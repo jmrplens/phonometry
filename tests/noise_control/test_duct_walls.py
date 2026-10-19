@@ -180,7 +180,7 @@ def test_every_cell_is_the_mark_the_second_reader_read(
         assert row.duct_length_m is None
 
     for band, text in zip(ref.ASHRAE_49_BANDS_HZ[printed_table], values, strict=True):
-        field = f"transmission_loss_{band}_db"
+        field = f"transmission_loss_{band}"
         held = getattr(row, field)
         printed_here = f"The {band} Hz cell is printed “{text}”"
         if text.startswith(">"):
@@ -249,11 +249,11 @@ def test_a_band_a_table_prints_no_column_for_is_not_a_band_it_left_empty() -> No
     between a measurement the page never made and one it made and censored.
     """
     row = _of("Table 31")[0]
-    assert row.transmission_loss_8000_db is None
-    assert "does not give it" in row.why_missing("transmission_loss_8000_db")
-    assert "transmission_loss_8000_db" not in row.unquantified
+    assert row.transmission_loss_8000 is None
+    assert "does not give it" in row.why_missing("transmission_loss_8000")
+    assert "transmission_loss_8000" not in row.unquantified
     dashed = _of("Table 31")[-1]
-    assert "—" in dashed.why_missing("transmission_loss_250_db")
+    assert "—" in dashed.why_missing("transmission_loss_250")
 
 
 # ---------------------------------------------------------------------------
@@ -279,8 +279,8 @@ def test_break_in_is_three_decibels_under_breakout_at_the_top_of_the_range() -> 
     for construction, breakout in rectangular_out.items():
         break_in = rectangular_in[construction]
         for band in (1000, 2000, 4000, 8000):
-            escaping = breakout.transmission_loss_db(band)
-            entering = break_in.transmission_loss_db(band)
+            escaping = breakout.transmission_loss(band)
+            entering = break_in.transmission_loss(band)
             assert escaping - entering == 3.0, (construction, band)
             pairs += 1
 
@@ -291,9 +291,7 @@ def test_break_in_is_three_decibels_under_breakout_at_the_top_of_the_range() -> 
         break_in = oval_in[construction]
         assert breakout.bands() == break_in.bands()
         top = max(break_in.bands())
-        difference = breakout.transmission_loss_db(top) - break_in.transmission_loss_db(
-            top
-        )
+        difference = breakout.transmission_loss(top) - break_in.transmission_loss(top)
         assert difference == 3.0, (construction, top)
         pairs += 1
     assert pairs == 35
@@ -405,8 +403,8 @@ def test_one_size_in_the_two_directions_is_two_rows() -> None:
     assert (breakout.direction, break_in.direction) == ("breakout", "break-in")
     assert breakout.first_side_mm == break_in.first_side_mm == 305
     assert breakout.sheet_metal_gauge == break_in.sheet_metal_gauge == "24"
-    assert breakout.transmission_loss_db(63) == 21
-    assert break_in.transmission_loss_db(63) == 16
+    assert breakout.transmission_loss(63) == 21
+    assert break_in.transmission_loss(63) == 16
 
 
 def test_the_round_tables_cannot_be_paired_at_all() -> None:
@@ -445,10 +443,10 @@ def test_a_bound_is_refused_rather_than_served_as_a_value() -> None:
     two-sided interval.
     """
     row = _of("Table 30")[0]
-    assert row.transmission_loss_63_db is None
-    assert row.ranges["transmission_loss_63_db"] == (45.0, None)
+    assert row.transmission_loss_63 is None
+    assert row.ranges["transmission_loss_63"] == (45.0, None)
     with pytest.raises(ValueError, match="lower bound of 45"):
-        row.transmission_loss_db(63)
+        row.transmission_loss(63)
     ends = [end for row in _rows() for end in row.ranges.values() for end in end]
     assert not any(end is not None and math.isinf(end) for end in ends)
 
@@ -461,9 +459,9 @@ def test_a_rule_keeps_the_glyph_and_is_given_no_meaning() -> None:
     ``why_missing`` reads it back as what is printed there.
     """
     row = _of("Table 34")[-1]
-    assert row.unquantified["transmission_loss_250_db"] == "—"
+    assert row.unquantified["transmission_loss_250"] == "—"
     with pytest.raises(ValueError, match="250 Hz band"):
-        row.transmission_loss_db(250)
+        row.transmission_loss(250)
 
 
 def test_a_value_in_parentheses_is_held_as_printed_and_the_mark_is_recorded() -> None:
@@ -490,8 +488,8 @@ def test_a_value_in_parentheses_is_held_as_printed_and_the_mark_is_recorded() ->
         assert "Parentheses indicate measurements" in row.note
         assert "approximate" in row.note
     first = _of("Table 30")[0]
-    assert first.transmission_loss_db(125) == 53
-    assert not first.is_approximate("transmission_loss_125_db")
+    assert first.transmission_loss(125) == 53
+    assert not first.is_approximate("transmission_loss_125")
     assert "(53)" in first.note
 
 
@@ -557,7 +555,7 @@ def test_the_break_in_credit_quotes_a_sentence_the_chapter_got_wrong() -> None:
     rectangular = _of("Table 33")[0]
     assert (circular.shape, circular.diameter_mm) == ("circular", 203)
     assert (rectangular.shape, rectangular.first_side_mm) == ("rectangular", 305)
-    assert rectangular.transmission_loss_db(8000) == 42
+    assert rectangular.transmission_loss(8000) == 42
     assert 8000 not in circular.bands()
 
 
@@ -610,7 +608,7 @@ def test_the_data_file_is_json_that_anything_can_read() -> None:
 def test_a_frequency_no_table_prints_is_refused_as_such() -> None:
     row = _rows()[0]
     with pytest.raises(ValueError, match="not an octave band"):
-        row.transmission_loss_db(700)
+        row.transmission_loss(700)
 
 
 def test_the_catalogue_is_reachable_from_the_package() -> None:

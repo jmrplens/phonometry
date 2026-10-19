@@ -775,7 +775,7 @@ def test_the_nozzle_reflection_reproduces_element_18() -> None:
         termination="wall",
         method="vdi2081",
         speed_of_sound=EXAMPLE_SPEED_OF_SOUND,
-        max_reduction_db=None,
+        max_reduction=None,
     )
     assert uncapped.values == pytest.approx(PRINTED_NOZZLE_DB, abs=0.05)
 
@@ -803,7 +803,7 @@ def test_the_nozzle_knows_all_four_solid_angles() -> None:
             termination=where,
             method="vdi2081",
             speed_of_sound=EXAMPLE_SPEED_OF_SOUND,
-            max_reduction_db=None,
+            max_reduction=None,
         ).values[0]
         for where in ("room", "wall", "edge", "corner")
     ]

@@ -82,7 +82,7 @@ def test_a_record_without_the_mechanism_is_refused(tmp_path: pathlib.Path) -> No
 
         @dataclass(frozen=True)
         class Bare:
-            level_db: float
+            level: float
         """,
     )
     assert refused == {"Bare": "Bare does not inherit RichDisplay"}
@@ -128,7 +128,7 @@ def test_every_way_of_inheriting_the_mechanism_is_accepted(
 
         @dataclass(frozen=True)
         class Direct(RichDisplay):
-            level_db: float
+            level: float
 
         @dataclass(frozen=True)
         class Copies(OwnsArrays):
@@ -156,7 +156,7 @@ def test_a_record_with_a_display_of_its_own_is_refused(tmp_path: pathlib.Path) -
 
         @dataclass(frozen=True)
         class Own(RichDisplay):
-            level_db: float
+            level: float
 
             def _repr_html_(self):
                 return "<p>mine</p>"
@@ -219,7 +219,7 @@ def test_a_private_record_is_held_only_once_a_public_module_lists_it(
 
     @dataclass(frozen=True)
     class Hidden:
-        level_db: float
+        level: float
     """
     assert _refused(tmp_path / "a", _results=source) == {}
     exported = {
@@ -239,7 +239,7 @@ def test_an_exemption_silences_its_class_and_goes_stale_without_it(
 
         @dataclass(frozen=True)
         class Bare:
-            level_db: float
+            level: float
         """,
     )
     found = crd.records_without_display(sorted(root.rglob("*.py")), root)

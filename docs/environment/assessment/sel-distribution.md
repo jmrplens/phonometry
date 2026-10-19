@@ -57,7 +57,7 @@ the rating level the standard hands on to an ISO 1996-1 assessment.
 
 ```python
 print(round(environment.long_term_sel(levels, probabilities), 1))  # 37.0
-print(round(environment.long_term_sel(levels, probabilities, rating_adjustment_db=12.0), 1))  # 49.0
+print(round(environment.long_term_sel(levels, probabilities, rating_adjustment=12.0), 1))  # 49.0
 ```
 
 ## Classes, subclasses and the spread for turbulence
@@ -74,7 +74,7 @@ energetic mean stays where it was (Equations (17) to (23)).
 dist = environment.sel_distribution(levels, probabilities, sigma_db=5.0, n_subclasses=10)
 print(dist.lower_bounds_db[:4].round(2))                              # [27.35 29.45 30.65 30.8 ]
 print([round(float(r), 4) for r in dist.class_densities_per_db[:4]])  # [0.0007, 0.024, 1.2399, 0.2222]
-print(round(dist.level_shift_db, 3))                                  # 2.878
+print(round(dist.level_shift, 3))                                  # 2.878
 ```
 
 That is Table A.4 of the standard, all 27 rows digit for digit. Two pairs of
@@ -92,7 +92,7 @@ Equation (A.4), Annex A's LT2.
 
 ```python
 print(dist.exceedance_level([95.0, 50.0, 10.0, 5.0, 1.0]).round(1))  # [21.6 31.5 40.5 43.  47.5]
-print(round(dist.distribution_long_term_level_db, 2))                 # 36.96
+print(round(dist.distribution_long_term_level, 2))                 # 36.96
 dist.plot(view="exceedance")
 ```
 

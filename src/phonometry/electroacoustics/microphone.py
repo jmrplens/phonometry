@@ -239,7 +239,7 @@ def _directivity_index_from_polar(
 
 
 def _overload_spl(
-    spl_db: NDArray[np.float64],
+    spl: NDArray[np.float64],
     thd_percent: NDArray[np.float64],
     limit_percent: float,
 ) -> float | None:
@@ -252,7 +252,7 @@ def _overload_spl(
     if thd_percent.size == 0:  # pragma: no cover - _as_curve enforces two points
         return None
     if float(thd_percent[0]) >= limit_percent:
-        return float(spl_db[0])
+        return float(spl[0])
     above = thd_percent >= limit_percent
     if not bool(np.any(above)):
         return None
@@ -261,7 +261,7 @@ def _overload_spl(
     frac = (limit_percent - float(thd_percent[i])) / (
         float(thd_percent[j]) - float(thd_percent[i])
     )
-    return float(spl_db[i] + frac * (spl_db[j] - spl_db[i]))
+    return float(spl[i] + frac * (spl[j] - spl[i]))
 
 
 @dataclass(frozen=True)
@@ -278,14 +278,14 @@ class MicrophoneDirectivity(OwnsArrays):
         degrees and dB (13.1.1/13.1.2).
     :ivar frequency: Stated frequency of the directional pattern, in Hz
         (13.1.1 requires the frequency or frequency band to be stated).
-    :ivar index_db: Stated directivity index, in dB (13.2.1); when omitted it
+    :ivar index: Stated directivity index, in dB (13.2.1); when omitted it
         is computed from :attr:`polar` through the 11.2.2 a) diffuse-field
         integral if the pattern reaches the rear.
     """
 
     polar: tuple[ArrayLike, ArrayLike] | None = None
     frequency: float | None = None
-    index_db: float | None = None
+    index: float | None = None
 
 
 #: No directional characteristics supplied: the Clause 13 default.
@@ -302,7 +302,7 @@ class MicrophoneNoise(OwnsArrays):
 
     :ivar voltage_v: Weighted r.m.s. output voltage due to inherent noise, in V
         (17.2 b); the equivalent noise level is computed from it.
-    :ivar equivalent_level_db: Stated equivalent sound pressure level due to
+    :ivar equivalent_level: Stated equivalent sound pressure level due to
         inherent noise, in dB SPL (17.1), when not computed from
         :attr:`voltage_v`.
     :ivar weighting: Weighting of the inherent-noise measurement: ``"A"``
@@ -317,11 +317,11 @@ class MicrophoneNoise(OwnsArrays):
         :func:`~phonometry.electroacoustics.weighted_thd` use for the same
         curve.
     :ivar spectrum: Inherent-noise spectrum as
-        ``(frequencies, band_levels_db)`` in (Hz, dB SPL) (17.2 b).
+        ``(frequencies, band_levels)`` in (Hz, dB SPL) (17.2 b).
     """
 
     voltage_v: float | None = None
-    equivalent_level_db: float | None = None
+    equivalent_level: float | None = None
     weighting: str = "A"
     spectrum: tuple[ArrayLike, ArrayLike] | None = None
 
@@ -347,16 +347,16 @@ class MicrophoneOverload(OwnsArrays):
     curve of 14.2, the limit and the resulting level are therefore one group.
 
     :ivar distortion: Total harmonic distortion against level as
-        ``(spl_db, thd_percent)`` in (dB SPL, %) (14.2).
+        ``(spl, thd_percent)`` in (dB SPL, %) (14.2).
     :ivar thd_percent: Distortion limit defining the overload sound pressure
         level, in % (default 1, a common 15.2.1 note value).
-    :ivar spl_db: Stated overload sound pressure level, in dB SPL (15.2); when
+    :ivar spl: Stated overload sound pressure level, in dB SPL (15.2); when
         omitted it is read from :attr:`distortion` at :attr:`thd_percent`.
     """
 
     distortion: tuple[ArrayLike, ArrayLike] | None = None
     thd_percent: float = 1.0
-    spl_db: float | None = None
+    spl: float | None = None
 
 
 #: No distortion curve supplied, at the 1 % limit: the 15.2 default.
@@ -407,7 +407,7 @@ class MicrophoneCharacteristics(OwnsArrays):
         sensitivity and the response normalization, in Hz (11.3).
     :ivar sensitivity_mv_per_pa: Rated free-field sensitivity ``M`` at the
         reference frequency, in mV/Pa (11.2.1/11.3).
-    :ivar sensitivity_level_db: Sensitivity level
+    :ivar sensitivity_level: Sensitivity level
         :math:`20 \log_{10}(M / 1\,\mathrm{V/Pa})`, in dB re 1 V/Pa (11.1).
     :ivar tolerance_db: Half-width of the response tolerance, in dB (12.1.1).
     :ivar effective_range: Computed effective frequency range ``(lo, hi)``
@@ -416,23 +416,23 @@ class MicrophoneCharacteristics(OwnsArrays):
         ``None``.
     :ivar min_load_impedance_ohm: Rated minimum permitted load impedance, in
         ohm (10.3), or ``None``.
-    :ivar equivalent_noise_level_db: Equivalent sound pressure level due to
+    :ivar equivalent_noise_level: Equivalent sound pressure level due to
         inherent noise, in dB SPL with :attr:`noise_weighting` weighting (17),
         or ``None``.
     :ivar noise_weighting: Weighting of the inherent-noise measurement
         (IEC 60268-1), ``"A"`` by default or ``"468"``.
-    :ivar max_spl_db: Overload sound pressure level at
+    :ivar max_spl: Overload sound pressure level at
         :attr:`max_spl_thd_percent` total harmonic distortion, in dB SPL
         (15.2), or ``None``.
-    :ivar max_spl_thd_percent: Distortion limit defining :attr:`max_spl_db`,
+    :ivar max_spl_thd_percent: Distortion limit defining :attr:`max_spl`,
         in % (15.2.1).
-    :ivar distortion_spl_db: Distortion-curve sound-pressure-level axis, in
+    :ivar distortion_spl: Distortion-curve sound-pressure-level axis, in
         dB SPL (14.2), or ``None``.
     :ivar distortion_thd_percent: Total harmonic distortion against level, in
         % (14.2), or ``None``.
     :ivar noise_frequencies: Inherent-noise spectrum frequency axis, in Hz
         (17.2 b), or ``None``.
-    :ivar noise_band_levels_db: Inherent-noise equivalent band levels, in
+    :ivar noise_band_levels: Inherent-noise equivalent band levels, in
         dB SPL (17.2 b), or ``None``.
     :ivar polar_angles_deg: Directional-pattern angles, in degrees (13.1), or
         ``None``.
@@ -440,7 +440,7 @@ class MicrophoneCharacteristics(OwnsArrays):
         reference-axis response, in dB (13.1.2), or ``None``.
     :ivar polar_frequency: Stated frequency of the directional pattern, in Hz,
         or ``None``.
-    :ivar directivity_index_db: Directivity index at :attr:`polar_frequency`,
+    :ivar directivity_index: Directivity index at :attr:`polar_frequency`,
         in dB (13.2), or ``None``.
     :ivar powering: Rated power supply description, e.g. the IEC 61938
         phantom-powering designation and voltage (9.1), or ``None``.
@@ -452,23 +452,23 @@ class MicrophoneCharacteristics(OwnsArrays):
     response_db: NDArray[np.float64]
     reference_frequency_hz: float
     sensitivity_mv_per_pa: float
-    sensitivity_level_db: float
+    sensitivity_level: float
     tolerance_db: float
     effective_range: tuple[float, float]
     rated_impedance_ohm: float | None
     min_load_impedance_ohm: float | None
-    equivalent_noise_level_db: float | None
+    equivalent_noise_level: float | None
     noise_weighting: str
-    max_spl_db: float | None
+    max_spl: float | None
     max_spl_thd_percent: float
-    distortion_spl_db: NDArray[np.float64] | None
+    distortion_spl: NDArray[np.float64] | None
     distortion_thd_percent: NDArray[np.float64] | None
     noise_frequencies: NDArray[np.float64] | None
-    noise_band_levels_db: NDArray[np.float64] | None
+    noise_band_levels: NDArray[np.float64] | None
     polar_angles_deg: NDArray[np.float64] | None
     polar_db: NDArray[np.float64] | None
     polar_frequency: float | None
-    directivity_index_db: float | None
+    directivity_index: float | None
     powering: str | None
     supply_current_ma: float | None
 
@@ -526,10 +526,10 @@ class MicrophoneCharacteristics(OwnsArrays):
             self,
             frequencies=1,
             response_db=1,
-            distortion_spl_db=1,
+            distortion_spl=1,
             distortion_thd_percent=1,
             noise_frequencies=1,
-            noise_band_levels_db=1,
+            noise_band_levels=1,
             polar_angles_deg=1,
             polar_db=1,
         )
@@ -537,12 +537,10 @@ class MicrophoneCharacteristics(OwnsArrays):
         require_same_length(
             self, "polar_angles_deg", "polar_db", axis="angle of incidence"
         )
-        require_same_length(
-            self, "noise_frequencies", "noise_band_levels_db", axis="band"
-        )
+        require_same_length(self, "noise_frequencies", "noise_band_levels", axis="band")
         require_same_length(
             self,
-            "distortion_spl_db",
+            "distortion_spl",
             "distortion_thd_percent",
             axis="sound pressure level",
         )
@@ -550,23 +548,23 @@ class MicrophoneCharacteristics(OwnsArrays):
             self,
             "frequencies",
             "response_db",
-            "distortion_spl_db",
+            "distortion_spl",
             "distortion_thd_percent",
             "noise_frequencies",
-            "noise_band_levels_db",
+            "noise_band_levels",
             "polar_angles_deg",
             "polar_db",
             "reference_frequency_hz",
             "sensitivity_mv_per_pa",
-            "sensitivity_level_db",
+            "sensitivity_level",
             "tolerance_db",
             "rated_impedance_ohm",
             "min_load_impedance_ohm",
-            "equivalent_noise_level_db",
-            "max_spl_db",
+            "equivalent_noise_level",
+            "max_spl",
             "max_spl_thd_percent",
             "polar_frequency",
-            "directivity_index_db",
+            "directivity_index",
             "supply_current_ma",
         )
         _require_frequency_pair(self, "effective_range")
@@ -587,20 +585,20 @@ class MicrophoneCharacteristics(OwnsArrays):
         SPL) minus the equivalent sound pressure level due to inherent
         noise (17), carrying the same weighting.
         """
-        if self.equivalent_noise_level_db is None:
+        if self.equivalent_noise_level is None:
             return None
-        return float(20.0 * np.log10(1.0 / _P_REF) - self.equivalent_noise_level_db)
+        return float(20.0 * np.log10(1.0 / _P_REF) - self.equivalent_noise_level)
 
     @property
-    def diffuse_field_sensitivity_level_db(self) -> float | None:
+    def diffuse_field_sensitivity_level(self) -> float | None:
         """Diffuse-field sensitivity level, in dB re 1 V/Pa, or ``None``.
 
         Per 11.2.2.1 the diffuse-field sensitivity level equals the free-field
         plane-wave sensitivity level minus the directivity index (13.2).
         """
-        if self.directivity_index_db is None:
+        if self.directivity_index is None:
             return None
-        return float(self.sensitivity_level_db - self.directivity_index_db)
+        return float(self.sensitivity_level - self.directivity_index)
 
     def report(
         self,
@@ -695,18 +693,16 @@ def _resolve_noise_level(
     sensitivity_v_per_pa: float,
 ) -> float | None:
     """Resolve the equivalent noise level, computing it from a voltage (17.2)."""
-    if noise.voltage_v is not None and noise.equivalent_level_db is not None:
-        msg = "give either 'noise.voltage_v' or 'noise.equivalent_level_db', not both."
+    if noise.voltage_v is not None and noise.equivalent_level is not None:
+        msg = "give either 'noise.voltage_v' or 'noise.equivalent_level', not both."
         raise ValueError(msg)
     if noise.voltage_v is not None:
         u_n = require_positive(noise.voltage_v, "noise.voltage_v")
         return float(20.0 * np.log10((u_n / sensitivity_v_per_pa) / _P_REF))
-    if noise.equivalent_level_db is not None and not np.isfinite(
-        noise.equivalent_level_db
-    ):
-        msg = "'noise.equivalent_level_db' must be finite."
+    if noise.equivalent_level is not None and not np.isfinite(noise.equivalent_level):
+        msg = "'noise.equivalent_level' must be finite."
         raise ValueError(msg)
-    return noise.equivalent_level_db
+    return noise.equivalent_level
 
 
 def _resolve_distortion(
@@ -727,18 +723,18 @@ def _resolve_polar(
 ) -> tuple[NDArray[np.float64] | None, NDArray[np.float64] | None, float | None]:
     """Resolve the optional directional pattern and directivity index (13.1/13.2).
 
-    A stated ``directivity.index_db`` is kept; otherwise it is computed from
+    A stated ``directivity.index`` is kept; otherwise it is computed from
     the pattern via the 11.2.2 a) integral when the supplied angles, folded
     onto the 0..180 half plane, span at least :data:`_MIN_POLAR_SPAN_DEG`
     towards the rear.
     """
-    index_db = directivity.index_db
-    if index_db is not None and not np.isfinite(index_db):
-        msg = "'directivity.index_db' must be finite."
+    index = directivity.index
+    if index is not None and not np.isfinite(index):
+        msg = "'directivity.index' must be finite."
         raise ValueError(msg)
     polar = directivity.polar
     if polar is None:
-        return None, None, index_db
+        return None, None, index
     p_ang = np.atleast_1d(np.asarray(polar[0], dtype=np.float64))
     p_db = np.atleast_1d(np.asarray(polar[1], dtype=np.float64))
     require_equal_shapes(
@@ -760,7 +756,7 @@ def _resolve_polar(
         raise ValueError(msg)
     order = np.argsort(p_ang)
     p_ang, p_db = p_ang[order], p_db[order]
-    di = index_db
+    di = index
     if di is None and float(np.max(_fold_angles_deg(p_ang))) >= _MIN_POLAR_SPAN_DEG:
         di = _directivity_index_from_polar(p_ang, p_db)
     return p_ang, p_db, di
@@ -826,11 +822,11 @@ def microphone_characteristics(
     thd_limit = require_positive(overload.thd_percent, "overload.thd_percent")
     d_spl, d_thd = _resolve_distortion(overload.distortion)
     max_spl: float | None = None
-    if overload.spl_db is not None:
-        if not np.isfinite(overload.spl_db):
-            msg = "'overload.spl_db' must be finite."
+    if overload.spl is not None:
+        if not np.isfinite(overload.spl):
+            msg = "'overload.spl' must be finite."
             raise ValueError(msg)
-        max_spl = float(overload.spl_db)
+        max_spl = float(overload.spl)
     elif d_spl is not None and d_thd is not None:
         max_spl = _overload_spl(d_spl, d_thd, thd_limit)
     n_f: NDArray[np.float64] | None = None
@@ -844,7 +840,7 @@ def microphone_characteristics(
         response_db=rel,
         reference_frequency_hz=f_ref,
         sensitivity_mv_per_pa=m_mv,
-        sensitivity_level_db=level,
+        sensitivity_level=level,
         tolerance_db=tol,
         effective_range=effective,
         rated_impedance_ohm=_optional_positive(
@@ -854,14 +850,14 @@ def microphone_characteristics(
             electrical.min_load_impedance_ohm,
             "electrical.min_load_impedance_ohm",
         ),
-        equivalent_noise_level_db=noise_level,
+        equivalent_noise_level=noise_level,
         noise_weighting=str(noise.weighting),
-        max_spl_db=max_spl,
+        max_spl=max_spl,
         max_spl_thd_percent=thd_limit,
-        distortion_spl_db=d_spl,
+        distortion_spl=d_spl,
         distortion_thd_percent=d_thd,
         noise_frequencies=n_f,
-        noise_band_levels_db=n_db,
+        noise_band_levels=n_db,
         polar_angles_deg=p_ang,
         polar_db=p_db,
         polar_frequency=(
@@ -869,7 +865,7 @@ def microphone_characteristics(
             if directivity.frequency is not None
             else None
         ),
-        directivity_index_db=di,
+        directivity_index=di,
         powering=electrical.powering,
         supply_current_ma=_optional_positive(
             electrical.supply_current_ma, "electrical.supply_current_ma"

@@ -44,7 +44,7 @@ the random-incidence field of 5.2.2 with the diffuse-field judgement of
 ISO 8253-2:2009, 5.3, and this standard's Table 1
 ([`RANDOM_INCIDENCE_VARIATION_LIMITS`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#random_incidence_variation_limits)); Annex A notes that the ATF
 itself may serve as the directional microphone where its front-to-random
-index, [`ATF_FRONT_TO_RANDOM_INDEX_DB`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#atf_front_to_random_index_db), reaches 4 dB.
+index, [`ATF_FRONT_TO_RANDOM_INDEX`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#atf_front_to_random_index), reaches 4 dB.
 [`check_plane_progressive_wave`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#check_plane_progressive_wave) judges the plane wave of 5.2.3, and
 [`verify_fixture_isolation`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#verify_fixture_isolation) the acoustic isolation of the fixture with
 its isolation cup (5.1.4).
@@ -68,23 +68,23 @@ Clause, table and formula numbers refer to ISO 4869-3:2007(E).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## ATF_FRONT_TO_RANDOM_INDEX_DB
+## ATF_FRONT_TO_RANDOM_INDEX
 
 *Constant* (`mapping`).
 
 ```python
-ATF_FRONT_TO_RANDOM_INDEX_DB = {500.0: 1.7, 630.0: 2.2, 800.0: 2.8, 1000.0: 3.2, 1250.0: 4.6, 1600.0: 4.6, 2000.0: 6.3, 2500.0: 6.5, 3150.0: 5.9, 4000.0: 2.9, 5000.0: -0.6, 6300.0: 5.1, 8000.0: 5.9}
+ATF_FRONT_TO_RANDOM_INDEX = {500.0: 1.7, 630.0: 2.2, 800.0: 2.8, 1000.0: 3.2, 1250.0: 4.6, 1600.0: 4.6, 2000.0: 6.3, 2500.0: 6.5, 3150.0: 5.9, 4000.0: 2.9, 5000.0: -0.6, 6300.0: 5.1, 8000.0: 5.9}
 ```
 
 ## check_plane_progressive_wave
 
 ```python
 check_plane_progressive_wave(
-    end_face_levels_db: ArrayLike,
+    end_face_levels: ArrayLike,
     *,
-    facing_levels_db: ArrayLike | None = None,
-    facing_away_levels_db: ArrayLike | None = None,
-    front_to_rear_index_db: ArrayLike | None = None,
+    facing_levels: ArrayLike | None = None,
+    facing_away_levels: ArrayLike | None = None,
+    front_to_rear_index: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
 ) -> PlaneProgressiveWaveCheck
 ```
@@ -108,10 +108,10 @@ not a condition judged here.
 
 | Name | Description |
 | :--- | :--- |
-| `end_face_levels_db` | The levels at the two end-face points, a `(2, bands)` grid in dB. |
-| `facing_levels_db` | The directional microphone's level facing the source per band, in dB; bands below 500 Hz may be NaN. |
-| `facing_away_levels_db` | Its level facing away, per band, in dB. |
-| `front_to_rear_index_db` | The microphone's front-to-rear sensitivity index, one number or one per band, in dB. |
+| `end_face_levels` | The levels at the two end-face points, a `(2, bands)` grid in dB. |
+| `facing_levels` | The directional microphone's level facing the source per band, in dB; bands below 500 Hz may be NaN. |
+| `facing_away_levels` | Its level facing away, per band, in dB. |
+| `front_to_rear_index` | The microphone's front-to-rear sensitivity index, one number or one per band, in dB. |
 | `frequencies` | The centre frequencies, in hertz, or `None` for the 22 bands of 63 Hz to 8 kHz. |
 
 **Returns:** [`PlaneProgressiveWaveCheck`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#planeprogressivewavecheck). Without the directional readings the directional test is not judged and the verdict does not pass.
@@ -126,11 +126,11 @@ not a condition judged here.
 
 ```python
 check_random_incidence_field(
-    position_levels_db: Mapping[str, ArrayLike],
-    reference_levels_db: ArrayLike,
+    position_levels: Mapping[str, ArrayLike],
+    reference_levels: ArrayLike,
     *,
-    directional_levels_db: ArrayLike | None = None,
-    front_to_random_index_db: ArrayLike | None = None,
+    directional_levels: ArrayLike | None = None,
+    front_to_random_index: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
 ) -> DiffuseSoundFieldCheck
 ```
@@ -151,7 +151,7 @@ This is the diffuse-field judgement of ISO 8253-2:2009, 5.3, with this
 standard's Table 1, and it returns the same
 [`DiffuseSoundFieldCheck`](/phonometry/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck). The fixture itself
 may be the directional microphone in the bands where its index
-([`ATF_FRONT_TO_RANDOM_INDEX_DB`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#atf_front_to_random_index_db)) reaches 4 dB; pass the index band
+([`ATF_FRONT_TO_RANDOM_INDEX`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#atf_front_to_random_index)) reaches 4 dB; pass the index band
 by band, NaN where it has none, and the bands it cannot judge are left
 unjudged.
 
@@ -159,10 +159,10 @@ unjudged.
 
 | Name | Description |
 | :--- | :--- |
-| `position_levels_db` | The level at each position per band, in dB, keyed `"front"`, `"back"`, `"left"`, `"right"`, `"up"` and `"down"`. |
-| `reference_levels_db` | The level at the reference point per band, in dB. |
-| `directional_levels_db` | The directional microphone's readings at the reference point, a `(directions, bands)` grid in dB; bands below 500 Hz are not read and may be NaN. `None` leaves the directional test unjudged, and the verdict then does not pass. |
-| `front_to_random_index_db` | The directional microphone's front-to-random sensitivity index, in dB, one number or one per band; required with `directional_levels_db`. |
+| `position_levels` | The level at each position per band, in dB, keyed `"front"`, `"back"`, `"left"`, `"right"`, `"up"` and `"down"`. |
+| `reference_levels` | The level at the reference point per band, in dB. |
+| `directional_levels` | The directional microphone's readings at the reference point, a `(directions, bands)` grid in dB; bands below 500 Hz are not read and may be NaN. `None` leaves the directional test unjudged, and the verdict then does not pass. |
+| `front_to_random_index` | The directional microphone's front-to-random sensitivity index, in dB, one number or one per band; required with `directional_levels`. |
 | `frequencies` | The centre frequencies, in hertz, or `None` for the 22 bands of 63 Hz to 8 kHz. |
 
 **Returns:** [`DiffuseSoundFieldCheck`](/phonometry/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck).
@@ -177,11 +177,11 @@ unjudged.
 
 ```python
 earmuff_insertion_loss(
-    open_levels_db: ArrayLike,
-    occluded_levels_db: ArrayLike,
+    open_levels: ArrayLike,
+    occluded_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    isolation_cup_levels_db: ArrayLike | None = None,
+    isolation_cup_levels: ArrayLike | None = None,
     fixture_uncertainty_db: float = 0.3,
     sound_field_uncertainty_db: float = 0.5,
     equipment_uncertainty_db: float = 0.2,
@@ -214,10 +214,10 @@ use [`phonometry.hearing.real_ear_attenuation`](/phonometry/reference/api/hearin
 
 | Name | Description |
 | :--- | :--- |
-| `open_levels_db` | The levels without the earmuff, one spectrum or a `(repetitions, bands)` grid, in dB. |
-| `occluded_levels_db` | The levels with it, one spectrum or one per fitting, in dB. |
+| `open_levels` | The levels without the earmuff, one spectrum or a `(repetitions, bands)` grid, in dB. |
+| `occluded_levels` | The levels with it, one spectrum or one per fitting, in dB. |
 | `frequencies` | The centre frequencies, in hertz, or `None` for the 22 bands of 63 Hz to 8 kHz ([`EARMUFF_TEST_BANDS_HZ`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#earmuff_test_bands_hz)). |
-| `isolation_cup_levels_db` | The level with the isolation cup in place of the earmuff per band, in dB, to check that it reads at least 10 dB lower (5.3). |
+| `isolation_cup_levels` | The level with the isolation cup in place of the earmuff per band, in dB, to check that it reads at least 10 dB lower (5.3). |
 | `fixture_uncertainty_db` | $u(\delta_1)$, in dB. |
 | `sound_field_uncertainty_db` | $u(\delta_2)$, in dB. |
 | `equipment_uncertainty_db` | $u(\delta_3)$, in dB. |
@@ -246,17 +246,17 @@ EARMUFF_TEST_BANDS_HZ = (63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0, 315.0, 4
 
 ```python
 EarmuffInsertionLossResult(
-    insertion_loss_db: np.ndarray,
-    repetition_insertion_loss_db: np.ndarray,
-    open_levels_db: np.ndarray,
-    occluded_levels_db: np.ndarray,
+    insertion_loss: np.ndarray,
+    repetition_insertion_loss: np.ndarray,
+    open_levels: np.ndarray,
+    occluded_levels: np.ndarray,
     open_uncertainty_db: np.ndarray,
     occluded_uncertainty_db: np.ndarray,
     fixture_uncertainty_db: float,
     sound_field_uncertainty_db: float,
     equipment_uncertainty_db: float,
     frequencies: np.ndarray,
-    isolation_cup_levels_db: np.ndarray | None = None,
+    isolation_cup_levels: np.ndarray | None = None,
 )
 ```
 
@@ -271,17 +271,17 @@ the ISO 4869-2 methods.
 
 | Name | Description |
 | :--- | :--- |
-| `insertion_loss_db` | $IL_f$, the mean open level less the mean occluded level per band, in dB, unrounded. |
-| `repetition_insertion_loss_db` | The mean open level less each fitting's occluded level, one row per repetition, in dB. |
-| `open_levels_db` | The levels without the earmuff, one row per measurement, in dB. |
-| `occluded_levels_db` | The levels with it, one row per fitting, in dB. |
+| `insertion_loss` | $IL_f$, the mean open level less the mean occluded level per band, in dB, unrounded. |
+| `repetition_insertion_loss` | The mean open level less each fitting's occluded level, one row per repetition, in dB. |
+| `open_levels` | The levels without the earmuff, one row per measurement, in dB. |
+| `occluded_levels` | The levels with it, one row per fitting, in dB. |
 | `open_uncertainty_db` | The standard uncertainty of the mean open level per band, in dB: the standard deviation of the mean when at least two open measurements were given, else Table B.1's 0,5 dB. |
 | `occluded_uncertainty_db` | That of the mean occluded level, from at least two fittings, else Table B.1's 1,0 dB. |
 | `fixture_uncertainty_db` | $u(\delta_1)$, in dB. |
 | `sound_field_uncertainty_db` | $u(\delta_2)$, in dB. |
 | `equipment_uncertainty_db` | $u(\delta_3)$, in dB. |
 | `frequencies` | The centre frequencies, in hertz. |
-| `isolation_cup_levels_db` | The level with the isolation cup in place of the earmuff per band, in dB, or `None`. |
+| `isolation_cup_levels` | The level with the isolation cup in place of the earmuff per band, in dB, or `None`. |
 
 ### EarmuffInsertionLossResult.budget()
 
@@ -423,7 +423,7 @@ The combined standard uncertainty per band (Formula (B.2)), in dB.
 ## FixtureIsolationCheck
 
 ```python
-FixtureIsolationCheck(frequencies: np.ndarray, isolation_db: np.ndarray)
+FixtureIsolationCheck(frequencies: np.ndarray, isolation: np.ndarray)
 ```
 
 Whether the test fixture isolates its microphone well enough (5.1.4).
@@ -436,7 +436,7 @@ The requirement is the clause's, read from the bands as
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The centre frequencies, in hertz. |
-| `isolation_db` | The acoustic isolation (3.7), the level with the isolation cup absent less the level with it sealed on, per band, in dB. |
+| `isolation` | The acoustic isolation (3.7), the level with the isolation cup absent less the level with it sealed on, per band, in dB. |
 
 ### FixtureIsolationCheck.margin_db
 
@@ -581,9 +581,9 @@ Draw the five contributions as bars, with the combined value.
 ```python
 PlaneProgressiveWaveCheck(
     frequencies: np.ndarray,
-    end_face_difference_db: np.ndarray,
+    end_face_difference: np.ndarray,
     front_to_back_db: np.ndarray,
-    front_to_rear_index_db: np.ndarray,
+    front_to_rear_index: np.ndarray,
 )
 ```
 
@@ -594,9 +594,9 @@ Whether the plane progressive wave of the test site is good enough (5.2.3).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The centre frequencies, in hertz. |
-| `end_face_difference_db` | The difference between the levels at the two points the centres of the fixture's end faces occupy, as an absolute value per band, in dB. |
+| `end_face_difference` | The difference between the levels at the two points the centres of the fixture's end faces occupy, as an absolute value per band, in dB. |
 | `front_to_back_db` | From 500 Hz up, the level a directional microphone at the reference point reads facing the source less the level facing away from it, per band, in dB; NaN below 500 Hz or where not measured. |
-| `front_to_rear_index_db` | The microphone's front-to-rear sensitivity index per band, in dB, NaN where not given. |
+| `front_to_rear_index` | The microphone's front-to-rear sensitivity index per band, in dB, NaN where not given. |
 
 ### PlaneProgressiveWaveCheck.directional_required
 
@@ -684,8 +684,8 @@ RANDOM_INCIDENCE_VARIATION_LIMITS = ((5.0, 5.0), (4.0, 4.0))
 
 ```python
 verify_fixture_isolation(
-    open_levels_db: ArrayLike,
-    cup_levels_db: ArrayLike,
+    open_levels: ArrayLike,
+    cup_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
 ) -> FixtureIsolationCheck
@@ -705,8 +705,8 @@ resilient mounting (5.1.2).
 
 | Name | Description |
 | :--- | :--- |
-| `open_levels_db` | The level at the microphone without the cup, per band, in dB. |
-| `cup_levels_db` | The level with the cup sealed on, per band, in dB. |
+| `open_levels` | The level at the microphone without the cup, per band, in dB. |
+| `cup_levels` | The level with the cup sealed on, per band, in dB. |
 | `frequencies` | The centre frequencies, in hertz, or `None` for the 22 bands of 63 Hz to 8 kHz. |
 
 **Returns:** [`FixtureIsolationCheck`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#fixtureisolationcheck).

@@ -242,15 +242,15 @@ def test_reference_pane_at_the_reference_needs_no_correction() -> None:
     res = building.rainfall_reference_correction(_I1_LEVEL, t_s)
     np.testing.assert_allclose(res.loss_factor, _I1_ETA_REF, rtol=1e-12)
     np.testing.assert_allclose(res.reference_loss_factor, _I1_ETA_REF, rtol=1e-12)
-    np.testing.assert_allclose(res.l_ic_ref_db, _I1_LEVEL)
-    np.testing.assert_allclose(res.correction_db, 0.0, atol=1e-9)
+    np.testing.assert_allclose(res.l_ic_ref, _I1_LEVEL)
+    np.testing.assert_allclose(res.correction, 0.0, atol=1e-9)
 
 
 def test_doubling_the_loss_factor_adds_three_decibels() -> None:
     """Formula (I.2): 10 lg(η/ηref) with η = 2 ηref."""
     t_s = 2.2 / (_I1_BANDS * 2.0 * _I1_ETA_REF)
     res = building.rainfall_reference_correction(_I1_LEVEL, t_s)
-    np.testing.assert_allclose(res.correction_db, 10.0 * np.log10(2.0), rtol=1e-12)
+    np.testing.assert_allclose(res.correction, 10.0 * np.log10(2.0), rtol=1e-12)
 
 
 def test_reference_correction_on_a_subset_of_bands() -> None:
@@ -258,7 +258,7 @@ def test_reference_correction_on_a_subset_of_bands() -> None:
     res = building.rainfall_reference_correction([47.0, 44.0], [0.5, 0.2], [500, 1000])
     eta = 2.2 / (np.array([500.0, 1000.0]) * np.array([0.5, 0.2]))
     eta_ref = 10.0 ** (np.array([-14.0, -16.0]) / 10.0)
-    np.testing.assert_allclose(res.correction_db, 10.0 * np.log10(eta / eta_ref))
+    np.testing.assert_allclose(res.correction, 10.0 * np.log10(eta / eta_ref))
 
 
 def test_correction_missing_a_measured_band_names_it() -> None:
@@ -315,7 +315,7 @@ def test_formula_k1_in_a_unit_room() -> None:
     res = building.rainfall_sound(
         np.full(18, 60.0), np.ones(18), _BANDS, volume=1.0, excited_area_m2=1.0
     )
-    np.testing.assert_allclose(res.l_i_db, 46.0)
+    np.testing.assert_allclose(res.l_i, 46.0)
     assert res.method == "pressure"
 
 
@@ -328,7 +328,7 @@ def test_formula_k1_terms() -> None:
         volume=100.0,
         excited_area_m2=4.0,
     )
-    np.testing.assert_allclose(res.l_i_db, 60.0 + 6.0 - 10.0 * np.log10(8.0))
+    np.testing.assert_allclose(res.l_i, 60.0 + 6.0 - 10.0 * np.log10(8.0))
 
 
 def test_three_generator_positions_add_energetically() -> None:
@@ -338,7 +338,7 @@ def test_three_generator_positions_add_energetically() -> None:
     three = building.rainfall_sound(
         np.full((3, 18), 60.0), np.ones(18), _BANDS, volume=1.0, excited_area_m2=1.0
     )
-    np.testing.assert_allclose(three.l_i_db - one.l_i_db, 10.0 * np.log10(3.0))
+    np.testing.assert_allclose(three.l_i - one.l_i, 10.0 * np.log10(3.0))
 
 
 def test_formula_k2_weights_each_band() -> None:
@@ -347,14 +347,14 @@ def test_formula_k2_weights_each_band() -> None:
     )
     weights = np.fromiter(building.RAINFALL_A_WEIGHTING.values(), float)
     expected = 10.0 * np.log10(np.sum(10.0 ** ((46.0 + weights) / 10.0)))
-    assert res.l_ia_db == pytest.approx(expected)
+    assert res.l_ia == pytest.approx(expected)
 
 
 def test_no_a_weighted_level_without_the_18_bands() -> None:
     res = building.rainfall_sound(
         [60.0], [1.0], [1000.0], volume=1.0, excited_area_m2=1.0
     )
-    assert res.l_ia_db is None
+    assert res.l_ia is None
 
 
 def test_formula_k3_sums_three_bands() -> None:
@@ -377,7 +377,7 @@ def test_background_is_removed_before_the_sum() -> None:
         background_db=background,
     )
     corrected = 10.0 * np.log10(10.0**6.0 - 10.0**5.0)
-    np.testing.assert_allclose(res.l_i_db, corrected - 14.0)
+    np.testing.assert_allclose(res.l_i, corrected - 14.0)
 
 
 def test_normalization_formula_k5() -> None:
@@ -392,17 +392,17 @@ def test_normalization_formula_k5() -> None:
         excited_area_m2=1.0,
         reference_correction=correction,
     )
-    assert res.l_i_norm_db is not None
-    np.testing.assert_allclose(res.l_i_norm_db, res.l_i_db - correction.correction_db)
+    assert res.l_i_norm is not None
+    np.testing.assert_allclose(res.l_i_norm, res.l_i - correction.correction)
     as_array = building.rainfall_sound(
         np.full(18, 60.0),
         np.ones(18),
         _BANDS,
         volume=1.0,
         excited_area_m2=1.0,
-        reference_correction=correction.correction_db,
+        reference_correction=correction.correction,
     )
-    assert as_array.l_ia_norm_db == pytest.approx(res.l_ia_norm_db)
+    assert as_array.l_ia_norm == pytest.approx(res.l_ia_norm)
     _, octaves = res.octave_bands(normalized=True)
     assert octaves.size == 6
 
@@ -426,7 +426,7 @@ def test_formula_k4_direct_intensity() -> None:
     res = building.rainfall_sound_from_intensity(
         np.full(18, 50.0), _BANDS, measuring_area_m2=4.0, excited_area_m2=1.0
     )
-    np.testing.assert_allclose(res.l_i_db, 50.0 + 10.0 * np.log10(4.0))
+    np.testing.assert_allclose(res.l_i, 50.0 + 10.0 * np.log10(4.0))
     assert res.method == "intensity"
 
 
@@ -441,9 +441,7 @@ def test_result_refuses_an_unknown_method() -> None:
     band = np.array([1000.0])
     level = np.array([40.0])
     with pytest.raises(ValueError, match=r"method"):
-        RainfallSoundResult(
-            frequencies=band, l_i_db=level, l_ia_db=None, method="guess"
-        )
+        RainfallSoundResult(frequencies=band, l_i=level, l_ia=None, method="guess")
 
 
 # --- Figures -----------------------------------------------------------------
@@ -494,13 +492,13 @@ def test_rain_figure_draws_the_measured_and_normalized_levels() -> None:
         reference_correction=correction,
     )
     ax = sound.plot()
-    assert sound.l_i_norm_db is not None
-    np.testing.assert_allclose(_line(ax, r"$L_I$"), sound.l_i_db)
+    assert sound.l_i_norm is not None
+    np.testing.assert_allclose(_line(ax, r"$L_I$"), sound.l_i)
     np.testing.assert_allclose(
-        _line(ax, r"$L_{I\mathrm{norm}}$ (normalized)"), sound.l_i_norm_db
+        _line(ax, r"$L_{I\mathrm{norm}}$ (normalized)"), sound.l_i_norm
     )
-    assert sound.l_ia_db is not None
-    assert f"= {round(sound.l_ia_db, 1)} dB" in ax.get_title()
+    assert sound.l_ia is not None
+    assert f"= {round(sound.l_ia, 1)} dB" in ax.get_title()
     plt.close(ax.figure)
 
 
@@ -512,7 +510,7 @@ def test_reference_figure_draws_the_corrected_level_against_table_i1() -> None:
         _I1_LEVEL + 1.0, 2.2 / (_I1_BANDS * 2.0 * _I1_ETA_REF)
     )
     ax = res.plot()
-    np.testing.assert_allclose(_line(ax, r"$L_{I,\mathrm{m,ref}}$"), res.l_i_m_ref_db)
+    np.testing.assert_allclose(_line(ax, r"$L_{I,\mathrm{m,ref}}$"), res.l_i_m_ref)
     np.testing.assert_allclose(
         _line(ax, r"$L_{I\mathrm{c,ref}}$ (Table I.1)"), _I1_LEVEL
     )

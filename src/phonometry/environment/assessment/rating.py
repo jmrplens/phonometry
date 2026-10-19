@@ -37,9 +37,9 @@ def composite_rating_level(periods: Iterable[tuple[float, float, float]]) -> flo
        10 \log_{10}\left[ \sum_i \frac{h_i}{24} \cdot
        10^{0.1 (L_i + K_i)} \right]
 
-    :param periods: Iterable of ``(level_db, hours, adjustment_db)`` tuples.
-        ``level_db`` is the period's (rating) equivalent continuous level,
-        ``hours`` its duration and ``adjustment_db`` the time-of-day or
+    :param periods: Iterable of ``(level, hours, adjustment)`` tuples.
+        ``level`` is the period's (rating) equivalent continuous level,
+        ``hours`` its duration and ``adjustment`` the time-of-day or
         source adjustment K (e.g. ISO 1996-1 Table A.1: evening 5 dB,
         night 10 dB). Hours must be positive and sum to 24.
     :return: Composite rating level in dB.

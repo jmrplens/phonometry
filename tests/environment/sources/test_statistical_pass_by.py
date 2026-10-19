@@ -66,7 +66,7 @@ def annex_e() -> StatisticalPassByResult:
         return statistical_pass_by(
             *_annex_e_rows(),
             road_speed_category="medium",
-            corrected_vehicle_sound_levels_db=ref.ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB,
+            corrected_vehicle_sound_levels=ref.ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB,
             reference_db=ref.ANNEX_E_REFERENCE_INDEX_DB,
         )
 
@@ -193,19 +193,17 @@ def test_annex_e_lines_are_recovered(annex_e: StatisticalPassByResult) -> None:
             ref.ANNEX_E_RESIDUAL_STANDARD_DEVIATIONS_DB[category]
         )
         # The line passes through the mean level printed beside it.
-        assert (
-            round(regression.mean_level_db, 1) == (ref.ANNEX_E_MEAN_LEVELS_DB[category])
-        )
+        assert round(regression.mean_level, 1) == (ref.ANNEX_E_MEAN_LEVELS_DB[category])
     assert annex_e.n_heavy_vehicles == ref.ANNEX_E_HEAVY_VEHICLE_COUNT
 
 
 def test_annex_e_vehicle_sound_levels(annex_e: StatisticalPassByResult) -> None:
-    assert dict(annex_e.reported_vehicle_sound_levels_db) == (
+    assert dict(annex_e.reported_vehicle_sound_levels) == (
         ref.ANNEX_E_VEHICLE_SOUND_LEVELS_DB
     )
-    assert annex_e.vehicle_sound_levels_db["1"] == pytest.approx(78.5456, abs=1e-4)
-    assert annex_e.vehicle_sound_levels_db["2a"] == pytest.approx(81.1140, abs=1e-4)
-    assert annex_e.vehicle_sound_levels_db["2b"] == pytest.approx(83.8379, abs=1e-4)
+    assert annex_e.vehicle_sound_levels["1"] == pytest.approx(78.5456, abs=1e-4)
+    assert annex_e.vehicle_sound_levels["2a"] == pytest.approx(81.1140, abs=1e-4)
+    assert annex_e.vehicle_sound_levels["2b"] == pytest.approx(83.8379, abs=1e-4)
 
 
 def test_annex_e_index_is_the_index_of_the_printed_levels() -> None:
@@ -221,17 +219,17 @@ def test_annex_e_index_end_to_end_is_the_printed_79_9(
     annex_e: StatisticalPassByResult,
 ) -> None:
     """From pass-bys, the index adds the one-decimal levels of 9.2, as 9.5 has it."""
-    assert annex_e.index_db == pytest.approx(79.9464, abs=1e-4)
-    assert annex_e.reported_index_db == ref.ANNEX_E_INDEX_DB
+    assert annex_e.index == pytest.approx(79.9464, abs=1e-4)
+    assert annex_e.reported_index == ref.ANNEX_E_INDEX_DB
 
 
 def test_the_unrounded_chain_would_print_80_0(
     annex_e: StatisticalPassByResult,
 ) -> None:
     """Carried unrounded from the printed lines, the index would print 80,0 dB."""
-    assert annex_e.full_precision_index_db == pytest.approx(79.9852, abs=1e-4)
-    assert round(annex_e.full_precision_index_db, 1) == pytest.approx(80.0)
-    two_decimals = {k: round(v, 2) for k, v in annex_e.vehicle_sound_levels_db.items()}
+    assert annex_e.full_precision_index == pytest.approx(79.9852, abs=1e-4)
+    assert round(annex_e.full_precision_index, 1) == pytest.approx(80.0)
+    two_decimals = {k: round(v, 2) for k, v in annex_e.vehicle_sound_levels.items()}
     literal = statistical_pass_by_index(two_decimals, road_speed_category="medium")
     assert literal == pytest.approx(79.9877, abs=1e-4)
     assert round(literal, 1) == pytest.approx(80.0)
@@ -239,28 +237,28 @@ def test_the_unrounded_chain_would_print_80_0(
 
 def test_the_index_is_rounded_once(annex_e: StatisticalPassByResult) -> None:
     """79,946 dB taken to 79,95 dB first would print 80,0 dB, not Annex E's 79,9."""
-    two_steps = math.floor(round(annex_e.index_db, 2) * 10.0 + 0.5) / 10.0
+    two_steps = math.floor(round(annex_e.index, 2) * 10.0 + 0.5) / 10.0
     assert two_steps == pytest.approx(80.0)
-    assert annex_e.reported_index_db == pytest.approx(79.9)
+    assert annex_e.reported_index == pytest.approx(79.9)
 
 
 def test_the_two_indices_differ_by_less_than_half_a_tenth(
     annex_e: StatisticalPassByResult,
 ) -> None:
     """Rounding moves each level at most 0,05 dB, and the index follows."""
-    gap = abs(annex_e.full_precision_index_db - annex_e.index_db)
+    gap = abs(annex_e.full_precision_index - annex_e.index)
     assert 0.0 < gap <= 0.05
 
 
 def test_annex_e_corrected_index_and_difference(
     annex_e: StatisticalPassByResult,
 ) -> None:
-    assert annex_e.corrected_index_db == pytest.approx(80.1210, abs=1e-4)
-    assert annex_e.reported_corrected_index_db == ref.ANNEX_E_CORRECTED_INDEX_DB
-    assert annex_e.corrected_difference_db is not None
-    assert round(annex_e.corrected_difference_db, 1) == ref.ANNEX_E_DIFFERENCE_DB
-    assert annex_e.difference_db == pytest.approx(
-        annex_e.index_db - ref.ANNEX_E_REFERENCE_INDEX_DB
+    assert annex_e.corrected_index == pytest.approx(80.1210, abs=1e-4)
+    assert annex_e.reported_corrected_index == ref.ANNEX_E_CORRECTED_INDEX_DB
+    assert annex_e.corrected_difference is not None
+    assert round(annex_e.corrected_difference, 1) == ref.ANNEX_E_DIFFERENCE_DB
+    assert annex_e.difference == pytest.approx(
+        annex_e.index - ref.ANNEX_E_REFERENCE_INDEX_DB
     )
 
 
@@ -283,8 +281,8 @@ def test_reference_as_levels_is_indexed_with_the_same_weights() -> None:
         road_speed_category="medium",
         reference_db=SPB_NORMALIZED_REFERENCE_DB,
     )
-    assert result.reference_index_db == pytest.approx(78.9219, abs=1e-4)
-    assert result.corrected_difference_db is None
+    assert result.reference_index == pytest.approx(78.9219, abs=1e-4)
+    assert result.corrected_difference is None
 
 
 def _index_by_hand(levels: dict[str, float], weights: dict[str, float]) -> float:
@@ -304,21 +302,21 @@ def test_national_weights_reach_every_index_of_the_result() -> None:
     result = statistical_pass_by(
         *_annex_e_rows(),
         road_speed_category="medium",
-        corrected_vehicle_sound_levels_db=corrected,
+        corrected_vehicle_sound_levels=corrected,
         reference_db=reference,
         weighting_factors=weights,
     )
     assert dict(result.weighting_factors) == weights
-    assert result.index_db == pytest.approx(
+    assert result.index == pytest.approx(
         _index_by_hand(ref.ANNEX_E_VEHICLE_SOUND_LEVELS_DB, weights), rel=1e-14
     )
-    assert result.corrected_index_db == pytest.approx(
+    assert result.corrected_index == pytest.approx(
         _index_by_hand({"1": 78.8, "2a": 81.1, "2b": 83.8}, weights), rel=1e-14
     )
-    assert result.reference_index_db == pytest.approx(
+    assert result.reference_index == pytest.approx(
         _index_by_hand({"1": 76.4, "2a": 81.1, "2b": 84.0}, weights), rel=1e-14
     )
-    assert dict(result.reported_corrected_vehicle_sound_levels_db or {}) == {
+    assert dict(result.reported_corrected_vehicle_sound_levels or {}) == {
         "1": 78.8,
         "2a": 81.1,
         "2b": 83.8,
@@ -330,13 +328,13 @@ def test_national_weights_reach_the_index_interval() -> None:
     result = statistical_pass_by(
         *_annex_e_rows(), road_speed_category="medium", weighting_factors=weights
     )
-    reported = dict(result.reported_vehicle_sound_levels_db)
+    reported = dict(result.reported_vehicle_sound_levels)
     step = 1e-6
     combined = 0.0
     for category in _CATEGORIES:
         moved = dict(reported)
         moved[category] += step
-        derivative = (_index_by_hand(moved, weights) - result.index_db) / step
+        derivative = (_index_by_hand(moved, weights) - result.index) / step
         combined += (
             derivative * result.regressions[category].confidence_interval_db
         ) ** 2
@@ -350,15 +348,15 @@ def test_reference_index_may_be_any_real_number() -> None:
     result = statistical_pass_by(
         *_annex_e_rows(), road_speed_category="medium", reference_db=np.int64(77)
     )
-    assert result.reference_index_db == pytest.approx(77.0)
-    assert result.difference_db == pytest.approx(result.index_db - 77.0)
+    assert result.reference_index == pytest.approx(77.0)
+    assert result.difference == pytest.approx(result.index - 77.0)
 
 
 def test_no_reference_leaves_the_differences_out() -> None:
     result = statistical_pass_by(*_annex_e_rows(), road_speed_category="medium")
-    assert result.difference_db is None
-    assert result.corrected_index_db is None
-    assert result.reported_corrected_index_db is None
+    assert result.difference is None
+    assert result.corrected_index is None
+    assert result.reported_corrected_index is None
 
 
 # --------------------------------------------------------------------------
@@ -412,9 +410,7 @@ def test_confidence_interval_is_the_line_interval_at_the_reference_speed() -> No
     assert regression.confidence_interval_db == pytest.approx(
         quantile * shifted.intercept_stderr, rel=1e-10
     )
-    assert regression.vehicle_sound_level_db == pytest.approx(
-        shifted.intercept, rel=1e-12
-    )
+    assert regression.vehicle_sound_level == pytest.approx(shifted.intercept, rel=1e-12)
 
 
 @pytest.mark.filterwarnings("ignore::phonometry.environment.StatisticalPassByWarning")
@@ -434,11 +430,11 @@ def test_index_interval_combines_the_three_by_sensitivity(
     step = 1e-6
     combined = 0.0
     for category in _CATEGORIES:
-        levels = dict(annex_e.reported_vehicle_sound_levels_db)
+        levels = dict(annex_e.reported_vehicle_sound_levels)
         levels[category] += step
         derivative = (
             statistical_pass_by_index(levels, road_speed_category="medium")
-            - annex_e.index_db
+            - annex_e.index
         ) / step
         combined += (
             derivative * annex_e.regressions[category].confidence_interval_db
@@ -481,9 +477,9 @@ def test_reported_levels_round_half_up() -> None:
         vehicle_category="1",
         road_speed_category="medium",
     )
-    assert regression.vehicle_sound_level_db == pytest.approx(78.25)
-    assert regression.reported_vehicle_sound_level_db == pytest.approx(78.3)
-    assert round(regression.vehicle_sound_level_db, 1) == pytest.approx(78.2)
+    assert regression.vehicle_sound_level == pytest.approx(78.25)
+    assert regression.reported_vehicle_sound_level == pytest.approx(78.3)
+    assert round(regression.vehicle_sound_level, 1) == pytest.approx(78.2)
 
 
 # --------------------------------------------------------------------------

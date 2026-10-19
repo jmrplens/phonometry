@@ -196,7 +196,7 @@ PrecisionCriteria(
     scan_intensity_level_2: np.ndarray | None = None,
     frequencies: np.ndarray | None = None,
     repeatability_limit_db: np.ndarray | None = None,
-    pressure_residual_index_db: np.ndarray | None = None,
+    pressure_residual_index: np.ndarray | None = None,
     field_nonuniformity_1: np.ndarray | None = None,
     field_nonuniformity_2: np.ndarray | None = None,
 )
@@ -234,7 +234,7 @@ unless both criterion 1 and criterion 2 are evaluable.
 | `scan_intensity_level_2` | `LIn(2)` per band, in dB, or `None`. |
 | `frequencies` | Nominal mid-band frequencies per band, in Hz, from which Table 1 gives the criterion-1 limit `s`, or `None`. |
 | `repeatability_limit_db` | The caller's own `s` per band, in dB, in place of Table 1, or `None` to read Table 1. |
-| `pressure_residual_index_db` | `delta_pI0` per band, in dB, or `None`. |
+| `pressure_residual_index` | `delta_pI0` per band, in dB, or `None`. |
 | `field_nonuniformity_1` | `FS(1)` per band, or `None`. |
 | `field_nonuniformity_2` | `FS(2)` per band, or `None`. |
 
@@ -572,7 +572,7 @@ SoundPowerIntensityResult(
     partial_power: np.ndarray,
     surface_pressure_intensity_index: np.ndarray | None,
     repeatability: np.ndarray | None,
-    pressure_residual_index_db: np.ndarray | None,
+    pressure_residual_index: np.ndarray | None,
     surface_area: float,
     band_type: str,
     grade: str,
@@ -597,7 +597,7 @@ is $|L_{Wi}(1) - L_{Wi}(2)|$ per segment and band (criterion 3),
 a second scan; it is $+\infty$ where the two sweeps reverse the flow
 direction on a segment (opposite-sign partial powers), a gross
 non-repeatability that criterion 3 must reject even when the magnitudes
-happen to match. `pressure_residual_index_db` is the
+happen to match. `pressure_residual_index` is the
 $\delta_{pI0}$ of the instrument per band, `None` when it was not
 given, and `dynamic_capability_index` the `Ld` it gives for the
 requested grade. `repeatability_limit_db` is the criterion-3 limit `s`

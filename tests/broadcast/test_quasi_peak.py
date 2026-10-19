@@ -239,7 +239,7 @@ def test_a_steady_1_khz_sine_at_0_775_volts_reads_0_dbqps(fs: float) -> None:
     """
     result = quasi_peak_meter(_steady_sine(BS468_CALIBRATION_V, fs), fs)
     assert result.reading == pytest.approx(BS468_CALIBRATION_V, abs=1e-12)
-    assert result.level_db == pytest.approx(0.0, abs=1e-9)
+    assert result.level == pytest.approx(0.0, abs=1e-9)
     assert result.level_unit == "dBqps"
 
 
@@ -288,9 +288,9 @@ def test_the_reading_tracks_over_20_db_of_short_bursts() -> None:
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message=r".*incommensurate with fs.*")
         burst = tone_burst(FS, BS468_BURST_HZ, cycles, post_silence=0.5).signal
-    top = quasi_peak_meter(burst, FS).level_db
+    top = quasi_peak_meter(burst, FS).level
     for step_db in np.linspace(0.0, BS468_OVERLOAD_RANGE_DB, 5):
-        attenuated = quasi_peak_meter(10.0 ** (-step_db / 20.0) * burst, FS).level_db
+        attenuated = quasi_peak_meter(10.0 ** (-step_db / 20.0) * burst, FS).level
         assert abs((top - attenuated) - step_db) < BS468_OVERLOAD_TOL_DB
         assert (top - attenuated) == pytest.approx(step_db, abs=1e-12)
 
@@ -309,8 +309,8 @@ def test_reversing_the_polarity_leaves_the_reading_unchanged() -> None:
     width = int(round(1e-3 * FS))
     for start in range(0, n - period, period):
         pulses[start : start + width] = 0.8
-    forward = quasi_peak_meter(pulses, FS, weighted=False).level_db
-    reversed_ = quasi_peak_meter(-pulses, FS, weighted=False).level_db
+    forward = quasi_peak_meter(pulses, FS, weighted=False).level
+    reversed_ = quasi_peak_meter(-pulses, FS, weighted=False).level
     assert abs(forward - reversed_) < BS468_REVERSIBILITY_TOL_DB
     assert forward == reversed_
 
@@ -404,7 +404,7 @@ def test_a_silent_record_reads_minus_infinity() -> None:
     """No excursion at all is a level of ``-inf``, not a division by zero."""
     result = quasi_peak_meter(np.zeros(4800), FS)
     assert result.reading == 0.0
-    assert result.level_db == -math.inf
+    assert result.level == -math.inf
 
 
 def test_the_result_is_frozen() -> None:
@@ -493,7 +493,7 @@ def test_a_two_dimensional_trace_is_refused() -> None:
     ):
         QuasiPeakResult(
             reading=1.0,
-            level_db=0.0,
+            level=0.0,
             reference=DBQPS_REFERENCE_V,
             trace=np.ones((2, 3)),
             fs=FS,
@@ -512,7 +512,7 @@ def test_an_uncalibrated_signal_reads_exactly_like_the_bare_array() -> None:
     from_signal = quasi_peak_meter(Signal(record, int(FS)))
     from_array = quasi_peak_meter(record, FS)
     assert from_signal.reading == from_array.reading
-    assert from_signal.level_db == from_array.level_db
+    assert from_signal.level == from_array.level
 
 
 def test_a_calibrated_signal_is_read_in_pascals() -> None:
@@ -524,7 +524,7 @@ def test_a_calibrated_signal_is_read_in_pascals() -> None:
     )
     from_array = quasi_peak_meter(factor * record, FS, reference=2e-5)
     assert from_signal.reading == from_array.reading
-    assert from_signal.level_db == from_array.level_db
+    assert from_signal.level == from_array.level
 
 
 def test_a_calibrated_signal_needs_a_reference_of_its_own() -> None:

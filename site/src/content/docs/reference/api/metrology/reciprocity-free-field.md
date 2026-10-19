@@ -282,7 +282,7 @@ free_field_reciprocity(
     relative_humidity_percent: float,
     acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
     dispersion: bool = True,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    corrections: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
 ) -> ReciprocityCalibration
 ```
@@ -314,7 +314,7 @@ printed Formula (8) drops (module docstring).
 | `relative_humidity_percent` | The relative humidity, in %. |
 | `acoustic_centers_m` | The acoustic centre of microphones 1, 2 and 3, each relative to its diaphragm on the principal axis, positive in front, in m, one value or one per frequency (Default: the centres of the diaphragms, which Annex A allows at sufficiently remote points). |
 | `dispersion` | Whether $k$ takes the speed of sound with the dispersion of IEC 61094-2 F.3 (Default: `True`). |
-| `corrections_db` | Corrections added to every level (Default: none). |
+| `corrections` | Corrections added to every level (Default: none). |
 | `expanded_uncertainty_db` | The expanded uncertainty, in dB (Default: `None`). |
 
 **Returns:** The [`ReciprocityCalibration`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration).
@@ -339,7 +339,7 @@ free_field_reciprocity_pair(
     relative_humidity_percent: float,
     acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    corrections: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
 ) -> ReciprocityCalibration
 ```
@@ -369,7 +369,7 @@ Formula (7), which the printed Formula (9) drops (module docstring).
 | `relative_humidity_percent` | The relative humidity, in %. |
 | `acoustic_centers_m` | The acoustic centres of the two microphones, positive in front of the diaphragm, in m (Default: the diaphragms). |
 | `dispersion` | Whether $k$ includes dispersion (Default: `True`). |
-| `corrections_db` | Corrections added to both levels (Default: none). |
+| `corrections` | Corrections added to both levels (Default: none). |
 | `expanded_uncertainty_db` | The expanded uncertainty, in dB (Default: `None`). |
 
 **Returns:** The [`ReciprocityCalibration`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration), of two microphones.

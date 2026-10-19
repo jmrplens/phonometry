@@ -527,6 +527,15 @@ from .damping import VER_BERANEK_14_1 as VER_BERANEK_14_1
 from .damping import VER_BERANEK_14_1_COLUMNS as VER_BERANEK_14_1_COLUMNS
 from .diffusion import COX_B_BANDS_HZ as COX_B_BANDS_HZ
 from .diffusion import COX_B_DIFFUSION as COX_B_DIFFUSION
+from .din45672_3_annex_a import DIN45672_3_TABLE_A1 as DIN45672_3_TABLE_A1
+from .din45672_3_annex_a import DIN45672_3_TABLE_A2 as DIN45672_3_TABLE_A2
+from .din45672_3_annex_a import DIN45672_3_TABLE_A3 as DIN45672_3_TABLE_A3
+from .din45672_3_annex_a import DIN45672_3_TABLE_A4 as DIN45672_3_TABLE_A4
+from .din45672_3_annex_a import DIN45672_3_TABLE_A5 as DIN45672_3_TABLE_A5
+from .din45672_3_annex_a import DIN45672_3_TABLE_A6 as DIN45672_3_TABLE_A6
+from .din45672_3_annex_a import (
+    TABLE_A1_A2_FLOOR_FREQUENCIES as TABLE_A1_A2_FLOOR_FREQUENCIES,
+)
 from .duct_walls import ASHRAE_49_BANDS_HZ as ASHRAE_49_BANDS_HZ
 from .duct_walls import ASHRAE_49_CREDITS as ASHRAE_49_CREDITS
 from .duct_walls import ASHRAE_49_DUCT_WALLS as ASHRAE_49_DUCT_WALLS

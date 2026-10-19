@@ -6,20 +6,20 @@
       "key": "linoleum_3_2_mm",
       "name": "Linóleum, 3,2 mm",
       "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
-      "impact_sound_improvement_db": 3
+      "impact_sound_improvement": 3
     },
     {
       "key": "baldosa_de_caucho_3_2_mm",
       "name": "Baldosa de caucho, 3,2 mm",
       "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
-      "impact_sound_improvement_db": 5
+      "impact_sound_improvement": 5
     },
     {
       "key": "asfalto",
       "name": "Asfalto",
       "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
       "ranges": {
-        "impact_sound_improvement_db": [
+        "impact_sound_improvement": [
           5,
           7
         ]
@@ -29,43 +29,43 @@
       "key": "suelo_de_parquet_sobre_listones",
       "name": "Suelo de parquet sobre listones",
       "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
-      "impact_sound_improvement_db": 7
+      "impact_sound_improvement": 7
     },
     {
       "key": "plancha_de_corcho_8_mm",
       "name": "Plancha de corcho, 8 mm",
       "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
-      "impact_sound_improvement_db": 10
+      "impact_sound_improvement": 10
     },
     {
       "key": "moqueta_wilton_9_5_mm",
       "name": "Moqueta Wilton, 9,5 mm",
       "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
-      "impact_sound_improvement_db": 24
+      "impact_sound_improvement": 24
     },
     {
       "key": "4_mm_de_linoleum_sobre_6_4_mm_de_plancha_de_corcho_duro",
       "name": "4 mm de linóleum sobre 6,4 mm de plancha de corcho duro",
       "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
-      "impact_sound_improvement_db": 6
+      "impact_sound_improvement": 6
     },
     {
       "key": "4_mm_de_linoleum_sobre_6_4_mm_de_plancha_de_corcho_blando",
       "name": "4 mm de linóleum sobre 6,4 mm de plancha de corcho blando",
       "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
-      "impact_sound_improvement_db": 14
+      "impact_sound_improvement": 14
     },
     {
       "key": "4_mm_de_linoleum_sobre_12_8_mm_de_corcho_blando",
       "name": "4 mm de linóleum sobre 12,8 mm de corcho blando",
       "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
-      "impact_sound_improvement_db": 16
+      "impact_sound_improvement": 16
     },
     {
       "key": "4_mm_de_linoleum_sobre_12_8_mm_de_tablero_blando",
       "name": "4 mm de linóleum sobre 12,8 mm de tablero blando",
       "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
-      "impact_sound_improvement_db": 18
+      "impact_sound_improvement": 18
     }
   ]
 }

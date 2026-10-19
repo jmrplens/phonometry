@@ -634,7 +634,7 @@ The Table A.1 limit of each frequency, in dB, read from the room.
 MicrophoneTraverse(
     positions_m: np.ndarray,
     levels: np.ndarray,
-    monitor_levels_db: np.ndarray | None = None,
+    monitor_levels: np.ndarray | None = None,
     background_levels: np.ndarray | None = None,
     name: str = '',
     targets: tuple[str, ...] = (),
@@ -649,7 +649,7 @@ One straight microphone traverse of ISO 26101:2017 5.1.3.2.
 | :--- | :--- |
 | `positions_m` | The measurement points, one row per point, as `(x, y, z)` coordinates in metres in the room frame: `z` points up and, in a hemi-anechoic room, the reflecting plane is `z = 0`. The mathematical origin of the traverse is given to [`inverse_square_law_deviations`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_deviations) in the same frame. |
 | `levels` | The measured sound pressure level $L'_{pi}$ at each point, one row per point and one column per test frequency, in dB. A `nan` marks a point not measured at that frequency, which is how a spacing that changes with frequency is written (ISO 3745 A.4.3 asks for equally spaced points *at each frequency*). Every other level is finite. |
-| `monitor_levels_db` | The monitor microphone level $L_{p,\mathrm{ref},i}$ recorded with each point, same shape; the first row is the level for the initial point 0, which every point is corrected to. It is finite wherever a level was measured and in the first row of every frequency measured. `None` applies no stability correction. |
+| `monitor_levels` | The monitor microphone level $L_{p,\mathrm{ref},i}$ recorded with each point, same shape; the first row is the level for the initial point 0, which every point is corrected to. It is finite wherever a level was measured and in the first row of every frequency measured. `None` applies no stability correction. |
 | `background_levels` | The background level at each point, same shape, or one row for the whole traverse, finite wherever a level was measured; `None` leaves the 6 dB requirement of ISO 26101 5.1.2.2 c) unjudged. |
 | `name` | A label for the traverse (the path it follows: a dihedral corner, the nearest wall, a door). |
 | `targets` | What the path is selected towards, among the five of the amended ISO 3745 A.3.3 a) to e): `"dihedral corner"`, `"trihedral corner"`, `"boundary center"` (the centre of the most uniform boundary surface), `"closest boundary"` and `"unique features"` (a door, a window, a ventilation opening). One path may serve more than one target, as A.3.3 NOTE 1 allows for c) and d); an empty tuple names none. |
@@ -665,7 +665,7 @@ MicrophoneTraverse.along(
     levels: ArrayLike,
     *,
     start_m: ArrayLike = (0.0, 0.0, 0.0),
-    monitor_levels_db: ArrayLike | None = None,
+    monitor_levels: ArrayLike | None = None,
     background_levels: ArrayLike | None = None,
     name: str = '',
     targets: Sequence[str] = (),
@@ -682,7 +682,7 @@ A traverse laid out along a straight line from `start_m`.
 | `distances` | The distance of each point from `start_m` along the path, in metres. |
 | `levels` | One row per point, one column per frequency, in dB. |
 | `start_m` | The point the distances are counted from, in metres; the room frame's origin by default. |
-| `monitor_levels_db` | As for the class. |
+| `monitor_levels` | As for the class. |
 | `background_levels` | As for the class. |
 | `name` | As for the class. |
 | `targets` | As for the class. |
@@ -732,7 +732,7 @@ frequencies.
 SourceDirectionalityResult(
     frequencies: np.ndarray,
     room: str,
-    mean_level_db: np.ndarray,
+    mean_level: np.ndarray,
     max_positive_deviation_db: np.ndarray,
     max_negative_deviation_db: np.ndarray,
 )
@@ -746,7 +746,7 @@ Whether a test source is uniform enough to qualify a room (ISO 26101 B.4).
 | :--- | :--- |
 | `frequencies` | The one-third octave mid-band frequencies, in hertz. |
 | `room` | The room type the source is to qualify. |
-| `mean_level_db` | The arithmetic mean of the decibel levels per band. |
+| `mean_level` | The arithmetic mean of the decibel levels per band. |
 | `max_positive_deviation_db` | The largest level above the mean. |
 | `max_negative_deviation_db` | The largest level below the mean, a negative number. |
 

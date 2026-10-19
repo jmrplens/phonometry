@@ -206,9 +206,9 @@ _CHOSEN_LIMITS = {
 #: a verdict flag, the words of a requirement.
 _NOT_LIMITS = {
     "phonometry.building.measurement.service_equipment.MeasurementDisturbanceCheck."
-    "max_levels_db": "the measured maximum levels",
+    "max_levels": "the measured maximum levels",
     "phonometry.building.measurement.service_equipment.VaryingBackgroundCheck."
-    "background_max_level_db": "the measured maximum of the background",
+    "background_max_level": "the measured maximum of the background",
     "phonometry.emission.free_field_qualification.SourceDirectionalityResult."
     "max_negative_deviation_db": "the measured largest deviation",
     "phonometry.emission.free_field_qualification.SourceDirectionalityResult."
@@ -219,7 +219,7 @@ _NOT_LIMITS = {
         "the requirement in words, not a value"
     ),
     "phonometry.environment.sources._statistical_pass_by.PassByRegression."
-    "max_levels_db": "the measured maximum level of each pass-by",
+    "max_levels": "the measured maximum level of each pass-by",
     "phonometry.metrology.sound_level_meter.SoundLevelMeterPeriodicRequirement."
     "over_max_by_correction_data": "the names of the results it concerns",
     "phonometry.noise_control._cabin_insulation.SourcePositionCheck."
@@ -251,7 +251,7 @@ _DERIVED_LIMITS = {
         "limits",
     ),
     "phonometry.electroacoustics.program_signal.ProgramSignalCheck": (
-        "relative_levels_db",
+        "relative_levels",
         "tolerance_plus_db",
         "tolerance_minus_db",
     ),
@@ -304,7 +304,7 @@ _DERIVED_LIMITS = {
     ),
     "phonometry.hearing.sound_field_audiometry.FreeSoundFieldCheck": (
         "axis_offset_m",
-        "inverse_distance_difference_db",
+        "inverse_distance_difference",
     ),
     "phonometry.hearing._real_ear_attenuation.REATSoundFieldCheck": (
         "allowable_variation_db",
@@ -473,9 +473,9 @@ _DERIVED_VALUES = frozenset(
         "action",
         "corner_standard_deviation_db",
         "deviations_m",
-        "inverse_distance_difference_db",
+        "inverse_distance_difference",
         "next_positions",
-        "relative_levels_db",
+        "relative_levels",
         "spread_db",
         "stage",
         "table_bands_hz",
@@ -754,7 +754,7 @@ def test_every_stated_flag_is_still_a_field() -> None:
 class _StoredByType:
     """A verdict stored under a name the guard has no reason to suspect."""
 
-    level_db: float
+    level: float
     clears_the_floor: bool
 
 
@@ -762,7 +762,7 @@ class _StoredByType:
 class _StoredByName:
     """A per-band verdict typed loosely, as an untyped array."""
 
-    level_db: float
+    level: float
     background_ok: object
 
 
@@ -803,7 +803,7 @@ class ProbeResult:
     category: str
     rating: str
     method: str
-    level_db: float
+    level: float
 
 
 def _rating(margin):
@@ -822,7 +822,7 @@ def probe(margin_db, method):
         category=_HIGH if worst >= LIMIT_DB else "low",
         rating=_rating(worst),
         method="fast" if method == "f" else "slow",
-        level_db=worst,
+        level=worst,
     )
 """
 
@@ -971,9 +971,9 @@ _DERIVED_FLAGS = {
         "passes",
     ),
     "phonometry.building.measurement.service_equipment.ServiceEquipmentBackgroundResult": (
-        "difference_db",
+        "difference",
         "regime",
-        "correction_db",
+        "correction",
         "corrected_db",
     ),
     "phonometry.building.measurement.service_equipment.ServiceEquipmentResult": (
@@ -1038,7 +1038,7 @@ _DERIVED_FLAGS = {
         "range_limited",
     ),
     "phonometry.emission.reference_sound_source.ReferenceSourceCalibration": (
-        "sound_power_level_db",
+        "sound_power_level",
         "intensity_bands",
         "intensity_agreement",
         "room_qualified",
@@ -1158,8 +1158,8 @@ _DERIVED_FLAGS = {
     ),
     "phonometry.environment.assessment.wind_turbine_receptor.SoundRelevantTurbines": (
         "relevant",
-        "total_level_db",
-        "relevant_level_db",
+        "total_level",
+        "relevant_level",
     ),
     "phonometry.environment.assessment.wind_turbine_receptor.TurbineSoundLevels": (
         "regimes",
@@ -1199,7 +1199,7 @@ _DERIVED_FLAGS = {
     "phonometry.hearing.occupational_exposure.ExposureResult": ("sampling_advisory",),
     "phonometry.hearing.occupational_exposure.TaskContribution": ("spread_advisory",),
     "phonometry.hearing._real_ear_attenuation.AttenuationDifferenceResult": (
-        "difference_db",
+        "difference",
         "criterion_db",
         "significant",
     ),

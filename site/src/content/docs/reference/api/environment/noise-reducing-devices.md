@@ -91,7 +91,7 @@ ABSORPTION_RATIO_LIMIT = 0.99
 
 ```python
 airborne_insulation_rating(
-    sound_reduction_index_db: ArrayLike,
+    sound_reduction_index: ArrayLike,
     *,
     spectrum: str = 'road',
 ) -> RoadDeviceRating
@@ -106,7 +106,7 @@ for a railway one, on the same weighting as the absorption rating above.
 
 | Name | Description |
 | :--- | :--- |
-| `sound_reduction_index_db` | $R$ in decibels, in the eighteen one-third octave bands of [`TRAFFIC_NOISE_BANDS_HZ`](/phonometry/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz). |
+| `sound_reduction_index` | $R$ in decibels, in the eighteen one-third octave bands of [`TRAFFIC_NOISE_BANDS_HZ`](/phonometry/reference/api/environment/noise-reducing-devices/#traffic_noise_bands_hz). |
 | `spectrum` | `"road"` (EN 1793-3, the default) or `"railway"` (EN 16272-3-1). |
 
 **Returns:** The rating, its reported integer and, for a road device, its Annex A category.

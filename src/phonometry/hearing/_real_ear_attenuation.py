@@ -288,7 +288,7 @@ def _subject_grid(values: ArrayLike, name: str) -> np.ndarray:
 class RealEarAttenuationResult(OwnsArrays):
     r"""The attenuation of a hearing protector on a panel of subjects (4.6).
 
-    :ivar attenuation_db: The individual attenuations :math:`A_{j,f}`, one row
+    :ivar attenuation: The individual attenuations :math:`A_{j,f}`, one row
         per subject and one column per test signal, in dB. This is the grid
         :func:`phonometry.hearing.assumed_protection_value`,
         :func:`phonometry.hearing.hml_rating` and
@@ -303,7 +303,7 @@ class RealEarAttenuationResult(OwnsArrays):
     :ivar n_subjects: The number of test subjects :math:`N`.
     """
 
-    attenuation_db: np.ndarray
+    attenuation: np.ndarray
     mean_db: np.ndarray
     standard_deviation_db: np.ndarray
     standard_uncertainty_db: np.ndarray
@@ -332,7 +332,7 @@ class RealEarAttenuationResult(OwnsArrays):
 
 
 def real_ear_attenuation(
-    attenuation_db: ArrayLike | None = None,
+    attenuation: ArrayLike | None = None,
     *,
     open_threshold_db: ArrayLike | None = None,
     occluded_threshold_db: ArrayLike | None = None,
@@ -360,11 +360,11 @@ def real_ear_attenuation(
     to share a reference: a threshold in sound pressure level and one in
     hearing level give the same difference.
 
-    :param attenuation_db: A ``(subjects, bands)`` grid of individual
+    :param attenuation: A ``(subjects, bands)`` grid of individual
         attenuations, in dB.
     :param open_threshold_db: The thresholds of hearing with open ears, a
         ``(subjects, bands)`` grid in dB, given together with
-        ``occluded_threshold_db`` instead of ``attenuation_db``.
+        ``occluded_threshold_db`` instead of ``attenuation``.
     :param occluded_threshold_db: The thresholds with the protector in place,
         in dB, on the same grid.
     :param frequencies: The centre frequencies of the test signals, in hertz,
@@ -378,10 +378,10 @@ def real_ear_attenuation(
         does not match the grid.
     """
     thresholds = open_threshold_db is not None or occluded_threshold_db is not None
-    if attenuation_db is not None and not thresholds:
-        grid = _subject_grid(attenuation_db, "attenuation_db")
+    if attenuation is not None and not thresholds:
+        grid = _subject_grid(attenuation, "attenuation")
     elif (
-        attenuation_db is None
+        attenuation is None
         and open_threshold_db is not None
         and occluded_threshold_db is not None
     ):
@@ -397,7 +397,7 @@ def real_ear_attenuation(
         grid = occluded - open_ears
     else:
         msg = (
-            "give either 'attenuation_db', or both 'open_threshold_db' and "
+            "give either 'attenuation', or both 'open_threshold_db' and "
             "'occluded_threshold_db' (4.6.2), and not both forms."
         )
         raise ValueError(msg)
@@ -407,7 +407,7 @@ def real_ear_attenuation(
     spread = np.asarray(grid.std(axis=0, ddof=1), dtype=np.float64)
     standard = spread / math.sqrt(n_subjects)
     return RealEarAttenuationResult(
-        attenuation_db=np.asarray(grid, dtype=np.float64),
+        attenuation=np.asarray(grid, dtype=np.float64),
         mean_db=mean,
         standard_deviation_db=spread,
         standard_uncertainty_db=standard,
@@ -528,7 +528,7 @@ class AttenuationDifferenceResult(OwnsArrays):
     frequencies: np.ndarray
 
     @property
-    def difference_db(self) -> np.ndarray:
+    def difference(self) -> np.ndarray:
         """:math:`|m_1 - m_2|` per band, in dB."""
         return np.asarray(
             np.abs(self.first_mean_db - self.second_mean_db), dtype=np.float64
@@ -552,7 +552,7 @@ class AttenuationDifferenceResult(OwnsArrays):
     def significant(self) -> np.ndarray:
         """Whether each band's difference exceeds its criterion, judged settled."""
         return np.asarray(
-            settled(self.difference_db - self.criterion_db) > 0.0, dtype=bool
+            settled(self.difference - self.criterion_db) > 0.0, dtype=bool
         )
 
     @property
@@ -737,20 +737,20 @@ def assess_attenuation_difference(
     )
 
 
-def allowable_field_variation(free_field_rejection_db: float) -> float:
+def allowable_field_variation(free_field_rejection: float) -> float:
     """How much a rotated directional microphone may see vary (Table 1).
 
-    :param free_field_rejection_db: The free-field rejection of the
+    :param free_field_rejection: The free-field rejection of the
         directional microphone at the test signal, in dB: front to side for a
         cosine microphone, front to back for a cardioid one (4.2.2 b)).
     :return: The allowable variation of the sound-field level, in dB.
     :raises ValueError: for a rejection below 10 dB, for which Table 1 says the
         microphone is not suitable, or one that is not finite.
     """
-    require_scalar(free_field_rejection_db, "free_field_rejection_db")
-    rejection = float(free_field_rejection_db)
+    require_scalar(free_field_rejection, "free_field_rejection")
+    rejection = float(free_field_rejection)
     if not math.isfinite(rejection):
-        msg = "'free_field_rejection_db' must be finite, in dB."
+        msg = "'free_field_rejection' must be finite, in dB."
         raise ValueError(msg)
     for lowest, allowed in REAT_FIELD_VARIATION_LIMITS:
         if rejection >= lowest:
@@ -771,12 +771,12 @@ class REATSoundFieldCheck(OwnsArrays):
     :ivar position_deviation_db: The level at each of the six positions 15 cm
         from the reference point less the level at it, one row per position in
         the order of :attr:`positions`, in dB.
-    :ivar left_right_difference_db: The difference between the right and left
+    :ivar left_right_difference: The difference between the right and left
         positions per band, as an absolute value, in dB.
     :ivar rotation_variation_db: The spread of the levels a rotated directional
         microphone saw per band, in dB, or ``nan`` where 4.2.2 b) does not
         apply (below 500 Hz) or no rotation was given.
-    :ivar free_field_rejection_db: The free-field rejection of the rotated
+    :ivar free_field_rejection: The free-field rejection of the rotated
         directional microphone, in dB, or ``None`` when no rotation was given.
         What Table 1 allows the spread (:attr:`allowable_variation_db`) is
         read from it, not stored, so a check cannot be built against another
@@ -792,9 +792,9 @@ class REATSoundFieldCheck(OwnsArrays):
 
     frequencies: np.ndarray
     position_deviation_db: np.ndarray
-    left_right_difference_db: np.ndarray
+    left_right_difference: np.ndarray
     rotation_variation_db: np.ndarray
-    free_field_rejection_db: float | None
+    free_field_rejection: float | None
     positions: tuple[str, ...] = _POSITIONS
 
     def __post_init__(self) -> None:
@@ -803,19 +803,19 @@ class REATSoundFieldCheck(OwnsArrays):
         :raises ValueError: for a rejection below 10 dB, or one that is not
             finite.
         """
-        if self.free_field_rejection_db is not None:
-            allowable_field_variation(self.free_field_rejection_db)
+        if self.free_field_rejection is not None:
+            allowable_field_variation(self.free_field_rejection)
 
     @property
     def allowable_variation_db(self) -> float | None:
         """What Table 1 allows the rotation spread, in dB.
 
-        :return: The allowance for :attr:`free_field_rejection_db`, or
+        :return: The allowance for :attr:`free_field_rejection`, or
             ``None`` when no rotation was given.
         """
-        if self.free_field_rejection_db is None:
+        if self.free_field_rejection is None:
             return None
-        return allowable_field_variation(self.free_field_rejection_db)
+        return allowable_field_variation(self.free_field_rejection)
 
     @property
     def uniform(self) -> np.ndarray:
@@ -834,7 +834,7 @@ class REATSoundFieldCheck(OwnsArrays):
 
         :return: One boolean per band.
         """
-        return settled(self.left_right_difference_db) <= _LEFT_RIGHT_TOLERANCE_DB
+        return settled(self.left_right_difference) <= _LEFT_RIGHT_TOLERANCE_DB
 
     @property
     def diffuse(self) -> np.ndarray:
@@ -901,11 +901,11 @@ class REATSoundFieldCheck(OwnsArrays):
 
 
 def check_reat_sound_field(
-    position_levels_db: Mapping[str, ArrayLike],
-    reference_levels_db: ArrayLike,
+    position_levels: Mapping[str, ArrayLike],
+    reference_levels: ArrayLike,
     *,
-    rotation_levels_db: ArrayLike | None = None,
-    free_field_rejection_db: float | None = None,
+    rotation_levels: ArrayLike | None = None,
+    free_field_rejection: float | None = None,
     frequencies: ArrayLike | None = None,
 ) -> REATSoundFieldCheck:
     r"""Is the sound field of the test site diffuse enough? (4.2.2).
@@ -924,17 +924,17 @@ def check_reat_sound_field(
     The reverberation time of 4.2.3 and the ambient noise of 4.2.4 are
     separate requirements of the test site and are not judged here.
 
-    :param position_levels_db: The level at each position per test signal, in
+    :param position_levels: The level at each position per test signal, in
         dB, keyed ``"front"``, ``"back"``, ``"left"``, ``"right"``, ``"up"``
         and ``"down"``.
-    :param reference_levels_db: The level at the reference point per test
+    :param reference_levels: The level at the reference point per test
         signal, in dB.
-    :param rotation_levels_db: The levels the directional microphone saw while
+    :param rotation_levels: The levels the directional microphone saw while
         rotated, a ``(readings, bands)`` grid in dB, on the same band axis;
         bands below 500 Hz are not read and may be ``nan``. ``None`` leaves
         b) unjudged, and the verdict then does not pass.
-    :param free_field_rejection_db: The free-field rejection of that
-        microphone, in dB, required with ``rotation_levels_db``.
+    :param free_field_rejection: The free-field rejection of that
+        microphone, in dB, required with ``rotation_levels``.
     :param frequencies: The centre frequencies, in hertz, or ``None`` for the
         test signals of 4.1 as :func:`real_ear_attenuation` assumes them.
     :return: :class:`REATSoundFieldCheck`.
@@ -943,20 +943,18 @@ def check_reat_sound_field(
         or the other way round, or if that rejection is below the 10 dB Table 1
         accepts.
     """
-    names = set(position_levels_db)
+    names = set(position_levels)
     if names != set(_POSITIONS):
         msg = (
-            "'position_levels_db' must give the six positions of 4.2.2 a), "
+            "'position_levels' must give the six positions of 4.2.2 a), "
             f"{', '.join(_POSITIONS)}; got {', '.join(sorted(names))}."
         )
         raise ValueError(msg)
-    reference = _band_values(reference_levels_db, None, "reference_levels_db")
+    reference = _band_values(reference_levels, None, "reference_levels")
     count = reference.size
     levels = np.vstack(
         [
-            _band_values(
-                position_levels_db[name], count, f"position_levels_db[{name!r}]"
-            )
+            _band_values(position_levels[name], count, f"position_levels[{name!r}]")
             for name in _POSITIONS
         ]
     )
@@ -966,19 +964,19 @@ def check_reat_sound_field(
     right = levels[_POSITIONS.index("right")]
     variation = np.full(count, np.nan)
     rejection: float | None = None
-    if (rotation_levels_db is None) != (free_field_rejection_db is None):
+    if (rotation_levels is None) != (free_field_rejection is None):
         msg = (
-            "give 'rotation_levels_db' and 'free_field_rejection_db' "
+            "give 'rotation_levels' and 'free_field_rejection' "
             "together: Table 1 sets the limit by the microphone's rejection."
         )
         raise ValueError(msg)
-    if rotation_levels_db is not None and free_field_rejection_db is not None:
-        allowable_field_variation(free_field_rejection_db)
-        rejection = float(free_field_rejection_db)
-        rotation = np.asarray(rotation_levels_db, dtype=np.float64)
+    if rotation_levels is not None and free_field_rejection is not None:
+        allowable_field_variation(free_field_rejection)
+        rejection = float(free_field_rejection)
+        rotation = np.asarray(rotation_levels, dtype=np.float64)
         if rotation.ndim != _GRID_RANK or rotation.shape[1] != count:
             msg = (
-                "'rotation_levels_db' must be a (readings, bands) grid on the "
+                "'rotation_levels' must be a (readings, bands) grid on the "
                 f"same {count} bands."
             )
             raise ValueError(msg)
@@ -986,7 +984,7 @@ def check_reat_sound_field(
         readings = rotation[:, judged]
         if readings.shape[0] < _MINIMUM_SUBJECTS or not np.all(np.isfinite(readings)):
             msg = (
-                "'rotation_levels_db' needs at least two finite readings in "
+                "'rotation_levels' needs at least two finite readings in "
                 "every band from 500 Hz up."
             )
             raise ValueError(msg)
@@ -994,7 +992,7 @@ def check_reat_sound_field(
     return REATSoundFieldCheck(
         frequencies=np.asarray(freqs, dtype=np.float64),
         position_deviation_db=deviation,
-        left_right_difference_db=np.abs(right - left),
+        left_right_difference=np.abs(right - left),
         rotation_variation_db=variation,
-        free_field_rejection_db=rejection,
+        free_field_rejection=rejection,
     )

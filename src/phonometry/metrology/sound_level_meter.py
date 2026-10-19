@@ -251,7 +251,7 @@ class PeakReference(RichDisplay):
     :ivar nominal_frequency_hz: The nominal frequency of the steady signal it
         is extracted from, in hertz (the test uses the exact frequency of
         Annex D, NOTE to Table 5).
-    :ivar reference_difference_db: The reference difference
+    :ivar reference_difference: The reference difference
         :math:`L_\mathrm{Cpeak} - L_\mathrm{C}`, in decibels.
     :ivar class_1_limits_db: The class 1 acceptance limits on the deviation
         from it, ``(lower, upper)``, in decibels.
@@ -260,7 +260,7 @@ class PeakReference(RichDisplay):
 
     signal: str
     nominal_frequency_hz: float
-    reference_difference_db: float
+    reference_difference: float
     class_1_limits_db: tuple[float, float]
     class_2_limits_db: tuple[float, float]
 
@@ -692,7 +692,7 @@ _STABILITY_LIMITS_DB: dict[int, float] = {1: 0.1, 2: 0.3}
 _OVERLOAD_LIMIT_DB = 1.5
 
 #: The rows of :data:`IEC61672_TABLE_5` IEC 61672-3:2013 19.1 tests, in the
-#: order :attr:`SoundLevelMeterPeriodicMeasurements.c_peak_differences_db`
+#: order :attr:`SoundLevelMeterPeriodicMeasurements.c_peak_differences`
 #: takes them: one cycle at 8 kHz, then the positive and the negative half
 #: cycle at 500 Hz.
 _C_PEAK_ROWS = (2, 3, 4)
@@ -740,8 +740,8 @@ _RANGE_LABEL_REFERENCE = "reference range"
 _LINEARITY_PROCEDURE: tuple[str, ...] = (
     "linear_operating_range_db",
     "linearity_starting_point_db",
-    "linearity_overload_level_db",
-    "linearity_under_range_level_db",
+    "linearity_overload_level",
+    "linearity_under_range_level",
 )
 
 #: IEC 61672-3:2013 16.3: the steps of the level linearity test, dB: 5 dB
@@ -1060,7 +1060,7 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
         8 kHz on the reference level range, indicated less anticipated level,
         one per step of 16.3, in any order.
     :ivar linearity_uncertainties_db: Their uncertainties.
-    :ivar linearity_levels_db: The anticipated level of each 16 result, which
+    :ivar linearity_levels: The anticipated level of each 16 result, which
         labels it and shows which steps of 16.3 the record holds.
     :ivar linear_operating_range_db: The lower and the upper boundary of the
         linear operating range at 8 kHz on the reference level range, as the
@@ -1069,10 +1069,10 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     :ivar linearity_starting_point_db: The starting point the instruction
         manual gives for the tests of level linearity at 8 kHz on the
         reference level range (16.2; IEC 61672-1 5.6.11).
-    :ivar linearity_overload_level_db: The anticipated level of the step that
+    :ivar linearity_overload_level: The anticipated level of the step that
         first caused an indication of overload, which the rising steps of
         16.3 stop short of.
-    :ivar linearity_under_range_level_db: The anticipated level of the step
+    :ivar linearity_under_range_level: The anticipated level of the step
         that first caused an indication of under-range, which the falling
         steps of 16.3 stop short of.
     :ivar range_linearity_deviations_db: 17.5: the level linearity deviations
@@ -1094,14 +1094,14 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
         :data:`TONEBURST_TEST_DURATIONS_MS` in order, NaN where not measured.
         The deviation from Table 4 is taken by the verdict.
     :ivar toneburst_uncertainties_db: The same keys and shape.
-    :ivar c_peak_differences_db: 19.6: :math:`L_\mathrm{Cpeak} -
+    :ivar c_peak_differences: 19.6: :math:`L_\mathrm{Cpeak} -
         L_\mathrm{C}` for one cycle at 8 kHz, a positive half cycle at 500 Hz
         and a negative half cycle at 500 Hz, in that order, NaN where not
         measured. The deviation from Table 5 is taken by the verdict.
     :ivar c_peak_uncertainties_db: Their uncertainties.
     :ivar c_peak_overload_indicated: Whether any of those signals caused an
         overload indication, which 19.3 and 19.5 forbid.
-    :ivar overload_difference_db: 20.4: the level of the positive
+    :ivar overload_difference: 20.4: the level of the positive
         one-half-cycle input signal that first caused an overload indication
         less that of the negative one.
     :ivar overload_uncertainty_db: Its uncertainty.
@@ -1138,19 +1138,19 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
     long_term_stability_uncertainty_db: float | None = None
     linearity_deviations_db: Sequence[float] | None = None
     linearity_uncertainties_db: Sequence[float] | None = None
-    linearity_levels_db: Sequence[float] | None = None
+    linearity_levels: Sequence[float] | None = None
     linear_operating_range_db: Sequence[float] | None = None
     linearity_starting_point_db: float | None = None
-    linearity_overload_level_db: float | None = None
-    linearity_under_range_level_db: float | None = None
+    linearity_overload_level: float | None = None
+    linearity_under_range_level: float | None = None
     range_linearity_deviations_db: Mapping[str, Sequence[float]] | None = None
     range_linearity_uncertainties_db: Mapping[str, Sequence[float]] | None = None
     toneburst_responses_db: Mapping[str, Sequence[float]] | None = None
     toneburst_uncertainties_db: Mapping[str, Sequence[float]] | None = None
-    c_peak_differences_db: Sequence[float] | None = None
+    c_peak_differences: Sequence[float] | None = None
     c_peak_uncertainties_db: Sequence[float] | None = None
     c_peak_overload_indicated: bool | None = None
-    overload_difference_db: float | None = None
+    overload_difference: float | None = None
     overload_uncertainty_db: float | None = None
     overload_latched: bool | None = None
     high_level_stability_db: float | None = None
@@ -1178,8 +1178,8 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
         self._check_range_rows()
         self._check_pairs()
         self._check_correction_data_split()
-        self._check_bool("c_peak_overload_indicated", "c_peak_differences_db")
-        self._check_bool("overload_latched", "overload_difference_db")
+        self._check_bool("c_peak_overload_indicated", "c_peak_differences")
+        self._check_bool("overload_latched", "overload_difference")
 
     def _set(self, name: str, value: object) -> None:
         """Replace a field of the frozen record while it is being built."""
@@ -1214,9 +1214,9 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
             "long_term_stability_db",
             "long_term_stability_uncertainty_db",
             "linearity_starting_point_db",
-            "linearity_overload_level_db",
-            "linearity_under_range_level_db",
-            "overload_difference_db",
+            "linearity_overload_level",
+            "linearity_under_range_level",
+            "overload_difference",
             "overload_uncertainty_db",
             "high_level_stability_db",
             "high_level_stability_uncertainty_db",
@@ -1233,9 +1233,9 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
             ("acoustic_weighting_uncertainties_without_correction_data_db", False),
             ("linearity_deviations_db", False),
             ("linearity_uncertainties_db", False),
-            ("linearity_levels_db", False),
+            ("linearity_levels", False),
             ("linear_operating_range_db", False),
-            ("c_peak_differences_db", True),
+            ("c_peak_differences", True),
             ("c_peak_uncertainties_db", True),
         ):
             value = getattr(self, name)
@@ -1244,7 +1244,7 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
         for name, count in (
             ("acoustic_weighting_deviations_db", len(ACOUSTIC_TEST_FREQUENCIES_HZ)),
             ("linear_operating_range_db", 2),
-            ("c_peak_differences_db", len(_C_PEAK_ROWS)),
+            ("c_peak_differences", len(_C_PEAK_ROWS)),
         ):
             row = getattr(self, name)
             if row is not None and len(row) != count:
@@ -1357,12 +1357,12 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
 
     def _check_linearity_levels(self) -> None:
         """The anticipated levels of Clause 16, one per result."""
-        levels = self.linearity_levels_db
+        levels = self.linearity_levels
         deviations = self.linearity_deviations_db
         if levels is not None and (
             deviations is None or len(levels) != len(deviations)
         ):
-            msg = "'linearity_levels_db' labels the 16 results: one level per result."
+            msg = "'linearity_levels' labels the 16 results: one level per result."
             raise ValueError(msg)
 
     def _check_linearity_procedure(self) -> None:
@@ -1395,9 +1395,9 @@ class SoundLevelMeterPeriodicMeasurements(RichDisplay):
                 f"operating range {bounds}, where 16.2 begins (IEC 61672-1 5.6.11)."
             )
             raise ValueError(msg)
-        levels = self.linearity_levels_db or ()
-        overload = self.linearity_overload_level_db
-        under_range = self.linearity_under_range_level_db
+        levels = self.linearity_levels or ()
+        overload = self.linearity_overload_level
+        under_range = self.linearity_under_range_level
         if overload is not None and any(level >= overload for level in levels):
             msg = (
                 f"a step of Clause 16 is at or above the first indication of "
@@ -1499,8 +1499,8 @@ _PAIRS: dict[str, tuple[str, str]] = {
         "range_linearity_uncertainties_db",
     ),
     "toneburst": ("toneburst_responses_db", "toneburst_uncertainties_db"),
-    "c_peak": ("c_peak_differences_db", "c_peak_uncertainties_db"),
-    "overload": ("overload_difference_db", "overload_uncertainty_db"),
+    "c_peak": ("c_peak_differences", "c_peak_uncertainties_db"),
+    "overload": ("overload_difference", "overload_uncertainty_db"),
     "high_level_stability": (
         "high_level_stability_db",
         "high_level_stability_uncertainty_db",
@@ -2263,7 +2263,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
     def _time_averaged_evidence(self) -> str | None:
         """Time-averaged: the overload test (20.1), or 14.3 comparing it with F."""
         m = self.measurements
-        if m.overload_difference_db is not None:
+        if m.overload_difference is not None:
             return (
                 "Clause 20 shows the meter displays it, as 20.1 tests the "
                 "overload indication only on such a meter"
@@ -2286,7 +2286,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
 
     def _peak_evidence(self) -> str | None:
         """C-weighted peak: Clause 19 was measured."""
-        if self.measurements.c_peak_differences_db is not None:
+        if self.measurements.c_peak_differences is not None:
             return "Clause 19 shows it"
         return None
 
@@ -2486,11 +2486,11 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         m = self.measurements
         if m.linearity_deviations_db is None:
             return []
-        levels = m.linearity_levels_db
+        levels = m.linearity_levels
         bounds = m.linear_operating_range_db
         start = m.linearity_starting_point_db
-        overload = m.linearity_overload_level_db
-        under_range = m.linearity_under_range_level_db
+        overload = m.linearity_overload_level
+        under_range = m.linearity_under_range_level
         if (
             levels is None
             or bounds is None
@@ -2500,7 +2500,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         ):
             absent = [
                 f"'{name}'"
-                for name in ("linearity_levels_db", *_LINEARITY_PROCEDURE)
+                for name in ("linearity_levels", *_LINEARITY_PROCEDURE)
                 if getattr(m, name) is None
             ]
             return [
@@ -2617,10 +2617,10 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         """19 and 20: the yes/no observations that go with the results."""
         m = self.measurements
         short = []
-        if m.c_peak_differences_db is not None:
+        if m.c_peak_differences is not None:
             gaps = [
                 _PEAK_LABELS[k]
-                for k, v in enumerate(m.c_peak_differences_db)
+                for k, v in enumerate(m.c_peak_differences)
                 if math.isnan(v)
             ]
             if gaps:
@@ -2635,7 +2635,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
                         "recorded (19.3, 19.5)",
                     )
                 )
-        if m.overload_difference_db is not None and m.overload_latched is None:
+        if m.overload_difference is not None and m.overload_latched is None:
             short.append(
                 (
                     "20",
@@ -3172,7 +3172,7 @@ def _c_peak(
     m: SoundLevelMeterPeriodicMeasurements, meter_class: int
 ) -> SoundLevelMeterPeriodicRequirement | None:
     """19: the deviation of each difference from Table 5, and no overload."""
-    values = m.c_peak_differences_db
+    values = m.c_peak_differences
     spread = m.c_peak_uncertainties_db
     if values is None or spread is None:
         return None
@@ -3187,7 +3187,7 @@ def _c_peak(
         reference = IEC61672_TABLE_5[row_index]
         verifications.append(
             verify_conformance(
-                value - reference.reference_difference_db,
+                value - reference.reference_difference,
                 uncertainty=u,
                 acceptance_limits=reference.limits_db(meter_class),
                 max_uncertainty=maximum,
@@ -3277,8 +3277,8 @@ def _linear_range_clear(m: SoundLevelMeterPeriodicMeasurements) -> bool | None:
         the record does not give the range and both indications.
     """
     bounds = m.linear_operating_range_db
-    overload = m.linearity_overload_level_db
-    under_range = m.linearity_under_range_level_db
+    overload = m.linearity_overload_level
+    under_range = m.linearity_under_range_level
     if bounds is None or overload is None or under_range is None:
         return None
     return under_range < bounds[0] and overload > bounds[1]
@@ -3394,7 +3394,7 @@ def verify_sound_level_meter_periodic(
             cls,
             {"": split} if split is not None else None,
         )
-    levels = m.linearity_levels_db
+    levels = m.linearity_levels
     linearity_labels = (
         [f"{level:g} dB" for level in levels]
         if levels is not None
@@ -3437,7 +3437,7 @@ def verify_sound_level_meter_periodic(
         _c_peak(m, cls),
         _scalar_requirement(
             "overload",
-            m.overload_difference_db,
+            m.overload_difference,
             m.overload_uncertainty_db,
             _OVERLOAD_LIMIT_DB,
             "positive - negative",

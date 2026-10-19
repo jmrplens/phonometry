@@ -67,7 +67,7 @@ def test_formula_17_reproduces_annex_b() -> None:
     """(B.5): L_c = 127 dB - 19,03 dB = 107,97 dB."""
     example = ref.IEC61260_B5
     level = filters.swept_band_level(
-        example["input_level_db"],
+        example["input_level"],
         fraction=example["fraction"],
         sweep_duration_s=example["sweep_duration_s"],
         averaging_time_s=example["averaging_time_s"],
@@ -75,7 +75,7 @@ def test_formula_17_reproduces_annex_b() -> None:
         end_frequency_hz=example["end_frequency_hz"],
     )
     assert round(level, 2) == example["expected_level_db"]
-    assert round(level - example["input_level_db"], 2) == example["correction_db"]
+    assert round(level - example["input_level"], 2) == example["correction"]
 
 
 def test_formula_17_subtracts_the_reference_attenuation() -> None:
@@ -87,7 +87,7 @@ def test_formula_17_subtracts_the_reference_attenuation() -> None:
         "end_frequency_hz": 20000.0,
     }
     base = filters.swept_band_level(94.0, **kwargs)
-    shifted = filters.swept_band_level(94.0, reference_attenuation_db=0.5, **kwargs)
+    shifted = filters.swept_band_level(94.0, reference_attenuation=0.5, **kwargs)
     assert base - shifted == pytest.approx(0.5, abs=1e-12)
     # lg(f2/f1) = 3/(10 b): the octave band holds 0.3 of a decade.
     decades = math.log10(20000.0 / 5.0)
@@ -229,7 +229,7 @@ def test_the_expected_level_is_formula_17(
             end_frequency_hz=swept.end_frequency_hz,
         )
         # A_ref of a Butterworth band at its exact mid-band is a hair off zero.
-        np.testing.assert_allclose(swept.expected_levels_db[row], level, atol=1e-3)
+        np.testing.assert_allclose(swept.expected_levels[row], level, atol=1e-3)
 
 
 def test_a_bank_that_loses_half_its_output_fails(
@@ -268,7 +268,7 @@ def test_the_verdict_has_no_truth_value_and_freezes_its_arrays(
 ) -> None:
     with pytest.raises(TypeError, match="TimeInvarianceResult has no truth value"):
         bool(swept)
-    assert not swept.output_levels_db.flags.writeable
+    assert not swept.output_levels.flags.writeable
     assert not swept.frequencies.flags.writeable
 
 
@@ -277,9 +277,9 @@ def test_a_verdict_refuses_levels_of_the_wrong_shape(
 ) -> None:
     import dataclasses
 
-    bad = np.asarray(swept.output_levels_db)[:, :-1]
-    with pytest.raises(ValueError, match="'output_levels_db' must be shaped"):
-        dataclasses.replace(swept, output_levels_db=bad)
+    bad = np.asarray(swept.output_levels)[:, :-1]
+    with pytest.raises(ValueError, match="'output_levels' must be shaped"):
+        dataclasses.replace(swept, output_levels=bad)
 
 
 @pytest.mark.parametrize("language", ["en", "es"])
@@ -299,9 +299,9 @@ def test_a_band_past_both_classes_is_drawn_inside_the_axes(
     """The figure frames the limits and every deviation, a failing one too."""
     import dataclasses
 
-    levels = np.array(swept.output_levels_db)
+    levels = np.array(swept.output_levels)
     levels[0, 1] += 1.54
-    failing = dataclasses.replace(swept, output_levels_db=levels)
+    failing = dataclasses.replace(swept, output_levels=levels)
     assert failing.overall_class is None
     ax = failing.plot()
     low, high = ax.get_ylim()

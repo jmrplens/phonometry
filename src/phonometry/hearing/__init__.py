@@ -12,7 +12,7 @@ rather than an ear.
 from __future__ import annotations
 
 from ._earmuff_insertion_loss import (
-    ATF_FRONT_TO_RANDOM_INDEX_DB,
+    ATF_FRONT_TO_RANDOM_INDEX,
     EARMUFF_INSERTION_LOSS_UNCERTAINTY,
     EARMUFF_TEST_BANDS_HZ,
     RANDOM_INCIDENCE_VARIATION_LIMITS,
@@ -54,8 +54,8 @@ from .audiometry import (
     AIR_CONDUCTION_AMBIENT_LIMITS_DB,
     AMBIENT_NOISE_BANDS_HZ,
     BONE_CONDUCTION_AMBIENT_LIMITS_DB,
-    EARPHONE_ATTENUATION_DB,
-    VIBROTACTILE_HEARING_LEVELS_DB,
+    EARPHONE_ATTENUATION,
+    VIBROTACTILE_HEARING_LEVELS,
     AmbientNoiseCheck,
     AscendingThresholdResult,
     AudiogramCautions,
@@ -117,7 +117,7 @@ from .occupational_exposure import (
 from .sound_field_audiometry import (
     DIFFUSE_FIELD_VARIATION_LIMITS,
     INCIDENCE_CORRECTION_FREQUENCIES_HZ,
-    INCIDENCE_CORRECTIONS_DB,
+    INCIDENCE_CORRECTIONS,
     SOUND_FIELD_AMBIENT_BANDS_HZ,
     SOUND_FIELD_AMBIENT_LIMITS_DB,
     DiffuseSoundFieldCheck,
@@ -161,7 +161,7 @@ __all__ = [
     "assess_attenuation_difference",
     "assumed_protection_value",
     "AssumedProtectionResult",
-    "ATF_FRONT_TO_RANDOM_INDEX_DB",
+    "ATF_FRONT_TO_RANDOM_INDEX",
     "AttenuationDifferenceResult",
     "audiogram_cautions",
     "AudiogramCautions",
@@ -189,7 +189,7 @@ __all__ = [
     "EARMUFF_INSERTION_LOSS_UNCERTAINTY",
     "EARMUFF_TEST_BANDS_HZ",
     "EarmuffInsertionLossResult",
-    "EARPHONE_ATTENUATION_DB",
+    "EARPHONE_ATTENUATION",
     "EARPHONE_COUPLERS",
     "earphone_reference_level",
     "EARPHONES",
@@ -209,7 +209,7 @@ __all__ = [
     "HTLANResult",
     "incidence_correction",
     "INCIDENCE_CORRECTION_FREQUENCIES_HZ",
-    "INCIDENCE_CORRECTIONS_DB",
+    "INCIDENCE_CORRECTIONS",
     "InsertionLossUncertaintyBudget",
     "INSTRUMENT_U2",
     "job_based_exposure",
@@ -252,5 +252,5 @@ __all__ = [
     "task_based_exposure",
     "TaskContribution",
     "verify_fixture_isolation",
-    "VIBROTACTILE_HEARING_LEVELS_DB",
+    "VIBROTACTILE_HEARING_LEVELS",
 ]

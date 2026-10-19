@@ -85,7 +85,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
-    "ISO10847_BACKGROUND_CORRECTIONS_DB",
+    "ISO10847_BACKGROUND_CORRECTIONS",
     "CLOSE_SOURCE_DISTANCE_M",
     "CLOUD_COVER_CLASSES",
     "EQUIVALENT_SECTOR_DEG",
@@ -102,7 +102,7 @@ __all__ = [
     "ISO10847_OCTAVE_BAND_RANGE_HZ",
     "POINT_SOURCE_DIVERGENCE_DB",
     "ISO10847_PREFERRED_BACKGROUND_MARGIN_DB",
-    "RECEIVER_CORRECTIONS_DB",
+    "RECEIVER_CORRECTIONS",
     "REFERENCE_ELEVATION_INCREMENT_DEG",
     "REFERENCE_MICROPHONE_CLEARANCE_M",
     "SHORT_DISTANCE_RATIO",
@@ -127,7 +127,7 @@ __all__ = [
 #: level without it. The column reads "correction to be made to", so the
 #: printed values are negative and are added rather than subtracted; the table
 #: of ISO 11820 reads the other way round and the two must not share a helper.
-ISO10847_BACKGROUND_CORRECTIONS_DB: Mapping[int, float] = MappingProxyType(
+ISO10847_BACKGROUND_CORRECTIONS: Mapping[int, float] = MappingProxyType(
     {
         4: -2.0,
         5: -2.0,
@@ -236,7 +236,7 @@ MIN_RECEIVER_HEIGHT_M: float = 1.2
 
 #: 8.2.2: the correction for the kind of receiver position, in decibels. The
 #: 6 dB is the pressure doubling at a large hard surface.
-RECEIVER_CORRECTIONS_DB: Mapping[str, float] = MappingProxyType(
+RECEIVER_CORRECTIONS: Mapping[str, float] = MappingProxyType(
     {
         "hemi_free_field": 0.0,
         "reflecting_surface": 6.0,
@@ -270,7 +270,7 @@ class BarrierInSituWarning(PhonometryWarning):
 
 
 def barrier_background_correction(
-    level_difference_db: ArrayLike,
+    level_difference: ArrayLike,
 ) -> NDArray[np.float64]:
     r"""The background correction of Table 3, in decibels to add.
 
@@ -286,7 +286,7 @@ def barrier_background_correction(
     numerically at a margin of 9 dB, where ISO 11820 takes off 0,5 dB and this
     one takes off 1. They are two tables and they stay two tables.
 
-    :param level_difference_db: The difference between the level measured with
+    :param level_difference: The difference between the level measured with
         the source and the level without it, in decibels.
     :return: The correction to add, in decibels, which is zero or negative.
     :raises ValueError: For a margin under
@@ -294,7 +294,7 @@ def barrier_background_correction(
     """
     # Settled: a difference of two readings that is 10 dB in decimal can be
     # 9,999 999 999 999 996 in binary, which would floor to the 9 dB row.
-    margin = settled(require_finite_array(level_difference_db, "level_difference_db"))
+    margin = settled(require_finite_array(level_difference, "level_difference"))
     if float(np.min(margin)) < ISO10847_MIN_BACKGROUND_MARGIN_DB:
         msg = (
             f"ISO 10847 6.4 calls the results invalid under "
@@ -303,10 +303,10 @@ def barrier_background_correction(
         )
         raise ValueError(msg)
     rows = np.floor(margin).astype(int)
-    highest = max(ISO10847_BACKGROUND_CORRECTIONS_DB)
+    highest = max(ISO10847_BACKGROUND_CORRECTIONS)
     return np.asarray(
         [
-            0.0 if row > highest else ISO10847_BACKGROUND_CORRECTIONS_DB[row]
+            0.0 if row > highest else ISO10847_BACKGROUND_CORRECTIONS[row]
             for row in rows.tolist()
         ],
         dtype=np.float64,
@@ -501,12 +501,12 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
     :ivar reference_after_db: :math:`L_{\mathrm{ref},\mathrm{A}}` per band.
     :ivar receiver_before_db: :math:`L_{\mathrm{r},\mathrm{B}}` per band.
     :ivar receiver_after_db: :math:`L_{\mathrm{r},\mathrm{A}}` per band.
-    :ivar insertion_loss_db: :math:`D_\mathrm{IL}` or :math:`D'_\mathrm{IL}` per band, in
+    :ivar insertion_loss: :math:`D_\mathrm{IL}` or :math:`D'_\mathrm{IL}` per band, in
         decibels.
     :ivar method: ``"direct"`` or ``"indirect"``.
-    :ivar receiver_correction_before_db: :math:`C_\mathrm{r}`, in decibels, zero for
+    :ivar receiver_correction_before: :math:`C_\mathrm{r}`, in decibels, zero for
         the direct method.
-    :ivar receiver_correction_after_db: :math:`C'_\mathrm{r}`, in decibels, zero for
+    :ivar receiver_correction_after: :math:`C'_\mathrm{r}`, in decibels, zero for
         the direct method.
     """
 
@@ -515,10 +515,10 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
     reference_after_db: NDArray[np.float64]
     receiver_before_db: NDArray[np.float64]
     receiver_after_db: NDArray[np.float64]
-    insertion_loss_db: NDArray[np.float64]
+    insertion_loss: NDArray[np.float64]
     method: str
-    receiver_correction_before_db: float
-    receiver_correction_after_db: float
+    receiver_correction_before: float
+    receiver_correction_after: float
 
     @property
     def symbol(self) -> str:
@@ -527,7 +527,7 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
 
     def rounded(self) -> NDArray[np.int_]:
         """The values as clause 10 c) reports them, to the nearest decibel."""
-        return np.asarray(round_half_even(self.insertion_loss_db), dtype=np.int_)
+        return np.asarray(round_half_even(self.insertion_loss), dtype=np.int_)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -642,10 +642,10 @@ def measured_insertion_loss_direct(
         reference_after_db=ref_a,
         receiver_before_db=rec_b,
         receiver_after_db=rec_a,
-        insertion_loss_db=np.asarray(loss, dtype=np.float64),
+        insertion_loss=np.asarray(loss, dtype=np.float64),
         method="direct",
-        receiver_correction_before_db=0.0,
-        receiver_correction_after_db=0.0,
+        receiver_correction_before=0.0,
+        receiver_correction_after=0.0,
     )
 
 
@@ -713,8 +713,8 @@ def measured_insertion_loss_indirect(
     after_type = require_choice(
         str(receiver_type_after), "receiver_type_after", _RECEIVER_TYPES
     )
-    correction_before = RECEIVER_CORRECTIONS_DB[before_type]
-    correction_after = RECEIVER_CORRECTIONS_DB[after_type]
+    correction_before = RECEIVER_CORRECTIONS[before_type]
+    correction_after = RECEIVER_CORRECTIONS[after_type]
     if before_type != after_type:
         msg = (
             "The NOTE to ISO 10847 8.2.2 prefers receiver positions whose "
@@ -731,8 +731,8 @@ def measured_insertion_loss_indirect(
         reference_after_db=ref_a,
         receiver_before_db=rec_b,
         receiver_after_db=rec_a,
-        insertion_loss_db=np.asarray(delta_after - delta_before, dtype=np.float64),
+        insertion_loss=np.asarray(delta_after - delta_before, dtype=np.float64),
         method="indirect",
-        receiver_correction_before_db=correction_before,
-        receiver_correction_after_db=correction_after,
+        receiver_correction_before=correction_before,
+        receiver_correction_after=correction_after,
     )

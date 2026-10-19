@@ -278,7 +278,7 @@ Every limit is read from a published, read-only table (`LEVEL_ACCEPTANCE_LIMITS_
 maxima beside them). Classes LS and 2 are specified from 160 Hz to 1.25 kHz only,
 and at any other nominal frequency the verifier refuses the class (5.1.2). A
 class LS/M or 1/M pistonphone takes the manufacturer's static-pressure correction
-as `static_pressure_correction_db`, added to the measured level (5.3.2, B.4.3.2),
+as `static_pressure_correction`, added to the measured level (5.3.2, B.4.3.2),
 and every other calibrator is refused one (5.1.7).
 `environmental_test="abbreviated"` applies the reduced limits of A.6.4.7, where
 a failure calls for the full environmental tests rather than a non-conformance.

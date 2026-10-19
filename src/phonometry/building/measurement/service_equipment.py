@@ -944,9 +944,9 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
     :ivar measured_db: The measured band levels :math:`L_1`, background
         included, in dB.
     :ivar background_db: The background band levels :math:`L_2`, in dB.
-    :ivar difference_db: :math:`\Delta L = L_1 - L_2` per band, in dB
+    :ivar difference: :math:`\Delta L = L_1 - L_2` per band, in dB
         (Formula (9)).
-    :ivar correction_db: The correction :math:`K` per band, in dB: 0 at 10 dB or
+    :ivar correction: The correction :math:`K` per band, in dB: 0 at 10 dB or
         more, Formula (8) from 4 dB, and 2,2 dB below 4 dB.
     :ivar corrected_db: :math:`L = L_1 - K` per band, in dB (Formula (7)).
     :ivar regime: Per band, ``"none"`` (no correction), ``"corrected"``
@@ -978,7 +978,7 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def difference_db(self) -> np.ndarray:
+    def difference(self) -> np.ndarray:
         r""":math:`\Delta L = L_1 - L_2` per band, in dB (Formula (9))."""
         return np.asarray(
             np.asarray(self.measured_db) - np.asarray(self.background_db),
@@ -988,18 +988,18 @@ class ServiceEquipmentBackgroundResult(OwnsArrays):
     @property
     def regime(self) -> tuple[str, ...]:
         """Per band, ``"none"``, ``"corrected"`` or ``"limited"`` (Clause 9)."""
-        return _background_regime(self.difference_db)[1]
+        return _background_regime(self.difference)[1]
 
     @property
-    def correction_db(self) -> np.ndarray:
+    def correction(self) -> np.ndarray:
         """The correction :math:`K` per band, in dB (Formulae (7) to (9))."""
-        return _background_regime(self.difference_db)[0]
+        return _background_regime(self.difference)[0]
 
     @property
     def corrected_db(self) -> np.ndarray:
         """:math:`L = L_1 - K` per band, in dB (Formula (7))."""
         return np.asarray(
-            np.asarray(self.measured_db) - self.correction_db, dtype=np.float64
+            np.asarray(self.measured_db) - self.correction, dtype=np.float64
         )
 
     @property
@@ -1660,7 +1660,7 @@ def check_position_spread(levels: ArrayLike) -> PositionSpreadCheck:
 
 
 def loudest_corner(
-    c_weighted_levels_db: ArrayLike, *, excluded: Sequence[int] = ()
+    c_weighted_levels: ArrayLike, *, excluded: Sequence[int] = ()
 ) -> int:
     """The corner that becomes microphone position 1 (ISO/DIS 16032:2023 7.2).
 
@@ -1672,18 +1672,18 @@ def loudest_corner(
     whose level is dominated by direct sound from a source in the room, a
     ventilation outlet for example, is left out.
 
-    :param c_weighted_levels_db: One C-weighted level per corner, in dB.
+    :param c_weighted_levels: One C-weighted level per corner, in dB.
     :param excluded: Indices of the corners dominated by direct sound, counted
-        from 0 in the order of ``c_weighted_levels_db``.
+        from 0 in the order of ``c_weighted_levels``.
     :return: The index of the loudest corner left, counted from 0; the first of
         a tie.
     :raises ValueError: If a level is not finite, ``excluded`` is not a
         sequence of whole numbers, an index is out of range, or every corner
         is excluded.
     """
-    levels = np.atleast_1d(_as_levels(c_weighted_levels_db, "c_weighted_levels_db"))
+    levels = np.atleast_1d(_as_levels(c_weighted_levels, "c_weighted_levels"))
     if levels.ndim != 1:
-        msg = "'c_weighted_levels_db' must give one level per corner."
+        msg = "'c_weighted_levels' must give one level per corner."
         raise ValueError(msg)
     msg = "'excluded' must be a sequence of corner indices, such as [1]."
     try:
@@ -2147,7 +2147,7 @@ class CalibrationDeviationResult(OwnsArrays):
 
     :ivar levels: The calibrator readings of this measurement in the order
         they were taken, at the beginning and at the end, in dB.
-    :ivar previous_levels_db: The readings of earlier calibrations of the same
+    :ivar previous_levels: The readings of earlier calibrations of the same
         instrumentation with the same calibrator, in dB; empty when none were
         given.
     :ivar deviations_db: Per reading of :attr:`levels`, the largest absolute
@@ -2157,7 +2157,7 @@ class CalibrationDeviationResult(OwnsArrays):
     """
 
     levels: np.ndarray
-    previous_levels_db: np.ndarray
+    previous_levels: np.ndarray
     deviations_db: np.ndarray
 
     @property
@@ -2228,9 +2228,9 @@ class CalibrationDeviationResult(OwnsArrays):
 
 
 def verify_calibration_deviation(
-    calibration_levels_db: ArrayLike,
+    calibration_levels: ArrayLike,
     *,
-    previous_levels_db: ArrayLike | None = None,
+    previous_levels: ArrayLike | None = None,
 ) -> CalibrationDeviationResult:
     r"""Has the sensitivity moved more than 0,5 dB (ISO/DIS 16032:2023 Clause 5)?
 
@@ -2250,27 +2250,27 @@ def verify_calibration_deviation(
     calibrator at the same stated level; readings taken at different stated
     levels are passed instead as each one's departure from its stated level.
 
-    :param calibration_levels_db: The calibrator readings of this measurement
+    :param calibration_levels: The calibrator readings of this measurement
         in the order taken, the one at the beginning and the one at the end,
-        in dB. One reading alone is judged against ``previous_levels_db``,
+        in dB. One reading alone is judged against ``previous_levels``,
         which lets the beginning be checked before measuring.
-    :param previous_levels_db: Readings of earlier calibrations of the same
+    :param previous_levels: Readings of earlier calibrations of the same
         instrumentation, in dB; ``None`` (default) to compare the end with the
         beginning only.
     :return: :class:`CalibrationDeviationResult`.
     :raises ValueError: If a reading is not a finite level, or there is
         nothing to compare: one reading and no earlier calibration.
     """
-    levels = _readings(calibration_levels_db, "calibration_levels_db")
+    levels = _readings(calibration_levels, "calibration_levels")
     previous = (
         np.empty(0)
-        if previous_levels_db is None
-        else _readings(previous_levels_db, "previous_levels_db")
+        if previous_levels is None
+        else _readings(previous_levels, "previous_levels")
     )
     if levels.size + previous.size < _MIN_CALIBRATIONS:
         msg = (
             "A calibration needs an earlier one to be compared with: give the "
-            "readings at the beginning and at the end, or 'previous_levels_db'."
+            "readings at the beginning and at the end, or 'previous_levels'."
         )
         raise ValueError(msg)
     history = np.concatenate((previous, levels))
@@ -2281,7 +2281,7 @@ def verify_calibration_deviation(
             deviations[i] = float(np.max(np.abs(level - earlier)))
     return CalibrationDeviationResult(
         levels=levels,
-        previous_levels_db=previous,
+        previous_levels=previous,
         deviations_db=deviations,
     )
 
@@ -2422,18 +2422,18 @@ class VaryingBackgroundCheck(OwnsArrays):
 
     The route the NOTE to Clause 9 offers when the background varies in time.
 
-    :ivar background_max_level_db: The maximum level of the background over the
+    :ivar background_max_level: The maximum level of the background over the
         observation period at the corner position, per band (or one weighted
         value), in dB.
-    :ivar equipment_levels_db: The service equipment sound pressure level,
+    :ivar equipment_levels: The service equipment sound pressure level,
         the same bands, in dB.
     :ivar observation_time_s: How long the background maximum was watched for,
         in s.
     :ivar frequencies: The band centres, in Hz, or ``None`` when not given.
     """
 
-    background_max_level_db: np.ndarray
-    equipment_levels_db: np.ndarray
+    background_max_level: np.ndarray
+    equipment_levels: np.ndarray
     observation_time_s: float
     frequencies: np.ndarray | None = None
 
@@ -2452,8 +2452,8 @@ class VaryingBackgroundCheck(OwnsArrays):
         :raises ValueError: if the levels or the centres do not share one
             band count.
         """
-        shape = np.asarray(self.background_max_level_db).shape
-        if np.asarray(self.equipment_levels_db).shape != shape or (
+        shape = np.asarray(self.background_max_level).shape
+        if np.asarray(self.equipment_levels).shape != shape or (
             self.frequencies is not None and np.asarray(self.frequencies).shape != shape
         ):
             msg = (
@@ -2468,8 +2468,8 @@ class VaryingBackgroundCheck(OwnsArrays):
         :return: The equipment level less the background maximum, in dB.
         """
         return np.asarray(
-            np.asarray(self.equipment_levels_db, dtype=np.float64)
-            - np.asarray(self.background_max_level_db, dtype=np.float64),
+            np.asarray(self.equipment_levels, dtype=np.float64)
+            - np.asarray(self.background_max_level, dtype=np.float64),
             dtype=np.float64,
         )
 
@@ -2527,8 +2527,8 @@ class VaryingBackgroundCheck(OwnsArrays):
 
 
 def check_varying_background(
-    background_max_level_db: ArrayLike,
-    equipment_levels_db: ArrayLike,
+    background_max_level: ArrayLike,
+    equipment_levels: ArrayLike,
     *,
     observation_time_s: float,
     frequencies: ArrayLike | None = None,
@@ -2551,9 +2551,9 @@ def check_varying_background(
     exactly 10 dB ("10 dB or more"). The 2004 edition took the maximum "in one
     of the microphone positions"; the draft names the corner.
 
-    :param background_max_level_db: The maximum level of the background over the
+    :param background_max_level: The maximum level of the background over the
         observation period, at the corner position, per band, in dB.
-    :param equipment_levels_db: The service equipment sound pressure level in
+    :param equipment_levels: The service equipment sound pressure level in
         the same bands, in dB.
     :param observation_time_s: How long the background maximum was watched
         for, in s.
@@ -2562,10 +2562,10 @@ def check_varying_background(
     :raises ValueError: If a level is not finite, the shapes differ, or the
         observation time is not one positive number.
     """
-    background = _readings(background_max_level_db, "background_max_level_db")
-    equipment = _readings(equipment_levels_db, "equipment_levels_db")
+    background = _readings(background_max_level, "background_max_level")
+    equipment = _readings(equipment_levels, "equipment_levels")
     if equipment.shape != background.shape:
-        msg = "'background_max_level_db' and 'equipment_levels_db' must give one level per band, the same count."
+        msg = "'background_max_level' and 'equipment_levels' must give one level per band, the same count."
         raise ValueError(msg)
     observation = _positive_number(observation_time_s, "observation_time_s")
     freqs = None
@@ -2575,8 +2575,8 @@ def check_varying_background(
             msg = "'frequencies' must give one finite centre per band."
             raise ValueError(msg)
     return VaryingBackgroundCheck(
-        background_max_level_db=background,
-        equipment_levels_db=equipment,
+        background_max_level=background,
+        equipment_levels=equipment,
         observation_time_s=observation,
         frequencies=None if freqs is None else freqs,
     )
@@ -2586,14 +2586,14 @@ def check_varying_background(
 class MeasurementDisturbanceCheck(OwnsArrays):
     r"""Whether each measurement period was free of disturbances (Clause 9).
 
-    :ivar max_levels_db: The maximum level in the middle of the frequency
+    :ivar max_levels: The maximum level in the middle of the frequency
         range, one per measurement period, in dB.
-    :ivar equivalent_levels_db: The equivalent level in the same band, one per
+    :ivar equivalent_levels: The equivalent level in the same band, one per
         period, in dB.
     """
 
-    max_levels_db: np.ndarray
-    equivalent_levels_db: np.ndarray
+    max_levels: np.ndarray
+    equivalent_levels: np.ndarray
 
     @property
     def limit_db(self) -> float:
@@ -2610,21 +2610,21 @@ class MeasurementDisturbanceCheck(OwnsArrays):
             share one period count.
         """
         if (
-            np.asarray(self.max_levels_db).shape
-            != np.asarray(self.equivalent_levels_db).shape
+            np.asarray(self.max_levels).shape
+            != np.asarray(self.equivalent_levels).shape
         ):
             msg = "MeasurementDisturbanceCheck: one maximum and one equivalent level per period."
             raise ValueError(msg)
 
     @property
-    def differences_db(self) -> np.ndarray:
+    def differences(self) -> np.ndarray:
         """The maximum less the equivalent level of each period, in dB.
 
         :return: One difference per measurement period.
         """
         return np.asarray(
-            np.asarray(self.max_levels_db, dtype=np.float64)
-            - np.asarray(self.equivalent_levels_db, dtype=np.float64),
+            np.asarray(self.max_levels, dtype=np.float64)
+            - np.asarray(self.equivalent_levels, dtype=np.float64),
             dtype=np.float64,
         )
 
@@ -2636,7 +2636,7 @@ class MeasurementDisturbanceCheck(OwnsArrays):
 
         :return: One boolean per measurement period.
         """
-        return self.differences_db < self.limit_db - _LIMIT_SLACK
+        return self.differences < self.limit_db - _LIMIT_SLACK
 
     @property
     def disturbed_periods(self) -> tuple[int, ...]:
@@ -2683,7 +2683,7 @@ class MeasurementDisturbanceCheck(OwnsArrays):
 
 
 def check_measurement_disturbance(
-    max_levels_db: ArrayLike, equivalent_levels_db: ArrayLike
+    max_levels: ArrayLike, equivalent_levels: ArrayLike
 ) -> MeasurementDisturbanceCheck:
     r"""Was a measurement period disturbed (ISO/DIS 16032:2023 Clause 9)?
 
@@ -2697,21 +2697,19 @@ def check_measurement_disturbance(
     the frequency range", which the operator chooses. A difference of exactly
     5 dB is not "less than 5 dB" and marks the period.
 
-    :param max_levels_db: The maximum level of a band in the middle of the
+    :param max_levels: The maximum level of a band in the middle of the
         frequency range, one per measurement period, in dB.
-    :param equivalent_levels_db: The equivalent level of the same band over
+    :param equivalent_levels: The equivalent level of the same band over
         the same period, one per period, in dB.
     :return: :class:`MeasurementDisturbanceCheck`.
     :raises ValueError: If a level is not finite or the two counts differ.
     """
-    maxima = _readings(max_levels_db, "max_levels_db")
-    equivalents = _readings(equivalent_levels_db, "equivalent_levels_db")
+    maxima = _readings(max_levels, "max_levels")
+    equivalents = _readings(equivalent_levels, "equivalent_levels")
     if maxima.shape != equivalents.shape:
-        msg = "'max_levels_db' and 'equivalent_levels_db' must give one level per period, the same count."
+        msg = "'max_levels' and 'equivalent_levels' must give one level per period, the same count."
         raise ValueError(msg)
-    return MeasurementDisturbanceCheck(
-        max_levels_db=maxima, equivalent_levels_db=equivalents
-    )
+    return MeasurementDisturbanceCheck(max_levels=maxima, equivalent_levels=equivalents)
 
 
 @dataclass(frozen=True)
@@ -2750,7 +2748,7 @@ class InstrumentAgreementCheck(RichDisplay):
                 object.__setattr__(self, name, MappingProxyType(dict(value)))
 
     @property
-    def differences_db(self) -> Mapping[str, float]:
+    def differences(self) -> Mapping[str, float]:
         """The calculated value less the instrument's, per single number, in dB.
 
         :return: Keyed like :attr:`calculated_db`.
@@ -2770,7 +2768,7 @@ class InstrumentAgreementCheck(RichDisplay):
         """
         return tuple(
             key
-            for key, difference in self.differences_db.items()
+            for key, difference in self.differences.items()
             if abs(difference) > self.limit_db + _LIMIT_SLACK
         )
 
@@ -2812,7 +2810,7 @@ class InstrumentAgreementCheck(RichDisplay):
 
 def check_instrument_agreement(
     result: ServiceEquipmentResult,
-    instrument_levels_db: Mapping[str, ArrayLike],
+    instrument_levels: Mapping[str, ArrayLike],
 ) -> InstrumentAgreementCheck:
     r"""Does the calculation agree with the instrument (NOTE to ISO/DIS 16032:2023 7.8)?
 
@@ -2832,13 +2830,13 @@ def check_instrument_agreement(
 
     :param result: The :class:`ServiceEquipmentResult` whose single numbers
         are compared.
-    :param instrument_levels_db: The instrument's value for each single number
+    :param instrument_levels: The instrument's value for each single number
         compared, keyed by its notation in ``result.ratings`` (``"LA,eq"``,
         ``"LC,Fmax"``...), in dB: one value, or the reading at each position,
         which is energy-averaged by Formula (1).
     :return: :class:`InstrumentAgreementCheck`.
     :raises TypeError: If ``result`` is not a :class:`ServiceEquipmentResult`.
-    :raises ValueError: If ``instrument_levels_db`` is empty, names a single
+    :raises ValueError: If ``instrument_levels`` is empty, names a single
         number the result does not carry, or holds a level that is not
         finite.
     """
@@ -2847,17 +2845,19 @@ def check_instrument_agreement(
             "'result' must be the ServiceEquipmentResult of service_equipment_level()."
         )
         raise TypeError(msg)
-    if not instrument_levels_db:
-        msg = "'instrument_levels_db' must name at least one single number, such as 'LA,eq'."
+    if not instrument_levels:
+        msg = (
+            "'instrument_levels' must name at least one single number, such as 'LA,eq'."
+        )
         raise ValueError(msg)
     calculated: dict[str, float] = {}
     instrument: dict[str, float] = {}
-    for key, value in instrument_levels_db.items():
+    for key, value in instrument_levels.items():
         if key not in result.ratings:
             carried = ", ".join(repr(k) for k in result.ratings)
             msg = f"The result carries no single number {key!r}; it carries {carried}."
             raise ValueError(msg)
-        readings = _readings(value, f"instrument_levels_db[{key!r}]")
+        readings = _readings(value, f"instrument_levels[{key!r}]")
         calculated[key] = float(result.ratings[key])
         # One reading is its own average: Formula (1) would hand 46,2 dB back
         # as 46,199 999 999 999 996.

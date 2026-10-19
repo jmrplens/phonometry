@@ -49,7 +49,7 @@ def test_table_ii_is_transcribed_as_printed() -> None:
     assert list(table) == list(printed)
     for frequency, band in table.items():
         level, tolerance = printed[frequency]
-        assert band.relative_level_db == level
+        assert band.relative_level == level
         assert band.tolerance_plus_db == tolerance
         assert band.tolerance_minus_db == tolerance
 
@@ -58,8 +58,8 @@ def test_table_ii_is_immutable() -> None:
     table = ea.SIMULATED_PROGRAM_SPECTRUM
     assert isinstance(table, MappingProxyType)
     band = table[1000.0]
-    with pytest.raises(dataclasses.FrozenInstanceError, match="relative_level_db"):
-        band.relative_level_db = 0.0
+    with pytest.raises(dataclasses.FrozenInstanceError, match="relative_level"):
+        band.relative_level = 0.0
 
 
 def test_clause_7_note_full_range_is_about_12_5_db_above_one_band() -> None:
@@ -264,7 +264,7 @@ def test_a_partial_spectrum_is_judged_on_its_bands() -> None:
 def test_check_results_are_read_only() -> None:
     frequencies, levels, _ = _table()
     check = ea.check_program_signal(frequencies, levels)
-    assert not check.band_levels_db.flags.writeable
+    assert not check.band_levels.flags.writeable
     assert not check.frequencies.flags.writeable
 
 
@@ -296,7 +296,7 @@ def test_lengths_must_agree() -> None:
 
 
 def test_a_level_must_be_finite() -> None:
-    with pytest.raises(ValueError, match="band_levels_db"):
+    with pytest.raises(ValueError, match="band_levels"):
         ea.check_program_signal([1000.0, 1250.0], [0.0, np.nan])
 
 
@@ -315,7 +315,7 @@ def test_check_plot_draws_the_bands_referred_by_the_offset(language: str) -> Non
     assert check.offset_db == pytest.approx(-73.2, abs=1e-12)
     ax = check.plot(language=language)
     table, referred = ax.lines
-    np.testing.assert_array_equal(table.get_ydata(), check.relative_levels_db)
+    np.testing.assert_array_equal(table.get_ydata(), check.relative_levels)
     np.testing.assert_allclose(referred.get_ydata(), shifted + check.offset_db)
     band = ax.collections[0].get_paths()[0].vertices[:, 1]
     assert float(np.min(band)) == pytest.approx(float(np.min(levels - tolerances)))
@@ -333,7 +333,7 @@ def test_limiting_plot_names_the_ratio_and_the_verdict(language: str) -> None:
     ax = check.plot(language=language)
     np.testing.assert_allclose(
         ax.lines[1].get_ydata(),
-        check.spectrum.band_levels_db + check.spectrum.offset_db,
+        check.spectrum.band_levels + check.spectrum.offset_db,
     )
     ratio = f"{check.peak_to_rms:.2f}"
     if language == "es":

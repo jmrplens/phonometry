@@ -39,7 +39,7 @@ from phonometry.room.spatial_decay import (
     EVALUATION_DISTANCES_M,
     FREE_FIELD_OFFSET_DB,
     ISO14257_REFERENCE_DISTANCE_M,
-    MAX_DIRECTIVITY_INDEX_DB,
+    MAX_DIRECTIVITY_INDEX,
     NORMALIZED_OFFSET_DB,
     OMNIDIRECTIONAL_RAMP_HZ,
     OMNIDIRECTIONAL_TOLERANCE_DB,
@@ -345,7 +345,7 @@ def test_a_curve_carries_its_region_and_its_two_descriptors() -> None:
     assert res.region == "whole"
     assert res.band == 1000.0
     assert res.decay_rate_db == pytest.approx(4.4, abs=0.05)
-    assert res.level_excess_db.size == res.distances.size
+    assert res.level_excess.size == res.distances.size
 
 
 def test_a_region_with_one_position_is_refused() -> None:
@@ -418,7 +418,7 @@ def test_the_spanish_plot_translates_its_title() -> None:
 
 def test_the_annex_a_limits_are_the_printed_ones() -> None:
     """A.1 on printed folio 14, A.2 and A.4 on printed folio 15."""
-    assert MAX_DIRECTIVITY_INDEX_DB == 8.0
+    assert MAX_DIRECTIVITY_INDEX == 8.0
     assert OMNIDIRECTIONAL_TOLERANCE_DB == (2.0, 8.0)
     assert OMNIDIRECTIONAL_RAMP_HZ == (630.0, 1000.0)
     assert ADJACENT_BAND_LIMIT_DB == 8.0
@@ -434,7 +434,7 @@ def test_the_annex_c_source_is_inside_the_limits_it_is_declared_against() -> Non
     8 dB cap and the adjacent-band step can be read off this declaration.
     """
     declared = oracle.ANNEX_C_SOURCE_DECLARATION_DB
-    assert declared["directivity index"] <= MAX_DIRECTIVITY_INDEX_DB
+    assert declared["directivity index"] <= MAX_DIRECTIVITY_INDEX
     assert declared["adjacent band step"] <= ADJACENT_BAND_LIMIT_DB
 
 

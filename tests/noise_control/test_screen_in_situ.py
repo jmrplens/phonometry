@@ -52,7 +52,7 @@ def test_the_attenuation_is_the_difference() -> None:
     unscreened = np.array([78.0, 80.0, 81.0, 79.0, 76.0, 72.0])
     screened = np.array([74.0, 74.0, 72.0, 68.0, 63.0, 58.0])
     res = noise_control.screen_attenuation(unscreened, screened, frequencies=BANDS)
-    assert res.attenuation_db.tolist() == [4.0, 6.0, 9.0, 11.0, 13.0, 14.0]
+    assert res.attenuation.tolist() == [4.0, 6.0, 9.0, 11.0, 13.0, 14.0]
     assert res.source_kind == "actual"
 
 
@@ -61,17 +61,17 @@ def test_a_common_level_shift_leaves_the_attenuation_alone() -> None:
     screened = np.array([74.0, 74.0])
     plain = noise_control.screen_attenuation(unscreened, screened)
     shifted = noise_control.screen_attenuation(unscreened + 5.0, screened + 5.0)
-    assert np.allclose(plain.attenuation_db, shifted.attenuation_db)
+    assert np.allclose(plain.attenuation, shifted.attenuation)
 
 
 def test_the_a_weighted_attenuation_is_a_difference() -> None:
     res = noise_control.screen_attenuation(
         [78.0],
         [70.0],
-        a_weighted_unscreened_level_db=81.4,
-        a_weighted_screened_level_db=72.9,
+        a_weighted_unscreened_level=81.4,
+        a_weighted_screened_level=72.9,
     )
-    assert res.a_weighted_attenuation_db == pytest.approx(8.5)
+    assert res.a_weighted_attenuation == pytest.approx(8.5)
 
 
 def test_an_artificial_source_may_not_give_an_a_weighted_attenuation() -> None:
@@ -80,20 +80,20 @@ def test_an_artificial_source_may_not_give_an_a_weighted_attenuation() -> None:
             [78.0],
             [70.0],
             source_kind="artificial",
-            a_weighted_unscreened_level_db=81.4,
-            a_weighted_screened_level_db=72.9,
+            a_weighted_unscreened_level=81.4,
+            a_weighted_screened_level=72.9,
         )
 
 
 def test_half_an_a_weighted_pair_is_refused() -> None:
     with pytest.raises(ValueError, match="both"):
         noise_control.screen_attenuation(
-            [78.0], [70.0], a_weighted_unscreened_level_db=81.4
+            [78.0], [70.0], a_weighted_unscreened_level=81.4
         )
 
 
 def test_mismatched_spectra_are_refused() -> None:
-    with pytest.raises(ValueError, match="screened_levels_db"):
+    with pytest.raises(ValueError, match="screened_levels"):
         noise_control.screen_attenuation([78.0, 80.0], [70.0])
 
 
@@ -298,11 +298,11 @@ def test_barrons_level_pair_gives_the_two_printed_band_reductions() -> None:
     # works out two of the eight bands in prose: 71.6 - 64.0 at 63 Hz and
     # 48.6 - 24.4 at 8000 Hz.
     printed = oracle.BARRON_EXAMPLE_7_9_PRINTED_REDUCTIONS_DB
-    assert res.attenuation_db[0] == pytest.approx(printed["63 Hz"])
-    assert res.attenuation_db[-1] == pytest.approx(printed["8000 Hz"])
+    assert res.attenuation[0] == pytest.approx(printed["63 Hz"])
+    assert res.attenuation[-1] == pytest.approx(printed["8000 Hz"])
     # The other six are the difference of two printed rows and are printed
     # nowhere, which is why they are asserted as a derivation, not as oracles.
-    assert res.attenuation_db.tolist() == pytest.approx(
+    assert res.attenuation.tolist() == pytest.approx(
         [7.6, 9.3, 11.7, 14.4, 17.4, 20.4, 23.4, 24.2]
     )
 
@@ -316,11 +316,11 @@ def test_barrons_a_weighted_pair_gives_the_printed_reduction() -> None:
         oracle.BARRON_TABLE_7_6_SCREENED_DB,
         frequencies=oracle.BARRON_TABLE_7_6_BANDS_HZ,
         source_kind="actual",
-        a_weighted_unscreened_level_db=unscreened,
-        a_weighted_screened_level_db=screened,
+        a_weighted_unscreened_level=unscreened,
+        a_weighted_screened_level=screened,
         distance=oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
-    assert res.a_weighted_attenuation_db == pytest.approx(
+    assert res.a_weighted_attenuation == pytest.approx(
         oracle.BARRON_EXAMPLE_7_9_A_REDUCTION_DB
     )
     # 7.4 c) gives D_pA the same rounding as D_p.
@@ -338,18 +338,18 @@ def test_the_reported_integers_round_a_tie_to_the_even_decibel() -> None:
     weighted = noise_control.screen_attenuation(
         [80.0],
         [70.0],
-        a_weighted_unscreened_level_db=80.5,
-        a_weighted_screened_level_db=78.0,
+        a_weighted_unscreened_level=80.5,
+        a_weighted_screened_level=78.0,
     )
     assert weighted.rounded_a_weighted() == 2
 
 
 def test_no_a_weighted_pair_reports_no_a_weighted_integer() -> None:
     res = noise_control.screen_attenuation([78.0, 80.0], [70.0, 71.0])
-    assert res.a_weighted_attenuation_db is None
+    assert res.a_weighted_attenuation is None
     assert res.rounded_a_weighted() is None
     # The raw band values are left alone by the rounding.
-    assert res.attenuation_db.tolist() == [8.0, 9.0]
+    assert res.attenuation.tolist() == [8.0, 9.0]
 
 
 def test_the_indoor_worked_example_gives_its_printed_reduction() -> None:
@@ -364,7 +364,7 @@ def test_the_indoor_worked_example_gives_its_printed_reduction() -> None:
         frequencies=[1000.0],
         distance=oracle.BARRON_EXAMPLE_7_10_SCREEN_DISTANCE_M,
     )
-    assert res.attenuation_db[0] == pytest.approx(printed)
+    assert res.attenuation[0] == pytest.approx(printed)
 
 
 def test_the_office_screen_example_rounds_to_the_printed_integers() -> None:
@@ -376,7 +376,7 @@ def test_the_office_screen_example_rounds_to_the_printed_integers() -> None:
         frequencies=oracle.HANSEN_EXAMPLE_6_23_BANDS_HZ,
         distance=2.0,
     )
-    assert res.attenuation_db.tolist() == pytest.approx([9.8, 15.2, 19.6])
+    assert res.attenuation.tolist() == pytest.approx([9.8, 15.2, 19.6])
     # Clause 7.4 c) reports D_p rounded to the nearest integer, which is the
     # "Reduction due to barrier 10 15 20" row of folio 318. The raw difference
     # stays on the result and the reported integers come from rounded().
@@ -393,7 +393,7 @@ def test_the_single_path_levels_of_the_1991_example_subtract() -> None:
     res = noise_control.screen_attenuation(
         [oracle.SRL_1991_UNSCREENED_DB] * len(paths), list(paths.values())
     )
-    assert res.attenuation_db.tolist() == pytest.approx([9.0, 15.0, 10.0, 18.0])
+    assert res.attenuation.tolist() == pytest.approx([9.0, 15.0, 10.0, 18.0])
 
 
 def test_the_ifa_worked_example_differences_are_the_printed_ones() -> None:
@@ -413,7 +413,7 @@ def test_the_ifa_worked_example_differences_are_the_printed_ones() -> None:
             frequencies=bands,
             source_kind="artificial",
         )
-        assert res.attenuation_db.tolist() == pytest.approx(values, abs=5e-14)
+        assert res.attenuation.tolist() == pytest.approx(values, abs=5e-14)
 
 
 def test_the_ifa_table_misprints_one_of_its_twelve_differences() -> None:
@@ -427,11 +427,11 @@ def test_the_ifa_table_misprints_one_of_its_twelve_differences() -> None:
         frequencies=[float(band) for band in levels],
         source_kind="artificial",
     )
-    assert res.attenuation_db.tolist() == pytest.approx([4.2, 4.1, 4.3, 5.3])
+    assert res.attenuation.tolist() == pytest.approx([4.2, 4.1, 4.3, 5.3])
     row, band = spatial_decay.IFA_LSA_01_234_MISPRINT
     printed = spatial_decay.IFA_LSA_01_234_DIFFERENCES_DB[row][list(levels).index(band)]
     assert printed == pytest.approx(4.7)
-    assert res.attenuation_db[2] != pytest.approx(printed)
+    assert res.attenuation[2] != pytest.approx(printed)
 
 
 def test_the_background_correction_matches_a_printed_worked_example() -> None:

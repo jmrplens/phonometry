@@ -616,7 +616,7 @@ class AdjustmentValue(OwnsArrays):
     :ivar free_field_deviation_db: :math:`d`, the indication in the free field
         less the incident level at each frequency, before the adjustment, in
         dB.
-    :ivar calibrator_level_db: :math:`L_1`, the level stated for the sound
+    :ivar calibrator_level: :math:`L_1`, the level stated for the sound
         calibrator, in dB.
     :ivar calibrator_reading_db: :math:`L_4'`, what the meter indicates on the
         calibrator before the adjustment, at the sensitivity the free-field
@@ -632,7 +632,7 @@ class AdjustmentValue(OwnsArrays):
 
     frequencies: NDArray[np.float64]
     free_field_deviation_db: NDArray[np.float64]
-    calibrator_level_db: float
+    calibrator_level: float
     calibrator_reading_db: float
     check_frequency_hz: float = _CHECK_FREQUENCY_HZ
     tolerance_db: NDArray[np.float64] | None = None
@@ -663,7 +663,7 @@ class AdjustmentValue(OwnsArrays):
         tolerance = _tolerance_column(self.tolerance_db, frequencies.size)
         if tolerance is not None:
             object.__setattr__(self, "tolerance_db", read_only(tolerance))
-        for name in ("calibrator_level_db", "calibrator_reading_db"):
+        for name in ("calibrator_level", "calibrator_reading_db"):
             require_finite(getattr(self, name), name)
         _index_of(frequencies, self.check_frequency_hz, "check_frequency_hz")
 
@@ -680,32 +680,32 @@ class AdjustmentValue(OwnsArrays):
         return raw / float(raw.sum())
 
     @property
-    def sensitivity_adjustment_db(self) -> float:
+    def sensitivity_adjustment(self) -> float:
         r""":math:`s = -\sum_i w_i d_i`, the change of sensitivity the fit
         makes, in dB: added to every indication.
         """
         return -float(np.sum(self.weights * self.free_field_deviation_db))
 
     @property
-    def calibrator_indicated_level_db(self) -> float:
+    def calibrator_indicated_level(self) -> float:
         r""":math:`L_4 = L_4' + s`, what the adjusted meter indicates on the
         calibrator, in dB.
         """
-        return self.calibrator_reading_db + self.sensitivity_adjustment_db
+        return self.calibrator_reading_db + self.sensitivity_adjustment
 
     @property
     def adjusted_deviation_db(self) -> NDArray[np.float64]:
         r"""The deviation of the free-field response after the adjustment,
         :math:`d + s`, in dB: curve (2) less curve (1) of Figure A.1.
         """
-        return self.free_field_deviation_db + self.sensitivity_adjustment_db
+        return self.free_field_deviation_db + self.sensitivity_adjustment
 
     @property
-    def adjustment_db(self) -> float:
+    def adjustment(self) -> float:
         r""":math:`\Delta L = L_1 - L_4`, in dB: the value the manual states,
         added to the indication on the calibrator to obtain its stated level.
         """
-        return self.calibrator_level_db - self.calibrator_indicated_level_db
+        return self.calibrator_level - self.calibrator_indicated_level
 
     def _check_index(self) -> int:
         return _index_of(
@@ -721,14 +721,14 @@ class AdjustmentValue(OwnsArrays):
         return float(self.adjusted_deviation_db[self._check_index()])
 
     @property
-    def free_field_indicated_level_db(self) -> float:
+    def free_field_indicated_level(self) -> float:
         r""":math:`L_2`, the indication in a free field at :math:`L_1` and the
         calibration check frequency, after the adjustment, in dB.
         """
-        return self.calibrator_level_db + self.check_frequency_offset_db
+        return self.calibrator_level + self.check_frequency_offset_db
 
     @property
-    def pressure_indicated_level_db(self) -> float | None:
+    def pressure_indicated_level(self) -> float | None:
         r""":math:`L_3`, the indication in a pressure field at :math:`L_1` and
         the calibration check frequency, after the adjustment, in dB; ``None``
         without the pressure response. :math:`L_3 - L_4` is what the loading
@@ -737,10 +737,10 @@ class AdjustmentValue(OwnsArrays):
         if self.pressure_deviation_db is None:
             return None
         deviation = float(self.pressure_deviation_db[self._check_index()])
-        return self.calibrator_level_db + deviation + self.sensitivity_adjustment_db
+        return self.calibrator_level + deviation + self.sensitivity_adjustment
 
     @property
-    def pressure_to_free_field_correction_db(self) -> NDArray[np.float64] | None:
+    def pressure_to_free_field_correction(self) -> NDArray[np.float64] | None:
         r"""The pressure-to-free-field correction of the meter at each
         frequency, in dB: the free-field level (1) less the indication in the
         pressure field (3), after the adjustment. ``None`` without the pressure
@@ -748,7 +748,7 @@ class AdjustmentValue(OwnsArrays):
         """
         if self.pressure_deviation_db is None:
             return None
-        return -(self.pressure_deviation_db + self.sensitivity_adjustment_db)
+        return -(self.pressure_deviation_db + self.sensitivity_adjustment)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -772,13 +772,13 @@ class AdjustmentValue(OwnsArrays):
 
 def adjustment_value(
     frequencies: ArrayLike,
-    free_field_indicated_level_db: ArrayLike,
+    free_field_indicated_level: ArrayLike,
     calibrator_reading_db: float,
     *,
-    calibrator_level_db: float,
-    incident_level_db: ArrayLike | None = None,
+    calibrator_level: float,
+    incident_level: ArrayLike | None = None,
     tolerance_db: ArrayLike | None = None,
-    pressure_indicated_level_db: ArrayLike | None = None,
+    pressure_indicated_level: ArrayLike | None = None,
     check_frequency_hz: float = _CHECK_FREQUENCY_HZ,
 ) -> AdjustmentValue:
     r"""The adjustment value at the calibration check frequency
@@ -802,18 +802,18 @@ def adjustment_value(
     sensitivity the free-field readings were taken at. The least-squares
     weighting is this module's reading of a text that prints no formula (see
     the module notes). Where the achievable free-field level differs from
-    :math:`L_1`, ``incident_level_db`` carries it, which is the allowance the
+    :math:`L_1`, ``incident_level`` carries it, which is the allowance the
     text asks for.
 
     :param frequencies: The frequencies of the free-field response, in Hz,
         increasing, the calibration check frequency among them.
-    :param free_field_indicated_level_db: What the meter indicates in the free
+    :param free_field_indicated_level: What the meter indicates in the free
         field at each frequency, in dB, before the adjustment.
     :param calibrator_reading_db: :math:`L_4'`, what the meter indicates on
         the recommended calibrator at the same sensitivity, in dB.
-    :param calibrator_level_db: :math:`L_1`, the level stated for the
+    :param calibrator_level: :math:`L_1`, the level stated for the
         calibrator at the calibration check frequency, in dB.
-    :param incident_level_db: The incident free-field level at each frequency,
+    :param incident_level: The incident free-field level at each frequency,
         in dB, one value or one per frequency (Default: None, the calibrator's
         :math:`L_1` at every frequency).
     :param tolerance_db: The tolerance the deviation is judged against at each
@@ -821,7 +821,7 @@ def adjustment_value(
         acceptance limits for the class; one value or one per frequency, and
         infinite where a frequency should not pull the fit (Default: None,
         equal weights).
-    :param pressure_indicated_level_db: What the meter indicates in a
+    :param pressure_indicated_level: What the meter indicates in a
         pressure field of level :math:`L_1` at each frequency, in dB, before
         the adjustment, for the pressure-to-free-field correction and
         :math:`L_3` (Default: None).
@@ -834,26 +834,24 @@ def adjustment_value(
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     indicated = _band_column(
-        free_field_indicated_level_db, "free_field_indicated_level_db", count
+        free_field_indicated_level, "free_field_indicated_level", count
     )
-    level = require_finite(calibrator_level_db, "calibrator_level_db")
+    level = require_finite(calibrator_level, "calibrator_level")
     incident = (
         np.full(count, level)
-        if incident_level_db is None
-        else _band_column(incident_level_db, "incident_level_db", count)
+        if incident_level is None
+        else _band_column(incident_level, "incident_level", count)
     )
     pressure = (
         None
-        if pressure_indicated_level_db is None
-        else _band_column(
-            pressure_indicated_level_db, "pressure_indicated_level_db", count
-        )
+        if pressure_indicated_level is None
+        else _band_column(pressure_indicated_level, "pressure_indicated_level", count)
         - level
     )
     return AdjustmentValue(
         frequencies=frequencies,
         free_field_deviation_db=indicated - incident,
-        calibrator_level_db=level,
+        calibrator_level=level,
         calibrator_reading_db=require_finite(
             calibrator_reading_db, "calibrator_reading_db"
         ),
@@ -873,7 +871,7 @@ class FreeFieldCorrection(OwnsArrays):
     r"""The corrections that bring a meter on a source to its free-field
     response (IEC 62585:2012, Formulas (D.7), (E.6) and (F.13)).
 
-    One row of :attr:`corrections_db` per determination, one combination of
+    One row of :attr:`corrections` per determination, one combination of
     microphone and source, and one column per frequency. The correction the
     manual states is their mean at each frequency (D.2 step 6, E.2 step 5,
     F.2 step 5). Clauses 12 to 14 judge "the range of correction values at
@@ -885,10 +883,10 @@ class FreeFieldCorrection(OwnsArrays):
     determinations share a microphone.
 
     :ivar frequencies: the frequencies, in Hz.
-    :ivar corrections_db: :math:`C_\mathrm{FF,SLM}`, or :math:`C_\mathrm{N,FF,SLM}`
+    :ivar corrections: :math:`C_\mathrm{FF,SLM}`, or :math:`C_\mathrm{N,FF,SLM}`
         for an actuator, of each determination, in dB, shape
         ``(determinations, frequencies)``.
-    :ivar reference_correction_db: what the reference microphone contributes
+    :ivar reference_correction: what the reference microphone contributes
         at each frequency, in dB: :math:`C_\mathrm{FF,RM}` for a calibrator or
         a coupler, :math:`S_\mathrm{N,RM} + G_\mathrm{N,RC}` for an actuator.
     :ivar source: ``"sound_calibrator"`` (Annex D), ``"comparison_coupler"``
@@ -897,14 +895,14 @@ class FreeFieldCorrection(OwnsArrays):
         actuator's corrections, in Hz; ``None`` for the other two sources,
         whose corrections are absolute.
     :ivar microphones: the microphone each determination was made with, one
-        label per row of :attr:`corrections_db` (a serial number or an
+        label per row of :attr:`corrections` (a serial number or an
         index), rows with the same label being the same microphone; ``None``
         when every determination is a microphone of its own.
     """
 
     frequencies: NDArray[np.float64]
-    corrections_db: NDArray[np.float64]
-    reference_correction_db: NDArray[np.float64]
+    corrections: NDArray[np.float64]
+    reference_correction: NDArray[np.float64]
     source: str
     check_frequency_hz: float | None = None
     microphones: tuple[Hashable, ...] | None = None
@@ -927,32 +925,28 @@ class FreeFieldCorrection(OwnsArrays):
             raise ValueError(msg)
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
-        corrections = np.array(
-            self.corrections_db, dtype=np.float64, ndmin=2, copy=None
-        )
+        corrections = np.array(self.corrections, dtype=np.float64, ndmin=2, copy=None)
         if corrections.ndim != _MATRIX_RANK or corrections.shape[1] != frequencies.size:
             msg = (
-                "FreeFieldCorrection: 'corrections_db' must hold one row per "
+                "FreeFieldCorrection: 'corrections' must hold one row per "
                 f"determination and one column per frequency ({frequencies.size}); "
                 f"got shape {corrections.shape}."
             )
             raise ValueError(msg)
         if not np.all(np.isfinite(corrections)):
-            msg = (
-                "FreeFieldCorrection: 'corrections_db' must contain only finite values."
-            )
+            msg = "FreeFieldCorrection: 'corrections' must contain only finite values."
             raise ValueError(msg)
-        object.__setattr__(self, "corrections_db", read_only(corrections))
+        object.__setattr__(self, "corrections", read_only(corrections))
         reference = require_finite_array(
-            self.reference_correction_db, "reference_correction_db"
+            self.reference_correction, "reference_correction"
         )
         if reference.size != frequencies.size:
             msg = (
-                "FreeFieldCorrection: 'reference_correction_db' must hold one "
+                "FreeFieldCorrection: 'reference_correction' must hold one "
                 f"value per frequency ({frequencies.size}); got {reference.size}."
             )
             raise ValueError(msg)
-        object.__setattr__(self, "reference_correction_db", read_only(reference))
+        object.__setattr__(self, "reference_correction", read_only(reference))
         normalised = self.source == "electrostatic_actuator"
         if normalised != (self.check_frequency_hz is not None):
             msg = (
@@ -971,11 +965,11 @@ class FreeFieldCorrection(OwnsArrays):
             )
 
     @property
-    def correction_db(self) -> NDArray[np.float64]:
+    def correction(self) -> NDArray[np.float64]:
         """The mean correction over the determinations at each frequency, in
         dB: the value the manual states.
         """
-        return np.mean(self.corrections_db, axis=0)
+        return np.mean(self.corrections, axis=0)
 
     def _microphone_rows(self) -> list[list[int]]:
         """The rows of each microphone, in the order they first appear."""
@@ -990,12 +984,12 @@ class FreeFieldCorrection(OwnsArrays):
         return list(groups.values())
 
     @property
-    def microphone_corrections_db(self) -> NDArray[np.float64]:
+    def microphone_corrections(self) -> NDArray[np.float64]:
         """The correction of each microphone, the mean over its
         determinations, in dB, shape ``(microphones, frequencies)``.
         """
         return np.array(
-            [self.corrections_db[rows].mean(axis=0) for rows in self._microphone_rows()]
+            [self.corrections[rows].mean(axis=0) for rows in self._microphone_rows()]
         )
 
     @property
@@ -1007,15 +1001,15 @@ class FreeFieldCorrection(OwnsArrays):
     def range_db(self) -> NDArray[np.float64]:
         """The range of the corrections over the microphones at each
         frequency, the largest less the smallest of
-        :attr:`microphone_corrections_db`, in dB: the range clauses 12 to 14
+        :attr:`microphone_corrections`, in dB: the range clauses 12 to 14
         judge. Zero for a single microphone.
         """
-        return np.ptp(self.microphone_corrections_db, axis=0)
+        return np.ptp(self.microphone_corrections, axis=0)
 
     @property
     def n_determinations(self) -> int:
         """The number of determinations averaged."""
-        return int(self.corrections_db.shape[0])
+        return int(self.corrections.shape[0])
 
     @property
     def formula(self) -> str:
@@ -1054,10 +1048,10 @@ def _substitution(
     readings: Mapping[str, ArrayLike],
     *,
     source: str,
-    reference_correction_db: ArrayLike,
+    reference_correction: ArrayLike,
     source_level_difference_db: ArrayLike,
     source_difference_name: str,
-    free_field_level_difference_db: ArrayLike,
+    free_field_level_difference: ArrayLike,
     microphones: Sequence[Hashable] | None,
 ) -> FreeFieldCorrection:
     """Formula (D.7) or (E.6): the two responses and the reference correction.
@@ -1072,7 +1066,7 @@ def _substitution(
         name: _determinations(value, name, count) for name, value in readings.items()
     }
     free_field = _determinations(
-        free_field_level_difference_db, "free_field_level_difference_db", count
+        free_field_level_difference, "free_field_level_difference", count
     )
     on_source = _determinations(
         source_level_difference_db, source_difference_name, count
@@ -1080,13 +1074,13 @@ def _substitution(
     _common_rows(
         {
             **matrices,
-            "free_field_level_difference_db": free_field,
+            "free_field_level_difference": free_field,
             source_difference_name: on_source,
         }
     )
     slm_free, reference_free, slm_source, reference_source = matrices.values()
     reference = _band_column(
-        reference_correction_db, "reference_free_field_correction_db", count
+        reference_correction, "reference_free_field_correction", count
     )
     corrections = (
         (slm_free - slm_source)
@@ -1097,8 +1091,8 @@ def _substitution(
     )
     return FreeFieldCorrection(
         frequencies=frequencies,
-        corrections_db=corrections,
-        reference_correction_db=reference,
+        corrections=corrections,
+        reference_correction=reference,
         source=source,
         microphones=(
             None
@@ -1110,14 +1104,14 @@ def _substitution(
 
 def sound_calibrator_correction(
     frequencies: ArrayLike,
-    slm_free_field_level_db: ArrayLike,
-    reference_free_field_level_db: ArrayLike,
-    slm_calibrator_level_db: ArrayLike,
-    reference_calibrator_level_db: ArrayLike,
+    slm_free_field_level: ArrayLike,
+    reference_free_field_level: ArrayLike,
+    slm_calibrator_level: ArrayLike,
+    reference_calibrator_level: ArrayLike,
     *,
-    reference_free_field_correction_db: ArrayLike,
-    free_field_level_difference_db: ArrayLike = 0.0,
-    calibrator_level_difference_db: ArrayLike = 0.0,
+    reference_free_field_correction: ArrayLike,
+    free_field_level_difference: ArrayLike = 0.0,
+    calibrator_level_difference: ArrayLike = 0.0,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection:
     r"""Free-field corrections for use with a multi-frequency sound calibrator
@@ -1145,22 +1139,22 @@ def sound_calibrator_correction(
     taken over the three microphones and not over the calibrators as well.
 
     :param frequencies: The frequencies, in Hz, increasing.
-    :param slm_free_field_level_db: :math:`L_\mathrm{ind1}`, the meter in the
+    :param slm_free_field_level: :math:`L_\mathrm{ind1}`, the meter in the
         free field, in dB.
-    :param reference_free_field_level_db: :math:`L_\mathrm{ind2}`, the
+    :param reference_free_field_level: :math:`L_\mathrm{ind2}`, the
         reference microphone in the same field, in dB.
-    :param slm_calibrator_level_db: :math:`L_\mathrm{ind3}`, the meter on the
+    :param slm_calibrator_level: :math:`L_\mathrm{ind3}`, the meter on the
         calibrator, in dB.
-    :param reference_calibrator_level_db: :math:`L_\mathrm{ind4}`, the
+    :param reference_calibrator_level: :math:`L_\mathrm{ind4}`, the
         reference microphone on the calibrator, in dB.
-    :param reference_free_field_correction_db: :math:`C_\mathrm{FF,RM}`, the
+    :param reference_free_field_correction: :math:`C_\mathrm{FF,RM}`, the
         free-field correction of the reference microphone from IEC/TS
         61094-7, in dB, one per frequency or one for all.
-    :param free_field_level_difference_db: :math:`L_{p,\mathrm{F1}} -
+    :param free_field_level_difference: :math:`L_{p,\mathrm{F1}} -
         L_{p,\mathrm{F2}}`, the free-field level during measurement 1 less that
         during measurement 2, from a monitor microphone, in dB (Default: 0, a
         stable source; NOTE 2).
-    :param calibrator_level_difference_db: :math:`L_{p,\mathrm{P1}} -
+    :param calibrator_level_difference: :math:`L_{p,\mathrm{P1}} -
         L_{p,\mathrm{P2}}`, the calibrator's level on the meter less that on
         the reference, in dB (Default: 0, a stable calibrator; NOTE 3).
     :param microphones: The microphone of each determination, one label per
@@ -1176,30 +1170,30 @@ def sound_calibrator_correction(
     return _substitution(
         frequencies,
         {
-            "slm_free_field_level_db": slm_free_field_level_db,
-            "reference_free_field_level_db": reference_free_field_level_db,
-            "slm_calibrator_level_db": slm_calibrator_level_db,
-            "reference_calibrator_level_db": reference_calibrator_level_db,
+            "slm_free_field_level": slm_free_field_level,
+            "reference_free_field_level": reference_free_field_level,
+            "slm_calibrator_level": slm_calibrator_level,
+            "reference_calibrator_level": reference_calibrator_level,
         },
         source="sound_calibrator",
-        reference_correction_db=reference_free_field_correction_db,
-        source_level_difference_db=calibrator_level_difference_db,
-        source_difference_name="calibrator_level_difference_db",
-        free_field_level_difference_db=free_field_level_difference_db,
+        reference_correction=reference_free_field_correction,
+        source_level_difference_db=calibrator_level_difference,
+        source_difference_name="calibrator_level_difference",
+        free_field_level_difference=free_field_level_difference,
         microphones=microphones,
     )
 
 
 def comparison_coupler_correction(
     frequencies: ArrayLike,
-    slm_free_field_level_db: ArrayLike,
-    reference_free_field_level_db: ArrayLike,
-    slm_coupler_level_db: ArrayLike,
-    reference_coupler_level_db: ArrayLike,
+    slm_free_field_level: ArrayLike,
+    reference_free_field_level: ArrayLike,
+    slm_coupler_level: ArrayLike,
+    reference_coupler_level: ArrayLike,
     *,
-    reference_free_field_correction_db: ArrayLike,
-    free_field_level_difference_db: ArrayLike = 0.0,
-    coupler_level_difference_db: ArrayLike = 0.0,
+    reference_free_field_correction: ArrayLike,
+    free_field_level_difference: ArrayLike = 0.0,
+    coupler_level_difference: ArrayLike = 0.0,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection:
     r"""Free-field corrections for use with a comparison coupler
@@ -1227,20 +1221,20 @@ def comparison_coupler_correction(
     correction is their mean.
 
     :param frequencies: The frequencies, in Hz, increasing.
-    :param slm_free_field_level_db: :math:`L_\mathrm{ind1}`, the meter in the
+    :param slm_free_field_level: :math:`L_\mathrm{ind1}`, the meter in the
         free field, in dB.
-    :param reference_free_field_level_db: :math:`L_\mathrm{ind2}`, the
+    :param reference_free_field_level: :math:`L_\mathrm{ind2}`, the
         reference microphone in the same field, in dB.
-    :param slm_coupler_level_db: the meter in the coupler, in dB
+    :param slm_coupler_level: the meter in the coupler, in dB
         (:math:`L_\mathrm{ind3b}` of Figure E.1).
-    :param reference_coupler_level_db: the reference microphone in the
+    :param reference_coupler_level: the reference microphone in the
         coupler, in dB (:math:`L_\mathrm{ind3a}` of Figure E.1).
-    :param reference_free_field_correction_db: :math:`C_\mathrm{FF,RM}` from
+    :param reference_free_field_correction: :math:`C_\mathrm{FF,RM}` from
         IEC/TS 61094-7, in dB, one per frequency or one for all.
-    :param free_field_level_difference_db: :math:`L_{p,\mathrm{F1}} -
+    :param free_field_level_difference: :math:`L_{p,\mathrm{F1}} -
         L_{p,\mathrm{F2}}`, the free-field level during measurement 1 less that
         during measurement 2, in dB (Default: 0; NOTE 2).
-    :param coupler_level_difference_db: the sound pressure level at the meter
+    :param coupler_level_difference: the sound pressure level at the meter
         less that at the reference in the coupler, in dB (Default: 0).
     :param microphones: The microphone of each determination, one label per
         row (Default: None, every determination a microphone of its own).
@@ -1250,30 +1244,30 @@ def comparison_coupler_correction(
     return _substitution(
         frequencies,
         {
-            "slm_free_field_level_db": slm_free_field_level_db,
-            "reference_free_field_level_db": reference_free_field_level_db,
-            "slm_coupler_level_db": slm_coupler_level_db,
-            "reference_coupler_level_db": reference_coupler_level_db,
+            "slm_free_field_level": slm_free_field_level,
+            "reference_free_field_level": reference_free_field_level,
+            "slm_coupler_level": slm_coupler_level,
+            "reference_coupler_level": reference_coupler_level,
         },
         source="comparison_coupler",
-        reference_correction_db=reference_free_field_correction_db,
-        source_level_difference_db=coupler_level_difference_db,
-        source_difference_name="coupler_level_difference_db",
-        free_field_level_difference_db=free_field_level_difference_db,
+        reference_correction=reference_free_field_correction,
+        source_level_difference_db=coupler_level_difference,
+        source_difference_name="coupler_level_difference",
+        free_field_level_difference=free_field_level_difference,
         microphones=microphones,
     )
 
 
 def electrostatic_actuator_correction(
     frequencies: ArrayLike,
-    slm_free_field_level_db: ArrayLike,
-    reference_free_field_level_db: ArrayLike,
-    slm_actuator_level_db: ArrayLike,
+    slm_free_field_level: ArrayLike,
+    reference_free_field_level: ArrayLike,
+    slm_actuator_level: ArrayLike,
     *,
-    reference_sensitivity_level_db: ArrayLike,
+    reference_sensitivity_level: ArrayLike,
     reference_channel_gain_db: ArrayLike = 0.0,
-    actuator_level_db: ArrayLike = 0.0,
-    free_field_level_difference_db: ArrayLike = 0.0,
+    actuator_level: ArrayLike = 0.0,
+    free_field_level_difference: ArrayLike = 0.0,
     check_frequency_hz: float = _CHECK_FREQUENCY_HZ,
     microphones: Sequence[Hashable] | None = None,
 ) -> FreeFieldCorrection:
@@ -1302,23 +1296,23 @@ def electrostatic_actuator_correction(
 
     :param frequencies: The frequencies, in Hz, increasing, :math:`f_0`
         among them.
-    :param slm_free_field_level_db: :math:`L_\mathrm{ind1}(f)`, the meter in
+    :param slm_free_field_level: :math:`L_\mathrm{ind1}(f)`, the meter in
         the free field, in dB.
-    :param reference_free_field_level_db: :math:`L_\mathrm{ind2}(f)`, the
+    :param reference_free_field_level: :math:`L_\mathrm{ind2}(f)`, the
         reference channel in the same field, in dB.
-    :param slm_actuator_level_db: :math:`L_\mathrm{ind3}(f)`, the meter on the
+    :param slm_actuator_level: :math:`L_\mathrm{ind3}(f)`, the meter on the
         actuator, in dB.
-    :param reference_sensitivity_level_db: :math:`S_\mathrm{RM}(f)`, the
+    :param reference_sensitivity_level: :math:`S_\mathrm{RM}(f)`, the
         free-field (open-circuit) sensitivity level of the reference
         microphone, in dB re 1 V/Pa, one per frequency.
     :param reference_channel_gain_db: :math:`G_\mathrm{RC}(f)`, the gain of
         the reference channel, in dB (Default: 0, a flat channel). Its
         frequency response has to be known; its absolute gain does not.
-    :param actuator_level_db: :math:`L_\mathrm{EA}(f)`, the level the actuator
+    :param actuator_level: :math:`L_\mathrm{EA}(f)`, the level the actuator
         simulates, in dB (Default: 0 at every frequency: the same at
         :math:`f` and :math:`f_0` for a drive voltage independent of
         frequency, NOTE 4).
-    :param free_field_level_difference_db: :math:`L_{p,\mathrm{F1}} -
+    :param free_field_level_difference: :math:`L_{p,\mathrm{F1}} -
         L_{p,\mathrm{F2}}` at each frequency, in dB (Default: 0; NOTE 3).
     :param check_frequency_hz: :math:`f_0`, in Hz (Default: 1000).
     :param microphones: The microphone of each determination, one label per
@@ -1331,40 +1325,38 @@ def electrostatic_actuator_correction(
     count = frequencies.size
     index = _index_of(frequencies, check_frequency_hz, "check_frequency_hz")
     named = {
-        "slm_free_field_level_db": _determinations(
-            slm_free_field_level_db, "slm_free_field_level_db", count
+        "slm_free_field_level": _determinations(
+            slm_free_field_level, "slm_free_field_level", count
         ),
-        "reference_free_field_level_db": _determinations(
-            reference_free_field_level_db, "reference_free_field_level_db", count
+        "reference_free_field_level": _determinations(
+            reference_free_field_level, "reference_free_field_level", count
         ),
-        "slm_actuator_level_db": _determinations(
-            slm_actuator_level_db, "slm_actuator_level_db", count
+        "slm_actuator_level": _determinations(
+            slm_actuator_level, "slm_actuator_level", count
         ),
-        "actuator_level_db": _determinations(
-            actuator_level_db, "actuator_level_db", count
-        ),
-        "free_field_level_difference_db": _determinations(
-            free_field_level_difference_db, "free_field_level_difference_db", count
+        "actuator_level": _determinations(actuator_level, "actuator_level", count),
+        "free_field_level_difference": _determinations(
+            free_field_level_difference, "free_field_level_difference", count
         ),
     }
     _common_rows(named)
     normalised = {name: matrix - matrix[:, [index]] for name, matrix in named.items()}
     sensitivity = _band_column(
-        reference_sensitivity_level_db, "reference_sensitivity_level_db", count
+        reference_sensitivity_level, "reference_sensitivity_level", count
     )
     gain = _band_column(reference_channel_gain_db, "reference_channel_gain_db", count)
     reference = (sensitivity - sensitivity[index]) + (gain - gain[index])
     corrections = (
-        normalised["slm_free_field_level_db"]
-        - normalised["reference_free_field_level_db"]
-        - normalised["free_field_level_difference_db"]
+        normalised["slm_free_field_level"]
+        - normalised["reference_free_field_level"]
+        - normalised["free_field_level_difference"]
         + reference
-        - (normalised["slm_actuator_level_db"] - normalised["actuator_level_db"])
+        - (normalised["slm_actuator_level"] - normalised["actuator_level"])
     )
     return FreeFieldCorrection(
         frequencies=frequencies,
-        corrections_db=corrections,
-        reference_correction_db=reference,
+        corrections=corrections,
+        reference_correction=reference,
         source="electrostatic_actuator",
         check_frequency_hz=float(frequencies[index]),
         microphones=(
@@ -1501,7 +1493,7 @@ class CorrectionUncertaintyBudget(OwnsArrays):
         return self.values_db / self.divisors
 
     @property
-    def correction_db(self) -> float:
+    def correction(self) -> float:
         """The correction the budget is for, in dB (0 when not given)."""
         return float(self.uncertainty.value)
 
@@ -1601,7 +1593,7 @@ def correction_uncertainty_budget(
     *,
     repeatability_dof: float,
     frequency_hz: float,
-    correction_db: float = 0.0,
+    correction: float = 0.0,
     static_pressure_kpa: float | None = None,
     additional_components: Sequence[Quantity] = (),
     coverage: float = 0.95,
@@ -1641,7 +1633,7 @@ def correction_uncertainty_budget(
         I.3.
     :param frequency_hz: The frequency, in Hz, which sets the clause 6
         component and the maximum the budget is judged against.
-    :param correction_db: The correction the budget is for, in dB (Default:
+    :param correction: The correction the budget is for, in dB (Default:
         0).
     :param static_pressure_kpa: The static pressure the measurements were
         made at, in kPa (Default: None). Below 97 kPa clause 6 adds a
@@ -1729,7 +1721,7 @@ def correction_uncertainty_budget(
         values.append(stated)
         divisors.append(divisor)
         signs.append(1.0)
-    offset = require_finite(correction_db, "correction_db")
+    offset = require_finite(correction, "correction")
     weights = np.array(signs)
 
     def model(*components: float) -> float:
@@ -1862,7 +1854,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
     :ivar frequencies: the frequencies, in Hz.
     :ivar expanded_uncertainty_db: the actual expanded uncertainty at each
         frequency, in dB.
-    :ivar correction_db: the corrections, in dB, which the documentation of
+    :ivar correction: the corrections, in dB, which the documentation of
         clause 15 states with their uncertainty; ``None`` if not given.
     :ivar coverage_factor: the coverage factor of each expanded uncertainty,
         which clause 15 asks to be stated; ``None`` if not given.
@@ -1874,7 +1866,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
     clause: int
     frequencies: NDArray[np.float64]
     expanded_uncertainty_db: NDArray[np.float64]
-    correction_db: NDArray[np.float64] | None = None
+    correction: NDArray[np.float64] | None = None
     coverage_factor: NDArray[np.float64] | None = None
     correction_range_db: NDArray[np.float64] | None = None
 
@@ -1898,7 +1890,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
             raise ValueError(msg)
         for name in (
             "expanded_uncertainty_db",
-            "correction_db",
+            "correction",
             "coverage_factor",
             "correction_range_db",
         ):
@@ -1912,7 +1904,7 @@ class CorrectionUncertaintyVerification(OwnsArrays):
                     f"per frequency ({frequencies.size}); got {column.size}."
                 )
                 raise ValueError(msg)
-            if name != "correction_db" and np.any(column < 0.0):
+            if name != "correction" and np.any(column < 0.0):
                 msg = (
                     f"CorrectionUncertaintyVerification: '{name}' must be non-negative."
                 )
@@ -2059,7 +2051,7 @@ def verify_correction_uncertainty(
     expanded_uncertainty_db: ArrayLike,
     *,
     clause: int,
-    correction_db: ArrayLike | None = None,
+    correction: ArrayLike | None = None,
     coverage_factor: ArrayLike | None = None,
     correction_range_db: ArrayLike | None = None,
 ) -> CorrectionUncertaintyVerification:
@@ -2085,7 +2077,7 @@ def verify_correction_uncertainty(
         diffraction), 10 (microphone response), 11 (windscreens and
         accessories), 12 (sound calibrator), 13 (comparison coupler) or 14
         (electrostatic actuator).
-    :param correction_db: The corrections, in dB, for the documentation of
+    :param correction: The corrections, in dB, for the documentation of
         clause 15 (Default: None).
     :param coverage_factor: The coverage factor of each expanded uncertainty,
         for the same documentation (Default: None).
@@ -2107,7 +2099,7 @@ def verify_correction_uncertainty(
         expanded_uncertainty_db=_band_column(
             expanded_uncertainty_db, "expanded_uncertainty_db", count
         ),
-        correction_db=_optional_column(correction_db, "correction_db", count),
+        correction=_optional_column(correction, "correction", count),
         coverage_factor=_optional_column(coverage_factor, "coverage_factor", count),
         correction_range_db=_optional_column(
             correction_range_db, "correction_range_db", count

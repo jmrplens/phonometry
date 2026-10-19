@@ -271,8 +271,8 @@ them.
 
 ```python
 joint_sound_reduction_index(
-    l1_db: ArrayLike,
-    l2_db: ArrayLike,
+    l1: ArrayLike,
+    l2: ArrayLike,
     absorption_area: ArrayLike,
     *,
     joint_length_m: float,
@@ -297,8 +297,8 @@ of the test arrangement $R_\mathrm{s,max}$ that
 
 | Name | Description |
 | :--- | :--- |
-| `l1_db` | Energy average sound pressure level in the source room, in dB, one value per band, or a `(positions, bands)` array that is energy-averaged over the positions (ISO 10140-2). |
-| `l2_db` | The same in the receiving room, in dB. |
+| `l1` | Energy average sound pressure level in the source room, in dB, one value per band, or a `(positions, bands)` array that is energy-averaged over the positions (ISO 10140-2). |
+| `l2` | The same in the receiving room, in dB. |
 | `absorption_area` | Equivalent absorption area $A$ of the receiving room per band, in m². |
 | `joint_length_m` | Length $l$ of the joint under test, in m. |
 
@@ -318,9 +318,9 @@ JointGapSeries(
     results: tuple[LaboratoryJointInsulationResult, ...],
     nominal_gap_mm: float,
     min_gap_mm: float | None,
-    r_s_w_db: np.ndarray,
-    r_s_w_c_db: np.ndarray,
-    r_s_w_ctr_db: np.ndarray,
+    r_s_w: np.ndarray,
+    r_s_w_c: np.ndarray,
+    r_s_w_ctr: np.ndarray,
 )
 ```
 
@@ -334,9 +334,9 @@ Single numbers of a variable slit against its gap width (J.4, J.5.2 h), i)).
 | `results` | The [`LaboratoryJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresult) at each width. |
 | `nominal_gap_mm` | The nominal gap width $b_\mathrm{n}$, in mm. |
 | `min_gap_mm` | The minimal gap width $b_\mathrm{min}$ at the maximal pressure, in mm, or `None` when not given. |
-| `r_s_w_db` | $R_\mathrm{s,w}$ at each width, in dB. |
-| `r_s_w_c_db` | $R_\mathrm{s,w} + C$ at each width, in dB. |
-| `r_s_w_ctr_db` | $R_\mathrm{s,Atr} = R_\mathrm{s,w} + C_\mathrm{tr}$ at each width, in dB. |
+| `r_s_w` | $R_\mathrm{s,w}$ at each width, in dB. |
+| `r_s_w_c` | $R_\mathrm{s,w} + C$ at each width, in dB. |
+| `r_s_w_ctr` | $R_\mathrm{s,Atr} = R_\mathrm{s,w} + C_\mathrm{tr}$ at each width, in dB. |
 
 ### JointGapSeries.at_gap()
 
@@ -505,11 +505,11 @@ Whether a measured width is $b_\mathrm{n} + 3$ mm (J.4 c)).
 ```python
 JointOpenBandRating(
     open_frequencies_hz: tuple[float, ...],
-    r_s_w_db: int | None,
-    c_db: int | None,
-    ctr_db: int | None,
-    c_100_5000_db: int | None,
-    ctr_100_5000_db: int | None,
+    r_s_w: int | None,
+    c: int | None,
+    ctr: int | None,
+    c_100_5000: int | None,
+    ctr_100_5000: int | None,
 )
 ```
 
@@ -528,11 +528,11 @@ range.
 | Name | Description |
 | :--- | :--- |
 | `open_frequencies_hz` | The indicative bands, in Hz. |
-| `r_s_w_db` | $R_\mathrm{s,w}$, in dB, or `None`. |
-| `c_db` | $C$, in dB, or `None`. |
-| `ctr_db` | $C_\mathrm{tr}$, in dB, or `None`. |
-| `c_100_5000_db` | $C_{100\text{-}5000}$, in dB, or `None`. |
-| `ctr_100_5000_db` | $C_\mathrm{tr,100\text{-}5000}$, in dB, or `None`. |
+| `r_s_w` | $R_\mathrm{s,w}$, in dB, or `None`. |
+| `c` | $C$, in dB, or `None`. |
+| `ctr` | $C_\mathrm{tr}$, in dB, or `None`. |
+| `c_100_5000` | $C_{100\text{-}5000}$, in dB, or `None`. |
+| `ctr_100_5000` | $C_\mathrm{tr,100\text{-}5000}$, in dB, or `None`. |
 
 ### JointOpenBandRating.plot()
 
@@ -615,8 +615,8 @@ Whether the width is no greater than 50 mm.
 
 ```python
 laboratory_joint_insulation(
-    r_s_measured_db: ArrayLike,
-    r_s_max_db: ArrayLike,
+    r_s_prime: ArrayLike,
+    r_s_max: ArrayLike,
     frequencies: ArrayLike,
     *,
     joint_length_m: float | None = None,
@@ -660,8 +660,8 @@ the bracketed lower limit, whichever rule corrected them.
 
 | Name | Description |
 | :--- | :--- |
-| `r_s_measured_db` | $R_\mathrm{s}'$ per one-third-octave band, in dB. |
-| `r_s_max_db` | $R_\mathrm{s,max}$ per band, in dB. |
+| `r_s_prime` | $R_\mathrm{s}'$ per one-third-octave band, in dB. |
+| `r_s_max` | $R_\mathrm{s,max}$ per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz. |
 | `joint_length_m` | Length of the joint under test, in m, kept for the form of Figure J.7; `None` leaves that row empty. |
 | `limit_at_max` | Set the bands within 3 dB of the maximum to $R_\mathrm{s,max}$ (default), or give them the 1,3 dB correction like the other bands below 6 dB. |
@@ -679,13 +679,13 @@ the bracketed lower limit, whichever rule corrected them.
 ```python
 LaboratoryJointInsulationResult(
     frequencies: np.ndarray,
-    r_s_measured_db: np.ndarray,
-    r_s_max_db: np.ndarray,
-    r_s_db: np.ndarray,
+    r_s_prime: np.ndarray,
+    r_s_max: np.ndarray,
+    r_s: np.ndarray,
     joint_length_m: float | None,
     rating: WeightedRatingResult | None,
-    c_100_5000_db: int | None,
-    ctr_100_5000_db: int | None,
+    c_100_5000: int | None,
+    ctr_100_5000: int | None,
     max_rating: WeightedRatingResult | None,
     open_band_rating: JointOpenBandRating | None,
     *,
@@ -700,13 +700,13 @@ Sound reduction index of a joint per metre (ISO 10140-1:2021 Annex J).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in Hz. |
-| `r_s_measured_db` | $R_\mathrm{s}'$, the index measured with the test element in the test opening, per band, in dB. |
-| `r_s_max_db` | $R_\mathrm{s,max}$, the maximum of the test arrangement with the joint sealed on both sides, in dB. |
-| `r_s_db` | $R_\mathrm{s}$, corrected for the flanking through the arrangement, in dB. In the `"limit"` and `"maximum"` bands it is a minimum value. |
+| `r_s_prime` | $R_\mathrm{s}'$, the index measured with the test element in the test opening, per band, in dB. |
+| `r_s_max` | $R_\mathrm{s,max}$, the maximum of the test arrangement with the joint sealed on both sides, in dB. |
+| `r_s` | $R_\mathrm{s}$, corrected for the flanking through the arrangement, in dB. In the `"limit"` and `"maximum"` bands it is a minimum value. |
 | `joint_length_m` | Length $l$ of the joint, in m, or `None` when not given; the form of Figure J.7 prints it as the test length. |
 | `rating` | $R_\mathrm{s,w}$ ($C$; $C_\mathrm{tr}$) of ISO 717-1:2020, or `None` without the 16 bands 100 Hz to 3 150 Hz. |
-| `c_100_5000_db` | $C_{100\text{-}5000}$, in dB, or `None` without the bands 100 Hz to 5 000 Hz. |
-| `ctr_100_5000_db` | $C_\mathrm{tr,100\text{-}5000}$, in dB, or `None`. |
+| `c_100_5000` | $C_{100\text{-}5000}$, in dB, or `None` without the bands 100 Hz to 5 000 Hz. |
+| `ctr_100_5000` | $C_\mathrm{tr,100\text{-}5000}$, in dB, or `None`. |
 | `max_rating` | The ISO 717-1 rating of $R_\mathrm{s,max}$, the maximum sound insulation of the arrangement J.5.2 a) asks the report to state, or `None`. |
 | `open_band_rating` | The single numbers with the indicative bands taken as infinitely high, or `None` when no band is indicative or there is no rating. |
 | `limit_at_max` | Whether the bands within 3 dB of the maximum were set to $R_\mathrm{s,max}$, as J.1 allows, rather than given the 1,3 dB correction (Default: `True`). |
@@ -768,23 +768,23 @@ curve over the rating range, as the diagram of Figure J.7. Requires
 matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-### LaboratoryJointInsulationResult.r_s_w_c_db
+### LaboratoryJointInsulationResult.r_s_w
+
+*property*
+
+$R_\mathrm{s,w}$, in dB, or `None` without a rating.
+
+### LaboratoryJointInsulationResult.r_s_w_c
 
 *property*
 
 $R_\mathrm{s,w} + C$, in dB, or `None` without a rating.
 
-### LaboratoryJointInsulationResult.r_s_w_ctr_db
+### LaboratoryJointInsulationResult.r_s_w_ctr
 
 *property*
 
 $R_\mathrm{s,Atr} = R_\mathrm{s,w} + C_\mathrm{tr}$, in dB, or `None`.
-
-### LaboratoryJointInsulationResult.r_s_w_db
-
-*property*
-
-$R_\mathrm{s,w}$, in dB, or `None` without a rating.
 
 ### LaboratoryJointInsulationResult.regime
 

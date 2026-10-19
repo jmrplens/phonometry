@@ -545,7 +545,7 @@ def plot_binned_sound_levels(
     ax = ax if ax is not None else _new_axes()
     ax.plot(
         result.interval_wind_speeds_m_s,
-        result.interval_levels_db,
+        result.interval_levels,
         color=_C_MUTED,
         ls="none",
         marker=".",
@@ -556,7 +556,7 @@ def plot_binned_sound_levels(
     errors = np.nan_to_num(np.asarray(result.combined_uncertainty_db), nan=0.0)
     ax.errorbar(
         result.wind_speeds_m_s,
-        result.mean_levels_db,
+        result.mean_levels,
         yerr=errors,
         capsize=3,
         **styled(
@@ -592,7 +592,7 @@ def plot_turbine_sound_levels(
 
     ax = ax if ax is not None else _new_axes()
     x = (
-        np.arange(np.asarray(result.total_levels_db).size, dtype=np.float64) + 1.0
+        np.arange(np.asarray(result.total_levels).size, dtype=np.float64) + 1.0
         if result.wind_speeds_m_s is None
         else np.asarray(result.wind_speeds_m_s)
     )
@@ -610,7 +610,7 @@ def plot_turbine_sound_levels(
     if near.any():
         (ring,) = ax.plot(
             x[near],
-            np.asarray(result.turbine_levels_db)[near],
+            np.asarray(result.turbine_levels)[near],
             color=_C_REFERENCE,
             ls="none",
             marker="o",
@@ -643,7 +643,7 @@ def _draw_turbine_levels(
     """Total, background and turbine level as three lines over every bin."""
     ax.plot(
         x,
-        result.total_levels_db,
+        result.total_levels,
         color=_C_SECONDARY,
         marker="^",
         lw=1.0,
@@ -659,7 +659,7 @@ def _draw_turbine_levels(
     )
     ax.plot(
         x,
-        result.turbine_levels_db,
+        result.turbine_levels,
         **styled(
             kwargs, color=_C_PRIMARY, marker="o", lw=1.8, label=_t("Turbine", language)
         ),
@@ -682,9 +682,9 @@ def _draw_turbine_levels_by_sector(
     """
     from matplotlib.lines import Line2D
 
-    total = np.asarray(result.total_levels_db)
+    total = np.asarray(result.total_levels)
     background = np.asarray(result.background_levels)
-    turbine = np.asarray(result.turbine_levels_db)
+    turbine = np.asarray(result.turbine_levels)
     for name, members, sector_colour in _direction_groups(
         result.wind_directions_deg, x.size, language
     ):
@@ -731,14 +731,14 @@ def plot_predicted_receptor_level(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    levels = np.asarray(result.turbine_levels_db)
+    levels = np.asarray(result.turbine_levels)
     positions = np.arange(levels.size, dtype=np.float64) + 1.0
     ax.bar(
         positions,
         levels,
         **styled(kwargs, color=_C_PRIMARY, label=_t("Turbine", language)),
     )
-    total = result.level_db
+    total = result.level
     u = result.combined_uncertainty_db
     ax.axhline(
         total,
@@ -776,7 +776,7 @@ def plot_sound_relevant_turbines(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    levels = np.asarray(result.predicted_levels_db)
+    levels = np.asarray(result.predicted_levels)
     order = np.argsort(-levels, kind="stable")
     positions = np.arange(levels.size, dtype=np.float64) + 1.0
     relevant = np.asarray(result.relevant)[order]
@@ -793,13 +793,13 @@ def plot_sound_relevant_turbines(
             label=_t("Not relevant", language),
         )
     ax.axhline(
-        result.total_level_db,
+        result.total_level,
         color=_C_REFERENCE,
         lw=1.2,
-        label=f"{_t('Total', language)} = {_num(result.total_level_db, language)} dB",
+        label=f"{_t('Total', language)} = {_num(result.total_level, language)} dB",
     )
     ax.axhline(
-        result.total_level_db - 1.0,
+        result.total_level - 1.0,
         color=_C_REFERENCE,
         ls="--",
         lw=1.0,
@@ -821,7 +821,7 @@ def plot_sound_relevant_turbines(
     ax.set_xlabel(_t("Turbine", language))
     ax.set_ylabel(_t(_PREDICTED_LEVEL_LABEL, language))
     # Room above the bars and the two lines for the legend.
-    ax.set_ylim(float(levels.min()) - 10.0, result.total_level_db + 12.0)
+    ax.set_ylim(float(levels.min()) - 10.0, result.total_level + 12.0)
     ax.grid(visible=True, axis="y", alpha=0.3)
     place_legend_clear(ax.legend(fontsize="small"))
     localize_axes(ax, language)
@@ -842,23 +842,23 @@ def plot_low_frequency_level(
     positions = _band_axis(ax, np.asarray(result.frequencies), language=language)
     ax.plot(
         positions,
-        result.outdoor_levels_db,
+        result.outdoor_levels,
         **styled(
             kwargs,
             color=_C_PRIMARY,
             marker="o",
             lw=1.5,
-            label=f"{_t('Outdoor', language)}: {_num(result.outdoor_level_db, language)} dB",
+            label=f"{_t('Outdoor', language)}: {_num(result.outdoor_level, language)} dB",
         ),
     )
-    if result.indoor_levels_db is not None and result.indoor_level_db is not None:
+    if result.indoor_levels is not None and result.indoor_level is not None:
         ax.plot(
             positions,
-            result.indoor_levels_db,
+            result.indoor_levels,
             color=_C_SECONDARY,
             marker="s",
             lw=1.5,
-            label=f"{_t('Indoor', language)}: {_num(result.indoor_level_db, language)} dB",
+            label=f"{_t('Indoor', language)}: {_num(result.indoor_level, language)} dB",
         )
     weighted = "A" if result.a_weighted else "Z"
     ax.set_ylabel(f"$L_{{p{weighted},\\mathrm{{LF}}}}$ [dB]")
@@ -880,7 +880,7 @@ def plot_sound_emergence(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    emergence = np.asarray(result.emergence_db)
+    emergence = np.asarray(result.emergence)
     if result.wind_speeds_m_s is None:
         x = np.arange(emergence.size, dtype=np.float64) + 1.0
         xlabel = _t(_SPEED_CLASS_LABEL, language)
@@ -917,7 +917,7 @@ def plot_wind_turbine_rating_level(
     labels = [
         _t(text, language) for text in ("Tonal", "Amplitude modulation", "Impulsive")
     ]
-    values = [result.adjustments_db[name] for name in names]
+    values = [result.adjustments[name] for name in names]
     positions = np.arange(3, dtype=np.float64)
     bars = ax.bar(positions, values, width=0.6, **styled(kwargs, color=_C_PRIMARY))
     if result.governing is not None:
@@ -930,8 +930,8 @@ def plot_wind_turbine_rating_level(
     ax.set_ylabel(_t("Adjustment [dB]", language))
     ax.set_ylim(0.0, max(max(values), 1.0) * 1.35)
     ax.set_title(
-        f"$L_\\mathrm{{r}}$ = {_num(result.equivalent_level_db, language)} + "
-        f"{_num(max(values), language)} = {_num(result.rating_level_db, language)} dB"
+        f"$L_\\mathrm{{r}}$ = {_num(result.equivalent_level, language)} + "
+        f"{_num(max(values), language)} = {_num(result.rating_level, language)} dB"
     )
     ax.grid(visible=True, axis="y", alpha=0.3)
     if result.governing is not None:
@@ -953,7 +953,7 @@ def plot_tone_search_limit(
     ax = ax if ax is not None else _new_axes()
     ax.plot(
         result.frequencies,
-        result.attenuation_db,
+        result.attenuation,
         **styled(
             kwargs,
             color=_C_PRIMARY,

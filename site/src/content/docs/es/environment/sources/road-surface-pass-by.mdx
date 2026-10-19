@@ -137,7 +137,7 @@ for category, (n, mean_kmh, spread, a, b, scatter) in site.items():
 result = environment.statistical_pass_by(
     categories, speeds, levels, road_speed_category="medium"
 )
-print(dict(result.reported_vehicle_sound_levels_db))
+print(dict(result.reported_vehicle_sound_levels))
 # {'1': 78.9, '2a': 81.0, '2b': 83.7}   dB, a 80, 70 y 70 km/h
 cars = result.regressions["1"]
 print(round(cars.slope_db_per_decade, 2), round(cars.correlation, 2))
@@ -211,7 +211,7 @@ de 9.5); compara pavimentos bajo una composición normalizada y no predice lo
 que medirá una calle.
 
 ```python
-print(round(result.index_db, 3), result.reported_index_db)
+print(round(result.index, 3), result.reported_index)
 # 80.14 80.1   dB
 ```
 
@@ -220,10 +220,10 @@ decimal: 9.5 define $L_1$, $L_{2a}$ y $L_{2b}$ como los niveles sonoros de
 vehículo «according to 9.2», y 9.2 pide todos los niveles «calculated to two
 decimal places and rounded to one decimal place». Las regresiones se llevan a
 precisión completa y cada nivel se redondea una sola vez, con el medio hacia
-arriba (`reported_vehicle_sound_levels_db`, aquí 78,9, 81,0 y 83,7 dB);
-`index_db` es el índice de esos tres niveles, que se redondea una vez más al
+arriba (`reported_vehicle_sound_levels`, aquí 78,9, 81,0 y 83,7 dB);
+`index` es el índice de esos tres niveles, que se redondea una vez más al
 informarlo. El índice de los niveles sin redondear queda en el resultado como
-`full_precision_index_db`, 80,153 dB en este emplazamiento.
+`full_precision_index`, 80,153 dB en este emplazamiento.
 
 La tabla 1 es la composición normalizada. El apartado 9.5 reconoce que las
 composiciones nacionales difieren y admite otros factores, siempre que se
@@ -263,7 +263,7 @@ result = environment.statistical_pass_by(
     road_speed_category="medium",
     reference_db=environment.SPB_NORMALIZED_REFERENCE_DB,
 )
-print(round(result.reference_index_db, 2), round(result.difference_db, 2))
+print(round(result.reference_index, 2), round(result.difference, 2))
 # 78.92 1.22   dB: este pavimento está 1,2 dB por encima de la referencia del anexo D
 ```
 
@@ -279,13 +279,13 @@ sonoros de vehículo a una temperatura del aire de 20 °C, pero dice en el mismo
 apartado que «a suitable method is at present under consideration» y solo hace
 obligatorios los niveles sin corregir. Aquí no se inventa ninguna corrección.
 Los niveles corregidos con el método que se elija entran como
-`corrected_vehicle_sound_levels_db`, y el índice se calcula también para ellos,
+`corrected_vehicle_sound_levels`, y el índice se calcula también para ellos,
 a partir de los niveles redondeados a un decimal
-(`reported_corrected_vehicle_sound_levels_db`, `corrected_index_db`). El
+(`reported_corrected_vehicle_sound_levels`, `corrected_index`). El
 apartado 13 recoge los niveles y el índice corregidos como datos opcionales del
 informe (26 y 28), junto a los no corregidos, que son obligatorios (25 y 27).
 Donde la temperatura del aire se tomó en cada paso, 9.4 prefiere
-corregir cada nivel medido; se corrige `max_levels_db` y se vuelve a llamar al
+corregir cada nivel medido; se corrige `max_levels` y se vuelve a llamar al
 método.
 
 ## 6. Qué precisión tiene
@@ -358,7 +358,7 @@ print(round(environment.statistical_pass_by_index(unrounded, road_speed_category
 
 Llevados sin redondear desde las rectas impresas, los niveles son 78,546,
 81,114 y 83,838 dB y su índice 79,985 dB, que se imprimiría **80,0**; el
-resultado conserva esa cadena como `full_precision_index_db`. Las rectas por sí
+resultado conserva esa cadena como `full_precision_index`. Las rectas por sí
 solas no distinguen las dos cadenas, porque sus ordenadas en el origen se
 imprimen con un decimal y sus pendientes con dos: en todas las rectas que
 concuerdan hasta la última cifra con la ordenada, la pendiente, el nivel medio,
@@ -369,7 +369,7 @@ decimales, 79,95, y luego a uno también daría 80,0. Las dos cadenas nunca
 difieren en más de 0,05 dB, lo más que se mueve un nivel al redondearlo, que
 queda por debajo de cualquier precisión que el método reclame pero puede mover
 la última cifra impresa. La fila de conformidad que fija los 79,9 dB lee
-`index_db` de la ejecución a partir de los pasos.
+`index` de la ejecución a partir de los pasos.
 
 Hay dos cosas más del anexo E que conviene saber antes de usarlo como
 comprobación. Su índice de referencia de 77,3 dB se describe como un caso de

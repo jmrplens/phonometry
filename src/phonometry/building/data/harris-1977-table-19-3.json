@@ -6,32 +6,32 @@
       "key": "37_mm_de_franjas_de_hormigon_sobre_12_mm_de_tablero_blando",
       "name": "37 mm de franjas de hormigón sobre 12 mm de tablero blando",
       "group": "Tabla 19.3. Aislamiento medio al impacto sonoro proporcionado por franjas de hormigón o asfalto sobre un suelo de hormigón desnudo",
-      "impact_sound_improvement_db": 10
+      "impact_sound_improvement": 10
     },
     {
       "key": "37_mm_de_franjas_de_hormigon_sobre_25_mm_de_corcho_granulado",
       "name": "37 mm de franjas de hormigón sobre 25 mm de corcho granulado",
       "group": "Tabla 19.3. Aislamiento medio al impacto sonoro proporcionado por franjas de hormigón o asfalto sobre un suelo de hormigón desnudo",
-      "impact_sound_improvement_db": 10
+      "impact_sound_improvement": 10
     },
     {
       "key": "37_mm_de_franjas_de_hormigon_sobre_25_mm_de_cubierta_elastica",
       "name": "37 mm de franjas de hormigón sobre 25 mm de cubierta elástica",
       "group": "Tabla 19.3. Aislamiento medio al impacto sonoro proporcionado por franjas de hormigón o asfalto sobre un suelo de hormigón desnudo",
-      "impact_sound_improvement_db": 24
+      "impact_sound_improvement": 24
     },
     {
       "key": "25_mm_de_asfalto_o_12_mm_de_tablero_blando",
       "name": "25 mm de asfalto o 12 mm de tablero blando",
       "group": "Tabla 19.3. Aislamiento medio al impacto sonoro proporcionado por franjas de hormigón o asfalto sobre un suelo de hormigón desnudo",
-      "impact_sound_improvement_db": 15,
+      "impact_sound_improvement": 15,
       "note": "The page prints \"o\" (or) between the two layers, where the other four rows print \"sobre\" (on). The description is kept as printed."
     },
     {
       "key": "37_mm_de_asfalto_sobre_25_mm_de_lana_mineral",
       "name": "37 mm de asfalto sobre 25 mm de lana mineral",
       "group": "Tabla 19.3. Aislamiento medio al impacto sonoro proporcionado por franjas de hormigón o asfalto sobre un suelo de hormigón desnudo",
-      "impact_sound_improvement_db": 27
+      "impact_sound_improvement": 27
     }
   ]
 }

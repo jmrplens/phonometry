@@ -792,9 +792,9 @@ def test_the_baua_reverberation_room_level_does_not_fit_its_absorption_area() ->
     # reverberation room the printed 81,08 dB gives 57,1 m2 rather than the
     # 97,7 m2 beside it; that column would need 79,74 dB. The absorption area
     # is the value the study carries downstream, so it is the one to use.
-    def absorption_area(level_db: float) -> float:
+    def absorption_area(level: float) -> float:
         surface_m2 = oracle.BAUA_DIRECT_SURFACE_M2
-        ratio = surface_m2 * 10.0 ** (0.1 * (level_db - oracle.BAUA_SOURCE_POWER_DB))
+        ratio = surface_m2 * 10.0 ** (0.1 * (level - oracle.BAUA_SOURCE_POWER_DB))
         return 4.0 * surface_m2 / (ratio - 1.0)
 
     assert absorption_area(oracle.BAUA_LEVEL_IN_SITU_DB["workroom"]) == pytest.approx(

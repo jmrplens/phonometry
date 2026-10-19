@@ -49,7 +49,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -64,6 +65,8 @@ from ..io._resolve import like_input, require_signal_rate, resolve_fs
 from .spectra import _positive, _validate_signal
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
@@ -288,6 +291,10 @@ class EnvelopeSpectrumResult(OwnsArrays):
         pre-filter applied before envelope detection, in Hz, or ``None``
         (no pre-filter).
     """
+
+    #: The mean level is the mean of the envelope, in the units of the signal
+    #: or their square, not a level in decibels.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"mean_level": ""})
 
     frequencies: NDArray[np.float64]
     amplitude: NDArray[np.float64]

@@ -58,13 +58,16 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
 from ..io._resolve import SignalInput, apply_calibration, resolve_pair_fs
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
 
 from .._internal.boundary import settled, settled_net_share
@@ -218,6 +221,12 @@ class IntensityResult(OwnsArrays):
     appended after the original fields and ``None`` for hand-built
     results.
     """
+
+    #: The bias correction is the linear factor :math:`k\Delta r/\sin(k\Delta r)`
+    #: the intensity is multiplied by, not a level.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"bias_correction": ""}
+    )
 
     frequencies: np.ndarray | None
     intensity: np.ndarray | None

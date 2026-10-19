@@ -106,7 +106,7 @@ Amendment 2 replaces 12.1, the three coils that make a uniform magnetic field.
 ```python
 check_program_signal(
     frequencies: ArrayLike,
-    band_levels_db: ArrayLike,
+    band_levels: ArrayLike,
 ) -> ProgramSignalCheck
 ```
 
@@ -128,7 +128,7 @@ table.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in Hz, nominal or exact, each a band of Table II (20 Hz to 20 kHz) and none repeated. |
-| `band_levels_db` | The band levels, in dB, on any reference. |
+| `band_levels` | The band levels, in dB, on any reference. |
 
 **Returns:** A [`ProgramSignalCheck`](/phonometry/reference/api/electroacoustics/program-signal/#programsignalcheck).
 
@@ -171,7 +171,7 @@ conventions the figure's notes state.
 ```python
 ProgramSignalCheck(
     frequencies: NDArray[np.float64],
-    band_levels_db: NDArray[np.float64],
+    band_levels: NDArray[np.float64],
 )
 ```
 
@@ -182,7 +182,7 @@ A one-third-octave spectrum judged against IEC 60268-1:1985 Table II.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The nominal frequencies of the bands judged, in Hz, ascending. |
-| `band_levels_db` | The band levels as given, in dB, in the order of `frequencies`. |
+| `band_levels` | The band levels as given, in dB, in the order of `frequencies`. |
 
 Table II's relative levels and tolerances at the bands, and the offset
 that refers the levels to them, are read from the table, so a check
@@ -255,7 +255,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The axes.
 
-### ProgramSignalCheck.relative_levels_db
+### ProgramSignalCheck.relative_levels
 
 *property*
 
@@ -277,7 +277,7 @@ The upper tolerances of Table II at the bands, in dB.
 
 ```python
 ProgramSpectrumBand(
-    relative_level_db: float,
+    relative_level: float,
     tolerance_plus_db: float,
     tolerance_minus_db: float,
 )
@@ -289,7 +289,7 @@ One row of IEC 60268-1:1985 Table II.
 
 | Name | Description |
 | :--- | :--- |
-| `relative_level_db` | The relative level of the one-third-octave band, in dB. |
+| `relative_level` | The relative level of the one-third-octave band, in dB. |
 | `tolerance_plus_db` | The upper tolerance, in dB, as printed (a positive number). |
 | `tolerance_minus_db` | The lower tolerance, in dB, as printed (a positive number). |
 

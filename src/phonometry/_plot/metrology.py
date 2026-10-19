@@ -1715,7 +1715,7 @@ def _plot_directivity_response(
     polar.set_theta_zero_location("N")
     polar.set_theta_direction(-1)
     _sign_theta_labels(polar)
-    relative = np.asarray(result.relative_levels_db, dtype=np.float64)
+    relative = np.asarray(result.relative_levels, dtype=np.float64)
     angles = np.asarray(result.incidence_angles_deg, dtype=np.float64)
     planes = np.asarray(result.plane_angles_deg, dtype=np.float64)
     for index, plane in enumerate(np.unique(planes)):
@@ -1746,7 +1746,7 @@ def _plot_directivity_response(
     ax.yaxis.set_major_formatter(_radial_formatter(float(ticks[-1]), language))
     ax.tick_params(axis="both", labelsize="x-small")
     ax.grid(visible=True, ls=":", lw=0.4, alpha=0.7)
-    di = format_number(result.directivity_index_db, language, decimals=2)
+    di = format_number(result.directivity_index, language, decimals=2)
     ax.set_title(
         _t(r"Directional response: $10\,\lg\gamma$ = {di} dB", language, di=di)
     )
@@ -1858,7 +1858,7 @@ def plot_random_incidence_sensitivity(
     style_default(kwargs, "ms", 3.0)
     if view == "correction":
         kwargs.setdefault("label", _t(_RI_CORRECTION_LABEL, language))
-        ax.plot(frequencies, result.correction_db, **kwargs)
+        ax.plot(frequencies, result.correction, **kwargs)
         ax.axhline(0.0, color=_C_MUTED, lw=0.8, ls="--")
         ax.set_ylabel(_t(_CORRECTION_AXIS_LABEL, language))
         ax.set_title(_t("Random-incidence correction (IEC 61183)", language))
@@ -1866,12 +1866,12 @@ def plot_random_incidence_sensitivity(
         kwargs.setdefault(
             "label", _t(r"$G_\mathrm{F}$, free field, reference direction", language)
         )
-        ax.plot(frequencies, result.free_field_level_db, **kwargs)
+        ax.plot(frequencies, result.free_field_level, **kwargs)
         # Open markers on a dashed line: up to about 1 kHz the correction is
         # nil and G_RI lies on G_F, which must stay visible underneath.
         ax.plot(
             frequencies,
-            result.random_incidence_level_db,
+            result.random_incidence_level,
             color=_C_REFERENCE,
             lw=1.5,
             ls="--",
@@ -1920,12 +1920,12 @@ def plot_diffuse_field_sensitivity(
     style_default(kwargs, "marker", "o")
     style_default(kwargs, "ms", 3.0)
     kwargs.setdefault("label", _t(r"$G_\mathrm{D}$, instrument under test", language))
-    ax.plot(frequencies, result.diffuse_field_level_db, **kwargs)
+    ax.plot(frequencies, result.diffuse_field_level, **kwargs)
     # Open markers on the other two: at low frequency the reference corrects
     # nothing and all three curves can lie on one another.
     ax.plot(
         frequencies,
-        result.reference_diffuse_field_level_db,
+        result.reference_diffuse_field_level,
         color=_C_SECONDARY,
         lw=1.2,
         ls="--",
@@ -1936,7 +1936,7 @@ def plot_diffuse_field_sensitivity(
     )
     ax.plot(
         frequencies,
-        result.level_difference_db,
+        result.level_difference,
         color=_C_TERTIARY,
         lw=1.2,
         ls=":",
@@ -2061,7 +2061,7 @@ def plot_adjustment_value(
         mfc="none",
         label=_t("Free-field response, before the adjustment", language),
     )
-    adjustment = format_number(result.sensitivity_adjustment_db, language, decimals=2)
+    adjustment = format_number(result.sensitivity_adjustment, language, decimals=2)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
     style_default(kwargs, "marker", "o")
@@ -2075,7 +2075,7 @@ def plot_adjustment_value(
         ),
     )
     ax.plot(frequencies, result.adjusted_deviation_db, **kwargs)
-    correction = result.pressure_to_free_field_correction_db
+    correction = result.pressure_to_free_field_correction
     if correction is not None:
         ax.plot(
             frequencies,
@@ -2100,7 +2100,7 @@ def plot_adjustment_value(
     format_frequency_axis(ax, language=language)
     ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
     ax.set_ylabel(_t("Deviation from the incident level [dB]", language))
-    delta = format_number(result.adjustment_db, language, decimals=2)
+    delta = format_number(result.adjustment, language, decimals=2)
     ax.set_title(
         _t(
             r"Adjustment value $\Delta L = L_1 - L_4$ = {dl} dB (IEC 62585)",
@@ -2138,7 +2138,7 @@ def plot_free_field_correction(
 
     ax = ax if ax is not None else _new_axes()
     frequencies = np.asarray(result.frequencies, dtype=np.float64)
-    corrections = np.asarray(result.corrections_db, dtype=np.float64)
+    corrections = np.asarray(result.corrections, dtype=np.float64)
     count = result.n_determinations
     if count > 1:
         ax.fill_between(
@@ -2158,10 +2158,10 @@ def plot_free_field_correction(
     if count > 1:
         label = _t("{label}, mean", language, label=label)
     kwargs.setdefault("label", label)
-    ax.plot(frequencies, result.correction_db, **kwargs)
+    ax.plot(frequencies, result.correction, **kwargs)
     ax.plot(
         frequencies,
-        result.reference_correction_db,
+        result.reference_correction,
         color=_C_SECONDARY,
         lw=1.2,
         ls="--",
@@ -2545,7 +2545,7 @@ def plot_comparison_calibration(
 
     ax = ax if ax is not None else _new_axes()
     frequencies = np.asarray(result.frequencies, dtype=np.float64)
-    level = np.asarray(result.sensitivity_level_db, dtype=np.float64)
+    level = np.asarray(result.sensitivity_level, dtype=np.float64)
     if result.expanded_uncertainty_db is not None:
         uncertainty = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
         ax.fill_between(
@@ -2564,9 +2564,9 @@ def plot_comparison_calibration(
         "label", _t(r"$L_\mathrm{test}$, microphone under test", language)
     )
     ax.plot(frequencies, level, **kwargs)
-    reference = np.asarray(result.reference_sensitivity_level_db, dtype=np.float64)
+    reference = np.asarray(result.reference_sensitivity_level, dtype=np.float64)
     reference_label = r"$L_\mathrm{ref}$, reference microphone"
-    difference = result.corrections_db.get(_FREE_FIELD_DIFFERENCE)
+    difference = result.corrections.get(_FREE_FIELD_DIFFERENCE)
     if difference is not None:
         # The level the free field compared the test microphone with, not the
         # pressure level the reference was calibrated at.
@@ -2640,7 +2640,7 @@ def plot_environmental_sensitivity_correction(
     style_default(kwargs, "marker", "o")
     style_default(kwargs, "ms", 3.5)
     kwargs.setdefault("label", _t(_ENVIRONMENT_TOTAL_LABEL, language))
-    ax.plot(frequencies, result.correction_db, **kwargs)
+    ax.plot(frequencies, result.correction, **kwargs)
     ax.set_xscale("log")
     format_frequency_axis(ax, language=language)
     ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
@@ -2688,7 +2688,7 @@ def plot_jig_diameter_correction(
 
     ax = ax if ax is not None else _new_axes()
     frequencies = np.asarray(result.frequencies, dtype=np.float64)
-    correction = np.asarray(result.correction_db, dtype=np.float64)
+    correction = np.asarray(result.correction, dtype=np.float64)
     uncertainty = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
     ax.fill_between(
         frequencies,
@@ -2802,10 +2802,10 @@ def plot_diameter_sound_field_correction(
     style_default(kwargs, "ms", 3.5)
     style_default(kwargs, "zorder", 3)
     kwargs.setdefault("label", _t(r"Correction, $-20\lg|R_P|$", language))
-    ax.plot(frequencies, result.correction_db, **kwargs)
+    ax.plot(frequencies, result.correction, **kwargs)
     ax.plot(
         frequencies,
-        result.doubled_separation_correction_db,
+        result.doubled_separation_correction,
         color=_C_SECONDARY,
         lw=1.2,
         ls="--",
@@ -2863,7 +2863,7 @@ def plot_jig_coupler_verification(
 
     ax = ax if ax is not None else _new_axes()
     frequencies = np.asarray(result.frequencies, dtype=np.float64)
-    difference = np.asarray(result.difference_db, dtype=np.float64)
+    difference = np.asarray(result.difference, dtype=np.float64)
     uncertainty = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
     shares = bool(np.any(np.asarray(result.shared_standard_uncertainty_db) > 0.0))
     ax.fill_between(
@@ -3305,7 +3305,7 @@ def plot_impedance_pressure_ratio(
     style_default(kwargs, "ms", 3.5)
     if quantity == "level":
         kwargs.setdefault("label", _t(r"$20\lg|R_P|$, test re reference", language))
-        ax.plot(frequencies, result.level_difference_db, **kwargs)
+        ax.plot(frequencies, result.level_difference, **kwargs)
         ax.plot(
             frequencies,
             result.standard_uncertainty_db,
@@ -3361,7 +3361,7 @@ def plot_rectangular_pulse(
     ax = ax if ax is not None else _new_axes()
     zero = result.first_zero_hz
     frequencies = np.linspace(0.0, _PULSE_SPAN * zero, _PULSE_POINTS)
-    level = np.maximum(result.level_db_at(frequencies), _PULSE_FLOOR_DB)
+    level = np.maximum(result.level_at(frequencies), _PULSE_FLOOR_DB)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
     kwargs.setdefault("label", _t(_PULSE_SPECTRUM_LABEL, language))
@@ -3378,7 +3378,7 @@ def plot_rectangular_pulse(
         ),
     )
     if upper_frequency_hz is not None:
-        droop = float(result.level_db_at([upper_frequency_hz])[0])
+        droop = float(result.level_at([upper_frequency_hz])[0])
         ax.axvline(
             upper_frequency_hz / 1000.0,
             color=_C_TERTIARY,

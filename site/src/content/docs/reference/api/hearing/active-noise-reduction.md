@@ -78,10 +78,10 @@ Clause, formula and table numbers refer to ISO 4869-6:2019(E).
 
 ```python
 active_insertion_loss(
-    insertion_loss_db: ArrayLike | None = None,
+    insertion_loss: ArrayLike | None = None,
     *,
-    passive_levels_db: ArrayLike | None = None,
-    active_levels_db: ArrayLike | None = None,
+    passive_levels: ArrayLike | None = None,
+    active_levels: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
 ) -> ActiveInsertionLossResult
 ```
@@ -112,9 +112,9 @@ earmuffs commonly do above 1 kHz; it is kept as it is.
 
 | Name | Description |
 | :--- | :--- |
-| `insertion_loss_db` | The active insertion loss in dB, a `(subjects, 2, bands)` grid per ear or a `(subjects, bands)` grid of the lower ear. |
-| `passive_levels_db` | The MIRE levels in the passive mode, a `(subjects, 2, bands)` grid in dB, given together with `active_levels_db` instead of `insertion_loss_db`. |
-| `active_levels_db` | The MIRE levels in the active mode, on the same grid. |
+| `insertion_loss` | The active insertion loss in dB, a `(subjects, 2, bands)` grid per ear or a `(subjects, bands)` grid of the lower ear. |
+| `passive_levels` | The MIRE levels in the passive mode, a `(subjects, 2, bands)` grid in dB, given together with `active_levels` instead of `insertion_loss`. |
+| `active_levels` | The MIRE levels in the active mode, on the same grid. |
 | `frequencies` | The centre frequencies in hertz, or `None` for the one-third-octave bands 50 Hz to 10 kHz (24 bands) or 100 Hz to 10 kHz (21), or the octave bands 63 Hz to 8 kHz (8) or 125 Hz to 8 kHz (7), by the number of bands. |
 
 **Returns:** [`ActiveInsertionLossResult`](/phonometry/reference/api/hearing/active-noise-reduction/#activeinsertionlossresult).
@@ -129,7 +129,7 @@ earmuffs commonly do above 1 kHz; it is kept as it is.
 
 ```python
 ActiveInsertionLossResult(
-    insertion_loss_db: np.ndarray,
+    insertion_loss: np.ndarray,
     per_ear_db: np.ndarray | None,
     mean_db: np.ndarray,
     standard_deviation_db: np.ndarray,
@@ -146,7 +146,7 @@ The active insertion loss of an ANR earmuff on a panel of subjects.
 
 | Name | Description |
 | :--- | :--- |
-| `insertion_loss_db` | $\alpha$ per subject and band, the ear with the lower value in each band (5.5 b)), in dB. |
+| `insertion_loss` | $\alpha$ per subject and band, the ear with the lower value in each band (5.5 b)), in dB. |
 | `per_ear_db` | The value of each ear, a `(subjects, 2, bands)` grid with the left ear first, in dB, or `None` when only the lower-ear values were given. |
 | `mean_db` | The mean over the subjects per band, in dB. |
 | `standard_deviation_db` | The sample standard deviation per band, in dB. |
@@ -183,7 +183,7 @@ Draw the mean active insertion loss with its expanded uncertainty.
 ```python
 anr_total_attenuation(
     reat: ArrayLike | RealEarAttenuationResult,
-    insertion_loss_db: ArrayLike | ActiveInsertionLossResult,
+    insertion_loss: ArrayLike | ActiveInsertionLossResult,
 ) -> ANRTotalAttenuationResult
 ```
 
@@ -212,7 +212,7 @@ attenuation from 63 Hz then still places the 100 Hz band, by interpolation.
 | Name | Description |
 | :--- | :--- |
 | `reat` | The passive attenuation, a [`RealEarAttenuationResult`](/phonometry/reference/api/hearing/real-ear-attenuation/#realearattenuationresult) or its `(subjects, octaves)` grid in dB on the octave bands 63 Hz or 125 Hz to 8 kHz. |
-| `insertion_loss_db` | The active insertion loss, an [`ActiveInsertionLossResult`](/phonometry/reference/api/hearing/active-noise-reduction/#activeinsertionlossresult) or a grid [`active_insertion_loss`](/phonometry/reference/api/hearing/active-noise-reduction/#active_insertion_loss) accepts, on the one-third-octave bands of 5.3.1. |
+| `insertion_loss` | The active insertion loss, an [`ActiveInsertionLossResult`](/phonometry/reference/api/hearing/active-noise-reduction/#activeinsertionlossresult) or a grid [`active_insertion_loss`](/phonometry/reference/api/hearing/active-noise-reduction/#active_insertion_loss) accepts, on the one-third-octave bands of 5.3.1. |
 
 **Returns:** [`ANRTotalAttenuationResult`](/phonometry/reference/api/hearing/active-noise-reduction/#anrtotalattenuationresult).
 
@@ -230,8 +230,8 @@ attenuation from 63 Hz then still places the 100 Hz band, by interpolation.
 
 ```python
 ANRLinearityResult(
-    external_levels_db: np.ndarray,
-    ear_levels_db: np.ndarray,
+    external_levels: np.ndarray,
+    ear_levels: np.ndarray,
     increments_db: np.ndarray,
 )
 ```
@@ -242,8 +242,8 @@ How far up an ANR earmuff stays linear (5.4.4).
 
 | Name | Description |
 | :--- | :--- |
-| `external_levels_db` | The external A-weighted levels applied, in dB, in 5 dB steps. |
-| `ear_levels_db` | The 125 Hz octave-band level at the ear, one row per sample, subject and ear, one column per external level, in dB. |
+| `external_levels` | The external A-weighted levels applied, in dB, in 5 dB steps. |
+| `ear_levels` | The 125 Hz octave-band level at the ear, one row per sample, subject and ear, one column per external level, in dB. |
 | `increments_db` | The step at the ear for each step outside, in dB. |
 
 ### ANRLinearityResult.linear
@@ -262,7 +262,7 @@ Whether it stayed linear up to 110 dB, which 5.6 i) then states.
 
 **Returns:** `True` when every step is linear and the last external level is 110 dB.
 
-### ANRLinearityResult.max_linear_level_db
+### ANRLinearityResult.max_linear_level
 
 *property*
 
@@ -313,7 +313,7 @@ ANRTotalAttenuationResult(
     total_octave_db: np.ndarray,
     total_third_octave_db: np.ndarray,
     reat_third_octave_db: np.ndarray,
-    insertion_loss_db: np.ndarray,
+    insertion_loss: np.ndarray,
     frequencies: np.ndarray,
     third_octave_frequencies: np.ndarray,
     assumed_protection: AssumedProtectionResult,
@@ -331,7 +331,7 @@ The total attenuation of an ANR earmuff and its ISO 4869-2 ratings (5.5).
 | `total_octave_db` | $A_{\mathrm{total,oct},j}$ per subject and octave band, Formula (1), in dB. This is the grid of 5.5 e). |
 | `total_third_octave_db` | $A_{\mathrm{total},f,j}$ per subject and one-third-octave band, 5.5 c), in dB. |
 | `reat_third_octave_db` | The passive attenuation interpolated and extrapolated into the one-third-octave bands, 5.5 a), in dB. |
-| `insertion_loss_db` | The lower-ear active insertion loss in the same bands, 5.5 b), in dB. |
+| `insertion_loss` | The lower-ear active insertion loss in the same bands, 5.5 b), in dB. |
 | `frequencies` | The octave bands, in hertz. |
 | `third_octave_frequencies` | The one-third-octave bands, in hertz. |
 | `assumed_protection` | Mean, standard deviation and APV at 84 %. |
@@ -365,10 +365,10 @@ Draw the passive, active and total attenuation and the APV.
 
 ```python
 assess_anr_linearity(
-    external_levels_db: ArrayLike,
-    ear_levels_db: ArrayLike | None = None,
+    external_levels: ArrayLike,
+    ear_levels: ArrayLike | None = None,
     *,
-    ear_third_octave_levels_db: ArrayLike | None = None,
+    ear_third_octave_levels: ArrayLike | None = None,
 ) -> ANRLinearityResult
 ```
 
@@ -386,9 +386,9 @@ and if it holds up to 110 dB, that is stated.
 
 | Name | Description |
 | :--- | :--- |
-| `external_levels_db` | The external A-weighted levels applied, in dB, in increasing 5 dB steps up to 110 dB. |
-| `ear_levels_db` | The 125 Hz octave-band level at the ear, in dB, with the external levels on the last axis and any number of leading axes (sample, subject, ear). |
-| `ear_third_octave_levels_db` | Instead, the 100 Hz, 125 Hz and 160 Hz one-third-octave levels at the ear, with those three on the last axis and the external levels on the one before. |
+| `external_levels` | The external A-weighted levels applied, in dB, in increasing 5 dB steps up to 110 dB. |
+| `ear_levels` | The 125 Hz octave-band level at the ear, in dB, with the external levels on the last axis and any number of leading axes (sample, subject, ear). |
+| `ear_third_octave_levels` | Instead, the 100 Hz, 125 Hz and 160 Hz one-third-octave levels at the ear, with those three on the last axis and the external levels on the one before. |
 
 **Returns:** [`ANRLinearityResult`](/phonometry/reference/api/hearing/active-noise-reduction/#anrlinearityresult).
 

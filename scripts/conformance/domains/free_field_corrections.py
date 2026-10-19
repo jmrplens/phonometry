@@ -329,11 +329,11 @@ def _chk_formula_d7() -> Outcome:
         _FIELD_2 + _RM_FREE,
         _ON_SLM + _SLM_PRESSURE,
         _ON_RM + _RM_PRESSURE,
-        reference_free_field_correction_db=_RM_FREE - _RM_PRESSURE,
-        free_field_level_difference_db=_FIELD_1 - _FIELD_2,
-        calibrator_level_difference_db=_ON_SLM - _ON_RM,
+        reference_free_field_correction=_RM_FREE - _RM_PRESSURE,
+        free_field_level_difference=_FIELD_1 - _FIELD_2,
+        calibrator_level_difference=_ON_SLM - _ON_RM,
     )
-    error = float(np.max(np.abs(result.correction_db - (_SLM_FREE - _SLM_PRESSURE))))
+    error = float(np.max(np.abs(result.correction - (_SLM_FREE - _SLM_PRESSURE))))
     return numeric(0.0, error, 1e-12, unit="dB", places=12)
 
 
@@ -356,11 +356,11 @@ def _chk_formula_e6() -> Outcome:
         _FIELD_2 + _RM_FREE,
         _ON_SLM + _SLM_PRESSURE,
         _ON_RM + _RM_PRESSURE,
-        reference_free_field_correction_db=_RM_FREE - _RM_PRESSURE,
-        free_field_level_difference_db=_FIELD_1 - _FIELD_2,
-        coupler_level_difference_db=_ON_SLM - _ON_RM,
+        reference_free_field_correction=_RM_FREE - _RM_PRESSURE,
+        free_field_level_difference=_FIELD_1 - _FIELD_2,
+        coupler_level_difference=_ON_SLM - _ON_RM,
     )
-    error = float(np.max(np.abs(result.correction_db - (_SLM_FREE - _SLM_PRESSURE))))
+    error = float(np.max(np.abs(result.correction - (_SLM_FREE - _SLM_PRESSURE))))
     return numeric(0.0, error, 1e-12, unit="dB", places=12)
 
 
@@ -380,13 +380,13 @@ def _chk_formula_f13() -> Outcome:
         _FIELD_1 + _SLM_FREE,
         _FIELD_2 + sensitivity + gain,
         actuator + slm_actuator,
-        reference_sensitivity_level_db=sensitivity,
+        reference_sensitivity_level=sensitivity,
         reference_channel_gain_db=gain,
-        actuator_level_db=actuator,
-        free_field_level_difference_db=_FIELD_1 - _FIELD_2,
+        actuator_level=actuator,
+        free_field_level_difference=_FIELD_1 - _FIELD_2,
     )
     absolute = _SLM_FREE - slm_actuator
-    error = float(np.max(np.abs(result.correction_db - (absolute - absolute[1]))))
+    error = float(np.max(np.abs(result.correction - (absolute - absolute[1]))))
     return numeric(0.0, error, 1e-12, unit="dB", places=12)
 
 
@@ -407,11 +407,11 @@ def _chk_annex_a() -> Outcome:
         [125.0, 1000.0, 8000.0],
         [94.2, 94.1, 93.4],
         93.7,
-        calibrator_level_db=94.0,
+        calibrator_level=94.0,
     )
     return numeric(
         0.2,
-        result.adjustment_db,
+        result.adjustment,
         1e-12,
         unit="dB",
         places=3,

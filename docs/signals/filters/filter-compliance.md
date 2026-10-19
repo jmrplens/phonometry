@@ -550,12 +550,12 @@ print(filters.PERIODIC_TEST_ATTENUATION_LIMITS_DB[1][7])  # (70.0, inf)
 row = [76.0, 63.0, 45.0, 20.0, 0.8, 0.3, 0.1, 0.0, 0.1, 0.2, 0.7, 19.0, 44.0, 63.0, 77.0]
 row_u = [0.4, 0.4, 0.4, 0.25, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.15, 0.25, 0.4, 0.4, 0.4]
 record = filters.FilterPeriodicMeasurements(
-    midband_attenuations_db=[0.12, -0.05, 0.08, 0.02, -0.1, 0.15],
+    midband_attenuations=[0.12, -0.05, 0.08, 0.02, -0.1, 0.15],
     midband_uncertainties_db=[0.15] * 6,
     linearity_deviations_db=[0.0, 0.1, 0.2, -0.3, 0.4],
-    linearity_levels_below_upper_db=[0.0, 10.0, 20.0, 45.0, 55.0],
+    linearity_levels_below_upper=[0.0, 10.0, 20.0, 45.0, 55.0],
     linearity_uncertainties_db=[0.12, 0.12, 0.25, 0.2, 0.3],
-    relative_attenuations_db=[row, [x + 0.2 for x in row], row],
+    relative_attenuations=[row, [x + 0.2 for x in row], row],
     relative_attenuation_uncertainties_db=[row_u, row_u, row_u],
 )
 verdict = filters.verify_filter_periodic(1, record, fraction=3)

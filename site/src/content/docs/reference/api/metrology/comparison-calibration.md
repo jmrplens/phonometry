@@ -336,10 +336,10 @@ components (an erratum; see `docs/ERRATA.md`).
 ```python
 ComparisonCalibration(
     frequencies: NDArray[np.float64],
-    reference_sensitivity_level_db: NDArray[np.float64],
-    output_level_differences_db: NDArray[np.float64],
-    pressure_level_difference_db: NDArray[np.float64],
-    corrections_db: Mapping[str, NDArray[np.float64]],
+    reference_sensitivity_level: NDArray[np.float64],
+    output_level_differences: NDArray[np.float64],
+    pressure_level_difference: NDArray[np.float64],
+    corrections: Mapping[str, NDArray[np.float64]],
     field: str,
     excitation: str,
     expanded_uncertainty_db: NDArray[np.float64] | None = None,
@@ -363,10 +363,10 @@ $$
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz. |
-| `reference_sensitivity_level_db` | $L_\mathrm{ref}$, the reference microphone's sensitivity level as calibrated, in dB re 1 V/Pa. |
-| `output_level_differences_db` | $20\lg R_V$ of each determination, one row per determination, in dB: the output of the test microphone re that of the reference. |
-| `pressure_level_difference_db` | $20\lg R_P$, the effective sound pressure on the test microphone re that on the reference, in dB. |
-| `corrections_db` | The corrections $C_j$ added to the level, by name, each in dB at every frequency. |
+| `reference_sensitivity_level` | $L_\mathrm{ref}$, the reference microphone's sensitivity level as calibrated, in dB re 1 V/Pa. |
+| `output_level_differences` | $20\lg R_V$ of each determination, one row per determination, in dB: the output of the test microphone re that of the reference. |
+| `pressure_level_difference` | $20\lg R_P$, the effective sound pressure on the test microphone re that on the reference, in dB. |
+| `corrections` | The corrections $C_j$ added to the level, by name, each in dB at every frequency. |
 | `field` | `"pressure"` (IEC 61094-5) or `"free_field"` (IEC 61094-8). |
 | `excitation` | `"simultaneous"` or `"sequential"`. |
 | `expanded_uncertainty_db` | The expanded uncertainty ($k = 2$) of the sensitivity level at each frequency, in dB, or `None`. |
@@ -374,7 +374,7 @@ $$
 | `output_phase_differences_deg` | $\arg R_V$ of each determination, one row per determination, in degrees, or `None`. |
 | `pressure_phase_difference_deg` | $\arg R_P$, in degrees, or `None`. |
 
-### ComparisonCalibration.correction_db
+### ComparisonCalibration.correction
 
 *property*
 
@@ -386,7 +386,7 @@ $\sum_j C_j$, in dB (0 without corrections).
 
 The number of determinations averaged.
 
-### ComparisonCalibration.output_level_difference_db
+### ComparisonCalibration.output_level_difference
 
 *property*
 
@@ -437,7 +437,7 @@ compared with.
 | :--- | :--- |
 | ValueError | for an unknown quantity, or the phase of a calibration of the level alone. |
 
-### ComparisonCalibration.sensitivity_level_db
+### ComparisonCalibration.sensitivity_level
 
 *property*
 
@@ -717,14 +717,14 @@ uncertainty of Table A.1 approximately is, comes with it.
 | `separation_m` | $L$, the distance between the diaphragms, in m. |
 | `speed_of_sound` | The speed of sound of the air in the gap, in m/s. |
 
-### DiameterSoundFieldCorrection.correction_db
+### DiameterSoundFieldCorrection.correction
 
 *property*
 
 $-20\lg\lvert R_P\rvert$, in dB: to be added to the
 sensitivity level of the test microphone, as Table A.1 is.
 
-### DiameterSoundFieldCorrection.doubled_separation_correction_db
+### DiameterSoundFieldCorrection.doubled_separation_correction
 
 *property*
 
@@ -896,7 +896,7 @@ $(p_{s,0}, t_0, H_0)$, it gives the level at $(p_s, t, H)$.
 | `temperature_coefficient_db_per_k` | $\delta_t$, in dB/K. |
 | `humidity_coefficient_db_per_percent` | $\delta_H$, in dB/%. |
 
-### EnvironmentalSensitivityCorrection.correction_db
+### EnvironmentalSensitivityCorrection.correction
 
 *property*
 
@@ -1182,7 +1182,7 @@ $$
 
 with $V_\mathrm{e}$ the equivalent volume of each microphone and
 $V_x$ that of what it works into. Its level,
-`level_difference_db`, is the `pressure_level_difference_db` of a
+`level_difference`, is the `pressure_level_difference` of a
 comparison, and its phase the `pressure_phase_difference_deg`.
 
 **Attributes**
@@ -1194,7 +1194,7 @@ comparison, and its phase the `pressure_phase_difference_deg`.
 | `coupling` | `"coupler"`, a closed coupler small against the wavelength (IEC 61094-2 Formula (3)), or `"series"`, the air between the microphones in series with each (IEC 61094-5 Table D.1, by the circuit of Jarvis 1996). |
 | `coupling_equivalent_volume_m3` | $V_x$ at each frequency, complex, in m³. |
 
-### ImpedancePressureRatio.level_difference_db
+### ImpedancePressureRatio.level_difference
 
 *property*
 
@@ -1277,8 +1277,8 @@ The table gives them at the preferred one-third-octave frequencies from
 symmetrical field and the 0,5 mm diaphragm separation of Figure A.4, "the
 only one for which the corrections specified in Table A.1 are valid". A
 frequency within 2 % of a row, such as an exact base-ten one-third-octave
-frequency, reads as that row. Pass `.correction_db` to the comparison as
-one of its `corrections_db` and `.standard_uncertainty_db` to the
+frequency, reads as that row. Pass `.correction` to the comparison as
+one of its `corrections` and `.standard_uncertainty_db` to the
 budget as an additional component.
 
 **Parameters**
@@ -1300,9 +1300,9 @@ budget as an additional component.
 ```python
 JigCouplerVerification(
     frequencies: NDArray[np.float64],
-    calibration_level_db: NDArray[np.float64],
+    calibration_level: NDArray[np.float64],
     calibration_uncertainty_db: NDArray[np.float64],
-    validation_level_db: NDArray[np.float64],
+    validation_level: NDArray[np.float64],
     validation_uncertainty_db: NDArray[np.float64],
     validation: str,
     unvalidated_frequencies_hz: NDArray[np.float64],
@@ -1348,9 +1348,9 @@ which this verification does not represent.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies the two calibrations share, in Hz. |
-| `calibration_level_db` | $L_\mathrm{cal}$, the sensitivity level from the jig or coupler being validated, in dB re 1 V/Pa. |
+| `calibration_level` | $L_\mathrm{cal}$, the sensitivity level from the jig or coupler being validated, in dB re 1 V/Pa. |
 | `calibration_uncertainty_db` | $U_\mathrm{cal}$, its expanded uncertainty ($k = 2$), in dB. |
-| `validation_level_db` | $L_\mathrm{val}$, the sensitivity level it is validated against, in dB re 1 V/Pa. |
+| `validation_level` | $L_\mathrm{val}$, the sensitivity level it is validated against, in dB re 1 V/Pa. |
 | `validation_uncertainty_db` | $U_\mathrm{val}$, its expanded uncertainty ($k = 2$), in dB. |
 | `validation` | `"comparison"`, a calibration in another jig or coupler or with another source, or `"reciprocity"`. |
 | `unvalidated_frequencies_hz` | The frequencies of the calibration the validation does not cover, in Hz: 6.7 allows "more than one jig and/or coupler to cover a full frequency range", each validated where it is used. |
@@ -1374,7 +1374,7 @@ and towards 1 as the shared part outweighs what each calibration adds
 to it (F.1.2.3, Example 2). 0 where a calibration carries no
 uncertainty, and so shares none.
 
-### JigCouplerVerification.difference_db
+### JigCouplerVerification.difference
 
 *property*
 
@@ -1443,7 +1443,7 @@ frequencies the validation does not cover as dashed vertical lines.
 ```python
 JigDiameterCorrection(
     frequencies: NDArray[np.float64],
-    correction_db: NDArray[np.float64],
+    correction: NDArray[np.float64],
 )
 ```
 
@@ -1463,7 +1463,7 @@ expanded uncertainty with.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies of the table asked for, in Hz. |
-| `correction_db` | The correction at each, in dB. |
+| `correction` | The correction at each, in dB. |
 
 ### JigDiameterCorrection.expanded_uncertainty_db
 
@@ -1508,8 +1508,8 @@ a coverage factor), in dB: the special-case component of Table D.1.
 ```python
 MonitorReadings(
     *,
-    reference_level_db: ArrayLike,
-    test_level_db: ArrayLike,
+    reference_level: ArrayLike,
+    test_level: ArrayLike,
     reference_phase_deg: ArrayLike | None = None,
     test_phase_deg: ArrayLike | None = None,
 )
@@ -1529,8 +1529,8 @@ phase. Pass one to [`sequential_comparison`](/phonometry/reference/api/metrology
 
 | Name | Description |
 | :--- | :--- |
-| `reference_level_db` | $20\lg V_\mathrm{mon,1}$, the monitor's output level in the measurement of the reference, in dB, one row per determination. |
-| `test_level_db` | $20\lg V_\mathrm{mon,2}$, the monitor's output level in the measurement of the test microphone, in dB. |
+| `reference_level` | $20\lg V_\mathrm{mon,1}$, the monitor's output level in the measurement of the reference, in dB, one row per determination. |
+| `test_level` | $20\lg V_\mathrm{mon,2}$, the monitor's output level in the measurement of the test microphone, in dB. |
 | `reference_phase_deg` | $\varphi_\mathrm{mon,1}$, the monitor's phase in the measurement of the reference, in degrees (Default: None). |
 | `test_phase_deg` | $\varphi_\mathrm{mon,2}$, the monitor's phase in the measurement of the test microphone, in degrees (Default: None; given with the other or not at all). |
 
@@ -1662,10 +1662,10 @@ $1/(2b)$, the first zero of the spectrum, in Hz (B.6.1).
 
 $b$ of Formula (B.10), half the duration, in s.
 
-### RectangularPulse.level_db_at()
+### RectangularPulse.level_at()
 
 ```python
-RectangularPulse.level_db_at(frequencies: ArrayLike) -> NDArray[np.float64]
+RectangularPulse.level_at(frequencies: ArrayLike) -> NDArray[np.float64]
 ```
 
 $20\lg\lvert X(f)/X(0)\rvert$, how far the spectrum has
@@ -1810,17 +1810,17 @@ fall within this time too.
 ```python
 sequential_comparison(
     frequencies: ArrayLike,
-    reference_sensitivity_level_db: ArrayLike,
-    reference_output_level_db: ArrayLike,
-    test_output_level_db: ArrayLike,
+    reference_sensitivity_level: ArrayLike,
+    reference_output_level: ArrayLike,
+    test_output_level: ArrayLike,
     *,
     monitor: MonitorReadings | None = None,
     field: str = 'pressure',
-    pressure_level_difference_db: ArrayLike = 0.0,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    pressure_level_difference: ArrayLike = 0.0,
+    corrections: Mapping[str, ArrayLike] | None = None,
     reference_environment: EnvironmentalSensitivityCorrection | None = None,
     test_environment: EnvironmentalSensitivityCorrection | None = None,
-    reference_free_field_difference_db: ArrayLike | None = None,
+    reference_free_field_difference: ArrayLike | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
     phase: SequentialComparisonPhase | None = None,
 ) -> ComparisonCalibration
@@ -1874,16 +1874,16 @@ same measurement point (7.3), $\arg R_P$ is 0.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
-| `reference_sensitivity_level_db` | $L_\mathrm{ref}$, the reference microphone's sensitivity level, in dB re 1 V/Pa. |
-| `reference_output_level_db` | $20\lg V_\mathrm{ref}$, the reference microphone's output level, in dB re any voltage the test microphone is read against too. |
-| `test_output_level_db` | $20\lg V_\mathrm{test}$, the test microphone's output level, in dB re the same voltage. |
+| `reference_sensitivity_level` | $L_\mathrm{ref}$, the reference microphone's sensitivity level, in dB re 1 V/Pa. |
+| `reference_output_level` | $20\lg V_\mathrm{ref}$, the reference microphone's output level, in dB re any voltage the test microphone is read against too. |
+| `test_output_level` | $20\lg V_\mathrm{test}$, the test microphone's output level, in dB re the same voltage. |
 | `monitor` | The [`MonitorReadings`](/phonometry/reference/api/metrology/comparison-calibration/#monitorreadings) of a monitor microphone, $20\lg V_\mathrm{mon,1}$ and $20\lg V_\mathrm{mon,2}$ in the measurements of the reference and of the test microphone, with their phases when the calibration carries the phase (Default: None, no monitor). |
 | `field` | `"pressure"` (IEC 61094-5, default) or `"free_field"` (IEC 61094-8). |
-| `pressure_level_difference_db` | $20\lg R_P$, in dB (Default: 0). |
-| `corrections_db` | Further corrections added to the level, by name, in dB (Default: none). |
+| `pressure_level_difference` | $20\lg R_P$, in dB (Default: 0). |
+| `corrections` | Further corrections added to the level, by name, in dB (Default: none). |
 | `reference_environment` | The [`EnvironmentalSensitivityCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) of the reference, added (Default: None). |
 | `test_environment` | The [`EnvironmentalSensitivityCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) of the test microphone, subtracted (Default: None). |
-| `reference_free_field_difference_db` | The reference's free-field to pressure sensitivity level difference (IEC/TS 61094-7), free field only, in dB; carried in `corrections_db` as `"reference free-field difference"` (Default: None). |
+| `reference_free_field_difference` | The reference's free-field to pressure sensitivity level difference (IEC/TS 61094-7), free field only, in dB; carried in `corrections` as `"reference free-field difference"` (Default: None). |
 | `expanded_uncertainty_db` | The expanded uncertainty ($k = 2$) of the result at each frequency, in dB (Default: None). |
 | `phase` | The [`SequentialComparisonPhase`](/phonometry/reference/api/metrology/comparison-calibration/#sequentialcomparisonphase) of the calibration: the reference's phase, the output phases and $\arg R_P$ (Default: None, a calibration of the level alone). |
 
@@ -1932,16 +1932,16 @@ to [`sequential_comparison`](/phonometry/reference/api/metrology/comparison-cali
 ```python
 simultaneous_comparison(
     frequencies: ArrayLike,
-    reference_sensitivity_level_db: ArrayLike,
-    channel_difference_db: ArrayLike,
-    interchanged_channel_difference_db: ArrayLike | None = None,
+    reference_sensitivity_level: ArrayLike,
+    channel_difference: ArrayLike,
+    interchanged_channel_difference: ArrayLike | None = None,
     *,
     field: str = 'pressure',
-    pressure_level_difference_db: ArrayLike = 0.0,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    pressure_level_difference: ArrayLike = 0.0,
+    corrections: Mapping[str, ArrayLike] | None = None,
     reference_environment: EnvironmentalSensitivityCorrection | None = None,
     test_environment: EnvironmentalSensitivityCorrection | None = None,
-    reference_free_field_difference_db: ArrayLike | None = None,
+    reference_free_field_difference: ArrayLike | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
     phase: SimultaneousComparisonPhase | None = None,
 ) -> ComparisonCalibration
@@ -2002,15 +2002,15 @@ the complex ratio the sensitivity "both modulus and phase" is.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
-| `reference_sensitivity_level_db` | $L_\mathrm{ref}$, the reference microphone's sensitivity level, in dB re 1 V/Pa, one value or one per frequency. For a free-field calibration it is the reference's free-field level, or its pressure level with `reference_free_field_difference_db`. |
-| `channel_difference_db` | $L_\mathrm{C12}$, the reading of channel 1 less that of channel 2 with the reference on channel 1, in dB. |
-| `interchanged_channel_difference_db` | $L_\mathrm{C21}$, the same difference after the interchange, the test microphone on channel 1, in dB (Default: None; required for `field="pressure"`). |
+| `reference_sensitivity_level` | $L_\mathrm{ref}$, the reference microphone's sensitivity level, in dB re 1 V/Pa, one value or one per frequency. For a free-field calibration it is the reference's free-field level, or its pressure level with `reference_free_field_difference`. |
+| `channel_difference` | $L_\mathrm{C12}$, the reading of channel 1 less that of channel 2 with the reference on channel 1, in dB. |
+| `interchanged_channel_difference` | $L_\mathrm{C21}$, the same difference after the interchange, the test microphone on channel 1, in dB (Default: None; required for `field="pressure"`). |
 | `field` | `"pressure"` (IEC 61094-5, default) or `"free_field"` (IEC 61094-8). |
-| `pressure_level_difference_db` | $20\lg R_P$, the effective sound pressure on the test microphone re that on the reference, in dB (Default: 0, the ratio reduced to unity). |
-| `corrections_db` | Further corrections added to the level, by name, in dB, such as `jig_diameter_correction(f).correction_db` (Default: none). |
+| `pressure_level_difference` | $20\lg R_P$, the effective sound pressure on the test microphone re that on the reference, in dB (Default: 0, the ratio reduced to unity). |
+| `corrections` | Further corrections added to the level, by name, in dB, such as `jig_diameter_correction(f).correction` (Default: none). |
 | `reference_environment` | The [`EnvironmentalSensitivityCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) that takes the reference's level from the conditions of its calibration to those of the test, added (Default: None). |
 | `test_environment` | The [`EnvironmentalSensitivityCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#environmentalsensitivitycorrection) of the test microphone from the reference conditions to those of the test, subtracted to refer the result to the reference conditions (Default: None, the result is at the conditions of the test). |
-| `reference_free_field_difference_db` | The reference's free-field to pressure sensitivity level difference (IEC/TS 61094-7), added to a pressure-calibrated reference in a free-field calibration only, in dB; the result carries it in `corrections_db` as `"reference free-field difference"` (Default: None). |
+| `reference_free_field_difference` | The reference's free-field to pressure sensitivity level difference (IEC/TS 61094-7), added to a pressure-calibrated reference in a free-field calibration only, in dB; the result carries it in `corrections` as `"reference free-field difference"` (Default: None). |
 | `expanded_uncertainty_db` | The expanded uncertainty ($k = 2$) of the result at each frequency, in dB, as [`comparison_uncertainty_budget`](/phonometry/reference/api/metrology/comparison-calibration/#comparison_uncertainty_budget) gives it (Default: None). |
 | `phase` | The [`SimultaneousComparisonPhase`](/phonometry/reference/api/metrology/comparison-calibration/#simultaneouscomparisonphase) of the calibration: the reference's phase, the phase readings and $\arg R_P$ (Default: None, a calibration of the level alone). |
 
@@ -2307,10 +2307,10 @@ The inverse of the window length, in Hz: the spacing of the
 frequencies the window can tell apart, as B.2.2 relates the length of
 an impulse response to its frequency step.
 
-### TimeSelectiveResponse.level_db_at()
+### TimeSelectiveResponse.level_at()
 
 ```python
-TimeSelectiveResponse.level_db_at(
+TimeSelectiveResponse.level_at(
     frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```

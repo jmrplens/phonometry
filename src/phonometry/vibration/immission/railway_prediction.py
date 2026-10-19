@@ -107,11 +107,11 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
 __all__ = [
     "FLOOR_NATURAL_FREQUENCIES_HZ",
-    "FOUNDATION_TO_FLOOR_DB",
+    "FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES",
     "FOUNDATION_TO_FLOOR_RATIOS",
     "GEOMETRIC_DECAY_EXPONENT_RANGE",
-    "GROUND_TO_FLOOR_DB",
-    "GROUND_TO_FOUNDATION_DB",
+    "GROUND_TO_FLOOR_LEVEL_DIFFERENCES",
+    "GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES",
     "KB_ASSESSMENT_BANDS_HZ",
     "KB_WEIGHTING_TABLE_DB",
     "LINE_SOURCE_EXPONENT_CORRECTION",
@@ -121,10 +121,10 @@ __all__ = [
     "SPEED_RESCALING_LIMIT",
     "TAKT_MAX_FACTOR",
     "TrainCategoryPrediction",
-    "foundation_to_floor_transfer",
+    "foundation_to_floor_level_difference",
     "ground_attenuation_coefficient_per_m",
-    "ground_to_floor_transfer",
-    "ground_to_foundation_transfer",
+    "ground_to_floor_level_difference",
+    "ground_to_foundation_level_difference",
     "ground_transmission",
     "kb_weighted_levels",
     "line_source_correction",
@@ -229,7 +229,7 @@ FLOOR_NATURAL_FREQUENCIES_HZ: tuple[float, ...] = (
 #: building with concrete floors and one with timber floors, by the natural
 #: frequency of the floor (the key) and along :data:`PREDICTION_BAND_CENTERS_HZ`.
 #: Valid for every storey. From building measurements, not a formula.
-GROUND_TO_FLOOR_DB: Mapping[str, Mapping[float, tuple[float, ...]]] = MappingProxyType({
+GROUND_TO_FLOOR_LEVEL_DIFFERENCES: Mapping[str, Mapping[float, tuple[float, ...]]] = MappingProxyType({
     "concrete": MappingProxyType({
         8.0: (
             -0.51, 1.42, 6.88, 15.0, 5.87, 0.17, -1.26, -0.96, -2.58, -3.5, -3.47,
@@ -329,7 +329,7 @@ GROUND_TO_FLOOR_DB: Mapping[str, Mapping[float, tuple[float, ...]]] = MappingPro
 #: decibels, for a basement and for a ground floor, as a mean over the
 #: buildings measured with the deviation either way, along the 14 bands from
 #: 4 Hz to 80 Hz. The print writes the 12,5 Hz row as 12.
-GROUND_TO_FOUNDATION_DB: Mapping[str, Mapping[str, tuple[float, ...]]] = MappingProxyType({
+GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES: Mapping[str, Mapping[str, tuple[float, ...]]] = MappingProxyType({
     "basement": MappingProxyType({
         "lower": (
             -9.1, -8.2, -8.3, -8.7, -8.2, -8.3, -9.5, -12.5, -14.7, -15.6, -14.5,
@@ -377,7 +377,7 @@ FOUNDATION_TO_FLOOR_RATIOS: tuple[float, ...] = (
 #: at 0,08 and its mean alone reaches 8. The timber table prints its lower
 #: deviation above its mean at the ratios 0,2, 3,15, 4 and 5, and above its
 #: upper one at 5, so no order between the three is enforced.
-FOUNDATION_TO_FLOOR_DB: Mapping[str, Mapping[str, tuple[float, ...]]] = MappingProxyType({
+FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES: Mapping[str, Mapping[str, tuple[float, ...]]] = MappingProxyType({
     "concrete": MappingProxyType({
         "lower": (
             -1.52, -1.53, -1.74, -2.42, -2.63, -1.89, -1.81, -1.73, -1.27, -0.72,
@@ -414,8 +414,8 @@ FOUNDATION_TO_FLOOR_DB: Mapping[str, Mapping[str, tuple[float, ...]]] = MappingP
     }),
 })  # fmt: skip
 
-_FLOORS = tuple(GROUND_TO_FLOOR_DB)
-_LEVELS = tuple(GROUND_TO_FOUNDATION_DB)
+_FLOORS = tuple(GROUND_TO_FLOOR_LEVEL_DIFFERENCES)
+_LEVELS = tuple(GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES)
 _STATISTICS = ("mean", "lower", "upper")
 _FITS = tuple(LINE_SOURCE_EXPONENT_CORRECTION)
 #: Half a sixth of an octave, the tolerance within which a frequency is
@@ -619,7 +619,7 @@ def ground_transmission(
     return spreading - 20.0 * math.log10(math.e) * alpha * (distance - reference)
 
 
-def ground_to_floor_transfer(
+def ground_to_floor_level_difference(
     floor: str, *, floor_natural_frequency_hz: float
 ) -> NDArray[np.float64]:
     r"""The level difference from the ground to a floor, Tables A.1 and A.2.
@@ -640,12 +640,14 @@ def ground_to_floor_transfer(
     :raises ValueError: For an unknown floor or a frequency the tables have
         no column for.
     """
-    table = GROUND_TO_FLOOR_DB[require_choice(str(floor), "floor", _FLOORS)]
+    table = GROUND_TO_FLOOR_LEVEL_DIFFERENCES[
+        require_choice(str(floor), "floor", _FLOORS)
+    ]
     index = _nominal([floor_natural_frequency_hz], FLOOR_NATURAL_FREQUENCIES_HZ)
     return np.asarray(table[FLOOR_NATURAL_FREQUENCIES_HZ[int(index[0])]])
 
 
-def ground_to_foundation_transfer(
+def ground_to_foundation_level_difference(
     level: str, *, statistic: str = "mean"
 ) -> NDArray[np.float64]:
     r"""The level difference from the ground into the foundation, Tables A.3 and A.4.
@@ -663,11 +665,13 @@ def ground_to_foundation_transfer(
         4 Hz to 80 Hz.
     :raises ValueError: For an unknown level or statistic.
     """
-    table = GROUND_TO_FOUNDATION_DB[require_choice(str(level), "level", _LEVELS)]
+    table = GROUND_TO_FOUNDATION_LEVEL_DIFFERENCES[
+        require_choice(str(level), "level", _LEVELS)
+    ]
     return np.asarray(table[require_choice(str(statistic), "statistic", _STATISTICS)])
 
 
-def foundation_to_floor_transfer(
+def foundation_to_floor_level_difference(
     frequencies: ArrayLike,
     *,
     floor: str,
@@ -694,7 +698,9 @@ def foundation_to_floor_transfer(
     """
     freqs = require_positive_array(frequencies, "frequencies")
     natural = require_positive(floor_natural_frequency_hz, "floor_natural_frequency_hz")
-    table = FOUNDATION_TO_FLOOR_DB[require_choice(str(floor), "floor", _FLOORS)]
+    table = FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES[
+        require_choice(str(floor), "floor", _FLOORS)
+    ]
     values = np.asarray(table[require_choice(str(statistic), "statistic", _STATISTICS)])
     known = np.isfinite(values)
     grid = np.log10(np.asarray(FOUNDATION_TO_FLOOR_RATIOS)[known])
@@ -736,7 +742,7 @@ def kb_weighted_levels(
     return levels + weights
 
 
-def takt_max_kb(weighted_levels_db: ArrayLike) -> float:
+def takt_max_kb(weighted_levels: ArrayLike) -> float:
     r"""The clock maximum r.m.s. of a category from its spectrum, Formula (9).
 
     :math:`KB_\mathrm{FTm,Zug} = c_{\mathrm{T}1} v_0
@@ -747,12 +753,12 @@ def takt_max_kb(weighted_levels_db: ArrayLike) -> float:
     quantity because KB is the velocity in millimetres per second. Annex C
     prints 0,4 for a sum level of 78,1 dB.
 
-    :param weighted_levels_db: :math:`L_{v,KB}`, as
+    :param weighted_levels: :math:`L_{v,KB}`, as
         :func:`kb_weighted_levels` gives them, one per band.
     :return: :math:`KB_\mathrm{FTm,Zug}`, dimensionless.
     :raises ValueError: For an empty or non-finite input.
     """
-    levels = _levels(weighted_levels_db, "weighted_levels_db")
+    levels = _levels(weighted_levels, "weighted_levels")
     total = band_sum_level(levels)
     return float(
         TAKT_MAX_FACTOR * VELOCITY_LEVEL_REFERENCE_MM_S * 10.0 ** (total / 20.0)
@@ -797,7 +803,7 @@ class TrainCategoryPrediction(OwnsArrays):
     :ivar weighted_frequencies_hz: The band centres from 4 Hz to 80 Hz the
         KB assessment sums.
     :ivar weighted_db: :math:`L_{v,KB}` of Formula (8) over those bands.
-    :ivar sum_level_db: :math:`L_{v,\mathrm{ges}}` of Formula (9), the energy sum of
+    :ivar sum_level: :math:`L_{v,\mathrm{ges}}` of Formula (9), the energy sum of
         the weighted bands.
     :ivar kb_ftm: :math:`KB_\mathrm{FTm,Zug}` of Formula (9).
     :ivar kb_fmax: :math:`KB_\mathrm{Fmax,Zug}` of Formula (10).
@@ -809,7 +815,7 @@ class TrainCategoryPrediction(OwnsArrays):
     floor_db: NDArray[np.float64]
     weighted_frequencies_hz: NDArray[np.float64]
     weighted_db: NDArray[np.float64]
-    sum_level_db: float
+    sum_level: float
     kb_ftm: float
     kb_fmax: float
     peak_velocity_mm_s: float
@@ -895,7 +901,7 @@ def predict_train_category(
         floor_db=floor,
         weighted_frequencies_hz=freqs[inside],
         weighted_db=weighted,
-        sum_level_db=band_sum_level(weighted),
+        sum_level=band_sum_level(weighted),
         kb_ftm=kb_ftm,
         kb_fmax=kb_fmax,
         peak_velocity_mm_s=peak_velocity_from_kb_mm_s(kb_fmax),

@@ -179,14 +179,14 @@ l_c12 = (l_ref + gain_1) - (l_true + gain_2) + field_a + noise[0]   # referencia
 l_c21 = (l_true + gain_1) - (l_ref + gain_2) + field_a + noise[1]   # intercambiados
 
 c = metrology.simultaneous_comparison(f, l_ref, l_c12, l_c21)
-print(c.n_determinations, c.sensitivity_level_db[[2, 8, 19]].round(2))   # 3 [-38.63 -38.58 -38.44]
-print(np.abs(c.sensitivity_level_db - l_true).max().round(3))           # 0.003
+print(c.n_determinations, c.sensitivity_level[[2, 8, 19]].round(2))   # 3 [-38.63 -38.58 -38.44]
+print(np.abs(c.sensitivity_level - l_true).max().round(3))           # 0.003
 ```
 
 Ni las ganancias ni la asimetría llegan al resultado; lo que queda, 0,003 dB
 como mucho, es el ruido de tres repeticiones. El apartado 5.1.2 hace del
 intercambio un requisito en un acoplador o un soporte, así que una
-calibración en presión sin `interchanged_channel_difference_db` se rechaza.
+calibración en presión sin `interchanged_channel_difference` se rechaza.
 El texto pide «the mean of the two ratios», y el Anexo C la toma en
 decibelios: la media de las dos diferencias de nivel, que es la media
 geométrica de los cocientes y la única en la que las ganancias se anulan
@@ -227,7 +227,7 @@ env = metrology.environmental_sensitivity_correction(
     static_pressure_coefficient_db_per_kpa=-0.005,   # los coeficientes propios del LS2P
     temperature_coefficient_db_per_k=0.002,
 )   # desde los 101.325 kPa, 23.0 °C y 50 % de su certificado
-print(env.correction_db[0].round(4))   # 0.0076
+print(env.correction[0].round(4))   # 0.0076
 ```
 
 Pasada como `reference_environment=`, la corrección se suma al nivel de la
@@ -323,11 +323,11 @@ exacta en base diez se lee como su fila:
 
 ```python
 j = metrology.jig_diameter_correction()
-print(j.correction_db[[0, 9, 13]])          # [-0.004 -0.235 -1.443]
+print(j.correction[[0, 9, 13]])          # [-0.004 -0.235 -1.443]
 print(j.standard_uncertainty_db[13].round(4))   # 0.0722
 ```
 
-`j.correction_db` llega a una calibración por `corrections_db=`, con un nombre
+`j.correction` llega a una calibración por `corrections=`, con un nombre
 propio, y `j.standard_uncertainty_db` a su balance como componente
 adicional, el primer caso especial de la Tabla D.1.
 
@@ -376,8 +376,8 @@ ws3 = {
     "test_resonance_frequency_hz": 100000,
 }   # los datos de la Tabla 1 de [1]
 model = metrology.diameter_sound_field_correction(j.frequencies, **ws3)
-print(round(model.speed_of_sound, 1), model.correction_db[[0, 9, 13]].round(3))   # 345.9 [-0.004 -0.233 -1.434]
-print(np.abs(model.correction_db - j.correction_db).max().round(4))               # 0.0093
+print(round(model.speed_of_sound, 1), model.correction[[0, 9, 13]].round(3))   # 345.9 [-0.004 -0.233 -1.434]
+print(np.abs(model.correction - j.correction).max().round(4))               # 0.0093
 ```
 
 Con el aire de referencia del apartado 4, el modelo queda a menos de
@@ -395,7 +395,7 @@ the microphones»; `separation_change_db` es ese cambio según el modelo, del
 orden que dice el A.2 y por debajo:
 
 ```python
-print((model.separation_change_db / np.abs(model.correction_db))[[0, 13]].round(3))   # [0.063 0.054]
+print((model.separation_change_db / np.abs(model.correction))[[0, 13]].round(3))   # [0.063 0.054]
 ```
 
 La Tabla A.1 vale para una pareja de micrófonos en la única separación de
@@ -409,10 +409,10 @@ divide por $J_0(j_{01}\varpi)$:
 ```python
 f12 = metrology.exact_frequencies(1000, 20000, fraction=12)   # cada doceavo de octava
 fine = metrology.diameter_sound_field_correction(f12, **ws3)
-print(f12.size, round(f12[50]), fine.correction_db[50].round(3))   # 53 17783 -1.141
+print(f12.size, round(f12[50]), fine.correction[50].round(3))   # 53 17783 -1.141
 ```
 
-`fine.correction_db` llega a una calibración por `corrections_db=`, como la
+`fine.correction` llega a una calibración por `corrections=`, como la
 Tabla A.1. El modelo supone un campo con simetría radial, y por eso el 6.5 y
 el A.2 piden una fuente coaxial en campo lejano o un campo difuso.
 
@@ -480,13 +480,13 @@ free = metrology.sequential_comparison(
     l_ref_p + c_ff + field_1,     # la salida de la referencia, dB re 1 V
     l_ws2f + field_2,             # la salida del WS2F en su lugar
     monitor=metrology.MonitorReadings(
-        reference_level_db=monitor + field_1, test_level_db=monitor + field_2
+        reference_level=monitor + field_1, test_level=monitor + field_2
     ),
     field="free_field",
-    reference_free_field_difference_db=c_ff,
+    reference_free_field_difference=c_ff,
     expanded_uncertainty_db=[free_field_budget(fx).expanded_uncertainty_db for fx in ff],
 )
-print(bool(np.abs(free.sensitivity_level_db - l_ws2f).max() < 1e-9))   # True
+print(bool(np.abs(free.sensitivity_level - l_ws2f).max() < 1e-9))   # True
 print(free.expanded_uncertainty_db[[0, 12, 16]].round(2))              # [0.16 0.26 0.51]
 ```
 
@@ -580,8 +580,8 @@ c0 = metrology.free_field_region(1.0, 0.005).speed_of_sound   # 345.9 m/s a 23.0
 f_step = np.arange(0.0, 100000.0 + 1.0, 50.0)   # de 0 Hz a 100 kHz en pasos de 50 Hz
 
 
-def mic(fx, level_db, f0, d):   # la sensibilidad de un micrófono, V/Pa: ilustrativa
-    return 10 ** (level_db / 20) / (1 - (fx / f0) ** 2 + 1j * d * fx / f0)
+def mic(fx, level, f0, d):   # la sensibilidad de un micrófono, V/Pa: ilustrativa
+    return 10 ** (level / 20) / (1 - (fx / f0) ** 2 + 1j * d * fx / f0)
 
 
 direct, rig = 1.0 / c0, 1.48 / c0   # el sonido directo en 1 m, la reflexión en el montaje en 1.48 m
@@ -646,8 +646,8 @@ m_ref = mic(fw, -38.0, 22000, 1.1)   # la sensibilidad en campo libre de la refe
 tsel = metrology.sequential_comparison(
     fw,
     20 * np.log10(np.abs(m_ref)),
-    ref.level_db_at(fw),
-    ws2f.level_db_at(fw),
+    ref.level_at(fw),
+    ws2f.level_at(fw),
     field="free_field",
     phase=metrology.SequentialComparisonPhase(
         reference_sensitivity_phase_deg=np.degrees(np.angle(m_ref)),
@@ -656,8 +656,8 @@ tsel = metrology.sequential_comparison(
     ),
 )
 m_ws2f = mic(fw, -26.4, 18000, 0.9)   # lo que la página sabe que es el WS2F
-print(tsel.sensitivity_level_db[[0, 6, 10]].round(2))   # [-26.34 -25.46 -26.6 ]
-print(bool(np.abs(tsel.sensitivity_level_db - 20 * np.log10(np.abs(m_ws2f))).max() < 1e-4))   # True
+print(tsel.sensitivity_level[[0, 6, 10]].round(2))   # [-26.34 -25.46 -26.6 ]
+print(bool(np.abs(tsel.sensitivity_level - 20 * np.log10(np.abs(m_ws2f))).max() < 1e-4))   # True
 record = 20 * np.log10(np.abs(ws2f.record_response_at(fw) / ref.record_response_at(fw)))
 print(np.abs(record - 20 * np.log10(np.abs(m_ws2f / m_ref))).max().round(2))   # 1.91
 ```
@@ -690,7 +690,7 @@ la duración (está en el [registro de erratas](/phonometry/es/reference/errata/
 T = metrology.rectangular_pulse_duration_s(20000)   # un primer cero diez veces 20 kHz
 pulse = metrology.rectangular_pulse(T, amplitude_v=10.0)
 print(T, pulse.half_duration_s, round(pulse.first_zero_hz))   # 5e-06 2.5e-06 200000
-print(pulse.level_db_at([20000.0]).round(2))                  # [-0.14]
+print(pulse.level_at([20000.0]).round(2))                  # [-0.14]
 ```
 
 Las respuestas a varios pulsos, promediadas en sincronía
@@ -826,14 +826,14 @@ rp = metrology.impedance_pressure_ratio(
     test_equivalent_volume_m3=lumped_ws2f.complex_equivalent_volume_m3(fi),
     coupling_equivalent_volume_m3=600e-9,   # el gas, la fuente y el monitor del acoplador: ilustrativos
 )
-print(rp.level_difference_db[[0, 10, 13]].round(3))      # [-0.281 -0.421  0.37 ]
+print(rp.level_difference[[0, 10, 13]].round(3))      # [-0.281 -0.421  0.37 ]
 print(rp.standard_uncertainty_db[[0, 10, 13]].round(3))  # [0.163 0.243 0.213]
 ```
 
 Un monitor que «shall accurately sense changes in the sound pressure at the
 test/reference microphone position» (5.1.3) elimina este cociente. Sin él,
-`rp.level_difference_db` y `rp.phase_difference_deg` van a la comparación
-como `pressure_level_difference_db` y como el `pressure_phase_difference_deg`
+`rp.level_difference` y `rp.phase_difference_deg` van a la comparación
+como `pressure_level_difference` y como el `pressure_phase_difference_deg`
 de sus datos de fase. Cuando
 el cociente se estima en lugar de corregirse, `rp.standard_uncertainty_db` es
 la componente `"impedance"` del balance: la diferencia de nivel leída como la
@@ -905,7 +905,7 @@ gap = metrology.impedance_pressure_ratio(
     test_equivalent_volume_m3=v_e(z_mic(7e7, 2.6e-13, 820)),           # su WS2P de alta sensibilidad
     coupling_impedance_pa_s_m3=z_x,
 )
-print(gap.level_difference_db[[69, 199]].round(4))   # [ 0.0064 -0.025 ]
+print(gap.level_difference[[69, 199]].round(4))   # [ 0.0064 -0.025 ]
 print(gap.phase_difference_deg[124].round(3))         # -0.158
 ```
 
@@ -936,10 +936,10 @@ pueden separarse:
 ```python
 d = metrology.diffuse_field_sensitivity(
     [1000.0, 2000.0], [94.3, 94.6], [94.0, 94.1],
-    reference_random_incidence_level_db=[-26.0, -26.2],
+    reference_random_incidence_level=[-26.0, -26.2],
 )
 s = metrology.sequential_comparison([1000.0, 2000.0], [-26.0, -26.2], [94.0, 94.1], [94.3, 94.6])
-print(d.diffuse_field_level_db, s.sensitivity_level_db)   # [-25.7 -25.7] [-25.7 -25.7]
+print(d.diffuse_field_level, s.sensitivity_level)   # [-25.7 -25.7] [-25.7 -25.7]
 ```
 
 ## 11. Validar un soporte o un acoplador
@@ -991,7 +991,7 @@ coupler = metrology.simultaneous_comparison(
 check = metrology.verify_jig_or_coupler(jig, coupler)
 print(check.passes, check.failing_frequencies_hz.round())    # False [6310.]
 print(check.unvalidated_frequencies_hz.round())              # [12589. 15849. 19953.]
-print(check.difference_db[8].round(3), check.expanded_uncertainty_db[8].round(3))   # -0.247 0.128
+print(check.difference[8].round(3), check.expanded_uncertainty_db[8].round(3))   # -0.247 0.128
 ```
 
 El soporte coincide con el acoplador en todas las frecuencias que comparten
@@ -1112,7 +1112,7 @@ fig.tight_layout()
 
 fig, ax = plt.subplots(figsize=(10, 6))
 fine.plot(ax, marker="none", language="es")
-ax.plot(j.frequencies, j.correction_db, ls="none", marker="D", label="Tabla A.1")
+ax.plot(j.frequencies, j.correction, ls="none", marker="D", label="Tabla A.1")
 ax.legend()
 fig.tight_layout()
 

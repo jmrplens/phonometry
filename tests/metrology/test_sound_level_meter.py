@@ -69,8 +69,8 @@ _STEPS_DB = (
 _PROCEDURE: dict[str, Any] = {
     "linear_operating_range_db": [55.0, 120.0],
     "linearity_starting_point_db": 94.0,
-    "linearity_overload_level_db": 121.0,
-    "linearity_under_range_level_db": 54.0,
+    "linearity_overload_level": 121.0,
+    "linearity_under_range_level": 54.0,
 }
 
 #: The 16 results of that meter, one per step.
@@ -110,7 +110,7 @@ def _record(**over: Any) -> metrology.SoundLevelMeterPeriodicMeasurements:
         "long_term_stability_uncertainty_db": 0.08,
         "linearity_deviations_db": _LINEARITY_DB,
         "linearity_uncertainties_db": [0.2] * len(_STEPS_DB),
-        "linearity_levels_db": list(_STEPS_DB),
+        "linearity_levels": list(_STEPS_DB),
         **_PROCEDURE,
         "range_linearity_deviations_db": {
             "17.3": [0.1, -0.1],
@@ -130,10 +130,10 @@ def _record(**over: Any) -> metrology.SoundLevelMeterPeriodicMeasurements:
             "S": [0.2, 0.2],
             "E": [0.2, 0.2, 0.2],
         },
-        "c_peak_differences_db": [3.6, 2.5, 2.3],
+        "c_peak_differences": [3.6, 2.5, 2.3],
         "c_peak_uncertainties_db": [0.3, 0.3, 0.3],
         "c_peak_overload_indicated": False,
-        "overload_difference_db": 0.3,
+        "overload_difference": 0.3,
         "overload_uncertainty_db": 0.2,
         "overload_latched": True,
         "high_level_stability_db": 0.02,
@@ -157,10 +157,10 @@ def _class_2_record(**over: Any) -> metrology.SoundLevelMeterPeriodicMeasurement
         "range_linearity_uncertainties_db": None,
         "toneburst_responses_db": {"F": [-1.0, -18.0, -27.0]},
         "toneburst_uncertainties_db": {"F": [0.2, 0.2, 0.2]},
-        "c_peak_differences_db": None,
+        "c_peak_differences": None,
         "c_peak_uncertainties_db": None,
         "c_peak_overload_indicated": None,
-        "overload_difference_db": None,
+        "overload_difference": None,
         "overload_uncertainty_db": None,
         "overload_latched": None,
     }
@@ -263,7 +263,7 @@ def test_table_5_matches_the_page() -> None:
     ):
         assert row.signal == signals.get(cycles, cycles)
         assert row.nominal_frequency_hz == _number(frequency)
-        assert row.reference_difference_db == _number(reference)
+        assert row.reference_difference == _number(reference)
         assert row.limits_db(1) == _limits(class_1)
         assert row.limits_db(2) == _limits(class_2)
 
@@ -611,9 +611,7 @@ def _limit_cases() -> list[_Limit]:
                 "c_peak",
                 cls,
                 _limits(row[2 + cls]),
-                lambda v, k=k: {
-                    "c_peak_differences_db": _placed([3.4, 2.4, 2.4], k, v)
-                },
+                lambda v, k=k: {"c_peak_differences": _placed([3.4, 2.4, 2.4], k, v)},
                 _number(row[2]),
             )
         cases += _both_limits(
@@ -621,7 +619,7 @@ def _limit_cases() -> list[_Limit]:
             "overload",
             cls,
             _text_limits("5.11.3", cls),
-            lambda v: {"overload_difference_db": v},
+            lambda v: {"overload_difference": v},
         )
         cases += _both_limits(
             "21",
@@ -860,7 +858,7 @@ def test_toneburst_and_peak_deviations_are_taken_from_the_tables() -> None:
             (
                 "linearity_deviations_db",
                 "linearity_uncertainties_db",
-                "linearity_levels_db",
+                "linearity_levels",
                 *_PROCEDURE,
             ),
             "16",
@@ -872,7 +870,7 @@ def test_toneburst_and_peak_deviations_are_taken_from_the_tables() -> None:
             "14.2",
         ),
         (
-            ("overload_difference_db", "overload_uncertainty_db", "overload_latched"),
+            ("overload_difference", "overload_uncertainty_db", "overload_latched"),
             "20",
         ),
     ],
@@ -892,7 +890,7 @@ def test_17_and_19_left_out_and_not_declared_keep_the_test_open() -> None:
     record = _record(
         range_linearity_deviations_db=None,
         range_linearity_uncertainties_db=None,
-        c_peak_differences_db=None,
+        c_peak_differences=None,
         c_peak_uncertainties_db=None,
         c_peak_overload_indicated=None,
     )
@@ -946,7 +944,7 @@ def test_class_1_provides_c_even_when_no_clause_names_it() -> None:
         self_noise_electrical_db={"A": 12.0},
         weighting_at_1khz_deviations_db=None,
         weighting_at_1khz_uncertainties_db=None,
-        c_peak_differences_db=None,
+        c_peak_differences=None,
         c_peak_uncertainties_db=None,
         c_peak_overload_indicated=None,
     )
@@ -970,7 +968,7 @@ def test_class_1_provides_c_even_when_no_clause_names_it() -> None:
 def test_a_c_weighted_peak_result_shows_the_meter_provides_c() -> None:
     """IEC 61672-1 5.1.10: a meter with C-weighted peak measures C-weighted Leq."""
     record = _class_2_record(
-        c_peak_differences_db=[3.4, 2.4, 2.4],
+        c_peak_differences=[3.4, 2.4, 2.4],
         c_peak_uncertainties_db=[0.3] * 3,
         c_peak_overload_indicated=False,
     )
@@ -1078,7 +1076,7 @@ def test_an_s_toneburst_shows_the_s_display_14_3_compares() -> None:
     record = _record(
         time_weighting_at_1khz_deviations_db=None,
         time_weighting_at_1khz_uncertainties_db=None,
-        overload_difference_db=None,
+        overload_difference=None,
         overload_uncertainty_db=None,
         overload_latched=None,
     )
@@ -1093,13 +1091,13 @@ def test_an_s_toneburst_shows_the_s_display_14_3_compares() -> None:
 def test_an_overload_test_shows_the_time_averaged_display() -> None:
     """20.1 tests only a meter that displays time-averaged sound level."""
     record = _class_2_record(
-        overload_difference_db=0.2,
+        overload_difference=0.2,
         overload_uncertainty_db=0.2,
         overload_latched=True,
     )
     assert _verify(record, 2).missing == ("14.3",)
     compared = _class_2_record(
-        overload_difference_db=0.2,
+        overload_difference=0.2,
         overload_uncertainty_db=0.2,
         overload_latched=True,
         time_weighting_at_1khz_deviations_db={"S": 0.0},
@@ -1166,7 +1164,7 @@ def _linearity(levels: list[float], **over: Any) -> dict[str, Any]:
     return {
         "linearity_deviations_db": [0.1] * len(levels),
         "linearity_uncertainties_db": [0.2] * len(levels),
-        "linearity_levels_db": levels,
+        "linearity_levels": levels,
         **over,
     }
 
@@ -1192,12 +1190,12 @@ def test_one_step_of_clause_16_does_not_pass() -> None:
     record = _record(
         linearity_deviations_db=[0.0],
         linearity_uncertainties_db=[0.2],
-        linearity_levels_db=None,
+        linearity_levels=None,
     )
     result = _verify(record, pattern_approval_public=True)
     assert not result.passes
     assert _16_gaps(result) == [
-        "the record does not give 'linearity_levels_db', and without it it cannot "
+        "the record does not give 'linearity_levels', and without it it cannot "
         "show that the steps rise from the starting point up to the first "
         "indication of overload and fall to the first indication of under-range "
         "(16.3)"
@@ -1214,8 +1212,8 @@ def test_a_record_without_the_extent_of_clause_16_names_what_it_lacks() -> None:
     assert len(gaps) == 1
     assert gaps[0].startswith(
         "the record does not give 'linear_operating_range_db', "
-        "'linearity_starting_point_db', 'linearity_overload_level_db' and "
-        "'linearity_under_range_level_db', and without them"
+        "'linearity_starting_point_db', 'linearity_overload_level' and "
+        "'linearity_under_range_level', and without them"
     )
 
 
@@ -1326,7 +1324,7 @@ def test_an_overload_inside_the_linear_operating_range_fails_clause_16() -> None
     """16.4 with IEC 61672-1 5.6.10: the range is free of both indications."""
     record = _record(
         **_linearity([level for level in _STEPS_DB if level != 120.0]),
-        linearity_overload_level_db=120.0,
+        linearity_overload_level=120.0,
     )
     result = _verify(record, pattern_approval_public=True)
     check = (
@@ -1340,7 +1338,7 @@ def test_an_overload_inside_the_linear_operating_range_fails_clause_16() -> None
     assert _16_gaps(result) == []
     under = _record(
         **_linearity([level for level in _STEPS_DB if level != 55.0]),
-        linearity_under_range_level_db=55.0,
+        linearity_under_range_level=55.0,
     )
     assert _verify(under).failed == (("16", check),)
 
@@ -1359,22 +1357,22 @@ def test_an_overload_inside_the_linear_operating_range_fails_clause_16() -> None
             "starting point of 125 dB lies outside",
         ),
         (
-            {"linearity_overload_level_db": 120.0},
+            {"linearity_overload_level": 120.0},
             "at or above the first indication of overload",
         ),
         (
-            {"linearity_under_range_level_db": 60.0},
+            {"linearity_under_range_level": 60.0},
             "at or below the first indication of under-range",
         ),
         (
-            {"linearity_under_range_level_db": 55.0},
+            {"linearity_under_range_level": 55.0},
             "at or below the first indication of under-range",
         ),
         (
             {
                 "linearity_deviations_db": None,
                 "linearity_uncertainties_db": None,
-                "linearity_levels_db": None,
+                "linearity_levels": None,
             },
             "describe the steps of Clause 16, whose results are missing",
         ),
@@ -1733,7 +1731,7 @@ def test_a_time_averaged_display_settles_the_sound_exposure_level() -> None:
         (
             {"c_weighted_peak": False},
             {
-                "c_peak_differences_db": [3.4, 2.4, 2.4],
+                "c_peak_differences": [3.4, 2.4, 2.4],
                 "c_peak_uncertainties_db": [0.3] * 3,
                 "c_peak_overload_indicated": False,
             },
@@ -1852,7 +1850,7 @@ def test_a_meter_without_f_has_no_s() -> None:
         (
             {"c_weighted_peak": None},
             {
-                "c_peak_differences_db": [3.4, 2.4, 2.4],
+                "c_peak_differences": [3.4, 2.4, 2.4],
                 "c_peak_uncertainties_db": [0.3] * 3,
                 "c_peak_overload_indicated": False,
             },
@@ -2039,7 +2037,7 @@ def test_checks_not_recorded_leave_the_clause_incomplete() -> None:
 
 def test_a_peak_signal_not_measured_leaves_clause_19_incomplete() -> None:
     record = _record(
-        c_peak_differences_db=[3.4, _NAN, 2.4],
+        c_peak_differences=[3.4, _NAN, 2.4],
         c_peak_uncertainties_db=[0.3, _NAN, 0.3],
     )
     result = _verify(record)
@@ -2181,7 +2179,7 @@ def test_a_4_4_result_must_be_over_its_maximum() -> None:
 
 def test_a_heading_keeps_the_capital_of_a_weighting_letter() -> None:
     """Clause 19, "C-weighted peak sound level", stays C in running text."""
-    result = _verify(_record(c_peak_differences_db=[5.6, 2.5, 2.3]))
+    result = _verify(_record(c_peak_differences=[5.6, 2.5, 2.3]))
     assert "clause 19 (C-weighted peak sound level), one cycle, 8 kHz:" in (
         result.statement
     )
@@ -2247,7 +2245,7 @@ _ELECTRICAL_SPLIT = "electrical_weighting_uncertainties_without_correction_data_
             {"linearity_uncertainties_db": [0.2] * 17 + [-0.1]},
             "'linearity_uncertainties_db' must be non-negative",
         ),
-        ({"linearity_levels_db": [94.0]}, "'linearity_levels_db' labels"),
+        ({"linearity_levels": [94.0]}, "'linearity_levels' labels"),
         (
             {"linearity_deviations_db": _placed(_LINEARITY_DB, 1, _NAN)},
             "'linearity_deviations_db' must hold finite values",
@@ -2543,8 +2541,8 @@ def _dense_16() -> dict[str, Any]:
         levels,
         linear_operating_range_db=[40.0, 120.0],
         linearity_starting_point_db=94.0,
-        linearity_overload_level_db=123.0,
-        linearity_under_range_level_db=37.0,
+        linearity_overload_level=123.0,
+        linearity_under_range_level=37.0,
     )
 
 

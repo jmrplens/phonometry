@@ -113,10 +113,10 @@ a = metrology.adjustment_value(
     f3,
     94.0 + response,           # the meter in a 94 dB free field, before the adjustment
     94.35,                     # L4': the same meter on its calibrator
-    calibrator_level_db=94.0,  # L1, stated for the calibrator
+    calibrator_level=94.0,  # L1, stated for the calibrator
     tolerance_db=tolerance,
 )
-print(round(a.sensitivity_adjustment_db, 2), round(a.adjustment_db, 2))  # -0.37 0.02
+print(round(a.sensitivity_adjustment, 2), round(a.adjustment, 2))  # -0.37 0.02
 print(round(a.check_frequency_offset_db, 2))                           # 0.15
 a.plot()
 ```
@@ -126,8 +126,8 @@ The fit lowers the sensitivity by 0,37 dB, the calibrator then reads
 meter reads a free field 0,15 dB high, $L_2 - L_1$: that is the offset the
 fit chose so that the response sits inside the tolerances everywhere else. A
 tolerance of `np.inf` leaves a band out of the fit, and
-`pressure_indicated_level_db=` adds the pressure response, from which
-`pressure_to_free_field_correction_db` and $L_3$ follow.
+`pressure_indicated_level=` adds the pressure response, from which
+`pressure_to_free_field_correction` and $L_3$ follow.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/free_field_adjustment.svg" alt="The deviation of the synthetic meter's free-field indication from the incident level at the 25 one-third octaves from 63 Hz to 16 kHz, before the adjustment (dashed grey, about +0.3 to +0.5 dB up to 8 kHz and falling to -0.8 dB at 16 kHz) and after it (solid, 0.37 dB lower, within 0.15 dB of zero up to 6.3 kHz and -1.2 dB at 16 kHz), inside the shaded tolerance band of plus or minus 1 dB narrowing to 0.7 dB at 1 kHz and widening to 2.5 dB at 16 kHz, with a dotted line at the calibration check frequency of 1 kHz; the title reads Adjustment value Delta L = L1 - L4 = 0.02 dB" width="88%" />
 
@@ -191,9 +191,9 @@ c = metrology.sound_calibrator_correction(
     94.0 + c_ff_rm,                # L_ind2: the reference in its place
     94.0 + pressure + spread / 2,  # L_ind3: the calibrator on the meter
     94.0,                          # L_ind4: the calibrator on the reference
-    reference_free_field_correction_db=c_ff_rm,
+    reference_free_field_correction=c_ff_rm,
 )
-print(c.correction_db.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
+print(c.correction.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
 print(c.range_db.round(2))       # [0.   0.   0.01 0.01 0.02 0.04 0.08 0.13 0.23]
 print(c.clause, c.formula)       # 12 D.7
 c.plot()
@@ -211,14 +211,14 @@ judges "the range of correction values at each frequency measured using a
 sample of three microphones", not the spread between the calibrators. Given
 nine rows, `microphones=[1, 1, 1, 2, 2, 2, 3, 3, 3]` says which rows share a
 microphone, and `range_db` is then the range of the three microphones' mean
-corrections, `microphone_corrections_db`. Without it every row counts as a
+corrections, `microphone_corrections`. Without it every row counts as a
 microphone of its own, as the three rows above do.
 
 **Annex E, a comparison coupler.** The meter and the reference face each other
 in the two openings of one cavity, so the third measurement reads both at
 once. `metrology.comparison_coupler_correction` takes the same free-field
-readings and the two readings in the coupler, `slm_coupler_level_db` and
-`reference_coupler_level_db`, named by what each is of. That naming is on
+readings and the two readings in the coupler, `slm_coupler_level` and
+`reference_coupler_level`, named by what each is of. That naming is on
 purpose: Figure E.1, its list of symbols and Table I.1 call the reference's
 reading $L_\mathrm{ind3a}$ and the meter's $L_\mathrm{ind3b}$, while Formulas
 (E.4) to (E.6) are written the other way round, as (D.5) to (D.7) are for a
@@ -252,14 +252,14 @@ e = metrology.electrostatic_actuator_correction(
     94.0 + free + spread,                  # L_ind1(f)
     94.0 - 26.0 + c_ff_rm,                 # L_ind2(f): the reference channel, dB re 1 V
     94.0 - 0.08 * x**1.7 + spread / 2,     # L_ind3(f): the actuator on the meter
-    reference_sensitivity_level_db=-26.0 + c_ff_rm,   # S_RM(f), dB re 1 V/Pa
+    reference_sensitivity_level=-26.0 + c_ff_rm,   # S_RM(f), dB re 1 V/Pa
 )
-print(e.correction_db.round(2))  # [-0.07 -0.12 -0.13 -0.09  0.    0.18  0.64  2.16  7.39]
+print(e.correction.round(2))  # [-0.07 -0.12 -0.13 -0.09  0.    0.18  0.64  2.16  7.39]
 ```
 
 The drive voltage of the actuator is taken to be independent of frequency, so
 its simulated level is the same at $f$ and $f_0$ (NOTE 4); pass
-`actuator_level_db=` when it is not, and `reference_channel_gain_db=` for a
+`actuator_level=` when it is not, and `reference_channel_gain_db=` for a
 reference channel that is not flat.
 
 ## 4. The uncertainty budget of Annex I
@@ -358,15 +358,15 @@ budgets = [
         {**table_i2, "a7": u7, "a11": u11, "a12": u11, "a15": u15},
         repeatability_dof=2,
         frequency_hz=fx,
-        correction_db=cx,
+        correction=cx,
     )
-    for fx, u7, u11, u15, cx in zip(f, a7, a11, a15, c.correction_db, strict=True)
+    for fx, u7, u11, u15, cx in zip(f, a7, a11, a15, c.correction, strict=True)
 ]
 v = metrology.verify_correction_uncertainty(
     f,
     [b.expanded_uncertainty_db for b in budgets],
     clause=c.clause,
-    correction_db=c.correction_db,
+    correction=c.correction,
     coverage_factor=[b.coverage_factor for b in budgets],
     correction_range_db=c.range_db,
 )

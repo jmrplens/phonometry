@@ -479,7 +479,7 @@ def free_field_reciprocity(
     relative_humidity_percent: float,
     acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0, 0.0),
     dispersion: bool = True,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    corrections: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
 ) -> ReciprocityCalibration:
     r"""The free-field sensitivities of three microphones calibrated in pairs
@@ -515,7 +515,7 @@ def free_field_reciprocity(
         the diaphragms, which Annex A allows at sufficiently remote points).
     :param dispersion: Whether :math:`k` takes the speed of sound with the
         dispersion of IEC 61094-2 F.3 (Default: ``True``).
-    :param corrections_db: Corrections added to every level (Default: none).
+    :param corrections: Corrections added to every level (Default: none).
     :param expanded_uncertainty_db: The expanded uncertainty, in dB (Default:
         ``None``).
     :return: The :class:`~phonometry.metrology.ReciprocityCalibration`.
@@ -561,7 +561,7 @@ def free_field_reciprocity(
         products,
         None,
         field="free_field",
-        corrections_db=corrections_db,
+        corrections=corrections,
         expanded_uncertainty_db=expanded_uncertainty_db,
     )
 
@@ -577,7 +577,7 @@ def free_field_reciprocity_pair(
     relative_humidity_percent: float,
     acoustic_centers_m: Sequence[ArrayLike] = (0.0, 0.0),
     dispersion: bool = True,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    corrections: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
 ) -> ReciprocityCalibration:
     r"""The complex free-field sensitivities of two microphones and an
@@ -607,7 +607,7 @@ def free_field_reciprocity_pair(
         positive in front of the diaphragm, in m (Default: the diaphragms).
     :param dispersion: Whether :math:`k` includes dispersion (Default:
         ``True``).
-    :param corrections_db: Corrections added to both levels (Default: none).
+    :param corrections: Corrections added to both levels (Default: none).
     :param expanded_uncertainty_db: The expanded uncertainty, in dB (Default:
         ``None``).
     :return: The :class:`~phonometry.metrology.ReciprocityCalibration`, of two
@@ -642,7 +642,7 @@ def free_field_reciprocity_pair(
         [product],
         sensitivity_ratio,
         field="free_field",
-        corrections_db=corrections_db,
+        corrections=corrections,
         expanded_uncertainty_db=expanded_uncertainty_db,
     )
 

@@ -335,10 +335,10 @@ def test_result_structure() -> None:
 
 
 def _tone_signal(
-    level_db: float, freq: float = 1000.0, seconds: float = 1.0
+    level: float, freq: float = 1000.0, seconds: float = 1.0
 ) -> np.ndarray:
     t = np.arange(int(FS * seconds)) / FS
-    amp = np.sqrt(2.0) * 2e-5 * 10 ** (level_db / 20.0)
+    amp = np.sqrt(2.0) * 2e-5 * 10 ** (level / 20.0)
     return amp * np.sin(2.0 * np.pi * freq * t)
 
 

@@ -67,7 +67,7 @@ from .facade import (
     radiated_sound_power,
 )
 from .installed_structure_borne import (
-    MIN_MULTI_JUNCTION_KIJ_DB,
+    MIN_MULTI_JUNCTION_KIJ,
     REFERENCE_AREA_M2,
     TABLE_D1_QUANTITIES,
     TABLE_F1_FORCE_LEVEL,
@@ -163,7 +163,7 @@ from .simplified_model import (
 __all__ = [
     "CEILING_ATTENUATION_CONTOUR",
     "EN_12354_AIR",
-    "MIN_MULTI_JUNCTION_KIJ_DB",
+    "MIN_MULTI_JUNCTION_KIJ",
     "PLATEAU_MATERIALS",
     "REFERENCE_AREA_M2",
     "TABLE_D1_QUANTITIES",

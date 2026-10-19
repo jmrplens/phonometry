@@ -156,7 +156,7 @@ polyphase resampling (44.1 to 48 kHz is the ratio 160/147) with a lowpass
 FIR designed *inside the function* by the Kaiser window method, from two
 numbers the caller controls:
 
-- `stopband_attenuation_db` (default 120): the alias rejection, with the
+- `stopband_attenuation` (default 120): the alias rejection, with the
   stopband starting exactly at the smaller of the two Nyquist frequencies,
   where folding happens;
 - `transition_width` (default 0.05): the fraction of that Nyquist frequency
@@ -211,7 +211,7 @@ ax.axvline(res.passband_edge_hz, color="g", linestyle="--",
            label="Passband edge")
 ax.axvline(res.stopband_edge_hz, color="r", linestyle="--",
            label="Stopband edge (alias fold)")
-ax.axhline(-res.stopband_attenuation_db, color="k", linestyle=":",
+ax.axhline(-res.stopband_attenuation, color="k", linestyle=":",
            label="Design attenuation -120 dB")
 ax.axvspan(res.stopband_edge_hz, 4 * res.stopband_edge_hz,
            color="r", alpha=0.08)

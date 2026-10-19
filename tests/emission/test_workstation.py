@@ -55,7 +55,7 @@ def test_annex_b_example_2_reproduces_end_to_end() -> None:
     mean = _energy_mean([77.5, 76.0, 77.2, 77.7, 75.9])
     assert mean == pytest.approx(76.9, abs=0.05)
 
-    level = ws.emission_sound_pressure_level(mean, local_correction_db=k3)
+    level = ws.emission_sound_pressure_level(mean, local_correction=k3)
     assert level == pytest.approx(73.2, abs=0.05)
 
     sigma = ws.total_standard_deviation(1.5, 1.0)
@@ -82,7 +82,7 @@ def test_annex_b_example_3_background_correction() -> None:
     assert k1 == pytest.approx(0.6, abs=0.05)
     assert not held
     assert ws.emission_sound_pressure_level(
-        79.0, background_correction_db=k1
+        79.0, background_correction=k1
     ) == pytest.approx(78.4, abs=0.05)
 
 
@@ -156,7 +156,7 @@ def test_k3_is_continuous_where_the_cap_takes_over() -> None:
     """
     just_above = ws.local_environmental_correction(0.2 + 1e-9)
     assert just_above == pytest.approx(6.9897, abs=1e-4)
-    assert ws.MAX_K3_DB - just_above == pytest.approx(0.0103, abs=1e-4)
+    assert ws.MAX_K3 - just_above == pytest.approx(0.0103, abs=1e-4)
 
 
 def test_k3_never_comes_back_as_minus_zero() -> None:
@@ -204,7 +204,7 @@ def test_it_stops_following_k2_at_the_cap() -> None:
     """
     for k2 in (8.0, 10.0, 20.0):
         k3 = ws.local_environmental_correction(ws.environmental_ratio_from_k2(k2))
-        assert k3 == pytest.approx(ws.MAX_K3_DB)
+        assert k3 == pytest.approx(ws.MAX_K3)
         assert k3 < k2
 
 
@@ -355,10 +355,10 @@ def test_a_spectrum_in_gives_a_spectrum_out() -> None:
 def _result(**overrides: object) -> ws.EmissionPressureResult:
     """Annex B Example 2 as a result, which is what the figure draws."""
     fields: dict[str, object] = {
-        "level_db": 73.2,
-        "measured_level_db": 76.9,
-        "background_correction_db": 0.0,
-        "local_correction_db": 3.7,
+        "level": 73.2,
+        "measured_level": 76.9,
+        "background_correction": 0.0,
+        "local_correction": 3.7,
         "grade": "engineering",
         "background_margin_db": 20.0,
         "standard": "ISO 11202",
@@ -443,9 +443,9 @@ def test_the_figure_refuses_a_spectrum() -> None:
     import matplotlib.pyplot as plt
 
     bands = _result(
-        level_db=np.array([70.0, 71.0]),
-        measured_level_db=np.array([74.0, 75.0]),
-        local_correction_db=np.array([4.0, 4.0]),
+        level=np.array([70.0, 71.0]),
+        measured_level=np.array([74.0, 75.0]),
+        local_correction=np.array([4.0, 4.0]),
     )
     with pytest.raises(ValueError, match="one determination"):
         bands.plot()

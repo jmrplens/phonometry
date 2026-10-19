@@ -128,7 +128,7 @@ __all__ = [
 class ProgramSpectrumBand(RichDisplay):
     """One row of IEC 60268-1:1985 Table II.
 
-    :ivar relative_level_db: The relative level of the one-third-octave band,
+    :ivar relative_level: The relative level of the one-third-octave band,
         in dB.
     :ivar tolerance_plus_db: The upper tolerance, in dB, as printed (a
         positive number).
@@ -136,7 +136,7 @@ class ProgramSpectrumBand(RichDisplay):
         positive number).
     """
 
-    relative_level_db: float
+    relative_level: float
     tolerance_plus_db: float
     tolerance_minus_db: float
 
@@ -306,7 +306,7 @@ def _band_levels_of_nodes(nodes_db: NDArray[np.float64]) -> NDArray[np.float64]:
 def _table_nodes_db() -> tuple[float, ...]:
     """The node levels that put every band of Table II on its printed level."""
     target = np.array(
-        [row.relative_level_db for row in SIMULATED_PROGRAM_SPECTRUM.values()]
+        [row.relative_level for row in SIMULATED_PROGRAM_SPECTRUM.values()]
     )
     nodes = target.copy()
     for _ in range(_FIT_ITERATIONS):
@@ -463,7 +463,7 @@ class ProgramSignalCheck(OwnsArrays):
 
     :ivar frequencies: The nominal frequencies of the bands judged, in Hz,
         ascending.
-    :ivar band_levels_db: The band levels as given, in dB, in the order of
+    :ivar band_levels: The band levels as given, in dB, in the order of
         :attr:`frequencies`.
 
     Table II's relative levels and tolerances at the bands, and the offset
@@ -472,7 +472,7 @@ class ProgramSignalCheck(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    band_levels_db: NDArray[np.float64]
+    band_levels: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a band Table II does not print, or levels of another length.
@@ -487,7 +487,7 @@ class ProgramSignalCheck(OwnsArrays):
                     "band of IEC 60268-1 Table II."
                 )
                 raise ValueError(msg)
-        levels = np.asarray(self.band_levels_db, dtype=np.float64)
+        levels = np.asarray(self.band_levels, dtype=np.float64)
         if levels.shape != np.shape(self.frequencies) or not np.all(
             np.isfinite(levels)
         ):
@@ -501,9 +501,9 @@ class ProgramSignalCheck(OwnsArrays):
         ]
 
     @property
-    def relative_levels_db(self) -> NDArray[np.float64]:
+    def relative_levels(self) -> NDArray[np.float64]:
         """Table II's relative levels at the bands, in dB."""
-        return np.array([row.relative_level_db for row in self._rows()])
+        return np.array([row.relative_level for row in self._rows()])
 
     @property
     def tolerance_plus_db(self) -> NDArray[np.float64]:
@@ -523,8 +523,8 @@ class ProgramSignalCheck(OwnsArrays):
         tolerance, or, when no level does, the level that shares the worst
         excursion equally between the two sides.
         """
-        table = self.relative_levels_db
-        levels = np.asarray(self.band_levels_db, dtype=np.float64)
+        table = self.relative_levels
+        levels = np.asarray(self.band_levels, dtype=np.float64)
         lowest = float(np.max(table - self.tolerance_minus_db - levels))
         highest = float(np.min(table + self.tolerance_plus_db - levels))
         return 0.5 * (lowest + highest)
@@ -533,7 +533,7 @@ class ProgramSignalCheck(OwnsArrays):
     def deviations_db(self) -> NDArray[np.float64]:
         """Each band's level, referred by :attr:`offset_db`, minus Table II, in dB."""
         return np.asarray(
-            self.band_levels_db + self.offset_db - self.relative_levels_db,
+            self.band_levels + self.offset_db - self.relative_levels,
             dtype=np.float64,
         )
 
@@ -603,7 +603,7 @@ class ProgramSignalCheck(OwnsArrays):
 
 
 def check_program_signal(
-    frequencies: ArrayLike, band_levels_db: ArrayLike
+    frequencies: ArrayLike, band_levels: ArrayLike
 ) -> ProgramSignalCheck:
     r"""Is this one-third-octave spectrum the programme signal of IEC 60268-1?
 
@@ -620,22 +620,22 @@ def check_program_signal(
 
     :param frequencies: Band centre frequencies, in Hz, nominal or exact,
         each a band of Table II (20 Hz to 20 kHz) and none repeated.
-    :param band_levels_db: The band levels, in dB, on any reference.
+    :param band_levels: The band levels, in dB, on any reference.
     :return: A :class:`ProgramSignalCheck`.
     :raises ValueError: If the inputs differ in length, a frequency is not a
         band of Table II or appears twice, a level is not finite, or fewer than
         two bands are given.
     """
     f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
-    levels = np.atleast_1d(np.asarray(band_levels_db, dtype=np.float64))
+    levels = np.atleast_1d(np.asarray(band_levels, dtype=np.float64))
     if f.ndim != 1 or levels.shape != f.shape:
-        msg = "'frequencies' and 'band_levels_db' must be 1-D and of equal length."
+        msg = "'frequencies' and 'band_levels' must be 1-D and of equal length."
         raise ValueError(msg)
     if f.size < _MIN_BANDS:
         msg = f"At least {_MIN_BANDS} bands are needed to judge a relative spectrum."
         raise ValueError(msg)
     if not np.all(np.isfinite(levels)):
-        msg = "'band_levels_db' must be finite."
+        msg = "'band_levels' must be finite."
         raise ValueError(msg)
     if not (np.all(np.isfinite(f)) and np.all(f > 0.0)):
         msg = "'frequencies' must hold positive, finite frequencies."
@@ -647,5 +647,5 @@ def check_program_signal(
     order = np.argsort(nominal)
     return ProgramSignalCheck(
         frequencies=read_only(nominal[order]),
-        band_levels_db=levels[order],
+        band_levels=levels[order],
     )

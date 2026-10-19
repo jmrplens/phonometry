@@ -58,6 +58,20 @@ and a quantity whose unit never changes does not put it in the name. A public
 function or method whose name ends in one of :data:`FUNCTION_REJECTED_UNITS`
 (a level, a correction, a difference, an index or a tolerance in decibels, a
 frequency in hertz) is reported with the name it reads as without it.
+One more is about decibels. A level and a level difference are in decibels
+by definition, so a name whose head noun is one (a level, a loss, an
+insulation, an isolation, a reduction, a rejection, a difference, an
+improvement, a single-value attenuation, a correction, an adjustment, an
+index, an emergence, the adaptation term of ISO 717, a shift, an increase,
+a decrease or an excess of a named level, or the printed symbol of one)
+says its unit already and carries no ``_db`` (:func:`decibel_head`): any
+public name that does is reported with the name it reads as without it. A name whose head noun does not say decibel (a
+tolerance, a margin, an uncertainty, a deviation, a step, a slope, a rate,
+a ratio, a difference of another quantity) keeps it, and the parameter rule
+above still asks it of a bare one: a plateau height in decibels named
+``plateau_height`` fails as it always did. :data:`LEVEL_SUFFIX_EXEMPT` lists
+the names that keep the suffix under such a noun, each with its reason.
+
 :data:`FUNCTION_UNIT_EXEMPT` lists the methods that keep the suffix, each with
 its reason.
 """
@@ -374,22 +388,6 @@ _A_ROW_ACCESSOR = (
 )
 FUNCTION_UNIT_EXEMPT: dict[tuple[str, str], str] = {
     (
-        "phonometry.noise_control.duct_walls",
-        "DuctWallSpectrum.transmission_loss_db",
-    ): _A_ROW_ACCESSOR,
-    (
-        "phonometry.building.catalogue",
-        "TransmissionLossSpectrum.transmission_loss_db",
-    ): _A_ROW_ACCESSOR,
-    (
-        "phonometry.building.datasheets",
-        "SoundReductionSpectrum.sound_reduction_index_db",
-    ): _A_ROW_ACCESSOR,
-    (
-        "phonometry.building.datasheets",
-        "ImpactImprovementSpectrum.impact_improvement_db",
-    ): _A_ROW_ACCESSOR,
-    (
         "phonometry.metrology.sound_level_meter",
         "PeakReference.limits_db",
     ): _A_ROW_ACCESSOR,
@@ -397,13 +395,6 @@ FUNCTION_UNIT_EXEMPT: dict[tuple[str, str], str] = {
         "phonometry.metrology.sound_level_meter",
         "ToneburstReference.limits_db",
     ): _A_ROW_ACCESSOR,
-    (
-        "phonometry.electroacoustics.induction_loop_components",
-        "LoopField.level_db",
-    ): (
-        "the field strength in decibels re 400 mA/m, beside the same field in "
-        "A/m that the record holds, so the unit says which of the two it returns"
-    ),
     ("phonometry.signals.windows", "WindowMetricsResult.enbw_hz"): (
         "the equivalent noise bandwidth in hertz, beside the same bandwidth in "
         "bins that the record holds as enbw_bins"
@@ -413,7 +404,8 @@ FUNCTION_UNIT_EXEMPT: dict[tuple[str, str], str] = {
 #: Published constants under the rule that stay without a unit, keyed by the
 #: module that owns them, with the reason. Every one is a count, a label, a
 #: pure number or a set of figures that carry their own units; a constant in
-#: decibels says so with ``_DB`` instead of a place here.
+#: decibels says so with ``_DB`` instead of a place here, or by its head noun
+#: when it names a level or a level difference (:func:`decibel_head`).
 _A_COUNT = "a count, which is what the name already says"
 _A_LABEL = (
     "the number Clause 5.2 of IEC 60534-8-3 gives a noise regime, a label and "
@@ -1190,15 +1182,262 @@ def holds_a_truth_value(annotation: str) -> bool:
     return bool(parts) and parts - {"None"} == {"bool"}
 
 
-def declares_its_unit(name: str) -> bool:
-    """Whether the name ends in a unit or says it carries none."""
+#: The head nouns of a level. A level is in decibels by definition and names
+#: its reference elsewhere, so a name whose head noun is one of these carries
+#: no ``_db``. ``spl``, ``lw``, ``lwa`` and ``leq`` are the abbreviations of a
+#: sound pressure, a sound power and an equivalent level that names spell as
+#: a word.
+LEVEL_NOUNS = frozenset({"level", "levels", "spl", "lw", "lwa", "leq"})
+
+#: The head nouns of a level difference that only ever hold decibels: an
+#: index (the sound reduction index, the directivity index, a single-number
+#: index) and a correction, which the parameter rule already reads as
+#: declaring their unit (:data:`DIMENSIONLESS`), and an emergence, the
+#: ambient level less the residual one (IEC TS 61400-11-2:2024 Equation
+#: (J.1)).
+LEVEL_DIFFERENCE_NOUNS = frozenset(
+    {"index", "indices", "correction", "corrections", "emergence", "emergences"}
+)
+
+#: The head nouns of a level difference that a name can also give to a
+#: difference of another quantity: a phase difference is in radians, a
+#: pressure loss in pascals and a temperature reduction in kelvin. They say
+#: decibel when the name names no other quantity (:func:`names_a_quantity`),
+#: or names the level they are the difference of (``pressure_level_difference``).
+#: An ``attenuation`` here is a single value; a rate per distance ends in
+#: one of :data:`RATE_UNITS` instead. An ``adjustment`` is a quantity added
+#: to a level (ISO 1996-1:2016, 3.3.1), an ``isolation`` the level with a
+#: seal absent less the level with it on, and a ``rejection`` the drop of a
+#: level the way an insertion loss is.
+BOUND_DIFFERENCE_NOUNS = frozenset(
+    {
+        "difference",
+        "differences",
+        "loss",
+        "losses",
+        "insulation",
+        "isolation",
+        "reduction",
+        "reductions",
+        "rejection",
+        "rejections",
+        "improvement",
+        "improvements",
+        "attenuation",
+        "attenuations",
+        "adjustment",
+        "adjustments",
+    }
+)
+
+#: The head nouns of a change that is a level difference only when the name
+#: names the level that changes: a ``level_shift``, a ``level_increase`` or a
+#: ``level_excess`` is in decibels, while the ``shift`` of a rating curve is
+#: a step of the absorption coefficient and a ``drop_height`` a length.
+LEVEL_CHANGE_NOUNS = frozenset(
+    {
+        "shift",
+        "shifts",
+        "increase",
+        "increases",
+        "decrease",
+        "decreases",
+        "excess",
+        "drop",
+        "drops",
+        "rise",
+        "rises",
+        "change",
+        "changes",
+        "increment",
+        "increments",
+    }
+)
+
+#: The spectrum adaptation term of ISO 717-1 and ISO 717-2, which the
+#: standards define as a value in decibels added to a single-number rating:
+#: a correction to a level difference, named by its two words.
+_ADAPTATION_TERM = ("adaptation", "term")
+
+#: A name spelled as the printed symbol of a level, read by its first word:
+#: :math:`L` with its subscripts (``l_n``, ``l_i_fmax``, ``l1``, ``lp_aeqt``),
+#: and an improvement or a reduction written :math:`\Delta L` or
+#: :math:`\Delta R` (``delta_lw``, ``delta_rw``).
+_DECIBEL_SYMBOL = re.compile(r"l\d*|lw|lwa|lp|spl")
+_DELTA_OF_A_LEVEL = re.compile(r"[lr].*")
+
+#: An :math:`\ell` with a number is a length in ``materials``: the distances
+#: :math:`\ell_1` and :math:`\ell_2` from the specimen to the nearest
+#: microphones of ASTM E2611 (``l1``, ``l2``), not the :math:`L` of a level.
+_LENGTH_SYMBOL = re.compile(r"l\d*")
+LENGTH_SYMBOL_PACKAGES = ("phonometry.materials",)
+
+#: Symbols that say decibel inside one package only, read as the first word of
+#: a name or as its head (``min_multi_junction_kij``, ``max_k3``). In
+#: ``building`` the sound reduction index :math:`R` (``r_s_w``), a level
+#: difference :math:`D` (``d_2m_nt``), the C, Ctr and CI of ISO 717, the
+#: spectrum adaptation terms of a rating, and the vibration reduction index
+#: :math:`K_{ij}` of EN ISO 12354-1 with the path indices :math:`K_{Ff}`,
+#: :math:`K_{Fd}` and :math:`K_{Df}` (``k_ij``, ``k_ff``, ``kij``). In
+#: ``emission`` the corrections of the sound power standards: :math:`C_1`,
+#: :math:`C_2` and :math:`C_3` for the meteorological conditions, the radiation
+#: impedance and the air absorption (ISO 3745, ISO 6926), and :math:`K_1`,
+#: :math:`K_2` and :math:`K_3` for the background, the environment and the
+#: local environment (ISO 3744, ISO 11202). Elsewhere an ``r`` is a distance
+#: (``r_direct``), a ``d`` a directivity, a ``c`` a gain or a constant of a
+#: weighting function (``c_db`` of the underwater weighting is its gain) and a
+#: ``c1`` a sound speed.
+PACKAGE_DECIBEL_SYMBOLS: dict[str, frozenset[str]] = {
+    "phonometry.building": frozenset({"r", "d", "c", "ctr", "ci", "k", "kij"}),
+    "phonometry.emission": frozenset({"c1", "c2", "c3", "k1", "k2", "k3"}),
+}
+
+#: The first words of a name that is a statistic of what follows: the
+#: standard deviation :math:`\sigma_L` of a level (``sigma_level_db``) or a
+#: standard uncertainty :math:`u`, which are not levels.
+_STATISTIC_SYMBOLS = frozenset({"sigma", "u"})
+
+#: The words that qualify a level from behind without being its head noun:
+#: a band (``_1000``, ``_1khz``), a frequency weighting (``_a``, ``_c``,
+#: ``_z``), the state it was read in (``_before``, ``_after``, ``_with``,
+#: ``_without``, ``_direct``, ``_measured``), a reference (``_ref``,
+#: ``_norm``) or an extreme (``_max``, ``_min``).
+_TRAILING_QUALIFIER = re.compile(
+    r"\d+(?:khz|hz)?|[acz]|before|after|with|without|direct|measured|ref|norm"
+    r"|max|min"
+)
+
+#: A level qualified by a phrase after it: ``band_levels_at_characteristic``,
+#: ``linearity_levels_below_upper``. The head noun is the word before the
+#: first of these.
+_PREPOSITIONS = frozenset({"at", "below", "above", "to", "of", "from", "over"})
+
+
+def _in_package(module: str, package: str) -> bool:
+    """Whether ``module`` is ``package`` or one of its submodules."""
+    return module == package or module.startswith(package + ".")
+
+
+def _package_symbol(word: str, module: str) -> bool:
+    """Whether ``word`` is a symbol that says decibel in the package of ``module``."""
+    return any(
+        _in_package(module, package) and word in symbols
+        for package, symbols in PACKAGE_DECIBEL_SYMBOLS.items()
+    )
+
+
+def _decibel_symbol(words: list[str], module: str) -> bool:
+    """Whether a name split into ``words`` is the symbol of a level or a difference.
+
+    The subscripts after the symbol may say anything but another quantity:
+    an ``l_thickness`` would be a length, whatever its first letter.
+    """
+    rest = "_".join(words[1:])
+    if rest and names_a_quantity(rest, module):
+        return False
+    first = words[0]
+    if _DECIBEL_SYMBOL.fullmatch(first):
+        return not (
+            _LENGTH_SYMBOL.fullmatch(first)
+            and any(_in_package(module, p) for p in LENGTH_SYMBOL_PACKAGES)
+        )
+    if first == "delta" and len(words) > 1 and _DELTA_OF_A_LEVEL.fullmatch(words[1]):
+        return True
+    return _package_symbol(first, module)
+
+
+def _head_says_decibel(words: list[str], module: str) -> bool:
+    """Whether the last word of ``words``, past its qualifiers, says decibel.
+
+    The last word may be a noun or, in its package, the printed symbol of a
+    correction or an index (:data:`PACKAGE_DECIBEL_SYMBOLS`): the cap on
+    :math:`K_3` of ISO 11202 is ``max_k3``.
+    """
+    words = list(words)
+    while len(words) > 1 and _TRAILING_QUALIFIER.fullmatch(words[-1]):
+        words.pop()
+    if tuple(words[-2:]) == _ADAPTATION_TERM:
+        return True
+    head = words[-1]
+    if head in LEVEL_NOUNS or head in LEVEL_DIFFERENCE_NOUNS:
+        return True
+    if _package_symbol(head, module):
+        return True
+    names_a_level = any(word in LEVEL_NOUNS for word in words[:-1])
+    if head in LEVEL_CHANGE_NOUNS:
+        return names_a_level
+    if head not in BOUND_DIFFERENCE_NOUNS:
+        return False
+    stem = "_".join(words[:-1])
+    return names_a_level or not (stem and names_a_quantity(stem, module))
+
+
+def decibel_head(name: str, module: str = "") -> bool:
+    """Whether the head noun of a name says it holds a level or a level difference.
+
+    The head noun is the last word of the name once the words that qualify
+    it from behind are set aside (:data:`_TRAILING_QUALIFIER`), or, when that
+    word says nothing of the kind, the word before a prepositional phrase
+    (:data:`_PREPOSITIONS`): ``band_levels_at_characteristic`` is a level,
+    ``front_to_random_index`` an index. A name spelled as a printed symbol
+    is read by its first word (:data:`_DECIBEL_SYMBOL`), and a name that is
+    a statistic of a level (``sigma_level``) is not a level. ``module`` is
+    where the name is defined, for the symbols that say decibel in one
+    package only.
+    """
+    words = [word for word in name.lower().split("_") if word]
+    if not words or words[0] in _STATISTIC_SYMBOLS:
+        return False
+    if _decibel_symbol(words, module) or _head_says_decibel(words, module):
+        return True
+    cut = next((i for i, word in enumerate(words) if i and word in _PREPOSITIONS), None)
+    return cut is not None and _head_says_decibel(words[:cut], module)
+
+
+def decibel_suffix(name: str, module: str = "") -> str | None:
+    """The ``_db`` a level or a level difference carries in its name, if any.
+
+    The suffix ends the name (``insertion_loss_db``) or stands inside it
+    before a qualifier (``level_db_at``). A ``_db`` that opens a rate
+    (``_db_per_m``) or closes one (``class_densities_per_db``) is a unit of
+    another quantity and is not this one.
+    """
+    words = name.lower().split("_")
+    for position, word in enumerate(words):
+        if word != "db" or not position:
+            continue
+        if words[position - 1] == "per" or words[position + 1 : position + 2] == [
+            "per"
+        ]:
+            continue
+        if decibel_head("_".join(words[:position]), module):
+            return "_" + "_".join(words[position:])
+    return None
+
+
+def declares_its_unit(name: str, module: str = "") -> bool:
+    """Whether the name ends in a unit or says it carries none.
+
+    A level or a level difference says it carries none by its head noun
+    (:func:`decibel_head`), which is why it carries no ``_db``.
+    """
     lowered = name.lower()
-    return lowered.endswith(UNITS) or lowered.endswith(DIMENSIONLESS)
+    return (
+        lowered.endswith(UNITS)
+        or lowered.endswith(DIMENSIONLESS)
+        or decibel_head(lowered, module)
+    )
 
 
-def constant_declares_its_unit(name: str) -> bool:
-    """Whether a constant's name ends in a unit or says it carries none."""
-    return declares_its_unit(name) or name.lower().endswith(CONSTANT_DIMENSIONLESS)
+def constant_declares_its_unit(name: str, module: str = "") -> bool:
+    """Whether a constant's name ends in a unit or says it carries none.
+
+    ``module`` is where the constant is published, for the symbols that say
+    decibel in one package only (``MAX_K3`` in ``emission``).
+    """
+    return declares_its_unit(name, module) or name.lower().endswith(
+        CONSTANT_DIMENSIONLESS
+    )
 
 
 def offenders(
@@ -1220,10 +1459,12 @@ def offenders(
         key = (parameter.module, parameter.qualname, parameter.name)
         if key in EXEMPT or key in POSITIONAL:
             used.add(key)
-            if key in POSITIONAL and not declares_its_unit(parameter.name):
+            if key in POSITIONAL and not declares_its_unit(
+                parameter.name, parameter.module
+            ):
                 unnamed.append(parameter)
             continue
-        if not declares_its_unit(parameter.name):
+        if not declares_its_unit(parameter.name, parameter.module):
             unnamed.append(parameter)
         # Only the dimensional half: a level, a ratio or an index carries no
         # unit to get wrong, so nothing is lost by passing one by position.
@@ -1573,6 +1814,18 @@ PAIR_EXEMPT: dict[tuple[str, str, str], str] = {
         ("r_tr_s", "r_tr_s_w"),
     ),
     **_pair(
+        "the sound reduction index R_s of a joint (ISO 10140-1:2021 Annex J), "
+        "its weighted R_s,w and R_s,w + C, beside the R of a facade element; "
+        + _SUBSCRIPT,
+        "building",
+        ("r", "r_s"),
+        ("r", "r_s_w"),
+        ("r", "r_s_w_c"),
+        ("r_s", "r_s_w"),
+        ("r_s", "r_s_w_c"),
+        ("r_s_w", "r_s_w_c"),
+    ),
+    **_pair(
         "a loudspeaker impedance curve (frequencies, modulus) or a "
         "LoopImpedance record, beside the modulus of an impedance in ohms",
         "electroacoustics",
@@ -1699,8 +1952,8 @@ PAIR_EXEMPT: dict[tuple[str, str, str], str] = {
     **_pair(
         _PATH_AND_RATE,
         "environment",
-        ("attenuation_db", "attenuation_db_per_m"),
-        ("air_attenuation_db", "air_attenuation_db_per_km"),
+        ("attenuation", "attenuation_db_per_m"),
+        ("air_attenuation", "air_attenuation_db_per_km"),
     ),
     **_pair(_FREQUENCY_HZ, "environment", ("frequency", "frequency_hz")),
     **_pair(
@@ -1957,7 +2210,7 @@ def unitless_constants() -> tuple[list[PublicName], list[tuple[str, str]]]:
             continue
         if not (holds_a_single_number(value) or constant_names_a_quantity(entry.name)):
             continue
-        if constant_declares_its_unit(entry.name):
+        if constant_declares_its_unit(entry.name, entry.module):
             continue
         key = (entry.module, entry.name)
         if key in CONSTANT_EXEMPT:
@@ -2038,6 +2291,103 @@ def unit_named_functions() -> tuple[list[PublicName], list[tuple[str, str]]]:
             continue
         found.append(entry)
     return found, [k for k in FUNCTION_UNIT_EXEMPT if k not in used]
+
+
+#: Names whose head noun says decibel and that keep ``_db``, keyed by
+#: ``(module, qualified name, name)``, with the reason. The suffix stays where
+#: the name holds something else under the word: the same quantity in a
+#: second form, or the uncertainty of the quantity it is named for.
+_IN_TWO_FORMS = (
+    "the same correction as the complex factor the record holds under the bare "
+    "name, so the suffix says which of the two this returns"
+)
+_A_BUDGET_COMPONENT = (
+    "a component of an uncertainty budget named for the input it is the "
+    "uncertainty of (ISO 4869-3 Table B.1): it holds a standard uncertainty in "
+    "decibels, not the level"
+)
+
+
+def _level_exempt(
+    reason: str, module: str, *owners: tuple[str, str]
+) -> dict[tuple[str, str, str], str]:
+    """One reason for several ``(owner, name)`` pairs of one module."""
+    return {(f"phonometry.{module}", owner, name): reason for owner, name in owners}
+
+
+LEVEL_SUFFIX_EXEMPT: dict[tuple[str, str, str], str] = {
+    **_level_exempt(
+        _IN_TWO_FORMS,
+        "metrology.reciprocity_coupler",
+        ("CouplerTransferImpedance", "capillary_correction_db"),
+    ),
+    **_level_exempt(
+        _A_BUDGET_COMPONENT,
+        "hearing._earmuff_insertion_loss",
+        ("InsertionLossUncertaintyBudget", "open_level_db"),
+        ("InsertionLossUncertaintyBudget", "occluded_level_db"),
+    ),
+}
+
+
+def decibel_suffixed() -> tuple[
+    list[tuple[PublicName, str]], list[tuple[str, str, str]]
+]:
+    """The public names of a level or a level difference that carry ``_db``, and stale keys.
+
+    Every name a caller writes is read: the parameters, fields and
+    properties, the methods and functions, and the published constants. A
+    level and a level difference are in decibels by definition, so the head
+    noun already says the unit (:func:`decibel_head`); a name whose head noun
+    does not say decibel (a tolerance, a margin, an uncertainty, a deviation,
+    a step, a slope, a rate) keeps its ``_db``.
+    """
+    found: list[tuple[PublicName, str]] = []
+    used: set[tuple[str, str, str]] = set()
+    entries = list(public_names())
+    known = {(e.module, e.qualname, e.name) for e in entries}
+    for entry in _public_functions():
+        owner, _, name = entry.qualname.rpartition(".")
+        if (entry.module, owner, name) not in known:
+            entries.append(PublicName(entry.module, owner, name, entry.where))
+    seen: set[tuple[str, str, str]] = set()
+    for entry in entries:
+        key = (entry.module, entry.qualname, entry.name)
+        if key in seen:
+            continue
+        seen.add(key)
+        suffix = decibel_suffix(entry.name, entry.module)
+        if suffix is None:
+            continue
+        if key in LEVEL_SUFFIX_EXEMPT:
+            used.add(key)
+            continue
+        found.append((entry, suffix))
+    return found, [k for k in LEVEL_SUFFIX_EXEMPT if k not in used]
+
+
+def _report_levels(levels: list[tuple[PublicName, str]]) -> None:
+    """Print the level rule's findings."""
+    if not levels:
+        return
+    print("::error::a level or a level difference carries a unit suffix")
+    print(f"{len(levels)} name(s) say decibel twice, by the head noun and by _db:")
+    for entry, suffix in sorted(levels):
+        dotted = ".".join(p for p in (entry.qualname, entry.name) if p)
+        wanted = entry.name[: -len(suffix)] + suffix[3:]
+        print(f"  {dotted} -> {wanted}  <- {entry.where}")
+    print(
+        "  -> a level and a level difference (a loss, an insulation, an "
+        "isolation, a reduction, a rejection, a difference, an improvement, "
+        "an attenuation, a correction, an adjustment, an index, an "
+        "emergence, an adaptation term, a shift or an increase of a named "
+        "level, or the symbol of one) are in decibels by "
+        "definition, so the name carries no _db; a name whose head noun does "
+        "not say decibel (tolerance, margin, uncertainty, deviation, step, "
+        "slope, rate) keeps it. A name that holds something else under the "
+        "word goes in LEVEL_SUFFIX_EXEMPT at the top of "
+        "scripts/check_parameter_units.py with its reason."
+    )
 
 
 def _report_functions(functions: list[PublicName]) -> None:
@@ -2153,6 +2503,7 @@ def main() -> int:
     pressures, stale_pressures = ambient_pressure_names(parameters)
     pairs, stale_pairs = bare_and_suffixed(parameters)
     functions, stale_functions = unit_named_functions()
+    levels, stale_levels = decibel_suffixed()
     stale_keys = [
         *stale,
         *stale_spellings,
@@ -2161,6 +2512,7 @@ def main() -> int:
         *stale_pressures,
         *stale_pairs,
         *stale_functions,
+        *stale_levels,
     ]
     if not (
         unnamed
@@ -2171,6 +2523,7 @@ def main() -> int:
         or pressures
         or pairs
         or functions
+        or levels
         or stale_keys
     ):
         print(
@@ -2206,6 +2559,7 @@ def main() -> int:
     _report_names(misspellings, constants)
     _report_closing(rates, pressures, pairs)
     _report_functions(functions)
+    _report_levels(levels)
     for key in stale_keys:
         print(
             f"::error::an exemption at the top of scripts/check_parameter_units.py "

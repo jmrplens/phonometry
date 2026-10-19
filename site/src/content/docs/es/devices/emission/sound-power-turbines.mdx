@@ -272,7 +272,7 @@ sala es apta cuando $K$ no supera 7 dB (8.3, A.3.3), que el apartado reescribe
 como $A/S \ge 1$. Las dos formas coinciden al decibelio entero en que está
 impreso el límite: la curva da $10 \lg 5 = 6{,}99$ dB en $A/S = 1$ y llega a
 7 dB en $A/S = 0{,}997$. `check_turbine_test_environment` juzga los 7 dB, a
-partir de la propia corrección o de un `environmental_correction_db` suelto
+partir de la propia corrección o de un `environmental_correction` suelto
 (0 al aire libre).
 
 El A.3.2 ofrece una segunda vía: una fuente sonora de referencia calibrada en
@@ -289,12 +289,12 @@ pantalla antiviento por encima de 1 m/s (4.3).
 room = emission.turbine_environmental_correction(
     surface.area, volume=60_000.0, reverberation_time=3.2)
 print(room.absorption_area, round(room.ratio, 2),
-      round(room.environmental_correction_db, 2))           # 3000.0 7.32 1.89
+      round(room.environmental_correction, 2))           # 3000.0 7.32 1.89
 print(emission.check_turbine_test_environment(room).passes)  # True
 
 source = emission.turbine_reference_source_correction(
-    [95.6, 96.3, 95.9, 96.8], calibrated_level_db=94.2, machine_length_m=21.0)
-print(round(source.environmental_correction_db, 2))           # 1.95
+    [95.6, 96.3, 95.9, 96.8], calibrated_level=94.2, machine_length_m=21.0)
+print(round(source.environmental_correction, 2))           # 1.95
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/turbine_room_correction.svg" alt="La corrección ambiental K en decibelios frente al cociente A entre S en un eje logarítmico de 0,5 a 300, rotulado en 0,5, 1, 5, 10, 50, 100 y 300 como la figura impresa: una curva azul que baja de 9,5 decibelios en 0,5, discontinua hasta A entre S igual a 1 y continua después, donde cruza una línea horizontal roja punteada en 7 decibelios, hasta casi cero en 300. Un punto naranja sobre la curva marca la sala del ejemplo, en A entre S de 7,3 y K de 1,89 decibelios, y el título dice que la sala es apta" width="100%" />
@@ -327,11 +327,11 @@ background = np.array([     # calculado a partir de la planta auxiliar (8.1, NOT
     85.0, 84.8, 84.5, 84.2, 83.0, 83.0, 83.0, 83.0, 83.0, 82.0, 81.0])
 full = emission.turbine_sound_power(
     levels, surface_area=surface.area, background_levels=background,
-    environmental_correction_db=room.environmental_correction_db,
+    environmental_correction=room.environmental_correction,
     overhead_mask=array.overhead_mask)
-print(round(full.surface_pressure_level_db, 2),
-      round(full.sound_power_level_db, 2))                   # 89.78 115.91
-print(full.reported_sound_power_level_db)                    # 116.0
+print(round(full.surface_pressure_level, 2),
+      round(full.sound_power_level, 2))                   # 89.78 115.91
+print(full.reported_sound_power_level)                    # 116.0
 print(round(full.overhead_effect_db, 2), full.overhead_may_be_deleted)  # 0.27 True
 print(round(full.level_range_db, 1), full.arithmetic_mean_allowed)      # 8.6 False
 full.plot(position_labels=array.labels, language="es")   # las claves numeradas
@@ -363,7 +363,7 @@ with warnings.catch_warnings():
     quarter = emission.turbine_sound_power(
         levels - 4.5, surface_area=surface.area,
         background_levels=background,
-        environmental_correction_db=room.environmental_correction_db)
+        environmental_correction=room.environmental_correction)
 print(quarter.upper_limit, quarter.conforms)                 # True False
 ```
 
@@ -395,7 +395,7 @@ un `ValueError`.
 ```python
 half = emission.turbine_sound_power(
     levels - 1.5, surface_area=surface.area, background_levels=background,
-    environmental_correction_db=room.environmental_correction_db,
+    environmental_correction=room.environmental_correction,
     overhead_mask=array.overhead_mask)
 report = emission.turbine_noise_declaration(
     {"50 % de carga": half, "100 % de carga": full},
@@ -403,7 +403,7 @@ report = emission.turbine_noise_declaration(
     noise_control="ninguno",
     measured_at="2026-09-25, de 10:30 a 12:10",
     tonal=True)
-print(report.reported_sound_power_levels_db)                   # (114.0, 116.0)
+print(report.reported_sound_power_levels)                   # (114.0, 116.0)
 print(report.loudest_condition, report.standard_deviation_db)  # 100 % de carga 5.0
 print(report.statement)
 report.plot(language="es")
@@ -416,7 +416,7 @@ report.plot(language="es")
 | `pressure_levels` | array 1D | dB | al menos 4 posiciones | $L_{p\mathrm{A}i}$ con el grupo en marcha |
 | `surface_area` | float | m² | positivo | $S$ de la ecuación (1) |
 | `background_levels` | array 1D o `None` | dB | obligatorio | Uno por posición; `None` indica que no se determinó |
-| `environmental_correction_db` | float | dB | obligatorio | $K$; 0 al aire libre; un valor por encima de 7 dB avisa |
+| `environmental_correction` | float | dB | obligatorio | $K$; 0 al aire libre; un valor por encima de 7 dB avisa |
 | `overhead_mask` | array de bool | | `None` | Para `overhead_effect_db` (NOTA de 7.2.2) |
 
 ## Qué cubre esta guía

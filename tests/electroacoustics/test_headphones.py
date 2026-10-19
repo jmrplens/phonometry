@@ -338,14 +338,14 @@ def test_band_levels_at_the_characteristic_voltage_sum_to_94_db() -> None:
     result = ea.program_characteristic_voltage(
         [0.05, 0.05, 0.05], BANDS, levels, a_weighted=True
     )
-    at_voltage = result.band_levels_at_characteristic_db
+    at_voltage = result.band_levels_at_characteristic
     total = 10.0 * math.log10(float(np.sum(10.0 ** (at_voltage / 10.0))))
     assert total == pytest.approx(94.0, abs=1e-9)
 
 
 def test_programme_characteristic_voltage_results_are_read_only() -> None:
     result = ea.program_characteristic_voltage(0.05, BANDS, np.full(BANDS.size, 80.0))
-    assert not result.band_levels_db.flags.writeable
+    assert not result.band_levels.flags.writeable
     with pytest.raises(dataclasses.FrozenInstanceError, match="a_weighted"):
         result.a_weighted = True  # type: ignore[misc]
 
@@ -459,9 +459,7 @@ def test_crosstalk_is_the_difference_of_the_levels() -> None:
     result = ea.crosstalk_attenuation(
         BANDS, np.full(BANDS.size, 100.0), np.linspace(40.0, 60.0, BANDS.size)
     )
-    np.testing.assert_allclose(
-        result.attenuation_db, np.linspace(60.0, 40.0, BANDS.size)
-    )
+    np.testing.assert_allclose(result.attenuation, np.linspace(60.0, 40.0, BANDS.size))
     assert result.min_db == pytest.approx(40.0)
 
 
@@ -614,9 +612,9 @@ def _microphone(**overrides: object) -> ea.EarCanalMicrophoneVerification:
         "entrance_area_mm2": limits["entrance_area_mm2"],
         "canal_section_area_mm2": 20.0,
         "volume_mm3": 100.0,
-        "pink_noise_band_levels_db": [60.0, 63.0, 61.0],
-        "open_levels_db": [60.0, 62.0],
-        "sealed_levels_db": [45.0, 40.0],
+        "pink_noise_band_levels": [60.0, 63.0, 61.0],
+        "open_levels": [60.0, 62.0],
+        "sealed_levels": [45.0, 40.0],
     }
     values.update(overrides)
     return ea.verify_ear_canal_microphone(**values)  # type: ignore[arg-type]
@@ -624,8 +622,8 @@ def _microphone(**overrides: object) -> ea.EarCanalMicrophoneVerification:
 
 def test_a_microphone_on_its_inclusive_limits_passes() -> None:
     verdict = _microphone()
-    assert verdict.neighbor_difference_db == 3.0
-    assert verdict.sealed_attenuation_db == 15.0
+    assert verdict.neighbor_difference == 3.0
+    assert verdict.sealed_attenuation == 15.0
     assert verdict.passes
 
 
@@ -642,7 +640,7 @@ def test_a_volume_of_130_mm3_is_not_less_than_130() -> None:
 
 
 def test_a_leaky_seal_fails_item_e() -> None:
-    verdict = _microphone(sealed_levels_db=[46.0, 40.0])
+    verdict = _microphone(sealed_levels=[46.0, 40.0])
     assert not verdict.requirements["e"]
 
 
@@ -765,7 +763,7 @@ def test_coupler_plot_holds_50_db_to_the_decade(
     )
     ax = response.plot(language=language, iec_scale=iec_scale)
     np.testing.assert_array_equal(
-        ax.lines[0].get_ydata(), response.sound_pressure_level_db
+        ax.lines[0].get_ydata(), response.sound_pressure_level
     )
     if iec_scale:
         assert ax.get_aspect() == pytest.approx(1.0 / 50.0)
@@ -834,7 +832,7 @@ def test_microphone_plot_marks_item_e_as_a_minimum(
     language: str, sealed: list[float]
 ) -> None:
     plt = pytest.importorskip("matplotlib.pyplot")
-    verdict = _microphone(sealed_levels_db=sealed)
+    verdict = _microphone(sealed_levels=sealed)
     ax = verdict.plot(language=language)
     heights = [patch.get_height() for patch in ax.patches]
     limits = ref.IEC60268_7_ANNEX_B
@@ -842,8 +840,8 @@ def test_microphone_plot_marks_item_e_as_a_minimum(
         100.0 * verdict.entrance_area_mm2 / limits["entrance_area_mm2"],
         100.0 * verdict.area_ratio / limits["canal_area_ratio"],
         100.0 * verdict.volume_mm3 / limits["volume_mm3"],
-        100.0 * verdict.neighbor_difference_db / limits["neighbor_difference_db"],
-        100.0 * verdict.sealed_attenuation_db / limits["sealed_attenuation_db"],
+        100.0 * verdict.neighbor_difference / limits["neighbor_difference"],
+        100.0 * verdict.sealed_attenuation / limits["sealed_attenuation"],
     ]
     np.testing.assert_allclose(heights, expected)
     assert ax.patches[4].get_hatch() == "//"
@@ -880,6 +878,6 @@ def test_characteristic_voltage_plot_names_what_was_corrected(
     ax = result.plot()
     heights = np.array([patch.get_height() for patch in ax.patches])
     floor = ax.patches[0].get_y()
-    np.testing.assert_allclose(heights + floor, result.band_levels_at_characteristic_db)
+    np.testing.assert_allclose(heights + floor, result.band_levels_at_characteristic)
     assert clause in ax.get_title()
     plt.close("all")

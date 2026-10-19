@@ -488,7 +488,7 @@ class TestModalFilterCutOn:
         assert ratio == pytest.approx(1.0067, abs=5e-5)
 
     def test_the_two_attenuation_minimums(self) -> None:
-        assert sm.MODAL_FILTER_ATTENUATION_DB == (3.0, 5.0)
+        assert sm.MODAL_FILTER_ATTENUATION == (3.0, 5.0)
 
     def test_neither_dimension_is_refused(self) -> None:
         with pytest.raises(ValueError, match="exactly one"):

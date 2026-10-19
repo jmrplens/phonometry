@@ -263,7 +263,7 @@ SOURCE_DETAIL_LEVELS = {1: 'omnidirectional point sources', 2: 'point sources wi
 total_workstation_level(
     contributions_db: ArrayLike,
     *,
-    existing_level_db: float | None = None,
+    existing_level: float | None = None,
 ) -> float
 ```
 
@@ -280,7 +280,7 @@ and the workstation, except at a machine's own workstation, where
 | Name | Description |
 | :--- | :--- |
 | `contributions_db` | The level each new machine alone would give at this workstation, in decibels. |
-| `existing_level_db` | The level already there, in decibels, which for a workstation with no machine is the background noise. |
+| `existing_level` | The level already there, in decibels, which for a workstation with no machine is the background noise. |
 
 **Returns:** The total, in decibels.
 
@@ -358,8 +358,8 @@ TYPICAL_EXCESS_RANGE_DB = {'near': (None, None), 'middle': (2.0, 10.0), 'far': (
 ```python
 workstation_level(
     *,
-    sound_power_level_db: float,
-    emission_level_db: float,
+    sound_power_level: float,
+    emission_level: float,
     absorption_area: float,
 ) -> float
 ```
@@ -373,8 +373,8 @@ declared with plus what the room adds to it.
 
 | Name | Description |
 | :--- | :--- |
-| `sound_power_level_db` | $L_{W\mathrm{A}}$ of the machine, in decibels. |
-| `emission_level_db` | $L_{p\mathrm{A}}$ at its workstation, in decibels. |
+| `sound_power_level` | $L_{W\mathrm{A}}$ of the machine, in decibels. |
+| `emission_level` | $L_{p\mathrm{A}}$ at its workstation, in decibels. |
 | `absorption_area` | $A$ of the room, in square metres. |
 
 **Returns:** $L'_{p\mathrm{A}}$, in decibels.
@@ -390,8 +390,8 @@ declared with plus what the room adds to it.
 ```python
 workstation_level_increase(
     *,
-    sound_power_level_db: float,
-    emission_level_db: float,
+    sound_power_level: float,
+    emission_level: float,
     absorption_area: float,
 ) -> float
 ```
@@ -413,8 +413,8 @@ $L_{W\mathrm{A}} - L_{p\mathrm{A}}$ as the parameter.
 
 | Name | Description |
 | :--- | :--- |
-| `sound_power_level_db` | $L_{W\mathrm{A}}$ of the machine, in decibels. |
-| `emission_level_db` | $L_{p\mathrm{A}}$ at its workstation, in decibels. |
+| `sound_power_level` | $L_{W\mathrm{A}}$ of the machine, in decibels. |
+| `emission_level` | $L_{p\mathrm{A}}$ at its workstation, in decibels. |
 | `absorption_area` | $A$ of the room, in square metres. |
 
 **Returns:** $\Delta L_\mathrm{A}$, in decibels.

@@ -161,7 +161,7 @@ def _chk_table_5() -> Outcome:
         cells = (
             (row.signal, signals.get(cycles, cycles)),
             (row.nominal_frequency_hz, _number(frequency)),
-            (row.reference_difference_db, _number(reference)),
+            (row.reference_difference, _number(reference)),
             (row.class_1_limits_db, _limits(class_1)),
             (row.class_2_limits_db, _limits(class_2)),
         )
@@ -242,11 +242,11 @@ def _record(**over: Any) -> ph.metrology.SoundLevelMeterPeriodicMeasurements:
         "long_term_stability_uncertainty_db": 0.05,
         "linearity_deviations_db": [0.0] * len(_STEPS_DB),
         "linearity_uncertainties_db": [0.2] * len(_STEPS_DB),
-        "linearity_levels_db": list(_STEPS_DB),
+        "linearity_levels": list(_STEPS_DB),
         "linear_operating_range_db": [55.0, 120.0],
         "linearity_starting_point_db": 94.0,
-        "linearity_overload_level_db": 121.0,
-        "linearity_under_range_level_db": 54.0,
+        "linearity_overload_level": 121.0,
+        "linearity_under_range_level": 54.0,
         "range_linearity_deviations_db": {"17.3": [0.0], "17.4": [0.0, 0.0]},
         "range_linearity_uncertainties_db": {"17.3": [0.2], "17.4": [0.2, 0.2]},
         "toneburst_responses_db": {
@@ -259,10 +259,10 @@ def _record(**over: Any) -> ph.metrology.SoundLevelMeterPeriodicMeasurements:
             "S": [0.2] * 2,
             "E": [0.2] * 3,
         },
-        "c_peak_differences_db": [3.4, 2.4, 2.4],
+        "c_peak_differences": [3.4, 2.4, 2.4],
         "c_peak_uncertainties_db": [0.3] * 3,
         "c_peak_overload_indicated": False,
-        "overload_difference_db": 0.0,
+        "overload_difference": 0.0,
         "overload_uncertainty_db": 0.2,
         "overload_latched": True,
         "high_level_stability_db": 0.0,
@@ -411,7 +411,7 @@ def _flip_rows() -> list[_FlipRow]:
         def fields(v: float) -> dict[str, Any]:
             row = [3.4, 2.4, 2.4]
             row[index] = v
-            return {"c_peak_differences_db": row}
+            return {"c_peak_differences": row}
 
         return fields
 
@@ -641,7 +641,7 @@ def _flip_rows() -> list[_FlipRow]:
             "Overload indication, positive less negative half cycle",
             "overload",
             1,
-            lambda v: {"overload_difference_db": v},
+            lambda v: {"overload_difference": v},
             _text_limit("5.11.3", 1),
             1.0,
         ),
@@ -968,7 +968,7 @@ def _chk_linearity_extent() -> Outcome:
         _record(
             linearity_deviations_db=[0.0],
             linearity_uncertainties_db=[0.2],
-            linearity_levels_db=[94.0],
+            linearity_levels=[94.0],
         ),
         features=_METER,
     )
@@ -1043,7 +1043,7 @@ def _chk_statement_s() -> Outcome:
 @register(_SLM, "IEC 61672-3:2013 22 t)", "Statement of a failure, class 1")
 def _chk_statement_t() -> Outcome:
     result = ph.metrology.verify_sound_level_meter_periodic(
-        1, _record(overload_difference_db=1.6), pattern_approval_public=True
+        1, _record(overload_difference=1.6), pattern_approval_public=True
     )
     head = _filled(ref.IEC61672_3_STATEMENT_T, 1)
     return _statement_outcome(head, result.statement[: len(head)])

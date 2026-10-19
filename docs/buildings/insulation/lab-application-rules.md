@@ -98,11 +98,11 @@ nowhere else. The result carries it in every case, since it needs only the
 two measured curves:
 
 ```python
-print(res.delta_rw_direct_db, res.delta_rw_c_direct_db, res.delta_rw_ctr_direct_db)
+print(res.delta_rw_direct, res.delta_rw_c_direct, res.delta_rw_ctr_direct)
 # 13 12 9
 other = building.laboratory_lining_improvement(r_without, r_without + delta_r, freqs,
                                         basic_element=None)
-print(other.rating, other.delta_rw_direct_db)                   # None 13
+print(other.rating, other.delta_rw_direct)                   # None 13
 ```
 
 The octave values of G.1, where a report wants them, come from the three
@@ -221,7 +221,7 @@ delta_l = np.array([0.4, 0.8, 1.5, 2.3, 3.4, 4.9, 6.8, 9.1, 11.6, 14.2, 16.9,
                     19.8, 22.4, 25.1, 27.3, 29.4, 30.8, 31.9])
 cover = building.laboratory_floor_covering_improvement(l_n0, l_n0 - delta_l, freqs,
                                                 reference_floor="lightweight_3")
-print(cover.designation, cover.delta_lw_db, cover.ci_delta_db)   # ΔLt,3,w 8 -3
+print(cover.designation, cover.delta_lw, cover.ci_delta)   # ΔLt,3,w 8 -3
 print(cover.reference_rating.rating, cover.bare_rating.rating)   # 67 75
 ```
 
@@ -273,7 +273,7 @@ maximum level, $\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} - L_\mathrm{i,Fmax}$
 ball = building.heavy_impact_improvement([79.2, 73.5, 66.1, 58.4],
                                          [78.6, 71.9, 62.3, 51.0],
                                          [63, 125, 250, 500])
-print(ball.improvement_db)                    # [0.6 1.6 3.8 7.4]
+print(ball.improvement)                    # [0.6 1.6 3.8 7.4]
 ```
 
 For a laboratory that cannot build a timber floor, H.6.2 allows a wooden
@@ -428,7 +428,7 @@ r_seal = np.array([33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0, 46.2,
 seal = building.laboratory_joint_insulation(r_seal, r_max, freqs, joint_length_m=5.4)
 print(seal.regime[-4:])
 # ('uncorrected', 'corrected', 'limit', 'maximum')
-print(np.round(seal.r_s_db[-4:], 1))           # [55.4 59.5 64.4 69. ]
+print(np.round(seal.r_s[-4:], 1))           # [55.4 59.5 64.4 69. ]
 ```
 
 The single numbers are those of ISO 717-1 on the corrected index, and the form
@@ -437,7 +437,7 @@ of Figure J.7 asks for the enlarged-range terms to 5 000 Hz as well:
 ```python
 rating = seal.rating
 print(rating.rating, rating.c, rating.ctr)               # 49 -1 -4
-print(seal.c_100_5000_db, seal.ctr_100_5000_db)           # 0 -4
+print(seal.c_100_5000, seal.ctr_100_5000)           # 0 -4
 print(seal.max_rating.rating)                             # 61
 ```
 
@@ -494,7 +494,7 @@ results = [building.laboratory_joint_insulation(
                np.minimum(r_seal - db * slope, r_max - 0.5), r_max, freqs)
            for db in loss.values()]
 series = building.joint_gap_series(list(loss), results, min_gap_mm=3.0)
-print(series.r_s_w_ctr_db)        # [48. 47. 45. 43. 38. 33. 33.]
+print(series.r_s_w_ctr)        # [48. 47. 45. 43. 38. 33. 33.]
 print(series.at_gap(7.0), series.working_range_mm)        # 40.5 (5.0, 8.0)
 ```
 
@@ -689,7 +689,7 @@ t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
 rain = building.rainfall_sound(l_pr, t, freqs, volume=62.0,
                                excited_area_m2=1.875,
                                reference_correction=correction)
-print(round(rain.l_ia_db, 1), round(rain.l_ia_norm_db, 1))     # 69.3 67.5
+print(round(rain.l_ia, 1), round(rain.l_ia_norm, 1))     # 69.3 67.5
 print(rain.octave_bands()[0])       # [ 125.  250.  500. 1000. 2000. 4000.]
 ```
 

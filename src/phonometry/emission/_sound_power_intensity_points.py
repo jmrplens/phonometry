@@ -960,7 +960,7 @@ class DiscretePointIntensityResult(OwnsArrays):
     f2: np.ndarray | None
     f3: np.ndarray | None
     f4: np.ndarray | None
-    pressure_residual_index_db: np.ndarray | None
+    pressure_residual_index: np.ndarray | None
     band_type: str
     grade: str
 
@@ -1000,7 +1000,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             f2=1,
             f3=1,
             f4=1,
-            pressure_residual_index_db=1,
+            pressure_residual_index=1,
         )
         require_same_length(
             self,
@@ -1010,7 +1010,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             "f2",
             "f3",
             "f4",
-            "pressure_residual_index_db",
+            "pressure_residual_index",
         )
         require_equal_counts(
             "DiscretePointIntensityResult",
@@ -1035,7 +1035,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             self.frequencies,
             cast("BandType", self.band_type),
             self.n_positions,
-            self.pressure_residual_index_db,
+            self.pressure_residual_index,
             self.f1,
             self.f2,
             self.f3,
@@ -1092,10 +1092,10 @@ class DiscretePointIntensityResult(OwnsArrays):
     @property
     def dynamic_capability_index(self) -> np.ndarray | None:
         r""":math:`L_\mathrm{d} = \delta_{pI0} - K` per band at the requested grade (Eq. (10))."""
-        if self.pressure_residual_index_db is None:
+        if self.pressure_residual_index is None:
             return None
         return _dynamic_capability(
-            self.pressure_residual_index_db, cast("DeterminationGrade", self.grade)
+            self.pressure_residual_index, cast("DeterminationGrade", self.grade)
         )
 
     @property
@@ -1153,7 +1153,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             self.f2,
             self.f3,
             np.asarray(self.f4, dtype=np.float64),
-            self.pressure_residual_index_db,
+            self.pressure_residual_index,
             self.n_positions,
             self.frequencies,
             cast("BandType", self.band_type),
@@ -2030,7 +2030,7 @@ def sound_power_intensity_points(
         f2=f2,
         f3=f3,
         f4=f4,
-        pressure_residual_index_db=residual,
+        pressure_residual_index=residual,
         band_type=band_type,
         grade=grade,
     )

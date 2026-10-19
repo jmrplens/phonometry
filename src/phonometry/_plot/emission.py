@@ -299,15 +299,15 @@ def plot_emission_pressure(
 
     ax = ax if ax is not None else _new_axes()
     values = [
-        float(np.asarray(result.measured_level_db).reshape(-1)[0]),
-        float(np.asarray(result.background_correction_db).reshape(-1)[0]),
-        float(np.asarray(result.local_correction_db).reshape(-1)[0]),
-        float(np.asarray(result.level_db).reshape(-1)[0]),
+        float(np.asarray(result.measured_level).reshape(-1)[0]),
+        float(np.asarray(result.background_correction).reshape(-1)[0]),
+        float(np.asarray(result.local_correction).reshape(-1)[0]),
+        float(np.asarray(result.level).reshape(-1)[0]),
     ]
-    if np.asarray(result.level_db).size != 1:
+    if np.asarray(result.level).size != 1:
         msg = (
             "plot_emission_pressure draws one determination; this result holds "
-            f"{np.asarray(result.level_db).size} bands. Pass a single level."
+            f"{np.asarray(result.level).size} bands. Pass a single level."
         )
         raise ValueError(msg)
 
@@ -1664,7 +1664,7 @@ def plot_special_room_suitability(
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    difference = np.asarray(result.difference_db, dtype=np.float64)
+    difference = np.asarray(result.difference, dtype=np.float64)
     limit = np.asarray(result.limit_db, dtype=np.float64)
     ok = np.asarray(result.band_within, dtype=bool)
     positions = _band_axis(ax, freqs, language=language)
@@ -1914,7 +1914,7 @@ def plot_turbine_layout(
 
 
 def plot_turbine_environmental_correction(
-    correction_db: float,
+    correction: float,
     ratio: float | None,
     *,
     passes: bool | None,
@@ -1930,7 +1930,7 @@ def plot_turbine_environmental_correction(
     a horizontal line when its :math:`K` came from a reference source and
     carries no :math:`A/S`.
 
-    :param correction_db: :math:`K` of the environment, in dB.
+    :param correction: :math:`K` of the environment, in dB.
     :param ratio: Its :math:`A/S`, or ``None``.
     :param passes: The verdict of the check, for the title, or ``None``.
     :param ax: Existing axes, or ``None`` to create a figure.
@@ -1966,11 +1966,11 @@ def plot_turbine_environmental_correction(
         linewidth=1.4,
         label=_t("7 dB limit (A.3.3)", language),
     )
-    shown = format_number(correction_db, language, decimals=2)
+    shown = format_number(correction, language, decimals=2)
     if ratio is not None:
         ax.plot(
             [ratio],
-            [correction_db],
+            [correction],
             linestyle="none",
             marker="o",
             ms=8.0,
@@ -1979,7 +1979,7 @@ def plot_turbine_environmental_correction(
         )
     else:
         ax.axhline(
-            correction_db,
+            correction,
             color=_C_SECONDARY,
             linestyle="-.",
             linewidth=1.4,
@@ -2053,7 +2053,7 @@ def plot_turbine_sound_power(
 
     from .._i18n import format_number, localize_axes
 
-    corrected = np.asarray(result.corrected_levels_db, dtype=np.float64)
+    corrected = np.asarray(result.corrected_levels, dtype=np.float64)
     names = None if position_labels is None else tuple(str(n) for n in position_labels)
     if names is not None and len(names) != corrected.size:
         msg = (
@@ -2091,9 +2091,7 @@ def plot_turbine_sound_power(
             color=_C_MUTED,
             label=_t("Background", language),
         )
-    energy = float(
-        result.surface_pressure_level_db + result.environmental_correction_db
-    )
+    energy = float(result.surface_pressure_level + result.environmental_correction)
     ax.axhline(
         energy,
         color=theme_line(ax.xaxis.label.get_color(), ax, quiet=0.7),
@@ -2101,9 +2099,9 @@ def plot_turbine_sound_power(
         linewidth=1.2,
         label=_t("Energy average", language),
     )
-    level = format_number(result.surface_pressure_level_db, language, decimals=1)
+    level = format_number(result.surface_pressure_level, language, decimals=1)
     ax.axhline(
-        float(result.surface_pressure_level_db),
+        float(result.surface_pressure_level),
         color=_C_REFERENCE,
         linewidth=1.6,
         label=_t("Surface level {level} dB", language, level=level),
@@ -2123,7 +2121,7 @@ def plot_turbine_sound_power(
         ax.xaxis.set_major_locator(MaxNLocator(integer=True, steps=[1, 2, 5, 10]))
         ax.set_xlabel(_t("Microphone position, in the order given", language))
     ax.set_ylabel(_t("A-weighted sound pressure level [dB]", language))
-    power = format_number(result.sound_power_level_db, language, decimals=1)
+    power = format_number(result.sound_power_level, language, decimals=1)
     ax.set_title(
         _t(
             _IEC_61063_TITLE,
@@ -2171,7 +2169,7 @@ def plot_turbine_noise_declaration(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    levels = np.asarray(declaration.reported_sound_power_levels_db, dtype=np.float64)
+    levels = np.asarray(declaration.reported_sound_power_levels, dtype=np.float64)
     sigma = float(declaration.standard_deviation_db)
     x = np.arange(levels.size)
     style_default(kwargs, "color", _C_PRIMARY)

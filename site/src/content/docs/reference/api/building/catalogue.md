@@ -27,7 +27,7 @@ connections and is in the table rather than in the theory.
 
 What the row carries
 --------------------
-Each octave band is a field of its own, `transmission_loss_500_db` and so
+Each octave band is a field of its own, `transmission_loss_500` and so
 on, with the band's centre frequency in hertz and the unit in the name. Every
 hedge of [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow) works on a band
 the way it works on any other field, so a band the page leaves empty says so
@@ -73,7 +73,7 @@ plasterboard mountings, doors unsealed and sealed, exterior doors, sealed
 windows and floor-ceiling systems. Each is a row of this catalogue with every
 band empty, and the rating in [`TransmissionLossSpectrum.sound_transmission_class`](/phonometry/reference/api/building/catalogue/#transmissionlossspectrum).
 A caller after a spectrum reads the band fields and finds `None`;
-[`TransmissionLossSpectrum.transmission_loss_db`](/phonometry/reference/api/building/catalogue/#transmissionlossspectrumtransmission_loss_db) then refuses with the
+[`TransmissionLossSpectrum.transmission_loss`](/phonometry/reference/api/building/catalogue/#transmissionlossspectrumtransmission_loss) then refuses with the
 row and the band, because the page printed nothing there.
 
 Most of those tables print one construction under several conditions, as
@@ -153,14 +153,14 @@ TransmissionLossSpectrum(
     group: str = '',
     note: str = '',
     provenance: Provenance | None = None,
-    transmission_loss_63_db: float | None = None,
-    transmission_loss_125_db: float | None = None,
-    transmission_loss_250_db: float | None = None,
-    transmission_loss_500_db: float | None = None,
-    transmission_loss_1000_db: float | None = None,
-    transmission_loss_2000_db: float | None = None,
-    transmission_loss_4000_db: float | None = None,
-    transmission_loss_8000_db: float | None = None,
+    transmission_loss_63: float | None = None,
+    transmission_loss_125: float | None = None,
+    transmission_loss_250: float | None = None,
+    transmission_loss_500: float | None = None,
+    transmission_loss_1000: float | None = None,
+    transmission_loss_2000: float | None = None,
+    transmission_loss_4000: float | None = None,
+    transmission_loss_8000: float | None = None,
     thickness_mm: float | None = None,
     surface_density_kg_m2: float | None = None,
     sound_transmission_class: float | None = None,
@@ -175,14 +175,14 @@ One construction of a published table, with its loss in each band.
 
 | Name | Description |
 | :--- | :--- |
-| `transmission_loss_63_db` | Airborne sound transmission loss in the 63 Hz octave band, in decibels, as printed. |
-| `transmission_loss_125_db` | The same in the 125 Hz band. |
-| `transmission_loss_250_db` | The same in the 250 Hz band. |
-| `transmission_loss_500_db` | The same in the 500 Hz band. |
-| `transmission_loss_1000_db` | The same in the 1 kHz band. |
-| `transmission_loss_2000_db` | The same in the 2 kHz band. |
-| `transmission_loss_4000_db` | The same in the 4 kHz band. |
-| `transmission_loss_8000_db` | The same in the 8 kHz band. |
+| `transmission_loss_63` | Airborne sound transmission loss in the 63 Hz octave band, in decibels, as printed. |
+| `transmission_loss_125` | The same in the 125 Hz band. |
+| `transmission_loss_250` | The same in the 250 Hz band. |
+| `transmission_loss_500` | The same in the 500 Hz band. |
+| `transmission_loss_1000` | The same in the 1 kHz band. |
+| `transmission_loss_2000` | The same in the 2 kHz band. |
+| `transmission_loss_4000` | The same in the 4 kHz band. |
+| `transmission_loss_8000` | The same in the 8 kHz band. |
 | `thickness_mm` | The overall thickness of the construction, in millimetres, as the page prints it beside the description. It is the assembly's thickness and not a leaf's: a double wall prints the pair and the cavity together. |
 | `surface_density_kg_m2` | The mass per unit area, in kilograms per square metre, as printed. This is what the mass law takes, and what two rows of the same description are told apart by. |
 | `sound_transmission_class` | The single-number rating the page prints beside the spectrum, where it prints one. It is not a band value and it does not follow from the ones beside it: an STC is computed from third-octave data, so a table that prints octave bands and an STC is printing two readings of one measurement and this catalogue keeps both. Empty for a page that rates nothing. |
@@ -409,10 +409,10 @@ number, is left out rather than filled with a zero;
 [`why_missing`](/phonometry/reference/api/io/io/#cataloguerowwhy_missing) on that band's field says which it
 was.
 
-### TransmissionLossSpectrum.transmission_loss_db()
+### TransmissionLossSpectrum.transmission_loss()
 
 ```python
-TransmissionLossSpectrum.transmission_loss_db(band_hz: int) -> float
+TransmissionLossSpectrum.transmission_loss(band_hz: int) -> float
 ```
 
 The loss in one band, or a refusal that says what the page had.

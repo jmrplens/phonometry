@@ -145,6 +145,6 @@ IEC60268_7_ANNEX_B = {
     "canal_area_ratio": 0.6,
     "adult_canal_area_mm2": 45.0,
     "volume_mm3": 130.0,
-    "neighbor_difference_db": 3.0,
-    "sealed_attenuation_db": 15.0,
+    "neighbor_difference": 3.0,
+    "sealed_attenuation": 15.0,
 }

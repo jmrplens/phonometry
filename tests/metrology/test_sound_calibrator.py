@@ -110,7 +110,7 @@ def test_tables_a1_a3_a4() -> None:
             (ref.IEC60942_FIELD_IMMUNITY_MAX_U,) * 3,
         ),
         (
-            metrology.ABBREVIATED_LEVEL_REDUCTIONS_DB,
+            metrology.ABBREVIATED_LEVEL_REDUCTIONS,
             ref.IEC60942_ABBREVIATED_REDUCTIONS,
         ),
         (
@@ -479,7 +479,7 @@ def test_the_pistonphone_correction_is_added_to_the_level() -> None:
     record = metrology.SoundCalibratorMeasurements(
         level_deviation_db=0.2,
         level_uncertainty_db=0.15,
-        static_pressure_correction_db=0.1,
+        static_pressure_correction=0.1,
     )
     result = metrology.verify_sound_calibrator(
         "1/M", record, nominal_frequency_hz=100.0
@@ -490,7 +490,7 @@ def test_the_pistonphone_correction_is_added_to_the_level() -> None:
     over = metrology.SoundCalibratorMeasurements(
         level_deviation_db=0.2,
         level_uncertainty_db=0.15,
-        static_pressure_correction_db=0.11,
+        static_pressure_correction=0.11,
     )
     refused = metrology.verify_sound_calibrator("1/M", over, nominal_frequency_hz=100.0)
     assert not refused.passes
@@ -500,7 +500,7 @@ def test_a_pistonphone_level_needs_its_correction() -> None:
     record = metrology.SoundCalibratorMeasurements(
         level_deviation_db=0.20, level_uncertainty_db=0.15
     )
-    with pytest.raises(ValueError, match="static_pressure_correction_db"):
+    with pytest.raises(ValueError, match="static_pressure_correction"):
         metrology.verify_sound_calibrator("LS/M", record, nominal_frequency_hz=250.0)
 
 
@@ -509,7 +509,7 @@ def test_only_a_pistonphone_takes_a_correction() -> None:
     record = metrology.SoundCalibratorMeasurements(
         level_deviation_db=0.20,
         level_uncertainty_db=0.15,
-        static_pressure_correction_db=0.0,
+        static_pressure_correction=0.0,
     )
     with pytest.raises(ValueError, match=r"5\.1\.7"):
         metrology.verify_sound_calibrator("1", record, nominal_frequency_hz=250.0)
@@ -519,7 +519,7 @@ def test_one_correction_per_level_measurement() -> None:
     record = metrology.SoundCalibratorMeasurements(
         level_deviation_db=[0.20, 0.10],
         level_uncertainty_db=0.05,
-        static_pressure_correction_db=[0.05, -0.30],
+        static_pressure_correction=[0.05, -0.30],
     )
     result = metrology.verify_sound_calibrator(
         "LS/M", record, nominal_frequency_hz=500.0
@@ -627,7 +627,7 @@ def test_the_verdicts_have_no_truth_value() -> None:
             {"level_deviation_db": [0.1, 0.2], "level_uncertainty_db": [0.1, 0.1, 0.1]},
             "level_uncertainty_db",
         ),
-        ({"static_pressure_correction_db": 0.1}, "static_pressure_correction_db"),
+        ({"static_pressure_correction": 0.1}, "static_pressure_correction"),
         (
             {
                 "frequency_deviation_percent": float("nan"),
@@ -747,7 +747,7 @@ def test_a_verdict_on_its_limit_is_not_drawn_as_a_failure() -> None:
     record = metrology.SoundCalibratorMeasurements(
         level_deviation_db=0.2,
         level_uncertainty_db=0.15,
-        static_pressure_correction_db=0.1,
+        static_pressure_correction=0.1,
     )
     result = metrology.verify_sound_calibrator(
         "1/M", record, nominal_frequency_hz=100.0

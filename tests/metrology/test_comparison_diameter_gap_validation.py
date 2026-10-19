@@ -158,7 +158,7 @@ def test_model_reproduces_every_row_of_table_a1_at_its_speed_of_sound() -> None:
         frequencies, gas=_sound(ref.BARHAM_2014_SPEED_OF_SOUND), **_WS3
     )
     expected = np.array([printed[f] for f in frequencies])
-    assert np.max(np.abs(result.correction_db - expected)) <= 0.0005
+    assert np.max(np.abs(result.correction - expected)) <= 0.0005
 
 
 def test_model_at_the_reference_air_is_within_a_hundredth_of_table_a1() -> None:
@@ -166,7 +166,7 @@ def test_model_at_the_reference_air_is_within_a_hundredth_of_table_a1() -> None:
     inside the 10 % expanded uncertainty of the NOTE to Table A.1.
     """
     result = metrology.diameter_sound_field_correction(_F_A1, **_WS3)
-    deviation = np.abs(result.correction_db - _PRINTED_A1)
+    deviation = np.abs(result.correction - _PRINTED_A1)
     assert result.speed_of_sound == pytest.approx(345.87, abs=0.01)
     assert np.max(deviation) < 0.01
     assert np.all(deviation < 0.1 * np.abs(_PRINTED_A1))
@@ -238,17 +238,17 @@ def test_doubled_separation_is_the_model_at_twice_the_distance() -> None:
         _F_A1, **{**_WS3, "separation_m": 2.0 * _WS3["separation_m"]}
     )
     np.testing.assert_allclose(
-        single.doubled_separation_correction_db, doubled.correction_db, rtol=1e-12
+        single.doubled_separation_correction, doubled.correction, rtol=1e-12
     )
     np.testing.assert_allclose(
         single.separation_change_db,
-        np.abs(doubled.correction_db - single.correction_db),
+        np.abs(doubled.correction - single.correction),
         rtol=1e-12,
     )
     # A regression pin of the model's own output, not a value any source
     # prints: by the model the change on doubling is 6,3 % of the correction
     # at 1 kHz and 5,4 % at 20 kHz, where A.2 observed "approximately" 10 %.
-    share = single.separation_change_db / np.abs(single.correction_db)
+    share = single.separation_change_db / np.abs(single.correction)
     assert share[0] == pytest.approx(0.0630, abs=5e-4)
     assert share[-1] == pytest.approx(0.0536, abs=5e-4)
 
@@ -256,7 +256,7 @@ def test_doubled_separation_is_the_model_at_twice_the_distance() -> None:
 def test_correction_vanishes_at_low_frequency() -> None:
     """Far below the radial modes the gap is a uniform pressure."""
     result = metrology.diameter_sound_field_correction([20.0, 100.0], **_WS3)
-    assert np.all(np.abs(result.correction_db) < 1e-4)
+    assert np.all(np.abs(result.correction) < 1e-4)
     assert np.all(np.abs(result.phase_difference_deg) < 1e-3)
 
 
@@ -332,10 +332,10 @@ def test_diameter_plot_draws_both_corrections() -> None:
     ax = result.plot(language="es")
     lines = {line.get_label(): line for line in ax.get_lines()}
     correction = lines[r"Corrección, $-20\lg|R_P|$"]
-    np.testing.assert_allclose(correction.get_ydata(), result.correction_db)
+    np.testing.assert_allclose(correction.get_ydata(), result.correction)
     doubled = next(line for label, line in lines.items() if "2L" in label)
     np.testing.assert_allclose(
-        doubled.get_ydata(), result.doubled_separation_correction_db
+        doubled.get_ydata(), result.doubled_separation_correction
     )
     assert "Micrófonos de distinto diámetro" in ax.get_title()
     assert "4,650" in ax.get_title()
@@ -368,7 +368,7 @@ def test_error_matches_the_printed_graph() -> None:
     """
     frequencies = np.arange(100.0, 20000.0 + 1.0, 100.0)
     ratio = _library_ratio(frequencies)
-    error = -np.asarray(ratio.level_difference_db)
+    error = -np.asarray(ratio.level_difference)
     phase = -np.asarray(ratio.phase_difference_deg)
     dip, dip_hz = ref.JARVIS_1996_GRAPH_DIP
     peak_deg, peak_hz = ref.JARVIS_1996_GRAPH_PHASE_PEAK
@@ -447,14 +447,14 @@ _F_VAL = np.array([1000.0, 2000.0, 4000.0, 8000.0])
 
 
 def _comparison(
-    level_db: np.ndarray,
+    level: np.ndarray,
     uncertainty_db: float | np.ndarray,
     frequencies: np.ndarray = _F_VAL,
 ) -> cc.ComparisonCalibration:
-    """A pressure calibration whose sensitivity level is ``level_db``: the
+    """A pressure calibration whose sensitivity level is ``level``: the
     reference at -38 dB and the two readings of the interchange.
     """
-    half = -38.0 - np.asarray(level_db)
+    half = -38.0 - np.asarray(level)
     return metrology.simultaneous_comparison(
         frequencies, -38.0, half, -half, expanded_uncertainty_db=uncertainty_db
     )
@@ -462,12 +462,12 @@ def _comparison(
 
 def _reciprocity(
     frequencies: np.ndarray,
-    level_db: float | np.ndarray,
+    level: float | np.ndarray,
     uncertainty_db: float | np.ndarray,
     field: str = "pressure",
 ) -> metrology.ReciprocityCalibration:
     """A three-microphone reciprocity calibration whose second microphone has
-    ``level_db``, one value or one per frequency.
+    ``level``, one value or one per frequency.
     """
     from phonometry.metrology.reciprocity_calibration import ReciprocityCalibration
 
@@ -475,7 +475,7 @@ def _reciprocity(
     levels = np.vstack(
         [
             np.full(count, -38.2),
-            np.broadcast_to(np.asarray(level_db, dtype=np.float64), (count,)),
+            np.broadcast_to(np.asarray(level, dtype=np.float64), (count,)),
             np.full(count, -37.9),
         ]
     )
@@ -493,7 +493,7 @@ def _reciprocity(
         products_v2_per_pa2=products.astype(np.complex128),
         field=field,
         method="three_microphones",
-        corrections_db={},
+        corrections={},
         expanded_uncertainty_db=uncertainty_db,
     )
 
@@ -506,7 +506,7 @@ def test_agreement_is_within_the_root_sum_square() -> None:
     other = _comparison(np.array([-26.4, -26.41, -26.3, -26.3]), 0.08)
     result = metrology.verify_jig_or_coupler(jig, other)
     np.testing.assert_allclose(result.expanded_uncertainty_db, 0.1, rtol=1e-12)
-    np.testing.assert_allclose(result.difference_db, [0.1, 0.11, 0.0, 0.0], atol=1e-12)
+    np.testing.assert_allclose(result.difference, [0.1, 0.11, 0.0, 0.0], atol=1e-12)
     assert result.agrees.tolist() == [True, False, True, True]
     assert result.failing_frequencies_hz.tolist() == [2000.0]
     assert not result.passes
@@ -523,14 +523,14 @@ def test_settling_decides_a_difference_on_the_limit() -> None:
     """
     on_the_limit = cc.JigCouplerVerification(
         frequencies=np.array([1000.0, 2000.0]),
-        calibration_level_db=np.array([-26.9, -26.9]),
+        calibration_level=np.array([-26.9, -26.9]),
         calibration_uncertainty_db=np.array([0.08, 0.08]),
-        validation_level_db=np.array([-27.0, -27.0 - 1e-6]),
+        validation_level=np.array([-27.0, -27.0 - 1e-6]),
         validation_uncertainty_db=np.array([0.06, 0.06]),
         validation="comparison",
         unvalidated_frequencies_hz=np.array([]),
     )
-    raw = np.abs(on_the_limit.difference_db)
+    raw = np.abs(on_the_limit.difference)
     assert raw[0] > on_the_limit.expanded_uncertainty_db[0]
     assert on_the_limit.agrees.tolist() == [True, False]
 
@@ -550,12 +550,12 @@ def test_validation_pairs_each_frequency_with_its_own() -> None:
     other = _comparison(other_level, other_uncertainty, frequencies=grid)
     result = metrology.verify_jig_or_coupler(jig, other)
     assert result.frequencies.tolist() == [1000.0, 2000.0, 4000.0]
-    np.testing.assert_allclose(result.validation_level_db, other_level[1:], atol=1e-9)
+    np.testing.assert_allclose(result.validation_level, other_level[1:], atol=1e-9)
     np.testing.assert_allclose(
         result.validation_uncertainty_db, other_uncertainty[1:], rtol=1e-12
     )
     np.testing.assert_allclose(result.calibration_uncertainty_db, [0.07, 0.08, 0.09])
-    np.testing.assert_allclose(result.difference_db, [0.02, -0.04, 0.11], atol=1e-9)
+    np.testing.assert_allclose(result.difference, [0.02, -0.04, 0.11], atol=1e-9)
     assert result.unvalidated_frequencies_hz.tolist() == [8000.0]
     assert result.agrees.tolist() == [True, True, False]
 
@@ -569,7 +569,7 @@ def test_validation_frequency_within_the_tolerance_is_the_same() -> None:
     reciprocity = _reciprocity(grid, np.array([-26.31, -26.32, -26.33]), 0.04)
     result = metrology.verify_jig_or_coupler(jig, reciprocity, microphone=1)
     assert result.frequencies.tolist() == [1000.0, 2000.0]
-    np.testing.assert_allclose(result.validation_level_db, [-26.31, -26.32], atol=1e-9)
+    np.testing.assert_allclose(result.validation_level, [-26.31, -26.32], atol=1e-9)
     assert result.unvalidated_frequencies_hz.tolist() == [4000.0, 8000.0]
 
 
@@ -584,7 +584,7 @@ def test_validation_against_a_reciprocity_calibration() -> None:
     assert result.validation == "reciprocity"
     assert result.frequencies.tolist() == [1000.0, 2000.0, 4000.0]
     assert result.unvalidated_frequencies_hz.tolist() == [8000.0]
-    np.testing.assert_allclose(result.difference_db, 0.02, atol=1e-9)
+    np.testing.assert_allclose(result.difference, 0.02, atol=1e-9)
     assert result.passes
 
 
@@ -673,9 +673,9 @@ def test_verification_refuses_a_negative_uncertainty() -> None:
     ):
         cc.JigCouplerVerification(
             frequencies=np.array([1000.0]),
-            calibration_level_db=np.array([-26.3]),
+            calibration_level=np.array([-26.3]),
             calibration_uncertainty_db=np.array([-0.1]),
-            validation_level_db=np.array([-26.3]),
+            validation_level=np.array([-26.3]),
             validation_uncertainty_db=np.array([0.06]),
             validation="comparison",
             unvalidated_frequencies_hz=np.array([]),
@@ -686,9 +686,9 @@ def test_verification_refuses_two_zero_uncertainties() -> None:
     with pytest.raises(ValueError, match="above 0 dB"):
         cc.JigCouplerVerification(
             frequencies=np.array([1000.0]),
-            calibration_level_db=np.array([-26.3]),
+            calibration_level=np.array([-26.3]),
             calibration_uncertainty_db=np.array([0.0]),
-            validation_level_db=np.array([-26.3]),
+            validation_level=np.array([-26.3]),
             validation_uncertainty_db=np.array([0.0]),
             validation="comparison",
             unvalidated_frequencies_hz=np.array([]),
@@ -730,7 +730,7 @@ def test_shared_reference_cancels_in_the_difference() -> None:
     )
     np.testing.assert_allclose(independent.correlation_coefficient, 0.0, atol=0.0)
     np.testing.assert_allclose(shared.shared_standard_uncertainty_db, 0.025)
-    np.testing.assert_allclose(shared.difference_db, independent.difference_db)
+    np.testing.assert_allclose(shared.difference, independent.difference)
 
 
 def test_shared_part_is_the_gum_law_for_correlated_inputs() -> None:
@@ -796,9 +796,9 @@ def test_correlation_is_zero_where_a_calibration_carries_no_uncertainty() -> Non
     """
     result = cc.JigCouplerVerification(
         frequencies=np.array([1000.0, 2000.0]),
-        calibration_level_db=np.array([-26.3, -26.3]),
+        calibration_level=np.array([-26.3, -26.3]),
         calibration_uncertainty_db=np.array([0.0, 0.08]),
-        validation_level_db=np.array([-26.3, -26.3]),
+        validation_level=np.array([-26.3, -26.3]),
         validation_uncertainty_db=np.array([0.06, 0.06]),
         validation="comparison",
         unvalidated_frequencies_hz=np.array([]),
@@ -891,9 +891,9 @@ def test_gum_example_2_correlation_of_two_items_against_one_standard() -> None:
         expanded = 2.0 * scale * math.hypot(comparison, standard)
         result = cc.JigCouplerVerification(
             frequencies=np.array([1000.0]),
-            calibration_level_db=np.array([-26.3]),
+            calibration_level=np.array([-26.3]),
             calibration_uncertainty_db=np.array([expanded]),
-            validation_level_db=np.array([-26.3]),
+            validation_level=np.array([-26.3]),
             validation_uncertainty_db=np.array([expanded]),
             validation="comparison",
             unvalidated_frequencies_hz=np.array([]),
@@ -910,9 +910,9 @@ def test_gum_example_2_correlation_of_two_items_against_one_standard() -> None:
 def test_verification_publishes_the_shared_part_read_only() -> None:
     result = cc.JigCouplerVerification(
         frequencies=np.array([1000.0, 2000.0]),
-        calibration_level_db=np.array([-26.3, -26.3]),
+        calibration_level=np.array([-26.3, -26.3]),
         calibration_uncertainty_db=np.array([0.08, 0.08]),
-        validation_level_db=np.array([-26.3, -26.3]),
+        validation_level=np.array([-26.3, -26.3]),
         validation_uncertainty_db=np.array([0.06, 0.06]),
         validation="comparison",
         unvalidated_frequencies_hz=np.array([]),
@@ -956,9 +956,9 @@ def test_verification_refuses_two_uncertainties_all_shared() -> None:
     with pytest.raises(ValueError, match="above 0 dB"):
         cc.JigCouplerVerification(
             frequencies=np.array([1000.0]),
-            calibration_level_db=np.array([-26.3]),
+            calibration_level=np.array([-26.3]),
             calibration_uncertainty_db=np.array([0.08]),
-            validation_level_db=np.array([-26.3]),
+            validation_level=np.array([-26.3]),
             validation_uncertainty_db=np.array([0.08]),
             validation="comparison",
             unvalidated_frequencies_hz=np.array([]),
@@ -972,9 +972,9 @@ def test_verification_refuses_a_negative_shared_part() -> None:
     ):
         cc.JigCouplerVerification(
             frequencies=np.array([1000.0]),
-            calibration_level_db=np.array([-26.3]),
+            calibration_level=np.array([-26.3]),
             calibration_uncertainty_db=np.array([0.08]),
-            validation_level_db=np.array([-26.3]),
+            validation_level=np.array([-26.3]),
             validation_uncertainty_db=np.array([0.06]),
             validation="comparison",
             unvalidated_frequencies_hz=np.array([]),
@@ -1031,7 +1031,7 @@ def test_verification_plot_marks_the_disagreements() -> None:
     lines = {line.get_label(): line for line in ax.get_lines()}
     np.testing.assert_allclose(
         lines[r"$\Delta = L_\mathrm{cal} - L_\mathrm{val}$"].get_ydata(),
-        result.difference_db,
+        result.difference,
     )
     failing = lines[r"$|\Delta| > U_\Delta$"]
     np.testing.assert_allclose(failing.get_xdata(), [2000.0])

@@ -1066,13 +1066,13 @@ class LevelDifferenceCheck(OwnsArrays):
     (:attr:`limit_db`), so a check cannot be built against another one.
 
     :ivar frequencies: Frequencies judged, in hertz.
-    :ivar difference_db: The level difference at each frequency, in dB
+    :ivar difference: The level difference at each frequency, in dB
         (``+inf`` where the second level is that of a zero signal).
     :ivar condition: ``"blocked_output"`` or ``"unwanted_input"``.
     """
 
     frequencies: np.ndarray
-    difference_db: np.ndarray
+    difference: np.ndarray
     condition: Literal["blocked_output", "unwanted_input"]
 
     def __post_init__(self) -> None:
@@ -1083,12 +1083,12 @@ class LevelDifferenceCheck(OwnsArrays):
             condition is unknown.
         """
         owner = type(self).__name__
-        require_ranks(self, frequencies=1, difference_db=1)
-        require_same_length(self, "frequencies", "difference_db", axis="frequency")
+        require_ranks(self, frequencies=1, difference=1)
+        require_same_length(self, "frequencies", "difference", axis="frequency")
         require_finite_fields(self, "frequencies")
-        difference = np.asarray(self.difference_db, dtype=np.float64)
+        difference = np.asarray(self.difference, dtype=np.float64)
         if np.any(np.isnan(difference)) or np.any(np.isneginf(difference)):
-            msg = f"{owner}: 'difference_db' must not hold NaN or -inf."
+            msg = f"{owner}: 'difference' must not hold NaN or -inf."
             raise ValueError(msg)
         if self.condition not in _CONDITIONS:
             msg = (
@@ -1114,7 +1114,7 @@ class LevelDifferenceCheck(OwnsArrays):
         """
         # Judged settled: a difference of two readings that is 20 dB in
         # decimal reaches the limit whichever way its last bits fall.
-        difference = np.asarray(self.difference_db, dtype=np.float64)
+        difference = np.asarray(self.difference, dtype=np.float64)
         return np.asarray(settled(difference) >= self.limit_db, dtype=bool)
 
     @property
@@ -1177,7 +1177,7 @@ def _warn_level_difference(
     if check.passes:
         return
     holds = check.holds
-    difference = np.asarray(check.difference_db, dtype=np.float64)
+    difference = np.asarray(check.difference, dtype=np.float64)
     worst = int(np.argmin(difference))
     warnings.warn(
         f"{np.count_nonzero(~holds)} of {holds.size} frequencies fall short of "
@@ -1192,8 +1192,8 @@ def _warn_level_difference(
 
 def check_blocked_output(
     frequencies: ArrayLike,
-    input_acceleration_level_db: ArrayLike,
-    output_acceleration_level_db: ArrayLike,
+    input_acceleration_level: ArrayLike,
+    output_acceleration_level: ArrayLike,
 ) -> LevelDifferenceCheck:
     r"""Is the output side blocked well enough for the stiffness to mean anything?
 
@@ -1212,9 +1212,9 @@ def check_blocked_output(
 
     :param frequencies: Frequencies, in hertz (narrow-band lines or band
         centres).
-    :param input_acceleration_level_db: Input acceleration level
+    :param input_acceleration_level: Input acceleration level
         :math:`L_{a1}`, in dB, one per frequency.
-    :param output_acceleration_level_db: Output acceleration level
+    :param output_acceleration_level: Output acceleration level
         :math:`L_{a2}`, in dB re the same reference, one per frequency;
         ``-inf`` for an output that does not move.
     :return: The :class:`LevelDifferenceCheck` (``condition="blocked_output"``).
@@ -1225,10 +1225,10 @@ def check_blocked_output(
     owner = "check_blocked_output"
     freq = _frequency_axis(frequencies, owner)
     first = _level_spectrum(
-        input_acceleration_level_db, freq.shape, owner, "input_acceleration_level_db"
+        input_acceleration_level, freq.shape, owner, "input_acceleration_level"
     )
     second = _level_spectrum(
-        output_acceleration_level_db, freq.shape, owner, "output_acceleration_level_db"
+        output_acceleration_level, freq.shape, owner, "output_acceleration_level"
     )
     if first.ndim != 1 or second.ndim != 1 or np.any(np.isneginf(first)):
         msg = (
@@ -1238,7 +1238,7 @@ def check_blocked_output(
         raise ValueError(msg)
     check = LevelDifferenceCheck(
         frequencies=freq,
-        difference_db=first - second,
+        difference=first - second,
         condition="blocked_output",
     )
     _warn_level_difference(
@@ -1251,8 +1251,8 @@ def check_blocked_output(
 
 def check_unwanted_input(
     frequencies: ArrayLike,
-    excitation_level_db: ArrayLike,
-    unwanted_level_db: ArrayLike,
+    excitation_level: ArrayLike,
+    unwanted_level: ArrayLike,
 ) -> LevelDifferenceCheck:
     r"""Does the input move in the excitation direction alone, by 15 dB?
 
@@ -1275,9 +1275,9 @@ def check_unwanted_input(
     errata register.)
 
     :param frequencies: Frequencies, in hertz.
-    :param excitation_level_db: Acceleration level in the excitation
+    :param excitation_level: Acceleration level in the excitation
         direction, in dB, one per frequency.
-    :param unwanted_level_db: Acceleration level in a perpendicular
+    :param unwanted_level: Acceleration level in a perpendicular
         direction, in dB re the same reference, one per frequency; or one row
         per direction, shape ``(directions, frequencies)``.
     :return: The :class:`LevelDifferenceCheck` (``condition="unwanted_input"``).
@@ -1288,18 +1288,16 @@ def check_unwanted_input(
     owner = "check_unwanted_input"
     freq = _frequency_axis(frequencies, owner)
     excitation = _level_spectrum(
-        excitation_level_db, freq.shape, owner, "excitation_level_db"
+        excitation_level, freq.shape, owner, "excitation_level"
     )
-    unwanted = _level_spectrum(
-        unwanted_level_db, freq.shape, owner, "unwanted_level_db"
-    )
+    unwanted = _level_spectrum(unwanted_level, freq.shape, owner, "unwanted_level")
     if excitation.ndim != 1 or np.any(np.isneginf(excitation)):
-        msg = f"{owner}: 'excitation_level_db' must be one finite level per frequency."
+        msg = f"{owner}: 'excitation_level' must be one finite level per frequency."
         raise ValueError(msg)
     loudest = unwanted if unwanted.ndim == 1 else np.max(unwanted, axis=0)
     check = LevelDifferenceCheck(
         frequencies=freq,
-        difference_db=excitation - loudest,
+        difference=excitation - loudest,
         condition="unwanted_input",
     )
     _warn_level_difference(
@@ -1453,8 +1451,8 @@ class OutputMassCheck(OwnsArrays):
 def check_output_mass(
     frequencies: ArrayLike,
     output_mass_kg: float,
-    output_force_level_db: ArrayLike,
-    output_acceleration_level_db: ArrayLike,
+    output_force_level: ArrayLike,
+    output_acceleration_level: ArrayLike,
 ) -> OutputMassCheck:
     r"""Is the mass in front of the output force transducers light enough?
 
@@ -1476,9 +1474,9 @@ def check_output_mass(
         force transducers: the output flange, the force distribution plate and
         half the mass of the transducers (ISO 10846-4), or the plate and half
         the transducers for a resilient support (ISO 10846-2), in kg.
-    :param output_force_level_db: Measured output force level
+    :param output_force_level: Measured output force level
         :math:`L_{F2}`, in dB re 1 µN, one per frequency.
-    :param output_acceleration_level_db: Output acceleration level
+    :param output_acceleration_level: Output acceleration level
         :math:`L_{a2}`, in dB re 1 µm/s², one per frequency.
     :return: The :class:`OutputMassCheck`.
     :raises ValueError: for frequencies that are not finite and positive, a
@@ -1493,8 +1491,8 @@ def check_output_mass(
     freq = _frequency_axis(frequencies, owner)
     levels = []
     for name, value in (
-        ("output_force_level_db", output_force_level_db),
-        ("output_acceleration_level_db", output_acceleration_level_db),
+        ("output_force_level", output_force_level),
+        ("output_acceleration_level", output_acceleration_level),
     ):
         level = np.asarray(value, dtype=np.float64)
         if level.shape != freq.shape or not np.all(np.isfinite(level)):
@@ -1794,18 +1792,18 @@ class DrivingPointStiffnessResult(OwnsArrays):
     :ivar frequencies: Frequencies, in hertz, strictly increasing.
     :ivar driving_point_stiffness: Complex :math:`k_{1,1}` at each frequency,
         in N/m.
-    :ivar blocked_output_difference_db: :math:`\Delta L_{1,2} = L_{a1} -
+    :ivar blocked_output_difference: :math:`\Delta L_{1,2} = L_{a1} -
         L_{a2}` per frequency, in dB, or ``None`` when Inequality (1) was not
         checked.
-    :ivar unwanted_input_difference_db: The input acceleration level less the
+    :ivar unwanted_input_difference: The input acceleration level less the
         loudest unwanted one per frequency, in dB, or ``None`` when
         Inequality (2) was not checked.
     """
 
     frequencies: np.ndarray
     driving_point_stiffness: np.ndarray
-    blocked_output_difference_db: np.ndarray | None = None
-    unwanted_input_difference_db: np.ndarray | None = None
+    blocked_output_difference: np.ndarray | None = None
+    unwanted_input_difference: np.ndarray | None = None
 
     def __post_init__(self) -> None:
         """Reject a sweep that cannot give a low-frequency value or an ordered limit.
@@ -1820,15 +1818,15 @@ class DrivingPointStiffnessResult(OwnsArrays):
             self,
             frequencies=1,
             driving_point_stiffness=1,
-            blocked_output_difference_db=1,
-            unwanted_input_difference_db=1,
+            blocked_output_difference=1,
+            unwanted_input_difference=1,
         )
         require_same_length(
             self,
             "frequencies",
             "driving_point_stiffness",
-            "blocked_output_difference_db",
-            "unwanted_input_difference_db",
+            "blocked_output_difference",
+            "unwanted_input_difference",
             axis="frequency",
         )
         require_finite_fields(self, "frequencies", "driving_point_stiffness")
@@ -1849,19 +1847,19 @@ class DrivingPointStiffnessResult(OwnsArrays):
     def _checks(self) -> list[LevelDifferenceCheck]:
         freq = np.asarray(self.frequencies, dtype=np.float64)
         checks = []
-        if self.blocked_output_difference_db is not None:
+        if self.blocked_output_difference is not None:
             checks.append(
                 LevelDifferenceCheck(
                     frequencies=freq,
-                    difference_db=self.blocked_output_difference_db,
+                    difference=self.blocked_output_difference,
                     condition="blocked_output",
                 )
             )
-        if self.unwanted_input_difference_db is not None:
+        if self.unwanted_input_difference is not None:
             checks.append(
                 LevelDifferenceCheck(
                     frequencies=freq,
-                    difference_db=self.unwanted_input_difference_db,
+                    difference=self.unwanted_input_difference,
                     condition="unwanted_input",
                 )
             )
@@ -1911,7 +1909,7 @@ class DrivingPointStiffnessResult(OwnsArrays):
         return loss_factor(self.driving_point_stiffness)
 
     @property
-    def low_frequency_level_db(self) -> float:
+    def low_frequency_level(self) -> float:
         r"""The low-frequency stiffness level of 6.2, in dB re 1 N/m.
 
         :return: :math:`10 \lg` of the mean squared magnitude over the
@@ -1922,17 +1920,17 @@ class DrivingPointStiffnessResult(OwnsArrays):
         return 10.0 * math.log10(power / REFERENCE_STIFFNESS_N_M**2)
 
     @property
-    def threshold_level_db(self) -> float:
+    def threshold_level(self) -> float:
         r"""The level 2 dB below the low-frequency value, whose crossing is :math:`f_\mathrm{UL}`.
 
         :return: The threshold, in dB re 1 N/m.
         """
-        return self.low_frequency_level_db - _DRIVING_POINT_TOLERANCE_DB
+        return self.low_frequency_level - _DRIVING_POINT_TOLERANCE_DB
 
     def _first_failure(self) -> tuple[int | None, float | None]:
         """The first adequate line 2 dB down, and the interpolated ``f_UL``."""
         freq = np.asarray(self.frequencies, dtype=np.float64)
-        margin = self.levels - self.threshold_level_db
+        margin = self.levels - self.threshold_level
         judged = self._adequate() & (freq >= _LOW_FREQUENCY_RANGE_HZ[0])
         return _limit_crossing(freq, margin, margin <= 0.0, judged)
 
@@ -2096,7 +2094,7 @@ def driving_point_stiffness(
             )
             raise ValueError(msg)
         blocked = np.asarray(
-            check_blocked_output(freq, input_level, output_level).difference_db,
+            check_blocked_output(freq, input_level, output_level).difference,
             dtype=np.float64,
         )
     if unwanted_acceleration_m_s2 is not None:
@@ -2104,14 +2102,14 @@ def driving_point_stiffness(
             unwanted_acceleration_m_s2, freq.shape, owner, "unwanted_acceleration_m_s2"
         )
         unwanted = np.asarray(
-            check_unwanted_input(freq, input_level, unwanted_level).difference_db,
+            check_unwanted_input(freq, input_level, unwanted_level).difference,
             dtype=np.float64,
         )
     return DrivingPointStiffnessResult(
         frequencies=freq,
         driving_point_stiffness=np.asarray(k11, dtype=np.complex128),
-        blocked_output_difference_db=blocked,
-        unwanted_input_difference_db=unwanted,
+        blocked_output_difference=blocked,
+        unwanted_input_difference=unwanted,
     )
 
 
@@ -2166,7 +2164,7 @@ class DrivingPointUncertainty(RichDisplay):
             raise ValueError(msg)
 
     @property
-    def band_level_db(self) -> float:
+    def band_level(self) -> float:
         r"""The band level :math:`L_{k,\mathrm{av}}`, in dB re 1 N/m."""
         return float(self.budget.value)
 
@@ -2211,7 +2209,7 @@ def _sum_of_inputs(*inputs: float) -> float:
 
 
 def driving_point_uncertainty(
-    band_level_db: float,
+    band_level: float,
     *,
     repeatability_range_db: float,
     signal_uncertainty_db: float = _U_SIGNAL_DB,
@@ -2249,7 +2247,7 @@ def driving_point_uncertainty(
     table. Every default can be replaced by a reasoned estimate, as the annex
     encourages, and the note to (B.3) allows doing so band by band.
 
-    :param band_level_db: The measured band level
+    :param band_level: The measured band level
         :math:`\hat{L}_{k,\mathrm{av}}`, in dB re 1 N/m.
     :param repeatability_range_db: The difference :math:`2p` between the
         highest and lowest band level of repeated installations, in dB
@@ -2268,7 +2266,7 @@ def driving_point_uncertainty(
     :raises ValueError: for a non-finite band level, or a negative or
         non-finite spread or standard uncertainty.
     """
-    band_level_db = require_finite(band_level_db, "band_level_db")
+    band_level = require_finite(band_level, "band_level")
     spread = require_finite(
         require_non_negative(repeatability_range_db, "repeatability_range_db"),
         "repeatability_range_db",
@@ -2286,7 +2284,7 @@ def driving_point_uncertainty(
     }
     quantities = (
         Quantity(
-            band_level_db,
+            band_level,
             u["signal_uncertainty_db"],
             "gaussian",
             name=_ANNEX_B_NAMES[0],

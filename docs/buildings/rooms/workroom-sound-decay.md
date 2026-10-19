@@ -43,7 +43,7 @@ still be loud, so the two do not substitute for each other.
 ```python
 res = room.spatial_decay_curve(d, distances, region="middle", far_limit_m=24.0)
 print(round(res.decay_rate_db, 2))    # 4.73 dB per doubling
-print(round(res.mean_excess_db, 2))   # 7.33 dB
+print(round(res.mean_level_excess, 2))   # 7.33 dB
 ```
 
 The ranges are clause 6.2: near from 1 m to `d1`, middle from `d1` to `d2`, far
@@ -97,7 +97,7 @@ corrected = room.corrected_distribution_value(d, reference, distances)
 
 fixed = room.spatial_decay_curve(corrected, distances, region="middle", far_limit_m=24.0)
 print(round(fixed.decay_rate_db, 2))    # 4.39 dB per doubling
-print(round(fixed.mean_excess_db, 2))   # 6.73 dB
+print(round(fixed.mean_level_excess, 2))   # 6.73 dB
 ```
 
 Annex C prints 4,4 dB per doubling, which is the corrected figure, and 7,3 dB of
@@ -127,8 +127,8 @@ description gathered at that level first.
 print(room.detail_is_sufficient("1", room_detail=3,
                                 fitting_detail=3, source_detail=1).satisfied)   # False
 print(round(room.fitting_density(480.0, 1200.0), 2))                           # 0.1
-print(round(room.workstation_level(sound_power_level_db=95.0,
-                                   emission_level_db=85.0,
+print(round(room.workstation_level(sound_power_level=95.0,
+                                   emission_level=85.0,
                                    absorption_area=200.0), 2))              # 85.79
 ```
 

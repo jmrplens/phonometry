@@ -96,8 +96,8 @@ judged here.
 
 ```python
 heavy_impact_improvement(
-    l_i_fmax_0_db: ArrayLike,
-    l_i_fmax_db: ArrayLike,
+    l_i_fmax_0: ArrayLike,
+    l_i_fmax: ArrayLike,
     frequencies: ArrayLike,
 ) -> HeavyImpactImprovementResult
 ```
@@ -118,8 +118,8 @@ octaves 63 Hz to 500 Hz or the matching one-third octaves
 
 | Name | Description |
 | :--- | :--- |
-| `l_i_fmax_0_db` | `Li,Fmax,0` per band, in dB. |
-| `l_i_fmax_db` | `Li,Fmax` per band, in dB. |
+| `l_i_fmax_0` | `Li,Fmax,0` per band, in dB. |
+| `l_i_fmax` | `Li,Fmax` per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz. |
 
 **Returns:** A [`HeavyImpactImprovementResult`](/phonometry/reference/api/building/laboratory-improvement/#heavyimpactimprovementresult).
@@ -135,9 +135,9 @@ octaves 63 Hz to 500 Hz or the matching one-third octaves
 ```python
 HeavyImpactImprovementResult(
     frequencies: np.ndarray,
-    l_i_fmax_0_db: np.ndarray,
-    l_i_fmax_db: np.ndarray,
-    improvement_db: np.ndarray,
+    l_i_fmax_0: np.ndarray,
+    l_i_fmax: np.ndarray,
+    improvement: np.ndarray,
 )
 ```
 
@@ -148,9 +148,9 @@ Improvement for the heavy/soft impact source (ISO 10140-1:2021 H.6.1).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in Hz. |
-| `l_i_fmax_0_db` | Maximum impact sound pressure level of the reference floor without the covering, `Li,Fmax,0`, in dB. |
-| `l_i_fmax_db` | The same with the covering, `Li,Fmax`, in dB. |
-| `improvement_db` | $\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} - L_\mathrm{i,Fmax}$ per band, in dB (Formula (H.3)). |
+| `l_i_fmax_0` | Maximum impact sound pressure level of the reference floor without the covering, `Li,Fmax,0`, in dB. |
+| `l_i_fmax` | The same with the covering, `Li,Fmax`, in dB. |
+| `improvement` | $\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} - L_\mathrm{i,Fmax}$ per band, in dB (Formula (H.3)). |
 
 ### HeavyImpactImprovementResult.plot()
 
@@ -172,8 +172,8 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 laboratory_floor_covering_improvement(
-    l_n0_db: ArrayLike,
-    l_n_db: ArrayLike,
+    l_n0: ArrayLike,
+    l_n: ArrayLike,
     frequencies: ArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = 'heavyweight',
@@ -206,8 +206,8 @@ is the one of the `reference_floor` the caller names.
 
 | Name | Description |
 | :--- | :--- |
-| `l_n0_db` | `Ln0` per one-third-octave band, in dB: the energy-averaged normalized level of the bare floor (e.g. `laboratory_impact_insulation(...).l_n`). For small category I specimens measured with the tapping machine beside each specimen, it is the arithmetic mean of the two positions either side (H.4.6.1.1). |
-| `l_n_db` | `Ln` with the covering, per band, in dB. |
+| `l_n0` | `Ln0` per one-third-octave band, in dB: the energy-averaged normalized level of the bare floor (e.g. `laboratory_impact_insulation(...).l_n`). For small category I specimens measured with the tapping machine beside each specimen, it is the arithmetic mean of the two positions either side (H.4.6.1.1). |
+| `l_n` | `Ln` with the covering, per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz; the ratings are formed on the 16 bands 100 Hz to 3 150 Hz when all are present. |
 | `reference_floor` | `"heavyweight"` (default), `"lightweight_1"`, `"lightweight_2"` or `"lightweight_3"`. |
 
@@ -223,8 +223,8 @@ is the one of the `reference_floor` the caller names.
 
 ```python
 laboratory_lining_improvement(
-    r_without_db: ArrayLike,
-    r_with_db: ArrayLike,
+    r_without: ArrayLike,
+    r_with: ArrayLike,
     frequencies: ArrayLike,
     *,
     basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'] | None = 'heavy_wall',
@@ -263,8 +263,8 @@ read off the numbers, so neither is refused here.
 
 | Name | Description |
 | :--- | :--- |
-| `r_without_db` | `Rwithout` per one-third-octave band, in dB (e.g. `laboratory_airborne_insulation(...).r`). |
-| `r_with_db` | `Rwith` per band, in dB. |
+| `r_without` | `Rwithout` per one-third-octave band, in dB (e.g. `laboratory_airborne_insulation(...).r`). |
+| `r_with` | `Rwith` per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz. |
 | `basic_element` | `"heavy_wall"` (default), `"heavy_floor"`, `"lightweight_wall"` or `None` for a basic element that is not one of the three standard ones. |
 
@@ -281,12 +281,12 @@ read off the numbers, so neither is refused here.
 ```python
 LaboratoryFloorCoveringImprovementResult(
     frequencies: np.ndarray,
-    l_n0_db: np.ndarray,
-    l_n_db: np.ndarray,
-    improvement_db: np.ndarray,
+    l_n0: np.ndarray,
+    l_n: np.ndarray,
+    improvement: np.ndarray,
     reference_floor: str,
-    delta_lw_db: int | None,
-    ci_delta_db: int | None,
+    delta_lw: int | None,
+    ci_delta: int | None,
     reference_rating: ImpactRatingResult | None,
     bare_rating: ImpactRatingResult | None,
 )
@@ -299,12 +299,12 @@ Improvement of impact sound insulation by a floor covering (Annex H).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in Hz. |
-| `l_n0_db` | Normalized impact sound pressure level of the reference floor without the covering, `Ln0`, in dB. |
-| `l_n_db` | Normalized impact sound pressure level with the covering, `Ln`, in dB. |
-| `improvement_db` | $\Delta L = L_\mathrm{n0} - L_\mathrm{n}$ per band, in dB (Formula (H.1)). |
+| `l_n0` | Normalized impact sound pressure level of the reference floor without the covering, `Ln0`, in dB. |
+| `l_n` | Normalized impact sound pressure level with the covering, `Ln`, in dB. |
+| `improvement` | $\Delta L = L_\mathrm{n0} - L_\mathrm{n}$ per band, in dB (Formula (H.1)). |
 | `reference_floor` | `"heavyweight"`, `"lightweight_1"`, `"lightweight_2"` or `"lightweight_3"`. |
-| `delta_lw_db` | The weighted reduction on the reference curve of that floor (`ΔLw` or `ΔLt,n,w`, ISO 717-2:2020 Clauses 5 and 6), in dB, or `None` without the 16 rating bands 100 Hz to 3 150 Hz. |
-| `ci_delta_db` | Its spectrum adaptation term, `CI,Δ` on the heavyweight floor (Formula (A.4)) or `CIΔ,t` on a lightweight one (Formula (A.6)), designated `CIΔ,t1` to `CIΔ,t3` by floor type (ISO 717-2:2020 A.2.3), in dB, or `None`. |
+| `delta_lw` | The weighted reduction on the reference curve of that floor (`ΔLw` or `ΔLt,n,w`, ISO 717-2:2020 Clauses 5 and 6), in dB, or `None` without the 16 rating bands 100 Hz to 3 150 Hz. |
+| `ci_delta` | Its spectrum adaptation term, `CI,Δ` on the heavyweight floor (Formula (A.4)) or `CIΔ,t` on a lightweight one (Formula (A.6)), designated `CIΔ,t1` to `CIΔ,t3` by floor type (ISO 717-2:2020 A.2.3), in dB, or `None`. |
 | `reference_rating` | The ISO 717-2 rating of the reference curve with the covering, $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$: `Ln,r,w` and `CI,r` of H.5 i), or `None`. |
 | `bare_rating` | The ISO 717-2 rating of the measured bare floor, `Ln,0,w` and `CI,0` of H.5 i), or `None`. |
 
@@ -407,14 +407,14 @@ its place.
 ```python
 LaboratoryLiningImprovementResult(
     frequencies: np.ndarray,
-    r_without_db: np.ndarray,
-    r_with_db: np.ndarray,
-    delta_r_db: np.ndarray,
+    r_without: np.ndarray,
+    r_with: np.ndarray,
+    delta_r: np.ndarray,
     basic_element: str | None,
     rating: ReductionImprovementRating | None,
-    delta_rw_direct_db: int | None,
-    delta_rw_c_direct_db: int | None,
-    delta_rw_ctr_direct_db: int | None,
+    delta_rw_direct: int | None,
+    delta_rw_c_direct: int | None,
+    delta_rw_ctr_direct: int | None,
 )
 ```
 
@@ -425,14 +425,14 @@ Improvement of airborne sound insulation by a lining (ISO 10140-1 Annex G).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in Hz. |
-| `r_without_db` | Sound reduction index of the basic element without the lining, `Rwithout`, in dB. |
-| `r_with_db` | Sound reduction index with the lining, `Rwith`, in dB. |
-| `delta_r_db` | Sound reduction improvement index $\Delta R = R_\mathrm{with} - R_\mathrm{without}$, in dB (G.1). |
+| `r_without` | Sound reduction index of the basic element without the lining, `Rwithout`, in dB. |
+| `r_with` | Sound reduction index with the lining, `Rwith`, in dB. |
+| `delta_r` | Sound reduction improvement index $\Delta R = R_\mathrm{with} - R_\mathrm{without}$, in dB (G.1). |
 | `basic_element` | The standard basic element the lining was measured on (`"heavy_wall"`, `"heavy_floor"`, `"lightweight_wall"`), or `None` for another basic element. |
 | `rating` | The ISO 717-1:2020 Annex D rating on the reference curve of that element, or `None` for another basic element or a spectrum without the 16 rating bands 100 Hz to 3 150 Hz. |
-| `delta_rw_direct_db` | `ΔRw,direct = Rw,with - Rw,without` (ISO 717-1:2020 Formula (D.2)), in dB, or `None` without the 16 rating bands. |
-| `delta_rw_c_direct_db` | `Δ(Rw + C)direct`, in dB, or `None`. |
-| `delta_rw_ctr_direct_db` | `Δ(Rw + Ctr)direct`, in dB, or `None`. |
+| `delta_rw_direct` | `ΔRw,direct = Rw,with - Rw,without` (ISO 717-1:2020 Formula (D.2)), in dB, or `None` without the 16 rating bands. |
+| `delta_rw_c_direct` | `Δ(Rw + C)direct`, in dB, or `None`. |
+| `delta_rw_ctr_direct` | `Δ(Rw + Ctr)direct`, in dB, or `None`. |
 
 ### LaboratoryLiningImprovementResult.octave_bands()
 

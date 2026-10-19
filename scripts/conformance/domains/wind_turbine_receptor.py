@@ -163,7 +163,7 @@ def _chk_background() -> Outcome:
         "u_c": math.hypot(0.8 * e_t, 0.6 * e_b) / (e_t - e_b),
     }
     computed = {
-        "L_c": float(result.turbine_levels_db[0]),
+        "L_c": float(result.turbine_levels[0]),
         "u_c": float(result.turbine_uncertainty_db[0]),
     }
     worst = max(abs(computed[k] - expected[k]) for k in expected)
@@ -184,7 +184,7 @@ def _chk_background() -> Outcome:
 )
 def _chk_three_db_rule() -> Outcome:
     result = env.turbine_sound_levels([42.0], [40.0])
-    return numeric(39.0, float(result.turbine_levels_db[0]), 1e-6, unit="dB", places=6)
+    return numeric(39.0, float(result.turbine_levels[0]), 1e-6, unit="dB", places=6)
 
 
 @register(
@@ -291,10 +291,10 @@ def _chk_table_c1() -> Outcome:
 )
 def _chk_c_tables() -> Outcome:
     pairs: list[tuple[object, tuple[float, ...]]] = [
-        (env.LOW_FREQUENCY_GROUND_CORRECTION_DB, oracle.WT_C2_GROUND_DB),
+        (env.LOW_FREQUENCY_GROUND_CORRECTION, oracle.WT_C2_GROUND_DB),
         (env.LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM, oracle.WT_C2_ALPHA_DB_PER_KM),
         *(
-            (env.LOW_FREQUENCY_FACADE_INSULATION_DB[name], row)
+            (env.LOW_FREQUENCY_FACADE_INSULATION[name], row)
             for name, row in oracle.WT_C3_FACADE_DB.items()
         ),
         (tuple(env.SWEDISH_LOW_FREQUENCY_LIMITS_DB.values()), oracle.WT_C5_SWEDEN_DB),
@@ -395,9 +395,9 @@ def _chk_c1() -> Outcome:
         distance=500.0,
         hub_height_m=100.0,
         frequencies=[63.0],
-        facade_insulation_db=[16.6],
+        facade_insulation=[16.6],
     )
-    indoor = result.indoor_levels_db
+    indoor = result.indoor_levels
     computed = math.nan if indoor is None else float(indoor[0])
     return numeric(expected, computed, 1e-6, unit="dB", places=6)
 
@@ -412,7 +412,7 @@ def _chk_c1() -> Outcome:
 )
 def _chk_emergence() -> Outcome:
     result = env.sound_emergence([44.5], [41.0])
-    return numeric(3.5, float(result.emergence_db[0]), 1e-6, unit="dB", places=6)
+    return numeric(3.5, float(result.emergence[0]), 1e-6, unit="dB", places=6)
 
 
 @register(
@@ -461,11 +461,11 @@ def _chk_table_a1() -> Outcome:
 def _chk_rating() -> Outcome:
     result = env.wind_turbine_rating_level(
         40.0,
-        tonal_adjustment_db=2.0,
-        amplitude_modulation_adjustment_db=4.0,
-        impulsive_adjustment_db=1.8,
+        tonal_adjustment=2.0,
+        amplitude_modulation_adjustment=4.0,
+        impulsive_adjustment=1.8,
     )
-    return numeric(44.0, result.rating_level_db, 1e-6, unit="dB", places=6)
+    return numeric(44.0, result.rating_level, 1e-6, unit="dB", places=6)
 
 
 def _search_khz(distance: float, temperature: float, humidity: float) -> float:

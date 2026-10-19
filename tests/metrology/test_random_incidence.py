@@ -103,7 +103,7 @@ def _counted_once_index_db(result: ri.DirectivityFactor) -> float:
     second = np.isclose(result.plane_angles_deg, 90.0)
     pole = np.isclose(result.incidence_angles_deg % 180.0, 0.0)
     kept = ~(second & pole)
-    energy = 10.0 ** (0.1 * (result.levels - result.reference_level_db))
+    energy = 10.0 ** (0.1 * (result.levels - result.reference_level))
     return -10.0 * math.log10(float(np.sum(result.weights[kept] * energy[kept])))
 
 
@@ -118,7 +118,7 @@ def test_counting_the_poles_once_leaves_an_omnidirectional_bias_of_0_008_db() ->
     assert counted_once == pytest.approx(_COUNTED_ONCE_SUM, abs=5e-7)
     assert -10.0 * math.log10(counted_once) == pytest.approx(0.00827, abs=5e-6)
     omni = metrology.directivity_factor(_omni(2, 36))
-    assert omni.directivity_index_db == pytest.approx(0.0, abs=1e-12)
+    assert omni.directivity_index == pytest.approx(0.0, abs=1e-12)
     assert _counted_once_index_db(omni) == pytest.approx(0.00827, abs=5e-6)
 
 
@@ -133,12 +133,12 @@ def test_the_counted_once_bias_grows_with_the_directivity() -> None:
     phi = np.radians(np.arange(36) * 10.0)
     plane = 94.0 + 10.0 * np.log10(((1.0 + np.cos(phi)) / 2.0) ** 4 * 0.999 + 0.001)
     result = metrology.directivity_factor(np.vstack((plane, plane)))
-    bias = _counted_once_index_db(result) - result.directivity_index_db
+    bias = _counted_once_index_db(result) - result.directivity_index
     k0 = float(metrology.adjustment_factors(10.0)[0])
     rear = 10.0 ** (0.1 * (plane[18] - 94.0))
     expected = -10.0 * math.log10(1.0 - result.gamma * k0 * (1.0 + rear))
     assert bias == pytest.approx(expected, rel=1e-9)
-    assert result.directivity_index_db == pytest.approx(7.0, abs=0.1)
+    assert result.directivity_index == pytest.approx(7.0, abs=0.1)
     assert bias == pytest.approx(0.02, abs=0.002)
 
 
@@ -272,16 +272,16 @@ def test_an_omnidirectional_instrument_has_gamma_one(
 def test_a_uniform_offset_is_the_directivity_index() -> None:
     """Every reading 1 dB above L_rd reads 10 lg gamma = -1 dB."""
     levels = _omni(2, 36, 95.0)
-    result = metrology.directivity_factor(levels, reference_level_db=94.0)
-    assert result.directivity_index_db == pytest.approx(-1.0, abs=1e-12)
+    result = metrology.directivity_factor(levels, reference_level=94.0)
+    assert result.directivity_index == pytest.approx(-1.0, abs=1e-12)
 
 
 def test_the_reference_level_defaults_to_the_first_reading() -> None:
     levels = _omni(2, 36)
     levels[0, 0] = 93.0
     result = metrology.directivity_factor(levels)
-    assert result.reference_level_db == pytest.approx(93.0)
-    explicit = metrology.directivity_factor(levels, reference_level_db=93.0)
+    assert result.reference_level == pytest.approx(93.0)
+    explicit = metrology.directivity_factor(levels, reference_level=93.0)
     assert explicit.gamma == pytest.approx(result.gamma, rel=1e-15)
 
 
@@ -371,7 +371,7 @@ def _directivity_fields(**changes: object) -> dict[str, object]:
         "plane_angles_deg": np.zeros(4),
         "levels": np.zeros(4),
         "weights": np.full(4, 0.25),
-        "reference_level_db": 0.0,
+        "reference_level": 0.0,
         "gamma": 1.0,
         "largest_element_fraction": 0.3,
         "formula": "A.3",
@@ -404,8 +404,8 @@ def test_the_result_refuses_a_formula_it_does_not_draw() -> None:
 
 
 def test_the_result_refuses_a_reference_level_that_is_not_finite() -> None:
-    fields = _directivity_fields(reference_level_db=math.nan)
-    with pytest.raises(ValueError, match="'reference_level_db' must be finite"):
+    fields = _directivity_fields(reference_level=math.nan)
+    with pytest.raises(ValueError, match="'reference_level' must be finite"):
         ri.DirectivityFactor(**fields)  # type: ignore[arg-type]
 
 
@@ -429,10 +429,10 @@ def test_the_relative_levels_are_the_readings_less_the_reference() -> None:
     """L(phi) - L_rd: a reading 3 dB below the reference is -3 dB."""
     levels = _omni(2, 36)
     levels[0, 9] = 91.0
-    result = metrology.directivity_factor(levels, reference_level_db=94.0)
-    assert result.relative_levels_db[0] == pytest.approx(0.0, abs=1e-12)
-    assert result.relative_levels_db[9] == pytest.approx(-3.0, abs=1e-12)
-    assert result.relative_levels_db[36 + 9] == pytest.approx(0.0, abs=1e-12)
+    result = metrology.directivity_factor(levels, reference_level=94.0)
+    assert result.relative_levels[0] == pytest.approx(0.0, abs=1e-12)
+    assert result.relative_levels[9] == pytest.approx(-3.0, abs=1e-12)
+    assert result.relative_levels[36 + 9] == pytest.approx(0.0, abs=1e-12)
 
 
 # --------------------------------------------------------------------------
@@ -499,7 +499,7 @@ def test_equal_area_is_formula_a5() -> None:
     horizontal = 94.0 - rng.uniform(0.0, 5.0, size=20)
     vertical = 94.0 - rng.uniform(0.0, 5.0, size=18)
     result = metrology.equal_area_directivity_factor(
-        horizontal, vertical, reference_level_db=94.0
+        horizontal, vertical, reference_level=94.0
     )
     total = np.sum(10.0 ** (-0.1 * (94.0 - np.concatenate((horizontal, vertical)))))
     assert result.gamma == pytest.approx(38.0 / total, rel=1e-13)
@@ -524,7 +524,7 @@ def test_equal_area_refuses_the_wrong_number_of_readings(
     h_levels = np.full(horizontal, 90.0)
     v_levels = np.full(vertical, 90.0)
     with pytest.raises(
-        ValueError, match="'horizontal_levels_db' and 'vertical_levels_db' must hold"
+        ValueError, match="'horizontal_levels' and 'vertical_levels' must hold"
     ):
         metrology.equal_area_directivity_factor(h_levels, v_levels)
 
@@ -548,18 +548,18 @@ def test_random_incidence_is_free_field_less_the_directivity_index() -> None:
     result = metrology.random_incidence_sensitivity(
         [1000.0, 4000.0, 8000.0], [0.2, -0.1, -0.8], [0.05, 0.85, 2.45]
     )
-    np.testing.assert_allclose(result.random_incidence_level_db, [0.15, -0.95, -3.25])
-    np.testing.assert_allclose(result.correction_db, [-0.05, -0.85, -2.45])
+    np.testing.assert_allclose(result.random_incidence_level, [0.15, -0.95, -3.25])
+    np.testing.assert_allclose(result.correction, [-0.05, -0.85, -2.45])
 
 
 def test_a_single_free_field_level_is_spread_over_the_bands() -> None:
     result = metrology.random_incidence_sensitivity([1000.0, 2000.0], 0.0, [0.1, 0.2])
-    np.testing.assert_allclose(result.free_field_level_db, [0.0, 0.0])
+    np.testing.assert_allclose(result.free_field_level, [0.0, 0.0])
 
 
 def test_random_incidence_refuses_a_column_of_the_wrong_length() -> None:
     with pytest.raises(
-        ValueError, match="'directivity_index_db' must hold one value per frequency"
+        ValueError, match="'directivity_index' must hold one value per frequency"
     ):
         metrology.random_incidence_sensitivity([1000.0, 2000.0], 0.0, [0.1, 0.2, 0.3])
 
@@ -575,17 +575,17 @@ def test_random_incidence_from_a_directivity_measurement() -> None:
         metrology.directivity_factor(_omni(2, 36)),
     ]
     result = metrology.random_incidence_sensitivity(
-        [1000.0, 2000.0], [0.0, 0.0], [d.directivity_index_db for d in dirs]
+        [1000.0, 2000.0], [0.0, 0.0], [d.directivity_index for d in dirs]
     )
-    assert result.random_incidence_level_db[0] == pytest.approx(
+    assert result.random_incidence_level[0] == pytest.approx(
         -10.0 * math.log10(dirs[0].gamma)
     )
-    assert result.random_incidence_level_db[1] == pytest.approx(0.0, abs=1e-12)
+    assert result.random_incidence_level[1] == pytest.approx(0.0, abs=1e-12)
 
 
 def test_the_sensitivity_columns_are_read_only() -> None:
     result = metrology.random_incidence_sensitivity([1000.0], 0.0, 0.1)
-    assert not result.random_incidence_level_db.flags.writeable
+    assert not result.random_incidence_level.flags.writeable
     assert not result.frequencies.flags.writeable
 
 
@@ -601,7 +601,7 @@ def test_table_b1_holds_every_printed_row() -> None:
         assert all(lowest <= key <= highest for key in keys)
         for key in keys:
             row = table[key]
-            assert row.directivity_index_db == pytest.approx(index, abs=1e-12)
+            assert row.directivity_index == pytest.approx(index, abs=1e-12)
             assert row.diffuse_pressure_difference_db == pytest.approx(
                 difference, abs=1e-12
             )
@@ -612,7 +612,7 @@ def test_table_b1_is_immutable() -> None:
     assert isinstance(table, types.MappingProxyType)
     row = table[8000.0]
     with pytest.raises(dataclasses.FrozenInstanceError):
-        row.directivity_index_db = 0.0  # type: ignore[misc]
+        row.directivity_index = 0.0  # type: ignore[misc]
 
 
 def test_formula_9_adds_the_random_incidence_level_of_the_reference() -> None:
@@ -620,10 +620,10 @@ def test_formula_9_adds_the_random_incidence_level_of_the_reference() -> None:
         [1000.0, 2000.0],
         [80.0, 81.0],
         [79.5, 80.2],
-        reference_random_incidence_level_db=[-0.1, -0.3],
+        reference_random_incidence_level=[-0.1, -0.3],
     )
-    np.testing.assert_allclose(result.level_difference_db, [0.5, 0.8])
-    np.testing.assert_allclose(result.diffuse_field_level_db, [0.4, 0.5])
+    np.testing.assert_allclose(result.level_difference, [0.5, 0.8])
+    np.testing.assert_allclose(result.diffuse_field_level, [0.4, 0.5])
     assert result.route == "random_incidence"
 
 
@@ -632,10 +632,10 @@ def test_formula_10_takes_the_directivity_of_table_b1_by_default() -> None:
         [1000.0, 8000.0, 20000.0],
         [80.0, 80.0, 80.0],
         [80.0, 80.0, 80.0],
-        reference_free_field_level_db=0.0,
+        reference_free_field_level=0.0,
     )
-    np.testing.assert_allclose(result.reference_correction_db, [-0.05, -2.45, -6.70])
-    np.testing.assert_allclose(result.diffuse_field_level_db, [-0.05, -2.45, -6.70])
+    np.testing.assert_allclose(result.reference_correction, [-0.05, -2.45, -6.70])
+    np.testing.assert_allclose(result.diffuse_field_level, [-0.05, -2.45, -6.70])
 
 
 def test_formula_10_with_a_known_directivity() -> None:
@@ -643,10 +643,10 @@ def test_formula_10_with_a_known_directivity() -> None:
         [1000.0],
         [80.0],
         [79.0],
-        reference_free_field_level_db=[0.3],
-        reference_directivity_index_db=[0.2],
+        reference_free_field_level=[0.3],
+        reference_directivity_index=[0.2],
     )
-    np.testing.assert_allclose(result.diffuse_field_level_db, [1.1])
+    np.testing.assert_allclose(result.diffuse_field_level, [1.1])
 
 
 def test_formula_11_adds_the_diffuse_to_pressure_difference_of_table_b1() -> None:
@@ -654,18 +654,18 @@ def test_formula_11_adds_the_diffuse_to_pressure_difference_of_table_b1() -> Non
         [500.0, 8000.0, 16000.0],
         [70.0, 70.0, 70.0],
         [70.0, 70.0, 70.0],
-        reference_pressure_level_db=-26.0,
+        reference_pressure_level=-26.0,
     )
-    np.testing.assert_allclose(result.reference_correction_db, [0.0, 1.20, 3.05])
-    np.testing.assert_allclose(result.diffuse_field_level_db, [-26.0, -24.8, -22.95])
+    np.testing.assert_allclose(result.reference_correction, [0.0, 1.20, 3.05])
+    np.testing.assert_allclose(result.diffuse_field_level, [-26.0, -24.8, -22.95])
 
 
 def test_table_b1_answers_an_exact_midband_frequency() -> None:
     """15 849 Hz is the base-ten midband of the 16 kHz band."""
     result = metrology.diffuse_field_sensitivity(
-        [1000.0 * 10.0**1.2], [0.0], [0.0], reference_pressure_level_db=0.0
+        [1000.0 * 10.0**1.2], [0.0], [0.0], reference_pressure_level=0.0
     )
-    np.testing.assert_allclose(result.reference_correction_db, [3.05])
+    np.testing.assert_allclose(result.reference_correction, [3.05])
 
 
 def test_table_b1_refuses_a_frequency_it_does_not_print() -> None:
@@ -674,17 +674,15 @@ def test_table_b1_refuses_a_frequency_it_does_not_print() -> None:
         ValueError, match="pass 'reference_diffuse_pressure_difference_db' for it"
     ):
         metrology.diffuse_field_sensitivity(
-            frequencies, 0.0, 0.0, reference_pressure_level_db=0.0
+            frequencies, 0.0, 0.0, reference_pressure_level=0.0
         )
 
 
 def test_a_frequency_between_the_rows_is_refused() -> None:
     frequencies = [1100.0]
-    with pytest.raises(
-        ValueError, match="pass 'reference_directivity_index_db' for it"
-    ):
+    with pytest.raises(ValueError, match="pass 'reference_directivity_index' for it"):
         metrology.diffuse_field_sensitivity(
-            frequencies, 0.0, 0.0, reference_free_field_level_db=0.0
+            frequencies, 0.0, 0.0, reference_free_field_level=0.0
         )
 
 
@@ -707,22 +705,22 @@ def test_two_reference_calibrations_are_refused() -> None:
             frequencies,
             0.0,
             0.0,
-            reference_random_incidence_level_db=0.0,
-            reference_pressure_level_db=0.0,
+            reference_random_incidence_level=0.0,
+            reference_pressure_level=0.0,
         )
 
 
 def test_a_correction_of_another_route_is_refused() -> None:
     frequencies = [1000.0]
     with pytest.raises(
-        ValueError, match="'reference_directivity_index_db' belongs to the free_field"
+        ValueError, match="'reference_directivity_index' belongs to the free_field"
     ):
         metrology.diffuse_field_sensitivity(
             frequencies,
             0.0,
             0.0,
-            reference_pressure_level_db=0.0,
-            reference_directivity_index_db=0.1,
+            reference_pressure_level=0.0,
+            reference_directivity_index=0.1,
         )
 
 
@@ -732,10 +730,10 @@ def test_the_diffuse_result_refuses_an_unknown_route() -> None:
     with pytest.raises(ValueError, match="'route' must be one of"):
         ri.DiffuseFieldSensitivity(
             frequencies=frequencies,
-            indicated_level_db=one,
-            reference_indicated_level_db=one,
-            reference_sensitivity_level_db=one,
-            reference_correction_db=one,
+            indicated_level=one,
+            reference_indicated_level=one,
+            reference_sensitivity_level=one,
+            reference_correction=one,
             route="comparison",
         )
 
@@ -761,7 +759,7 @@ def test_the_response_is_one_closed_curve_per_plane() -> None:
         assert len(theta) == 37
         assert radius[0] == pytest.approx(radius[-1])
         mask = np.isclose(result.plane_angles_deg, plane)
-        np.testing.assert_allclose(radius[:-1], result.relative_levels_db[mask])
+        np.testing.assert_allclose(radius[:-1], result.relative_levels[mask])
     assert "10\\,\\lg\\gamma" in ax.get_title()
     plt.close("all")
 
@@ -805,7 +803,7 @@ def test_the_equal_area_vertical_curve_runs_through_the_poles() -> None:
     assert len(degrees) == 20
     for pole, index in ((0.0, 0), (180.0, 10)):
         at_pole = np.isclose(degrees, pole)
-        assert radius[:-1][at_pole] == pytest.approx(result.relative_levels_db[index])
+        assert radius[:-1][at_pole] == pytest.approx(result.relative_levels[index])
     plt.close("all")
 
 
@@ -872,10 +870,8 @@ def test_the_sensitivity_views_draw_the_levels_and_the_correction() -> None:
         [1000.0, 4000.0, 8000.0], [0.2, -0.1, -0.8], [0.05, 0.85, 2.45]
     )
     ax = result.plot()
-    np.testing.assert_allclose(ax.lines[0].get_ydata(), result.free_field_level_db)
-    np.testing.assert_allclose(
-        ax.lines[1].get_ydata(), result.random_incidence_level_db
-    )
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), result.free_field_level)
+    np.testing.assert_allclose(ax.lines[1].get_ydata(), result.random_incidence_level)
     plt.close("all")
     ax = result.plot(view="correction", language="es")
     np.testing.assert_allclose(ax.lines[0].get_ydata(), [-0.05, -0.85, -2.45])
@@ -911,13 +907,13 @@ def test_the_other_views_forward_style_to_their_first_curve(
 
 def test_the_diffuse_figure_draws_the_three_terms() -> None:
     result = metrology.diffuse_field_sensitivity(
-        [1000.0, 8000.0], [80.0, 81.0], [79.5, 80.0], reference_pressure_level_db=-26.0
+        [1000.0, 8000.0], [80.0, 81.0], [79.5, 80.0], reference_pressure_level=-26.0
     )
     ax = result.plot()
-    np.testing.assert_allclose(ax.lines[0].get_ydata(), result.diffuse_field_level_db)
+    np.testing.assert_allclose(ax.lines[0].get_ydata(), result.diffuse_field_level)
     np.testing.assert_allclose(
-        ax.lines[1].get_ydata(), result.reference_diffuse_field_level_db
+        ax.lines[1].get_ydata(), result.reference_diffuse_field_level
     )
-    np.testing.assert_allclose(ax.lines[2].get_ydata(), result.level_difference_db)
+    np.testing.assert_allclose(ax.lines[2].get_ydata(), result.level_difference)
     assert "Formula (11)" in ax.get_legend_handles_labels()[1][1]
     plt.close("all")

@@ -319,10 +319,10 @@ def plot_plant_sound_power(
     style_default(kwargs, "label", _t(_LABEL_LW, language))
     style_default(kwargs, "width", 0.6)
     style_default(kwargs, "zorder", 2)
-    ax.bar(positions, result.sound_power_level_db, **kwargs)
+    ax.bar(positions, result.sound_power_level, **kwargs)
     ax.plot(
         positions,
-        result.mean_level_db,
+        result.mean_level,
         color=_C_SECONDARY,
         marker="o",
         linewidth=1.6,
@@ -332,7 +332,7 @@ def plot_plant_sound_power(
     if result.steps_2_3_applied:
         ax.plot(
             positions,
-            result.corrected_mean_level_db,
+            result.corrected_mean_level,
             color=_C_TERTIARY,
             marker="s",
             linestyle="--",
@@ -340,11 +340,11 @@ def plot_plant_sound_power(
             zorder=3,
             label=_t(_LABEL_MEAN_STAR, language),
         )
-    low = float(np.min(result.mean_level_db))
-    high = float(np.max(result.sound_power_level_db))
+    low = float(np.min(result.mean_level))
+    high = float(np.max(result.sound_power_level))
     ax.set_ylim(low - 10.0, high + 12.0)
     ax.set_ylabel(_t(_YLABEL_LEVEL, language))
-    total = format_number(result.a_weighted_sound_power_level_db, language, decimals=1)
+    total = format_number(result.a_weighted_sound_power_level, language, decimals=1)
     ax.set_title(
         f"{_t('ISO 8297 sound power of the plant', language)}"
         f" ($L_{{W\\mathrm{{A}}}}$ = {total} dB)"
@@ -502,14 +502,14 @@ def plot_partial_plant_contributions(
     )
     style_default(kwargs, "width", 0.7)
     style_default(kwargs, "zorder", 2)
-    ax.bar(positions, result.total_level_db, **kwargs)
+    ax.bar(positions, result.total_level, **kwargs)
     cycle = (_C_SECONDARY, _C_TERTIARY, _C_REFERENCE, _C_MUTED)
     markers = ("o", "s", "^", "D")
     for i, (name, levels, total) in enumerate(
         zip(
             result.names,
-            result.part_levels_db,
-            result.a_weighted_part_levels_db,
+            result.part_levels,
+            result.a_weighted_part_levels,
             strict=True,
         )
     ):
@@ -525,8 +525,8 @@ def plot_partial_plant_contributions(
                 f"{format_number(float(total), language, decimals=1)} dB)"
             ),
         )
-    low = float(np.min(result.part_levels_db))
-    high = float(np.max(result.total_level_db))
+    low = float(np.min(result.part_levels))
+    high = float(np.max(result.total_level))
     ax.set_ylim(low - 10.0, high + 12.0)
     ax.set_ylabel(_t(_YLABEL_LEVEL, language))
     ax.set_title(_t("Parts of the plant and their sum, ISO 8297 §0.2 b)", language))

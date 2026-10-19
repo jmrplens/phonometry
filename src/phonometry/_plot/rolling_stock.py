@@ -380,14 +380,14 @@ def plot_pass_by_measurement(
         **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=r"$L_{p\mathrm{AF}}(t)$"),
     )
     ax.hlines(
-        result.equivalent_level_db,
+        result.equivalent_level,
         result.start_s,
         result.end_s,
         color=_C_SECONDARY,
         lw=2.0,
         label=(
             r"$L_{p\mathrm{Aeq},T}$ = "
-            f"{format_number(result.equivalent_level_db, language)} dB"
+            f"{format_number(result.equivalent_level, language)} dB"
         ),
     )
     inside = (result.times >= result.start_s) & (result.times <= result.end_s)
@@ -395,14 +395,14 @@ def plot_pass_by_measurement(
         peak = int(np.flatnonzero(inside)[np.argmax(result.levels[inside])])
         ax.plot(
             [result.times[peak]],
-            [result.max_level_db],
+            [result.max_level],
             linestyle="none",
             marker="v",
             ms=8,
             color=_C_REFERENCE,
             label=(
                 r"$L_{p\mathrm{AFmax}}$ = "
-                f"{format_number(result.max_level_db, language)} dB"
+                f"{format_number(result.max_level, language)} dB"
             ),
         )
     ax.set_xlabel(_t(_TIME_LABEL, language))
@@ -441,12 +441,12 @@ def plot_stationary_test(
         **styled(kwargs, color=_C_PRIMARY, label=_t("Mean over the sets", language)),
     )
     ax.axhline(
-        result.reported_level_db,
+        result.reported_level,
         color=_C_SECONDARY,
         lw=2.0,
         label=(
             f"{_t('Unit level', language)}: "
-            f"{format_number(result.reported_level_db, language, decimals=0)} dB"
+            f"{format_number(result.reported_level, language, decimals=0)} dB"
         ),
     )
     low = float(np.min(result.levels)) - 5.0
@@ -504,7 +504,7 @@ def plot_rolling_stock_test(
                 color=_C_REFERENCE,
                 label=_t("Spread above 3 dB", language),
             )
-    reported = result.reported_levels_db
+    reported = result.reported_levels
     ax.plot(
         x,
         [reported[p] for p in result.positions],
@@ -518,13 +518,13 @@ def plot_rolling_stock_test(
         ),
     )
     ax.axhline(
-        result.final_level_db,
+        result.final_level,
         color=_C_SECONDARY,
         lw=1.6,
         ls="--",
         label=(
             f"{_t('Result', language)}: "
-            f"{format_number(result.final_level_db, language, decimals=0)} dB"
+            f"{format_number(result.final_level, language, decimals=0)} dB"
         ),
     )
     ax.set_xticks(x)
@@ -606,7 +606,7 @@ def plot_adjacent_neutrality(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    levels = [result.unit_level_db, result.with_adjacent_level_db]
+    levels = [result.unit_level, result.with_adjacent_level]
     # Each level is written under its bar, not over it: the allowance line
     # runs 2 dB above the first bar, which is where the second one ends in
     # the very case the plot exists to show.
@@ -625,7 +625,7 @@ def plot_adjacent_neutrality(
         ),
     )
     ax.axhline(
-        result.unit_level_db + 2.0,
+        result.unit_level + 2.0,
         color=_C_SECONDARY,
         lw=1.6,
         ls="--",
@@ -638,7 +638,7 @@ def plot_adjacent_neutrality(
     verdict = _t("Neutral", language) if result.passes else _t("Not neutral", language)
     ax.set_title(
         f"{_t('ISO 3095 6.3.4 acoustic neutrality', language)}: {verdict} "
-        f"(+{format_number(result.difference_db, language)} dB)"
+        f"(+{format_number(result.difference, language)} dB)"
     )
     ax.grid(visible=True, axis="y", alpha=0.3)
     place_legend_clear(ax.legend(fontsize="small"))
@@ -668,7 +668,7 @@ def plot_small_roughness_deviation(
     x = [positions[round(10.0 * math.log10(f))] for f in result.frequencies]
     ax.plot(
         x,
-        result.noise_levels_db,
+        result.noise_levels,
         **styled(
             kwargs,
             color=_C_PRIMARY,
@@ -680,7 +680,7 @@ def plot_small_roughness_deviation(
     )
     ax.plot(
         x,
-        result.revised_noise_levels_db,
+        result.revised_noise_levels,
         color=_C_SECONDARY,
         lw=1.6,
         ls="--",

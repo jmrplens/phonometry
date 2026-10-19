@@ -662,8 +662,8 @@ def _draw_loudspeaker_response(
 ) -> None:
     """On-axis SPL with the tolerance band, reference lines and range markers."""
     f = np.asarray(result.frequencies, dtype=np.float64)
-    spl = np.asarray(result.spl_db, dtype=np.float64)
-    ref = float(result.reference_level_db)
+    spl = np.asarray(result.spl, dtype=np.float64)
+    ref = float(result.reference_level)
     tol = float(result.tolerance_db)
     top = float(np.ceil((max(float(np.max(spl)), ref + tol) + 2.0) / 5.0) * 5.0)
     ax.axhspan(
@@ -829,7 +829,7 @@ def _draw_noise_spectrum(
 ) -> None:
     """Inherent-noise equivalent band-level spectrum (17.2 b)."""
     ax.semilogx(
-        result.noise_frequencies, result.noise_band_levels_db, color=_C_PRIMARY, lw=1.3
+        result.noise_frequencies, result.noise_band_levels, color=_C_PRIMARY, lw=1.3
     )
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Band level [dB]", language))
@@ -843,7 +843,7 @@ def _draw_microphone_distortion(
 ) -> None:
     """Total harmonic distortion against sound pressure level (14.2/15.2)."""
     ax.plot(
-        np.asarray(result.distortion_spl_db, dtype=np.float64),
+        np.asarray(result.distortion_spl, dtype=np.float64),
         np.asarray(result.distortion_thd_percent, dtype=np.float64),
         color=_C_PRIMARY,
         lw=1.3,
@@ -859,9 +859,9 @@ def _draw_microphone_distortion(
             thd=_fmt_num(result.max_spl_thd_percent, language),
         ),
     )
-    if result.max_spl_db is not None:
+    if result.max_spl is not None:
         ax.axvline(
-            result.max_spl_db,
+            result.max_spl,
             color=_C_EDGE,
             lw=0.8,
             ls="--",
@@ -897,7 +897,7 @@ _MICROPHONE_QUANTITIES: dict[str, tuple[Any, bool, str | None]] = {
     "response": (_draw_microphone_response, False, None),
     "directivity": (_draw_datasheet_polar, True, "polar_angles_deg"),
     "noise": (_draw_noise_spectrum, False, "noise_frequencies"),
-    "distortion": (_draw_microphone_distortion, False, "distortion_spl_db"),
+    "distortion": (_draw_microphone_distortion, False, "distortion_spl"),
 }
 
 

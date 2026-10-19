@@ -67,7 +67,7 @@ they are three separate implementations here and share nothing.
 
 ```python
 barrier_background_correction(
-    level_difference_db: ArrayLike,
+    level_difference: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -89,7 +89,7 @@ one takes off 1. They are two tables and they stay two tables.
 
 | Name | Description |
 | :--- | :--- |
-| `level_difference_db` | The difference between the level measured with the source and the level without it, in decibels. |
+| `level_difference` | The difference between the level measured with the source and the level without it, in decibels. |
 
 **Returns:** The correction to add, in decibels, which is zero or negative.
 
@@ -226,12 +226,12 @@ distance.
 | :--- | :--- |
 | ValueError | For a non-positive height or distance. |
 
-## ISO10847_BACKGROUND_CORRECTIONS_DB
+## ISO10847_BACKGROUND_CORRECTIONS
 
 *Constant* (`mapping`).
 
 ```python
-ISO10847_BACKGROUND_CORRECTIONS_DB = {4: -2.0, 5: -2.0, 6: -1.0, 7: -1.0, 8: -1.0, 9: -1.0}
+ISO10847_BACKGROUND_CORRECTIONS = {4: -2.0, 5: -2.0, 6: -1.0, 7: -1.0, 8: -1.0, 9: -1.0}
 ```
 
 ## ISO10847_MIN_BACKGROUND_MARGIN_DB
@@ -422,10 +422,10 @@ MeasuredBarrierInsertionLoss(
     reference_after_db: NDArray[np.float64],
     receiver_before_db: NDArray[np.float64],
     receiver_after_db: NDArray[np.float64],
-    insertion_loss_db: NDArray[np.float64],
+    insertion_loss: NDArray[np.float64],
     method: str,
-    receiver_correction_before_db: float,
-    receiver_correction_after_db: float,
+    receiver_correction_before: float,
+    receiver_correction_after: float,
 )
 ```
 
@@ -440,10 +440,10 @@ The insertion loss of a barrier as measured, ISO 10847 clause 8.2.
 | `reference_after_db` | $L_{\mathrm{ref},\mathrm{A}}$ per band. |
 | `receiver_before_db` | $L_{\mathrm{r},\mathrm{B}}$ per band. |
 | `receiver_after_db` | $L_{\mathrm{r},\mathrm{A}}$ per band. |
-| `insertion_loss_db` | $D_\mathrm{IL}$ or $D'_\mathrm{IL}$ per band, in decibels. |
+| `insertion_loss` | $D_\mathrm{IL}$ or $D'_\mathrm{IL}$ per band, in decibels. |
 | `method` | `"direct"` or `"indirect"`. |
-| `receiver_correction_before_db` | $C_\mathrm{r}$, in decibels, zero for the direct method. |
-| `receiver_correction_after_db` | $C'_\mathrm{r}$, in decibels, zero for the direct method. |
+| `receiver_correction_before` | $C_\mathrm{r}$, in decibels, zero for the direct method. |
+| `receiver_correction_after` | $C'_\mathrm{r}$, in decibels, zero for the direct method. |
 
 ### MeasuredBarrierInsertionLoss.plot()
 
@@ -508,12 +508,12 @@ MIN_REPETITIONS = 3
 POINT_SOURCE_DIVERGENCE_DB = 6.0
 ```
 
-## RECEIVER_CORRECTIONS_DB
+## RECEIVER_CORRECTIONS
 
 *Constant* (`mapping`).
 
 ```python
-RECEIVER_CORRECTIONS_DB = {'hemi_free_field': 0.0, 'reflecting_surface': 6.0}
+RECEIVER_CORRECTIONS = {'hemi_free_field': 0.0, 'reflecting_surface': 6.0}
 ```
 
 ## REFERENCE_ELEVATION_INCREMENT_DEG

@@ -1036,7 +1036,7 @@ def _pink_noise(n: int, rng: np.random.Generator) -> np.ndarray:
 def stipa_signal(
     fs: int,
     duration_s: float = 18.0,
-    level_db: float | None = None,
+    level: float | None = None,
     seed: int | None = None,
 ) -> np.ndarray:
     """Generate an IEC 60268-16:2020 conformant STIPA test signal.
@@ -1052,8 +1052,8 @@ def stipa_signal(
     :param fs: Sample rate in Hz (>= 22,5 kHz).
     :param duration_s: Duration in seconds (the standard recommends 15 s to
         25 s; default 18 s).
-    :param level_db: Optional overall level in dB SPL: the output is
-        scaled so its RMS, taken as pascals, sits at ``level_db`` re
+    :param level: Optional overall level in dB SPL: the output is
+        scaled so its RMS, taken as pascals, sits at ``level`` re
         20 uPa. Default (None) normalizes the RMS to 0,1 (digital full
         scale headroom for the 12-14 dB crest factor).
     :param seed: Seed for the pink-noise generator (None: random).
@@ -1106,6 +1106,6 @@ def stipa_signal(
         )
 
     rms = float(np.sqrt(np.mean(out**2)))
-    if level_db is None:
+    if level is None:
         return out * (0.1 / rms)
-    return np.asarray(out * (_P0 * 10.0 ** (level_db / 20.0) / rms))
+    return np.asarray(out * (_P0 * 10.0 ** (level / 20.0) / rms))

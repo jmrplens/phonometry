@@ -373,7 +373,7 @@ def _chk_table_c3() -> Outcome:
     correction = metrology.large_volume_wave_motion_correction(frequencies)
     matching = sum(
         math.isclose(float(value), ref.IEC61094_2_TABLE_C3_DB[f], abs_tol=1e-12)
-        for f, value in zip(frequencies, correction.correction_db, strict=True)
+        for f, value in zip(frequencies, correction.correction, strict=True)
     )
     return count(matching, len(frequencies), subject="rows of Table C.3")
 

@@ -211,14 +211,14 @@ result = electroacoustics.loudspeaker_characteristics(
         frequency=2000.0,
     ),
 )
-print(round(result.sensitivity_level_db, 1))                 # dB, 1 W / 1 m
+print(round(result.sensitivity_level, 1))                 # dB, 1 W / 1 m
 print(tuple(round(x) for x in result.effective_range))       # Hz
 
 result.report("loudspeaker.pdf", metadata=ReportMetadata(measurement_standard="IEC 60268-5"))
 ```
 
 `loudspeaker_characteristics` returns a `LoudspeakerCharacteristics` with the
-computed `sensitivity_level_db`, `effective_range`, `reference_level_db`,
+computed `sensitivity_level`, `effective_range`, `reference_level`,
 `characteristic_sensitivity_pa` and `min_impedance_ohm`, and a `.report()` that
 writes the fiche. The on-axis response is drawn with its tolerance band and the
 effective-range markers to the IEC 60263 proportion (one frequency decade equal

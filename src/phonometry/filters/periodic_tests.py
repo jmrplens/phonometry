@@ -321,7 +321,7 @@ class FilterPeriodicMeasurements(RichDisplay):
     position of a sequence of the same length. A clause left at ``None`` was
     not measured. Everything is in decibels.
 
-    :ivar midband_attenuations_db: 10.2: the relative attenuation at the
+    :ivar midband_attenuations: 10.2: the relative attenuation at the
         exact mid-band frequency of every filter of the set.
     :ivar midband_uncertainties_db: Their uncertainties.
     :ivar bandwidth_deviations_db: 10.3: for a time-invariant filter, the
@@ -335,7 +335,7 @@ class FilterPeriodicMeasurements(RichDisplay):
     :ivar linearity_deviations_db: 11.7: the level linearity deviations of
         the three selected filters on the reference level range, at every
         level measured.
-    :ivar linearity_levels_below_upper_db: For each of them, how far below
+    :ivar linearity_levels_below_upper: For each of them, how far below
         the upper boundary of the linear operating range the input level was
         (:math:`L_\mathrm{u} - L`, negative above it), which decides between
         the limits of 5.13.3 and 5.13.4 and the maxima of Annex B.
@@ -347,7 +347,7 @@ class FilterPeriodicMeasurements(RichDisplay):
     :ivar range_linearity_deviations_db: 11.9: the level linearity deviation
         30 dB below the upper boundary of every other level range.
     :ivar range_linearity_uncertainties_db: Their uncertainties.
-    :ivar relative_attenuations_db: 13: for each of the three selected
+    :ivar relative_attenuations: 13: for each of the three selected
         filters, a row of 15 relative attenuations at the test frequencies of
         :func:`periodic_test_frequencies`, ``k = -7 .. 7``, NaN where 13.4
         drops the frequency.
@@ -358,18 +358,18 @@ class FilterPeriodicMeasurements(RichDisplay):
         which places its test frequencies for 13.4.
     """
 
-    midband_attenuations_db: Sequence[float] | None = None
+    midband_attenuations: Sequence[float] | None = None
     midband_uncertainties_db: Sequence[float] | None = None
     bandwidth_deviations_db: Sequence[float] | None = None
     bandwidth_uncertainties_db: Sequence[float] | None = None
     set_midband_frequencies_hz: Sequence[float] | None = None
     linearity_deviations_db: Sequence[float] | None = None
-    linearity_levels_below_upper_db: Sequence[float] | None = None
+    linearity_levels_below_upper: Sequence[float] | None = None
     linearity_uncertainties_db: Sequence[float] | None = None
     linearity_midband_frequencies_hz: Sequence[float] | None = None
     range_linearity_deviations_db: Sequence[float] | None = None
     range_linearity_uncertainties_db: Sequence[float] | None = None
-    relative_attenuations_db: Sequence[Sequence[float]] | None = None
+    relative_attenuations: Sequence[Sequence[float]] | None = None
     relative_attenuation_uncertainties_db: Sequence[Sequence[float]] | None = None
     tested_midband_frequencies_hz: Sequence[float] | None = None
 
@@ -382,13 +382,13 @@ class FilterPeriodicMeasurements(RichDisplay):
             and then in both rows) or if an uncertainty is negative.
         """
         for name in (
-            "midband_attenuations_db",
+            "midband_attenuations",
             "midband_uncertainties_db",
             "bandwidth_deviations_db",
             "bandwidth_uncertainties_db",
             "set_midband_frequencies_hz",
             "linearity_deviations_db",
-            "linearity_levels_below_upper_db",
+            "linearity_levels_below_upper",
             "linearity_uncertainties_db",
             "linearity_midband_frequencies_hz",
             "range_linearity_deviations_db",
@@ -397,13 +397,11 @@ class FilterPeriodicMeasurements(RichDisplay):
         ):
             object.__setattr__(self, name, _sequence(getattr(self, name), name))
         for name in (
-            "relative_attenuations_db",
+            "relative_attenuations",
             "relative_attenuation_uncertainties_db",
         ):
             object.__setattr__(self, name, _rows(getattr(self, name), name))
-        self._check_group(
-            "10.2", ("midband_attenuations_db", "midband_uncertainties_db")
-        )
+        self._check_group("10.2", ("midband_attenuations", "midband_uncertainties_db"))
         self._check_group(
             "10.3", ("bandwidth_deviations_db", "bandwidth_uncertainties_db")
         )
@@ -411,7 +409,7 @@ class FilterPeriodicMeasurements(RichDisplay):
             "11.7",
             (
                 "linearity_deviations_db",
-                "linearity_levels_below_upper_db",
+                "linearity_levels_below_upper",
                 "linearity_uncertainties_db",
             ),
         )
@@ -421,7 +419,7 @@ class FilterPeriodicMeasurements(RichDisplay):
         )
         self._check_group(
             "13",
-            ("relative_attenuations_db", "relative_attenuation_uncertainties_db"),
+            ("relative_attenuations", "relative_attenuation_uncertainties_db"),
         )
         self._check_labels()
         self._check_clause_13()
@@ -456,7 +454,7 @@ class FilterPeriodicMeasurements(RichDisplay):
         pairs = (
             (
                 "set_midband_frequencies_hz",
-                ("midband_attenuations_db", "bandwidth_deviations_db"),
+                ("midband_attenuations", "bandwidth_deviations_db"),
             ),
             (
                 "linearity_midband_frequencies_hz",
@@ -464,7 +462,7 @@ class FilterPeriodicMeasurements(RichDisplay):
             ),
             (
                 "tested_midband_frequencies_hz",
-                ("relative_attenuations_db",),
+                ("relative_attenuations",),
             ),
         )
         for label_name, result_names in pairs:
@@ -485,7 +483,7 @@ class FilterPeriodicMeasurements(RichDisplay):
 
     def _check_clause_13(self) -> None:
         """The NaN where 13.4 drops a frequency are the same in both rows."""
-        values = self.relative_attenuations_db
+        values = self.relative_attenuations
         uncertainties = self.relative_attenuation_uncertainties_db
         if values is None or uncertainties is None:
             return
@@ -493,13 +491,13 @@ class FilterPeriodicMeasurements(RichDisplay):
         u = np.asarray(uncertainties, dtype=np.float64)
         if not np.array_equal(np.isnan(v), np.isnan(u)):
             msg = (
-                "'relative_attenuations_db' and "
+                "'relative_attenuations' and "
                 "'relative_attenuation_uncertainties_db' must leave the same test "
                 "frequencies out (NaN), those 13.4 drops."
             )
             raise ValueError(msg)
         if np.all(np.isnan(v)):
-            msg = "'relative_attenuations_db' holds no measured value."
+            msg = "'relative_attenuations' holds no measured value."
             raise ValueError(msg)
 
 
@@ -657,7 +655,7 @@ class FilterPeriodicVerification(RichDisplay):
             count = int(np.unique(np.asarray(m.linearity_midband_frequencies_hz)).size)
             if count < _SELECTED_FILTERS:
                 short.append(("11.7", f"{_on_filters(count)}, and 11.3 requires three"))
-        rows = m.relative_attenuations_db
+        rows = m.relative_attenuations
         if rows is not None:
             if len(rows) < _SELECTED_FILTERS:
                 short.append(
@@ -669,7 +667,7 @@ class FilterPeriodicVerification(RichDisplay):
     def _frequencies_not_measured(self) -> list[str]:
         """The test frequencies 13.4 requires that a clause 13 row leaves out."""
         m = self.measurements
-        rows = m.relative_attenuations_db
+        rows = m.relative_attenuations
         if rows is None or m.set_midband_frequencies_hz is None:
             return []
         tested = m.tested_midband_frequencies_hz
@@ -712,7 +710,7 @@ class FilterPeriodicVerification(RichDisplay):
             gaps.append(
                 "the filter each level linearity result of 11.7 was measured on"
             )
-        if m.relative_attenuations_db is not None and (
+        if m.relative_attenuations is not None and (
             m.set_midband_frequencies_hz is None
             or m.tested_midband_frequencies_hz is None
         ):
@@ -951,7 +949,7 @@ def _clause_11_7(
     near, far = _LINEARITY_LIMITS_DB[filter_class]
     near_u, far_u = _LINEARITY_MAX_UNCERTAINTY_DB
     deviations = m.linearity_deviations_db or ()
-    depths = m.linearity_levels_below_upper_db or ()
+    depths = m.linearity_levels_below_upper or ()
     uncertainties = m.linearity_uncertainties_db or ()
     filters = (
         [f"{_hz_label(f)}, " for f in m.linearity_midband_frequencies_hz]
@@ -1011,7 +1009,7 @@ def _clause_13(
     """13: Table 1 at the 15 test frequencies, the maximum by the attenuation."""
     omega = periodic_test_frequencies(fraction)
     limits = PERIODIC_TEST_ATTENUATION_LIMITS_DB[filter_class]
-    rows = m.relative_attenuations_db or ()
+    rows = m.relative_attenuations or ()
     rows_u = m.relative_attenuation_uncertainties_db or ()
     names = _filter_labels(m.tested_midband_frequencies_hz, len(rows))
     verifications = []
@@ -1081,14 +1079,14 @@ def verify_filter_periodic(
     cls = int(filter_class)
     m = measurements
     clauses: list[PeriodicTestClause] = []
-    if m.midband_attenuations_db is not None and m.midband_uncertainties_db is not None:
+    if m.midband_attenuations is not None and m.midband_uncertainties_db is not None:
         clauses.append(
             _clause_10(
                 "10.2",
-                m.midband_attenuations_db,
+                m.midband_attenuations,
                 m.midband_uncertainties_db,
                 _filter_labels(
-                    m.set_midband_frequencies_hz, len(m.midband_attenuations_db)
+                    m.set_midband_frequencies_hz, len(m.midband_attenuations)
                 ),
                 cls,
             )
@@ -1112,7 +1110,7 @@ def verify_filter_periodic(
         clauses.append(_clause_11_7(m, cls))
     if m.range_linearity_deviations_db is not None:
         clauses.append(_clause_11_9(m, cls))
-    if m.relative_attenuations_db is not None:
+    if m.relative_attenuations is not None:
         clauses.append(_clause_13(m, cls, fraction))
     if not clauses:
         msg = "'measurements' holds no result to grade."

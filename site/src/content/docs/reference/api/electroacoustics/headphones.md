@@ -189,7 +189,7 @@ BACK_RADIATIONS = {'C': 'closed-back', 'O': 'open-back'}
 ```python
 characteristic_voltage(
     source_emf_v: float,
-    sound_pressure_level_db: float,
+    sound_pressure_level: float,
 ) -> float
 ```
 
@@ -199,7 +199,7 @@ The characteristic voltage is "the sinusoidal source e.m.f. at 500 Hz
 which, when applied to the headphone through the rated source impedance,
 produces a sound pressure level in the coupler or ear simulator of 94 dB".
 The headphone is linear at that level, so a reading of
-`sound_pressure_level_db` at `source_emf_v` scales to it:
+`sound_pressure_level` at `source_emf_v` scales to it:
 $E\,10^{(94 - L)/20}$. The same scaling serves the programme signal
 of 8.3.4 with the level of the whole signal
 ([`program_signal_level`](/phonometry/reference/api/electroacoustics/headphones/#program_signal_level)).
@@ -209,7 +209,7 @@ of 8.3.4 with the level of the whole signal
 | Name | Description |
 | :--- | :--- |
 | `source_emf_v` | The source e.m.f. of the reading, in volts (RMS). |
-| `sound_pressure_level_db` | The level it produced in the coupler or ear simulator, in dB re 20 µPa. |
+| `sound_pressure_level` | The level it produced in the coupler or ear simulator, in dB re 20 µPa. |
 
 **Returns:** The characteristic voltage, in volts (RMS).
 
@@ -260,7 +260,7 @@ peak over its RMS against the two limits.
 ```python
 coupler_frequency_response(
     frequencies: ArrayLike,
-    sound_pressure_level_db: ArrayLike,
+    sound_pressure_level: ArrayLike,
     *,
     rated_frequency_range_hz: tuple[float, float] | None = None,
 ) -> CouplerFrequencyResponse
@@ -277,7 +277,7 @@ the rated source impedance, over "at least the rated frequency range".
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in Hz, strictly ascending. |
-| `sound_pressure_level_db` | The level at each, in dB re 20 µPa. |
+| `sound_pressure_level` | The level at each, in dB re 20 µPa. |
 | `rated_frequency_range_hz` | The rated frequency range (8.6.6), as (lower, upper), in Hz, to judge the coverage; `None` if not stated. |
 
 **Returns:** A [`CouplerFrequencyResponse`](/phonometry/reference/api/electroacoustics/headphones/#couplerfrequencyresponse).
@@ -293,7 +293,7 @@ the rated source impedance, over "at least the rated frequency range".
 ```python
 CouplerFrequencyResponse(
     frequencies: NDArray[np.float64],
-    sound_pressure_level_db: NDArray[np.float64],
+    sound_pressure_level: NDArray[np.float64],
     rated_frequency_range_hz: tuple[float, float] | None,
 )
 ```
@@ -305,7 +305,7 @@ The coupler or ear simulator frequency response (IEC 60268-7 8.6.2).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, ascending. |
-| `sound_pressure_level_db` | The level in the coupler or ear simulator at each frequency, in dB re 20 µPa. |
+| `sound_pressure_level` | The level in the coupler or ear simulator at each frequency, in dB re 20 µPa. |
 | `rated_frequency_range_hz` | The rated frequency range, (lower, upper), in Hz, or `None` when not stated. |
 
 ### CouplerFrequencyResponse.covers_rated_range
@@ -373,8 +373,8 @@ The level relative to its value at a reference frequency, in dB.
 ```python
 crosstalk_attenuation(
     frequencies: ArrayLike,
-    driven_level_db: ArrayLike,
-    other_level_db: ArrayLike,
+    driven_level: ArrayLike,
+    other_level: ArrayLike,
 ) -> CrosstalkAttenuation
 ```
 
@@ -390,8 +390,8 @@ channel", expressed as the difference of the two levels against frequency.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in Hz, strictly ascending. |
-| `driven_level_db` | The level with the channel under test driven, in dB re 20 µPa. |
-| `other_level_db` | The level with the other channel driven, in dB re 20 µPa. |
+| `driven_level` | The level with the channel under test driven, in dB re 20 µPa. |
+| `other_level` | The level with the other channel driven, in dB re 20 µPa. |
 
 **Returns:** A [`CrosstalkAttenuation`](/phonometry/reference/api/electroacoustics/headphones/#crosstalkattenuation).
 
@@ -406,8 +406,8 @@ channel", expressed as the difference of the two levels against frequency.
 ```python
 CrosstalkAttenuation(
     frequencies: NDArray[np.float64],
-    driven_level_db: NDArray[np.float64],
-    other_level_db: NDArray[np.float64],
+    driven_level: NDArray[np.float64],
+    other_level: NDArray[np.float64],
 )
 ```
 
@@ -418,10 +418,10 @@ The crosstalk attenuation of a multi-channel headphone (IEC 60268-7 8.12).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, ascending. |
-| `driven_level_db` | The level in the coupler of the channel under test with the rated e.m.f. on that channel, in dB re 20 µPa. |
-| `other_level_db` | The level in the same coupler with the rated e.m.f. on the other, stated channel, in dB re 20 µPa. |
+| `driven_level` | The level in the coupler of the channel under test with the rated e.m.f. on that channel, in dB re 20 µPa. |
+| `other_level` | The level in the same coupler with the rated e.m.f. on the other, stated channel, in dB re 20 µPa. |
 
-### CrosstalkAttenuation.attenuation_db
+### CrosstalkAttenuation.attenuation
 
 *property*
 
@@ -463,8 +463,8 @@ Requires matplotlib (`pip install phonometry[plot]`).
 ```python
 ear_canal_frequency_response(
     frequencies: ArrayLike,
-    earphone_levels_db: ArrayLike,
-    sound_field_levels_db: ArrayLike,
+    earphone_levels: ArrayLike,
+    sound_field_levels: ArrayLike,
     *,
     reference_frequency_hz: float = 500.0,
 ) -> EarCanalFrequencyResponse
@@ -486,8 +486,8 @@ result also carries the two checks of the procedure: the fittings within
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The band centres, in Hz, ascending, including the reference band. |
-| `earphone_levels_db` | The levels with the headphone, in dB, shape (persons, 2, bands), or (2, bands) for one person. |
-| `sound_field_levels_db` | The levels in the sound field, in dB, the same shape. |
+| `earphone_levels` | The levels with the headphone, in dB, shape (persons, 2, bands), or (2, bands) for one person. |
+| `sound_field_levels` | The levels in the sound field, in dB, the same shape. |
 | `reference_frequency_hz` | The reference band of Formula (1), in Hz (500 Hz, as the formula prints it). |
 
 **Returns:** An [`EarCanalFrequencyResponse`](/phonometry/reference/api/electroacoustics/headphones/#earcanalfrequencyresponse).
@@ -503,8 +503,8 @@ result also carries the two checks of the procedure: the fittings within
 ```python
 EarCanalFrequencyResponse(
     frequencies: NDArray[np.float64],
-    earphone_levels_db: NDArray[np.float64],
-    sound_field_levels_db: NDArray[np.float64],
+    earphone_levels: NDArray[np.float64],
+    sound_field_levels: NDArray[np.float64],
     reference_frequency_hz: float,
 )
 ```
@@ -516,11 +516,11 @@ The ear canal sound pressure level frequency response (IEC 60268-7 8.6.5).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The one-third-octave band centres, in Hz. |
-| `earphone_levels_db` | The probe microphone's band levels with the headphone, items c) and d), shape (persons, 2, bands), in dB. |
-| `sound_field_levels_db` | The probe microphone's band levels in the sound field, items b) and e), shape (persons, 2, bands), in dB. |
+| `earphone_levels` | The probe microphone's band levels with the headphone, items c) and d), shape (persons, 2, bands), in dB. |
+| `sound_field_levels` | The probe microphone's band levels in the sound field, items b) and e), shape (persons, 2, bands), in dB. |
 | `reference_frequency_hz` | The band of Formula (1), in Hz. |
 
-### EarCanalFrequencyResponse.fitting_difference_db
+### EarCanalFrequencyResponse.fitting_difference
 
 *property*
 
@@ -631,8 +631,8 @@ EarCanalMicrophoneVerification(
     canal_section_area_mm2: float,
     ear_canal_area_mm2: float,
     volume_mm3: float,
-    neighbor_difference_db: float,
-    sealed_attenuation_db: float,
+    neighbor_difference: float,
+    sealed_attenuation: float,
 )
 ```
 
@@ -646,8 +646,8 @@ A probe microphone judged by IEC 60268-7:2010 Annex B a) to e).
 | `canal_section_area_mm2` | Its cross-sectional area in the rest of the ear canal, in mm² (b). |
 | `ear_canal_area_mm2` | The cross-sectional area of the ear canal, in mm² (b; 45 mm² for an average adult). |
 | `volume_mm3` | The microphone's volume with its mounting parts, in mm³ (c). |
-| `neighbor_difference_db` | The largest difference between the responses to neighbouring one-third-octave bands of pink noise, in dB (d). |
-| `sealed_attenuation_db` | The smallest drop of the output level when the sound entrance is sealed, over the measuring frequencies, in dB (e). |
+| `neighbor_difference` | The largest difference between the responses to neighbouring one-third-octave bands of pink noise, in dB (d). |
+| `sealed_attenuation` | The smallest drop of the output level when the sound entrance is sealed, over the measuring frequencies, in dB (e). |
 
 ### EarCanalMicrophoneVerification.area_ratio
 
@@ -705,7 +705,7 @@ EARPHONE_TYPES = {'C': 'circumaural', 'E': 'intra-concha', 'H': 'earshell', 'I':
 ```python
 field_comparison_response(
     frequencies: ArrayLike,
-    field_level_db: ArrayLike,
+    field_level: ArrayLike,
     source_emf_v: ArrayLike,
     *,
     field: Literal['free', 'diffuse'],
@@ -736,7 +736,7 @@ method (8.6.3.3).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The one-third-octave band centres, in Hz, ascending, including the reference band. |
-| `field_level_db` | The level of the reference field at the reference point, without the person, in dB re 20 µPa: one value per band, or one row per person. |
+| `field_level` | The level of the reference field at the reference point, without the person, in dB re 20 µPa: one value per band, or one row per person. |
 | `source_emf_v` | The e.m.f. that made the headphone equally loud, in volts (RMS), one row per person, one value per band. |
 | `field` | `"free"` (8.6.3) or `"diffuse"` (8.6.4). |
 | `reference_frequency_hz` | The band the response is referred to, in Hz: by default 1 000 Hz, the standard reference frequency of IEC 60268-1:1985 Clause 3, which IEC 60268-7 names without defining and on whose band 8.6.3.2 c) and 8.6.4.2 c) begin and end the test sequence. Pass 500 Hz to refer the response to the band of the ear-canal response of Formula (1). |
@@ -1136,7 +1136,7 @@ Spaces around the hyphens are ignored, so the clause's own layout,
 program_characteristic_voltage(
     source_emf_v: ArrayLike,
     frequencies: ArrayLike,
-    band_levels_db: ArrayLike,
+    band_levels: ArrayLike,
     *,
     a_weighted: bool = False,
     free_field_response_db: ArrayLike | None = None,
@@ -1160,7 +1160,7 @@ measurements".
 | :--- | :--- |
 | `source_emf_v` | The source e.m.f. of each fitting's reading, in volts (RMS): one value for all, or one per fitting. |
 | `frequencies` | The band centre frequencies, in Hz, ascending. |
-| `band_levels_db` | The band levels, in dB re 20 µPa, shape `(bands,)` for one fitting or `(fittings, bands)`. |
+| `band_levels` | The band levels, in dB re 20 µPa, shape `(bands,)` for one fitting or `(fittings, bands)`. |
 | `a_weighted` | Apply the A-weighting (8.3.5). |
 | `free_field_response_db` | The free-field response of the head and torso simulator in each band, in dB, compensated by its inverse (8.3.5); `None` for none. |
 
@@ -1177,7 +1177,7 @@ measurements".
 ```python
 program_signal_level(
     frequencies: ArrayLike,
-    band_levels_db: ArrayLike,
+    band_levels: ArrayLike,
     *,
     a_weighted: bool = False,
     free_field_response_db: ArrayLike | None = None,
@@ -1204,7 +1204,7 @@ $$
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The band centre frequencies, in Hz, ascending. |
-| `band_levels_db` | The band levels read in the coupler or ear simulator, in dB re 20 µPa. |
+| `band_levels` | The band levels read in the coupler or ear simulator, in dB re 20 µPa. |
 | `a_weighted` | Apply the A-weighting (8.3.5, 8.5.2 d). |
 | `free_field_response_db` | The free-field response of the head and torso simulator at 0° azimuth in each band, in dB, whose inverse compensates the output; `None` for no compensation. |
 
@@ -1221,9 +1221,9 @@ $$
 ```python
 ProgramCharacteristicVoltage(
     frequencies: NDArray[np.float64],
-    band_levels_db: NDArray[np.float64],
+    band_levels: NDArray[np.float64],
     source_emf_v: NDArray[np.float64],
-    corrections_db: NDArray[np.float64],
+    corrections: NDArray[np.float64],
     a_weighted: bool,
     free_field_compensated: bool,
 )
@@ -1236,13 +1236,13 @@ The simulated programme signal characteristic voltage (IEC 60268-7 8.3.4, 8.3.5)
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The band centre frequencies, in Hz. |
-| `band_levels_db` | The band levels read in the coupler or ear simulator, one row per fitting, in dB re 20 µPa. |
+| `band_levels` | The band levels read in the coupler or ear simulator, one row per fitting, in dB re 20 µPa. |
 | `source_emf_v` | The source e.m.f. of each fitting's reading, in volts (RMS). |
-| `corrections_db` | The correction added to each band, in dB: the A-weighting minus the free-field response, zero when neither applies. |
+| `corrections` | The correction added to each band, in dB: the A-weighting minus the free-field response, zero when neither applies. |
 | `a_weighted` | Whether the A-weighting was applied. |
 | `free_field_compensated` | Whether the free-field response was compensated. |
 
-### ProgramCharacteristicVoltage.band_levels_at_characteristic_db
+### ProgramCharacteristicVoltage.band_levels_at_characteristic
 
 *property*
 
@@ -1306,7 +1306,7 @@ The e.m.f. that gives 94 dB in each fitting, in volts (RMS).
 ```python
 protection_voltage(
     source_emf_v: ArrayLike,
-    sound_pressure_level_db: ArrayLike,
+    sound_pressure_level: ArrayLike,
 ) -> ProtectionVoltage
 ```
 
@@ -1325,7 +1325,7 @@ between the two steps that straddle it.
 | Name | Description |
 | :--- | :--- |
 | `source_emf_v` | The source e.m.f. of each step, in volts (RMS), strictly ascending. |
-| `sound_pressure_level_db` | The level at each step, in dB re 20 µPa. |
+| `sound_pressure_level` | The level at each step, in dB re 20 µPa. |
 
 **Returns:** A [`ProtectionVoltage`](/phonometry/reference/api/electroacoustics/headphones/#protectionvoltage).
 
@@ -1340,7 +1340,7 @@ between the two steps that straddle it.
 ```python
 ProtectionVoltage(
     source_emf_v: NDArray[np.float64],
-    sound_pressure_level_db: NDArray[np.float64],
+    sound_pressure_level: NDArray[np.float64],
     protection_voltage_v: float | None,
 )
 ```
@@ -1352,7 +1352,7 @@ A protective device's operating point from a level sweep (IEC 60268-7 8.3.6).
 | Name | Description |
 | :--- | :--- |
 | `source_emf_v` | The source e.m.f. of each step, in volts (RMS), ascending. |
-| `sound_pressure_level_db` | The level at each step, in dB re 20 µPa. |
+| `sound_pressure_level` | The level at each step, in dB re 20 µPa. |
 | `protection_voltage_v` | The e.m.f. at which the sensitivity has changed by 1 dB from the first step, interpolated, in volts; `None` when the sweep never reaches that change. |
 
 ### ProtectionVoltage.measurement_voltages_v
@@ -1504,9 +1504,9 @@ verify_ear_canal_microphone(
     entrance_area_mm2: float,
     canal_section_area_mm2: float,
     volume_mm3: float,
-    pink_noise_band_levels_db: ArrayLike,
-    open_levels_db: ArrayLike,
-    sealed_levels_db: ArrayLike,
+    pink_noise_band_levels: ArrayLike,
+    open_levels: ArrayLike,
+    sealed_levels: ArrayLike,
     ear_canal_area_mm2: float = 45.0,
 ) -> EarCanalMicrophoneVerification
 ```
@@ -1531,9 +1531,9 @@ certificate, are not numbers.
 | `entrance_area_mm2` | Cross-sectional area in the concha and the first 4 mm of the canal, in mm². |
 | `canal_section_area_mm2` | Cross-sectional area in the rest of the canal, in mm². |
 | `volume_mm3` | Volume with the mounting parts, in mm³. |
-| `pink_noise_band_levels_db` | The microphone's output levels for consecutive one-third-octave bands of pink noise of equal level, in dB, ascending in frequency. |
-| `open_levels_db` | The output level with the entrance open at each measuring frequency, in dB. |
-| `sealed_levels_db` | The output level with the entrance sealed at the same frequencies, in dB. |
+| `pink_noise_band_levels` | The microphone's output levels for consecutive one-third-octave bands of pink noise of equal level, in dB, ascending in frequency. |
+| `open_levels` | The output level with the entrance open at each measuring frequency, in dB. |
+| `sealed_levels` | The output level with the entrance sealed at the same frequencies, in dB. |
 | `ear_canal_area_mm2` | The canal's cross-sectional area, in mm²; the adult average of item b) by default. |
 
 **Returns:** An [`EarCanalMicrophoneVerification`](/phonometry/reference/api/electroacoustics/headphones/#earcanalmicrophoneverification).
@@ -1585,7 +1585,7 @@ measurement covered 20 Hz to 20 kHz as 8.2.2.2 c) requires.
 
 ```python
 working_sound_pressure_level(
-    sound_pressure_level_db: float,
+    sound_pressure_level: float,
     source_emf_v: float,
     *,
     rated_impedance_ohm: float,
@@ -1619,7 +1619,7 @@ since a noise signal has no single impedance to divide by.
 
 | Name | Description |
 | :--- | :--- |
-| `sound_pressure_level_db` | The level read in the coupler or ear simulator, in dB re 20 µPa. |
+| `sound_pressure_level` | The level read in the coupler or ear simulator, in dB re 20 µPa. |
 | `source_emf_v` | The source e.m.f. of the reading, in volts (RMS). |
 | `rated_impedance_ohm` | The rated impedance, in ohms. |
 | `rated_source_impedance_ohm` | The rated source impedance, in ohms. |

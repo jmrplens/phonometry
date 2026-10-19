@@ -573,7 +573,7 @@ the room constant of the method of clause 6. It goes into
 ## tone_level_from_sidebands
 
 ```python
-tone_level_from_sidebands(sideband_levels_db: ArrayLike) -> float
+tone_level_from_sidebands(sideband_levels: ArrayLike) -> float
 ```
 
 Total level of a tone from its sideband levels (ISO 9295 Formula (3)).
@@ -587,7 +587,7 @@ its energy when the analyser is narrower than
 
 | Name | Description |
 | :--- | :--- |
-| `sideband_levels_db` | The $N_\mathrm{sb}$ sideband levels $L_i$, in decibels re 20 µPa. |
+| `sideband_levels` | The $N_\mathrm{sb}$ sideband levels $L_i$, in decibels re 20 µPa. |
 
 **Returns:** $L_\mathrm{tot}$, in decibels re 20 µPa.
 

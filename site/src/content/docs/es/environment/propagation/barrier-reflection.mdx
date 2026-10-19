@@ -141,7 +141,7 @@ for k, (direct_m, reflected_m) in enumerate(environment.reflection_grid_paths_m(
     front[k] = pulse(0.01 + direct_m / c) / direct_m + 0.35 * reflection / reflected_m
 
 sub = environment.subtract_direct_sound(front[4], free[4], fs)
-print(round(sub.shift_samples, 2), round(sub.reduction_db))   # -0.14 57
+print(round(sub.shift_samples, 2), round(sub.reduction))   # -0.14 57
 ```
 
 <ThemeImage

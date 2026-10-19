@@ -133,7 +133,7 @@ current = electroacoustics.loop_current(10.0, 14.0, height_m=1.2)
 print(round(current, 2))                      # 5.41 A para 400 mA/m sobre el centro
 x = np.linspace(-8.0, 8.0, 641)               # un recorrido a través del lado de 10 m, y = 0
 field = electroacoustics.rectangular_loop_field(current, 10.0, 14.0, x, 0.0, 1.2)
-level = field.level_db("z")
+level = field.level("z")
 print(x[np.abs(level) <= 3.0][[0, -1]])       # [-4.75  4.75] m dentro de ±3 dB
 
 print(round(electroacoustics.loop_center_field(1.0, 10.0, width_m=14.0), 4))  # 0.0761 A/m (E.1)
@@ -271,7 +271,7 @@ print(round(20 * np.log10(np.ptp(noise) / np.sqrt(np.mean(noise**2))), 2))  # 18
 
 combi = 0.4 * electroacoustics.combi_signal(fs, n_cycles=2, seed=7)  # ráfagas de sinusoide a 400 mA/m
 reading = electroacoustics.field_strength_meter(combi, fs)
-print(round(reading.max_level_db, 2), round(reading.equivalent_db, 2))  # 0.0 -3.98 dB
+print(round(reading.max_level, 2), round(reading.equivalent_db, 2))  # 0.0 -3.98 dB
 ```
 
 La NOTA 2 de 6.4, y la NOTA 3 de 5.4.8.2 de IEC 62489-1, imprimen las
@@ -358,7 +358,7 @@ todos los valores que cubre y devuelve un único objeto de veredicto.
 current = electroacoustics.loop_current(10.0, 20.0, height_m=1.2)   # el lugar de culto típico
 x, y = np.meshgrid([-3.5, 0.0, 3.5], [-8.0, -4.0, 0.0, 4.0, 8.0])     # quince asientos
 levels = np.stack([
-    electroacoustics.rectangular_loop_field(current, 10.0, 20.0, x, y, height).level_db("z")
+    electroacoustics.rectangular_loop_field(current, 10.0, 20.0, x, y, height).level("z")
     for height in (1.2, 1.7)
 ])
 first = electroacoustics.verify_induction_loop_system(levels)
@@ -372,8 +372,8 @@ verdict = electroacoustics.verify_induction_loop_system(
     levels,
     frequencies=[100.0, 1000.0, 5000.0],
     response_db=[[-0.4, 0.0, -1.8], [-0.3, 0.0, -2.4], [-0.6, 0.0, -3.4]],
-    background_noise_levels_db=off,
-    system_noise_levels_db=on,
+    background_noise_levels=off,
+    system_noise_levels=on,
 )
 site = verdict.background_noise
 print(round(site.reference_signal_to_noise_ratio_db, 1), site.category)  # 35.4 acceptable
@@ -439,13 +439,13 @@ print(points.shape, points[0, :, :2].round(3).tolist())
 counter = electroacoustics.verify_small_volume_system(
     [[5.1, 4.2, 5.3], [2.0, 1.1, 2.2], [-2.9, -3.8, -2.7]],   # filas a 1,2 m, 1,45 m y 1,7 m
     layout="counter",
-    standing_area_levels_db=[6.5, 7.9, 9.2],   # la zona de pie junto al semicírculo
+    standing_area_levels=[6.5, 7.9, 9.2],   # la zona de pie junto al semicírculo
 )
 print(counter.passes, counter.failed)                                    # False ('standing_area',)
 print(round(counter.requirement("standing_area").worst_margin_db, 2))    # -1.2 dB
 ```
 
-Las filas de `field_strength_levels_db` siguen las alturas de
+Las filas de `field_strength_levels` siguen las alturas de
 `small_volume_measurement_points`, de la más baja a la más alta, así que el
 mostrador de arriba es más intenso a 1,2 m y más débil a 1,7 m. El Anexo A.4,
 informativo, permite «hasta, pero no mayor que, +12 dB» a 1,45 m en un mostrador
@@ -617,7 +617,7 @@ f = np.array([100.0, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000]
 phase = 90.0 - 4.0 * np.log2(f / 700.0) ** 2 / 3.0                 # grados entre las corrientes
 quadrature = electroacoustics.quadrature_phase_error(f, phase)
 print(round(quadrature.max_deviation_deg, 2), quadrature.max_deviation_frequency_hz)  # 10.73 5000.0
-print(round(quadrature.level_increase_db, 2), round(quadrature.level_decrease_db, 2))  # 1.48 -1.79 dB
+print(round(quadrature.level_increase, 2), round(quadrature.level_decrease, 2))  # 1.48 -1.79 dB
 ```
 
 Una desviación $\delta$ respecto a 90° deja una componente en fase $\sin\delta$

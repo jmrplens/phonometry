@@ -63,7 +63,7 @@ spectrum against them with `presentation="sound field"`.
 threshold exists for a loudspeaker away from 0° incidence (4.8, NOTE 1).
 Table B.1 prints how much higher the sound pressure level is at the ear
 closest to the loudspeaker at 45° and 90°, rounded to the nearest 0,5 dB, which
-[`INCIDENCE_CORRECTIONS_DB`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_corrections_db) carries and [`incidence_correction`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_correction)
+[`INCIDENCE_CORRECTIONS`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_corrections) carries and [`incidence_correction`](/phonometry/reference/api/hearing/sound-field-audiometry/#incidence_correction)
 reads. The paragraph above the table announces it from 200 Hz; its rows start
 at 125 Hz, and the library carries every printed row (see `docs/ERRATA.md`).
 
@@ -75,11 +75,11 @@ Clause, table and annex numbers refer to ISO 8253-2:2009(E).
 
 ```python
 check_diffuse_sound_field(
-    position_levels_db: Mapping[str, ArrayLike],
-    reference_levels_db: ArrayLike,
+    position_levels: Mapping[str, ArrayLike],
+    reference_levels: ArrayLike,
     *,
-    directional_levels_db: ArrayLike | None = None,
-    front_to_random_index_db: ArrayLike | None = None,
+    directional_levels: ArrayLike | None = None,
+    front_to_random_index: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
 ) -> DiffuseSoundFieldCheck
 ```
@@ -108,10 +108,10 @@ them.
 
 | Name | Description |
 | :--- | :--- |
-| `position_levels_db` | The level at each position per test signal, in dB, keyed `"front"`, `"back"`, `"left"`, `"right"`, `"up"` and `"down"`. |
-| `reference_levels_db` | The level at the reference point per test signal, in dB. |
-| `directional_levels_db` | The levels the directional microphone read at the reference point, a `(directions, bands)` grid in dB on the same band axis; bands below 500 Hz are not read and may be NaN. `None` leaves b) unjudged, and the verdict then does not pass. |
-| `front_to_random_index_db` | The microphone's front-to-random sensitivity index, in dB, one number or one per band; required with `directional_levels_db`. A band where it is below 4 dB, or NaN, is left unjudged, since Table 1 says the microphone is not suitable there. |
+| `position_levels` | The level at each position per test signal, in dB, keyed `"front"`, `"back"`, `"left"`, `"right"`, `"up"` and `"down"`. |
+| `reference_levels` | The level at the reference point per test signal, in dB. |
+| `directional_levels` | The levels the directional microphone read at the reference point, a `(directions, bands)` grid in dB on the same band axis; bands below 500 Hz are not read and may be NaN. `None` leaves b) unjudged, and the verdict then does not pass. |
+| `front_to_random_index` | The microphone's front-to-random sensitivity index, in dB, one number or one per band; required with `directional_levels`. A band where it is below 4 dB, or NaN, is left unjudged, since Table 1 says the microphone is not suitable there. |
 | `frequencies` | The frequencies of the test signals, in hertz, or `None` for the eleven audiometric frequencies from 125 Hz to 8 kHz. |
 
 **Returns:** [`DiffuseSoundFieldCheck`](/phonometry/reference/api/hearing/sound-field-audiometry/#diffusesoundfieldcheck).
@@ -126,11 +126,11 @@ them.
 
 ```python
 check_free_sound_field(
-    lateral_levels_db: Mapping[str, ArrayLike],
-    reference_levels_db: ArrayLike,
+    lateral_levels: Mapping[str, ArrayLike],
+    reference_levels: ArrayLike,
     *,
-    front_levels_db: ArrayLike,
-    back_levels_db: ArrayLike,
+    front_levels: ArrayLike,
+    back_levels: ArrayLike,
     loudspeaker_distance_m: float,
     frequencies: ArrayLike | None = None,
 ) -> FreeSoundFieldCheck
@@ -165,10 +165,10 @@ to 5.2 says only an anechoic room does.
 
 | Name | Description |
 | :--- | :--- |
-| `lateral_levels_db` | The level at each lateral position per test signal, in dB, keyed `"left"`, `"right"`, `"up"` and `"down"`. |
-| `reference_levels_db` | The level at the reference point per test signal, in dB. |
-| `front_levels_db` | The level on the reference axis 0,15 m in front of the reference point, towards the loudspeaker, in dB. |
-| `back_levels_db` | The level 0,15 m behind it, in dB. |
+| `lateral_levels` | The level at each lateral position per test signal, in dB, keyed `"left"`, `"right"`, `"up"` and `"down"`. |
+| `reference_levels` | The level at the reference point per test signal, in dB. |
+| `front_levels` | The level on the reference axis 0,15 m in front of the reference point, towards the loudspeaker, in dB. |
+| `back_levels` | The level 0,15 m behind it, in dB. |
 | `loudspeaker_distance_m` | $r$, in metres. A distance under 1 m is judged, not refused: the verdict fails a). |
 | `frequencies` | The test frequencies, in hertz, or `None` for the eleven audiometric frequencies from 125 Hz to 8 kHz. |
 
@@ -184,11 +184,11 @@ to 5.2 says only an anechoic room does.
 
 ```python
 check_quasi_free_sound_field(
-    lateral_levels_db: Mapping[str, ArrayLike],
-    reference_levels_db: ArrayLike,
+    lateral_levels: Mapping[str, ArrayLike],
+    reference_levels: ArrayLike,
     *,
-    front_levels_db: ArrayLike,
-    back_levels_db: ArrayLike,
+    front_levels: ArrayLike,
+    back_levels: ArrayLike,
     loudspeaker_distance_m: float,
     frequencies: ArrayLike | None = None,
 ) -> FreeSoundFieldCheck
@@ -218,10 +218,10 @@ which [`FreeSoundFieldCheck.usable_frequencies`](/phonometry/reference/api/heari
 
 | Name | Description |
 | :--- | :--- |
-| `lateral_levels_db` | The level at each lateral position per test signal, in dB, keyed `"left"`, `"right"`, `"up"` and `"down"`. |
-| `reference_levels_db` | The level at the reference point per test signal, in dB. |
-| `front_levels_db` | The level on the reference axis 0,10 m in front of the reference point, towards the loudspeaker, in dB. |
-| `back_levels_db` | The level 0,10 m behind it, in dB. |
+| `lateral_levels` | The level at each lateral position per test signal, in dB, keyed `"left"`, `"right"`, `"up"` and `"down"`. |
+| `reference_levels` | The level at the reference point per test signal, in dB. |
+| `front_levels` | The level on the reference axis 0,10 m in front of the reference point, towards the loudspeaker, in dB. |
+| `back_levels` | The level 0,10 m behind it, in dB. |
 | `loudspeaker_distance_m` | $r$, in metres. A distance under 1 m is judged, not refused: the verdict fails a). |
 | `frequencies` | The test frequencies, in hertz, or `None` for the eleven audiometric frequencies from 125 Hz to 8 kHz. |
 
@@ -247,9 +247,9 @@ DIFFUSE_FIELD_VARIATION_LIMITS = ((5.0, 5.0), (4.5, 4.5), (4.0, 4.0))
 DiffuseSoundFieldCheck(
     frequencies: np.ndarray,
     position_deviation_db: np.ndarray,
-    left_right_difference_db: np.ndarray,
+    left_right_difference: np.ndarray,
     directional_variation_db: np.ndarray,
-    front_to_random_index_db: np.ndarray | None,
+    front_to_random_index: np.ndarray | None,
     standard: str,
     positions: tuple[str, ...] = ('front', 'back', 'left', 'right', 'up', 'down'),
 )
@@ -268,9 +268,9 @@ into the variation it may read.
 | :--- | :--- |
 | `frequencies` | The centre frequencies of the test signals, in hertz. |
 | `position_deviation_db` | The level at each of the six positions 0,15 m from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
-| `left_right_difference_db` | The difference between the right and left positions per band, as an absolute value, in dB. |
+| `left_right_difference` | The difference between the right and left positions per band, as an absolute value, in dB. |
 | `directional_variation_db` | The largest less the smallest level the directional microphone read at the reference point per band, in dB, or NaN where no reading was given or the band is below 500 Hz. |
-| `front_to_random_index_db` | The directional microphone's front-to-random sensitivity index per band, in dB, or `None` when no directional reading was given. |
+| `front_to_random_index` | The directional microphone's front-to-random sensitivity index per band, in dB, or `None` when no directional reading was given. |
 | `standard` | The clause this check applies, `"ISO 8253-2 5.3"` or `"ISO 4869-3 5.2.2"`, which picks the Table 1 the index is read against. |
 | `positions` | The position names, in row order. |
 
@@ -381,7 +381,7 @@ FreeSoundFieldCheck(
     field: str,
     frequencies: np.ndarray,
     lateral_deviation_db: np.ndarray,
-    axis_difference_db: np.ndarray,
+    axis_difference: np.ndarray,
     loudspeaker_distance_m: float,
     positions: tuple[str, ...] = ('left', 'right', 'up', 'down'),
 )
@@ -398,13 +398,13 @@ The verdict of ISO 8253-2:2009, 5.2 (free) or 5.4 (quasi-free).
 | `field` | `"free"` or `"quasi-free"`. |
 | `frequencies` | The frequencies of the test signals, in hertz. |
 | `lateral_deviation_db` | The level at each of the four positions 0,15 m from the reference point less the level at it, one row per position in the order of `positions`, in dB. |
-| `axis_difference_db` | The level at the axial point in front of the reference point, towards the loudspeaker, less the level at the one behind it, per band, in dB. |
+| `axis_difference` | The level at the axial point in front of the reference point, towards the loudspeaker, less the level at the one behind it, per band, in dB. |
 | `loudspeaker_distance_m` | $r$, the distance from the loudspeaker to the reference point, in metres. |
 | `positions` | The lateral position names, in row order. |
 
 Where the axial points sit (`axis_offset_m`) is the clause's, and
 so is the difference the inverse distance law gives there
-(`inverse_distance_difference_db`): both are read from the field and
+(`inverse_distance_difference`): both are read from the field and
 the loudspeaker distance and are not fields, so a check cannot be built
 against another offset or another law.
 
@@ -459,7 +459,7 @@ The axial difference less what the inverse distance law gives, in dB.
 
 **Returns:** One value per band.
 
-### FreeSoundFieldCheck.inverse_distance_difference_db
+### FreeSoundFieldCheck.inverse_distance_difference
 
 *property*
 
@@ -475,7 +475,7 @@ The tolerance of the four lateral positions per band, in dB.
 
 **Returns:** ±1 dB up to and including 4 kHz and ±2 dB above for a free field (5.2 b)), ±2 dB throughout for a quasi-free one (5.4 b)).
 
-### FreeSoundFieldCheck.left_right_difference_db
+### FreeSoundFieldCheck.left_right_difference
 
 *property*
 
@@ -573,12 +573,12 @@ NOTE 1); how a report uses the increase is left to it.
 INCIDENCE_CORRECTION_FREQUENCIES_HZ = (125.0, 160.0, 200.0, 250.0, 315.0, 400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0, 1500.0, 1600.0, 2000.0, 2500.0, 3000.0, 3150.0, 4000.0, 5000.0, 6000.0, 6300.0, 8000.0, 10000.0, 12500.0)
 ```
 
-## INCIDENCE_CORRECTIONS_DB
+## INCIDENCE_CORRECTIONS
 
 *Constant* (`mapping`).
 
 ```python
-INCIDENCE_CORRECTIONS_DB = {45.0: array([0.5, 1. , 1. , 1. , 1.5, 2.5, 3. , 3.5, 3.5, 4. , 4. , 3.5, 3.5,
+INCIDENCE_CORRECTIONS = {45.0: array([0.5, 1. , 1. , 1. , 1.5, 2.5, 3. , 3.5, 3.5, 4. , 4. , 3.5, 3.5,
        3. , 3.5, 5. , 5. , 4. , 6. , 7.5, 7.5, 5.5, 4.5, 1.5]), 90.0: array([ 1. ,  1.5,  1.5,  2. ,  2.5,  3.5,  4.5,  5. ,  5. ,  5.5,  6. ,
         5. ,  4.5,  2. ,  2. ,  2.5,  2. , -0.5,  4. ,  9.5, 10. ,  8.5,
         6. ,  8. ])}

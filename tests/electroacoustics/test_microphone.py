@@ -70,10 +70,10 @@ def test_sensitivity_level_is_20lg_m_over_1v_pa() -> None:
     result = electroacoustics.microphone_characteristics(
         f, rel, _M_MV, tolerance_db=_TOL
     )
-    assert result.sensitivity_level_db == pytest.approx(
+    assert result.sensitivity_level == pytest.approx(
         20.0 * math.log10(0.0125), abs=1e-12
     )
-    assert result.sensitivity_level_db == pytest.approx(-38.0618, abs=5e-5)
+    assert result.sensitivity_level == pytest.approx(-38.0618, abs=5e-5)
     assert result.sensitivity_v_per_pa == pytest.approx(0.0125, rel=1e-12)
 
 
@@ -83,7 +83,7 @@ def test_reference_sensitivity_gives_zero_level() -> None:
     result = electroacoustics.microphone_characteristics(
         f, rel, 1000.0, tolerance_db=_TOL
     )
-    assert result.sensitivity_level_db == pytest.approx(0.0, abs=1e-12)
+    assert result.sensitivity_level == pytest.approx(0.0, abs=1e-12)
 
 
 # --- IEC 60268-4 12.2 effective frequency range -------------------------------
@@ -143,12 +143,10 @@ def test_cardioid_directivity_index_is_10lg3() -> None:
             polar=(angles, pattern), frequency=1000.0
         ),
     )
-    assert result.directivity_index_db == pytest.approx(
-        10.0 * math.log10(3.0), abs=5e-3
-    )
+    assert result.directivity_index == pytest.approx(10.0 * math.log10(3.0), abs=5e-3)
     # 11.2.2.1: diffuse-field level = free-field level - directivity index.
-    assert result.diffuse_field_sensitivity_level_db == pytest.approx(
-        result.sensitivity_level_db - result.directivity_index_db, abs=1e-12
+    assert result.diffuse_field_sensitivity_level == pytest.approx(
+        result.sensitivity_level - result.directivity_index, abs=1e-12
     )
 
 
@@ -166,7 +164,7 @@ def test_omnidirectional_directivity_index_is_zero() -> None:
         ),
     )
     # Trapezoidal quadrature of the 11.2.2 a) integral over 0,25 degree steps.
-    assert result.directivity_index_db == pytest.approx(0.0, abs=1e-4)
+    assert result.directivity_index == pytest.approx(0.0, abs=1e-4)
 
 
 def test_stated_directivity_index_is_kept() -> None:
@@ -179,10 +177,10 @@ def test_stated_directivity_index_is_kept() -> None:
         _M_MV,
         tolerance_db=_TOL,
         directivity=electroacoustics.MicrophoneDirectivity(
-            polar=(angles, np.zeros_like(angles)), index_db=4.5
+            polar=(angles, np.zeros_like(angles)), index=4.5
         ),
     )
-    assert result.directivity_index_db == pytest.approx(4.5)
+    assert result.directivity_index == pytest.approx(4.5)
 
 
 def test_front_only_pattern_gives_no_directivity_index() -> None:
@@ -198,7 +196,7 @@ def test_front_only_pattern_gives_no_directivity_index() -> None:
             polar=(angles, np.zeros_like(angles))
         ),
     )
-    assert result.directivity_index_db is None
+    assert result.directivity_index is None
 
 
 def test_full_circle_cardioid_gives_same_directivity_index() -> None:
@@ -214,9 +212,7 @@ def test_full_circle_cardioid_gives_same_directivity_index() -> None:
         tolerance_db=_TOL,
         directivity=electroacoustics.MicrophoneDirectivity(polar=(angles, pattern)),
     )
-    assert result.directivity_index_db == pytest.approx(
-        10.0 * math.log10(3.0), abs=5e-3
-    )
+    assert result.directivity_index == pytest.approx(10.0 * math.log10(3.0), abs=5e-3)
 
 
 def test_front_quarter_beyond_270_gives_no_directivity_index() -> None:
@@ -232,7 +228,7 @@ def test_front_quarter_beyond_270_gives_no_directivity_index() -> None:
             polar=(angles, np.zeros_like(angles))
         ),
     )
-    assert result.directivity_index_db is None
+    assert result.directivity_index is None
 
 
 # --- IEC 60268-4 17.2 equivalent noise level and 15.2 overload SPL ------------
@@ -248,7 +244,7 @@ def test_equivalent_noise_level_from_noise_voltage() -> None:
         tolerance_db=_TOL,
         noise=electroacoustics.MicrophoneNoise(voltage_v=2.5e-6),
     )
-    assert result.equivalent_noise_level_db == pytest.approx(20.0, abs=1e-12)
+    assert result.equivalent_noise_level == pytest.approx(20.0, abs=1e-12)
     # SNR re 1 Pa: 20 lg(1 Pa / 20 uPa) - L_N = 93,98 - 20,0.
     assert result.signal_to_noise_ratio_db == pytest.approx(
         20.0 * math.log10(1.0 / 20e-6) - 20.0, abs=1e-12
@@ -269,7 +265,7 @@ def test_overload_spl_read_from_distortion_curve() -> None:
             distortion=(spl, thd), thd_percent=0.5
         ),
     )
-    assert result.max_spl_db == pytest.approx(130.0, abs=1e-9)
+    assert result.max_spl == pytest.approx(130.0, abs=1e-9)
 
 
 def test_stated_max_spl_is_kept() -> None:
@@ -283,10 +279,10 @@ def test_stated_max_spl_is_kept() -> None:
         _M_MV,
         tolerance_db=_TOL,
         overload=electroacoustics.MicrophoneOverload(
-            distortion=(spl, thd), thd_percent=0.5, spl_db=132.0
+            distortion=(spl, thd), thd_percent=0.5, spl=132.0
         ),
     )
-    assert result.max_spl_db == pytest.approx(132.0)
+    assert result.max_spl == pytest.approx(132.0)
 
 
 def test_distortion_below_limit_gives_no_max_spl() -> None:
@@ -301,7 +297,7 @@ def test_distortion_below_limit_gives_no_max_spl() -> None:
         tolerance_db=_TOL,
         overload=electroacoustics.MicrophoneOverload(distortion=(spl, thd)),
     )
-    assert result.max_spl_db is None
+    assert result.max_spl is None
 
 
 # --- model validation ----------------------------------------------------------
@@ -337,11 +333,11 @@ def test_reference_frequency_outside_band_rejected() -> None:
 def test_noise_voltage_and_stated_level_conflict() -> None:
     f, rel = _flat_response()
     conflicting_noise = electroacoustics.MicrophoneNoise(
-        voltage_v=1e-6, equivalent_level_db=14.0
+        voltage_v=1e-6, equivalent_level=14.0
     )
     with pytest.raises(
         ValueError,
-        match=r"either 'noise\.voltage_v' or 'noise\.equivalent_level_db', not both",
+        match=r"either 'noise\.voltage_v' or 'noise\.equivalent_level', not both",
     ):
         electroacoustics.microphone_characteristics(
             f, rel, _M_MV, noise=conflicting_noise
@@ -417,14 +413,14 @@ def test_nonfinite_stated_directivity_index_rejected_with_polar() -> None:
     angles = np.linspace(0.0, 180.0, 181)
     omnidirectional = np.zeros_like(angles)
     infinite_index_with_polar = electroacoustics.MicrophoneDirectivity(
-        polar=(angles, omnidirectional), index_db=float("inf")
+        polar=(angles, omnidirectional), index=float("inf")
     )
-    with pytest.raises(ValueError, match=r"directivity\.index_db"):
+    with pytest.raises(ValueError, match=r"directivity\.index"):
         electroacoustics.microphone_characteristics(
             f, rel, _M_MV, directivity=infinite_index_with_polar
         )
-    nan_index = electroacoustics.MicrophoneDirectivity(index_db=float("nan"))
-    with pytest.raises(ValueError, match=r"directivity\.index_db"):
+    nan_index = electroacoustics.MicrophoneDirectivity(index=float("nan"))
+    with pytest.raises(ValueError, match=r"directivity\.index"):
         electroacoustics.microphone_characteristics(
             f, rel, _M_MV, directivity=nan_index
         )
@@ -435,7 +431,7 @@ def test_no_noise_input_gives_no_noise_rows() -> None:
     result = electroacoustics.microphone_characteristics(
         f, rel, _M_MV, tolerance_db=_TOL
     )
-    assert result.equivalent_noise_level_db is None
+    assert result.equivalent_noise_level is None
     assert result.signal_to_noise_ratio_db is None
 
 
@@ -593,7 +589,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
         ("frequencies", float("inf")),
         ("response_db", float("nan")),
         ("polar_db", float("nan")),
-        ("noise_band_levels_db", float("nan")),
+        ("noise_band_levels", float("nan")),
     ],
 )
 def test_a_non_finite_curve_is_refused_where_the_result_is_built(
@@ -648,12 +644,12 @@ def test_a_non_finite_response_axis_no_longer_reaches_the_fiche(
     "field",
     [
         "sensitivity_mv_per_pa",
-        "sensitivity_level_db",
+        "sensitivity_level",
         "reference_frequency_hz",
         "polar_frequency",
-        "equivalent_noise_level_db",
+        "equivalent_noise_level",
         "tolerance_db",
-        "directivity_index_db",
+        "directivity_index",
     ],
 )
 def test_a_non_finite_rated_number_is_refused_where_the_result_is_built(
@@ -759,9 +755,7 @@ def test_a_weighting_outside_iec_60268_1_is_refused_at_construction(
     1 unclosed tags``, naming neither the field nor the result.
     """
     f, rel = _flat_response()
-    noise = electroacoustics.MicrophoneNoise(
-        equivalent_level_db=14.0, weighting=weighting
-    )
+    noise = electroacoustics.MicrophoneNoise(equivalent_level=14.0, weighting=weighting)
     with pytest.raises(ValueError, match=r"'noise_weighting' must be one of"):
         electroacoustics.microphone_characteristics(
             f, rel, _M_MV, tolerance_db=_TOL, noise=noise
@@ -782,9 +776,7 @@ def test_the_bs468_quasi_peak_weighting_is_accepted(tmp_path: Path) -> None:
         rel,
         _M_MV,
         tolerance_db=_TOL,
-        noise=electroacoustics.MicrophoneNoise(
-            equivalent_level_db=14.0, weighting="468"
-        ),
+        noise=electroacoustics.MicrophoneNoise(equivalent_level=14.0, weighting="468"),
     )
     out = tmp_path / "bs468.pdf"
     result.report(str(out))
@@ -799,7 +791,7 @@ def test_the_legacy_ccir_name_is_refused_for_the_one_the_library_uses() -> None:
     value that worked in one place raised in the other.
     """
     f, rel = _flat_response()
-    noise = electroacoustics.MicrophoneNoise(equivalent_level_db=14.0, weighting="CCIR")
+    noise = electroacoustics.MicrophoneNoise(equivalent_level=14.0, weighting="CCIR")
     with pytest.raises(ValueError, match=r"'noise_weighting' must be one of"):
         electroacoustics.microphone_characteristics(
             f, rel, _M_MV, tolerance_db=_TOL, noise=noise

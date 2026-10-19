@@ -56,7 +56,7 @@ the report never merely repeats a manufacturer number:
 ```python
 loudspeaker_characteristics(
     frequencies: ArrayLike,
-    spl_db: ArrayLike,
+    spl: ArrayLike,
     rated_impedance_ohm: float,
     *,
     input_voltage_v: float | None = None,
@@ -82,7 +82,7 @@ distortion and directivity data feed the corresponding report panels.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | On-axis response frequency axis, in Hz (1-D, > 0). Logarithmically spaced samples are strongly recommended: the band averages behind the sensitivity level and the effective-range reference weight each sample equally, so a linearly spaced grid over-weights the high-frequency end of every band. |
-| `spl_db` | On-axis sound pressure level, in dB re 20 uPa. |
+| `spl` | On-axis sound pressure level, in dB re 20 uPa. |
 | `rated_impedance_ohm` | Rated impedance `R`, in ohm (16.1). |
 | `input_voltage_v` | Constant drive voltage of the response, in V; defaults to $\sqrt{R}$ (1 W into `R`, the 2.83 V @ 8 ohm convention). |
 | `distance` | Measuring distance of the response, in m (default 1). |
@@ -106,14 +106,14 @@ distortion and directivity data feed the corresponding report panels.
 ```python
 LoudspeakerCharacteristics(
     frequencies: NDArray[np.float64],
-    spl_db: NDArray[np.float64],
+    spl: NDArray[np.float64],
     rated_impedance_ohm: float,
     input_voltage_v: float,
     distance: float,
     sensitivity_band: tuple[float, float],
     tolerance_db: float,
-    reference_level_db: float,
-    sensitivity_level_db: float,
+    reference_level: float,
+    sensitivity_level: float,
     effective_range: tuple[float, float],
     rated_frequency_range_hz: tuple[float, float] | None,
     rated_noise_power: float | None,
@@ -126,7 +126,7 @@ LoudspeakerCharacteristics(
     polar_angles_deg: NDArray[np.float64] | None,
     polar_db: NDArray[np.float64] | None,
     polar_frequency: float | None,
-    directivity_index_db: float | None,
+    directivity_index: float | None,
 )
 ```
 
@@ -143,14 +143,14 @@ computed from the on-axis response (see the module docstring).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | On-axis response frequency axis, in Hz. |
-| `spl_db` | On-axis sound pressure level (re 20 uPa), in dB, measured at `input_voltage_v` and `distance`. |
+| `spl` | On-axis sound pressure level (re 20 uPa), in dB, measured at `input_voltage_v` and `distance`. |
 | `rated_impedance_ohm` | Rated impedance `R`, in ohm (16.1). |
 | `input_voltage_v` | Constant drive voltage of the response, in V. |
 | `distance` | Measuring distance of the response, in m. |
 | `sensitivity_band` | Stated band `(lo, hi)` for the characteristic sensitivity, in Hz. |
 | `tolerance_db` | Half-width of the response tolerance band, in dB. |
-| `reference_level_db` | Level averaged over a one-octave band in the region of maximum sensitivity (the effective-range reference), in dB. |
-| `sensitivity_level_db` | Characteristic sensitivity level referred to 1 W into `R` at 1 m (20.3/20.4), in dB. |
+| `reference_level` | Level averaged over a one-octave band in the region of maximum sensitivity (the effective-range reference), in dB. |
+| `sensitivity_level` | Characteristic sensitivity level referred to 1 W into `R` at 1 m (20.3/20.4), in dB. |
 | `effective_range` | Computed effective frequency range `(lo, hi)`, Hz. |
 | `rated_frequency_range_hz` | Manufacturer-stated rated frequency range `(lo, hi)` in Hz (19.1), or `None`. |
 | `rated_noise_power` | Rated noise power, in W (18.1), or `None`. |
@@ -163,7 +163,7 @@ computed from the on-axis response (see the module docstring).
 | `polar_angles_deg` | Polar-response angles, in degrees, or `None`. |
 | `polar_db` | Polar response relative to the on-axis level, in dB, or `None`. |
 | `polar_frequency` | Frequency of the polar response, in Hz, or `None`. |
-| `directivity_index_db` | Directivity index at `polar_frequency`, in dB (23.3), or `None`. |
+| `directivity_index` | Directivity index at `polar_frequency`, in dB (23.3), or `None`. |
 
 ### LoudspeakerCharacteristics.characteristic_sensitivity_pa
 
@@ -276,7 +276,7 @@ LoudspeakerDirectivity(
     piston: RadiatingPistonResult | None = None,
     polar: tuple[ArrayLike, ArrayLike] | None = None,
     frequency: float | None = None,
-    index_db: float | None = None,
+    index: float | None = None,
 )
 ```
 
@@ -295,7 +295,7 @@ directivity of a radiating piston.
 | `piston` | A [`RadiatingPistonResult`](/phonometry/reference/api/electroacoustics/piston/#radiatingpistonresult) computed with `angles` to supply the pattern and the directivity index; it takes precedence over `polar` (23.1/23.3). |
 | `polar` | Directional response pattern as `(angles_deg, relative_db)`, relative to the on-axis level, when it is not taken from `piston` (23.1). |
 | `frequency` | Stated frequency of the directional pattern, in Hz; it also selects which of `piston`'s frequencies is drawn. |
-| `index_db` | Directivity index at `frequency`, in dB (23.3), when not taken from `piston`. |
+| `index` | Directivity index at `frequency`, in dB (23.3), when not taken from `piston`. |
 
 ## LoudspeakerRatings
 

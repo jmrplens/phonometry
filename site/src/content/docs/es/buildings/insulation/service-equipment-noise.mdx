@@ -245,7 +245,7 @@ el capítulo por sí sola:
 ```python
 k = building.service_equipment_background_correction(
     [40.0, 40.0, 40.0], [28.0, 34.0, 38.0])
-print(np.round(k.correction_db, 2), k.regime)
+print(np.round(k.correction, 2), k.regime)
 # [0.   1.26 2.2 ] ('none', 'corrected', 'limited')
 ```
 
@@ -376,7 +376,7 @@ proceden del mismo calibrador al mismo nivel declarado.
 ```python
 cal = building.verify_calibration_deviation(
     [94.0, 94.2],                       # principio y final de esta medición [dB]
-    previous_levels_db=[93.9, 94.0],    # calibraciones anteriores de la cadena [dB]
+    previous_levels=[93.9, 94.0],    # calibraciones anteriores de la cadena [dB]
 )
 print(np.round(cal.deviations_db, 2), cal.passes)   # [0.1 0.3] True
 cal.plot()
@@ -471,7 +471,7 @@ periods = building.check_measurement_disturbance(
     [41.6, 42.0, 48.9, 41.3, 41.8, 42.2],   # máximo de una banda central, por periodo [dB]
     [39.0, 39.4, 41.1, 38.9, 39.2, 39.6],   # nivel equivalente, misma banda y periodos [dB]
 )
-print(np.round(periods.differences_db, 1), periods.disturbed_periods)
+print(np.round(periods.differences, 1), periods.disturbed_periods)
 # [2.6 2.6 7.8 2.4 2.6 2.6] (2,)
 periods.plot()
 ```
@@ -498,7 +498,7 @@ tipo de explicación que pide la NOTA.
 ```python
 agreement = building.check_instrument_agreement(
     res, {"LA,eq": [46.0, 44.5, 45.8], "LC,eq": [52.3, 50.8, 52.1]})
-print({k: round(v, 1) for k, v in agreement.differences_db.items()}, agreement.passes)
+print({k: round(v, 1) for k, v in agreement.differences.items()}, agreement.passes)
 # {'LA,eq': -0.5, 'LC,eq': 0.2} True
 agreement.plot()
 ```

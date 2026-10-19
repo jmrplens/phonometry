@@ -113,7 +113,7 @@ $$
 
 ```python
 print(round(environment.long_term_sel(levels, probabilities), 1))  # 37.0
-print(round(environment.long_term_sel(levels, probabilities, rating_adjustment_db=12.0), 1))  # 49.0
+print(round(environment.long_term_sel(levels, probabilities, rating_adjustment=12.0), 1))  # 49.0
 ```
 
 37,0 dB is the LT1 Figure A.3 prints. It sits well above the level half the
@@ -178,7 +178,7 @@ $$
 
 ```python
 print(round(environment.turbulence_level_shift(5.0), 3))   # 2.878
-print(round(dist.level_shift_db, 3))                       # 2.878
+print(round(dist.level_shift, 3))                       # 2.878
 ```
 
 Annex A says the shift of its example was 1,04 dB. That is Equation (22) at a
@@ -203,7 +203,7 @@ $$
 ```python
 print(dist.exceedance_level([95.0, 50.0, 10.0, 5.0, 1.0]).round(1))  # [21.6 31.5 40.5 43.  47.5]
 print(round(dist.exceedance(37.0), 3))                                 # 0.214
-print(round(dist.long_term_level_db, 2), round(dist.distribution_long_term_level_db, 2))  # 37.01 36.96
+print(round(dist.long_term_level, 2), round(dist.distribution_long_term_level, 2))  # 37.01 36.96
 ```
 
 The long-term level taken a second time, over the continuous density

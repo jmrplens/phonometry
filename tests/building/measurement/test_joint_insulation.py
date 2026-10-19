@@ -125,7 +125,7 @@ def test_printed_limit_correction_is_formula_j2_at_six_decibels() -> None:
     correction = _j2(50.0, 50.0 + margin) - 50.0
     assert round(correction, 1) == pytest.approx(ref.ISO10140_1_J1_LIMIT_CORRECTION_DB)
     res = _one_band(50.0, 50.0 + margin - 0.1)
-    assert res.r_s_db[0] - 50.0 == pytest.approx(ref.ISO10140_1_J1_LIMIT_CORRECTION_DB)
+    assert res.r_s[0] - 50.0 == pytest.approx(ref.ISO10140_1_J1_LIMIT_CORRECTION_DB)
 
 
 @pytest.mark.parametrize(
@@ -154,7 +154,7 @@ def test_each_regime_gives_its_value() -> None:
     res = building.laboratory_joint_insulation(
         measured, maximum, [500.0, 630.0, 800.0, 1000.0]
     )
-    assert res.r_s_db == pytest.approx([45.0, _j2(45.0, 52.0), 46.3, 46.5], abs=1e-12)
+    assert res.r_s == pytest.approx([45.0, _j2(45.0, 52.0), 46.3, 46.5], abs=1e-12)
     assert res.min_value.tolist() == [False, False, True, True]
 
 
@@ -163,14 +163,14 @@ def test_six_decibels_reached_in_decimals_is_still_formula_j2() -> None:
     assert 36.3 - 30.3 < 6.0
     res = _one_band(30.3, 36.3)
     assert res.regime == ("corrected",)
-    assert res.r_s_db[0] == pytest.approx(_j2(30.3, 36.3), abs=1e-12)
+    assert res.r_s[0] == pytest.approx(_j2(30.3, 36.3), abs=1e-12)
 
 
 def test_the_maximum_rule_is_optional() -> None:
     """J.1 "may" set the lower limit to Rs,max; without it, 1,3 dB applies."""
     res = _one_band(48.0, 50.4, limit_at_max=False)
     assert res.regime == ("limit",)
-    assert res.r_s_db[0] == pytest.approx(49.3)
+    assert res.r_s[0] == pytest.approx(49.3)
 
 
 def test_printed_lower_limit_example() -> None:
@@ -178,7 +178,7 @@ def test_printed_lower_limit_example() -> None:
     maximum = ref.ISO10140_1_J1_EXAMPLE_MINIMUM_DB
     res = _one_band(maximum - 2.0, maximum)
     assert res.regime == ("maximum",)
-    assert res.r_s_db[0] == pytest.approx(maximum)
+    assert res.r_s[0] == pytest.approx(maximum)
     assert res.indicative.tolist() == [True]
 
 
@@ -193,13 +193,13 @@ def test_result_refuses_mismatched_columns() -> None:
     with pytest.raises(ValueError, match="band"):
         LaboratoryJointInsulationResult(
             frequencies=two_bands,
-            r_s_measured_db=good.r_s_measured_db,
-            r_s_max_db=good.r_s_max_db,
-            r_s_db=good.r_s_db,
+            r_s_prime=good.r_s_prime,
+            r_s_max=good.r_s_max,
+            r_s=good.r_s,
             joint_length_m=None,
             rating=None,
-            c_100_5000_db=None,
-            ctr_100_5000_db=None,
+            c_100_5000=None,
+            ctr_100_5000=None,
             max_rating=None,
             open_band_rating=None,
         )
@@ -208,13 +208,13 @@ def test_result_refuses_mismatched_columns() -> None:
 def _columns(good: LaboratoryJointInsulationResult) -> dict[str, object]:
     return {
         "frequencies": good.frequencies,
-        "r_s_measured_db": good.r_s_measured_db,
-        "r_s_max_db": good.r_s_max_db,
-        "r_s_db": good.r_s_db,
+        "r_s_prime": good.r_s_prime,
+        "r_s_max": good.r_s_max,
+        "r_s": good.r_s,
         "joint_length_m": None,
         "rating": None,
-        "c_100_5000_db": None,
-        "ctr_100_5000_db": None,
+        "c_100_5000": None,
+        "ctr_100_5000": None,
         "max_rating": None,
         "open_band_rating": None,
     }
@@ -249,7 +249,7 @@ def test_a_hand_built_result_reads_its_regime_from_its_columns(
 def test_a_hand_built_result_refuses_the_correction_of_another_rule() -> None:
     """Within 3 dB of the maximum, J.1 gives 1,3 dB or the maximum, not both."""
     columns = _columns(_one_band(45.0, 46.0, limit_at_max=True))
-    with pytest.raises(ValueError, match="r_s_db"):
+    with pytest.raises(ValueError, match="'r_s' must be the correction"):
         LaboratoryJointInsulationResult(**columns, limit_at_max=False)  # type: ignore[arg-type]
 
 
@@ -280,12 +280,12 @@ def test_enlarged_range_terms_need_the_bands_to_5000_hz() -> None:
         measured[:16], measured[:16] + 20.0, _BANDS[:16]
     )
     extended = building.weighted_rating_extended(measured, _BANDS)
-    assert (full.c_100_5000_db, full.ctr_100_5000_db) == (
+    assert (full.c_100_5000, full.ctr_100_5000) == (
         extended.c_100_5000,
         extended.ctr_100_5000,
     )
-    assert core.c_100_5000_db is None
-    assert core.ctr_100_5000_db is None
+    assert core.c_100_5000 is None
+    assert core.ctr_100_5000 is None
     assert core.rating is not None
 
 
@@ -294,15 +294,15 @@ def test_no_rating_without_the_core_bands() -> None:
         [45.0] * 3, [60.0] * 3, [500.0, 630.0, 800.0]
     )
     assert res.rating is None
-    assert res.r_s_w_db is None
-    assert res.r_s_w_ctr_db is None
+    assert res.r_s_w is None
+    assert res.r_s_w_ctr is None
     assert res.bracketed is False
 
 
 def test_single_number_properties() -> None:
     measured = np.asarray(ref.ISO10140_2_TABLE_A1_R_F)
     res = building.laboratory_joint_insulation(measured, measured + 20.0, _BANDS)
-    assert (res.r_s_w_db, res.r_s_w_c_db, res.r_s_w_ctr_db) == (59, 57, 52)
+    assert (res.r_s_w, res.r_s_w_c, res.r_s_w_ctr) == (59, 57, 52)
 
 
 def test_maximum_of_the_arrangement_is_rated() -> None:
@@ -337,7 +337,7 @@ def test_open_bands_rated_by_hand() -> None:
     opened = res.open_band_rating
     assert opened is not None
     assert opened.open_frequencies_hz == (400.0, 500.0, 630.0, 800.0)
-    assert (opened.r_s_w_db, opened.c_db) == (59, 0)
+    assert (opened.r_s_w, opened.c) == (59, 0)
     assert res.bracketed is True
 
 
@@ -357,8 +357,8 @@ def test_every_band_open_is_unbounded() -> None:
     )
     opened = res.open_band_rating
     assert opened is not None
-    assert opened.r_s_w_db is None
-    assert opened.c_100_5000_db is None
+    assert opened.r_s_w is None
+    assert opened.c_100_5000 is None
     assert res.bracketed is True
 
 
@@ -374,7 +374,7 @@ def test_indicative_bands_are_read_on_the_measured_index() -> None:
     measured[7] = maximum[7] - 3.5
     res = building.laboratory_joint_insulation(measured, maximum, _BANDS)
     assert res.regime[7] == "limit"
-    assert res.r_s_max_db[7] - res.r_s_db[7] == pytest.approx(2.2)
+    assert res.r_s_max[7] - res.r_s[7] == pytest.approx(2.2)
     assert not res.indicative.any()
     assert res.open_band_rating is None
 
@@ -484,14 +484,14 @@ def test_series_is_sorted_by_width_and_defaults_to_five_millimetres() -> None:
     series = _series()
     assert series.gap_widths_mm.tolist() == [3.0, 5.0, 8.0]
     assert series.working_range_mm == (5.0, 8.0)
-    assert series.r_s_w_db[0] > series.r_s_w_db[-1]
+    assert series.r_s_w[0] > series.r_s_w[-1]
 
 
 def test_series_reads_the_line_between_the_measured_widths() -> None:
     series = _series()
-    expected = np.interp(6.5, series.gap_widths_mm, series.r_s_w_ctr_db)
+    expected = np.interp(6.5, series.gap_widths_mm, series.r_s_w_ctr)
     assert series.at_gap(6.5) == pytest.approx(expected)
-    assert series.at_gap(5.0, "r_s_w") == pytest.approx(series.r_s_w_db[1])
+    assert series.at_gap(5.0, "r_s_w") == pytest.approx(series.r_s_w[1])
 
 
 def test_series_never_extrapolates() -> None:
@@ -806,7 +806,7 @@ def test_gap_series_figure_marks_the_working_range() -> None:
     )
     assert verticals == [3.0, 5.0, 8.0]
     measured = [line for line in ax.lines if line.get_marker() == "o"]
-    assert measured[0].get_ydata().tolist() == series.r_s_w_db.tolist()
+    assert measured[0].get_ydata().tolist() == series.r_s_w.tolist()
 
 
 @pytest.mark.usefixtures("agg_backend")
@@ -820,7 +820,7 @@ def test_gap_series_octave_figure_draws_the_sealed_element_and_each_width() -> N
     ax = series.plot_octave_bands()
     assert len(ax.lines) == len(series.gap_widths_mm) + 1
     sealed = series.results[0]
-    _, maximum = improvement_octave_bands(sealed.r_s_max_db, sealed.frequencies)
+    _, maximum = improvement_octave_bands(sealed.r_s_max, sealed.frequencies)
     assert ax.lines[0].get_ydata() == pytest.approx(maximum)
     assert "R_\\mathrm{s,max}" in ax.lines[0].get_label()
     for line, result in zip(ax.lines[1:], series.results, strict=True):
@@ -839,9 +839,9 @@ def test_joint_figure_draws_each_column_as_its_curve() -> None:
     corrected = next(v for k, v in by_label.items() if "corrected" in k)
     measured = next(v for k, v in by_label.items() if "measured" in k)
     maximum = next(v for k, v in by_label.items() if "sealed joint" in k)
-    assert corrected.get_ydata() == pytest.approx(res.r_s_db)
-    assert measured.get_ydata() == pytest.approx(res.r_s_measured_db)
-    assert maximum.get_ydata() == pytest.approx(res.r_s_max_db)
+    assert corrected.get_ydata() == pytest.approx(res.r_s)
+    assert measured.get_ydata() == pytest.approx(res.r_s_prime)
+    assert maximum.get_ydata() == pytest.approx(res.r_s_max)
 
 
 def test_joint_figure_lines_keep_three_to_one_on_a_dark_page() -> None:
@@ -958,18 +958,18 @@ def test_brackets_take_more_than_one_decibel(lift: int, *, bracketed: bool) -> N
     assert base.rating is not None
     opened = building.JointOpenBandRating(
         open_frequencies_hz=(500.0,),
-        r_s_w_db=base.rating.rating + lift,
-        c_db=base.rating.c - lift,
-        ctr_db=base.rating.ctr - lift,
-        c_100_5000_db=base.c_100_5000_db,
-        ctr_100_5000_db=base.ctr_100_5000_db,
+        r_s_w=base.rating.rating + lift,
+        c=base.rating.c - lift,
+        ctr=base.rating.ctr - lift,
+        c_100_5000=base.c_100_5000,
+        ctr_100_5000=base.ctr_100_5000,
     )
     shifted = dataclasses.replace(base, open_band_rating=opened)
     # Rs,w moves by the lift; Rs,w + C and Rs,w + Ctr stay where they were.
     assert shifted.bracketed is bracketed
 
 
-@pytest.mark.parametrize("term", ["c_db", "ctr_db", "c_100_5000_db", "ctr_100_5000_db"])
+@pytest.mark.parametrize("term", ["c", "ctr", "c_100_5000", "ctr_100_5000"])
 @pytest.mark.parametrize(("lift", "bracketed"), [(1, False), (2, True)])
 def test_brackets_follow_every_single_number(
     term: str, lift: int, *, bracketed: bool
@@ -979,11 +979,11 @@ def test_brackets_follow_every_single_number(
     assert base.rating is not None
     unchanged = building.JointOpenBandRating(
         open_frequencies_hz=(500.0,),
-        r_s_w_db=base.rating.rating,
-        c_db=base.rating.c,
-        ctr_db=base.rating.ctr,
-        c_100_5000_db=base.c_100_5000_db,
-        ctr_100_5000_db=base.ctr_100_5000_db,
+        r_s_w=base.rating.rating,
+        c=base.rating.c,
+        ctr=base.rating.ctr,
+        c_100_5000=base.c_100_5000,
+        ctr_100_5000=base.ctr_100_5000,
     )
     assert dataclasses.replace(base, open_band_rating=unchanged).bracketed is False
     current = getattr(unchanged, term)

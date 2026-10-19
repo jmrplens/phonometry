@@ -339,12 +339,12 @@ class LevelDifferenceQuantiles(OwnsArrays):
     stored; the ranking positions, the two quantiles, the mean and the
     standard deviation are read from it, so they cannot disagree with it.
 
-    :ivar sorted_differences_db: The sample of level differences, sorted in
+    :ivar sorted_differences: The sample of level differences, sorted in
         ascending order as C.4 sorts it, in dB. At least
         :data:`MIN_SAMPLE_SIZE` values.
     """
 
-    sorted_differences_db: NDArray[np.float64]
+    sorted_differences: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Keep a sorted, read-only copy of a sample C.4 can rank.
@@ -354,7 +354,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
             ascending order.
         """
         values = np.asarray(
-            require_finite_array(self.sorted_differences_db, "sorted_differences_db"),
+            require_finite_array(self.sorted_differences, "sorted_differences"),
             dtype=np.float64,
         )
         if values.size < MIN_SAMPLE_SIZE:
@@ -365,16 +365,16 @@ class LevelDifferenceQuantiles(OwnsArrays):
             raise ValueError(msg)
         if np.any(np.diff(values) < 0.0):
             msg = (
-                "LevelDifferenceQuantiles: 'sorted_differences_db' must be "
+                "LevelDifferenceQuantiles: 'sorted_differences' must be "
                 "sorted in ascending order, as C.4 ranks it."
             )
             raise ValueError(msg)
-        object.__setattr__(self, "sorted_differences_db", read_only(values))
+        object.__setattr__(self, "sorted_differences", read_only(values))
 
     @property
     def sample_size(self) -> int:
         """``N``, the number of level differences in the sample."""
-        return int(self.sorted_differences_db.size)
+        return int(self.sorted_differences.size)
 
     @property
     def rank_q01(self) -> int:
@@ -397,7 +397,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
         C.2, NOTE 2: 10 % of all the differences are expected below it.
         """
-        return float(self.sorted_differences_db[self.rank_q01 - 1])
+        return float(self.sorted_differences[self.rank_q01 - 1])
 
     @property
     def q09_db(self) -> float:
@@ -405,7 +405,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
         C.2, NOTE 2: 10 % of all the differences are expected above it.
         """
-        return float(self.sorted_differences_db[self.rank_q09 - 1])
+        return float(self.sorted_differences[self.rank_q09 - 1])
 
     @property
     def mean_db(self) -> float:
@@ -413,7 +413,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
         C.5: the value "specified for considering a systematic deviation".
         """
-        return float(np.mean(self.sorted_differences_db))
+        return float(np.mean(self.sorted_differences))
 
     @property
     def standard_deviation_db(self) -> float:
@@ -423,7 +423,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
         by ISO/IEC Guide 98-3. The sample standard deviation, with ``N - 1``
         degrees of freedom.
         """
-        return float(np.std(self.sorted_differences_db, ddof=1))
+        return float(np.std(self.sorted_differences, ddof=1))
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -450,7 +450,7 @@ class LevelDifferenceQuantiles(OwnsArrays):
 
 
 def level_difference_quantiles(
-    level_differences_db: ArrayLike,
+    level_differences: ArrayLike,
 ) -> LevelDifferenceQuantiles:
     r"""The 0,1- and 0,9-quantiles of a sample of level differences
     (ISO 17534-1:2015, C.4).
@@ -468,20 +468,20 @@ def level_difference_quantiles(
     give :math:`R(q_{0,1}) = 2`, :math:`R(q_{0,9}) = 24`,
     :math:`q_{0,1} = -1` dB and :math:`q_{0,9} = 3` dB.
 
-    :param level_differences_db: The sample of level differences, in dB, in
+    :param level_differences: The sample of level differences, in dB, in
         any order; at least :data:`MIN_SAMPLE_SIZE` values.
     :return: A :class:`LevelDifferenceQuantiles`.
     :raises ValueError: for fewer than 20 values, a non-finite value or an
         input that is not one-dimensional.
     """
-    values = require_finite_array(level_differences_db, "level_differences_db")
+    values = require_finite_array(level_differences, "level_differences")
     if values.size < MIN_SAMPLE_SIZE:
         msg = (
             "C.2 of ISO 17534-1 requires a random sample of at least "
             f"{MIN_SAMPLE_SIZE} level differences; got {values.size}."
         )
         raise ValueError(msg)
-    return LevelDifferenceQuantiles(sorted_differences_db=np.sort(values))
+    return LevelDifferenceQuantiles(sorted_differences=np.sort(values))
 
 
 # --------------------------------------------------------------------------- #
@@ -699,14 +699,14 @@ class RoundRobinPrecision(OwnsArrays):
         return int(self.levels.shape[1])
 
     @property
-    def mean_levels_db(self) -> NDArray[np.float64]:
+    def mean_levels(self) -> NDArray[np.float64]:
         r""":math:`\bar L_n`, the arithmetic mean at each receiver, in dB."""
         return np.mean(self.levels, axis=1)
 
     @property
     def deviations_db(self) -> NDArray[np.float64]:
         r""":math:`dL_{n,m} = L_{n,m} - \bar L_n`, shape ``(N, M)``, in dB."""
-        return self.levels - self.mean_levels_db[:, None]
+        return self.levels - self.mean_levels[:, None]
 
     @property
     def max_abs_deviations_db(self) -> NDArray[np.float64]:

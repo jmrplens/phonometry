@@ -588,7 +588,6 @@ _STATED_FLAGS = {
     "phonometry.aircraft.airport_noise.FlightSegmentState.landing_roll": _CALLER,
     "phonometry.aircraft.anp_fleet.ANPProfile.ground_roll": _ROW,
     "phonometry.aircraft.anp_fleet.ANPProfile.landing_roll": _ROW,
-    "phonometry.broadcast.quasi_peak.QuasiPeakResult.weighted": _CALLER,
     "phonometry.building.impact_catalogue.ImpactInsulation.has_section_drawing": _ROW,
     "phonometry.building.measurement.intensity_insulation.LowFrequencyElementResult."
     "absorbing_specimen_surface": _CALLER,
@@ -607,8 +606,6 @@ _STATED_FLAGS = {
     "phonometry.building.measurement.uncertainty.BandUncertainty.upper_limit": _CALLER,
     "phonometry.building.measurement.uncertainty.UncertainValue.one_sided": _CALLER,
     "phonometry.building.prediction.linings.LiningImprovementResult.anchors": _CALLER,
-    "phonometry.electroacoustics.headphones.ProgramCharacteristicVoltage."
-    "a_weighted": _CALLER,
     "phonometry.electroacoustics.headphones.ProgramCharacteristicVoltage."
     "free_field_compensated": _CALLER,
     "phonometry.electroacoustics.induction_loop.BackgroundNoiseAssessment."
@@ -633,8 +630,6 @@ _STATED_FLAGS = {
     "phonometry.environment.assessment.spain.PeriodAssessment.new_activity": _CALLER,
     "phonometry.environment.assessment.wind_turbine_modulation.ModulationBlock."
     "excluded": _CALLER,
-    "phonometry.environment.assessment.wind_turbine_receptor.LowFrequencyLevel."
-    "a_weighted": _CALLER,
     "phonometry.environment.propagation.ground_barriers.BarrierInsertionLoss."
     "ground": _BRANCH,
     "phonometry.environment.propagation.outdoor_propagation.Barrier."
@@ -693,9 +688,6 @@ _STATED_FLAGS = {
     "corrections_in_manual": _CALLER,
     "phonometry.metrology.sound_level_meter.SoundLevelMeterPeriodicVerification."
     "pattern_approval_public": _CALLER,
-    "phonometry.noise_control._cabin_insulation.WeightedCabinInsulation.apparent": (
-        _CALLER
-    ),
     "phonometry.noise_control.enclosure_insulation.MethodEntry.band_values": _ROW,
     "phonometry.noise_control.enclosure_insulation.MethodEntry."
     "survey_grade_excluded": _ROW,
@@ -1235,6 +1227,7 @@ _DERIVED_FLAGS = {
         "attenuation_accuracy",
     ),
     "phonometry.noise_control._cabin_insulation.CabinInsulationResult": ("apparent",),
+    "phonometry.noise_control._cabin_insulation.WeightedCabinInsulation": ("apparent",),
     "phonometry.noise_control._cabin_insulation.CabinUncertainty": (
         "ratio_satisfied",
         "stateable",

@@ -184,14 +184,14 @@ class PathContribution(RichDisplay):
     :ivar label: Path name (``"Dd"`` for the direct path).
     :ivar kind: ``"Dd"``, ``"Ff"``, ``"Df"`` or ``"Fd"``.
     :ivar r_w: Weighted sound reduction index of the path, in dB.
-    :ivar fraction: Fraction of the total transmitted sound energy carried by
-        this path (0 to 1); the dominant path has the largest fraction.
+    :ivar energy_fraction: Fraction of the total transmitted sound energy
+        carried by this path (0 to 1); the dominant path has the largest.
     """
 
     label: str
     kind: str
     r_w: float
-    fraction: float
+    energy_fraction: float
 
     def __post_init__(self) -> None:
         """Refuse a non-finite path index or energy share.
@@ -202,10 +202,10 @@ class PathContribution(RichDisplay):
         ``r_w`` for display, where ``math.floor`` answered a NaN with
         "cannot convert float NaN to integer", naming no field.
 
-        :raises ValueError: if ``r_w`` or ``fraction`` is not finite.
+        :raises ValueError: if ``r_w`` or ``energy_fraction`` is not finite.
         """
         _check_finite(self.r_w, "r_w")
-        _check_finite(self.fraction, "fraction")
+        _check_finite(self.energy_fraction, "energy_fraction")
 
 
 @dataclass(frozen=True)
@@ -930,7 +930,7 @@ def predicted_airborne_insulation(
 
     contributions = [
         PathContribution(
-            label="Dd", kind="Dd", r_w=r_dd, fraction=tau_direct / tau_total
+            label="Dd", kind="Dd", r_w=r_dd, energy_fraction=tau_direct / tau_total
         )
     ]
     contributions += [
@@ -938,11 +938,11 @@ def predicted_airborne_insulation(
             label=p.label,
             kind=p.kind,
             r_w=p.r_ij_w,
-            fraction=tau / tau_total,
+            energy_fraction=tau / tau_total,
         )
         for p, tau in zip(flanking_paths, tau_paths, strict=True)
     ]
-    dominant = max(contributions, key=lambda c: c.fraction)
+    dominant = max(contributions, key=lambda c: c.energy_fraction)
     return AirbornePredictionResult(
         r_prime_w=r_prime_w,
         r_direct_w=r_dd,

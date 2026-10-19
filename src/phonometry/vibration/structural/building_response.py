@@ -84,7 +84,12 @@ __all__ = [
 #: The four predictors of Annex D, by what they are computed from.
 PeriodModel = Literal["stories", "height", "height_width", "slenderness"]
 
-PERIOD_MODELS: tuple[str, ...] = ("stories", "height", "height_width", "slenderness")
+PERIOD_MODELS: tuple[PeriodModel, ...] = (
+    "stories",
+    "height",
+    "height_width",
+    "slenderness",
+)
 
 #: D.2: the range each code coefficient is drawn from. ``height`` is
 #: :math:`k_1` of Formula (D.1), ``height_width`` is :math:`k_2` of (D.2) and
@@ -157,7 +162,7 @@ def _refuse_unused(model: str, **given: object) -> None:
 
 
 def fundamental_period(
-    model: PeriodModel | str,
+    model: PeriodModel,
     *,
     n_stories: int | None = None,
     height_m: float | None = None,
@@ -190,7 +195,7 @@ def fundamental_period(
         the model needs is missing or not positive, or if an argument the
         model does not use is given.
     """
-    name = require_choice(str(model), "model", PERIOD_MODELS)
+    name = require_choice(model, "model", PERIOD_MODELS)
     _refuse_unused(
         name,
         n_stories=n_stories,
@@ -221,7 +226,7 @@ def fundamental_period(
 
 
 def fundamental_frequency(
-    model: PeriodModel | str,
+    model: PeriodModel,
     *,
     n_stories: int | None = None,
     height_m: float | None = None,
@@ -296,7 +301,7 @@ class BuildingFrequencyEstimate(RichDisplay):
 
     frequency_hz: float
     period_s: float
-    model: str
+    model: PeriodModel
     coefficient: float | None
     height_m: float | None
 
@@ -337,7 +342,7 @@ class BuildingFrequencyEstimate(RichDisplay):
 
 
 def estimate_fundamental_frequency(
-    model: PeriodModel | str,
+    model: PeriodModel,
     *,
     n_stories: int | None = None,
     height_m: float | None = None,
@@ -361,12 +366,11 @@ def estimate_fundamental_frequency(
         width_m=width_m,
         coefficient=coefficient,
     )
-    name = str(model)
-    used = None if name == "stories" else _coefficient(name, coefficient)
+    used = None if model == "stories" else _coefficient(model, coefficient)
     return BuildingFrequencyEstimate(
         frequency_hz=1.0 / period,
         period_s=period,
-        model=name,
+        model=model,
         coefficient=used,
         height_m=None if height_m is None else float(height_m),
     )

@@ -601,7 +601,7 @@ def test_two_line_estimate_rises_12_db_per_octave() -> None:
         covering,
         plate_stiffness,
         impedance,
-        band="octave",
+        fraction=1,
     )
     steps = np.diff(octaves.improvement)
     assert np.all(steps > 11.0)
@@ -614,7 +614,7 @@ def test_two_line_estimate_rises_12_db_per_octave() -> None:
         covering,
         plate_stiffness,
         impedance,
-        band="octave",
+        fraction=1,
     )
     assert np.diff(far.improvement)[0] < 6.0
 
@@ -721,9 +721,9 @@ def test_covering_band_average_is_independent_of_where_the_grid_falls() -> None:
     assert np.max(np.abs(np.diff(lines))) > 35.0
 
 
-@pytest.mark.parametrize(("band", "exponent"), [("third", 1.0 / 6.0), ("octave", 0.5)])
+@pytest.mark.parametrize(("fraction", "exponent"), [(3, 1.0 / 6.0), (1, 0.5)])
 def test_covering_bands_are_the_iec_61260_base_ten_bands(
-    band: str, exponent: float
+    fraction: int, exponent: float
 ) -> None:
     """The lines a band averages over are set by the IEC 61260-1 band edges.
 
@@ -747,7 +747,7 @@ def test_covering_bands_are_the_iec_61260_base_ten_bands(
         covering,
         plate_stiffness,
         impedance,
-        band=band,  # type: ignore[arg-type]
+        fraction=fraction,  # type: ignore[arg-type]
     )
     for i, fc in enumerate(centres):
         chosen = (result.lines >= fc / ratio) & (result.lines <= fc * ratio)
@@ -759,7 +759,7 @@ def test_covering_bands_are_the_iec_61260_base_ten_bands(
     # The octave band at 1 kHz holds exactly 71 lines of the 10 Hz comb,
     # 710 Hz to 1410 Hz. Edges 1,5 % wider reach 700 Hz and 1430 Hz and hold
     # 74, which is what makes the constant observable at all.
-    if band == "octave":
+    if fraction == 1:
         inside = (result.lines >= 1000.0 / ratio) & (result.lines <= 1000.0 * ratio)
         assert int(inside.sum()) == 71
         assert result.lines[inside][0] == 710.0
@@ -1236,8 +1236,8 @@ def test_a_power_input_of_another_length_is_refused() -> None:
 
 def test_octave_bandwidth_factor() -> None:
     """H Eq. (3.91): ``B = 0,23 f`` for thirds, ``B = 0,707 f`` for octaves."""
-    third = building.short_pulse_mean_square_force(1000.0, band="third")[0]
-    octave = building.short_pulse_mean_square_force(1000.0, band="octave")[0]
+    third = building.short_pulse_mean_square_force(1000.0, fraction=3)[0]
+    octave = building.short_pulse_mean_square_force(1000.0, fraction=1)[0]
     assert octave / third == pytest.approx(0.707 / 0.23, rel=1e-12)
 
 
@@ -1257,8 +1257,8 @@ def test_octave_bandwidth_factor() -> None:
             "'thickness_m' must be positive",
         ),
         (
-            lambda: building.tapping_force_spectrum([100.0], 1e6, 1e3, band="half"),
-            "'band' must be one of",
+            lambda: building.tapping_force_spectrum([100.0], 1e6, 1e3, fraction=2),  # type: ignore[arg-type]
+            "'fraction' must be 1",
         ),
         (
             lambda: building.force_pulse([-1.0], 1e6, 1e3),

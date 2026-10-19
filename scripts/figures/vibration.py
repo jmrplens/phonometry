@@ -52,6 +52,10 @@ from .theme import (
 if TYPE_CHECKING:
     from matplotlib.artist import Artist
 
+    from phonometry.vibration._choices import BuildingClass
+    from phonometry.vibration.structural.building_damage import PipelineMaterial
+    from phonometry.vibration.structural.building_response import PeriodModel
+
 
 def generate_junction_transmission(output_dir: str) -> None:
     """Hopkins 5.2.1.3 bending-wave transmission at a rigid X-junction."""
@@ -2685,7 +2689,7 @@ def generate_structural_damage_guidelines(output_dir: str) -> None:
     print("Generating structural_damage_guidelines...")
     from phonometry import vibration
 
-    classes = (
+    classes: tuple[tuple[BuildingClass, str, str], ...] = (
         ("commercial", "commercial and industrial", COLOR_PRIMARY),
         ("residential", "dwellings", COLOR_TERTIARY),
         ("sensitive", "especially sensitive", COLOR_SECONDARY),
@@ -2765,7 +2769,7 @@ def generate_structural_damage_guidelines(output_dir: str) -> None:
 
     # Bottom right: buried pipelines, judged on the pipe by its material,
     # with the long-term half the standard allows without further evidence.
-    materials = (
+    materials: tuple[tuple[PipelineMaterial, str], ...] = (
         ("welded_steel", "welded steel"),
         ("concrete_or_flanged_metal", "concrete,\nflanged metal"),
         ("masonry_or_plastic", "masonry,\nplastic"),
@@ -2827,7 +2831,7 @@ def generate_building_frequency_prediction(output_dir: str) -> None:
         label="$f = 46/h$ (Figure D.1)",
     )
     # (model, curve label, short label for the bar rows, colour, dash)
-    forms = (
+    forms: tuple[tuple[PeriodModel, str, str, str, str], ...] = (
         ("height", "$T = k_1 h$ (D.1)", "$T = k_1 h$", COLOR_TERTIARY, "--"),
         (
             "height_width",
@@ -6139,7 +6143,7 @@ def generate_assessment_weighting(output_dir: str) -> None:
     from phonometry import vibration
 
     freqs = np.geomspace(1.0, 315.0, 500)
-    colors = {
+    colors: dict[BuildingClass, str] = {
         "commercial": COLOR_PRIMARY,
         "residential": COLOR_TERTIARY,
         "sensitive": COLOR_SECONDARY,

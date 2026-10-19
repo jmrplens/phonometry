@@ -168,7 +168,7 @@ enclosure_artificial_source_insulation(
     frequencies: ArrayLike | None = None,
     quantity: str = 'sound_power',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
-    band_fraction: int = 3,
+    fraction: Literal[1, 3] = 3,
 ) -> EnclosureInsulationResult
 ```
 
@@ -194,7 +194,7 @@ $D_p$ and 9.4 e) reports whichever it was. That is `quantity`.
 | `frequencies` | Nominal band centres, in hertz. |
 | `quantity` | `"sound_power"` (default) for Equation (1), or `"sound_pressure"` for Equation (3). |
 | `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
-| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 
 **Returns:** The averaged insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
 
@@ -212,7 +212,7 @@ enclosure_reciprocity_insulation(
     internal_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    band_fraction: int = 3,
+    fraction: Literal[1, 3] = 3,
 ) -> EnclosureInsulationResult
 ```
 
@@ -232,7 +232,7 @@ at all.
 | `external_levels` | The averaged level in the field outside, per band, in decibels. |
 | `internal_levels` | The averaged level inside the enclosure standing in that field, per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
-| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 
 **Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult) whose quantity is `"reciprocity"`.
 
@@ -255,7 +255,7 @@ enclosure_sound_power_insulation(
     base_standard: str = 'ISO 3744',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
     source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
-    band_fraction: int = 3,
+    fraction: Literal[1, 3] = 3,
 ) -> EnclosureInsulationResult
 ```
 
@@ -278,7 +278,7 @@ the ISO 3744 Annex E table, which is what the note to clause 6.2 prefers.
 | `base_standard` | The standard the sound power came from, as Table 1 lists them. |
 | `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
-| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 
 **Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
 
@@ -301,7 +301,7 @@ enclosure_sound_pressure_insulation(
     base_standard: str = 'ISO 11201',
     condition: Literal['laboratory', 'in-situ'] = 'laboratory',
     source_kind: Literal['actual', 'reciprocity', 'artificial'] = 'actual',
-    band_fraction: int = 3,
+    fraction: Literal[1, 3] = 3,
 ) -> EnclosureInsulationResult
 ```
 
@@ -326,7 +326,7 @@ different numbers about the same enclosure.
 | `base_standard` | The standard the pressure levels came from. |
 | `condition` | `"laboratory"` for part 1, `"in-situ"` for part 2. |
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
-| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 
 **Returns:** The insertion loss, as an [`EnclosureInsulationResult`](/phonometry/reference/api/noise_control/enclosure-insulation/#enclosureinsulationresult).
 
@@ -349,7 +349,7 @@ EnclosureInsulationResult(
     condition: str,
     source_kind: str,
     base_standard: str,
-    band_fraction: int,
+    fraction: int,
 )
 ```
 
@@ -368,7 +368,7 @@ The measured insulation of an enclosure, band by band (ISO 11546).
 | `condition` | `"laboratory"` (part 1) or `"in-situ"` (part 2). |
 | `source_kind` | `"actual"`, `"reciprocity"` or `"artificial"`. |
 | `base_standard` | The standard the levels were determined by. |
-| `band_fraction` | 3 for one-third octaves, 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. |
 
 ### EnclosureInsulationResult.plot()
 
@@ -760,7 +760,7 @@ weighted_enclosure_insulation(
     insulation: ArrayLike,
     *,
     quantity: str = 'sound_power',
-    band_fraction: int = 3,
+    fraction: Literal[1, 3] = 3,
 ) -> WeightedEnclosureInsulation
 ```
 
@@ -778,7 +778,7 @@ rows; what is done here is the trim to the rating bands.
 | :--- | :--- |
 | `insulation` | The insertion loss per band, in decibels, over exactly the 16 one-third-octave rating bands of 100 Hz to 3,15 kHz or the 5 octave ones of 125 Hz to 2 kHz; a wider spectrum is refused rather than trimmed, because which bands it holds is the caller's to say. |
 | `quantity` | `"sound_power"` (default) or `"reciprocity"`. |
-| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 
 **Returns:** The rating, as a [`WeightedEnclosureInsulation`](/phonometry/reference/api/noise_control/enclosure-insulation/#weightedenclosureinsulation).
 

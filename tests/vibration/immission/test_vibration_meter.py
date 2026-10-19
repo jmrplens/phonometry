@@ -185,6 +185,19 @@ def test_a_meter_on_its_design_response_passes() -> None:
     assert im.KB_REFERENCE_FREQUENCY_HZ not in result.frequencies
 
 
+def test_an_unweighted_meter_is_graded_against_the_band_limitation() -> None:
+    """``weighting="Z"`` is the band limitation of Formula (3) and nothing else."""
+    f = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
+    flat = np.abs(im.band_limitation_response(f))
+    result = im.verify_vibration_meter(f, flat, weighting="Z")
+    assert result.weighting == "Z"
+    assert result.passes
+    assert result.deviation_percent == pytest.approx(np.zeros(f.size - 1), abs=1e-9)
+    # The same flat response read against the KB weighting is far off it.
+    weighted = im.verify_vibration_meter(f, flat)
+    assert not weighted.passes
+
+
 def test_a_meter_outside_the_central_band_fails_there_and_only_there() -> None:
     """One frequency pushed 12 % up fails; the tail keeps its wider limit."""
     f = np.array([1.0, 16.0, 31.5, 80.0])

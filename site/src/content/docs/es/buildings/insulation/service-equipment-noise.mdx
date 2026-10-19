@@ -290,7 +290,7 @@ vuelve a llenar la cisterna de un inodoro (anexo B.2.6) y se escucha en el
 dormitorio de al lado, tres lecturas de 25 Hz a 10 kHz:
 
 ```python
-freqs = np.array(list(building.SERVICE_EQUIPMENT_WEIGHTING["third"]["A"]))
+freqs = np.array(list(building.SERVICE_EQUIPMENT_WEIGHTING[3]["A"]))
 spectrum = np.array([29.5, 31.0, 33.2, 35.4, 37.1, 38.6, 40.2, 41.5, 42.3,
                      42.8, 42.6, 41.9, 40.8, 39.4, 37.9, 36.2, 34.6, 33.1,
                      31.4, 29.8, 28.1, 26.5, 24.6, 22.9, 21.0, 19.4, 17.6])
@@ -332,7 +332,7 @@ están las seis bandas grises.*
 | `levels` | array | dB | obligatorio | Niveles por banda de cada lectura, `(lecturas, bandas)`; una fila para una sola lectura |
 | `frequencies` | array | Hz | obligatorio | Frecuencias centrales nominales, crecientes: tercios de octava de 25 Hz a 10 kHz u octavas de 31,5 Hz a 8 kHz |
 | `quantity` | str | | obligatorio | `"Smax"`, `"Fmax"` o `"eq"`, la magnitud de la tabla 1; da nombre a los valores únicos |
-| `band` | str | | `"third"` | `"third"` u `"octave"`; el capítulo 6 pide tercios de octava, las octavas son opcionales |
+| `fraction` | int | | `3` | `3` (tercios de octava) o `1` (octavas); el capítulo 6 pide tercios de octava, las octavas son opcionales |
 | `background_db` | array | dB | `None` | Un nivel por banda, o una fila por posición, promediada energéticamente |
 | `reverberation_time` | array | s | `None` | Por banda; solo se lee de 50 Hz a 5 kHz (octavas de 63 Hz a 4 kHz), el resto puede ser `nan` |
 | `volume` | float | m³ | `None` | Volumen del recinto para los niveles normalizados; necesita el tiempo de reverberación |

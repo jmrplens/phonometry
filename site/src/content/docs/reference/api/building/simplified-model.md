@@ -602,7 +602,7 @@ Supported `junction_type` values and their formulas:
 ## PathContribution
 
 ```python
-PathContribution(label: str, kind: str, r_w: float, fraction: float)
+PathContribution(label: str, kind: str, r_w: float, energy_fraction: float)
 ```
 
 A transmission path with its share of the total transmitted energy.
@@ -614,7 +614,7 @@ A transmission path with its share of the total transmitted energy.
 | `label` | Path name (`"Dd"` for the direct path). |
 | `kind` | `"Dd"`, `"Ff"`, `"Df"` or `"Fd"`. |
 | `r_w` | Weighted sound reduction index of the path, in dB. |
-| `fraction` | Fraction of the total transmitted sound energy carried by this path (0 to 1); the dominant path has the largest fraction. |
+| `energy_fraction` | Fraction of the total transmitted sound energy carried by this path (0 to 1); the dominant path has the largest. |
 
 ## predicted_airborne_insulation
 

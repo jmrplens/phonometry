@@ -160,7 +160,7 @@ def test_kij_mean_membership_excludes_out_of_range_bands() -> None:
     frequencies = np.asarray(_FREQS, dtype=np.float64)
     bracketed = np.zeros(frequencies.size, dtype=np.bool_)
     bracketed[:3] = True  # the three lowest bands (also below 200 Hz)
-    in_mean, low, high = _kij_mean_membership(frequencies, bracketed)
+    in_mean, low, high = _kij_mean_membership(frequencies, bracketed, None)
     assert (low, high) == (200.0, 1250.0)
     # 200, 250, 315, 400, 500, 630, 800, 1000, 1250 Hz -> nine bands.
     assert int(in_mean.sum()) == 9
@@ -168,6 +168,21 @@ def test_kij_mean_membership_excludes_out_of_range_bands() -> None:
     assert not bool(in_mean[list(_FREQS).index(1600)])
     # A non-bracketed band inside the range (250 Hz) is included.
     assert bool(in_mean[list(_FREQS).index(250)])
+
+
+def test_kij_mean_membership_reads_the_band_set_the_result_states() -> None:
+    """A result that states ``fraction=1`` is averaged over the octave range.
+
+    Its centres alone would read as one-third octaves here, so the fiche
+    would box a different Annex A mean from the one ``single_number`` gives.
+    """
+    from phonometry._report.iso10848 import _kij_mean_membership
+
+    frequencies = np.asarray(_FREQS, dtype=np.float64)
+    _, low, high = _kij_mean_membership(frequencies, None, 1)
+    assert (low, high) == (125.0, 1000.0)
+    _, low, high = _kij_mean_membership(frequencies, None, None)
+    assert (low, high) == (200.0, 1250.0)
 
 
 def test_kij_fiche_distinguishes_all_bracketed_from_out_of_range(

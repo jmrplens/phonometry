@@ -187,7 +187,7 @@ def test_octave_reference_rates_itself() -> None:
 
 def test_explicit_band_set_override() -> None:
     """Band count 16/5 is inferred but can be stated explicitly."""
-    res = building.weighted_rating(_ANNEX_C_R, bands="third-octave")
+    res = building.weighted_rating(_ANNEX_C_R, fraction=3)
     assert res.rating == 30
 
 

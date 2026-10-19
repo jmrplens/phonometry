@@ -74,6 +74,9 @@ _MINORITY = {
     "ci_upper": "confidence_upper",
     "lower_ci": "confidence_lower",
     "upper_ci": "confidence_upper",
+    "band_type": "fraction",
+    "band_fraction": "fraction",
+    "curve": "weighting",
 }
 
 _KHZ = (

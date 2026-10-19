@@ -17,10 +17,14 @@ values of D.4.
 from __future__ import annotations
 
 import functools
+from typing import TYPE_CHECKING
 
 import phonometry as ph
 
 from ..registry import Outcome, numeric, register
+
+if TYPE_CHECKING:
+    from phonometry.vibration.structural.building_response import PeriodModel
 
 _BUILDING_RESPONSE = "Building response prediction (ISO 4866)"
 
@@ -91,7 +95,7 @@ def _chk_storeys() -> Outcome:
     return numeric(1.0, computed, _TOLERANCE, unit="Hz", places=4)
 
 
-def _chk_code_period(model: str, coefficient: float, printed: float) -> Outcome:
+def _chk_code_period(model: PeriodModel, coefficient: float, printed: float) -> Outcome:
     """One end of one code coefficient range, as the period it produces."""
     if model == "height":
         computed = ph.vibration.fundamental_period(
@@ -109,7 +113,7 @@ def _chk_code_period(model: str, coefficient: float, printed: float) -> Outcome:
 #: states a period a caller would get rather than repeating a coefficient back
 #: at itself. The heights are 50 m for (D.1) and 60 m by 20 m for the other
 #: two.
-_CODE_CASES = (
+_CODE_CASES: tuple[tuple[PeriodModel, str, float, float], ...] = (
     ("height", "D.1", _K1_ENDS[0], 0.7),
     ("height", "D.1", _K1_ENDS[1], 1.5),
     ("height_width", "D.2", _K2_ENDS[0], 1.1673),

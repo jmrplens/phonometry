@@ -133,7 +133,7 @@ BinauralIndicators(
     parameters: tuple[str, ...],
     fs: float,
     duration_s: float,
-    field: str,
+    field: Literal['free', 'diffuse'],
 )
 ```
 

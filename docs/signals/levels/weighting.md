@@ -35,7 +35,7 @@ freqs = np.fft.rfftfreq(fs, 1 / fs)
 
 fig, ax = plt.subplots(figsize=(9, 5))
 for curve in ("A", "C", "Z"):
-    spectrum = np.fft.rfft(filters.weighting_filter(impulse, fs, curve=curve))
+    spectrum = np.fft.rfft(filters.weighting_filter(impulse, fs, weighting=curve))
     ax.semilogx(freqs[1:], 20 * np.log10(np.abs(spectrum[1:]) + np.finfo(float).eps),
                 label=curve)
 ax.set(xlim=(10, 22000), ylim=(-72, 15),
@@ -57,7 +57,7 @@ plt.show()
   whatever your capture chain delivered: remove DC (`detrend`) and
   high-pass the wind noise yourself if the recording extends below 10 Hz.
 
-The `curve` argument also accepts the four special weightings, charted and
+The `weighting` argument also accepts the four special weightings, charted and
 documented in [Special Weightings](special-weightings.md): `'G'` for
 infrasound (ISO 7196), the historical `'B'` (ANSI S1.4-1983) and `'D'`
 (IEC 537), and `'AU'` for audible sound in the presence of ultrasound
@@ -130,8 +130,8 @@ t = np.arange(10 * fs) / fs
 rng = np.random.default_rng(1)
 x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 
-la = signals.leq(filters.weighting_filter(x, fs, curve="A"))
-lc = signals.leq(filters.weighting_filter(x, fs, curve="C"))
+la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
+lc = signals.leq(filters.weighting_filter(x, fs, weighting="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
 # LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
 # C - A above 20 dB: the A-weighted number alone would hide the rumble.
@@ -148,13 +148,13 @@ fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Apply A-weighting to the raw recording
-weighted_signal = filters.weighting_filter(recording, fs, curve='A')
+weighted_signal = filters.weighting_filter(recording, fs, weighting='A')
 
 # Apply C-weighting for peak analysis
-c_weighted_signal = filters.weighting_filter(recording, fs, curve='C')
+c_weighted_signal = filters.weighting_filter(recording, fs, weighting='C')
 ```
 
-The special weightings take the same `curve` argument; each is documented,
+The special weightings take the same `weighting` argument; each is documented,
 with its own response chart, in [Special Weightings](special-weightings.md).
 
 ## 3. `weighting_filter()` / `WeightingFilter` parameters
@@ -163,7 +163,7 @@ with its own response chart, in [Special Weightings](special-weightings.md).
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D or 2D array, or `Signal` | any | non-empty | 2D is `[channels, samples]` |
 | `fs` | int | Hz | > 0; taken from `x` when `x` is a `Signal` | |
-| `curve` | str | — | `'A'` (default), `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'Z'`, `'468'` | `'G'` per ISO 7196 (infrasound), `'B'`/`'D'` historical and `'AU'` per IEC 61012 are covered in [Special Weightings](special-weightings.md); `'Z'` is a bypass; `'468'` is the ITU-R BS.468-4 programme-level curve, which needs the fitted design and refuses `high_accuracy=False` |
+| `weighting` | str | — | `'A'` (default), `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'Z'`, `'468'` | `'G'` per ISO 7196 (infrasound), `'B'`/`'D'` historical and `'AU'` per IEC 61012 are covered in [Special Weightings](special-weightings.md); `'Z'` is a bypass; `'468'` is the ITU-R BS.468-4 programme-level curve, which needs the fitted design and refuses `high_accuracy=False` |
 | `high_accuracy` | bool | — | default `True` | Fit the analog prototype at $f_\mathrm{s}$ instead of transforming it blind; keeps A/C in class 1 at every sample rate. Details in §5 |
 | `stateful` | bool (class only) | — | default `False` | Carries filter state across blocks (streaming) |
 | `steady_ic` | bool (class only) | — | default `False` | Steady-state initial conditions (no onset transient) |
@@ -256,7 +256,7 @@ fig, ax = plt.subplots(figsize=(9, 5))
 ax.semilogx(freqs, analytic, "k--", label="Analytic (IEC 61672-1)")
 for high_accuracy, label in ((False, "Plain bilinear"),
                              (True, "Fitted at fs (default)")):
-    weighted = filters.weighting_filter(impulse, fs, curve="A",
+    weighted = filters.weighting_filter(impulse, fs, weighting="A",
                                 high_accuracy=high_accuracy)
     response = 20 * np.log10(np.abs(np.fft.rfft(weighted))
                              + np.finfo(float).eps)[1:]
@@ -296,7 +296,7 @@ fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # The closed-form bilinear design, explicitly
-y = filters.weighting_filter(recording, fs, curve="A", high_accuracy=False)
+y = filters.weighting_filter(recording, fs, weighting="A", high_accuracy=False)
 
 # Stateful block processing (same fitted design, state carried between blocks)
 wf = filters.WeightingFilter(fs, "A", stateful=True)

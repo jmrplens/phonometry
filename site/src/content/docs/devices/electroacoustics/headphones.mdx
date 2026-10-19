@@ -265,7 +265,7 @@ reading = 72.0 + levels[in_range] + resonance  # dB re 20 µPa at 0.1 V
 fittings = np.vstack([reading, reading + 0.6, reading - 0.4])
 plain = electroacoustics.program_characteristic_voltage(0.1, frequencies, fittings)
 weighted = electroacoustics.program_characteristic_voltage(
-    0.1, frequencies, fittings, a_weighted=True
+    0.1, frequencies, fittings, weighting="A"
 )
 print(round(plain.characteristic_voltage_v, 3), round(weighted.characteristic_voltage_v, 3))
 # 0.241 0.253

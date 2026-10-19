@@ -249,7 +249,7 @@ def plot_quasi_peak(
     ax.set_ylabel(_t("Quasi-peak reading", language))
     title = (
         "Quasi-peak reading (ITU-R BS.468-4, weighted)"
-        if result.weighted
+        if result.weighting == "468"
         else "Quasi-peak reading (ITU-R BS.468-4, unweighted)"
     )
     ax.set_title(_t(title, language))

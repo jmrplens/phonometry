@@ -85,6 +85,7 @@ from ..._internal.validation import (
     require_positive,
 )
 from ..._internal.warnings import PhonometryWarning
+from .._choices import _BUILDING_CLASSES, BuildingClass
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -116,12 +117,6 @@ __all__ = [
     "story_fundamental_frequency",
 ]
 
-#: The three building classes of Table 1, in the order the rows are printed:
-#: commercial and industrial buildings (row 1), dwellings and buildings of
-#: like construction or use (row 2), and buildings that suit neither and are
-#: worth preserving, such as listed ones (row 3).
-BuildingClass = Literal["commercial", "residential", "sensitive"]
-
 #: Where the velocity was measured: at the foundation, or in the topmost
 #: floor plane (horizontal, at the outside wall).
 MeasurementLocation = Literal["foundation", "top_floor"]
@@ -129,7 +124,15 @@ MeasurementLocation = Literal["foundation", "top_floor"]
 #: How often the vibration occurs, in the sense of Clauses 5 and 6.
 VibrationDuration = Literal["short_term", "long_term"]
 
-BUILDING_CLASSES: tuple[str, ...] = ("commercial", "residential", "sensitive")
+#: The three building classes of Table 1, in the order the rows are printed:
+#: commercial and industrial buildings (row 1), dwellings and buildings of
+#: like construction or use (row 2), and buildings that suit neither and are
+#: worth preserving, such as listed ones (row 3).
+BUILDING_CLASSES: tuple[BuildingClass, ...] = _BUILDING_CLASSES
+
+#: The two places a velocity is measured, and the two durations.
+_LOCATIONS: tuple[MeasurementLocation, ...] = ("foundation", "top_floor")
+_DURATIONS: tuple[VibrationDuration, ...] = ("short_term", "long_term")
 
 #: The frequencies Table 1 prints its foundation guideline values at, in
 #: hertz. They are the ends of the three bands of the table, so the value at
@@ -189,7 +192,7 @@ PipelineMaterial = Literal[
     "welded_steel", "concrete_or_flanged_metal", "masonry_or_plastic"
 ]
 
-PIPELINE_MATERIALS: tuple[str, ...] = (
+PIPELINE_MATERIALS: tuple[PipelineMaterial, ...] = (
     "welded_steel",
     "concrete_or_flanged_metal",
     "masonry_or_plastic",
@@ -259,11 +262,11 @@ class BuildingDamageWarning(PhonometryWarning):
 
 
 def guideline_velocity(
-    building_class: BuildingClass | str,
+    building_class: BuildingClass,
     frequency: ArrayLike | None = None,
     *,
-    location: MeasurementLocation | str = "foundation",
-    duration: VibrationDuration | str = "short_term",
+    location: MeasurementLocation = "foundation",
+    duration: VibrationDuration = "short_term",
     massive_structure: bool = False,
 ) -> np.ndarray | float:
     r"""The guideline peak velocity of Table 1 or Table 3, in mm/s.
@@ -296,9 +299,9 @@ def guideline_velocity(
         is not positive and finite, or if *massive_structure* is asked for
         outside row 1 of Table 1.
     """
-    cls = require_choice(str(building_class), "building_class", BUILDING_CLASSES)
-    where = require_choice(str(location), "location", ("foundation", "top_floor"))
-    when = require_choice(str(duration), "duration", ("short_term", "long_term"))
+    cls = require_choice(building_class, "building_class", BUILDING_CLASSES)
+    where = require_choice(location, "location", _LOCATIONS)
+    when = require_choice(duration, "duration", _DURATIONS)
     factor = 1.0
     if massive_structure:
         if cls != "commercial":
@@ -349,9 +352,9 @@ def guideline_velocity(
 
 
 def pipeline_guideline_velocity(
-    material: PipelineMaterial | str,
+    material: PipelineMaterial,
     *,
-    duration: VibrationDuration | str = "short_term",
+    duration: VibrationDuration = "short_term",
 ) -> float:
     """The guideline peak velocity on a buried pipeline (Table 2), in mm/s.
 
@@ -364,8 +367,8 @@ def pipeline_guideline_velocity(
     :return: The guideline peak velocity, in millimetres per second.
     :raises ValueError: If a name is not one of its choices.
     """
-    pipe = require_choice(str(material), "material", PIPELINE_MATERIALS)
-    when = require_choice(str(duration), "duration", ("short_term", "long_term"))
+    pipe = require_choice(material, "material", PIPELINE_MATERIALS)
+    when = require_choice(duration, "duration", _DURATIONS)
     value = PIPELINE_MM_S[pipe]
     return value * PIPELINE_LONG_TERM_FACTOR if when == "long_term" else value
 
@@ -392,9 +395,9 @@ class DamageAssessment(RichDisplay):
     """
 
     velocity_mm_s: float
-    building_class: str
-    location: str
-    duration: str
+    building_class: BuildingClass
+    location: MeasurementLocation
+    duration: VibrationDuration
     frequency_hz: float | None
     _: KW_ONLY
     massive_structure: bool = False
@@ -467,10 +470,10 @@ class DamageAssessment(RichDisplay):
 def assess_building_vibration(
     velocity_mm_s: float,
     *,
-    building_class: BuildingClass | str,
+    building_class: BuildingClass,
     frequency_hz: float | None = None,
-    location: MeasurementLocation | str = "foundation",
-    duration: VibrationDuration | str = "short_term",
+    location: MeasurementLocation = "foundation",
+    duration: VibrationDuration = "short_term",
     massive_structure: bool = False,
 ) -> DamageAssessment:
     """Compare one measured peak velocity with its guideline value.
@@ -494,9 +497,9 @@ def assess_building_vibration(
     v = require_non_negative(velocity_mm_s, "velocity_mm_s")
     return DamageAssessment(
         velocity_mm_s=v,
-        building_class=str(building_class),
-        location=str(location),
-        duration=str(duration),
+        building_class=building_class,
+        location=location,
+        duration=duration,
         frequency_hz=None if frequency_hz is None else float(frequency_hz),
         massive_structure=bool(massive_structure),
     )
@@ -601,7 +604,7 @@ def bending_stress(
 
 
 def foundation_guideline_curve(
-    building_class: BuildingClass | str,
+    building_class: BuildingClass,
     frequency: ArrayLike | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Bild 1 as two arrays: frequency and guideline velocity.
@@ -616,7 +619,7 @@ def foundation_guideline_curve(
     :raises ValueError: If the class is not one of the three, or a frequency
         is not positive and finite.
     """
-    cls = require_choice(str(building_class), "building_class", BUILDING_CLASSES)
+    cls = require_choice(building_class, "building_class", BUILDING_CLASSES)
     if frequency is None:
         f = np.asarray(FOUNDATION_FREQUENCIES_HZ, dtype=np.float64)
     else:

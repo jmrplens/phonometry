@@ -702,6 +702,9 @@ _RESPELLED_4_0_FIELDS = [
         "assessment_period_min",
         "assessment_period_minutes",
     ),
+    ("building", "PathContribution", "fraction", "energy_fraction"),
+    ("building", "DetailedAirborneResult", "fractions", "energy_fractions"),
+    ("building", "DetailedImpactResult", "fractions", "energy_fractions"),
 ]
 
 

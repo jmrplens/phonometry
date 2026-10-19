@@ -112,11 +112,9 @@ def _chk_background_formula() -> Outcome:
 def _chk_table_a1_a() -> Outcome:
     table = building.SERVICE_EQUIPMENT_WEIGHTING
     matching = sum(
-        abs(table["third"]["A"][f] - a) <= 1e-12
-        for f, a, _ in ref.ISO16032_TABLE_A1_THIRD
+        abs(table[3]["A"][f] - a) <= 1e-12 for f, a, _ in ref.ISO16032_TABLE_A1_THIRD
     ) + sum(
-        abs(table["octave"]["A"][f] - a) <= 1e-12
-        for f, a, _ in ref.ISO16032_TABLE_A1_OCTAVE
+        abs(table[1]["A"][f] - a) <= 1e-12 for f, a, _ in ref.ISO16032_TABLE_A1_OCTAVE
     )
     total = len(ref.ISO16032_TABLE_A1_THIRD) + len(ref.ISO16032_TABLE_A1_OCTAVE)
     return count(matching, total, subject="A-weighting cells of Table A.1")
@@ -134,9 +132,9 @@ def _chk_table_a1_c() -> Outcome:
     matching = 0
     for f, _, printed in ref.ISO16032_TABLE_A1_THIRD:
         wanted = iec[f] if f in defect else printed
-        matching += abs(table["third"]["C"][f] - wanted) <= 1e-12
+        matching += abs(table[3]["C"][f] - wanted) <= 1e-12
     for f, _, printed in ref.ISO16032_TABLE_A1_OCTAVE:
-        matching += abs(table["octave"]["C"][f] - printed) <= 1e-12
+        matching += abs(table[1]["C"][f] - printed) <= 1e-12
     total = len(ref.ISO16032_TABLE_A1_THIRD) + len(ref.ISO16032_TABLE_A1_OCTAVE)
     return count(
         matching,
@@ -158,9 +156,9 @@ def _chk_table_2() -> Outcome:
     total = 0
     for thirds, octaves, sigma in ref.ISO16032_TABLE_2_BANDS:
         for f in thirds:
-            matching += abs(band_table["third"][f] - sigma) <= 1e-12
+            matching += abs(band_table[3][f] - sigma) <= 1e-12
         for f in octaves:
-            matching += abs(band_table["octave"][f] - sigma) <= 1e-12
+            matching += abs(band_table[1][f] - sigma) <= 1e-12
         total += len(thirds) + len(octaves)
     for weighting, sigma in ref.ISO16032_TABLE_2_WEIGHTED:
         matching += (
@@ -198,20 +196,20 @@ def _chk_standardization() -> Outcome:
     # 10 lg 2 off the bands 7.7 standardizes, nothing off the others, in
     # one-third octaves and in octaves.
     worst = 0.0
-    widths: tuple[tuple[Literal["third", "octave"], np.ndarray], ...] = (
-        ("third", _THIRD),
-        ("octave", _OCTAVE),
+    widths: tuple[tuple[Literal[1, 3], np.ndarray], ...] = (
+        (3, _THIRD),
+        (1, _OCTAVE),
     )
-    for band, freqs in widths:
+    for fraction, freqs in widths:
         res = building.service_equipment_level(
             np.full((3, freqs.size), 40.0),
             freqs,
             quantity="eq",
-            band=band,
+            fraction=fraction,
             reverberation_time=np.full(freqs.size, 1.0),
         )
         assert res.standardized_db is not None
-        low, high = (50.0, 5000.0) if band == "third" else (63.0, 4000.0)
+        low, high = (50.0, 5000.0) if fraction == 3 else (63.0, 4000.0)
         inside = (freqs >= low) & (freqs <= high)
         expected = np.where(inside, 40.0 - 10.0 * math.log10(2.0), 40.0)
         worst = max(worst, float(np.max(np.abs(res.standardized_db - expected))))
@@ -246,7 +244,7 @@ def _chk_normalization() -> Outcome:
 )
 def _chk_a_weighted() -> Outcome:
     res = building.service_equipment_level(_flat(40.0), _THIRD, quantity="eq")
-    a = building.SERVICE_EQUIPMENT_WEIGHTING["third"]["A"]
+    a = building.SERVICE_EQUIPMENT_WEIGHTING[3]["A"]
     bands = [f for f in _THIRD if 50.0 <= f <= 5000.0]
     expected = 10.0 * math.log10(sum(10.0 ** (0.1 * (40.0 + a[f])) for f in bands))
     return numeric(expected, res.unrounded_ratings["LA,eq"], 1e-9, unit="dB", places=4)
@@ -259,7 +257,7 @@ def _chk_a_weighted() -> Outcome:
 )
 def _chk_c_weighted() -> Outcome:
     res = building.service_equipment_level(_flat(40.0), _THIRD, quantity="eq")
-    c = building.SERVICE_EQUIPMENT_WEIGHTING["third"]["C"]
+    c = building.SERVICE_EQUIPMENT_WEIGHTING[3]["C"]
     expected = 10.0 * math.log10(sum(10.0 ** (0.1 * (40.0 + c[f])) for f in _THIRD))
     return numeric(expected, res.unrounded_ratings["LC,eq"], 1e-9, unit="dB", places=4)
 

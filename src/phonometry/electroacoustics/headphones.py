@@ -176,7 +176,13 @@ import numpy as np
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_count, require_positive, require_scalar
+from .._internal.types import A_OR_Z_WEIGHTINGS, AOrZWeighting
+from .._internal.validation import (
+    require_choice,
+    require_count,
+    require_positive,
+    require_scalar,
+)
 from .program_signal import ProgramSignalCheck, check_program_signal
 
 if TYPE_CHECKING:
@@ -870,14 +876,14 @@ def working_sound_pressure_level(
 def _band_corrections(
     frequencies: NDArray[np.float64],
     *,
-    a_weighted: bool,
+    weighting: str,
     free_field_response_db: ArrayLike | None,
 ) -> NDArray[np.float64]:
     """The per-band A-weighting minus the free-field response, in dB."""
     from ..filters.weighting_compliance import _analytic_weighting_db, _exact_base10
 
     corrections = np.zeros_like(frequencies)
-    if a_weighted:
+    if weighting == "A":
         corrections += _analytic_weighting_db("A", _exact_base10(frequencies))
     if free_field_response_db is not None:
         response = _levels(free_field_response_db, "free_field_response_db")
@@ -892,7 +898,7 @@ def program_signal_level(
     frequencies: ArrayLike,
     band_levels: ArrayLike,
     *,
-    a_weighted: bool = False,
+    weighting: AOrZWeighting = "Z",
     free_field_response_db: ArrayLike | None = None,
 ) -> float:
     r"""The level of the simulated programme signal from its one-third-octave bands.
@@ -913,20 +919,23 @@ def program_signal_level(
     :param frequencies: The band centre frequencies, in Hz, ascending.
     :param band_levels: The band levels read in the coupler or ear
         simulator, in dB re 20 µPa.
-    :param a_weighted: Apply the A-weighting (8.3.5, 8.5.2 d).
+    :param weighting: ``"A"`` to apply the A-weighting (8.3.5, 8.5.2 d) or
+        ``"Z"`` (default) for none.
     :param free_field_response_db: The free-field response of the head and
         torso simulator at 0° azimuth in each band, in dB, whose inverse
         compensates the output; ``None`` for no compensation.
     :return: The level of the whole signal, in dB re 20 µPa.
-    :raises ValueError: If the inputs differ in length or are not finite.
+    :raises ValueError: If the inputs differ in length or are not finite, or
+        ``weighting`` is neither ``"A"`` nor ``"Z"``.
     """
+    weighting = require_choice(weighting, "weighting", A_OR_Z_WEIGHTINGS)
     f = _frequencies(frequencies)
     levels = _levels(band_levels, "band_levels")
     if levels.shape != f.shape:
         msg = "'frequencies' and 'band_levels' must have the same length."
         raise ValueError(msg)
     corrections = _band_corrections(
-        f, a_weighted=a_weighted, free_field_response_db=free_field_response_db
+        f, weighting=weighting, free_field_response_db=free_field_response_db
     )
     return float(10.0 * np.log10(np.sum(10.0 ** ((levels + corrections) / 10.0))))
 
@@ -942,7 +951,8 @@ class ProgramCharacteristicVoltage(OwnsArrays):
         (RMS).
     :ivar corrections: The correction added to each band, in dB: the
         A-weighting minus the free-field response, zero when neither applies.
-    :ivar a_weighted: Whether the A-weighting was applied.
+    :ivar weighting: ``"A"`` when the A-weighting was applied, ``"Z"`` when
+        none was.
     :ivar free_field_compensated: Whether the free-field response was
         compensated.
     """
@@ -951,8 +961,15 @@ class ProgramCharacteristicVoltage(OwnsArrays):
     band_levels: NDArray[np.float64]
     source_emf_v: NDArray[np.float64]
     corrections: NDArray[np.float64]
-    a_weighted: bool
+    weighting: AOrZWeighting
     free_field_compensated: bool
+
+    def __post_init__(self) -> None:
+        """Refuse a weighting 8.3.5 does not apply.
+
+        :raises ValueError: if ``weighting`` is neither ``"A"`` nor ``"Z"``.
+        """
+        require_choice(self.weighting, "weighting", A_OR_Z_WEIGHTINGS)
 
     @property
     def levels(self) -> NDArray[np.float64]:
@@ -1024,7 +1041,7 @@ def program_characteristic_voltage(
     frequencies: ArrayLike,
     band_levels: ArrayLike,
     *,
-    a_weighted: bool = False,
+    weighting: AOrZWeighting = "Z",
     free_field_response_db: ArrayLike | None = None,
 ) -> ProgramCharacteristicVoltage:
     """The simulated programme signal characteristic voltage of IEC 60268-7.
@@ -1043,13 +1060,16 @@ def program_characteristic_voltage(
     :param frequencies: The band centre frequencies, in Hz, ascending.
     :param band_levels: The band levels, in dB re 20 µPa, shape
         ``(bands,)`` for one fitting or ``(fittings, bands)``.
-    :param a_weighted: Apply the A-weighting (8.3.5).
+    :param weighting: ``"A"`` to apply the A-weighting (8.3.5) or ``"Z"``
+        (default) for none.
     :param free_field_response_db: The free-field response of the head and
         torso simulator in each band, in dB, compensated by its inverse
         (8.3.5); ``None`` for none.
     :return: A :class:`ProgramCharacteristicVoltage`.
-    :raises ValueError: If the shapes disagree or a value is out of range.
+    :raises ValueError: If the shapes disagree, a value is out of range or
+        ``weighting`` is neither ``"A"`` nor ``"Z"``.
     """
+    weighting = require_choice(weighting, "weighting", A_OR_Z_WEIGHTINGS)
     f = _frequencies(frequencies)
     levels = np.atleast_2d(_levels(band_levels, "band_levels"))
     if levels.ndim != _MATRIX_NDIM or levels.shape[1] != f.size:
@@ -1062,14 +1082,14 @@ def program_characteristic_voltage(
         msg = "'source_emf_v' must be positive and finite."
         raise ValueError(msg)
     corrections = _band_corrections(
-        f, a_weighted=a_weighted, free_field_response_db=free_field_response_db
+        f, weighting=weighting, free_field_response_db=free_field_response_db
     )
     return ProgramCharacteristicVoltage(
         frequencies=f,
         band_levels=levels,
         source_emf_v=emf,
         corrections=read_only(corrections),
-        a_weighted=bool(a_weighted),
+        weighting=weighting,
         free_field_compensated=free_field_response_db is not None,
     )
 

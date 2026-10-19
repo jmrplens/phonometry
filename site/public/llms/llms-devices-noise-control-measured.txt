@@ -634,7 +634,7 @@ without = [96.0, 98.0, 99.0, 97.0, 94.0, 89.0]   # dB, machine alone
 with_box = [88.0, 86.0, 81.0, 74.0, 68.0, 63.0]  # dB, enclosure fitted
 
 res = noise_control.enclosure_sound_power_insulation(
-    without, with_box, frequencies=bands, band_fraction=1,
+    without, with_box, frequencies=bands, fraction=1,
 )
 print(res.rounded())                    # [ 8 12 18 23 26 26] dB
 print(round(res.a_weighted_insulation, 1))   # 19.3 dB
@@ -731,7 +731,7 @@ room = [88.0, 90.0, 91.0, 89.0, 86.0, 82.0]    # dB, level in the room
 inside = [76.0, 72.0, 66.0, 59.0, 52.0, 47.0]  # dB, level in the cabin
 
 cab = noise_control.cabin_insulation(
-    room, inside, frequencies=bands, band_fraction=1,
+    room, inside, frequencies=bands, fraction=1,
     method="in-situ-loudspeaker",
 )
 print(cab.symbol, cab.rounded())   # D'_p [12 18 25 30 34 35] dB
@@ -784,7 +784,7 @@ own quantity where that standard writes the sound reduction index.
 
 ```python
 rating = noise_control.weighted_cabin_insulation(
-    cab.insulation[:5], apparent=True, band_fraction=1,
+    cab.insulation[:5], method=cab.method, fraction=1,
 )
 print(rating.rating, rating.c, rating.ctr)   # 28 -1 -5
 ```

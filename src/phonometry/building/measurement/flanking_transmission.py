@@ -80,7 +80,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
-    require_choice,
+    require_band_fraction,
     require_equal_counts,
     require_equal_shapes,
     require_ranks,
@@ -100,6 +100,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._internal.types import BandFraction
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -366,11 +367,11 @@ class VibrationReductionResult(OwnsArrays):
         bracketed by, or ``None`` when none was supplied. An octave band
         carries the smallest of its three one-third-octave bands, since it is
         bracketed when any of them is.
-    :ivar band_type: ``"third-octave"`` or ``"octave"``, the band set the
-        caller states for the Annex A range the single number is averaged
-        over, as :meth:`octave_bands` states it; ``None`` (the default, and
-        what :func:`vibration_reduction_index` leaves) reads it from the
-        spacing of the frequencies each time.
+    :ivar fraction: The band set the caller states for the Annex A range the
+        single number is averaged over, 3 for one-third octaves or 1 for
+        octaves, as :meth:`octave_bands` states it (``fraction=1``); ``None``
+        (the default, and what :func:`vibration_reduction_index` leaves) reads
+        it from the spacing of the frequencies each time.
 
     ``single_number`` and ``bracketed`` are read from the fields, the
     0,25 of ISO 10848-4 Clause 9 and the Annex A range, so they are not
@@ -380,7 +381,7 @@ class VibrationReductionResult(OwnsArrays):
     frequencies: np.ndarray | None
     k_ij: np.ndarray
     modal_overlap: np.ndarray | None = None
-    band_type: str | None = None
+    fraction: int | None = None
 
     def __post_init__(self) -> None:
         """Reject a junction whose per-band columns do not share a band set.
@@ -403,8 +404,8 @@ class VibrationReductionResult(OwnsArrays):
         """
         require_ranks(self, frequencies=1, k_ij=1, modal_overlap=1)
         require_same_length(self, "frequencies", "k_ij", "modal_overlap")
-        if self.band_type is not None:
-            require_choice(self.band_type, "band_type", ("third-octave", "octave"))
+        if self.fraction is not None:
+            require_band_fraction(self.fraction, "fraction")
 
     @property
     def bracketed(self) -> np.ndarray | None:
@@ -421,13 +422,13 @@ class VibrationReductionResult(OwnsArrays):
     @property
     def single_number(self) -> float | None:
         """The Annex A mean ``K̄ij`` over the bands not bracketed, in dB, or ``None``."""
-        band_type = (
-            _detect_band_type(self.frequencies)
-            if self.band_type is None
-            else self.band_type
+        fraction = (
+            _detect_fraction(self.frequencies)
+            if self.fraction is None
+            else self.fraction
         )
         return _single_number_kij(
-            self.frequencies, self.k_ij, bracketed=self.bracketed, band_type=band_type
+            self.frequencies, self.k_ij, bracketed=self.bracketed, fraction=fraction
         )
 
     def octave_bands(self) -> VibrationReductionResult:
@@ -464,7 +465,7 @@ class VibrationReductionResult(OwnsArrays):
             frequencies=oct_f,
             k_ij=oct_k,
             modal_overlap=oct_overlap,
-            band_type="octave",
+            fraction=1,
         )
 
     def plot(
@@ -549,12 +550,12 @@ def _validate_octave_triples(freq_groups: np.ndarray) -> None:
             raise ValueError(msg)
 
 
-def _detect_band_type(frequencies: np.ndarray | None) -> str:
-    """``"octave"`` when consecutive centres step by ~2, else third-octave."""
+def _detect_fraction(frequencies: np.ndarray | None) -> int:
+    """1 (octaves) when consecutive centres step by ~2, else 3 (one-third octaves)."""
     if frequencies is None or frequencies.size < 2:  # noqa: PLR2004
-        return "third-octave"
+        return 3
     ratio = float(np.median(frequencies[1:] / frequencies[:-1]))
-    return "octave" if ratio > _OCTAVE_STEP_THRESHOLD else "third-octave"
+    return 1 if ratio > _OCTAVE_STEP_THRESHOLD else 3
 
 
 def _single_number_kij(
@@ -562,7 +563,7 @@ def _single_number_kij(
     k_ij: np.ndarray,
     *,
     bracketed: np.ndarray | None = None,
-    band_type: str = "third-octave",
+    fraction: int = 3,
 ) -> float | None:
     """Arithmetic-mean ``K̄ij`` (Annex A), or ``None``.
 
@@ -576,7 +577,7 @@ def _single_number_kij(
     """
     if frequencies is None:
         return None
-    if band_type == "octave":
+    if fraction == 1:
         low, high = _SINGLE_NUMBER_LOW_OCTAVE, _SINGLE_NUMBER_HIGH_OCTAVE
     else:
         low, high = _SINGLE_NUMBER_LOW, _SINGLE_NUMBER_HIGH
@@ -940,7 +941,7 @@ def normalized_flanking_level_difference(
     absorption_area: Sequence[float] | np.ndarray,
     *,
     reference_area: float = _REFERENCE_ABSORPTION_AREA,
-    bands: str | None = None,
+    fraction: BandFraction | None = None,
 ) -> FlankingLevelDifferenceResult:
     r"""Normalized flanking level difference ``Dn,f`` (airborne, Formula (4)).
 
@@ -952,9 +953,9 @@ def normalized_flanking_level_difference(
     :param absorption_area: Receiving-room equivalent absorption area ``A`` per
         band, in m².
     :param reference_area: ``A0``, in m² (default 10 m²).
-    :param bands: Band spacing passed to
-        :func:`phonometry.building.weighted_rating`; auto-detected when
-        ``None``.
+    :param fraction: Band set passed to
+        :func:`phonometry.building.weighted_rating`, 3 for one-third octaves
+        or 1 for octaves; read from the number of bands when ``None``.
     :return: A :class:`FlankingLevelDifferenceResult`; the single-number
         rating is formed only for 16 (one-third-octave) or 5 (octave) bands.
     :raises ValueError: On incompatible band counts or non-positive areas.
@@ -973,7 +974,7 @@ def normalized_flanking_level_difference(
         "band",
     )
     d_n_f = l1 - l2 - 10.0 * np.log10(area / a0)
-    rating = _maybe_rating(d_n_f, bands)
+    rating = _maybe_rating(d_n_f, fraction)
     return FlankingLevelDifferenceResult(d_n_f=d_n_f, rating=rating)
 
 
@@ -982,7 +983,7 @@ def normalized_flanking_impact_level(
     absorption_area: Sequence[float] | np.ndarray,
     *,
     reference_area: float = _REFERENCE_ABSORPTION_AREA,
-    bands: str | None = None,
+    fraction: BandFraction | None = None,
 ) -> FlankingImpactLevelResult:
     r"""Normalized flanking impact level ``Ln,f`` (Formula (5)).
 
@@ -995,9 +996,9 @@ def normalized_flanking_impact_level(
     :param absorption_area: Receiving-room equivalent absorption area ``A`` per
         band, in m².
     :param reference_area: ``A0``, in m² (default 10 m²).
-    :param bands: Band spacing passed to
-        :func:`phonometry.building.weighted_impact_rating`; auto-detected when
-        ``None``.
+    :param fraction: Band set passed to
+        :func:`phonometry.building.weighted_impact_rating`, 3 for one-third
+        octaves or 1 for octaves; read from the number of bands when ``None``.
     :return: A :class:`FlankingImpactLevelResult`; the single-number rating is
         formed only for 16 (one-third-octave) or 5 (octave) bands.
     :raises ValueError: On incompatible band counts or non-positive areas.
@@ -1013,14 +1014,16 @@ def normalized_flanking_impact_level(
     l_n_f = l2 + 10.0 * np.log10(area / a0)
     rating: ImpactRatingResult | None = None
     if l_n_f.size in (16, 5):
-        rating = weighted_impact_rating(l_n_f, bands)
+        rating = weighted_impact_rating(l_n_f, fraction)
     return FlankingImpactLevelResult(l_n_f=l_n_f, rating=rating)
 
 
-def _maybe_rating(values: np.ndarray, bands: str | None) -> WeightedRatingResult | None:
+def _maybe_rating(
+    values: np.ndarray, fraction: BandFraction | None
+) -> WeightedRatingResult | None:
     """Form the ISO 717-1 rating when the band count is 16 or 5, else ``None``."""
     if values.size in (16, 5):
-        return weighted_rating(values, bands)
+        return weighted_rating(values, fraction)
     return None
 
 

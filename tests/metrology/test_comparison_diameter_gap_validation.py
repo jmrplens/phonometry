@@ -618,14 +618,14 @@ def test_validation_refuses_a_microphone_for_a_comparison() -> None:
 
 def test_validation_refuses_a_free_field_reciprocity_calibration() -> None:
     jig = _comparison(np.full(4, -26.3), 0.08)
-    free = _reciprocity(_F_VAL, -26.32, 0.04, field="free_field")
+    free = _reciprocity(_F_VAL, -26.32, 0.04, field="free")
     with pytest.raises(ValueError, match="pressure calibration too"):
         metrology.verify_jig_or_coupler(jig, free, microphone=1)
 
 
 def test_validation_refuses_a_free_field_calibration() -> None:
     free = metrology.sequential_comparison(
-        _F_VAL, -38.0, 94.0, 105.7, field="free_field", expanded_uncertainty_db=0.1
+        _F_VAL, -38.0, 94.0, 105.7, field="free", expanded_uncertainty_db=0.1
     )
     other = _comparison(np.full(4, -26.3), 0.08)
     with pytest.raises(ValueError, match="free-field one"):

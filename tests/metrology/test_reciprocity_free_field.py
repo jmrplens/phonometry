@@ -214,7 +214,7 @@ def test_three_microphones_give_their_sensitivities_back() -> None:
     np.testing.assert_allclose(
         calibration.sensitivity_v_per_pa, sign * _TRUE, rtol=1e-12
     )
-    assert calibration.field == "free_field"
+    assert calibration.field == "free"
     assert calibration.standard == "IEC 61094-3:2016+COR1:2016"
 
 
@@ -465,7 +465,7 @@ def test_free_field_components_are_named_by_table_1() -> None:
     }
     assert set(result.components_db) <= set(metrology.IEC61094_3_TABLE_1)
     budget = metrology.reciprocity_uncertainty_budget(
-        _F, result.components_db, field="free_field"
+        _F, result.components_db, field="free"
     )
     assert np.all(budget.expanded_uncertainty_db > 0.0)
 

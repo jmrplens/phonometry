@@ -54,7 +54,7 @@ energetic combination used by the EN 12354-3/-4 facade model of
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy.special import j1, struve
@@ -78,7 +78,7 @@ _SPEED_OF_SOUND: float = 343.0
 _EULER_GAMMA: float = 0.57722
 #: Incident-field constant ``m`` of Hopkins (2007) Eq. 4.99, printed with the
 #: equation's symbols on PDF page 522 (printed p. 495).
-_FIELD_M: dict[str, float] = {"diffuse": 8.0, "normal": 4.0}
+_FIELD_M: dict[Literal["diffuse", "normal"], float] = {"diffuse": 8.0, "normal": 4.0}
 #: Slit-position constant ``n`` of Hopkins (2007) Eq. 4.99, printed with the
 #: equation's symbols on PDF page 522 (printed p. 495).
 _POSITION_N: dict[str, float] = {"mid": 1.0, "edge": 0.5}
@@ -233,7 +233,7 @@ def slit_transmission_coefficient(
     width_m: float,
     depth: float,
     *,
-    field: str = "diffuse",
+    field: Literal["diffuse", "normal"] = "diffuse",
     position: str = "mid",
     speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> ApertureTransmissionResult:

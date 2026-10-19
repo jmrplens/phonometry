@@ -69,7 +69,7 @@ def _uniform_result(grade: str = "engineering") -> SoundPowerIntensityResult:
         pressure_levels=np.full((_N_SEG, len(_FREQS)), 80.0),
         pressure_residual_index=15.0,
         frequencies=_FREQS,
-        band_type="octave",
+        fraction=1,
         grade=grade,
     )
 
@@ -136,7 +136,7 @@ def test_third_octave_labels_and_grouping(tmp_path: Path) -> None:
     intensity = np.linspace(0.5e-4, 1.5e-4, freqs.size)
     scan = np.tile(intensity, (_N_SEG, 1))
     res = sound_power_intensity(
-        scan, np.full(_N_SEG, _SEG_AREA), frequencies=freqs, band_type="third"
+        scan, np.full(_N_SEG, _SEG_AREA), frequencies=freqs, fraction=3
     )
     out = tmp_path / "third.pdf"
     res.report(str(out))
@@ -184,7 +184,7 @@ def test_omitted_bands_listed_in_basis_strip(tmp_path: Path) -> None:
         pressure_levels=lp,
         pressure_residual_index=15.0,
         frequencies=_FREQS,
-        band_type="octave",
+        fraction=1,
     )
     assert res.a_weighting_omitted_bands is not None
     assert res.a_weighting_omitted_bands.tolist() == [True] + [False] * 5
@@ -231,7 +231,7 @@ def test_negative_band_reported_as_dash(tmp_path: Path) -> None:
     scan[:, 1] = -_INTENSITY[1]
     with pytest.warns(SoundPowerWarning, match="negative in one or more bands"):
         res = sound_power_intensity(
-            scan, np.full(_N_SEG, _SEG_AREA), frequencies=_FREQS, band_type="octave"
+            scan, np.full(_N_SEG, _SEG_AREA), frequencies=_FREQS, fraction=1
         )
     out = tmp_path / "negative.pdf"
     res.report(str(out))

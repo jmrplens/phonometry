@@ -358,7 +358,7 @@ LowFrequencyLevel(
     outdoor_level: float,
     indoor_level: float | None,
     *,
-    a_weighted: bool,
+    weighting: Literal['A', 'Z'],
 )
 ```
 
@@ -373,7 +373,7 @@ band; the band arrays are summed over the turbines.
 | :--- | :--- |
 | `frequencies` | The one-third-octave centres, in Hz. |
 | `sound_power_levels` | The turbines' band sound power levels. |
-| `a_weighting_db` | The A-weighting added to each band (zero when the result is unweighted). |
+| `a_weighting_db` | The A-weighting added to each band (zero when the weighting is `"Z"`). |
 | `distance_terms_db` | $10 \lg(l^2 + h^2)$ of each turbine, in dB. |
 | `ground_correction` | $\Delta L_\mathrm{g,LF}$ per band. |
 | `air_attenuation` | $\Delta L_\mathrm{a}$ per turbine and band. |
@@ -382,7 +382,7 @@ band; the band arrays are summed over the turbines.
 | `indoor_levels` | Indoor band levels, or `None`. |
 | `outdoor_level` | Energy sum of the outdoor bands, in dB. |
 | `indoor_level` | Energy sum of the indoor bands, or `None`. |
-| `a_weighted` | Whether the levels are A-weighted. |
+| `weighting` | `"A"` when the levels are A-weighted, `"Z"` when they are not. |
 
 ### LowFrequencyLevel.plot()
 
@@ -1096,7 +1096,7 @@ wind_turbine_low_frequency_level(
     ground_correction: ArrayLike | None = None,
     air_attenuation_db_per_km: ArrayLike | None = None,
     facade_insulation: ArrayLike | None = None,
-    a_weighted: bool = True,
+    weighting: Literal['A', 'Z'] = 'A',
 ) -> LowFrequencyLevel
 ```
 
@@ -1124,7 +1124,7 @@ criterion of C.6.1 sums 10 Hz to 160 Hz, so pass those bands for it.
 | `ground_correction` | $\Delta L_\mathrm{g,LF}$ per band; `None` for Table C.2 (onshore, impedance class D). |
 | `air_attenuation_db_per_km` | $\alpha$ per band, in dB/km, zero or positive (the ISO 9613-1 absorption coefficient, C.2); `None` for Table C.2, as printed (see [`LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_air_attenuation_db_per_km)). |
 | `facade_insulation` | $\Delta L_\sigma$ per band, for an indoor level (for instance a row of [`LOW_FREQUENCY_FACADE_INSULATION`](/phonometry/reference/api/environment/wind-turbine-receptor/#low_frequency_facade_insulation)); `None` for the outdoor level alone. |
-| `a_weighted` | Add the A-weighting of Table C.4 (IEC 61672-1) to each band (the default), or give unweighted levels. |
+| `weighting` | `"A"` (default) to add the A-weighting of Table C.4 (IEC 61672-1) to each band, or `"Z"` for unweighted levels. |
 
 **Returns:** A [`LowFrequencyLevel`](/phonometry/reference/api/environment/wind-turbine-receptor/#lowfrequencylevel).
 
@@ -1132,7 +1132,7 @@ criterion of C.6.1 sums 10 Hz to 160 Hz, so pass those bands for it.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the shapes disagree, a distance or height is not positive, an air attenuation coefficient is negative, a default table has no value at a supplied band, or `a_weighted` is not a boolean. |
+| ValueError | If the shapes disagree, a distance or height is not positive, an air attenuation coefficient is negative, a default table has no value at a supplied band, or `weighting` is neither `"A"` nor `"Z"`. |
 
 ## wind_turbine_rating_level
 

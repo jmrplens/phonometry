@@ -1138,7 +1138,7 @@ program_characteristic_voltage(
     frequencies: ArrayLike,
     band_levels: ArrayLike,
     *,
-    a_weighted: bool = False,
+    weighting: Literal['A', 'Z'] = 'Z',
     free_field_response_db: ArrayLike | None = None,
 ) -> ProgramCharacteristicVoltage
 ```
@@ -1161,7 +1161,7 @@ measurements".
 | `source_emf_v` | The source e.m.f. of each fitting's reading, in volts (RMS): one value for all, or one per fitting. |
 | `frequencies` | The band centre frequencies, in Hz, ascending. |
 | `band_levels` | The band levels, in dB re 20 µPa, shape `(bands,)` for one fitting or `(fittings, bands)`. |
-| `a_weighted` | Apply the A-weighting (8.3.5). |
+| `weighting` | `"A"` to apply the A-weighting (8.3.5) or `"Z"` (default) for none. |
 | `free_field_response_db` | The free-field response of the head and torso simulator in each band, in dB, compensated by its inverse (8.3.5); `None` for none. |
 
 **Returns:** A [`ProgramCharacteristicVoltage`](/phonometry/reference/api/electroacoustics/headphones/#programcharacteristicvoltage).
@@ -1170,7 +1170,7 @@ measurements".
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the shapes disagree or a value is out of range. |
+| ValueError | If the shapes disagree, a value is out of range or `weighting` is neither `"A"` nor `"Z"`. |
 
 ## program_signal_level
 
@@ -1179,7 +1179,7 @@ program_signal_level(
     frequencies: ArrayLike,
     band_levels: ArrayLike,
     *,
-    a_weighted: bool = False,
+    weighting: Literal['A', 'Z'] = 'Z',
     free_field_response_db: ArrayLike | None = None,
 ) -> float
 ```
@@ -1205,7 +1205,7 @@ $$
 | :--- | :--- |
 | `frequencies` | The band centre frequencies, in Hz, ascending. |
 | `band_levels` | The band levels read in the coupler or ear simulator, in dB re 20 µPa. |
-| `a_weighted` | Apply the A-weighting (8.3.5, 8.5.2 d). |
+| `weighting` | `"A"` to apply the A-weighting (8.3.5, 8.5.2 d) or `"Z"` (default) for none. |
 | `free_field_response_db` | The free-field response of the head and torso simulator at 0° azimuth in each band, in dB, whose inverse compensates the output; `None` for no compensation. |
 
 **Returns:** The level of the whole signal, in dB re 20 µPa.
@@ -1214,7 +1214,7 @@ $$
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the inputs differ in length or are not finite. |
+| ValueError | If the inputs differ in length or are not finite, or `weighting` is neither `"A"` nor `"Z"`. |
 
 ## ProgramCharacteristicVoltage
 
@@ -1224,7 +1224,7 @@ ProgramCharacteristicVoltage(
     band_levels: NDArray[np.float64],
     source_emf_v: NDArray[np.float64],
     corrections: NDArray[np.float64],
-    a_weighted: bool,
+    weighting: Literal['A', 'Z'],
     free_field_compensated: bool,
 )
 ```
@@ -1239,7 +1239,7 @@ The simulated programme signal characteristic voltage (IEC 60268-7 8.3.4, 8.3.5)
 | `band_levels` | The band levels read in the coupler or ear simulator, one row per fitting, in dB re 20 µPa. |
 | `source_emf_v` | The source e.m.f. of each fitting's reading, in volts (RMS). |
 | `corrections` | The correction added to each band, in dB: the A-weighting minus the free-field response, zero when neither applies. |
-| `a_weighted` | Whether the A-weighting was applied. |
+| `weighting` | `"A"` when the A-weighting was applied, `"Z"` when none was. |
 | `free_field_compensated` | Whether the free-field response was compensated. |
 
 ### ProgramCharacteristicVoltage.band_levels_at_characteristic

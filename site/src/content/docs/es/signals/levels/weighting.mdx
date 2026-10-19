@@ -74,7 +74,7 @@ freqs = np.fft.rfftfreq(fs, 1 / fs)
 
 fig, ax = plt.subplots(figsize=(9, 5))
 for curve in ("A", "C", "Z"):
-    spectrum = np.fft.rfft(filters.weighting_filter(impulse, fs, curve=curve))
+    spectrum = np.fft.rfft(filters.weighting_filter(impulse, fs, weighting=curve))
     ax.semilogx(freqs[1:], 20 * np.log10(np.abs(spectrum[1:]) + np.finfo(float).eps),
                 label=curve)
 ax.set(xlim=(10, 22000), ylim=(-72, 15),
@@ -97,7 +97,7 @@ plt.show()
   componente continua (`detrend`) y filtra tú el ruido de viento con un paso
   alto si la grabación baja de 10 Hz.
 
-El argumento `curve` acepta además las cuatro ponderaciones especiales, con
+El argumento `weighting` acepta además las cuatro ponderaciones especiales, con
 gráfica y documentación en
 [Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/): `'G'`
 para infrasonido (ISO 7196), las históricas `'B'` (ANSI S1.4-1983) y `'D'`
@@ -105,7 +105,7 @@ para infrasonido (ISO 7196), las históricas `'B'` (ANSI S1.4-1983) y `'D'`
 (IEC 61012).
 
 La respuesta en una línea es
-`filters.weighting_filter(recording, fs, curve='A')`. El apartado 2 lo enseña
+`filters.weighting_filter(recording, fs, weighting='A')`. El apartado 2 lo enseña
 sobre una señal ejecutable, el 5 explica por qué el diseño por defecto
 se ajusta a la frecuencia de muestreo en lugar de transformar el prototipo
 impreso, y el 6 demuestra que el resultado cumple la clase 1.
@@ -181,8 +181,8 @@ t = np.arange(10 * fs) / fs
 rng = np.random.default_rng(1)
 x = 0.2 * np.sin(2 * np.pi * 50 * t) + 0.01 * rng.standard_normal(t.size)
 
-la = signals.leq(filters.weighting_filter(x, fs, curve="A"))
-lc = signals.leq(filters.weighting_filter(x, fs, curve="C"))
+la = signals.leq(filters.weighting_filter(x, fs, weighting="A"))
+lc = signals.leq(filters.weighting_filter(x, fs, weighting="C"))
 print(f"LAeq = {la:.1f} dB   LCeq = {lc:.1f} dB   C - A = {lc - la:.1f} dB")
 # LAeq = 52.4 dB   LCeq = 75.7 dB   C - A = 23.2 dB
 # C - A por encima de 20 dB: el número ponderado A ocultaría el retumbo.
@@ -205,7 +205,7 @@ import matplotlib.pyplot as plt
 fig, ax = plt.subplots(figsize=(9, 4.5))
 for curve, style in (("Z", "-"), ("C", "--"), ("A", ":")):
     filtered = filters.octave_filter(
-        filters.weighting_filter(x, fs, curve=curve), fs, fraction=3)
+        filters.weighting_filter(x, fs, weighting=curve), fs, fraction=3)
     band_levels, centres = filtered.levels, filtered.frequencies
     ax.semilogx(centres, band_levels, style, label=f"Bandas ponderadas {curve}")
 ax.set(xlabel="Frecuencia central de banda [Hz]", ylabel="Nivel de banda [dB]")
@@ -250,13 +250,13 @@ fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Aplicar ponderación A a la señal en bruto
-weighted_signal = filters.weighting_filter(recording, fs, curve='A')
+weighted_signal = filters.weighting_filter(recording, fs, weighting='A')
 
 # Aplicar ponderación C para análisis de picos
-c_weighted_signal = filters.weighting_filter(recording, fs, curve='C')
+c_weighted_signal = filters.weighting_filter(recording, fs, weighting='C')
 ```
 
-Las ponderaciones especiales usan el mismo argumento `curve`; cada una está
+Las ponderaciones especiales usan el mismo argumento `weighting`; cada una está
 documentada, con su propia gráfica de respuesta, en
 [Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/).
 
@@ -270,7 +270,7 @@ onda y luego filtrar por bandas.
 ```python
 band_source = signals.noise_signal(fs, 20.0, color="pink", rms=0.05, seed=3)
 filtered = filters.octave_filter(
-    filters.weighting_filter(band_source, fs, curve="A"), fs, fraction=3)
+    filters.weighting_filter(band_source, fs, weighting="A"), fs, fraction=3)
 weighted_bands, centres = filtered.levels, filtered.frequencies
 print(f"suma energética de las bandas ponderadas A "
       f"{10 * np.log10(np.sum(10 ** (weighted_bands / 10))):.2f} dB")
@@ -304,7 +304,7 @@ C y para G.
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | array 1D o 2D, o `Signal` | cualquiera | no vacío | 2D es `[channels, samples]` |
 | `fs` | int | Hz | > 0; tomada de `x` cuando `x` es un `Signal` | |
-| `curve` | str | — | `'A'` (por defecto), `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'Z'`, `'468'` | `'G'` según ISO 7196 (infrasonido), `'B'`/`'D'` históricas y `'AU'` según IEC 61012 se tratan en [Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/); `'Z'` se implementa como un paso directo de una respuesta que la norma especifica plana; `'468'` es la curva de nivel de programa de ITU-R BS.468-4, y su falda es tan pronunciada que exige el diseño ajustado y rechaza `high_accuracy=False` |
+| `weighting` | str | — | `'A'` (por defecto), `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'Z'`, `'468'` | `'G'` según ISO 7196 (infrasonido), `'B'`/`'D'` históricas y `'AU'` según IEC 61012 se tratan en [Ponderaciones especiales](/phonometry/es/signals/levels/special-weightings/); `'Z'` se implementa como un paso directo de una respuesta que la norma especifica plana; `'468'` es la curva de nivel de programa de ITU-R BS.468-4, y su falda es tan pronunciada que exige el diseño ajustado y rechaza `high_accuracy=False` |
 | `high_accuracy` | bool | — | por defecto `True` | Ajusta el prototipo analógico a $f_\mathrm{s}$ en vez de transformarlo a ciegas; mantiene A/C en clase 1 a cualquier frecuencia de muestreo. Detalles en el §5 |
 | `stateful` | bool (solo clase) | — | por defecto `False` | Conserva el estado del filtro entre bloques (streaming) |
 | `steady_ic` | bool (solo clase) | — | por defecto `False` | Condiciones iniciales estacionarias (sin transitorio de arranque) |
@@ -404,7 +404,7 @@ fig, ax = plt.subplots(figsize=(9, 5))
 ax.semilogx(freqs, analytic, "k--", label="Analítica (IEC 61672-1)")
 for high_accuracy, label in ((False, "Bilineal simple"),
                              (True, "Sobremuestreado (por defecto)")):
-    weighted = filters.weighting_filter(impulse, fs, curve="A",
+    weighted = filters.weighting_filter(impulse, fs, weighting="A",
                                 high_accuracy=high_accuracy)
     response = 20 * np.log10(np.abs(np.fft.rfft(weighted))
                              + np.finfo(float).eps)[1:]
@@ -446,7 +446,7 @@ fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # El diseño bilineal en forma cerrada, explícito
-y = filters.weighting_filter(recording, fs, curve="A", high_accuracy=False)
+y = filters.weighting_filter(recording, fs, weighting="A", high_accuracy=False)
 
 # Procesado por bloques con estado (mismo diseño ajustado, estado entre bloques)
 wf = filters.WeightingFilter(fs, "A", stateful=True)
@@ -622,11 +622,11 @@ especiales](/phonometry/es/signals/levels/special-weightings/).
 
 ### ¿Cómo aplico la ponderación A a una señal con Python?
 
-Llama a `filters.weighting_filter(recording, fs, curve='A')` sobre una señal
+Llama a `filters.weighting_filter(recording, fs, weighting='A')` sobre una señal
 calibrada. Devuelve la señal temporal ponderada A, filtrada con el diseño de
 polos y ceros de IEC 61672-1:2013 dentro de las tolerancias de clase 1, así que
 `signals.leq()` sobre la salida es el $L_\mathrm{Aeq}$. La misma función aplica las
-ponderaciones C, Z, B, D, AU y la G de infrasonido mediante `curve`.
+ponderaciones C, Z, B, D, AU y la G de infrasonido mediante su argumento `weighting`.
 
 ### ¿Cuándo debo usar la ponderación C en lugar de la ponderación A?
 

@@ -30,13 +30,20 @@ from typing import TYPE_CHECKING, Any, Literal
 import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
-from .._internal.validation import require_ranks, require_same_length, require_scalar
+from .._internal.validation import (
+    require_choice,
+    require_ranks,
+    require_same_length,
+    require_scalar,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from .._internal.types import FreeOrDiffuseField
 
 __all__ = [
     "AUDIOMETRIC_FREQUENCIES_HZ",
@@ -195,8 +202,10 @@ _REFERENCE_DIFFUSE: np.ndarray = np.array(
     [22.1, 11.4, 3.8, 1.2, 0.8, 1.0, -1.5, -4.0, -3.8, 1.4, 6.8],
     dtype=np.float64,
 )
-_REFERENCE = {"free-field": _REFERENCE_FREE, "diffuse-field": _REFERENCE_DIFFUSE}
-FIELDS: tuple[str, ...] = ("free-field", "diffuse-field")
+#: The listening conditions of ISO 389-7 Table 1, as every public ``field``
+#: writes a sound field.
+_REFERENCE = {"free": _REFERENCE_FREE, "diffuse": _REFERENCE_DIFFUSE}
+FIELDS: tuple[FreeOrDiffuseField, ...] = ("free", "diffuse")
 
 _REFERENCE_AGE = 18.0  # lower age limit of the ISO 7029 formulae.
 
@@ -373,7 +382,7 @@ def age_threshold(
 
 
 def reference_threshold(
-    field: str = "free-field", frequencies: ArrayLike | None = None
+    field: FreeOrDiffuseField = "free", frequencies: ArrayLike | None = None
 ) -> np.ndarray:
     """Reference threshold of hearing (ISO 389-7:2005, Table 1).
 
@@ -381,16 +390,15 @@ def reference_threshold(
     (0 dB HL) under the given listening condition, at the audiometric
     frequencies.
 
-    :param field: ``"free-field"`` (frontal incidence) or ``"diffuse-field"``.
+    :param field: ``"free"`` (a free field, frontal incidence) or
+        ``"diffuse"`` (a diffuse field).
     :param frequencies: Optional subset of the audiometric frequencies, in
         hertz; ``None`` uses all eleven (125 Hz - 8000 Hz).
     :return: The reference threshold, in dB, aligned with the frequencies.
     :raises ValueError: for an unknown field or frequency.
     """
-    if field not in _REFERENCE:
-        msg = f"field must be one of {FIELDS}; got {field!r}."
-        raise ValueError(msg)
-    return _select(_REFERENCE[field], frequencies)
+    chosen = require_choice(field, "field", FIELDS)
+    return _select(_REFERENCE[chosen], frequencies)
 
 
 # ---------------------------------------------------------------------------

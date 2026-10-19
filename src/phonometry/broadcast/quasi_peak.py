@@ -4,7 +4,7 @@ r"""Psophometric quasi-peak programme-level meter (ITU-R BS.468-4 clause 2).
 ITU-R BS.468-4 specifies the instrument that measures audio-frequency noise
 voltage in sound broadcasting as two parts. Clause 1 is the weighting
 network, realised elsewhere in this library
-(:func:`phonometry.filters.weighting_filter` with ``curve="468"``, from the
+(:func:`phonometry.filters.weighting_filter` with ``weighting="468"``, from the
 Fig. 1a ladder). Clause 2 is the detector this module implements: a
 **quasi-peak** value method, whose reading is reported in **dBqps**
 (clause 3).
@@ -104,7 +104,7 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from functools import lru_cache
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -112,6 +112,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_1d_signal,
+    require_choice,
     require_finite_fields,
     require_positive,
     require_ranks,
@@ -349,6 +350,11 @@ def _alpha(time_constant: float, fs: float) -> float:
     return -math.expm1(-1.0 / (fs * time_constant))
 
 
+#: The two readings of the meter: through the clause 1 network, or flat.
+_Weighting = Literal["468", "Z"]
+_WEIGHTINGS: tuple[_Weighting, ...] = ("468", "Z")
+
+
 def _weighted_record(samples: np.ndarray, fs: float, *, weighted: bool) -> np.ndarray:
     """The record the detector rectifies, weighted or not.
 
@@ -467,9 +473,9 @@ class QuasiPeakResult(OwnsArrays):
         sample with it, in the record's own unit. This is the needle, and the
         shape of its rise and decay is the whole content of clause 2.
     :ivar fs: Sample rate of the record, Hz.
-    :ivar weighted: Whether the ITU-R BS.468-4 weighting network was in the
-        path. Clause 2's preamble runs every test but the clause 2.4
-        reversibility check through it.
+    :ivar weighting: ``"468"`` when the ITU-R BS.468-4 weighting network was
+        in the path, ``"Z"`` when it was not. Clause 2's preamble runs every
+        test but the clause 2.4 reversibility check through it.
     """
 
     reading: float
@@ -478,7 +484,7 @@ class QuasiPeakResult(OwnsArrays):
     trace: np.ndarray
     fs: float
     _: KW_ONLY
-    weighted: bool
+    weighting: _Weighting
 
     def __post_init__(self) -> None:
         """Reject a reading that its own trace does not support.
@@ -491,9 +497,11 @@ class QuasiPeakResult(OwnsArrays):
         derived from the scalar alone -- so the disagreement would print as a
         marker sitting off the curve, with no error anywhere.
 
-        :raises ValueError: if the trace is not a series, or if the reading
-            is not the maximum of the trace.
+        :raises ValueError: if the trace is not a series, if the reading is
+            not the maximum of the trace, or if ``weighting`` is neither
+            ``"468"`` nor ``"Z"``.
         """
+        require_choice(self.weighting, "weighting", _WEIGHTINGS)
         require_ranks(self, trace=1)
         peak = float(np.max(self.trace)) if self.trace.size else 0.0
         if not math.isclose(self.reading, peak, rel_tol=0.0, abs_tol=1e-12):
@@ -590,7 +598,7 @@ def quasi_peak_meter(
     x: SignalInput,
     fs: float | None = None,
     *,
-    weighted: bool = True,
+    weighting: _Weighting = "468",
     reference: float | None = None,
 ) -> QuasiPeakResult:
     """Read a record with the ITU-R BS.468-4 quasi-peak meter.
@@ -624,18 +632,20 @@ def quasi_peak_meter(
     :param fs: Sample rate, Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
         that disagrees with it raises instead of silently winning.
-    :param weighted: Whether to run the record through the clause 1
-        weighting network first (default ``True``, which is what clause 2's
-        preamble requires of every test but the clause 2.4 reversibility
-        check).
+    :param weighting: ``"468"`` (default) to run the record through the
+        clause 1 weighting network first, which is what clause 2's preamble
+        requires of every test but the clause 2.4 reversibility check, or
+        ``"Z"`` to read it unweighted.
     :param reference: The reference of ``level``, in the record's own
         unit. ``None`` (the default) is the 0.775 V of clause 2.6, and is
         refused for a calibrated Signal, whose samples are pascals.
     :return: A :class:`QuasiPeakResult`.
     :raises ValueError: If the record is empty or not 1-D, if *fs* is not
-        positive, if *reference* is not positive, or if a calibrated Signal
-        arrives without one.
+        positive, if *reference* is not positive, if a calibrated Signal
+        arrives without one, or if ``weighting`` is neither ``"468"`` nor
+        ``"Z"``.
     """
+    weighting = require_choice(weighting, "weighting", _WEIGHTINGS)
     fs = require_positive(resolve_fs(x, fs), "fs")
     reference = _resolve_reference(x, reference)
     samples = require_1d_signal(resolve_samples(x), "x")
@@ -643,7 +653,9 @@ def quasi_peak_meter(
         msg = "Input signal 'x' cannot be empty."
         raise ValueError(msg)
 
-    trace = _detector_trace(samples, fs, weighted=weighted) * _calibration_factor(fs)
+    trace = _detector_trace(
+        samples, fs, weighted=weighting == "468"
+    ) * _calibration_factor(fs)
     reading = float(trace.max())
     level = 20.0 * math.log10(reading / reference) if reading > 0.0 else -math.inf
     return QuasiPeakResult(
@@ -652,7 +664,7 @@ def quasi_peak_meter(
         reference=float(reference),
         trace=trace,
         fs=float(fs),
-        weighted=weighted,
+        weighting=weighting,
     )
 
 

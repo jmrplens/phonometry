@@ -860,7 +860,7 @@ def plot_low_frequency_level(
             lw=1.5,
             label=f"{_t('Indoor', language)}: {_num(result.indoor_level, language)} dB",
         )
-    weighted = "A" if result.a_weighted else "Z"
+    weighted = result.weighting
     ax.set_ylabel(f"$L_{{p{weighted},\\mathrm{{LF}}}}$ [dB]")
     ax.set_title(_t("Low frequency sound", language))
     ax.grid(visible=True, alpha=0.3)

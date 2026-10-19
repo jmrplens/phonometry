@@ -161,7 +161,7 @@ determination_standard_deviation(
     grade: Literal['precision', 'engineering', 'survey'],
     frequency: float | None = None,
     *,
-    band_type: Literal['octave', 'third'] = 'third',
+    fraction: Literal[1, 3] = 3,
 ) -> float
 ```
 
@@ -184,7 +184,7 @@ determination. Footnote 3 calls the grade-3 figure tentative.
 | :--- | :--- |
 | `grade` | `'precision'` (grade 1), `'engineering'` (grade 2) or `'survey'` (grade 3). |
 | `frequency` | Nominal mid-band centre in Hz, or `None` for the A-weighted row. |
-| `band_type` | `'octave'` or `'third'`; ignored when `frequency` is `None`. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves; ignored when `frequency` is `None`. |
 
 **Returns:** `s` in decibels.
 
@@ -206,7 +206,7 @@ DiscretePointIntensityResult(
     f3: np.ndarray | None,
     f4: np.ndarray | None,
     pressure_residual_index: np.ndarray | None,
-    band_type: str,
+    fraction: int,
     grade: str,
 )
 ```
@@ -612,7 +612,7 @@ position_count_factor(
     grade: Literal['precision', 'engineering', 'survey'],
     frequency: float | None = None,
     *,
-    band_type: Literal['octave', 'third'] = 'third',
+    fraction: Literal[1, 3] = 3,
 ) -> float
 ```
 
@@ -634,7 +634,7 @@ asked for, and asking the wrong half raises.
 | :--- | :--- |
 | `grade` | `'precision'` (grade 1), `'engineering'` (grade 2) or `'survey'` (grade 3). |
 | `frequency` | Nominal mid-band centre in Hz, as a Table B.2 label or the exact base-ten centre behind it. `None` asks for the A-weighted row instead, whose footnote fixes the summed range at 63 Hz to 4 kHz (octave) or 50 Hz to 6,3 kHz (one-third octave). |
-| `band_type` | `'octave'` or `'third'`, selecting the frequency column; ignored when `frequency` is `None`. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the frequency column; ignored when `frequency` is `None`. |
 
 **Returns:** `C`, dimensionless.
 
@@ -642,7 +642,7 @@ asked for, and asking the wrong half raises.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `grade` or `band_type` is unknown; if a per-band value is asked for at the survey grade, or an A-weighted one at the precision or engineering grade; or if `frequency` is not a tabulated band. |
+| ValueError | If `grade` is unknown or `fraction` is not 1 or 3; if a per-band value is asked for at the survey grade, or an A-weighted one at the precision or engineering grade; or if `frequency` is not a tabulated band. |
 
 ## sound_power_intensity_points
 
@@ -655,7 +655,7 @@ sound_power_intensity_points(
     pressure_residual_index: float | ArrayLike | None = None,
     temporal_intensity: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    band_type: Literal['octave', 'third'] = 'third',
+    fraction: Literal[1, 3] = 3,
     grade: Literal['precision', 'engineering', 'survey'] = 'engineering',
 ) -> DiscretePointIntensityResult
 ```
@@ -713,7 +713,7 @@ achieved grade rather than the requested one, which is the grade clause
 | `pressure_residual_index` | Optional $\delta_{pI0}$ of the instrument, dB, as a scalar or one value per band. |
 | `temporal_intensity` | Optional `(M, bands)` or `(M,)` short-time samples of the normal intensity at one typical position (clause 8.2), W/m^2, for `F1`. |
 | `frequencies` | Optional `(bands,)` nominal mid-band centres, Hz. |
-| `band_type` | `'octave'` or `'third'`, the column of Tables B.2 and 2 the frequencies are read in. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, the column of Tables B.2 and 2 the frequencies are read in. |
 | `grade` | `'precision'` (grade 1), `'engineering'` (grade 2, default) or `'survey'` (grade 3). |
 
 **Returns:** A [`DiscretePointIntensityResult`](/phonometry/reference/api/power/sound-power-intensity-points/#discretepointintensityresult).
@@ -722,4 +722,4 @@ achieved grade rather than the requested one, which is the grade clause
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `grade` is none of the three grades of Table 1, or `band_type` is neither `'octave'` nor `'third'`; if `normal_intensity` is neither 1D nor 2D, or `areas` is not 1D; if the position set is empty, the positions and areas disagree in length, or an area is not positive and finite; if an input is not finite; if the optional arrays do not span the same positions or bands; if a frequency is not a band of Tables B.2 and 2; or if `temporal_intensity` is neither 1D nor 2D, carries fewer than two samples, or holds a band whose mean is not positive and so leaves `F1` nothing to normalize by. |
+| ValueError | If `grade` is none of the three grades of Table 1, or `fraction` is neither 1 nor 3; if `normal_intensity` is neither 1D nor 2D, or `areas` is not 1D; if the position set is empty, the positions and areas disagree in length, or an area is not positive and finite; if an input is not finite; if the optional arrays do not span the same positions or bands; if a frequency is not a band of Tables B.2 and 2; or if `temporal_intensity` is neither 1D nor 2D, carries fewer than two samples, or holds a band whose mean is not positive and so leaves `F1` nothing to normalize by. |

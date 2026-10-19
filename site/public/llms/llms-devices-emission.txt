@@ -269,7 +269,7 @@ lp = np.tile(lw_true - 10.0 * np.log10(3.0), (6, 1))
 inten = emission.sound_power_intensity(i_n, np.full(6, 0.5),
                                        pressure_levels=lp,
                                        pressure_residual_index=18.0,
-                                       frequencies=freqs, band_type="octave")
+                                       frequencies=freqs, fraction=1)
 # ISO 3741: comparison against a reference source of known LW = 84 dB per band.
 comp = emission.sound_power_comparison(lw_true - 20.0, np.full(6, 64.0),
                                        np.full(6, 84.0), frequencies=freqs)

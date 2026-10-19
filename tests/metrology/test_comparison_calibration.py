@@ -196,7 +196,7 @@ def test_free_field_budget_takes_table_2_keys() -> None:
     budget = metrology.comparison_uncertainty_budget(
         {"reference": 0.1, "free_field": 0.05, "positioning": 0.03},
         frequency_hz=4000.0,
-        field="free_field",
+        field="free",
     )
     assert budget.names == ("reference", "positioning", "free_field")
     assert budget.standard == "IEC 61094-8:2012"
@@ -209,7 +209,7 @@ def test_budget_refuses_a_component_of_the_other_table() -> None:
     components = {"drift": 0.017}
     with pytest.raises(ValueError, match=r"not components of IEC 61094-8"):
         metrology.comparison_uncertainty_budget(
-            components, frequency_hz=1000.0, field="free_field"
+            components, frequency_hz=1000.0, field="free"
         )
 
 
@@ -289,9 +289,7 @@ def test_pressure_calibration_refuses_to_skip_the_interchange() -> None:
 
 def test_free_field_simultaneous_without_interchange_reads_the_difference() -> None:
     difference = _L_REF - _L_TEST
-    result = metrology.simultaneous_comparison(
-        _F, _L_REF, difference, field="free_field"
-    )
+    result = metrology.simultaneous_comparison(_F, _L_REF, difference, field="free")
     np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
     assert result.standard == "IEC 61094-8:2012"
 
@@ -321,7 +319,7 @@ def test_monitor_ratio_cancels_a_drifting_source() -> None:
             reference_level=monitor_gain + field_ref,
             test_level=monitor_gain + field_test,
         ),
-        field="free_field",
+        field="free",
     )
     np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
     assert result.excitation == "sequential"
@@ -653,7 +651,7 @@ def test_free_field_difference_is_added_to_a_pressure_calibrated_reference() -> 
         _L_REF,
         _L_REF + difference + 94.0,
         _L_TEST + 94.0,
-        field="free_field",
+        field="free",
         reference_free_field_difference=difference,
     )
     np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
@@ -852,9 +850,9 @@ def test_calibration_plot_draws_the_band_and_both_levels() -> None:
     np.testing.assert_allclose(ax.get_lines()[0].get_ydata(), _L_TEST, atol=1e-12)
     plt.close(fig)
     fig, ax = plt.subplots()
-    metrology.simultaneous_comparison(
-        _F, _L_REF, _L_REF - _L_TEST, field="free_field"
-    ).plot(ax, language="es")
+    metrology.simultaneous_comparison(_F, _L_REF, _L_REF - _L_TEST, field="free").plot(
+        ax, language="es"
+    )
     assert ax.get_title() == "Sensibilidad en campo libre por comparación (IEC 61094-8)"
     assert len(ax.collections) == 0
     plt.close(fig)
@@ -871,7 +869,7 @@ def test_free_field_plot_draws_the_reference_free_field_level() -> None:
         _L_REF,
         _L_REF + difference + 74.0,
         _L_TEST + 74.0,
-        field="free_field",
+        field="free",
         reference_free_field_difference=difference,
     )
     fig, ax = plt.subplots()

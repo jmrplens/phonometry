@@ -223,7 +223,7 @@ class EcmaFluctuationStrength(OwnsArrays):
     times: np.ndarray
     fluctuation_strength_vs_time: np.ndarray
     specific_fluctuation_strength_vs_time: np.ndarray
-    field: str
+    field: Literal["free", "diffuse"]
 
     def __post_init__(self) -> None:
         """Reject a result whose curves disagree with the axes they are drawn on.

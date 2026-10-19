@@ -84,8 +84,10 @@ from ..._internal.boundary import round_half_away_from_zero, round_half_up
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
+from ..._internal.types import BAND_SET_NAMES
 from ..._internal.validation import (
     check_engine,
+    require_band_fraction,
     require_choice,
     require_equal_shapes,
     require_ranks,
@@ -97,6 +99,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._internal.types import BandFraction
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -168,6 +171,9 @@ _FREQ_OCTAVE: tuple[float, ...] = (125.0, 250.0, 500.0, 1000.0, 2000.0)
 #: and 5 octave bands (125 Hz to 2000 Hz).
 _N_THIRD_OCTAVE_BANDS = 16
 _N_OCTAVE_BANDS = 5
+#: The ``fraction`` of each band set: octaves and one-third octaves.
+_OCTAVE = 1
+_THIRD_OCTAVE = 3
 
 #: Index of the 500 Hz band in each band set (the rating is read there).
 _INDEX_500_THIRD = 7
@@ -179,9 +185,6 @@ _INDEX_500_OCTAVE = 2
 #: 10,0 dB (5 octave bands) limits.
 _MAX_UNFAVOURABLE_THIRD = 32.0
 _MAX_UNFAVOURABLE_OCTAVE = 10.0
-
-#: The refusal of a band set the ratings do not read.
-_BANDS_REFUSAL = "'bands' must be 'third-octave', 'octave' or None."
 
 #: Tolerance absorbing floating-point noise when comparing the
 #: unfavourable-deviation sum (a true multiple of 0,1 dB) to the bound.
@@ -393,47 +396,47 @@ _THIRD_OCTAVE_ONLY: frozenset[float] = frozenset(_FREQ_THIRD_OCTAVE) - frozenset
 
 def _by_band(
     values: Mapping[float, float] | Sequence[float] | np.ndarray,
-    bands: str | None,
+    fraction: BandFraction | None,
     name: str,
-) -> tuple[np.ndarray, str | None]:
+) -> tuple[np.ndarray, BandFraction | None]:
     """The values in rating order, read from a mapping by band when given one.
 
     A mapping is keyed by band centre frequency in hertz, as
     :meth:`~phonometry.io.BandedRow.spectrum` returns a row's bands: a
     mapping that holds any one-third-octave band that is not an octave
     centre is read as one-third octaves (100 Hz to 3150 Hz), any other as
-    the five octaves 125 Hz to 2000 Hz, unless *bands* says which. Keys
+    the five octaves 125 Hz to 2000 Hz, unless *fraction* says which. Keys
     outside the rated range are not read. A band the rating needs and the
     mapping does not hold is refused, never filled from its neighbours, so
     a spectrum with a gap cannot be rated as if it had none.
 
     :return: The values as an array in the order of the rating bands, and
-        the band set they were read as (*bands* itself for a sequence).
+        the band set they were read as (*fraction* itself for a sequence).
     :raises ValueError: for a mapping that lacks a rating band, naming each
         one missing.
     """
+    if fraction is not None:
+        fraction = require_band_fraction(fraction, "fraction")
     if not isinstance(values, Mapping):
-        return np.asarray(values, dtype=np.float64), bands
-    if bands is None:
+        return np.asarray(values, dtype=np.float64), fraction
+    if fraction is None:
         third = any(centre in values for centre in _THIRD_OCTAVE_ONLY)
-        bands = "third-octave" if third else "octave"
-    if bands == "third-octave":
-        centres = _FREQ_THIRD_OCTAVE
-    elif bands == "octave":
-        centres = _FREQ_OCTAVE
-    else:
-        msg = _BANDS_REFUSAL
-        raise ValueError(msg)
+        fraction = 3 if third else 1
+    centres = _FREQ_THIRD_OCTAVE if fraction == _THIRD_OCTAVE else _FREQ_OCTAVE
     missing = [centre for centre in centres if centre not in values]
     if missing:
         named = ", ".join(f"{centre:g}" for centre in missing)
+        band_set = BAND_SET_NAMES[fraction]
         msg = (
-            f"{name!r} holds no value in the {bands} band of {named} Hz, and "
-            f"ISO 717 rates the {bands} bands {centres[0]:g} Hz to "
+            f"{name!r} holds no value in the {band_set} band of {named} Hz, and "
+            f"ISO 717 rates the {band_set} bands {centres[0]:g} Hz to "
             f"{centres[-1]:g} Hz; a missing band is never filled in"
         )
         raise ValueError(msg)
-    return np.asarray([values[centre] for centre in centres], dtype=np.float64), bands
+    return (
+        np.asarray([values[centre] for centre in centres], dtype=np.float64),
+        fraction,
+    )
 
 
 def _require_finite_curves(owner: object, *fields: str) -> None:
@@ -874,14 +877,14 @@ def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
 
 
 def _resolve_band_set(
-    n: int, bands: str | None
+    n: int, fraction: BandFraction | None
 ) -> tuple[tuple[int, ...], float, int, tuple[int, ...], tuple[int, ...]]:
     """Select the reference curve, bound and spectra for the band set.
 
     :return: ``(reference, max_unfavourable, index_500, spectrum1,
         spectrum2)``.
     """
-    if bands == "third-octave" or (bands is None and n == _N_THIRD_OCTAVE_BANDS):
+    if fraction == _THIRD_OCTAVE or (fraction is None and n == _N_THIRD_OCTAVE_BANDS):
         if n != _N_THIRD_OCTAVE_BANDS:
             msg = f"One-third-octave rating needs 16 bands (100-3150 Hz), got {n}."
             raise ValueError(msg)
@@ -892,7 +895,7 @@ def _resolve_band_set(
             _SPECTRUM1_THIRD,
             _SPECTRUM2_THIRD,
         )
-    if bands == "octave" or (bands is None and n == _N_OCTAVE_BANDS):
+    if fraction == _OCTAVE or (fraction is None and n == _N_OCTAVE_BANDS):
         if n != _N_OCTAVE_BANDS:
             msg = f"Octave rating needs 5 bands (125-2000 Hz), got {n}."
             raise ValueError(msg)
@@ -903,9 +906,6 @@ def _resolve_band_set(
             _SPECTRUM1_OCTAVE,
             _SPECTRUM2_OCTAVE,
         )
-    if bands is not None:
-        msg = _BANDS_REFUSAL
-        raise ValueError(msg)
     msg = (
         "Expected 16 one-third-octave (100-3150 Hz) or 5 octave "
         f"(125-2000 Hz) values, got {n}."
@@ -965,7 +965,7 @@ def _adaptation_term(
 
 def weighted_rating(
     values_by_band: Mapping[float, float] | Sequence[float] | np.ndarray,
-    bands: str | None = None,
+    fraction: BandFraction | None = None,
 ) -> WeightedRatingResult:
     """Single-number weighted rating and C / Ctr per ISO 717-1.
 
@@ -987,22 +987,23 @@ def weighted_rating(
         one that holds any one-third-octave band that is not an octave
         centre as the 16 one-third octaves, any other as the 5 octaves, and
         a rating band it lacks is refused rather than filled.
-    :param bands: ``"third-octave"``, ``"octave"`` or ``None`` to infer
-        the band set from the number of values or the keys of the mapping.
+    :param fraction: The band set, 3 for one-third octaves or 1 for octaves,
+        or ``None`` to infer it from the number of values or the keys of the
+        mapping.
     :return: :class:`WeightedRatingResult` with ``rating``, ``c``,
         ``ctr`` and ``unfavorable_sum``.
     :raises ValueError: If the number of values does not match the band
         set, if a mapping lacks a band of it, or if any value is
         non-finite.
     """
-    data, bands = _by_band(values_by_band, bands, "values_by_band")
+    data, fraction = _by_band(values_by_band, fraction, "values_by_band")
     if data.ndim != 1:
         raise ValueError(_VALUES_1D_MSG)
     if not np.all(np.isfinite(data)):
         raise ValueError(_VALUES_FINITE_MSG)
 
     reference, limit, index_500, spectrum1, spectrum2 = _resolve_band_set(
-        int(data.size), bands
+        int(data.size), fraction
     )
     measured = _round_half_up_tenths(data)
     ref = np.asarray(reference, dtype=np.float64)
@@ -1024,14 +1025,14 @@ def weighted_rating(
 
 
 def _resolve_impact_band_set(
-    n: int, bands: str | None
+    n: int, fraction: BandFraction | None
 ) -> tuple[tuple[int, ...], float, int, int, int]:
     """Select the impact reference curve, bound, indices for the band set.
 
     :return: ``(reference, max_unfavourable, index_500, octave_offset,
         ci_band_count)``.
     """
-    if bands == "third-octave" or (bands is None and n == _N_THIRD_OCTAVE_BANDS):
+    if fraction == _THIRD_OCTAVE or (fraction is None and n == _N_THIRD_OCTAVE_BANDS):
         if n != _N_THIRD_OCTAVE_BANDS:
             msg = (
                 f"One-third-octave impact rating needs 16 bands (100-3150 Hz), got {n}."
@@ -1044,7 +1045,7 @@ def _resolve_impact_band_set(
             0,
             _CI_THIRD_OCTAVE_BANDS,
         )
-    if bands == "octave" or (bands is None and n == _N_OCTAVE_BANDS):
+    if fraction == _OCTAVE or (fraction is None and n == _N_OCTAVE_BANDS):
         if n != _N_OCTAVE_BANDS:
             msg = f"Octave impact rating needs 5 bands (125-2000 Hz), got {n}."
             raise ValueError(msg)
@@ -1055,9 +1056,6 @@ def _resolve_impact_band_set(
             _IMPACT_OCTAVE_OFFSET,
             5,
         )
-    if bands is not None:
-        msg = _BANDS_REFUSAL
-        raise ValueError(msg)
     msg = (
         "Expected 16 one-third-octave (100-3150 Hz) or 5 octave "
         f"(125-2000 Hz) values, got {n}."
@@ -1080,7 +1078,7 @@ def _impact_ci(measured: np.ndarray, rating: int, n_bands: int) -> int:
 
 def weighted_impact_rating(
     values_by_band: Mapping[float, float] | Sequence[float] | np.ndarray,
-    bands: str | None = None,
+    fraction: BandFraction | None = None,
 ) -> ImpactRatingResult:
     r"""Single-number weighted impact rating and CI per ISO 717-2.
 
@@ -1108,22 +1106,23 @@ def weighted_impact_rating(
         values as octave bands. A mapping of band centre frequency in hertz
         to level is read band by band, as :func:`weighted_rating` reads
         one, and a rating band it lacks is refused rather than filled.
-    :param bands: ``"third-octave"``, ``"octave"`` or ``None`` to infer
-        the band set from the number of values or the keys of the mapping.
+    :param fraction: The band set, 3 for one-third octaves or 1 for octaves,
+        or ``None`` to infer it from the number of values or the keys of the
+        mapping.
     :return: :class:`ImpactRatingResult` with ``rating``, ``ci`` and
         ``unfavorable_sum``.
     :raises ValueError: If the number of values does not match the band
         set, if a mapping lacks a band of it, or if any value is
         non-finite.
     """
-    data, bands = _by_band(values_by_band, bands, "values_by_band")
+    data, fraction = _by_band(values_by_band, fraction, "values_by_band")
     if data.ndim != 1:
         raise ValueError(_VALUES_1D_MSG)
     if not np.all(np.isfinite(data)):
         raise ValueError(_VALUES_FINITE_MSG)
 
     reference, limit, index_500, octave_offset, ci_bands = _resolve_impact_band_set(
-        int(data.size), bands
+        int(data.size), fraction
     )
     measured = _round_half_up_tenths(data)
     ref = np.asarray(reference, dtype=np.float64)
@@ -1216,7 +1215,7 @@ def _impact_improvement_rating(
     delta_l: Mapping[float, float] | Sequence[float] | np.ndarray,
 ) -> ImpactImprovementRatingResult:
     """``ΔLw``, ``CI,Δ`` and ``CI,r`` of one improvement spectrum."""
-    dl, _ = _by_band(delta_l, "third-octave", "delta_l")
+    dl, _ = _by_band(delta_l, 3, "delta_l")
     ci_delta = impact_improvement_adaptation_term(dl)
     return ImpactImprovementRatingResult(
         delta_lw=weighted_impact_improvement(dl),
@@ -1717,7 +1716,7 @@ def _impact_improvement_ratings(
     one_decimal: bool,
 ) -> tuple[float, float]:
     """``(ΔLw, CI,Δ)`` of Formulas (1), (2) and (A.4)/(A.6), unrounded types."""
-    dl, _ = _by_band(delta_l, "third-octave", "delta_l")
+    dl, _ = _by_band(delta_l, 3, "delta_l")
     bare = _reference_floor_curve(reference_floor)
     covered = bare - _validated_improvement(dl, "delta_l")  # Formula (1)
     rated_bare = weighted_impact_rating_extended(bare, one_decimal=one_decimal)

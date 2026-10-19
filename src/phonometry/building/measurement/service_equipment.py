@@ -148,8 +148,10 @@ from ..._internal.boundary import round_half_up
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean
+from ..._internal.types import BAND_SET_NAMES
 from ..._internal.validation import (
     _as_float64,
+    require_band_fraction,
     require_choice,
     require_count,
     require_positive,
@@ -160,6 +162,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from ..._internal.types import BandFraction
 
 __all__ = [
     "SERVICE_EQUIPMENT_OPERATING_CONDITIONS",
@@ -302,15 +306,16 @@ _C_OCTAVE: Final = (-3.0, -0.8, -0.2, 0.0, 0.0, 0.0, -0.2, -0.8, -3.0)
 
 #: A- and C-weighting corrections of **ISO/DIS 16032:2023 Annex A, Table A.1**
 #: (E DIN EN ISO 16032:2023-05, printed p. 12 of the English text), in dB.
-#: Keyed by band width (``"third"``, 25 Hz to 10 000 Hz, or ``"octave"``,
-#: 31,5 Hz to 8 000 Hz), then by weighting (``"A"`` or ``"C"``), then by the
-#: nominal band centre in Hz. The one-third-octave C-weighting at 25 Hz and from
+#: Keyed by band set, the ``fraction`` of :func:`service_equipment_level` (3,
+#: one-third octaves 25 Hz to 10 000 Hz, or 1, octaves 31,5 Hz to 8 000 Hz),
+#: then by weighting (``"A"`` or ``"C"``), then by the nominal band centre in
+#: Hz. The one-third-octave C-weighting at 25 Hz and from
 #: 1 600 Hz to 10 000 Hz is the IEC 61672-1:2013 value where the draft prints a
 #: defect; every other cell is the print.
-SERVICE_EQUIPMENT_WEIGHTING: Mapping[str, Mapping[str, Mapping[float, float]]] = (
+SERVICE_EQUIPMENT_WEIGHTING: Mapping[int, Mapping[str, Mapping[float, float]]] = (
     MappingProxyType(
         {
-            "third": MappingProxyType(
+            3: MappingProxyType(
                 {
                     "A": MappingProxyType(
                         dict(zip(_THIRD_OCTAVE_BANDS, _A_THIRD, strict=True))
@@ -320,7 +325,7 @@ SERVICE_EQUIPMENT_WEIGHTING: Mapping[str, Mapping[str, Mapping[float, float]]] =
                     ),
                 }
             ),
-            "octave": MappingProxyType(
+            1: MappingProxyType(
                 {
                     "A": MappingProxyType(
                         dict(zip(_OCTAVE_BANDS, _A_OCTAVE, strict=True))
@@ -353,19 +358,20 @@ _TABLE2_THIRD_ROWS: Final = (
 
 #: Reproducibility standard deviation of a room-average band level,
 #: **ISO/DIS 16032:2023 Clause 10, Table 2** (printed p. 10), in dB. Keyed by
-#: band width, then by the nominal band centre in Hz: 1,9 dB from 25 Hz to
+#: band set (3 one-third octaves, 1 octaves), then by the nominal band centre
+#: in Hz: 1,9 dB from 25 Hz to
 #: 160 Hz (octaves 31,5 Hz to 125 Hz), 1,5 dB from 200 Hz to 315 Hz (250 Hz),
 #: 1,2 dB from 400 Hz to 630 Hz (500 Hz) and 1,0 dB from 800 Hz to 10 000 Hz
 #: (1 000 Hz to 8 000 Hz). The values are estimated from a limited number of
 #: measurements of sources constant in time; a fluctuating source increases the
 #: uncertainty, maximum levels most of all.
-SERVICE_EQUIPMENT_REPRODUCIBILITY: Mapping[str, Mapping[float, float]] = (
+SERVICE_EQUIPMENT_REPRODUCIBILITY: Mapping[int, Mapping[float, float]] = (
     MappingProxyType(
         {
-            "third": MappingProxyType(
+            3: MappingProxyType(
                 {f: sigma for centres, sigma in _TABLE2_THIRD_ROWS for f in centres}
             ),
-            "octave": MappingProxyType(
+            1: MappingProxyType(
                 {31.5: 1.9, 63.0: 1.9, 125.0: 1.9, 250.0: 1.5, 500.0: 1.2}
                 | dict.fromkeys((1000.0, 2000.0, 4000.0, 8000.0), 1.0)
             ),
@@ -703,9 +709,7 @@ _LIMITED_CORRECTION_DB = 2.2
 
 #: Standardization range of 7.7 and 8: one-third-octave 50 Hz to 5 000 Hz,
 #: octave 63 Hz to 4 000 Hz (Hz, inclusive).
-_STANDARDIZATION_RANGE: Final = MappingProxyType(
-    {"third": (50.0, 5000.0), "octave": (63.0, 4000.0)}
-)
+_STANDARDIZATION_RANGE: Final = MappingProxyType({3: (50.0, 5000.0), 1: (63.0, 4000.0)})
 
 #: Frequency ranges of the weighted values (4.2, 7.8), in Hz, inclusive. The
 #: octave counterpart of the restricted range is the 63 Hz to 4 000 Hz the
@@ -713,12 +717,10 @@ _STANDARDIZATION_RANGE: Final = MappingProxyType(
 #: octave range is the 31,5 Hz to 8 000 Hz of 4.2.
 _WEIGHTING_RANGES: Final = MappingProxyType(
     {
-        "third": MappingProxyType(
+        3: MappingProxyType(
             {"restricted": (50.0, 5000.0), "extended": (25.0, 10000.0)}
         ),
-        "octave": MappingProxyType(
-            {"restricted": (63.0, 4000.0), "extended": (31.5, 8000.0)}
-        ),
+        1: MappingProxyType({"restricted": (63.0, 4000.0), "extended": (31.5, 8000.0)}),
     }
 )
 
@@ -781,12 +783,12 @@ _INSTRUMENT_AGREEMENT_DB = 2.0
 #: Calibrations a deviation needs: one reading and one before it.
 _MIN_CALIBRATIONS = 2
 
-_Band = Literal["third", "octave"]
 _Quantity = Literal["Smax", "Fmax", "eq"]
 _Range = Literal["restricted", "extended"]
 _Mounting = Literal["wall", "ceiling"]
 _QUANTITIES: Final = ("Smax", "Fmax", "eq")
-_BANDS: Final = ("third", "octave")
+#: The ``fraction`` of the one-third-octave band set.
+_THIRD = 3
 _RANGES: Final = ("restricted", "extended")
 _MOUNTINGS: Final = ("wall", "ceiling")
 
@@ -815,9 +817,9 @@ def _round_half_up(value: float, decimals: int = 0) -> float:
     return float(_round_half_up_array(value, decimals))
 
 
-def _nominal_bands(frequencies: ArrayLike, band: str) -> np.ndarray:
+def _nominal_bands(frequencies: ArrayLike, fraction: int) -> np.ndarray:
     """Match each given centre to the nominal band of 4.2 it stands for."""
-    table = np.asarray(_THIRD_OCTAVE_BANDS if band == "third" else _OCTAVE_BANDS)
+    table = np.asarray(_THIRD_OCTAVE_BANDS if fraction == _THIRD else _OCTAVE_BANDS)
     freqs = np.atleast_1d(_as_float64(frequencies, "frequencies"))
     if freqs.ndim != 1 or freqs.size == 0 or not np.all(np.isfinite(freqs)):
         msg = (
@@ -830,7 +832,8 @@ def _nominal_bands(frequencies: ArrayLike, band: str) -> np.ndarray:
         if not math.isclose(f, float(table[j]), rel_tol=_NOMINAL_TOLERANCE):
             low, high = table[0], table[-1]
             msg = (
-                f"{f:g} Hz is not a nominal {band}-band centre of ISO/DIS 16032 4.2 "
+                f"{f:g} Hz is not a nominal {BAND_SET_NAMES[fraction]}-band centre "
+                "of ISO/DIS 16032 4.2 "
                 f"({low:g} Hz to {high:g} Hz)."
             )
             raise ValueError(msg)
@@ -849,9 +852,9 @@ def _in_range(nominal: np.ndarray, bounds: tuple[float, float]) -> np.ndarray:
     )
 
 
-def _covers(nominal: np.ndarray, band: str, bounds: tuple[float, float]) -> bool:
+def _covers(nominal: np.ndarray, fraction: int, bounds: tuple[float, float]) -> bool:
     """Whether every nominal band of a range is among the given ones."""
-    table = np.asarray(_THIRD_OCTAVE_BANDS if band == "third" else _OCTAVE_BANDS)
+    table = np.asarray(_THIRD_OCTAVE_BANDS if fraction == _THIRD else _OCTAVE_BANDS)
     needed = table[_in_range(table, bounds)]
     return bool(np.all(np.isin(needed, nominal)))
 
@@ -1128,7 +1131,7 @@ class ServiceEquipmentResult(OwnsArrays):
     :attr:`frequencies`.
 
     :ivar frequencies: Nominal band centres, in Hz.
-    :ivar band: ``"third"`` or ``"octave"``.
+    :ivar fraction: The band set, 3 for one-third octaves or 1 for octaves.
     :ivar quantity: The Table 1 quantity: ``"Smax"``, ``"Fmax"`` or ``"eq"``.
     :ivar a_weighting_range: ``"restricted"`` (50 Hz to 5 000 Hz; octave
         63 Hz to 4 000 Hz) or ``"extended"`` (25 Hz to 10 000 Hz; octave
@@ -1143,7 +1146,7 @@ class ServiceEquipmentResult(OwnsArrays):
         average itself when there is no background).
     :ivar standardizable: Per band, whether 7.7 lets it be standardized or
         normalized (50 Hz to 5 000 Hz; octave 63 Hz to 4 000 Hz); read from
-        ``frequencies`` and ``band``, so it is not a field.
+        ``frequencies`` and ``fraction``, so it is not a field.
     :ivar standardized_db: :math:`L_{\mathrm{n}T}` per band (Formula (5)), in dB,
         or ``None`` without a reverberation time. Bands outside the range are
         the corrected level, unstandardized.
@@ -1159,7 +1162,7 @@ class ServiceEquipmentResult(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    band: str
+    fraction: int
     quantity: str
     a_weighting_range: str
     readings_db: np.ndarray
@@ -1176,8 +1179,10 @@ class ServiceEquipmentResult(OwnsArrays):
         """Reject a result whose band arrays do not share one band set.
 
         :raises ValueError: if a band array differs in length from
-            :attr:`frequencies` or the readings are not two-dimensional.
+            :attr:`frequencies`, the readings are not two-dimensional or
+            ``fraction`` is not 1 or 3.
         """
+        require_band_fraction(self.fraction, "fraction")
         shape = np.asarray(self.frequencies).shape
         bands = [
             self.average_db,
@@ -1202,10 +1207,12 @@ class ServiceEquipmentResult(OwnsArrays):
         """Per band, whether 7.7 lets it be standardized or normalized.
 
         :return: One boolean per band, ``True`` inside the range 7.7 gives for
-            :attr:`band`.
+            :attr:`fraction`.
         """
         return np.asarray(
-            _in_range(np.asarray(self.frequencies), _STANDARDIZATION_RANGE[self.band]),
+            _in_range(
+                np.asarray(self.frequencies), _STANDARDIZATION_RANGE[self.fraction]
+            ),
             dtype=bool,
         )
 
@@ -1221,7 +1228,7 @@ class ServiceEquipmentResult(OwnsArrays):
         """The bands a weighted value of this result was summed over."""
         key = self.a_weighting_range if weighting == "A" else "extended"
         return _in_range(
-            np.asarray(self.frequencies), _WEIGHTING_RANGES[self.band][key]
+            np.asarray(self.frequencies), _WEIGHTING_RANGES[self.fraction][key]
         )
 
     def upper_limit(self, weighting: str) -> bool:
@@ -1307,7 +1314,7 @@ def service_equipment_level(
     frequencies: ArrayLike,
     *,
     quantity: _Quantity,
-    band: _Band = "third",
+    fraction: BandFraction = 3,
     background_db: ArrayLike | None = None,
     reverberation_time: ArrayLike | None = None,
     volume: float | None = None,
@@ -1333,11 +1340,12 @@ def service_equipment_level(
         (one-dimensional for a single reading), in dB.
     :param frequencies: Nominal band centres, in Hz, increasing: the
         one-third-octave bands of 25 Hz to 10 000 Hz or the octave bands of
-        31,5 Hz to 8 000 Hz, as ``band`` says.
+        31,5 Hz to 8 000 Hz, as ``fraction`` says.
     :param quantity: The Table 1 quantity measured: ``"Smax"``, ``"Fmax"`` or
         ``"eq"``. It names the single numbers and nothing else.
-    :param band: ``"third"`` (default) or ``"octave"``. 6 asks for the weighted
-        values from one-third-octave bands; octave results are optional.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves. 6 asks for the weighted values from one-third-octave bands;
+        octave results are optional.
     :param background_db: Background band levels, in dB, one per band or one
         row per microphone position (energy-averaged over the positions, as the
         2004 edition says in so many words and the draft leaves implicit).
@@ -1360,13 +1368,13 @@ def service_equipment_level(
         reverberation time.
     """
     require_choice(quantity, "quantity", _QUANTITIES)
-    require_choice(band, "band", _BANDS)
+    fraction = require_band_fraction(fraction, "fraction")
     require_choice(a_weighting_range, "a_weighting_range", _RANGES)
     # T0 is read only with a reverberation time, and checked on every call.
     t0 = _positive_number(
         reference_reverberation_time_s, "reference_reverberation_time_s"
     )
-    nominal = _nominal_bands(frequencies, band)
+    nominal = _nominal_bands(frequencies, fraction)
     readings = _as_levels(levels, "levels")
     if readings.ndim == 1:
         readings = readings[np.newaxis, :]
@@ -1374,16 +1382,19 @@ def service_equipment_level(
         msg = "'levels' must be (readings, bands) with one column per band of 'frequencies'."
         raise ValueError(msg)
 
-    a_mask = _in_range(nominal, _WEIGHTING_RANGES[band][a_weighting_range])
-    if not _covers(nominal, band, _WEIGHTING_RANGES[band][a_weighting_range]):
-        low, high = _WEIGHTING_RANGES[band][a_weighting_range]
+    a_mask = _in_range(nominal, _WEIGHTING_RANGES[fraction][a_weighting_range])
+    if not _covers(nominal, fraction, _WEIGHTING_RANGES[fraction][a_weighting_range]):
+        low, high = _WEIGHTING_RANGES[fraction][a_weighting_range]
         msg = (
-            f"The {a_weighting_range} A-weighting range needs every {band} band from "
+            f"The {a_weighting_range} A-weighting range needs every "
+            f"{BAND_SET_NAMES[fraction]} band from "
             f"{low:g} Hz to {high:g} Hz (ISO/DIS 16032 7.8)."
         )
         raise ValueError(msg)
-    c_bounds = _WEIGHTING_RANGES[band]["extended"]
-    c_mask = _in_range(nominal, c_bounds) if _covers(nominal, band, c_bounds) else None
+    c_bounds = _WEIGHTING_RANGES[fraction]["extended"]
+    c_mask = (
+        _in_range(nominal, c_bounds) if _covers(nominal, fraction, c_bounds) else None
+    )
 
     average = _round_half_up_array(energy_mean(readings, axis=0), 1)
 
@@ -1398,7 +1409,7 @@ def service_equipment_level(
         )
         corrected = background.corrected_db
 
-    standardizable = _in_range(nominal, _STANDARDIZATION_RANGE[band])
+    standardizable = _in_range(nominal, _STANDARDIZATION_RANGE[fraction])
     standardized, normalized = _standardize(
         corrected,
         standardizable,
@@ -1407,7 +1418,7 @@ def service_equipment_level(
         t0=t0,
     )
 
-    weights = SERVICE_EQUIPMENT_WEIGHTING[band]
+    weights = SERVICE_EQUIPMENT_WEIGHTING[fraction]
     a_corr = np.asarray([weights["A"][float(f)] for f in nominal])
     c_corr = np.asarray([weights["C"][float(f)] for f in nominal])
     unrounded: dict[str, float] = {}
@@ -1421,11 +1432,11 @@ def service_equipment_level(
     ratings = {k: int(_round_half_up(v)) for k, v in unrounded.items()}
 
     reproducibility = np.asarray(
-        [SERVICE_EQUIPMENT_REPRODUCIBILITY[band][float(f)] for f in nominal]
+        [SERVICE_EQUIPMENT_REPRODUCIBILITY[fraction][float(f)] for f in nominal]
     )
     return ServiceEquipmentResult(
         frequencies=nominal,
-        band=band,
+        fraction=fraction,
         quantity=quantity,
         a_weighting_range=a_weighting_range,
         readings_db=readings,

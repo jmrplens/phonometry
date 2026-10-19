@@ -69,7 +69,7 @@ def _sections() -> list[EQSection]:
 #: arguments it needs. Kept here rather than derived from the source, so that
 #: a function leaving the eligible set has to be removed here deliberately.
 TRANSFORMS = [
-    ("weighting_filter", lambda: {"curve": "A"}),
+    ("weighting_filter", lambda: {"weighting": "A"}),
     ("parametric_eq", lambda: {"sections": _sections()}),
 ]
 IDS = [name for name, _ in TRANSFORMS]
@@ -237,7 +237,7 @@ def test_the_object_forms_of_the_filters_wrap_too() -> None:
     assert isinstance(weighted, Signal)
     assert weighted.calibration_factor == 1.0
     assert np.array_equal(
-        np.asarray(weighted), np.asarray(weighting_filter(sig, curve="A"))
+        np.asarray(weighted), np.asarray(weighting_filter(sig, weighting="A"))
     )
 
     equalized = ParametricEQ(FS, _sections()).filter(sig)

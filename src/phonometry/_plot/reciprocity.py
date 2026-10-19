@@ -82,13 +82,13 @@ _CYCLE = (_C_SECONDARY, _C_TERTIARY, _C_QUATERNARY, _C_MUTED, _C_REFERENCE)
 _CALIBRATION_TITLES = MappingProxyType(
     {
         "pressure": "Pressure sensitivity by reciprocity (IEC 61094-2)",
-        "free_field": "Free-field sensitivity by reciprocity (IEC 61094-3)",
+        "free": "Free-field sensitivity by reciprocity (IEC 61094-3)",
     }
 )
 _BUDGET_TITLES = MappingProxyType(
     {
         "pressure": "Pressure reciprocity budget (IEC 61094-2 Table 1)",
-        "free_field": "Free-field reciprocity budget (IEC 61094-3 Table 1)",
+        "free": "Free-field reciprocity budget (IEC 61094-3 Table 1)",
     }
 )
 
@@ -101,7 +101,7 @@ _COUPLER_TITLES = MappingProxyType(
 _PARAMETER_TITLES = MappingProxyType(
     {
         "pressure": r"Uncertainty from $Z_\mathrm{{a}}$, microphone {n} (IEC 61094-2 7.5)",
-        "free_field": r"Uncertainty from $Z_\mathrm{{a}}$, microphone {n} (IEC 61094-3 7.8)",
+        "free": r"Uncertainty from $Z_\mathrm{{a}}$, microphone {n} (IEC 61094-3 7.8)",
     }
 )
 _ATTENUATION_TITLE = "Air attenuation (IEC 61094-3 Annex B): {t} °C, {p} kPa, {h} %"
@@ -170,13 +170,13 @@ _STRINGS: Mapping[str, str] = MappingProxyType(
             "pressure"
         ]: "Sensibilidad en presión por reciprocidad (IEC 61094-2)",
         _CALIBRATION_TITLES[
-            "free_field"
+            "free"
         ]: "Sensibilidad en campo libre por reciprocidad (IEC 61094-3)",
         _BUDGET_TITLES[
             "pressure"
         ]: "Balance de incertidumbre en presión (IEC 61094-2, tabla 1)",
         _BUDGET_TITLES[
-            "free_field"
+            "free"
         ]: "Balance de incertidumbre en campo libre (IEC 61094-3, tabla 1)",
         r"Expanded uncertainty $U$ ($k$ = {k})": r"Incertidumbre expandida $U$ ($k$ = {k})",
         r"Combined standard uncertainty $u_\mathrm{c}$": r"Incertidumbre típica combinada $u_\mathrm{c}$",
@@ -214,7 +214,7 @@ _STRINGS: Mapping[str, str] = MappingProxyType(
             "pressure"
         ]: r"Incertidumbre debida a $Z_\mathrm{{a}}$, micrófono {n} (IEC 61094-2, 7.5)",
         _PARAMETER_TITLES[
-            "free_field"
+            "free"
         ]: r"Incertidumbre debida a $Z_\mathrm{{a}}$, micrófono {n} (IEC 61094-3, 7.8)",
         _ALPHA_TOTAL_LABEL: _ALPHA_TOTAL_LABEL,
         _ALPHA_CLASSICAL_LABEL: _ALPHA_CLASSICAL_LABEL,
@@ -750,7 +750,7 @@ def plot_parameter_uncertainty(
         :class:`~phonometry.metrology.reciprocity_free_field.FreeFieldParameterUncertainty`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
-    :param field: ``"pressure"`` or ``"free_field"``, for the title.
+    :param field: ``"pressure"`` or ``"free"``, for the title.
     :param kwargs: Forwarded to the first component's curve.
     :return: The axes.
     """

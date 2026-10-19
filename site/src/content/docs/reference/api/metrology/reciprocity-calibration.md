@@ -78,7 +78,7 @@ reciprocity_uncertainty_budget(
     frequencies: ArrayLike,
     standard_uncertainties_db: Mapping[str, ArrayLike],
     *,
-    field: str = 'pressure',
+    field: Literal['pressure', 'free'] = 'pressure',
     additional_components_db: Mapping[str, ArrayLike] | None = None,
     coverage_factor: float = 2.0,
 ) -> ReciprocityUncertaintyBudget
@@ -111,7 +111,7 @@ freedom passes its own.
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz, increasing. |
 | `standard_uncertainties_db` | The components, keyed by name, each a standard uncertainty in dB, one value or one per frequency. |
-| `field` | `"pressure"` (default) or `"free_field"`. |
+| `field` | `"pressure"` (default) or `"free"`. |
 | `additional_components_db` | Further components, by name, in the same form (Default: none). |
 | `coverage_factor` | $k$ (Default: 2). |
 
@@ -130,7 +130,7 @@ ReciprocityCalibration(
     frequencies: NDArray[np.float64],
     sensitivity_v_per_pa: NDArray[np.complex128],
     products_v2_per_pa2: NDArray[np.complex128],
-    field: str,
+    field: Literal['pressure', 'free'],
     method: str,
     corrections: Mapping[str, NDArray[np.float64]],
     expanded_uncertainty_db: NDArray[np.float64] | None = None,
@@ -152,7 +152,7 @@ Built by [`pressure_reciprocity`](/phonometry/reference/api/metrology/reciprocit
 | `frequencies` | The frequencies, in Hz. |
 | `sensitivity_v_per_pa` | The complex sensitivity of each microphone, one row per microphone, in V/Pa: the pressure sensitivity $M_\mathrm{p}$ in a coupler, the free-field sensitivity $M_\mathrm{f}$ in a free field. |
 | `products_v2_per_pa2` | The product of the two sensitivities of each pair, one row per pair (12, 23, 31 in the three-microphone method, 12 alone with an auxiliary source), in V²/Pa². |
-| `field` | `"pressure"` (IEC 61094-2) or `"free_field"` (IEC 61094-3). |
+| `field` | `"pressure"` (IEC 61094-2) or `"free"` (IEC 61094-3). |
 | `method` | `"three_microphones"` or `"auxiliary_source"`. |
 | `corrections` | Corrections added to every microphone's sensitivity level, by name, in dB at each frequency: the wave-motion correction of IEC 61094-2 Table C.3 for a large-volume coupler, say. |
 | `expanded_uncertainty_db` | The expanded uncertainty of the sensitivity level at each frequency, in dB, or `None`. |
@@ -224,7 +224,7 @@ The designation the calibration follows.
 ```python
 ReciprocityUncertaintyBudget(
     frequencies: NDArray[np.float64],
-    field: str,
+    field: Literal['pressure', 'free'],
     names: tuple[str, ...],
     components: tuple[str, ...],
     standard_uncertainties_db: NDArray[np.float64],
@@ -245,7 +245,7 @@ coverage factor.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz. |
-| `field` | `"pressure"` (IEC 61094-2) or `"free_field"` (IEC 61094-3). |
+| `field` | `"pressure"` (IEC 61094-2) or `"free"` (IEC 61094-3). |
 | `names` | The key of each component, those of the field's Table 1 in its order, then any additional ones. |
 | `components` | The component as the table prints it, or the name of an additional one. |
 | `standard_uncertainties_db` | $u_i(f)$, one row per component, in dB. |

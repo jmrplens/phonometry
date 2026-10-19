@@ -110,7 +110,7 @@ EcmaFluctuationStrength(
     times: np.ndarray,
     fluctuation_strength_vs_time: np.ndarray,
     specific_fluctuation_strength_vs_time: np.ndarray,
-    field: str,
+    field: Literal['free', 'diffuse'],
 )
 ```
 

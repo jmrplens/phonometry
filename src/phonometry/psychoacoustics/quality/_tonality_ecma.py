@@ -103,7 +103,7 @@ class EcmaTonality(OwnsArrays):
     times: np.ndarray
     tonality_vs_time: np.ndarray
     tonal_frequency_vs_time: np.ndarray
-    field: str
+    field: Literal["free", "diffuse"]
 
     def __post_init__(self) -> None:
         """Reject a result whose curves disagree with the axes they are drawn on.

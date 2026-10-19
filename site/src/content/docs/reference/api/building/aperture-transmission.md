@@ -285,7 +285,7 @@ slit_transmission_coefficient(
     width_m: float,
     depth: float,
     *,
-    field: str = 'diffuse',
+    field: Literal['diffuse', 'normal'] = 'diffuse',
     position: str = 'mid',
     speed_of_sound: float = 343.0,
 ) -> ApertureTransmissionResult

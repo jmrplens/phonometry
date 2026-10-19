@@ -267,7 +267,7 @@ calculated_sound_reduction_index(
     total_loss_factor: ArrayLike,
     radiation_factor: ArrayLike,
     forced_radiation_factor: ArrayLike,
-    bands: Literal['third', 'octave'] = 'third',
+    fraction: Literal[1, 3] = 3,
     resonant_only: bool = False,
     density: float | None = None,
     longitudinal_velocity: float | None = None,
@@ -317,7 +317,7 @@ upwards on its lightweight blockwork.
 | `total_loss_factor` | Total loss factor `ηtot` per band (laboratory or in situ, matching the situation being described). |
 | `radiation_factor` | Radiation factor for free bending waves `σ` per band (see [`bending_radiation_factor`](/phonometry/reference/api/building/detailed-model/#bending_radiation_factor)). |
 | `forced_radiation_factor` | Radiation factor for forced waves `σf` per band (see [`forced_radiation_factor`](/phonometry/reference/api/building/detailed-model/#forced_radiation_factor)); ignored when `resonant_only` is set. |
-| `bands` | `"third"` (default) or `"octave"`, setting the band limits used to locate the $f \approx f_\mathrm{c}$ branch. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, setting the band limits used to locate the $f \approx f_\mathrm{c}$ branch. |
 | `resonant_only` | Drop the forced-transmission term below `fc`. |
 | `density` | Density `ρ` of the material, in kg/m³; with `longitudinal_velocity` it enables the Formula (B.10) plateau. |
 | `longitudinal_velocity` | Quasi-longitudinal phase velocity `cL` of the material, in m/s. |
@@ -340,7 +340,7 @@ detailed_airborne_prediction(
     direct_index: ArrayLike,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = 'Dd',
-    bands: Literal['third', 'octave'] = 'third',
+    fraction: Literal[1, 3] = 3,
 ) -> DetailedAirborneResult
 ```
 
@@ -362,7 +362,7 @@ the bands cover the rating range (100 Hz to 3150 Hz in one-third octaves,
 | `direct_index` | `RDd` per band, in dB (see [`direct_reduction_index`](/phonometry/reference/api/building/detailed-model/#direct_reduction_index)). |
 | `flanking_paths` | The flanking paths (see [`airborne_flanking_path`](/phonometry/reference/api/building/detailed-model/#airborne_flanking_path)); may be empty. |
 | `direct_label` | Label of the direct path (Default: `"Dd"`). |
-| `bands` | `"third"` (default) or `"octave"`, selecting the ISO 717-1 rating range. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the ISO 717-1 rating range. |
 
 **Returns:** The [`DetailedAirborneResult`](/phonometry/reference/api/building/detailed-model/#detailedairborneresult).
 
@@ -381,7 +381,7 @@ detailed_impact_prediction(
     direct_level: ArrayLike | None = None,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = 'Dd',
-    bands: Literal['third', 'octave'] = 'third',
+    fraction: Literal[1, 3] = 3,
 ) -> DetailedImpactResult
 ```
 
@@ -403,7 +403,7 @@ carries no direct path at all.
 | `direct_level` | `Ln,d` per band, in dB (see [`direct_impact_level`](/phonometry/reference/api/building/detailed-model/#direct_impact_level)), or `None` for the Formula (2) case of two rooms next to each other, which has no direct path. |
 | `flanking_paths` | The flanking paths (see [`impact_flanking_path`](/phonometry/reference/api/building/detailed-model/#impact_flanking_path)); may be empty when `direct_level` is given. |
 | `direct_label` | Label of the direct path (Default: `"Dd"`). |
-| `bands` | `"third"` (default) or `"octave"`. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves, selecting the ISO 717-2 rating range. |
 
 **Returns:** The [`DetailedImpactResult`](/phonometry/reference/api/building/detailed-model/#detailedimpactresult).
 
@@ -420,7 +420,7 @@ DetailedAirborneResult(
     frequencies: np.ndarray,
     paths: tuple[BandPath, ...],
     r_prime: np.ndarray,
-    fractions: np.ndarray,
+    energy_fractions: np.ndarray,
     rating: WeightedRatingResult | None,
 )
 ```
@@ -434,7 +434,7 @@ Per-band apparent sound reduction index `R'` (ISO 12354-1, 4.2).
 | `frequencies` | Band centre frequencies, in Hz. |
 | `paths` | Every transmission path (the direct path first), each with its `Rij` per band. |
 | `r_prime` | Apparent sound reduction index `R'` per band, in dB. |
-| `fractions` | Share of the transmitted energy carried by each path per band (paths x bands), summing to 1 in every band. |
+| `energy_fractions` | Share of the transmitted energy carried by each path per band (paths x bands), summing to 1 in every band. |
 | `rating` | `R'w (C; Ctr)` per ISO 717-1, or `None` when the bands supplied do not cover the rating range. |
 
 ### DetailedAirborneResult.dominant
@@ -507,7 +507,7 @@ DetailedImpactResult(
     frequencies: np.ndarray,
     paths: tuple[BandPath, ...],
     l_prime_n: np.ndarray,
-    fractions: np.ndarray,
+    energy_fractions: np.ndarray,
     rating: ImpactRatingResult | None,
 )
 ```
@@ -521,7 +521,7 @@ Per-band apparent impact level `L'n` (ISO 12354-2, 4.2).
 | `frequencies` | Band centre frequencies, in Hz. |
 | `paths` | Every transmission path (the direct path first), each with its `Ln,ij` per band. |
 | `l_prime_n` | Apparent normalized impact level `L'n` per band, in dB. |
-| `fractions` | Share of the radiated energy carried by each path per band (paths x bands), summing to 1 in every band. |
+| `energy_fractions` | Share of the radiated energy carried by each path per band (paths x bands), summing to 1 in every band. |
 | `rating` | `L'n,w (CI)` per ISO 717-2, or `None` when the bands supplied do not cover the rating range. |
 
 ### DetailedImpactResult.dominant
@@ -1142,7 +1142,7 @@ in_situ_element(
     element: HomogeneousElement,
     frequencies: ArrayLike,
     *,
-    bands: Literal['third', 'octave'] = 'third',
+    fraction: Literal[1, 3] = 3,
     resonant_only: bool = False,
     fluid: Fluid = ...,
 ) -> InSituElementResult
@@ -1167,7 +1167,7 @@ data come from a laboratory measurement.
 | :--- | :--- |
 | `element` | The [`HomogeneousElement`](/phonometry/reference/api/building/detailed-model/#homogeneouselement) description. |
 | `frequencies` | Band centre frequencies, in Hz. |
-| `bands` | `"third"` (default) or `"octave"`. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 | `resonant_only` | Drop the forced-transmission term of Formula (B.2) below `fc` (Annex B.1, flanking paths). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN_12354_AIR`](/phonometry/reference/api/building/detailed-model/#en_12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
 
@@ -1497,7 +1497,7 @@ reciprocity_impact_level(
     sound_reduction_index: ArrayLike,
     frequencies: ArrayLike,
     *,
-    bands: Literal['third', 'octave'] = 'third',
+    fraction: Literal[1, 3] = 3,
 ) -> np.ndarray
 ```
 
@@ -1517,7 +1517,7 @@ about 1 kHz, above which the stiffness of the floor's top layer matters).
 | :--- | :--- |
 | `sound_reduction_index` | `R` of the floor per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz. |
-| `bands` | `"third"` (default, constant 38) or `"octave"` (43). |
+| `fraction` | The band set, 3 for one-third octaves (default, constant 38) or 1 for octaves (43). |
 
 **Returns:** The normalized impact sound pressure level `Ln` per band, dB.
 

@@ -69,7 +69,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -810,7 +810,7 @@ class FreeSoundFieldCheck(OwnsArrays):
     against another offset or another law.
     """
 
-    field: str
+    field: Literal["free", "quasi-free"]
     frequencies: np.ndarray
     lateral_deviation_db: np.ndarray
     axis_difference: np.ndarray
@@ -1000,7 +1000,7 @@ def _free_field_check(
     back_levels: ArrayLike,
     loudspeaker_distance_m: float,
     frequencies: ArrayLike | None,
-    field: str,
+    field: Literal["free", "quasi-free"],
     owner: str,
 ) -> FreeSoundFieldCheck:
     """The free or quasi-free judgement of 5.2 or 5.4.

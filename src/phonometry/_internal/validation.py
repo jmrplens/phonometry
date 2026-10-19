@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 
     from numpy.typing import ArrayLike
 
+    from .types import BandFraction
+
 
 def is_positive(value: float) -> bool:
     """True only for a value strictly above zero. NaN answers ``False``.
@@ -284,8 +286,12 @@ def require_count(value: object, name: str, *, at_least: int = 1) -> int:
     return int(number)
 
 
-def require_choice(value: str, name: str, options: tuple[str, ...]) -> str:
+def require_choice[T](value: object, name: str, options: tuple[T, ...]) -> T:
     """Require *value* to be one of *options*.
+
+    Generic in the options, so a tuple typed with a ``Literal`` alias hands
+    the checked value back as that alias: the caller narrows a ``str``
+    without a ``cast`` of its own.
 
     :param value: The value to validate.
     :param name: Parameter name used in the error message.
@@ -297,6 +303,34 @@ def require_choice(value: str, name: str, options: tuple[str, ...]) -> str:
         msg = f"'{name}' must be one of {options}; got {value!r}."
         raise ValueError(msg)
     return value
+
+
+#: The two band sets a standard rates or tabulates: octaves and thirds.
+_BAND_FRACTIONS = (1, 3)
+
+
+def require_band_fraction(value: object, name: str) -> BandFraction:
+    """Require *value* to name a band set: 1 (octave) or 3 (one-third octave).
+
+    The integer is the denominator ``b`` of the IEC 61260-1 bandwidth
+    designator ``1/b``, the ``fraction`` of
+    :class:`~phonometry.filters.OctaveFilterBank`. ``True`` is refused
+    although it compares equal to 1, and so is a float, so a band set is never
+    read from a flag or a measured number.
+
+    :param value: The value to validate.
+    :param name: Parameter name used in the error message.
+    :return: The validated band fraction.
+    :raises ValueError: for anything other than the integers 1 and 3.
+    """
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, int | np.integer)
+        or int(value) not in _BAND_FRACTIONS
+    ):
+        msg = f"'{name}' must be 1 (octave) or 3 (one-third octave); got {value!r}."
+        raise ValueError(msg)
+    return cast("BandFraction", int(value))
 
 
 def check_engine(engine: str) -> None:

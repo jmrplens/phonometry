@@ -138,6 +138,11 @@ print(vibration.guideline_velocity("commercial", 50.0, massive_structure=True))
 # 80.0
 ```
 
+Every choice on this page is a `Literal` in the signature: the building class,
+the place of measurement, the duration and the pipe material. A type checker
+therefore flags `"residental"` before the call runs, and the call still refuses
+it at run time with the three names it accepts.
+
 ## 3. Floors, and the one number that covers them
 
 A floor or ceiling gets its own sentence rather than a table. Clause 5.2: if

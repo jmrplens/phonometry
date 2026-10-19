@@ -47,7 +47,7 @@ EcmaTonality(
     times: np.ndarray,
     tonality_vs_time: np.ndarray,
     tonal_frequency_vs_time: np.ndarray,
-    field: str,
+    field: Literal['free', 'diffuse'],
 )
 ```
 

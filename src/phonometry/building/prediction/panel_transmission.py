@@ -96,6 +96,7 @@ from scipy.special import ellipe
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_band_fraction,
     require_choice,
     require_non_negative,
     require_positive,
@@ -114,6 +115,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._internal.types import BandFraction
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
     from ..measurement.ratings import WeightedRatingResult
@@ -122,8 +124,8 @@ if TYPE_CHECKING:
 #: points: the published air's own, so the module spells 343 m/s once.
 _SPEED_OF_SOUND: float = ABSORBER_AIR.speed_of_sound
 #: Field-incidence correction ``dB`` of Bies 5e Eq. 7.42, PDF page 409
-#: (printed p. 380), keyed by band width.
-_FIELD_CORRECTION: dict[str, float] = {"third": 5.5, "octave": 4.0}
+#: (printed p. 380), keyed by band set (3 one-third octaves, 1 octaves).
+_FIELD_CORRECTION: dict[int, float] = {3: 5.5, 1: 4.0}
 #: Error message for a non-positive frequency (shared by the module funcs).
 _FREQ_POSITIVE_MSG = "'frequency' must be positive."
 #: Error message for a malformed frequency axis (shared by the module funcs).
@@ -202,15 +204,15 @@ __all__ = [
 ]
 
 
-def field_incidence_correction(band: str = "third") -> float:
+def field_incidence_correction(fraction: BandFraction = 3) -> float:
     """Field-incidence mass-law correction ``dB`` (Bies Eq. 7.42).
 
-    :param band: ``"third"`` (5.5 dB) or ``"octave"`` (4.0 dB).
+    :param fraction: The band set, 3 for one-third octaves (5.5 dB) or 1 for
+        octaves (4.0 dB).
     :return: The correction subtracted from the normal-incidence mass law, dB.
-    :raises ValueError: for an unknown band width.
+    :raises ValueError: for a band set other than 1 or 3.
     """
-    band = require_choice(band, "band", tuple(_FIELD_CORRECTION))
-    return _FIELD_CORRECTION[band]
+    return _FIELD_CORRECTION[require_band_fraction(fraction, "fraction")]
 
 
 def mass_law_transmission_loss(
@@ -218,7 +220,7 @@ def mass_law_transmission_loss(
     mass_per_area: float,
     *,
     incidence: str = "field",
-    band: str = "third",
+    fraction: BandFraction = 3,
     field_correction: float | None = None,
     fluid: Fluid = ABSORBER_AIR,
 ) -> np.ndarray:
@@ -234,13 +236,15 @@ def mass_law_transmission_loss(
     :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2 (> 0).
     :param incidence: ``"normal"`` or ``"field"`` (Default: ``"field"``).
-    :param band: Band width for the field correction (``"third"``/``"octave"``).
+    :param fraction: The band set of the field correction, 3 for one-third
+        octaves or 1 for octaves.
     :param field_correction: Explicit field-incidence correction, in dB
         (>= 0), overriding the band table (Default: ``None``).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: The transmission loss ``TL``, in dB.
-    :raises ValueError: for a non-positive input or unknown incidence/band.
+    :raises ValueError: for a non-positive input, an unknown incidence or a
+        band set other than 1 or 3.
     """
     incidence = require_choice(incidence, "incidence", ("normal", "field"))
     m2 = require_positive(mass_per_area, "mass_per_area")
@@ -252,14 +256,14 @@ def mass_law_transmission_loss(
     ratio = np.pi * f * m2 / (rho0 * c0)
     tl = 10.0 * np.log10(1.0 + ratio**2)
     if incidence == "field":
-        tl = tl - _resolve_field_correction(band, field_correction)
+        tl = tl - _resolve_field_correction(fraction, field_correction)
     return np.asarray(tl, dtype=np.float64)
 
 
-def _resolve_field_correction(band: str, override: float | None) -> float:
+def _resolve_field_correction(fraction: BandFraction, override: float | None) -> float:
     """The field-incidence correction to subtract, in dB."""
     if override is None:
-        return field_incidence_correction(band)
+        return field_incidence_correction(fraction)
     require_scalar(override, "field_correction")
     value = float(override)
     if not np.isfinite(value) or value < 0.0:
@@ -333,20 +337,22 @@ class SoundReductionResult(OwnsArrays):
         r = np.asarray(self.transmission_loss, dtype=np.float64)
         return np.asarray(10.0 ** (-r / 10.0), dtype=np.float64)
 
-    def rating(self, bands: str | None = None) -> WeightedRatingResult:
+    def rating(self, fraction: BandFraction | None = None) -> WeightedRatingResult:
         """Single-number weighted rating ``Rw`` of the predicted ``R(f)``.
 
         Delegates to :func:`phonometry.building.weighted_rating` (ISO 717-1);
         requires the spectrum to be on the 16 one-third-octave bands (100 Hz to
         3150 Hz) or the 5 octave bands (125 Hz to 2000 Hz).
 
-        :param bands: Band set forwarded to
-            :func:`phonometry.building.weighted_rating`.
+        :param fraction: Band set forwarded to
+            :func:`phonometry.building.weighted_rating`, 3 for one-third
+            octaves or 1 for octaves (Default: ``None``, read from the number
+            of values).
         :return: The :class:`~phonometry.building.measurement.ratings.WeightedRatingResult`.
         """
         from ..measurement.ratings import weighted_rating
 
-        return weighted_rating(self.transmission_loss, bands)
+        return weighted_rating(self.transmission_loss, fraction)
 
     def report(self, path: str, **kwargs: Any) -> str:
         """Render the ISO 717-1 Annex C rating fiche of ``R(f)`` to a PDF.
@@ -405,7 +411,7 @@ def single_panel_transmission_loss(
     critical_frequency: float | None = None,
     bending_stiffness: float | None = None,
     loss_factor: float = 0.01,
-    band: str = "third",
+    fraction: BandFraction = 3,
     coincidence_model: str = "sharp",
     field_correction: float | None = None,
     fluid: Fluid = ABSORBER_AIR,
@@ -448,7 +454,8 @@ def single_panel_transmission_loss(
     :param bending_stiffness: Bending stiffness per unit width ``B'``, in N.m,
         used to compute ``fc`` when *critical_frequency* is not given.
     :param loss_factor: Total loss factor ``eta`` (> 0, Default: 0.01).
-    :param band: Band width for the field correction (``"third"``/``"octave"``).
+    :param fraction: The band set of the field correction, 3 for one-third
+        octaves or 1 for octaves.
     :param coincidence_model: ``"sharp"`` (Default, Bies Eq. 7.44 above ``fc``
         with the interpolated bridge from :math:`f_\mathrm{c}/2`) or ``"cremer"``
         (Norton Eq. 3.110, mass law right up to ``fc``).
@@ -486,7 +493,7 @@ def single_panel_transmission_loss(
             fluid=fluid,
         )
 
-    correction = _resolve_field_correction(band, field_correction)
+    correction = _resolve_field_correction(fraction, field_correction)
     tl = np.empty_like(f)
     if model == "cremer":
         # Norton Eqs. (3.104) below fc and (3.110) at and above it.
@@ -754,7 +761,7 @@ def plateau_transmission_loss(
     m2, height, ratio = _resolve_plateau_panel(
         material, thickness_mm, mass_per_area, plateau_height_db, frequency_ratio
     )
-    correction = _resolve_field_correction("third", field_correction)
+    correction = _resolve_field_correction(3, field_correction)
     c0 = fluid.speed_of_sound
     rho0 = fluid.density
     f = _band_axis(frequency)
@@ -1139,7 +1146,7 @@ def orthotropic_transmission_loss(
     method: str = "integral",
     area: float | None = None,
     limiting_angle_deg: float = 78.0,
-    band: str = "third",
+    fraction: BandFraction = 3,
     fluid: Fluid = ABSORBER_AIR,
 ) -> SoundReductionResult:
     r"""Orthotropic-panel sound reduction index (Vigran 6.5.3, Bies 7.2.4.5).
@@ -1214,8 +1221,8 @@ def orthotropic_transmission_loss(
         (:math:`0 < \theta_\mathrm{L} < 90`, Default: 78.0), used when *area* is
         ``None`` and only by ``method="integral"``, but validated on both
         routes.
-    :param band: Band width for the field correction of the Heckl mass-law
-        branch (``"third"``/``"octave"``).
+    :param fraction: The band set of the field correction of the Heckl
+        mass-law branch, 3 for one-third octaves or 1 for octaves.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: A :class:`SoundReductionResult` (model ``"orthotropic-integral"``
@@ -1260,7 +1267,7 @@ def orthotropic_transmission_loss(
             fc1,
             fc2,
             fluid=fluid,
-            correction=field_incidence_correction(band),
+            correction=field_incidence_correction(fraction),
         )
         return SoundReductionResult(
             frequencies=f,
@@ -1361,7 +1368,7 @@ def double_wall_transmission_loss(
     loss_factor: float = 0.1,
     cavity_medium: PorousMediumResult | None = None,
     tie_stiffness_per_area: float = 0.0,
-    band: str = "third",
+    fraction: BandFraction = 3,
     fluid: Fluid = ABSORBER_AIR,
 ) -> SoundReductionResult:
     r"""Sound reduction index of a double wall (Bies 7.2.6, Eq. 7.64).
@@ -1387,7 +1394,8 @@ def double_wall_transmission_loss(
         :func:`mass_spring_mass_resonance`.
     :param tie_stiffness_per_area: Stiffness per unit area :math:`N k / S` of a
         connection array bridging the cavity, in N/m^3 (>= 0, Default: 0).
-    :param band: Band width for the field correction (``"third"``/``"octave"``).
+    :param fraction: The band set of the field correction, 3 for one-third
+        octaves or 1 for octaves.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
         :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: A :class:`SoundReductionResult` (model ``"double-wall"``).
@@ -1415,7 +1423,7 @@ def double_wall_transmission_loss(
             freq,
             mass,
             incidence="field",
-            band=band,
+            fraction=fraction,
             fluid=fluid,
         )
 

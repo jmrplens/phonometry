@@ -285,7 +285,7 @@ def test_a_spectrum_that_is_not_the_rating_bands_is_refused() -> None:
 
 def test_the_octave_rating_reads_five_bands() -> None:
     rating = noise_control.weighted_enclosure_insulation(
-        [15.0, 20.0, 25.0, 30.0, 35.0], band_fraction=1
+        [15.0, 20.0, 25.0, 30.0, 35.0], fraction=1
     )
     assert rating.frequencies.tolist() == [125.0, 250.0, 500.0, 1000.0, 2000.0]
 
@@ -540,7 +540,7 @@ def test_the_insulation_of_a_two_metre_enclosure_is_a_plain_subtraction() -> Non
     # 74 dB once the enclosure is on, is 23 dB of insulation and nothing else.
     with pytest.warns(EnclosureInsulationWarning):
         res = noise_control.enclosure_sound_power_insulation(
-            [97.0], [74.0], frequencies=[1000.0], band_fraction=3
+            [97.0], [74.0], frequencies=[1000.0], fraction=3
         )
     assert res.insulation[0] == pytest.approx(23.0)
     assert math.isclose(
@@ -828,7 +828,7 @@ def test_the_barron_example_prints_both_a_weighted_totals() -> None:
         base_standard="ISO 11201",
         condition="in-situ",
         source_kind="actual",
-        band_fraction=1,
+        fraction=1,
     )
     # Each total carries a twentieth of rounding, so their difference carries a
     # tenth, and that is what D_pA is held to.

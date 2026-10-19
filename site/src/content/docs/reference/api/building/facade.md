@@ -124,7 +124,7 @@ facade_sound_reduction(
     area: float,
     volume: float,
     delta_l_fs: float = 0.0,
-    bands: str | None = None,
+    fraction: Literal[1, 3] | None = None,
     frequencies: Sequence[float] | None = None,
 ) -> FacadePredictionResult
 ```
@@ -143,7 +143,7 @@ indices (Formulas 11-12) and the standardized level difference (Formula 13).
 | `area` | Total façade area `S` seen from inside, in m². |
 | `volume` | Receiving-room volume `V`, in m³ (Formula 13). |
 | `delta_l_fs` | Façade-shape term `ΔLfs` in dB (Annex C; 0 for a flat reflecting façade). |
-| `bands` | `"octave"`, `"third-octave"` or `None` (auto) for the single number ratings, passed to [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating). |
+| `fraction` | The band set of the single-number ratings, passed to [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating): 3 for one-third octaves, 1 for octaves or `None` (Default) to read it from the number of bands. |
 | `frequencies` | Optional band centre frequencies (Hz), stored on the result for plotting; must match the element band count. |
 
 **Returns:** A [`FacadePredictionResult`](/phonometry/reference/api/building/facade/#facadepredictionresult).

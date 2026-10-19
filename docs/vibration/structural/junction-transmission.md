@@ -280,7 +280,7 @@ ff, df, fd = building.flanking_element(
 pred = building.predicted_airborne_insulation(r_direct=57.0,
                                               flanking_paths=[ff, df, fd])
 print(round(pred.r_prime_w, 1))                      # 55.4  (Rw 57 direct)
-print(pred.dominant.label, round(pred.dominant.fraction, 2))   # Dd 0.68
+print(pred.dominant.label, round(pred.dominant.energy_fraction, 2))   # Dd 0.68
 ```
 
 One junction with a moderate $K_{ij}$ already trims 1.6 dB off the direct

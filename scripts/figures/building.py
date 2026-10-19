@@ -405,7 +405,7 @@ def generate_facade_prediction(output_dir: str) -> None:
         building.FacadeElement(name="air inlet", dn_e=[28, 23, 25, 38, 44]),
     ]
     result = building.facade_sound_reduction(
-        elements, area=11.3, volume=50.0, frequencies=bands, bands="octave"
+        elements, area=11.3, volume=50.0, frequencies=bands, fraction=1
     )
 
     x = np.arange(len(bands))
@@ -3340,7 +3340,7 @@ def _service_equipment_measurement() -> "ServiceEquipmentResult":
     """A water closet heard in the bedroom next door, 25 Hz to 10 kHz."""
     from phonometry import building
 
-    freqs = np.array(list(building.SERVICE_EQUIPMENT_WEIGHTING["third"]["A"]))
+    freqs = np.array(list(building.SERVICE_EQUIPMENT_WEIGHTING[3]["A"]))
     # Flushing and refilling one full cycle (Annex B.2.6), the equivalent
     # level of each of the three readings of 7.4.1.
     spectrum = np.array(

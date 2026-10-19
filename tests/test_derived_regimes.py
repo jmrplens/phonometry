@@ -374,7 +374,7 @@ def test_the_measured_index_leaves_the_band_set_to_the_frequencies() -> None:
         12.0,
         frequencies=np.array([100.0 * 2.0 ** (k / 3.0) for k in range(16)]),
     )
-    assert result.band_type is None
+    assert result.fraction is None
     octaves = dataclasses.replace(
         result,
         frequencies=np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]),

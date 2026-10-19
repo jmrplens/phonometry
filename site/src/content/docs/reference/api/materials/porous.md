@@ -110,6 +110,7 @@ bulk density outside the range the fit was made over emits a
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive density. |
+| TypeError | if `bulk_density_kg_m3` is not a single number. |
 
 ## check_limp_frame
 
@@ -147,6 +148,7 @@ above the limit.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a negative modulus or an unknown criterion. |
+| TypeError | if `criterion` is not a text, or `fluid_bulk_modulus` or `frame_bulk_modulus` is not a single number. |
 
 ## decoupling_frequency
 
@@ -185,6 +187,7 @@ matters.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or a porosity above 1. |
+| TypeError | if `flow_resistivity_pa_s_m2`, `frame_density` or `porosity` is not a single number. |
 
 ## delany_bazley
 
@@ -219,6 +222,12 @@ are still returned.
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `flow_resistivity_pa_s_m2` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## DELANY_BAZLEY_COEFFICIENTS
 
@@ -278,35 +287,44 @@ question about the material, and neither is a substitute for measuring it.
 | `bulk_density_kg_m3` | Bulk density of the layer, in kg/m3 (> 0), below the fibre density: the ratio of the two is the fibre volume fraction, and Eqs. (5.29) and (5.30) are stated for a porosity close to 1. |
 | `fiber_density_kg_m3` | Density of the fibre itself, in kg/m3 (> 0). |
 
-**Returns:** The viscous and thermal lengths, in metres.
+**Returns:** The viscous and thermal lengths, in metres, as a [`FiberCharacteristicLengths`](/phonometry/reference/api/materials/porous/#fibercharacteristiclengths).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, or a bulk density at or above the fibre density, which leaves no pore for a length to describe. |
+| TypeError | if `bulk_density_kg_m3`, `fiber_density_kg_m3` or `fiber_radius_m` is not a single number. |
 
 ## FiberCharacteristicLengths
 
 ```python
-FiberCharacteristicLengths(
-    viscous_length_m: ForwardRef('float'),
-    thermal_length_m: ForwardRef('float'),
-)
+FiberCharacteristicLengths(viscous_length_m: float, thermal_length_m: float)
 ```
 
 The two characteristic lengths of a fibrous layer, in metres.
+
+What [`fiber_characteristic_lengths`](/phonometry/reference/api/materials/porous/#fiber_characteristic_lengths) returns: the viscous length
+$\Lambda$ and the thermal length $\Lambda'$, named, where a
+named tuple used to unpack them by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `viscous_length_m` | The viscous characteristic length, in m. |
+| `thermal_length_m` | The thermal characteristic length, in m. |
 
 ## FiberResistivityFit
 
 ```python
 FiberResistivityFit(
-    k1: ForwardRef('float'),
-    k2: ForwardRef('float'),
-    fiber_diameter_um: ForwardRef('float'),
-    bulk_density_range_kg_m3: ForwardRef('tuple[float, float]'),
-    direction: ForwardRef('str'),
-    source: ForwardRef('str'),
+    k1: float,
+    k2: float,
+    fiber_diameter_um: float,
+    bulk_density_range_kg_m3: tuple[float, float],
+    direction: str,
+    source: str,
 )
 ```
 
@@ -362,6 +380,12 @@ end-corrected plug length $t' = t + 2 \delta a$ (Cox & D'Antonio
 
 **Returns:** Resonance frequency `f0`, in hertz.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `cavity_depth`, `end_correction`, `hole_radius`, `open_area`, `plate_thickness_m` or `speed_of_sound` is not a single number. |
+
 ## johnson_champoux_allard
 
 ```python
@@ -413,6 +437,12 @@ $\omega \to \infty$ (Johnson et al. 1987), pinned in the tests.
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `flow_resistivity_pa_s_m2`, `porosity`, `thermal_length_m`, `tortuosity` or `viscous_length_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## limp_frame
 
@@ -490,6 +520,7 @@ rule of thumb on when the frame may be treated as limp at all.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or a porosity above 1. |
+| TypeError | if `frame_density` or `porosity` is not a single number. |
 
 ## LIMP_FRAME_CRITERIA
 
@@ -578,6 +609,12 @@ resistance for the internal/fixing losses.
 
 **Returns:** Complex transfer impedance `z`, in Pa s/m.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `resistance` or `surface_density` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+
 ## membrane_resonance_frequency
 
 ```python
@@ -608,6 +645,12 @@ the porous-filled cavity case below about 500 Hz.
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** Resonance frequency `f0`, in hertz.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `cavity_depth` or `surface_density` is not a single number. |
 
 ## microperforated_plate_impedance
 
@@ -655,6 +698,12 @@ transfer impedance (Cox & D'Antonio Eq. (7.35)).
 
 **Returns:** Complex transfer impedance `z`, in Pa s/m.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `end_correction`, `hole_radius`, `open_area` or `thickness_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+
 ## miki
 
 ```python
@@ -688,6 +737,12 @@ Sect. 4.1).
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `flow_resistivity_pa_s_m2` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## MIKI_VALIDITY
 
@@ -744,6 +799,12 @@ holes.
 
 **Returns:** Complex transfer impedance `z`, in Pa s/m.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `end_correction`, `hole_radius`, `open_area` or `thickness_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+
 ## perforation_end_correction
 
 ```python
@@ -769,6 +830,12 @@ $\delta \to 0.85$ for an isolated hole.
 | `open_area` | Fractional open area `eps` of the sheet (0..1). |
 
 **Returns:** End-correction factor `delta` (dimensionless, per end).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `open_area` is not a single number. |
 
 ## plot_absorber_stack
 
@@ -833,6 +900,7 @@ It closes on its own data: at the 2 600 kg/m3 fibre density and the 31 to
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive density, or a bulk density at or above the fibre density, which is not a porous material. |
+| TypeError | if `bulk_density_kg_m3` or `fiber_density_kg_m3` is not a single number. |
 
 ## PorousAbsorberWarning
 
@@ -959,3 +1027,4 @@ covering or a screen.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or a porosity out of range. |
+| TypeError | if `flow_resistivity_pa_s_m2`, `porosity`, `shape_factor` or `tortuosity` is not a single number. |

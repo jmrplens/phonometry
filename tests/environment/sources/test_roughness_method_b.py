@@ -467,15 +467,15 @@ def test_the_average_keeps_a_shared_method_and_drops_a_mixed_one() -> None:
 
 def test_a_spectrum_refuses_an_unknown_method() -> None:
     with pytest.raises(ValueError, match="'method'"):
-        AcousticRoughnessSpectrum([0.01], [0.0], method="C")
+        AcousticRoughnessSpectrum(wavelengths_m=[0.01], levels=[0.0], method="C")
 
 
 def _spectrum_under_limit(length_m: float | None) -> AcousticRoughnessSpectrum:
     limit = environment.REFERENCE_TRACK_ROUGHNESS_LIMIT_DB
     wavelengths = sorted(limit, reverse=True)
     return AcousticRoughnessSpectrum(
-        wavelengths,
-        [limit[w] - 2.0 for w in wavelengths],
+        wavelengths_m=wavelengths,
+        levels=[limit[w] - 2.0 for w in wavelengths],
         record_length_m=length_m,
         method="B",
     )
@@ -486,9 +486,9 @@ def _passing_decay_rates() -> list[environment.TrackDecayRate]:
     limits = environment.REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M
     return [
         environment.TrackDecayRate(
-            direction,
-            list(limits[direction]),
-            [1.1 * v for v in limits[direction].values()],
+            direction=direction,
+            frequencies=list(limits[direction]),
+            decay_rates_db_per_m=[1.1 * v for v in limits[direction].values()],
         )
         for direction in ("vertical", "lateral")
     ]
@@ -547,7 +547,10 @@ def test_a_method_a_line_is_not_held_to_the_15_m() -> None:
     """For Method A the 15 m is a NOTE of 7.4.2, not a requirement."""
     spectrum = _spectrum_under_limit(1.0)
     fourier = AcousticRoughnessSpectrum(
-        spectrum.wavelengths_m, spectrum.levels, record_length_m=1.0, method="A"
+        wavelengths_m=spectrum.wavelengths_m,
+        levels=spectrum.levels,
+        record_length_m=1.0,
+        method="A",
     )
     check = environment.check_reference_track([fourier], [], speed_kmh=160.0)
     assert all(c.clause != "EN 15610 7.4.3" for c in check.conditions)

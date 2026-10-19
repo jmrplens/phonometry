@@ -194,6 +194,8 @@ def fundamental_period(
     :raises ValueError: If the model is not one of the four, if an argument
         the model needs is missing or not positive, or if an argument the
         model does not use is given.
+    :raises TypeError: if ``model`` is not a text, or ``coefficient``, ``height_m`` or
+        ``width_m`` is not a single number.
     """
     name = require_choice(model, "model", PERIOD_MODELS)
     _refuse_unused(
@@ -279,6 +281,7 @@ def empirical_frequency_bounds(frequency_hz: float) -> tuple[float, float]:
     :param frequency_hz: A predicted fundamental frequency, in hertz.
     :return: ``(lower, upper)``, the band the annex says is not uncommon.
     :raises ValueError: If the frequency is not positive and finite.
+    :raises TypeError: if ``frequency_hz`` is not a single number.
     """
     f = require_positive(frequency_hz, "frequency_hz")
     return (
@@ -358,6 +361,7 @@ def estimate_fundamental_frequency(
     :param coefficient: The code coefficient, or ``None`` for the midpoint.
     :return: The prediction, as a :class:`BuildingFrequencyEstimate`.
     :raises ValueError: For anything :func:`fundamental_period` refuses.
+    :raises TypeError: if ``coefficient`` is not a single number.
     """
     period = fundamental_period(
         model,

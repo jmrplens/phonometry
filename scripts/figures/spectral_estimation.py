@@ -584,7 +584,7 @@ def generate_window_functions_tradeoff(output_dir: str) -> None:
             alpha=0.9,
             label=(
                 f"{name}: ENBW {res.enbw_bins:.2f} bins, sidelobe "
-                f"{_fmt_minus(res.highest_sidelobe_db, '.1f')} dB"
+                f"{_fmt_minus(res.highest_sidelobe_level, '.1f')} dB"
             ),
         )
     ax.set_xlim(0.0, 16.0)

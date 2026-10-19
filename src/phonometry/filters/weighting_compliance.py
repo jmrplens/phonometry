@@ -38,8 +38,10 @@ around each mid-band frequency, live in :mod:`phonometry.filters.compliance`.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -59,6 +61,7 @@ __all__ = [
     "WeightingComplianceResult",
     "verify_weighting_class",
     "weighting_class_limits",
+    "WeightingClassLimits",
 ]
 
 _INF = float("inf")
@@ -479,9 +482,33 @@ def _edition_masks(spec: dict[str, Any]) -> dict[int, tuple[np.ndarray, np.ndarr
     }
 
 
+@dataclass(frozen=True)
+class WeightingClassLimits(OwnsArrays):
+    """The acceptance limits of one performance class of a weighting standard.
+
+    What :func:`weighting_class_limits` returns: the nominal frequencies and
+    the two limits on the deviation from the design goal, named, lower first,
+    where a ``(frequencies, lower, upper)`` tuple used to be unpacked by
+    position.
+
+    :ivar frequencies: The 34 nominal frequencies, in Hz.
+    :ivar lower: The lower deviation limit at each, in dB (``-inf`` where only
+        the upper limit applies).
+    :ivar upper: The upper deviation limit at each, in dB.
+    """
+
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"lower": "dB", "upper": "dB"}
+    )
+
+    frequencies: np.ndarray
+    lower: np.ndarray
+    upper: np.ndarray
+
+
 def weighting_class_limits(
     weighting_class: int, *, edition: str = "2013"
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> WeightingClassLimits:
     """Acceptance limits of one performance class of a weighting standard.
 
     The limits apply to every weighting the edition defines; they qualify the
@@ -498,11 +525,12 @@ def weighting_class_limits(
         instrument Type N.
     :param edition: ``"2013"`` (IEC 61672-1:2013, classes 1/2) or ``"1979"``
         (IEC 651:1979, which adds the stricter Type 0 and a Type 3).
-    :return: Tuple ``(frequencies, lower, upper)`` of the 34 nominal
-        frequencies (Hz) and the lower/upper deviation limits in dB. A lower
+    :return: The 34 nominal frequencies (Hz) and the lower and upper
+        deviation limits in dB, as a :class:`WeightingClassLimits`. A lower
         limit of ``-inf`` means only the upper limit applies.
     :raises ValueError: if the edition is unknown or does not define the
         requested class.
+    :raises TypeError: if ``weighting_class`` is not a single number.
     """
     require_scalar(weighting_class, "weighting_class")
     spec = _edition_spec(edition)
@@ -516,7 +544,7 @@ def weighting_class_limits(
     freqs = np.array([row[0] for row in table], dtype=np.float64)
     upper = np.array([row[up_col] for row in table], dtype=np.float64)
     lower = np.array([row[lo_col] for row in table], dtype=np.float64)
-    return freqs, lower, upper
+    return WeightingClassLimits(frequencies=freqs, lower=lower, upper=upper)
 
 
 def _design_goal_db(curve: str) -> np.ndarray:
@@ -748,6 +776,7 @@ class WeightingComplianceResult(OwnsArrays):
             weighting, a row carries margins for other classes or states a class,
             or the sweep and the rows disagree on being empty or on their
             classes.
+        :raises TypeError: if ``edition`` or ``weighting`` is not a text.
         """
         object.__setattr__(self, "band_margins", frozen_rows(self.band_margins))
         object.__setattr__(self, "between_nominals", frozen_row(self.between_nominals))
@@ -962,6 +991,8 @@ def verify_weighting_class(
         between-nominals sweep and the filter it was measured on.
     :raises ValueError: if the edition is unknown, the edition does not define
         the filter's weighting, or ``n_sweep_points`` is below 64.
+    :raises TypeError: if ``n_sweep_points`` is a flag, a text or an array where a count
+        goes.
     """
     spec = _edition_spec(edition)
     if wf.weighting not in spec["curves"]:

@@ -636,7 +636,8 @@ stay continuous across it.*
 # The BiotWavesResult of the published glass wool. Its .plot() draws the
 # upper panel; the lower one is two of its fields.
 glass_wool = materials.PUBLISHED_POROUS_MATERIALS["allard-2009-table-6-1/domisol_coffrage"]
-shear, poisson = glass_wool.frame_constants()
+frame = glass_wool.frame_constants()
+shear, poisson = frame.shear_modulus_pa, frame.poisson_ratio
 f_biot = np.linspace(50.0, 1500.0, 1451)
 biot = materials.biot_waves(
     glass_wool.medium(f_biot),
@@ -693,7 +694,8 @@ print(glass_wool.source)
 # Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123); Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)
 
 f = np.linspace(200.0, 1500.0, 1301)
-shear, poisson = glass_wool.frame_constants()   # 220 N/cm2 in pascals, eta 0.1
+frame = glass_wool.frame_constants()
+shear, poisson = frame.shear_modulus_pa, frame.poisson_ratio   # 220 N/cm2 in pascals, eta 0.1
 med = glass_wool.medium(f)
 
 print(materials.frame_elastic_coefficient(shear, poisson))   # (4400000+440000j)
@@ -753,7 +755,8 @@ from phonometry import materials
 
 bands = np.array([250, 315, 400, 500, 630, 800, 1000], dtype=float)
 glass_wool = materials.PUBLISHED_POROUS_MATERIALS["allard-2009-table-6-1/domisol_coffrage"]
-shear, poisson = glass_wool.frame_constants()
+frame = glass_wool.frame_constants()
+shear, poisson = frame.shear_modulus_pa, frame.poisson_ratio
 med = glass_wool.medium(bands)
 poroelastic = materials.PoroelasticLayer(
     0.10, med, glass_wool.porosity, glass_wool.tortuosity,

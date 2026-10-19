@@ -333,7 +333,7 @@ def test_the_end_bands_are_read_on_the_half_facing_the_set() -> None:
     omega, _ = _bank_summation(bank.sos, bank.factor, fs, mids, 1, 24, last, "1995")
     np.testing.assert_allclose(omega, _test_frequencies(1, 24, -12, 0), rtol=1e-15)
     result = filters.verify_filter_class(bank, edition="1995")
-    assert all(b["summation_min_db"] is not None for b in result.bands)
+    assert all(b["summation_difference_lower"] is not None for b in result.bands)
 
 
 def test_a_single_band_has_no_summation_to_grade() -> None:
@@ -357,8 +357,8 @@ def test_the_default_bank_is_class_0_on_4_5_3_and_4_9(fraction: int) -> None:
     assert result.requirement_class("summation") == 0
     deviations = [b["bandwidth_deviation_db"] for b in result.bands]
     assert 0.04 < min(deviations) <= max(deviations) < 0.06
-    assert min(b["summation_min_db"] for b in result.bands) > -0.01
-    assert max(b["summation_max_db"] for b in result.bands) < 0.17
+    assert min(b["summation_difference_lower"] for b in result.bands) > -0.01
+    assert max(b["summation_difference_upper"] for b in result.bands) < 0.17
 
 
 @pytest.mark.parametrize(("order", "expected"), [(3, 1), (2, 2)])
@@ -390,7 +390,7 @@ def test_a_bank_whose_neighbours_overlap_fails_the_summation(filter_type: str) -
     )
     result = filters.verify_filter_class(bank, edition="1995")
     assert result.requirement_class("summation") is None
-    assert max(b["summation_max_db"] for b in result.bands) == pytest.approx(
+    assert max(b["summation_difference_upper"] for b in result.bands) == pytest.approx(
         _HALF_POWER_DB, abs=0.01
     )
 

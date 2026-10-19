@@ -932,6 +932,8 @@ def loudness_zwicker(
         phon mapping, ``specific`` the pattern at the loudness maximum,
         ``n5``/``n10`` the percentile values and ``times`` /
         ``loudness_vs_time`` the loudness trace at 500 Hz.
+    :raises TypeError: if ``time_skip`` is not a single number, or ``fs`` is a flag, a
+        text or an array where a count goes.
     """
     diffuse = _validate_field(field)
     fs = resolve_fs(x, fs)

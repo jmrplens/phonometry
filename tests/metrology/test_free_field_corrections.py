@@ -185,7 +185,7 @@ def test_static_pressure_below_97_kpa_adds_the_clause_6_component(
         static_pressure_kpa=95.0,
     )
     assert low.descriptors[-1] == "static pressure"
-    assert low.values_db[-1] == pytest.approx(expanded_db)
+    assert low.stated_uncertainties_db[-1] == pytest.approx(expanded_db)
     assert low.divisors[-1] == pytest.approx(2.0)
     assert low.standard_uncertainties_db[-1] == pytest.approx(expanded_db / 2.0)
     normal = metrology.correction_uncertainty_budget(
@@ -222,7 +222,7 @@ def test_additional_components_enter_the_budget() -> None:
 def test_budget_needs_all_fifteen_components() -> None:
     values = dict(ref.IEC62585_TABLE_I2_VALUES_DB)
     del values["a13"]
-    with pytest.raises(ValueError, match="values_db"):
+    with pytest.raises(ValueError, match="stated_uncertainties_db"):
         metrology.correction_uncertainty_budget(
             values, repeatability_dof=2, frequency_hz=1e3
         )
@@ -230,7 +230,7 @@ def test_budget_needs_all_fifteen_components() -> None:
 
 def test_budget_refuses_an_unknown_component() -> None:
     values = {**ref.IEC62585_TABLE_I2_VALUES_DB, "a16": 0.01}
-    with pytest.raises(ValueError, match="values_db"):
+    with pytest.raises(ValueError, match="stated_uncertainties_db"):
         metrology.correction_uncertainty_budget(
             values, repeatability_dof=2, frequency_hz=1e3
         )
@@ -255,9 +255,9 @@ def test_budget_refuses_degrees_of_freedom_that_are_not_positive(dof: float) -> 
 
 def test_budget_refuses_a_combination_its_columns_do_not_give() -> None:
     budget = _budget_i2()
-    doubled = budget.values_db * 2.0
+    doubled = budget.stated_uncertainties_db * 2.0
     with pytest.raises(ValueError, match="'uncertainty' must be the combination"):
-        dataclasses.replace(budget, values_db=doubled)
+        dataclasses.replace(budget, stated_uncertainties_db=doubled)
 
 
 def test_budget_refuses_column_dofs_that_are_not_positive() -> None:
@@ -270,7 +270,7 @@ def test_budget_refuses_column_dofs_that_are_not_positive() -> None:
 def test_budget_columns_are_read_only() -> None:
     budget = _budget_i2()
     with pytest.raises(ValueError, match="read-only"):
-        budget.values_db[0] = 1.0
+        budget.stated_uncertainties_db[0] = 1.0
 
 
 # --------------------------------------------------------------------------
@@ -486,7 +486,7 @@ def test_equal_weights_take_the_mean_deviation() -> None:
     result = metrology.adjustment_value(
         frequencies=_A_FREQUENCIES,
         free_field_indicated_level=94.0 + _A_DEVIATION,
-        calibrator_reading_db=93.9,
+        calibrator_indicated_level_before=93.9,
         calibrator_level=94.0,
     )
     s = -float(np.mean(_A_DEVIATION))
@@ -505,7 +505,7 @@ def test_adjustment_value_is_l1_less_l4() -> None:
     result = metrology.adjustment_value(
         frequencies=_A_FREQUENCIES,
         free_field_indicated_level=94.0 + _A_DEVIATION,
-        calibrator_reading_db=93.7,
+        calibrator_indicated_level_before=93.7,
         calibrator_level=94.0,
     )
     # s = +0,1 dB, so L4 = 93,7 + 0,1 = 93,8 dB and ΔL = 94,0 - 93,8 = +0,2 dB.
@@ -523,7 +523,7 @@ def test_a_nominal_check_frequency_finds_its_exact_counterpart() -> None:
     result = metrology.adjustment_value(
         frequencies=_THIRDS,
         free_field_indicated_level=94.0,
-        calibrator_reading_db=94.0,
+        calibrator_indicated_level_before=94.0,
         calibrator_level=94.0,
         check_frequency_hz=250.0,
     )
@@ -547,7 +547,7 @@ def test_tolerances_weigh_the_fit() -> None:
     result = metrology.adjustment_value(
         frequencies=_A_FREQUENCIES,
         free_field_indicated_level=94.0 + _A_DEVIATION,
-        calibrator_reading_db=94.0,
+        calibrator_indicated_level_before=94.0,
         calibrator_level=94.0,
         tolerance_db=tolerance,
     )
@@ -562,7 +562,7 @@ def test_the_incident_level_carries_a_field_below_the_calibrator_level() -> None
     result = metrology.adjustment_value(
         frequencies=_A_FREQUENCIES,
         free_field_indicated_level=90.0 + _A_DEVIATION,
-        calibrator_reading_db=93.9,
+        calibrator_indicated_level_before=93.9,
         calibrator_level=94.0,
         incident_level=90.0,
     )
@@ -574,7 +574,7 @@ def test_pressure_response_gives_l3_and_the_pressure_correction() -> None:
     result = metrology.adjustment_value(
         frequencies=_A_FREQUENCIES,
         free_field_indicated_level=94.0 + _A_DEVIATION,
-        calibrator_reading_db=93.9,
+        calibrator_indicated_level_before=93.9,
         calibrator_level=94.0,
         pressure_indicated_level=pressure,
     )
@@ -588,7 +588,7 @@ def test_adjustment_needs_the_check_frequency_among_the_frequencies() -> None:
         metrology.adjustment_value(
             frequencies=[125.0, 8000.0],
             free_field_indicated_level=[94.0, 93.0],
-            calibrator_reading_db=94.0,
+            calibrator_indicated_level_before=94.0,
             calibrator_level=94.0,
         )
 
@@ -601,7 +601,7 @@ def test_adjustment_refuses_a_tolerance_that_is_not_positive(
         metrology.adjustment_value(
             frequencies=_A_FREQUENCIES,
             free_field_indicated_level=94.0 + _A_DEVIATION,
-            calibrator_reading_db=94.0,
+            calibrator_indicated_level_before=94.0,
             calibrator_level=94.0,
             tolerance_db=tolerance,
         )
@@ -612,7 +612,7 @@ def test_adjustment_refuses_a_tolerance_infinite_everywhere() -> None:
         metrology.adjustment_value(
             frequencies=_A_FREQUENCIES,
             free_field_indicated_level=94.0 + _A_DEVIATION,
-            calibrator_reading_db=94.0,
+            calibrator_indicated_level_before=94.0,
             calibrator_level=94.0,
             tolerance_db=np.inf,
         )
@@ -622,7 +622,7 @@ def test_adjustment_value_columns_are_read_only() -> None:
     result = metrology.adjustment_value(
         frequencies=_A_FREQUENCIES,
         free_field_indicated_level=94.0 + _A_DEVIATION,
-        calibrator_reading_db=94.0,
+        calibrator_indicated_level_before=94.0,
         calibrator_level=94.0,
     )
     with pytest.raises(ValueError, match="read-only"):
@@ -880,7 +880,7 @@ def test_every_result_plots(language: str) -> None:
     adjustment = metrology.adjustment_value(
         frequencies=_A_FREQUENCIES,
         free_field_indicated_level=94.0 + _A_DEVIATION,
-        calibrator_reading_db=94.0,
+        calibrator_indicated_level_before=94.0,
         calibrator_level=94.0,
         tolerance_db=[1.0, 0.7, np.inf],
         pressure_indicated_level=94.0 + _A_DEVIATION - 0.1,

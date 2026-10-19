@@ -35,7 +35,8 @@ def _labels(obj: object) -> str:
 
 
 def test_intensity_class_es() -> None:
-    freqs, class1, _ = residual_index_limits("probe")
+    limits = residual_index_limits("probe")
+    freqs, class1 = limits.frequencies, limits.class_1
     res = verify_intensity_class(class1 + 1.0, frequencies=freqs, device="probe")
     ax = res.plot(language="es")
     assert "Tabla 2 de IEC 61043" in ax.get_title()

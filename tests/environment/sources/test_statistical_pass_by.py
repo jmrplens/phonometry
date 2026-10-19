@@ -26,10 +26,10 @@ from scipy import stats
 
 from phonometry import environment
 from phonometry.environment.sources import (
-    SPB_ANNEX_D_SURFACES_DB,
+    SPB_ANNEX_D_SURFACE_LEVELS,
     SPB_CONFIDENCE_INTERVALS_DB,
     SPB_MIN_VEHICLE_COUNTS,
-    SPB_NORMALIZED_REFERENCE_DB,
+    SPB_NORMALIZED_REFERENCE_LEVELS,
     SPB_REFERENCE_SPEEDS_KMH,
     SPB_SPEED_WINDOW_STANDARD_DEVIATIONS,
     SPB_VEHICLE_CATEGORIES,
@@ -67,7 +67,7 @@ def annex_e() -> StatisticalPassByResult:
             *_annex_e_rows(),
             road_speed_category="medium",
             corrected_vehicle_sound_levels=ref.ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB,
-            reference_db=ref.ANNEX_E_REFERENCE_INDEX_DB,
+            reference_levels=ref.ANNEX_E_REFERENCE_INDEX_DB,
         )
 
 
@@ -76,7 +76,7 @@ def _cloud(
     *,
     mean_speed_kmh: float,
     lg_spread: float,
-    intercept_db: float,
+    intercept_level: float,
     slope_db: float,
     residual_db: float,
     seed: int,
@@ -84,7 +84,7 @@ def _cloud(
     """Seeded pass-bys scattered about a line in ``lg v``."""
     rng = np.random.default_rng(seed)
     logs = math.log10(mean_speed_kmh) + lg_spread * rng.standard_normal(n)
-    levels = intercept_db + slope_db * logs + residual_db * rng.standard_normal(n)
+    levels = intercept_level + slope_db * logs + residual_db * rng.standard_normal(n)
     return 10.0**logs, levels
 
 
@@ -130,11 +130,11 @@ def test_table_2_intervals_are_about_two_standard_errors() -> None:
 
 
 def test_annex_d_surfaces_and_their_average() -> None:
-    assert {k: dict(v) for k, v in SPB_ANNEX_D_SURFACES_DB.items()} == (
+    assert {k: dict(v) for k, v in SPB_ANNEX_D_SURFACE_LEVELS.items()} == (
         ref.ANNEX_D_SURFACES_DB
     )
-    assert dict(SPB_NORMALIZED_REFERENCE_DB) == ref.ANNEX_D_AVERAGE_DB
-    averaged = normalized_reference_levels(SPB_ANNEX_D_SURFACES_DB)
+    assert dict(SPB_NORMALIZED_REFERENCE_LEVELS) == ref.ANNEX_D_AVERAGE_DB
+    averaged = normalized_reference_levels(SPB_ANNEX_D_SURFACE_LEVELS)
     assert {k: round(v, 1) for k, v in averaged.items()} == ref.ANNEX_D_AVERAGE_DB
 
 
@@ -156,8 +156,8 @@ def test_annex_d_does_not_decide_between_means() -> None:
         (SPB_REFERENCE_SPEEDS_KMH["medium"], "1"),
         (SPB_WEIGHTING_FACTORS["high"], "2b"),
         (SPB_MIN_VEHICLE_COUNTS, "2"),
-        (SPB_ANNEX_D_SURFACES_DB["A1"], "1"),
-        (SPB_NORMALIZED_REFERENCE_DB, "2a"),
+        (SPB_ANNEX_D_SURFACE_LEVELS["A1"], "1"),
+        (SPB_NORMALIZED_REFERENCE_LEVELS, "2a"),
     ],
 )
 def test_published_tables_refuse_writes(table: dict, key: str) -> None:
@@ -177,7 +177,7 @@ def test_result_arrays_refuse_writes(annex_e: StatisticalPassByResult) -> None:
 def test_annex_e_lines_are_recovered(annex_e: StatisticalPassByResult) -> None:
     for category, regression in annex_e.regressions.items():
         assert regression.n_vehicles == ref.ANNEX_E_VEHICLE_COUNTS[category]
-        assert regression.intercept_db == pytest.approx(
+        assert regression.intercept_level == pytest.approx(
             ref.ANNEX_E_INTERCEPTS_DB[category], abs=1e-9
         )
         assert regression.slope_db_per_decade == pytest.approx(
@@ -270,7 +270,7 @@ def test_annex_e_meets_7_3_and_9_3(annex_e: StatisticalPassByResult) -> None:
 def test_annex_d_reference_index_is_not_the_annex_e_one() -> None:
     """The seven-surface reference of Annex D indexes to 78,9 dB, not 77,3 dB."""
     index = statistical_pass_by_index(
-        SPB_NORMALIZED_REFERENCE_DB, road_speed_category="medium"
+        SPB_NORMALIZED_REFERENCE_LEVELS, road_speed_category="medium"
     )
     assert index == pytest.approx(78.9219, abs=1e-4)
 
@@ -279,7 +279,7 @@ def test_reference_as_levels_is_indexed_with_the_same_weights() -> None:
     result = statistical_pass_by(
         *_annex_e_rows(),
         road_speed_category="medium",
-        reference_db=SPB_NORMALIZED_REFERENCE_DB,
+        reference_levels=SPB_NORMALIZED_REFERENCE_LEVELS,
     )
     assert result.reference_index == pytest.approx(78.9219, abs=1e-4)
     assert result.corrected_difference is None
@@ -303,7 +303,7 @@ def test_national_weights_reach_every_index_of_the_result() -> None:
         *_annex_e_rows(),
         road_speed_category="medium",
         corrected_vehicle_sound_levels=corrected,
-        reference_db=reference,
+        reference_levels=reference,
         weighting_factors=weights,
     )
     assert dict(result.weighting_factors) == weights
@@ -346,7 +346,7 @@ def test_national_weights_reach_the_index_interval() -> None:
 def test_reference_index_may_be_any_real_number() -> None:
     """A numpy integer is an index, not a mapping of levels."""
     result = statistical_pass_by(
-        *_annex_e_rows(), road_speed_category="medium", reference_db=np.int64(77)
+        *_annex_e_rows(), road_speed_category="medium", reference_levels=np.int64(77)
     )
     assert result.reference_index == pytest.approx(77.0)
     assert result.difference == pytest.approx(result.index - 77.0)
@@ -367,7 +367,7 @@ def test_regression_matches_linregress() -> None:
         150,
         mean_speed_kmh=84.0,
         lg_spread=0.06,
-        intercept_db=18.0,
+        intercept_level=18.0,
         slope_db=32.0,
         residual_db=1.4,
         seed=1,
@@ -377,7 +377,7 @@ def test_regression_matches_linregress() -> None:
     )
     fit = stats.linregress(np.log10(speeds), levels)
     assert regression.slope_db_per_decade == pytest.approx(fit.slope, rel=1e-12)
-    assert regression.intercept_db == pytest.approx(fit.intercept, rel=1e-12)
+    assert regression.intercept_level == pytest.approx(fit.intercept, rel=1e-12)
     assert regression.correlation == pytest.approx(fit.rvalue, rel=1e-12)
     residuals = levels - (fit.intercept + fit.slope * np.log10(speeds))
     assert regression.residual_standard_deviation_db == pytest.approx(
@@ -397,7 +397,7 @@ def test_confidence_interval_is_the_line_interval_at_the_reference_speed() -> No
         40,
         mean_speed_kmh=76.0,
         lg_spread=0.05,
-        intercept_db=46.0,
+        intercept_level=46.0,
         slope_db=19.0,
         residual_db=2.0,
         seed=2,
@@ -490,7 +490,7 @@ def test_reference_speed_outside_the_window_warns() -> None:
         120,
         mean_speed_kmh=115.0,
         lg_spread=0.02,
-        intercept_db=17.0,
+        intercept_level=17.0,
         slope_db=32.0,
         residual_db=1.0,
         seed=3,
@@ -543,7 +543,7 @@ def test_too_few_vehicles_of_a_category_warns() -> None:
         20,
         mean_speed_kmh=80.0,
         lg_spread=0.05,
-        intercept_db=17.0,
+        intercept_level=17.0,
         slope_db=32.0,
         residual_db=1.0,
         seed=4,
@@ -562,7 +562,7 @@ def test_too_few_heavy_vehicles_together_warns() -> None:
             n,
             mean_speed_kmh=75.0,
             lg_spread=0.06,
-            intercept_db=40.0,
+            intercept_level=40.0,
             slope_db=22.0,
             residual_db=1.5,
             seed=seed,
@@ -590,7 +590,7 @@ def _site_rows(counts: dict[str, int]) -> tuple[list[str], list[float], list[flo
             n,
             mean_speed_kmh=mean_kmh,
             lg_spread=0.05,
-            intercept_db=a,
+            intercept_level=a,
             slope_db=b,
             residual_db=1.5,
             seed=seed,

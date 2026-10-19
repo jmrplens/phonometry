@@ -672,6 +672,7 @@ class HVACSpectrumResult(OwnsArrays):
         :raises ValueError: if ``values`` does not carry one entry per band,
             either field carries an extra axis, or ``quantity`` is not one of
             the two tags.
+        :raises TypeError: if ``quantity`` is not a text.
         """
         require_ranks(self, frequencies=1, values=1)
         require_same_length(self, "frequencies", "values")
@@ -787,6 +788,8 @@ def end_reflection_loss(
     :param speed_of_sound: Speed of sound ``c``, m/s (used by the closed form;
         the table is indexed by frequency directly).
     :return: A :class:`HVACSpectrumResult` of the reflection loss, dB.
+    :raises TypeError: if ``method`` is not a text, or ``aspect_ratio``, ``diameter_m``,
+        ``max_reduction`` or ``speed_of_sound`` is not a single number.
     """
     if method == "vdi2081":
         bands = _frequencies(frequencies)
@@ -960,6 +963,8 @@ def elbow_insertion_loss(
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :param model: ``"ashrae"`` (default) or ``"vdi2081"``.
     :return: A :class:`HVACSpectrumResult` of the insertion loss, dB per bend.
+    :raises TypeError: if ``lined_side`` or ``model`` is not a text, or
+        ``speed_of_sound`` or ``width_m`` is not a single number.
     """
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     if scheme == "vdi2081":
@@ -1034,6 +1039,8 @@ def plenum_attenuation(
         per-band array).
     :raises ValueError: If a dimension is not positive, ``mean_absorption``
         leaves ``(0, 1)`` or ``angle_rad`` leaves ``[0, pi/2]``.
+    :raises TypeError: if ``angle_rad``, ``exit_area``, ``line_of_sight`` or
+        ``wall_area`` is not a single number.
     """
     s_out = require_positive(exit_area, "exit_area")
     r = require_positive(line_of_sight, "line_of_sight")
@@ -1082,6 +1089,7 @@ def flow_noise_straight_duct(
     :param area: Duct cross-sectional area ``S``, m2.
     :return: A :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
+    :raises TypeError: if ``area`` or ``flow_velocity`` is not a single number.
     """
     f = _frequencies(frequencies)
     u = require_positive(flow_velocity, "flow_velocity")
@@ -1141,6 +1149,8 @@ def flow_noise_straight_duct_overall(
     :return: The overall sound power level, dB re 1e-12 W.
     :raises ValueError: If the speed or the area is not positive, or the
         weighting is neither of the two the guideline prints.
+    :raises TypeError: if ``weighting`` is not a text, or ``area`` or ``flow_velocity``
+        is not a single number.
     """
     v = require_positive(flow_velocity, "flow_velocity")
     s = require_positive(area, "area")
@@ -1221,6 +1231,9 @@ def flow_noise_bend(
         to 0,20.
     :return: A :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
+    :raises TypeError: if ``model`` is not a text, or ``area``, ``branch_diameter_m``,
+        ``density``, ``flow_velocity``, ``height_m`` or ``rounding_ratio`` is not a
+        single number.
     """
     f = _frequencies(frequencies)
     u = require_positive(flow_velocity, "flow_velocity")
@@ -1273,6 +1286,8 @@ def blade_passing_frequency(rotational_speed_rpm: float, n_blades: int) -> float
     :param n_blades: Number of impeller blades.
     :return: The blade passing frequency, Hz.
     :raises ValueError: If ``n_blades`` is not a positive integer.
+    :raises TypeError: if ``n_blades`` or ``rotational_speed_rpm`` is not a single
+        number.
     """
     rpm = require_positive(rotational_speed_rpm, "rotational_speed_rpm")
     require_scalar(n_blades, "n_blades")
@@ -1313,6 +1328,7 @@ def fan_efficiency_correction(*, relative_efficiency_percent: float) -> float:
         outside the span Table 13.6 tabulates.
     :return: The correction ``C_EFF``, dB.
     :raises ValueError: If the efficiency is not in ``(0, 100]``.
+    :raises TypeError: if ``relative_efficiency_percent`` is not a single number.
     """
     eta = require_positive(relative_efficiency_percent, "relative_efficiency_percent")
     if eta > 100.0:  # noqa: PLR2004
@@ -1547,6 +1563,10 @@ def fan_sound_power(  # noqa: PLR0913
         eight octave bands from 63 Hz to 8 kHz.
     :return: An :class:`HVACSpectrumResult` of the band sound power level,
         dB re 1e-12 W.
+    :raises TypeError: if ``assembly``, ``fan_type`` or ``model`` is not a text, or
+        ``blade_frequency``, ``fan_speed_rpm``, ``fan_static_pressure_pa``,
+        ``fan_total_pressure_pa``, ``n_blades``, ``relative_flow``,
+        ``specific_sound_power_level`` or ``volume_flow`` is not a single number.
     """
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     q = require_positive(volume_flow, "volume_flow")
@@ -1634,6 +1654,7 @@ def octave_band_limits(
     :param frequencies: Octave-band centres, Hz; ``None`` (default) uses the
         eight octave bands from 63 Hz to 8 kHz.
     :return: An :class:`HVACSpectrumResult` of the per-band limit, dB.
+    :raises TypeError: if ``a_weighted_limit_db`` is not a single number.
     """
     f, idx = _octave_slots(frequencies)
     require_scalar(a_weighted_limit_db, "a_weighted_limit_db")
@@ -1929,6 +1950,8 @@ def unlined_rectangular_duct_attenuation(
     :param model: ``"ashrae"`` (default, Reynolds) or ``"vdi2081"``
         (Table 5, the largest side length selecting the row).
     :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
+    :raises TypeError: if ``model`` is not a text, or ``height_m``, ``length`` or
+        ``width_m`` is not a single number.
     """
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     f = _frequencies(frequencies)
@@ -2006,6 +2029,8 @@ def unlined_circular_duct_attenuation(
         Table 5 row. The table stops at 1,00 m.
     :param model: ``"ashrae"`` (default, Long Table 14.1) or ``"vdi2081"``.
     :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
+    :raises TypeError: if ``model`` is not a text, or ``diameter_m`` or ``length`` is
+        not a single number.
     """
     scheme = require_choice(model, "model", ("ashrae", "vdi2081"))
     if scheme == "vdi2081":
@@ -2071,6 +2096,8 @@ def lined_rectangular_duct_attenuation(
         :func:`unlined_rectangular_duct_attenuation`, the side-wall
         contribution the insertion-loss measurement subtracts out.
     :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
+    :raises TypeError: if ``height_m``, ``length``, ``lining_thickness_m`` or
+        ``width_m`` is not a single number.
     """
     f, idx = _octave_slots(frequencies)
     ps = _perimeter_over_area(width_m, height_m)
@@ -2119,6 +2146,8 @@ def lined_circular_duct_attenuation(
     :param length: Duct run length ``l``, m.
     :param lining_thickness_m: Lining thickness ``t``, m.
     :return: An :class:`HVACSpectrumResult` of the attenuation, dB.
+    :raises TypeError: if ``diameter_m``, ``length`` or ``lining_thickness_m`` is not a
+        single number.
     """
     f, idx = _octave_slots(frequencies)
     d_in = require_positive(diameter_m, "diameter_m") / _M_PER_IN
@@ -2160,6 +2189,7 @@ def flexible_duct_insertion_loss(
     :param diameter_m: Internal diameter, m (100 mm to 406 mm tabulated).
     :param length: Duct run length, m (0.9 m to 3.7 m tabulated).
     :return: An :class:`HVACSpectrumResult` of the insertion loss, dB.
+    :raises TypeError: if ``diameter_m`` or ``length`` is not a single number.
     """
     f, idx = _octave_slots(frequencies, _FLEX_BANDS)
     d_in = require_positive(diameter_m, "diameter_m") / _M_PER_IN
@@ -2245,6 +2275,9 @@ def section_change_loss(
         not positive, the shape is unknown, a round duct's size contradicts
         its area, or a rectangular duct meeting a sudden increase is given no
         size.
+    :raises TypeError: if ``shape`` is not a text, or ``cap``, ``downstream_area``,
+        ``speed_of_sound``, ``upstream_area`` or ``upstream_size`` is not a single
+        number.
     """
     f = _frequencies(frequencies)
     s_1 = require_positive(upstream_area, "upstream_area")
@@ -2347,6 +2380,8 @@ def split_loss(
     :return: The split loss, dB (positive).
     :raises ValueError: If the areas are not positive or ``branch`` is out of
         range.
+    :raises TypeError: if ``model`` is not a text, or ``branch`` or ``main_area`` is not
+        a single number.
     """
     require_scalar(branch, "branch")
     s_m = require_positive(main_area, "main_area")
@@ -2398,6 +2433,8 @@ def end_reflection_loss_closed_form(
         ``"free"`` (free space).
     :param speed_of_sound: Speed of sound ``c``, m/s.
     :return: An :class:`HVACSpectrumResult` of the reflection loss, dB.
+    :raises TypeError: if ``termination`` is not a text, or ``diameter_m`` or
+        ``speed_of_sound`` is not a single number.
     """
     f = _frequencies(frequencies)
     d = require_positive(diameter_m, "diameter_m")
@@ -2418,6 +2455,7 @@ def equivalent_diameter(area: float) -> float:
 
     :param area: Duct cross-sectional area ``S``, m2.
     :return: The equivalent diameter, m.
+    :raises TypeError: if ``area`` is not a single number.
     """
     return float(np.sqrt(4.0 * require_positive(area, "area") / np.pi))
 
@@ -2473,6 +2511,7 @@ def splitter_silencer_insertion_loss(
     :return: An :class:`HVACSpectrumResult` of the insertion loss, dB.
     :raises ValueError: If any dimension is not positive, or if
         ``airway_widths`` is not a non-empty 1-D array.
+    :raises TypeError: if ``splitter_thickness_m`` is not a single number.
     """
     widths = np.atleast_1d(np.asarray(airway_widths, dtype=np.float64))
     if widths.ndim != 1 or widths.size == 0:
@@ -2559,6 +2598,9 @@ def silencer_self_noise(
         which the guideline's own worked example computes as ``2 s``, the
         parallel-plate limit, rather than as ``4 A / P``; ``docs/ERRATA.md``
         records the difference.
+    :raises TypeError: if ``model`` is not a text, or ``airway_velocity``,
+        ``airway_width``, ``approach_area``, ``height_m``, ``n_passages`` or
+        ``pressure_drop_pa`` is not a single number.
     """
     if require_choice(model, "model", ("ashrae", "vdi2081")) == "vdi2081":
         missing = [
@@ -2681,6 +2723,8 @@ def diffuser_sound_power(
         dB re 1e-12 W.
     :raises ValueError: If a dimension is not positive, ``n_devices`` is not a
         positive integer or ``shape`` is unknown.
+    :raises TypeError: if ``shape`` is not a text, or ``face_area``, ``n_devices``,
+        ``pressure_drop_pa`` or ``volume_flow`` is not a single number.
     """
     f = _OCTAVE_BANDS if frequencies is None else _frequencies(frequencies)
     area_ft2 = require_positive(face_area, "face_area") / _M_PER_FT**2
@@ -2737,6 +2781,8 @@ def air_terminal_velocity_limit(
         air opening).
     :return: The maximum recommended neck velocity, m/s.
     :raises ValueError: If the design criterion is not tabulated.
+    :raises TypeError: if ``opening`` is not a text, or ``design_criterion`` is not a
+        single number.
     """
     side = require_choice(opening, "opening", ("supply", "return"))
     table = _TERMINAL_VELOCITY_LIMIT[side]
@@ -2777,6 +2823,8 @@ def air_terminal_damper_correction(
     :return: The level to add to the diffuser's rated sound power, dB.
     :raises ValueError: If ``pressure_ratio`` is not positive or ``location`` is
         unknown.
+    :raises TypeError: if ``location`` is not a text, or ``pressure_ratio`` is not a
+        single number.
     """
     ratio = require_positive(pressure_ratio, "pressure_ratio")
     key = require_choice(location, "location", tuple(_DAMPER_CORRECTION))
@@ -2876,6 +2924,7 @@ def room_effect(
         input is scalar, otherwise a per-band array).
     :raises ValueError: unless exactly one absorption measure is given, or if
         an argument is not positive and finite.
+    :raises TypeError: if ``distance`` is not a single number.
     """
     r = require_positive(distance, "distance")
     measure = _room_measure(room_constant, absorption_area)

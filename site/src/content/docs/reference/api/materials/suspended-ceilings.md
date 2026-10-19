@@ -94,6 +94,7 @@ humidity or more.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive volume or area, or coefficients that do not match band for band. |
+| TypeError | if `specimen_area_m2` or `volume` is not a single number, or `attenuation_empty_per_m` or `attenuation_with_per_m` holds a text or a value that is not a real number. |
 
 ## AIR_CORRECTION_LIMIT
 
@@ -313,6 +314,7 @@ substructure pitch of "approx. 0,6 m" of 4.1.1.2.3.4
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive area or depth, a negative or non-finite deflection, substructure or support dimension or fixture density, a non-positive or non-finite support centre distance, a relative humidity that is empty, not one-dimensional, not finite or outside 0 % to 100 %, an unknown mounting letter, or a type E arrangement with no depth given. |
+| TypeError | if `area`, `deflection_mm`, `depth_mm`, `fixture_density_kg_m2`, `substructure_height_mm`, `substructure_width_mm`, `support_center_distance_m`, `support_height_mm` or `support_width_mm` is not a single number, or `relative_humidity_percent` holds a text or a value that is not a real number. |
 
 ## EN16487_COVERAGE_FACTOR
 
@@ -421,6 +423,7 @@ been investigated for any other absorber or mounting.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a frequency Table 1 does not print. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## SUBSTRUCTURE_LIMITS_MM
 

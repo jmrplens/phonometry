@@ -138,6 +138,7 @@ below this grazing angle the wave is totally reflected.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `c2 <= c1` (no critical angle exists). |
+| TypeError | if `c1` or `c2` is not a single number. |
 
 ## reflection_coefficient
 
@@ -171,6 +172,7 @@ Complex plane-wave pressure reflection coefficient at the seabed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `c1`, `c2`, `rho1` or `rho2` is not a single number. |
 
 ## seabed_reflection
 

@@ -400,7 +400,10 @@ def _uniform_hemisphere(
     az = np.arange(-90.0, 91.0, 10.0)
     po = np.arange(0.0, 181.0, 10.0)
     return ph.aircraft.RotorcraftHemisphere(
-        freqs, az, po, np.full((az.size, po.size, freqs.size), level)
+        frequencies=freqs,
+        azimuth_deg=az,
+        polar_deg=po,
+        levels=np.full((az.size, po.size, freqs.size), level),
     )
 
 

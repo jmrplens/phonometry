@@ -48,6 +48,7 @@ from .aircraft import (
     generate_rotorcraft_terrain_screening,
 )
 from .building import (
+    generate_background_corrected_level,
     generate_background_correction_regimes,
     generate_ceiling_plenum_flanking,
     generate_composite_facade_weak_element,
@@ -81,6 +82,7 @@ from .building import (
     generate_service_equipment_position_spread,
     generate_service_equipment_positions,
     generate_service_equipment_varying_background,
+    generate_strong_coupling_check,
     generate_survey_impact_insulation,
     generate_survey_insulation,
 )
@@ -875,6 +877,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_floating_floor_prediction,
     generate_soft_covering_prediction,
     generate_flanking_transmission,
+    generate_strong_coupling_check,
+    generate_background_corrected_level,
     generate_reverberation_models,
     # Rooms/prediction: model behaviour against the mean absorption,
     # the EN 12354-6 air and object terms, the image-source order

@@ -185,20 +185,22 @@ def test_loop_current_reproduces_figure_h1(aspect: float) -> None:
 
 @pytest.mark.parametrize(("aspect", "n_turns"), [(1.0, 1), (3.0, 1), (3.0, 2)])
 def test_loop_dimensions_against_biot_savart(aspect: float, n_turns: int) -> None:
-    short, long = ea.loop_dimensions(5.0, aspect_ratio=aspect, n_turns=n_turns)
+    sides = ea.loop_dimensions(5.0, aspect_ratio=aspect, n_turns=n_turns)
+    short, long = sides.width_m, sides.length_m
     field = ea.rectangular_loop_field(5.0, long, short, 0.0, 0.0, 1.4, n_turns=n_turns)
     assert float(field.h_z_a_per_m) == pytest.approx(0.4, rel=1e-9)
 
 
 @pytest.mark.parametrize("aspect", [1.0, 3.0])
 def test_loop_dimensions_invert_the_loop_current(aspect: float) -> None:
-    short, long = ea.loop_dimensions(5.0, aspect_ratio=aspect)
+    sides = ea.loop_dimensions(5.0, aspect_ratio=aspect)
+    short, long = sides.width_m, sides.length_m
     assert long == pytest.approx(aspect * short)
     assert ea.loop_current(long, short) == pytest.approx(5.0, rel=1e-9)
 
 
 def test_loop_dimensions_take_the_larger_branch() -> None:
-    short, _ = ea.loop_dimensions(4.0)
+    short = ea.loop_dimensions(4.0).width_m
     smaller = 0.5 * short
     assert ea.loop_current(smaller, smaller) < 4.0
 
@@ -420,7 +422,7 @@ def test_agc_range_of_a_characteristic_like_figure_a1() -> None:
     out = [-33.0, -23.0, -13.0, -8.0, -3.0, -1.0, 0.0, 0.0, 0.0]
     agc = ea.agc_characteristic(emf, out)
     assert agc.agc_range_db == pytest.approx(30.0, abs=2e-3)
-    assert agc.agc_range_end_db == pytest.approx(0.0)
+    assert agc.agc_range_end_level == pytest.approx(0.0)
     assert agc.agc_range_db < ref.IEC62489_1_AGC_RANGE_DB
 
 
@@ -443,8 +445,8 @@ def test_agc_range_handles_an_overshoot() -> None:
     # window: the widest one holds the overshoot and runs from where the
     # rising side reaches -2 dB (-31,11 dB) to where the falling side does
     # (-11,43 dB), wider than the 18,57 dB from +0,5 dB down to the top.
-    assert agc.agc_range_start_db == pytest.approx(-40.0 + 8.0 / 0.9, abs=2e-3)
-    assert agc.agc_range_end_db == pytest.approx(-20.0 + 3.0 / 0.35, abs=2e-3)
+    assert agc.agc_range_start_level == pytest.approx(-40.0 + 8.0 / 0.9, abs=2e-3)
+    assert agc.agc_range_end_level == pytest.approx(-20.0 + 3.0 / 0.35, abs=2e-3)
     assert agc.agc_range_db == pytest.approx(3.0 / 0.35 + 20.0 - 8.0 / 0.9, abs=3e-3)
 
 
@@ -461,8 +463,8 @@ def test_agc_range_ends_where_the_line_crosses_a_level_between_steps() -> None:
     # through 3 dB (-5 dB). Neither end is a step, and neither lies on any
     # grid of input levels.
     agc = ea.agc_characteristic([-30.0, -20.0, -10.0, 0.0], [-6.0, 3.0, 0.0, 6.0])
-    assert agc.agc_range_start_db == pytest.approx(-30.0 + 60.0 / 9.0, abs=1e-12)
-    assert agc.agc_range_end_db == pytest.approx(-5.0, abs=1e-12)
+    assert agc.agc_range_start_level == pytest.approx(-30.0 + 60.0 / 9.0, abs=1e-12)
+    assert agc.agc_range_end_level == pytest.approx(-5.0, abs=1e-12)
     assert agc.agc_range_db == pytest.approx(25.0 - 60.0 / 9.0, abs=1e-12)
 
 
@@ -475,8 +477,8 @@ def test_agc_range_keeps_a_window_whose_levels_differ_by_exactly_3_db() -> None:
     out = [2.5, 1.19, 2.5, 4.19, 2.5]
     agc = ea.agc_characteristic(emf, out)
     assert agc.agc_range_db == pytest.approx(40.0, abs=1e-12)
-    assert agc.agc_range_start_db == pytest.approx(0.0, abs=1e-12)
-    assert agc.agc_range_end_db == pytest.approx(40.0, abs=1e-12)
+    assert agc.agc_range_start_level == pytest.approx(0.0, abs=1e-12)
+    assert agc.agc_range_end_level == pytest.approx(40.0, abs=1e-12)
 
 
 def test_agc_range_ends_where_a_window_exactly_3_db_deep_meets_its_edges() -> None:
@@ -487,8 +489,8 @@ def test_agc_range_ends_where_a_window_exactly_3_db_deep_meets_its_edges() -> No
     emf = [-35.0, -30.0, -25.0, -20.0, -15.0]
     out = [0.0, -4.4, -1.4, -1.6, 2.0]
     agc = ea.agc_characteristic(emf, out)
-    assert agc.agc_range_start_db == pytest.approx(-35.0 + 5.0 * 1.4 / 4.4, abs=1e-9)
-    assert agc.agc_range_end_db == pytest.approx(-20.0 + 5.0 * 0.2 / 3.6, abs=1e-9)
+    assert agc.agc_range_start_level == pytest.approx(-35.0 + 5.0 * 1.4 / 4.4, abs=1e-9)
+    assert agc.agc_range_end_level == pytest.approx(-20.0 + 5.0 * 0.2 / 3.6, abs=1e-9)
 
 
 def test_agc_range_does_not_grow_with_the_span_of_the_input() -> None:

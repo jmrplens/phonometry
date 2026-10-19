@@ -233,6 +233,7 @@ lower `min_n_records` states that fewer were judged enough.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an invalid range, exclusion or limit, a `min_n_records` that is not a whole number of at least 1, or exclusions that leave no frequency of the range to judge. |
+| TypeError | if `min_coherence` is not a single number, or `min_n_records` is a flag, a text or an array where a count goes. |
 
 ## check_double_hit
 
@@ -287,6 +288,7 @@ as several. The unfiltered force avoids both effects.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a record that is not 1-D and finite, a non-positive sample rate, a threshold outside (0, 1), or a record with no force in it. |
+| TypeError | if `threshold_ratio` is not a single number. |
 
 ## check_force_spectrum
 
@@ -354,6 +356,7 @@ Did one channel of the record stay below its full scale? (8.4)
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an invalid record, sample rate or full scale. |
+| TypeError | if `full_scale` is not a single number. |
 
 ## check_response_decay
 
@@ -398,6 +401,7 @@ far. Pass the response as recorded, before any window.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an invalid record, sample rate, segment or start, a response that is zero at every sample or at every sample from the start on (a dead channel has measured nothing, so it has not decayed either), or a force record of another length, without force or whose pulse does not end inside the record. |
+| TypeError | if `segment_s` or `start_s` is not a single number. |
 
 ## COHERENCE_RECORDS
 
@@ -627,7 +631,7 @@ Time of every sample of the record, in seconds.
 energy_spectral_density(
     record: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
-) -> tuple[np.ndarray, np.ndarray]
+) -> EnergySpectralDensity
 ```
 
 One-sided energy spectral density of a transient record (3.3, 3.4).
@@ -646,13 +650,55 @@ The DC bin and, for an even record, the Nyquist bin are not doubled.
 | `record` | One record, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is not applied. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 
-**Returns:** `(frequencies, esd)`: the DFT bin frequencies from 0 Hz to the Nyquist frequency, in hertz, and the density at each, in the record's unit squared times s/Hz.
+**Returns:** The DFT bin frequencies from 0 Hz to the Nyquist frequency, in hertz, and the density at each, in the record's unit squared times s/Hz, as an [`EnergySpectralDensity`](/phonometry/reference/api/vibration/impact-mobility/#energyspectraldensity).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a record that is not 1-D and finite, or a non-positive sample rate. |
+
+## EnergySpectralDensity
+
+```python
+EnergySpectralDensity(frequencies: np.ndarray, density: np.ndarray)
+```
+
+The one-sided energy spectral density of a transient record (3.3, 3.4).
+
+What [`energy_spectral_density`](/phonometry/reference/api/vibration/impact-mobility/#energy_spectral_density) returns: the bins and the density,
+named, where a `(frequencies, esd)` tuple used to be unpacked by
+position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The DFT bin frequencies from 0 Hz to the Nyquist frequency, in hertz. |
+| `density` | The energy spectral density at each, in the record's unit squared times s/Hz. |
+
+### EnergySpectralDensity.plot()
+
+```python
+EnergySpectralDensity.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the density in dB re its highest bin against frequency.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the density curve. |
+
+**Returns:** The axes.
 
 ## exponential_decay_rate
 
@@ -689,6 +735,7 @@ $a = -\ln(w_\mathrm{end}) f_s / (N - 1)$ and
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than 16 samples, a non-positive sample rate or a final value outside (0, 1]. |
+| TypeError | if `final_value` or `fs` is not a single number, or `n_samples` is a flag, a text or an array where a count goes. |
 
 ## exponential_window
 
@@ -725,6 +772,7 @@ damping away again.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than 16 samples, a non-positive sample rate or a negative decay rate. |
+| TypeError | if `decay_rate_per_s` or `fs` is not a single number, or `n_samples` is a flag, a text or an array where a count goes. |
 
 ## exponential_window_correction
 
@@ -890,6 +938,7 @@ the response still carries it. [`check_double_hit`](/phonometry/reference/api/vi
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than 16 samples, a non-positive sample rate or width, a negative start or taper, or a window, its falling ramp included, that is still open at the last sample of the record, at $(N - 1)/f_s$. |
+| TypeError | if `fs`, `start_s`, `taper_s` or `width_s` is not a single number, or `n_samples` is a flag, a text or an array where a count goes. |
 
 ## ForceSpectrumCheck
 
@@ -1496,6 +1545,7 @@ the record the exponential window multiplied:
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched or non-finite data, a band that is not a pair of positive numbers or holds fewer than three frequencies, an unknown kind, or a band whose data hold no lightly damped mode. |
+| TypeError | if `exponential_decay_rate_per_s` is not a single number. |
 
 ## SingleModeFitResult
 

@@ -255,6 +255,8 @@ def sae_band_attenuation(
     :param static_pressure_kpa: Ambient atmospheric pressure, in kPa (default 101.325).
     :return: An :class:`AircraftBandAttenuation`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``path_length_m`` is not a single number, or ``frequencies``
+        holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     s = require_non_negative(path_length_m, "path_length_m")
@@ -600,6 +602,9 @@ def arp866a_attenuation(
     :raises ValueError: for a band outside Table 2, a temperature at or below
         absolute zero, a humidity outside 0 % to 100 %, or an unknown
         interpolation.
+    :raises TypeError: if ``eta_interpolation`` is not a text,
+        ``relative_humidity_percent`` or ``temperature_c`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     interpolation = require_choice(

@@ -271,6 +271,7 @@ def reverberation_index(
     :param t0: Reference reverberation time ``T0``, in seconds (Default: 0,5 s).
     :return: The reverberation index ``k`` per band, in dB.
     :raises ValueError: If ``t``/``t0`` are not positive or ``t`` is non-finite.
+    :raises TypeError: if ``t0`` is not a single number.
     """
     tt = _finite_bands(t, "t")
     if np.any(tt <= 0.0):
@@ -323,6 +324,7 @@ def estimate_reverberation_index(
         dB, or the scalar A-/C-weighted index when ``weighted`` is ``True``.
     :raises ValueError: If ``volume`` is not in ``(0, 150]``, or ``room`` is
         not tabulated for that volume range.
+    :raises TypeError: if ``volume`` is not a single number.
     """
     v = _positive(volume, "volume")
     if v > _TABLE3_VOLUME_LIMITS[-1]:
@@ -768,6 +770,7 @@ def survey_airborne_insulation(
     :return: :class:`SurveyAirborneResult`.
     :raises ValueError: If band counts differ, if ``area`` is given without
         ``volume``, or if ``area``/``volume`` are not positive.
+    :raises TypeError: if ``area`` or ``volume`` is not a single number.
     """
     l1_bands = _as_band_levels(l1, "l1")
     l2_bands = _as_band_levels(l2, "l2")
@@ -827,6 +830,7 @@ def survey_impact_insulation(
     :param volume: Receiving-room volume ``V``, in m³ (required for ``L'n``).
     :return: :class:`SurveyImpactResult`.
     :raises ValueError: If band counts differ or ``volume`` is not positive.
+    :raises TypeError: if ``volume`` is not a single number.
     """
     l_i = _as_band_levels(li, "li")
     k = _validate_index(reverberation_index, int(l_i.size))
@@ -864,6 +868,7 @@ def survey_facade_insulation(
     :param volume: Receiving-room volume ``V``, in m³ (required for ``D2m,n``).
     :return: :class:`SurveyFacadeResult`.
     :raises ValueError: If band counts differ or ``volume`` is not positive.
+    :raises TypeError: if ``volume`` is not a single number.
     """
     out = _as_band_levels(l1_2m, "l1_2m")
     l2_bands = _as_band_levels(l2, "l2")
@@ -914,6 +919,7 @@ def survey_service_equipment_level(
     :return: :class:`SurveyServiceEquipmentResult`.
     :raises ValueError: If not exactly three measurements are given, if shapes
         are inconsistent, or if ``volume`` is not positive.
+    :raises TypeError: if ``volume`` is not a single number.
     """
     m = _finite_bands(measurements, "measurements")
     if m.ndim not in (1, 2) or m.shape[0] != _SERVICE_EQUIPMENT_POSITIONS:

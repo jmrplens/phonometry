@@ -713,7 +713,7 @@ def plot_real_ear_attenuation(
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     grid = np.asarray(result.attenuation, dtype=np.float64)
-    mean = np.asarray(result.mean_db, dtype=np.float64)
+    mean = np.asarray(result.mean_attenuation, dtype=np.float64)
     expanded = np.asarray(result.expanded_uncertainty_db, dtype=np.float64)
     for index, row in enumerate(grid):
         ax.plot(
@@ -805,7 +805,7 @@ def plot_attenuation_difference(
             bar.set_edgecolor(_C_REFERENCE)
     ax.plot(
         positions,
-        np.asarray(result.criterion_db, dtype=np.float64),
+        np.asarray(result.significance_limit_db, dtype=np.float64),
         "_",
         color=_C_REFERENCE,
         ms=22,
@@ -960,7 +960,7 @@ def plot_active_insertion_loss(
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     grid = np.asarray(result.insertion_loss, dtype=np.float64)
-    mean = np.asarray(result.mean_db, dtype=np.float64)
+    mean = np.asarray(result.mean_insertion_loss, dtype=np.float64)
     for index, row in enumerate(grid):
         ax.plot(
             freqs,
@@ -1026,7 +1026,7 @@ def plot_anr_total_attenuation(
     octaves = np.asarray(result.frequencies, dtype=np.float64)
     ax.plot(
         thirds,
-        np.mean(result.reat_third_octave_db, axis=0),
+        np.mean(result.reat_third_octave_attenuation, axis=0),
         "--",
         color=_C_MUTED,
         lw=1.6,
@@ -1048,7 +1048,7 @@ def plot_anr_total_attenuation(
     total_kwargs.setdefault("label", _t("total, one-third octaves", language))
     ax.plot(
         thirds,
-        np.mean(result.total_third_octave_db, axis=0),
+        np.mean(result.total_third_octave_attenuation, axis=0),
         "-",
         zorder=3,
         **total_kwargs,

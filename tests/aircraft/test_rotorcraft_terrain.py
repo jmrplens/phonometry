@@ -317,7 +317,10 @@ def _terrain_case(tz: np.ndarray) -> tuple:
     az = np.arange(-90.0, 91.0, 10.0)
     po = np.arange(0.0, 181.0, 10.0)
     h = aircraft.RotorcraftHemisphere(
-        freqs, az, po, np.full((az.size, po.size, freqs.size), 95.0)
+        frequencies=freqs,
+        azimuth_deg=az,
+        polar_deg=po,
+        levels=np.full((az.size, po.size, freqs.size), 95.0),
     )
     t = np.arange(0.0, 40.5, 0.5)
     pos = np.column_stack([np.zeros_like(t), 50.0 * t - 1000.0, np.full_like(t, 60.0)])

@@ -64,7 +64,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -79,6 +80,8 @@ from .._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
 
     from .._report.metadata import ReportMetadata
@@ -89,6 +92,7 @@ __all__ = [
     "phase_mismatch_from_residual_index",
     "residual_index_from_phase_mismatch",
     "residual_index_limits",
+    "ResidualIndexLimits",
     "verify_intensity_class",
 ]
 
@@ -201,12 +205,35 @@ def _check_device(device: str) -> tuple[int, int]:
     return columns
 
 
+@dataclass(frozen=True)
+class ResidualIndexLimits(OwnsArrays):
+    r"""The IEC 61043 Table 2 minimum pressure-residual intensity index, per class.
+
+    What :func:`residual_index_limits` returns: the bands and the two class
+    minima, named, where a ``(frequencies, class1, class2)`` tuple used to be
+    unpacked by position.
+
+    :ivar frequencies: The nominal band centres, in Hz.
+    :ivar class_1: The class 1 minimum :math:`\delta_{pI0}` in each band, in
+        dB, rescaled to the microphone separation.
+    :ivar class_2: The class 2 minimum, in dB.
+    """
+
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"class_1": "dB", "class_2": "dB"}
+    )
+
+    frequencies: np.ndarray
+    class_1: np.ndarray
+    class_2: np.ndarray
+
+
 def residual_index_limits(
     device: str = "instrument",
     *,
     spacing_m: float = _REFERENCE_SPACING_M,
     frequencies: list[float] | np.ndarray | None = None,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> ResidualIndexLimits:
     r"""IEC 61043:1993 Table 2 minimum pressure-residual intensity index.
 
     Returns the class 1 and class 2 minima the standard requires of a device
@@ -222,10 +249,12 @@ def residual_index_limits(
     :param frequencies: Band centre frequencies in Hz to report the limits at,
         as nominal labels or the exact base-ten centres behind them. ``None``
         (default) returns all 22 tabulated one-third-octave bands.
-    :return: Tuple ``(frequencies, class1, class2)`` of the nominal band
-        centres in Hz and the two minimum ``delta_pI0`` requirements in dB.
+    :return: The nominal band centres in Hz and the two minimum
+        ``delta_pI0`` requirements in dB, as a :class:`ResidualIndexLimits`
+        (``frequencies``, ``class_1``, ``class_2``).
     :raises ValueError: If ``device`` is unknown, ``spacing_m`` is not positive
         or a frequency is not a tabulated band.
+    :raises TypeError: if ``spacing_m`` is not a single number.
     """
     col1, col2 = _check_device(device)
     offset = _spacing_offset(spacing_m)
@@ -240,7 +269,7 @@ def residual_index_limits(
     freqs = np.asarray(wanted, dtype=np.float64)
     class1 = np.asarray([rows[f][col1] + offset for f in wanted], dtype=np.float64)
     class2 = np.asarray([rows[f][col2] + offset for f in wanted], dtype=np.float64)
-    return freqs, class1, class2
+    return ResidualIndexLimits(frequencies=freqs, class_1=class1, class_2=class2)
 
 
 def instrument_class_from_components(probe_class: int, processor_class: int) -> int:
@@ -258,6 +287,8 @@ def instrument_class_from_components(probe_class: int, processor_class: int) -> 
     :return: The class of the assembled instrument (1 or 2).
     :raises ValueError: If either class is not 1 or 2. The non-real-time
         class 2X of clause 4 is not modelled here.
+    :raises TypeError: if ``probe_class`` or ``processor_class`` is a flag, a text or an
+        array where a count goes.
     """
     require_scalar(probe_class, "probe_class")
     require_scalar(processor_class, "processor_class")
@@ -421,6 +452,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         :raises ValueError: if the spectra disagree in length or are empty,
             the device tag is not a Table 2 column group, a value is not
             finite, or a band is not tabulated or is repeated.
+        :raises TypeError: if ``spacing_m`` is not a single number.
         """
         _check_device(self.device)
         require_ranks(self, frequencies=1, residual_index=1)
@@ -510,7 +542,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         """
         return residual_index_limits(
             self.device, spacing_m=self.spacing_m, frequencies=self.frequencies
-        )[1]
+        ).class_1
 
     @property
     def limit_class2(self) -> np.ndarray:
@@ -520,7 +552,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         """
         return residual_index_limits(
             self.device, spacing_m=self.spacing_m, frequencies=self.frequencies
-        )[2]
+        ).class_2
 
     @property
     def spacing_offset_db(self) -> float:
@@ -544,6 +576,8 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
         :param device_class: 1 or 2; ``None`` (default) uses
             :meth:`reference_class`.
         :raises ValueError: If ``device_class`` is not 1 or 2.
+        :raises TypeError: if ``device_class`` is a flag, a text or an array where a
+            count goes.
         """
         cls = (
             self.reference_class()
@@ -560,6 +594,8 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
 
         :param device_class: 1 or 2; ``None`` (default) uses
             :meth:`reference_class`.
+        :raises TypeError: if ``device_class`` is a flag, a text or an array where a
+            count goes.
         """
         cls = (
             self.reference_class()
@@ -706,6 +742,7 @@ def phase_mismatch_from_residual_index(
         :class:`numpy.ndarray` (0-d for scalar inputs).
     :raises ValueError: If ``spacing_m``, ``speed_of_sound`` or ``frequency`` are not positive
         and finite, or if ``residual_index`` is not finite.
+    :raises TypeError: if ``spacing_m`` or ``speed_of_sound`` is not a single number.
     """
     index = np.asarray(residual_index, dtype=np.float64)
     if np.any(~np.isfinite(index)):
@@ -752,6 +789,7 @@ def residual_index_from_phase_mismatch(
         scalar inputs).
     :raises ValueError: If ``phase_mismatch_deg`` is not positive and finite, or
         if ``spacing_m``, ``speed_of_sound`` or ``frequency`` are not positive and finite.
+    :raises TypeError: if ``spacing_m`` or ``speed_of_sound`` is not a single number.
     """
     phi = np.asarray(phase_mismatch_deg, dtype=np.float64)
     if np.any(~np.isfinite(phi)) or np.any(phi <= 0.0):

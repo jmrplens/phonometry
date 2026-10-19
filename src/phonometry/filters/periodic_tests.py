@@ -256,6 +256,7 @@ def periodic_test_frequencies(fraction: float) -> np.ndarray:
         index ``k + 7``; ``PERIODIC_TEST_ATTENUATION_LIMITS_DB[c][abs(k)]``
         are their acceptance limits.
     :raises ValueError: for a ``fraction`` that is not positive.
+    :raises TypeError: if ``fraction`` is not a single number.
     """
     b = require_positive(fraction, "fraction")
     upper = np.array(
@@ -318,7 +319,7 @@ def _rows(
     return tuple(tuple(float(v) for v in row) for row in arr)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FilterPeriodicMeasurements(RichDisplay):
     r"""What a laboratory measured in the periodic tests of IEC 61260-3:2016.
 
@@ -1077,6 +1078,8 @@ def verify_filter_periodic(
     :return: A :class:`FilterPeriodicVerification`.
     :raises ValueError: for a class other than 1 or 2, a ``fraction`` that is
         not positive, or a record with nothing measured.
+    :raises TypeError: if ``fraction`` is not a single number, or ``filter_class`` is a
+        flag, a text or an array where a count goes.
     """
     if not is_class_designation(filter_class, _CLASSES):
         msg = f"'filter_class' must be 1 or 2 (IEC 61260-1:2014); got {filter_class!r}."

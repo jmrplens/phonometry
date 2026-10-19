@@ -126,6 +126,7 @@ to 150 m³.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `volume` is not in `(0, 150]`, or `room` is not tabulated for that volume range. |
+| TypeError | if `volume` is not a single number. |
 
 ## reverberation_index
 
@@ -153,6 +154,7 @@ Reverberation index $k = 10 \log_{10}(T/T_0)$ (ISO 10052, Cl. 3.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `t`/`t0` are not positive or `t` is non-finite. |
+| TypeError | if `t0` is not a single number. |
 
 ## survey_airborne_insulation
 
@@ -210,6 +212,7 @@ reverberation index `k` comes from [`reverberation_index`](/phonometry/reference
 | Exception | When |
 | :--- | :--- |
 | ValueError | If band counts differ, if `area` is given without `volume`, or if `area`/`volume` are not positive. |
+| TypeError | if `area` or `volume` is not a single number. |
 
 ## survey_facade_insulation
 
@@ -250,6 +253,7 @@ $D_{2\mathrm{m,n}} = D_{2\mathrm{m}} + k + 10 \log_{10}(A_0 T_0 / (0.16\,V))$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If band counts differ or `volume` is not positive. |
+| TypeError | if `volume` is not a single number. |
 
 ## survey_impact_insulation
 
@@ -289,6 +293,7 @@ positions, Clause 3.7).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If band counts differ or `volume` is not positive. |
+| TypeError | if `volume` is not a single number. |
 
 ## survey_service_equipment_level
 
@@ -329,6 +334,7 @@ $L_{XY,\mathrm{n}} = L_{XY} - k - 10 \log_{10}(A_0 T_0 / (0.16\,V))$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If not exactly three measurements are given, if shapes are inconsistent, or if `volume` is not positive. |
+| TypeError | if `volume` is not a single number. |
 
 ## SurveyAirborneResult
 

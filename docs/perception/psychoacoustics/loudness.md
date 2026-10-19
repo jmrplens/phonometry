@@ -175,7 +175,8 @@ result:
 ```python
 from phonometry import psychoacoustics
 
-freqs, spl = psychoacoustics.equal_loudness_contour(40.0)   # the classic 40-phon contour
+contour = psychoacoustics.equal_loudness_contour(40.0)
+freqs, spl = contour.frequencies, contour.levels   # the classic 40-phon contour
 phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 phon
 
 # The whole family (20-90 phon by default) plus the hearing threshold:
@@ -203,10 +204,12 @@ plt.show()
 # preferred frequencies of Table 1, one contour per loudness level:
 fig, ax = plt.subplots()
 for phon in [20, 40, 60, 80, 90]:
-    freqs, spl = psychoacoustics.equal_loudness_contour(float(phon))
+    contour = psychoacoustics.equal_loudness_contour(float(phon))
+    freqs, spl = contour.frequencies, contour.levels
     ax.semilogx(freqs, spl, color="C0")
     ax.annotate(f"{phon} phon", xy=(1000, phon + 1), fontsize=9)
-ft, tf = psychoacoustics.hearing_threshold()
+threshold = psychoacoustics.hearing_threshold()
+ft, tf = threshold.frequencies, threshold.levels
 ax.semilogx(ft, tf, "--", color="C1", label="Hearing threshold $T_f$")
 ax.set(xlabel="Frequency [Hz]", ylabel="Sound pressure level [dB re 20 µPa]")
 ax.grid(True, which="both", alpha=0.3)

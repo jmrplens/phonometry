@@ -153,7 +153,7 @@ electromagnetic exposure of IEC 62489-2 is outside this library.
 
 ```python
 agc_characteristic(
-    source_emf_db: ArrayLike,
+    source_emf_levels: ArrayLike,
     output_level: ArrayLike,
 ) -> AGCCharacteristic
 ```
@@ -181,20 +181,26 @@ measured.
 
 | Name | Description |
 | :--- | :--- |
-| `source_emf_db` | Source e.m.f. levels, in dB re any fixed voltage, strictly ascending. |
+| `source_emf_levels` | Source e.m.f. levels, in dB re any fixed voltage, strictly ascending. |
 | `output_level` | Output current level at each, in dB re the rated maximum output current. |
 
 **Returns:** An [`AGCCharacteristic`](/phonometry/reference/api/electroacoustics/induction-loop-components/#agccharacteristic).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `output_level` or `source_emf_levels` holds a text or a value that is not a real number. |
 
 ## AGCCharacteristic
 
 ```python
 AGCCharacteristic(
-    source_emf_db: np.ndarray,
+    source_emf_levels: np.ndarray,
     output_level: np.ndarray,
     agc_range_db: float,
-    agc_range_start_db: float,
-    agc_range_end_db: float,
+    agc_range_start_level: float,
+    agc_range_end_level: float,
 )
 ```
 
@@ -204,11 +210,11 @@ The steady-state output/input characteristic of an amplifier (5.4.13).
 
 | Name | Description |
 | :--- | :--- |
-| `source_emf_db` | The source e.m.f. levels, in dB, ascending. |
+| `source_emf_levels` | The source e.m.f. levels, in dB, ascending. |
 | `output_level` | The output current level at each, in dB referred to the rated maximum output current (5.4.13.3). |
 | `agc_range_db` | The widest span of input level over which the output level changes by no more than 3 dB, in dB: the quantity IEC 62489-1:2010+A1:2014 5.4.13.4 recommends to be at least 32 dB. |
-| `agc_range_start_db` | The input level where that span starts, in dB. |
-| `agc_range_end_db` | The input level where it ends, in dB. |
+| `agc_range_start_level` | The input level where that span starts, in dB. |
+| `agc_range_end_level` | The input level where it ends, in dB. |
 
 ### AGCCharacteristic.plot()
 
@@ -271,6 +277,12 @@ range of at least 50 Hz to 8 kHz" and the load current measured at each
 
 **Returns:** An [`AmplifierFrequencyResponse`](/phonometry/reference/api/electroacoustics/induction-loop-components/#amplifierfrequencyresponse).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies` or `output_current_a` holds a text or a value that is not a real number. |
+
 ## amplifier_signal_to_noise_ratio
 
 ```python
@@ -298,10 +310,17 @@ source e.m.f. reduced to zero.
 
 **Returns:** The signal-to-noise ratio, in dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `noise_current_a` or `rated_current_a` is not a single number. |
+
 ## AmplifierFrequencyResponse
 
 ```python
 AmplifierFrequencyResponse(
+    *,
     frequencies: np.ndarray,
     output_current_a: np.ndarray,
     response_db: np.ndarray,
@@ -395,6 +414,7 @@ the RMS voltage of the sine with the same peaks.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a record that does not swing both ways. |
+| TypeError | if `voltage_v` holds a text or a value that is not a real number. |
 
 ## equivalent_input_noise_voltage
 
@@ -426,6 +446,12 @@ $$
 | `noise_current_a` | The A-weighted output current with no input, in amperes. |
 
 **Returns:** The equivalent input noise voltage, in volts.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `noise_current_a`, `output_current_a` or `source_emf_v` is not a single number. |
 
 ## loop_center_field
 
@@ -465,6 +491,12 @@ of 1,5 and 3,3 dB at 4.
 
 **Returns:** The field strength at the centre, in A/m.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `current_a`, `length_m` or `width_m` is not a single number, or `n_turns` is a flag, a text or an array where a count goes. |
+
 ## loop_current
 
 ```python
@@ -500,6 +532,12 @@ figure are reproduced: 4,88 A for a 10 m square and 6,41 A for 10 m by
 
 **Returns:** The RMS current in each turn, in amperes.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `field_strength_a_per_m`, `height_m`, `length_m` or `width_m` is not a single number, or `n_turns` is a flag, a text or an array where a count goes. |
+
 ## loop_dimensions
 
 ```python
@@ -510,7 +548,7 @@ loop_dimensions(
     height_m: float = 1.4,
     field_strength_a_per_m: float = 0.4,
     n_turns: int = 1,
-) -> tuple[float, float]
+) -> LoopDimensions
 ```
 
 The largest loop an amplifier's current drives to a field strength (5.4.11).
@@ -533,13 +571,14 @@ specification is read for.
 | `field_strength_a_per_m` | The field strength to reach, in A/m (400 mA/m). |
 | `n_turns` | Number of turns. |
 
-**Returns:** `(short_side_m, long_side_m)`, in metres.
+**Returns:** The short and the long side, in metres, as a [`LoopDimensions`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loopdimensions) (`width_m`, `length_m`).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | when the current cannot reach the field strength at that height with a loop of any size. |
+| TypeError | if `aspect_ratio`, `current_a`, `field_strength_a_per_m` or `height_m` is not a single number, or `n_turns` is a flag, a text or an array where a count goes. |
 
 ## loop_impedance
 
@@ -563,6 +602,12 @@ The impedance of a loop from its resistance and inductance.
 | `frequencies` | Frequencies to tabulate the magnitude at, in hertz; by default the one-third-octave centres from 50 Hz to 10 kHz. |
 
 **Returns:** A [`LoopImpedance`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loopimpedance).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `inductance_h` or `resistance_ohm` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## loop_resistance
 
@@ -596,6 +641,31 @@ $10^{-8}$ ohm metres, and 1/58 is inside that range.
 | `conductor_temperature_c` | Temperature of the conductor, in degrees Celsius. |
 
 **Returns:** The DC resistance of the loop, in ohms.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `conductor_area_mm2`, `conductor_temperature_c` or `perimeter_m` is not a single number, or `n_turns` is a flag, a text or an array where a count goes. |
+
+## LoopDimensions
+
+```python
+LoopDimensions(width_m: float, length_m: float)
+```
+
+The sides of the largest loop an amplifier drives to a field strength.
+
+What [`loop_dimensions`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_dimensions) returns: the two sides, named, where a
+`(short side, long side)` tuple used to be unpacked by position, with
+the names [`loop_current`](/phonometry/reference/api/electroacoustics/induction-loop-components/#loop_current) takes them by.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `width_m` | The short side, in metres. |
+| `length_m` | The long side, in metres: the short side times the aspect ratio. |
 
 ## LoopField
 
@@ -655,6 +725,12 @@ The field strength level of one component, dB re 400 mA/m.
 
 **Returns:** $20\lg(|H|/0{,}4\ \mathrm{A/m})$; minus infinity where the component vanishes, which is the null line outside a loop.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `component` is not a text. |
+
 ### LoopField.magnitude_a_per_m
 
 *property*
@@ -696,6 +772,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 LoopImpedance(
+    *,
     resistance_ohm: float,
     inductance_h: float,
     frequencies: np.ndarray,
@@ -763,6 +840,12 @@ The RMS voltage that drives a current through the loop (IEC 60118-4 E.3).
 | `frequency_hz` | Frequency or frequencies, in hertz, positive and finite. |
 
 **Returns:** $U = I|Z|$, in volts.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `current_a` is not a single number. |
 
 ### LoopImpedance.plot()
 
@@ -836,6 +919,7 @@ interpolated linearly between the two steps either side of it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a negative distortion, which no measurement gives, or when the distortion never reaches the rated value, or already exceeds it at the first step, so the current lies outside the steps measured. |
+| TypeError | if `load_resistance_ohm` or `rated_thd_percent` is not a single number, or `resistor_voltage_v` or `thd_percent` holds a text or a value that is not a real number. |
 
 ## MaxOutputCurrent
 
@@ -927,7 +1011,7 @@ that gives 0 dB, where the scaling does nothing.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `impedance_ohm` holds an element that is not a number. |
+| TypeError | If `impedance_ohm`, `frequencies` or `field_strength_level` holds an element that is not a number, or `input_voltage_v` is not one number. |
 | ValueError | If the frequencies are not positive and ascending or miss 1000 Hz, the arrays differ in length, a level is not finite, or a real impedance is not positive. |
 
 ## NECK_LOOP_TYPES
@@ -1113,6 +1197,12 @@ degrees are as much in quadrature as 90.
 
 **Returns:** A [`QuadraturePhaseError`](/phonometry/reference/api/electroacoustics/induction-loop-components/#quadraturephaseerror).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies` or `phase_difference_deg` holds a text or a value that is not a real number. |
+
 ## QuadraturePhaseError
 
 ```python
@@ -1232,6 +1322,7 @@ it. Metal in the building, which Annex F describes, is not modelled.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive dimension, a non-finite coordinate or a point on the conductor, where a filament's field is infinite. |
+| TypeError | if `current_a`, `length_m` or `width_m` is not a single number, or `n_turns` is a flag, a text or an array where a count goes. |
 
 ## rectangular_loop_inductance
 
@@ -1284,6 +1375,7 @@ at 1 kHz), which is why the term is included by default.
 | Exception | When |
 | :--- | :--- |
 | ValueError | when the wire is not thin against the sides, where the formula does not hold. |
+| TypeError | if `conductor_area_mm2`, `length_m` or `width_m` is not a single number, or `n_turns` is a flag, a text or an array where a count goes. |
 
 ## verify_neck_loop
 
@@ -1320,5 +1412,5 @@ input ([`NECK_LOOP_TYPES`](/phonometry/reference/api/electroacoustics/induction-
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `neck_loop_type` is not a number, a bool included. |
+| TypeError | if `neck_loop_type` is not a number, a bool included, or `input_voltage_v` or `dc_resistance_ohm` is not one number. |
 | ValueError | if `neck_loop_type` is a number but not 1 or 2. |

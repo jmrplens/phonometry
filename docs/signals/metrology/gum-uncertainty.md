@@ -51,7 +51,8 @@ print(round(result.combined_uncertainty, 3))  # 0.407 dB
 print(result.contributions.round(3))          # [0.    0.115 0.173 0.35 ]
 print(round(result.effective_dof, 1))         # 16.5
 
-k, U = result.expanded(0.95)
+expanded = result.expanded(0.95)
+k, U = expanded.coverage_factor, expanded.expanded_uncertainty
 print(round(k, 2), round(U, 2))               # 2.11 0.86  ->  Y = 74.0 ± 0.9 dB
 ```
 
@@ -155,7 +156,8 @@ model = lambda a, b, c, d: a + b + c + d
 result = metrology.uncertainty_propagation(model, quantities)
 mc = metrology.monte_carlo(model, quantities, n_trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
-k, U = result.expanded(0.95)
+expanded = result.expanded(0.95)
+k, U = expanded.coverage_factor, expanded.expanded_uncertainty
 
 # One line per panel — the budget bars, and the Monte Carlo histogram with
 # its coverage interval (the committed figure also overlays the GUM Gaussian):
@@ -186,8 +188,8 @@ plt.show()
 
 The `UncertaintyResult` carries the `value`, `combined_uncertainty`, the
 `sensitivities`, the per-input `contributions` and the `effective_dof`; its
-`.plot()` draws the budget and `.expanded(coverage)` returns the pair
-$(k, U)$. The `MonteCarloResult` carries the `value`, `standard_uncertainty`,
+`.plot()` draws the budget and `.expanded(coverage)` returns   an
+`ExpandedUncertainty` (`coverage_factor`, `expanded_uncertainty`). The `MonteCarloResult` carries the `value`, `standard_uncertainty`,
 the coverage `interval` and its `coverage`; with `keep_samples=True` it also
 retains the output `samples`, and its `.plot()` draws the output histogram
 with the coverage interval marked (the right panel above). The building-acoustics uncertainty

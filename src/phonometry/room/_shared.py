@@ -53,6 +53,7 @@ def validate_ir(
     :return: The samples as a plain 1D float array.
     :raises ValueError: If the response is not one-dimensional, is silent,
         or ``fs`` is not positive.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     require_scalar(fs, "fs")
     x = _typesignal(ir, name="ir")
@@ -128,6 +129,7 @@ def split_bands(
         ``bands`` holds the untouched response when ``limits`` is ``None``.
     :raises ValueError: If ``limits`` is not a pair, is not finite, or leaves
         no band below the Nyquist frequency.
+    :raises TypeError: if ``limits`` holds a text or a value that is not a real number.
     """
     if limits is None:
         return None, [x]

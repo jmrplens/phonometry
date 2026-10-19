@@ -878,7 +878,8 @@ def generate_heavy_impact_sources(output_dir: str) -> None:
         ("bang_machine", COLOR_SECONDARY),
     ):
         spec = building.heavy_impact_source_specification(source)
-        _f, lower, upper = building.heavy_impact_source_limits(source)
+        limits = building.heavy_impact_source_limits(source)
+        _f, lower, upper = limits.frequencies, limits.lower, limits.upper
         label = source.replace("_", " ")
         ax_src.fill_between(
             x,
@@ -1279,7 +1280,8 @@ def generate_insulation_uncertainty_demo(output_dir: str) -> None:
     # Per-band standard uncertainty u (ISO 12999-1 Table 2, situation B); match
     # each measured band to its tabulated value, then expand at k = 1.96 (95 %).
     band = band_uncertainty("airborne", "B")
-    band_f, band_u = band.to_arrays()
+    band_f = np.asarray(band.frequencies, dtype=float)
+    band_u = np.asarray(band.uncertainties, dtype=float)
     idx = [int(np.argmin(np.abs(band_f - f))) for f in freqs]
     u_band = band_u[idx]
     k = insulation_coverage_factor(0.95)
@@ -3373,7 +3375,7 @@ def _service_equipment_measurement() -> "ServiceEquipmentResult":
         readings,
         frequencies=freqs,
         quantity="eq",
-        background_db=background,
+        background_levels=background,
         reverberation_time=reverberation,
         volume=float(np.prod(_SERVICE_ROOM)),
     )
@@ -3488,4 +3490,95 @@ def generate_service_equipment_instrument_agreement(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(9, 5.6))
     check.plot(ax=ax, language=_LANG)
     save_figure(output_dir, "service_equipment_instrument_agreement.png")
+    plt.close()
+
+
+#: The one-third-octave bands of the ISO 16251-1 rating range, 100 Hz to 3,15 kHz.
+_ISO16251_BANDS_HZ = (
+    100.0,
+    125.0,
+    160.0,
+    200.0,
+    250.0,
+    315.0,
+    400.0,
+    500.0,
+    630.0,
+    800.0,
+    1000.0,
+    1250.0,
+    1600.0,
+    2000.0,
+    2500.0,
+    3150.0,
+)
+
+
+def generate_background_corrected_level(output_dir: str) -> None:
+    """ISO 16251-1 Formula (2): the margin of each band against the criterion.
+
+    The textile carpet of the impact-improvement guide on the mock-up, read
+    with the covering in place over an accelerometer background of 20 dB re
+    1 um/s^2: the low bands clear 15 dB, two sit between 6 dB and 15 dB, and
+    the five highest are held at the limit of measurement.
+    """
+    print("Generating background_corrected_level...")
+    from phonometry import building
+
+    bare = np.array(
+        [72, 73, 74, 74, 75, 75, 76, 76, 77, 77, 78, 78, 79, 79, 80, 80], dtype=float
+    )
+    improvement = np.array(
+        [5, 8, 10, 14, 18, 23, 30, 31, 39, 49, 53, 57, 60, 67, 68, 71], dtype=float
+    )
+    background = np.full(16, 20.0)
+    covering = bare - improvement
+    measured = 10.0 * np.log10(10.0 ** (covering / 10.0) + 10.0 ** (background / 10.0))
+    result = building.background_corrected_level(
+        measured, background, frequencies=_ISO16251_BANDS_HZ
+    )
+    _fig, ax = plt.subplots(figsize=(10, 5.8))
+    result.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "background_corrected_level.png")
+    plt.close()
+
+
+def generate_strong_coupling_check(output_dir: str) -> None:
+    """ISO 10848-1 Formula (15) across the bands of a heavy junction.
+
+    A 140 mm concrete wall (322 kg/m², fc 133 Hz) excited, joined to a
+    200 mm one (460 kg/m², fc 93 Hz): the bound is 6,1 dB and the one-way
+    velocity level difference stays under it in the five lowest bands, where
+    the walls are strongly coupled and the measured Kij may not be relevant.
+    """
+    print("Generating strong_coupling_check...")
+    from phonometry import building
+
+    freqs = (*_ISO16251_BANDS_HZ, 4000.0, 5000.0)
+    dv_ij = [
+        4.2,
+        4.7,
+        5.1,
+        5.5,
+        5.9,
+        6.4,
+        6.8,
+        7.4,
+        7.9,
+        8.5,
+        9.0,
+        9.6,
+        10.1,
+        10.7,
+        11.2,
+        11.7,
+        12.1,
+        12.6,
+    ]
+    check = building.check_strong_coupling(
+        dv_ij, 322.0, 460.0, 133.0, 93.0, frequencies=freqs
+    )
+    _fig, ax = plt.subplots(figsize=(10, 5.8))
+    check.plot(ax=ax, language=_LANG)
+    save_figure(output_dir, "strong_coupling_check.png")
     plt.close()

@@ -41,7 +41,7 @@ $$
 for predicting a traffic noise level (9.5 NOTE), and the comparison clause 10
 has in mind is a difference from a reference surface, of which Annex D gives an
 example built from seven dense bituminous surfaces
-([`normalized_reference_levels`](/phonometry/reference/api/environment/statistical-pass-by/#normalized_reference_levels), [`SPB_NORMALIZED_REFERENCE_DB`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_db)).
+([`normalized_reference_levels`](/phonometry/reference/api/environment/statistical-pass-by/#normalized_reference_levels), [`SPB_NORMALIZED_REFERENCE_LEVELS`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_levels)).
 
 **The rounding chain.** 9.2 ends "All levels shall be calculated to two decimal
 places and rounded to one decimal place", and 9.5 defines the levels the index
@@ -120,7 +120,7 @@ The normalized reference case is a fictitious surface whose
 $L_\mathrm{veh}$ are set by convention, "for instance ... the
 average results of a great number of SPB measurements" on dense asphalt
 surfaces. Annex D builds one from seven surfaces
-([`SPB_ANNEX_D_SURFACES_DB`](/phonometry/reference/api/environment/statistical-pass-by/#spb_annex_d_surfaces_db)) and prints the average of each column,
+([`SPB_ANNEX_D_SURFACE_LEVELS`](/phonometry/reference/api/environment/statistical-pass-by/#spb_annex_d_surface_levels)) and prints the average of each column,
 which is what this returns: the arithmetic mean, category by category.
 
 The energetic mean would print the same row there (76,4, 81,0 and 84,0 dB
@@ -184,6 +184,7 @@ stay on the result.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown category, a speed that is not positive, a level that is not finite, inputs that do not match pass-by for pass-by, fewer than three pass-bys, or pass-bys all at one speed. |
+| TypeError | if `road_speed_category` is not a text, or `max_levels` or `speeds_kmh` holds a text or a value that is not a real number. |
 
 ## PassByRegression
 
@@ -194,7 +195,7 @@ PassByRegression(
     speeds_kmh: NDArray[np.float64],
     max_levels: NDArray[np.float64],
     reference_speed_kmh: float,
-    intercept_db: float,
+    intercept_level: float,
     slope_db_per_decade: float,
     correlation: float,
     level_standard_deviation_db: float,
@@ -225,7 +226,7 @@ spreads printed beside them (the errata registry has the arithmetic).
 | `speeds_kmh` | The measured speed of each pass-by, in km/h, read-only. |
 | `max_levels` | The maximum A-weighted level of each pass-by, time weighting F, in decibels, read-only. |
 | `reference_speed_kmh` | The Table 1 reference speed of the category, in km/h. |
-| `intercept_db` | $a$, the ordinate of the line at 1 km/h, in decibels. |
+| `intercept_level` | $a$, the ordinate of the line at 1 km/h, in decibels. |
 | `slope_db_per_decade` | $b$, in decibels per decade of speed. |
 | `correlation` | The correlation coefficient of level and $\lg v$. |
 | `level_standard_deviation_db` | The standard deviation of the measured levels, in decibels. |
@@ -325,12 +326,12 @@ vehicles ([`SPB_SPEED_WINDOW_STANDARD_DEVIATIONS`](/phonometry/reference/api/env
 
 $L_\mathrm{veh}$, the line at the reference speed, unrounded (9.2).
 
-## SPB_ANNEX_D_SURFACES_DB
+## SPB_ANNEX_D_SURFACE_LEVELS
 
 *Constant* (`mapping`).
 
 ```python
-SPB_ANNEX_D_SURFACES_DB = {'A1': {'1': 76.6, '2a': 81.1, '2b': 84.1}, 'A2': {'1': 75.9, '2a': 80.0, '2b': 83.0}, 'A3': {'1': 76.4, '2a': 81.8, '2b': 84.0}, 'A4': {'1': 77.2, '2a': 81.5, '2b': 84.9}, 'B1': {'1': 76.1, '2a': 81.0, '2b': 84.4}, 'B2': {'1': 76.4, '2a': 80.4, '2b': 83.3}, 'B3': {'1': 76.4, '2a': 81.0, '2b': 84.1}}
+SPB_ANNEX_D_SURFACE_LEVELS = {'A1': {'1': 76.6, '2a': 81.1, '2b': 84.1}, 'A2': {'1': 75.9, '2a': 80.0, '2b': 83.0}, 'A3': {'1': 76.4, '2a': 81.8, '2b': 84.0}, 'A4': {'1': 77.2, '2a': 81.5, '2b': 84.9}, 'B1': {'1': 76.1, '2a': 81.0, '2b': 84.4}, 'B2': {'1': 76.4, '2a': 80.4, '2b': 83.3}, 'B3': {'1': 76.4, '2a': 81.0, '2b': 84.1}}
 ```
 
 ## SPB_CONFIDENCE_INTERVALS_DB
@@ -349,12 +350,12 @@ SPB_CONFIDENCE_INTERVALS_DB = {'1': 0.3, '2a': 0.7, '2b': 0.7}
 SPB_MIN_VEHICLE_COUNTS = {'1': 100, '2a': 30, '2b': 30, '2': 80}
 ```
 
-## SPB_NORMALIZED_REFERENCE_DB
+## SPB_NORMALIZED_REFERENCE_LEVELS
 
 *Constant* (`mapping`).
 
 ```python
-SPB_NORMALIZED_REFERENCE_DB = {'1': 76.4, '2a': 81.0, '2b': 84.0}
+SPB_NORMALIZED_REFERENCE_LEVELS = {'1': 76.4, '2a': 81.0, '2b': 84.0}
 ```
 
 ## SPB_REFERENCE_AIR_TEMPERATURE_C
@@ -423,7 +424,7 @@ statistical_pass_by(
     *,
     road_speed_category: str,
     corrected_vehicle_sound_levels: Mapping[str, float] | None = None,
-    reference_db: float | Mapping[str, float] | None = None,
+    reference_levels: float | Mapping[str, float] | None = None,
     weighting_factors: Mapping[str, float] | None = None,
 ) -> StatisticalPassByResult
 ```
@@ -452,7 +453,7 @@ speed windows are judged, kept on the result and emitted as
 | `max_levels` | The maximum A-weighted level of each pass-by, time weighting F, in decibels. |
 | `road_speed_category` | `"low"`, `"medium"` or `"high"` (3.3). |
 | `corrected_vehicle_sound_levels` | Vehicle sound levels corrected to [`SPB_REFERENCE_AIR_TEMPERATURE_C`](/phonometry/reference/api/environment/statistical-pass-by/#spb_reference_air_temperature_c) by a method of the caller's choosing, keyed by category, for which the index is also computed, from the levels rounded to one decimal. 9.4 gives no method. To correct each pass-by instead, which 9.4 prefers, correct `max_levels` and call this again. |
-| `reference_db` | The reference surface of clause 10: either its SPBI in decibels, used as given, or its three vehicle sound levels keyed by category (for instance [`SPB_NORMALIZED_REFERENCE_DB`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_db)), whose index is then computed from the levels rounded to one decimal, with the same weighting factors. |
+| `reference_levels` | The reference surface of clause 10: either its SPBI in decibels, used as given, or its three vehicle sound levels keyed by category (for instance [`SPB_NORMALIZED_REFERENCE_LEVELS`](/phonometry/reference/api/environment/statistical-pass-by/#spb_normalized_reference_levels)), whose index is then computed from the levels rounded to one decimal, with the same weighting factors. |
 | `weighting_factors` | Other proportions of the three categories (9.5); Table 1 when omitted. |
 
 **Returns:** The regressions, the levels and the index, as a [`StatisticalPassByResult`](/phonometry/reference/api/environment/statistical-pass-by/#statisticalpassbyresult).
@@ -462,6 +463,7 @@ speed windows are judged, kept on the result and emitted as
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a category the method does not use, rows that do not match, a category with fewer than three pass-bys or all at one speed, or invalid weighting factors or levels. |
+| TypeError | if `road_speed_category` is not a text, or `reference_levels` is not a single number. |
 
 ## statistical_pass_by_index
 
@@ -509,6 +511,7 @@ before calling this.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a road speed category the standard does not define, a level missing, unknown or not finite, or weighting factors that are negative or do not add up to 1. |
+| TypeError | if `road_speed_category` is not a text. |
 
 ## StatisticalPassByResult
 

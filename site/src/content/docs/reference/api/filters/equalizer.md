@@ -200,6 +200,12 @@ series as a numerically robust SOS cascade, following the house style of
 | `stateful` | If True, `filter` carries the filter state across calls (block processing). |
 | `steady_ic` | If True, initialize the state at steady state. |
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs` is not a single number. |
+
 ### ParametricEQ.filter()
 
 ```python
@@ -246,3 +252,9 @@ Evaluate the cascade frequency response on a log-spaced grid.
 | `f_max` | Highest frequency, in Hz (default: Nyquist). |
 
 **Returns:** An [`EQResponseResult`](/phonometry/reference/api/filters/equalizer/#eqresponseresult) (carries the SOS cascade and plots the magnitude/phase response).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `f_max`, `f_min` or `n_points` is not a single number. |

@@ -147,7 +147,7 @@ def _vigran_corrugated() -> tuple[float, tuple[float, float, float]]:
         youngs_modulus=VIGRAN_STEEL["youngs_modulus"],
         poisson_ratio=VIGRAN_STEEL["poisson_ratio"],
     )
-    return mass, stiffness
+    return mass, (stiffness.b_x_n_m, stiffness.b_z_n_m, stiffness.b_xz_n_m)
 
 
 # ---------------------------------------------------------------------------
@@ -213,13 +213,14 @@ def test_corrugated_stiffness_returns_to_the_flat_plate_when_flattened() -> None
     twisting term: Timoshenko's corrugated ``Bxz`` carries no ``Bx nu_z``
     contribution, unlike the general Eq. (3.114).
     """
-    b_x, b_z, b_xz = building.corrugated_plate_stiffness(
+    stiffness = building.corrugated_plate_stiffness(
         VIGRAN_THICKNESS,
         1.0e-9,
         VIGRAN_WAVELENGTH,
         youngs_modulus=VIGRAN_STEEL["youngs_modulus"],
         poisson_ratio=VIGRAN_STEEL["poisson_ratio"],
     )
+    b_x, b_z, b_xz = stiffness.b_x_n_m, stiffness.b_z_n_m, stiffness.b_xz_n_m
     flat = _vigran_flat_stiffness()
     nu = VIGRAN_STEEL["poisson_ratio"]
     assert b_x == pytest.approx(flat, rel=1e-9)

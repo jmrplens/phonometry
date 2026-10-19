@@ -10,6 +10,8 @@ impedance tube spans exactly the drawn thickness).
 
 from __future__ import annotations
 
+import dataclasses
+
 import numpy as np
 import pytest
 
@@ -110,17 +112,8 @@ def test_layered_result_retains_layers_and_draws() -> None:
     res = m.layered_absorber(FREQ, layers)
     assert res.layers == tuple(layers)
     assert res.plot_geometry() is not None
-    bare = m.LayeredAbsorberResult(
-        frequencies=res.frequencies,
-        angle_rad=res.angle_rad,
-        surface_impedance=res.surface_impedance,
-        normalized_impedance=res.normalized_impedance,
-        reflection=res.reflection,
-        absorption=res.absorption,
-        transfer_matrix=res.transfer_matrix,
-    )
-    with pytest.raises(ValueError, match=r"does not retain its layers"):
-        bare.plot_geometry()
+    with pytest.raises(TypeError, match=r"LayeredAbsorberResult: 'layers' is required"):
+        dataclasses.replace(res, layers=None)
 
 
 def test_single_layer_dataclasses_plot() -> None:
@@ -161,7 +154,7 @@ def test_diffuser_response_retains_wells_and_draws() -> None:
         reflection=np.exp(-2j * np.pi * np.arange(7) / 7),
     )
     assert explicit.depths is None
-    with pytest.raises(ValueError, match=r"does not retain its well geometry"):
+    with pytest.raises(ValueError, match=r"has no well profile to draw"):
         explicit.plot_geometry()
 
 

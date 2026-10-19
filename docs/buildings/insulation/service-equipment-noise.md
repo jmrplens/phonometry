@@ -268,7 +268,7 @@ t = np.array([np.nan, np.nan, np.nan, 0.82, 0.78, 0.74, 0.70, 0.66, 0.63,
               0.48, 0.47, 0.46, 0.45, 0.44, np.nan, np.nan, np.nan])
 res = building.service_equipment_level(
     readings, frequencies=freqs, quantity="eq",
-    background_db=background, reverberation_time=t, volume=35.7,
+    background_levels=background, reverberation_time=t, volume=35.7,
 )
 print(res.ratings["LA,eq"], res.ratings["LA,eq,nT"], res.ratings["LC,eq,nT"])
 # 45 45 51
@@ -298,14 +298,14 @@ they are.*
 | `frequencies` | array | Hz | required | Nominal centres, increasing: one-third octaves 25 Hz to 10 kHz or octaves 31.5 Hz to 8 kHz |
 | `quantity` | str | | required | `"Smax"`, `"Fmax"` or `"eq"`, the Table 1 quantity; it names the single numbers |
 | `fraction` | int | | `3` | `3` (one-third octaves) or `1` (octaves); Clause 6 asks for one-third octaves, octaves are optional |
-| `background_db` | array | dB | `None` | One level per band, or one row per position, energy-averaged |
+| `background_levels` | array | dB | `None` | One level per band, or one row per position, energy-averaged |
 | `reverberation_time` | array | s | `None` | Per band; only 50 Hz to 5 kHz (octaves 63 Hz to 4 kHz) is read, the rest may be `nan` |
 | `volume` | float | m³ | `None` | Room volume for the normalized levels; needs the reverberation time |
 | `reference_reverberation_time_s` | float | s | `0.5` | $T_0$ of Formula (5) |
 | `a_weighting_range` | str | | `"restricted"` | `"restricted"` (50 Hz to 5 kHz; octaves 63 Hz to 4 kHz) or `"extended"` (25 Hz to 10 kHz; octaves 31.5 Hz to 8 kHz) |
 
-The result carries `average_db`, `background` (the Clause 9 correction),
-`corrected_db`, `standardized_db`, `normalized_db`, `standardizable`,
+The result carries `average_levels`, `background` (the Clause 9 correction),
+`corrected_levels`, `standardized_levels`, `normalized_levels`, `standardizable`,
 `ratings` and `unrounded_ratings` keyed by Table 1, `upper_limit("A")` and
 `upper_limit("C")`, `unstandardized_bands_hz`, `reproducibility_db` and
 `weighted_reproducibility_db`. The C-weighted values are formed only when the

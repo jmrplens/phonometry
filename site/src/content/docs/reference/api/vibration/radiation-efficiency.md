@@ -94,6 +94,7 @@ $f_\mathrm{c} = (c_0^2 / 2\pi) \sqrt{m'' / B'}$ (identical to Bies Eq. 7.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `bending_stiffness`, `mass_per_area` or `speed_of_sound` is not a single number. |
 
 ## plot_plate_geometry
 
@@ -131,6 +132,7 @@ Plate a x b inside its baffle frame, boundary condition in the title.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a side that is not positive and finite. |
+| TypeError | if `length_x` or `length_y` is not a single number. |
 
 ## radiation_efficiency
 
@@ -174,6 +176,7 @@ expressions.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or unknown boundary/baffle. |
+| TypeError | if `baffle` or `boundary` is not a text, or `critical_frequency`, `length_x`, `length_y` or `speed_of_sound` is not a single number. |
 
 ## RadiationEfficiencyResult
 

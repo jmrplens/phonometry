@@ -332,6 +332,8 @@ def swept_band_level(
     :return: :math:`L_\mathrm{c}` in the unit of ``input_level``.
     :raises ValueError: for a non-positive bandwidth designator, duration,
         averaging time or frequency, or an end frequency not above the start.
+    :raises TypeError: if ``averaging_time_s``, ``end_frequency_hz``, ``fraction``,
+        ``start_frequency_hz`` or ``sweep_duration_s`` is not a single number.
     """
     b = require_positive(fraction, "fraction")
     t_sweep = require_positive(sweep_duration_s, "sweep_duration_s")
@@ -411,6 +413,11 @@ def swept_level_uncertainty(
     :raises ValueError: for a negative uncertainty or resolution, a
         non-positive duration or frequency, or an end frequency not above the
         start.
+    :raises TypeError: if ``averaging_time_s``, ``averaging_time_uncertainty_s``,
+        ``display_resolution_db``, ``end_frequency_hz``,
+        ``end_frequency_uncertainty_hz``, ``input_level_uncertainty_db``,
+        ``start_frequency_hz``, ``start_frequency_uncertainty_hz``, ``sweep_duration_s``
+        or ``sweep_duration_uncertainty_s`` is not a single number.
     """
     u_in = require_non_negative(
         input_level_uncertainty_db, "input_level_uncertainty_db"

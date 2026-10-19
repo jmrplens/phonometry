@@ -68,7 +68,7 @@ _STEPS_DB = (
 #: and under-range indications first appeared, as the record carries them.
 _PROCEDURE: dict[str, Any] = {
     "linear_operating_range_db": [55.0, 120.0],
-    "linearity_starting_point_db": 94.0,
+    "linearity_starting_level": 94.0,
     "linearity_overload_level": 121.0,
     "linearity_under_range_level": 54.0,
 }
@@ -88,10 +88,10 @@ def _record(**over: Any) -> metrology.SoundLevelMeterPeriodicMeasurements:
         "static_pressures_kpa": [100.8, 100.6],
         "air_temperatures_c": [23.1, 23.4],
         "relative_humidities_percent": [45.0, 47.0],
-        "calibration_check_initial_db": 93.9,
-        "calibration_check_adjusted_db": 94.0,
-        "self_noise_microphone_db": 17.2,
-        "self_noise_electrical_db": {"A": 12.1, "C": 14.0, "Z": 19.5},
+        "calibration_check_initial_level": 93.9,
+        "calibration_check_adjusted_level": 94.0,
+        "microphone_self_noise_level": 17.2,
+        "electrical_self_noise_levels": {"A": 12.1, "C": 14.0, "Z": 19.5},
         "acoustic_weighting_deviations_db": [0.2, -0.6],
         "acoustic_weighting_uncertainties_db": [0.25, 0.4],
         "electrical_weighting_deviations_db": {
@@ -146,7 +146,7 @@ def _record(**over: Any) -> metrology.SoundLevelMeterPeriodicMeasurements:
 def _class_2_record(**over: Any) -> metrology.SoundLevelMeterPeriodicMeasurements:
     """A complete class 2 record of a meter with A only, F and no Leq."""
     base: dict[str, Any] = {
-        "self_noise_electrical_db": {"A": 14.0},
+        "electrical_self_noise_levels": {"A": 14.0},
         "electrical_weighting_deviations_db": {"A": [0.0] * 8},
         "electrical_weighting_uncertainties_db": {"A": [0.2] * 8},
         "weighting_at_1khz_deviations_db": None,
@@ -273,7 +273,8 @@ def test_table_3_is_read_as_printed_at_the_test_frequencies(meter_class: int) ->
     """The verdict reads Table 3 through ``filters.weighting_class_limits``."""
     from phonometry.filters import weighting_class_limits
 
-    frequencies, lower, upper = weighting_class_limits(meter_class)
+    limits = weighting_class_limits(meter_class)
+    frequencies, lower, upper = limits.frequencies, limits.lower, limits.upper
     published = {
         float(f): (float(lo), float(up))
         for f, lo, up in zip(frequencies, lower, upper, strict=True)
@@ -840,8 +841,8 @@ def test_toneburst_and_peak_deviations_are_taken_from_the_tables() -> None:
             ),
             "7",
         ),
-        (("calibration_check_initial_db", "calibration_check_adjusted_db"), "10"),
-        (("self_noise_microphone_db", "self_noise_electrical_db"), "11"),
+        (("calibration_check_initial_level", "calibration_check_adjusted_level"), "10"),
+        (("microphone_self_noise_level", "electrical_self_noise_levels"), "11"),
         (
             ("acoustic_weighting_deviations_db", "acoustic_weighting_uncertainties_db"),
             "12",
@@ -921,7 +922,7 @@ def test_class_1_needs_c_in_clause_13_and_11_2() -> None:
     record = _record(
         electrical_weighting_deviations_db=rows,
         electrical_weighting_uncertainties_db={k: [0.2] * 9 for k in rows},
-        self_noise_electrical_db={"A": 12.0},
+        electrical_self_noise_levels={"A": 12.0},
     )
     result = _verify(record)
     assert [clause for clause, _ in result.incomplete] == ["11", "11", "13"]
@@ -941,7 +942,7 @@ def test_class_1_provides_c_even_when_no_clause_names_it() -> None:
     record = _record(
         electrical_weighting_deviations_db={"A": [0.0] * 9},
         electrical_weighting_uncertainties_db={"A": [0.2] * 9},
-        self_noise_electrical_db={"A": 12.0},
+        electrical_self_noise_levels={"A": 12.0},
         weighting_at_1khz_deviations_db=None,
         weighting_at_1khz_uncertainties_db=None,
         c_peak_differences=None,
@@ -996,7 +997,7 @@ def test_a_weighting_any_clause_names_is_one_the_meter_provides() -> None:
     record = _class_2_record(
         electrical_weighting_deviations_db=rows,
         electrical_weighting_uncertainties_db={"A": [0.2] * 8},
-        self_noise_electrical_db={"A": 12.0, "Z": 19.0},
+        electrical_self_noise_levels={"A": 12.0, "Z": 19.0},
         weighting_at_1khz_deviations_db={"Z": 0.0},
         weighting_at_1khz_uncertainties_db={"Z": 0.1},
     )
@@ -1014,7 +1015,7 @@ def test_a_class_2_meter_with_z_owes_the_comparison_of_14_2() -> None:
     record = _class_2_record(
         electrical_weighting_deviations_db={"A": [0.0] * 8, "Z": [0.0] * 8},
         electrical_weighting_uncertainties_db={"A": [0.2] * 8, "Z": [0.2] * 8},
-        self_noise_electrical_db={"A": 12.0, "Z": 19.0},
+        electrical_self_noise_levels={"A": 12.0, "Z": 19.0},
     )
     assert _verify(record, 2).missing == ("14.2",)
 
@@ -1212,7 +1213,7 @@ def test_a_record_without_the_extent_of_clause_16_names_what_it_lacks() -> None:
     assert len(gaps) == 1
     assert gaps[0].startswith(
         "the record does not give 'linear_operating_range_db', "
-        "'linearity_starting_point_db', 'linearity_overload_level' and "
+        "'linearity_starting_level', 'linearity_overload_level' and "
         "'linearity_under_range_level', and without them"
     )
 
@@ -1353,7 +1354,7 @@ def test_an_overload_inside_the_linear_operating_range_fails_clause_16() -> None
             "'linear_operating_range_db' must hold 2 results",
         ),
         (
-            {"linearity_starting_point_db": 125.0},
+            {"linearity_starting_level": 125.0},
             "starting point of 125 dB lies outside",
         ),
         (
@@ -1761,7 +1762,7 @@ def test_a_time_averaged_display_settles_the_sound_exposure_level() -> None:
         ),
         (
             {"z_weighting": False},
-            {"self_noise_electrical_db": {"A": 12.0, "Z": 19.0}},
+            {"electrical_self_noise_levels": {"A": 12.0, "Z": 19.0}},
             "'features.z_weighting' is False, but the record shows",
         ),
         (
@@ -1961,8 +1962,11 @@ def test_the_features_are_frozen_and_hold_plain_booleans() -> None:
 @pytest.mark.parametrize(
     ("dropped", "what"),
     [
-        ("self_noise_microphone_db", "11.1, with the microphone installed"),
-        ("self_noise_electrical_db", "11.2, with the electrical input-signal device"),
+        ("microphone_self_noise_level", "11.1, with the microphone installed"),
+        (
+            "electrical_self_noise_levels",
+            "11.2, with the electrical input-signal device",
+        ),
     ],
 )
 def test_one_half_of_clause_11_left_out_is_incomplete(dropped: str, what: str) -> None:
@@ -2239,7 +2243,7 @@ def test_the_record_is_frozen() -> None:
     assert isinstance(record.toneburst_responses_db, MappingProxyType)
     assert isinstance(record.toneburst_responses_db["F"], tuple)
     assert isinstance(record.linearity_deviations_db, tuple)
-    assert isinstance(record.self_noise_electrical_db, MappingProxyType)
+    assert isinstance(record.electrical_self_noise_levels, MappingProxyType)
     with pytest.raises(dataclasses.FrozenInstanceError):
         record.long_term_stability_db = 1.0  # type: ignore[misc]
 
@@ -2252,7 +2256,7 @@ _ELECTRICAL_SPLIT = "electrical_weighting_uncertainties_without_correction_data_
     ("fields", "match"),
     [
         ({"long_term_stability_uncertainty_db": None}, "clause 15 needs"),
-        ({"calibration_check_adjusted_db": None}, "clause 10 needs"),
+        ({"calibration_check_adjusted_level": None}, "clause 10 needs"),
         ({"air_temperatures_c": None}, "clause 7 records"),
         (
             {"relative_humidities_percent": [45.0, 120.0]},
@@ -2379,7 +2383,7 @@ def test_a_class_2_row_of_nine_frequencies_is_refused() -> None:
 
 def test_an_empty_record_has_nothing_to_grade() -> None:
     record = metrology.SoundLevelMeterPeriodicMeasurements(
-        calibration_check_initial_db=94.0, calibration_check_adjusted_db=94.0
+        calibration_check_initial_level=94.0, calibration_check_adjusted_level=94.0
     )
     with pytest.raises(ValueError, match="'measurements' holds no result to grade"):
         metrology.verify_sound_level_meter_periodic(1, record)
@@ -2567,7 +2571,7 @@ def _dense_16() -> dict[str, Any]:
     return _linearity(
         levels,
         linear_operating_range_db=[40.0, 120.0],
-        linearity_starting_point_db=94.0,
+        linearity_starting_level=94.0,
         linearity_overload_level=123.0,
         linearity_under_range_level=37.0,
     )

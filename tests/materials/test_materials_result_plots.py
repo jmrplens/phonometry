@@ -164,6 +164,8 @@ def test_insitu_absorption_plot_renders_nan_band_as_em_dash() -> None:
     res = InSituAbsorptionResult(
         frequencies=np.array([500.0, 630.0, 800.0, 1000.0]),
         absorption=np.array([0.2, np.nan, 0.6, 0.5]),
+        source_height_m=0.25,
+        microphone_height_m=0.25,
     )
     ax = res.plot()
     heights = [p.get_height() for p in ax.patches]

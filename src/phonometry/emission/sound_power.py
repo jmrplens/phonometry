@@ -407,6 +407,8 @@ class SoundPowerResult(OwnsArrays):
             ``grade`` is neither ``'engineering'`` nor ``'survey'``,
             ``surface_area`` is not finite, or ``sound_power_level`` carries
             a non-finite band.
+        :raises TypeError: if ``grade`` is not a text, or ``surface_area`` is not a
+            single number.
         """
         require_choice(self.grade, "grade", ("engineering", "survey"))
         require_scalar(self.surface_area, "surface_area")
@@ -600,6 +602,8 @@ def background_noise_correction(
     :param background_levels: Background-noise levels, in decibels.
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
     :return: ``K1`` per band, in decibels.
+    :raises TypeError: if ``background_levels`` holds a text or a value that is not a
+        real number.
     """
     low, high = _K1_CRITERIA[_check_grade(grade)]
     src = np.asarray(source_levels, dtype=np.float64)
@@ -737,6 +741,8 @@ def environmental_correction(
     :param room_surface: Room boundary area ``Sv`` (m^2), with ``alpha``.
     :return: ``K2`` in decibels; a scalar for scalar inputs, otherwise an array
         per band.
+    :raises TypeError: if ``room_surface``, ``surface_area`` or ``volume`` is not a
+        single number.
     """
     surface_area = require_positive(surface_area, "surface_area")
     if absorption_area is None:
@@ -821,6 +827,7 @@ def measurement_positions(
     :raises ValueError: for a surface other than ``'hemisphere'``, a radius
         that is not positive, a number of reflecting planes other than 1, 2
         or 3, or an unknown grade.
+    :raises TypeError: if ``radius`` is not a single number.
     """
     require_scalar(radius, "radius")
     if surface != "hemisphere":
@@ -1064,6 +1071,8 @@ def sound_power_pressure(
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
     :param sigma_omc_db: ``sigma_omc`` (dB), operating/mounting instability.
     :return: :class:`SoundPowerResult`.
+    :raises TypeError: if ``distance``, ``radius`` or ``sigma_omc_db`` is not a single
+        number, or ``dimensions`` holds a text or a value that is not a real number.
     """
     grade = _check_grade(grade)
     sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
@@ -1228,6 +1237,8 @@ class SoundEnergyResult(OwnsArrays):
             ``surface_area`` is not finite, ``sound_energy_level`` carries a
             non-finite band, ``n_events`` is below one or ``integration_time``
             is not positive.
+        :raises TypeError: if ``grade`` is not a text, or ``integration_time`` or
+            ``surface_area`` is not a single number.
         """
         require_choice(self.grade, "grade", ("engineering", "survey"))
         require_scalar(self.surface_area, "surface_area")
@@ -1388,6 +1399,8 @@ def reference_atmosphere_correction(
     :raises ValueError: if neither or both of ``static_pressure_kpa`` and
         ``altitude`` are given, or either is out of range, or ``temperature_c``
         is not above absolute zero.
+    :raises TypeError: if ``altitude``, ``static_pressure_kpa`` or ``temperature_c`` is
+        not a single number.
     """
     require_scalar(temperature_c, "temperature_c")
     if not math.isfinite(temperature_c) or temperature_c <= -_KELVIN_OFFSET:
@@ -1547,6 +1560,10 @@ def sound_energy_pressure(
         geometry that does not describe the surface, too few positions, a
         background without its ``integration_time``, or a mismatched
         ``frequencies`` length.
+    :raises TypeError: if ``distance``, ``integration_time``, ``radius`` or
+        ``sigma_omc_db`` is not a single number, ``n_events`` is a flag, a text or an
+        array where a count goes, or ``dimensions`` holds a text or a value that is not
+        a real number.
     """
     grade = _check_grade(grade)
     sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")

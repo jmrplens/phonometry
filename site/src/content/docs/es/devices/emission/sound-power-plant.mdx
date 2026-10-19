@@ -513,9 +513,9 @@ print(f"LWA = {asphalt_result.a_weighted_sound_power_level:.1f} dB")
 area = emission.partial_plant_contributions(
     [result, asphalt_result], names=["Machaqueo y cribado", "Aglomerado asfáltico"]
 )
-print(f"LWA de la zona = {area.a_weighted_total_db:.1f} dB")
+print(f"LWA de la zona = {area.a_weighted_total_level:.1f} dB")
 # LWA de la zona = 114.1 dB
-print(np.round(area.a_weighted_contribution_db, 1))
+print(np.round(area.a_weighted_relative_part_levels, 1))
 # [-0.6 -8.7]
 ```
 

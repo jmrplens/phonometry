@@ -413,6 +413,7 @@ def check_sidecar_labels(
     :param channels: The channels of the audio file.
     :raises ValueError: naming the sidecar, for a count of labels that is
         not *channels*.
+    :raises TypeError: if ``channels`` is not a single number.
     """
     require_scalar(channels, "channels")
     if labels is not None and len(labels) != channels:

@@ -238,6 +238,8 @@ def response_peaks(response: ArrayLike) -> np.ndarray:
 
     :param response: The spinal response acceleration :math:`A_\mathrm{z}(t)`.
     :return: The positive peak values, in the order they occur.
+    :raises TypeError: if ``response`` holds a text or a value that is not a real
+        number.
     """
     sig = require_1d_signal(response, name="response")
     if sig.size == 0:
@@ -299,6 +301,8 @@ def daily_dose(dose: float, exposure_time: float, measurement_time: float) -> fl
     :param measurement_time: Period :math:`t_\mathrm{m}` over which :math:`D_\mathrm{z}`
         was measured (same unit as ``exposure_time``).
     :return: The daily dose :math:`D_\mathrm{zd} = D_\mathrm{z} (t_\mathrm{d}/t_\mathrm{m})^{1/6}`, m/s2.
+    :raises TypeError: if ``dose``, ``exposure_time`` or ``measurement_time`` is not a
+        single number.
     """
     require_scalar(dose, "dose")
     exposure_time = require_positive(exposure_time, "exposure_time")
@@ -357,6 +361,7 @@ def compression_dose(daily_dose_value: float, *, mz: float = _MZ_MALE) -> float:
         Formula C.2; default 0.029, the 82 kg male value, and 0.025 for the
         female.
     :return: The daily compressive stress :math:`S_\mathrm{d} = m_\mathrm{z} D_\mathrm{zd}`, MPa.
+    :raises TypeError: if ``daily_dose_value`` or ``mz`` is not a single number.
     """
     require_scalar(daily_dose_value, "daily_dose_value")
     require_scalar(mz, "mz")
@@ -366,6 +371,8 @@ def compression_dose(daily_dose_value: float, *, mz: float = _MZ_MALE) -> float:
 def static_stress(mz: float = _MZ_MALE) -> float:
     r"""Static compressive stress :math:`S_\text{stat} = m_\mathrm{z} \cdot 9.81`
     (Annex C), MPa.
+
+    :raises TypeError: if ``mz`` is not a single number.
     """
     require_scalar(mz, "mz")
     return mz * _GRAVITY
@@ -382,6 +389,7 @@ def ultimate_strength(
         :math:`S_\text{age}`).
     :return: The ultimate strength
         :math:`S_\mathrm{u} = 6.75 - S_\text{age} (b+i)`, MPa.
+    :raises TypeError: if ``sex`` is not a text.
     """
     require_choice(sex, "sex", _SEXES)
     slope = _STRENGTH_AGE_SLOPE_MALE if sex == "male" else _STRENGTH_AGE_SLOPE_FEMALE
@@ -417,6 +425,9 @@ def injury_risk(
     :raises ValueError: if ``exposure_duration_years`` is not positive or the spine strength
         is exhausted (:math:`S_\mathrm{u} - S_\text{stat} \le 0`) within the
         exposure period.
+    :raises TypeError: if ``sex`` is not a text, or ``daily_compression``,
+        ``days_per_year``, ``exposure_duration_years`` or ``start_age`` is not a single
+        number.
     """
     require_scalar(daily_compression, "daily_compression")
     require_scalar(start_age, "start_age")
@@ -452,6 +463,7 @@ def injury_probability(
     :return: The injury probability
         :math:`P = 1 - \exp(-(R/\alpha)^\beta)` in 0-1; a float for a
         scalar input, otherwise an array. Negative :math:`R` gives 0.
+    :raises TypeError: if ``sex`` is not a text.
     """
     require_choice(sex, "sex", _SEXES)
     alpha, beta = _WEIBULL_MALE if sex == "male" else _WEIBULL_FEMALE
@@ -683,6 +695,7 @@ def multiple_shock_assessment(
     :param mz: Stress conversion :math:`m_\mathrm{z}` (MPa per m/s2); defaults to
         the sex-specific value.
     :return: The :class:`MultipleShockResult`.
+    :raises TypeError: if ``sex`` is not a text.
     """
     require_choice(sex, "sex", _SEXES)
     if (exposure_time is None) != (measurement_time is None):

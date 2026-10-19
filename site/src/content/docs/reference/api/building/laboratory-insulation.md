@@ -156,6 +156,7 @@ assumed already corrected for background noise (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band counts of `l1`, `l2` and `t2` differ, if `area`/`volume`/`t2` are not positive, or if inputs are non-finite. |
+| TypeError | if `area` or `volume` is not a single number. |
 
 ## laboratory_impact_insulation
 
@@ -201,6 +202,7 @@ assumed already corrected for background noise (see
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band counts of `li` and `t2` differ, if `volume`/`t2` are not positive, or if inputs are non-finite. |
+| TypeError | if `volume` is not a single number. |
 
 ## LaboratoryAirborneInsulationResult
 

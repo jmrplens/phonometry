@@ -348,7 +348,8 @@ def test_nothing_is_derived_without_a_poisson_ratio() -> None:
 def test_the_complex_shear_modulus_is_rebuilt_from_the_two_stored_fields() -> None:
     """``N(1 + j eta)`` goes in as two reals and comes back as one complex."""
     row = PUBLISHED_POROUS_MATERIALS["allard-2009-table-8-1/material_2"]
-    shear, poisson = row.frame_constants()
+    frame = row.frame_constants()
+    shear, poisson = frame.shear_modulus_pa, frame.poisson_ratio
     assert shear == pytest.approx(complex(80.0e3, 12.0e3), rel=1e-12)
     assert poisson == 0.44
 
@@ -398,7 +399,7 @@ def test_every_published_row_with_both_moduli_prints_its_loss_factor() -> None:
     assert len(with_moduli) >= 20
     for row in with_moduli:
         assert row.structural_loss_factor is not None, (row.table, row.name)
-        shear, _ = row.frame_constants()
+        shear = row.frame_constants().shear_modulus_pa
         assert shear.imag == pytest.approx(
             row.shear_modulus_pa * row.structural_loss_factor, rel=1e-15
         )

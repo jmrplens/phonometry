@@ -124,6 +124,7 @@ def velocity_level(
     :param reference: Reference velocity ``v0`` (Default: 5e-8 m/s).
     :return: The velocity level ``L_v``, in dB re ``v0``.
     :raises ValueError: for a non-positive reference.
+    :raises TypeError: if ``reference`` is not a single number.
     """
     reference = require_positive(reference, "reference")
     v = np.asarray(velocity, dtype=np.float64)
@@ -148,6 +149,7 @@ def velocity_level_from_acceleration(
     :param reference: Reference velocity ``v0`` (Default: 5e-8 m/s).
     :return: The velocity level ``L_v``, in dB re ``v0``.
     :raises ValueError: for a non-positive frequency or reference.
+    :raises TypeError: if ``reference`` is not a single number.
     """
     reference = require_positive(reference, "reference")
     a = np.asarray(peak_acceleration, dtype=np.float64)
@@ -207,6 +209,7 @@ def radiation_factor(
     :param impedance: Characteristic impedance ``Z_c`` (Default: 411 N.s/m^3).
     :return: The radiation factor ``epsilon`` (dimensionless).
     :raises ValueError: for a non-positive area or impedance.
+    :raises TypeError: if ``area`` or ``impedance`` is not a single number.
     """
     area = require_positive(area, "area")
     impedance = require_positive(impedance, "impedance")
@@ -243,6 +246,8 @@ def radiated_sound_power_level(
     :param reference_impedance: ``Z_c,0`` (Default: 400 N.s/m^3).
     :return: The sound power level ``L_W``, in dB re 1 pW.
     :raises ValueError: for a non-positive area, reference area or impedance.
+    :raises TypeError: if ``area``, ``normalized_impedance``, ``reference_area`` or
+        ``reference_impedance`` is not a single number.
     """
     area = require_positive(area, "area")
     reference_area = require_positive(reference_area, "reference_area")
@@ -273,6 +278,7 @@ def extraneous_velocity_correction(level_difference: float) -> float:
 
     :param level_difference: Level difference :math:`\Delta L_v`, in dB.
     :return: The correction ``K1A`` to subtract, in dB.
+    :raises TypeError: if ``level_difference`` is not a single number.
     """
     require_scalar(level_difference, "level_difference")
     if level_difference >= _K1A_ZERO_ABOVE_DB:
@@ -343,6 +349,7 @@ class VibrationSoundPowerResult(OwnsArrays):
         :raises ValueError: if any per-band quantity disagrees with the
             rest, the determination covers no band, any quantity carries a
             non-finite value, or the area is not a positive finite number.
+        :raises TypeError: if ``area`` is not a single number.
         """
         require_ranks(
             self,

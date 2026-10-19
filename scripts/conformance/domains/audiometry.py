@@ -161,7 +161,7 @@ def _chk_a33() -> Outcome:
     budget = hearing.audiometric_uncertainty(1000.0)
     return record(
         {"u(delta_eq)": ref.ISO8253_1_A33_EQUIPMENT_DB},
-        {"u(delta_eq)": round(budget.equipment_db, 1)},
+        {"u(delta_eq)": round(budget.equipment_uncertainty_db, 1)},
         unit="dB",
     )
 
@@ -178,10 +178,10 @@ def _chk_a34() -> Outcome:
         {"up to 4 kHz": low, "above 4 kHz": high},
         {
             "up to 4 kHz": round(
-                hearing.audiometric_uncertainty(4000.0).transducer_db, 1
+                hearing.audiometric_uncertainty(4000.0).transducer_uncertainty_db, 1
             ),
             "above 4 kHz": round(
-                hearing.audiometric_uncertainty(8000.0).transducer_db, 1
+                hearing.audiometric_uncertainty(8000.0).transducer_uncertainty_db, 1
             ),
         },
         unit="dB",
@@ -203,15 +203,15 @@ def _chk_table_a2() -> Outcome:
     expected = dict(zip(names, ref.ISO8253_1_TABLE_A2_COMPONENTS_DB, strict=True))
     computed = {
         name: round(value, 1)
-        for name, value in zip(names, budget.components_db[:4], strict=True)
+        for name, value in zip(names, budget.standard_uncertainties_db[:4], strict=True)
     }
     expected |= {
         "u": ref.ISO8253_1_TABLE_A2_U_DB,
         "U": ref.ISO8253_1_TABLE_A2_EXPANDED_DB,
     }
     computed |= {
-        "u": round(budget.combined_db, 1),
-        "U": float(round(budget.expanded_db)),
+        "u": round(budget.combined_uncertainty_db, 1),
+        "U": float(round(budget.expanded_uncertainty_db)),
     }
     return record(expected, computed, unit="dB")
 
@@ -224,7 +224,7 @@ def _chk_table_a2() -> Outcome:
 def _chk_ascending() -> Outcome:
     """Ascents ending at 35, 30, 30, 35 and 30 dB: 30 dB, answered 3 times of 5."""
     result = hearing.ascending_method_threshold([35.0, 30.0, 30.0, 35.0, 30.0])
-    return record({"threshold": 30.0}, {"threshold": result.threshold_db}, unit="dB")
+    return record({"threshold": 30.0}, {"threshold": result.threshold_level}, unit="dB")
 
 
 @register(
@@ -240,7 +240,7 @@ def _chk_bracketing() -> Outcome:
     result = hearing.bracketing_method_threshold([30, 30, 35], [35, 35, 35])
     return record(
         {"mean": 33.333, "threshold": 35.0},
-        {"mean": round(result.mean_db, 3), "threshold": result.threshold_db},
+        {"mean": round(result.mean_level, 3), "threshold": result.threshold_level},
         unit="dB",
     )
 
@@ -264,10 +264,10 @@ def _chk_automatic() -> Outcome:
     return record(
         {"peaks": 30.5, "valleys": 20.0, "mean": 25.25, "threshold": 26.0},
         {
-            "peaks": round(float(np.mean(result.peaks_db)), 9),
-            "valleys": round(float(np.mean(result.valleys_db)), 9),
-            "mean": round(result.mean_db, 9),
-            "threshold": result.threshold_db,
+            "peaks": round(float(np.mean(result.peak_levels)), 9),
+            "valleys": round(float(np.mean(result.valley_levels)), 9),
+            "mean": round(result.mean_level, 9),
+            "threshold": result.threshold_level,
         },
         unit="dB",
     )
@@ -288,8 +288,8 @@ def _chk_sweep() -> Outcome:
     return record(
         {"mean": 25.3, "threshold": 25.0},
         {
-            "mean": round(float(result.mean_db[0]), 9),
-            "threshold": result.threshold_db[0],
+            "mean": round(float(result.mean_level[0]), 9),
+            "threshold": result.threshold_level[0],
         },
         unit="dB",
     )
@@ -329,7 +329,7 @@ def _chk_cross_hearing() -> Outcome:
     at = ref.ISO8253_1_CROSS_HEARING_DB
     levels = [at - 5.0, at, at + 5.0]
     flags = hearing.audiogram_cautions(
-        [500.0, 1000.0, 2000.0], air_conduction_db=levels
+        [500.0, 1000.0, 2000.0], air_conduction_threshold_levels=levels
     ).cross_hearing
     matching = sum(
         int(bool(flag) == (level >= at))
@@ -356,7 +356,9 @@ def _chk_vibrotactile() -> Outcome:
     computed: dict[str, float] = {}
     for placement, lower in (("mastoid", 0.0), ("forehead", offset)):
         levels = hearing.audiogram_cautions(
-            freqs, bone_conduction_db=[0.0] * len(freqs), vibrator_placement=placement
+            freqs,
+            bone_conduction_threshold_levels=[0.0] * len(freqs),
+            vibrator_placement=placement,
         ).vibrotactile_levels
         for f, level in zip(freqs, levels, strict=True):
             expected[f"{f:g} Hz {placement}"] = printed[f] - lower
@@ -496,7 +498,10 @@ def _chk_4869_3_budget() -> Outcome:
     budget = hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY
     return record(
         {"u": ref.ISO4869_3_TABLE_B1_U_DB, "U": ref.ISO4869_3_B4_EXPANDED_DB},
-        {"u": round(budget.combined_db, 1), "U": round(budget.expanded_db, 1)},
+        {
+            "u": round(budget.combined_uncertainty_db, 1),
+            "U": round(budget.expanded_uncertainty_db, 1),
+        },
         unit="dB",
     )
 
@@ -559,7 +564,7 @@ def _chk_4869_3_isolation() -> Outcome:
     freqs = np.asarray(hearing.EARMUFF_TEST_BANDS_HZ)
     required = hearing.verify_fixture_isolation(
         np.full(freqs.size, 100.0), np.zeros(freqs.size)
-    ).required_db
+    ).min_isolation
     matching = 0
     for first, last, least in ref.ISO4869_3_ISOLATION:
         band = (freqs >= first) & (freqs <= last)

@@ -518,6 +518,8 @@ def power_spectral_density(
     :param confidence: Confidence level for the chi-square interval.
     :return: A :class:`SpectralDensityResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``confidence`` or ``overlap`` is not a single number, or
+        ``nperseg`` is a flag, a text or an array where a count goes.
     """
     xa = _validate_signal(x, "x")
     fs_v = _positive(resolve_fs(x, fs), "fs")
@@ -569,6 +571,8 @@ def resolution_bias_error(
         spectral peak, in Hz.
     :return: Normalized bias error (dimensionless, negative at a peak).
     :raises ValueError: If either bandwidth is not positive.
+    :raises TypeError: if ``half_power_bandwidth`` or ``resolution_bandwidth`` is not a
+        single number.
     """
     be = _positive(resolution_bandwidth, "resolution_bandwidth")
     br = _positive(half_power_bandwidth, "half_power_bandwidth")
@@ -727,6 +731,8 @@ def cross_spectral_density(
     :param scaling: ``'density'`` or ``'spectrum'``.
     :return: A :class:`CrossSpectralDensityResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``overlap`` is not a single number, or ``nperseg`` is a flag,
+        a text or an array where a count goes.
     """
     xa = _validate_signal(x, "x")
     ya = _validate_signal(y, "y")
@@ -960,6 +966,8 @@ def coherent_output_spectrum(
     :param scaling: ``'density'`` or ``'spectrum'``.
     :return: A :class:`CoherentOutputSpectrumResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``overlap`` is not a single number, or ``nperseg`` is a flag,
+        a text or an array where a count goes.
     """
     xa = _validate_signal(x, "x")
     ya = _validate_signal(y, "y")
@@ -1130,6 +1138,7 @@ def fractional_octave_smoothing(
         returned in the same domain.
     :return: Smoothed spectrum, same shape and domain as ``values``.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``fraction`` is not a single number.
     """
     f = np.asarray(frequencies, dtype=np.float64)
     v = np.asarray(values, dtype=np.float64)

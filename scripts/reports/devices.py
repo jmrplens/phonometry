@@ -86,7 +86,9 @@ def _intensity_class_example() -> tuple[object, ReportMetadata, str]:
     required-class-1 verdict, showing both halves of the layout at once.
     """
     spacing = 0.012
-    freqs, _, _ = ph.emission.residual_index_limits("instrument", spacing_m=spacing)
+    freqs = ph.emission.residual_index_limits(
+        "instrument", spacing_m=spacing
+    ).frequencies
     phase_mismatch = 0.05 * np.maximum(1.0, freqs / 1000.0)  # degrees
     measured = ph.emission.residual_index_from_phase_mismatch(
         phase_mismatch, frequency=freqs, spacing_m=spacing

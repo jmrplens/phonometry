@@ -380,6 +380,7 @@ def type_test_speeds(max_speed_kmh: float) -> tuple[float, ...]:
         unit, in km/h.
     :return: The type-test speeds, in km/h, slowest first.
     :raises ValueError: For a speed that is not positive.
+    :raises TypeError: if ``max_speed_kmh`` is not a single number.
     """
     vmax = require_positive(max_speed_kmh, "max_speed_kmh")
     speeds = [vmax]
@@ -397,6 +398,7 @@ def min_curve_radius(speed_kmh: float) -> float:
     :param speed_kmh: The test speed, in km/h.
     :return: The minimum radius, in metres.
     :raises ValueError: For a speed that is not positive.
+    :raises TypeError: if ``speed_kmh`` is not a single number.
     """
     speed = require_positive(speed_kmh, "speed_kmh")
     for limit_kmh, radius_m in _CURVE_RADII_M:
@@ -418,6 +420,7 @@ def pass_by_time(unit_length_m: float, *, speed_kmh: float) -> float:
     :param speed_kmh: Its speed, in km/h.
     :return: :math:`T_p`, in seconds.
     :raises ValueError: For a length or speed that is not positive.
+    :raises TypeError: if ``speed_kmh`` or ``unit_length_m`` is not a single number.
     """
     length = require_positive(unit_length_m, "unit_length_m")
     speed = require_positive(speed_kmh, "speed_kmh")
@@ -446,6 +449,8 @@ def transit_exposure_level(
     :return: TEL, in dB.
     :raises ValueError: For a level that is not finite or times that are not
         positive.
+    :raises TypeError: if ``equivalent_level``, ``measurement_time_s`` or
+        ``pass_by_time_s`` is not a single number.
     """
     level = require_finite(equivalent_level, "equivalent_level")
     duration = require_positive(measurement_time_s, "measurement_time_s")
@@ -466,6 +471,7 @@ def acceleration_test_positions(unit_length_m: float) -> NDArray[np.float64]:
     :return: The positions, in metres behind the front of the unit at
         standstill, the front cross section first at -10 m; read-only.
     :raises ValueError: For a length that is not positive.
+    :raises TypeError: if ``unit_length_m`` is not a single number.
     """
     length = require_positive(unit_length_m, "unit_length_m")
     if length <= _MAXIMUM_SPACING_M * (1.0 + _TOLERANCE):
@@ -651,6 +657,8 @@ def pass_by_measurement(
     :raises ValueError: For a record of more than one channel, an empty
         record, an interval that is empty or runs past the record, or times
         that are negative.
+    :raises TypeError: if ``end_s``, ``history_interval_s``, ``pass_by_time_s`` or
+        ``start_s`` is not a single number.
     """
     rate = resolve_fs(x, fs, name="x")
     samples = require_1d_signal(resolve_samples(x, name="x"), "x")
@@ -739,6 +747,8 @@ def stationary_unit_level(levels: ArrayLike, lengths_m: ArrayLike) -> float:
     :return: The average, in dB, unrounded.
     :raises ValueError: For levels that are not finite, lengths that are not
         positive, or arrays of different lengths.
+    :raises TypeError: if ``lengths_m`` or ``levels`` holds a text or a value that is
+        not a real number.
     """
     levels = require_finite_array(levels, "levels")
     lengths = require_positive_array(lengths_m, "lengths_m")
@@ -772,6 +782,8 @@ class StationaryTestResult(OwnsArrays):
         :raises ValueError: For fewer than three sets, a length per position
             missing, levels that are not finite or lengths that are not
             positive.
+        :raises TypeError: if ``lengths_m`` holds a text or a value that is not a real
+            number.
         """
         levels = np.atleast_2d(np.asarray(self.levels, dtype=np.float64))
         lengths = require_positive_array(self.lengths_m, "lengths_m")
@@ -856,7 +868,7 @@ class RollingStockTestResult(RichDisplay):
     r"""A test decided by the highest rounded mean of three runs per position.
 
     :param method: One of :data:`ROLLING_STOCK_TEST_METHODS`.
-    :param samples_db: The runs of each position, in dB, keyed by the
+    :param run_levels: The runs of each position, in dB, keyed by the
         position's name: :math:`L_{p\mathrm{Aeq},T_p}` at constant speed,
         :math:`L_{p\mathrm{AFmax}}` when starting (maximum level method) and
         braking, :math:`L_{p\mathrm{Aeq},T}` when starting (averaged level
@@ -864,21 +876,22 @@ class RollingStockTestResult(RichDisplay):
     """
 
     method: str
-    samples_db: Mapping[str, tuple[float, ...]]
+    run_levels: Mapping[str, tuple[float, ...]]
 
     def __post_init__(self) -> None:
         """Check the method and the runs, and freeze them.
 
         :raises ValueError: For an unknown method, no position, fewer than
             three runs at a position, or a run that is not finite.
+        :raises TypeError: if ``method`` is not a text.
         """
         require_choice(self.method, "method", ROLLING_STOCK_TEST_METHODS)
-        if not self.samples_db:
-            msg = "'samples_db' holds no position."
+        if not self.run_levels:
+            msg = "'run_levels' holds no position."
             raise ValueError(msg)
         frozen: dict[str, tuple[float, ...]] = {}
-        for position, runs in self.samples_db.items():
-            values = require_finite_array(runs, f"samples_db[{position!r}]")
+        for position, runs in self.run_levels.items():
+            values = require_finite_array(runs, f"run_levels[{position!r}]")
             if values.size < _MINIMUM_RUNS:
                 msg = (
                     f"position {position!r} has {values.size} runs; the test "
@@ -886,18 +899,18 @@ class RollingStockTestResult(RichDisplay):
                 )
                 raise ValueError(msg)
             frozen[str(position)] = tuple(float(v) for v in values)
-        object.__setattr__(self, "samples_db", MappingProxyType(frozen))
+        object.__setattr__(self, "run_levels", MappingProxyType(frozen))
 
     @property
     def positions(self) -> tuple[str, ...]:
         """The positions, in the order given."""
-        return tuple(self.samples_db)
+        return tuple(self.run_levels)
 
     @property
     def mean_levels(self) -> Mapping[str, float]:
         """The arithmetic mean of each position's runs, in dB, unrounded."""
         return MappingProxyType(
-            {p: float(np.mean(v)) for p, v in self.samples_db.items()}
+            {p: float(np.mean(v)) for p, v in self.run_levels.items()}
         )
 
     @property
@@ -911,7 +924,7 @@ class RollingStockTestResult(RichDisplay):
     def spreads_db(self) -> Mapping[str, float]:
         """The spread of each position's runs, in dB (9.3)."""
         return MappingProxyType(
-            {p: _spread(np.asarray(v)) for p, v in self.samples_db.items()}
+            {p: _spread(np.asarray(v)) for p, v in self.run_levels.items()}
         )
 
     @property
@@ -956,7 +969,7 @@ class RollingStockTestResult(RichDisplay):
 
 
 def rolling_stock_test(
-    samples_db: Mapping[str, ArrayLike], *, method: str = "constant_speed"
+    run_levels: Mapping[str, ArrayLike], *, method: str = "constant_speed"
 ) -> RollingStockTestResult:
     """The result of a constant-speed, starting or braking test, 6.7.1, 7.5.4, 7.6.4, 8.7.
 
@@ -967,7 +980,7 @@ def rolling_stock_test(
     normalisation, when one is required, goes on the runs before this
     (6.7.1).
 
-    :param samples_db: The runs of each position, in dB, keyed by a name
+    :param run_levels: The runs of each position, in dB, keyed by a name
         for the position (``"left"``, ``"right"``, ``"front, direction 1"``).
     :param method: One of :data:`ROLLING_STOCK_TEST_METHODS`.
     :return: The test.
@@ -975,9 +988,9 @@ def rolling_stock_test(
     """
     return RollingStockTestResult(
         method=method,
-        samples_db={
+        run_levels={
             p: tuple(np.atleast_1d(np.asarray(v, dtype=np.float64)))
-            for p, v in samples_db.items()
+            for p, v in run_levels.items()
         },
     )
 
@@ -1068,6 +1081,8 @@ def impulsiveness_rise_speed(times: ArrayLike, levels: ArrayLike) -> RiseSpeedRe
     :return: The slopes and their rise speeds.
     :raises ValueError: For arrays of different lengths, fewer than two
         samples, or times that do not increase.
+    :raises TypeError: if ``levels`` or ``times`` holds a text or a value that is not a
+        real number.
     """
     times = require_finite_array(times, "times")
     levels = require_finite_array(levels, "levels")
@@ -1124,6 +1139,8 @@ def background_level_increase(
     :return: :math:`\Delta L`, in dB, as one value or one per band.
     :raises ValueError: For levels that are not finite, of different lengths,
         or no more than 3 dB above the background.
+    :raises TypeError: if ``background_level`` or ``measured_level`` holds a text or a
+        value that is not a real number.
     """
     measured = require_finite_array(measured_level, "measured_level")
     background = require_finite_array(background_level, "background_level")
@@ -1159,6 +1176,8 @@ class AdjacentVehicleNeutrality(RichDisplay):
         """Check that both levels are finite.
 
         :raises ValueError: For a level that is not finite.
+        :raises TypeError: if ``unit_level`` or ``with_adjacent_level`` is not a single
+            number.
         """
         require_finite(self.with_adjacent_level, "with_adjacent_level")
         require_finite(self.unit_level, "unit_level")
@@ -1220,6 +1239,8 @@ def check_adjacent_vehicle_neutrality(
     :param unit_level: :math:`L_{p\mathrm{Aeq},T_p}`, in dB.
     :return: The verdict.
     :raises ValueError: For a level that is not finite.
+    :raises TypeError: if ``unit_level`` or ``with_adjacent_level`` is not a single
+        number.
     """
     require_scalar(unit_level, "unit_level")
     require_scalar(with_adjacent_level, "with_adjacent_level")
@@ -1363,7 +1384,7 @@ class SmallRoughnessDeviation(OwnsArrays):
         return np.asarray(self.noise_levels - self.roughness_correction)
 
     @property
-    def impact_db(self) -> float:
+    def level_increase(self) -> float:
         r""":math:`\Delta L_{p\mathrm{Aeq},T_p}` of Formula C.4, in dB.
 
         The energy sum of the measured spectrum less that of the revised one:
@@ -1383,7 +1404,7 @@ class SmallRoughnessDeviation(OwnsArrays):
     @property
     def passes(self) -> bool:
         """Whether the effect is at most 1 dB, C.3."""
-        return self.impact_db <= _SMALL_DEVIATION_DB + _TOLERANCE
+        return self.level_increase <= _SMALL_DEVIATION_DB + _TOLERANCE
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.
@@ -1466,6 +1487,8 @@ def check_small_roughness_deviations(
     :raises ValueError: For a speed that is not positive, a noise spectrum
         that does not match its bands, or a limit with a wavelength that is
         not positive or two in one one-third octave band.
+    :raises TypeError: if ``speed_kmh`` is not a single number, or ``frequencies`` or
+        ``noise_levels`` holds a text or a value that is not a real number.
     """
     speed = require_positive(speed_kmh, "speed_kmh")
     noise, frequencies, bands = _noise_spectrum(noise_levels, frequencies)
@@ -1624,6 +1647,9 @@ def roughness_comparability(
     :return: The four differences and the bound.
     :raises ValueError: For spectra with no band in common, a speed that is
         not positive, or noise spectra that do not match their bands.
+    :raises TypeError: if ``speed_kmh`` is not a single number, or ``frequencies``,
+        ``noise_levels_1`` or ``noise_levels_2`` holds a text or a value that is not a
+        real number.
     """
     speed = require_positive(speed_kmh, "speed_kmh")
     noise_1, axis, bands = _noise_spectrum(noise_levels_1, frequencies)
@@ -1743,6 +1769,8 @@ class ReferenceTrackCheck(RichDisplay):
             band that is not positive or two keys in one one-third octave
             band, or an Annex C verdict of another speed, of another
             roughness or against another roughness limit.
+        :raises TypeError: if ``curve_radius_m``, ``speed_kmh`` or
+            ``track_gradient_ratio`` is not a single number.
         """
         object.__setattr__(
             self, "speed_kmh", require_positive(self.speed_kmh, "speed_kmh")
@@ -1832,6 +1860,7 @@ class ReferenceTrackCheck(RichDisplay):
         :param language: ``"en"`` or ``"es"``.
         :param kwargs: Passed to the measured spectra.
         :return: The axes drawn on.
+        :raises TypeError: if ``panel`` is not a text.
         """
         from ..._i18n import check_language
         from ..._plot.rolling_stock import plot_reference_track
@@ -2070,7 +2099,7 @@ def _roughness_conditions(
             holds=small_deviations.passes,
             detail=(
                 f"exceeds by {worst:.1f} dB at {where}; "
-                f"Annex C effect {small_deviations.impact_db:.2f} dB"
+                f"Annex C effect {small_deviations.level_increase:.2f} dB"
             ),
         )
     else:
@@ -2250,6 +2279,7 @@ def check_reference_track(
         direction, limits with a band that is not positive or two keys in one
         one-third octave band, or an Annex C verdict of another speed, of
         another roughness or against another roughness limit.
+    :raises TypeError: if ``speed_kmh`` is not a single number.
     """
     speed = require_positive(speed_kmh, "speed_kmh")
     roughness_limit = _frozen_roughness_limit(roughness_limit_db)
@@ -2321,7 +2351,7 @@ class PassByUncertainty(RichDisplay):
     :math:`Y = \sum X_i` (Formula G.1), so every sensitivity coefficient is 1
     (Formula G.4).
 
-    :param reading_db: The reading :math:`L_p`, in dB.
+    :param pressure_level: The reading :math:`L_p`, in dB.
     :param names: The name of each input quantity.
     :param corrections: The mean value correction :math:`\Delta L_p` of
         each input, in dB (0 for a symmetric interval).
@@ -2330,7 +2360,7 @@ class PassByUncertainty(RichDisplay):
     :param coverage_factor: :math:`k`, 2 by G.5.
     """
 
-    reading_db: float
+    pressure_level: float
     names: tuple[str, ...]
     corrections: tuple[float, ...]
     standard_uncertainties_db: tuple[float, ...]
@@ -2342,8 +2372,10 @@ class PassByUncertainty(RichDisplay):
         :raises ValueError: For lists of different lengths, no input, two
             inputs of the same name, a negative uncertainty, or a value that
             is not finite.
+        :raises TypeError: if ``coverage_factor`` or ``pressure_level`` is not a single
+            number.
         """
-        require_finite(self.reading_db, "reading_db")
+        require_finite(self.pressure_level, "pressure_level")
         names = tuple(str(name) for name in self.names)
         corrections = tuple(float(c) for c in self.corrections)
         uncertainties = tuple(float(u) for u in self.standard_uncertainties_db)
@@ -2369,7 +2401,7 @@ class PassByUncertainty(RichDisplay):
     @property
     def level(self) -> float:
         """The result :math:`y`, the reading plus every mean value correction, in dB."""
-        return self.reading_db + sum(self.corrections)
+        return self.pressure_level + sum(self.corrections)
 
     @property
     def combined_uncertainty_db(self) -> float:
@@ -2431,7 +2463,7 @@ def _input_names(inputs: Sequence[Quantity]) -> tuple[str, ...]:
 
 
 def pass_by_uncertainty(
-    reading_db: float,
+    pressure_level: float,
     inputs: Sequence[Quantity],
     *,
     coverage_factor: float = _COVERAGE_FACTOR,
@@ -2450,7 +2482,7 @@ def pass_by_uncertainty(
     known only by its limits :math:`\pm a` has :math:`u = a/\sqrt{3}` (Formula
     G.2): build it with :func:`phonometry.metrology.rectangular`.
 
-    :param reading_db: The reading :math:`L_p`, in dB.
+    :param pressure_level: The reading :math:`L_p`, in dB.
     :param inputs: The input quantities as :class:`phonometry.metrology.Quantity`
         objects, whose ``value`` is the mean value correction in dB and whose
         ``uncertainty`` is the standard uncertainty in dB. An input without a
@@ -2461,7 +2493,7 @@ def pass_by_uncertainty(
     :raises ValueError: See :class:`PassByUncertainty`.
     """
     return PassByUncertainty(
-        reading_db=float(reading_db),
+        pressure_level=float(pressure_level),
         names=_input_names(inputs),
         corrections=tuple(float(q.value) for q in inputs),
         standard_uncertainties_db=tuple(float(q.uncertainty) for q in inputs),

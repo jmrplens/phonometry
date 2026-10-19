@@ -58,7 +58,7 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
 
 __all__ = [
-    "NC_CURVES_DB",
+    "NC_CURVE_LEVELS",
     "NC_OCTAVE_BANDS_HZ",
     "NC_RATINGS",
     "NCResult",
@@ -99,7 +99,7 @@ NC_RATINGS: np.ndarray = read_only(
 
 #: NC curve octave-band sound pressure levels, in dB (Table 1), one row per
 #: entry of :data:`NC_RATINGS`, columns aligned with :data:`NC_OCTAVE_BANDS_HZ`.
-NC_CURVES_DB: np.ndarray = read_only(
+NC_CURVE_LEVELS: np.ndarray = read_only(
     np.array(
         [
             [78, 61, 47, 36, 28, 22, 18, 14, 12, 11],  # NC-15
@@ -239,6 +239,8 @@ class NCResult(OwnsArrays):
             'frequencies' is not the ten Table 1 octave bands, 'out_of_range'
             is an unknown tag, or 'rating' and 'out_of_range' contradict each
             other.
+        :raises TypeError: if ``out_of_range`` is not a text, or ``rating`` is not a
+            single number.
         """
         require_ranks(self, frequencies=1, levels=1)
         require_same_length(self, "frequencies", "levels")
@@ -412,7 +414,8 @@ class RCResult(OwnsArrays):
         :func:`room_criterion` marks each band it was not given with a
         ``NaN`` that the fiche renders as an em dash.
 
-        :raises TypeError: if 'rating' is not an integer (a bool is not one).
+        :raises TypeError: if 'rating' is not an integer (a bool is not one),
+            or ``classification`` is not a text.
         :raises ValueError: if the three per-band arrays do not share one
             length, 'frequencies' is not the ten tabulated octave bands,
             'rating', 'lmf' or 'reference_curve' is not finite, or
@@ -535,6 +538,7 @@ def nc_curve(index: float) -> np.ndarray:
         linearly interpolated band by band.
     :return: The 10-band curve levels, in dB, aligned with :data:`NC_OCTAVE_BANDS_HZ`.
     :raises ValueError: if ``index`` is outside the tabulated range.
+    :raises TypeError: if ``index`` is not a single number.
     """
     require_scalar(index, "index")
     if index < NC_RATINGS[0] or index > NC_RATINGS[-1]:
@@ -544,7 +548,7 @@ def nc_curve(index: float) -> np.ndarray:
         )
         raise ValueError(msg)
     return np.array(
-        [np.interp(index, NC_RATINGS, NC_CURVES_DB[:, k]) for k in range(_N_BANDS)]
+        [np.interp(index, NC_RATINGS, NC_CURVE_LEVELS[:, k]) for k in range(_N_BANDS)]
     )
 
 
@@ -557,6 +561,7 @@ def rc_curve(index: float) -> np.ndarray:
 
     :param index: The RC designation (value at 1000 Hz).
     :return: The 10-band curve levels, in dB, aligned with :data:`NC_OCTAVE_BANDS_HZ`.
+    :raises TypeError: if ``index`` is not a single number.
     """
     require_scalar(index, "index")
     curve = index - 5.0 * _RC_OCTAVE_STEPS
@@ -668,10 +673,10 @@ def noise_criterion(
     per_band = np.full(_N_BANDS, np.nan)
     above = np.zeros(_N_BANDS, dtype=bool)
     for k in np.flatnonzero(valid):
-        if aligned[k] > NC_CURVES_DB[-1, k]:
+        if aligned[k] > NC_CURVE_LEVELS[-1, k]:
             above[k] = True  # louder than the NC-70 curve in this band.
-        elif aligned[k] >= NC_CURVES_DB[0, k]:
-            per_band[k] = np.interp(aligned[k], NC_CURVES_DB[:, k], NC_RATINGS)
+        elif aligned[k] >= NC_CURVE_LEVELS[0, k]:
+            per_band[k] = np.interp(aligned[k], NC_CURVE_LEVELS[:, k], NC_RATINGS)
         # A band below the NC-15 curve touches no curve and stays NaN.
 
     def build(
@@ -695,7 +700,7 @@ def noise_criterion(
     if above.any():
         # Above the family: no NC rating exists; the governing band is the
         # one with the maximum exceedance over the NC-70 curve.
-        exceedance = np.where(above, aligned - NC_CURVES_DB[-1], -np.inf)
+        exceedance = np.where(above, aligned - NC_CURVE_LEVELS[-1], -np.inf)
         governing = int(np.argmax(exceedance))
         return build(
             float("nan"),

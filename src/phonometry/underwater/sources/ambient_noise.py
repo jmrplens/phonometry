@@ -94,6 +94,8 @@ def wind_noise_spectrum(
         energy sum).
     :return: Wind-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
     :raises ValueError: If the inputs are invalid (a negative wind speed).
+    :raises TypeError: if ``wind_speed_kt`` is not a single number, or ``frequency_hz``
+        holds a text or a value that is not a real number.
     """
     f_khz = require_positive_array(frequency_hz, "frequency_hz") / 1000.0
     u = require_non_negative(wind_speed_kt, "wind_speed_kt")
@@ -124,6 +126,9 @@ def thermal_noise_spectrum(
     :param speed_of_sound: Sound speed ``c``, in m/s (default 1500).
     :return: Thermal-noise spectrum level per frequency, in dB re 1 µPa²/Hz.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``density``, ``speed_of_sound`` or ``temperature_c`` is not a
+        single number, or ``frequency_hz`` holds a text or a value that is not a real
+        number.
     """
     f = require_positive_array(frequency_hz, "frequency_hz")
     t_kelvin = require_above_absolute_zero(temperature_c, "temperature_c") + 273.15
@@ -221,6 +226,8 @@ def ocean_ambient_noise(
     :param speed_of_sound: Sound speed, in m/s.
     :return: An :class:`AmbientNoiseResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``frequencies_hz`` or ``shipping`` holds a text or a value
+        that is not a real number.
     """
     f = require_positive_array(frequencies_hz, "frequencies_hz")
     wind = wind_noise_spectrum(f, wind_speed_kt)

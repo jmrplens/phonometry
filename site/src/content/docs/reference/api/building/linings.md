@@ -96,6 +96,7 @@ than folded into the fit.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, `system` is unknown, or `glued_area` is out of range or combined with `system="studs"`. |
+| TypeError | if `system` is not a text, or `glued_area` or `resonance_frequency` is not a single number. |
 
 **Warns**
 
@@ -139,6 +140,7 @@ The same formula applies to `ΔRw`, `ΔRA` and `ΔRA,tr`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not finite, or `fo` is not positive. |
+| TypeError | if `base_rating_in_situ`, `laboratory_improvement` or `resonance_frequency` is not a single number. |
 
 ## lining_resonance_frequency
 
@@ -187,6 +189,7 @@ Exactly one of the two branches applies:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, or if the two branches are both given or both omitted. |
+| TypeError | if `base_mass_per_area`, `dynamic_stiffness` or `lining_mass_per_area` is not a single number. |
 
 ## LiningImprovementResult
 
@@ -235,12 +238,6 @@ system's own resonance marked, the analogue of Figures D.2 and D.3.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-### LiningImprovementResult.ratings
-
-*property*
-
-`(ΔRw, ΔRA, ΔRA,tr)` as a tuple, in dB.
-
 ## weighted_lining_improvement
 
 ```python
@@ -278,6 +275,7 @@ takes the more conservative −10 dB there (see `docs/ERRATA.md`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `fo` is outside the tabulated range or an input is not finite. |
+| TypeError | if `base_rating` or `resonance_frequency` is not a single number. |
 
 **Warns**
 

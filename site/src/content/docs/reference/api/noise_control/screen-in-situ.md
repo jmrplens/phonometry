@@ -143,6 +143,7 @@ refused.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For fewer than [`IMPULSE_REPEATS`](/phonometry/reference/api/noise_control/screen-in-situ/#impulse_repeats) repeats or a spread past [`IMPULSE_INVALID_DEVIATION_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#impulse_invalid_deviation_db). |
+| TypeError | if `repeat_levels` holds a text or a value that is not a real number. |
 
 ## IMPULSE_REPEAT_DEVIATION_DB
 
@@ -219,6 +220,7 @@ an average.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive height. |
+| TypeError | if `screen_height_m` is not a single number. |
 
 ## MIN_MICROPHONE_DISTANCE_M
 
@@ -310,6 +312,7 @@ machine's, so the pair is refused rather than computed under
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra that do not match, a band centre or a distance that is not strictly positive, an unknown source kind, half an A-weighted pair, or an A-weighted pair with an artificial source. |
+| TypeError | if `distance` is not a single number, or `frequencies`, `screened_levels` or `unscreened_levels` holds a text or a value that is not a real number. |
 
 ## screen_background_corrected_level
 
@@ -350,6 +353,7 @@ the remedy is to wait for a quieter day rather than to correct harder.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match band for band, or a margin under [`ISO11821_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/screen-in-situ/#iso11821_min_background_margin_db). |
+| TypeError | if `background_levels` or `levels` holds a text or a value that is not a real number. |
 
 ## SCREEN_DISTANCE_FACTORS
 
@@ -393,6 +397,7 @@ much of a shadow the source casts on itself.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a count that is not [`DIRECTIVITY_POSITIONS`](/phonometry/reference/api/noise_control/screen-in-situ/#directivity_positions). |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## ScreenInSituResult
 

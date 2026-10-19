@@ -129,6 +129,7 @@ $\eta_\mathrm{cav}/(\eta_\mathrm{turb}+\eta_\mathrm{cav})$ alone.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is out of range, or the cavitating branch was asked for without its peak frequency. |
+| TypeError | if `cavitation_fraction` or `internal_level` is not a single number. |
 
 ## CAPACITY_SCALE_CONSTANTS
 
@@ -180,6 +181,7 @@ and no inequality; the minimum is what it means.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a pressure is not positive and finite, if the valve does not drop pressure, or if the recovery factor is outside the range a recovery factor lives in. |
+| TypeError | if `inlet_pressure_pa`, `outlet_pressure_pa`, `pressure_recovery` or `vapor_pressure_pa` is not a single number. |
 
 ## cavitation_distribution
 
@@ -219,6 +221,7 @@ gravel where turbulence is heard as a hiss around one frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `peak` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## cavitation_efficiency
 
@@ -264,6 +267,7 @@ stops.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, if the operating point is below the threshold, or if it is at or past flashing, where the equation has no value. |
+| TypeError | if `choked_differential`, `corrected_ratio`, `differential`, `pressure_ratio` or `turbulent` is not a single number. |
 
 ## CAVITATION_FLOOR_WIDTH
 
@@ -312,6 +316,7 @@ drops back down into a rumble.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, or the operating point is at or past flashing. |
+| TypeError | if `corrected_ratio`, `pressure_ratio` or `turbulent_peak` is not a single number. |
 
 ## cavitation_transmission_loss
 
@@ -365,6 +370,7 @@ printed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, or only one of the two ratios the floor needs was given. |
+| TypeError | if `cavitation_peak`, `corrected_ratio`, `efficiency_ratio`, `pressure_ratio`, `turbulent_loss` or `turbulent_peak` is not a single number. |
 
 ## combined_stage_level
 
@@ -397,6 +403,7 @@ stage is absorbed inside the trim.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `levels` is not one sequence of at least two levels, or one is not finite. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## corrected_incipient_ratio
 
@@ -442,6 +449,7 @@ later.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, if $x_{Fz}$ is at or above 1, or if the correction to this inlet pressure carries the threshold to or above 1. |
+| TypeError | if `incipient_ratio` or `inlet_pressure_pa` is not a single number. |
 
 ## differential_pressure_ratio
 
@@ -479,6 +487,7 @@ far towards flashing this operating point is, and 1 is the whole way.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a pressure is not positive and finite, if the valve does not drop pressure, or if the inlet is already at the vapour pressure. |
+| TypeError | if `inlet_pressure_pa`, `outlet_pressure_pa` or `vapor_pressure_pa` is not a single number. |
 
 ## HydrodynamicValveNoise
 
@@ -612,6 +621,7 @@ keeps $x_{Fz}$ high and stays quiet longer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, or the coefficient is not one Table 1 prints a constant for. |
+| TypeError | if `coefficient` is not a text, or `flow_coefficient`, `pressure_recovery` or `style_modifier` is not a single number. |
 
 ## internal_sound_pressure_level
 
@@ -659,6 +669,7 @@ $\rho_L$ intact, which settles it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `density`, `internal_diameter_m`, `sound_power` or `speed_of_sound` is not a single number. |
 
 ## jet_strouhal_number
 
@@ -717,6 +728,7 @@ and comes out anywhere between about 0,2 and 0,5.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, if the inlet is at or below the vapour pressure, or if a choice is not one the standard prints. |
+| TypeError | if `coefficient` or `form` is not a text, or `corrected_ratio`, `flow_coefficient`, `inlet_pressure_pa`, `pressure_recovery`, `seat_diameter_m`, `style_modifier`, `valve_diameter_m` or `vapor_pressure_pa` is not a single number. |
 
 ## last_stage_differential
 
@@ -759,6 +771,7 @@ the cap says so.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, or the last stage does not drop pressure. |
+| TypeError | if `corrected_ratio`, `inlet_pressure_pa`, `outlet_pressure_pa` or `vapor_pressure_pa` is not a single number. |
 
 ## last_stage_seat_diameter_mm
 
@@ -797,6 +810,7 @@ metres, so divide by 1 000 before passing it on.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the coefficient is not positive and finite, or is not one Table 1 prints a constant for. |
+| TypeError | if `coefficient` is not a text, or `flow_coefficient` is not a single number. |
 
 ## LiquidPipe
 
@@ -917,6 +931,7 @@ $10^{-6}$ of this and calls it sound.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, or the recovery factor is outside its range. |
+| TypeError | if `mass_flow`, `pressure_recovery` or `velocity` is not a single number. |
 
 ## multihole_incipient_cavitation_ratio
 
@@ -955,6 +970,7 @@ counts get the same threshold here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the passage count is not a whole number of one or more, or another value is not positive and finite. |
+| TypeError | if `hole_diameter_m` or `pressure_recovery` is not a single number, or `n_passages` is a flag, a text or an array where a count goes. |
 
 ## pipe_ring_frequency
 
@@ -992,6 +1008,7 @@ it worse.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `internal_diameter_m` or `pipe_sound_speed` is not a single number. |
 
 ## REFERENCE_INLET_PRESSURE_PA
 
@@ -1046,6 +1063,7 @@ out at −44,7 dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `air_density`, `air_sound_speed`, `internal_diameter_m`, `pipe_density`, `pipe_sound_speed` or `wall_thickness_m` is not a single number. |
 
 ## stage_conditions
 
@@ -1097,6 +1115,7 @@ see `docs/ERRATA.md`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, if fewer than two stages were given, or if the stages between them would take more than the differential the valve has. |
+| TypeError | if `flow_coefficient`, `inlet_pressure_pa`, `outlet_pressure_pa` or `vapor_pressure_pa` is not a single number, or `stage_coefficients` holds a text or a value that is not a real number. |
 
 **Warns**
 
@@ -1170,6 +1189,7 @@ costs 6,02.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `ring` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## turbulent_distribution
 
@@ -1215,6 +1235,7 @@ page renders it as a bare 1, which flattens the low-frequency side.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `peak` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## turbulent_efficiency
 
@@ -1249,6 +1270,7 @@ in the $10^{-6}$ range: one part in a million of the stream power.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `speed_of_sound` or `velocity` is not a single number. |
 
 ## turbulent_peak_frequency
 
@@ -1285,6 +1307,7 @@ diameter of Equation (4) stands for that size.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite. |
+| TypeError | if `jet`, `strouhal_number` or `velocity` is not a single number. |
 
 ## uniform_passage_style_modifier
 
@@ -1318,6 +1341,7 @@ jet area, and a peak frequency four times higher.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the count is not a whole number of one or more. |
+| TypeError | if `n_passages` is a flag, a text or an array where a count goes. |
 
 ## valve_hydrodynamic_noise
 
@@ -1363,6 +1387,7 @@ exactly zero, so the two branches meet without a step.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is outside the range its equation is written for, or if the operating point is at or past flashing, where Equations (9) and (13) divide by zero. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## vena_contracta_velocity
 
@@ -1399,3 +1424,4 @@ ideal velocity head the valve actually reaches at the vena contracta.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, or the recovery factor is outside its range. |
+| TypeError | if `density`, `differential` or `pressure_recovery` is not a single number. |

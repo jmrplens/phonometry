@@ -174,6 +174,8 @@ class ConformanceVerification(RichDisplay):
             on its own side only), if the lower limit is above the upper one,
             if both limits are open, if the uncertainty is negative or if the
             maximum-permitted uncertainty is not positive.
+        :raises TypeError: if ``lower_limit``, ``max_uncertainty``, ``uncertainty`` or
+            ``upper_limit`` is not a single number.
         """
         require_scalar(self.max_uncertainty, "max_uncertainty")
         require_scalar(self.uncertainty, "uncertainty")
@@ -401,6 +403,7 @@ def verify_conformance(
         side), a negative symmetric limit, a lower limit above the upper one,
         a pair open at both ends, a negative uncertainty or a
         maximum-permitted uncertainty that is not positive.
+    :raises TypeError: if ``acceptance_limits`` is not a single number.
     """
     lower, upper = _limits(acceptance_limits)
     return ConformanceVerification(

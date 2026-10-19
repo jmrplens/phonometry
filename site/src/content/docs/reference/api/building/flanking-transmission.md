@@ -121,13 +121,17 @@ check_strong_coupling(
     mass_j: float,
     critical_frequency_i: float,
     critical_frequency_j: float,
+    *,
+    frequencies: Sequence[float] | np.ndarray | None = None,
 ) -> StrongCouplingCheck
 ```
 
-Do the two elements couple strongly enough for `Kij`? (Part 1, Formula (15)).
+Is the coupling of the two elements weak enough for `Kij`? (Part 1, Formula (15)).
 
-`Kij` is relevant only where
-$D_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}$.
+The measured `Kij` may not be relevant, the elements being strongly
+coupled, in a band where
+$D_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}$
+does not hold (Part 1, 4.3.3).
 
 **Parameters**
 
@@ -138,6 +142,7 @@ $D_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm
 | `mass_j` | Mass per unit area `mj` of element `j`, in kg/m². |
 | `critical_frequency_i` | Critical frequency `fci` of element `i`, in Hz. |
 | `critical_frequency_j` | Critical frequency `fcj` of element `j`, in Hz. |
+| `frequencies` | The band centre frequencies of the differences, in Hz, for the plot to name the bands by; `None` (the default) numbers them. |
 
 **Returns:** The verdict, as a [`StrongCouplingCheck`](/phonometry/reference/api/building/flanking-transmission/#strongcouplingcheck); band by band in its [`holds`](/phonometry/reference/api/building/flanking-transmission/#strongcouplingcheckholds).
 
@@ -145,7 +150,8 @@ $D_{\mathrm{v},ij} \ge 3 - 10 \log_{10}\frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If any scalar input is not positive/finite. |
+| ValueError | If any scalar input is not positive/finite, or the band frequencies are not one positive value per band. |
+| TypeError | if `critical_frequency_i`, `critical_frequency_j`, `mass_i` or `mass_j` is not a single number. |
 
 ## critical_frequency
 
@@ -193,6 +199,7 @@ Hopkins Eq. 2.201 derives. See `docs/ERRATA.md`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any input is not positive/finite. |
+| TypeError | if `longitudinal_wave_speed`, `speed_of_sound` or `thickness_m` is not a single number. |
 
 ## direction_averaged_level_difference
 
@@ -261,6 +268,7 @@ with $f_{\mathrm{ref}} = 1000$ Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any input is not positive/finite or the band counts are incompatible. |
+| TypeError | if `area` or `speed_of_sound` is not a single number. |
 
 ## FlankingImpactLevelResult
 
@@ -438,6 +446,7 @@ Modal density $n = \pi \cdot S \cdot f_\mathrm{c} / c_0^2$ (Part 4, (5)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any input is not positive/finite. |
+| TypeError | if `area`, `critical_frequency` or `speed_of_sound` is not a single number. |
 
 ## modal_overlap_factor
 
@@ -512,6 +521,7 @@ tapping machine on the source-room floor.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts or non-positive areas. |
+| TypeError | if `reference_area` is not a single number. |
 
 ## normalized_flanking_level_difference
 
@@ -548,6 +558,7 @@ area $A_0 = 10$ m².
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts or non-positive areas. |
+| TypeError | if `reference_area` is not a single number. |
 
 ## StrongCouplingCheck
 
@@ -559,12 +570,15 @@ StrongCouplingCheck(
     mass_j: float,
     critical_frequency_i: float,
     critical_frequency_j: float,
+    frequencies: NDArray[np.float64] | None = None,
 )
 ```
 
 The strong-coupling condition of Part 1, Formula (15), band by band.
 
-`Kij` is relevant only where the elements couple strongly,
+Where the elements are so strongly coupled that they cannot be taken as
+separate SEA subsystems, the measured `Kij` may not be relevant (Part
+1, 4.3.1 a) and 4.3.3); the coupling is weak enough for it only where
 
 $$
 D_{\mathrm{v},ij} \ge 3 - 10 \lg \frac{m_i f_{\mathrm{c}j}}{m_j f_{\mathrm{c}i}}
@@ -587,6 +601,7 @@ against another threshold.
 | `mass_j` | Mass per unit area `mj` of element `j`, in kg/m². |
 | `critical_frequency_i` | Critical frequency `fci` of element `i`, in Hz. |
 | `critical_frequency_j` | Critical frequency `fcj` of element `j`, in Hz. |
+| `frequencies` | The band centre frequencies of the differences, in Hz, or `None` where the bands were not named; only the plot reads them. |
 
 ### StrongCouplingCheck.holds
 
@@ -597,17 +612,48 @@ Whether the inequality holds in each band.
 Judged settled: for two like elements the threshold is 3 dB to the
 last bits of the logarithm of a ratio that is 1 in decimal.
 
-### StrongCouplingCheck.passes
-
-*property*
-
-The verdict: the elements couple strongly in every band given.
-
-### StrongCouplingCheck.threshold_db
+### StrongCouplingCheck.min_velocity_level_difference
 
 *property*
 
 The least `Dv,ij`, $3 - 10 \lg (m_i f_{\mathrm{c}j} / (m_j f_{\mathrm{c}i}))$, in dB.
+
+### StrongCouplingCheck.passes
+
+*property*
+
+The verdict: the inequality holds in every band given.
+
+In none of them, then, does strong coupling put `Kij` in doubt.
+
+### StrongCouplingCheck.plot()
+
+```python
+StrongCouplingCheck.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot `Dv,ij` band by band against the bound of Formula (15).
+
+The bound $3 - 10 \lg (m_i f_{\mathrm{c}j} / (m_j f_{\mathrm{c}i}))$ is drawn across the bands with the side under it
+shaded, where the elements are strongly coupled and `Kij` may not be
+relevant, and a band where the inequality does not hold is marked.
+
+Requires matplotlib (`pip install phonometry[plot]`).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the `Dv,ij` curve. |
+
+**Returns:** The axes.
 
 ## total_loss_factor
 
@@ -711,6 +757,7 @@ is used.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts, non-positive geometry, or if only one of the two structural reverberation times is supplied. |
+| TypeError | if `area_i`, `area_j` or `junction_length` is not a single number. |
 
 ## vibration_reduction_index_from_flanking
 
@@ -762,6 +809,7 @@ The standard warns this holds only for resonant-only transmission; measured
 | Exception | When |
 | :--- | :--- |
 | ValueError | On incompatible band counts or non-positive geometry. |
+| TypeError | if `area_i`, `area_j`, `junction_length` or `reference_area` is not a single number. |
 
 ## VibrationReductionResult
 

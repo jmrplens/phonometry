@@ -570,6 +570,8 @@ def room_to_room_transmission(
         neither or both source descriptions are given, if the criterion
         family or the sound power model is unknown, or if
         ``receiver_distance_m`` is given and is not a positive finite number.
+    :raises TypeError: if ``partition_area`` or ``receiver_distance_m`` is not a single
+        number.
     """
     from ..room.steady_field import SOURCE_POWER_MODELS, steady_state_spl
 

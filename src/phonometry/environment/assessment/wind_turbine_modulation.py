@@ -105,7 +105,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "AM_BLOCK_SAMPLES",
-    "AM_EXCEEDANCE_THRESHOLDS_DB",
+    "AM_EXCEEDANCE_DEPTHS_DB",
     "AM_FREQUENCY_BANDS_HZ",
     "AM_MIN_VALID_BLOCKS",
     "AM_MODULATION_FREQUENCY_LIMITS_HZ",
@@ -162,7 +162,7 @@ AM_FREQUENCY_BANDS_HZ: Mapping[int, tuple[float, ...]] = MappingProxyType(
 
 #: Modulation depths the binned results count the data points above, in dB
 #: (13.7 a) iii)).
-AM_EXCEEDANCE_THRESHOLDS_DB: tuple[float, float, float] = (3.0, 6.0, 9.0)
+AM_EXCEEDANCE_DEPTHS_DB: tuple[float, float, float] = (3.0, 6.0, 9.0)
 
 #: Peak-to-peak swing, in dB, that the fundamental alone and a harmonic alone
 #: each have to exceed for the harmonic to be kept (13.6.2.3 f)).
@@ -254,6 +254,9 @@ def amplitude_modulation_band_levels(
     :raises ValueError: If the band is not one of the band numbers (``1.5``
         and ``True`` are not), a band centre is missing or duplicated, the weighting is neither ``"A"`` nor ``"Z"``, or the
         levels are not finite.
+    :raises TypeError: if ``band`` is a flag, a text or an array where a count goes, or
+        ``band_levels`` or ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     if not is_class_designation(band, tuple(AM_FREQUENCY_BANDS_HZ)):
         msg = (
@@ -367,7 +370,7 @@ class ModulationBlock(OwnsArrays):
     r"""The analysis of one 10 s block (IEC TS 61400-11-2:2024, 13.6.2.3).
 
     :ivar levels: The 100 band-limited ``LAeq,100ms`` values analysed, in dB.
-    :ivar detrended_db: ``levels`` minus its cubic least-squares fit, in dB.
+    :ivar detrended_levels: ``levels`` minus its cubic least-squares fit, in dB.
     :ivar frequencies: The spectrum lines, 0.1 Hz to 4.9 Hz.
     :ivar power_spectrum: :math:`S_{xx}` of Equation (12) at those lines,
         from the positive frequencies (the half magnitude the TS allows).
@@ -380,7 +383,7 @@ class ModulationBlock(OwnsArrays):
         lines hold nothing above rounding.
     :ivar harmonic_frequencies_hz: The frequencies of the harmonics kept in
         the reconstruction, second before third; empty when none is.
-    :ivar reconstructed_db: The reconstructed series, in dB about zero; empty
+    :ivar reconstructed_levels: The reconstructed series, in dB about zero; empty
         for a prominence-failed block.
     :ivar modulation_depth_db: ``L5 - L95`` of the reconstructed series, in
         dB; ``None`` unless the block is valid.
@@ -392,7 +395,7 @@ class ModulationBlock(OwnsArrays):
     """
 
     levels: NDArray[np.float64]
-    detrended_db: NDArray[np.float64]
+    detrended_levels: NDArray[np.float64]
     frequencies: NDArray[np.float64]
     power_spectrum: NDArray[np.float64]
     modulation_frequency_range_hz: tuple[float, float]
@@ -400,7 +403,7 @@ class ModulationBlock(OwnsArrays):
     fundamental_frequency_hz: float | None
     prominence: float | None
     harmonic_frequencies_hz: tuple[float, ...]
-    reconstructed_db: NDArray[np.float64]
+    reconstructed_levels: NDArray[np.float64]
     modulation_depth_db: float | None
     excluded: bool = False
 
@@ -415,6 +418,7 @@ class ModulationBlock(OwnsArrays):
             given together, the prominence is negative or NaN, or the
             modulation depth is present on a block that is not valid or
             missing on one that is.
+        :raises TypeError: if ``prominence`` is not a single number.
         """
         if (self.fundamental_frequency_hz is None) != (self.prominence is None):
             msg = (
@@ -571,6 +575,7 @@ def amplitude_modulation_block(
     :return: A :class:`ModulationBlock`.
     :raises ValueError: If the block does not hold 100 finite values or the
         range is outside 0.3 Hz to 1.6 Hz or holds no spectrum line.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     first, last_in_range = _validated_range(modulation_frequency_range_hz)
     levels = require_finite_array(levels, "levels")
@@ -591,7 +596,7 @@ def amplitude_modulation_block(
     low, high = (float(v) for v in modulation_frequency_range_hz)
     common: dict[str, Any] = {
         "levels": levels,
-        "detrended_db": read_only(detrended),
+        "detrended_levels": read_only(detrended),
         "frequencies": read_only(frequencies),
         "power_spectrum": read_only(spectrum),
         "modulation_frequency_range_hz": (low, high),
@@ -605,7 +610,7 @@ def amplitude_modulation_block(
             fundamental_frequency_hz=None,
             prominence=None,
             harmonic_frequencies_hz=(),
-            reconstructed_db=read_only(np.zeros(0)),
+            reconstructed_levels=read_only(np.zeros(0)),
             modulation_depth_db=None,
         )
     fundamental = max(in_range, key=lambda k: settled[k - 1])
@@ -616,7 +621,7 @@ def amplitude_modulation_block(
             fundamental_frequency_hz=fundamental / _BLOCK_DURATION_S,
             prominence=prominence,
             harmonic_frequencies_hz=(),
-            reconstructed_db=read_only(np.zeros(0)),
+            reconstructed_levels=read_only(np.zeros(0)),
             modulation_depth_db=None,
         )
     kept = set(_window(fundamental, last_line))
@@ -640,7 +645,7 @@ def amplitude_modulation_block(
         fundamental_frequency_hz=fundamental / _BLOCK_DURATION_S,
         prominence=prominence,
         harmonic_frequencies_hz=tuple(harmonics),
-        reconstructed_db=read_only(reconstructed),
+        reconstructed_levels=read_only(reconstructed),
         modulation_depth_db=depth,
     )
 
@@ -774,7 +779,7 @@ def amplitude_modulation_period(
         an adaptation to be justified.
     :return: A :class:`ModulationPeriod`.
     :raises TypeError: If the exclusion flags are neither booleans nor
-        integers.
+        integers, or ``levels`` holds a text or a value that is not a number.
     :raises ValueError: If the period does not hold 6 000 finite values or the
         exclusion flags are not sixty booleans (or 0 and 1).
     """
@@ -837,14 +842,14 @@ def _excluded(block: ModulationBlock) -> ModulationBlock:
     """The same block, marked as excluded by the practitioner."""
     return ModulationBlock(
         levels=block.levels,
-        detrended_db=block.detrended_db,
+        detrended_levels=block.detrended_levels,
         frequencies=block.frequencies,
         power_spectrum=block.power_spectrum,
         modulation_frequency_range_hz=block.modulation_frequency_range_hz,
         fundamental_frequency_hz=block.fundamental_frequency_hz,
         prominence=block.prominence,
         harmonic_frequencies_hz=(),
-        reconstructed_db=read_only(np.zeros(0)),
+        reconstructed_levels=read_only(np.zeros(0)),
         modulation_depth_db=None,
         excluded=True,
     )
@@ -875,7 +880,7 @@ class BinnedModulation(OwnsArrays):
     :ivar type_a_uncertainty_db: Standard deviation of that mean, Equation
         (9) of 10.3.3 (13.6.5); NaN for a bin of one data point.
     :ivar exceedance_percent: Percentage of the bin's data points rated above
-        3 dB, 6 dB and 9 dB (:data:`AM_EXCEEDANCE_THRESHOLDS_DB`), shape
+        3 dB, 6 dB and 9 dB (:data:`AM_EXCEEDANCE_DEPTHS_DB`), shape
         ``(bins, bands, 3)``.
     :ivar selected_bands: The band with the highest mean rating in each bin,
         the lowest-numbered of equally high ones.
@@ -955,7 +960,8 @@ def bin_amplitude_modulation(
         zero.
     :return: A :class:`BinnedModulation`.
     :raises TypeError: If ``bands`` is a text rather than a sequence of band
-        numbers, or the exclusion flags are neither booleans nor integers.
+        numbers, the exclusion flags are neither booleans nor integers, or
+        ``ratings_db`` holds a text or a value that is not a number.
     :raises ValueError: If the shapes disagree, a value is not finite, a
         wind speed is negative, a band is not a band number or is repeated,
         an integer exclusion flag is other than 0 and 1, or the sector width
@@ -1016,14 +1022,14 @@ def bin_amplitude_modulation(
     nonzero = np.zeros((n_bins, n_bands), dtype=np.int64)
     means = np.zeros((n_bins, n_bands))
     type_a = np.zeros((n_bins, n_bands))
-    exceed = np.zeros((n_bins, n_bands, len(AM_EXCEEDANCE_THRESHOLDS_DB)))
+    exceed = np.zeros((n_bins, n_bands, len(AM_EXCEEDANCE_DEPTHS_DB)))
     for row, key in enumerate(occupied):
         values = ratings[bins.members(key) & keep]
         counts[row] = values.shape[0]
         nonzero[row] = np.count_nonzero(values > 0.0, axis=0)
         means[row] = np.mean(values, axis=0)
         type_a[row] = [_type_a_arithmetic(values[:, j]) for j in range(n_bands)]
-        for t, threshold in enumerate(AM_EXCEEDANCE_THRESHOLDS_DB):
+        for t, threshold in enumerate(AM_EXCEEDANCE_DEPTHS_DB):
             exceed[row, :, t] = 100.0 * np.mean(values > threshold, axis=0)
     best = np.argmax(means, axis=1)
     centres = [bins.centres(key) for key in occupied]

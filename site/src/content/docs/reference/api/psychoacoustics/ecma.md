@@ -111,6 +111,12 @@ Psychoacoustic loudness per ECMA-418-2:2025 (Sottek Hearing Model).
 
 **Returns:** An [`EcmaLoudness`](/phonometry/reference/api/psychoacoustics/ecma/#ecmaloudness) with the single loudness value N (Formula 117), the average specific loudness N'(z) (Formula 115) and the time-dependent loudness N(l) (Formula 116).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs` is not a single number. |
+
 The 1 kHz / 40 dB SPL sinusoid defines 1 sone_HMS via the calibration
 constant of Formula (23); with the full Clause 6.2.3 averaging this
 chain computes 0.9845 sone_HMS for it (see the module docstring for the

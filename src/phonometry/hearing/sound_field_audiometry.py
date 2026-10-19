@@ -825,6 +825,8 @@ class FreeSoundFieldCheck(OwnsArrays):
         :raises ValueError: If the field is not ``"free"`` or
             ``"quasi-free"``, or the loudspeaker is not farther from the
             reference point than the axial points.
+        :raises TypeError: if ``field`` is not a text, or ``loudspeaker_distance_m`` is
+            not a single number.
         """
         require_choice(self.field, "field", ("free", "quasi-free"))
         require_scalar(self.loudspeaker_distance_m, "loudspeaker_distance_m")
@@ -1095,6 +1097,7 @@ def check_free_sound_field(
     :return: :class:`FreeSoundFieldCheck`.
     :raises ValueError: if a position is missing or unknown, if the bands do
         not match, or if the distance is not larger than 0,15 m.
+    :raises TypeError: if ``loudspeaker_distance_m`` is not a single number.
     """
     return _free_field_check(
         lateral_levels,
@@ -1152,6 +1155,7 @@ def check_quasi_free_sound_field(
     :return: :class:`FreeSoundFieldCheck` with ``field="quasi-free"``.
     :raises ValueError: if a position is missing or unknown, if the bands do
         not match, or if the distance is not larger than 0,10 m.
+    :raises TypeError: if ``loudspeaker_distance_m`` is not a single number.
     """
     return _free_field_check(
         lateral_levels,

@@ -89,7 +89,7 @@ _REQUIREMENT_ROWS: dict[str, tuple[tuple[str, str, tuple[str, str] | None], ...]
         (
             "summation",
             "Summation of output signals (5.16)",
-            ("summation_min_db", "summation_max_db"),
+            ("summation_difference_lower", "summation_difference_upper"),
         ),
     ),
     "1995": (
@@ -102,7 +102,7 @@ _REQUIREMENT_ROWS: dict[str, tuple[tuple[str, str, tuple[str, str] | None], ...]
         (
             "summation",
             "Summation of output signals (4.9)",
-            ("summation_min_db", "summation_max_db"),
+            ("summation_difference_lower", "summation_difference_upper"),
         ),
     ),
 }

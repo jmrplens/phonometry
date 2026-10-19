@@ -110,6 +110,8 @@ def ideal_gas(
         density, a speed of sound and the ratio of specific heats it was given.
     :raises ValueError: for a non-positive input or a temperature at or below
         absolute zero.
+    :raises TypeError: if ``heat_capacity_ratio``, ``molar_mass_kg_mol``,
+        ``static_pressure_pa`` or ``temperature_c`` is not a single number.
     """
     from .._internal.validation import require_above_absolute_zero, require_positive
 

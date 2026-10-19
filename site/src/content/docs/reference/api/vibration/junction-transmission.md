@@ -186,6 +186,7 @@ $\bar{\tau} = \int_0^{\pi/2} \tau(\theta) \cos\theta \,\mathrm{d}\theta$, evalua
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `chi`/`psi`, an unknown junction or section, or a straight section that does not exist. |
+| TypeError | if `chi` is not a single number. |
 
 ## corner_transmission_coefficient
 
@@ -219,6 +220,7 @@ Returns `0` for angles beyond the cut-off $\arcsin(\chi)$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `chi`/`psi`, an out-of-range angle or an unknown junction. |
+| TypeError | if `chi` or `psi` is not a single number. |
 
 ## coupling_loss_factor
 
@@ -256,6 +258,7 @@ source-plate bending-wave group velocity `cg_i`, the junction length
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input, or a coefficient and a frequency whose shapes cannot be broadcast together. |
+| TypeError | if `group_velocity`, `junction_length` or `plate_area` is not a single number. |
 
 ## inline_transmission_coefficient
 
@@ -283,6 +286,7 @@ transmits fully).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `chi`/`psi`. |
+| TypeError | if `chi` or `psi` is not a single number. |
 
 ## junction_transmission
 
@@ -341,7 +345,7 @@ junction_wave_parameters(
     thickness2_m: float,
     wave_speed2: float,
     surface_density2: float,
-) -> tuple[float, float]
+) -> JunctionWaveParameters
 ```
 
 Wave parameters `chi` and `psi` of a plate pair (Hopkins 5.10/5.11).
@@ -361,13 +365,14 @@ $\psi = (h_2 c_{\mathrm{L}2} \rho_{\mathrm{s}2}) / (h_1 c_{\mathrm{L}1} \rho_{\m
 | `wave_speed2` | Quasi-longitudinal wave speed `cL2` of plate 2, in m/s (> 0). |
 | `surface_density2` | Surface density `rho_s2` of plate 2, in kg/m^2 (> 0). |
 
-**Returns:** The pair `(chi, psi)`.
+**Returns:** $\chi$ and $\psi$, as a [`JunctionWaveParameters`](/phonometry/reference/api/vibration/junction-transmission/#junctionwaveparameters).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `surface_density1`, `surface_density2`, `thickness1_m`, `thickness2_m`, `wave_speed1` or `wave_speed2` is not a single number. |
 
 ## JunctionTransmissionResult
 
@@ -384,8 +389,8 @@ JunctionTransmissionResult(
     corner_average: float,
     straight_average: float | None,
     *,
-    thickness1_m: float | None = None,
-    thickness2_m: float | None = None,
+    thickness1_m: float,
+    thickness2_m: float,
 )
 ```
 
@@ -405,8 +410,8 @@ Bending-wave transmission across a rigid plate junction (Hopkins 5.2.1.3).
 | `straight` | Straight-section coefficient `tau13(theta)` on the grid, or `None` when the junction has no straight section. |
 | `corner_average` | Diffuse-field angular average `tau_bar_12` (Eq. 5.6). |
 | `straight_average` | Angular average `tau_bar_13`, or `None`. |
-| `thickness1_m` | Plate 1 thickness, in metres, retained (with `thickness2_m`) so `plot_geometry` can draw the junction; appended after the original fields and `None` for hand-built results. |
-| `thickness2_m` | Plate 2 thickness, in metres, or `None`. |
+| `thickness1_m` | Plate 1 thickness, in metres, retained (with `thickness2_m`) so `plot_geometry` can draw the junction. |
+| `thickness2_m` | Plate 2 thickness, in metres. |
 
 ### JunctionTransmissionResult.corner_reduction_index
 
@@ -452,11 +457,24 @@ Draw the plate-junction cross-section to scale.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-**Raises**
+## JunctionWaveParameters
 
-| Exception | When |
+```python
+JunctionWaveParameters(chi: float, psi: float)
+```
+
+The wave parameters of a rigid plate junction (Hopkins Eqs. 5.10/5.11, p. 541).
+
+What [`junction_wave_parameters`](/phonometry/reference/api/vibration/junction-transmission/#junction_wave_parameters) returns: $\chi$ and
+$\psi$, named, where a `(chi, psi)` tuple used to be unpacked by
+position.
+
+**Attributes**
+
+| Name | Description |
 | :--- | :--- |
-| ValueError | If the result does not retain its geometry. |
+| `chi` | $\chi$, the ratio of the bending wavenumbers. |
+| `psi` | $\psi$, the ratio of the bending stiffnesses scaled by the wavenumbers. |
 
 ## plot_junction_geometry
 
@@ -497,6 +515,7 @@ the junction type follows
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown junction type, or a thickness that is not positive and finite. |
+| TypeError | if `thickness1_m` or `thickness2_m` is not a single number. |
 
 ## point_connection_coupling_loss_factor
 
@@ -562,6 +581,7 @@ is the one that reproduces the book's own answer to problem 6.13; see
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-integer input. |
+| TypeError | if `plate_area1`, `surface_density1`, `surface_density2`, `thickness1_m`, `thickness2_m`, `wave_speed1` or `wave_speed2` is not a single number, or `n_connections` is a flag, a text or an array where a count goes. |
 
 ## right_angle_transmission_coefficient
 
@@ -623,6 +643,7 @@ of [`junction_wave_parameters`](/phonometry/reference/api/vibration/junction-tra
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or an unknown incidence. |
+| TypeError | if `incidence` is not a text, or `density1`, `density2`, `thickness1_m`, `thickness2_m`, `wave_speed1` or `wave_speed2` is not a single number. |
 
 ## straight_transmission_coefficient
 
@@ -657,6 +678,7 @@ covered.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `chi`/`psi`, an out-of-range angle, or a junction without a straight section. |
+| TypeError | if `chi` or `psi` is not a single number. |
 
 ## wave_vibration_reduction_index
 
@@ -691,3 +713,4 @@ $\bar{\tau}_{ij} = \bar{\tau}_{ji} \sqrt{f_{\mathrm{c}j} / f_{\mathrm{c}i}}$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `tau` or `fc_j`. |
+| TypeError | if `critical_frequency_receiver` is not a single number. |

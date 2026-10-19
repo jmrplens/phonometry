@@ -103,6 +103,7 @@ same time axis.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `decimation_factor` is a flag, a text or an array where a count goes. |
 
 ## envelope_spectrum
 
@@ -175,6 +176,7 @@ untouched) before the detector, the Figure 13.11 front end.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `nfft` is a flag, a text or an array where a count goes. |
 
 ## EnvelopeResult
 

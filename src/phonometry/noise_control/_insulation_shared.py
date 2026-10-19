@@ -140,6 +140,8 @@ def leak_ratio(opening_area_m2: float, interior_surface_area_m2: float) -> float
         included, in square metres.
     :return: The ratio, dimensionless.
     :raises ValueError: For a non-positive area.
+    :raises TypeError: if ``interior_surface_area_m2`` or ``opening_area_m2`` is not a
+        single number.
     """
     openings = require_positive(opening_area_m2, "opening_area_m2")
     interior = require_positive(interior_surface_area_m2, "interior_surface_area_m2")
@@ -156,5 +158,6 @@ def seal_ratio(leak: float) -> float:
     :param leak: The leak ratio :math:`\theta`, dimensionless and positive.
     :return: :math:`\psi`, dimensionless.
     :raises ValueError: For a non-positive ratio.
+    :raises TypeError: if ``leak`` is not a single number.
     """
     return 1.0 / require_positive(leak, "leak")

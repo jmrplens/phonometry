@@ -715,6 +715,9 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
                 reflection=np.ones(3, dtype=complex),
                 absorption=np.zeros(3),
                 well_absorption=np.zeros(3),
+                wells=(None,),
+                depth_m=0.1,
+                period_m=0.1,
             ),
             "frequencies",
         ),
@@ -732,9 +735,12 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
         ),
         "RailwayTrack": (
             lambda a: environment.RailwayTrack(
-                rail_roughness=(a, np.zeros(3)), track_transfer=np.zeros(3)
+                rail_roughness=environment.WavelengthSpectrum(
+                    wavelengths_mm=np.arange(1.0, 4.0), levels=np.zeros(3)
+                ),
+                track_transfer=a,
             ),
-            "rail_roughness",
+            "track_transfer",
         ),
         "FDTDResult": (
             lambda a: simulation.FDTDResult(

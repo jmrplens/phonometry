@@ -63,6 +63,7 @@ def critical_angle(c1: float, c2: float) -> float:
     :param c2: Sound speed in the sediment, in m/s.
     :return: The critical grazing angle, in degrees.
     :raises ValueError: If ``c2 <= c1`` (no critical angle exists).
+    :raises TypeError: if ``c1`` or ``c2`` is not a single number.
     """
     cw = require_positive(c1, "c1")
     cs = require_positive(c2, "c2")
@@ -91,6 +92,7 @@ def reflection_coefficient(
     :param c2: Sound speed in the sediment ``c2``, in m/s.
     :return: The complex reflection coefficient per grazing angle.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``c1``, ``c2``, ``rho1`` or ``rho2`` is not a single number.
     """
     phi = np.atleast_1d(np.asarray(grazing_angle_deg, dtype=np.float64))
     if phi.size == 0 or not np.all(np.isfinite(phi)):

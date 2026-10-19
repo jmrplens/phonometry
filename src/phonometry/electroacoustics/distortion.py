@@ -264,6 +264,7 @@ def thd(
     :return: Total harmonic distortion, as a ratio (0..).
     :raises ValueError: If the signal/parameters are invalid, ``kind`` is
         unknown, or no harmonic of the fundamental lies below Nyquist.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
@@ -318,6 +319,8 @@ def harmonic_distortion(
     :return: nth-order harmonic distortion, as a ratio.
     :raises ValueError: If ``order`` is not an integer, ``order`` < 2 or the
         inputs are invalid.
+    :raises TypeError: if ``fs`` or ``fundamental`` is not a single number, or ``order``
+        is a flag, a text or an array where a count goes.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
@@ -469,6 +472,8 @@ def thd_plus_noise(
         ratio.
     :return: THD+N as a ratio (default) or in dB.
     :raises ValueError: If the inputs are invalid or ``notch_q`` out of range.
+    :raises TypeError: if ``bandwidth``, ``fs``, ``fundamental`` or ``notch_q`` is not a
+        single number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
@@ -647,6 +652,7 @@ def weighted_thd(
     :param window: FFT window used only for fundamental auto-detection.
     :return: Weighted THD, as a ratio.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``fs``, ``fundamental`` or ``notch_q`` is not a single number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)
@@ -770,6 +776,7 @@ def harmonic_analysis(
     :param window: FFT window (default ``'hann'``).
     :return: A :class:`HarmonicDistortionResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     fs = resolve_fs(x, fs, name="x")
     sig = _validate_signal(x)

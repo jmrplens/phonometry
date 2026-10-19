@@ -161,7 +161,7 @@ renamed.
 
 Where a background spectrum is supplied it is taken off first, by the
 ISO 3741 correction 6.4 asks for, and a margin under
-[`MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/noise_control/cabin-insulation/#min_signal_to_background_db) is reported.
+[`ISO11957_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/cabin-insulation/#iso11957_min_background_margin_db) is reported.
 
 **Parameters**
 
@@ -185,6 +185,7 @@ ISO 3741 correction 6.4 asks for, and a margin under
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra that do not match, an unknown method or band fraction, or an A-weighted pair under a method that does not define one. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), `a_weighted_cabin_level`, `a_weighted_room_level` or `internal_noise_level` is not a single number, or `cabin_background_levels`, `cabin_levels`, `frequencies`, `room_background_levels` or `room_levels` holds a text or a value that is not a real number. |
 
 ## CabinInsulationResult
 
@@ -354,6 +355,7 @@ for the octaves below 125 Hz, so nothing is claimed for them here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match, a frequency that names no one-third-octave band, a band given twice, or an octave that is not covered by its three bands. |
+| TypeError | if `frequencies` or `third_octave_levels` holds a text or a value that is not a real number. |
 
 ## check_source_positions
 
@@ -391,6 +393,7 @@ $D'_p$ already formed and does not pretend to do that conversion.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For fewer than [`MIN_SOURCE_POSITIONS_IN_SITU`](/phonometry/reference/api/noise_control/cabin-insulation/#min_source_positions_in_situ) positions, or an array that is not rectangular. |
+| TypeError | if `insulation_by_position` holds a text or a value that is not a real number. |
 
 ## DEFAULT_BAND_FLATNESS_LIMIT_DB
 
@@ -446,6 +449,7 @@ be, and nothing here is corrected for flanking through the floor.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match band for band. |
+| TypeError | if `frequencies`, `insulation` or `spectrum_levels` holds a text or a value that is not a real number. |
 
 ## IN_SITU_EXCESS_STANDARD_DEVIATION_DB
 
@@ -504,7 +508,7 @@ or over the inclined circular path, averaged on a mean-square basis with
 the external sources switched off.
 
 The background rule of 6.7 is not the one of 6.4. The margin over the
-background must reach [`MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/noise_control/cabin-insulation/#min_signal_to_background_db), and the
+background must reach [`ISO11957_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/cabin-insulation/#iso11957_min_background_margin_db), and the
 correction is made **only** while the margin stays inside
 [`INTERNAL_NOISE_CORRECTION_WINDOW_DB`](/phonometry/reference/api/noise_control/cabin-insulation/#internal_noise_correction_window_db): past the top of that window
 the correction is under a tenth of a decibel and the clause does not ask
@@ -527,6 +531,23 @@ rather than band by band, which is what makes it a separate line here from
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty or non-finite set of levels. |
+| TypeError | if `background_level` is not a single number, or `levels` holds a text or a value that is not a real number. |
+
+## ISO11957_MIN_BACKGROUND_MARGIN_DB
+
+*Constant* (`float`).
+
+```python
+ISO11957_MIN_BACKGROUND_MARGIN_DB = 6.0
+```
+
+## ISO11957_PREFERRED_BACKGROUND_MARGIN_DB
+
+*Constant* (`float`).
+
+```python
+ISO11957_PREFERRED_BACKGROUND_MARGIN_DB = 12.0
+```
 
 ## LOW_BAND_CLEARANCE_M
 
@@ -602,6 +623,7 @@ written here exactly as printed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive frequency or speed. |
+| TypeError | if `lowest_band_frequency_hz` or `speed_of_sound` is not a single number. |
 
 ## MIN_FIXED_MICROPHONE_POSITIONS
 
@@ -641,14 +663,6 @@ MIN_MICROPHONE_HEIGHT_M = 1.0
 
 ```python
 MIN_ROOM_TO_CABIN_VOLUME_RATIO = 20.0
-```
-
-## MIN_SIGNAL_TO_BACKGROUND_DB
-
-*Constant* (`float`).
-
-```python
-MIN_SIGNAL_TO_BACKGROUND_DB = 6.0
 ```
 
 ## MIN_SOURCE_POSITIONS_IN_SITU
@@ -697,14 +711,6 @@ OPERATOR_PATH_INCLINATION_DEG = 45.0
 
 ```python
 OPERATOR_SPHERE_RADIUS_M = 0.3
-```
-
-## PREFERRED_SIGNAL_TO_BACKGROUND_DB
-
-*Constant* (`float`).
-
-```python
-PREFERRED_SIGNAL_TO_BACKGROUND_DB = 12.0
 ```
 
 ## SourcePositionCheck
@@ -794,6 +800,7 @@ declared value to ISO 4871.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive volume or an unknown method. |
+| TypeError | if `cabin_volume_m3` or `room_volume_m3` is not a single number. |
 
 ## WALL_CLEARANCE_FACTOR
 
@@ -841,6 +848,7 @@ answer to that objection.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a spectrum that is not the rating bands, an unknown method or a band set other than 1 or 3. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `insulation` holds a text or a value that is not a real number. |
 
 ## WeightedCabinInsulation
 

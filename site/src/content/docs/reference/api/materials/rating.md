@@ -73,6 +73,7 @@ Sound absorption class for `alpha_w` (ISO 11654 Table B.1, Annex B).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `alpha_w` is not a finite value in `[0, 1]`. |
+| TypeError | if `alpha_w` is not a single number. |
 
 ## AbsorptionRatingResult
 

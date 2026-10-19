@@ -188,7 +188,10 @@ def run_hemisphere_queries() -> np.ndarray:
 
     h = hemisphere_inputs()
     hemi = ph.aircraft.RotorcraftHemisphere(
-        h["frequencies"], h["azimuth"], h["polar"], h["levels"]
+        frequencies=h["frequencies"],
+        azimuth_deg=h["azimuth"],
+        polar_deg=h["polar"],
+        levels=h["levels"],
     )
     out = [
         ph.aircraft.hemisphere_source_level(hemi, phi, theta)

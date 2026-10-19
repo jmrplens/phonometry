@@ -626,8 +626,8 @@ _KWARG_PLOT_CASES = [
         "audiogram_cautions",
         lambda: ph.hearing.audiogram_cautions(
             [250.0, 500.0, 1000.0],
-            air_conduction_db=[20.0, 40.0, 45.0],
-            bone_conduction_db=[40.0, 30.0, 35.0],
+            air_conduction_threshold_levels=[20.0, 40.0, 45.0],
+            bone_conduction_threshold_levels=[40.0, 30.0, 35.0],
         ),
         "line",
     ),
@@ -840,6 +840,62 @@ _KWARG_PLOT_CASES = [
         "revised_npd_curves",
         lambda: ph.aircraft.load_anp_database().revised_npd_curves(
             "747100", "D", temperature_c=10.0, relative_humidity_percent=80.0
+        ),
+        "line",
+    ),
+    (
+        "coherence",
+        lambda: ph.electroacoustics.coherence(
+            np.sin(np.arange(4096) / 3.0),
+            np.sin(np.arange(4096) / 3.0) + np.cos(np.arange(4096) / 7.0),
+            fs=1000.0,
+        ),
+        "line",
+    ),
+    (
+        "octave_band_levels",
+        lambda: ph.emission.octave_band_levels(
+            [60.0, 62.0, 61.0], frequencies=[50.0, 63.0, 80.0]
+        ),
+        "bar",
+    ),
+    (
+        "wavelength_spectrum",
+        lambda: ph.environment.sources.cnossos_rail.rail_roughness(
+            ph.environment.sources.cnossos_rail.RailRoughnessClass.WELL_MAINTAINED
+        ),
+        "line",
+    ),
+    (
+        "one_third_octave_absorption",
+        lambda: ph.materials.surfaces.one_third_octave_absorption(
+            np.linspace(0.1, 0.9, 200), frequencies=np.linspace(400.0, 1200.0, 200)
+        ),
+        "bar",
+    ),
+    (
+        "loudness_contour",
+        lambda: ph.psychoacoustics.equal_loudness_contour(40.0),
+        "line",
+    ),
+    (
+        "background_corrected_level",
+        lambda: ph.building.background_corrected_level(
+            [60.0, 45.0, 33.0], [30.0, 35.0, 30.0], frequencies=[100.0, 125.0, 160.0]
+        ),
+        "bar",
+    ),
+    (
+        "strong_coupling_check",
+        lambda: ph.building.check_strong_coupling(
+            [4.0, 2.0, 6.0], 200.0, 200.0, 100.0, 100.0
+        ),
+        "line",
+    ),
+    (
+        "energy_spectral_density",
+        lambda: ph.vibration.energy_spectral_density(
+            np.exp(-np.arange(128) / 8.0), fs=1000.0
         ),
         "line",
     ),
@@ -1155,7 +1211,9 @@ def test_single_axes_plots_accept_external_ax() -> None:
         ph.hearing.check_audiometric_ambient_noise(np.full(25, 10.0)),
         ph.hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35]),
         ph.hearing.check_retest_agreement(25.0, 30.0),
-        ph.hearing.audiogram_cautions([250.0, 500.0], air_conduction_db=[20.0, 45.0]),
+        ph.hearing.audiogram_cautions(
+            [250.0, 500.0], air_conduction_threshold_levels=[20.0, 45.0]
+        ),
         ph.hearing.audiometric_uncertainty(1000.0),
         ph.hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY,
         ph.hearing.verify_fixture_isolation(np.full(22, 120.0), np.full(22, 55.0)),

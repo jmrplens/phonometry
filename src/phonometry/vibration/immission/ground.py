@@ -109,6 +109,8 @@ def shear_modulus_from_wave_speed(
     :param density: :math:`\rho`, in kilograms per cubic metre.
     :return: :math:`G`, in pascals.
     :raises ValueError: For a non-positive speed or density.
+    :raises TypeError: if ``density`` or ``shear_wave_speed_m_s`` is not a single
+        number.
     """
     v_s = require_positive(shear_wave_speed_m_s, "shear_wave_speed_m_s")
     rho = require_positive(density, "density")
@@ -133,6 +135,8 @@ def poisson_ratio_from_wave_speeds(
     :raises ValueError: For a non-positive speed, or a compression wave no
         faster than :math:`2/\sqrt{3}` times the shear wave, which no stable
         continuum carries.
+    :raises TypeError: if ``compression_wave_speed_m_s`` or ``shear_wave_speed_m_s`` is
+        not a single number.
     """
     v_p, v_s = _speeds(compression_wave_speed_m_s, shear_wave_speed_m_s)
     return (v_p**2 - 2.0 * v_s**2) / (2.0 * (v_p**2 - v_s**2))
@@ -182,6 +186,8 @@ def compression_wave_speed(
     :return: :math:`\mathrm{v}_\mathrm{p}`, in metres per second.
     :raises ValueError: For a non-positive modulus or density, or a ratio
         outside ``(-1, 0.5)``, where the continuum would not be stable.
+    :raises TypeError: if ``density``, ``poisson_ratio`` or ``shear_modulus_pa`` is not
+        a single number.
     """
     g = require_positive(shear_modulus_pa, "shear_modulus_pa")
     rho = require_positive(density, "density")
@@ -207,6 +213,8 @@ def shear_strain_amplitude(
     :param shear_wave_speed_m_s: :math:`\mathrm{v}_\mathrm{s}`, in metres per second.
     :return: :math:`\hat\gamma`, in radians.
     :raises ValueError: For a negative amplitude or a non-positive speed.
+    :raises TypeError: if ``shear_wave_speed_m_s`` or ``velocity_amplitude_m_s`` is not
+        a single number.
     """
     require_scalar(velocity_amplitude_m_s, "velocity_amplitude_m_s")
     v = float(velocity_amplitude_m_s)

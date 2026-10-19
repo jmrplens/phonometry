@@ -113,6 +113,7 @@ def plot_aperture_geometry(
     :raises ValueError: for a ``depth``, ``width_m`` or ``radius`` that is not
         finite and positive, or for anything other than exactly one of
         ``width_m``/``radius``.
+    :raises TypeError: if ``depth``, ``radius`` or ``width_m`` is not a single number.
     """
     from matplotlib.patches import Arc
 
@@ -343,6 +344,8 @@ def plot_double_wall_geometry(
     :return: The axes.
     :raises ValueError: naming the first of the three that is not finite and
         positive, or ``resonance_frequency`` when one is passed that is not.
+    :raises TypeError: if ``gap_m``, ``mass1``, ``mass2`` or ``resonance_frequency`` is
+        not a single number.
     """
     _check_language(language)
     require_positive(mass1, "mass1")

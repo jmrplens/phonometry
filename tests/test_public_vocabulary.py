@@ -1072,14 +1072,11 @@ def test_words_are_spelled_out() -> None:
     assert not offenders, "\n".join(sorted(set(offenders)))
 
 
-#: Row keys a spelling rule does not apply to, each with its reason.
-_ROW_KEY_EXEMPT = {
-    ("FilterComplianceResult", "summation_max_db"): (
-        "the upper end of the range of the summation of output signals "
-        "Delta P_j of IEC 61260-1 5.16, paired with summation_min_db: a bound "
-        "of a deviation, not the maximum level Lmax"
-    ),
-}
+#: Row keys a spelling rule does not apply to, each with its reason. Empty:
+#: the two ends of the summation of IEC 61260-1 5.16 across a band are
+#: ``summation_difference_lower`` and ``summation_difference_upper``, which
+#: no rule refuses.
+_ROW_KEY_EXEMPT: dict[tuple[str, str], str] = {}
 
 
 def test_the_row_keys_of_a_verdict_are_spelled_out() -> None:
@@ -1093,7 +1090,8 @@ def test_the_row_keys_of_a_verdict_are_spelled_out() -> None:
     """
     from phonometry import emission, filters
 
-    frequencies, class1, _ = emission.residual_index_limits("probe")
+    limits = emission.residual_index_limits("probe")
+    frequencies, class1 = limits.frequencies, limits.class_1
     verdicts = {
         "FilterComplianceResult": filters.verify_filter_class(
             filters.OctaveFilterBank(48000, fraction=1, limits=[500, 2000]),

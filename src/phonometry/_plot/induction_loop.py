@@ -410,7 +410,7 @@ def plot_agc_characteristic(
 
     ax = ax if ax is not None else _new_axes()
     ax.plot(
-        result.source_emf_db,
+        result.source_emf_levels,
         result.output_level,
         **styled(
             kwargs,
@@ -422,11 +422,13 @@ def plot_agc_characteristic(
         ),
     )
     top = float(
-        np.interp(result.agc_range_end_db, result.source_emf_db, result.output_level)
+        np.interp(
+            result.agc_range_end_level, result.source_emf_levels, result.output_level
+        )
     )
     ax.axvspan(
-        result.agc_range_start_db,
-        result.agc_range_end_db,
+        result.agc_range_start_level,
+        result.agc_range_end_level,
         color=theme_fill(_C_PRIMARY, ax),
         zorder=0,
         lw=0,
@@ -772,8 +774,8 @@ def plot_loop_requirement(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    index = np.arange(1, len(result.values_db) + 1)
-    values = np.asarray(result.values_db)
+    index = np.arange(1, len(result.levels) + 1)
+    values = np.asarray(result.levels)
     ax.plot(
         index,
         values,
@@ -786,8 +788,8 @@ def plot_loop_requirement(
             label=_t("Measured", language),
         ),
     )
-    lower = np.asarray(result.lower_db)
-    upper = np.asarray(result.upper_db)
+    lower = np.asarray(result.lower_limits_db)
+    upper = np.asarray(result.upper_limits_db)
     if np.any(np.isfinite(lower)):
         ax.step(
             index,

@@ -260,6 +260,8 @@ def ship_source_spectrum(
     :return: A :class:`ShipTrafficSpectrum`.
     :raises ValueError: If ``model``/``vessel_class`` is unknown or an input is
         invalid.
+    :raises TypeError: if ``length_m`` or ``speed_kt`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     f = _clean_frequencies(frequencies)
     key = model.strip().lower()

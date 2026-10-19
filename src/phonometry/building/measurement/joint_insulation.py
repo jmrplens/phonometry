@@ -209,6 +209,8 @@ def joint_sound_reduction_index(
     :return: :math:`R_\mathrm{s}` per band, in dB.
     :raises ValueError: If the inputs disagree in band count, a level is not
         finite, an area is not positive, or the length is not positive.
+    :raises TypeError: if ``joint_length_m`` is not a single number, or
+        ``absorption_area`` holds a text or a value that is not a real number.
     """
     l1 = _as_band_levels(np.asarray(l1, dtype=np.float64), "l1")
     l2 = _as_band_levels(np.asarray(l2, dtype=np.float64), "l2")
@@ -670,6 +672,8 @@ def laboratory_joint_insulation(
     :return: A :class:`LaboratoryJointInsulationResult`.
     :raises ValueError: If the three inputs disagree in length, a value is not
         finite, a frequency or the joint length is not positive.
+    :raises TypeError: if ``joint_length_m`` is not a single number, or ``frequencies``,
+        ``r_s_max`` or ``r_s_prime`` holds a text or a value that is not a real number.
     """
     freqs = require_positive_array(frequencies, "frequencies")
     measured = require_finite_array(r_s_prime, "r_s_prime")
@@ -813,6 +817,8 @@ def check_joint_test_element(
     :return: A :class:`JointTestElementCheck`.
     :raises ValueError: If the length is not positive or the width is
         negative or not finite.
+    :raises TypeError: if ``joint_length_m`` or ``joint_width_mm`` is not a single
+        number.
     """
     length = require_positive(joint_length_m, "joint_length_m")
     width = require_non_negative(joint_width_mm, "joint_width_mm")
@@ -910,6 +916,8 @@ def check_gap_width(readings_mm: ArrayLike) -> GapWidthCheck:
     :return: A :class:`GapWidthCheck`.
     :raises ValueError: If there is no reading, or a reading is negative or
         not finite.
+    :raises TypeError: if ``readings_mm`` holds a text or a value that is not a real
+        number.
     """
     widths = require_finite_array(readings_mm, "readings_mm")
     if np.any(widths < 0.0):
@@ -980,7 +988,10 @@ class JointGapSeries(OwnsArrays):
     def single_number(
         self, quantity: Literal["r_s_w", "r_s_w_c", "r_s_w_ctr"] = "r_s_w_ctr"
     ) -> np.ndarray:
-        """The single number at each width: ``"r_s_w"``, ``"r_s_w_c"`` or ``"r_s_w_ctr"``."""
+        """The single number at each width: ``"r_s_w"``, ``"r_s_w_c"`` or ``"r_s_w_ctr"``.
+
+        :raises TypeError: if ``quantity`` is not a text.
+        """
         require_choice(quantity, "quantity", _SINGLE_NUMBERS)
         return np.asarray(getattr(self, quantity), dtype=np.float64)
 
@@ -999,6 +1010,7 @@ class JointGapSeries(OwnsArrays):
         :param quantity: ``"r_s_w"``, ``"r_s_w_c"`` or ``"r_s_w_ctr"`` (default).
         :return: The single number, in dB.
         :raises ValueError: If the width lies outside the measured widths.
+        :raises TypeError: if ``gap_mm`` is not a single number.
         """
         values = self.single_number(quantity)
         widths = np.asarray(self.gap_widths_mm, dtype=np.float64)
@@ -1027,6 +1039,8 @@ class JointGapSeries(OwnsArrays):
         :math:`b_\mathrm{n} + 3` marked. Requires matplotlib
         (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :raises TypeError: if ``quantity`` is not a text.
         """
         from ..._i18n import check_language
         from ..._plot.joint_insulation import plot_joint_gap_series
@@ -1088,6 +1102,8 @@ def joint_gap_series(
     :return: A :class:`JointGapSeries`, sorted by gap width.
     :raises ValueError: If the widths and results disagree in number, two
         widths coincide, a width is negative, or a result carries no rating.
+    :raises TypeError: if ``min_gap_mm`` or ``nominal_gap_mm`` is not a single number,
+        or ``gap_widths_mm`` holds a text or a value that is not a real number.
     """
     widths = require_finite_array(gap_widths_mm, "gap_widths_mm")
     if np.any(widths < 0.0):

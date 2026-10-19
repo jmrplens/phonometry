@@ -110,6 +110,7 @@ as the database conditions.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `scaling_factor` is not a single number. |
 
 ## flight_path_kinematics
 
@@ -150,6 +151,7 @@ radar tracks (e.g. spline resampling) before differentiating.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `gravity` is not a single number. |
 
 ## FlightConditionInterpolation
 
@@ -303,6 +305,7 @@ reference implementation.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `condition` is not a text. |
 
 ## hover_ring_hemisphere
 
@@ -369,6 +372,7 @@ and the propagation adjustments honour as the reference distance.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `mapping` is not a text, `azimuth_step`, `distance_m` or `polar_step` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## interpolated_source_level
 
@@ -532,6 +536,7 @@ received histories to the exposure (`SEL`, Doc 32 Eq. 27) or maximum
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `metric` is not a text. |
 
 ## RotorcraftAtmosphere
 
@@ -651,11 +656,11 @@ and an optional elevation model replaces the flat plane with real terrain.
 
 ```python
 RotorcraftHemisphere(
+    *,
     frequencies: NDArray[np.float64],
     azimuth_deg: NDArray[np.float64],
     polar_deg: NDArray[np.float64],
     levels: NDArray[np.float64],
-    *,
     distance_m: float = 60.0,
 )
 ```

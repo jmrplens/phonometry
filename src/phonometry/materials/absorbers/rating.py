@@ -364,6 +364,8 @@ class AbsorptionRatingResult(OwnsArrays):
             does not hold three bands per rating octave, or if
             ``unfavorable_sum`` does not restate the deviations between the
             two octave curves.
+        :raises TypeError: if ``alpha_w`` is not a single number, or ``frequencies`` or
+            ``third_octave_alpha_s`` is a single number where an array goes.
         """
         require_scalar(self.alpha_w, "alpha_w")
         if not math.isfinite(self.alpha_w) or not 0.0 <= self.alpha_w <= 1.0:
@@ -675,6 +677,7 @@ def absorption_class(alpha_w: float) -> str:
     :returns: ``"A"``, ``"B"``, ``"C"``, ``"D"``, ``"E"`` or
         ``"Not classified"``.
     :raises ValueError: if ``alpha_w`` is not a finite value in ``[0, 1]``.
+    :raises TypeError: if ``alpha_w`` is not a single number.
     """
     require_scalar(alpha_w, "alpha_w")
     if not math.isfinite(alpha_w) or not 0.0 <= alpha_w <= 1.0:

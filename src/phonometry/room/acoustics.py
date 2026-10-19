@@ -516,6 +516,7 @@ def decay_curve(
         sound and ``levels`` in dB (0 dB at time zero), up to the noise
         truncation point. It unpacks as ``times, levels = decay_curve(...)``
         for backward compatibility and exposes :meth:`DecayCurve.plot`.
+    :raises TypeError: if ``band`` or ``fraction`` is not a single number.
     """
     require_scalar(band, "band")
     require_scalar(fraction, "fraction")
@@ -755,6 +756,7 @@ def reverberation_time_standard_deviation(
         coefficients for, if ``decays`` or ``positions`` is below one, or if a
         reverberation time or bandwidth is not positive and finite. An
         infinite ``decays`` is taken: it is the limit 7.2 declines to use.
+    :raises TypeError: if ``evaluation_range`` is not a single number.
     """
     require_scalar(evaluation_range, "evaluation_range")
     key = float(evaluation_range)
@@ -821,6 +823,7 @@ def min_reliable_reverberation_time(
         seconds, of the shape of ``bandwidth``.
     :raises ValueError: If a bandwidth is not positive and finite, or the
         detector time is not a finite time of zero seconds or more.
+    :raises TypeError: if ``detector_time`` is not a single number.
     """
     width = np.asarray(bandwidth, dtype=np.float64)
     if not np.all(np.isfinite(width)) or np.any(width <= 0.0):

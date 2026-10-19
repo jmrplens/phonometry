@@ -88,6 +88,12 @@ with-specimen area `A2` from `T2` (both equations have identical form).
 
 **Returns:** Equivalent sound absorption area `A`, in square metres, with the shape of `t60`.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `speed_of_sound`, `temperature_c` or `volume` is not a single number. |
+
 ## absorption_coefficient
 
 ```python
@@ -144,6 +150,12 @@ advisory [`AbsorptionWarning`](/phonometry/reference/api/materials/sound-absorpt
 | `m2` | With-specimen air attenuation coefficient `m2`, in 1/m (default 0). |
 
 **Returns:** Sound absorption coefficient `alpha_s` with the broadcast shape of `t1` and `t2`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `sample_area`, `speed_of_sound1`, `speed_of_sound2`, `temperature1_c`, `temperature2_c` or `volume` is not a single number. |
 
 ## AbsorptionWarning
 
@@ -203,6 +215,7 @@ with-specimen climates differ.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the frequency and reverberation-time arrays do not share one shape, `relative_humidity_percent` is not within `[0, 100]` %, or an input is non-physical (see [`absorption_coefficient`](/phonometry/reference/api/materials/sound-absorption/#absorption_coefficient)). |
+| TypeError | if `relative_humidity_percent`, `speed_of_sound`, `temperature_c` or `volume` is not a single number. |
 
 ## power_attenuation_from_alpha
 

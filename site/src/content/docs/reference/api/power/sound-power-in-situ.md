@@ -384,6 +384,7 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `event_levels` is not a finite 2D or 3D array, `n_events` is given with the 3D form or missing or not a positive integer with the 2D form, `integration_time` is not positive, or any of the refusals of [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ) applies. |
+| TypeError | if `integration_time` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
 
 ## sound_power_in_situ
 

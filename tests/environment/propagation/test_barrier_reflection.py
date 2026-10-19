@@ -624,7 +624,10 @@ class TestAnnexB:
 
     def test_table_b2_from_table_a1(self) -> None:
         uncertainty = prop.reflection_index_expanded_uncertainty()
-        per_band, rating = uncertainty.expanded_uncertainty, uncertainty.rating_db
+        per_band, rating = (
+            uncertainty.expanded_uncertainty,
+            uncertainty.rating_expanded_uncertainty_db,
+        )
         result = prop.reflection_index_from_positions(self._positions())
         np.testing.assert_array_equal(uncertainty.frequencies, result.frequencies)
         assert (uncertainty.estimate, uncertainty.coverage_factor) == ("high", 1.96)
@@ -655,7 +658,7 @@ class TestAnnexB:
             estimate="median", coverage_factor=2.0
         )
         assert median.expanded_uncertainty[0] == pytest.approx(2.0 * 0.27)
-        assert median.rating_db == pytest.approx(2.0 * 0.68)
+        assert median.rating_expanded_uncertainty_db == pytest.approx(2.0 * 0.68)
 
     def test_the_uncertainty_is_read_only(self) -> None:
         uncertainty = prop.reflection_index_expanded_uncertainty()

@@ -131,6 +131,7 @@ single layer and to a glued rigid backing.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive thickness. |
+| TypeError | if `thickness_m` is not a single number. |
 
 ## biot_waves
 
@@ -192,6 +193,7 @@ $\rho_a = \phi \rho_0 (\alpha_\infty - 1)$ (Eq. (6.44)):
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an out-of-range porosity, tortuosity, frame density, shear modulus or Poisson coefficient. |
+| TypeError | if `frame_density`, `poisson_ratio`, `porosity` or `tortuosity` is not a single number. |
 
 ## BiotWavesResult
 
@@ -339,6 +341,7 @@ with the bulk modulus of the pore fluid.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-finite `N`, a negative $\operatorname{Im}(N)$ or a `nu` outside $(-1, 0.5)$. |
+| TypeError | if `poisson_ratio` is not a single number. |
 
 ## frame_elastic_coefficient
 
@@ -374,6 +377,7 @@ frame resonance of [`frame_quarter_wave_resonance`](/phonometry/reference/api/ma
 | Exception | When |
 | :--- | :--- |
 | ValueError | as [`frame_bulk_modulus`](/phonometry/reference/api/materials/biot/#frame_bulk_modulus). |
+| TypeError | if `poisson_ratio` is not a single number. |
 
 ## frame_quarter_wave_resonance
 
@@ -422,6 +426,7 @@ few per cent above `fr`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive thickness or frame density, or an invalid `N` / `nu`. |
+| TypeError | if `frame_density` or `thickness_m` is not a single number. |
 
 ## poroelastic_transfer_matrix
 
@@ -467,3 +472,4 @@ is written around and the one an external multilayer chain expects.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive thickness. |
+| TypeError | if `thickness_m` is not a single number. |

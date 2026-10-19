@@ -411,7 +411,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
     :ivar thd_frequencies: THD-curve frequency axis, Hz, or ``None``.
     :ivar thd_percent: Total harmonic distortion, in %, or ``None``.
     :ivar polar_angles_deg: Polar-response angles, in degrees, or ``None``.
-    :ivar polar_db: Polar response relative to the on-axis level, in dB, or
+    :ivar polar_response_db: Polar response relative to the on-axis level, in dB, or
         ``None``.
     :ivar polar_frequency: Frequency of the polar response, in Hz, or ``None``.
     :ivar directivity_index: Directivity index at :attr:`polar_frequency`,
@@ -437,7 +437,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
     thd_frequencies: NDArray[np.float64] | None
     thd_percent: NDArray[np.float64] | None
     polar_angles_deg: NDArray[np.float64] | None
-    polar_db: NDArray[np.float64] | None
+    polar_response_db: NDArray[np.float64] | None
     polar_frequency: float | None
     directivity_index: float | None
 
@@ -497,14 +497,14 @@ class LoudspeakerCharacteristics(OwnsArrays):
             thd_frequencies=1,
             thd_percent=1,
             polar_angles_deg=1,
-            polar_db=1,
+            polar_response_db=1,
         )
         require_same_length(self, "frequencies", "spl", axis="frequency")
         require_same_length(
             self, "impedance_frequencies", "impedance_modulus_ohm", axis="frequency"
         )
         require_same_length(self, "thd_frequencies", "thd_percent", axis="frequency")
-        require_same_length(self, "polar_angles_deg", "polar_db", axis="angle")
+        require_same_length(self, "polar_angles_deg", "polar_response_db", axis="angle")
         require_finite_fields(
             self,
             "frequencies",
@@ -514,7 +514,7 @@ class LoudspeakerCharacteristics(OwnsArrays):
             "thd_frequencies",
             "thd_percent",
             "polar_angles_deg",
-            "polar_db",
+            "polar_response_db",
             "rated_impedance_ohm",
             "input_voltage_v",
             "distance",
@@ -825,6 +825,8 @@ def loudspeaker_characteristics(
         noise and sinusoidal powers and the resonance frequency.
     :return: A :class:`LoudspeakerCharacteristics`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``distance``, ``input_voltage_v``, ``rated_impedance_ohm`` or
+        ``tolerance_db`` is not a single number.
     """
     f, spl = _as_curve(frequencies, spl, "on-axis response")
     r = require_positive(rated_impedance_ohm, "rated_impedance_ohm")
@@ -875,7 +877,7 @@ def loudspeaker_characteristics(
         thd_frequencies=thd_f,
         thd_percent=thd_p,
         polar_angles_deg=p_ang,
-        polar_db=p_db,
+        polar_response_db=p_db,
         polar_frequency=p_freq,
         directivity_index=di,
     )

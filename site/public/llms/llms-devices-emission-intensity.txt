@@ -824,7 +824,7 @@ from phonometry import emission
 # The band centres Table 2 is defined on, and the measured residual index of
 # the chain: one value per band, taken with the spacer that will be fitted in
 # the field. Replace the placeholder with your own residual-intensity test.
-freqs, _, _ = emission.residual_index_limits("instrument", spacing_m=0.012)
+freqs = emission.residual_index_limits("instrument", spacing_m=0.012).frequencies
 measured_delta_pi0 = [11.0, 11.9, 11.2, 10.0, 13.2, 15.9, 17.0, 18.0,
                       19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 24.0, 24.0,
                       24.0, 24.0, 24.0, 24.0, 24.0, 24.0]   # dB, 22 bands
@@ -862,7 +862,7 @@ from phonometry import emission
 # climbs 10 dB per decade, and above 1 kHz the mismatch of a real chain grows
 # with frequency, so the index levels off.
 spacing = 0.012
-freqs, _, _ = emission.residual_index_limits("instrument", spacing_m=spacing)
+freqs = emission.residual_index_limits("instrument", spacing_m=spacing).frequencies
 phase_mismatch = 0.05 * np.maximum(1.0, freqs / 1000.0)          # degrees
 measured = emission.residual_index_from_phase_mismatch(phase_mismatch, spacing,
                                                         frequency=freqs)

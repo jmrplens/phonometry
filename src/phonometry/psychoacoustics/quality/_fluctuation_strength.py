@@ -104,6 +104,8 @@ def fluctuation_strength_am_noise(
     :return: Fluctuation strength, in vacil (>= 0).
     :raises ValueError: If ``modulation_factor`` is outside [0, 1] or
         ``mod_frequency`` is not positive/finite, or the level is not finite.
+    :raises TypeError: if ``level``, ``mod_frequency`` or ``modulation_factor`` is not a
+        single number.
     """
     require_scalar(modulation_factor, "modulation_factor")
     m = float(modulation_factor)
@@ -567,6 +569,7 @@ def fluctuation_strength(
     :param fs: Sample rate, in Hz (resampled to the model rate if needed).
     :return: A :class:`FluctuationStrengthResult`.
     :raises ValueError: If the signal is invalid or ``fs`` is not positive.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     from scipy import signal as sp_signal
 

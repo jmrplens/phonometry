@@ -562,6 +562,7 @@ class OctaveFilterBank:
             between calls, and how that state starts (:class:`BlockProcessing`).
         :param response_plot: Whether to show or save the filter response plot
             drawn while designing the bank (:class:`ResponsePlot`).
+        :raises TypeError: if ``fraction``, ``fs`` or ``order`` is not a single number.
         """
         limits = _validate_bank_design(
             fs, fraction, order, limits, design, block_processing
@@ -815,6 +816,7 @@ class OctaveFilterBank:
             ``(channels, bands, frames)`` for 2D input, ``frequencies`` holds
             the exact mid-band frequencies and ``times`` each window's centre
             in seconds.
+        :raises TypeError: if ``overlap`` or ``window_time`` is not a single number.
         """
         require_scalar(overlap, "overlap")
         if self.stateful:

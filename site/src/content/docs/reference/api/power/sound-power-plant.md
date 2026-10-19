@@ -255,29 +255,23 @@ own contours, and each part's share of it (0.2 b, c).
 | `frequencies` | Nominal octave-band centres, in Hz. |
 | `part_levels` | $L_W$ of each part, `(parts, bands)`, in dB re 1 pW. |
 
-### PartialPlantContributions.a_weighted_contribution_db
-
-*property*
-
-Each part's $L_{W\mathrm{A}}$ less the total, in decibels.
-
 ### PartialPlantContributions.a_weighted_part_levels
 
 *property*
 
 $L_{W\mathrm{A}}$ of each part over the bands of 10.9, in dB re 1 pW.
 
-### PartialPlantContributions.a_weighted_total_db
+### PartialPlantContributions.a_weighted_relative_part_levels
+
+*property*
+
+Each part's $L_{W\mathrm{A}}$ less the total, in decibels.
+
+### PartialPlantContributions.a_weighted_total_level
 
 *property*
 
 $L_{W\mathrm{A}}$ of the parts together, in dB re 1 pW.
-
-### PartialPlantContributions.contribution_db
-
-*property*
-
-Each part's $L_W$ less the total, per band, in decibels (at most 0).
 
 ### PartialPlantContributions.plot()
 
@@ -301,6 +295,12 @@ Plot each part's $L_W$ and their total, band by band.
 | `kwargs` | Forwarded to the total's bars. |
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+
+### PartialPlantContributions.relative_part_levels
+
+*property*
+
+Each part's $L_W$ less the total, per band, in decibels (at most 0).
 
 ### PartialPlantContributions.total_level
 
@@ -364,6 +364,7 @@ standard sets no number for "markedly".
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a band outside the method, only one of the two weather values, or a humidity outside 0 % to 100 %. |
+| TypeError | if `relative_humidity_percent` or `temperature_c` is not a single number. |
 
 ## PLANT_BACKGROUND_CORRECTION
 
@@ -438,6 +439,7 @@ of `source_heights_m`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a negative or non-finite height, a count from 1 to 9, or no sources at all. |
+| TypeError | if `n_low_sources` is a flag, a text or an array where a count goes. |
 
 ## plant_mean_distance_limits_m
 
@@ -467,6 +469,7 @@ where no contour meets the clause.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive area. |
+| TypeError | if `plant_area_m2` is not a single number. |
 
 ## plant_measurement_contour
 
@@ -543,6 +546,7 @@ applied, the uncertainty may be greater than the table's.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a ratio outside 0,05 to 0,5. |
+| TypeError | if `distance_ratio` is not a single number. |
 
 ## PLANT_METHOD_UNCERTAINTY_DB
 
@@ -582,6 +586,7 @@ reported; [`check_plant_measurement`](/phonometry/reference/api/power/sound-powe
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a negative height or a non-positive area. |
+| TypeError | if `characteristic_height_m` or `measurement_area_m2` is not a single number. |
 
 ## plant_sound_power
 
@@ -641,6 +646,7 @@ The geometry is the one 9.2 measures on the plot plan, to within ±5 %;
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels that do not match the bands, a background less than 6 dB below a level, a non-positive geometry, a microphone angle outside (0°, 90°], or half a weather. |
+| TypeError | if `background_levels` or `levels` holds a text or a value that is not a real number. |
 
 ## plant_steady_reading
 
@@ -672,6 +678,7 @@ judges that one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a minimum above the maximum, or a swing of 5 dB or more, the swing settled to nine decimals first, so 64,1 - 59,1 dB, 4,999 999 999 999 993 in binary, is the 5 dB it is. |
+| TypeError | if `max_level` or `min_level` is not a single number. |
 
 ## PlantMeasurementCheck
 
@@ -939,6 +946,7 @@ Run clause 10 on the levels read at the measured positions of this contour.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a number of rows that is not the number of measured positions, or any error of [`plant_sound_power`](/phonometry/reference/api/power/sound-power-plant/#plant_sound_power). |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## PlantRequirement
 

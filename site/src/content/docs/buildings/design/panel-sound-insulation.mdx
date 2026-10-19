@@ -490,9 +490,10 @@ from phonometry import building, vibration
 # nu = 0.3, m'' = 7.8 kg/m2, corrugated into a sinusoid 20 mm deep
 # (amplitude H = 10 mm) at a 100 mm pitch.
 flat_b = vibration.plate_bending_stiffness(2.1e11, 1.0e-3, 0.3)
-b_x, b_z, b_xz = building.corrugated_plate_stiffness(
+stiffness = building.corrugated_plate_stiffness(
     1.0e-3, 0.010, 0.100, youngs_modulus=2.1e11, poisson_ratio=0.3,
 )
+b_x, b_z, b_xz = stiffness.b_x_n_m, stiffness.b_z_n_m, stiffness.b_xz_n_m
 mass = 7.8 * building.corrugated_plate_mass_factor(0.010, 0.100)
 print(round(flat_b, 1), round(b_x, 1), round(b_z))     # 19.2 17.5 2202
 print(round(mass, 2))                                  # 8.52 kg/m2 (+9 %)
@@ -541,9 +542,10 @@ bands = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000,
                   10000, 12500, 16000], dtype=float)
 eta = 0.011
 flat_b = vibration.plate_bending_stiffness(2.1e11, 1.0e-3, 0.3)
-b_x, b_z, _ = building.corrugated_plate_stiffness(
+stiffness = building.corrugated_plate_stiffness(
     1.0e-3, 0.010, 0.100, youngs_modulus=2.1e11, poisson_ratio=0.3,
 )
+b_x, b_z = stiffness.b_x_n_m, stiffness.b_z_n_m
 mass = 7.8 * building.corrugated_plate_mass_factor(0.010, 0.100)
 fc1, fc2 = building.orthotropic_critical_frequencies(mass, b_x, b_z)
 
@@ -698,7 +700,8 @@ Hall & Hopkins (2001).
 ```python
 from phonometry import building
 
-print(building.wall_tie_stiffness("butterfly"))        # (0.05 m, 1.7e6 N/m)
+tie = building.wall_tie_stiffness("butterfly")
+print(tie.cavity_width_m, tie.stiffness)       # 0.05 1700000.0
 
 # Hopkins Fig. 4.35: two 140 kg/m2 leaves across an empty 75 mm cavity.
 print(round(building.mass_spring_mass_resonance(140.0, 140.0, 0.075)))          # 26 Hz

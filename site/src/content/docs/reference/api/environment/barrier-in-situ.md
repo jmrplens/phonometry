@@ -98,6 +98,7 @@ one takes off 1. They are two tables and they stay two tables.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a margin under [`ISO10847_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/environment/barrier-in-situ/#iso10847_min_background_margin_db), which 6.4 calls invalid. |
+| TypeError | if `level_difference` holds a text or a value that is not a real number. |
 
 ## BarrierInSituWarning
 
@@ -148,6 +149,7 @@ campaign at hand.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive height or distance. |
+| TypeError | if `barrier_height_m`, `barrier_to_receiver_m`, `receiver_height_m`, `source_height_m` or `source_to_barrier_m` is not a single number. |
 
 ## CLOSE_SOURCE_DISTANCE_M
 
@@ -224,6 +226,7 @@ cross at 15 m.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive distance. |
+| TypeError | if `barrier_to_receiver_m` is not a single number. |
 
 ## ISO10847_BACKGROUND_CORRECTIONS
 
@@ -309,10 +312,10 @@ MAX_WIND_SPEED_M_S = 5.0
 
 ```python
 measured_insertion_loss_direct(
-    reference_before_db: ArrayLike,
-    reference_after_db: ArrayLike,
-    receiver_before_db: ArrayLike,
-    receiver_after_db: ArrayLike,
+    reference_levels_before: ArrayLike,
+    reference_levels_after: ArrayLike,
+    receiver_levels_before: ArrayLike,
+    receiver_levels_after: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
 ) -> MeasuredBarrierInsertionLoss
@@ -338,10 +341,10 @@ anything: **the same reference and receiver positions in both campaigns**.
 
 | Name | Description |
 | :--- | :--- |
-| `reference_before_db` | $L_{\mathrm{ref},\mathrm{B}}$ per band, in decibels. |
-| `reference_after_db` | $L_{\mathrm{ref},\mathrm{A}}$ per band, in decibels. |
-| `receiver_before_db` | $L_{\mathrm{r},\mathrm{B}}$ per band, in decibels. |
-| `receiver_after_db` | $L_{\mathrm{r},\mathrm{A}}$ per band, in decibels. |
+| `reference_levels_before` | $L_{\mathrm{ref},\mathrm{B}}$ per band, in decibels. |
+| `reference_levels_after` | $L_{\mathrm{ref},\mathrm{A}}$ per band, in decibels. |
+| `receiver_levels_before` | $L_{\mathrm{r},\mathrm{B}}$ per band, in decibels. |
+| `receiver_levels_after` | $L_{\mathrm{r},\mathrm{A}}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 
 **Returns:** The insertion loss, as a [`MeasuredBarrierInsertionLoss`](/phonometry/reference/api/environment/barrier-in-situ/#measuredbarrierinsertionloss).
@@ -351,15 +354,16 @@ anything: **the same reference and receiver positions in both campaigns**.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For levels that do not match band for band, or a band centre that is not strictly positive. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## measured_insertion_loss_indirect
 
 ```python
 measured_insertion_loss_indirect(
-    reference_before_db: ArrayLike,
-    reference_after_db: ArrayLike,
-    receiver_before_db: ArrayLike,
-    receiver_after_db: ArrayLike,
+    reference_levels_before: ArrayLike,
+    reference_levels_after: ArrayLike,
+    receiver_levels_before: ArrayLike,
+    receiver_levels_after: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
     receiver_type_before: Literal['hemi_free_field', 'reflecting_surface'] = 'hemi_free_field',
@@ -396,10 +400,10 @@ exists.
 
 | Name | Description |
 | :--- | :--- |
-| `reference_before_db` | $L_{\mathrm{ref},\mathrm{B}}$ per band, at the substitute site, in decibels. |
-| `reference_after_db` | $L_{\mathrm{ref},\mathrm{A}}$ per band, in decibels. |
-| `receiver_before_db` | $L_{\mathrm{r},\mathrm{B}}$ per band, at the substitute site, in decibels. |
-| `receiver_after_db` | $L_{\mathrm{r},\mathrm{A}}$ per band, in decibels. |
+| `reference_levels_before` | $L_{\mathrm{ref},\mathrm{B}}$ per band, at the substitute site, in decibels. |
+| `reference_levels_after` | $L_{\mathrm{ref},\mathrm{A}}$ per band, in decibels. |
+| `receiver_levels_before` | $L_{\mathrm{r},\mathrm{B}}$ per band, at the substitute site, in decibels. |
+| `receiver_levels_after` | $L_{\mathrm{r},\mathrm{A}}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 | `receiver_type_before` | `"hemi_free_field"` (default) or `"reflecting_surface"`, for the substitute site. |
 | `receiver_type_after` | The same for the barrier site. |
@@ -411,16 +415,17 @@ exists.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For levels that do not match band for band, a band centre that is not strictly positive, or an unknown receiver type. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## MeasuredBarrierInsertionLoss
 
 ```python
 MeasuredBarrierInsertionLoss(
     frequencies: NDArray[np.float64] | None,
-    reference_before_db: NDArray[np.float64],
-    reference_after_db: NDArray[np.float64],
-    receiver_before_db: NDArray[np.float64],
-    receiver_after_db: NDArray[np.float64],
+    reference_levels_before: NDArray[np.float64],
+    reference_levels_after: NDArray[np.float64],
+    receiver_levels_before: NDArray[np.float64],
+    receiver_levels_after: NDArray[np.float64],
     insertion_loss: NDArray[np.float64],
     method: str,
     receiver_correction_before: float,
@@ -435,10 +440,10 @@ The insertion loss of a barrier as measured, ISO 10847 clause 8.2.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal band centres, in hertz, or `None` where the measurement is an A-weighted level. |
-| `reference_before_db` | $L_{\mathrm{ref},\mathrm{B}}$ per band. |
-| `reference_after_db` | $L_{\mathrm{ref},\mathrm{A}}$ per band. |
-| `receiver_before_db` | $L_{\mathrm{r},\mathrm{B}}$ per band. |
-| `receiver_after_db` | $L_{\mathrm{r},\mathrm{A}}$ per band. |
+| `reference_levels_before` | $L_{\mathrm{ref},\mathrm{B}}$ per band. |
+| `reference_levels_after` | $L_{\mathrm{ref},\mathrm{A}}$ per band. |
+| `receiver_levels_before` | $L_{\mathrm{r},\mathrm{B}}$ per band. |
+| `receiver_levels_after` | $L_{\mathrm{r},\mathrm{A}}$ per band. |
 | `insertion_loss` | $D_\mathrm{IL}$ or $D'_\mathrm{IL}$ per band, in decibels. |
 | `method` | `"direct"` or `"indirect"`. |
 | `receiver_correction_before` | $C_\mathrm{r}$, in decibels, zero for the direct method. |
@@ -588,6 +593,7 @@ enforced.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive height or distance. |
+| TypeError | if `barrier_height_m` or `source_to_barrier_m` is not a single number. |
 
 ## SHORT_DISTANCE_RATIO
 
@@ -714,6 +720,7 @@ made at all, which is a refusal rather than a class.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a component that is not finite, or past [`MAX_WIND_SPEED_M_S`](/phonometry/reference/api/environment/barrier-in-situ/#max_wind_speed_m_s) in absolute value. |
+| TypeError | if `vector_component_m_s` is not a single number. |
 
 ## WIND_CLASSES
 

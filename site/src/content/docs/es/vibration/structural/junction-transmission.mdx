@@ -149,7 +149,8 @@ ambos valen 1.
 ```python
 from phonometry import vibration
 
-chi, psi = vibration.junction_wave_parameters(0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0)
+params = vibration.junction_wave_parameters(0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0)
+chi, psi = params.chi, params.psi
 #  -> (sqrt(0.5), 4.0)
 ```
 

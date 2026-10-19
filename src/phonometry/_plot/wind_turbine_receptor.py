@@ -297,12 +297,12 @@ def _draw_block_spectrum(
 def _draw_block_series(
     result: ModulationBlock, ax: Axes, language: str, kwargs: dict[str, Any]
 ) -> None:
-    time_s = np.arange(np.asarray(result.detrended_db).size) * 0.1
-    reconstructed = np.asarray(result.reconstructed_db)
+    time_s = np.arange(np.asarray(result.detrended_levels).size) * 0.1
+    reconstructed = np.asarray(result.reconstructed_levels)
     if reconstructed.size:
         ax.plot(
             time_s,
-            result.detrended_db,
+            result.detrended_levels,
             color=_C_MUTED,
             lw=1.0,
             label=_t(_DETRENDED_LABEL, language),
@@ -324,7 +324,7 @@ def _draw_block_series(
     else:
         ax.plot(
             time_s,
-            result.detrended_db,
+            result.detrended_levels,
             **styled(
                 kwargs, color=_C_MUTED, lw=1.0, label=_t(_DETRENDED_LABEL, language)
             ),

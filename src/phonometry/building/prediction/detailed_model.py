@@ -320,6 +320,9 @@ def bending_radiation_factor(
         (Default: 340 m/s, the value ISO 12354-1 Annex A fixes).
     :return: The radiation factor ``σ`` per band (dimensionless).
     :raises ValueError: If any input is not positive and finite.
+    :raises TypeError: if ``critical_frequency``, ``length1``, ``length2`` or
+        ``speed_of_sound`` is not a single number, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     fc = require_positive(critical_frequency, "critical_frequency")
@@ -404,6 +407,8 @@ def forced_radiation_factor(
         the lower one guards the deep low-frequency extrapolation, where the
         logarithm turns negative).
     :raises ValueError: If any input is not positive and finite.
+    :raises TypeError: if ``length1``, ``length2`` or ``speed_of_sound`` is not a single
+        number, or ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     c0 = require_positive(speed_of_sound, "speed_of_sound")
@@ -495,6 +500,10 @@ def calculated_sound_reduction_index(
     :return: The sound reduction index ``R`` per band, in dB.
     :raises ValueError: If an input is not positive/finite or the per-band
         arrays do not share the band count.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
+        ``critical_frequency``, ``density``, ``longitudinal_velocity`` or
+        ``mass_per_area`` is not a single number, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     m = require_positive(mass_per_area, "mass_per_area")
@@ -562,6 +571,8 @@ def bare_floor_impact_level(
     :return: The normalized impact sound pressure level ``Ln`` per band, in dB.
     :raises ValueError: If an input is not positive/finite or the per-band
         arrays do not share the band count.
+    :raises TypeError: if ``mass_per_area`` is not a single number, or ``frequencies``
+        holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     m = require_positive(mass_per_area, "mass_per_area")
@@ -606,6 +617,8 @@ def perimeter_absorption_coefficient(
         (dimensionless).
     :raises ValueError: If the two sequences differ in length, a critical
         frequency is not positive, or an index is not finite.
+    :raises TypeError: if ``critical_frequencies`` holds a text or a value that is not a
+        real number.
     """
     fc = require_positive_array(critical_frequencies, "critical_frequencies")
     kij = np.atleast_1d(np.asarray(vibration_reduction_indices, dtype=np.float64))
@@ -658,6 +671,9 @@ def in_situ_total_loss_factor(
     :return: The total loss factor ``ηtot,situ`` per band (dimensionless).
     :raises ValueError: If an input is not positive/finite, the perimeter sum
         is negative, or the band counts disagree.
+    :raises TypeError: if ``area``, ``critical_frequency``, ``internal_loss_factor``,
+        ``mass_per_area`` or ``perimeter_absorption`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     eta_int = require_positive(internal_loss_factor, "internal_loss_factor")
@@ -697,6 +713,8 @@ def laboratory_total_loss_factor(
         (Default: 0,01).
     :return: The laboratory total loss factor per band (dimensionless).
     :raises ValueError: If an input is not positive and finite.
+    :raises TypeError: if ``internal_loss_factor`` or ``mass_per_area`` is not a single
+        number, or ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     m = require_positive(mass_per_area, "mass_per_area")
@@ -714,6 +732,8 @@ def structural_reverberation_time(
     :return: The structural reverberation time ``Ts`` per band, in s.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f = require_positive_array(frequencies, "frequencies")
     eta = _band_array(total_loss_factor, f.size, "total_loss_factor", positive=True)
@@ -745,6 +765,8 @@ def in_situ_reduction_index(
     :return: The in-situ index ``Rsitu`` per band, in dB.
     :raises ValueError: If a reverberation time is not positive/finite or the
         band counts disagree.
+    :raises TypeError: if ``laboratory_reverberation_time`` or
+        ``situ_reverberation_time`` holds a text or a value that is not a real number.
     """
     r = np.atleast_1d(np.asarray(sound_reduction_index, dtype=np.float64))
     ratio = _time_ratio(situ_reverberation_time, laboratory_reverberation_time)
@@ -769,6 +791,8 @@ def in_situ_impact_level(
     :return: The in-situ level ``Ln,situ`` per band, in dB.
     :raises ValueError: If a reverberation time is not positive/finite or the
         band counts disagree.
+    :raises TypeError: if ``laboratory_reverberation_time`` or
+        ``situ_reverberation_time`` holds a text or a value that is not a real number.
     """
     ln = np.atleast_1d(np.asarray(impact_level, dtype=np.float64))
     ratio = _time_ratio(situ_reverberation_time, laboratory_reverberation_time)
@@ -802,6 +826,8 @@ def in_situ_equivalent_absorption_length(
     :return: The equivalent absorption length ``asitu`` per band, in m.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     from ..measurement.flanking_transmission import equivalent_absorption_length
 
@@ -841,6 +867,9 @@ def in_situ_velocity_level_difference(
     :return: ``Dv,ij,situ`` per band, in dB (never negative).
     :raises ValueError: If a length is not positive/finite or the band counts
         disagree.
+    :raises TypeError: if ``coupling_length`` is not a single number, or
+        ``absorption_length_i`` or ``absorption_length_j`` holds a text or a value that
+        is not a real number.
     """
     a_i_raw = require_positive_array(absorption_length_i, "absorption_length_i")
     a_j_raw = require_positive_array(absorption_length_j, "absorption_length_j")
@@ -922,6 +951,8 @@ def flanking_reduction_index(
     :param delta_r_j: ``ΔRj,situ`` on element ``j``, per band, in dB.
     :return: ``Rij`` per band, in dB.
     :raises ValueError: If an area is not positive and finite.
+    :raises TypeError: if ``area_i``, ``area_j`` or ``separating_area`` is not a single
+        number.
     """
     ss = require_positive(separating_area, "separating_area")
     si = require_positive(area_i, "area_i")
@@ -973,6 +1004,8 @@ def flanking_reduction_index_from_normalized_difference(
     :param delta_r_j: ``ΔRj,situ`` on element ``j``, per band, in dB.
     :return: ``Rij`` per band, in dB.
     :raises ValueError: If a geometry value is not positive and finite.
+    :raises TypeError: if ``coupling_length`` or ``separating_area`` is not a single
+        number.
     """
     ss = require_positive(separating_area, "separating_area")
     lij = require_positive(coupling_length, "coupling_length")
@@ -1017,6 +1050,8 @@ def flanking_reduction_index_from_flanking_level(
     :param reference_absorption_area: ``Ao``, in m² (Default: 10 m²).
     :return: ``Rij`` per band, in dB.
     :raises ValueError: If a geometry value is not positive and finite.
+    :raises TypeError: if ``coupling_length``, ``laboratory_coupling_length``,
+        ``reference_absorption_area`` or ``separating_area`` is not a single number.
     """
     ss = require_positive(separating_area, "separating_area")
     lij = require_positive(coupling_length, "coupling_length")
@@ -1053,6 +1088,8 @@ def resonant_sound_reduction_index(
     :return: The resonant-only index ``R*`` per band, in dB.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
+    :raises TypeError: if ``critical_frequency`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     fc = require_positive(critical_frequency, "critical_frequency")
@@ -1084,6 +1121,8 @@ def reciprocity_impact_level(
     :return: The normalized impact sound pressure level ``Ln`` per band, dB.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     r = _band_array(sound_reduction_index, f.size, "sound_reduction_index")
@@ -1149,6 +1188,7 @@ def flanking_impact_level(
         element, per band, in dB.
     :return: ``Ln,ij`` per band, in dB.
     :raises ValueError: If an area is not positive and finite.
+    :raises TypeError: if ``area_i`` or ``area_j`` is not a single number.
     """
     si = require_positive(area_i, "area_i")
     sj = require_positive(area_j, "area_j")
@@ -1198,6 +1238,7 @@ def flanking_impact_level_from_normalized_difference(
         per band, in dB.
     :return: ``Ln,ij`` per band, in dB.
     :raises ValueError: If a geometry value is not positive and finite.
+    :raises TypeError: if ``area_i`` or ``coupling_length`` is not a single number.
     """
     si = require_positive(area_i, "area_i")
     lij = require_positive(coupling_length, "coupling_length")
@@ -1247,6 +1288,8 @@ def flanking_impact_level_from_flanking_level(
         horizontal flanking elements, 2,5 m for vertical ones.
     :return: ``Ln,ij`` per band, in dB.
     :raises ValueError: If a geometry value is not positive and finite.
+    :raises TypeError: if ``area``, ``coupling_length``, ``laboratory_area`` or
+        ``laboratory_coupling_length`` is not a single number.
     """
     si = require_positive(area, "area")
     si_lab = require_positive(laboratory_area, "laboratory_area")
@@ -1281,6 +1324,8 @@ def floating_floor_improvement(
     :param slope: 30 (screed, Formula C.1) or 40 (asphalt/dry, Formula C.3).
     :return: The improvement ``ΔL`` per band, in dB (0 at and below ``fo``).
     :raises ValueError: If an input is not positive and finite.
+    :raises TypeError: if ``resonance_frequency`` or ``slope`` is not a single number,
+        or ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     f0 = require_positive(resonance_frequency, "resonance_frequency")
@@ -1381,7 +1426,8 @@ class HomogeneousElement(RichDisplay):
             ``fc`` (Default: :data:`EN_12354_AIR`, the 340 m/s of Annex A).
         :return: The :class:`HomogeneousElement`.
         :raises TypeError: for a row that is not a
-            :class:`~phonometry.solids.SolidMaterial`.
+            :class:`~phonometry.solids.SolidMaterial`, or a ``thickness_m`` or
+            ``internal_loss_factor`` that is not one number.
         :raises ValueError: for a thickness or a loss factor that is not
             positive and finite, or for a density or a plate speed the row
             holds no number for, in the row's own terms.
@@ -1528,6 +1574,8 @@ def in_situ_element(
         :data:`EN_12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
     :return: The :class:`InSituElementResult`.
     :raises ValueError: If any element property is not positive and finite.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     f = require_positive_array(frequencies, "frequencies")
     sigma = bending_radiation_factor(
@@ -1696,6 +1744,7 @@ def airborne_flanking_path(
     :return: The :class:`BandPath` carrying ``Rij``.
     :raises ValueError: If ``kind`` is unknown or a geometry value is not
         positive.
+    :raises TypeError: if ``kind`` is not a text.
     """
     require_choice(kind, "kind", ("Ff", "Df", "Fd"))
     dv = in_situ_velocity_level_difference(
@@ -1956,6 +2005,8 @@ def detailed_airborne_prediction(
         octaves, selecting the ISO 717-1 rating range.
     :return: The :class:`DetailedAirborneResult`.
     :raises ValueError: If a path does not match the band count.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     from ..measurement.ratings import weighted_rating
 
@@ -2010,6 +2061,8 @@ def detailed_impact_prediction(
     :return: The :class:`DetailedImpactResult`.
     :raises ValueError: If a path does not match the band count, or if neither
         a direct level nor any flanking path is given.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     from ..measurement.ratings import weighted_impact_rating
 

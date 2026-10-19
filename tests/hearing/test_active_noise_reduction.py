@@ -61,7 +61,9 @@ def test_table_a3_mean_and_spread() -> None:
     result = hearing.active_insertion_loss(_A3)
     assert result.n_subjects == 16
     assert result.frequencies.tolist() == _OCTAVES
-    assert np.round(result.mean_db, 1).tolist() == ref.ISO4869_6_TABLE_A3_MEAN
+    assert (
+        np.round(result.mean_insertion_loss, 1).tolist() == ref.ISO4869_6_TABLE_A3_MEAN
+    )
     assert (
         np.round(result.standard_deviation_db, 1).tolist()
         == ref.ISO4869_6_TABLE_A3_SIGMA
@@ -101,7 +103,7 @@ def test_table_a3_uncertainty_rows_come_from_the_rounded_row_above() -> None:
 def test_table_a3_negative_values_are_kept_with_their_sign() -> None:
     """Above 500 Hz the circuit adds sound: the means are negative and stay so."""
     result = hearing.active_insertion_loss(_A3)
-    assert (result.mean_db[4:] < 0.0).all()
+    assert (result.mean_insertion_loss[4:] < 0.0).all()
     np.testing.assert_allclose(result.insertion_loss, _A3)
 
 
@@ -109,13 +111,17 @@ def test_table_a2_budget() -> None:
     """u = 0,78 dB and U95 = 1,6 dB from the three components of Table A.2."""
     budget = hearing.ANR_WITHIN_LABORATORY_UNCERTAINTY
     meth, eq, env, u, u95 = ref.ISO4869_6_TABLE_A2
-    assert (budget.method_db, budget.equipment_db, budget.environment_db) == (
+    assert (
+        budget.method_uncertainty_db,
+        budget.equipment_uncertainty_db,
+        budget.environment_uncertainty_db,
+    ) == (
         meth,
         eq,
         env,
     )
-    assert round(budget.combined_db, 2) == u
-    assert round(budget.expanded_db, 1) == u95
+    assert round(budget.combined_uncertainty_db, 2) == u
+    assert round(budget.expanded_uncertainty_db, 1) == u95
 
 
 # ---------------------------------------------------------------------------
@@ -130,8 +136,8 @@ def test_lower_ear_matches_the_workbook() -> None:
         result.insertion_loss, ref.ISO4869_6_WORKBOOK_LOWER_EAR, atol=1e-9
     )
     assert result.frequencies.tolist() == ref.ISO4869_6_THIRD_OCTAVES
-    assert result.per_ear_db is not None
-    assert result.per_ear_db.shape == (16, 2, 24)
+    assert result.per_ear_insertion_loss is not None
+    assert result.per_ear_insertion_loss.shape == (16, 2, 24)
 
 
 def test_the_result_holds_its_own_copy_of_the_grid() -> None:
@@ -142,8 +148,8 @@ def test_the_result_holds_its_own_copy_of_the_grid() -> None:
     left = float(per_ear[0, 0, 0])
     result = hearing.active_insertion_loss(per_ear)
     per_ear[0, 0, 0] = 99.0
-    assert result.per_ear_db is not None
-    assert result.per_ear_db[0, 0, 0] == pytest.approx(left)
+    assert result.per_ear_insertion_loss is not None
+    assert result.per_ear_insertion_loss[0, 0, 0] == pytest.approx(left)
     assert result.insertion_loss[0, 0] == pytest.approx(
         ref.ISO4869_6_WORKBOOK_LOWER_EAR[0][0]
     )
@@ -212,7 +218,7 @@ def test_interpolated_reat_matches_the_workbook() -> None:
     result = _workbook_total()
     assert result.third_octave_frequencies.tolist() == ref.ISO4869_6_THIRD_OCTAVES
     assert (
-        _half_up(result.reat_third_octave_db).tolist()
+        _half_up(result.reat_third_octave_attenuation).tolist()
         == ref.ISO4869_6_WORKBOOK_REAT_THIRDS
     )
 
@@ -222,18 +228,22 @@ def test_interpolation_is_linear_in_hertz() -> None:
     reat = np.tile([10.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 30.0], (2, 1))
     active = np.zeros((2, 24))
     result = hearing.anr_total_attenuation(reat, active)
-    at_80 = result.reat_third_octave_db[0, 2]
+    at_80 = result.reat_third_octave_attenuation[0, 2]
     assert at_80 == pytest.approx(10.0 + 10.0 * (80.0 - 63.0) / (125.0 - 63.0))
     # The ends continue the first and the last segment.
-    assert result.reat_third_octave_db[0, 0] == pytest.approx(10.0 - 10.0 * 13.0 / 62.0)
-    assert result.reat_third_octave_db[0, -1] == pytest.approx(30.0 + 10.0 * 0.5)
+    assert result.reat_third_octave_attenuation[0, 0] == pytest.approx(
+        10.0 - 10.0 * 13.0 / 62.0
+    )
+    assert result.reat_third_octave_attenuation[0, -1] == pytest.approx(
+        30.0 + 10.0 * 0.5
+    )
 
 
 def test_total_thirds_match_the_workbook() -> None:
     """Rows 206-221, within the 0,05 dB the workbook's rounding of a) leaves."""
     result = _workbook_total()
     workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_THIRDS)
-    assert np.abs(result.total_third_octave_db - workbook).max() <= 0.05 + 1e-9
+    assert np.abs(result.total_third_octave_attenuation - workbook).max() <= 0.05 + 1e-9
 
 
 def test_octave_totals_match_the_workbook() -> None:
@@ -244,8 +254,8 @@ def test_octave_totals_match_the_workbook() -> None:
     """
     result = _workbook_total()
     workbook = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_OCTAVES)
-    assert result.total_octave_db.shape == (16, 8)
-    assert np.abs(result.total_octave_db - workbook).max() <= 0.1
+    assert result.total_octave_attenuation.shape == (16, 8)
+    assert np.abs(result.total_octave_attenuation - workbook).max() <= 0.1
 
 
 def test_formula_1_on_the_workbook_thirds_gives_every_octave_cell_exactly() -> None:
@@ -259,8 +269,8 @@ def test_formula_1_on_the_workbook_thirds_gives_every_octave_cell_exactly() -> N
     """
     thirds = np.asarray(ref.ISO4869_6_WORKBOOK_TOTAL_THIRDS)
     result = hearing.anr_total_attenuation(np.zeros((16, 8)), thirds)
-    np.testing.assert_array_equal(result.total_third_octave_db, thirds)
-    assert _half_up(result.total_octave_db).tolist() == (
+    np.testing.assert_array_equal(result.total_third_octave_attenuation, thirds)
+    assert _half_up(result.total_octave_attenuation).tolist() == (
         ref.ISO4869_6_WORKBOOK_TOTAL_OCTAVES
     )
 
@@ -282,7 +292,7 @@ def test_mean_sd_and_apv_match_the_workbook() -> None:
 def test_ratings_are_iso_4869_2_at_84_percent() -> None:
     """5.5 e): the octave totals go into ISO 4869-2 unchanged."""
     result = _workbook_total()
-    grid = result.total_octave_db
+    grid = result.total_octave_attenuation
     assert result.hml.reported == hearing.hml_rating(grid).reported
     assert result.snr.reported == hearing.snr_rating(grid).reported
     assert result.hml.performance == result.snr.performance == 84
@@ -292,7 +302,7 @@ def test_a_reat_result_and_its_grid_give_the_same_total() -> None:
     reat = hearing.real_ear_attenuation(ref.ISO4869_6_WORKBOOK_REAT)
     from_result = hearing.anr_total_attenuation(reat, _workbook_insertion_loss())
     np.testing.assert_allclose(
-        from_result.total_octave_db, _workbook_total().total_octave_db
+        from_result.total_octave_attenuation, _workbook_total().total_octave_attenuation
     )
 
 
@@ -301,7 +311,7 @@ def test_reat_from_125_hz_uses_the_bands_from_100_hz() -> None:
     result = hearing.anr_total_attenuation(reat, _workbook_insertion_loss())
     assert result.frequencies.tolist() == _OCTAVES[1:]
     assert result.third_octave_frequencies[0] == 100.0
-    assert result.total_octave_db.shape == (16, 7)
+    assert result.total_octave_attenuation.shape == (16, 7)
 
 
 def test_insertion_loss_from_100_hz_gives_the_total_from_125_hz() -> None:
@@ -312,7 +322,8 @@ def test_insertion_loss_from_100_hz_gives_the_total_from_125_hz() -> None:
     result = hearing.anr_total_attenuation(ref.ISO4869_6_WORKBOOK_REAT, from_100)
     assert result.frequencies.tolist() == _OCTAVES[1:]
     np.testing.assert_allclose(
-        result.total_octave_db, _workbook_total().total_octave_db[:, 1:]
+        result.total_octave_attenuation,
+        _workbook_total().total_octave_attenuation[:, 1:],
     )
 
 

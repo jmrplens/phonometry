@@ -276,6 +276,7 @@ given `coupling_impedance_pa_s_m3` = $Z_x$, exactly.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not positive and increasing, a length or radius that is not positive, conditions Annex F refuses, or a gas at another pressure. |
+| TypeError | if `gap_length_m`, `gap_radius_m` or `static_pressure_kpa` is not a single number. |
 
 ## comparison_uncertainty_budget
 
@@ -330,6 +331,7 @@ components (an erratum; see `docs/ERRATA.md`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a key that is not a component of the field's table, an additional component without a name or with the name of another component, no component at all, or a value that is negative or not finite. |
+| TypeError | if `field` is not a text, or `coverage_factor` or `frequency_hz` is not a single number. |
 
 ## ComparisonCalibration
 
@@ -436,6 +438,7 @@ compared with.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown quantity, or the phase of a calibration of the level alone. |
+| TypeError | if `quantity` is not a text. |
 
 ### ComparisonCalibration.sensitivity_level
 
@@ -557,7 +560,7 @@ The designation whose table the budget follows.
 ComparisonUncertaintyRow(
     component: str,
     subclauses: tuple[str, ...] = (),
-    stated_db: float | None = None,
+    stated_uncertainty_db: float | None = None,
     divisor: float | None = None,
     standard_uncertainty_db: float | None = None,
 )
@@ -578,8 +581,8 @@ each and prints no value.
 | :--- | :--- |
 | `component` | The component as the table prints it. |
 | `subclauses` | The subclauses the table refers the component to (Table 2); empty for Table D.1, which prints none. |
-| `stated_db` | The value the row's text states, in dB: a semi-range or an expanded uncertainty with $k = 2$, as `divisor` says; `None` for the repeatability of Table D.1, whose text states none, and for Table 2. |
-| `divisor` | What turns `stated_db` into a standard uncertainty: $\sqrt{3}$ for the semi-range of a rectangular distribution, 2 for an expanded uncertainty with $k = 2$; `None` where `stated_db` is. |
+| `stated_uncertainty_db` | The value the row's text states, in dB: a semi-range or an expanded uncertainty with $k = 2$, as `divisor` says; `None` for the repeatability of Table D.1, whose text states none, and for Table 2. |
+| `divisor` | What turns `stated_uncertainty_db` into a standard uncertainty: $\sqrt{3}$ for the semi-range of a rectangular distribution, 2 for an expanded uncertainty with $k = 2$; `None` where `stated_uncertainty_db` is. |
 | `standard_uncertainty_db` | The standard uncertainty the table prints, in dB; `None` for Table 2. |
 
 ## diameter_sound_field_correction
@@ -675,6 +678,7 @@ $R_P = -1$ at $c/2L$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not positive and increasing or not below both resonances, a dimension that is not positive, an outer radius smaller than the diaphragm's or not smaller than $a$, conditions Annex F refuses, a gas at another pressure, or a frequency at which a mode of the gap is exactly at its cut-off. |
+| TypeError | if `static_pressure_kpa` is not a single number. |
 
 ## DiameterSoundFieldCorrection
 
@@ -855,6 +859,7 @@ or subtract it from the result (`test_environment=`).
 
 ```python
 EnvironmentalSensitivityCorrection(
+    *,
     frequencies: NDArray[np.float64],
     static_pressure_kpa: float,
     temperature_c: float,
@@ -982,6 +987,7 @@ conditions default to the reference conditions of clause 4, 23,0 °C,
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a separation or window that is not positive, or conditions Annex F refuses. |
+| TypeError | if `relative_humidity_percent`, `static_pressure_kpa` or `temperature_c` is not a single number. |
 
 ## FreeFieldRegion
 
@@ -1070,7 +1076,7 @@ IEC61094_5_TABLE_A1 = {1000.0: -0.004, 1250.0: -0.006, 1600.0: -0.009, 2000.0: -
 *Constant* (`mapping`).
 
 ```python
-IEC61094_5_TABLE_D1 = {'reference': ComparisonUncertaintyRow(component='Sensitivity of reference microphone', subclauses=(), stated_db=0.05, divisor=2.0, standard_uncertainty_db=0.025), 'capacitance': ComparisonUncertaintyRow(component='Microphone capacitance', subclauses=(), stated_db=0.01, divisor=1.7320508075688772, standard_uncertainty_db=0.006), 'non_linearity': ComparisonUncertaintyRow(component='Non-linearity', subclauses=(), stated_db=0.03, divisor=1.7320508075688772, standard_uncertainty_db=0.017), 'impedance': ComparisonUncertaintyRow(component='Microphone impedance', subclauses=(), stated_db=0.005, divisor=1.7320508075688772, standard_uncertainty_db=0.003), 'polarizing_voltage': ComparisonUncertaintyRow(component='Polarising voltage', subclauses=(), stated_db=0.008681549586371858, divisor=1.7320508075688772, standard_uncertainty_db=0.005), 'repeatability': ComparisonUncertaintyRow(component='Repeatability', subclauses=(), stated_db=None, divisor=None, standard_uncertainty_db=0.025), 'drift': ComparisonUncertaintyRow(component='Drift in reference microphone sensitivity since last calibration', subclauses=(), stated_db=0.03, divisor=1.7320508075688772, standard_uncertainty_db=0.017), 'rounding': ComparisonUncertaintyRow(component='Rounding of reported results', subclauses=(), stated_db=0.005, divisor=1.7320508075688772, standard_uncertainty_db=0.003)}
+IEC61094_5_TABLE_D1 = {'reference': ComparisonUncertaintyRow(component='Sensitivity of reference microphone', subclauses=(), stated_uncertainty_db=0.05, divisor=2.0, standard_uncertainty_db=0.025), 'capacitance': ComparisonUncertaintyRow(component='Microphone capacitance', subclauses=(), stated_uncertainty_db=0.01, divisor=1.7320508075688772, standard_uncertainty_db=0.006), 'non_linearity': ComparisonUncertaintyRow(component='Non-linearity', subclauses=(), stated_uncertainty_db=0.03, divisor=1.7320508075688772, standard_uncertainty_db=0.017), 'impedance': ComparisonUncertaintyRow(component='Microphone impedance', subclauses=(), stated_uncertainty_db=0.005, divisor=1.7320508075688772, standard_uncertainty_db=0.003), 'polarizing_voltage': ComparisonUncertaintyRow(component='Polarising voltage', subclauses=(), stated_uncertainty_db=0.008681549586371858, divisor=1.7320508075688772, standard_uncertainty_db=0.005), 'repeatability': ComparisonUncertaintyRow(component='Repeatability', subclauses=(), stated_uncertainty_db=None, divisor=None, standard_uncertainty_db=0.025), 'drift': ComparisonUncertaintyRow(component='Drift in reference microphone sensitivity since last calibration', subclauses=(), stated_uncertainty_db=0.03, divisor=1.7320508075688772, standard_uncertainty_db=0.017), 'rounding': ComparisonUncertaintyRow(component='Rounding of reported results', subclauses=(), stated_uncertainty_db=0.005, divisor=1.7320508075688772, standard_uncertainty_db=0.003)}
 ```
 
 ## IEC61094_8_TABLE_1
@@ -1160,6 +1166,7 @@ and $p_{s,\mathrm{r}}$ = 101,325 kPa):
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not positive and increasing, not exactly one of the two couplings, a series impedance of zero, a column that is not one finite value per frequency, or a coupling and a test microphone whose equivalent volumes cancel. |
+| TypeError | if `coupling_equivalent_volume_m3`, `coupling_impedance_pa_s_m3`, `reference_equivalent_volume_m3` or `test_equivalent_volume_m3` holds a text. |
 
 ## ImpedancePressureRatio
 
@@ -1238,6 +1245,7 @@ or $\arg R_P$, against frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown quantity. |
+| TypeError | if `quantity` is not a text. |
 
 ### ImpedancePressureRatio.standard_uncertainty_db
 
@@ -1616,6 +1624,7 @@ half-duration $b$ of 2,5 µs, at which the spectrum has fallen by
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency that is not positive or a ratio that is not above 1. |
+| TypeError | if `upper_frequency_hz` or `zero_ratio` is not a single number. |
 
 ## RectangularPulse
 
@@ -1706,6 +1715,12 @@ frequencies of interest.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `upper_frequency_hz` is not a single number. |
+
 ### RectangularPulse.spectrum_at()
 
 ```python
@@ -1728,6 +1743,7 @@ centred on the time origin, where it is real.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency that is not finite. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## ReferenceCalibrationRow
 
@@ -1804,6 +1820,7 @@ fall within this time too.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a separation that is not positive, a reflected path that is not longer than the direct one, or conditions Annex F refuses. |
+| TypeError | if `reflected_path_m`, `source_distance_m` or `static_pressure_kpa` is not a single number. |
 
 ## sequential_comparison
 
@@ -1894,6 +1911,7 @@ same measurement point (7.3), $\arg R_P$ is 0.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown field, a free-field correction on a pressure calibration, an environmental correction made at other frequencies, readings whose numbers of determinations disagree, any column that is not one finite value per frequency, or monitor phases without the output phases. |
+| TypeError | if `field` is not a text. |
 
 ## SequentialComparisonPhase
 
@@ -2021,6 +2039,7 @@ the complex ratio the sensitivity "both modulus and phase" is.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown field, a pressure calibration without the interchange, a free-field correction on a pressure calibration, an environmental correction made at other frequencies, readings whose numbers of determinations disagree, any column that is not one finite value per frequency, or phase readings that do not follow the level readings. |
+| TypeError | if `field` is not a text. |
 
 ## SimultaneousComparisonPhase
 
@@ -2104,6 +2123,7 @@ one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than two frequencies, an axis that does not start at 0 Hz or is not equally spaced, or a response that is not one finite value per frequency. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number, or `response` holds a text. |
 
 ## SteppedSineImpulseResponse
 
@@ -2299,6 +2319,7 @@ the microphone under test, to the end of the time window".
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an arrival at or after the end of the window, or what [`free_field_region`](/phonometry/reference/api/metrology/comparison-calibration/#free_field_region) refuses. |
+| TypeError | if `arrival_time_s` is not a single number. |
 
 ### TimeSelectiveResponse.frequency_resolution_hz
 
@@ -2379,6 +2400,7 @@ $H(f)$ with and without the window.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown quantity. |
+| TypeError | if `quantity` is not a text. |
 
 ### TimeSelectiveResponse.record_response_at()
 
@@ -2527,4 +2549,4 @@ common to both levels, with the same sign, may be given here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a calibration or validation that is not a pressure calibration or carries no expanded uncertainty, a reciprocity calibration without `microphone` (or a comparison with one), a microphone it does not hold, no frequency in common, or a shared standard uncertainty that is negative, not one value per frequency of `calibration`, larger than the standard uncertainty of either calibration, or all of both. |
-| TypeError | for a validation that is neither calibration. |
+| TypeError | for a validation that is neither calibration, or a `microphone` that is not one number. |

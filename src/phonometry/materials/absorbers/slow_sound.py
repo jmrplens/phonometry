@@ -80,6 +80,7 @@ from ..._internal.validation import (
     require_count,
     require_positive,
     require_positive_array,
+    require_present,
     require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
@@ -108,6 +109,7 @@ __all__ = [
     "helmholtz_resonator_impedance",
     "rectangular_duct_properties",
     "slit_effective_properties",
+    "EffectiveFluidProperties",
     "slit_helmholtz_absorber",
 ]
 
@@ -139,6 +141,8 @@ class HelmholtzResonator(RichDisplay):
 
         :raises ValueError: if any of the four lengths is not positive and
             finite.
+        :raises TypeError: if ``cavity_length_m``, ``cavity_side_m``, ``neck_length_m``
+            or ``neck_side_m`` is not a single number.
         """
         require_positive(self.neck_length_m, "neck_length_m")
         require_positive(self.neck_side_m, "neck_side_m")
@@ -165,12 +169,32 @@ class HelmholtzResonator(RichDisplay):
 # ---------------------------------------------------------------------------
 # Visco-thermal effective parameters
 # ---------------------------------------------------------------------------
+@dataclass(frozen=True)
+class EffectiveFluidProperties(OwnsArrays):
+    r"""The visco-thermal equivalent fluid of a narrow channel.
+
+    What :func:`slit_effective_properties` and
+    :func:`rectangular_duct_properties` return: the effective density and the
+    effective bulk modulus, named, where a ``(rho, kappa)`` tuple used to be
+    unpacked by position, with the names
+    :class:`~phonometry.materials.PorousMediumResult` gives the same pair.
+
+    :ivar effective_density: :math:`\rho`, the complex effective density, in
+        kg/m³, shaped like the frequency.
+    :ivar bulk_modulus: :math:`\kappa`, the complex effective bulk modulus,
+        in Pa, shaped like the frequency.
+    """
+
+    effective_density: Complex
+    bulk_modulus: Complex
+
+
 def slit_effective_properties(
     frequency: ArrayLike,
     *,
     slit_height_m: float,
     fluid: Fluid = ABSORBER_AIR,
-) -> tuple[Complex, Complex]:
+) -> EffectiveFluidProperties:
     r"""Effective density and bulk modulus of a narrow slit of height ``h``.
 
     .. math::
@@ -191,7 +215,10 @@ def slit_effective_properties(
         (:class:`~phonometry.fluids.Fluid`); the
         density ``rho0``, viscosity ``eta``, Prandtl number ``Pr``, ratio of
         specific heats ``gamma`` and static pressure ``P0`` are read from it.
-    :return: ``(rho_s, kappa_s)`` complex arrays shaped like ``frequency``.
+    :return: ``rho_s`` and ``kappa_s``, complex arrays shaped like
+        ``frequency``, as an :class:`EffectiveFluidProperties`.
+    :raises TypeError: if ``slit_height_m`` is not a single number, or ``frequency``
+        holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     h = require_positive(slit_height_m, "slit_height_m")
@@ -205,9 +232,9 @@ def slit_effective_properties(
     x_kap = (h / 2.0) * np.sqrt(1j * omega * pr * rho0 / eta)
     rho_s = rho0 / (1.0 - np.tanh(x_rho) / x_rho)
     kap_s = (gamma * p0) / (1.0 + (gamma - 1.0) * np.tanh(x_kap) / x_kap)
-    return (
-        np.asarray(rho_s, dtype=np.complex128),
-        np.asarray(kap_s, dtype=np.complex128),
+    return EffectiveFluidProperties(
+        effective_density=np.asarray(rho_s, dtype=np.complex128),
+        bulk_modulus=np.asarray(kap_s, dtype=np.complex128),
     )
 
 
@@ -217,7 +244,7 @@ def rectangular_duct_properties(
     side_m: float,
     fluid: Fluid = ABSORBER_AIR,
     n_sum_terms: int = _DUCT_TERMS,
-) -> tuple[Complex, Complex]:
+) -> EffectiveFluidProperties:
     r"""Effective density and bulk modulus of a square duct of the given side.
 
     The Stinson (1991) rectangular-duct series (Appl. Sci. 2017 Eqs. (7)-(8)),
@@ -250,7 +277,11 @@ def rectangular_duct_properties(
         density ``rho0``, viscosity ``eta``, Prandtl number ``Pr``, ratio of
         specific heats ``gamma`` and static pressure ``P0`` are read from it.
     :param n_sum_terms: Transverse modes kept per axis (default 40).
-    :return: ``(rho, kappa)`` complex arrays shaped like ``frequency``.
+    :return: ``rho`` and ``kappa``, complex arrays shaped like
+        ``frequency``, as an :class:`EffectiveFluidProperties`.
+    :raises TypeError: if ``side_m`` is not a single number, ``n_sum_terms`` is a flag,
+        a text or an array where a count goes, or ``frequency`` holds a text or a value
+        that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     a = require_positive(side_m, "side_m")
@@ -281,7 +312,10 @@ def rectangular_duct_properties(
     kap = kappa0 / (gamma + (64.0 * (gamma - 1.0) * g_kap2[:, 0, 0] / a**4) * s_kap)
     rho = np.conj(rho).reshape(np.shape(f))
     kap = np.conj(kap).reshape(np.shape(f))
-    return np.asarray(rho, dtype=np.complex128), np.asarray(kap, dtype=np.complex128)
+    return EffectiveFluidProperties(
+        effective_density=np.asarray(rho, dtype=np.complex128),
+        bulk_modulus=np.asarray(kap, dtype=np.complex128),
+    )
 
 
 def _neck_slit_correction(
@@ -347,8 +381,10 @@ def _slit_resonator_ducts(
         raise ValueError(msg)
     h = require_positive(slit_height, "slit_height_m")
     a = require_positive(lattice_step_m, "lattice_step_m")
-    rho_n, kap_n = slit_effective_properties(f, slit_height_m=wn, fluid=fluid)
-    rho_c, kap_c = slit_effective_properties(f, slit_height_m=wc, fluid=fluid)
+    channel = slit_effective_properties(f, slit_height_m=wn, fluid=fluid)
+    rho_n, kap_n = channel.effective_density, channel.bulk_modulus
+    channel = slit_effective_properties(f, slit_height_m=wc, fluid=fluid)
+    rho_c, kap_c = channel.effective_density, channel.bulk_modulus
     z_n = np.asarray(np.sqrt(kap_n * rho_n) / (wn * a), dtype=np.complex128)
     z_c = np.asarray(np.sqrt(kap_c * rho_c) / (wc * a), dtype=np.complex128)
     dl = 0.0
@@ -379,12 +415,14 @@ def _square_resonator_ducts(
     n_sum_terms: int,
 ) -> tuple[Complex, Complex, Complex, Complex, Complex, Complex, float]:
     """Duct parameters of the square resonator (APL Eqs. (A23)-(A26))."""
-    rho_n, kap_n = rectangular_duct_properties(
+    channel = rectangular_duct_properties(
         f, side_m=wn, fluid=fluid, n_sum_terms=n_sum_terms
     )
-    rho_c, kap_c = rectangular_duct_properties(
+    rho_n, kap_n = channel.effective_density, channel.bulk_modulus
+    channel = rectangular_duct_properties(
         f, side_m=wc, fluid=fluid, n_sum_terms=n_sum_terms
     )
+    rho_c, kap_c = channel.effective_density, channel.bulk_modulus
     z_n = np.asarray(np.sqrt(kap_n * rho_n) / wn**2, dtype=np.complex128)
     z_c = np.asarray(np.sqrt(kap_c * rho_c) / wc**2, dtype=np.complex128)
     dl = 0.0
@@ -454,6 +492,8 @@ def helmholtz_resonator_impedance(
     :param n_sum_terms: Transverse modes kept per axis in the duct series.
     :return: Complex acoustic impedance ``Z_HR``, in Pa s/m3, shaped like
         ``frequency``.
+    :raises TypeError: if ``lattice_step_m`` or ``slit_height_m`` is not a single
+        number, or ``frequency`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     ln = require_positive(resonator.neck_length_m, "neck_length_m")
@@ -515,8 +555,7 @@ class SlitResonatorAbsorberResult(OwnsArrays):
 
     The trailing fields retain the panel geometry the prediction was run
     with (``resonators``, ``slit_height_m``, ``lattice_step_m``, ``period_m``) so
-    :meth:`plot_geometry` can draw the cross-section; they are appended after
-    the original fields and default to ``None`` for hand-built results.
+    :meth:`plot_geometry` can draw the cross-section.
     """
 
     frequencies: Real
@@ -529,10 +568,20 @@ class SlitResonatorAbsorberResult(OwnsArrays):
     effective_impedance: Complex
     transfer_matrix: Complex
     _: KW_ONLY
-    resonators: tuple[HelmholtzResonator, ...] | None = None
-    slit_height_m: float | None = None
-    lattice_step_m: float | None = None
-    period_m: float | None = None
+    resonators: tuple[HelmholtzResonator, ...]
+    slit_height_m: float
+    lattice_step_m: float
+    period_m: float
+
+    def __post_init__(self) -> None:
+        """Refuse a prediction built without the panel it was run for.
+
+        :raises TypeError: if ``resonators``, ``slit_height_m``,
+            ``lattice_step_m`` or ``period_m`` is ``None``.
+        """
+        require_present(
+            self, "resonators", "slit_height_m", "lattice_step_m", "period_m"
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -555,8 +604,6 @@ class SlitResonatorAbsorberResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its geometry.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_slit_absorber_result_geometry
@@ -597,7 +644,8 @@ def _panel_transfer_matrix(
     area_slit = slit_height * lattice_step_m
     area_cell = period_m * lattice_step_m
     phit = slit_height / period_m
-    rho_s, kap_s = slit_effective_properties(f, slit_height_m=slit_height, fluid=fluid)
+    channel = slit_effective_properties(f, slit_height_m=slit_height, fluid=fluid)
+    rho_s, kap_s = channel.effective_density, channel.bulk_modulus
     k_s = omega * np.sqrt(rho_s / kap_s)
     z_s = np.sqrt(kap_s * rho_s) / area_slit
     nf = omega.size
@@ -697,6 +745,9 @@ def slit_helmholtz_absorber(
         number ``Pr``, ratio of specific heats ``gamma`` and static pressure
         ``P0``.
     :return: A :class:`SlitResonatorAbsorberResult`.
+    :raises TypeError: if ``resonator_geometry`` is not a text, ``angle_rad``,
+        ``lattice_step_m``, ``period_m`` or ``slit_height_m`` is not a single number, or
+        ``frequency`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     if isinstance(resonators, HelmholtzResonator):
@@ -883,6 +934,8 @@ def critical_coupling_design(
     :return: A :class:`CriticalCouplingResult`. A
         :class:`SlowSoundAbsorberWarning` is emitted (via :func:`warnings.warn`)
         if the solver does not reach perfect absorption within tolerance.
+    :raises TypeError: if ``angle_rad``, ``lattice_step_m``, ``period_m`` or
+        ``target_frequency`` is not a single number.
     """
     f0 = require_positive(target_frequency, "target_frequency")
     a = require_positive(lattice_step_m, "lattice_step_m")

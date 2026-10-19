@@ -243,6 +243,7 @@ def air(
         temperature. That last one is a combination rather than an argument: at
         20 degC and 1 kPa, 50 % relative humidity asks for a water vapour mole
         fraction of 1,17, and a mole fraction cannot reach 1.
+    :raises TypeError: if ``temperature_c`` is not a single number.
 
     Nothing else is refused. Annex F states a domain for its equations and this
     warns outside it, because a fit past its range is still arithmetic; what it

@@ -812,6 +812,7 @@ class SIIResult(OwnsArrays):
         :raises ValueError: if any per-band quantity disagrees with the rest,
             ``method`` is not one of :data:`SII_METHODS`, or any quantity
             carries a non-finite value.
+        :raises TypeError: if ``method`` is not a text.
         """
         require_choice(self.method, "method", SII_METHODS)
         require_ranks(
@@ -1295,6 +1296,7 @@ class SIIProcedure(OwnsArrays):
 
         :raises ValueError: if the band axes disagree, ``method`` is not one
             of :data:`SII_METHODS`, or a column carries a non-finite value.
+        :raises TypeError: if ``method`` is not a text.
         """
         require_choice(self.method, "method", SII_METHODS)
         require_ranks(

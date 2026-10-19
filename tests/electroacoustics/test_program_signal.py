@@ -50,8 +50,8 @@ def test_table_ii_is_transcribed_as_printed() -> None:
     for frequency, band in table.items():
         level, tolerance = printed[frequency]
         assert band.relative_level == level
-        assert band.tolerance_plus_db == tolerance
-        assert band.tolerance_minus_db == tolerance
+        assert band.upper_tolerance_db == tolerance
+        assert band.lower_tolerance_db == tolerance
 
 
 def test_table_ii_is_immutable() -> None:

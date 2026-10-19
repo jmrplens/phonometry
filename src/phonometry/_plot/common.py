@@ -529,6 +529,7 @@ def theme_line(
     :param ratio: Minimum WCAG contrast against the page; the default is the
         2.2 non-text minimum of 3:1.
     :return: The stroke colour as an ``(r, g, b)`` triple in 0-1 sRGB.
+    :raises TypeError: if ``quiet`` is not a single number.
     """
     require_scalar(quiet, "quiet")
     from matplotlib.colors import to_rgb

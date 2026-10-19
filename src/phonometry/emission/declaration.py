@@ -114,7 +114,10 @@ class OperatingModeDeclaration(RichDisplay):
     verification_level: float | None = None
 
     def __post_init__(self) -> None:
-        """Validate the levels, the uncertainties and the pressure pairing."""
+        """Validate the levels, the uncertainties and the pressure pairing.
+
+        :raises TypeError: if ``emission_pressure_level`` is not a single number.
+        """
         if not str(self.mode).strip():
             msg = "OperatingModeDeclaration.mode must be a non-empty label."
             raise ValueError(msg)

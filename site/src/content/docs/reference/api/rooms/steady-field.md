@@ -146,6 +146,12 @@ Room constant $R = S \bar{\alpha} / (1 - \bar{\alpha})$
 
 **Returns:** The room constant `R`, m2; a float for a scalar input, otherwise a per-band array.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `surface_area` is not a single number. |
+
 ## sabine_absorption_area
 
 ```python
@@ -186,6 +192,7 @@ is the same expression at 339 m/s.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the volume, the time or the speed is not positive and finite. |
+| TypeError | if `speed_of_sound` or `volume` is not a single number. |
 
 ## schroeder_frequency
 
@@ -212,6 +219,12 @@ modes and `R` / `rc` lose their meaning.
 | `volume` | Room volume `V`, m3. |
 
 **Returns:** The Schroeder frequency, Hz.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `volume` is not a single number. |
 
 ## SOURCE_POWER_MODELS
 
@@ -254,6 +267,12 @@ distance (crossover of the two fields).
 | `characteristic_impedance` | Optional `rho c` for the Bies $10 \log_{10}(\rho c / 400)$ term (`None` omits it). |
 
 **Returns:** A [`SteadyFieldResult`](/phonometry/reference/api/rooms/steady-field/#steadyfieldresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `characteristic_impedance`, `directivity`, `mean_absorption` or `sound_power_level` is not a single number. |
 
 ## steady_state_spl
 
@@ -313,6 +332,7 @@ such as a room-to-room transmission uses.
 | Exception | When |
 | :--- | :--- |
 | ValueError | unless exactly one absorption measure is given; if `distance`, the measure or `directivity` is not positive and finite; or if `source_model` is not one of [`SOURCE_POWER_MODELS`](/phonometry/reference/api/rooms/steady-field/#source_power_models). |
+| TypeError | if `source_model` is not a text, or `characteristic_impedance` is not a single number. |
 
 ## SteadyFieldResult
 

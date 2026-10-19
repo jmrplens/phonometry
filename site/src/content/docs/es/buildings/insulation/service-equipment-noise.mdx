@@ -303,7 +303,7 @@ t = np.array([np.nan, np.nan, np.nan, 0.82, 0.78, 0.74, 0.70, 0.66, 0.63,
               0.48, 0.47, 0.46, 0.45, 0.44, np.nan, np.nan, np.nan])
 res = building.service_equipment_level(
     readings, frequencies=freqs, quantity="eq",
-    background_db=background, reverberation_time=t, volume=35.7,
+    background_levels=background, reverberation_time=t, volume=35.7,
 )
 print(res.ratings["LA,eq"], res.ratings["LA,eq,nT"], res.ratings["LC,eq,nT"])
 # 45 45 51
@@ -333,14 +333,14 @@ están las seis bandas grises.*
 | `frequencies` | array | Hz | obligatorio | Frecuencias centrales nominales, crecientes: tercios de octava de 25 Hz a 10 kHz u octavas de 31,5 Hz a 8 kHz |
 | `quantity` | str | | obligatorio | `"Smax"`, `"Fmax"` o `"eq"`, la magnitud de la tabla 1; da nombre a los valores únicos |
 | `fraction` | int | | `3` | `3` (tercios de octava) o `1` (octavas); el capítulo 6 pide tercios de octava, las octavas son opcionales |
-| `background_db` | array | dB | `None` | Un nivel por banda, o una fila por posición, promediada energéticamente |
+| `background_levels` | array | dB | `None` | Un nivel por banda, o una fila por posición, promediada energéticamente |
 | `reverberation_time` | array | s | `None` | Por banda; solo se lee de 50 Hz a 5 kHz (octavas de 63 Hz a 4 kHz), el resto puede ser `nan` |
 | `volume` | float | m³ | `None` | Volumen del recinto para los niveles normalizados; necesita el tiempo de reverberación |
 | `reference_reverberation_time_s` | float | s | `0.5` | $T_0$ de la fórmula (5) |
 | `a_weighting_range` | str | | `"restricted"` | `"restricted"` (50 Hz a 5 kHz; octavas de 63 Hz a 4 kHz) o `"extended"` (25 Hz a 10 kHz; octavas de 31,5 Hz a 8 kHz) |
 
-El resultado lleva `average_db`, `background` (la corrección del capítulo 9),
-`corrected_db`, `standardized_db`, `normalized_db`, `standardizable`,
+El resultado lleva `average_levels`, `background` (la corrección del capítulo 9),
+`corrected_levels`, `standardized_levels`, `normalized_levels`, `standardizable`,
 `ratings` y `unrounded_ratings` indexados por la tabla 1, `upper_limit("A")` y
 `upper_limit("C")`, `unstandardized_bands_hz`, `reproducibility_db` y
 `weighted_reproducibility_db`. Los valores ponderados C solo se forman cuando

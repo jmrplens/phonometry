@@ -169,7 +169,7 @@ _STRINGS: dict[str, str] = {
     "PNLTM [TPNdB]": "PNLTM [TPNdB]",
     "Duration correction D [dB]": "Corrección de duración D [dB]",
     "10 dB-down window (records)": "Ventana 10 dB por debajo (registros)",
-    "Bandsharing adjustment [dB]": "Ajuste por reparto de bandas [dB]",
+    "Bandsharing adjustment [TPNdB]": "Ajuste por reparto de bandas [TPNdB]",
     "Integrated (Programme) Loudness": "Sonoridad integrada (de programa)",
     "Maximum True Peak": "Pico real máximo",
     "Loudness Range (LRA)": "Rango de sonoridad (LRA)",

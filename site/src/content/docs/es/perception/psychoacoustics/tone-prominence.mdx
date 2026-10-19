@@ -45,8 +45,8 @@ t = np.arange(fs) / fs
 x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # tono de 1 kHz en ruido
 tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # pico más alto, o tone_frequency=...
 pr = psychoacoustics.prominence_ratio(x, fs, tone_frequency=1000.0)
-print(round(tnr.ratio_db, 1), round(tnr.criterion_db, 1), tnr.prominent)  # 45.6 8.0 True
-print(round(pr.ratio_db, 1), round(pr.criterion_db, 1), pr.prominent)     # 45.7 9.0 True
+print(round(tnr.ratio_db, 1), round(tnr.prominence_limit_db, 1), tnr.prominent)  # 45.6 8.0 True
+print(round(pr.ratio_db, 1), round(pr.prominence_limit_db, 1), pr.prominent)     # 45.7 9.0 True
 
 tnr.plot()   # el tono frente a su criterio de prominencia (necesita matplotlib)
 ```
@@ -114,7 +114,7 @@ dfc = 25 + 75 * (1 + 1.4 * (res.frequency / 1000) ** 2) ** 0.69
 sel = (f > 700) & (f < 1400)
 plt.plot(f[sel], 10 * np.log10(p[sel]))
 plt.axvspan(res.frequency - dfc / 2, res.frequency + dfc / 2, alpha=0.15)
-plt.title(f"TNR = {res.ratio_db:.1f} dB (criterio {res.criterion_db:.1f} dB)")
+plt.title(f"TNR = {res.ratio_db:.1f} dB (criterio {res.prominence_limit_db:.1f} dB)")
 plt.xlabel("Frecuencia [Hz]"); plt.ylabel("Potencia por bin [dB]")
 plt.show()
 ```
@@ -154,7 +154,7 @@ t = np.arange(10 * fs) / fs
 x = (np.sqrt(2) * 0.011 * np.sin(2 * np.pi * 250.0 * t)
      + 0.03 * rng.standard_normal(t.size))
 res = psychoacoustics.tone_to_noise_ratio(x, fs)
-print(round(res.ratio_db, 1), round(res.criterion_db, 1), res.prominent)
+print(round(res.ratio_db, 1), round(res.prominence_limit_db, 1), res.prominent)
 # 15.1 13.0 True
 
 # En una línea: el tono frente a la curva de criterio de su propio método.
@@ -167,7 +167,7 @@ criterio = np.where(f < 1000.0, 8.0 + 8.33 * np.log10(1000.0 / f), 8.0)
 fig, ax = plt.subplots()
 ax.semilogx(f, criterio, color="#d62728", label="criterio de prominencia")
 ax.plot([res.frequency], [res.ratio_db], "o", label="tono evaluado")
-ax.plot([res.frequency] * 2, [res.criterion_db, res.ratio_db], ":", color="0.6")
+ax.plot([res.frequency] * 2, [res.prominence_limit_db, res.ratio_db], ":", color="0.6")
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Relación tono-ruido TNR [dB]")
 ax.legend()
@@ -332,7 +332,7 @@ diferencias de nivel).
 
 Ambos devuelven un `ToneAssessment(frequency, ratio_db, method)`, donde `method`
 dice qué relación se ha calculado (`"tone_to_noise_ratio"` o
-`"prominence_ratio"`); `criterion_db` y `prominent` se leen de la fórmula de la
+`"prominence_ratio"`); `prominence_limit_db` y `prominent` se leen de la fórmula de la
 norma para esa relación, de modo que una evaluación no puede llevar otro
 criterio.
 

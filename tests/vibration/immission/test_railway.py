@@ -268,7 +268,8 @@ def _lines(upper_hz: float = 600.0) -> np.ndarray:
 def test_each_band_takes_the_lines_table_1_gives_it() -> None:
     """A flat density of one: each band's mean square is K_n · 1,25."""
     f = _lines()
-    centres, rms = im.third_octaves_from_narrowband(frequencies=f, psd=np.ones_like(f))
+    bands = im.third_octaves_from_narrowband(frequencies=f, psd=np.ones_like(f))
+    centres, rms = bands.frequencies, bands.velocities_mm_s
     assert list(centres) == list(im.THIRD_OCTAVE_LINES)
     counts = rms**2 / im.NARROWBAND_RESOLUTION_HZ
     assert np.allclose(counts, list(im.THIRD_OCTAVE_LINES.values()))
@@ -278,7 +279,8 @@ def _band_of(line_hz: float) -> list[float]:
     """The bands a single line of power lands in."""
     f = _lines()
     density = np.where(np.isclose(f, line_hz), 1.0, 0.0)
-    centres, rms = im.third_octaves_from_narrowband(frequencies=f, psd=density)
+    bands = im.third_octaves_from_narrowband(frequencies=f, psd=density)
+    centres, rms = bands.frequencies, bands.velocities_mm_s
     return [float(c) for c, r in zip(centres, rms, strict=True) if r > 0.0]
 
 
@@ -314,7 +316,8 @@ def test_nominal_bands_leave_six_lines_out_and_share_five() -> None:
 
 def test_a_short_spectrum_stops_at_the_last_whole_band() -> None:
     f = _lines(100.0)
-    centres, _rms = im.third_octaves_from_narrowband(frequencies=f, psd=np.ones_like(f))
+    bands = im.third_octaves_from_narrowband(frequencies=f, psd=np.ones_like(f))
+    centres, _rms = bands.frequencies, bands.velocities_mm_s
     assert centres[-1] == 80.0
 
 
@@ -324,12 +327,14 @@ def test_a_late_spectrum_starts_at_the_first_whole_band() -> None:
     from_line = im.third_octaves_from_narrowband(
         frequencies=f[3:], psd=np.ones(f.size - 3)
     )
-    assert from_line[0][0] == 4.0  # 3,75 Hz is the whole 4 Hz band
+    assert from_line.frequencies[0] == 4.0  # 3,75 Hz is the whole 4 Hz band
     from_20 = im.third_octaves_from_narrowband(
         frequencies=f[16:], psd=np.ones(f.size - 16)
     )
-    assert from_20[0][0] == 25.0  # the 20 Hz band needs 18,75 Hz
-    assert np.allclose(from_20[1] ** 2 / 1.25, list(im.THIRD_OCTAVE_LINES.values())[8:])
+    assert from_20.frequencies[0] == 25.0  # the 20 Hz band needs 18,75 Hz
+    assert np.allclose(
+        from_20.velocities_mm_s**2 / 1.25, list(im.THIRD_OCTAVE_LINES.values())[8:]
+    )
 
 
 def test_table_1_refuses_a_spectrum_of_another_resolution() -> None:

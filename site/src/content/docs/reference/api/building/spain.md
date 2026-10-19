@@ -136,6 +136,7 @@ for a reverberation time), and the rounded value is compared with the limit.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `value` is not finite. |
+| TypeError | if `value` is not a single number. |
 
 ## d2m_nt_a
 
@@ -298,6 +299,7 @@ residential acoustic areas.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown use/room combination, an unknown dominant noise, or a non-finite `Ld`. |
+| TypeError | if `ld` is not a single number. |
 
 ## DB_HR_FREQUENCIES_HZ
 
@@ -685,3 +687,4 @@ catalogue value by 0 dB up to 2,7 m2, -1 dB over 2,7 to 3,6 m2, -2 dB over
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `area` is not positive and finite. |
+| TypeError | if `area` is not a single number. |

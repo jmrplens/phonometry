@@ -200,3 +200,9 @@ recordings (or the excitation, for pre-emphasis) and read
 | `delay` | Modeling delay in samples. Default `n_fft // 2`. |
 
 **Returns:** An [`InverseFilterResult`](/phonometry/reference/api/signals/inversion/#inversefilterresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs`, `regularization_inside`, `regularization_outside` or `transition_octaves` is not a single number, or `delay` is a flag, a text or an array where a count goes. |

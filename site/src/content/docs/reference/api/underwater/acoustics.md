@@ -85,6 +85,7 @@ $L_{p,\mathrm{pk}} = 20 \log_{10}(\max \lvert p \rvert / p_0)$ dB re
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the signal is invalid or is all zero. |
+| TypeError | if `reference` is not a single number. |
 
 ## sound_exposure_level
 
@@ -118,6 +119,7 @@ record.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid or the signal has no energy. |
+| TypeError | if `fs` or `reference` is not a single number. |
 
 ## sound_pressure_level
 
@@ -148,6 +150,7 @@ in pascals and the underwater reference $p_0 = 1$ µPa by default.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the signal is invalid or has no energy. |
+| TypeError | if `reference` is not a single number. |
 
 ## UNDERWATER_REFERENCE_EXPOSURE_PA2_S
 

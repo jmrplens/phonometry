@@ -333,11 +333,12 @@ l_in_sub = np.array([
     np.full(16, 39.0),    # 5.5 m2, hacia fuera
     np.full(16, 33.0),    # 1.5 m2, HACIA DENTRO -> área negativa
 ])
-l_in_comb, s_m = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, -1.5])
+combined = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, -1.5])
+l_in_comb, s_m = combined.levels, combined.measurement_area
 print(round(float(l_in_comb[0]), 2), s_m)     # 39.36 12.0
 
 # Ignorar el signo infla la potencia transmitida, es decir, baja RI:
-l_in_naive, _ = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, 1.5])
+l_in_naive = building.subarea_intensity_level(l_in_sub, [5.0, 5.5, 1.5]).levels
 print(round(float(l_in_naive[0] - l_in_comb[0]), 2))   # 0.24
 ```
 
@@ -367,7 +368,7 @@ $10\log_{10}(S_\mathrm{m}/S)$ de $R_I$.
 `intensity_element_normalized_difference()` un
 `IntensityElementNormalizedResult` (`d_i_n_e`, `rating`);
 `surface_pressure_intensity_indicator()` devuelve un array y
-`subarea_intensity_level()` una pareja `(LIn, Sm)`. Los campos `rating` solo se forman
+`subarea_intensity_level()` un `SubareaIntensityLevel` (`levels`, `measurement_area`). Los campos `rating` solo se forman
 con exactamente 16 valores de tercio de octava o 5 de octava, y son `None` en
 otro caso, así que un barrido tomado sobre el rango completo de ISO 15186-1, de
 100 Hz a 5000 Hz (apartado 6.6, 18 bandas), hay que recortarlo al rango de

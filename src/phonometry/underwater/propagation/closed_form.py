@@ -109,6 +109,7 @@ def spreading_loss(
         ``"practical"``.
     :return: Spreading loss per range, in dB.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``transition_range`` is not a single number.
     """
     r = _positive_array(range_m, "range_m")
     key = law.strip().lower()
@@ -211,6 +212,8 @@ def seawater_absorption(
         ~50 kHz; ignores ``temperature_c``/``salinity``/``depth``/``ph``).
     :return: Absorption coefficient per frequency, in dB/km.
     :raises ValueError: If ``model`` is unknown or an input is invalid.
+    :raises TypeError: if ``depth``, ``salinity`` or ``temperature_c`` is not a single
+        number.
     """
     f_khz = _positive_array(frequency_hz, "frequency_hz") / 1000.0
     require_scalar(temperature_c, "temperature_c")
@@ -353,6 +356,7 @@ def propagation_loss(
     :param transition_range: Transition range for the ``"practical"`` law, in m.
     :return: A :class:`PropagationLossResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``frequency_hz`` is not a single number.
     """
     f = _positive(frequency_hz, "frequency_hz")
     r = _positive_array(range_m, "range_m")

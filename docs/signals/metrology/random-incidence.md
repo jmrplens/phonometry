@@ -106,7 +106,8 @@ each, every reading weighing the same (Formula (A.5)):
 a = metrology.axisymmetric_directivity_factor(levels[0])
 print(round(a.directivity_index, 2))   # 2.45
 
-horizontal, vertical = metrology.equal_area_incidence_angles()
+angles = metrology.equal_area_incidence_angles()
+horizontal, vertical = angles.horizontal_deg, angles.vertical_deg
 print(horizontal[:6].round(1))   # [ 0.  32.6 50.8 65.1 77.8 90. ]
 e = metrology.equal_area_directivity_factor(
     94.0 + pattern_db(horizontal, 0.785), 94.0 + pattern_db(vertical, 0.98)

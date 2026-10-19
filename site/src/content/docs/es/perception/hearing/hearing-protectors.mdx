@@ -85,7 +85,7 @@ tabla_a3 = np.array([
     [15.9, 17.8, 26.0, 40.6, 38.0, 40.2, 37.2], [11.8, 18.4, 29.6, 37.2, 40.8, 36.0, 29.9],
 ])
 reat = hearing.real_ear_attenuation(tabla_a3)
-print(np.round(reat.mean_db, 1))                  # [17.1 21.1 28.8 38.5 37.5 36.2 35. ]
+print(np.round(reat.mean_attenuation, 1))                  # [17.1 21.1 28.8 38.5 37.5 36.2 35. ]
 print(np.round(reat.standard_deviation_db, 1))    # [3.9 3.9 3.5 4.5 3.2 3.2 4.6]
 print(np.round(reat.expanded_uncertainty_db, 1))  # [2.  1.9 1.7 2.2 1.6 1.6 2.3]
 
@@ -94,8 +94,8 @@ print(np.round(hearing.assumed_protection_value(reat.attenuation).apv, 1))
 # [13.1 17.2 25.3 34.  34.3 33.  30.4]
 ```
 
-También pueden entrar los propios umbrales, como `open_threshold_db` y
-`occluded_threshold_db`; solo tienen que compartir referencia, porque un nivel
+También pueden entrar los propios umbrales, como `open_threshold_levels` y
+`occluded_threshold_levels`; solo tienen que compartir referencia, porque un nivel
 de presión sonora y uno de nivel de audición dan la misma diferencia. Todo se
 calcula con precisión completa y lo redondea quien lo imprime, que es lo que
 dicen hacer las Tablas A.3 y B.1.
@@ -150,7 +150,7 @@ u95_2 = [1.6, 1.2, 1.4, 1.5, 1.5, 1.7, 2.5]
 diferencia = hearing.assess_attenuation_difference(
     reat, media_2, second_expanded_uncertainty_db=u95_2
 )
-print(np.round(diferencia.criterion_db, 1))  # [2.5 2.3 2.2 2.7 2.2 2.3 3.4]
+print(np.round(diferencia.significance_limit_db, 1))  # [2.5 2.3 2.2 2.7 2.2 2.3 3.4]
 print(diferencia.significant_frequencies)    # [8000.]
 ```
 
@@ -166,9 +166,9 @@ redondear da 3,21 dB:
 
 ```python
 tapon = hearing.REAT_WITHIN_LABORATORY_UNCERTAINTY["earplug"]["250 Hz up to 4 kHz"]
-print(round(tapon.expanded_db, 2))                                          # 2.27
+print(round(tapon.expanded_uncertainty_db, 2))                                          # 2.27
 print(round(hearing.min_significant_difference(2.3), 1))                # 3.3
-print(round(hearing.min_significant_difference(tapon.expanded_db), 2))  # 3.21
+print(round(hearing.min_significant_difference(tapon.expanded_uncertainty_db), 2))  # 3.21
 
 # La U95 típica banda a banda, lista para assess_attenuation_difference.
 print(np.round(hearing.reat_expanded_uncertainty(reat.frequencies, protector="earplug"), 1))
@@ -453,7 +453,7 @@ tabla_a3_anr = np.array([
     [24.3, 24.2, 22.5, 4.2, -6.3, -2.5, -0.9, -0.5], [23.8, 24.9, 20.7, 3.8, -4.8, -0.5, -0.3, 0.2],
 ])
 insercion = hearing.active_insertion_loss(tabla_a3_anr)
-print(np.round(insercion.mean_db, 1))                  # [21.4 23.8 21.4  4.8 -5.6 -2.  -1.1 -0.6]
+print(np.round(insercion.mean_insertion_loss, 1))                  # [21.4 23.8 21.4  4.8 -5.6 -2.  -1.1 -0.6]
 print(np.round(insercion.expanded_uncertainty_db, 1))  # [0.9 0.4 0.7 0.9 0.7 0.8 0.7 0.3]
 ```
 
@@ -620,7 +620,7 @@ fittings = open_level - loss + spread
 il = hearing.earmuff_insertion_loss(
     open_level, fittings, isolation_cup_levels=open_level - 70.0
 )
-print(il.reported_db[[3, 9, 12, 18]])                   # [13.5 32.5 37.  38. ]
+print(il.reported_insertion_loss[[3, 9, 12, 18]])                   # [13.5 32.5 37.  38. ]
 print(np.round(il.expanded_uncertainty_db[[3, 12, 21]], 1))  # [1.8 1.9 2.1]
 print(il.repetitions_sufficient, bool(np.all(il.floor_adequate)))  # True True
 ```

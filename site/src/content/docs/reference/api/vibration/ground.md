@@ -75,6 +75,7 @@ slow at every Poisson's ratio.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive modulus or density, or a ratio outside `(-1, 0.5)`, where the continuum would not be stable. |
+| TypeError | if `density`, `poisson_ratio` or `shear_modulus_pa` is not a single number. |
 
 ## GROUND_WAVE_SPEED_RANGES_M_S
 
@@ -113,6 +114,7 @@ right.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive speed, or a compression wave no faster than $2/\sqrt{3}$ times the shear wave, which no stable continuum carries. |
+| TypeError | if `compression_wave_speed_m_s` or `shear_wave_speed_m_s` is not a single number. |
 
 ## shear_modulus_from_wave_speed
 
@@ -140,6 +142,7 @@ The shear modulus $G = \mathrm{v}_\mathrm{s}^2 \rho$, Formula (5), in pascals.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive speed or density. |
+| TypeError | if `density` or `shear_wave_speed_m_s` is not a single number. |
 
 ## shear_strain_amplitude
 
@@ -170,6 +173,7 @@ small-strain modulus still applies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative amplitude or a non-positive speed. |
+| TypeError | if `shear_wave_speed_m_s` or `velocity_amplitude_m_s` is not a single number. |
 
 ## SHEAR_STRAIN_LINEAR_LIMIT
 

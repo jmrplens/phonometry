@@ -93,6 +93,12 @@ $s'_\mathrm{t} = 4 \pi^2 m'_\mathrm{t} f_\mathrm{r}^2$.
 
 **Returns:** The apparent dynamic stiffness per unit area `s't`, in N/m3 (numerically MN/m3 when divided by 1e6).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `total_mass_per_area_kg_m2` is not a single number. |
+
 ## DynamicStiffnessResult
 
 ```python
@@ -218,6 +224,12 @@ with the material's structure: $s'_\mathrm{a} = p_0 / (d\,\epsilon)$.
 
 **Returns:** The enclosed-gas dynamic stiffness per unit area `s'a`, in N/m3.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `porosity` or `static_pressure_pa` is not a single number. |
+
 :::note
 With the standard's $p_0 = 0.1$ MPa and $\epsilon = 0.9$
 this reduces to $s'_\mathrm{a} = 111/d$ MN/m3 for `d` in millimetres
@@ -259,6 +271,12 @@ frequency (Formula 2).
 | `static_pressure_pa` | Atmospheric pressure `p0`, in pascals. |
 
 **Returns:** The [`DynamicStiffnessResult`](/phonometry/reference/api/materials/dynamic-stiffness/#dynamicstiffnessresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `airflow_resistivity_kpa_s_m2`, `floor_mass_per_area_kg_m2`, `resonant_frequency_hz` or `static_pressure_pa` is not a single number. |
 
 ## installed_dynamic_stiffness
 
@@ -308,6 +326,7 @@ in pascal seconds per square metre, a thousand times smaller a unit.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive `s't` or `r`, a negative `s'a`, or no `s'a` below 100 kPa.s/m2, where an absent gas term is not a zero one. |
+| TypeError | if `airflow_resistivity_kpa_s_m2`, `apparent_stiffness_n_m3` or `gas_stiffness_n_m3` is not a single number. |
 
 ## natural_frequency
 
@@ -330,6 +349,12 @@ $f_0 = (1/2\pi)\sqrt{s'/m'}$.
 | `mass_per_area_kg_m2` | Mass per unit area of the supported floor `m'`, in kg/m2. |
 
 **Returns:** The natural frequency `f0`, in hertz.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `mass_per_area_kg_m2` is not a single number. |
 
 ## plot_dynamic_stiffness_rig
 
@@ -370,6 +395,7 @@ plate.
 | Exception | When |
 | :--- | :--- |
 | ValueError | naming the first of the three that is not finite and positive. |
+| TypeError | if `load_mass`, `specimen_side` or `specimen_thickness_m` is not a single number. |
 
 ## PUBLISHED_RESILIENT_LAYERS
 
@@ -643,6 +669,7 @@ resistivity passed picks.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a row that gives only `s't` when no resistivity is passed, saying that `s't` is not `s'` and what to pass; for a row with no value of either stiffness whose `s't` cell holds something else, such as a declared bound, which it names; for a row that gives neither stiffness, naming what its source had in the `s'` cell; for a row that gives `s'` when either keyword is passed; for a resistivity below 100 kPa.s/m2 with no `s'a`; and for a non-positive mass or resistivity. A cell the computation needs and the row does not hold is refused as [`printed`](/phonometry/reference/api/io/io/#cataloguerowprinted) refuses it. |
+| TypeError | if `mass_per_area_kg_m2` is not a single number. |
 
 ### ResilientLayer.printed()
 

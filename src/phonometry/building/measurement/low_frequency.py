@@ -199,6 +199,7 @@ def low_frequency_procedure_applies(volume: float) -> bool:
     :param volume: Room volume ``V``, in m³.
     :return: ``True`` when the low-frequency procedure is required.
     :raises ValueError: If ``volume`` is not a positive, finite number.
+    :raises TypeError: if ``volume`` is not a single number.
     """
     require_scalar(volume, "volume")
     value = float(volume)
@@ -513,6 +514,7 @@ class LowFrequencyProcedure(OwnsArrays):
             reads, if it does not carry exactly the three low-frequency bands,
             or if ``reverberation_63_octave`` is given and is not positive and
             finite.
+        :raises TypeError: if ``volume`` is not a single number.
         """
         _require_volume_triggers(self.volume, "volume")
         corners = np.asarray(self.corner_levels, dtype=np.float64)

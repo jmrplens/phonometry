@@ -339,6 +339,8 @@ def linear_airflow_velocity(volume_flow_rate: float, area: float) -> float:
 
     ``volume_flow_rate`` is ``q_v`` (m3/s) and ``area`` is ``A`` (m2); returns
     ``u`` in m/s.
+
+    :raises TypeError: if ``area`` or ``volume_flow_rate`` is not a single number.
     """
     require_scalar(area, "area")
     require_scalar(volume_flow_rate, "volume_flow_rate")
@@ -356,6 +358,9 @@ def airflow_resistance(pressure_drop_pa: float, volume_flow_rate: float) -> floa
     ``pressure_drop_pa`` is the pressure difference :math:`\Delta p` across the
     specimen (Pa) and ``volume_flow_rate`` is the volumetric airflow rate
     ``q_v`` (m3/s). Returns ``R`` in Pa*s/m3.
+
+    :raises TypeError: if ``pressure_drop_pa`` or ``volume_flow_rate`` is not a single
+        number.
     """
     require_scalar(pressure_drop_pa, "pressure_drop_pa")
     require_scalar(volume_flow_rate, "volume_flow_rate")
@@ -386,6 +391,9 @@ def specific_airflow_resistance(
       :math:`u = q_v / A`).
 
     The unit is pascal second per metre (Pa*s/m), not Pa*s/m2.
+
+    :raises TypeError: if ``area``, ``pressure_drop_pa``, ``resistance`` or ``velocity``
+        is not a single number.
     """
     require_scalar(area, "area")
     require_scalar(pressure_drop_pa, "pressure_drop_pa")
@@ -428,6 +436,9 @@ def airflow_resistivity(specific_resistance: float, thickness_m: float) -> float
 
     ``specific_resistance`` is ``R_s`` (Pa*s/m) and ``thickness_m`` is ``d`` (m),
     the specimen thickness in the flow direction. Returns ``sigma`` in Pa*s/m2.
+
+    :raises TypeError: if ``specific_resistance`` or ``thickness_m`` is not a single
+        number.
     """
     require_scalar(specific_resistance, "specific_resistance")
     require_scalar(thickness_m, "thickness_m")
@@ -480,6 +491,9 @@ def static_airflow_resistance(
     ``linear_coefficient`` ``a`` is the zero-velocity specific airflow
     resistance. A velocity above the clause 7.5 upper limit (15 mm/s) raises
     :class:`AirflowResistanceWarning`.
+
+    :raises TypeError: if ``area``, ``evaluation_velocity`` or ``thickness_m`` is not a
+        single number.
     """
     require_scalar(area, "area")
     require_scalar(evaluation_velocity, "evaluation_velocity")
@@ -549,6 +563,9 @@ def piston_volume_flow_rate(
     ``frequency`` is the piston frequency ``f`` (Hz), ``stroke_amplitude`` the
     stroke amplitude ``h`` (m) and ``piston_area`` the piston cross-section
     ``A_P`` (m2). Returns ``q_v`` in m3/s.
+
+    :raises TypeError: if ``frequency``, ``piston_area`` or ``stroke_amplitude`` is not
+        a single number.
     """
     require_scalar(frequency, "frequency")
     require_scalar(piston_area, "piston_area")
@@ -592,6 +609,8 @@ def thermal_boundary_layer_thickness(
     be found there (see ``docs/ERRATA.md``). The defaults here are the Annex F values;
     with the Annex A.3 example (:math:`f = 2` Hz) both pairs give ``1.83e-3 m``, because
     the printed pair preserves the tabulated diffusivity.
+
+    :raises TypeError: if ``frequency`` is not a single number.
     """
     require_scalar(frequency, "frequency")
     if frequency <= 0.0:
@@ -633,6 +652,9 @@ def effective_kappa(
     :func:`alternating_airflow_resistance`; the Annex A.3 worked example
     (:math:`S = 0.0471` m2, :math:`V = 7.854\times 10^{-4}` m3,
     :math:`f = 2` Hz) yields :math:`\kappa' = 1.370`.
+
+    :raises TypeError: if ``cavity_surface`` or ``cavity_volume`` is not a single
+        number.
     """
     require_scalar(cavity_surface, "cavity_surface")
     require_scalar(cavity_volume, "cavity_volume")
@@ -722,6 +744,10 @@ def alternating_airflow_resistance(
     piston area and the specimen area, and this function is handed neither. Compute it
     with :func:`piston_volume_flow_rate` and :func:`linear_airflow_velocity` if
     the rig is near either end of the range.
+
+    :raises TypeError: if ``cavity_volume``, ``frequency``, ``kappa_prime``,
+        ``level_specimen``, ``level_termination``, ``piston_stroke_specimen``,
+        ``piston_stroke_termination`` or ``static_pressure_pa`` is not a single number.
     """
     require_scalar(level_specimen, "level_specimen")
     require_scalar(level_termination, "level_termination")

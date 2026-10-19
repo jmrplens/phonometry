@@ -277,6 +277,7 @@ below 5 %: e.g. $\gamma^2 = 0.8$ needs about $n = 75$ spectra
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a coherence outside (0, 1] or `n_averages < 1`. |
+| TypeError | if `n_averages` is a flag, a text or an array where a count goes. |
 
 ## resonance_frequency
 
@@ -295,6 +296,12 @@ SDOF, in Hz.
 | `stiffness` | Stiffness `k`, in N/m. |
 
 **Returns:** The natural frequency `f0`, in hertz.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `mass` or `stiffness` is not a single number. |
 
 ## RigidMassCalibrationResult
 
@@ -479,6 +486,12 @@ ISO 7626-1 (Table 1 / 3.1.2 definitions).
 
 **Returns:** The complex receptance `H`, in m/N.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `damping`, `mass` or `stiffness` is not a single number. |
+
 ## verify_rigid_mass_calibration
 
 ```python
@@ -519,3 +532,4 @@ clause's and is not a parameter.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown quantity, non-positive mass or frequency, or mismatched shapes. |
+| TypeError | if `mass` is not a single number. |

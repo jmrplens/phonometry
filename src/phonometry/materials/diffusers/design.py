@@ -66,7 +66,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_count, require_scalar
+from ..._internal.validation import require_count, require_present, require_scalar
 from .scattering_diffusion import (
     DiffusionSpectrum,
     diffusion_spectrum,
@@ -154,6 +154,7 @@ def quadratic_residue_sequence(prime: int) -> Real:
     :return: The sequence ``s_n`` as an integer-valued float array of length
         ``N``.
     :raises ValueError: if ``prime`` is not an odd prime of at least 3.
+    :raises TypeError: if ``prime`` is a flag, a text or an array where a count goes.
     """
     n = _prime_generator(prime)
     indices = np.arange(n, dtype=np.int64)
@@ -181,6 +182,8 @@ def qrd_well_depths(
     :return: Well depths ``d_n``, in metres, one per well of a single period.
     :raises ValueError: if ``prime`` is not an odd prime, or if
         ``design_frequency`` or ``speed_of_sound`` is not positive.
+    :raises TypeError: if ``design_frequency`` or ``speed_of_sound`` is not a single
+        number, or ``prime`` is a flag, a text or an array where a count goes.
     """
     n = _prime_generator(prime)
     f0 = _positive_scalar(design_frequency, "design_frequency")
@@ -268,9 +271,8 @@ class DiffuserPolarResponse(OwnsArrays):
         predicted response (ISO 17497-2, Formula (5)).
     :ivar source_angle_deg: Angle of incidence ``psi`` of the source, in degrees.
     :ivar well_width: Well width ``w`` of the predicted surface, in metres,
-        always retained by the predictor (with ``n_repetitions``) so
-        :meth:`plot_geometry` can draw the well profile; appended after the
-        original fields and ``None`` only for hand-built responses.
+        retained (with ``n_repetitions``) so :meth:`plot_geometry` can draw
+        the well profile.
     :ivar depths: Well depths ``d_n`` of one period, in metres, when the
         response was predicted from depths; ``None`` otherwise (explicit
         ``reflection`` surfaces have no drawable well profile).
@@ -283,9 +285,16 @@ class DiffuserPolarResponse(OwnsArrays):
     coefficient: float
     _: KW_ONLY
     source_angle_deg: float = 0.0
-    well_width: float | None = None
+    well_width: float
     depths: Real | None = None
-    n_repetitions: int | None = None
+    n_repetitions: int
+
+    def __post_init__(self) -> None:
+        """Refuse a response built without the surface it was predicted for.
+
+        :raises TypeError: if ``well_width`` or ``n_repetitions`` is ``None``.
+        """
+        require_present(self, "well_width", "n_repetitions")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -309,9 +318,8 @@ class DiffuserPolarResponse(OwnsArrays):
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
 
-        :raises ValueError: If the response does not retain its well
-            geometry (hand-built, or predicted from an explicit
-            ``reflection`` sequence).
+        :raises ValueError: If the response was predicted from an explicit
+            ``reflection`` sequence, which has no well profile to draw.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_diffuser_geometry
@@ -464,6 +472,9 @@ def predict_diffuser_polar_response(
         directional diffusion coefficient and ``.plot()``.
     :raises ValueError: for invalid geometry, or if not exactly one of ``depths``
         and ``reflection`` is supplied.
+    :raises TypeError: if ``frequency``, ``source_angle_deg``, ``speed_of_sound`` or
+        ``well_width`` is not a single number, or ``n_repetitions`` is a flag, a text or
+        an array where a count goes.
     """
     w, f, ang, psi, n_periods, c = _prepare_geometry(
         well_width,

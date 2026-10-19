@@ -369,6 +369,7 @@ def impulse_prominence(
     :raises ValueError: for empty input, mismatched lengths, a non-positive
         onset rate or level difference, or an assessment period that is not
         positive and finite.
+    :raises TypeError: if ``assessment_period_minutes`` is not a single number.
     """
     require_scalar(assessment_period_minutes, "assessment_period_minutes")
     if not math.isfinite(assessment_period_minutes) or assessment_period_minutes <= 0.0:
@@ -428,6 +429,7 @@ def rating_level(
         ``durations``); commonly the sum of the durations.
     :return: The rating level ``LAr,T``, in dB.
     :raises ValueError: for mismatched lengths or a non-positive time.
+    :raises TypeError: if ``reference_time`` is not a single number.
     """
     le = np.atleast_1d(np.asarray(laeq, dtype=np.float64))
     ki = np.atleast_1d(np.asarray(adjustment, dtype=np.float64))
@@ -730,6 +732,7 @@ def sound_pressure_level_history(
         dB. The realised interval is ``times[1] - times[0]`` and may differ
         slightly from ``dt`` because it is an integer number of samples.
     :raises ValueError: for a non-positive ``fs`` or ``dt`` outside 10-25 ms.
+    :raises TypeError: if ``dt`` or ``fs`` is not a single number.
     """
     from ...filters.weighting import time_weighting, weighting_filter
 
@@ -895,6 +898,7 @@ def detect_onsets(
         for pass-bys of road vehicles, trains or aircraft (3.5, Note 1).
     :return: The detected onsets, ordered in time (empty when none is found).
     :raises ValueError: for a non-positive ``dt`` or fewer than two samples.
+    :raises TypeError: if ``dt`` is not a single number.
     """
     lev = np.asarray(levels, dtype=np.float64).ravel()
     require_scalar(dt, "dt")

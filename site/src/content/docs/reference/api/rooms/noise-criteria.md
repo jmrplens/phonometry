@@ -57,8 +57,9 @@ Octave-band levels of a Noise Criteria curve (ANSI/ASA S12.2-2019 Table 1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `index` is outside the tabulated range. |
+| TypeError | if `index` is not a single number. |
 
-## NC_CURVES_DB
+## NC_CURVE_LEVELS
 
 *Constant* (`numpy.ndarray, shape (12, 10)`).
 
@@ -242,6 +243,12 @@ equals the 31.5 Hz level.
 | `index` | The RC designation (value at 1000 Hz). |
 
 **Returns:** The 10-band curve levels, in dB, aligned with [`NC_OCTAVE_BANDS_HZ`](/phonometry/reference/api/rooms/noise-criteria/#nc_octave_bands_hz).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `index` is not a single number. |
 
 ## RCResult
 

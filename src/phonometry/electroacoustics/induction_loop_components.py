@@ -190,6 +190,7 @@ __all__ = [
     "loop_center_field",
     "loop_current",
     "loop_dimensions",
+    "LoopDimensions",
     "loop_impedance",
     "loop_resistance",
     "max_output_current",
@@ -422,6 +423,7 @@ class LoopField(OwnsArrays):
         :param component: ``"x"``, ``"y"``, ``"z"`` or ``"magnitude"``.
         :return: :math:`20\lg(|H|/0{,}4\ \mathrm{A/m})`; minus infinity where
             the component vanishes, which is the null line outside a loop.
+        :raises TypeError: if ``component`` is not a text.
         """
         name = require_choice(component, "component", ("x", "y", "z", "magnitude"))
         values = (
@@ -497,6 +499,8 @@ def rectangular_loop_field(
     :return: A :class:`LoopField`.
     :raises ValueError: for a non-positive dimension, a non-finite coordinate
         or a point on the conductor, where a filament's field is infinite.
+    :raises TypeError: if ``current_a``, ``length_m`` or ``width_m`` is not a single
+        number, or ``n_turns`` is a flag, a text or an array where a count goes.
     """
     current = require_finite(current_a, "current_a")
     length = require_positive(length_m, "length_m")
@@ -571,6 +575,8 @@ def loop_center_field(
         square.
     :param n_turns: Number of turns.
     :return: The field strength at the centre, in A/m.
+    :raises TypeError: if ``current_a``, ``length_m`` or ``width_m`` is not a single
+        number, or ``n_turns`` is a flag, a text or an array where a count goes.
     """
     current = require_finite(current_a, "current_a")
     side = require_positive(length_m, "length_m")
@@ -604,6 +610,9 @@ def loop_current(
     :param field_strength_a_per_m: The field strength to reach, in A/m.
     :param n_turns: Number of turns.
     :return: The RMS current in each turn, in amperes.
+    :raises TypeError: if ``field_strength_a_per_m``, ``height_m``, ``length_m`` or
+        ``width_m`` is not a single number, or ``n_turns`` is a flag, a text or an array
+        where a count goes.
     """
     length = require_positive(length_m, "length_m")
     width = require_positive(width_m, "width_m")
@@ -613,6 +622,23 @@ def loop_current(
     return target / (n * _axis_field_per_ampere(length, width, height))
 
 
+@dataclass(frozen=True)
+class LoopDimensions(OwnsArrays):
+    """The sides of the largest loop an amplifier drives to a field strength.
+
+    What :func:`loop_dimensions` returns: the two sides, named, where a
+    ``(short side, long side)`` tuple used to be unpacked by position, with
+    the names :func:`loop_current` takes them by.
+
+    :ivar width_m: The short side, in metres.
+    :ivar length_m: The long side, in metres: the short side times the aspect
+        ratio.
+    """
+
+    width_m: float
+    length_m: float
+
+
 def loop_dimensions(
     current_a: float,
     *,
@@ -620,7 +646,7 @@ def loop_dimensions(
     height_m: float = _MEASUREMENT_HEIGHT_M,
     field_strength_a_per_m: float = _REFERENCE_FIELD_STRENGTH_A_PER_M,
     n_turns: int = 1,
-) -> tuple[float, float]:
+) -> LoopDimensions:
     """The largest loop an amplifier's current drives to a field strength (5.4.11).
 
     IEC 62489-1:2010 5.4.11.1 states "the linear dimensions of a square loop,
@@ -640,9 +666,13 @@ def loop_dimensions(
     :param field_strength_a_per_m: The field strength to reach, in A/m
         (400 mA/m).
     :param n_turns: Number of turns.
-    :return: ``(short_side_m, long_side_m)``, in metres.
+    :return: The short and the long side, in metres, as a
+        :class:`LoopDimensions` (``width_m``, ``length_m``).
     :raises ValueError: when the current cannot reach the field strength at
         that height with a loop of any size.
+    :raises TypeError: if ``aspect_ratio``, ``current_a``, ``field_strength_a_per_m`` or
+        ``height_m`` is not a single number, or ``n_turns`` is a flag, a text or an
+        array where a count goes.
     """
     current = require_positive(current_a, "current_a")
     ratio = require_finite(aspect_ratio, "aspect_ratio")
@@ -680,7 +710,7 @@ def loop_dimensions(
             lambda s: field(s) - target, best, upper, xtol=1e-12, rtol=1e-14
         )
     )
-    return short, ratio * short
+    return LoopDimensions(width_m=short, length_m=ratio * short)
 
 
 # ---------------------------------------------------------------------------
@@ -712,6 +742,9 @@ def loop_resistance(
     :param conductor_temperature_c: Temperature of the conductor, in degrees
         Celsius.
     :return: The DC resistance of the loop, in ohms.
+    :raises TypeError: if ``conductor_area_mm2``, ``conductor_temperature_c`` or
+        ``perimeter_m`` is not a single number, or ``n_turns`` is a flag, a text or an
+        array where a count goes.
     """
     perimeter = require_positive(perimeter_m, "perimeter_m")
     area = require_positive(conductor_area_mm2, "conductor_area_mm2")
@@ -769,6 +802,8 @@ def rectangular_loop_inductance(
     :return: The inductance, in henries.
     :raises ValueError: when the wire is not thin against the sides, where the
         formula does not hold.
+    :raises TypeError: if ``conductor_area_mm2``, ``length_m`` or ``width_m`` is not a
+        single number, or ``n_turns`` is a flag, a text or an array where a count goes.
     """
     a = require_positive(length_m, "length_m")
     b = require_positive(width_m, "width_m")
@@ -804,7 +839,7 @@ def _frequencies_to_read(frequency_hz: ArrayLike) -> np.ndarray:
     return f
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class LoopImpedance(OwnsArrays):
     r"""The impedance of a loop, a resistance in series with an inductance.
 
@@ -848,6 +883,7 @@ class LoopImpedance(OwnsArrays):
         :param current_a: RMS loop current, in amperes.
         :param frequency_hz: Frequency or frequencies, in hertz, positive and finite.
         :return: :math:`U = I|Z|`, in volts.
+        :raises TypeError: if ``current_a`` is not a single number.
         """
         current = require_finite(current_a, "current_a")
         return current * self.at(frequency_hz)
@@ -889,6 +925,8 @@ def loop_impedance(
     :param frequencies: Frequencies to tabulate the magnitude at, in hertz;
         by default the one-third-octave centres from 50 Hz to 10 kHz.
     :return: A :class:`LoopImpedance`.
+    :raises TypeError: if ``inductance_h`` or ``resistance_ohm`` is not a single number,
+        or ``frequencies`` holds a text or a value that is not a real number.
     """
     resistance = require_positive(resistance_ohm, "resistance_ohm")
     inductance = require_positive(inductance_h, "inductance_h")
@@ -994,6 +1032,9 @@ def max_output_current(
         or when the distortion never reaches the rated value, or already
         exceeds it at the first step, so the current lies outside the steps
         measured.
+    :raises TypeError: if ``load_resistance_ohm`` or ``rated_thd_percent`` is not a
+        single number, or ``resistor_voltage_v`` or ``thd_percent`` holds a text or a
+        value that is not a real number.
     """
     voltage = require_positive_array(resistor_voltage_v, "resistor_voltage_v")
     thd = require_finite_array(thd_percent, "thd_percent")
@@ -1054,6 +1095,8 @@ def compliance_voltage(voltage_v: ArrayLike) -> float:
         bandwidth (5.4.8.2 c).
     :return: The compliance voltage, in volts.
     :raises ValueError: for a record that does not swing both ways.
+    :raises TypeError: if ``voltage_v`` holds a text or a value that is not a real
+        number.
     """
     v = require_finite_array(voltage_v, "voltage_v")
     positive = float(np.max(v))
@@ -1086,6 +1129,8 @@ def equivalent_input_noise_voltage(
     :param noise_current_a: The A-weighted output current with no input, in
         amperes.
     :return: The equivalent input noise voltage, in volts.
+    :raises TypeError: if ``noise_current_a``, ``output_current_a`` or ``source_emf_v``
+        is not a single number.
     """
     u = require_positive(source_emf_v, "source_emf_v")
     i = require_positive(output_current_a, "output_current_a")
@@ -1110,6 +1155,8 @@ def amplifier_signal_to_noise_ratio(
     :param noise_current_a: The noise output current :math:`I_\mathrm{n}`, in
         amperes.
     :return: The signal-to-noise ratio, in dB.
+    :raises TypeError: if ``noise_current_a`` or ``rated_current_a`` is not a single
+        number.
     """
     i_r = require_positive(rated_current_a, "rated_current_a")
     i_n = require_positive(noise_current_a, "noise_current_a")
@@ -1139,7 +1186,7 @@ def _ascending(frequencies: np.ndarray, name: str) -> None:
         raise ValueError(msg)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class AmplifierFrequencyResponse(OwnsArrays):
     """The frequency response of an amplifier into its load (IEC 62489-1:2010 5.4.12).
 
@@ -1210,6 +1257,8 @@ def amplifier_frequency_response(
         and including 1000 Hz.
     :param output_current_a: The RMS load current at each, in amperes.
     :return: An :class:`AmplifierFrequencyResponse`.
+    :raises TypeError: if ``frequencies`` or ``output_current_a`` holds a text or a
+        value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     current = require_positive_array(output_current_a, "output_current_a")
@@ -1325,21 +1374,21 @@ def _widest_window(x: np.ndarray, y: np.ndarray, spread: float) -> tuple[float, 
 class AGCCharacteristic(OwnsArrays):
     """The steady-state output/input characteristic of an amplifier (5.4.13).
 
-    :ivar source_emf_db: The source e.m.f. levels, in dB, ascending.
+    :ivar source_emf_levels: The source e.m.f. levels, in dB, ascending.
     :ivar output_level: The output current level at each, in dB referred to
         the rated maximum output current (5.4.13.3).
     :ivar agc_range_db: The widest span of input level over which the output
         level changes by no more than 3 dB, in dB: the quantity IEC
         62489-1:2010+A1:2014 5.4.13.4 recommends to be at least 32 dB.
-    :ivar agc_range_start_db: The input level where that span starts, in dB.
-    :ivar agc_range_end_db: The input level where it ends, in dB.
+    :ivar agc_range_start_level: The input level where that span starts, in dB.
+    :ivar agc_range_end_level: The input level where it ends, in dB.
     """
 
-    source_emf_db: np.ndarray
+    source_emf_levels: np.ndarray
     output_level: np.ndarray
     agc_range_db: float
-    agc_range_start_db: float
-    agc_range_end_db: float
+    agc_range_start_level: float
+    agc_range_end_level: float
 
     @property
     def recommended_range_db(self) -> float:
@@ -1369,7 +1418,7 @@ class AGCCharacteristic(OwnsArrays):
 
 
 def agc_characteristic(
-    source_emf_db: ArrayLike, output_level: ArrayLike
+    source_emf_levels: ArrayLike, output_level: ArrayLike
 ) -> AGCCharacteristic:
     """The output/input characteristic of an amplifier and its AGC range (5.4.13).
 
@@ -1390,25 +1439,27 @@ def agc_characteristic(
     input where the output is 3 dB below its top to the highest input
     measured.
 
-    :param source_emf_db: Source e.m.f. levels, in dB re any fixed voltage,
+    :param source_emf_levels: Source e.m.f. levels, in dB re any fixed voltage,
         strictly ascending.
     :param output_level: Output current level at each, in dB re the rated
         maximum output current.
     :return: An :class:`AGCCharacteristic`.
+    :raises TypeError: if ``output_level`` or ``source_emf_levels`` holds a text or a
+        value that is not a real number.
     """
-    x = require_finite_array(source_emf_db, "source_emf_db")
+    x = require_finite_array(source_emf_levels, "source_emf_levels")
     y = require_finite_array(output_level, "output_level")
     if x.size != y.size or x.size < _MIN_CHARACTERISTIC_POINTS:
-        msg = "'source_emf_db' and 'output_level' need the same length, at least 2."
+        msg = "'source_emf_levels' and 'output_level' need the same length, at least 2."
         raise ValueError(msg)
-    _ascending(x, "source_emf_db")
+    _ascending(x, "source_emf_levels")
     start, end = _widest_window(x, y, _AGC_OUTPUT_CHANGE_DB)
     return AGCCharacteristic(
-        source_emf_db=x,
+        source_emf_levels=x,
         output_level=y,
         agc_range_db=end - start,
-        agc_range_start_db=start,
-        agc_range_end_db=end,
+        agc_range_start_level=start,
+        agc_range_end_level=end,
     )
 
 
@@ -1494,6 +1545,8 @@ def quadrature_phase_error(
     :param phase_difference_deg: The phase angle between the loop currents at
         each, in degrees.
     :return: A :class:`QuadraturePhaseError`.
+    :raises TypeError: if ``frequencies`` or ``phase_difference_deg`` holds a text or a
+        value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     phase = require_finite_array(phase_difference_deg, "phase_difference_deg")
@@ -1617,8 +1670,9 @@ def neck_loop_characteristics(
     :param input_voltage_v: The input voltage the field was measured with, in
         volts.
     :return: A :class:`NeckLoopCharacteristics`.
-    :raises TypeError: If ``impedance_ohm`` holds an element that is not a
-        number.
+    :raises TypeError: If ``impedance_ohm``, ``frequencies`` or
+        ``field_strength_level`` holds an element that is not a number, or
+        ``input_voltage_v`` is not one number.
     :raises ValueError: If the frequencies are not positive and ascending or
         miss 1000 Hz, the arrays differ in length, a level is not finite, or
         a real impedance is not positive.
@@ -1809,7 +1863,8 @@ def verify_neck_loop(
         jig, in volts (:attr:`NeckLoopCharacteristics.reference_input_voltage_v`).
     :param neck_loop_type: 1 or 2.
     :return: A :class:`NeckLoopVerification`.
-    :raises TypeError: if ``neck_loop_type`` is not a number, a bool included.
+    :raises TypeError: if ``neck_loop_type`` is not a number, a bool included,
+        or ``input_voltage_v`` or ``dc_resistance_ohm`` is not one number.
     :raises ValueError: if ``neck_loop_type`` is a number but not 1 or 2.
     """
     resistance = require_positive(dc_resistance_ohm, "dc_resistance_ohm")

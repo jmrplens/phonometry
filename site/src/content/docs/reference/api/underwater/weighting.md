@@ -269,6 +269,7 @@ dual-metric rule requires.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
+| TypeError | if `n_events` or `peak_spl` is not a single number. |
 
 ## WeightedExposureResult
 

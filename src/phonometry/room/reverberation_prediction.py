@@ -337,6 +337,7 @@ def sabine_reverberation_time(
         343 m/s, dry air at 20 °C, giving the factor ``0.161``).
     :return: The reverberation time ``T``, s; a float for scalar inputs,
         otherwise a per-band array.
+    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
@@ -372,6 +373,7 @@ def eyring_reverberation_time(
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s.
+    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
@@ -410,6 +412,7 @@ def millington_sette_reverberation_time(
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s.
+    :raises TypeError: if ``speed_of_sound`` or ``volume`` is not a single number.
     """
     volume = require_positive(volume, "volume")
     speed_of_sound = require_positive(speed_of_sound, "speed_of_sound")
@@ -521,6 +524,7 @@ def fitzroy_reverberation_time(
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s.
+    :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     weights, times = _axial_eyring_times(
         dimensions, absorptions, air_attenuation_per_m, speed_of_sound
@@ -554,6 +558,7 @@ def arau_puchades_reverberation_time(
     :param air_attenuation_per_m: Air power-attenuation coefficient ``m`` (1/m).
     :param speed_of_sound: Speed of sound ``c0``, m/s.
     :return: The reverberation time ``T``, s.
+    :raises TypeError: if ``speed_of_sound`` is not a single number.
     """
     weights, times = _axial_eyring_times(
         dimensions, absorptions, air_attenuation_per_m, speed_of_sound

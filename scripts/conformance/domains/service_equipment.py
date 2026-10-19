@@ -102,7 +102,7 @@ def _chk_background_formula() -> Outcome:
     res = building.service_equipment_background_correction(l1, l2)
     subtracted = 10.0 * np.log10(10.0 ** (0.1 * l1) - 10.0 ** (0.1 * l2))
     expected = np.where(l1 - l2 >= 10.0, l1, subtracted)
-    worst = float(np.max(np.abs(res.corrected_db - expected)))
+    worst = float(np.max(np.abs(res.corrected_levels - expected)))
     return numeric(0.0, worst, 1e-9, unit="dB", places=6)
 
 
@@ -180,7 +180,7 @@ def _chk_average() -> Outcome:
     exact = 10.0 * math.log10((10.0**4.0 + 10.0**4.3 + 10.0**4.6) / 3.0)
     return numeric(
         math.floor(exact * 10.0 + 0.5) / 10.0,
-        float(res.average_db[0]),
+        float(res.average_levels[0]),
         1e-9,
         unit="dB",
         places=2,
@@ -208,11 +208,11 @@ def _chk_standardization() -> Outcome:
             fraction=fraction,
             reverberation_time=np.full(freqs.size, 1.0),
         )
-        assert res.standardized_db is not None
+        assert res.standardized_levels is not None
         low, high = (50.0, 5000.0) if fraction == 3 else (63.0, 4000.0)
         inside = (freqs >= low) & (freqs <= high)
         expected = np.where(inside, 40.0 - 10.0 * math.log10(2.0), 40.0)
-        worst = max(worst, float(np.max(np.abs(res.standardized_db - expected))))
+        worst = max(worst, float(np.max(np.abs(res.standardized_levels - expected))))
     return numeric(0.0, worst, 1e-9, unit="dB", places=6)
 
 
@@ -232,8 +232,8 @@ def _chk_normalization() -> Outcome:
         reverberation_time=np.full(_THIRD.size, 0.5),
         volume=50.0,
     )
-    assert res.normalized_db is not None
-    at_1_khz = float(res.normalized_db[_THIRD == 1000.0][0])
+    assert res.normalized_levels is not None
+    at_1_khz = float(res.normalized_levels[_THIRD == 1000.0][0])
     return numeric(42.0412, at_1_khz, 5e-5, unit="dB", places=4)
 
 

@@ -184,6 +184,8 @@ def train_category_rms(kb_fti_zug: ArrayLike) -> float:
     :param kb_fti_zug: :math:`KB_{\mathrm{FT}i,\mathrm{Zug}}` of each passage, dimensionless.
     :return: :math:`KB_\mathrm{FTm,Zug}`.
     :raises ValueError: For an empty, non-finite or negative input.
+    :raises TypeError: if ``kb_fti_zug`` holds a text or a value that is not a real
+        number.
     """
     values = _passages(kb_fti_zug)
     return float(np.sqrt(np.mean(values**2)))
@@ -201,6 +203,8 @@ def train_kb_fmax(kb_ftm_zug: ArrayLike) -> NDArray[np.float64]:
     :param kb_ftm_zug: :math:`KB_\mathrm{FTm,Zug}` of each category.
     :return: :math:`KB_\mathrm{Fmax,Zug}` of each, in the same order.
     :raises ValueError: For an empty, non-finite or negative input.
+    :raises TypeError: if ``kb_ftm_zug`` holds a text or a value that is not a real
+        number.
     """
     values = require_finite_array(kb_ftm_zug, "kb_ftm_zug")
     if np.any(values < 0.0):
@@ -253,6 +257,8 @@ def train_assessment_severity(
     :return: :math:`KB_\mathrm{FTr}`.
     :raises ValueError: For mismatched, negative or non-finite inputs, a
         count that is not whole, or an unknown time of day.
+    :raises TypeError: if ``alpha``, ``kb_ftm_zug`` or ``trains`` holds a text or a
+        value that is not a real number.
     """
     severities = require_finite_array(kb_ftm_zug, "kb_ftm_zug")
     counts = require_finite_array(trains, "trains")
@@ -450,6 +456,8 @@ def assess_railway_change(
     :return: The verdict, as a :class:`RailwayChange`.
     :raises ValueError: For a negative quantity, an unknown time of day, or
         guide values of the 1999 edition or of the other period.
+    :raises TypeError: if ``kb_fmax_after``, ``kb_fmax_before``, ``kb_ftr_after`` or
+        ``kb_ftr_before`` is not a single number.
     """
     fmax_before = require_non_negative(kb_fmax_before, "kb_fmax_before")
     fmax_after = require_non_negative(kb_fmax_after, "kb_fmax_after")

@@ -497,7 +497,7 @@ def test_a_drop_of_1_db_to_within_rounding_leaves_the_turbine_out() -> None:
 # Annex C: low frequency sound
 # ---------------------------------------------------------------------------
 def test_table_3_type_b_examples_are_transcribed() -> None:
-    assert dict(env.TYPE_B_UNCERTAINTY_EXAMPLES_DB) == ref.WT_TABLE3_TYPE_B_DB
+    assert dict(env.EXAMPLE_TYPE_B_UNCERTAINTIES_DB) == ref.WT_TABLE3_TYPE_B_DB
 
 
 def test_table_c1_impedance_classes_are_transcribed() -> None:

@@ -99,6 +99,7 @@ reduces to the looser of the two component classes.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either class is not 1 or 2. The non-real-time class 2X of clause 4 is not modelled here. |
+| TypeError | if `probe_class` or `processor_class` is a flag, a text or an array where a count goes. |
 
 ## IntensityInstrumentComplianceResult
 
@@ -161,6 +162,7 @@ Smallest per-band margin to a class, in dB (the binding margin).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `device_class` is not 1 or 2. |
+| TypeError | if `device_class` is a flag, a text or an array where a count goes. |
 
 ### IntensityInstrumentComplianceResult.failing_bands()
 
@@ -177,6 +179,12 @@ Nominal centre frequencies of the bands that miss a class, in Hz.
 | Name | Description |
 | :--- | :--- |
 | `device_class` | 1 or 2; `None` (default) uses `reference_class`. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `device_class` is a flag, a text or an array where a count goes. |
 
 ### IntensityInstrumentComplianceResult.limit_class1
 
@@ -364,6 +372,7 @@ angular unit $k d$ is expressed in; degrees are used here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `spacing_m`, `speed_of_sound` or `frequency` are not positive and finite, or if `residual_index` is not finite. |
+| TypeError | if `spacing_m` or `speed_of_sound` is not a single number. |
 
 ## residual_index_from_phase_mismatch
 
@@ -411,6 +420,7 @@ table requires.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `phase_mismatch_deg` is not positive and finite, or if `spacing_m`, `speed_of_sound` or `frequency` are not positive and finite. |
+| TypeError | if `spacing_m` or `speed_of_sound` is not a single number. |
 
 ## residual_index_limits
 
@@ -420,7 +430,7 @@ residual_index_limits(
     *,
     spacing_m: float = 0.025,
     frequencies: list[float] | np.ndarray | None = None,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]
+) -> ResidualIndexLimits
 ```
 
 IEC 61043:1993 Table 2 minimum pressure-residual intensity index.
@@ -439,13 +449,38 @@ for a spacing in metres).
 | `spacing_m` | Microphone separation in metres (default 0.025, the nominal separation the table is printed for). |
 | `frequencies` | Band centre frequencies in Hz to report the limits at, as nominal labels or the exact base-ten centres behind them. `None` (default) returns all 22 tabulated one-third-octave bands. |
 
-**Returns:** Tuple `(frequencies, class1, class2)` of the nominal band centres in Hz and the two minimum `delta_pI0` requirements in dB.
+**Returns:** The nominal band centres in Hz and the two minimum `delta_pI0` requirements in dB, as a [`ResidualIndexLimits`](/phonometry/reference/api/power/intensity-compliance/#residualindexlimits) (`frequencies`, `class_1`, `class_2`).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `device` is unknown, `spacing_m` is not positive or a frequency is not a tabulated band. |
+| TypeError | if `spacing_m` is not a single number. |
+
+## ResidualIndexLimits
+
+```python
+ResidualIndexLimits(
+    frequencies: np.ndarray,
+    class_1: np.ndarray,
+    class_2: np.ndarray,
+)
+```
+
+The IEC 61043 Table 2 minimum pressure-residual intensity index, per class.
+
+What [`residual_index_limits`](/phonometry/reference/api/power/intensity-compliance/#residual_index_limits) returns: the bands and the two class
+minima, named, where a `(frequencies, class1, class2)` tuple used to be
+unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The nominal band centres, in Hz. |
+| `class_1` | The class 1 minimum $\delta_{pI0}$ in each band, in dB, rescaled to the microphone separation. |
+| `class_2` | The class 2 minimum, in dB. |
 
 ## verify_intensity_class
 

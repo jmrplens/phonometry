@@ -154,11 +154,11 @@ def test_the_worked_example_of_c4() -> None:
         ref.ISO17534_1_EXAMPLE_DIFFERENCES_DB
     )
     rank_q01, rank_q09 = ref.ISO17534_1_EXAMPLE_RANKS
-    q01_db, q09_db = ref.ISO17534_1_EXAMPLE_QUANTILES_DB
+    q01_level_difference, q09_level_difference = ref.ISO17534_1_EXAMPLE_QUANTILES_DB
     assert result.rank_q01 == rank_q01
     assert result.rank_q09 == rank_q09
-    assert result.q01_db == pytest.approx(q01_db, abs=1e-12)
-    assert result.q09_db == pytest.approx(q09_db, abs=1e-12)
+    assert result.q01_level_difference == pytest.approx(q01_level_difference, abs=1e-12)
+    assert result.q09_level_difference == pytest.approx(q09_level_difference, abs=1e-12)
     assert result.sample_size == 25
     assert result.from_table
 
@@ -168,20 +168,22 @@ def test_the_order_of_the_sample_does_not_matter() -> None:
     shuffled = np.random.default_rng(17534).permutation(values)
     result = environment.level_difference_quantiles(shuffled)
     np.testing.assert_array_equal(result.sorted_differences, values)
-    assert result.q01_db == pytest.approx(-1.0, abs=1e-12)
-    assert result.q09_db == pytest.approx(3.0, abs=1e-12)
+    assert result.q01_level_difference == pytest.approx(-1.0, abs=1e-12)
+    assert result.q09_level_difference == pytest.approx(3.0, abs=1e-12)
 
 
 def test_c5_mean_and_estimated_standard_deviation() -> None:
     """The systematic deviation and the uncertainty C.5 asks for."""
     values = ref.ISO17534_1_EXAMPLE_DIFFERENCES_DB
     result = environment.level_difference_quantiles(values)
-    assert result.mean_db == pytest.approx(statistics.fmean(values), rel=1e-12)
+    assert result.mean_level_difference == pytest.approx(
+        statistics.fmean(values), rel=1e-12
+    )
     assert result.standard_deviation_db == pytest.approx(
         statistics.stdev(values), rel=1e-12
     )
     # 39 dB over 25 values: the example's mean is 1,56 dB.
-    assert result.mean_db == pytest.approx(1.56, abs=1e-12)
+    assert result.mean_level_difference == pytest.approx(1.56, abs=1e-12)
 
 
 def test_above_fifty_the_quantiles_follow_the_formulas() -> None:
@@ -191,8 +193,8 @@ def test_above_fifty_the_quantiles_follow_the_formulas() -> None:
     assert not result.from_table
     assert result.rank_q01 == 7
     assert result.rank_q09 == 66
-    assert result.q01_db == pytest.approx(6.0)
-    assert result.q09_db == pytest.approx(65.0)
+    assert result.q01_level_difference == pytest.approx(6.0)
+    assert result.q09_level_difference == pytest.approx(65.0)
 
 
 def test_the_sample_is_a_read_only_copy() -> None:
@@ -445,14 +447,14 @@ def test_round_robin_result_is_the_q09_of_the_largest_deviations() -> None:
     result = environment.round_robin_precision(_round_robin_levels())
     # Table C.1 for 40 receivers: R(q0,9) = 37.
     assert result.rank_q09 == 37
-    assert result.q09_db == pytest.approx(np.linspace(0.05, 2.0, 40)[36])
+    assert result.q09_level_difference == pytest.approx(np.linspace(0.05, 2.0, 40)[36])
 
 
 def test_the_mean_is_not_an_energetic_average() -> None:
     levels = np.tile([50.0, 60.0], (20, 1))
     result = environment.round_robin_precision(levels)
     np.testing.assert_allclose(result.mean_levels, 55.0)
-    assert result.q09_db == pytest.approx(5.0)
+    assert result.q09_level_difference == pytest.approx(5.0)
 
 
 def test_the_largest_deviation_is_absolute_and_from_the_arithmetic_mean() -> None:
@@ -467,7 +469,7 @@ def test_the_largest_deviation_is_absolute_and_from_the_arithmetic_mean() -> Non
     result = environment.round_robin_precision(levels)
     np.testing.assert_allclose(result.mean_levels, 53.0)
     np.testing.assert_allclose(result.max_abs_deviations_db, 3.0)
-    assert result.q09_db == pytest.approx(3.0)
+    assert result.q09_level_difference == pytest.approx(3.0)
 
 
 def test_round_robin_levels_are_a_read_only_copy() -> None:
@@ -660,8 +662,8 @@ def test_the_columns_are_read_only_copies() -> None:
     results = np.array([1.0, 2.0])
     verdict = environment.verify_calculation_results(results, [0.9, 1.9], [1.1, 2.1])
     results[0] = 5.0
-    assert verdict.results_db[0] == pytest.approx(1.0)
-    assert not verdict.results_db.flags.writeable
+    assert verdict.computed_levels[0] == pytest.approx(1.0)
+    assert not verdict.computed_levels.flags.writeable
 
 
 def test_the_module_publishes_its_names_through_environment() -> None:

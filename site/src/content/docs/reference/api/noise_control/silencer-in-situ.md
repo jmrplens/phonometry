@@ -142,6 +142,7 @@ level itself is given either way.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match point for point, or an extraneous level at or above the level it is subtracted from. |
+| TypeError | if `extraneous_levels` or `levels` holds a text or a value that is not a real number. |
 
 ## ExtraneousCorrectionResult
 
@@ -202,6 +203,7 @@ $w = \sqrt{2 p_\mathrm{v} / \rho}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive density or a negative velocity pressure. |
+| TypeError | if `density` is not a single number, or `velocity_pressure_pa` holds a text or a value that is not a real number. |
 
 ## gas_density_kg_m3
 
@@ -245,6 +247,7 @@ Equation (29) prints it and admits any gas through its molar mass.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a temperature that is not finite or at or below the absolute zero the equation uses, or a non-positive pressure or molar mass. |
+| TypeError | if `atmospheric_pressure_pa`, `molar_mass_kg_kmol` or `temperature_c` is not a single number. |
 
 ## in_situ_insertion_loss
 
@@ -304,6 +307,7 @@ value per band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra that do not match, an area or a field correction that is neither one value nor one per band, a non-positive area or band centre, a field correction that is not finite, or a case that is not an insertion one. |
+| TypeError | if `area_with_m2`, `area_without_m2`, `field_correction_difference` or `frequencies` holds a text or a value that is not a real number. |
 
 ## in_situ_transmission_loss
 
@@ -359,6 +363,7 @@ band, or one value per band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra that do not match, an area or a field correction that is neither one value nor one per band, a non-positive area or band centre, a field correction that is not finite, or a case that is not a transmission one. |
+| TypeError | if `field_correction_difference`, `frequencies`, `receiver_area_m2` or `source_area_m2` holds a text or a value that is not a real number. |
 
 ## insertion_level_difference
 
@@ -390,6 +395,7 @@ which run they are.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra that do not match band for band. |
+| TypeError | if `levels_with` or `levels_without` holds a text or a value that is not a real number. |
 
 ## installation_case
 
@@ -418,6 +424,7 @@ side is not part of what is measured.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a number outside the figure. |
+| TypeError | if `number` is a flag, a text or an array where a count goes. |
 
 ## INSTALLATION_CASES
 
@@ -579,6 +586,7 @@ reported rather than returned as a distance nobody can stand at.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive area. |
+| TypeError | if `downstream_area` or `free_area_m2` is not a single number. |
 
 ## measurement_distance_upstream_m
 
@@ -604,6 +612,7 @@ diameters of the upstream measurement cross-section.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive area. |
+| TypeError | if `upstream_area` is not a single number. |
 
 ## octave_levels_from_third_octave
 
@@ -639,6 +648,7 @@ difference taken afterwards.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a count that is not a multiple of three. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## reverberant_surface_area_m2
 
@@ -682,6 +692,7 @@ so.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive volume, time or speed. |
+| TypeError | if `speed_of_sound` or `volume_m3` is not a single number, or `reverberation_time_s` holds a text or a value that is not a real number. |
 
 ## SABINE_AREA_COEFFICIENT
 
@@ -729,6 +740,7 @@ the 10 dB row.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a margin under [`ISO11820_MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/noise_control/silencer-in-situ/#iso11820_min_background_margin_db), which Table 1 calls invalid. |
+| TypeError | if `level_difference` holds a text or a value that is not a real number. |
 
 ## silencer_flow_velocity_m_s
 
@@ -763,6 +775,7 @@ why 9.2 asks for it rather than for the duct velocity.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive area. |
+| TypeError | if `free_area_m2`, `upstream_area` or `upstream_mean_velocity_m_s` is not a single number. |
 
 ## silencer_mean_sound_pressure_level
 
@@ -792,6 +805,7 @@ sound pressure level".
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty or non-finite set of levels. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## silencer_sound_power_level
 
@@ -832,6 +846,7 @@ have been chosen as 3.3 and 3.4 define them.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive area or mismatched shapes. |
+| TypeError | if `area`, `field_correction` or `mean_level` holds a text or a value that is not a real number. |
 
 ## SilencerInSituResult
 
@@ -937,6 +952,7 @@ says in words.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a value that is not finite, or a non-positive density or area. |
+| TypeError | if `density`, `downstream_area`, `total_pressure_loss_pa`, `upstream_area` or `volume_flow` is not a single number. |
 
 ## temperature_field_correction
 
@@ -990,6 +1006,7 @@ The standard writes 273 rather than 273,15, and that is what is used.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a temperature that is not finite or at or below the absolute zero the equation uses. |
+| TypeError | if `receiver_temperature_c` or `source_temperature_c` is not a single number. |
 
 ## total_pressure_loss_pa
 
@@ -1016,6 +1033,12 @@ also the static pressure difference.
 | `downstream_total_pressure_pa` | $\overline{p_\mathrm{Td}}$, in pascals, on the same basis. |
 
 **Returns:** $\Delta p_\mathrm{T}$, in pascals.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `downstream_total_pressure_pa` or `upstream_total_pressure_pa` is not a single number. |
 
 ## transmission_level_difference
 
@@ -1051,6 +1074,7 @@ turns into a transmission loss.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra that do not match band for band. |
+| TypeError | if `receiver_levels` or `source_levels` holds a text or a value that is not a real number. |
 
 ## TYPICAL_FIELD_CORRECTION_LIMIT_DB
 
@@ -1097,6 +1121,7 @@ asks.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match. |
+| TypeError | if `static_pressure_pa` or `total_pressure_pa` holds a text or a value that is not a real number. |
 
 ## VELOCITY_UNIFORMITY_TOLERANCE_PERCENT
 

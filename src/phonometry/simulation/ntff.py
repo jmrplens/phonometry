@@ -151,6 +151,7 @@ class ContourPhasors(OwnsArrays):
         :raises ValueError: for a non-positive ``frequency`` or ``segment``,
             for arrays that do not share one sample axis in the shapes above,
             or for a non-finite sample.
+        :raises TypeError: if ``frequency`` or ``segment`` is not a single number.
         """
         require_scalar(self.frequency, "frequency")
         require_scalar(self.segment, "segment")
@@ -305,7 +306,7 @@ def far_field_from_contour(
     :return: Complex array, one value per angle: the far-field pattern
         ``F(a)`` (units Pa sqrt(m)), or the pressure [Pa] at ``distance``.
     :raises TypeError: For a ``contour`` that is not a
-        :class:`ContourPhasors`.
+        :class:`ContourPhasors`, or a ``distance`` that is not one number.
     :raises ValueError: For invalid angles, a non-positive ``distance``, or
         an observation circle that does not clear the contour.
     """

@@ -127,6 +127,7 @@ convention.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid or the impedance is unspecified. |
+| TypeError | if `frequency_hz`, `height_step_m`, `max_height_m`, `max_range`, `range_step` or `source_height_m` is not a single number. |
 
 ## atmospheric_ray_paths
 
@@ -174,6 +175,7 @@ path; a ground reflection is instantaneous and leaves it continuous.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `max_range` or `source_height_m` is not a single number, or `n_steps` is a flag, a text or an array where a count goes. |
 
 ## AtmosphericPEResult
 
@@ -343,6 +345,7 @@ and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `max_height_m` or `ground_speed_of_sound` is not positive, or the profile turns non-positive within `[0, max_height_m]`. |
+| TypeError | if `gradient_per_s`, `ground_speed_of_sound` or `max_height_m` is not a single number. |
 
 ## log_linear_sound_speed_profile
 
@@ -383,6 +386,7 @@ near the ground is resolved by sampling the height grid logarithmically.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On non-positive `c0`, `z0` or `max_height_m`, fewer than two points, or a profile that turns non-positive. |
+| TypeError | if `b`, `ground_speed_of_sound`, `max_height_m` or `roughness_length` is not a single number, or `n_points` is a flag, a text or an array where a count goes. |
 
 ## ray_curvature_radius
 
@@ -419,6 +423,7 @@ $R_\mathrm{c} = c_0 / (|\text{gradient}| \cos\theta_0)$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the gradient is zero (a straight ray) or the launch angle is not within `(-90, 90)` degrees. |
+| TypeError | if `gradient_per_s`, `ground_speed_of_sound` or `launch_angle_deg` is not a single number. |
 
 ## shadow_zone_distance
 
@@ -463,3 +468,4 @@ compared with $R_\mathrm{c}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the gradient is not negative, or a height is negative. |
+| TypeError | if `gradient_per_s`, `ground_speed_of_sound`, `receiver_height_m` or `source_height_m` is not a single number. |

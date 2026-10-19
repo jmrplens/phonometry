@@ -328,7 +328,7 @@ print(annex_b.rating.reported)                 # 8 dB, as printed under the tabl
 print(round(annex_b.rating.rating, 2))         # 7.65 dB before rounding, see below
 
 u = environment.reflection_index_expanded_uncertainty()  # Table A.1, high column, k = 1.96
-print(round(u.rating_db, 2))                             # 1.59 dB, Table B.2
+print(round(u.rating_expanded_uncertainty_db, 2))                             # 1.59 dB, Table B.2
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/barrier_reflection_index.svg" alt="The sound reflection index of the Annex B barrier over the eighteen one-third octave bands from 100 Hz to 5 kHz: twelve light points per band for the twelve grid positions and a line through their average, near 0.58 in the three hatched bands below 200 Hz, falling from 0.39 at 250 Hz to 0.05 at 630 Hz, around 0.1 up to 1.25 kHz, a peak of 0.30 at 1.6 kHz and a rise to 0.43 at 5 kHz. The title gives DL RI of 8 dB from 200 Hz to 5 kHz." width="92%"></picture>

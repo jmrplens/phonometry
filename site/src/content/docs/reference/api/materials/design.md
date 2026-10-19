@@ -78,9 +78,9 @@ DiffuserPolarResponse(
     coefficient: float,
     *,
     source_angle_deg: float = 0.0,
-    well_width: float | None = None,
+    well_width: float,
     depths: NDArray[np.float64] | None = None,
-    n_repetitions: int | None = None,
+    n_repetitions: int,
 )
 ```
 
@@ -95,7 +95,7 @@ A predicted far-field polar response of a diffuser at one frequency.
 | `levels` | Predicted reflected sound-pressure level at each angle, in decibels, referenced to the peak of the response (peak at 0 dB). |
 | `coefficient` | Directional diffusion coefficient `d_theta` of the predicted response (ISO 17497-2, Formula (5)). |
 | `source_angle_deg` | Angle of incidence `psi` of the source, in degrees. |
-| `well_width` | Well width `w` of the predicted surface, in metres, always retained by the predictor (with `n_repetitions`) so `plot_geometry` can draw the well profile; appended after the original fields and `None` only for hand-built responses. |
+| `well_width` | Well width `w` of the predicted surface, in metres, retained (with `n_repetitions`) so `plot_geometry` can draw the well profile. |
 | `depths` | Well depths `d_n` of one period, in metres, when the response was predicted from depths; `None` otherwise (explicit `reflection` surfaces have no drawable well profile). |
 | `n_repetitions` | Number of repeated periods of the prediction. |
 
@@ -135,7 +135,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the response does not retain its well geometry (hand-built, or predicted from an explicit `reflection` sequence). |
+| ValueError | If the response was predicted from an explicit `reflection` sequence, which has no well profile to draw. |
 
 ## plot_qrd_geometry
 
@@ -178,6 +178,7 @@ sequence.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an empty or non-1-D depth sequence, a depth that is not finite and non-negative, a non-positive well width, fewer than one period, or a negative fin width. |
+| TypeError | if `fin_width`, `n_repetitions` or `well_width` is not a single number. |
 
 ## predict_diffuser_polar_response
 
@@ -240,6 +241,7 @@ exactly one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for invalid geometry, or if not exactly one of `depths` and `reflection` is supplied. |
+| TypeError | if `frequency`, `source_angle_deg`, `speed_of_sound` or `well_width` is not a single number, or `n_repetitions` is a flag, a text or an array where a count goes. |
 
 ## predicted_diffusion_spectrum
 
@@ -333,6 +335,7 @@ $\lambda_0 / 2$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `prime` is not an odd prime, or if `design_frequency` or `speed_of_sound` is not positive. |
+| TypeError | if `design_frequency` or `speed_of_sound` is not a single number, or `prime` is a flag, a text or an array where a count goes. |
 
 ## quadratic_residue_sequence
 
@@ -360,3 +363,4 @@ number of wells per period. For $N = 7$ this returns
 | Exception | When |
 | :--- | :--- |
 | ValueError | if `prime` is not an odd prime of at least 3. |
+| TypeError | if `prime` is a flag, a text or an array where a count goes. |

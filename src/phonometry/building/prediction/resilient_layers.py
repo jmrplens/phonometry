@@ -216,6 +216,7 @@ def hammer_impact_velocity(
     :param gravity: Acceleration of free fall ``g``, in m/s² (Default: 9,81).
     :return: The impact velocity ``vo``, in m/s.
     :raises ValueError: If an input is not positive and finite.
+    :raises TypeError: if ``drop_height_m`` or ``gravity`` is not a single number.
     """
     h = require_positive(drop_height_m, "drop_height_m")
     g = require_positive(gravity, "gravity")
@@ -243,6 +244,8 @@ def plate_contact_stiffness(
     :return: The contact stiffness ``K``, in N/m.
     :raises ValueError: If an input is not positive and finite, or
         :math:`\lvert \nu \rvert \ge 1`.
+    :raises TypeError: if ``poisson_ratio``, ``radius`` or ``youngs_modulus`` is not a
+        single number.
     """
     require_scalar(poisson_ratio, "poisson_ratio")
     e = require_positive(youngs_modulus, "youngs_modulus")
@@ -272,6 +275,8 @@ def covering_contact_stiffness(
     :param radius: Contact radius ``r``, in m (Default: 0,015).
     :return: The contact stiffness ``K``, in N/m.
     :raises ValueError: If an input is not positive and finite.
+    :raises TypeError: if ``radius``, ``thickness_m`` or ``youngs_modulus`` is not a
+        single number.
     """
     e = require_positive(youngs_modulus, "youngs_modulus")
     d = require_positive(thickness_m, "thickness_m")
@@ -326,6 +331,8 @@ def tapping_cut_off_frequency(
     :param mass: Hammer mass ``m``, in kg (Default: 0,5).
     :return: The cut-off frequency ``fco``, in Hz.
     :raises ValueError: If an input is not positive and finite.
+    :raises TypeError: if ``contact_stiffness``, ``impedance`` or ``mass`` is not a
+        single number.
     """
     k = require_positive(contact_stiffness, "contact_stiffness")
     z = require_positive(impedance, "impedance")
@@ -354,6 +361,7 @@ def hammer_limiting_frequency(
     :param mass: Hammer mass ``m``, in kg (Default: 0,5).
     :return: The limiting frequency ``flimit``, in Hz.
     :raises ValueError: If an input is not positive and finite.
+    :raises TypeError: if ``impedance`` or ``mass`` is not a single number.
     """
     z = require_positive(impedance, "impedance")
     m = require_positive(mass, "mass")
@@ -401,6 +409,8 @@ def force_pulse(
         negative.
     :raises ValueError: If an input is not positive and finite, or ``time``
         contains a negative value.
+    :raises TypeError: if ``contact_stiffness``, ``impact_velocity``, ``impedance`` or
+        ``mass`` is not a single number.
     """
     k = require_positive(contact_stiffness, "contact_stiffness")
     z = require_positive(impedance, "impedance")
@@ -462,6 +472,8 @@ def short_pulse_mean_square_force(
     :return: The band mean-square force ``F²rms``, in N².
     :raises ValueError: If an input is not positive and finite, or
         ``fraction`` is not 1 or 3.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     return np.asarray(_SHORT_PULSE_COEFFICIENT * _band_factor(fraction) * f)
@@ -539,6 +551,9 @@ class TappingForceResult(OwnsArrays):
         :raises ValueError: if the per-band quantities disagree, ``K``,
             ``Zdp`` or ``m`` is not positive and finite, or a quantity read
             from them is not what its equation gives.
+        :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
+            float), or ``contact_stiffness``, ``impedance``, ``lower_limit`` or ``mass``
+            is not a single number.
         """
         require_ranks(
             self,
@@ -672,6 +687,10 @@ def tapping_force_spectrum(
     :return: A :class:`TappingForceResult`.
     :raises ValueError: If an input is not positive and finite, or
         ``fraction`` is not 1 or 3.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
+        ``contact_stiffness``, ``impact_rate``, ``impact_velocity``, ``impedance`` or
+        ``mass`` is not a single number, or ``frequencies`` holds a text or a value that
+        is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     k = require_positive(contact_stiffness, "contact_stiffness")
@@ -789,6 +808,7 @@ class CoveringImprovementResult(OwnsArrays):
 
         :raises ValueError: if the per-band or the per-line quantities
             disagree.
+        :raises TypeError: if ``lines`` is a single number where an array goes.
         """
         require_ranks(
             self,
@@ -890,6 +910,9 @@ def covering_improvement(
     :return: A :class:`CoveringImprovementResult`.
     :raises ValueError: If an input is not positive and finite, or
         ``fraction`` is not 1 or 3.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
+        ``impact_rate`` is not a single number, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     fi = require_positive(impact_rate, "impact_rate")
@@ -977,6 +1000,8 @@ def floating_floor_resonance_frequency(
         kg/m².
     :return: The resonance frequency ``fo``, in Hz.
     :raises ValueError: If an input is not positive and finite.
+    :raises TypeError: if ``dynamic_stiffness`` or ``mass_per_area`` is not a single
+        number.
     """
     s = require_positive(dynamic_stiffness, "dynamic_stiffness")
     m = require_positive(mass_per_area, "mass_per_area")
@@ -995,6 +1020,7 @@ def combined_dynamic_stiffness(layers: ArrayLike) -> float:
         (any 1-D array-like).
     :return: The total dynamic stiffness ``s'tot``, in N/m³.
     :raises ValueError: If ``layers`` is empty or holds a non-positive value.
+    :raises TypeError: if ``layers`` holds a text or a value that is not a real number.
     """
     values = require_positive_array(layers, "layers")
     return float(1.0 / np.sum(1.0 / values))
@@ -1036,6 +1062,8 @@ def double_floating_floor_resonances(
         floating floor, in kg/m².
     :return: ``(lower, upper)`` resonance frequencies, in Hz.
     :raises ValueError: If an input is not positive and finite.
+    :raises TypeError: if ``lower_mass_per_area``, ``lower_stiffness``,
+        ``upper_mass_per_area`` or ``upper_stiffness`` is not a single number.
     """
     s1 = require_positive(lower_stiffness, "lower_stiffness")
     m1 = require_positive(lower_mass_per_area, "lower_mass_per_area")
@@ -1073,6 +1101,8 @@ def weighted_floating_floor_improvement(
     :return: The weighted improvement ``ΔLw``, in dB.
     :raises ValueError: If an input is not positive and finite, or ``floor`` is
         unknown.
+    :raises TypeError: if ``floor`` is not a text, or ``dynamic_stiffness`` or
+        ``mass_per_area`` is not a single number.
     """
     m = require_positive(mass_per_area, "mass_per_area")
     s = require_positive(dynamic_stiffness, "dynamic_stiffness") * 1e-6
@@ -1232,6 +1262,9 @@ def floating_floor_improvement_spectrum(
     :return: A :class:`FloatingFloorImprovementResult`.
     :raises ValueError: If an input is not positive and finite, ``model`` is
         unknown, or ``"cremer_hammer"`` is used without a limiting frequency.
+    :raises TypeError: if ``model`` is not a text, ``limiting_frequency`` or
+        ``resonance_frequency`` is not a single number, or ``frequencies`` holds a text
+        or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     f0 = require_positive(resonance_frequency, "resonance_frequency")
@@ -1338,6 +1371,9 @@ def resilient_mount_improvement(
     :return: The improvement ``ΔL`` per band, in dB, and 0 dB at and below
         ``fo``.
     :raises ValueError: If an input is not positive and finite.
+    :raises TypeError: if ``impedance``, ``mass_per_area``, ``mount_density`` or
+        ``mount_stiffness`` is not a single number, or ``frequencies`` or
+        ``loss_factor`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     z1 = require_positive(impedance, "impedance")

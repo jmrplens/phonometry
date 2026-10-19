@@ -76,6 +76,7 @@ $\mathrm{SEL}_{\mathrm{ss}} + 10 \log_{10} N$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `n_strikes` is not a whole number $\ge 1$. |
+| TypeError | if `n_strikes` or `sel_ss` is not a single number. |
 
 ## pile_strike_metrics
 
@@ -215,7 +216,7 @@ handed straight to
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `limits` is not a sequence, or holds a text or anything else that is not a number. |
+| TypeError | If `limits` is not a sequence, or holds a text or anything else that is not a number, or `fraction` is a bool, a text or an array rather than a whole number. |
 | ValueError | If the inputs are invalid: a `fraction` other than 1 or 3, `limits` that are not a finite, increasing, positive pair, or a pressure or sampling rate the analysis cannot take. |
 
 ## StrikeSELSpectrum

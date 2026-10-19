@@ -78,7 +78,8 @@ def test_wall_tie_table() -> None:
     """Hopkins (2007) Table A4, digit for digit, converted to SI base units."""
     assert set(building.WALL_TIE_STIFFNESS) == set(HOPKINS_TABLE_A4)
     for name, (cavity_mm, stiffness_mn) in HOPKINS_TABLE_A4.items():
-        cavity, stiffness = building.wall_tie_stiffness(name)
+        tie = building.wall_tie_stiffness(name)
+        cavity, stiffness = tie.cavity_width_m, tie.stiffness
         assert cavity == pytest.approx(cavity_mm / 1000.0)
         assert stiffness == pytest.approx(stiffness_mn * 1e6)
 
@@ -91,9 +92,9 @@ def test_wall_tie_stiffness_ordering() -> None:
     prints for a 50 mm spacing, and they order butterfly < double-triangle <
     vertical-twist by a factor of about 55 end to end.
     """
-    butterfly = building.wall_tie_stiffness("butterfly")[1]
-    triangle = building.wall_tie_stiffness("double_triangle")[1]
-    twist = building.wall_tie_stiffness("vertical_twist")[1]
+    butterfly = building.wall_tie_stiffness("butterfly").stiffness
+    triangle = building.wall_tie_stiffness("double_triangle").stiffness
+    twist = building.wall_tie_stiffness("vertical_twist").stiffness
     assert butterfly < triangle < twist
     assert twist / butterfly == pytest.approx(94.0 / 1.7)
 

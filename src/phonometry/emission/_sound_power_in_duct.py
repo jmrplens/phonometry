@@ -676,6 +676,7 @@ class InDuctSoundPowerResult(OwnsArrays):
         :raises ValueError: if a per-band field disagrees with the rest,
             ``shield`` is not one of the three of clause 5.3, or a scalar or
             a level is not finite.
+        :raises TypeError: if ``shield`` is not a text.
         """
         require_choice(self.shield, "shield", _SHIELDS)
         per_band = (
@@ -987,6 +988,9 @@ def flow_modal_correction(
         ball), a velocity beyond 40 m/s asked for in a band above 10 kHz,
         where Annex A tabulates no coefficients, or a non-positive speed of
         sound.
+    :raises TypeError: if ``shield`` is not a text, ``duct_diameter_m``,
+        ``flow_velocity`` or ``speed_of_sound`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     freqs = _nominal_bands(frequencies)
     _check_shield(shield)
@@ -1026,6 +1030,8 @@ def in_duct_reproducibility(frequencies: ArrayLike) -> np.ndarray:
         hertz, 50 Hz to 20 kHz.
     :return: :math:`\sigma_R` per band, in decibels.
     :raises ValueError: for a band that is not a nominal centre.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     freqs = _nominal_bands(frequencies)
     table = {**_TABLE_2_SIGMA_R, **_TABLE_3_SIGMA_R}
@@ -1163,6 +1169,10 @@ def sound_power_in_duct(
         velocity beyond 40 m/s asked for in a band above 10 kHz, a correction
         that is neither a scalar nor one value per band, or a non-positive
         static pressure.
+    :raises TypeError: if ``shield`` is not a text, ``duct_diameter_m``,
+        ``flow_velocity``, ``static_pressure_kpa`` or ``temperature_c`` is not a single
+        number, or ``frequencies``, ``microphone_correction`` or ``shield_correction``
+        holds a text or a value that is not a real number.
     """
     freqs = _nominal_bands(frequencies)
     _check_shield(shield)

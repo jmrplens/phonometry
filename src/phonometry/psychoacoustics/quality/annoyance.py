@@ -139,6 +139,8 @@ def psychoacoustic_annoyance(
     :param roughness: Roughness ``R``, in asper (ECMA-418-2).
     :return: A :class:`PsychoacousticAnnoyanceResult`.
     :raises ValueError: If any quantity is negative or non-finite.
+    :raises TypeError: if ``fluctuation_strength``, ``n5``, ``roughness`` or
+        ``sharpness`` is not a single number.
     """
     n5_v = _nonnegative(n5, "n5")
     s_v = _nonnegative(sharpness, "sharpness")

@@ -55,6 +55,7 @@ if TYPE_CHECKING:
         DiscretePointIntensityResult,
     )
     from ..emission._sound_power_reverberation import (
+        OctaveBandLevels,
         ReverberationSoundEnergyResult,
         ReverberationSoundPowerResult,
     )
@@ -257,6 +258,9 @@ _STRINGS: dict[str, str] = {
     "Table 1: ±{sigma} dB": "Tabla 1: ±{sigma} dB",
     "A-weighted sound power level [dB re 1 pW]": "Nivel de potencia acústica ponderado A [dB re 1 pW]",
     "IEC 61063 report: loudest at {condition}": "Informe IEC 61063: condición más ruidosa, {condition}",
+    "Octave-band level [dB]": "Nivel en banda de octava [dB]",
+    "ISO 3741 Annex F octave-band levels": "Niveles en banda de octava, ISO 3741 anexo F",
+    "Spectrum {n}": "Espectro {n}",
 }
 
 
@@ -2225,5 +2229,52 @@ def plot_turbine_noise_declaration(
     ax.grid(visible=True, axis="y", alpha=0.3)
     legend = ax.legend(fontsize="small")
     place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_octave_band_levels(
+    result: OctaveBandLevels,
+    *,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """Octave-band levels summed from one-third octaves (ISO 3741 Annex F).
+
+    One bar per octave for a single spectrum; several spectra (levels with
+    more than one axis) draw one marked line each, numbered in the legend in
+    the order the leading axes hold them.
+
+    :param result: An :class:`~phonometry.emission.OctaveBandLevels`.
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the :meth:`~matplotlib.axes.Axes.bar` call of
+        a single spectrum, or to every line of several.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    positions = _band_axis(ax, freqs, language=language)
+    if levels.ndim == 1:
+        style_default(kwargs, "color", _C_PRIMARY)
+        ax.bar(positions, levels, **kwargs)
+        if "label" in kwargs:
+            ax.legend(loc="best", fontsize="small")
+    else:
+        style_default(kwargs, "marker", "o")
+        for n, row in enumerate(levels.reshape(-1, freqs.size), start=1):
+            ax.plot(
+                positions,
+                row,
+                **{"label": _t("Spectrum {n}", language, n=n), **kwargs},
+            )
+        place_legend_clear(ax.legend(loc="best", fontsize="small"))
+    ax.set_ylabel(_t("Octave-band level [dB]", language))
+    ax.set_title(_t("ISO 3741 Annex F octave-band levels", language))
+    ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax

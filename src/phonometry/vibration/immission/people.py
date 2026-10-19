@@ -504,6 +504,7 @@ def induced_seismic_kb_fmax(peak_velocity_mm_s: float) -> float:
     :param peak_velocity_mm_s: :math:`v_{\max}`, in millimetres per second.
     :return: :math:`KB_\mathrm{Fmax}`.
     :raises ValueError: For a negative velocity.
+    :raises TypeError: if ``peak_velocity_mm_s`` is not a single number.
     """
     return INDUCED_SEISMIC_PEAK_FACTOR * require_non_negative(
         peak_velocity_mm_s, "peak_velocity_mm_s"
@@ -544,6 +545,8 @@ def construction_guide_values(
     :return: The three values, as a :class:`GuideValues`.
     :raises ValueError: For a duration that is not a whole number of days
         from 1 to 78, an unknown stage, an unknown area or a sensitive one.
+    :raises TypeError: if ``duration_days`` is a flag, a text or an array where a count
+        goes.
     """
     days = require_count(duration_days, "duration_days")
     if days > _CONSTRUCTION_MAX_DAYS:
@@ -621,6 +624,8 @@ def assessment_vibration_severity(
     :return: :math:`KB_\mathrm{FTr}`, dimensionless.
     :raises ValueError: For mismatched or negative inputs, an unknown time of day,
         an exposure longer than the period, or a rest-time flag by night.
+    :raises TypeError: if ``exposure_s`` or ``kb_ftm`` holds a text or a value that is
+        not a real number.
     """
     severities, durations = _exposures(kb_ftm, exposure_s)
     which = require_choice(str(time_of_day), "time_of_day", _PERIODS)
@@ -659,6 +664,7 @@ def admissible_exposure_s(
     :return: The exposure, in seconds.
     :raises ValueError: For a non-positive severity or guide value, or an
         unknown time of day.
+    :raises TypeError: if ``a_r`` or ``kb_ftm`` is not a single number.
     """
     severity = require_positive(kb_ftm, "kb_ftm")
     guide = require_positive(a_r, "a_r")
@@ -681,6 +687,7 @@ def admissible_trains_per_hour(kb_ftm: float, a_r: float) -> float:
     :param a_r: :math:`A_\mathrm{r}`.
     :return: Trains per hour, not rounded; the standard rounds down.
     :raises ValueError: For a non-positive severity or guide value.
+    :raises TypeError: if ``a_r`` or ``kb_ftm`` is not a single number.
     """
     severity = require_positive(kb_ftm, "kb_ftm")
     guide = require_positive(a_r, "a_r")
@@ -699,6 +706,7 @@ def railway_takt_max_rms(kb_fti: ArrayLike) -> float:
     :param kb_fti: The clock maxima the class occupied, dimensionless.
     :return: :math:`KB_{\mathrm{FTm},j}`.
     :raises ValueError: For an empty, non-finite or negative input.
+    :raises TypeError: if ``kb_fti`` holds a text or a value that is not a real number.
     """
     return takt_max_rms(_maxima(kb_fti))
 
@@ -724,6 +732,7 @@ def railway_takt_spread(kb_fti: ArrayLike) -> float:
     :param kb_fti: The clock maxima the class occupied, at least two.
     :return: :math:`s(KB^2_{\mathrm{FTm},j})`.
     :raises ValueError: For fewer than two maxima, or a bad input.
+    :raises TypeError: if ``kb_fti`` holds a text or a value that is not a real number.
     """
     values = _maxima(kb_fti)
     if values.size < _MIN_MAXIMA_FOR_SPREAD:
@@ -782,6 +791,8 @@ def railway_assessment_severity(
         :class:`RailwayAssessment`.
     :raises ValueError: For mismatched or negative inputs, more occupied
         intervals than the period holds, or an unknown time of day.
+    :raises TypeError: if ``kb_ftm``, ``occupied_takte`` or ``spread`` holds a text or a
+        value that is not a real number.
     """
     severities = require_finite_array(kb_ftm, "kb_ftm")
     takte = require_finite_array(occupied_takte, "occupied_takte")
@@ -836,6 +847,8 @@ def kb_from_peak_velocity(peak_velocity_mm_s: float, frequency_hz: float) -> flo
     :param frequency_hz: :math:`f`, the frequency of the record, in hertz.
     :return: :math:`KB`, dimensionless.
     :raises ValueError: For a negative velocity or a non-positive frequency.
+    :raises TypeError: if ``frequency_hz`` or ``peak_velocity_mm_s`` is not a single
+        number.
     """
     peak = require_non_negative(peak_velocity_mm_s, "peak_velocity_mm_s")
     freq = require_positive(frequency_hz, "frequency_hz")
@@ -1102,6 +1115,7 @@ def assess_people_in_buildings(
     :raises ValueError: For a negative severity, an unknown source or
         edition, an edition other than the guide values are of, or a verdict
         that needs :math:`KB_\mathrm{FTr}` without one given.
+    :raises TypeError: if ``kb_fmax`` or ``kb_ftr`` is not a single number.
     """
     peak = require_non_negative(kb_fmax, "kb_fmax")
     year = _edition_of(guide, edition)

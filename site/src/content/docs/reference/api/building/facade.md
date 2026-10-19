@@ -114,6 +114,7 @@ open or closed fence).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown shape, a negative height/absorption, or a shape/height combination the figure marks "does not apply". |
+| TypeError | if `absorption` or `line_of_sight` is not a single number. |
 
 ## facade_sound_reduction
 
@@ -147,6 +148,12 @@ indices (Formulas 11-12) and the standardized level difference (Formula 13).
 | `frequencies` | Optional band centre frequencies (Hz), stored on the result for plotting; must match the element band count. |
 
 **Returns:** A [`FacadePredictionResult`](/phonometry/reference/api/building/facade/#facadepredictionresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `area` or `volume` is not a single number. |
 
 ## FacadeElement
 
@@ -186,6 +193,12 @@ FacadeElement.tau(total_area: float, n_bands: int) -> np.ndarray
 ```
 
 Transmission factor `τ` of this element for the whole façade area.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `n_bands` or `total_area` is not a single number. |
 
 ## FacadePredictionResult
 
@@ -337,6 +350,12 @@ into the quarter-space over hard ground is built into the formula.
 
 **Returns:** `Atot` in dB (subtract from `LW` to get the exterior `Lp`).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `distance`, `height_m` or `width_m` is not a single number. |
+
 ## outdoor_level
 
 ```python
@@ -433,6 +452,12 @@ the standard's separate segment-of-openings Formula (4).
 | `octave_bands` | Optional octave-band centre frequencies (Hz) matching the per-band data; enables the A-weighted single number. |
 
 **Returns:** A [`RadiatedPowerResult`](/phonometry/reference/api/building/facade/#radiatedpowerresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `area` is not a single number. |
 
 ## RadiatedPowerResult
 

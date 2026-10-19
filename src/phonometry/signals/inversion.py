@@ -487,6 +487,9 @@ def regularized_inverse_filter(
         circular design has room for the anticausal (delayed) part.
     :param delay: Modeling delay in samples. Default ``n_fft // 2``.
     :return: An :class:`InverseFilterResult`.
+    :raises TypeError: if ``fs``, ``regularization_inside``, ``regularization_outside``
+        or ``transition_octaves`` is not a single number, or ``delay`` is a flag, a text
+        or an array where a count goes.
     """
     require_scalar(regularization_inside, "regularization_inside")
     require_scalar(regularization_outside, "regularization_outside")

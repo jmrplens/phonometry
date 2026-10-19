@@ -152,7 +152,7 @@ class ToneAssessment(RichDisplay):
 
     ``ratio_db`` is the tone-to-noise ratio (clause 11) or the prominence
     ratio (clause 12), as ``method`` says. The prominence criterion at
-    ``frequency`` (:attr:`criterion_db`) is the standard's formula for that
+    ``frequency`` (:attr:`prominence_limit_db`) is the standard's formula for that
     ratio and the verdict (:attr:`prominent`) is read from it, so an
     assessment cannot be built against another criterion.
     ``prominent`` applies the numeric criterion only; the standard's
@@ -174,6 +174,7 @@ class ToneAssessment(RichDisplay):
 
         :raises ValueError: for a method other than the two of ECMA-418-1, or
             a frequency that is not positive.
+        :raises TypeError: if ``frequency`` is not a single number.
         """
         if self.method not in _TONE_METHODS:
             msg = f"'method' must be one of {_TONE_METHODS}; got {self.method!r}."
@@ -184,7 +185,7 @@ class ToneAssessment(RichDisplay):
             raise ValueError(msg)
 
     @property
-    def criterion_db(self) -> float:
+    def prominence_limit_db(self) -> float:
         """The prominence limit at :attr:`frequency`, in dB.
 
         :return: Formulae (12)-(13) for the tone-to-noise ratio, (25)-(26)
@@ -198,7 +199,8 @@ class ToneAssessment(RichDisplay):
     def prominent(self) -> bool:
         """Whether the ratio reaches the criterion inside the range of interest."""
         return bool(
-            self.ratio_db >= self.criterion_db and _F_MIN <= self.frequency < _F_MAX
+            self.ratio_db >= self.prominence_limit_db
+            and _F_MIN <= self.frequency < _F_MAX
         )
 
     def plot(
@@ -210,7 +212,7 @@ class ToneAssessment(RichDisplay):
         11.2 kHz range of interest with this tone at its own frequency and
         the margin to the criterion marked; a tone on or above the curve is
         prominent. The criterion family (tone-to-noise ratio, clause 11, or
-        prominence ratio, clause 12) is recovered from ``criterion_db``.
+        prominence ratio, clause 12) is recovered from ``prominence_limit_db``.
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
@@ -380,6 +382,8 @@ def tone_to_noise_ratio(
     :param resolution_hz: FFT bin spacing (default 1.0 Hz; the tone band
         must stay within 15 % of the critical bandwidth, clause 11.2).
     :return: :class:`ToneAssessment` with ``ratio_db`` = TNR in dB.
+    :raises TypeError: if ``fs``, ``resolution_hz`` or ``tone_frequency`` is not a
+        single number.
     """
     require_scalar(fs, "fs")
     require_scalar(resolution_hz, "resolution_hz")
@@ -512,6 +516,8 @@ def prominence_ratio(
         peak in the range of interest).
     :param resolution_hz: FFT bin spacing (default 1.0 Hz).
     :return: :class:`ToneAssessment` with ``ratio_db`` = PR in dB.
+    :raises TypeError: if ``fs``, ``resolution_hz`` or ``tone_frequency`` is not a
+        single number.
     """
     require_scalar(fs, "fs")
     require_scalar(resolution_hz, "resolution_hz")

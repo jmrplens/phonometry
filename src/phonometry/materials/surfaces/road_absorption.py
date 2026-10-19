@@ -71,6 +71,7 @@ from numpy.typing import ArrayLike, NDArray
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_equal_shapes,
+    require_present,
     require_scalar,
 )
 from ..._internal.warnings import PhonometryWarning
@@ -157,6 +158,7 @@ __all__ = [
     "max_sampled_area_radius",
     "msa_major_axis",
     "one_third_octave_absorption",
+    "OneThirdOctaveAbsorption",
     "power_reflection_coefficient",
     "reflected_path_delay",
     "spot_internal_loss_correction",
@@ -196,6 +198,8 @@ def geometric_spreading_factor(
         :math:`0 < K_\mathrm{r} < 1`).
     :raises ValueError: If ``ds`` or ``dm`` is not positive or
         :math:`d_\mathrm{s} \le d_\mathrm{m}`.
+    :raises TypeError: if ``microphone_height_m`` or ``source_height_m`` is not a single
+        number.
     """
     _check_geometry(source_height_m, microphone_height_m)
     return float(
@@ -221,6 +225,7 @@ def geometric_spreading_factor_angle(
     :param source_height_m: Source-to-reference-plane distance ``ds``, in metres.
     :param microphone_height_m: Microphone-to-reference-plane distance ``dm``, in metres.
     :return: Oblique factor ``Kr,theta`` (positive root, dimensionless).
+    :raises TypeError: if ``incidence_angle_rad`` is not a single number.
     """
     require_scalar(incidence_angle_rad, "incidence_angle_rad")
     kr = geometric_spreading_factor(
@@ -246,6 +251,8 @@ def reflected_path_delay(
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
     :return: Delay ``dtau``, in seconds.
     :raises ValueError: If ``dm`` or ``c`` is not positive.
+    :raises TypeError: if ``microphone_height_m`` or ``speed_of_sound`` is not a single
+        number.
     """
     require_scalar(microphone_height_m, "microphone_height_m")
     require_scalar(speed_of_sound, "speed_of_sound")
@@ -334,6 +341,8 @@ def adrienne_window(
     :raises ValueError: If ``fs`` is not positive, a duration is
         negative, the flat duration is not positive, or an edge shape is
         unknown.
+    :raises TypeError: if ``flat_duration``, ``fs``, ``leading_duration`` or
+        ``trailing_duration`` is not a single number.
     """
     require_scalar(flat_duration, "flat_duration")
     require_scalar(fs, "fs")
@@ -446,6 +455,7 @@ def in_situ_reflection_factor(
     :return: Complex reflection factor ``r(f)`` at the ``rfft`` frequency bins.
     :raises ValueError: On empty inputs, invalid geometry, or ``delay`` given
         without ``fs``.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     require_scalar(fs, "fs")
     kr = geometric_spreading_factor_angle(
@@ -610,6 +620,41 @@ def absorption_reference_corrected(
 # --------------------------------------------------------------------------- #
 # One-third-octave presentation (ISO 13472-1 Clause 4.1 / ISO 13472-2 6.6)
 # --------------------------------------------------------------------------- #
+@dataclass(frozen=True)
+class OneThirdOctaveAbsorption(OwnsArrays):
+    """Narrow-band absorption averaged into one-third-octave bands.
+
+    What :func:`one_third_octave_absorption` returns: the band centres and
+    the band absorption, named, where a ``(band_centres, band_absorption)``
+    tuple used to be unpacked by position.
+
+    :ivar frequencies: The one-third-octave band centres, in Hz.
+    :ivar absorption: The linear average of the narrow-band absorption in each
+        band; ``nan`` for a band with no narrow-band sample.
+    """
+
+    frequencies: NDArray[np.float64]
+    absorption: NDArray[np.float64]
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the band absorption against the band centres.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the absorption curve.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.materials import plot_one_third_octave_absorption
+
+        check_language(language)
+        return plot_one_third_octave_absorption(
+            self, ax=ax, language=language, **kwargs
+        )
+
+
 def one_third_octave_absorption(
     absorption: ArrayLike,
     *,
@@ -617,7 +662,7 @@ def one_third_octave_absorption(
     f_min: float = PART1_FREQUENCY_RANGE_HZ[0],
     f_max: float = PART1_FREQUENCY_RANGE_HZ[1],
     clip_negative: bool = True,
-) -> tuple[Real, Real]:
+) -> OneThirdOctaveAbsorption:
     r"""Aggregate narrow-band absorption into one-third-octave bands.
 
     Both parts require a **linear average** of the narrow-band absorption over
@@ -634,8 +679,9 @@ def one_third_octave_absorption(
     :param f_max: Highest band centre to report, in hertz (4000 Hz for Part 1;
         pass 1600 Hz for the Part-2 range).
     :param clip_negative: Set negative band results to zero (default ``True``).
-    :return: Tuple ``(band_centres, band_absorption)``; a band with no
-        narrow-band samples yields ``nan``.
+    :return: The band centres and the band absorption, as a
+        :class:`OneThirdOctaveAbsorption`; a band with no narrow-band samples
+        yields ``nan``.
     :raises ValueError: If ``frequencies`` and ``absorption`` differ in shape or
         are empty.
     """
@@ -662,7 +708,9 @@ def one_third_octave_absorption(
             out[i] = float(np.mean(alpha[mask]))
     if clip_negative:
         out = np.where(np.isnan(out), out, np.maximum(out, 0.0))
-    return centres, np.asarray(out, dtype=np.float64)
+    return OneThirdOctaveAbsorption(
+        frequencies=centres, absorption=np.asarray(out, dtype=np.float64)
+    )
 
 
 @dataclass(frozen=True)
@@ -674,15 +722,22 @@ class InSituAbsorptionResult(OwnsArrays):
         with no contributing narrow-band samples is ``nan``).
     :ivar source_height_m: Source height the spectrum was reduced with, in
         metres, retained (with ``microphone_height_m``) so :meth:`plot_geometry`
-        can draw the set-up; ``None`` for hand-built results.
-    :ivar microphone_height_m: Microphone height, in metres, or ``None``.
+        can draw the set-up.
+    :ivar microphone_height_m: Microphone height, in metres.
     """
 
     frequencies: Real
     absorption: Real
     _: KW_ONLY
-    source_height_m: float | None = None
-    microphone_height_m: float | None = None
+    source_height_m: float
+    microphone_height_m: float
+
+    def __post_init__(self) -> None:
+        """Refuse a spectrum built without the set-up it was reduced with.
+
+        :raises TypeError: if a height is ``None``.
+        """
+        require_present(self, "source_height_m", "microphone_height_m")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -705,8 +760,6 @@ class InSituAbsorptionResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its geometry.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_in_situ_result_geometry
@@ -759,6 +812,7 @@ def in_situ_absorption_spectrum(
     :return: An :class:`InSituAbsorptionResult` with ``.plot()``.
     :raises ValueError: On empty inputs, invalid geometry, or a
         non-positive ``fs``.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     require_scalar(fs, "fs")
     fs = resolve_pair_fs(
@@ -784,13 +838,14 @@ def in_situ_absorption_spectrum(
         n=length,
     )
     freq = np.fft.rfftfreq(length, d=1.0 / fs)
-    centres, band = one_third_octave_absorption(
+    bands = one_third_octave_absorption(
         frequencies=freq,
         absorption=alpha,
         f_min=f_min,
         f_max=f_max,
         clip_negative=clip_negative,
     )
+    centres, band = bands.frequencies, bands.absorption
     return InSituAbsorptionResult(
         frequencies=centres,
         absorption=band,
@@ -830,6 +885,8 @@ def max_sampled_area_radius(
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
     :return: Maximum-sampled-area radius ``r``, in metres.
     :raises ValueError: On non-positive geometry or window width.
+    :raises TypeError: if ``microphone_height_m``, ``source_height_m``,
+        ``speed_of_sound`` or ``window_width`` is not a single number.
     """
     require_scalar(speed_of_sound, "speed_of_sound")
     require_scalar(window_width, "window_width")
@@ -868,6 +925,9 @@ def msa_major_axis(
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
     :return: Major axis ``a``, in metres.
     :raises ValueError: On non-positive window width, speed, or negative ``dp``.
+    :raises TypeError: if ``microphone_height_m``, ``projected_distance``,
+        ``source_height_m``, ``speed_of_sound`` or ``window_width`` is not a single
+        number.
     """
     require_scalar(microphone_height_m, "microphone_height_m")
     require_scalar(projected_distance, "projected_distance")
@@ -910,6 +970,7 @@ def spot_tube_upper_frequency(
     :param speed_of_sound: Speed of sound ``c0``, in metres per second.
     :return: Upper usable frequency ``f_u``, in hertz.
     :raises ValueError: If ``d`` or ``c0`` is not positive.
+    :raises TypeError: if ``diameter_m`` or ``speed_of_sound`` is not a single number.
     """
     require_scalar(diameter_m, "diameter_m")
     require_scalar(speed_of_sound, "speed_of_sound")
@@ -944,6 +1005,8 @@ def spot_microphone_spacing_bounds(
     :param f_max: Highest frequency of interest ``f_max``, in hertz.
     :return: Tuple ``(s_min, s_max)`` of the lower and upper spacing limits, m.
     :raises ValueError: On non-positive speed or frequency, or ``f_min >= f_max``.
+    :raises TypeError: if ``f_max``, ``f_min`` or ``speed_of_sound`` is not a single
+        number.
     """
     require_scalar(f_max, "f_max")
     require_scalar(f_min, "f_min")

@@ -95,6 +95,12 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 
 **Returns:** A [`DiffuseFieldAbsorptionResult`](/phonometry/reference/api/materials/layered/#diffusefieldabsorptionresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `angle_limit_rad` is not a single number, `n_quadrature_points` is a flag, a text or an array where a count goes, or `frequency` holds a text or a value that is not a real number. |
+
 ## DiffuseFieldAbsorptionResult
 
 ```python
@@ -180,6 +186,12 @@ extremely attenuating layers); the raw chain matrix is still returned in
 
 **Returns:** A [`LayeredAbsorberResult`](/phonometry/reference/api/materials/layered/#layeredabsorberresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `angle_rad` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+
 ## LayeredAbsorberResult
 
 ```python
@@ -191,7 +203,7 @@ LayeredAbsorberResult(
     reflection: NDArray[np.complex128],
     absorption: NDArray[np.float64],
     transfer_matrix: NDArray[np.complex128],
-    layers: tuple[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer, ...] | None = None,
+    layers: tuple[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer, ...],
 )
 ```
 
@@ -207,9 +219,7 @@ the total chain matrix with shape `(2, 2, len(frequency))`
 (unimodular: every layer is reciprocal).
 
 `layers` retains the layer sequence the stack was solved with (front
-layer first) so `plot_geometry` can draw the cross-section; it is
-appended after the original fields and defaults to `None` for
-hand-built results.
+layer first) so `plot_geometry` can draw the cross-section.
 
 ### LayeredAbsorberResult.plot()
 
@@ -243,12 +253,6 @@ Draw the solved stack cross-section to scale (dimensioned).
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the result does not retain its `layers`. |
 
 ## MembraneLayer
 
@@ -364,3 +368,9 @@ Sect. D.5).
 | `angle_limit_rad` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
 
 **Returns:** Statistical absorption coefficient `alpha_dif`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `angle_limit_rad` is not a single number. |

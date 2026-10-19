@@ -121,6 +121,7 @@ $R_{I,\mathrm{M}} = R_I + K_\mathrm{c}$ (Clause 3.10). Two forms are available:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `frequencies` is not positive/finite, if only one of `boundary_area` / `volume` is supplied, or if either is not positive. |
+| TypeError | if `boundary_area` or `volume` is not a single number. |
 
 ## intensity_element_normalized_difference
 
@@ -179,6 +180,7 @@ function implements the corrected per-unit form and warns when
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band counts differ, if `measurement_area` is not positive, if `n` is not a positive integer, or if inputs are non-finite. |
+| TypeError | if `measurement_area` is not a single number, or `n` is a flag, a text or an array where a count goes. |
 
 **Warns**
 
@@ -241,6 +243,7 @@ with [`subarea_intensity_level`](/phonometry/reference/api/building/intensity-in
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the band counts differ, if `measurement_area` / `area` are not positive, or if inputs are non-finite. |
+| TypeError | if `area` or `measurement_area` is not a single number. |
 
 ## IntensityElementNormalizedResult
 
@@ -528,6 +531,7 @@ that range and nowhere else.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-finite or non-positive frequency, surface mass, area below 1 m², or a climate the formulas cannot be evaluated in. |
+| TypeError | if `area`, `static_pressure_pa`, `surface_mass` or `temperature_c` is not a single number. |
 
 ## low_frequency_element_normalized_difference
 
@@ -580,6 +584,7 @@ disagree on the page, and this is the one that agrees with the physics.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the band counts differ, if the measurement area is not positive, if `n_elements` is not a positive integer, if any level is non-finite, or if `frequencies` carries a band outside the range this part is defined for. |
+| TypeError | if `measurement_area` is not a single number, or `n_elements` is a flag, a text or an array where a count goes. |
 
 ## low_frequency_intensity_reduction
 
@@ -655,6 +660,7 @@ energy-averaged. Sub-areas scanned separately are combined first with
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the band counts differ, if either area is not positive, if any level is non-finite, or if `frequencies` carries a band outside the range this part is defined for. |
+| TypeError | if `area` or `measurement_area` is not a single number. |
 
 ## LowFrequencyElementResult
 
@@ -810,7 +816,7 @@ indicator itself is `None`.
 subarea_intensity_level(
     l_in: Sequence[Sequence[float]] | np.ndarray,
     measurement_area: Sequence[float] | np.ndarray,
-) -> tuple[np.ndarray, float]
+) -> SubareaIntensityLevel
 ```
 
 Combine per-subarea intensity levels (ISO 15186-1, Formulas (11)-(12)).
@@ -840,13 +846,32 @@ unsigned area sum.
 | `l_in` | Per-subarea intensity levels as a `(subareas, bands)` array (one row per subarea), in dB (magnitude of the intensity). |
 | `measurement_area` | Subarea areas `Smi`, in m² (one per row). Negative values mark reverse-flow subareas per Clause 6.4.6; zero is invalid. |
 
-**Returns:** A tuple `(LIn, Sm)` with the combined level per band, in dB, and the total measured area $S_\mathrm{m} = \sum \lvert S_{\mathrm{m}i} \rvert$, in m².
+**Returns:** The combination, as a [`SubareaIntensityLevel`](/phonometry/reference/api/building/intensity-insulation/#subareaintensitylevel): the combined level per band, in dB, in its `levels`, and the total measured area $S_\mathrm{m} = \sum \lvert S_{\mathrm{m}i} \rvert$, in m², in its `measurement_area`.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the shapes are inconsistent or values non-finite, if any subarea area is zero, or if the signed energy sum of Formula (11) is not positive in some band (the reverse flows cancel or exceed the forward flow, so no level exists). |
+
+## SubareaIntensityLevel
+
+```python
+SubareaIntensityLevel(levels: np.ndarray, measurement_area: float)
+```
+
+The intensity level of a surface scanned in subareas (ISO 15186-1 F. (11)-(12)).
+
+What [`subarea_intensity_level`](/phonometry/reference/api/building/intensity-insulation/#subarea_intensity_level) returns: the combined level and the
+area it is combined over, named, where a `(LIn, Sm)` tuple used to be
+unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | $L_{I\mathrm{n}}$, the normal sound intensity level over the whole measurement surface, per band, in dB (Formula (11)). |
+| `measurement_area` | $S_\mathrm{m} = \sum_i \lvert S_{\mathrm{m}i} \rvert$, the total measured area, in m² (Formula (12)). |
 
 ## surface_pressure_intensity_indicator
 

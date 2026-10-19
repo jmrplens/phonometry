@@ -41,7 +41,7 @@ table_a3 = np.array([
     [15.9, 17.8, 26.0, 40.6, 38.0, 40.2, 37.2], [11.8, 18.4, 29.6, 37.2, 40.8, 36.0, 29.9],
 ])
 reat = hearing.real_ear_attenuation(table_a3)
-print(np.round(reat.mean_db, 1))                  # [17.1 21.1 28.8 38.5 37.5 36.2 35. ]
+print(np.round(reat.mean_attenuation, 1))                  # [17.1 21.1 28.8 38.5 37.5 36.2 35. ]
 print(np.round(reat.expanded_uncertainty_db, 1))  # [2.  1.9 1.7 2.2 1.6 1.6 2.3]
 
 # Annex B, Table B.1: a second test of the same earmuff, printed as means and U95.
@@ -50,7 +50,7 @@ test_2_u95 = [1.6, 1.2, 1.4, 1.5, 1.5, 1.7, 2.5]
 difference = hearing.assess_attenuation_difference(
     reat, test_2_mean, second_expanded_uncertainty_db=test_2_u95
 )
-print(np.round(difference.criterion_db, 1))  # [2.5 2.3 2.2 2.7 2.2 2.3 3.4]
+print(np.round(difference.significance_limit_db, 1))  # [2.5 2.3 2.2 2.7 2.2 2.3 3.4]
 print(difference.significant_frequencies)    # [8000.]
 ```
 
@@ -196,7 +196,7 @@ table_a3_anr = np.array([
     [24.3, 24.2, 22.5, 4.2, -6.3, -2.5, -0.9, -0.5], [23.8, 24.9, 20.7, 3.8, -4.8, -0.5, -0.3, 0.2],
 ])
 insertion = hearing.active_insertion_loss(table_a3_anr)
-print(np.round(insertion.mean_db, 1))                  # [21.4 23.8 21.4  4.8 -5.6 -2.  -1.1 -0.6]
+print(np.round(insertion.mean_insertion_loss, 1))                  # [21.4 23.8 21.4  4.8 -5.6 -2.  -1.1 -0.6]
 print(np.round(insertion.expanded_uncertainty_db, 1))  # [0.9 0.4 0.7 0.9 0.7 0.8 0.7 0.3]
 ```
 
@@ -231,7 +231,7 @@ open_level = np.full(22, 88.0)
 il = hearing.earmuff_insertion_loss(
     open_level, open_level - loss + spread, isolation_cup_levels=open_level - 70.0
 )
-print(il.reported_db[[3, 9, 12, 18]])                        # [13.5 32.5 37.  38. ]
+print(il.reported_insertion_loss[[3, 9, 12, 18]])                        # [13.5 32.5 37.  38. ]
 print(np.round(il.expanded_uncertainty_db[[3, 12, 21]], 1))  # [1.8 1.9 2.1]
 ```
 

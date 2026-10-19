@@ -127,7 +127,7 @@ def test_the_survey_record_reads_its_thresholds_and_differences() -> None:
     survey = environment.assess_tonal_survey(
         [40.0, 60.0, 40.0, 50.0, 41.0], frequencies=[100.0, 125.0, 160.0, 500.0, 630.0]
     )
-    assert survey.thresholds_db.tolist() == [15.0, 15.0, 8.0, 5.0, 5.0]
+    assert survey.min_level_differences.tolist() == [15.0, 15.0, 8.0, 5.0, 5.0]
     assert np.isnan(survey.level_differences[0])
     assert np.isnan(survey.level_differences[-1])
     assert survey.level_differences[1:-1].tolist() == [20.0, -20.0, 9.0]

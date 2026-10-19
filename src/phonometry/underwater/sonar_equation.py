@@ -237,6 +237,8 @@ def passive_sonar_equation(
     :param detection_threshold: Detection threshold ``DT``, in dB.
     :return: A :class:`SonarEquationResult`.
     :raises ValueError: If an input is not finite.
+    :raises TypeError: if ``detection_threshold``, ``directivity_index``,
+        ``noise_level`` or ``source_level`` is not a single number.
     """
     sl = _finite(source_level, "source_level")
     nl = _finite(noise_level, "noise_level")
@@ -291,6 +293,9 @@ def active_sonar_equation(
         case is reverberation-limited.
     :return: A :class:`SonarEquationResult`.
     :raises ValueError: If an input is not finite.
+    :raises TypeError: if ``detection_threshold``, ``directivity_index``,
+        ``noise_level``, ``reverberation_level``, ``source_level`` or
+        ``target_strength`` is not a single number.
     """
     sl = _finite(source_level, "source_level")
     ts = _finite(target_strength, "target_strength")
@@ -399,6 +404,8 @@ def detection_range(
     :param n_points: Number of ranges kept on the returned loss curve.
     :return: A :class:`DetectionRangeResult`.
     :raises ValueError: If an input is invalid.
+    :raises TypeError: if ``figure_of_merit``, ``max_range`` or ``ph`` is not a single
+        number, or ``n_points`` is a flag, a text or an array where a count goes.
     """
     require_scalar(ph, "ph")
     from scipy.optimize import brentq
@@ -479,6 +486,7 @@ def detection_range_from_curve(
         :func:`detection_range` returns the same two values for the same two
         situations.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``figure_of_merit`` is not a single number.
     """
     fom = _finite(figure_of_merit, "figure_of_merit")
     r = _finite_array(range_m, "range_m")
@@ -566,6 +574,8 @@ def array_directivity_index(
     :return: The directivity index ``DI``, in dB (>= 0).
     :raises ValueError: for a non-positive or non-finite length or wavelength,
         or a non-finite steer angle.
+    :raises TypeError: if ``array_length_m``, ``steer_angle_rad`` or ``wavelength_m`` is
+        not a single number.
     """
     from scipy.special import sici
 
@@ -632,6 +642,7 @@ def detection_threshold(false_alarm_probability: float) -> float:
     :raises ValueError: for a non-finite ``p_fa``, or one outside (0, 1/2).
         At :math:`p_\mathrm{fa} = 1/2` the inner logarithm is zero and the
         threshold diverges: half the empty beams are already called detections.
+    :raises TypeError: if ``false_alarm_probability`` is not a single number.
     """
     p_fa = _finite(false_alarm_probability, "false_alarm_probability")
     if not 0.0 < p_fa < _DIVERGENT_FALSE_ALARM_PROBABILITY:

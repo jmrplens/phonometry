@@ -133,6 +133,7 @@ above 500 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `center_frequency` is not positive/finite. |
+| TypeError | if `center_frequency` is not a single number. |
 
 ## environmental_expanded_uncertainty
 
@@ -177,6 +178,7 @@ the other two had to be qualified.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `u` is negative/non-finite or `coverage` is not one of the tabulated values. |
+| TypeError | if `coverage` or `standard_uncertainty` is not a single number. |
 
 ## EnvironmentalMeasurementWarning
 
@@ -213,6 +215,7 @@ one of `l90` / `l95`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If not exactly one of `l90` / `l95` is given, the inputs are not finite, or the percentile ordering is inverted (`L90`/`L95` cannot exceed `L50`, almost certainly swapped arguments, which the squared spread would otherwise hide). |
+| TypeError | if `l50`, `l90` or `l95` is not a single number. |
 
 ## RepeatedMeasurementResult
 
@@ -270,6 +273,7 @@ $u_L = \sqrt{c_{L'}^2 \cdot u_{L'}^2 + c_\mathrm{res}^2 \cdot u_\mathrm{res}^2}$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the residual is not below the measured level or an uncertainty is negative/non-finite. |
+| TypeError | if `measured_level`, `measured_uncertainty`, `residual_level` or `residual_uncertainty` is not a single number. |
 
 ## residual_sound_correction
 
@@ -305,6 +309,7 @@ and an [`EnvironmentalMeasurementWarning`](/phonometry/reference/api/environment
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the levels are not finite or the residual is not below the measured level. |
+| TypeError | if `measured_level` or `residual_level` is not a single number. |
 
 ## ResidualCorrectionResult
 
@@ -363,6 +368,7 @@ to integers.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `audibility` is not finite. |
+| TypeError | if `audibility` is not a single number. |
 
 ## tonal_adjustment_from_mean_audibility
 
@@ -395,6 +401,7 @@ $2 < \Delta L \le 9$ → 3, $\Delta L > 9$ → 6).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `mean_audibility` is not finite. |
+| TypeError | if `mean_audibility` is not a single number. |
 
 ## tonal_audibility
 
@@ -426,6 +433,7 @@ dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `center_frequency` is not positive/finite or the levels are not finite. |
+| TypeError | if `center_frequency`, `masking_noise_level` or `tone_level` is not a single number. |
 
 ## TonalAssessmentResult
 
@@ -503,6 +511,12 @@ supplied outside that span are judged with the nearest rule
 
 Each band less the louder of its two neighbours, in dB; NaN at the ends.
 
+### TonalSurveyAssessment.min_level_differences
+
+*property*
+
+The level difference Annex K asks of each band, in dB.
+
 ### TonalSurveyAssessment.plot()
 
 ```python
@@ -534,12 +548,6 @@ Whether each band holds a prominent tone; the two end bands never do.
 
 Judged settled: a band 5 dB above its neighbours in decimal reaches the
 threshold whichever way the last bits of the subtraction fall.
-
-### TonalSurveyAssessment.thresholds_db
-
-*property*
-
-The level difference Annex K asks of each band, in dB.
 
 ### TonalSurveyAssessment.tone_frequencies
 

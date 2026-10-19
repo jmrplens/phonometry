@@ -86,7 +86,7 @@ def test_butter_order6_decimated_octave_bank_is_class1_on_every_requirement() ->
     for decimated, reference in zip(
         result.bands[1:-1], full_rate.bands[1:-1], strict=True
     ):
-        for key in ("summation_max_db", "summation_min_db"):
+        for key in ("summation_difference_upper", "summation_difference_lower"):
             assert decimated[key] == pytest.approx(reference[key], abs=0.005)
 
 
@@ -259,8 +259,8 @@ def test_butter_meets_class0_1995() -> None:
         "class",
         "checked_to_omega",
         "bandwidth_deviation_db",
-        "summation_min_db",
-        "summation_max_db",
+        "summation_difference_lower",
+        "summation_difference_upper",
         *margins,
     }
     # A class-0 band must clear class 1 and class 2 by at least as much.
@@ -285,8 +285,8 @@ def test_2014_default_unaffected_by_edition_support() -> None:
         "bandwidth_deviation_db",
         "bandwidth_margin_class1_db",
         "bandwidth_margin_class2_db",
-        "summation_min_db",
-        "summation_max_db",
+        "summation_difference_lower",
+        "summation_difference_upper",
         "summation_margin_class1_db",
         "summation_margin_class2_db",
     }

@@ -59,6 +59,7 @@ $d = d_{\mathrm{CPA}} \tan(\mathrm{angle})$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the distance or any angle is out of range. |
+| TypeError | if `angles_deg` holds a text or a value that is not a real number. |
 
 ## monopole_source_level
 
@@ -100,6 +101,7 @@ depth is $d_\mathrm{s} = 0.7 D$ (Formula 1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid or the shapes mismatch. |
+| TypeError | if `frequency` or `rnl` holds a text or a value that is not a real number. |
 
 ## radiated_noise_level
 

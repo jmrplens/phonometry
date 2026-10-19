@@ -396,7 +396,7 @@ the tester's judgement.
 
 **Returns:** `True` from three repetitions.
 
-### EarmuffInsertionLossResult.reported_db
+### EarmuffInsertionLossResult.reported_insertion_loss
 
 *property*
 
@@ -429,7 +429,7 @@ FixtureIsolationVerification(frequencies: np.ndarray, isolation: np.ndarray)
 Whether the test fixture isolates its microphone well enough (5.1.4).
 
 The requirement is the clause's, read from the bands as
-`required_db`, so a check cannot be built against another one.
+`min_isolation`, so a check cannot be built against another one.
 
 **Attributes**
 
@@ -445,6 +445,14 @@ The requirement is the clause's, read from the bands as
 The isolation less the requirement per band, in dB.
 
 **Returns:** Negative where the fixture falls short, NaN where nothing is required.
+
+### FixtureIsolationVerification.min_isolation
+
+*property*
+
+The least isolation 5.1.4 asks per band, in dB.
+
+**Returns:** 50 dB from 63 Hz to 250 Hz, 65 dB from 315 Hz to 4 kHz and 55 dB above; NaN below 63 Hz, where it asks nothing.
 
 ### FixtureIsolationVerification.passes
 
@@ -477,14 +485,6 @@ Draw the isolation against the requirement, band by band.
 
 **Returns:** The axes.
 
-### FixtureIsolationVerification.required_db
-
-*property*
-
-The least isolation 5.1.4 asks per band, in dB.
-
-**Returns:** 50 dB from 63 Hz to 250 Hz, 65 dB from 315 Hz to 4 kHz and 55 dB above; NaN below 63 Hz, where it asks nothing.
-
 ### FixtureIsolationVerification.sufficient
 
 *property*
@@ -497,11 +497,11 @@ Per band, whether the isolation reaches the requirement.
 
 ```python
 InsertionLossUncertaintyBudget(
-    open_level_db: float,
-    occluded_level_db: float,
-    fixture_db: float,
-    sound_field_db: float,
-    equipment_db: float,
+    open_level_uncertainty_db: float,
+    occluded_level_uncertainty_db: float,
+    fixture_uncertainty_db: float,
+    sound_field_uncertainty_db: float,
+    equipment_uncertainty_db: float,
 )
 ```
 
@@ -515,13 +515,13 @@ combined standard uncertainty is their root sum of squares (Formula
 
 | Name | Description |
 | :--- | :--- |
-| `open_level_db` | The standard uncertainty of $L_\mathrm{open}$, the standard deviation of the mean of repeated measurements, in dB. |
-| `occluded_level_db` | That of $L_\mathrm{occl}$, which also carries the refitting of the earmuff, in dB. |
-| `fixture_db` | $\delta_1$, the fixture's departure from its specification, in dB. |
-| `sound_field_db` | $\delta_2$, the field's departure from an ideal random-incidence field or plane wave, in dB. |
-| `equipment_db` | $\delta_3$, the measuring equipment, in dB. |
+| `open_level_uncertainty_db` | The standard uncertainty of $L_\mathrm{open}$, the standard deviation of the mean of repeated measurements, in dB. |
+| `occluded_level_uncertainty_db` | That of $L_\mathrm{occl}$, which also carries the refitting of the earmuff, in dB. |
+| `fixture_uncertainty_db` | $\delta_1$, the fixture's departure from its specification, in dB. |
+| `sound_field_uncertainty_db` | $\delta_2$, the field's departure from an ideal random-incidence field or plane wave, in dB. |
+| `equipment_uncertainty_db` | $\delta_3$, the measuring equipment, in dB. |
 
-### InsertionLossUncertaintyBudget.combined_db
+### InsertionLossUncertaintyBudget.combined_uncertainty_db
 
 *property*
 
@@ -529,15 +529,7 @@ $u = \sqrt{\sum (c_i u_i)^2}$ (Formula (B.2)), in dB.
 
 **Returns:** The combined standard uncertainty, unrounded.
 
-### InsertionLossUncertaintyBudget.components_db
-
-*property*
-
-The five standard uncertainties in the order of Table B.1, in dB.
-
-**Returns:** The components.
-
-### InsertionLossUncertaintyBudget.expanded_db
+### InsertionLossUncertaintyBudget.expanded_uncertainty_db
 
 *property*
 
@@ -576,13 +568,21 @@ Draw the five contributions as bars, with the combined value.
 
 **Returns:** The axes.
 
+### InsertionLossUncertaintyBudget.standard_uncertainties_db
+
+*property*
+
+The five standard uncertainties in the order of Table B.1, in dB.
+
+**Returns:** The components.
+
 ## PlaneProgressiveWaveCheck
 
 ```python
 PlaneProgressiveWaveCheck(
     frequencies: np.ndarray,
     end_face_difference: np.ndarray,
-    front_to_back_db: np.ndarray,
+    front_to_back_ratio_db: np.ndarray,
     front_to_rear_index: np.ndarray,
 )
 ```
@@ -595,7 +595,7 @@ Whether the plane progressive wave of the test site is good enough (5.2.3).
 | :--- | :--- |
 | `frequencies` | The centre frequencies, in hertz. |
 | `end_face_difference` | The difference between the levels at the two points the centres of the fixture's end faces occupy, as an absolute value per band, in dB. |
-| `front_to_back_db` | From 500 Hz up, the level a directional microphone at the reference point reads facing the source less the level facing away from it, per band, in dB; NaN below 500 Hz or where not measured. |
+| `front_to_back_ratio_db` | From 500 Hz up, the level a directional microphone at the reference point reads facing the source less the level facing away from it, per band, in dB; NaN below 500 Hz or where not measured. |
 | `front_to_rear_index` | The microphone's front-to-rear sensitivity index per band, in dB, NaN where not given. |
 
 ### PlaneProgressiveWaveCheck.directional_required

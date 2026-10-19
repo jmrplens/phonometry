@@ -159,7 +159,7 @@ y = broadcast.k_weighting(np.random.default_rng(0).standard_normal(48000),
 
 `k_weighting_response` evaluates those same biquads as a transfer function
 and returns a frozen `KWeightingResponse` carrying the combined magnitude
-(`magnitude_db`) and the two stages (`shelf_db`, `highpass_db`) over a
+(`magnitude_db`) and the two stages (`shelf_magnitude_db`, `highpass_magnitude_db`) over a
 logarithmic frequency grid; its `.plot()` draws the response, with the +4 dB
 spherical-head shelf and the RLB high-pass roll-off:
 

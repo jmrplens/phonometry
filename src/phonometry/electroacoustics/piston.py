@@ -526,6 +526,8 @@ def radiating_piston(
     :param angles_rad: Optional polar angles ``theta`` from the axis, rad, at which
         to sample the directivity pattern.
     :return: A :class:`RadiatingPistonResult`.
+    :raises TypeError: if ``density``, ``radius`` or ``speed_of_sound`` is not a single
+        number.
     """
     a = require_positive(radius, "radius")
     c = require_positive(speed_of_sound, "speed_of_sound")

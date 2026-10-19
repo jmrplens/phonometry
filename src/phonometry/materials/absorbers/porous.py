@@ -70,14 +70,14 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, NamedTuple
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy import special
 
 from ..._internal.boundary import settled
-from ..._internal.display import RichDisplay, record_html, record_pretty
+from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
@@ -93,7 +93,6 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
-    from ..._internal.display import Printer
     from ..._internal.types import Real
 
 Complex = NDArray[np.complex128]
@@ -368,6 +367,8 @@ def delany_bazley(
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`PorousMediumResult`.
+    :raises TypeError: if ``flow_resistivity_pa_s_m2`` is not a single number, or
+        ``frequency`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
@@ -429,6 +430,8 @@ def miki(
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`PorousMediumResult`.
+    :raises TypeError: if ``flow_resistivity_pa_s_m2`` is not a single number, or
+        ``frequency`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
@@ -501,6 +504,9 @@ def johnson_champoux_allard(
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`PorousMediumResult`.
+    :raises TypeError: if ``flow_resistivity_pa_s_m2``, ``porosity``,
+        ``thermal_length_m``, ``tortuosity`` or ``viscous_length_m`` is not a single
+        number, or ``frequency`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
@@ -569,6 +575,8 @@ def decoupling_frequency(
         made of.
     :return: The decoupling frequency ``Fd``, in hertz.
     :raises ValueError: for a non-positive input or a porosity above 1.
+    :raises TypeError: if ``flow_resistivity_pa_s_m2``, ``frame_density`` or
+        ``porosity`` is not a single number.
     """
     sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
     phi = require_positive(porosity, "porosity")
@@ -608,6 +616,8 @@ class LimpFrameCheck(RichDisplay):
 
         :raises ValueError: for a negative frame modulus, a fluid modulus that
             is not positive, or an unknown criterion.
+        :raises TypeError: if ``criterion`` is not a text, or ``fluid_bulk_modulus`` or
+            ``frame_bulk_modulus`` is not a single number.
         """
         require_choice(self.criterion, "criterion", tuple(LIMP_FRAME_CRITERIA))
         require_non_negative(self.frame_bulk_modulus, "frame_bulk_modulus")
@@ -668,6 +678,8 @@ def check_limp_frame(
         :math:`\lvert K_c/K_\mathrm{f} \rvert` is below the threshold (the
         book prints both criteria as strict inequalities).
     :raises ValueError: for a negative modulus or an unknown criterion.
+    :raises TypeError: if ``criterion`` is not a text, or ``fluid_bulk_modulus`` or
+        ``frame_bulk_modulus`` is not a single number.
     """
     return LimpFrameCheck(
         require_non_negative(frame_bulk_modulus, "frame_bulk_modulus"),
@@ -742,6 +754,7 @@ def limp_frame(
     :return: A :class:`PorousMediumResult` with model
         ``"limp_frame(<base model>)"``.
     :raises ValueError: for a non-positive input or a porosity above 1.
+    :raises TypeError: if ``frame_density`` or ``porosity`` is not a single number.
     """
     rho1 = require_positive(frame_density, "frame_density")
     phi = require_positive(porosity, "porosity")
@@ -780,7 +793,8 @@ def limp_frame(
 # ---------------------------------------------------------------------------
 
 
-class FiberResistivityFit(NamedTuple):
+@dataclass(frozen=True)
+class FiberResistivityFit(RichDisplay):
     """A published ``k1``, ``k2`` pair of Hopkins Eq. (1.165), and its range.
 
     The pair is not a property of mineral wool in general: ``k1`` belongs to a
@@ -806,14 +820,6 @@ class FiberResistivityFit(NamedTuple):
     bulk_density_range_kg_m3: tuple[float, float]
     direction: str
     source: str
-
-    def _repr_html_(self) -> str:
-        """The table Jupyter, JupyterLab, VS Code and Colab render."""
-        return record_html(self)
-
-    def _repr_pretty_(self, printer: Printer, cycle: object) -> None:
-        """The table in plain text, for the IPython terminal."""
-        record_pretty(self, printer, cycle)
 
 
 #: The rock wool of Hopkins Fig. 1.49, measured across two UK manufacturers at
@@ -864,6 +870,7 @@ def airflow_resistivity_from_bulk_density(
         :data:`ROCK_WOOL_LONGITUDINAL_FIT`.
     :return: The airflow resistivity ``r``, in Pa s/m2.
     :raises ValueError: for a non-positive density.
+    :raises TypeError: if ``bulk_density_kg_m3`` is not a single number.
     """
     density = require_positive(bulk_density_kg_m3, "bulk_density_kg_m3")
     low, high = fit.bulk_density_range_kg_m3
@@ -898,6 +905,8 @@ def porosity_from_bulk_density(
     :return: The open porosity ``phi``, between 0 and 1.
     :raises ValueError: for a non-positive density, or a bulk density at or
         above the fibre density, which is not a porous material.
+    :raises TypeError: if ``bulk_density_kg_m3`` or ``fiber_density_kg_m3`` is not a
+        single number.
     """
     bulk = require_positive(bulk_density_kg_m3, "bulk_density_kg_m3")
     fibre = require_positive(fiber_density_kg_m3, "fiber_density_kg_m3")
@@ -946,6 +955,8 @@ def viscous_characteristic_length(
         micro-geometry is known well enough to say otherwise.
     :return: The viscous characteristic length ``Lambda``, in metres.
     :raises ValueError: for a non-positive input or a porosity out of range.
+    :raises TypeError: if ``flow_resistivity_pa_s_m2``, ``porosity``, ``shape_factor``
+        or ``tortuosity`` is not a single number.
     """
     sigma = require_positive(flow_resistivity_pa_s_m2, "flow_resistivity_pa_s_m2")
     phi = require_positive(porosity, "porosity")
@@ -959,19 +970,20 @@ def viscous_characteristic_length(
     return math.sqrt(8.0 * fluid.viscosity * alpha / (sigma * phi)) / shape
 
 
-class FiberCharacteristicLengths(NamedTuple):
-    """The two characteristic lengths of a fibrous layer, in metres."""
+@dataclass(frozen=True)
+class FiberCharacteristicLengths(RichDisplay):
+    r"""The two characteristic lengths of a fibrous layer, in metres.
+
+    What :func:`fiber_characteristic_lengths` returns: the viscous length
+    :math:`\Lambda` and the thermal length :math:`\Lambda'`, named, where a
+    named tuple used to unpack them by position.
+
+    :ivar viscous_length_m: The viscous characteristic length, in m.
+    :ivar thermal_length_m: The thermal characteristic length, in m.
+    """
 
     viscous_length_m: float
     thermal_length_m: float
-
-    def _repr_html_(self) -> str:
-        """The table Jupyter, JupyterLab, VS Code and Colab render."""
-        return record_html(self)
-
-    def _repr_pretty_(self, printer: Printer, cycle: object) -> None:
-        """The table in plain text, for the IPython terminal."""
-        record_pretty(self, printer, cycle)
 
 
 def fiber_characteristic_lengths(
@@ -1012,9 +1024,12 @@ def fiber_characteristic_lengths(
         the fibre density: the ratio of the two is the fibre volume fraction,
         and Eqs. (5.29) and (5.30) are stated for a porosity close to 1.
     :param fiber_density_kg_m3: Density of the fibre itself, in kg/m3 (> 0).
-    :return: The viscous and thermal lengths, in metres.
+    :return: The viscous and thermal lengths, in metres, as a
+        :class:`FiberCharacteristicLengths`.
     :raises ValueError: for a non-positive input, or a bulk density at or above
         the fibre density, which leaves no pore for a length to describe.
+    :raises TypeError: if ``bulk_density_kg_m3``, ``fiber_density_kg_m3`` or
+        ``fiber_radius_m`` is not a single number.
     """
     radius = require_positive(fiber_radius_m, "fiber_radius_m")
     bulk = require_positive(bulk_density_kg_m3, "bulk_density_kg_m3")
@@ -1049,6 +1064,7 @@ def perforation_end_correction(open_area: float) -> float:
 
     :param open_area: Fractional open area ``eps`` of the sheet (0..1).
     :return: End-correction factor ``delta`` (dimensionless, per end).
+    :raises TypeError: if ``open_area`` is not a single number.
     """
     eps = require_positive(open_area, "open_area")
     if eps > 1.0:
@@ -1098,6 +1114,9 @@ def perforated_plate_impedance(
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: Complex transfer impedance ``z``, in Pa s/m.
+    :raises TypeError: if ``end_correction``, ``hole_radius``, ``open_area`` or
+        ``thickness_m`` is not a single number, or ``frequency`` holds a text or a value
+        that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     t = require_positive(thickness_m, "thickness_m")
@@ -1161,6 +1180,9 @@ def microperforated_plate_impedance(
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: Complex transfer impedance ``z``, in Pa s/m.
+    :raises TypeError: if ``end_correction``, ``hole_radius``, ``open_area`` or
+        ``thickness_m`` is not a single number, or ``frequency`` holds a text or a value
+        that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     t = require_positive(thickness_m, "thickness_m")
@@ -1199,6 +1221,8 @@ def membrane_impedance(
     :param surface_density: Mass per unit area ``m``, in kg/m2.
     :param resistance: Series flow resistance ``r``, in Pa s/m (default 0).
     :return: Complex transfer impedance ``z``, in Pa s/m.
+    :raises TypeError: if ``resistance`` or ``surface_density`` is not a single number,
+        or ``frequency`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     m = require_positive(surface_density, "surface_density")
@@ -1229,6 +1253,9 @@ def helmholtz_resonance_frequency(
         :func:`perforation_end_correction` of ``eps``.
     :param speed_of_sound: Speed of sound ``c`` in fluid, in m/s.
     :return: Resonance frequency ``f0``, in hertz.
+    :raises TypeError: if ``cavity_depth``, ``end_correction``, ``hole_radius``,
+        ``open_area``, ``plate_thickness_m`` or ``speed_of_sound`` is not a single
+        number.
     """
     d = require_positive(cavity_depth, "cavity_depth")
     t = require_positive(plate_thickness_m, "plate_thickness_m")
@@ -1269,6 +1296,8 @@ def membrane_resonance_frequency(
         values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: Resonance frequency ``f0``, in hertz.
+    :raises TypeError: if ``cavity_depth`` or ``surface_density`` is not a single
+        number.
     """
     m = require_positive(surface_density, "surface_density")
     d = require_positive(cavity_depth, "cavity_depth")

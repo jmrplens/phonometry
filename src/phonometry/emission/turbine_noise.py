@@ -334,6 +334,7 @@ class TurbineMeasurementSurface(OwnsArrays):
         :raises ValueError: if the three dimension arrays and the reference
             boxes do not have one entry each per parallelepiped, or a
             dimension or the area is not positive and finite.
+        :raises TypeError: if ``area`` is not a single number.
         """
         count = len(self.reference_boxes)
         for name in ("lengths_m", "widths_m", "heights_m"):
@@ -745,10 +746,12 @@ def turbine_microphone_positions(
         position 3 with it, as the NOTE of 7.2.2 allows once a preliminary
         investigation has shown the overhead positions move the sound power
         level by no more than 1,0 dB (see
-        :attr:`TurbineSoundPowerResult.overhead_effect_db`).
+        :attr:`TurbineSoundPowerResult.overhead_level_difference`).
     :return: The positions, their labels and the overhead mask.
     :raises TypeError: for a ``surface`` that is not a
-        :class:`TurbineMeasurementSurface`.
+        :class:`TurbineMeasurementSurface`, a ``spacing_m`` or
+        ``microphone_height_m`` that is not one number, or a
+        ``n_turbine_boxes`` that is a bool, a text or an array.
     :raises ValueError: for a height outside the sides, a non-positive
         spacing, or a ``n_turbine_boxes`` that leaves no driven machinery.
     """
@@ -897,6 +900,8 @@ def turbine_background_correction(level_difference: ArrayLike) -> float | np.nda
     :return: The correction to subtract, in dB: a ``float`` for a scalar, an
         array for an array.
     :raises ValueError: if a difference is not finite.
+    :raises TypeError: if ``level_difference`` holds a text or a value that is not a
+        real number.
     """
     scalar = np.ndim(level_difference) == 0
     difference = require_finite_array(level_difference, "level_difference")
@@ -1038,6 +1043,8 @@ def turbine_environmental_correction(
     :return: The correction and the room data it came from.
     :raises ValueError: unless exactly one of the two routes to :math:`A` is
         given whole, or for a non-positive input.
+    :raises TypeError: if ``absorption_area``, ``reverberation_time``, ``surface_area``
+        or ``volume`` is not a single number.
     """
     area = require_positive(surface_area, "surface_area")
     by_room = (volume, reverberation_time)
@@ -1095,6 +1102,9 @@ def turbine_reference_source_correction(
     :return: The correction and the determinations it came from.
     :raises ValueError: for the wrong number of determinations or a
         non-finite level.
+    :raises TypeError: if ``calibrated_level`` or ``machine_length_m`` is not a single
+        number, or ``sound_power_levels`` holds a text or a value that is not a real
+        number.
     """
     levels = require_finite_array(sound_power_levels, "sound_power_levels")
     reference = require_finite(calibrated_level, "calibrated_level")
@@ -1224,7 +1234,9 @@ def check_turbine_test_environment(
         metres per second; ``None`` indoors.
     :return: The conditions and the verdict.
     :raises TypeError: for a ``correction`` that is not a
-        :class:`TurbineEnvironmentalCorrection`.
+        :class:`TurbineEnvironmentalCorrection`, or an
+        ``environmental_correction`` or ``wind_speed_m_s`` that is not one
+        number.
     :raises ValueError: unless exactly one of ``correction`` and
         ``environmental_correction`` is given, for a non-finite correction
         or for a negative wind speed.
@@ -1375,7 +1387,7 @@ class TurbineSoundPowerResult(OwnsArrays):
         return float(np.max(levels) - np.min(levels))
 
     @property
-    def arithmetic_mean_db(self) -> float:
+    def arithmetic_mean_level(self) -> float:
         """The plain average of the corrected position levels, :math:`K` subtracted.
 
         The NOTE of 8.3 allows it in place of Equation (2) when
@@ -1393,7 +1405,7 @@ class TurbineSoundPowerResult(OwnsArrays):
         return self.level_range_db <= _ARITHMETIC_RANGE_DB + _BOUNDARY_SLACK_DB
 
     @property
-    def overhead_effect_db(self) -> float | None:
+    def overhead_level_difference(self) -> float | None:
         r"""How much the overhead positions move :math:`L_{W\mathrm{A}}`, in dB.
 
         The sound power level from every position less the one without the
@@ -1413,7 +1425,7 @@ class TurbineSoundPowerResult(OwnsArrays):
     @property
     def overhead_may_be_deleted(self) -> bool | None:
         """Whether the overhead positions move the level by no more than 1,0 dB."""
-        effect = self.overhead_effect_db
+        effect = self.overhead_level_difference
         if effect is None:
             return None
         return abs(effect) <= _OVERHEAD_EFFECT_LIMIT_DB + _BOUNDARY_SLACK_DB
@@ -1508,6 +1520,9 @@ def turbine_sound_power(
         level.
     :raises ValueError: for fewer than four positions, arrays of different
         lengths or non-finite values.
+    :raises TypeError: if ``environmental_correction`` or ``surface_area`` is not a
+        single number, or ``background_levels`` or ``pressure_levels`` holds a text or a
+        value that is not a real number.
     """
     levels = require_finite_array(pressure_levels, "pressure_levels")
     if levels.ndim != 1 or levels.size < _MIN_POSITIONS:

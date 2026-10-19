@@ -170,7 +170,7 @@ def plot_k_weighting_response(
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     ax.plot(
         freqs,
-        np.asarray(result.shelf_db, dtype=np.float64),
+        np.asarray(result.shelf_magnitude_db, dtype=np.float64),
         color=_C_MUTED,
         linewidth=1.0,
         linestyle="--",
@@ -178,7 +178,7 @@ def plot_k_weighting_response(
     )
     ax.plot(
         freqs,
-        np.asarray(result.highpass_db, dtype=np.float64),
+        np.asarray(result.highpass_magnitude_db, dtype=np.float64),
         color=_C_SECONDARY,
         linewidth=1.0,
         linestyle=":",

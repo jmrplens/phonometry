@@ -92,6 +92,12 @@ $L_\mathrm{d} > F_2$ (criterion 1, Annex B equation (B.1)).
 
 **Returns:** Ld in decibels.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `bias_error_factor` or `pressure_residual_intensity_index` is not a single number. |
+
 ## field_indicators
 
 ```python
@@ -386,6 +392,12 @@ intensity axis through both; default is the classic 12 mm spacer.
 
 **Returns:** The axes.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `spacing_m` is not a single number. |
+
 ## sound_intensity
 
 ```python
@@ -452,6 +464,12 @@ by the factor $\sin(k \Delta r)/(k \Delta r)$ (IEC 61043:1993,
 | `bias_correct` | If True, apply the per-bin finite-difference correction $(k \Delta r)/\sin(k \Delta r)$ (IEC 61043:1993, 7.3) to the intensity spectral density before summing the band and broadband totals, so the totals no longer under-read as the frequency approaches `max_valid_frequency`. The reciprocal diverges as $k \Delta r \to \pi$ (the first spatial-aliasing null at $c/(2 \Delta r)$, inside the default band range for close spacings), so it is applied only over the probe's usable range (up to $k \Delta r = \pi/2$) and held constant beyond, keeping the totals bounded instead of letting a few near-null bins dominate them. Default False keeps the exact legacy totals; the per-band `bias_correction` factor (same clamped definition) is reported either way. |
 
 **Returns:** [`IntensityResult`](/phonometry/reference/api/power/intensity/#intensityresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `density`, `fs`, `spacing_m` or `speed_of_sound` is not a single number. |
 
 ## temporal_variability_indicator
 

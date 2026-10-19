@@ -897,12 +897,12 @@ def plot_noise_criterion(
     :return: The axes.
     """
     from .._i18n import decimal_comma, localize_axes
-    from ..room.noise_criteria import NC_CURVES_DB, NC_OCTAVE_BANDS_HZ, NC_RATINGS
+    from ..room.noise_criteria import NC_CURVE_LEVELS, NC_OCTAVE_BANDS_HZ, NC_RATINGS
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     levels = np.asarray(result.levels, dtype=np.float64)
-    for row, idx in zip(NC_CURVES_DB, NC_RATINGS, strict=True):
+    for row, idx in zip(NC_CURVE_LEVELS, NC_RATINGS, strict=True):
         ax.plot(NC_OCTAVE_BANDS_HZ, row, color=_C_MUTED, lw=0.8, zorder=1)
         ax.annotate(
             f"{idx:.0f}",
@@ -1201,6 +1201,7 @@ def plot_excitation(
     :param kwargs: Forwarded to the time-domain ``plot`` call.
     :return: The time-domain axes (``ax`` given) or the array of two axes.
     :raises ValueError: for an unknown ``kind``, or an empty signal.
+    :raises TypeError: if ``kind`` is not a text.
     """
     from .._i18n import check_language, localize_axes
 
@@ -1761,12 +1762,13 @@ def plot_spatial_decay(
     :param language: ``"en"`` or ``"es"``.
     :param kwargs: Forwarded to the measured curve's ``plot`` call.
     :return: The axes drawn on.
+    :raises TypeError: if ``language`` is not a text.
     """
     require_choice(language, "language", ("en", "es"))
     axes = _new_axes() if ax is None else ax
     radii = np.asarray(result.distances, dtype=np.float64)
-    values = np.asarray(result.distribution_values_db, dtype=np.float64)
-    reference = np.asarray(result.reference_values_db, dtype=np.float64)
+    values = np.asarray(result.distribution_levels, dtype=np.float64)
+    reference = np.asarray(result.reference_distribution_levels, dtype=np.float64)
 
     axes.fill_between(
         radii,

@@ -106,6 +106,8 @@ def _insitu() -> InSituAbsorptionResult:
     return InSituAbsorptionResult(
         frequencies=np.array([250.0, 500.0, 1000.0, 2000.0]),
         absorption=np.array([0.2, 0.4, 0.6, 0.5]),
+        source_height_m=0.25,
+        microphone_height_m=0.25,
     )
 
 
@@ -123,6 +125,8 @@ def _impedance_tube() -> ImpedanceTubeResult:
         reflection=reflection,
         surface_impedance=_RC * normalized,
         normalized_impedance=normalized,
+        spacing_m=0.05,
+        x1=0.1,
         absorption=absorption,
     )
 

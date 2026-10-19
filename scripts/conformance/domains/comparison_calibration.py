@@ -130,13 +130,15 @@ def _chk_d1_components() -> Outcome:
     for key, (stated, divisor) in ref.IEC61094_5_TABLE_D1_STATED.items():
         row = table[key]
         printed = ref.IEC61094_5_TABLE_D1_STANDARD_DB[key]
-        if row.stated_db is None or row.divisor is None:
+        if row.stated_uncertainty_db is None or row.divisor is None:
             continue
         if (
-            math.isclose(row.stated_db, stated, rel_tol=1e-12)
+            math.isclose(row.stated_uncertainty_db, stated, rel_tol=1e-12)
             and math.isclose(row.divisor, divisor, rel_tol=1e-12)
             and math.isclose(
-                round(row.stated_db / row.divisor, 3), printed, abs_tol=1e-12
+                round(row.stated_uncertainty_db / row.divisor, 3),
+                printed,
+                abs_tol=1e-12,
             )
         ):
             matching += 1

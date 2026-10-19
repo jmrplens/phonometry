@@ -193,6 +193,7 @@ determination. Footnote 3 calls the grade-3 figure tentative.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On the same mismatches [`position_count_factor`](/phonometry/reference/api/power/sound-power-intensity-points/#position_count_factor) refuses. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequency` is not a single number. |
 
 ## DiscretePointIntensityResult
 
@@ -643,6 +644,7 @@ asked for, and asking the wrong half raises.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `grade` is unknown or `fraction` is not 1 or 3; if a per-band value is asked for at the survey grade, or an A-weighted one at the precision or engineering grade; or if `frequency` is not a tabulated band. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequency` is not a single number. |
 
 ## sound_power_intensity_points
 
@@ -723,3 +725,4 @@ achieved grade rather than the requested one, which is the grade clause
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `grade` is none of the three grades of Table 1, or `fraction` is neither 1 nor 3; if `normal_intensity` is neither 1D nor 2D, or `areas` is not 1D; if the position set is empty, the positions and areas disagree in length, or an area is not positive and finite; if an input is not finite; if the optional arrays do not span the same positions or bands; if a frequency is not a band of Tables B.2 and 2; or if `temporal_intensity` is neither 1D nor 2D, carries fewer than two samples, or holds a band whose mean is not positive and so leaves `F1` nothing to normalize by. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float). |

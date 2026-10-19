@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from .contours import (
     EqualLoudnessContours,
+    LoudnessContour,
     equal_loudness_contour,
     equal_loudness_contours,
     hearing_threshold,
@@ -42,6 +43,7 @@ __all__ = [
     "MooreGlasbergTimeVaryingLoudness",
     "ZwickerLoudness",
     "equal_loudness_contour",
+    "LoudnessContour",
     "equal_loudness_contours",
     "hearing_threshold",
     "loudness_ecma",

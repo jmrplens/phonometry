@@ -261,7 +261,8 @@ def test_impact_insulation_plot_curves_and_label_kwarg() -> None:
 def test_band_uncertainty_plot_spectrum() -> None:
     res = _band_uncertainty()
     ax = res.plot()
-    freqs, u = res.to_arrays()
+    freqs = np.asarray(res.frequencies, dtype=float)
+    u = np.asarray(res.uncertainties, dtype=float)
     np.testing.assert_allclose(ax.lines[0].get_xdata(), freqs)
     np.testing.assert_allclose(ax.lines[0].get_ydata(), u)
     assert "12999" in ax.get_title()
@@ -361,3 +362,137 @@ def test_low_frequency_element_plot_draws_its_own_quantity() -> None:
     assert "15186-3" in ax.get_title()
     assert "element" in ax.get_title()
     plt.close("all")
+
+
+# ---------------------------------------------------------------------------
+# ISO 16251-1 background correction and ISO 10848-1 strong coupling: each draws
+# its values band by band against the criterion it is judged by.
+# ---------------------------------------------------------------------------
+_COVERING_BANDS_HZ = [100.0, 125.0, 160.0, 200.0, 250.0, 315.0]
+
+
+def _background_check() -> ph.building.BackgroundCorrectedLevel:
+    # Margins of 20, 16, 15, 10, 6 and 3 dB: two clear, the boundary, two in
+    # the subtraction band and one at the limit.
+    background = np.full(6, 30.0)
+    return ph.building.background_corrected_level(
+        background + np.array([20.0, 16.0, 15.0, 10.0, 6.0, 3.0]),
+        background,
+        frequencies=_COVERING_BANDS_HZ,
+    )
+
+
+def test_the_background_margin_is_drawn_against_its_three_regimes() -> None:
+    result = _background_check()
+    ax = result.plot()
+    heights = [patch.get_height() for patch in ax.patches if patch.get_width() < 1.0]
+    np.testing.assert_allclose(heights, result.margins_db)
+    labels = [tick.get_text() for tick in ax.get_xticklabels()]
+    assert labels == ["100", "125", "160", "200", "250", "315"]
+    bounds = sorted(line.get_ydata()[0] for line in ax.lines)
+    assert bounds == [6.0, 15.0]
+    legend = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert legend == [
+        "under 6 dB: 1.3 dB, limit of measurement",
+        "6 to 15 dB: background subtracted",
+        "15 dB and more: used unchanged",
+    ]
+    assert ax.get_title().endswith("1 of 6 bands at the limit")
+    plt.close("all")
+
+
+def test_the_background_margin_reads_in_spanish() -> None:
+    ax = _background_check().plot(language="es")
+    assert ax.get_title() == (
+        "Corrección por ruido de fondo ISO 16251-1: 1 de 6 bandas en el límite"
+    )
+    assert ax.get_xlabel() == "Frecuencia [Hz]"
+    plt.close("all")
+
+
+def test_a_background_record_of_several_positions_draws_one_line_each() -> None:
+    background = np.full((2, 3), 30.0)
+    result = ph.building.background_corrected_level(
+        background + [[20.0, 10.0, 3.0], [18.0, 8.0, 2.0]], background
+    )
+    ax = result.plot()
+    lines = [line for line in ax.lines if line.get_label().startswith("Position")]
+    assert [line.get_label() for line in lines] == ["Position 1", "Position 2"]
+    np.testing.assert_allclose(lines[1].get_ydata(), [18.0, 8.0, 2.0])
+    assert [tick.get_text() for tick in ax.get_xticklabels()] == ["1", "2", "3"]
+    # Both positions hold the third band at the limit: one band of three.
+    assert ax.get_title().endswith(": 1 of 3 bands at the limit")
+    plt.close("all")
+
+
+def test_the_band_frequencies_of_a_background_record_are_one_per_band() -> None:
+    with pytest.raises(ValueError, match="'frequencies' must be one positive"):
+        ph.building.background_corrected_level(
+            [50.0, 50.0], [30.0, 30.0], frequencies=[100.0]
+        )
+
+
+def _coupling_check() -> ph.building.StrongCouplingCheck:
+    # Two like elements: the bound is 3 dB, and the 125 Hz and 160 Hz bands
+    # stay under it.
+    return ph.building.check_strong_coupling(
+        [4.0, 2.0, 2.9, 3.0, 5.0, 7.0],
+        200.0,
+        200.0,
+        100.0,
+        100.0,
+        frequencies=_COVERING_BANDS_HZ,
+    )
+
+
+def test_the_coupling_difference_is_drawn_against_formula_15() -> None:
+    check = _coupling_check()
+    ax = check.plot()
+    by_label = {line.get_label(): line for line in ax.lines}
+    curve = by_label[r"$D_{\mathrm{v},ij}$"]
+    np.testing.assert_allclose(curve.get_ydata(), check.velocity_level_difference)
+    bound = by_label[r"Formula (15): $D_{\mathrm{v},ij} \geq$ 3.0 dB"]
+    assert bound.get_ydata()[0] == pytest.approx(check.min_velocity_level_difference)
+    failed = by_label["does not hold"]
+    np.testing.assert_array_equal(failed.get_xdata(), [1.0, 2.0])
+    assert ax.get_title() == "ISO 10848-1 Formula (15): holds in 4 of 6 bands"
+    plt.close("all")
+
+
+def test_the_side_under_the_coupling_bound_is_strong_coupling() -> None:
+    # ISO 10848-1:2006, 4.3.3: where Formula (15) is not satisfied the elements
+    # are strongly coupled and the measured Kij may not be relevant, so the
+    # shaded side is the one under the bound, and it is named strong coupling.
+    check = _coupling_check()
+    ax = check.plot()
+    (span,) = [
+        patch
+        for patch in ax.patches
+        if patch.get_label() == r"strong coupling: $K_{ij}$ may not be relevant"
+    ]
+    bottom, top = span.get_y(), span.get_y() + span.get_height()
+    assert top == pytest.approx(check.min_velocity_level_difference)
+    assert bottom < float(np.min(check.velocity_level_difference))
+    under = check.velocity_level_difference < top
+    np.testing.assert_array_equal(under, ~check.holds)
+    plt.close("all")
+
+
+def test_the_coupling_check_reads_in_spanish_and_marks_nothing_when_it_holds() -> None:
+    check = ph.building.check_strong_coupling([4.0, 5.0], 200.0, 200.0, 100.0, 100.0)
+    ax = check.plot(language="es")
+    labels = [line.get_label() for line in ax.lines]
+    assert "no se cumple" not in labels
+    assert r"Fórmula (15): $D_{\mathrm{v},ij} \geq$ 3,0 dB" in labels
+    assert ax.get_title() == "Fórmula (15) de ISO 10848-1: se cumple en 2 de 2 bandas"
+    legend = [text.get_text() for text in ax.get_legend().get_texts()]
+    assert r"acoplamiento fuerte: $K_{ij}$ puede no ser pertinente" in legend
+    assert ax.get_xlabel() == "Índice de banda"
+    plt.close("all")
+
+
+def test_the_band_frequencies_of_a_coupling_check_are_one_per_band() -> None:
+    with pytest.raises(ValueError, match="'frequencies' must be one positive"):
+        ph.building.check_strong_coupling(
+            [4.0, 5.0], 200.0, 200.0, 100.0, 100.0, frequencies=[100.0]
+        )

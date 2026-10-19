@@ -107,7 +107,7 @@ def _standing_wave_phase(
 
 
 def standing_wave_reflection(
-    swr: ArrayLike, first_min_distance: ArrayLike, wavelength: ArrayLike
+    swr: ArrayLike, first_min_distance: ArrayLike, *, wavelength: ArrayLike
 ) -> Complex:
     r"""Complex reflection factor from the standing wave (ISO 10534-1, Eqs. (17)-(23)).
 
@@ -130,7 +130,7 @@ def standing_wave_reflection(
 
 
 def standing_wave_normalized_impedance(
-    swr: ArrayLike, first_min_distance: ArrayLike, wavelength: ArrayLike
+    swr: ArrayLike, first_min_distance: ArrayLike, *, wavelength: ArrayLike
 ) -> Complex:
     r"""Normalised impedance from the standing wave (ISO 10534-1, Eqs. (24)-(26)).
 
@@ -142,5 +142,5 @@ def standing_wave_normalized_impedance(
     :param wavelength: Wavelength ``lambda0``, in metres.
     :return: Normalised surface impedance ``z`` (complex).
     """
-    r = standing_wave_reflection(swr, first_min_distance, wavelength)
+    r = standing_wave_reflection(swr, first_min_distance, wavelength=wavelength)
     return np.asarray((1.0 + r) / (1.0 - r), dtype=np.complex128)

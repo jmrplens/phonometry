@@ -818,12 +818,12 @@ def test_a_name_its_package_never_published_is_withdrawn(
         getattr(home, name)
 
 
-def test_the_nc_curves_are_published_with_their_unit() -> None:
+def test_the_nc_curves_are_published_as_levels() -> None:
     """The one table a guide drew by hand, published by ``room``."""
     assert ph.room.NC_OCTAVE_BANDS_HZ.shape == (10,)
-    assert ph.room.NC_CURVES_DB.shape == (ph.room.NC_RATINGS.size, 10)
+    assert ph.room.NC_CURVE_LEVELS.shape == (ph.room.NC_RATINGS.size, 10)
     np.testing.assert_allclose(
-        ph.room.nc_curve(40.0), ph.room.NC_CURVES_DB[ph.room.NC_RATINGS == 40.0][0]
+        ph.room.nc_curve(40.0), ph.room.NC_CURVE_LEVELS[ph.room.NC_RATINGS == 40.0][0]
     )
 
 
@@ -855,3 +855,56 @@ def test_a_level_constant_spelled_with_its_decibels_is_gone() -> None:
     assert ph.noise_control.MODAL_FILTER_ATTENUATION == (3.0, 5.0)
     assert not hasattr(ph.emission, "MAX_K3_DB")
     assert ph.emission.MAX_K3 == pytest.approx(7.0)
+
+
+# --------------------------------------------------------------------------- #
+# 4.0 a name says the quantity it holds: a name made of qualifiers and ``_db``
+# took the noun of what it holds. The ones that shipped in 3.3.0 or 4.0.0rc1,
+# each gone under its old spelling.
+# --------------------------------------------------------------------------- #
+_RENAMED_4_0_QUALIFIER_FIELDS = [
+    ("signals", "WindowMetricsResult", "highest_sidelobe_db", "highest_sidelobe_level"),
+    ("broadcast", "KWeightingResponse", "shelf_db", "shelf_magnitude_db"),
+    ("broadcast", "KWeightingResponse", "highpass_db", "highpass_magnitude_db"),
+    ("signals", "LifterResult", "liftered_db", "liftered_spectrum_db"),
+    ("electroacoustics", "MicrophoneCharacteristics", "polar_db", "polar_response_db"),
+    ("electroacoustics", "LoudspeakerCharacteristics", "polar_db", "polar_response_db"),
+]
+
+
+@pytest.mark.parametrize(
+    ("package", "record", "old", "new"), _RENAMED_4_0_QUALIFIER_FIELDS
+)
+def test_a_field_made_of_qualifiers_is_gone(
+    package: str, record: str, old: str, new: str
+) -> None:
+    fields = {
+        field.name
+        for field in dataclasses.fields(getattr(getattr(ph, package), record))
+    }
+    assert new in fields
+    assert old not in fields
+
+
+def test_the_tone_prominence_limit_and_the_omc_deviation_say_what_they_are() -> None:
+    assert not hasattr(ph.psychoacoustics.ToneAssessment, "criterion_db")
+    assert isinstance(ph.psychoacoustics.ToneAssessment.prominence_limit_db, property)
+    parameters = inspect.signature(ph.emission.total_standard_deviation).parameters
+    assert "operating_db" not in parameters
+    assert "sigma_omc_db" in parameters
+
+
+# --------------------------------------------------------------------------- #
+# 4.0 an answer of several quantities is a record: the two members that only
+# repacked a record's own fields into a tuple are gone, and the records that
+# replaced the tuples do not unpack.
+# --------------------------------------------------------------------------- #
+def test_the_members_that_repacked_fields_as_tuples_are_gone() -> None:
+    assert not hasattr(ph.building.BandUncertainty, "to_arrays")
+    assert not hasattr(ph.building.LiningImprovementResult, "ratings")
+
+
+def test_an_answer_that_was_a_tuple_does_not_unpack() -> None:
+    contour = ph.psychoacoustics.equal_loudness_contour(40.0)
+    with pytest.raises(TypeError, match="cannot unpack non-iterable"):
+        _frequencies, _levels = contour  # type: ignore[misc]

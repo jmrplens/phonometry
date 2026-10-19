@@ -87,7 +87,10 @@ if TYPE_CHECKING:
         PassByRegression,
         StatisticalPassByResult,
     )
-    from ..environment.sources.cnossos_rail import RailwayEmissionResult
+    from ..environment.sources.cnossos_rail import (
+        RailwayEmissionResult,
+        WavelengthSpectrum,
+    )
     from ..environment.sources.cnossos_road import RoadEmissionResult
     from ..environment.sources.wind_turbine import WindTurbineTonalityResult
 
@@ -110,6 +113,9 @@ _LT_LABEL = "$L_\\mathrm{t}$ [dB]"
 #: The legend name of the band-level bars two renderers draw, written once
 #: so the translation table and the legends agree.
 _BAND_LEVEL_LABEL = "Band level"
+#: The level ordinate of the tonal-audibility and wavelength-spectrum plots,
+#: written once so the translation table and the axes agree.
+_LEVEL_LABEL = "Level [dB]"
 #: The abscissa of the three ISO 13474 views: the level ``x`` the density and
 #: the exceedance are functions of.
 _SEL_X_LABEL = "Single-event sound exposure level $x$ [dB]"
@@ -149,7 +155,7 @@ _STRINGS: dict[str, str] = {
     "Masking level": "Nivel de enmascaramiento",
     "Tone": "Tono",
     _FREQ_LABEL: "Frecuencia [Hz]",
-    "Level [dB]": "Nivel [dB]",
+    _LEVEL_LABEL: "Nivel [dB]",
     "IEC 61400-11 tonal audibility": "Audibilidad tonal IEC 61400-11",
     "threshold": "umbral",
     "Impulses": "Impulsos",
@@ -325,6 +331,10 @@ _STRINGS: dict[str, str] = {
     "ISO 17534-1 TRC form: {inside} of {total} results inside": (
         "Formulario TRC de ISO 17534-1: {inside} de {total} resultados dentro"
     ),
+    r"Wavelength $\lambda$ [mm]": r"Longitud de onda $\lambda$ [mm]",
+    "CNOSSOS-EU Appendix G spectrum over wavelength": (
+        "Espectro CNOSSOS-EU del apéndice G en longitud de onda"
+    ),
 }
 
 
@@ -431,7 +441,7 @@ def plot_wind_turbine_tonality(
         label=f"{_t('Tone', language)} ({format_number(result.tone_level, language)} dB)",
     )
     ax.set_xlabel(_t(_FREQ_LABEL, language))
-    ax.set_ylabel(_t("Level [dB]", language))
+    ax.set_ylabel(_t(_LEVEL_LABEL, language))
     ax.set_title(
         f"{_t('IEC 61400-11 tonal audibility', language)} $\\Delta L_\\mathrm{{a}}$ = {format_number(result.tonal_audibility, language)} dB"
     )
@@ -530,7 +540,7 @@ def plot_tonal_survey(
     prominent = np.asarray(result.prominent, dtype=bool)
     positions = np.arange(levels.size, dtype=np.float64)
     needed = levels - np.asarray(result.level_differences, dtype=np.float64)
-    needed = needed + np.asarray(result.thresholds_db, dtype=np.float64)
+    needed = needed + np.asarray(result.min_level_differences, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("width", 0.66)
     kwargs.setdefault("label", _t(_BAND_LEVEL_LABEL, language))
@@ -1455,7 +1465,7 @@ def plot_reflection_index_uncertainty(
     bars = ax.bar(positions, values, **kwargs)
     from matplotlib.lines import Line2D
 
-    rating = format_number(result.rating_db, language, decimals=2)
+    rating = format_number(result.rating_expanded_uncertainty_db, language, decimals=2)
     stated = Line2D(
         [],
         [],
@@ -1730,8 +1740,8 @@ def plot_barrier_in_situ(
     return _plot_two_runs(
         ax,
         None if result.frequencies is None else np.asarray(result.frequencies),
-        np.asarray(result.receiver_before_db, dtype=np.float64),
-        np.asarray(result.receiver_after_db, dtype=np.float64),
+        np.asarray(result.receiver_levels_before, dtype=np.float64),
+        np.asarray(result.receiver_levels_after, dtype=np.float64),
         np.asarray(result.insertion_loss, dtype=np.float64),
         labels=(
             _t("Receiver level before the barrier", language),
@@ -1803,7 +1813,9 @@ def _spb_line(
 ) -> tuple[np.ndarray, np.ndarray]:
     """The fitted line between two speeds, as the arrays to draw."""
     speeds = np.geomspace(low, high, 32)
-    levels = regression.intercept_db + regression.slope_db_per_decade * np.log10(speeds)
+    levels = regression.intercept_level + regression.slope_db_per_decade * np.log10(
+        speeds
+    )
     return speeds, levels
 
 
@@ -2843,8 +2855,8 @@ def plot_level_difference_quantiles(
     values = np.asarray(result.sorted_differences, dtype=np.float64)
     ranks = np.arange(1, values.size + 1)
     ax.axhspan(
-        result.q01_db,
-        result.q09_db,
+        result.q01_level_difference,
+        result.q09_level_difference,
         color=theme_fill(_C_PRIMARY, ax),
         zorder=0,
         label=_t("Central 80 % of the differences", language),
@@ -2863,8 +2875,8 @@ def plot_level_difference_quantiles(
     )
     template = _t("{symbol} = {value} dB at $R$ = {rank}", language)
     for rank, value, color, symbol in (
-        (result.rank_q01, result.q01_db, _C_SECONDARY, "$q_{0,1}$"),
-        (result.rank_q09, result.q09_db, _C_TERTIARY, "$q_{0,9}$"),
+        (result.rank_q01, result.q01_level_difference, _C_SECONDARY, "$q_{0,1}$"),
+        (result.rank_q09, result.q09_level_difference, _C_TERTIARY, "$q_{0,9}$"),
     ):
         ax.axvline(rank, color=color, ls=":", lw=1.1, zorder=1)
         ax.plot(
@@ -2946,7 +2958,7 @@ def plot_round_robin_precision(
             label=_t("Receivers", language),
         ),
     )
-    q09 = result.q09_db
+    q09 = result.q09_level_difference
     ax.axvline(
         q09,
         color=_C_REFERENCE,
@@ -3059,5 +3071,46 @@ def plot_calculation_verification(
     ax.set_axisbelow(True)
     legend = ax.legend(fontsize="small")
     place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_wavelength_spectrum(
+    result: WavelengthSpectrum,
+    *,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """A roughness or contact-filter spectrum against wavelength (Appendix G).
+
+    The wavelength axis is logarithmic and runs from the longest wavelength
+    on the left to the shortest on the right, the order Appendix G prints
+    its tables in, so a frequency rises along it as on every other spectrum.
+
+    :param result: A
+        :class:`~phonometry.environment.sources.cnossos_rail.WavelengthSpectrum`.
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the spectrum ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    wavelengths = np.asarray(result.wavelengths_mm, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "markersize", 3.5)
+    ax.plot(wavelengths, levels, **kwargs)
+    ax.set_xscale("log")
+    ax.set_xlim(float(wavelengths.max()), float(wavelengths.min()))
+    ax.set_xlabel(_t(r"Wavelength $\lambda$ [mm]", language))
+    ax.set_ylabel(_t(_LEVEL_LABEL, language))
+    ax.set_title(_t("CNOSSOS-EU Appendix G spectrum over wavelength", language))
+    if "label" in kwargs:
+        ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax

@@ -59,6 +59,7 @@ __all__ = [
     "MonteCarloResult",
     "Quantity",
     "UncertaintyResult",
+    "ExpandedUncertainty",
     "UncertaintyWarning",
     "combined_standard_uncertainty",
     "coverage_factor",
@@ -118,6 +119,8 @@ class Quantity(RichDisplay):
         it flows through :func:`uncertainty_propagation` into a NaN contribution
         the budget plot draws as an invisible bar -- indistinguishable from a
         zero contribution -- under a legend reading ``u_c = nan``.
+
+        :raises TypeError: if ``dof`` or ``uncertainty`` is not a single number.
         """
         require_scalar(self.dof, "dof")
         require_non_negative(self.uncertainty, "uncertainty")
@@ -136,6 +139,8 @@ def rectangular(value: float, half_width: float, name: str = "") -> Quantity:
     r"""Type B quantity with a rectangular PDF of half-width ``a`` (GUM 4.3.7).
 
     The standard uncertainty is :math:`a / \sqrt{3}`.
+
+    :raises TypeError: if ``half_width`` or ``value`` is not a single number.
     """
     require_scalar(half_width, "half_width")
     require_scalar(value, "value")
@@ -146,6 +151,8 @@ def triangular(value: float, half_width: float, name: str = "") -> Quantity:
     r"""Type B quantity with a triangular PDF of half-width ``a`` (GUM 4.3.9).
 
     The standard uncertainty is :math:`a / \sqrt{6}`.
+
+    :raises TypeError: if ``half_width`` or ``value`` is not a single number.
     """
     require_scalar(half_width, "half_width")
     require_scalar(value, "value")
@@ -156,10 +163,29 @@ def u_shaped(value: float, half_width: float, name: str = "") -> Quantity:
     r"""Type B quantity with a U-shaped (arcsine) PDF of half-width ``a``.
 
     The standard uncertainty is :math:`a / \sqrt{2}`.
+
+    :raises TypeError: if ``half_width`` or ``value`` is not a single number.
     """
     require_scalar(half_width, "half_width")
     require_scalar(value, "value")
     return Quantity(value, half_width / math.sqrt(2.0), "u-shaped", name=name)
+
+
+@dataclass(frozen=True)
+class ExpandedUncertainty(OwnsArrays):
+    r"""An expanded uncertainty and the coverage factor it was formed with.
+
+    What :meth:`UncertaintyResult.expanded` returns: ``k`` and
+    :math:`U = k u_\mathrm{c}`, named, where a ``(k, U)`` tuple used to be
+    unpacked by position (GUM clause 6, Annex G).
+
+    :ivar coverage_factor: The coverage factor ``k``.
+    :ivar expanded_uncertainty: :math:`U = k u_\mathrm{c}`, in the unit of
+        the measurand.
+    """
+
+    coverage_factor: float
+    expanded_uncertainty: float
 
 
 @dataclass(frozen=True)
@@ -237,6 +263,7 @@ class UncertaintyResult(OwnsArrays):
             the labels span different numbers of input quantities, or if the
             estimate, the combined uncertainty, a coefficient or a
             contribution is not finite.
+        :raises TypeError: if ``contributions`` is a single number where an array goes.
         """
         owner = type(self).__name__
         require_ranks(self, sensitivities=1, contributions=1)
@@ -269,20 +296,23 @@ class UncertaintyResult(OwnsArrays):
 
     def expanded(
         self, coverage: float = 0.95, *, coverage_factor_override: float | None = None
-    ) -> tuple[float, float]:
+    ) -> ExpandedUncertainty:
         r"""Coverage factor ``k`` and expanded uncertainty :math:`U = k u_\mathrm{c}`.
 
         :param coverage: Coverage probability in (0, 1); ``0.95`` by default.
         :param coverage_factor_override: Explicit ``k``. Required for a
             correlated budget with finite input degrees of freedom, where the
             GUM defines no effective-dof formula (``effective_dof`` is NaN).
-        :return: The pair ``(k, U)`` (GUM clause 6, Annex G).
+        :return: The coverage factor ``k`` and ``U``, as an
+            :class:`ExpandedUncertainty` (GUM clause 6, Annex G).
         :raises ValueError: If the effective dof are undefined and no
             explicit coverage factor is given.
         """
         if coverage_factor_override is not None:
             k = float(coverage_factor_override)
-            return k, k * self.combined_uncertainty
+            return ExpandedUncertainty(
+                coverage_factor=k, expanded_uncertainty=k * self.combined_uncertainty
+            )
         if math.isnan(self.effective_dof):
             msg = (
                 "The effective degrees of freedom are undefined for a "
@@ -292,7 +322,9 @@ class UncertaintyResult(OwnsArrays):
             )
             raise ValueError(msg)
         k = coverage_factor(coverage, self.effective_dof)
-        return k, k * self.combined_uncertainty
+        return ExpandedUncertainty(
+            coverage_factor=k, expanded_uncertainty=k * self.combined_uncertainty
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -621,6 +653,7 @@ def coverage_factor(coverage: float = 0.95, dof: float = math.inf) -> float:
     :return: The two-sided coverage factor
         :math:`k = t_p(\text{dof})`.
     :raises ValueError: for a coverage outside (0, 1).
+    :raises TypeError: if ``coverage`` or ``dof`` is not a single number.
     """
     require_scalar(dof, "dof")
     require_scalar(coverage, "coverage")
@@ -699,6 +732,7 @@ def monte_carlo(
     :return: A :class:`MonteCarloResult`.
     :raises ValueError: for no inputs, fewer than 2 trials or bad coverage,
         or when the model returns a non-finite output for any trial.
+    :raises TypeError: if ``coverage`` or ``n_trials`` is not a single number.
     """
     require_scalar(coverage, "coverage")
     require_scalar(n_trials, "n_trials")

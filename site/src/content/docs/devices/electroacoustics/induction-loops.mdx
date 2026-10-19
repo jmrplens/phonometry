@@ -134,8 +134,10 @@ print(round(electroacoustics.loop_center_field(1.0, 10.0, width_m=14.0), 4))  # 
 exact = electroacoustics.rectangular_loop_field(1.0, 10.0, 14.0, 0.0, 0.0, 0.0)
 print(round(float(exact.h_z_a_per_m), 4))                                   # 0.0782 A/m
 
-print([round(v, 1) for v in electroacoustics.loop_dimensions(5.0)])                    # [10.3, 10.3] m
-print([round(v, 1) for v in electroacoustics.loop_dimensions(5.0, aspect_ratio=3.0)])  # [7.4, 22.1] m
+square = electroacoustics.loop_dimensions(5.0)
+print(round(square.width_m, 1), round(square.length_m, 1))  # 10.3 10.3 (m)
+oblong = electroacoustics.loop_dimensions(5.0, aspect_ratio=3.0)
+print(round(oblong.width_m, 1), round(oblong.length_m, 1))  # 7.4 22.1 (m)
 
 print([round(electroacoustics.loop_current(10.0 * r, 10.0), 2) for r in (1, 1.5, 2, 3, 5)])
 # [4.88, 5.63, 6.04, 6.41, 6.64] A: Figure H.1 at a 10 m shorter side
@@ -260,7 +262,7 @@ print(round(20 * np.log10(np.ptp(noise) / np.sqrt(np.mean(noise**2))), 2))  # 18
 
 combi = 0.4 * electroacoustics.combi_signal(fs, n_cycles=2, seed=7)  # sine bursts at 400 mA/m
 reading = electroacoustics.field_strength_meter(combi, fs)
-print(round(reading.max_level, 2), round(reading.equivalent_db, 2))  # 0.0 -3.98 dB
+print(round(reading.max_level, 2), round(reading.equivalent_level, 2))  # 0.0 -3.98 dB
 ```
 
 6.4 NOTE 2, and NOTE 3 to 5.4.8.2 of IEC 62489-1, print the theoretical

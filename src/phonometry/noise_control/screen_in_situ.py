@@ -201,6 +201,8 @@ def screen_background_corrected_level(
     :return: The corrected level per band, in decibels.
     :raises ValueError: For inputs that do not match band for band, or a
         margin under :data:`ISO11821_MIN_BACKGROUND_MARGIN_DB`.
+    :raises TypeError: if ``background_levels`` or ``levels`` holds a text or a value
+        that is not a real number.
     """
     levels = require_finite_array(levels, "levels")
     background = require_finite_array(background_levels, "background_levels")
@@ -241,6 +243,7 @@ def screen_source_directivity_index(levels: ArrayLike) -> NDArray[np.float64]:
     :return: :math:`DI_i` at each position, in decibels.
     :raises ValueError: For a count that is not
         :data:`DIRECTIVITY_POSITIONS`.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     levels = require_finite_array(levels, "levels")
     if levels.size != DIRECTIVITY_POSITIONS:
@@ -273,6 +276,7 @@ def microphone_distances_m(screen_height_m: float) -> NDArray[np.float64]:
     :param screen_height_m: The screen height, in metres.
     :return: The four distances from the screen, in metres.
     :raises ValueError: For a non-positive height.
+    :raises TypeError: if ``screen_height_m`` is not a single number.
     """
     height = require_positive(screen_height_m, "screen_height_m")
     if height < MIN_SCREEN_DIMENSION_M:
@@ -303,6 +307,8 @@ def impulse_mean_level(repeat_levels: ArrayLike) -> float:
     :return: The arithmetic mean, in decibels.
     :raises ValueError: For fewer than :data:`IMPULSE_REPEATS` repeats or a
         spread past :data:`IMPULSE_INVALID_DEVIATION_DB`.
+    :raises TypeError: if ``repeat_levels`` holds a text or a value that is not a real
+        number.
     """
     levels = require_finite_array(repeat_levels, "repeat_levels")
     if levels.size < IMPULSE_REPEATS:
@@ -434,6 +440,9 @@ def screen_attenuation(
     :raises ValueError: For spectra that do not match, a band centre or a
         distance that is not strictly positive, an unknown source kind, half an
         A-weighted pair, or an A-weighted pair with an artificial source.
+    :raises TypeError: if ``distance`` is not a single number, or ``frequencies``,
+        ``screened_levels`` or ``unscreened_levels`` holds a text or a value that is not
+        a real number.
     """
     unscreened = require_finite_array(unscreened_levels, "unscreened_levels")
     screened = require_finite_array(screened_levels, "screened_levels")

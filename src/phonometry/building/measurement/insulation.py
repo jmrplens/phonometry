@@ -1025,6 +1025,7 @@ def airborne_insulation(
         source room. A room that does not round below 25 m³ is refused where
         the corner measurements are described, by
         :class:`~.low_frequency.LowFrequencyProcedure` itself.
+    :raises TypeError: if ``area``, ``t0`` or ``volume`` is not a single number.
     :warns LowFrequencyWarning: when the receiving room rounds below 25 m³ and
         ``frequencies`` names any of the three bands but no ``receiver_low_frequency``
         answers Clause 8.1.
@@ -1172,6 +1173,7 @@ def impact_insulation(
         reverberation time is missing. A room that does not round below 25 m³
         is refused where the corner measurements are described, by
         :class:`~.low_frequency.LowFrequencyProcedure` itself.
+    :raises TypeError: if ``t0`` or ``volume`` is not a single number.
     :warns LowFrequencyWarning: when ``volume`` rounds below 25 m³ and
         ``frequencies`` names any of the three bands but no ``low_frequency`` answers
         Clause 8.1.
@@ -1371,6 +1373,7 @@ def facade_insulation(
         described, by :class:`~.low_frequency.LowFrequencyProcedure` itself.
         Supplying ``surface_level`` alone is not an error: ``r_prime`` simply
         stays ``None``.
+    :raises TypeError: if ``area``, ``t0`` or ``volume`` is not a single number.
     :warns LowFrequencyWarning: when a loudspeaker-method ``volume`` rounds
         below 25 m³ and ``frequencies`` names any of the three bands but no
         ``low_frequency`` answers Clause 7.3.1.

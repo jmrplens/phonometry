@@ -114,7 +114,7 @@ def generate_tonality_spectrum(output_dir: str) -> None:
     )
     ax.axvline(result.frequency, color=COLOR_SECONDARY, linewidth=1.4, linestyle="--")
     ax.annotate(
-        f"TNR = {result.ratio_db:.1f} dB\n(criterion {result.criterion_db:.1f} dB)",
+        f"TNR = {result.ratio_db:.1f} dB\n(criterion {result.prominence_limit_db:.1f} dB)",
         xy=(result.frequency, db.max() - 2),
         xytext=(1120, db.max() - 8),
         fontsize=11,
@@ -4170,7 +4170,7 @@ def generate_hearing_protector_reat(output_dir: str) -> None:
         )
     ax_reat.errorbar(
         freqs,
-        reat.mean_db,
+        reat.mean_attenuation,
         yerr=reat.expanded_uncertainty_db,
         fmt="none",
         ecolor=COLOR_SECONDARY,
@@ -4181,7 +4181,7 @@ def generate_hearing_protector_reat(output_dir: str) -> None:
     )
     ax_reat.plot(
         freqs,
-        reat.mean_db,
+        reat.mean_attenuation,
         "-o",
         color=COLOR_PRIMARY,
         linewidth=2.4,
@@ -4218,7 +4218,7 @@ def generate_hearing_protector_reat(output_dir: str) -> None:
             bar.set_edgecolor(COLOR_SECONDARY)
     ax_diff.plot(
         x,
-        comparison.criterion_db,
+        comparison.significance_limit_db,
         "_",
         color=COLOR_SECONDARY,
         markersize=26,
@@ -4318,7 +4318,7 @@ def generate_hearing_protector_anr(output_dir: str) -> None:
     # attenuation is weakest where the circuit works, which is the point.
     ax_chain.plot(
         thirds,
-        total.reat_third_octave_db.mean(axis=0),
+        total.reat_third_octave_attenuation.mean(axis=0),
         "--",
         color=COLOR_TERTIARY,
         linewidth=2.0,
@@ -4336,7 +4336,7 @@ def generate_hearing_protector_anr(output_dir: str) -> None:
     )
     ax_chain.plot(
         thirds,
-        total.total_third_octave_db.mean(axis=0),
+        total.total_third_octave_attenuation.mean(axis=0),
         "-",
         color=COLOR_PRIMARY,
         linewidth=2.4,
@@ -4387,7 +4387,7 @@ def generate_hearing_protector_anr(output_dir: str) -> None:
         )
     ax_ail.errorbar(
         active.frequencies,
-        active.mean_db,
+        active.mean_insertion_loss,
         yerr=active.expanded_uncertainty_db,
         fmt="none",
         ecolor=COLOR_SECONDARY,
@@ -4398,7 +4398,7 @@ def generate_hearing_protector_anr(output_dir: str) -> None:
     )
     ax_ail.plot(
         active.frequencies,
-        active.mean_db,
+        active.mean_insertion_loss,
         "-o",
         color=COLOR_PRIMARY,
         linewidth=2.2,

@@ -44,8 +44,12 @@ if TYPE_CHECKING:
         RainfallSoundResult,
         RainGeneratorVerification,
     )
-    from ..building.measurement.flanking_transmission import VibrationReductionResult
+    from ..building.measurement.flanking_transmission import (
+        StrongCouplingCheck,
+        VibrationReductionResult,
+    )
     from ..building.measurement.floor_covering_improvement import (
+        BackgroundCorrectedLevel,
         FloorCoveringImprovementResult,
         OctaveBandSpectrum,
     )
@@ -1586,7 +1590,8 @@ def plot_band_uncertainty(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    freqs, u = result.to_arrays()
+    freqs = np.asarray(result.frequencies, dtype=float)
+    u = np.asarray(result.uncertainties, dtype=float)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     ax.plot(freqs, u, **kwargs)
@@ -2425,16 +2430,18 @@ def plot_lining_improvement(
     # make drawing the curve emit an extrapolation warning.
     sweep = np.logspace(np.log10(30.0), np.log10(5000.0), 300)
     sweep[0], sweep[-1] = 30.0, 5000.0
-    ratings: list[tuple[float, float, float]] = [
+    swept = [
         lining_improvement(
             float(f),
             system=result.system,
             anchors=result.anchors,
             glued_area=result.glued_area,
-        ).ratings
+        )
         for f in sweep
     ]
-    curves = np.asarray(ratings, dtype=np.float64)
+    curves = np.asarray(
+        [(r.delta_rw, r.delta_ra, r.delta_ratr) for r in swept], dtype=np.float64
+    )
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", kwargs.pop("label", r"$\Delta R_\mathrm{w}$"))
     ax.plot(sweep, curves[:, 0], **kwargs)
@@ -2699,7 +2706,7 @@ def plot_service_equipment_level(
 
     ax = ax if ax is not None else _new_axes()
     positions = _band_axis(ax, result.frequencies, language=language)
-    if result.standardized_db is not None:
+    if result.standardized_levels is not None:
         shade = theme_fill(_C_MUTED, ax)
         for x in positions[~np.asarray(result.standardizable)]:
             ax.axvspan(x - 0.5, x + 0.5, color=shade, lw=0, zorder=0)
@@ -2708,7 +2715,7 @@ def plot_service_equipment_level(
         )
     ax.plot(
         positions,
-        result.average_db,
+        result.average_levels,
         "o--",
         color=_C_REFERENCE,
         lw=1.0,
@@ -2718,24 +2725,24 @@ def plot_service_equipment_level(
     if result.background is not None:
         ax.plot(
             positions,
-            result.background.background_db,
+            result.background.background_levels,
             ":",
             color=_C_MUTED,
             lw=1.4,
             label=_t(_BACKGROUND_L2_LABEL, language),
         )
-    final = result.corrected_db
+    final = result.corrected_levels
     final_label = _t(_CORRECTED_LABEL, language)
-    if result.standardized_db is not None:
+    if result.standardized_levels is not None:
         ax.plot(
             positions,
-            result.corrected_db,
+            result.corrected_levels,
             "-",
             color=_C_TERTIARY,
             lw=1.2,
             label=final_label,
         )
-        final = result.standardized_db
+        final = result.standardized_levels
         final_label = _t("standardized $L_{\\mathrm{n}T}$", language)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "s")
@@ -2774,7 +2781,9 @@ def plot_service_equipment_background(
 
     ax = ax if ax is not None else _new_axes()
     freqs = result.frequencies
-    labels = freqs if freqs is not None else np.arange(result.measured_db.size) + 1.0
+    labels = (
+        freqs if freqs is not None else np.arange(result.measured_levels.size) + 1.0
+    )
     positions = _band_axis(
         ax,
         labels,
@@ -2784,7 +2793,7 @@ def plot_service_equipment_background(
     )
     ax.plot(
         positions,
-        result.measured_db,
+        result.measured_levels,
         "o--",
         color=_C_REFERENCE,
         lw=1.0,
@@ -2793,7 +2802,7 @@ def plot_service_equipment_background(
     )
     ax.plot(
         positions,
-        result.background_db,
+        result.background_levels,
         ":",
         color=_C_MUTED,
         lw=1.4,
@@ -2802,9 +2811,11 @@ def plot_service_equipment_background(
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "s")
     kwargs.setdefault("label", _t(_CORRECTED_LABEL, language))
-    ax.plot(positions, result.corrected_db, "-", **kwargs)
+    ax.plot(positions, result.corrected_levels, "-", **kwargs)
     if result.influenced:
-        _mark_upper_limits(ax, positions, result.corrected_db, result.limited, language)
+        _mark_upper_limits(
+            ax, positions, result.corrected_levels, result.limited, language
+        )
     ax.set_ylabel(_t(_SPL_LABEL, language))
     ax.set_title(_t(_BACKGROUND_TITLE, language))
     ax.grid(visible=True, axis="y", alpha=0.3)
@@ -4078,5 +4089,228 @@ def plot_octave_band_spectrum(
     ax.set_title(_t(_OCTAVE_BAND_TITLE, language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+_STRINGS.update(
+    {
+        r"Margin above the background $L' - L_\mathrm{b}$ [dB]": (
+            r"Margen sobre el fondo $L' - L_\mathrm{b}$ [dB]"
+        ),
+        "ISO 16251-1 background correction: {limited} of {total} bands at the limit": (
+            "Corrección por ruido de fondo ISO 16251-1: {limited} de {total} "
+            "bandas en el límite"
+        ),
+        "15 dB and more: used unchanged": "15 dB o más: sin corrección",
+        "6 to 15 dB: background subtracted": "de 6 a 15 dB: se resta el fondo",
+        "under 6 dB: 1.3 dB, limit of measurement": (
+            "menos de 6 dB: 1,3 dB, límite de medida"
+        ),
+        "Position {n}": "Posición {n}",
+        r"Velocity level difference $D_{\mathrm{v},ij}$ [dB]": (
+            r"Diferencia de niveles de velocidad $D_{\mathrm{v},ij}$ [dB]"
+        ),
+        r"Formula (15): $D_{\mathrm{v},ij} \geq$ {bound} dB": (
+            r"Fórmula (15): $D_{\mathrm{v},ij} \geq$ {bound} dB"
+        ),
+        r"strong coupling: $K_{ij}$ may not be relevant": (
+            r"acoplamiento fuerte: $K_{ij}$ puede no ser pertinente"
+        ),
+        "does not hold": "no se cumple",
+        "ISO 10848-1 Formula (15): holds in {held} of {total} bands": (
+            "Fórmula (15) de ISO 10848-1: se cumple en {held} de {total} bandas"
+        ),
+    }
+)
+
+
+def _named_band_axis(
+    ax: Axes, frequencies: np.ndarray | None, n_bands: int, language: str
+) -> np.ndarray:
+    """A band axis labelled with the centres, or numbered where none were given."""
+    if frequencies is None:
+        return _band_axis(
+            ax,
+            [str(i + 1) for i in range(n_bands)],
+            xlabel=_t(_BAND_INDEX_LABEL, language),
+            language=language,
+        )
+    return _band_axis(
+        ax,
+        np.asarray(frequencies, dtype=np.float64),
+        xlabel=_t(_FREQ_LABEL, language),
+        language=language,
+    )
+
+
+def plot_background_corrected_level(
+    result: BackgroundCorrectedLevel,
+    *,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""The margin :math:`L' - L_\mathrm{b}` of each band against ISO 16251-1 F. (2).
+
+    The three regimes of the correction are shaded across the bands: 15 dB
+    and more, used unchanged; 6 dB to 15 dB, the background subtracted in
+    energy; under 6 dB, the 1.3 dB limit of measurement. A one-dimensional
+    record draws one bar per band, all in one colour over the shaded regimes,
+    a (positions, bands) record one line per position. The title counts the
+    bands at the limit, a band of a (positions, bands) record counting once
+    if any position holds it there.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.floor_covering_improvement.BackgroundCorrectedLevel`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the margin bars, or to the line of each
+        position.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+    from ..building.measurement.floor_covering_improvement import (
+        _MARGIN_LIMIT,
+        _MARGIN_NEGLIGIBLE,
+    )
+
+    ax = ax if ax is not None else _new_axes()
+    margins = np.asarray(result.margins_db, dtype=np.float64)
+    limited = np.asarray(result.limited, dtype=bool)
+    n_bands = margins.shape[-1]
+    positions = _named_band_axis(ax, result.frequencies, n_bands, language)
+    low = min(0.0, float(np.min(margins)) - 2.0)
+    high = max(_MARGIN_NEGLIGIBLE + 5.0, float(np.max(margins)) + 3.0)
+    ax.axhspan(
+        low,
+        _MARGIN_LIMIT,
+        color=theme_fill(_C_REFERENCE, ax),
+        lw=0,
+        zorder=0,
+        label=_t("under 6 dB: 1.3 dB, limit of measurement", language),
+    )
+    ax.axhspan(
+        _MARGIN_LIMIT,
+        _MARGIN_NEGLIGIBLE,
+        color=theme_fill(_C_SECONDARY, ax),
+        lw=0,
+        zorder=0,
+        label=_t("6 to 15 dB: background subtracted", language),
+    )
+    ax.axhspan(
+        _MARGIN_NEGLIGIBLE,
+        high,
+        color=theme_fill(_C_TERTIARY, ax),
+        lw=0,
+        zorder=0,
+        label=_t("15 dB and more: used unchanged", language),
+    )
+    for bound in (_MARGIN_LIMIT, _MARGIN_NEGLIGIBLE):
+        ax.axhline(bound, color=_C_MUTED, ls="--", lw=1.0, zorder=1)
+    if margins.ndim == 1:
+        style_default(kwargs, "color", _C_PRIMARY)
+        style_default(kwargs, "width", 0.6)
+        ax.bar(positions, margins, zorder=2, **kwargs)
+    else:
+        style_default(kwargs, "marker", "o")
+        for n, row in enumerate(margins.reshape(-1, n_bands), start=1):
+            ax.plot(
+                positions,
+                row,
+                zorder=2,
+                **{"label": _t("Position {n}", language).format(n=n), **kwargs},
+            )
+    ax.set_ylim(low, high)
+    ax.set_ylabel(_t(r"Margin above the background $L' - L_\mathrm{b}$ [dB]", language))
+    ax.set_title(
+        _t(
+            "ISO 16251-1 background correction: {limited} of {total} bands at the limit",
+            language,
+        ).format(
+            limited=int(np.count_nonzero(limited.reshape(-1, n_bands).any(axis=0))),
+            total=n_bands,
+        )
+    )
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_strong_coupling_check(
+    result: StrongCouplingCheck,
+    *,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    r"""``Dv,ij`` band by band against the bound of ISO 10848-1 Formula (15).
+
+    The bound :math:`3 - 10 \lg (m_i f_{\mathrm{c}j} / (m_j f_{\mathrm{c}i}))`
+    is drawn across the bands. The side under it is shaded: a band there
+    does not meet the inequality, its elements are strongly coupled and the
+    measured ``Kij`` may not be relevant (ISO 10848-1:2006, 4.3.3), and
+    every such band is marked.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.flanking_transmission.StrongCouplingCheck`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the ``Dv,ij`` curve.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    difference = np.asarray(result.velocity_level_difference, dtype=np.float64)
+    holds = np.asarray(result.holds, dtype=bool)
+    bound = result.min_velocity_level_difference
+    positions = _named_band_axis(ax, result.frequencies, difference.size, language)
+    low = min(bound, float(np.min(difference))) - 3.0
+    high = max(bound, float(np.max(difference))) + 3.0
+    ax.axhspan(
+        low,
+        bound,
+        color=theme_fill(_C_REFERENCE, ax),
+        lw=0,
+        zorder=0,
+        label=_t(r"strong coupling: $K_{ij}$ may not be relevant", language),
+    )
+    ax.axhline(
+        bound,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.4,
+        zorder=1,
+        label=_t(
+            r"Formula (15): $D_{\mathrm{v},ij} \geq$ {bound} dB", language
+        ).replace("{bound}", format_number(bound, language, decimals=1)),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "marker", "o")
+    kwargs.setdefault("label", r"$D_{\mathrm{v},ij}$")
+    ax.plot(positions, difference, zorder=2, **kwargs)
+    if not np.all(holds):
+        ax.plot(
+            positions[~holds],
+            difference[~holds],
+            ls="",
+            marker="x",
+            ms=10,
+            mew=2.0,
+            color=_C_REFERENCE,
+            zorder=3,
+            label=_t("does not hold", language),
+        )
+    ax.set_ylim(low, high)
+    ax.set_ylabel(_t(r"Velocity level difference $D_{\mathrm{v},ij}$ [dB]", language))
+    ax.set_title(
+        _t(
+            "ISO 10848-1 Formula (15): holds in {held} of {total} bands", language
+        ).format(held=int(np.count_nonzero(holds)), total=holds.size)
+    )
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    place_legend_clear(ax.legend(fontsize="small"))
     localize_axes(ax, language)
     return ax

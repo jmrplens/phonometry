@@ -481,17 +481,19 @@ class EPNLIntegration(OwnsArrays):
     :ivar pnltm: Maximum tone-corrected perceived noise level, in TPNdB,
         including the bandsharing adjustment ``ΔB`` (App. 2 §4.4.2), the
         adjusted value §4.4.3 requires for EPNL.
-    :ivar bandsharing_adjustment: The bandsharing adjustment ``ΔB``, in dB
-        (App. 2 §4.4.2; zero unless the tone correction at PNLTM is
-        suppressed).
+    :ivar bandsharing_adjustment: The bandsharing adjustment ``ΔB``, in
+        TPNdB, the unit the Nomenclature prints for it (I-7), since it is
+        added to the maximum PNLT (App. 2 §4.4.2; zero unless the tone
+        correction at PNLTM is suppressed).
     :ivar band_limits: The 0-based 10 dB-down record indices ``(kF, kL)``,
         both inclusive.
     """
 
-    #: The units ICAO Annex 16 Vol. I prints in its Nomenclature (I-6):
-    #: EPNdB for the EPNL, TPNdB for a tone-corrected perceived noise level.
+    #: The units ICAO Annex 16 Vol. I prints in its Nomenclature (I-5 to
+    #: I-7): EPNdB for the EPNL, TPNdB for a tone-corrected perceived noise
+    #: level and for the bandsharing adjustment added to it.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
-        {"epnl": "EPNdB", "pnltm": "TPNdB"}
+        {"epnl": "EPNdB", "pnltm": "TPNdB", "bandsharing_adjustment": "TPNdB"}
     )
 
     epnl: float
@@ -502,8 +504,9 @@ class EPNLIntegration(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a non-finite level or a window that is not a pair of indices.
 
-        :raises TypeError: if a level is not one number, or ``band_limits``
-            holds something other than whole record indices.
+        :raises TypeError: if ``epnl``, ``pnltm`` or ``bandsharing_adjustment``
+            is not one number, or ``band_limits`` holds something other than
+            whole record indices.
         :raises ValueError: if a level is not finite, the bandsharing
             adjustment is negative, or ``band_limits`` is not a pair of record
             indices with ``0 <= kF <= kL``.
@@ -579,6 +582,7 @@ def epnl_from_pnlt(
         record indices ``.band_limits`` (inclusive), with the duration
         correction as ``.duration_correction``.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``reference_time`` is not a single number.
     """
     require_scalar(reference_time, "reference_time")
     p = np.atleast_1d(np.asarray(pnlt, dtype=np.float64))
@@ -636,19 +640,28 @@ class EPNLResult(OwnsArrays):
     :ivar pnltm: Maximum tone-corrected perceived noise level, in TPNdB,
         including the bandsharing adjustment ``ΔB`` (App. 2 §4.4.2), the
         adjusted value §4.4.3 requires for EPNL.
-    :ivar bandsharing_adjustment: The bandsharing adjustment ``ΔB``, in dB
-        (App. 2 §4.4.2; zero unless the tone correction at PNLTM is
-        suppressed).
+    :ivar bandsharing_adjustment: The bandsharing adjustment ``ΔB``, in
+        TPNdB, the unit the Nomenclature prints for it (I-7), since it is
+        added to the maximum PNLT (App. 2 §4.4.2; zero unless the tone
+        correction at PNLTM is suppressed).
     :ivar duration_correction: Duration correction
         :math:`D = \mathrm{EPNL} - \mathrm{PNLTM}`, in dB.
     :ivar epnl: Effective perceived noise level, in EPNdB.
     :ivar band_limits: The 0-based 10 dB-down record indices ``(kF, kL)``.
     """
 
-    #: The units ICAO Annex 16 Vol. I prints in its Nomenclature (I-6): PNdB
-    #: for the PNL, TPNdB once the tone correction is added, EPNdB for the EPNL.
+    #: The units ICAO Annex 16 Vol. I prints in its Nomenclature (I-5 to
+    #: I-7): PNdB for the PNL, TPNdB once the tone correction is added and
+    #: for the bandsharing adjustment added to the maximum PNLT, EPNdB for the
+    #: EPNL.
     _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
-        {"pnl": "PNdB", "pnlt": "TPNdB", "pnltm": "TPNdB", "epnl": "EPNdB"}
+        {
+            "pnl": "PNdB",
+            "pnlt": "TPNdB",
+            "pnltm": "TPNdB",
+            "bandsharing_adjustment": "TPNdB",
+            "epnl": "EPNdB",
+        }
     )
 
     frequencies: NDArray[np.float64]

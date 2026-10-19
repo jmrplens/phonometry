@@ -95,6 +95,7 @@ def lateral_attenuation(elevation_deg: float, lateral_m: float) -> float:
     :param lateral_m: Lateral displacement ``ℓ`` from the ground track, in metres.
     :return: The lateral attenuation ``Λ``, in dB (subtracted from the level).
     :raises ValueError: If ``lateral_m`` is negative or non-finite.
+    :raises TypeError: if ``elevation_deg`` or ``lateral_m`` is not a single number.
     """
     require_scalar(lateral_m, "lateral_m")
     ell = float(lateral_m)
@@ -122,6 +123,7 @@ def engine_installation_correction(
     :param mounting: ``"wing"``, ``"fuselage"`` or ``"propeller"``.
     :return: The correction ``ΔI``, in dB (added to the level).
     :raises ValueError: If ``mounting`` is unknown or the angle is non-finite.
+    :raises TypeError: if ``depression_deg`` is not a single number.
     """
     require_scalar(depression_deg, "depression_deg")
     phi = float(depression_deg)
@@ -153,6 +155,8 @@ def duration_correction(reference_speed_m_s: float, segment_speed_m_s: float) ->
         ``reference_speed_m_s``.
     :return: The duration correction ``ΔV``, in dB.
     :raises ValueError: If a speed is not strictly positive.
+    :raises TypeError: if ``reference_speed_m_s`` or ``segment_speed_m_s`` is not a
+        single number.
     """
     require_scalar(reference_speed_m_s, "reference_speed_m_s")
     vref = float(reference_speed_m_s)
@@ -176,6 +180,8 @@ def noise_fraction(q: float, segment_length: float, scaled_distance_m: float) ->
         −150 dB).
     :raises ValueError: If ``segment_length`` or ``scaled_distance_m`` is not
         positive.
+    :raises TypeError: if ``q``, ``scaled_distance_m`` or ``segment_length`` is not a
+        single number.
     """
     require_scalar(q, "q")
     require_scalar(segment_length, "segment_length")
@@ -226,6 +232,8 @@ def impedance_adjustment(
     :return: The impedance adjustment, in dB (added to the NPD level).
     :raises ValueError: If the pressure is not positive, the temperature is at
         or below -273,15 degC, or either input is non-finite.
+    :raises TypeError: if ``static_pressure_kpa`` or ``temperature_c`` is not a single
+        number.
     """
     require_scalar(temperature_c, "temperature_c")
     t = float(temperature_c)
@@ -296,6 +304,7 @@ def start_of_roll_directivity(
     :param engine: ``"jet"`` (turbofan, Eq. 4-24a) or ``"turboprop"`` (Eq. 4-24b).
     :return: The directivity correction ``ΔSOR``, in dB (added to the level).
     :raises ValueError: If ``engine`` is unknown or the inputs are invalid.
+    :raises TypeError: if ``azimuth_deg`` or ``distance_m`` is not a single number.
     """
     require_scalar(azimuth_deg, "azimuth_deg")
     psi = float(azimuth_deg)
@@ -450,6 +459,7 @@ def npd_level(
     :param distance_m: Query slant distance(s) ``d``, in metres.
     :return: The interpolated event level per query distance, in dB.
     :raises ValueError: If the table or inputs are invalid.
+    :raises TypeError: if ``power`` is not a single number.
     """
     p, d, lv = _clean_table(powers, distances_m, levels)
     dq = np.atleast_1d(np.asarray(distance_m, dtype=np.float64))
@@ -745,6 +755,7 @@ class FlyoverResult(OwnsArrays):
 
         :raises ValueError: if either array has more than one axis, or
             ``metric`` is not ``"exposure"`` or ``"maximum"``.
+        :raises TypeError: if ``metric`` is not a text.
         """
         require_ranks(self, segment_levels=1, observer=1)
         require_choice(self.metric, "metric", ("exposure", "maximum"))
@@ -1490,6 +1501,7 @@ class NoiseContourResult(OwnsArrays):
 
         :raises ValueError: if the level grid disagrees with the x or y axis,
             or ``metric`` is not ``"exposure"`` or ``"maximum"``.
+        :raises TypeError: if ``metric`` is not a text.
         """
         require_ranks(self, x=1, y=1, levels=2)
         require_same_length(self, "y", ("levels", 0), axis="grid row")

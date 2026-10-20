@@ -354,7 +354,7 @@ fasores de contorno.
 | `cpu` (NumPy) | float32 | 3×10⁻⁶ | todos los niveles de instrucciones de CPU, con NumPy 2.0.2 y 2.5.3 |
 | `torch:cpu` | float64 | 9×10⁻¹⁶ | todos los niveles de instrucciones de CPU, con torch 2.3.0 y 2.14.1 |
 | `torch:cpu` | float32 | 2×10⁻⁶ | todos los niveles de instrucciones de CPU, con torch 2.3.0 y 2.14.1 |
-| `torch:mps` | float32 | aún sin publicar | el trabajo de CI `mps`, en un runner de macOS |
+| `torch:mps` | float32 | 2×10⁻⁶ | el trabajo de CI `mps`, en un runner de macOS 15 con Apple silicon, con torch 2.14.1 |
 | `torch:cuda` | float64, float32 | sin medir | ningún runner de CI tiene una GPU de NVIDIA |
 
 Cada cota es el peor valor sobre la matriz de escenarios, no una promesa
@@ -373,10 +373,9 @@ torch; el nivel base, AVX2 y AVX512 en NumPy), con su versión mínima y con la
 fijada, redondeado hacia arriba a una cifra significativa, y solo se sube a
 partir de una medida nueva. Todo trabajo de CI que ejecuta los tests de
 simulación exige su cota a NumPy en float32, y el trabajo `array-api` exige
-las suyas a toda ejecución en `torch:cpu`. En MPS la cota se mide en la CI
-sobre un runner de macOS y se publica aquí una vez medida; desde entonces el
-trabajo `mps` le exige esa cota a toda ejecución, y hasta entonces no se
-promete ningún número para MPS. `torch:cuda` avanza con el mismo código que
+las suyas a toda ejecución en `torch:cpu`. La cota de MPS la midió del mismo modo
+el trabajo `mps`, en un runner de macOS 15 con Apple silicon, y ese trabajo
+le exige esa cota a toda ejecución en MPS. `torch:cuda` avanza con el mismo código que
 `torch:cpu`, pero no se ha medido ninguna ejecución en él, así que no tiene
 cota.
 

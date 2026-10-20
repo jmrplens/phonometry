@@ -342,7 +342,7 @@ collocated velocities and the contour phasors.
 | `cpu` (NumPy) | float32 | 3×10⁻⁶ | every CPU kernel level, at NumPy 2.0.2 and 2.5.3 |
 | `torch:cpu` | float64 | 9×10⁻¹⁶ | every CPU kernel level, at torch 2.3.0 and 2.14.1 |
 | `torch:cpu` | float32 | 2×10⁻⁶ | every CPU kernel level, at torch 2.3.0 and 2.14.1 |
-| `torch:mps` | float32 | not published yet | the `mps` CI job, on a macOS runner |
+| `torch:mps` | float32 | 2×10⁻⁶ | the `mps` CI job, on a macOS 15 runner with Apple silicon, at torch 2.14.1 |
 | `torch:cuda` | float64, float32 | not measured | no CI runner has an NVIDIA GPU |
 
 Each bound is the worst value over the scenario matrix, not a promise about
@@ -360,9 +360,9 @@ and AVX512 for NumPy), at the library's floor and at its pinned release,
 rounded up to one significant figure, and it is raised only from a new
 measurement. Every CI job that runs the simulation tests holds NumPy in
 float32 to its bound, and the `array-api` job holds every run on `torch:cpu`
-to its two. On MPS the bound is measured in CI on a macOS runner and
-published here once measured; from then on the `mps` job holds every run to
-it, and until then no number is promised for MPS. `torch:cuda` steps the
+to its two. The MPS bound was measured the same way by the `mps` job,
+on a macOS 15 runner with Apple silicon, and that job holds every run on MPS
+to it. `torch:cuda` steps the
 same code as `torch:cpu`, but no run on it has been measured, so it has no
 bound.
 

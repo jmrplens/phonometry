@@ -18,6 +18,9 @@
     "steps": "60 to 120"
   },
   "torch:mps/float32": {
-    "max_relative": null
+    "max_relative": 2e-06,
+    "scenarios": 7,
+    "grids": "32 by 40 to 64 by 48 cells",
+    "steps": "60 to 120"
   }
 }

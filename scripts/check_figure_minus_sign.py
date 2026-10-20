@@ -59,6 +59,12 @@ import pathlib
 import re
 import sys
 
+_SCRIPTS = pathlib.Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+
+import check_figure_legends as legends
+
 #: Where the figures are committed.
 IMAGES = pathlib.Path(__file__).resolve().parent.parent / ".github" / "images"
 
@@ -137,27 +143,40 @@ def signed_with_hyphen(text: str, *, mathtext: bool) -> bool:
     return _SIGN.search(text) is not None
 
 
+def hyphenated(path: pathlib.Path) -> list[str]:
+    """Every string *path* draws whose number is signed with a hyphen-minus.
+
+    Allowed or not, in the order drawn: the per-drawing half of
+    :func:`check`, which the clip frame audit runs on each frame.
+    """
+    source = path.read_text(encoding="utf-8", errors="replace")
+    mathtext = _MATPLOTLIB in source
+    return [
+        text
+        for text in _COMMENT.findall(source)
+        if signed_with_hyphen(text, mathtext=mathtext)
+    ]
+
+
 def check(images: pathlib.Path) -> tuple[list[tuple[str, str]], list[str]]:
     """Find the strings that sign a number with a hyphen, and the stale allowances.
 
     :param images: The directory the figures are committed in.
     :return: The ``(figure, string)`` pairs that are not allowed, in the order
-        met, and the allowance keys nothing matches any more.
+        met, and the allowance keys nothing matches any more. An allowance
+        keyed by an animation clip is never stale here: no committed drawing
+        carries a clip's name, and the clip frame audit ratchets it.
     """
     found: list[tuple[str, str]] = []
     seen: set[str] = set()
     for path in sorted(images.glob("*.svg")):
         name = figure(path)
-        source = path.read_text(encoding="utf-8", errors="replace")
-        mathtext = _MATPLOTLIB in source
-        for text in _COMMENT.findall(source):
-            if not signed_with_hyphen(text, mathtext=mathtext):
-                continue
+        for text in hyphenated(path):
             key = f"{name}: {text}"
             seen.add(key)
             if key not in ALLOWED and (name, text) not in found:
                 found.append((name, text))
-    return found, sorted(set(ALLOWED) - seen)
+    return found, sorted(k for k in set(ALLOWED) - seen if not legends.is_clip(k))
 
 
 def main(argv: list[str] | None = None) -> int:

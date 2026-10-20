@@ -32,7 +32,7 @@ Each rule on a page has the same parts:
 - [Docstrings and comments](docstrings.md) (D, C): the module docstring and the document it names, function and class docstrings, the mathematics they carry, comments in the code, and how long a module grows. D rules cover docstrings and modules, C rules cover comments.
 - [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, and the data the package publishes.
 - [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, and the workflows under `.github/`.
-- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues page and the errata register.
+- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues page, the errata register and the frames of a clip.
 - [Prose, commits and pull requests](prose.md) (P): the language of each surface, the characters a text may hold, citing a page, the CHANGELOG, commit messages and pull request text.
 
 ## Rules
@@ -271,7 +271,7 @@ Each rule on a page has the same parts:
 | [F44](docs-and-figures.md#f44) | Move a label off a curve, or chip it opaquely above the curves | `scripts/check_figure_annotations.py`, `make figure-annotations`, `CI: Documentation figures up to date` |
 | [F45](docs-and-figures.md#f45) | Draw nothing over a tick label: legends, curves, markers and insets stay clear | `scripts/check_figure_tick_clearance.py`, `make figure-tick-clearance`, `CI: Documentation figures up to date` |
 | [F46](docs-and-figures.md#f46) | Place a hand-set label clear of tick labels, other text and strokes, in both languages | `scripts/check_figure_text_clearance.py`, `make figure-text-clearance`, `CI: Documentation figures up to date` |
-| [F47](docs-and-figures.md#f47) | Place a legend where it covers no plotted point, in English and in Spanish | `scripts/check_figure_legends.py`, `make figure-legends`, `CI: Documentation figures up to date` |
+| [F47](docs-and-figures.md#f47) | Place a legend or a label's chip where it covers no plotted point, in English and in Spanish | `scripts/check_figure_legends.py`, `make figure-legends`, `CI: Documentation figures up to date` |
 | [F48](docs-and-figures.md#f48) | Shade a region so it clears CIEDE2000 10 against the page in both themes | `scripts/check_figure_contrast.py`, `make figure-contrast`, `CI: Documentation figures up to date` |
 | [F49](docs-and-figures.md#f49) | Keep every line legible on the dark page: 3:1 for hairlines, 2:1 for thicker strokes | `scripts/check_stroke_contrast.py`, `CI: Documentation figures up to date` |
 | [F50](docs-and-figures.md#f50) | Color a fiche's bars by category with a legend; never rotate long tick labels | review |
@@ -284,6 +284,7 @@ Each rule on a page has the same parts:
 | [F57](docs-and-figures.md#f57) | Cite an errata entry's page by document, edition, PDF page and printed folio | `scripts/check_errata_evidence.py`, `CI: Errata entries cite their page` |
 | [F58](docs-and-figures.md#f58) | Quote a printed value, its symbols and its separator exactly as the source prints them | review |
 | [F59](docs-and-figures.md#f59) | Add or remove an errata entry in docs/ERRATA.md and docs/ERRATA.es.md together | `make site-reports`, `CI: Generated evidence pages up to date` |
+| [F60](docs-and-figures.md#f60) | Hold every frame of a clip to the figure gates before it is encoded | `scripts/clip_frame_audit.py`, `make animation-audit`, `tests/test_clip_frame_audit.py` |
 
 ### Prose, commits and pull requests
 

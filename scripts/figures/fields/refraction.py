@@ -22,6 +22,27 @@ _REFR_B = 1.0  # log-profile strength [m/s]
 _REFR_C0 = 340.0  # ground-level effective speed
 _REFR_SRC = (30.0, 2.0)  # source range/height [m]
 _REFR_RECV = 350.0  # receiver distance from the source
+
+#: How opaque a ray of the fan is once it has come in.
+_RAY_ALPHA = 0.65
+
+
+def _ray_shadow(fraction: float) -> list[Any]:
+    """The dark edge under a ray, as opaque as *fraction* of a full ray.
+
+    Its colour carries its own alpha, which matplotlib keeps whatever the
+    line's alpha is: at the line's 0 the white ray was hidden and its shadow
+    was not, so the fan showed as grey lines before it was meant to appear.
+    """
+    from matplotlib import patheffects
+
+    return [
+        patheffects.withStroke(
+            linewidth=1.5, foreground=(0.25, 0.25, 0.25, 0.376 * fraction)
+        )
+    ]
+
+
 _REFR_F = 50.0  # CW drive: lambda ~ 6.9 m
 # Mesh rule: dx = min(smallest scene dimension / 4, lambda/8 at the
 # carrier) = min(2 m source height / 4 = 0.5 m, 6.86 m / 8 = 0.857 m);
@@ -177,11 +198,11 @@ def animate_fdtd_refraction(output_dir: str) -> None:
 
     T = _translate_str
     outline = [patheffects.withStroke(linewidth=2.0, foreground=FIELD_STROKE)]
-    # The ray fan is drawn over the scene, and two of its rays run straight
-    # through the source and receiver labels (worst on the dark page, where
-    # the rays are nearly the colour of the text). A wider halo keeps a
-    # clear channel around those two labels instead of a struck-through
-    # word; the rays still pass, which is what a ray fan does.
+    # The ray fan is drawn over the scene, and its rays ran straight through
+    # the source and receiver labels (worst on the dark page, where the rays
+    # are nearly the colour of the text). A wider halo keeps a clear channel
+    # round a label a ray passes; the source label also stands above the
+    # fan, where no ray reaches (see below).
     ray_outline = [patheffects.withStroke(linewidth=3.6, foreground=FIELD_STROKE)]
     p_all, e_db, times, z, c_profs, rays = _refraction_fields()
     profiles = _refraction_profiles()
@@ -282,9 +303,8 @@ def animate_fdtd_refraction(output_dir: str) -> None:
                 lw=0.8,
                 alpha=0.0,
                 zorder=3.4,
-                path_effects=[
-                    patheffects.withStroke(linewidth=1.5, foreground="#40404060")
-                ],
+                path_effects=_ray_shadow(0.0),
+                visible=False,
             )
             lines_row.append(ln)
         ray_lines.append(lines_row)
@@ -298,9 +318,13 @@ def animate_fdtd_refraction(output_dir: str) -> None:
             markeredgewidth=0.8,
             zorder=4,
         )
+        # Above the fan, up and to the left of the source: right of it and
+        # just above, its rays rose through the label. Measured on the ray
+        # fans: within the 75 m the label spans no ray reaches 11 m (the
+        # upwind fan, the steeper of the two, is at 11.7 m only at 80 m).
         ax_f.text(
-            src_x + 8.0,
-            src_h + 4.0,
+            16.0,
+            14.0,
             T("source ($h$ = 2 m)"),
             ha="left",
             va="bottom",
@@ -426,13 +450,15 @@ def animate_fdtd_refraction(output_dir: str) -> None:
 
     def update(k: int) -> tuple[Any, ...]:
         alpha_e = min(1.0, max(0.0, (k - reveal) / 12.0))
-        alpha_r = min(0.65, max(0.0, (k - rays_on) / 20.0))
+        alpha_r = min(_RAY_ALPHA, max(0.0, (k - rays_on) / 20.0))
         arts: list[Any] = []
         for row in range(2):
             ims[row].set_data(p_all[row][k])
             ims_e[row].set_alpha(alpha_e)
             for ln in ray_lines[row]:
                 ln.set_alpha(alpha_r)
+                ln.set_visible(alpha_r > 0.0)
+                ln.set_path_effects(_ray_shadow(alpha_r / _RAY_ALPHA))
                 arts.append(ln)
             v_txts[row].set_text(verdicts[row] if k >= reveal else "")
         t_txt.set_text(T(f"$t$ = {times[k]:5.2f} s"))

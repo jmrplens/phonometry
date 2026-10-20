@@ -369,8 +369,18 @@ def animate_fdtd_critical_angle(output_dir: str) -> None:
                 ls="--",
                 zorder=5,
             )
-            for a in (ax, ax_f):
-                a.axvline(r_c, color=COLOR_MUTED, lw=1.0, ls=":", zorder=3)
+            # The critical range, marked over the water it is measured in and
+            # on the flux axis below: carried on through the bed, the line
+            # struck through the sediment's label.
+            ax.plot(
+                [r_c, r_c],
+                [0.0, _SB_WATER],
+                color=COLOR_MUTED,
+                lw=1.0,
+                ls=":",
+                zorder=3,
+            )
+            ax_f.axvline(r_c, color=COLOR_MUTED, lw=1.0, ls=":", zorder=3)
             ax.text(
                 r_c - 4.0,
                 3.0,
@@ -467,7 +477,9 @@ def animate_fdtd_critical_angle(output_dir: str) -> None:
                 [], [], color=color, lw=2.0, label=T(name), zorder=6 - len(f_lines)
             )[0]
         )
-    ax_f.legend(fontsize=7.5, loc="lower left", ncol=2, framealpha=0.85)
+    # Above the measured curves, which start at its corner: drawn under them,
+    # the sand curve ran through its own entry while it climbed.
+    ax_f.legend(fontsize=7.5, loc="lower left", ncol=2, framealpha=0.85).set_zorder(7)
     for label_x, label_psi in ((118.6, 24.6), (210.0, 11.9), (340.0, 6.8)):
         ax_f.text(
             label_x + 5.0,
@@ -479,9 +491,12 @@ def animate_fdtd_critical_angle(output_dir: str) -> None:
             color=COLOR_MUTED,
         )
 
+    # A row of its own under the title (the layout rect below stops lower to
+    # make it): once the contact angle joins the time, the readout reaches
+    # under the title, which it touched from the title's own row.
     t_txt = fig.text(
         0.012,
-        0.955,
+        0.945,
         "",
         ha="left",
         va="top",
@@ -505,7 +520,7 @@ def animate_fdtd_critical_angle(output_dir: str) -> None:
         color=COLOR_FG,
         alpha=0.85,
     )
-    fig.get_layout_engine().set(rect=(0.0, 0.035, 1.0, 0.95))  # type: ignore[union-attr, call-arg]  # _anim_figure: constrained engine, never None
+    fig.get_layout_engine().set(rect=(0.0, 0.035, 1.0, 0.93))  # type: ignore[union-attr, call-arg]  # _anim_figure: constrained engine, never None
 
     def update(k: int) -> tuple[Any, ...]:
         j = min(k, times.size - 1)

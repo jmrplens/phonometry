@@ -160,14 +160,17 @@ def animate_fdtd_room_modes(output_dir: str) -> None:
             for xn in (1.25, 3.75):
                 ax_r.axvline(xn, color="white", ls="--", lw=1.0, alpha=0.75)
             ax_r.axhline(1.75, color="white", ls="--", lw=1.0, alpha=0.75)
+            # Between the two vertical nodal lines and just above the
+            # horizontal one, where the map is dark: in the top-left corner
+            # the label sat on an antinode and the first line ran through it.
             ax_r.text(
-                0.12,
-                3.3,
+                2.5,
+                1.85,
                 T("nodal lines (2,1)"),
                 color="white",
                 fontsize=8,
-                ha="left",
-                va="top",
+                ha="center",
+                va="bottom",
             )
         else:
             ax_p.tick_params(labelleft=False)

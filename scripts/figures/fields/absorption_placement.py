@@ -34,7 +34,7 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 from numpy.typing import NDArray
 
-from phonometry._plot.common import _OFFSET_POINTS
+from phonometry._plot.common import _OFFSET_POINTS, theme_fill
 
 from ..media import (
     _ANIM_PILL_BOX,
@@ -42,6 +42,7 @@ from ..media import (
     _render_clip,
     _translate_str,
 )
+from ..schematics import _page_chip
 from ..theme import (
     CMAP_FIELD,
     COLOR_FG,
@@ -424,11 +425,13 @@ def animate_fdtd_absorption_placement(output_dir: str) -> None:
     span = _AP_FLOOR + 2.0
     x_sab = t_pk + t_sab * 1e3 * -span / 60.0
     x_eyr = t_pk + t_eyr * 1e3 * -span / 60.0
+    # An opaque wash at the library's distance from the page: 14 % of the
+    # muted grey sat under 3 CIEDE2000 from the white page and 4.3 from the
+    # black one, a band nobody could see the edges of.
     ax_d.fill(
         [t_pk, x_sab, x_eyr],
         [0.0, span, span],
-        color=COLOR_MUTED,
-        alpha=0.14,
+        color=theme_fill(COLOR_MUTED, ax_d),
         lw=0.0,
         zorder=1,
     )
@@ -436,7 +439,10 @@ def animate_fdtd_absorption_placement(output_dir: str) -> None:
         ax_d.plot(
             [t_pk, x_line], [0.0, span], color=COLOR_MUTED, lw=1.3, ls="--", zorder=3
         )
-        frac = 0.52 if name == "Sabine" else 0.30
+        # Both at the same depth, either side of the band's apex: half-way
+        # down the Sabine line, the label ended under the second verdict pill,
+        # which covered the top of its letters once it was revealed.
+        frac = 0.30
         ax_d.annotate(
             T(f"{name}, $T$ = {t_line * 1e3:.0f} ms"),
             (t_pk + t_line * 1e3 * frac, -60.0 * frac),
@@ -533,6 +539,8 @@ def animate_fdtd_absorption_placement(output_dir: str) -> None:
         arrowprops={"arrowstyle": "<->", "color": COLOR_FG, "lw": 1.2},
         visible=False,
     )
+    # On a chip above the curves: the gap narrows to the left of the arrow,
+    # and the floor + ceiling curve ran through the top of the number.
     gap_txt = ax_d.text(
         x_gap - 2.5,
         0.5 * float(lev_a[k_gap] + lev_b[k_gap]),
@@ -541,6 +549,8 @@ def animate_fdtd_absorption_placement(output_dir: str) -> None:
         va="center",
         fontsize=8.5,
         color=COLOR_FG,
+        zorder=6,
+        bbox=_page_chip(0.15),
     )
 
     reveal = int(0.7 * times.size)

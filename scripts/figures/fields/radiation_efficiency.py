@@ -14,7 +14,8 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 
 from ..media import _ANIM_PILL_BOX, _anim_figure, _render_clip, _translate_str
-from ..theme import CMAP_FIELD, COLOR_FG, COLOR_GRID, FIELD_INK, FIELD_STROKE
+from ..theme import CMAP_FIELD, COLOR_FG, FIELD_INK, FIELD_STROKE
+from ._core import _solid_in_field
 from .elastic import (
     _EC_CB_TUNE,
     _EL_C0,
@@ -347,7 +348,7 @@ def animate_elastic_radiation_efficiency(output_dir: str) -> None:
                 (x0, -_EL_H),
                 x1 - x0,
                 _EL_H,
-                facecolor=COLOR_GRID,
+                facecolor=_solid_in_field(ax),
                 edgecolor=COLOR_FG,
                 lw=0.7,
                 zorder=3,

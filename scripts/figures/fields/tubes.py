@@ -14,6 +14,8 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from phonometry._plot.common import theme_line
+
 from ..media import (
     _ANIM_FPS,
     _ANIM_FRAMES,
@@ -713,13 +715,17 @@ def animate_standing_wave_tube(output_dir: str) -> None:
                 color=COLOR_FG,
                 fontsize=9,
             )
-        # Waves: incident, reflected (fades in), their sum and the envelope
+        # Waves: incident, reflected (fades in), their sum and the envelope.
+        # The two that fade in are hidden until they start and quieted with
+        # theme_line while they come up, rather than by alpha: an alpha ramp
+        # drew them for its first half second below the 2:1 a line needs on
+        # the dark page (F49), and theme_line starts them where they read.
         (l_inc,) = ax.plot([], [], color=COLOR_PRIMARY, lw=1.2, alpha=0.85)
-        (l_ref,) = ax.plot([], [], color=COLOR_TERTIARY, lw=1.2, alpha=0.0)
+        (l_ref,) = ax.plot([], [], color=COLOR_TERTIARY, lw=1.2, visible=False)
         (l_sum,) = ax.plot([], [], color=COLOR_SECONDARY, lw=2.2)
         env = amp * np.sqrt(1.0 + refl**2 + 2.0 * refl * np.cos(2.0 * k * (xs - x)))
         env_lines = [
-            ax.plot(x, s * env, color=COLOR_FG, lw=1.0, ls="--", alpha=0.0)[0]
+            ax.plot(x, s * env, color=COLOR_FG, lw=1.0, ls="--", visible=False)[0]
             for s in (1.0, -1.0)
         ]
         (mic_dots,) = ax.plot(
@@ -741,6 +747,7 @@ def animate_standing_wave_tube(output_dir: str) -> None:
         )
         panels.append(
             {
+                "ax": ax,
                 "refl": refl,
                 "l_inc": l_inc,
                 "l_ref": l_ref,
@@ -800,10 +807,14 @@ def animate_standing_wave_tube(output_dir: str) -> None:
             p_ref = refl * amp * np.cos(ph - k * xi)
             pn["l_inc"].set_data(x, p_inc)
             pn["l_ref"].set_data(x, p_ref)
-            pn["l_ref"].set_alpha(0.85 * a_ref)
+            pn["l_ref"].set_visible(a_ref > 0.0)
+            pn["l_ref"].set_color(
+                theme_line(COLOR_TERTIARY, pn["ax"], quiet=0.85 * a_ref)
+            )
             pn["l_sum"].set_data(x, p_inc + a_ref * p_ref)
             for line in pn["env_lines"]:
-                line.set_alpha(0.8 * a_env)
+                line.set_visible(a_env > 0.0)
+                line.set_color(theme_line(COLOR_FG, pn["ax"], quiet=0.8 * a_env))
             if a_env > 0.0:
                 xm = np.array([xs - m for m in mic_xi])
                 pim = amp * np.cos(ph + k * (xs - xm))

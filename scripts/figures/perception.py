@@ -4091,6 +4091,12 @@ def generate_hearing_protector_methods(output_dir: str) -> None:
     ax_hml.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, zorder=0)
     ax_hml.set_axisbelow(True)
     ax_hml.legend(loc="upper right", fontsize=9, framealpha=1.0, facecolor=COLOR_PANEL)
+    # The three readouts sit in the corner under the reference noises, and the
+    # Spanish one ("por bandas de octava") runs out past the column at
+    # 4.3 dB, whose lowest subjects it covered: room below the lowest subject
+    # puts the chip under all of them in both languages.
+    lowest = float(np.min(hml.predicted_reduction))
+    ax_hml.set_ylim(bottom=lowest - 0.45 * (high - lowest))
 
     ax_hml.text(
         0.03,

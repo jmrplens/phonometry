@@ -18,8 +18,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.collections import LineCollection
 
-from phonometry._plot.common import format_frequency_axis
+from phonometry._plot.common import (
+    format_frequency_axis,
+    theme_fill,
+    theme_fill_alpha,
+    theme_line,
+)
 
+from . import theme as _theme
 from .i18n import _LANG, _fmt_minus
 from .media import (
     _ANIM_FPS,
@@ -63,6 +69,35 @@ def _halo(linewidth: float = 2.4) -> list[Any]:
     from matplotlib import patheffects
 
     return [patheffects.withStroke(linewidth=linewidth, foreground=FIELD_STROKE)]
+
+
+def _page_chip(pad: float = 0.25) -> dict[str, Any]:
+    """An opaque backing in the page colour for a label something moving crosses.
+
+    A readout that rides over a curve, or that a cursor or a sweep front
+    passes, cannot keep clear of it on every frame. Drawn above the curves on
+    this chip, the label hides what passes under it instead of being struck
+    through by it: the second choice of F44, after a place nothing reaches.
+    A stroke painted before an opaque fill is hidden where the fill is, which
+    is how the text clearance gate reads it.
+    """
+    return {
+        "boxstyle": f"round,pad={pad}",
+        "facecolor": plt.rcParams["figure.facecolor"],
+        "edgecolor": "none",
+    }
+
+
+def _solid_fill(ax: Axes) -> tuple[float, float, float]:
+    """The fill of a drawn solid: a wall, a slab, a microphone or loudspeaker body.
+
+    The solids were filled with ``COLOR_GRID``, which is tuned to disappear
+    into the page it is drawn on: on the white page it sits 6.5 CIEDE2000
+    from it, under the 10 a shaded area needs to be seen at a glance (F48).
+    :func:`theme_fill` puts the wash the library's own distance from either
+    page, a light grey on the white one and a dark grey on the black one.
+    """
+    return theme_fill(COLOR_FG, ax)
 
 
 def _pending_ink(color: str) -> tuple[float, float, float]:
@@ -133,6 +168,7 @@ def _draw_mic(
     size: float = 1.0,
     label: str = "",
     angle: float = 0.0,
+    chip: bool = False,
 ) -> None:
     """A measurement-microphone symbol: rounded body plus capsule head.
 
@@ -140,7 +176,9 @@ def _draw_mic(
     on an equal-aspect schematic axes so the capsule stays round. ``angle``
     rotates the whole symbol (degrees, counterclockwise) around ``(x, y)``
     -- e.g. ``-90`` points a ``direction = +1`` capsule straight down; the
-    label stays horizontal and rides on the rotated anchor.
+    label stays horizontal and rides on the rotated anchor; ``chip`` sets it
+    on a page-coloured chip (:func:`_page_chip`) for a microphone that
+    wavefronts sweep past.
     """
     from matplotlib import transforms
     from matplotlib.patches import Circle, FancyBboxPatch
@@ -155,7 +193,7 @@ def _draw_mic(
         body_w,
         body_h,
         boxstyle="round,pad=0.03",
-        facecolor=COLOR_GRID,
+        facecolor=_solid_fill(ax),
         edgecolor=COLOR_FG,
         lw=1.2,
     )
@@ -176,7 +214,16 @@ def _draw_mic(
         dx, dy = 0.0, body_h * 1.7
         lx = x + dx * np.cos(rad) - dy * np.sin(rad)
         ly = y + dx * np.sin(rad) + dy * np.cos(rad)
-        ax.text(lx, ly, label, ha="center", va="bottom", color=COLOR_FG, fontsize=11)
+        ax.text(
+            lx,
+            ly,
+            label,
+            ha="center",
+            va="bottom",
+            color=COLOR_FG,
+            fontsize=11,
+            bbox=_page_chip(0.1) if chip else None,
+        )
 
 
 def _draw_speaker(
@@ -195,7 +242,7 @@ def _draw_speaker(
         Polygon(
             [(x, y - cone_h), (x, y + cone_h), (xb, y + box_h), (xb, y - box_h)],
             closed=True,
-            facecolor=COLOR_GRID,
+            facecolor=_solid_fill(ax),
             edgecolor=COLOR_FG,
             lw=1.2,
         )
@@ -205,11 +252,20 @@ def _draw_speaker(
             (min(xb, xb - d * box_l), y - box_h),
             box_l,
             2 * box_h,
-            facecolor=COLOR_GRID,
+            facecolor=_solid_fill(ax),
             edgecolor=COLOR_FG,
             lw=1.2,
         )
     )
+
+
+#: The width under which a stroke is a hairline and needs 3:1 against its
+#: page rather than 2:1 (F49).
+_HAIRLINE_PT = 0.6
+
+#: The hue each wavefront arc was made in, which :func:`_set_wavefronts`
+#: quiets as the front spreads: the arc's own edge colour is the quieted one.
+_WAVEFRONT_HUE: dict[Arc, ColorType] = {}
 
 
 def _make_wavefronts(
@@ -238,6 +294,7 @@ def _make_wavefronts(
         arc.set_visible(False)
         ax.add_patch(arc)
         arcs.append(arc)
+        _WAVEFRONT_HUE[arc] = color
     return arcs
 
 
@@ -249,11 +306,21 @@ def _set_wavefronts(
     alpha: float = 0.9,
     color: ColorType | None = None,
 ) -> list[Arc]:
-    """Resize each wavefront arc; fronts fade toward ``rmax`` and hide beyond.
+    """Resize each wavefront arc; fronts quiet toward ``rmax`` and hide beyond.
 
-    ``radii`` pairs with ``arcs``; non-positive radii hide the arc. Returns
-    the arcs (for blit-style artist lists).
+    ``radii`` pairs with ``arcs``; non-positive radii hide the arc. ``color``
+    sets a new hue for all of them (a sweep that changes colour as it goes).
+    Returns the arcs (for blit-style artist lists).
+
+    A front fades by its colour, not by its alpha: ``alpha`` times what is
+    left of the way to ``rmax`` is the emphasis :func:`theme_line` quiets
+    the hue to, and it holds the stroke at the contrast its width needs on
+    the page it is drawn on (F49: 2:1, 3:1 under 0.6 pt) until the front is
+    hidden. Faded by alpha towards zero, the outer fronts sank into the
+    dark page at 1.0 to 1.8:1 while they were still drawn.
     """
+    from typing import cast
+
     for arc, r in zip(arcs, radii, strict=True):
         if r <= 0.0 or r > rmax:
             arc.set_visible(False)
@@ -261,9 +328,20 @@ def _set_wavefronts(
         arc.set_visible(True)
         arc.width = 2.0 * r
         arc.height = 2.0 * r
-        arc.set_alpha(alpha * max(0.0, 1.0 - r / rmax))
         if color is not None:
-            arc.set_edgecolor(color)
+            _WAVEFRONT_HUE[arc] = color
+        # The floor F49 holds the stroke to, and a hair over it: the colour is
+        # written as two hex digits a channel, and the rounding took a front
+        # asked for at exactly 2:1 down to 1.99:1.
+        floor = (3.0 if arc.get_linewidth() < _HAIRLINE_PT else 2.0) + 0.05
+        arc.set_edgecolor(
+            theme_line(
+                _WAVEFRONT_HUE[arc],
+                cast("Axes | None", arc.axes),
+                quiet=alpha * max(0.0, 1.0 - r / rmax),
+                ratio=floor,
+            )
+        )
     return arcs
 
 
@@ -435,12 +513,21 @@ def _flow_box(
 def _light_box(
     box: dict[str, Any], value: str, color: str, *, fill: bool = False
 ) -> None:
-    """Light a pipeline box up: colored edge, full-strength title, a value."""
+    """Light a pipeline box up: colored edge, full-strength title, a value.
+
+    A filled box is washed in its colour at the opacity that puts it the
+    library's CIEDE2000 distance from the page (:func:`theme_fill_alpha`): a
+    flat 15 % of the blue sat 7.7 from the white page and 7.3 from the black
+    one, under the 10 a shaded area needs to be seen (F48).
+    """
     from matplotlib.colors import to_rgba
 
-    box["box"].set_edgecolor(color)
-    box["box"].set_linewidth(2.2)
-    box["box"].set_facecolor(to_rgba(color, 0.15) if fill else "none")
+    patch = box["box"]
+    patch.set_edgecolor(color)
+    patch.set_linewidth(2.2)
+    patch.set_facecolor(
+        to_rgba(color, theme_fill_alpha(color, patch.axes)) if fill else "none"
+    )
     box["title"].set_alpha(1.0)
     box["value"].set_text(value)
     box["value"].set_color(color)
@@ -705,7 +792,13 @@ def animate_time_weighting_ballistics(output_dir: str) -> None:
     ]
     ax_t.set_xlim(0.5, 4.0)
     ax_t.set_ylim(0, 1.25)
-    ax_t.axvspan(1.0, 2.5, color=COLOR_GRID, alpha=0.4, lw=0)
+    # The band is an opaque wash a set distance from the page: COLOR_GRID at
+    # 40 % sat 2.5 CIEDE2000 from the white page and 8 from the black one.
+    burst_fill = theme_fill(COLOR_FG, ax_t)
+    ax_t.axvspan(1.0, 2.5, color=burst_fill, lw=0)
+    # The cursor sweeps the band, and the label sits on the band: backed in
+    # the band's own colour, it hides the cursor as it passes instead of
+    # being struck through by it.
     ax_t.text(
         1.75,
         1.19,
@@ -715,6 +808,11 @@ def animate_time_weighting_ballistics(output_dir: str) -> None:
         color=COLOR_FG,
         fontsize=8.5,
         alpha=0.8,
+        bbox={
+            "boxstyle": "round,pad=0.2",
+            "facecolor": burst_fill,
+            "edgecolor": "none",
+        },
     )
     (l_f,) = ax_t.plot([], [], color=COLOR_PRIMARY, lw=2.0, label=T("Fast (125 ms)"))
     (l_s,) = ax_t.plot([], [], color=COLOR_SECONDARY, lw=2.0, label=T("Slow (1000 ms)"))
@@ -826,13 +924,24 @@ def animate_onset_detection(output_dir: str) -> None:
         [], [], color=COLOR_FG, lw=3.2, solid_capstyle="round", zorder=5
     )
     (tangent,) = ax.plot([], [], color=COLOR_FG, lw=1.6, ls="--", zorder=6)
+    # The readout rides above the lens, and the onset it reads climbs
+    # through that space: on its chip it hides the curve as it passes.
     lens_txt = ax.text(
-        0.7, ls, "", ha="center", va="bottom", color=COLOR_FG, fontsize=9, zorder=6
+        0.7,
+        ls,
+        "",
+        ha="center",
+        va="bottom",
+        color=COLOR_FG,
+        fontsize=9,
+        zorder=6,
+        bbox=_page_chip(0.2),
     )
     # The magnifier sweeps the panel in data coordinates and its handle dips
     # into the bottom-left corner where this caption is anchored, so the
-    # caption is drawn above it and haloed: the handle is the same ink as the
-    # text, and crossing it whole reads as a struck-through word.
+    # caption is drawn above it on its chip: the handle is the same ink as the
+    # text, and a halo only cleared the glyphs, leaving the handle through
+    # the gaps of "> 10" as a struck-through word.
     ax.text(
         0.02,
         0.05,
@@ -843,7 +952,7 @@ def animate_onset_detection(output_dir: str) -> None:
         color=COLOR_FG,
         fontsize=9,
         zorder=8,
-        path_effects=_halo(3.0),
+        bbox=_page_chip(0.2),
     )
     ax.set_title(T("Impulse onset detection (NT ACOU 112)"))
     ax.set_xlabel(T("Time [s]"))
@@ -1096,8 +1205,15 @@ def animate_instantaneous_intensity(output_dir: str) -> None:
         ax_tr.set_ylim(-1.15, 1.15)
         p_sig = np.cos(w * t)
         u_sig = np.cos(w * t - phi)
+        # The two companion traces are quieted with theme_line rather than
+        # alpha: at 55 % alpha the pressure trace composited to 1.9:1 on the
+        # dark page, under the 2:1 a line of its width needs (F49).
         ax_tr.plot(
-            t, p_sig, color=COLOR_PRIMARY, alpha=0.55, lw=1.1, label=T("pressure $p$")
+            t,
+            p_sig,
+            color=theme_line(COLOR_PRIMARY, ax_tr, quiet=0.55),
+            lw=1.1,
+            label=T("pressure $p$"),
         )
         # Dashed, because in the progressive panel p and u are the same
         # normalised curve: drawn solid, the velocity covers the pressure
@@ -1106,8 +1222,7 @@ def animate_instantaneous_intensity(output_dir: str) -> None:
         ax_tr.plot(
             t,
             u_sig,
-            color=COLOR_TERTIARY,
-            alpha=0.55,
+            color=theme_line(COLOR_TERTIARY, ax_tr, quiet=0.55),
             lw=1.3,
             ls=(0, (5, 3)),
             label=T("velocity $u$"),
@@ -1116,6 +1231,8 @@ def animate_instantaneous_intensity(output_dir: str) -> None:
             [], [], color=COLOR_SECONDARY, lw=2.0, label=T(r"intensity $p\cdot u$")
         )
         mline = ax_tr.axhline(0.0, color=COLOR_FG, ls="--", lw=1.1, alpha=0.7)
+        # The running mean is read where the traces swing through: on its
+        # chip, above them.
         txt = ax_tr.text(
             0.5,
             0.02,
@@ -1126,6 +1243,8 @@ def animate_instantaneous_intensity(output_dir: str) -> None:
             family="monospace",
             fontsize=10,
             color=COLOR_FG,
+            zorder=4,
+            bbox=_page_chip(0.2),
         )
         ax_tr.set_xlabel(T("Time [s]"))
         if col == 0:
@@ -1287,10 +1406,16 @@ def animate_schroeder(output_dir: str) -> None:
     ax_e.tick_params(labelbottom=False)
     sweep_max = float(t_raw[-1])  # start the front at the very end of p²
     fill_alpha = 0.5 if _FILENAME_SUFFIX else 0.35
-    ax_e.plot(t_raw[ds], raw_db[ds], color="gray", alpha=0.4, lw=0.6)
+    # Quieted with theme_line rather than alpha: at 40 % alpha the thin trace
+    # composited to 1.7:1 on the dark page, under the 2:1 a line of its width
+    # needs (F49).
+    raw_color = theme_line("gray", ax_e, quiet=0.4)
+    ax_e.plot(t_raw[ds], raw_db[ds], color=raw_color, lw=0.6)
     e_fill: dict[str, FillBetweenPolyCollection | None] = {"art": None}
     front_e = ax_e.axvline(sweep_max, color=COLOR_FG, lw=1.3, alpha=0.55)
     # Sits well below the upper-right legend (a higher anchor ran under it).
+    # The note and the readout ride on the squared response and on the tail
+    # energy filling under it, so each sits on its chip, above them.
     front_txt = ax_e.text(
         sweep_max,
         -22.0,
@@ -1299,6 +1424,8 @@ def animate_schroeder(output_dir: str) -> None:
         va="top",
         color=COLOR_FG,
         fontsize=9,
+        zorder=4,
+        bbox=_page_chip(0.2),
     )
     e_txt = ax_e.text(
         0.02,
@@ -1310,13 +1437,13 @@ def animate_schroeder(output_dir: str) -> None:
         family="monospace",
         fontsize=10,
         color=COLOR_FG,
+        zorder=4,
+        bbox=_page_chip(0.2),
     )
     ax_e.set_ylabel(T("Level [dB]"), fontsize=9)
     ax_e.legend(
         handles=[
-            Patch(
-                facecolor="gray", alpha=0.4, label=T("squared impulse response $p^2$")
-            ),
+            Patch(facecolor=raw_color, label=T("squared impulse response $p^2$")),
             Patch(
                 facecolor=COLOR_SECONDARY,
                 alpha=fill_alpha,
@@ -1340,6 +1467,7 @@ def animate_schroeder(output_dir: str) -> None:
         (fl,) = ax_d.plot([], [], color=color, ls=style, lw=1.7)
         fit_lines.append((fl, span))
     front_d = ax_d.axvline(sweep_max, color=COLOR_FG, lw=1.3, alpha=0.55)
+    # The integration front sweeps back to zero across the formula.
     ax_d.text(
         0.02,
         0.08,
@@ -1349,6 +1477,8 @@ def animate_schroeder(output_dir: str) -> None:
         va="bottom",
         color=COLOR_FG,
         fontsize=10,
+        zorder=4,
+        bbox=_page_chip(0.2),
     )
     ann_fits = [
         ax_d.text(
@@ -1451,7 +1581,7 @@ def animate_flanking_paths(output_dir: str) -> None:
             (wall_x0, floor_y1),
             wall_x1 - wall_x0,
             5.0,
-            facecolor=COLOR_GRID,
+            facecolor=_solid_fill(ax),
             edgecolor=COLOR_FG,
             lw=1.2,
         )
@@ -1461,7 +1591,7 @@ def animate_flanking_paths(output_dir: str) -> None:
             (0.7, floor_y0),
             12.8,
             floor_y1 - floor_y0,
-            facecolor=COLOR_GRID,
+            facecolor=_solid_fill(ax),
             edgecolor=COLOR_FG,
             lw=1.2,
         )
@@ -1481,10 +1611,12 @@ def animate_flanking_paths(output_dir: str) -> None:
         color=COLOR_FG,
         fontsize=10,
     )
-    # Element letters: capital = source side, lowercase = receiving side
+    # Element letters: capital = source side, lowercase = receiving side. The
+    # wall letters sit high enough that the wavefronts the wall re-radiates,
+    # 70 degrees either side of the normal, pass below the "d".
     for xt, yt, s in (
-        (wall_x0 - 0.25, 4.3, "D"),
-        (wall_x1 + 0.25, 4.3, "d"),
+        (wall_x0 - 0.25, 4.6, "D"),
+        (wall_x1 + 0.25, 4.6, "d"),
         (3.6, 1.3, "F"),
         (10.3, 1.3, "f"),
     ):
@@ -1561,8 +1693,10 @@ def animate_flanking_paths(output_dir: str) -> None:
     junction = (6.85, 1.3)
     for pn in paths:
         pts = np.asarray(pn["pts"])
-        ax.plot(pts[:, 0], pts[:, 1], color=pn["color"], lw=1.0, ls=":", alpha=0.35)
-        (trail,) = ax.plot([], [], color=pn["color"], lw=2.0, alpha=0.85)
+        # The route waits in the label's pending ink: 35 % of the hue over the
+        # black page sat at 1.3 to 1.7:1 and the dotted routes vanished.
+        ax.plot(pts[:, 0], pts[:, 1], color=_pending_ink(pn["color"]), lw=1.0, ls=":")
+        (trail,) = ax.plot([], [], color=pn["color"], lw=2.0)
         pulse = Circle(
             (0.0, 0.0), 0.16, facecolor=pn["color"], edgecolor="none", visible=False
         )
@@ -1646,7 +1780,12 @@ def animate_flanking_paths(output_dir: str) -> None:
                     [_polyline_point(pts, f) for f in np.linspace(0.0, frac, n_tr)]
                 )
                 pn["trail"].set_data(tr[:, 0], tr[:, 1])
-                pn["trail"].set_alpha(0.3 + 0.5 * scale)
+                # Dimmed with theme_line rather than alpha: the trails of the
+                # weakest paths faded to 1.98:1 on the dark page, under the
+                # 2:1 a line of their width needs (F49).
+                pn["trail"].set_color(
+                    theme_line(pn["color"], ax, quiet=0.3 + 0.5 * scale)
+                )
                 _set_wavefronts(pn["arcs"], [0.0] * 3, 1.0)
                 if pn["key"] != "Dd" and 0.35 < frac < 0.75:
                     junc_txt.set_text(T(r"junction: $K_{ij}$ attenuates each transfer"))
@@ -1741,17 +1880,16 @@ def animate_intensity_scan_power(output_dir: str) -> None:
     # the box's rear-bottom edge ran straight through the machine and
     # underlined "source" along its baseline. Order the faces above the
     # wireframe, and the wavefronts above the faces they leave from.
-    from matplotlib.colors import to_rgb
-
-    bg = np.asarray(to_rgb(plt.rcParams["figure.facecolor"]))
-    grid_rgb = np.asarray(to_rgb(COLOR_GRID))
-    for poly, al in ((front, 0.75), (side, 0.55), (top, 0.9)):
-        tint = tuple(al * grid_rgb + (1.0 - al) * bg)
+    # Each face is a wash a set CIEDE2000 distance from the page, the top the
+    # furthest and the side the nearest, as the shading ran before: blended
+    # from COLOR_GRID the three sat 3.5 to 5.8 from the white page, under the
+    # 10 a shaded area needs to be seen (F48).
+    for poly, delta_e in ((front, 14.0), (side, 11.0), (top, 17.0)):
         ax.add_patch(
             Polygon(
                 poly,
                 closed=True,
-                facecolor=tint,
+                facecolor=theme_fill(COLOR_FG, ax, delta_e=delta_e),
                 edgecolor=COLOR_FG,
                 lw=1.0,
                 zorder=2.2,
@@ -1790,6 +1928,8 @@ def animate_intensity_scan_power(output_dir: str) -> None:
         visible=False,
     )
     ax.add_patch(probe)
+    # The label rides with the probe across the box's edges, so it sits on its
+    # chip above them.
     probe_lab = ax.text(
         0.0,
         0.0,
@@ -1799,6 +1939,8 @@ def animate_intensity_scan_power(output_dir: str) -> None:
         color=COLOR_FG,
         fontsize=8.5,
         visible=False,
+        zorder=6,
+        bbox=_page_chip(0.15),
     )
     # Normal-intensity arrows on the top face: longer where the source is
     # closer (I·n ~ cos(theta) / r^2), revealed as the probe passes.
@@ -2025,7 +2167,9 @@ def animate_sweep_deconvolution(output_dir: str) -> None:
     )
     ax_r.add_patch(room_box)
     _draw_speaker(ax_r, 2.6, 1.7, size=1.1)
-    _draw_mic(ax_r, 14.6, 1.7, direction=-1, size=0.85, label=T("mic"))
+    # The wavefronts reach the microphone, and the wider Spanish label with
+    # it, so the label sits on its chip above them.
+    _draw_mic(ax_r, 14.6, 1.7, direction=-1, size=0.85, label=T("mic"), chip=True)
     # direct and reflected ray paths
     ax_r.plot([2.8, 13.9], [1.7, 1.7], color=COLOR_FG, lw=1.0, ls="--", alpha=0.5)
     for ry in (0.3, 3.1):
@@ -2147,11 +2291,16 @@ def animate_sweep_deconvolution(output_dir: str) -> None:
         tc = min(kf, sweep_frames - 1) / _ANIM_FPS
         arts: list[Any] = []
         t_sig = min(tc / play_end, 1.0) * rec_dur
-        # room wavefronts coloured by the instantaneous sweep frequency
+        # room wavefronts coloured by the instantaneous sweep frequency, read
+        # off the stretch of the ramp the page leaves legible: from its dark
+        # end the first second of the sweep drew near-black arcs on the dark
+        # page (1.1:1 against the 2:1 a line needs, F49)
         if tc < play_end:
             f_now = f1 * (f2 / f1) ** min(t_sig / sweep_len, 1.0)
             cmap = plt.get_cmap("plasma")
-            col = cmap(float(np.log(f_now / f1) / np.log(f2 / f1)))
+            lo, hi = _theme._SERIES_SPAN
+            share = float(np.log(f_now / f1) / np.log(f2 / f1))
+            col = cmap(lo + (hi - lo) * share)
             age = (tc * 2.2) % 1.0
             _set_wavefronts(
                 arcs,
@@ -2281,11 +2430,13 @@ def animate_specific_loudness(output_dir: str) -> None:
     # Anchored by its right edge, a short step inside the right spine: placed
     # by its left edge, the Spanish string ran 380 px past the axes, and since
     # a text artist counts toward the axes' tight bounding box, the frame it
-    # appeared on also shrank the whole plot column by 16 %.
+    # appeared on also shrank the whole plot column by 16 %. High enough that
+    # the longer Spanish line ends right of the 85 dB pattern's upper slope:
+    # at 3.2 sone/Bark its first letters sat on the curve.
     spread = ax.annotate(
         T("upward spread of masking"),
         xy=(13.0, 1.1),
-        xytext=(23.6, 3.2),
+        xytext=(23.6, 4.6),
         ha="right",
         fontsize=8.5,
         color=COLOR_FG,
@@ -2416,12 +2567,13 @@ def animate_power_two_rooms(output_dir: str) -> None:
         Rectangle((0.6, 0.4), 6.8, 5.6, facecolor="none", edgecolor=COLOR_FG, lw=1.4)
     )
     wedge = 0.42
+    wedge_fill = _solid_fill(ax_a)
     for xw in np.arange(0.85, 7.3, 0.55):
         ax_a.add_patch(
             Polygon(
                 [(xw - 0.22, 0.4), (xw + 0.22, 0.4), (xw, 0.4 + wedge)],
                 closed=True,
-                facecolor=COLOR_GRID,
+                facecolor=wedge_fill,
                 edgecolor=COLOR_FG,
                 lw=0.6,
             )
@@ -2430,7 +2582,7 @@ def animate_power_two_rooms(output_dir: str) -> None:
             Polygon(
                 [(xw - 0.22, 6.0), (xw + 0.22, 6.0), (xw, 6.0 - wedge)],
                 closed=True,
-                facecolor=COLOR_GRID,
+                facecolor=wedge_fill,
                 edgecolor=COLOR_FG,
                 lw=0.6,
             )
@@ -2440,7 +2592,7 @@ def animate_power_two_rooms(output_dir: str) -> None:
             Polygon(
                 [(0.6, yw - 0.22), (0.6, yw + 0.22), (0.6 + wedge, yw)],
                 closed=True,
-                facecolor=COLOR_GRID,
+                facecolor=wedge_fill,
                 edgecolor=COLOR_FG,
                 lw=0.6,
             )
@@ -2449,7 +2601,7 @@ def animate_power_two_rooms(output_dir: str) -> None:
             Polygon(
                 [(7.4, yw - 0.22), (7.4, yw + 0.22), (7.4 - wedge, yw)],
                 closed=True,
-                facecolor=COLOR_GRID,
+                facecolor=wedge_fill,
                 edgecolor=COLOR_FG,
                 lw=0.6,
             )
@@ -2466,16 +2618,27 @@ def animate_power_two_rooms(output_dir: str) -> None:
             ms=4,
             color=COLOR_PRIMARY,
         )
+    # The wavefronts sweep the whole room, so the caption and the readout
+    # sit on their chips above them. The caption sits inside the ring, over
+    # the loudspeaker: a chip hides what is under it, and at the foot of the
+    # ring, where it sat before, it hid the tops of the two lowest
+    # microphones. Here it clears the speaker below and the dots at 15, 45,
+    # 135 and 165 degrees either side.
     ax_a.text(
         ca[0],
-        ca[1] - r_mic + 0.14,
+        ca[1] + 0.62,
         T("microphone sphere, $r$"),
         ha="center",
         va="bottom",
         color=COLOR_PRIMARY,
         fontsize=8,
+        zorder=6,
+        bbox=_page_chip(0.15),
     )
     arcs_a = _make_wavefronts(ax_a, *ca, COLOR_TERTIARY, n=4)
+    # On its chip, and shown whole once it is shown: the wavefronts sweep the
+    # whole room, and a halo kept them off the letters but not out of the
+    # gaps between the words, where they ran through the line.
     note_a = ax_a.text(
         4.0,
         0.92,
@@ -2484,18 +2647,23 @@ def animate_power_two_rooms(output_dir: str) -> None:
         va="bottom",
         color=COLOR_FG,
         fontsize=8,
-        alpha=0.0,
-        path_effects=_halo(),
+        zorder=6,
+        bbox=_page_chip(0.15),
+        visible=False,
     )
+    # Above the room, where no microphone of the sphere is: inside its top
+    # right corner the chip hid one of them.
     lp_a = ax_a.text(
-        6.9,
-        5.5,
+        7.4,
+        6.08,
         "",
         ha="right",
-        va="top",
+        va="bottom",
         color=COLOR_FG,
         fontsize=9,
         family="monospace",
+        zorder=6,
+        bbox=_page_chip(0.15),
     )
 
     # --- reverberation room: bare walls, diffuse build-up, one mic path --
@@ -2505,8 +2673,15 @@ def animate_power_two_rooms(output_dir: str) -> None:
     )
     # animated fill (the diffuse level building up) + a fixed outline
     room_patch = Rectangle(
-        (0.6, 0.4), 6.8, 5.6, facecolor=COLOR_PRIMARY, edgecolor="none", alpha=0.0
+        (0.6, 0.4),
+        6.8,
+        5.6,
+        facecolor=COLOR_PRIMARY,
+        edgecolor="none",
+        visible=False,
     )
+    room_lo = theme_fill_alpha(COLOR_PRIMARY, ax_r, delta_e=10.5)
+    room_hi = theme_fill_alpha(COLOR_PRIMARY, ax_r, delta_e=16.0)
     ax_r.add_patch(room_patch)
     ax_r.add_patch(
         Rectangle((0.6, 0.4), 6.8, 5.6, facecolor="none", edgecolor=COLOR_FG, lw=1.4)
@@ -2540,7 +2715,8 @@ def animate_power_two_rooms(output_dir: str) -> None:
     )
     (mic_dot,) = ax_r.plot([], [], marker="o", ms=6, color=COLOR_PRIMARY)
     # Both captions sit in the path of the bouncing rays, which fold across
-    # the whole room, so they are haloed rather than merely drawn above them.
+    # the whole room, so they sit on chips: a halo kept the rays off the
+    # letters but not out of the gaps between the words.
     ax_r.text(
         mic_path_c[0],
         mic_path_c[1] - mic_path_r - 0.28,
@@ -2549,7 +2725,8 @@ def animate_power_two_rooms(output_dir: str) -> None:
         va="top",
         color=COLOR_PRIMARY,
         fontsize=8,
-        path_effects=_halo(),
+        zorder=6,
+        bbox=_page_chip(0.15),
     )
     note_r = ax_r.text(
         4.0,
@@ -2559,15 +2736,16 @@ def animate_power_two_rooms(output_dir: str) -> None:
         va="bottom",
         color=COLOR_FG,
         fontsize=8,
-        alpha=0.0,
-        path_effects=_halo(),
+        zorder=6,
+        bbox=_page_chip(0.15),
+        visible=False,
     )
     lp_r = ax_r.text(
-        6.9,
-        5.5,
+        7.4,
+        6.08,
         "",
         ha="right",
-        va="top",
+        va="bottom",
         color=COLOR_FG,
         fontsize=9,
         family="monospace",
@@ -2623,10 +2801,17 @@ def animate_power_two_rooms(output_dir: str) -> None:
             arcs_a, [2.9 * ((age + 0.25 * i) % 1.0) for i in range(4)], 2.9, alpha=0.8
         )
         arts += arcs_a
-        note_a.set_alpha(min(tc / 2.0, 1.0) * 0.9)
+        note_a.set_visible(tc >= 1.0)
         # diffuse field: rays bounce, the background level rises
         build = float(np.clip(tc / 4.0, 0.0, 1.0))
-        room_patch.set_alpha(0.16 * (1.0 - np.exp(-3.0 * build)))
+        # The diffuse level builds from the faintest wash that still reads on
+        # the page to a full one: from zero it spent its first second under
+        # the 10 CIEDE2000 a shaded area needs to be seen (F48).
+        room_patch.set_visible(build > 0.0)
+        room_patch.set_alpha(
+            room_lo
+            + (room_hi - room_lo) * (1.0 - np.exp(-3.0 * build)) / (1.0 - np.exp(-3.0))
+        )
         for ray in rays:
             ts = np.linspace(max(0.0, tc - 0.9), tc, 24)
             xs = [_fold(cr[0] + ray["v"][0] * s, 0.7, 7.3) for s in ts]
@@ -2638,7 +2823,7 @@ def animate_power_two_rooms(output_dir: str) -> None:
             [mic_path_c[0] + mic_path_r * np.cos(ang)],
             [mic_path_c[1] + mic_path_r * np.sin(ang)],
         )
-        note_r.set_alpha(min(tc / 2.0, 1.0) * 0.9)
+        note_r.set_visible(tc >= 1.0)
         arts += [room_patch, mic_dot, note_a, note_r]
         # microphone readings appear, then each formula computes L_W
         if tc >= t_meter:
@@ -2705,7 +2890,9 @@ def animate_comb_filtering(output_dir: str) -> None:
     ax = fig.add_subplot(gs[:, 0])
     _schematic_axes(ax, (0.0, 5.6), (-2.3, 2.6), equal=True)
     ax.axhline(0.0, color=COLOR_FG, lw=2.0)
-    ax.fill_between([0.0, 5.6], -2.3, 0.0, color=COLOR_GRID, alpha=0.35, lw=0)
+    # The ground is an opaque wash a set distance from the page: COLOR_GRID at
+    # 35 % sat 2.2 CIEDE2000 from the white page and 6.7 from the black one.
+    ax.fill_between([0.0, 5.6], -2.3, 0.0, color=theme_fill(COLOR_FG, ax), lw=0)
     ax.text(
         5.5,
         -0.34,
@@ -2717,10 +2904,15 @@ def animate_comb_filtering(output_dir: str) -> None:
     )
     _draw_speaker(ax, xs_, hs, size=0.8)
     ax.plot([xs_ - 0.25, xs_ - 0.25], [0.0, hs - 0.28], color=COLOR_FG, lw=1.2)
-    # image source below the floor
+    # The image source below the floor is a virtual one, drawn as its dashed
+    # outline: the body faded to 30 % was a grey nobody could tell from the
+    # ground it sits in (1.3 CIEDE2000 from that ground, 1.9 from the white
+    # page).
     _draw_speaker(ax, xs_, -hs, size=0.8)
     for art in ax.patches[-2:]:
-        art.set_alpha(0.3)
+        art.set_facecolor("none")
+        art.set_edgecolor(theme_line(COLOR_FG, ax, quiet=0.45))
+        art.set_linestyle((0, (3, 2)))
     ax.text(
         xs_ + 0.4,
         -hs,
@@ -2733,7 +2925,9 @@ def animate_comb_filtering(output_dir: str) -> None:
     )
     (l_dir,) = ax.plot([], [], color=COLOR_PRIMARY, lw=1.8)
     (l_ref,) = ax.plot([], [], color=COLOR_SECONDARY, lw=1.6, ls="--")
-    (l_img,) = ax.plot([], [], color=COLOR_SECONDARY, lw=1.0, ls=":", alpha=0.5)
+    (l_img,) = ax.plot(
+        [], [], color=theme_line(COLOR_SECONDARY, ax, quiet=0.5), lw=1.0, ls=":"
+    )
     (mic_stand,) = ax.plot([], [], color=COLOR_FG, lw=1.2)
     (mic_dot,) = ax.plot(
         [],
@@ -3063,14 +3257,16 @@ def animate_dynamic_stiffness_sweep(output_dir: str) -> None:
     ax_p.set_yticks([0, -90, -180])
     ax_p.set_xlabel(T("Excitation frequency [Hz]"))
     ax_p.set_ylabel(T("Phase [deg]"), fontsize=9)
-    # Haloed: the Spanish string reaches as far as the phase flank, and the
-    # trace was filling the counter of its last letter.
+    # Under the dashed line and right of the flank, where the phase trace
+    # has already fallen past it: above the line on the left, the trace ran
+    # through the end of the English label and through the middle of the
+    # wider Spanish one, which the halo only half hid.
     ax_p.text(
-        f_lo + 1.0,
-        -83.0,
+        f_hi,
+        -97.0,
         T("−90 deg: resonance"),
-        ha="left",
-        va="bottom",
+        ha="right",
+        va="top",
         color=COLOR_SECONDARY,
         fontsize=8.5,
         path_effects=_halo(),
@@ -3335,7 +3531,11 @@ def animate_modulation_transfer(output_dir: str) -> None:
     _grid_axes(ax_m)
     ax_m.set_xscale("log")
     ax_m.set_xlim(0.55, 14.5)
-    ax_m.set_ylim(0.0, 1.05)
+    # Headroom above m = 1 for the caption: at the shortest reverberation
+    # times the curve runs along m = 1 itself, and a caption inside the
+    # 0 to 1 range was struck through by it.
+    ax_m.set_ylim(0.0, 1.3)
+    ax_m.set_yticks(np.arange(0.0, 1.01, 0.2))
     ax_m.set_xticks([1.0, 10.0])
     ax_m.set_xticklabels(["1", "10"])
     ax_m.set_xlabel(T("Modulation frequency $F$ [Hz]"), fontsize=8.5)
@@ -3343,14 +3543,18 @@ def animate_modulation_transfer(output_dir: str) -> None:
     ax_m.tick_params(labelsize=8)
     (m_line,) = ax_m.plot([], [], color=COLOR_PRIMARY, lw=1.8, marker="o", ms=3.4)
     (m_dot,) = ax_m.plot([], [], color=COLOR_SECONDARY, marker="o", ms=8.0, ls="none")
-    ax_m.axvline(f_probe, color=COLOR_SECONDARY, lw=0.9, ls=":", alpha=0.7)
+    # The caption takes the headroom above m = 1, which the curve never
+    # reaches, and the probe's marker line stops short of it: along the
+    # bottom, the line ran through the caption and the falling curve reached
+    # its last Spanish words.
+    ax_m.axvline(f_probe, ymax=0.8, color=COLOR_SECONDARY, lw=0.9, ls=":", alpha=0.7)
     ax_m.text(
         0.03,
-        0.06,
+        0.95,
         T("the red point is the 4 Hz probe on the left"),
         transform=ax_m.transAxes,
         ha="left",
-        va="bottom",
+        va="top",
         color=COLOR_FG,
         fontsize=7.5,
     )
@@ -3575,6 +3779,8 @@ def animate_loudness_gating(output_dir: str) -> None:
         [], [], color=COLOR_QUATERNARY, lw=1.4, label=T("short-term (3 s)")
     )
     ax_t.axhline(_GATE_ABSOLUTE, color=COLOR_FG, lw=1.0, ls=":", alpha=0.8)
+    # The playback cursor sweeps the corner the gate is named in, so the name
+    # sits on its chip above it.
     ax_t.text(
         0.4,
         _GATE_ABSOLUTE + 0.8,
@@ -3583,6 +3789,8 @@ def animate_loudness_gating(output_dir: str) -> None:
         va="bottom",
         color=COLOR_FG,
         fontsize=7.5,
+        zorder=4,
+        bbox=_page_chip(0.15),
     )
     rel_line = ax_t.axhline(-70.0, color=COLOR_SECONDARY, lw=1.6, ls="--")
     # The threshold labels ride over the block scatter, so they carry the
@@ -3594,12 +3802,14 @@ def animate_loudness_gating(output_dir: str) -> None:
         "edgecolor": "none",
         "alpha": 0.85,
     }
+    # Under its line: every block above the relative gate is one it counts,
+    # and on top of the line the chip hid the last of them.
     rel_txt = ax_t.text(
         duration - 0.4,
         -70.0,
         "",
         ha="right",
-        va="bottom",
+        va="top",
         color=COLOR_SECONDARY,
         fontsize=8,
         bbox=_label_bbox,
@@ -3682,7 +3892,7 @@ def animate_loudness_gating(output_dir: str) -> None:
         short.set_data(st_t[st_seen], st_l[st_seen])
         rel_line.set_ydata([gamma, gamma])
         rel_line_h.set_ydata([gamma, gamma])
-        rel_txt.set_position((duration - 0.4, gamma + 0.6))
+        rel_txt.set_position((duration - 0.4, gamma - 0.6))
         rel_txt.set_text(T(f"relative gate {_fmt_minus(gamma, '.1f')} LUFS"))
         int_line.set_ydata([integrated, integrated])
         head.set_data([played, played], [-72.0, -8.0])
@@ -3719,7 +3929,11 @@ def animate_loudness_gating(output_dir: str) -> None:
             if lra_band["art"] is not None:
                 lra_band["art"].remove()
             lra_band["art"] = ax_t.axhspan(
-                lo, hi, color=COLOR_QUATERNARY, alpha=0.14, lw=0
+                lo,
+                hi,
+                color=COLOR_QUATERNARY,
+                alpha=theme_fill_alpha(COLOR_QUATERNARY, ax_t),
+                lw=0,
             )
             st_above = st_l[st_l > _GATE_ABSOLUTE]
             gate_lra = _energy_mean_lufs(st_above) + _LRA_RELATIVE
@@ -4222,23 +4436,35 @@ def animate_image_source_buildup(output_dir: str) -> None:
         color=COLOR_PRIMARY,
         ls="none",
     )
-    ax_p.text(
-        _IS_SOURCE[0],
-        _IS_SOURCE[1] - 1.6,
+    # The names sit outside the room, clear of its walls, and on their chips:
+    # inside, they lay on the walls and on the lattice lines through them,
+    # and the rays reach every point of the plan wherever they are put. A
+    # chip hides what is under it, so it goes where no image is drawn: right
+    # under the source stands its first image, its mirror in the wall y = 0,
+    # so the name sits beside that column, between it and the next image
+    # along (x = 12), with a leader to the star it names.
+    ax_p.annotate(
         T("source"),
-        ha="center",
+        xy=(_IS_SOURCE[0] + 0.35, _IS_SOURCE[1] - 0.45),
+        xytext=(_IS_SOURCE[0] + 1.1, -0.7),
+        ha="left",
         va="top",
         color=COLOR_FG,
         fontsize=8,
+        zorder=6,
+        bbox=_page_chip(0.15),
+        arrowprops={"arrowstyle": "-", "color": COLOR_FG, "lw": 0.8},
     )
     ax_p.text(
-        _IS_RECEIVER[0] + 1.0,
-        _IS_RECEIVER[1] + 0.6,
+        _IS_RECEIVER[0],
+        ly + 0.7,
         T("receiver"),
-        ha="left",
+        ha="center",
         va="bottom",
         color=COLOR_FG,
         fontsize=8,
+        zorder=6,
+        bbox=_page_chip(0.15),
     )
     ax_p.plot(
         plan_xy[:, 0],
@@ -4250,7 +4476,12 @@ def animate_image_source_buildup(output_dir: str) -> None:
         alpha=0.55,
     )
     lit = ax_p.scatter([], [], s=30.0, zorder=4)
-    rays = LineCollection([], colors=COLOR_PRIMARY, linewidths=0.5, alpha=0.45)
+    # Quieted with theme_line rather than alpha, and no thinner than 0.6 pt: a
+    # 0.5 pt ray at 45 % alpha composited to 1.7:1 on the dark page, under the
+    # 3:1 a hairline needs (F49).
+    rays = LineCollection(
+        [], colors=[theme_line(COLOR_PRIMARY, ax_p, quiet=0.45)], linewidths=0.6
+    )
     ax_p.add_collection(rays)
     front = Circle(
         (_IS_RECEIVER[0], _IS_RECEIVER[1]),
@@ -4272,6 +4503,7 @@ def animate_image_source_buildup(output_dir: str) -> None:
         fontsize=8,
         color=COLOR_FG,
     )
+    # The readout sits on the lattice, so on its chip.
     radius_txt = ax_p.text(
         -16.0,
         -17.0,
@@ -4281,6 +4513,8 @@ def animate_image_source_buildup(output_dir: str) -> None:
         color=COLOR_SECONDARY,
         fontsize=9,
         family="monospace",
+        zorder=6,
+        bbox=_page_chip(0.15),
     )
 
     # --- top right: the reflectogram being written -----------------------
@@ -4554,7 +4788,7 @@ def animate_iso717_shift(output_dir: str) -> None:
         0.0,
         "",
         ha="left",
-        va="center",
+        va="bottom",
         color=COLOR_TERTIARY,
         fontsize=9.5,
         family="monospace",
@@ -4685,11 +4919,17 @@ def animate_iso717_shift(output_dir: str) -> None:
             alpha=0.30,
         )
         read_dot.set_data([7.0], [curve[7]])
-        read_txt.set_position((7.6, curve[7]))
-        read_txt.set_text(T(f"{st['read']:.0f} dB at 500 Hz"))
         lo_y, hi_y = float(min(y.min(), curve.min())), float(max(y.max(), curve.max()))
         pad = 0.18 * (hi_y - lo_y)
         ax_s.set_ylim(lo_y - pad, hi_y + pad)
+        # The reading sits above its dot, on the side where the shifted curve
+        # falls away from it: to the left of 500 Hz for the rising airborne
+        # curve, to the right for the falling impact one. Beside the dot on
+        # the right, its chip hid the curve's next markers on the way down.
+        rise = 0.035 * (hi_y - lo_y + 2.0 * pad)
+        read_txt.set_position((7.4 if impact else 6.6, curve[7] + rise))
+        read_txt.set_horizontalalignment("left" if impact else "right")
+        read_txt.set_text(T(f"{st['read']:.0f} dB at 500 Hz"))
         ax_s.set_ylabel(
             T("Normalized impact level $L_\\mathrm{n}$ [dB]")
             if impact
@@ -4796,6 +5036,12 @@ _BVE_FS = 48_000
 _BVE_FREQ = 4_000.0  # the Table 4 excitation
 _BVE_BLOCK = 0.125  # the block grid, numerically tau_F
 _BVE_SPAN = 0.75  # seconds of record drawn (six blocks)
+# Top of the level axis of the detector panel [dB re steady tone]: no curve
+# rises above 0 dB, and the legend sits in the headroom above it. Measured on
+# the frames: the four-line Spanish box comes down to 0.3 dB in the first act
+# (whose curves stay under -4 dB) and to 1.9 dB in the second, the English
+# one to 3.2 and 4.4 dB.
+_BVE_TOP_DB = 14.0
 _BVE_BURST_T0 = 0.25  # earliest burst start, on a block boundary
 _BVE_OFFSETS = 64  # alignments sampled across one block period
 #: (burst duration, IEC 61672-1 Table 4 target, class 1 tolerance).
@@ -4892,21 +5138,37 @@ def animate_block_vs_exponential(output_dir: str) -> None:
     ax_r = fig.add_subplot(gs[0, 0])
     _grid_axes(ax_r)
     ax_r.set_xlim(0.0, _BVE_SPAN)
-    ax_r.set_ylim(-1.35, 1.35)
+    # Headroom above the burst for its dimension arrow and, above that, its
+    # label on a chip: at 1.35 the label sat on the arrow head and reached
+    # the top spine, and the block boundaries ran through it.
+    ax_r.set_ylim(-1.35, 1.65)
     ax_r.set_ylabel(T("Sound pressure"), fontsize=8.5)
     ax_r.tick_params(labelsize=8, labelbottom=False)
     for k in range(int(_BVE_SPAN / _BVE_BLOCK) + 1):
         ax_r.axvline(k * _BVE_BLOCK, color=COLOR_MUTED, lw=1.0, ls=":")
     for k in range(0, int(_BVE_SPAN / _BVE_BLOCK), 2):
+        # An opaque wash a set distance from the page: COLOR_GRID at 45 %
+        # sat 2.8 CIEDE2000 from the white page and 9.4 from the black one.
         ax_r.axvspan(
-            k * _BVE_BLOCK, (k + 1) * _BVE_BLOCK, color=COLOR_GRID, alpha=0.45, zorder=0
+            k * _BVE_BLOCK,
+            (k + 1) * _BVE_BLOCK,
+            color=theme_fill(COLOR_FG, ax_r),
+            zorder=0,
         )
     (wave,) = ax_r.plot([], [], color=COLOR_PRIMARY, lw=0.7)
     ax_r.set_title(
         T("the shaded strips are the 125 ms blocks"), fontsize=8.5, color=COLOR_FG
     )
     burst_txt = ax_r.text(
-        0.0, 1.16, "", ha="center", va="bottom", color=COLOR_FG, fontsize=8.5
+        0.0,
+        1.26,
+        "",
+        ha="center",
+        va="bottom",
+        color=COLOR_FG,
+        fontsize=8.5,
+        zorder=4,
+        bbox=_page_chip(0.15),
     )
     burst_arrow = _make_arrow(ax_r, COLOR_FG, scale=8.0)
     burst_arrow.set_arrowstyle("<|-|>", head_length=0.5, head_width=0.28)
@@ -4938,9 +5200,14 @@ def animate_block_vs_exponential(output_dir: str) -> None:
     (blk_peak,) = ax_d.plot(
         [], [], color=COLOR_TERTIARY, marker="s", ms=7.0, ls="none", zorder=5
     )
-    # Lower left: nothing is drawn before the burst starts at 0.25 s in
-    # either act, and lower right is where the exponential tail decays.
-    ax_d.legend(loc="lower left", fontsize=7.5, framealpha=0.9)
+    # Above every curve, in headroom the level axis keeps for it: nothing is
+    # drawn over 0 dB re the steady tone. In the lower left, where it was,
+    # the box reached past 0.36 s in English and 0.37 s in Spanish, over the
+    # block step at 0.25 s and the rising envelope of every alignment; the
+    # lower right is where the tail decays. The Spanish target label still
+    # breaks in two, to keep the box narrow.
+    ax_d.legend(loc="upper left", fontsize=7.5, framealpha=0.9)
+    ax_d.set_yticks([-15.0, -10.0, -5.0, 0.0])
 
     # --- top right: the reading against alignment, built up --------------
     ax_a = fig.add_subplot(gs[0, 1])
@@ -4996,7 +5263,7 @@ def animate_block_vs_exponential(output_dir: str) -> None:
         t0 = _BVE_BURST_T0 + float(offsets[i])
         t1 = t0 + act["seconds"]
         burst_arrow.set_positions((t0, 1.12), (t1, 1.12))
-        burst_txt.set_position(((t0 + t1) / 2.0, 1.16))
+        burst_txt.set_position(((t0 + t1) / 2.0, 1.26))
         burst_txt.set_text(T(f"4 kHz burst, {act['seconds'] * 1e3:.0f} ms"))
 
         env_line.set_data(t, act["env"][i])
@@ -5007,13 +5274,17 @@ def animate_block_vs_exponential(output_dir: str) -> None:
         j_blk = int(np.argmax(act["blocks"][i]))
         blk_peak.set_data([(j_blk + 0.5) * _BVE_BLOCK], [act["blocks"][i][j_blk]])
         target_line.set_ydata([target, target])
-        ax_d.set_ylim(target - 14.0, 4.0)
+        ax_d.set_ylim(target - 14.0, _BVE_TOP_DB)
 
         ax_a.set_ylim(target - 3.6, target + 2.2)
         if corridor["art"] is not None:
             corridor["art"].remove()
         corridor["art"] = ax_a.axhspan(
-            target - limit, target + limit, color=COLOR_MUTED, alpha=0.28, zorder=0
+            target - limit,
+            target + limit,
+            color=COLOR_MUTED,
+            alpha=theme_fill_alpha(COLOR_MUTED, ax_a),
+            zorder=0,
         )
         ms = offsets[: i + 1] * 1e3
         exp_trace.set_data(ms, act["exp"][: i + 1])
@@ -5162,10 +5433,12 @@ def animate_feedback_howl(output_dir: str) -> None:
     )
     # Nothing is labelled above the microphone: the feedback path arrives
     # there from the upper right and any label in that wedge crosses it.
+    # Three short lines: on two, the long second line ran out across the cable
+    # that leaves the microphone, in English and further in Spanish.
     ax_g.text(
         talker[0],
         talker[1] - 0.5,
-        T("talker,\n0.3 m from the microphone"),
+        T("talker,\n0.3 m from\nthe microphone"),
         ha="center",
         va="top",
         color=COLOR_FG,
@@ -5179,6 +5452,8 @@ def animate_feedback_howl(output_dir: str) -> None:
         va="top",
         color=COLOR_FG,
         fontsize=9,
+        zorder=4,
+        bbox=_page_chip(0.1),
     )
     ax_g.text(
         listener[0],
@@ -5226,24 +5501,20 @@ def animate_feedback_howl(output_dir: str) -> None:
     ax_g.plot(
         [fb_a[0], fb_b[0]], [fb_a[1], fb_b[1]], color=COLOR_PRIMARY, lw=1.6, ls="--"
     )
-    ang = float(np.degrees(np.arctan2(fb_a[1] - fb_b[1], fb_a[0] - fb_b[0])))
-    # rotation_mode="anchor" so the offset below the line is exact: without
-    # it matplotlib aligns before rotating and the label swings across the
-    # cable underneath.
-    # Short, because the path is short: the longer wording ran onto the
-    # microphone at one end and the loudspeaker at the other, and the
-    # sentence it came from belongs in the prose beside the clip.
-    perp = np.deg2rad(ang)
+    # Level, in the open space up and to the left of the path, and short,
+    # because the path is short: the longer wording ran onto the microphone
+    # at one end and the loudspeaker at the other, and the sentence it came
+    # from belongs in the prose beside the clip. Laid along the path, the
+    # label ran across the cable's rise to the loudspeaker below it and onto
+    # the loudspeaker above it, in Spanish worse than in English.
     ax_g.text(
-        (fb_a[0] + fb_b[0]) / 2.0 + 0.34 * float(np.sin(perp)),
-        (fb_a[1] + fb_b[1]) / 2.0 - 0.34 * float(np.cos(perp)),
+        3.9,
+        2.2,
         T("the feedback path"),
-        ha="center",
-        va="top",
-        rotation_mode="anchor",
+        ha="right",
+        va="center",
         color=COLOR_PRIMARY,
         fontsize=9,
-        rotation=ang,
     )
     copy_dot = Circle(
         spk, 0.18, facecolor=COLOR_PRIMARY, edgecolor="none", alpha=0.85, zorder=6
@@ -5348,10 +5619,12 @@ def animate_feedback_howl(output_dir: str) -> None:
         for j, ln in enumerate(total_lines):
             if j < a:
                 ln.set_data(idx, case_totals[j])
-                ln.set_alpha(0.45)
+                # A finished case steps back with theme_line, not alpha: at
+                # 45 % the purple composited to 1.8:1 on the dark page.
+                ln.set_color(theme_line(colors[j], ax_t, quiet=0.45))
             elif j == a:
                 ln.set_data(seen, case["totals_db"][: n_done + 1])
-                ln.set_alpha(1.0)
+                ln.set_color(colors[j])
             else:
                 ln.set_data([], [])
         for j, ll in enumerate(limit_lines):

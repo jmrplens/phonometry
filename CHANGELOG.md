@@ -1984,6 +1984,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Every frame of every animation clip passes the checks the figures pass,
+  and a clip is encoded in all four of its variants or in none.** The figure
+  checks read the committed SVGs for a label a line strikes through or a later
+  fill paints over, a mark over a tick label, a legend or a label's chip over a
+  datum, tick labels run together, a fill or a line the page swallows, a
+  hyphen for a minus sign and a Spanish decimal point, and a clip has no
+  committed drawing for them to read: the EPNL flyover clip shipped its
+  "microphone" label struck through by the ground line, and it was found by
+  eye. Making a clip now draws every frame of it, in the order the animation
+  draws it, as the SVG the figures are saved as, and holds it to those checks
+  (`scripts/clip_frame_audit.py`). It inspects the four variants before any of
+  them is encoded, so a finding on the dark page or in Spanish alone stops the
+  whole clip, and names the clip, the variant, the frame and the finding.
+  `make animation-audit` (`python scripts/generate_graphs.py --animations
+  --audit-only`) runs the same inspection without encoding a video or
+  publishing anything, and lists every finding with the frames it holds over.
+  Swept with it in both languages and both themes, 33 of the 43 clips
+  failed in at least one frame, and they are drawn again: a readout, caption
+  or wave letter that a curve, a cursor, a ray or a wavefront ran through sits
+  on an opaque chip or where nothing reaches it, and no chip sits over a datum
+  any more (the image-source clip's "source" hid the first image of the
+  source, the two-room clip's caption two microphones of the sphere); walls,
+  slabs, plates and the microphone and loudspeaker bodies, filled with a grey
+  the white page swallowed, take a fill that stands out from either page;
+  companion curves, fading trails and spreading wavefronts, dimmed with
+  transparency until the dark page swallowed them, are drawn in an opaque
+  quieter colour that keeps the contrast a line of their width needs; labels
+  that ran past their panel or across a wall break onto two lines; and the
+  time readouts of the critical-angle and absorption-placement clips no longer
+  run into their titles. Looking at the redrawn frames found three more: the
+  legend of the block-versus-exponential clip covered the block step and the
+  rising envelope for most of the clip and now sits above the curves, the
+  refraction clip showed the shadows of its ray fan as grey lines before the
+  fan comes in, and the ground-effect clip's image-source chip hid the frame
+  of its panel. The other 9 clips draw every frame exactly as before and
+  keep the files already published.
+
+- **The figure checks read what they used to miss.** A label's chip over a
+  plotted point fails as a legend over it does (`check_figure_legends.py`),
+  unless the chip is a badge in the point's own colour, and a tick mark is not
+  counted as a plotted point; a legend frame or a chip filled black, which
+  matplotlib writes with no fill at all, is still a plate over what lies
+  under it; a label painted over by a fill drawn after it,
+  the chip of another label or a legend plate, fails the text clearance
+  check; a label drawn with a halo is written to SVG
+  as its string and its glyphs, so every check reads it, and the halo hides
+  what is painted under it and nothing painted over it; and the stroke
+  contrast check reads the opacity of a patch faded with `set_alpha` and
+  measures every line against the page its drawing paints, black for a dark
+  matplotlib figure, rather than a fixed panel grey. On the figures they
+  found two Spanish defects, both mended: the readout chip of
+  `hearing_protector_methods` over the lowest subjects of one reference noise,
+  and the note of `vdi2081_flow_noise` over the 250 Hz mark of the 10 m/s
+  curve. The clip fingerprint follows a clip's drawing code into the
+  `phonometry._plot` helpers it draws with, so a change to the colour a helper
+  picks marks the clips that use it stale.
+
 - **The impulsive-sound analysis refuses a stereo signal instead of reading it
   as one channel twice as long.** `environment.sound_pressure_level_history`
   and `environment.impulsive_sound_adjustment` flattened a `(2, n)` signal into

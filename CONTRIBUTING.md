@@ -245,7 +245,29 @@ make assets                                              # once: the checkout
 make animations                                          # render every clip
 python scripts/generate_graphs.py --animations --anim anim_<name>   # or one
 make posters                                             # only the stills, no re-encode
+make animation-audit ANIM=anim_<name>                    # inspect every frame, encode nothing
 ```
+
+Before a clip is encoded, every frame of it is held to the gates the figures
+pass ([F60](docs/contributing/docs-and-figures.md#f60)):
+`scripts/clip_frame_audit.py` draws each frame, in the order the animation
+draws it, as the SVG the figures are saved as, and reads it for a label a line
+strikes through or a later fill paints over, a mark over a tick label, a
+legend or a label's chip over a datum, tick labels run together, a fill or a
+line the page swallows, a hyphen for a minus and, in Spanish, a decimal
+point. The four variants of a clip are inspected before any of them is
+encoded, so a finding in one stops the clip: it names the clip, the variant,
+the frame and the finding, and nothing is encoded or published.
+`make animation-audit` runs the same inspection without rendering a video,
+stamping a fingerprint or publishing anything, and lists every finding with
+the frames it holds over: the way to look at a clip after changing its
+drawing code, and at every clip after changing the audit or a checker. A
+finding that is a decision goes in the gate's own exemption table, keyed for
+the clip the way that table keys a figure, with the reason. No CI job runs the
+audit, because CI cannot render a clip; the freshness check
+(`scripts/check_animation_freshness.py`) fails a change to a clip's drawing
+code, in `scripts/figures` or in the `phonometry._plot` helpers it draws
+with, until the clip is rendered again, and the render runs the audit.
 
 After rendering, `make animations` and `make posters` publish what they
 wrote: `scripts/publish_assets.py` stages `images/` in the assets checkout,

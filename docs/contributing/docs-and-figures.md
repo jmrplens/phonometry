@@ -2,7 +2,7 @@
 
 # Documentation and figures
 
-This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues page; and the errata register. Read it before you add or change a guide, a figure or a renderer, an animation or an errata entry. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
+This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues page; the errata register; and the frames of a clip, held to the figure gates before it is encoded. Read it before you add or change a guide, a figure or a renderer, an animation or an errata entry. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
 
 ## Guides and the docs mirror
 
@@ -1102,12 +1102,12 @@ ax.text(0.85, 0.05, "Banda de octava", transform=ax.transAxes)  # runs out throu
 
 **Enforced by:** `scripts/check_figure_text_clearance.py`, `make figure-text-clearance`, `CI: Documentation figures up to date`
 
-**Exceptions.** `EXEMPTIONS` of the script, keyed by drawing with its reason, is empty; a stale entry fails. Gridlines, tick marks, legend frames, chips, fills and an annotation's own leader are not counted.
+**Exceptions.** `EXEMPTIONS` of the script, keyed by drawing with its reason, is empty; a stale entry fails. Gridlines, tick marks, legend frames, chips and an annotation's own leader are not counted as strokes. A fill or a chip under a label is its backing; one painted after the label over its letters (the chip of a later label, a legend plate) is counted. A label drawn with a halo (a path effect) is read as its string, and the halo hides what is painted before it, not what is painted after.
 
 <a id="f47"></a>
-### F47. Place a legend where it covers no plotted point, in English and in Spanish
+### F47. Place a legend or a label's chip where it covers no plotted point, in English and in Spanish
 
-**Why.** A legend's width is set by its longest label and a Spanish label is routinely half again as long, so a box that clears the data in one language covers it in the other; a point under an opaque legend is a datum the reader no longer has.
+**Why.** A legend's width is set by its longest label and a Spanish label is routinely half again as long, so a box that clears the data in one language covers it in the other; a point under an opaque legend is a datum the reader no longer has. The chip of a label is the same kind of plate: the image-source clip put its "source" chip over the first image of the source, and the two-room clip its caption chip over two microphones of the sphere.
 
 **Do**
 
@@ -1126,7 +1126,7 @@ ax.legend(loc="lower right")  # over the last markers once the labels are Spanis
 
 **Enforced by:** `scripts/check_figure_legends.py`, `make figure-legends`, `CI: Documentation figures up to date`
 
-**Exceptions.** `EXEMPTIONS` in `scripts/check_figure_legends.py`, keyed by drawing with the reason it is a decision (a legend that is merely inconvenient to move does not belong); one entry, `true_peak_intersample` (a comb of identical grid ticks). Ratcheted both ways. A legend with `frameon=False` is not measured (its letters are the annotation check's business).
+**Exceptions.** `EXEMPTIONS` in `scripts/check_figure_legends.py`, keyed by drawing with the reason it is a decision (a legend that is merely inconvenient to move does not belong); one entry, `true_peak_intersample` (a comb of identical grid ticks). Ratcheted both ways. A legend with `frameon=False` is not measured (its letters are the annotation check's business). A chip counts only over a point painted before it, and not when it is fainter than half opacity or filled with the point's own colour: a badge centred on the point it numbers stands in for it. A tick mark is the frame of the axes, not a plotted point, and is not counted.
 
 <a id="f48"></a>
 ### F48. Shade a region so it clears CIEDE2000 10 against the page in both themes
@@ -1172,7 +1172,7 @@ ax.plot(x, y, color="#555555", alpha=0.5, linewidth=0.4)
 
 **Enforced by:** `scripts/check_stroke_contrast.py`, `CI: Documentation figures up to date`
 
-**Exceptions.** A hairline is a stroke under 0.6 pt. Grid and axis furniture is exempt by color (`SCAFFOLDING`: #555555, #e0e0e0, #b0b0b0) and the 3-D grid by group name (`grid3d`); strokes inside an axes covered by a filled contour or a mesh (`QuadContourSet`, `QuadMesh`) are read against that field, which `scripts/check_figure_contrast.py` judges. No other exemption.
+**Exceptions.** A hairline is a stroke under 0.6 pt. A stroke is read at the opacity it is painted with (its `stroke-opacity`, times the `opacity` matplotlib writes for a patch faded with `set_alpha`, times that of every group round it) against the page its drawing paints behind it: the axes or figure background (black for a dark matplotlib figure), a diagram's plate, else the site's dark ground. Grid and axis furniture is exempt by color (`SCAFFOLDING`: #555555, #e0e0e0, #b0b0b0) and the 3-D grid by group name (`grid3d`); strokes inside an axes covered by a filled contour or a mesh (`QuadContourSet`, `QuadMesh`) are read against that field, which `scripts/check_figure_contrast.py` judges. No other exemption.
 
 <a id="f50"></a>
 ### F50. Color a fiche's bars by category with a legend; never rotate long tick labels
@@ -1231,10 +1231,12 @@ python scripts/generate_graphs.py --animations --anim anim_epnl_flyover
 **Don't**
 
 ```text
-Change a scene in scripts/figures/ (or a library function it calls) and commit without re-rendering the clip: the fingerprint next to the clip no longer matches.
+Change a scene in scripts/figures/ (or a phonometry._plot helper it draws with) and commit without re-rendering the clip: the fingerprint next to the clip no longer matches.
 ```
 
 **Enforced by:** `scripts/check_animation_freshness.py`, `make animation-freshness`
+
+**Exceptions.** The fingerprint (`scripts/animation_fingerprint.py`) follows a clip's code through `scripts/figures` and through the drawing helpers of `phonometry._plot` it calls (the colours of a fill or a quiet line, the frequency axis, the dark field map), and stops at the rest of the library: a change to the physics moves the static figures, where `scripts/check_figures.py` catches it.
 
 <a id="f53"></a>
 ### F53. Embed an animation lazily, with its space reserved
@@ -1410,3 +1412,28 @@ A commit that adds the English entry and leaves the Spanish register for later.
 ```
 
 **Enforced by:** `make site-reports`, `CI: Generated evidence pages up to date`
+
+## Clip frames
+
+<a id="f60"></a>
+### F60. Hold every frame of a clip to the figure gates before it is encoded
+
+**Why.** The figure gates read the committed SVGs, and a clip has none: its frames exist only while the encoder pulls them. The EPNL flyover clip shipped its "microphone" label struck through by the ground line in every frame, and it was found by eye. A render now draws each frame as the SVG the figures are saved as, in the order the animation draws it, and holds it to the gates that apply to a frame: text and tick clearance, legends and chips over a datum, and the tick labels of an axis on the light frames in both languages, the contrast of a fill on every frame and of a stroke on the dark ones, the minus sign everywhere and the decimal comma in Spanish. A label drawn with a halo is read like any other. The four variants of a clip are inspected before any is encoded, so a finding in one, the dark page or the Spanish text alone, stops the whole clip; it names the clip, the variant, the frame and the finding, and nothing is encoded, stamped or published.
+
+**Do**
+
+```bash
+make animation-audit ANIM=anim_epnl_flyover   # every frame of its four variants, no video
+python scripts/generate_graphs.py --animations --anim anim_epnl_flyover   # the render audits first
+```
+
+**Don't**
+
+```text
+Place a clip's label by eye on the poster still and publish the clip: the
+frames between the first and the poster are never looked at.
+```
+
+**Enforced by:** `scripts/clip_frame_audit.py`, `make animation-audit`, `tests/test_clip_frame_audit.py`
+
+**Exceptions.** Every frame is inspected, none sampled: run over every frame of the 43 clips as they were drawn before the audit, 24 of the 314 runs of a finding held for a single frame (in six clips), which any stride would have let through. A finding that is a decision goes in the gate's own exemption table, with the reason, keyed for a clip the way that table keys a figure: `check_figure_text_clearance.EXEMPTIONS` by the drawing with its language suffix (`anim_epnl_flyover`, `anim_epnl_flyover_es`) or `drawing: text`; `check_figure_legends.EXEMPTIONS` by the clip alone; `check_figure_minus_sign.ALLOWED` and `check_figure_decimal_point.ALLOWED` by `clip: text`, with no language or theme suffix. The figure gates leave such an entry alone, and the audit-only run fails it once no frame fires it. No CI job runs the audit, because CI cannot render a clip: the freshness check ([F52](#f52)) fails a change to a clip's drawing code, in `scripts/figures` or in the `phonometry._plot` helpers it draws with, until the clip is rendered again, and the render runs the audit. A change to the audit or to a checker moves no fingerprint, so after one, `make animation-audit` over every clip shows whether the published clips still pass.

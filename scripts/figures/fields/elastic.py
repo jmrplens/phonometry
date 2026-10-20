@@ -24,12 +24,11 @@ from ..media import (
 from ..theme import (
     CMAP_FIELD,
     COLOR_FG,
-    COLOR_GRID,
     COLOR_TERTIARY,
     FIELD_INK,
     FIELD_STROKE,
 )
-from ._core import _fit_text_x, _gain_note, _weak_field_gain
+from ._core import _fit_text_x, _gain_note, _solid_in_field, _weak_field_gain
 
 # --- Elastic FDTD clips: plate junction and coincidence --------------------
 # Both clips run the library's 2D P-SV solver (phonometry.simulation
@@ -677,7 +676,7 @@ def animate_elastic_coincidence(output_dir: str) -> None:
                 (x0, _EC_PLATE_Y),
                 x1 - x0,
                 _EL_H,
-                facecolor=COLOR_GRID,
+                facecolor=_solid_in_field(ax),
                 edgecolor=COLOR_FG,
                 lw=0.8,
                 zorder=3,

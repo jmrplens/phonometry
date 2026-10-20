@@ -188,6 +188,8 @@ def test_the_test_matrix_runs_every_supported_python() -> None:
 _PINNED_TOOLING = frozenset(
     {
         "animation_fingerprint",
+        "check_stroke_contrast",
+        "clip_frame_audit",
         "conformance_badges",
         "diagrams",
         "figure_annotation_audit",

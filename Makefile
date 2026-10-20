@@ -521,7 +521,11 @@ assets:
 # assets.lock here, so the code and the clips say which version goes with
 # which. Still records language fragments into the same directory as `make
 # graphs`, so `make figure-language` afterwards sees figures, plates and
-# clips at once. PUBLISH=no renders without pushing, for a look.
+# clips at once. PUBLISH=no renders without pushing, for a look. Before a
+# clip is encoded, every frame of its four variants is held to the figure
+# gates (see `animation-audit`): a finding stops the render, naming the clip,
+# the variant, the frame and the finding, and nothing of the clip is encoded
+# or published.
 animations: assets
 	$(FIGURE_LANGUAGE_ENV) $(PYTHON) scripts/generate_graphs.py --animations
 	@if [ "$(PUBLISH)" != "no" ]; then $(PYTHON) scripts/publish_assets.py; fi
@@ -535,6 +539,27 @@ animations: assets
 # looks in the assets checkout for the files; CI hands it a manifest instead.
 animation-freshness:
 	$(PYTHON) scripts/check_animation_freshness.py
+
+# The gates above read the committed SVGs for a label a line strikes through
+# or a later fill paints over, a mark over a tick label, a legend or a label's
+# chip over a datum, a fill or a line the page swallows, a hyphen for a minus
+# and a Spanish decimal point. A clip has no committed drawing for them to
+# read, and the EPNL flyover clip shipped its "microphone" label struck
+# through by the ground line. So every render draws each frame of a clip as
+# the SVG the figures are saved as, in the order the animation draws it, and
+# holds its four variants to those gates before any of them is encoded
+# (scripts/clip_frame_audit.py). This target runs the same inspection without
+# the render: every frame of every clip in its four variants, no video, no
+# fingerprint stamped, nothing published, and every finding listed with the
+# frames it holds over. ANIM=anim_<name> inspects one clip; the field clips
+# need their simulation, so the GPU settings in .env. No CI job runs it,
+# because CI cannot render a clip: the freshness check fails a change to a
+# clip's drawing code (scripts/figures, and the phonometry._plot helpers it
+# draws with) until the clip is rendered again, and the render runs this
+# audit. A change to the audit or to a checker moves no fingerprint: run this
+# over every clip after one.
+animation-audit:
+	$(FIGURE_ENV) $(PYTHON) scripts/generate_graphs.py --animations --audit-only $(if $(ANIM),--anim $(ANIM))
 
 # Re-extract only the deferred-loading poster stills (anim_*_poster.webp) from
 # the published animation WebMs, without the slow clip re-encode, and publish
@@ -742,7 +767,7 @@ check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
-	assets animations animation-freshness posters brand lighthouse \
+	assets animations animation-freshness animation-audit posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \

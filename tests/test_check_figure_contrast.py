@@ -41,8 +41,14 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture(autouse=True)
-def _close_figures() -> Iterator[None]:
-    yield
+def _own_page() -> Iterator[None]:
+    """Close what a test drew and put back the settings its page rewrote.
+
+    Each test picks the light or the dark page with ``plt.style.use``, which
+    rewrites matplotlib's global settings for whatever the worker runs next.
+    """
+    with mpl.rc_context():
+        yield
     plt.close("all")
 
 

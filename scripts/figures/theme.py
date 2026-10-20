@@ -41,6 +41,14 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from matplotlib.backend_bases import GraphicsContextBase, RendererBase
+    from matplotlib.figure import Figure
+    from matplotlib.font_manager import FontProperties
+    from matplotlib.path import Path
+    from matplotlib.patheffects import PathEffectRenderer
+    from matplotlib.text import Text
+    from matplotlib.transforms import Transform
+    from matplotlib.typing import ColorType
 
 # Constants for professional styling
 LABEL_FREQ_HZ = "Frequency [Hz]"
@@ -233,15 +241,168 @@ _RASTER_FIGURES = frozenset(
 )
 
 
+# PLR0913 and FBT: the parameters are matplotlib's draw_text signature.
+def _draw_path_effect_text(  # noqa: PLR0913
+    self: PathEffectRenderer,
+    gc: GraphicsContextBase,
+    x: float,
+    y: float,
+    s: str,
+    prop: FontProperties,
+    angle: float,
+    ismath: bool | Literal["TeX"] = False,  # noqa: FBT001, FBT002
+    mtext: Text | None = None,
+) -> None:
+    """``PathEffectRenderer.draw_text`` while :func:`svg_text` writes a drawing.
+
+    matplotlib draws a text with a path effect (the halo round a label laid
+    over a moving field) by turning the whole string into one outline and
+    handing it to each effect, the plain one included, so the SVG gets two
+    bare paths and none of the string comment and placed glyphs every figure
+    gate reads a text by: the label was invisible to all of them. Here the
+    effects that add something (the halo's stroke) still draw that outline,
+    and the plain text is drawn by the SVG renderer itself, as any other
+    label, with its string. What lands on the page is the same: the same
+    halo under the same letters in the same colour.
+    """
+    from matplotlib.backend_bases import RendererBase
+    from matplotlib.patheffects import AbstractPathEffect, Normal, PathEffectRenderer
+
+    class _Added(AbstractPathEffect):
+        """A ``with...`` effect without the plain draw it ends with."""
+
+        def __init__(self, effect: AbstractPathEffect) -> None:
+            super().__init__()
+            self._effect = effect
+
+        def draw_path(
+            self,
+            renderer: RendererBase,
+            gc: GraphicsContextBase,
+            tpath: Path,
+            affine: Transform,
+            # N803: matplotlib's own name for the parameter.
+            rgbFace: ColorType | None = None,  # noqa: N803
+        ) -> None:
+            from typing import cast
+
+            base = cast("type[AbstractPathEffect]", type(self._effect).__mro__[1])
+            base.draw_path(self._effect, renderer, gc, tpath, affine, rgbFace)
+
+    for effect in self._path_effects:
+        if isinstance(effect, Normal):
+            self._renderer.draw_text(gc, x, y, s, prop, angle, ismath, mtext)
+            continue
+        # ``withStroke`` and its siblings are made by matplotlib's
+        # ``_subclass_with_normal``: a subclass of the effect named for it,
+        # whose draw is the effect's and then the plain one.
+        base = type(effect).__mro__[1]
+        with_normal = type(effect).__name__ == f"with{base.__name__}"
+        RendererBase.draw_text(
+            PathEffectRenderer(
+                [_Added(effect) if with_normal else effect], self._renderer
+            ),
+            gc,
+            x,
+            y,
+            s,
+            prop,
+            angle,
+            ismath,
+            mtext,
+        )
+        if with_normal:
+            self._renderer.draw_text(gc, x, y, s, prop, angle, ismath, mtext)
+
+
+def svg_text(fig: Figure, **kwargs: Any) -> str:
+    """*fig* drawn as the SVG :func:`save_figure` writes, returned as text.
+
+    The one place a drawing becomes an SVG: the figures are saved through it,
+    and so is every frame of a clip when ``scripts/clip_frame_audit.py`` holds
+    it to the gates the figures pass, so a frame is read in exactly the form
+    those gates were written for. ``kwargs`` go to ``Figure.savefig``.
+
+    Element ids come from a fixed ``svg.hashsalt``, so the same drawing gives
+    the same bytes, and the date is left out of the metadata. A text drawn
+    with a path effect is written as a text with its string, its halo under
+    it (:func:`_draw_path_effect_text`), so the gates read it as they read
+    any other label.
+    """
+    import io
+
+    import generated_assets
+    from matplotlib.patheffects import PathEffectRenderer
+
+    plt.rcParams["svg.hashsalt"] = "phonometry"
+    # Text is drawn as outlines, not as <text>. Keeping it as text made a
+    # figure's typography depend on the machine reading it, and for half
+    # the corpus that dependency was visible:
+    #
+    # A label with any mathtext in it is not laid out by the viewer. The
+    # whole string goes through matplotlib's mathtext, which emits one
+    # <tspan> per glyph carrying its own absolute ``x`` -- and those
+    # positions are computed from DejaVu Sans metrics. The file, meanwhile,
+    # asked for a *generic* family, so the viewer set those glyphs in its
+    # own sans (Helvetica on iOS/macOS, Roboto on Android, Arial/Segoe on
+    # Windows, whatever fontconfig picks on Linux) at DejaVu's advances.
+    # Narrower glyphs on wider advances read as letter-spaced prose: the
+    # title of ln_levels_example shipped as "S t a t i s t i c a l". A
+    # label with no mathtext escaped it, being written as one <text> the
+    # viewer is free to shape -- so the defect landed on exactly the
+    # figures carrying mathematics, and grew with every one added.
+    #
+    # The generic family was itself the fix for the previous round of this:
+    # matplotlib writes mathtext with a bare "DejaVu Sans" and no generic
+    # fallback, so a viewer without that font fell back to a *serif*. Both
+    # failures are the same failure -- the drawn result depending on the
+    # reader's font stack -- and outlines end the dependency rather than
+    # trading one symptom for the next. It also drops the STIX exception
+    # that fix needed (radicals and extensible delimiters are drawn from a
+    # dedicated font at a size matched to the glyph beside them, which
+    # rewriting the family silently broke).
+    #
+    # Reproducibility, which is why 'none' was chosen originally, is not
+    # lost: the outlines come from the DejaVu build that matplotlib itself
+    # ships, so they are pinned by the pinned matplotlib, and
+    # check_figures.py compares structure plus numbers within a tolerance
+    # rather than bytes. The report fiches have drawn their plot text as
+    # paths all along (see phonometry._report._layout), so this is the two
+    # halves of the project agreeing rather than a new departure.
+    #
+    # What it costs: the text of a committed .svg is no longer text, so it
+    # cannot be selected in an editor or found with Ctrl-F. Nothing
+    # downstream wanted it. Every figure is embedded as <img>, where the
+    # internal DOM is not exposed to assistive technology (the alt text
+    # is, and ThemeImage.astro refuses to render without one), and in a
+    # figure with mathematics that text layer was already unreadable --
+    # thirty positioned tspans with the glyphs in layout order, as
+    # check_figure_language.py had to work around.
+    plt.rcParams["svg.fonttype"] = "path"
+    kwargs.setdefault("metadata", {"Date": None})
+    # Through a buffer and generated_assets.compact_svg: the coordinates
+    # are cut to what a display can resolve and the indentation, DOCTYPE
+    # and metadata come off, a sixth of every file. Reversing the SVG_TOL
+    # relationship: the comparison in check_figures.py accepts one
+    # rounding quantum, which is what two machines either side of a
+    # boundary differ by after this.
+    drawn = io.StringIO()
+    PathEffectRenderer.draw_text = _draw_path_effect_text  # type: ignore[method-assign, assignment]
+    try:
+        fig.savefig(drawn, format="svg", **kwargs)
+    finally:
+        del PathEffectRenderer.draw_text
+    return generated_assets.compact_svg(drawn.getvalue())
+
+
 def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
     """Translate, theme-suffix and save the current figure.
 
     Vector figures are written as SVG made byte-reproducible with a fixed
     ``svg.hashsalt`` (deterministic element ids), ``svg.fonttype = "path"``
-    (text drawn as glyph outlines, for the reason spelled out below) and no
-    date metadata -- so ``make graphs`` is stable and CI can diff it. The
-    figures in
-    :data:`_RASTER_FIGURES` stay raster (SVG would be heavier), written as
+    (text drawn as glyph outlines, for the reason spelled out in
+    :func:`svg_text`) and no date metadata -- so ``make graphs`` is stable
+    and CI can diff it. The figures in :data:`_RASTER_FIGURES` stay raster (SVG would be heavier), written as
     lossless WebP: matplotlib renders the canvas to an in-memory PNG with the
     version-stamped ``Software`` chunk (and any date) stripped, and Pillow
     re-encodes those exact pixels with the exhaustive ``method=6`` search,
@@ -273,67 +434,14 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
     # Kept on ``os`` for the reason given at the stem above.
     path = os.path.join(output_dir, f"{stem}{_LANG_SUFFIX}{_FILENAME_SUFFIX}.{ext}")  # noqa: PTH118
     if ext == "svg":
-        plt.rcParams["svg.hashsalt"] = "phonometry"
-        # Text is drawn as outlines, not as <text>. Keeping it as text made a
-        # figure's typography depend on the machine reading it, and for half
-        # the corpus that dependency was visible:
-        #
-        # A label with any mathtext in it is not laid out by the viewer. The
-        # whole string goes through matplotlib's mathtext, which emits one
-        # <tspan> per glyph carrying its own absolute ``x`` -- and those
-        # positions are computed from DejaVu Sans metrics. The file, meanwhile,
-        # asked for a *generic* family, so the viewer set those glyphs in its
-        # own sans (Helvetica on iOS/macOS, Roboto on Android, Arial/Segoe on
-        # Windows, whatever fontconfig picks on Linux) at DejaVu's advances.
-        # Narrower glyphs on wider advances read as letter-spaced prose: the
-        # title of ln_levels_example shipped as "S t a t i s t i c a l". A
-        # label with no mathtext escaped it, being written as one <text> the
-        # viewer is free to shape -- so the defect landed on exactly the
-        # figures carrying mathematics, and grew with every one added.
-        #
-        # The generic family was itself the fix for the previous round of this:
-        # matplotlib writes mathtext with a bare "DejaVu Sans" and no generic
-        # fallback, so a viewer without that font fell back to a *serif*. Both
-        # failures are the same failure -- the drawn result depending on the
-        # reader's font stack -- and outlines end the dependency rather than
-        # trading one symptom for the next. It also drops the STIX exception
-        # that fix needed (radicals and extensible delimiters are drawn from a
-        # dedicated font at a size matched to the glyph beside them, which
-        # rewriting the family silently broke).
-        #
-        # Reproducibility, which is why 'none' was chosen originally, is not
-        # lost: the outlines come from the DejaVu build that matplotlib itself
-        # ships, so they are pinned by the pinned matplotlib, and
-        # check_figures.py compares structure plus numbers within a tolerance
-        # rather than bytes. The report fiches have drawn their plot text as
-        # paths all along (see phonometry._report._layout), so this is the two
-        # halves of the project agreeing rather than a new departure.
-        #
-        # What it costs: the text of a committed .svg is no longer text, so it
-        # cannot be selected in an editor or found with Ctrl-F. Nothing
-        # downstream wanted it. Every figure is embedded as <img>, where the
-        # internal DOM is not exposed to assistive technology (the alt text
-        # is, and ThemeImage.astro refuses to render without one), and in a
-        # figure with mathematics that text layer was already unreadable --
-        # thirty positioned tspans with the glyphs in layout order, as
-        # check_figure_language.py had to work around.
-        plt.rcParams["svg.fonttype"] = "path"
-        kwargs.setdefault("metadata", {"Date": None})
-        # Through a buffer and generated_assets.compact_svg: the coordinates
-        # are cut to what a display can resolve and the indentation, DOCTYPE
-        # and metadata come off, a sixth of every file. Reversing the SVG_TOL
-        # relationship: the comparison in check_figures.py accepts one
-        # rounding quantum, which is what two machines either side of a
-        # boundary differ by after this.
-        import io
-
-        import generated_assets
-
-        drawn = io.StringIO()
-        plt.savefig(drawn, format="svg", **kwargs)
+        fig = plt.gcf()
         # A ``str`` path, for the reason given at the stem above.
         with open(path, "w", encoding="utf-8") as handle:  # noqa: PTH123
-            handle.write(generated_assets.compact_svg(drawn.getvalue()))
+            handle.write(svg_text(fig, **kwargs))
+        # ``pyplot.savefig``, which wrote the figures before ``svg_text``
+        # did, repaints the canvas after the save; kept, so a generator that
+        # saves or measures the same figure again finds it as it did.
+        fig.canvas.draw_idle()
         return
     import io
 

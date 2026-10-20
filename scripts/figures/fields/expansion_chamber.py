@@ -15,6 +15,7 @@ from ..media import (
     _render_clip,
     _translate_str,
 )
+from ..schematics import _page_chip
 from ..theme import CMAP_FIELD, COLOR_FG, COLOR_GRID, COLOR_PRIMARY
 from ._core import _anim_speaker
 
@@ -361,6 +362,8 @@ def _anim_chamber_hardware(
         va="top",
         fontsize=7.5,
     )
+    # Above the shell, where the envelope's baseline runs: on its chip, the
+    # dimensions sit over the baseline instead of being underlined by it.
     ax.text(
         0.5 * (x0 + x1),
         height + wall + 0.006,
@@ -369,4 +372,6 @@ def _anim_chamber_hardware(
         va="bottom",
         fontsize=7.5,
         color=COLOR_FG,
+        zorder=4,
+        bbox=_page_chip(0.1),
     )

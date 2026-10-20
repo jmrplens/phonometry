@@ -257,9 +257,12 @@ def animate_fdtd_ground_effect(output_dir: str) -> None:
         "facecolor": fig.get_facecolor(),
         "edgecolor": "none",
     }
+    # A hair above the ghost's own height: centred on it, the chip reached
+    # 0.02 m past the bottom of the panel and hid the frame of the axes
+    # under its letters.
     ax_p.text(
         1.95,
-        -1.5,
+        -1.4,
         T("image source (ghost)"),
         ha="left",
         va="center",

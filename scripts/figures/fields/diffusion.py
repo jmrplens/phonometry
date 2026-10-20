@@ -10,11 +10,10 @@ from ..media import _anim_figure, _render_clip, _translate_str
 from ..theme import (
     CMAP_FIELD,
     COLOR_FG,
-    COLOR_GRID,
     FIELD_INK,
     FIELD_STROKE,
 )
-from ._core import _fit_text_below
+from ._core import _fit_text_below, _solid_in_field
 
 _QRD_DESIGN_F = 343.0 / 0.56  # ~612 Hz: lambda0 = 0.56 m
 _QRD_SLAB = (2.085, 3.915, 0.55, 0.85)  # x0, x1, y0, y1 of the panel slab
@@ -230,7 +229,7 @@ def animate_fdtd_diffusion(output_dir: str) -> None:
                 Polygon(
                     polys[col],
                     closed=True,
-                    facecolor=COLOR_GRID,
+                    facecolor=_solid_in_field(ax),
                     edgecolor=COLOR_FG,
                     lw=1.0,
                 )

@@ -29,7 +29,13 @@ Only what can change a frame, and only the part of it the clip reaches:
 * the clip's own ``animate_*`` function and, transitively, every function,
   class and module constant it names inside ``scripts/figures`` -- the module
   helpers, the shared clip tail (``figures/media.py``), the field builders,
-  the translation machinery of ``figures/i18n.py``;
+  the translation machinery of ``figures/i18n.py`` -- and inside
+  ``phonometry._plot``, the drawing code the clips share with the library's
+  own renderers: the colours a fill or a quiet line is given against its
+  page (``theme_fill``, ``theme_line``), the frequency axis, the dark map of
+  a wave field. A statement at the top of a module that the walk reaches
+  counts as reached too, with what it names: ``figures.theme`` registers the
+  dark field map that way;
 * ``figures.theme.set_theme``, which is not called by the clip but decides
   the palette and the rcParams every frame is drawn with, and everything it
   reaches;
@@ -53,11 +59,15 @@ re-render, so an alarm nobody believes would be worse than no alarm.
 Known gaps, deliberately
 ------------------------
 
-* **The library.** A clip calls ``phonometry`` for its physics, and this walk
-  stops at the package boundary. Extending it there would trade a real but
-  rare miss for a constant stream of false positives from refactors that
-  change no pixel, and a library change that moves a number moves the static
-  figures with it, where ``check_figures.py`` does catch it.
+* **The library's physics.** A clip calls ``phonometry`` for its numbers,
+  and outside ``phonometry._plot`` this walk stops at the package boundary.
+  Extending it there would trade a real but rare miss for a constant stream
+  of false positives from refactors that change no pixel, and a library
+  change that moves a number moves the static figures with it, where
+  ``check_figures.py`` does catch it. Drawing code is another matter: a
+  change to the colour a helper picks moves no number and still redraws
+  every clip that asks for it, so ``phonometry._plot`` is walked like
+  ``scripts/figures``.
 * **Pattern translations reached only through an f-string.** The selection
   below matches a table pattern against the clip's literal text, and a label
   assembled at run time from several pieces may not be recognisable in the
@@ -86,8 +96,17 @@ _SCRIPTS = pathlib.Path(__file__).resolve().parent
 #: checks the tree against.
 MANIFEST = _SCRIPTS / "animation_fingerprints.txt"
 
-#: The package the walk stays inside.
+#: The package the walk starts in.
 _PKG_NAME = "figures"
+
+#: The packages the walk stays inside: where each lives under the repository
+#: root, and the dotted name it is imported under. ``phonometry._plot`` is the
+#: drawing code of the library, which the clips call for their colours and
+#: their axes; the rest of the library is physics (see "Known gaps").
+_PACKAGES: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
+    (("scripts", "figures"), (_PKG_NAME,)),
+    (("src", "phonometry", "_plot"), ("phonometry", "_plot")),
+)
 
 #: Where the clip names are mapped to their builders.
 _REGISTRY = "figures.registry"
@@ -240,16 +259,17 @@ class Sources:
         self.root = root
         self.modules: dict[str, _Module] = {}
         self.packages: set[str] = set()
-        package_root = root / "scripts" / "figures"
         parsed: dict[str, ast.Module] = {}
-        for path in sorted(package_root.rglob("*.py")):
-            rel = path.relative_to(package_root).with_suffix("")
-            parts = list(rel.parts[:-1] if rel.name == "__init__" else rel.parts)
-            name = ".".join([_PKG_NAME, *parts])
-            if path.name == "__init__.py":
-                self.packages.add(name)
-            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-            parsed[name] = ast.fix_missing_locations(_RuntimeView().visit(tree))
+        for where, prefix in _PACKAGES:
+            package_root = root.joinpath(*where)
+            for path in sorted(package_root.rglob("*.py")):
+                rel = path.relative_to(package_root).with_suffix("")
+                parts = list(rel.parts[:-1] if rel.name == "__init__" else rel.parts)
+                name = ".".join([*prefix, *parts])
+                if path.name == "__init__.py":
+                    self.packages.add(name)
+                tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+                parsed[name] = ast.fix_missing_locations(_RuntimeView().visit(tree))
         # Every module name has to be known before the imports are resolved:
         # ``from . import media`` reads as a module reference or as a symbol
         # depending on whether ``figures.media`` exists.
@@ -290,8 +310,15 @@ class Sources:
     # -- the walk ----------------------------------------------------------
 
     def closure(self, roots: Iterable[Symbol]) -> set[Symbol]:
-        """Every package symbol reachable from *roots*, roots included."""
+        """Every package symbol reachable from *roots*, roots included.
+
+        Reaching a symbol reaches the top-level statements of its module too
+        (:attr:`_Module.body`), which run when the module is imported:
+        ``figures.theme`` registers the dark field map in one, so what such
+        a statement names is followed like what a function names.
+        """
         seen: set[Symbol] = set()
+        modules: set[str] = set()
         stack = list(roots)
         while stack:
             symbol = stack.pop()
@@ -302,6 +329,10 @@ class Sources:
                 continue
             seen.add(symbol)
             stack.extend(self.referenced(symbol[0], node))
+            if symbol[0] not in modules:
+                modules.add(symbol[0])
+                for statement in self.modules[symbol[0]].body:
+                    stack.extend(self.referenced(symbol[0], statement))
         return seen
 
     def node(self, symbol: Symbol) -> ast.AST | None:
@@ -728,9 +759,10 @@ _HEADER = """\
 # each), so nothing else can tell that the code drawing a clip has moved since
 # the clip was written. Each hash covers the clip's builder, everything it
 # reaches inside scripts/figures (the shared clip tail, the theme, the
-# translation machinery) and the translation-table entries its own strings
-# select; it is taken over the syntax tree, so comments and docstrings do not
-# move it. See scripts/animation_fingerprint.py.
+# translation machinery) and inside phonometry._plot (the drawing helpers it
+# calls), and the translation-table entries its own strings select; it is
+# taken over the syntax tree, so comments and docstrings do not move it. See
+# scripts/animation_fingerprint.py.
 #
 # Written by the renderer. To refresh one clip, re-render it:
 #     python scripts/generate_graphs.py --animations --anim <clip>

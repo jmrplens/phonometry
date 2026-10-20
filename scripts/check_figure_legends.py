@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail on a legend that closes over a plotted point.
+"""Fail on a legend, or the chip of a text, that closes over a plotted point.
 
 A legend is an opaque plate the author places by hand, and its width is set by
 its longest label. That is a defect waiting to happen in a bilingual corpus:
@@ -23,11 +23,31 @@ ships rather than about a rebuild of it:
   inside it that is filled with a colour, has no ``id`` of its own and holds
   the legend's own handles;
 * a plotted point is a ``<use>`` outside every legend group, referencing a
-  glyph defined in a ``<defs>``.
+  glyph defined in a ``<defs>``, and outside the ``xtick_N`` and ``ytick_N``
+  groups of an axis: a tick mark is placed the same way, and it is the
+  frame of the axes, not a datum.
 
 A legend drawn with ``frameon=False`` writes no such path and is not measured,
 which is right rather than a gap: what it puts over the drawing is its own
 letters, and letters over a curve are what the annotation audit measures.
+
+The chip of a text
+------------------
+A label's chip (``bbox=`` on a text) is the same kind of plate: opaque, and
+placed by hand. The guide says so (a chip "hides any datum under it, so it is
+the second choice") and nothing measured it, so the image-source clip shipped
+its "source" chip over the first image of the source in the wall, and the
+two-room clip its caption chip over the two lowest microphones of the sphere.
+So the chip is read the way a legend frame is, with one difference that
+follows from what a chip is: a point painted *after* it is drawn on top of it
+and stays in view, so only the points painted before the chip count. A chip is
+the filled path of the ``patch_N`` group matplotlib writes first inside the
+text's ``text_N`` group, and one fainter than :data:`CHIP_OPAQUE` (a wash in
+an empty corner, which F44 allows) leaves what is under it readable and is
+not measured. Nor is a chip filled with the colour of the point it covers: that
+is a badge standing in for the point, the way the numbered microphone
+positions are drawn (a chip in the position's own colour, centred on it), and
+the reader still has a mark of that colour where the point is.
 
 Both are read in the figure's own coordinates. The ``translate()`` of every
 ancestor group is accumulated on the way down, which costs nothing and is what
@@ -111,6 +131,20 @@ _TRANSLATE = re.compile(r"translate\(\s*(-?[\d.eE+-]+)[ ,]+(-?[\d.eE+-]+)\s*\)")
 #: points under it.
 _GLYPH_ID = re.compile(r"^m[0-9a-f]+$")
 
+#: The groups matplotlib writes the ticks of an axis in. A tick mark is a
+#: glyph placed with ``<use>`` like a marker, and it is not a datum.
+_TICK_GROUPS = ("xtick_", "ytick_")
+
+#: How opaque the chip of a text has to be to hide a point painted under
+#: it: the threshold the text clearance gate reads a fill as hiding at.
+CHIP_OPAQUE = 0.5
+
+#: An opacity in a ``style``: the element's own, or its fill's.
+_OPACITY = re.compile(r"(?:^|;)\s*(fill-opacity|opacity):\s*([-+\d.eE]+)")
+
+#: The fill colour in a ``style``.
+_FILL = re.compile(r"(?:^|;)\s*fill:\s*(#[0-9a-fA-F]{6})")
+
 #: Drawings whose legend covers a mark that is not a datum, with the reason.
 #: Read the module docstring before adding one: a legend that is merely
 #: inconvenient to move does not belong here.
@@ -123,10 +157,24 @@ EXEMPTIONS: dict[str, str] = {
 }
 
 
+#: What the name of every animation clip starts with. A clip has no committed
+#: drawing: its frames are held to these gates as they are rendered, by
+#: ``scripts/clip_frame_audit.py``, so an exemption keyed by a clip is that
+#: audit's to ratchet, and a gate reading the committed drawings does not call
+#: it stale for matching none of them.
+CLIP_PREFIX = "anim_"
+
+
+def is_clip(key: str) -> bool:
+    """Whether an exemption *key* names an animation clip rather than a drawing."""
+    return key.startswith(CLIP_PREFIX)
+
+
 class Overlap(NamedTuple):
-    """One plotted point a legend frame closes over."""
+    """One plotted point a legend frame or the chip of a text closes over."""
 
     drawing: str
+    #: The plate: ``legend_N``, or ``the chip of text_N 'its words'``.
     legend: str
     artist: str
     x: float
@@ -206,7 +254,9 @@ def _frames(
     """The frame of every legend that draws one, in figure coordinates.
 
     The frame is the first path inside the group that is filled with a colour,
-    carries no ``id`` of its own and holds the legend's own handles. Holding
+    carries no ``id`` of its own and holds the legend's own handles. A path
+    with no ``fill`` written is filled black, as SVG fills it: matplotlib
+    leaves the declaration out for black, the frame of a dark page. Holding
     them is what the test is for: a legend drawn with ``frameon=False`` writes
     no frame at all, and the first filled path inside it is then a swatch or a
     rule belonging to one of its entries, which is a mark of the legend rather
@@ -221,7 +271,7 @@ def _frames(
         if element.tag != SVG + "path" or element.get("id"):
             continue
         style = element.get("style") or ""
-        if "fill:" not in style or "fill: none" in style:
+        if "fill: none" in style:
             continue
         box = _box(element.get("d", ""))
         if box is None:
@@ -233,29 +283,118 @@ def _frames(
     return frames
 
 
+def _opacity(style: str) -> float:
+    """How opaque a fill is painted: its ``fill-opacity`` times its ``opacity``."""
+    value = 1.0
+    for _name, number in _OPACITY.findall(style):
+        value *= float(number)
+    return value
+
+
+def _fill(style: str) -> str | None:
+    """The ``#rrggbb`` a style fills with, lower case, or ``None`` for no fill.
+
+    A style that writes no ``fill`` fills black, as SVG does: matplotlib
+    leaves the declaration out for black.
+    """
+    if "fill: none" in style:
+        return None
+    found = _FILL.search(style)
+    return found.group(1).lower() if found else "#000000"
+
+
+def _chips(
+    nodes: list[tuple[ET.Element, float, float, str | None]],
+) -> list[tuple[int, str, tuple[float, float, float, float], str | None]]:
+    """The chip of every text that draws one: where it is painted, whose, its
+    box and its fill colour.
+
+    matplotlib writes a text as ``<g id="text_N">``, the chip first inside it
+    as a ``patch_N`` group holding one filled path, then the comment that
+    names the string and its glyphs.
+    """
+    found: list[tuple[int, str, tuple[float, float, float, float], str | None]] = []
+    for order, (element, dx, dy, _legend) in enumerate(nodes):
+        name = element.get("id") or ""
+        if element.tag != SVG + "g" or not name.startswith("text_"):
+            continue
+        words = next(
+            (
+                (child.text or "").strip()
+                for child in element
+                # A comment's tag is a function, every element's a string.
+                if not isinstance(child.tag, str)
+            ),
+            "",
+        )
+        patch = next(
+            (
+                child
+                for child in element
+                if child.tag == SVG + "g"
+                and (child.get("id") or "").startswith("patch_")
+            ),
+            None,
+        )
+        if patch is None:
+            continue
+        shape = next(iter(patch.iter(SVG + "path")), None)
+        style = "" if shape is None else shape.get("style") or ""
+        if shape is None or "fill: none" in style or _opacity(style) < CHIP_OPAQUE:
+            continue
+        box = _box(shape.get("d", ""))
+        if box is None:
+            continue
+        moved = _TRANSLATE.search(patch.get("transform") or "")
+        px, py = (float(moved.group(1)), float(moved.group(2))) if moved else (0, 0)
+        label = f"the chip of {name}" + (f" {words!r}" if words else "")
+        found.append(
+            (
+                order,
+                label,
+                (
+                    box[0] + dx + px,
+                    box[1] + dy + py,
+                    box[2] + dx + px,
+                    box[3] + dy + py,
+                ),
+                _fill(style),
+            )
+        )
+    return found
+
+
 def measure(path: pathlib.Path) -> list[Overlap]:
-    """Every plotted point a legend of *path* closes over."""
-    root = ET.parse(path).getroot()
+    """Every plotted point a legend or the chip of a text of *path* closes over."""
+    parser = ET.XMLParser(target=ET.TreeBuilder(insert_comments=True))
+    root = ET.parse(path, parser).getroot()
     glyphs = _glyphs(root)
     nodes = _walk(root)
     frames = _frames(nodes)
-    if not frames:
+    chips = _chips(nodes)
+    if not frames and not chips:
         return []
     parents = {child: parent for parent, *_ in nodes for child in parent}
     found: list[Overlap] = []
-    for element, dx, dy, legend in nodes:
+    for order, (element, dx, dy, legend) in enumerate(nodes):
         if element.tag != SVG + "use" or legend is not None:
             continue
         ref = (element.get(XLINK + "href") or element.get("href") or "").lstrip("#")
         glyph = glyphs.get(ref)
-        if glyph is None:
+        if glyph is None or _tick_mark(element, parents):
             continue
         try:
             x = float(element.get("x", "")) + dx
             y = float(element.get("y", "")) + dy
         except ValueError:
             continue
-        for name, (x0, y0, x1, y1) in frames.items():
+        colour = _fill(element.get("style") or "")
+        plates = [*frames.items()] + [
+            (name, box)
+            for painted, name, box, fill in chips
+            if painted > order and (colour is None or fill != colour)
+        ]
+        for name, (x0, y0, x1, y1) in plates:
             covers = (
                 x + glyph[2] > x0
                 and x + glyph[0] < x1
@@ -265,6 +404,16 @@ def measure(path: pathlib.Path) -> list[Overlap]:
             if covers:
                 found.append(Overlap(path.stem, name, _artist(element, parents), x, y))
     return found
+
+
+def _tick_mark(element: ET.Element, parents: dict[ET.Element, ET.Element]) -> bool:
+    """Whether *element* is a tick mark: inside an ``xtick_N`` or ``ytick_N`` group."""
+    walker = parents.get(element)
+    while walker is not None:
+        if (walker.get("id") or "").startswith(_TICK_GROUPS):
+            return True
+        walker = parents.get(walker)
+    return False
 
 
 def _artist(element: ET.Element, parents: dict[ET.Element, ET.Element]) -> str:
@@ -323,7 +472,7 @@ def main(argv: list[str] | None = None) -> int:
 
     offenders = [o for o in overlaps if _drawing(o.drawing) not in EXEMPTIONS]
     covered = {_drawing(o.drawing) for o in overlaps}
-    stale = sorted(set(EXEMPTIONS) - covered)
+    stale = sorted(k for k in set(EXEMPTIONS) - covered if not is_clip(k))
     if stale:
         print(
             f"::error::{len(stale)} exemption(s) name a figure whose legend no "
@@ -333,16 +482,16 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {name}")
     if offenders:
         print(
-            f"::error::{len(offenders)} plotted point(s) sit under a legend - "
-            "move the legend, or write the figure down in EXEMPTIONS with the "
-            "reason the mark is not a reading:"
+            f"::error::{len(offenders)} plotted point(s) sit under a legend or a "
+            "chip - move the legend or the label, or write the figure down in "
+            "EXEMPTIONS with the reason the mark is not a reading:"
         )
         for overlap in offenders:
             print(f"  {overlap.describe()}")
     if offenders or stale:
         return 1
     print(
-        f"No legend covers a plotted point: {len(files)} drawings, "
+        f"No legend or chip covers a plotted point: {len(files)} drawings, "
         f"{len(EXEMPTIONS)} exempt."
     )
     return 0

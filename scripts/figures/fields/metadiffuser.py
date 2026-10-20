@@ -19,10 +19,10 @@ from ..media import _anim_figure, _render_clip, _translate_str
 from ..theme import (
     CMAP_FIELD,
     COLOR_FG,
-    COLOR_GRID,
     FIELD_INK,
     FIELD_STROKE,
 )
+from ._core import _solid_in_field
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -428,7 +428,7 @@ def animate_fdtd_metadiffuser(output_dir: str) -> None:
                     Polygon(
                         qrd_poly,
                         closed=True,
-                        facecolor=COLOR_GRID,
+                        facecolor=_solid_in_field(ax),
                         edgecolor=COLOR_FG,
                         lw=0.8,
                     )
@@ -439,7 +439,7 @@ def animate_fdtd_metadiffuser(output_dir: str) -> None:
                         (x_l, y1 - 0.023),
                         x_r - x_l,
                         0.023,
-                        facecolor=COLOR_GRID,
+                        facecolor=_solid_in_field(ax),
                         edgecolor=COLOR_FG,
                         lw=0.8,
                     )

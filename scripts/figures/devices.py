@@ -6612,6 +6612,10 @@ def generate_vdi2081_flow_noise(output_dir: str) -> None:
     ax2.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax2.set_axisbelow(True)
     ax2.legend(loc="lower left", fontsize=8.5)
+    # Headroom over the loudest band for the note, which in Spanish runs
+    # back over the 250 Hz mark of the 10 m/s curve when it shares its rows.
+    bottom, top = ax2.get_ylim()
+    ax2.set_ylim(bottom, top + 0.22 * (top - bottom))
     ax2.text(
         0.985,
         0.955,

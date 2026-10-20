@@ -4,8 +4,9 @@
 The continuous-wave capture loop and the running-RMS to dB conversion every
 FDTD clip post-processes its frames with, the weak-field display gain the
 clips that put a loud and a quiet region in the same colour ramp share, the
-loudspeaker drawn on the clips that drive a bore, and the measure-then-slide
-pass that keeps an annotation inside its panel in either language.
+loudspeaker drawn on the clips that drive a bore, the fill of a solid drawn
+into a field, and the measure-then-slide pass that keeps an annotation inside
+its panel in either language.
 """
 
 from __future__ import annotations
@@ -14,6 +15,8 @@ import sys
 from typing import TYPE_CHECKING
 
 import numpy as np
+
+from phonometry._plot.common import theme_fill
 
 from ..theme import COLOR_FG
 
@@ -24,6 +27,23 @@ if TYPE_CHECKING:
     from matplotlib.text import Text
     from matplotlib.transforms import Bbox
     from numpy.typing import NDArray
+
+
+#: How far a solid drawn into a field sits from the page, in CIEDE2000: where
+#: ``COLOR_GRID`` already sat on the dark page.
+_SOLID_DELTA_E = 24.0
+
+
+def _solid_in_field(ax: Axes) -> tuple[float, float, float]:
+    """The fill of a solid drawn into a field: a ground slab, a plate, a body.
+
+    The solids were filled with ``COLOR_GRID``, which is tuned to disappear
+    into the page: on the white one it sat 6.5 CIEDE2000 from it, under the
+    10 a filled shape needs to be seen (F48), while on the dark one it sat
+    24 away. A solid also stands where the field passes through zero, which
+    is the page colour, so it takes the dark page's distance on both pages.
+    """
+    return theme_fill(COLOR_FG, ax, delta_e=_SOLID_DELTA_E)
 
 
 def _cw_beta(scene: Scene, frequency: float) -> float:

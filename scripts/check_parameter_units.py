@@ -1010,7 +1010,7 @@ def _where(obj: object) -> str:
     where = (
         ""
         if path is None
-        else f"{pathlib.Path(path).resolve().relative_to(ROOT)}:{line}"
+        else f"{pathlib.Path(path).resolve().relative_to(ROOT).as_posix()}:{line}"
     )
     _WHERE[id(obj)] = (obj, where)
     return where

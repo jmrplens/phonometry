@@ -712,6 +712,7 @@ _STATED_FLAGS = {
     "phonometry.signals._envelope.EnvelopeResult.antialias": _CALLER,
     "phonometry.signals._envelope.EnvelopeSpectrumResult.remove_dc": _CALLER,
     "phonometry.signals.multitaper.MultitaperSpectralDensityResult.adaptive": _CALLER,
+    "phonometry.simulation.compute.Compute.fallback": _CALLER,
     "phonometry.simulation.elastic_fdtd.ElasticFDTDResult.obstacle_mask": _CALLER,
     "phonometry.simulation.fdtd.FDTDResult.obstacle_mask": _CALLER,
     "phonometry.speech.objective_intelligibility.STOIResult.extended": _CALLER,

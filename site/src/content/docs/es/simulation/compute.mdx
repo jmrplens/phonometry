@@ -1,0 +1,503 @@
+---
+title: "Dónde se calcula una simulación: NumPy, CuPy y torch"
+description: "Calcular las simulaciones FDTD acústica y elástica con NumPy, en una GPU de NVIDIA con CuPy o con PyTorch: la petición Compute, use() y PHONOMETRY_COMPUTE, la vuelta a NumPy, la procedencia que registra cada resultado, lo que se promete en cada dispositivo y las instantáneas diezmadas."
+references:
+  - type: web
+    organization: "Consortium for Python Data API Standards"
+    title: "Python array API standard"
+    url: "https://data-apis.org/array-api/latest/"
+    note: "Las operaciones con las que las simulaciones FDTD hacen avanzar sus campos una vez construidas, que es lo que permite que un mismo código de avance calcule con NumPy, CuPy y torch."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../components/SeeAlso.astro';
+
+Una ejecución FDTD es un puñado de operaciones con arrays repetidas miles de
+veces sobre campos de tamaño fijo, que es justo el trabajo para el que está
+hecha una GPU. Las dos simulaciones de `phonometry.simulation`, la acústica
+de `FDTD2D` detrás de `fdtd_simulation` y la elástica de `ElasticFDTD2D`
+detrás de `elastic_fdtd_simulation`, calculan con NumPy por defecto, y en una
+GPU de NVIDIA con CuPy o con PyTorch (en una CPU, una GPU de NVIDIA o el MPS
+de Apple) cuando se les pide. Es un mismo código de avance para todos: cada
+simulación construye sus mapas en el anfitrión (la memoria de la CPU) con
+NumPy en float64 al crearse, los pasa al dispositivo una sola vez y, a partir
+de ahí, solo toca sus campos con operaciones del estándar de arrays de
+Python (el *array API standard*), que implementan las tres bibliotecas.
+
+Esta página explica cómo pedir un dispositivo, qué hay que instalar para cada
+uno, cómo elige su dispositivo un script entero o un proceso de trabajo, qué
+pasa cuando el dispositivo no está, cómo registra un resultado dónde se
+calculó y qué promete la biblioteca sobre los números en cada dispositivo. La
+física, las fuentes y los contornos son los mismos en todos; se explican en
+[Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/) y en
+[Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/).
+
+## 1. Pedir un dispositivo: `Compute`
+
+Un registro `Compute` dice dónde avanzan los campos, con qué `dtype` y si la
+ejecución puede volver a NumPy:
+
+| Campo | Valores | Por defecto |
+|---|---|---|
+| `device` | `"cpu"` (NumPy), `"cupy"` (una GPU de NVIDIA con CuPy), `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` (Apple silicon) | `"cpu"` |
+| `device_index` | qué GPU, para `"cupy"` y `"torch:cuda"` | `0` |
+| `dtype` | `"float64"` o `"float32"` | `"float64"` |
+| `fallback` | calcular con NumPy, con un aviso, cuando el dispositivo no está disponible, en lugar de lanzar un error | `False` |
+
+El registro es una petición. Construirlo no importa ni sondea nada, así que un
+script que nombra una GPU se puede escribir y comprobar en un portátil que no
+la tiene; la simulación comprueba la petición al construirse. Una petición
+que no puede significar nada se rechaza en el acto con `ValueError`:
+`"torch:mps"` en float64 (MPS no tiene float64), un índice en un dispositivo
+que solo tiene una instancia (`"cpu"`, `"torch:cpu"` y `"torch:mps"`) y
+`fallback=True` en `"cpu"`, que ya es el destino de la vuelta.
+
+```python
+from phonometry import simulation
+
+print(simulation.Compute())
+# Compute(device='cpu', device_index=0, dtype='float64', fallback=False)
+request = simulation.Compute(device="cupy", device_index=1, dtype="float32")
+print(request.device, request.device_index, request.dtype)   # cupy 1 float32
+try:
+    simulation.Compute(device="torch:mps")
+except ValueError as error:
+    print(error)   # device 'torch:mps' needs dtype='float32': MPS has no float64
+```
+
+`FDTD2D`, `ElasticFDTD2D`, `ElasticFDTD2D.from_regions` y las dos funciones
+de simulación lo toman como `compute=`:
+
+```py
+gpu = simulation.Compute(device="cupy")
+sim = simulation.FDTD2D(343.0, 0.01, shape=(200, 300), compute=gpu)
+res = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    probes=[(200, 100)],
+    compute=gpu,
+)
+```
+
+Una ejecución en float32 no necesita GPU: con NumPy reduce a la mitad la
+memoria que ocupan cada campo y cada instantánea. La sección 6 dice cuánto
+pueden apartarse sus números de los de una ejecución en float64.
+
+```python
+light = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    probes=[(200, 100)],
+    snapshot_every=50,
+    compute=simulation.Compute(dtype="float32"),
+)
+print(light.snapshots.dtype, light.pressures.dtype)   # float32 float64
+```
+
+Las instantáneas conservan el `dtype` con el que avanzó la ejecución. Las
+historias de las sondas (aquí `pressures`, y `signals` en un resultado
+elástico) son float64 sea cual sea: cada muestra se convierte una sola vez al
+salir del dispositivo.
+
+## 2. Qué hay que instalar para cada dispositivo
+
+| Dispositivo | Qué instalar | Notas |
+|---|---|---|
+| `"cpu"` | nada: NumPy es una dependencia de phonometry | la referencia con la que se compara cualquier otro dispositivo |
+| `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` | `pip install phonometry[torch]` | torch 2.3.0 o posterior con array-api-compat 1.5.1 o posterior; `[full]` no lo incluye |
+| `"cupy"` | el wheel de CuPy para tu versión de CUDA, como `pip install cupy-cuda12x` o `pip install cupy-cuda13x` | no es un extra de phonometry, porque el wheel tiene que corresponder a la CUDA que admite tu controlador |
+
+`[full]` deja fuera torch a propósito: los wheels de torch que sirve PyPI para
+Linux traen gigabytes de bibliotecas de CUDA. En una máquina Linux sin GPU de
+NVIDIA, toma torch del índice de CPU de PyTorch y esas bibliotecas se quedan
+fuera:
+
+```bash
+pip install phonometry[torch] --extra-index-url https://download.pytorch.org/whl/cpu
+```
+
+`"torch:mps"` necesita un Mac con Apple silicon y calcula solo en float32.
+CuPy necesita una GPU de NVIDIA y su controlador; la prueba de la sección 6 se
+hizo con `cupy-cuda13x` 14.2.0, con el runtime de CUDA 13.2, sobre un
+controlador que admite CUDA 13.3. Una biblioteca que falta se notifica al
+construir una simulación, no al importar phonometry: el camino de NumPy no
+importa ni CuPy ni torch.
+
+## 3. Un dispositivo para todo un script: `use()` y `PHONOMETRY_COMPUTE`
+
+Pasar `compute=` en cada llamada es explícito, y es lo que debe hacer el
+código construido sobre phonometry. Un script o un cuaderno pueden nombrar el
+dispositivo una sola vez, y la ubicación que recibe una simulación es la
+primera de estas que diga algo:
+
+1. el argumento `compute=` de la clase o de la función de simulación;
+2. el bloque `use()` más interior en el que se ejecuta la llamada;
+3. la variable de entorno `PHONOMETRY_COMPUTE`;
+4. NumPy en float64.
+
+La ubicación se resuelve al construir la simulación, con `FDTD2D(...)`,
+`ElasticFDTD2D(...)`, `ElasticFDTD2D.from_regions(...)` o una de las
+funciones de simulación, y la simulación conserva la que recibió: salir de un
+bloque `use()` no mueve una simulación construida dentro de él.
+
+```python
+with simulation.use(simulation.Compute(dtype="float32")):
+    inside = simulation.fdtd_simulation(
+        343.0, 0.01, 1.0e-3, shape=(100, 150),
+        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
+        probes=[(100, 50)],
+    )
+    pinned = simulation.fdtd_simulation(
+        343.0, 0.01, 1.0e-3, shape=(100, 150),
+        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
+        probes=[(100, 50)],
+        compute=simulation.Compute(),
+    )
+print(inside.provenance.dtype, pinned.provenance.dtype)   # float32 float64
+```
+
+`PHONOMETRY_COMPUTE` escribe una ubicación como texto,
+`device[:index][,option...]`, con las opciones `float32`, `float64` y
+`fallback`: `cupy`, `cupy:1`, `torch:cuda:1,fallback`, `torch:mps,float32` o
+`cpu,float32`. Los espacios alrededor de las partes se ignoran. La variable se
+lee cada vez que se resuelve una ubicación y nunca al importar, así que se
+puede fijar después de `import phonometry`. Un valor que la gramática no
+describe, una opción repetida, dos `dtype` o una petición que `Compute`
+rechaza (`torch:mps` sin `float32`) lanzan `ValueError` nombrando la variable
+al construir la primera simulación.
+
+```bash
+PHONOMETRY_COMPUTE=cupy:1,fallback python study.py
+```
+
+**Hilos y procesos.** `use()` guarda su registro en una variable de contexto.
+Que un hilo o un proceso nuevo lo vea depende de cómo se inicie, así que pasa
+a cada hilo o proceso de trabajo su ubicación con `compute=` o con
+`PHONOMETRY_COMPUTE`, nunca con un bloque `use()` alrededor del código que lo
+inicia:
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+
+single = simulation.Compute(dtype="float32")
+
+
+def pulse_run(half_width_s):
+    return simulation.fdtd_simulation(
+        343.0, 0.01, 1.0e-3, shape=(100, 150),
+        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=half_width_s)],
+        probes=[(100, 50)],
+        compute=single,
+    )
+
+
+with ThreadPoolExecutor(max_workers=2) as pool:
+    runs = list(pool.map(pulse_run, (2.0e-4, 3.0e-4)))
+print([run.provenance.dtype for run in runs])   # ['float32', 'float32']
+```
+
+## 4. Cuando el dispositivo no está: `fallback`
+
+Sin `fallback`, construir una simulación en un dispositivo que no se puede
+usar lanza un error, y el mensaje dice por qué:
+
+- `ComputeImportError`, una subclase de `ImportError`, cuando la biblioteca
+  del dispositivo no está instalada (`"cupy"` sin CuPy, o un dispositivo
+  `"torch:..."` sin el extra `[torch]`) o está instalada y falla al
+  importarse, como le pasa a CuPy sin las bibliotecas de CUDA que carga; el
+  mensaje lleva el motivo que dio la importación y dice cuál de los dos casos
+  fue;
+- `ComputeDeviceError`, una subclase de `RuntimeError`, cuando la biblioteca
+  está y el dispositivo no: ningún dispositivo CUDA, un índice más allá de las
+  GPU presentes, ningún MPS en la máquina, o cualquier dispositivo salvo
+  `"cpu"` en Pyodide. Un dispositivo que se declara disponible recibe además
+  un cálculo pequeño, una vez por proceso, y se rechaza igual si falla: el MPS
+  de una máquina virtual de macOS no puede reservar memoria, y CuPy sin su
+  compilador de CUDA no puede construir un núcleo.
+
+Con `fallback=True` no se lanza ninguno de los dos. La ejecución avisa con
+`ComputeFallbackWarning`, un `PhonometryWarning` cuyo mensaje lleva el motivo,
+y calcula con NumPy en el `dtype` pedido. El aviso señala la línea de tu
+código que construyó la simulación o llamó a la función de simulación, nunca
+una línea dentro de la biblioteca, y la procedencia del resultado dice
+`"cpu"`, de modo que una ejecución que volvió a NumPy no puede pasar después
+por una ejecución en GPU.
+
+```py
+request = simulation.Compute(device="cupy", fallback=True)
+res = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    probes=[(200, 100)],
+    compute=request,
+)
+# En una máquina sin CuPy:
+# ComputeFallbackWarning: device 'cupy' needs CuPy, which is not installed
+# (No module named 'cupy'); install the wheel for your CUDA version, e.g.
+# pip install cupy-cuda12x; running on NumPy instead (fallback=True)
+print(res.provenance.device)   # cpu
+```
+
+Un trabajo por lotes que nunca debe volver a NumPy en silencio convierte el
+aviso en un error, y la ejecución se detiene donde habría vuelto:
+
+```py
+import warnings
+
+warnings.simplefilter("error", simulation.ComputeFallbackWarning)
+```
+
+## 5. Dónde se calculó una ejecución: `provenance`
+
+Todo `FDTDResult` y todo `ElasticFDTDResult` llevan un `RunProvenance`, y una
+simulación da el mismo registro como `sim.provenance`:
+
+| Campo | Qué guarda |
+|---|---|
+| `device`, `device_index`, `dtype` | la ubicación en la que avanzaron los campos, tras la posible vuelta a NumPy |
+| `numpy_version` | la versión de NumPy donde se calculó la ejecución |
+| `array_library` | la biblioteca de arrays y su versión (`"cupy 14.2.0"`, `"torch 2.14.1"`), `None` con NumPy |
+| `cuda_runtime` | el runtime de CUDA que usa la biblioteca de arrays (`"13.2"`), `None` fuera de un dispositivo CUDA |
+| `cuda_driver_api` | la versión de CUDA que admite el controlador de la GPU (`"13.3"`), que solo da CuPy; no es la versión propia del controlador de NVIDIA |
+| `gpu` | el nombre de la GPU (`"Apple MPS"` en MPS), `None` fuera de una GPU |
+| `host` | la máquina a la que fue la ejecución, `None` para esta |
+
+```python
+print(light.provenance.device, light.provenance.dtype, light.provenance.array_library)
+# cpu float32 None
+```
+
+Una ejecución en CuPy registra la tarjeta y las versiones con las que avanzó:
+
+```py
+gpu_run = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    compute=simulation.Compute(device="cupy"),
+)
+print(gpu_run.provenance)
+# En la máquina de la prueba de la sección 6:
+# RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
+#     numpy_version='2.5.3', array_library='cupy 14.2.0', cuda_runtime='13.2',
+#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060')
+```
+
+Los campos de una simulación viven en su dispositivo. `sim.p`, `sim.vx` y
+`sim.vy` de un `FDTD2D`, los cinco arrays de esfuerzo y velocidad de un
+`ElasticFDTD2D`, su presión sintética `sim.p` y `sim.collocated(field)` son
+arrays de NumPy con NumPy y arrays propios de la biblioteca del dispositivo en
+los demás casos. `sim.host_field(name)` devuelve una copia en NumPy de un
+campo almacenado en cualquier dispositivo, y `sim.run(...)` devuelve sus
+fotogramas de instantáneas en el anfitrión. Lo que devuelve una función de
+simulación ya está en el anfitrión: un resultado guarda arrays de NumPy sea
+cual sea el dispositivo con el que se calculó. Con CuPy y un `device_index`
+distinto de 0, una escritura en un campo desde fuera de la simulación, como
+`sim.p[10, 10] = 1.0`, se ejecuta en el dispositivo actual de CuPy, así que
+hazla dentro de `with cupy.cuda.Device(i):`, con `i` el índice de la
+simulación.
+
+```python
+sim = simulation.FDTD2D(343.0, 0.01, shape=(100, 150), compute=simulation.Compute(dtype="float32"))
+sim.add_source(simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4))
+frames = sim.run(200, snapshot_every=50, snapshot_decimation=2)
+field = sim.host_field("p")
+print(frames.shape, frames.dtype, type(field).__name__, sim.provenance.device)
+# (5, 50, 75) float32 ndarray cpu
+```
+
+## 6. Qué se promete en cada dispositivo
+
+La referencia es NumPy en float64, y cada dispositivo se compara con ella
+sobre la misma matriz de escenarios: siete ejecuciones pequeñas, una por cada
+capacidad de las simulaciones (una esponja absorbente, un borde de impedancia,
+un obstáculo con un mapa de amortiguamiento y una fuente muestreada, una
+fuente de onda plana, una sonda de contorno, un medio elástico por capas bajo
+una superficie libre, y fuentes de fuerza elásticas alrededor de un
+obstáculo), sobre mallas de 32 por 40 a 64 por 48 celdas avanzadas entre 60 y
+120 pasos, con instantáneas diezmadas en dos de ellas.
+
+**NumPy, float64: idéntico bit a bit.** Las mismas entradas dan salidas
+idénticas bit a bit en la misma plataforma: sin números aleatorios y con
+todas las operaciones en un orden fijo. El camino de NumPy se compara además,
+bit a bit, con una copia congelada de las dos simulaciones tal como eran antes
+de poder calcular en otro sitio, de modo que los demás dispositivos no le han
+costado nada a los números de NumPy.
+
+**CuPy, float64: campos idénticos bit a bit, según lo medido.** En una NVIDIA
+GeForce RTX 4060 con el controlador de NVIDIA 610.57.04, CuPy 14.2.0
+(`cupy-cuda13x`, runtime de CUDA 13.2, API del controlador 13.3) y Python 3.13,
+todos los campos, fotogramas de instantáneas, campos colocalizados y fasores de
+contorno de los siete escenarios fueron idénticos bit a bit a los de NumPy. La
+energía, una suma sobre toda la malla, difirió como mucho en 1,79×10⁻¹⁶
+relativo en esas siete ejecuciones, porque la GPU suma las celdas en otro
+orden; es el peor valor de la matriz, y una suma sobre una malla más grande
+puede diferir más. La medida está registrada en `gpu-parity.lock`, en la raíz
+del repositorio, con el controlador de NVIDIA, las versiones de CUDA, la imagen
+de contenedor en la que se hizo y una huella de las dos simulaciones, de sus
+backends y de la matriz de escenarios. La CI comprueba esa huella en cada pull
+request, así que una simulación que cambia sin una prueba nueva en GPU falla.
+La promesa es esa única medida: el fichero registra una sola prueba, con la
+tarjeta, el controlador y las versiones de arriba, y otra GPU, otro controlador
+u otra versión de CuPy solo quedan cubiertos cuando el mantenedor hace con
+ellos una prueba nueva (`make gpu-parity`) y la registra en el fichero.
+
+**torch, y NumPy en float32: dentro de una cota publicada sobre la matriz de
+escenarios.** La cota es la mayor diferencia relativa respecto de la
+ejecución de NumPy en float64, $\max|a - b| / \max|b|$ con $b$ el número de
+NumPy, sobre todos los números que registra un escenario: los campos, los
+fotogramas de instantáneas, la energía, las velocidades colocalizadas y los
+fasores de contorno.
+
+| Dispositivo | dtype | Cota | Dónde se mide |
+|---|---|---|---|
+| `cpu` (NumPy) | float32 | 3×10⁻⁶ | todos los niveles de instrucciones de CPU, con NumPy 2.0.2 y 2.5.3 |
+| `torch:cpu` | float64 | 9×10⁻¹⁶ | todos los niveles de instrucciones de CPU, con torch 2.3.0 y 2.14.1 |
+| `torch:cpu` | float32 | 2×10⁻⁶ | todos los niveles de instrucciones de CPU, con torch 2.3.0 y 2.14.1 |
+| `torch:mps` | float32 | aún sin publicar | el trabajo de CI `mps`, en un runner de macOS |
+| `torch:cuda` | float64, float32 | sin medir | ningún runner de CI tiene una GPU de NVIDIA |
+
+Cada cota es el peor valor sobre la matriz de escenarios, no una promesa
+sobre cualquier ejecución. Float32 redondea cada paso, y su redondeo crece
+con el número de pasos, así que una ejecución más larga que las de la matriz
+puede diferir más. Medido fuera de la matriz, en la malla de 200 por 300
+celdas de los ejemplos anteriores, con la misma celda de fuente y la misma
+sonda, avanzada 8085 pasos (0,1 s), la presión en float32 en la sonda
+difirió de la de la ejecución en float64 en 8,0×10⁻⁶ relativo con un
+`CWSource` de 1 kHz y en 4,0×10⁻⁶ con el pulso gaussiano, igual con NumPy que
+con `torch:cpu`.
+
+Cada cota de CPU es el peor valor medido sobre todos los niveles de
+instrucciones de CPU que despacha la biblioteca (DEFAULT, AVX2 y AVX512 en
+torch; el nivel base, AVX2 y AVX512 en NumPy), con su versión mínima y con la
+fijada, redondeado hacia arriba a una cifra significativa, y solo se sube a
+partir de una medida nueva. Todo trabajo de CI que ejecuta los tests de
+simulación exige su cota a NumPy en float32, y el trabajo `array-api` exige
+las suyas a toda ejecución en `torch:cpu`. En MPS la cota se mide en la CI
+sobre un runner de macOS y se publica aquí una vez medida; desde entonces el
+trabajo `mps` le exige esa cota a toda ejecución, y hasta entonces no se
+promete ningún número para MPS. `torch:cuda` avanza con el mismo código que
+`torch:cpu`, pero no se ha medido ninguna ejecución en él, así que no tiene
+cota.
+
+**CuPy en float32: aún sin medir.** La prueba en la GPU solo cubre float64,
+así que una ejecución en float32 con CuPy no tiene cota publicada hasta que
+una prueba en la GPU la mida. Como toda ejecución en float32, redondea cada
+paso a float32, unas siete cifras significativas.
+
+**Las sumas de la sonda de contorno.** Las sumas DFT acumuladas de una sonda
+de contorno (sección 4 de la guía acústica) añaden un término por paso durante
+miles de pasos, y el redondeo de una suma crece con su número de términos. Se
+acumulan en float64 en todo dispositivo que tenga float64, también cuando los
+campos avanzan en float32; en MPS, que no lo tiene, son float32 con suma
+compensada (de Neumaier). El trabajo `mps` ejecuta en el propio MPS una
+comprobación del contorno en float32 de 3000 pasos, así que un compilador que
+reordene la suma compensada falla ahí.
+
+## 7. Registrar menos: `snapshot_decimation`
+
+En una malla grande, las instantáneas son la mayor parte de lo que devuelve
+una ejecución: un fotograma en float64 de una malla de 400 por 600 celdas
+ocupa 1,9 MB, y una ejecución guarda uno cada `snapshot_every` pasos.
+`snapshot_decimation=d` conserva una de cada `d` celdas en cada eje, empezando
+por la primera, de modo que un fotograma tiene $\lceil n_y/d \rceil$ por
+$\lceil n_x/d \rceil$ celdas: `d = 2` guarda una cuarta parte de las celdas y
+`d = 4`, la dieciseisava parte. En una GPU el campo se recorta primero en el
+dispositivo, y solo las celdas conservadas pasan al anfitrión.
+
+La opción tiene el mismo nombre y la misma regla en todas partes:
+`fdtd_simulation(..., snapshot_every=, snapshot_decimation=)`,
+`ElasticRecording(snapshot_every=, snapshot_decimation=)` y el `run()` de las
+dos simulaciones. Toma un número entero de 1 o más; un booleano, un texto o un
+array lanzan `TypeError`, y un número menor que 1 o no entero, `ValueError`.
+El resultado lo registra como `snapshot_decimation`, y
+`.plot(kind="snapshot")` dibuja cada muestra sobre el bloque de `d` por `d`
+celdas del que se tomó, con los ejes sobre el dominio completo.
+
+```python
+decimated = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    snapshot_every=10,
+    snapshot_decimation=4,
+)
+print(decimated.snapshots.shape, decimated.snapshot_decimation)   # (17, 50, 75) 4
+decimated.plot(kind="snapshot", language="es")
+```
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+Dónde avanzan las dos simulaciones FDTD: NumPy en float64 o float32, CuPy en
+una GPU de NVIDIA y torch en una CPU, una GPU de NVIDIA o el MPS de Apple,
+elegido por llamada con `compute=`, por bloque con `use()` o por proceso con
+`PHONOMETRY_COMPUTE`; los rechazos de una petición que no se puede atender y
+la vuelta a NumPy con `ComputeFallbackWarning`; el `RunProvenance` que
+registra cada resultado; lo que se promete en cada dispositivo, bit a bit con
+NumPy en float64, bit a bit según lo medido con CuPy en float64 y dentro de
+una cota publicada sobre la matriz de escenarios con torch en la CPU y con
+NumPy en float32; y las instantáneas diezmadas.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Una simulación avanza en un solo dispositivo: una ejecución no se reparte
+entre varias GPU, y `device_index` elige una de ellas. Las demás bibliotecas
+de arrays (JAX, MLX, dpnp) no son backends, y la GPU ejecuta la misma
+secuencia de operaciones estándar que NumPy, sin núcleos fusionados ni
+compilados, que es lo que mantiene los campos de CuPy idénticos bit a bit.
+Esta página no publica tiempos: una GPU paga un coste fijo por cada operación
+que lanza, así que solo ayuda en mallas lo bastante grandes para amortizarlo.
+CuPy en float32 y torch en CUDA aún no tienen cota medida, y ninguna cota
+cubre una ejecución más larga o más grande que las de la matriz de
+escenarios. El resto de phonometry calcula solo con NumPy.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/):
+  la simulación acústica, sus fuentes, sondas y contornos, y cómo dimensionar
+  una ejecución.
+- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
+  la simulación elástica, que toma el mismo `compute=`.
+- Referencia de la API: [`simulation.compute`](/phonometry/es/reference/api/simulation/compute/),
+  [`simulation.fdtd`](/phonometry/es/reference/api/simulation/fdtd/),
+  [`simulation.elastic_fdtd`](/phonometry/es/reference/api/simulation/elastic-fdtd/).
+
+</SeeAlso>
+
+## Respuestas rápidas
+
+### ¿Cambia una GPU el resultado de una simulación FDTD?
+
+Con CuPy en float64, según lo medido con la tarjeta y las versiones de la
+sección 6, no: todos los campos son idénticos bit a bit a los de NumPy, y solo
+la energía total, una suma sobre la malla, difiere, como mucho en
+1,79×10⁻¹⁶ relativo sobre la matriz de escenarios de la sección 6; una suma
+sobre una malla más grande puede diferir más. Con torch el resultado
+coincide con NumPy dentro de la cota publicada para el dispositivo y el
+`dtype`, 9×10⁻¹⁶ relativo en una CPU en float64 sobre la misma matriz. Una
+ejecución en float32 difiere de una en float64 por el redondeo de float32,
+que crece con el número de pasos: con NumPy, como mucho en 3×10⁻⁶ relativo
+sobre la matriz, y en 8,0×10⁻⁶ en una ejecución medida de 8085 pasos.
+
+### ¿Cómo calculo una simulación FDTD en una GPU?
+
+Instala CuPy para tu versión de CUDA (`pip install cupy-cuda12x`) o el extra
+`[torch]`, y pasa `compute=simulation.Compute(device="cupy")` o
+`device="torch:cuda"` al motor (`FDTD2D` o `ElasticFDTD2D`) o a la función de
+simulación. Para llevar todo un script, envuélvelo en
+`with simulation.use(...)` o fija `PHONOMETRY_COMPUTE=cupy` en su entorno.
+`result.provenance` dice dónde se calculó cada ejecución.
+
+### ¿Por qué se calculó con NumPy si pedí una GPU?
+
+Porque la petición decía `fallback=True` y el dispositivo no se podía usar:
+faltaba la biblioteca o no se pudo importar, o el dispositivo no estaba o
+falló su primer cálculo pequeño. La ejecución avisó con
+`ComputeFallbackWarning`, cuyo mensaje da el motivo, y
+`result.provenance.device` dice `"cpu"`. Sin `fallback=True`, la misma
+petición lanza en su lugar `ComputeImportError` o `ComputeDeviceError`.

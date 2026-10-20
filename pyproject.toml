@@ -110,6 +110,10 @@ classifiers = [
 #   svglib 0.9.0  0.8 is Python 2 code
 #   soundfile 0.12.0   the first wheel that carries its own libsndfile; 0.11
 #                 needs one installed on the system
+#   torch 2.3.0   2.2.0 to 2.2.2 are built against NumPy 1 and cannot read
+#                 an array of NumPy 2 ("Numpy is not available"); 2.1 has no
+#                 wheel for Python 3.12
+#   array-api-compat 1.5.1  1.5 refuses a Python scalar in where()
 dependencies = [
     "numpy>=2.0.2",
     "scipy>=1.14.0",
@@ -125,6 +129,11 @@ report = ["reportlab>=4.0.4", "svglib>=0.9.0"]
 # python-soundfile, whose wheel bundles libsndfile (LGPL-2.1, dynamically
 # linked).
 audio = ["soundfile>=0.12.0"]
+# The torch backend of the FDTD engines (phonometry.simulation.Compute): CPU,
+# CUDA or Apple MPS. CuPy is not an extra: its wheel depends on the CUDA
+# version, and no CI job can measure a floor for it; the guide names the
+# version the GPU proof ran on.
+torch = ["torch>=2.3.0", "array-api-compat>=1.5.1"]
 full = ["numba>=0.60.0", "matplotlib>=3.10.7", "reportlab>=4.0.4", "svglib>=0.9.0", "soundfile>=0.12.0"]
 
 [project.urls]

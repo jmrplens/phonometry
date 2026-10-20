@@ -162,6 +162,32 @@ res = simulation.elastic_fdtd_simulation(
 t = res.times[1:]
 t1, t2 = (t[np.abs(res.signals[k, 0, 1:]).argmax()] for k in range(2))
 print(round(0.24 / (t2 - t1)))    # 6424  c_P = sqrt((lambda+2mu)/rho) = 6450.5
+print(res.provenance.device, res.provenance.dtype)   # cpu float64
+```
+
+La ejecución se calculó con NumPy en float64, como registra
+`res.provenance`. El esquema elástico toma el mismo `compute=` que el
+acústico, y también `ElasticFDTD2D.from_regions`: el bloque anterior calcula
+en una GPU de NVIDIA con CuPy con un argumento más. En un dispositivo así los
+campos propios de la simulación, `sim.p` y `sim.collocated(field)` incluidos,
+son arrays de ese dispositivo, y `sim.host_field(name)` da una copia en NumPy;
+un resultado está en el anfitrión (la memoria de la CPU) sea cual sea el
+dispositivo con el que se calculó. [Dónde se calcula una simulación](/phonometry/es/simulation/compute/)
+trata los dispositivos, qué hay que instalar para cada uno y qué se promete
+sobre los números en cada uno.
+
+```py
+on_gpu = simulation.elastic_fdtd_simulation(
+    ALUMINUM.c_p, ALUMINUM.c_s, 0.002, 1.1e-4, rho=ALUMINUM.rho,
+    shape=(501, 501),
+    sources=[simulation.ExplosionSource(
+        ix=250, iy=250,
+        waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=w).value)],
+    recording=simulation.ElasticRecording(
+        probes=[(350, 250), (470, 250)], probe_fields=("p",)),
+    compute=simulation.Compute(device="cupy"),
+)
+print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, y el nombre de la tarjeta
 ```
 
 ## 2. Fluidos dentro del esquema elástico
@@ -835,6 +861,9 @@ observable en los campos pero no tiene aquí oráculo dedicado en forma cerrada.
   esquema acústico que esta guía extiende, con la malla escalonada, la
   cota de Courant y la maquinaria de fuentes, sondas y contornos que ambos
   comparten.
+- [Dónde se calcula una simulación](/phonometry/es/simulation/compute/): los
+  dos esquemas en una GPU de NVIDIA con CuPy o con PyTorch, y lo que se
+  promete sobre sus números.
 - [Predicción del aislamiento de paneles](/phonometry/es/buildings/design/panel-sound-insulation/):
   las formas cerradas de la ley de masas y la coincidencia; la ejecución de
   la placa sumergida del §7 es su contraste de onda completa.

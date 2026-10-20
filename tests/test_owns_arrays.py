@@ -585,7 +585,7 @@ def test_a_run_writes_its_frames_into_one_array(
     """
     sim = engine()
     with _traced_peak() as traced:
-        frames = sim.run(100, record_every=1)  # type: ignore[attr-defined]
+        frames = sim.run(100, snapshot_every=1)  # type: ignore[attr-defined]
     peak = traced[0]
     assert frames.shape[0] == 101
     assert peak - frames.nbytes < frames.nbytes / 2, (peak, frames.nbytes)
@@ -755,6 +755,18 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
                 snapshots=None,
                 snapshot_times=None,
                 obstacle_mask=None,
+                snapshot_decimation=1,
+                provenance=simulation.RunProvenance(
+                    host=None,
+                    device="cpu",
+                    device_index=0,
+                    dtype="float64",
+                    numpy_version=np.__version__,
+                    array_library=None,
+                    cuda_runtime=None,
+                    cuda_driver_api=None,
+                    gpu=None,
+                ),
             ),
             "pressures",
         ),

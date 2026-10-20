@@ -2,7 +2,7 @@
 
 # Numbers and data
 
-This page governs how phonometry compares the numbers it computes and how it holds and publishes data: equality with zero and comparison with a printed limit, the guards a scalar, a count or a signal passes before it is read, the arrays a result keeps, units, reference values and the precision a numerical setting is sized to, and the citations and cells of the packaged catalogues. Read it before you write or change code in `src/` that compares a computed value, validates an argument, stores an array, converts a unit or transcribes a printed number, and before you edit a catalogue data file. Examples that import from `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)). Where a unit goes in a name is on [Naming](naming.md), and which error class a refusal raises is on [API shape](api.md).
+This page governs how phonometry compares the numbers it computes and how it holds and publishes data: equality with zero and comparison with a printed limit, the guards a scalar, a count or a signal passes before it is read, the arrays a result keeps, units, reference values and the precision a numerical setting is sized to, the citations and cells of the packaged catalogues, and the operations an FDTD engine steps its fields with. Read it before you write or change code in `src/` that compares a computed value, validates an argument, stores an array, converts a unit or transcribes a printed number, before you edit a catalogue data file, and before you change a method of an FDTD engine. Examples that import from `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)). Where a unit goes in a name is on [Naming](naming.md), and which error class a refusal raises is on [API shape](api.md).
 
 ## Comparing computed values
 
@@ -551,3 +551,34 @@ key renamed in src/phonometry/<domain>/data/*.json only
 **Enforced by:** `tests/test_published_catalogue_fingerprint.py::test_every_published_row_is_the_baseline_carried_through_the_changes`, `make catalogue-data`, `make catalogue-schema`
 
 **Exceptions.** The pieces: the key in `src/phonometry/**/data/*.json`, the column spec in `scripts/generate_catalogue_data.py`, the regenerated site catalogues and published schema, `tests/data/published_catalogues/baseline.json`, and the Spanish catalogue strings in `site/src/data/catalogue-es.json` ([P5](prose.md#p5)).
+
+## Fields an engine steps
+
+<a id="x21"></a>
+### X21. Touch an engine's field only with Array API standard operations
+
+**Why.** The FDTD engines step on NumPy, CuPy and torch from one code. A NumPy-only call on a field (`div.fill(0.0)`, `np.divide(where=, out=)`, two index arrays at once) works on NumPy and breaks on a GPU, or quietly copies the field to the host and back every step.
+
+**Do**
+
+```python
+import numpy as xp  # stands for the engine's namespace: NumPy's, CuPy's or torch's
+
+p = xp.zeros((4, 5))
+div = xp.ones((4, 5))
+flat_index = xp.asarray([0, 7, 13])
+
+div[...] = 0.0
+values = xp.take(xp.reshape(p, (-1,)), flat_index)
+```
+
+**Don't**
+
+```py
+div.fill(0.0)
+values = p[rows, cols]
+```
+
+**Enforced by:** `CI: FDTD engines on array-api-strict and torch (CPU)`, `tests/simulation/test_gpu_parity_lock.py`
+
+**Exceptions.** The maps are built on the host in NumPy float64 when the engine is constructed and handed to the backend once; that code may use any NumPy call. Every method that reads or writes a field after that uses only the standard, in the order of operations the NumPy path had, with no fused kernels. The `array-api` job steps every scenario of `scripts/engine_scenarios.py` on array-api-strict, which refuses a call outside the standard and a NumPy call on a device array, and the lock test fails when an engine file changes without a new CuPy proof (`make gpu-parity` on a GPU).

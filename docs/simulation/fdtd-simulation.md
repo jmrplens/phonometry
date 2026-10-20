@@ -15,12 +15,13 @@ pressure-velocity scheme (Eqs. 4.11-4.12), the Courant stability condition
 (Eqs. 4.13-4.14), rigid boundaries as zero normal face velocity (Eq. 4.32)
 and the frequency-independent real-impedance boundary (Eqs. 4.33-4.35).
 
-The solver is **deterministic by design**: float64 arithmetic, no random
-numbers and single-threaded numpy stepping, so the same inputs produce
-bit-identical outputs on the same platform. It is the engine behind the FDTD
-animations of this documentation, promoted to a public API with sources,
-pressure probes, rasterised obstacles, per-side boundary conditions and a
-frozen result object.
+The solver is **deterministic by design**: no random numbers and every
+operation in a fixed order, so on NumPy in float64 the same inputs produce
+bit-identical outputs on the same platform, and on CuPy the fields come out
+bit-identical to NumPy's on the GPU they were measured on. It is the engine
+behind the FDTD animations of this documentation, promoted to a public API
+with sources, pressure probes, rasterised obstacles, per-side boundary
+conditions and a frozen result object.
 
 Here is one of those animations, and it is a fair advertisement for what the
 rest of this page builds. Nothing in it is drawn: the colonnade is a boolean
@@ -90,7 +91,24 @@ res = simulation.fdtd_simulation(
 )
 print(res.size)                  # (3.0, 2.0)  metres
 print(round(res.dt * 1e6, 2))    # 12.37  microseconds (CN = 0.6)
+print(res.provenance.device, res.provenance.dtype)   # cpu float64
 res.plot()                       # probe pressure histories (figure in §3)
+```
+
+The run stepped on NumPy in float64, and `res.provenance` records that. The
+same call steps on an NVIDIA GPU through CuPy, or on PyTorch, with one more
+argument; [Where a simulation runs](compute.md) covers the devices, what each
+needs installed, how a whole script picks one and what is promised about the
+numbers on each.
+
+```py
+on_gpu = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    probes=[(200, 100)],
+    compute=simulation.Compute(device="cupy"),
+)
+print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
 ```
 
 The grid is index-based: cell ``(ix, iy)`` has its centre at
@@ -239,7 +257,7 @@ FDTD box ends a couple of wavelengths from the scatterer. The
 `add_contour_probe` / `far_field_from_contour` pair bridges that gap with
 the 2D Kirchhoff-Helmholtz integral: the probe folds the steady-state
 pressure and outward normal velocity on a closed rectangle of cell faces
-into complex accumulators (an on-the-fly DFT per point and frequency, so a
+into running DFT sums (an on-the-fly DFT per point and frequency, so a
 continuous-wave run stores no time histories), and the integral propagates
 those phasors to infinity with the free-space Green function
 $-(j/4)\,H_0^{(2)}(kR)$: the same construction full-wave FEM solvers use to
@@ -551,9 +569,10 @@ impedance reflection coefficient above and the dispersion relation itself.
 
 The frozen `FDTDResult` carries the time axis, the per-probe pressure
 histories, the probe positions in metres, the grid metadata, the sources,
-the optional field snapshots with their times and the obstacle mask; its
-`.plot()` draws the probe histories, and `.plot(kind="snapshot")` renders
-one recorded field with the geometry overlaid.
+the optional field snapshots with their times and decimation, the obstacle
+mask and the provenance of the run; its `.plot()` draws the probe
+histories, and `.plot(kind="snapshot")` renders one recorded field with the
+geometry overlaid.
 
 The same staggered lattice extends beyond fluids: the companion
 `elastic_fdtd_simulation` integrates the P-SV velocity-stress system of
@@ -598,6 +617,8 @@ against a closed form or a 3D solver.
 - [Elastic waves and fluid-solid coupling](elastic-waves.md):
   the P-SV companion solver on the same staggered grid, with Rayleigh and
   Scholte waves, mode conversion and immersed plates.
+- [Where a simulation runs](compute.md): the same run on an NVIDIA GPU
+  through CuPy or on PyTorch, and what is promised about its numbers.
 - [Conformance report](../CONFORMANCE.md): two of the closed-form
   validation anchors of section 6 run there.
 - API reference: [`simulation.fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/fdtd/),

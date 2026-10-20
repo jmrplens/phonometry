@@ -626,7 +626,8 @@ def test_each_snapshot_is_the_field_of_its_own_step() -> None:
         ({"sources": []}, "at least one source"),
         ({"duration": 0.0}, "duration must be positive"),
         ({"duration": 1e-9}, "at least one time step"),
-        ({"snapshot_every": 0}, "snapshot_every must be >= 1"),
+        ({"snapshot_every": 0}, "'snapshot_every' must be a whole number, at least 1"),
+        ({"snapshot_every": -1}, "'snapshot_every' must be a whole number, at least 1"),
         ({"snapshot_every": 2.5}, "'snapshot_every' must be a whole number"),
         ({"probes": [(99, 0)]}, r"probe .* lies outside the grid"),
         ({"probes": [(2.5, 3)]}, "'probe ix' must be a whole number"),
@@ -685,10 +686,12 @@ def test_non_integral_counts_and_coordinates_are_rejected() -> None:
         sim.add_source(float_source)
     with pytest.raises(ValueError, match="'n_steps' must be a whole number"):
         sim.run(1.5)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'record_every' must be a whole number"):
-        sim.run(10, record_every=1.5)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'decimate' must be a whole number"):
-        sim.run(10, decimate=1.5)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'snapshot_every' must be a whole number"):
+        sim.run(10, snapshot_every=1.5)  # type: ignore[arg-type]
+    with pytest.raises(
+        ValueError, match="'snapshot_decimation' must be a whole number"
+    ):
+        sim.run(10, snapshot_decimation=1.5)  # type: ignore[arg-type]
     assert sim.n == 0  # nothing ran on the rejected calls
 
 

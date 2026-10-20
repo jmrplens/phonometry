@@ -24,9 +24,22 @@ field snapshots and a ``.plot()`` method. :class:`FDTD2D` is the underlying
 stepping engine (also used by the documentation animations) for callers that
 need frame-by-frame access to the field.
 
-The solver is deliberately deterministic: float64 arithmetic throughout, no
-random numbers and single-threaded numpy execution, so identical inputs give
-bit-identical outputs on the same platform.
+The solver is deliberately deterministic: no random numbers, and every
+operation in a fixed order. On NumPy in float64 identical inputs give
+bit-identical outputs on the same platform. On CuPy in float64 the recorded
+proof (``gpu-parity.lock``) found every field, snapshot and contour phasor
+bit-identical to NumPy's over the scenarios of both engines, and the energy
+within 1.79e-16 relative over them, because the GPU sums it in another
+order; the guide on where a simulation runs names the hardware it was
+measured on. Runs on torch's CPU device, and float32 runs on NumPy, agree
+with NumPy in float64 within the tolerance that guide publishes for each
+device and dtype. Each of these bounds is the worst over that scenario
+matrix (grids of up to 64 by 48 cells, up to 120 steps), not a promise about
+any run: float32 rounding grows with the number of steps. An acoustic run
+of 8085 steps on a 200 by 300 cell grid, driven by a 1 kHz ``CWSource``,
+differed by 8.0e-06 relative at its probe (4.0e-06 with a Gaussian pulse),
+on NumPy and on torch's CPU device alike. A float32 run on CuPy, and any run
+on torch's CUDA device, is not measured yet.
 
 Validated against analytic oracles: the eigenfrequencies of a rigid
 rectangular box and of an effectively 1D tube, the numerical dispersion
@@ -49,6 +62,7 @@ from numpy.typing import ArrayLike, NDArray
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, handed_over, read_only_copy
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_equal_counts,
     require_positive,
@@ -56,6 +70,8 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from . import _backends
+from .compute import RunProvenance
 from .ntff import ContourPhasors
 
 if TYPE_CHECKING:
@@ -64,6 +80,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._i18n import Language
+    from .compute import Compute
 
 __all__ = [
     "FDTD2D",
@@ -410,53 +427,73 @@ def _validate_sponge_damping(
 class _PressureEngine(Protocol):
     """The stepping interface the shared ``run()`` driver relies on."""
 
+    _backend: _backends.Backend
+
     def step(self) -> None:
         """Advance the leapfrog scheme by one time step."""
 
     @property
-    def p(self) -> Field2D:
-        """Pressure at the cell centres, shape ``(ny, nx)``."""
+    def p(self) -> _backends.DeviceArray:
+        """Pressure at the cell centres, shape ``(ny, nx)``, on the device."""
+
+
+def _snapshot_options(
+    snapshot_every: int | None,
+    snapshot_decimation: int,
+) -> tuple[int | None, int]:
+    """The snapshot cadence and decimation, validated alike on every route.
+
+    The ``run()`` of both engines and both simulation functions read the two
+    counts here, so a bad value is refused with the same class and the same
+    words whichever way it came in.
+
+    :param snapshot_every: Steps between snapshots, or ``None`` for none.
+    :param snapshot_decimation: Cells a snapshot steps over along each axis.
+    :return: Both as ``int``, the cadence ``None`` when no snapshot is asked.
+    :raises TypeError: for a flag, a text, an array or anything else that is
+        not a number.
+    :raises ValueError: for a number that is not a whole number of 1 or more.
+    """
+    require_scalar(snapshot_every, "snapshot_every")
+    require_scalar(snapshot_decimation, "snapshot_decimation")
+    every = (
+        None
+        if snapshot_every is None
+        else require_count(snapshot_every, "snapshot_every")
+    )
+    return every, require_count(snapshot_decimation, "snapshot_decimation")
 
 
 def _run_recording(
     engine: _PressureEngine,
     n_steps: int,
-    record_every: int | None,
-    decimate: int,
-) -> NDArray[np.float64]:
+    snapshot_every: int | None,
+    snapshot_decimation: int,
+) -> NDArray[np.floating]:
     """Validate the ``run()`` arguments and march, recording pressure frames.
 
-    The frames are written into one array allocated before the march (one
-    for the initial state, then one every ``record_every`` steps), so the
-    recording is never held twice, as a list of frames and their stack.
+    The frames are written into one host array allocated before the march
+    (one for the initial state, then one every ``snapshot_every`` steps), so
+    the recording is never held twice, as a list of frames and their stack.
     """
-    require_scalar(decimate, "decimate")
-    require_scalar(record_every, "record_every")
+    every, d = _snapshot_options(snapshot_every, snapshot_decimation)
     require_scalar(n_steps, "n_steps")
     n_steps = _integer("n_steps", n_steps)
     if n_steps < 0:
         msg = "'n_steps' must be non-negative"
         raise ValueError(msg)
-    if record_every is not None:
-        record_every = _integer("record_every", record_every)
-        if record_every < 1:
-            msg = "record_every must be >= 1"
-            raise ValueError(msg)
-    decimate = _integer("decimate", decimate)
-    if decimate < 1:
-        msg = "decimate must be >= 1"
-        raise ValueError(msg)
-    if record_every is None:
+    backend = engine._backend
+    if every is None:
         for _ in range(n_steps):
             engine.step()
-        return np.zeros((0, 0, 0), dtype=np.float64)
-    first = engine.p[::decimate, ::decimate]
-    frames = np.zeros((n_steps // record_every + 1, *first.shape), dtype=first.dtype)
+        return np.zeros((0, 0, 0), dtype=backend.host_dtype)
+    first = backend.to_host(engine.p[::d, ::d])
+    frames = np.zeros((n_steps // every + 1, *first.shape), dtype=first.dtype)
     frames[0] = first
     for i in range(n_steps):
         engine.step()
-        if (i + 1) % record_every == 0:
-            frames[(i + 1) // record_every] = engine.p[::decimate, ::decimate]
+        if (i + 1) % every == 0:
+            frames[(i + 1) // every] = backend.to_host(engine.p[::d, ::d])
     return frames
 
 
@@ -581,6 +618,134 @@ def _edge_impedance_profile(
     return z
 
 
+def _validated_impedances(
+    edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None,
+    absorbing: tuple[str, ...],
+    ny: int,
+    nx: int,
+) -> list[tuple[str, Field2D]]:
+    """Validate the per-side impedance spec into ``(side, profile)`` pairs.
+
+    :param absorbing: The sides that carry a sponge layer, which cannot
+        also be impedance boundaries.
+    :return: One pair per impedance side, in the order of :data:`_SIDES`.
+    """
+    if not edge_impedance:
+        return []
+    unknown = set(edge_impedance) - set(_SIDES)
+    if unknown:
+        msg = f"unknown impedance sides: {sorted(unknown)}"
+        raise ValueError(msg)
+    profiles: list[tuple[str, Field2D]] = []
+    for side in _SIDES:  # deterministic order
+        if side not in edge_impedance:
+            continue
+        if side in absorbing:
+            msg = f"side {side!r} cannot be both absorbing and an impedance boundary"
+            raise ValueError(msg)
+        n_edge = ny if side in ("left", "right") else nx
+        profiles.append(
+            (side, _edge_impedance_profile(side, edge_impedance[side], n_edge))
+        )
+    return profiles
+
+
+def _require_courant(cfl: float) -> None:
+    """Refuse a Courant number outside ``(0, 1)``, where the leapfrog is unstable.
+
+    :raises TypeError: if ``cfl`` is not a single number.
+    """
+    require_scalar(cfl, "cfl")
+    if not np.isfinite(cfl) or not 0.0 < cfl < 1.0:
+        msg = (
+            "cfl must lie in (0, 1): the leapfrog scheme "
+            "is unstable beyond the Courant bound CN = 1"
+        )
+        raise ValueError(msg)
+
+
+def _time_step(cfl: float, dx: float, c_max: float) -> float:
+    r"""The time step of Courant number *cfl*: Eq. 4.13 solved for :math:`\Delta t`.
+
+    One formula for both engines and for the simulation functions, which
+    count a run's steps before they build its engine.
+    """
+    return cfl * dx / (c_max * float(np.sqrt(2.0)))
+
+
+def _acoustic_grid(
+    c: float | Field2D, shape: tuple[int, int] | None, cfl: float, dx: float
+) -> tuple[Field2D, float, float]:
+    """The sound-speed map, the grid spacing and the time step, checked on the host.
+
+    :return: ``(c_map, dx, dt)``.
+    """
+    _require_courant(cfl)
+    c_map = _resolve_c_map(c, shape)
+    dx = _positive_finite("dx", dx)
+    return c_map, dx, _time_step(cfl, dx, float(c_map.max()))
+
+
+def _step_count(duration: float, dt: float) -> int:
+    """The number of steps of *dt* that cover *duration*, at least one."""
+    steps = round(duration / dt)
+    if steps < 1:
+        msg = f"duration must cover at least one time step (dt = {dt:.3e} s)"
+        raise ValueError(msg)
+    return steps
+
+
+def _check_source(
+    source: AnySource, shape: tuple[int, ...], obstacle: NDArray[np.bool_] | None
+) -> None:
+    """Refuse a source off the grid ``(ny, nx)`` or inside the obstacle.
+
+    Shared by :meth:`FDTD2D.add_source` and :func:`fdtd_simulation`, which
+    checks its sources before it builds the engine.
+    """
+    if isinstance(source, PlaneWaveSource):
+        _check_plane_source(source, shape, obstacle)
+        return
+    ny, nx = shape
+    ix = _integer("source ix", source.ix)
+    iy = _integer("source iy", source.iy)
+    if not (0 <= ix < nx and 0 <= iy < ny):
+        msg = "source position lies outside the grid"
+        raise ValueError(msg)
+    if obstacle is not None and obstacle[iy, ix]:
+        msg = "source position lies inside an obstacle"
+        raise ValueError(msg)
+
+
+def _check_plane_source(
+    source: PlaneWaveSource,
+    shape: tuple[int, ...],
+    obstacle: NDArray[np.bool_] | None,
+) -> None:
+    """Refuse a plane-wave injection line off the grid or across the obstacle."""
+    if source.direction not in _SIDE_TRAVEL:
+        msg = "'direction' must be 'down', 'up', 'left' or 'right'."
+        raise ValueError(msg)
+    offset = _integer("plane-wave offset", source.offset)
+    ny, nx = shape
+    limit = ny if source.direction in ("down", "up") else nx
+    if not 0 <= offset < limit - 1:
+        msg = "plane-wave offset lies outside the grid"
+        raise ValueError(msg)
+    if obstacle is not None:
+        if source.direction == "down":
+            line = obstacle[offset, :]
+        elif source.direction == "up":
+            line = obstacle[ny - 1 - offset, :]
+        elif source.direction == "right":
+            line = obstacle[:, offset]
+        else:
+            line = obstacle[:, nx - 1 - offset]
+        if bool(np.any(line)):
+            msg = "plane-wave injection line crosses an obstacle"
+            raise ValueError(msg)
+
+
 class _ImpedanceEdge:
     r"""One locally reacting boundary side with a real specific impedance.
 
@@ -596,16 +761,23 @@ class _ImpedanceEdge:
     __slots__ = ("c1", "c2", "side", "vb")
 
     def __init__(
-        self, side: str, impedance: Field2D, rho_edge: Field2D, dt: float, dx: float
+        self,
+        side: str,
+        impedance: Field2D,
+        rho_edge: Field2D,
+        dt: float,
+        dx: float,
+        backend: _backends.Backend,
     ) -> None:
         self.side = side
-        # a = dt Z / (rho dx): the dimensionless boundary Courant product.
+        # a = dt Z / (rho dx): the dimensionless boundary Courant product,
+        # on the host; the two coefficients go to the device once.
         a = dt * impedance / (rho_edge * dx)
-        self.c1 = (1.0 - a) / (1.0 + a)
-        self.c2 = (2.0 * dt / (rho_edge * dx)) / (1.0 + a)
-        self.vb: Field2D = np.zeros(impedance.shape, dtype=np.float64)
+        self.c1 = backend.asarray((1.0 - a) / (1.0 + a))
+        self.c2 = backend.asarray((2.0 * dt / (rho_edge * dx)) / (1.0 + a))
+        self.vb = backend.zeros(impedance.shape)
 
-    def update(self, p: Field2D) -> None:
+    def update(self, p: _backends.DeviceArray) -> None:
         """Advance the boundary-face velocity by one leapfrog step."""
         if self.side == "left":
             self.vb = self.c1 * self.vb - self.c2 * p[:, 0]
@@ -616,7 +788,7 @@ class _ImpedanceEdge:
         else:  # bottom
             self.vb = self.c1 * self.vb + self.c2 * p[-1, :]
 
-    def add_flux(self, div: Field2D) -> None:
+    def add_flux(self, div: _backends.DeviceArray) -> None:
         """Add the boundary-face flux to the velocity divergence."""
         if self.side == "left":
             div[:, 0] -= self.vb
@@ -636,10 +808,10 @@ class ContourProbe:
     ``iy0..iy1`` (inclusive); on each face the engine samples the outward
     normal velocity (which lives exactly there on the staggered grid) and
     the pressure averaged from the two adjacent cell centres, and folds
-    them into complex accumulators at each requested frequency, so a
+    them into running DFT sums at each requested frequency, so a
     continuous-wave run never stores full time histories.
 
-    After every step the accumulators gain :math:`p\, \mathrm{e}^{-j \omega t}` with
+    After every step the sums gain :math:`p\, \mathrm{e}^{-j \omega t}` with
     the fields' own leapfrog time stamps (:math:`t = n\,\Delta t` for
     pressure, :math:`t = (n - 1/2)\,\Delta t` for velocity, so the half-step
     stagger is handled
@@ -649,6 +821,12 @@ class ContourProbe:
     out, call :meth:`reset`, then integrate a window as close as possible
     to a whole number of periods (the residual leakage falls as one over
     the number of periods).
+
+    The sums are kept in float64 on every device that has it, also when the
+    fields step in float32: the rounding of a sum grows with the number of
+    steps, and in float32 it would soon outweigh the field's own. The
+    exception is ``torch:mps``, which has no float64; there the sums are
+    float32 with Neumaier's compensated summation.
 
     :ivar positions: Face-sample positions ``(x, y)`` [m], shape
         ``(n_points, 2)``, ordered left, right, top, bottom face.
@@ -739,43 +917,94 @@ class ContourProbe:
         self._omega = 2.0 * np.pi * freqs
         self._dt = sim.dt
         self._dx = dx
-        self._acc_p = np.zeros((freqs.size, pos.shape[0]), dtype=np.complex128)
-        self._acc_v = np.zeros_like(self._acc_p)
+        b = sim._backend
+        self._backend = b
+        self._segments = (s_left, s_right, s_top, s_bottom)
+        n_points = pos.shape[0]
+        # The running DFT sums, frequency first so that phasors() brings one
+        # frequency to the host: then the quantity (p, v_n), the part (real,
+        # imaginary) and the contour point.
+        sums_shape = (freqs.size, 2, 2, n_points)
+        acc = b.accumulator_dtype
+        self._sums = b.zeros(sums_shape, dtype=acc)
+        # What each float32 addition rounds away (Neumaier); float64 sums
+        # need no compensation.
+        self._carry = b.zeros(sums_shape, dtype=acc) if acc == "float32" else None
+        # This step's face samples (p, v_n) in the field dtype, shaped to
+        # broadcast over the parts and filled in place every step.
+        self._now = b.zeros((2, 1, n_points))
         self.samples = 0
 
     def reset(self) -> None:
-        """Clear the accumulators (call once the field is steady)."""
-        self._acc_p.fill(0.0)
-        self._acc_v.fill(0.0)
+        """Clear the running sums (call once the field is steady)."""
+        with self._backend.context():
+            self._sums[...] = 0.0
+            if self._carry is not None:
+                self._carry[...] = 0.0
         self.samples = 0
 
-    def _accumulate(self, p: Field2D, vx: Field2D, vy: Field2D, n: int) -> None:
-        """Fold the current fields into the running DFT sums."""
+    def _accumulate(
+        self,
+        p: _backends.DeviceArray,
+        vx: _backends.DeviceArray,
+        vy: _backends.DeviceArray,
+        n: int,
+    ) -> None:
+        r"""Fold the current fields into the running DFT sums.
+
+        The phases are computed on the host in float64 and moved to the
+        device in one transfer; the products are summed there, real and
+        imaginary parts apart. NumPy multiplies a complex phase
+        :math:`a + jb` by a real sample :math:`x` as
+        :math:`(a x - b \cdot 0) + j (a \cdot 0 + b x)`, which differs from
+        :math:`a x` and :math:`b x` at most in the sign of a zero; the sums
+        start at +0, and a sum that starts at +0 never turns -0, so the split
+        sums equal the complex ones bit for bit.
+        """
+        b = self._backend
         ys, xs = self._ys, self._xs
         ix0, ix1 = self._ix0, self._ix1
         iy0, iy1 = self._iy0, self._iy1
-        p_now = np.concatenate(
-            (
-                0.5 * (p[ys, ix0 - 1] + p[ys, ix0]),
-                0.5 * (p[ys, ix1] + p[ys, ix1 + 1]),
-                0.5 * (p[iy0 - 1, xs] + p[iy0, xs]),
-                0.5 * (p[iy1, xs] + p[iy1 + 1, xs]),
-            )
-        )
-        v_now = np.concatenate(
-            (
-                -vx[ys, ix0 - 1],
-                vx[ys, ix1],
-                -vy[iy0 - 1, xs],
-                vy[iy1, xs],
-            )
-        )
+        left, right, top, bottom = self._segments
+        now = self._now
+        now[0, 0, left] = 0.5 * (p[ys, ix0 - 1] + p[ys, ix0])
+        now[0, 0, right] = 0.5 * (p[ys, ix1] + p[ys, ix1 + 1])
+        now[0, 0, top] = 0.5 * (p[iy0 - 1, xs] + p[iy0, xs])
+        now[0, 0, bottom] = 0.5 * (p[iy1, xs] + p[iy1 + 1, xs])
+        now[1, 0, left] = -vx[ys, ix0 - 1]
+        now[1, 0, right] = vx[ys, ix1]
+        now[1, 0, top] = -vy[iy0 - 1, xs]
+        now[1, 0, bottom] = vy[iy1, xs]
         # Leapfrog time stamps: p sits at n dt, v half a step earlier.
         phase_p = np.exp(self._omega * (-1j * (n * self._dt)))
         phase_v = np.exp(self._omega * (-1j * ((n - 0.5) * self._dt)))
-        self._acc_p += phase_p[:, np.newaxis] * p_now[np.newaxis, :]
-        self._acc_v += phase_v[:, np.newaxis] * v_now[np.newaxis, :]
+        phases = np.empty((self._omega.size, 2, 2, 1))
+        phases[:, 0, 0, 0], phases[:, 0, 1, 0] = phase_p.real, phase_p.imag
+        phases[:, 1, 0, 0], phases[:, 1, 1, 0] = phase_v.real, phase_v.imag
+        term = b.asarray(phases, dtype=b.accumulator_dtype) * now
+        if self._carry is None:
+            self._sums += term
+        else:
+            self._add_compensated(term)
         self.samples += 1
+
+    def _add_compensated(self, term: _backends.DeviceArray) -> None:
+        """Add *term* to float32 sums with Neumaier's compensated summation.
+
+        Each addition rounds away low bits, and ``(s - t) + term`` (or
+        ``(term - t) + s`` when the term is the larger) recovers them exactly
+        into the carry, which :meth:`phasors` adds back. That difference is
+        exact only when its first operand is the larger one, and Kahan's form
+        always takes the sum first; Neumaier's picks the order, so a term
+        larger than the sum, as at the start of a window or at a frequency
+        the field does not carry, loses nothing either.
+        """
+        xp = self._backend.xp
+        s = self._sums
+        t = s + term
+        larger = xp.abs(s) >= xp.abs(term)
+        self._carry += xp.where(larger, (s - t) + term, (term - t) + s)
+        self._sums = t
 
     def phasors(self, frequency: float) -> ContourPhasors:
         """The accumulated contour phasors at one tracked frequency.
@@ -800,14 +1029,25 @@ class ContourProbe:
         if self.samples == 0:
             msg = "no samples accumulated yet; step the simulation first"
             raise ValueError(msg)
-        scale = 2.0 / self.samples
         i = matches[0]
+        b = self._backend
+        # Only this frequency's sums come to the host, shape (2, 2, n_points).
+        sums = b.to_host(self._sums[i, ...])
+        if self._carry is not None:
+            sums = sums.astype(np.float64) + b.to_host(self._carry[i, ...])
+        # The complex sums are rebuilt by assignment alone, so no arithmetic
+        # touches the float64 ones on the way.
+        acc_p = np.empty(sums.shape[-1], dtype=np.complex128)
+        acc_p.real, acc_p.imag = sums[0, 0], sums[0, 1]
+        acc_v = np.empty_like(acc_p)
+        acc_v.real, acc_v.imag = sums[1, 0], sums[1, 1]
+        scale = 2.0 / self.samples
         return ContourPhasors(
             frequency=self.frequencies[i],
             positions=self.positions,
             normals=self.normals,
-            pressure=np.asarray(scale * self._acc_p[i]),
-            normal_velocity=np.asarray(scale * self._acc_v[i]),
+            pressure=np.asarray(scale * acc_p),
+            normal_velocity=np.asarray(scale * acc_v),
             segment=self._dx,
         )
 
@@ -863,8 +1103,16 @@ class FDTD2D:
     :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells:
         every face adjacent to a masked cell is closed (zero normal
         velocity, Eq. 4.32), rasterising arbitrary interior geometry.
+    :param compute: Where the engine steps (:class:`Compute`); ``None``
+        follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :raises TypeError: if ``cfl``, ``dx`` or ``sponge_reflection`` is not a single
-        number, or ``sponge_width`` is a flag, a text or an array where a count goes.
+        number, ``sponge_width`` is a flag, a text or an array where a count goes,
+        or ``compute`` is not a :class:`Compute`.
+    :raises ComputeImportError: when the library of the device ``compute``
+        asks for is not installed or does not import.
+    :raises ComputeDeviceError: when that device is not present, or fails a
+        first small computation; with ``fallback=True`` the engine warns
+        with :class:`ComputeFallbackWarning` and steps on NumPy instead.
     """
 
     def __init__(
@@ -881,52 +1129,70 @@ class FDTD2D:
         shape: tuple[int, int] | None = None,
         edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None = None,
         obstacle_mask: NDArray[np.bool_] | None = None,
+        compute: Compute | None = None,
     ) -> None:
-        require_scalar(cfl, "cfl")
-        c_map = _resolve_c_map(c, shape)
-        if not np.isfinite(cfl) or not 0.0 < cfl < 1.0:
-            msg = (
-                "cfl must lie in (0, 1): the leapfrog scheme "
-                "is unstable beyond the Courant bound CN = 1"
-            )
-            raise ValueError(msg)
+        c_map, self.dx, self.dt = _acoustic_grid(c, shape, cfl, dx)
         ny, nx = c_map.shape
         rho_map = _resolve_rho_map(rho, ny, nx)
         sponge_width, damping_map = _validate_sponge_damping(
             sponge_width, sponge_reflection, damping, ny, nx
         )
+        sides = _resolve_sponge_sides(sponge_sides)
+        #: Sponge-layer width in cells (read-only configuration record).
+        self.sponge_width = require_count(sponge_width, "sponge_width", at_least=None)
+        #: Sides carrying a sponge layer when ``sponge_width > 0``.
+        self.sponge_sides: tuple[str, ...] = sides if sponge_width > 0 else ()
+        impedances = _validated_impedances(edge_impedance, self.sponge_sides, ny, nx)
+        self._obstacle: NDArray[np.bool_] | None = _validated_obstacle(
+            obstacle_mask, ny, nx
+        )
 
-        self.dx = _positive_finite("dx", dx)
+        # Every argument is checked on the host before the device is asked
+        # for, so a bad one raises its own error, never a missing library's
+        # or a fallback warning first.
+        backend = _backends.backend_for(compute)
+        self._backend = backend
+        self._xp = backend.xp
         # The medium the simulation was built on, as read-only copies of its
         # own: an edit to the caller's maps cannot make them disagree with
         # dt and kappa, which were computed from them here.
         self.c = read_only_copy(c_map)
         self.rho = read_only_copy(rho_map)
         c_max = float(c_map.max())
-        self.dt = cfl * self.dx / (c_max * float(np.sqrt(2.0)))
         #: Mean sound speed, cached for the plane-wave machinery.
         self._c_ref = float(c_map.mean())
-        self.kappa = rho_map * c_map**2  # bulk modulus at centres
-        # Density averaged onto the faces where each velocity lives.
-        self._rho_x = 0.5 * (rho_map[:, 1:] + rho_map[:, :-1])
-        self._rho_y = 0.5 * (rho_map[1:, :] + rho_map[:-1, :])
+        #: Bulk modulus at the cell centres [Pa], a read-only host copy.
+        self.kappa = read_only_copy(rho_map * c_map**2)
+        self._kappa = backend.asarray(self.kappa)
+        # Density averaged onto the faces where each velocity lives, kept on
+        # the host for the plane-wave initial condition and on the device
+        # for the step.
+        rho_x = 0.5 * (rho_map[:, 1:] + rho_map[:, :-1])
+        rho_y = 0.5 * (rho_map[1:, :] + rho_map[:-1, :])
+        self._rho_x_host, self._rho_y_host = rho_x, rho_y
+        self._rho_x = backend.asarray(rho_x)
+        self._rho_y = backend.asarray(rho_y)
 
-        self.p: Field2D = np.zeros((ny, nx), dtype=np.float64)
-        self.vx: Field2D = np.zeros((ny, nx - 1), dtype=np.float64)
-        self.vy: Field2D = np.zeros((ny - 1, nx), dtype=np.float64)
-        self._div: Field2D = np.zeros((ny, nx), dtype=np.float64)
+        self.p = backend.zeros((ny, nx))
+        self.vx = backend.zeros((ny, nx - 1))
+        self.vy = backend.zeros((ny - 1, nx))
+        self._div = backend.zeros((ny, nx))
         self._sources: list[Source] = []
         self._plane_sources: list[PlaneWaveSource] = []
         self._contour_probes: list[ContourProbe] = []
         self.n = 0  # completed steps
 
-        sides = _resolve_sponge_sides(sponge_sides)
-        #: Sponge-layer width in cells (read-only configuration record).
-        self.sponge_width = require_count(sponge_width, "sponge_width", at_least=None)
-        #: Sides carrying a sponge layer when ``sponge_width > 0``.
-        self.sponge_sides: tuple[str, ...] = sides if sponge_width > 0 else ()
         self._init_decay(sides, sponge_width, sponge_reflection, damping_map, c_max)
-        self._edges = self._build_edges(edge_impedance, sponge_width, sides, ny, nx)
+        rho_edges = {
+            "left": self.rho[:, 0],
+            "right": self.rho[:, -1],
+            "top": self.rho[0, :],
+            "bottom": self.rho[-1, :],
+        }
+        self._edges = [
+            _ImpedanceEdge(side, z, rho_edges[side], self.dt, self.dx, backend)
+            for side, z in impedances
+        ]
         #: Per-side impedance boundaries as supplied (immutable record), read
         #: once the edges have validated them; an array profile is kept as a
         #: read-only copy of its own.
@@ -940,7 +1206,7 @@ class FDTD2D:
                 }
             )
         )
-        self._init_obstacle(obstacle_mask, ny, nx)
+        self._init_obstacle()
 
     def _init_decay(
         self,
@@ -960,65 +1226,29 @@ class FDTD2D:
             c_max,
             self.dx,
         )
-        self._decay_p: Field2D = np.exp(-sigma * self.dt)
-        self._decay_vx: Field2D = np.exp(
-            -(0.5 * (sigma[:, 1:] + sigma[:, :-1])) * self.dt
+        backend = self._backend
+        self._decay_p = backend.asarray(np.exp(-sigma * self.dt))
+        self._decay_vx = backend.asarray(
+            np.exp(-(0.5 * (sigma[:, 1:] + sigma[:, :-1])) * self.dt)
         )
-        self._decay_vy: Field2D = np.exp(
-            -(0.5 * (sigma[1:, :] + sigma[:-1, :])) * self.dt
+        self._decay_vy = backend.asarray(
+            np.exp(-(0.5 * (sigma[1:, :] + sigma[:-1, :])) * self.dt)
         )
 
-    def _init_obstacle(
-        self, obstacle_mask: NDArray[np.bool_] | None, ny: int, nx: int
-    ) -> None:
-        """Validate the obstacle mask into closed-face velocity factors."""
-        self._obstacle: NDArray[np.bool_] | None = _validated_obstacle(
-            obstacle_mask, ny, nx
-        )
-        self._vx_open: Field2D | None = None
-        self._vy_open: Field2D | None = None
+    def _init_obstacle(self) -> None:
+        """Turn the validated obstacle mask into closed-face velocity factors on the device."""
+        self._vx_open: _backends.DeviceArray | None = None
+        self._vy_open: _backends.DeviceArray | None = None
         if self._obstacle is not None:
             mask = self._obstacle
             # A face between two cells is open only when both are open
             # (rigid obstacle boundary: zero normal velocity, Eq. 4.32).
-            self._vx_open = (~(mask[:, 1:] | mask[:, :-1])).astype(np.float64)
-            self._vy_open = (~(mask[1:, :] | mask[:-1, :])).astype(np.float64)
-
-    def _build_edges(
-        self,
-        edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None,
-        sponge_width: int,
-        sponge_sides: tuple[str, ...],
-        ny: int,
-        nx: int,
-    ) -> list[_ImpedanceEdge]:
-        """Validate the per-side impedance spec into edge updaters."""
-        edges: list[_ImpedanceEdge] = []
-        if not edge_impedance:
-            return edges
-        unknown = set(edge_impedance) - set(_SIDES)
-        if unknown:
-            msg = f"unknown impedance sides: {sorted(unknown)}"
-            raise ValueError(msg)
-        absorbing = set(sponge_sides) if sponge_width > 0 else set()
-        rho_edges = {
-            "left": self.rho[:, 0],
-            "right": self.rho[:, -1],
-            "top": self.rho[0, :],
-            "bottom": self.rho[-1, :],
-        }
-        for side in _SIDES:  # deterministic order
-            if side not in edge_impedance:
-                continue
-            if side in absorbing:
-                msg = (
-                    f"side {side!r} cannot be both absorbing and an impedance boundary"
-                )
-                raise ValueError(msg)
-            n_edge = ny if side in ("left", "right") else nx
-            z = _edge_impedance_profile(side, edge_impedance[side], n_edge)
-            edges.append(_ImpedanceEdge(side, z, rho_edges[side], self.dt, self.dx))
-        return edges
+            self._vx_open = self._backend.asarray(
+                (~(mask[:, 1:] | mask[:, :-1])).astype(np.float64)
+            )
+            self._vy_open = self._backend.asarray(
+                (~(mask[1:, :] | mask[:-1, :])).astype(np.float64)
+            )
 
     @property
     def time(self) -> float:
@@ -1083,22 +1313,29 @@ class FDTD2D:
         axis_y = direction in ("down", "up")
         sign = 1.0 if direction in ("down", "right") else -1.0
         c_ref = self._c_ref
+        # The increments are built on the host in float64, as the maps are,
+        # and each goes to the device once.
         if axis_y:
             centres = (np.arange(ny) + 0.5) * self.dx
             faces = np.arange(1, ny) * self.dx
-            self.p += profile(centres)[:, np.newaxis]
+            dp = profile(centres)[:, np.newaxis]
             # v = sign * p / (rho c) for travel along +/- y, sampled on the
             # faces a half time step earlier: g(y -/+ c t) at t = -dt/2.
             v_prof = profile(faces + sign * 0.5 * c_ref * self.dt)
-            rho_face = self._rho_y
-            self.vy += sign * v_prof[:, np.newaxis] / (rho_face * c_ref)
+            dv = sign * v_prof[:, np.newaxis] / (self._rho_y_host * c_ref)
         else:
             centres = (np.arange(nx) + 0.5) * self.dx
             faces = np.arange(1, nx) * self.dx
-            self.p += profile(centres)[np.newaxis, :]
+            dp = profile(centres)[np.newaxis, :]
             v_prof = profile(faces + sign * 0.5 * c_ref * self.dt)
-            rho_face = self._rho_x
-            self.vx += sign * v_prof[np.newaxis, :] / (rho_face * c_ref)
+            dv = sign * v_prof[np.newaxis, :] / (self._rho_x_host * c_ref)
+        backend = self._backend
+        with backend.context():
+            self.p += backend.asarray(dp)
+            if axis_y:
+                self.vy += backend.asarray(dv)
+            else:
+                self.vx += backend.asarray(dv)
 
     def plot_geometry(
         self,
@@ -1136,19 +1373,11 @@ class FDTD2D:
         :class:`PlaneWaveSource` injects a sustained one-way plane wave on
         a full line of cells near its launch edge.
         """
+        _check_source(source, self.c.shape, self._obstacle)
         if isinstance(source, PlaneWaveSource):
-            self._add_plane_source(source)
-            return
-        ny, nx = self.p.shape
-        ix = _integer("source ix", source.ix)
-        iy = _integer("source iy", source.iy)
-        if not (0 <= ix < nx and 0 <= iy < ny):
-            msg = "source position lies outside the grid"
-            raise ValueError(msg)
-        if self._obstacle is not None and self._obstacle[iy, ix]:
-            msg = "source position lies inside an obstacle"
-            raise ValueError(msg)
-        self._sources.append(source)
+            self._plane_sources.append(source)
+        else:
+            self._sources.append(source)
 
     def add_contour_probe(
         self, ix0: int, ix1: int, iy0: int, iy1: int, *, frequencies: ArrayLike
@@ -1162,7 +1391,7 @@ class FDTD2D:
         the step after registration the engine
         folds the face pressures (averaged from the two adjacent cell
         centres) and the outward face normal velocities into running DFT
-        accumulators at each requested frequency; see :class:`ContourProbe`
+        sums at each requested frequency; see :class:`ContourProbe`
         for the steady-state protocol and
         :func:`~phonometry.simulation.ntff.far_field_from_contour` for the
         far-field transformation of the captured phasors.
@@ -1186,33 +1415,13 @@ class FDTD2D:
         self._contour_probes.append(probe)
         return probe
 
-    def _add_plane_source(self, source: PlaneWaveSource) -> None:
-        """Validate and register a plane-wave injection line."""
-        if source.direction not in _SIDE_TRAVEL:
-            msg = "'direction' must be 'down', 'up', 'left' or 'right'."
-            raise ValueError(msg)
-        offset = _integer("plane-wave offset", source.offset)
-        ny, nx = self.p.shape
-        limit = ny if source.direction in ("down", "up") else nx
-        if not 0 <= offset < limit - 1:
-            msg = "plane-wave offset lies outside the grid"
-            raise ValueError(msg)
-        if self._obstacle is not None:
-            if source.direction == "down":
-                line = self._obstacle[offset, :]
-            elif source.direction == "up":
-                line = self._obstacle[ny - 1 - offset, :]
-            elif source.direction == "right":
-                line = self._obstacle[:, offset]
-            else:
-                line = self._obstacle[:, nx - 1 - offset]
-            if bool(np.any(line)):
-                msg = "plane-wave injection line crosses an obstacle"
-                raise ValueError(msg)
-        self._plane_sources.append(source)
-
     def step(self) -> None:
         """Advance the leapfrog scheme by one time step."""
+        with self._backend.context():
+            self._step()
+
+    def _step(self) -> None:
+        """One leapfrog step on the backend's arrays."""
         dt_dx = self.dt / self.dx
         # Velocity half-step from the pressure gradient (rigid walls are the
         # implicit zero normal velocity at the domain edge).
@@ -1227,14 +1436,14 @@ class FDTD2D:
             edge.update(self.p)
         # Pressure step from the velocity divergence (reused buffer).
         div = self._div
-        div.fill(0.0)
+        div[...] = 0.0
         div[:, :-1] += self.vx
         div[:, 1:] -= self.vx
         div[:-1, :] += self.vy
         div[1:, :] -= self.vy
         for edge in self._edges:
             edge.add_flux(div)
-        self.p -= self.kappa * dt_dx * div
+        self.p -= self._kappa * dt_dx * div
         t_next = (self.n + 1) * self.dt
         for src in self._sources:
             self.p[src.iy, src.ix] += src.value(t_next)
@@ -1276,40 +1485,65 @@ class FDTD2D:
 
     def energy(self) -> float:
         """Total acoustic field energy [J per metre of depth]."""
-        e_p = float(np.sum(self.p**2 / (2.0 * self.kappa)))
-        e_v = 0.5 * (
-            float(np.sum(self._rho_x * self.vx**2))
-            + float(np.sum(self._rho_y * self.vy**2))
-        )
+        xp, b = self._xp, self._backend
+        with b.context():
+            e_p = b.scalar(xp.sum(self.p**2 / (2.0 * self._kappa)))
+            e_v = 0.5 * (
+                b.scalar(xp.sum(self._rho_x * self.vx**2))
+                + b.scalar(xp.sum(self._rho_y * self.vy**2))
+            )
         return (e_p + e_v) * self.dx**2
 
     def run(
         self,
         n_steps: int,
-        record_every: int | None = None,
-        decimate: int = 1,
-    ) -> NDArray[np.float64]:
+        snapshot_every: int | None = None,
+        snapshot_decimation: int = 1,
+    ) -> NDArray[np.floating]:
         """Advance ``n_steps`` steps, optionally recording pressure frames.
 
-        With ``record_every = k`` a snapshot of ``p`` is stored after every
-        ``k``-th step (and one of the initial state), spatially subsampled by
-        ``decimate``; the stacked ``(n_frames, ny', nx')`` array plugs
-        straight into a ``FuncAnimation`` ``imshow`` update. Without
-        ``record_every`` an empty array is returned and only the final state
-        is kept (read it from ``self.p``).
+        With ``snapshot_every = k`` a host copy of ``p`` is stored after
+        every ``k``-th step (and one of the initial state), keeping every
+        ``snapshot_decimation``-th cell along each axis; the stacked
+        ``(n_frames, ny', nx')`` array plugs straight into a ``FuncAnimation``
+        ``imshow`` update. Without ``snapshot_every`` an empty array is
+        returned and only the final state is kept (read it with
+        :meth:`host_field`).
 
-        :raises TypeError: if ``decimate``, ``n_steps`` or ``record_every`` is a flag, a
-            text or an array where a count goes.
+        :raises TypeError: if ``snapshot_decimation``, ``n_steps`` or
+            ``snapshot_every`` is a flag, a text or an array where a count goes.
+        :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
+            or ``snapshot_every`` or ``snapshot_decimation`` is not a whole
+            number of 1 or more.
         """
-        return _run_recording(self, n_steps, record_every, decimate)
+        return _run_recording(self, n_steps, snapshot_every, snapshot_decimation)
+
+    #: The arrays the engine stores, the names :meth:`host_field` reads.
+    _STORED: tuple[Literal["p", "vx", "vy"], ...] = ("p", "vx", "vy")
+
+    def host_field(self, name: Literal["p", "vx", "vy"]) -> NDArray[np.floating]:
+        """A NumPy copy of the stored field *name*, whatever the device.
+
+        :param name: ``"p"`` (cell centres), ``"vx"`` or ``"vy"`` (faces).
+        :raises TypeError: if ``name`` is not a text.
+        :raises ValueError: for a field the engine does not store.
+        """
+        require_choice(name, "name", self._STORED)
+        return np.array(self._backend.to_host(getattr(self, name)), copy=True)
+
+    @property
+    def provenance(self) -> RunProvenance:
+        """Where this engine steps: device, dtype and library versions."""
+        return self._backend.provenance
 
 
 def _require_grid_axes(
     owner: str,
     shape: tuple[int, int],
-    snapshots: NDArray[np.float64] | None,
+    snapshots: NDArray[np.floating] | None,
     obstacle_mask: NDArray[np.bool_] | None,
-) -> None:
+    snapshot_decimation: int,
+) -> int:
     """Require every whole-domain raster to cover the grid ``shape`` names.
 
     Shared by the acoustic and the elastic result, which record different
@@ -1321,23 +1555,63 @@ def _require_grid_axes(
     never simulated. Neither imshow nor the eye objects: the frame is a
     perfectly ordinary field plot of the wrong thing.
 
+    A snapshot keeps every ``snapshot_decimation``-th cell along each axis,
+    starting with the first, so its axes are ``ceil(ny / d)`` by
+    ``ceil(nx / d)``.
+
     :param owner: Name of the result type being checked, for the message.
     :param shape: The grid the run covered, ``(ny, nx)``.
-    :param snapshots: Recorded frames, ``(n_frames, ny, nx)``, or ``None``.
+    :param snapshots: Recorded frames, ``(n_frames, ceil(ny / d),
+        ceil(nx / d))``, or ``None``.
     :param obstacle_mask: Rigid-cell map, ``(ny, nx)``, or ``None``.
-    :raises ValueError: if a raster disagrees with ``shape``.
+    :param snapshot_decimation: The ``d`` the snapshots were taken with.
+    :return: ``snapshot_decimation`` as an ``int``, for the result to hold.
+    :raises TypeError: if ``snapshot_decimation`` is not a number.
+    :raises ValueError: if a raster disagrees with ``shape``, or
+        ``snapshot_decimation`` is not a whole number of 1 or more.
     """
+    d = require_count(snapshot_decimation, "snapshot_decimation")
     ny, nx = shape
     rows = {"shape (rows)": ny}
     columns = {"shape (columns)": nx}
-    if snapshots is not None:
-        rows["snapshots (axis 1)"] = snapshots.shape[1]
-        columns["snapshots (axis 2)"] = snapshots.shape[2]
     if obstacle_mask is not None:
         rows["obstacle_mask"] = obstacle_mask.shape[0]
         columns["obstacle_mask (axis 1)"] = obstacle_mask.shape[1]
     require_equal_counts(owner, rows, "grid row")
     require_equal_counts(owner, columns, "grid column")
+    if snapshots is not None:
+        # Ceiling division: the decimated grid keeps the first cell of every block.
+        require_equal_counts(
+            owner,
+            {"decimated rows": -(-ny // d), "snapshots (axis 1)": snapshots.shape[1]},
+            "decimated grid row",
+        )
+        require_equal_counts(
+            owner,
+            {
+                "decimated columns": -(-nx // d),
+                "snapshots (axis 2)": snapshots.shape[2],
+            },
+            "decimated grid column",
+        )
+    return d
+
+
+def _require_provenance(owner: str, provenance: object) -> None:
+    """Refuse a result's ``provenance`` that is not a :class:`RunProvenance`.
+
+    ``None`` included: a result that cannot say where it stepped could pass
+    for a run on any device.
+
+    :param owner: The result's class name, which the message names.
+    :raises TypeError: for anything but a :class:`RunProvenance`.
+    """
+    if not isinstance(provenance, RunProvenance):
+        msg = (
+            f"{owner}: 'provenance' must be a RunProvenance, got "
+            f"{type(provenance).__name__}."
+        )
+        raise TypeError(msg)
 
 
 @dataclass(frozen=True)
@@ -1355,10 +1629,15 @@ class FDTDResult(OwnsArrays):
     :ivar dt: Time step [s].
     :ivar shape: Grid shape ``(ny, nx)``.
     :ivar sources: The source definitions of the run.
-    :ivar snapshots: Recorded pressure fields, shape ``(n_frames, ny, nx)``,
-        or ``None`` when no snapshots were requested.
+    :ivar snapshots: Recorded pressure fields, shape ``(n_frames,
+        ceil(ny / d), ceil(nx / d))`` with ``d`` the ``snapshot_decimation``,
+        in the dtype the run stepped in, or ``None`` when no snapshots were
+        requested.
     :ivar snapshot_times: Time of each snapshot [s], or ``None``.
     :ivar obstacle_mask: Boolean map of rigid cells, or ``None``.
+    :ivar snapshot_decimation: Every how many cells a snapshot keeps along
+        each axis (1 keeps every cell).
+    :ivar provenance: Where the run stepped (:class:`RunProvenance`).
     """
 
     times: NDArray[np.float64]
@@ -1368,10 +1647,12 @@ class FDTDResult(OwnsArrays):
     dx: float
     dt: float
     shape: tuple[int, int]
-    sources: tuple[Source, ...]
-    snapshots: NDArray[np.float64] | None
+    sources: tuple[AnySource, ...]
+    snapshots: NDArray[np.floating] | None
     snapshot_times: NDArray[np.float64] | None
     obstacle_mask: NDArray[np.bool_] | None
+    snapshot_decimation: int
+    provenance: RunProvenance
 
     def __post_init__(self) -> None:
         """Reject a run whose probes, time axis and grid do not line up.
@@ -1386,9 +1667,13 @@ class FDTDResult(OwnsArrays):
         frame recorded on a different grid into a plausible field over a
         domain it never covered.
 
+        :raises TypeError: if ``snapshot_decimation`` is not a number, or
+            ``provenance`` is not a :class:`RunProvenance`.
         :raises ValueError: if the probe, time-step, snapshot or grid axes
-            disagree.
+            disagree, or ``snapshot_decimation`` is not a whole number of 1
+            or more.
         """
+        _require_provenance(type(self).__name__, self.provenance)
         require_ranks(
             self,
             times=1,
@@ -1407,9 +1692,16 @@ class FDTDResult(OwnsArrays):
         )
         require_same_length(self, "times", ("pressures", 1), axis="time step")
         require_same_length(self, "snapshots", "snapshot_times", axis="snapshot")
-        _require_grid_axes(
-            type(self).__name__, self.shape, self.snapshots, self.obstacle_mask
+        decimation = _require_grid_axes(
+            type(self).__name__,
+            self.shape,
+            self.snapshots,
+            self.obstacle_mask,
+            self.snapshot_decimation,
         )
+        # Held as an int, so a whole float or a NumPy integer reads back as
+        # the plain step a slice and the snapshot renderer take.
+        object.__setattr__(self, "snapshot_decimation", decimation)
 
     @property
     def size(self) -> tuple[float, float]:
@@ -1521,8 +1813,9 @@ def _record_run(
     steps: int,
     probe_ix: NDArray[np.int_],
     snapshot_every: int | None,
+    snapshot_decimation: int,
     pressures: NDArray[np.float64],
-    snapshots: NDArray[np.float64] | None,
+    snapshots: NDArray[np.floating] | None,
 ) -> None:
     """Step the engine, writing probe histories and field snapshots in place.
 
@@ -1531,21 +1824,40 @@ def _record_run(
     steps, so it has ``steps // snapshot_every + 1`` of them. Both are
     allocated by the caller before the march, so that the run is never held
     twice, as a list of frames and their stack.
+
+    The probes are read through one flat index per cell, ``row * nx +
+    column``, since the Array API standard indexes one axis with an integer
+    array, not two at once. On NumPy the samples are written straight into
+    ``pressures``; on a device they go into a buffer there, which comes to
+    the host once, after the march. Each snapshot is cut to every
+    ``snapshot_decimation``-th cell on the device and comes to the host as
+    it is taken, so only the cells it keeps cross.
     """
+    b, xp = sim._backend, sim._xp
+    d = snapshot_decimation
     if snapshots is not None:
-        snapshots[0] = sim.p
-    rows = probe_ix[:, 1]
-    cols = probe_ix[:, 0]
-    for i in range(steps):
-        sim.step()
-        if probe_ix.shape[0]:
-            pressures[:, i + 1] = sim.p[rows, cols]
-        if (
-            snapshots is not None
-            and snapshot_every is not None
-            and (i + 1) % snapshot_every == 0
-        ):
-            snapshots[(i + 1) // snapshot_every] = sim.p
+        snapshots[0] = b.to_host(sim.p[::d, ::d])
+    n_probes = probe_ix.shape[0]
+    nx = sim.p.shape[1]
+    centre = b.index(probe_ix[:, 1] * nx + probe_ix[:, 0])
+    buffer = None if b.name == "numpy" else b.zeros((n_probes, steps + 1))
+    with b.context():
+        for i in range(steps):
+            sim.step()
+            if n_probes:
+                sample = xp.take(xp.reshape(sim.p, (-1,)), centre)
+                if buffer is None:
+                    pressures[:, i + 1] = sample
+                else:
+                    buffer[:, i + 1] = sample
+            if (
+                snapshots is not None
+                and snapshot_every is not None
+                and (i + 1) % snapshot_every == 0
+            ):
+                snapshots[(i + 1) // snapshot_every] = b.to_host(sim.p[::d, ::d])
+    if buffer is not None:
+        pressures[...] = b.to_host(buffer)
 
 
 def fdtd_simulation(
@@ -1553,7 +1865,7 @@ def fdtd_simulation(
     dx: float,
     duration: float,
     *,
-    sources: Sequence[Source],
+    sources: Sequence[AnySource],
     shape: tuple[int, int] | None = None,
     rho: float | Field2D = 1.2,
     cfl: float = 0.6,
@@ -1564,6 +1876,8 @@ def fdtd_simulation(
     obstacle_mask: NDArray[np.bool_] | None = None,
     damping: float = 0.0,
     snapshot_every: int | None = None,
+    snapshot_decimation: int = 1,
+    compute: Compute | None = None,
 ) -> FDTDResult:
     r"""Run a deterministic 2D acoustic FDTD simulation.
 
@@ -1594,7 +1908,7 @@ def fdtd_simulation(
     :param dx: Grid spacing [m] (square cells).
     :param duration: Physical time to simulate [s].
     :param sources: One or more of :class:`GaussianPulse`,
-        :class:`CWSource` or :class:`SignalSource`.
+        :class:`CWSource`, :class:`SignalSource` or :class:`PlaneWaveSource`.
     :param shape: Grid shape ``(ny, nx)``, required when ``c`` is a scalar.
     :param rho: Density map [kg/m3]; scalar or ``(ny, nx)`` array.
     :param cfl: Courant number in ``(0, 1)`` (Eqs. 4.13-4.14); the time step
@@ -1612,30 +1926,48 @@ def fdtd_simulation(
     :param damping: Uniform bulk amplitude decay rate [1/s].
     :param snapshot_every: Record a full pressure-field snapshot every this
         many steps (and at :math:`t = 0`); ``None`` records none.
+    :param snapshot_decimation: Keep every this many cells along each axis
+        in a snapshot (default 1, every cell); the result records it.
+    :param compute: Where the run steps (:class:`Compute`); ``None`` follows
+        :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :return: A :class:`FDTDResult`.
-    :raises TypeError: If an input is of the wrong type: a ``duration`` that
-        is not one number, an ``absorbing_layer_cells`` or ``snapshot_every``
-        that is not a number, a ``shape`` that is not a pair, a complex
-        medium, or an ``obstacle_mask`` that is not boolean.
+    :raises TypeError: If an input is of the wrong type: a ``duration``,
+        ``cfl`` or ``dx`` that is not one number, an ``absorbing_layer_cells``
+        that is not a number,
+        a ``snapshot_every`` or ``snapshot_decimation`` that is a flag, a text
+        or an array where a count goes, a ``shape`` that is not a pair, a
+        complex medium, an ``obstacle_mask`` that is not boolean, or a
+        ``compute`` that is not a :class:`Compute`.
     :raises ValueError: If the inputs are invalid.
+    :raises ComputeImportError: When the device's library is not installed
+        or does not import.
+    :raises ComputeDeviceError: When the device is not present, or fails a
+        first small computation; with ``fallback=True`` the run warns with
+        :class:`ComputeFallbackWarning` and steps on NumPy instead.
     """
     require_scalar(absorbing_layer_cells, "absorbing_layer_cells")
-    require_scalar(snapshot_every, "snapshot_every")
+    snapshot_every, d = _snapshot_options(snapshot_every, snapshot_decimation)
     if len(sources) == 0:
         msg = "at least one source is required"
         raise ValueError(msg)
     duration = _positive_finite("duration", duration)
-    if snapshot_every is not None:
-        snapshot_every = _integer("snapshot_every", snapshot_every)
-        if snapshot_every < 1:
-            msg = "snapshot_every must be >= 1"
-            raise ValueError(msg)
     absorbing_sides, edge_impedance = _parse_boundaries(boundaries)
     if absorbing_sides:
         absorbing_layer_cells = _integer("absorbing_layer_cells", absorbing_layer_cells)
         if absorbing_layer_cells < 1:
             msg = "absorbing_layer_cells must be >= 1"
             raise ValueError(msg)
+
+    # The grid, the obstacle, the sources, the probes and the step count are
+    # checked on the host first, through the helpers the engine uses, so a
+    # bad one raises its own error before the engine asks for its device.
+    c_map, _, dt = _acoustic_grid(c, shape, cfl, dx)
+    ny, nx = c_map.shape
+    obstacle = _validated_obstacle(obstacle_mask, ny, nx)
+    for source in sources:
+        _check_source(source, (ny, nx), obstacle)
+    probe_ix = _probe_indices(probes, (ny, nx), obstacle)
+    steps = _step_count(duration, dt)
 
     sim = FDTD2D(
         c,
@@ -1648,27 +1980,25 @@ def fdtd_simulation(
         shape=shape,
         edge_impedance=edge_impedance or None,
         obstacle_mask=obstacle_mask,
+        compute=compute,
     )
     for source in sources:
         sim.add_source(source)
-
-    ny, nx = sim.p.shape
-    probe_ix = _probe_indices(probes, (ny, nx), sim._obstacle)
-
-    steps = round(duration / sim.dt)
-    if steps < 1:
-        msg = f"duration must cover at least one time step (dt = {sim.dt:.3e} s)"
-        raise ValueError(msg)
     times = np.arange(steps + 1, dtype=np.float64) * sim.dt
     # The record keeps these two as they are (handed_over): the snapshots are
     # most of the result, and a copy would hold them twice while it is built.
+    # The probe histories are float64 whatever the run's dtype; the snapshots
+    # keep it, a float32 run's being half the size.
     pressures = np.zeros((probe_ix.shape[0], steps + 1), dtype=np.float64)
     snapshots = (
         None
         if snapshot_every is None
-        else np.zeros((steps // snapshot_every + 1, ny, nx), dtype=np.float64)
+        else np.zeros(
+            (steps // snapshot_every + 1, -(-ny // d), -(-nx // d)),
+            dtype=sim._backend.host_dtype,
+        )
     )
-    _record_run(sim, steps, probe_ix, snapshot_every, pressures, snapshots)
+    _record_run(sim, steps, probe_ix, snapshot_every, d, pressures, snapshots)
 
     positions = (probe_ix.astype(np.float64) + 0.5) * sim.dx
     return FDTDResult(
@@ -1687,4 +2017,6 @@ def fdtd_simulation(
             else np.arange(0, steps + 1, snapshot_every, dtype=np.float64) * sim.dt
         ),
         obstacle_mask=(sim._obstacle if sim._obstacle is not None else None),
+        snapshot_decimation=d,
+        provenance=sim.provenance,
     )

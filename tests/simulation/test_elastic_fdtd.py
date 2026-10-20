@@ -668,7 +668,15 @@ def test_source_validation() -> None:
         ),
         (
             {"recording": ElasticRecording(snapshot_every=0)},
-            "snapshot_every must be >= 1",
+            "'snapshot_every' must be a whole number, at least 1",
+        ),
+        (
+            {"recording": ElasticRecording(snapshot_every=-1)},
+            "'snapshot_every' must be a whole number, at least 1",
+        ),
+        (
+            {"recording": ElasticRecording(snapshot_every=2.5)},  # type: ignore[arg-type]
+            "'snapshot_every' must be a whole number",
         ),
         (
             {"recording": ElasticRecording(probes=[(99, 0)])},

@@ -996,9 +996,15 @@ def _where(obj: object) -> str:
     known = _WHERE.get(id(obj))
     if known is not None and known[0] is obj:
         return known[1]
+    # A decorated function (``@contextmanager``, ``functools.wraps``) is the
+    # decorator's wrapper, whose code lives in the decorator's file; its own
+    # code is under ``__wrapped__``. ``getsourcelines`` unwraps it and
+    # ``getsourcefile`` does not, so both read the function the source defines
+    # or the path and the line would come from two different files.
+    source = inspect.unwrap(obj) if inspect.isroutine(obj) else obj
     try:
-        path = inspect.getsourcefile(obj)  # type: ignore[arg-type]
-        line = inspect.getsourcelines(obj)[1]  # type: ignore[arg-type]
+        path = inspect.getsourcefile(source)  # type: ignore[arg-type]
+        line = inspect.getsourcelines(source)[1]  # type: ignore[arg-type]
     except (OSError, TypeError):
         path = None
     where = (

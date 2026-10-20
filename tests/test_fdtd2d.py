@@ -59,7 +59,7 @@ def test_centered_pulse_stays_symmetric() -> None:
 
 
 def test_two_runs_are_bit_identical() -> None:
-    frames = [_pulse_box(sponge_width=10).run(300, record_every=50) for _ in range(2)]
+    frames = [_pulse_box(sponge_width=10).run(300, snapshot_every=50) for _ in range(2)]
     assert frames[0].shape == (7, 81, 101)
     assert np.array_equal(frames[0], frames[1])
 
@@ -67,7 +67,7 @@ def test_two_runs_are_bit_identical() -> None:
 def test_cw_source_and_decimation() -> None:
     sim = fdtd2d.FDTD2D(343.0, 0.05, shape=(80, 100), damping=5.0)
     sim.add_source(fdtd2d.CWSource(ix=10, iy=10, frequency=200.0))
-    frames = sim.run(400, record_every=100, decimate=2)
+    frames = sim.run(400, snapshot_every=100, snapshot_decimation=2)
     assert frames.shape == (5, 40, 50)
     assert float(np.abs(frames[-1]).max()) > 0.0
 
@@ -215,8 +215,14 @@ def test_cw_source_rejects_invalid_parameters(
     ("kwargs", "match"),
     [
         ({"n_steps": -1}, "'n_steps' must be non-negative"),
-        ({"n_steps": 1, "record_every": 0}, "record_every must be >= 1"),
-        ({"n_steps": 1, "record_every": 1, "decimate": 0}, "decimate must be >= 1"),
+        (
+            {"n_steps": 1, "snapshot_every": 0},
+            "'snapshot_every' must be a whole number, at least 1",
+        ),
+        (
+            {"n_steps": 1, "snapshot_every": 1, "snapshot_decimation": 0},
+            "'snapshot_decimation' must be a whole number, at least 1",
+        ),
     ],
 )
 def test_run_rejects_invalid_recording_controls(

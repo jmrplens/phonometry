@@ -1,0 +1,5 @@
+# The torch backend of the FDTD engines, for the CI job that tests it. The CI
+# installs these from PyTorch's CPU index (--extra-index-url
+# https://download.pytorch.org/whl/cpu), so the CUDA wheels are never fetched.
+torch==2.14.1
+array-api-compat==1.15.0

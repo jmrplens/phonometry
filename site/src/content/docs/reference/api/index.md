@@ -390,3 +390,4 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`simulation.fdtd`](/phonometry/reference/api/simulation/fdtd/) | 2D acoustic finite-difference time-domain (FDTD) simulation. |
 | [`simulation.ntff`](/phonometry/reference/api/simulation/ntff/) | 2D near-to-far-field (NTFF) transformation over a closed contour. |
 | [`simulation.elastic_fdtd`](/phonometry/reference/api/simulation/elastic-fdtd/) | 2D elastic finite-difference time-domain (P-SV) simulation. |
+| [`simulation.compute`](/phonometry/reference/api/simulation/compute/) | Where an FDTD simulation runs: the device, its dtype and what to do if absent. |

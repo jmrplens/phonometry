@@ -12,10 +12,12 @@ dominio del tiempo (FDTD) integra las ecuaciones acústicas lineales sobre una
 malla 2D, de modo que la reflexión, la difracción, la interferencia, el
 comportamiento modal y la refracción en medios inhomogéneos emergen de
 primeros principios, y su compañero elástico lleva el mismo esquema a los
-sólidos. Ambos esquemas son deterministas (entradas idénticas dan
-salidas idénticas bit a bit en la misma plataforma), están validados contra
-oráculos analíticos y sirven además como motor de contraste para los modelos
-en forma cerrada de las demás secciones.
+sólidos. Ambos esquemas son deterministas (con NumPy en float64, entradas
+idénticas dan salidas idénticas bit a bit en la misma plataforma), están
+validados contra oráculos analíticos y sirven además como motor de contraste
+para los modelos en forma cerrada de las demás secciones. Los dos calculan
+también en una GPU de NVIDIA con CuPy o con PyTorch cuando se les pide, con
+el mismo código, y cada resultado registra dónde se calculó.
 
 El dominio 2D es una **sección**, y eso tiene una consecuencia que conviene
 zanjar antes de que salga ningún número de la simulación: un punto del plano es
@@ -37,7 +39,10 @@ regla de resolución de celdas por longitud de onda. La página elástica
 extiende la misma malla escalonada a los sólidos: ondas de cizalla,
 superficies libres con ondas de Rayleigh, y el acoplamiento fluido-sólido
 con conversión de modo, ondas de interfase de Scholte y transmisión de
-placas sumergidas.
+placas sumergidas. Una tercera página, común a las dos, explica dónde se
+calcula una ejecución: NumPy, CuPy o torch, elegido por llamada, por bloque de
+código o por proceso, con lo que se promete sobre los números en cada
+dispositivo.
 
 Una buena forma de leerla es junto a las páginas de forma cerrada que
 contrasta: las frecuencias modales de
@@ -134,6 +139,11 @@ dice en su propia apertura.
   misma malla, con superficies libres por imagen de esfuerzos, ondas de
   Rayleigh, conversión de modo, ondas de interfase de Scholte y transmisión
   de placas sumergidas, cada una validada contra su forma cerrada exacta.
+- [Dónde se calcula una simulación: NumPy, CuPy y torch](/phonometry/es/simulation/compute/):
+  los dos esquemas con NumPy, en una GPU de NVIDIA con CuPy o con PyTorch,
+  la petición `Compute`, `use()` y `PHONOMETRY_COMPUTE`, la vuelta a NumPy,
+  la procedencia que registra un resultado, los campos idénticos bit a bit
+  de CuPy, las cotas publicadas de torch y las instantáneas diezmadas.
 
 ## Qué no cubre esta sección
 

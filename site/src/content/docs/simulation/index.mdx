@@ -11,10 +11,12 @@ field itself**. A finite-difference time-domain (FDTD) solver integrates the
 linear acoustic equations on a 2D grid, so reflection, diffraction,
 interference, modal behaviour and refraction through inhomogeneous media all
 emerge from first principles, and its elastic companion carries the same
-scheme into solids. Both solvers are deterministic (identical inputs give
-bit-identical outputs on the same platform), validated against analytic
-oracles, and double as a cross-check engine for the closed-form models of
-the other sections.
+scheme into solids. Both solvers are deterministic (on NumPy in float64,
+identical inputs give bit-identical outputs on the same platform), validated
+against analytic oracles, and double as a cross-check engine for the
+closed-form models of the other sections. Both also step on an NVIDIA GPU
+through CuPy or on PyTorch when asked, from the same code, and every result
+records where it ran.
 
 The 2D domain is a **cross-section**, and that has one consequence worth
 settling before any number leaves the solver: a point in the plane is
@@ -33,7 +35,10 @@ its cost, what a 2D domain can and cannot say about a 3D problem, and how
 numerical dispersion sets the cells-per-wavelength resolution rule. The
 elastic page extends the same staggered grid to solids: shear waves, free
 surfaces with Rayleigh waves, and fluid-solid coupling with mode
-conversion, Scholte interface waves and immersed-plate transmission.
+conversion, Scholte interface waves and immersed-plate transmission. A third
+page, common to both, says where a run steps: NumPy, CuPy or torch, chosen
+per call, per block of code or per process, with what is promised about the
+numbers on each device.
 
 A good way to read it is alongside the closed-form pages it cross-checks:
 the modal frequencies of [room acoustics](/phonometry/buildings/rooms/room-acoustics/)
@@ -111,6 +116,11 @@ so in its own opening.
   grid, with stress-imaging free surfaces, Rayleigh waves, mode conversion,
   Scholte interface waves and immersed-plate transmission, each validated
   against its exact closed form.
+- [Where a simulation runs: NumPy, CuPy and torch](/phonometry/simulation/compute/):
+  both solvers on NumPy, on an NVIDIA GPU through CuPy or on PyTorch, the
+  `Compute` request, `use()` and `PHONOMETRY_COMPUTE`, the fallback to
+  NumPy, the provenance a result records, the bit-identical CuPy fields and
+  the published torch bounds, and decimated snapshots.
 
 ## What this section does not cover
 

@@ -755,6 +755,7 @@ estos aparecen en la tabla de los nombres que ya no están.
 | `trials=` en `metrology.monte_carlo`, y `MonteCarloResult.trials` | `n_trials` |
 | el `passages` de `silencer_self_noise`, `valve_style_modifier`, `multihole_incipient_cavitation_ratio` y `uniform_passage_style_modifier`, y el `stages` de `stage_level_correction` | `n_passages` y `n_stages` |
 | el `steps` de `FDTD2D.run` y `ElasticFDTD2D.run`, y `max_arrivals=` en `underwater.eigenrays` | `n_steps` y `max_n_arrivals=` |
+| `record_every=` y `decimate=` en `FDTD2D.run` y `ElasticFDTD2D.run` | `snapshot_every=` y `snapshot_decimation=`, los nombres que dan `fdtd_simulation` y `ElasticRecording` a las mismas dos cuentas |
 | `sidebands=` en `gear_mesh_frequencies` y `induction_motor_frequencies`, el `poles`, el `rotor_bars` y el `slot_harmonics` de `induction_motor_frequencies`, y `lobe_orders=` en `blade_pass_frequencies` | `n_sidebands`, `n_poles`, `n_rotor_bars`, `n_slot_harmonics` y `n_lobe_orders` |
 | `years=` en `hearing.nipts` y `htlan` y en `vibration.injury_risk` y `multiple_shock_assessment`, y `.years` en los resultados de la ISO 1999 (`NiptsResult` y `HtlanResult` en la 3.3.0) y en `MultipleShockResult` | `exposure_duration_years`: una duración nombra su magnitud antes que su unidad |
 | `environment.NoisePhase.hours` y `hours=` en `evaluation_period_level` | `duration_hours` |
@@ -1311,6 +1312,14 @@ o con `None` en uno (también mediante `dataclasses.replace`), lanza
 | `vibration.JunctionTransmissionResult` | `thickness1_m` y `thickness2_m`, las placas de la unión, por nombre |
 | `noise_control.ReactiveSilencerResult` | `plane_wave_limit`, y exactamente uno de `geometry` (un dispositivo con nombre) y `chain` (una `SilencerChain`); `resonances`, `geometry`, `plane_wave_limit` y `chain` van por nombre |
 
+`simulation.FDTDResult` y `simulation.ElasticFDTDResult` toman dos campos
+más, detrás de los demás: `snapshot_decimation`, cada cuántas celdas guarda
+una instantánea en cada eje (1 para todas, como antes), y `provenance`, el
+`simulation.RunProvenance` de dónde se calculó la ejecución. Un resultado
+construido a mano pasa los dos, y dejar fuera uno lanza `TypeError`
+nombrándolo; los resultados que devuelven las funciones de simulación ya
+llevan los dos.
+
 `filters.WeightingFilter(..., high_accuracy=None)` seleccionaba el valor por
 defecto. Ahora `high_accuracy` es un `bool` sin más, `True` por defecto, y
 `None` lanza `TypeError` en vez de leerse como falso, lo que elegiría el diseño
@@ -1358,7 +1367,7 @@ veces. Y la aritmética sobre un bloque, o sobre lo que un filtro devuelve para
 
 ## Las tablas publicadas no admiten escritura
 
-Toda tabla que la biblioteca publica a nivel de módulo es de sólo lectura en
+Toda tabla que la biblioteca publica a nivel de módulo es de solo lectura en
 la 4.0. En la 3.3.0 las tablas publicadas eran diccionarios corrientes y los
 arrays publicados admitían aritmética sobre el propio array, así que una
 línea como `REFERENCE_CURVE[500] = 0.9` o `BAND_IMPORTANCE *= 2` cambiaba el
@@ -1385,7 +1394,7 @@ print(REFERENCE_CURVE[4000], curve[4000], curves[0, 0], room.NC_CURVE_LEVELS[0, 
 Una tabla que lleva tablas dentro necesita copiar cada nivel, como en
 `{area: dict(rows) for area, rows in GUIDE_VALUES.items()}`. La misma copia
 hace falta antes de serializar una tabla con pickle, copiarla en profundidad o
-escribirla como JSON, porque un mapeo de sólo lectura no admite ninguna de las
+escribirla como JSON, porque un mapeo de solo lectura no admite ninguna de las
 tres cosas.
 
 ## Un resultado guarda una copia propia de los arrays que recibe
@@ -1396,15 +1405,20 @@ para niveles y frecuencias, porque en ese caso `np.asarray` devuelve su
 argumento sin tocarlo. Cambiar después el array de quien llamaba,
 `levels[0] = 0.0` o `frequencies *= 2`, cambiaba un resultado ya calculado y
 quizá ya impreso. En la 4.0 todo array que una función o un método de la
-biblioteca guarda de los argumentos que recibe es una copia propia, de sólo
+biblioteca guarda de los argumentos que recibe es una copia propia, de solo
 lectura como las tablas publicadas, y el array de quien llama queda como
 estaba. Lo mismo vale para los objetos que guardan arrays para entregarlos
 después: la rejilla de frecuencias de una `noise_control.SilencerChain`, los
 ejes y las trayectorias con los que se construye una `aircraft.ANPDatabase`
 y los mapas del medio de `simulation.FDTD2D` y `simulation.ElasticFDTD2D`,
 cuyos `c`, `rho`, `c_p` y `c_s` siguen siendo ahora aquellos con los que se
-calculó el paso de tiempo. Una `Signal` también guarda una copia propia de
-sus muestras, que sigue siendo escribible para procesarla en su sitio, como
+calculó el paso de tiempo. Los mapas que las simulaciones derivan de ellos,
+`FDTD2D.kappa` y `ElasticFDTD2D.mu` y `.lam`, son también copias de solo
+lectura en el anfitrión (la memoria de la CPU): en la 4.0.0rc1 editar uno
+llegaba a parte del avance y no al paso de tiempo, y ahora lanza
+`ValueError`, así que otro medio es una simulación nueva construida con los
+mapas editados. Una `Signal` también guarda una copia propia de sus
+muestras, que sigue siendo escribible para procesarla en su sitio, como
 siempre lo fueron las muestras de un fichero leído con `io.read`. Un registro
 de resultado construido a mano, llamando directamente a su clase, hace la
 misma copia: todo registro público que puede guardar un array copia los

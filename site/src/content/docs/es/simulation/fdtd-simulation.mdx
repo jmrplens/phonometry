@@ -57,9 +57,11 @@ tiempo (Ecs. 4.11-4.12), la condición de estabilidad de Courant
 (Ec. 4.32) y el contorno de impedancia real independiente de la frecuencia
 (Ecs. 4.33-4.35).
 
-El esquema es **determinista por diseño**: aritmética float64, sin
-números aleatorios y avance numpy monohilo, de modo que las mismas entradas
-producen salidas idénticas bit a bit en la misma plataforma. Es el motor de
+El esquema es **determinista por diseño**: sin números aleatorios y con
+todas las operaciones en un orden fijo, de modo que con NumPy en float64 las
+mismas entradas producen salidas idénticas bit a bit en la misma plataforma,
+y con CuPy los campos salen idénticos bit a bit a los de NumPy en la GPU en
+la que se midieron. Es el motor de
 las animaciones FDTD de esta documentación, elevado a API pública con
 fuentes, sondas de presión, obstáculos rasterizados, condiciones de contorno
 por lado y un objeto de resultado congelado.
@@ -152,7 +154,25 @@ res = simulation.fdtd_simulation(
 )
 print(res.size)                  # (3.0, 2.0)  metros
 print(round(res.dt * 1e6, 2))    # 12.37  microsegundos (CN = 0.6)
+print(res.provenance.device, res.provenance.dtype)   # cpu float64
 res.plot()                       # historias de presión en las sondas (figura de la sección 5)
+```
+
+La ejecución se calculó con NumPy en float64, y `res.provenance` lo registra.
+La misma llamada calcula en una GPU de NVIDIA con CuPy, o con PyTorch, con un
+argumento más; [Dónde se calcula una
+simulación](/phonometry/es/simulation/compute/) trata los dispositivos, qué
+hay que instalar para cada uno, cómo elige uno todo un script y qué se promete
+sobre los números en cada uno.
+
+```py
+on_gpu = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    probes=[(200, 100)],
+    compute=simulation.Compute(device="cupy"),
+)
+print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, y el nombre de la tarjeta
 ```
 
 El paso temporal no es una entrada. Sale de `cfl` y de la mayor velocidad
@@ -574,7 +594,7 @@ lejano, pero una caja FDTD termina a un par de longitudes de onda del
 dispersor. La pareja `add_contour_probe` / `far_field_from_contour` salva
 esa distancia con la integral de Kirchhoff-Helmholtz 2D: la sonda pliega la
 presión y la velocidad normal saliente del régimen estacionario, sobre un
-rectángulo cerrado de caras de celda, en acumuladores complejos (una DFT al
+rectángulo cerrado de caras de celda, en sumas de DFT acumuladas (una DFT al
 vuelo por punto y frecuencia, así que un régimen de onda continua no
 almacena historias temporales), y la integral propaga esos fasores hasta el
 infinito con la función de Green de espacio libre $-(j/4)\,H_0^{(2)}(kR)$, la
@@ -1026,8 +1046,9 @@ de dispersión.
 
 El `FDTDResult` congelado lleva el eje temporal, las historias de presión por
 sonda, las posiciones de las sondas en metros, los metadatos de la malla, las
-fuentes, las instantáneas opcionales del campo con sus tiempos y la máscara
-de obstáculos; su `.plot()` dibuja las historias de las sondas, y
+fuentes, las instantáneas opcionales del campo con sus tiempos y su
+diezmado, la máscara de obstáculos y la procedencia de la ejecución; su
+`.plot()` dibuja las historias de las sondas, y
 `.plot(kind="snapshot")` representa un campo registrado con la geometría
 superpuesta.
 
@@ -1096,6 +1117,9 @@ fluido-sólido](/phonometry/es/simulation/elastic-waves/).
 - [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
   el esquema compañero P-SV sobre la misma malla escalonada, con ondas
   de Rayleigh y de Scholte, conversión de modo y placas sumergidas.
+- [Dónde se calcula una simulación](/phonometry/es/simulation/compute/): la
+  misma ejecución en una GPU de NVIDIA con CuPy o con PyTorch, y lo que se
+  promete sobre sus números.
 - [Informe de conformidad](/phonometry/es/reference/conformance/): dos de los anclajes
   de validación en forma cerrada de la sección 6 se ejecutan ahí.
 - Referencia de la API: [`simulation.fdtd`](/phonometry/es/reference/api/simulation/fdtd/),

@@ -30,7 +30,7 @@ Each rule on a page has the same parts:
 - [Naming](naming.md) (N): modules, classes, errors and warnings, functions, parameters and record fields, constants, and the words, units and spelling names are made of.
 - [API shape](api.md) (A): where a public name lives and how it is imported, what a module publishes, the shape of a signature, what a function returns, how a verdict answers, which error or warning a refusal raises, and how a name is renamed or retired.
 - [Docstrings and comments](docstrings.md) (D, C): the module docstring and the document it names, function and class docstrings, the mathematics they carry, comments in the code, and how long a module grows. D rules cover docstrings and modules, C rules cover comments.
-- [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, and the data the package publishes.
+- [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, the data the package publishes, and the fields an FDTD engine steps.
 - [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, and the workflows under `.github/`.
 - [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues page, the errata register and the frames of a clip.
 - [Prose, commits and pull requests](prose.md) (P): the language of each surface, the characters a text may hold, citing a page, the CHANGELOG, commit messages and pull request text.
@@ -192,6 +192,7 @@ Each rule on a page has the same parts:
 | [X18](numerics.md#x18) | Write a catalogue number as printed, and say in words why a cell is empty | `tests/test_internal_catalogue.py::test_no_number_carries_more_digits_than_a_page_prints`, `tests/test_internal_catalogue.py::test_an_unquantified_cell_holds_what_the_page_printed`, `tests/test_internal_catalogue.py::test_a_not_derivable_cell_says_why_in_words`, `tests/test_internal_catalogue.py::test_a_misprinted_cell_says_what_the_page_printed_and_why_it_cannot_be` |
 | [X19](numerics.md#x19) | Publish both values when two printed sources disagree; never vote by majority | `scripts/check_solid_agreement.py`, `scripts/check_shared_sources.py`, `make solid-agreement`, `make shared-sources`, `CI: The books agree about the solids they share`, `tests/test_check_solid_agreement.py` |
 | [X20](numerics.md#x20) | Rename a catalogue field in its data, spec, schema, baseline and translations together | `tests/test_published_catalogue_fingerprint.py::test_every_published_row_is_the_baseline_carried_through_the_changes`, `make catalogue-data`, `make catalogue-schema` |
+| [X21](numerics.md#x21) | Touch an engine's field only with Array API standard operations | `CI: FDTD engines on array-api-strict and torch (CPU)`, `tests/simulation/test_gpu_parity_lock.py` |
 
 ### Tests
 

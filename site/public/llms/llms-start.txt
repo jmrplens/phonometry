@@ -129,8 +129,9 @@ phonometry needs Python 3.12 or newer, with NumPy 2.0.2 and SciPy 1.14.0
 or later. Each of those floors, and each floor of the extras, is the oldest
 release the library's tests pass with, and a CI job installs exactly those
 releases on Python 3.12 to keep it so: matplotlib 3.10.7 for `[plot]`,
-reportlab 4.0.4 and svglib 0.9.0 for `[report]`, numba 0.60.0 for `[perf]` and
-python-soundfile 0.12.0 for `[audio]`.
+reportlab 4.0.4 and svglib 0.9.0 for `[report]`, numba 0.60.0 for `[perf]`,
+python-soundfile 0.12.0 for `[audio]` and torch 2.3.0 with
+array-api-compat 1.5.1 for `[torch]`.
 
 Optional extras:
 
@@ -140,20 +141,24 @@ pip install phonometry[perf]    # numba, faster 'impulse' time weighting
 pip install phonometry[report]  # reportlab + svglib, so result .report() methods render normative PDF fiches (their figure panel needs [plot] too)
 pip install phonometry[audio]   # python-soundfile, so phonometry.io also reads FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV
 pip install phonometry[full]    # all of the above (recommended)
+pip install phonometry[torch]   # torch + array-api-compat, so the FDTD engines run on PyTorch (CPU, CUDA or Apple MPS); not part of [full]
 ```
 
 I recommend `pip install phonometry[full]`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
-enabled. The base install computes every metric on NumPy and SciPy alone, and
-that includes reading every linear measurement WAV (24-bit, multichannel
-EXTENSIBLE, RF64) through `phonometry.io`; the only things it leaves
-unavailable are the figures (`.plot()` and the filter response plots), the
-normative PDF fiches (`.report()`), the compiled kernel that speeds up the
-`impulse` time weighting, and the compressed audio formats. One licensing note
-on `[audio]`: it installs python-soundfile, whose wheel bundles **libsndfile
-under the LGPL-2.1** (dynamically linked, the same pattern as librosa and
-torchaudio). The base install deliberately stays free of it, which is why the
-metrological formats need no extra.
+enabled except the torch backend of the FDTD engines, which `[torch]` adds. The
+base install computes every metric on NumPy and SciPy alone, and that includes
+reading every linear measurement WAV (24-bit, multichannel EXTENSIBLE, RF64)
+through `phonometry.io`; the only things it leaves unavailable are the figures
+(`.plot()` and the filter response plots), the normative PDF fiches
+(`.report()`), the compiled kernel that speeds up the `impulse` time weighting,
+the other audio formats (FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV), and the
+torch backend of the FDTD engines (which run on NumPy either way, and on an
+NVIDIA GPU once CuPy is installed). One licensing note on `[audio]`: it
+installs python-soundfile, whose wheel bundles **libsndfile under the
+LGPL-2.1** (dynamically linked, the same pattern as librosa and torchaudio).
+The base install deliberately stays free of it, which is why the metrological
+formats need no extra.
 
 One caveat about `[full]`: numba is the only extra that caps NumPy, and it
 raises that cap only once it supports a new NumPy minor. So in the weeks after
@@ -161,6 +166,17 @@ a NumPy minor release, `phonometry[full]` (like `phonometry[perf]`) can resolve
 one minor behind what a plain install gets. numba only makes the `impulse` time
 weighting faster, so if you need the newest NumPy the day it ships, install
 `phonometry[plot,report]` and leave `[perf]` out.
+
+`[full]` leaves `[torch]` out on purpose: the torch wheels PyPI serves on Linux
+bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
+take torch from PyTorch's CPU index and those libraries stay out:
+
+```bash
+pip install phonometry[torch] --extra-index-url https://download.pytorch.org/whl/cpu
+```
+
+[Where a simulation runs](https://docs.jmrp.io/phonometry/simulation/compute/) says what each device of the FDTD engines
+needs, CuPy's wheel for an NVIDIA GPU among them.
 
 **Option 2: Cloning and Installing**
 

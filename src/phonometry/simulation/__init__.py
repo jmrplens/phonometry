@@ -3,6 +3,14 @@
 
 from __future__ import annotations
 
+from .compute import (
+    Compute,
+    ComputeDeviceError,
+    ComputeFallbackWarning,
+    ComputeImportError,
+    RunProvenance,
+    use,
+)
 from .elastic_fdtd import (
     AIR,
     ALUMINUM,
@@ -40,6 +48,10 @@ __all__ = [
     "STEEL",
     "WATER",
     "CWSource",
+    "Compute",
+    "ComputeDeviceError",
+    "ComputeFallbackWarning",
+    "ComputeImportError",
     "ContourPhasors",
     "ContourProbe",
     "ElasticBoundaries",
@@ -52,9 +64,11 @@ __all__ = [
     "GaussianPulse",
     "Material",
     "PlaneWaveSource",
+    "RunProvenance",
     "SignalSource",
     "elastic_fdtd_simulation",
     "far_field_from_contour",
     "fdtd_simulation",
     "scholte_speed",
+    "use",
 ]

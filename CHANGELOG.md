@@ -9,6 +9,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **The FDTD engines step on an NVIDIA GPU through CuPy, or on PyTorch, from
+  the same code, and every result records where it ran.**
+  `simulation.Compute(device=, device_index=, dtype=, fallback=)` names where
+  `FDTD2D`, `ElasticFDTD2D`, `ElasticFDTD2D.from_regions`, `fdtd_simulation`
+  and `elastic_fdtd_simulation` step: `"cpu"` (NumPy, the default), `"cupy"`,
+  `"torch:cpu"`, `"torch:cuda"` or `"torch:mps"`, in float64 or float32,
+  passed as `compute=`. A `with simulation.use(...)` block sets it for the
+  code inside, and the `PHONOMETRY_COMPUTE` environment variable (`cupy:1`,
+  `torch:mps,float32`, `torch:cuda,fallback`) for a whole process; the
+  argument wins over the block, the block over the variable, and the
+  variable over NumPy in float64. Building a `Compute` imports and probes
+  nothing. An engine checks its arguments first and the request after,
+  when it is built: it raises `ComputeImportError` when the device's library
+  is missing or does not import, with the import's own reason, and
+  `ComputeDeviceError` when the device itself is absent or unusable, a
+  device that says it is there being given one small computation, once per
+  process, to prove it; with `fallback=True` it warns with
+  `ComputeFallbackWarning` at the caller's line instead and steps on NumPy.
+  `FDTDResult.provenance`, `ElasticFDTDResult.provenance` and the engines'
+  `.provenance` are a `RunProvenance`: the device, the dtype, the NumPy and
+  array library versions, the CUDA runtime and the GPU's name. A result
+  refuses a provenance that is not one, and a `RunProvenance` refuses fields
+  no run could have written. On another
+  device the engines' fields, `ElasticFDTD2D.p` and `collocated()` included,
+  are that device's arrays, `host_field(name)` gives a NumPy copy on any
+  device, and a result holds NumPy arrays whatever stepped. After
+  construction the engines touch their fields only with Array API standard
+  operations, and NumPy's numbers did not move: the NumPy path is held bit
+  for bit to a frozen copy of the engines as they were. On CuPy in float64
+  every field, snapshot and contour phasor came out bit-identical to NumPy's
+  on an NVIDIA GeForce RTX 4060 with CuPy 14.2.0, and the energy within
+  1.79e-16 relative; `gpu-parity.lock` records that proof with a fingerprint
+  of the engines, which CI checks on every pull request. torch on a CPU stays
+  within 9e-16 of NumPy in float64 and within 2e-06 in float32, and NumPy in
+  float32 within 3e-06 of its float64 run, each measured over every CPU
+  kernel level at the oldest and the newest release of the library. Every
+  one of these bounds is the worst over the scenario matrix (grids of up to
+  64 by 48 cells, up to 120 steps), not a promise about any run: float32
+  rounding grows with the number of steps, and a run of 8085 steps on a 200
+  by 300 cell grid, driven by a 1 kHz `CWSource`, differed by 8.0e-06
+  relative at its probe (4.0e-06 with a Gaussian pulse). A CI job holds
+  torch and array-api-strict to the engines, every job that runs the
+  simulation tests holds NumPy in float32 to its bound and the main test
+  matrix prints that number on each of its runners, and another job measures
+  MPS on a macOS runner, where it also runs a 3000-step float32 contour
+  check. The contour probe's running sums are float64 on every device that
+  has float64, also in a float32 run. The new guide, "Where a simulation
+  runs", says all of this in English and Spanish, and the contributor guide
+  adds X21: an engine touches its fields only with Array API standard
+  operations.
+
+- **A snapshot can keep every d-th cell, and the result says so.**
+  `snapshot_decimation=` on `fdtd_simulation`, `ElasticRecording`,
+  `FDTD2D.run` and `ElasticFDTD2D.run` keeps every d-th cell along each axis,
+  starting with the first, so a frame is `ceil(ny / d)` by `ceil(nx / d)`, a
+  quarter of the memory at `d = 2`; on a GPU the field is sliced on the
+  device and only the kept cells cross to the host.
+  `FDTDResult.snapshot_decimation` and `ElasticFDTDResult.snapshot_decimation`
+  record it as an `int`, a result refuses snapshots that are not on the
+  decimated grid, and `.plot(kind="snapshot")` draws each sample over the
+  block of cells it was taken from, with the axes on the whole domain. The
+  snapshots keep the dtype the run stepped in, so a float32 run's take half
+  the memory; the probe histories stay float64.
+
+- **`pip install phonometry[torch]` installs the torch backend of the FDTD
+  engines.** It brings torch 2.3.0 or later and array-api-compat 1.5.1 or
+  later, the oldest releases the backend's tests pass with, which the
+  minimum-versions CI job installs. `[full]` leaves it out on purpose,
+  because the torch wheels PyPI serves on Linux bring gigabytes of CUDA
+  libraries; on a Linux machine without an NVIDIA GPU,
+  `pip install phonometry[torch] --extra-index-url https://download.pytorch.org/whl/cpu`
+  takes the CPU wheels instead. The install pages, the README and llms.txt
+  say so in English and Spanish.
+
 - **Contributors and coding agents have one written style guide.**
   `docs/contributing/` says how phonometry names things, shapes its public API,
   writes docstrings and comments, compares and holds numbers, writes tests,
@@ -1984,6 +2058,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **`fdtd_simulation` takes a `PlaneWaveSource` by its type, and draws the
+  snapshot of a plane-wave run.** The function always handed a plane wave to
+  the engine, but its `sources` were typed and documented as point sources
+  only, and `FDTDResult.plot(kind="snapshot")` on a plane-wave run raised
+  `AttributeError` looking for the source's cell. `sources` now takes
+  `GaussianPulse`, `CWSource`, `SignalSource` or `PlaneWaveSource`, and the
+  snapshot marks the point sources only.
+
 - **Every frame of every animation clip passes the checks the figures pass,
   and a clip is encoded in all four of its variants or in none.** The figure
   checks read the committed SVGs for a label a line strikes through or a later
@@ -3198,6 +3280,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   carries each kind of empty list, printed the way the older versions print.
 
 ### Changed
+
+- **`FDTD2D.run` and `ElasticFDTD2D.run` name their snapshot options as the
+  simulation functions do.** `record_every=` is `snapshot_every=` and
+  `decimate=` is `snapshot_decimation=`, the names `fdtd_simulation` and
+  `ElasticRecording` take, and every route refuses a bad count with the same
+  class and the same words: a flag, a text or an array is a `TypeError`, and
+  a number that is not a whole number of 1 or more a `ValueError`. A call
+  that passed the cadence by position is unchanged; one that named it
+  renames it, as the migration guide shows.
+
+- **`FDTD2D.kappa`, `ElasticFDTD2D.mu` and `ElasticFDTD2D.lam` are
+  read-only.** They are host copies the engine computed from its medium, as
+  `c`, `rho`, `c_p` and `c_s` already were. An edit used to reach part of the
+  step and not the time step computed from the same maps; now it raises
+  `ValueError`, and the engine steps on device copies of its own. A
+  different medium is a new engine built from edited maps.
 
 - **Every fixed choice of the public API is a `Literal` of its options.** A
   parameter or a record field that the library checks against a fixed set of

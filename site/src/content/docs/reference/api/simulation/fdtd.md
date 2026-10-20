@@ -30,9 +30,22 @@ field snapshots and a `.plot()` method. [`FDTD2D`](/phonometry/reference/api/sim
 stepping engine (also used by the documentation animations) for callers that
 need frame-by-frame access to the field.
 
-The solver is deliberately deterministic: float64 arithmetic throughout, no
-random numbers and single-threaded numpy execution, so identical inputs give
-bit-identical outputs on the same platform.
+The solver is deliberately deterministic: no random numbers, and every
+operation in a fixed order. On NumPy in float64 identical inputs give
+bit-identical outputs on the same platform. On CuPy in float64 the recorded
+proof (`gpu-parity.lock`) found every field, snapshot and contour phasor
+bit-identical to NumPy's over the scenarios of both engines, and the energy
+within 1.79e-16 relative over them, because the GPU sums it in another
+order; the guide on where a simulation runs names the hardware it was
+measured on. Runs on torch's CPU device, and float32 runs on NumPy, agree
+with NumPy in float64 within the tolerance that guide publishes for each
+device and dtype. Each of these bounds is the worst over that scenario
+matrix (grids of up to 64 by 48 cells, up to 120 steps), not a promise about
+any run: float32 rounding grows with the number of steps. An acoustic run
+of 8085 steps on a 200 by 300 cell grid, driven by a 1 kHz `CWSource`,
+differed by 8.0e-06 relative at its probe (4.0e-06 with a Gaussian pulse),
+on NumPy and on torch's CPU device alike. A float32 run on CuPy, and any run
+on torch's CUDA device, is not measured yet.
 
 Validated against analytic oracles: the eigenfrequencies of a rigid
 rectangular box and of an effectively 1D tube, the numerical dispersion
@@ -64,10 +77,10 @@ rectangle of cell faces around the cell block `ix0..ix1` x
 `iy0..iy1` (inclusive); on each face the engine samples the outward
 normal velocity (which lives exactly there on the staggered grid) and
 the pressure averaged from the two adjacent cell centres, and folds
-them into complex accumulators at each requested frequency, so a
+them into running DFT sums at each requested frequency, so a
 continuous-wave run never stores full time histories.
 
-After every step the accumulators gain $p\, \mathrm{e}^{-j \omega t}$ with
+After every step the sums gain $p\, \mathrm{e}^{-j \omega t}$ with
 the fields' own leapfrog time stamps ($t = n\,\Delta t$ for
 pressure, $t = (n - 1/2)\,\Delta t$ for velocity, so the half-step
 stagger is handled
@@ -77,6 +90,12 @@ convention. Accumulate only over the steady state: run the transient
 out, call `reset`, then integrate a window as close as possible
 to a whole number of periods (the residual leakage falls as one over
 the number of periods).
+
+The sums are kept in float64 on every device that has it, also when the
+fields step in float32: the rounding of a sum grows with the number of
+steps, and in float32 it would soon outweigh the field's own. The
+exception is `torch:mps`, which has no float64; there the sums are
+float32 with Neumaier's compensated summation.
 
 **Attributes**
 
@@ -121,7 +140,7 @@ The accumulated contour phasors at one tracked frequency.
 ContourProbe.reset() -> None
 ```
 
-Clear the accumulators (call once the field is steady).
+Clear the running sums (call once the field is steady).
 
 ## CWSource
 
@@ -175,6 +194,7 @@ FDTD2D(
     shape: tuple[int, int] | None = None,
     edge_impedance: Mapping[Literal['left', 'right', 'top', 'bottom'], float | NDArray[np.float64]] | None = None,
     obstacle_mask: NDArray[np.bool_] | None = None,
+    compute: Compute | None = None,
 )
 ```
 
@@ -204,12 +224,15 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 | `shape` | Grid shape `(ny, nx)`, required only when `c` is a scalar. |
 | `edge_impedance` | Locally reacting boundary sides: a mapping from side name to a real specific acoustic impedance [Pa s/m], either a scalar or a per-edge-cell 1D array (length `ny` for `left`/ `right`, `nx` for `top`/`bottom`). Implements Eqs. (4.33)-(4.35); $Z = \rho c$ is a normal-incidence matched (anechoic) edge. A side cannot be both a sponge and an impedance boundary. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells: every face adjacent to a masked cell is closed (zero normal velocity, Eq. 4.32), rasterising arbitrary interior geometry. |
+| `compute` | Where the engine steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl`, `dx` or `sponge_reflection` is not a single number, or `sponge_width` is a flag, a text or an array where a count goes. |
+| TypeError | if `cfl`, `dx` or `sponge_reflection` is not a single number, `sponge_width` is a flag, a text or an array where a count goes, or `compute` is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
+| ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
+| ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 
 ### FDTD2D.add_contour_probe()
 
@@ -233,7 +256,7 @@ $y = i_{y0}\,\Delta x$ and $y = (i_{y1}+1)\,\Delta x$. From
 the step after registration the engine
 folds the face pressures (averaged from the two adjacent cell
 centres) and the outward face normal velocities into running DFT
-accumulators at each requested frequency; see [`ContourProbe`](/phonometry/reference/api/simulation/fdtd/#contourprobe)
+sums at each requested frequency; see [`ContourProbe`](/phonometry/reference/api/simulation/fdtd/#contourprobe)
 for the steady-state protocol and
 [`far_field_from_contour`](/phonometry/reference/api/simulation/ntff/#far_field_from_contour) for the
 far-field transformation of the captured phasors.
@@ -329,6 +352,27 @@ FDTD2D.energy() -> float
 
 Total acoustic field energy [J per metre of depth].
 
+### FDTD2D.host_field()
+
+```python
+FDTD2D.host_field(name: Literal['p', 'vx', 'vy']) -> NDArray[np.floating]
+```
+
+A NumPy copy of the stored field *name*, whatever the device.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | `"p"` (cell centres), `"vx"` or `"vy"` (faces). |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `name` is not a text. |
+| ValueError | for a field the engine does not store. |
+
 ### FDTD2D.plot_geometry()
 
 ```python
@@ -358,30 +402,38 @@ time stepping happens. Requires matplotlib
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the obstacle `imshow`. |
 
+### FDTD2D.provenance
+
+*property*
+
+Where this engine steps: device, dtype and library versions.
+
 ### FDTD2D.run()
 
 ```python
 FDTD2D.run(
     n_steps: int,
-    record_every: int | None = None,
-    decimate: int = 1,
-) -> NDArray[np.float64]
+    snapshot_every: int | None = None,
+    snapshot_decimation: int = 1,
+) -> NDArray[np.floating]
 ```
 
 Advance `n_steps` steps, optionally recording pressure frames.
 
-With `record_every = k` a snapshot of `p` is stored after every
-`k`-th step (and one of the initial state), spatially subsampled by
-`decimate`; the stacked `(n_frames, ny', nx')` array plugs
-straight into a `FuncAnimation` `imshow` update. Without
-`record_every` an empty array is returned and only the final state
-is kept (read it from `self.p`).
+With `snapshot_every = k` a host copy of `p` is stored after
+every `k`-th step (and one of the initial state), keeping every
+`snapshot_decimation`-th cell along each axis; the stacked
+`(n_frames, ny', nx')` array plugs straight into a `FuncAnimation`
+`imshow` update. Without `snapshot_every` an empty array is
+returned and only the final state is kept (read it with
+`host_field`).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `decimate`, `n_steps` or `record_every` is a flag, a text or an array where a count goes. |
+| TypeError | if `snapshot_decimation`, `n_steps` or `snapshot_every` is a flag, a text or an array where a count goes. |
+| ValueError | if `n_steps` is not a whole number of 0 or more, or `snapshot_every` or `snapshot_decimation` is not a whole number of 1 or more. |
 
 ### FDTD2D.step()
 
@@ -405,7 +457,7 @@ fdtd_simulation(
     dx: float,
     duration: float,
     *,
-    sources: Sequence[GaussianPulse | CWSource | SignalSource],
+    sources: Sequence[GaussianPulse | CWSource | SignalSource | PlaneWaveSource],
     shape: tuple[int, int] | None = None,
     rho: float | NDArray[np.float64] = 1.2,
     cfl: float = 0.6,
@@ -415,6 +467,8 @@ fdtd_simulation(
     obstacle_mask: NDArray[np.bool_] | None = None,
     damping: float = 0.0,
     snapshot_every: int | None = None,
+    snapshot_decimation: int = 1,
+    compute: Compute | None = None,
 ) -> FDTDResult
 ```
 
@@ -449,7 +503,7 @@ spreading rather than the 3D spherical $1/r$.
 | `c` | Sound-speed map [m/s], shape `(ny, nx)`, or a scalar with an explicit `shape`. |
 | `dx` | Grid spacing [m] (square cells). |
 | `duration` | Physical time to simulate [s]. |
-| `sources` | One or more of [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource). |
+| `sources` | One or more of [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource), [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource) or [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource). |
 | `shape` | Grid shape `(ny, nx)`, required when `c` is a scalar. |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
 | `cfl` | Courant number in `(0, 1)` (Eqs. 4.13-4.14); the time step is $\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})$. Default 0.6. |
@@ -459,6 +513,8 @@ spreading rather than the 3D spherical $1/r$.
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells (rasterised interior geometry). |
 | `damping` | Uniform bulk amplitude decay rate [1/s]. |
 | `snapshot_every` | Record a full pressure-field snapshot every this many steps (and at $t = 0$); `None` records none. |
+| `snapshot_decimation` | Keep every this many cells along each axis in a snapshot (default 1, every cell); the result records it. |
+| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
 
 **Returns:** A [`FDTDResult`](/phonometry/reference/api/simulation/fdtd/#fdtdresult).
 
@@ -466,8 +522,10 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an input is of the wrong type: a `duration` that is not one number, an `absorbing_layer_cells` or `snapshot_every` that is not a number, a `shape` that is not a pair, a complex medium, or an `obstacle_mask` that is not boolean. |
+| TypeError | If an input is of the wrong type: a `duration`, `cfl` or `dx` that is not one number, an `absorbing_layer_cells` that is not a number, a `snapshot_every` or `snapshot_decimation` that is a flag, a text or an array where a count goes, a `shape` that is not a pair, a complex medium, an `obstacle_mask` that is not boolean, or a `compute` that is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
 | ValueError | If the inputs are invalid. |
+| ComputeImportError | When the device's library is not installed or does not import. |
+| ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 
 ## FDTDResult
 
@@ -480,10 +538,12 @@ FDTDResult(
     dx: float,
     dt: float,
     shape: tuple[int, int],
-    sources: tuple[GaussianPulse | CWSource | SignalSource, ...],
-    snapshots: NDArray[np.float64] | None,
+    sources: tuple[GaussianPulse | CWSource | SignalSource | PlaneWaveSource, ...],
+    snapshots: NDArray[np.floating] | None,
     snapshot_times: NDArray[np.float64] | None,
     obstacle_mask: NDArray[np.bool_] | None,
+    snapshot_decimation: int,
+    provenance: RunProvenance,
 )
 ```
 
@@ -501,9 +561,11 @@ Frozen result of a [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd
 | `dt` | Time step [s]. |
 | `shape` | Grid shape `(ny, nx)`. |
 | `sources` | The source definitions of the run. |
-| `snapshots` | Recorded pressure fields, shape `(n_frames, ny, nx)`, or `None` when no snapshots were requested. |
+| `snapshots` | Recorded pressure fields, shape `(n_frames, ceil(ny / d), ceil(nx / d))` with `d` the `snapshot_decimation`, in the dtype the run stepped in, or `None` when no snapshots were requested. |
 | `snapshot_times` | Time of each snapshot [s], or `None`. |
 | `obstacle_mask` | Boolean map of rigid cells, or `None`. |
+| `snapshot_decimation` | Every how many cells a snapshot keeps along each axis (1 keeps every cell). |
+| `provenance` | Where the run stepped ([`RunProvenance`](/phonometry/reference/api/simulation/compute/#runprovenance)). |
 
 ### FDTDResult.plot()
 

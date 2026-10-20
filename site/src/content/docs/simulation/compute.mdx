@@ -1,0 +1,485 @@
+---
+title: "Where a simulation runs: NumPy, CuPy and torch"
+description: "Stepping the acoustic and elastic FDTD engines on NumPy, on an NVIDIA GPU through CuPy, or on PyTorch: the Compute request, use() and PHONOMETRY_COMPUTE, the fallback to NumPy, the provenance every result records, what is promised on each device, and decimated snapshots."
+references:
+  - type: web
+    organization: "Consortium for Python Data API Standards"
+    title: "Python array API standard"
+    url: "https://data-apis.org/array-api/latest/"
+    note: "The operations the FDTD engines step their fields with once they are built, which is what lets one stepping code run on NumPy, CuPy and torch."
+---
+
+import Scope from '../../../components/Scope.astro';
+import ScopeClaim from '../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../components/SeeAlso.astro';
+
+An FDTD run is a handful of array operations repeated thousands of times over
+fields of a fixed size, which is the kind of work a GPU is built for. The two
+engines of `phonometry.simulation`, the acoustic `FDTD2D` behind
+`fdtd_simulation` and the elastic `ElasticFDTD2D` behind
+`elastic_fdtd_simulation`, step on NumPy by default, and on an NVIDIA GPU
+through CuPy or on PyTorch (on a CPU, an NVIDIA GPU or Apple's MPS) when you
+ask. It is one stepping code for all of them: each engine builds its maps on
+the host in NumPy float64 when it is constructed, hands them to the device
+once, and from then on touches its fields only with operations of the Python
+array API standard, which the three libraries implement.
+
+This page says how to ask for a device, what each one needs installed, how a
+whole script or a worker picks its device, what happens when the device is
+not there, how a result records where it ran, and what the library promises
+about the numbers on each device. The physics, the sources and the
+boundaries are the same everywhere; they are explained in
+[2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/) and
+[Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/).
+
+## 1. Asking for a device: `Compute`
+
+A `Compute` record says where the fields step, in which dtype, and whether
+the run may fall back to NumPy:
+
+| Field | Values | Default |
+|---|---|---|
+| `device` | `"cpu"` (NumPy), `"cupy"` (an NVIDIA GPU through CuPy), `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` (Apple silicon) | `"cpu"` |
+| `device_index` | which GPU, for `"cupy"` and `"torch:cuda"` | `0` |
+| `dtype` | `"float64"` or `"float32"` | `"float64"` |
+| `fallback` | step on NumPy with a warning when the device is not available, instead of raising | `False` |
+
+The record is a request. Building one imports and probes nothing, so a script
+that names a GPU can be written and checked on a laptop that has none; the
+engine checks the request when it is built. A request that cannot mean
+anything is refused at once with `ValueError`: `"torch:mps"` in float64 (MPS
+has no float64), an index on a device that has one instance (`"cpu"`,
+`"torch:cpu"` and `"torch:mps"`), and `fallback=True` on `"cpu"`, which is
+the fallback already.
+
+```python
+from phonometry import simulation
+
+print(simulation.Compute())
+# Compute(device='cpu', device_index=0, dtype='float64', fallback=False)
+request = simulation.Compute(device="cupy", device_index=1, dtype="float32")
+print(request.device, request.device_index, request.dtype)   # cupy 1 float32
+try:
+    simulation.Compute(device="torch:mps")
+except ValueError as error:
+    print(error)   # device 'torch:mps' needs dtype='float32': MPS has no float64
+```
+
+Both engines, `ElasticFDTD2D.from_regions` and both simulation functions
+take it as `compute=`:
+
+```py
+gpu = simulation.Compute(device="cupy")
+sim = simulation.FDTD2D(343.0, 0.01, shape=(200, 300), compute=gpu)
+res = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    probes=[(200, 100)],
+    compute=gpu,
+)
+```
+
+A float32 run needs no GPU: on NumPy it halves the memory every field and
+every snapshot takes. Section 6 says how far its numbers can stray from a
+float64 run's.
+
+```python
+light = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    probes=[(200, 100)],
+    snapshot_every=50,
+    compute=simulation.Compute(dtype="float32"),
+)
+print(light.snapshots.dtype, light.pressures.dtype)   # float32 float64
+```
+
+The snapshots keep the dtype the run stepped in. The probe histories
+(`pressures` here, `signals` of an elastic result) are float64 whatever it
+was: each sample is cast once on its way off the device.
+
+## 2. What each device needs installed
+
+| Device | What to install | Notes |
+|---|---|---|
+| `"cpu"` | nothing: NumPy is a dependency of phonometry | the reference every other device is compared with |
+| `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` | `pip install phonometry[torch]` | torch 2.3.0 or later with array-api-compat 1.5.1 or later; `[full]` leaves it out |
+| `"cupy"` | the CuPy wheel for your CUDA version, such as `pip install cupy-cuda12x` or `pip install cupy-cuda13x` | not an extra of phonometry, because the wheel has to match the CUDA your driver supports |
+
+`[full]` leaves torch out on purpose: the torch wheels PyPI serves for Linux
+bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
+take torch from PyTorch's CPU index and those libraries stay out:
+
+```bash
+pip install phonometry[torch] --extra-index-url https://download.pytorch.org/whl/cpu
+```
+
+`"torch:mps"` needs a Mac with Apple silicon and steps in float32 only. CuPy
+needs an NVIDIA GPU and its driver; the proof of section 6 ran on
+`cupy-cuda13x` 14.2.0, with the CUDA 13.2 runtime, on a driver that
+supports CUDA 13.3. A missing library is reported when an engine is built,
+not when phonometry is imported: the NumPy path imports neither CuPy nor
+torch.
+
+## 3. One device for a whole script: `use()` and `PHONOMETRY_COMPUTE`
+
+Passing `compute=` to every call is explicit, and it is what code built on
+phonometry should do. A script or a notebook can name the device once
+instead, and the placement an engine gets is the first of these that says
+something:
+
+1. the `compute=` argument of the engine or of the simulation function;
+2. the innermost `use()` block the call runs in;
+3. the `PHONOMETRY_COMPUTE` environment variable;
+4. NumPy in float64.
+
+The placement is resolved when an engine is built, by `FDTD2D(...)`,
+`ElasticFDTD2D(...)`, `ElasticFDTD2D.from_regions(...)` or one of the
+simulation functions, and the engine keeps the one it got: leaving a `use()`
+block does not move an engine built inside it.
+
+```python
+with simulation.use(simulation.Compute(dtype="float32")):
+    inside = simulation.fdtd_simulation(
+        343.0, 0.01, 1.0e-3, shape=(100, 150),
+        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
+        probes=[(100, 50)],
+    )
+    pinned = simulation.fdtd_simulation(
+        343.0, 0.01, 1.0e-3, shape=(100, 150),
+        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
+        probes=[(100, 50)],
+        compute=simulation.Compute(),
+    )
+print(inside.provenance.dtype, pinned.provenance.dtype)   # float32 float64
+```
+
+`PHONOMETRY_COMPUTE` writes a placement as text,
+`device[:index][,option...]`, with the options `float32`, `float64` and
+`fallback`: `cupy`, `cupy:1`, `torch:cuda:1,fallback`, `torch:mps,float32`
+or `cpu,float32`. Spaces around the parts are ignored. The variable is read
+each time a placement is resolved and never at import, so it can be set after
+`import phonometry`. A value the grammar does not describe, an option given
+twice, two dtypes, or a request `Compute` refuses (`torch:mps` without
+`float32`) raises `ValueError` naming the variable when the first engine is
+built.
+
+```bash
+PHONOMETRY_COMPUTE=cupy:1,fallback python study.py
+```
+
+**Threads and processes.** `use()` holds its record in a context variable.
+Whether a new thread or process sees it depends on how it is started, so give
+a worker its placement through `compute=` or `PHONOMETRY_COMPUTE`, never
+through a `use()` block around the code that starts it:
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+
+single = simulation.Compute(dtype="float32")
+
+
+def pulse_run(half_width_s):
+    return simulation.fdtd_simulation(
+        343.0, 0.01, 1.0e-3, shape=(100, 150),
+        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=half_width_s)],
+        probes=[(100, 50)],
+        compute=single,
+    )
+
+
+with ThreadPoolExecutor(max_workers=2) as pool:
+    runs = list(pool.map(pulse_run, (2.0e-4, 3.0e-4)))
+print([run.provenance.dtype for run in runs])   # ['float32', 'float32']
+```
+
+## 4. When the device is not there: `fallback`
+
+Without `fallback`, building an engine on a device that cannot be used
+raises, and the message says why:
+
+- `ComputeImportError`, a subclass of `ImportError`, when the device's
+  library is not installed (`"cupy"` without CuPy, or a `"torch:..."` device
+  without the `[torch]` extra) or is installed and fails to import, as CuPy
+  does without the CUDA libraries it loads; the message carries the import's
+  own reason, and says which of the two it was;
+- `ComputeDeviceError`, a subclass of `RuntimeError`, when the library is
+  there and the device is not: no CUDA device, an index past the GPUs
+  present, no MPS on the machine, or any device but `"cpu"` in Pyodide. A
+  device that reports itself available is also given one small computation,
+  once per process, and refused the same way if it fails: MPS in a macOS
+  virtual machine cannot allocate, and CuPy without its CUDA compiler cannot
+  build a kernel.
+
+With `fallback=True` neither is raised. The run warns with
+`ComputeFallbackWarning`, a `PhonometryWarning` whose message carries the
+reason, and steps on NumPy in the dtype that was asked for. The warning
+points at the line of your code that built the engine or called the
+simulation function, never at a line inside the library, and the result's
+provenance says `"cpu"`, so a run that fell back cannot pass for a GPU run
+later.
+
+```py
+request = simulation.Compute(device="cupy", fallback=True)
+res = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    probes=[(200, 100)],
+    compute=request,
+)
+# On a machine without CuPy:
+# ComputeFallbackWarning: device 'cupy' needs CuPy, which is not installed
+# (No module named 'cupy'); install the wheel for your CUDA version, e.g.
+# pip install cupy-cuda12x; running on NumPy instead (fallback=True)
+print(res.provenance.device)   # cpu
+```
+
+A batch job that must never fall back in silence turns the warning into an
+error, and the run stops where it would have fallen back:
+
+```py
+import warnings
+
+warnings.simplefilter("error", simulation.ComputeFallbackWarning)
+```
+
+## 5. Where a run stepped: `provenance`
+
+Every `FDTDResult` and `ElasticFDTDResult` carries a `RunProvenance`, and an
+engine reports the same record as `sim.provenance`:
+
+| Field | What it holds |
+|---|---|
+| `device`, `device_index`, `dtype` | the placement the fields stepped on, after any fallback |
+| `numpy_version` | NumPy's version where the run stepped |
+| `array_library` | the array library and its version (`"cupy 14.2.0"`, `"torch 2.14.1"`), `None` for NumPy |
+| `cuda_runtime` | the CUDA runtime the array library uses (`"13.2"`), `None` off a CUDA device |
+| `cuda_driver_api` | the CUDA version the GPU driver supports (`"13.3"`), reported by CuPy only; it is not the NVIDIA driver's own version |
+| `gpu` | the GPU's name (`"Apple MPS"` on MPS), `None` off a GPU |
+| `host` | the machine the run went to, `None` for this one |
+
+```python
+print(light.provenance.device, light.provenance.dtype, light.provenance.array_library)
+# cpu float32 None
+```
+
+A run on CuPy records the card and the versions it stepped on:
+
+```py
+gpu_run = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    compute=simulation.Compute(device="cupy"),
+)
+print(gpu_run.provenance)
+# On the machine of the proof in section 6:
+# RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
+#     numpy_version='2.5.3', array_library='cupy 14.2.0', cuda_runtime='13.2',
+#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060')
+```
+
+An engine's fields live on its device. `sim.p`, `sim.vx` and `sim.vy` of an
+`FDTD2D`, the five stress and velocity arrays of an `ElasticFDTD2D`, its
+synthetic pressure `sim.p` and `sim.collocated(field)` are NumPy arrays on
+NumPy and the device library's own arrays elsewhere. `sim.host_field(name)`
+returns a NumPy copy of a stored field on every device, and `sim.run(...)`
+returns its snapshot frames on the host. What a simulation function returns
+is on the host already: a result holds NumPy arrays whatever device stepped.
+On CuPy with a `device_index` other than 0, a write into a field from
+outside the engine, such as `sim.p[10, 10] = 1.0`, runs on CuPy's current
+device, so make it inside `with cupy.cuda.Device(i):` with `i` the engine's
+index.
+
+```python
+sim = simulation.FDTD2D(343.0, 0.01, shape=(100, 150), compute=simulation.Compute(dtype="float32"))
+sim.add_source(simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4))
+frames = sim.run(200, snapshot_every=50, snapshot_decimation=2)
+field = sim.host_field("p")
+print(frames.shape, frames.dtype, type(field).__name__, sim.provenance.device)
+# (5, 50, 75) float32 ndarray cpu
+```
+
+## 6. What is promised on each device
+
+The reference is NumPy in float64, and each device is held to it over the
+same scenario matrix: seven small runs, one for each engine feature (an
+absorbing sponge, an impedance edge, an obstacle with a damping map and a
+sampled source, a plane-wave source, a contour probe, a layered elastic
+medium under a free surface, and elastic force sources around an obstacle),
+on grids of 32 by 40 to 64 by 48 cells stepped 60 to 120 times, with
+decimated snapshots in two of them.
+
+**NumPy, float64: bit-identical.** Identical inputs give bit-identical
+outputs on the same platform: no random numbers, and every operation in a
+fixed order. The NumPy path is also held bit for bit to a frozen copy of the
+two engines as they stood before they could step anywhere else, so the other
+devices cost the NumPy numbers nothing.
+
+**CuPy, float64: bit-identical fields, as measured.** On an NVIDIA GeForce RTX
+4060 with NVIDIA driver 610.57.04, CuPy 14.2.0 (`cupy-cuda13x`, CUDA runtime
+13.2, driver API 13.3) and Python 3.13, every field, snapshot frame, collocated
+field and contour phasor of the seven scenarios was bit-identical to NumPy's.
+The energy, a sum over the whole grid, differed by at most 1.79×10⁻¹⁶ relative
+over those seven runs, because the GPU adds the cells in another order; that is
+the worst of the matrix, and a sum over a larger grid can differ more. The
+measurement is recorded in `gpu-parity.lock`, at the root of the repository,
+with the NVIDIA driver, the CUDA versions, the container image it ran in and a
+fingerprint of the two engines, their backends and the scenario matrix. CI
+checks that fingerprint on every pull request, so an engine that changes
+without a new proof on a GPU fails. The promise is that one measurement: the
+lock records a single proof, on the card, driver and versions above, and
+another GPU, driver or CuPy release is covered only once the maintainer runs a
+new proof on it (`make gpu-parity`) and records it in the lock.
+
+**torch, and NumPy in float32: within a published bound over the scenario
+matrix.** The bound is the largest relative difference from the NumPy
+float64 run, $\max|a - b| / \max|b|$ with $b$ the NumPy number, over every
+number a scenario records: the fields, the snapshot frames, the energy, the
+collocated velocities and the contour phasors.
+
+| Device | dtype | Bound | Where it is measured |
+|---|---|---|---|
+| `cpu` (NumPy) | float32 | 3×10⁻⁶ | every CPU kernel level, at NumPy 2.0.2 and 2.5.3 |
+| `torch:cpu` | float64 | 9×10⁻¹⁶ | every CPU kernel level, at torch 2.3.0 and 2.14.1 |
+| `torch:cpu` | float32 | 2×10⁻⁶ | every CPU kernel level, at torch 2.3.0 and 2.14.1 |
+| `torch:mps` | float32 | not published yet | the `mps` CI job, on a macOS runner |
+| `torch:cuda` | float64, float32 | not measured | no CI runner has an NVIDIA GPU |
+
+Each bound is the worst value over the scenario matrix, not a promise about
+any run. Float32 rounds every step, and its rounding grows with the number
+of steps, so a run longer than the matrix's can differ more. Measured
+outside the matrix, on the 200 by 300 cell grid of the examples above, with
+the same source cell and probe, stepped 8085 times (0.1 s), the float32
+pressure at the probe differed from the float64 run's by 8.0×10⁻⁶ relative
+with a 1 kHz `CWSource` and by 4.0×10⁻⁶ with the Gaussian pulse, on NumPy and
+on `torch:cpu` alike.
+
+Each CPU bound is the worst value measured over every CPU kernel level the
+library dispatches (DEFAULT, AVX2 and AVX512 for torch; the baseline, AVX2
+and AVX512 for NumPy), at the library's floor and at its pinned release,
+rounded up to one significant figure, and it is raised only from a new
+measurement. Every CI job that runs the simulation tests holds NumPy in
+float32 to its bound, and the `array-api` job holds every run on `torch:cpu`
+to its two. On MPS the bound is measured in CI on a macOS runner and
+published here once measured; from then on the `mps` job holds every run to
+it, and until then no number is promised for MPS. `torch:cuda` steps the
+same code as `torch:cpu`, but no run on it has been measured, so it has no
+bound.
+
+**CuPy in float32: not measured yet.** The proof on the GPU covers float64
+only, so a float32 run on CuPy has no published bound until a proof on the
+GPU measures one. Like every float32 run, it rounds each step to float32,
+about seven significant digits.
+
+**The contour probe's sums.** The running DFT sums of a contour probe
+(section 4 of the acoustic guide) add one term per step for thousands of
+steps, and the rounding of a sum grows with its number of terms. They are
+accumulated in float64 on every device that has float64, also when the fields
+step in float32; on MPS, which has none, they are float32 with compensated
+(Neumaier) summation. The `mps` job runs a 3000-step float32 contour check on
+MPS itself, so a compiler that reorders the compensated sum fails there.
+
+## 7. Recording less: `snapshot_decimation`
+
+On a large grid the snapshots are most of what a run returns: one float64
+frame of a 400 by 600 cell grid takes 1.9 MB, and a run keeps one every
+`snapshot_every` steps.
+`snapshot_decimation=d` keeps every `d`-th cell along each axis, starting
+with the first, so a frame is $\lceil n_y/d \rceil$ by $\lceil n_x/d \rceil$:
+`d = 2` stores a quarter of the cells and `d = 4` a sixteenth. On a GPU the
+field is sliced on the device first, and only the kept cells cross to the
+host.
+
+The option has the same name and the same rule everywhere:
+`fdtd_simulation(..., snapshot_every=, snapshot_decimation=)`,
+`ElasticRecording(snapshot_every=, snapshot_decimation=)`, and the `run()` of
+both engines. It takes a whole number of 1 or more; a flag, a text or an
+array raises `TypeError`, and a number below 1 or not whole raises
+`ValueError`. The result records it as `snapshot_decimation`, and
+`.plot(kind="snapshot")` draws each sample over the `d` by `d` block of cells
+it was taken from, with the axes on the whole domain.
+
+```python
+decimated = simulation.fdtd_simulation(
+    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    snapshot_every=10,
+    snapshot_decimation=4,
+)
+print(decimated.snapshots.shape, decimated.snapshot_decimation)   # (17, 50, 75) 4
+decimated.plot(kind="snapshot")
+```
+
+## What this guide covers
+
+<Scope>
+<ScopeClaim status="covered" label="Covered">
+Where the two FDTD engines step: NumPy in float64 or float32, CuPy on an
+NVIDIA GPU, and torch on a CPU, an NVIDIA GPU or Apple's MPS, chosen per
+call with `compute=`, per block with `use()` or per process with
+`PHONOMETRY_COMPUTE`; the refusals of a request that cannot be met and the
+fallback to NumPy with `ComputeFallbackWarning`; the `RunProvenance` every
+result records; what is promised on each device, bit for bit on NumPy in
+float64, bit for bit as measured on CuPy in float64, and within a bound
+published over the scenario matrix on torch's CPU device and on NumPy in
+float32; and decimated snapshots.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="Not covered">
+One engine steps on one device: a run is not split across GPUs, and
+`device_index` picks one of them. The other array libraries (JAX, MLX, dpnp)
+are not backends, and the GPU runs the same sequence of standard operations
+as NumPy, with no fused or compiled kernels, which is what keeps the CuPy
+fields bit-identical. This page publishes no timing: a GPU pays a fixed cost
+for every operation it launches, so it helps only on grids large enough to
+spend it. CuPy in float32 and torch on CUDA have no measured bound yet, and
+no bound covers a run longer or larger than the scenario matrix. The rest of
+phonometry computes on NumPy only.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## See also
+
+- [2D FDTD wave simulation](/phonometry/simulation/fdtd-simulation/): the
+  acoustic engine, its sources, probes and boundaries, and how to size a run.
+- [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/):
+  the elastic engine, which takes the same `compute=`.
+- API reference: [`simulation.compute`](/phonometry/reference/api/simulation/compute/),
+  [`simulation.fdtd`](/phonometry/reference/api/simulation/fdtd/),
+  [`simulation.elastic_fdtd`](/phonometry/reference/api/simulation/elastic-fdtd/).
+
+</SeeAlso>
+
+## Quick answers
+
+### Does a GPU change the result of an FDTD simulation?
+
+On CuPy in float64, as measured on the card and versions of section 6, no:
+every field is bit-identical to NumPy's, and only the total energy, a sum
+over the grid, differs, by at most 1.79×10⁻¹⁶ relative over the scenario
+matrix of section 6; a sum over a larger grid can differ more. On torch the
+result agrees with NumPy within the bound published for the device and
+dtype, 9×10⁻¹⁶ relative on a CPU in float64 over the same matrix. A float32
+run differs from a float64 one by float32 rounding, which grows with the
+number of steps: on NumPy by at most 3×10⁻⁶ relative over the matrix, and by
+8.0×10⁻⁶ in a measured run of 8085 steps.
+
+### How do I run an FDTD simulation on a GPU?
+
+Install CuPy for your CUDA version (`pip install cupy-cuda12x`) or the
+`[torch]` extra, then pass `compute=simulation.Compute(device="cupy")` or
+`device="torch:cuda"` to the engine (`FDTD2D` or `ElasticFDTD2D`) or the
+simulation function. To move a whole script, wrap it in
+`with simulation.use(...)` or set `PHONOMETRY_COMPUTE=cupy` in its environment.
+`result.provenance` says where each run stepped.
+
+### Why did my run step on NumPy when I asked for a GPU?
+
+Because the request said `fallback=True` and the device could not be used:
+the library was missing or did not import, or the device was absent or
+failed its first small computation. The run warned with
+`ComputeFallbackWarning`, whose message gives the reason, and
+`result.provenance.device` reads `"cpu"`. Without `fallback=True` the same
+request raises `ComputeImportError` or `ComputeDeviceError` instead.

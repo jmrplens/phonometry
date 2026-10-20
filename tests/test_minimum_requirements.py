@@ -14,7 +14,6 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
-import conftest
 import pinned_stack
 import pytest
 import yaml
@@ -34,6 +33,23 @@ def _module() -> ModuleType:
     assert spec.loader is not None
     module = importlib.util.module_from_spec(spec)
     sys.modules["minimum_requirements"] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+def _root_conftest() -> ModuleType:
+    """The suite's own ``tests/conftest.py``, read from its file.
+
+    ``import conftest`` gives whichever conftest pytest imported last under
+    that name: a directory below with a ``conftest.py`` of its own (the
+    simulation tests have one) takes the name once it is collected.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "_root_conftest", _ROOT / "tests" / "conftest.py"
+    )
+    assert spec is not None
+    assert spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
 
@@ -62,12 +78,29 @@ def test_every_declared_requirement_is_pinned_at_its_floor() -> None:
         assert pinned[_MODULE._normalise(name)] == version
 
 
+#: Extras ``full`` leaves out, with the reason. torch pulls gigabytes of CUDA
+#: wheels from PyPI on Linux, which nobody asking for "everything" for the
+#: acoustics expects.
+_NOT_IN_FULL = {"torch"}
+
+
 def test_the_full_extra_names_every_other_extra_at_the_same_floor() -> None:
     """``full`` is the union of the other extras, each at the floor it declares."""
     extras = _pyproject()["project"]["optional-dependencies"]  # type: ignore[index]
     full = set(extras.pop("full"))
-    others = {spec for specs in extras.values() for spec in specs}
+    others = {
+        spec
+        for name, specs in extras.items()
+        if name not in _NOT_IN_FULL
+        for spec in specs
+    }
     assert full == others
+
+
+def test_every_extra_full_leaves_out_is_declared() -> None:
+    """A name in ``_NOT_IN_FULL`` that no extra has would exempt nothing."""
+    extras = _pyproject()["project"]["optional-dependencies"]  # type: ignore[index]
+    assert _NOT_IN_FULL <= set(extras) - {"full"}
 
 
 def test_a_requirement_without_a_floor_is_refused() -> None:
@@ -95,6 +128,35 @@ def test_an_environment_off_its_floors_is_reported() -> None:
     problems = _MODULE.mismatches({"pytest": "0.0.1", "no-such-distribution": "1.0"})
     assert any(line.startswith("pytest: ") for line in problems)
     assert "no-such-distribution: not installed, the floor is 1.0" in problems
+
+
+def test_a_local_version_label_is_the_release_it_labels(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """torch from its CPU index installs as ``2.x.y+cpu``, the release ``2.x.y``."""
+    installed = {"torch": "2.6.0+cpu", "array-api-compat": "1.12.0"}
+    monkeypatch.setattr(_MODULE.metadata, "version", installed.__getitem__)
+
+    assert _MODULE.mismatches({"torch": "2.6.0", "array-api-compat": "1.12.0"}) == []
+    assert _MODULE.mismatches({"torch": "2.5.0"}) == [
+        "torch: 2.6.0+cpu installed, the floor is 2.5.0"
+    ]
+
+
+def test_check_passes_a_cpu_wheel_at_its_floor(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """``--check`` end to end, as the minimum-versions job runs it."""
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text(
+        '[project]\nname = "x"\ndependencies = ["torch>=2.6.0"]\n', encoding="utf-8"
+    )
+    monkeypatch.setattr(_MODULE.metadata, "version", {"torch": "2.6.0+cpu"}.__getitem__)
+
+    assert _MODULE.main(["--pyproject", str(pyproject), "--check"]) == 0
+    assert capsys.readouterr().out == "OK: 1 distributions at their floors\n"
 
 
 def test_dependabot_moves_the_pins_and_leaves_the_floors() -> None:
@@ -315,10 +377,11 @@ def test_a_pinned_stack_module_is_left_out_before_it_is_imported(
     """The hook reads the mark from the source: the module would raise if imported."""
     tooling, library = _two_modules(tmp_path)
     on, off = _options(without_pinned_stack=True), _options(without_pinned_stack=False)
+    conftest = _root_conftest()
 
-    assert conftest.pytest_ignore_collect(tooling, on) is True  # type: ignore[arg-type]
-    assert conftest.pytest_ignore_collect(library, on) is None  # type: ignore[arg-type]
-    assert conftest.pytest_ignore_collect(tooling, off) is None  # type: ignore[arg-type]
+    assert conftest.pytest_ignore_collect(tooling, on) is True
+    assert conftest.pytest_ignore_collect(library, on) is None
+    assert conftest.pytest_ignore_collect(tooling, off) is None
 
 
 def _collect(directory: Path, *options: str) -> subprocess.CompletedProcess[str]:
@@ -466,6 +529,8 @@ _DISPLAY_NAMES = {
     "svglib": "svglib",
     "numba": "numba",
     "soundfile": "python-soundfile",
+    "torch": "torch",
+    "array-api-compat": "array-api-compat",
 }
 
 

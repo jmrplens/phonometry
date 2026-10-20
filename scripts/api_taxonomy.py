@@ -471,6 +471,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.simulation.fdtd",
             "phonometry.simulation.ntff",
             "phonometry.simulation.elastic_fdtd",
+            "phonometry.simulation.compute",
         ),
     ),
 )

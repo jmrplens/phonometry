@@ -1399,6 +1399,50 @@ jobs:
         tests/simulation/test_write_elastic_fdtd_animation.py
         tests/simulation/test_video_job.py
 
+  # The FDTD engines' NumPy numbers, held to the golden digests in
+  # engine-digests.json. Their bits depend on the C library's libm and on
+  # NumPy's SIMD dispatch, so they are checked in the one environment the
+  # file records, which is this job's: this runner image, Python 3.13, the
+  # pinned stack, and NumPy's AVX-512 kernels switched off, so whichever x86
+  # runner this lands on computes the same bits. The measured file is kept as
+  # an artifact: a moved digest can be read there and, when the move is
+  # meant, committed with `make engine-digests RUN=<this run's id>`. A NumPy
+  # bump fails here on the environment line alone until that is done.
+  engine-digests:
+    name: FDTD engines hold their golden digests
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-dev.txt
+        pip install -e .
+    - name: The live engines are the frozen copies
+      run: pytest -q -n0 tests/simulation/test_engine_frozen_parity.py
+    - name: Hold the engines to their golden digests
+      env:
+        PHONOMETRY_ENGINE_DIGESTS: require
+      run: |
+        export NPY_DISABLE_CPU_FEATURES="$(python scripts/engine_digests.py --avx512-features)"
+        python scripts/engine_digests.py --output engine-digests.measured.json
+        pytest -q -n0 tests/simulation/test_engine_golden_digests.py
+    - name: Keep the measured digests
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: engine-digests-measured
+        path: engine-digests.measured.json
+
   # Apple's MPS device, on the macOS runners that expose a working one
   # (macOS 14 reports MPS available but cannot allocate on it). It holds the
   # float32 tolerance the guide publishes for torch:mps, and runs the long

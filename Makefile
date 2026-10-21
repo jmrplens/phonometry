@@ -782,12 +782,29 @@ gpu-parity:
 node-image:
 	PYTHONPATH=src $(PYTHON) scripts/node_image.py --host "$(HOST)" --target "$(or $(TARGET),gpu)"
 
+# The FDTD engines' NumPy numbers as golden digests (engine-digests.json). The
+# bits depend on the environment the file records (the C library's libm and
+# NumPy's SIMD dispatch), and the committed file is the one the engine-digests
+# CI job measured: when a change is meant to move what the engines compute,
+# take that job's artifact with `make engine-digests RUN=<run id>`. Without
+# RUN this measures here and compares, on NumPy whatever PHONOMETRY_COMPUTE
+# says and with NumPy's AVX-512 kernels switched off as in that job; where the
+# environment differs from the file's, a moved digest may be that alone.
+engine-digests:
+	@if [ -n "$(RUN)" ]; then \
+		rm -rf build/engine-digests && \
+		gh run download "$(RUN)" -n engine-digests-measured -D build/engine-digests && \
+		cp build/engine-digests/engine-digests.measured.json engine-digests.json; \
+	else \
+		env -u PHONOMETRY_COMPUTE NPY_DISABLE_CPU_FEATURES="$$(PYTHONPATH=src $(PYTHON) scripts/engine_digests.py --avx512-features)" PYTHONPATH=src $(PYTHON) scripts/engine_digests.py; \
+	fi
+
 check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
 	assets animations animation-freshness animation-audit posters brand lighthouse \
-	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu gpu-parity node-image coverage check \
+	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu gpu-parity node-image engine-digests coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \

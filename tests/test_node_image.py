@@ -143,3 +143,106 @@ def test_a_python_node_has_no_image_to_build() -> None:
     )
     with pytest.raises(SystemExit, match="runs Python, not Docker"):
         node_image.build_command(lab, "gpu")
+
+
+_HOSTS = """\
+[hosts.nas]
+ssh = "root@192.168.0.40"
+runner = "docker"
+image = "phonometry-node:gpu"
+
+[hosts.lab]
+ssh = "lab"
+runner = "python"
+python = "/usr/bin/python3"
+"""
+#: A stand-in for ssh: it reads the build context from its standard input and
+#: exits with the number of files in it.
+_COUNT_THE_CONTEXT = (
+    "import io, sys, tarfile\n"
+    "with tarfile.open(fileobj=io.BytesIO(sys.stdin.buffer.read())) as archive:\n"
+    "    sys.exit(len(archive.getnames()))\n"
+)
+
+
+@pytest.fixture
+def hosts_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """A hosts file with a Docker node and a Python node, read in place of the user's."""
+    path = tmp_path / "hosts.toml"
+    path.write_text(_HOSTS, encoding="utf-8")
+    monkeypatch.setenv("PHONOMETRY_HOSTS_FILE", str(path))
+    monkeypatch.setattr(command, "_SSH_PROGRAM", ("ssh",))
+    return path
+
+
+def test_the_build_needs_a_host(
+    hosts_file: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    with pytest.raises(SystemExit, match="^2$"):
+        node_image.main(["--host", ""])
+    assert "make node-image HOST=<name>" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    ("host", "refusal"),
+    [
+        ("nowhere", "no host 'nowhere' in .*hosts.toml; it names lab, nas"),
+        ("lab", "host 'lab' runs Python, not Docker"),
+    ],
+)
+def test_the_build_refuses_a_host_it_cannot_build_on(
+    hosts_file: Path, host: str, refusal: str
+) -> None:
+    with pytest.raises(SystemExit, match=refusal):
+        node_image.main(["--host", host])
+
+
+def test_the_build_names_a_missing_hosts_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("PHONOMETRY_HOSTS_FILE", str(tmp_path / "absent.toml"))
+    with pytest.raises(SystemExit, match="absent.toml does not exist"):
+        node_image.main(["--host", "nas"])
+
+
+def test_the_build_names_a_missing_ssh(
+    hosts_file: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(command, "_SSH_PROGRAM", None)
+    monkeypatch.setenv("PATH", str(tmp_path / "no-programs-here"))
+    with pytest.raises(SystemExit, match="no ssh client on PATH"):
+        node_image.main(["--host", "nas"])
+
+
+def test_the_build_pipes_the_context_to_ssh_and_returns_its_exit_status(
+    hosts_file: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.setattr(
+        command, "_SSH_PROGRAM", (sys.executable, "-c", _COUNT_THE_CONTEXT)
+    )
+    assert node_image.main(["--host", "nas", "--target", "cpu"]) == len(
+        node_image.CONTEXT
+    )
+    assert capsys.readouterr().out.startswith(
+        "building phonometry-node:gpu (cpu) on nas"
+    )
+
+
+def test_cupy_cannot_replace_the_pinned_numpy() -> None:
+    """CuPy goes in without its requirements, and pip check stops a NumPy outside its range."""
+    assert re.search(
+        r"^RUN pip install --no-cache-dir --no-deps cupy-cuda13x==\S+ cuda-pathfinder==\S+ \\\n"
+        r"\s+&& pip check$",
+        _TEXT,
+        flags=re.MULTILINE,
+    )
+
+
+def test_the_files_a_node_runs_keep_their_line_endings() -> None:
+    """A CRLF checkout would break the provisioning script and the image's copy of the Dockerfile."""
+    attributes = (_ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines()
+    assert {"*.sh text eol=lf", "docker/node/Dockerfile text eol=lf"} <= set(attributes)
+    for name in ("docker/node/Dockerfile", "docker/node/provision.sh"):
+        assert b"\r" not in (_ROOT / name).read_bytes(), name

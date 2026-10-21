@@ -1,0 +1,6 @@
+# A node runs these files as they are checked out. A CRLF checkout on
+# Windows would send it a provisioning script sh cannot run, and a
+# Dockerfile whose copy in the image differs, byte for byte, from the
+# repository's.
+*.sh text eol=lf
+docker/node/Dockerfile text eol=lf

@@ -153,12 +153,45 @@ def problems(
             "was found among BtbN's releases"
         )
     elif newest[0] != pinned.url and _release_of(newest[0]) > _release_of(pinned.url):
-        url, sha256 = newest
-        found.append(
-            f"a newer month-end build is out: FFMPEG_URL={url} FFMPEG_SHA256={sha256}; "
-            "move the pin as docker/node/Dockerfile says, once a node shows its SVT-AV1 is 4"
-        )
+        found.append(_offer(pinned, *newest))
     return found
+
+
+def _line_of(url: str) -> tuple[int, int] | None:
+    """The ffmpeg release line of the build at *url*, as ``(9, 0)``, or ``None``."""
+    match = _ASSET.match(url.rpartition("/")[2])
+    return (int(match[1]), int(match[2])) if match else None
+
+
+def _named(line: tuple[int, int] | None) -> str:
+    """A release line as messages write it."""
+    return (
+        "ffmpeg of an unknown release line"
+        if line is None
+        else f"ffmpeg n{line[0]}.{line[1]}"
+    )
+
+
+def _offer(pinned: Pin, url: str, sha256: str) -> str:
+    """What the check says of *url*, a month-end build from a release after the pin's.
+
+    A build of a lower release line than the pinned one is never offered as
+    newer: the release then lacks the pinned line, which is a problem of its
+    own, and moving the pin to it would take ffmpeg back a release line.
+    """
+    line, pinned_line = _line_of(url), _line_of(pinned.url)
+    if line is not None and pinned_line is not None and line < pinned_line:
+        return (
+            f"the newest month-end release has no build of the pinned "
+            f"{_named(pinned_line)} or a later line with its SHA-256, only of "
+            f"{_named(line)} ({url}): keep the pin, and see whether BtbN still "
+            "builds that line"
+        )
+    return (
+        f"a newer month-end build of {_named(line)} is out: FFMPEG_URL={url} "
+        f"FFMPEG_SHA256={sha256}; move the pin as docker/node/Dockerfile says, once "
+        "a node shows its SVT-AV1 is 4"
+    )
 
 
 def _request(url: str, method: str = "GET") -> urllib.request.Request:

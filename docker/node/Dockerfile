@@ -10,8 +10,11 @@
 # pinned requirements with the figure stack, the DejaVu fonts, ffmpeg and
 # make. The gpu stage then adds the CUDA headers CuPy compiles its kernels
 # with, pinned to the cudart the base image carries, and CuPy with its one
-# open requirement pinned beside it. Both stages copy the bootstrap a node
-# runs first from the package, to the path the client runs it at.
+# open requirement pinned beside it. CuPy goes in without its requirements,
+# so pip cannot swap the pinned NumPy for one in CuPy's range: pip check
+# stops the build instead when the pinned NumPy falls outside it. Both
+# stages copy the bootstrap a node runs first from the package, to the path
+# the client runs it at.
 #
 # CUDA 13.3.1 is the CUDA of the node's driver, 610.57.04, which reports
 # 13.3, so nothing in the image leans on the driver running a newer minor
@@ -44,7 +47,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends cuda-cudart-dev-13-3=13.3.29-1 \
     && rm -rf /var/lib/apt/lists/*
 ENV PATH=/opt/venv/bin:$PATH
-RUN pip install --no-cache-dir cupy-cuda13x==14.2.0 cuda-pathfinder==1.8.3
+RUN pip install --no-cache-dir --no-deps cupy-cuda13x==14.2.0 cuda-pathfinder==1.8.3 \
+    && pip check
 COPY src/phonometry/simulation/_remote/bootstrap.py /usr/local/share/phonometry-node/bootstrap.py
 COPY docker/node/Dockerfile /usr/local/share/phonometry-node/Dockerfile
 

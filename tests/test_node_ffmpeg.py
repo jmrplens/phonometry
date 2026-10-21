@@ -91,6 +91,21 @@ def test_a_newer_month_end_build_is_named_with_its_url_and_sha256() -> None:
     (problem,) = node_ffmpeg.problems(older, _RELEASES, answers=lambda url: True)
     assert f"FFMPEG_URL={_PINNED.url}" in problem
     assert f"FFMPEG_SHA256={_SHA}" in problem
+    assert "build of ffmpeg n9.0 is out" in problem
+
+
+def test_a_build_of_a_lower_release_line_is_never_offered_as_newer() -> None:
+    """A month-end release that lacks the pinned line is named, and its lower line is not offered."""
+    older = node_ffmpeg.Pin(f"{_BASE}/autobuild-2026-08-31-13-27/{_GPL_9}", _SHA)
+    releases = [
+        _release("autobuild-2026-10-20-13-08", _GPL_9),
+        _release("autobuild-2026-09-30-13-08", _GPL_8, *_OTHERS),
+        _release("autobuild-2026-08-31-13-27", _GPL_9),
+    ]
+    (problem,) = node_ffmpeg.problems(older, releases, answers=lambda url: True)
+    assert "no build of the pinned ffmpeg n9.0" in problem
+    assert "only of ffmpeg n8.1" in problem
+    assert "FFMPEG_URL=" not in problem
 
 
 def test_an_older_month_end_build_is_not_offered() -> None:

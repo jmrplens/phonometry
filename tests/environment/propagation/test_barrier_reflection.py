@@ -243,7 +243,7 @@ class TestSubtraction:
         result = prop.subtract_direct_sound(front[4], free[4], _FS)
         assert result.shift_samples == pytest.approx(-0.36, abs=1e-12)
         assert result.amplitude_factor == pytest.approx(1.0, rel=1e-6)
-        assert result.reduction_db > 60.0
+        assert result.reduction > 60.0
 
     def test_the_residual_is_the_reflection(self) -> None:
         front, free = _grid(reflection=0.5)
@@ -252,7 +252,7 @@ class TestSubtraction:
         expected = 0.5 * _pulse(_START + paths[4, 1] / _C * _FS, 1.0 / paths[4, 1])
         np.testing.assert_allclose(result.residual, expected, atol=1e-9)
         # Only rounding is left of the direct sound.
-        assert result.reduction_db > 200.0
+        assert result.reduction > 200.0
 
     def test_the_amplitude_is_matched_to_the_peak(self) -> None:
         front, free = _grid(reflection=0.5, gain=1.2)
@@ -271,7 +271,7 @@ class TestSubtraction:
         front[1036] = 0.05
         result = prop.subtract_direct_sound(front, free, _FS)
         assert result.shift_samples == pytest.approx(0.0, abs=1e-12)
-        assert result.reduction_db == pytest.approx(40.0, abs=1e-9)
+        assert result.reduction == pytest.approx(40.0, abs=1e-9)
 
     def test_a_poor_subtraction_warns_below_10_db(self) -> None:
         front, _ = _grid(reflection=0.5)

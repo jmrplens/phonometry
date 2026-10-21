@@ -230,7 +230,7 @@ def test_the_annex_b_figure_hatches_only_the_significant_band() -> None:
     hatched = [bool(bar.get_hatch()) for bar in ax.patches]
     assert hatched == [False] * 6 + [True]
     np.testing.assert_allclose(
-        [bar.get_height() for bar in ax.patches], result.difference_db
+        [bar.get_height() for bar in ax.patches], result.difference
     )
     assert "8000 Hz" in ax.get_title()
     # The hatch is explained in the legend, and the bands read as the other
@@ -266,8 +266,8 @@ def test_the_annex_b_figure_writes_a_spanish_band_with_a_comma() -> None:
 
 _SIX = ("front", "back", "left", "right", "up", "down")
 _ROTATION = {
-    "rotation_levels_db": [[0.0] * 7, [4.0] * 7],
-    "free_field_rejection_db": 17.0,
+    "rotation_levels": [[0.0] * 7, [4.0] * 7],
+    "free_field_rejection": 17.0,
 }
 
 

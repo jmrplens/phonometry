@@ -193,7 +193,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 assess_background_noise(
-    noise_levels_db: ArrayLike,
+    noise_levels: ArrayLike,
     *,
     noise_is_tonal: bool = False,
 ) -> BackgroundNoiseAssessment
@@ -220,7 +220,7 @@ does not, and withholds that relaxation.
 
 | Name | Description |
 | :--- | :--- |
-| `noise_levels_db` | A-weighted noise level at each point, in dB re 400 mA/m. |
+| `noise_levels` | A-weighted noise level at each point, in dB re 400 mA/m. |
 | `noise_is_tonal` | The noise has a significant undesirable tonal quality and is not mostly at low frequencies. |
 
 **Returns:** A [`BackgroundNoiseAssessment`](/phonometry/reference/api/electroacoustics/induction-loop/#backgroundnoiseassessment).
@@ -228,7 +228,7 @@ does not, and withholds that relaxation.
 ## BackgroundNoiseAssessment
 
 ```python
-BackgroundNoiseAssessment(noise_levels_db: np.ndarray, noise_is_tonal: bool)
+BackgroundNoiseAssessment(noise_levels: np.ndarray, noise_is_tonal: bool)
 ```
 
 The magnetic background noise of a site against 7.2 of IEC 60118-4:2014.
@@ -242,7 +242,7 @@ noise does not reach.
 
 | Name | Description |
 | :--- | :--- |
-| `noise_levels_db` | The A-weighted noise level at each point with the loop switched off, in dB re 400 mA/m. |
+| `noise_levels` | The A-weighted noise level at each point with the loop switched off, in dB re 400 mA/m. |
 | `noise_is_tonal` | Whether the noise was declared tonal and not mostly at low frequencies, which withholds the 22 dB relaxation. |
 
 ### BackgroundNoiseAssessment.category
@@ -368,7 +368,7 @@ own zero crossings.
 ## field_strength
 
 ```python
-field_strength(level_db: ArrayLike) -> np.ndarray
+field_strength(level: ArrayLike) -> np.ndarray
 ```
 
 The magnetic field strength of a level in dB re 400 mA/m, in A/m.
@@ -381,7 +381,7 @@ prints 566 mA/m, which is $400\sqrt{2}$).
 
 | Name | Description |
 | :--- | :--- |
-| `level_db` | Level, in dB re 400 mA/m (scalar or array). |
+| `level` | Level, in dB re 400 mA/m (scalar or array). |
 
 **Returns:** The RMS field strength, in A/m.
 
@@ -443,7 +443,7 @@ FieldStrengthReading(
     weighting: str,
     times: np.ndarray,
     levels: np.ndarray,
-    max_level_db: float,
+    max_level: float,
     equivalent_db: float,
 )
 ```
@@ -458,7 +458,7 @@ What the true-RMS field strength meter of IEC 60118-4:2014 6.1.3 reads.
 | `weighting` | `"Z"` (flat, 6.1.2) or `"A"` (the noise measurements of clause 7 and 10.4). |
 | `times` | The time of each reading, in seconds. |
 | `levels` | The time-weighted level, 125 ms exponential averaging, in dB re 400 mA/m. |
-| `max_level_db` | The maximum indication over the record, the "maximum value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re 400 mA/m. |
+| `max_level` | The maximum indication over the record, the "maximum value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re 400 mA/m. |
 | `equivalent_db` | The level of the mean square over the whole record, in dB re 400 mA/m. |
 
 ### FieldStrengthReading.plot()
@@ -863,13 +863,13 @@ first doubling.
 
 ```python
 verify_induction_loop_system(
-    field_strength_levels_db: ArrayLike,
+    field_strength_levels: ArrayLike,
     *,
-    specified_level_db: float = 0.0,
+    specified_level: float = 0.0,
     frequencies: ArrayLike | None = None,
     response_db: ArrayLike | None = None,
-    background_noise_levels_db: ArrayLike | None = None,
-    system_noise_levels_db: ArrayLike | None = None,
+    background_noise_levels: ArrayLike | None = None,
+    system_noise_levels: ArrayLike | None = None,
     noise_is_tonal: bool = False,
 ) -> InductionLoopVerification
 ```
@@ -885,7 +885,7 @@ normally at 1,2 m for seated and 1,7 m for standing listeners (8.4.2):
   1 kHz sine or the combi signal and the true-RMS meter. Measured with
   another signal or meter, the specified level is the reading the
   manufacturer states for 400 mA/m (Table 3 gives -6 dB for pink noise on
-  the RMS meter), passed as `specified_level_db`;
+  the RMS meter), passed as `specified_level`;
 * `"field_strength_reached"` (8.2.7): the maximum value of the field is
   400 mA/m "at one point, at least, within the useful magnetic field
   volume" (8.2.1), so the highest level reaches the specified one. A
@@ -914,12 +914,12 @@ off is also assessed against the recommendations of 7.2
 
 | Name | Description |
 | :--- | :--- |
-| `field_strength_levels_db` | The field strength level at each selected point, in dB re 400 mA/m. |
-| `specified_level_db` | The level specified according to 8.2.7 for the signal and meter used, in dB re 400 mA/m. |
+| `field_strength_levels` | The field strength level at each selected point, in dB re 400 mA/m. |
+| `specified_level` | The level specified according to 8.2.7 for the signal and meter used, in dB re 400 mA/m. |
 | `frequencies` | The frequencies of the response, in hertz, including 100 Hz, 1 kHz and 5 kHz. |
 | `response_db` | The response at each frequency, in dB on any fixed reference, for one point or one row per point. |
-| `background_noise_levels_db` | The A-weighted level at each point with the loop switched off, in dB re 400 mA/m. |
-| `system_noise_levels_db` | The A-weighted level at the same points with the system on and every input muted, in dB re 400 mA/m. |
+| `background_noise_levels` | The A-weighted level at each point with the loop switched off, in dB re 400 mA/m. |
+| `system_noise_levels` | The A-weighted level at the same points with the system on and every input muted, in dB re 400 mA/m. |
 | `noise_is_tonal` | The background noise has a significant undesirable tonal quality and is not mostly at low frequencies, which withholds the 22 dB relaxation of 7.2 ([`assess_background_noise`](/phonometry/reference/api/electroacoustics/induction-loop/#assess_background_noise)). |
 
 **Returns:** An [`InductionLoopVerification`](/phonometry/reference/api/electroacoustics/induction-loop/#inductionloopverification).
@@ -928,11 +928,11 @@ off is also assessed against the recommendations of 7.2
 
 ```python
 verify_small_volume_system(
-    field_strength_levels_db: ArrayLike,
+    field_strength_levels: ArrayLike,
     *,
     layout: str,
     heights_m: ArrayLike | None = None,
-    standing_area_levels_db: ArrayLike | None = None,
+    standing_area_levels: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
     response_db: ArrayLike | None = None,
 ) -> InductionLoopVerification
@@ -950,7 +950,7 @@ in their place (9.4):
 * `"field_strength_reached"`: at one point at least, 0 dB or more;
 * `"standing_area"`: nowhere in the area where people are expected to
   stand above +8 dB, judged on the measurement points and on any survey
-  of that area given as `standing_area_levels_db`;
+  of that area given as `standing_area_levels`;
 * `"frequency_response"`: 8.3.7 at every point.
 
 A useful volume replaces the points of 9.2 (`"refuge_useful_volume"`)
@@ -968,10 +968,10 @@ The informative Annex A.4 allows up to +12 dB at 1,45 m for a counter;
 
 | Name | Description |
 | :--- | :--- |
-| `field_strength_levels_db` | The level at each measurement point, in dB re 400 mA/m: shape `(heights, points)` for a layout of Figures 2 and 3, `(2, 6)` for a refuge and `(3, 3)` for a counter, in the order of [`small_volume_measurement_points`](/phonometry/reference/api/electroacoustics/induction-loop/#small_volume_measurement_points); any shape for a useful volume. |
+| `field_strength_levels` | The level at each measurement point, in dB re 400 mA/m: shape `(heights, points)` for a layout of Figures 2 and 3, `(2, 6)` for a refuge and `(3, 3)` for a counter, in the order of [`small_volume_measurement_points`](/phonometry/reference/api/electroacoustics/induction-loop/#small_volume_measurement_points); any shape for a useful volume. |
 | `layout` | `"refuge_small"`, `"refuge_large"` or `"counter"` for the points of Figures 2 and 3; `"refuge_useful_volume"` or `"counter_useful_volume"` for a useful volume of 9.4 in their place. |
-| `heights_m` | The height of each point of a useful volume above the floor, in metres, in the shape of `field_strength_levels_db`; required for a useful volume, and refused for the fixed layouts, whose heights are those of Figures 2 and 3. |
-| `standing_area_levels_db` | Levels surveyed elsewhere in the area where people are expected to stand, in dB re 400 mA/m. |
+| `heights_m` | The height of each point of a useful volume above the floor, in metres, in the shape of `field_strength_levels`; required for a useful volume, and refused for the fixed layouts, whose heights are those of Figures 2 and 3. |
+| `standing_area_levels` | Levels surveyed elsewhere in the area where people are expected to stand, in dB re 400 mA/m. |
 | `frequencies` | The frequencies of the response, in hertz, including 100 Hz, 1 kHz and 5 kHz. |
 | `response_db` | The response at each frequency, one row per point. |
 

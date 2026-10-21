@@ -95790,49 +95790,49 @@ export const catalogues = {
         "unit": ""
       },
       {
-        "field": "transmission_loss_63_db",
+        "field": "transmission_loss_63",
         "heading": "63 Hz",
         "headingEs": "63 Hz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_125_db",
+        "field": "transmission_loss_125",
         "heading": "125 Hz",
         "headingEs": "125 Hz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_250_db",
+        "field": "transmission_loss_250",
         "heading": "250 Hz",
         "headingEs": "250 Hz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_500_db",
+        "field": "transmission_loss_500",
         "heading": "500 Hz",
         "headingEs": "500 Hz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_1000_db",
+        "field": "transmission_loss_1000",
         "heading": "1 kHz",
         "headingEs": "1 kHz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_2000_db",
+        "field": "transmission_loss_2000",
         "heading": "2 kHz",
         "headingEs": "2 kHz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_4000_db",
+        "field": "transmission_loss_4000",
         "heading": "4 kHz",
         "headingEs": "4 kHz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_8000_db",
+        "field": "transmission_loss_8000",
         "heading": "8 kHz",
         "headingEs": "8 kHz",
         "unit": "dB"
@@ -117311,7 +117311,7 @@ export const catalogues = {
         "unit": "kg/m³"
       },
       {
-        "field": "impact_sound_improvement_db",
+        "field": "impact_sound_improvement",
         "heading": "Average improvement",
         "headingEs": "Mejora media",
         "unit": "dB"
@@ -120868,49 +120868,49 @@ export const catalogues = {
         "unit": "m"
       },
       {
-        "field": "transmission_loss_63_db",
+        "field": "transmission_loss_63",
         "heading": "63 Hz",
         "headingEs": "63 Hz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_125_db",
+        "field": "transmission_loss_125",
         "heading": "125 Hz",
         "headingEs": "125 Hz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_250_db",
+        "field": "transmission_loss_250",
         "heading": "250 Hz",
         "headingEs": "250 Hz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_500_db",
+        "field": "transmission_loss_500",
         "heading": "500 Hz",
         "headingEs": "500 Hz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_1000_db",
+        "field": "transmission_loss_1000",
         "heading": "1 kHz",
         "headingEs": "1 kHz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_2000_db",
+        "field": "transmission_loss_2000",
         "heading": "2 kHz",
         "headingEs": "2 kHz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_4000_db",
+        "field": "transmission_loss_4000",
         "heading": "4 kHz",
         "headingEs": "4 kHz",
         "unit": "dB"
       },
       {
-        "field": "transmission_loss_8000_db",
+        "field": "transmission_loss_8000",
         "heading": "8 kHz",
         "headingEs": "8 kHz",
         "unit": "dB"

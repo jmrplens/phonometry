@@ -258,7 +258,7 @@ def _slm_periodic_verification() -> "SoundLevelMeterPeriodicVerification":
         long_term_stability_uncertainty_db=0.07,
         linear_operating_range_db=[40.0, 120.0],
         linearity_starting_point_db=94.0,
-        linearity_levels_db=[
+        linearity_levels=[
             *(94.0, 99.0, 104.0, 109.0, 114.0, 119.0, 120.0, 121.0, 122.0),
             *(89.0, 84.0, 79.0, 74.0, 69.0, 64.0, 59.0, 54.0, 49.0, 44.0),
             *(43.0, 42.0, 41.0, 40.0, 39.0, 38.0),
@@ -269,8 +269,8 @@ def _slm_periodic_verification() -> "SoundLevelMeterPeriodicVerification":
             *(0.2, 0.3, 0.3, 0.4, 0.5, 0.6),
         ],
         linearity_uncertainties_db=[0.18] * 25,
-        linearity_overload_level_db=123.0,
-        linearity_under_range_level_db=37.0,
+        linearity_overload_level=123.0,
+        linearity_under_range_level=37.0,
         range_linearity_deviations_db={"17.3": [0.1], "17.4": [0.1, -0.2]},
         range_linearity_uncertainties_db={"17.3": [0.18], "17.4": [0.18, 0.18]},
         toneburst_responses_db={
@@ -283,10 +283,10 @@ def _slm_periodic_verification() -> "SoundLevelMeterPeriodicVerification":
             "S": [0.2, 0.2],
             "E": [0.2, 0.2, 0.25],
         },
-        c_peak_differences_db=[3.9, 2.5, 2.2],
+        c_peak_differences=[3.9, 2.5, 2.2],
         c_peak_uncertainties_db=[0.3, 0.3, 0.3],
         c_peak_overload_indicated=False,
-        overload_difference_db=0.4,
+        overload_difference=0.4,
         overload_uncertainty_db=0.2,
         overload_latched=True,
         high_level_stability_db=0.03,
@@ -1461,7 +1461,7 @@ def _meter(frequency_hz: float) -> "DirectivityFactor":
     from phonometry import metrology
 
     b = _METER_REAR_FLOOR
-    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index_db
+    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index
     n = (1.0 - b) / (10.0 ** (-target / 10.0) - b) - 1.0
     phi = np.arange(0, 360, 10)
     return metrology.directivity_factor(
@@ -1475,7 +1475,7 @@ def _meter_sensitivity() -> "RandomIncidenceSensitivity":
     from phonometry import metrology
 
     bands = sorted(metrology.IEC61183_TABLE_B1)
-    index = [_meter(f).directivity_index_db for f in bands]
+    index = [_meter(f).directivity_index for f in bands]
     g_f = -10.0 * np.log10(1.0 + (np.array(bands) / _METER_ROLL_OFF_HZ) ** 4)
     return metrology.random_incidence_sensitivity(bands, g_f, index)
 
@@ -1527,9 +1527,9 @@ def generate_diffuse_field_sensitivity(output_dir: str) -> None:
     # of 0 dB plus Delta_DP.
     result = metrology.diffuse_field_sensitivity(
         bands,
-        _DIFFUSE_FIELD_DB + np.asarray(meter.random_incidence_level_db),
+        _DIFFUSE_FIELD_DB + np.asarray(meter.random_incidence_level),
         _DIFFUSE_FIELD_DB + delta_dp,
-        reference_pressure_level_db=0.0,
+        reference_pressure_level=0.0,
     )
     fig, ax = plt.subplots(figsize=(10, 6))
     result.plot(ax, language=_LANG)
@@ -1613,7 +1613,7 @@ def _calibrator_correction() -> "FreeFieldCorrection":
         94.0 + m["c_ff_rm"],
         94.0 + m["pressure"] + m["spread"] / 2,
         94.0,
-        reference_free_field_correction_db=m["c_ff_rm"],
+        reference_free_field_correction=m["c_ff_rm"],
     )
 
 
@@ -1632,7 +1632,7 @@ def generate_free_field_adjustment(output_dir: str) -> None:
         f3,
         94.0 + response,
         94.35,
-        calibrator_level_db=94.0,
+        calibrator_level=94.0,
         tolerance_db=tolerance,
     )
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -1654,7 +1654,7 @@ def generate_free_field_correction(output_dir: str) -> None:
         94.0 + m["free"] + m["spread"],
         94.0 - 26.0 + m["c_ff_rm"],
         94.0 - 0.08 * m["x"] ** 1.7 + m["spread"] / 2,
-        reference_sensitivity_level_db=-26.0 + m["c_ff_rm"],
+        reference_sensitivity_level=-26.0 + m["c_ff_rm"],
     )
     fig, (ax_calibrator, ax_actuator) = plt.subplots(1, 2, figsize=(13.5, 5.6))
     calibrator.plot(ax_calibrator, language=_LANG)
@@ -1694,14 +1694,14 @@ def generate_free_field_verification(output_dir: str) -> None:
             {**_TABLE_I2_DB, "a7": a7, "a11": a11, "a12": a11, "a15": a15},
             repeatability_dof=2,
             frequency_hz=frequency,
-            correction_db=value,
+            correction=value,
         )
         for frequency, a7, a11, a15, value in zip(
             correction.frequencies,
             _OCTAVE_A7_DB,
             _OCTAVE_A11_DB,
             _OCTAVE_A15_DB,
-            correction.correction_db,
+            correction.correction,
             strict=True,
         )
     ]
@@ -1709,7 +1709,7 @@ def generate_free_field_verification(output_dir: str) -> None:
         correction.frequencies,
         [b.expanded_uncertainty_db for b in budgets],
         clause=correction.clause,
-        correction_db=correction.correction_db,
+        correction=correction.correction,
         coverage_factor=[b.coverage_factor for b in budgets],
         correction_range_db=correction.range_db,
     )
@@ -1831,11 +1831,11 @@ def _free_field_comparison() -> "ComparisonCalibration":
         l_ref_p + c_ff + field_1,
         l_ws2f + field_2,
         monitor=metrology.MonitorReadings(
-            reference_level_db=monitor + field_1,
-            test_level_db=monitor + field_2,
+            reference_level=monitor + field_1,
+            test_level=monitor + field_2,
         ),
         field="free_field",
-        reference_free_field_difference_db=c_ff,
+        reference_free_field_difference=c_ff,
         expanded_uncertainty_db=[
             _free_field_budget(fx).expanded_uncertainty_db for fx in f
         ],
@@ -1906,7 +1906,7 @@ def generate_comparison_diameter_correction(output_dir: str) -> None:
     fine.plot(ax, language=_LANG, marker="none")
     ax.plot(
         table.frequencies,
-        table.correction_db,
+        table.correction,
         ls="none",
         marker="D",
         ms=5,
@@ -2018,11 +2018,11 @@ _STEP_FREQUENCIES_HZ = np.arange(0.0, 100000.0 + 1.0, 50.0)
 
 
 def _lumped_microphone(
-    frequencies: np.ndarray, level_db: float, resonance_hz: float, loss: float
+    frequencies: np.ndarray, level: float, resonance_hz: float, loss: float
 ) -> np.ndarray:
     """The guide's illustrative microphone, V/Pa: a second-order response."""
     ratio = frequencies / resonance_hz
-    return 10 ** (level_db / 20) / (1 - ratio**2 + 1j * loss * ratio)
+    return 10 ** (level / 20) / (1 - ratio**2 + 1j * loss * ratio)
 
 
 def _stepped_sine_pair() -> tuple[Any, Any, float]:
@@ -2092,8 +2092,8 @@ def _time_selective_calibration() -> "ComparisonCalibration":
     return metrology.sequential_comparison(
         fw,
         20 * np.log10(np.abs(m_ref)),
-        ref.level_db_at(fw),
-        ws2f.level_db_at(fw),
+        ref.level_at(fw),
+        ws2f.level_at(fw),
         field="free_field",
         phase=metrology.SequentialComparisonPhase(
             reference_sensitivity_phase_deg=np.degrees(np.angle(m_ref)),

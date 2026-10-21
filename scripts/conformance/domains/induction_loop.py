@@ -246,7 +246,7 @@ def _chk_field_window() -> Outcome:
     def verdict(level: float, specified: float = 0.0) -> bool:
         # The second point holds the 400 mA/m 8.2.7 asks for at one point.
         return ea.verify_induction_loop_system(
-            [level, specified], specified_level_db=specified
+            [level, specified], specified_level=specified
         ).passes
 
     return _window_row(
@@ -271,9 +271,7 @@ def _chk_field_window() -> Outcome:
 )
 def _chk_field_reached() -> Outcome:
     def verdict(levels: list[float], specified: float = 0.0) -> bool:
-        return ea.verify_induction_loop_system(
-            levels, specified_level_db=specified
-        ).passes
+        return ea.verify_induction_loop_system(levels, specified_level=specified).passes
 
     pink = ref.IEC60118_4_TABLE3["pink_noise"][0]
     return _window_row(
@@ -347,7 +345,7 @@ def _chk_small_volume() -> Outcome:
 
     def verdict(levels: np.ndarray, survey: list[float] | None = None) -> bool:
         return ea.verify_small_volume_system(
-            levels, layout="counter", standing_area_levels_db=survey
+            levels, layout="counter", standing_area_levels=survey
         ).passes
 
     edges = np.array([[-span, 0.0, span]] * 3)
@@ -503,7 +501,7 @@ def _chk_system_noise() -> Outcome:
 
     def verdict(off: float, on: float) -> bool:
         return ea.verify_induction_loop_system(
-            [0.0], background_noise_levels_db=[off], system_noise_levels_db=[on]
+            [0.0], background_noise_levels=[off], system_noise_levels=[on]
         ).passes
 
     return _window_row(
@@ -857,7 +855,7 @@ def _chk_quadrature_rise() -> Outcome:
     error = ea.quadrature_phase_error([100.0, 1000.0, 5000.0], [90.0, 85.0, 90.0])
     return numeric(
         ref.IEC62489_1_QUADRATURE_EXAMPLE_DB,
-        error.level_increase_db,
+        error.level_increase,
         0.01,
         unit="dB",
         places=3,
@@ -870,7 +868,7 @@ def _chk_quadrature_fall() -> Outcome:
     closed = 20.0 * math.log10(1.0 - math.cos(math.radians(85.0)))
     return numeric(
         closed,
-        error.level_decrease_db,
+        error.level_decrease,
         1e-9,
         unit="dB",
         places=3,

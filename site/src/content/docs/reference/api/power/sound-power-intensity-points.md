@@ -205,7 +205,7 @@ DiscretePointIntensityResult(
     f2: np.ndarray | None,
     f3: np.ndarray | None,
     f4: np.ndarray | None,
-    pressure_residual_index_db: np.ndarray | None,
+    pressure_residual_index: np.ndarray | None,
     band_type: str,
     grade: str,
 )

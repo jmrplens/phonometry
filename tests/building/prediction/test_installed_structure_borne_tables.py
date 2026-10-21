@@ -409,7 +409,7 @@ def test_clause_f1_multi_junction_adjustment_values() -> None:
 
 def test_clause_f1_kij_floor() -> None:
     """ "the resulting value for Kij should normally not become less than -5 dB"."""
-    assert building.MIN_MULTI_JUNCTION_KIJ_DB == -5.0
+    assert building.MIN_MULTI_JUNCTION_KIJ == -5.0
 
 
 def test_multi_junction_adjustment_rejects_zero_junctions() -> None:

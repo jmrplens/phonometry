@@ -748,7 +748,7 @@ def test_result_refuses_disagreeing_shapes() -> None:
     with pytest.raises(ValueError, match="'quantity' must be one of"):
         dataclasses.replace(res, quantity="intensity")
     with pytest.raises(ValueError, match="'excess_levels' must carry one finite value"):
-        dataclasses.replace(res, excess_levels_db=np.full(3, 8.0))
+        dataclasses.replace(res, excess_levels=np.full(3, 8.0))
     with pytest.raises(ValueError, match="'directivity_range' must be finite"):
         dataclasses.replace(res, directivity_range_db=-1.0)
 
@@ -766,7 +766,7 @@ def test_the_grade_and_its_uncertainty_are_read_from_the_indicators(field: str) 
 def test_a_hand_built_grade_follows_its_indicators() -> None:
     res = _power()
     engineering = dataclasses.replace(
-        res, excess_levels_db=np.full(4, 7.0), directivity_range_db=7.0
+        res, excess_levels=np.full(4, 7.0), directivity_range_db=7.0
     )
     survey = dataclasses.replace(engineering, directivity_range_db=7.1)
     assert (engineering.grade, survey.grade) == ("engineering", "survey")

@@ -70,8 +70,8 @@ WindowMetricsResult(
     taps: NDArray[np.float64],
     coherent_gain: float,
     enbw_bins: float,
-    scalloping_loss_db: float,
-    worst_case_processing_loss_db: float,
+    scalloping_loss: float,
+    worst_case_processing_loss: float,
     highest_sidelobe_db: float,
     mainlobe_width_3db_bins: float,
 )
@@ -95,8 +95,8 @@ window is sampled DFT-even (periodic), exactly as
 | `taps` | The window samples `w[m]` (DFT-even). |
 | `coherent_gain` | Normalized DC gain $\sum w / n$ (1 for rectangular); the amplitude a bin-centered tone is scaled by before correction. |
 | `enbw_bins` | Equivalent noise bandwidth $n \sum w^2 / \left( \sum w \right)^2$, in bins: the width of the ideal rectangular filter that would pass the same white-noise power (1 rectangular, 1.5 Hann, 1987/1458 Hamming). |
-| `scalloping_loss_db` | Attenuation of a tone midway between two bins, $-20 \log_{10} \lvert W(1/2)/W(0) \rvert$, in dB (positive). |
-| `worst_case_processing_loss_db` | Scalloping loss plus the ENBW processing loss $10 \log_{10}(\mathrm{ENBW})$, in dB: the worst-case reduction in output signal-to-noise ratio for a tone in white noise. |
+| `scalloping_loss` | Attenuation of a tone midway between two bins, $-20 \log_{10} \lvert W(1/2)/W(0) \rvert$, in dB (positive). |
+| `worst_case_processing_loss` | Scalloping loss plus the ENBW processing loss $10 \log_{10}(\mathrm{ENBW})$, in dB: the worst-case reduction in output signal-to-noise ratio for a tone in white noise. |
 | `highest_sidelobe_db` | Level of the highest sidelobe relative to the main lobe, in dB (negative; -13.3 rectangular, -31.5 Hann). |
 | `mainlobe_width_3db_bins` | Two-sided -3 dB width of the main lobe, in bins. |
 

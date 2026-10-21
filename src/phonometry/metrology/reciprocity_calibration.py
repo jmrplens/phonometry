@@ -202,7 +202,7 @@ class ReciprocityCalibration(OwnsArrays):
         12 alone with an auxiliary source), in V²/Pa².
     :ivar field: ``"pressure"`` (IEC 61094-2) or ``"free_field"`` (IEC 61094-3).
     :ivar method: ``"three_microphones"`` or ``"auxiliary_source"``.
-    :ivar corrections_db: Corrections added to every microphone's sensitivity
+    :ivar corrections: Corrections added to every microphone's sensitivity
         level, by name, in dB at each frequency: the wave-motion correction of
         IEC 61094-2 Table C.3 for a large-volume coupler, say.
     :ivar expanded_uncertainty_db: The expanded uncertainty of the
@@ -214,7 +214,7 @@ class ReciprocityCalibration(OwnsArrays):
     products_v2_per_pa2: NDArray[np.complex128]
     field: str
     method: str
-    corrections_db: Mapping[str, NDArray[np.float64]]
+    corrections: Mapping[str, NDArray[np.float64]]
     expanded_uncertainty_db: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
@@ -251,10 +251,10 @@ class ReciprocityCalibration(OwnsArrays):
                 raise ValueError(msg)
             object.__setattr__(self, name, read_only(array))
         corrections = {
-            str(key): read_only(_band_column(value, f"corrections_db[{key!r}]", count))
-            for key, value in self.corrections_db.items()
+            str(key): read_only(_band_column(value, f"corrections[{key!r}]", count))
+            for key, value in self.corrections.items()
         }
-        object.__setattr__(self, "corrections_db", MappingProxyType(corrections))
+        object.__setattr__(self, "corrections", MappingProxyType(corrections))
         if self.expanded_uncertainty_db is not None:
             uncertainty = _band_column(
                 self.expanded_uncertainty_db, "expanded_uncertainty_db", count
@@ -278,25 +278,25 @@ class ReciprocityCalibration(OwnsArrays):
         return int(self.sensitivity_v_per_pa.shape[0])
 
     @property
-    def correction_db(self) -> NDArray[np.float64]:
+    def correction(self) -> NDArray[np.float64]:
         r""":math:`\sum_j C_j`, the corrections added to every level, in dB."""
         total = np.zeros(self.frequencies.size)
-        for value in self.corrections_db.values():
+        for value in self.corrections.values():
             total = total + value
         return total
 
     @property
-    def sensitivity_level_db(self) -> NDArray[np.float64]:
+    def sensitivity_level(self) -> NDArray[np.float64]:
         r""":math:`20\lg(|M|/1\,\mathrm{V/Pa}) + \sum_j C_j`, one row per
         microphone, in dB re 1 V/Pa.
         """
         level = 20.0 * np.log10(np.abs(self.sensitivity_v_per_pa))
-        return level + self.correction_db
+        return level + self.correction
 
     @property
     def sensitivity_mv_per_pa(self) -> NDArray[np.float64]:
         """The modulus of each sensitivity with the corrections, in mV/Pa."""
-        return 1000.0 * 10.0 ** (self.sensitivity_level_db / 20.0)
+        return 1000.0 * 10.0 ** (self.sensitivity_level / 20.0)
 
     @property
     def phase_deg(self) -> NDArray[np.float64]:
@@ -332,7 +332,7 @@ def _calibration(
     *,
     field: str,
     method: str,
-    corrections_db: Mapping[str, ArrayLike] | None,
+    corrections: Mapping[str, ArrayLike] | None,
     expanded_uncertainty_db: ArrayLike | None,
 ) -> ReciprocityCalibration:
     """Build the result; shared by the pressure and the free-field routes."""
@@ -342,7 +342,7 @@ def _calibration(
         products_v2_per_pa2=products,
         field=field,
         method=method,
-        corrections_db=dict(corrections_db or {}),  # type: ignore[arg-type]
+        corrections=dict(corrections or {}),  # type: ignore[arg-type]
         expanded_uncertainty_db=(
             None
             if expanded_uncertainty_db is None
@@ -357,7 +357,7 @@ def _solved(
     sensitivity_ratio: ArrayLike | None,
     *,
     field: str,
-    corrections_db: Mapping[str, ArrayLike] | None,
+    corrections: Mapping[str, ArrayLike] | None,
     expanded_uncertainty_db: ArrayLike | None,
 ) -> ReciprocityCalibration:
     """Solve the products for the sensitivities, by the triad or by a pair."""
@@ -376,7 +376,7 @@ def _solved(
         np.vstack(products),
         field=field,
         method=method,
-        corrections_db=corrections_db,
+        corrections=corrections,
         expanded_uncertainty_db=expanded_uncertainty_db,
     )
 

@@ -154,7 +154,7 @@ electromagnetic exposure of IEC 62489-2 is outside this library.
 ```python
 agc_characteristic(
     source_emf_db: ArrayLike,
-    output_level_db: ArrayLike,
+    output_level: ArrayLike,
 ) -> AGCCharacteristic
 ```
 
@@ -182,7 +182,7 @@ measured.
 | Name | Description |
 | :--- | :--- |
 | `source_emf_db` | Source e.m.f. levels, in dB re any fixed voltage, strictly ascending. |
-| `output_level_db` | Output current level at each, in dB re the rated maximum output current. |
+| `output_level` | Output current level at each, in dB re the rated maximum output current. |
 
 **Returns:** An [`AGCCharacteristic`](/phonometry/reference/api/electroacoustics/induction-loop-components/#agccharacteristic).
 
@@ -191,7 +191,7 @@ measured.
 ```python
 AGCCharacteristic(
     source_emf_db: np.ndarray,
-    output_level_db: np.ndarray,
+    output_level: np.ndarray,
     agc_range_db: float,
     agc_range_start_db: float,
     agc_range_end_db: float,
@@ -205,7 +205,7 @@ The steady-state output/input characteristic of an amplifier (5.4.13).
 | Name | Description |
 | :--- | :--- |
 | `source_emf_db` | The source e.m.f. levels, in dB, ascending. |
-| `output_level_db` | The output current level at each, in dB referred to the rated maximum output current (5.4.13.3). |
+| `output_level` | The output current level at each, in dB referred to the rated maximum output current (5.4.13.3). |
 | `agc_range_db` | The widest span of input level over which the output level changes by no more than 3 dB, in dB: the quantity IEC 62489-1:2010+A1:2014 5.4.13.4 recommends to be at least 32 dB. |
 | `agc_range_start_db` | The input level where that span starts, in dB. |
 | `agc_range_end_db` | The input level where it ends, in dB. |
@@ -638,10 +638,10 @@ same arrays describe it turned on its side.
 | `h_y_a_per_m` | The $y$ component, in A/m. |
 | `h_z_a_per_m` | The $z$ component, in A/m. |
 
-### LoopField.level_db()
+### LoopField.level()
 
 ```python
-LoopField.level_db(component: str = 'z') -> np.ndarray
+LoopField.level(component: str = 'z') -> np.ndarray
 ```
 
 The field strength level of one component, dB re 400 mA/m.
@@ -891,7 +891,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ```python
 neck_loop_characteristics(
     frequencies: ArrayLike,
-    field_strength_level_db: ArrayLike,
+    field_strength_level: ArrayLike,
     impedance_ohm: ArrayLike,
     *,
     input_voltage_v: float,
@@ -916,7 +916,7 @@ that gives 0 dB, where the scaling does nothing.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The measurement frequencies, in hertz, ascending and including 1000 Hz. |
-| `field_strength_level_db` | The field strength level on the jig at each, in dB re 400 mA/m. |
+| `field_strength_level` | The field strength level on the jig at each, in dB re 400 mA/m. |
 | `impedance_ohm` | The input impedance at each, in ohms; complex values are reduced to their magnitude, and real ones must be positive. |
 | `input_voltage_v` | The input voltage the field was measured with, in volts. |
 
@@ -935,7 +935,7 @@ NECK_LOOP_TYPES = {1: NeckLoopType(description='for audio sources powered by two
 ```python
 NeckLoopCharacteristics(
     frequencies: np.ndarray,
-    field_strength_level_db: np.ndarray,
+    field_strength_level: np.ndarray,
     impedance_ohm: np.ndarray,
     input_voltage_v: float,
     reference_input_voltage_v: float,
@@ -952,7 +952,7 @@ What IEC 62489-1:2010+A1:2014 clause 9 states for a neck loop.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The measurement frequencies, in hertz. |
-| `field_strength_level_db` | The field strength level on the test jig at each, in dB re 400 mA/m, with `input_voltage_v` applied. |
+| `field_strength_level` | The field strength level on the test jig at each, in dB re 400 mA/m, with `input_voltage_v` applied. |
 | `impedance_ohm` | The magnitude of the input impedance at each, in ohms. |
 | `input_voltage_v` | The input voltage the field was measured with, in volts. |
 | `reference_input_voltage_v` | The input voltage that produces 400 mA/m at 1 kHz at the telecoil position of the jig, the characteristic of 9.1, in volts. |
@@ -1136,7 +1136,7 @@ the in-phase part is $\cos 85^\circ = 0{,}087$).
 | `max_deviation_deg` | The largest deviation over 100 Hz to 5 kHz, the characteristic of 5.4.14.2, in degrees. |
 | `max_deviation_frequency_hz` | Where it occurs, in hertz, stated with it (5.4.14.4). |
 
-### QuadraturePhaseError.level_decrease_db
+### QuadraturePhaseError.level_decrease
 
 *property*
 
@@ -1148,7 +1148,7 @@ same number without the cancellation near 90 degrees. At a deviation
 of 90 degrees, currents in phase or in antiphase, the two fields
 cancel where they subtract and the fall is minus infinity.
 
-### QuadraturePhaseError.level_increase_db
+### QuadraturePhaseError.level_increase
 
 *property*
 

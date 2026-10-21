@@ -318,7 +318,7 @@ end_reflection_loss(
     method: str = 'bies',
     speed_of_sound: float = 343.0,
     aspect_ratio: float = 1.0,
-    max_reduction_db: float | None = 15.0,
+    max_reduction: float | None = 15.0,
 ) -> HVACSpectrumResult
 ```
 
@@ -347,7 +347,7 @@ The two agree within a couple of decibels over the bands both cover.
 | `termination` | `"flush"` (duct flush with a wall/ceiling) or `"free"` (free space / suspended in the room). |
 | `method` | `"bies"` (Table 8.14 look-up), `"long"` (closed form) or `"vdi2081"` (VDI 2081 Part 1 Figure 28). |
 | `aspect_ratio` | **VDI 2081 only.** Nozzle length over height `m` (default 1, a square opening). Figure 28 is drawn from 1 to 30. |
-| `max_reduction_db` | **VDI 2081 only.** Ceiling on the reduction, dB (default 15). Section 6.6 says the theoretical value is not reached because the duct walls radiate what the nozzle reflects, and the guideline's own worked example applies exactly this cap. `None` returns the uncapped closed form. |
+| `max_reduction` | **VDI 2081 only.** Ceiling on the reduction, dB (default 15). Section 6.6 says the theoretical value is not reached because the duct walls radiate what the nozzle reflects, and the guideline's own worked example applies exactly this cap. `None` returns the uncapped closed form. |
 | `speed_of_sound` | Speed of sound `c`, m/s (used by the closed form; the table is indexed by frequency directly). |
 
 **Returns:** A [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the reflection loss, dB.

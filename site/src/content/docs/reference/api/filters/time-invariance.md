@@ -45,14 +45,14 @@ This module has three things for it:
 
 ```python
 swept_band_level(
-    input_level_db: float,
+    input_level: float,
     *,
     fraction: float,
     sweep_duration_s: float,
     averaging_time_s: float,
     start_frequency_hz: float,
     end_frequency_hz: float,
-    reference_attenuation_db: float = 0.0,
+    reference_attenuation: float = 0.0,
 ) -> float
 ```
 
@@ -73,15 +73,15 @@ is what 5.14.3 and IEC 61260-3:2016 10.3.6 grade.
 
 | Name | Description |
 | :--- | :--- |
-| `input_level_db` | $L_\mathrm{in}$, the level of the sweep. |
+| `input_level` | $L_\mathrm{in}$, the level of the sweep. |
 | `fraction` | The bandwidth designator denominator `b`. |
 | `sweep_duration_s` | $T_\mathrm{sweep}$, the time from the start frequency to the end frequency. |
 | `averaging_time_s` | $T_\mathrm{avg}$, the averaging time of the output level. |
 | `start_frequency_hz` | $f_\mathrm{start}$. |
 | `end_frequency_hz` | $f_\mathrm{end}$, above the start. |
-| `reference_attenuation_db` | $A_\mathrm{ref}$, the reference attenuation of 5.9 (0 dB by default). |
+| `reference_attenuation` | $A_\mathrm{ref}$, the reference attenuation of 5.9 (0 dB by default). |
 
-**Returns:** $L_\mathrm{c}$ in the unit of `input_level_db`.
+**Returns:** $L_\mathrm{c}$ in the unit of `input_level`.
 
 **Raises**
 
@@ -164,8 +164,8 @@ TimeInvarianceResult(
     end_frequency_hz: float,
     sweep_durations_s: tuple[float, ...],
     averaging_times_s: tuple[float, ...],
-    output_levels_db: np.ndarray,
-    expected_levels_db: np.ndarray,
+    output_levels: np.ndarray,
+    expected_levels: np.ndarray,
 )
 ```
 
@@ -196,8 +196,8 @@ Formula (A.4)), so $L_\mathrm{in} = 0$ dB.
 | `end_frequency_hz` | $f_\mathrm{end}$ of every sweep. |
 | `sweep_durations_s` | $T_\mathrm{sweep}$, one per rate. |
 | `averaging_times_s` | $T_\mathrm{avg}$, one per rate: the sweep and the silence after it during which the slowest band's output dies away. |
-| `output_levels_db` | The measured time-averaged output level $L_\mathrm{out}$, shape `(rates, bands)`. |
-| `expected_levels_db` | $L_\mathrm{c}$ of Formula (17), same shape. |
+| `output_levels` | The measured time-averaged output level $L_\mathrm{out}$, shape `(rates, bands)`. |
+| `expected_levels` | $L_\mathrm{c}$ of Formula (17), same shape. |
 
 ### TimeInvarianceResult.band_classes
 

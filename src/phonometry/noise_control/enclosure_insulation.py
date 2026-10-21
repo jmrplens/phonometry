@@ -112,7 +112,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
 __all__ = [
     "ARTIFICIAL_SOURCE_DROP_MM",
-    "ARTIFICIAL_SOURCE_EXAMPLE_LWA_DB",
+    "ARTIFICIAL_SOURCE_EXAMPLE_LWA",
     "ARTIFICIAL_SOURCE_LEAK_RATIO_ADVISORY",
     "ARTIFICIAL_SOURCE_MAX_FILL_RATIO",
     "ARTIFICIAL_SOURCE_PLATE_MM",
@@ -170,7 +170,7 @@ ARTIFICIAL_SOURCE_STANDOFF_MM: float = 60.0
 #: decibels. The spectrum is an illustration measured on a 600 mm plate, not
 #: the 800 mm plate Annex A specifies, so it is not a calibration target; see
 #: ``docs/ERRATA.md``.
-ARTIFICIAL_SOURCE_EXAMPLE_LWA_DB: float = 110.0
+ARTIFICIAL_SOURCE_EXAMPLE_LWA: float = 110.0
 
 #: 7.2 of part 2: the artificial source stands at least this fraction of the
 #: shortest interior dimension away from any enclosure wall.

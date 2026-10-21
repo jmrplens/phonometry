@@ -170,7 +170,7 @@ def test_sloped_improvement_is_rated_on_each_floor(floor: str) -> None:
     res = building.laboratory_floor_covering_improvement(
         bare, bare - dl, _CORE, reference_floor=floor
     )
-    assert (res.delta_lw_db, res.ci_delta_db) == (delta_lw, ci_delta)
+    assert (res.delta_lw, res.ci_delta) == (delta_lw, ci_delta)
     assert res.reference_rating is not None
     assert (res.reference_rating.rating, res.reference_rating.ci) == (ln_r_w, ci_r)
 
@@ -336,9 +336,9 @@ def test_sloped_lining_direct_differences_formula_d2() -> None:
         without, with_, _TABLE_E1, basic_element=None
     )
     direct = (
-        res.delta_rw_direct_db,
-        res.delta_rw_c_direct_db,
-        res.delta_rw_ctr_direct_db,
+        res.delta_rw_direct,
+        res.delta_rw_c_direct,
+        res.delta_rw_ctr_direct,
     )
     assert direct == ref.ISO717_1_MEASURED_WALL_DIRECT
 
@@ -390,7 +390,7 @@ def test_laboratory_lining_improvement_on_the_heavy_wall() -> None:
     without = np.linspace(40.0, 65.0, 18)
     with_ = without + 10.0
     res = building.laboratory_lining_improvement(without, with_, freqs)
-    np.testing.assert_allclose(res.delta_r_db, 10.0)
+    np.testing.assert_allclose(res.delta_r, 10.0)
     assert res.rating is not None
     assert (res.rating.delta_rw, res.rating.delta_rw_c, res.rating.delta_rw_ctr) == (
         10,
@@ -398,9 +398,9 @@ def test_laboratory_lining_improvement_on_the_heavy_wall() -> None:
         10,
     )
     assert (
-        res.delta_rw_direct_db,
-        res.delta_rw_c_direct_db,
-        res.delta_rw_ctr_direct_db,
+        res.delta_rw_direct,
+        res.delta_rw_c_direct,
+        res.delta_rw_ctr_direct,
     ) == (10, 10, 10)
     centres, octaves = res.octave_bands()
     np.testing.assert_allclose(centres, [125, 250, 500, 1000, 2000, 4000])
@@ -412,12 +412,12 @@ def test_other_basic_element_keeps_only_the_direct_difference() -> None:
         np.full(16, 40.0), np.full(16, 45.0), _CORE, basic_element=None
     )
     assert res.rating is None
-    assert res.delta_rw_direct_db == 5
+    assert res.delta_rw_direct == 5
 
 
 def test_lining_spectrum_without_rating_bands_has_no_rating() -> None:
     res = building.laboratory_lining_improvement([40, 41], [45, 47], [500, 630])
-    assert (res.rating, res.delta_rw_direct_db) == (None, None)
+    assert (res.rating, res.delta_rw_direct) == (None, None)
 
 
 def test_octave_formula_d1_averages_energy_not_decibels() -> None:
@@ -437,14 +437,14 @@ def test_lining_result_refuses_mismatched_columns() -> None:
     with pytest.raises(ValueError, match=r"LaboratoryLiningImprovementResult"):
         LaboratoryLiningImprovementResult(
             frequencies=two_bands,
-            r_without_db=one_level,
-            r_with_db=two_levels,
-            delta_r_db=two_levels,
+            r_without=one_level,
+            r_with=two_levels,
+            delta_r=two_levels,
             basic_element=None,
             rating=None,
-            delta_rw_direct_db=None,
-            delta_rw_c_direct_db=None,
-            delta_rw_ctr_direct_db=None,
+            delta_rw_direct=None,
+            delta_rw_c_direct=None,
+            delta_rw_ctr_direct=None,
         )
 
 
@@ -527,7 +527,7 @@ def test_annex_c2_example_through_the_annex_h_front_end() -> None:
     dl = np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L)
     bare = np.full(16, 75.0)
     res = building.laboratory_floor_covering_improvement(bare, bare - dl, _CORE)
-    assert (res.delta_lw_db, res.ci_delta_db) == (
+    assert (res.delta_lw, res.ci_delta) == (
         ref.ISO717_2_ANNEX_C2_DELTA_LW,
         ref.ISO717_2_ANNEX_C2_CI_DELTA,
     )
@@ -560,10 +560,10 @@ def test_lightweight_floors_are_rated_on_their_own_curve(
         bare, bare - dl, freqs, reference_floor=floor
     )
     assert res.designation == designation
-    assert res.delta_lw_db == building.weighted_impact_improvement(
+    assert res.delta_lw == building.weighted_impact_improvement(
         dl[:16], reference_floor=floor
     )
-    assert res.ci_delta_db == building.impact_improvement_adaptation_term(
+    assert res.ci_delta == building.impact_improvement_adaptation_term(
         dl[:16], reference_floor=floor
     )
 
@@ -575,7 +575,7 @@ def test_octave_formula_h2() -> None:
     centres, octaves = res.octave_bands()
     assert centres.tolist() == [1000.0]
     assert octaves[0] == pytest.approx(-10.0 * np.log10((1.0 + 0.1 + 0.01) / 3.0))
-    assert res.delta_lw_db is None
+    assert res.delta_lw is None
 
 
 def test_floor_covering_result_refuses_an_unknown_floor() -> None:
@@ -584,12 +584,12 @@ def test_floor_covering_result_refuses_an_unknown_floor() -> None:
     with pytest.raises(ValueError, match=r"reference_floor"):
         LaboratoryFloorCoveringImprovementResult(
             frequencies=band,
-            l_n0_db=one,
-            l_n_db=one,
-            improvement_db=one,
+            l_n0=one,
+            l_n=one,
+            improvement=one,
             reference_floor="timber",
-            delta_lw_db=None,
-            ci_delta_db=None,
+            delta_lw=None,
+            ci_delta=None,
             reference_rating=None,
             bare_rating=None,
         )
@@ -599,7 +599,7 @@ def test_heavy_impact_improvement_is_formula_h3() -> None:
     res = building.heavy_impact_improvement(
         [80.0, 75.0, 70.0, 65.0], [78.0, 70.0, 62.0, 55.0], [63, 125, 250, 500]
     )
-    np.testing.assert_allclose(res.improvement_db, [2.0, 5.0, 8.0, 10.0])
+    np.testing.assert_allclose(res.improvement, [2.0, 5.0, 8.0, 10.0])
 
 
 def test_heavy_impact_improvement_refuses_mismatched_inputs() -> None:
@@ -654,7 +654,7 @@ def test_covering_figure_draws_the_improvement_and_names_its_terms() -> None:
         bare, bare - dl, _CORE, reference_floor="lightweight_3"
     )
     ax = res.plot()
-    np.testing.assert_allclose(_line(ax, r"$\Delta L$"), res.improvement_db)
+    np.testing.assert_allclose(_line(ax, r"$\Delta L$"), res.improvement)
     title = ax.get_title()
     assert r"$\Delta L_\mathrm{t,3,w}$ = 11 dB" in title
     assert r"$C_{\mathrm{I}\Delta,\mathrm{t3}}$ = −3 dB" in title

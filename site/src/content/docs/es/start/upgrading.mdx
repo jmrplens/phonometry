@@ -399,7 +399,7 @@ final de esta página; estas son las demás.
 | `building.TAPPING_DROP_HEIGHT`, `TAPPING_HAMMER_RADIUS`, `TAPPING_HAMMER_MASS`, `TAPPING_IMPACT_RATE` | `TAPPING_DROP_HEIGHT_M`, `TAPPING_HAMMER_RADIUS_M`, `TAPPING_HAMMER_MASS_KG`, `TAPPING_IMPACT_RATE_HZ` |
 | `building.LOW_FREQUENCY_VOLUME_LIMIT` | `LOW_FREQUENCY_VOLUME_LIMIT_M3` |
 | `hearing.AUDIOMETRIC_FREQUENCIES`, `PROTECTOR_OCTAVE_BANDS` | `AUDIOMETRIC_FREQUENCIES_HZ`, `PROTECTOR_OCTAVE_BANDS_HZ` |
-| `building.MINIMUM_MULTI_JUNCTION_KIJ`, −5 dB | `MIN_MULTI_JUNCTION_KIJ_DB` |
+| `building.MINIMUM_MULTI_JUNCTION_KIJ`, −5 dB | `MIN_MULTI_JUNCTION_KIJ` |
 | `broadcast.DBQPS_REFERENCE`, 0,775 V | `DBQPS_REFERENCE_V` |
 | `electroacoustics.CARDIOID_RELATIVE_DIRECTIVITY`, `DEFAULT_STABILITY_MARGIN`, las dos en dB | los mismos nombres terminados en `_DB` |
 | `environment.REFERENCE_JOINT_DENSITY`, juntas por metro | `REFERENCE_JOINT_DENSITY_PER_M` |
@@ -574,7 +574,7 @@ estos aparecen en la tabla de los nombres que ya no están.
 | `harmonics=` en `gear_mesh_frequencies` y `blade_pass_frequencies`, y el `count` de `FaultFrequencyResult.harmonics` | `n_harmonics` |
 | `SawtoothBurstTest.burst_count` | `.n_bursts` |
 | `room.MAXIMUM_DIRECTIVITY_STEP_DEG`, `MINIMUM_BANDWIDTH_TIME_PRODUCT`, `MINIMUM_DETECTOR_MULTIPLE` y `MINIMUM_REFERENCE_DISTANCE_M`, `noise_control.MAXIMUM_PASSAGE_ASPECT`, `MINIMUM_FLOW_RATES` y `MINIMUM_PRESSURE_DIFFERENCE_PA`, `emission.MINIMUM_BACKGROUND_MARGIN_DB` | `MAX_DIRECTIVITY_STEP_DEG`, `MIN_BANDWIDTH_TIME_PRODUCT`, `MIN_DETECTOR_MULTIPLE`, `MIN_REFERENCE_DISTANCE_M`, `MAX_PASSAGE_ASPECT`, `MIN_FLOW_RATES`, `MIN_PRESSURE_DIFFERENCE_PA`, `MIN_BACKGROUND_MARGIN_DB` |
-| `OperatingLine.maximum_deviation`, `maximum_open_loop_gain` y `maximum_level_at_microphone` en `FeedbackStabilityResult`, `maximum_reduction_db=` en `end_reflection_loss`, `LoudspeakerCharacteristics.minimum_impedance`, `minimum_load_impedance` en `MicrophoneCharacteristics` y `MicrophoneElectrical`, `DiscretePointIntensityResult.minimum_positions`, `minimum_speed=` en `railway_source_power` | `max_deviation`, `max_open_loop_gain`, `max_level_at_microphone`, `max_reduction_db=`, `min_impedance_ohm`, `min_load_impedance_ohm`, `min_positions`, `min_speed_kmh=` |
+| `OperatingLine.maximum_deviation`, `maximum_open_loop_gain` y `maximum_level_at_microphone` en `FeedbackStabilityResult`, `maximum_reduction_db=` en `end_reflection_loss`, `LoudspeakerCharacteristics.minimum_impedance`, `minimum_load_impedance` en `MicrophoneCharacteristics` y `MicrophoneElectrical`, `DiscretePointIntensityResult.minimum_positions`, `minimum_speed=` en `railway_source_power` | `max_deviation`, `max_open_loop_gain`, `max_level_at_microphone`, `max_reduction=`, `min_impedance_ohm`, `min_load_impedance_ohm`, `min_positions`, `min_speed_kmh=` |
 | `building.a_weighted_maximum_impact_level`, `standardized_maximum_impact_level`, `AWeightedMaximumImpactResult` y `StandardizedMaximumImpactResult` | `a_weighted_max_impact_level`, `standardized_max_impact_level`, `AWeightedMaxImpactResult` y `StandardizedMaxImpactResult`: `max` y `min` en todo nombre público, términos consagrados incluidos |
 | `room.minimum_reliable_reverberation_time` y `minimum_receiver_positions` | `min_reliable_reverberation_time` y `min_receiver_positions` |
 | `PhaseDecompositionResult.minimum_phase_response` | `.min_phase_response` |
@@ -675,6 +675,49 @@ print(round(metrology.combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38]
 print(round(noise_control.combined_stage_level([80.0, 80.0]), 2))
 # 2.18
 # 83.01
+```
+
+## Un nivel o una diferencia de niveles no lleva sufijo de unidad
+
+Un nivel y una diferencia de niveles están en decibelios por definición (un
+nivel de sonoridad está en fonios), así que un nombre público cuyo núcleo es
+uno de ellos no lleva `_db`, sea un parámetro, un campo, una propiedad, un
+método o una constante. El núcleo es el último sustantivo del nombre, pasadas
+las palabras que lo califican por detrás (una banda, una ponderación
+frecuencial, `before` o `after`, `max` o `min`): un nivel, una pérdida, un
+aislamiento, una reducción, un rechazo, una diferencia, una
+mejora, una atenuación de un solo valor, una corrección, un ajuste, un
+índice, el término de adaptación espectral de la ISO 717, un desplazamiento o
+un exceso del nivel que el nombre nombra (`level_shift`), o el símbolo impreso
+de uno de ellos. Un nombre cuyo núcleo no dice decibelios conserva el sufijo:
+una tolerancia, un margen, una incertidumbre, una desviación, un escalón, una
+pendiente o una tasa (`tolerance_db`, `background_margin_db`,
+`expanded_uncertainty_db`, `slope_db_per_decade`, `attenuation_db_per_m`). La
+tabla de un cuaderno sigue mostrando en decibelios un número con ese nombre,
+ahora leídos de su núcleo, y un nivel de sonoridad en fonios; un indicador,
+un texto, un factor complejo o un registro con uno de esos nombres no muestra
+unidad, y un número que el núcleo leería mal (el índice de reflexión de la
+EN 1793-5, el A_eta de la IEC 60534-8-3) muestra la suya. Casi todos los
+nombres que esto renombra son posteriores a la 4.0.0rc1; los que se
+publicaron son estos.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `MicrophoneCharacteristics.sensitivity_level_db`, `diffuse_field_sensitivity_level_db`, `directivity_index_db`, `equivalent_noise_level_db`, `noise_band_levels_db`, `max_spl_db` y `distortion_spl_db`; `MicrophoneNoise.equivalent_level_db`, `MicrophoneOverload.spl_db`, `MicrophoneDirectivity.index_db` | `sensitivity_level`, `diffuse_field_sensitivity_level`, `directivity_index`, `equivalent_noise_level`, `noise_band_levels`, `max_spl`, `distortion_spl`; `equivalent_level`, `spl`, `index` |
+| `LoudspeakerCharacteristics.sensitivity_level_db`, `reference_level_db`, `directivity_index_db` y `spl_db`, `spl_db=` en `loudspeaker_characteristics`, `LoudspeakerDirectivity.index_db` | `sensitivity_level`, `reference_level`, `directivity_index`, `spl`, `spl=`, `index` |
+| `QuasiPeakResult.level_db`; `level_db=` en `stipa_signal` y `fluctuation_strength_am_noise` | `level`, `level=` |
+| `WindowMetricsResult.scalloping_loss_db` y `worst_case_processing_loss_db`, `SynchronousAverageResult.noise_reduction_db`, `ResampledSignalResult.stopband_attenuation_db` y `stopband_attenuation_db=` en `resample_signal` | `scalloping_loss`, `worst_case_processing_loss`, `noise_reduction`, `stopband_attenuation`, `stopband_attenuation=` |
+| `EmissionPressureResult.level_db`, `measured_level_db`, `background_correction_db` y `local_correction_db`, los mismos tres parámetros de `emission_sound_pressure_level`, `measured_level_db` y `background_level_db` en `background_noise_correction_at_workstation`, `local_correction_db` en `grade_from_local_correction`, `environmental_correction_db` y `directivity_index_db=` en `environmental_ratio_from_k2` y `environmental_ratio_from_absorption` | `level`, `measured_level`, `background_correction`, `local_correction`, `background_level`, `environmental_correction`, `directivity_index=` |
+| `noise_control.MODAL_FILTER_ATTENUATION_DB` | `MODAL_FILTER_ATTENUATION` |
+| `emission.MAX_K3_DB` y `GRADE_2_MAX_K3_DB`, el tope de la corrección ambiental local $K_3$ y su cota del grado 2 | `MAX_K3`, `GRADE_2_MAX_K3` |
+| `sound_reduction_index_db` en `environment.airborne_insulation_rating` | `sound_reduction_index` |
+
+```python
+from phonometry import signals
+
+metrics = signals.window_metrics("hann")
+print(round(metrics.scalloping_loss, 2), round(metrics.worst_case_processing_loss, 2))
+# 1.42 3.18
 ```
 
 ## Un módulo nunca queda oculto tras una función de su mismo nombre
@@ -1161,12 +1204,12 @@ indica en qué versión apareció cada veredicto.
 | `emission.SpecialRoomReverberationCheck` | `lower_limit`, `upper_limit` | las bandas | después de 4.0.0rc1 |
 | `emission.IntensityInstrumentComplianceResult` | `limit_class1`, `limit_class2`, `spacing_offset_db` | `device`, `spacing_m`; las filas por banda se leen de ellos, véase la sección siguiente | 4.0.0rc1 |
 | `emission.InverseSquareLawResult`, `emission.SourceDirectionalityResult` | `tolerance_db` | lo selecciona `room`; los radios cualificados deben ser los que alcanzan los niveles | después de 4.0.0rc1 |
-| `hearing.AmbientNoiseCheck` | `limits_db`, `table_bands_hz` | gana `earphone_attenuation_db` y `allowed_threshold_shift_db` | después de 4.0.0rc1 |
+| `hearing.AmbientNoiseCheck` | `limits_db`, `table_bands_hz` | gana `earphone_attenuation` y `allowed_threshold_shift_db` | después de 4.0.0rc1 |
 | `hearing.FixtureIsolationCheck` | `required_db` | las bandas | después de 4.0.0rc1 |
-| `hearing.REATSoundFieldCheck` | `allowable_variation_db` | gana `free_field_rejection_db` | después de 4.0.0rc1 |
-| `hearing.DiffuseSoundFieldCheck` | `allowable_variation_db` | gana `front_to_random_index_db` | después de 4.0.0rc1 |
-| `hearing.FreeSoundFieldCheck` | `axis_offset_m`, `inverse_distance_difference_db` | los seleccionan `field` y `loudspeaker_distance_m` | después de 4.0.0rc1 |
-| `electroacoustics.ProgramSignalCheck` | `offset_db`, `relative_levels_db`, `tolerance_plus_db`, `tolerance_minus_db` | `frequencies`, `band_levels_db` | después de 4.0.0rc1 |
+| `hearing.REATSoundFieldCheck` | `allowable_variation_db` | gana `free_field_rejection` | después de 4.0.0rc1 |
+| `hearing.DiffuseSoundFieldCheck` | `allowable_variation_db` | gana `front_to_random_index` | después de 4.0.0rc1 |
+| `hearing.FreeSoundFieldCheck` | `axis_offset_m`, `inverse_distance_difference` | los seleccionan `field` y `loudspeaker_distance_m` | después de 4.0.0rc1 |
+| `electroacoustics.ProgramSignalCheck` | `offset_db`, `relative_levels`, `tolerance_plus_db`, `tolerance_minus_db` | `frequencies`, `band_levels` | después de 4.0.0rc1 |
 | `electroacoustics.NeckLoopVerification` | `limits` | lo selecciona `neck_loop_type` | después de 4.0.0rc1 |
 | `psychoacoustics.ToneAssessment` | `criterion_db`, `prominent` | gana `method`, `"tone_to_noise_ratio"` o `"prominence_ratio"` | 3.3.0 |
 | `underwater.WeightedExposureResult` | `criteria` | gana `impulsive` | 4.0.0rc1 |
@@ -1252,32 +1295,32 @@ marca un campo que solo se pasa por nombre.
 | `building.ServiceEquipmentPositionCheck` | `separation_m`, `surface_distance_m`, `source_distance_m`, `heights_m`, `corner_height_m`, `corner_wall_distances_m` y los seis `*_ok` | la sala, la esquina y las posiciones | después de 4.0.0rc1 |
 | `building.DBHRCheck` | `reported`, `margin`, `complies` | `requirement`, `value` | 4.0.0rc1 |
 | `building.LowFrequencyIntensityResult`, `building.LowFrequencyElementResult` | `qualified` | `surface_pressure_intensity_indicator`, frente al límite de 6.4.2 que selecciona `absorbing_specimen_surface` | 4.0.0rc1 |
-| `electroacoustics.BackgroundNoiseAssessment` | `reference_signal_to_noise_ratio_db`, `category`, `report_required` | `noise_levels_db`, `noise_is_tonal` | después de 4.0.0rc1 |
+| `electroacoustics.BackgroundNoiseAssessment` | `reference_signal_to_noise_ratio_db`, `category`, `report_required` | `noise_levels`, `noise_is_tonal` | después de 4.0.0rc1 |
 | `electroacoustics.FeedbackStabilityResult` | `is_stable` | `loop_gain`, `stability_margin` | 4.0.0rc1 |
 | `emission.FreeFieldCheck` | `room`, `frequencies`, `band_radius_m`, `max_qualified_radius_m`, todos los `*_met`, `full_frequency_range`, `conforming_range_hz`, `conforming_radius_m`, `not_judged` | los argumentos de `check_free_field`: gana `source_directionality`, `reflecting_plane_absorption_coefficient`, `reflecting_plane_margin_m`, `paths_in_working_area`, `speed_of_sound` | después de 4.0.0rc1 |
 | `emission.IntensityInstrumentComplianceResult` | `bands`, `overall_class`, `range_limited` | `frequencies`, `residual_index`, `device`, `spacing_m` | 4.0.0rc1 |
-| `emission.ReferenceSourceCalibration` | `sound_power_level_db`, `intensity_bands`, `intensity_agreement`, `room_qualified` | gana `intensity_sound_power_level_db` y `room_qualification` | después de 4.0.0rc1 |
+| `emission.ReferenceSourceCalibration` | `sound_power_level`, `intensity_bands`, `intensity_agreement`, `room_qualified` | gana `intensity_sound_power_level` y `room_qualification` | después de 4.0.0rc1 |
 | `emission.HardWalledSoundPowerResult` | `background_requirement_met`, `upper_bound` | gana `background_margin_db`, `background_margin_ref_db` | después de 4.0.0rc1 |
-| `emission.InSituSoundPowerResult` | `background_requirement_met`, `upper_bound`, `grade`, `sigma_r0`, `sigma_tot`, `expanded_uncertainty` | gana `background_margin_db`, `background_margin_ref_db`, los menores de todas las posiciones, y `excess_levels_db`, `directivity_range_db`, los dos indicadores con los que la tabla 2 asigna el grado | 4.0.0rc1 |
+| `emission.InSituSoundPowerResult` | `background_requirement_met`, `upper_bound`, `grade`, `sigma_r0`, `sigma_tot`, `expanded_uncertainty` | gana `background_margin_db`, `background_margin_ref_db`, los menores de todas las posiciones, y `excess_levels`, `directivity_range_db`, los dos indicadores con los que la tabla 2 asigna el grado | 4.0.0rc1 |
 | `emission.SpecialRoomSoundPowerResult` | `background_requirement_met`, `background_requirement_met_a` | gana `background_margin_db`, `background_margin_ref_db`, `background_margin_a_db` | después de 4.0.0rc1 |
 | `emission.EmissionPressureResult` | `upper_bound` | gana `background_margin_db`, solo por nombre | 4.0.0rc1 |
-| `emission.PrecisionCriteria` | de `criterion_1` a `criterion_5`, `qualified` | gana las lecturas: `indicators`, `scan_intensity_level_1`, `scan_intensity_level_2`, `frequencies`, `repeatability_limit_db`, `pressure_residual_index_db`, `field_nonuniformity_1`, `field_nonuniformity_2` | 3.3.0 |
-| `emission.DiscretePointIntensityResult` | todo salvo los indicadores y el grado: `partial_power`, `sound_power`, `sound_power_level`, `achieved_grade`, los dos criterios, las cifras con ponderación A y el resto | gana `normal_intensity`, `segment_areas_m2`, `pressure_residual_index_db`, `band_type` | 4.0.0rc1 |
-| `emission.TurbineTestEnvironmentCheck` | `correction_ok`, `wind_ok`, `windscreen_advised` | `environmental_correction_db`, `ratio`, `wind_speed_m_s` | después de 4.0.0rc1 |
+| `emission.PrecisionCriteria` | de `criterion_1` a `criterion_5`, `qualified` | gana las lecturas: `indicators`, `scan_intensity_level_1`, `scan_intensity_level_2`, `frequencies`, `repeatability_limit_db`, `pressure_residual_index`, `field_nonuniformity_1`, `field_nonuniformity_2` | 3.3.0 |
+| `emission.DiscretePointIntensityResult` | todo salvo los indicadores y el grado: `partial_power`, `sound_power`, `sound_power_level`, `achieved_grade`, los dos criterios, las cifras con ponderación A y el resto | gana `normal_intensity`, `segment_areas_m2`, `pressure_residual_index`, `band_type` | 4.0.0rc1 |
+| `emission.TurbineTestEnvironmentCheck` | `correction_ok`, `wind_ok`, `windscreen_advised` | `environmental_correction`, `ratio`, `wind_speed_m_s` | después de 4.0.0rc1 |
 | `environment.ImpulseOnset` | `level_difference`, `prominence`, `qualifies` | `level_start`, `level_end`, `onset_rate` | 3.3.0 |
 | `environment.ImpulseProminenceResult` | `per_impulse`, `qualifies`, `prominence`, `adjustment` | `onset_rates`, `level_differences`, `assessment_period_minutes` | 3.3.0 |
 | `environment.ResidualCorrectionResult` | `reliable` | `margin` | 3.3.0 |
 | `environment.PeriodAssessment` | `reported_level`, `reported_long_term`, `max_phase_level`, `phase_pass`, `daily_pass`, `long_term_pass` | `phases`, los dos niveles y `limit`; gana `new_activity`, solo por nombre | 4.0.0rc1 |
 | `environment.ModulationPeriod` | `modulation_depths_db`, `fundamental_frequencies_hz`, `n_valid_blocks`, `rated`, `rating_db`, `mean_modulation_frequency_hz`, `mode_modulation_frequency_hz` | `blocks` | después de 4.0.0rc1 |
-| `environment.SoundRelevantTurbines` | `relevant`, `total_level_db`, `relevant_level_db` | `predicted_levels_db` | después de 4.0.0rc1 |
+| `environment.SoundRelevantTurbines` | `relevant`, `total_level`, `relevant_level` | `predicted_levels` | después de 4.0.0rc1 |
 | `environment.WindShearProfile` | `typical` | `shear_exponent` | después de 4.0.0rc1 |
 | `environment.WindTurbineTonalityResult` | `is_audible` | `tonal_audibility`, `has_identified_tone`, que también es de solo lectura (sección siguiente) | 3.3.0 |
 | `filters.FilterComplianceResult` | `bands`, `overall_class`, `range_limited` | gana `band_margins`, las filas sin su clase | 3.3.0 |
 | `filters.WeightingComplianceResult` | `bands`, `overall_class`, `range_limited` | gana `band_margins`, las filas sin su clase | 4.0.0rc1 |
-| `hearing.AscendingThresholdResult` | `threshold_db`, `determined`, `series_exhausted` | `ascent_levels_db`, `shortened` | después de 4.0.0rc1 |
+| `hearing.AscendingThresholdResult` | `threshold_db`, `determined`, `series_exhausted` | `ascent_levels`, `shortened` | después de 4.0.0rc1 |
 | `hearing.TaskContribution` | `spread_advisory` | `n_samples`, `sample_range_db` | 3.3.0 |
 | `hearing.ExposureResult` | `sampling_advisory` | gana `sample_range_db`, `n_workers`, `sample_duration_hours`, solo por nombre | 3.3.0 |
-| `hearing.AttenuationDifferenceResult` | `difference_db`, `criterion_db`, `significant` | las dos medias y sus incertidumbres expandidas | después de 4.0.0rc1 |
+| `hearing.AttenuationDifferenceResult` | `difference`, `criterion_db`, `significant` | las dos medias y sus incertidumbres expandidas | después de 4.0.0rc1 |
 | `materials.CeilingSpecimenCheck` | `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok`, `ce_marking_depth`, `satisfied` | gana las cifras medidas: `deflection_mm`, `substructure_width_mm`, `substructure_height_mm`, `fixture_density_kg_m2`, `support_width_mm`, `support_height_mm`, `support_center_distance_m`, `lowest_relative_humidity_percent` | después de 4.0.0rc1 |
 | `metrology.TrendTestResult` | `trend_free`, `bounds` | `statistic`, frente a la región que dan `values`, `method`, `alpha` y `median` | 3.3.0 |
 | `metrology.StationarityTestResult` | `stationary`, `bounds` | `trend_statistic`, frente a la región que dan `segment_values`, `method` y `alpha` | 3.3.0 |
@@ -1291,14 +1334,14 @@ marca un campo que solo se pasa por nombre.
 | `vibration.PeopleAssessment` | `complies`, `criterion`, `within_uncertainty` | `kb_fmax`, `kb_ftr`, `guide`, `source`; gana `rare_short_events`, solo por nombre | después de 4.0.0rc1 |
 | `vibration.RailwayChange` | `complies`, `kb_fmax_met`, `kb_ftr_met`, `kb_fmax_increase_percent`, `kb_ftr_increase_percent` | gana `kb_fmax_before`, `kb_fmax_after`, `kb_ftr_before`, `kb_ftr_after` | después de 4.0.0rc1 |
 | `vibration.TransferStiffnessResult` | `valid` | gana `transmissibility`, el \|T\| del método indirecto | 3.3.0 |
-| `vibration.DrivingPointStiffnessResult` | `adequate` | gana `blocked_output_difference_db`, `unwanted_input_difference_db` | después de 4.0.0rc1 |
+| `vibration.DrivingPointStiffnessResult` | `adequate` | gana `blocked_output_difference`, `unwanted_input_difference` | después de 4.0.0rc1 |
 | `aircraft.AircraftSystemComplianceResult` | `passes`, `checks` | gana `directional`, `frequency_response`, `linearity`, `resolution`, los argumentos de `verify_aircraft_noise_system` | 4.0.0rc1 |
 | `broadcast.QuasiPeakDynamicsResult` | `passes`, `worst_margin_db`, `worst_deviation_db`, `stimuli` | gana `readings_percent`, las once lecturas en el orden de las tablas 2 y 3 | 4.0.0rc1 |
 | `building.FloorCoveringImprovementResult` | `limited` | gana `background_margin_db`, el menor margen de todas las posiciones y de los dos forjados | 3.1.0 |
 | `building.VibrationReductionResult` | `single_number`, `bracketed` | `frequencies`, `k_ij`; gana `modal_overlap`, `band_type` | 3.1.0 |
-| `building.ServiceEquipmentBackgroundResult` | `difference_db`, `correction_db`, `corrected_db`, `regime` | `measured_db`, `background_db` | después de 4.0.0rc1 |
+| `building.ServiceEquipmentBackgroundResult` | `difference`, `correction`, `corrected_db`, `regime` | `measured_db`, `background_db` | después de 4.0.0rc1 |
 | `building.ServiceEquipmentResult` | `standardizable` | `frequencies`, `band` | después de 4.0.0rc1 |
-| `emission.SoundPowerIntensityResult` | `partial_power_level`, `sound_power`, `sound_power_level`, `negative_band`, `negative_partial_power_index`, `dynamic_capability_index`, `achieved_grade`, `a_weighting_omitted_bands`, `sound_power_level_a` | `partial_power` y los indicadores; gana `pressure_residual_index_db`, `band_type`, `repeatability_limit_db` | 3.1.0 |
+| `emission.SoundPowerIntensityResult` | `partial_power_level`, `sound_power`, `sound_power_level`, `negative_band`, `negative_partial_power_index`, `dynamic_capability_index`, `achieved_grade`, `a_weighting_omitted_bands`, `sound_power_level_a` | `partial_power` y los indicadores; gana `pressure_residual_index`, `band_type`, `repeatability_limit_db` | 3.1.0 |
 | `emission.PrecisionIntensityResult` | `sound_power`, `sound_power_level`, `sound_power_level_normalized`, `not_applicable_band`, `sound_power_level_a` | `partial_power`; gana `temperature_c`, `static_pressure_pa`, solo por nombre | 3.1.0 |
 | `emission.InDuctSoundPowerResult` | `information_only_band` | `frequencies`, `flow_velocity` | 4.0.0rc1 |
 | `emission.SourceLocationPlan` | `spectral_character`, `a_weighted_spectral_character` | `standard`, `standard_deviation_db`, `a_weighted_standard_deviation_db` | después de 4.0.0rc1 |
@@ -1403,13 +1446,13 @@ lee `band_type` de `vibration_reduction_index` (véase debajo de la tabla).
 | `noise_control.HydrodynamicValveNoise` | `regime`, con cavitación cuando Δp supera x_Fzp1 (p1 - pv) (IEC 60534-8-4, 5.1) | `differential`, `corrected_ratio`; gana `inlet_pressure_pa`, `vapor_pressure_pa` | 4.0.0rc1 |
 | `noise_control.AerodynamicValveNoise` | `regime`, los cinco intervalos de IEC 60534-8-3, 5.2 | `pressure_ratio`, `boundaries`; gana `specific_heat_ratio`, `pressure_recovery`, `efficiency_correction`, solo por nombre | 4.0.0rc1 |
 | `aircraft.TerrainScreeningResult` | `screened`, terreno estrictamente por encima de la línea de visión | `source`, `receiver`, `distances_m`, `heights_m` | 3.3.0 |
-| `hearing.AutomaticThresholdResult` | `is_peak`, `retained` (ISO 8253-1, 6.3.5 a)) | `reversal_levels_db` | después de 4.0.0rc1 |
-| `hearing.SweepThresholdResult` | `is_peak` | `reversal_levels_db` | después de 4.0.0rc1 |
+| `hearing.AutomaticThresholdResult` | `is_peak`, `retained` (ISO 8253-1, 6.3.5 a)) | `reversal_levels` | después de 4.0.0rc1 |
+| `hearing.SweepThresholdResult` | `is_peak` | `reversal_levels` | después de 4.0.0rc1 |
 | `metrology.WaveMotionCorrection` | `interpolated` | `frequencies`, `speed_of_sound_ratio` | después de 4.0.0rc1 |
 | `noise_control.CabinInsulationResult` | `apparent` (ISO 11957, 3.6) | `method` | después de 4.0.0rc1 |
 | `environment.WindTurbineTonalityResult` | `has_identified_tone` (IEC 61400-11, 9.5.2 a 9.5.4) | `levels`, `frequencies`; gana `candidate_frequency_hz`, solo por nombre | 3.3.0 |
-| `building.LaboratoryJointInsulationResult` | `regime` (ISO 10140-1, J.1) | `r_s_measured_db`, `r_s_max_db`; gana `limit_at_max`, solo por nombre | después de 4.0.0rc1 |
-| `environment.TurbineSoundLevels` | `regimes` (IEC TS 61400-11-2, 11.7) | `total_levels_db`, `background_levels` | después de 4.0.0rc1 |
+| `building.LaboratoryJointInsulationResult` | `regime` (ISO 10140-1, J.1) | `r_s_prime`, `r_s_max`; gana `limit_at_max`, solo por nombre | después de 4.0.0rc1 |
+| `environment.TurbineSoundLevels` | `regimes` (IEC TS 61400-11-2, 11.7) | `total_levels`, `background_levels` | después de 4.0.0rc1 |
 | `underwater.WestonPropagationResult` | `regime` | `range_m`, `boundaries` | 4.0.0rc1 |
 | `signals.SynchronousAverageResult` | `interpolated`, f_s T no es un número entero de muestras | `fs`, `period_s` | 4.0.0rc1 |
 

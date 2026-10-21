@@ -31,7 +31,7 @@ from phonometry import noise_control
 from phonometry.noise_control.silencer_in_situ import (
     INSTALLATION_CASES,
     ISO11820_AIR_GAS_CONSTANT_J_KG_K,
-    ISO11820_BACKGROUND_CORRECTIONS_DB,
+    ISO11820_BACKGROUND_CORRECTIONS,
     ISO11820_MIN_BACKGROUND_MARGIN_DB,
     ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K,
     ISO11820_SPEED_OF_SOUND_M_S,
@@ -44,7 +44,7 @@ BANDS = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
 
 def test_table_one_reproduces_its_printed_rows() -> None:
     printed = {3: 3.0, 4: 2.0, 5: 2.0, 6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
-    assert ISO11820_BACKGROUND_CORRECTIONS_DB == printed
+    assert ISO11820_BACKGROUND_CORRECTIONS == printed
     margins = np.arange(3, 16, dtype=float)
     corrections = noise_control.silencer_background_correction(margins)
     assert corrections[:8].tolist() == [3.0, 2.0, 2.0, 1.0, 1.0, 1.0, 0.5, 0.5]
@@ -140,7 +140,7 @@ def test_a_non_positive_reverberation_time_is_refused() -> None:
 
 def test_the_sound_power_level_adds_the_area_and_the_field_correction() -> None:
     levels = noise_control.silencer_sound_power_level(
-        [80.0], area=[10.0], field_correction_db=[1.0]
+        [80.0], area=[10.0], field_correction=[1.0]
     )
     assert levels[0] == pytest.approx(80.0 + 10.0 * math.log10(10.0) + 1.0)
 
@@ -148,7 +148,7 @@ def test_the_sound_power_level_adds_the_area_and_the_field_correction() -> None:
 def test_a_field_correction_past_three_decibels_is_reported() -> None:
     with pytest.warns(SilencerInSituWarning, match="NOTE 4"):
         noise_control.silencer_sound_power_level(
-            [80.0], area=[10.0], field_correction_db=[4.0]
+            [80.0], area=[10.0], field_correction=[4.0]
         )
 
 
@@ -180,14 +180,14 @@ def test_equation_nineteen_is_the_difference_plus_two_terms() -> None:
         source_area_m2=2.0,
         receiver_area_m2=1.0,
         frequencies=[500.0, 1000.0],
-        field_correction_difference_db=-1.0,
+        field_correction_difference=-1.0,
     )
     area_term = 10.0 * math.log10(2.0)
     assert res.area_term_db.shape == (2,)
     assert np.allclose(res.area_term_db, [area_term, area_term])
-    assert res.field_correction_difference_db.shape == (2,)
-    assert np.allclose(res.field_correction_difference_db, [-1.0, -1.0])
-    assert res.loss_db[0] == pytest.approx(25.0 + area_term - 1.0)
+    assert res.field_correction_difference.shape == (2,)
+    assert np.allclose(res.field_correction_difference, [-1.0, -1.0])
+    assert res.loss[0] == pytest.approx(25.0 + area_term - 1.0)
     assert res.symbol == "D_ts"
 
 
@@ -198,7 +198,7 @@ def test_a_common_level_shift_leaves_the_loss_alone() -> None:
     shifted = noise_control.in_situ_transmission_loss(
         [98.0, 99.0], [73.0, 71.0], source_area_m2=2.0, receiver_area_m2=1.0
     )
-    assert np.allclose(plain.loss_db, shifted.loss_db)
+    assert np.allclose(plain.loss, shifted.loss)
 
 
 def test_equal_areas_leave_no_area_term() -> None:
@@ -223,13 +223,13 @@ def test_the_areas_of_a_diffuse_room_move_band_by_band() -> None:
         [70.0, 68.0, 63.0],
         source_area_m2=0.9,
         receiver_area_m2=areas,
-        field_correction_difference_db=[0.5, 0.0, -0.5],
+        field_correction_difference=[0.5, 0.0, -0.5],
     )
     expected_terms = 10.0 * np.log10(0.9 / areas)
     assert np.allclose(res.area_term_db, expected_terms, rtol=0.0, atol=1e-12)
     assert res.area_term_db.shape == (3,)
     assert np.allclose(
-        res.loss_db,
+        res.loss,
         np.array([25.0, 28.0, 31.0]) + expected_terms + np.array([0.5, 0.0, -0.5]),
         rtol=0.0,
         atol=1e-12,
@@ -242,23 +242,23 @@ def test_a_single_area_broadcasts_over_the_bands() -> None:
         [72.0, 70.0, 69.0],
         area_without_m2=2.0,
         area_with_m2=[1.5],
-        field_correction_difference_db=0.3,
+        field_correction_difference=0.3,
     )
     repeated = noise_control.in_situ_insertion_loss(
         [90.0, 92.0, 88.0],
         [72.0, 70.0, 69.0],
         area_without_m2=[2.0, 2.0, 2.0],
         area_with_m2=[1.5, 1.5, 1.5],
-        field_correction_difference_db=[0.3, 0.3, 0.3],
+        field_correction_difference=[0.3, 0.3, 0.3],
     )
-    assert np.array_equal(scalar.loss_db, repeated.loss_db)
+    assert np.array_equal(scalar.loss, repeated.loss)
     assert np.array_equal(scalar.area_term_db, repeated.area_term_db)
     assert np.array_equal(
-        scalar.field_correction_difference_db,
-        repeated.field_correction_difference_db,
+        scalar.field_correction_difference,
+        repeated.field_correction_difference,
     )
     assert scalar.area_term_db.shape == (3,)
-    assert scalar.field_correction_difference_db.shape == (3,)
+    assert scalar.field_correction_difference.shape == (3,)
 
 
 def test_areas_that_do_not_match_the_bands_are_refused() -> None:
@@ -277,14 +277,14 @@ def test_areas_that_do_not_match_the_bands_are_refused() -> None:
             area_with_m2=1.0,
         )
     with pytest.raises(
-        ValueError, match="'field_correction_difference_db' must be one value"
+        ValueError, match="'field_correction_difference' must be one value"
     ):
         noise_control.in_situ_insertion_loss(
             [90.0, 92.0],
             [72.0, 70.0],
             area_without_m2=1.0,
             area_with_m2=1.0,
-            field_correction_difference_db=[0.0, 0.1, 0.2],
+            field_correction_difference=[0.0, 0.1, 0.2],
         )
 
 
@@ -314,7 +314,7 @@ def test_equation_twenty_one_is_the_insertion_shape() -> None:
         area_with_m2=1.0,
         case=17,
     )
-    assert res.loss_db.tolist() == [18.0, 22.0]
+    assert res.loss.tolist() == [18.0, 22.0]
     assert res.symbol == "D_is"
     assert res.case is not None
     assert res.case.number == 17
@@ -479,7 +479,7 @@ def test_equation_thirty_one_scales_by_the_area_ratio() -> None:
 
 def test_the_printed_thresholds() -> None:
     assert ISO11820_MIN_BACKGROUND_MARGIN_DB == 3.0
-    assert noise_control.MAX_EXTRANEOUS_CORRECTION_DB == 3.0
+    assert noise_control.MAX_EXTRANEOUS_CORRECTION == 3.0
     assert noise_control.ISO11820_OCTAVE_BAND_RANGE_HZ == (63.0, 4000.0)
     assert noise_control.ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ == (50.0, 5000.0)
 
@@ -533,13 +533,13 @@ def test_a_band_centre_at_zero_is_refused() -> None:
 
 
 def test_a_non_finite_field_correction_is_refused() -> None:
-    with pytest.raises(ValueError, match="field_correction_difference_db"):
+    with pytest.raises(ValueError, match="field_correction_difference"):
         noise_control.in_situ_transmission_loss(
             [90.0],
             [70.0],
             source_area_m2=0.9,
             receiver_area_m2=9.0,
-            field_correction_difference_db=math.nan,
+            field_correction_difference=math.nan,
         )
 
 
@@ -570,7 +570,7 @@ def folded_octave_level(third_octave_db: tuple[float, ...]) -> float:
     return float(noise_control.octave_levels_from_third_octave(third_octave_db)[0])
 
 
-def background_correction_db(margin_db: float) -> float:
+def background_correction(margin_db: float) -> float:
     """What Equations (17) and (18) take off at a single measuring point."""
     with warnings.catch_warnings():
         # Barron's table reaches down to a 1 dB margin, where ISO 11820 caps
@@ -672,10 +672,10 @@ def test_the_thesis_insertion_loss_reproduces_its_three_printed_columns() -> Non
             area_without_m2=area_without,
             area_with_m2=area_with,
             frequencies=list(table),
-            field_correction_difference_db=0.0,
+            field_correction_difference=0.0,
             case=18,
         )
-        assert result.loss_db == pytest.approx([row[4] for row in rows], abs=0.15)
+        assert result.loss == pytest.approx([row[4] for row in rows], abs=0.15)
         # The same numbers as one band at a time with scalar areas.
         for index, row in enumerate(rows):
             band = noise_control.in_situ_insertion_loss(
@@ -685,8 +685,8 @@ def test_the_thesis_insertion_loss_reproduces_its_three_printed_columns() -> Non
                 area_with_m2=float(area_with[index]),
                 case=18,
             )
-            assert float(result.loss_db[index]) == pytest.approx(
-                float(band.loss_db[0]), abs=1e-12
+            assert float(result.loss[index]) == pytest.approx(
+                float(band.loss[0]), abs=1e-12
             )
 
 
@@ -714,7 +714,7 @@ def test_the_thesis_area_term_is_not_negligible_in_every_band() -> None:
 def test_barron_table_3_4_is_the_energy_subtraction_at_one_point() -> None:
     """Barron (2003) Table 3-4, twenty-two printed margins from 1 dB to 20 dB."""
     for margin, printed in oracle.BARRON_TABLE_3_4_DB.items():
-        correction = background_correction_db(margin)
+        correction = background_correction(margin)
         assert correction == pytest.approx(printed, abs=0.05)
         assert round(correction, 1) == printed
 
@@ -856,7 +856,7 @@ def test_barron_example_3_3_sound_power_needs_its_field_correction() -> None:
     level = noise_control.silencer_sound_power_level(
         [mean],
         area=[oracle.BARRON_EXAMPLE_3_3_AREA_M2],
-        field_correction_db=[correction],
+        field_correction=[correction],
     )
     assert round(float(level[0]), 1) == oracle.BARRON_EXAMPLE_3_3_SOUND_POWER_DB
     without = noise_control.silencer_sound_power_level(

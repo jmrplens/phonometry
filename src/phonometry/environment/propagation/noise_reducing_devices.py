@@ -371,14 +371,14 @@ def sound_absorption_rating(
 
 
 def airborne_insulation_rating(
-    sound_reduction_index_db: ArrayLike, *, spectrum: str = "road"
+    sound_reduction_index: ArrayLike, *, spectrum: str = "road"
 ) -> RoadDeviceRating:
     r"""``DL_R``, the single-number rating of airborne sound insulation.
 
     EN 1793-2:2012 Clause 5.2 for a road device, EN 16272-3-1:2012 Clause 6
     for a railway one, on the same weighting as the absorption rating above.
 
-    :param sound_reduction_index_db: :math:`R` in decibels, in the eighteen
+    :param sound_reduction_index: :math:`R` in decibels, in the eighteen
         one-third octave bands of :data:`TRAFFIC_NOISE_BANDS_HZ`.
     :param spectrum: ``"road"`` (EN 1793-3, the default) or ``"railway"``
         (EN 16272-3-1).
@@ -388,7 +388,7 @@ def airborne_insulation_rating(
         not finite, or the spectrum is not one of the two.
     """
     reduction, weights = _weighted(
-        sound_reduction_index_db, "sound_reduction_index_db", spectrum
+        sound_reduction_index, "sound_reduction_index", spectrum
     )
     energy = 10.0 ** (0.1 * weights)
     transmitted = float(np.sum(energy * 10.0 ** (-0.1 * reduction)) / np.sum(energy))

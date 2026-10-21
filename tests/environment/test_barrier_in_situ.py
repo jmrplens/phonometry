@@ -25,7 +25,7 @@ from phonometry.environment.propagation.barrier_in_situ import (
     CLOUD_COVER_CLASSES,
     EQUIVALENT_SECTOR_DEG,
     EQUIVALENT_SURROUNDINGS_RADIUS_M,
-    ISO10847_BACKGROUND_CORRECTIONS_DB,
+    ISO10847_BACKGROUND_CORRECTIONS,
     ISO10847_MIN_BACKGROUND_MARGIN_DB,
     ISO10847_OCTAVE_BAND_RANGE_HZ,
     ISO10847_PREFERRED_BACKGROUND_MARGIN_DB,
@@ -36,7 +36,7 @@ from phonometry.environment.propagation.barrier_in_situ import (
     MIN_RECEIVER_HEIGHT_M,
     MIN_REPETITIONS,
     POINT_SOURCE_DIVERGENCE_DB,
-    RECEIVER_CORRECTIONS_DB,
+    RECEIVER_CORRECTIONS,
     REFERENCE_ELEVATION_INCREMENT_DEG,
     REFERENCE_MICROPHONE_CLEARANCE_M,
     SHORT_DISTANCE_RATIO,
@@ -65,7 +65,7 @@ def test_the_direct_method_returns_the_barrier_attenuation() -> None:
         receiver_after,
         frequencies=BANDS,
     )
-    assert np.allclose(res.insertion_loss_db, ATTENUATION)
+    assert np.allclose(res.insertion_loss, ATTENUATION)
     assert res.symbol == "D_IL"
     assert res.method == "direct"
 
@@ -74,7 +74,7 @@ def test_a_barrier_that_does_nothing_gives_zero() -> None:
     res = environment.measured_insertion_loss_direct(
         REFERENCE_BEFORE, REFERENCE_BEFORE, RECEIVER_BEFORE, RECEIVER_BEFORE
     )
-    assert np.allclose(res.insertion_loss_db, 0.0)
+    assert np.allclose(res.insertion_loss, 0.0)
 
 
 def test_a_source_that_got_louder_is_normalised_away() -> None:
@@ -89,7 +89,7 @@ def test_a_source_that_got_louder_is_normalised_away() -> None:
     louder = environment.measured_insertion_loss_direct(
         REFERENCE_BEFORE, louder_reference, RECEIVER_BEFORE, louder_receiver
     )
-    assert np.allclose(plain.insertion_loss_db, louder.insertion_loss_db)
+    assert np.allclose(plain.insertion_loss, louder.insertion_loss)
 
 
 def test_the_rounding_is_the_reporting_rule() -> None:
@@ -104,7 +104,7 @@ def test_the_indirect_method_matches_the_direct_one_for_one_receiver_kind() -> N
     direct = environment.measured_insertion_loss_direct(
         REFERENCE_BEFORE, reference_after, RECEIVER_BEFORE, receiver_after
     )
-    for kind in RECEIVER_CORRECTIONS_DB:
+    for kind in RECEIVER_CORRECTIONS:
         indirect = environment.measured_insertion_loss_indirect(
             REFERENCE_BEFORE,
             reference_after,
@@ -113,7 +113,7 @@ def test_the_indirect_method_matches_the_direct_one_for_one_receiver_kind() -> N
             receiver_type_before=kind,  # type: ignore[arg-type]
             receiver_type_after=kind,  # type: ignore[arg-type]
         )
-        assert np.allclose(indirect.insertion_loss_db, direct.insertion_loss_db)
+        assert np.allclose(indirect.insertion_loss, direct.insertion_loss)
         assert indirect.symbol == "D'_IL"
 
 
@@ -130,9 +130,9 @@ def test_mixing_the_two_receiver_kinds_moves_the_answer_by_six_decibels() -> Non
             receiver_after,
             receiver_type_after="reflecting_surface",
         )
-    assert np.allclose(mixed.insertion_loss_db - direct.insertion_loss_db, 6.0)
-    assert RECEIVER_CORRECTIONS_DB["reflecting_surface"] == 6.0
-    assert RECEIVER_CORRECTIONS_DB["hemi_free_field"] == 0.0
+    assert np.allclose(mixed.insertion_loss - direct.insertion_loss, 6.0)
+    assert RECEIVER_CORRECTIONS["reflecting_surface"] == 6.0
+    assert RECEIVER_CORRECTIONS["hemi_free_field"] == 0.0
 
 
 def test_an_unknown_receiver_type_is_refused() -> None:
@@ -155,7 +155,7 @@ def test_levels_that_do_not_match_are_refused() -> None:
 
 
 def test_table_three_reproduces_its_two_rows() -> None:
-    assert ISO10847_BACKGROUND_CORRECTIONS_DB == {
+    assert ISO10847_BACKGROUND_CORRECTIONS == {
         4: -2.0,
         5: -2.0,
         6: -1.0,
@@ -470,7 +470,7 @@ def test_the_cordero_campaign_reports_its_two_insertion_losses() -> None:
         )
     for case, reported in oracle.CORDERO_TABLA_2_DBA.items():
         assert results[case].rounded().tolist() == [reported]
-    assert float(results["con ruido"].insertion_loss_db[0]) == pytest.approx(
+    assert float(results["con ruido"].insertion_loss[0]) == pytest.approx(
         oracle.CORDERO_UNROUNDED_CON_RUIDO_DBA, abs=PRINTED_TENTH_DB
     )
 
@@ -489,7 +489,7 @@ def test_the_lindeman_direct_runs_reproduce_their_printed_losses() -> None:
         receiver_before_db=list(receiver_before),
         receiver_after_db=list(receiver_after),
     )
-    assert res.insertion_loss_db == pytest.approx(
+    assert res.insertion_loss == pytest.approx(
         list(oracle.LINDEMAN_TABLE_8_INSERTION_LOSS_DBA.values()),
         abs=PRINTED_TENTH_DB,
     )
@@ -511,8 +511,8 @@ def test_the_lindeman_first_run_is_a_defect_of_the_source() -> None:
         receiver_before_db=[receiver_before],
         receiver_after_db=[receiver_after],
     )
-    assert float(res.insertion_loss_db[0]) == pytest.approx(5.8, abs=PRINTED_TENTH_DB)
-    assert float(res.insertion_loss_db[0]) != pytest.approx(
+    assert float(res.insertion_loss[0]) == pytest.approx(5.8, abs=PRINTED_TENTH_DB)
+    assert float(res.insertion_loss[0]) != pytest.approx(
         oracle.LINDEMAN_TABLE_8_RUN_1_PRINTED_DBA, abs=PRINTED_TENTH_DB
     )
 
@@ -529,10 +529,10 @@ def test_the_lindeman_indirect_runs_and_their_mean() -> None:
         receiver_before_db=list(levels["receiver before"]),
         receiver_after_db=list(levels["receiver after"]),
     )
-    assert res.insertion_loss_db == pytest.approx(
+    assert res.insertion_loss == pytest.approx(
         list(oracle.LINDEMAN_TABLE_13_INSERTION_LOSS_DBA), abs=PRINTED_TENTH_DB
     )
-    assert float(np.mean(res.insertion_loss_db)) == pytest.approx(
+    assert float(np.mean(res.insertion_loss)) == pytest.approx(
         oracle.LINDEMAN_TABLE_13_MEAN_DBA, abs=PRINTED_TENTH_DB
     )
     assert res.symbol == "D'_IL"
@@ -555,7 +555,7 @@ def test_the_lindeman_fourth_run_takes_its_level_from_the_table_above() -> None:
         ],
         receiver_after_db=[levels["receiver after"][run]] * 2,
     )
-    from_table_twelve, from_the_misprint = res.insertion_loss_db.tolist()
+    from_table_twelve, from_the_misprint = res.insertion_loss.tolist()
     assert from_table_twelve == pytest.approx(
         oracle.LINDEMAN_TABLE_13_INSERTION_LOSS_DBA[run], abs=PRINTED_TENTH_DB
     )
@@ -580,7 +580,7 @@ def test_the_fhwa_worked_example_reaches_both_of_its_printed_answers() -> None:
             receiver_before_db=[oracle.FHWA_6_6_3_RECEIVER_BEFORE_DB],
             receiver_after_db=[receiver_after],
         )
-        assert float(res.insertion_loss_db[0]) + edge_db == pytest.approx(
+        assert float(res.insertion_loss[0]) + edge_db == pytest.approx(
             printed, abs=PRINTED_TENTH_DB
         )
 
@@ -669,7 +669,7 @@ def test_the_jagniatinskis_campaign_uses_only_the_printed_difference() -> None:
                 receiver_before_db=[reference_before + correction],
                 receiver_after_db=[receiver_after],
             )
-            assert float(res.insertion_loss_db[0]) == pytest.approx(
+            assert float(res.insertion_loss[0]) == pytest.approx(
                 insertion_loss, abs=PRINTED_TENTH_DB
             )
 
@@ -698,7 +698,7 @@ def test_a_campaign_with_no_reference_microphone_is_the_plain_difference() -> No
             [without for without, _, _ in rows],
             [with_screen for _, with_screen, _ in rows],
         )
-        assert res.insertion_loss_db == pytest.approx(
+        assert res.insertion_loss == pytest.approx(
             [printed for _, _, printed in rows], abs=PRINTED_TENTH_DB
         )
 
@@ -713,10 +713,10 @@ def test_the_six_decibels_are_a_pressure_doubling() -> None:
     # folio 14 (PDF page 20), prints the same figure in its NOTE 2 as the
     # ideal case, while asking for 5,7 dB when its Annex B conditions are met,
     # so it corroborates the mechanism and not the flat 6 dB.
-    assert RECEIVER_CORRECTIONS_DB["reflecting_surface"] == pytest.approx(
+    assert RECEIVER_CORRECTIONS["reflecting_surface"] == pytest.approx(
         20.0 * math.log10(2.0), abs=0.021
     )
-    assert RECEIVER_CORRECTIONS_DB["hemi_free_field"] == 0.0
+    assert RECEIVER_CORRECTIONS["hemi_free_field"] == 0.0
 
 
 def test_the_divergence_rates_are_printed_in_a_textbook_too() -> None:

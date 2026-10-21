@@ -106,21 +106,21 @@ def test_source_spectrum_is_table_d2(class_id: int, column: int) -> None:
 
 
 def test_air1845_attenuation_is_table_d3a() -> None:
-    got = _increment(103, "arp5534").reference_attenuation_db
+    got = _increment(103, "arp5534").reference_attenuation
     assert np.all(np.abs(got - np.array(TABLE_D3A)) <= _HALF_MILLI)
 
 
 def test_arp5534_attenuation_is_table_d3c_to_the_last_digit() -> None:
     # All 240 cells, which the ISO 9613-1 Annex B saturation vapour pressure
     # does not give: ARP 5534 Eq. 6 is what makes the last digit.
-    got = _increment(103, "arp5534").specified_attenuation_db
+    got = _increment(103, "arp5534").specified_attenuation
     assert np.all(np.abs(got - np.array(TABLE_D3C)) <= _HALF_MILLI)
 
 
 def test_arp866a_attenuation_is_table_d3b_within_seven_ppm() -> None:
     # 208 cells to the last digit; the other 32 are the long high-frequency
     # paths, printed about 6 ppm below the ISO 3891 formula.
-    got = _increment(103, "arp866a").specified_attenuation_db
+    got = _increment(103, "arp866a").specified_attenuation
     printed = np.array(TABLE_D3B)
     assert np.all(np.abs(got - printed) <= _HALF_MILLI + 7e-6 * printed)
 
@@ -252,9 +252,9 @@ def test_increment_inputs_are_refused_by_name() -> None:
 
 def test_increment_rejects_tables_off_its_axes() -> None:
     inc = _increment(103, "arp5534")
-    transposed = inc.specified_attenuation_db.T
-    with pytest.raises(ValueError, match="specified_attenuation_db"):
-        dataclasses.replace(inc, specified_attenuation_db=transposed)
+    transposed = inc.specified_attenuation.T
+    with pytest.raises(ValueError, match="specified_attenuation"):
+        dataclasses.replace(inc, specified_attenuation=transposed)
     short = inc.increment_db[:-1]
     with pytest.raises(ValueError, match="'increment_db' \\(9\\)"):
         dataclasses.replace(inc, increment_db=short)
@@ -411,8 +411,8 @@ def test_attenuation_plot_draws_the_column_of_its_distance() -> None:
     inc = _increment(103, "arp5534")
     column = inc.distance_column(_DISTANCES_M[6])
     ax = inc.plot_attenuation(distance_m=_DISTANCES_M[6])
-    assert np.array_equal(_ydata(ax, 0), inc.reference_attenuation_db[:, column])
-    assert np.array_equal(_ydata(ax, 1), inc.specified_attenuation_db[:, column])
+    assert np.array_equal(_ydata(ax, 0), inc.reference_attenuation[:, column])
+    assert np.array_equal(_ydata(ax, 1), inc.specified_attenuation[:, column])
     assert np.array_equal(ax.lines[1].get_xdata(), inc.frequencies)
     plt.close("all")
 

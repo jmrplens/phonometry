@@ -238,14 +238,14 @@ class ReferenceMicrophoneRow(RichDisplay):
     table rounds both to 0,05 dB, determined with pure tones, with a
     measurement uncertainty of ±0,03 dB (B.5).
 
-    :ivar directivity_index_db: :math:`10\lg\gamma` of the microphone, in dB:
+    :ivar directivity_index: :math:`10\lg\gamma` of the microphone, in dB:
         the directivity factor Formula (10) takes as :math:`\gamma_\mathrm{ref}`.
     :ivar diffuse_pressure_difference_db: :math:`\Delta_\mathrm{DP}`, its
         diffuse-field sensitivity level less its pressure sensitivity level, in
         dB, which Formula (11) adds to a pressure calibration.
     """
 
-    directivity_index_db: float
+    directivity_index: float
     diffuse_pressure_difference_db: float
 
 
@@ -255,7 +255,7 @@ def _table_b1(
     return MappingProxyType(
         {
             frequency: ReferenceMicrophoneRow(
-                directivity_index_db=index, diffuse_pressure_difference_db=difference
+                directivity_index=index, diffuse_pressure_difference_db=difference
             )
             for frequency, (index, difference) in rows.items()
         }
@@ -506,7 +506,7 @@ class DirectivityFactor(OwnsArrays):
     :ivar levels: :math:`L(\phi)`, the level the instrument indicates for
         each direction, in dB.
     :ivar weights: :math:`K` of each reading, dimensionless; they sum to one.
-    :ivar reference_level_db: :math:`L_\mathrm{rd}`, in dB.
+    :ivar reference_level: :math:`L_\mathrm{rd}`, in dB.
     :ivar gamma: :math:`\gamma`, dimensionless.
     :ivar largest_element_fraction: the largest element of the division, as a
         fraction of the sphere between 0 and 1 (A.1.6). For one plane under
@@ -522,7 +522,7 @@ class DirectivityFactor(OwnsArrays):
     plane_angles_deg: NDArray[np.float64]
     levels: NDArray[np.float64]
     weights: NDArray[np.float64]
-    reference_level_db: float
+    reference_level: float
     gamma: float
     largest_element_fraction: float
     formula: str
@@ -559,7 +559,7 @@ class DirectivityFactor(OwnsArrays):
                 msg = f"DirectivityFactor: '{name}' must contain only finite values."
                 raise ValueError(msg)
             object.__setattr__(self, name, read_only(array))
-        require_finite(self.reference_level_db, "reference_level_db")
+        require_finite(self.reference_level, "reference_level")
         require_scalar(self.gamma, "gamma")
         if not (math.isfinite(self.gamma) and self.gamma > 0.0):
             msg = f"DirectivityFactor: 'gamma' must be positive and finite; got {self.gamma!r}."
@@ -573,16 +573,16 @@ class DirectivityFactor(OwnsArrays):
             raise ValueError(msg)
 
     @property
-    def directivity_index_db(self) -> float:
+    def directivity_index(self) -> float:
         r""":math:`10\lg\gamma`, in dB: what Formula (1) subtracts from
         :math:`G_\mathrm{F}`, and what Table B.1 tabulates.
         """
         return 10.0 * math.log10(self.gamma)
 
     @property
-    def relative_levels_db(self) -> NDArray[np.float64]:
+    def relative_levels(self) -> NDArray[np.float64]:
         r""":math:`L(\phi) - L_\mathrm{rd}` of each reading, in dB."""
-        return self.levels - self.reference_level_db
+        return self.levels - self.reference_level
 
     def plot(
         self,
@@ -628,7 +628,7 @@ def _reference_level(value: float | None, first_reading: float) -> float:
     """
     if value is None:
         return first_reading
-    return require_finite(value, "reference_level_db")
+    return require_finite(value, "reference_level")
 
 
 def _gamma(
@@ -658,7 +658,7 @@ def _plane_readings(
 
 def _from_planes(
     levels: NDArray[np.float64],
-    reference_level_db: float | None,
+    reference_level: float | None,
     formula: str,
 ) -> DirectivityFactor:
     """Formula (A.3) or (A.4) on a ``(planes, m)`` grid of readings.
@@ -676,13 +676,13 @@ def _from_planes(
     angles, plane_angles, flat, weights = _plane_readings(
         levels, _weights(half_steps, planes)
     )
-    lrd = _reference_level(reference_level_db, float(levels[0, 0]))
+    lrd = _reference_level(reference_level, float(levels[0, 0]))
     return DirectivityFactor(
         incidence_angles_deg=angles,
         plane_angles_deg=plane_angles,
         levels=flat,
         weights=weights,
-        reference_level_db=lrd,
+        reference_level=lrd,
         gamma=_gamma(flat, weights, lrd),
         largest_element_fraction=largest,
         formula=formula,
@@ -706,7 +706,7 @@ def _plane_count(count: int, name: str) -> int:
 
 
 def directivity_factor(
-    levels: ArrayLike, *, reference_level_db: float | None = None
+    levels: ArrayLike, *, reference_level: float | None = None
 ) -> DirectivityFactor:
     r"""Directivity factor from readings in two or more planes
     (IEC 61183:1994, Formula (A.3)).
@@ -738,7 +738,7 @@ def directivity_factor(
         reference direction: shape ``(2, 36)`` for Annex A. An instrument
         measured in one plane under rotational symmetry goes to
         :func:`axisymmetric_directivity_factor`.
-    :param reference_level_db: :math:`L_\mathrm{rd}` in dB (Default: None,
+    :param reference_level: :math:`L_\mathrm{rd}` in dB (Default: None,
         the reading at 0° in the first plane, which A.4.4 takes in the same
         position).
     :return: The :class:`DirectivityFactor`.
@@ -755,11 +755,11 @@ def directivity_factor(
             f"axisymmetric_directivity_factor. Got shape {matrix.shape}."
         )
         raise ValueError(msg)
-    return _from_planes(matrix, reference_level_db, "A.3")
+    return _from_planes(matrix, reference_level, "A.3")
 
 
 def axisymmetric_directivity_factor(
-    levels: ArrayLike, *, reference_level_db: float | None = None
+    levels: ArrayLike, *, reference_level: float | None = None
 ) -> DirectivityFactor:
     r"""Directivity factor of an instrument with rotational symmetry, from one
     plane (IEC 61183:1994, Formula (A.4)).
@@ -778,7 +778,7 @@ def axisymmetric_directivity_factor(
     :param levels: :math:`L(\phi,\mathrm{h})` in dB, one plane at
         :math:`\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi`: 36 readings
         for Annex A.
-    :param reference_level_db: :math:`L_\mathrm{rd}` in dB (Default: None,
+    :param reference_level: :math:`L_\mathrm{rd}` in dB (Default: None,
         the reading at 0°).
     :return: The :class:`DirectivityFactor`.
     :raises ValueError: for readings in more than one plane, an odd number of
@@ -793,14 +793,14 @@ def axisymmetric_directivity_factor(
             f"planes go to directivity_factor. Got shape {matrix.shape}."
         )
         raise ValueError(msg)
-    return _from_planes(matrix, reference_level_db, "A.4")
+    return _from_planes(matrix, reference_level, "A.4")
 
 
 def equal_area_directivity_factor(
-    horizontal_levels_db: ArrayLike,
-    vertical_levels_db: ArrayLike,
+    horizontal_levels: ArrayLike,
+    vertical_levels: ArrayLike,
     *,
-    reference_level_db: float | None = None,
+    reference_level: float | None = None,
 ) -> DirectivityFactor:
     r"""Directivity factor from 38 equal-area elements (IEC 61183:1994,
     Formula (A.5)).
@@ -813,24 +813,24 @@ def equal_area_directivity_factor(
     NOTE 2 of A.4.7: with the directions of the note to A.1.8, every element
     is 1/38 of the sphere (2,6 %) and every reading weighs the same.
 
-    :param horizontal_levels_db: :math:`L(n)` in the horizontal (X-Y) plane,
+    :param horizontal_levels: :math:`L(n)` in the horizontal (X-Y) plane,
         in dB, 20 readings at the directions of
         :func:`equal_area_incidence_angles`, in the order the note prints them
         (0°, 32,6°, ..., 180°, ..., 327,4°).
-    :param vertical_levels_db: :math:`L(n)` in the vertical (X-Z) plane, in
+    :param vertical_levels: :math:`L(n)` in the vertical (X-Z) plane, in
         dB, 18 readings at the same directions without 0° and 180°.
-    :param reference_level_db: :math:`L_\mathrm{rd}` in dB (Default: None,
+    :param reference_level: :math:`L_\mathrm{rd}` in dB (Default: None,
         the horizontal reading at 0°).
     :return: The :class:`DirectivityFactor`.
     :raises ValueError: for readings not 20 and 18, or a value that is not
         finite.
     """
-    horizontal = require_finite_array(horizontal_levels_db, "horizontal_levels_db")
-    vertical = require_finite_array(vertical_levels_db, "vertical_levels_db")
+    horizontal = require_finite_array(horizontal_levels, "horizontal_levels")
+    vertical = require_finite_array(vertical_levels, "vertical_levels")
     vertical_count = _EQUAL_AREA_ELEMENTS - _EQUAL_AREA_HORIZONTAL
     if horizontal.size != _EQUAL_AREA_HORIZONTAL or vertical.size != vertical_count:
         msg = (
-            "'horizontal_levels_db' and 'vertical_levels_db' must hold the 20 "
+            "'horizontal_levels' and 'vertical_levels' must hold the 20 "
             "and 18 readings of the 38 equal-area elements of IEC 61183; got "
             f"{horizontal.size} and {vertical.size}."
         )
@@ -838,7 +838,7 @@ def equal_area_directivity_factor(
     h_angles, v_angles = equal_area_incidence_angles()
     levels = np.concatenate((horizontal, vertical))
     weights = np.full(levels.size, 1.0 / _EQUAL_AREA_ELEMENTS)
-    lrd = _reference_level(reference_level_db, float(horizontal[0]))
+    lrd = _reference_level(reference_level, float(horizontal[0]))
     return DirectivityFactor(
         incidence_angles_deg=np.concatenate((h_angles, v_angles)),
         plane_angles_deg=np.concatenate(
@@ -846,7 +846,7 @@ def equal_area_directivity_factor(
         ),
         levels=levels,
         weights=weights,
-        reference_level_db=lrd,
+        reference_level=lrd,
         gamma=_gamma(levels, weights, lrd),
         largest_element_fraction=1.0 / _EQUAL_AREA_ELEMENTS,
         formula="A.5",
@@ -897,17 +897,17 @@ class RandomIncidenceSensitivity(OwnsArrays):
     :math:`G_\mathrm{RI} = G_\mathrm{F} - 10\lg\gamma` at each frequency.
 
     :ivar frequencies: the preferred frequencies, in Hz.
-    :ivar free_field_level_db: :math:`G_\mathrm{F} = L_\mathrm{rd} -
+    :ivar free_field_level: :math:`G_\mathrm{F} = L_\mathrm{rd} -
         L_\mathrm{o}`, the free-field sensitivity level for the reference
         direction, in dB.
-    :ivar directivity_index_db: :math:`10\lg\gamma`, in dB.
-    :ivar random_incidence_level_db: :math:`G_\mathrm{RI}`, in dB.
+    :ivar directivity_index: :math:`10\lg\gamma`, in dB.
+    :ivar random_incidence_level: :math:`G_\mathrm{RI}`, in dB.
     """
 
     frequencies: NDArray[np.float64]
-    free_field_level_db: NDArray[np.float64]
-    directivity_index_db: NDArray[np.float64]
-    random_incidence_level_db: NDArray[np.float64]
+    free_field_level: NDArray[np.float64]
+    directivity_index: NDArray[np.float64]
+    random_incidence_level: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Refuse columns that disagree, and publish them read-only.
@@ -917,9 +917,9 @@ class RandomIncidenceSensitivity(OwnsArrays):
         """
         columns = (
             "frequencies",
-            "free_field_level_db",
-            "directivity_index_db",
-            "random_incidence_level_db",
+            "free_field_level",
+            "directivity_index",
+            "random_incidence_level",
         )
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
@@ -934,12 +934,12 @@ class RandomIncidenceSensitivity(OwnsArrays):
             object.__setattr__(self, name, read_only(column))
 
     @property
-    def correction_db(self) -> NDArray[np.float64]:
+    def correction(self) -> NDArray[np.float64]:
         r""":math:`G_\mathrm{RI} - G_\mathrm{F} = -10\lg\gamma` at each
         frequency, in dB: what the instrument reads in a random-incidence
         field relative to a plane wave from its reference direction.
         """
-        return self.random_incidence_level_db - self.free_field_level_db
+        return self.random_incidence_level - self.free_field_level
 
     def plot(
         self,
@@ -974,8 +974,8 @@ class RandomIncidenceSensitivity(OwnsArrays):
 
 def random_incidence_sensitivity(
     frequencies: ArrayLike,
-    free_field_level_db: ArrayLike,
-    directivity_index_db: ArrayLike,
+    free_field_level: ArrayLike,
+    directivity_index: ArrayLike,
 ) -> RandomIncidenceSensitivity:
     r"""Random-incidence sensitivity level from the free-field sensitivity
     level and the directivity factor (IEC 61183:1994, Formulas (1) and (A.6)).
@@ -990,23 +990,23 @@ def random_incidence_sensitivity(
     instrument of that model (4.2).
 
     :param frequencies: The preferred frequencies, in Hz, increasing.
-    :param free_field_level_db: :math:`G_\mathrm{F}` at each frequency, in dB
+    :param free_field_level: :math:`G_\mathrm{F}` at each frequency, in dB
         (A.3).
-    :param directivity_index_db: :math:`10\lg\gamma` at each frequency, in dB:
-        :attr:`DirectivityFactor.directivity_index_db` of the readings at that
+    :param directivity_index: :math:`10\lg\gamma` at each frequency, in dB:
+        :attr:`DirectivityFactor.directivity_index` of the readings at that
         frequency.
     :return: The :class:`RandomIncidenceSensitivity`.
     :raises ValueError: for columns of different lengths, a value that is not
         finite, or frequencies that are not positive and increasing.
     """
     frequencies = _frequency_axis(frequencies)
-    free_field = _band_column(free_field_level_db, "free_field_level_db", frequencies)
-    index = _band_column(directivity_index_db, "directivity_index_db", frequencies)
+    free_field = _band_column(free_field_level, "free_field_level", frequencies)
+    index = _band_column(directivity_index, "directivity_index", frequencies)
     return RandomIncidenceSensitivity(
         frequencies=frequencies,
-        free_field_level_db=free_field,
-        directivity_index_db=index,
-        random_incidence_level_db=free_field - index,
+        free_field_level=free_field,
+        directivity_index=index,
+        random_incidence_level=free_field - index,
     )
 
 
@@ -1057,14 +1057,14 @@ class DiffuseFieldSensitivity(OwnsArrays):
     for a pressure calibration, Formula (11).
 
     :ivar frequencies: the band centres, in Hz.
-    :ivar indicated_level_db: :math:`L_\mathrm{D}`, what the instrument under
+    :ivar indicated_level: :math:`L_\mathrm{D}`, what the instrument under
         test indicates, in dB.
-    :ivar reference_indicated_level_db: :math:`L_\mathrm{D,ref}`, what the
+    :ivar reference_indicated_level: :math:`L_\mathrm{D,ref}`, what the
         reference instrument indicates at the same positions, in dB.
-    :ivar reference_sensitivity_level_db: the reference's calibrated
+    :ivar reference_sensitivity_level: the reference's calibrated
         sensitivity level, in dB: :math:`G_\mathrm{RI,ref}`,
         :math:`G_\mathrm{F,ref}` or :math:`G_\mathrm{P,ref}`.
-    :ivar reference_correction_db: what turns that into the reference's
+    :ivar reference_correction: what turns that into the reference's
         diffuse-field sensitivity level, in dB: 0, :math:`-10\lg
         \gamma_\mathrm{ref}` or :math:`\Delta_\mathrm{DP}`.
     :ivar route: ``"random_incidence"`` (Formula (9)), ``"free_field"``
@@ -1072,10 +1072,10 @@ class DiffuseFieldSensitivity(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    indicated_level_db: NDArray[np.float64]
-    reference_indicated_level_db: NDArray[np.float64]
-    reference_sensitivity_level_db: NDArray[np.float64]
-    reference_correction_db: NDArray[np.float64]
+    indicated_level: NDArray[np.float64]
+    reference_indicated_level: NDArray[np.float64]
+    reference_sensitivity_level: NDArray[np.float64]
+    reference_correction: NDArray[np.float64]
     route: str
 
     def __post_init__(self) -> None:
@@ -1095,10 +1095,10 @@ class DiffuseFieldSensitivity(OwnsArrays):
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in (
-            "indicated_level_db",
-            "reference_indicated_level_db",
-            "reference_sensitivity_level_db",
-            "reference_correction_db",
+            "indicated_level",
+            "reference_indicated_level",
+            "reference_sensitivity_level",
+            "reference_correction",
         ):
             column = require_finite_array(getattr(self, name), name)
             if column.size != frequencies.size:
@@ -1110,28 +1110,28 @@ class DiffuseFieldSensitivity(OwnsArrays):
             object.__setattr__(self, name, read_only(column))
 
     @property
-    def level_difference_db(self) -> NDArray[np.float64]:
+    def level_difference(self) -> NDArray[np.float64]:
         r""":math:`\Delta G_\mathrm{D} = L_\mathrm{D} - L_\mathrm{D,ref}`, in dB
         (Formula (8)).
         """
         return _output_level_difference_db(
-            self.indicated_level_db, self.reference_indicated_level_db
+            self.indicated_level, self.reference_indicated_level
         )
 
     @property
-    def reference_diffuse_field_level_db(self) -> NDArray[np.float64]:
+    def reference_diffuse_field_level(self) -> NDArray[np.float64]:
         r""":math:`G_\mathrm{D,ref}`, the diffuse-field sensitivity level of the
         reference instrument, in dB.
         """
-        return self.reference_sensitivity_level_db + self.reference_correction_db
+        return self.reference_sensitivity_level + self.reference_correction
 
     @property
-    def diffuse_field_level_db(self) -> NDArray[np.float64]:
+    def diffuse_field_level(self) -> NDArray[np.float64]:
         r""":math:`G_\mathrm{D}`, the diffuse-field sensitivity level of the
         instrument under test, in dB (Formulas (9) to (11)).
         """
         return _compared_level_db(
-            self.reference_diffuse_field_level_db, self.level_difference_db
+            self.reference_diffuse_field_level, self.level_difference
         )
 
     def plot(
@@ -1160,13 +1160,13 @@ class DiffuseFieldSensitivity(OwnsArrays):
 
 def diffuse_field_sensitivity(
     frequencies: ArrayLike,
-    indicated_level_db: ArrayLike,
-    reference_indicated_level_db: ArrayLike,
+    indicated_level: ArrayLike,
+    reference_indicated_level: ArrayLike,
     *,
-    reference_random_incidence_level_db: ArrayLike | None = None,
-    reference_free_field_level_db: ArrayLike | None = None,
-    reference_directivity_index_db: ArrayLike | None = None,
-    reference_pressure_level_db: ArrayLike | None = None,
+    reference_random_incidence_level: ArrayLike | None = None,
+    reference_free_field_level: ArrayLike | None = None,
+    reference_directivity_index: ArrayLike | None = None,
+    reference_pressure_level: ArrayLike | None = None,
     reference_diffuse_pressure_difference_db: ArrayLike | None = None,
 ) -> DiffuseFieldSensitivity:
     r"""Diffuse-field sensitivity level by comparison with a reference sound
@@ -1192,8 +1192,8 @@ def diffuse_field_sensitivity(
        G_\mathrm{D} = \Delta G_\mathrm{D} + (G_\mathrm{P,ref}
        + \Delta_\mathrm{DP}) \tag{11}
 
-    Exactly one of ``reference_random_incidence_level_db``,
-    ``reference_free_field_level_db`` and ``reference_pressure_level_db``
+    Exactly one of ``reference_random_incidence_level``,
+    ``reference_free_field_level`` and ``reference_pressure_level``
     selects the formula. For Formulas (10) and (11), the directivity factor
     and the diffuse-to-pressure difference of the reference default to Table
     B.1, the type LS2aP/LS2F microphone, one of the two types Annex B
@@ -1201,17 +1201,17 @@ def diffuse_field_sensitivity(
     frequency from 25 Hz to 20 kHz.
 
     :param frequencies: The band centres, in Hz, increasing.
-    :param indicated_level_db: :math:`L_\mathrm{D}`, what the instrument under
+    :param indicated_level: :math:`L_\mathrm{D}`, what the instrument under
         test indicates in the diffuse field, in dB, one per band.
-    :param reference_indicated_level_db: :math:`L_\mathrm{D,ref}`, what the
+    :param reference_indicated_level: :math:`L_\mathrm{D,ref}`, what the
         reference instrument indicates at the same positions, in dB.
-    :param reference_random_incidence_level_db: :math:`G_\mathrm{RI,ref}` in
+    :param reference_random_incidence_level: :math:`G_\mathrm{RI,ref}` in
         dB, for a reference calibrated by clause 4 (Formula (9)).
-    :param reference_free_field_level_db: :math:`G_\mathrm{F,ref}` in dB, for a
+    :param reference_free_field_level: :math:`G_\mathrm{F,ref}` in dB, for a
         reference calibrated in a free field (Formula (10)).
-    :param reference_directivity_index_db: :math:`10\lg\gamma_\mathrm{ref}` in
+    :param reference_directivity_index: :math:`10\lg\gamma_\mathrm{ref}` in
         dB, with Formula (10) only (Default: None, Table B.1).
-    :param reference_pressure_level_db: :math:`G_\mathrm{P,ref}` in dB, for a
+    :param reference_pressure_level: :math:`G_\mathrm{P,ref}` in dB, for a
         reference calibrated in a pressure field (Formula (11)).
     :param reference_diffuse_pressure_difference_db: :math:`\Delta_\mathrm{DP}`
         in dB, with Formula (11) only (Default: None, Table B.1).
@@ -1223,24 +1223,24 @@ def diffuse_field_sensitivity(
     """
     frequencies = _frequency_axis(frequencies)
     given = {
-        "random_incidence": reference_random_incidence_level_db,
-        "free_field": reference_free_field_level_db,
-        "pressure": reference_pressure_level_db,
+        "random_incidence": reference_random_incidence_level,
+        "free_field": reference_free_field_level,
+        "pressure": reference_pressure_level,
     }
     chosen = [(route, value) for route, value in given.items() if value is not None]
     if len(chosen) != 1:
         msg = (
             "Give exactly one calibration of the reference instrument: "
-            "'reference_random_incidence_level_db' (Formula (9)), "
-            "'reference_free_field_level_db' (Formula (10)) or "
-            "'reference_pressure_level_db' (Formula (11)); got "
+            "'reference_random_incidence_level' (Formula (9)), "
+            "'reference_free_field_level' (Formula (10)) or "
+            "'reference_pressure_level' (Formula (11)); got "
             f"{[route for route, _ in chosen] or 'none'}."
         )
         raise ValueError(msg)
     route, reference_sensitivity = chosen[0]
     stray = {
-        "reference_directivity_index_db": (
-            reference_directivity_index_db,
+        "reference_directivity_index": (
+            reference_directivity_index,
             "free_field",
         ),
         "reference_diffuse_pressure_difference_db": (
@@ -1257,11 +1257,11 @@ def diffuse_field_sensitivity(
     if route == "random_incidence":
         correction = np.zeros(frequencies.size)
     elif route == "free_field":
-        name = "reference_directivity_index_db"
+        name = "reference_directivity_index"
         correction = -(
-            _table_b1_column(frequencies, "directivity_index_db", name)
-            if reference_directivity_index_db is None
-            else _band_column(reference_directivity_index_db, name, frequencies)
+            _table_b1_column(frequencies, "directivity_index", name)
+            if reference_directivity_index is None
+            else _band_column(reference_directivity_index, name, frequencies)
         )
     else:
         name = "reference_diffuse_pressure_difference_db"
@@ -1274,13 +1274,11 @@ def diffuse_field_sensitivity(
         )
     return DiffuseFieldSensitivity(
         frequencies=frequencies,
-        indicated_level_db=_band_column(
-            indicated_level_db, "indicated_level_db", frequencies
+        indicated_level=_band_column(indicated_level, "indicated_level", frequencies),
+        reference_indicated_level=_band_column(
+            reference_indicated_level, "reference_indicated_level", frequencies
         ),
-        reference_indicated_level_db=_band_column(
-            reference_indicated_level_db, "reference_indicated_level_db", frequencies
-        ),
-        reference_sensitivity_level_db=sensitivity,
-        reference_correction_db=correction,
+        reference_sensitivity_level=sensitivity,
+        reference_correction=correction,
         route=route,
     )

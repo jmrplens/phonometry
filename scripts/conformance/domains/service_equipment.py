@@ -59,7 +59,7 @@ def _chk_background_four_db() -> Outcome:
     # "A difference of 4 dB corresponds to a correction value of 2,2 dB."
     difference, printed = ref.ISO16032_BACKGROUND_LIMIT_DB
     res = building.service_equipment_background_correction([50.0], [50.0 - difference])
-    return numeric(printed, float(res.correction_db[0]), 0.05, unit="dB", places=2)
+    return numeric(printed, float(res.correction[0]), 0.05, unit="dB", places=2)
 
 
 @register(_DOMAIN, f"{_DRAFT} Clause 9", "Correction held at 2,2 dB below 4 dB")
@@ -69,7 +69,7 @@ def _chk_background_limited() -> Outcome:
     res = building.service_equipment_background_correction(
         [50.0, 50.0, 50.0], [49.0, 50.0, 55.0]
     )
-    held = int(np.count_nonzero(np.abs(res.correction_db - 2.2) <= 1e-12))
+    held = int(np.count_nonzero(np.abs(res.correction - 2.2) <= 1e-12))
     return count(held, 3, subject="bands held at 2,2 dB")
 
 
@@ -449,9 +449,7 @@ def _chk_calibration() -> Outcome:
         (building.verify_calibration_deviation([127.8, 128.3]), True),
         (building.verify_calibration_deviation([93.8, 94.4]), False),
         (
-            building.verify_calibration_deviation(
-                [94.0, 94.2], previous_levels_db=[93.6]
-            ),
+            building.verify_calibration_deviation([94.0, 94.2], previous_levels=[93.6]),
             False,
         ),
     )

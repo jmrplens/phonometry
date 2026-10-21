@@ -328,7 +328,7 @@ def _chk_field_immunity() -> Outcome:
 )
 def _chk_abbreviated_limits() -> Outcome:
     reductions = _per_class_matches(
-        ph.metrology.ABBREVIATED_LEVEL_REDUCTIONS_DB,
+        ph.metrology.ABBREVIATED_LEVEL_REDUCTIONS,
         ref.IEC60942_ABBREVIATED_REDUCTIONS,
     )
     frequency = _per_class_matches(

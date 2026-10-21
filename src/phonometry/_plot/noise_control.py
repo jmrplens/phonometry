@@ -732,8 +732,8 @@ def plot_silencer_in_situ(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    difference = np.asarray(result.level_difference_db, dtype=np.float64)
-    loss = np.asarray(result.loss_db, dtype=np.float64)
+    difference = np.asarray(result.level_difference, dtype=np.float64)
+    loss = np.asarray(result.loss, dtype=np.float64)
     continuous = result.frequencies is not None
     x = (
         np.asarray(result.frequencies, dtype=np.float64)
@@ -806,9 +806,9 @@ def plot_screen_in_situ(
     return _plot_two_runs(
         ax,
         None if result.frequencies is None else np.asarray(result.frequencies),
-        np.asarray(result.unscreened_levels_db, dtype=np.float64),
-        np.asarray(result.screened_levels_db, dtype=np.float64),
-        np.asarray(result.attenuation_db, dtype=np.float64),
+        np.asarray(result.unscreened_levels, dtype=np.float64),
+        np.asarray(result.screened_levels, dtype=np.float64),
+        np.asarray(result.attenuation, dtype=np.float64),
         labels=(
             _t("Unscreened level $L_{p1}$", language),
             _t("Screened level $L_{p2}$", language),

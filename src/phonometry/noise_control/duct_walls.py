@@ -124,15 +124,15 @@ class DuctWallSpectrum(BandedRow):
     named by the column: a transmission loss here is a breakout or a break-in
     transmission loss, never both, and :attr:`direction` is what says which.
 
-    :ivar transmission_loss_63_db: The transmission loss in the 63 Hz octave
+    :ivar transmission_loss_63: The transmission loss in the 63 Hz octave
         band, in decibels, in the direction :attr:`direction` names.
-    :ivar transmission_loss_125_db: The same in the 125 Hz band.
-    :ivar transmission_loss_250_db: The same in the 250 Hz band.
-    :ivar transmission_loss_500_db: The same in the 500 Hz band.
-    :ivar transmission_loss_1000_db: The same in the 1 kHz band.
-    :ivar transmission_loss_2000_db: The same in the 2 kHz band.
-    :ivar transmission_loss_4000_db: The same in the 4 kHz band.
-    :ivar transmission_loss_8000_db: The same in the 8 kHz band, which only the
+    :ivar transmission_loss_125: The same in the 125 Hz band.
+    :ivar transmission_loss_250: The same in the 250 Hz band.
+    :ivar transmission_loss_500: The same in the 500 Hz band.
+    :ivar transmission_loss_1000: The same in the 1 kHz band.
+    :ivar transmission_loss_2000: The same in the 2 kHz band.
+    :ivar transmission_loss_4000: The same in the 4 kHz band.
+    :ivar transmission_loss_8000: The same in the 8 kHz band, which only the
         two rectangular tables print a column for.
     :ivar direction: ``"breakout"`` for the sound that leaves the duct through
         its wall, ``"break-in"`` for the sound that enters it through the same
@@ -168,14 +168,14 @@ class DuctWallSpectrum(BandedRow):
         the page writes it.
     """
 
-    transmission_loss_63_db: float | None = None
-    transmission_loss_125_db: float | None = None
-    transmission_loss_250_db: float | None = None
-    transmission_loss_500_db: float | None = None
-    transmission_loss_1000_db: float | None = None
-    transmission_loss_2000_db: float | None = None
-    transmission_loss_4000_db: float | None = None
-    transmission_loss_8000_db: float | None = None
+    transmission_loss_63: float | None = None
+    transmission_loss_125: float | None = None
+    transmission_loss_250: float | None = None
+    transmission_loss_500: float | None = None
+    transmission_loss_1000: float | None = None
+    transmission_loss_2000: float | None = None
+    transmission_loss_4000: float | None = None
+    transmission_loss_8000: float | None = None
     direction: str = ""
     shape: str = ""
     printed_table: str = ""
@@ -187,7 +187,6 @@ class DuctWallSpectrum(BandedRow):
 
     _bands_hz: ClassVar[tuple[int, ...]] = DUCT_WALL_BANDS_HZ
     _band_prefix: ClassVar[str] = "transmission_loss_"
-    _band_suffix: ClassVar[str] = "_db"
     _band_kind: ClassVar[str] = "an octave"
     _table_kind: ClassVar[str] = "duct wall"
 
@@ -201,7 +200,7 @@ class DuctWallSpectrum(BandedRow):
         """Whether this row is the sound entering the duct through its wall."""
         return self.direction == _BREAK_IN
 
-    def transmission_loss_db(self, band_hz: int) -> float:
+    def transmission_loss(self, band_hz: int) -> float:
         """The loss in one band, or a refusal that says what the page had.
 
         Which of the two transmission losses it is follows from

@@ -137,9 +137,7 @@ def _chk_starting_positions() -> Outcome:
     "Result of the standstill budget, the reading plus the mean value corrections, dB",
 )
 def _chk_table_g2_level() -> Outcome:
-    return numeric(
-        ref.TABLE_G2_LEVEL_DB, _table_g2().level_db, 0.005, unit="dB", places=3
-    )
+    return numeric(ref.TABLE_G2_LEVEL_DB, _table_g2().level, 0.005, unit="dB", places=3)
 
 
 @register(
@@ -247,7 +245,7 @@ def _chk_tone_level() -> Outcome:
         np.sin(2.0 * np.pi * 1000.0 * t), fs, start_s=2.0, end_s=8.0
     )
     expected = 10.0 * math.log10(0.5 / 2.0e-5**2)
-    return numeric(expected, record_.equivalent_level_db, 0.02, unit="dB", places=3)
+    return numeric(expected, record_.equivalent_level, 0.02, unit="dB", places=3)
 
 
 @register(

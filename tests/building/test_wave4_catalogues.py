@@ -272,12 +272,12 @@ def test_rossing_11_4_holds_six_bands_and_a_rating_per_row() -> None:
     assert list(rows) == [label for label, _ in ref.ROSSING_11_4]
     for label, cells in ref.ROSSING_11_4:
         row = rows[label]
-        assert [row.transmission_loss_db(band) for band in bands] == [
+        assert [row.transmission_loss(band) for band in bands] == [
             _num(cell) for cell in cells[:6]
         ]
         assert row.sound_transmission_class == _num(cells[6])
-        assert row.transmission_loss_63_db is None
-        assert row.transmission_loss_8000_db is None
+        assert row.transmission_loss_63 is None
+        assert row.transmission_loss_8000 is None
 
 
 @pytest.mark.parametrize(
@@ -321,8 +321,8 @@ def test_the_open_plan_partition_keeps_the_name_the_page_prints() -> None:
 def test_a_table_that_prints_only_a_rating_refuses_every_band(table: str) -> None:
     row = _table(table)[0]
     for band in TRANSMISSION_LOSS_BANDS_HZ:
-        with pytest.raises(ValueError, match=r"has no transmission_loss_\d+_db"):
-            row.transmission_loss_db(band)
+        with pytest.raises(ValueError, match=r"has no transmission_loss_\d+,"):
+            row.transmission_loss(band)
 
 
 # ---------------------------------------------------------------------------
@@ -341,18 +341,16 @@ def test_each_finish_holds_the_improvement_the_page_prints(
     for row, (_label, (value,)) in zip(_impact(table), oracle, strict=True):
         if "-" in value:
             low, high = value.split("-")
-            assert row.impact_sound_improvement_db is None
-            assert row.ranges == {
-                "impact_sound_improvement_db": (_num(low), _num(high))
-            }
+            assert row.impact_sound_improvement is None
+            assert row.ranges == {"impact_sound_improvement": (_num(low), _num(high))}
         else:
-            assert row.impact_sound_improvement_db == _num(value)
+            assert row.impact_sound_improvement == _num(value)
 
 
 def test_each_timber_floor_holds_its_improvement_and_its_load() -> None:
     rows = _impact("harris-1977-table-19-4")
     for row, (_label, (load, value)) in zip(rows, ref.HARRIS_1977_19_4, strict=True):
-        assert row.impact_sound_improvement_db == _num(value)
+        assert row.impact_sound_improvement == _num(value)
         assert row.added_load_pa == pytest.approx(
             _num(load) * TECHNICAL_ATMOSPHERE_PA, rel=1e-12
         )
@@ -363,9 +361,9 @@ def test_the_floor_printed_twice_is_two_rows_told_apart_by_the_load() -> None:
     twice = [row for row in _impact("harris-1977-table-19-4") if row.name == name]
     assert len(twice) == 2
     unloaded, loaded = twice
-    assert (unloaded.added_load_pa, unloaded.impact_sound_improvement_db) == (0, 27)
+    assert (unloaded.added_load_pa, unloaded.impact_sound_improvement) == (0, 27)
     assert loaded.added_load_pa == pytest.approx(82375.86)
-    assert loaded.impact_sound_improvement_db == 22
+    assert loaded.impact_sound_improvement == 22
     assert unloaded.variant != loaded.variant
 
 
@@ -375,7 +373,7 @@ def test_the_1977_rows_carry_no_rating_and_the_rating_rows_no_decibels() -> None
             assert row.impact_insulation_class is None
             assert row.impact_insulation_class_improvement is None
         else:
-            assert row.impact_sound_improvement_db is None
+            assert row.impact_sound_improvement is None
             assert row.added_load_pa is None
 
 

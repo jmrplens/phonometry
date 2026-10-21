@@ -752,7 +752,7 @@ def end_reflection_loss(
     method: str = "bies",
     speed_of_sound: float = _C_AIR,
     aspect_ratio: float = 1.0,
-    max_reduction_db: float | None = _VDI2081_END_REFLECTION_CAP,
+    max_reduction: float | None = _VDI2081_END_REFLECTION_CAP,
 ) -> HVACSpectrumResult:
     """Duct end reflection loss (Bies Table 8.14, ASHRAE; or Long's closed form).
 
@@ -779,7 +779,7 @@ def end_reflection_loss(
         or ``"vdi2081"`` (VDI 2081 Part 1 Figure 28).
     :param aspect_ratio: **VDI 2081 only.** Nozzle length over height ``m``
         (default 1, a square opening). Figure 28 is drawn from 1 to 30.
-    :param max_reduction_db: **VDI 2081 only.** Ceiling on the reduction,
+    :param max_reduction: **VDI 2081 only.** Ceiling on the reduction,
         dB (default 15). Section 6.6 says the theoretical value is not reached
         because the duct walls radiate what the nozzle reflects, and the
         guideline's own worked example applies exactly this cap. ``None``
@@ -803,9 +803,9 @@ def end_reflection_loss(
             aspect_ratio=require_positive(aspect_ratio, "aspect_ratio"),
             speed_of_sound=require_positive(speed_of_sound, "speed_of_sound"),
         )
-        if max_reduction_db is not None:
+        if max_reduction is not None:
             values = np.minimum(
-                values, require_positive(max_reduction_db, "max_reduction_db")
+                values, require_positive(max_reduction, "max_reduction")
             )
         return HVACSpectrumResult(
             frequencies=bands,

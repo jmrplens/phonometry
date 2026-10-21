@@ -153,18 +153,18 @@ result = electroacoustics.microphone_characteristics(
         powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
     ),
 )
-print(round(result.sensitivity_level_db, 1))            # -38.1 dB re 1 V/Pa
+print(round(result.sensitivity_level, 1))            # -38.1 dB re 1 V/Pa
 print(tuple(round(x) for x in result.effective_range))  # Hz
-print(round(result.directivity_index_db, 1))            # 4.8 dB (cardioid)
-print(round(result.equivalent_noise_level_db, 1))       # dB(A)
+print(round(result.directivity_index, 1))            # 4.8 dB (cardioid)
+print(round(result.equivalent_noise_level, 1))       # dB(A)
 
 result.report("microphone.pdf", metadata=ReportMetadata(measurement_standard="IEC 60268-4"))
 ```
 
 `microphone_characteristics` returns a `MicrophoneCharacteristics` with the
-computed `sensitivity_level_db`, `effective_range`, `directivity_index_db`,
-`equivalent_noise_level_db`, `max_spl_db`, `signal_to_noise_ratio_db` and
-`diffuse_field_sensitivity_level_db`, and a `.report()` that writes the fiche.
+computed `sensitivity_level`, `effective_range`, `directivity_index`,
+`equivalent_noise_level`, `max_spl`, `signal_to_noise_ratio_db` and
+`diffuse_field_sensitivity_level`, and a `.report()` that writes the fiche.
 The free-field response is drawn with its tolerance band, the
 reference-frequency marker and the effective-range markers to the IEC 60263
 proportion (one frequency decade equal to 25 dB), and the directional pattern

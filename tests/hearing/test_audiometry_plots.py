@@ -56,7 +56,7 @@ def test_the_room_figure_marks_only_the_bands_over_their_limit() -> None:
 
 def test_the_ascending_figure_rings_the_end_of_every_ascent() -> None:
     result = hearing.ascending_method_threshold(
-        presentation_levels_db=[20, 25, 30, 20, 25, 30, 20, 25, 30],
+        presentation_levels=[20, 25, 30, 20, 25, 30, 20, 25, 30],
         responses=[0, 0, 1, 0, 0, 1, 0, 0, 1],
     )
     ax = result.plot()
@@ -109,8 +109,8 @@ def test_the_free_field_figure_limits_the_ear_sides_above_4_khz_only() -> None:
     check = hearing.check_free_sound_field(
         dict.fromkeys(("left", "right", "up", "down"), [0.5] * 11),
         [0.0] * 11,
-        front_levels_db=[1.3] * 11,
-        back_levels_db=[0.0] * 11,
+        front_levels=[1.3] * 11,
+        back_levels=[0.0] * 11,
         loudspeaker_distance_m=2.0,
     )
     ax = check.plot()
@@ -119,8 +119,8 @@ def test_the_free_field_figure_limits_the_ear_sides_above_4_khz_only() -> None:
     quasi = hearing.check_quasi_free_sound_field(
         dict.fromkeys(("left", "right", "up", "down"), [0.5] * 11),
         [0.0] * 11,
-        front_levels_db=[1.3] * 11,
-        back_levels_db=[0.0] * 11,
+        front_levels=[1.3] * 11,
+        back_levels=[0.0] * 11,
         loudspeaker_distance_m=2.0,
     ).plot(language="es")
     assert "límite de 3 dB" not in _labels(quasi)
@@ -188,8 +188,8 @@ def test_a_quasi_free_field_names_its_usable_range() -> None:
     check = hearing.check_quasi_free_sound_field(
         lateral,
         [0.0] * 11,
-        front_levels_db=[1.743] * 11,
-        back_levels_db=[0.0] * 11,
+        front_levels=[1.743] * 11,
+        back_levels=[0.0] * 11,
         loudspeaker_distance_m=1.0,
     )
     ax = check.plot()
@@ -210,7 +210,7 @@ def test_the_room_title_names_the_earphone_of_the_limits() -> None:
     assert insert.earphone == "ER-3A"
     assert "(ER-3A)" in insert.plot().get_title()
     own = hearing.check_audiometric_ambient_noise(
-        levels, earphone_attenuation_db=np.full(25, 30.0)
+        levels, earphone_attenuation=np.full(25, 30.0)
     )
     assert "(atenuación propia)" in own.plot(language="es").get_title()
     bone = hearing.check_audiometric_ambient_noise(levels, presentation="bone")
@@ -253,8 +253,8 @@ def test_a_free_field_band_is_crossed_on_the_requirement_it_fails() -> None:
     check = hearing.check_free_sound_field(
         lateral,
         [0.0] * 11,
-        front_levels_db=[law] * 11,
-        back_levels_db=[0.0] * 11,
+        front_levels=[law] * 11,
+        back_levels=[0.0] * 11,
         loudspeaker_distance_m=2.0,
     )
     assert np.all(check.uniform)

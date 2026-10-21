@@ -173,12 +173,12 @@ def _chk_sharpness_table_a2() -> Outcome:
     # of 4 sone; permitted deviation 5 % or 0.05 acum.
     from scipy import signal as sp_signal
 
-    def narrowband(level_db: float) -> np.ndarray:
+    def narrowband(level: float) -> np.ndarray:
         rng = np.random.default_rng(7)
         white = rng.standard_normal(_FS * 2)
         sos = sp_signal.butter(8, [2320.0, 2700.0], btype="band", fs=_FS, output="sos")
         nb = sp_signal.sosfilt(sos, white)
-        return np.asarray(nb / np.sqrt(np.mean(nb**2)) * 2e-5 * 10 ** (level_db / 20))
+        return np.asarray(nb / np.sqrt(np.mean(nb**2)) * 2e-5 * 10 ** (level / 20))
 
     lo, hi = 30.0, 90.0
     for _ in range(13):  # set the clause 6 loudness of 4 sone
@@ -206,15 +206,15 @@ def _chk_iso226_contour() -> Outcome:
 
 
 # --- Block-A psychoacoustics: calibrated tones (pressure in pascals) --------
-def _spl_tone(freq: float, level_db: float, seconds: float) -> np.ndarray:
-    """Pure tone whose RMS is ``level_db`` dB re 20 uPa (pressure in Pa)."""
+def _spl_tone(freq: float, level: float, seconds: float) -> np.ndarray:
+    """Pure tone whose RMS is ``level`` dB re 20 uPa (pressure in Pa)."""
     t = np.arange(int(_FS * seconds)) / _FS
-    amp = math.sqrt(2.0) * 2e-5 * 10.0 ** (level_db / 20.0)
+    amp = math.sqrt(2.0) * 2e-5 * 10.0 ** (level / 20.0)
     return np.asarray(amp * np.sin(2.0 * np.pi * freq * t))
 
 
 def _am_tone(
-    fc: float, fmod: float, depth: float, level_db: float, seconds: float
+    fc: float, fmod: float, depth: float, level: float, seconds: float
 ) -> np.ndarray:
     """Amplitude-modulated tone at an OVERALL RMS level (pressure in Pa).
 
@@ -223,7 +223,7 @@ def _am_tone(
     """
     t = np.arange(int(_FS * seconds)) / _FS
     x = (1.0 + depth * np.cos(2.0 * np.pi * fmod * t)) * np.sin(2.0 * np.pi * fc * t)
-    return np.asarray(x * (2e-5 * 10.0 ** (level_db / 20.0)) / np.sqrt(np.mean(x**2)))
+    return np.asarray(x * (2e-5 * 10.0 ** (level / 20.0)) / np.sqrt(np.mean(x**2)))
 
 
 @register(

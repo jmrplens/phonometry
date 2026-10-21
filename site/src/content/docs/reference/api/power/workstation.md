@@ -104,8 +104,8 @@ ISO 11202:2010 and its Amendment 1:2020, ISO 11203:1995 and its Amendment
 
 ```python
 background_noise_correction_at_workstation(
-    measured_level_db: ArrayLike,
-    background_level_db: ArrayLike,
+    measured_level: ArrayLike,
+    background_level: ArrayLike,
     *,
     grade: Literal['engineering', 'survey'] = 'engineering',
 ) -> tuple[float | NDArray[np.float64], bool]
@@ -131,8 +131,8 @@ the caller must carry into what it publishes.
 
 | Name | Description |
 | :--- | :--- |
-| `measured_level_db` | The reading with the machine running, $L'_p$, in decibels; a scalar or one value per band. |
-| `background_level_db` | The reading with it stopped, $L_p(B)$, in decibels, of the same shape. |
+| `measured_level` | The reading with the machine running, $L'_p$, in decibels; a scalar or one value per band. |
+| `background_level` | The reading with it stopped, $L_p(B)$, in decibels, of the same shape. |
 | `grade` | `'engineering'` (grade 2, 6 dB) or `'survey'` (grade 3, 3 dB), which sets how far down a determination may be claimed. |
 
 **Returns:** The correction in decibels, and whether any value was clamped.
@@ -188,10 +188,10 @@ compared with a limit value, and is this function's default.
 
 ```python
 emission_sound_pressure_level(
-    measured_level_db: ArrayLike,
+    measured_level: ArrayLike,
     *,
-    background_correction_db: ArrayLike = 0.0,
-    local_correction_db: ArrayLike = 0.0,
+    background_correction: ArrayLike = 0.0,
+    local_correction: ArrayLike = 0.0,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -216,9 +216,9 @@ recognised, so the rule is the caller's to keep.
 
 | Name | Description |
 | :--- | :--- |
-| `measured_level_db` | The uncorrected reading $L'_p$, in decibels. |
-| `background_correction_db` | $K_1$ in decibels (default 0). |
-| `local_correction_db` | $K_3$ in decibels (default 0). |
+| `measured_level` | The uncorrected reading $L'_p$, in decibels. |
+| `background_correction` | $K_1$ in decibels (default 0). |
+| `local_correction` | $K_3$ in decibels (default 0). |
 
 **Returns:** $L_p$ in decibels, of the broadcast shape.
 
@@ -226,10 +226,10 @@ recognised, so the rule is the caller's to keep.
 
 ```python
 EmissionPressureResult(
-    level_db: float | NDArray[np.float64],
-    measured_level_db: float | NDArray[np.float64],
-    background_correction_db: float | NDArray[np.float64],
-    local_correction_db: float | NDArray[np.float64],
+    level: float | NDArray[np.float64],
+    measured_level: float | NDArray[np.float64],
+    background_correction: float | NDArray[np.float64],
+    local_correction: float | NDArray[np.float64],
     grade: Literal['engineering', 'survey'],
     *,
     background_margin_db: float | NDArray[np.float64],
@@ -243,10 +243,10 @@ An emission sound pressure level and the two corrections behind it.
 
 | Name | Description |
 | :--- | :--- |
-| `level_db` | Emission sound pressure level $L_p$, in decibels re 20 uPa: what the meter read, less both corrections. |
-| `measured_level_db` | The uncorrected reading $L'_p$, in decibels. |
-| `background_correction_db` | $K_1$, in decibels. |
-| `local_correction_db` | $K_3$, in decibels. |
+| `level` | Emission sound pressure level $L_p$, in decibels re 20 uPa: what the meter read, less both corrections. |
+| `measured_level` | The uncorrected reading $L'_p$, in decibels. |
+| `background_correction` | $K_1$, in decibels. |
+| `local_correction` | $K_3$, in decibels. |
 | `grade` | Accuracy grade the determination earns. |
 | `background_margin_db` | $\Delta L = L'_p - L_p(B)$, the margin of the reading over the background, in decibels, a scalar or one per band; `upper_bound` is read from it and the grade's minimum. |
 | `standard` | The part of the group the determination followed. |
@@ -280,7 +280,7 @@ grade 3), judged on the settled margin as $K_1$ is.
 environmental_ratio_from_absorption(
     absorption_area: ArrayLike,
     measurement_surface_m2: float,
-    directivity_index_db: ArrayLike = 0.0,
+    directivity_index: ArrayLike = 0.0,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -302,7 +302,7 @@ why ISO 11204 A.1.2 says the two routes rest on the same assumptions.
 | :--- | :--- |
 | `absorption_area` | Equivalent sound absorption area $A$ of the test room, in square metres, strictly positive. |
 | `measurement_surface_m2` | Area $S_M$ of the reference measurement surface, in square metres, strictly positive. |
-| `directivity_index_db` | $D^*_{I,\mathrm{op}}$ in decibels (default 0). |
+| `directivity_index` | $D^*_{I,\mathrm{op}}$ in decibels (default 0). |
 
 **Returns:** The ratio $z$.
 
@@ -316,8 +316,8 @@ why ISO 11204 A.1.2 says the two routes rest on the same assumptions.
 
 ```python
 environmental_ratio_from_k2(
-    environmental_correction_db: ArrayLike,
-    directivity_index_db: ArrayLike = 0.0,
+    environmental_correction: ArrayLike,
+    directivity_index: ArrayLike = 0.0,
 ) -> float | NDArray[np.float64]
 ```
 
@@ -338,7 +338,7 @@ $z = 10^{-0,1 K_2}$, so $K_3 = K_2$: a work station that sees
 the machine no more strongly than the measurement surface does needs the
 same correction the surface needed. That holds until the cap bites, at
 $K_2 = 7$ dB; above it the local correction stays at
-[`MAX_K3_DB`](/phonometry/reference/api/power/workstation/#max_k3_db) however large the environmental one grows, which is the
+[`MAX_K3`](/phonometry/reference/api/power/workstation/#max_k3) however large the environmental one grows, which is the
 piecewise function of [`local_environmental_correction`](/phonometry/reference/api/power/workstation/#local_environmental_correction) and not a
 limitation here.
 
@@ -346,31 +346,31 @@ limitation here.
 
 | Name | Description |
 | :--- | :--- |
-| `environmental_correction_db` | $K_2$ in decibels, non-negative. |
-| `directivity_index_db` | $D^*_{I,\mathrm{op}}$ in decibels (default 0, no directivity). |
+| `environmental_correction` | $K_2$ in decibels, non-negative. |
+| `directivity_index` | $D^*_{I,\mathrm{op}}$ in decibels (default 0, no directivity). |
 
 **Returns:** The ratio $z$, of the broadcast shape.
 
-## GRADE_2_MAX_K3_DB
+## GRADE_2_MAX_K3
 
 *Constant* (`float`).
 
 ```python
-GRADE_2_MAX_K3_DB = 4.0
+GRADE_2_MAX_K3 = 4.0
 ```
 
 ## grade_from_local_correction
 
 ```python
 grade_from_local_correction(
-    local_correction_db: ArrayLike,
+    local_correction: ArrayLike,
 ) -> Literal['engineering', 'survey']
 ```
 
 The accuracy grade a local environmental correction earns.
 
 ISO 11202:2010 A.1.3 puts the boundary at
-[`GRADE_2_MAX_K3_DB`](/phonometry/reference/api/power/workstation/#grade_2_max_k3_db): a greatest possible $K_3$ of 4 dB or less
+[`GRADE_2_MAX_K3`](/phonometry/reference/api/power/workstation/#grade_2_max_k3): a greatest possible $K_3$ of 4 dB or less
 is grade 2 (engineering), and more than that is grade 3 (survey). Method A.2
 reaches the same boundary by a different road, Condition (A.6), which is
 algebraically the same 4 dB once (A.4) and (A.5) are substituted into it.
@@ -382,7 +382,7 @@ weakest part.
 
 | Name | Description |
 | :--- | :--- |
-| `local_correction_db` | $K_3$ in decibels; a scalar or one value per band. |
+| `local_correction` | $K_3$ in decibels; a scalar or one value per band. |
 
 **Returns:** `'engineering'` or `'survey'`.
 
@@ -424,12 +424,12 @@ correction cannot be negative: the room can only add to the reading.
 | :--- | :--- |
 | ValueError | If any value is not strictly positive. |
 
-## MAX_K3_DB
+## MAX_K3
 
 *Constant* (`float`).
 
 ```python
-MAX_K3_DB = 7.0
+MAX_K3 = 7.0
 ```
 
 ## MIN_BACKGROUND_MARGIN_DB

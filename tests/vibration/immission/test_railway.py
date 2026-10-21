@@ -380,7 +380,7 @@ def test_a_steady_passage_reduces_to_its_closed_forms() -> None:
     assert passage.event_velocity_mm_s == pytest.approx(
         math.sqrt(energy / im.EVENT_REFERENCE_DURATION_S), rel=1e-6
     )
-    assert passage.event_level_db == pytest.approx(
+    assert passage.event_level == pytest.approx(
         20.0
         * math.log10(passage.event_velocity_mm_s / im.VELOCITY_LEVEL_REFERENCE_MM_S)
     )
@@ -388,9 +388,9 @@ def test_a_steady_passage_reduces_to_its_closed_forms() -> None:
     expected = 20.0 * math.log10(
         (1.0 / math.sqrt(2.0)) / im.VELOCITY_LEVEL_REFERENCE_MM_S
     )
-    assert passage.band_interval_levels_db[1, band] == pytest.approx(expected, abs=0.2)
-    assert passage.band_max_levels_db[band] == pytest.approx(expected, abs=0.5)
-    others = np.delete(passage.band_interval_levels_db[1], band)
+    assert passage.band_interval_levels[1, band] == pytest.approx(expected, abs=0.2)
+    assert passage.band_max_levels[band] == pytest.approx(expected, abs=0.5)
+    others = np.delete(passage.band_interval_levels[1], band)
     assert np.all(others < expected - 15.0)
 
 
@@ -424,7 +424,7 @@ def test_the_bands_can_stop_at_80_hz() -> None:
         _passage(), FS_HZ, t2_s=(8.0, 20.0), upper_band_hz=80.0
     )
     assert passage.frequencies[-1] == 80.0
-    assert passage.band_interval_levels_db.shape == (3, passage.frequencies.size)
+    assert passage.band_interval_levels.shape == (3, passage.frequencies.size)
     record = _passage()
     for upper in (500.0, 100.5):
         with pytest.raises(ValueError, match="upper_band_hz"):
@@ -463,7 +463,7 @@ def test_the_bank_needs_an_integer_rate() -> None:
 def test_a_silent_record_has_no_event_level() -> None:
     passage = im.evaluate_train_passage(np.zeros(4 * FS_HZ), FS_HZ, t2_s=(1.0, 3.0))
     assert passage.event_velocity_mm_s == 0.0
-    assert math.isinf(passage.event_level_db)
+    assert math.isinf(passage.event_level)
 
 
 def test_the_module_lists_what_it_publishes() -> None:

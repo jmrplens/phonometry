@@ -3098,7 +3098,7 @@ def plot_calibration_deviation(
     from .geometry._draft import _chip
 
     ax = ax if ax is not None else _new_axes()
-    previous = np.asarray(result.previous_levels_db, dtype=np.float64)
+    previous = np.asarray(result.previous_levels, dtype=np.float64)
     levels = np.asarray(result.levels, dtype=np.float64)
     history = np.concatenate((previous, levels))
     x_previous = np.arange(previous.size, dtype=np.float64)
@@ -3293,8 +3293,8 @@ def plot_varying_background(
 
     ax = ax if ax is not None else _new_axes()
     freqs = result.frequencies
-    equipment = np.asarray(result.equipment_levels_db, dtype=np.float64)
-    background = np.asarray(result.background_max_level_db, dtype=np.float64)
+    equipment = np.asarray(result.equipment_levels, dtype=np.float64)
+    background = np.asarray(result.background_max_level, dtype=np.float64)
     labels = freqs if freqs is not None else np.arange(equipment.size) + 1.0
     positions = _band_axis(
         ax,
@@ -3370,7 +3370,7 @@ def plot_measurement_disturbance(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    differences = np.asarray(result.differences_db, dtype=np.float64)
+    differences = np.asarray(result.differences, dtype=np.float64)
     x = np.arange(1, differences.size + 1, dtype=np.float64)
     top = max(float(np.max(differences)), result.limit_db) + 0.5 * result.limit_db
     ax.fill_between(
@@ -3430,8 +3430,8 @@ def plot_instrument_agreement(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    keys = list(result.differences_db)
-    differences = np.array([result.differences_db[k] for k in keys], dtype=np.float64)
+    keys = list(result.differences)
+    differences = np.array([result.differences[k] for k in keys], dtype=np.float64)
     x = np.arange(differences.size, dtype=np.float64)
     limit = result.limit_db
     ax.fill_between(
@@ -3661,7 +3661,7 @@ def plot_lab_lining_improvement(
 
     ax = ax if ax is not None else _new_axes()
     _improvement_curve(
-        ax, result.frequencies, result.delta_r_db, r"$\Delta R$", language, kwargs
+        ax, result.frequencies, result.delta_r, r"$\Delta R$", language, kwargs
     )
     ax.set_ylabel(_t(_DELTA_R_LABEL, language))
     if result.rating is not None:
@@ -3670,10 +3670,10 @@ def plot_lab_lining_improvement(
             rf"{element}: $\Delta R_\mathrm{{w,{result.rating.index}}}$ = "
             f"{_db(result.rating.delta_rw, language)} dB"
         )
-    elif result.delta_rw_direct_db is not None:
+    elif result.delta_rw_direct is not None:
         headline = (
             r"$\Delta R_\mathrm{w,direct}$ = "
-            f"{_db(result.delta_rw_direct_db, language)} dB"
+            f"{_db(result.delta_rw_direct, language)} dB"
         )
     else:
         headline = _t("no rating (bands missing)", language)
@@ -3778,7 +3778,7 @@ def plot_lab_floor_covering_improvement(
     _improvement_curve(
         ax,
         result.frequencies,
-        result.improvement_db,
+        result.improvement,
         r"$\Delta L$",
         language,
         kwargs,
@@ -3793,12 +3793,12 @@ def plot_lab_floor_covering_improvement(
                 label = None
     ax.set_ylabel(_t(_IMPROVEMENT_LABEL, language))
     floor = _t(_REFERENCE_FLOOR_LABELS[result.reference_floor], language)
-    if result.delta_lw_db is not None and result.ci_delta_db is not None:
+    if result.delta_lw is not None and result.ci_delta is not None:
         headline = (
             f"{floor}: {_FLOOR_SYMBOLS[result.reference_floor]} = "
-            f"{_db(result.delta_lw_db, language)} dB "
+            f"{_db(result.delta_lw, language)} dB "
             f"({_FLOOR_ADAPTATION_SYMBOLS[result.reference_floor]} = "
-            f"{_db(result.ci_delta_db, language)} dB)"
+            f"{_db(result.ci_delta, language)} dB)"
         )
     else:
         headline = f"{floor}: {_t('no rating (bands missing)', language)}"
@@ -3829,7 +3829,7 @@ def plot_heavy_impact_improvement(
     _improvement_curve(
         ax,
         result.frequencies,
-        result.improvement_db,
+        result.improvement,
         r"$\Delta L_\mathrm{r}$",
         language,
         kwargs,
@@ -3948,8 +3948,8 @@ def plot_rainfall_reference_correction(
     positions = _band_axis(ax, result.frequencies, language=language)
     ax.fill_between(
         positions,
-        result.l_ic_ref_db,
-        result.l_i_m_ref_db,
+        result.l_ic_ref,
+        result.l_i_m_ref,
         color=theme_fill(_C_TERTIARY, ax),
         lw=0,
         zorder=0,
@@ -3957,7 +3957,7 @@ def plot_rainfall_reference_correction(
     )
     ax.plot(
         positions,
-        result.l_ic_ref_db,
+        result.l_ic_ref,
         "s--",
         color=_C_REFERENCE,
         lw=1.2,
@@ -3966,7 +3966,7 @@ def plot_rainfall_reference_correction(
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("label", r"$L_{I,\mathrm{m,ref}}$")
-    ax.plot(positions, result.l_i_m_ref_db, **kwargs)
+    ax.plot(positions, result.l_i_m_ref, **kwargs)
     ax.set_ylabel(_t(_INTENSITY_LEVEL_LABEL, language))
     ax.set_title(_t(_RAIN_REFERENCE_TITLE, language))
     ax.grid(visible=True, which="both", alpha=0.3)
@@ -3997,11 +3997,11 @@ def plot_rainfall_sound(
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("label", r"$L_I$")
-    ax.plot(positions, result.l_i_db, **kwargs)
-    if result.l_i_norm_db is not None:
+    ax.plot(positions, result.l_i, **kwargs)
+    if result.l_i_norm is not None:
         ax.plot(
             positions,
-            result.l_i_norm_db,
+            result.l_i_norm,
             "s--",
             color=_C_SECONDARY,
             lw=1.2,
@@ -4009,14 +4009,14 @@ def plot_rainfall_sound(
         )
     ax.set_ylabel(_t(_INTENSITY_LEVEL_LABEL, language))
     title = _t(_RAIN_TITLE, language)
-    if result.l_ia_db is not None:
+    if result.l_ia is not None:
         title += "\n" + (
-            rf"$L_{{I\mathrm{{A}}}}$ = {_db(round(result.l_ia_db, 1), language)} dB"
+            rf"$L_{{I\mathrm{{A}}}}$ = {_db(round(result.l_ia, 1), language)} dB"
         )
-        if result.l_ia_norm_db is not None:
+        if result.l_ia_norm is not None:
             title += (
                 rf", $L_{{I\mathrm{{A,norm}}}}$ = "
-                f"{_db(round(result.l_ia_norm_db, 1), language)} dB"
+                f"{_db(round(result.l_ia_norm, 1), language)} dB"
             )
     ax.set_title(title)
     ax.grid(visible=True, which="both", alpha=0.3)

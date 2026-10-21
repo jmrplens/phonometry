@@ -195,7 +195,7 @@ def _levels_and_probabilities(
 
 
 def frequency_weighted_sel(
-    band_levels_db: ArrayLike, weighting_db: ArrayLike
+    band_levels: ArrayLike, weighting_db: ArrayLike
 ) -> float | NDArray[np.float64]:
     r"""Frequency-weighted sound exposure level from band levels (Equation (5)).
 
@@ -210,24 +210,24 @@ def frequency_weighted_sel(
     spectrum, so the function sums every band it is given: passing the whole
     range from 1 Hz to 10 kHz always meets the requirement.
 
-    :param band_levels_db: Band sound exposure levels :math:`L_E(j)`, in dB,
+    :param band_levels: Band sound exposure levels :math:`L_E(j)`, in dB,
         along the last axis. Leading axes are kept, so an array of shape
         ``(N_atm, N_exc, n_bands)`` of the replica atmospheres returns their
         ``(N_atm, N_exc)`` weighted levels at once.
     :param weighting_db: The frequency weighting :math:`\mathrm{w}(j)` of each
         band, in dB (A-weighting, C-weighting or any other), broadcast against
-        ``band_levels_db``.
+        ``band_levels``.
     :return: :math:`L_{E,\mathrm{w}}` in dB, a float for a single spectrum.
     :raises ValueError: for an empty or non-finite input, or shapes that do
         not broadcast.
     """
-    levels = _real_array(band_levels_db, "band_levels_db")
+    levels = _real_array(band_levels, "band_levels")
     weighting = _real_array(weighting_db, "weighting_db")
     try:
         weighted = levels + weighting
     except ValueError as exc:
         msg = (
-            "'weighting_db' must broadcast against 'band_levels_db' along the "
+            "'weighting_db' must broadcast against 'band_levels' along the "
             f"band axis; got {weighting.shape} and {levels.shape}."
         )
         raise ValueError(msg) from exc
@@ -286,7 +286,7 @@ def long_term_sel(
     levels: ArrayLike,
     probabilities: ArrayLike,
     *,
-    rating_adjustment_db: float = 0.0,
+    rating_adjustment: float = 0.0,
 ) -> float:
     r"""Long-term average single-event sound exposure level (Equations (7), (8)).
 
@@ -313,7 +313,7 @@ def long_term_sel(
         in dB, any shape (``(N_atm, N_exc)`` or already flattened).
     :param probabilities: The probability of each replica, the same shape as
         ``levels`` (see :func:`replica_probabilities`).
-    :param rating_adjustment_db: ``K``, in dB; 0 dB (the default) gives
+    :param rating_adjustment: ``K``, in dB; 0 dB (the default) gives
         Equation (7).
     :return: The long-term average level, in dB.
     :raises ValueError: if the shapes differ, a probability is negative, the
@@ -321,7 +321,7 @@ def long_term_sel(
         is not finite.
     """
     levels, probs = _levels_and_probabilities(levels, probabilities)
-    k_db = require_finite(rating_adjustment_db, "rating_adjustment_db")
+    k_db = require_finite(rating_adjustment, "rating_adjustment")
     return _energy_mean_db(levels, probs) + k_db
 
 
@@ -409,7 +409,7 @@ class SELDistribution(OwnsArrays):
     Equations (10) to (16); each class is split into ``n_subclasses`` equal
     subclasses (Equations (17) to (20)) and each subclass is replaced by a
     normal distribution of standard deviation ``sigma_db`` centred
-    ``level_shift_db`` below the subclass centre (Equations (21) to (23)).
+    ``level_shift`` below the subclass centre (Equations (21) to (23)).
 
     :ivar levels: :math:`L_{E,\mathrm{w},m}` of the ``M`` classes, in
         increasing order, in dB.
@@ -423,13 +423,13 @@ class SELDistribution(OwnsArrays):
     :ivar subclass_centers_db: :math:`\mu_{m,j}`, shape ``(M, subclasses)``, in
         dB (Equation (18)).
     :ivar sigma_db: :math:`\sigma` of the turbulent spread, in dB.
-    :ivar level_shift_db: :math:`\Delta\mu`, in dB (Equation (22)).
+    :ivar level_shift: :math:`\Delta\mu`, in dB (Equation (22)).
     :ivar n_subclasses: :math:`N_\mathrm{sub}`, the subclasses per class.
-    :ivar long_term_level_db: :math:`\langle L_{E,\mathrm{w}}\rangle_\mathrm{LT}`
+    :ivar long_term_level: :math:`\langle L_{E,\mathrm{w}}\rangle_\mathrm{LT}`
         from the classes, Equation (7); Annex A's ``LT1``.
-    :ivar distribution_long_term_level_db: the same average taken over the
+    :ivar distribution_long_term_level: the same average taken over the
         continuous distribution, Equation (A.4); Annex A's ``LT2``. It differs
-        from ``long_term_level_db`` only by the spreading of each class over its
+        from ``long_term_level`` only by the spreading of each class over its
         width, since :math:`\Delta\mu` preserves the energy of each subclass.
     :ivar replicas: For each class, the flat indices of the replica
         atmospheres it holds, in the row-major order the input was given in; a
@@ -443,10 +443,10 @@ class SELDistribution(OwnsArrays):
     class_densities_per_db: NDArray[np.float64]
     subclass_centers_db: NDArray[np.float64]
     sigma_db: float
-    level_shift_db: float
+    level_shift: float
     n_subclasses: int
-    long_term_level_db: float
-    distribution_long_term_level_db: float
+    long_term_level: float
+    distribution_long_term_level: float
     replicas: tuple[tuple[int, ...], ...]
 
     def __post_init__(self) -> None:
@@ -518,7 +518,7 @@ class SELDistribution(OwnsArrays):
         The weight of subclass ``{m, j}`` is :math:`b_m\rho_m = \wp_m/N_\mathrm{sub}`
         (Equation (21)) and its mean :math:`\mu_{m,j} - \Delta\mu`.
         """
-        means = (self.subclass_centers_db - self.level_shift_db).ravel()
+        means = (self.subclass_centers_db - self.level_shift).ravel()
         weights = np.repeat(self.probabilities / self.n_subclasses, self.n_subclasses)
         return means, weights
 
@@ -590,7 +590,7 @@ class SELDistribution(OwnsArrays):
         # The exceedance is strictly decreasing and every Gaussian lies within
         # 40 standard deviations of these two ends to far below 1e-300, so the
         # root is bracketed for any target the check above lets through.
-        lo = float(np.min(self.lower_bounds_db)) - self.level_shift_db
+        lo = float(np.min(self.lower_bounds_db)) - self.level_shift
         hi = float(np.max(self.upper_bounds_db))
         lo -= 40.0 * self.sigma_db
         hi += 40.0 * self.sigma_db
@@ -727,9 +727,9 @@ def sel_distribution(
         class_densities_per_db=read_only(densities),
         subclass_centers_db=read_only(centres),
         sigma_db=sigma,
-        level_shift_db=shift,
+        level_shift=shift,
         n_subclasses=n_sub,
-        long_term_level_db=lt1,
-        distribution_long_term_level_db=lt2,
+        long_term_level=lt1,
+        distribution_long_term_level=lt2,
         replicas=tuple(members),
     )

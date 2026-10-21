@@ -166,10 +166,10 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
     r"""Improvement of airborne sound insulation by a lining (ISO 10140-1 Annex G).
 
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
-    :ivar r_without_db: Sound reduction index of the basic element without the
+    :ivar r_without: Sound reduction index of the basic element without the
         lining, ``Rwithout``, in dB.
-    :ivar r_with_db: Sound reduction index with the lining, ``Rwith``, in dB.
-    :ivar delta_r_db: Sound reduction improvement index
+    :ivar r_with: Sound reduction index with the lining, ``Rwith``, in dB.
+    :ivar delta_r: Sound reduction improvement index
         :math:`\Delta R = R_\mathrm{with} - R_\mathrm{without}`, in dB (G.1).
     :ivar basic_element: The standard basic element the lining was measured
         on (``"heavy_wall"``, ``"heavy_floor"``, ``"lightweight_wall"``), or
@@ -177,27 +177,27 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
     :ivar rating: The ISO 717-1:2020 Annex D rating on the reference curve of
         that element, or ``None`` for another basic element or a spectrum
         without the 16 rating bands 100 Hz to 3 150 Hz.
-    :ivar delta_rw_direct_db: ``ΔRw,direct = Rw,with - Rw,without``
+    :ivar delta_rw_direct: ``ΔRw,direct = Rw,with - Rw,without``
         (ISO 717-1:2020 Formula (D.2)), in dB, or ``None`` without the 16
         rating bands.
-    :ivar delta_rw_c_direct_db: ``Δ(Rw + C)direct``, in dB, or ``None``.
-    :ivar delta_rw_ctr_direct_db: ``Δ(Rw + Ctr)direct``, in dB, or ``None``.
+    :ivar delta_rw_c_direct: ``Δ(Rw + C)direct``, in dB, or ``None``.
+    :ivar delta_rw_ctr_direct: ``Δ(Rw + Ctr)direct``, in dB, or ``None``.
     """
 
     frequencies: np.ndarray
-    r_without_db: np.ndarray
-    r_with_db: np.ndarray
-    delta_r_db: np.ndarray
+    r_without: np.ndarray
+    r_with: np.ndarray
+    delta_r: np.ndarray
     basic_element: str | None
     rating: ReductionImprovementRating | None
-    delta_rw_direct_db: int | None
-    delta_rw_c_direct_db: int | None
-    delta_rw_ctr_direct_db: int | None
+    delta_rw_direct: int | None
+    delta_rw_c_direct: int | None
+    delta_rw_ctr_direct: int | None
 
     def __post_init__(self) -> None:
         """Reject spectra of different lengths and an unknown basic element.
 
-        The figure draws ``delta_r_db`` against ``frequencies`` and the
+        The figure draws ``delta_r`` against ``frequencies`` and the
         octave conversion regroups the same pair, so a column of another
         length would be matched to the wrong bands. The element name is
         looked up to title the figure with its ISO 717-1 index.
@@ -205,10 +205,8 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
         :raises ValueError: if the per-band columns disagree, or
             ``basic_element`` is neither a standard element nor ``None``.
         """
-        require_ranks(self, frequencies=1, r_without_db=1, r_with_db=1, delta_r_db=1)
-        require_same_length(
-            self, "frequencies", "r_without_db", "r_with_db", "delta_r_db"
-        )
+        require_ranks(self, frequencies=1, r_without=1, r_with=1, delta_r=1)
+        require_same_length(self, "frequencies", "r_without", "r_with", "delta_r")
         if self.basic_element is not None:
             require_choice(self.basic_element, "basic_element", tuple(_BASIC_ELEMENTS))
 
@@ -219,7 +217,7 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
         over the three one-third-octave bands of each octave, for every octave
         whose three bands are present.
         """
-        return improvement_octave_bands(self.delta_r_db, self.frequencies)
+        return improvement_octave_bands(self.delta_r, self.frequencies)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -237,8 +235,8 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
 
 
 def laboratory_lining_improvement(
-    r_without_db: ArrayLike,
-    r_with_db: ArrayLike,
+    r_without: ArrayLike,
+    r_with: ArrayLike,
     frequencies: ArrayLike,
     *,
     basic_element: BasicElement | None = "heavy_wall",
@@ -271,9 +269,9 @@ def laboratory_lining_improvement(
     NOTE 1 limits the result to direct airborne transmission; neither can be
     read off the numbers, so neither is refused here.
 
-    :param r_without_db: ``Rwithout`` per one-third-octave band, in dB
+    :param r_without: ``Rwithout`` per one-third-octave band, in dB
         (e.g. ``laboratory_airborne_insulation(...).r``).
-    :param r_with_db: ``Rwith`` per band, in dB.
+    :param r_with: ``Rwith`` per band, in dB.
     :param frequencies: Band centre frequencies, in Hz.
     :param basic_element: ``"heavy_wall"`` (default), ``"heavy_floor"``,
         ``"lightweight_wall"`` or ``None`` for a basic element that is not one
@@ -285,8 +283,8 @@ def laboratory_lining_improvement(
     freqs, without, with_ = _paired_spectra(
         "laboratory_lining_improvement",
         frequencies,
-        ("r_without_db", r_without_db),
-        ("r_with_db", r_with_db),
+        ("r_without", r_without),
+        ("r_with", r_with),
     )
     if basic_element is not None:
         require_choice(basic_element, "basic_element", tuple(_BASIC_ELEMENTS))
@@ -316,14 +314,14 @@ def laboratory_lining_improvement(
             )
     return LaboratoryLiningImprovementResult(
         frequencies=freqs,
-        r_without_db=without,
-        r_with_db=with_,
-        delta_r_db=delta,
+        r_without=without,
+        r_with=with_,
+        delta_r=delta,
         basic_element=basic_element,
         rating=rating,
-        delta_rw_direct_db=direct[0],
-        delta_rw_c_direct_db=direct[1],
-        delta_rw_ctr_direct_db=direct[2],
+        delta_rw_direct=direct[0],
+        delta_rw_c_direct=direct[1],
+        delta_rw_ctr_direct=direct[2],
     )
 
 
@@ -456,18 +454,18 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
     r"""Improvement of impact sound insulation by a floor covering (Annex H).
 
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
-    :ivar l_n0_db: Normalized impact sound pressure level of the reference
+    :ivar l_n0: Normalized impact sound pressure level of the reference
         floor without the covering, ``Ln0``, in dB.
-    :ivar l_n_db: Normalized impact sound pressure level with the covering,
+    :ivar l_n: Normalized impact sound pressure level with the covering,
         ``Ln``, in dB.
-    :ivar improvement_db: :math:`\Delta L = L_\mathrm{n0} - L_\mathrm{n}`
+    :ivar improvement: :math:`\Delta L = L_\mathrm{n0} - L_\mathrm{n}`
         per band, in dB (Formula (H.1)).
     :ivar reference_floor: ``"heavyweight"``, ``"lightweight_1"``,
         ``"lightweight_2"`` or ``"lightweight_3"``.
-    :ivar delta_lw_db: The weighted reduction on the reference curve of that
+    :ivar delta_lw: The weighted reduction on the reference curve of that
         floor (``ΔLw`` or ``ΔLt,n,w``, ISO 717-2:2020 Clauses 5 and 6), in
         dB, or ``None`` without the 16 rating bands 100 Hz to 3 150 Hz.
-    :ivar ci_delta_db: Its spectrum adaptation term, ``CI,Δ`` on the
+    :ivar ci_delta: Its spectrum adaptation term, ``CI,Δ`` on the
         heavyweight floor (Formula (A.4)) or ``CIΔ,t`` on a lightweight one
         (Formula (A.6)), designated ``CIΔ,t1`` to ``CIΔ,t3`` by floor type
         (ISO 717-2:2020 A.2.3), in dB, or ``None``.
@@ -479,27 +477,27 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    l_n0_db: np.ndarray
-    l_n_db: np.ndarray
-    improvement_db: np.ndarray
+    l_n0: np.ndarray
+    l_n: np.ndarray
+    improvement: np.ndarray
     reference_floor: str
-    delta_lw_db: int | None
-    ci_delta_db: int | None
+    delta_lw: int | None
+    ci_delta: int | None
     reference_rating: ImpactRatingResult | None
     bare_rating: ImpactRatingResult | None
 
     def __post_init__(self) -> None:
         """Reject spectra of different lengths and an unknown reference floor.
 
-        The figure and the octave conversion read ``improvement_db`` against
+        The figure and the octave conversion read ``improvement`` against
         ``frequencies`` band by band, and the designation of the rating is
         looked up from the floor name.
 
         :raises ValueError: if the per-band columns disagree, or the floor is
             not one of the four reference floors.
         """
-        require_ranks(self, frequencies=1, l_n0_db=1, l_n_db=1, improvement_db=1)
-        require_same_length(self, "frequencies", "l_n0_db", "l_n_db", "improvement_db")
+        require_ranks(self, frequencies=1, l_n0=1, l_n=1, improvement=1)
+        require_same_length(self, "frequencies", "l_n0", "l_n", "improvement")
         require_choice(
             self.reference_floor, "reference_floor", tuple(_REFERENCE_FLOORS)
         )
@@ -515,7 +513,7 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
         :math:`\Delta L_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta L_j/10}]`
         over the three one-third-octave bands of each octave present.
         """
-        return improvement_octave_bands(self.improvement_db, self.frequencies)
+        return improvement_octave_bands(self.improvement, self.frequencies)
 
     def plot(
         self,
@@ -596,7 +594,7 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
 
         check_engine(engine)
         check_language(language)
-        if self.delta_lw_db is None or self.ci_delta_db is None:
+        if self.delta_lw is None or self.ci_delta is None:
             msg = (
                 "The Figure H.4 form needs the weighted reduction, formed on the "
                 "16 one-third-octave bands 100 Hz to 3150 Hz; this result has none."
@@ -608,8 +606,8 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
 
 
 def laboratory_floor_covering_improvement(
-    l_n0_db: ArrayLike,
-    l_n_db: ArrayLike,
+    l_n0: ArrayLike,
+    l_n: ArrayLike,
     frequencies: ArrayLike,
     *,
     reference_floor: ReferenceFloor = "heavyweight",
@@ -636,12 +634,12 @@ def laboratory_floor_covering_improvement(
     describes the covering on a similar board and the rating it is given here
     is the one of the ``reference_floor`` the caller names.
 
-    :param l_n0_db: ``Ln0`` per one-third-octave band, in dB: the
+    :param l_n0: ``Ln0`` per one-third-octave band, in dB: the
         energy-averaged normalized level of the bare floor (e.g.
         ``laboratory_impact_insulation(...).l_n``). For small category I specimens
         measured with the tapping machine beside each specimen, it is the
         arithmetic mean of the two positions either side (H.4.6.1.1).
-    :param l_n_db: ``Ln`` with the covering, per band, in dB.
+    :param l_n: ``Ln`` with the covering, per band, in dB.
     :param frequencies: Band centre frequencies, in Hz; the ratings are
         formed on the 16 bands 100 Hz to 3 150 Hz when all are present.
     :param reference_floor: ``"heavyweight"`` (default), ``"lightweight_1"``,
@@ -654,8 +652,8 @@ def laboratory_floor_covering_improvement(
     freqs, bare, covered = _paired_spectra(
         "laboratory_floor_covering_improvement",
         frequencies,
-        ("l_n0_db", l_n0_db),
-        ("l_n_db", l_n_db),
+        ("l_n0", l_n0),
+        ("l_n", l_n),
     )
     require_choice(reference_floor, "reference_floor", tuple(_REFERENCE_FLOORS))
     improvement = bare - covered  # Formula (H.1)
@@ -675,12 +673,12 @@ def laboratory_floor_covering_improvement(
         bare_rating = weighted_impact_rating(bare[core])
     return LaboratoryFloorCoveringImprovementResult(
         frequencies=freqs,
-        l_n0_db=bare,
-        l_n_db=covered,
-        improvement_db=improvement,
+        l_n0=bare,
+        l_n=covered,
+        improvement=improvement,
         reference_floor=reference_floor,
-        delta_lw_db=delta_lw,
-        ci_delta_db=ci_delta,
+        delta_lw=delta_lw,
+        ci_delta=ci_delta,
         reference_rating=reference_rating,
         bare_rating=bare_rating,
     )
@@ -691,17 +689,17 @@ class HeavyImpactImprovementResult(OwnsArrays):
     r"""Improvement for the heavy/soft impact source (ISO 10140-1:2021 H.6.1).
 
     :ivar frequencies: Band centre frequencies, in Hz.
-    :ivar l_i_fmax_0_db: Maximum impact sound pressure level of the reference
+    :ivar l_i_fmax_0: Maximum impact sound pressure level of the reference
         floor without the covering, ``Li,Fmax,0``, in dB.
-    :ivar l_i_fmax_db: The same with the covering, ``Li,Fmax``, in dB.
-    :ivar improvement_db: :math:`\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} -
+    :ivar l_i_fmax: The same with the covering, ``Li,Fmax``, in dB.
+    :ivar improvement: :math:`\Delta L_\mathrm{r} = L_\mathrm{i,Fmax,0} -
         L_\mathrm{i,Fmax}` per band, in dB (Formula (H.3)).
     """
 
     frequencies: np.ndarray
-    l_i_fmax_0_db: np.ndarray
-    l_i_fmax_db: np.ndarray
-    improvement_db: np.ndarray
+    l_i_fmax_0: np.ndarray
+    l_i_fmax: np.ndarray
+    improvement: np.ndarray
 
     def __post_init__(self) -> None:
         """Reject columns of different lengths.
@@ -711,12 +709,12 @@ class HeavyImpactImprovementResult(OwnsArrays):
         require_ranks(
             self,
             frequencies=1,
-            l_i_fmax_0_db=1,
-            l_i_fmax_db=1,
-            improvement_db=1,
+            l_i_fmax_0=1,
+            l_i_fmax=1,
+            improvement=1,
         )
         require_same_length(
-            self, "frequencies", "l_i_fmax_0_db", "l_i_fmax_db", "improvement_db"
+            self, "frequencies", "l_i_fmax_0", "l_i_fmax", "improvement"
         )
 
     def plot(
@@ -735,8 +733,8 @@ class HeavyImpactImprovementResult(OwnsArrays):
 
 
 def heavy_impact_improvement(
-    l_i_fmax_0_db: ArrayLike,
-    l_i_fmax_db: ArrayLike,
+    l_i_fmax_0: ArrayLike,
+    l_i_fmax: ArrayLike,
     frequencies: ArrayLike,
 ) -> HeavyImpactImprovementResult:
     r"""Improvement of a floor covering under the rubber ball (H.6.1).
@@ -751,8 +749,8 @@ def heavy_impact_improvement(
     octaves 63 Hz to 500 Hz or the matching one-third octaves
     (:func:`~phonometry.building.heavy_impact_octave_levels`).
 
-    :param l_i_fmax_0_db: ``Li,Fmax,0`` per band, in dB.
-    :param l_i_fmax_db: ``Li,Fmax`` per band, in dB.
+    :param l_i_fmax_0: ``Li,Fmax,0`` per band, in dB.
+    :param l_i_fmax: ``Li,Fmax`` per band, in dB.
     :param frequencies: Band centre frequencies, in Hz.
     :return: A :class:`HeavyImpactImprovementResult`.
     :raises ValueError: If the inputs disagree in length, a value is not finite
@@ -761,12 +759,12 @@ def heavy_impact_improvement(
     freqs, bare, covered = _paired_spectra(
         "heavy_impact_improvement",
         frequencies,
-        ("l_i_fmax_0_db", l_i_fmax_0_db),
-        ("l_i_fmax_db", l_i_fmax_db),
+        ("l_i_fmax_0", l_i_fmax_0),
+        ("l_i_fmax", l_i_fmax),
     )
     return HeavyImpactImprovementResult(
         frequencies=freqs,
-        l_i_fmax_0_db=bare,
-        l_i_fmax_db=covered,
-        improvement_db=bare - covered,
+        l_i_fmax_0=bare,
+        l_i_fmax=covered,
+        improvement=bare - covered,
     )

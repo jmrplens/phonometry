@@ -672,7 +672,7 @@ with its corrections (IEC 61094-2:2009 5.4 to 5.6).
 $-20\lg|\Delta_\mathrm{C}|$, the change of
 $|Z_{\mathrm{a},12}|$ the tubes cause, in dB.
 
-### CouplerTransferImpedance.heat_conduction_correction_db
+### CouplerTransferImpedance.heat_conduction_correction
 
 *property*
 
@@ -781,7 +781,7 @@ The heat-conduction correction of a closed cavity at low frequencies
 | `heat_capacity_ratio` | $\kappa$ of the gas. |
 | `method` | `"exact"` or `"approximation"`. |
 
-### HeatConductionCorrection.correction_db
+### HeatConductionCorrection.correction
 
 *property*
 
@@ -1056,7 +1056,7 @@ pressure_reciprocity(
     electrical_transfer_impedances_ohm: Sequence[ArrayLike],
     acoustic_transfer_impedances: Sequence[ArrayLike | CouplerTransferImpedance],
     *,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    corrections: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
 ) -> ReciprocityCalibration
 ```
@@ -1084,7 +1084,7 @@ complex products together, on the branch described in
 | `frequencies` | The frequencies, in Hz, increasing. |
 | `electrical_transfer_impedances_ohm` | $Z_{\mathrm{e},12}$, $Z_{\mathrm{e},23}$ and $Z_{\mathrm{e},31}$, complex, in Ω, each one value or one per frequency. |
 | `acoustic_transfer_impedances` | $Z_{\mathrm{a},12}$, $Z_{\mathrm{a},23}$ and $Z_{\mathrm{a},31}$, each a [`CouplerTransferImpedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplertransferimpedance) or complex values in Pa·s/m³ already corrected. |
-| `corrections_db` | Corrections added to every sensitivity level, by name, in dB: [`large_volume_wave_motion_correction`](/phonometry/reference/api/metrology/reciprocity-coupler/#large_volume_wave_motion_correction) for the large-volume coupler of LS1P microphones (Default: none). |
+| `corrections` | Corrections added to every sensitivity level, by name, in dB: [`large_volume_wave_motion_correction`](/phonometry/reference/api/metrology/reciprocity-coupler/#large_volume_wave_motion_correction) for the large-volume coupler of LS1P microphones (Default: none). |
 | `expanded_uncertainty_db` | The expanded uncertainty of the levels, in dB, one value or one per frequency, from [`reciprocity_uncertainty_budget`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocity_uncertainty_budget) (Default: `None`). |
 
 **Returns:** The [`ReciprocityCalibration`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration).
@@ -1104,7 +1104,7 @@ pressure_reciprocity_pair(
     acoustic_transfer_impedance: ArrayLike | CouplerTransferImpedance,
     sensitivity_ratio: ArrayLike,
     *,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    corrections: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
 ) -> ReciprocityCalibration
 ```
@@ -1128,7 +1128,7 @@ reciprocal (5.1.1).
 | `electrical_transfer_impedance_ohm` | $Z_{\mathrm{e},12}$, complex, in Ω. |
 | `acoustic_transfer_impedance` | $Z_{\mathrm{a},12}$, a [`CouplerTransferImpedance`](/phonometry/reference/api/metrology/reciprocity-coupler/#couplertransferimpedance) or complex values in Pa·s/m³. |
 | `sensitivity_ratio` | $M_{\mathrm{p},1}/M_{\mathrm{p},2}$, complex, one value or one per frequency. |
-| `corrections_db` | Corrections added to both levels (Default: none). |
+| `corrections` | Corrections added to both levels (Default: none). |
 | `expanded_uncertainty_db` | The expanded uncertainty, in dB (Default: `None`). |
 
 **Returns:** The [`ReciprocityCalibration`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocitycalibration), of two microphones.
@@ -1296,7 +1296,7 @@ that is not a right circular cylinder.
 ```python
 WaveMotionCorrection(
     frequencies: NDArray[np.float64],
-    correction_db: NDArray[np.float64],
+    correction: NDArray[np.float64],
     speed_of_sound_ratio: float,
 )
 ```
@@ -1309,7 +1309,7 @@ microphones (IEC 61094-2:2009 C.3, Table C.3).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz. |
-| `correction_db` | The correction added to the pressure sensitivity level, in dB. |
+| `correction` | The correction added to the pressure sensitivity level, in dB. |
 | `speed_of_sound_ratio` | The ratio of the speed of sound in the gas of the coupler to that in air, 1 for air. |
 
 Whether each value was interpolated between rows of the table

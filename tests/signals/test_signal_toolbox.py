@@ -256,7 +256,7 @@ def test_designed_filter_meets_its_own_spec(
 
     x = ph.signals.noise_signal(fs, 0.2, seed=5)
     res = ph.signals.resample_signal(
-        x, fs, fs_new=fs_new, stopband_attenuation_db=atten, transition_width=tw
+        x, fs, fs_new=fs_new, stopband_attenuation=atten, transition_width=tw
     )
     fs_up = res.original_fs * res.up
     freqs, h = sp_signal.freqz(res.filter_taps, worN=1 << 19, fs=fs_up)
@@ -277,7 +277,7 @@ def test_resampled_tone_matches_analytic_tone() -> None:
     t = np.arange(int(fs * 0.5)) / fs
     tone = np.sin(2.0 * np.pi * 1000.0 * t)
     res = ph.signals.resample_signal(
-        tone, fs, fs_new=fs_new, stopband_attenuation_db=atten
+        tone, fs, fs_new=fs_new, stopband_attenuation=atten
     )
     t_new = np.arange(res.signal.size) / fs_new
     exact = np.sin(2.0 * np.pi * 1000.0 * t_new)
@@ -313,8 +313,8 @@ def test_irrational_ratio_raises() -> None:
 def test_resample_invalid_parameters() -> None:
     x = ph.signals.noise_signal(FS, 0.05, seed=4)
     two_dimensional = np.zeros((4, 4))
-    with pytest.raises(ValueError, match=r"'stopband_attenuation_db' must be at least"):
-        ph.signals.resample_signal(x, FS, fs_new=32000.0, stopband_attenuation_db=10.0)
+    with pytest.raises(ValueError, match=r"'stopband_attenuation' must be at least"):
+        ph.signals.resample_signal(x, FS, fs_new=32000.0, stopband_attenuation=10.0)
     with pytest.raises(ValueError, match=r"'transition_width' must be in"):
         ph.signals.resample_signal(x, FS, fs_new=32000.0, transition_width=0.9)
     with pytest.raises(ValueError, match=r"'x' must be one-dimensional"):
@@ -348,9 +348,7 @@ def test_resampled_record_and_taps_must_each_be_flat() -> None:
 
 def test_resample_plot_filter_and_edges() -> None:
     x = ph.signals.noise_signal(FS, 0.2, seed=5)
-    res = ph.signals.resample_signal(
-        x, FS, fs_new=32000.0, stopband_attenuation_db=100.0
-    )
+    res = ph.signals.resample_signal(x, FS, fs_new=32000.0, stopband_attenuation=100.0)
     ax = res.plot(linewidth=2)
     # The magnitude trace echoes the requested kwargs.
     assert any(line.get_linewidth() == 2.0 for line in ax.lines)
@@ -360,7 +358,7 @@ def test_resample_plot_filter_and_edges() -> None:
     assert res.stopband_edge_hz in xs
     # The attenuation line sits at -A dB.
     ys = {line.get_ydata()[0] for line in ax.lines if len(line.get_ydata()) == 2}
-    assert -res.stopband_attenuation_db in ys
+    assert -res.stopband_attenuation in ys
     assert "Polyphase resampling" in ax.get_title()
     assert "160/240" not in ax.get_title()  # reduced ratio, not the raw rates
     assert f"$L/M$ = {res.up}/{res.down}" in ax.get_title()

@@ -177,7 +177,7 @@ _register_61260_1_table_c1()
 def _chk_annex_b() -> Outcome:
     example = ref.IEC61260_B5
     level = ph.filters.swept_band_level(
-        example["input_level_db"],
+        example["input_level"],
         fraction=example["fraction"],
         sweep_duration_s=example["sweep_duration_s"],
         averaging_time_s=example["averaging_time_s"],

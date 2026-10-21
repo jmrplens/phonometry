@@ -1807,7 +1807,7 @@ def plot_spatial_decay(
     axes.set_title(_t("ISO 14257 spatial sound distribution", language))
     axes.annotate(
         _t(_DESCRIPTORS_LABEL, language)
-        % (result.decay_rate_db, result.mean_excess_db),
+        % (result.decay_rate_db, result.mean_level_excess),
         xy=(0.03, 0.06),
         xycoords="axes fraction",
         fontsize="small",

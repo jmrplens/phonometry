@@ -415,7 +415,7 @@ class LoopField(OwnsArrays):
             np.sqrt(self.h_x_a_per_m**2 + self.h_y_a_per_m**2 + self.h_z_a_per_m**2)
         )
 
-    def level_db(self, component: str = "z") -> np.ndarray:
+    def level(self, component: str = "z") -> np.ndarray:
         r"""The field strength level of one component, dB re 400 mA/m.
 
         :param component: ``"x"``, ``"y"``, ``"z"`` or ``"magnitude"``.
@@ -1325,7 +1325,7 @@ class AGCCharacteristic(OwnsArrays):
     """The steady-state output/input characteristic of an amplifier (5.4.13).
 
     :ivar source_emf_db: The source e.m.f. levels, in dB, ascending.
-    :ivar output_level_db: The output current level at each, in dB referred to
+    :ivar output_level: The output current level at each, in dB referred to
         the rated maximum output current (5.4.13.3).
     :ivar agc_range_db: The widest span of input level over which the output
         level changes by no more than 3 dB, in dB: the quantity IEC
@@ -1335,7 +1335,7 @@ class AGCCharacteristic(OwnsArrays):
     """
 
     source_emf_db: np.ndarray
-    output_level_db: np.ndarray
+    output_level: np.ndarray
     agc_range_db: float
     agc_range_start_db: float
     agc_range_end_db: float
@@ -1368,7 +1368,7 @@ class AGCCharacteristic(OwnsArrays):
 
 
 def agc_characteristic(
-    source_emf_db: ArrayLike, output_level_db: ArrayLike
+    source_emf_db: ArrayLike, output_level: ArrayLike
 ) -> AGCCharacteristic:
     """The output/input characteristic of an amplifier and its AGC range (5.4.13).
 
@@ -1391,20 +1391,20 @@ def agc_characteristic(
 
     :param source_emf_db: Source e.m.f. levels, in dB re any fixed voltage,
         strictly ascending.
-    :param output_level_db: Output current level at each, in dB re the rated
+    :param output_level: Output current level at each, in dB re the rated
         maximum output current.
     :return: An :class:`AGCCharacteristic`.
     """
     x = require_finite_array(source_emf_db, "source_emf_db")
-    y = require_finite_array(output_level_db, "output_level_db")
+    y = require_finite_array(output_level, "output_level")
     if x.size != y.size or x.size < _MIN_CHARACTERISTIC_POINTS:
-        msg = "'source_emf_db' and 'output_level_db' need the same length, at least 2."
+        msg = "'source_emf_db' and 'output_level' need the same length, at least 2."
         raise ValueError(msg)
     _ascending(x, "source_emf_db")
     start, end = _widest_window(x, y, _AGC_OUTPUT_CHANGE_DB)
     return AGCCharacteristic(
         source_emf_db=x,
-        output_level_db=y,
+        output_level=y,
         agc_range_db=end - start,
         agc_range_start_db=start,
         agc_range_end_db=end,
@@ -1440,12 +1440,12 @@ class QuadraturePhaseError(OwnsArrays):
     max_deviation_frequency_hz: float
 
     @property
-    def level_increase_db(self) -> float:
+    def level_increase(self) -> float:
         """Where the in-phase parts add, the level rises by this, in dB."""
         return 20.0 * math.log10(1.0 + math.sin(math.radians(self.max_deviation_deg)))
 
     @property
-    def level_decrease_db(self) -> float:
+    def level_decrease(self) -> float:
         r"""Where they subtract, the level falls by this, in dB (a negative number).
 
         :math:`20\lg(1 - \sin\delta)`, computed as
@@ -1541,7 +1541,7 @@ class NeckLoopCharacteristics(OwnsArrays):
     """What IEC 62489-1:2010+A1:2014 clause 9 states for a neck loop.
 
     :ivar frequencies: The measurement frequencies, in hertz.
-    :ivar field_strength_level_db: The field strength level on the test jig at
+    :ivar field_strength_level: The field strength level on the test jig at
         each, in dB re 400 mA/m, with :attr:`input_voltage_v` applied.
     :ivar impedance_ohm: The magnitude of the input impedance at each, in ohms.
     :ivar input_voltage_v: The input voltage the field was measured with, in
@@ -1559,7 +1559,7 @@ class NeckLoopCharacteristics(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    field_strength_level_db: np.ndarray
+    field_strength_level: np.ndarray
     impedance_ohm: np.ndarray
     input_voltage_v: float
     reference_input_voltage_v: float
@@ -1588,7 +1588,7 @@ class NeckLoopCharacteristics(OwnsArrays):
 
 def neck_loop_characteristics(
     frequencies: ArrayLike,
-    field_strength_level_db: ArrayLike,
+    field_strength_level: ArrayLike,
     impedance_ohm: ArrayLike,
     *,
     input_voltage_v: float,
@@ -1608,7 +1608,7 @@ def neck_loop_characteristics(
 
     :param frequencies: The measurement frequencies, in hertz, ascending
         and including 1000 Hz.
-    :param field_strength_level_db: The field strength level on the jig at
+    :param field_strength_level: The field strength level on the jig at
         each, in dB re 400 mA/m.
     :param impedance_ohm: The input impedance at each, in ohms; complex
         values are reduced to their magnitude, and real ones must be
@@ -1618,7 +1618,7 @@ def neck_loop_characteristics(
     :return: A :class:`NeckLoopCharacteristics`.
     """
     f = require_positive_array(frequencies, "frequencies")
-    level = require_finite_array(field_strength_level_db, "field_strength_level_db")
+    level = require_finite_array(field_strength_level, "field_strength_level")
     try:
         complex_input = np.iscomplexobj(impedance_ohm)
     except (TypeError, ValueError) as exc:
@@ -1630,7 +1630,7 @@ def neck_loop_characteristics(
     )
     if not f.size == level.size == z.size:
         msg = (
-            "'frequencies', 'field_strength_level_db' and 'impedance_ohm' "
+            "'frequencies', 'field_strength_level' and 'impedance_ohm' "
             "must have the same length."
         )
         raise ValueError(msg)
@@ -1645,7 +1645,7 @@ def neck_loop_characteristics(
     )
     return NeckLoopCharacteristics(
         frequencies=f,
-        field_strength_level_db=level,
+        field_strength_level=level,
         impedance_ohm=z,
         input_voltage_v=voltage,
         reference_input_voltage_v=voltage * 10.0 ** (-float(level[ref]) / 20.0),

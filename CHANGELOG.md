@@ -13,8 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   display the last line of a cell, and every public result, verdict and record
   now displays as a table of its fields instead of the dataclass repr: a
   scalar with its unit, read from the end of the field's name
-  (`band_levels_db` in dB, `wind_speed_m_s` in m/s) or from the bare name of
-  an axis (`frequencies` in Hz, `levels` in dB, `times` in s), an array as one
+  (`tolerance_db` in dB, `wind_speed_m_s` in m/s), from its head noun when
+  it is a level or a level difference (`band_levels` and `insertion_loss` in
+  dB) or from the bare name of an axis (`frequencies` in Hz, `levels` in dB,
+  `times` in s), an array as one
   line with its shape, its type and the range of its values but never the
   values, a record held in a field as a folded table of its own, and the
   outcome of a verdict, PASS or FAIL, in the title. The frames of a simulation take one row, and the largest result
@@ -736,7 +738,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   applies the repeat at 1 kHz of 6.2.3.2 Step 3, and `audiogram_cautions`
   flags the air-conduction levels of 40 dB or more that 6.2.3.2 asks to treat
   with caution for cross-hearing and the bone-conduction levels at the average
-  vibrotactile threshold of 8.4 (`VIBROTACTILE_HEARING_LEVELS_DB`).
+  vibrotactile threshold of 8.4 (`VIBROTACTILE_HEARING_LEVELS`).
   `audiometric_uncertainty` builds the Annex A budget, which reproduces
   Table A.2: $u$ = 4.9 dB and $U$ = 10 dB. `check_free_sound_field`,
   `check_quasi_free_sound_field` and `check_diffuse_sound_field` qualify a
@@ -872,8 +874,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   are the `sound_power_level` of `sound_power_special_room`, the level at the
   test, and not its `sound_power_level_ref`, which would count $C_2$ twice.
   `SpecialRoomSuitabilityCheck` now holds both spectra,
-  `measured_power_level_db` and `calibrated_power_level_db` as read, and
-  derives `difference_db` from them. Every ISO 3743-1 and ISO 3743-2 result
+  `measured_power_level` and `calibrated_power_level` as read, and
+  derives `difference` from them. Every ISO 3743-1 and ISO 3743-2 result
   now keeps its own copy of the band frequencies, so changing the caller's
   array afterwards no longer relabels its bands. The guide checks its 72 m³
   room against the source's calibration at 22 °C and 97.5 kPa, with a new
@@ -1082,7 +1084,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   from a calibrated reference source (A.3.2, two determinations up to 10 m of
   machine and four above), and `check_turbine_test_environment` judges the
   7 dB limit of A.3.3 and the 6 m/s wind limit outdoors, from either
-  correction or from a bare `environmental_correction_db` (0 outdoors).
+  correction or from a bare `environmental_correction` (0 outdoors).
   `turbine_sound_power` returns the surface sound pressure level and the
   sound power level of Equations (2) and (3), flags an upper limit when a
   background is within 3 dB and names the positions that make it one
@@ -1513,7 +1515,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of subjects, or the open and occluded thresholds they are the difference of
   (4.6.2), and returns per test signal the mean, the standard deviation, the
   standard uncertainty of the mean `s/√N` and the expanded uncertainty `2u` of
-  Annex A; its `attenuation_db` grid goes into `assumed_protection_value`,
+  Annex A; its `attenuation` grid goes into `assumed_protection_value`,
   `hml_rating` and `snr_rating` unchanged, and `.plot()` draws the mean
   downwards on the grid Clause 6 l) asks for. `hearing.assess_attenuation_difference`
   applies the Annex B test band by band, significant when the difference of the
@@ -1548,7 +1550,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   It takes temperature-corrected levels as an input, since 9.4 gives no
   correction, and a reference surface as an index or as its three levels,
   and returns the difference from it; the index of the unrounded levels
-  stays on the result as `full_precision_index_db`. `pass_by_regression`
+  stays on the result as `full_precision_index`. `pass_by_regression`
   fits one category and keeps what clause 13 item 29 asks to be reported
   (slope, intercept, the mean and the spread of the speeds, the spread of
   the residuals), the correlation and level spread Annex E prints beside
@@ -1773,7 +1775,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   bare concrete floor, with the average improvement in impact sound
   insulation each one gives. It is a level difference averaged over
   frequency, neither a class nor an improvement on one, and is held in a
-  field of its own, `ImpactInsulation.impact_sound_improvement_db`; the load
+  field of its own, `ImpactInsulation.impact_sound_improvement`; the load
   Table 19.4 prints in kg/cm² is `added_load_pa`. Every cell of the eleven
   tables was read twice from the page and compared: 501 cells, and no
   disagreement.
@@ -3091,6 +3093,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   GitHub Pages redirects every old address to the same path on the new host,
   so existing links keep working.
 
+- **A level or a level difference carries no unit suffix.** A level and a
+  level difference are in decibels by definition, so every public name whose
+  head noun is one has dropped its `_db`, in parameters, fields, properties,
+  methods and constants alike: `MicrophoneCharacteristics.sensitivity_level`,
+  `LoudspeakerCharacteristics.spl`, `QuasiPeakResult.level`,
+  `WindowMetricsResult.scalloping_loss`, `EmissionPressureResult.level` and
+  its corrections, `noise_control.MODAL_FILTER_ATTENUATION`, `emission.MAX_K3`,
+  and the band columns of the published transmission loss, sound reduction
+  and impact improvement catalogues (`sound_reduction_index_1000`, in the
+  data files and the catalogue schema too). The head noun is a level, a loss,
+  an insulation, an isolation, a reduction, a rejection, a difference, an
+  improvement, a single-value attenuation, a correction, an adjustment (ISO
+  1996-1, a quantity added to a level), an index, an emergence, the spectrum
+  adaptation term of ISO 717, a shift, an increase, a decrease or an excess
+  of the level the name names, or the printed symbol of one, such as the K3,
+  C1 and Kij of the sound power and building standards: the wind turbine
+  rating level takes `tonal_adjustment`, `amplitude_modulation_adjustment`
+  and `impulsive_adjustment`, beside the `adjustment` of the impulsive and
+  tonal assessments, and `SpatialDecayResult` holds `level_excess` and
+  `mean_level_excess`, the names of the functions that compute them; a name
+  whose head noun does not say
+  decibel keeps the suffix (`tolerance_db`, `background_margin_db`,
+  `expanded_uncertainty_db`, `level_step_db`, `attenuation_db_per_m`), and so
+  does a decibel value under a noun that names another quantity, as the unit
+  rule has always asked. A notebook table shows a number under a bare level
+  or level difference in decibels, read from its head noun, and a loudness
+  level in phon (ISO 532-1); a flag, a text, a complex factor or a record
+  under such a name shows no unit, and a number the head noun would misread
+  (the reflection index and gain correction of EN 1793-5, the A_eta of IEC
+  60534-8-3, the tube lengths l1 and l2 of ASTM E2611) shows its own.
+  `scripts/check_parameter_units.py` fails on a public name whose head noun
+  says decibel and that still ends in `_db`. The migration guide lists every
+  name this renames that shipped in 3.3.0 or 4.0.0rc1.
+
 - **A function is named for what it returns, and a unit stays in the name only
   where the quantity has two.** A level, a correction, a difference, an index
   or a tolerance is in decibels and a frequency in hertz wherever the library
@@ -3105,9 +3141,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of the two checks and refuses a NaN or an infinite alpha that ISO 354's
   version passed through to the absorption area. CONTRIBUTING states the rule
   and `scripts/check_parameter_units.py` fails on a public function or method
-  that ends in `_db` or `_hz`; the six methods that read the columns of a
-  printed row, `LoopField.level_db` and `WindowMetricsResult.enbw_hz` keep
-  the suffix, each with its reason.
+  that ends in `_db` or `_hz`; the two methods that read the limit columns
+  of a printed row and `WindowMetricsResult.enbw_hz` keep the suffix, each
+  with its reason.
 
 - **One computation, one name: the root-sum-square of the library is
   `metrology.combined_standard_uncertainty`.** GUM 5.1.2, ISO 1996-2
@@ -3293,10 +3329,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Matplotlib write the two words and as the standards write the maximum and
   minimum levels Lmax and Lmin. A term of art is no exception: the
   statistical pass-by and the railway passages spell their maximum levels
-  `max_levels_db`, `PassByMeasurement.max_level_db` and
-  `TrainPassage.band_max_levels_db`, `check_varying_background` takes
-  `background_max_level_db`, `plant_steady_reading` takes `max_level_db` and
-  `min_level_db`, `aircraft.event_level` and `noise_contour` take
+  `max_levels`, `PassByMeasurement.max_level` and
+  `TrainPassage.band_max_levels`, `check_varying_background` takes
+  `background_max_level`, `plant_steady_reading` takes `max_level` and
+  `min_level`, `aircraft.event_level` and `noise_contour` take
   `max_levels=`, the heavy impact functions of `building` are
   `a_weighted_max_impact_level` and `standardized_max_impact_level` with
   `AWeightedMaxImpactResult` and `StandardizedMaxImpactResult`, the
@@ -3372,7 +3408,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `frequencies_hz` of `weighted_exposure` and `ocean_ambient_noise`, whose
   formulas are printed with the frequency in kHz; and
   `BandAveragedStiffness.center_frequencies`, beside its
-  `nominal_frequencies`. Compound names such as `band_levels_db`,
+  `nominal_frequencies`. Compound names such as
   `evaluation_frequencies_hz` and `start_s` keep theirs. The vocabulary test
   now fails on `fs_hz`, `sample_rate_hz`, `frequencies_hz`, `levels_db`,
   `times_s`, `distances_m`, `band_centers` and the other spellings of a
@@ -3433,29 +3469,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `AmbientNoiseResult.plot()`, the API reference and the guides, where the
   underwater pages wrote kn.
 
-- **A published constant says its unit in its name.** Sixty-five published
+- **A published constant says its unit in its name.** Sixty-four published
   constants are renamed so that the unit a reader would otherwise have to look
   up is in the name, as it is for a parameter. A constant that holds a single
-  number ends in its unit, or in `_DB` when it is in decibels, whatever its
-  name says, because `10.0` on its own could be hertz, decibels or a count:
+  number ends in its unit whatever its name says, or in `_DB` when it is in
+  decibels and its name does not name a level or a level difference, because
+  `10.0` on its own could be hertz, decibels or a count:
   `TAPPING_IMPACT_RATE_HZ`, `DBQPS_REFERENCE_V`,
   `ISO7235_ABSOLUTE_ZERO_OFFSET_K`, `ERB_C1_HZ` and `ERB_C2_PER_HZ`,
   `REFERENCE_STIFFNESS_N_M`, `NORMALIZED_IMPEDANCE_PA_S_M`,
   `UNDERWATER_REFERENCE_EXPOSURE_PA2_S`, `REFERENCE_JOINT_DENSITY_PER_M`, the
   four A(8) values of Directive 2002/44/EC as `HAV_EAV_A8_M_S2` and its
   siblings, `UNCONSTRAINED_BELOW_PERCENT`, and `NO_TONE_AUDIBILITY_DB`,
-  `COMMUNICATION_SNR_DB`, `PRIVACY_SNR_DB`, `DEFAULT_STABILITY_MARGIN_DB`,
-  `CARDIOID_RELATIVE_DIRECTIVITY_DB` and `MIN_MULTI_JUNCTION_KIJ_DB` for
-  the decibels. A count, a label, a factor, a fraction or a ratio carries no
-  unit and keeps its name, and so do the two vibration dose values, whose one
-  unit is m/s^1.75. A table, which holds several figures and often several
-  units, ends in its unit when its name says what it holds: a speed, a
-  frequency or a set of bands, a height, a length, a radius or a diameter, a
-  mass, an area, a volume, a velocity, an acceleration, an angle, a period, a
-  pressure, a temperature, a humidity or a gas constant. That covers
-  `NOY_BANDS_HZ`, `ROAD_REFERENCE_SPEED_KMH` and the other four CNOSSOS-EU
-  speeds, `ROAD_REFERENCE_TEMPERATURE_C`, `TAPPING_HAMMER_MASS_KG`,
-  `REFERENCE_AREA_M2`,
+  `COMMUNICATION_SNR_DB`, `PRIVACY_SNR_DB`, `DEFAULT_STABILITY_MARGIN_DB` and
+  `CARDIOID_RELATIVE_DIRECTIVITY_DB` for the decibels. A count, a label, a
+  factor, a fraction or a ratio carries no unit and keeps its name, and so do
+  the two vibration dose values, whose one unit is m/s^1.75. A table, which
+  holds several figures and often several units, ends in its unit when its name
+  says what it holds: a speed, a frequency or a set of bands, a height, a
+  length, a radius or a diameter, a mass, an area, a volume, a velocity, an
+  acceleration, an angle, a period, a pressure, a temperature, a humidity or a
+  gas constant. That covers `NOY_BANDS_HZ`, `ROAD_REFERENCE_SPEED_KMH` and the
+  other four CNOSSOS-EU speeds, `ROAD_REFERENCE_TEMPERATURE_C`,
+  `TAPPING_HAMMER_MASS_KG`, `REFERENCE_AREA_M2`,
   `LOW_FREQUENCY_VOLUME_LIMIT_M3`, `UNDERWATER_REFERENCE_PRESSURE_PA`,
   `DEFAULT_POLAR_ANGLES_DEG` and the rest. A few change more than a suffix.
   `materials.DEFAULT_SPEED_OF_SOUND`, the 340 m/s of ISO 13472-1 Annex A, is
@@ -3476,13 +3512,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K` and
   `fluids.MOLAR_GAS_CONSTANT_J_MOL_K`. The ISO 13472-1 heights,
   `DEFAULT_MICROPHONE_HEIGHT_M` and `DEFAULT_SOURCE_HEIGHT_M`, rename the
-  parameters they default too: `microphone_height_m=` and `source_height_m=`
-  on every function that takes them and on `plot_in_situ_geometry`, and the
-  two fields of `InSituAbsorptionResult`. No value moved.
-  `make parameter-units` holds both halves of the rule, the single numbers by
-  their value and the tables by their name, with every count, label and pure
-  number it lets through listed with its reason, and the upgrading guide lists
-  each old name with the new one.
+  parameters they default too: `microphone_height_m=` and `source_height_m=` on
+  every function that takes them and on `plot_in_situ_geometry`, and the two
+  fields of `InSituAbsorptionResult`. No value moved. `make parameter-units`
+  holds both halves of the rule, the single numbers by their value and the
+  tables by their name, with every count, label and pure number it lets through
+  listed with its reason, and the upgrading guide lists each old name with the
+  new one.
 
 - **`GasStream` takes its inlet temperature in degrees Celsius.**
   `noise_control.GasStream.inlet_temperature_k` is `inlet_temperature_c`: the
@@ -3657,7 +3693,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `pressure_levels` replace the `_db` spellings on the turbine, free-field,
   reference-source, screen, spatial-decay and wind-turbine functions, as on
   the rest of the sound-power family. `anr_total_attenuation` takes
-  `insertion_loss_db`, the name of the value it reads back.
+  `insertion_loss`, the name of the value it reads back.
   `scripts/check_parameter_units.py` now walks properties as well as
   parameters and fields, holds speeds and phases to the rule (the speed of
   sound excepted), refuses an absorption or attenuation documented per
@@ -3719,7 +3755,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `fiber_diameter_distribution_parameter` columns of the carpet and porous
   catalogues (in the catalogue file format and its schema too), the
   `"boundary center"` target of a microphone traverse, and the fields
-  `centered`, `program`, `normalized_difference`, `neighbor_difference_db`,
+  `centered`, `program`, `normalized_difference`, `neighbor_difference`,
   `behavior_observation`, `subclass_centers_db`, `plant_center_m`,
   `support_center_distance_m`, `collected_volume_liters`, the
   `unfavorable_sum` of the enclosure and cabin ratings and the
@@ -3786,9 +3822,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the same answers, and every limit still reads under the same name; code
   that constructs one of these classes directly keeps only the measured
   fields and the choices the standard leaves to the user, a few of which are
-  new fields (`AmbientNoiseCheck.earphone_attenuation_db` and
-  `allowed_threshold_shift_db`, `REATSoundFieldCheck.free_field_rejection_db`,
-  `DiffuseSoundFieldCheck.front_to_random_index_db`,
+  new fields (`AmbientNoiseCheck.earphone_attenuation` and
+  `allowed_threshold_shift_db`, `REATSoundFieldCheck.free_field_rejection`,
+  `DiffuseSoundFieldCheck.front_to_random_index`,
   `OutputMassCheck.output_apparent_mass_kg`, `ToneAssessment.method`,
   `WeightedExposureResult.impulsive`, `MountingCheck.peak_acceleration_m_s2`
   and `upper_frequency_hz`, `VibrationMeterVerification.measured_response`,
@@ -4535,7 +4571,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   "Single glass in heavy frame", and the thickness is what tells them apart.
   It is the table that shows what the mass law does not: the same 280 mm brick
   wall, same mass, is 40 dB at 500 Hz on strip ties and 55 dB on expanded
-  metal ties. `TransmissionLossSpectrum.transmission_loss_db(band)` refuses
+  metal ties. `TransmissionLossSpectrum.transmission_loss(band)` refuses
   rather than answering zero for a band the page leaves empty, because zero
   decibels is a partition that transmits everything. Read twice from the
   pages, like every other table here.
@@ -5573,7 +5609,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reverberation time band by band, which is how `reverberant_surface_area_m2`
   returns it. `in_situ_transmission_loss` and `in_situ_insertion_loss` take each
   area and the field correction as one value or one per band, and
-  `SilencerInSituResult.area_term_db` and `field_correction_difference_db` are
+  `SilencerInSituResult.area_term_db` and `field_correction_difference` are
   arrays of one value per band now, even when single values went in: code that
   rounded them as floats needs an array operation. The thesis oracle that had to
   be driven one band at a time is one call per table.
@@ -6139,9 +6175,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of the ratio, for a change of up to 30 %; `ground_transmission` is
   spreading with an exponent and damping with `alpha_R` = 2π f D / c_s,
   Formulae (4) to (6). The six tables of Annex A are read off their pages
-  cell by cell: `ground_to_floor_transfer` by natural frequency of a
-  concrete or timber floor, `ground_to_foundation_transfer` for a basement
-  or a ground floor with both deviations, `foundation_to_floor_transfer`
+  cell by cell: `ground_to_floor_level_difference` by natural frequency of a
+  concrete or timber floor, `ground_to_foundation_level_difference` for a basement
+  or a ground floor with both deviations, `foundation_to_floor_level_difference`
   against the ratio to the natural frequency, interpolated in decibels over
   the logarithm of the ratio. Clause 7 is `predict_train_category`: Table 2,
   the KB weighting rounded to a tenth of a decibel, added to the bands from

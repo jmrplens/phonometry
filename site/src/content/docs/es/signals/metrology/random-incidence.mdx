@@ -159,14 +159,14 @@ phi = np.arange(0, 360, 10)
 levels = 94.0 + np.vstack((pattern_db(phi, 0.785),    # plano X-Y (h), 8 kHz
                            pattern_db(phi, 0.98)))    # plano X-Z (v), la carcasa lo estrecha
 d = metrology.directivity_factor(levels)
-print(round(d.gamma, 3), round(d.directivity_index_db, 2))   # 1.845 2.66
+print(round(d.gamma, 3), round(d.directivity_index, 2))   # 1.845 2.66
 d.plot()                  # la respuesta polar, una curva por plano
 d.plot(view="weights")    # K(phi) de cada lectura
 ```
 
 El nivel de referencia $L_\mathrm{rd}$ es por defecto la lectura a 0° en el
 primer plano, que A.4.4 toma con el sonómetro en esa misma posición; pasa
-`reference_level_db=` cuando se haya medido aparte.
+`reference_level=` cuando se haya medido aparte.
 
 ## 3. Un plano, o 38 elementos iguales
 
@@ -176,7 +176,7 @@ ese plano dos veces:
 
 ```python
 a = metrology.axisymmetric_directivity_factor(levels[0])
-print(round(a.directivity_index_db, 2))   # 2.45
+print(round(a.directivity_index, 2))   # 2.45
 ```
 
 Es el plano X-Y solo, cuyo diagrama se construyó para tener los 2,45 dB que la
@@ -195,7 +195,7 @@ print(horizontal[:6].round(1))   # [ 0.  32.6 50.8 65.1 77.8 90. ]
 e = metrology.equal_area_directivity_factor(
     94.0 + pattern_db(horizontal, 0.785), 94.0 + pattern_db(vertical, 0.98)
 )
-print(round(e.directivity_index_db, 2))   # 2.66
+print(round(e.directivity_index, 2))   # 2.66
 ```
 
 La nota imprime 77,9° y 282,1° donde la construcción da 77,85° y 282,15°.
@@ -220,17 +220,17 @@ bands = sorted(metrology.IEC61183_TABLE_B1)   # las 30 frecuencias preferentes, 
 def meter(frequency_hz):
     """El sonómetro sintético en una banda: el plano X-Y tiene el 10 lg gamma que la
     Tabla B.1 imprime para el micrófono, y la carcasa estrecha el plano X-Z."""
-    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index_db
+    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index
     n = 0.98 / (10 ** (-target / 10) - 0.02) - 1   # el exponente que da ese índice
     return metrology.directivity_factor(
         94.0 + np.vstack((pattern_db(phi, n), pattern_db(phi, 1.25 * n))))
 
-index = [meter(f).directivity_index_db for f in bands]
+index = [meter(f).directivity_index for f in bands]
 g_f = -10 * np.log10(1 + (np.array(bands) / 25000) ** 4)   # L_rd - L_o en cada banda
 r = metrology.random_incidence_sensitivity(bands, g_f, index)
 shown = np.isin(r.frequencies, [1000, 4000, 8000, 16000])
-print(r.correction_db[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
-print(r.random_incidence_level_db[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
+print(r.correction[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
+print(r.random_incidence_level[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
 r.plot(language="es")                      # G_F y G_RI
 r.plot(view="correction", language="es")   # G_RI - G_F = -10 lg gamma
 ```
@@ -284,18 +284,18 @@ es 0 dB, su $\Delta_\mathrm{DP}$:
 
 ```python
 print(metrology.IEC61183_TABLE_B1[8000.0])
-# ReferenceMicrophoneRow(directivity_index_db=2.45, diffuse_pressure_difference_db=1.2)
+# ReferenceMicrophoneRow(directivity_index=2.45, diffuse_pressure_difference_db=1.2)
 
 delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
                      for f in bands])
 dd = metrology.diffuse_field_sensitivity(
     bands,
-    80.0 + r.random_incidence_level_db,  # L_D, el sonómetro en ensayo
+    80.0 + r.random_incidence_level,  # L_D, el sonómetro en ensayo
     80.0 + delta_dp,                     # L_D,ref, un LS2aP calibrado en presión
-    reference_pressure_level_db=0.0,     # G_P,ref; Delta_DP de la Tabla B.1
+    reference_pressure_level=0.0,     # G_P,ref; Delta_DP de la Tabla B.1
 )
-print(dd.reference_correction_db[shown])            # [0.   0.25 1.2  3.05]
-print(dd.diffuse_field_level_db[shown].round(2))    # [-0.06 -0.95 -2.71 -6.29]
+print(dd.reference_correction[shown])            # [0.   0.25 1.2  3.05]
+print(dd.diffuse_field_level[shown].round(2))    # [-0.06 -0.95 -2.71 -6.29]
 dd.plot(language="es")
 ```
 
@@ -310,9 +310,9 @@ Los dos métodos se encuentran aquí: a efectos de la norma, el nivel de
 sensibilidad en campo difuso puede usarse indistintamente con el de
 incidencia aleatoria (1.2), y el ejemplo devuelve, a partir de una comparación
 en una sala, el nivel que el primer método midió en una cámara anecoica.
-`reference_free_field_level_db` elige la Fórmula (10) y
-`reference_random_incidence_level_db` la Fórmula (9);
-`reference_directivity_index_db` y `reference_diffuse_pressure_difference_db`
+`reference_free_field_level` elige la Fórmula (10) y
+`reference_random_incidence_level` la Fórmula (9);
+`reference_directivity_index` y `reference_diffuse_pressure_difference_db`
 sustituyen los valores de la Tabla B.1 para un micrófono de referencia de otro
 tipo.
 

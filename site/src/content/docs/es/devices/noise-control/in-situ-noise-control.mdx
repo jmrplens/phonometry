@@ -96,7 +96,7 @@ res = noise_control.in_situ_transmission_loss(
     receiver_area_m2=10.8,   # un cuarto de la absorción de la sala a 500 Hz
     frequencies=bands, case=2,
 )
-print(res.loss_db.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
+print(res.loss.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
 print(res.area_term_db.round(1))   # [-10.8 -10.8 -10.8 -10.8 -10.8 -10.8] dB
 ```
 
@@ -156,7 +156,7 @@ res = noise_control.in_situ_transmission_loss(
     frequencies=bands, case=2,
 )
 print(res.area_term_db.round(1))   # [ -9.6 -10.1 -10.8 -11.2 -11.6 -12.1] dB
-print(res.loss_db.round(1))        # [16.4 20.9 26.2 29.8 30.4 26.9] dB
+print(res.loss.round(1))        # [16.4 20.9 26.2 29.8 30.4 26.9] dB
 ```
 
 A 500 Hz no se mueve nada. Por debajo, la sala es más reverberante, su superficie
@@ -218,18 +218,18 @@ res = noise_control.screen_attenuation(
     [78.0, 80.0, 81.0, 79.0, 76.0, 72.0],   # dB, sin la pantalla
     [74.0, 74.0, 72.0, 68.0, 63.0, 58.0],   # dB, con la pantalla
     frequencies=bands,
-    a_weighted_unscreened_level_db=84.1,
-    a_weighted_screened_level_db=74.6,
+    a_weighted_unscreened_level=84.1,
+    a_weighted_screened_level=74.6,
 )
-print(res.attenuation_db)                   # [ 4.  6.  9. 11. 13. 14.] dB
-print(res.a_weighted_attenuation_db)        # 9.5 dB
+print(res.attenuation)                   # [ 4.  6.  9. 11. 13. 14.] dB
+print(res.a_weighted_attenuation)        # 9.5 dB
 print(res.rounded())                        # [ 4  6  9 11 13 14] dB
 print(res.rounded_a_weighted())             # 10 dB
 ```
 
 El apartado 7.4 c) informa de las dos al decibelio entero más próximo.
 `rounded()` y `rounded_a_weighted()` las dan así, como enteros, mientras que
-`attenuation_db` conserva la diferencia sin redondear para seguir calculando. Un
+`attenuation` conserva la diferencia sin redondear para seguir calculando. Un
 medio exacto va al decibelio par, como en los demás resultados in situ de la
 biblioteca, así que los 9,5 dB de arriba se informan como 10 dB.
 
@@ -302,7 +302,7 @@ res = environment.measured_insertion_loss_direct(
     [58.0, 53.0, 47.0, 41.0, 35.0, 29.0],   # receptor, después
     frequencies=bands,
 )
-print(res.insertion_loss_db)   # [ 7. 10. 13. 15. 16. 16.] dB
+print(res.insertion_loss)   # [ 7. 10. 13. 15. 16. 16.] dB
 ```
 
 La fuente sonó 2 dB más fuerte el segundo día en todas las bandas, y la respuesta

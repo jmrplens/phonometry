@@ -148,7 +148,7 @@ arrived in, and the eleven acceptance windows are ratios in which every
 unit cancels. Only the *level* needs a unit, and clause 2.6 gives
 BS.468-4 exactly one, the volt. A bare array or an uncalibrated
 [`Signal`](/phonometry/reference/api/io/io/#signal) is therefore read against 0.775 V and its
-`level_db` is dBqps. A **calibrated** Signal is analysed in pascals,
+`level` is dBqps. A **calibrated** Signal is analysed in pascals,
 as everywhere else in this library, and then has to be given a
 *reference* of its own: 0.775 V is not a pressure, and BS.468-4 offers
 no pressure to put in its place. `result.level_unit` names whichever
@@ -161,7 +161,7 @@ scale came out.
 | `x` | The record: a 1-D array, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal). Multichannel input is refused rather than mixed, because a quasi-peak reading is one needle over one channel. |
 | `fs` | Sample rate, Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `weighted` | Whether to run the record through the clause 1 weighting network first (default `True`, which is what clause 2's preamble requires of every test but the clause 2.4 reversibility check). |
-| `reference` | The reference of `level_db`, in the record's own unit. `None` (the default) is the 0.775 V of clause 2.6, and is refused for a calibrated Signal, whose samples are pascals. |
+| `reference` | The reference of `level`, in the record's own unit. `None` (the default) is the 0.775 V of clause 2.6, and is refused for a calibrated Signal, whose samples are pascals. |
 
 **Returns:** A [`QuasiPeakResult`](/phonometry/reference/api/broadcast/quasi-peak/#quasipeakresult).
 
@@ -246,7 +246,7 @@ The smallest of the margins, negative when one reading is outside its window.
 ```python
 QuasiPeakResult(
     reading: float,
-    level_db: float,
+    level: float,
     reference: float,
     trace: np.ndarray,
     fs: float,
@@ -262,8 +262,8 @@ A quasi-peak reading of one record (ITU-R BS.468-4 clause 2).
 | Name | Description |
 | :--- | :--- |
 | `reading` | The quasi-peak reading: the largest value `trace` reaches, on the scale clause 2.6 fixes, in the record's own unit. |
-| `level_db` | `20 lg(reading / reference)`. This is **dBqps** (clause 3) when `reference` is the 0.775 V clause 2.6 names, and a level against whatever else the caller referred it to otherwise; `level_unit` is the one place that says which. |
-| `reference` | The reference `level_db` is taken against, in the record's own unit. |
+| `level` | `20 lg(reading / reference)`. This is **dBqps** (clause 3) when `reference` is the 0.775 V clause 2.6 names, and a level against whatever else the caller referred it to otherwise; `level_unit` is the one place that says which. |
+| `reference` | The reference `level` is taken against, in the record's own unit. |
 | `trace` | The reading device's output over the record, sample for sample with it, in the record's own unit. This is the needle, and the shape of its rise and decay is the whole content of clause 2. |
 | `fs` | Sample rate of the record, Hz. |
 | `weighted` | Whether the ITU-R BS.468-4 weighting network was in the path. Clause 2's preamble runs every test but the clause 2.4 reversibility check through it. |
@@ -272,7 +272,7 @@ A quasi-peak reading of one record (ITU-R BS.468-4 clause 2).
 
 *property*
 
-The name of the scale `level_db` is on.
+The name of the scale `level` is on.
 
 The one place that answers whether the level may be called
 **dBqps**, which clause 3 defines only against the 0.775 V of

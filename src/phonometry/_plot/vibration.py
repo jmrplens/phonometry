@@ -1132,7 +1132,7 @@ def plot_level_difference_check(
     created = ax is None
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
-    difference = np.asarray(result.difference_db, dtype=np.float64)
+    difference = np.asarray(result.difference, dtype=np.float64)
     shown = np.where(np.isfinite(difference), difference, np.nan)
     holds = np.asarray(result.holds, dtype=bool)
     limit = format_number(result.limit_db, language, decimals=0)
@@ -1320,7 +1320,7 @@ def plot_driving_point_stiffness(
     freq = np.asarray(result.frequencies, dtype=np.float64)
     levels = np.asarray(result.levels, dtype=np.float64)
     fmin, fmax = float(freq.min()), float(freq.max())
-    low = result.low_frequency_level_db
+    low = result.low_frequency_level
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"driving-point stiffness $L_{k_{1,1}}$", language))
     style_default(kwargs, "linewidth", 1.4)
@@ -1333,7 +1333,7 @@ def plot_driving_point_stiffness(
         label=_t("low-frequency value (1 Hz to 20 Hz)", language),
     )
     ax.axhline(
-        result.threshold_level_db,
+        result.threshold_level,
         color=_C_REFERENCE,
         ls=":",
         lw=1.2,
@@ -1411,7 +1411,7 @@ def plot_driving_point_uncertainty(
             r"ISO 10846-5 Annex B: $L_{{k,\mathrm{{av}}}}$ = {level} dB, $U$ = {u} dB",
             language,
         ).format(
-            level=format_number(result.band_level_db, language, decimals=1),
+            level=format_number(result.band_level, language, decimals=1),
             u=expanded,
         )
     )
@@ -3115,10 +3115,10 @@ def plot_train_passage_spectrum(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "markersize", 4)
     kwargs.setdefault("label", _t(_MAX_LEVEL_LABEL, language))
-    ax.plot(positions, result.band_max_levels_db, **kwargs)
+    ax.plot(positions, result.band_max_levels, **kwargs)
     ax.plot(
         positions,
-        result.band_interval_levels_db[1],
+        result.band_interval_levels[1],
         color=_C_TERTIARY,
         ls="--",
         lw=1.4,

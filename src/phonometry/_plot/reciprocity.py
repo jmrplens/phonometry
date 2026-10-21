@@ -352,7 +352,7 @@ def plot_reciprocity_calibration(
     """
     ax = ax if ax is not None else _new_axes()
     frequencies = np.asarray(result.frequencies, dtype=np.float64)
-    levels = np.asarray(result.sensitivity_level_db, dtype=np.float64)
+    levels = np.asarray(result.sensitivity_level, dtype=np.float64)
     band_label = None
     if result.expanded_uncertainty_db is not None:
         band_label = _band_label(
@@ -487,7 +487,7 @@ def plot_heat_conduction_correction(
         "label",
         _t(r"$20\lg|\Delta_\mathrm{H}|$, apparent increase of the volume", language),
     )
-    ax.plot(result.frequencies, result.correction_db, **kwargs)
+    ax.plot(result.frequencies, result.correction, **kwargs)
     ax.set_ylim(bottom=0.0)
     _frequency_axes(
         ax,
@@ -575,7 +575,7 @@ def plot_coupler_transfer_impedance(
     style_default(kwargs, "marker", "o")
     style_default(kwargs, "ms", 3.0)
     kwargs.setdefault("label", _t("Heat conduction", language))
-    ax.plot(frequencies, result.heat_conduction_correction_db, **kwargs)
+    ax.plot(frequencies, result.heat_conduction_correction, **kwargs)
     ax.plot(
         frequencies,
         result.capillary_correction_db,
@@ -589,7 +589,7 @@ def plot_coupler_transfer_impedance(
     )
     ax.plot(
         frequencies,
-        result.heat_conduction_correction_db + result.capillary_correction_db,
+        result.heat_conduction_correction + result.capillary_correction_db,
         color=_C_TERTIARY,
         lw=1.0,
         ls=":",
@@ -628,7 +628,7 @@ def plot_wave_motion_correction(
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
     kwargs.setdefault("label", _t("Wave-motion correction", language))
-    ax.plot(result.frequencies, result.correction_db, **kwargs)
+    ax.plot(result.frequencies, result.correction, **kwargs)
     printed = np.array(sorted(IEC61094_2_TABLE_C3), dtype=np.float64)
     ax.plot(
         printed * result.speed_of_sound_ratio,

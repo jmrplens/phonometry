@@ -313,8 +313,8 @@ _SATURATED_PERCENT = 100.0
 #: sequential comparison lines up by determination.
 _MONITOR_REFERENCE_PHASE = "monitor.reference_phase_deg"
 _MONITOR_TEST_PHASE = "monitor.test_phase_deg"
-_MONITOR_REFERENCE_LEVEL = "monitor.reference_level_db"
-_MONITOR_TEST_LEVEL = "monitor.test_level_db"
+_MONITOR_REFERENCE_LEVEL = "monitor.reference_level"
+_MONITOR_TEST_LEVEL = "monitor.test_level"
 
 #: Relative agreement asked of two frequency axes for them to be the same
 #: frequencies: the rounding of a value that went through arithmetic, nothing
@@ -322,7 +322,7 @@ _MONITOR_TEST_LEVEL = "monitor.test_level_db"
 _SAME_FREQUENCY_REL_TOL = 1e-9
 
 #: The name under which a free-field calibration carries the reference's
-#: free-field to pressure sensitivity level difference in ``corrections_db``.
+#: free-field to pressure sensitivity level difference in ``corrections``.
 _FREE_FIELD_DIFFERENCE = "reference free-field difference"
 
 #: The coverage factor both parts report the expanded uncertainty with
@@ -408,8 +408,8 @@ _J01 = float(special.jn_zeros(0, 1)[0])
 
 
 def _output_level_difference_db(
-    test_output_level_db: ArrayLike,
-    reference_output_level_db: ArrayLike,
+    test_output_level: ArrayLike,
+    reference_output_level: ArrayLike,
     test_monitor_level_db: ArrayLike | None = None,
     reference_monitor_level_db: ArrayLike | None = None,
 ) -> NDArray[np.float64]:
@@ -421,8 +421,8 @@ def _output_level_difference_db(
     Without a monitor it is the plain difference of the two readings, which is
     also Formula (8) of IEC 61183.
     """
-    test = np.asarray(test_output_level_db, dtype=np.float64)
-    reference = np.asarray(reference_output_level_db, dtype=np.float64)
+    test = np.asarray(test_output_level, dtype=np.float64)
+    reference = np.asarray(reference_output_level, dtype=np.float64)
     if test_monitor_level_db is not None:
         test = test - np.asarray(test_monitor_level_db, dtype=np.float64)
     if reference_monitor_level_db is not None:
@@ -431,7 +431,7 @@ def _output_level_difference_db(
 
 
 def _interchange_level_difference_db(
-    channel_difference_db: ArrayLike, interchanged_channel_difference_db: ArrayLike
+    channel_difference: ArrayLike, interchanged_channel_difference: ArrayLike
 ) -> NDArray[np.float64]:
     r""":math:`20\lg R_V` from the two channel differences of Annex C.
 
@@ -439,16 +439,16 @@ def _interchange_level_difference_db(
     :math:`L_\mathrm{test} - L_\mathrm{ref} = -\tfrac12(L_\mathrm{C12} -
     L_\mathrm{C21})`.
     """
-    first = np.asarray(channel_difference_db, dtype=np.float64)
-    second = np.asarray(interchanged_channel_difference_db, dtype=np.float64)
+    first = np.asarray(channel_difference, dtype=np.float64)
+    second = np.asarray(interchanged_channel_difference, dtype=np.float64)
     return -0.5 * (first - second)
 
 
 def _compared_level_db(
-    reference_level_db: ArrayLike,
-    output_level_difference_db: ArrayLike,
-    pressure_level_difference_db: ArrayLike = 0.0,
-    correction_db: ArrayLike = 0.0,
+    reference_level: ArrayLike,
+    output_level_difference: ArrayLike,
+    pressure_level_difference: ArrayLike = 0.0,
+    correction: ArrayLike = 0.0,
 ) -> NDArray[np.float64]:
     r"""The sensitivity level of the microphone under test.
 
@@ -458,10 +458,10 @@ def _compared_level_db(
     pressure ratio and no correction.
     """
     return (
-        np.asarray(reference_level_db, dtype=np.float64)
-        + np.asarray(output_level_difference_db, dtype=np.float64)
-        - np.asarray(pressure_level_difference_db, dtype=np.float64)
-        + np.asarray(correction_db, dtype=np.float64)
+        np.asarray(reference_level, dtype=np.float64)
+        + np.asarray(output_level_difference, dtype=np.float64)
+        - np.asarray(pressure_level_difference, dtype=np.float64)
+        + np.asarray(correction, dtype=np.float64)
     )
 
 
@@ -863,7 +863,7 @@ class EnvironmentalSensitivityCorrection(OwnsArrays):
         )
 
     @property
-    def correction_db(self) -> NDArray[np.float64]:
+    def correction(self) -> NDArray[np.float64]:
         r""":math:`C_\mathrm{env}`, the sum of the three terms, in dB."""
         pressure = self.static_pressure_term_db
         return pressure + self.temperature_term_db + self.humidity_term_db
@@ -995,11 +995,11 @@ class JigDiameterCorrection(OwnsArrays):
     expanded uncertainty with.
 
     :ivar frequencies: The frequencies of the table asked for, in Hz.
-    :ivar correction_db: The correction at each, in dB.
+    :ivar correction: The correction at each, in dB.
     """
 
     frequencies: NDArray[np.float64]
-    correction_db: NDArray[np.float64]
+    correction: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Publish the columns read-only.
@@ -1008,16 +1008,16 @@ class JigDiameterCorrection(OwnsArrays):
             are not finite.
         """
         frequencies = _frequency_axis(self.frequencies)
-        correction = _band_column(self.correction_db, "correction_db", frequencies.size)
+        correction = _band_column(self.correction, "correction", frequencies.size)
         object.__setattr__(self, "frequencies", read_only(frequencies))
-        object.__setattr__(self, "correction_db", read_only(correction))
+        object.__setattr__(self, "correction", read_only(correction))
 
     @property
     def expanded_uncertainty_db(self) -> NDArray[np.float64]:
         """The expanded uncertainty of each correction, one tenth of its
         magnitude, in dB (read as :math:`k = 2`, 7.9 and D.2).
         """
-        return _JIG_CORRECTION_RELATIVE_EXPANDED * np.abs(self.correction_db)
+        return _JIG_CORRECTION_RELATIVE_EXPANDED * np.abs(self.correction)
 
     @property
     def standard_uncertainty_db(self) -> NDArray[np.float64]:
@@ -1073,8 +1073,8 @@ def jig_diameter_correction(
     symmetrical field and the 0,5 mm diaphragm separation of Figure A.4, "the
     only one for which the corrections specified in Table A.1 are valid". A
     frequency within 2 % of a row, such as an exact base-ten one-third-octave
-    frequency, reads as that row. Pass ``.correction_db`` to the comparison as
-    one of its ``corrections_db`` and ``.standard_uncertainty_db`` to the
+    frequency, reads as that row. Pass ``.correction`` to the comparison as
+    one of its ``corrections`` and ``.standard_uncertainty_db`` to the
     budget as an additional component.
 
     :param frequencies: Frequencies of the table, in Hz, increasing
@@ -1088,7 +1088,7 @@ def jig_diameter_correction(
         else _frequency_axis(frequencies)
     )
     correction = np.array([_table_a1_value(float(f)) for f in frequencies])
-    return JigDiameterCorrection(frequencies=frequencies, correction_db=correction)
+    return JigDiameterCorrection(frequencies=frequencies, correction=correction)
 
 
 # ---------------------------------------------------------------------------
@@ -1158,14 +1158,14 @@ class DiameterSoundFieldCorrection(OwnsArrays):
             object.__setattr__(self, name, read_only(column))
 
     @property
-    def correction_db(self) -> NDArray[np.float64]:
+    def correction(self) -> NDArray[np.float64]:
         r""":math:`-20\lg\lvert R_P\rvert`, in dB: to be added to the
         sensitivity level of the test microphone, as Table A.1 is.
         """
         return -20.0 * np.log10(np.abs(self.ratio))
 
     @property
-    def doubled_separation_correction_db(self) -> NDArray[np.float64]:
+    def doubled_separation_correction(self) -> NDArray[np.float64]:
         """The correction with the diaphragms twice as far apart, in dB."""
         return -20.0 * np.log10(np.abs(self.doubled_separation_ratio))
 
@@ -1184,7 +1184,7 @@ class DiameterSoundFieldCorrection(OwnsArrays):
         to take this change as the expanded uncertainty is the caller's
         estimate to make.
         """
-        return np.abs(self.doubled_separation_correction_db - self.correction_db)
+        return np.abs(self.doubled_separation_correction - self.correction)
 
     @property
     def phase_difference_deg(self) -> NDArray[np.float64]:
@@ -1532,15 +1532,15 @@ class ComparisonCalibration(OwnsArrays):
        L_\mathrm{test} = L_\mathrm{ref} + 20\lg R_V - 20\lg R_P + \sum_j C_j
 
     :ivar frequencies: The frequencies, in Hz.
-    :ivar reference_sensitivity_level_db: :math:`L_\mathrm{ref}`, the
+    :ivar reference_sensitivity_level: :math:`L_\mathrm{ref}`, the
         reference microphone's sensitivity level as calibrated, in dB re
         1 V/Pa.
-    :ivar output_level_differences_db: :math:`20\lg R_V` of each
+    :ivar output_level_differences: :math:`20\lg R_V` of each
         determination, one row per determination, in dB: the output of the
         test microphone re that of the reference.
-    :ivar pressure_level_difference_db: :math:`20\lg R_P`, the effective sound
+    :ivar pressure_level_difference: :math:`20\lg R_P`, the effective sound
         pressure on the test microphone re that on the reference, in dB.
-    :ivar corrections_db: The corrections :math:`C_j` added to the level, by
+    :ivar corrections: The corrections :math:`C_j` added to the level, by
         name, each in dB at every frequency.
     :ivar field: ``"pressure"`` (IEC 61094-5) or ``"free_field"``
         (IEC 61094-8).
@@ -1557,10 +1557,10 @@ class ComparisonCalibration(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    reference_sensitivity_level_db: NDArray[np.float64]
-    output_level_differences_db: NDArray[np.float64]
-    pressure_level_difference_db: NDArray[np.float64]
-    corrections_db: Mapping[str, NDArray[np.float64]]
+    reference_sensitivity_level: NDArray[np.float64]
+    output_level_differences: NDArray[np.float64]
+    pressure_level_difference: NDArray[np.float64]
+    corrections: Mapping[str, NDArray[np.float64]]
     field: str
     excitation: str
     expanded_uncertainty_db: NDArray[np.float64] | None = None
@@ -1585,20 +1585,18 @@ class ComparisonCalibration(OwnsArrays):
         frequencies = _frequency_axis(self.frequencies)
         count = frequencies.size
         object.__setattr__(self, "frequencies", read_only(frequencies))
-        for name in ("reference_sensitivity_level_db", "pressure_level_difference_db"):
+        for name in ("reference_sensitivity_level", "pressure_level_difference"):
             column = _band_column(getattr(self, name), name, count)
             object.__setattr__(self, name, read_only(column))
         rows = _determinations(
-            self.output_level_differences_db, "output_level_differences_db", count
+            self.output_level_differences, "output_level_differences", count
         )
-        object.__setattr__(self, "output_level_differences_db", read_only(rows))
+        object.__setattr__(self, "output_level_differences", read_only(rows))
         corrections = {
-            str(name): read_only(
-                _band_column(value, f"corrections_db[{name!r}]", count)
-            )
-            for name, value in self.corrections_db.items()
+            str(name): read_only(_band_column(value, f"corrections[{name!r}]", count))
+            for name, value in self.corrections.items()
         }
-        object.__setattr__(self, "corrections_db", MappingProxyType(corrections))
+        object.__setattr__(self, "corrections", MappingProxyType(corrections))
         if self.expanded_uncertainty_db is not None:
             uncertainty = _band_column(
                 self.expanded_uncertainty_db, "expanded_uncertainty_db", count
@@ -1667,35 +1665,35 @@ class ComparisonCalibration(OwnsArrays):
     @property
     def n_determinations(self) -> int:
         """The number of determinations averaged."""
-        return int(self.output_level_differences_db.shape[0])
+        return int(self.output_level_differences.shape[0])
 
     @property
-    def output_level_difference_db(self) -> NDArray[np.float64]:
+    def output_level_difference(self) -> NDArray[np.float64]:
         r""":math:`20\lg R_V`, the mean over the determinations, in dB."""
-        return np.mean(self.output_level_differences_db, axis=0)
+        return np.mean(self.output_level_differences, axis=0)
 
     @property
-    def correction_db(self) -> NDArray[np.float64]:
+    def correction(self) -> NDArray[np.float64]:
         r""":math:`\sum_j C_j`, in dB (0 without corrections)."""
         total = np.zeros(self.frequencies.size)
-        for value in self.corrections_db.values():
+        for value in self.corrections.values():
             total = total + value
         return total
 
     @property
-    def sensitivity_level_db(self) -> NDArray[np.float64]:
+    def sensitivity_level(self) -> NDArray[np.float64]:
         r""":math:`L_\mathrm{test}`, in dB re 1 V/Pa."""
         return _compared_level_db(
-            self.reference_sensitivity_level_db,
-            self.output_level_difference_db,
-            self.pressure_level_difference_db,
-            self.correction_db,
+            self.reference_sensitivity_level,
+            self.output_level_difference,
+            self.pressure_level_difference,
+            self.correction,
         )
 
     @property
     def sensitivity_mv_per_pa(self) -> NDArray[np.float64]:
         r""":math:`M_\mathrm{test} = 10^{L_\mathrm{test}/20}` V/Pa, in mV/Pa."""
-        return 1000.0 * 10.0 ** (self.sensitivity_level_db / 20.0)
+        return 1000.0 * 10.0 ** (self.sensitivity_level / 20.0)
 
     @property
     def output_phase_difference_deg(self) -> NDArray[np.float64] | None:
@@ -1800,16 +1798,16 @@ def _frequencies_of(
 
 def _calibration(
     frequencies: NDArray[np.float64],
-    reference_sensitivity_level_db: ArrayLike,
-    output_level_differences_db: NDArray[np.float64],
+    reference_sensitivity_level: ArrayLike,
+    output_level_differences: NDArray[np.float64],
     *,
     field: str,
     excitation: str,
-    pressure_level_difference_db: ArrayLike,
-    corrections_db: Mapping[str, ArrayLike] | None,
+    pressure_level_difference: ArrayLike,
+    corrections: Mapping[str, ArrayLike] | None,
     reference_environment: EnvironmentalSensitivityCorrection | None,
     test_environment: EnvironmentalSensitivityCorrection | None,
-    reference_free_field_difference_db: ArrayLike | None,
+    reference_free_field_difference: ArrayLike | None,
     expanded_uncertainty_db: ArrayLike | None,
     phases: _Phases | None = None,
 ) -> ComparisonCalibration:
@@ -1820,35 +1818,35 @@ def _calibration(
     """
     field = require_choice(field, "field", _FIELDS)
     named: dict[str, ArrayLike] = {}
-    if reference_free_field_difference_db is not None:
+    if reference_free_field_difference is not None:
         if field != "free_field":
             msg = (
-                "'reference_free_field_difference_db' belongs to a free-field "
+                "'reference_free_field_difference' belongs to a free-field "
                 "calibration (IEC 61094-8 Table 1), not to a pressure one."
             )
             raise ValueError(msg)
-        named[_FREE_FIELD_DIFFERENCE] = reference_free_field_difference_db
+        named[_FREE_FIELD_DIFFERENCE] = reference_free_field_difference
     if reference_environment is not None:
         _frequencies_of(reference_environment, "reference_environment", frequencies)
-        named["reference environment"] = reference_environment.correction_db
+        named["reference environment"] = reference_environment.correction
     if test_environment is not None:
         _frequencies_of(test_environment, "test_environment", frequencies)
-        named["reference conditions"] = -test_environment.correction_db
-    for name, value in (corrections_db or {}).items():
+        named["reference conditions"] = -test_environment.correction
+    for name, value in (corrections or {}).items():
         if name in named:
-            msg = f"'corrections_db' repeats the correction {name!r}."
+            msg = f"'corrections' repeats the correction {name!r}."
             raise ValueError(msg)
         named[str(name)] = value
     return ComparisonCalibration(
         frequencies=frequencies,
-        reference_sensitivity_level_db=np.asarray(
-            reference_sensitivity_level_db, dtype=np.float64
+        reference_sensitivity_level=np.asarray(
+            reference_sensitivity_level, dtype=np.float64
         ),
-        output_level_differences_db=output_level_differences_db,
-        pressure_level_difference_db=np.asarray(
-            pressure_level_difference_db, dtype=np.float64
+        output_level_differences=output_level_differences,
+        pressure_level_difference=np.asarray(
+            pressure_level_difference, dtype=np.float64
         ),
-        corrections_db=named,  # type: ignore[arg-type]
+        corrections=named,  # type: ignore[arg-type]
         field=field,
         excitation=excitation,
         expanded_uncertainty_db=(
@@ -1952,10 +1950,10 @@ class MonitorReadings(OwnsArrays):
     Its phases are read with its levels when the calibration carries the
     phase. Pass one to :func:`sequential_comparison` as ``monitor``.
 
-    :param reference_level_db: :math:`20\lg V_\mathrm{mon,1}`, the monitor's
+    :param reference_level: :math:`20\lg V_\mathrm{mon,1}`, the monitor's
         output level in the measurement of the reference, in dB, one row per
         determination.
-    :param test_level_db: :math:`20\lg V_\mathrm{mon,2}`, the monitor's
+    :param test_level: :math:`20\lg V_\mathrm{mon,2}`, the monitor's
         output level in the measurement of the test microphone, in dB.
     :param reference_phase_deg: :math:`\varphi_\mathrm{mon,1}`, the monitor's
         phase in the measurement of the reference, in degrees (Default: None).
@@ -1966,8 +1964,8 @@ class MonitorReadings(OwnsArrays):
     """
 
     _: KW_ONLY
-    reference_level_db: ArrayLike
-    test_level_db: ArrayLike
+    reference_level: ArrayLike
+    test_level: ArrayLike
     reference_phase_deg: ArrayLike | None = None
     test_phase_deg: ArrayLike | None = None
 
@@ -2014,7 +2012,7 @@ def _simultaneous_phases(
         msg = (
             "The phase readings follow the level readings: give "
             "'interchanged_channel_phase_difference_deg' exactly when "
-            "'interchanged_channel_difference_db' is given."
+            "'interchanged_channel_difference' is given."
         )
         raise ValueError(msg)
     first = _determinations(
@@ -2105,16 +2103,16 @@ def _sequential_phases(
 
 def simultaneous_comparison(
     frequencies: ArrayLike,
-    reference_sensitivity_level_db: ArrayLike,
-    channel_difference_db: ArrayLike,
-    interchanged_channel_difference_db: ArrayLike | None = None,
+    reference_sensitivity_level: ArrayLike,
+    channel_difference: ArrayLike,
+    interchanged_channel_difference: ArrayLike | None = None,
     *,
     field: str = "pressure",
-    pressure_level_difference_db: ArrayLike = 0.0,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    pressure_level_difference: ArrayLike = 0.0,
+    corrections: Mapping[str, ArrayLike] | None = None,
     reference_environment: EnvironmentalSensitivityCorrection | None = None,
     test_environment: EnvironmentalSensitivityCorrection | None = None,
-    reference_free_field_difference_db: ArrayLike | None = None,
+    reference_free_field_difference: ArrayLike | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
     phase: SimultaneousComparisonPhase | None = None,
 ) -> ComparisonCalibration:
@@ -2172,24 +2170,24 @@ def simultaneous_comparison(
     the complex ratio the sensitivity "both modulus and phase" is.
 
     :param frequencies: The frequencies, in Hz, increasing.
-    :param reference_sensitivity_level_db: :math:`L_\mathrm{ref}`, the
+    :param reference_sensitivity_level: :math:`L_\mathrm{ref}`, the
         reference microphone's sensitivity level, in dB re 1 V/Pa, one value
         or one per frequency. For a free-field calibration it is the
         reference's free-field level, or its pressure level with
-        ``reference_free_field_difference_db``.
-    :param channel_difference_db: :math:`L_\mathrm{C12}`, the reading of
+        ``reference_free_field_difference``.
+    :param channel_difference: :math:`L_\mathrm{C12}`, the reading of
         channel 1 less that of channel 2 with the reference on channel 1, in
         dB.
-    :param interchanged_channel_difference_db: :math:`L_\mathrm{C21}`, the
+    :param interchanged_channel_difference: :math:`L_\mathrm{C21}`, the
         same difference after the interchange, the test microphone on
         channel 1, in dB (Default: None; required for ``field="pressure"``).
     :param field: ``"pressure"`` (IEC 61094-5, default) or ``"free_field"``
         (IEC 61094-8).
-    :param pressure_level_difference_db: :math:`20\lg R_P`, the effective
+    :param pressure_level_difference: :math:`20\lg R_P`, the effective
         sound pressure on the test microphone re that on the reference, in dB
         (Default: 0, the ratio reduced to unity).
-    :param corrections_db: Further corrections added to the level, by name,
-        in dB, such as ``jig_diameter_correction(f).correction_db`` (Default:
+    :param corrections: Further corrections added to the level, by name,
+        in dB, such as ``jig_diameter_correction(f).correction`` (Default:
         none).
     :param reference_environment: The :class:`EnvironmentalSensitivityCorrection` that
         takes the reference's level from the conditions of its calibration to
@@ -2198,10 +2196,10 @@ def simultaneous_comparison(
         microphone from the reference conditions to those of the test,
         subtracted to refer the result to the reference conditions (Default:
         None, the result is at the conditions of the test).
-    :param reference_free_field_difference_db: The reference's free-field to
+    :param reference_free_field_difference: The reference's free-field to
         pressure sensitivity level difference (IEC/TS 61094-7), added to a
         pressure-calibrated reference in a free-field calibration only, in dB;
-        the result carries it in ``corrections_db`` as ``"reference free-field
+        the result carries it in ``corrections`` as ``"reference free-field
         difference"`` (Default: None).
     :param expanded_uncertainty_db: The expanded uncertainty (:math:`k = 2`)
         of the result at each frequency, in dB, as
@@ -2220,63 +2218,63 @@ def simultaneous_comparison(
     field = require_choice(field, "field", _FIELDS)
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
-    first = _determinations(channel_difference_db, "channel_difference_db", count)
-    if interchanged_channel_difference_db is None:
+    first = _determinations(channel_difference, "channel_difference", count)
+    if interchanged_channel_difference is None:
         if field == "pressure":
             msg = (
                 "A pressure calibration by simultaneous excitation needs the "
                 "reading after the microphones are interchanged (IEC 61094-5 "
-                "5.1.2); pass 'interchanged_channel_difference_db'."
+                "5.1.2); pass 'interchanged_channel_difference'."
             )
             raise ValueError(msg)
         ratios = -first
     else:
         second = _determinations(
-            interchanged_channel_difference_db,
-            "interchanged_channel_difference_db",
+            interchanged_channel_difference,
+            "interchanged_channel_difference",
             count,
         )
         _common_rows(
             {
-                "channel_difference_db": first,
-                "interchanged_channel_difference_db": second,
+                "channel_difference": first,
+                "interchanged_channel_difference": second,
             }
         )
         ratios = _interchange_level_difference_db(first, second)
     phases = _simultaneous_phases(
-        count, phase, interchanged=interchanged_channel_difference_db is not None
+        count, phase, interchanged=interchanged_channel_difference is not None
     )
     if phases is not None:
         _common_rows({"level readings": ratios, "phase readings": phases.output})
     return _calibration(
         frequencies,
-        reference_sensitivity_level_db,
+        reference_sensitivity_level,
         ratios,
         phases=phases,
         field=field,
         excitation="simultaneous",
-        pressure_level_difference_db=pressure_level_difference_db,
-        corrections_db=corrections_db,
+        pressure_level_difference=pressure_level_difference,
+        corrections=corrections,
         reference_environment=reference_environment,
         test_environment=test_environment,
-        reference_free_field_difference_db=reference_free_field_difference_db,
+        reference_free_field_difference=reference_free_field_difference,
         expanded_uncertainty_db=expanded_uncertainty_db,
     )
 
 
 def sequential_comparison(
     frequencies: ArrayLike,
-    reference_sensitivity_level_db: ArrayLike,
-    reference_output_level_db: ArrayLike,
-    test_output_level_db: ArrayLike,
+    reference_sensitivity_level: ArrayLike,
+    reference_output_level: ArrayLike,
+    test_output_level: ArrayLike,
     *,
     monitor: MonitorReadings | None = None,
     field: str = "pressure",
-    pressure_level_difference_db: ArrayLike = 0.0,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    pressure_level_difference: ArrayLike = 0.0,
+    corrections: Mapping[str, ArrayLike] | None = None,
     reference_environment: EnvironmentalSensitivityCorrection | None = None,
     test_environment: EnvironmentalSensitivityCorrection | None = None,
-    reference_free_field_difference_db: ArrayLike | None = None,
+    reference_free_field_difference: ArrayLike | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
     phase: SequentialComparisonPhase | None = None,
 ) -> ComparisonCalibration:
@@ -2326,12 +2324,12 @@ def sequential_comparison(
     same measurement point (7.3), :math:`\arg R_P` is 0.
 
     :param frequencies: The frequencies, in Hz, increasing.
-    :param reference_sensitivity_level_db: :math:`L_\mathrm{ref}`, the
+    :param reference_sensitivity_level: :math:`L_\mathrm{ref}`, the
         reference microphone's sensitivity level, in dB re 1 V/Pa.
-    :param reference_output_level_db: :math:`20\lg V_\mathrm{ref}`, the
+    :param reference_output_level: :math:`20\lg V_\mathrm{ref}`, the
         reference microphone's output level, in dB re any voltage the test
         microphone is read against too.
-    :param test_output_level_db: :math:`20\lg V_\mathrm{test}`, the test
+    :param test_output_level: :math:`20\lg V_\mathrm{test}`, the test
         microphone's output level, in dB re the same voltage.
     :param monitor: The :class:`MonitorReadings` of a monitor microphone,
         :math:`20\lg V_\mathrm{mon,1}` and :math:`20\lg V_\mathrm{mon,2}`
@@ -2340,16 +2338,16 @@ def sequential_comparison(
         no monitor).
     :param field: ``"pressure"`` (IEC 61094-5, default) or ``"free_field"``
         (IEC 61094-8).
-    :param pressure_level_difference_db: :math:`20\lg R_P`, in dB (Default: 0).
-    :param corrections_db: Further corrections added to the level, by name,
+    :param pressure_level_difference: :math:`20\lg R_P`, in dB (Default: 0).
+    :param corrections: Further corrections added to the level, by name,
         in dB (Default: none).
     :param reference_environment: The :class:`EnvironmentalSensitivityCorrection` of the
         reference, added (Default: None).
     :param test_environment: The :class:`EnvironmentalSensitivityCorrection` of the test
         microphone, subtracted (Default: None).
-    :param reference_free_field_difference_db: The reference's free-field to
+    :param reference_free_field_difference: The reference's free-field to
         pressure sensitivity level difference (IEC/TS 61094-7), free field
-        only, in dB; carried in ``corrections_db`` as ``"reference free-field
+        only, in dB; carried in ``corrections`` as ``"reference free-field
         difference"`` (Default: None).
     :param expanded_uncertainty_db: The expanded uncertainty (:math:`k = 2`)
         of the result at each frequency, in dB (Default: None).
@@ -2367,24 +2365,24 @@ def sequential_comparison(
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
     readings = {
-        "reference_output_level_db": _determinations(
-            reference_output_level_db, "reference_output_level_db", count
+        "reference_output_level": _determinations(
+            reference_output_level, "reference_output_level", count
         ),
-        "test_output_level_db": _determinations(
-            test_output_level_db, "test_output_level_db", count
+        "test_output_level": _determinations(
+            test_output_level, "test_output_level", count
         ),
     }
     if monitor is not None:
         readings[_MONITOR_REFERENCE_LEVEL] = _determinations(
-            monitor.reference_level_db, _MONITOR_REFERENCE_LEVEL, count
+            monitor.reference_level, _MONITOR_REFERENCE_LEVEL, count
         )
         readings[_MONITOR_TEST_LEVEL] = _determinations(
-            monitor.test_level_db, _MONITOR_TEST_LEVEL, count
+            monitor.test_level, _MONITOR_TEST_LEVEL, count
         )
     _common_rows(readings)
     ratios = _output_level_difference_db(
-        readings["test_output_level_db"],
-        readings["reference_output_level_db"],
+        readings["test_output_level"],
+        readings["reference_output_level"],
         readings.get(_MONITOR_TEST_LEVEL),
         readings.get(_MONITOR_REFERENCE_LEVEL),
     )
@@ -2393,16 +2391,16 @@ def sequential_comparison(
         _common_rows({"level readings": ratios, "phase readings": phases.output})
     return _calibration(
         frequencies,
-        reference_sensitivity_level_db,
+        reference_sensitivity_level,
         np.atleast_2d(ratios),
         phases=phases,
         field=field,
         excitation="sequential",
-        pressure_level_difference_db=pressure_level_difference_db,
-        corrections_db=corrections_db,
+        pressure_level_difference=pressure_level_difference,
+        corrections=corrections,
         reference_environment=reference_environment,
         test_environment=test_environment,
-        reference_free_field_difference_db=reference_free_field_difference_db,
+        reference_free_field_difference=reference_free_field_difference,
         expanded_uncertainty_db=expanded_uncertainty_db,
     )
 
@@ -2713,11 +2711,11 @@ class JigCouplerVerification(OwnsArrays):
     which this verification does not represent.
 
     :ivar frequencies: The frequencies the two calibrations share, in Hz.
-    :ivar calibration_level_db: :math:`L_\mathrm{cal}`, the sensitivity level
+    :ivar calibration_level: :math:`L_\mathrm{cal}`, the sensitivity level
         from the jig or coupler being validated, in dB re 1 V/Pa.
     :ivar calibration_uncertainty_db: :math:`U_\mathrm{cal}`, its expanded
         uncertainty (:math:`k = 2`), in dB.
-    :ivar validation_level_db: :math:`L_\mathrm{val}`, the sensitivity level
+    :ivar validation_level: :math:`L_\mathrm{val}`, the sensitivity level
         it is validated against, in dB re 1 V/Pa.
     :ivar validation_uncertainty_db: :math:`U_\mathrm{val}`, its expanded
         uncertainty (:math:`k = 2`), in dB.
@@ -2737,9 +2735,9 @@ class JigCouplerVerification(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    calibration_level_db: NDArray[np.float64]
+    calibration_level: NDArray[np.float64]
     calibration_uncertainty_db: NDArray[np.float64]
-    validation_level_db: NDArray[np.float64]
+    validation_level: NDArray[np.float64]
     validation_uncertainty_db: NDArray[np.float64]
     validation: str
     unvalidated_frequencies_hz: NDArray[np.float64]
@@ -2764,9 +2762,9 @@ class JigCouplerVerification(OwnsArrays):
         count = frequencies.size
         object.__setattr__(self, "frequencies", read_only(frequencies))
         for name in (
-            "calibration_level_db",
+            "calibration_level",
             "calibration_uncertainty_db",
-            "validation_level_db",
+            "validation_level",
             "validation_uncertainty_db",
             "shared_standard_uncertainty_db",
         ):
@@ -2800,9 +2798,9 @@ class JigCouplerVerification(OwnsArrays):
         )
 
     @property
-    def difference_db(self) -> NDArray[np.float64]:
+    def difference(self) -> NDArray[np.float64]:
         r""":math:`\Delta = L_\mathrm{cal} - L_\mathrm{val}`, in dB."""
-        return self.calibration_level_db - self.validation_level_db
+        return self.calibration_level - self.validation_level
 
     @property
     def _shared_expanded_db(self) -> NDArray[np.float64]:
@@ -2846,7 +2844,7 @@ class JigCouplerVerification(OwnsArrays):
         r""":math:`\Delta/U_\Delta`, the difference in units of its expanded
         uncertainty: within :math:`\pm 1` where the two agree.
         """
-        return self.difference_db / self.expanded_uncertainty_db
+        return self.difference / self.expanded_uncertainty_db
 
     @property
     def agrees(self) -> NDArray[np.bool_]:
@@ -2854,8 +2852,7 @@ class JigCouplerVerification(OwnsArrays):
         both sides settled to a nanodecibel before they meet.
         """
         return np.asarray(
-            settled(np.abs(self.difference_db))
-            <= settled(self.expanded_uncertainty_db),
+            settled(np.abs(self.difference)) <= settled(self.expanded_uncertainty_db),
             dtype=np.bool_,
         )
 
@@ -2936,15 +2933,13 @@ def _validation_columns(
                 f"microphones of the reciprocity calibration; got {microphone}."
             )
             raise ValueError(msg)
-        level = np.asarray(
-            validation.sensitivity_level_db[microphone], dtype=np.float64
-        )
+        level = np.asarray(validation.sensitivity_level[microphone], dtype=np.float64)
     elif isinstance(validation, ComparisonCalibration):
         kind = "comparison"
         if microphone is not None:
             msg = "'microphone' only picks a microphone of a reciprocity calibration."
             raise ValueError(msg)
-        level = np.asarray(validation.sensitivity_level_db, dtype=np.float64)
+        level = np.asarray(validation.sensitivity_level, dtype=np.float64)
     else:
         msg = (
             "'validation' must be a ComparisonCalibration or a ReciprocityCalibration."
@@ -3073,11 +3068,11 @@ def verify_jig_or_coupler(
         raise ValueError(msg)
     return JigCouplerVerification(
         frequencies=own[covered],
-        calibration_level_db=np.asarray(calibration.sensitivity_level_db)[covered],
+        calibration_level=np.asarray(calibration.sensitivity_level)[covered],
         calibration_uncertainty_db=np.asarray(calibration.expanded_uncertainty_db)[
             covered
         ],
-        validation_level_db=level[match[covered]],
+        validation_level=level[match[covered]],
         validation_uncertainty_db=uncertainty[match[covered]],
         validation=kind,
         unvalidated_frequencies_hz=own[~covered],
@@ -3348,7 +3343,7 @@ class ImpedancePressureRatio(OwnsArrays):
 
     with :math:`V_\mathrm{e}` the equivalent volume of each microphone and
     :math:`V_x` that of what it works into. Its level,
-    :attr:`level_difference_db`, is the ``pressure_level_difference_db`` of a
+    :attr:`level_difference`, is the ``pressure_level_difference`` of a
     comparison, and its phase the ``pressure_phase_difference_deg``.
 
     :ivar frequencies: The frequencies, in Hz.
@@ -3382,7 +3377,7 @@ class ImpedancePressureRatio(OwnsArrays):
             object.__setattr__(self, name, read_only(column))
 
     @property
-    def level_difference_db(self) -> NDArray[np.float64]:
+    def level_difference(self) -> NDArray[np.float64]:
         r""":math:`20\lg\lvert R_P\rvert`, in dB: what the test microphone
         hears more than the reference.
         """
@@ -3413,7 +3408,7 @@ class ImpedancePressureRatio(OwnsArrays):
         this value is an estimate of the model's, not a substitute for that
         experiment.
         """
-        return np.abs(self.level_difference_db) / _SQRT3
+        return np.abs(self.level_difference) / _SQRT3
 
     def plot(
         self,
@@ -3727,7 +3722,7 @@ class RectangularPulse(RichDisplay):
         # numpy's sinc is sin(pi x)/(pi x): with x = 2 f b it is (B.10) over 2ab.
         return self.area_v_s * np.sinc(frequencies * self.duration_s)
 
-    def level_db_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
+    def level_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
         r""":math:`20\lg\lvert X(f)/X(0)\rvert`, how far the spectrum has
         fallen from its value at 0 Hz, in dB (minus infinity at a zero).
 
@@ -4048,7 +4043,7 @@ class TimeSelectiveResponse(OwnsArrays):
             response = response / (pulse.spectrum_at(frequencies) * delay)
         return response
 
-    def level_db_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
+    def level_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
         r""":math:`20\lg\lvert H(f)\rvert`, in dB re 1 of the response's unit
         times a second.
 

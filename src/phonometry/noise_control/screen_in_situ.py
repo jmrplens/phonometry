@@ -286,7 +286,7 @@ def microphone_distances_m(screen_height_m: float) -> NDArray[np.float64]:
     return np.maximum(factors * height, MIN_MICROPHONE_DISTANCE_M)
 
 
-def impulse_mean_level(repeat_levels_db: ArrayLike) -> float:
+def impulse_mean_level(repeat_levels: ArrayLike) -> float:
     r"""The level of an impulsive measurement, 5.6.2.1.
 
     A single-impulse source is measured at least three times with the S time
@@ -299,12 +299,12 @@ def impulse_mean_level(repeat_levels_db: ArrayLike) -> float:
     :data:`IMPULSE_INVALID_DEVIATION_DB` the measurement is invalid, which is
     refused.
 
-    :param repeat_levels_db: The levels of the repeats, in decibels.
+    :param repeat_levels: The levels of the repeats, in decibels.
     :return: The arithmetic mean, in decibels.
     :raises ValueError: For fewer than :data:`IMPULSE_REPEATS` repeats or a
         spread past :data:`IMPULSE_INVALID_DEVIATION_DB`.
     """
-    levels = require_finite_array(repeat_levels_db, "repeat_levels_db")
+    levels = require_finite_array(repeat_levels, "repeat_levels")
     if levels.size < IMPULSE_REPEATS:
         msg = (
             f"ISO 11821 5.6.2.1 repeats an impulsive measurement at least "
@@ -334,12 +334,12 @@ class ScreenInSituResult(OwnsArrays):
     r"""The in-situ attenuation of a removable screen, ISO 11821 clause 5.8.
 
     :ivar frequencies: Nominal band centres, in hertz, or ``None``.
-    :ivar unscreened_levels_db: :math:`L_{p1}`, the level with the screen
+    :ivar unscreened_levels: :math:`L_{p1}`, the level with the screen
         removed, per band.
-    :ivar screened_levels_db: :math:`L_{p2}`, the level with it in place, per
+    :ivar screened_levels: :math:`L_{p2}`, the level with it in place, per
         band.
-    :ivar attenuation_db: :math:`D_p` per band, in decibels.
-    :ivar a_weighted_attenuation_db: :math:`D_{p\mathrm{A}}`, in decibels, or ``None``.
+    :ivar attenuation: :math:`D_p` per band, in decibels.
+    :ivar a_weighted_attenuation: :math:`D_{p\mathrm{A}}`, in decibels, or ``None``.
         Clause 5.9 allows it only with the actual source.
     :ivar source_kind: ``"actual"`` or ``"artificial"``.
     :ivar distance: How far the position stands from the screen, in metres,
@@ -347,21 +347,21 @@ class ScreenInSituResult(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64] | None
-    unscreened_levels_db: NDArray[np.float64]
-    screened_levels_db: NDArray[np.float64]
-    attenuation_db: NDArray[np.float64]
-    a_weighted_attenuation_db: float | None
+    unscreened_levels: NDArray[np.float64]
+    screened_levels: NDArray[np.float64]
+    attenuation: NDArray[np.float64]
+    a_weighted_attenuation: float | None
     source_kind: str
     distance: float | None
 
     def rounded(self) -> NDArray[np.int_]:
         """The band values as 7.4 c) reports them, to the nearest integer.
 
-        :attr:`attenuation_db` keeps the unrounded difference. A tie goes to
+        :attr:`attenuation` keeps the unrounded difference. A tie goes to
         the even decibel, Rule A of ISO 80000-1:2009 Annex B, as in the other
         in-situ standards of this library.
         """
-        return np.asarray(round_half_even(self.attenuation_db), dtype=np.int_)
+        return np.asarray(round_half_even(self.attenuation), dtype=np.int_)
 
     def rounded_a_weighted(self) -> int | None:
         r""":math:`D_{p\mathrm{A}}` as 7.4 c) reports it, to the nearest integer.
@@ -369,9 +369,9 @@ class ScreenInSituResult(OwnsArrays):
         The clause gives the A-weighted attenuation the same rounding as the
         band values. ``None`` where no A-weighted pair was given.
         """
-        if self.a_weighted_attenuation_db is None:
+        if self.a_weighted_attenuation is None:
             return None
-        return int(round_half_even(self.a_weighted_attenuation_db))
+        return int(round_half_even(self.a_weighted_attenuation))
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -394,13 +394,13 @@ class ScreenInSituResult(OwnsArrays):
 
 
 def screen_attenuation(
-    unscreened_levels_db: ArrayLike,
-    screened_levels_db: ArrayLike,
+    unscreened_levels: ArrayLike,
+    screened_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
     source_kind: SourceKind = "actual",
-    a_weighted_unscreened_level_db: float | None = None,
-    a_weighted_screened_level_db: float | None = None,
+    a_weighted_unscreened_level: float | None = None,
+    a_weighted_screened_level: float | None = None,
     distance: float | None = None,
 ) -> ScreenInSituResult:
     r"""The in-situ attenuation of a screen, clauses 5.8 and 5.9.
@@ -419,12 +419,12 @@ def screen_attenuation(
     machine's, so the pair is refused rather than computed under
     ``source_kind="artificial"``.
 
-    :param unscreened_levels_db: :math:`L_{p1}` per band, in decibels.
-    :param screened_levels_db: :math:`L_{p2}` per band, in decibels.
+    :param unscreened_levels: :math:`L_{p1}` per band, in decibels.
+    :param screened_levels: :math:`L_{p2}` per band, in decibels.
     :param frequencies: Nominal band centres, in hertz.
     :param source_kind: ``"actual"`` (default) or ``"artificial"``.
-    :param a_weighted_unscreened_level_db: :math:`L_{p\mathrm{A}1}`, in decibels.
-    :param a_weighted_screened_level_db: :math:`L_{p\mathrm{A}2}`, in decibels.
+    :param a_weighted_unscreened_level: :math:`L_{p\mathrm{A}1}`, in decibels.
+    :param a_weighted_screened_level: :math:`L_{p\mathrm{A}2}`, in decibels.
     :param distance: How far this position stands from the screen, in
         metres, carried into the result because 5.5.2 reports the spread over
         the line rather than one number.
@@ -433,12 +433,10 @@ def screen_attenuation(
         distance that is not strictly positive, an unknown source kind, half an
         A-weighted pair, or an A-weighted pair with an artificial source.
     """
-    unscreened = require_finite_array(unscreened_levels_db, "unscreened_levels_db")
-    screened = require_finite_array(screened_levels_db, "screened_levels_db")
+    unscreened = require_finite_array(unscreened_levels, "unscreened_levels")
+    screened = require_finite_array(screened_levels, "screened_levels")
     if unscreened.shape != screened.shape:
-        msg = (
-            "'unscreened_levels_db' and 'screened_levels_db' must match band for band."
-        )
+        msg = "'unscreened_levels' and 'screened_levels' must match band for band."
         raise ValueError(msg)
     kind = require_choice(str(source_kind), "source_kind", _SOURCE_KINDS)
     freqs: NDArray[np.float64] | None = None
@@ -449,15 +447,15 @@ def screen_attenuation(
             raise ValueError(msg)
     weighted: float | None = None
     given = (
-        a_weighted_unscreened_level_db is not None,
-        a_weighted_screened_level_db is not None,
+        a_weighted_unscreened_level is not None,
+        a_weighted_screened_level is not None,
     )
     if any(given):
         if not all(given):
             msg = (
                 "Clause 5.9 is a difference, so give both "
-                "'a_weighted_unscreened_level_db' and "
-                "'a_weighted_screened_level_db' or neither."
+                "'a_weighted_unscreened_level' and "
+                "'a_weighted_screened_level' or neither."
             )
             raise ValueError(msg)
         if kind == "artificial":
@@ -467,16 +465,16 @@ def screen_attenuation(
             )
             raise ValueError(msg)
         weighted = require_finite(
-            a_weighted_unscreened_level_db or 0.0, "a_weighted_unscreened_level_db"
+            a_weighted_unscreened_level or 0.0, "a_weighted_unscreened_level"
         ) - require_finite(
-            a_weighted_screened_level_db or 0.0, "a_weighted_screened_level_db"
+            a_weighted_screened_level or 0.0, "a_weighted_screened_level"
         )
     return ScreenInSituResult(
         frequencies=freqs,
-        unscreened_levels_db=unscreened,
-        screened_levels_db=screened,
-        attenuation_db=np.asarray(unscreened - screened, dtype=np.float64),
-        a_weighted_attenuation_db=weighted,
+        unscreened_levels=unscreened,
+        screened_levels=screened,
+        attenuation=np.asarray(unscreened - screened, dtype=np.float64),
+        a_weighted_attenuation=weighted,
         source_kind=kind,
         distance=(None if distance is None else require_positive(distance, "distance")),
     )

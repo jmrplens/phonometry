@@ -32,13 +32,13 @@ from phonometry import hearing
 booth = [50, 48, 45, 43, 40, 36, 30, 24, 19, 16, 14, 12, 11,
          10, 10, 10, 9, 9, 9, 8, 8, 8, 8, 8, 8]
 supra_aural = hearing.check_audiometric_ambient_noise(booth)
-print(supra_aural.passes, supra_aural.lowest_measurable_hearing_level_db)  # False 3.0
+print(supra_aural.passes, supra_aural.lowest_measurable_hearing_level)  # False 3.0
 insert = hearing.check_audiometric_ambient_noise(booth, earphone="ER-3A")
 print(insert.passes)                                                       # True
 bone = hearing.check_audiometric_ambient_noise(
     booth, presentation="bone", lowest_test_frequency_hz=250
 )
-print(bone.lowest_measurable_hearing_level_db)                             # 6.0
+print(bone.lowest_measurable_hearing_level)                             # 6.0
 ```
 
 `presentation="sound field"` judges the room against ISO 8253-2 Table 2, up to
@@ -69,11 +69,11 @@ pass, and `noise_floor_db=` flags the bands within 6 dB of the meter's own floor
 
 ```python
 series = hearing.ascending_method_threshold(
-    presentation_levels_db=[30, 20, 25, 15, 20, 25, 15, 20, 10, 15, 20, 25],
+    presentation_levels=[30, 20, 25, 15, 20, 25, 15, 20, 10, 15, 20, 25],
     responses=[1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1],
-    familiarization_level_db=40.0,
+    familiarization_level=40.0,
 )
-print(series.ascent_levels_db, series.threshold_db)   # [25. 25. 20. 25.] 25.0
+print(series.ascent_levels, series.threshold_db)   # [25. 25. 20. 25.] 25.0
 print(hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35]).threshold_db)  # 35.0
 tracing = hearing.automatic_audiometry_threshold(
     [38, 22, 31, 21, 32, 20, 30, 29, 31, 19, 30, 20, 31, 21]
@@ -91,7 +91,7 @@ change of 10 dB or more sends the test back to the further frequencies.
 (cross-hearing, 6.2.3.2) and a bone-conduction level at the average vibrotactile
 threshold of 8.4, 40, 60 and 70 dB at 250 Hz, 500 Hz and 1 kHz for the mastoid
 and about 10 dB lower for the forehead
-(`hearing.VIBROTACTILE_HEARING_LEVELS_DB`).
+(`hearing.VIBROTACTILE_HEARING_LEVELS`).
 
 ```python
 print(hearing.check_retest_agreement(25.0, 35.0).retest_further_frequencies)  # True

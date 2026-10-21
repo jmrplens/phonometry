@@ -159,7 +159,7 @@ one hour (the definition under Table H.1).
 
 ```python
 rainfall_reference_correction(
-    l_i_ref_db: ArrayLike,
+    l_i_ref: ArrayLike,
     structural_reverberation_time: ArrayLike,
     frequencies: ArrayLike | None = None,
 ) -> RainfallReferenceCorrection
@@ -185,7 +185,7 @@ $f$ in Formula (I.1) is taken as the band centre frequency given.
 
 | Name | Description |
 | :--- | :--- |
-| `l_i_ref_db` | $L_{I,\mathrm{ref}}$ of the reference specimen per band, in dB re 1 pW/m² (e.g. `rainfall_sound(...).l_i_db`). |
+| `l_i_ref` | $L_{I,\mathrm{ref}}$ of the reference specimen per band, in dB re 1 pW/m² (e.g. `rainfall_sound(...).l_i`). |
 | `structural_reverberation_time` | Its structural reverberation time per band, measured to ISO 10140-4, in s. |
 | `frequencies` | Band centre frequencies, in Hz, each one of the 18 bands of Table I.1 (100 Hz to 5 000 Hz); `None` takes all 18. |
 
@@ -217,7 +217,7 @@ RAINFALL_REFERENCE_LOSS_FACTOR_DB = {100.0: -10.0, 125.0: -11.0, 160.0: -11.0, 2
 
 ```python
 rainfall_sound(
-    l_pr_db: ArrayLike,
+    l_pr: ArrayLike,
     reverberation_time: ArrayLike,
     frequencies: ArrayLike,
     *,
@@ -254,7 +254,7 @@ for comparison between laboratories.
 
 | Name | Description |
 | :--- | :--- |
-| `l_pr_db` | Room-averaged sound pressure level per band, in dB: `(bands,)` for one position of the rain generator or `(positions, bands)` for several, which are added energetically. |
+| `l_pr` | Room-averaged sound pressure level per band, in dB: `(bands,)` for one position of the rain generator or `(positions, bands)` for several, which are added energetically. |
 | `reverberation_time` | Reverberation time of the test room per band, in s. |
 | `frequencies` | Band centre frequencies, in Hz. |
 | `volume` | Volume of the test room, in m³. |
@@ -274,7 +274,7 @@ for comparison between laboratories.
 
 ```python
 rainfall_sound_from_intensity(
-    l_im_db: ArrayLike,
+    l_im: ArrayLike,
     frequencies: ArrayLike,
     *,
     measuring_area_m2: float,
@@ -297,7 +297,7 @@ then follow as in K.4.2.
 
 | Name | Description |
 | :--- | :--- |
-| `l_im_db` | Sound intensity level measured over the surface, per band, in dB re 1 pW/m². |
+| `l_im` | Sound intensity level measured over the surface, per band, in dB re 1 pW/m². |
 | `frequencies` | Band centre frequencies, in Hz. |
 | `measuring_area_m2` | Area of the measuring surface $S_\mathrm{m}$, in m². |
 | `excited_area_m2` | Area of the specimen directly excited by the rain, $S_\mathrm{e}$, in m². |
@@ -316,13 +316,13 @@ then follow as in K.4.2.
 ```python
 RainfallReferenceCorrection(
     frequencies: np.ndarray,
-    l_i_ref_db: np.ndarray,
+    l_i_ref: np.ndarray,
     structural_reverberation_time: np.ndarray,
     loss_factor: np.ndarray,
     reference_loss_factor: np.ndarray,
-    l_i_m_ref_db: np.ndarray,
-    l_ic_ref_db: np.ndarray,
-    correction_db: np.ndarray,
+    l_i_m_ref: np.ndarray,
+    l_ic_ref: np.ndarray,
+    correction: np.ndarray,
 )
 ```
 
@@ -333,13 +333,13 @@ The normalization correction from the reference glass pane (Annex I).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in Hz. |
-| `l_i_ref_db` | Measured sound intensity level of the reference specimen, $L_{I,\mathrm{ref}}$, in dB re 1 pW/m². |
+| `l_i_ref` | Measured sound intensity level of the reference specimen, $L_{I,\mathrm{ref}}$, in dB re 1 pW/m². |
 | `structural_reverberation_time` | Its structural reverberation time $T_\mathrm{s}$, in s. |
 | `loss_factor` | Its total loss factor $\eta = 2.2/(f T_\mathrm{s})$ (Formula (I.1)), a linear ratio. |
 | `reference_loss_factor` | The reference loss factor $\eta_\mathrm{ref}$ of Table I.1 as a linear ratio, like `loss_factor`: $10^{x/10}$ of the decibel value $x$ the table prints ([`RAINFALL_REFERENCE_LOSS_FACTOR_DB`](/phonometry/reference/api/building/rainfall-sound/#rainfall_reference_loss_factor_db)). |
-| `l_i_m_ref_db` | The level corrected to the reference loss factor, $L_{I,\mathrm{m,ref}}$, in dB (Formula (I.2)). |
-| `l_ic_ref_db` | The reference level $L_{I\mathrm{c,ref}}$ of Table I.1, in dB. |
-| `correction_db` | $\Delta L_{I\mathrm{c}} = L_{I,\mathrm{m,ref}} - L_{I\mathrm{c,ref}}$, in dB (Formula (I.3)). |
+| `l_i_m_ref` | The level corrected to the reference loss factor, $L_{I,\mathrm{m,ref}}$, in dB (Formula (I.2)). |
+| `l_ic_ref` | The reference level $L_{I\mathrm{c,ref}}$ of Table I.1, in dB. |
+| `correction` | $\Delta L_{I\mathrm{c}} = L_{I,\mathrm{m,ref}} - L_{I\mathrm{c,ref}}$, in dB (Formula (I.3)). |
 
 ### RainfallReferenceCorrection.plot()
 
@@ -364,12 +364,12 @@ the laboratory is normalized by. Requires matplotlib
 ```python
 RainfallSoundResult(
     frequencies: np.ndarray,
-    l_i_db: np.ndarray,
-    l_ia_db: float | None,
+    l_i: np.ndarray,
+    l_ia: float | None,
     method: str,
-    correction_db: np.ndarray | None = None,
-    l_i_norm_db: np.ndarray | None = None,
-    l_ia_norm_db: float | None = None,
+    correction: np.ndarray | None = None,
+    l_i_norm: np.ndarray | None = None,
+    l_ia_norm: float | None = None,
 )
 ```
 
@@ -380,12 +380,12 @@ Sound intensity level radiated by a specimen under rain (Annex K).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in Hz. |
-| `l_i_db` | Sound intensity level $L_I$ per band, in dB re 1 pW/m² (Formula (K.1) or (K.4)). |
-| `l_ia_db` | A-weighted sound intensity level $L_{I\mathrm{A}}$, in dB (Formula (K.2)), or `None` when the 18 bands 100 Hz to 5 000 Hz are not all present. |
+| `l_i` | Sound intensity level $L_I$ per band, in dB re 1 pW/m² (Formula (K.1) or (K.4)). |
+| `l_ia` | A-weighted sound intensity level $L_{I\mathrm{A}}$, in dB (Formula (K.2)), or `None` when the 18 bands 100 Hz to 5 000 Hz are not all present. |
 | `method` | `"pressure"` (K.4.2) or `"intensity"` (K.4.3). |
-| `correction_db` | The laboratory correction $\Delta L_{I\mathrm{c}}$ per band, in dB, or `None` when the levels were not normalized. |
-| `l_i_norm_db` | Normalized level $L_{I\mathrm{norm}} = L_I - \Delta L_{I\mathrm{c}}$ per band, in dB (Formula (K.5)), or `None`. |
-| `l_ia_norm_db` | Its A-weighted level $L_{I\mathrm{Anorm}}$, in dB, or `None`. |
+| `correction` | The laboratory correction $\Delta L_{I\mathrm{c}}$ per band, in dB, or `None` when the levels were not normalized. |
+| `l_i_norm` | Normalized level $L_{I\mathrm{norm}} = L_I - \Delta L_{I\mathrm{c}}$ per band, in dB (Formula (K.5)), or `None`. |
+| `l_ia_norm` | Its A-weighted level $L_{I\mathrm{Anorm}}$, in dB, or `None`. |
 
 ### RainfallSoundResult.octave_bands()
 

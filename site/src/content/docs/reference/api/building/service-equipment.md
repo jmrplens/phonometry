@@ -272,7 +272,7 @@ A departure of exactly `tolerance_s` is within it.
 ```python
 CalibrationDeviationResult(
     levels: np.ndarray,
-    previous_levels_db: np.ndarray,
+    previous_levels: np.ndarray,
     deviations_db: np.ndarray,
 )
 ```
@@ -284,7 +284,7 @@ Whether the instrumentation may be used, by its calibrations (Clause 5).
 | Name | Description |
 | :--- | :--- |
 | `levels` | The calibrator readings of this measurement in the order they were taken, at the beginning and at the end, in dB. |
-| `previous_levels_db` | The readings of earlier calibrations of the same instrumentation with the same calibrator, in dB; empty when none were given. |
+| `previous_levels` | The readings of earlier calibrations of the same instrumentation with the same calibrator, in dB; empty when none were given. |
 | `deviations_db` | Per reading of `levels`, the largest absolute difference from every calibration taken before it, the earlier ones and the readings of this measurement already taken, in dB; `nan` for a first reading with nothing before it. |
 
 ### CalibrationDeviationResult.largest_deviation_db
@@ -383,7 +383,7 @@ the same positions, is not a number and is left to the operator.
 ```python
 check_instrument_agreement(
     result: ServiceEquipmentResult,
-    instrument_levels_db: Mapping[str, ArrayLike],
+    instrument_levels: Mapping[str, ArrayLike],
 ) -> InstrumentAgreementCheck
 ```
 
@@ -408,7 +408,7 @@ case.
 | Name | Description |
 | :--- | :--- |
 | `result` | The [`ServiceEquipmentResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresult) whose single numbers are compared. |
-| `instrument_levels_db` | The instrument's value for each single number compared, keyed by its notation in `result.ratings` (`"LA,eq"`, `"LC,Fmax"`...), in dB: one value, or the reading at each position, which is energy-averaged by Formula (1). |
+| `instrument_levels` | The instrument's value for each single number compared, keyed by its notation in `result.ratings` (`"LA,eq"`, `"LC,Fmax"`...), in dB: one value, or the reading at each position, which is energy-averaged by Formula (1). |
 
 **Returns:** [`InstrumentAgreementCheck`](/phonometry/reference/api/building/service-equipment/#instrumentagreementcheck).
 
@@ -417,14 +417,14 @@ case.
 | Exception | When |
 | :--- | :--- |
 | TypeError | If `result` is not a [`ServiceEquipmentResult`](/phonometry/reference/api/building/service-equipment/#serviceequipmentresult). |
-| ValueError | If `instrument_levels_db` is empty, names a single number the result does not carry, or holds a level that is not finite. |
+| ValueError | If `instrument_levels` is empty, names a single number the result does not carry, or holds a level that is not finite. |
 
 ## check_measurement_disturbance
 
 ```python
 check_measurement_disturbance(
-    max_levels_db: ArrayLike,
-    equivalent_levels_db: ArrayLike,
+    max_levels: ArrayLike,
+    equivalent_levels: ArrayLike,
 ) -> MeasurementDisturbanceCheck
 ```
 
@@ -444,8 +444,8 @@ the frequency range", which the operator chooses. A difference of exactly
 
 | Name | Description |
 | :--- | :--- |
-| `max_levels_db` | The maximum level of a band in the middle of the frequency range, one per measurement period, in dB. |
-| `equivalent_levels_db` | The equivalent level of the same band over the same period, one per period, in dB. |
+| `max_levels` | The maximum level of a band in the middle of the frequency range, one per measurement period, in dB. |
+| `equivalent_levels` | The equivalent level of the same band over the same period, one per period, in dB. |
 
 **Returns:** [`MeasurementDisturbanceCheck`](/phonometry/reference/api/building/service-equipment/#measurementdisturbancecheck).
 
@@ -566,8 +566,8 @@ positions, whose 0,50 m from the room surfaces 7.3 sets instead.
 
 ```python
 check_varying_background(
-    background_max_level_db: ArrayLike,
-    equipment_levels_db: ArrayLike,
+    background_max_level: ArrayLike,
+    equipment_levels: ArrayLike,
     *,
     observation_time_s: float,
     frequencies: ArrayLike | None = None,
@@ -596,8 +596,8 @@ of the microphone positions"; the draft names the corner.
 
 | Name | Description |
 | :--- | :--- |
-| `background_max_level_db` | The maximum level of the background over the observation period, at the corner position, per band, in dB. |
-| `equipment_levels_db` | The service equipment sound pressure level in the same bands, in dB. |
+| `background_max_level` | The maximum level of the background over the observation period, at the corner position, per band, in dB. |
+| `equipment_levels` | The service equipment sound pressure level in the same bands, in dB. |
 | `observation_time_s` | How long the background maximum was watched for, in s. |
 | `frequencies` | Band centres in Hz, kept for the plot only. |
 
@@ -627,7 +627,7 @@ Whether the calculated single numbers agree with the instrument (7.8).
 | `calculated_db` | The single numbers of the result compared, as 7.8 rounds them, keyed by their Table 1 notation (`"LA,eq"`...), in dB. |
 | `instrument_db` | The value the instrument registered for each, in dB; the energy average when several readings were given. |
 
-### InstrumentAgreementCheck.differences_db
+### InstrumentAgreementCheck.differences
 
 *property*
 
@@ -688,7 +688,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 ```python
 loudest_corner(
-    c_weighted_levels_db: ArrayLike,
+    c_weighted_levels: ArrayLike,
     *,
     excluded: Sequence[int] = (),
 ) -> int
@@ -708,8 +708,8 @@ ventilation outlet for example, is left out.
 
 | Name | Description |
 | :--- | :--- |
-| `c_weighted_levels_db` | One C-weighted level per corner, in dB. |
-| `excluded` | Indices of the corners dominated by direct sound, counted from 0 in the order of `c_weighted_levels_db`. |
+| `c_weighted_levels` | One C-weighted level per corner, in dB. |
+| `excluded` | Indices of the corners dominated by direct sound, counted from 0 in the order of `c_weighted_levels`. |
 
 **Returns:** The index of the loudest corner left, counted from 0; the first of a tie.
 
@@ -723,8 +723,8 @@ ventilation outlet for example, is left out.
 
 ```python
 MeasurementDisturbanceCheck(
-    max_levels_db: np.ndarray,
-    equivalent_levels_db: np.ndarray,
+    max_levels: np.ndarray,
+    equivalent_levels: np.ndarray,
 )
 ```
 
@@ -734,10 +734,10 @@ Whether each measurement period was free of disturbances (Clause 9).
 
 | Name | Description |
 | :--- | :--- |
-| `max_levels_db` | The maximum level in the middle of the frequency range, one per measurement period, in dB. |
-| `equivalent_levels_db` | The equivalent level in the same band, one per period, in dB. |
+| `max_levels` | The maximum level in the middle of the frequency range, one per measurement period, in dB. |
+| `equivalent_levels` | The equivalent level in the same band, one per period, in dB. |
 
-### MeasurementDisturbanceCheck.differences_db
+### MeasurementDisturbanceCheck.differences
 
 *property*
 
@@ -1081,8 +1081,8 @@ Band levels corrected for the background by Clause 9.
 | :--- | :--- |
 | `measured_db` | The measured band levels $L_1$, background included, in dB. |
 | `background_db` | The background band levels $L_2$, in dB. |
-| `difference_db` | $\Delta L = L_1 - L_2$ per band, in dB (Formula (9)). |
-| `correction_db` | The correction $K$ per band, in dB: 0 at 10 dB or more, Formula (8) from 4 dB, and 2,2 dB below 4 dB. |
+| `difference` | $\Delta L = L_1 - L_2$ per band, in dB (Formula (9)). |
+| `correction` | The correction $K$ per band, in dB: 0 at 10 dB or more, Formula (8) from 4 dB, and 2,2 dB below 4 dB. |
 | `corrected_db` | $L = L_1 - K$ per band, in dB (Formula (7)). |
 | `regime` | Per band, `"none"` (no correction), `"corrected"` (Formula (8)) or `"limited"` (held at 2,2 dB: the band is an upper limit of the equipment level). |
 | `frequencies` | The band centres, in Hz, or `None` when not given. |
@@ -1097,13 +1097,13 @@ they are read-only properties and not fields.
 
 $L = L_1 - K$ per band, in dB (Formula (7)).
 
-### ServiceEquipmentBackgroundResult.correction_db
+### ServiceEquipmentBackgroundResult.correction
 
 *property*
 
 The correction $K$ per band, in dB (Formulae (7) to (9)).
 
-### ServiceEquipmentBackgroundResult.difference_db
+### ServiceEquipmentBackgroundResult.difference
 
 *property*
 
@@ -1488,8 +1488,8 @@ of all, is more uncertain, and the draft states no coverage factor.
 
 ```python
 VaryingBackgroundCheck(
-    background_max_level_db: np.ndarray,
-    equipment_levels_db: np.ndarray,
+    background_max_level: np.ndarray,
+    equipment_levels: np.ndarray,
     observation_time_s: float,
     frequencies: np.ndarray | None = None,
 )
@@ -1503,8 +1503,8 @@ The route the NOTE to Clause 9 offers when the background varies in time.
 
 | Name | Description |
 | :--- | :--- |
-| `background_max_level_db` | The maximum level of the background over the observation period at the corner position, per band (or one weighted value), in dB. |
-| `equipment_levels_db` | The service equipment sound pressure level, the same bands, in dB. |
+| `background_max_level` | The maximum level of the background over the observation period at the corner position, per band (or one weighted value), in dB. |
+| `equipment_levels` | The service equipment sound pressure level, the same bands, in dB. |
 | `observation_time_s` | How long the background maximum was watched for, in s. |
 | `frequencies` | The band centres, in Hz, or `None` when not given. |
 
@@ -1577,9 +1577,9 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 ```python
 verify_calibration_deviation(
-    calibration_levels_db: ArrayLike,
+    calibration_levels: ArrayLike,
     *,
-    previous_levels_db: ArrayLike | None = None,
+    previous_levels: ArrayLike | None = None,
 ) -> CalibrationDeviationResult
 ```
 
@@ -1605,8 +1605,8 @@ levels are passed instead as each one's departure from its stated level.
 
 | Name | Description |
 | :--- | :--- |
-| `calibration_levels_db` | The calibrator readings of this measurement in the order taken, the one at the beginning and the one at the end, in dB. One reading alone is judged against `previous_levels_db`, which lets the beginning be checked before measuring. |
-| `previous_levels_db` | Readings of earlier calibrations of the same instrumentation, in dB; `None` (default) to compare the end with the beginning only. |
+| `calibration_levels` | The calibrator readings of this measurement in the order taken, the one at the beginning and the one at the end, in dB. One reading alone is judged against `previous_levels`, which lets the beginning be checked before measuring. |
+| `previous_levels` | Readings of earlier calibrations of the same instrumentation, in dB; `None` (default) to compare the end with the beginning only. |
 
 **Returns:** [`CalibrationDeviationResult`](/phonometry/reference/api/building/service-equipment/#calibrationdeviationresult).
 

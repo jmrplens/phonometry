@@ -31,8 +31,8 @@ from phonometry import electroacoustics
 from phonometry.filters import octave_filter
 
 table = electroacoustics.SIMULATED_PROGRAM_SPECTRUM
-levels = np.array([band.relative_level_db for band in table.values()])
-print(len(table), table[20.0].relative_level_db, table[20000.0].relative_level_db)
+levels = np.array([band.relative_level for band in table.values()])
+print(len(table), table[20.0].relative_level, table[20000.0].relative_level)
 # 31 -13.5 -21.6
 print(round(10 * np.log10(np.sum(10 ** (levels / 10))), 2))  # 12.56
 ```
@@ -480,9 +480,9 @@ microphone = electroacoustics.verify_ear_canal_microphone(
     entrance_area_mm2=3.8,
     canal_section_area_mm2=19.0,
     volume_mm3=95.0,
-    pink_noise_band_levels_db=[61.0, 62.2, 63.1, 62.5, 61.4],
-    open_levels_db=[62.0, 63.0, 62.5],
-    sealed_levels_db=[41.0, 44.0, 45.5],
+    pink_noise_band_levels=[61.0, 62.2, 63.1, 62.5, 61.4],
+    open_levels=[62.0, 63.0, 62.5],
+    sealed_levels=[41.0, 44.0, 45.5],
 )
 print(microphone.passes, round(microphone.area_ratio, 3))  # True 0.422
 ```

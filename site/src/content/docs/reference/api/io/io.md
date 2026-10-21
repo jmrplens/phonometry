@@ -164,7 +164,7 @@ did not print. That is what this holds.
 
 A subclass declares the bands its tables can print and how its band fields
 are spelled, and defines the reading method under the name its own domain
-uses, because `row.transmission_loss_db(500)` reads better than a generic
+uses, because `row.transmission_loss(500)` reads better than a generic
 verb and says what comes back. `values_at` reads the row at a whole
 array of frequencies, for a function that takes one value per band by
 position.

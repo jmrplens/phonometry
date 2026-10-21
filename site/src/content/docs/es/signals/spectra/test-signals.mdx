@@ -166,7 +166,7 @@ remuestrea de forma polifásica racional (44,1 a 48 kHz es la razón 160/147)
 con un FIR paso bajo diseñado *dentro de la función* por el método de la
 ventana de Kaiser, a partir de dos números que controla quien llama:
 
-- `stopband_attenuation_db` (por defecto 120): el rechazo de alias, con la
+- `stopband_attenuation` (por defecto 120): el rechazo de alias, con la
   banda atenuada empezando exactamente en la menor de las dos frecuencias
   de Nyquist, donde se produce el plegado;
 - `transition_width` (por defecto 0,05): la fracción de esa frecuencia de
@@ -222,7 +222,7 @@ ax.axvline(res.passband_edge_hz, color="g", linestyle="--",
            label="Borde de la banda de paso")
 ax.axvline(res.stopband_edge_hz, color="r", linestyle="--",
            label="Borde de la banda atenuada (pliegue de alias)")
-ax.axhline(-res.stopband_attenuation_db, color="k", linestyle=":",
+ax.axhline(-res.stopband_attenuation, color="k", linestyle=":",
            label="Atenuación de diseño -120 dB")
 ax.axvspan(res.stopband_edge_hz, 4 * res.stopband_edge_hz,
            color="r", alpha=0.08)

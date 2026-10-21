@@ -516,8 +516,8 @@ def test_a_rotation_varying_exactly_the_table_1_allowance_is_diffuse(
     check = hearing.check_reat_sound_field(
         levels,
         [high],
-        rotation_levels_db=[[high], [low]],
-        free_field_rejection_db=10.0,
+        rotation_levels=[[high], [low]],
+        free_field_rejection=10.0,
         frequencies=[1000.0],
     )
     assert bool(np.all(check.diffuse))
@@ -1230,8 +1230,8 @@ def test_a_screen_attenuation_on_a_half_is_reported_even(
     result = noise_control.screen_attenuation(
         [pair[0]],
         [pair[1]],
-        a_weighted_unscreened_level_db=pair[0],
-        a_weighted_screened_level_db=pair[1],
+        a_weighted_unscreened_level=pair[0],
+        a_weighted_screened_level=pair[1],
     )
     assert int(result.rounded()[0]) == reported
     assert result.rounded_a_weighted() == reported
@@ -1422,9 +1422,9 @@ def test_a_canal_section_of_six_tenths_of_the_canal_is_not_less_than_that(
         entrance_area_mm2=4.0,
         canal_section_area_mm2=section,
         volume_mm3=100.0,
-        pink_noise_band_levels_db=[60.0, 61.0],
-        open_levels_db=[80.0],
-        sealed_levels_db=[60.0],
+        pink_noise_band_levels=[60.0, 61.0],
+        open_levels=[80.0],
+        sealed_levels=[60.0],
         ear_canal_area_mm2=canal,
     )
     assert not check.requirements["b"]

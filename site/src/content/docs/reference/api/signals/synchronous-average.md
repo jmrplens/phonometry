@@ -49,7 +49,7 @@ averaged over `N` periods has residual variance $\sigma^2/N$:
 the residual standard deviation falls as $1/\sqrt{N}$ and the
 amplitude signal-to-noise ratio improves by $\sqrt{N}$ (a power
 reduction of $10 \log_{10} N$ dB, reported as
-`noise_reduction_db`).
+`noise_reduction`).
 
 **Choosing N (McFadden's revised-model correction).** Because a discrete
 interfering tone at a *non-harmonic* order $q = f T$ is only
@@ -127,7 +127,7 @@ SynchronousAverageResult(
     period_s: float,
     fs: float,
     *,
-    noise_reduction_db: float,
+    noise_reduction: float,
     residual_rms: float,
     comb_frequencies: NDArray[np.float64],
     comb_response: NDArray[np.float64],
@@ -147,7 +147,7 @@ Time synchronous average of a periodic waveform in noise.
 | `samples_per_period` | Integer samples per period `M` after any alignment. |
 | `period_s` | Repetition period `T`, in seconds. |
 | `fs` | Sample rate, in Hz. |
-| `noise_reduction_db` | Power reduction of asynchronous noise, $10 \log_{10} N$ dB (amplitude SNR gain $\sqrt{N}$). |
+| `noise_reduction` | Power reduction of asynchronous noise, $10 \log_{10} N$ dB (amplitude SNR gain $\sqrt{N}$). |
 | `residual_rms` | Root-mean-square of `residual`. |
 | `comb_frequencies` | Frequency axis of the comb-filter response, in Hz (from DC over a whole number of harmonics of `1/T`). |
 | `comb_response` | Magnitude of the comb filter (McFadden Eq. 8) on `comb_frequencies`. |

@@ -91,7 +91,7 @@ phi = np.arange(0, 360, 10)
 levels = 94.0 + np.vstack((pattern_db(phi, 0.785),    # X-Y plane (h), 8 kHz
                            pattern_db(phi, 0.98)))    # X-Z plane (v), the case narrows it
 d = metrology.directivity_factor(levels)
-print(round(d.gamma, 3), round(d.directivity_index_db, 2))   # 1.845 2.66
+print(round(d.gamma, 3), round(d.directivity_index, 2))   # 1.845 2.66
 d.plot()                  # the polar response, one curve per plane
 d.plot(view="weights")    # K(phi) of each reading
 ```
@@ -104,14 +104,14 @@ each, every reading weighing the same (Formula (A.5)):
 
 ```python
 a = metrology.axisymmetric_directivity_factor(levels[0])
-print(round(a.directivity_index_db, 2))   # 2.45
+print(round(a.directivity_index, 2))   # 2.45
 
 horizontal, vertical = metrology.equal_area_incidence_angles()
 print(horizontal[:6].round(1))   # [ 0.  32.6 50.8 65.1 77.8 90. ]
 e = metrology.equal_area_directivity_factor(
     94.0 + pattern_db(horizontal, 0.785), 94.0 + pattern_db(vertical, 0.98)
 )
-print(round(e.directivity_index_db, 2))   # 2.66
+print(round(e.directivity_index, 2))   # 2.66
 ```
 
 The X-Y plane alone has the 2,45 dB Table B.1 prints for the microphone at
@@ -133,17 +133,17 @@ bands = sorted(metrology.IEC61183_TABLE_B1)   # the 30 preferred frequencies, 25
 def meter(frequency_hz):
     """The synthetic meter at one band: the X-Y plane has the 10 lg gamma Table B.1
     prints for the microphone, and the case narrows the X-Z plane."""
-    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index_db
+    target = metrology.IEC61183_TABLE_B1[frequency_hz].directivity_index
     n = 0.98 / (10 ** (-target / 10) - 0.02) - 1   # the exponent with that index
     return metrology.directivity_factor(
         94.0 + np.vstack((pattern_db(phi, n), pattern_db(phi, 1.25 * n))))
 
-index = [meter(f).directivity_index_db for f in bands]
+index = [meter(f).directivity_index for f in bands]
 g_f = -10 * np.log10(1 + (np.array(bands) / 25000) ** 4)   # L_rd - L_o at each band
 r = metrology.random_incidence_sensitivity(bands, g_f, index)
 shown = np.isin(r.frequencies, [1000, 4000, 8000, 16000])
-print(r.correction_db[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
-print(r.random_incidence_level_db[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
+print(r.correction[shown].round(2))              # [-0.06 -0.95 -2.66 -5.62]
+print(r.random_incidence_level[shown].round(2))  # [-0.06 -0.95 -2.71 -6.29]
 r.plot()
 r.plot(view="correction")
 ```
@@ -177,18 +177,18 @@ level is 0 dB the field plus its `Delta_DP`:
 
 ```python
 print(metrology.IEC61183_TABLE_B1[8000.0])
-# ReferenceMicrophoneRow(directivity_index_db=2.45, diffuse_pressure_difference_db=1.2)
+# ReferenceMicrophoneRow(directivity_index=2.45, diffuse_pressure_difference_db=1.2)
 
 delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
                      for f in bands])
 dd = metrology.diffuse_field_sensitivity(
     bands,
-    80.0 + r.random_incidence_level_db,  # L_D, the meter under test
+    80.0 + r.random_incidence_level,  # L_D, the meter under test
     80.0 + delta_dp,                     # L_D,ref, a pressure-calibrated LS2aP
-    reference_pressure_level_db=0.0,     # G_P,ref; Delta_DP from Table B.1
+    reference_pressure_level=0.0,     # G_P,ref; Delta_DP from Table B.1
 )
-print(dd.reference_correction_db[shown])            # [0.   0.25 1.2  3.05]
-print(dd.diffuse_field_level_db[shown].round(2))    # [-0.06 -0.95 -2.71 -6.29]
+print(dd.reference_correction[shown])            # [0.   0.25 1.2  3.05]
+print(dd.diffuse_field_level[shown].round(2))    # [-0.06 -0.95 -2.71 -6.29]
 dd.plot()
 ```
 

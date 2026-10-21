@@ -15,17 +15,23 @@ public API) and on records written for the purpose.
 
 from __future__ import annotations
 
+import collections.abc
 import dataclasses
+import functools
 import importlib
 import inspect
+import numbers
 import pathlib
 import pkgutil
+import types
+import typing
 import warnings
 import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, NamedTuple
 from unittest import mock
 
 import numpy as np
+import numpy.typing as npt
 import pytest
 import result_factories
 
@@ -35,7 +41,7 @@ from phonometry._internal import display
 from phonometry._internal.display import RichDisplay
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
 
 #: The tags the table is written with, and nothing else.
 _TAGS = frozenset(
@@ -567,9 +573,25 @@ def test_the_worst_case_stays_bounded() -> None:
         ("c_s", ""),
         ("r_tr_s", ""),
         ("r_direct_w", ""),
-        ("delta_rw_c", ""),
-        ("sound_power_level_a", ""),
         ("m", ""),
+        ("r_squared", ""),
+        ("peak_temperature_c", "\N{DEGREE SIGN}C"),
+        # A level or a level difference, in decibels by its head noun.
+        ("delta_rw_c", "dB"),
+        ("sound_power_level_a", "dB"),
+        ("insertion_loss", "dB"),
+        ("band_levels", "dB"),
+        ("sound_reduction_index_1000", "dB"),
+        ("background_corrections", "dB"),
+        ("levels_before", "dB"),
+        ("band_levels_at_characteristic", "dB"),
+        ("spectrum_adaptation_term", "dB"),
+        ("l_i_fmax_0", "dB"),
+        ("max_spl", "dB"),
+        # A statistic of a level, or a word that only ends like one.
+        ("sigma_level", ""),
+        ("level_uncertainty_db", "dB"),
+        ("standard_deviation", ""),
         # The axes the vocabulary names by the bare concept, in their one unit.
         ("frequencies", "Hz"),
         ("octave_frequencies", "Hz"),
@@ -595,6 +617,29 @@ def test_a_renamed_band_axis_keeps_its_unit_in_the_table() -> None:
     assert units["frequencies"] == "Hz"
 
 
+def test_a_symbol_says_decibel_only_in_the_package_that_prints_it() -> None:
+    """``r_s_w`` is a sound reduction index in ``building`` and nothing elsewhere.
+
+    The R, D and C of the building standards are a distance, a directivity
+    and a gain in other packages, so the record's module decides.
+    """
+    assert display.unit_of("r_s_w", "phonometry.building.measurement") == "dB"
+    assert display.unit_of("ctr", "phonometry.building.measurement.ratings") == "dB"
+    assert display.unit_of("r_direct", "phonometry.environment.propagation") == ""
+    assert display.unit_of("c", "phonometry.underwater.bioacoustics") == ""
+
+
+def test_a_renamed_level_keeps_its_unit_in_the_table() -> None:
+    """``level_db`` became ``level`` and the table still shows decibels."""
+    fs = 48_000.0
+    record = phonometry.broadcast.quasi_peak_meter(
+        np.sin(2.0 * np.pi * 1000.0 * np.arange(int(fs)) / fs), fs
+    )
+    units = {row.name: row.unit for row in display._rows(record, depth=0)[0]}
+    assert units["level"] == "dB"
+    assert units["reading"] == ""
+
+
 def test_a_record_names_the_unit_of_a_bare_field_that_holds_another() -> None:
     """Crossing levels are in the units of the signal, not in decibels."""
     record = phonometry.metrology.level_crossing_rate(
@@ -603,6 +648,237 @@ def test_a_record_names_the_unit_of_a_bare_field_that_holds_another() -> None:
     units = {row.name: row.unit for row in display._rows(record, depth=0)[0]}
     assert units["levels"] == ""
     assert units["fs"] == "Hz"
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["loudness_level", "loudness_level_max", "short_term_loudness_level"],
+)
+def test_a_loudness_level_is_in_phon(name: str) -> None:
+    """ISO 532-1:2017, 3.16, Note 1: a loudness level is expressed in phons."""
+    assert display.unit_of(name, "phonometry.psychoacoustics.loudness") == "phon"
+
+
+def test_the_table_shows_a_loudness_level_in_phon() -> None:
+    fs = 48_000.0
+    tone = (
+        np.sqrt(2.0)
+        * 20e-6
+        * 10.0**3
+        * np.sin(2.0 * np.pi * 1000.0 * np.arange(int(fs)) / fs)
+    )
+    record = phonometry.psychoacoustics.loudness_zwicker(tone, fs)
+    units = {row.name: row.unit for row in display._rows(record, depth=0)[0]}
+    assert units["loudness_level"] == "phon"
+
+
+def test_an_ell_is_a_length_in_materials() -> None:
+    """ASTM E2611's distances l1 and l2 are not the L of a level there."""
+    module = "phonometry.materials.absorbers.four_microphone"
+    assert not display.says_decibels("l1", module)
+    assert display.says_decibels("l1", "phonometry.building.measurement")
+    matrix = phonometry.materials.TransferMatrix(
+        1.0, 0.0, 0.0, 1.0, l1=0.1, s1=0.05, l2=0.1, s2=0.05
+    )
+    units = {row.name: row.unit for row in display._rows(matrix, depth=0)[0]}
+    assert units["l1"] == units["l2"] == units["s1"] == "m"
+
+
+@pytest.mark.parametrize(
+    ("value", "holds"),
+    [
+        (1.5, True),
+        (3, True),
+        (np.float32(2.0), True),
+        (np.array([1.0, 2.0]), True),
+        ((None, 2.0), True),
+        ({"a": 1.0}, True),
+        ((), True),
+        (None, False),
+        (True, False),
+        (np.False_, False),
+        ("LK,x", False),
+        (1.0 + 2.0j, False),
+        (np.array([1.0 + 0.0j]), False),
+        (np.array([True, False]), False),
+        (("a", "b"), False),
+        ({"a": "b"}, False),
+    ],
+)
+def test_only_a_value_that_holds_a_number_is_in_a_unit(
+    value: object, *, holds: bool
+) -> None:
+    assert display.holds_a_quantity(value) is holds
+
+
+def test_a_truth_value_or_a_text_shows_no_unit_whatever_its_name() -> None:
+    """A bool named for a level, or a text named for an index, is in no unit."""
+    condition = phonometry.building.SERVICE_EQUIPMENT_OPERATING_CONDITIONS["water_tap"]
+    units = {row.name: row.unit for row in display._rows(condition, depth=0)[0]}
+    assert units["max_level"] == units["equivalent_level"] == ""
+    limits = phonometry.environment.activity_limits("a")
+    units = {row.name: row.unit for row in display._rows(limits, depth=0)[0]}
+    assert units["index"] == ""
+
+
+@functools.cache
+def _annotation_names() -> dict[str, object]:
+    """What a record's annotations name under ``TYPE_CHECKING`` only.
+
+    The package imports ``NDArray``, ``Mapping`` and the records a field
+    holds for the type checker alone, so :func:`typing.get_type_hints`
+    reads them from here.
+    """
+    names: dict[str, object] = {"np": np, "numpy": np, "npt": npt}
+    for module in (typing, collections.abc, numbers, npt):
+        names.update(
+            (name, obj) for name, obj in vars(module).items() if name[:1].isupper()
+        )
+    for module_info in pkgutil.walk_packages(phonometry.__path__, "phonometry."):
+        module = importlib.import_module(module_info.name)
+        for name, obj in vars(module).items():
+            if isinstance(obj, type) and obj.__module__.startswith("phonometry"):
+                names.setdefault(name, obj)
+    return names
+
+
+def _arms(annotation: object) -> Iterator[object]:
+    """The types a union names, one by one."""
+    if typing.get_origin(annotation) in {typing.Union, types.UnionType}:
+        for arm in typing.get_args(annotation):
+            yield from _arms(arm)
+    else:
+        yield annotation
+
+
+def _sample_of(annotation: object) -> object:
+    """A value of the kind an annotation names when it holds no number, or None."""
+    for arm in _arms(annotation):
+        if arm is bool:
+            return True
+        if arm is str:
+            return "a label"
+        if arm is complex:
+            return 1.0j
+        if typing.get_origin(arm) is np.ndarray:
+            scalar = (typing.get_args(typing.get_args(arm)[-1]) or (None,))[0]
+            if isinstance(scalar, type) and issubclass(
+                scalar, np.complexfloating | np.bool_
+            ):
+                return np.zeros(1, dtype=scalar)
+        if isinstance(arm, type) and (
+            dataclasses.is_dataclass(arm)
+            or (issubclass(arm, tuple) and hasattr(arm, "_fields"))
+        ):
+            return _stub(arm)
+    return None
+
+
+def _stub(cls: type) -> object:
+    """An instance of a record class that no constructor checked."""
+    if issubclass(cls, tuple) and isinstance(getattr(cls, "_fields", None), tuple):
+        return tuple.__new__(cls, [None] * len(cls._fields))  # type: ignore[attr-defined]
+    return object.__new__(cls)
+
+
+def test_no_public_field_that_holds_no_number_is_shown_in_a_unit() -> None:
+    """No truth value, text, complex factor or record field is shown as a level.
+
+    The decibel is read from the head noun of the field's name, and a name
+    that says a level (``max_level``), an index (``index``) or a loss
+    (``boundary_loss``) can hold a flag, a label, the complex factor
+    :math:`F(w)` or a record of its own. Beside any of them the table shows
+    only the unit the name spells (``pole_rad_s``, a record of boundaries in
+    ``displacement_um``), if any.
+    """
+    shown = []
+    read = 0
+    for cls in _public_records():
+        hints = typing.get_type_hints(cls, localns=_annotation_names())
+        read += 1
+        record = _stub(cls)
+        for name in (
+            [field.name for field in dataclasses.fields(cls)]
+            if dataclasses.is_dataclass(cls)
+            else list(cls._fields)  # type: ignore[attr-defined]
+        ):
+            sample = _sample_of(hints.get(name))
+            if sample is None:
+                continue
+            unit = display._unit_in(record, name, sample)
+            if unit != display._spelled_unit(name):
+                shown.append(f"{cls.__name__}.{name}: {unit}")
+    assert read == len(_public_records())
+    assert shown == []
+
+
+#: The fields whose name reads as one unit and whose value is in another, or
+#: in none: a sample position named an index, a ratio of energies named an
+#: index or a correction, a decimal exponent named a correction, a linear
+#: factor named a correction, a mean of an envelope named a level, a tube
+#: length written as the ``l`` of ASTM E2611 and a class-number difference.
+_MISLEADING_NAMES = (
+    ("aircraft.rotorcraft_propagation", "TerrainScreeningResult", "path_difference", "m"),
+    ("building.impact_catalogue", "ImpactInsulation", "impact_insulation_class_improvement", ""),
+    ("emission.intensity", "IntensityResult", "bias_correction", ""),
+    ("environment.propagation.barrier_reflection", "DirectSoundSubtraction", "peak_index", ""),
+    ("environment.propagation.barrier_reflection", "ReflectionIndexResult", "reflection_index", ""),
+    ("environment.propagation.barrier_reflection", "ReflectionIndexResult", "gain_corrections", ""),
+    ("materials.absorbers.four_microphone", "TransferMatrix", "l1", "m"),
+    ("materials.absorbers.four_microphone", "TransferMatrix", "s2", "m"),
+    ("materials.absorbers.layered", "PerforatedPlateLayer", "end_correction", ""),
+    ("materials.absorbers.layered", "MicroperforatedPlateLayer", "end_correction", ""),
+    ("metrology.data_qualification", "LevelCrossingResult", "levels", ""),
+    ("noise_control.valves", "AerodynamicValveNoise", "efficiency_correction", ""),
+    ("noise_control.valves", "Expander", "efficiency_correction", ""),
+    ("noise_control.valves", "ValveTrim", "efficiency_correction", ""),
+    ("room.auditorium", "AuditoriumQuantity", "just_noticeable_difference", ""),
+    ("signals._envelope", "EnvelopeSpectrumResult", "mean_level", ""),
+    ("vibration.structural._impact_mobility", "DoubleHitCheck", "impact_indices", ""),
+)  # fmt: skip
+
+
+@pytest.mark.parametrize(
+    ("module", "name", "field", "unit"),
+    _MISLEADING_NAMES,
+    ids=[f"{name}.{field}" for _, name, field, _ in _MISLEADING_NAMES],
+)
+def test_a_number_its_name_misreads_shows_its_own_unit(
+    module: str, name: str, field: str, unit: str
+) -> None:
+    cls = getattr(importlib.import_module(f"phonometry.{module}"), name)
+    assert display._unit_in(_stub(cls), field, 1.0) == unit
+
+
+def _overriding_records() -> list[type]:
+    """Every class of the package that names the unit of a field of its own."""
+    found: dict[int, type] = {}
+    for module_info in pkgutil.walk_packages(phonometry.__path__, "phonometry."):
+        module = importlib.import_module(module_info.name)
+        for obj in vars(module).values():
+            if isinstance(obj, type) and "_display_units" in vars(obj):
+                found[id(obj)] = obj
+    return sorted(found.values(), key=lambda cls: f"{cls.__module__}.{cls.__name__}")
+
+
+@pytest.mark.parametrize("cls", _overriding_records(), ids=lambda cls: cls.__name__)
+def test_every_unit_a_record_names_is_needed_and_shown(cls: type) -> None:
+    """A ``_display_units`` entry names a field and says what the name does not.
+
+    An entry the name already says would hide nothing if it were deleted; an
+    entry for a field the record does not have is a typo that leaves the
+    field it meant reading the wrong unit.
+    """
+    fields = (
+        {field.name for field in dataclasses.fields(cls)}
+        if dataclasses.is_dataclass(cls)
+        else set(cls._fields)  # type: ignore[attr-defined]
+    )
+    record = object.__new__(cls)
+    for name, unit in cls._display_units.items():  # type: ignore[attr-defined]
+        assert name in fields
+        assert display.unit_of(name, cls.__module__) != unit
+        assert display._unit_in(record, name, 1.0) == unit
 
 
 #: The words that spell a unit and nothing else, at the end of a field's name.

@@ -94,7 +94,7 @@ def test_table_1_is_transcribed_as_printed() -> None:
 
 
 def test_table_2_is_transcribed_as_printed() -> None:
-    assert dict(emission.PLANT_BACKGROUND_CORRECTION_DB) == dict(ref.ISO8297_TABLE_2)
+    assert dict(emission.PLANT_BACKGROUND_CORRECTION) == dict(ref.ISO8297_TABLE_2)
 
 
 @pytest.mark.parametrize(
@@ -102,7 +102,7 @@ def test_table_2_is_transcribed_as_printed() -> None:
     [
         emission.PLANT_AIR_ABSORPTION_DB_PER_M,
         emission.PLANT_METHOD_UNCERTAINTY_DB,
-        emission.PLANT_BACKGROUND_CORRECTION_DB,
+        emission.PLANT_BACKGROUND_CORRECTION,
     ],
 )
 def test_printed_tables_are_read_only(table: object) -> None:
@@ -642,7 +642,7 @@ def test_steps_1_and_4_to_8_by_hand() -> None:
         plant_area_m2=10000.0,
     )
     mean = 10.0 * np.log10(np.mean(10.0 ** (levels / 10.0), axis=0))
-    np.testing.assert_allclose(res.mean_level_db, mean)
+    np.testing.assert_allclose(res.mean_level, mean)
     assert res.area_term_db == pytest.approx(
         10.0 * math.log10(2 * 40000.0 + 10.0 * 800.0)
     )
@@ -654,7 +654,7 @@ def test_steps_1_and_4_to_8_by_hand() -> None:
     expected = (
         mean + res.area_term_db + res.near_field_term_db + res.air_absorption_term_db
     )
-    np.testing.assert_allclose(res.sound_power_level_db, expected)
+    np.testing.assert_allclose(res.sound_power_level, expected)
 
 
 def test_note_11_bounds_the_proximity_term() -> None:
@@ -722,9 +722,7 @@ def test_a_point_source_gives_its_own_sound_power_back() -> None:
         expected = 10.0 * math.log10(
             (radius**2 + radius * height) / (radius**2 + height**2)
         )
-        assert res.sound_power_level_db[0] - source_lw == pytest.approx(
-            expected, abs=1e-5
-        )
+        assert res.sound_power_level[0] - source_lw == pytest.approx(expected, abs=1e-5)
 
 
 def test_a_result_keeps_copies_of_the_callers_readings() -> None:
@@ -733,9 +731,9 @@ def test_a_result_keeps_copies_of_the_callers_readings() -> None:
         levels, [500.0, 1000.0], measurement_area_m2=1e4, contour_length_m=400.0,
         microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
     )  # fmt: skip
-    before = res.sound_power_level_db.copy()
+    before = res.sound_power_level.copy()
     levels += 20.0
-    np.testing.assert_array_equal(res.sound_power_level_db, before)
+    np.testing.assert_array_equal(res.sound_power_level, before)
     assert not res.measured_levels.flags.writeable
     assert not res.frequencies.flags.writeable
 
@@ -748,9 +746,7 @@ def test_background_is_corrected_position_by_position() -> None:
         microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
         background_levels=background,
     )  # fmt: skip
-    np.testing.assert_array_equal(
-        res.background_correction_db, [[1.0, 0.5], [0.0, 1.0]]
-    )
+    np.testing.assert_array_equal(res.background_correction, [[1.0, 0.5], [0.0, 1.0]])
     np.testing.assert_allclose(res.levels, levels - [[1.0, 0.5], [0.0, 1.0]])
 
 
@@ -777,10 +773,8 @@ def test_steps_2_and_3_cap_a_level_far_above_the_average() -> None:
     np.testing.assert_array_equal(res.capped[:, 0], [False, False, False, False, True])
     capped = np.array([60.0, 60.0, 60.0, 60.0, mean + 5.0])
     star = 10.0 * math.log10(np.mean(10.0 ** (capped / 10.0)))
-    assert res.corrected_mean_level_db[0] == pytest.approx(star)
-    assert res.sound_power_level_db[0] - res.corrected_mean_level_db[
-        0
-    ] == pytest.approx(
+    assert res.corrected_mean_level[0] == pytest.approx(star)
+    assert res.sound_power_level[0] - res.corrected_mean_level[0] == pytest.approx(
         res.area_term_db + res.near_field_term_db + res.air_absorption_term_db[0]
     )
 
@@ -790,7 +784,7 @@ def test_no_warning_when_every_level_is_within_5_db() -> None:
         warnings.simplefilter("error")
         res = _contour().sound_power(_levels(_contour().positions_m.shape[0]), OCTAVES)
     assert not res.steps_2_3_applied
-    np.testing.assert_allclose(res.corrected_mean_level_db, res.mean_level_db)
+    np.testing.assert_allclose(res.corrected_mean_level, res.mean_level)
 
 
 @pytest.mark.parametrize(("theta", "term"), [(30.0, 2.0), (45.0, 1.5), (90.0, 0.0)])
@@ -819,10 +813,8 @@ def test_a_weighted_level_uses_the_annex_e_octave_corrections() -> None:
         microphone_height_m=5.0, mean_distance_m=10.0, plant_area_m2=4e3,
     )  # fmt: skip
     ck = np.array([-26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])
-    expected = 10.0 * math.log10(
-        np.sum(10.0 ** ((res.sound_power_level_db + ck) / 10.0))
-    )
-    assert res.a_weighted_sound_power_level_db == pytest.approx(expected)
+    expected = 10.0 * math.log10(np.sum(10.0 ** ((res.sound_power_level + ck) / 10.0)))
+    assert res.a_weighted_sound_power_level == pytest.approx(expected)
 
 
 def test_the_31_5_hz_band_is_left_out_of_lwa() -> None:
@@ -832,8 +824,8 @@ def test_the_31_5_hz_band_is_left_out_of_lwa() -> None:
         plant_area_m2=4e3,
     )  # fmt: skip
     np.testing.assert_array_equal(with_low.a_weighted_bands_hz, [1000.0])
-    assert with_low.a_weighted_sound_power_level_db == pytest.approx(
-        with_low.sound_power_level_db[1]
+    assert with_low.a_weighted_sound_power_level == pytest.approx(
+        with_low.sound_power_level[1]
     )
 
 
@@ -844,7 +836,7 @@ def test_weather_changes_only_the_air_term() -> None:
     weather = contour.sound_power(
         levels, OCTAVES, temperature_c=25.0, relative_humidity_percent=40.0
     )
-    delta = weather.sound_power_level_db - table.sound_power_level_db
+    delta = weather.sound_power_level - table.sound_power_level
     np.testing.assert_allclose(
         delta, weather.air_absorption_term_db - table.air_absorption_term_db
     )
@@ -1156,7 +1148,7 @@ def test_a_level_exactly_5_db_above_the_average_is_not_replaced() -> None:
         contour_length_m=400.0, microphone_height_m=5.0, mean_distance_m=10.0,
         plant_area_m2=4e3,
     )  # fmt: skip
-    excess = float(res.levels[3, 0] - res.mean_level_db[0])
+    excess = float(res.levels[3, 0] - res.mean_level[0])
     assert excess == pytest.approx(5.0, abs=1e-12)
     assert not res.capped[3, 0]
     assert _requirement(res, "level_excess").holds
@@ -1184,7 +1176,7 @@ def test_a_level_a_hair_under_5_db_above_the_average_is_not_replaced(
         )  # fmt: skip
     assert not res.capped.any()
     assert not res.steps_2_3_applied
-    np.testing.assert_array_equal(res.corrected_mean_level_db, res.mean_level_db)
+    np.testing.assert_array_equal(res.corrected_mean_level, res.mean_level)
     row = _requirement(res, "level_excess")
     assert row.value == 5.0
     assert row.holds
@@ -1212,7 +1204,7 @@ def test_background_margins_of_decimal_readings_at_the_edges_of_6_b(
         np.full(shape, operating), OCTAVES,
         background_levels=np.full(shape, background),
     )  # fmt: skip
-    np.testing.assert_array_equal(res.background_correction_db, correction)
+    np.testing.assert_array_equal(res.background_correction, correction)
     check = emission.check_plant_measurement(contour, res)
     assert check.requirement("background_margin").holds is required
     assert check.requirement("background_margin_preferred").holds is preferred
@@ -1282,11 +1274,11 @@ def test_two_equal_parts_add_3_db() -> None:
     _contour_, res = _passing()
     parts = emission.partial_plant_contributions([res, res], names=["North", "South"])
     np.testing.assert_allclose(
-        parts.total_level_db - res.sound_power_level_db, 10.0 * math.log10(2.0)
+        parts.total_level - res.sound_power_level, 10.0 * math.log10(2.0)
     )
     np.testing.assert_allclose(parts.contribution_db, -10.0 * math.log10(2.0))
     assert parts.a_weighted_total_db == pytest.approx(
-        res.a_weighted_sound_power_level_db + 10.0 * math.log10(2.0)
+        res.a_weighted_sound_power_level + 10.0 * math.log10(2.0)
     )
 
 
@@ -1339,8 +1331,8 @@ def test_sound_power_plot_draws_one_bar_per_band() -> None:
     res = contour.sound_power(_levels(contour.positions_m.shape[0]), OCTAVES)
     ax = res.plot()
     heights = [p.get_height() for p in ax.patches]
-    np.testing.assert_allclose(heights, res.sound_power_level_db)
-    assert f"{res.a_weighted_sound_power_level_db:.1f}" in ax.get_title()
+    np.testing.assert_allclose(heights, res.sound_power_level)
+    assert f"{res.a_weighted_sound_power_level:.1f}" in ax.get_title()
     plt.close("all")
 
 
@@ -1373,7 +1365,5 @@ def test_partial_plot_draws_the_sum_and_each_part() -> None:
     parts = emission.partial_plant_contributions([res, res], names=["A", "B"])
     ax = parts.plot()
     assert len(ax.lines) == 2
-    np.testing.assert_allclose(
-        [p.get_height() for p in ax.patches], parts.total_level_db
-    )
+    np.testing.assert_allclose([p.get_height() for p in ax.patches], parts.total_level)
     plt.close("all")

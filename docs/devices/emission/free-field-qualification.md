@@ -271,7 +271,7 @@ plt.show()
 
 | Function | Clause | Returns | Notes |
 | :--- | :--- | :--- | :--- |
-| `MicrophoneTraverse(positions_m, levels, monitor_levels_db=None, background_levels=None, name="", targets=())` | 5.1.3.2, A.3.3 | one traverse | `nan` marks a point not measured at a frequency, which is how a spacing that changes with frequency is written; `targets` names what the path is selected towards among `"dihedral corner"`, `"trihedral corner"`, `"boundary center"`, `"closest boundary"` and `"unique features"` |
+| `MicrophoneTraverse(positions_m, levels, monitor_levels=None, background_levels=None, name="", targets=())` | 5.1.3.2, A.3.3 | one traverse | `nan` marks a point not measured at a frequency, which is how a spacing that changes with frequency is written; `targets` names what the path is selected towards among `"dihedral corner"`, `"trihedral corner"`, `"boundary center"`, `"closest boundary"` and `"unique features"` |
 | `MicrophoneTraverse.along(direction, distances, levels, *, start_m=(0, 0, 0), ...)` | 5.1.3.2 | one traverse | Laid out along a straight line |
 | `inverse_square_law_deviations(traverses, *, frequencies, room, origin_m=None, source_box_m=None)` | Formulae (1) to (4) | `InverseSquareLawResult` | One call per test source; `origin_m` or `source_box_m`, not both |
 | `inverse_square_law_tolerance(frequencies, *, room)` | Table A.1 | limit per band [dB] | A tone is read in the one-third octave band that contains it |
@@ -498,11 +498,11 @@ air = emission.CalibrationConditions(
     temperature_c=20.0, static_pressure_kpa=98.6, air_absorption_db_per_m=alpha)
 calibration = emission.reference_source_calibration(
     levels, frequencies=thirds, arrangement="fixed", conditions=air)
-print(calibration.sound_power_level_db[[0, 10, 20]].round(2))  # [86.06 87.77 78.41] dB
-print(round(calibration.c1_db, 3), calibration.c2_db[0].round(3))   # -0.031 0.087
-print(calibration.c3_db[[0, 10, 20]].round(3))                 # [0.001 0.009 0.351] dB
+print(calibration.sound_power_level[[0, 10, 20]].round(2))  # [86.06 87.77 78.41] dB
+print(round(calibration.c1, 3), calibration.c2[0].round(3))   # -0.031 0.087
+print(calibration.c3[[0, 10, 20]].round(3))              # [0.001 0.009 0.351] dB
 print(calibration.expanded_uncertainty_db[[0, 3, 16]].round(2))    # [1.57 0.98 1.96] dB
-print(round(calibration.sound_power_level_a_db, 1))            # 97.6 dB
+print(round(calibration.sound_power_level_a, 1))            # 97.6 dB
 ```
 
 `CalibrationConditions` carries the air of the calibration: its temperature
@@ -512,13 +512,13 @@ with no air absorption. The surface is averaged as ISO 3745 averages it, through
 `sound_power_anechoic`. $C_1$ and $C_2$ nearly cancel at this pressure and
 temperature, leaving 0.06 dB; $C_2$ here is Formula (A.5) of Annex A for a source whose
 radiation is unknown, $-10 \lg(p_\mathrm{s}/p_{\mathrm{s},0}) + 7{,}5 \lg(\theta/\theta_1)$
-with $\theta_1 = 296$ K, and `c2_db` takes the manufacturer's value instead,
+with $\theta_1 = 296$ K, and `c2` takes the manufacturer's value instead,
 which 8.4 prefers. $C_3$ reaches 0.35 dB at 10 kHz over the 2 m path. The
 expanded uncertainty is $1{,}96\,\sigma_R$ with $\sigma_R$ from the Table 2
 column of the arrangement, 0.8 dB from 100 Hz to 160 Hz, 0.5 dB from 200 Hz
 to 3 150 Hz and 1.0 dB above for the fixed positions. At 50 Hz to 80 Hz,
 Annex B replaces the pressure levels by sound intensity levels when the two
-agree within Table B.1 from 50 Hz to 315 Hz (`intensity_sound_power_level_db`).
+agree within Table B.1 from 50 Hz to 315 Hz (`intensity_sound_power_level`).
 
 `verify_reference_sound_source` then judges clause 5. A calibration brings its
 bands, levels and directivity indices; the repetitions of 8.3.3 and the
@@ -532,7 +532,7 @@ judged.
 jitter = np.array([[0.05], [-0.08], [0.04]]) * np.where(thirds < 200.0, 3.0, 1.0)
 supply = 0.12 + 0.06 * np.cos(np.arange(thirds.size) / 3.0)   # over +-10 % line voltage
 verdict = emission.verify_reference_sound_source(
-    calibration, repeated_levels_db=calibration.sound_power_level_db[None, :] + jitter,
+    calibration, repeated_levels=calibration.sound_power_level[None, :] + jitter,
     supply_variation_db=supply)
 print(verdict.passes)                                        # True
 print(round(verdict.core_range_db, 2), verdict.adjacent_step_db.max().round(2))
@@ -542,8 +542,8 @@ print(verdict.repeatability_db[[0, 4]].round(3), verdict.repeatability_limit_db[
 print(verdict.supply_variation_db.max().round(2), verdict.supply_met)   # 0.18 True
 
 drift = emission.verify_reference_source_drift(
-    calibration.sound_power_level_db,
-    calibration.sound_power_level_db + np.where(thirds < 160.0, 1.2, 0.3),
+    calibration.sound_power_level,
+    calibration.sound_power_level + np.where(thirds < 160.0, 1.2, 0.3),
     frequencies=thirds)
 print(drift.passes, drift.recalibration_required)            # False True
 ```
@@ -606,7 +606,7 @@ with the laboratory.
 ISO 3747 corrects the measured levels of the reference source to its
 calibration by the manufacturer's specifications instead (Equation (9)), and
 reads the calibrated levels as they are. A calibration made with the
-manufacturer's `c2_db` cannot be read at a test, since only the manufacturer
+manufacturer's `c2` cannot be read at a test, since only the manufacturer
 gives $C_2$ there, and says so.
 
 ```python
@@ -630,11 +630,11 @@ $C_2$, 0.13 dB, carries the result of the source under test back to them.
 
 | Function | Clause | Returns | Notes |
 | :--- | :--- | :--- | :--- |
-| `reference_source_calibration(levels, *, frequencies, arrangement, background_levels=None, max_levels_db=None, conditions=None, radiation="unknown", knee_frequency_hz=None, c2_db=None, intensity_sound_power_level_db=None, room_qualification=None, coverage_factor=1.96)` | 8, Formula (2) | `ReferenceSourceCalibration` | `arrangement` is `"paths"` or `"fixed"`, the column of Table 2; `room_qualification` warns when the room does not cover the bands at 2 m (8.1) |
+| `reference_source_calibration(levels, *, frequencies, arrangement, background_levels=None, max_levels=None, conditions=None, radiation="unknown", knee_frequency_hz=None, c2=None, intensity_sound_power_level=None, room_qualification=None, coverage_factor=1.96)` | 8, Formula (2) | `ReferenceSourceCalibration` | `arrangement` is `"paths"` or `"fixed"`, the column of Table 2; `room_qualification` warns when the room does not cover the bands at 2 m (8.1) |
 | `CalibrationConditions(*, temperature_c=23.0, static_pressure_kpa=101.325, air_absorption_db_per_m=None)` | 4, 8.4 | the air of Formula (2) | Temperature and static pressure for $C_1$ and $C_2$, $a(f)$ per band for $C_3$ |
 | `ReferenceSourceCalibration.sound_power_level_at(frequencies, *, bandwidth="one-third-octave", temperature_c=None, static_pressure_kpa=None)` | 8.4 | $L_W$ per band [dB] | With the conditions of a test, $L_W - C_2$ there |
-| `verify_reference_sound_source(calibration, *, frequencies=None, repeated_levels_db=None, supply_variation_db=None, directivity_index_db=None, reverberation_rooms_only=False)` | 5.2, 5.4, 5.5 | `ReferenceSoundSourceVerdict` | Three sound power or five sound pressure repetitions; the largest change over the declared supply range |
-| `verify_reference_source_drift(reference_levels_db, latest_levels_db, *, frequencies)` | 5.6 | `ReferenceSourceDriftResult` | 2.83 times Table 1 |
+| `verify_reference_sound_source(calibration, *, frequencies=None, repeated_levels=None, supply_variation_db=None, directivity_index=None, reverberation_rooms_only=False)` | 5.2, 5.4, 5.5 | `ReferenceSoundSourceVerdict` | Three sound power or five sound pressure repetitions; the largest change over the declared supply range |
+| `verify_reference_source_drift(reference_levels, latest_levels, *, frequencies)` | 5.6 | `ReferenceSourceDriftResult` | 2.83 times Table 1 |
 | `repeatability_standard_deviation(levels)` | Formula (1) | $\sigma_r$ per band [dB] | About the energy average |
 | `radiation_impedance_correction(*, temperature_c=23.0, static_pressure_kpa=101.325, radiation="unknown", frequencies=None, knee_frequency_hz=None)` | Annex A | $C_2$ [dB] | Monopole, aerodynamic dipole or unknown |
 | `knee_frequency(d0_m, *, speed_of_sound=343.0)` | Formula (A.1) | $f_\mathrm{k}$ [Hz] | $c/(2\pi d_0)$ |

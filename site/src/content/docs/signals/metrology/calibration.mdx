@@ -678,7 +678,7 @@ from phonometry import metrology
 # to the reference 101.325 kPa for the barometer reading of the day.
 piston = metrology.SoundCalibratorMeasurements(
     level_deviation_db=0.31, level_uncertainty_db=0.08,
-    static_pressure_correction_db=-0.12,
+    static_pressure_correction=-0.12,
 )
 result = metrology.verify_sound_calibrator("1/M", piston, nominal_frequency_hz=250.0)
 print(f"{result.requirement('level').verifications[0].deviation:.2f}")   # 0.19

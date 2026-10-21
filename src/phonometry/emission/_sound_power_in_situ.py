@@ -202,7 +202,7 @@ class InSituSoundPowerResult(OwnsArrays):
     short is not one, since its capped correction pulls the level down; it
     is flagged by ``background_requirement_met`` alone.
 
-    ``excess_levels_db`` and ``directivity_range_db`` are the two indicators
+    ``excess_levels`` and ``directivity_range_db`` are the two indicators
     Table 2 grades the determination by, the A-weighted excess
     :math:`\Delta L_{f\mathrm{A}}` at each microphone position and the
     directivity range of the source, ``None`` where they were not determined.
@@ -228,7 +228,7 @@ class InSituSoundPowerResult(OwnsArrays):
     background_margin_db: np.ndarray
     background_margin_ref_db: np.ndarray
     c2: float
-    excess_levels_db: np.ndarray | None
+    excess_levels: np.ndarray | None
     directivity_range_db: float | None
     sigma_omc_db: float
     coverage_factor: float
@@ -254,7 +254,7 @@ class InSituSoundPowerResult(OwnsArrays):
         require_choice(self.quantity, "quantity", ("power", "energy"))
         require_positive(self.coverage_factor, "coverage_factor")
         _check_grade_indicators(
-            self.excess_levels_db,
+            self.excess_levels,
             self.directivity_range_db,
             int(np.shape(self.background_correction)[0]),
         )
@@ -344,7 +344,7 @@ class InSituSoundPowerResult(OwnsArrays):
         a directivity range within 7 dB; survey whenever either indicator
         fails or was not determined.
         """
-        return _grade_from(self.excess_levels_db, self.directivity_range_db)
+        return _grade_from(self.excess_levels, self.directivity_range_db)
 
     @property
     def sigma_r0(self) -> float:
@@ -920,7 +920,7 @@ def _determine(
         background_margin_db=np.asarray(margin_source, dtype=np.float64),
         background_margin_ref_db=np.asarray(margin_ref, dtype=np.float64),
         c2=_c2_correction(comparison.temperature_c, comparison.static_pressure_kpa),
-        excess_levels_db=excess,
+        excess_levels=excess,
         directivity_range_db=directivity,
         sigma_omc_db=omc,
         coverage_factor=comparison.coverage_factor,

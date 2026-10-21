@@ -457,7 +457,7 @@ def generate_driving_point_stiffness(output_dir: str) -> None:
         label=r"transfer stiffness $L_{k_{2,1}}$",
     )
     top.axhline(
-        res.threshold_level_db,
+        res.threshold_level,
         color=COLOR_FG,
         linestyle=":",
         linewidth=1.4,
@@ -5148,10 +5148,10 @@ def _relative_level_db(relative: np.ndarray) -> np.ndarray:
     horizontal line at whatever floor the panel happens to use, which is a
     reading the standard never drew.
     """
-    level_db = np.full(relative.shape, np.nan)
+    level = np.full(relative.shape, np.nan)
     positive = relative > 0.0
-    level_db[positive] = 20.0 * np.log10(relative[positive])
-    return level_db
+    level[positive] = 20.0 * np.log10(relative[positive])
+    return level
 
 
 def generate_meter_running_rms_decay(output_dir: str) -> None:
@@ -6307,7 +6307,7 @@ def generate_railway_spectra(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.plot(
         positions,
-        passage.band_max_levels_db,
+        passage.band_max_levels,
         color=COLOR_PRIMARY,
         linewidth=1.8,
         marker="o",
@@ -6316,7 +6316,7 @@ def generate_railway_spectra(output_dir: str) -> None:
     )
     ax.plot(
         positions,
-        passage.band_interval_levels_db[1],
+        passage.band_interval_levels[1],
         color=COLOR_TERTIARY,
         linewidth=1.6,
         linestyle="--",
@@ -6670,7 +6670,7 @@ def generate_building_transfer_spectra(output_dir: str) -> None:
         for natural, (colour, style) in styles.items():
             ax.plot(
                 positions,
-                vibration.ground_to_floor_transfer(
+                vibration.ground_to_floor_level_difference(
                     floor, floor_natural_frequency_hz=natural
                 ),
                 color=colour,

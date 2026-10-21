@@ -21,7 +21,7 @@ connections and is in the table rather than in the theory.
 
 What the row carries
 --------------------
-Each octave band is a field of its own, ``transmission_loss_500_db`` and so
+Each octave band is a field of its own, ``transmission_loss_500`` and so
 on, with the band's centre frequency in hertz and the unit in the name. Every
 hedge of :class:`~phonometry.io.CatalogueRow` works on a band
 the way it works on any other field, so a band the page leaves empty says so
@@ -67,7 +67,7 @@ plasterboard mountings, doors unsealed and sealed, exterior doors, sealed
 windows and floor-ceiling systems. Each is a row of this catalogue with every
 band empty, and the rating in :attr:`TransmissionLossSpectrum.sound_transmission_class`.
 A caller after a spectrum reads the band fields and finds ``None``;
-:meth:`TransmissionLossSpectrum.transmission_loss_db` then refuses with the
+:meth:`TransmissionLossSpectrum.transmission_loss` then refuses with the
 row and the band, because the page printed nothing there.
 
 Most of those tables print one construction under several conditions, as
@@ -124,15 +124,15 @@ TRANSMISSION_LOSS_BANDS_HZ: tuple[int, ...] = (
 class TransmissionLossSpectrum(BandedRow):
     """One construction of a published table, with its loss in each band.
 
-    :ivar transmission_loss_63_db: Airborne sound transmission loss in the
+    :ivar transmission_loss_63: Airborne sound transmission loss in the
         63 Hz octave band, in decibels, as printed.
-    :ivar transmission_loss_125_db: The same in the 125 Hz band.
-    :ivar transmission_loss_250_db: The same in the 250 Hz band.
-    :ivar transmission_loss_500_db: The same in the 500 Hz band.
-    :ivar transmission_loss_1000_db: The same in the 1 kHz band.
-    :ivar transmission_loss_2000_db: The same in the 2 kHz band.
-    :ivar transmission_loss_4000_db: The same in the 4 kHz band.
-    :ivar transmission_loss_8000_db: The same in the 8 kHz band.
+    :ivar transmission_loss_125: The same in the 125 Hz band.
+    :ivar transmission_loss_250: The same in the 250 Hz band.
+    :ivar transmission_loss_500: The same in the 500 Hz band.
+    :ivar transmission_loss_1000: The same in the 1 kHz band.
+    :ivar transmission_loss_2000: The same in the 2 kHz band.
+    :ivar transmission_loss_4000: The same in the 4 kHz band.
+    :ivar transmission_loss_8000: The same in the 8 kHz band.
     :ivar thickness_mm: The overall thickness of the construction, in
         millimetres, as the page prints it beside the description. It is the
         assembly's thickness and not a leaf's: a double wall prints the pair
@@ -161,14 +161,14 @@ class TransmissionLossSpectrum(BandedRow):
         Empty when the description stands on its own.
     """
 
-    transmission_loss_63_db: float | None = None
-    transmission_loss_125_db: float | None = None
-    transmission_loss_250_db: float | None = None
-    transmission_loss_500_db: float | None = None
-    transmission_loss_1000_db: float | None = None
-    transmission_loss_2000_db: float | None = None
-    transmission_loss_4000_db: float | None = None
-    transmission_loss_8000_db: float | None = None
+    transmission_loss_63: float | None = None
+    transmission_loss_125: float | None = None
+    transmission_loss_250: float | None = None
+    transmission_loss_500: float | None = None
+    transmission_loss_1000: float | None = None
+    transmission_loss_2000: float | None = None
+    transmission_loss_4000: float | None = None
+    transmission_loss_8000: float | None = None
     thickness_mm: float | None = None
     surface_density_kg_m2: float | None = None
     sound_transmission_class: float | None = None
@@ -177,11 +177,10 @@ class TransmissionLossSpectrum(BandedRow):
 
     _bands_hz: ClassVar[tuple[int, ...]] = TRANSMISSION_LOSS_BANDS_HZ
     _band_prefix: ClassVar[str] = "transmission_loss_"
-    _band_suffix: ClassVar[str] = "_db"
     _band_kind: ClassVar[str] = "an octave"
     _table_kind: ClassVar[str] = "transmission loss"
 
-    def transmission_loss_db(self, band_hz: int) -> float:
+    def transmission_loss(self, band_hz: int) -> float:
         """The loss in one band, or a refusal that says what the page had.
 
         :param band_hz: An octave-band centre frequency from

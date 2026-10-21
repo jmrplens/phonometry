@@ -179,8 +179,8 @@ _SINGLE_NUMBERS = ("r_s_w", "r_s_w_c", "r_s_w_ctr")
 
 
 def joint_sound_reduction_index(
-    l1_db: ArrayLike,
-    l2_db: ArrayLike,
+    l1: ArrayLike,
+    l2: ArrayLike,
     absorption_area: ArrayLike,
     *,
     joint_length_m: float,
@@ -199,10 +199,10 @@ def joint_sound_reduction_index(
     of the test arrangement :math:`R_\mathrm{s,max}` that
     :func:`laboratory_joint_insulation` corrects against (J.1).
 
-    :param l1_db: Energy average sound pressure level in the source room, in
+    :param l1: Energy average sound pressure level in the source room, in
         dB, one value per band, or a ``(positions, bands)`` array that is
         energy-averaged over the positions (ISO 10140-2).
-    :param l2_db: The same in the receiving room, in dB.
+    :param l2: The same in the receiving room, in dB.
     :param absorption_area: Equivalent absorption area :math:`A` of the
         receiving room per band, in m².
     :param joint_length_m: Length :math:`l` of the joint under test, in m.
@@ -210,12 +210,12 @@ def joint_sound_reduction_index(
     :raises ValueError: If the inputs disagree in band count, a level is not
         finite, an area is not positive, or the length is not positive.
     """
-    l1 = _as_band_levels(np.asarray(l1_db, dtype=np.float64), "l1_db")
-    l2 = _as_band_levels(np.asarray(l2_db, dtype=np.float64), "l2_db")
+    l1 = _as_band_levels(np.asarray(l1, dtype=np.float64), "l1")
+    l2 = _as_band_levels(np.asarray(l2, dtype=np.float64), "l2")
     area = require_positive_array(absorption_area, "absorption_area")
     require_equal_shapes(
         "joint_sound_reduction_index",
-        {"l1_db": l1.shape, "l2_db": l2.shape, "absorption_area": area.shape},
+        {"l1": l1.shape, "l2": l2.shape, "absorption_area": area.shape},
         "band",
     )
     length = require_positive(joint_length_m, "joint_length_m")
@@ -236,20 +236,20 @@ class JointOpenBandRating(RichDisplay):
     range.
 
     :ivar open_frequencies_hz: The indicative bands, in Hz.
-    :ivar r_s_w_db: :math:`R_\mathrm{s,w}`, in dB, or ``None``.
-    :ivar c_db: :math:`C`, in dB, or ``None``.
-    :ivar ctr_db: :math:`C_\mathrm{tr}`, in dB, or ``None``.
-    :ivar c_100_5000_db: :math:`C_{100\text{-}5000}`, in dB, or ``None``.
-    :ivar ctr_100_5000_db: :math:`C_\mathrm{tr,100\text{-}5000}`, in dB, or
+    :ivar r_s_w: :math:`R_\mathrm{s,w}`, in dB, or ``None``.
+    :ivar c: :math:`C`, in dB, or ``None``.
+    :ivar ctr: :math:`C_\mathrm{tr}`, in dB, or ``None``.
+    :ivar c_100_5000: :math:`C_{100\text{-}5000}`, in dB, or ``None``.
+    :ivar ctr_100_5000: :math:`C_\mathrm{tr,100\text{-}5000}`, in dB, or
         ``None``.
     """
 
     open_frequencies_hz: tuple[float, ...]
-    r_s_w_db: int | None
-    c_db: int | None
-    ctr_db: int | None
-    c_100_5000_db: int | None
-    ctr_100_5000_db: int | None
+    r_s_w: int | None
+    c: int | None
+    ctr: int | None
+    c_100_5000: int | None
+    ctr_100_5000: int | None
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -301,13 +301,11 @@ def _open_band_rating(
     wide = _match_bands(freqs, band_freqs)
     return JointOpenBandRating(
         open_frequencies_hz=opened,
-        r_s_w_db=rating,
-        c_db=_sum_term(core_values, _SPECTRUM1_THIRD, rating),
-        ctr_db=_sum_term(core_values, _SPECTRUM2_THIRD, rating),
-        c_100_5000_db=None
-        if wide is None
-        else _sum_term(values[wide], spectrum1, rating),
-        ctr_100_5000_db=None
+        r_s_w=rating,
+        c=_sum_term(core_values, _SPECTRUM1_THIRD, rating),
+        ctr=_sum_term(core_values, _SPECTRUM2_THIRD, rating),
+        c_100_5000=None if wide is None else _sum_term(values[wide], spectrum1, rating),
+        ctr_100_5000=None
         if wide is None
         else _sum_term(values[wide], spectrum2, rating),
     )
@@ -333,20 +331,20 @@ class LaboratoryJointInsulationResult(OwnsArrays):
     r"""Sound reduction index of a joint per metre (ISO 10140-1:2021 Annex J).
 
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
-    :ivar r_s_measured_db: :math:`R_\mathrm{s}'`, the index measured with the
+    :ivar r_s_prime: :math:`R_\mathrm{s}'`, the index measured with the
         test element in the test opening, per band, in dB.
-    :ivar r_s_max_db: :math:`R_\mathrm{s,max}`, the maximum of the test
+    :ivar r_s_max: :math:`R_\mathrm{s,max}`, the maximum of the test
         arrangement with the joint sealed on both sides, in dB.
-    :ivar r_s_db: :math:`R_\mathrm{s}`, corrected for the flanking through the
+    :ivar r_s: :math:`R_\mathrm{s}`, corrected for the flanking through the
         arrangement, in dB. In the ``"limit"`` and ``"maximum"`` bands it is a
         minimum value.
     :ivar joint_length_m: Length :math:`l` of the joint, in m, or ``None``
         when not given; the form of Figure J.7 prints it as the test length.
     :ivar rating: :math:`R_\mathrm{s,w}` (:math:`C`; :math:`C_\mathrm{tr}`) of
         ISO 717-1:2020, or ``None`` without the 16 bands 100 Hz to 3 150 Hz.
-    :ivar c_100_5000_db: :math:`C_{100\text{-}5000}`, in dB, or ``None``
+    :ivar c_100_5000: :math:`C_{100\text{-}5000}`, in dB, or ``None``
         without the bands 100 Hz to 5 000 Hz.
-    :ivar ctr_100_5000_db: :math:`C_\mathrm{tr,100\text{-}5000}`, in dB, or
+    :ivar ctr_100_5000: :math:`C_\mathrm{tr,100\text{-}5000}`, in dB, or
         ``None``.
     :ivar max_rating: The ISO 717-1 rating of :math:`R_\mathrm{s,max}`, the
         maximum sound insulation of the arrangement J.5.2 a) asks the report
@@ -363,13 +361,13 @@ class LaboratoryJointInsulationResult(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    r_s_measured_db: np.ndarray
-    r_s_max_db: np.ndarray
-    r_s_db: np.ndarray
+    r_s_prime: np.ndarray
+    r_s_max: np.ndarray
+    r_s: np.ndarray
     joint_length_m: float | None
     rating: WeightedRatingResult | None
-    c_100_5000_db: int | None
-    ctr_100_5000_db: int | None
+    c_100_5000: int | None
+    ctr_100_5000: int | None
     max_rating: WeightedRatingResult | None
     open_band_rating: JointOpenBandRating | None
     _: KW_ONLY
@@ -384,32 +382,30 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         The corrected index is what that regime's rule of J.1 makes of the
         measured and the maximum indices, so it is held to it band by band.
 
-        :raises ValueError: if the per-band columns disagree, or ``r_s_db`` is
+        :raises ValueError: if the per-band columns disagree, or ``r_s`` is
             not the correction the regime of each band gives.
         """
         require_ranks(
             self,
             frequencies=1,
-            r_s_measured_db=1,
-            r_s_max_db=1,
-            r_s_db=1,
+            r_s_prime=1,
+            r_s_max=1,
+            r_s=1,
         )
-        require_same_length(
-            self, "frequencies", "r_s_measured_db", "r_s_max_db", "r_s_db"
-        )
+        require_same_length(self, "frequencies", "r_s_prime", "r_s_max", "r_s")
         expected = _correct(
-            np.asarray(self.r_s_measured_db, dtype=np.float64),
-            np.asarray(self.r_s_max_db, dtype=np.float64),
+            np.asarray(self.r_s_prime, dtype=np.float64),
+            np.asarray(self.r_s_max, dtype=np.float64),
             limit_at_max=self.limit_at_max,
         )
         if not np.allclose(
-            self.r_s_db, expected, rtol=0.0, atol=_FIELD_SLACK_DB, equal_nan=True
+            self.r_s, expected, rtol=0.0, atol=_FIELD_SLACK_DB, equal_nan=True
         ):
             msg = (
-                "LaboratoryJointInsulationResult: 'r_s_db' must be the correction of "
-                "J.1 each band's regime gives from 'r_s_measured_db' and "
-                f"'r_s_max_db', {expected.tolist()!r}; got "
-                f"{np.asarray(self.r_s_db).tolist()!r}."
+                "LaboratoryJointInsulationResult: 'r_s' must be the correction of "
+                "J.1 each band's regime gives from 'r_s_prime' and "
+                f"'r_s_max', {expected.tolist()!r}; got "
+                f"{np.asarray(self.r_s).tolist()!r}."
             )
             raise ValueError(msg)
 
@@ -424,8 +420,8 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         :math:`R_\mathrm{s,max} - 3` dB when :attr:`limit_at_max`.
         """
         return _regimes(
-            np.asarray(self.r_s_measured_db),
-            np.asarray(self.r_s_max_db),
+            np.asarray(self.r_s_prime),
+            np.asarray(self.r_s_max),
             limit_at_max=self.limit_at_max,
         )
 
@@ -437,9 +433,7 @@ class LaboratoryJointInsulationResult(OwnsArrays):
     @property
     def indicative(self) -> np.ndarray:
         r"""Bands where :math:`R_\mathrm{s}' > R_\mathrm{s,max} - 3` dB (J.1)."""
-        return _indicative_bands(
-            np.asarray(self.r_s_measured_db), np.asarray(self.r_s_max_db)
-        )
+        return _indicative_bands(np.asarray(self.r_s_prime), np.asarray(self.r_s_max))
 
     @property
     def bracketed(self) -> bool:
@@ -456,16 +450,16 @@ class LaboratoryJointInsulationResult(OwnsArrays):
             self.rating.rating,
             self.rating.c,
             self.rating.ctr,
-            self.c_100_5000_db,
-            self.ctr_100_5000_db,
+            self.c_100_5000,
+            self.ctr_100_5000,
         )
         opened = self.open_band_rating
         other = _single_numbers(
-            opened.r_s_w_db,
-            opened.c_db,
-            opened.ctr_db,
-            opened.c_100_5000_db,
-            opened.ctr_100_5000_db,
+            opened.r_s_w,
+            opened.c,
+            opened.ctr,
+            opened.c_100_5000,
+            opened.ctr_100_5000,
         )
         for first, second in zip(direct, other, strict=True):
             if first is None:
@@ -475,17 +469,17 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         return False
 
     @property
-    def r_s_w_db(self) -> int | None:
+    def r_s_w(self) -> int | None:
         r""":math:`R_\mathrm{s,w}`, in dB, or ``None`` without a rating."""
         return None if self.rating is None else self.rating.rating
 
     @property
-    def r_s_w_c_db(self) -> int | None:
+    def r_s_w_c(self) -> int | None:
         r""":math:`R_\mathrm{s,w} + C`, in dB, or ``None`` without a rating."""
         return None if self.rating is None else self.rating.rating + self.rating.c
 
     @property
-    def r_s_w_ctr_db(self) -> int | None:
+    def r_s_w_ctr(self) -> int | None:
         r""":math:`R_\mathrm{s,Atr} = R_\mathrm{s,w} + C_\mathrm{tr}`, in dB, or ``None``."""
         return None if self.rating is None else self.rating.rating + self.rating.ctr
 
@@ -496,7 +490,7 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         transmitted power of the three thirds averaged, as Figure J.9 plots
         a joint at several gap widths in octave bands.
         """
-        return improvement_octave_bands(self.r_s_db, self.frequencies)
+        return improvement_octave_bands(self.r_s, self.frequencies)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -619,8 +613,8 @@ def _correct(
 
 
 def laboratory_joint_insulation(
-    r_s_measured_db: ArrayLike,
-    r_s_max_db: ArrayLike,
+    r_s_prime: ArrayLike,
+    r_s_max: ArrayLike,
     frequencies: ArrayLike,
     *,
     joint_length_m: float | None = None,
@@ -659,9 +653,9 @@ def laboratory_joint_insulation(
     indicative bands are read on :math:`R_\mathrm{s}'`, the same condition as
     the bracketed lower limit, whichever rule corrected them.
 
-    :param r_s_measured_db: :math:`R_\mathrm{s}'` per one-third-octave band,
+    :param r_s_prime: :math:`R_\mathrm{s}'` per one-third-octave band,
         in dB.
-    :param r_s_max_db: :math:`R_\mathrm{s,max}` per band, in dB.
+    :param r_s_max: :math:`R_\mathrm{s,max}` per band, in dB.
     :param frequencies: Band centre frequencies, in Hz.
     :param joint_length_m: Length of the joint under test, in m, kept for the
         form of Figure J.7; ``None`` leaves that row empty.
@@ -673,13 +667,13 @@ def laboratory_joint_insulation(
         finite, a frequency or the joint length is not positive.
     """
     freqs = require_positive_array(frequencies, "frequencies")
-    measured = require_finite_array(r_s_measured_db, "r_s_measured_db")
-    maximum = require_finite_array(r_s_max_db, "r_s_max_db")
+    measured = require_finite_array(r_s_prime, "r_s_prime")
+    maximum = require_finite_array(r_s_max, "r_s_max")
     require_equal_shapes(
         "laboratory_joint_insulation",
         {
-            "r_s_measured_db": measured.shape,
-            "r_s_max_db": maximum.shape,
+            "r_s_prime": measured.shape,
+            "r_s_max": maximum.shape,
             "frequencies": freqs.shape,
         },
         "band",
@@ -708,13 +702,13 @@ def laboratory_joint_insulation(
             opened = _open_band_rating(r_s, freqs, core, open_mask)
     return LaboratoryJointInsulationResult(
         frequencies=freqs,
-        r_s_measured_db=measured,
-        r_s_max_db=maximum,
-        r_s_db=np.asarray(r_s, dtype=np.float64),
+        r_s_prime=measured,
+        r_s_max=maximum,
+        r_s=np.asarray(r_s, dtype=np.float64),
         joint_length_m=length,
         rating=rating,
-        c_100_5000_db=c_wide,
-        ctr_100_5000_db=ctr_wide,
+        c_100_5000=c_wide,
+        ctr_100_5000=ctr_wide,
         max_rating=max_rating,
         open_band_rating=opened,
         limit_at_max=bool(limit_at_max),
@@ -931,9 +925,9 @@ class JointGapSeries(OwnsArrays):
     :ivar nominal_gap_mm: The nominal gap width :math:`b_\mathrm{n}`, in mm.
     :ivar min_gap_mm: The minimal gap width :math:`b_\mathrm{min}` at the
         maximal pressure, in mm, or ``None`` when not given.
-    :ivar r_s_w_db: :math:`R_\mathrm{s,w}` at each width, in dB.
-    :ivar r_s_w_c_db: :math:`R_\mathrm{s,w} + C` at each width, in dB.
-    :ivar r_s_w_ctr_db: :math:`R_\mathrm{s,Atr} = R_\mathrm{s,w} +
+    :ivar r_s_w: :math:`R_\mathrm{s,w}` at each width, in dB.
+    :ivar r_s_w_c: :math:`R_\mathrm{s,w} + C` at each width, in dB.
+    :ivar r_s_w_ctr: :math:`R_\mathrm{s,Atr} = R_\mathrm{s,w} +
         C_\mathrm{tr}` at each width, in dB.
     """
 
@@ -941,22 +935,22 @@ class JointGapSeries(OwnsArrays):
     results: tuple[LaboratoryJointInsulationResult, ...]
     nominal_gap_mm: float
     min_gap_mm: float | None
-    r_s_w_db: np.ndarray
-    r_s_w_c_db: np.ndarray
-    r_s_w_ctr_db: np.ndarray
+    r_s_w: np.ndarray
+    r_s_w_c: np.ndarray
+    r_s_w_ctr: np.ndarray
 
     def __post_init__(self) -> None:
         """Reject columns of different lengths.
 
         :raises ValueError: if the widths, results and single numbers disagree.
         """
-        require_ranks(self, gap_widths_mm=1, r_s_w_db=1, r_s_w_c_db=1, r_s_w_ctr_db=1)
+        require_ranks(self, gap_widths_mm=1, r_s_w=1, r_s_w_c=1, r_s_w_ctr=1)
         require_same_length(
             self,
             "gap_widths_mm",
-            "r_s_w_db",
-            "r_s_w_c_db",
-            "r_s_w_ctr_db",
+            "r_s_w",
+            "r_s_w_c",
+            "r_s_w_ctr",
             axis="width",
         )
         if len(self.results) != np.size(self.gap_widths_mm):
@@ -983,7 +977,7 @@ class JointGapSeries(OwnsArrays):
     ) -> np.ndarray:
         """The single number at each width: ``"r_s_w"``, ``"r_s_w_c"`` or ``"r_s_w_ctr"``."""
         require_choice(quantity, "quantity", _SINGLE_NUMBERS)
-        return np.asarray(getattr(self, f"{quantity}_db"), dtype=np.float64)
+        return np.asarray(getattr(self, quantity), dtype=np.float64)
 
     def at_gap(
         self,
@@ -1129,9 +1123,9 @@ def joint_gap_series(
         results=items,
         nominal_gap_mm=nominal,
         min_gap_mm=minimum,
-        r_s_w_db=table[:, 0],
-        r_s_w_c_db=table[:, 1],
-        r_s_w_ctr_db=table[:, 2],
+        r_s_w=table[:, 0],
+        r_s_w_c=table[:, 1],
+        r_s_w_ctr=table[:, 2],
     )
 
 

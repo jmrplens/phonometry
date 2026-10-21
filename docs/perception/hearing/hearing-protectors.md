@@ -229,7 +229,7 @@ loss = np.array([7.5, 9.0, 11.0, 13.5, 16.5, 20.0, 23.5, 27.0, 30.0, 32.5, 34.5,
 spread = np.array([[-0.6], [0.1], [0.5]]) * np.linspace(1.0, 2.2, 22)
 open_level = np.full(22, 88.0)
 il = hearing.earmuff_insertion_loss(
-    open_level, open_level - loss + spread, isolation_cup_levels_db=open_level - 70.0
+    open_level, open_level - loss + spread, isolation_cup_levels=open_level - 70.0
 )
 print(il.reported_db[[3, 9, 12, 18]])                        # [13.5 32.5 37.  38. ]
 print(np.round(il.expanded_uncertainty_db[[3, 12, 21]], 1))  # [1.8 1.9 2.1]

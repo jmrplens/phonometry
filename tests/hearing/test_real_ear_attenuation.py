@@ -72,13 +72,13 @@ def test_attenuation_is_occluded_minus_open_threshold() -> None:
     from_thresholds = hearing.real_ear_attenuation(
         open_threshold_db=open_ears, occluded_threshold_db=open_ears + _A3
     )
-    np.testing.assert_allclose(from_thresholds.attenuation_db, _A3)
+    np.testing.assert_allclose(from_thresholds.attenuation, _A3)
     np.testing.assert_allclose(from_thresholds.mean_db, _table_a3().mean_db)
 
 
 def test_the_grid_feeds_iso_4869_2_unchanged() -> None:
     """The attenuation grid is what ISO 4869-2 starts from, seven bands and all."""
-    grid = _table_a3().attenuation_db
+    grid = _table_a3().attenuation
     apv = hearing.assumed_protection_value(grid)
     assert apv.frequencies.tolist() == ref.ISO4869_1_FREQUENCIES
     np.testing.assert_allclose(apv.mean_attenuation, _table_a3().mean_db)
@@ -98,7 +98,7 @@ def test_the_result_holds_its_own_copy_of_the_grid() -> None:
     grid = _A3.copy()
     result = hearing.real_ear_attenuation(grid)
     grid[0, 0] = 99.0
-    assert result.attenuation_db[0, 0] == pytest.approx(9.6)
+    assert result.attenuation[0, 0] == pytest.approx(9.6)
 
 
 def test_the_result_holds_its_own_copy_of_the_frequencies() -> None:
@@ -252,8 +252,8 @@ def test_table_b1_difference_row_within_the_rounding_of_test_2() -> None:
     """
     result = _table_b1()
     printed = np.asarray(ref.ISO4869_1_TABLE_B1_DIFFERENCE)
-    assert np.abs(result.difference_db - printed).max() <= 0.1
-    matching = np.abs(result.difference_db - printed) < 0.05
+    assert np.abs(result.difference - printed).max() <= 0.1
+    matching = np.abs(result.difference - printed) < 0.05
     assert matching.tolist() == [True] * 6 + [False]
 
 
@@ -271,7 +271,7 @@ def test_the_test_is_symmetric() -> None:
         _table_a3(),
         first_expanded_uncertainty_db=ref.ISO4869_1_TABLE_B1_U95_2,
     )
-    np.testing.assert_allclose(backward.difference_db, forward.difference_db)
+    np.testing.assert_allclose(backward.difference, forward.difference)
     assert backward.significant.tolist() == forward.significant.tolist()
 
 
@@ -429,8 +429,8 @@ def test_a_qualifying_sound_field() -> None:
     check = hearing.check_reat_sound_field(
         _positions((1.0, -1.0, 1.4, -1.4, 2.5, -2.5)),
         np.zeros(7),
-        rotation_levels_db=np.vstack([np.zeros(7), np.full(7, 5.0)]),
-        free_field_rejection_db=12.0,
+        rotation_levels=np.vstack([np.zeros(7), np.full(7, 5.0)]),
+        free_field_rejection=12.0,
     )
     assert check.passes
     assert check.allowable_variation_db == 5.0
@@ -463,7 +463,7 @@ def test_right_and_left_within_2_5_db_can_still_be_3_db_apart(
     )
     assert check.uniform.all()
     assert not check.balanced.any()
-    np.testing.assert_allclose(check.left_right_difference_db, 3.2)
+    np.testing.assert_allclose(check.left_right_difference, 3.2)
     assert not check.passes
 
 
@@ -491,15 +491,15 @@ def test_a_rotation_past_table_1_fails_only_from_500_hz() -> None:
     check = hearing.check_reat_sound_field(
         _positions((0.0,) * 6),
         np.zeros(7),
-        rotation_levels_db=rotation,
-        free_field_rejection_db=20.0,
+        rotation_levels=rotation,
+        free_field_rejection=20.0,
     )
     assert check.diffuse.tolist() == [True, True] + [True] * 5
     stricter = hearing.check_reat_sound_field(
         _positions((0.0,) * 6),
         np.zeros(7),
-        rotation_levels_db=rotation,
-        free_field_rejection_db=15.0,
+        rotation_levels=rotation,
+        free_field_rejection=15.0,
     )
     assert stricter.diffuse.tolist() == [True, True] + [False] * 5
     assert not stricter.passes
@@ -518,7 +518,7 @@ def test_a_rotation_without_its_microphone_is_refused() -> None:
     six = _positions((0.0,) * 6)
     reference = np.zeros(7)
     with pytest.raises(ValueError, match="together"):
-        hearing.check_reat_sound_field(six, reference, rotation_levels_db=rotation)
+        hearing.check_reat_sound_field(six, reference, rotation_levels=rotation)
 
 
 def test_the_sound_field_check_has_no_truth_value() -> None:

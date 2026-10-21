@@ -101,5 +101,5 @@ def _chk_calibration() -> Outcome:
     """Clause 2.6 fixes the scale of the whole instrument, as an equality."""
     t = np.arange(round(3.0 * _FS)) / _FS
     tone = math.sqrt(2.0) * ref.BS468_CALIBRATION_V * np.sin(2.0 * math.pi * 1000.0 * t)
-    computed = ph.broadcast.quasi_peak_meter(tone, _FS).level_db
+    computed = ph.broadcast.quasi_peak_meter(tone, _FS).level
     return numeric(0.0, computed, 1e-6, unit="dBqps", places=6)

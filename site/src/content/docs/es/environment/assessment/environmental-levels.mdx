@@ -151,7 +151,7 @@ plt.show()
 | :--- | :--- | :--- |
 | `lden(lday, levening, lnight, period_hours=(12, 4, 8))` | $L_\mathrm{Aeq}$ por periodo [dB]; `period_hours` debe sumar 24 | +5 dB tarde, +10 dB noche (3.6.4) |
 | `ldn(lday, lnight, period_hours=(15, 9))` | | +10 dB noche (3.6.5) |
-| `composite_rating_level(periods)` | iterable de `(level_db, hours, adjustment_db)`; horas positivas, finitas y sumando 24 | Fórmulas generales (5)-(6); ajustes según la Tabla A.1 |
+| `composite_rating_level(periods)` | iterable de `(level, hours, adjustment)`; horas positivas, finitas y sumando 24 | Fórmulas generales (5)-(6); ajustes según la Tabla A.1 |
 
 Dónde pones el micrófono cambia el número: ISO 1996-2 fija las posiciones del
 receptor y sus correcciones de fachada. El diagrama es contexto de medida;

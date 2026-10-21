@@ -1128,9 +1128,9 @@ def plot_resampled_signal(
         lw=1.2,
         label=_t("Stopband edge (alias fold)", language),
     )
-    atten = format_number(result.stopband_attenuation_db, language, decimals=0)
+    atten = format_number(result.stopband_attenuation, language, decimals=0)
     ax.axhline(
-        -result.stopband_attenuation_db,
+        -result.stopband_attenuation,
         color=_C_MUTED,
         linestyle=":",
         lw=1.2,
@@ -1145,7 +1145,7 @@ def plot_resampled_signal(
     )
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(_MAGNITUDE_LABEL, language))
-    ax.set_ylim(-result.stopband_attenuation_db - 40.0, 10.0)
+    ax.set_ylim(-result.stopband_attenuation - 40.0, 10.0)
     fs0 = format_number(result.original_fs, language, decimals=0)
     fs1 = format_number(result.fs, language, decimals=0)
     ax.set_title(
@@ -1249,10 +1249,10 @@ def plot_window_metrics(
             linestyle="--",
             label=_t("Highest sidelobe {sll} dB", language, sll=sll),
         )
-        sl = decimal_comma(f"{result.scalloping_loss_db:.2f}", language)
+        sl = decimal_comma(f"{result.scalloping_loss:.2f}", language)
         axs.plot(
             [0.5],
-            [-result.scalloping_loss_db],
+            [-result.scalloping_loss],
             "o",
             color=_C_SECONDARY,
             ms=5.0,

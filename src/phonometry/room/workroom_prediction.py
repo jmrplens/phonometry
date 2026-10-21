@@ -343,8 +343,8 @@ def fitting_density(surface_area: float, volume: float) -> float:
 
 def workstation_level_increase(
     *,
-    sound_power_level_db: float,
-    emission_level_db: float,
+    sound_power_level: float,
+    emission_level: float,
     absorption_area: float,
 ) -> float:
     r"""How much the room adds at the machine's own workstation, Annex C.
@@ -361,8 +361,8 @@ def workstation_level_increase(
     which is what Figure C.1 draws against the equivalent absorption area with
     :math:`L_{W\mathrm{A}} - L_{p\mathrm{A}}` as the parameter.
 
-    :param sound_power_level_db: :math:`L_{W\mathrm{A}}` of the machine, in decibels.
-    :param emission_level_db: :math:`L_{p\mathrm{A}}` at its workstation, in decibels.
+    :param sound_power_level: :math:`L_{W\mathrm{A}}` of the machine, in decibels.
+    :param emission_level: :math:`L_{p\mathrm{A}}` at its workstation, in decibels.
     :param absorption_area: :math:`A` of the room, in square metres.
     :return: :math:`\Delta L_\mathrm{A}`, in decibels.
     :raises ValueError: For a non-finite level, a non-positive absorption
@@ -370,14 +370,14 @@ def workstation_level_increase(
         put the workstation inside a measurement surface smaller than a square
         metre.
     """
-    power = require_finite(sound_power_level_db, "sound_power_level_db")
-    emission = require_finite(emission_level_db, "emission_level_db")
+    power = require_finite(sound_power_level, "sound_power_level")
+    emission = require_finite(emission_level, "emission_level")
     absorption = require_positive(absorption_area, "absorption_area")
     difference = power - emission
     if difference < 0.0:
         msg = (
             "Annex C reads the measurement surface off the difference "
-            "'sound_power_level_db' minus 'emission_level_db', and here that "
+            "'sound_power_level' minus 'emission_level', and here that "
             f"difference is {difference:.1f} dB, which is no surface at all."
         )
         raise ValueError(msg)
@@ -387,8 +387,8 @@ def workstation_level_increase(
 
 def workstation_level(
     *,
-    sound_power_level_db: float,
-    emission_level_db: float,
+    sound_power_level: float,
+    emission_level: float,
     absorption_area: float,
 ) -> float:
     r"""The level at the machine's own workstation in the room, Annex C.
@@ -396,21 +396,21 @@ def workstation_level(
     :math:`L'_{p\mathrm{A}} = L_{p\mathrm{A}} + \Delta L_\mathrm{A}`, the emission value the machine was
     declared with plus what the room adds to it.
 
-    :param sound_power_level_db: :math:`L_{W\mathrm{A}}` of the machine, in decibels.
-    :param emission_level_db: :math:`L_{p\mathrm{A}}` at its workstation, in decibels.
+    :param sound_power_level: :math:`L_{W\mathrm{A}}` of the machine, in decibels.
+    :param emission_level: :math:`L_{p\mathrm{A}}` at its workstation, in decibels.
     :param absorption_area: :math:`A` of the room, in square metres.
     :return: :math:`L'_{p\mathrm{A}}`, in decibels.
     :raises ValueError: As :func:`workstation_level_increase`.
     """
-    return emission_level_db + workstation_level_increase(
-        sound_power_level_db=sound_power_level_db,
-        emission_level_db=emission_level_db,
+    return emission_level + workstation_level_increase(
+        sound_power_level=sound_power_level,
+        emission_level=emission_level,
         absorption_area=absorption_area,
     )
 
 
 def total_workstation_level(
-    contributions_db: ArrayLike, *, existing_level_db: float | None = None
+    contributions_db: ArrayLike, *, existing_level: float | None = None
 ) -> float:
     """What a workstation hears once the new machines are installed, Annex B.
 
@@ -422,16 +422,14 @@ def total_workstation_level(
 
     :param contributions_db: The level each new machine alone would give at
         this workstation, in decibels.
-    :param existing_level_db: The level already there, in decibels, which for
+    :param existing_level: The level already there, in decibels, which for
         a workstation with no machine is the background noise.
     :return: The total, in decibels.
     :raises ValueError: For levels that are not finite.
     """
     levels = require_finite_array(contributions_db, "contributions_db")
-    if existing_level_db is not None:
-        levels = np.append(
-            levels, require_finite(existing_level_db, "existing_level_db")
-        )
+    if existing_level is not None:
+        levels = np.append(levels, require_finite(existing_level, "existing_level"))
     return float(energy_sum(levels))
 
 

@@ -224,9 +224,9 @@ def test_harris_estimated_reduction(case: str) -> None:
     loss. That sum is exact arithmetic on the printed lines, but it is a
     construction rather than a quotation.
     """
-    reduction_db, printed_dba = HARRIS_CASES[case]
+    reduction, printed_dba = HARRIS_CASES[case]
     estimate = noise_control.estimated_a_weighted_enclosure_insulation(
-        HARRIS_BEFORE_DB, reduction_db, frequencies=OCTAVES_HZ
+        HARRIS_BEFORE_DB, reduction, frequencies=OCTAVES_HZ
     )
     assert estimate == pytest.approx(HARRIS_BEFORE_DBA - printed_dba, abs=1.0), case
 

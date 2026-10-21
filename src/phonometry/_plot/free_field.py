@@ -465,7 +465,7 @@ def plot_reference_source_calibration(
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    levels = np.asarray(result.sound_power_level_db, dtype=np.float64)
+    levels = np.asarray(result.sound_power_level, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
     bars = dict(kwargs)
     style_default(bars, "color", _C_PRIMARY)
@@ -547,8 +547,8 @@ def plot_reference_sound_source(
             color="#17becf",
             label=_t("Supply variation / 0.3 dB", language),
         )
-    if result.directivity_index_db is not None:
-        shares.append(result.directivity_index_db / result.directivity_limit_db)
+    if result.directivity_index is not None:
+        shares.append(result.directivity_index / result.directivity_limit_db)
         ax.plot(
             positions,
             shares[-1],

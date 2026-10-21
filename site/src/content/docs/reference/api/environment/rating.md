@@ -33,7 +33,7 @@ $$
 
 | Name | Description |
 | :--- | :--- |
-| `periods` | Iterable of `(level_db, hours, adjustment_db)` tuples. `level_db` is the period's (rating) equivalent continuous level, `hours` its duration and `adjustment_db` the time-of-day or source adjustment K (e.g. ISO 1996-1 Table A.1: evening 5 dB, night 10 dB). Hours must be positive and sum to 24. |
+| `periods` | Iterable of `(level, hours, adjustment)` tuples. `level` is the period's (rating) equivalent continuous level, `hours` its duration and `adjustment` the time-of-day or source adjustment K (e.g. ISO 1996-1 Table A.1: evening 5 dB, night 10 dB). Hours must be positive and sum to 24. |
 
 **Returns:** Composite rating level in dB.
 

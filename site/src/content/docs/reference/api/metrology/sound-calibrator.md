@@ -59,7 +59,7 @@ follows the ambient static pressure, and its manual gives the correction to
 the reference 101,325 kPa (5.1.5, 6.3 i). That correction depends on the
 barometer reading and on data only the manufacturer has, so this module does
 not compute it: the caller supplies it as
-[`SoundCalibratorMeasurements.static_pressure_correction_db`](/phonometry/reference/api/metrology/sound-calibrator/#soundcalibratormeasurements) and it is
+[`SoundCalibratorMeasurements.static_pressure_correction`](/phonometry/reference/api/metrology/sound-calibrator/#soundcalibratormeasurements) and it is
 added to the measured level before the level is graded (5.3.2, A.5.1.2,
 B.4.3.2). Every other calibrator shall not need any environmental correction
 (5.1.7), and is refused one.
@@ -95,12 +95,12 @@ tested (B.6 g, h).
 ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT = {'LS': 0.5, '1': 0.5, '2': 1.3}
 ```
 
-## ABBREVIATED_LEVEL_REDUCTIONS_DB
+## ABBREVIATED_LEVEL_REDUCTIONS
 
 *Constant* (`mapping`).
 
 ```python
-ABBREVIATED_LEVEL_REDUCTIONS_DB = {'LS': 0.05, '1': 0.05, '2': 0.1}
+ABBREVIATED_LEVEL_REDUCTIONS = {'LS': 0.05, '1': 0.05, '2': 0.1}
 ```
 
 ## CALIBRATOR_CLASSES
@@ -308,7 +308,7 @@ LEVEL_MAX_UNCERTAINTY_DB = (CalibratorTableRow(lower_hz=31.5, upper_hz=63.0, inc
 SoundCalibratorMeasurements(
     level_deviation_db: float | Sequence[float] | None = None,
     level_uncertainty_db: float | Sequence[float] | None = None,
-    static_pressure_correction_db: float | Sequence[float] | None = None,
+    static_pressure_correction: float | Sequence[float] | None = None,
     fluctuation_db: float | Sequence[float] | None = None,
     fluctuation_uncertainty_db: float | Sequence[float] | None = None,
     frequency_deviation_percent: float | Sequence[float] | None = None,
@@ -344,7 +344,7 @@ frequency); an uncertainty given as one number applies to all of them.
 | :--- | :--- |
 | `level_deviation_db` | Measured minus specified sound pressure level (5.3.2), in decibels: the mean of at least three couplings at the nominal supply voltage (A.5.5.3, B.4.6.3.1), and also the level measured, without replications, at each end of the supply-voltage range, which has to meet Table 2 too (5.3.4, A.5.5.6 to A.5.5.8). For an /M pistonphone, as measured: the correction below is added to it. |
 | `level_uncertainty_db` | Its expanded uncertainty, in decibels. |
-| `static_pressure_correction_db` | The manufacturer's correction to the reference static pressure for a class LS/M or 1/M pistonphone (5.1.5, B.4.3.2), in decibels, added to `level_deviation_db`. Required for those designations whenever the level is given (`0.0` at the reference pressure) and refused for every other (5.1.7). |
+| `static_pressure_correction` | The manufacturer's correction to the reference static pressure for a class LS/M or 1/M pistonphone (5.1.5, B.4.3.2), in decibels, added to `level_deviation_db`. Required for those designations whenever the level is given (`0.0` at the reference pressure) and refused for every other (5.1.7). |
 | `fluctuation_db` | The short-term level fluctuation (5.3.3): the larger of the absolute differences between the maximum and the minimum F-weighted level and their mean over 60 s, in decibels. |
 | `fluctuation_uncertainty_db` | Its expanded uncertainty, in decibels. |
 | `frequency_deviation_percent` | Measured minus specified frequency, in per cent of the specified frequency (5.4.2). |

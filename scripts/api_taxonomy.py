@@ -681,7 +681,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # by module finds no owner; they belong to the module that grades a
     # calibrator against them.
     "ABBREVIATED_FREQUENCY_ACCEPTANCE_LIMITS_PERCENT": "phonometry.metrology.sound_calibrator",
-    "ABBREVIATED_LEVEL_REDUCTIONS_DB": "phonometry.metrology.sound_calibrator",
+    "ABBREVIATED_LEVEL_REDUCTIONS": "phonometry.metrology.sound_calibrator",
     "CALIBRATOR_CLASSES": "phonometry.metrology.sound_calibrator",
     "CALIBRATOR_REQUIREMENTS": "phonometry.metrology.sound_calibrator",
     "DISTORTION_ACCEPTANCE_LIMITS_PERCENT": "phonometry.metrology.sound_calibrator",

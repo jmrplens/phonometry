@@ -133,7 +133,7 @@ rng = np.random.default_rng(3095)
 p = 0.25 * np.sqrt(angle / np.pi + 1e-4) * rng.standard_normal(t.size)
 
 passby = environment.pass_by_measurement(p, fs, start_s=front_s, end_s=front_s + tp)
-print(round(tp, 2), round(passby.equivalent_level_db, 1), round(passby.max_level_db, 1))
+print(round(tp, 2), round(passby.equivalent_level, 1), round(passby.max_level, 1))
 # 4.5 81.3 81.9   T_p in s, L_pAeq,Tp and L_pAFmax in dB
 ```
 
@@ -166,7 +166,7 @@ whole = environment.pass_by_measurement(
 )
 print(round(whole.start_margin_db, 1), round(whole.end_margin_db, 1), whole.recording_interval_sufficient)
 # 14.0 17.8 True
-print(round(whole.equivalent_level_db, 1), round(whole.normalized_level_db, 1))
+print(round(whole.equivalent_level, 1), round(whole.normalized_level, 1))
 # 77.1 82.0   L_pAeq,T over the whole 14 s record, and TEL
 ```
 
@@ -188,7 +188,7 @@ runs of every position lie within the 3 dB of 9.3:
 test = environment.rolling_stock_test(
     {"left": [81.3, 82.1, 81.6], "right": [80.4, 80.9, 81.2]}
 )
-print(dict(test.reported_levels_db), test.final_level_db, test.valid)
+print(dict(test.reported_levels), test.final_level, test.valid)
 # {'left': 82.0, 'right': 81.0} 82.0 True
 ```
 
@@ -224,7 +224,7 @@ mesh = np.array(side + side + ends + ends)
 sets = mesh + np.array([[0.0], [0.4], [-0.3]])  # three sets, one row each
 lengths = [5.0] * 8 + [environment.STATIONARY_END_POSITION_LENGTH_M] * 4
 standing = environment.stationary_test(sets, lengths)
-print(standing.set_levels_db.round(2), standing.reported_level_db)
+print(standing.set_levels.round(2), standing.reported_level)
 # [66.31 66.71 66.01] 66.0
 ```
 
@@ -552,7 +552,7 @@ rows = [  # Table G.2: input, mean value correction and standard uncertainty, dB
 budget = environment.pass_by_uncertainty(
     55.0, [metrology.Quantity(v, u, name=n) for n, v, u in rows]
 )
-print(round(budget.level_db, 2), round(budget.combined_uncertainty_db, 2),
+print(round(budget.level, 2), round(budget.combined_uncertainty_db, 2),
       round(budget.expanded_uncertainty_db, 2))
 # 55.68 0.83 1.66   Table G.2 prints 55,68, 0,83 and 1,66
 print(round(metrology.rectangular(0.0, 0.8).uncertainty, 2))
@@ -599,7 +599,7 @@ levels[121:] = 82.0
 print(round(environment.impulsiveness_rise_speed(times, levels).rise_speed_db_per_s, 1))
 # 60.0   dB/s
 neutral = environment.check_adjacent_vehicle_neutrality(83.04, 81.06)
-print(neutral.difference_db, neutral.passes)
+print(neutral.difference, neutral.passes)
 # 1.9 True
 print(round(environment.background_level_increase(78.0, 72.0), 2))
 # 1.26   dB the background adds to the 78 dB measured

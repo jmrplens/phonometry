@@ -420,7 +420,7 @@ class HeatConductionCorrection(OwnsArrays):
         return kappa / (1.0 + (kappa - 1.0) * self.transfer_function)
 
     @property
-    def correction_db(self) -> NDArray[np.float64]:
+    def correction(self) -> NDArray[np.float64]:
         r""":math:`20\lg|\Delta_\mathrm{H}|`, the apparent increase of the
         volume, in dB.
         """
@@ -1148,7 +1148,7 @@ class CouplerTransferImpedance(OwnsArrays):
         return self.heat_conducting_impedance_pa_s_m3 / self.capillary_correction
 
     @property
-    def heat_conduction_correction_db(self) -> NDArray[np.float64]:
+    def heat_conduction_correction(self) -> NDArray[np.float64]:
         r""":math:`20\lg|Z''_{\mathrm{a},12}/Z'_{\mathrm{a},12}|`, in dB."""
         return 20.0 * np.log10(
             np.abs(
@@ -1412,7 +1412,7 @@ def pressure_reciprocity(
     electrical_transfer_impedances_ohm: Sequence[ArrayLike],
     acoustic_transfer_impedances: Sequence[ArrayLike | CouplerTransferImpedance],
     *,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    corrections: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
 ) -> ReciprocityCalibration:
     r"""The pressure sensitivities of three microphones calibrated in pairs in
@@ -1442,7 +1442,7 @@ def pressure_reciprocity(
         :math:`Z_{\mathrm{a},23}` and :math:`Z_{\mathrm{a},31}`, each a
         :class:`CouplerTransferImpedance` or complex values in Pa·s/m³ already
         corrected.
-    :param corrections_db: Corrections added to every sensitivity level, by
+    :param corrections: Corrections added to every sensitivity level, by
         name, in dB: :func:`large_volume_wave_motion_correction` for the
         large-volume coupler of LS1P microphones (Default: none).
     :param expanded_uncertainty_db: The expanded uncertainty of the levels, in
@@ -1477,7 +1477,7 @@ def pressure_reciprocity(
         products,
         None,
         field="pressure",
-        corrections_db=corrections_db,
+        corrections=corrections,
         expanded_uncertainty_db=expanded_uncertainty_db,
     )
 
@@ -1488,7 +1488,7 @@ def pressure_reciprocity_pair(
     acoustic_transfer_impedance: ArrayLike | CouplerTransferImpedance,
     sensitivity_ratio: ArrayLike,
     *,
-    corrections_db: Mapping[str, ArrayLike] | None = None,
+    corrections: Mapping[str, ArrayLike] | None = None,
     expanded_uncertainty_db: ArrayLike | None = None,
 ) -> ReciprocityCalibration:
     r"""The pressure sensitivities of two microphones and an auxiliary sound
@@ -1510,7 +1510,7 @@ def pressure_reciprocity_pair(
         :class:`CouplerTransferImpedance` or complex values in Pa·s/m³.
     :param sensitivity_ratio: :math:`M_{\mathrm{p},1}/M_{\mathrm{p},2}`,
         complex, one value or one per frequency.
-    :param corrections_db: Corrections added to both levels (Default: none).
+    :param corrections: Corrections added to both levels (Default: none).
     :param expanded_uncertainty_db: The expanded uncertainty, in dB (Default:
         ``None``).
     :return: The :class:`~phonometry.metrology.ReciprocityCalibration`, of two
@@ -1530,7 +1530,7 @@ def pressure_reciprocity_pair(
         [product],
         sensitivity_ratio,
         field="pressure",
-        corrections_db=corrections_db,
+        corrections=corrections,
         expanded_uncertainty_db=expanded_uncertainty_db,
     )
 
@@ -1555,7 +1555,7 @@ class WaveMotionCorrection(OwnsArrays):
     microphones (IEC 61094-2:2009 C.3, Table C.3).
 
     :ivar frequencies: The frequencies, in Hz.
-    :ivar correction_db: The correction added to the pressure sensitivity
+    :ivar correction: The correction added to the pressure sensitivity
         level, in dB.
     :ivar speed_of_sound_ratio: The ratio of the speed of sound in the gas of
         the coupler to that in air, 1 for air.
@@ -1566,7 +1566,7 @@ class WaveMotionCorrection(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    correction_db: NDArray[np.float64]
+    correction: NDArray[np.float64]
     speed_of_sound_ratio: float
 
     def __post_init__(self) -> None:
@@ -1584,16 +1584,18 @@ class WaveMotionCorrection(OwnsArrays):
         """
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
-        column = np.asarray(self.correction_db, dtype=np.float64).reshape(-1)
+        column = np.asarray(self.correction, dtype=np.float64).reshape(-1)
         if column.size != frequencies.size:
-            msg = "WaveMotionCorrection: 'correction_db' must hold one value per frequency."
+            msg = (
+                "WaveMotionCorrection: 'correction' must hold one value per frequency."
+            )
             raise ValueError(msg)
-        object.__setattr__(self, "correction_db", read_only(column))
+        object.__setattr__(self, "correction", read_only(column))
         ratio = require_positive(self.speed_of_sound_ratio, "speed_of_sound_ratio")
         expected = np.array([_table_c3(float(f) / ratio)[0] for f in frequencies])
         if not np.allclose(column, expected, rtol=0.0, atol=_FIELD_SLACK_DB):
             msg = (
-                "WaveMotionCorrection: 'correction_db' must be what Table C.3 "
+                "WaveMotionCorrection: 'correction' must be what Table C.3 "
                 "gives at each frequency for 'speed_of_sound_ratio', "
                 f"{expected.tolist()!r}; got {column.tolist()!r}."
             )
@@ -1689,7 +1691,7 @@ def large_volume_wave_motion_correction(
     ratio = require_positive(speed_of_sound_ratio, "speed_of_sound_ratio")
     return WaveMotionCorrection(
         frequencies=frequencies,
-        correction_db=np.array([_table_c3(float(f) / ratio)[0] for f in frequencies]),
+        correction=np.array([_table_c3(float(f) / ratio)[0] for f in frequencies]),
         speed_of_sound_ratio=ratio,
     )
 

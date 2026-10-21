@@ -799,7 +799,7 @@ def test_a_record_that_inherits_the_copy_passes(tmp_path: pathlib.Path) -> None:
 
         @dataclass(frozen=True)
         class Single:
-            level_db: float
+            level: float
             label: str
         """,
         _plumbing="""

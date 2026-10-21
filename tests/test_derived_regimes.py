@@ -420,7 +420,7 @@ def test_an_automatic_threshold_is_held_to_its_reversals() -> None:
     )
     other = np.array([40.0, 30.0, 42.0, 31.0, 41.0, 33.0])
     with pytest.raises(ValueError, match="mean_db"):
-        dataclasses.replace(result, reversal_levels_db=other)
+        dataclasses.replace(result, reversal_levels=other)
 
 
 def test_a_tracing_that_keeps_no_peak_is_refused() -> None:
@@ -429,14 +429,14 @@ def test_a_tracing_that_keeps_no_peak_is_refused() -> None:
     )
     narrowed = np.array([40.0, 30.0, 42.0, 39.0, 41.0, 32.0])
     with pytest.raises(ValueError, match="no peak or no valley"):
-        dataclasses.replace(result, reversal_levels_db=narrowed)
+        dataclasses.replace(result, reversal_levels=narrowed)
 
 
 def test_a_tracing_that_does_not_alternate_is_refused() -> None:
     result = hearing.automatic_audiometry_threshold([40.0, 30.0, 42.0, 31.0])
     stepped = np.array([40.0, 30.0, 20.0, 31.0])
-    with pytest.raises(ValueError, match="'reversal_levels_db' must alternate"):
-        dataclasses.replace(result, reversal_levels_db=stepped)
+    with pytest.raises(ValueError, match="'reversal_levels' must alternate"):
+        dataclasses.replace(result, reversal_levels=stepped)
 
 
 def test_the_sweep_peaks_are_read_from_the_levels() -> None:
@@ -451,7 +451,7 @@ def test_a_sweep_threshold_is_held_to_its_reversals() -> None:
     levels = np.array([30.0, 40.0, 31.0, 41.0, 32.0, 42.0, 31.0, 40.0])
     result = hearing.sweep_audiometry_threshold(frequencies, levels)
     with pytest.raises(ValueError, match="mean_db"):
-        dataclasses.replace(result, reversal_levels_db=levels + 1.0)
+        dataclasses.replace(result, reversal_levels=levels + 1.0)
 
 
 # --- IEC 61094-2 Table C.3: read from a row or interpolated -------------------------
@@ -474,7 +474,7 @@ def test_a_correction_beyond_the_last_row_is_refused() -> None:
 
 def test_a_correction_of_another_gas_is_refused() -> None:
     result = metrology.large_volume_wave_motion_correction([800.0, 1100.0, 2000.0])
-    with pytest.raises(ValueError, match="correction_db"):
+    with pytest.raises(ValueError, match="correction"):
         dataclasses.replace(result, speed_of_sound_ratio=2.0)
 
 
@@ -584,8 +584,8 @@ def test_the_background_rule_is_read_from_the_levels(
 
 def test_a_level_difference_is_the_total_less_the_background() -> None:
     result = environment.turbine_sound_levels([40.0], [37.0])
-    with pytest.raises(ValueError, match="level_differences_db"):
-        dataclasses.replace(result, level_differences_db=np.array([-0.1]))
+    with pytest.raises(ValueError, match="level_differences"):
+        dataclasses.replace(result, level_differences=np.array([-0.1]))
 
 
 def test_a_turbine_level_follows_the_rule_of_its_bin() -> None:
@@ -594,9 +594,9 @@ def test_a_turbine_level_follows_the_rule_of_its_bin() -> None:
     result = environment.turbine_sound_levels([40.0], [37.0])
     louder = {
         "background_levels": np.array([45.0]),
-        "level_differences_db": np.array([-5.0]),
+        "level_differences": np.array([-5.0]),
     }
-    with pytest.raises(ValueError, match="turbine_levels_db"):
+    with pytest.raises(ValueError, match="turbine_levels"):
         dataclasses.replace(result, **louder)
 
 

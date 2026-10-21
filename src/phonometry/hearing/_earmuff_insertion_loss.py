@@ -36,7 +36,7 @@ the random-incidence field of 5.2.2 with the diffuse-field judgement of
 ISO 8253-2:2009, 5.3, and this standard's Table 1
 (:data:`RANDOM_INCIDENCE_VARIATION_LIMITS`); Annex A notes that the ATF
 itself may serve as the directional microphone where its front-to-random
-index, :data:`ATF_FRONT_TO_RANDOM_INDEX_DB`, reaches 4 dB.
+index, :data:`ATF_FRONT_TO_RANDOM_INDEX`, reaches 4 dB.
 :func:`check_plane_progressive_wave` judges the plane wave of 5.2.3, and
 :func:`verify_fixture_isolation` the acoustic isolation of the fixture with
 its isolation cup (5.1.4).
@@ -84,7 +84,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 __all__ = [
-    "ATF_FRONT_TO_RANDOM_INDEX_DB",
+    "ATF_FRONT_TO_RANDOM_INDEX",
     "EARMUFF_INSERTION_LOSS_UNCERTAINTY",
     "EARMUFF_TEST_BANDS_HZ",
     "RANDOM_INCIDENCE_VARIATION_LIMITS",
@@ -142,7 +142,7 @@ RANDOM_INCIDENCE_VARIATION_LIMITS: tuple[tuple[float, float], ...] = (
 #: with a WS1P microphone, in dB, keyed by frequency in hertz, 500 Hz to
 #: 8 kHz. Where it reaches 4 dB the fixture may itself test the directional
 #: condition of 5.2.2 (NOTE to Table 1).
-ATF_FRONT_TO_RANDOM_INDEX_DB: Mapping[float, float] = MappingProxyType(
+ATF_FRONT_TO_RANDOM_INDEX: Mapping[float, float] = MappingProxyType(
     {
         500.0: 1.7,
         630.0: 2.2,
@@ -381,13 +381,13 @@ class EarmuffInsertionLossResult(OwnsArrays):
     as the protection it provides, and nothing in the library feeds them to
     the ISO 4869-2 methods.
 
-    :ivar insertion_loss_db: :math:`IL_f`, the mean open level less the mean
+    :ivar insertion_loss: :math:`IL_f`, the mean open level less the mean
         occluded level per band, in dB, unrounded.
-    :ivar repetition_insertion_loss_db: The mean open level less each fitting's
+    :ivar repetition_insertion_loss: The mean open level less each fitting's
         occluded level, one row per repetition, in dB.
-    :ivar open_levels_db: The levels without the earmuff, one row per
+    :ivar open_levels: The levels without the earmuff, one row per
         measurement, in dB.
-    :ivar occluded_levels_db: The levels with it, one row per fitting, in dB.
+    :ivar occluded_levels: The levels with it, one row per fitting, in dB.
     :ivar open_uncertainty_db: The standard uncertainty of the mean open level
         per band, in dB: the standard deviation of the mean when at least two
         open measurements were given, else Table B.1's 0,5 dB.
@@ -397,21 +397,21 @@ class EarmuffInsertionLossResult(OwnsArrays):
     :ivar sound_field_uncertainty_db: :math:`u(\delta_2)`, in dB.
     :ivar equipment_uncertainty_db: :math:`u(\delta_3)`, in dB.
     :ivar frequencies: The centre frequencies, in hertz.
-    :ivar isolation_cup_levels_db: The level with the isolation cup in place
+    :ivar isolation_cup_levels: The level with the isolation cup in place
         of the earmuff per band, in dB, or ``None``.
     """
 
-    insertion_loss_db: np.ndarray
-    repetition_insertion_loss_db: np.ndarray
-    open_levels_db: np.ndarray
-    occluded_levels_db: np.ndarray
+    insertion_loss: np.ndarray
+    repetition_insertion_loss: np.ndarray
+    open_levels: np.ndarray
+    occluded_levels: np.ndarray
     open_uncertainty_db: np.ndarray
     occluded_uncertainty_db: np.ndarray
     fixture_uncertainty_db: float
     sound_field_uncertainty_db: float
     equipment_uncertainty_db: float
     frequencies: np.ndarray
-    isolation_cup_levels_db: np.ndarray | None = None
+    isolation_cup_levels: np.ndarray | None = None
 
     @property
     def n_repetitions(self) -> int:
@@ -419,7 +419,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
 
         :return: The count of occluded measurements.
         """
-        return int(self.occluded_levels_db.shape[0])
+        return int(self.occluded_levels.shape[0])
 
     @property
     def repetitions_sufficient(self) -> bool:
@@ -438,7 +438,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
 
         :return: One value per band, halves rounded upwards.
         """
-        return round_half_up(self.insertion_loss_db, _REPORT_DECIMALS)
+        return round_half_up(self.insertion_loss, _REPORT_DECIMALS)
 
     @property
     def standard_uncertainty_db(self) -> np.ndarray:
@@ -491,9 +491,9 @@ class EarmuffInsertionLossResult(OwnsArrays):
 
         :return: The margin, or ``None`` when no cup levels were given.
         """
-        if self.isolation_cup_levels_db is None:
+        if self.isolation_cup_levels is None:
             return None
-        margin = self.occluded_levels_db.mean(axis=0) - self.isolation_cup_levels_db
+        margin = self.occluded_levels.mean(axis=0) - self.isolation_cup_levels
         return np.asarray(margin, dtype=np.float64)
 
     @property
@@ -517,7 +517,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
 
         :return: The largest absolute departure per band.
         """
-        return np.max(np.abs(self.open_levels_db - self.open_levels_db[0]), axis=0)
+        return np.max(np.abs(self.open_levels - self.open_levels[0]), axis=0)
 
     @property
     def level_stable(self) -> np.ndarray:
@@ -534,7 +534,7 @@ class EarmuffInsertionLossResult(OwnsArrays):
         :return: ``True`` when the system's one-third-octave response has no
             step larger than 5 dB between neighbouring bands.
         """
-        mean_open = self.open_levels_db.mean(axis=0)
+        mean_open = self.open_levels.mean(axis=0)
         return bool(
             np.all(_at_most(np.abs(np.diff(mean_open)), _ADJACENT_BAND_STEP_DB))
         )
@@ -571,11 +571,11 @@ def _level_uncertainty(grid: np.ndarray, typical_db: float) -> np.ndarray:
 
 
 def earmuff_insertion_loss(
-    open_levels_db: ArrayLike,
-    occluded_levels_db: ArrayLike,
+    open_levels: ArrayLike,
+    occluded_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    isolation_cup_levels_db: ArrayLike | None = None,
+    isolation_cup_levels: ArrayLike | None = None,
     fixture_uncertainty_db: float = 0.3,
     sound_field_uncertainty_db: float = 0.5,
     equipment_uncertainty_db: float = 0.2,
@@ -602,13 +602,13 @@ def earmuff_insertion_loss(
     ageing and is not the real-ear attenuation ISO 4869-2 needs (Clause 1);
     use :func:`phonometry.hearing.real_ear_attenuation` for that.
 
-    :param open_levels_db: The levels without the earmuff, one spectrum or a
+    :param open_levels: The levels without the earmuff, one spectrum or a
         ``(repetitions, bands)`` grid, in dB.
-    :param occluded_levels_db: The levels with it, one spectrum or one per
+    :param occluded_levels: The levels with it, one spectrum or one per
         fitting, in dB.
     :param frequencies: The centre frequencies, in hertz, or ``None`` for the
         22 bands of 63 Hz to 8 kHz (:data:`EARMUFF_TEST_BANDS_HZ`).
-    :param isolation_cup_levels_db: The level with the isolation cup in place
+    :param isolation_cup_levels: The level with the isolation cup in place
         of the earmuff per band, in dB, to check that it reads at least 10 dB
         lower (5.3).
     :param fixture_uncertainty_db: :math:`u(\delta_1)`, in dB.
@@ -619,22 +619,22 @@ def earmuff_insertion_loss(
         bands, cup levels that do not match, frequencies that do not fit, or an
         uncertainty that is negative or not finite.
     """
-    open_grid = _level_grid(open_levels_db, "open_levels_db")
-    occluded = _level_grid(occluded_levels_db, "occluded_levels_db")
+    open_grid = _level_grid(open_levels, "open_levels")
+    occluded = _level_grid(occluded_levels, "occluded_levels")
     count = open_grid.shape[1]
     if occluded.shape[1] != count:
         msg = (
-            "'open_levels_db' and 'occluded_levels_db' must share their bands; "
+            "'open_levels' and 'occluded_levels' must share their bands; "
             f"got {count} and {occluded.shape[1]}."
         )
         raise ValueError(msg)
     freqs = _band_axis(frequencies, count, "earmuff_insertion_loss")
     cup = None
-    if isolation_cup_levels_db is not None:
-        cup = np.array(isolation_cup_levels_db, dtype=np.float64)
+    if isolation_cup_levels is not None:
+        cup = np.array(isolation_cup_levels, dtype=np.float64)
         if cup.shape != (count,) or not np.all(np.isfinite(cup)):
             msg = (
-                "'isolation_cup_levels_db' must hold one finite level per band, "
+                "'isolation_cup_levels' must hold one finite level per band, "
                 f"{count} values."
             )
             raise ValueError(msg)
@@ -648,26 +648,26 @@ def earmuff_insertion_loss(
         raise ValueError(msg)
     mean_open = open_grid.mean(axis=0)
     return EarmuffInsertionLossResult(
-        insertion_loss_db=mean_open - occluded.mean(axis=0),
-        repetition_insertion_loss_db=mean_open[None, :] - occluded,
-        open_levels_db=open_grid,
-        occluded_levels_db=occluded,
+        insertion_loss=mean_open - occluded.mean(axis=0),
+        repetition_insertion_loss=mean_open[None, :] - occluded,
+        open_levels=open_grid,
+        occluded_levels=occluded,
         open_uncertainty_db=_level_uncertainty(open_grid, _OPEN_LEVEL_U_DB),
         occluded_uncertainty_db=_level_uncertainty(occluded, _OCCLUDED_LEVEL_U_DB),
         fixture_uncertainty_db=float(fixture_uncertainty_db),
         sound_field_uncertainty_db=float(sound_field_uncertainty_db),
         equipment_uncertainty_db=float(equipment_uncertainty_db),
         frequencies=freqs,
-        isolation_cup_levels_db=cup,
+        isolation_cup_levels=cup,
     )
 
 
 def check_random_incidence_field(
-    position_levels_db: Mapping[str, ArrayLike],
-    reference_levels_db: ArrayLike,
+    position_levels: Mapping[str, ArrayLike],
+    reference_levels: ArrayLike,
     *,
-    directional_levels_db: ArrayLike | None = None,
-    front_to_random_index_db: ArrayLike | None = None,
+    directional_levels: ArrayLike | None = None,
+    front_to_random_index: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
 ) -> DiffuseSoundFieldCheck:
     """Is the random-incidence field of the test site good enough? (5.2.2).
@@ -686,22 +686,22 @@ def check_random_incidence_field(
     standard's Table 1, and it returns the same
     :class:`~phonometry.hearing.DiffuseSoundFieldCheck`. The fixture itself
     may be the directional microphone in the bands where its index
-    (:data:`ATF_FRONT_TO_RANDOM_INDEX_DB`) reaches 4 dB; pass the index band
+    (:data:`ATF_FRONT_TO_RANDOM_INDEX`) reaches 4 dB; pass the index band
     by band, NaN where it has none, and the bands it cannot judge are left
     unjudged.
 
-    :param position_levels_db: The level at each position per band, in dB,
+    :param position_levels: The level at each position per band, in dB,
         keyed ``"front"``, ``"back"``, ``"left"``, ``"right"``, ``"up"`` and
         ``"down"``.
-    :param reference_levels_db: The level at the reference point per band, in
+    :param reference_levels: The level at the reference point per band, in
         dB.
-    :param directional_levels_db: The directional microphone's readings at the
+    :param directional_levels: The directional microphone's readings at the
         reference point, a ``(directions, bands)`` grid in dB; bands below
         500 Hz are not read and may be NaN. ``None`` leaves the directional
         test unjudged, and the verdict then does not pass.
-    :param front_to_random_index_db: The directional microphone's
+    :param front_to_random_index: The directional microphone's
         front-to-random sensitivity index, in dB, one number or one per band;
-        required with ``directional_levels_db``.
+        required with ``directional_levels``.
     :param frequencies: The centre frequencies, in hertz, or ``None`` for the
         22 bands of 63 Hz to 8 kHz.
     :return: :class:`~phonometry.hearing.DiffuseSoundFieldCheck`.
@@ -711,10 +711,10 @@ def check_random_incidence_field(
         fewer than two finite readings.
     """
     return _diffuse_field_check(
-        position_levels_db,
-        reference_levels_db,
-        directional_levels_db=directional_levels_db,
-        front_to_random_index_db=front_to_random_index_db,
+        position_levels,
+        reference_levels,
+        directional_levels=directional_levels,
+        front_to_random_index=front_to_random_index,
         frequencies=frequencies,
         default_frequencies=EARMUFF_TEST_BANDS_HZ,
         standard=_RANDOM_INCIDENCE_CLAUSE,
@@ -727,20 +727,20 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
     """Whether the plane progressive wave of the test site is good enough (5.2.3).
 
     :ivar frequencies: The centre frequencies, in hertz.
-    :ivar end_face_difference_db: The difference between the levels at the
+    :ivar end_face_difference: The difference between the levels at the
         two points the centres of the fixture's end faces occupy, as an
         absolute value per band, in dB.
     :ivar front_to_back_db: From 500 Hz up, the level a directional microphone
         at the reference point reads facing the source less the level facing
         away from it, per band, in dB; NaN below 500 Hz or where not measured.
-    :ivar front_to_rear_index_db: The microphone's front-to-rear sensitivity
+    :ivar front_to_rear_index: The microphone's front-to-rear sensitivity
         index per band, in dB, NaN where not given.
     """
 
     frequencies: np.ndarray
-    end_face_difference_db: np.ndarray
+    end_face_difference: np.ndarray
     front_to_back_db: np.ndarray
-    front_to_rear_index_db: np.ndarray
+    front_to_rear_index: np.ndarray
 
     @property
     def end_faces_matched(self) -> np.ndarray:
@@ -748,7 +748,7 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
 
         :return: One boolean per band.
         """
-        return _at_most(self.end_face_difference_db, _END_FACE_TOLERANCE_DB)
+        return _at_most(self.end_face_difference, _END_FACE_TOLERANCE_DB)
 
     @property
     def directional_required(self) -> np.ndarray:
@@ -764,7 +764,7 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
 
         :return: One boolean per band; ``False`` where no index was given.
         """
-        return np.asarray(self.front_to_rear_index_db > _FRONT_TO_REAR_INDEX_DB)
+        return np.asarray(self.front_to_rear_index > _FRONT_TO_REAR_INDEX_DB)
 
     @property
     def progressive(self) -> np.ndarray:
@@ -823,11 +823,11 @@ class PlaneProgressiveWaveCheck(OwnsArrays):
 
 
 def check_plane_progressive_wave(
-    end_face_levels_db: ArrayLike,
+    end_face_levels: ArrayLike,
     *,
-    facing_levels_db: ArrayLike | None = None,
-    facing_away_levels_db: ArrayLike | None = None,
-    front_to_rear_index_db: ArrayLike | None = None,
+    facing_levels: ArrayLike | None = None,
+    facing_away_levels: ArrayLike | None = None,
+    front_to_rear_index: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
 ) -> PlaneProgressiveWaveCheck:
     """Is the plane progressive wave of the test site good enough? (5.2.3).
@@ -845,12 +845,12 @@ def check_plane_progressive_wave(
     wave meets its end faces at grazing incidence; that is its orientation,
     not a condition judged here.
 
-    :param end_face_levels_db: The levels at the two end-face points, a
+    :param end_face_levels: The levels at the two end-face points, a
         ``(2, bands)`` grid in dB.
-    :param facing_levels_db: The directional microphone's level facing the
+    :param facing_levels: The directional microphone's level facing the
         source per band, in dB; bands below 500 Hz may be NaN.
-    :param facing_away_levels_db: Its level facing away, per band, in dB.
-    :param front_to_rear_index_db: The microphone's front-to-rear sensitivity
+    :param facing_away_levels: Its level facing away, per band, in dB.
+    :param front_to_rear_index: The microphone's front-to-rear sensitivity
         index, one number or one per band, in dB.
     :param frequencies: The centre frequencies, in hertz, or ``None`` for the
         22 bands of 63 Hz to 8 kHz.
@@ -861,29 +861,29 @@ def check_plane_progressive_wave(
         levels, directional readings given in part, or arrays that do not
         match.
     """
-    faces = np.array(end_face_levels_db, dtype=np.float64)
+    faces = np.array(end_face_levels, dtype=np.float64)
     if (
         faces.ndim != _GRID_RANK
         or faces.shape[0] != _END_FACE_POSITIONS
         or not np.all(np.isfinite(faces))
     ):
-        msg = "'end_face_levels_db' must be a (2, bands) grid of finite levels, in dB."
+        msg = "'end_face_levels' must be a (2, bands) grid of finite levels, in dB."
         raise ValueError(msg)
     count = faces.shape[1]
     freqs = _band_axis(frequencies, count, "check_plane_progressive_wave")
-    directional = (facing_levels_db, facing_away_levels_db, front_to_rear_index_db)
+    directional = (facing_levels, facing_away_levels, front_to_rear_index)
     front_to_back = np.full(count, np.nan)
     index = np.full(count, np.nan)
     if any(value is not None for value in directional):
         if any(value is None for value in directional):
             msg = (
-                "give 'facing_levels_db', 'facing_away_levels_db' and "
-                "'front_to_rear_index_db' together."
+                "give 'facing_levels', 'facing_away_levels' and "
+                "'front_to_rear_index' together."
             )
             raise ValueError(msg)
-        facing = np.array(facing_levels_db, dtype=np.float64)
-        away = np.array(facing_away_levels_db, dtype=np.float64)
-        given_index = np.array(front_to_rear_index_db, dtype=np.float64)
+        facing = np.array(facing_levels, dtype=np.float64)
+        away = np.array(facing_away_levels, dtype=np.float64)
+        given_index = np.array(front_to_rear_index, dtype=np.float64)
         if given_index.ndim == 0:
             given_index = np.full(count, float(given_index))
         if (
@@ -903,9 +903,9 @@ def check_plane_progressive_wave(
         index = given_index
     return PlaneProgressiveWaveCheck(
         frequencies=freqs,
-        end_face_difference_db=np.abs(faces[0] - faces[1]),
+        end_face_difference=np.abs(faces[0] - faces[1]),
         front_to_back_db=front_to_back,
-        front_to_rear_index_db=index,
+        front_to_rear_index=index,
     )
 
 
@@ -934,21 +934,21 @@ class FixtureIsolationCheck(OwnsArrays):
     :attr:`required_db`, so a check cannot be built against another one.
 
     :ivar frequencies: The centre frequencies, in hertz.
-    :ivar isolation_db: The acoustic isolation (3.7), the level with the
+    :ivar isolation: The acoustic isolation (3.7), the level with the
         isolation cup absent less the level with it sealed on, per band, in
         dB.
     """
 
     frequencies: np.ndarray
-    isolation_db: np.ndarray
+    isolation: np.ndarray
 
     def __post_init__(self) -> None:
         """Reject a check whose isolation does not follow its bands.
 
         :raises ValueError: if the isolation does not hold one value per band.
         """
-        if np.asarray(self.isolation_db).shape != np.asarray(self.frequencies).shape:
-            msg = "FixtureIsolationCheck: 'isolation_db' must hold one value per band."
+        if np.asarray(self.isolation).shape != np.asarray(self.frequencies).shape:
+            msg = "FixtureIsolationCheck: 'isolation' must hold one value per band."
             raise ValueError(msg)
 
     @property
@@ -966,7 +966,7 @@ class FixtureIsolationCheck(OwnsArrays):
 
         :return: One boolean per band; ``True`` where nothing is required.
         """
-        reached = self.isolation_db >= self.required_db - _BOUNDARY_SLACK_DB
+        reached = self.isolation >= self.required_db - _BOUNDARY_SLACK_DB
         return np.asarray(np.isnan(self.required_db) | reached, dtype=bool)
 
     @property
@@ -976,7 +976,7 @@ class FixtureIsolationCheck(OwnsArrays):
         :return: Negative where the fixture falls short, NaN where nothing is
             required.
         """
-        return np.asarray(self.isolation_db - self.required_db, dtype=np.float64)
+        return np.asarray(self.isolation - self.required_db, dtype=np.float64)
 
     @property
     def passes(self) -> bool:
@@ -1013,8 +1013,8 @@ class FixtureIsolationCheck(OwnsArrays):
 
 
 def verify_fixture_isolation(
-    open_levels_db: ArrayLike,
-    cup_levels_db: ArrayLike,
+    open_levels: ArrayLike,
+    cup_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
 ) -> FixtureIsolationCheck:
@@ -1028,22 +1028,22 @@ def verify_fixture_isolation(
     structure-borne paths both count, which is why the fixture sits on a
     resilient mounting (5.1.2).
 
-    :param open_levels_db: The level at the microphone without the cup, per
+    :param open_levels: The level at the microphone without the cup, per
         band, in dB.
-    :param cup_levels_db: The level with the cup sealed on, per band, in dB.
+    :param cup_levels: The level with the cup sealed on, per band, in dB.
     :param frequencies: The centre frequencies, in hertz, or ``None`` for the
         22 bands of 63 Hz to 8 kHz.
     :return: :class:`FixtureIsolationCheck`.
     :raises ValueError: for levels that are not finite or do not match the
         bands.
     """
-    open_levels = _level_grid(open_levels_db, "open_levels_db")
-    cup = _level_grid(cup_levels_db, "cup_levels_db")
+    open_levels = _level_grid(open_levels, "open_levels")
+    cup = _level_grid(cup_levels, "cup_levels")
     if open_levels.shape[0] != 1 or cup.shape != open_levels.shape:
-        msg = "'open_levels_db' and 'cup_levels_db' must be one spectrum each on the same bands."
+        msg = "'open_levels' and 'cup_levels' must be one spectrum each on the same bands."
         raise ValueError(msg)
     freqs = _band_axis(frequencies, open_levels.shape[1], "verify_fixture_isolation")
     return FixtureIsolationCheck(
         frequencies=freqs,
-        isolation_db=open_levels[0] - cup[0],
+        isolation=open_levels[0] - cup[0],
     )

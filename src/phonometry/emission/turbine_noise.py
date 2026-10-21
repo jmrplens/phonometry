@@ -253,9 +253,9 @@ def _round_half_up(value: float) -> int:
     return int(round_half_up(value))
 
 
-def _below_criterion(level_difference_db: ArrayLike) -> np.ndarray:
+def _below_criterion(level_difference: ArrayLike) -> np.ndarray:
     """Which background level differences are less than 3 dB (4.2)."""
-    difference = np.asarray(level_difference_db, dtype=np.float64)
+    difference = np.asarray(level_difference, dtype=np.float64)
     return np.asarray(
         difference < _BACKGROUND_CRITERION_DB - _BOUNDARY_SLACK_DB, dtype=bool
     )
@@ -860,7 +860,7 @@ def turbine_microphone_positions(
 # ---------------------------------------------------------------------------
 
 
-def turbine_background_correction(level_difference_db: ArrayLike) -> float | np.ndarray:
+def turbine_background_correction(level_difference: ArrayLike) -> float | np.ndarray:
     r"""Correction for background noise of Table 2 (clause 8.1).
 
     The correction to subtract from the level measured with the source
@@ -889,14 +889,14 @@ def turbine_background_correction(level_difference_db: ArrayLike) -> float | np.
     of a decibel either way, and they are applied position by position rather
     than to the surface-averaged level.
 
-    :param level_difference_db: The level with the source operating less the
+    :param level_difference: The level with the source operating less the
         background level, at each position, in dB (scalar or 1-D array).
     :return: The correction to subtract, in dB: a ``float`` for a scalar, an
         array for an array.
     :raises ValueError: if a difference is not finite.
     """
-    scalar = np.ndim(level_difference_db) == 0
-    difference = require_finite_array(level_difference_db, "level_difference_db")
+    scalar = np.ndim(level_difference) == 0
+    difference = require_finite_array(level_difference, "level_difference")
     first_row = _TABLE_2[int(_BACKGROUND_CRITERION_DB)]
     last_row = max(_TABLE_2)
 
@@ -920,21 +920,21 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
     Built by :func:`turbine_environmental_correction` (A.3.1, Figure A.3) or
     by :func:`turbine_reference_source_correction` (A.3.2).
 
-    :ivar environmental_correction_db: :math:`K`, in dB.
+    :ivar environmental_correction: :math:`K`, in dB.
     :ivar method: ``"absorption"`` (A.3.1) or ``"reference source"`` (A.3.2).
     :ivar surface_area: :math:`S` (A.3.1), in square metres, or ``None``.
     :ivar absorption_area: :math:`A` (A.3.1), in square metres, or ``None``.
-    :ivar reference_levels_db: The determinations of the reference source's
+    :ivar reference_levels: The determinations of the reference source's
         sound power level :math:`L_W` (A.3.2), in dB, or ``None``.
-    :ivar calibrated_level_db: :math:`L_{W\mathrm{r}}` (A.3.2), in dB, or ``None``.
+    :ivar calibrated_level: :math:`L_{W\mathrm{r}}` (A.3.2), in dB, or ``None``.
     """
 
-    environmental_correction_db: float
+    environmental_correction: float
     method: Literal["absorption", "reference source"]
     surface_area: float | None = None
     absorption_area: float | None = None
-    reference_levels_db: np.ndarray | None = None
-    calibrated_level_db: float | None = None
+    reference_levels: np.ndarray | None = None
+    calibrated_level: float | None = None
 
     def __post_init__(self) -> None:
         """Refuse a correction without the data of the route it names.
@@ -957,20 +957,20 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
             )
             raise ValueError(msg)
         if self.method == _REFERENCE_SOURCE and (
-            self.reference_levels_db is None or self.calibrated_level_db is None
+            self.reference_levels is None or self.calibrated_level is None
         ):
             msg = (
                 "TurbineEnvironmentalCorrection: the reference-source route needs "
-                "'reference_levels_db' and 'calibrated_level_db'."
+                "'reference_levels' and 'calibrated_level'."
             )
             raise ValueError(msg)
         require_finite_fields(
             self,
-            "environmental_correction_db",
+            "environmental_correction",
             "surface_area",
             "absorption_area",
-            "reference_levels_db",
-            "calibrated_level_db",
+            "reference_levels",
+            "calibrated_level",
         )
 
     @property
@@ -995,7 +995,7 @@ class TurbineEnvironmentalCorrection(OwnsArrays):
 
         check_language(language)
         return plot_turbine_environmental_correction(
-            self.environmental_correction_db,
+            self.environmental_correction,
             self.ratio,
             passes=None,
             ax=ax,
@@ -1058,7 +1058,7 @@ def turbine_environmental_correction(
         raise ValueError(msg)
     k = 10.0 * math.log10(1.0 + _FOUR / (absorption / area))
     return TurbineEnvironmentalCorrection(
-        environmental_correction_db=k,
+        environmental_correction=k,
         method="absorption",
         surface_area=area,
         absorption_area=absorption,
@@ -1066,9 +1066,9 @@ def turbine_environmental_correction(
 
 
 def turbine_reference_source_correction(
-    sound_power_levels_db: ArrayLike,
+    sound_power_levels: ArrayLike,
     *,
-    calibrated_level_db: float,
+    calibrated_level: float,
     machine_length_m: float,
 ) -> TurbineEnvironmentalCorrection:
     r"""Environmental correction :math:`K = L_W - L_{W\mathrm{r}}` from a reference source (A.3.2).
@@ -1084,17 +1084,17 @@ def turbine_reference_source_correction(
     value" and does not say which mean; the library takes the arithmetic mean
     of the determinations.
 
-    :param sound_power_levels_db: The determinations of :math:`L_W`, in dB:
+    :param sound_power_levels: The determinations of :math:`L_W`, in dB:
         two for a machine up to 10 m long, four above.
-    :param calibrated_level_db: :math:`L_{W\mathrm{r}}`, in dB re 1 pW.
+    :param calibrated_level: :math:`L_{W\mathrm{r}}`, in dB re 1 pW.
     :param machine_length_m: Length of the machine under test, in metres,
         which sets how many determinations are needed.
     :return: The correction and the determinations it came from.
     :raises ValueError: for the wrong number of determinations or a
         non-finite level.
     """
-    levels = require_finite_array(sound_power_levels_db, "sound_power_levels_db")
-    reference = require_finite(calibrated_level_db, "calibrated_level_db")
+    levels = require_finite_array(sound_power_levels, "sound_power_levels")
+    reference = require_finite(calibrated_level, "calibrated_level")
     length = require_positive(machine_length_m, "machine_length_m")
     expected = (
         _LONG_MACHINE_DETERMINATIONS
@@ -1110,10 +1110,10 @@ def turbine_reference_source_correction(
         raise ValueError(msg)
     k = float(np.mean(levels)) - reference
     return TurbineEnvironmentalCorrection(
-        environmental_correction_db=k,
+        environmental_correction=k,
         method=_REFERENCE_SOURCE,
-        reference_levels_db=levels,
-        calibrated_level_db=reference,
+        reference_levels=levels,
+        calibrated_level=reference,
     )
 
 
@@ -1125,13 +1125,13 @@ class TurbineTestEnvironmentCheck(RichDisplay):
     from the correction and the wind speed against the 7 dB, 6 m/s and
     1 m/s the standard prints, so they are not fields.
 
-    :ivar environmental_correction_db: :math:`K`, in dB.
+    :ivar environmental_correction: :math:`K`, in dB.
     :ivar ratio: :math:`A/S`, when the correction came from the room
         absorption, else ``None``.
     :ivar wind_speed_m_s: The wind speed outdoors, in m/s, or ``None``.
     """
 
-    environmental_correction_db: float
+    environmental_correction: float
     ratio: float | None
     _: KW_ONLY
     wind_speed_m_s: float | None = None
@@ -1139,7 +1139,7 @@ class TurbineTestEnvironmentCheck(RichDisplay):
     @property
     def correction_ok(self) -> bool:
         r""":math:`K \le 7` dB (A.3.3)."""
-        return _within_k_limit(self.environmental_correction_db)
+        return _within_k_limit(self.environmental_correction)
 
     @property
     def wind_ok(self) -> bool | None:
@@ -1186,7 +1186,7 @@ class TurbineTestEnvironmentCheck(RichDisplay):
 
         check_language(language)
         return plot_turbine_environmental_correction(
-            self.environmental_correction_db,
+            self.environmental_correction,
             self.ratio,
             passes=self.passes,
             ax=ax,
@@ -1198,7 +1198,7 @@ class TurbineTestEnvironmentCheck(RichDisplay):
 def check_turbine_test_environment(
     correction: TurbineEnvironmentalCorrection | None = None,
     *,
-    environmental_correction_db: float | None = None,
+    environmental_correction: float | None = None,
     wind_speed_m_s: float | None = None,
 ) -> TurbineTestEnvironmentCheck:
     r"""Is the test environment good enough for the standard (A.3.3, 4.3)?
@@ -1214,33 +1214,33 @@ def check_turbine_test_environment(
     :param correction: The environmental correction, from
         :func:`turbine_environmental_correction` or
         :func:`turbine_reference_source_correction`; or give
-        ``environmental_correction_db`` instead.
-    :param environmental_correction_db: :math:`K` in dB, when it was found
+        ``environmental_correction`` instead.
+    :param environmental_correction: :math:`K` in dB, when it was found
         some other way, ``0.0`` outdoors (A.4).
     :param wind_speed_m_s: The wind speed for a measurement outdoors, in
         metres per second; ``None`` indoors.
     :return: The conditions and the verdict.
     :raises ValueError: unless exactly one of ``correction`` and
-        ``environmental_correction_db`` is given, for a non-finite correction
+        ``environmental_correction`` is given, for a non-finite correction
         or for a negative wind speed.
     """
-    if (correction is None) == (environmental_correction_db is None):
+    if (correction is None) == (environmental_correction is None):
         msg = (
             "check_turbine_test_environment: give 'correction' or "
-            "'environmental_correction_db', one of the two."
+            "'environmental_correction', one of the two."
         )
         raise ValueError(msg)
-    if environmental_correction_db is not None:
-        k = require_finite(environmental_correction_db, "environmental_correction_db")
+    if environmental_correction is not None:
+        k = require_finite(environmental_correction, "environmental_correction")
         ratio = None
     elif isinstance(correction, TurbineEnvironmentalCorrection):
-        k = correction.environmental_correction_db
+        k = correction.environmental_correction
         ratio = correction.ratio
     else:
         msg = (
             "check_turbine_test_environment: 'correction' must be a "
             "TurbineEnvironmentalCorrection; pass a bare K as "
-            "'environmental_correction_db'."
+            "'environmental_correction'."
         )
         raise ValueError(msg)
     wind: float | None = None
@@ -1253,7 +1253,7 @@ def check_turbine_test_environment(
             )
             raise ValueError(msg)
     return TurbineTestEnvironmentCheck(
-        environmental_correction_db=k, ratio=ratio, wind_speed_m_s=wind
+        environmental_correction=k, ratio=ratio, wind_speed_m_s=wind
     )
 
 
@@ -1272,26 +1272,26 @@ class TurbineSoundPowerResult(OwnsArrays):
         turbine set operating, one per position, in dB re 20 µPa.
     :ivar background_levels: The background level at each position, in
         dB, or ``None`` when it was not determined.
-    :ivar background_corrections_db: The correction of Table 2 at each
+    :ivar background_corrections: The correction of Table 2 at each
         position, in dB (zero where no background was given).
-    :ivar corrected_levels_db: The levels after 8.1, in dB.
-    :ivar environmental_correction_db: :math:`K`, in dB.
+    :ivar corrected_levels: The levels after 8.1, in dB.
+    :ivar environmental_correction: :math:`K`, in dB.
     :ivar surface_area: :math:`S`, in square metres.
-    :ivar surface_pressure_level_db: :math:`\overline{L_{p\mathrm{A}}}` of
+    :ivar surface_pressure_level: :math:`\overline{L_{p\mathrm{A}}}` of
         Equation (2), :math:`K` subtracted, in dB re 20 µPa.
-    :ivar sound_power_level_db: :math:`L_{W\mathrm{A}}` of Equation (3), in
+    :ivar sound_power_level: :math:`L_{W\mathrm{A}}` of Equation (3), in
         dB re 1 pW.
     :ivar overhead_mask: Which positions are overhead, or ``None``.
     """
 
     pressure_levels: np.ndarray
     background_levels: np.ndarray | None
-    background_corrections_db: np.ndarray
-    corrected_levels_db: np.ndarray
-    environmental_correction_db: float
+    background_corrections: np.ndarray
+    corrected_levels: np.ndarray
+    environmental_correction: float
     surface_area: float
-    surface_pressure_level_db: float
-    sound_power_level_db: float
+    surface_pressure_level: float
+    sound_power_level: float
     overhead_mask: np.ndarray | None = field(default=None)
 
     def __post_init__(self) -> None:
@@ -1304,8 +1304,8 @@ class TurbineSoundPowerResult(OwnsArrays):
         count = np.asarray(self.pressure_levels).shape
         for name in (
             "background_levels",
-            "background_corrections_db",
-            "corrected_levels_db",
+            "background_corrections",
+            "corrected_levels",
             "overhead_mask",
         ):
             value = getattr(self, name)
@@ -1319,16 +1319,16 @@ class TurbineSoundPowerResult(OwnsArrays):
             self,
             "pressure_levels",
             "background_levels",
-            "background_corrections_db",
-            "corrected_levels_db",
-            "environmental_correction_db",
+            "background_corrections",
+            "corrected_levels",
+            "environmental_correction",
             "surface_area",
-            "surface_pressure_level_db",
-            "sound_power_level_db",
+            "surface_pressure_level",
+            "sound_power_level",
         )
 
     @property
-    def level_differences_db(self) -> np.ndarray | None:
+    def level_differences(self) -> np.ndarray | None:
         """The level with the source operating less the background, per position."""
         if self.background_levels is None:
             return None
@@ -1345,7 +1345,7 @@ class TurbineSoundPowerResult(OwnsArrays):
             the determination an upper limit, or ``None`` without a
             background.
         """
-        differences = self.level_differences_db
+        differences = self.level_differences
         return None if differences is None else _below_criterion(differences)
 
     @property
@@ -1359,14 +1359,14 @@ class TurbineSoundPowerResult(OwnsArrays):
         return limited is not None and bool(np.any(limited))
 
     @property
-    def reported_sound_power_level_db(self) -> float:
+    def reported_sound_power_level(self) -> float:
         r""":math:`L_{W\mathrm{A}}` rounded to the nearest whole decibel (9.4 g)."""
-        return float(_round_half_up(self.sound_power_level_db))
+        return float(_round_half_up(self.sound_power_level))
 
     @property
     def level_range_db(self) -> float:
         """The range of the corrected position levels, in dB."""
-        levels = np.asarray(self.corrected_levels_db)
+        levels = np.asarray(self.corrected_levels)
         return float(np.max(levels) - np.min(levels))
 
     @property
@@ -1380,9 +1380,7 @@ class TurbineSoundPowerResult(OwnsArrays):
         0,707 dB (two levels 5 dB apart, the louder at 41 % of the positions),
         the NOTE's 0,7 dB to its one decimal.
         """
-        return (
-            float(np.mean(self.corrected_levels_db)) - self.environmental_correction_db
-        )
+        return float(np.mean(self.corrected_levels)) - self.environmental_correction
 
     @property
     def arithmetic_mean_allowed(self) -> bool:
@@ -1403,8 +1401,8 @@ class TurbineSoundPowerResult(OwnsArrays):
         mask = np.asarray(self.overhead_mask, dtype=bool)
         if not np.any(mask) or np.all(mask):
             return None
-        without = energy_mean(np.asarray(self.corrected_levels_db)[~mask])
-        with_all = energy_mean(np.asarray(self.corrected_levels_db))
+        without = energy_mean(np.asarray(self.corrected_levels)[~mask])
+        with_all = energy_mean(np.asarray(self.corrected_levels))
         return float(with_all - without)
 
     @property
@@ -1422,9 +1420,7 @@ class TurbineSoundPowerResult(OwnsArrays):
         Every background at least 3 dB below (4.2) and :math:`K` within 7 dB
         (8.3). Only such a determination can carry the statement of clause 10.
         """
-        return not self.upper_limit and _within_k_limit(
-            self.environmental_correction_db
-        )
+        return not self.upper_limit and _within_k_limit(self.environmental_correction)
 
     def plot(
         self,
@@ -1464,7 +1460,7 @@ def turbine_sound_power(
     *,
     surface_area: float,
     background_levels: ArrayLike | None,
-    environmental_correction_db: float,
+    environmental_correction: float,
     overhead_mask: ArrayLike | None = None,
 ) -> TurbineSoundPowerResult:
     r"""Surface sound pressure level and sound power level of a turbine set (8.1 to 8.4).
@@ -1496,7 +1492,7 @@ def turbine_sound_power(
         stopped, and NOTE 1 of 8.1 allows it to be evaluated by computation
         instead. ``None`` states that no background was determined, and no
         correction is applied.
-    :param environmental_correction_db: :math:`K`, in dB: from
+    :param environmental_correction: :math:`K`, in dB: from
         :func:`turbine_environmental_correction` or
         :func:`turbine_reference_source_correction`, or ``0.0`` outdoors
         (A.4).
@@ -1517,7 +1513,7 @@ def turbine_sound_power(
         )
         raise ValueError(msg)
     area = require_positive(surface_area, "surface_area")
-    k = require_finite(environmental_correction_db, "environmental_correction_db")
+    k = require_finite(environmental_correction, "environmental_correction")
     background: np.ndarray | None = None
     corrections = np.zeros_like(levels)
     if background_levels is not None:
@@ -1560,12 +1556,12 @@ def turbine_sound_power(
     return TurbineSoundPowerResult(
         pressure_levels=levels,
         background_levels=None if background is None else background,
-        background_corrections_db=read_only(corrections),
-        corrected_levels_db=read_only(corrected),
-        environmental_correction_db=k,
+        background_corrections=read_only(corrections),
+        corrected_levels=read_only(corrected),
+        environmental_correction=k,
         surface_area=area,
-        surface_pressure_level_db=float(surface_level),
-        sound_power_level_db=float(power),
+        surface_pressure_level=float(surface_level),
+        sound_power_level=float(power),
         overhead_mask=mask,
     )
 
@@ -1588,13 +1584,13 @@ class TurbineNoiseDeclaration(OwnsArrays):
     :ivar tonal: Whether the sound contains prominent discrete tones, which
         selects the row of Table 1.
     :ivar operating_conditions: The operating conditions, clause 10 b).
-    :ivar position_levels_db: The A-weighted levels at each position,
+    :ivar position_levels: The A-weighted levels at each position,
         corrected for the background, per condition, clause 10 c).
-    :ivar surface_pressure_levels_db: The A-weighted surface sound pressure
+    :ivar surface_pressure_levels: The A-weighted surface sound pressure
         level per condition, clause 10 d), in dB re 20 µPa.
-    :ivar sound_power_levels_db: The A-weighted sound power level per
+    :ivar sound_power_levels: The A-weighted sound power level per
         condition as determined by Equation (3), in dB re 1 pW; clause 10 e)
-        reports it as :attr:`reported_sound_power_levels_db`.
+        reports it as :attr:`reported_sound_power_levels`.
     """
 
     turbine: str
@@ -1602,9 +1598,9 @@ class TurbineNoiseDeclaration(OwnsArrays):
     measured_at: str
     tonal: bool
     operating_conditions: tuple[str, ...]
-    position_levels_db: tuple[np.ndarray, ...]
-    surface_pressure_levels_db: tuple[float, ...]
-    sound_power_levels_db: tuple[float, ...]
+    position_levels: tuple[np.ndarray, ...]
+    surface_pressure_levels: tuple[float, ...]
+    sound_power_levels: tuple[float, ...]
 
     def __post_init__(self) -> None:
         """Refuse a report whose rows disagree in number.
@@ -1617,9 +1613,9 @@ class TurbineNoiseDeclaration(OwnsArrays):
             msg = "TurbineNoiseDeclaration: at least one operating condition is needed."
             raise ValueError(msg)
         for name in (
-            "position_levels_db",
-            "surface_pressure_levels_db",
-            "sound_power_levels_db",
+            "position_levels",
+            "surface_pressure_levels",
+            "sound_power_levels",
         ):
             if len(getattr(self, name)) != count:
                 msg = (
@@ -1627,9 +1623,7 @@ class TurbineNoiseDeclaration(OwnsArrays):
                     f"operating condition ({count})."
                 )
                 raise ValueError(msg)
-        require_finite_fields(
-            self, "surface_pressure_levels_db", "sound_power_levels_db"
-        )
+        require_finite_fields(self, "surface_pressure_levels", "sound_power_levels")
 
     @property
     def statement(self) -> str:
@@ -1647,14 +1641,12 @@ class TurbineNoiseDeclaration(OwnsArrays):
         return _TABLE_1[self.tonal]
 
     @property
-    def reported_sound_power_levels_db(self) -> tuple[float, ...]:
+    def reported_sound_power_levels(self) -> tuple[float, ...]:
         """The sound power levels rounded to the nearest whole decibel (9.4 g).
 
         What clause 10 e) reports, in dB re 1 pW, one per operating condition.
         """
-        return tuple(
-            float(_round_half_up(level)) for level in self.sound_power_levels_db
-        )
+        return tuple(float(_round_half_up(level)) for level in self.sound_power_levels)
 
     @property
     def loudest_condition(self) -> str:
@@ -1664,7 +1656,7 @@ class TurbineNoiseDeclaration(OwnsArrays):
         that report the same whole decibel are still told apart; on an exact
         tie it is the first condition listed.
         """
-        index = int(np.argmax(self.sound_power_levels_db))
+        index = int(np.argmax(self.sound_power_levels))
         return self.operating_conditions[index]
 
     def plot(
@@ -1758,16 +1750,16 @@ def turbine_noise_declaration(
             )
             raise ValueError(msg)
         conditions.append(str(condition))
-        levels.append(read_only(np.array(result.corrected_levels_db, dtype=np.float64)))
-        surface.append(result.surface_pressure_level_db)
-        power.append(result.sound_power_level_db)
+        levels.append(read_only(np.array(result.corrected_levels, dtype=np.float64)))
+        surface.append(result.surface_pressure_level)
+        power.append(result.sound_power_level)
     return TurbineNoiseDeclaration(
         turbine=turbine,
         noise_control=noise_control,
         measured_at=measured_at,
         tonal=bool(tonal),
         operating_conditions=tuple(conditions),
-        position_levels_db=tuple(levels),
-        surface_pressure_levels_db=tuple(surface),
-        sound_power_levels_db=tuple(power),
+        position_levels=tuple(levels),
+        surface_pressure_levels=tuple(surface),
+        sound_power_levels=tuple(power),
     )

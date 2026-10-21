@@ -31,6 +31,7 @@ from ..common import (
     _OFFSET_POINTS,
     page_is_dark,
     style_default,
+    styled,
     theme_fill_alpha,
 )
 
@@ -275,7 +276,7 @@ def _material_rect(
     if face != "none":
         alpha = max(alpha, theme_fill_alpha(face, ax))
     kwargs["alpha"] = alpha
-    patch = Rectangle((x, y), width, height, hatch=hatch, **kwargs)
+    patch = Rectangle((x, y), width, height, **styled(kwargs, hatch=hatch))
     ax.add_patch(patch)
     return patch
 

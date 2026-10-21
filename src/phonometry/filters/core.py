@@ -22,6 +22,7 @@ from .._internal.validation import (
     is_scalar,
     require_choice,
     require_positive,
+    require_present,
     require_real,
     require_scalar,
 )
@@ -215,6 +216,90 @@ class OctaveFilterResult(OwnsArrays):
 _SPECTROGRAM_RANKS = (2, 3)
 
 
+def _spectrogram_axis(
+    value: object, name: str, levels: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """One axis of a spectrogram as a float array as long as its axis of ``levels``.
+
+    :param value: The axis as the record was given it.
+    :param name: Its field name, for the message: ``times`` runs along the
+        frames of ``levels``, every other axis along its bands.
+    :param levels: The level grid, ``(bands, frames)`` or ``(channels, bands,
+        frames)``.
+    :return: The axis as a one-dimensional ``float64`` array.
+    :raises ValueError: if the axis is not one-dimensional or not as long as
+        its axis of ``levels``.
+    """
+    count = levels.shape[-1 if name == "times" else -2]
+    axis = np.asarray(value, dtype=np.float64)
+    if axis.ndim != 1:
+        msg = (
+            f"OctaveSpectrogramResult: '{name}' must be one-dimensional; "
+            f"got shape {axis.shape}."
+        )
+        raise ValueError(msg)
+    if axis.size != count:
+        what = "frames" if name == "times" else "bands"
+        msg = (
+            f"OctaveSpectrogramResult: 'levels' holds {count} {what} and "
+            f"'{name}' {axis.size}."
+        )
+        raise ValueError(msg)
+    return axis
+
+
+#: How far apart, relatively, the shared edge of two neighbouring bands and
+#: the log widths of two bands of one bank may be. A bank's edges agree to
+#: 1.5e-14 at worst over fractions 1 to 24; this only refuses edges that are
+#: not one bank's.
+_EDGE_RTOL = 1e-9
+
+
+def _require_bank_edges(
+    frequencies: NDArray[np.float64],
+    lower: NDArray[np.float64],
+    upper: NDArray[np.float64],
+) -> None:
+    """Refuse band edges that are not the bands of one filter bank.
+
+    The plot draws one row per band, all equally tall on a logarithmic axis,
+    from the first lower edge to the last upper edge. That is what the bands of
+    a bank are: positive, each enclosing its centre, each starting where the
+    one below it ends, all equally wide in log frequency.
+
+    :param frequencies: The band centres, in hertz.
+    :param lower: The lower edge of each band, in hertz.
+    :param upper: The upper edge of each band, in hertz.
+    :raises ValueError: for an edge that is not positive and finite, a band
+        whose edges do not enclose its centre, or bands that are not
+        contiguous and equally wide on a logarithmic axis.
+    """
+    if not (np.all(np.isfinite(lower)) and np.all(np.isfinite(upper))) or np.any(
+        lower <= 0.0
+    ):
+        msg = (
+            "OctaveSpectrogramResult: 'lower_edges' and 'upper_edges' must be "
+            "positive and finite."
+        )
+        raise ValueError(msg)
+    if not np.all((lower < frequencies) & (frequencies < upper)):
+        msg = (
+            "OctaveSpectrogramResult: each band's edges must enclose its centre, "
+            "'lower_edges' < 'frequencies' < 'upper_edges'."
+        )
+        raise ValueError(msg)
+    widths = np.log(upper / lower)
+    if frequencies.size > 1 and not (
+        np.allclose(lower[1:], upper[:-1], rtol=_EDGE_RTOL, atol=0.0)
+        and np.allclose(widths, widths[0], rtol=_EDGE_RTOL, atol=0.0)
+    ):
+        msg = (
+            "OctaveSpectrogramResult: the bands must be contiguous and equally "
+            "wide on a logarithmic axis, as the bands of one filter bank are."
+        )
+        raise ValueError(msg)
+
+
 @dataclass(frozen=True)
 class OctaveSpectrogramResult(OwnsArrays):
     """Band levels over time: what :meth:`OctaveFilterBank.spectrogram` returns.
@@ -229,55 +314,50 @@ class OctaveSpectrogramResult(OwnsArrays):
     :ivar frequencies: The exact mid-band frequency of each band, in hertz,
         as a read-only array.
     :ivar times: The centre of each analysis window, in seconds.
+    :ivar lower_edges: The lower edge of each band, in hertz, as the bank
+        designed it.
+    :ivar upper_edges: The upper edge of each band, in hertz.
     """
 
     levels: NDArray[np.float64]
     frequencies: NDArray[np.float64]
     times: NDArray[np.float64]
+    lower_edges: NDArray[np.float64]
+    upper_edges: NDArray[np.float64]
 
     def __post_init__(self) -> None:
-        """Hold the axes as float arrays and pin the level grid to both of them.
+        """Hold the axes as float arrays and pin the level grid to all of them.
 
-        The plot places the raster by the ends of :attr:`frequencies` and
-        :attr:`times`, so a grid with one band or one frame too many would be
-        stretched across the axes without complaint. It is refused here.
+        The plot places the raster by the ends of :attr:`times` and by the
+        edges of the first and the last band, so a grid with one band or one
+        frame too many would be stretched across the axes without complaint.
+        It is refused here.
 
+        :raises TypeError: if ``lower_edges`` or ``upper_edges`` is ``None``.
         :raises ValueError: if ``levels`` is neither two- nor
-            three-dimensional, an axis is not one-dimensional, or the band or
-            frame axis of ``levels`` disagrees with ``frequencies`` or
-            ``times``.
+            three-dimensional, an axis is not one-dimensional, the band or
+            frame axis of ``levels`` disagrees with ``frequencies``, an edge
+            array or ``times``, or the edges are not the bands of one filter
+            bank (see :func:`_require_bank_edges`).
         """
+        require_present(self, "lower_edges", "upper_edges")
         levels = np.asarray(self.levels, dtype=np.float64)
-        frequencies = np.asarray(self.frequencies, dtype=np.float64)
-        times = np.asarray(self.times, dtype=np.float64)
         if levels.ndim not in _SPECTROGRAM_RANKS:
             msg = (
                 "OctaveSpectrogramResult: 'levels' must be (bands, frames) or "
                 f"(channels, bands, frames); got shape {levels.shape}."
             )
             raise ValueError(msg)
-        for name, axis in (("frequencies", frequencies), ("times", times)):
-            if axis.ndim != 1:
-                msg = (
-                    f"OctaveSpectrogramResult: '{name}' must be one-dimensional; "
-                    f"got shape {axis.shape}."
-                )
-                raise ValueError(msg)
-        if levels.shape[-2] != frequencies.size:
-            msg = (
-                f"OctaveSpectrogramResult: 'levels' holds {levels.shape[-2]} "
-                f"bands and 'frequencies' {frequencies.size}."
-            )
-            raise ValueError(msg)
-        if levels.shape[-1] != times.size:
-            msg = (
-                f"OctaveSpectrogramResult: 'levels' holds {levels.shape[-1]} "
-                f"frames and 'times' {times.size}."
-            )
-            raise ValueError(msg)
+        axes = {
+            name: _spectrogram_axis(getattr(self, name), name, levels)
+            for name in ("frequencies", "times", "lower_edges", "upper_edges")
+        }
+        _require_bank_edges(
+            axes["frequencies"], axes["lower_edges"], axes["upper_edges"]
+        )
         object.__setattr__(self, "levels", read_only(levels))
-        object.__setattr__(self, "frequencies", read_only(frequencies))
-        object.__setattr__(self, "times", read_only(times))
+        for name, axis in axes.items():
+            object.__setattr__(self, name, read_only(axis))
 
     def plot(
         self,
@@ -882,6 +962,8 @@ class OctaveFilterBank:
             levels=levels if is_multichannel else levels[0],
             frequencies=self.frequencies,
             times=times,
+            lower_edges=self.lower_edges,
+            upper_edges=self.upper_edges,
         )
 
     def _process_bands(

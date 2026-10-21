@@ -111,10 +111,10 @@ tolerance = np.minimum(upper, -lower)[band]                # el lado más estrec
 x3 = f3 / 1000
 response = 0.4 + 0.12 * np.cos(3 * np.log(x3)) - 0.3 * (x3 / 8) ** 2   # indicación menos campo, dB
 a = metrology.adjustment_value(
-    94.0 + response,
-    94.35,           # el sonómetro en un campo libre de 94 dB, antes del ajuste
-    frequencies=f3,                     # L4': el mismo sonómetro sobre su calibrador
-    calibrator_level=94.0,  # L1, declarado para el calibrador
+    94.0 + response,           # el sonómetro en un campo libre de 94 dB, antes del ajuste
+    94.35,                     # L4': el mismo sonómetro sobre su calibrador
+    frequencies=f3,
+    calibrator_level=94.0,     # L1, declarado para el calibrador
     tolerance_db=tolerance,
 )
 print(round(a.sensitivity_adjustment, 2), round(a.adjustment, 2))  # -0.37 0.02
@@ -188,11 +188,11 @@ pressure = -0.1 * x**1.5                        # el sonómetro sobre el calibra
 spread = np.array([[0.0], [0.02], [-0.03]]) * x**0.8   # tres micrófonos del modelo
 
 c = metrology.sound_calibrator_correction(
-    94.0 + free + spread,
-    94.0 + c_ff_rm,          # L_ind1: el sonómetro en campo libre
-    94.0 + pressure + spread / 2,                # L_ind2: la referencia en su lugar
-    94.0,  # L_ind3: el calibrador sobre el sonómetro
-    frequencies=f,                          # L_ind4: el calibrador sobre la referencia
+    94.0 + free + spread,          # L_ind1: el sonómetro en campo libre
+    94.0 + c_ff_rm,                # L_ind2: la referencia en su lugar
+    94.0 + pressure + spread / 2,  # L_ind3: el calibrador sobre el sonómetro
+    94.0,                          # L_ind4: el calibrador sobre la referencia
+    frequencies=f,
     reference_free_field_correction=c_ff_rm,
 )
 print(c.correction.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
@@ -252,10 +252,10 @@ $$
 
 ```python
 e = metrology.electrostatic_actuator_correction(
-    94.0 + free + spread,
-    94.0 - 26.0 + c_ff_rm,                  # L_ind1(f)
-    94.0 - 0.08 * x**1.7 + spread / 2,                 # L_ind2(f): el canal de referencia, dB re 1 V
-    frequencies=f,     # L_ind3(f): el actuador sobre el sonómetro
+    94.0 + free + spread,                  # L_ind1(f)
+    94.0 - 26.0 + c_ff_rm,                 # L_ind2(f): el canal de referencia, dB re 1 V
+    94.0 - 0.08 * x**1.7 + spread / 2,     # L_ind3(f): el actuador sobre el sonómetro
+    frequencies=f,
     reference_sensitivity_level=-26.0 + c_ff_rm,   # S_RM(f), dB re 1 V/Pa
 )
 print(e.correction.round(2))  # [-0.07 -0.12 -0.13 -0.09  0.    0.18  0.64  2.16  7.39]

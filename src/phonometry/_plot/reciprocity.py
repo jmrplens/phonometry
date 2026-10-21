@@ -46,6 +46,7 @@ from .common import (
     format_frequency_axis,
     place_legend_clear,
     style_default,
+    styled,
     theme_fill,
 )
 
@@ -946,7 +947,7 @@ def plot_free_field_arrangement(
     )
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Distance between the diaphragms", language))
-    ax.barh(positions, distances, height=0.5, **kwargs)
+    ax.barh(positions, distances, **styled(kwargs, height=0.5))
     # Each limit is drawn across the rows it applies to only.
     ax.vlines(
         10.0 * diameter,

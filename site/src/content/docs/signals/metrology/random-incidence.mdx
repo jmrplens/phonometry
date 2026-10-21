@@ -284,9 +284,9 @@ print(metrology.IEC61183_TABLE_B1[8000.0])
 delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
                      for f in bands])
 dd = metrology.diffuse_field_sensitivity(
-    80.0 + r.random_incidence_level,
-    80.0 + delta_dp,  # L_D, the meter under test
-    frequencies=bands,                     # L_D,ref, a pressure-calibrated LS2aP
+    80.0 + r.random_incidence_level,  # L_D, the meter under test
+    80.0 + delta_dp,                  # L_D,ref, a pressure-calibrated LS2aP
+    frequencies=bands,
     reference_pressure_level=0.0,     # G_P,ref; Delta_DP from Table B.1
 )
 print(dd.reference_correction[shown])            # [0.   0.25 1.2  3.05]

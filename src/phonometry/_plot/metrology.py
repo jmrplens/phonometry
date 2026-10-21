@@ -71,6 +71,7 @@ from .common import (
     format_frequency_axis,
     place_legend_clear,
     style_default,
+    styled,
     theme_fill,
 )
 
@@ -658,8 +659,7 @@ def plot_peak_statistics(
     ax.plot(
         peaks,
         exceedance,
-        drawstyle="steps-post",
-        **kwargs,
+        **styled(kwargs, drawstyle="steps-post"),
     )
     floor = max(1.0 / peaks.size, 1e-6)
     ax.set_yscale("log")
@@ -894,7 +894,7 @@ def _draw_verdicts(
             style["label"] = key
             shown.add(key)
         style_default(style, "linestyle", "none")
-        ax.plot([x], [v.deviation], zorder=4, **style)
+        ax.plot([x], [v.deviation], **styled(style, zorder=4))
 
 
 def _finite_or(limit: float, fallback: float) -> float:
@@ -1146,7 +1146,7 @@ def plot_sound_calibrator_verification(
     style = dict(kwargs)
     style_default(style, "color", _C_PRIMARY)
     style.setdefault("label", _t("Deviation / acceptance limit", language))
-    bars = ax.barh(y - height / 2, deviation_share, height=height, **style)
+    bars = ax.barh(y - height / 2, deviation_share, **styled(style, height=height))
     spread = ax.barh(
         y + height / 2,
         uncertainty_share,

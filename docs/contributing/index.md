@@ -23,7 +23,7 @@ Each rule on a page has the same parts:
 - **Enforced by**: the check that holds the rule: a script, a test (`path::test_name`), a Makefile target (`make target`), a ruff code (`ruff CODE`), a CI job or step (`CI: its name`), `mypy` or `bandit`, or review when no check does.
 - **Exceptions**: only when there are some, with how one is declared.
 
-`tests/test_contributing_guide.py` holds the guide to this shape: it fails when a page and this index disagree, when an enforcer names a check that does not exist, or when a link into the guide misses its anchor.
+`tests/test_contributing_guide.py` holds the guide to this shape: it fails when a rule lacks its Why, its Do or its Don't, or an example label has no fence after it, when a page and this index disagree, when an enforcer names a check that does not exist or that the configuration switches off, or when a link into the guide misses its anchor.
 
 ## Pages
 

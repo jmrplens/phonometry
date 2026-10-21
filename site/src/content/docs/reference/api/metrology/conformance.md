@@ -238,4 +238,4 @@ what the standard prints for the test at hand, read off its own tables.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-finite number (bar a limit open on its own side), a negative symmetric limit, a lower limit above the upper one, a pair open at both ends, a negative uncertainty or a maximum-permitted uncertainty that is not positive. |
-| TypeError | if `acceptance_limits` is not a single number. |
+| TypeError | if `deviation`, `uncertainty`, `max_uncertainty`, `acceptance_limits` or a member of its `(lower, upper)` pair is an array or a text rather than one number. |

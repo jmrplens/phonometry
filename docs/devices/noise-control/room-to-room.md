@@ -145,9 +145,9 @@ operator = [(25.0, [0.08, 0.24, 0.57, 0.69, 0.71, 0.73]),
             (25.0, ceiling), (60.0, walls)]
 
 chain = noise_control.room_to_room_transmission(
-    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
-    5.0 * 3.0,       # TL of the separating wall
-    room.equivalent_absorption_area(operator),                                  # the wall is 5 m x 3 m
+    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],       # TL of the separating wall
+    5.0 * 3.0,                                  # the wall is 5 m x 3 m
+    room.equivalent_absorption_area(operator),
     frequencies=bands,
     source=noise_control.SourceRoom(
         power_level=[105.0, 103.0, 98.0, 108.0, 107.0, 109.0],

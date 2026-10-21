@@ -51,6 +51,7 @@ from .common import (
     format_frequency_axis,
     style_default,
     style_pop,
+    styled,
 )
 
 #: The two edge bins (DC and Nyquist) trimmed from a per-frequency array
@@ -379,7 +380,9 @@ def plot_cross_spectral_density(
 
     def _magnitude(axm: Axes) -> None:
         kwargs.setdefault("label", "$|\\hat{G}_{xy}(f)|$")
-        axm.semilogx(freqs[pos], _db10(result.magnitude[pos]), color=color, **kwargs)
+        axm.semilogx(
+            freqs[pos], _db10(result.magnitude[pos]), **styled(kwargs, color=color)
+        )
         axm.set_ylabel(_psd_ylabel(result.scaling, language))
         axm.grid(visible=True, which="both", alpha=0.3)
         axm.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
@@ -459,7 +462,9 @@ def plot_coherent_output_spectrum(
         kwargs.setdefault(
             "label", "$\\hat{G}_{vv} = \\hat{\\gamma}^2_{xy}\\hat{G}_{yy}$"
         )
-        axs.semilogx(freqs[pos], _db10(result.coherent_psd[pos]), color=color, **kwargs)
+        axs.semilogx(
+            freqs[pos], _db10(result.coherent_psd[pos]), **styled(kwargs, color=color)
+        )
         axs.semilogx(
             freqs[pos],
             _db10(result.noise_psd[pos]),
@@ -721,7 +726,9 @@ def plot_zoom_fft(
     df = format_number(result.bin_spacing_hz, language, decimals=3)
     kwargs.setdefault("label", f"$B_\\mathrm{{e}}$ = {be} Hz, $\\Delta f$ = {df} Hz")
     ax.plot(
-        freqs, _db10(np.asarray(result.power, dtype=np.float64)), color=color, **kwargs
+        freqs,
+        _db10(np.asarray(result.power, dtype=np.float64)),
+        **styled(kwargs, color=color),
     )
     ax.set_xlim(float(freqs[0]), float(freqs[-1]))
     ax.set_xlabel(_t(_FREQ_LABEL, language))
@@ -857,7 +864,7 @@ def plot_aligned_impulse_response(
     style_default(kwargs, "color", _C_PRIMARY)
     n = decimal_comma(fmt_minus(result.delay_samples, "+.3f"), language)
     kwargs.setdefault("label", _t("Aligned IR (delay {n} samples)", language, n=n))
-    ax.plot(t, result.aligned, lw=1.2, **kwargs)
+    ax.plot(t, result.aligned, **styled(kwargs, lw=1.2))
     ax.set_xlabel(_t(_TIME_LABEL, language))
     ax.set_ylabel(_t("Amplitude", language))
     ax.set_title(_t("Impulse-response alignment (sub-sample)", language))
@@ -899,7 +906,7 @@ def plot_envelope(
         )
         style_default(kwargs, "color", _C_PRIMARY)
         kwargs.setdefault("label", _t("Envelope $A(t)$ (Eq. 13.17)", language))
-        axe.plot(result.times, result.envelope, lw=1.8, **kwargs)
+        axe.plot(result.times, result.envelope, **styled(kwargs, lw=1.8))
         axe.set_ylabel(_t("Amplitude", language))
         axe.grid(visible=True, alpha=0.3)
         axe.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
@@ -1321,7 +1328,9 @@ def plot_lifter(
             "label",
             _t("Liftered ({mode})", language, mode=_t(result.mode, language)),
         )
-        axe.plot(result.frequencies, result.liftered_spectrum_db, lw=1.6, **kwargs)
+        axe.plot(
+            result.frequencies, result.liftered_spectrum_db, **styled(kwargs, lw=1.6)
+        )
         axe.set_xlabel(_t(_FREQ_LABEL, language))
         axe.set_ylabel(_t(_MAGNITUDE_LABEL, language))
         axe.grid(visible=True, alpha=0.3)
@@ -1519,9 +1528,7 @@ def plot_inverse_filter(
     ax.semilogx(
         freqs[pos],
         20.0 * np.log10(np.maximum(h_mag[pos], tiny) / peak),
-        color=color,
-        lw=1.2,
-        **kwargs,
+        **styled(kwargs, color=color, lw=1.2),
     )
     ax.semilogx(
         freqs[pos],

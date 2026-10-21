@@ -18,6 +18,7 @@ from .common import (
     _band_axis,
     _new_axes,
     style_default,
+    styled,
 )
 
 if TYPE_CHECKING:
@@ -217,7 +218,7 @@ def plot_sii(
     peak = float(contribution.max()) if contribution.size else 0.0
     scaled = contribution / peak if peak > 0.0 else contribution
     kwargs.setdefault("label", _t(r"Importance-weighted $I_i\,A_i$ (scaled)", language))
-    ax.bar(positions, scaled, width=0.5, **kwargs)
+    ax.bar(positions, scaled, **styled(kwargs, width=0.5))
     ax.set_ylabel(_t("Band audibility", language))
     ax.set_ylim(0.0, 1.0)
     ax.set_title(
@@ -272,7 +273,9 @@ def plot_sii_procedure(
     # A post-step draws each band's Ii flat across its own width, which is what
     # makes a 6-band and a 21-band function comparable at a glance.
     ax.plot(
-        edges, np.append(importance, importance[-1]), drawstyle="steps-post", **kwargs
+        edges,
+        np.append(importance, importance[-1]),
+        **styled(kwargs, drawstyle="steps-post"),
     )
     ax.set_ylabel(_t("Band importance $I_i$", language))
     # Start at zero, and never let a fixed limit from an earlier procedure clip

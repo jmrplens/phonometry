@@ -449,6 +449,8 @@ _BINDINGS = {
     "from . import probe": None,
     "from fake_pkg import probe": None,
     "import fake_pkg.probe": None,
+    "import fake_pkg.probe as probe": None,
+    "import other_pkg.probe as probe": "import other_pkg.probe as probe",
     "from .probe import probe": "from .probe import probe",
     "from ._impl import run as probe": "from ._impl import run as probe",
     "import json as probe": "import json as probe",
@@ -472,6 +474,30 @@ def test_only_importing_the_submodule_itself_leaves_its_name_alone() -> None:
         ]
         first = next((text for text in found if text is not None), None)
         assert first == binding, statement
+
+
+_NESTED_BINDINGS = {
+    "from ..fake_pkg import probe": None,
+    "from ..fake_pkg import run as probe": "from ..fake_pkg import run as probe",
+    "from .. import probe": "from .. import probe",
+    "from ...beyond import probe": "from ...beyond import probe",
+}
+
+
+def test_a_relative_import_is_read_from_where_it_resolves() -> None:
+    """``from ..pkg import leaf`` inside ``outer.pkg`` names the package itself.
+
+    Comparing the written source with the package name missed it, so a correct
+    ``__init__`` failed the gate. ``from .. import probe`` reaches ``outer``
+    instead, and an import that climbs past the top-level package resolves to
+    nothing, so both still hide the module.
+    """
+    import ast
+
+    for statement, binding in _NESTED_BINDINGS.items():
+        (node,) = ast.parse(statement).body
+        found = gate._binding_other_than_submodule(node, "outer.fake_pkg", "probe")
+        assert found == binding, statement
 
 
 def test_the_library_reaches_every_public_module_by_its_name() -> None:
@@ -554,3 +580,77 @@ def test_defined_names_reads_what_the_module_binds_itself() -> None:
         ]
     finally:
         linecache.cache.pop(filename, None)
+
+
+# ---------------------------------------------------------------------------
+# A usage example calls the function the way its signature allows
+# ---------------------------------------------------------------------------
+def _measured(
+    velocities: object, drops: object, area: object, *, thickness_m: object = None
+) -> None:
+    """A function whose last parameter is keyword-only."""
+
+
+class _Drawn:
+    """A record whose method the table shows on the class."""
+
+    def plot_geometry(self, *, frequency_index: int = 0) -> None:
+        """Draw it."""
+
+    @classmethod
+    def from_rows(cls, rows: object) -> None:
+        """Build it."""
+
+
+_EXAMPLES = (
+    "| Name | Kind | What | Example |\n"
+    "| :--- | :--- | :--- | :--- |\n"
+    "| `measured` | `function` | prose | `res = fake.measured(u, dp, 0.01, 0.05)` |\n"
+    "| `measured` | `function` | prose | `fake.measured(u, dp, 0.01, thickness_m=0.05)` |\n"
+    "| `measured` | `function` | prose | `fake.measured(u, ..., thickness_m=...)` |\n"
+    "| `measured` | `function` | prose | `fake.measured(u, dp, area=1, depth=...)` |\n"
+    "| `measured` | `function` | prose | `fake.measured(u, dp, thickness_m=0.05, ...)` |\n"
+    "| `_Drawn.plot_geometry` | `method` | prose | `_Drawn.plot_geometry(frequency_index=2)` |\n"
+    "| `_Drawn.plot_geometry` | `method` | prose | `_Drawn.plot_geometry(2)` |\n"
+    "| `_Drawn.from_rows` | `classmethod` | prose | `_Drawn.from_rows(rows)` |\n"
+    "| `withdrawn` | `function` | prose | `fake.withdrawn(1)` |\n"
+    "| `res.plot` | `method` | prose | `res.plot(ax, 1, 2, 3)`, `np.zeros(3, 4, 5, 6)` |\n"
+    "| `grouped` | `function` | prose | `fake.measured(2 600.0, 1, 2, thickness_m=1)` |\n"
+    "| `nested` | `function` | prose | `fake.measured(fake.measured(), dp, area=1, ...)` |\n"
+)
+
+
+def test_an_example_its_function_refuses_is_reported() -> None:
+    """A keyword-only parameter passed by position is the row a reader copies and fails on.
+
+    What stays quiet matters as much: a call through a variable or a third
+    party (``res.plot``, ``np.zeros``) is not the library's to check, an
+    elided argument list (``...``) is held only to what it does write, a
+    method shown on its class takes its instance for granted, and the page's
+    digit grouping is read as one number.
+    """
+    roots = {"fake": types.SimpleNamespace(measured=_measured), "_Drawn": _Drawn}
+    assert gate.example_problems(_EXAMPLES, roots) == [
+        "measured: `res = fake.measured(u, dp, 0.01, 0.05)` calls fake.measured, "
+        "which refuses it: too many positional arguments",
+        "measured: `fake.measured(u, dp, area=1, depth=...)` calls fake.measured, "
+        "which refuses it: got an unexpected keyword argument 'depth'",
+        "_Drawn.plot_geometry: `_Drawn.plot_geometry(2)` calls "
+        "_Drawn.plot_geometry, which refuses it: too many positional arguments",
+        "withdrawn: `fake.withdrawn(1)` calls fake.withdrawn, which does not "
+        "exist: fake has no attribute 'withdrawn'",
+        "nested: `fake.measured(fake.measured(), dp, area=1, ...)` calls "
+        "fake.measured, which refuses it: missing a required argument: "
+        "'velocities'",
+    ]
+
+
+def test_every_example_in_the_curated_table_binds_to_its_signature() -> None:
+    markdown = (
+        pathlib.Path(__file__).resolve().parent.parent
+        / "docs"
+        / "reference"
+        / "api"
+        / "index.md"
+    ).read_text(encoding="utf-8")
+    assert gate.example_problems(markdown, gate.usage_roots()) == []

@@ -141,6 +141,23 @@ def _integer(name: str, value: int) -> int:
     return require_count(value, name, at_least=None)
 
 
+def _hold_cells(record: object, *names: str) -> None:
+    """Hold each named cell index of a source record as the int it names.
+
+    ``ix=2.0`` names cell 2, and the engine indexes its arrays with the
+    record's own fields, so a whole float is stored as an int and anything
+    else is refused here, where the record is built, rather than at the
+    first step.
+
+    :param record: The frozen source record being built.
+    :param names: Its cell-index fields.
+    :raises TypeError: for an index that is not a number, or a flag.
+    :raises ValueError: for an index that is not whole.
+    """
+    for name in names:
+        object.__setattr__(record, name, _integer(name, getattr(record, name)))
+
+
 def _positive_map(name: str, field: Field2D) -> None:
     """Validate that every cell of *field* is strictly positive and finite."""
     if not np.all(np.isfinite(field)) or bool(np.any(field <= 0.0)):
@@ -173,11 +190,15 @@ class GaussianPulse(RichDisplay):
     amplitude: float = 1.0
 
     def __post_init__(self) -> None:
-        """Require a positive ``half_width_s`` and finite ``amplitude`` and ``t0``.
+        """Hold the cell indices as ints and check the pulse parameters.
 
-        :raises TypeError: if ``amplitude``, ``half_width_s`` or ``t0`` is not a single
-            number.
+        ``half_width_s`` is positive, ``amplitude`` and ``t0`` finite.
+
+        :raises TypeError: if ``ix`` or ``iy`` is not a number, or
+            ``amplitude``, ``half_width_s`` or ``t0`` is not a single number.
+        :raises ValueError: if ``ix`` or ``iy`` is not whole.
         """
+        _hold_cells(self, "ix", "iy")
         _positive_finite("half_width_s", self.half_width_s)
         _finite("amplitude", self.amplitude)
         if self.t0 is not None:
@@ -210,11 +231,16 @@ class CWSource(RichDisplay):
     ramp_cycles: float = 3.0
 
     def __post_init__(self) -> None:
-        """Require a positive ``frequency`` and a non-negative ``ramp_cycles``.
+        """Hold the cell indices as ints and check the drive parameters.
 
-        :raises TypeError: if ``amplitude``, ``frequency`` or ``ramp_cycles`` is not a
-            single number.
+        ``frequency`` is positive and ``ramp_cycles`` non-negative.
+
+        :raises TypeError: if ``ix`` or ``iy`` is not a number, or
+            ``amplitude``, ``frequency`` or ``ramp_cycles`` is not a single
+            number.
+        :raises ValueError: if ``ix`` or ``iy`` is not whole.
         """
+        _hold_cells(self, "ix", "iy")
         require_scalar(self.ramp_cycles, "ramp_cycles")
         _positive_finite("frequency", self.frequency)
         _finite("amplitude", self.amplitude)
@@ -259,10 +285,15 @@ class SignalSource(OwnsArrays):
     amplitude: float = 1.0
 
     def __post_init__(self) -> None:
-        """Require a positive ``fs`` and freeze finite 1D ``samples``.
+        """Hold the cell indices as ints, check ``fs`` and freeze the ``samples``.
 
-        :raises TypeError: if ``amplitude`` or ``fs`` is not a single number.
+        ``fs`` is positive and ``samples`` a finite, non-empty 1D array.
+
+        :raises TypeError: if ``ix`` or ``iy`` is not a number, or
+            ``amplitude`` or ``fs`` is not a single number.
+        :raises ValueError: if ``ix`` or ``iy`` is not whole.
         """
+        _hold_cells(self, "ix", "iy")
         _positive_finite("fs", self.fs)
         _finite("amplitude", self.amplitude)
         arr = np.asarray(self.samples, dtype=np.float64)
@@ -325,12 +356,15 @@ class PlaneWaveSource(RichDisplay):
         """Require a callable ``waveform`` and a finite ``amplitude``.
 
         ``direction`` and ``offset`` are checked against the grid in
-        :meth:`FDTD2D.add_source`, which is the first place a grid exists.
+        :meth:`FDTD2D.add_source`, which is the first place a grid exists;
+        ``offset`` is held as the whole number of cells it names here.
 
-        :raises TypeError: if ``waveform`` is not callable, or ``amplitude`` is
-            not one number.
-        :raises ValueError: if ``amplitude`` is not finite.
+        :raises TypeError: if ``waveform`` is not callable, ``offset`` is not a
+            number, or ``amplitude`` is not one number.
+        :raises ValueError: if ``offset`` is not whole or ``amplitude`` is not
+            finite.
         """
+        _hold_cells(self, "offset")
         if not callable(self.waveform):
             msg = "waveform must be callable"
             raise TypeError(msg)

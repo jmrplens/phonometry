@@ -504,8 +504,8 @@ section 6:
 
 ```python
 lift = electroacoustics.amplifier_frequency_response(
-    [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],
-    frequencies=[100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],       # output current, A
+    [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],       # output current, A
+    frequencies=[100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],
 )
 print(lift.response_db.round(2))                # [0.   0.   1.58 3.23 4.08 4.86 5.11] dB re 1 kHz
 speech = electroacoustics.verify_amplifier_overload(current, z, 11.0, current_response=lift)

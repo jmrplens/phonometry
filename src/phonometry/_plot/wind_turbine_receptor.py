@@ -22,6 +22,7 @@ from .common import (
     _new_axes,
     format_frequency_axis,
     place_legend_clear,
+    refuse_fixed_keywords,
     styled,
 )
 
@@ -242,9 +243,9 @@ def _draw_block_spectrum(
         ax.bar(
             freqs[mask],
             spectrum[mask],
-            width=width,
             **styled(
                 kwargs,
+                width=width,
                 color=_C_PRIMARY,
                 label=_t("Lines in the inverse transform", language),
             ),
@@ -253,9 +254,11 @@ def _draw_block_spectrum(
         ax.bar(
             freqs,
             spectrum,
-            width=width,
             **styled(
-                kwargs, color=_C_MUTED, label=_t("Prominence-failed block", language)
+                kwargs,
+                width=width,
+                color=_C_MUTED,
+                label=_t("Prominence-failed block", language),
             ),
         )
     low, high = result.modulation_frequency_range_hz
@@ -542,7 +545,10 @@ def plot_binned_sound_levels(
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
-    """The interval levels against wind speed with the bin averages over them."""
+    """The interval levels against wind speed with the bin averages over them.
+
+    :raises TypeError: for ``yerr``, which the uncertainty of each mean sets.
+    """
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
@@ -557,13 +563,19 @@ def plot_binned_sound_levels(
         label=_t("Interval levels", language),
     )
     errors = np.nan_to_num(np.asarray(result.combined_uncertainty_db), nan=0.0)
+    refuse_fixed_keywords(
+        kwargs,
+        "plot_binned_sound_levels",
+        "yerr",
+        reason="draws the uncertainty of each bin's mean",
+    )
     ax.errorbar(
         result.wind_speeds_m_s,
         result.mean_levels,
-        yerr=errors,
-        capsize=3,
         **styled(
             kwargs,
+            yerr=errors,
+            capsize=3,
             color=_C_PRIMARY,
             lw=1.5,
             ls="none",
@@ -893,8 +905,7 @@ def plot_sound_emergence(
     ax.bar(
         x,
         emergence,
-        width=0.6,
-        **styled(kwargs, color=_C_PRIMARY, label="$E(j)$"),
+        **styled(kwargs, width=0.6, color=_C_PRIMARY, label="$E(j)$"),
     )
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     ax.set_xlabel(xlabel)
@@ -922,7 +933,7 @@ def plot_wind_turbine_rating_level(
     ]
     values = [result.adjustments[name] for name in names]
     positions = np.arange(3, dtype=np.float64)
-    bars = ax.bar(positions, values, width=0.6, **styled(kwargs, color=_C_PRIMARY))
+    bars = ax.bar(positions, values, **styled(kwargs, width=0.6, color=_C_PRIMARY))
     if result.governing is not None:
         governing = bars[names.index(result.governing)]
         governing.set_edgecolor(_C_REFERENCE)

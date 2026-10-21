@@ -771,16 +771,16 @@ result = bank.spectrogram(x, window_time=0.125, overlap=0.875)
 result.plot(language="es")
 plt.show()
 
-# A mano, desde los campos del resultado. Las filas están espaciadas por
-# igual en log10 de la frecuencia, así que el ráster se coloca ahí, a medio
-# paso de banda a cada lado de cada centro, y se lleva al eje logarítmico
+# A mano, desde los campos del resultado. Las bandas son igual de anchas en
+# log10 de la frecuencia, así que el ráster se coloca ahí, del borde inferior
+# de la primera banda al superior de la última, y se lleva al eje logarítmico
 # con 10**y: una imagen puesta tal cual en un eje log reparte sus filas por
 # igual en Hz.
 from matplotlib.scale import LogTransform
 from matplotlib.transforms import IdentityTransform, blended_transform_factory
 
-f, t = result.frequencies, result.times
-half_band = np.log10(f[-1] / f[0]) / (2 * (f.size - 1))
+t = result.times
+lower, upper = result.lower_edges, result.upper_edges
 half_hop = (t[1] - t[0]) / 2
 fig, ax = plt.subplots()
 ax.set_yscale("log")
@@ -790,9 +790,9 @@ image = ax.imshow(result.levels, origin="lower", aspect="auto", cmap="magma",
                   interpolation="nearest", transform=rows,
                   vmin=result.levels.max() - 80.0, vmax=result.levels.max(),
                   extent=(t[0] - half_hop, t[-1] + half_hop,
-                          np.log10(f[0]) - half_band, np.log10(f[-1]) + half_band))
+                          np.log10(lower[0]), np.log10(upper[-1])))
 ax.set_xlim(t[0] - half_hop, t[-1] + half_hop)
-ax.set_ylim(f[0] / 10**half_band, f[-1] * 10**half_band)
+ax.set_ylim(lower[0], upper[-1])
 ax.set(xlabel="Tiempo [s]", ylabel="Frecuencia [Hz]")
 fig.colorbar(image, label="Nivel de banda [dB]")
 plt.show()
@@ -804,7 +804,9 @@ plt.show()
   `times` por su nombre, o dibújalo con `result.plot()`.
 - Una entrada multicanal `(channels, samples)` da `levels` con forma
   `(channels, bands, frames)`; `result.plot(channel=0)` dibuja un canal.
-- `times` contiene el centro de cada ventana en segundos.
+- `times` contiene el centro de cada ventana en segundos, y `lower_edges` y
+  `upper_edges` los bordes de cada banda, entre los que el gráfico dibuja su
+  fila.
 - `mode='peak'` da niveles de pico por ventana en lugar de RMS.
 - `zero_phase=True` filtra las bandas hacia delante y atrás para que el retardo
   de grupo por banda no desplace las ventanas (solo análisis offline).

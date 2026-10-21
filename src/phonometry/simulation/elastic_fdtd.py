@@ -103,6 +103,7 @@ from .fdtd import (
     Field2D,
     Side,
     _finite,
+    _hold_cells,
     _integer,
     _positive_finite,
     _positive_map,
@@ -199,7 +200,13 @@ class ExplosionSource(RichDisplay):
     amplitude: float = 1.0
 
     def __post_init__(self) -> None:
-        """Reject a non-finite ``amplitude`` gain."""
+        """Hold whole cell indices and reject a non-finite ``amplitude`` gain.
+
+        :raises TypeError: if ``ix`` or ``iy`` is not a number.
+        :raises ValueError: if ``ix`` or ``iy`` is not whole, or ``amplitude``
+            is not finite.
+        """
+        _hold_cells(self, "ix", "iy")
         _finite("amplitude", self.amplitude)
 
 
@@ -235,7 +242,13 @@ class ForceSource(RichDisplay):
     amplitude: float = 1.0
 
     def __post_init__(self) -> None:
-        """Reject a non-finite gain and a ``direction`` other than ``"x"``/``"y"``."""
+        """Hold the cell indices as ints and check the gain and the direction.
+
+        :raises TypeError: if ``ix`` or ``iy`` is not a number.
+        :raises ValueError: if ``ix`` or ``iy`` is not whole, ``amplitude`` is
+            not finite, or ``direction`` is not ``"x"`` or ``"y"``.
+        """
+        _hold_cells(self, "ix", "iy")
         _finite("amplitude", self.amplitude)
         if self.direction not in _DIRECTIONS:
             msg = "direction must be 'x' or 'y'"

@@ -1862,3 +1862,116 @@ def test_the_range_order_rule_reads_a_list(
     names: list[str], expected: list[tuple[str, str]]
 ) -> None:
     assert _upper_before_lower(names) == expected
+
+
+# ---------------------------------------------------------------------------
+# A count's name stays out of the prose that says the plain noun
+# ---------------------------------------------------------------------------
+_ROOT = Path(__file__).resolve().parent.parent
+
+#: A count parameter written where the sentence wants its noun: "the number
+#: of n_planes", "Biquad n_sections". Renaming ``planes`` to ``n_planes`` with a
+#: word-boundary pattern rewrites the noun in every sentence around it too.
+_COUNT_AS_NOUN = re.compile(r"[A-Za-z]\s+(n_[a-z_]*[a-z]s)\b(?!\s*=)")
+
+#: Spans that hold code or mathematics, where an identifier is what is meant,
+#: and the field name a docstring opens a line with (``:param n_planes:``).
+_CODE_SPANS = re.compile(
+    r":math:`[^`]*`|``[^`]*``|`[^`]*`|\$[^$]*\$|^:\w+(?:\s+[\w.]+)?:"
+)
+
+
+def _prose_lines(text: str, *, docstring: bool) -> Iterator[str]:
+    """The lines of ``text`` a reader reads as sentences, code spans removed.
+
+    Fenced and displayed blocks (Markdown fences, ``$$``, ``.. math::`` and
+    doctest lines) are skipped; inline code and inline mathematics are cut out.
+    """
+    fenced = False
+    math_indent: int | None = None
+    for line in text.splitlines():
+        stripped = line.strip()
+        indent = len(line) - len(line.lstrip())
+        if math_indent is not None and (not stripped or indent > math_indent):
+            continue
+        math_indent = None
+        if stripped.startswith("$$") and stripped.count("$$") > 1:
+            continue  # A display formula opened and closed on its own line.
+        if stripped.startswith(("```", "$$")):
+            fenced = not fenced
+            continue
+        if fenced or stripped.startswith(">>>"):
+            continue
+        if docstring and stripped.startswith(".. math::"):
+            math_indent = indent
+            continue
+        yield _CODE_SPANS.sub(" ", stripped)
+
+
+def _docstrings() -> Iterator[tuple[str, str]]:
+    for path in sorted((_ROOT / "src" / "phonometry").rglob("*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(
+                node, (ast.Module, ast.ClassDef, ast.FunctionDef, ast.AsyncFunctionDef)
+            ) and (doc := ast.get_docstring(node, clean=True)):
+                yield str(path.relative_to(_ROOT)), doc
+
+
+#: The API pages generated from the docstrings, which the docstring half of the
+#: test reads at their source. ``docs/reference/api/index.md`` is written by
+#: hand and read with the guides.
+_GENERATED_API = _ROOT / "site" / "src" / "content" / "docs" / "reference" / "api"
+
+
+def _pages() -> Iterator[tuple[str, str]]:
+    roots = (_ROOT / "docs", _ROOT / "site" / "src" / "content" / "docs")
+    for root in roots:
+        for path in sorted([*root.rglob("*.md"), *root.rglob("*.mdx")]):
+            if _GENERATED_API not in path.parents:
+                yield str(path.relative_to(_ROOT)), path.read_text(encoding="utf-8")
+
+
+def count_names_written_as_nouns(text: str, *, docstring: bool) -> list[str]:
+    """Every count parameter ``text`` writes where its sentence wants the noun."""
+    return [
+        match.group(1)
+        for line in _prose_lines(text, docstring=docstring)
+        for match in _COUNT_AS_NOUN.finditer(line)
+    ]
+
+
+def test_the_rule_tells_a_count_named_in_prose_from_one_used_as_a_noun() -> None:
+    text = (
+        "Measurements in ``n_planes`` n_planes through the reference.\n"
+        ":param n_planes: The number of n_planes (Default: 2).\n"
+        "Biquad n_sections, i.e. half the degree.\n"
+        "Pass ``n_planes`` planes; the shape is (7, n_bands).\n"
+        "```python\nr = f(x, n_axles=4)  # four n_axles\n```\n"
+        "$$N = n_\\mathrm{a}$$\nThe number of n_axles per vehicle.\n"
+        ".. math::\n\n    f(n_x, n_y) = n_points\n\nThe number of planes.\n"
+    )
+    assert count_names_written_as_nouns(text, docstring=True) == [
+        "n_planes",
+        "n_planes",
+        "n_sections",
+        "n_axles",
+    ]
+
+
+def test_a_count_name_never_stands_in_for_its_noun_in_prose() -> None:
+    """The rename to ``n_<plural>`` stops at the identifier.
+
+    "The number of n_planes" and "Number of n_axles per vehicle" are what a
+    word-boundary rename of ``planes`` and ``axles`` leaves in the sentences
+    around the parameter; the docstrings and the guides say the noun.
+    """
+    found = [
+        f"{where}: {name}"
+        for where, text, docstring in (
+            *((w, t, True) for w, t in _docstrings()),
+            *((w, t, False) for w, t in _pages()),
+        )
+        for name in count_names_written_as_nouns(text, docstring=docstring)
+    ]
+    assert found == []

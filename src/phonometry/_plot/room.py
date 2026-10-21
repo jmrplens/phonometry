@@ -30,6 +30,7 @@ from .common import (
     format_frequency_axis,
     style_default,
     style_pop,
+    styled,
 )
 
 if TYPE_CHECKING:
@@ -466,7 +467,7 @@ def plot_sound_strength(
         )
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Measured $G$", language))
-    ax_strength.plot(positions, strength, "o-", zorder=3, **kwargs)
+    ax_strength.plot(positions, strength, "o-", **styled(kwargs, zorder=3))
     ax_strength.set_ylabel(_t("Sound strength $G$ [dB]", language))
     ax_strength.set_title(_t("ISO 3382-1 sound strength", language))
     _band_axis(
@@ -561,7 +562,7 @@ def plot_lateral_energy(
         symbol = r"Measured $J_\mathrm{LFC}$"
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(symbol, language))
-    ax.plot(positions, values, "o-", zorder=3, **kwargs)
+    ax.plot(positions, values, "o-", **styled(kwargs, zorder=3))
     ax.set_ylabel(_t("Early lateral energy fraction", language))
     ax.set_title(_t("ISO 3382-1 early lateral energy", language))
     _band_axis(
@@ -623,7 +624,7 @@ def plot_late_lateral(
         )
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"Measured $L_J$", language))
-    ax.plot(positions, values, "o-", zorder=3, **kwargs)
+    ax.plot(positions, values, "o-", **styled(kwargs, zorder=3))
     ax.set_ylabel(_t(r"Late lateral sound level $L_J$ [dB]", language))
     ax.set_title(_t("ISO 3382-1 late lateral sound level", language))
     _band_axis(
@@ -677,7 +678,7 @@ def plot_stage_support(
     kwargs.setdefault(
         "label", _t(r"Early support, $\mathrm{ST}_\mathrm{Early}$", language)
     )
-    ax.plot(positions, early, "o-", zorder=3, **kwargs)
+    ax.plot(positions, early, "o-", **styled(kwargs, zorder=3))
     ax.plot(
         positions,
         late,
@@ -735,7 +736,7 @@ def plot_interaural_correlation(
     )
     for index, (curve, label) in enumerate(zip(curves, labels, strict=True)):
         colour = palette[index % len(palette)]
-        ax.plot(lag_ms, curve, color=colour, label=label, zorder=3, **kwargs)
+        ax.plot(lag_ms, curve, **styled(kwargs, color=colour, label=label, zorder=3))
         ax.plot(
             [float(result.delay[index]) * 1000.0],
             [float(curve[int(np.argmax(np.abs(curve)))])],
@@ -878,7 +879,7 @@ def plot_impulse_response(
         return ax
 
     axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.0))
-    axes[0].plot(time, h / norm, color=color, lw=0.8, **kwargs)
+    axes[0].plot(time, h / norm, **styled(kwargs, color=color, lw=0.8))
     axes[0].set_ylabel(_t("Amplitude (norm.)", language))
     axes[0].set_title(title)
     axes[0].grid(visible=True, alpha=0.3)
@@ -915,7 +916,7 @@ def plot_noise_criterion(
     valid = ~np.isnan(levels)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Measured", language))
-    ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
+    ax.plot(freqs[valid], levels[valid], "o-", **styled(kwargs, zorder=3))
     # Nearest *valid* band rather than float equality against the stored
     # value; the marker sits on that band so its x and y stay paired. A
     # SIL-designated or below-family spectrum has no governing band (NaN),
@@ -997,7 +998,7 @@ def plot_room_criterion(
     )
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Measured", language))
-    ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
+    ax.plot(freqs[valid], levels[valid], "o-", **styled(kwargs, zorder=3))
     _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t(_OCTAVE_BAND_SPL_LABEL, language))
     ax.set_title(f"ANSI/ASA S12.2 {result.label}")
@@ -1074,10 +1075,7 @@ def plot_reverberation_models(
         ax.plot(
             freq,
             np.asarray(curve, dtype=np.float64),
-            color=color,
-            marker=marker,
-            lw=lw,
-            **model_kwargs,
+            **styled(model_kwargs, color=color, marker=marker, lw=lw),
         )
     _freq_axis(ax, freq, language=language)
     ax.set_ylabel(_t(_REVERBERATION_TIME_LABEL, language))
@@ -1233,7 +1231,9 @@ def plot_excitation(
 
     if kind == "mls":
         show = min(n, 120)
-        ax_time.step(np.arange(show), x[:show], where="mid", color=color, **kwargs)
+        ax_time.step(
+            np.arange(show), x[:show], **styled(kwargs, where="mid", color=color)
+        )
         ax_time.set_xlabel(_t("Sample", language))
         ax_time.set_ylabel(_t("Amplitude", language))
         ax_time.set_ylim(-1.4, 1.4)
@@ -1269,7 +1269,7 @@ def plot_excitation(
         return axes
 
     # Swept sine.
-    ax_time.plot(t, x, color=color, lw=0.6, **kwargs)
+    ax_time.plot(t, x, **styled(kwargs, color=color, lw=0.6))
     ax_time.set_xlabel(_t(_TIME_LABEL, language))
     ax_time.set_ylabel(_t("Amplitude", language))
     ax_time.set_title(_t("ISO 18233 exponential sine sweep", language))
@@ -1363,7 +1363,12 @@ def plot_image_source_reflectogram(
         localize_axes(cbar.ax, language)
     ax.vlines(ms[order0], -120.0, level[order0], color=_C_PRIMARY, lw=1.6, zorder=4)
     kwargs.setdefault("label", _t("Direct sound", language))
-    ax.plot(ms[order0], level[order0], "o", color=_C_PRIMARY, ms=7, zorder=5, **kwargs)
+    ax.plot(
+        ms[order0],
+        level[order0],
+        "o",
+        **styled(kwargs, color=_C_PRIMARY, ms=7, zorder=5),
+    )
 
     lx, ly, lz = result.dimensions
     # A bare ``:g`` never reaches the locale pass (``localize_axes`` reformats
@@ -1565,7 +1570,7 @@ def plot_shaped_sweep(
         return ax
 
     axes = _new_axes_column(2, figsize=(8.0, 6.0))
-    axes[0].plot(time, x, color=color, lw=0.6, **kwargs)
+    axes[0].plot(time, x, **styled(kwargs, color=color, lw=0.6))
     axes[0].set_xlabel(xlabel)
     axes[0].set_ylabel(_t("Amplitude", language))
     axes[0].set_title(f"{title}: {_t('Crest factor', language)} {crest} dB")
@@ -1624,9 +1629,7 @@ def plot_room_modes(
             freqs[mask],
             row - 0.35,
             row + 0.35,
-            color=colors[kind],
-            lw=1.2,
-            **kind_kwargs,
+            **styled(kind_kwargs, color=colors[kind], lw=1.2),
         )
     ladder.set_ylim(0.4, 4.1)
     order = ("oblique", "tangential", "axial")
@@ -1713,9 +1716,7 @@ def plot_crowd_noise(
         ax.plot(
             n,
             curve,
-            color=palette[row % len(palette)],
-            lw=1.8,
-            **area_kwargs,
+            **styled(area_kwargs, color=palette[row % len(palette)], lw=1.8),
         )
     ax.axhline(
         result.signal_level,

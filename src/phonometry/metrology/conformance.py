@@ -130,8 +130,10 @@ def _open_limit(value: float, name: str, *, upper: bool) -> float:
     :param value: The limit.
     :param name: Its field name, for the message.
     :param upper: ``True`` for the upper limit, ``False`` for the lower one.
+    :raises TypeError: for an array or a text, which is not read as a number.
     :raises ValueError: for a NaN or an infinity on the wrong side.
     """
+    require_scalar(value, name)
     limit = float(value)
     if math.isinf(limit) and (limit > 0.0) is upper:
         return limit
@@ -176,11 +178,17 @@ class ConformanceVerification(RichDisplay):
             on its own side only), if the lower limit is above the upper one,
             if both limits are open, if the uncertainty is negative or if the
             maximum-permitted uncertainty is not positive.
-        :raises TypeError: if ``lower_limit``, ``max_uncertainty``, ``uncertainty`` or
-            ``upper_limit`` is not a single number.
+        :raises TypeError: if ``deviation``, ``uncertainty``, ``lower_limit``,
+            ``upper_limit`` or ``max_uncertainty`` is an array or a text rather
+            than one number.
         """
-        require_scalar(self.max_uncertainty, "max_uncertainty")
+        # Each number's rank before anything converts it: the limits go
+        # through float() in _open_limit, which would parse a text.
+        require_scalar(self.deviation, "deviation")
         require_scalar(self.uncertainty, "uncertainty")
+        require_scalar(self.max_uncertainty, "max_uncertainty")
+        require_scalar(self.lower_limit, "lower_limit")
+        require_scalar(self.upper_limit, "upper_limit")
         for name in ("deviation", "uncertainty", "max_uncertainty"):
             object.__setattr__(self, name, require_finite(getattr(self, name), name))
         object.__setattr__(
@@ -193,8 +201,6 @@ class ConformanceVerification(RichDisplay):
             "upper_limit",
             _open_limit(self.upper_limit, "upper_limit", upper=True),
         )
-        require_scalar(self.lower_limit, "lower_limit")
-        require_scalar(self.upper_limit, "upper_limit")
         if math.isinf(self.lower_limit) and math.isinf(self.upper_limit):
             msg = (
                 "'lower_limit' and 'upper_limit' are both open: an acceptance "
@@ -405,14 +411,16 @@ def verify_conformance(
         side), a negative symmetric limit, a lower limit above the upper one,
         a pair open at both ends, a negative uncertainty or a
         maximum-permitted uncertainty that is not positive.
-    :raises TypeError: if ``acceptance_limits`` is not a single number.
+    :raises TypeError: if ``deviation``, ``uncertainty``, ``max_uncertainty``,
+        ``acceptance_limits`` or a member of its ``(lower, upper)`` pair is an
+        array or a text rather than one number.
     """
     lower, upper = _limits(acceptance_limits)
     return ConformanceVerification(
-        deviation=float(deviation),
-        uncertainty=float(uncertainty),
+        deviation=deviation,
+        uncertainty=uncertainty,
         lower_limit=lower,
         upper_limit=upper,
-        max_uncertainty=float(max_uncertainty),
+        max_uncertainty=max_uncertainty,
         unit=str(unit),
     )

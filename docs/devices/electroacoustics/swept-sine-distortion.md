@@ -275,7 +275,7 @@ grids.
 - [`impulse_response`](../../buildings/rooms/room-acoustics.md) recovers the *linear* IR from the
   same sweep recording and simply discards the negative-time distortion
   products; `swept_sine_distortion` is the tool that reads them.
-- [`thd_ratio` / `harmonic_analysis`](electroacoustics.md) measure distortion
+- [`thd` / `harmonic_analysis`](electroacoustics.md) measure distortion
   from a steady tone at one frequency; the sweep separator returns the same
   ratios as a continuous function of frequency, from one measurement.
 - The phase utilities operate on any one-sided *complex* response: an

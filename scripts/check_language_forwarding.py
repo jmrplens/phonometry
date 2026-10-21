@@ -141,7 +141,7 @@ MIXED_NAMESAKES: dict[str, str] = {
 #: language on instead.
 EXEMPT: dict[str, str] = {
     (
-        "scripts/figures/schematics.py:3011::animate_comb_filtering -> "
+        "scripts/figures/schematics.py:3014::animate_comb_filtering -> "
         "phonometry._plot.common.format_frequency_axis"
     ): (
         "The clip spans 50 Hz to 8 kHz, whose labelled centres (63 to 8k) are "

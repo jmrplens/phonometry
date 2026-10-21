@@ -181,7 +181,7 @@ _HF_CETACEANS = "High-frequency cetaceans"
 
 #: NMFS (2018) revision v2.0, Table 3 = Table ES2 (printed pp. 18 and 3) with
 #: the generalised hearing ranges of Table ES1 (printed p. 2).
-_NMFS_2018: dict[str, WeightingParameters] = {
+_NMFS_2018: dict[HearingGroup, WeightingParameters] = {
     "LF": _row(
         "LF",
         "nmfs-2018",
@@ -247,7 +247,7 @@ _NMFS_2018: dict[str, WeightingParameters] = {
 #: NMFS (2024) update v3.0, Table 5 = Table ES2 (printed pp. 25 and 3) with the
 #: generalised hearing ranges of Table ES1 (printed p. 2). The otariid ``C`` is
 #: implemented as 1.36 dB (see the module note).
-_NMFS_2024: dict[str, WeightingParameters] = {
+_NMFS_2024: dict[HearingGroup, WeightingParameters] = {
     "LF": _row(
         "LF",
         "nmfs-2024",
@@ -339,7 +339,7 @@ _NMFS_2024: dict[str, WeightingParameters] = {
 
 #: Southall et al. (2019) Table 5, PDF page 25 (printed p. 149). The article
 #: tabulates no generalised hearing range, so those fields stay ``None``.
-_SOUTHALL_2019: dict[str, WeightingParameters] = {
+_SOUTHALL_2019: dict[HearingGroup, WeightingParameters] = {
     "LF": _row("LF", "southall-2019", _LF_CETACEANS, 1.0, 2.0, 0.20, 19.0, 0.13, 179.0),
     "HF": _row("HF", "southall-2019", _HF_CETACEANS, 1.6, 2.0, 8.8, 110.0, 1.20, 177.0),
     "VHF": _row(
@@ -402,7 +402,7 @@ _SOUTHALL_2019: dict[str, WeightingParameters] = {
     ),
 }
 
-_PARAMETERS: dict[str, dict[str, WeightingParameters]] = {
+_PARAMETERS: dict[Guidance, dict[HearingGroup, WeightingParameters]] = {
     "nmfs-2024": _NMFS_2024,
     "nmfs-2018": _NMFS_2018,
     "southall-2019": _SOUTHALL_2019,
@@ -430,7 +430,7 @@ class ExposureCriteria(RichDisplay):
     :ivar source: Table the numbers come from.
     """
 
-    group: str
+    group: HearingGroup
     guidance: Guidance
     _: KW_ONLY
     impulsive: bool
@@ -449,14 +449,14 @@ _CriteriaRow = tuple[float | None, float | None, float | None, float | None]
 
 #: Non-impulsive and impulsive criteria per guidance version and group.
 #: NMFS 2018: Table 3 (weighted TTS onset) and Table ES3 (PTS onset).
-_CRITERIA_2018_CONTINUOUS: dict[str, _CriteriaRow] = {
+_CRITERIA_2018_CONTINUOUS: dict[HearingGroup, _CriteriaRow] = {
     "LF": (179.0, 199.0, None, None),
     "MF": (178.0, 198.0, None, None),
     "HF": (153.0, 173.0, None, None),
     "PW": (181.0, 201.0, None, None),
     "OW": (199.0, 219.0, None, None),
 }
-_CRITERIA_2018_IMPULSIVE: dict[str, _CriteriaRow] = {
+_CRITERIA_2018_IMPULSIVE: dict[HearingGroup, _CriteriaRow] = {
     "LF": (None, 183.0, None, 219.0),
     "MF": (None, 185.0, None, 230.0),
     "HF": (None, 155.0, None, 202.0),
@@ -465,7 +465,7 @@ _CRITERIA_2018_IMPULSIVE: dict[str, _CriteriaRow] = {
 }
 #: NMFS 2024: Table 5 / Table ES3, completed with the Navy Phase 4 impulsive
 #: TTS values of Table A.E-2 (printed p. 43) that ES3 does not repeat.
-_CRITERIA_2024_CONTINUOUS: dict[str, _CriteriaRow] = {
+_CRITERIA_2024_CONTINUOUS: dict[HearingGroup, _CriteriaRow] = {
     "LF": (177.0, 197.0, None, None),
     "HF": (181.0, 201.0, None, None),
     "VHF": (161.0, 181.0, None, None),
@@ -474,7 +474,7 @@ _CRITERIA_2024_CONTINUOUS: dict[str, _CriteriaRow] = {
     "PA": (134.0, 154.0, None, None),
     "OA": (157.0, 177.0, None, None),
 }
-_CRITERIA_2024_IMPULSIVE: dict[str, _CriteriaRow] = {
+_CRITERIA_2024_IMPULSIVE: dict[HearingGroup, _CriteriaRow] = {
     "LF": (168.0, 183.0, 216.0, 222.0),
     "HF": (178.0, 193.0, 224.0, 230.0),
     "VHF": (144.0, 159.0, 196.0, 202.0),
@@ -486,7 +486,7 @@ _CRITERIA_2024_IMPULSIVE: dict[str, _CriteriaRow] = {
 #: Southall et al. (2019) Table 6, PDF page 30 (printed p. 154), for the
 #: non-impulsive thresholds, and Table 7 as corrected by the errata of
 #: Aquatic Mammals 45(5), PDF page 110 (printed p. 570).
-_CRITERIA_SOUTHALL_CONTINUOUS: dict[str, _CriteriaRow] = {
+_CRITERIA_SOUTHALL_CONTINUOUS: dict[HearingGroup, _CriteriaRow] = {
     "LF": (179.0, 199.0, None, None),
     "HF": (178.0, 198.0, None, None),
     "VHF": (153.0, 173.0, None, None),
@@ -496,7 +496,7 @@ _CRITERIA_SOUTHALL_CONTINUOUS: dict[str, _CriteriaRow] = {
     "PCA": (134.0, 154.0, None, None),
     "OCA": (157.0, 177.0, None, None),
 }
-_CRITERIA_SOUTHALL_IMPULSIVE: dict[str, _CriteriaRow] = {
+_CRITERIA_SOUTHALL_IMPULSIVE: dict[HearingGroup, _CriteriaRow] = {
     "LF": (168.0, 183.0, 213.0, 219.0),
     "HF": (170.0, 185.0, 224.0, 230.0),
     "VHF": (140.0, 155.0, 196.0, 202.0),
@@ -511,8 +511,8 @@ _CRITERIA_SOUTHALL_IMPULSIVE: dict[str, _CriteriaRow] = {
 _CRITERIA: dict[
     Guidance,
     tuple[
-        dict[str, _CriteriaRow],
-        dict[str, _CriteriaRow],
+        dict[HearingGroup, _CriteriaRow],
+        dict[HearingGroup, _CriteriaRow],
         Literal["PTS", "AUD INJ"],
         str,
         str,
@@ -557,7 +557,7 @@ def _check_guidance(guidance: str) -> Guidance:
     return key
 
 
-def hearing_groups(guidance: Guidance = "nmfs-2024") -> tuple[str, ...]:
+def hearing_groups(guidance: Guidance = "nmfs-2024") -> tuple[HearingGroup, ...]:
     """Hearing-group codes defined by a guidance version.
 
     :param guidance: One of :data:`WEIGHTING_GUIDANCE`.

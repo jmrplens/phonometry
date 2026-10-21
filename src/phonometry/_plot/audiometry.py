@@ -22,6 +22,7 @@ from .common import (
     format_frequency_axis,
     place_legend_clear,
     style_default,
+    styled,
 )
 
 if TYPE_CHECKING:
@@ -302,7 +303,7 @@ def plot_ambient_noise(
     style_default(measured, "color", _C_PRIMARY)
     style_default(measured, "linewidth", 2.0)
     measured.setdefault("label", _t("measured ambient level", language))
-    ax.plot(freqs, levels, "-o", ms=4, zorder=3, **measured)
+    ax.plot(freqs, levels, "-o", **styled(measured, ms=4, zorder=3))
     over = ~np.asarray(result.within, dtype=bool)
     if np.any(over):
         ax.plot(
@@ -365,7 +366,7 @@ def plot_ascending_threshold(
         heard = np.asarray(result.responses, dtype=bool)
         steps = np.arange(1, levels.size + 1)
         line.setdefault("label", _t("presentations", language))
-        ax.plot(steps, levels, "-", zorder=2, **line)
+        ax.plot(steps, levels, "-", **styled(line, zorder=2))
         ax.plot(
             steps[heard],
             levels[heard],
@@ -404,7 +405,7 @@ def plot_ascending_threshold(
         ascents = np.asarray(result.ascent_levels, dtype=np.float64)
         span = np.arange(1, ascents.size + 1)
         line.setdefault("label", _t("ascent response level", language))
-        ax.plot(span, ascents, "-o", zorder=3, **line)
+        ax.plot(span, ascents, "-o", **styled(line, zorder=3))
         ax.set_xlabel(_t("ascents", language).capitalize())
     if result.determined:
         level = _number(result.threshold_level, language, "g")
@@ -455,7 +456,7 @@ def plot_bracketing_threshold(
     style_default(ascent, "color", _C_PRIMARY)
     style_default(ascent, "linewidth", 1.6)
     ascent.setdefault("label", _t("ascents", language))
-    ax.plot(np.arange(1, ups.size + 1), ups, "-^", ms=8, zorder=3, **ascent)
+    ax.plot(np.arange(1, ups.size + 1), ups, "-^", **styled(ascent, ms=8, zorder=3))
     ax.plot(
         np.arange(1, downs.size + 1),
         downs,
@@ -527,7 +528,7 @@ def plot_automatic_threshold(
     style_default(trace, "color", _C_PRIMARY)
     style_default(trace, "linewidth", 1.6)
     trace.setdefault("label", _t("tracing", language))
-    ax.plot(steps, levels, "-", zorder=2, **trace)
+    ax.plot(steps, levels, "-", **styled(trace, zorder=2))
     ax.plot(steps[kept], levels[kept], "o", color=_C_PRIMARY, ms=5, zorder=3)
     ax.plot(
         steps[~kept],
@@ -607,8 +608,7 @@ def plot_sweep_threshold(
         np.asarray(result.running_frequencies, dtype=np.float64),
         np.asarray(result.running_threshold_levels, dtype=np.float64),
         "-",
-        zorder=2,
-        **running,
+        **styled(running, zorder=2),
     )
     ax.plot(
         np.asarray(result.frequencies, dtype=np.float64),
@@ -668,9 +668,7 @@ def plot_retest_agreement(
         [0, 1],
         [first, float(result.repeat_threshold_level)],
         "-o",
-        ms=9,
-        zorder=3,
-        **marks,
+        **styled(marks, ms=9, zorder=3),
     )
     ax.set_xticks([0, 1])
     ax.set_xticklabels([_t("first measurement", language), _t("repeat", language)])
@@ -729,7 +727,7 @@ def plot_audiogram_cautions(
         style_default(curve, "color", _C_PRIMARY)
         style_default(curve, "linewidth", 2.0)
         curve.setdefault("label", _t("air conduction level", language))
-        ax.plot(freqs, air, "-o", ms=6, zorder=3, **curve)
+        ax.plot(freqs, air, "-o", **styled(curve, ms=6, zorder=3))
         ax.axhline(
             _CROSS_HEARING_LEVEL_DB,
             color=_C_PRIMARY,
@@ -820,7 +818,7 @@ def _plot_budget(
     bars = dict(kwargs)
     style_default(bars, "color", _C_PRIMARY)
     bars.setdefault("label", _t("contribution $u_i$", language))
-    ax.bar(positions, values, width=0.6, zorder=2, **bars)
+    ax.bar(positions, values, **styled(bars, width=0.6, zorder=2))
     ax.axhline(
         combined,
         color=_C_REFERENCE,
@@ -964,7 +962,7 @@ def plot_diffuse_sound_field(
     style_default(position, "color", _C_PRIMARY)
     style_default(position, "linewidth", 2.0)
     position.setdefault("label", _t("largest position deviation", language))
-    ax.plot(freqs, worst, "-o", ms=4, zorder=3, **position)
+    ax.plot(freqs, worst, "-o", **styled(position, ms=4, zorder=3))
     for limit in (-2.5, 2.5):
         ax.axhline(
             limit,
@@ -1076,7 +1074,7 @@ def plot_free_sound_field(
     style_default(lateral, "color", _C_PRIMARY)
     style_default(lateral, "linewidth", 2.0)
     lateral.setdefault("label", _t("largest lateral deviation", language))
-    ax.plot(freqs, worst, "-o", ms=4, zorder=3, **lateral)
+    ax.plot(freqs, worst, "-o", **styled(lateral, ms=4, zorder=3))
     tolerance = np.asarray(result.lateral_tolerance_db, dtype=np.float64)
     ax.step(
         freqs,
@@ -1247,7 +1245,7 @@ def plot_earmuff_insertion_loss(
     style_default(curve, "color", _C_PRIMARY)
     style_default(curve, "linewidth", 2.2)
     curve.setdefault("label", _t("mean insertion loss", language))
-    ax.plot(freqs, mean, "-o", ms=4, zorder=3, **curve)
+    ax.plot(freqs, mean, "-o", **styled(curve, ms=4, zorder=3))
     _log_frequency_axis(ax, freqs, language)
     ax.set_ylabel(_t(_IL_LABEL, language))
     ax.invert_yaxis()
@@ -1290,9 +1288,7 @@ def plot_plane_progressive_wave(
         freqs,
         np.asarray(result.end_face_difference, dtype=np.float64),
         "-o",
-        ms=4,
-        zorder=3,
-        **faces,
+        **styled(faces, ms=4, zorder=3),
     )
     ax.axhline(
         2.0,
@@ -1368,7 +1364,7 @@ def plot_fixture_isolation(
     style_default(curve, "linewidth", 2.0)
     curve.setdefault("label", _t("acoustic isolation", language))
     isolation = np.asarray(result.isolation, dtype=np.float64)
-    ax.plot(freqs, isolation, "-o", ms=4, zorder=3, **curve)
+    ax.plot(freqs, isolation, "-o", **styled(curve, ms=4, zorder=3))
     short = ~np.asarray(result.sufficient, dtype=bool)
     if np.any(short):
         ax.plot(

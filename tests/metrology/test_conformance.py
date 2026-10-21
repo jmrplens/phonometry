@@ -13,12 +13,14 @@ of C.1) included.
 from __future__ import annotations
 
 import math
+import re
 
 import matplotlib as mpl
 
 mpl.use("Agg")
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pytest
 from reference_data import (
     IEC60942_TABLE_E1,
@@ -206,6 +208,69 @@ def test_inputs_the_rule_cannot_be_read_on(
     arguments.update(kwargs)
     with pytest.raises(ValueError, match=fragment):
         metrology.verify_conformance(0.0, **arguments)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "fragment"),
+    [
+        (
+            {"acceptance_limits": ("1", 2.0)},
+            "'acceptance_limits' must be one number, not a text",
+        ),
+        (
+            {"acceptance_limits": (np.array([1.0, 2.0]), 2.0)},
+            "'acceptance_limits' must be one number, not an array",
+        ),
+        (
+            {"acceptance_limits": np.array([-1.0, 1.0])},
+            "'acceptance_limits' must be one number, not an array",
+        ),
+        (
+            {"acceptance_limits": "0.5"},
+            "'acceptance_limits' must be one number, not a text",
+        ),
+        ({"deviation": "0.3"}, "'deviation' must be one number, not a text"),
+        (
+            {"uncertainty": np.array([0.1])},
+            "'uncertainty' must be one number, not an array",
+        ),
+        (
+            {"max_uncertainty": "0.15"},
+            "'max_uncertainty' must be one number, not a text",
+        ),
+    ],
+)
+def test_a_text_or_an_array_is_not_read_as_a_number(
+    kwargs: dict[str, object], fragment: str
+) -> None:
+    """A text is not parsed into a number, and an array is not read as one.
+
+    ``float()`` ran before the guards, so ``("1", 2.0)`` was accepted as a
+    limit of 1 and an array member failed inside numpy without a name.
+    """
+    arguments: dict[str, object] = {
+        "deviation": 0.0,
+        "uncertainty": 0.1,
+        "acceptance_limits": 0.25,
+        "max_uncertainty": 0.15,
+    }
+    arguments.update(kwargs)
+    with pytest.raises(TypeError, match=re.escape(fragment)):
+        metrology.verify_conformance(**arguments)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("field", ["lower_limit", "upper_limit"])
+def test_a_limit_of_the_record_is_one_number(field: str) -> None:
+    arguments: dict[str, object] = {
+        "deviation": 0.0,
+        "uncertainty": 0.1,
+        "lower_limit": -1.0,
+        "upper_limit": 1.0,
+        "max_uncertainty": 0.15,
+        field: "1",
+    }
+    with pytest.raises(TypeError, match=f"'{field}' must be one number, not a text"):
+        metrology.ConformanceVerification(**arguments)  # type: ignore[arg-type]
 
 
 def test_a_non_finite_deviation_is_refused() -> None:

@@ -1172,7 +1172,7 @@ def fit_prototype(
     :param band: Frequencies in Hz between which the response is fitted. The
         response outside it is not claimed: see
         :func:`phonometry.filters.weighting._fit_band`.
-    :param n_sections: Biquad n_sections, i.e. half the degree of the realised
+    :param n_sections: Biquad sections, i.e. half the degree of the realised
         filter.
     :param reference_frequency_hz: The standard's reference frequency. The residual is measured
         relative to the response at :func:`_anchor_hz`, which is *reference_frequency_hz* itself

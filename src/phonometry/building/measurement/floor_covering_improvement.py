@@ -61,6 +61,7 @@ from ..._internal.validation import (
     check_engine,
     require_choice,
     require_equal_shapes,
+    require_present,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -641,14 +642,16 @@ class OctaveBandSpectrum(OwnsArrays):
     quantity: Quantity
 
     def __post_init__(self) -> None:
-        """Reject an unknown quantity or columns of different lengths.
+        """Reject an unknown quantity, a missing column or unequal columns.
 
         :raises ValueError: if ``quantity`` is not one of the five above, or
             the two columns are not one-dimensional arrays of one value per
             octave.
-        :raises TypeError: if ``quantity`` is not a text.
+        :raises TypeError: if ``quantity`` is not a text, or a column is
+            ``None``.
         """
         require_choice(self.quantity, "quantity", _OCTAVE_BAND_QUANTITIES)
+        require_present(self, "frequencies", "values")
         require_ranks(self, frequencies=1, values=1)
         require_same_length(self, "frequencies", "values")
 

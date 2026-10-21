@@ -133,7 +133,7 @@ Adjustment factors $K(\phi)$ for one plane of measurements
 
 The share of the sphere each reading stands for, at the angles
 $\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi$ from the
-reference direction, for measurements in `n_planes` n_planes through the
+reference direction, for measurements in `n_planes` planes through the
 reference direction at equal angles $\Delta\alpha = 180°/n$ apart:
 
 $$
@@ -156,7 +156,7 @@ the two planes of Annex A), so the pole readings enter every plane's sum
 | Name | Description |
 | :--- | :--- |
 | `step_deg` | The angular step $\Delta\phi$ in degrees. It has to divide 180° into a whole number of steps, at least two, so that both poles are measured. |
-| `n_planes` | The number of n_planes $n$ the measurements are made in (Default: 2, the X-Y and X-Z planes of Annex A). |
+| `n_planes` | The number of planes $n$ the measurements are made in (Default: 2, the X-Y and X-Z planes of Annex A). |
 
 **Returns:** The `360 / step_deg` factors, read-only, the first at 0°.
 
@@ -615,7 +615,7 @@ symmetry stands for the same two planes and is judged on their division.
 | Name | Description |
 | :--- | :--- |
 | `step_deg` | The angular step $\Delta\phi$ in degrees, dividing 180° into a whole number of steps, at least two. |
-| `n_planes` | The number of n_planes (Default: 2). |
+| `n_planes` | The number of planes (Default: 2). |
 
 **Returns:** The fraction, between 0 and 1.
 

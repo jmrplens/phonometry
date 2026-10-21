@@ -34,6 +34,13 @@ object, and the row passes when it uses one of them. A cell naming two
 (``dataclass`` / ``constant``, for a class and an instance of it sharing a
 row) passes when either is true.
 
+The **usage examples** are checked as well, because no snippet gate runs
+this page and a signature moves under them: a parameter turned keyword-only
+left ``static_airflow_resistance(..., 0.01, 0.05)`` raising ``TypeError`` for
+the reader who copied it, and thirteen rows had gone the same way.
+:func:`example_problems` binds every call that starts from something the
+library publishes to that callable's signature, without running it.
+
 The **surface** behind the table is checked too, because a name with two
 addresses, or one no reader can import, is a defect the table cannot show.
 Every name has one public address: the domain package that publishes it, and
@@ -90,7 +97,8 @@ Usage::
     python scripts/check_api_reference.py
 
 Exit status 0 when every public name has a row that says what it is, every
-plain-name row names something public, every public name has one address and
+plain-name row names something public, every usage example calls the library
+the way its signatures allow, every public name has one address and
 none is an alias, every public module is reached by its name and declares an
 ``__all__`` that lists all it publishes, and the page shows the current
 version; 1 otherwise.
@@ -291,6 +299,186 @@ def kind_problems(markdown: str, owners: dict[str, ModuleType]) -> list[str]:
             said = " / ".join(sorted(declared))
             problems.append(f"{name}: says {said}, is {'/'.join(sorted(allowed))}")
     return problems
+
+
+#: The page's grouping space inside a number (``2\u202f600.0``), which
+#: Python does not read.
+_GROUPED_DIGITS = re.compile(r"(?<=\d)\u202f(?=\d)")
+
+#: ``, ...)`` closing a call, "and the rest of its arguments", which the page
+#: also writes after keywords, where Python refuses it.
+_ELIDED_TAIL = re.compile(r",\s*\.\.\.\s*\)")
+
+#: What an elided tail is read as: a ``**`` spread of this name, which Python
+#: takes after keywords and which marks the one call that elides.
+_ELIDED = "__elided__"
+
+
+def usage_roots() -> dict[str, object]:
+    """What a usage example may start a call from, by the name it is written with.
+
+    The examples call through a domain package (``materials.porosity(...)``)
+    or name a published object directly (``OctaveFilterBank(...)``,
+    ``Signal.from_file(...)``); anything else they start from is a variable
+    of the example or a third party, and is not the library's to check.
+
+    :return: Written name to the object it reaches.
+    """
+    import phonometry
+
+    owners = public_names()
+    roots: dict[str, object] = {
+        name: getattr(package, name) for name, package in owners.items()
+    }
+    for name in phonometry.__all__:
+        if inspect.ismodule(getattr(phonometry, name)):
+            roots[name] = getattr(phonometry, name)
+    roots["phonometry"] = phonometry
+    return roots
+
+
+def example_problems(markdown: str, roots: Mapping[str, object]) -> list[str]:
+    """Usage examples that call the library in a way its signatures refuse.
+
+    The table is the one page no snippet gate runs, so a parameter that turns
+    keyword-only, or a function that is renamed, leaves an example a reader
+    copies and fails on. Every call in a row's usage cell (the last one; the
+    description names functions as ``info()`` without calling them) that
+    starts from something the library publishes is bound to that callable's
+    signature with :meth:`inspect.Signature.bind`, which counts the arguments
+    and checks the keywords without running anything. An argument list the
+    example elides (``f(x, ...)``) is held only to what it writes.
+
+    :param markdown: The ``docs/reference/api/index.md`` source.
+    :param roots: What a call may start from (see :func:`usage_roots`).
+    :return: One message per refused call, in reading order.
+    """
+    problems: list[str] = []
+    for line in markdown.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|"):
+            continue
+        cells = re.split(r"(?<!\\)\|", stripped)
+        if len(cells) < 6:
+            continue  # Not a row of the four-column name table.
+        row = " / ".join(_BACKTICKED.findall(cells[1]))
+        problems.extend(
+            f"{row}: `{fragment}` calls {problem}"
+            for fragment in _BACKTICKED.findall(cells[-2])
+            for problem in _fragment_problems(fragment, roots)
+        )
+    return problems
+
+
+def _fragment_problems(fragment: str, roots: Mapping[str, object]) -> Iterator[str]:
+    """Each call in one backticked fragment that its target refuses.
+
+    :param fragment: The text between two backticks of a usage cell.
+    :param roots: What a call may start from.
+    :return: ``"<dotted name>, which ..."`` per refused call; nothing for a
+        fragment that is not Python (``.plot()``, ``10 lg(...)``).
+    """
+    source = _GROUPED_DIGITS.sub("", fragment)
+    source = _ELIDED_TAIL.sub(f", **{_ELIDED})", source)
+    if source.rstrip().endswith(":"):
+        source += " pass"  # ``with simulation.use(...):`` opens a block.
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return
+    for call in ast.walk(tree):
+        if not isinstance(call, ast.Call):
+            continue
+        parts = _dotted_name(call.func)
+        target = _call_target(parts, roots) if parts else None
+        if target is None:
+            continue
+        dotted = ".".join(parts)
+        if isinstance(target, str):
+            yield f"{dotted}, which does not exist: {target}"
+            continue
+        callee, takes_self = target
+        if refusal := _refusal(call, callee, takes_self=takes_self):
+            yield f"{dotted}, which refuses it: {refusal}"
+
+
+def _dotted_name(func: ast.expr) -> list[str]:
+    """``["a", "b", "c"]`` for a call written ``a.b.c(...)``; empty otherwise."""
+    parts: list[str] = []
+    while isinstance(func, ast.Attribute):
+        parts.append(func.attr)
+        func = func.value
+    if not isinstance(func, ast.Name):
+        return []
+    parts.append(func.id)
+    return parts[::-1]
+
+
+def _call_target(
+    parts: list[str], roots: Mapping[str, object]
+) -> tuple[object, bool] | str | None:
+    """The callable a dotted call reaches, and whether it still needs its instance.
+
+    :param parts: The dotted name of the call, root first.
+    :param roots: What a call may start from.
+    :return: ``(callable, takes_self)``; a message when a link of the name is
+        missing; ``None`` when the root is not the library's. ``takes_self`` is
+        true for a method the example shows on its class
+        (``Result.plot_geometry()``), which a reader calls on an instance.
+    """
+    owner: object = None
+    target = roots.get(parts[0], _NOTHING)
+    if target is _NOTHING:
+        return None
+    for depth, attribute in enumerate(parts[1:], start=1):
+        owner, target = target, getattr(target, attribute, _NOTHING)
+        if target is _NOTHING:
+            return f"{'.'.join(parts[:depth])} has no attribute {attribute!r}"
+    takes_self = inspect.isclass(owner) and inspect.isfunction(
+        inspect.getattr_static(owner, parts[-1], None)
+    )
+    return target, takes_self
+
+
+def _refusal(call: ast.Call, target: object, *, takes_self: bool) -> str:
+    """Why ``target``'s signature refuses ``call``, or ``""`` when it binds.
+
+    A call that elides its arguments (a positional ``...``, or the ``, ...)``
+    tail read as ``**__elided__``) is held only to what it writes, and the
+    elision is this call's alone: a call nested in its arguments is held to
+    all of its own.
+
+    :param call: The call as the example writes it.
+    :param target: The callable it reaches.
+    :param takes_self: Whether the call leaves out the instance a method takes.
+    :return: The :class:`TypeError` text :meth:`inspect.Signature.bind` raises.
+    """
+    if not callable(target) or any(isinstance(arg, ast.Starred) for arg in call.args):
+        return ""  # Not callable, or ``*args`` hides what it passes.
+    elided = False
+    keywords: dict[str, None] = {}
+    for keyword in call.keywords:
+        if keyword.arg is not None:
+            keywords[keyword.arg] = None
+        elif isinstance(keyword.value, ast.Name) and keyword.value.id == _ELIDED:
+            elided = True
+        else:
+            return ""  # ``**options`` hides what it passes.
+    try:
+        signature = inspect.signature(target)
+    except ValueError:
+        return ""  # A builtin with no signature to read.
+    positional = list(call.args)
+    for index, arg in enumerate(positional):
+        if isinstance(arg, ast.Constant) and arg.value is Ellipsis:
+            positional, elided = positional[:index], True
+            break
+    bind = signature.bind_partial if elided else signature.bind
+    try:
+        bind(*[None] * (len(positional) + takes_self), **keywords)
+    except TypeError as error:
+        return str(error)
+    return ""
 
 
 def is_type_alias(obj: object) -> bool:
@@ -599,9 +787,9 @@ def _package_binding(parent: ModuleType | None, leaf: str) -> str | None:
     Reading the package source closes what reading its attributes cannot: a
     module that some other import reached first has already replaced the
     published object, and then the attribute shows the module. Only importing
-    the submodule itself (``from . import leaf``, ``import pkg.leaf``) binds
-    the name to it; any other import, assignment, function or class of that
-    name hides it.
+    the submodule itself (``from . import leaf``, ``from ..pkg import leaf``,
+    ``import pkg.leaf``, ``import pkg.leaf as leaf``) binds the name to it;
+    any other import, assignment, function or class of that name hides it.
 
     :param parent: The package, or ``None`` for a top-level module.
     :param leaf: The last component of the module's dotted name.
@@ -650,7 +838,7 @@ def _binding_other_than_submodule(
         return f"class {leaf}" if node.name == leaf else None
     if isinstance(node, ast.ImportFrom):
         source = "." * node.level + (node.module or "")
-        submodule_itself = source in {".", package}
+        submodule_itself = _resolved_source(source, package) == package
         for alias in node.names:
             if (alias.asname or alias.name) == leaf and not (
                 submodule_itself and alias.name == leaf
@@ -660,7 +848,7 @@ def _binding_other_than_submodule(
         return None
     if isinstance(node, ast.Import):
         for alias in node.names:
-            if alias.asname == leaf:
+            if alias.asname == leaf and alias.name != f"{package}.{leaf}":
                 return f"import {alias.name} as {leaf}"
         return None
     targets: list[ast.expr] = []
@@ -675,6 +863,23 @@ def _binding_other_than_submodule(
     ):
         return f"{leaf} = ..."
     return None
+
+
+def _resolved_source(source: str, package: str) -> str:
+    """The absolute module a ``from <source> import`` statement of ``package`` reads.
+
+    ``from ..pkg import leaf`` inside ``outer.pkg`` reads ``outer.pkg`` itself,
+    which the written source does not show.
+
+    :param source: The dots and the module name as written (``"..pkg"``).
+    :param package: The dotted name of the package whose ``__init__`` holds it.
+    :return: The absolute module name, or ``""`` for a relative import that
+        climbs past the top-level package and so reads nothing.
+    """
+    try:
+        return importlib.util.resolve_name(source, package)
+    except (ImportError, ValueError):
+        return ""
 
 
 def _unlisted_problems(
@@ -778,6 +983,16 @@ def main() -> int:
         for problem in wrong:
             print(f"  - {problem}")
         return 1
+    refused = example_problems(markdown, usage_roots())
+    if refused:
+        print(
+            f"docs/reference/api/index.md shows {len(refused)} call(s) the "
+            "library refuses; a reader copies the example and it fails:"
+        )
+        for problem in refused:
+            print(f"  - {problem}")
+        print("Write each call the way the signature takes it.")
+        return 1
     domains = [
         getattr(phonometry, name)
         for name in phonometry.__all__
@@ -815,7 +1030,8 @@ def main() -> int:
         return 1
     print(
         f"docs/reference/api/index.md covers all {len(public)} public names, "
-        f"says what each of them is, and shows version {phonometry.__version__}; "
+        f"says what each of them is, calls each the way its signature allows, "
+        f"and shows version {phonometry.__version__}; "
         "every public name has one address and none is a type alias, and every "
         "public module is reached by its name and lists all it publishes."
     )

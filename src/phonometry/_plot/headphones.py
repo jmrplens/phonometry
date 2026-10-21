@@ -25,6 +25,7 @@ from .common import (
     _new_axes,
     format_frequency_axis,
     place_legend_clear,
+    refuse_fixed_keywords,
     styled,
     theme_fill,
 )
@@ -384,6 +385,7 @@ def plot_programme_characteristic_voltage(
     :param language: Label language.
     :param kwargs: Forwarded to the bars' ``Axes.bar``.
     :return: The axes.
+    :raises TypeError: for ``bottom``, which the floor of the axis sets.
     """
     from .._i18n import localize_axes
 
@@ -395,12 +397,18 @@ def plot_programme_characteristic_voltage(
     # not name a characteristic voltage; the bars and the title say which.
     a_weighted = result.weighting == "A"
     partial = a_weighted != result.free_field_compensated
+    refuse_fixed_keywords(
+        kwargs,
+        "plot_programme_characteristic_voltage",
+        "bottom",
+        reason="raises each bar from the floor of the axis to its level",
+    )
     ax.bar(
         positions,
         levels - floor,
-        bottom=floor,
         **styled(
             kwargs,
+            bottom=floor,
             color=_C_PRIMARY,
             edgecolor=_C_EDGE,
             width=0.7,

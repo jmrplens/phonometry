@@ -32,6 +32,7 @@ from ..common import (
     _C_TERTIARY,
     _new_axes,
     style_default,
+    styled,
 )
 from ._draft import (
     _LEGEND_LOC,
@@ -374,7 +375,7 @@ def plot_sound_reinforcement_geometry(
     style_default(kwargs, "linewidth", 1.4)
     style_default(kwargs, "linestyle", "--")
     kwargs.setdefault("label", _t("Feedback path", language))
-    ax.plot([h_xy[0], m_xy[0]], [h_xy[1], 0.62], zorder=4, **kwargs)
+    ax.plot([h_xy[0], m_xy[0]], [h_xy[1], 0.62], **styled(kwargs, zorder=4))
 
     # Each length beside its own path. The steep feedback path takes its
     # length on its left, not above its middle, where the path runs on up

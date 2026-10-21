@@ -22,6 +22,8 @@ from ..common import (
     _C_REFERENCE,
     _C_SECONDARY,
     _new_axes,
+    refuse_fixed_keywords,
+    styled,
 )
 from ._draft import (
     _AXIS_X,
@@ -136,6 +138,7 @@ def plot_fdtd_domain(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the domain ``imshow`` of the obstacle layer.
     :return: The axes.
+    :raises TypeError: for ``extent`` or ``origin``, which the grid sets.
     """
     _check_language(language)
     from ..._i18n import localize_axes
@@ -156,11 +159,19 @@ def plot_fdtd_domain(
     mask = getattr(sim, "_obstacle", None)
     if mask is not None:
         overlay = np.ma.masked_where(~mask, np.ones_like(mask, dtype=float))
+        refuse_fixed_keywords(
+            kwargs,
+            "plot_fdtd_domain",
+            "extent",
+            "origin",
+            reason="places the obstacles on the grid the sources and probes are on",
+        )
         kwargs.setdefault("cmap", "gray")
         kwargs.setdefault("vmin", 0.0)
         kwargs.setdefault("vmax", 2.0)
         ax.imshow(
-            overlay, extent=extent, origin="upper", interpolation="nearest", **kwargs
+            overlay,
+            **styled(kwargs, extent=extent, origin="upper", interpolation="nearest"),
         )
     _fdtd_sponge_bands(ax, sim, lx, ly, handles)
     _fdtd_edges(ax, sim, lx, ly, handles)

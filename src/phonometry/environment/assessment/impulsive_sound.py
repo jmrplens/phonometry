@@ -1069,12 +1069,12 @@ def _plot_level_history(
 
     import matplotlib.pyplot as plt
 
-    from ..._plot.common import style_default
+    from ..._plot.common import style_default, styled
 
     if ax is None:
         _, ax = plt.subplots()
     style_default(kwargs, "lw", 1.0)
-    ax.plot(result.times, result.levels, label=labels["level"], **kwargs)
+    ax.plot(result.times, result.levels, **styled(kwargs, label=labels["level"]))
     ax.set_xlabel(labels["xlabel"])
     ax.set_ylabel(labels["ylabel"])
     ax.grid(visible=True, alpha=0.3)
@@ -1104,11 +1104,13 @@ def _plot_impulsive_sound(
     # dark grey on the white theme and all but gone on the dark one. Mix the
     # page towards its own ink instead, which darkens on white and lightens on
     # black and keeps the same distance from the page on both.
-    from ..._plot.common import theme_line
+    from ..._plot.common import styled, theme_line
 
     ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.7)
     ax.plot(
-        result.times, result.levels, color=ink, lw=1.2, label=labels["level"], **kwargs
+        result.times,
+        result.levels,
+        **styled(kwargs, color=ink, lw=1.2, label=labels["level"]),
     )
 
     for onset in result.onsets:

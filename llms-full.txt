@@ -19092,8 +19092,8 @@ section 6:
 
 ```python
 lift = electroacoustics.amplifier_frequency_response(
-    [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],
-    frequencies=[100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],       # output current, A
+    [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],       # output current, A
+    frequencies=[100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],
 )
 print(lift.response_db.round(2))                # [0.   0.   1.58 3.23 4.08 4.86 5.11] dB re 1 kHz
 speech = electroacoustics.verify_amplifier_overload(current, z, 11.0, current_response=lift)
@@ -20483,7 +20483,7 @@ grids.
 - [`impulse_response`](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) recovers the *linear* IR from the
   same sweep recording and simply discards the negative-time distortion
   products; `swept_sine_distortion` is the tool that reads them.
-- [`thd_ratio` / `harmonic_analysis`](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/) measure distortion
+- [`thd` / `harmonic_analysis`](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/) measure distortion
   from a steady tone at one frequency; the sweep separator returns the same
   ratios as a continuous function of frequency, from one measurement.
 - The phase utilities operate on any one-sided *complex* response: an
@@ -30554,9 +30554,9 @@ operator = [(25.0, [0.08, 0.24, 0.57, 0.69, 0.71, 0.73]),
             (25.0, ceiling), (60.0, walls)]
 
 chain = noise_control.room_to_room_transmission(
-    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
-    5.0 * 3.0,       # TL of the separating wall
-    room.equivalent_absorption_area(operator),                                  # the wall is 5 m x 3 m
+    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],       # TL of the separating wall
+    5.0 * 3.0,                                  # the wall is 5 m x 3 m
+    room.equivalent_absorption_area(operator),
     frequencies=bands,
     source=noise_control.SourceRoom(
         power_level=[105.0, 103.0, 98.0, 108.0, 107.0, 109.0],
@@ -52295,7 +52295,7 @@ documents, one page per module.
 | `BlockProcessing` | `dataclass` | **Filter state carried between calls.**<br>• `stateful`: Carry filter state between calls (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False) | `OctaveFilterBank(48000, 1, design=filters.FilterDesign(resample=False), block_processing=filters.BlockProcessing(stateful=True))` |
 | `ResponsePlot` | `dataclass` | **Response plot drawn while designing.**<br>• `show`: Show the plot (Default: False)<br>• `file`: Path to save the plot (Default: None) | `OctaveFilterBank(48000, 3, response_plot=filters.ResponsePlot(show=True))` |
 | `OctaveFilterBank.spectrogram` | `method` | **Band levels over time.**<br>• `x`: Signal array (1D or 2D)<br>• `window_time`: Window length [s] (Default: 0.125)<br>• `overlap`: Fraction in [0, 1) (Default: 0.5)<br>• `mode`: 'rms' or 'peak'<br>• `zero_phase`: Group-delay-free frames (Default: False) | `r = bank.spectrogram(x)`<br><br>• an `OctaveSpectrogramResult`: `r.levels`, `r.frequencies`, `r.times` |
-| `OctaveSpectrogramResult` | `dataclass` | **Band levels over time, as a record.**<br>• `levels` [dB]: `(bands, frames)` or `(channels, bands, frames)`<br>• `frequencies` [Hz]: exact mid-band frequencies, read-only<br>• `times` [s]: window centres<br>• the level grid is checked against both axes when the record is built<br>• `.plot(channel=None)`: one raster on a log frequency axis with a dB colour bar; a multichannel result needs `channel` | `r = bank.spectrogram(x)`<br>`ax = r.plot()` |
+| `OctaveSpectrogramResult` | `dataclass` | **Band levels over time, as a record.**<br>• `levels` [dB]: `(bands, frames)` or `(channels, bands, frames)`<br>• `frequencies` [Hz]: exact mid-band frequencies, read-only<br>• `times` [s]: window centres<br>• `lower_edges` / `upper_edges` [Hz]: the edges of each band<br>• the level grid is checked against every axis when the record is built<br>• `.plot(channel=None)`: one raster on a log frequency axis, each row between its band's edges, with a dB colour bar; a multichannel result needs `channel` | `r = bank.spectrogram(x)`<br>`ax = r.plot()` |
 | `weighting_filter` | `function` | **Acoustic weighting.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical), 'D' (withdrawn IEC 537, aircraft), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012), '468' (ITU-R BS.468-4 psophometric) or 'Z' (Default: 'A')<br>• `high_accuracy`: fit the analog prototype at `fs` instead of transforming it blind, for IEC class 1 accuracy at every rate (Default: True; '468' requires it) | `y = filters.weighting_filter(x, fs, weighting='A')`<br><br>• `y`: weighted signal |
 | `WeightingFilter` | `class` | **Reusable weighting filter.**<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'A', 'B', 'C', 'D', 'G', 'AU', '468' or 'Z'<br>• `stateful`: Block processing (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `high_accuracy`: Fitted design, independent of `stateful`, a `bool` (Default: True; '468' refuses False) | `wf = filters.WeightingFilter(fs, 'A')`<br>`y = wf.filter(x)` |
 | `time_weighting` | `function` | **Energy capture.**<br>• `x`: Raw signal array (squared internally; time is the last axis)<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', or 'impulse'<br>• `initial_state`: None, 'zero', 'first', scalar, or array (Default: None) | `env = filters.time_weighting(x, fs, mode='fast')`<br><br>• `env`: energy envelope (Mean Square), same shape as `x` |
@@ -52983,13 +52983,13 @@ documents, one page per module.
 | `power_attenuation_from_alpha` | `function` | **ISO 9613-1 α → power attenuation m, the one conversion of ISO 354 8.1.2.1 and ISO 17497-1 Eq. (3).**<br>• `attenuation_db_per_m`: α [dB/m]<br>• Refuses a negative or non-finite α | `m = materials.power_attenuation_from_alpha(0.01)`<br><br>• m = α/(10 lg e) ≈ α/4.343 [1/m] |
 | `measure_sound_absorption` | `function` | **Reverberation-room absorption measurement (ISO 354 Eq. 5/7/8/9).**<br>• `frequencies` [Hz], `t_empty` T1 [s], `t_specimen` T2 [s]<br>• `volume` V [m³], `area` S [m²]<br>• `temperature_c` [°C] (Default: 20), `relative_humidity_percent` [%]<br>• `speed_of_sound` [m/s], `m` [1/m] (Default: 0) | `r = materials.measure_sound_absorption(t1, t2, frequencies=f, volume=200, area=10.8)`<br><br>• `SoundAbsorptionMeasurement` |
 | `SoundAbsorptionMeasurement` | `dataclass` | **Reverberation-room sound absorption (ISO 354).**<br>• `frequencies` [Hz], `t_empty`/`t_specimen` [s]<br>• `volume`, `area`, `temperature_c`, `relative_humidity_percent`, `speed_of_sound`<br>• `air_attenuation_per_m` m [1/m]<br>• `absorption_area_empty` A1, `absorption_area_with_specimen` A2 [m²]<br>• `alpha_s` (unclamped)<br>• `.equivalent_absorption_area` AT = A2−A1<br>• `.plot()` / `.report()` | `r.alpha_s, r.equivalent_absorption_area` |
-| `air_attenuation` | `function` | **Atmospheric attenuation coefficient α (ISO 9613-1 Eq. 5).**<br>• `frequencies` [Hz]<br>• `temperature_c` [°C] (Default: 20)<br>• `relative_humidity_percent` [%] (Default: 50)<br>• `static_pressure_kpa` [kPa] (Default: 101.325)<br>• `exact_midband`: snap to Table 1 midbands (Default: False) | `a = environment.air_attenuation([1000, 4000], 20, 50)`<br><br>• α [dB/m] (×1000 = dB/km); out-of-range warns |
+| `air_attenuation` | `function` | **Atmospheric attenuation coefficient α (ISO 9613-1 Eq. 5).**<br>• `frequencies` [Hz]<br>• `temperature_c` [°C] (Default: 20)<br>• `relative_humidity_percent` [%] (Default: 50)<br>• `static_pressure_kpa` [kPa] (Default: 101.325)<br>• `exact_midband`: snap to Table 1 midbands (Default: False) | `a = environment.air_attenuation([1000, 4000], temperature_c=20, relative_humidity_percent=50)`<br><br>• α [dB/m] (×1000 = dB/km); out-of-range warns |
 | `air_power_attenuation_per_m` | `function` | **ISO 354 power attenuation m from conditions (ISO 9613-1 + ISO 354).**<br>• Same parameters as `air_attenuation` | `m = environment.air_power_attenuation_per_m([1000, 4000], temperature_c=20.0, relative_humidity_percent=50.0)`<br><br>• m = α/(10 lg e) [1/m] |
 | `AtmosphericAbsorptionWarning` | `warning class` | **ISO 9613-1 out-of-range advisory.**<br>Emitted by `air_attenuation` when temperature/humidity/frequency leave the tabulated ranges or pressure exceeds 200 kPa, and by `emission.air_absorption_np_per_m` (so also by `emission.room_constant_from_air_absorption` and `emission.free_field_absorption_correction`) outside 50 Hz to 22.4 kHz, the ISO 9613-1 range as ISO 9295 Annex A extends it, or outside its temperature and humidity ranges; the result still returns | `warnings.simplefilter('error', AtmosphericAbsorptionWarning)` |
-| `atmospheric_attenuation` | `function` | **Plottable ISO 9613-1 attenuation-coefficient curve.**<br>• Same parameters as `air_attenuation`<br>• `distance` d [m] (optional; enables total attenuation) | `res = environment.atmospheric_attenuation([1000, 4000], 20, 50)`<br><br>• `AtmosphericAttenuation`; `res.plot()` |
+| `atmospheric_attenuation` | `function` | **Plottable ISO 9613-1 attenuation-coefficient curve.**<br>• Same parameters as `air_attenuation`<br>• `distance` d [m] (optional; enables total attenuation) | `res = environment.atmospheric_attenuation([1000, 4000], temperature_c=20, relative_humidity_percent=50)`<br><br>• `AtmosphericAttenuation`; `res.plot()` |
 | `AtmosphericAttenuation` | `dataclass` | **Atmospheric attenuation result (ISO 9613-1).**<br>• `frequencies` [Hz]<br>• `attenuation_db_per_m` α [dB/m]<br>• `temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`<br>• `distance` [m] or `None`<br>• `.total_attenuation` A = α·d [dB] (ISO 9613-2 Aatm) or `None`<br>• `.plot()`: α (dB/km) vs frequency | `res.attenuation_db_per_m, res.total_attenuation` |
 | `geometric_divergence` | `function` | **Geometrical divergence Adiv (ISO 9613-2 Eq. 7).**<br>• `distance` d [m] | `a = environment.geometric_divergence(100.0)`<br><br>• 20 lg(d/d₀) + 11 = 51 dB at 100 m |
-| `atmospheric_absorption` | `function` | **Atmospheric absorption term Aatm (ISO 9613-2 Eq. 8)**, α at the exact base-10 midbands (the Table 2 convention).<br>• `distance` d [m]<br>• `frequencies` [Hz] (snapped to exact midbands)<br>• `temperature_c`/`relative_humidity_percent`/`static_pressure_kpa` | `aatm = environment.atmospheric_absorption(200, bands)`<br><br>• α·d per band [dB] |
+| `atmospheric_absorption` | `function` | **Atmospheric absorption term Aatm (ISO 9613-2 Eq. 8)**, α at the exact base-10 midbands (the Table 2 convention).<br>• `distance` d [m]<br>• `frequencies` [Hz] (snapped to exact midbands)<br>• `temperature_c`/`relative_humidity_percent`/`static_pressure_kpa` | `aatm = environment.atmospheric_absorption(200, frequencies=bands)`<br><br>• α·d per band [dB] |
 | `ground_attenuation` | `function` | **Ground effect Agr, general method (ISO 9613-2 7.3.1, Eq. 9).**<br>• `distance` d, `source_height_m` hs, `receiver_height_m` hr [m]<br>• `frequencies` [Hz]<br>• `ground_source`/`ground_middle`/`ground_receiver` G ∈ [0,1]<br>• `projected_distance` dp [m] | `agr = environment.ground_attenuation(200, 2, 2, frequencies=bands, ground_source=1, ground_middle=1, ground_receiver=1)`<br><br>• As+Ar+Am per band [dB] (negative = gain) |
 | `ground_attenuation_alternative` | `function` | **Ground effect Agr, A-weighted method (ISO 9613-2 7.3.2, Eq. 10).**<br>• `distance` d [m]<br>• `mean_height_m` hm [m] | `agr = environment.ground_attenuation_alternative(200, 2)`<br><br>• 4.8 − (2hm/d)·(17+300/d) ≥ 0 [dB] |
 | `directivity_omega` | `function` | **Solid-angle directivity index DΩ (ISO 9613-2 Eq. 11).**<br>• `source_height_m` hs, `receiver_height_m` hr, `projected_distance` dp [m] | `dw = environment.directivity_omega(1.5, 1.5, 200)`<br><br>• 0…~3 dB (add to Dc for the 7.3.2 method) |
@@ -53006,7 +53006,7 @@ documents, one page per module.
 | `ISO10847_OCTAVE_BAND_RANGE_HZ` / `ISO10847_OCTAVE_BAND_EXTENDED_RANGE_HZ` / `ISO10847_THIRD_OCTAVE_BAND_RANGE_HZ` / `ISO10847_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ` | `constant` | **The bands ISO 10847 measures in, clause 5.**<br>• 63 Hz to 4 kHz in octaves and 50 Hz to 5 kHz in one-third octaves<br>• the extended ranges reach 8 kHz and 10 kHz where the source or the barrier asks for them | `environment.ISO10847_OCTAVE_BAND_RANGE_HZ  # (63.0, 4000.0)` |
 | `BarrierInSituWarning` | `warning class` | **A NOTE of ISO 10847 the measurement cannot follow; the clause it hangs from is still applied.** Subclass of `PhonometryWarning`<br>• emitted by `reference_microphone_height_m` when the barrier top already stands 80° or more above the near end of the source region, so no height reaches the 10° of the NOTE to 7.2.2 and the microphone keeps the 1,5 m clearance<br>• by `measured_insertion_loss_indirect` when the receiver types of the two campaigns differ, which the NOTE to 8.2.2 advises against and which moves the answer by 6 dB | `warnings.simplefilter('error', environment.BarrierInSituWarning)` |
 | `meteorological_correction` | `function` | **Meteorological correction Cmet (ISO 9613-2 Eq. 21/22).**<br>• `projected_distance` dp, `source_height_m` hs, `receiver_height_m` hr [m]<br>• `c0`: factor C₀ [dB] | `c = environment.meteorological_correction(200, 1.5, 1.5, 2.0)`<br><br>• C₀[1 − 10(hs+hr)/dp] ≥ 0 [dB] |
-| `outdoor_propagation_attenuation` | `function` | **Total octave-band attenuation A (ISO 9613-2 Eq. 4).**<br>• `distance` d, `source_height_m` hs, `receiver_height_m` hr [m]<br>• `frequencies` [Hz]<br>• `ground_source`/`ground_middle`/`ground_receiver` G<br>• `barrier`: `Barrier` or None<br>• `temperature_c`/`relative_humidity_percent`/`static_pressure_kpa` (Default: 20 °C/70 %/101.325 kPa, a Table 2 reference atmosphere)<br>• `projected_distance` dp [m] | `att = environment.outdoor_propagation_attenuation(200, 2, 2, bands, 1, 1, 1)`<br><br>• `OutdoorAttenuation` term breakdown |
+| `outdoor_propagation_attenuation` | `function` | **Total octave-band attenuation A (ISO 9613-2 Eq. 4).**<br>• `distance` d, `source_height_m` hs, `receiver_height_m` hr [m]<br>• `frequencies` [Hz]<br>• `ground_source`/`ground_middle`/`ground_receiver` G<br>• `barrier`: `Barrier` or None<br>• `temperature_c`/`relative_humidity_percent`/`static_pressure_kpa` (Default: 20 °C/70 %/101.325 kPa, a Table 2 reference atmosphere)<br>• `projected_distance` dp [m] | `att = environment.outdoor_propagation_attenuation(200, 2, 2, frequencies=bands, ground_source=1, ground_middle=1, ground_receiver=1)`<br><br>• `OutdoorAttenuation` term breakdown |
 | `predicted_receiver_level` | `function` | **Predicted octave-band receiver level (ISO 9613-2 Eq. 3/6).**<br>• `sound_power_level` Lw [dB]<br>• `geometry`: `PropagationGeometry`<br>• `frequencies` [Hz]<br>• `ground`: `GroundFactors`, `barrier`: `Barrier`, `atmosphere`: `AtmosphericConditions`<br>• `directivity`: `DirectivityCorrection`<br>• `c0`: subtract Cmet (Default: None) | `lp = environment.predicted_receiver_level(lw, environment.PropagationGeometry(distance=200, source_height_m=2, receiver_height_m=2), frequencies=bands)`<br><br>• LfT(DW) = Lw + Dc − A per band [dB] |
 | `OutdoorAttenuation` | `dataclass` | **Per-band ISO 9613-2 attenuation breakdown.**<br>• `frequencies` [Hz]<br>• `a_div`, `a_atm`, `a_gr`, `a_bar` [dB]<br>• `a_total` = Adiv+Aatm+Agr+Abar [dB]<br>• `d_omega` [dB]<br>• `.report()` one-page ISO 9613-2 prediction fiche (pass a `SourceEmission` for the A-weighted receiver level) | `att.a_div, att.a_bar, att.a_total` |
 | `SourceEmission` | `dataclass` | **Source emission for the receiver-level fiche (ISO 9613-2 Eq. 3), report-time only.**<br>• `sound_power_level` Lw [dB]<br>• `directivity_index` Di [dB] (Default: 0)<br>• `d_omega` DΩ [dB] (Default: 0)<br>• `cmet` Cmet [dB] (Default: None) | `att.report("f.pdf", source_emission=environment.SourceEmission(sound_power_level=lw))` |
@@ -53025,7 +53025,7 @@ documents, one page per module.
 | `RailwayVehicle` | `dataclass` | **One vehicle of the traffic on a track section.**<br>• `stock`: `RollingStock`<br>• `flow_rate` Q [veh/h], `speed_kmh` v [km/h], by name<br>• `condition`: `RunningCondition`<br>• `idling_time` Tidle | `RailwayVehicle(stock=stock, flow_rate=96.0, speed_kmh=160.0)` |
 | `RollingStock` | `dataclass` | **Appendix G data of one vehicle type.**<br>• `n_axles` Na<br>• `wheel_roughness`, `contact_filter`: `WavelengthSpectrum` (wavelengths [mm], levels [dB])<br>• `wheel_transfer`, `superstructure_transfer`: 24 bands [dB/axle]<br>• `traction`, `aerodynamic`: `RailSourceSpectra` (source A, source B)<br>• `aerodynamic_alpha` (Default: 50)<br>• `tram` (Default: False) | `RollingStock(n_axles=4, wheel_roughness=..., ...)` |
 | `RailwayTrack` | `dataclass` | **Appendix G data of one track section.**<br>• `rail_roughness`, `impact_roughness`: `WavelengthSpectrum` (wavelengths [mm], levels [dB])<br>• `track_transfer`, `bridge_transfer`: 24 bands [dB/axle]<br>• `joint_density` nl [1/m] (Default: 0.01)<br>• `squeal_excess` [dB], `length` L [m] (Default: 100) | `RailwayTrack(rail_roughness=..., track_transfer=...)` |
-| `roughness_to_frequency` | `function` | **Resample a roughness spectrum from wavelength onto frequency, λ = v/f with v in m/s (Annex II 2.3.2 as corrected in 2018).**<br>• `levels` [dB], `wavelengths_mm` [mm], `speed_kmh` [km/h]<br>• `frequencies` [Hz], `interpolation` | `lr = environment.roughness_to_frequency(levels, lam, 160.0)` |
+| `roughness_to_frequency` | `function` | **Resample a roughness spectrum from wavelength onto frequency, λ = v/f with v in m/s (Annex II 2.3.2 as corrected in 2018).**<br>• `levels` [dB], `wavelengths_mm` [mm], `speed_kmh` [km/h]<br>• `frequencies` [Hz], `interpolation` | `lr = environment.roughness_to_frequency(levels, wavelengths_mm=lam, speed_kmh=160.0)` |
 | `total_effective_roughness` | `function` | **Total effective roughness LR,TOT (Annex II 2.3.7).**<br>• `rail`, `wheel`, `filter_`: 24 bands [dB] | `ltot = environment.total_effective_roughness(rail, wheel, a3)`<br><br>• 10 lg(10^(LrTR/10)+10^(LrVEH/10)) + A3 |
 | `impact_roughness` | `function` | **Impact roughness at a joint density (Annex II 2.3.12).**<br>• `single`: Table G-4 on the frequency grid [dB]<br>• `joint_density` nl [1/m] | `li = environment.impact_roughness(single, 0.03)`<br><br>• + 10 lg(nl/0.01) |
 | `rolling_sound_power` | `function` | **One rolling-noise component (Annex II 2.3.8 to 2.3.10).**<br>• `roughness` LR,TOT, `transfer` LH [dB]<br>• `n_axles` Na | `lw = environment.rolling_sound_power(ltot, environment.track_transfer("M/M"), 4)`<br><br>• LR,TOT + LH + 10 lg(Na) |
@@ -53265,7 +53265,7 @@ documents, one page per module.
 | `coherence` / `CoherenceResult` | `function` / `dataclass` | **Ordinary coherence γ² (Bendat & Piersol).**<br>• `x`, `y`, `fs` [Hz]<br>• `nperseg` (Default: None), `overlap` (Default: 0.5)<br>= \|Gxy\|²/(Gxx·Gyy) ∈ [0, 1]<br>• `.frequencies` [Hz], `.coherence`, `.plot()` | `c = electroacoustics.coherence(x, y, fs)`<br>`c.coherence.min()` |
 | `FrequencyResponseResult` | `dataclass` | **Frequency-response result.**<br>• `frequencies` [Hz]<br>• `response`: complex H(f)<br>• `magnitude_db` / `phase_rad` [rad]<br>• `coherence`: γ²(f)<br>• `estimator`<br>• `.plot()`: Bode + coherence | `res.magnitude_db, res.coherence` |
 | `synchronized_sweep_signal` | `function` | **Synchronized exponential sweep (Novak et al. 2015, Eqs. 47/49).**<br>• `fs`, `f1` < `f2` [Hz], `duration_s` (quantized by the rounding)<br>• `amplitude` (Default: 1.0), `fade` (Default: 0.0)<br>Rate L = round(f1·T̃/ln(f2/f1))/f1 → f1·L integer, so a L·ln(n) shift equals the nth harmonic and harmonic phases become system properties | `x = electroacoustics.synchronized_sweep_signal(48000, 20.0, 6000.0, 4.0)`<br><br>• sweep samples (duration L·ln(f2/f1)) |
-| `swept_sine_distortion` | `function` | **Harmonic separation and THD(f) from one sweep (Farina 2000 / Novak et al. 2015).**<br>• `recorded`, `fs`, plus the generator parameters `f1`, `f2`, `duration_s`<br>• `method`: 'synchronized' (Default; analytic deconvolution, meaningful phases) / 'farina' (classical ESS, magnitudes only)<br>• `n_harmonics` (Default: 5), `ir_length` (Default: largest power of two fitting the closest arrivals)<br>• `amplitude` (Default: 1.0), `fade` (Default: generator default), `remove_dc` (Default: True) | `res = electroacoustics.swept_sine_distortion(y, fs, 20.0, 6000.0, 4.0)`<br><br>• `SweptSineDistortionResult` |
+| `swept_sine_distortion` | `function` | **Harmonic separation and THD(f) from one sweep (Farina 2000 / Novak et al. 2015).**<br>• `recorded`, `fs`, plus the generator parameters `f1`, `f2`, `duration_s`<br>• `method`: 'synchronized' (Default; analytic deconvolution, meaningful phases) / 'farina' (classical ESS, magnitudes only)<br>• `n_harmonics` (Default: 5), `ir_length` (Default: largest power of two fitting the closest arrivals)<br>• `amplitude` (Default: 1.0), `fade` (Default: generator default), `remove_dc` (Default: True) | `res = electroacoustics.swept_sine_distortion(y, fs, f1=20.0, f2=6000.0, duration_s=4.0)`<br><br>• `SweptSineDistortionResult` |
 | `SweptSineDistortionResult` | `dataclass` | **Swept-sine harmonic separation.**<br>• `frequencies` [Hz], `harmonic_responses`: complex H₁..H_N, `harmonic_irs` (windowed, centred), `delays` L·ln(n) [s]<br>• `thd_frequencies` [Hz], `thd_ratio`, `distortion_ratios`: \|Hₙ(n·f)\|/\|H₁(f)\| per order<br>• `fs`, `f1`, `f2`, `duration_s`, `rate` L, `method`, `n_harmonics`<br>• `.plot()`: \|Hₙ\| magnitudes + THD(f) | `res.thd_ratio, res.harmonic_responses` |
 | `radiating_piston` | `function` | **Radiation of a rigid baffled circular piston (Beranek & Mellow §4.19/§13.7).**<br>• `radius` a [m], `frequencies` [Hz]<br>• `speed_of_sound` (Default: 343), `density` (Default: 1.206)<br>• `angles_rad`: directivity polar angles_rad [rad] (Default: None) | `res = electroacoustics.radiating_piston(0.1, freqs)`<br><br>• `RadiatingPistonResult` |
 | `plot_piston_geometry` | `function` | **Baffled piston to scale, optional far-field lobe.**<br>• `radius` a [m]<br>• `angles_rad` [rad] + `directivity` (linear), together<br>• `lobe_label`, `language` | `plot_piston_geometry(0.1, angles_rad=ang, directivity=d)`<br><br>• Also `RadiatingPistonResult.plot_geometry(frequency_index=...)` |
@@ -53563,7 +53563,7 @@ documents, one page per module.
 | `thermal_noise_spectrum` | `function` | **Mellen thermal noise, dB re 1 µPa²/Hz.**<br>• `frequency_hz` [Hz]<br>• `temperature_c` (Default: 16.85) / `density` (Default: 1025) / `speed_of_sound` (Default: 1500) | `thermal_noise_spectrum(5e4)` |
 | `ocean_ambient_noise` | `function` | **Composite ambient-noise spectrum (wind + thermal [+ shipping]).**<br>• `frequencies_hz` [Hz] / `wind_speed_kt` [kt]<br>• `shipping` [dB or None] / `temperature_c` / `density` / `speed_of_sound` | `ocean_ambient_noise(f, wind_speed_kt=10)`<br><br>• `AmbientNoiseResult` |
 | `AmbientNoiseResult` | `dataclass` | **Ambient-noise result.**<br>• `frequencies` [Hz] / `spectrum_level` [dB re 1 µPa²/Hz]<br>• `wind` / `thermal` / `shipping` [dB or None]<br>• `wind_speed_kt` [kt]<br>• `.plot()`: composite + components vs frequency | `res.spectrum_level` |
-| `ship_source_spectrum` | `function` | **Predicted ship source-level spectrum.**<br>• `speed_kt` (Default: 12) / `length_m` (Default: 100)<br>• `vessel_class` (Default: `"containership"`) / `model`: `"jomopans-echo"` (default) / `"randi"` / `"wales-heitmeyer"`<br>• `frequencies` (Default: decidecade 10 Hz–31.5 kHz) | `ship_source_spectrum(18, 300, vessel_class="containership")`<br><br>• `ShipTrafficSpectrum` |
+| `ship_source_spectrum` | `function` | **Predicted ship source-level spectrum.**<br>• `speed_kt` (Default: 12) / `length_m` (Default: 100)<br>• `vessel_class` (Default: `"containership"`) / `model`: `"jomopans-echo"` (default) / `"randi"` / `"wales-heitmeyer"`<br>• `frequencies` (Default: decidecade 10 Hz–31.5 kHz) | `ship_source_spectrum(18, length_m=300, vessel_class="containership")`<br><br>• `ShipTrafficSpectrum` |
 | `ShipTrafficSpectrum` | `dataclass` | **Ship source-spectrum result.**<br>• `frequencies` [Hz] / `source_psd` [dB re 1 µPa²/Hz at 1 m] / `band_level` [dB re 1 µPa m]<br>• `model` / `vessel_class` / `speed_kt` / `length_m`<br>• `.plot()`: source PSD vs frequency | `res.source_psd, res.band_level` |
 | `VESSEL_CLASSES` | `tuple` | **The 13 JOMOPANS-ECHO vessel classes.** | `"bulker" in VESSEL_CLASSES` |
 | `normal_modes` | `function` | **Normal-mode propagation loss (range-independent).**<br>• `frequency_hz` / `depths` [m] / `speeds_of_sound` [m/s]<br>• `source_depth` / `receiver_depth` [m] / `ranges_m` / `density` / `bottom`: `"pressure-release"`\|`"rigid"` / `n_depth_points` | `normal_modes(50, [0,200], [1500,1500], source_depth=50, receiver_depth=100)`<br><br>• `NormalModeResult` |
@@ -53636,7 +53636,7 @@ documents, one page per module.
 | `engine_installation_correction` | `function` | **Engine-install lateral directivity ΔI(φ) (Eq. 4-15/4-16).**<br>• `depression_deg` φ / `mounting`: `"wing"`\|`"fuselage"`\|`"propeller"` | `engine_installation_correction(20, "wing")` |
 | `duration_correction` | `function` | **Duration correction ΔV = 10·lg(Vref/Vseg) (Eq. 4-14).**<br>• `reference_speed_m_s` / `segment_speed_m_s` | `duration_correction(82.3, 90)` |
 | `noise_fraction` | `function` | **Finite-segment noise fraction ΔF (Eq. 4-20).**<br>• `q` [m] / `segment_length` λ [m] / `scaled_distance_m` dλ [m] | `noise_fraction(0, 5000, 100)` |
-| `impedance_adjustment` | `function` | **Acoustic-impedance adjustment of NPD data (Eq. 4-6/4-7).**<br>• `temperature_c` [°C] / `static_pressure_kpa` [kPa]<br>= 10·lg(ρc/409.81); +0.074 dB at ISA | `impedance_adjustment(15, 101.325)` |
+| `impedance_adjustment` | `function` | **Acoustic-impedance adjustment of NPD data (Eq. 4-6/4-7).**<br>• `temperature_c` [°C] / `static_pressure_kpa` [kPa]<br>= 10·lg(ρc/409.81); +0.074 dB at ISA | `impedance_adjustment(temperature_c=15, static_pressure_kpa=101.325)` |
 | `start_of_roll_directivity` | `function` | **Start-of-roll rearward directivity ΔSOR (Eq. 4-22/4-24/4-25).**<br>• `azimuth_deg` ψ (arccos q/dSOR) / `distance_m` dSOR<br>• `engine`: `"jet"`\|`"turboprop"`; 0 ahead (ψ<90°) | `start_of_roll_directivity(120, 300, "jet")` |
 | `AerodromeAtmosphere` | `dataclass` | **Aerodrome air of the Doc 29 impedance adjustment (Eq. 4-6/4-7).**<br>• `temperature_c` [°C] (15) / `static_pressure_kpa` [kPa] (101.325) | `AerodromeAtmosphere(temperature_c=25.0, static_pressure_kpa=100.0)` |
 | `FlightSegmentState` | `dataclass` | **What each flight-path segment is doing (one entry per segment).**<br>• `ground_roll` / `landing_roll` masks / `bank` ε [°] (§4.5.2) | `FlightSegmentState(ground_roll=gr)` |
@@ -53730,7 +53730,7 @@ documents, one page per module.
 | `ModulationBlockStatus` | `enum` | **Why a 10 s block counts or not.**<br>`VALID` / `NO_PEAK` / `LOW_PROMINENCE` / `EXCLUDED` | `block.status is ModulationBlockStatus.VALID` |
 | `amplitude_modulation_period` | `function` | **The 10 min AM rating (13.6.3).**<br>• `levels`: 6 000 values of 100 ms<br>• `modulation_frequency_range_hz` / `excluded_blocks` (60 flags) | `environment.amplitude_modulation_period(x, modulation_frequency_range_hz=(0.4, 0.9))`<br><br>• `ModulationPeriod` |
 | `ModulationPeriod` | `dataclass` | **10 min rating.**<br>• `blocks` / `modulation_depths_db` / `n_valid_blocks` / `rated` (≥ 30)<br>• `rating_db`: 90th percentile of the valid depths, else 0 dB<br>• `mean_modulation_frequency_hz` / `mode_modulation_frequency_hz`<br>• `.plot()`<br>• takes `blocks`; `modulation_depths_db`, `fundamental_frequencies_hz`, `n_valid_blocks`, `rated`, `rating_db`, `mean_modulation_frequency_hz`, ... are read-only, read from them | `period.rating_db` |
-| `bin_amplitude_modulation` | `function` | **10 min ratings per bin, worst band chosen (13.6.4).**<br>• `ratings_db`: one row per period, one column per band<br>• `wind_speeds_m_s` / optional `wind_directions_deg`<br>• `bands` ((1, 2, 3)) / `excluded` / `sector_width_deg` (30) | `environment.bin_amplitude_modulation(r, speeds, directions)`<br><br>• `BinnedModulation` |
+| `bin_amplitude_modulation` | `function` | **10 min ratings per bin, worst band chosen (13.6.4).**<br>• `ratings_db`: one row per period, one column per band<br>• `wind_speeds_m_s` / optional `wind_directions_deg`<br>• `bands` ((1, 2, 3)) / `excluded` / `sector_width_deg` (30) | `environment.bin_amplitude_modulation(r, speeds, wind_directions_deg=directions)`<br><br>• `BinnedModulation` |
 | `BinnedModulation` | `dataclass` | **Binned AM ratings.**<br>• `mean_ratings_db` (zeros included) / `type_a_uncertainty_db` / `counts` / `nonzero_counts` / `exceedance_percent` (3, 6, 9 dB)<br>• `selected_bands` / `selected_ratings_db`<br>• `.plot()` | `binned.selected_bands` |
 | `AM_FREQUENCY_BANDS_HZ` / `AM_EXCEEDANCE_DEPTHS_DB` / `AM_MODULATION_FREQUENCY_LIMITS_HZ` | `mapping` / `constant` / `constant` | **Clause 13 bands and limits.**<br>• band → its seven one-third-octave centres [Hz]<br>• (3, 6, 9) dB of 13.7<br>• (0.3, 1.6) Hz of 13.2 | `AM_FREQUENCY_BANDS_HZ[2]` |
 | `AM_SAMPLE_INTERVAL_S` / `AM_BLOCK_SAMPLES` / `AM_PERIOD_BLOCKS` / `AM_MIN_VALID_BLOCKS` / `AM_PROMINENCE_THRESHOLD` | `constant` | **Clause 13 numbers.**<br>0.1 s / 100 samples / 60 blocks / 30 valid blocks / prominence 4 | `AM_PROMINENCE_THRESHOLD  # 4.0` |
@@ -54234,7 +54234,7 @@ documents, one page per module.
 | `miso_coherence` | `function` | **Multiple & partial coherence of a MISO system (Bendat & Piersol Ch. 7).**<br>• `inputs`: q input records, q ≥ 2 (sequence of 1-D arrays or a (q, n) array), `output`, `fs`<br>• `order`: conditioning order (Default: 0..q−1)<br>• `window`, `nperseg`, `overlap`, `scaling` as above | `res = signals.miso_coherence([x1, x2], y, fs)`<br><br>• `MISOCoherenceResult` |
 | `MISOCoherenceResult` | `dataclass` | **Multiple/partial coherence of q correlated inputs and one output.**<br>• `ordinary_coherence` (q×F), `multiple_coherence` γ²y:x, `partial_coherence` (q×F, conditioned per `order`)<br>• `coherent_output_spectra` Gvi (q×F, Σ Gvi + `noise_psd` = `output_psd`)<br>• `multiple_coherence_random_error` (Eq. 9.98), `coherent_output_random_error` (Eq. 9.100)<br>• `.dominant_input()`: per-band index of the strongest source<br>• `.plot()`: coherent output spectra + coherences | `res.multiple_coherence, res.dominant_input()` |
 | `resolution_bias_error` | `function` | **First-order resolution bias at a resonance peak, εb ≈ −(Be/Br)²/3 (Eq. 8.141).**<br>• `resolution_bandwidth` Be [Hz]<br>• `half_power_bandwidth` Br [Hz] | `resolution_bias_error(1.0, 4.0)  # -1/48` |
-| `noise_signal` | `function` | **Colored Gaussian noise with an exact power-law PSD slope.**<br>• `fs`, `duration_s` (Default: 1.0)<br>• `color`: 'white'/'pink'/'red'/'blue'/'violet' (0/−3.01/−6.02/+3.01/+6.02 dB/oct)<br>• `rms` (Default: 1.0)<br>• `seed`: bit-reproducible per seed | `pink = signals.noise_signal(48000, 10.0, color='pink', seed=7)` |
+| `noise_signal` | `function` | **Colored Gaussian noise with an exact power-law PSD slope.**<br>• `fs`, `duration_s` (Default: 1.0)<br>• `color`: 'white'/'pink'/'red'/'blue'/'violet' (0/−3.01/−6.02/+3.01/+6.02 dB/oct)<br>• `rms` (Default: 1.0)<br>• `seed`: bit-reproducible per seed | `pink = signals.noise_signal(48000, duration_s=10.0, color='pink', seed=7)` |
 | `tone_burst` | `function` | **IEC 60268-1 tone burst (Clause A2): zero-crossing start, integral full periods.**<br>• `fs`, `frequency`, `n_cycles`<br>• `amplitude` (Default: 1.0)<br>• `n_repetitions` + `repetition_rate` [bursts/s]: repetitive train (Clause A2.2)<br>• `pre_silence`, `post_silence` [s] | `res = signals.tone_burst(48000, 5000, 25, repetition_rate=10, n_repetitions=4)`<br><br>• `ToneBurstResult` |
 | `ToneBurstWarning` | `warning class` | **A tone burst whose gate cannot close on the tone's zero crossing.** Subclass of `PhonometryWarning`<br>Emitted by `tone_burst` when `fs` and `frequency` are incommensurate; the message gives the residual step | `warnings.simplefilter('error', signals.ToneBurstWarning)` |
 | `resample_signal` | `function` | **Polyphase resampling with an explicit anti-alias spec (Kaiser FIR designed here).**<br>• `x`, `fs`, `fs_new` (rational ratio, e.g. 160/147)<br>• `stopband_attenuation` (Default: 120)<br>• `transition_width`: fraction of the smaller Nyquist (Default: 0.05)<br>• `max_denominator` (Default: 1000) | `res = signals.resample_signal(x, 44100, fs_new=48000)`<br><br>• `ResampledSignalResult` (signal + designed taps) |
@@ -54338,9 +54338,9 @@ documents, one page per module.
 | `ImpedanceTubeWarning` | `warning class` | **ISO 10534-2 advisory.**<br>Emitted by `two_microphone_impedance` for frequencies outside the plane-wave working range (Eqs. 1–4); the results are still returned | `warnings.simplefilter('error', ImpedanceTubeWarning)` |
 | `standing_wave_ratio_from_level` | `function` | **Standing-wave ratio from ΔL (ISO 10534-1 Eq. 15).**<br>• `level_difference`: Lmax − Lmin [dB] | `standing_wave_ratio_from_level(20.0)  # 10.0`<br><br>• s = 10^(ΔL/20) |
 | `standing_wave_reflection_magnitude` | `function` | **Reflection magnitude from the SWR (Eq. 14).**<br>• `swr`: s ≥ 1 | `standing_wave_reflection_magnitude(10.0)  # 0.818`<br><br>• \|r\| = (s − 1)/(s + 1) |
-| `standing_wave_reflection` | `function` | **Complex reflection factor from the standing wave (Eqs. 17–23).**<br>• `swr`: s<br>• `first_min_distance`: x_min1 [m]<br>• `wavelength`: λ0 [m] | `standing_wave_reflection(10.0, 0.05, 0.4)  # -0.818j`<br><br>• phase φ = π(4x_min1/λ0 − 1) |
+| `standing_wave_reflection` | `function` | **Complex reflection factor from the standing wave (Eqs. 17–23).**<br>• `swr`: s<br>• `first_min_distance`: x_min1 [m]<br>• `wavelength`: λ0 [m] | `standing_wave_reflection(10.0, 0.05, wavelength=0.4)  # -0.818j`<br><br>• phase φ = π(4x_min1/λ0 − 1) |
 | `standing_wave_absorption` | `function` | **Absorption from the SWR (Eqs. 9 + 14).**<br>• `swr`: s ≥ 1 | `standing_wave_absorption(10.0)  # 0.331`<br><br>• α = 4s/(s + 1)² |
-| `standing_wave_normalized_impedance` | `function` | **Normalised impedance from the standing wave (Eqs. 24–26).**<br>• `swr`, `first_min_distance` [m], `wavelength` [m] | `standing_wave_normalized_impedance(10.0, 0.05, 0.4)`<br><br>• 0.198 − 0.98j |
+| `standing_wave_normalized_impedance` | `function` | **Normalised impedance from the standing wave (Eqs. 24–26).**<br>• `swr`, `first_min_distance` [m], `wavelength` [m] | `standing_wave_normalized_impedance(10.0, 0.05, wavelength=0.4)`<br><br>• 0.198 − 0.98j |
 | `wave_decomposition` / `WaveAmplitudes` | `function` / `dataclass` | **Decompose the field into (A, B, C, D) (ASTM E2611-19 Eqs. 17–20).**<br>• `h1`…`h4`: microphone transfer functions<br>• `l1`, `s1`, `l2`, `s2`: geometry [m]<br>• `wavenumber` k<br>• `diameter_m` + `shape`: activate the plane-wave range check | `w = materials.wave_decomposition(h1, h2, h3, h4, l1=0.2, s1=0.05, l2=0.2, s2=0.05, wavenumber=k)`<br><br>• `w.a`, `w.b`, `w.c`, `w.d`: forward/backward amplitudes, both sides |
 | `face_quantities` / `FaceQuantities` | `function` / `dataclass` | **Face pressures and velocities (Eq. 21).**<br>• `a`, `b`, `c`, `d`: wave amplitudes<br>• `wavenumber` k, `thickness_m` d [m], `characteristic_impedance` ρc | `faces = materials.face_quantities(w.a, w.b, w.c, w.d, wavenumber=k, thickness_m=0.05, characteristic_impedance=407.0)`<br><br>• `faces.p0`, `faces.pd`, `faces.u0`, `faces.ud` |
 | `transfer_matrix_two_load` | `function` | **Two-load transfer matrix (ASTM E2611-19 Eqs. 17–22).**<br>• `load_a`, `load_b`: (H1, H2, H3, H4) per termination<br>• `l1`, `s1`, `l2`, `s2`, `thickness_m` [m]<br>• `wavenumber`, `characteristic_impedance`<br>• `frequencies` (retained for `.plot()`), `diameter_m` + `shape`: range check | `T = materials.transfer_matrix_two_load(load_a, load_b, l1=0.2, s1=0.05, l2=0.2, s2=0.05, thickness_m=0.05, wavenumber=k, characteristic_impedance=407.0)`<br><br>• `TransferMatrix` |
@@ -54351,7 +54351,7 @@ documents, one page per module.
 | `specific_airflow_resistance` | `function` | **Specific airflow resistance Rs (§3.2).**<br>• `resistance` R + `area` A, **or** `pressure_drop_pa` Δp + `velocity` u | `specific_airflow_resistance(4000.0, 0.01)  # 40.0`<br><br>• Rs = R·A = Δp/u [Pa·s/m] |
 | `airflow_resistivity` | `function` | **Airflow resistivity σ = Rs/d (§3.3).**<br>• `specific_resistance` Rs [Pa·s/m]<br>• `thickness_m` d [m] | `airflow_resistivity(40.0, 0.05)  # 800.0`<br><br>• [Pa·s/m²] |
 | `linear_airflow_velocity` | `function` | **Linear airflow velocity u = qv/A (§3.4).**<br>• `volume_flow_rate` qv [m³/s]<br>• `area` A [m²] | `linear_airflow_velocity(5e-6, 0.01)  # 0.0005`<br><br>• [m/s] |
-| `static_airflow_resistance` | `function` | **Stepwise static-method determination (ISO 9053-1 §7.5).**<br>• `velocities` u [m/s], `pressure_drops_pa` Δp [Pa] (≥ 2 steps)<br>• `area` A [m²]<br>• `thickness_m` d [m] (Default: None → no σ)<br>• `evaluation_velocity` [m/s] (Default: 0.0005) | `res = materials.static_airflow_resistance([0.0005, 0.001, 0.002], [0.02, 0.041, 0.086], 0.01, 0.05)`<br><br>• `StaticAirflowResult` (Rs = 40.0, σ = 800) |
+| `static_airflow_resistance` | `function` | **Stepwise static-method determination (ISO 9053-1 §7.5).**<br>• `velocities` u [m/s], `pressure_drops_pa` Δp [Pa] (≥ 2 steps)<br>• `area` A [m²]<br>• `thickness_m` d [m] (Default: None → no σ)<br>• `evaluation_velocity` [m/s] (Default: 0.0005) | `res = materials.static_airflow_resistance([0.0005, 0.001, 0.002], [0.02, 0.041, 0.086], 0.01, thickness_m=0.05)`<br><br>• `StaticAirflowResult` (Rs = 40.0, σ = 800) |
 | `StaticAirflowResult` | `dataclass` | **Static-method result at the evaluation velocity.**<br>• `resistance` R [Pa·s/m³], `specific_resistance` Rs [Pa·s/m]<br>• `resistivity` σ [Pa·s/m²] or None<br>• `evaluation_velocity` [m/s], `pressure_drop_pa` [Pa]<br>• `linear_coefficient` a (zero-velocity Rs), `quadratic_coefficient` b | `res.specific_resistance, res.resistivity` |
 | `piston_volume_flow_rate` | `function` | **RMS piston volume flow qv = 2πf·h·AP (ISO 9053-2 §6.2).**<br>• `frequency` f [Hz]<br>• `stroke_amplitude` h [m]<br>• `piston_area` AP [m²] | `piston_volume_flow_rate(2.0, 0.005, 0.01)  # 0.000628`<br><br>• [m³/s] |
 | `alternating_airflow_resistance` | `function` | **Alternating-method resistance (ISO 9053-2:2020 Formula 2).**<br>• `level_specimen` Lps / `level_termination` Lpt [dB]<br>• `piston_stroke_specimen` hs / `piston_stroke_termination` ht [m]<br>• `frequency` f [Hz] (1–4 Hz), `cavity_volume` V [m³]<br>• `static_pressure_pa` [Pa] (Default: 101325)<br>• `kappa_prime` κ′ (Default: 1.4; use `effective_kappa` for Annex A conformity)<br>• `background_level` Lpb [dB] (Default: None) | `r = materials.alternating_airflow_resistance(78.0, 60.0, piston_stroke_specimen=5e-3, piston_stroke_termination=5e-4, frequency=2.0, cavity_volume=7.854e-4)`<br><br>• R [Pa·s/m³]; `AirflowResistanceWarning` when criteria fail |
@@ -54553,7 +54553,7 @@ documents, one page per module.
 | `indication_tolerance_percent` / `INDICATION_TOLERANCE_PERCENT` / `LOW_FREQUENCY_INDICATION_TOLERANCE_PERCENT` / `LOW_FREQUENCY_WEIGHTING` | `function` / `constant` | **How far the indication itself may sit from the truth (ISO 8041-1 Table 2).**<br>• 4 % at the reference frequency, and 5 % for the low-frequency whole-body case, which is `Wf` | `vibration.indication_tolerance_percent('Wf')  # 5.0` |
 | `PVEM_INDICATION_TOLERANCES_PERCENT` | `constant` | **Table 2 of a personal vibration exposure meter (ISO 8041-2:2021).**<br>• `'indication'` 4 %, `'low-frequency indication'` 5 %, `'weighting consistency'` 3 %: the first two rows of the Part 1 table<br>• no running r.m.s. row, because Part 2 5.13 declares the running r.m.s. not applicable to a PVEM | `vibration.PVEM_INDICATION_TOLERANCES_PERCENT['weighting consistency']  # 3.0` |
 | `band_limiting_response` / `band_limiting_factors` / `apply_band_limiting` | `function` | **The band-limiting stage of a weighting on its own (ISO 8041-1 Formulae (1) and (2)).**<br>• the two-pole Butterworth high-pass and low-pass pair every weighting starts with, without the transition and step stages<br>• `apply_band_limiting(x, fs=None, *, name)` filters with it, which is what the band-limiting row of the burst tables is measured on | `vibration.band_limiting_factors('Wk', [1.0])`<br><br>• 0.9874 |
-| `band_limited_weighting_factor` / `WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT` | `function` / `constant` | **The weighting factor a band-limited channel actually shows (ISO 8041-1 Table 2, row 2).**<br>• the design goal times the band-limiting response, which is what a meter indicates when both stages are in the path<br>• the 3 % row 2 allows between the two | `vibration.band_limited_weighting_factor('Wk', [16.0])` |
+| `band_limited_weighting_factor` / `WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT` | `function` / `constant` | **The weighting factor a band-limited channel actually shows (ISO 8041-1 Table 2, row 2).**<br>• the design goal times the band-limiting response, which is what a meter indicates when both stages are in the path<br>• the 3 % row 2 allows between the two | `vibration.band_limited_weighting_factor('Wk')` |
 | `running_rms_decay_time` | `function` | **How long the running r.m.s. takes to fall to 10 % of its steady value (ISO 8041-1 5.13).**<br>• `integration_time`, and `method` selecting linear or exponential averaging<br>• the quantity Table 11 prints, timed from the moment the signal is shut off | `vibration.running_rms_decay_time(1.0, method='linear')` |
 | `verify_running_rms_decay` / `RunningRMSDecayVerification` / `RUNNING_RMS_DECAY_RATE_DB_PER_S` / `RUNNING_RMS_DECAY_TIME_S` / `RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT` | `function` / `dataclass` / `constant` | **Does the running r.m.s. decay at the printed rate (ISO 8041-1 Tables 10 and 11)?**<br>• `measured_time_s`, with `integration_time` and `method` keyword-only<br>• `.passes`, `.printed_time_s`, `.tolerance_s`, `.lower_time_s`, `.upper_time_s`, `.deviation_s`, `.plot()`<br>• the decay in decibels per second and the time to fall, per integration time, for linear and exponential averaging<br>• the 2 % the indication may differ by | `vibration.RUNNING_RMS_DECAY_RATE_DB_PER_S[1]`<br><br>• (1.0, 3.8, 4.9) s, dB, dB |
 | `verify_signal_burst_response` / `SignalBurstVerification` | `function` / `dataclass` | **A meter's response to the saw-tooth burst of ISO 8041-1 5.9 (Tables 7 to 9).**<br>• `application`, `weighting`, the measured indications per burst length<br>• `.passes`, `.deviation_percent`, `.failing_cycle_counts`, `.plot()`; no truth value: `bool()` raises<br>• graded on a zero-state simulation, which is what the printed tables come from | `vibration.verify_signal_burst_response('whole-body', 'Wk', measured)` |
@@ -62014,15 +62014,16 @@ result = bank.spectrogram(x, window_time=0.125, overlap=0.875)
 result.plot()
 plt.show()
 
-# By hand, from the result's fields. The rows are spaced evenly in log10
-# of the frequency, so the raster is laid out there, half a band step
-# either side of each centre, and carried onto the logarithmic axis through
-# 10**y: an image placed straight on a log axis spreads its rows evenly in Hz.
+# By hand, from the result's fields. The bands are equally wide in log10 of
+# the frequency, so the raster is laid out there, from the lower edge of the
+# first band to the upper edge of the last, and carried onto the logarithmic
+# axis through 10**y: an image placed straight on a log axis spreads its rows
+# evenly in Hz.
 from matplotlib.scale import LogTransform
 from matplotlib.transforms import IdentityTransform, blended_transform_factory
 
-f, t = result.frequencies, result.times
-half_band = np.log10(f[-1] / f[0]) / (2 * (f.size - 1))
+t = result.times
+lower, upper = result.lower_edges, result.upper_edges
 half_hop = (t[1] - t[0]) / 2
 fig, ax = plt.subplots()
 ax.set_yscale("log")
@@ -62032,9 +62033,9 @@ image = ax.imshow(result.levels, origin="lower", aspect="auto", cmap="magma",
                   interpolation="nearest", transform=rows,
                   vmin=result.levels.max() - 80.0, vmax=result.levels.max(),
                   extent=(t[0] - half_hop, t[-1] + half_hop,
-                          np.log10(f[0]) - half_band, np.log10(f[-1]) + half_band))
+                          np.log10(lower[0]), np.log10(upper[-1])))
 ax.set_xlim(t[0] - half_hop, t[-1] + half_hop)
-ax.set_ylim(f[0] / 10**half_band, f[-1] * 10**half_band)
+ax.set_ylim(lower[0], upper[-1])
 ax.set(xlabel="Time [s]", ylabel="Frequency [Hz]")
 fig.colorbar(image, label="Band level [dB]")
 plt.show()
@@ -62046,7 +62047,8 @@ plt.show()
   `times` by name, or draw it with `result.plot()`.
 - Multichannel input `(channels, samples)` gives `levels` shaped
   `(channels, bands, frames)`; `result.plot(channel=0)` draws one channel.
-- `times` holds each window's center in seconds.
+- `times` holds each window's center in seconds, and `lower_edges` and
+  `upper_edges` hold each band's edges, between which the plot draws its row.
 - `mode='peak'` gives per-window peak-holding levels instead of RMS.
 - `zero_phase=True` filters bands forward-backward so per-band group delay does
   not skew the frames (offline analysis only).
@@ -63949,9 +63951,9 @@ def free_field_budget(fx):
 
 free = metrology.sequential_comparison(
     l_ref_p,
-    l_ref_p + c_ff + field_1,
-    l_ws2f + field_2,     # the reference's output, dB re 1 V
-    frequencies=ff,             # the WS2F's output in its place
+    l_ref_p + c_ff + field_1,     # the reference's output, dB re 1 V
+    l_ws2f + field_2,             # the WS2F's output in its place
+    frequencies=ff,
     monitor=metrology.MonitorReadings(
         reference_level=monitor + field_1, test_level=monitor + field_2
     ),
@@ -65326,11 +65328,11 @@ pressure = -0.1 * x**1.5                        # the meter on the calibrator, r
 spread = np.array([[0.0], [0.02], [-0.03]]) * x**0.8   # three microphones of the model
 
 c = metrology.sound_calibrator_correction(
-    94.0 + free + spread,
-    94.0 + c_ff_rm,          # L_ind1: the meter in the free field
-    94.0 + pressure + spread / 2,                # L_ind2: the reference in its place
-    94.0,  # L_ind3: the calibrator on the meter
-    frequencies=f,                          # L_ind4: the calibrator on the reference
+    94.0 + free + spread,          # L_ind1: the meter in the free field
+    94.0 + c_ff_rm,                # L_ind2: the reference in its place
+    94.0 + pressure + spread / 2,  # L_ind3: the calibrator on the meter
+    94.0,                          # L_ind4: the calibrator on the reference
+    frequencies=f,
     reference_free_field_correction=c_ff_rm,
 )
 print(c.correction.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
@@ -66082,9 +66084,9 @@ print(metrology.IEC61183_TABLE_B1[8000.0])
 delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
                      for f in bands])
 dd = metrology.diffuse_field_sensitivity(
-    80.0 + r.random_incidence_level,
-    80.0 + delta_dp,  # L_D, the meter under test
-    frequencies=bands,                     # L_D,ref, a pressure-calibrated LS2aP
+    80.0 + r.random_incidence_level,  # L_D, the meter under test
+    80.0 + delta_dp,                  # L_D,ref, a pressure-calibrated LS2aP
+    frequencies=bands,
     reference_pressure_level=0.0,     # G_P,ref; Delta_DP from Table B.1
 )
 print(dd.reference_correction[shown])            # [0.   0.25 1.2  3.05]

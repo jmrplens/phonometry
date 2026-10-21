@@ -20,6 +20,7 @@ from .common import (
     _freq_axis,
     _new_axes,
     style_default,
+    styled,
     theme_fill,
 )
 
@@ -477,9 +478,7 @@ def plot_assumed_protection(
         freqs,
         np.asarray(result.apv, dtype=np.float64),
         "--s",
-        ms=4,
-        zorder=4,
-        **apv_kwargs,
+        **styled(apv_kwargs, ms=4, zorder=4),
     )
     ax.set_ylabel(_t(_ATTENUATION_LABEL, language))
     ax.set_title(
@@ -589,7 +588,7 @@ def plot_snr_rating(
     bar_kwargs = dict(kwargs)
     style_default(bar_kwargs, "color", _C_PRIMARY)
     bar_kwargs.setdefault("label", _t("per subject", language))
-    ax.bar(positions, per_subject, width=0.7, zorder=2, **bar_kwargs)
+    ax.bar(positions, per_subject, **styled(bar_kwargs, width=0.7, zorder=2))
     ax.axhline(
         result.mean,
         color=_C_SECONDARY,
@@ -658,8 +657,7 @@ def plot_protected_level(
     ax.bar(
         positions,
         np.asarray(result.band_levels, dtype=np.float64),
-        width=0.7,
-        **bar_kwargs,
+        **styled(bar_kwargs, width=0.7),
     )
     ax.set_xticks(positions)
     ax.set_xticklabels([f"{f:g}" for f in freqs], rotation=45, ha="right")
@@ -742,7 +740,7 @@ def plot_real_ear_attenuation(
     style_default(mean_kwargs, "color", _C_PRIMARY)
     style_default(mean_kwargs, "linewidth", 2.2)
     mean_kwargs.setdefault("label", _t("mean attenuation $m$", language))
-    ax.plot(freqs, mean, "-o", ms=4, zorder=3, **mean_kwargs)
+    ax.plot(freqs, mean, "-o", **styled(mean_kwargs, ms=4, zorder=3))
     _freq_axis(ax, freqs, language=language)
     ax.set_xlim(freqs.min() / _FREQUENCY_MARGIN, freqs.max() * _FREQUENCY_MARGIN)
     ax.set_ylabel(_t(_ATTENUATION_LABEL, language))
@@ -795,9 +793,7 @@ def plot_attenuation_difference(
     bars = ax.bar(
         positions,
         np.asarray(result.difference, dtype=np.float64),
-        width=0.6,
-        zorder=2,
-        **bar_kwargs,
+        **styled(bar_kwargs, width=0.6, zorder=2),
     )
     significant = np.asarray(result.significant, dtype=bool)
     for bar, flagged in zip(bars, significant, strict=True):
@@ -873,7 +869,7 @@ def plot_reat_sound_field(
     style_default(position_kwargs, "color", _C_PRIMARY)
     style_default(position_kwargs, "linewidth", 2.0)
     position_kwargs.setdefault("label", _t("largest position deviation", language))
-    ax.plot(freqs, worst, "-o", ms=4, zorder=3, **position_kwargs)
+    ax.plot(freqs, worst, "-o", **styled(position_kwargs, ms=4, zorder=3))
     for limit in (-2.5, 2.5):
         ax.axhline(
             limit,
@@ -988,7 +984,7 @@ def plot_active_insertion_loss(
     style_default(mean_kwargs, "color", _C_PRIMARY)
     style_default(mean_kwargs, "linewidth", 2.2)
     mean_kwargs.setdefault("label", _t("mean active insertion loss", language))
-    ax.plot(freqs, mean, "-o", ms=4, zorder=3, **mean_kwargs)
+    ax.plot(freqs, mean, "-o", **styled(mean_kwargs, ms=4, zorder=3))
     ax.axhline(0.0, color=_C_EDGE, lw=0.8, zorder=0)
     _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t(_AIL_LABEL, language))
@@ -1051,8 +1047,7 @@ def plot_anr_total_attenuation(
         thirds,
         np.mean(result.total_third_octave_attenuation, axis=0),
         "-",
-        zorder=3,
-        **total_kwargs,
+        **styled(total_kwargs, zorder=3),
     )
     ax.plot(
         octaves,
@@ -1138,7 +1133,10 @@ def plot_anr_linearity(
     style_default(median_kwargs, "linewidth", 2.0)
     median_kwargs.setdefault("label", _t("median over the ears", language))
     ax.plot(
-        upper_ends, np.median(increments, axis=0), "-o", ms=4, zorder=3, **median_kwargs
+        upper_ends,
+        np.median(increments, axis=0),
+        "-o",
+        **styled(median_kwargs, ms=4, zorder=3),
     )
     ax.axvline(
         result.max_linear_level,

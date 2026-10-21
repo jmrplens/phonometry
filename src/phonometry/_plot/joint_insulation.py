@@ -28,6 +28,7 @@ from .common import (
     _new_axes,
     place_legend_clear,
     style_default,
+    styled,
     theme_fill,
     theme_line,
 )
@@ -291,7 +292,7 @@ def plot_joint_open_band_rating(
     positions = np.arange(len(terms), dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(_SINGLE_NUMBER_LABEL, language))
-    bars = ax.bar(positions, values, width=0.6, **kwargs)
+    bars = ax.bar(positions, values, **styled(kwargs, width=0.6))
     texts = [
         ""
         if value is None
@@ -352,7 +353,7 @@ def plot_joint_test_element_check(
     oks = [result.length_ok, result.width_ok]
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(_VALUE_BOUND_LABEL, language))
-    bars = ax.barh(np.arange(2.0), ratios, height=0.5, **kwargs)
+    bars = ax.barh(np.arange(2.0), ratios, **styled(kwargs, height=0.5))
     for bar, ok in zip(bars, oks, strict=True):
         if not ok:
             bar.set_hatch("//")

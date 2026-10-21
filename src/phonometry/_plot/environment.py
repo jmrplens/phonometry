@@ -28,6 +28,7 @@ from .common import (
     _plot_two_runs,
     format_frequency_axis,
     place_legend_clear,
+    refuse_fixed_keywords,
     style_default,
     styled,
     theme_fill,
@@ -545,7 +546,7 @@ def plot_tonal_survey(
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("width", 0.66)
     kwargs.setdefault("label", _t(_BAND_LEVEL_LABEL, language))
-    ax.bar(positions, levels, zorder=3, **kwargs)
+    ax.bar(positions, levels, **styled(kwargs, zorder=3))
     if np.any(prominent):
         ax.bar(
             positions[prominent],
@@ -679,7 +680,11 @@ def plot_outdoor_attenuation(
     style_default(kwargs, "color", _C_REFERENCE)
     kwargs.setdefault("marker", "D")
     kwargs.setdefault("label", _t(_TOTAL_A_LABEL, language))
-    ax.plot(positions, np.asarray(result.a_total, dtype=np.float64), zorder=4, **kwargs)
+    ax.plot(
+        positions,
+        np.asarray(result.a_total, dtype=np.float64),
+        **styled(kwargs, zorder=4),
+    )
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     ax.set_ylabel(_t("Attenuation $A$ [dB]", language))
     ax.set_title(_t("ISO 9613-2 attenuation breakdown", language))
@@ -1028,7 +1033,7 @@ def plot_tonal_correction_rd1367(
 
     style_default(kwargs, "color", _C_PRIMARY_LIGHT)
     kwargs.setdefault("label", _t(_BAND_LEVEL_LABEL, language))
-    ax.bar(positions, levels, width=0.72, **kwargs)
+    ax.bar(positions, levels, **styled(kwargs, width=0.72))
     ax.set_ylabel(_t("Band level [dB]", language))
 
     twin = ax.twinx()
@@ -1414,8 +1419,7 @@ def plot_reflection_index(
     ax.plot(
         positions,
         np.asarray(result.reflection_index, dtype=np.float64),
-        zorder=3,
-        **kwargs,
+        **styled(kwargs, zorder=3),
     )
     ax.set_xlim(-0.5, positions[-1] + 0.5)
     ax.set_ylim(bottom=0.0)
@@ -1550,7 +1554,7 @@ def plot_direct_sound_subtraction(
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "linewidth", 1.6)
     kwargs.setdefault("label", _t("What is left: the reflection", language))
-    ax.plot(time_ms, residual[start:stop], zorder=3, **kwargs)
+    ax.plot(time_ms, residual[start:stop], **styled(kwargs, zorder=3))
     ax.set_xlim(time_ms[0], time_ms[-1])
     ax.set_xlabel(_t("Time after the direct sound [ms]", language))
     ax.set_ylabel(_t("Impulse response [a.u.]", language))
@@ -1679,7 +1683,7 @@ def plot_reflection_grid_check(
     style_default(kwargs, "marker", "o")
     style_default(kwargs, "linewidth", 1.4)
     kwargs.setdefault("label", _t("Deviation from Table 3", language))
-    ax.plot(positions, deviations_mm, zorder=3, **kwargs)
+    ax.plot(positions, deviations_mm, **styled(kwargs, zorder=3))
     outside = ~np.asarray(result.within, dtype=bool)
     if np.any(outside):
         ax.plot(
@@ -2935,6 +2939,7 @@ def plot_round_robin_precision(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the histogram bars.
     :return: The axes.
+    :raises TypeError: for ``width`` or ``align``, which the classes set.
     """
     from .._i18n import format_number, localize_axes
 
@@ -2946,13 +2951,20 @@ def plot_round_robin_precision(
     edges = width * np.arange(classes + 1, dtype=np.float64)
     edges[-1] = max(float(edges[-1]), largest)
     counts, _ = np.histogram(maxima, bins=edges)
+    refuse_fixed_keywords(
+        kwargs,
+        "plot_round_robin_precision",
+        "width",
+        "align",
+        reason="draws each bar over the class it counts",
+    )
     ax.bar(
         edges[:-1],
         counts,
-        width=np.diff(edges),
-        align="edge",
         **styled(
             kwargs,
+            width=np.diff(edges),
+            align="edge",
             color=theme_fill(_C_PRIMARY, ax),
             edgecolor=_C_PRIMARY,
             lw=0.9,

@@ -83,8 +83,9 @@ def _through_a_shell(
 
 
 def test_ssh_takes_these_options_and_no_others() -> None:
-    # Every one of them overrides what ~/.ssh/config says for the host; one
-    # more that weakens them cannot slip in beside the checks of each.
+    # Every one of them overrides what ~/.ssh/config says for the host, and
+    # every client from OpenSSH 7.6 on knows it; one more that weakens them,
+    # or that an older client refuses, cannot slip in beside the checks of each.
     assert command.SSH_OPTIONS == (
         "-T",
         "-a",
@@ -93,12 +94,6 @@ def test_ssh_takes_these_options_and_no_others() -> None:
         "RequestTTY=no",
         "-o",
         "RemoteCommand=none",
-        "-o",
-        "SessionType=default",
-        "-o",
-        "StdinNull=no",
-        "-o",
-        "ForkAfterAuthentication=no",
         "-o",
         "ClearAllForwardings=yes",
         "-o",

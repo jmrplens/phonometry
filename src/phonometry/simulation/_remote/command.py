@@ -20,8 +20,17 @@ if TYPE_CHECKING:
     from ..compute import Compute
     from .hosts import HostEntry
 
-#: The options every connection takes, whatever ``~/.ssh/config`` says for
-#: the host: options on the command line win over the file.
+#: The options every connection takes. Options on the command line win over
+#: ``~/.ssh/config``, so whatever the file says for the host, a run gets no
+#: terminal (RequestTTY), no RemoteCommand, no agent, X11 or port forwarding
+#: (ForwardAgent, ForwardX11, LocalForward, RemoteForward, DynamicForward),
+#: no LocalCommand (PermitLocalCommand), never a prompt (BatchMode), and the
+#: keep-alives and the connection timeout below. Every client from OpenSSH
+#: 7.6 on knows them. SessionType, StdinNull and ForkAfterAuthentication are
+#: left out on purpose: a client older than OpenSSH 8.7 refuses them on the
+#: command line and would run nothing. A host alias used as a node leaves
+#: them at their defaults: a SessionType of none, a StdinNull of yes or a
+#: ForkAfterAuthentication of yes hangs a run until its timeout.
 SSH_OPTIONS: tuple[str, ...] = (
     # No terminal (-T and RequestTTY): a pty turns every LF of a frame into
     # CRLF and reads the package's bytes as keys (0x03 interrupts, 0x04 ends
@@ -35,16 +44,9 @@ SSH_OPTIONS: tuple[str, ...] = (
         word
         for setting in (
             "RequestTTY=no",
-            # The session runs the command it is given, in the foreground, on
-            # the frames. A RemoteCommand of the file makes ssh refuse to run
-            # beside it; a SessionType of none (no session), a StdinNull (the
-            # node reads /dev/null, not the frames) or a
-            # ForkAfterAuthentication (ssh goes to the background) hangs a
-            # run until its timeout, and one of subsystem runs no command.
+            # The session runs the command it is given: a RemoteCommand of the
+            # file makes ssh refuse to run beside it.
             "RemoteCommand=none",
-            "SessionType=default",
-            "StdinNull=no",
-            "ForkAfterAuthentication=no",
             # No port forwarding, and no LocalCommand, whose output on this
             # machine would land among the frames.
             "ClearAllForwardings=yes",

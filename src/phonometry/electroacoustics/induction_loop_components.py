@@ -172,7 +172,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "NECK_LOOP_TYPES",
-    "AgcCharacteristic",
+    "AGCCharacteristic",
     "AmplifierFrequencyResponse",
     "LoopField",
     "LoopImpedance",
@@ -924,7 +924,7 @@ class MaximumOutputCurrent(OwnsArrays):
         rated load, in ohms.
     :ivar rated_thd_percent: The rated total harmonic distortion of 5.4.6, in
         percent.
-    :ivar maximum_current_a: The load current at which the distortion first
+    :ivar max_current_a: The load current at which the distortion first
         reaches the rated value, interpolated linearly between the two steps
         either side, in amperes: the characteristic of 5.4.7, stated in
         amperes (5.4.7.3).
@@ -935,7 +935,7 @@ class MaximumOutputCurrent(OwnsArrays):
     thd_percent: np.ndarray
     load_resistance_ohm: float
     rated_thd_percent: float
-    maximum_current_a: float
+    max_current_a: float
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1034,7 +1034,7 @@ def maximum_output_current(
         thd_percent=thd,
         load_resistance_ohm=resistance,
         rated_thd_percent=rated,
-        maximum_current_a=maximum,
+        max_current_a=maximum,
     )
 
 
@@ -1321,7 +1321,7 @@ def _widest_window(x: np.ndarray, y: np.ndarray, spread: float) -> tuple[float, 
 
 
 @dataclass(frozen=True)
-class AgcCharacteristic(OwnsArrays):
+class AGCCharacteristic(OwnsArrays):
     """The steady-state output/input characteristic of an amplifier (5.4.13).
 
     :ivar source_emf_db: The source e.m.f. levels, in dB, ascending.
@@ -1369,7 +1369,7 @@ class AgcCharacteristic(OwnsArrays):
 
 def agc_characteristic(
     source_emf_db: ArrayLike, output_level_db: ArrayLike
-) -> AgcCharacteristic:
+) -> AGCCharacteristic:
     """The output/input characteristic of an amplifier and its AGC range (5.4.13).
 
     From standard measuring conditions the source e.m.f. is reduced to zero
@@ -1393,7 +1393,7 @@ def agc_characteristic(
         strictly ascending.
     :param output_level_db: Output current level at each, in dB re the rated
         maximum output current.
-    :return: An :class:`AgcCharacteristic`.
+    :return: An :class:`AGCCharacteristic`.
     """
     x = require_finite_array(source_emf_db, "source_emf_db")
     y = require_finite_array(output_level_db, "output_level_db")
@@ -1402,7 +1402,7 @@ def agc_characteristic(
         raise ValueError(msg)
     _ascending(x, "source_emf_db")
     start, end = _widest_window(x, y, _AGC_OUTPUT_CHANGE_DB)
-    return AgcCharacteristic(
+    return AGCCharacteristic(
         source_emf_db=x,
         output_level_db=y,
         agc_range_db=end - start,
@@ -1549,7 +1549,7 @@ class NeckLoopCharacteristics(OwnsArrays):
     :ivar reference_input_voltage_v: The input voltage that produces 400 mA/m
         at 1 kHz at the telecoil position of the jig, the characteristic of
         9.1, in volts.
-    :ivar minimum_impedance_ohm: The smallest magnitude of the input
+    :ivar min_impedance_ohm: The smallest magnitude of the input
         impedance over 100 Hz to 5 kHz, rounded to the nearest ohm (9.2.1).
     :ivar response_db: The field strength level relative to the one at
         1 kHz, in dB.
@@ -1563,7 +1563,7 @@ class NeckLoopCharacteristics(OwnsArrays):
     impedance_ohm: np.ndarray
     input_voltage_v: float
     reference_input_voltage_v: float
-    minimum_impedance_ohm: float
+    min_impedance_ohm: float
     response_db: np.ndarray
     frequencies_3db_hz: tuple[float, ...]
 
@@ -1649,7 +1649,7 @@ def neck_loop_characteristics(
         impedance_ohm=z,
         input_voltage_v=voltage,
         reference_input_voltage_v=voltage * 10.0 ** (-float(level[ref]) / 20.0),
-        minimum_impedance_ohm=float(math.floor(minimum + 0.5)),
+        min_impedance_ohm=float(math.floor(minimum + 0.5)),
         response_db=read_only(response),
         frequencies_3db_hz=tuple(sorted(crossings)),
     )

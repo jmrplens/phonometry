@@ -232,7 +232,7 @@ A.2.3 and still carry a finite level here. `criterion_1`
 (Figure B.1's unnumbered $F_3 - F_2 \le 3$ dB gate) and
 `criterion_2` ($N > C F_4^2$, equation (B.2)) are the per-band
 verdicts, `None` where they could not be evaluated;
-`minimum_positions` is the $C F_4^2$ that criterion 2 compares
+`min_positions` is the $C F_4^2$ that criterion 2 compares
 `positions` against.
 
 `achieved_grade` is the per-band grade, one of `'precision'`,
@@ -311,7 +311,7 @@ Table 2 footnote 1's 2s per band, at the grade each band achieved.
 
 The field non-uniformity of the A-weighted determination (B.1.2).
 
-### DiscretePointIntensityResult.minimum_positions
+### DiscretePointIntensityResult.min_positions
 
 *property*
 

@@ -100,9 +100,9 @@ __all__ = [
     "ImpedanceTubeWarning",
     "absorption_from_reflection",
     "air_density_iso10534",
-    "apply_mic_calibration",
+    "apply_microphone_calibration",
     "hydraulic_diameter",
-    "mic_calibration_factor",
+    "microphone_calibration_factor",
     "normalized_surface_admittance",
     "normalized_surface_impedance",
     "plane_wave_frequency_range",
@@ -315,7 +315,7 @@ def reflection_factor(
     :param h12: Measured transfer function ``H12`` between microphone
         positions 1 and 2 (Clause 7.6, Eq. (14)); complex, scalar or per band.
         It must already be corrected for microphone mismatch (see
-        :func:`apply_mic_calibration`).
+        :func:`apply_microphone_calibration`).
     :param spacing_m: Microphone spacing :math:`s = x_1 - x_2`, in metres.
     :param x1: Distance from the sample surface to the farther microphone
         (position 1), in metres.
@@ -395,7 +395,9 @@ def absorption_from_reflection(reflection: ArrayLike) -> Real:
     return np.asarray(1.0 - np.abs(r) ** 2, dtype=np.float64)
 
 
-def mic_calibration_factor(h12_config1: ArrayLike, h12_config2: ArrayLike) -> Complex:
+def microphone_calibration_factor(
+    h12_config1: ArrayLike, h12_config2: ArrayLike
+) -> Complex:
     r"""Microphone-mismatch calibration factor ``Hc`` (ISO 10534-2, Eq. (10)).
 
     :math:`H_\mathrm{c} = \sqrt{H_{12}^{I} / H_{12}^{II}}` from a transfer function measured on an
@@ -412,7 +414,7 @@ def mic_calibration_factor(h12_config1: ArrayLike, h12_config2: ArrayLike) -> Co
     return np.asarray(np.sqrt(h1 / h2), dtype=np.complex128)
 
 
-def apply_mic_calibration(
+def apply_microphone_calibration(
     h12_uncorrected: ArrayLike, calibration_factor: ArrayLike
 ) -> Complex:
     r"""Apply the microphone calibration factor (ISO 10534-2, Eq. (13)).
@@ -421,7 +423,7 @@ def apply_mic_calibration(
 
     :param h12_uncorrected: Uncorrected measured transfer function.
     :param calibration_factor: Calibration factor ``Hc`` from
-        :func:`mic_calibration_factor`.
+        :func:`microphone_calibration_factor`.
     :return: Corrected transfer function ``H12``.
     """
     h = np.asarray(h12_uncorrected, dtype=np.complex128)

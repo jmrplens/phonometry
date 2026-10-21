@@ -8,7 +8,7 @@ sidebar:
 Building acoustic performance prediction (EN 12354-1/-2:2000).
 
 This is the **prediction** counterpart of the measurement modules
-([`phonometry.building.measurement.lab_insulation`](/phonometry/reference/api/building/lab-insulation/) for laboratory `R`/`Ln` and
+([`phonometry.building.measurement.laboratory_insulation`](/phonometry/reference/api/building/laboratory-insulation/) for laboratory `R`/`Ln` and
 [`phonometry.building.measurement.insulation`](/phonometry/reference/api/building/insulation/) for field `R'`/`L'n`). EN 12354 estimates the
 *in-situ* apparent performance of a building from the laboratory performance of
 its elements, adding the flanking transmission that a field measurement would
@@ -245,7 +245,7 @@ junction elements are
 the flanking element) and `KFd`/`KDf` to
 $10 \log_{10}[l_\mathrm{f} l_0 (1/S_\mathrm{F} + 1/S_\mathrm{s})]$ (flanking and separating
 element), via
-[`junction_min_vibration_reduction`](/phonometry/reference/api/building/simplified-model/#junction_min_vibration_reduction). Without `flanking_area` the
+[`junction_minimum_vibration_reduction`](/phonometry/reference/api/building/simplified-model/#junction_minimum_vibration_reduction). Without `flanking_area` the
 per-path floors cannot be formed from the available geometry, so the raw
 `k_ff`/`k_fd`/`k_df` are used unchanged; compute the floors
 yourself (or call [`flanking_path`](/phonometry/reference/api/building/simplified-model/#flanking_path) with `kij_min`) in that case to
@@ -310,7 +310,7 @@ When `kij_min` is given, `k_ij` is clamped up to it
 (`max(k_ij, kij_min)`) before the path is formed, enforcing the floor
 $K_{ij} \ge K_{ij,\mathrm{min}}$ of Clause 4.4.2 (compute
 `kij_min` with
-[`junction_min_vibration_reduction`](/phonometry/reference/api/building/simplified-model/#junction_min_vibration_reduction)). Left as `None` the raw `k_ij`
+[`junction_minimum_vibration_reduction`](/phonometry/reference/api/building/simplified-model/#junction_minimum_vibration_reduction)). Left as `None` the raw `k_ij`
 is used unchanged.
 
 **Parameters**
@@ -477,10 +477,10 @@ of the flanking construction and the model assumptions is recorded in
 | ValueError | If `engine` is unknown or `language` is not supported. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
 
-## junction_min_vibration_reduction
+## junction_minimum_vibration_reduction
 
 ```python
-junction_min_vibration_reduction(
+junction_minimum_vibration_reduction(
     coupling_length: float,
     s_i: float,
     s_j: float,

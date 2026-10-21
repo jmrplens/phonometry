@@ -85,10 +85,10 @@ kelvin.
 | :--- | :--- |
 | ValueError | if any temperature is at or below -273.15 degC, or any pressure is not positive. |
 
-## apply_mic_calibration
+## apply_microphone_calibration
 
 ```python
-apply_mic_calibration(
+apply_microphone_calibration(
     h12_uncorrected: ArrayLike,
     calibration_factor: ArrayLike,
 ) -> NDArray[np.complex128]
@@ -103,7 +103,7 @@ $H_{12} = H_{12,\text{uncorrected}} / H_\mathrm{c}$.
 | Name | Description |
 | :--- | :--- |
 | `h12_uncorrected` | Uncorrected measured transfer function. |
-| `calibration_factor` | Calibration factor `Hc` from [`mic_calibration_factor`](/phonometry/reference/api/materials/impedance-tube/#mic_calibration_factor). |
+| `calibration_factor` | Calibration factor `Hc` from [`microphone_calibration_factor`](/phonometry/reference/api/materials/impedance-tube/#microphone_calibration_factor). |
 
 **Returns:** Corrected transfer function `H12`.
 
@@ -252,10 +252,10 @@ to the normal-incidence coefficient reported here).
 
 Advisory for out-of-plane-wave-range impedance-tube frequencies.
 
-## mic_calibration_factor
+## microphone_calibration_factor
 
 ```python
-mic_calibration_factor(
+microphone_calibration_factor(
     h12_config1: ArrayLike,
     h12_config2: ArrayLike,
 ) -> NDArray[np.complex128]
@@ -476,7 +476,7 @@ the sample to the **farther** microphone (Clause 7.7).
 
 | Name | Description |
 | :--- | :--- |
-| `h12` | Measured transfer function `H12` between microphone positions 1 and 2 (Clause 7.6, Eq. (14)); complex, scalar or per band. It must already be corrected for microphone mismatch (see [`apply_mic_calibration`](/phonometry/reference/api/materials/impedance-tube/#apply_mic_calibration)). |
+| `h12` | Measured transfer function `H12` between microphone positions 1 and 2 (Clause 7.6, Eq. (14)); complex, scalar or per band. It must already be corrected for microphone mismatch (see [`apply_microphone_calibration`](/phonometry/reference/api/materials/impedance-tube/#apply_microphone_calibration)). |
 | `spacing_m` | Microphone spacing $s = x_1 - x_2$, in metres. |
 | `x1` | Distance from the sample surface to the farther microphone (position 1), in metres. |
 | `wavenumber` | Complex wavenumber `k0` (from [`tube_wavenumber`](/phonometry/reference/api/materials/impedance-tube/#tube_wavenumber)), scalar or per band. |

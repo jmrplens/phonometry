@@ -350,11 +350,11 @@ def test_infrastructure_limits_annex_iii_table_a1(
     ("area", "expected"),
     [("e", 80.0), ("a", 85.0), ("d", 88.0), ("c", 90.0), ("b", 90.0)],
 )
-def test_max_infrastructure_limits_annex_iii_table_a2(
+def test_maximum_infrastructure_limits_annex_iii_table_a2(
     area: str, expected: float
 ) -> None:
     """Annex III Table A2: the LAmax limit for rail and airport infrastructure."""
-    assert rd.max_infrastructure_limit(area) == expected
+    assert rd.maximum_infrastructure_limit(area) == expected
 
 
 @pytest.mark.parametrize(

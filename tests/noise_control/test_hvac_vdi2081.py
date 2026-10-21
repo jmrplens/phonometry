@@ -51,7 +51,7 @@ PRINTED_A_WEIGHTING_DB = (-26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1)
 PRINTED_TOLERANCE_DB = 0.05
 
 
-def _supply_fan() -> hvac.HvacSpectrumResult:
+def _supply_fan() -> hvac.HVACSpectrumResult:
     """Element 1 of Table 1, with nothing but the printed service data."""
     return hvac.fan_sound_power(
         FAN_VOLUME_FLOW_M3_S,
@@ -184,7 +184,7 @@ def test_the_blade_allowance_lands_in_the_octave_that_holds_it() -> None:
         fan_total_pressure_pa=FAN_TOTAL_PRESSURE_PA,
         assembly="am",
         fan_speed_rpm=FAN_SPEED_RPM,
-        blade_count=12,
+        n_blades=12,
     )
     passing = FAN_SPEED_RPM * 12.0 / 60.0  # 250 Hz
     difference = bladed.values - plain.values
@@ -199,7 +199,7 @@ def test_the_blade_allowance_lands_in_the_octave_that_holds_it() -> None:
         fan_total_pressure_pa=FAN_TOTAL_PRESSURE_PA,
         assembly="rr",
         fan_speed_rpm=FAN_SPEED_RPM,
-        blade_count=12,
+        n_blades=12,
     )
     assert rr_bladed.values == pytest.approx(_supply_fan().values, abs=1e-9)
 
@@ -259,7 +259,7 @@ def test_the_default_model_is_still_the_ashrae_one() -> None:
             {"specific_sound_power_level": 0.0},
             r"'specific_sound_power_level' must be positive",
         ),
-        ({"blade_count": 0}, r"'blade_count' must be positive"),
+        ({"n_blades": 0}, r"'n_blades' must be positive"),
     ],
 )
 def test_the_vdi_model_refuses_what_is_not_a_fan(
@@ -775,7 +775,7 @@ def test_the_nozzle_reflection_reproduces_element_18() -> None:
         termination="wall",
         method="vdi2081",
         speed_of_sound=EXAMPLE_SPEED_OF_SOUND,
-        maximum_reduction_db=None,
+        max_reduction_db=None,
     )
     assert uncapped.values == pytest.approx(PRINTED_NOZZLE_DB, abs=0.05)
 
@@ -803,7 +803,7 @@ def test_the_nozzle_knows_all_four_solid_angles() -> None:
             termination=where,
             method="vdi2081",
             speed_of_sound=EXAMPLE_SPEED_OF_SOUND,
-            maximum_reduction_db=None,
+            max_reduction_db=None,
         ).values[0]
         for where in ("room", "wall", "edge", "corner")
     ]

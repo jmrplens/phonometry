@@ -173,8 +173,8 @@ FeedbackStabilityResult(
     margin: float,
     headroom: float,
     *,
-    maximum_open_loop_gain: float,
-    maximum_level_at_microphone: float,
+    max_open_loop_gain: float,
+    max_level_at_microphone: float,
     level_loudspeaker_at_microphone: float,
     level_loudspeaker_at_listener: float,
     microphone_directivity: float,
@@ -195,8 +195,8 @@ Gain structure and stability verdict of a reinforcement loop.
 | `stability_margin` | Required margin below oscillation, dB. |
 | `margin` | Margin actually available, `-loop_gain`, dB. |
 | `headroom` | Gain that may still be added before the required margin is used up, `-stability_margin - loop_gain`, dB; negative when the criterion of Equation (18.24) is already violated. |
-| `maximum_open_loop_gain` | Largest $Z_\mathrm{S}$ the loop tolerates, dB. |
-| `maximum_level_at_microphone` | Largest $L_{\mathrm{H}\text{-}\mathrm{M}}$ the loop tolerates, dB, for the given $Z_\mathrm{S}$ (Equations (18.20) to (18.22)). |
+| `max_open_loop_gain` | Largest $Z_\mathrm{S}$ the loop tolerates, dB. |
+| `max_level_at_microphone` | Largest $L_{\mathrm{H}\text{-}\mathrm{M}}$ the loop tolerates, dB, for the given $Z_\mathrm{S}$ (Equations (18.20) to (18.22)). |
 | `level_loudspeaker_at_microphone` | Input $L_{\mathrm{H}\text{-}\mathrm{M}}$, dB. |
 | `level_loudspeaker_at_listener` | Input $L_{\mathrm{H}\text{-}\mathrm{L}}$, dB. |
 | `microphone_directivity` | Input $D_\mathrm{M}(\theta)$, dB. |

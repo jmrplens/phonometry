@@ -183,7 +183,7 @@ strike_sel_spectrum(
     *,
     fraction: int = 3,
     limits: tuple[float, float] = (10.0, 20000.0),
-) -> StrikeSelSpectrum
+) -> StrikeSELSpectrum
 ```
 
 Band-resolved single-strike sound exposure level.
@@ -196,7 +196,7 @@ the energy sum of the returned band levels reproduces the broadband
 falls outside `limits`.
 
 Bands narrower than the FFT bin spacing `fs/n` contain no bin and are
-reported as `-inf` dB (see [`StrikeSelSpectrum`](/phonometry/reference/api/underwater/pile-driving-noise/#strikeselspectrum)); the result can be
+reported as `-inf` dB (see [`StrikeSELSpectrum`](/phonometry/reference/api/underwater/pile-driving-noise/#strikeselspectrum)); the result can be
 handed straight to
 [`weighted_exposure`](/phonometry/reference/api/underwater/weighting/#weighted_exposure).
 
@@ -209,7 +209,7 @@ handed straight to
 | `fraction` | Bandwidth fraction: 1 (octave) or 3 (one-third octave). |
 | `limits` | Lower and upper band-centre limits, in Hz. |
 
-**Returns:** A [`StrikeSelSpectrum`](/phonometry/reference/api/underwater/pile-driving-noise/#strikeselspectrum).
+**Returns:** A [`StrikeSELSpectrum`](/phonometry/reference/api/underwater/pile-driving-noise/#strikeselspectrum).
 
 **Raises**
 
@@ -217,10 +217,10 @@ handed straight to
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
 
-## StrikeSelSpectrum
+## StrikeSELSpectrum
 
 ```python
-StrikeSelSpectrum(
+StrikeSELSpectrum(
     frequencies: NDArray[np.float64],
     band_sel: NDArray[np.float64],
     total_sel: float,
@@ -243,10 +243,10 @@ Single-strike sound exposure level resolved into fractional-octave bands.
 | `fraction` | Bandwidth fraction (1 for octaves, 3 for one-third octaves). |
 | `fs` | Sample rate, in Hz. |
 
-### StrikeSelSpectrum.plot()
+### StrikeSELSpectrum.plot()
 
 ```python
-StrikeSelSpectrum.plot(
+StrikeSELSpectrum.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',

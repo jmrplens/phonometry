@@ -1,8 +1,8 @@
 ---
-title: "building.measurement.lab_improvement"
+title: "building.measurement.laboratory_improvement"
 description: "Improvement of sound insulation measured in the laboratory: a lining on a basic element and a floor covering on a reference floor (ISO 10140-1:2021 Annexes G and H)."
 sidebar:
-  label: "lab_improvement"
+  label: "laboratory_improvement"
 ---
 
 Improvement of sound insulation measured in the laboratory: a lining on a
@@ -27,7 +27,7 @@ wall of about 70 kg/m²), the single numbers are `ΔRw`, `Δ(Rw + C)` and
 other basic element they are the direct differences `ΔRw,direct`,
 `Δ(Rw + C)direct` and `Δ(Rw + Ctr)direct` of Formula (D.2), which describe
 the lining only on that element. G.4 adds one numeric condition, on the curing
-of the basic element ([`check_lining_curing`](/phonometry/reference/api/building/lab-improvement/#check_lining_curing)).
+of the basic element ([`check_lining_curing`](/phonometry/reference/api/building/laboratory-improvement/#check_lining_curing)).
 
 **Floor coverings, Annex H.** The improvement of impact sound insulation is
 $\Delta L = L_\mathrm{n0} - L_\mathrm{n}$ per band (Formula (H.1)), on the
@@ -84,7 +84,7 @@ judged here.
 | `time_lag_days` | Days between the two measurements (zero or more). |
 | `required_curing_days` | The curing period that settles the element without further condition, in days (default 14). |
 
-**Returns:** A [`LiningCuringCheck`](/phonometry/reference/api/building/lab-improvement/#liningcuringcheck).
+**Returns:** A [`LiningCuringCheck`](/phonometry/reference/api/building/laboratory-improvement/#liningcuringcheck).
 
 **Raises**
 
@@ -122,7 +122,7 @@ octaves 63 Hz to 500 Hz or the matching one-third octaves
 | `l_i_fmax_db` | `Li,Fmax` per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz. |
 
-**Returns:** A [`HeavyImpactImprovementResult`](/phonometry/reference/api/building/lab-improvement/#heavyimpactimprovementresult).
+**Returns:** A [`HeavyImpactImprovementResult`](/phonometry/reference/api/building/laboratory-improvement/#heavyimpactimprovementresult).
 
 **Raises**
 
@@ -168,16 +168,16 @@ Plot the improvement `ΔLr` per band.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-## lab_floor_covering_improvement
+## laboratory_floor_covering_improvement
 
 ```python
-lab_floor_covering_improvement(
+laboratory_floor_covering_improvement(
     l_n0_db: ArrayLike,
     l_n_db: ArrayLike,
     frequencies: ArrayLike,
     *,
     reference_floor: Literal['heavyweight', 'lightweight_1', 'lightweight_2', 'lightweight_3'] = 'heavyweight',
-) -> LabFloorCoveringImprovementResult
+) -> LaboratoryFloorCoveringImprovementResult
 ```
 
 Improvement of impact sound insulation by a floor covering (ISO 10140-1 H).
@@ -206,12 +206,12 @@ is the one of the `reference_floor` the caller names.
 
 | Name | Description |
 | :--- | :--- |
-| `l_n0_db` | `Ln0` per one-third-octave band, in dB: the energy-averaged normalized level of the bare floor (e.g. `lab_impact_insulation(...).l_n`). For small category I specimens measured with the tapping machine beside each specimen, it is the arithmetic mean of the two positions either side (H.4.6.1.1). |
+| `l_n0_db` | `Ln0` per one-third-octave band, in dB: the energy-averaged normalized level of the bare floor (e.g. `laboratory_impact_insulation(...).l_n`). For small category I specimens measured with the tapping machine beside each specimen, it is the arithmetic mean of the two positions either side (H.4.6.1.1). |
 | `l_n_db` | `Ln` with the covering, per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz; the ratings are formed on the 16 bands 100 Hz to 3 150 Hz when all are present. |
 | `reference_floor` | `"heavyweight"` (default), `"lightweight_1"`, `"lightweight_2"` or `"lightweight_3"`. |
 
-**Returns:** A [`LabFloorCoveringImprovementResult`](/phonometry/reference/api/building/lab-improvement/#labfloorcoveringimprovementresult).
+**Returns:** A [`LaboratoryFloorCoveringImprovementResult`](/phonometry/reference/api/building/laboratory-improvement/#laboratoryfloorcoveringimprovementresult).
 
 **Raises**
 
@@ -219,16 +219,16 @@ is the one of the `reference_floor` the caller names.
 | :--- | :--- |
 | ValueError | If the three inputs disagree in length, a value is not finite, a frequency is not positive, or `reference_floor` is not one of the four floors. |
 
-## lab_lining_improvement
+## laboratory_lining_improvement
 
 ```python
-lab_lining_improvement(
+laboratory_lining_improvement(
     r_without_db: ArrayLike,
     r_with_db: ArrayLike,
     frequencies: ArrayLike,
     *,
     basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'] | None = 'heavy_wall',
-) -> LabLiningImprovementResult
+) -> LaboratoryLiningImprovementResult
 ```
 
 Improvement of airborne sound insulation by a lining (ISO 10140-1:2021 G).
@@ -263,12 +263,12 @@ read off the numbers, so neither is refused here.
 
 | Name | Description |
 | :--- | :--- |
-| `r_without_db` | `Rwithout` per one-third-octave band, in dB (e.g. `lab_airborne_insulation(...).r`). |
+| `r_without_db` | `Rwithout` per one-third-octave band, in dB (e.g. `laboratory_airborne_insulation(...).r`). |
 | `r_with_db` | `Rwith` per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz. |
 | `basic_element` | `"heavy_wall"` (default), `"heavy_floor"`, `"lightweight_wall"` or `None` for a basic element that is not one of the three standard ones. |
 
-**Returns:** A [`LabLiningImprovementResult`](/phonometry/reference/api/building/lab-improvement/#labliningimprovementresult).
+**Returns:** A [`LaboratoryLiningImprovementResult`](/phonometry/reference/api/building/laboratory-improvement/#laboratoryliningimprovementresult).
 
 **Raises**
 
@@ -276,10 +276,10 @@ read off the numbers, so neither is refused here.
 | :--- | :--- |
 | ValueError | If the three inputs disagree in length, a value is not finite, a frequency is not positive, or `basic_element` is unknown. |
 
-## LabFloorCoveringImprovementResult
+## LaboratoryFloorCoveringImprovementResult
 
 ```python
-LabFloorCoveringImprovementResult(
+LaboratoryFloorCoveringImprovementResult(
     frequencies: np.ndarray,
     l_n0_db: np.ndarray,
     l_n_db: np.ndarray,
@@ -308,16 +308,16 @@ Improvement of impact sound insulation by a floor covering (Annex H).
 | `reference_rating` | The ISO 717-2 rating of the reference curve with the covering, $L_\mathrm{n,r} = L_\mathrm{n,r,0} - \Delta L$: `Ln,r,w` and `CI,r` of H.5 i), or `None`. |
 | `bare_rating` | The ISO 717-2 rating of the measured bare floor, `Ln,0,w` and `CI,0` of H.5 i), or `None`. |
 
-### LabFloorCoveringImprovementResult.designation
+### LaboratoryFloorCoveringImprovementResult.designation
 
 *property*
 
 `"ΔLw"` on the heavyweight floor, `"ΔLt,n,w"` on floor No n (H.1).
 
-### LabFloorCoveringImprovementResult.octave_bands()
+### LaboratoryFloorCoveringImprovementResult.octave_bands()
 
 ```python
-LabFloorCoveringImprovementResult.octave_bands() -> tuple[np.ndarray, np.ndarray]
+LaboratoryFloorCoveringImprovementResult.octave_bands() -> tuple[np.ndarray, np.ndarray]
 ```
 
 `(octave centres in Hz, ΔLoct in dB)` by Formula (H.2).
@@ -325,10 +325,10 @@ LabFloorCoveringImprovementResult.octave_bands() -> tuple[np.ndarray, np.ndarray
 $\Delta L_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta L_j/10}]$
 over the three one-third-octave bands of each octave present.
 
-### LabFloorCoveringImprovementResult.plot()
+### LaboratoryFloorCoveringImprovementResult.plot()
 
 ```python
-LabFloorCoveringImprovementResult.plot(
+LaboratoryFloorCoveringImprovementResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -351,10 +351,10 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `rating_range` | Mark the frequency range of the ISO 717-2 rating, 100 Hz to 3 150 Hz, with two dashed lines, as the diagram of the form of Figure H.4 does (its key 1). |
 | `kwargs` | Forwarded to the `ΔL` curve. |
 
-### LabFloorCoveringImprovementResult.report()
+### LaboratoryFloorCoveringImprovementResult.report()
 
 ```python
-LabFloorCoveringImprovementResult.report(
+LaboratoryFloorCoveringImprovementResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -402,10 +402,10 @@ its place.
 | ValueError | If `engine` or `language` is unknown, or the result carries no weighted reduction (the 16 bands 100 Hz to 3 150 Hz are missing). |
 | ImportError | If reportlab or matplotlib is not installed. |
 
-## LabLiningImprovementResult
+## LaboratoryLiningImprovementResult
 
 ```python
-LabLiningImprovementResult(
+LaboratoryLiningImprovementResult(
     frequencies: np.ndarray,
     r_without_db: np.ndarray,
     r_with_db: np.ndarray,
@@ -434,10 +434,10 @@ Improvement of airborne sound insulation by a lining (ISO 10140-1 Annex G).
 | `delta_rw_c_direct_db` | `Δ(Rw + C)direct`, in dB, or `None`. |
 | `delta_rw_ctr_direct_db` | `Δ(Rw + Ctr)direct`, in dB, or `None`. |
 
-### LabLiningImprovementResult.octave_bands()
+### LaboratoryLiningImprovementResult.octave_bands()
 
 ```python
-LabLiningImprovementResult.octave_bands() -> tuple[np.ndarray, np.ndarray]
+LaboratoryLiningImprovementResult.octave_bands() -> tuple[np.ndarray, np.ndarray]
 ```
 
 `(octave centres in Hz, ΔRoct in dB)` (ISO 717-1:2020 Formula (D.1)).
@@ -446,10 +446,10 @@ $\Delta R_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta R_j/10}]$
 over the three one-third-octave bands of each octave, for every octave
 whose three bands are present.
 
-### LabLiningImprovementResult.plot()
+### LaboratoryLiningImprovementResult.plot()
 
 ```python
-LabLiningImprovementResult.plot(
+LaboratoryLiningImprovementResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',

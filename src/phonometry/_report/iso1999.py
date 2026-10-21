@@ -7,7 +7,7 @@ like a statistical hearing-damage prediction sheet. Both quantities are
 population estimates over the six ISO 1999 audiometric frequencies (500 Hz to
 6000 Hz), not clinical measurements, so the fiches read as predictions:
 
-* :class:`~phonometry.hearing.noise_induced_hearing_loss.NiptsResult` renders
+* :class:`~phonometry.hearing.noise_induced_hearing_loss.NIPTSResult` renders
   the noise-induced permanent threshold shift (NIPTS, clause 6.3): a
   per-audiometric-frequency table of the median ``N50`` (Formula 2/3) and the
   NIPTS at the chosen population fractile (Formula 4/5) beside the result's own
@@ -15,7 +15,7 @@ population estimates over the six ISO 1999 audiometric frequencies (500 Hz to
   hearing-handicap set, and the exposure conditions (``L_EX,8h``, exposure
   years, fractile); ``verbose=True`` adds the upper/lower spread columns
   (``du``/``dl``, Formulae 6/7);
-* :class:`~phonometry.hearing.noise_induced_hearing_loss.HtlanResult` renders
+* :class:`~phonometry.hearing.noise_induced_hearing_loss.HTLANResult` renders
   the hearing threshold level associated with age and noise (HTLAN, clause 6.1):
   a per-audiometric-frequency table of the age component ``H`` (HTLA, database
   A = ISO 7029), the noise component ``N`` (NIPTS) and the combined threshold
@@ -60,7 +60,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
-    from ..hearing.noise_induced_hearing_loss import HtlanResult, NiptsResult
+    from ..hearing.noise_induced_hearing_loss import HTLANResult, NIPTSResult
     from .metadata import ReportMetadata
 
 #: The 2/3/4 kHz hearing-handicap audiometric set, in hertz. The mean threshold
@@ -178,7 +178,7 @@ def _nipts_metadata_pairs(
 
 
 def _nipts_table(
-    result: NiptsResult, *, verbose: bool = False, language: str = "en"
+    result: NIPTSResult, *, verbose: bool = False, language: str = "en"
 ) -> Table:
     """The per-audiometric-frequency NIPTS table (median and fractile value)."""
     from reportlab.lib.units import mm
@@ -219,7 +219,7 @@ def _nipts_table(
 
 
 def _nipts_statement(
-    result: NiptsResult, language: str = "en"
+    result: NIPTSResult, language: str = "en"
 ) -> tuple[str, list[str]]:
     """The boxed representative NIPTS statement and the exposure-condition terms."""
     is_handicap, value, freq = _representative(result.frequencies, result.value)
@@ -246,7 +246,7 @@ def _nipts_statement(
 
 
 def _nipts_verdict(
-    result: NiptsResult, requirement: float, language: str = "en"
+    result: NIPTSResult, requirement: float, language: str = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag: the representative NIPTS at or below a maximum.
 
@@ -264,7 +264,7 @@ def _nipts_verdict(
 
 
 def render_nipts_report(
-    result: NiptsResult,
+    result: NIPTSResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -274,7 +274,7 @@ def render_nipts_report(
     """Render a NIPTS prediction fiche to a PDF at ``path`` (ISO 1999:2013, 6.3).
 
     :param result: A
-        :class:`~phonometry.hearing.noise_induced_hearing_loss.NiptsResult`.
+        :class:`~phonometry.hearing.noise_induced_hearing_loss.NIPTSResult`.
     :param path: Destination path of the PDF file.
     :param metadata: Optional :class:`ReportMetadata` supplying the header
         identity (``client`` is the company, ``specimen`` the worker(s)/group,
@@ -363,7 +363,7 @@ def render_nipts_report(
 # HTLAN fiche.
 # --------------------------------------------------------------------------- #
 def _htlan_table(
-    result: HtlanResult, *, verbose: bool = False, language: str = "en"
+    result: HTLANResult, *, verbose: bool = False, language: str = "en"
 ) -> Table:
     """The per-audiometric-frequency HTLAN table (age, noise and combined)."""
     from reportlab.lib.units import mm
@@ -405,7 +405,7 @@ def _htlan_table(
 
 
 def _htlan_statement(
-    result: HtlanResult, language: str = "en"
+    result: HTLANResult, language: str = "en"
 ) -> tuple[str, list[str]]:
     """The boxed representative HTLAN statement and the listener/exposure terms."""
     is_handicap, value, freq = _representative(result.frequencies, result.threshold)
@@ -438,7 +438,7 @@ def _htlan_statement(
 
 
 def _htlan_verdict(
-    result: HtlanResult, requirement: float, language: str = "en"
+    result: HTLANResult, requirement: float, language: str = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag: the representative HTLAN at or below a maximum."""
     _, value, _ = _representative(result.frequencies, result.threshold)
@@ -451,7 +451,7 @@ def _htlan_verdict(
 
 
 def render_htlan_report(
-    result: HtlanResult,
+    result: HTLANResult,
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -461,7 +461,7 @@ def render_htlan_report(
     """Render an HTLAN prediction fiche to a PDF at ``path`` (ISO 1999:2013, 6.1).
 
     :param result: A
-        :class:`~phonometry.hearing.noise_induced_hearing_loss.HtlanResult`.
+        :class:`~phonometry.hearing.noise_induced_hearing_loss.HTLANResult`.
     :param path: Destination path of the PDF file.
     :param metadata: Optional :class:`ReportMetadata` supplying the header
         identity and, via ``requirement``, a maximum acceptable representative

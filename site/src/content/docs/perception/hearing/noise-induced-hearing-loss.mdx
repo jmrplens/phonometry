@@ -216,7 +216,7 @@ matter, and the library says so at three of them by raising
 
 ### NIPTS report (`.report()`)
 
-`NiptsResult.report(path)` renders a one-page PDF fiche laid out like the
+`NIPTSResult.report(path)` renders a one-page PDF fiche laid out like the
 noise-induced hearing loss prediction an occupational-hygiene service issues
 for an exposure group, following **ISO 1999:2013** (clause 6.3): a
 prediction-basis line, an optional metadata header block (company,
@@ -256,7 +256,7 @@ repository; click the preview to open the PDF.
 	name="iso1999_nipts_example"
 	title="ISO 1999 NIPTS prediction example report (PDF)"
 	description="One-page noise-induced hearing loss prediction fiche: a metadata header (company, worker group, workplace, date of assessment), a table of the median N50 and the NIPTS at the requested fractile from 500 Hz to 6000 Hz (12.9 dB and 17.8 dB at 4000 Hz), the spectrum plot with its 10-90 % fractile band, and the boxed predicted NIPTS averaged over 2/3/4 kHz = 13.9 dB for a noise exposure LEX,8h = 90 dB over 20 years at population fractile Q = 10 %."
-	caption="NIPTS prediction fiche (NiptsResult.report), the shift averaged over the 2/3/4 kHz hearing-handicap set."
+	caption="NIPTS prediction fiche (NIPTSResult.report), the shift averaged over the 2/3/4 kHz hearing-handicap set."
 />
 
 ## 2. Age and noise combined: HTLAN (clause 6.1)
@@ -434,16 +434,16 @@ population's *percentage beyond fence* depends on the fractile spread, not just
 the median, so it must be read from the distribution, never from the median
 threshold alone.
 
-The `NiptsResult` carries the `median` ($N_{50}$), the
+The `NIPTSResult` carries the `median` ($N_{50}$), the
 `spread_upper`/`spread_lower`
-and the `value` at the requested fractile; the `HtlanResult` carries `htla`,
+and the `value` at the requested fractile; the `HTLANResult` carries `htla`,
 `nipts` and the combined `threshold`. Both expose `.plot()`. The age component
 alone is the subject of the
 [hearing-threshold](/phonometry/perception/hearing/hearing-threshold/) guide.
 
 ### HTLAN report (`.report()`)
 
-`HtlanResult.report(path)` renders the companion fiche for the combined
+`HTLANResult.report(path)` renders the companion fiche for the combined
 threshold, following **ISO 1999:2013** clause 6.1: the same prediction-basis
 line and metadata header as the NIPTS fiche, but a table that carries the age
 component $H$, the noise component $N$ and the combined $H'$ at each
@@ -479,7 +479,7 @@ repository; click the preview to open the PDF.
 	name="iso1999_htlan_example"
 	title="ISO 1999 HTLAN prediction example report (PDF)"
 	description="One-page hearing threshold level prediction fiche for age and noise: a metadata header, a table of the age component H, the noise component N and the combined threshold H' from 500 Hz to 6000 Hz (20.2, 24.8 and 40.8 dB at 4000 Hz), the plot of the three curves, and the boxed predicted hearing threshold level averaged over 2/3/4 kHz = 33.0 dB HL for a 60-year-old male listener exposed at LEX,8h = 95 dB over 30 years at population fractile Q = 50 %."
-	caption="Age-plus-noise threshold fiche (HtlanResult.report), the HTLAN averaged over the 2/3/4 kHz hearing-handicap set."
+	caption="Age-plus-noise threshold fiche (HTLANResult.report), the HTLAN averaged over the 2/3/4 kHz hearing-handicap set."
 />
 
 ## What this guide covers

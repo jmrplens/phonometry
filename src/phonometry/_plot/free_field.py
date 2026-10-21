@@ -337,7 +337,7 @@ def plot_free_field_check(
             Patch(facecolor=_C_MUTED, label=_t("A requirement not met", language))
         )
     ax.axhline(
-        result.maximum_qualified_radius_m,
+        result.max_qualified_radius_m,
         color=_C_REFERENCE,
         linewidth=1.4,
         label=_t("Maximum qualified radius", language),
@@ -413,10 +413,10 @@ def plot_source_directionality(
     style_default(up, "color", _C_PRIMARY)
     up.setdefault("width", 0.6)
     up.setdefault("label", _t("Largest level above the mean", language))
-    ax.bar(positions, result.maximum_positive_deviation_db, **up)
+    ax.bar(positions, result.max_positive_deviation_db, **up)
     ax.bar(
         positions,
-        result.maximum_negative_deviation_db,
+        result.max_negative_deviation_db,
         width=up["width"],
         color=_C_SECONDARY,
         label=_t("Largest level below the mean", language),

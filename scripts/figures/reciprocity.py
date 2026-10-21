@@ -87,7 +87,7 @@ def _pressure_example() -> (
     coupler = metrology.PlaneWaveCoupler(
         length_m=7.5e-3,
         diameter_m=18.6e-3,
-        capillary=metrology.CapillaryTube(length_m=0.05, radius_m=0.2e-3, count=2),
+        capillary=metrology.CapillaryTube(length_m=0.05, radius_m=0.2e-3, n_tubes=2),
     )
     za = [
         metrology.coupler_transfer_impedance(
@@ -292,7 +292,7 @@ def generate_reciprocity_budgets(output_dir: str) -> None:
     coupler = metrology.PlaneWaveCoupler(
         length_m=7.5e-3,
         diameter_m=18.6e-3,
-        capillary=metrology.CapillaryTube(length_m=0.05, radius_m=0.2e-3, count=2),
+        capillary=metrology.CapillaryTube(length_m=0.05, radius_m=0.2e-3, n_tubes=2),
     )
     pressure = _pressure_budget(f, coupler, _ls1p_microphones())
     ff = metrology.exact_frequencies(1000, 40000, fraction=3)

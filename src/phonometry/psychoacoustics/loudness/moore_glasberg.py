@@ -1048,7 +1048,7 @@ def loudness_moore_glasberg(
     """
     _validate_conditions(field, presentation)
     fs = resolve_fs(x, fs)
-    pressure = apply_calibration(x, require_1d_signal(_typesignal(x), name="'x'"))
+    pressure = apply_calibration(x, require_1d_signal(_typesignal(x), name="x"))
     if pressure.size == 0:
         msg = "Input signal 'x' cannot be empty."
         raise ValueError(msg)

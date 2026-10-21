@@ -43,8 +43,8 @@ fs = 48000
 rng = np.random.default_rng(0)
 t = np.arange(fs) / fs
 x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # tono de 1 kHz en ruido
-tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # pico más alto, o tone_freq=...
-pr = psychoacoustics.prominence_ratio(x, fs, tone_freq=1000.0)
+tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # pico más alto, o tone_frequency=...
+pr = psychoacoustics.prominence_ratio(x, fs, tone_frequency=1000.0)
 print(round(tnr.ratio_db, 1), round(tnr.criterion_db, 1), tnr.prominent)  # 45.6 8.0 True
 print(round(pr.ratio_db, 1), round(pr.criterion_db, 1), pr.prominent)     # 45.7 9.0 True
 
@@ -224,8 +224,8 @@ noise = 0.05 * rng.standard_normal(t.size)
 for relative_db in (-24.0, -12.0, 0.0, 12.0):
     second = np.sqrt(2) * 0.012 * 10 ** (relative_db / 20)
     y = primary + second * np.sin(2 * np.pi * 1160.0 * t) + noise
-    tnr_y = psychoacoustics.tone_to_noise_ratio(y, fs, tone_freq=1000.0)
-    pr_y = psychoacoustics.prominence_ratio(y, fs, tone_freq=1000.0)
+    tnr_y = psychoacoustics.tone_to_noise_ratio(y, fs, tone_frequency=1000.0)
+    pr_y = psychoacoustics.prominence_ratio(y, fs, tone_frequency=1000.0)
     print(relative_db, round(tnr_y.ratio_db, 1), round(pr_y.ratio_db, 1))
 #   -24.0 9.2  9.8
 #   -12.0 9.2  8.7
@@ -249,7 +249,7 @@ no es que sea incierta: es inválida. Los remedios están aguas arriba:
 estabilizar el punto de funcionamiento del equipo en ensayo, acortar cada
 promedio y promediar las relaciones en vez de los espectros, o hacer
 seguimiento de órdenes de la fuente giratoria. Los complejos armónicos merecen
-el mismo cuidado componente a componente con `tone_freq=`, ya que la deriva de
+el mismo cuidado componente a componente con `tone_frequency=`, ya que la deriva de
 un fundamental se multiplica proporcionalmente en cada armónico.
 
 ## 2. Dónde medir (ECMA-74), y qué necesitan las relaciones
@@ -316,7 +316,7 @@ de umbral de los apartados 8 y 9 que viene después necesita niveles de presión
 acústica reales.
 
 Los tonos secundarios próximos en la misma banda crítica se combinan según el
-apartado 11.6; para complejos armónicos evalúa cada componente (`tone_freq=`).
+apartado 11.6; para complejos armónicos evalúa cada componente (`tone_frequency=`).
 Ambos métodos trabajan sobre espectros promediados RMS con ventana Hann y no
 necesitan calibración absoluta para la relación en sí (ambas relaciones son
 diferencias de nivel).
@@ -327,7 +327,7 @@ diferencias de nivel).
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | array 1D | cualquiera (vale sin calibrar) | ≥ `fs/resolution_hz` muestras | Las relaciones son diferencias de nivel: la calibración se cancela |
 | `fs` | int | Hz | > 0 | |
-| `tone_freq` | float, opcional | Hz | 89,1–11 200; por defecto `None` | `None` evalúa el pico más alto del rango de interés |
+| `tone_frequency` | float, opcional | Hz | 89,1–11 200; por defecto `None` | `None` evalúa el pico más alto del rango de interés |
 | `resolution_hz` | float | Hz | > 0; por defecto `1.0` | La banda del tono debe quedar dentro del 15 % de la banda crítica (apartado 11.2) |
 
 Ambos devuelven un `ToneAssessment(frequency, ratio_db, method)`, donde `method`

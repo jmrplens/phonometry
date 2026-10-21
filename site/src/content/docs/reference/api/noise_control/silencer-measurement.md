@@ -113,7 +113,7 @@ rates and need not even have the same number of points.
 
 Each series is at least five airflow rates spread over the test range,
 and the lowest has to produce more than
-[`MINIMUM_PRESSURE_DIFFERENCE_PA`](/phonometry/reference/api/noise_control/silencer-measurement/#minimum_pressure_difference_pa).
+[`MIN_PRESSURE_DIFFERENCE_PA`](/phonometry/reference/api/noise_control/silencer-measurement/#min_pressure_difference_pa).
 
 **Parameters**
 
@@ -537,20 +537,20 @@ between 125 and its `> 160` row.
 | :--- | :--- |
 | ValueError | If the frequency is not positive and finite. |
 
-## MINIMUM_FLOW_RATES
+## MIN_FLOW_RATES
 
 *Constant* (`int`).
 
 ```python
-MINIMUM_FLOW_RATES = 5
+MIN_FLOW_RATES = 5
 ```
 
-## MINIMUM_PRESSURE_DIFFERENCE_PA
+## MIN_PRESSURE_DIFFERENCE_PA
 
 *Constant* (`float`).
 
 ```python
-MINIMUM_PRESSURE_DIFFERENCE_PA = 10.0
+MIN_PRESSURE_DIFFERENCE_PA = 10.0
 ```
 
 ## MODAL_FILTER_ATTENUATION_DB
@@ -810,7 +810,7 @@ the middle.
 OperatingLine(
     slope: float,
     intercept: float,
-    maximum_deviation: float,
+    max_deviation: float,
     smallest_duty: float,
     largest_duty: float,
     duty: NDArray[np.float64],
@@ -841,7 +841,7 @@ are extrapolated rather than measured directly.
 | :--- | :--- |
 | `slope` | dB per decade of the duty. |
 | `intercept` | The level, in dB, at a duty of 1 in whatever unit the duty was given in. |
-| `maximum_deviation` | The largest distance, in dB, between a measured point and the line. |
+| `max_deviation` | The largest distance, in dB, between a measured point and the line. |
 | `smallest_duty` | The lowest duty measured. |
 | `largest_duty` | The highest duty measured. |
 | `duty` | The duties the fit was made from, as given. |

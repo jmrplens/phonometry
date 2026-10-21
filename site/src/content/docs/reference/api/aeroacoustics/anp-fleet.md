@@ -17,15 +17,15 @@ engine power settings, per operation mode) and default trajectories.
 This module reads the ANP database tables (the semicolon-delimited CSV exports)
 and exposes, for a given aircraft identifier and operation:
 
-* [`AnpNpdCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) -- the NPD curves (`LAmax`/`SEL` versus distance for
+* [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves) -- the NPD curves (`LAmax`/`SEL` versus distance for
   each tabulated power), with a `.plot()`;
-* [`AnpProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile) -- the default fixed-point trajectory as a Doc 29 flight
+* [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile) -- the default fixed-point trajectory as a Doc 29 flight
   path `(N, 5)` with the takeoff/landing ground-roll masks, with a `.plot()`;
-* [`AnpAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraft) -- the aircraft metadata plus convenience wiring
-  ([`AnpAircraft.event_level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftevent_level), [`AnpAircraft.noise_contour`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftnoise_contour)) that feeds
+* [`ANPAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraft) -- the aircraft metadata plus convenience wiring
+  ([`ANPAircraft.event_level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftevent_level), [`ANPAircraft.noise_contour`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraftnoise_contour)) that feeds
   the NPD curves and the profile straight into the existing Doc 29 functions.
 
-[`load_anp_database`](/phonometry/reference/api/aeroacoustics/anp-fleet/#load_anp_database) returns an [`AnpDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase). Called without a path
+[`load_anp_database`](/phonometry/reference/api/aeroacoustics/anp-fleet/#load_anp_database) returns an [`ANPDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase). Called without a path
 it loads the full EASA ANP database (archive version 2.3) shipped with the
 package (see `aircraft/data/anp/PROVENANCE.md`); pointed at a directory it
 reads any other ANP CSV export the user provides.
@@ -33,8 +33,8 @@ reads any other ANP CSV export the user provides.
 Aircraft whose default trajectory is published as *procedural steps* rather than
 as fixed points are reached through [`phonometry.aircraft.flight_performance`](/phonometry/reference/api/aeroacoustics/flight-performance/),
 the ECAC Doc 29 Vol. 2 Appendix B performance model:
-[`AnpDatabase.flight_profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseflight_profile) flies the published procedure for an
-aerodrome and its weather, and [`AnpDatabase.procedural_profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprocedural_profile) returns the
+[`ANPDatabase.flight_profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseflight_profile) flies the published procedure for an
+aerodrome and its weather, and [`ANPDatabase.procedural_profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprocedural_profile) returns the
 result as the same Doc 29 flight path the fixed-point bridge produces, so either
 kind of profile feeds the same chain. NPD curves are available for every aircraft
 regardless.
@@ -44,21 +44,21 @@ database v2.3 (2020) and the ECAC Doc 29 4th ed. Vol 2 NPD/profile conventions.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## AnpAircraft
+## ANPAircraft
 
 ```python
-AnpAircraft(
+ANPAircraft(
     aircraft_id: str,
     description: str,
     engine_type: str,
-    num_engines: int,
+    n_engines: int,
     weight_class: str,
     mounting: str,
     npd_id: str,
     power_parameter: str,
     approach_spectral_class_id: str,
     departure_spectral_class_id: str,
-    database: AnpDatabase,
+    database: ANPDatabase,
 )
 ```
 
@@ -71,19 +71,19 @@ One ANP aircraft type: metadata plus NPD/profile access and Doc 29 wiring.
 | `aircraft_id` | ANP aircraft identifier (e.g. `"747100"`). |
 | `description` | Human-readable aircraft/engine description. |
 | `engine_type` | `"Jet"`, `"Turboprop"` or `"Piston"`. |
-| `num_engines` | Number of engines. |
+| `n_engines` | Number of engines. |
 | `weight_class` | ICAO wake weight class. |
 | `mounting` | Doc 29 engine mounting (`"wing"`/`"fuselage"`/`"propeller"`). |
 | `npd_id` | ANP noise identifier. |
 | `power_parameter` | Name/unit of the NPD power parameter. |
 | `approach_spectral_class_id` | Spectral class of the approach NPD. |
 | `departure_spectral_class_id` | Spectral class of the departure NPD. |
-| `database` | The [`AnpDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase) the aircraft was read from, which its NPD, spectral-class, profile and Doc 29 methods consult. |
+| `database` | The [`ANPDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase) the aircraft was read from, which its NPD, spectral-class, profile and Doc 29 methods consult. |
 
-### AnpAircraft.event_level()
+### ANPAircraft.event_level()
 
 ```python
-AnpAircraft.event_level(
+ANPAircraft.event_level(
     observer: NDArray[np.float64] | list[float],
     operation: str,
     *,
@@ -97,12 +97,12 @@ AnpAircraft.event_level(
 ) -> FlyoverResult
 ```
 
-Single-event level at a receiver (see [`AnpDatabase.event_level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseevent_level)).
+Single-event level at a receiver (see [`ANPDatabase.event_level`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseevent_level)).
 
-### AnpAircraft.noise_contour()
+### ANPAircraft.noise_contour()
 
 ```python
-AnpAircraft.noise_contour(
+ANPAircraft.noise_contour(
     operation: str,
     *,
     x: NDArray[np.float64] | list[float],
@@ -117,33 +117,33 @@ AnpAircraft.noise_contour(
 ) -> NoiseContourResult
 ```
 
-Single-event ground contour (see [`AnpDatabase.noise_contour`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenoise_contour)).
+Single-event ground contour (see [`ANPDatabase.noise_contour`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenoise_contour)).
 
-### AnpAircraft.npd_curves()
+### ANPAircraft.npd_curves()
 
 ```python
-AnpAircraft.npd_curves(operation: str, metric: str = 'SEL') -> AnpNpdCurves
+ANPAircraft.npd_curves(operation: str, metric: str = 'SEL') -> ANPNPDCurves
 ```
 
-NPD curves for this aircraft (see [`AnpDatabase.npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenpd_curves)).
+NPD curves for this aircraft (see [`ANPDatabase.npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenpd_curves)).
 
-### AnpAircraft.profile()
+### ANPAircraft.profile()
 
 ```python
-AnpAircraft.profile(
+ANPAircraft.profile(
     operation: str,
     stage_length: int = 1,
     *,
     profile_id: str | None = None,
-) -> AnpProfile
+) -> ANPProfile
 ```
 
-Fixed-point profile (see [`AnpDatabase.profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprofile)).
+Fixed-point profile (see [`ANPDatabase.profile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaseprofile)).
 
-### AnpAircraft.revised_npd_curves()
+### ANPAircraft.revised_npd_curves()
 
 ```python
-AnpAircraft.revised_npd_curves(
+ANPAircraft.revised_npd_curves(
     operation: str,
     metric: str = 'SEL',
     *,
@@ -151,15 +151,15 @@ AnpAircraft.revised_npd_curves(
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
     absorption: str = 'arp5534',
-) -> RevisedNpdCurves
+) -> RevisedNPDCurves
 ```
 
-NPD curves for another atmosphere (see [`AnpDatabase.revised_npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaserevised_npd_curves)).
+NPD curves for another atmosphere (see [`ANPDatabase.revised_npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabaserevised_npd_curves)).
 
-### AnpAircraft.spectral_class()
+### ANPAircraft.spectral_class()
 
 ```python
-AnpAircraft.spectral_class(operation: str) -> SpectralClass
+ANPAircraft.spectral_class(operation: str) -> SpectralClass
 ```
 
 Spectral class of this aircraft's NPD for an operation.
@@ -178,10 +178,10 @@ Spectral class of this aircraft's NPD for an operation.
 | :--- | :--- |
 | KeyError | if the database carries no such class. |
 
-## AnpDatabase
+## ANPDatabase
 
 ```python
-AnpDatabase(
+ANPDatabase(
     aircraft: Mapping[str, dict[str, str]],
     npd: Mapping[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]],
     distances_m: NDArray[np.float64],
@@ -197,13 +197,13 @@ aircraft; default profiles are available for aircraft that have a fixed-point
 trajectory in the database, and procedural-step profiles for those whose
 coefficient and step tables the export carries.
 
-### AnpDatabase.aircraft()
+### ANPDatabase.aircraft()
 
 ```python
-AnpDatabase.aircraft(aircraft_id: str) -> AnpAircraft
+ANPDatabase.aircraft(aircraft_id: str) -> ANPAircraft
 ```
 
-Return the [`AnpAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraft) for an identifier.
+Return the [`ANPAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraft) for an identifier.
 
 **Raises**
 
@@ -211,16 +211,16 @@ Return the [`AnpAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#an
 | :--- | :--- |
 | KeyError | If the identifier is not in the database. |
 
-### AnpDatabase.aircraft_ids
+### ANPDatabase.aircraft_ids
 
 *property*
 
 Sorted list of aircraft identifiers in the database.
 
-### AnpDatabase.event_level()
+### ANPDatabase.event_level()
 
 ```python
-AnpDatabase.event_level(
+ANPDatabase.event_level(
     aircraft_id: str,
     observer: NDArray[np.float64] | list[float],
     operation: str,
@@ -257,10 +257,10 @@ Feeds the aircraft's profile and NPD curves into
 
 **Returns:** A [`FlyoverResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#flyoverresult).
 
-### AnpDatabase.flight_profile()
+### ANPDatabase.flight_profile()
 
 ```python
-AnpDatabase.flight_profile(
+ANPDatabase.flight_profile(
     aircraft_id: str,
     operation: str,
     *,
@@ -296,10 +296,10 @@ which is why one has to be given and why the answer is not a table entry.
 | :--- | :--- |
 | KeyError | If the aircraft has no procedural-step profile or no default weight for the request. |
 
-### AnpDatabase.noise_contour()
+### ANPDatabase.noise_contour()
 
 ```python
-AnpDatabase.noise_contour(
+ANPDatabase.noise_contour(
     aircraft_id: str,
     operation: str,
     *,
@@ -338,14 +338,14 @@ Feeds the aircraft's profile and NPD curves into
 
 **Returns:** A [`NoiseContourResult`](/phonometry/reference/api/aeroacoustics/airport-noise/#noisecontourresult).
 
-### AnpDatabase.npd_curves()
+### ANPDatabase.npd_curves()
 
 ```python
-AnpDatabase.npd_curves(
+ANPDatabase.npd_curves(
     aircraft_id: str,
     operation: str,
     metric: str = 'SEL',
-) -> AnpNpdCurves
+) -> ANPNPDCurves
 ```
 
 NPD curves for an aircraft, operation and noise metric.
@@ -358,7 +358,7 @@ NPD curves for an aircraft, operation and noise metric.
 | `operation` | `"departure"`/`"D"` or `"arrival"`/`"A"`. |
 | `metric` | `"SEL"` (default) or `"LAmax"`. |
 
-**Returns:** An [`AnpNpdCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves).
+**Returns:** An [`ANPNPDCurves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpnpdcurves).
 
 **Raises**
 
@@ -367,10 +367,10 @@ NPD curves for an aircraft, operation and noise metric.
 | KeyError | If the aircraft has no NPD data for the request. |
 | ValueError | If the metric or operation is unknown. |
 
-### AnpDatabase.performance_aircraft()
+### ANPDatabase.performance_aircraft()
 
 ```python
-AnpDatabase.performance_aircraft(aircraft_id: str) -> PerformanceAircraft
+ANPDatabase.performance_aircraft(aircraft_id: str) -> PerformanceAircraft
 ```
 
 The aeroplane's ECAC Doc 29 Vol. 2 Appendix B coefficient set.
@@ -396,10 +396,10 @@ approach weight follows from the last of those as Doc 29 defines it.
 | KeyError | If the aircraft is not in the database. |
 | ValueError | If the export carries no performance tables at all, which is the case for an NPD-only export. |
 
-### AnpDatabase.procedural_profile()
+### ANPDatabase.procedural_profile()
 
 ```python
-AnpDatabase.procedural_profile(
+ANPDatabase.procedural_profile(
     aircraft_id: str,
     operation: str,
     *,
@@ -407,12 +407,12 @@ AnpDatabase.procedural_profile(
     stage_length: int | str = 1,
     profile_id: str | None = None,
     weight_lb: float | None = None,
-) -> AnpProfile
+) -> ANPProfile
 ```
 
 A flown procedure as the flight path the Doc 29 noise chain reads.
 
-`flight_profile` converted into the same [`AnpProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile) the
+`flight_profile` converted into the same [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile) the
 fixed-point bridge returns, so an aircraft that publishes procedural
 steps and one that publishes fixed points feed
 [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/#event_level) and [`noise_contour`](/phonometry/reference/api/aeroacoustics/airport-noise/#noise_contour) alike. The units change on
@@ -422,12 +422,12 @@ net thrust per engine the NPD tables are indexed on.
 
 Takes the same arguments as `flight_profile`.
 
-**Returns:** An [`AnpProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile).
+**Returns:** An [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile).
 
-### AnpDatabase.procedural_steps()
+### ANPDatabase.procedural_steps()
 
 ```python
-AnpDatabase.procedural_steps(
+ANPDatabase.procedural_steps(
     aircraft_id: str,
     operation: str,
     stage_length: int | str = 1,
@@ -462,16 +462,16 @@ read only for a departure.
 | KeyError | If the aircraft has no procedural-step profile for the request, or `profile_id` is not among the available ones. |
 | ValueError | If `profile_id` is `None` and several profiles exist with none of them named `"DEFAULT"`. |
 
-### AnpDatabase.profile()
+### ANPDatabase.profile()
 
 ```python
-AnpDatabase.profile(
+ANPDatabase.profile(
     aircraft_id: str,
     operation: str,
     stage_length: int | str = 1,
     *,
     profile_id: str | None = None,
-) -> AnpProfile
+) -> ANPProfile
 ```
 
 Fixed-point trajectory for an aircraft, operation and stage length.
@@ -491,7 +491,7 @@ none named `"DEFAULT"`) raises listing the identifiers.
 | `stage_length` | ANP stage length (default 1). |
 | `profile_id` | Optional ANP profile identifier (e.g. `"DEFAULT"`, `"3000LB"`); `None` (default) selects as described above. |
 
-**Returns:** An [`AnpProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile) (a Doc 29 flight path with ground-roll masks).
+**Returns:** An [`ANPProfile`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpprofile) (a Doc 29 flight path with ground-roll masks).
 
 **Raises**
 
@@ -500,10 +500,10 @@ none named `"DEFAULT"`) raises listing the identifiers.
 | KeyError | If the aircraft is unknown, has no fixed-point profile for the request, or `profile_id` is not among the available ones. |
 | ValueError | If `profile_id` is `None` and several profiles exist with none of them named `"DEFAULT"`. |
 
-### AnpDatabase.revised_npd_curves()
+### ANPDatabase.revised_npd_curves()
 
 ```python
-AnpDatabase.revised_npd_curves(
+ANPDatabase.revised_npd_curves(
     aircraft_id: str,
     operation: str,
     metric: str = 'SEL',
@@ -512,7 +512,7 @@ AnpDatabase.revised_npd_curves(
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
     absorption: str = 'arp5534',
-) -> RevisedNpdCurves
+) -> RevisedNPDCurves
 ```
 
 NPD curves recalculated for another atmosphere (Doc 29 Vol. 2 Appendix D).
@@ -534,7 +534,7 @@ it.
 | `static_pressure_kpa` | Air pressure, in kPa (default 101.325). |
 | `absorption` | `"arp5534"` (default) or `"arp866a"`. |
 
-**Returns:** A [`RevisedNpdCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).
+**Returns:** A [`RevisedNPDCurves`](/phonometry/reference/api/aeroacoustics/npd-atmosphere/#revisednpdcurves).
 
 **Raises**
 
@@ -543,10 +543,10 @@ it.
 | KeyError | if the aircraft, its NPD data or its spectral class is missing. |
 | ValueError | for an unknown metric, operation or absorption route. |
 
-### AnpDatabase.spectral_class()
+### ANPDatabase.spectral_class()
 
 ```python
-AnpDatabase.spectral_class(class_id: int | str) -> SpectralClass
+ANPDatabase.spectral_class(class_id: int | str) -> SpectralClass
 ```
 
 One spectral class of the database (ECAC Doc 29 Vol. 2 G4.3).
@@ -565,16 +565,16 @@ One spectral class of the database (ECAC Doc 29 Vol. 2 G4.3).
 | :--- | :--- |
 | KeyError | if the export carries no such class, or no spectral-class table at all. |
 
-### AnpDatabase.spectral_class_ids
+### ANPDatabase.spectral_class_ids
 
 *property*
 
 Sorted list of the spectral class identifiers in the database.
 
-## AnpNpdCurves
+## ANPNPDCurves
 
 ```python
-AnpNpdCurves(
+ANPNPDCurves(
     aircraft_id: str,
     npd_id: str,
     metric: str,
@@ -604,10 +604,10 @@ ANP Noise-Power-Distance curves for one aircraft, metric and operation.
 The `powers`, `distances_m` and `levels` arrays are read-only views shared
 with the parent database; copy them before mutating.
 
-### AnpNpdCurves.level()
+### ANPNPDCurves.level()
 
 ```python
-AnpNpdCurves.level(
+ANPNPDCurves.level(
     power: float,
     distance_m: NDArray[np.float64] | list[float] | float,
 ) -> NDArray[np.float64]
@@ -624,10 +624,10 @@ Interpolated NPD level `L(P, d)` (Doc 29 Eq. 4-3/4-4).
 
 **Returns:** The interpolated level per query distance, in dB.
 
-### AnpNpdCurves.plot()
+### ANPNPDCurves.plot()
 
 ```python
-AnpNpdCurves.plot(
+ANPNPDCurves.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -637,10 +637,10 @@ AnpNpdCurves.plot(
 
 Plot the NPD curve at each tabulated power versus slant distance.
 
-## AnpProfile
+## ANPProfile
 
 ```python
-AnpProfile(
+ANPProfile(
     aircraft_id: str,
     operation: str,
     profile_id: str,
@@ -668,10 +668,10 @@ Default fixed-point trajectory of an ANP aircraft as a Doc 29 flight path.
 `path` is a read-only view shared with the parent database; copy it before
 mutating.
 
-### AnpProfile.plot()
+### ANPProfile.plot()
 
 ```python
-AnpProfile.plot(
+ANPProfile.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -684,7 +684,7 @@ Plot the trajectory altitude versus along-track distance.
 ## load_anp_database
 
 ```python
-load_anp_database(path: Path | str | None = None) -> AnpDatabase
+load_anp_database(path: Path | str | None = None) -> ANPDatabase
 ```
 
 Load an EASA ANP database (aircraft, NPD curves and default profiles).
@@ -695,7 +695,7 @@ Load an EASA ANP database (aircraft, NPD curves and default profiles).
 | :--- | :--- |
 | `path` | Directory of an ANP CSV export (the `*Aircraft.csv`, `*NPD_data.csv`, `*fixed_point_profiles.csv` tables, plus the optional performance tables the procedural-step model reads: `*engine_coefficients.csv`, `*Aerodynamic_coefficients.csv`, `*weights.csv` and the two `*procedural_steps.csv`, and the `*Spectral_classes.csv` table ECAC Doc 29 Vol. 2 Appendix D reads to recalculate the NPD curves for another atmosphere). If `None` (default), loads the full EASA ANP database v2.3 shipped with the package (see `aircraft/data/anp/PROVENANCE.md`). |
 
-**Returns:** An [`AnpDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase).
+**Returns:** An [`ANPDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase).
 
 **Raises**
 

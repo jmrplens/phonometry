@@ -679,20 +679,20 @@ Plot the per-band lateral fraction against the Table A.1 range.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+## MAX_DIRECTIVITY_STEP_DEG
+
+*Constant* (`float`).
+
+```python
+MAX_DIRECTIVITY_STEP_DEG = 12.5
+```
+
 ## MAX_SOURCE_DIRECTIVITY_DEVIATION_DB
 
 *Constant* (`mapping`).
 
 ```python
 MAX_SOURCE_DIRECTIVITY_DEVIATION_DB = {125.0: 1.0, 250.0: 1.0, 500.0: 1.0, 1000.0: 3.0, 2000.0: 5.0, 4000.0: 6.0}
-```
-
-## MAXIMUM_DIRECTIVITY_STEP_DEG
-
-*Constant* (`float`).
-
-```python
-MAXIMUM_DIRECTIVITY_STEP_DEG = 12.5
 ```
 
 ## MID_FREQUENCY_OCTAVES_HZ
@@ -709,6 +709,14 @@ MID_FREQUENCY_OCTAVES_HZ = (500.0, 1000.0)
 
 ```python
 MID_FREQUENCY_THIRD_OCTAVES_HZ = (400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0)
+```
+
+## MIN_REFERENCE_DISTANCE_M
+
+*Constant* (`float`).
+
+```python
+MIN_REFERENCE_DISTANCE_M = 3.0
 ```
 
 ## minimum_receiver_positions
@@ -750,14 +758,6 @@ as balconies and under-balcony areas will need more than this.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a seat count is not a positive, finite number. |
-
-## MINIMUM_REFERENCE_DISTANCE_M
-
-*Constant* (`float`).
-
-```python
-MINIMUM_REFERENCE_DISTANCE_M = 3.0
-```
 
 ## octave_pair_averages
 

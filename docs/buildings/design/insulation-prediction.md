@@ -141,7 +141,7 @@ enforces a floor $K_{ij} \ge K_{ij,\min}$ from the junction geometry
 (Formula 29). Pass the flanking-element area to
 `flanking_element(..., flanking_area=...)` and the clamp is applied
 automatically per path; or compute the floor yourself with
-`junction_min_vibration_reduction` and pass it to
+`junction_minimum_vibration_reduction` and pass it to
 `flanking_path(..., kij_min=...)`, which raises a below-floor $K_{ij}$ to the
 minimum:
 
@@ -151,7 +151,7 @@ from phonometry import building
 # floor, so a realistic tabulated Kij is rarely clamped; but small, light
 # elements can push it above the tabulated value (e.g. lf = 4 m, S = 1.5 m²
 # gives 7.3 dB, over the 5 dB lightweight floor).
-print(round(building.junction_min_vibration_reduction(coupling_length=4.5,
+print(round(building.junction_minimum_vibration_reduction(coupling_length=4.5,
                                              s_i=11.5, s_j=11.5), 1))     # -1.1
 ```
 

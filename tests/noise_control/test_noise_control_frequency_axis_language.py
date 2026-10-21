@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
     from phonometry.noise_control.duct_path import DuctPathResult
     from phonometry.noise_control.enclosures import EnclosureResult
-    from phonometry.noise_control.hvac import HvacSpectrumResult
+    from phonometry.noise_control.hvac import HVACSpectrumResult
     from phonometry.noise_control.room_to_room import RoomToRoomResult
     from phonometry.noise_control.silencers import ReactiveSilencerResult
 
@@ -50,7 +50,7 @@ def _reactive_silencer() -> ReactiveSilencerResult:
     )
 
 
-def _hvac_spectrum() -> HvacSpectrumResult:
+def _hvac_spectrum() -> HVACSpectrumResult:
     return noise_control.end_reflection_loss(_BANDS, 0.3)
 
 

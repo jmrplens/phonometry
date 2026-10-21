@@ -759,7 +759,7 @@ class TrainPassage(OwnsArrays):
     :ivar frequencies: The nominal third-octave centres analysed.
     :ivar band_interval_levels_db: :math:`L_{v\mathrm{F}j}(f_{\mathrm{T}n})` of Formula (6), one
         row per stretch, :math:`T_1` to :math:`T_3`.
-    :ivar band_max_levels_db: :math:`L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})` of Formula
+    :ivar band_maximum_levels_db: :math:`L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})` of Formula
         (7), over :math:`T_3`.
     :ivar fs: The sampling frequency of the record.
     """
@@ -775,7 +775,7 @@ class TrainPassage(OwnsArrays):
     event_level_db: float
     frequencies: NDArray[np.float64]
     band_interval_levels_db: NDArray[np.float64]
-    band_max_levels_db: NDArray[np.float64]
+    band_maximum_levels_db: NDArray[np.float64]
     fs: float
 
     def plot(
@@ -970,7 +970,7 @@ def evaluate_train_passage(
         ),
         frequencies=centres,
         band_interval_levels_db=interval_levels,
-        band_max_levels_db=_level(
+        band_maximum_levels_db=_level(
             np.max(band_rms[:, t3], axis=1), VELOCITY_LEVEL_REFERENCE_MM_S
         ),
         fs=fs,

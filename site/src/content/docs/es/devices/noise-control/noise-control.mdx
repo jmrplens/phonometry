@@ -114,7 +114,7 @@ from phonometry.noise_control import hvac
 
 bands = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0]
 
-# Una línea para un conducto: el HvacSpectrumResult del extremo enrasado de 300 mm.
+# Una línea para un conducto: el HVACSpectrumResult del extremo enrasado de 300 mm.
 er = hvac.end_reflection_loss(bands, diameter_m=0.30, termination="flush")
 er.plot(language="es")
 plt.show()
@@ -158,7 +158,7 @@ import numpy as np                    # hvac: importado en el fragmento anterior
 
 bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 
-# Una línea para un elemento: el HvacSpectrumResult del codo cuadrado revestido.
+# Una línea para un elemento: el HVACSpectrumResult del codo cuadrado revestido.
 hvac.elbow_insertion_loss(bands, width_m=0.3, bend_type="square",
                           lined=True).plot(language="es")
 plt.show()
@@ -273,7 +273,7 @@ por los nodos tabulados) y el de codos lee la Tabla 8.11 según la banda en la
 que cae su $W/\lambda$; los métodos de plenum (Wells) y de
 ruido de flujo (VDI 2081) son formas cerradas. `end_reflection_loss`,
 `elbow_insertion_loss`, `flow_noise_straight_duct` y `flow_noise_bend` devuelven
-un `HvacSpectrumResult` (atenuación o nivel de potencia acústica regenerada) con
+un `HVACSpectrumResult` (atenuación o nivel de potencia acústica regenerada) con
 `.plot()`; `plenum_attenuation` devuelve la pérdida de transmisión directamente.
 Los conductos rectangulares usan el diámetro equivalente $D = \sqrt{4S/\pi}$.
 
@@ -283,7 +283,7 @@ de ASHRAE; no hay forma cerrada en esa edición. Este módulo reproduce e
 interpola la tabla.
 :::
 
-Un `HvacSpectrumResult` también se archiva solo: `.report()` genera una ficha de
+Un `HVACSpectrumResult` también se archiva solo: `.report()` genera una ficha de
 ruido de conducto de una página, con la tabla por banda junto al espectro, el
 resultado de número único en su recuadro (el nivel de potencia acústica
 ponderado A cuando el espectro es ruido regenerado, la atenuación media cuando
@@ -318,7 +318,7 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 	name="hvac_duct_noise_example"
 	title="Informe de ejemplo del espectro de ruido de un conducto HVAC (PDF)"
 	description="Ficha de ruido de conducto HVAC de una página: una cabecera de metadatos con el conducto de impulsión recto y la sala de climatización, una tabla por bandas de octava del nivel de potencia acústica generado por el flujo, que cae de 42,5 dB a 63 Hz a 21,8 dB a 4 kHz, el mismo espectro representado al lado, el nivel de potencia acústica ponderado A LWA = 38,8 dB(A) re 1 pW enmarcado con el nivel global sin ponderar LW = 47,0 dB re 1 pW, y un veredicto CUMPLE frente a un máximo declarado de 45,0 dB(A)."
-	caption="Ficha de ruido de conducto HVAC (HvacSpectrumResult.report), la potencia acústica generada por el flujo en un conducto recto a 12 m/s con sección de 0,04 m2."
+	caption="Ficha de ruido de conducto HVAC (HVACSpectrumResult.report), la potencia acústica generada por el flujo en un conducto recto a 12 m/s con sección de 0,04 m2."
 />
 
 ## 2. Cerramientos de máquina

@@ -60,8 +60,8 @@ def test_precision_positions_sphere_shape_and_scale() -> None:
 
 
 def test_precision_positions_primary_array_is_20() -> None:
-    """count=20 returns the primary array (positions 1-20)."""
-    pos = precision_positions("hemisphere", radius=1.0, count=20)
+    """n_positions=20 returns the primary array (positions 1-20)."""
+    pos = precision_positions("hemisphere", radius=1.0, n_positions=20)
     assert pos.shape == (20, 3)
 
 
@@ -102,8 +102,8 @@ def test_precision_positions_requires_a_radius() -> None:
 
 
 def test_precision_positions_bad_count_raises() -> None:
-    with pytest.raises(ValueError, match="'count' must be 20"):
-        precision_positions("sphere", radius=1.0, count=30)
+    with pytest.raises(ValueError, match="'n_positions' must be 20"):
+        precision_positions("sphere", radius=1.0, n_positions=30)
 
 
 # ==========================================================================

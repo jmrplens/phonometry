@@ -26,15 +26,15 @@ from phonometry.environment.propagation.barrier_in_situ import (
     EQUIVALENT_SECTOR_DEG,
     EQUIVALENT_SURROUNDINGS_RADIUS_M,
     ISO10847_BACKGROUND_CORRECTIONS_DB,
-    ISO10847_MINIMUM_BACKGROUND_MARGIN_DB,
+    ISO10847_MIN_BACKGROUND_MARGIN_DB,
     ISO10847_OCTAVE_BAND_RANGE_HZ,
     ISO10847_PREFERRED_BACKGROUND_MARGIN_DB,
     ISO10847_THIRD_OCTAVE_BAND_RANGE_HZ,
     LINE_SOURCE_DIVERGENCE_DB,
     LONG_DISTANCE_M,
-    MAXIMUM_WIND_SPEED_M_S,
-    MINIMUM_RECEIVER_HEIGHT_M,
-    MINIMUM_REPETITIONS,
+    MAX_WIND_SPEED_M_S,
+    MIN_RECEIVER_HEIGHT_M,
+    MIN_REPETITIONS,
     POINT_SOURCE_DIVERGENCE_DB,
     RECEIVER_CORRECTIONS_DB,
     REFERENCE_ELEVATION_INCREMENT_DEG,
@@ -176,7 +176,7 @@ def test_the_correction_is_added_rather_than_subtracted() -> None:
 def test_a_margin_under_four_decibels_is_refused() -> None:
     with pytest.raises(ValueError, match="invalid"):
         environment.barrier_background_correction([3.9])
-    assert ISO10847_MINIMUM_BACKGROUND_MARGIN_DB == 4.0
+    assert ISO10847_MIN_BACKGROUND_MARGIN_DB == 4.0
 
 
 def test_this_table_is_not_the_one_the_silencer_standard_prints() -> None:
@@ -238,7 +238,7 @@ def test_the_upwind_class_is_read_as_negative() -> None:
 def test_no_measurement_above_five_metres_per_second() -> None:
     with pytest.raises(ValueError, match="5 m/s"):
         environment.wind_class(5.5)
-    assert MAXIMUM_WIND_SPEED_M_S == 5.0
+    assert MAX_WIND_SPEED_M_S == 5.0
     assert WIND_VECTOR_TOLERANCE_M_S == 2.0
 
 
@@ -361,8 +361,8 @@ def test_the_hemi_free_field_rule_takes_the_shorter_of_the_two() -> None:
 def test_the_printed_constants() -> None:
     assert ISO10847_OCTAVE_BAND_RANGE_HZ == (63.0, 4000.0)
     assert ISO10847_THIRD_OCTAVE_BAND_RANGE_HZ == (50.0, 5000.0)
-    assert MINIMUM_RECEIVER_HEIGHT_M == 1.2
-    assert MINIMUM_REPETITIONS == 3
+    assert MIN_RECEIVER_HEIGHT_M == 1.2
+    assert MIN_REPETITIONS == 3
     assert LONG_DISTANCE_M == 250.0
     assert TEMPERATURE_TOLERANCE_C == 10.0
     assert EQUIVALENT_SECTOR_DEG == 60.0
@@ -637,9 +637,7 @@ def test_the_background_table_is_reprinted_by_a_second_committee() -> None:
     for margins, printed in oracle.CEN_TS_16272_7_TABLE_4_DB:
         corrections = environment.barrier_background_correction(list(margins))
         assert corrections.tolist() == [printed] * len(margins)
-    assert (
-        ISO10847_MINIMUM_BACKGROUND_MARGIN_DB == oracle.CEN_TS_16272_7_MINIMUM_MARGIN_DB
-    )
+    assert ISO10847_MIN_BACKGROUND_MARGIN_DB == oracle.CEN_TS_16272_7_MINIMUM_MARGIN_DB
     assert (
         ISO10847_PREFERRED_BACKGROUND_MARGIN_DB
         == oracle.CEN_TS_16272_7_PREFERRED_MARGIN_DB

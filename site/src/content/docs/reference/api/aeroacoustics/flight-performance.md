@@ -488,7 +488,7 @@ Corrected net thrust per engine, lb (Eq. B-9, and Eq. B-10 in kind).
 ```python
 PerformanceAircraft(
     aircraft_id: str,
-    engines: int,
+    n_engines: int,
     max_static_thrust_lb: float,
     max_landing_weight_lb: float,
     jet_coefficients: Mapping[str, JetEngineCoefficients] = ...,
@@ -504,7 +504,7 @@ One aeroplane's Appendix B coefficient set.
 | Name | Description |
 | :--- | :--- |
 | `aircraft_id` | ANP aircraft identifier. |
-| `engines` | Number of engines supplying thrust `N`. |
+| `n_engines` | Number of engines supplying thrust `N`. |
 | `max_static_thrust_lb` | Maximum sea-level static thrust per engine, lb. Read only by Eq. B-79 and Eq. B-81, where a Decelerate step's start thrust is a percentage of it. |
 | `max_landing_weight_lb` | Maximum gross landing weight, lb. The approach weight is 90 % of it (Eq. B-75, Eq. B-76). |
 | `jet_coefficients` | Eq. B-9 coefficients per thrust rating. |

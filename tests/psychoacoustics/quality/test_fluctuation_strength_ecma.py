@@ -402,7 +402,7 @@ def test_invalid_field_raises() -> None:
 
 def test_empty_signal_raises() -> None:
     empty = np.array([])
-    with pytest.raises(ValueError, match="signal must not be empty"):
+    with pytest.raises(ValueError, match="'x' must not be empty"):
         psychoacoustics.fluctuation_strength_ecma(empty, FS)
 
 
@@ -416,9 +416,7 @@ def test_invalid_fs_raises(bad_fs: float) -> None:
 def test_non_finite_signal_raises() -> None:
     sig = _tone(1000.0, 60.0, 1.0)
     sig[100] = np.nan
-    with pytest.raises(
-        ValueError, match="'signal_in' must contain only finite samples"
-    ):
+    with pytest.raises(ValueError, match="'x' must contain only finite samples"):
         psychoacoustics.fluctuation_strength_ecma(sig, FS)
 
 

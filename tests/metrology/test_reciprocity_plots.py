@@ -40,7 +40,7 @@ _MICS = tuple(
 _PLANE = metrology.PlaneWaveCoupler(
     length_m=7.5e-3,
     diameter_m=18.6e-3,
-    capillary=metrology.CapillaryTube(length_m=0.05, radius_m=1.0 / 6000.0, count=2),
+    capillary=metrology.CapillaryTube(length_m=0.05, radius_m=1.0 / 6000.0, n_tubes=2),
 )
 _LARGE = metrology.LargeVolumeCoupler(
     length_m=12.55e-3, diameter_m=42.88e-3, port_length_m=0.80e-3

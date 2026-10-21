@@ -196,23 +196,23 @@ check_coherence(
     *,
     frequency_range_hz: tuple[float, float],
     exclude_hz: Sequence[tuple[float, float]] = (),
-    minimum_coherence: float = 0.9,
-    minimum_records: int = 5,
+    min_coherence: float = 0.9,
+    min_records: int = 5,
 ) -> CoherenceCheck
 ```
 
 Is the averaged estimate's coherence high over the range of interest? (9.1)
 
-The check passes when the coherence exceeds `minimum_coherence` (0,9,
+The check passes when the coherence exceeds `min_coherence` (0,9,
 what 9.1 calls high) at every frequency of the range that is not excluded,
-and at least `minimum_records` impacts were averaged (five, the lower end
+and at least `min_records` impacts were averaged (five, the lower end
 of the five to ten 9.1 says a high coherence needs). A single impact has a
 coherence of 1 by construction and fails the second condition.
 
 8.6 finds three to five impacts usually enough to verify data quality in a
 low-noise environment; the coherence estimate itself, 9.1 adds, needs five
 to ten records to be trusted. Averaging five impacts satisfies both, and a
-lower `minimum_records` states that fewer were judged enough.
+lower `min_records` states that fewer were judged enough.
 
 **Parameters**
 
@@ -221,8 +221,8 @@ lower `minimum_records` states that fewer were judged enough.
 | `result` | The averaged estimate, from [`impact_mobility`](/phonometry/reference/api/vibration/impact-mobility/#impact_mobility). |
 | `frequency_range_hz` | `(f_low, f_high)`, in hertz. |
 | `exclude_hz` | Bands `(f_low, f_high)` to leave out of the verdict, such as anti-resonances (9.1, NOTE 1) (Default: none). |
-| `minimum_coherence` | The coherence to exceed (Default: 0.9). |
-| `minimum_records` | The fewest impacts to accept, a whole number of at least 1 (Default: 5). |
+| `min_coherence` | The coherence to exceed (Default: 0.9). |
+| `min_records` | The fewest impacts to accept, a whole number of at least 1 (Default: 5). |
 
 **Returns:** A [`CoherenceCheck`](/phonometry/reference/api/vibration/impact-mobility/#coherencecheck).
 
@@ -230,7 +230,7 @@ lower `minimum_records` states that fewer were judged enough.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for an invalid range, exclusion or limit, a `minimum_records` that is not a whole number of at least 1, or exclusions that leave no frequency of the range to judge. |
+| ValueError | for an invalid range, exclusion or limit, a `min_records` that is not a whole number of at least 1, or exclusions that leave no frequency of the range to judge. |
 
 ## check_double_hit
 
@@ -414,8 +414,8 @@ CoherenceCheck(
     judged: np.ndarray,
     *,
     impacts: int,
-    minimum_coherence: float = 0.9,
-    minimum_records: int = 5,
+    min_coherence: float = 0.9,
+    min_records: int = 5,
 )
 ```
 
@@ -437,8 +437,8 @@ be excluded from the judgement.
 | `coherence` | Ordinary coherence $\gamma^2$ at each. |
 | `judged` | Per frequency, whether it enters the verdict (`False` where excluded as an anti-resonance). |
 | `impacts` | Number of impacts averaged. |
-| `minimum_coherence` | The coherence each judged frequency must exceed. |
-| `minimum_records` | The fewest impacts the check accepts. |
+| `min_coherence` | The coherence each judged frequency must exceed. |
+| `min_records` | The fewest impacts the check accepts. |
 
 ### CoherenceCheck.enough_records
 

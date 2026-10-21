@@ -292,7 +292,7 @@ plt.show()
 
 Todo lo que hay entre el ventilador y la sala quita algo, y casi todo sale
 gratis. Los modelos son los del capítulo 14 de Long con las regresiones de
-Reynolds (1990), y todos devuelven un `HvacSpectrumResult` con `.values`,
+Reynolds (1990), y todos devuelven un `HVACSpectrumResult` con `.values`,
 `.plot()` y `.report()`. Todos toman las bandas de análisis como primer
 argumento, y `None` significa las `hvac.OCTAVE_BANDS` por omisión, el conjunto
 de 63 Hz a 8 kHz que usan las hojas publicadas; pásale tu propio vector cuando
@@ -446,7 +446,7 @@ salga de una hoja de características.*
 ```python
 import matplotlib.pyplot as plt
 
-# `bandas`, IN y FT como arriba; todos los modelos devuelven un HvacSpectrumResult.
+# `bandas`, IN y FT como arriba; todos los modelos devuelven un HVACSpectrumResult.
 
 # Una línea para un elemento:
 noise_control.lined_rectangular_duct_attenuation(bandas, 36 * IN, 24 * IN, 5 * FT, 1 * IN,
@@ -1033,7 +1033,7 @@ import numpy as np
 from phonometry import noise_control
 
 # Problema 7.2 de Norton: un conducto de climatización de 0.65 x 0.4 m a 15 m/s.
-modos = noise_control.rectangular_duct_cut_on(0.65, 0.40, flow_velocity=15.0, count=6)
+modos = noise_control.rectangular_duct_cut_on(0.65, 0.40, flow_velocity=15.0, n_modes=6)
 print(modos.modes[:3])                          # ((1, 0), (0, 1), (1, 1))
 print(np.round(modos.cut_on[:3], 1))            # [263.6 428.3 502.9] Hz
 print(np.round(modos.cut_on_no_flow[:3], 1))    # [263.8 428.8 503.4] Hz
@@ -1095,7 +1095,7 @@ from phonometry import noise_control
 
 # Problema 7.1 de Norton: un conducto circular de 254 mm con vapor a 200 m/s.
 vapor = noise_control.circular_duct_cut_on(0.254, flow_velocity=200.0,
-                                           speed_of_sound=405.0, count=6)
+                                           speed_of_sound=405.0, n_modes=6)
 print(vapor.modes)
 # ((1, 0), (2, 0), (0, 1), (3, 0), (4, 0), (1, 1))
 print(np.round(vapor.cut_on_no_flow, 1))
@@ -1126,12 +1126,12 @@ from phonometry import noise_control
 
 # Una línea para un conducto: la escalera de corte con la banda de onda plana.
 vapor = noise_control.circular_duct_cut_on(0.254, flow_velocity=200.0,
-                                           speed_of_sound=405.0, count=6)
+                                           speed_of_sound=405.0, n_modes=6)
 vapor.plot(language="es")
 plt.show()
 
 # El conducto de ventilación del problema 7.2, donde el flujo casi no cuenta.
-noise_control.rectangular_duct_cut_on(0.65, 0.40, flow_velocity=15.0, count=6).plot(language="es")
+noise_control.rectangular_duct_cut_on(0.65, 0.40, flow_velocity=15.0, n_modes=6).plot(language="es")
 plt.show()
 ```
 

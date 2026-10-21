@@ -1103,10 +1103,10 @@ class HardWalledRoomCheck(OwnsArrays):
     (4.4), and :attr:`limit_db` the Table 3 value it may not exceed.
     ``volume`` is the room, ``reference_box_volume_m3`` and
     ``largest_box_dimension_m`` the reference box of 4.1, and
-    :attr:`minimum_volume_m3` / :attr:`box_dimension_limit_m` what 4.2 asks
+    :attr:`min_volume_m3` / :attr:`box_dimension_limit_m` what 4.2 asks
     of them. ``max_absorption_coefficient`` is the largest sound absorption
     coefficient of any portion of the boundary surfaces, ``NaN`` when none was
-    supplied, against the 0,20 of 4.3. :attr:`minimum_microphone_distance_m`
+    supplied, against the 0,20 of 4.3. :attr:`min_microphone_distance_m`
     is the :math:`d_\mathrm{min} = 0{,}3\,V^{1/3}` of 7.3 that keeps the
     microphones in the reverberant field, stated for the setup rather than
     judged. The limits are the standard's and are read from the bands, the
@@ -1153,7 +1153,7 @@ class HardWalledRoomCheck(OwnsArrays):
         return _table3_sigma(np.asarray(self.frequencies, dtype=np.float64))
 
     @property
-    def minimum_volume_m3(self) -> float:
+    def min_volume_m3(self) -> float:
         """The volume 4.2 asks of the room: 40 m³ and forty reference boxes.
 
         :return: The larger of the two, in cubic metres.
@@ -1175,7 +1175,7 @@ class HardWalledRoomCheck(OwnsArrays):
         return _BOX_LIMIT_LARGE_ROOM_M
 
     @property
-    def minimum_microphone_distance_m(self) -> float:
+    def min_microphone_distance_m(self) -> float:
         r"""The :math:`d_\mathrm{min} = 0{,}3\,V^{1/3}` of 7.3, in metres.
 
         :return: The least distance from the source that keeps a microphone
@@ -1203,7 +1203,7 @@ class HardWalledRoomCheck(OwnsArrays):
         least".
         """
         volume = float(settled(self.volume))
-        return volume >= float(settled(self.minimum_volume_m3))
+        return volume >= float(settled(self.min_volume_m3))
 
     @property
     def box_fits(self) -> bool:

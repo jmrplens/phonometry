@@ -232,7 +232,7 @@ acoustician meets indoors is different in kind, because a reflection is a
 The failure signature is worth memorising, because no returned number reports
 it: a correlogram whose main peak is not much taller than its neighbours, or a
 delay that jumps between segments of the same record, means the direct path is
-not dominant and the delay you have is a reflection's. `delay_std` will not warn
+not dominant and the delay you have is a reflection's. `delay_standard_deviation` will not warn
 you; Eq. 8.129 models the scatter of a single peak, not the choice between two.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay.svg" alt="Normalized cross-correlation of a colored two-sensor signal pair against lag in milliseconds: the direct correlator shows a broad peak around the true 20-sample delay while the GCC-PHAT curve collapses to a sharp spike exactly on the dashed true-delay line" width="82%" loading="eager" />
@@ -312,7 +312,7 @@ y = np.roll(s, delay) + signals.noise_signal(fs, 4.0, color="white", rms=0.02, s
 res = signals.time_delay(x, y, fs, method="gcc", weighting="ml",
                          nperseg=2048, upsample=16, signal_bandwidth=1000.0)
 print(res.delay, res.delay_samples)     # seconds and fractional samples
-print(res.delay_std, res.delay_interval)  # Eq. 8.129 sigma, +/-2 sigma
+print(res.delay_standard_deviation, res.delay_interval)  # Eq. 8.129 sigma, +/-2 sigma
 res.plot()                              # correlation with the delay marked
 ```
 

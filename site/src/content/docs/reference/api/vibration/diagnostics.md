@@ -163,7 +163,7 @@ blade_pass_frequencies(
     speed_rpm: float,
     n_blades: int,
     *,
-    harmonics: int = 3,
+    n_harmonics: int = 3,
     n_vanes: int | None = None,
     lobe_orders: int = 1,
 ) -> FaultFrequencyResult
@@ -171,7 +171,7 @@ blade_pass_frequencies(
 
 Blade-passing frequency and interaction patterns (Norton 8.15-8.17).
 
-$f_\mathrm{b} = n\, N_{\text{blades}} \times N/60$ for `n = 1 .. harmonics`,
+$f_\mathrm{b} = n\, N_{\text{blades}} \times N/60$ for `n = 1 .. n_harmonics`,
 the discrete tone
 family of any fan, blower or pump impeller; a rotary positive-displacement
 blower repeats four times per revolution, so pass `4 x` its speed.
@@ -194,7 +194,7 @@ pattern turning at a different speed.
 | :--- | :--- |
 | `speed_rpm` | Shaft speed `N`, in r/min (> 0). |
 | `n_blades` | Number of blades (integer >= 1). |
-| `harmonics` | Number of blade-pass harmonics (integer >= 1, Default: 3). |
+| `n_harmonics` | Number of blade-pass harmonics (integer >= 1, Default: 3). |
 | `n_vanes` | Number of stator vanes `V` (integer >= 1) to include the lobed interaction patterns (Default: `None`, blade tones only). |
 | `lobe_orders` | Highest `\|k\|` in $m_\mathrm{L} = n\, N_{\text{blades}} \pm k\, N_{\text{vanes}}$ (integer >= 1, Default: 1). |
 
@@ -274,26 +274,26 @@ Predicted frequencies, in hertz, in order.
 ### FaultFrequencyResult.harmonics()
 
 ```python
-FaultFrequencyResult.harmonics(name: str, count: int) -> np.ndarray
+FaultFrequencyResult.harmonics(name: str, n_harmonics: int) -> np.ndarray
 ```
 
-The first *count* integer harmonics of the line called *name*.
+The first *n_harmonics* integer harmonics of the line called *name*.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `name` | Line name (see `names`). |
-| `count` | Number of harmonics, $\ge 1$ (the fundamental first). |
+| `n_harmonics` | Number of harmonics, $\ge 1$ (the fundamental first). |
 
-**Returns:** Frequencies $n f$ for `n = 1 .. count`, in hertz.
+**Returns:** Frequencies $n f$ for `n = 1 .. n_harmonics`, in hertz.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | KeyError | If no line carries that name. |
-| ValueError | If *count* is not a positive integer. |
+| ValueError | If *n_harmonics* is not a positive integer. |
 
 ### FaultFrequencyResult.names
 
@@ -393,7 +393,7 @@ gear_mesh_frequencies(
     speed_rpm: float,
     n_teeth: int,
     *,
-    harmonics: int = 3,
+    n_harmonics: int = 3,
     sidebands: int = 0,
     sideband_rate: float | None = None,
 ) -> FaultFrequencyResult
@@ -402,7 +402,7 @@ gear_mesh_frequencies(
 Gear-meshing frequency and its sideband family (Norton Eq. 8.3).
 
 $\mathrm{GMF} = n_{\text{teeth}} \times N/60$, with integer
-harmonics `k GMF` (`k = 1 .. harmonics`) named `"GMF"`,
+harmonics `k GMF` (`k = 1 .. n_harmonics`) named `"GMF"`,
 `"2xGMF"`, ... Each harmonic can carry a
 modulation family at `k GMF +/- m f_mod` (`m = 1 .. sidebands`), named
 `"GMF-1x"`, `"2xGMF+2x"`, and so on. The default modulation rate is
@@ -419,7 +419,7 @@ Only positive sideband frequencies are returned.
 | :--- | :--- |
 | `speed_rpm` | Shaft speed `N` of the wheel, in r/min (> 0). |
 | `n_teeth` | Number of teeth on that wheel (integer >= 1). |
-| `harmonics` | Number of mesh harmonics (integer >= 1, Default: 3). |
+| `n_harmonics` | Number of mesh harmonics (integer >= 1, Default: 3). |
 | `sidebands` | Sideband order per harmonic (integer >= 0, Default: 0, no sidebands). |
 | `sideband_rate` | Modulation rate `f_mod`, in hertz (> 0, Default: the wheel's own shaft rate). |
 

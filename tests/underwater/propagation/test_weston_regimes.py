@@ -106,7 +106,7 @@ def test_cutoff_frequency_admits_exactly_one_mode() -> None:
     h, c = 50.0, 1500.0
     fc = waveguide_cutoff_frequency(h, seabed="sand", speed_of_sound=c)
     bounds = weston_regime_boundaries(fc, h, seabed="sand", speed_of_sound=c)
-    assert bounds.mode_count == pytest.approx(1.0, abs=1e-9)
+    assert bounds.n_modes == pytest.approx(1.0, abs=1e-9)
 
 
 def test_cylindrical_to_mode_stripping_boundary_equates_the_two_laws() -> None:

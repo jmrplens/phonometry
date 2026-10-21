@@ -15,7 +15,7 @@ from .ambient_noise import (
 )
 from .pile_driving_noise import (
     PileStrikeResult,
-    StrikeSelSpectrum,
+    StrikeSELSpectrum,
     cumulative_sel,
     cumulative_sel_identical,
     pile_strike_metrics,
@@ -41,7 +41,7 @@ __all__ = [
     "PileStrikeResult",
     "ShipSourceLevelResult",
     "ShipTrafficSpectrum",
-    "StrikeSelSpectrum",
+    "StrikeSELSpectrum",
     "cumulative_sel",
     "cumulative_sel_identical",
     "hydrophone_depths",

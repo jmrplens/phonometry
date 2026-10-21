@@ -45,7 +45,7 @@ def _workbook_insertion_loss() -> hearing.ActiveInsertionLossResult:
     )
 
 
-def _workbook_total() -> hearing.AnrTotalAttenuationResult:
+def _workbook_total() -> hearing.ANRTotalAttenuationResult:
     return hearing.anr_total_attenuation(
         ref.ISO4869_6_WORKBOOK_REAT, _workbook_insertion_loss()
     )
@@ -361,7 +361,7 @@ def test_linear_to_110_db() -> None:
     result = hearing.assess_anr_linearity(_EXTERNAL, _ears([5.0, 5.0, 5.0, 5.0]))
     assert result.passes
     assert result.linear_to_110_db
-    assert result.maximum_linear_level_db == 110.0
+    assert result.max_linear_level_db == 110.0
 
 
 def test_the_tolerance_is_one_decibel_either_way_inclusive() -> None:
@@ -369,7 +369,7 @@ def test_the_tolerance_is_one_decibel_either_way_inclusive() -> None:
     result = hearing.assess_anr_linearity(_EXTERNAL, _ears([4.0, 6.0, 4.0, 6.0]))
     assert result.passes
     assert result.linear_to_110_db
-    assert result.maximum_linear_level_db == 110.0
+    assert result.max_linear_level_db == 110.0
 
 
 def test_linear_throughout_but_stopping_below_110_db() -> None:
@@ -378,7 +378,7 @@ def test_linear_throughout_but_stopping_below_110_db() -> None:
         [90.0, 95.0, 100.0, 105.0], _ears([5.0, 5.0, 5.0])
     )
     assert result.passes
-    assert result.maximum_linear_level_db == 105.0
+    assert result.max_linear_level_db == 105.0
     assert not result.linear_to_110_db
 
 
@@ -389,13 +389,13 @@ def test_a_short_step_caps_the_linear_level_below_it() -> None:
     result = hearing.assess_anr_linearity(_EXTERNAL, levels)
     assert not result.passes
     assert not result.linear_to_110_db
-    assert result.maximum_linear_level_db == 100.0
+    assert result.max_linear_level_db == 100.0
     assert result.linear[2].tolist() == [True, True, False, True]
 
 
 def test_the_first_step_failing_leaves_the_starting_level() -> None:
     result = hearing.assess_anr_linearity(_EXTERNAL, _ears([7.0, 5.0, 5.0, 5.0]))
-    assert result.maximum_linear_level_db == 90.0
+    assert result.max_linear_level_db == 90.0
 
 
 def test_any_leading_axes_are_ears() -> None:

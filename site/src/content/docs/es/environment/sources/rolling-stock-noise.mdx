@@ -134,7 +134,7 @@ rng = np.random.default_rng(3095)
 p = 0.25 * np.sqrt(angle / np.pi + 1e-4) * rng.standard_normal(t.size)
 
 passby = environment.pass_by_measurement(p, fs, start_s=front_s, end_s=front_s + tp)
-print(round(tp, 2), round(passby.equivalent_level_db, 1), round(passby.max_level_db, 1))
+print(round(tp, 2), round(passby.equivalent_level_db, 1), round(passby.maximum_level_db, 1))
 # 4.5 81.3 81.9   T_p en s, L_pAeq,Tp y L_pAFmax en dB
 ```
 
@@ -281,7 +281,7 @@ spectra = [
     environment.acoustic_roughness_spectrum(r, sample_spacing_m=1.0e-3)
     for r in (left, right)
 ]
-print(spectra[0].segment_count, spectra[0].wavelengths_m[0], spectra[0].wavelengths_m[-1])
+print(spectra[0].n_segments, spectra[0].wavelengths_m[0], spectra[0].wavelengths_m[-1])
 # 39 0.25 0.0025
 print(round(spectra[0].level_at(0.0315), 1), round(spectra[1].level_at(0.0315), 1), limit[0.0315])
 # -2.6 -3.6 -5.0   dB re 1 um: los dos carriles por encima del límite en la banda de 3,15 cm
@@ -418,7 +418,7 @@ decay = [
     environment.track_decay_rate(responses(vertical), frequencies=bands, direction="vertical"),
     environment.track_decay_rate(responses(lateral), frequencies=bands, direction="lateral"),
 ]
-print(x_hammer[-1], round(decay[0].minimum_measurable_db_per_m, 3), decay[1].far_field_sufficient)
+print(x_hammer[-1], round(decay[0].min_measurable_db_per_m, 3), decay[1].far_field_sufficient)
 # 39.6 0.11 True
 print(round(decay[0].rate_at(1000.0), 2), round(decay[1].rate_at(1000.0), 2))
 # 1.19 0.5

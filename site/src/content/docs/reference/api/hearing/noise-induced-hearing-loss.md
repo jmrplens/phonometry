@@ -69,7 +69,7 @@ htlan(
     years: float,
     fractile: float = 0.5,
     frequencies: ArrayLike | None = None,
-) -> HtlanResult
+) -> HTLANResult
 ```
 
 Hearing threshold level associated with age and noise (clause 6.1).
@@ -93,7 +93,7 @@ components.
 | `fractile` | Population fractile in (0, 1) applied to both components. |
 | `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all six (500 Hz - 6000 Hz). |
 
-**Returns:** An [`HtlanResult`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#htlanresult) with `htla`, `nipts`, `threshold` and `.plot()`.
+**Returns:** An [`HTLANResult`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#htlanresult) with `htla`, `nipts`, `threshold` and `.plot()`.
 
 **Raises**
 
@@ -106,10 +106,10 @@ so exposure conditions outside the standard's stated ranges raise a
 [`NoiseInducedHearingLossWarning`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#noiseinducedhearinglosswarning) and the `.report()` fiche prints
 the extrapolation caveat.
 
-## HtlanResult
+## HTLANResult
 
 ```python
-HtlanResult(
+HTLANResult(
     age: float,
     sex: str,
     l_ex: float,
@@ -140,10 +140,10 @@ All arrays are in dB and aligned with `NIPTS_FREQUENCIES`.
 | `nipts` | Noise component `N` (NIPTS at `fractile`). |
 | `threshold` | Combined HTLAN $H' = H + N - H N / 120$. |
 
-### HtlanResult.plot()
+### HTLANResult.plot()
 
 ```python
-HtlanResult.plot(
+HTLANResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -156,10 +156,10 @@ Plot the age, noise and combined threshold components over frequency.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-### HtlanResult.report()
+### HTLANResult.report()
 
 ```python
-HtlanResult.report(
+HTLANResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
@@ -210,7 +210,7 @@ nipts(
     years: float,
     fractile: float = 0.5,
     frequencies: ArrayLike | None = None,
-) -> NiptsResult
+) -> NIPTSResult
 ```
 
 Noise-induced permanent threshold shift (ISO 1999:2013, clause 6.3).
@@ -232,7 +232,7 @@ zero.
 | `fractile` | Population fractile in the open interval (0, 1); `0.5` gives the median. The reliable range of the standard is 0.05-0.95. |
 | `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all six (500 Hz - 6000 Hz). |
 
-**Returns:** A [`NiptsResult`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#niptsresult) with the distribution and `.plot()`.
+**Returns:** A [`NIPTSResult`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#niptsresult) with the distribution and `.plot()`.
 
 **Raises**
 
@@ -246,10 +246,10 @@ exposure levels up to `VALIDATED_L_EX_MAX`) the computation still
 runs but a [`NoiseInducedHearingLossWarning`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#noiseinducedhearinglosswarning) marks the result as an
 extrapolation, and the `.report()` fiche prints the matching caveat.
 
-## NiptsResult
+## NIPTSResult
 
 ```python
-NiptsResult(
+NIPTSResult(
     l_ex: float,
     years: float,
     fractile: float,
@@ -278,10 +278,10 @@ All arrays are in dB and aligned with `NIPTS_FREQUENCIES`.
 | `spread_upper` | Upper half-Gaussian spread `du` (Formula 6). |
 | `spread_lower` | Lower half-Gaussian spread `dl` (Formula 7). |
 
-### NiptsResult.plot()
+### NIPTSResult.plot()
 
 ```python
-NiptsResult.plot(
+NIPTSResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -294,10 +294,10 @@ Plot the NIPTS spectrum with the fractile band over frequency.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-### NiptsResult.report()
+### NIPTSResult.report()
 
 ```python
-NiptsResult.report(
+NIPTSResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,

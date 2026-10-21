@@ -96,8 +96,8 @@ if TYPE_CHECKING:
 __all__ = [
     "ANR_WITHIN_LABORATORY_UNCERTAINTY",
     "ActiveInsertionLossResult",
-    "AnrLinearityResult",
-    "AnrTotalAttenuationResult",
+    "ANRLinearityResult",
+    "ANRTotalAttenuationResult",
     "active_insertion_loss",
     "anr_total_attenuation",
     "assess_anr_linearity",
@@ -407,7 +407,7 @@ def active_insertion_loss(
 
 
 @dataclass(frozen=True)
-class AnrTotalAttenuationResult(OwnsArrays):
+class ANRTotalAttenuationResult(OwnsArrays):
     r"""The total attenuation of an ANR earmuff and its ISO 4869-2 ratings (5.5).
 
     :ivar total_octave_db: :math:`A_{\mathrm{total,oct},j}` per subject and
@@ -551,7 +551,7 @@ def _lower_ear_thirds(
 def anr_total_attenuation(
     reat: ArrayLike | RealEarAttenuationResult,
     insertion_loss_db: ArrayLike | ActiveInsertionLossResult,
-) -> AnrTotalAttenuationResult:
+) -> ANRTotalAttenuationResult:
     r"""The total attenuation of an ANR earmuff, subject by subject (5.5).
 
     Runs 5.5 a) to e): the passive attenuation of ISO 4869-1 is interpolated
@@ -582,7 +582,7 @@ def anr_total_attenuation(
         :class:`ActiveInsertionLossResult` or a grid
         :func:`active_insertion_loss` accepts, on the one-third-octave bands of
         5.3.1.
-    :return: :class:`AnrTotalAttenuationResult`.
+    :return: :class:`ANRTotalAttenuationResult`.
     :raises ValueError: if the passive attenuation is not on the octave bands
         of ISO 4869-1, if the insertion loss does not reach the bands it needs,
         or if the two do not have the same number of subjects.
@@ -616,7 +616,7 @@ def anr_total_attenuation(
     total_thirds = interpolated + active
     grouped = total_thirds.reshape(total_thirds.shape[0], kept.size, _THIRDS_PER_OCTAVE)
     total_octaves = -10.0 * np.log10(np.mean(10.0 ** (-0.1 * grouped), axis=2))
-    return AnrTotalAttenuationResult(
+    return ANRTotalAttenuationResult(
         total_octave_db=total_octaves,
         total_third_octave_db=total_thirds,
         reat_third_octave_db=interpolated,
@@ -632,7 +632,7 @@ def anr_total_attenuation(
 
 
 @dataclass(frozen=True)
-class AnrLinearityResult(OwnsArrays):
+class ANRLinearityResult(OwnsArrays):
     r"""How far up an ANR earmuff stays linear (5.4.4).
 
     :ivar external_levels_db: The external A-weighted levels applied, in dB,
@@ -657,7 +657,7 @@ class AnrLinearityResult(OwnsArrays):
         return np.asarray(settled(deviation) <= _LINEARITY_TOLERANCE_DB, dtype=bool)
 
     @property
-    def maximum_linear_level_db(self) -> float:
+    def max_linear_level_db(self) -> float:
         """The highest external level up to which every ear stayed linear, in dB.
 
         Read from :attr:`linear`, the same judgement :attr:`passes` makes: the
@@ -695,11 +695,11 @@ class AnrLinearityResult(OwnsArrays):
         """Refuse to stand in for the verdict it carries.
 
         :raises TypeError: Always; the verdict is :attr:`passes`, and the
-            rating is :attr:`maximum_linear_level_db`.
+            rating is :attr:`max_linear_level_db`.
         """
         msg = (
-            "an AnrLinearityResult has no truth value; read '.passes' or "
-            "'.maximum_linear_level_db'"
+            "an ANRLinearityResult has no truth value; read '.passes' or "
+            "'.max_linear_level_db'"
         )
         raise TypeError(msg)
 
@@ -723,7 +723,7 @@ def assess_anr_linearity(
     ear_levels_db: ArrayLike | None = None,
     *,
     ear_third_octave_levels_db: ArrayLike | None = None,
-) -> AnrLinearityResult:
+) -> ANRLinearityResult:
     r"""Up to what external level does the earmuff stay linear? (5.4.4).
 
     With red noise (5.3.2) and the circuit on, the external A-weighted level
@@ -742,7 +742,7 @@ def assess_anr_linearity(
     :param ear_third_octave_levels_db: Instead, the 100 Hz, 125 Hz and 160 Hz
         one-third-octave levels at the ear, with those three on the last axis
         and the external levels on the one before.
-    :return: :class:`AnrLinearityResult`.
+    :return: :class:`ANRLinearityResult`.
     :raises ValueError: if the external levels are not 5 dB steps, if they pass
         110 dB, if neither or both of the ear-level forms are given, or if the
         shapes do not match.
@@ -798,7 +798,7 @@ def assess_anr_linearity(
         msg = "the ear levels must contain only finite values, in dB."
         raise ValueError(msg)
     grid = levels.reshape(-1, external.size)
-    return AnrLinearityResult(
+    return ANRLinearityResult(
         external_levels_db=np.asarray(external, dtype=np.float64),
         ear_levels_db=np.asarray(grid, dtype=np.float64),
         increments_db=np.diff(grid, axis=1),

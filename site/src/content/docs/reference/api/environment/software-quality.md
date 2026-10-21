@@ -287,7 +287,7 @@ place, and the differences go to [`level_difference_quantiles`](/phonometry/refe
 | Name | Description |
 | :--- | :--- |
 | `total_length_m` | `L`, the length of the contours that remain, in metres, long enough that no two points share a whole metre, which is always so from `sample_size` metres on. |
-| `sample_size` | `M`, at least [`MINIMUM_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#minimum_sample_size). |
+| `sample_size` | `M`, at least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size). |
 
 **Returns:** The `M` chainages, in metres, in increasing order.
 
@@ -325,7 +325,7 @@ $q_{0,1} = -1$ dB and $q_{0,9} = 3$ dB.
 
 | Name | Description |
 | :--- | :--- |
-| `level_differences_db` | The sample of level differences, in dB, in any order; at least [`MINIMUM_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#minimum_sample_size) values. |
+| `level_differences_db` | The sample of level differences, in dB, in any order; at least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size) values. |
 
 **Returns:** A [`LevelDifferenceQuantiles`](/phonometry/reference/api/environment/software-quality/#leveldifferencequantiles).
 
@@ -352,7 +352,7 @@ standard deviation are read from it, so they cannot disagree with it.
 
 | Name | Description |
 | :--- | :--- |
-| `sorted_differences_db` | The sample of level differences, sorted in ascending order as C.4 sorts it, in dB. At least [`MINIMUM_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#minimum_sample_size) values. |
+| `sorted_differences_db` | The sample of level differences, sorted in ascending order as C.4 sorts it, in dB. At least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size) values. |
 
 ### LevelDifferenceQuantiles.from_table
 
@@ -440,12 +440,12 @@ C.5: the uncertainty to carry into an error-propagation calculation
 by ISO/IEC Guide 98-3. The sample standard deviation, with `N - 1`
 degrees of freedom.
 
-## MINIMUM_SAMPLE_SIZE
+## MIN_SAMPLE_SIZE
 
 *Constant* (`int`).
 
 ```python
-MINIMUM_SAMPLE_SIZE = 20
+MIN_SAMPLE_SIZE = 20
 ```
 
 ## RANKING_POSITIONS
@@ -487,7 +487,7 @@ function applies the print.
 
 | Name | Description |
 | :--- | :--- |
-| `sample_size` | `N`, the number of values in the sample, at least [`MINIMUM_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#minimum_sample_size). |
+| `sample_size` | `N`, the number of values in the sample, at least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size). |
 
 **Returns:** `(R(q0,1), R(q0,9))`.
 
@@ -648,7 +648,7 @@ sample are defined, only less representative of the map.
 
 ```python
 uniform_sample_indices(
-    point_count: int,
+    n_points: int,
     sample_size: int,
     *,
     horizontal_clearances_m: ArrayLike | None = None,
@@ -674,11 +674,11 @@ than one point in a hundred is returned with a
 
 | Name | Description |
 | :--- | :--- |
-| `point_count` | How many single points there are (grid receivers, points along a street), before any is left out. |
-| `sample_size` | `M`, the random sample size, at least [`MINIMUM_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#minimum_sample_size) and at most the number of points that remain. |
+| `n_points` | How many single points there are (grid receivers, points along a street), before any is left out. |
+| `sample_size` | `M`, the random sample size, at least [`MIN_SAMPLE_SIZE`](/phonometry/reference/api/environment/software-quality/#min_sample_size) and at most the number of points that remain. |
 | `horizontal_clearances_m` | Optional, one value per point: its horizontal distance to the nearest source or obstacle, in metres. The points at less than 2 m are left out before numbering; without it, every point takes part. |
 
-**Returns:** The indices of the sampled points among the `point_count` points, in increasing order.
+**Returns:** The indices of the sampled points among the `n_points` points, in increasing order.
 
 **Raises**
 

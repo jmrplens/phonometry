@@ -138,10 +138,10 @@ def test_clause_4_3_the_building_on_its_ground() -> None:
     assert im.soil_building_frequency_guide(2) == (8.0, 15.0)
     assert im.soil_building_frequency_guide(4) == (8.0, 12.0)
     assert im.soil_building_frequency_guide(9) == (0.0, 8.0)
-    assert im.foundation_transfer_max() == 2.0
-    assert im.foundation_transfer_max(0.5) == 1.0
-    assert im.floor_transfer_max(0.02) == 25.0
-    assert im.floor_transfer_max(0.05) == 10.0
+    assert im.foundation_transfer_maximum() == 2.0
+    assert im.foundation_transfer_maximum(0.5) == 1.0
+    assert im.floor_transfer_maximum(0.02) == 25.0
+    assert im.floor_transfer_maximum(0.05) == 10.0
     assert im.FLOOR_DAMPING_RATIO_RANGE == (0.02, 0.05)
     assert im.FOUNDATION_TRANSFER_ABOVE_RESONANCE == 0.5
     # Formula (4) is the storey estimate DIN 4150-3 6.4 prints too, and one
@@ -156,8 +156,8 @@ def test_clause_4_3_the_building_on_its_ground() -> None:
         im.soil_building_frequency_guide(float("inf"))
     with pytest.raises(ValueError, match="stories"):
         im.soil_building_frequency_guide("3")  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="harmonics"):
-        im.track_excitation_frequency(20.0, spacing_m=0.6, harmonics=2.9)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'n_harmonics'"):
+        im.track_excitation_frequency(20.0, spacing_m=0.6, n_harmonics=2.9)  # type: ignore[arg-type]
 
 
 def test_formulae_5_and_6_the_single_events() -> None:
@@ -200,7 +200,7 @@ def test_formulae_5_and_6_the_single_events() -> None:
 
 def test_clause_5_3_2_what_a_track_excites() -> None:
     """f_A = v_Z / d and its multiples: 20 m/s over 0,6 m sleepers is 33,3 Hz."""
-    freqs = im.track_excitation_frequency(20.0, spacing_m=0.6, harmonics=3)
+    freqs = im.track_excitation_frequency(20.0, spacing_m=0.6, n_harmonics=3)
     assert freqs == pytest.approx([33.333, 66.667, 100.0], abs=0.001)
     assert im.RAIL_SUPPORT_SPACING_M == (0.6, 0.9)
     assert im.VEHICLE_NATURAL_FREQUENCIES_HZ == {
@@ -210,8 +210,8 @@ def test_clause_5_3_2_what_a_track_excites() -> None:
     assert im.TRACK_TRANSMITTED_BANDS_HZ["ballast"] == (40.0, 80.0)
     assert im.RAIL_INFLUENCE_RANGE_M == 80.0
     assert im.MACHINE_FREQUENCY_BANDS_HZ["frame_saw"] == (4.0, 8.0)
-    with pytest.raises(ValueError, match="harmonics"):
-        im.track_excitation_frequency(20.0, spacing_m=0.6, harmonics=0)
+    with pytest.raises(ValueError, match="'n_harmonics'"):
+        im.track_excitation_frequency(20.0, spacing_m=0.6, n_harmonics=0)
 
 
 def test_figure_a18_formula_7_against_the_drawn_curve() -> None:
@@ -224,24 +224,24 @@ def test_figure_a18_formula_7_against_the_drawn_curve() -> None:
     """
     counts = np.array([10.0, 20.0, 40.0, 60.0, 80.0, 100.0])
     drawn = np.array([0.68, 0.78, 0.90, 1.03, 1.16, 1.27])
-    computed = im.machine_hall_velocity_mm_s(0.44, counts, reference_count=3)
+    computed = im.machine_hall_velocity_mm_s(0.44, counts, n_reference_machines=3)
     assert np.all(np.abs(computed / drawn - 1.0) < 0.06)
     assert np.all(computed < drawn)
-    assert im.machine_count_correction([10.0], reference_count=3)[0] == 0.471
+    assert im.machine_count_correction([10.0], n_reference_machines=3)[0] == 0.471
     # Figure 3, the left frame at N = 4, and the right one at N = 100: the
     # N_B = 5 curve starts at 0,455, above 1 over root 5, so the family is
     # empirical and not a rule.
-    assert im.machine_count_correction([4.0], reference_count=5)[0] == 0.455
-    assert im.machine_count_correction([100.0], reference_count=100)[0] == 0.099
-    assert im.machine_count_correction([7.0], reference_count=3)[0] == pytest.approx(
-        (0.519 + 0.496) / 2
-    )
+    assert im.machine_count_correction([4.0], n_reference_machines=5)[0] == 0.455
+    assert im.machine_count_correction([100.0], n_reference_machines=100)[0] == 0.099
+    assert im.machine_count_correction([7.0], n_reference_machines=3)[
+        0
+    ] == pytest.approx((0.519 + 0.496) / 2)
     # The groups of Figure A.16 add up to the 252 machines of the example.
     assert 63 + 7 + 8 + 6 + 57 + 1 + 23 + 31 + 12 + 32 + 4 + 3 + 5 == 252
     with pytest.raises(ValueError, match="N_B"):
-        im.machine_count_correction([10.0], reference_count=7)
+        im.machine_count_correction([10.0], n_reference_machines=7)
     with pytest.raises(ValueError, match="from 4 to 100"):
-        im.machine_count_correction([3.0], reference_count=3)
+        im.machine_count_correction([3.0], n_reference_machines=3)
 
 
 def test_the_module_lists_what_it_publishes() -> None:

@@ -255,13 +255,11 @@ def test_s_stays_where_the_integrated_response_has_settled() -> None:
     assert _tenths(bank, 24) == _tenths(bank, 36)
     assert (
         filters.verify_filter_class(
-            bank, edition="1995", num_points=2**10
+            bank, edition="1995", n_points=2**10
         ).points_per_bandwidth
         == 24
     )
-    assert (
-        filters.verify_filter_class(bank, num_points=2**10).points_per_bandwidth == 24
-    )
+    assert filters.verify_filter_class(bank, n_points=2**10).points_per_bandwidth == 24
 
 
 def test_s_is_raised_in_steps_of_12_until_the_tenths_settle() -> None:
@@ -302,7 +300,7 @@ def test_a_response_that_never_settles_is_taken_at_the_largest_s(
         return 0.05 + 0.001 * (-1) ** (points // 12)
 
     monkeypatch.setattr(compliance, "_bank_bandwidth_deviation", alternating)
-    result = filters.verify_filter_class(_GRADED_BANK, edition="1995", num_points=2**8)
+    result = filters.verify_filter_class(_GRADED_BANK, edition="1995", n_points=2**8)
     assert result.points_per_bandwidth == 16 * 24
 
 

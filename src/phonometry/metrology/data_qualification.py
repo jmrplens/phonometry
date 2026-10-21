@@ -374,7 +374,7 @@ def _check_null_mean(
     the *statistic* under the no-trend hypothesis, fixed by the method and
     by how many observations were counted. That makes it a closed function
     of fields the result already carries, and the one the reader divides by
-    -- ``(statistic - mean) / std`` is the standardized departure the whole
+    -- ``(statistic - mean) / standard_deviation`` is the standardized departure the whole
     test is read through, and it is computed by the caller, not by any
     renderer here, so a mean that belongs to another sequence is never
     caught downstream. A billionth is allowed so a caller who recomputed
@@ -468,7 +468,8 @@ class TrendTestResult(OwnsArrays):
         ``r``.
     :ivar n: Number of observations used.
     :ivar mean: Null mean of the statistic (B&P Eq. (4.54) for ``A``).
-    :ivar std: Null standard deviation (B&P Eq. (4.55) for ``A``).
+    :ivar standard_deviation: Null standard deviation (B&P Eq. (4.55) for
+        ``A``).
     :ivar p_value: Two-sided p-value from the exact null distribution
         (normal approximation above :math:`n = 100` for reverse
         arrangements).
@@ -483,7 +484,7 @@ class TrendTestResult(OwnsArrays):
     statistic: int
     n: int
     mean: float
-    std: float
+    standard_deviation: float
     p_value: float
     _: KW_ONLY
     alpha: float
@@ -538,7 +539,7 @@ class TrendTestResult(OwnsArrays):
         the count and the method and nothing else. Nothing here reads it --
         the plot states the count and the bounds -- which is exactly why it
         goes unchecked otherwise: the caller is the reader, standardizing
-        the departure as ``(statistic - mean) / std``, and a mean belonging
+        the departure as ``(statistic - mean) / standard_deviation``, and a mean belonging
         to another sequence turns an ordinary count into a flat rejection
         with no array anywhere the wrong length.
 
@@ -600,7 +601,7 @@ def _trend_test_reverse(values: NDArray[np.float64], alpha: float) -> TrendTestR
         statistic=statistic,
         n=n,
         mean=mean,
-        std=std,
+        standard_deviation=std,
         p_value=_reverse_arrangement_p_value(n, statistic),
         alpha=alpha,
     )
@@ -633,7 +634,7 @@ def _trend_test_runs(values: NDArray[np.float64], alpha: float) -> TrendTestResu
         statistic=statistic,
         n=int(kept.size),
         mean=mean,
-        std=std,
+        standard_deviation=std,
         p_value=_runs_p_value(n1, n2, statistic),
         alpha=alpha,
         median=median,
@@ -715,7 +716,7 @@ class StationarityTestResult(OwnsArrays):
     per-segment :attr:`statistic` sequence was computed, and the sequence
     was tested for trends with :func:`trend_test` (the B&P Sec. 10.3.1.1
     procedure). The hypothesis of stationarity is accepted when
-    ``bounds[0] < count <= bounds[1]``.
+    ``bounds[0] < trend_statistic <= bounds[1]``.
 
     :ivar segment_values: Per-segment values of the tested statistic.
     :ivar segment_times: Segment centre times, in seconds.
@@ -723,9 +724,10 @@ class StationarityTestResult(OwnsArrays):
         ``"rms"``, ``"mean"`` or ``"variance"``.
     :ivar method: Trend test used: ``"reverse_arrangements"`` or
         ``"runs"``.
-    :ivar count: Observed test statistic (reverse arrangements or runs).
+    :ivar trend_statistic: Observed statistic of the trend test, the count
+        of reverse arrangements or of runs.
     :ivar mean: Null mean of the count.
-    :ivar std: Null standard deviation of the count.
+    :ivar standard_deviation: Null standard deviation of the count.
     :ivar p_value: Two-sided p-value of the observed count.
     :ivar alpha: Significance level (default 0.05).
     :ivar n_segments: Number of segments the record was divided into.
@@ -737,9 +739,9 @@ class StationarityTestResult(OwnsArrays):
     segment_times: NDArray[np.float64]
     statistic: str
     method: str
-    count: int
+    trend_statistic: int
     mean: float
-    std: float
+    standard_deviation: float
     p_value: float
     _: KW_ONLY
     alpha: float
@@ -768,8 +770,8 @@ class StationarityTestResult(OwnsArrays):
 
     @property
     def stationary(self) -> bool:
-        """Whether the count falls inside the acceptance region, ``lower < count <= upper``."""
-        return self.bounds[0] < self.count <= self.bounds[1]
+        """Whether the count falls inside the acceptance region, ``lower < trend_statistic <= upper``."""
+        return self.bounds[0] < self.trend_statistic <= self.bounds[1]
 
     def __post_init__(self) -> None:
         """Reject a test whose per-segment sequences disagree.
@@ -791,7 +793,8 @@ class StationarityTestResult(OwnsArrays):
         the array's own median, which is the median
         :func:`~phonometry._plot.metrology.plot_stationarity_test` draws.
         So it is recomputable from what is stored, and worth recomputing:
-        the caller standardizes the count as ``(count - mean) / std`` and no
+        the caller standardizes the count as
+        ``(trend_statistic - mean) / standard_deviation`` and no
         renderer here would notice a mean belonging to another record.
 
         :raises ValueError: if either per-segment sequence disagrees with the
@@ -915,9 +918,9 @@ def stationarity_test(
         segment_times=times,
         statistic=statistic,
         method=method,
-        count=trend.statistic,
+        trend_statistic=trend.statistic,
         mean=trend.mean,
-        std=trend.std,
+        standard_deviation=trend.standard_deviation,
         p_value=trend.p_value,
         alpha=alpha,
         n_segments=segments,

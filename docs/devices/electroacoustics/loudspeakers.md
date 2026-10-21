@@ -219,7 +219,7 @@ result.report("loudspeaker.pdf", metadata=ReportMetadata(measurement_standard="I
 
 `loudspeaker_characteristics` returns a `LoudspeakerCharacteristics` with the
 computed `sensitivity_level_db`, `effective_range`, `reference_level_db`,
-`characteristic_sensitivity_pa` and `minimum_impedance_ohm`, and a `.report()` that
+`characteristic_sensitivity_pa` and `min_impedance_ohm`, and a `.report()` that
 writes the fiche. The on-axis response is drawn with its tolerance band and the
 effective-range markers to the IEC 60263 proportion (one frequency decade equal
 to 25 dB), and the polar directivity on the IEC 60263 25 dB reference circle.
@@ -405,11 +405,11 @@ from phonometry import electroacoustics as ea
 # An auditorium at Zs = -6 dB, omnidirectional microphone, one mic open.
 res = ea.feedback_stability(-6.0, 76.0, 80.0)
 print(res.is_stable, round(res.headroom, 1))          # True 0.0 dB
-print(round(res.maximum_level_at_microphone, 1))      # 76.0 dB = L(H-L) - 4
+print(round(res.max_level_at_microphone, 1))      # 76.0 dB = L(H-L) - 4
 
 # A cardioid buys back exactly its relative directivity index.
 card = ea.feedback_stability(-6.0, 78.0, 80.0, microphone_directivity=-2.0)
-print(round(card.maximum_level_at_microphone, 1))     # 78.0 dB = L(H-L) - 2
+print(round(card.max_level_at_microphone, 1))     # 78.0 dB = L(H-L) - 2
 
 # Four open microphones cost 10 lg 4 = 6 dB of that headroom.
 print(round(ea.open_microphone_correction(4), 1))     # 6.0 dB
@@ -443,7 +443,7 @@ audience, while a cardioid may let it rise to 2 dB below.
 
 Returns a `FeedbackStabilityResult` (`open_loop_gain`, `feedback_loop_gain`,
 `nom_correction`, `loop_gain`, `margin`, `headroom`, `is_stable`,
-`maximum_open_loop_gain`, `maximum_level_at_microphone`) with `.plot()`.
+`max_open_loop_gain`, `max_level_at_microphone`) with `.plot()`.
 `feedback_loop_gain` and `open_microphone_correction` are callable directly, and
 `plot_sound_reinforcement_geometry` draws the loop above.
 

@@ -514,7 +514,7 @@ class TimeDelayResult(OwnsArrays):
         :math:`\hat{\rho}_{xy}` at the
         estimated delay (rounded to the nearest sample) - the quantity
         entering the B&P error formulas, whatever the method.
-    :ivar delay_std: Standard deviation of the peak-location estimate,
+    :ivar delay_standard_deviation: Standard deviation of the peak-location estimate,
         :math:`\sigma(\hat{\tau}_0) \approx (3/4)^{1/4}
         \sqrt{\varepsilon} / (\pi B)` (Eq. 8.129), in seconds; ``None``
         unless ``signal_bandwidth`` was given.
@@ -532,7 +532,7 @@ class TimeDelayResult(OwnsArrays):
     lags: NDArray[np.float64]
     correlation: NDArray[np.float64]
     peak_correlation: float
-    delay_std: float | None
+    delay_standard_deviation: float | None
     delay_interval: tuple[float, float] | None
     signal_bandwidth: float | None
     fs: float
@@ -868,7 +868,7 @@ def time_delay(
         lags=lag_samples / fs_v,
         correlation=curve,
         peak_correlation=rho,
-        delay_std=std,
+        delay_standard_deviation=std,
         delay_interval=interval,
         signal_bandwidth=signal_bandwidth,
         fs=fs_v,

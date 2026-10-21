@@ -94,9 +94,9 @@ __all__ = [
     "IMPULSE_INVALID_DEVIATION_DB",
     "IMPULSE_REPEATS",
     "IMPULSE_REPEAT_DEVIATION_DB",
-    "ISO11821_MINIMUM_BACKGROUND_MARGIN_DB",
-    "MINIMUM_MICROPHONE_DISTANCE_M",
-    "MINIMUM_SCREEN_DIMENSION_M",
+    "ISO11821_MIN_BACKGROUND_MARGIN_DB",
+    "MIN_MICROPHONE_DISTANCE_M",
+    "MIN_SCREEN_DIMENSION_M",
     "OPERATOR_HEIGHT_M",
     "OPERATOR_HEIGHT_TOLERANCE_M",
     "OUTDOOR_RANGE_M",
@@ -113,7 +113,7 @@ __all__ = [
 
 #: 5.2.1 and 5.2.2: the margin over the background the level behind the screen
 #: must keep, and the margin the standard would rather have.
-ISO11821_MINIMUM_BACKGROUND_MARGIN_DB: float = 6.0
+ISO11821_MIN_BACKGROUND_MARGIN_DB: float = 6.0
 ISO11821_PREFERRED_BACKGROUND_MARGIN_DB: float = 10.0
 
 #: 5.7: the window inside which the background correction is made. Under the
@@ -148,11 +148,11 @@ SCREEN_DISTANCE_FACTORS: tuple[float, ...] = (0.25, 0.5, 1.0, 2.0)
 
 #: 5.5.2: no microphone stands closer than this to the screen, in metres,
 #: whatever the height says.
-MINIMUM_MICROPHONE_DISTANCE_M: float = 1.0
+MIN_MICROPHONE_DISTANCE_M: float = 1.0
 
 #: The Introduction: the method holds for a screen at least this high and this
 #: long, in metres, and a smaller one by agreement.
-MINIMUM_SCREEN_DIMENSION_M: float = 1.5
+MIN_SCREEN_DIMENSION_M: float = 1.5
 
 #: The Introduction: outdoors the measurement stops at this distance from the
 #: screen, in metres, and goes further by agreement.
@@ -200,7 +200,7 @@ def screen_background_corrected_level(
         decibels.
     :return: The corrected level per band, in decibels.
     :raises ValueError: For inputs that do not match band for band, or a
-        margin under :data:`ISO11821_MINIMUM_BACKGROUND_MARGIN_DB`.
+        margin under :data:`ISO11821_MIN_BACKGROUND_MARGIN_DB`.
     """
     levels = require_finite_array(levels, "levels")
     background = require_finite_array(background_levels, "background_levels")
@@ -258,7 +258,7 @@ def microphone_distances_m(screen_height_m: float) -> NDArray[np.float64]:
 
     A quarter, a half, once and twice the screen height, along a line
     perpendicular to the screen, and never closer than
-    :data:`MINIMUM_MICROPHONE_DISTANCE_M`. Under 4 m the quarter-height
+    :data:`MIN_MICROPHONE_DISTANCE_M`. Under 4 m the quarter-height
     position falls inside that floor and is pushed out to it; at 2 m and under
     the half-height one is pushed out too, and then the two nearest positions
     coincide. The clause keeps the floor rather than the factor, so the
@@ -275,15 +275,15 @@ def microphone_distances_m(screen_height_m: float) -> NDArray[np.float64]:
     :raises ValueError: For a non-positive height.
     """
     height = require_positive(screen_height_m, "screen_height_m")
-    if height < MINIMUM_SCREEN_DIMENSION_M:
+    if height < MIN_SCREEN_DIMENSION_M:
         msg = (
             f"ISO 11821 applies to a screen at least "
-            f"{MINIMUM_SCREEN_DIMENSION_M:g} m high and long, and a smaller "
+            f"{MIN_SCREEN_DIMENSION_M:g} m high and long, and a smaller "
             f"one only by agreement; this one is {height:g} m."
         )
         warnings.warn(msg, ScreenInSituWarning, stacklevel=2)
     factors = np.asarray(SCREEN_DISTANCE_FACTORS, dtype=np.float64)
-    return np.maximum(factors * height, MINIMUM_MICROPHONE_DISTANCE_M)
+    return np.maximum(factors * height, MIN_MICROPHONE_DISTANCE_M)
 
 
 def impulse_mean_level(repeat_levels_db: ArrayLike) -> float:

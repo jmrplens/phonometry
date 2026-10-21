@@ -2010,7 +2010,7 @@ def generate_machine_fault_families(output_dir: str) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(13.6, 8.8))
 
     # --- (a) and (b): the same gear pair with two different faults ----------
-    gear = vibration.gear_mesh_frequencies(1500.0, 28, harmonics=3, sidebands=2)
+    gear = vibration.gear_mesh_frequencies(1500.0, 28, n_harmonics=3, sidebands=2)
     shaft = gear.shaft_rate  # 25 Hz
     gmf = gear["GMF"]  # 700 Hz
     cases = (
@@ -2083,7 +2083,7 @@ def generate_machine_fault_families(output_dir: str) -> None:
 
     # --- (d): the ducted fan, blade rate against its lobe patterns ----------
     ax = axes[1][1]
-    fan = vibration.blade_pass_frequencies(3500.0, 6, harmonics=1, n_vanes=4)
+    fan = vibration.blade_pass_frequencies(3500.0, 6, n_harmonics=1, n_vanes=4)
     freq = np.linspace(0.0, 420.0, 3200)
     spec = _LineSpectrum(freq, floor=0.006)
     spec.add(fan.shaft_rate, 0.10, width=0.8)
@@ -5686,7 +5686,7 @@ def generate_meter_signal_burst_response(output_dir: str) -> None:
         linewidth=0.0,
         zorder=2,
     )
-    starts = test.start_time_s + np.arange(test.burst_count) * test.repeat_time_s
+    starts = test.start_time_s + np.arange(test.n_bursts) * test.repeat_time_s
     record_ticks = (*starts, test.duration_s)
     ax_record.set_xticks(list(record_ticks))
     ax_record.set_xticklabels([f"{value:g}" for value in record_ticks], fontsize=9)
@@ -5696,7 +5696,7 @@ def generate_meter_signal_burst_response(output_dir: str) -> None:
     ax_record.text(
         0.5 * test.duration_s,
         1.55,
-        f"the whole-body row of Table 6: {test.burst_count} bursts of {longest}\n"
+        f"the whole-body row of Table 6: {test.n_bursts} bursts of {longest}\n"
         f"cycles in a {test.duration_s:.0f} s record, the first at "
         f"{test.start_time_s:.0f} s and then one every "
         f"{test.repeat_time_s:.0f} s",
@@ -6307,7 +6307,7 @@ def generate_railway_spectra(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     ax.plot(
         positions,
-        passage.band_max_levels_db,
+        passage.band_maximum_levels_db,
         color=COLOR_PRIMARY,
         linewidth=1.8,
         marker="o",

@@ -221,7 +221,7 @@ plt.show()
 ## Revised curves, and the chain that reads them
 
 `revise_npd_curves` adds the increment to every power setting of an
-`AnpNpdCurves`, and `AnpDatabase.revised_npd_curves` does it with the aircraft's
+`ANPNPDCurves`, and `ANPDatabase.revised_npd_curves` does it with the aircraft's
 own spectral class. The event and contour wiring of the database takes the
 humidity directly, and recalculates both NPD tables with the temperature and
 pressure it already reads for the impedance adjustment.

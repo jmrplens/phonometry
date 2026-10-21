@@ -202,10 +202,10 @@ the mean levels of any two of the directional source's orientations
 (4.4), and `limit_db` the Table 3 value it may not exceed.
 `volume` is the room, `reference_box_volume_m3` and
 `largest_box_dimension_m` the reference box of 4.1, and
-`minimum_volume_m3` / `box_dimension_limit_m` what 4.2 asks
+`min_volume_m3` / `box_dimension_limit_m` what 4.2 asks
 of them. `max_absorption_coefficient` is the largest sound absorption
 coefficient of any portion of the boundary surfaces, `NaN` when none was
-supplied, against the 0,20 of 4.3. `minimum_microphone_distance_m`
+supplied, against the 0,20 of 4.3. `min_microphone_distance_m`
 is the $d_\mathrm{min} = 0{,}3\,V^{1/3}$ of 7.3 that keeps the
 microphones in the reverberant field, stated for the setup rather than
 judged. The limits are the standard's and are read from the bands, the
@@ -245,7 +245,7 @@ The Table 3 standard deviation of reproducibility of each band, in dB.
 
 **Returns:** The spread 4.4 allows each band.
 
-### HardWalledRoomCheck.minimum_microphone_distance_m
+### HardWalledRoomCheck.min_microphone_distance_m
 
 *property*
 
@@ -253,7 +253,7 @@ The $d_\mathrm{min} = 0{,}3\,V^{1/3}$ of 7.3, in metres.
 
 **Returns:** The least distance from the source that keeps a microphone in the reverberant field.
 
-### HardWalledRoomCheck.minimum_volume_m3
+### HardWalledRoomCheck.min_volume_m3
 
 *property*
 

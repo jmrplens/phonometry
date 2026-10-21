@@ -266,7 +266,7 @@ def test_empty_bands_result_is_graceful() -> None:
         frequencies=np.asarray([], dtype=float),
         factors=(),
         fs=48000.0,
-        num_points=2048,
+        n_points=2048,
     )
     assert empty.available_classes() == []
     assert empty.overall_class is None

@@ -39,11 +39,11 @@ db = aircraft.load_anp_database()
 print(len(db.aircraft_ids))          # 155 aircraft types
 ac = db.aircraft("747100")
 print(ac.description)                # Boeing 747-100 / JT9DBD
-print(ac.engine_type, ac.num_engines, ac.weight_class)
+print(ac.engine_type, ac.n_engines, ac.weight_class)
 print(ac.power_parameter, ac.mounting)   # CNT (lb) wing
 ```
 
-An `AnpAircraft` describes itself with the engine type and count and the ICAO
+An `ANPAircraft` describes itself with the engine type and count and the ICAO
 wake weight class, and carries two fields you will use directly. The **power
 parameter** names the quantity the NPD table is indexed by: not a force in
 newtons but whatever the manufacturer tabulated against, corrected net thrust in

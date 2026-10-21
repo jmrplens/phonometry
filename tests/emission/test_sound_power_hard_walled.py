@@ -524,7 +524,7 @@ def test_minimum_microphone_distance_of_7_3() -> None:
         volume=64.0,
         reference_box_m=[0.5, 0.5, 0.5],
     )
-    assert check.minimum_microphone_distance_m == pytest.approx(0.3 * 4.0)
+    assert check.min_microphone_distance_m == pytest.approx(0.3 * 4.0)
 
 
 def test_room_check_has_no_truth_value() -> None:

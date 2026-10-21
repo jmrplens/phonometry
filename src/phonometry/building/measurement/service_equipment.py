@@ -1210,7 +1210,7 @@ class ServiceEquipmentResult(OwnsArrays):
         )
 
     @property
-    def reading_count(self) -> int:
+    def n_readings(self) -> int:
         """The number of readings averaged by Formula (1).
 
         :return: The number of rows of :attr:`readings_db`.
@@ -2422,7 +2422,7 @@ class VaryingBackgroundCheck(OwnsArrays):
 
     The route the NOTE to Clause 9 offers when the background varies in time.
 
-    :ivar background_maximum_db: The maximum level of the background over the
+    :ivar background_maximum_level_db: The maximum level of the background over the
         observation period at the corner position, per band (or one weighted
         value), in dB.
     :ivar equipment_levels_db: The service equipment sound pressure level,
@@ -2432,7 +2432,7 @@ class VaryingBackgroundCheck(OwnsArrays):
     :ivar frequencies: The band centres, in Hz, or ``None`` when not given.
     """
 
-    background_maximum_db: np.ndarray
+    background_maximum_level_db: np.ndarray
     equipment_levels_db: np.ndarray
     observation_time_s: float
     frequencies: np.ndarray | None = None
@@ -2452,7 +2452,7 @@ class VaryingBackgroundCheck(OwnsArrays):
         :raises ValueError: if the levels or the centres do not share one
             band count.
         """
-        shape = np.asarray(self.background_maximum_db).shape
+        shape = np.asarray(self.background_maximum_level_db).shape
         if np.asarray(self.equipment_levels_db).shape != shape or (
             self.frequencies is not None and np.asarray(self.frequencies).shape != shape
         ):
@@ -2469,7 +2469,7 @@ class VaryingBackgroundCheck(OwnsArrays):
         """
         return np.asarray(
             np.asarray(self.equipment_levels_db, dtype=np.float64)
-            - np.asarray(self.background_maximum_db, dtype=np.float64),
+            - np.asarray(self.background_maximum_level_db, dtype=np.float64),
             dtype=np.float64,
         )
 
@@ -2527,7 +2527,7 @@ class VaryingBackgroundCheck(OwnsArrays):
 
 
 def check_varying_background(
-    background_maximum_db: ArrayLike,
+    background_maximum_level_db: ArrayLike,
     equipment_levels_db: ArrayLike,
     *,
     observation_time_s: float,
@@ -2551,7 +2551,7 @@ def check_varying_background(
     exactly 10 dB ("10 dB or more"). The 2004 edition took the maximum "in one
     of the microphone positions"; the draft names the corner.
 
-    :param background_maximum_db: The maximum level of the background over the
+    :param background_maximum_level_db: The maximum level of the background over the
         observation period, at the corner position, per band, in dB.
     :param equipment_levels_db: The service equipment sound pressure level in
         the same bands, in dB.
@@ -2562,10 +2562,10 @@ def check_varying_background(
     :raises ValueError: If a level is not finite, the shapes differ, or the
         observation time is not one positive number.
     """
-    background = _readings(background_maximum_db, "background_maximum_db")
+    background = _readings(background_maximum_level_db, "background_maximum_level_db")
     equipment = _readings(equipment_levels_db, "equipment_levels_db")
     if equipment.shape != background.shape:
-        msg = "'background_maximum_db' and 'equipment_levels_db' must give one level per band, the same count."
+        msg = "'background_maximum_level_db' and 'equipment_levels_db' must give one level per band, the same count."
         raise ValueError(msg)
     observation = _positive_number(observation_time_s, "observation_time_s")
     freqs = None
@@ -2575,7 +2575,7 @@ def check_varying_background(
             msg = "'frequencies' must give one finite centre per band."
             raise ValueError(msg)
     return VaryingBackgroundCheck(
-        background_maximum_db=background,
+        background_maximum_level_db=background,
         equipment_levels_db=equipment,
         observation_time_s=observation,
         frequencies=None if freqs is None else freqs,

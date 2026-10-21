@@ -131,7 +131,7 @@ NEGLIGIBLE_BACKGROUND_MARGIN_DB = 15.0
 #: Smallest signal-to-background margin, in decibels, a result of each grade may
 #: be determined from. Below it the correction is clamped there and the level
 #: becomes an upper bound (ISO 11202:2010 6.4.1 and Annex B).
-MINIMUM_BACKGROUND_MARGIN_DB: Mapping[Grade, float] = MappingProxyType(
+MIN_BACKGROUND_MARGIN_DB: Mapping[Grade, float] = MappingProxyType(
     {
         "engineering": 6.0,
         "survey": 3.0,
@@ -202,10 +202,10 @@ class EmissionPressureResult(OwnsArrays):
         """Whether the background margin fell below the grade's minimum.
 
         The level is then an upper bound rather than a determination
-        (:data:`MINIMUM_BACKGROUND_MARGIN_DB`: 6 dB for grade 2, 3 dB for
+        (:data:`MIN_BACKGROUND_MARGIN_DB`: 6 dB for grade 2, 3 dB for
         grade 3), judged on the settled margin as :math:`K_1` is.
         """
-        floor = MINIMUM_BACKGROUND_MARGIN_DB[_check_grade(self.grade)]
+        floor = MIN_BACKGROUND_MARGIN_DB[_check_grade(self.grade)]
         return bool(np.any(settled(np.asarray(self.background_margin_db)) < floor))
 
     def plot(
@@ -238,7 +238,7 @@ def background_noise_correction_at_workstation(
     same closed form as ISO 3744:2010 Equation (16) on the sound-power side, and
     this group puts its own thresholds around it: above
     :data:`NEGLIGIBLE_BACKGROUND_MARGIN_DB` the correction is taken as zero, and
-    below the grade's entry in :data:`MINIMUM_BACKGROUND_MARGIN_DB` it is held
+    below the grade's entry in :data:`MIN_BACKGROUND_MARGIN_DB` it is held
     at the value it has there. A held correction does not fail the measurement;
     it makes the level an upper bound, which the second return value reports and
     the caller must carry into what it publishes.
@@ -264,7 +264,7 @@ def background_noise_correction_at_workstation(
         )
         raise ValueError(msg)
 
-    floor = MINIMUM_BACKGROUND_MARGIN_DB[checked]
+    floor = MIN_BACKGROUND_MARGIN_DB[checked]
     delta = measured - background
     clamped = np.clip(delta, floor, None)
     correction = -10.0 * np.log10(1.0 - np.power(10.0, -0.1 * clamped))

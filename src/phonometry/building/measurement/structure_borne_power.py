@@ -395,9 +395,9 @@ def reception_plate_power(
         scalar nor one value per band.
     """
     freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
-    lv = require_per_band(velocity_level, "velocity_level", freq)
+    lv = require_per_band(velocity_level, "velocity_level", freq, "frequency")
     if loss_factor is not None:
-        eta = require_per_band(loss_factor, "loss_factor", freq)
+        eta = require_per_band(loss_factor, "loss_factor", freq, "frequency")
     elif reverberation_time is not None:
         eta = np.asarray(plate_loss_factor(freq, reverberation_time), dtype=np.float64)
     else:

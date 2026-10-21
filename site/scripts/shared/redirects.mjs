@@ -4,7 +4,7 @@
 // pages, then filed into topic folders, then given subgroups. Each of those
 // moves changed the URL of every page it touched, and a moved page leaves its
 // old address behind as a 404 unless something is done about it. Almost
-// nothing was: `astro.config.mjs` carried eight redirect entries against 436
+// nothing was: `astro.config.mjs` carried eight redirect entries against 440
 // addresses that had gone dead, so `/guides/room-acoustics/`,
 // `/guides/sound-power/`, `/reference/why-phonometry/` and hundreds more
 // answered 404 to anyone arriving from a search result, a bookmark or a

@@ -321,7 +321,7 @@ class WestonRegimeBoundaries(RichDisplay):
     :ivar effective_depth: Weston effective depth ``He``, in metres.
     :ivar cutoff_frequency: Waveguide cut-off frequency, in Hz (``nan`` when
         the seabed has no critical angle).
-    :ivar mode_count: Number of cut-on modes,
+    :ivar n_modes: Number of cut-on modes,
         :math:`(\omega/c_\mathrm{w}) H_\mathrm{e} \sin \psi_\mathrm{c} / \pi` (Eq. 9.58), as a real
         number.
     """
@@ -333,7 +333,7 @@ class WestonRegimeBoundaries(RichDisplay):
     reflection_loss_gradient_np_per_rad: float
     effective_depth: float
     cutoff_frequency: float
-    mode_count: float
+    n_modes: float
 
 
 def weston_regime_boundaries(
@@ -403,7 +403,7 @@ def weston_regime_boundaries(
         reflection_loss_gradient_np_per_rad=float(eta),
         effective_depth=float(h_eff),
         cutoff_frequency=float(f_cut),
-        mode_count=float(k * h_eff * np.sin(psi_c) / np.pi),
+        n_modes=float(k * h_eff * np.sin(psi_c) / np.pi),
     )
 
 

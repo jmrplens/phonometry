@@ -730,12 +730,12 @@ def test_a_check_reads_its_verdict_from_the_value() -> None:
     the flag inverted was painted in the compliant colour beside a stem whose
     very geometry said otherwise. All three are read from the value now.
     """
-    requirement = hr.DbHrRequirement(
+    requirement = hr.DBHRRequirement(
         "DnT,A", 50.0, "min", "dBA", 0, "DB-HR 2.1", "between dwellings"
     )
-    check = hr.DbHrCheck(requirement, 45.0)
+    check = hr.DBHRCheck(requirement, 45.0)
     assert (check.reported, check.margin, check.complies) == (45.0, -5.0, False)
-    fields = {field.name for field in dataclasses.fields(hr.DbHrCheck)}
+    fields = {field.name for field in dataclasses.fields(hr.DBHRCheck)}
     assert fields == {"requirement", "value"}
     with pytest.raises(TypeError, match="complies"):
         dataclasses.replace(check, complies=True)
@@ -748,15 +748,15 @@ def test_a_check_rounds_by_the_requirements_decimals() -> None:
     same achieved value is a different reported value under each requirement,
     and half of a last place rounds up rather than to even.
     """
-    seconds = hr.DbHrRequirement("T", 0.7, "max", "s", 1, "DB-HR 2.2", "classroom")
-    decibels = hr.DbHrRequirement(
+    seconds = hr.DBHRRequirement("T", 0.7, "max", "s", 1, "DB-HR 2.2", "classroom")
+    decibels = hr.DBHRRequirement(
         "DnT,A", 50.0, "min", "dBA", 0, "DB-HR 2.1", "between dwellings"
     )
     assert hr.check_db_hr_requirement(0.649, seconds).reported == pytest.approx(0.6)
     assert hr.check_db_hr_requirement(50.5, decibels).reported == pytest.approx(51.0)
-    assert hr.DbHrCheck(decibels, 50.5).margin == pytest.approx(1.0)
+    assert hr.DBHRCheck(decibels, 50.5).margin == pytest.approx(1.0)
     # A value just under the limit that rounds onto it complies.
-    assert hr.DbHrCheck(decibels, 49.5).complies
+    assert hr.DBHRCheck(decibels, 49.5).complies
 
 
 def test_a_check_on_an_undetermined_value_is_refused() -> None:
@@ -766,11 +766,11 @@ def test_a_check_on_an_undetermined_value_is_refused() -> None:
     producer emits one; a check assembled by hand around ``nan`` would keep its
     derived fields mutually consistent and reach the figure as a verdict.
     """
-    requirement = hr.DbHrRequirement(
+    requirement = hr.DBHRRequirement(
         "DnT,A", 50.0, "min", "dBA", 0, "DB-HR 2.1", "between dwellings"
     )
-    with pytest.raises(ValueError, match=r"DbHrCheck: 'value' must be finite"):
-        hr.DbHrCheck(requirement, math.nan)
+    with pytest.raises(ValueError, match=r"DBHRCheck: 'value' must be finite"):
+        hr.DBHRCheck(requirement, math.nan)
 
 
 def test_requirement_lookup_validation() -> None:
@@ -800,8 +800,8 @@ def test_requirement_direction_is_validated() -> None:
     "max", so the dataclass rejects any other spelling at construction.
     """
     with pytest.raises(ValueError, match=r"'direction' must be"):
-        hr.DbHrRequirement("D2m,nT,Atr", 32.0, "minimum", "dBA", 0, "ref", "desc")
-    assert hr.DbHrRequirement("T", 0.7, "max", "s", 1, "ref", "desc").direction == "max"
+        hr.DBHRRequirement("D2m,nT,Atr", 32.0, "minimum", "dBA", 0, "ref", "desc")
+    assert hr.DBHRRequirement("T", 0.7, "max", "s", 1, "ref", "desc").direction == "max"
 
 
 def test_published_spectra_are_read_only() -> None:

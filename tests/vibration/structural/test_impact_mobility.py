@@ -1064,8 +1064,8 @@ def test_exclusions_that_leave_nothing_to_judge_are_refused() -> None:
         )
 
 
-@pytest.mark.parametrize("minimum_records", [5.9, True, 0, "5"])
-def test_minimum_records_is_a_whole_number(minimum_records: object) -> None:
+@pytest.mark.parametrize("min_records", [5.9, True, 0, "5"])
+def test_minimum_records_is_a_whole_number(min_records: object) -> None:
     """int() would read 5.9 as 5 and True as 1, and loosen the verdict."""
     force, response = _sdof_impact(0.1)
     records = vibration.impact_mobility(
@@ -1073,10 +1073,10 @@ def test_minimum_records_is_a_whole_number(minimum_records: object) -> None:
         np.tile(response, (COHERENCE_RECORDS, 1)),
         FS,
     )
-    minimum = cast("Any", minimum_records)
-    with pytest.raises(ValueError, match="minimum_records"):
+    minimum = cast("Any", min_records)
+    with pytest.raises(ValueError, match="min_records"):
         vibration.check_coherence(
-            records, frequency_range_hz=(10.0, 400.0), minimum_records=minimum
+            records, frequency_range_hz=(10.0, 400.0), min_records=minimum
         )
 
 
@@ -1088,10 +1088,10 @@ def test_a_whole_float_minimum_is_a_count() -> None:
         FS,
     )
     check = vibration.check_coherence(
-        records, frequency_range_hz=(10.0, 400.0), minimum_records=cast("Any", 5.0)
+        records, frequency_range_hz=(10.0, 400.0), min_records=cast("Any", 5.0)
     )
-    assert check.minimum_records == COHERENCE_RECORDS
-    assert isinstance(check.minimum_records, int)
+    assert check.min_records == COHERENCE_RECORDS
+    assert isinstance(check.min_records, int)
     not_a_count: Any = True
     with pytest.raises(ValueError, match="impacts"):
         vibration.CoherenceCheck(

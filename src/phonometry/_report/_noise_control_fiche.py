@@ -57,7 +57,7 @@ if TYPE_CHECKING:
     from reportlab.platypus import Table
 
     from ..noise_control.enclosures import EnclosureResult
-    from ..noise_control.hvac import HvacSpectrumResult
+    from ..noise_control.hvac import HVACSpectrumResult
     from ..noise_control.silencers import ReactiveSilencerResult
     from .metadata import ReportMetadata
 
@@ -135,7 +135,7 @@ def performance_verdict(
 
 
 def render_noise_control_fiche(
-    result: EnclosureResult | ReactiveSilencerResult | HvacSpectrumResult,
+    result: EnclosureResult | ReactiveSilencerResult | HVACSpectrumResult,
     path: str,
     *,
     title: str,

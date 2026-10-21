@@ -72,7 +72,7 @@ mics = tuple(
 coupler = metrology.PlaneWaveCoupler(
     length_m=7.5e-3,
     diameter_m=18.6e-3,
-    capillary=metrology.CapillaryTube(length_m=0.05, radius_m=0.2e-3, count=2),
+    capillary=metrology.CapillaryTube(length_m=0.05, radius_m=0.2e-3, n_tubes=2),
 )
 conditions = {"temperature_c": 22.4, "static_pressure_pa": 100200.0, "relative_humidity_percent": 46.0}
 f = metrology.exact_frequencies(20, 10000, fraction=3)

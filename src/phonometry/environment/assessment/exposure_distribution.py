@@ -47,7 +47,7 @@ The chain, in the order the standard writes it:
   distribution, Equation (A.4) of Annex A.
 
 :func:`sel_distribution` does the last three steps and returns a
-:class:`SelDistribution`, whose ``.plot()`` draws the class density, the
+:class:`SELDistribution`, whose ``.plot()`` draws the class density, the
 continuous density or the exceedance curve.
 
 Two readings the text leaves to the implementer
@@ -90,7 +90,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
-    "SelDistribution",
+    "SELDistribution",
     "frequency_weighted_sel",
     "long_term_sel",
     "replica_probabilities",
@@ -118,7 +118,7 @@ _ANNEX_A_SUBCLASSES = 10
 #: of classes with some left out.
 _PROBABILITY_SUM_TOLERANCE = 0.01
 
-#: The views :meth:`SelDistribution.plot` draws.
+#: The views :meth:`SELDistribution.plot` draws.
 _VIEWS = ("classes", "density", "exceedance")
 
 #: The fewest classes a distribution can have: the outer boundaries of
@@ -401,7 +401,7 @@ def _merge_undefined_classes(
 
 
 @dataclass(frozen=True)
-class SelDistribution(OwnsArrays):
+class SELDistribution(OwnsArrays):
     r"""The statistical distribution of a single-event sound exposure level
     (ISO 13474:2009, clause 5).
 
@@ -471,26 +471,26 @@ class SelDistribution(OwnsArrays):
         count = np.size(self.levels)
         if count < _MIN_CLASSES or any(shape != (count,) for shape in sizes.values()):
             msg = (
-                "SelDistribution: the per-class columns must be 1-D arrays of "
+                "SELDistribution: the per-class columns must be 1-D arrays of "
                 f"the same length, at least two classes; got {sizes}."
             )
             raise ValueError(msg)
         if np.shape(self.subclass_centers_db) != (count, self.subclasses):
             msg = (
-                "SelDistribution: 'subclass_centers_db' must have one row of "
+                "SELDistribution: 'subclass_centers_db' must have one row of "
                 f"'subclasses' ({self.subclasses}) centres per class; got "
                 f"{np.shape(self.subclass_centers_db)}."
             )
             raise ValueError(msg)
         if len(self.replicas) != count:
-            msg = "SelDistribution: 'replicas' must name the replicas of every class."
+            msg = "SELDistribution: 'replicas' must name the replicas of every class."
             raise ValueError(msg)
         for name in (*per_class, "subclass_centers_db"):
             if not np.all(np.isfinite(getattr(self, name))):
-                msg = f"SelDistribution: '{name}' must contain only finite values."
+                msg = f"SELDistribution: '{name}' must contain only finite values."
                 raise ValueError(msg)
         if not np.all(self.upper_bounds_db > self.lower_bounds_db):
-            msg = "SelDistribution: every class must have a positive width."
+            msg = "SELDistribution: every class must have a positive width."
             raise ValueError(msg)
         require_positive(self.sigma_db, "sigma_db")
 
@@ -652,7 +652,7 @@ def sel_distribution(
     *,
     sigma_db: float = _TYPICAL_SIGMA_DB,
     subclasses: int = _ANNEX_A_SUBCLASSES,
-) -> SelDistribution:
+) -> SELDistribution:
     r"""Statistical distribution of the single-event sound exposure level
     (ISO 13474:2009, clause 5).
 
@@ -719,7 +719,7 @@ def sel_distribution(
     weights = np.repeat(sorted_probs / n_sub, n_sub)
     lt2 = _energy_mean_db(centres.ravel(), weights)
 
-    return SelDistribution(
+    return SELDistribution(
         levels=read_only(sorted_levels),
         probabilities=read_only(sorted_probs),
         lower_bounds_db=read_only(lower),

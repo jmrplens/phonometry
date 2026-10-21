@@ -174,7 +174,7 @@ How far the response at the farthest position is below the direct one, per band,
 
 Whether the farthest response is at least 10 dB below the direct one in every band (6.7).
 
-### TrackDecayRate.minimum_measurable_db_per_m
+### TrackDecayRate.min_measurable_db_per_m
 
 *property*
 

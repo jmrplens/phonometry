@@ -55,7 +55,7 @@ class PerBandValues(Protocol):
     """Anything carrying a per-band ``values`` array.
 
     Structural stand-in for the spectrum results a workflow forwards whole,
-    such as :class:`~phonometry.noise_control.hvac.HvacSpectrumResult`.
+    such as :class:`~phonometry.noise_control.hvac.HVACSpectrumResult`.
     """
 
     @property
@@ -70,7 +70,7 @@ def as_band_spectrum(
 
     :param value: A scalar (broadcast over the bands), a per-band sequence, an
         object exposing per-band ``values`` (such as an
-        :class:`~phonometry.noise_control.hvac.HvacSpectrumResult`), or ``None``
+        :class:`~phonometry.noise_control.hvac.HVACSpectrumResult`), or ``None``
         for a constant ``default``.
     :param n: Number of analysis bands.
     :param name: Parameter name, for the error messages.

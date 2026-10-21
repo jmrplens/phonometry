@@ -239,17 +239,17 @@ class FaultFrequencyResult(RichDisplay):
         """The lines as a ``{name: frequency}`` mapping."""
         return {line.name: line.frequency for line in self.lines}
 
-    def harmonics(self, name: str, count: int) -> np.ndarray:
-        r"""The first *count* integer harmonics of the line called *name*.
+    def harmonics(self, name: str, n_harmonics: int) -> np.ndarray:
+        r"""The first *n_harmonics* integer harmonics of the line called *name*.
 
         :param name: Line name (see :attr:`names`).
-        :param count: Number of harmonics, :math:`\ge 1` (the fundamental
-            first).
-        :return: Frequencies :math:`n f` for ``n = 1 .. count``, in hertz.
+        :param n_harmonics: Number of harmonics, :math:`\ge 1` (the
+            fundamental first).
+        :return: Frequencies :math:`n f` for ``n = 1 .. n_harmonics``, in hertz.
         :raises KeyError: If no line carries that name.
-        :raises ValueError: If *count* is not a positive integer.
+        :raises ValueError: If *n_harmonics* is not a positive integer.
         """
-        n = _require_count(count, "count")
+        n = _require_count(n_harmonics, "n_harmonics")
         return self[name] * np.arange(1, n + 1, dtype=np.float64)
 
     def within(self, low: float, high: float) -> FaultFrequencyResult:
@@ -475,14 +475,14 @@ def gear_mesh_frequencies(
     speed_rpm: float,
     n_teeth: int,
     *,
-    harmonics: int = 3,
+    n_harmonics: int = 3,
     sidebands: int = 0,
     sideband_rate: float | None = None,
 ) -> FaultFrequencyResult:
     r"""Gear-meshing frequency and its sideband family (Norton Eq. 8.3).
 
     :math:`\mathrm{GMF} = n_{\text{teeth}} \times N/60`, with integer
-    harmonics ``k GMF`` (``k = 1 .. harmonics``) named ``"GMF"``,
+    harmonics ``k GMF`` (``k = 1 .. n_harmonics``) named ``"GMF"``,
     ``"2xGMF"``, ... Each harmonic can carry a
     modulation family at ``k GMF +/- m f_mod`` (``m = 1 .. sidebands``), named
     ``"GMF-1x"``, ``"2xGMF+2x"``, and so on. The default modulation rate is
@@ -495,7 +495,7 @@ def gear_mesh_frequencies(
 
     :param speed_rpm: Shaft speed ``N`` of the wheel, in r/min (> 0).
     :param n_teeth: Number of teeth on that wheel (integer >= 1).
-    :param harmonics: Number of mesh harmonics (integer >= 1, Default: 3).
+    :param n_harmonics: Number of mesh harmonics (integer >= 1, Default: 3).
     :param sidebands: Sideband order per harmonic (integer >= 0, Default: 0,
         no sidebands).
     :param sideband_rate: Modulation rate ``f_mod``, in hertz (> 0, Default:
@@ -505,7 +505,7 @@ def gear_mesh_frequencies(
     """
     fs = shaft_rate(speed_rpm)
     teeth = _require_count(n_teeth, "n_teeth")
-    n_harm = _require_count(harmonics, "harmonics")
+    n_harm = _require_count(n_harmonics, "n_harmonics")
     n_side = _require_count(sidebands, "sidebands", minimum=0)
     f_mod = (
         fs
@@ -694,7 +694,7 @@ def induction_motor_frequencies(
 
 
 def _lobe_patterns(
-    blades: int, vanes: int, fs: float, harmonics: int, k_max: int
+    blades: int, vanes: int, fs: float, n_harmonics: int, k_max: int
 ) -> list[FaultLine]:
     r"""Rotating blade-vane interaction patterns (Norton Eqs. 8.16 and 8.17).
 
@@ -707,7 +707,7 @@ def _lobe_patterns(
     """
     out: list[FaultLine] = []
     seen: set[tuple[int, int]] = set()
-    for n in range(1, harmonics + 1):
+    for n in range(1, n_harmonics + 1):
         for k in range(1, k_max + 1):
             for sign in (-1, 1):
                 lobes = n * blades + sign * k * vanes
@@ -732,13 +732,13 @@ def blade_pass_frequencies(
     speed_rpm: float,
     n_blades: int,
     *,
-    harmonics: int = 3,
+    n_harmonics: int = 3,
     n_vanes: int | None = None,
     lobe_orders: int = 1,
 ) -> FaultFrequencyResult:
     r"""Blade-passing frequency and interaction patterns (Norton 8.15-8.17).
 
-    :math:`f_\mathrm{b} = n\, N_{\text{blades}} \times N/60` for ``n = 1 .. harmonics``,
+    :math:`f_\mathrm{b} = n\, N_{\text{blades}} \times N/60` for ``n = 1 .. n_harmonics``,
     the discrete tone
     family of any fan, blower or pump impeller; a rotary positive-displacement
     blower repeats four times per revolution, so pass ``4 x`` its speed.
@@ -757,7 +757,7 @@ def blade_pass_frequencies(
 
     :param speed_rpm: Shaft speed ``N``, in r/min (> 0).
     :param n_blades: Number of blades (integer >= 1).
-    :param harmonics: Number of blade-pass harmonics (integer >= 1,
+    :param n_harmonics: Number of blade-pass harmonics (integer >= 1,
         Default: 3).
     :param n_vanes: Number of stator vanes ``V`` (integer >= 1) to include the
         lobed interaction patterns (Default: ``None``, blade tones only).
@@ -769,7 +769,7 @@ def blade_pass_frequencies(
     """
     fs = shaft_rate(speed_rpm)
     blades = _require_count(n_blades, "n_blades")
-    n_harm = _require_count(harmonics, "harmonics")
+    n_harm = _require_count(n_harmonics, "n_harmonics")
     k_max = _require_count(lobe_orders, "lobe_orders")
     vanes = None if n_vanes is None else _require_count(n_vanes, "n_vanes")
 

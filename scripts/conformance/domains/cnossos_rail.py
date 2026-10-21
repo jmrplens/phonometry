@@ -94,7 +94,7 @@ def _cnossos_rail_case(case: dict[str, str]) -> RailwayEmissionResult:
         psi=float(case["psi_deg"]),
         phi=float(case["phi_deg"]),
         reference_time=12.0,
-        minimum_speed_kmh=0.0,
+        min_speed_kmh=0.0,
         directivity_edition=ph.environment.DirectivityEdition.ORIGINAL_2015,
     )
 

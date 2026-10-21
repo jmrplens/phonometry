@@ -528,7 +528,7 @@ def plot_stationarity_test(
         ax.set_title(_t("Stationarity test (Bendat & Piersol 10.3.1.1)", language))
     verdict = _t("stationary" if result.stationary else "nonstationary", language)
     label = _trend_verdict_label(
-        result.method, result.count, result.bounds, verdict, language
+        result.method, result.trend_statistic, result.bounds, verdict, language
     )
     index = np.arange(1, result.n_segments + 1)
     style_default(kwargs, "color", _C_PRIMARY)
@@ -2323,7 +2323,7 @@ def plot_correction_uncertainty_verification(
     kwargs.setdefault("label", _t(r"Expanded uncertainty $U$", language))
     ax.plot(frequencies, result.expanded_uncertainty_db, **kwargs)
     tops = [
-        float(np.max(result.maximum_uncertainty_db)),
+        float(np.max(result.max_uncertainty_db)),
         float(np.max(result.expanded_uncertainty_db)),
     ]
     failing = ~np.asarray(result.uncertainty_passes)

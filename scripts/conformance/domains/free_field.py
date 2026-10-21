@@ -164,9 +164,7 @@ def _free_field_fit(distances: np.ndarray) -> emission.InverseSquareLawResult:
 def _chk_exact_field_radius() -> Outcome:
     d = np.arange(0.30, 3.0001, 0.02)
     fit = _free_field_fit(d)
-    return numeric(
-        float(d[-1]), fit.maximum_qualified_radius_m, 1e-9, unit="m", places=4
-    )
+    return numeric(float(d[-1]), fit.max_qualified_radius_m, 1e-9, unit="m", places=4)
 
 
 @register(

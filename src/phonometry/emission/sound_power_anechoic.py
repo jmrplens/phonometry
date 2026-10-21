@@ -439,7 +439,7 @@ def precision_positions(
     *,
     radius: float,
     array: PrecisionArray = "general",
-    count: int = 40,
+    n_positions: int = 40,
 ) -> np.ndarray:
     """Normative ISO 3745:2012 microphone coordinates, scaled by ``radius``.
 
@@ -455,8 +455,8 @@ def precision_positions(
     :param radius: Measurement radius ``r``, in metres.
     :param array: ``'general'`` (Table E.1) or ``'broadband'`` (Table E.2);
         ignored for a sphere (only Table D.1 exists).
-    :param count: ``20`` (primary array) or ``40`` (full array).
-    :return: ``(count, 3)`` microphone coordinates, in metres.
+    :param n_positions: ``20`` (primary array) or ``40`` (full array).
+    :return: ``(n_positions, 3)`` microphone coordinates, in metres.
     """
     if surface not in ("sphere", "hemisphere"):
         raise ValueError(_SURFACE_CHOICE_MSG)
@@ -466,11 +466,11 @@ def precision_positions(
     if radius <= 0:
         msg = "A positive 'radius' is required."
         raise ValueError(msg)
-    if count not in (20, 40):
-        msg = "'count' must be 20 (primary array) or 40 (full array)."
+    if n_positions not in (20, 40):
+        msg = "'n_positions' must be 20 (primary array) or 40 (full array)."
         raise ValueError(msg)
     table = _precision_table(surface, array)
-    return np.asarray(table[:count] * radius, dtype=np.float64)
+    return np.asarray(table[:n_positions] * radius, dtype=np.float64)
 
 
 def _k1_lower_criterion(frequencies: np.ndarray) -> np.ndarray:
@@ -754,7 +754,7 @@ def _room_qualification_warnings(
         )
         raise ValueError(msg)
     if check.passes:
-        qualified_radius = check.maximum_qualified_radius_m
+        qualified_radius = check.max_qualified_radius_m
         low, high = float(check.frequencies[0]), float(check.frequencies[-1])
     elif check.conforming_range_hz is not None and not check.not_judged:
         qualified_radius = check.conforming_radius_m

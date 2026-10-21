@@ -166,7 +166,7 @@ class ModulationDistortionResult(OwnsArrays):
 
 
 def modulation_distortion(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
     f_low: float,
@@ -194,7 +194,7 @@ def modulation_distortion(
     root-sum-square that SMPTE-type analyzers report is returned alongside
     as ``smpte``.
 
-    :param signal: Captured signal (1-D). Accepts a
+    :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples: the distortion ratios are ratios and come out unchanged,
         while ``carrier_amplitude`` and ``sideband_amplitudes`` carry the
@@ -209,8 +209,8 @@ def modulation_distortion(
         the ``smpte`` combined RMS.
     :raises ValueError: If the inputs are invalid.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
     fl = _positive(f_low, "f_low")
     fh = _positive(f_high, "f_high")
@@ -256,7 +256,7 @@ def modulation_distortion(
 
 
 def difference_frequency_distortion(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
     f1: float,
@@ -282,7 +282,7 @@ def difference_frequency_distortion(
     that fall outside (0, Nyquist) or that cannot be separated from a primary
     tone or DC read zero.
 
-    :param signal: Captured signal (1-D). Accepts a
+    :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples and then cancels: this is a ratio of product amplitudes
         drawn from the same record, so the factor divides out and the
@@ -297,8 +297,8 @@ def difference_frequency_distortion(
     :return: nth-order difference-frequency distortion, as a ratio.
     :raises ValueError: If ``order`` is not 2 or 3 or the inputs are invalid.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
     fa = _positive(f1, "f1")
     fb = _positive(f2, "f2")
@@ -325,7 +325,7 @@ def difference_frequency_distortion(
 
 
 def total_difference_frequency_distortion(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     f1: float = 8000.0,
     f2: float = 11950.0,
@@ -351,7 +351,7 @@ def total_difference_frequency_distortion(
     (The out-of-band product at :math:`2 f_2 - f_1` is explicitly not
     part of it.)
 
-    :param signal: Captured signal (1-D). Accepts a
+    :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples and then cancels: this is a ratio of product amplitudes
         drawn from the same record, so the factor divides out and the
@@ -365,8 +365,8 @@ def total_difference_frequency_distortion(
     :return: Total difference-frequency distortion, as a ratio.
     :raises ValueError: If the inputs are invalid.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
     fa = _positive(f1, "f1")
     fb = _positive(f2, "f2")
@@ -417,7 +417,7 @@ def _dim_components(f_sine: float, f_square: float, nyquist: float) -> list[floa
 
 
 def dynamic_intermodulation_distortion(
-    signal: Signal | NDArray[np.float64] | list[float],
+    x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
     f_sine: float = 15000.0,
@@ -433,7 +433,7 @@ def dynamic_intermodulation_distortion(
     fall below ``f_sine`` (IEC 60268-3 Table 2), relative to the 15 kHz
     sine amplitude.
 
-    :param signal: Captured signal (1-D). Accepts a
+    :param x: Captured signal (1-D). Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples and then cancels: this is a ratio of product amplitudes
         drawn from the same record, so the factor divides out and the
@@ -447,8 +447,8 @@ def dynamic_intermodulation_distortion(
     :return: Dynamic intermodulation distortion, as a ratio.
     :raises ValueError: If the inputs are invalid.
     """
-    fs = resolve_fs(signal, fs, name="signal")
-    sig = _validate_signal(signal)
+    fs = resolve_fs(x, fs, name="x")
+    sig = _validate_signal(x)
     fs_v = _positive(fs, "fs")
     fsine = _positive(f_sine, "f_sine")
     fsq = _positive(f_square, "f_square")

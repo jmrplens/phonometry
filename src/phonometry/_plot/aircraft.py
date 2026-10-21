@@ -28,16 +28,16 @@ if TYPE_CHECKING:
     from ..aircraft.airport_noise import (
         FlyoverResult,
         NoiseContourResult,
-        NpdLevelResult,
+        NPDLevelResult,
     )
-    from ..aircraft.anp_fleet import AnpNpdCurves, AnpProfile, SpectralClass
+    from ..aircraft.anp_fleet import ANPNPDCurves, ANPProfile, SpectralClass
     from ..aircraft.atmospheric_absorption import (
         AircraftBandAttenuation,
-        Arp866aAttenuation,
+        ARP866AAttenuation,
     )
     from ..aircraft.certification import EPNLResult
     from ..aircraft.flight_performance import FlightProfile
-    from ..aircraft.npd_atmosphere import NpdAtmosphereIncrement, RevisedNpdCurves
+    from ..aircraft.npd_atmosphere import NPDAtmosphereIncrement, RevisedNPDCurves
     from ..aircraft.rotorcraft_noise import (
         FlightPathKinematics,
         RotorcraftEventResult,
@@ -254,7 +254,7 @@ def plot_aircraft_band_attenuation(
 
 
 def plot_npd_level(
-    result: NpdLevelResult,
+    result: NPDLevelResult,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -262,7 +262,7 @@ def plot_npd_level(
 ) -> Axes:
     """NPD event level versus slant distance (log axis), with the tabulated nodes.
 
-    :param result: An :class:`~phonometry.aircraft.airport_noise.NpdLevelResult`.
+    :param result: An :class:`~phonometry.aircraft.airport_noise.NPDLevelResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the interpolated-curve ``plot`` call.
@@ -743,11 +743,11 @@ def plot_terrain_screening(
 
 
 def plot_anp_npd(
-    result: AnpNpdCurves, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    result: ANPNPDCurves, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
 ) -> Axes:
     """NPD curve at each tabulated power against slant distance.
 
-    :param result: An :class:`~phonometry.aircraft.anp_fleet.AnpNpdCurves`.
+    :param result: An :class:`~phonometry.aircraft.anp_fleet.ANPNPDCurves`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the interpolated-curve ``plot`` call.
@@ -782,11 +782,11 @@ def plot_anp_npd(
 
 
 def plot_anp_profile(
-    result: AnpProfile, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    result: ANPProfile, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
 ) -> Axes:
     """Trajectory altitude against along-track distance, runway points marked.
 
-    :param result: An :class:`~phonometry.aircraft.anp_fleet.AnpProfile`.
+    :param result: An :class:`~phonometry.aircraft.anp_fleet.ANPProfile`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the trajectory ``plot`` call.
@@ -916,7 +916,7 @@ def _route_label(absorption: str, air: str) -> str:
 
 
 def plot_arp866a_attenuation(
-    result: Arp866aAttenuation,
+    result: ARP866AAttenuation,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -925,7 +925,7 @@ def plot_arp866a_attenuation(
     """SAE ARP 866A attenuation coefficient versus frequency (ISO 3891 Annex A).
 
     :param result: An
-        :class:`~phonometry.aircraft.atmospheric_absorption.Arp866aAttenuation`.
+        :class:`~phonometry.aircraft.atmospheric_absorption.ARP866AAttenuation`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the coefficient ``plot`` call.
@@ -1003,7 +1003,7 @@ def plot_spectral_class(
 
 
 def plot_npd_atmosphere_increment(
-    result: NpdAtmosphereIncrement,
+    result: NPDAtmosphereIncrement,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -1012,7 +1012,7 @@ def plot_npd_atmosphere_increment(
     """ECAC Doc 29 Appendix D increment against slant distance.
 
     :param result: A
-        :class:`~phonometry.aircraft.npd_atmosphere.NpdAtmosphereIncrement`.
+        :class:`~phonometry.aircraft.npd_atmosphere.NPDAtmosphereIncrement`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the increment ``plot`` call.
@@ -1047,7 +1047,7 @@ def plot_npd_atmosphere_increment(
 
 
 def plot_npd_atmosphere_attenuation(
-    result: NpdAtmosphereIncrement,
+    result: NPDAtmosphereIncrement,
     ax: Axes | None = None,
     *,
     column: int,
@@ -1058,7 +1058,7 @@ def plot_npd_atmosphere_attenuation(
     """Band attenuation of the AIR-1845 and the specified atmosphere at one distance.
 
     :param result: A
-        :class:`~phonometry.aircraft.npd_atmosphere.NpdAtmosphereIncrement`.
+        :class:`~phonometry.aircraft.npd_atmosphere.NPDAtmosphereIncrement`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param column: Index of the NPD distance to draw.
     :param reference: Also draw the SAE AIR-1845 attenuation of Table D-1.
@@ -1113,7 +1113,7 @@ def plot_npd_atmosphere_attenuation(
 
 
 def plot_revised_npd_curves(
-    result: RevisedNpdCurves,
+    result: RevisedNPDCurves,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -1121,7 +1121,7 @@ def plot_revised_npd_curves(
 ) -> Axes:
     """Revised NPD curves (solid) over the original ones (dashed) against distance.
 
-    :param result: A :class:`~phonometry.aircraft.npd_atmosphere.RevisedNpdCurves`.
+    :param result: A :class:`~phonometry.aircraft.npd_atmosphere.RevisedNPDCurves`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to each revised-curve ``plot`` call.

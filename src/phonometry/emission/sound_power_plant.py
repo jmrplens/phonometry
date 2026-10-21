@@ -415,7 +415,7 @@ def _directional_angles(
 
 
 def plant_characteristic_height_m(
-    source_heights_m: ArrayLike, *, low_source_count: int = 0
+    source_heights_m: ArrayLike, *, n_low_sources: int = 0
 ) -> float:
     r"""The characteristic height of the plant :math:`H`, 9.2 c) and NOTE 7.
 
@@ -423,13 +423,13 @@ def plant_characteristic_height_m(
     equipment lists and the elevation drawings,
     :math:`H = \frac{1}{n}\sum_{k=1}^{n} h_k`. NOTE 7 lets a plant with ten or
     more sources lower than 2 m count them approximately (to ±10 %) and take
-    each at 1 m: pass those sources as ``low_source_count`` and leave them out
+    each at 1 m: pass those sources as ``n_low_sources`` and leave them out
     of ``source_heights_m``.
 
     :param source_heights_m: :math:`h_k`, the height of the midpoint of each
         source not counted by NOTE 7, in metres. May be empty when every
         source is.
-    :param low_source_count: How many sources lower than 2 m NOTE 7 takes at
+    :param n_low_sources: How many sources lower than 2 m NOTE 7 takes at
         1 m; 0, or at least 10.
     :return: :math:`H`, in metres.
     :raises ValueError: for a negative or non-finite height, a count from 1 to
@@ -439,7 +439,7 @@ def plant_characteristic_height_m(
     if heights.ndim != 1 or not np.all(np.isfinite(heights)) or np.any(heights < 0.0):
         msg = "'source_heights_m' must be a 1-D sequence of finite heights >= 0 m."
         raise ValueError(msg)
-    low = require_count(low_source_count, "low_source_count", minimum=0)
+    low = require_count(n_low_sources, "n_low_sources", minimum=0)
     if 0 < low < _LOW_SOURCE_MIN_COUNT:
         msg = (
             f"NOTE 7 of ISO 8297 applies to {_LOW_SOURCE_MIN_COUNT} or more "
@@ -631,7 +631,7 @@ def plant_method_uncertainty(distance_ratio: float) -> tuple[float, float]:
     return PLANT_METHOD_UNCERTAINTY_DB[below[-1]]
 
 
-def plant_steady_reading(maximum_db: float, minimum_db: float) -> float:
+def plant_steady_reading(maximum_level_db: float, minimum_level_db: float) -> float:
     r"""The level read on a sound level meter from a steady noise, 9.5.2.
 
     With time weighting S, a needle that swings over less than 5 dB marks
@@ -642,17 +642,17 @@ def plant_steady_reading(maximum_db: float, minimum_db: float) -> float:
     the level used; ``leq_range_db`` of :func:`check_plant_measurement`
     judges that one.
 
-    :param maximum_db: The highest level read, in decibels.
-    :param minimum_db: The lowest level read, in decibels.
+    :param maximum_level_db: The highest level read, in decibels.
+    :param minimum_level_db: The lowest level read, in decibels.
     :return: The level, in decibels.
     :raises ValueError: for a minimum above the maximum, or a swing of 5 dB or
         more, the swing settled to nine decimals first, so 64,1 - 59,1 dB,
         4,999 999 999 999 993 in binary, is the 5 dB it is.
     """
-    top = require_finite(maximum_db, "maximum_db")
-    bottom = require_finite(minimum_db, "minimum_db")
+    top = require_finite(maximum_level_db, "maximum_level_db")
+    bottom = require_finite(minimum_level_db, "minimum_level_db")
     if bottom > top:
-        msg = "'minimum_db' must not exceed 'maximum_db'."
+        msg = "'minimum_level_db' must not exceed 'maximum_level_db'."
         raise ValueError(msg)
     swing = float(settled(top - bottom))
     if swing >= _STEADY_RANGE_DB:
@@ -975,7 +975,7 @@ class PlantMeasurementContour(OwnsArrays):
 
     The plant area and the contour are polygons in metres, in any consistent
     plane coordinates; the contour encloses the plant and does not touch it.
-    The layout is ``position_count`` positions spaced equally along the
+    The layout is ``n_positions`` positions spaced equally along the
     contour from its first vertex (9.1.2.4, :math:`D_\mathrm{m} = l/N`), of
     which those listed in ``omitted_positions`` could not be measured; every
     quantity below is taken over the positions that were.
@@ -984,7 +984,7 @@ class PlantMeasurementContour(OwnsArrays):
     :ivar contour_m: Vertices of the measurement contour, ``(n, 2)``, in
         metres.
     :ivar characteristic_height_m: :math:`H`, in metres (9.2 c).
-    :ivar position_count: Positions in the equidistant layout.
+    :ivar n_positions: Positions in the equidistant layout.
     :ivar omitted_positions: Indices into the layout of the positions left out
         (9.1.2.4), in increasing order.
     """
@@ -992,7 +992,7 @@ class PlantMeasurementContour(OwnsArrays):
     plant_outline_m: NDArray[np.float64]
     contour_m: NDArray[np.float64]
     characteristic_height_m: float
-    position_count: int
+    n_positions: int
     omitted_positions: tuple[int, ...] = ()
 
     def __post_init__(self) -> None:
@@ -1019,9 +1019,7 @@ class PlantMeasurementContour(OwnsArrays):
         if height < 0.0:
             msg = "'characteristic_height_m' must be >= 0 m."
             raise ValueError(msg)
-        count = require_count(
-            self.position_count, "position_count", minimum=_MIN_POSITIONS
-        )
+        count = require_count(self.n_positions, "n_positions", minimum=_MIN_POSITIONS)
         omitted = tuple(
             require_count(i, "omitted_positions", minimum=0)
             for i in self.omitted_positions
@@ -1056,20 +1054,20 @@ class PlantMeasurementContour(OwnsArrays):
     @cached_property
     def _layout(self) -> tuple[np.ndarray, np.ndarray]:
         """Every position of the layout and its inward normal."""
-        points, normals = _walk(self.contour_m, self.position_count)
+        points, normals = _walk(self.contour_m, self.n_positions)
         return read_only(points), read_only(normals)
 
     @cached_property
     def measured(self) -> NDArray[np.bool_]:
         """Per layout position, whether it was measured (not omitted)."""
-        mask = np.ones(self.position_count, dtype=bool)
+        mask = np.ones(self.n_positions, dtype=bool)
         mask[list(self.omitted_positions)] = False
         return read_only(mask)
 
     @property
     def layout_positions_m(self) -> NDArray[np.float64]:
         """Every position of the equidistant layout, omitted ones included,
-        ``(position_count, 2)``, in metres.
+        ``(n_positions, 2)``, in metres.
         """
         return np.array(self._layout[0], dtype=np.float64)
 
@@ -1187,7 +1185,7 @@ class PlantMeasurementContour(OwnsArrays):
         r""":math:`D_\mathrm{m}`, the distance between adjacent positions of the
         layout along the contour, in metres (3.6).
         """
-        return self.contour_length_m / self.position_count
+        return self.contour_length_m / self.n_positions
 
     @property
     def mean_distance_m(self) -> float:
@@ -1202,7 +1200,7 @@ class PlantMeasurementContour(OwnsArrays):
     @property
     def omitted_percent(self) -> float:
         """The share of the layout left out, in percent (9.1.2.4)."""
-        return 100.0 * len(self.omitted_positions) / self.position_count
+        return 100.0 * len(self.omitted_positions) / self.n_positions
 
     @property
     def largest_plant_dimension_m(self) -> float:
@@ -1223,7 +1221,7 @@ class PlantMeasurementContour(OwnsArrays):
         return np.array([cx, cy])
 
     @property
-    def minimum_receiver_distance_m(self) -> float:
+    def min_receiver_distance_m(self) -> float:
         """The distance from the plant centre beyond which 0.2 a) lets the
         result stand for a point source: 1,5 times the largest dimension, in
         metres.
@@ -1324,16 +1322,16 @@ def plant_measurement_contour(
     contour_m: ArrayLike,
     *,
     characteristic_height_m: float,
-    position_count: int | None = None,
+    n_positions: int | None = None,
     omitted_positions: Sequence[int] = (),
 ) -> PlantMeasurementContour:
     r"""Lay the measurement positions on a contour round the plant area, 9.1.
 
     The positions are spaced equally along the contour from its first vertex.
-    With no ``position_count``, the layout is the smallest that meets 9.1.1 c),
+    With no ``n_positions``, the layout is the smallest that meets 9.1.1 c),
     :math:`D_\mathrm{m} = l/N \le 2\bar{d}`, with :math:`\bar{d}` taken over
     that same layout, from three positions up. A layout of your own is given
-    as ``position_count``, and the positions that could not be measured, a
+    as ``n_positions``, and the positions that could not be measured, a
     river or a building in the way (9.1.2.4), as ``omitted_positions``.
 
     The contour is not required to meet 9.1.1 here: a first contour drawn on
@@ -1344,25 +1342,25 @@ def plant_measurement_contour(
     :param contour_m: Vertices of the measurement contour round it, in metres.
     :param characteristic_height_m: :math:`H`, in metres, from
         :func:`plant_characteristic_height_m`.
-    :param position_count: Positions in the layout, or ``None`` for the
+    :param n_positions: Positions in the layout, or ``None`` for the
         fewest 9.1.1 c) allows.
     :param omitted_positions: Indices into the layout of positions not
-        measured; needs ``position_count``, since the indices refer to it.
+        measured; needs ``n_positions``, since the indices refer to it.
     :return: A :class:`PlantMeasurementContour`.
     :raises ValueError: for polygons that do not form a contour round the plant
         area, or omitted positions without a layout to refer to.
     """
     omitted = tuple(omitted_positions)
-    if position_count is not None:
+    if n_positions is not None:
         return PlantMeasurementContour(
             np.asarray(plant_outline_m, dtype=np.float64),
             np.asarray(contour_m, dtype=np.float64),
             characteristic_height_m,
-            position_count,
+            n_positions,
             omitted,
         )
     if omitted:
-        msg = "'omitted_positions' index a layout; give its 'position_count' with them."
+        msg = "'omitted_positions' index a layout; give its 'n_positions' with them."
         raise ValueError(msg)
     first = PlantMeasurementContour(
         np.asarray(plant_outline_m, dtype=np.float64),

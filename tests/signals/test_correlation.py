@@ -373,15 +373,19 @@ def test_delay_std_fields_follow_the_closed_form() -> None:
     bandwidth = 1000.0
     x, y = _two_detector_pair(1, 50, 3.0, bandwidth)
     res = ph.signals.time_delay(x, y, FS, method="direct", signal_bandwidth=bandwidth)
-    assert res.delay_std is not None
+    assert res.delay_standard_deviation is not None
     assert res.delay_interval is not None
     eps = ph.signals.correlation_random_error(
         abs(res.peak_correlation), bandwidth, N / FS
     )
     expected = (0.75**0.25) * np.sqrt(eps) / (np.pi * bandwidth)
-    assert res.delay_std == pytest.approx(expected, rel=1e-9)
-    assert res.delay_interval[0] == pytest.approx(res.delay - 2.0 * res.delay_std)
-    assert res.delay_interval[1] == pytest.approx(res.delay + 2.0 * res.delay_std)
+    assert res.delay_standard_deviation == pytest.approx(expected, rel=1e-9)
+    assert res.delay_interval[0] == pytest.approx(
+        res.delay - 2.0 * res.delay_standard_deviation
+    )
+    assert res.delay_interval[1] == pytest.approx(
+        res.delay + 2.0 * res.delay_standard_deviation
+    )
     # ρpeak -> S/sqrt((S+M)(S+N)) = 1/4 (Eq. 8.115).
     assert res.peak_correlation == pytest.approx(0.25, abs=0.02)
 
@@ -403,8 +407,8 @@ def test_delay_scatter_is_consistent_with_the_eq_8_129_prediction() -> None:
         )
         delays.append(res.delay)
         if seed == 0:
-            assert res.delay_std is not None
-            predicted = res.delay_std
+            assert res.delay_standard_deviation is not None
+            predicted = res.delay_standard_deviation
     scatter = float(np.std(np.asarray(delays)))
     assert 0.15 * predicted < scatter < 1.2 * predicted
 
@@ -412,7 +416,7 @@ def test_delay_scatter_is_consistent_with_the_eq_8_129_prediction() -> None:
 def test_no_bandwidth_means_no_error_fields() -> None:
     x = _white(15)
     res = ph.signals.time_delay(x, np.roll(x, 5), FS, method="direct")
-    assert res.delay_std is None
+    assert res.delay_standard_deviation is None
     assert res.delay_interval is None
     assert res.signal_bandwidth is None
 

@@ -4,7 +4,7 @@ description: "What 4.0 moved, renamed and removed, and how to find the new spell
 ---
 
 4.0 is a hard break with no compatibility layer. Almost nothing was deleted:
-of the 885 names the root exported in 3.3.0, fifty exist nowhere any more
+of the 885 names the root exported in 3.3.0, sixty-seven exist nowhere any more
 and the rest simply live at a named address instead of a flat one. So most of the
 work is an import sweep, and this page is mostly a map.
 
@@ -28,7 +28,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # this is the new spelling
 ```
 
-Measured across the whole surface, 832 of those 885 root names are published
+Measured across the whole surface, 815 of those 885 root names are published
 today by exactly one subpackage, none by two, and none needs a path deeper
 than `phonometry.<subpackage>`. Three more are still at the root, where they
 always were. So the swap is unambiguous: find the subpackage, import from it.
@@ -326,7 +326,7 @@ were each the same word for two things:
 | `air_attenuation=` on `sabine_reverberation_time`, `eyring_reverberation_time`, `millington_sette_reverberation_time`, `fitzroy_reverberation_time`, `arau_puchades_reverberation_time`, `reverberation_time_models` and `image_source_rir`, and `SoundAbsorptionMeasurement.air_attenuation` | `air_attenuation_per_m` |
 | `attenuation=` on `tube_wavenumber` and `two_microphone_impedance`, in Np/m | `attenuation_np_per_m=` |
 | `attenuation_source=` and `attenuation_receiving=` on `plenum_flanking_reduction_index` | `attenuation_source_per_m=` and `attenuation_receiving_per_m=` |
-| `speed=` on `road_rolling_noise`, `road_propulsion_noise`, `road_vehicle_sound_power`, `aerodynamic_sound_power` and `roughness_to_frequency`; `RoadTraffic.speed`, `RailwayVehicle.speed` and `RoadSurfaceCoefficients.speed_range`; `railway_source_power(minimum_speed=)`, all in km/h | `speed_kmh`, `speed_range_kmh` and `minimum_speed_kmh=`; `RailwayVehicle` takes `speed_kmh=` by name |
+| `speed=` on `road_rolling_noise`, `road_propulsion_noise`, `road_vehicle_sound_power`, `aerodynamic_sound_power` and `roughness_to_frequency`; `RoadTraffic.speed`, `RailwayVehicle.speed` and `RoadSurfaceCoefficients.speed_range`; `railway_source_power(minimum_speed=)`, all in km/h | `speed_kmh`, `speed_range_kmh` and `min_speed_kmh=`; `RailwayVehicle` takes `speed_kmh=` by name |
 | `reference_speed=` on `event_level`, `noise_contour` and `duration_correction`, and `segment_speed=` on `duration_correction` | `reference_speed_m_s=` and `segment_speed_m_s=` |
 | `FlightPathKinematics.airspeed` and `.ground_speed`, in m/s | `.airspeed_m_s` and `.ground_speed_m_s` |
 | `ground_speed=` on `linear_sound_speed_profile`, `log_linear_sound_speed_profile`, `ray_curvature_radius` and `shadow_zone_distance`, the speed of sound at the ground | `ground_speed_of_sound=` |
@@ -362,7 +362,7 @@ ever had the one, as in the table of "One spelling per concept":
 | `width=` on `plane_wave_limit`, `rectangular_duct_cut_on`, `elbow_insertion_loss`, `lined_rectangular_duct_attenuation`, `unlined_rectangular_duct_attenuation` and `hydraulic_diameter` | `width_m=`, beside their `height_m=` |
 | `width=` on `outdoor_attenuation`, `typical_element_mobility`, `slit_transmission_coefficient`, `slit_resonance_frequencies` and `plot_aperture_geometry`, and `ApertureTransmissionResult.width`, in metres | `width_m`, beside the `height_m` of a facade and the `joint_width_mm` of a joint |
 | `AircraftBandAttenuation.coefficient`, in dB/m | `.coefficient_db_per_m`, beside the `coefficient_db_per_100m` of an ARP 866A result |
-| `LoudspeakerCharacteristics.rated_impedance`, `.minimum_impedance` and `.impedance_modulus`, and `loudspeaker_characteristics(rated_impedance=)`; `rated_impedance` and `minimum_load_impedance` on `MicrophoneCharacteristics` and `MicrophoneElectrical`, and `microphone_characteristics(rated_impedance=, minimum_load_impedance=)` of 3.3.0, all in ohms | the same names ending in `_ohm`, as the headphone and induction-loop records spell them beside the mechanical impedances of a piston; the microphone pair is given as `microphone_characteristics(..., electrical=MicrophoneElectrical(rated_impedance_ohm=..., minimum_load_impedance_ohm=...))` |
+| `LoudspeakerCharacteristics.rated_impedance`, `.minimum_impedance` and `.impedance_modulus`, and `loudspeaker_characteristics(rated_impedance=)`; `rated_impedance` and `minimum_load_impedance` on `MicrophoneCharacteristics` and `MicrophoneElectrical`, and `microphone_characteristics(rated_impedance=, minimum_load_impedance=)` of 3.3.0, all in ohms | the same names ending in `_ohm`, as the headphone and induction-loop records spell them beside the mechanical impedances of a piston, with a minimum spelled `min_` (`rated_impedance_ohm`, `min_impedance_ohm`, `impedance_modulus_ohm`, `min_load_impedance_ohm`); the microphone pair is given as `microphone_characteristics(..., electrical=MicrophoneElectrical(rated_impedance_ohm=..., min_load_impedance_ohm=...))` |
 | `flow_resistivity=` on `ground_effect`, `atmospheric_parabolic_equation`, `delany_bazley`, `miki`, `johnson_champoux_allard` and `decoupling_frequency`, `PorousMediumResult.flow_resistivity`, and `barrier_insertion_loss(ground_flow_resistivity=)`, in Pa s/m² | `flow_resistivity_pa_s_m2` and `ground_flow_resistivity_pa_s_m2`, beside the kPa s/m² of the IEC TS 61400-11-2 ground classes and of EN 29052-1 |
 
 A published constant follows the same rule, and it needs it more, because a
@@ -378,7 +378,7 @@ gone names at the end of this page; these are the rest.
 | `noise_control.ISO7235_GAS_CONSTANT`, 287 J/(kg K) | `ISO7235_AIR_GAS_CONSTANT_J_KG_K` |
 | `noise_control.UNIVERSAL_GAS_CONSTANT`, 8314 J/(kmol K) | `IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K` |
 | `noise_control.AIR_SOUND_SPEED_M_S`, `PIPE_SOUND_SPEED_M_S` | `AIR_SPEED_OF_SOUND_M_S`, `PIPE_SPEED_OF_SOUND_M_S` |
-| `environment.ROAD_REFERENCE_SPEED`, `RAILWAY_MINIMUM_SPEED`, `TRAM_MINIMUM_SPEED`, `AERODYNAMIC_THRESHOLD_SPEED`, `AERODYNAMIC_REFERENCE_SPEED`, all in km/h | the same names ending in `_KMH` |
+| `environment.ROAD_REFERENCE_SPEED`, `RAILWAY_MINIMUM_SPEED`, `TRAM_MINIMUM_SPEED`, `AERODYNAMIC_THRESHOLD_SPEED`, `AERODYNAMIC_REFERENCE_SPEED`, all in km/h | `ROAD_REFERENCE_SPEED_KMH`, `RAILWAY_MIN_SPEED_KMH`, `TRAM_MIN_SPEED_KMH`, `AERODYNAMIC_THRESHOLD_SPEED_KMH`, `AERODYNAMIC_REFERENCE_SPEED_KMH` |
 | `environment.ROAD_REFERENCE_TEMPERATURE` | `ROAD_REFERENCE_TEMPERATURE_C` |
 | `environment.ROAD_SOURCE_HEIGHT`, `RAILWAY_SOURCE_HEIGHTS` | `ROAD_SOURCE_HEIGHT_M`, `RAILWAY_SOURCE_HEIGHTS_M` |
 | `environment.ROAD_OCTAVE_BANDS`, `RAILWAY_OCTAVE_BANDS`, `RAILWAY_THIRD_OCTAVE_BANDS` | the same names ending in `_HZ` |
@@ -387,7 +387,7 @@ gone names at the end of this page; these are the rest.
 | `building.TAPPING_DROP_HEIGHT`, `TAPPING_HAMMER_RADIUS`, `TAPPING_HAMMER_MASS`, `TAPPING_IMPACT_RATE` | `TAPPING_DROP_HEIGHT_M`, `TAPPING_HAMMER_RADIUS_M`, `TAPPING_HAMMER_MASS_KG`, `TAPPING_IMPACT_RATE_HZ` |
 | `building.LOW_FREQUENCY_VOLUME_LIMIT` | `LOW_FREQUENCY_VOLUME_LIMIT_M3` |
 | `hearing.AUDIOMETRIC_FREQUENCIES`, `PROTECTOR_OCTAVE_BANDS` | `AUDIOMETRIC_FREQUENCIES_HZ`, `PROTECTOR_OCTAVE_BANDS_HZ` |
-| `building.MINIMUM_MULTI_JUNCTION_KIJ`, −5 dB | `MINIMUM_MULTI_JUNCTION_KIJ_DB` |
+| `building.MINIMUM_MULTI_JUNCTION_KIJ`, −5 dB | `MIN_MULTI_JUNCTION_KIJ_DB` |
 | `broadcast.DBQPS_REFERENCE`, 0.775 V | `DBQPS_REFERENCE_V` |
 | `electroacoustics.CARDIOID_RELATIVE_DIRECTIVITY`, `DEFAULT_STABILITY_MARGIN`, both in dB | the same names ending in `_DB` |
 | `environment.REFERENCE_JOINT_DENSITY`, joints per metre | `REFERENCE_JOINT_DENSITY_PER_M` |
@@ -519,6 +519,44 @@ prints keeps its print, which is why the CNOSSOS surface below is still
 | `simulation.ALUMINIUM` | `simulation.ALUMINUM` |
 | `RoadSurface.OPTIMISED_BRUSHED_DOWN_CONCRETE` | `RoadSurface.OPTIMIZED_BRUSHED_DOWN_CONCRETE`, whose value is still the `"optimised brushed down concrete"` that CNOSSOS-EU Table F-4 prints |
 
+A word has one spelling as well. An acronym is written in capitals inside a
+class name, as `EPNLResult` and `STIResult` always were; Ecma, which is the
+name the organisation gives itself and not an acronym, is the exception
+(`EcmaLoudness`). `mic`, `lab` and `std` are spelled out. A count is
+`n_<plural>`. A limit or an extreme is `min_` or `max_`, and `MIN_` or `MAX_`
+in a constant, except where the word is part of the name of a quantity:
+minimum phase, maximum length sequence, the maximum impact level, the takt
+maximum (the clock maximum of DIN 45669-1 and DIN 4150-2,
+`TAKT_MAXIMUM_FACTOR`), and the maximum
+and minimum levels Lmax and Lmin, which are `maximum_level` and
+`minimum_level` also where only the unit says a level (`maximum_level_db`,
+never `max_db`). A function or a class is named in words, `minimum` and
+`maximum` included (`junction_minimum_vibration_reduction`). A function that reads a time
+signal takes it first, as `x`, the name `octave_filter(x, fs)` and the rest
+of the signal functions always used; called by position, nothing changes. The
+3.3.0 top-level names among these are in the table of names that are gone.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `building.DbHrAssessment`, `DbHrCheck`, `DbHrGlobalIndexResult` and `DbHrRequirement`, `noise_control.HvacWarning`, `underwater.StrikeSelSpectrum` | `DBHRAssessment`, `DBHRCheck`, `DBHRGlobalIndexResult`, `DBHRRequirement`, `HVACWarning`, `StrikeSELSpectrum` |
+| the module `building.measurement.lab_insulation` | `building.measurement.laboratory_insulation`; importing from `building` is unchanged |
+| `HMLRatingResult.subject_h`, `.subject_m` and `.subject_l` | `.subject_high`, `.subject_medium` and `.subject_low`, the values per subject beside `high`, `medium` and `low` |
+| `.std` on `TrendTestResult` and `StationarityTestResult`, `TimeDelayResult.delay_std` | `.standard_deviation`, `.delay_standard_deviation` |
+| `StationarityTestResult.count` | `.trend_statistic`, the `statistic` of the trend test it ran |
+| `num_points=` on `verify_filter_class`, and `FilterComplianceResult.num_points` | `n_points` |
+| `AnpAircraft.num_engines` and `PerformanceAircraft.engines` | `ANPAircraft.n_engines` and `PerformanceAircraft.n_engines` |
+| `blade_count=` on `fan_sound_power`, and the `blades` of `blade_passing_frequency` | `n_blades` |
+| `count=` on `precision_positions` | `n_positions=` |
+| `count=` on `circular_duct_cut_on` and `rectangular_duct_cut_on`, and `WestonRegimeBoundaries.mode_count` | `n_modes` |
+| `count=` on `diffuser_sound_power` | `n_devices=` |
+| `harmonics=` on `gear_mesh_frequencies` and `blade_pass_frequencies`, and the `count` of `FaultFrequencyResult.harmonics` | `n_harmonics` |
+| `SawtoothBurstTest.burst_count` | `.n_bursts` |
+| `room.MAXIMUM_DIRECTIVITY_STEP_DEG`, `MINIMUM_BANDWIDTH_TIME_PRODUCT`, `MINIMUM_DETECTOR_MULTIPLE` and `MINIMUM_REFERENCE_DISTANCE_M`, `noise_control.MAXIMUM_PASSAGE_ASPECT`, `MINIMUM_FLOW_RATES` and `MINIMUM_PRESSURE_DIFFERENCE_PA`, `emission.MINIMUM_BACKGROUND_MARGIN_DB` | `MAX_DIRECTIVITY_STEP_DEG`, `MIN_BANDWIDTH_TIME_PRODUCT`, `MIN_DETECTOR_MULTIPLE`, `MIN_REFERENCE_DISTANCE_M`, `MAX_PASSAGE_ASPECT`, `MIN_FLOW_RATES`, `MIN_PRESSURE_DIFFERENCE_PA`, `MIN_BACKGROUND_MARGIN_DB` |
+| `environment.max_infrastructure_limit` | `maximum_infrastructure_limit`: a function is named in words |
+| `OperatingLine.maximum_deviation`, `maximum_open_loop_gain` and `maximum_level_at_microphone` on `FeedbackStabilityResult`, `maximum_reduction_db=` on `end_reflection_loss`, `LoudspeakerCharacteristics.minimum_impedance`, `minimum_load_impedance` on `MicrophoneCharacteristics` and `MicrophoneElectrical`, `DiscretePointIntensityResult.minimum_positions`, `minimum_speed=` on `railway_source_power` | `max_deviation`, `max_open_loop_gain`, `max_level_at_microphone`, `max_reduction_db=`, `min_impedance_ohm`, `min_load_impedance_ohm`, `min_positions`, `min_speed_kmh=` |
+| `signal_in=` on `loudness_ecma`, `tonality_ecma`, `roughness_ecma`, `fluctuation_strength_ecma` and `fluctuation_strength`; `signal=` on `loudness_moore_glasberg_time`, on the distortion and noise measurements of `electroacoustics` (`thd`, `thd_plus_noise`, `sinad`, `weighted_thd`, `harmonic_analysis`, `harmonic_distortion`, `dynamic_range`, `idle_channel_noise`, `modulation_distortion`, `difference_frequency_distortion`, `total_difference_frequency_distortion`, `dynamic_intermodulation_distortion`), on `impulsive_sound_adjustment` and `sound_pressure_level_history`, on the human-vibration functions (`running_rms`, `mtvv`, `vibration_dose_value`, `motion_sickness_dose_value`, `crest_factor`, `apply_weighting`, `apply_band_limiting`) and on `room.plot_excitation` | `x` |
+| `tone_freq=` on `tone_to_noise_ratio` and `prominence_ratio` | `tone_frequency=`, which, like `resolution_hz=`, is now keyword-only |
+
 ## Every public name has one address
 
 A handful of names could be imported from a second module in 3.3.0 or
@@ -535,7 +573,7 @@ single address now, the one the resolver above returns, and none is private:
 | `emission.DeclarationForm`; `Grade` and `Surface` listed by `emission.sound_power`; `EQFilterType` listed by `filters.equalizer` (`metrology.equalizer` in 3.3.0) | nothing to import: no type alias is public. Pass the string the parameter takes, `form="single-number"` for instance, and the API reference shows each parameter's `Literal[...]` where the alias used to be |
 | `BASIC_METHOD_MAX_CREST_FACTOR` listed by `vibration.human.exposure` | not published. `vibration.crest_factor` warns above 9, the crest factor up to which ISO 2631-1 6.2.2 holds the basic method sufficient |
 | `REFERENCE_IMPEDANCE`, `REFERENCE_AREA` and `REFERENCE_SOUND_POWER` of `emission.vibration_sound_power`, a module with no `__all__` whose package never published them | not published. The 400 N·s/m³ and the 1 m² are the defaults of `reference_impedance=` and `reference_area=` in `emission.radiated_sound_power_level`, and the 1 pW is `metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value` |
-| `AnpAircraft(..., _database=db)` and `aircraft._database` | `AnpAircraft(..., database=db)` and `aircraft.database`, still left out of the repr and of comparisons |
+| `AnpAircraft(..., _database=db)` and `aircraft._database` | `ANPAircraft(..., database=db)` and `aircraft.database`, still left out of the repr and of comparisons |
 | `AnpDatabase(..., performance=...)` (4.0.0rc1) | no `performance=`, whose type nothing published: `aircraft.load_anp_database` reads the performance tables of an export, and a database built by hand flies fixed-point profiles |
 
 ```python
@@ -632,7 +670,7 @@ print(verdict.overall_class, len(verdict.bands))
 
 `verify_running_rms_decay` is newer than 3.3.0, and in 4.0.0rc1 it returned a
 bare `bool`, which threw away the printed interval and the measured time it
-had judged. It now returns a `RunningRmsDecayVerification` that keeps both:
+had judged. It now returns a `RunningRMSDecayVerification` that keeps both:
 the verdict is `.passes`, beside `.measured_time_s`, `.printed_time_s`,
 `.tolerance_s` and the interval as `.lower_time_s` and `.upper_time_s`. The
 object refuses to be read as a truth value, so an
@@ -752,7 +790,7 @@ keeps from the arguments it was given is a copy of its own, made read-only
 like the published tables, and the caller's array is left as it was. That
 holds for the objects that keep arrays to hand out later as well: the
 frequency grid of a `noise_control.SilencerChain`, the axes and flight paths
-an `aircraft.AnpDatabase` is built from, and the medium maps of
+an `aircraft.ANPDatabase` is built from, and the medium maps of
 `simulation.FDTD2D` and `simulation.ElasticFDTD2D`, whose `c`, `rho`, `c_p`
 and `c_s` now stay the ones the time step was computed from. A `Signal`
 keeps a copy of its own samples too, which stays writeable for processing in
@@ -961,7 +999,7 @@ says where each verdict first shipped.
 | `noise_control.SourcePositionCheck` | `required_positions`, `satisfied`, `exceeds_maximum` | `positions_used`, `max_octave_spread_db` | after 4.0.0rc1 |
 | `noise_control.TestEnvironmentApplicability` | `environmental_correction_limit_db`, `background_margin_limit_db`, `required_area_ratio`, `applicable` | `base_standard`, `actual_area_ratio`, `mean_absorption_coefficient` | after 4.0.0rc1 |
 | `environment.ReflectionGridCheck` | `nominal_m`, `deviations_m`, `within` | `check`, `path_differences_m` | after 4.0.0rc1 |
-| `emission.HardWalledRoomCheck` | `limit_db`, `minimum_volume_m3`, `box_dimension_limit_m`, `minimum_microphone_distance_m` | the bands, the room and the box | after 4.0.0rc1 |
+| `emission.HardWalledRoomCheck` | `limit_db`, `min_volume_m3`, `box_dimension_limit_m`, `min_microphone_distance_m` | the bands, the room and the box | after 4.0.0rc1 |
 | `emission.ReferenceSoundSourceVerdict` | every `*_limit_db`, `adjacent_step_db`, `core_range_db`, `extended_range_db`, `frequency_range_met`, `not_judged` | the bands, the levels and the measured figures | after 4.0.0rc1 |
 | `emission.ReferenceSourceDriftResult`, `emission.SpecialRoomSuitabilityCheck` | `limit_db` | the bands | after 4.0.0rc1 |
 | `emission.SpecialRoomReverberationCheck` | `lower_limit`, `upper_limit` | the bands | after 4.0.0rc1 |
@@ -969,7 +1007,7 @@ says where each verdict first shipped.
 | `emission.InverseSquareLawResult`, `emission.SourceDirectionalityResult` | `tolerance_db` | `room` selects it; the qualified radii must be the ones the levels reach | after 4.0.0rc1 |
 | `hearing.AmbientNoiseCheck` | `limits_db`, `table_bands_hz` | gains `earphone_attenuation_db` and `allowed_threshold_shift_db` | after 4.0.0rc1 |
 | `hearing.FixtureIsolationCheck` | `required_db` | the bands | after 4.0.0rc1 |
-| `hearing.ReatSoundFieldCheck` | `allowable_variation_db` | gains `free_field_rejection_db` | after 4.0.0rc1 |
+| `hearing.REATSoundFieldCheck` | `allowable_variation_db` | gains `free_field_rejection_db` | after 4.0.0rc1 |
 | `hearing.DiffuseSoundFieldCheck` | `allowable_variation_db` | gains `front_to_random_index_db` | after 4.0.0rc1 |
 | `hearing.FreeSoundFieldCheck` | `axis_offset_m`, `inverse_distance_difference_db` | `field` and `loudspeaker_distance_m` select them | after 4.0.0rc1 |
 | `electroacoustics.ProgramSignalCheck` | `offset_db`, `relative_levels_db`, `tolerance_plus_db`, `tolerance_minus_db` | `frequencies`, `band_levels_db` | after 4.0.0rc1 |
@@ -978,7 +1016,7 @@ says where each verdict first shipped.
 | `underwater.WeightedExposureResult` | `criteria` | gains `impulsive` | 4.0.0rc1 |
 | `vibration.ExposureAssessment` | `action_value`, `limit_value`, `exceeds_action`, `exceeds_limit`, `zone` | `value`, `kind`, `metric` | 3.3.0 |
 | `vibration.PhaseVerification`, `vibration.WeightingVerification` | `tolerance_deg` (phase), `within_tolerance` | the weighting and the frequencies | 4.0.0rc1 |
-| `vibration.RunningRmsDecayVerification` | `printed_time_s`, `tolerance_s` | `method`, `integration_time`, `measured_time_s` | after 4.0.0rc1 |
+| `vibration.RunningRMSDecayVerification` | `printed_time_s`, `tolerance_s` | `method`, `integration_time`, `measured_time_s` | after 4.0.0rc1 |
 | `vibration.SignalBurstVerification` | `printed`, `deviation_percent`, `tolerance_percent`, `within_tolerance` | the table row, the columns and `measured` | 4.0.0rc1 |
 | `vibration.VibrationMeterVerification` | `lower_percent`, `upper_percent`, `within_tolerance` | gains `measured_response` | after 4.0.0rc1 |
 | `vibration.AssessmentVelocity` | `guide_value_mm_s` | `building_class` selects it | after 4.0.0rc1 |
@@ -1047,15 +1085,15 @@ that is keyword-only.
 | --- | --- | --- | --- |
 | `building.JointTestElementCheck` | `length_ok`, `width_ok`, `passes` | `joint_length_m`, `joint_width_mm`, `window_or_door_gap` | after 4.0.0rc1 |
 | `building.GapWidthCheck` | `gap_width_mm`, `spread_mm`, `enough_positions`, `uniform`, `passes` | `readings_mm` | after 4.0.0rc1 |
-| `building.JointGapSeriesCheck` | `nominal_measured`, `minimum_measured`, `working_range_measured`, `passes` | `gap_widths_mm`, `nominal_gap_mm`, `minimum_gap_mm` | after 4.0.0rc1 |
+| `building.JointGapSeriesCheck` | `nominal_measured`, `min_measured`, `working_range_measured`, `passes` | `gap_widths_mm`, `nominal_gap_mm`, `min_gap_mm` | after 4.0.0rc1 |
 | `building.LiningCuringCheck` | `cured`, `lag_within_third`, `passes` | `curing_time_days`, `time_lag_days`, `required_curing_days` | after 4.0.0rc1 |
 | `building.RainGeneratorVerification` | `rate_deviation_mm_h`, `rate_ok`, `drop_share`, `drops_ok`, `velocity_share`, `velocities_ok`, `passes` | `rain_type`, `rainfall_rate_mm_h`, `drop_diameters_mm`, `fall_velocities_m_s` | after 4.0.0rc1 |
 | `building.ServiceEquipmentPositionCheck` | `separation_m`, `surface_distance_m`, `source_distance_m`, `heights_m`, `corner_height_m`, `corner_wall_distances_m` and the six `*_ok` | the room, the corner and the positions | after 4.0.0rc1 |
-| `building.DbHrCheck` | `reported`, `margin`, `complies` | `requirement`, `value` | 4.0.0rc1 |
+| `building.DBHRCheck` | `reported`, `margin`, `complies` | `requirement`, `value` | 4.0.0rc1 |
 | `building.LowFrequencyIntensityResult`, `building.LowFrequencyElementResult` | `qualified` | `surface_pressure_intensity_indicator`, against the 6.4.2 limit `absorbing_specimen_surface` selects | 4.0.0rc1 |
 | `electroacoustics.BackgroundNoiseAssessment` | `reference_signal_to_noise_ratio_db`, `category`, `report_required` | `noise_levels_db`, `noise_is_tonal` | after 4.0.0rc1 |
 | `electroacoustics.FeedbackStabilityResult` | `is_stable` | `loop_gain`, `stability_margin` | 4.0.0rc1 |
-| `emission.FreeFieldCheck` | `room`, `frequencies`, `band_radius_m`, `maximum_qualified_radius_m`, every `*_met`, `full_frequency_range`, `conforming_range_hz`, `conforming_radius_m`, `not_judged` | the arguments of `check_free_field`: gains `source_directionality`, `reflecting_plane_absorption_coefficient`, `reflecting_plane_margin_m`, `paths_in_working_area`, `speed_of_sound` | after 4.0.0rc1 |
+| `emission.FreeFieldCheck` | `room`, `frequencies`, `band_radius_m`, `max_qualified_radius_m`, every `*_met`, `full_frequency_range`, `conforming_range_hz`, `conforming_radius_m`, `not_judged` | the arguments of `check_free_field`: gains `source_directionality`, `reflecting_plane_absorption_coefficient`, `reflecting_plane_margin_m`, `paths_in_working_area`, `speed_of_sound` | after 4.0.0rc1 |
 | `emission.IntensityInstrumentComplianceResult` | `bands`, `overall_class`, `range_limited` | `frequencies`, `residual_index`, `device`, `spacing_m` | 4.0.0rc1 |
 | `emission.ReferenceSourceCalibration` | `sound_power_level_db`, `intensity_bands`, `intensity_agreement`, `room_qualified` | gains `intensity_sound_power_level_db` and `room_qualification` | after 4.0.0rc1 |
 | `emission.HardWalledSoundPowerResult` | `background_requirement_met`, `upper_bound` | gains `background_margin_db`, `background_margin_ref_db` | after 4.0.0rc1 |
@@ -1081,7 +1119,7 @@ that is keyword-only.
 | `hearing.AttenuationDifferenceResult` | `difference_db`, `criterion_db`, `significant` | the two means and their expanded uncertainties | after 4.0.0rc1 |
 | `materials.CeilingSpecimenCheck` | `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok`, `ce_marking_depth`, `satisfied` | gains the measured figures: `deflection_mm`, `substructure_width_mm`, `substructure_height_mm`, `fixture_density_kg_m2`, `support_width_mm`, `support_height_mm`, `support_center_distance_m`, `lowest_relative_humidity_percent` | after 4.0.0rc1 |
 | `metrology.TrendTestResult` | `trend_free`, `bounds` | `statistic`, against the region `values`, `method`, `alpha` and `median` give | 3.3.0 |
-| `metrology.StationarityTestResult` | `stationary`, `bounds` | `count`, against the region `segment_values`, `method` and `alpha` give | 3.3.0 |
+| `metrology.StationarityTestResult` | `stationary`, `bounds` | `trend_statistic`, against the region `segment_values`, `method` and `alpha` give | 3.3.0 |
 | `metrology.CouplerCheck` | `ratio_recommended`, `approximation_valid`, `full_solution_advised`, `conditions_valid` | gains `heat_conduction_method`, `temperature_c`, `static_pressure_pa`, `relative_humidity_percent`, `in_air`, by name only | after 4.0.0rc1 |
 | `metrology.FreeFieldArrangementCheck` | `distances_ok`, `support_ok`, `annex_a_range`, `attenuation_accuracy` | gains `air_attenuation` | after 4.0.0rc1 |
 | `noise_control.CabinUncertainty` | `ratio_satisfied`, `stateable`, `stated_band_range_hz`, `increased_uncertainty_band_range_hz`, `excess_standard_deviation_db` | `method`, `volume_ratio` | after 4.0.0rc1 |
@@ -1206,7 +1244,7 @@ is read from, has to change, and so does code that reads `band_type` from
 | `metrology.WaveMotionCorrection` | `interpolated` | `frequencies`, `speed_of_sound_ratio` | after 4.0.0rc1 |
 | `noise_control.CabinInsulationResult` | `apparent` (ISO 11957 3.6) | `method` | after 4.0.0rc1 |
 | `environment.WindTurbineTonalityResult` | `has_identified_tone` (IEC 61400-11 9.5.2 to 9.5.4) | `levels`, `frequencies`; gains `candidate_frequency_hz`, by name only | 3.3.0 |
-| `building.LabJointInsulationResult` | `regime` (ISO 10140-1 J.1) | `r_s_measured_db`, `r_s_max_db`; gains `limit_at_maximum`, by name only | after 4.0.0rc1 |
+| `building.LaboratoryJointInsulationResult` | `regime` (ISO 10140-1 J.1) | `r_s_measured_db`, `r_s_max_db`; gains `limit_at_maximum`, by name only | after 4.0.0rc1 |
 | `environment.TurbineSoundLevels` | `regimes` (IEC TS 61400-11-2 11.7) | `total_levels_db`, `background_levels` | after 4.0.0rc1 |
 | `underwater.WestonPropagationResult` | `regime` | `range_m`, `boundaries` | 4.0.0rc1 |
 | `signals.SynchronousAverageResult` | `interpolated`, f_s T not a whole number of samples | `fs`, `period_s` | 4.0.0rc1 |
@@ -1246,7 +1284,7 @@ of these results refuses:
 - `WindTurbineTonalityResult`: a candidate that is not a line of the spectrum
   at or above 20 Hz, and a Formula 30 to 34 chain that is not the one the
   spectrum gives about it.
-- `LabJointInsulationResult`: a corrected index of another rule of J.1.
+- `LaboratoryJointInsulationResult`: a corrected index of another rule of J.1.
 - `TurbineSoundLevels`: a level difference other than the total less the
   background, a turbine level of another rule of 11.7, and an uncertainty on
   a bin whose level cannot be determined.
@@ -1275,9 +1313,9 @@ except ValueError as error:
 # True
 ```
 
-## The fifty names that are gone
+## The sixty-seven names that are gone
 
-Everything else moved. These fifty exist in no public module:
+Everything else moved. These sixty-seven exist in no public module:
 
 | Gone | What to write instead |
 | --- | --- |
@@ -1313,6 +1351,12 @@ Everything else moved. These fifty exist in no public module:
 | `combine_linings`, `combine_subareas`, `combine_partial_exposures`, `combine_age_and_noise` | `building.combined_lining_improvement`, `building.subarea_intensity_level`, `vibration.combined_daily_exposure`, `hearing.age_and_noise_threshold`: a computation is named for what it returns |
 | `air_attenuation_m` | `environment.air_power_attenuation_per_m`. The m it returns is the power attenuation coefficient of ISO 354, in 1/m, not a length |
 | `attenuation_from_alpha`, `air_attenuation_coefficient` | `materials.power_attenuation_from_alpha`, the one conversion ISO 354 and ISO 17497-1 both make. Its argument is `attenuation_db_per_m`, where the two old functions named it `alpha` and `pressure_attenuation_db_per_m`. It refuses a NaN or an infinite alpha, which `attenuation_from_alpha` let through |
+| `HtlanResult`, `NiptsResult` | `hearing.HTLANResult`, `hearing.NIPTSResult`: an acronym is written in capitals, as in `HMLRatingResult` |
+| `AnpAircraft`, `AnpDatabase`, `AnpNpdCurves`, `AnpProfile`, `NpdLevelResult` | `aircraft.ANPAircraft`, `aircraft.ANPDatabase`, `aircraft.ANPNPDCurves`, `aircraft.ANPProfile`, `aircraft.NPDLevelResult`; the number of engines is `ANPAircraft.n_engines` |
+| `HvacSpectrumResult` | `noise_control.HVACSpectrumResult` |
+| `mic_calibration_factor`, `apply_mic_calibration` | `materials.microphone_calibration_factor`, `materials.apply_microphone_calibration` |
+| `lab_airborne_insulation`, `lab_impact_insulation`, `LabAirborneInsulationResult`, `LabImpactInsulationResult`, `LabInsulationWarning` | `building.laboratory_airborne_insulation`, `building.laboratory_impact_insulation`, `building.LaboratoryAirborneInsulationResult`, `building.LaboratoryImpactInsulationResult`, `building.LaboratoryInsulationWarning` |
+| `junction_min_vibration_reduction`, `max_sampled_area_radius` | `building.junction_minimum_vibration_reduction`, `materials.maximum_sampled_area_radius`: a function is named in words, `minimum` and `maximum` included |
 
 ## What did not change
 

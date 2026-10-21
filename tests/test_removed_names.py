@@ -329,8 +329,8 @@ def test_a_second_name_the_4_0_removed_is_gone(module: str, name: str) -> None:
 #: aircraft's database is ``database`` now, and a database built by hand takes
 #: no performance tables, which only an ANP export carries.
 _REMOVED_4_0_KEYWORDS = [
-    ("aircraft", "AnpAircraft", "_database"),
-    ("aircraft", "AnpDatabase", "performance"),
+    ("aircraft", "ANPAircraft", "_database"),
+    ("aircraft", "ANPDatabase", "performance"),
 ]
 
 
@@ -559,3 +559,92 @@ def test_the_american_spellings_are_all_here() -> None:
         ("phonometry.simulation", "ALUMINUM"),
     ):
         assert hasattr(importlib.import_module(module), name), (module, name)
+
+
+# --------------------------------------------------------------------------- #
+# 4.0 one spelling per word: acronyms in capitals, abbreviations spelled out,
+# a count as n_<plural> and the time signal as x. The old spellings are gone,
+# with no alias; a sample of each kind, the 3.3.0 top-level names among them.
+# --------------------------------------------------------------------------- #
+_RESPELLED_4_0_NAMES = [
+    ("hearing", "HtlanResult", "HTLANResult"),
+    ("hearing", "NiptsResult", "NIPTSResult"),
+    ("aircraft", "AnpAircraft", "ANPAircraft"),
+    ("aircraft", "AnpDatabase", "ANPDatabase"),
+    ("aircraft", "AnpNpdCurves", "ANPNPDCurves"),
+    ("aircraft", "AnpProfile", "ANPProfile"),
+    ("aircraft", "NpdLevelResult", "NPDLevelResult"),
+    ("noise_control", "HvacSpectrumResult", "HVACSpectrumResult"),
+    ("noise_control", "HvacWarning", "HVACWarning"),
+    ("building", "DbHrCheck", "DBHRCheck"),
+    ("underwater", "StrikeSelSpectrum", "StrikeSELSpectrum"),
+    ("materials", "mic_calibration_factor", "microphone_calibration_factor"),
+    ("materials", "apply_mic_calibration", "apply_microphone_calibration"),
+    ("building", "lab_airborne_insulation", "laboratory_airborne_insulation"),
+    ("building", "lab_impact_insulation", "laboratory_impact_insulation"),
+    ("building", "LabAirborneInsulationResult", "LaboratoryAirborneInsulationResult"),
+    ("building", "LabImpactInsulationResult", "LaboratoryImpactInsulationResult"),
+    ("building", "LabInsulationWarning", "LaboratoryInsulationWarning"),
+    ("noise_control", "MINIMUM_MICROPHONE_DISTANCE_M", "MIN_MICROPHONE_DISTANCE_M"),
+    ("room", "MAXIMUM_DIRECTIVITY_STEP_DEG", "MAX_DIRECTIVITY_STEP_DEG"),
+    ("environment", "RAILWAY_MINIMUM_SPEED", "RAILWAY_MIN_SPEED_KMH"),
+    (
+        "building",
+        "junction_min_vibration_reduction",
+        "junction_minimum_vibration_reduction",
+    ),
+    ("materials", "max_sampled_area_radius", "maximum_sampled_area_radius"),
+    ("environment", "max_infrastructure_limit", "maximum_infrastructure_limit"),
+    ("metrology", "MaxUncertaintyRow", "MaximumUncertaintyRow"),
+    ("vibration", "floor_transfer_max", "floor_transfer_maximum"),
+]
+
+
+@pytest.mark.parametrize(("package", "old", "new"), _RESPELLED_4_0_NAMES)
+def test_a_spelling_the_4_0_retired_is_gone(package: str, old: str, new: str) -> None:
+    home = getattr(ph, package)
+    assert hasattr(home, new), f"{package}.{new}"
+    with pytest.raises(AttributeError, match=rf"has no attribute '{old}'"):
+        getattr(home, old)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "phonometry.building.measurement.lab_insulation",
+        "phonometry.building.measurement.lab_improvement",
+    ],
+)
+def test_the_laboratory_modules_left_their_abbreviated_paths(path: str) -> None:
+    with pytest.raises(
+        ModuleNotFoundError, match=rf"No module named '(?:{_import_chain(path)})'"
+    ):
+        importlib.import_module(path)
+
+
+#: ``(package, callable, old keyword, new keyword)``.
+_RENAMED_4_0_KEYWORDS = [
+    ("filters", "verify_filter_class", "num_points", "n_points"),
+    ("noise_control", "fan_sound_power", "blade_count", "n_blades"),
+    ("psychoacoustics", "loudness_ecma", "signal_in", "x"),
+    ("electroacoustics", "thd", "signal", "x"),
+    ("vibration", "running_rms", "signal", "x"),
+    ("psychoacoustics", "tone_to_noise_ratio", "tone_freq", "tone_frequency"),
+    ("vibration", "gear_mesh_frequencies", "harmonics", "n_harmonics"),
+    (
+        "building",
+        "check_varying_background",
+        "background_maximum_db",
+        "background_maximum_level_db",
+    ),
+    ("emission", "plant_steady_reading", "maximum_db", "maximum_level_db"),
+]
+
+
+@pytest.mark.parametrize(("package", "owner", "old", "new"), _RENAMED_4_0_KEYWORDS)
+def test_a_keyword_the_4_0_respelled_is_gone(
+    package: str, owner: str, old: str, new: str
+) -> None:
+    parameters = inspect.signature(getattr(getattr(ph, package), owner)).parameters
+    assert new in parameters
+    assert old not in parameters

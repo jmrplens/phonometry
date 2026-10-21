@@ -129,10 +129,8 @@ def test_rated_impedance_passes_at_exactly_80_percent() -> None:
     verdict = ea.verify_rated_impedance(
         f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(20.0, 20000.0)
     )
-    assert verdict.minimum_ohm == 25.6
-    assert verdict.minimum_ratio == pytest.approx(
-        ref.IEC60268_7_RATED_IMPEDANCE_FRACTION
-    )
+    assert verdict.min_ohm == 25.6
+    assert verdict.min_ratio == pytest.approx(ref.IEC60268_7_RATED_IMPEDANCE_FRACTION)
     assert verdict.passes
     assert verdict.frequencies_to_state_hz.size == 0
 
@@ -143,7 +141,7 @@ def test_rated_impedance_fails_below_80_percent() -> None:
         f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(20.0, 20000.0)
     )
     assert not verdict.passes
-    assert verdict.minimum_frequency_hz == float(f[100])
+    assert verdict.min_frequency_hz == float(f[100])
     np.testing.assert_array_equal(verdict.frequencies_to_state_hz, [f[100]])
 
 
@@ -464,7 +462,7 @@ def test_crosstalk_is_the_difference_of_the_levels() -> None:
     np.testing.assert_allclose(
         result.attenuation_db, np.linspace(60.0, 40.0, BANDS.size)
     )
-    assert result.minimum_db == pytest.approx(40.0)
+    assert result.min_db == pytest.approx(40.0)
 
 
 # ---------------------------------------------------------------------------
@@ -730,8 +728,8 @@ def test_impedance_plot_draws_the_modulus_the_limit_and_the_minimum(
     np.testing.assert_array_equal(curve.get_ydata(), verdict.impedance_ohm)
     assert tuple(rated.get_ydata()) == (32.0, 32.0)
     assert tuple(limit.get_ydata()) == (verdict.limit_ohm, verdict.limit_ohm)
-    assert tuple(lowest.get_xdata()) == (verdict.minimum_frequency_hz,)
-    assert tuple(lowest.get_ydata()) == (verdict.minimum_ohm,)
+    assert tuple(lowest.get_xdata()) == (verdict.min_frequency_hz,)
+    assert tuple(lowest.get_ydata()) == (verdict.min_ohm,)
     labels = [text.get_text() for text in ax.get_legend().get_texts()]
     assert lowest.get_label() in labels
     assert _title_verdict(ax.get_title()) == _VERDICT_WORDS[(language, verdict.passes)]

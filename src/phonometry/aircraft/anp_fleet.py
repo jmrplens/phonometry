@@ -11,15 +11,15 @@ engine power settings, per operation mode) and default trajectories.
 This module reads the ANP database tables (the semicolon-delimited CSV exports)
 and exposes, for a given aircraft identifier and operation:
 
-* :class:`AnpNpdCurves` -- the NPD curves (``LAmax``/``SEL`` versus distance for
+* :class:`ANPNPDCurves` -- the NPD curves (``LAmax``/``SEL`` versus distance for
   each tabulated power), with a ``.plot()``;
-* :class:`AnpProfile` -- the default fixed-point trajectory as a Doc 29 flight
+* :class:`ANPProfile` -- the default fixed-point trajectory as a Doc 29 flight
   path ``(N, 5)`` with the takeoff/landing ground-roll masks, with a ``.plot()``;
-* :class:`AnpAircraft` -- the aircraft metadata plus convenience wiring
-  (:meth:`AnpAircraft.event_level`, :meth:`AnpAircraft.noise_contour`) that feeds
+* :class:`ANPAircraft` -- the aircraft metadata plus convenience wiring
+  (:meth:`ANPAircraft.event_level`, :meth:`ANPAircraft.noise_contour`) that feeds
   the NPD curves and the profile straight into the existing Doc 29 functions.
 
-:func:`load_anp_database` returns an :class:`AnpDatabase`. Called without a path
+:func:`load_anp_database` returns an :class:`ANPDatabase`. Called without a path
 it loads the full EASA ANP database (archive version 2.3) shipped with the
 package (see ``aircraft/data/anp/PROVENANCE.md``); pointed at a directory it
 reads any other ANP CSV export the user provides.
@@ -27,8 +27,8 @@ reads any other ANP CSV export the user provides.
 Aircraft whose default trajectory is published as *procedural steps* rather than
 as fixed points are reached through :mod:`phonometry.aircraft.flight_performance`,
 the ECAC Doc 29 Vol. 2 Appendix B performance model:
-:meth:`AnpDatabase.flight_profile` flies the published procedure for an
-aerodrome and its weather, and :meth:`AnpDatabase.procedural_profile` returns the
+:meth:`ANPDatabase.flight_profile` flies the published procedure for an
+aerodrome and its weather, and :meth:`ANPDatabase.procedural_profile` returns the
 result as the same Doc 29 flight path the fixed-point bridge produces, so either
 kind of profile feeds the same chain. NPD curves are available for every aircraft
 regardless.
@@ -84,7 +84,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .flight_performance import Aerodrome
-    from .npd_atmosphere import RevisedNpdCurves
+    from .npd_atmosphere import RevisedNPDCurves
 
 #: Feet-to-metres conversion (NPD slant distances and profile altitudes/distances).
 _FT_M = 0.3048
@@ -259,12 +259,12 @@ def _distances_m(header: Iterable[str]) -> NDArray[np.float64]:
     if np.any(np.diff(distances) <= 0.0):
         msg = "NPD 'L_<ft>ft' distance columns must be strictly increasing."
         raise ValueError(msg)
-    distances.flags.writeable = False  # shared across every AnpNpdCurves
+    distances.flags.writeable = False  # shared across every ANPNPDCurves
     return distances
 
 
 @dataclass(frozen=True)
-class AnpNpdCurves(OwnsArrays):
+class ANPNPDCurves(OwnsArrays):
     """ANP Noise-Power-Distance curves for one aircraft, metric and operation.
 
     :ivar aircraft_id: ANP aircraft identifier.
@@ -336,7 +336,7 @@ class AnpNpdCurves(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class AnpProfile(OwnsArrays):
+class ANPProfile(OwnsArrays):
     """Default fixed-point trajectory of an ANP aircraft as a Doc 29 flight path.
 
     :ivar aircraft_id: ANP aircraft identifier.
@@ -388,7 +388,7 @@ class AnpProfile(OwnsArrays):
         path_columns = 5
         if np.shape(self.path)[1] != path_columns:
             msg = (
-                "AnpProfile: 'path' must have shape (N, 5) "
+                "ANPProfile: 'path' must have shape (N, 5) "
                 "(x, y, z, power, speed); got shape "
                 f"{np.shape(self.path)}."
             )
@@ -466,37 +466,37 @@ class SpectralClass(OwnsArrays):
 
 
 @dataclass(frozen=True)
-class AnpAircraft(RichDisplay):
+class ANPAircraft(RichDisplay):
     """One ANP aircraft type: metadata plus NPD/profile access and Doc 29 wiring.
 
     :ivar aircraft_id: ANP aircraft identifier (e.g. ``"747100"``).
     :ivar description: Human-readable aircraft/engine description.
     :ivar engine_type: ``"Jet"``, ``"Turboprop"`` or ``"Piston"``.
-    :ivar num_engines: Number of engines.
+    :ivar n_engines: Number of engines.
     :ivar weight_class: ICAO wake weight class.
     :ivar mounting: Doc 29 engine mounting (``"wing"``/``"fuselage"``/``"propeller"``).
     :ivar npd_id: ANP noise identifier.
     :ivar power_parameter: Name/unit of the NPD power parameter.
     :ivar approach_spectral_class_id: Spectral class of the approach NPD.
     :ivar departure_spectral_class_id: Spectral class of the departure NPD.
-    :ivar database: The :class:`AnpDatabase` the aircraft was read from, which
+    :ivar database: The :class:`ANPDatabase` the aircraft was read from, which
         its NPD, spectral-class, profile and Doc 29 methods consult.
     """
 
     aircraft_id: str
     description: str
     engine_type: str
-    num_engines: int
+    n_engines: int
     weight_class: str
     mounting: str
     npd_id: str
     power_parameter: str
     approach_spectral_class_id: str
     departure_spectral_class_id: str
-    database: AnpDatabase = field(repr=False, compare=False)
+    database: ANPDatabase = field(repr=False, compare=False)
 
-    def npd_curves(self, operation: str, metric: str = "SEL") -> AnpNpdCurves:
-        """NPD curves for this aircraft (see :meth:`AnpDatabase.npd_curves`)."""
+    def npd_curves(self, operation: str, metric: str = "SEL") -> ANPNPDCurves:
+        """NPD curves for this aircraft (see :meth:`ANPDatabase.npd_curves`)."""
         return self.database.npd_curves(self.aircraft_id, operation, metric)
 
     def spectral_class(self, operation: str) -> SpectralClass:
@@ -523,8 +523,8 @@ class AnpAircraft(RichDisplay):
         relative_humidity_percent: float,
         static_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
         absorption: str = "arp5534",
-    ) -> RevisedNpdCurves:
-        """NPD curves for another atmosphere (see :meth:`AnpDatabase.revised_npd_curves`)."""
+    ) -> RevisedNPDCurves:
+        """NPD curves for another atmosphere (see :meth:`ANPDatabase.revised_npd_curves`)."""
         return self.database.revised_npd_curves(
             self.aircraft_id,
             operation,
@@ -537,8 +537,8 @@ class AnpAircraft(RichDisplay):
 
     def profile(
         self, operation: str, stage_length: int = 1, *, profile_id: str | None = None
-    ) -> AnpProfile:
-        """Fixed-point profile (see :meth:`AnpDatabase.profile`)."""
+    ) -> ANPProfile:
+        """Fixed-point profile (see :meth:`ANPDatabase.profile`)."""
         return self.database.profile(
             self.aircraft_id, operation, stage_length, profile_id=profile_id
         )
@@ -556,7 +556,7 @@ class AnpAircraft(RichDisplay):
         relative_humidity_percent: float | None = None,
         absorption: str = "arp5534",
     ) -> FlyoverResult:
-        """Single-event level at a receiver (see :meth:`AnpDatabase.event_level`)."""
+        """Single-event level at a receiver (see :meth:`ANPDatabase.event_level`)."""
         return self.database.event_level(
             self.aircraft_id,
             observer,
@@ -584,7 +584,7 @@ class AnpAircraft(RichDisplay):
         relative_humidity_percent: float | None = None,
         absorption: str = "arp5534",
     ) -> NoiseContourResult:
-        """Single-event ground contour (see :meth:`AnpDatabase.noise_contour`)."""
+        """Single-event ground contour (see :meth:`ANPDatabase.noise_contour`)."""
         return self.database.noise_contour(
             self.aircraft_id,
             operation,
@@ -627,7 +627,7 @@ class _PerformanceTables:
     )
 
 
-class AnpDatabase:
+class ANPDatabase:
     """A parsed ANP database (aircraft metadata, NPD curves and default profiles).
 
     Build one with :func:`load_anp_database`. NPD curves are available for every
@@ -674,7 +674,7 @@ class AnpDatabase:
         *,
         performance: _PerformanceTables,
         spectral_classes: Mapping[str, SpectralClass] | None = None,
-    ) -> AnpDatabase:
+    ) -> ANPDatabase:
         """A database holding the performance tables an ANP export carries.
 
         The tables are the parser's own record, not something a caller builds,
@@ -689,8 +689,8 @@ class AnpDatabase:
         """Sorted list of aircraft identifiers in the database."""
         return sorted(self._aircraft)
 
-    def aircraft(self, aircraft_id: str) -> AnpAircraft:
-        """Return the :class:`AnpAircraft` for an identifier.
+    def aircraft(self, aircraft_id: str) -> ANPAircraft:
+        """Return the :class:`ANPAircraft` for an identifier.
 
         :raises KeyError: If the identifier is not in the database.
         """
@@ -702,11 +702,11 @@ class AnpDatabase:
             raise KeyError(msg)
         m = self._aircraft[aircraft_id]
         lat = m.get("Lateral Directivity Identifier", "").strip().lower()
-        return AnpAircraft(
+        return ANPAircraft(
             aircraft_id=aircraft_id,
             description=m.get("Description", ""),
             engine_type=m.get("Engine Type", ""),
-            num_engines=int(float(m.get("Number Of Engines", "0") or 0)),
+            n_engines=int(float(m.get("Number Of Engines", "0") or 0)),
             weight_class=m.get("Weight Class", ""),
             mounting=_MOUNTING.get(lat, "wing"),
             npd_id=m.get("NPD_ID", ""),
@@ -754,7 +754,7 @@ class AnpDatabase:
         relative_humidity_percent: float,
         static_pressure_kpa: float = _STANDARD_PRESSURE_KPA,
         absorption: str = "arp5534",
-    ) -> RevisedNpdCurves:
+    ) -> RevisedNPDCurves:
         """NPD curves recalculated for another atmosphere (Doc 29 Vol. 2 Appendix D).
 
         The curves of :meth:`npd_curves` revised by the increment of the
@@ -769,7 +769,7 @@ class AnpDatabase:
         :param relative_humidity_percent: Relative humidity, in percent.
         :param static_pressure_kpa: Air pressure, in kPa (default 101.325).
         :param absorption: ``"arp5534"`` (default) or ``"arp866a"``.
-        :return: A :class:`~phonometry.aircraft.npd_atmosphere.RevisedNpdCurves`.
+        :return: A :class:`~phonometry.aircraft.npd_atmosphere.RevisedNPDCurves`.
         :raises KeyError: if the aircraft, its NPD data or its spectral class is
             missing.
         :raises ValueError: for an unknown metric, operation or absorption route.
@@ -788,13 +788,13 @@ class AnpDatabase:
 
     def npd_curves(
         self, aircraft_id: str, operation: str, metric: str = "SEL"
-    ) -> AnpNpdCurves:
+    ) -> ANPNPDCurves:
         """NPD curves for an aircraft, operation and noise metric.
 
         :param aircraft_id: ANP aircraft identifier.
         :param operation: ``"departure"``/``"D"`` or ``"arrival"``/``"A"``.
         :param metric: ``"SEL"`` (default) or ``"LAmax"``.
-        :return: An :class:`AnpNpdCurves`.
+        :return: An :class:`ANPNPDCurves`.
         :raises KeyError: If the aircraft has no NPD data for the request.
         :raises ValueError: If the metric or operation is unknown.
         """
@@ -815,7 +815,7 @@ class AnpDatabase:
             )
             raise KeyError(msg)
         powers, levels = self._npd[key]
-        return AnpNpdCurves(
+        return ANPNPDCurves(
             aircraft_id=aircraft_id,
             npd_id=npd_id,
             metric=metric,
@@ -833,7 +833,7 @@ class AnpDatabase:
         stage_length: int | str = 1,
         *,
         profile_id: str | None = None,
-    ) -> AnpProfile:
+    ) -> ANPProfile:
         """Fixed-point trajectory for an aircraft, operation and stage length.
 
         Aircraft may ship several fixed-point profiles for the same operation
@@ -847,7 +847,7 @@ class AnpDatabase:
         :param stage_length: ANP stage length (default 1).
         :param profile_id: Optional ANP profile identifier (e.g. ``"DEFAULT"``,
             ``"3000LB"``); ``None`` (default) selects as described above.
-        :return: An :class:`AnpProfile` (a Doc 29 flight path with ground-roll masks).
+        :return: An :class:`ANPProfile` (a Doc 29 flight path with ground-roll masks).
         :raises KeyError: If the aircraft is unknown, has no fixed-point profile
             for the request, or ``profile_id`` is not among the available ones.
         :raises ValueError: If ``profile_id`` is ``None`` and several profiles
@@ -927,7 +927,7 @@ class AnpDatabase:
         seg_zero = on_ground[:-1] & on_ground[1:]
         ground_roll = seg_zero & (op == _DEPARTURE)
         landing_roll = seg_zero & (op == _ARRIVAL)
-        return AnpProfile(
+        return ANPProfile(
             aircraft_id=aircraft_id,
             operation=op,
             profile_id=pid,
@@ -971,7 +971,7 @@ class AnpDatabase:
             raise ValueError(msg)
         return PerformanceAircraft(
             aircraft_id=aircraft_id,
-            engines=int(float(meta.get("Number Of Engines", "0") or 0)),
+            n_engines=int(float(meta.get("Number Of Engines", "0") or 0)),
             max_static_thrust_lb=float(
                 meta.get("Max Sea Level Static Thrust (lb)", "0") or 0.0
             ),
@@ -1130,10 +1130,10 @@ class AnpDatabase:
         stage_length: int | str = 1,
         profile_id: str | None = None,
         weight_lb: float | None = None,
-    ) -> AnpProfile:
+    ) -> ANPProfile:
         """A flown procedure as the flight path the Doc 29 noise chain reads.
 
-        :meth:`flight_profile` converted into the same :class:`AnpProfile` the
+        :meth:`flight_profile` converted into the same :class:`ANPProfile` the
         fixed-point bridge returns, so an aircraft that publishes procedural
         steps and one that publishes fixed points feed
         :meth:`event_level` and :meth:`noise_contour` alike. The units change on
@@ -1143,7 +1143,7 @@ class AnpDatabase:
 
         Takes the same arguments as :meth:`flight_profile`.
 
-        :return: An :class:`AnpProfile`.
+        :return: An :class:`ANPProfile`.
         """
         flown = self.flight_profile(
             aircraft_id,
@@ -1162,12 +1162,12 @@ class AnpDatabase:
                 flown.true_airspeed_kt * _KT_MS,
             )
         )
-        path.flags.writeable = False  # exposed by reference on AnpProfile
+        path.flags.writeable = False  # exposed by reference on ANPProfile
         # A synthesised profile puts its ground points at exactly zero height,
         # so the same threshold the fixed-point bridge uses separates them.
         on_ground = np.abs(path[:, 2]) <= _GROUND_ALTITUDE_M
         seg_zero = on_ground[:-1] & on_ground[1:]
-        return AnpProfile(
+        return ANPProfile(
             aircraft_id=aircraft_id,
             operation=flown.operation,
             profile_id=flown.procedure_id,
@@ -1183,10 +1183,10 @@ class AnpDatabase:
         operation: str,
         stage_length: int | str,
         aerodrome: Aerodrome | None = None,
-        npd_air: _NpdAir | None = None,
+        npd_air: _NPDAir | None = None,
     ) -> tuple[
-        AnpAircraft,
-        AnpProfile,
+        ANPAircraft,
+        ANPProfile,
         NDArray[np.float64],
         NDArray[np.float64],
         NDArray[np.float64],
@@ -1421,7 +1421,7 @@ def _impedance_atmosphere(
     )
 
 
-class _NpdAir(NamedTuple):
+class _NPDAir(NamedTuple):
     """The air the Appendix D recalculation of the NPD tables is made for."""
 
     atmosphere: AerodromeAtmosphere
@@ -1433,7 +1433,7 @@ def _npd_air(
     atmosphere: AerodromeAtmosphere,
     relative_humidity_percent: float | None,
     absorption: str,
-) -> _NpdAir | None:
+) -> _NPDAir | None:
     """The Appendix D air, or ``None`` when no humidity asks for one.
 
     The temperature and pressure are the ones the impedance adjustment reads,
@@ -1449,7 +1449,7 @@ def _npd_air(
     require_choice(absorption, "absorption", _ABSORPTION)
     if relative_humidity_percent is None:
         return None
-    return _NpdAir(atmosphere, float(relative_humidity_percent), absorption)
+    return _NPDAir(atmosphere, float(relative_humidity_percent), absorption)
 
 
 def _read_tables(path: Path | str | None) -> dict[str, str]:
@@ -1506,7 +1506,7 @@ def _parse_npd(
         entries.sort(key=lambda e: e[0])
         powers = np.asarray([e[0] for e in entries], dtype=np.float64)
         levels_arr = np.asarray([e[1] for e in entries], dtype=np.float64)
-        powers.flags.writeable = False  # exposed by reference on AnpNpdCurves
+        powers.flags.writeable = False  # exposed by reference on ANPNPDCurves
         levels_arr.flags.writeable = False
         npd[key] = (powers, levels_arr)
     return npd, distances
@@ -1558,7 +1558,7 @@ def _parse_profiles(
             )
             raise ValueError(msg)
         path = np.asarray([p[1] for p in pts], dtype=np.float64)
-        path.flags.writeable = False  # exposed by reference on AnpProfile
+        path.flags.writeable = False  # exposed by reference on ANPProfile
         profiles[key] = path
     return profiles
 
@@ -1786,7 +1786,7 @@ def _optional_table(name: str, tables: Mapping[str, str]) -> str | None:
         return None
 
 
-def load_anp_database(path: Path | str | None = None) -> AnpDatabase:
+def load_anp_database(path: Path | str | None = None) -> ANPDatabase:
     """Load an EASA ANP database (aircraft, NPD curves and default profiles).
 
     :param path: Directory of an ANP CSV export (the ``*Aircraft.csv``,
@@ -1798,7 +1798,7 @@ def load_anp_database(path: Path | str | None = None) -> AnpDatabase:
         recalculate the NPD curves for another atmosphere). If ``None``
         (default), loads the full EASA ANP database v2.3 shipped with the
         package (see ``aircraft/data/anp/PROVENANCE.md``).
-    :return: An :class:`AnpDatabase`.
+    :return: An :class:`ANPDatabase`.
     :raises FileNotFoundError: If a required table is missing.
     """
     tables = _read_tables(path)
@@ -1807,7 +1807,7 @@ def load_anp_database(path: Path | str | None = None) -> AnpDatabase:
     npd, distances = _parse_npd(_pick("npd", tables))
     profiles = _parse_profiles(_pick("fixed_point", tables))
     spectral = _optional_table("spectral", tables)
-    return AnpDatabase._from_export(
+    return ANPDatabase._from_export(
         aircraft=aircraft,
         npd=npd,
         distances_m=distances,

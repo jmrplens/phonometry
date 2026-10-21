@@ -122,7 +122,7 @@ ISO 11204:2010 Equation (7), one expression printed three times. It is the
 same closed form as ISO 3744:2010 Equation (16) on the sound-power side, and
 this group puts its own thresholds around it: above
 [`NEGLIGIBLE_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#negligible_background_margin_db) the correction is taken as zero, and
-below the grade's entry in [`MINIMUM_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#minimum_background_margin_db) it is held
+below the grade's entry in [`MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#min_background_margin_db) it is held
 at the value it has there. A held correction does not fail the measurement;
 it makes the level an upper bound, which the second return value reports and
 the caller must carry into what it publishes.
@@ -271,7 +271,7 @@ Plot the reading, the two corrections and what is left of them.
 Whether the background margin fell below the grade's minimum.
 
 The level is then an upper bound rather than a determination
-([`MINIMUM_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#minimum_background_margin_db): 6 dB for grade 2, 3 dB for
+([`MIN_BACKGROUND_MARGIN_DB`](/phonometry/reference/api/power/workstation/#min_background_margin_db): 6 dB for grade 2, 3 dB for
 grade 3), judged on the settled margin as $K_1$ is.
 
 ## environmental_ratio_from_absorption
@@ -432,12 +432,12 @@ correction cannot be negative: the room can only add to the reading.
 MAX_K3_DB = 7.0
 ```
 
-## MINIMUM_BACKGROUND_MARGIN_DB
+## MIN_BACKGROUND_MARGIN_DB
 
 *Constant* (`mapping`).
 
 ```python
-MINIMUM_BACKGROUND_MARGIN_DB = {'engineering': 6.0, 'survey': 3.0}
+MIN_BACKGROUND_MARGIN_DB = {'engineering': 6.0, 'survey': 3.0}
 ```
 
 ## NEGLIGIBLE_BACKGROUND_MARGIN_DB

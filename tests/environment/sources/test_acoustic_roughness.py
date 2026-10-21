@@ -53,7 +53,7 @@ def test_a_sinusoid_on_a_line_reads_its_mean_square_in_its_band() -> None:
     )
     assert spectrum.level_at(0.01) == pytest.approx(10.0 * math.log10(4.5), abs=1e-9)
     # 7.4.2: 1 m segments overlapping by half, starting every 0,5 m to 14 m.
-    assert spectrum.segment_count == 29
+    assert spectrum.n_segments == 29
 
 
 def test_the_linear_trend_of_each_segment_is_removed() -> None:
@@ -136,7 +136,7 @@ def test_the_bands_run_from_a_quarter_segment_down_to_nyquist() -> None:
     assert spectrum.wavelengths_m[-1] == pytest.approx(0.0025)
     assert np.all(np.diff(spectrum.wavelengths_m) < 0.0)
     assert spectrum.record_length_m == pytest.approx(3.0)
-    assert spectrum.segment_count == 5
+    assert spectrum.n_segments == 5
 
 
 def test_a_band_longer_than_a_quarter_segment_is_left_out() -> None:
@@ -352,10 +352,10 @@ def test_the_average_is_on_mean_squares() -> None:
     """7.6: two spectra average as 10 lg of the mean of their energies."""
     wavelengths = [0.1, 0.08, 0.063]
     one = AcousticRoughnessSpectrum(
-        wavelengths, [0.0, 3.0, -2.0], record_length_m=1.0, segment_count=1
+        wavelengths, [0.0, 3.0, -2.0], record_length_m=1.0, n_segments=1
     )
     two = AcousticRoughnessSpectrum(
-        wavelengths, [6.0, 3.0, 4.0], record_length_m=2.0, segment_count=3
+        wavelengths, [6.0, 3.0, 4.0], record_length_m=2.0, n_segments=3
     )
     mean = average_roughness_spectra([one, two])
     expected = 10.0 * np.log10(
@@ -363,7 +363,7 @@ def test_the_average_is_on_mean_squares() -> None:
     )
     np.testing.assert_allclose(mean.levels, expected, rtol=0, atol=1e-12)
     assert mean.record_length_m == pytest.approx(3.0)
-    assert mean.segment_count == 4
+    assert mean.n_segments == 4
 
 
 def test_the_average_keeps_only_the_common_bands() -> None:

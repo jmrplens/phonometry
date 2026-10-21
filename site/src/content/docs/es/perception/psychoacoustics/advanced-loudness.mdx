@@ -444,7 +444,7 @@ plt.show()
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
-| `signal` | array 1D o `(n, 2)` | Pa | no vacío | Mono = diótico; dos columnas = oídos izquierdo/derecho |
+| `x` | array 1D o `(n, 2)` | Pa | no vacío | Mono = diótico; dos columnas = oídos izquierdo/derecho |
 | `fs` | int | Hz | > 0 | |
 | `field` | str | — | `'free'` (por defecto) / `'diffuse'` / `'eardrum'` | Transferencia del oído externo |
 | `presentation` | str | — | `'binaural'` (por defecto) / `'diotic'` / `'monaural'` | Suma binaural |
@@ -530,7 +530,7 @@ plt.show()
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
-| `signal_in` | array 1D | Pa | no vacío | Señal de presión calibrada |
+| `x` | array 1D | Pa | no vacío | Señal de presión calibrada |
 | `fs` | float | Hz | > 0 | Se remuestrea a 48 kHz internamente si es necesario (apartado 5.1.1) |
 | `field` | str | — | `'free'` (por defecto) / `'diffuse'` | Filtro del oído externo/medio (apartado 5.1.3) |
 

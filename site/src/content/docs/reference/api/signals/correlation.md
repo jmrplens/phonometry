@@ -472,7 +472,7 @@ TimeDelayResult(
     lags: NDArray[np.float64],
     correlation: NDArray[np.float64],
     peak_correlation: float,
-    delay_std: float | None,
+    delay_standard_deviation: float | None,
     delay_interval: tuple[float, float] | None,
     signal_bandwidth: float | None,
     fs: float,
@@ -492,7 +492,7 @@ Time-delay estimate between two records.
 | `lags` | Lag axis of [`correlation`](/phonometry/reference/api/signals/correlation/#correlation), in seconds. |
 | `correlation` | The correlation function whose peak was located: the correlation coefficient $\hat{\rho}_{xy}(\tau)$ for `'direct'`, the weighted GCC $\hat{R}_\psi(\tau)$ (normalized to unit peak magnitude) for `'gcc'`, and the unweighted equivalent for `'phase'` (whose estimate comes from Eq. 5.101b, not from this curve). |
 | `peak_correlation` | Plain correlation coefficient $\hat{\rho}_{xy}$ at the estimated delay (rounded to the nearest sample) - the quantity entering the B&P error formulas, whatever the method. |
-| `delay_std` | Standard deviation of the peak-location estimate, $\sigma(\hat{\tau}_0) \approx (3/4)^{1/4} \sqrt{\varepsilon} / (\pi B)$ (Eq. 8.129), in seconds; `None` unless `signal_bandwidth` was given. |
+| `delay_standard_deviation` | Standard deviation of the peak-location estimate, $\sigma(\hat{\tau}_0) \approx (3/4)^{1/4} \sqrt{\varepsilon} / (\pi B)$ (Eq. 8.129), in seconds; `None` unless `signal_bandwidth` was given. |
 | `delay_interval` | Approximate 95 % confidence interval $\hat{\tau}_0 \pm 2\sigma$ (Eq. 8.130), in seconds; `None` without a bandwidth. |
 | `signal_bandwidth` | The bandwidth `B` used for the error, Hz. |
 | `fs` | Sample rate, in Hz. |

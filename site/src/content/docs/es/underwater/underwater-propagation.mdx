@@ -392,7 +392,7 @@ from phonometry import underwater
 
 b = underwater.weston_regime_boundaries(250.0, 50.0, seabed="sand")
 print(b.cylindrical_to_mode_stripping)   # r_CS, en metros
-print(b.cutoff_frequency, b.mode_count)  # la propagación guiada exige f > f_c
+print(b.cutoff_frequency, b.n_modes)  # la propagación guiada exige f > f_c
 print(underwater.reflection_loss_gradient("sand"))   # 0.278 Np/rad
 ```
 

@@ -797,7 +797,7 @@ def _doc29_reference_jet() -> ph.aircraft.PerformanceAircraft:
     """
     return ph.aircraft.PerformanceAircraft(
         aircraft_id="JETW",
-        engines=2,
+        n_engines=2,
         max_static_thrust_lb=25000.0,
         max_landing_weight_lb=159222.0,
         jet_coefficients={
@@ -949,7 +949,7 @@ def _appendix_d_tables() -> ModuleType:
 
 def _appendix_d_increment(
     class_id: int, absorption: str
-) -> ph.aircraft.NpdAtmosphereIncrement:
+) -> ph.aircraft.NPDAtmosphereIncrement:
     database = ph.aircraft.load_anp_database()
     return ph.aircraft.npd_atmosphere_increment(
         database.spectral_class(class_id), absorption=absorption, **_APPENDIX_D_AIR
@@ -1077,7 +1077,7 @@ def _appendix_d_revised(absorption: str) -> tuple[np.ndarray, np.ndarray]:
     revised = []
     for operation, class_id in (("A", 205), ("D", 103)):
         rows = [r for r in tables.TABLE_D6A if r[0] == operation]
-        curves = ph.aircraft.AnpNpdCurves(
+        curves = ph.aircraft.ANPNPDCurves(
             aircraft_id="JETW",
             npd_id="JETW",
             metric="SEL",

@@ -505,7 +505,7 @@ def test_harmonic_result_rejects_amplitude_axis_of_another_length() -> None:
 )
 def test_rejects_non_finite_signal(func: Callable[[np.ndarray, int], object]) -> None:
     bad = np.array([np.nan] * 100)
-    with pytest.raises(ValueError, match="'signal' must be finite"):
+    with pytest.raises(ValueError, match="'x' must be finite"):
         func(bad, FS)
 
 
@@ -519,7 +519,7 @@ def test_rejects_bad_fs_and_kind() -> None:
 
 def test_rejects_too_short_signal() -> None:
     too_short = np.array([0.0, 1.0, 0.0])
-    with pytest.raises(ValueError, match="'signal' must contain at least"):
+    with pytest.raises(ValueError, match="'x' must contain at least"):
         electroacoustics.thd(too_short, FS)
 
 

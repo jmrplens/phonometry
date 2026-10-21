@@ -337,8 +337,8 @@ def plot_rated_impedance(
         label=_t("80 % of the rated impedance", language),
     )
     ax.plot(
-        [result.minimum_frequency_hz],
-        [result.minimum_ohm],
+        [result.min_frequency_hz],
+        [result.min_ohm],
         ls="none",
         marker="o",
         ms=6,
@@ -347,7 +347,7 @@ def plot_rated_impedance(
         label=_t(
             "Lowest modulus in range {value} {ohm}",
             language,
-            value=_num(result.minimum_ohm, language, 1),
+            value=_num(result.min_ohm, language, 1),
             ohm=_OHM,
         ),
     )
@@ -647,7 +647,7 @@ def plot_crosstalk_attenuation(
         _t(
             "Crosstalk attenuation (8.12), minimum {value} dB",
             language,
-            value=_num(result.minimum_db, language, 1),
+            value=_num(result.min_db, language, 1),
         )
     )
     ax.grid(visible=True, which="both", alpha=0.3)

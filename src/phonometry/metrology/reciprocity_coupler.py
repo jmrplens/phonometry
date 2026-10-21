@@ -552,12 +552,12 @@ class CapillaryTube(RichDisplay):
         impedance goes as the fourth power of it, and that a flow calibration
         may be needed to know the effective radius of a tube that is not
         circular.
-    :ivar count: :math:`n`, the number of identical tubes.
+    :ivar n_tubes: :math:`n`, the number of identical tubes.
     """
 
     length_m: float
     radius_m: float
-    count: int = 1
+    n_tubes: int = 1
 
     def __post_init__(self) -> None:
         """Refuse a length or radius that is not positive, or no tube.
@@ -566,7 +566,7 @@ class CapillaryTube(RichDisplay):
         """
         require_positive(self.length_m, "length_m")
         require_positive(self.radius_m, "radius_m")
-        require_count(self.count, "count")
+        require_count(self.n_tubes, "n_tubes")
 
 
 @dataclass(frozen=True)
@@ -1196,7 +1196,7 @@ def _capillary_correction(
     tube = capillary_tube_impedance(
         frequencies, length_m=capillary.length_m, radius_m=capillary.radius_m, gas=gas
     )
-    return 1.0 + capillary.count * impedance / tube.impedance_pa_s_m3
+    return 1.0 + capillary.n_tubes * impedance / tube.impedance_pa_s_m3
 
 
 def _large_volume(

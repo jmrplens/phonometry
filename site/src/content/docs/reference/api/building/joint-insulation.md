@@ -26,7 +26,7 @@ $l$ and the equivalent absorption area $A$ of the receiving room
 of every measurement, so J.1 asks for the maximum the arrangement can show,
 $R_\mathrm{s,max}$, measured with the joint sealed on both sides. Unless
 it lies 10 dB or more above the measured $R_\mathrm{s}'$, the result is
-corrected by the rules of ISO 10140-2:2021 A.3 ([`lab_joint_insulation`](/phonometry/reference/api/building/joint-insulation/#lab_joint_insulation)):
+corrected by the rules of ISO 10140-2:2021 A.3 ([`laboratory_joint_insulation`](/phonometry/reference/api/building/joint-insulation/#laboratory_joint_insulation)):
 
 * a difference of 6 dB up to 10 dB: Formula (J.2),
   $R_\mathrm{s} = -10 \lg(10^{-R_\mathrm{s}'/10} - 10^{-R_\mathrm{s,max}/10})$;
@@ -109,7 +109,7 @@ width of a result is the average of readings that J.2.2 lets spread over
 0,3 mm, so a measured width within 0,3 mm of a required one counts as
 that width. A series that does not name $b_\mathrm{min}$ fails
 J.4 b), because nothing then shows which width it was; pass
-`minimum_gap_mm` to [`joint_gap_series`](/phonometry/reference/api/building/joint-insulation/#joint_gap_series).
+`min_gap_mm` to [`joint_gap_series`](/phonometry/reference/api/building/joint-insulation/#joint_gap_series).
 
 **Parameters**
 
@@ -226,10 +226,10 @@ Whether no two readings differ by more than 0,3 mm.
 ```python
 joint_gap_series(
     gap_widths_mm: ArrayLike,
-    results: tuple[LabJointInsulationResult, ...] | list[LabJointInsulationResult],
+    results: tuple[LaboratoryJointInsulationResult, ...] | list[LaboratoryJointInsulationResult],
     *,
     nominal_gap_mm: float = 5.0,
-    minimum_gap_mm: float | None = None,
+    min_gap_mm: float | None = None,
 ) -> JointGapSeries
 ```
 
@@ -255,9 +255,9 @@ them.
 | Name | Description |
 | :--- | :--- |
 | `gap_widths_mm` | The gap width `b` of each result, in mm (the average of [`check_gap_width`](/phonometry/reference/api/building/joint-insulation/#check_gap_width)). |
-| `results` | The [`LabJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#labjointinsulationresult) at each width, each with its ISO 717-1 rating. |
+| `results` | The [`LaboratoryJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresult) at each width, each with its ISO 717-1 rating. |
 | `nominal_gap_mm` | $b_\mathrm{n}$, in mm (default 5 mm). |
-| `minimum_gap_mm` | $b_\mathrm{min}$, in mm, marked on the plot when given. |
+| `min_gap_mm` | $b_\mathrm{min}$, in mm, marked on the plot when given. |
 
 **Returns:** A [`JointGapSeries`](/phonometry/reference/api/building/joint-insulation/#jointgapseries), sorted by gap width.
 
@@ -291,7 +291,7 @@ twice as long lets twice the power through, so the index of a metre is
 
 The same formula, with the joint sealed on both sides, gives the maximum
 of the test arrangement $R_\mathrm{s,max}$ that
-[`lab_joint_insulation`](/phonometry/reference/api/building/joint-insulation/#lab_joint_insulation) corrects against (J.1).
+[`laboratory_joint_insulation`](/phonometry/reference/api/building/joint-insulation/#laboratory_joint_insulation) corrects against (J.1).
 
 **Parameters**
 
@@ -315,9 +315,9 @@ of the test arrangement $R_\mathrm{s,max}$ that
 ```python
 JointGapSeries(
     gap_widths_mm: np.ndarray,
-    results: tuple[LabJointInsulationResult, ...],
+    results: tuple[LaboratoryJointInsulationResult, ...],
     nominal_gap_mm: float,
-    minimum_gap_mm: float | None,
+    min_gap_mm: float | None,
     r_s_w_db: np.ndarray,
     r_s_w_c_db: np.ndarray,
     r_s_w_ctr_db: np.ndarray,
@@ -331,9 +331,9 @@ Single numbers of a variable slit against its gap width (J.4, J.5.2 h), i)).
 | Name | Description |
 | :--- | :--- |
 | `gap_widths_mm` | The gap widths measured, ascending, in mm. |
-| `results` | The [`LabJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#labjointinsulationresult) at each width. |
+| `results` | The [`LaboratoryJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresult) at each width. |
 | `nominal_gap_mm` | The nominal gap width $b_\mathrm{n}$, in mm. |
-| `minimum_gap_mm` | The minimal gap width $b_\mathrm{min}$ at the maximal pressure, in mm, or `None` when not given. |
+| `min_gap_mm` | The minimal gap width $b_\mathrm{min}$ at the maximal pressure, in mm, or `None` when not given. |
 | `r_s_w_db` | $R_\mathrm{s,w}$ at each width, in dB. |
 | `r_s_w_c_db` | $R_\mathrm{s,w} + C$ at each width, in dB. |
 | `r_s_w_ctr_db` | $R_\mathrm{s,Atr} = R_\mathrm{s,w} + C_\mathrm{tr}$ at each width, in dB. |
@@ -433,7 +433,7 @@ at; where J.5.2 h) lets "a gap range other than 3 mm" apply,
 JointGapSeriesCheck(
     gap_widths_mm: tuple[float, ...],
     nominal_gap_mm: float,
-    minimum_gap_mm: float | None,
+    min_gap_mm: float | None,
 )
 ```
 
@@ -449,9 +449,9 @@ a series that misses one.
 | :--- | :--- |
 | `gap_widths_mm` | The gap widths measured, ascending, in mm. |
 | `nominal_gap_mm` | The nominal gap width $b_\mathrm{n}$, in mm. |
-| `minimum_gap_mm` | The minimal gap width $b_\mathrm{min}$, in mm, or `None` when the series does not name it. |
+| `min_gap_mm` | The minimal gap width $b_\mathrm{min}$, in mm, or `None` when the series does not name it. |
 
-### JointGapSeriesCheck.minimum_measured
+### JointGapSeriesCheck.min_measured
 
 *property*
 
@@ -611,17 +611,17 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 Whether the width is no greater than 50 mm.
 
-## lab_joint_insulation
+## laboratory_joint_insulation
 
 ```python
-lab_joint_insulation(
+laboratory_joint_insulation(
     r_s_measured_db: ArrayLike,
     r_s_max_db: ArrayLike,
     frequencies: ArrayLike,
     *,
     joint_length_m: float | None = None,
     limit_at_maximum: bool = True,
-) -> LabJointInsulationResult
+) -> LaboratoryJointInsulationResult
 ```
 
 Sound reduction index of a joint, corrected for the test arrangement (J.1).
@@ -652,7 +652,7 @@ with the 18 bands to 5 000 Hz $C_{100\text{-}5000}$ and
 $C_\mathrm{tr,100\text{-}5000}$, the evaluation of Figure J.7. Bands
 with $d < 3$ dB are indicative: J.1 rates the curve again with them
 taken as infinitely high, and a change of more than 1 dB puts the single
-numbers in brackets ([`LabJointInsulationResult.bracketed`](/phonometry/reference/api/building/joint-insulation/#labjointinsulationresultbracketed)). The
+numbers in brackets ([`LaboratoryJointInsulationResult.bracketed`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresultbracketed)). The
 indicative bands are read on $R_\mathrm{s}'$, the same condition as
 the bracketed lower limit, whichever rule corrected them.
 
@@ -666,7 +666,7 @@ the bracketed lower limit, whichever rule corrected them.
 | `joint_length_m` | Length of the joint under test, in m, kept for the form of Figure J.7; `None` leaves that row empty. |
 | `limit_at_maximum` | Set the bands within 3 dB of the maximum to $R_\mathrm{s,max}$ (default), or give them the 1,3 dB correction like the other bands below 6 dB. |
 
-**Returns:** A [`LabJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#labjointinsulationresult).
+**Returns:** A [`LaboratoryJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresult).
 
 **Raises**
 
@@ -674,10 +674,10 @@ the bracketed lower limit, whichever rule corrected them.
 | :--- | :--- |
 | ValueError | If the three inputs disagree in length, a value is not finite, a frequency or the joint length is not positive. |
 
-## LabJointInsulationResult
+## LaboratoryJointInsulationResult
 
 ```python
-LabJointInsulationResult(
+LaboratoryJointInsulationResult(
     frequencies: np.ndarray,
     r_s_measured_db: np.ndarray,
     r_s_max_db: np.ndarray,
@@ -714,7 +714,7 @@ Sound reduction index of a joint per metre (ISO 10140-1:2021 Annex J).
 How each band was corrected (`regime`) is read from the measured
 and the maximum indices and `limit_at_maximum`, so it is not a field.
 
-### LabJointInsulationResult.bracketed
+### LaboratoryJointInsulationResult.bracketed
 
 *property*
 
@@ -725,22 +725,22 @@ of $R_\mathrm{s,w}$, $R_\mathrm{s,w} + C$,
 $R_\mathrm{s,w} + C_\mathrm{tr}$ or their enlarged-range sums
 by more than 1 dB, or leaves one of them unbounded.
 
-### LabJointInsulationResult.indicative
+### LaboratoryJointInsulationResult.indicative
 
 *property*
 
 Bands where $R_\mathrm{s}' > R_\mathrm{s,max} - 3$ dB (J.1).
 
-### LabJointInsulationResult.minimum_value
+### LaboratoryJointInsulationResult.min_value
 
 *property*
 
 Bands whose $R_\mathrm{s}$ is a minimum value (`"limit"` or `"maximum"`).
 
-### LabJointInsulationResult.octave_bands()
+### LaboratoryJointInsulationResult.octave_bands()
 
 ```python
-LabJointInsulationResult.octave_bands() -> tuple[np.ndarray, np.ndarray]
+LaboratoryJointInsulationResult.octave_bands() -> tuple[np.ndarray, np.ndarray]
 ```
 
 `(octave centres in Hz, Rs,oct in dB)` from the three thirds of each octave.
@@ -749,10 +749,10 @@ $R_\mathrm{oct} = -10 \lg[(1/3) \sum 10^{-R_j/10}]$: the
 transmitted power of the three thirds averaged, as Figure J.9 plots
 a joint at several gap widths in octave bands.
 
-### LabJointInsulationResult.plot()
+### LaboratoryJointInsulationResult.plot()
 
 ```python
-LabJointInsulationResult.plot(
+LaboratoryJointInsulationResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -768,25 +768,25 @@ curve over the rating range, as the diagram of Figure J.7. Requires
 matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-### LabJointInsulationResult.r_s_w_c_db
+### LaboratoryJointInsulationResult.r_s_w_c_db
 
 *property*
 
 $R_\mathrm{s,w} + C$, in dB, or `None` without a rating.
 
-### LabJointInsulationResult.r_s_w_ctr_db
+### LaboratoryJointInsulationResult.r_s_w_ctr_db
 
 *property*
 
 $R_\mathrm{s,Atr} = R_\mathrm{s,w} + C_\mathrm{tr}$, in dB, or `None`.
 
-### LabJointInsulationResult.r_s_w_db
+### LaboratoryJointInsulationResult.r_s_w_db
 
 *property*
 
 $R_\mathrm{s,w}$, in dB, or `None` without a rating.
 
-### LabJointInsulationResult.regime
+### LaboratoryJointInsulationResult.regime
 
 *property*
 
@@ -798,10 +798,10 @@ by Formula (J.2) from 6 dB to 10 dB, `"limit"` (the fixed 1,3 dB)
 below 6 dB, and `"maximum"` (set to $R_\mathrm{s,max}$) above
 $R_\mathrm{s,max} - 3$ dB when `limit_at_maximum`.
 
-### LabJointInsulationResult.report()
+### LaboratoryJointInsulationResult.report()
 
 ```python
-LabJointInsulationResult.report(
+LaboratoryJointInsulationResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,

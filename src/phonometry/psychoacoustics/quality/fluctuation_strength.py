@@ -307,13 +307,13 @@ def _cross_covariance(x: NDArray[np.float64], y: NDArray[np.float64]) -> float:
 def _validate_signal(x: Signal | NDArray[np.float64]) -> NDArray[np.float64]:
     sig = np.asarray(x, dtype=np.float64)
     if sig.ndim != 1:
-        msg = "'signal' must be one-dimensional."
+        msg = "'x' must be one-dimensional."
         raise ValueError(msg)
     if sig.size == 0:
-        msg = "'signal' must not be empty."
+        msg = "'x' must not be empty."
         raise ValueError(msg)
     if not np.all(np.isfinite(sig)):
-        msg = "'signal' must be finite."
+        msg = "'x' must be finite."
         raise ValueError(msg)
     return sig
 
@@ -512,7 +512,7 @@ def _c_fs() -> float:
 
 
 def fluctuation_strength(
-    signal_in: Signal | NDArray[np.float64],
+    x: Signal | NDArray[np.float64],
     fs: float | None = None,
 ) -> FluctuationStrengthResult:
     r"""Fluctuation strength of a calibrated signal (Osses 2016 model).
@@ -558,7 +558,7 @@ def fluctuation_strength(
         modulated energy across bands). FM-tone accuracy is *not* pursued --
         the reference method itself overestimates it above 4 Hz.
 
-    :param signal_in: Calibrated sound-pressure signal (1-D), in Pa.
+    :param x: Calibrated sound-pressure signal (1-D), in Pa.
         Accepts a :class:`phonometry.io.Signal`, which is where that
         calibration comes from without arithmetic: the model reads
         excitation levels, so an uncalibrated record is taken as if one
@@ -570,8 +570,8 @@ def fluctuation_strength(
     """
     from scipy import signal as sp_signal
 
-    fs = resolve_fs(signal_in, fs, name="signal_in")
-    sig = apply_calibration(signal_in, _validate_signal(signal_in))
+    fs = resolve_fs(x, fs, name="x")
+    sig = apply_calibration(x, _validate_signal(x))
     require_scalar(fs, "fs")
     fs_v = float(fs)
     if not np.isfinite(fs_v) or fs_v <= 0.0:

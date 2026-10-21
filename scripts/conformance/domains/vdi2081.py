@@ -477,7 +477,7 @@ def _chk_end_reflection() -> Outcome:
         termination="wall",
         method="vdi2081",
         speed_of_sound=_EXAMPLE_SPEED,
-        maximum_reduction_db=None,
+        max_reduction_db=None,
     ).values
     return _worst_band(_PRINTED_NOZZLE, values, 0.05)
 

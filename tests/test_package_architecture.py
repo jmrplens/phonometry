@@ -599,7 +599,7 @@ def test_no_docstring_breaks_its_own_field_list() -> None:
 def test_every_warning_a_package_can_raise_is_published() -> None:
     """A warning you cannot name is a warning you cannot filter.
 
-    ``HvacWarning`` fires whenever a relative efficiency lands below the 50 %
+    ``HVACWarning`` fires whenever a relative efficiency lands below the 50 %
     floor Long Table 13.6 is tabulated from, which is the deliberate case as
     well as the mistaken one, and ``phonometry.noise_control`` did not publish
     it while publishing its sibling ``PlaneWaveWarning``. A caller could see it

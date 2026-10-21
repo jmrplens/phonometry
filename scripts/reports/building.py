@@ -271,7 +271,7 @@ def _lab_airborne_example() -> tuple[object, ReportMetadata, str]:
         ]
     )
     l1 = np.full(16, 90.0)
-    result = ph.building.lab_airborne_insulation(
+    result = ph.building.laboratory_airborne_insulation(
         l1, l1 - r, np.full(16, 0.8), area=10.0, volume=50.0
     )
     metadata = ReportMetadata(
@@ -326,7 +326,7 @@ def _lab_impact_example() -> tuple[object, ReportMetadata, str]:
             71.2,
         ]
     )
-    result = ph.building.lab_impact_insulation(li, np.full(16, 0.8), volume=50.0)
+    result = ph.building.laboratory_impact_insulation(li, np.full(16, 0.8), volume=50.0)
     # The impact fiche's plot legend carries an extra "500 Hz read" entry that
     # wraps to a second row, making the embedded figure taller than the
     # airborne one; the header is kept to the essential accredited fields so
@@ -540,7 +540,7 @@ def _floor_covering_form_example() -> tuple[object, ReportMetadata, str]:
         [3.0, 3.7, 1.9, 3.0, 3.2, 3.5, 4.0, 6.1]
         + [6.7, 7.0, 7.7, 10.8, 15.2, 20.3, 25.4, 23.2]
     )
-    result = ph.building.lab_floor_covering_improvement(
+    result = ph.building.laboratory_floor_covering_improvement(
         bare, bare - delta_l, _RATING_FREQS
     )
     metadata = ReportMetadata(
@@ -584,7 +584,7 @@ def _joint_form_example() -> tuple[object, ReportMetadata, str]:
         [33.4, 35.1, 37.9, 40.6, 43.0, 45.2, 46.1, 46.8, 47.0]
         + [46.2, 45.1, 46.9, 49.8, 52.6, 55.4, 58.9, 63.1, 66.2]
     )
-    result = ph.building.lab_joint_insulation(
+    result = ph.building.laboratory_joint_insulation(
         seal, maximum, _FLANKING_FREQS, joint_length_m=5.4
     )
     metadata = ReportMetadata(

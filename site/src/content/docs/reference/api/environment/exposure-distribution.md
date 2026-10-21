@@ -49,7 +49,7 @@ The chain, in the order the standard writes it:
   distribution, Equation (A.4) of Annex A.
 
 [`sel_distribution`](/phonometry/reference/api/environment/exposure-distribution/#sel_distribution) does the last three steps and returns a
-[`SelDistribution`](/phonometry/reference/api/environment/exposure-distribution/#seldistribution), whose `.plot()` draws the class density, the
+[`SELDistribution`](/phonometry/reference/api/environment/exposure-distribution/#seldistribution), whose `.plot()` draws the class density, the
 continuous density or the exceedance curve.
 
 Two readings the text leaves to the implementer
@@ -201,7 +201,7 @@ sel_distribution(
     *,
     sigma_db: float = 5.0,
     subclasses: int = 10,
-) -> SelDistribution
+) -> SELDistribution
 ```
 
 Statistical distribution of the single-event sound exposure level
@@ -238,10 +238,10 @@ width, in which case the run is combined (see the module documentation).
 | :--- | :--- |
 | ValueError | if the shapes differ, a value is not finite, a probability is negative, the probabilities do not sum to one, every probability is zero, fewer than two distinct levels remain once equal levels are combined, `sigma_db` is not positive, or `subclasses` is not a whole number of at least one. |
 
-## SelDistribution
+## SELDistribution
 
 ```python
-SelDistribution(
+SELDistribution(
     levels: NDArray[np.float64],
     probabilities: NDArray[np.float64],
     lower_bounds_db: NDArray[np.float64],
@@ -283,10 +283,10 @@ normal distribution of standard deviation `sigma_db` centred
 | `distribution_long_term_level_db` | the same average taken over the continuous distribution, Equation (A.4); Annex A's `LT2`. It differs from `long_term_level_db` only by the spreading of each class over its width, since $\Delta\mu$ preserves the energy of each subclass. |
 | `replicas` | For each class, the flat indices of the replica atmospheres it holds, in the row-major order the input was given in; a class holds more than one only where equal levels were combined. |
 
-### SelDistribution.class_density()
+### SELDistribution.class_density()
 
 ```python
-SelDistribution.class_density(
+SELDistribution.class_density(
     x_db: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
@@ -306,10 +306,10 @@ neighbour, it is zero.
 
 **Returns:** $\rho(x)$, a float for a scalar `x`.
 
-### SelDistribution.density()
+### SELDistribution.density()
 
 ```python
-SelDistribution.density(x_db: ArrayLike) -> float | NDArray[np.float64]
+SELDistribution.density(x_db: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 The continuous density $\rho^{*}(x)$ (Equations (21), (23)), in 1/dB.
@@ -322,10 +322,10 @@ The continuous density $\rho^{*}(x)$ (Equations (21), (23)), in 1/dB.
 
 **Returns:** $\rho^{*}(x)$, a float for a scalar `x`.
 
-### SelDistribution.exceedance()
+### SELDistribution.exceedance()
 
 ```python
-SelDistribution.exceedance(x_db: ArrayLike) -> float | NDArray[np.float64]
+SELDistribution.exceedance(x_db: ArrayLike) -> float | NDArray[np.float64]
 ```
 
 Probability that the level exceeds `x` (Equation (24)).
@@ -346,10 +346,10 @@ falls.
 
 **Returns:** The probability, a float for a scalar `x`.
 
-### SelDistribution.exceedance_level()
+### SELDistribution.exceedance_level()
 
 ```python
-SelDistribution.exceedance_level(
+SELDistribution.exceedance_level(
     percent: ArrayLike,
 ) -> float | NDArray[np.float64]
 ```
@@ -375,10 +375,10 @@ the lowest of the usual set; `exceedance_level(1)` the highest.
 | :--- | :--- |
 | ValueError | for a percentage outside that range. |
 
-### SelDistribution.plot()
+### SELDistribution.plot()
 
 ```python
-SelDistribution.plot(
+SELDistribution.plot(
     ax: Axes | None = None,
     *,
     view: str = 'density',

@@ -766,7 +766,7 @@ def is_class_designation(value: object, expected: Sequence[int]) -> bool:
 
 
 def require_per_band(
-    x: ArrayLike, name: str, bands: np.ndarray, bands_name: str = "frequency"
+    x: ArrayLike, name: str, bands: np.ndarray, bands_name: str
 ) -> np.ndarray:
     """Broadcast *x* over the band axis, saying whose length disagrees.
 
@@ -784,7 +784,9 @@ def require_per_band(
     :param x: The per-band input (a scalar applies to every band).
     :param name: Parameter name used in the error message.
     :param bands: The band axis to match, already coerced and 1-D.
-    :param bands_name: Parameter name of the band axis, for the message.
+    :param bands_name: The caller's name for the band axis, quoted in the
+        message. It has no default, so a message never names an axis the
+        caller does not take (``frequency`` beside a ``frequencies``).
     :return: The broadcast ``float64`` array, of ``bands.shape``.
     :raises ValueError: if *x* is neither a scalar nor of ``bands``' length.
     """
@@ -798,21 +800,23 @@ def require_per_band(
     return np.broadcast_to(arr, bands.shape).astype(np.float64)
 
 
-def require_1d_signal(x: ArrayLike, name: str = "signal") -> np.ndarray:
+def require_1d_signal(x: ArrayLike, name: str) -> np.ndarray:
     """Coerce *x* to a float64 array and require a 1-D time series.
 
     Multichannel input is rejected rather than silently flattened (a raveled
     2-D signal concatenates the channels into one wrong series).
 
     :param x: The input signal.
-    :param name: Parameter name used in the error message.
+    :param name: The caller's name for the parameter, quoted in the error
+        message. It has no default, so a message never names a parameter the
+        caller does not have.
     :return: The validated ``float64`` array.
     :raises ValueError: for a non-1-D input.
     """
     arr = _as_float64(x, name)
     if arr.ndim != 1:
         msg = (
-            f"{name} must be a 1-D time series; got shape {arr.shape}. "
+            f"'{name}' must be a 1-D time series; got shape {arr.shape}. "
             "Process multichannel signals one channel at a time."
         )
         raise ValueError(msg)

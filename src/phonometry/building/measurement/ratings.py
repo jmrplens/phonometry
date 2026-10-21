@@ -1986,7 +1986,7 @@ def weighted_reduction_improvement(
     the ratings "directly from the single-number ratings for that basic
     element with and without the tested acoustical lining", the direct
     difference ``ΔRw,direct`` of Formula (D.2); that needs both measured
-    curves and is what :func:`~phonometry.building.lab_lining_improvement`
+    curves and is what :func:`~phonometry.building.laboratory_lining_improvement`
     returns beside this rating.
 
     :param delta_r: The sound reduction improvement index ``ΔR`` per

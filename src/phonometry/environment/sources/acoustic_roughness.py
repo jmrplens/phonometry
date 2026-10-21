@@ -466,7 +466,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
         from, in metres: for Method B, what is left once the 2 m at either
         end of each record have been discarded (7.4.3); ``None`` when not
         known.
-    :param segment_count: How many Fourier segments were averaged into it;
+    :param n_segments: How many Fourier segments were averaged into it;
         ``None`` when not known, and for Method B, which has none.
     :param method: ``"A"`` for the Fourier analysis of 7.4.2, ``"B"`` for the
         digital filters of 7.4.3; ``None`` when not known or when an average
@@ -476,7 +476,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
     wavelengths_m: NDArray[np.float64]
     levels: NDArray[np.float64]
     record_length_m: float | None = None
-    segment_count: int | None = None
+    n_segments: int | None = None
     method: str | None = None
 
     def __post_init__(self) -> None:
@@ -670,7 +670,7 @@ def acoustic_roughness_spectrum(
         wavelengths_m=np.array([_nominal_wavelength_m(int(b)) for b in bands]),
         levels=levels,
         record_length_m=float(record.size * spacing),
-        segment_count=int(segments.shape[0]),
+        n_segments=int(segments.shape[0]),
         method="A",
     )
 
@@ -885,7 +885,7 @@ def filtered_roughness_spectrum(
         wavelengths_m=np.array([_nominal_wavelength_m(b) for b in bands]),
         levels=np.asarray(levels),
         record_length_m=float(analysed_m),
-        segment_count=None,
+        n_segments=None,
         method="B",
     )
 
@@ -928,7 +928,7 @@ def average_roughness_spectra(
         )
     levels = 10.0 * np.log10(energies / len(spectra))
     lengths = [s.record_length_m for s in spectra]
-    counts = [s.segment_count for s in spectra]
+    counts = [s.n_segments for s in spectra]
     methods = {s.method for s in spectra}
     return AcousticRoughnessSpectrum(
         wavelengths_m=np.array([_nominal_wavelength_m(b) for b in bands]),
@@ -936,7 +936,7 @@ def average_roughness_spectra(
         record_length_m=None
         if None in lengths
         else float(sum(x for x in lengths if x is not None)),
-        segment_count=None
+        n_segments=None
         if None in counts
         else int(sum(c for c in counts if c is not None)),
         method=methods.pop() if len(methods) == 1 else None,

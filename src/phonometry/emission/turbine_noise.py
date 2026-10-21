@@ -550,7 +550,7 @@ class TurbineMicrophoneArray(OwnsArrays):
         require_finite_fields(self, "positions_m")
 
     @property
-    def count(self) -> int:
+    def n_positions(self) -> int:
         """Number of positions, key and additional, overhead included."""
         return int(np.asarray(self.positions_m).shape[0])
 

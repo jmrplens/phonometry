@@ -32,7 +32,7 @@ from phonometry.noise_control.silencer_in_situ import (
     INSTALLATION_CASES,
     ISO11820_AIR_GAS_CONSTANT_J_KG_K,
     ISO11820_BACKGROUND_CORRECTIONS_DB,
-    ISO11820_MINIMUM_BACKGROUND_MARGIN_DB,
+    ISO11820_MIN_BACKGROUND_MARGIN_DB,
     ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K,
     ISO11820_SPEED_OF_SOUND_M_S,
     SABINE_AREA_COEFFICIENT,
@@ -478,8 +478,8 @@ def test_equation_thirty_one_scales_by_the_area_ratio() -> None:
 
 
 def test_the_printed_thresholds() -> None:
-    assert ISO11820_MINIMUM_BACKGROUND_MARGIN_DB == 3.0
-    assert noise_control.MAXIMUM_EXTRANEOUS_CORRECTION_DB == 3.0
+    assert ISO11820_MIN_BACKGROUND_MARGIN_DB == 3.0
+    assert noise_control.MAX_EXTRANEOUS_CORRECTION_DB == 3.0
     assert noise_control.ISO11820_OCTAVE_BAND_RANGE_HZ == (63.0, 4000.0)
     assert noise_control.ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ == (50.0, 5000.0)
 

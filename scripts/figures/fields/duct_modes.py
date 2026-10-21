@@ -14,6 +14,7 @@ from ..theme import (
     COLOR_SECONDARY,
     COLOR_TERTIARY,
 )
+from ._core import _host
 
 # The worked ventilation duct of the duct-path guide (Long, Table 14.9's
 # supply trunk class): 0.65 x 0.40 m, whose first higher-order acoustic mode
@@ -88,7 +89,11 @@ def _duct_cut_on_fields() -> tuple[Any, Any, Any, Any, Any, tuple[float, float]]
     cross-section histories at the station, the frame times and the
     off-plane-mode fraction measured at the station in each run.
     """
-    import fdtd2d
+    import clip_placement
+
+    from phonometry.simulation import FDTD2D, CWSource
+
+    compute = clip_placement.compute_for("anim_fdtd_duct_cut_on")
 
     dx = _DUCT_DX
     ny = round(_DUCT_A / dx)
@@ -111,13 +116,16 @@ def _duct_cut_on_fields() -> tuple[Any, Any, Any, Any, Any, tuple[float, float]]
     sigmas: list[float] = []
     times = np.zeros(0)
     for f in _DUCT_FREQS:
-        sim = fdtd2d.FDTD2D(
-            c0, dx, shape=(ny, nx), sponge_width=_DUCT_SPONGE, sponge_sides=("right",)
+        sim = FDTD2D(
+            c0,
+            dx,
+            shape=(ny, nx),
+            sponge_width=_DUCT_SPONGE,
+            sponge_sides=("right",),
+            compute=compute,
         )
         sim.add_source(
-            fdtd2d.CWSource(
-                ix=src_ix, iy=src_iy, frequency=f, ramp_cycles=_DUCT_RAMP_S * f
-            )
+            CWSource(ix=src_ix, iy=src_iy, frequency=f, ramp_cycles=_DUCT_RAMP_S * f)
         )
         frames: list[Any] = []
         column: list[Any] = []
@@ -125,8 +133,8 @@ def _duct_cut_on_fields() -> tuple[Any, Any, Any, Any, Any, tuple[float, float]]
         while len(frames) < n_active:
             sim.step()
             if sim.n % every == 0:
-                frames.append(sim.p[::2, view_cols].astype(np.float32))
-                column.append(sim.p[:, st_ix].astype(np.float32))
+                frames.append(_host(sim, sim.p[::2, view_cols]))
+                column.append(_host(sim, sim.p[:, st_ix]))
                 ts.append(sim.time)
         stack = np.stack(frames)
         col = np.stack(column)

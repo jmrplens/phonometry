@@ -16,7 +16,7 @@ from ..media import (
     _translate_str,
 )
 from ..theme import CMAP_FIELD, COLOR_FG, COLOR_GRID, COLOR_PRIMARY
-from ._core import _anim_speaker, _fit_text_x
+from ._core import _anim_speaker, _fit_text_x, _host
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -107,13 +107,16 @@ def _slit_absorber_fields(
     frames, cell-zoom frames, the settled |p| envelope), the frame times
     and the library absorption at 300 Hz for both slit heights.
     """
-    import fdtd2d
+    import clip_placement
 
     from phonometry import materials
     from phonometry.materials import (
         rectangular_duct_properties,
         slit_effective_properties,
     )
+    from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
+
+    compute = clip_placement.compute_for("anim_fdtd_slit_absorber")
 
     design = _slit_absorber_design()
     res = design.resonator
@@ -205,7 +208,7 @@ def _slit_absorber_fields(
             c_map[sl] = c_e
             rho_map[sl] = rho_e * scale
             sig_map[sl] = sig_e
-        sim = fdtd2d.FDTD2D(
+        sim = FDTD2D(
             c_map,
             dx,
             rho=rho_map,
@@ -213,31 +216,33 @@ def _slit_absorber_fields(
             cfl=0.95,
             obstacle_mask=mask,
             edge_impedance={"left": 1.2 * 343.0},
+            compute=compute,
         )
-        tone = fdtd2d.CWSource(ix=0, iy=0, frequency=_SLIT_ABS_F0)
+        tone = CWSource(ix=0, iy=0, frequency=_SLIT_ABS_F0)
         sim.add_source(
-            fdtd2d.PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
+            PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
         )
+        xp = sim._backend.xp
         mid = ny // 2
         # Settle to steady state, sampling the exact standing-wave
         # envelope over the final full period.
         period_m = round(1.0 / (_SLIT_ABS_F0 * sim.dt))
         settle = round(0.020 / sim.dt)
-        env = np.zeros(sim.p[mid, :face:2].shape, dtype=np.float32)
+        env = sim._backend.zeros(tuple(sim.p[mid, :face:2].shape))
         for i in range(settle):
             sim.step()
             if i >= settle - period_m:
-                np.maximum(env, np.abs(sim.p[mid, :face:2]), out=env)
+                env = xp.maximum(env, xp.abs(sim.p[mid, :face:2]))
         tube: list[Any] = []
         cell: list[Any] = []
         ts: list[float] = []
         while len(tube) < n_frames:
             sim.step()
             if sim.n % every == 0:
-                tube.append(sim.p[::4, ::4].astype(np.float32))
-                cell.append(sim.p[:, zoom0:].astype(np.float32))
+                tube.append(_host(sim, sim.p[::4, ::4]))
+                cell.append(_host(sim, sim.p[:, zoom0:]))
                 ts.append(sim.time)
-        runs.append((np.stack(tube), np.stack(cell), env))
+        runs.append((np.stack(tube), np.stack(cell), _host(sim, env)))
         times = np.asarray(ts)
     return runs[0], runs[1], times, alphas
 

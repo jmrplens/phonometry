@@ -25,6 +25,7 @@ from ..theme import (
     COLOR_SECONDARY,
     COLOR_TERTIARY,
 )
+from ._core import _host
 
 _DISP_C = 343.0
 _DISP_F0 = 500.0  # tone-burst carrier
@@ -88,7 +89,7 @@ def _disp_phase_speed(
 
 
 def _disp_packet_group_speed(
-    profile: NDArray[np.float64], dx: float, courant: float
+    profile: NDArray[np.floating[Any]], dx: float, courant: float
 ) -> float:
     """Group speed of a whole packet / c, weighted by its own spectrum.
 
@@ -123,7 +124,11 @@ def _dispersion_fields() -> tuple[Any, ...]:
     crossings and the measured and predicted group speeds; plus the shared
     frame times and the per-axis Courant number.
     """
-    import fdtd2d
+    import clip_placement
+
+    from phonometry.simulation import FDTD2D
+
+    compute = clip_placement.compute_for("anim_fdtd_dispersion")
 
     t_end = (
         1.2
@@ -139,25 +144,28 @@ def _dispersion_fields() -> tuple[Any, ...]:
         n_x = n_vis + round(_DISP_LOSSY / dx)
         x = (np.arange(n_x) + 0.5) * dx
         ramp = np.clip((x - n_vis * dx) / _DISP_LOSSY, 0.0, 1.0) ** 2
-        sim = fdtd2d.FDTD2D(
+        sim = FDTD2D(
             _DISP_C,
             dx,
             shape=(3, n_x),
             damping=np.tile(_DISP_SIGMA * ramp, (3, 1)),
             edge_impedance={"left": 1.2 * _DISP_C, "right": 1.2 * _DISP_C},
+            compute=compute,
         )
         sim.add_plane_wave(
             "right", center=_DISP_X0, width=_DISP_W, wavelength=_DISP_LAMBDA
         )
         courant = _DISP_C * sim.dt / dx
-        v_pred = _disp_packet_group_speed(sim.p[1, :n_vis].copy(), dx, courant)
+        v_pred = _disp_packet_group_speed(sim.host_field("p")[1, :n_vis], dx, courant)
+        xp = sim._backend.xp
+        visible = sim._backend.index(np.arange(n_vis))
         raw_t: list[float] = []
         raw_p: list[Any] = []
         while sim.time <= times[-1] + sim.dt:
             raw_t.append(sim.time)
-            raw_p.append(sim.p[1, :n_vis].copy())
+            raw_p.append(xp.take(sim.p[1], visible))
             sim.step()
-        raw = np.asarray(raw_p)
+        raw = _host(sim, xp.stack(raw_p), dtype=np.float64)
         t_raw = np.asarray(raw_t)
         # One common timeline for all three panels: each tube keeps its own
         # dt and is resampled onto the 40 us capture grid, which for the

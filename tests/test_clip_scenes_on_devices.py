@@ -48,24 +48,16 @@ _NOT_YET: frozenset[str] = frozenset(
     {
         "absorption_placement.py",
         "diffusion.py",
-        "dispersion.py",
-        "duct_modes.py",
-        "ducting.py",
         "elastic.py",
-        "expansion_chamber.py",
         "ground_effect.py",
         "halfspace.py",
         "metadiffuser.py",
         "mode_conversion.py",
-        "open_end.py",
         "pillar_hall.py",
         "radiation_efficiency.py",
         "refraction.py",
         "room_modes.py",
         "seabed.py",
-        "side_branch.py",
-        "slit_absorber.py",
-        "tubes.py",
     }
 )
 

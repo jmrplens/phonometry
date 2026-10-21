@@ -264,11 +264,12 @@ def _nested(levels: int) -> dict[str, object]:
 def test_arguments_that_do_not_rebuild_are_refused_by_name(
     run: dict[str, object], error: str
 ) -> None:
+    job = io.BytesIO(_raw_job({"run": run}))
     frames = io.BytesIO()
     with pytest.raises(
         bootstrap.Refused, match=f"arguments do not rebuild: {error}"
     ) as refused:
-        node.serve(io.BytesIO(_raw_job({"run": run})), frames)
+        node.serve(job, frames)
     assert refused.value.stage == "job"
     assert frames.getvalue() == b""
 
@@ -286,17 +287,18 @@ def test_arguments_that_do_not_rebuild_are_refused_by_name(
 def test_a_placement_other_than_a_device_an_index_and_a_dtype_is_refused(
     compute: dict[str, object], words: str
 ) -> None:
+    job = io.BytesIO(_job("fdtd_simulation", {"run": _ACOUSTIC}, compute=compute))
+    frames = io.BytesIO()
     with pytest.raises(bootstrap.Refused, match=words) as refused:
-        node.serve(
-            io.BytesIO(_job("fdtd_simulation", {"run": _ACOUSTIC}, compute=compute)),
-            io.BytesIO(),
-        )
+        node.serve(job, frames)
     assert refused.value.stage == "job"
 
 
 def test_a_frame_that_is_no_job_is_refused() -> None:
+    job = io.BytesIO(_raw_job({}, kind="package"))
+    frames = io.BytesIO()
     with pytest.raises(bootstrap.Refused, match="expected a job"):
-        node.serve(io.BytesIO(_raw_job({}, kind="package")), io.BytesIO())
+        node.serve(job, frames)
 
 
 def _warns_and_returns(**arguments: object) -> tuple[object, None]:

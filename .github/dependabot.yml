@@ -85,12 +85,16 @@ updates:
       - "javascript"
     open-pull-requests-limit: 2
 
-  # The base image of docker/node/Dockerfile, the GPU node the CuPy proof in
-  # gpu-parity.lock is measured on. Its CUDA minor is the node driver's own,
-  # and the CUDA headers are pinned to the exact cudart it carries, which no
-  # CI job would catch drifting, since none builds that image. So only a new
-  # digest of the same tag is proposed: a CUDA release of any size is a
-  # change made by hand, with the headers and the driver beside it.
+  # The base images of docker/node/Dockerfile. The gpu stage's is the GPU
+  # node the CuPy proof in gpu-parity.lock is measured on. Its CUDA minor is
+  # the node driver's own, and the CUDA headers are pinned to the exact
+  # cudart it carries, which no CI job would catch drifting, since none
+  # builds that stage. So only a new digest of the same tag is proposed: a
+  # CUDA release of any size is a change made by hand, with the headers and
+  # the driver beside it. The cpu stage starts from Ubuntu 24.04, the release
+  # the CUDA image is built on, and the CI job that builds that stage checks
+  # a new digest of it. The image's ffmpeg is pinned by URL and SHA-256,
+  # which Dependabot cannot move; the workflow node-ffmpeg.yml watches it.
   - package-ecosystem: "docker"
     directory: "/docker/node"
     cooldown:
@@ -109,3 +113,7 @@ updates:
           - "version-update:semver-major"
           - "version-update:semver-minor"
           - "version-update:semver-patch"
+      - dependency-name: "ubuntu"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"

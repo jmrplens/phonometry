@@ -774,12 +774,20 @@ test-gpu:
 gpu-parity:
 	PYTHONPATH=src $(TEST_ENV) $(PYTHON) scripts/gpu_parity.py --write
 
+# The node image a remote simulation runs in (docker/node/Dockerfile), built
+# on the node itself over ssh: HOST names an entry of the hosts file whose
+# runner is docker, and the image is tagged with that entry's image. TARGET=cpu
+# builds it for a node without an NVIDIA GPU (the default is gpu). src goes
+# first on the path, so the hosts reader and the bootstrap are this checkout's.
+node-image:
+	PYTHONPATH=src $(PYTHON) scripts/node_image.py --host "$(HOST)" --target "$(or $(TARGET),gpu)"
+
 check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
 	assets animations animation-freshness animation-audit posters brand lighthouse \
-	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu gpu-parity coverage check \
+	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu gpu-parity node-image coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \

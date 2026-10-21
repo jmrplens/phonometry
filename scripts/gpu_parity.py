@@ -161,8 +161,10 @@ def require_covered(imported: Iterable[tuple[str, pathlib.Path]]) -> None:
 
 
 def base_image_of(dockerfile: str) -> str | None:
-    """The image the first ``FROM`` of *dockerfile* names, digest included."""
-    match = re.search(r"^FROM\s+(\S+)", dockerfile, flags=re.MULTILINE)
+    """The image the ``gpu`` stage of *dockerfile* starts from, digest included."""
+    match = re.search(
+        r"^FROM\s+(\S+)\s+AS\s+gpu\s*$", dockerfile, flags=re.MULTILINE | re.IGNORECASE
+    )
     return match.group(1) if match else None
 
 

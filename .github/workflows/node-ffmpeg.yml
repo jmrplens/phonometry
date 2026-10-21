@@ -1,0 +1,41 @@
+# The node image's ffmpeg (docker/node/Dockerfile) is a static build pinned by
+# URL and SHA-256, which Dependabot cannot move. Each month, after BtbN's
+# month-end build, this checks that the pinned file still downloads, that
+# GitHub still lists the pinned SHA-256 for it, and that no newer month-end
+# build is out. A red run names the new URL and SHA-256. The pin is moved by
+# hand, as the Dockerfile's comment says.
+name: Node image ffmpeg pin
+
+on:
+  schedule:
+    - cron: "23 6 3 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A dispatch while the scheduled run is going waits for it: both read the
+# same releases, and neither writes anything.
+concurrency:
+  group: node-ffmpeg
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: The node image's ffmpeg is the newest month-end build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    # The token only lifts the API's rate limit for anonymous callers, which a
+    # shared runner address reaches; the workflow reads, it writes nothing.
+    - name: Compare the pin with BtbN's releases
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: python scripts/node_ffmpeg.py check

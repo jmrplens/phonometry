@@ -760,15 +760,16 @@ result = bank.spectrogram(x, window_time=0.125, overlap=0.875)
 result.plot()
 plt.show()
 
-# By hand, from the result's fields. The rows are spaced evenly in log10
-# of the frequency, so the raster is laid out there, half a band step
-# either side of each centre, and carried onto the logarithmic axis through
-# 10**y: an image placed straight on a log axis spreads its rows evenly in Hz.
+# By hand, from the result's fields. The bands are equally wide in log10 of
+# the frequency, so the raster is laid out there, from the lower edge of the
+# first band to the upper edge of the last, and carried onto the logarithmic
+# axis through 10**y: an image placed straight on a log axis spreads its rows
+# evenly in Hz.
 from matplotlib.scale import LogTransform
 from matplotlib.transforms import IdentityTransform, blended_transform_factory
 
-f, t = result.frequencies, result.times
-half_band = np.log10(f[-1] / f[0]) / (2 * (f.size - 1))
+t = result.times
+lower, upper = result.lower_edges, result.upper_edges
 half_hop = (t[1] - t[0]) / 2
 fig, ax = plt.subplots()
 ax.set_yscale("log")
@@ -778,9 +779,9 @@ image = ax.imshow(result.levels, origin="lower", aspect="auto", cmap="magma",
                   interpolation="nearest", transform=rows,
                   vmin=result.levels.max() - 80.0, vmax=result.levels.max(),
                   extent=(t[0] - half_hop, t[-1] + half_hop,
-                          np.log10(f[0]) - half_band, np.log10(f[-1]) + half_band))
+                          np.log10(lower[0]), np.log10(upper[-1])))
 ax.set_xlim(t[0] - half_hop, t[-1] + half_hop)
-ax.set_ylim(f[0] / 10**half_band, f[-1] * 10**half_band)
+ax.set_ylim(lower[0], upper[-1])
 ax.set(xlabel="Time [s]", ylabel="Frequency [Hz]")
 fig.colorbar(image, label="Band level [dB]")
 plt.show()

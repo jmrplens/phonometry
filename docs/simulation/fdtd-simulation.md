@@ -87,7 +87,7 @@ from phonometry import simulation
 res = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
+    recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
 print(res.size)                  # (3.0, 2.0)  metres
 print(round(res.dt * 1e6, 2))    # 12.37  microseconds (CN = 0.6)
@@ -105,7 +105,7 @@ numbers on each.
 on_gpu = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
+    recording=simulation.FDTDRecording(probes=[(200, 100)]),
     compute=simulation.Compute(device="cupy"),
 )
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
@@ -124,7 +124,9 @@ contribution that does not scatter passing waves) at a grid cell:
 `CWSource` (a sine tone faded in with a raised-cosine ramp so its onset does
 not splash a broadband transient) and `SignalSource` (an arbitrary sampled
 waveform, linearly interpolated onto the simulation time steps). Probes
-record the pressure at their cell every time step into the result.
+record the pressure at their cell every time step into the result. The
+probes and the snapshot cadence travel together as one `FDTDRecording`,
+passed as `recording=`; a run without one keeps only its time axis.
 
 **Plane waves "from infinity".** Point sources in 2D are really line
 sources, so a diffuser or a barrier is often better interrogated with a
@@ -419,10 +421,10 @@ mask[60:, 150:154] = True
 res = simulation.fdtd_simulation(
     343.0, 0.01, 9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(100, 100), (240, 100)],
+    recording=simulation.FDTDRecording(
+        probes=[(100, 100), (240, 100)], snapshot_every=75),
     obstacle_mask=mask,
     boundaries="absorbing", absorbing_layer_cells=30,
-    snapshot_every=75,
 )
 
 fig, (ax_f, ax_p) = plt.subplots(
@@ -450,7 +452,7 @@ nx, ny = round(lx / dx), round(ly / dx)
 res = simulation.fdtd_simulation(
     343.0, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
-    probes=[(nx - 4, ny - 3)],
+    recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
 p = res.pressures[0]
 spec = np.abs(np.fft.rfft(p * np.hanning(p.size), n=8 * p.size))
@@ -482,7 +484,7 @@ nx, ny = round(lx / dx), round(ly / dx)
 res = simulation.fdtd_simulation(
     c, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
-    probes=[(nx - 4, ny - 3)],
+    recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
 
 # One line: the raw probe pressure history the spectrum is computed from.

@@ -732,7 +732,8 @@ of the signal functions always used; called by position, nothing changes. The
 | `trials=` on `metrology.monte_carlo`, and `MonteCarloResult.trials` | `n_trials` |
 | the `passages` of `silencer_self_noise`, `valve_style_modifier`, `multihole_incipient_cavitation_ratio` and `uniform_passage_style_modifier`, and the `stages` of `stage_level_correction` | `n_passages` and `n_stages` |
 | the `steps` of `FDTD2D.run` and `ElasticFDTD2D.run`, and `max_arrivals=` on `underwater.eigenrays` | `n_steps` and `max_n_arrivals=` |
-| `record_every=` and `decimate=` on `FDTD2D.run` and `ElasticFDTD2D.run` | `snapshot_every=` and `snapshot_decimation=`, the names `fdtd_simulation` and `ElasticRecording` take for the same two counts |
+| `record_every=` and `decimate=` on `FDTD2D.run` and `ElasticFDTD2D.run` | `snapshot_every=` and `snapshot_decimation=`, the names `FDTDRecording` and `ElasticRecording` take for the same two counts |
+| `fdtd_simulation(probes=..., snapshot_every=..., snapshot_decimation=...)` | `fdtd_simulation(recording=FDTDRecording(probes=..., snapshot_every=..., snapshot_decimation=...))`: what an acoustic run records travels as one record, as an elastic run's travels as one `ElasticRecording`; a run without one records only its time axis, as before |
 | `sidebands=` on `gear_mesh_frequencies` and `induction_motor_frequencies`, the `poles`, `rotor_bars` and `slot_harmonics` of `induction_motor_frequencies`, and `lobe_orders=` on `blade_pass_frequencies` | `n_sidebands`, `n_poles`, `n_rotor_bars`, `n_slot_harmonics` and `n_lobe_orders` |
 | `years=` on `hearing.nipts` and `htlan` and on `vibration.injury_risk` and `multiple_shock_assessment`, and `.years` on the ISO 1999 results (`NiptsResult` and `HtlanResult` in 3.3.0) and on `MultipleShockResult` | `exposure_duration_years`: a duration names its quantity before its unit |
 | `environment.NoisePhase.hours` and `hours=` on `evaluation_period_level` | `duration_hours` |

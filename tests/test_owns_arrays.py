@@ -453,8 +453,7 @@ def _fdtd() -> object:
         100 * sim.dt,
         sources=[simulation.GaussianPulse(ix=50, iy=50, half_width_s=2e-4)],
         shape=(100, 100),
-        probes=[(10, 10)],
-        snapshot_every=1,
+        recording=simulation.FDTDRecording(probes=[(10, 10)], snapshot_every=1),
     )
 
 

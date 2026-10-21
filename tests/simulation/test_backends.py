@@ -24,6 +24,7 @@ from phonometry.simulation import (
     ElasticFDTD2D,
     ElasticRecording,
     ExplosionSource,
+    FDTDRecording,
     ForceSource,
     GaussianPulse,
     PlaneWaveSource,
@@ -755,7 +756,7 @@ _NUMPY_RUN = """
 import sys
 from phonometry import simulation as s
 s.fdtd_simulation(
-    343.0, 0.01, 1e-4, shape=(8, 8), probes=[(4, 4)],
+    343.0, 0.01, 1e-4, shape=(8, 8), recording=s.FDTDRecording(probes=[(4, 4)]),
     sources=[s.GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
 )
 s.elastic_fdtd_simulation(
@@ -795,7 +796,7 @@ def _acoustic_run(compute: Compute, **changes: Any) -> object:
         "duration": 1e-4,
         "shape": (8, 8),
         "sources": [GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
-        "probes": [(4, 4)],
+        "recording": FDTDRecording(probes=[(4, 4)]),
         **changes,
     }
     duration = arguments.pop("duration")
@@ -828,11 +829,13 @@ _CELL_1_1[1, 1] = True
 
 _BAD_ARGUMENTS: dict[str, tuple[Callable[[Compute], object], str]] = {
     "acoustic run, probe off the grid": (
-        lambda c: _acoustic_run(c, probes=[(20, 4)]),
+        lambda c: _acoustic_run(c, recording=FDTDRecording(probes=[(20, 4)])),
         "lies outside the grid",
     ),
     "acoustic run, probe in the obstacle": (
-        lambda c: _acoustic_run(c, probes=[(1, 1)], obstacle_mask=_CELL_1_1),
+        lambda c: _acoustic_run(
+            c, recording=FDTDRecording(probes=[(1, 1)]), obstacle_mask=_CELL_1_1
+        ),
         r"probe \(1, 1\) lies inside an obstacle",
     ),
     "acoustic run, source off the grid": (

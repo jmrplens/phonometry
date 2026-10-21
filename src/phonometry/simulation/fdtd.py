@@ -86,6 +86,7 @@ __all__ = [
     "FDTD2D",
     "CWSource",
     "ContourProbe",
+    "FDTDRecording",
     "FDTDResult",
     "GaussianPulse",
     "PlaneWaveSource",
@@ -443,9 +444,9 @@ def _snapshot_options(
 ) -> tuple[int | None, int]:
     """The snapshot cadence and decimation, validated alike on every route.
 
-    The ``run()`` of both engines and both simulation functions read the two
-    counts here, so a bad value is refused with the same class and the same
-    words whichever way it came in.
+    The ``run()`` of both engines, :class:`FDTDRecording` and the elastic
+    simulation function read the two counts here, so a bad value is refused
+    with the same class and the same words whichever way it came in.
 
     :param snapshot_every: Steps between snapshots, or ``None`` for none.
     :param snapshot_decimation: Cells a snapshot steps over along each axis.
@@ -1747,6 +1748,49 @@ class FDTDResult(OwnsArrays):
         raise ValueError(msg)
 
 
+@dataclass(frozen=True, kw_only=True)
+class FDTDRecording(RichDisplay):
+    """What an acoustic run writes down: probe histories and field snapshots.
+
+    The two ways out of a running simulation. Probes record the pressure
+    history at named cells; snapshots record the whole pressure field every
+    ``snapshot_every`` steps. Recording nothing (the default) runs the
+    physics and keeps only the time axis.
+
+    :param probes: Pressure-probe cells as ``(ix, iy)`` index pairs.
+    :param snapshot_every: Record a full pressure-field snapshot every this
+        many steps (and at :math:`t = 0`); ``None`` records none.
+    :param snapshot_decimation: Keep every this many cells along each axis
+        in a snapshot (default 1, every cell); the result records it.
+    :raises TypeError: for a probe that is not a pair or has an index that is
+        not a number, or a ``snapshot_every`` or ``snapshot_decimation`` that
+        is a flag, a text, an array or anything else that is not a number.
+    :raises ValueError: for a probe of more or fewer than two indices or with
+        an index that is not a whole number, or a ``snapshot_every`` or
+        ``snapshot_decimation`` that is not a whole number of 1 or more.
+    """
+
+    probes: Sequence[tuple[int, int]] = ()
+    snapshot_every: int | None = None
+    snapshot_decimation: int = 1
+
+    def __post_init__(self) -> None:
+        """Refuse a malformed probe or count when the record is built.
+
+        Whether a probe lies on the grid, and outside the obstacle, is checked
+        by :func:`fdtd_simulation`, the first place a grid exists.
+        """
+        every, decimation = _snapshot_options(
+            self.snapshot_every, self.snapshot_decimation
+        )
+        # Held as a tuple of int pairs and plain ints, so a list handed in
+        # cannot change the record after it is built, and a whole float or a
+        # NumPy integer reads back as the count a slice takes.
+        object.__setattr__(self, "probes", _probe_pairs(self.probes))
+        object.__setattr__(self, "snapshot_every", every)
+        object.__setattr__(self, "snapshot_decimation", decimation)
+
+
 def _parse_boundaries(
     boundaries: AcousticBoundary
     | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]],
@@ -1779,14 +1823,20 @@ def _parse_boundaries(
     return tuple(absorbing), impedance
 
 
-def _probe_indices(
-    probes: Sequence[tuple[int, int]],
-    shape: tuple[int, int],
-    obstacle: NDArray[np.bool_] | None,
-) -> NDArray[np.int_]:
-    """Validate the probe cells into an ``(n_probes, 2)`` index array."""
-    ny, nx = shape
-    probe_ix = np.zeros((len(probes), 2), dtype=np.int_)
+def _probe_pairs(probes: Iterable[tuple[int, int]]) -> tuple[tuple[int, int], ...]:
+    """The probe cells as whole ``(ix, iy)`` pairs, read before any grid exists.
+
+    :class:`FDTDRecording` reads them here when it is built, and
+    :func:`_probe_indices` when a run checks them against its grid, so a
+    malformed probe is refused with the same class and the same words on
+    every route.
+
+    :raises TypeError: for an entry that is not a pair, or an index that is
+        not a number.
+    :raises ValueError: for an entry of more or fewer than two indices, or an
+        index that is not a whole number.
+    """
+    pairs: list[tuple[int, int]] = []
     for k, entry in enumerate(probes):
         try:
             ix, iy = entry
@@ -1796,8 +1846,20 @@ def _probe_indices(
         except ValueError:
             msg = f"probes must hold (ix, iy) index pairs; entry {k} is {entry!r}"
             raise ValueError(msg) from None
-        ix = _integer("probe ix", ix)
-        iy = _integer("probe iy", iy)
+        pairs.append((_integer("probe ix", ix), _integer("probe iy", iy)))
+    return tuple(pairs)
+
+
+def _probe_indices(
+    probes: Iterable[tuple[int, int]],
+    shape: tuple[int, int],
+    obstacle: NDArray[np.bool_] | None,
+) -> NDArray[np.int_]:
+    """Validate the probe cells into an ``(n_probes, 2)`` index array."""
+    ny, nx = shape
+    pairs = _probe_pairs(probes)
+    probe_ix = np.zeros((len(pairs), 2), dtype=np.int_)
+    for k, (ix, iy) in enumerate(pairs):
         if not (0 <= ix < nx and 0 <= iy < ny):
             msg = f"probe ({ix}, {iy}) lies outside the grid"
             raise ValueError(msg)
@@ -1869,14 +1931,12 @@ def fdtd_simulation(
     shape: tuple[int, int] | None = None,
     rho: float | Field2D = 1.2,
     cfl: float = 0.6,
-    probes: Sequence[tuple[int, int]] = (),
+    recording: FDTDRecording | None = None,
     boundaries: AcousticBoundary
     | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]] = "rigid",
     absorbing_layer_cells: int = 20,
     obstacle_mask: NDArray[np.bool_] | None = None,
     damping: float = 0.0,
-    snapshot_every: int | None = None,
-    snapshot_decimation: int = 1,
     compute: Compute | None = None,
 ) -> FDTDResult:
     r"""Run a deterministic 2D acoustic FDTD simulation.
@@ -1914,7 +1974,9 @@ def fdtd_simulation(
     :param cfl: Courant number in ``(0, 1)`` (Eqs. 4.13-4.14); the time step
         is :math:`\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})`.
         Default 0.6.
-    :param probes: Pressure-probe cells as ``(ix, iy)`` index pairs.
+    :param recording: What the run records (:class:`FDTDRecording`): the
+        probe cells, and the snapshot cadence and decimation. ``None``
+        records nothing but the time axis.
     :param boundaries: ``"rigid"`` (default), ``"absorbing"``, or a mapping
         from side name (``left``/``right``/``top``/``bottom``) to
         ``"rigid"``, ``"absorbing"``, or a real specific impedance
@@ -1924,20 +1986,14 @@ def fdtd_simulation(
     :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells
         (rasterised interior geometry).
     :param damping: Uniform bulk amplitude decay rate [1/s].
-    :param snapshot_every: Record a full pressure-field snapshot every this
-        many steps (and at :math:`t = 0`); ``None`` records none.
-    :param snapshot_decimation: Keep every this many cells along each axis
-        in a snapshot (default 1, every cell); the result records it.
     :param compute: Where the run steps (:class:`Compute`); ``None`` follows
         :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :return: A :class:`FDTDResult`.
     :raises TypeError: If an input is of the wrong type: a ``duration``,
         ``cfl`` or ``dx`` that is not one number, an ``absorbing_layer_cells``
-        that is not a number,
-        a ``snapshot_every`` or ``snapshot_decimation`` that is a flag, a text
-        or an array where a count goes, a ``shape`` that is not a pair, a
-        complex medium, an ``obstacle_mask`` that is not boolean, or a
-        ``compute`` that is not a :class:`Compute`.
+        that is not a number, a ``shape`` that is not a pair, a complex
+        medium, an ``obstacle_mask`` that is not boolean, or a ``compute``
+        that is not a :class:`Compute`.
     :raises ValueError: If the inputs are invalid.
     :raises ComputeImportError: When the device's library is not installed
         or does not import.
@@ -1945,8 +2001,9 @@ def fdtd_simulation(
         first small computation; with ``fallback=True`` the run warns with
         :class:`ComputeFallbackWarning` and steps on NumPy instead.
     """
+    recording = FDTDRecording() if recording is None else recording
+    snapshot_every, d = recording.snapshot_every, recording.snapshot_decimation
     require_scalar(absorbing_layer_cells, "absorbing_layer_cells")
-    snapshot_every, d = _snapshot_options(snapshot_every, snapshot_decimation)
     if len(sources) == 0:
         msg = "at least one source is required"
         raise ValueError(msg)
@@ -1966,7 +2023,7 @@ def fdtd_simulation(
     obstacle = _validated_obstacle(obstacle_mask, ny, nx)
     for source in sources:
         _check_source(source, (ny, nx), obstacle)
-    probe_ix = _probe_indices(probes, (ny, nx), obstacle)
+    probe_ix = _probe_indices(recording.probes, (ny, nx), obstacle)
     steps = _step_count(duration, dt)
 
     sim = FDTD2D(

@@ -75,7 +75,7 @@ sim = simulation.FDTD2D(343.0, 0.01, shape=(200, 300), compute=gpu)
 res = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
+    recording=simulation.FDTDRecording(probes=[(200, 100)]),
     compute=gpu,
 )
 ```
@@ -88,8 +88,7 @@ pueden apartarse sus números de los de una ejecución en float64.
 light = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
-    snapshot_every=50,
+    recording=simulation.FDTDRecording(probes=[(200, 100)], snapshot_every=50),
     compute=simulation.Compute(dtype="float32"),
 )
 print(light.snapshots.dtype, light.pressures.dtype)   # float32 float64
@@ -146,12 +145,12 @@ with simulation.use(simulation.Compute(dtype="float32")):
     inside = simulation.fdtd_simulation(
         343.0, 0.01, 1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
-        probes=[(100, 50)],
+        recording=simulation.FDTDRecording(probes=[(100, 50)]),
     )
     pinned = simulation.fdtd_simulation(
         343.0, 0.01, 1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
-        probes=[(100, 50)],
+        recording=simulation.FDTDRecording(probes=[(100, 50)]),
         compute=simulation.Compute(),
     )
 print(inside.provenance.dtype, pinned.provenance.dtype)   # float32 float64
@@ -187,7 +186,7 @@ def pulse_run(half_width_s):
     return simulation.fdtd_simulation(
         343.0, 0.01, 1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=half_width_s)],
-        probes=[(100, 50)],
+        recording=simulation.FDTDRecording(probes=[(100, 50)]),
         compute=single,
     )
 
@@ -229,7 +228,7 @@ request = simulation.Compute(device="cupy", fallback=True)
 res = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
+    recording=simulation.FDTDRecording(probes=[(200, 100)]),
     compute=request,
 )
 # En una máquina sin CuPy:
@@ -405,7 +404,7 @@ $\lceil n_x/d \rceil$ celdas: `d = 2` guarda una cuarta parte de las celdas y
 dispositivo, y solo las celdas conservadas pasan al anfitrión.
 
 La opción tiene el mismo nombre y la misma regla en todas partes:
-`fdtd_simulation(..., snapshot_every=, snapshot_decimation=)`,
+`FDTDRecording(snapshot_every=, snapshot_decimation=)`,
 `ElasticRecording(snapshot_every=, snapshot_decimation=)` y el `run()` de las
 dos simulaciones. Toma un número entero de 1 o más; un booleano, un texto o un
 array lanzan `TypeError`, y un número menor que 1 o no entero, `ValueError`.
@@ -417,8 +416,8 @@ celdas del que se tomó, con los ejes sobre el dominio completo.
 decimated = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    snapshot_every=10,
-    snapshot_decimation=4,
+    recording=simulation.FDTDRecording(
+        snapshot_every=10, snapshot_decimation=4),
 )
 print(decimated.snapshots.shape, decimated.snapshot_decimation)   # (17, 50, 75) 4
 decimated.plot(kind="snapshot", language="es")

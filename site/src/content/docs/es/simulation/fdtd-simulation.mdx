@@ -150,7 +150,7 @@ res = simulation.fdtd_simulation(
     2.0e-3,            # duration: tiempo simulado [s] (dt se deriva, no se da)
     shape=(200, 300),  # (ny, nx) celdas -> un dominio de 2.0 x 3.0 m
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
+    recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
 print(res.size)                  # (3.0, 2.0)  metros
 print(round(res.dt * 1e6, 2))    # 12.37  microsegundos (CN = 0.6)
@@ -169,7 +169,7 @@ sobre los números en cada uno.
 on_gpu = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
+    recording=simulation.FDTDRecording(probes=[(200, 100)]),
     compute=simulation.Compute(device="cupy"),
 )
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, y el nombre de la tarjeta
@@ -194,6 +194,9 @@ arranque no salpique el campo con un transitorio de banda ancha) y
 `SignalSource` (una forma de onda muestreada arbitraria, interpolada
 linealmente sobre los pasos temporales de la simulación). Las sondas
 registran la presión en su celda en cada paso temporal dentro del resultado.
+Las sondas y la cadencia de las instantáneas viajan juntas en un
+`FDTDRecording`, que se pasa como `recording=`; una ejecución sin él solo
+guarda su eje temporal.
 
 **Ondas planas «desde el infinito».** Una fuente puntual en 2D es en
 realidad una fuente lineal, así que un difusor o una barrera se interrogan
@@ -820,10 +823,10 @@ mask[60:, 150:154] = True
 res = simulation.fdtd_simulation(
     343.0, 0.01, 9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(100, 100), (240, 100)],
+    recording=simulation.FDTDRecording(
+        probes=[(100, 100), (240, 100)], snapshot_every=75),
     obstacle_mask=mask,
     boundaries="absorbing", absorbing_layer_cells=30,
-    snapshot_every=75,
 )
 
 fig, (ax_f, ax_p) = plt.subplots(
@@ -976,7 +979,7 @@ nx, ny = round(lx / dx), round(ly / dx)
 res = simulation.fdtd_simulation(
     343.0, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
-    probes=[(nx - 4, ny - 3)],
+    recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
 p = res.pressures[0]
 # Enventana el registro (termina con los modos todavía resonando sin
@@ -1015,7 +1018,7 @@ nx, ny = round(lx / dx), round(ly / dx)
 res = simulation.fdtd_simulation(
     c, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
-    probes=[(nx - 4, ny - 3)],
+    recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
 
 # Una línea: la historia de presión en la sonda de la que sale el espectro.

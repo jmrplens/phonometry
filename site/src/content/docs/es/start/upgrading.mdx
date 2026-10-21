@@ -755,7 +755,8 @@ estos aparecen en la tabla de los nombres que ya no están.
 | `trials=` en `metrology.monte_carlo`, y `MonteCarloResult.trials` | `n_trials` |
 | el `passages` de `silencer_self_noise`, `valve_style_modifier`, `multihole_incipient_cavitation_ratio` y `uniform_passage_style_modifier`, y el `stages` de `stage_level_correction` | `n_passages` y `n_stages` |
 | el `steps` de `FDTD2D.run` y `ElasticFDTD2D.run`, y `max_arrivals=` en `underwater.eigenrays` | `n_steps` y `max_n_arrivals=` |
-| `record_every=` y `decimate=` en `FDTD2D.run` y `ElasticFDTD2D.run` | `snapshot_every=` y `snapshot_decimation=`, los nombres que dan `fdtd_simulation` y `ElasticRecording` a las mismas dos cuentas |
+| `record_every=` y `decimate=` en `FDTD2D.run` y `ElasticFDTD2D.run` | `snapshot_every=` y `snapshot_decimation=`, los nombres que dan `FDTDRecording` y `ElasticRecording` a las mismas dos cuentas |
+| `fdtd_simulation(probes=..., snapshot_every=..., snapshot_decimation=...)` | `fdtd_simulation(recording=FDTDRecording(probes=..., snapshot_every=..., snapshot_decimation=...))`: lo que anota una ejecución acústica viaja en un solo registro, como lo de una elástica viaja en un `ElasticRecording`; una ejecución sin él solo anota su eje temporal, como antes |
 | `sidebands=` en `gear_mesh_frequencies` y `induction_motor_frequencies`, el `poles`, el `rotor_bars` y el `slot_harmonics` de `induction_motor_frequencies`, y `lobe_orders=` en `blade_pass_frequencies` | `n_sidebands`, `n_poles`, `n_rotor_bars`, `n_slot_harmonics` y `n_lobe_orders` |
 | `years=` en `hearing.nipts` y `htlan` y en `vibration.injury_risk` y `multiple_shock_assessment`, y `.years` en los resultados de la ISO 1999 (`NiptsResult` y `HtlanResult` en la 3.3.0) y en `MultipleShockResult` | `exposure_duration_years`: una duración nombra su magnitud antes que su unidad |
 | `environment.NoisePhase.hours` y `hours=` en `evaluation_period_level` | `duration_hours` |

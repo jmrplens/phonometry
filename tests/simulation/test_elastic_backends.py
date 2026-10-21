@@ -24,6 +24,7 @@ from phonometry.simulation import (
     ElasticFDTDResult,
     ElasticRecording,
     ExplosionSource,
+    FDTDRecording,
     FDTDResult,
     elastic_fdtd,
     elastic_fdtd_simulation,
@@ -144,8 +145,9 @@ def test_a_recorded_acoustic_run_agrees_with_numpy(
             1e-3,
             shape=(16, 20),
             sources=[CWSource(ix=6, iy=7, frequency=2000.0)],
-            probes=[(0, 0), (19, 15), (12, 3)],
-            snapshot_every=1,
+            recording=FDTDRecording(
+                probes=[(0, 0), (19, 15), (12, 3)], snapshot_every=1
+            ),
         )
 
     want = simulate()

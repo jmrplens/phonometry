@@ -54621,8 +54621,9 @@ documents, one page per module.
 | `poisson_ratio_from_wave_speeds` / `shear_modulus_from_wave_speed` / `youngs_modulus_from_wave_speeds` | `function` | **DIN 45672-1 Clause 4.5: the ground's constants from its two wave speeds.**<br>• Formula (3) `ν = (v_p² − 2v_s²) / (2(v_p² − v_s²))` and Formula (5) `G = v_s² ρ`<br>• `E = 2G(1 + ν)`, not the printed `E = v_p² ρ`, which is the P-wave modulus; see `docs/ERRATA.md`<br>• speeds in m/s, keyword-only `density` | `vibration.poisson_ratio_from_wave_speeds(400.0, 180.0)  # 0.373` |
 | `compression_wave_speed` / `shear_strain_amplitude` | `function` | **Formula (1) corrected, and Formula (4).**<br>• `v_p = √(2G(1 − ν) / (ρ(1 − 2ν)))`, the continuum; the print is short of the factor 2<br>• `γ̂ = v̂ / v_s`, with the velocity amplitude in m/s | `vibration.shear_strain_amplitude(2e-4, shear_wave_speed_m_s=180.0)` |
 | `GROUND_WAVE_SPEED_RANGES_M_S` / `SHEAR_STRAIN_LINEAR_LIMIT` | `constant` | **What Clause 4.5 gives for natural ground.**<br>• compression waves 200-2000 m/s and shear waves 10-1000 m/s<br>• `10⁻⁴`: the shear strain up to which Figure 1 has the modulus about constant | `vibration.SHEAR_STRAIN_LINEAR_LIMIT  # 0.0001` |
-| `fdtd_simulation` | `function` | **2D acoustic FDTD wave simulation (staggered grid, leapfrog).**<br>• `c`: sound-speed map [m/s], `(ny, nx)` array or scalar with `shape`<br>• `dx`: grid spacing [m]<br>• `duration`: physical time to simulate [s]<br>• `sources`: `GaussianPulse` \| `CWSource` \| `SignalSource` \| `PlaneWaveSource` list<br>• `probes`: `(ix, iy)` pressure-probe cells<br>• `boundaries`: `"rigid"` \| `"absorbing"` \| per-side mapping (name or real impedance [Pa·s/m])<br>• `obstacle_mask`: boolean `(ny, nx)` rigid-cell map / `rho` / `cfl` / `damping` / `absorbing_layer_cells`<br>• `snapshot_every` steps / `snapshot_decimation`: keep every d-th cell along each axis (Default: 1)<br>• `compute`: where the run steps, a `Compute` (Default: `use()`, then `PHONOMETRY_COMPUTE`, then NumPy in float64) | `res = simulation.fdtd_simulation(343, 0.01, 0.02, shape=(200, 300), sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3e-4)], probes=[(200, 100)])`<br><br>• `FDTDResult` |
+| `fdtd_simulation` | `function` | **2D acoustic FDTD wave simulation (staggered grid, leapfrog).**<br>• `c`: sound-speed map [m/s], `(ny, nx)` array or scalar with `shape`<br>• `dx`: grid spacing [m]<br>• `duration`: physical time to simulate [s]<br>• `sources`: `GaussianPulse` \| `CWSource` \| `SignalSource` \| `PlaneWaveSource` list<br>• `recording`: `FDTDRecording` (probe cells, snapshot cadence and decimation)<br>• `boundaries`: `"rigid"` \| `"absorbing"` \| per-side mapping (name or real impedance [Pa·s/m])<br>• `obstacle_mask`: boolean `(ny, nx)` rigid-cell map / `rho` / `cfl` / `damping` / `absorbing_layer_cells`<br>• `compute`: where the run steps, a `Compute` (Default: `use()`, then `PHONOMETRY_COMPUTE`, then NumPy in float64) | `res = simulation.fdtd_simulation(343, 0.01, 0.02, shape=(200, 300), sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3e-4)], recording=simulation.FDTDRecording(probes=[(200, 100)]))`<br><br>• `FDTDResult` |
 | `FDTDResult` | `dataclass` | **FDTD simulation result.**<br>• `times` [s] / `pressures` [Pa] per probe, float64 whatever the run's dtype / `probes` / `probe_positions` [m]<br>• `dx` / `dt` / `shape` / `size` [m] / `sources` / `snapshots` (the run's dtype, `(n_frames, ceil(ny / d), ceil(nx / d))`) / `snapshot_times` / `obstacle_mask`<br>• `snapshot_decimation`: the `d` of the snapshots / `provenance`: where the run stepped, a `RunProvenance`; both required when built by hand<br>• `.plot()`: probe histories; `.plot(kind="snapshot")`: pressure field | `res.pressures, res.times`<br>`res.plot()` |
+| `FDTDRecording` | `dataclass` | **What an acoustic FDTD run records.**<br>• `probes`: `(ix, iy)` pressure-probe cells (Default: none)<br>• `snapshot_every` steps (Default: None)<br>• `snapshot_decimation`: keep every d-th cell along each axis (Default: 1) | `FDTDRecording(probes=[(200, 100)], snapshot_every=50, snapshot_decimation=2)` |
 | `FDTD2D` | `class` | **FDTD stepping engine (frame-by-frame access).**<br>• `c` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `sponge_width` / `sponge_sides` / `sponge_reflection` / `damping`<br>• `edge_impedance`: per-side real impedance [Pa·s/m] / `obstacle_mask`<br>• `compute`: where the engine steps, a `Compute`<br>• `kappa`: bulk modulus [Pa], a read-only host copy | `sim = simulation.FDTD2D(343, 0.01, shape=(200, 300))`<br>`sim.add_source(src); sim.step(); sim.run(400, snapshot_every=10, snapshot_decimation=4)`<br>• `sim.p` / `sim.vx` / `sim.vy` (the device's arrays) / `sim.dt` / `sim.time` / `sim.energy()`<br>• `sim.host_field("p")`: a NumPy copy of a field on any device / `sim.provenance`<br>• `sim.plot_geometry(probes=...)`: draw the configured domain before running<br>• `sim.add_plane_wave(direction, center=..., width=..., wavelength=...)`: one-way plane packet initial condition<br>• `sim.add_contour_probe(ix0, ix1, iy0, iy1, frequencies=...)`: on-the-fly `p`/`v_n` phasor capture on a closed contour |
 | `GaussianPulse` | `dataclass` | **Gaussian pulse source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `width` [s] / `t0` [s] (Default: `4*width`) / `amplitude` [Pa] | `GaussianPulse(ix=60, iy=100, half_width_s=3e-4)` |
 | `PlaneWaveSource` | `dataclass` | **Sustained one-way plane wave injected on a line (TF/SF style).**<br>• `direction`: 'down'/'up'/'left'/'right' (travel)<br>• `waveform`: callable t → p_inc(t) [Pa] (reuse a point source's `.value`)<br>• `offset`: line position in cells from the launch edge (place it just inside a sponge)<br>• `amplitude` (Default: 1.0) | `sim.add_source(simulation.PlaneWaveSource(direction='down', waveform=simulation.CWSource(ix=0, iy=0, frequency=1000.0).value, offset=22))`<br><br>• Transversely plane to machine precision; ~1e-4 residual behind the line |
@@ -70314,7 +70315,7 @@ sim = simulation.FDTD2D(343.0, 0.01, shape=(200, 300), compute=gpu)
 res = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
+    recording=simulation.FDTDRecording(probes=[(200, 100)]),
     compute=gpu,
 )
 ```
@@ -70327,8 +70328,7 @@ float64 run's.
 light = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
-    snapshot_every=50,
+    recording=simulation.FDTDRecording(probes=[(200, 100)], snapshot_every=50),
     compute=simulation.Compute(dtype="float32"),
 )
 print(light.snapshots.dtype, light.pressures.dtype)   # float32 float64
@@ -70383,12 +70383,12 @@ with simulation.use(simulation.Compute(dtype="float32")):
     inside = simulation.fdtd_simulation(
         343.0, 0.01, 1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
-        probes=[(100, 50)],
+        recording=simulation.FDTDRecording(probes=[(100, 50)]),
     )
     pinned = simulation.fdtd_simulation(
         343.0, 0.01, 1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
-        probes=[(100, 50)],
+        recording=simulation.FDTDRecording(probes=[(100, 50)]),
         compute=simulation.Compute(),
     )
 print(inside.provenance.dtype, pinned.provenance.dtype)   # float32 float64
@@ -70423,7 +70423,7 @@ def pulse_run(half_width_s):
     return simulation.fdtd_simulation(
         343.0, 0.01, 1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=half_width_s)],
-        probes=[(100, 50)],
+        recording=simulation.FDTDRecording(probes=[(100, 50)]),
         compute=single,
     )
 
@@ -70464,7 +70464,7 @@ request = simulation.Compute(device="cupy", fallback=True)
 res = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
+    recording=simulation.FDTDRecording(probes=[(200, 100)]),
     compute=request,
 )
 # On a machine without CuPy:
@@ -70631,7 +70631,7 @@ field is sliced on the device first, and only the kept cells cross to the
 host.
 
 The option has the same name and the same rule everywhere:
-`fdtd_simulation(..., snapshot_every=, snapshot_decimation=)`,
+`FDTDRecording(snapshot_every=, snapshot_decimation=)`,
 `ElasticRecording(snapshot_every=, snapshot_decimation=)`, and the `run()` of
 both engines. It takes a whole number of 1 or more; a flag, a text or an
 array raises `TypeError`, and a number below 1 or not whole raises
@@ -70643,8 +70643,8 @@ it was taken from, with the axes on the whole domain.
 decimated = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    snapshot_every=10,
-    snapshot_decimation=4,
+    recording=simulation.FDTDRecording(
+        snapshot_every=10, snapshot_decimation=4),
 )
 print(decimated.snapshots.shape, decimated.snapshot_decimation)   # (17, 50, 75) 4
 decimated.plot(kind="snapshot")
@@ -71389,7 +71389,7 @@ from phonometry import simulation
 res = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
+    recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
 print(res.size)                  # (3.0, 2.0)  metres
 print(round(res.dt * 1e6, 2))    # 12.37  microseconds (CN = 0.6)
@@ -71407,7 +71407,7 @@ numbers on each.
 on_gpu = simulation.fdtd_simulation(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(200, 100)],
+    recording=simulation.FDTDRecording(probes=[(200, 100)]),
     compute=simulation.Compute(device="cupy"),
 )
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
@@ -71426,7 +71426,9 @@ contribution that does not scatter passing waves) at a grid cell:
 `CWSource` (a sine tone faded in with a raised-cosine ramp so its onset does
 not splash a broadband transient) and `SignalSource` (an arbitrary sampled
 waveform, linearly interpolated onto the simulation time steps). Probes
-record the pressure at their cell every time step into the result.
+record the pressure at their cell every time step into the result. The
+probes and the snapshot cadence travel together as one `FDTDRecording`,
+passed as `recording=`; a run without one keeps only its time axis.
 
 **Plane waves "from infinity".** Point sources in 2D are really line
 sources, so a diffuser or a barrier is often better interrogated with a
@@ -71721,10 +71723,10 @@ mask[60:, 150:154] = True
 res = simulation.fdtd_simulation(
     343.0, 0.01, 9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    probes=[(100, 100), (240, 100)],
+    recording=simulation.FDTDRecording(
+        probes=[(100, 100), (240, 100)], snapshot_every=75),
     obstacle_mask=mask,
     boundaries="absorbing", absorbing_layer_cells=30,
-    snapshot_every=75,
 )
 
 fig, (ax_f, ax_p) = plt.subplots(
@@ -71752,7 +71754,7 @@ nx, ny = round(lx / dx), round(ly / dx)
 res = simulation.fdtd_simulation(
     343.0, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
-    probes=[(nx - 4, ny - 3)],
+    recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
 p = res.pressures[0]
 spec = np.abs(np.fft.rfft(p * np.hanning(p.size), n=8 * p.size))
@@ -71784,7 +71786,7 @@ nx, ny = round(lx / dx), round(ly / dx)
 res = simulation.fdtd_simulation(
     c, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
-    probes=[(nx - 4, ny - 3)],
+    recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
 
 # One line: the raw probe pressure history the spectrum is computed from.
@@ -73859,7 +73861,8 @@ of the signal functions always used; called by position, nothing changes. The
 | `trials=` on `metrology.monte_carlo`, and `MonteCarloResult.trials` | `n_trials` |
 | the `passages` of `silencer_self_noise`, `valve_style_modifier`, `multihole_incipient_cavitation_ratio` and `uniform_passage_style_modifier`, and the `stages` of `stage_level_correction` | `n_passages` and `n_stages` |
 | the `steps` of `FDTD2D.run` and `ElasticFDTD2D.run`, and `max_arrivals=` on `underwater.eigenrays` | `n_steps` and `max_n_arrivals=` |
-| `record_every=` and `decimate=` on `FDTD2D.run` and `ElasticFDTD2D.run` | `snapshot_every=` and `snapshot_decimation=`, the names `fdtd_simulation` and `ElasticRecording` take for the same two counts |
+| `record_every=` and `decimate=` on `FDTD2D.run` and `ElasticFDTD2D.run` | `snapshot_every=` and `snapshot_decimation=`, the names `FDTDRecording` and `ElasticRecording` take for the same two counts |
+| `fdtd_simulation(probes=..., snapshot_every=..., snapshot_decimation=...)` | `fdtd_simulation(recording=FDTDRecording(probes=..., snapshot_every=..., snapshot_decimation=...))`: what an acoustic run records travels as one record, as an elastic run's travels as one `ElasticRecording`; a run without one records only its time axis, as before |
 | `sidebands=` on `gear_mesh_frequencies` and `induction_motor_frequencies`, the `poles`, `rotor_bars` and `slot_harmonics` of `induction_motor_frequencies`, and `lobe_orders=` on `blade_pass_frequencies` | `n_sidebands`, `n_poles`, `n_rotor_bars`, `n_slot_harmonics` and `n_lobe_orders` |
 | `years=` on `hearing.nipts` and `htlan` and on `vibration.injury_risk` and `multiple_shock_assessment`, and `.years` on the ISO 1999 results (`NiptsResult` and `HtlanResult` in 3.3.0) and on `MultipleShockResult` | `exposure_duration_years`: a duration names its quantity before its unit |
 | `environment.NoisePhase.hours` and `hours=` on `evaluation_period_level` | `duration_hours` |

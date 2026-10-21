@@ -461,13 +461,11 @@ fdtd_simulation(
     shape: tuple[int, int] | None = None,
     rho: float | NDArray[np.float64] = 1.2,
     cfl: float = 0.6,
-    probes: Sequence[tuple[int, int]] = (),
+    recording: FDTDRecording | None = None,
     boundaries: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | NDArray[np.float64]] = 'rigid',
     absorbing_layer_cells: int = 20,
     obstacle_mask: NDArray[np.bool_] | None = None,
     damping: float = 0.0,
-    snapshot_every: int | None = None,
-    snapshot_decimation: int = 1,
     compute: Compute | None = None,
 ) -> FDTDResult
 ```
@@ -507,13 +505,11 @@ spreading rather than the 3D spherical $1/r$.
 | `shape` | Grid shape `(ny, nx)`, required when `c` is a scalar. |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
 | `cfl` | Courant number in `(0, 1)` (Eqs. 4.13-4.14); the time step is $\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})$. Default 0.6. |
-| `probes` | Pressure-probe cells as `(ix, iy)` index pairs. |
+| `recording` | What the run records ([`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording)): the probe cells, and the snapshot cadence and decimation. `None` records nothing but the time axis. |
 | `boundaries` | `"rigid"` (default), `"absorbing"`, or a mapping from side name (`left`/`right`/`top`/`bottom`) to `"rigid"`, `"absorbing"`, or a real specific impedance [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35). |
 | `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells (rasterised interior geometry). |
 | `damping` | Uniform bulk amplitude decay rate [1/s]. |
-| `snapshot_every` | Record a full pressure-field snapshot every this many steps (and at $t = 0$); `None` records none. |
-| `snapshot_decimation` | Keep every this many cells along each axis in a snapshot (default 1, every cell); the result records it. |
 | `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
 
 **Returns:** A [`FDTDResult`](/phonometry/reference/api/simulation/fdtd/#fdtdresult).
@@ -522,10 +518,43 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an input is of the wrong type: a `duration`, `cfl` or `dx` that is not one number, an `absorbing_layer_cells` that is not a number, a `snapshot_every` or `snapshot_decimation` that is a flag, a text or an array where a count goes, a `shape` that is not a pair, a complex medium, an `obstacle_mask` that is not boolean, or a `compute` that is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
+| TypeError | If an input is of the wrong type: a `duration`, `cfl` or `dx` that is not one number, an `absorbing_layer_cells` that is not a number, a `shape` that is not a pair, a complex medium, an `obstacle_mask` that is not boolean, or a `compute` that is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
 | ValueError | If the inputs are invalid. |
 | ComputeImportError | When the device's library is not installed or does not import. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
+
+## FDTDRecording
+
+```python
+FDTDRecording(
+    *,
+    probes: Sequence[tuple[int, int]] = (),
+    snapshot_every: int | None = None,
+    snapshot_decimation: int = 1,
+)
+```
+
+What an acoustic run writes down: probe histories and field snapshots.
+
+The two ways out of a running simulation. Probes record the pressure
+history at named cells; snapshots record the whole pressure field every
+`snapshot_every` steps. Recording nothing (the default) runs the
+physics and keeps only the time axis.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `probes` | Pressure-probe cells as `(ix, iy)` index pairs. |
+| `snapshot_every` | Record a full pressure-field snapshot every this many steps (and at $t = 0$); `None` records none. |
+| `snapshot_decimation` | Keep every this many cells along each axis in a snapshot (default 1, every cell); the result records it. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a probe that is not a pair or has an index that is not a number, or a `snapshot_every` or `snapshot_decimation` that is a flag, a text, an array or anything else that is not a number. |
+| ValueError | for a probe of more or fewer than two indices or with an index that is not a whole number, or a `snapshot_every` or `snapshot_decimation` that is not a whole number of 1 or more. |
 
 ## FDTDResult
 

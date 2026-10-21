@@ -61,7 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   operations.
 
 - **A snapshot can keep every d-th cell, and the result says so.**
-  `snapshot_decimation=` on `fdtd_simulation`, `ElasticRecording`,
+  `snapshot_decimation=` on `FDTDRecording`, `ElasticRecording`,
   `FDTD2D.run` and `ElasticFDTD2D.run` keeps every d-th cell along each axis,
   starting with the first, so a frame is `ceil(ny / d)` by `ceil(nx / d)`, a
   quarter of the memory at `d = 2`; on a GPU the field is sliced on the
@@ -3281,14 +3281,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- **`FDTD2D.run` and `ElasticFDTD2D.run` name their snapshot options as the
-  simulation functions do.** `record_every=` is `snapshot_every=` and
-  `decimate=` is `snapshot_decimation=`, the names `fdtd_simulation` and
-  `ElasticRecording` take, and every route refuses a bad count with the same
-  class and the same words: a flag, a text or an array is a `TypeError`, and
-  a number that is not a whole number of 1 or more a `ValueError`. A call
-  that passed the cadence by position is unchanged; one that named it
-  renames it, as the migration guide shows.
+- **`fdtd_simulation` takes what it records as one `FDTDRecording`, and
+  `FDTD2D.run` and `ElasticFDTD2D.run` name their snapshot options as the
+  recordings do.** The `probes=`, `snapshot_every=` and
+  `snapshot_decimation=` of `fdtd_simulation` are the fields of
+  `simulation.FDTDRecording`, passed as `recording=`, as
+  `elastic_fdtd_simulation` takes an `ElasticRecording`; the record refuses
+  a malformed probe or count when it is built, and a run without one
+  records only its time axis, as before. `record_every=` is
+  `snapshot_every=` and `decimate=` is `snapshot_decimation=`, the names
+  `FDTDRecording` and `ElasticRecording` take, and every route refuses a bad
+  count with the same class and the same words: a flag, a text or an array
+  is a `TypeError`, and a number that is not a whole number of 1 or more a
+  `ValueError`. A call that passed the cadence by position is unchanged; one
+  that named it renames it, as the migration guide shows.
 
 - **`FDTD2D.kappa`, `ElasticFDTD2D.mu` and `ElasticFDTD2D.lam` are
   read-only.** They are host copies the engine computed from its medium, as

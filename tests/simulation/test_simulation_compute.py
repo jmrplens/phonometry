@@ -19,6 +19,7 @@ from phonometry.simulation import (
     ElasticFDTD2D,
     ElasticRecording,
     ExplosionSource,
+    FDTDRecording,
     GaussianPulse,
     PlaneWaveSource,
     elastic_fdtd_simulation,
@@ -33,14 +34,15 @@ if TYPE_CHECKING:
     from phonometry.simulation.elastic_fdtd import Field
 
 
-def _acoustic(**kwargs: Any) -> FDTDResult:
-    """A small acoustic run with one pulse, the options of the test on top."""
+def _acoustic(recording: FDTDRecording | None = None, **kwargs: Any) -> FDTDResult:
+    """A small acoustic run with one pulse, recorded as the test asks."""
     return fdtd_simulation(
         343.0,
         0.01,
         1e-3,
         shape=(30, 41),
         sources=[GaussianPulse(ix=15, iy=15, half_width_s=4e-5)],
+        recording=recording,
         **kwargs,
     )
 
@@ -79,15 +81,15 @@ def test_a_run_records_where_it_ran() -> None:
 
 
 def test_snapshots_are_decimated_and_checked_against_the_grid() -> None:
-    res = _acoustic(snapshot_every=5, snapshot_decimation=4)
+    res = _acoustic(FDTDRecording(snapshot_every=5, snapshot_decimation=4))
     assert res.snapshots is not None
     assert res.snapshots.shape[1:] == (8, 11)
     assert res.snapshot_decimation == 4
 
 
 def test_a_decimated_snapshot_is_every_d_th_cell_of_the_full_one() -> None:
-    full = _acoustic(snapshot_every=5)
-    decimated = _acoustic(snapshot_every=5, snapshot_decimation=4)
+    full = _acoustic(FDTDRecording(snapshot_every=5))
+    decimated = _acoustic(FDTDRecording(snapshot_every=5, snapshot_decimation=4))
     assert full.snapshots is not None
     assert decimated.snapshots is not None
     assert np.abs(full.snapshots[-1]).max() > 0.0
@@ -108,11 +110,11 @@ def test_the_decimation_is_a_count_of_one_or_more(
     value: object, error: type[Exception]
 ) -> None:
     with pytest.raises(error, match="snapshot_decimation"):
-        _acoustic(snapshot_every=5, snapshot_decimation=value)
+        FDTDRecording(snapshot_every=5, snapshot_decimation=value)  # type: ignore[arg-type]
 
 
 def test_a_result_refuses_snapshots_of_another_decimated_grid() -> None:
-    res = _acoustic(snapshot_every=5, snapshot_decimation=4)
+    res = _acoustic(FDTDRecording(snapshot_every=5, snapshot_decimation=4))
     assert res.snapshots is not None
     # The floor of 41 / 4 instead of its ceiling: one column short.
     floor = res.snapshots[:, :, :10]
@@ -126,7 +128,7 @@ def test_a_result_refuses_snapshots_of_another_decimated_grid() -> None:
 
 @pytest.mark.parametrize("value", [4.0, np.int64(4)], ids=["float", "numpy integer"])
 def test_a_result_holds_its_decimation_as_an_int(value: object) -> None:
-    res = _acoustic(snapshot_every=5, snapshot_decimation=4)
+    res = _acoustic(FDTDRecording(snapshot_every=5, snapshot_decimation=4))
     rebuilt = replace(res, snapshot_decimation=value)
     assert type(rebuilt.snapshot_decimation) is int
     assert rebuilt.snapshot_decimation == 4
@@ -149,14 +151,17 @@ def _elastic_run_route(every: object, decimation: object) -> object:
 
 
 def _function_route(every: object, decimation: object) -> object:
+    recording = FDTDRecording(
+        snapshot_every=every,  # type: ignore[arg-type]
+        snapshot_decimation=decimation,  # type: ignore[arg-type]
+    )
     return fdtd_simulation(
         343.0,
         0.01,
         1e-4,
         shape=(8, 8),
         sources=[GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
-        snapshot_every=every,  # type: ignore[arg-type]
-        snapshot_decimation=decimation,  # type: ignore[arg-type]
+        recording=recording,
     )
 
 
@@ -208,7 +213,7 @@ _BAD_COUNTS: dict[str, object] = {
 def test_a_bad_snapshot_count_is_refused_alike_on_every_route(
     route: str, option: str, bad: str
 ) -> None:
-    """The engines' ``run()`` and the two simulation functions share one check."""
+    """The engines' ``run()``, ``FDTDRecording`` and ``elastic_fdtd_simulation`` share one check."""
     counts: dict[str, object] = {"snapshot_every": 2, "snapshot_decimation": 1}
     counts[option] = _BAD_COUNTS[bad]
     error, message = _SNAPSHOT_REFUSALS[bad]
@@ -225,8 +230,7 @@ def test_a_float32_run_keeps_float32_snapshots() -> None:
         5e-4,
         shape=(20, 20),
         sources=[GaussianPulse(ix=10, iy=10, half_width_s=4e-5)],
-        probes=[(4, 4)],
-        snapshot_every=5,
+        recording=FDTDRecording(probes=[(4, 4)], snapshot_every=5),
         compute=Compute(dtype="float32"),
     )
     assert res.snapshots is not None
@@ -245,7 +249,7 @@ def test_a_plane_wave_runs_through_the_function() -> None:
         boundaries="absorbing",
         absorbing_layer_cells=8,
         sources=[PlaneWaveSource(direction="down", waveform=pulse.value, offset=10)],
-        probes=[(15, 30)],
+        recording=FDTDRecording(probes=[(15, 30)]),
     )
     assert np.abs(res.pressures).max() > 0.0
     assert isinstance(res.sources[0], PlaneWaveSource)
@@ -261,7 +265,7 @@ def test_a_plane_wave_run_draws_its_snapshot_with_the_point_sources_only() -> No
         5e-4,
         shape=(40, 30),
         sources=[PlaneWaveSource(direction="down", waveform=pulse.value), pulse],
-        snapshot_every=10,
+        recording=FDTDRecording(snapshot_every=10),
     )
     ax = res.plot(kind="snapshot")
     stars = [line for line in ax.lines if line.get_marker() == "*"]
@@ -353,10 +357,14 @@ def test_a_decimated_run_on_the_strict_backend_agrees_with_numpy(
     go_strict: Callable[[], None],
 ) -> None:
     """The snapshot is sliced on the device and then copied, on every backend."""
-    want = _acoustic(snapshot_every=5, snapshot_decimation=4, probes=[(3, 7)])
+    want = _acoustic(
+        FDTDRecording(probes=[(3, 7)], snapshot_every=5, snapshot_decimation=4)
+    )
     elastic_want = _elastic(ElasticRecording(snapshot_every=4, snapshot_decimation=3))
     go_strict()
-    got = _acoustic(snapshot_every=5, snapshot_decimation=4, probes=[(3, 7)])
+    got = _acoustic(
+        FDTDRecording(probes=[(3, 7)], snapshot_every=5, snapshot_decimation=4)
+    )
     elastic_got = _elastic(ElasticRecording(snapshot_every=4, snapshot_decimation=3))
     assert got.provenance.array_library is not None
     assert got.provenance.array_library.startswith("array-api-strict")

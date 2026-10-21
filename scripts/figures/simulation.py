@@ -145,11 +145,12 @@ def generate_fdtd_simulation(output_dir: str) -> None:
         9.0e-3,
         shape=(200, 300),
         sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-        probes=[(100, 100), (240, 100)],
+        recording=simulation.FDTDRecording(
+            probes=[(100, 100), (240, 100)], snapshot_every=75
+        ),
         obstacle_mask=mask,
         boundaries="absorbing",
         absorbing_layer_cells=30,
-        snapshot_every=75,
     )
 
     _fig, (ax_f, ax_p) = plt.subplots(
@@ -349,7 +350,7 @@ def generate_fdtd_room_modes(output_dir: str) -> None:
         0.35,
         shape=(ny, nx),
         sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
-        probes=[(nx - 4, ny - 3)],
+        recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
     )
     p = res.pressures[0]
     spec = np.abs(np.fft.rfft(p * np.hanning(p.size), n=8 * p.size))

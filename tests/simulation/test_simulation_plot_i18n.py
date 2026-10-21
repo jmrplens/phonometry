@@ -17,7 +17,7 @@ from phonometry.simulation import (
     ExplosionSource,
     elastic_fdtd_simulation,
 )
-from phonometry.simulation.fdtd import GaussianPulse, fdtd_simulation
+from phonometry.simulation.fdtd import FDTDRecording, GaussianPulse, fdtd_simulation
 
 
 def _result() -> object:
@@ -29,9 +29,8 @@ def _result() -> object:
         3.0e-3,
         shape=(30, 40),
         sources=[GaussianPulse(ix=7, iy=5, half_width_s=3.0e-4)],
-        probes=[(10, 5), (24, 10)],
+        recording=FDTDRecording(probes=[(10, 5), (24, 10)], snapshot_every=10),
         obstacle_mask=mask,
-        snapshot_every=10,
     )
 
 
@@ -64,8 +63,7 @@ def test_a_decimated_snapshot_covers_the_domain_without_stretching() -> None:
         1e-3,
         shape=(30, 101),
         sources=[GaussianPulse(ix=50, iy=15, half_width_s=4e-5)],
-        snapshot_every=10,
-        snapshot_decimation=4,
+        recording=FDTDRecording(snapshot_every=10, snapshot_decimation=4),
     )
     ax = res.plot(kind="snapshot")
     image = ax.images[0]
@@ -90,8 +88,7 @@ def test_the_obstacles_of_a_decimated_snapshot_stay_on_the_domain() -> None:
         shape=(30, 101),
         sources=[GaussianPulse(ix=50, iy=15, half_width_s=4e-5)],
         obstacle_mask=mask,
-        snapshot_every=10,
-        snapshot_decimation=4,
+        recording=FDTDRecording(snapshot_every=10, snapshot_decimation=4),
     )
     ax = res.plot(kind="snapshot")
     assert ax.images[1].get_extent() == pytest.approx([0.0, 1.01, 0.30, 0.0])

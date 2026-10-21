@@ -1193,7 +1193,7 @@ RUNNING_RMS_DECAY_RATE_DB_PER_S: tuple[tuple[float, float, float], ...] = (
 )
 
 
-def running_rms_decay_time(integration_time_s: float, *, method: str) -> float:
+def running_rms_decay_time(integration_time: float, *, method: str) -> float:
     r"""When the running r.m.s. falls to 10 % after the signal is shut off.
 
     5.13 (folio 20) applies a steady sinusoid at the reference frequency for
@@ -1212,7 +1212,7 @@ def running_rms_decay_time(integration_time_s: float, *, method: str) -> float:
     Both land inside the printed bands of :data:`RUNNING_RMS_DECAY_TIME_S`
     for the three time constants the standard tabulates.
 
-    :param integration_time_s: The averaging time ``tau``, in seconds (> 0).
+    :param integration_time: The averaging time ``tau``, in seconds (> 0).
     :param method: ``"linear"`` (Table 10) or ``"exponential"`` (Table 11),
         the two averages of :func:`~phonometry.vibration.running_rms`.
     :return: The time to 10 % of the initial indicated value, in seconds.
@@ -1220,10 +1220,10 @@ def running_rms_decay_time(integration_time_s: float, *, method: str) -> float:
         time is not positive and finite.
     """
     averaging = require_choice(str(method), "method", ("linear", "exponential"))
-    require_scalar(integration_time_s, "integration_time_s")
-    tau = float(integration_time_s)
+    require_scalar(integration_time, "integration_time")
+    tau = float(integration_time)
     if not math.isfinite(tau) or tau <= 0.0:
-        msg = "'integration_time_s' must be positive and finite."
+        msg = "'integration_time' must be positive and finite."
         raise ValueError(msg)
     if averaging == "linear":
         return (1.0 - _DECAY_FRACTION**2) * tau
@@ -1242,14 +1242,14 @@ class RunningRmsDecayVerification(RichDisplay):
     not nor be built against another row.
 
     :ivar method: ``"linear"`` (Table 10) or ``"exponential"`` (Table 11).
-    :ivar integration_time_s: The printed time constant the row is for, in
+    :ivar integration_time: The printed time constant the row is for, in
         seconds.
     :ivar measured_time_s: The measured time to 10 % of the initial
         indicated value, as supplied, in seconds.
     """
 
     method: str
-    integration_time_s: float
+    integration_time: float
     measured_time_s: float
 
     def __post_init__(self) -> None:
@@ -1265,7 +1265,7 @@ class RunningRmsDecayVerification(RichDisplay):
         averaging = require_choice(
             str(self.method), "method", ("linear", "exponential")
         )
-        tau = float(self.integration_time_s)
+        tau = float(self.integration_time)
         for printed_tau, printed_time, tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
             if math.isclose(tau, printed_tau, rel_tol=1e-9, abs_tol=0.0):
                 return printed_time, tolerance
@@ -1273,7 +1273,7 @@ class RunningRmsDecayVerification(RichDisplay):
             f"{row[0]:g}" for row in RUNNING_RMS_DECAY_TIME_S[averaging]
         )
         msg = (
-            f"'integration_time_s' must be one of the time constants Tables 10 "
+            f"'integration_time' must be one of the time constants Tables 10 "
             f"and 11 print ({printed} s); {tau:g} s has no printed decay band."
         )
         raise ValueError(msg)
@@ -1354,7 +1354,7 @@ class RunningRmsDecayVerification(RichDisplay):
 
 
 def verify_running_rms_decay(
-    measured_time_s: float, *, integration_time_s: float, method: str
+    measured_time_s: float, *, integration_time: float, method: str
 ) -> RunningRmsDecayVerification:
     """Verify a measured decay time against Table 10 or Table 11.
 
@@ -1370,7 +1370,7 @@ def verify_running_rms_decay(
 
     :param measured_time_s: The measured time to 10 % of the initial
         indicated value, in seconds (> 0).
-    :param integration_time_s: The averaging time it was measured at, which
+    :param integration_time: The averaging time it was measured at, which
         has to be one of the printed 0,125 s, 1 s and 8 s. Keyword-only, and
         so is the method: two times in seconds side by side are the kind of
         pair a positional call gets the wrong way round in silence.
@@ -1387,10 +1387,10 @@ def verify_running_rms_decay(
     if not math.isfinite(measured) or measured <= 0.0:
         msg = "'measured_time_s' must be positive and finite."
         raise ValueError(msg)
-    tau = float(integration_time_s)
+    tau = float(integration_time)
     for printed_tau, _time, _tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
         if math.isclose(tau, printed_tau, rel_tol=1e-9, abs_tol=0.0):
             tau = printed_tau
     return RunningRmsDecayVerification(
-        method=averaging, integration_time_s=tau, measured_time_s=measured
+        method=averaging, integration_time=tau, measured_time_s=measured
     )

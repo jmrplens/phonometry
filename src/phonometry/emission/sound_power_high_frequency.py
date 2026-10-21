@@ -247,7 +247,7 @@ def _room_geometry(volume: float, surface_area_m2: float) -> tuple[float, float]
 
 
 def room_absorption_coefficient(
-    reverberation_time_s: ArrayLike, *, volume: float, surface_area_m2: float
+    reverberation_time: ArrayLike, *, volume: float, surface_area: float
 ) -> NDArray[np.float64]:
     r"""Room absorption coefficient from the reverberation time (ISO 9295 Formula (5)).
 
@@ -257,51 +257,51 @@ def room_absorption_coefficient(
     absorption coefficient cannot be taken as small compared with unity. The
     constant is the 0,16 the formula prints.
 
-    :param reverberation_time_s: Mean measured reverberation time ``T`` per
+    :param reverberation_time: Mean measured reverberation time ``T`` per
         band, in seconds (scalar or one value per band); clause 6.2 averages
         three or four points of the microphone path.
     :param volume: Room volume ``V``, in cubic metres.
-    :param surface_area_m2: Total room surface ``S``, in square metres.
+    :param surface_area: Total room surface ``S``, in square metres.
     :return: :math:`\alpha_\mathrm{room}` per band, in (0, 1).
     :raises ValueError: for a non-positive or non-finite time, volume or
         surface.
     """
-    t = require_positive_array(reverberation_time_s, "reverberation_time_s")
-    volume, surface = _room_geometry(volume, surface_area_m2)
+    t = require_positive_array(reverberation_time, "reverberation_time")
+    volume, surface = _room_geometry(volume, surface_area)
     return np.asarray(
         1.0 - np.exp(-_EYRING_CONSTANT * volume / (surface * t)), dtype=np.float64
     )
 
 
 def room_constant_from_reverberation_time(
-    reverberation_time_s: ArrayLike, *, volume: float, surface_area_m2: float
+    reverberation_time: ArrayLike, *, volume: float, surface_area: float
 ) -> NDArray[np.float64]:
     r"""Room constant from the measured reverberation time (ISO 9295 Formulae (4), (5)).
 
     :math:`R = S \alpha_\mathrm{room} / (1 - \alpha_\mathrm{room})` with
     :math:`\alpha_\mathrm{room}` from :func:`room_absorption_coefficient`,
     the room constant of the method of clause 6. It goes into
-    :func:`high_frequency_sound_power` as ``room_constant_m2``.
+    :func:`high_frequency_sound_power` as ``room_constant``.
 
-    :param reverberation_time_s: Mean measured reverberation time ``T`` per
+    :param reverberation_time: Mean measured reverberation time ``T`` per
         band, in seconds (scalar or one value per band).
     :param volume: Room volume ``V``, in cubic metres.
-    :param surface_area_m2: Total room surface ``S``, in square metres.
+    :param surface_area: Total room surface ``S``, in square metres.
     :return: ``R`` per band, in square metres.
     :raises ValueError: for a non-positive or non-finite time, volume or
         surface.
     """
     alpha = room_absorption_coefficient(
-        reverberation_time_s, volume=volume, surface_area_m2=surface_area_m2
+        reverberation_time, volume=volume, surface_area=surface_area
     )
-    return np.asarray(float(surface_area_m2) * alpha / (1.0 - alpha), dtype=np.float64)
+    return np.asarray(float(surface_area) * alpha / (1.0 - alpha), dtype=np.float64)
 
 
 def room_constant_from_air_absorption(
     frequencies: ArrayLike,
     *,
     volume: float,
-    surface_area_m2: float,
+    surface_area: float,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
@@ -319,7 +319,7 @@ def room_constant_from_air_absorption(
 
     :param frequencies: Band centre or tone frequencies, in hertz.
     :param volume: Room volume ``V``, in cubic metres.
-    :param surface_area_m2: Total room surface ``S``, in square metres.
+    :param surface_area: Total room surface ``S``, in square metres.
     :param temperature_c: Air temperature in the room, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity in the room, in percent.
     :param static_pressure_kpa: Static pressure in the room, in kilopascals
@@ -330,7 +330,7 @@ def room_constant_from_air_absorption(
         where :math:`8 \alpha V / S \ge 1`: the air alone would then absorb more
         than the room surface can, and Formula (7) has no finite room constant.
     """
-    volume, surface = _room_geometry(volume, surface_area_m2)
+    volume, surface = _room_geometry(volume, surface_area)
     freqs = require_positive_array(frequencies, "frequencies")
     alpha = air_absorption_np_per_m(
         freqs,
@@ -412,7 +412,7 @@ def tone_level_from_sidebands(sideband_levels_db: ArrayLike) -> float:
 def free_field_absorption_correction(
     frequencies: ArrayLike,
     *,
-    radius_m: float,
+    radius: float,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
@@ -430,7 +430,7 @@ def free_field_absorption_correction(
     is the same thing.
 
     :param frequencies: Band centre or tone frequencies, in hertz.
-    :param radius_m: Radius ``r`` of the measurement hemisphere, in metres.
+    :param radius: Radius ``r`` of the measurement hemisphere, in metres.
     :param temperature_c: Air temperature, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity, in percent.
     :param static_pressure_kpa: Static pressure, in kilopascals (default
@@ -439,7 +439,7 @@ def free_field_absorption_correction(
     :raises ValueError: for a non-positive radius or the atmospheric inputs
         :func:`air_absorption_np_per_m` refuses.
     """
-    radius = require_positive(radius_m, "radius_m")
+    radius = require_positive(radius, "radius")
     alpha_db_per_m = _EIGHT_686 * air_absorption_np_per_m(
         frequencies,
         temperature_c=temperature_c,
@@ -608,7 +608,7 @@ def high_frequency_sound_power(
     pressure_levels: ArrayLike,
     *,
     frequencies: ArrayLike,
-    room_constant_m2: ArrayLike,
+    room_constant: ArrayLike,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     tonal: bool = False,
@@ -631,7 +631,7 @@ def high_frequency_sound_power(
     :param frequencies: Band centre or tone frequencies, in hertz, one per
         band. A frequency outside 11,2 kHz to 22,4 kHz emits a
         :class:`~phonometry.emission.SoundPowerWarning`.
-    :param room_constant_m2: Room constant ``R``, in square metres, a scalar or
+    :param room_constant: Room constant ``R``, in square metres, a scalar or
         one value per band.
     :param temperature_c: Air temperature in the room, in degrees Celsius
         (default 23,0 °C, the reference temperature).
@@ -648,9 +648,9 @@ def high_frequency_sound_power(
     mean_level = _mean_band_level(pressure_levels, "pressure_levels")
     n_bands = mean_level.size
     freqs = _band_frequencies(frequencies, n_bands)
-    room_constant = _per_band(room_constant_m2, "room_constant_m2", n_bands)
+    room_constant = _per_band(room_constant, "room_constant", n_bands)
     if not np.all(np.isfinite(room_constant)) or np.any(room_constant <= 0.0):
-        msg = "'room_constant_m2' must be positive and finite."
+        msg = "'room_constant' must be positive and finite."
         raise ValueError(msg)
     c1 = _c1_correction(temperature_c, static_pressure_kpa)
     c2 = _c2_correction(temperature_c, static_pressure_kpa)

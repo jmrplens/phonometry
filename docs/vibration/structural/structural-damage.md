@@ -215,7 +215,7 @@ from phonometry import vibration
 # Concrete, 30 GPa dynamic modulus, 2400 kg/m3, first mode, 10 mm/s peak.
 # Note the unit: the tables are in mm/s and this formula is in m/s.
 sigma = vibration.bending_stress(
-    0.010, dynamic_modulus_pa=3.0e10, density_kg_m3=2400.0
+    0.010, dynamic_modulus_pa=3.0e10, density=2400.0
 )
 print(round(sigma / 1e6, 2), "MPa")     # 0.15 MPa
 ```

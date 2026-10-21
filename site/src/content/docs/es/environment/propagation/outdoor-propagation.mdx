@@ -183,7 +183,7 @@ $m$ a mano.
 | `frequencies` | escalar o array 1D | Hz | > 0 | Vectorizado; 50–10 000 Hz tabulado |
 | `temperature_c` | float | °C | def. `20.0` | −20…+50 tabulado; fuera avisa |
 | `relative_humidity_percent` | float | % | def. `50.0` | 10…100 tabulado; se admite `[0, 100]` |
-| `atmospheric_pressure_kpa` | float | kPa | def. `101.325` | ≤ 200 válido (apartado 7); por encima avisa |
+| `static_pressure_kpa` | float | kPa | def. `101.325` | ≤ 200 válido (apartado 7); por encima avisa |
 | `exact_midband` | bool | — | def. `False` | Ajusta a $f_\mathrm{m} = 1000\cdot10^{k/10}$ (reproduce la Tabla 1) |
 
 `air_attenuation` devuelve $\alpha$ en dB/m; `air_attenuation_m` devuelve
@@ -688,7 +688,7 @@ corta frente a la diferencia de camino.
 | `frequencies` | array 1D | Hz | def. 8 octavas 63–8000 | `DEFAULT_FREQUENCIES_HZ` |
 | `ground_source` / `ground_middle` / `ground_receiver` | float | — | `[0, 1]`, def. `0.0` | Factor de suelo $G$ (0 duro, 1 poroso) |
 | `barrier` | `Barrier` o None | — | def. `None` | Obstáculo de apantallamiento |
-| `temperature_c` / `relative_humidity_percent` / `atmospheric_pressure_kpa` | float | °C / % / kPa | 20 / 70 / 101.325 | Pasados a $A_\mathrm{atm}$ |
+| `temperature_c` / `relative_humidity_percent` / `static_pressure_kpa` | float | °C / % / kPa | 20 / 70 / 101.325 | Pasados a $A_\mathrm{atm}$ |
 | `projected_distance` | float o None | m | def. $\sqrt{d^2-(h_\mathrm{s}-h_\mathrm{r})^2}$ | $d_\mathrm{p}$ proyectada sobre el suelo |
 
 Devuelve un `OutdoorAttenuation` con `a_div`, `a_atm`, `a_gr`, `a_bar`,

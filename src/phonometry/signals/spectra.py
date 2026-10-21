@@ -582,7 +582,7 @@ class CrossSpectralDensityResult(OwnsArrays):
     :ivar frequencies: One-sided frequency axis, in Hz.
     :ivar csd: Complex cross-spectral density :math:`\hat{G}_{xy}(f)`.
     :ivar magnitude: :math:`\lvert \hat{G}_{xy}(f) \rvert`.
-    :ivar phase: Cross-spectrum phase :math:`\hat{\theta}_{xy}(f)`, in
+    :ivar phase_rad: Cross-spectrum phase :math:`\hat{\theta}_{xy}(f)`, in
         radians (unwrapped).
     :ivar coherence: Ordinary coherence
         :math:`\hat{\gamma}^2_{xy}(f) \in [0, 1]`.
@@ -590,7 +590,7 @@ class CrossSpectralDensityResult(OwnsArrays):
         :math:`\lvert \hat{G}_{xy} \rvert`,
         :math:`\varepsilon = 1/(\lvert \gamma_{xy} \rvert \sqrt{n_\mathrm{d}})`
         (Eq. 9.33).
-    :ivar phase_std: Standard deviation of the phase estimate, in radians,
+    :ivar phase_standard_deviation_rad: Standard deviation of the phase estimate, in radians,
         :math:`\mathrm{s.d.} = (1 - \gamma^2_{xy})^{1/2} /
         (\lvert \gamma_{xy} \rvert \sqrt{2 n_\mathrm{d}})` (Eq. 9.52).
     :ivar n_segments: Raw number of segments averaged.
@@ -607,10 +607,10 @@ class CrossSpectralDensityResult(OwnsArrays):
     frequencies: NDArray[np.float64]
     csd: NDArray[np.complex128]
     magnitude: NDArray[np.float64]
-    phase: NDArray[np.float64]
+    phase_rad: NDArray[np.float64]
     coherence: NDArray[np.float64]
     magnitude_random_error: NDArray[np.float64]
-    phase_std: NDArray[np.float64]
+    phase_standard_deviation_rad: NDArray[np.float64]
     n_segments: int
     n_averages: float
     resolution_bandwidth: float
@@ -626,7 +626,7 @@ class CrossSpectralDensityResult(OwnsArrays):
         quantities computed on it, all of them from the single
         :math:`\hat{G}_{xy}` the same segment averaging returned. The figure
         cuts a positive-frequency mask from ``frequencies`` and applies it to
-        ``magnitude``, ``phase``, ``phase_std`` and ``coherence``, so any of
+        ``magnitude``, ``phase_rad``, ``phase_standard_deviation_rad`` and ``coherence``, so any of
         those five out of step raises, short or long, ``IndexError: boolean
         index did not match indexed array along axis 0; size of axis is 128
         but size of corresponding boolean axis is 129`` from inside numpy -
@@ -648,20 +648,20 @@ class CrossSpectralDensityResult(OwnsArrays):
             frequencies=1,
             csd=1,
             magnitude=1,
-            phase=1,
+            phase_rad=1,
             coherence=1,
             magnitude_random_error=1,
-            phase_std=1,
+            phase_standard_deviation_rad=1,
         )
         require_same_length(
             self,
             "frequencies",
             "csd",
             "magnitude",
-            "phase",
+            "phase_rad",
             "coherence",
             "magnitude_random_error",
-            "phase_std",
+            "phase_standard_deviation_rad",
             axis="frequency",
         )
 
@@ -748,10 +748,10 @@ def cross_spectral_density(
         frequencies=freqs,
         csd=gxy,
         magnitude=np.abs(gxy),
-        phase=np.unwrap(np.angle(gxy)),
+        phase_rad=np.unwrap(np.angle(gxy)),
         coherence=coh,
         magnitude_random_error=mag_err,
-        phase_std=phase_std,
+        phase_standard_deviation_rad=phase_std,
         n_segments=k,
         n_averages=nd,
         resolution_bandwidth=benbw,

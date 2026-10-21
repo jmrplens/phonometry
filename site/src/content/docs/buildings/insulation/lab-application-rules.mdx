@@ -728,7 +728,7 @@ l_pr = np.array([48.2, 51.0, 53.1, 55.4, 57.0, 58.3, 59.1, 59.8, 60.2, 60.4,
                  60.1, 59.4, 58.6, 57.5, 56.2, 54.4, 52.3, 49.8])
 t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
               1.1, 1.05, 1.0, 0.95, 0.9, 0.85])
-rain = building.rainfall_sound(l_pr, t, freqs, volume_m3=62.0,
+rain = building.rainfall_sound(l_pr, t, freqs, volume=62.0,
                                excited_area_m2=1.875,
                                reference_correction=correction)
 print(round(rain.l_ia_db, 1), round(rain.l_ia_norm_db, 1))     # 69.3 67.5
@@ -769,7 +769,7 @@ l_pr = np.array([48.2, 51.0, 53.1, 55.4, 57.0, 58.3, 59.1, 59.8, 60.2, 60.4,
                  60.1, 59.4, 58.6, 57.5, 56.2, 54.4, 52.3, 49.8])
 t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
               1.1, 1.05, 1.0, 0.95, 0.9, 0.85])
-rain = building.rainfall_sound(l_pr, t, freqs, volume_m3=62.0,
+rain = building.rainfall_sound(l_pr, t, freqs, volume=62.0,
                                excited_area_m2=1.875,
                                reference_correction=correction)
 

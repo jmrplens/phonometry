@@ -108,7 +108,7 @@ __all__ = [
     "ISO11820_OCTAVE_BAND_RANGE_HZ",
     "SABINE_AREA_COEFFICIENT",
     "ISO11820_SPEED_OF_SOUND_M_S",
-    "ISO11820_AMBIENT_PRESSURE_PA",
+    "ISO11820_ATMOSPHERIC_PRESSURE_PA",
     "ISO11820_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ",
     "ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ",
     "TYPICAL_FIELD_CORRECTION_LIMIT_DB",
@@ -200,7 +200,7 @@ ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K: float = 8314.4
 ISO11820_AIR_GAS_CONSTANT_J_KG_K: float = 287.0
 
 #: Equation (29): the ambient static pressure it assumes, in pascals.
-ISO11820_AMBIENT_PRESSURE_PA: float = 100_000.0
+ISO11820_ATMOSPHERIC_PRESSURE_PA: float = 100_000.0
 
 #: Equation (15): the upstream measurement surface stands this many equivalent
 #: diameters from the silencer.
@@ -612,7 +612,7 @@ def reverberant_surface_area_m2(
 def sound_power_level_db(
     mean_level_db: ArrayLike,
     *,
-    area_m2: ArrayLike,
+    area: ArrayLike,
     field_correction_db: ArrayLike = 0.0,
 ) -> NDArray[np.float64]:
     r"""A mean level read as a sound power, Equations (5), (7), (9) and (11).
@@ -629,16 +629,16 @@ def sound_power_level_db(
     have been chosen as 3.3 and 3.4 define them.
 
     :param mean_level_db: :math:`\overline{L_p}` per band, in decibels.
-    :param area_m2: :math:`S`, in square metres.
+    :param area: :math:`S`, in square metres.
     :param field_correction_db: :math:`K`, in decibels.
     :return: :math:`L_W` per band, in decibels.
     :raises ValueError: For a non-positive area or mismatched shapes.
     """
     levels = require_finite_array(mean_level_db, "mean_level_db")
-    area = require_finite_array(area_m2, "area_m2")
+    area = require_finite_array(area, "area")
     correction = require_finite_array(field_correction_db, "field_correction_db")
     if np.any(area <= 0.0):
-        msg = "'area_m2' must be strictly positive."
+        msg = "'area' must be strictly positive."
         raise ValueError(msg)
     if np.max(np.abs(correction)) > TYPICAL_FIELD_CORRECTION_LIMIT_DB:
         msg = (
@@ -1016,10 +1016,10 @@ def total_pressure_loss_pa(
 def static_pressure_difference_pa(
     total_pressure_loss_pa: float,
     *,
-    volume_flow_m3_s: float,
-    density_kg_m3: float,
-    upstream_area_m2: float,
-    downstream_area_m2: float,
+    volume_flow: float,
+    density: float,
+    upstream_area: float,
+    downstream_area: float,
 ) -> float:
     r"""The static pressure difference behind a change of area, Equation (14).
 
@@ -1034,39 +1034,39 @@ def static_pressure_difference_pa(
     says in words.
 
     :param total_pressure_loss_pa: :math:`\Delta p_\mathrm{T}`, in pascals.
-    :param volume_flow_m3_s: :math:`q_V`, in cubic metres per second.
-    :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
-    :param upstream_area_m2: :math:`S_\mathrm{u}`, in square metres.
-    :param downstream_area_m2: :math:`S_\mathrm{d}`, in square metres.
+    :param volume_flow: :math:`q_V`, in cubic metres per second.
+    :param density: :math:`\rho`, in kilograms per cubic metre.
+    :param upstream_area: :math:`S_\mathrm{u}`, in square metres.
+    :param downstream_area: :math:`S_\mathrm{d}`, in square metres.
     :return: :math:`\Delta p_\mathrm{S}`, in pascals.
     :raises ValueError: For a value that is not finite, or a non-positive
         density or area.
     """
-    density = require_positive(density_kg_m3, "density_kg_m3")
-    upstream = require_positive(upstream_area_m2, "upstream_area_m2")
-    downstream = require_positive(downstream_area_m2, "downstream_area_m2")
-    flow = require_finite(volume_flow_m3_s, "volume_flow_m3_s")
+    density = require_positive(density, "density")
+    upstream = require_positive(upstream_area, "upstream_area")
+    downstream = require_positive(downstream_area, "downstream_area")
+    flow = require_finite(volume_flow, "volume_flow")
     loss = require_finite(total_pressure_loss_pa, "total_pressure_loss_pa")
     bracket = 1.0 / upstream**2 - 1.0 / downstream**2
     return loss - density * flow**2 / 2.0 * bracket
 
 
-def measurement_distance_upstream_m(upstream_area_m2: float) -> float:
+def measurement_distance_upstream_m(upstream_area: float) -> float:
     r"""How far upstream the measurement surface stands, Equation (15).
 
     :math:`d_\mathrm{u} = 1,5 \sqrt{4 S_\mathrm{u} / \pi}`, which is one and a half equivalent
     diameters of the upstream measurement cross-section.
 
-    :param upstream_area_m2: :math:`S_\mathrm{u}`, in square metres.
+    :param upstream_area: :math:`S_\mathrm{u}`, in square metres.
     :return: :math:`d_\mathrm{u}`, in metres.
     :raises ValueError: For a non-positive area.
     """
-    area = require_positive(upstream_area_m2, "upstream_area_m2")
+    area = require_positive(upstream_area, "upstream_area")
     return UPSTREAM_DISTANCE_DIAMETERS * math.sqrt(4.0 * area / math.pi)
 
 
 def measurement_distance_downstream_m(
-    downstream_area_m2: float, free_area_m2: float
+    downstream_area: float, free_area_m2: float
 ) -> float:
     r"""How far downstream the measurement surface stands, Equation (16).
 
@@ -1079,12 +1079,12 @@ def measurement_distance_downstream_m(
     which is agreement between the parties on the distances, and the case is
     reported rather than returned as a distance nobody can stand at.
 
-    :param downstream_area_m2: :math:`S_\mathrm{d}`, in square metres.
+    :param downstream_area: :math:`S_\mathrm{d}`, in square metres.
     :param free_area_m2: :math:`S_\mathrm{f}`, in square metres.
     :return: :math:`d_\mathrm{d}`, in metres.
     :raises ValueError: For a non-positive area.
     """
-    downstream = require_positive(downstream_area_m2, "downstream_area_m2")
+    downstream = require_positive(downstream_area, "downstream_area")
     free = require_positive(free_area_m2, "free_area_m2")
     first, second = DOWNSTREAM_DISTANCE_COEFFICIENTS
     distance = first * math.sqrt(downstream) - second * math.sqrt(free)
@@ -1121,20 +1121,20 @@ def velocity_pressure_pa(
 
 
 def flow_velocity_m_s(
-    velocity_pressure_pa: ArrayLike, density_kg_m3: float
+    velocity_pressure_pa: ArrayLike, density: float
 ) -> NDArray[np.float64]:
     r"""The flow velocity a velocity pressure stands for, Equation (28).
 
     :math:`w = \sqrt{2 p_\mathrm{v} / \rho}`.
 
     :param velocity_pressure_pa: :math:`p_\mathrm{v}`, in pascals.
-    :param density_kg_m3: :math:`\rho`, in kilograms per cubic metre.
+    :param density: :math:`\rho`, in kilograms per cubic metre.
     :return: :math:`w`, in metres per second.
     :raises ValueError: For a non-positive density or a negative velocity
         pressure.
     """
     pressure = require_finite_array(velocity_pressure_pa, "velocity_pressure_pa")
-    density = require_positive(density_kg_m3, "density_kg_m3")
+    density = require_positive(density, "density")
     if np.any(pressure < 0.0):
         msg = "'velocity_pressure_pa' must not be negative; the root has no real value."
         raise ValueError(msg)
@@ -1145,7 +1145,7 @@ def gas_density_kg_m3(
     *,
     temperature_c: float,
     molar_mass_kg_kmol: float | None = None,
-    ambient_pressure_pa: float = ISO11820_AMBIENT_PRESSURE_PA,
+    atmospheric_pressure_pa: float = ISO11820_ATMOSPHERIC_PRESSURE_PA,
 ) -> float:
     r"""The density of the gas, Equation (29).
 
@@ -1166,13 +1166,13 @@ def gas_density_kg_m3(
     :param temperature_c: :math:`\theta`, in degrees Celsius.
     :param molar_mass_kg_kmol: :math:`M`, in kilograms per kilomole. Omit it
         for air.
-    :param ambient_pressure_pa: :math:`p_{\text{amb}}`, in pascals.
+    :param atmospheric_pressure_pa: :math:`p_{\text{amb}}`, in pascals.
     :return: :math:`\rho`, in kilograms per cubic metre.
     :raises ValueError: For a temperature that is not finite or at or below
         the absolute zero the equation uses, or a non-positive pressure or
         molar mass.
     """
-    pressure = require_positive(ambient_pressure_pa, "ambient_pressure_pa")
+    pressure = require_positive(atmospheric_pressure_pa, "atmospheric_pressure_pa")
     absolute = 273.0 + require_finite(temperature_c, "temperature_c")
     if absolute <= 0.0:
         msg = (
@@ -1189,7 +1189,7 @@ def gas_density_kg_m3(
 def silencer_flow_velocity_m_s(
     upstream_mean_velocity_m_s: float,
     *,
-    upstream_area_m2: float,
+    upstream_area: float,
     free_area_m2: float,
 ) -> float:
     r"""The mean velocity inside the silencer, Equation (31).
@@ -1201,13 +1201,13 @@ def silencer_flow_velocity_m_s(
 
     :param upstream_mean_velocity_m_s: :math:`\overline{w_\mathrm{u}}`, in metres per
         second, the arithmetic mean of Equation (30).
-    :param upstream_area_m2: :math:`S_\mathrm{u}`, in square metres.
+    :param upstream_area: :math:`S_\mathrm{u}`, in square metres.
     :param free_area_m2: :math:`S_\mathrm{f}`, the free cross-section, in square
         metres.
     :return: :math:`\overline{w_\mathrm{f}}`, in metres per second.
     :raises ValueError: For a non-positive area.
     """
-    upstream = require_positive(upstream_area_m2, "upstream_area_m2")
+    upstream = require_positive(upstream_area, "upstream_area")
     free = require_positive(free_area_m2, "free_area_m2")
     mean_velocity = require_finite(
         upstream_mean_velocity_m_s, "upstream_mean_velocity_m_s"

@@ -524,7 +524,7 @@ def test_measurement_carries_conditions() -> None:
     assert res.temperature_c == 20.0
     assert res.relative_humidity_percent == 54.0
     np.testing.assert_array_equal(res.frequencies, _FREQS)
-    np.testing.assert_allclose(res.air_attenuation, np.zeros_like(_FREQS))
+    np.testing.assert_allclose(res.air_attenuation_per_m, np.zeros_like(_FREQS))
 
 
 def test_measurement_negative_humidity_raises() -> None:

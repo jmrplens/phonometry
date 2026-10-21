@@ -160,7 +160,7 @@ A measured or modelled mobility FRF over frequency.
 
 Mobility magnitude `|Y|`, in m/(N.s).
 
-### MobilityResult.phase
+### MobilityResult.phase_rad
 
 *property*
 
@@ -363,12 +363,6 @@ read from them, so a check cannot be built against another tolerance.
 | `mass` | Mass `m` of the calibration block, in kg. |
 | `quantity` | FRF kind checked (`"accelerance"` or `"mobility"`). |
 
-### RigidMassCalibrationResult.deviation
-
-*property*
-
-Relative deviation `measured/expected - 1` per frequency.
-
 ### RigidMassCalibrationResult.expected
 
 *property*
@@ -403,7 +397,13 @@ no `ax` a two-panel figure is drawn and its axes array returned; with
 
 Requires matplotlib (`pip install phonometry[plot]`).
 
-### RigidMassCalibrationResult.tolerance
+### RigidMassCalibrationResult.relative_deviation
+
+*property*
+
+Relative deviation `measured/expected - 1` per frequency.
+
+### RigidMassCalibrationResult.relative_tolerance
 
 *property*
 

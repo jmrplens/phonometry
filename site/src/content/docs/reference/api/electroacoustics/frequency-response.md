@@ -73,7 +73,7 @@ FrequencyResponseResult(
     frequencies: NDArray[np.float64],
     response: NDArray[np.complex128],
     magnitude_db: NDArray[np.float64],
-    phase: NDArray[np.float64],
+    phase_rad: NDArray[np.float64],
     coherence: NDArray[np.float64],
     estimator: str,
 )
@@ -89,7 +89,7 @@ Piersol).
 | `frequencies` | Frequency axis, in Hz. |
 | `response` | Complex frequency-response estimate `H(f)`. |
 | `magnitude_db` | Magnitude $20 \log_{10} \lvert H \rvert$, in dB. |
-| `phase` | Phase of `H`, in radians (unwrapped). |
+| `phase_rad` | Phase of `H`, in radians (unwrapped). |
 | `coherence` | Ordinary coherence $\gamma^2(f) \in [0, 1]$. |
 | `estimator` | Estimator used (`'H1'` or `'H2'`). |
 

@@ -383,7 +383,7 @@ def plot_propagation_loss(
         color=_C_SECONDARY,
         lw=1.0,
         ls=":",
-        label=f"{_t('Absorption', language)} ({decimal_comma(f'{result.absorption_coefficient:.3g}', language)} dB/km)",
+        label=f"{_t('Absorption', language)} ({decimal_comma(f'{result.absorption_db_per_km:.3g}', language)} dB/km)",
     )
     ax.set_xlabel(_t(_RANGE_LABEL, language))
     ax.set_ylabel(_t(_PROPAGATION_LOSS_LABEL, language))

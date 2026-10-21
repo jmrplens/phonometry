@@ -486,7 +486,7 @@ class TappingForceResult(OwnsArrays):
         :math:`\lvert F_n \rvert_{\text{upper}} = 2 m v_0/T_\mathrm{i}`, in N
         (Eq. 3.100); 6 dB above ``lower_limit`` in mean square.
     :ivar band: Band width used for ``mean_square_force``.
-    :ivar mass_kg: Hammer mass ``m`` used, in kg (Default: 0,5).
+    :ivar mass: Hammer mass ``m`` used, in kg (Default: 0,5).
 
     Whether the oscillation is over-critical is read from ``K``, ``Zdp`` and
     ``m`` (:attr:`over_critical`), so it is not a field.
@@ -504,7 +504,7 @@ class TappingForceResult(OwnsArrays):
     lower_limit: float
     upper_limit: float
     band: str = "third"
-    mass_kg: float = TAPPING_HAMMER_MASS_KG
+    mass: float = TAPPING_HAMMER_MASS_KG
 
     def __post_init__(self) -> None:
         """Reject a force spectrum whose per-band quantities disagree.
@@ -548,7 +548,7 @@ class TappingForceResult(OwnsArrays):
         )
         k = require_positive(self.contact_stiffness, "contact_stiffness")
         z = require_positive(self.impedance, "impedance")
-        m = require_positive(self.mass_kg, "mass_kg")
+        m = require_positive(self.mass, "mass")
         lower = require_positive(self.lower_limit, "lower_limit")
         factor = _band_factor(self.band)  # type: ignore[arg-type]
         expected = (
@@ -600,9 +600,9 @@ class TappingForceResult(OwnsArrays):
         Hopkins draws the line at :math:`K m \ge 4 Z_\mathrm{dp}^{2}`: the pulse
         then decays to zero without changing sign, so the hammer does not
         rebound; below it the oscillation is under-critical (Eq. 3.96). Read
-        from :attr:`contact_stiffness`, :attr:`impedance` and :attr:`mass_kg`.
+        from :attr:`contact_stiffness`, :attr:`impedance` and :attr:`mass`.
         """
-        return _is_over_critical(self.contact_stiffness, self.impedance, self.mass_kg)
+        return _is_over_critical(self.contact_stiffness, self.impedance, self.mass)
 
     @property
     def power_input_level(self) -> np.ndarray:
@@ -694,7 +694,7 @@ def tapping_force_spectrum(
         lower_limit=float(m * v0 * fi),
         upper_limit=float(2.0 * m * v0 * fi),
         band=band,
-        mass_kg=m,
+        mass=m,
     )
 
 

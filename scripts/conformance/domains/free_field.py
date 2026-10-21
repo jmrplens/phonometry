@@ -573,7 +573,7 @@ def _exact_traverses(
             u,
             distances,
             level,
-            background_levels_db=None if margin_db is None else level - margin_db,
+            background_levels=None if margin_db is None else level - margin_db,
         )
         for u in directions
     ]

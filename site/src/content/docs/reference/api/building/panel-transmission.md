@@ -199,7 +199,7 @@ double_wall_transmission_loss(
     frequency: ArrayLike,
     mass1: float,
     mass2: float,
-    gap: float,
+    gap_m: float,
     *,
     loss_factor: float = 0.1,
     cavity_medium: PorousMediumResult | None = None,
@@ -229,7 +229,7 @@ unit area as *tie_stiffness_per_area* (see
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `mass1` | Surface density of leaf 1 `m1`, in kg/m^2 (> 0). |
 | `mass2` | Surface density of leaf 2 `m2`, in kg/m^2 (> 0). |
-| `gap` | Cavity depth `d`, in m (> 0). |
+| `gap_m` | Cavity depth `d`, in m (> 0). |
 | `loss_factor` | Leaf loss factor `eta` (> 0, Default: 0.1); reserved for the coincidence extension and reported for reference. |
 | `cavity_medium` | Optional porous fill; see [`mass_spring_mass_resonance`](/phonometry/reference/api/building/panel-transmission/#mass_spring_mass_resonance). |
 | `tie_stiffness_per_area` | Stiffness per unit area $N k / S$ of a connection array bridging the cavity, in N/m^3 (>= 0, Default: 0). |
@@ -313,7 +313,7 @@ builds its estimate on).
 mass_spring_mass_resonance(
     mass1: float,
     mass2: float,
-    gap: float,
+    gap_m: float,
     *,
     cavity_medium: PorousMediumResult | None = None,
     tie_stiffness_per_area: float = 0.0,
@@ -343,7 +343,7 @@ tie density and Hopkins' Table A4.
 | :--- | :--- |
 | `mass1` | Surface density of leaf 1 `m1`, in kg/m^2 (> 0). |
 | `mass2` | Surface density of leaf 2 `m2`, in kg/m^2 (> 0). |
-| `gap` | Cavity depth `d`, in m (> 0). |
+| `gap_m` | Cavity depth `d`, in m (> 0). |
 | `cavity_medium` | Optional porous fill (a [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult)) whose effective bulk modulus sets the cavity stiffness. |
 | `tie_stiffness_per_area` | Stiffness per unit area $N k / S$ of a connection array bridging the cavity, in N/m^3 (>= 0, Default: 0). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air these models are published with). |
@@ -649,7 +649,7 @@ and the material's own is then not read at all.
 plot_double_wall_geometry(
     mass1: float,
     mass2: float,
-    gap: float,
+    gap_m: float,
     ax: Axes | None = None,
     *,
     resonance_frequency: float | None = None,
@@ -660,7 +660,7 @@ plot_double_wall_geometry(
 
 Draw the mass-spring-mass double wall to scale.
 
-Two leaves separated by the `gap`; leaf thicknesses are drawn from the
+Two leaves separated by the `gap_m`; leaf thicknesses are drawn from the
 surface densities at a nominal board density, and the mass-spring-mass
 resonance is annotated when given.
 
@@ -670,7 +670,7 @@ resonance is annotated when given.
 | :--- | :--- |
 | `mass1` | Surface density of the first leaf, in kg/m2. |
 | `mass2` | Surface density of the second leaf, in kg/m2. |
-| `gap` | Cavity depth, in metres. |
+| `gap_m` | Cavity depth, in metres. |
 | `ax` | Existing axes, or `None` to create a figure. |
 | `resonance_frequency` | Optional `f0` to annotate, in Hz. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
@@ -765,7 +765,7 @@ SoundReductionResult(
     resonance_frequency: float | None = None,
     mass1: float | None = None,
     mass2: float | None = None,
-    gap: float | None = None,
+    gap_m: float | None = None,
     plateau_height_db: float | None = None,
     plateau_start: float | None = None,
     plateau_end: float | None = None,
@@ -784,9 +784,9 @@ Predicted airborne sound reduction index `R(f)` of a construction.
 | `model` | Prediction model (e.g. `"sharp-single"`, `"double-wall"`). |
 | `critical_frequency` | Coincidence frequency `fc`, in hertz, or `None` (double wall reports the mass-spring-mass resonance instead). |
 | `resonance_frequency` | Mass-spring-mass resonance `f0`, in hertz, or `None` (single panel). |
-| `mass1` | First-leaf surface density, in kg/m2, retained (with `mass2` and `gap`) by the double-wall constructor so `plot_geometry` can draw the section; `None` otherwise. |
+| `mass1` | First-leaf surface density, in kg/m2, retained (with `mass2` and `gap_m`) by the double-wall constructor so `plot_geometry` can draw the section; `None` otherwise. |
 | `mass2` | Second-leaf surface density, in kg/m2, or `None`. |
-| `gap` | Cavity depth, in metres, or `None`. |
+| `gap_m` | Cavity depth, in metres, or `None`. |
 | `plateau_height_db` | Height of the coincidence plateau, in dB, or `None` (only the plateau model sets these three). |
 | `plateau_start` | Frequency of point A, where the mass-law line meets the plateau, in hertz, or `None`. |
 | `plateau_end` | Frequency of point B, where the 10 dB/octave recovery starts, in hertz, or `None`. |

@@ -301,7 +301,7 @@ print(mass.mass_limit_kg, mass.passes, mass.bias_bound_db.round(3))   # [0.6] Tr
 fe = np.geomspace(20.0, 5000.0, 400)
 m_eff = 20.0 * (1.0 + (fe / 3000.0) ** 2)
 ones = np.ones(fe.size, dtype=complex)
-block = vibration.effective_blocking_mass(fe, m_eff * ones, ones, ones, blocking_mass_kg=20.0)
+block = vibration.effective_blocking_mass(fe, m_eff * ones, ones, ones, blocking_mass=20.0)
 print(round(block.upper_frequency_limit_hz, 1))         # 1047.9  Hz
 ```
 

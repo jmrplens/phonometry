@@ -415,7 +415,7 @@ Plot the measured `LFE` against the printed tolerance band.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
-### HeavyImpactSourceCheck.tolerance
+### HeavyImpactSourceCheck.tolerance_db
 
 *property*
 
@@ -434,7 +434,7 @@ HeavyImpactSourceSpec(
     name: str,
     frequencies: tuple[float, ...],
     force_exposure_level: tuple[float, ...],
-    tolerance: tuple[float, ...],
+    tolerance_db: tuple[float, ...],
     drop_height_m: float,
     drop_height_tolerance_m: float,
     effective_mass: float,
@@ -466,7 +466,7 @@ spectrum by other means still conforms.
 | `name` | `"rubber_ball"` or `"bang_machine"`. |
 | `frequencies` | Octave-band centre frequencies, in Hz. |
 | `force_exposure_level` | Nominal `LFE` per band, in dB re 1 N. |
-| `tolerance` | Tolerance on `LFE` per band, in dB. |
+| `tolerance_db` | Tolerance on `LFE` per band, in dB. |
 | `drop_height_m` | Free-fall drop height, in m. |
 | `drop_height_tolerance_m` | Tolerance on the drop height, in m. |
 | `effective_mass` | Effective (equivalent) mass of the source, in kg. |

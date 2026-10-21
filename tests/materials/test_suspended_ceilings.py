@@ -83,10 +83,10 @@ def test_the_uncertainty_is_a_coverage_factor_over_a_standard_deviation() -> Non
 def test_the_air_correction_is_four_volumes_over_the_area() -> None:
     with pytest.warns(SuspendedCeilingWarning, match="4.2.1"):
         got = materials.air_absorption_correction(
-            volume_m3=200.0,
+            volume=200.0,
             specimen_area_m2=10.8,
-            attenuation_with=[0.01],
-            attenuation_empty=[0.008],
+            attenuation_with_per_m=[0.01],
+            attenuation_empty_per_m=[0.008],
         )
     assert got[0] == pytest.approx(4.0 * 200.0 * 0.002 / 10.8)
 
@@ -94,20 +94,20 @@ def test_the_air_correction_is_four_volumes_over_the_area() -> None:
 def test_a_dry_room_can_pass_the_cap_the_clause_sets() -> None:
     """A difference of 1e-4 per metre in a 200 m3 room is 0,0074, well under."""
     got = materials.air_absorption_correction(
-        volume_m3=200.0,
+        volume=200.0,
         specimen_area_m2=10.8,
-        attenuation_with=[0.0101],
-        attenuation_empty=[0.0100],
+        attenuation_with_per_m=[0.0101],
+        attenuation_empty_per_m=[0.0100],
     )
     assert abs(got[0]) < AIR_CORRECTION_LIMIT
 
 
 def test_the_correction_is_zero_when_the_air_did_not_change() -> None:
     got = materials.air_absorption_correction(
-        volume_m3=200.0,
+        volume=200.0,
         specimen_area_m2=10.8,
-        attenuation_with=[0.01, 0.02],
-        attenuation_empty=[0.01, 0.02],
+        attenuation_with_per_m=[0.01, 0.02],
+        attenuation_empty_per_m=[0.01, 0.02],
     )
     assert np.allclose(got, 0.0)
 
@@ -115,10 +115,10 @@ def test_the_correction_is_zero_when_the_air_did_not_change() -> None:
 def test_mismatched_attenuation_spectra_are_refused() -> None:
     with pytest.raises(ValueError, match="band for band"):
         materials.air_absorption_correction(
-            volume_m3=200.0,
+            volume=200.0,
             specimen_area_m2=10.8,
-            attenuation_with=[0.01, 0.02],
-            attenuation_empty=[0.01],
+            attenuation_with_per_m=[0.01, 0.02],
+            attenuation_empty_per_m=[0.01],
         )
 
 
@@ -135,7 +135,7 @@ def test_the_printed_geometry_is_the_printed_geometry() -> None:
 
 def test_a_conforming_arrangement_passes() -> None:
     check = materials.check_ceiling_specimen(
-        area_m2=10.8,
+        area=10.8,
         depth_mm=200.0,
         deflection_mm=3.0,
         substructure_width_mm=25.0,
@@ -149,7 +149,7 @@ def test_a_conforming_arrangement_passes() -> None:
 def test_a_sagging_ceiling_fails_the_deflection_rule() -> None:
     with pytest.warns(SuspendedCeilingWarning, match="4.1.1.2.3.5"):
         check = materials.check_ceiling_specimen(
-            area_m2=10.8, depth_mm=200.0, deflection_mm=8.0
+            area=10.8, depth_mm=200.0, deflection_mm=8.0
         )
     assert check.deflection_ok is False
     assert check.satisfied is False
@@ -158,7 +158,7 @@ def test_a_sagging_ceiling_fails_the_deflection_rule() -> None:
 def test_a_deep_substructure_fails_its_own_rule() -> None:
     with pytest.warns(SuspendedCeilingWarning, match="substructure"):
         check = materials.check_ceiling_specimen(
-            area_m2=10.8, depth_mm=200.0, substructure_height_mm=70.0
+            area=10.8, depth_mm=200.0, substructure_height_mm=70.0
         )
     assert check.substructure_ok is False
 
@@ -166,7 +166,7 @@ def test_a_deep_substructure_fails_its_own_rule() -> None:
 def test_a_light_mounting_fixture_fails() -> None:
     with pytest.warns(SuspendedCeilingWarning, match="4.1.1.1.6"):
         check = materials.check_ceiling_specimen(
-            area_m2=10.8, depth_mm=200.0, fixture_density_kg_m2=8.0
+            area=10.8, depth_mm=200.0, fixture_density_kg_m2=8.0
         )
     assert check.fixture_ok is False
 
@@ -179,7 +179,7 @@ def test_another_depth_is_allowed_but_is_not_the_ce_marking_one() -> None:
     what the depth is not and stops there.
     """
     with pytest.warns(SuspendedCeilingWarning, match="CE marking") as caught:
-        check = materials.check_ceiling_specimen(area_m2=10.8, depth_mm=400.0)
+        check = materials.check_ceiling_specimen(area=10.8, depth_mm=400.0)
     assert check.satisfied is True
     assert check.ce_marking_depth is False
     assert all("outside EN 16487" not in str(entry.message) for entry in caught)
@@ -188,7 +188,7 @@ def test_another_depth_is_allowed_but_is_not_the_ce_marking_one() -> None:
 def test_a_limit_left_and_another_depth_are_told_apart_in_one_warning() -> None:
     with pytest.warns(SuspendedCeilingWarning) as caught:
         check = materials.check_ceiling_specimen(
-            area_m2=10.8, depth_mm=400.0, deflection_mm=8.0
+            area=10.8, depth_mm=400.0, deflection_mm=8.0
         )
     (message,) = [str(entry.message) for entry in caught]
     _, _, after = message.partition("outside EN 16487: ")
@@ -204,7 +204,7 @@ def test_supports_inside_the_printed_section_and_spacing_pass() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", SuspendedCeilingWarning)
         check = materials.check_ceiling_specimen(
-            area_m2=10.8,
+            area=10.8,
             depth_mm=200.0,
             support_width_mm=50.0,
             support_height_mm=50.0,
@@ -230,9 +230,7 @@ def test_a_support_over_the_printed_section_fails(field: str, value: float) -> N
     """
     dimension: dict[str, Any] = {field: value}
     with pytest.warns(SuspendedCeilingWarning, match=r"4\.1\.1\.2\.3\.6"):
-        check = materials.check_ceiling_specimen(
-            area_m2=10.8, depth_mm=200.0, **dimension
-        )
+        check = materials.check_ceiling_specimen(area=10.8, depth_mm=200.0, **dimension)
     assert check.supports_ok is False
     assert check.satisfied is False
 
@@ -241,7 +239,7 @@ def test_supports_closer_than_the_printed_spacing_fail() -> None:
     """4.1.1.2.3.6: support units "at centre distances of >= 1,2 m"."""
     with pytest.warns(SuspendedCeilingWarning, match=r"1\.2 m of 4\.1\.1\.2\.3\.6"):
         check = materials.check_ceiling_specimen(
-            area_m2=10.8,
+            area=10.8,
             depth_mm=200.0,
             support_width_mm=40.0,
             support_height_mm=40.0,
@@ -255,7 +253,7 @@ def test_supports_closer_than_the_printed_spacing_fail() -> None:
 def test_a_non_positive_support_spacing_is_refused(value: float) -> None:
     with pytest.raises(ValueError, match="support_centre_distance_m"):
         materials.check_ceiling_specimen(
-            area_m2=10.8, depth_mm=200.0, support_centre_distance_m=value
+            area=10.8, depth_mm=200.0, support_centre_distance_m=value
         )
 
 
@@ -267,7 +265,7 @@ def test_a_dry_room_fails_the_humidity_floor() -> None:
     """
     with pytest.warns(SuspendedCeilingWarning, match=r"41 %.*50 % of 4\.2\.2"):
         check = materials.check_ceiling_specimen(
-            area_m2=10.8, depth_mm=200.0, relative_humidity_percent=[41.0, 44.0]
+            area=10.8, depth_mm=200.0, relative_humidity_percent=[41.0, 44.0]
         )
     assert check.humidity_ok is False
     assert check.satisfied is False
@@ -278,7 +276,7 @@ def test_a_room_at_or_over_the_floor_passes(humidity: float | list[float]) -> No
     with warnings.catch_warnings():
         warnings.simplefilter("error", SuspendedCeilingWarning)
         check = materials.check_ceiling_specimen(
-            area_m2=10.8, depth_mm=200.0, relative_humidity_percent=humidity
+            area=10.8, depth_mm=200.0, relative_humidity_percent=humidity
         )
     assert check.humidity_ok is True
     assert check.satisfied is True
@@ -287,13 +285,13 @@ def test_a_room_at_or_over_the_floor_passes(humidity: float | list[float]) -> No
 def test_one_dry_measurement_among_humid_ones_fails() -> None:
     with pytest.warns(SuspendedCeilingWarning, match="4.2.2"):
         check = materials.check_ceiling_specimen(
-            area_m2=10.8, depth_mm=200.0, relative_humidity_percent=[62.0, 49.0, 58.0]
+            area=10.8, depth_mm=200.0, relative_humidity_percent=[62.0, 49.0, 58.0]
         )
     assert check.humidity_ok is False
 
 
 def test_an_omitted_humidity_is_not_judged() -> None:
-    check = materials.check_ceiling_specimen(area_m2=10.8, depth_mm=200.0)
+    check = materials.check_ceiling_specimen(area=10.8, depth_mm=200.0)
     assert check.humidity_ok is None
     assert check.supports_ok is True
     assert check.satisfied is True
@@ -306,7 +304,7 @@ def test_an_omitted_humidity_is_not_judged() -> None:
 def test_a_humidity_that_is_not_one_is_refused(humidity: object) -> None:
     with pytest.raises(ValueError, match="relative_humidity_percent"):
         materials.check_ceiling_specimen(
-            area_m2=10.8,
+            area=10.8,
             depth_mm=200.0,
             relative_humidity_percent=humidity,  # type: ignore[arg-type]
         )
@@ -315,7 +313,7 @@ def test_a_humidity_that_is_not_one_is_refused(humidity: object) -> None:
 def test_the_ce_marking_depth_belongs_to_the_type_e_mounting_alone() -> None:
     """4.1.1.2.3.1 fixes 200 mm for type E, so type A cannot reach it."""
     check = materials.check_ceiling_specimen(
-        area_m2=10.8, mounting="A", depth_mm=TYPE_E_DEPTH_MM
+        area=10.8, mounting="A", depth_mm=TYPE_E_DEPTH_MM
     )
     assert check.ce_marking_depth is False
     assert check.satisfied is True
@@ -323,7 +321,7 @@ def test_the_ce_marking_depth_belongs_to_the_type_e_mounting_alone() -> None:
 
 def test_a_type_e_arrangement_without_a_depth_is_refused() -> None:
     with pytest.raises(ValueError, match="depth_mm"):
-        materials.check_ceiling_specimen(area_m2=10.8)
+        materials.check_ceiling_specimen(area=10.8)
 
 
 def test_the_four_mountings_are_the_admitted_ones() -> None:
@@ -334,7 +332,7 @@ def test_the_four_mountings_are_the_admitted_ones() -> None:
 
 def test_an_unknown_mounting_letter_is_refused() -> None:
     with pytest.raises(ValueError, match="mounting"):
-        materials.check_ceiling_specimen(area_m2=10.8, mounting="Z", depth_mm=200.0)
+        materials.check_ceiling_specimen(area=10.8, mounting="Z", depth_mm=200.0)
 
 
 @pytest.mark.parametrize(
@@ -352,15 +350,13 @@ def test_a_negative_geometry_is_refused_rather_than_judged(field: str) -> None:
     """An upper bound alone would let a negative length pass as conforming."""
     negative: dict[str, Any] = {field: -1.0}
     with pytest.raises(ValueError, match=field):
-        materials.check_ceiling_specimen(area_m2=10.8, depth_mm=200.0, **negative)
+        materials.check_ceiling_specimen(area=10.8, depth_mm=200.0, **negative)
 
 
 @pytest.mark.parametrize("value", [float("-inf"), float("inf"), float("nan")])
 def test_a_non_finite_geometry_is_refused(value: float) -> None:
     with pytest.raises(ValueError, match="deflection_mm"):
-        materials.check_ceiling_specimen(
-            area_m2=10.8, depth_mm=200.0, deflection_mm=value
-        )
+        materials.check_ceiling_specimen(area=10.8, depth_mm=200.0, deflection_mm=value)
 
 
 def test_an_area_away_from_the_target_is_reported_and_not_warned_about() -> None:
@@ -369,7 +365,7 @@ def test_an_area_away_from_the_target_is_reported_and_not_warned_about() -> None
     # clause makes one number of it a failure.
     with warnings.catch_warnings():
         warnings.simplefilter("error", SuspendedCeilingWarning)
-        check = materials.check_ceiling_specimen(area_m2=9.6, depth_mm=200.0)
+        check = materials.check_ceiling_specimen(area=9.6, depth_mm=200.0)
     assert check.area_error_m2 == pytest.approx(-1.2)
     assert check.satisfied is True
 
@@ -377,10 +373,10 @@ def test_an_area_away_from_the_target_is_reported_and_not_warned_about() -> None
 def test_an_air_correction_over_the_cap_is_warned_about() -> None:
     with pytest.warns(SuspendedCeilingWarning, match="4.2.1"):
         correction = materials.air_absorption_correction(
-            volume_m3=200.0,
+            volume=200.0,
             specimen_area_m2=10.8,
-            attenuation_with=[0.0005, 0.0230],
-            attenuation_empty=[0.0004, 0.0210],
+            attenuation_with_per_m=[0.0005, 0.0230],
+            attenuation_empty_per_m=[0.0004, 0.0210],
         )
     assert float(correction[-1]) > materials.AIR_CORRECTION_LIMIT
 
@@ -389,10 +385,10 @@ def test_a_correction_inside_the_cap_is_silent() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", SuspendedCeilingWarning)
         correction = materials.air_absorption_correction(
-            volume_m3=200.0,
+            volume=200.0,
             specimen_area_m2=10.8,
-            attenuation_with=[0.0011, 0.0035],
-            attenuation_empty=[0.0010, 0.0030],
+            attenuation_with_per_m=[0.0011, 0.0035],
+            attenuation_empty_per_m=[0.0010, 0.0030],
         )
     assert float(max(correction)) < materials.AIR_CORRECTION_LIMIT
 
@@ -462,7 +458,7 @@ def test_the_printed_attenuation_of_iso9613_table_one() -> None:
                 bands,
                 temperature_c=temperature_c,
                 relative_humidity_percent=humidity,
-                atmospheric_pressure_kpa=101.325,
+                static_pressure_kpa=101.325,
                 exact_midband=True,
             )
             * 1000.0
@@ -498,10 +494,10 @@ def test_the_air_term_carries_the_factor_of_four_the_example_prints() -> None:
     """
     with pytest.warns(SuspendedCeilingWarning, match="4.2.1"):
         correction = materials.air_absorption_correction(
-            volume_m3=oracle.VIGRAN_EXAMPLE_VOLUME_M3,
+            volume=oracle.VIGRAN_EXAMPLE_VOLUME_M3,
             specimen_area_m2=TARGET_SPECIMEN_AREA_M2,
-            attenuation_with=[oracle.VIGRAN_EXAMPLE_M_PER_M],
-            attenuation_empty=[0.0],
+            attenuation_with_per_m=[oracle.VIGRAN_EXAMPLE_M_PER_M],
+            attenuation_empty_per_m=[0.0],
         )
     assert float(correction[0]) * TARGET_SPECIMEN_AREA_M2 == pytest.approx(
         oracle.VIGRAN_EXAMPLE_AIR_ABSORPTION_M2
@@ -523,7 +519,7 @@ def test_the_printed_air_absorption_constant_of_cox_table_four_two() -> None:
                 oracle.COX_TABLE_4_2_BANDS_HZ,
                 temperature_c=20.0,
                 relative_humidity_percent=humidity,
-                atmospheric_pressure_kpa=101.325,
+                static_pressure_kpa=101.325,
             )
             * 1e3
         )
@@ -563,10 +559,10 @@ def test_a_ten_point_humidity_swing_busts_the_cap_of_the_clause() -> None:
     attenuation_empty = _library_m(temperature_c=20.0, humidity=50.0, bands=bands)
     with pytest.warns(SuspendedCeilingWarning, match="4.2.1"):
         got = materials.air_absorption_correction(
-            volume_m3=oracle.SRL_13441_VOLUME_M3,
+            volume=oracle.SRL_13441_VOLUME_M3,
             specimen_area_m2=oracle.SRL_13441_AREA_M2,
-            attenuation_with=attenuation_with,
-            attenuation_empty=attenuation_empty,
+            attenuation_with_per_m=attenuation_with,
+            attenuation_empty_per_m=attenuation_empty,
         )
     assert got.tolist() == pytest.approx(printed_side.tolist(), abs=5e-9)
     assert float(np.max(np.abs(got))) > AIR_CORRECTION_LIMIT
@@ -601,10 +597,12 @@ def test_a_humid_room_stays_inside_the_cap_at_every_band() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", SuspendedCeilingWarning)
         got = materials.air_absorption_correction(
-            volume_m3=oracle.SP_P302808_VOLUME_M3,
+            volume=oracle.SP_P302808_VOLUME_M3,
             specimen_area_m2=oracle.SP_P302808_AREA_M2,
-            attenuation_with=_library_m(temperature_c=25.0, humidity=90.0, bands=bands),
-            attenuation_empty=_library_m(
+            attenuation_with_per_m=_library_m(
+                temperature_c=25.0, humidity=90.0, bands=bands
+            ),
+            attenuation_empty_per_m=_library_m(
                 temperature_c=20.0, humidity=90.0, bands=bands
             ),
         )
@@ -634,13 +632,13 @@ def test_an_accredited_certificate_reproduces_from_its_printed_inputs() -> None:
             oracle.SRL_13441_BANDS_HZ,
             temperature_c=empty_temperature_c,
             relative_humidity_percent=empty_humidity,
-            atmospheric_pressure_kpa=empty_pressure_mbar / 10.0,
+            static_pressure_kpa=empty_pressure_mbar / 10.0,
         ),
         m2=environment.air_attenuation_m(
             oracle.SRL_13441_BANDS_HZ,
             temperature_c=temperature_c,
             relative_humidity_percent=humidity,
-            atmospheric_pressure_kpa=pressure_mbar / 10.0,
+            static_pressure_kpa=pressure_mbar / 10.0,
         ),
     )
     assert got.tolist() == pytest.approx(list(oracle.SRL_13441_ALPHA_S), abs=0.005)
@@ -715,7 +713,7 @@ def test_real_arrangements_against_the_printed_geometry() -> None:
             # verdict under test rather than a surprise.
             warnings.simplefilter("ignore", SuspendedCeilingWarning)
             got = materials.check_ceiling_specimen(
-                area_m2=area_m2, mounting="E", depth_mm=depth_mm
+                area=area_m2, mounting="E", depth_mm=depth_mm
             )
         assert got.area_error_m2 == pytest.approx(area_error_m2, abs=5e-9), report
         assert got.ce_marking_depth is ce_marking, report
@@ -753,7 +751,7 @@ def test_the_humidity_floor_against_real_room_climates() -> None:
             # clause, which is the verdict under test rather than a surprise.
             warnings.simplefilter("ignore", SuspendedCeilingWarning)
             got = materials.check_ceiling_specimen(
-                area_m2=area_m2,
+                area=area_m2,
                 mounting="E",
                 depth_mm=depth_mm,
                 relative_humidity_percent=printed,

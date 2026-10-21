@@ -1735,7 +1735,7 @@ def _finite(value: float, name: str) -> float:
     return scalar
 
 
-def _speed(value: float, name: str = "speed") -> float:
+def _speed(value: float, name: str = "speed_kmh") -> float:
     v = _finite(value, name)
     if v <= 0.0:
         msg = f"'{name}' must be a positive number of km/h."
@@ -1963,7 +1963,7 @@ def traction_sound_power(
 
 
 def aerodynamic_sound_power(
-    speed: float = AERODYNAMIC_REFERENCE_SPEED_KMH,
+    speed_kmh: float = AERODYNAMIC_REFERENCE_SPEED_KMH,
     *,
     reference: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None,
     alpha: float = _AERODYNAMIC_ALPHA,
@@ -1974,14 +1974,14 @@ def aerodynamic_sound_power(
     :math:`v_0 = 300` km/h.
     At the reference speed the result is Table G-6 verbatim.
 
-    :param speed: Train speed ``v``, in km/h.
+    :param speed_kmh: Train speed ``v``, in km/h.
     :param reference: ``(source A, source B)`` reference spectra at ``v_0``, or
         ``None`` (the default) for Table G-6.
     :param alpha: Speed exponent ``alpha_h,i``; Table G-6 gives 50 in every band.
     :return: ``(source A spectrum, source B spectrum)``, 24 values each.
     :raises ValueError: If the speed is not positive.
     """
-    v = _speed(speed)
+    v = _speed(speed_kmh)
     low, high = (
         (
             np.asarray(_TABLE_G6_A, dtype=np.float64),
@@ -2019,8 +2019,8 @@ def bridge_transfer(bridge: BridgeType | str) -> NDArray[np.float64]:
 
 def roughness_to_frequency(
     levels: ArrayLike,
-    wavelengths: ArrayLike,
-    speed: float,
+    wavelengths_mm: ArrayLike,
+    speed_kmh: float,
     *,
     frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ,
     interpolation: RoughnessInterpolation = RoughnessInterpolation.PROPORTIONAL,
@@ -2036,23 +2036,23 @@ def roughness_to_frequency(
     is held.
 
     :param levels: Roughness levels of the table, in dB.
-    :param wavelengths: Wavelengths of the table, in mm, in any monotonic order.
-    :param speed: Train speed ``v``, in km/h.
+    :param wavelengths_mm: Wavelengths of the table, in mm, in any monotonic order.
+    :param speed_kmh: Train speed ``v``, in km/h.
     :param frequencies: Target midband frequencies, in Hz.
     :param interpolation: The :class:`RoughnessInterpolation` rule.
     :return: The spectrum on the target frequency grid, in dB.
     :raises ValueError: If an input is invalid.
     """
     y = np.asarray(levels, dtype=np.float64)
-    lam = np.asarray(wavelengths, dtype=np.float64) / 1000.0
+    lam = np.asarray(wavelengths_mm, dtype=np.float64) / 1000.0
     require_axis_rank(y, "roughness_to_frequency", "levels", 1)
     require_equal_shapes(
         "roughness_to_frequency",
-        {"levels": y.shape, "wavelengths": lam.shape},
+        {"levels": y.shape, "wavelengths_mm": lam.shape},
         "wavelength",
     )
     if np.any(lam <= 0.0):
-        msg = "'wavelengths' must all be positive."
+        msg = "'wavelengths_mm' must all be positive."
         raise ValueError(msg)
     freqs = np.asarray(frequencies, dtype=np.float64)
     if np.any(freqs <= 0.0):
@@ -2060,7 +2060,7 @@ def roughness_to_frequency(
         raise ValueError(msg)
     order = np.argsort(lam)
     lam, y = lam[order], y[order]
-    wanted = _speed(speed) / 3.6 / freqs
+    wanted = _speed(speed_kmh) / 3.6 / freqs
     if interpolation is RoughnessInterpolation.ENERGY:
         return np.asarray(
             10.0 * np.log10(np.interp(wanted, lam, 10.0 ** (y / 10.0))),
@@ -2330,7 +2330,7 @@ class RailwayVehicle(RichDisplay):
 
     :ivar stock: The :class:`RollingStock` data of the vehicle type.
     :ivar flow_rate: Average number of vehicles per hour ``Q``.
-    :ivar speed: Their speed ``v`` on the track section, in km/h.
+    :ivar speed_kmh: Their speed ``v`` on the track section, in km/h.
     :ivar condition: The :class:`RunningCondition` ``c``.
     :ivar idling_time: Total idling time ``T_idle`` within ``T_ref``, in the
         same unit as ``T_ref``; used only when ``condition`` is idling.
@@ -2338,7 +2338,8 @@ class RailwayVehicle(RichDisplay):
 
     stock: RollingStock
     flow_rate: float = 0.0
-    speed: float = 0.0
+    _: KW_ONLY
+    speed_kmh: float = 0.0
     condition: RunningCondition = RunningCondition.CONSTANT
     idling_time: float = 0.0
 
@@ -2536,10 +2537,12 @@ def _rolling_and_bridge(
     return rolling, bridge
 
 
-def _roughness_speed_floor(stock: RollingStock, minimum_speed: float | None) -> float:
+def _roughness_speed_floor(
+    stock: RollingStock, minimum_speed_kmh: float | None
+) -> float:
     """Speed floor of 2.3.2: 50 km/h, or 30 km/h for a tram or light metro."""
-    if minimum_speed is not None:
-        return _finite(minimum_speed, "minimum_speed")
+    if minimum_speed_kmh is not None:
+        return _finite(minimum_speed_kmh, "minimum_speed_kmh")
     return TRAM_MINIMUM_SPEED_KMH if stock.tram else RAILWAY_MINIMUM_SPEED_KMH
 
 
@@ -2562,7 +2565,7 @@ def _flow_term(vehicle: RailwayVehicle, reference_time: float, length: float) ->
     # As above: an empty track is a legitimate input and carries -inf.
     if q <= 0.0:
         return -np.inf
-    return float(10.0 * np.log10(q / (1000.0 * _speed(vehicle.speed))))
+    return float(10.0 * np.log10(q / (1000.0 * _speed(vehicle.speed_kmh))))
 
 
 def _vehicle_spectra(
@@ -2591,7 +2594,7 @@ def _vehicle_spectra(
     components: list[tuple[str, int, NDArray[np.float64]]] = []
 
     if vehicle.condition is not RunningCondition.IDLING:
-        speed = _speed(vehicle.speed)
+        speed = _speed(vehicle.speed_kmh)
         rolling, bridge = _rolling_and_bridge(
             vehicle,
             track,
@@ -2660,7 +2663,7 @@ def railway_source_power(
     psi: float = 0.0,
     phi: float = 90.0,
     reference_time: float = 12.0,
-    minimum_speed: float | None = None,
+    minimum_speed_kmh: float | None = None,
     interpolation: RoughnessInterpolation = RoughnessInterpolation.PROPORTIONAL,
     directivity_edition: DirectivityEdition = DirectivityEdition.CURRENT,
 ) -> RailwayEmissionResult:
@@ -2685,7 +2688,7 @@ def railway_source_power(
         default 90 deg is broadside, where the dipole correction is 0 dB.
     :param reference_time: Reference period ``T_ref`` of (2.3.4), in the same
         unit as ``idling_time``.
-    :param minimum_speed: Speed floor used to determine the total effective
+    :param minimum_speed_kmh: Speed floor used to determine the total effective
         roughness, in km/h; ``None`` (the default) selects 50 km/h, or 30 km/h
         for a tram. Pass ``0`` to switch the floor off, which also switches off
         the exclusion of impact noise below it.
@@ -2721,7 +2724,7 @@ def railway_source_power(
         sources, omni, breakdown = _vehicle_spectra(
             vehicle,
             track,
-            _roughness_speed_floor(vehicle.stock, minimum_speed),
+            _roughness_speed_floor(vehicle.stock, minimum_speed_kmh),
             interpolation,
             ver_aero_b,
         )

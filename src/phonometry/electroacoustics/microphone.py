@@ -291,11 +291,11 @@ class MicrophoneNoise(OwnsArrays):
     noise, either stated directly or computed from the weighted inherent-noise
     output voltage, and the band spectrum that voltage was measured over.
 
-    :ivar voltage: Weighted r.m.s. output voltage due to inherent noise, in V
+    :ivar voltage_v: Weighted r.m.s. output voltage due to inherent noise, in V
         (17.2 b); the equivalent noise level is computed from it.
     :ivar equivalent_level_db: Stated equivalent sound pressure level due to
         inherent noise, in dB SPL (17.1), when not computed from
-        :attr:`voltage`.
+        :attr:`voltage_v`.
     :ivar weighting: Weighting of the inherent-noise measurement: ``"A"``
         (default, the IEC 60268-1 6.2.1 A-weighted r.m.s. recommendation) or
         ``"468"`` (the 6.2.2 psophometric quasi-peak measurement to ITU-R
@@ -311,7 +311,7 @@ class MicrophoneNoise(OwnsArrays):
         ``(frequencies, band_levels_db)`` in (Hz, dB SPL) (17.2 b).
     """
 
-    voltage: float | None = None
+    voltage_v: float | None = None
     equivalent_level_db: float | None = None
     weighting: str = "A"
     spectrum: tuple[ArrayLike, ArrayLike] | None = None
@@ -362,16 +362,16 @@ class MicrophoneElectrical(RichDisplay):
     impedance and the rated minimum permitted load impedance of Clause 10, and
     the rated power supply of Clause 9.
 
-    :ivar rated_impedance: Rated (internal) impedance, in ohm (10.2).
-    :ivar minimum_load_impedance: Rated minimum permitted load impedance, in
+    :ivar rated_impedance_ohm: Rated (internal) impedance, in ohm (10.2).
+    :ivar minimum_load_impedance_ohm: Rated minimum permitted load impedance, in
         ohm (10.3).
     :ivar powering: Rated power supply description (9.1), e.g. the IEC 61938
         phantom-powering designation and voltage.
     :ivar supply_current_ma: Current drawn from the power supply, in mA (9.1).
     """
 
-    rated_impedance: float | None = None
-    minimum_load_impedance: float | None = None
+    rated_impedance_ohm: float | None = None
+    minimum_load_impedance_ohm: float | None = None
     powering: str | None = None
     supply_current_ma: float | None = None
 
@@ -393,8 +393,8 @@ class MicrophoneCharacteristics(OwnsArrays):
 
     :ivar frequencies: Free-field response frequency axis, in Hz.
     :ivar response_db: Free-field frequency response relative to the level at
-        :attr:`reference_frequency` (0 dB there), in dB (12.1.1).
-    :ivar reference_frequency: Stated reference frequency of the rated
+        :attr:`reference_frequency_hz` (0 dB there), in dB (12.1.1).
+    :ivar reference_frequency_hz: Stated reference frequency of the rated
         sensitivity and the response normalization, in Hz (11.3).
     :ivar sensitivity_mv_per_pa: Rated free-field sensitivity ``M`` at the
         reference frequency, in mV/Pa (11.2.1/11.3).
@@ -403,9 +403,9 @@ class MicrophoneCharacteristics(OwnsArrays):
     :ivar tolerance_db: Half-width of the response tolerance, in dB (12.1.1).
     :ivar effective_range: Computed effective frequency range ``(lo, hi)``
         against the tolerance limits, in Hz (12.2).
-    :ivar rated_impedance: Rated (internal) impedance, in ohm (10.2), or
+    :ivar rated_impedance_ohm: Rated (internal) impedance, in ohm (10.2), or
         ``None``.
-    :ivar minimum_load_impedance: Rated minimum permitted load impedance, in
+    :ivar minimum_load_impedance_ohm: Rated minimum permitted load impedance, in
         ohm (10.3), or ``None``.
     :ivar equivalent_noise_level_db: Equivalent sound pressure level due to
         inherent noise, in dB SPL with :attr:`noise_weighting` weighting (17),
@@ -441,13 +441,13 @@ class MicrophoneCharacteristics(OwnsArrays):
 
     frequencies: NDArray[np.float64]
     response_db: NDArray[np.float64]
-    reference_frequency: float
+    reference_frequency_hz: float
     sensitivity_mv_per_pa: float
     sensitivity_level_db: float
     tolerance_db: float
     effective_range: tuple[float, float]
-    rated_impedance: float | None
-    minimum_load_impedance: float | None
+    rated_impedance_ohm: float | None
+    minimum_load_impedance_ohm: float | None
     equivalent_noise_level_db: float | None
     noise_weighting: str
     max_spl_db: float | None
@@ -547,12 +547,12 @@ class MicrophoneCharacteristics(OwnsArrays):
             "noise_band_levels_db",
             "polar_angles_deg",
             "polar_db",
-            "reference_frequency",
+            "reference_frequency_hz",
             "sensitivity_mv_per_pa",
             "sensitivity_level_db",
             "tolerance_db",
-            "rated_impedance",
-            "minimum_load_impedance",
+            "rated_impedance_ohm",
+            "minimum_load_impedance_ohm",
             "equivalent_noise_level_db",
             "max_spl_db",
             "max_spl_thd_percent",
@@ -686,11 +686,11 @@ def _resolve_noise_level(
     sensitivity_v_per_pa: float,
 ) -> float | None:
     """Resolve the equivalent noise level, computing it from a voltage (17.2)."""
-    if noise.voltage is not None and noise.equivalent_level_db is not None:
-        msg = "give either 'noise.voltage' or 'noise.equivalent_level_db', not both."
+    if noise.voltage_v is not None and noise.equivalent_level_db is not None:
+        msg = "give either 'noise.voltage_v' or 'noise.equivalent_level_db', not both."
         raise ValueError(msg)
-    if noise.voltage is not None:
-        u_n = require_positive(noise.voltage, "noise.voltage")
+    if noise.voltage_v is not None:
+        u_n = require_positive(noise.voltage_v, "noise.voltage_v")
         return float(20.0 * np.log10((u_n / sensitivity_v_per_pa) / _P_REF))
     if noise.equivalent_level_db is not None and not np.isfinite(
         noise.equivalent_level_db
@@ -762,7 +762,7 @@ def microphone_characteristics(
     response_db: ArrayLike,
     sensitivity_mv_per_pa: float,
     *,
-    reference_frequency: float = _REFERENCE_FREQUENCY,
+    reference_frequency_hz: float = _REFERENCE_FREQUENCY,
     tolerance_db: float = 2.0,
     directivity: MicrophoneDirectivity = _DEFAULT_DIRECTIVITY,
     noise: MicrophoneNoise = _DEFAULT_NOISE,
@@ -783,10 +783,10 @@ def microphone_characteristics(
     :param frequencies: Free-field response frequency axis, in Hz (1-D, > 0).
     :param response_db: Free-field frequency response, in dB, relative to the
         output at a stated frequency (12.1.1); it is re-normalized to 0 dB at
-        ``reference_frequency``.
+        ``reference_frequency_hz``.
     :param sensitivity_mv_per_pa: Rated free-field sensitivity ``M`` at the
         reference frequency, in mV/Pa (11.2.1/11.3).
-    :param reference_frequency: Stated reference frequency, in Hz; the 11.3
+    :param reference_frequency_hz: Stated reference frequency, in Hz; the 11.3
         standard reference frequency of 1 000 Hz by default.
     :param tolerance_db: Half-width of the response tolerance, in dB
         (default 2), defining the effective frequency range (12.2).
@@ -805,10 +805,10 @@ def microphone_characteristics(
     """
     f, resp = _as_curve(frequencies, response_db, "frequency response")
     m_mv = require_positive(sensitivity_mv_per_pa, "sensitivity_mv_per_pa")
-    f_ref = require_positive(reference_frequency, "reference_frequency")
+    f_ref = require_positive(reference_frequency_hz, "reference_frequency_hz")
     tol = require_positive(tolerance_db, "tolerance_db")
     if not float(f[0]) <= f_ref <= float(f[-1]):
-        msg = "'reference_frequency' must lie within the measured frequency band."
+        msg = "'reference_frequency_hz' must lie within the measured frequency band."
         raise ValueError(msg)
     rel = _normalized_response(f, resp, f_ref)
     effective = _effective_range(f, rel, tol, f_ref)
@@ -833,16 +833,17 @@ def microphone_characteristics(
     return MicrophoneCharacteristics(
         frequencies=f,
         response_db=rel,
-        reference_frequency=f_ref,
+        reference_frequency_hz=f_ref,
         sensitivity_mv_per_pa=m_mv,
         sensitivity_level_db=level,
         tolerance_db=tol,
         effective_range=effective,
-        rated_impedance=_optional_positive(
-            electrical.rated_impedance, "electrical.rated_impedance"
+        rated_impedance_ohm=_optional_positive(
+            electrical.rated_impedance_ohm, "electrical.rated_impedance_ohm"
         ),
-        minimum_load_impedance=_optional_positive(
-            electrical.minimum_load_impedance, "electrical.minimum_load_impedance"
+        minimum_load_impedance_ohm=_optional_positive(
+            electrical.minimum_load_impedance_ohm,
+            "electrical.minimum_load_impedance_ohm",
         ),
         equivalent_noise_level_db=noise_level,
         noise_weighting=str(noise.weighting),

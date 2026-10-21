@@ -86,7 +86,7 @@ def test_ground_effect_takes_the_row_as_it_takes_the_resistivity(model: str) -> 
         BANDS, 1.5, 1.2, 50.0, impedance=CLASS_D.medium(BANDS, model=model)
     )
     by_number = environment.ground_effect(
-        BANDS, 1.5, 1.2, 50.0, flow_resistivity=200_000.0, model=model
+        BANDS, 1.5, 1.2, 50.0, flow_resistivity_pa_s_m2=200_000.0, model=model
     )
     np.testing.assert_array_equal(
         by_row.excess_attenuation, by_number.excess_attenuation
@@ -101,19 +101,21 @@ def test_a_barrier_takes_the_row_as_its_ground() -> None:
         BANDS, 1.0, 20.0, 4.0, 60.0, 1.5, ground_impedance=CLASS_D.medium(BANDS)
     )
     by_number = environment.barrier_insertion_loss(
-        BANDS, 1.0, 20.0, 4.0, 60.0, 1.5, ground_flow_resistivity=200_000.0
+        BANDS, 1.0, 20.0, 4.0, 60.0, 1.5, ground_flow_resistivity_pa_s_m2=200_000.0
     )
     np.testing.assert_array_equal(by_row.insertion_loss, by_number.insertion_loss)
 
 
 def test_the_parabolic_equation_takes_the_row_at_its_frequency() -> None:
-    profile = linear_sound_speed_profile(1e-12, ground_speed=343.0, max_height_m=60.0)
+    profile = linear_sound_speed_profile(
+        1e-12, ground_speed_of_sound=343.0, max_height_m=60.0
+    )
     kwargs = {"source_height_m": 2.0, "max_range": 120.0, "max_height_m": 30.0}
     by_row = environment.atmospheric_parabolic_equation(
         500.0, profile, impedance=CLASS_D.medium([500.0]), **kwargs
     )
     by_number = environment.atmospheric_parabolic_equation(
-        500.0, profile, flow_resistivity=200_000.0, **kwargs
+        500.0, profile, flow_resistivity_pa_s_m2=200_000.0, **kwargs
     )
     np.testing.assert_array_equal(
         by_row.level_at_height(2.0), by_number.level_at_height(2.0)
@@ -286,7 +288,7 @@ def test_a_ground_of_your_own_goes_into_the_outdoor_models() -> None:
         BANDS, 1.5, 1.2, 50.0, impedance=pasture.medium(BANDS)
     )
     by_number = environment.ground_effect(
-        BANDS, 1.5, 1.2, 50.0, flow_resistivity=180_000.0
+        BANDS, 1.5, 1.2, 50.0, flow_resistivity_pa_s_m2=180_000.0
     )
     np.testing.assert_array_equal(
         by_row.excess_attenuation, by_number.excess_attenuation

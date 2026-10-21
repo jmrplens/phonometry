@@ -133,7 +133,7 @@ def atmospheric_adjustment(
     *,
     temperature_c: float = 25.0,
     relative_humidity_percent: float = 70.0,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     reference_distance_m: float = _RH,
 ) -> NDArray[np.float64]:
     r"""Atmospheric-absorption adjustment ``ΔLa`` of the hemisphere level (Eq. 26/27).
@@ -171,7 +171,7 @@ def atmospheric_adjustment(
         reference path).
     :param temperature_c: Air temperature, in °C (default 25 °C, ICAO reference).
     :param relative_humidity_percent: Relative humidity, in % (default 70 %).
-    :param atmospheric_pressure_kpa: Ambient pressure, in kPa (default 101.325).
+    :param static_pressure_kpa: Ambient pressure, in kPa (default 101.325).
     :param reference_distance_m: Hemisphere reference distance ``rh``, in metres
         (default 60). Pass :attr:`RotorcraftHemisphere.distance_m` when the data
         uses a non-standard polar distance.
@@ -183,7 +183,7 @@ def atmospheric_adjustment(
     r = require_positive(distance_m, "distance_m")
     rh = require_positive(reference_distance_m, "reference_distance_m")
     alpha = _absorption_coefficient(
-        f, temperature_c, relative_humidity_percent, atmospheric_pressure_kpa
+        f, temperature_c, relative_humidity_percent, static_pressure_kpa
     )
     return np.asarray(-alpha * (r - rh), dtype=np.float64)
 
@@ -192,7 +192,7 @@ def _absorption_coefficient(
     frequencies: NDArray[np.float64],
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float,
+    static_pressure_kpa: float,
 ) -> NDArray[np.float64]:
     """ISO 9613-1 pure-tone ``α`` in dB/m at the exact band centres (Eq. 27).
 
@@ -220,7 +220,7 @@ def _absorption_coefficient(
             frequencies,
             temperature_c=temperature_c,
             relative_humidity_percent=relative_humidity_percent,
-            atmospheric_pressure_kpa=atmospheric_pressure_kpa,
+            static_pressure_kpa=static_pressure_kpa,
             exact_midband=True,
         )
     return np.asarray(alpha, dtype=np.float64)

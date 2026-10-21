@@ -360,7 +360,7 @@ _KWARG_PLOT_CASES = [
         "turbine_environment",
         lambda: ph.emission.check_turbine_test_environment(
             ph.emission.turbine_environmental_correction(
-                _turbine_surface().area_m2, absorption_area_m2=900.0
+                _turbine_surface().area, absorption_area=900.0
             )
         ),
         "line",
@@ -491,7 +491,7 @@ _KWARG_PLOT_CASES = [
     (
         "running_rms_decay_verification",
         lambda: ph.vibration.verify_running_rms_decay(
-            0.98, integration_time_s=1.0, method="linear"
+            0.98, integration_time=1.0, method="linear"
         ),
         "line",
     ),
@@ -1124,7 +1124,7 @@ def test_single_axes_plots_accept_external_ax() -> None:
         _response_decay(),
         _channel_match(),
         ph.vibration.verify_running_rms_decay(
-            4.7, integration_time_s=1.0, method="exponential"
+            4.7, integration_time=1.0, method="exponential"
         ),
         _conformance_verification(),
         _sound_calibrator(),

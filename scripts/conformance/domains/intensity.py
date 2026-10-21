@@ -1038,10 +1038,10 @@ def _chk_iso9295_eyring_room_constant() -> Outcome:
     volume, surface, time = 200.0, 210.0, 0.70
     alpha_room = 1.0 - math.exp(-0.16 * volume / (surface * time))
     alpha = ph.emission.room_absorption_coefficient(
-        time, volume=volume, surface_area_m2=surface
+        time, volume=volume, surface_area=surface
     )
     room = ph.emission.room_constant_from_reverberation_time(
-        time, volume=volume, surface_area_m2=surface
+        time, volume=volume, surface_area=surface
     )
     return record(
         {
@@ -1071,7 +1071,7 @@ def _chk_iso9295_air_room_constant() -> Outcome:
     room = ph.emission.room_constant_from_air_absorption(
         [16000.0],
         volume=200.0,
-        surface_area_m2=210.0,
+        surface_area=210.0,
         temperature_c=23.0,
         relative_humidity_percent=50.0,
     )
@@ -1103,7 +1103,7 @@ def _chk_iso9295_direct_level() -> Outcome:
                 ph.emission.high_frequency_sound_power(
                     [60.0, 58.0, 55.0],
                     frequencies=_ISO9295_THIRDS,
-                    room_constant_m2=40.0,
+                    room_constant=40.0,
                     temperature_c=theta,
                     static_pressure_kpa=pressure_kpa,
                 ).sound_power_level[0]
@@ -1177,13 +1177,13 @@ def _chk_iso9295_free_field_correction() -> Outcome:
     )
     beyond = ph.emission.free_field_absorption_correction(
         _ISO9295_THIRDS,
-        radius_m=4.0,
+        radius=4.0,
         temperature_c=23.0,
         relative_humidity_percent=50.0,
     )
     at_two = ph.emission.free_field_absorption_correction(
         _ISO9295_THIRDS,
-        radius_m=2.0,
+        radius=2.0,
         temperature_c=23.0,
         relative_humidity_percent=50.0,
     )

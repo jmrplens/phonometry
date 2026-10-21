@@ -480,7 +480,7 @@ def test_the_caustic_counter_reads_sign_changes_and_nothing_else() -> None:
 def test_the_trace_records_the_profile_it_flew_through() -> None:
     trace, _res = _guide_arrivals()
     np.testing.assert_array_equal(trace.profile_depths, [0.0, _GUIDE["depth"]])
-    np.testing.assert_array_equal(trace.profile_speeds, [_C, _C])
+    np.testing.assert_array_equal(trace.profile_speeds_of_sound, [_C, _C])
 
 
 def test_invalid_inputs_rejected() -> None:

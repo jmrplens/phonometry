@@ -414,8 +414,8 @@ def test_medium_is_the_model_called_with_the_stored_parameters() -> None:
         row.flow_resistivity_pa_s_m2,
         porosity=row.porosity,
         tortuosity=row.tortuosity,
-        viscous_length=row.viscous_length_um / 1e6,
-        thermal_length=row.thermal_length_um / 1e6,
+        viscous_length_m=row.viscous_length_um / 1e6,
+        thermal_length_m=row.thermal_length_um / 1e6,
     )
     np.testing.assert_array_equal(
         row.medium(f).characteristic_impedance,

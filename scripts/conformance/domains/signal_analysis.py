@@ -499,7 +499,7 @@ def _chk_hilbert_cos_to_sin() -> Outcome:
     t = np.arange(n) / fs
     res = ph.signals.envelope(np.cos(2.0 * np.pi * 500.0 * t), fs)
     interior = slice(1024, n - 1024)
-    reconstructed = res.envelope * np.sin(res.phase)
+    reconstructed = res.envelope * np.sin(res.phase_rad)
     err = float(
         np.max(
             np.abs(reconstructed[interior] - np.sin(2.0 * np.pi * 500.0 * t)[interior])

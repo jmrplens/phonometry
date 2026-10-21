@@ -149,7 +149,7 @@ assumed already corrected for background noise (see
 | `area` | Area `S` of the free test opening, in m². |
 | `volume` | Receiving-room volume `V`, in m³. |
 
-**Returns:** [`LabAirborneInsulationResult`](/phonometry/reference/api/building/lab-insulation/#labairborneinsulationresult) with `r`, `absorption` and `rating`.
+**Returns:** [`LabAirborneInsulationResult`](/phonometry/reference/api/building/lab-insulation/#labairborneinsulationresult) with `r`, `absorption_area` and `rating`.
 
 **Raises**
 
@@ -194,7 +194,7 @@ assumed already corrected for background noise (see
 | `t2` | Receiving-room reverberation time per band, in seconds. |
 | `volume` | Receiving-room volume `V`, in m³. |
 
-**Returns:** [`LabImpactInsulationResult`](/phonometry/reference/api/building/lab-insulation/#labimpactinsulationresult) with `l_n`, `absorption` and `rating`.
+**Returns:** [`LabImpactInsulationResult`](/phonometry/reference/api/building/lab-insulation/#labimpactinsulationresult) with `l_n`, `absorption_area` and `rating`.
 
 **Raises**
 
@@ -207,7 +207,7 @@ assumed already corrected for background noise (see
 ```python
 LabAirborneInsulationResult(
     r: np.ndarray,
-    absorption: np.ndarray,
+    absorption_area: np.ndarray,
     rating: WeightedRatingResult | None,
 )
 ```
@@ -219,7 +219,7 @@ Per-band laboratory airborne sound insulation (ISO 10140-2:2010).
 | Name | Description |
 | :--- | :--- |
 | `r` | Sound reduction index $R = L_1 - L_2 + 10 \log_{10}(S/A)$ per band, in dB (Clause 3.1, Formula (2)). |
-| `absorption` | Equivalent sound absorption area $A = 0.16\,V/T$ per band, in m² (ISO 10140-4:2010, Formula (5)). |
+| `absorption_area` | Equivalent sound absorption area $A = 0.16\,V/T$ per band, in m² (ISO 10140-4:2010, Formula (5)). |
 | `rating` | Single-number weighted rating `Rw` with `C` / `Ctr` (ISO 717-1), or `None` when the number of bands is neither 16 (one-third octave) nor 5 (octave) and no rating can be formed. |
 
 ### LabAirborneInsulationResult.plot()
@@ -291,7 +291,7 @@ is rejected.
 ```python
 LabImpactInsulationResult(
     l_n: np.ndarray,
-    absorption: np.ndarray,
+    absorption_area: np.ndarray,
     rating: ImpactRatingResult | None,
 )
 ```
@@ -303,7 +303,7 @@ Per-band laboratory impact sound insulation (ISO 10140-3:2010).
 | Name | Description |
 | :--- | :--- |
 | `l_n` | Normalized impact sound pressure level $L_\mathrm{n} = L_\mathrm{i} + 10 \log_{10}(A/A_0)$ per band, in dB (Clause 3.2, Formula (1)). |
-| `absorption` | Equivalent sound absorption area $A = 0.16\,V/T$ per band, in m² (ISO 10140-4:2010, Formula (5)). |
+| `absorption_area` | Equivalent sound absorption area $A = 0.16\,V/T$ per band, in m² (ISO 10140-4:2010, Formula (5)). |
 | `rating` | Single-number weighted rating `Ln,w` with `CI` (ISO 717-2), or `None` when the number of bands is neither 16 (one-third octave) nor 5 (octave) and no rating can be formed. |
 
 ### LabImpactInsulationResult.plot()

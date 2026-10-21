@@ -587,7 +587,7 @@ def generate_ground_effect_spherical(output_dir: str) -> None:
         _warnings.simplefilter("ignore")
         for label, sigma, color in grounds:
             res = environment.ground_effect(
-                freqs, 1.0, 1.5, 50.0, flow_resistivity=sigma
+                freqs, 1.0, 1.5, 50.0, flow_resistivity_pa_s_m2=sigma
             )
             ax.plot(
                 freqs,
@@ -632,7 +632,7 @@ def generate_atmospheric_refraction(output_dir: str) -> None:
     # up and leave an acoustic shadow near the ground (Salomons Sec. 4.4/4.6).
     c0, b = 340.0, -1.0
     prof = environment.log_linear_sound_speed_profile(
-        b, ground_speed=c0, max_height_m=60.0
+        b, ground_speed_of_sound=c0, max_height_m=60.0
     )
     zs = 2.0
     fig, axes = plt.subplots(2, 1, figsize=(11, 8.2), sharex=True)
@@ -659,7 +659,9 @@ def generate_atmospheric_refraction(output_dir: str) -> None:
     )
     # The linear-gradient shadow distance (grazing ray at hr = zs) as a guide.
     grad = (prof.speed_at(10.0) - c0) / 10.0
-    x_sh = environment.shadow_zone_distance(float(grad), zs, zs, ground_speed=c0)
+    x_sh = environment.shadow_zone_distance(
+        float(grad), zs, zs, ground_speed_of_sound=c0
+    )
     axes[0].axvline(
         x_sh,
         color=COLOR_SECONDARY,
@@ -682,7 +684,7 @@ def generate_atmospheric_refraction(output_dir: str) -> None:
             400.0,
             prof,
             source_height_m=zs,
-            flow_resistivity=200e3,
+            flow_resistivity_pa_s_m2=200e3,
             max_range=600.0,
             max_height_m=40.0,
         )
@@ -1097,10 +1099,10 @@ def generate_atmospheric_sound_speed_profiles(output_dir: str) -> None:
     from phonometry import environment
 
     down = environment.log_linear_sound_speed_profile(
-        +1.0, ground_speed=340.0, max_height_m=60.0
+        +1.0, ground_speed_of_sound=340.0, max_height_m=60.0
     )
     up = environment.log_linear_sound_speed_profile(
-        -1.0, ground_speed=340.0, max_height_m=60.0
+        -1.0, ground_speed_of_sound=340.0, max_height_m=60.0
     )
     _fig, ax = plt.subplots(figsize=(7.0, 7.5))
     ax.plot(
@@ -1138,7 +1140,7 @@ def generate_atmospheric_ray_fan(output_dir: str) -> None:
     from phonometry import environment
 
     profile = environment.log_linear_sound_speed_profile(
-        +1.0, ground_speed=340.0, max_height_m=60.0
+        +1.0, ground_speed_of_sound=340.0, max_height_m=60.0
     )
     zs = 2.0
     rays = environment.atmospheric_ray_paths(
@@ -1200,7 +1202,7 @@ def generate_atmospheric_pe_range(output_dir: str) -> None:
     cases = [
         (
             environment.log_linear_sound_speed_profile(
-                +1.0, ground_speed=c0, max_height_m=60.0
+                +1.0, ground_speed_of_sound=c0, max_height_m=60.0
             ),
             COLOR_PRIMARY,
             "-",
@@ -1208,7 +1210,7 @@ def generate_atmospheric_pe_range(output_dir: str) -> None:
         ),
         (
             environment.linear_sound_speed_profile(
-                0.0, ground_speed=c0, max_height_m=60.0
+                0.0, ground_speed_of_sound=c0, max_height_m=60.0
             ),
             COLOR_FG,
             "--",
@@ -1216,7 +1218,7 @@ def generate_atmospheric_pe_range(output_dir: str) -> None:
         ),
         (
             environment.log_linear_sound_speed_profile(
-                -1.0, ground_speed=c0, max_height_m=60.0
+                -1.0, ground_speed_of_sound=c0, max_height_m=60.0
             ),
             COLOR_SECONDARY,
             "-",
@@ -1231,7 +1233,7 @@ def generate_atmospheric_pe_range(output_dir: str) -> None:
                 400.0,
                 profile,
                 source_height_m=zs,
-                flow_resistivity=200e3,
+                flow_resistivity_pa_s_m2=200e3,
                 max_range=600.0,
                 max_height_m=40.0,
             )
@@ -1248,7 +1250,9 @@ def generate_atmospheric_pe_range(output_dir: str) -> None:
     # (the 10 m mean gradient of the log profile), as in the page-top figure.
     up_prof = cases[2][0]
     grad = (up_prof.speed_at(10.0) - c0) / 10.0
-    x_sh = environment.shadow_zone_distance(float(grad), zs, zr, ground_speed=c0)
+    x_sh = environment.shadow_zone_distance(
+        float(grad), zs, zr, ground_speed_of_sound=c0
+    )
     ax.axvline(
         x_sh,
         color=COLOR_SECONDARY,
@@ -1297,7 +1301,7 @@ def generate_barrier_insertion_loss_methods(output_dir: str) -> None:
             100.0,
             1.5,
             method="exact",
-            ground_flow_resistivity=2e5,
+            ground_flow_resistivity_pa_s_m2=2e5,
         )
     _fig, ax = plt.subplots(figsize=(11.0, 6.4))
     ax.plot(
@@ -1429,7 +1433,7 @@ def generate_cnossos_rail_emission(output_dir: str) -> None:
     # 96 coaches per hour at 160 km/h: eight eight-car trains an hour on a
     # conventional main line, seen broadside and slightly from above.
     result = environment.railway_source_power(
-        environment.RailwayVehicle(stock, flow_rate=96.0, speed=160.0),
+        environment.RailwayVehicle(stock, flow_rate=96.0, speed_kmh=160.0),
         track,
         phi=90.0,
         psi=10.0,
@@ -1757,7 +1761,12 @@ def generate_ground_reflection_coefficient(output_dir: str) -> None:
         _warnings.simplefilter("ignore")
         for h in heights:
             res = environment.ground_effect(
-                [freq], float(h), float(h), dist, flow_resistivity=2e5, model="miki"
+                [freq],
+                float(h),
+                float(h),
+                dist,
+                flow_resistivity_pa_s_m2=2e5,
+                model="miki",
             )
             rp = complex(res.plane_reflection_coefficient[0])
             q = complex(res.reflection_coefficient[0])
@@ -1958,7 +1967,9 @@ def generate_shadow_zone_map(output_dir: str) -> None:
         ax.loglog(
             gradients,
             [
-                environment.shadow_zone_distance(-float(g), hs, hr, ground_speed=340.0)
+                environment.shadow_zone_distance(
+                    -float(g), hs, hr, ground_speed_of_sound=340.0
+                )
                 for g in gradients
             ],
             color=color,
@@ -1970,7 +1981,7 @@ def generate_shadow_zone_map(output_dir: str) -> None:
     ax.axvline(0.1, color=COLOR_MUTED, linestyle="--", linewidth=1.3, zorder=2)
     ax.plot(
         [0.1],
-        [environment.shadow_zone_distance(-0.1, 2.0, 2.0, ground_speed=340.0)],
+        [environment.shadow_zone_distance(-0.1, 2.0, 2.0, ground_speed_of_sound=340.0)],
         "o",
         color=COLOR_FG,
         markersize=8,
@@ -1987,7 +1998,11 @@ def generate_shadow_zone_map(output_dir: str) -> None:
     grad_log = 1.0 * np.log(101.0) / 10.0
     ax.plot(
         [grad_log],
-        [environment.shadow_zone_distance(-grad_log, 2.0, 2.0, ground_speed=340.0)],
+        [
+            environment.shadow_zone_distance(
+                -grad_log, 2.0, 2.0, ground_speed_of_sound=340.0
+            )
+        ],
         "s",
         color=COLOR_SECONDARY,
         markersize=8,
@@ -2029,7 +2044,7 @@ def generate_refraction_homogeneous_check(output_dir: str) -> None:
 
     c0, freq, zs = 343.0, 500.0, 2.0
     flat = environment.linear_sound_speed_profile(
-        1e-12, ground_speed=c0, max_height_m=200.0
+        1e-12, ground_speed_of_sound=c0, max_height_m=200.0
     )
     with _warnings.catch_warnings():
         _warnings.simplefilter("ignore")
@@ -2299,8 +2314,8 @@ def generate_cnossos_road_surfaces(output_dir: str) -> None:
         row = environment.road_surface_coefficients(surface)
         span = (
             "all speeds"
-            if row.speed_range is None
-            else "{:g}-{:g} km/h".format(*row.speed_range)
+            if row.speed_range_kmh is None
+            else "{:g}-{:g} km/h".format(*row.speed_range_kmh)
         )
         ax.semilogx(
             bands,
@@ -2341,7 +2356,7 @@ def generate_cnossos_rail_components(output_dir: str) -> None:
 
     _fig, (left, right) = plt.subplots(1, 2, figsize=(13, 5.4))
     result = environment.railway_source_power(
-        environment.RailwayVehicle(stock, flow_rate=96.0, speed=160.0),
+        environment.RailwayVehicle(stock, flow_rate=96.0, speed_kmh=160.0),
         track,
         phi=90.0,
         psi=10.0,
@@ -2387,7 +2402,7 @@ def generate_cnossos_rail_components(output_dir: str) -> None:
                 total(
                     environment.railway_source_power(
                         environment.RailwayVehicle(
-                            stock, flow_rate=96.0, speed=float(v)
+                            stock, flow_rate=96.0, speed_kmh=float(v)
                         ),
                         track,
                         phi=90.0,
@@ -2731,7 +2746,7 @@ def _wt_low_frequency() -> "LowFrequencyLevel":
     power = 118.0 - np.arange(environment.LOW_FREQUENCY_BANDS_HZ.size, dtype=float)
     return environment.wind_turbine_low_frequency_level(
         np.vstack([power, power, power - 1.0]),
-        distance_m=[650.0, 820.0, 1100.0],
+        distance=[650.0, 820.0, 1100.0],
         hub_height_m=120.0,
         facade_insulation_db=environment.LOW_FREQUENCY_FACADE_INSULATION_DB[
             "Denmark brick or similar"

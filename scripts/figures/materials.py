@@ -1172,15 +1172,15 @@ def generate_slow_sound_absorber(output_dir: str) -> None:
     period_m = 5.0e-2
     f0 = 300.0
     base = materials.HelmholtzResonator(
-        neck_length=1.0e-3,
-        neck_side=3.0e-3,
-        cavity_length=30.0e-3,
-        cavity_side=27.0e-3,
+        neck_length_m=1.0e-3,
+        neck_side_m=3.0e-3,
+        cavity_length_m=30.0e-3,
+        cavity_side_m=27.0e-3,
     )
     design = materials.critical_coupling_design(
         f0,
         base,
-        lattice_step=lattice_step,
+        lattice_step_m=lattice_step,
         period_m=period_m,
     )
     h0 = design.slit_height_m
@@ -1196,7 +1196,7 @@ def generate_slow_sound_absorber(output_dir: str) -> None:
             f,
             design.resonator,
             slit_height_m=height,
-            lattice_step=lattice_step,
+            lattice_step_m=lattice_step,
             period_m=period_m,
         )
         ax.plot(f, res.absorption, ls, color=color, linewidth=2.2, label=label)
@@ -1273,15 +1273,15 @@ def generate_slit_absorber_geometry(output_dir: str) -> None:
     from phonometry import materials
 
     base = materials.HelmholtzResonator(
-        neck_length=1.0e-3,
-        neck_side=3.0e-3,
-        cavity_length=30.0e-3,
-        cavity_side=27.0e-3,
+        neck_length_m=1.0e-3,
+        neck_side_m=3.0e-3,
+        cavity_length_m=30.0e-3,
+        cavity_side_m=27.0e-3,
     )
     design = materials.critical_coupling_design(
         300.0,
         base,
-        lattice_step=3.0e-2,
+        lattice_step_m=3.0e-2,
         period_m=5.0e-2,
     )
     _fig, ax = plt.subplots(figsize=(10, 6.2))
@@ -1289,7 +1289,7 @@ def generate_slit_absorber_geometry(output_dir: str) -> None:
         [design.resonator],
         ax=ax,
         slit_height_m=design.slit_height_m,
-        lattice_step=3.0e-2,
+        lattice_step_m=3.0e-2,
         period_m=5.0e-2,
         language=_LANG,
     )
@@ -1372,7 +1372,7 @@ def generate_metadiffuser_polar(output_dir: str) -> None:
     meta = materials.metadiffuser_polar_response(
         2000.0,
         wells,
-        depth=depth,
+        depth_m=depth,
         period_m=period_m,
         repetitions=6,
     )
@@ -1436,7 +1436,7 @@ def generate_metadiffuser_geometry(output_dir: str) -> None:
     plot_metadiffuser_panel_geometry(
         wells,
         ax=ax,
-        depth=depth,
+        depth_m=depth,
         period_m=period_m,
         language=_LANG,
     )
@@ -1457,7 +1457,7 @@ def generate_metadiffuser_absorption(output_dir: str) -> None:
     wells, depth, period_m = _qr_metadiffuser_wells()
     freqs = np.arange(1800.0, 2601.0, 5.0)
     panel = materials.metadiffuser_reflection(
-        freqs, wells, depth=depth, period_m=period_m
+        freqs, wells, depth_m=depth, period_m=period_m
     )
     per_well = np.asarray(panel.well_absorption)
     face = np.asarray(panel.absorption)
@@ -1520,7 +1520,7 @@ def generate_metadiffuser_phase_match(output_dir: str) -> None:
     index = np.arange(1, 6)
 
     at_design = materials.metadiffuser_reflection(
-        np.array([2000.0]), wells, depth=depth, period_m=period_m
+        np.array([2000.0]), wells, depth_m=depth, period_m=period_m
     )
     r_design = np.asarray(at_design.reflection)[:, 0]
     k_design = 2.0 * np.pi * 2000.0 / 343.0
@@ -1528,7 +1528,7 @@ def generate_metadiffuser_phase_match(output_dir: str) -> None:
 
     freqs = np.linspace(1600.0, 2600.0, 201)
     swept = materials.metadiffuser_reflection(
-        freqs, wells, depth=depth, period_m=period_m
+        freqs, wells, depth_m=depth, period_m=period_m
     )
     phases = np.degrees(np.angle(np.asarray(swept.reflection)))
     k = 2.0 * np.pi * freqs / 343.0
@@ -1650,7 +1650,7 @@ def generate_metadiffuser_spectrum(output_dir: str) -> None:
         [500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000], dtype=float
     )
     meta = materials.metadiffuser_diffusion_spectrum(
-        freqs, wells, depth=depth, period_m=period_m, repetitions=6
+        freqs, wells, depth_m=depth, period_m=period_m, repetitions=6
     )
     qrd = materials.predicted_diffusion_spectrum(
         period_m, freqs, depths=qrd_depths, repetitions=6, include_obliquity=False
@@ -1775,10 +1775,10 @@ def generate_helmholtz_resonator_geometry(output_dir: str) -> None:
     from phonometry import materials
 
     resonator = materials.HelmholtzResonator(
-        neck_length=1.0e-3,
-        neck_side=3.0e-3,
-        cavity_length=30.0e-3,
-        cavity_side=27.0e-3,
+        neck_length_m=1.0e-3,
+        neck_side_m=3.0e-3,
+        cavity_length_m=30.0e-3,
+        cavity_side_m=27.0e-3,
     )
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     resonator.plot(ax=ax, language=_LANG)
@@ -3729,8 +3729,8 @@ def generate_porous_model_comparison(output_dir: str) -> None:
                 sigma,
                 porosity=0.98,
                 tortuosity=1.0,
-                viscous_length=8.7e-5,
-                thermal_length=8.7e-5,
+                viscous_length_m=8.7e-5,
+                thermal_length_m=8.7e-5,
             ),
             COLOR_TERTIARY,
             ":",
@@ -4128,13 +4128,13 @@ def _slit_design(target: float = 300.0) -> CriticalCouplingResult:
     from phonometry import materials
 
     base = materials.HelmholtzResonator(
-        neck_length=1.0e-3,
-        neck_side=3.0e-3,
-        cavity_length=30.0e-3,
-        cavity_side=27.0e-3,
+        neck_length_m=1.0e-3,
+        neck_side_m=3.0e-3,
+        cavity_length_m=30.0e-3,
+        cavity_side_m=27.0e-3,
     )
     return materials.critical_coupling_design(
-        target, base, lattice_step=3.0e-2, period_m=5.0e-2
+        target, base, lattice_step_m=3.0e-2, period_m=5.0e-2
     )
 
 
@@ -4157,7 +4157,7 @@ def generate_critical_coupling_impedance(output_dir: str) -> None:
                     one,
                     design.resonator,
                     slit_height_m=float(h),
-                    lattice_step=3.0e-2,
+                    lattice_step_m=3.0e-2,
                     period_m=5.0e-2,
                 ).normalized_impedance[0]
             )
@@ -4217,7 +4217,7 @@ def generate_critical_coupling_impedance(output_dir: str) -> None:
             freq,
             design.resonator,
             slit_height_m=factor * h0,
-            lattice_step=3.0e-2,
+            lattice_step_m=3.0e-2,
             period_m=5.0e-2,
         ).normalized_impedance
         ax_l.plot(loc.real, loc.imag, color=color, linewidth=2.0, label=label)
@@ -4271,14 +4271,17 @@ def generate_slow_sound_dispersion(output_dir: str) -> None:
         freq,
         design.resonator,
         slit_height_m=design.slit_height_m,
-        lattice_step=3.0e-2,
+        lattice_step_m=3.0e-2,
         period_m=5.0e-2,
     )
     ratio = 2.0 * np.pi * freq / res.effective_wavenumber.real / c0
 
     # The resonator's own resonance: where its shunt reactance changes sign.
     z_hr = materials.helmholtz_resonator_impedance(
-        freq, design.resonator, slit_height_m=design.slit_height_m, lattice_step=3.0e-2
+        freq,
+        design.resonator,
+        slit_height_m=design.slit_height_m,
+        lattice_step_m=3.0e-2,
     )
     crossing = freq[np.flatnonzero(np.diff(np.sign(z_hr.imag)))]
     f_res = float(crossing[0]) if crossing.size else float("nan")
@@ -4371,7 +4374,11 @@ def generate_graded_slit_absorber(output_dir: str) -> None:
     step = float(freq[1] - freq[0])
     for i, (label, resonators, height, color, style) in enumerate(curves):
         alpha = materials.slit_helmholtz_absorber(
-            freq, resonators, slit_height_m=height, lattice_step=3.0e-2, period_m=5.0e-2
+            freq,
+            resonators,
+            slit_height_m=height,
+            lattice_step_m=3.0e-2,
+            period_m=5.0e-2,
         ).absorption
         ax.plot(freq, alpha, color=color, linewidth=2.2, linestyle=style, label=label)
         # The band above 0.8 is not one interval for a chain, so shade where

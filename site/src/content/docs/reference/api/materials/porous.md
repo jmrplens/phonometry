@@ -110,7 +110,7 @@ bulk density outside the range the fit was made over emits a
 
 ```python
 decoupling_frequency(
-    flow_resistivity: float,
+    flow_resistivity_pa_s_m2: float,
     *,
     porosity: float,
     frame_density: float,
@@ -132,7 +132,7 @@ matters.
 
 | Name | Description |
 | :--- | :--- |
-| `flow_resistivity` | Airflow resistivity `sigma`, in Pa s/m2 (> 0). |
+| `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2 (> 0). |
 | `porosity` | Open porosity `phi` (0 \< phi \<= 1). |
 | `frame_density` | Bulk density of the frame `rho1`, in kg/m3 (> 0): the mass of solid per unit volume of material, i.e. the density of the sample as weighed, not the density of the material the fibres are made of. |
 
@@ -149,7 +149,7 @@ matters.
 ```python
 delany_bazley(
     frequency: ArrayLike,
-    flow_resistivity: float,
+    flow_resistivity_pa_s_m2: float,
     *,
     coefficients: str | tuple[float, ...] = 'delany_bazley',
     fluid: Fluid = ...,
@@ -172,7 +172,7 @@ are still returned.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `flow_resistivity` | Airflow resistivity `sigma`, in Pa s/m2. |
+| `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. |
 | `coefficients` | Preset name from [`DELANY_BAZLEY_COEFFICIENTS`](/phonometry/reference/api/materials/porous/#delany_bazley_coefficients) (`"delany_bazley"` rockwool/fibreglass default, `"garai_pompoli"` polyester, `"dunn_davern"` / `"wu"` foams) or an explicit `(C1..C8)` tuple. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
@@ -325,12 +325,12 @@ end-corrected plug length $t' = t + 2 \delta a$ (Cox & D'Antonio
 ```python
 johnson_champoux_allard(
     frequency: ArrayLike,
-    flow_resistivity: float,
+    flow_resistivity_pa_s_m2: float,
     *,
     porosity: float,
     tortuosity: float,
-    viscous_length: float,
-    thermal_length: float,
+    viscous_length_m: float,
+    thermal_length_m: float,
     fluid: Fluid = ...,
 ) -> PorousMediumResult
 ```
@@ -363,11 +363,11 @@ $\omega \to \infty$ (Johnson et al. 1987), pinned in the tests.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `flow_resistivity` | Airflow resistivity `sigma`, in Pa s/m2. |
+| `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. |
 | `porosity` | Open porosity `phi` (0 \< phi \<= 1). |
 | `tortuosity` | High-frequency tortuosity $T = \alpha_\infty$ (>= 1). |
-| `viscous_length` | Viscous characteristic length `L`, in metres. |
-| `thermal_length` | Thermal characteristic length `L'`, in metres (physically $L' \ge L$). |
+| `viscous_length_m` | Viscous characteristic length `L`, in metres. |
+| `thermal_length_m` | Thermal characteristic length `L'`, in metres (physically $L' \ge L$). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
@@ -608,7 +608,7 @@ transfer impedance (Cox & D'Antonio Eq. (7.35)).
 ```python
 miki(
     frequency: ArrayLike,
-    flow_resistivity: float,
+    flow_resistivity_pa_s_m2: float,
     *,
     fluid: Fluid = ...,
 ) -> PorousMediumResult
@@ -632,7 +632,7 @@ Sect. 4.1).
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `flow_resistivity` | Airflow resistivity `sigma`, in Pa s/m2. |
+| `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air this model was published with). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
@@ -796,7 +796,7 @@ PorousMediumResult(
     effective_density: NDArray[np.complex128],
     bulk_modulus: NDArray[np.complex128],
     model: str,
-    flow_resistivity: float,
+    flow_resistivity_pa_s_m2: float,
     speed_of_sound: float,
     air_density: float,
 )

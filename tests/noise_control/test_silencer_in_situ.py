@@ -138,7 +138,7 @@ def test_a_non_positive_reverberation_time_is_refused() -> None:
 
 def test_the_sound_power_level_adds_the_area_and_the_field_correction() -> None:
     levels = noise_control.sound_power_level_db(
-        [80.0], area_m2=[10.0], field_correction_db=[1.0]
+        [80.0], area=[10.0], field_correction_db=[1.0]
     )
     assert levels[0] == pytest.approx(80.0 + 10.0 * math.log10(10.0) + 1.0)
 
@@ -146,7 +146,7 @@ def test_the_sound_power_level_adds_the_area_and_the_field_correction() -> None:
 def test_a_field_correction_past_three_decibels_is_reported() -> None:
     with pytest.warns(SilencerInSituWarning, match="NOTE 4"):
         noise_control.sound_power_level_db(
-            [80.0], area_m2=[10.0], field_correction_db=[4.0]
+            [80.0], area=[10.0], field_correction_db=[4.0]
         )
 
 
@@ -403,10 +403,10 @@ def test_equation_thirteen_is_a_pressure_difference() -> None:
 def test_equation_fourteen_vanishes_for_equal_areas() -> None:
     static = noise_control.static_pressure_difference_pa(
         140.0,
-        volume_flow_m3_s=3.0,
-        density_kg_m3=1.2,
-        upstream_area_m2=0.5,
-        downstream_area_m2=0.5,
+        volume_flow=3.0,
+        density=1.2,
+        upstream_area=0.5,
+        downstream_area=0.5,
     )
     assert static == pytest.approx(140.0)
 
@@ -414,10 +414,10 @@ def test_equation_fourteen_vanishes_for_equal_areas() -> None:
 def test_equation_fourteen_moves_with_the_area_change() -> None:
     static = noise_control.static_pressure_difference_pa(
         140.0,
-        volume_flow_m3_s=3.0,
-        density_kg_m3=1.2,
-        upstream_area_m2=0.5,
-        downstream_area_m2=1.0,
+        volume_flow=3.0,
+        density=1.2,
+        upstream_area=0.5,
+        downstream_area=1.0,
     )
     expected = 140.0 - 1.2 * 9.0 / 2.0 * (1.0 / 0.25 - 1.0 / 1.0)
     assert static == pytest.approx(expected)
@@ -470,7 +470,7 @@ def test_equation_twenty_nine_admits_another_gas() -> None:
 
 def test_equation_thirty_one_scales_by_the_area_ratio() -> None:
     velocity = noise_control.silencer_flow_velocity_m_s(
-        8.0, upstream_area_m2=0.5, free_area_m2=0.2
+        8.0, upstream_area=0.5, free_area_m2=0.2
     )
     assert velocity == pytest.approx(8.0 * 0.5 / 0.2)
 
@@ -829,7 +829,7 @@ def test_barron_example_3_4_mean_and_area_term() -> None:
     )
     assert round(mean, 1) == oracle.BARRON_EXAMPLE_3_4_MEAN_DB
     term = noise_control.sound_power_level_db(
-        [0.0], area_m2=[oracle.BARRON_EXAMPLE_3_4_AREA_M2]
+        [0.0], area=[oracle.BARRON_EXAMPLE_3_4_AREA_M2]
     )
     assert round(float(term[0]), 2) == oracle.BARRON_EXAMPLE_3_4_AREA_TERM_DB
     # The area itself follows from the printed 2,60 m by 2,80 m by 1,60 m high
@@ -853,12 +853,12 @@ def test_barron_example_3_3_sound_power_needs_its_field_correction() -> None:
     correction = -10.0 * math.log10(oracle.BARRON_EXAMPLE_3_3_IMPEDANCE_RAYL / 400.0)
     level = noise_control.sound_power_level_db(
         [mean],
-        area_m2=[oracle.BARRON_EXAMPLE_3_3_AREA_M2],
+        area=[oracle.BARRON_EXAMPLE_3_3_AREA_M2],
         field_correction_db=[correction],
     )
     assert round(float(level[0]), 1) == oracle.BARRON_EXAMPLE_3_3_SOUND_POWER_DB
     without = noise_control.sound_power_level_db(
-        [mean], area_m2=[oracle.BARRON_EXAMPLE_3_3_AREA_M2]
+        [mean], area=[oracle.BARRON_EXAMPLE_3_3_AREA_M2]
     )
     assert round(float(without[0]), 1) != oracle.BARRON_EXAMPLE_3_3_SOUND_POWER_DB
 
@@ -871,7 +871,7 @@ def test_ver_beranek_absorption_area_and_its_decibel_term() -> None:
         oracle.VER_BERANEK_EXAMPLE_4_2_SPEED_M_S,
     )
     assert round(absorption, 1) == oracle.VER_BERANEK_EXAMPLE_4_2_ABSORPTION_M2
-    term = noise_control.sound_power_level_db([0.0], area_m2=[absorption])
+    term = noise_control.sound_power_level_db([0.0], area=[absorption])
     assert round(float(term[0]), 1) == oracle.VER_BERANEK_EXAMPLE_4_2_AREA_TERM_DB
 
 
@@ -911,7 +911,7 @@ def test_barron_muffler_gas_densities() -> None:
         printed,
     ) in oracle.BARRON_MUFFLER_GAS_DENSITY.values():
         density = noise_control.gas_density_kg_m3(
-            temperature_c=temperature_c, ambient_pressure_pa=pressure_pa
+            temperature_c=temperature_c, atmospheric_pressure_pa=pressure_pa
         )
         assert round(density, 3) == printed
 
@@ -939,7 +939,7 @@ def test_vdi_2081_splitter_gap_velocity() -> None:
     assert round(face_velocity, 2) == 4.94
     velocity = noise_control.silencer_flow_velocity_m_s(
         face_velocity,
-        upstream_area_m2=oracle.VDI2081_SPLITTER_HOUSING_AREA_M2,
+        upstream_area=oracle.VDI2081_SPLITTER_HOUSING_AREA_M2,
         free_area_m2=oracle.VDI2081_SPLITTER_FREE_AREA_M2,
     )
     assert round(velocity, 2) == oracle.VDI2081_SPLITTER_GAP_VELOCITY_M_S
@@ -957,7 +957,7 @@ def test_fuchs_table_13_4_airway_velocities() -> None:
             free_m2 = housing_m2 / (1.0 + ratio)
             velocity = noise_control.silencer_flow_velocity_m_s(
                 flow_m3_h / 3600.0 / housing_m2,
-                upstream_area_m2=housing_m2,
+                upstream_area=housing_m2,
                 free_area_m2=free_m2,
             )
             assert math.floor(velocity) == printed

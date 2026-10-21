@@ -67,7 +67,7 @@ def test_enclosed_gas_matches_standard_note() -> None:
 
 def test_enclosed_gas_true_atmosphere() -> None:
     """A real 101 325 Pa can be passed instead of the standard's 0,1 MPa."""
-    sa = materials.enclosed_gas_stiffness(0.02, 0.9, atmospheric_pressure_pa=101_325.0)
+    sa = materials.enclosed_gas_stiffness(0.02, 0.9, static_pressure_pa=101_325.0)
     assert sa == pytest.approx(101_325.0 / (0.02 * 0.9), rel=1e-12)
 
 
@@ -162,21 +162,21 @@ def test_floating_floor_resonance_chain() -> None:
         porosity=0.9,
     )
     assert isinstance(res, materials.DynamicStiffnessResult)
-    assert res.apparent_stiffness == pytest.approx(4_934_802.2, rel=1e-6)
-    assert res.gas_stiffness == pytest.approx(1.0e5 / (0.02 * 0.9), rel=1e-9)
-    assert res.dynamic_stiffness == pytest.approx(
-        res.apparent_stiffness + res.gas_stiffness, rel=1e-12
+    assert res.apparent_stiffness_n_m3 == pytest.approx(4_934_802.2, rel=1e-6)
+    assert res.gas_stiffness_n_m3 == pytest.approx(1.0e5 / (0.02 * 0.9), rel=1e-9)
+    assert res.dynamic_stiffness_n_m3 == pytest.approx(
+        res.apparent_stiffness_n_m3 + res.gas_stiffness_n_m3, rel=1e-12
     )
     assert res.natural_frequency == pytest.approx(
-        math.sqrt(res.dynamic_stiffness / 100.0) / (2.0 * math.pi), rel=1e-9
+        math.sqrt(res.dynamic_stiffness_n_m3 / 100.0) / (2.0 * math.pi), rel=1e-9
     )
 
 
 def test_chain_high_resistivity_ignores_gas() -> None:
     """With r >= 100 kPa.s/m2 the gas term is not needed."""
     res = materials.floating_floor_resonance(25.0, 200.0, 100.0)  # default r = inf
-    assert res.gas_stiffness == 0.0
-    assert res.dynamic_stiffness == res.apparent_stiffness
+    assert res.gas_stiffness_n_m3 == 0.0
+    assert res.dynamic_stiffness_n_m3 == res.apparent_stiffness_n_m3
 
 
 def test_chain_requires_gas_inputs_below_100() -> None:
@@ -220,10 +220,10 @@ def test_non_positive_inputs_raise() -> None:
 @pytest.mark.parametrize(
     ("field_name", "message"),
     [
-        ("apparent_stiffness", "'apparent_stiffness' must be positive"),
-        ("resonant_frequency", "'resonant_frequency' must be positive"),
-        ("floor_mass_per_area", "'floor_mass_per_area' must be positive"),
-        ("gas_stiffness", "'gas_stiffness' must be non-negative"),
+        ("apparent_stiffness_n_m3", "'apparent_stiffness_n_m3' must be positive"),
+        ("resonant_frequency_hz", "'resonant_frequency_hz' must be positive"),
+        ("floor_mass_per_area_kg_m2", "'floor_mass_per_area_kg_m2' must be positive"),
+        ("gas_stiffness_n_m3", "'gas_stiffness_n_m3' must be non-negative"),
     ],
 )
 def test_a_determined_quantity_left_non_finite_is_refused(
@@ -231,9 +231,9 @@ def test_a_determined_quantity_left_non_finite_is_refused(
 ) -> None:
     """The fiche prints these four unconditionally, headline included.
 
-    A NaN ``apparent_stiffness`` becomes the BOXED ``s't = nan MN/m3`` of a
-    fully rendered accredited page and a NaN ``resonant_frequency`` prints
-    ``fr = nan Hz`` in the metrics table beside it. The one producer,
+    A NaN ``apparent_stiffness_n_m3`` becomes the BOXED ``s't = nan MN/m3`` of
+    a fully rendered accredited page and a NaN ``resonant_frequency_hz``
+    prints ``fr = nan Hz`` in the metrics table beside it. The one producer,
     :func:`floating_floor_resonance`, computes the apparent stiffness from a
     positive resonance and load mass and pins the floor mass positive, so the
     method never leaves any of the four undetermined.
@@ -264,7 +264,7 @@ def test_the_unresolved_installed_stiffness_is_kept_not_refused() -> None:
             thickness_m=0.02,
             porosity=0.9,
         )
-    assert math.isnan(res.dynamic_stiffness)
+    assert math.isnan(res.dynamic_stiffness_n_m3)
     assert math.isnan(res.natural_frequency)
 
 
@@ -619,7 +619,7 @@ class TestApparentStiffnessRow:
 
     def test_the_module_s_formula_7_is_the_hand_one(self) -> None:
         assert materials.enclosed_gas_stiffness(
-            _D, _EPSILON, atmospheric_pressure_pa=_P0
+            _D, _EPSILON, static_pressure_pa=_P0
         ) == pytest.approx(_formula_7(_P0, _D, _EPSILON), rel=1e-15)
 
     def test_intermediate_resistivity_without_s_a_is_refused(self) -> None:

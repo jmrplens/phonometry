@@ -521,7 +521,7 @@ RUNNING_RMS_DECAY_RATE_DB_PER_S = ((0.125, 31.0, 40.0), (1.0, 3.8, 4.9), (8.0, 0
 ## running_rms_decay_time
 
 ```python
-running_rms_decay_time(integration_time_s: float, *, method: str) -> float
+running_rms_decay_time(integration_time: float, *, method: str) -> float
 ```
 
 When the running r.m.s. falls to 10 % after the signal is shut off.
@@ -546,7 +546,7 @@ for the three time constants the standard tabulates.
 
 | Name | Description |
 | :--- | :--- |
-| `integration_time_s` | The averaging time `tau`, in seconds (> 0). |
+| `integration_time` | The averaging time `tau`, in seconds (> 0). |
 | `method` | `"linear"` (Table 10) or `"exponential"` (Table 11), the two averages of [`running_rms`](/phonometry/reference/api/vibration/exposure/#running_rms). |
 
 **Returns:** The time to 10 % of the initial indicated value, in seconds.
@@ -571,7 +571,7 @@ RUNNING_RMS_DECAY_TIME_S = {'linear': ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05),
 RunningRmsDecayVerification(
     *,
     method: str,
-    integration_time_s: float,
+    integration_time: float,
     measured_time_s: float,
 )
 ```
@@ -590,7 +590,7 @@ not nor be built against another row.
 | Name | Description |
 | :--- | :--- |
 | `method` | `"linear"` (Table 10) or `"exponential"` (Table 11). |
-| `integration_time_s` | The printed time constant the row is for, in seconds. |
+| `integration_time` | The printed time constant the row is for, in seconds. |
 | `measured_time_s` | The measured time to 10 % of the initial indicated value, as supplied, in seconds. |
 
 ### RunningRmsDecayVerification.deviation_s
@@ -761,7 +761,7 @@ this function does not perform.
 verify_running_rms_decay(
     measured_time_s: float,
     *,
-    integration_time_s: float,
+    integration_time: float,
     method: str,
 ) -> RunningRmsDecayVerification
 ```
@@ -783,7 +783,7 @@ against a band the standard does not give.
 | Name | Description |
 | :--- | :--- |
 | `measured_time_s` | The measured time to 10 % of the initial indicated value, in seconds (> 0). |
-| `integration_time_s` | The averaging time it was measured at, which has to be one of the printed 0,125 s, 1 s and 8 s. Keyword-only, and so is the method: two times in seconds side by side are the kind of pair a positional call gets the wrong way round in silence. |
+| `integration_time` | The averaging time it was measured at, which has to be one of the printed 0,125 s, 1 s and 8 s. Keyword-only, and so is the method: two times in seconds side by side are the kind of pair a positional call gets the wrong way round in silence. |
 | `method` | `"linear"` (Table 10) or `"exponential"` (Table 11). |
 
 **Returns:** The verdict, as a [`RunningRmsDecayVerification`](/phonometry/reference/api/vibration/instrumentation/#runningrmsdecayverification) that keeps the printed row it was judged against.

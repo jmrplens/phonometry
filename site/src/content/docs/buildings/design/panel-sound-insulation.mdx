@@ -779,7 +779,7 @@ from phonometry import building
 
 # A 2 mm x 100 mm-deep slit: its transmission peaks at the half-wavelength
 # resonances of the slit depth.
-print(building.slit_resonance_frequencies(depth=0.1, width=0.002, orders=2).round().tolist())  # [~1500, ~3100]
+print(building.slit_resonance_frequencies(depth=0.1, width_m=0.002, orders=2).round().tolist())  # [~1500, ~3100]
 
 # A wall of Rw = 50 dB with 1 % of its area left open as a slit is capped:
 print(round(float(building.composite_transmission_loss([0.99, 0.01], [50.0, 0.0])), 1))   # 20.0
@@ -804,7 +804,7 @@ import numpy as np
 from phonometry import building
 
 f = np.geomspace(100.0, 5000.0, 200)
-result = building.slit_transmission_coefficient(f, width=0.002, depth=0.1)
+result = building.slit_transmission_coefficient(f, width_m=0.002, depth=0.1)
 
 # One line: the wall section with the slit to scale.
 result.plot_geometry()
@@ -958,9 +958,9 @@ print(round(float(w) * 1e3, 3), "mW")                 # W = |F|^2 / (16 sqrt(B' 
 | `loss_factor` | float | — | > 0; default `0.01` single panel, `0.1` double wall | Total loss factor $\eta$ |
 | `band` | str | — | `'third'` (−5.5 dB) / `'octave'` (−4.0 dB) | Field-incidence correction width |
 | `mass1` / `mass2` | float | kg/m² | > 0 | Double-wall leaf surface densities |
-| `gap` | float | m | > 0 | Cavity depth $d$ |
+| `gap_m` | float | m | > 0 | Cavity depth $d$ |
 | `cavity_medium` | `PorousMediumResult` | — | default `None` | Porous fill; lowers $f_0$ |
-| `width` (slit) | float | m | > 0 | Slit width $w$. **Second** positional argument of both `slit_transmission_coefficient` and `slit_resonance_frequencies` |
+| `width_m` (slit) | float | m | > 0 | Slit width $w$. **Second** positional argument of both `slit_transmission_coefficient` and `slit_resonance_frequencies` |
 | `depth` (slit) | float | m | > 0 | Slit depth $d$ (the wall thickness). **Third** positional argument of `slit_transmission_coefficient`, **first** of `slit_resonance_frequencies`: the two functions take the pair in opposite orders |
 | `field` / `position` (slit) | str | — | `'diffuse'`/`'normal'`, `'mid'`/`'edge'` | Incident field and slit location |
 | `radius` / `depth` (hole) | float | m | > 0 | Circular-aperture radius $a$ / depth $d$ |

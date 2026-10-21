@@ -30,7 +30,7 @@ from phonometry.vibration.structural.point_mobility import infinite_plate_mobili
 _TABLE_D1_COLUMN_TWO = {
     "mass": ("mass",),
     "bar_end": ("density", "longitudinal_velocity", "area"),
-    "beam": ("density", "longitudinal_velocity", "thickness_m", "width"),
+    "beam": ("density", "longitudinal_velocity", "thickness_m", "width_m"),
     "plate": ("density", "longitudinal_velocity", "thickness_m"),
     "pipe": ("density", "longitudinal_velocity", "thickness_m", "radius"),
     "mass_spring": ("mass", "stiffness", "loss_factor"),
@@ -72,7 +72,7 @@ def test_table_d1_beam_row() -> None:
         density=600.0,
         longitudinal_velocity=4400.0,
         thickness_m=0.08,
-        width=0.12,
+        width_m=0.12,
     ) == pytest.approx(7.700564949552747e-05)
 
 
@@ -184,7 +184,9 @@ def test_table_d1_rejects_a_quantity_that_does_not_describe_the_row(
         building.TABLE_D1_QUANTITIES[structure], 1.0
     )
     surplus = next(
-        k for k in ("mass", "area", "stiffness", "radius", "width") if k not in supplied
+        k
+        for k in ("mass", "area", "stiffness", "radius", "width_m")
+        if k not in supplied
     )
     kwargs: dict[str, float] = {**supplied, surplus: 1.0}
     if structure in ("mass", "beam", "pipe", "mass_spring"):

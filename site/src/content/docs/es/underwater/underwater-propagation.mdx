@@ -237,7 +237,7 @@ ranges = np.linspace(10.0, 20_000.0, 400)
 pl = underwater.propagation_loss(ranges, 10e3, law="practical",
                                   transition_range=1000.0, temperature_c=10.0,
                                   salinity=35.0, depth=100.0)
-print(f"alpha = {pl.absorption_coefficient:.2f} dB/km")   # alpha = 0.95 dB/km
+print(f"alpha = {pl.absorption_db_per_km:.2f} dB/km")   # alpha = 0.95 dB/km
 pl.plot(language="es")   # PL total con las contribuciones de divergencia y absorción
 plt.show()
 ```
@@ -251,7 +251,7 @@ from phonometry import underwater
 ranges = np.linspace(10.0, 20_000.0, 400)
 pl = underwater.propagation_loss(ranges, 10e3, law="practical", transition_range=1000.0,
                           temperature_c=10.0, salinity=35.0, depth=100.0)
-print(round(pl.absorption_coefficient, 3), round(float(pl.pl[-1]), 1))
+print(round(pl.absorption_db_per_km, 3), round(float(pl.pl[-1]), 1))
 # 0.95 dB/km, 92.0 dB a 20 km
 
 # El mismo caso con los otros dos modelos de absorción, para que la
@@ -260,7 +260,7 @@ for model in ("ainslie-mccolm", "thorp"):
     other = underwater.propagation_loss(ranges, 10e3, law="practical",
                               transition_range=1000.0, temperature_c=10.0,
                               salinity=35.0, depth=100.0, model=model)
-    print(model, round(other.absorption_coefficient, 3))   # 0.973 / 1.15
+    print(model, round(other.absorption_db_per_km, 3))   # 0.973 / 1.15
 
 pl.plot()   # PL frente a distancia con la separación divergencia/absorción
 ```

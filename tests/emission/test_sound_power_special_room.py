@@ -93,14 +93,14 @@ def test_the_note_form_agrees_with_formula1_for_a_cube_at_342_7_m_s() -> None:
     volume = 70.0
     surface = 6.0 * volume ** (2.0 / 3.0)
     note = emission.reverberation_parameter(
-        THIRDS, volume, surface_area_m2=surface, speed_of_sound=257.0 * 8.0 / 6.0
+        THIRDS, volume, surface_area=surface, speed_of_sound=257.0 * 8.0 / 6.0
     )
     np.testing.assert_allclose(note, emission.reverberation_parameter(THIRDS, volume))
 
 
 def test_the_note_form_needs_both_its_inputs() -> None:
-    with pytest.raises(ValueError, match="surface_area_m2"):
-        emission.reverberation_parameter(THIRDS, 70.0, surface_area_m2=100.0)
+    with pytest.raises(ValueError, match="surface_area"):
+        emission.reverberation_parameter(THIRDS, 70.0, surface_area=100.0)
 
 
 def test_a_room_that_follows_the_curve_centres_on_formula_b2() -> None:

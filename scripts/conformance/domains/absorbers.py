@@ -100,8 +100,8 @@ def _chk_porous_jca_dc() -> Outcome:
         _PA_SIGMA,
         porosity=0.95,
         tortuosity=1.3,
-        viscous_length=6e-5,
-        thermal_length=1.2e-4,
+        viscous_length_m=6e-5,
+        thermal_length_m=1.2e-4,
         fluid=ph.materials.PUBLISHED_AIR,
     )
     value = float((1j * 2.0 * math.pi * f * res.effective_density)[0].real)
@@ -464,16 +464,16 @@ _SLOW_SOUND = "Slow-sound perfect absorbers (Jimenez et al. Appl. Sci. 2017)"
 )
 def _chk_slow_sound_perfect_absorption() -> Outcome:
     res = ph.materials.HelmholtzResonator(
-        neck_length=1.0e-3,
-        neck_side=3.0e-3,
-        cavity_length=30.0e-3,
-        cavity_side=27.0e-3,
+        neck_length_m=1.0e-3,
+        neck_side_m=3.0e-3,
+        cavity_length_m=30.0e-3,
+        cavity_side_m=27.0e-3,
     )
     air = ph.materials.PUBLISHED_AIR
     design = ph.materials.critical_coupling_design(
         300.0,
         res,
-        lattice_step=3.0e-2,
+        lattice_step_m=3.0e-2,
         period_m=5.0e-2,
         fluid=air,
     )
@@ -481,7 +481,7 @@ def _chk_slow_sound_perfect_absorption() -> Outcome:
         np.array([300.0]),
         design.resonator,
         slit_height_m=design.slit_height_m,
-        lattice_step=3.0e-2,
+        lattice_step_m=3.0e-2,
         period_m=5.0e-2,
         fluid=air,
     )
@@ -523,7 +523,7 @@ def _chk_slow_sound_duct_resistivity() -> Outcome:
     f = np.array([1.0e-2])
     rho, _ = ph.materials.rectangular_duct_properties(
         f,
-        side=side,
+        side_m=side,
         fluid=air,
     )
     sigma = float((1j * 2.0 * math.pi * f * rho)[0].real)

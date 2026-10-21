@@ -206,7 +206,7 @@ la longitud de onda (6.2.3). Pasar `diameter_m=` (y `shape=`) a
 `two_microphone_impedance`, `wave_decomposition` o las funciones
 `transfer_matrix_*` convierte la comprobación correspondiente en un aviso, y
 para la estimación de atenuación del anexo A en tubo rectangular
-`hydraulic_diameter(width, height)` proporciona el diámetro $4A/P$ que espera
+`hydraulic_diameter(width_m, height_m)` proporciona el diámetro $4A/P$ que espera
 `tube_attenuation_constant`.
 
 El tubo completo, muestra incluida, también se puede simular: la sección 5
@@ -520,7 +520,7 @@ importan:
   atmosférica a ±0,5 kPa (apartado 4.12); la Ec. (5) convierte la primera en
   $c_0$ y la Ec. (7) la pareja en $\rho$. La biblioteca expone las dos:
   `speed_of_sound_iso10534(temperature_c=...)` y
-  `air_density_iso10534(temperature_c=..., atmospheric_pressure_kpa=...)`. La
+  `air_density_iso10534(temperature_c=..., static_pressure_kpa=...)`. La
   temperatura va en grados Celsius, como cualquier otra temperatura de la
   biblioteca, y la presión en kilopascales, tal como la enuncia el apartado
   4.12. Las dos ecuaciones están escritas en kelvin, y la conversión ocurre
@@ -669,7 +669,7 @@ from phonometry import ReportMetadata, fluids, materials
 c0 = float(materials.speed_of_sound_iso10534(temperature_c=20.0))   # 343.29 m/s
 rho_c = fluids.characteristic_impedance(
     float(materials.air_density_iso10534(
-        temperature_c=20.0, atmospheric_pressure_kpa=101.0)), c0)   # 405.6 Pa.s/m
+        temperature_c=20.0, static_pressure_kpa=101.0)), c0)   # 405.6 Pa.s/m
 diameter_m, spacing, x1 = 0.100, 0.050, 0.100
 theta, cavity = 1.0, c0 / (4.0 * 1000.0)     # cuarto de onda a 1 kHz: 86 mm
 freqs = np.array([400, 500, 630, 800, 1000, 1250, 1600], dtype=float)

@@ -49,7 +49,7 @@ compression_wave_speed(
     shear_modulus_pa: float,
     *,
     poisson_ratio: float,
-    density_kg_m3: float,
+    density: float,
 ) -> float
 ```
 
@@ -66,7 +66,7 @@ slow at every Poisson's ratio.
 | :--- | :--- |
 | `shear_modulus_pa` | $G$, in pascals. |
 | `poisson_ratio` | $\nu$, above -1 and below 0,5. |
-| `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
+| `density` | $\rho$, in kilograms per cubic metre. |
 
 **Returns:** $\mathrm{v}_\mathrm{p}$, in metres per second.
 
@@ -120,7 +120,7 @@ right.
 shear_modulus_from_wave_speed(
     shear_wave_speed_m_s: float,
     *,
-    density_kg_m3: float,
+    density: float,
 ) -> float
 ```
 
@@ -131,7 +131,7 @@ The shear modulus $G = \mathrm{v}_\mathrm{s}^2 \rho$, Formula (5), in pascals.
 | Name | Description |
 | :--- | :--- |
 | `shear_wave_speed_m_s` | $\mathrm{v}_\mathrm{s}$, in metres per second. |
-| `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
+| `density` | $\rho$, in kilograms per cubic metre. |
 
 **Returns:** $G$, in pascals.
 
@@ -186,7 +186,7 @@ youngs_modulus_from_wave_speeds(
     compression_wave_speed_m_s: float,
     shear_wave_speed_m_s: float,
     *,
-    density_kg_m3: float,
+    density: float,
 ) -> float
 ```
 
@@ -203,7 +203,7 @@ factor of 3,8.
 | :--- | :--- |
 | `compression_wave_speed_m_s` | $\mathrm{v}_\mathrm{p}$, in metres per second. |
 | `shear_wave_speed_m_s` | $\mathrm{v}_\mathrm{s}$, in metres per second. |
-| `density_kg_m3` | $\rho$, in kilograms per cubic metre. |
+| `density` | $\rho$, in kilograms per cubic metre. |
 
 **Returns:** $E$, in pascals.
 

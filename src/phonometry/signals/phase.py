@@ -248,23 +248,24 @@ class PhaseDecompositionResult(OwnsArrays):
     :ivar frequencies: Frequency axis, in Hz.
     :ivar magnitude: :math:`\lvert H(f) \rvert` (shared by the measured
         and minimum-phase responses).
-    :ivar phase: Measured phase, unwrapped and referenced to DC, rad.
-    :ivar minimum_phase: Phase reconstructed from :math:`\lvert H \rvert`
+    :ivar phase_rad: Measured phase, unwrapped and referenced to DC, rad.
+    :ivar minimum_phase_rad: Phase reconstructed from :math:`\lvert H \rvert`
         alone, rad.
-    :ivar excess_phase: ``phase - minimum_phase``: the all-pass part, rad.
+    :ivar excess_phase_rad: ``phase_rad - minimum_phase_rad``: the all-pass part,
+        rad.
     :ivar group_delay: Group delay of the measured response, s.
     :ivar excess_group_delay: Group delay of the all-pass part alone, s
         (constant :math:`t_0` for a pure latency).
     :ivar minimum_phase_response: Complex minimum-phase response
-        :math:`\lvert H \rvert \exp(j \, \text{minimum\_phase})`.
+        :math:`\lvert H \rvert \exp(j \, \text{minimum\_phase\_rad})`.
     :ivar fs: Sample rate of the underlying record, in Hz.
     """
 
     frequencies: NDArray[np.float64]
     magnitude: NDArray[np.float64]
-    phase: NDArray[np.float64]
-    minimum_phase: NDArray[np.float64]
-    excess_phase: NDArray[np.float64]
+    phase_rad: NDArray[np.float64]
+    minimum_phase_rad: NDArray[np.float64]
+    excess_phase_rad: NDArray[np.float64]
     group_delay: NDArray[np.float64]
     excess_group_delay: NDArray[np.float64]
     minimum_phase_response: NDArray[np.complex128]
@@ -315,9 +316,9 @@ class PhaseDecompositionResult(OwnsArrays):
             self,
             frequencies=1,
             magnitude=1,
-            phase=1,
-            minimum_phase=1,
-            excess_phase=1,
+            phase_rad=1,
+            minimum_phase_rad=1,
+            excess_phase_rad=1,
             group_delay=1,
             excess_group_delay=1,
             minimum_phase_response=1,
@@ -326,9 +327,9 @@ class PhaseDecompositionResult(OwnsArrays):
             self,
             "frequencies",
             "magnitude",
-            "phase",
-            "minimum_phase",
-            "excess_phase",
+            "phase_rad",
+            "minimum_phase_rad",
+            "excess_phase_rad",
             "group_delay",
             "excess_group_delay",
             "minimum_phase_response",
@@ -393,9 +394,9 @@ def phase_decomposition(
     return PhaseDecompositionResult(
         frequencies=frequencies,
         magnitude=np.abs(resp),
-        phase=measured,
-        minimum_phase=phase_min,
-        excess_phase=phase_exc,
+        phase_rad=measured,
+        minimum_phase_rad=phase_min,
+        excess_phase_rad=phase_exc,
         group_delay=tau,
         excess_group_delay=np.asarray(tau - tau_min, dtype=np.float64),
         minimum_phase_response=reconstructed,

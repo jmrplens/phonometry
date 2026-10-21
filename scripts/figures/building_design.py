@@ -851,7 +851,7 @@ def generate_aperture_slit_geometry(output_dir: str) -> None:
     from phonometry import building
 
     _fig, ax = plt.subplots(figsize=(9.0, 6.2))
-    building.plot_aperture_geometry(0.1, ax=ax, width=0.002, language=_LANG)
+    building.plot_aperture_geometry(0.1, ax=ax, width_m=0.002, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "aperture_slit_geometry.svg")
     plt.close()

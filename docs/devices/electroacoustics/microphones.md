@@ -140,7 +140,7 @@ result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,          # 12.5 mV/Pa at 1 kHz
     directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, cardioid), frequency=1000.0),
     noise=electroacoustics.MicrophoneNoise(                             # A-weighted, V
-        voltage=1.25e-6,
+        voltage_v=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
     ),
     overload=electroacoustics.MicrophoneOverload(
@@ -149,7 +149,7 @@ result = electroacoustics.microphone_characteristics(
         thd_percent=0.5,
     ),
     electrical=electroacoustics.MicrophoneElectrical(
-        rated_impedance=150.0, minimum_load_impedance=1000.0,
+        rated_impedance_ohm=150.0, minimum_load_impedance_ohm=1000.0,
         powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
     ),
 )
@@ -253,7 +253,7 @@ noise_f = np.geomspace(20, 20000, 31)
 result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,
     noise=electroacoustics.MicrophoneNoise(
-        voltage=1.25e-6,
+        voltage_v=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
     ),
 )

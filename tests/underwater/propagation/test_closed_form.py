@@ -202,7 +202,7 @@ def test_propagation_loss_is_spreading_plus_absorption() -> None:
     expected = 20.0 * np.log10(res.range_m) + alpha * (res.range_m / 1000.0)
     np.testing.assert_allclose(res.pl, expected, rtol=1e-9)
     np.testing.assert_allclose(res.spreading + res.absorption, res.pl)
-    assert res.absorption_coefficient == pytest.approx(alpha)
+    assert res.absorption_db_per_km == pytest.approx(alpha)
 
 
 def test_propagation_loss_rejects_nonpositive_range() -> None:

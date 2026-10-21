@@ -58,6 +58,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import functools
 import importlib
 import inspect
 import pathlib
@@ -72,7 +73,7 @@ import numpy as np
 import phonometry
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Callable, Iterable, Iterator
     from types import ModuleType
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -98,7 +99,12 @@ QUANTITIES = ("pressure", "temperature", "humid")
 #: millimetres on the catalogue row it comes from, a spacing is a distance
 #: between two microphones or the hertz between two spectral lines, and a
 #: height is in metres beside a plateau height in decibels: each of them has
-#: had two units under one name in this tree.
+#: had two units under one name in this tree. A phase is in radians on a
+#: transfer function and in degrees on the calibration records beside it. A
+#: speed is a vehicle's in km/h in CNOSSOS-EU, in m/s along a flight path and
+#: in knots on an aerodrome, or a shaft's in revolutions per minute; the speed
+#: of sound is not one of them (:data:`_SOUND_SPEED`), because it has only
+#: ever been written in m/s.
 WORD_QUANTITIES = frozenset(
     {
         "diameter",
@@ -117,8 +123,20 @@ WORD_QUANTITIES = frozenset(
         "spacings",
         "height",
         "heights",
+        "phase",
+        "phases",
+        "speed",
+        "speeds",
+        "airspeed",
+        "airspeeds",
     }
 )
+
+#: The speed of sound, which a speed word inside it does not put under the
+#: rule: ``speed_of_sound``, a ``seabed_sound_speed`` and the ``wave_speed``
+#: of a bending wave are in m/s and nowhere else, so they are read without
+#: the phrase.
+_SOUND_SPEED = re.compile(r"speeds?_of_sound|sound_speeds?|wave_speeds?")
 
 #: Where a name breaks into words: at an underscore, and between a letter and
 #: the digit that numbers it (``thickness1`` is the word ``thickness`` of
@@ -150,6 +168,11 @@ PACKAGE_WORD_QUANTITIES: dict[str, frozenset[str]] = {
 #: puts it under the line, and the last one is the denominator of a speed, a
 #: density or a stiffness (``_m_s2``, ``_kg_m3``, ``_n_m``). ``_hz`` is also
 #: the other unit a spacing is written in, the spacing of spectral lines.
+#: The electrical units (``_ohm``, ``_v``, ``_ma``), the imperial ones of the
+#: ANP database (``_lb``, ``_hp``), the millisecond of a toneburst, the day of
+#: a construction site and the decibels per 100 m of SAE ARP 866A are here
+#: because the tree writes them, so the pair rule below can tell a name
+#: written with one of them from the same name written bare.
 UNITS = (
     "_kpa",
     "_pa",
@@ -169,29 +192,62 @@ UNITS = (
     "_np_per_rad",
     "_min",
     "_hours",
+    "_days",
+    "_ms",
     "_hz",
     "_m_hz",
     "_khz",
     "_kmh",
     "_kt",
+    "_rpm",
     "_m_s",
     "_m_s2",
     "_mm_s",
     "_kg",
+    "_kg_m2",
+    "_kg_m3",
+    "_lb",
+    "_kn",
+    "_hp",
     "_m2",
     "_m3",
+    "_m3_s",
+    "_mm2",
+    "_mm3",
     "_j_kg_k",
     "_j_kmol_k",
     "_j_mol_k",
     "_kg_mol",
     "_kg_kmol",
+    "_psu",
     "_v",
+    "_ma",
+    "_ohm",
+    "_mv_per_pa",
+    "_v2_per_hz",
+    "_a_per_m",
     "_per_m",
+    "_per_cm",
+    "_db_per_km",
+    "_db_per_100m",
     "_per_hz",
     "_n_m",
+    "_n_m3",
+    "_n_per_m",
     "_pa_s_m",
+    "_pa_s_m2",
+    "_kpa_s_m2",
     "_pa2_s",
 )
+
+#: Single letters that are a unit on some names and a subscript of the
+#: printed symbol on many more: newtons (``force_n``) beside the normalized
+#: ``d_n``, watts (``input_power_w``) beside the weighted ``r_w``, amperes
+#: (``current_a``) beside the A-weighted ``sound_power_level_a``, henries
+#: (``inductance_h``). The first three rules cannot take them as units, or
+#: every subscript would declare a unit it does not hold; the pair rule reads
+#: them, and lists each subscript pair in :data:`PAIR_EXEMPT` with its reason.
+PAIR_ONLY_UNITS = ("_n", "_w", "_a", "_h")
 
 #: Suffixes that say the quantity has no unit of its own: a level is in
 #: decibels and names its reference elsewhere, a ratio and an index are pure
@@ -614,6 +670,15 @@ _OF_A_DISTRIBUTION = (
     "diameter: dimensionless, with the class width it is referred to stated in "
     "the data file it is read from"
 )
+
+
+def _exempt_parameters(
+    reason: str, module: str, *owners: tuple[str, str]
+) -> dict[tuple[str, str, str], str]:
+    """One reason for several ``(owner, parameter)`` pairs of one module."""
+    return {(f"phonometry.{module}", owner, name): reason for owner, name in owners}
+
+
 EXEMPT: dict[tuple[str, str, str], str] = {
     (
         "phonometry.materials.absorbers.catalogue",
@@ -696,6 +761,96 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         "the label 1 (source A, 0.5 m) or 2 (source B, 4.0 m) that picks "
         "formula (2.3.16) or (2.3.17), a choice of source line and not a length"
     ),
+    # A phase of an activity, not of a wave: RD 1367/2007 (Annex IV
+    # A.3.4.2 b) splits an assessment period into the noise phases of the
+    # activity.
+    **_exempt_parameters(
+        "a noise phase of the activity (RD 1367/2007, Annex IV A.3.4.2 b)), "
+        "a stage of the period and not an angle",
+        "environment.assessment.spain",
+        ("PeriodAssessment", "phases"),
+        ("evaluation_period_level", "phases"),
+    ),
+    (
+        "phonometry.environment.assessment.spain",
+        "PeriodAssessment",
+        "phase_limit",
+    ): (
+        "the limit + 5 dB of Article 25.1 b iii for one noise phase of the "
+        "activity, a level and not an angle"
+    ),
+    # A phase that is an object, a count or a complex response.
+    **_exempt_parameters(
+        "the SequentialComparisonPhase or SimultaneousComparisonPhase record of "
+        "the IEC 61094-8 phase step, an object and not an angle",
+        "metrology.comparison_calibration",
+        ("sequential_comparison", "phase"),
+        ("simultaneous_comparison", "phase"),
+    ),
+    (
+        "phonometry.signals.cepstrum",
+        "CepstrumResult",
+        "linear_phase_samples",
+    ): "a count of samples, which is what the name already says",
+    (
+        "phonometry.signals.phase",
+        "PhaseDecompositionResult",
+        "minimum_phase_response",
+    ): (
+        "the complex minimum-phase response |H| exp(j minimum_phase_rad), "
+        "dimensionless, not an angle"
+    ),
+    # Verdicts held in arrays: a bool per band carries no length or angle.
+    **_exempt_parameters(
+        "a per-band verdict array, True where the rule is met; it holds no "
+        "spacing, only whether one was respected",
+        "emission.free_field_qualification",
+        ("FreeFieldCheck", "spacing_met"),
+        ("FreeFieldCheck", "equal_spacing_met"),
+        ("FreeFieldCheck", "iso26101_spacing_met"),
+    ),
+    (
+        "phonometry.vibration.structural.impact_mobility",
+        "ChannelMatchVerification",
+        "phase_within",
+    ): "a per-line verdict array, True where the phase match holds; no angle",
+    (
+        "phonometry.building.measurement.service_equipment",
+        "MeasurementDisturbanceCheck",
+        "disturbed_periods",
+    ): "the indices of the disturbed measurement periods, counts and not durations",
+    # Speeds that are a label, a logarithm or a database's own unit.
+    **_exempt_parameters(
+        'the ISO 11819-1 road speed category "low", "medium" or "high", a label',
+        "environment.sources.statistical_pass_by",
+        ("PassByRegression", "road_speed_category"),
+        ("StatisticalPassByResult", "road_speed_category"),
+        ("pass_by_regression", "road_speed_category"),
+        ("statistical_pass_by", "road_speed_category"),
+        ("statistical_pass_by_index", "road_speed_category"),
+    ),
+    (
+        "phonometry.environment.sources.statistical_pass_by",
+        "PassByRegression",
+        "lg_speed_standard_deviation",
+    ): (
+        "the standard deviation of lg(v), a decimal logarithm and a pure number "
+        "whatever unit the speed was in"
+    ),
+    **_exempt_parameters(
+        "an airspeed of the rotorcraft source database, in the unit its "
+        "hemispheres are tabulated in: the Eq. 3-10 weights read it only as a "
+        "fraction of the database span, and the docstring asks for m/s when "
+        "the track supplies the query",
+        "aircraft.rotorcraft_noise",
+        ("RotorcraftTrackState", "airspeed"),
+        ("flight_condition_weights", "airspeed"),
+        ("flight_condition_weights", "airspeeds"),
+        ("interpolated_source_level", "airspeed"),
+        ("interpolated_source_level", "airspeeds"),
+        ("rotorcraft_event_level", "airspeeds"),
+        ("rotorcraft_noise_contour", "airspeeds"),
+    ),
     # The bearing formulae use the two diameters as a ratio d/D, so the unit
     # cancels and the docstring asks only that both be the same one.
     (
@@ -740,6 +895,12 @@ class Parameter(NamedTuple):
     annotation: str = ""
     #: ``True`` when a caller can still pass this one by position.
     positional: bool = False
+    #: What the docstring says the parameter, field or property holds: its
+    #: ``:param:`` or ``:ivar:`` entry, or the first paragraph of a property.
+    doc: str = ""
+    #: The public module whose ``__all__`` publishes it, which is where a
+    #: caller meets a callable defined in a private module such as ``_plot``.
+    publisher: str = ""
 
 
 def _is_public(name: str) -> bool:
@@ -810,14 +971,86 @@ def _members(name: str, obj: object) -> Iterator[tuple[str, object]]:
             yield f"{name}.{attribute}", member
 
 
+def documented(doc: str | None, name: str) -> str:
+    """The ``:param name:`` or ``:ivar name:`` entry of a docstring, or ``""``.
+
+    The entry runs to the next field list item or the next blank line, so a
+    description wrapped over several lines is read whole.
+    """
+    if not doc:
+        return ""
+    found = re.search(
+        rf":(?:param|ivar|var)\s+{re.escape(name)}:(.*?)(?=\n\s*:[a-z]+[\s:]|\n\s*\n|\Z)",
+        inspect.cleandoc(doc),
+        re.DOTALL,
+    )
+    return " ".join(found.group(1).split()) if found else ""
+
+
+def _first_paragraph(doc: str | None) -> str:
+    """The summary paragraph of a docstring, on one line."""
+    if not doc:
+        return ""
+    return " ".join(inspect.cleandoc(doc).split("\n\n", 1)[0].split())
+
+
+def _properties(obj: object) -> Iterator[tuple[str, Callable[..., object]]]:
+    """The public properties of a class, ``functools.cached_property`` included.
+
+    A property is a name a caller reads off a result like a field, so the
+    unit rule holds it as it holds the field beside it.
+    """
+    if not inspect.isclass(obj):
+        return
+    for attribute, member in vars(obj).items():
+        if not _is_public(attribute):
+            continue
+        if isinstance(member, property) and member.fget is not None:
+            yield attribute, member.fget
+        elif isinstance(member, functools.cached_property):
+            yield attribute, member.func
+
+
+def _property_parameters(
+    module_name: str, exported: str, obj: object
+) -> Iterator[Parameter]:
+    """One :class:`Parameter` per public property of an exported class."""
+    for attribute, getter in _properties(obj):
+        try:
+            returns = inspect.signature(getter).return_annotation
+        except (TypeError, ValueError):
+            continue
+        declared = "" if returns is inspect.Signature.empty else str(returns)
+        home = getattr(obj, "__module__", module_name)
+        yield Parameter(
+            home,
+            exported,
+            attribute,
+            _where(obj),
+            annotation=declared,
+            doc=_first_paragraph(getattr(getter, "__doc__", None)),
+            publisher=module_name,
+        )
+
+
 def public_parameters() -> Iterator[Parameter]:
-    """Every parameter a caller can name in a call to the published API."""
+    """Every parameter a caller can name in a call to the published API.
+
+    The properties of the published classes come with them: a caller reads
+    ``result.phase_rad`` as it reads a field, and the unit is lost there as
+    easily.
+    """
     seen: set[tuple[str, str, str]] = set()
     for module_name, module in public_modules():
         for exported in getattr(module, "__all__", ()):
             obj = getattr(module, exported, None)
             if not callable(obj):
                 continue
+            for entry in _property_parameters(module_name, exported, obj):
+                key = (entry.module, entry.qualname, entry.name)
+                if key not in seen:
+                    seen.add(key)
+                    yield entry
             for qualname, target in _members(exported, obj):
                 if not callable(target):
                     continue
@@ -855,6 +1088,8 @@ def public_parameters() -> Iterator[Parameter]:
                         loose,
                         declared,
                         parameter.kind is parameter.POSITIONAL_OR_KEYWORD,
+                        documented(getattr(target, "__doc__", None), parameter.name),
+                        module_name,
                     )
 
 
@@ -876,7 +1111,7 @@ def names_a_quantity(name: str, module: str = "") -> bool:
     and nowhere else.
     """
     lowered = name.lower()
-    if _says(lowered, WORD_QUANTITIES):
+    if _says(_SOUND_SPEED.sub("", lowered), WORD_QUANTITIES):
         return True
     for package, scoped in PACKAGE_WORD_QUANTITIES.items():
         if (module == package or module.startswith(package + ".")) and _says(
@@ -941,6 +1176,144 @@ def offenders(
             loose.append(parameter)
     stale = [k for k in (*EXEMPT, *POSITIONAL) if k not in used]
     return unnamed, loose, stale
+
+
+#: The words of a rate at which a wave loses energy over distance. Only a
+#: rate is held to the rule below: an absorption coefficient alpha is a pure
+#: number and an attenuation in decibels is a level difference, and both keep
+#: the names they have.
+RATE_WORDS = frozenset({"absorption", "attenuation"})
+
+#: A coefficient is the other word a rate goes by: ISO 9613-1 calls its alpha
+#: in dB/m "the attenuation coefficient", and a record that holds it per band
+#: can name the field ``coefficient`` alone, which says neither word above.
+#: A coefficient documented per distance is held to the rate rule; one that
+#: is a pure number never is, because its docstring gives no distance.
+RATE_COEFFICIENT_WORDS = frozenset({"coefficient", "coefficients"})
+
+#: The endings an attenuation or absorption rate takes: decibels per metre,
+#: decibels per kilometre, or a coefficient per metre whose own unit (neper,
+#: or the power ratio of ISO 354's ``m``) the name says before ``_per_m``.
+RATE_UNITS = ("_db_per_m", "_db_per_km", "_per_m")
+
+#: A unit per distance as a docstring writes it: dB/m, dB/km, Np/m, 1/m,
+#: m^-1, "per metre" or "reciprocal metres".
+_PER_DISTANCE = re.compile(
+    r"(?:\bdB|\bNp|neper)s?\s*(?:/|per)\s*(?:k?m\b|100\s*m\b|metre|meter|kilomet)"
+    r"|\b1\s*/\s*m\b|m\^\{?-1|m\u207b\u00b9|\bper\s+(?:kilo)?met(?:re|er)"
+    r"|reciprocal\s+met(?:re|er)",
+    re.IGNORECASE,
+)
+
+#: Names under the rate rule that are not a rate, keyed by location.
+RATE_EXEMPT: dict[tuple[str, str, str], str] = {}
+
+
+def misnamed_rates(
+    parameters: Iterable[Parameter] | None = None,
+) -> tuple[list[Parameter], list[tuple[str, str, str]]]:
+    """The attenuation and absorption rates whose name hides the distance.
+
+    A name that says ``absorption``, ``attenuation`` or ``coefficient`` and
+    whose docstring gives it a unit per distance ends in one of
+    :data:`RATE_UNITS`: an ``absorption_coefficient`` in dB/km beside the
+    dimensionless ``absorption_coefficient`` of a wall reads as the wall's,
+    a ``_coefficient`` suffix is what the rule reads as a pure number, and a
+    bare ``coefficient`` in dB/m beside one in dB/100 m says neither unit.
+    """
+    found: list[Parameter] = []
+    used: set[tuple[str, str, str]] = set()
+    for parameter in public_parameters() if parameters is None else parameters:
+        lowered = parameter.name.lower()
+        says_a_rate = _says(lowered, RATE_WORDS) or _says(
+            lowered, RATE_COEFFICIENT_WORDS
+        )
+        if not says_a_rate or not _PER_DISTANCE.search(parameter.doc):
+            continue
+        if lowered.endswith(RATE_UNITS):
+            continue
+        key = (parameter.module, parameter.qualname, parameter.name)
+        if key in RATE_EXEMPT:
+            used.add(key)
+            continue
+        found.append(parameter)
+    return found, [k for k in RATE_EXEMPT if k not in used]
+
+
+#: The pressure of the medium has one stem. ``static_pressure_`` is the
+#: absolute pressure of the medium a quantity is computed in (the air, a gas
+#: or sea water), with
+#: the ``_pa`` or ``_kpa`` the clause it comes from writes it in; a gauge
+#: pressure in a duct, which some signatures carry beside it, says
+#: ``gauge`` or is the ``static_pressure_pa`` of a velocity-pressure formula.
+#: Any other word for the ambient pressure is refused.
+_AMBIENT_PRESSURE = re.compile(
+    r"(?:^|_)(?:ambient|barometric|atmospheric|air|absolute|environmental"
+    r"|outdoor|outside)_pressure(?:_|$)"
+)
+
+#: Where ``atmospheric_pressure_`` is the name, with the reason: the outside
+#: atmosphere where the same method measures a stream pressure in a duct or
+#: a pipe, so ``static_pressure_`` would read as the stream's.
+_OUTSIDE_THE_STREAM = (
+    "the atmosphere outside the duct or pipe, beside the gauge static "
+    "pressure of the stream the same method measures"
+)
+ATMOSPHERIC_ADMITTED: dict[tuple[str, str, str], str] = {
+    (
+        "phonometry.noise_control.valves",
+        "pipe_transmission_loss",
+        "atmospheric_pressure_pa",
+    ): _OUTSIDE_THE_STREAM,
+    (
+        "phonometry.noise_control.valves",
+        "DownstreamPipe",
+        "atmospheric_pressure_pa",
+    ): _OUTSIDE_THE_STREAM,
+    (
+        "phonometry.noise_control.silencer_measurement",
+        "normal_air_density",
+        "atmospheric_pressure_pa",
+    ): _OUTSIDE_THE_STREAM,
+    (
+        "phonometry.noise_control.silencer_in_situ",
+        "gas_density_kg_m3",
+        "atmospheric_pressure_pa",
+    ): _OUTSIDE_THE_STREAM,
+    (
+        "phonometry.noise_control.silencer_in_situ",
+        "",
+        "ISO11820_ATMOSPHERIC_PRESSURE_PA",
+    ): _OUTSIDE_THE_STREAM,
+}
+
+
+def ambient_pressure_names(
+    parameters: Iterable[Parameter] | None = None,
+) -> tuple[list[PublicName], list[tuple[str, str, str]]]:
+    """The names that call the pressure of the medium anything but its stem.
+
+    Parameters, fields and properties are read from the walk, and the
+    published constants beside them, so a default does not keep a second
+    word alive under the name it defaults.
+    """
+    found: list[PublicName] = []
+    used: set[tuple[str, str, str]] = set()
+    entries: list[PublicName] = [
+        PublicName(p.module, p.qualname, p.name, p.where)
+        for p in (public_parameters() if parameters is None else parameters)
+    ]
+    entries.extend(entry for entry, _ in public_constants())
+    for entry in entries:
+        lowered = entry.name.lower()
+        if not _AMBIENT_PRESSURE.search(lowered):
+            continue
+        key = (entry.module, entry.qualname, entry.name)
+        if key in ATMOSPHERIC_ADMITTED and "atmospheric_pressure" in lowered:
+            used.add(key)
+            continue
+        found.append(entry)
+    return found, [k for k in ATMOSPHERIC_ADMITTED if k not in used]
 
 
 class PublicName(NamedTuple):
@@ -1082,6 +1455,402 @@ def misspelled(
     return found, [k for k in SPELLING_EXEMPT if k not in used]
 
 
+#: Where the bare name and the same name with a unit are allowed to stand
+#: side by side in one subpackage, keyed by ``(subpackage, bare, suffixed)``,
+#: with the reason. Every other pair is one quantity spelled two ways, and
+#: the rule above says which way: with the unit where a second unit competes
+#: for the word, without it where the word only ever had one.
+_FREQUENCY_HZ = (
+    "a frequency is in hertz throughout; the bare word is a result's stated "
+    "frequency or a vectorised argument, and frequency_hz the scalar argument "
+    "the 4.0 vocabulary keeps (upgrading guide, One spelling per concept)"
+)
+_KHZ_FORMULAS = (
+    "the underwater formulas behind the inputs are printed with f in kHz and "
+    "ranges in km beside a dB/km absorption, so the inputs name their unit "
+    "and the result fields keep the axis vocabulary"
+)
+_SUBSCRIPT = "the suffix is a subscript of the printed symbol, not a unit"
+
+
+def _pair(
+    reason: str, package: str, *pairs: tuple[str, str]
+) -> dict[tuple[str, str, str], str]:
+    """One reason for several ``(bare, suffixed)`` pairs of one subpackage."""
+    return {(f"phonometry.{package}", bare, unit): reason for bare, unit in pairs}
+
+
+_A_WEIGHTED = "the A-weighted figure beside the band or unweighted one; " + _SUBSCRIPT
+_WEIGHTED = (
+    "the weighted single-number rating of ISO 717 or ISO 11654 beside the "
+    "band values it is read from; " + _SUBSCRIPT
+)
+_NORMALIZED = "the normalized quantity beside the raw one; " + _SUBSCRIPT
+_PATH_AND_RATE = (
+    "an attenuation over a path, in dB, beside the rate per distance it is "
+    "accumulated from"
+)
+
+PAIR_EXEMPT: dict[tuple[str, str, str], str] = {
+    **_pair(
+        "the engine power setting P that indexes the NPD curves, in whatever "
+        "unit the ANP database tabulates it (pounds of thrust, per cent), "
+        "beside the propulsive power of a propeller engine in horsepower",
+        "aircraft",
+        ("power", "power_hp"),
+    ),
+    **_pair(
+        _NORMALIZED,
+        "building",
+        ("d", "d_n"),
+        ("d_2m", "d_2m_n"),
+        ("l_xy", "l_xy_n"),
+    ),
+    **_pair(
+        _WEIGHTED,
+        "building",
+        ("d_2m_nt", "d_2m_nt_w"),
+        ("delta_l", "delta_l_w"),
+        ("l_prime_n", "l_prime_n_w"),
+        ("r", "r_w"),
+        ("r_direct", "r_direct_w"),
+        ("r_prime", "r_prime_w"),
+        ("r_tr_s", "r_tr_s_w"),
+    ),
+    **_pair(
+        "a loudspeaker impedance curve (frequencies, modulus) or a "
+        "LoopImpedance record, beside the modulus of an impedance in ohms",
+        "electroacoustics",
+        ("impedance", "impedance_ohm"),
+    ),
+    **_pair(
+        "the normalized radiation resistance R1(2ka) of a piston, a pure "
+        "number, beside a series resistance in ohms",
+        "electroacoustics",
+        ("resistance", "resistance_ohm"),
+    ),
+    **_pair(
+        _A_WEIGHTED,
+        "emission",
+        ("achieved_grade", "achieved_grade_a"),
+        ("background_requirement_met", "background_requirement_met_a"),
+        ("expanded_uncertainty", "expanded_uncertainty_a"),
+        ("sigma_r0", "sigma_r0_a"),
+        ("sigma_tot", "sigma_tot_a"),
+        ("sound_energy_level", "sound_energy_level_a"),
+        ("sound_power_level", "sound_power_level_a"),
+    ),
+    **_pair(
+        "the TrackDecayRate records of a reference-track check, beside the "
+        "rates in dB/m one of them holds",
+        "environment",
+        ("decay_rates", "decay_rates_db_per_m"),
+    ),
+    **_pair(
+        "the table limit of a Spanish evaluation period, in dB, beside a "
+        "lower limit on a track decay rate in dB/m",
+        "environment",
+        ("limit", "limit_db_per_m"),
+    ),
+    **_pair(
+        "the CNOSSOS-EU levels L_WR and L_WP beside the coefficients A_R and "
+        "A_P they are computed from; " + _SUBSCRIPT,
+        "environment",
+        ("propulsion", "propulsion_a"),
+        ("rolling", "rolling_a"),
+    ),
+    **_pair(
+        "the weighted sound absorption coefficient of ISO 11654 beside the "
+        "band coefficients; " + _SUBSCRIPT,
+        "materials",
+        ("alpha", "alpha_w"),
+    ),
+    **_pair(
+        "the four transfer functions of the one-load method beside those of "
+        "load a of the two-load method, a label",
+        "materials",
+        ("load", "load_a"),
+    ),
+    **_pair(
+        "the catalogue row names the unit of every column, because the books "
+        "it is transcribed from print the frame density in several; the "
+        "models take the same kg/m3",
+        "materials",
+        ("frame_density", "frame_density_kg_m3"),
+    ),
+    **_pair(
+        "a recorded response beside the response to code a of a Golay pair, a label",
+        "room",
+        ("recorded", "recorded_a"),
+    ),
+    **_pair(
+        "the probability density p2(v) of the DIN 45672-2 amplitude "
+        "distribution, in 1/(mm/s), beside the mass density of a rod in kg/m3",
+        "vibration",
+        ("density", "density_per_mm_s"),
+    ),
+    **_pair(
+        "the velocity power spectral density in (mm/s)2/Hz the railway "
+        "functions read, beside the voltage density in V2/Hz of the analyser "
+        "that velocity_psd_from_voltage converts from",
+        "vibration",
+        ("psd", "psd_v2_per_hz"),
+    ),
+    **_pair(
+        "the airspeed of the rotorcraft database, in whatever unit its "
+        "hemispheres are tabulated in, beside the airspeed the track "
+        "kinematics derive in m/s",
+        "aircraft",
+        ("airspeed", "airspeed_m_s"),
+    ),
+    **_pair(
+        'the band width "third" or "octave", a label, beside the centre '
+        "frequency of one band a catalogue accessor takes",
+        "building",
+        ("band", "band_hz"),
+    ),
+    **_pair(
+        "Delta(Rw + C), the C spectrum adaptation term of ISO 717-1, not degrees "
+        "Celsius",
+        "building",
+        ("delta_rw", "delta_rw_c"),
+    ),
+    **_pair(_FREQUENCY_HZ, "electroacoustics", ("frequency", "frequency_hz")),
+    **_pair(
+        "the MicrophoneNoise record of Clause 17 beside the duration of a "
+        "stretch of noise in a combined test signal",
+        "electroacoustics",
+        ("noise", "noise_s"),
+    ),
+    **_pair(
+        "a time signal x(t) or y(t), or the dimensionless 2ka of a piston, "
+        "beside the coordinates of a point in metres",
+        "electroacoustics",
+        ("x", "x_m"),
+        ("y", "y_m"),
+    ),
+    **_pair(
+        "the PlantMeasurementContour record beside the vertices it is built "
+        "from, in metres",
+        "emission",
+        ("contour", "contour_m"),
+    ),
+    **_pair(_FREQUENCY_HZ, "emission", ("frequency", "frequency_hz")),
+    **_pair(
+        "the number N of measurement positions beside their coordinates",
+        "emission",
+        ("positions", "positions_m"),
+    ),
+    **_pair(
+        _PATH_AND_RATE,
+        "environment",
+        ("attenuation_db", "attenuation_db_per_m"),
+        ("air_attenuation_db", "air_attenuation_db_per_km"),
+    ),
+    **_pair(_FREQUENCY_HZ, "environment", ("frequency", "frequency_hz")),
+    **_pair(
+        "the label 1 or 2 that picks a CNOSSOS-EU source line beside a height "
+        "in metres",
+        "environment",
+        ("height", "height_m"),
+    ),
+    **_pair(
+        "a roughness limit in dB per wavelength beside a decay-rate limit in dB/m",
+        "environment",
+        ("limit_db", "limit_db_per_m"),
+    ),
+    **_pair(
+        'the evaluation period "day", "evening" or "night", a label, beside '
+        "the durations of the periods in hours",
+        "environment",
+        ("period", "period_hours"),
+    ),
+    **_pair(
+        "a roughness spectrum, a roughness class or the level L_R,TOT in dB, "
+        "beside a raw roughness record in micrometres",
+        "environment",
+        ("roughness", "roughness_um"),
+    ),
+    **_pair(_FREQUENCY_HZ, "hearing", ("frequency", "frequency_hz")),
+    **_pair(
+        "the absorption coefficient alpha_s of ISO 354; " + _SUBSCRIPT,
+        "materials",
+        ("alpha", "alpha_s"),
+    ),
+    **_pair(
+        "the complex shear modulus the Biot model takes, beside the real "
+        "modulus a catalogue row holds in the unit the catalogue holds every "
+        "row in",
+        "materials",
+        ("shear_modulus", "shear_modulus_pa"),
+    ),
+    **_pair(_FREQUENCY_HZ, "metrology", ("frequency", "frequency_hz")),
+    **_pair(
+        "the phase record of a comparison calibration, an object, beside the "
+        "phase of a sensitivity in degrees",
+        "metrology",
+        ("phase", "phase_deg"),
+    ),
+    **_pair(_FREQUENCY_HZ, "room", ("frequency", "frequency_hz")),
+    **_pair(
+        "the number N of source and receiver positions beside the distances "
+        "of the microphones in metres",
+        "room",
+        ("positions", "positions_m"),
+    ),
+    **_pair(
+        "the sound-speed map c beside the S-wave speed c_s of an elastic "
+        "cell; " + _SUBSCRIPT,
+        "simulation",
+        ("c", "c_s"),
+    ),
+    **_pair(
+        "the volume-absorption loss in dB, or the name of the model applied, "
+        "beside the absorption rate in dB/km",
+        "underwater",
+        ("absorption", "absorption_db_per_km"),
+    ),
+    **_pair(
+        _KHZ_FORMULAS,
+        "underwater",
+        ("frequencies", "frequencies_hz"),
+        ("frequency", "frequency_hz"),
+        ("ranges", "ranges_m"),
+    ),
+    **_pair(
+        "the acceleration, displacement and velocity ratings AR, DR and VR "
+        "that index the tables of ISO 20816-9, or an acceleration record a "
+        "Signal carries with its own calibration, beside bare arrays in their "
+        "units",
+        "vibration",
+        ("acceleration", "acceleration_m_s2"),
+        ("displacement", "displacement_um"),
+        ("velocity", "velocity_mm_s"),
+    ),
+    **_pair(
+        'the analysis band width "octave" or "third", a label, beside a '
+        "frequency band (f_low, f_high) in hertz",
+        "vibration",
+        ("band", "band_hz"),
+    ),
+    **_pair(
+        "a dimensionless coefficient of a building code beside the k of a "
+        "peak-velocity law in mm/s",
+        "vibration",
+        ("coefficient", "coefficient_mm_s"),
+    ),
+    **_pair(
+        'the duration class "short_term" or "long_term" of DIN 4150-3, a '
+        "label, beside durations in seconds and the working days of a "
+        "construction site",
+        "vibration",
+        ("duration", "duration_days"),
+        ("duration", "duration_s"),
+    ),
+    **_pair(_FREQUENCY_HZ, "vibration", ("frequency", "frequency_hz")),
+    **_pair(
+        "the KB_FTr of a railway assessment spread one class below or above, "
+        "beside the limits of a meter verification in per cent",
+        "vibration",
+        ("lower", "lower_percent"),
+        ("upper", "upper_percent"),
+    ),
+}
+
+
+def _subpackage(module: str) -> str:
+    """The first-level package a module belongs to, the root for a private one."""
+    parts = module.split(".")
+    if len(parts) < 2 or not _is_public(parts[1]):
+        return parts[0]
+    return ".".join(parts[:2])
+
+
+def _package_of(parameter: Parameter) -> str:
+    """The subpackage a caller meets a name in.
+
+    That is the subpackage of the module that defines it, or, for a callable
+    defined in a private module (a ``_plot`` renderer published by
+    ``building``), of the public module that publishes it.
+    """
+    home = _subpackage(parameter.module)
+    if home == "phonometry" and parameter.publisher:
+        return _subpackage(parameter.publisher)
+    return home
+
+
+#: Every unit the pair rule reads, single letters included.
+_PAIR_UNITS = frozenset((*UNITS, *RATE_UNITS, *PER_HOUR_UNITS, *PAIR_ONLY_UNITS))
+
+#: The words a compound unit is written in, ``per`` and the decibel aside:
+#: ``_kg_m3`` is ``kg`` and ``m3``, ``_pa_s_m2`` is ``pa``, ``s`` and ``m2``.
+_UNIT_WORDS = frozenset(
+    word for unit in _PAIR_UNITS for word in unit.strip("_").split("_")
+) - {"per", "db"}
+
+
+def is_unit_tail(tail: str) -> bool:
+    """Whether what follows a name and an underscore is a unit.
+
+    One word is a unit when :data:`UNITS` or :data:`PAIR_ONLY_UNITS` lists it,
+    so the ``j`` of an element ``area_j`` is not one. Several words are a
+    unit when each is a word of a listed unit, ``per`` stands between two of
+    them and ``db`` only opens a rate (``db_per_100m``): a compound the tree
+    has not written yet is read like the ones it has, and a level's bare
+    ``_db`` is not a unit (:data:`DIMENSIONLESS`).
+    """
+    words = tail.split("_")
+    if len(words) == 1:
+        return f"_{tail}" in _PAIR_UNITS
+    for i, word in enumerate(words):
+        if word == "db":
+            if i or words[1] != "per":
+                return False
+        elif word == "per":
+            if i == len(words) - 1 or words[i + 1] in {"per", "db"}:
+                return False
+        elif word not in _UNIT_WORDS:
+            return False
+    return True
+
+
+def bare_and_suffixed(
+    parameters: Iterable[Parameter] | None = None,
+) -> tuple[list[tuple[str, str, str, str, str]], list[tuple[str, str, str]]]:
+    """Names written both bare and with a unit inside one subpackage, and stale keys.
+
+    The three unit rules hold a name to its unit one name at a time, so they
+    cannot see that ``volume`` and ``volume_m3`` sit in the same package, or
+    a ``density`` beside a ``density_kg_m3``. A caller who has typed one has
+    every reason to expect the other to mean the same thing in the same unit,
+    and the pair says nothing about whether it does. A name is paired with
+    every shorter public name of its package that it extends by a unit
+    (:func:`is_unit_tail`), compound units included, and each pair is
+    reported with the place of the bare spelling and of the suffixed one.
+    """
+    names: dict[str, dict[str, str]] = {}
+    for parameter in public_parameters() if parameters is None else parameters:
+        bucket = names.setdefault(_package_of(parameter), {})
+        owner = f"{parameter.qualname}({parameter.name})"
+        bucket.setdefault(parameter.name, f"{owner}  <- {parameter.where}")
+    found: list[tuple[str, str, str, str, str]] = []
+    used: set[tuple[str, str, str]] = set()
+    for package, spelled in sorted(names.items()):
+        for name in sorted(spelled):
+            for cut, char in enumerate(name):
+                if char != "_" or not cut:
+                    continue
+                bare, tail = name[:cut], name[cut + 1 :]
+                if bare not in spelled or not tail or not is_unit_tail(tail.lower()):
+                    continue
+                key = (package, bare, name)
+                if key in PAIR_EXEMPT:
+                    used.add(key)
+                    continue
+                found.append((package, bare, name, spelled[bare], spelled[name]))
+    return found, [k for k in PAIR_EXEMPT if k not in used]
+
+
 def holds_a_number(value: object) -> bool:
     """Whether a constant holds a bare number a reader could take in a wrong unit.
 
@@ -1179,6 +1948,47 @@ def _report_names(
         )
 
 
+def _report_closing(
+    rates: list[Parameter],
+    pressures: list[PublicName],
+    pairs: list[tuple[str, str, str, str, str]],
+) -> None:
+    """Print the findings of the rate, pressure-stem and pair rules."""
+    if rates:
+        print("::error::an attenuation or absorption rate hides its distance")
+        print(f"{len(rates)} rate(s) documented per distance end in no rate unit:")
+        for parameter in sorted(rates):
+            print(f"  {parameter.qualname}({parameter.name})  <- {parameter.where}")
+        print(
+            "  -> end the name in "
+            + ", ".join(RATE_UNITS)
+            + "; a name that is not a rate goes in RATE_EXEMPT with its reason."
+        )
+    if pressures:
+        print("::error::the pressure of the medium is called by another stem")
+        print(f"{len(pressures)} name(s) use a stem other than static_pressure_:")
+        for entry in sorted(pressures):
+            dotted = ".".join(p for p in (entry.qualname, entry.name) if p)
+            print(f"  {dotted}  <- {entry.where}")
+        print(
+            "  -> static_pressure_pa or static_pressure_kpa, as the clause "
+            "writes it; atmospheric_pressure_ only for the outside atmosphere "
+            "beside a stream pressure, listed in ATMOSPHERIC_ADMITTED."
+        )
+    if pairs:
+        print("::error::one name is public both bare and with its unit")
+        print(f"{len(pairs)} pair(s) inside one subpackage:")
+        for package, bare, suffixed, at_bare, at_suffixed in pairs:
+            print(f"  {package}: {bare} / {suffixed}")
+            print(f"      {at_bare}")
+            print(f"      {at_suffixed}")
+        print(
+            "  -> keep the unit where a second unit competes for the word and "
+            "drop it where the word only ever had one; two different "
+            "quantities under one word go in PAIR_EXEMPT with the reason."
+        )
+
+
 def main() -> int:
     """Report every public name whose unit is hidden or spelled the retired way."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -1188,8 +1998,27 @@ def main() -> int:
     unnamed, loose, stale = offenders(parameters)
     misspellings, stale_spellings = misspelled(parameters)
     constants, stale_constants = unitless_constants()
-    stale_keys = [*stale, *stale_spellings, *stale_constants]
-    if not (unnamed or loose or misspellings or constants or stale_keys):
+    rates, stale_rates = misnamed_rates(parameters)
+    pressures, stale_pressures = ambient_pressure_names(parameters)
+    pairs, stale_pairs = bare_and_suffixed(parameters)
+    stale_keys = [
+        *stale,
+        *stale_spellings,
+        *stale_constants,
+        *stale_rates,
+        *stale_pressures,
+        *stale_pairs,
+    ]
+    if not (
+        unnamed
+        or loose
+        or misspellings
+        or constants
+        or rates
+        or pressures
+        or pairs
+        or stale_keys
+    ):
         print(
             "Every public parameter and constant under the rule names its unit, "
             "in the one spelling the tree uses, and asks for it by name."
@@ -1220,6 +2049,7 @@ def main() -> int:
             "POSITIONAL with the reason."
         )
     _report_names(misspellings, constants)
+    _report_closing(rates, pressures, pairs)
     for key in stale_keys:
         print(
             f"::error::an exemption at the top of scripts/check_parameter_units.py "

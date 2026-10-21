@@ -178,7 +178,7 @@ for h, ln, lc, wn, wc in filas:
     pozos.append(materials.MetadiffuserWell(h * mm, (resonador, resonador)))
 
 f = np.arange(1800.0, 2601.0, 5.0)
-panel = materials.metadiffuser_reflection(f, pozos, depth=0.02, period_m=0.07)
+panel = materials.metadiffuser_reflection(f, pozos, depth_m=0.02, period_m=0.07)
 alfa1 = panel.well_absorption[0]
 print(round(float(alfa1.max()), 2), int(f[alfa1.argmax()]))  # 0.99 2305
 
@@ -193,7 +193,7 @@ print(round(float(panel.absorption.max()), 3), peak)
 
 # Comparación de campo lejano: la secuencia de cinco pozos repetida seis
 # veces (2,1 m).
-polar = materials.metadiffuser_polar_response(2000.0, pozos, depth=0.02,
+polar = materials.metadiffuser_polar_response(2000.0, pozos, depth_m=0.02,
                                               period_m=0.07, repetitions=6)
 print(round(polar.coefficient, 2))                           # 0.32
 ```
@@ -219,7 +219,7 @@ plt.show()
 
 # A partir de una lista de pozos a secas, sin calcular antes una reflexión, el
 # mismo dibujo sale de materials.plot_metadiffuser_panel_geometry(
-#     pozos, depth=0.02, period_m=0.07).
+#     pozos, depth_m=0.02, period_m=0.07).
 ```
 
 </details>
@@ -287,7 +287,7 @@ pozos = [
 
 # El panel metadifusor y el QRD al que se ajustó, a 2 kHz y con seis
 # repeticiones del periodo (paneles de 2,1 m).
-meta = materials.metadiffuser_polar_response(2000.0, pozos, depth=0.02, period_m=0.07,
+meta = materials.metadiffuser_polar_response(2000.0, pozos, depth_m=0.02, period_m=0.07,
                                              repetitions=6)
 secuencia = np.roll(materials.quadratic_residue_sequence(5), -1)
 profundidades = secuencia * (343.0 / 500.0) / (2 * 5)
@@ -348,7 +348,7 @@ from phonometry import materials
 
 # pozos: las cinco ranuras publicadas del ejemplo de arriba.
 panel = materials.metadiffuser_reflection(np.array([2000.0]), pozos,
-                                          depth=0.02, period_m=0.07)
+                                          depth_m=0.02, period_m=0.07)
 fases = np.degrees(np.angle(panel.reflection[:, 0]))
 print(np.round(np.abs(panel.reflection[:, 0]), 2))  # [0.97 1.   1.   0.97 0.98]
 print(np.round(fases))                              # [ 75. -71. -71.  74.   2.]
@@ -380,7 +380,7 @@ import matplotlib.pyplot as plt
 
 # `pozos` y `profundidades` vienen de los bloques de arriba.
 barrido = np.linspace(1600.0, 2600.0, 201)
-barrida = materials.metadiffuser_reflection(barrido, pozos, depth=0.02, period_m=0.07)
+barrida = materials.metadiffuser_reflection(barrido, pozos, depth_m=0.02, period_m=0.07)
 k_barrido = 2 * np.pi * barrido / 343.0
 fase_objetivo = np.angle(np.exp(-2j * np.outer(profundidades, k_barrido)))
 error = np.degrees(np.angle(np.exp(1j * (np.angle(barrida.reflection)
@@ -425,7 +425,7 @@ def panel_con(cavidad_mm):
         resonador = materials.HelmholtzResonator(ln * mm, wn * mm, lc * mm, wc * mm)
         construidos.append(materials.MetadiffuserWell(h * mm, (resonador, resonador)))
     return materials.metadiffuser_reflection(np.array([2000.0]), construidos,
-                                             depth=0.02, period_m=0.07)
+                                             depth_m=0.02, period_m=0.07)
 
 mejor = None
 for cavidad_mm in np.linspace(4.0, 22.0, 60):
@@ -484,7 +484,7 @@ import numpy as np
 # diferencia entre ellos es cómo llega cada pozo a su fase.
 bandas = np.array([500, 630, 800, 1000, 1250, 1600, 2000,
                    2500, 3150, 4000, 5000], float)
-meta = materials.metadiffuser_diffusion_spectrum(bandas, pozos, depth=0.02,
+meta = materials.metadiffuser_diffusion_spectrum(bandas, pozos, depth_m=0.02,
                                                  period_m=0.07, repetitions=6)
 qrd = materials.predicted_diffusion_spectrum(
     0.07, bandas, depths=profundidades, repetitions=6, include_obliquity=False)

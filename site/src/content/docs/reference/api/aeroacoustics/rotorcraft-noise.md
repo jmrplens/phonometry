@@ -178,8 +178,8 @@ contour entry points hand it per track point.
 FlightPathKinematics(
     times: NDArray[np.float64],
     positions: NDArray[np.float64],
-    ground_speed: NDArray[np.float64],
-    airspeed: NDArray[np.float64],
+    ground_speed_m_s: NDArray[np.float64],
+    airspeed_m_s: NDArray[np.float64],
     heading: NDArray[np.float64],
     curvature: NDArray[np.float64],
     bank_angle_deg: NDArray[np.float64],
@@ -197,8 +197,8 @@ All rates come from central finite differences around each track point.
 | :--- | :--- |
 | `times` | Track times, in s, shape `(N,)`. |
 | `positions` | Track positions `(x, y, z)`, in metres, shape `(N, 3)`. |
-| `ground_speed` | Ground speed `V_g` (Eq. 16), in m/s, shape `(N,)`. |
-| `airspeed` | Airspeed `V_A` (Eq. 17, zero-wind), in m/s, shape `(N,)`. |
+| `ground_speed_m_s` | Ground speed `V_g` (Eq. 16), in m/s, shape `(N,)`. |
+| `airspeed_m_s` | Airspeed `V_A` (Eq. 17, zero-wind), in m/s, shape `(N,)`. |
 | `heading` | Heading $\Theta = \operatorname{atan2}(\Delta X, \Delta Y)$ (Eq. 19), in degrees, shape `(N,)`. |
 | `curvature` | Track curvature $K = \Delta\Theta/\Delta S$ (Eq. 18), in rad/m, shape `(N,)` (zero where the ground speed vanishes). |
 | `bank_angle_deg` | Bank angle $\Phi = \arctan(K \cdot V_\mathrm{g}^2/g)$ (Eq. 20), in degrees, positive starboard down, shape `(N,)`. |
@@ -539,7 +539,7 @@ RotorcraftAtmosphere(
     *,
     temperature_c: float = 25.0,
     relative_humidity_percent: float = 70.0,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
     atmospheric_method: str = 'iso9613',
 )
 ```
@@ -560,7 +560,7 @@ method about, and at a different reference temperature.
 | :--- | :--- |
 | `temperature_c` | Air temperature, in °C (default 25, ICAO reference). |
 | `relative_humidity_percent` | Relative humidity, in % (default 70). |
-| `atmospheric_pressure_kpa` | Ambient pressure, in kPa (default 101.325). |
+| `static_pressure_kpa` | Ambient pressure, in kPa (default 101.325). |
 | `atmospheric_method` | `"iso9613"` for the pure-tone Eq. 26/27 term (the guidance text), or `"sae"` for the SAE ARP 5534 band-integrated mapping used by the NORAH2 reference implementation (they agree to ~0.05 dB below 3.15 kHz). |
 
 ## RotorcraftEventResult
@@ -571,8 +571,8 @@ RotorcraftEventResult(
     emission_times: NDArray[np.float64],
     times: NDArray[np.float64],
     distances_m: NDArray[np.float64],
-    azimuth: NDArray[np.float64],
-    polar: NDArray[np.float64],
+    azimuth_deg: NDArray[np.float64],
+    polar_deg: NDArray[np.float64],
     band_levels: NDArray[np.float64],
     a_levels: NDArray[np.float64],
     la_max: float,
@@ -594,8 +594,8 @@ A rotorcraft single-event time history at a receiver (Doc 32 §6.1).
 | `emission_times` | Emission times `t_e`, in s, shape `(K,)`. |
 | `times` | Recorded times $t_\mathrm{r} = t_\mathrm{e} + r/c$ (Eq. 22), in s, shape `(K,)`. |
 | `distances_m` | Slant distance `r` per step, in metres, shape `(K,)`. |
-| `azimuth` | Emission azimuth `φ` per step, in degrees, shape `(K,)`. |
-| `polar` | Emission polar angle `θ` per step, in degrees, shape `(K,)`. |
+| `azimuth_deg` | Emission azimuth `φ` per step, in degrees, shape `(K,)`. |
+| `polar_deg` | Emission polar angle `θ` per step, in degrees, shape `(K,)`. |
 | `band_levels` | Received (unweighted) band levels, in dB, shape `(K, F)`. |
 | `a_levels` | A-weighted overall level `L_A(t)` per step, in dB(A), shape `(K,)`. |
 | `la_max` | Maximum A-weighted level `LASmax`, in dB(A). |
@@ -651,8 +651,8 @@ and an optional elevation model replaces the flat plane with real terrain.
 ```python
 RotorcraftHemisphere(
     frequencies: NDArray[np.float64],
-    azimuth: NDArray[np.float64],
-    polar: NDArray[np.float64],
+    azimuth_deg: NDArray[np.float64],
+    polar_deg: NDArray[np.float64],
     levels: NDArray[np.float64],
     *,
     distance_m: float = 60.0,
@@ -671,8 +671,8 @@ lookup.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Band centre frequencies, in Hz, shape `(F,)`. |
-| `azimuth` | Azimuth angles `φ`, in degrees, shape `(A,)` (`-90` port … `+90` starboard). |
-| `polar` | Polar angles `θ`, in degrees, shape `(P,)` (`0` forward … `180` rearward). |
+| `azimuth_deg` | Azimuth angles `φ`, in degrees, shape `(A,)` (`-90` port … `+90` starboard). |
+| `polar_deg` | Polar angles `θ`, in degrees, shape `(P,)` (`0` forward … `180` rearward). |
 | `levels` | Band levels, in dB, shape `(A, P, F)`. |
 | `distance_m` | Reference distance, in metres (default 60). The standard NORAH database uses 60 m; when the data uses another polar distance (e.g. 70 m hover rings), pass this value as `reference_distance_m` to [`spherical_spreading_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#spherical_spreading_adjustment) and [`atmospheric_adjustment`](/phonometry/reference/api/aeroacoustics/rotorcraft-propagation/#atmospheric_adjustment) so the propagation chain honours it. |
 

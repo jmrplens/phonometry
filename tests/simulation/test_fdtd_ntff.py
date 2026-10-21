@@ -457,13 +457,13 @@ def test_meshed_metadiffuser_far_field_matches_tmm_model(
     module = metadiffuser_polar_response(
         F0,
         wells,
-        depth=META_DEPTH,
+        depth_m=META_DEPTH,
         period_m=PITCH,
         angles_deg=POLAR_ANGLES,
         repetitions=1,
     )
     reflection = metadiffuser_reflection(
-        np.asarray([F0]), wells, depth=META_DEPTH, period_m=PITCH
+        np.asarray([F0]), wells, depth_m=META_DEPTH, period_m=PITCH
     ).reflection[:, 0]
     obliq = predict_diffuser_polar_response(
         PITCH,

@@ -394,10 +394,10 @@ def plot_cross_spectral_density(
     axes = _new_axes_column(3, sharex=True, figsize=(8.0, 7.0))
     _magnitude(axes[0])
     axes[0].set_title(_t("Cross-spectral density (Bendat & Piersol)", language))
-    phase = np.degrees(result.phase[pos])
+    phase = np.degrees(result.phase_rad[pos])
     # Cap the drawn band at +/-180 deg: at near-zero coherence the Eq. 9.52
     # s.d. diverges and a literal band would blow the panel's autoscale.
-    sigma = np.minimum(np.degrees(result.phase_std[pos]), 180.0)
+    sigma = np.minimum(np.degrees(result.phase_standard_deviation_rad[pos]), 180.0)
     finite = np.isfinite(sigma)
     axes[1].fill_between(
         freqs[pos][finite],
@@ -954,17 +954,17 @@ def plot_phase_decomposition(
     def _phase_panel(axp: Axes) -> None:
         style_default(kwargs, "color", _C_PRIMARY)
         kwargs.setdefault("label", _t("Measured phase", language))
-        axp.semilogx(freqs[pos], result.phase[pos], **kwargs)
+        axp.semilogx(freqs[pos], result.phase_rad[pos], **kwargs)
         axp.semilogx(
             freqs[pos],
-            result.minimum_phase[pos],
+            result.minimum_phase_rad[pos],
             color=_C_SECONDARY,
             ls="--",
             label=_t("Minimum phase (from $|H|$)", language),
         )
         axp.semilogx(
             freqs[pos],
-            result.excess_phase[pos],
+            result.excess_phase_rad[pos],
             color=_C_MUTED,
             label=_t("Excess phase (all-pass)", language),
         )

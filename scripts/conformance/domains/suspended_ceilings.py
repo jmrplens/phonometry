@@ -128,10 +128,10 @@ def _library_correction(
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         correction = ph.materials.air_absorption_correction(
-            volume_m3=volume_m3,
+            volume=volume_m3,
             specimen_area_m2=specimen_area_m2,
-            attenuation_with=m_2,
-            attenuation_empty=m_1,
+            attenuation_with_per_m=m_2,
+            attenuation_empty_per_m=m_1,
         )
     warned = any(
         issubclass(entry.category, SuspendedCeilingWarning) for entry in caught
@@ -215,7 +215,7 @@ def _chk_iso9613_table1_climates() -> Outcome:
                 bands,
                 temperature_c=temperature_c,
                 relative_humidity_percent=humidity,
-                atmospheric_pressure_kpa=101.325,
+                static_pressure_kpa=101.325,
                 exact_midband=True,
             )
             * 1000.0
@@ -281,10 +281,10 @@ def _chk_four_m_v() -> Outcome:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", SuspendedCeilingWarning)
         correction = ph.materials.air_absorption_correction(
-            volume_m3=oracle.VIGRAN_EXAMPLE_VOLUME_M3,
+            volume=oracle.VIGRAN_EXAMPLE_VOLUME_M3,
             specimen_area_m2=TARGET_SPECIMEN_AREA_M2,
-            attenuation_with=[oracle.VIGRAN_EXAMPLE_M_PER_M],
-            attenuation_empty=[0.0],
+            attenuation_with_per_m=[oracle.VIGRAN_EXAMPLE_M_PER_M],
+            attenuation_empty_per_m=[0.0],
         )
     return numeric(
         oracle.VIGRAN_EXAMPLE_AIR_ABSORPTION_M2,
@@ -322,7 +322,7 @@ def _chk_cox_table_4_2() -> Outcome:
                 oracle.COX_TABLE_4_2_BANDS_HZ,
                 temperature_c=20.0,
                 relative_humidity_percent=humidity,
-                atmospheric_pressure_kpa=101.325,
+                static_pressure_kpa=101.325,
             )
             * 1e3
         )
@@ -454,13 +454,13 @@ def _chk_srl_absorption_coefficient() -> Outcome:
         oracle.SRL_13441_BANDS_HZ,
         temperature_c=empty_temperature_c,
         relative_humidity_percent=empty_humidity,
-        atmospheric_pressure_kpa=empty_pressure_mbar / 10.0,
+        static_pressure_kpa=empty_pressure_mbar / 10.0,
     )
     m_2 = ph.environment.air_attenuation_m(
         oracle.SRL_13441_BANDS_HZ,
         temperature_c=temperature_c,
         relative_humidity_percent=humidity,
-        atmospheric_pressure_kpa=pressure_mbar / 10.0,
+        static_pressure_kpa=pressure_mbar / 10.0,
     )
     got = ph.materials.absorption_coefficient(
         oracle.SRL_13441_T1_S,
@@ -531,7 +531,7 @@ def _chk_real_arrangements() -> Outcome:
             # verdict being checked rather than a surprise.
             warnings.simplefilter("ignore", SuspendedCeilingWarning)
             got = ph.materials.check_ceiling_specimen(
-                area_m2=area_m2, mounting="E", depth_mm=depth_mm
+                area=area_m2, mounting="E", depth_mm=depth_mm
             )
         matching += int(
             abs(got.area_error_m2 - error_m2) <= 5e-9
@@ -596,7 +596,7 @@ def _chk_humidity_floor() -> Outcome:
             # clause, which is the verdict being checked rather than a surprise.
             warnings.simplefilter("ignore", SuspendedCeilingWarning)
             got = ph.materials.check_ceiling_specimen(
-                area_m2=area_m2,
+                area=area_m2,
                 mounting="E",
                 depth_mm=depth_mm,
                 relative_humidity_percent=climates,

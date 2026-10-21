@@ -197,7 +197,7 @@ Normalizations:
 correlation_random_error(
     coefficient: float,
     signal_bandwidth: float,
-    duration: float,
+    duration_s: float,
 ) -> float
 ```
 
@@ -227,7 +227,7 @@ $\varepsilon \approx 0.35$.
 | :--- | :--- |
 | `coefficient` | Correlation coefficient $\rho_{xy}(\tau)$ at the lag. |
 | `signal_bandwidth` | Signal bandwidth `B`, in Hz. |
-| `duration` | Record length `T`, in seconds. |
+| `duration_s` | Record length `T`, in seconds. |
 
 **Returns:** Normalized random error (dimensionless; `inf` at $\rho = 0$).
 
@@ -248,7 +248,7 @@ CorrelationResult(
     kind: str,
     fs: float,
     n_samples: int,
-    duration: float,
+    duration_s: float,
 )
 ```
 
@@ -265,7 +265,7 @@ Auto- or cross-correlation estimate (B&P Sections 5.1, 8.4, 11.4).
 | `kind` | `'autocorrelation'` or `'cross-correlation'`. |
 | `fs` | Sample rate, in Hz. |
 | `n_samples` | Record length `N`, in samples. |
-| `duration` | Record length $T = N/f_\mathrm{s}$, in seconds. |
+| `duration_s` | Record length $T = N/f_\mathrm{s}$, in seconds. |
 
 ### CorrelationResult.plot()
 

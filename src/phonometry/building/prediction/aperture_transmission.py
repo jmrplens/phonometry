@@ -117,7 +117,7 @@ class ApertureTransmissionResult(OwnsArrays):
     :ivar frequencies: Band centre frequencies, in hertz.
     :ivar transmission_coefficient: Transmission coefficient ``tau`` per band.
     :ivar kind: ``"slit"`` or ``"circular"``.
-    :ivar width: Slit width, in metres, retained (with ``depth``) so
+    :ivar width_m: Slit width, in metres, retained (with ``depth``) so
         :meth:`plot_geometry` can draw the section; appended after the
         original fields and ``None`` for circular apertures or hand-built
         results.
@@ -128,7 +128,7 @@ class ApertureTransmissionResult(OwnsArrays):
     frequencies: np.ndarray
     transmission_coefficient: np.ndarray
     kind: str
-    width: float | None = None
+    width_m: float | None = None
     radius: float | None = None
     depth: float | None = None
 
@@ -145,14 +145,14 @@ class ApertureTransmissionResult(OwnsArrays):
         frequency only.
 
         The retained geometry is pinned to one shape as well: a slit keeps its
-        ``width`` and a circular aperture its ``radius``, never both, and
-        :meth:`plot_geometry` draws whichever is present, testing ``width``
+        ``width_m`` and a circular aperture its ``radius``, never both, and
+        :meth:`plot_geometry` draws whichever is present, testing ``width_m``
         first. A result carrying both would silently render the slit section
         for what claims to be a circular aperture.
 
         The kept shape has to be the shape ``kind`` names, too. The section is
         drawn from whichever of the two is present and nothing in it says which
-        kind it belongs to, so a ``"circular"`` result that kept a ``width``
+        kind it belongs to, so a ``"circular"`` result that kept a ``width_m``
         draws the slit section of that width -- pixel for pixel the figure of a
         slit, under a curve the same result labels a circular aperture -- and a
         ``"slit"`` that kept a ``radius`` draws the hole section of the doubled
@@ -164,22 +164,22 @@ class ApertureTransmissionResult(OwnsArrays):
         """
         require_ranks(self, frequencies=1, transmission_coefficient=1)
         require_same_length(self, "frequencies", "transmission_coefficient")
-        if self.width is not None and self.radius is not None:
+        if self.width_m is not None and self.radius is not None:
             msg = (
-                "Give at most one of 'width' (a slit) and 'radius' (a "
+                "Give at most one of 'width_m' (a slit) and 'radius' (a "
                 "circular aperture); this result carries both."
             )
             raise ValueError(msg)
-        if self.width is not None and self.kind != "slit":
+        if self.width_m is not None and self.kind != "slit":
             msg = (
-                f"'width' is the slit width, but 'kind' is {self.kind!r}; give "
+                f"'width_m' is the slit width, but 'kind' is {self.kind!r}; give "
                 "'radius' for a circular aperture."
             )
             raise ValueError(msg)
         if self.radius is not None and self.kind != "circular":
             msg = (
                 f"'radius' is the circular-aperture radius, but 'kind' is "
-                f"{self.kind!r}; give 'width' for a slit."
+                f"{self.kind!r}; give 'width_m' for a slit."
             )
             raise ValueError(msg)
 
@@ -230,7 +230,7 @@ def _slit_end_correction(k_big: np.ndarray) -> np.ndarray:
 
 def slit_transmission_coefficient(
     frequency: ArrayLike,
-    width: float,
+    width_m: float,
     depth: float,
     *,
     field: str = "diffuse",
@@ -240,7 +240,7 @@ def slit_transmission_coefficient(
     r"""Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).
 
     :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
-    :param width: Slit width ``w``, in m (> 0).
+    :param width_m: Slit width ``w``, in m (> 0).
     :param depth: Slit depth ``d`` (wall thickness across the slit), in m (> 0).
     :param field: ``"diffuse"`` (:math:`m = 8`) or ``"normal"``
         (:math:`m = 4`).
@@ -250,7 +250,7 @@ def slit_transmission_coefficient(
     :return: An :class:`ApertureTransmissionResult` (kind ``"slit"``).
     :raises ValueError: for a non-positive input or unknown field/position.
     """
-    w = require_positive(width, "width")
+    w = require_positive(width_m, "width_m")
     d = require_positive(depth, "depth")
     c0 = require_positive(speed_of_sound, "speed_of_sound")
     field = require_choice(field, "field", tuple(_FIELD_M))
@@ -291,14 +291,14 @@ def slit_transmission_coefficient(
         frequencies=f,
         transmission_coefficient=np.asarray(tau, dtype=np.float64),
         kind="slit",
-        width=float(width),
+        width_m=float(width_m),
         depth=float(depth),
     )
 
 
 def slit_resonance_frequencies(
     depth: float,
-    width: float,
+    width_m: float,
     *,
     orders: int = 3,
     speed_of_sound: float = _SPEED_OF_SOUND,
@@ -311,17 +311,17 @@ def slit_resonance_frequencies(
     because the end correction ``e`` depends weakly on frequency.
 
     :param depth: Slit depth ``d``, in m (> 0).
-    :param width: Slit width ``w``, in m (> 0).
+    :param width_m: Slit width ``w``, in m (> 0).
     :param orders: Number of resonance orders ``z = 1..orders`` (>= 1).
     :param speed_of_sound: Speed of sound in air ``c0`` (Default: 343 m/s).
     :return: The resonance frequencies (Hz), one per order.
     :raises ValueError: for a non-positive input, ``orders < 1``, or a slit so
         wide relative to its depth that the effective depth :math:`d + 2e` is
-        non-positive (no resonance exists; ``width`` must be much less than the
+        non-positive (no resonance exists; ``width_m`` must be much less than the
         wavelength).
     """
     d = require_positive(depth, "depth")
-    w = require_positive(width, "width")
+    w = require_positive(width_m, "width_m")
     c0 = require_positive(speed_of_sound, "speed_of_sound")
     if orders < 1:
         msg = "'orders' must be at least 1."
@@ -339,7 +339,7 @@ def slit_resonance_frequencies(
                 msg = (
                     "slit too wide relative to its depth: the effective depth "
                     "d + 2e is non-positive, so no resonance exists (the "
-                    "Gomperts slit model requires 'width' << wavelength)."
+                    "Gomperts slit model requires 'width_m' << wavelength)."
                 )
                 raise ValueError(msg)
             f_new = z * c0 / (2.0 * effective_depth)

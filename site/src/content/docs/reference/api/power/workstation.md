@@ -278,7 +278,7 @@ grade 3), judged on the settled margin as $K_1$ is.
 
 ```python
 environmental_ratio_from_absorption(
-    absorption_area_m2: ArrayLike,
+    absorption_area: ArrayLike,
     measurement_surface_m2: float,
     directivity_index_db: ArrayLike = 0.0,
 ) -> float | NDArray[np.float64]
@@ -300,7 +300,7 @@ why ISO 11204 A.1.2 says the two routes rest on the same assumptions.
 
 | Name | Description |
 | :--- | :--- |
-| `absorption_area_m2` | Equivalent sound absorption area $A$ of the test room, in square metres, strictly positive. |
+| `absorption_area` | Equivalent sound absorption area $A$ of the test room, in square metres, strictly positive. |
 | `measurement_surface_m2` | Area $S_M$ of the reference measurement surface, in square metres, strictly positive. |
 | `directivity_index_db` | $D^*_{I,\mathrm{op}}$ in decibels (default 0). |
 

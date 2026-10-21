@@ -541,8 +541,8 @@ top.semilogx(f[bad], res.measured[bad], "o", color="C1", label="fuera de toleran
 top.set_ylabel("Acelerancia |A| [1/kg]"); top.legend()
 
 bot.axhspan(-5.0, 5.0, color="C1", alpha=0.15)
-bot.semilogx(f, 100.0 * res.deviation, color="C0")
-bot.semilogx(f[bad], 100.0 * res.deviation[bad], "o", color="C1")
+bot.semilogx(f, 100.0 * res.relative_deviation, color="C0")
+bot.semilogx(f[bad], 100.0 * res.relative_deviation[bad], "o", color="C1")
 bot.set_xlabel("Frecuencia [Hz]"); bot.set_ylabel("Desviación [%]")
 plt.show()
 ```
@@ -552,7 +552,7 @@ plt.show()
 ## 4. El objeto `MobilityResult`
 
 `sdof_mobility_result` agrupa la FRF en frecuencia en un `MobilityResult`, que
-expone `.magnitude`, `.phase`, `.to(target)` (cualquier tipo de la Tabla 1) y un
+expone `.magnitude`, `.phase_rad`, `.to(target)` (cualquier tipo de la Tabla 1) y un
 `.plot()` de $|Y(f)|$ con la resonancia marcada:
 
 ```python
@@ -640,13 +640,13 @@ f = np.array([50.0, 500.0])
 # Una losa de hormigón de 140 mm: E = 30 GPa, nu = 0,2, rho = 2400 kg/m3.
 b_plate = vibration.plate_bending_stiffness(3.0e10, 0.14, 0.2)
 plate = vibration.infinite_plate_point_mobility(f, b_plate, 336.0)
-print(f"{float(plate.magnitude[0]):.3e}", round(float(np.degrees(plate.phase[0]))))
+print(f"{float(plate.magnitude[0]):.3e}", round(float(np.degrees(plate.phase_rad[0]))))
 #  2.551e-06 0     -> real, y lo mismo a 500 Hz
 
 # Una viga de acero de 100 x 200 mm, excitada en un punto lejos de sus extremos.
 b_beam = 2.1e11 * 0.1 * 0.2**3 / 12.0
 beam = vibration.infinite_beam_point_mobility(f, b_beam, 7800.0 * 0.02)
-print(f"{float(beam.magnitude[0]):.3e}", round(float(np.degrees(beam.phase[0]))))
+print(f"{float(beam.magnitude[0]):.3e}", round(float(np.degrees(beam.phase_rad[0]))))
 #  7.388e-06 -45
 print(np.round(vibration.beam_bending_wave_speed(f, b_beam, 7800.0 * 0.02), 1))
 #  [306.8 970.1]  -> c_B crece como sqrt(f), así que |Y| cae como 1/sqrt(f)

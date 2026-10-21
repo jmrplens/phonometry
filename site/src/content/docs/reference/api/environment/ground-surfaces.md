@@ -307,7 +307,7 @@ the Miki model, and it goes into
 `ground_impedance` and
 [`atmospheric_parabolic_equation`](/phonometry/reference/api/environment/refraction/#atmospheric_parabolic_equation) as
 `impedance`, unchanged. Those functions work out the same medium from a bare
-`flow_resistivity`; this is the path for a row, which keeps the
+`flow_resistivity_pa_s_m2`; this is the path for a row, which keeps the
 refusal of a cell the page did not print as a number.
 
 An effective flow resistivity is the parameter of the model it was

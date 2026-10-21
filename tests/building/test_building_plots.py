@@ -244,7 +244,9 @@ def test_plenum_plot_without_frequencies_uses_band_indices() -> None:
 
 
 def test_plenum_plot_of_the_attenuated_model() -> None:
-    res = _plenum(attenuation_source=[0.3] * 5, attenuation_receiving=[0.3] * 5)
+    res = _plenum(
+        attenuation_source_per_m=[0.3] * 5, attenuation_receiving_per_m=[0.3] * 5
+    )
     assert res.model == "attenuated"
     ax = res.plot()
     values = [ln.get_ydata() for ln in ax.lines]

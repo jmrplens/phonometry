@@ -575,7 +575,7 @@ class RainfallReferenceCorrection(OwnsArrays):
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
     :ivar l_i_ref_db: Measured sound intensity level of the reference
         specimen, :math:`L_{I,\mathrm{ref}}`, in dB re 1 pW/m².
-    :ivar structural_reverberation_time_s: Its structural reverberation time
+    :ivar structural_reverberation_time: Its structural reverberation time
         :math:`T_\mathrm{s}`, in s.
     :ivar loss_factor: Its total loss factor
         :math:`\eta = 2.2/(f T_\mathrm{s})` (Formula (I.1)), a linear ratio.
@@ -593,7 +593,7 @@ class RainfallReferenceCorrection(OwnsArrays):
 
     frequencies: np.ndarray
     l_i_ref_db: np.ndarray
-    structural_reverberation_time_s: np.ndarray
+    structural_reverberation_time: np.ndarray
     loss_factor: np.ndarray
     reference_loss_factor: np.ndarray
     l_i_m_ref_db: np.ndarray
@@ -608,7 +608,7 @@ class RainfallReferenceCorrection(OwnsArrays):
         fields = (
             "frequencies",
             "l_i_ref_db",
-            "structural_reverberation_time_s",
+            "structural_reverberation_time",
             "loss_factor",
             "reference_loss_factor",
             "l_i_m_ref_db",
@@ -639,7 +639,7 @@ class RainfallReferenceCorrection(OwnsArrays):
 
 def rainfall_reference_correction(
     l_i_ref_db: ArrayLike,
-    structural_reverberation_time_s: ArrayLike,
+    structural_reverberation_time: ArrayLike,
     frequencies: ArrayLike | None = None,
 ) -> RainfallReferenceCorrection:
     r"""Correction :math:`\Delta L_{I\mathrm{c}}` of a laboratory (ISO 10140-5 I.2).
@@ -662,7 +662,7 @@ def rainfall_reference_correction(
 
     :param l_i_ref_db: :math:`L_{I,\mathrm{ref}}` of the reference specimen per
         band, in dB re 1 pW/m² (e.g. ``rainfall_sound(...).l_i_db``).
-    :param structural_reverberation_time_s: Its structural reverberation time
+    :param structural_reverberation_time: Its structural reverberation time
         per band, measured to ISO 10140-4, in s.
     :param frequencies: Band centre frequencies, in Hz, each one of the 18
         bands of Table I.1 (100 Hz to 5 000 Hz); ``None`` takes all 18.
@@ -678,14 +678,14 @@ def rainfall_reference_correction(
     )
     level = require_finite_array(l_i_ref_db, "l_i_ref_db")
     t_s = require_positive_array(
-        structural_reverberation_time_s, "structural_reverberation_time_s"
+        structural_reverberation_time, "structural_reverberation_time"
     )
     require_equal_shapes(
         "rainfall_reference_correction",
         {
             "frequencies": freqs.shape,
             "l_i_ref_db": level.shape,
-            "structural_reverberation_time_s": t_s.shape,
+            "structural_reverberation_time": t_s.shape,
         },
         "band",
     )
@@ -699,7 +699,7 @@ def rainfall_reference_correction(
     return RainfallReferenceCorrection(
         frequencies=freqs,
         l_i_ref_db=level,
-        structural_reverberation_time_s=t_s,
+        structural_reverberation_time=t_s,
         loss_factor=eta,
         reference_loss_factor=eta_ref,
         l_i_m_ref_db=l_i_m_ref,
@@ -843,10 +843,10 @@ def _normalized(
 
 def rainfall_sound(
     l_pr_db: ArrayLike,
-    reverberation_time_s: ArrayLike,
+    reverberation_time: ArrayLike,
     frequencies: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     excited_area_m2: float,
     background_db: ArrayLike | None = None,
     reference_correction: RainfallReferenceCorrection | ArrayLike | None = None,
@@ -877,10 +877,10 @@ def rainfall_sound(
     :param l_pr_db: Room-averaged sound pressure level per band, in dB:
         ``(bands,)`` for one position of the rain generator or
         ``(positions, bands)`` for several, which are added energetically.
-    :param reverberation_time_s: Reverberation time of the test room per band,
+    :param reverberation_time: Reverberation time of the test room per band,
         in s.
     :param frequencies: Band centre frequencies, in Hz.
-    :param volume_m3: Volume of the test room, in m³.
+    :param volume: Volume of the test room, in m³.
     :param excited_area_m2: Area of the specimen directly excited by the rain,
         :math:`S_\mathrm{e}`, in m².
     :param background_db: Background noise level per band, in dB, or ``None``.
@@ -907,17 +907,17 @@ def rainfall_sound(
     if not np.all(np.isfinite(levels)):
         msg = "'l_pr_db' must contain only finite values."
         raise ValueError(msg)
-    t = require_positive_array(reverberation_time_s, "reverberation_time_s")
+    t = require_positive_array(reverberation_time, "reverberation_time")
     require_equal_shapes(
         "rainfall_sound",
         {
             "frequencies": freqs.shape,
             "l_pr_db (bands)": levels.shape[1:],
-            "reverberation_time_s": t.shape,
+            "reverberation_time": t.shape,
         },
         "band",
     )
-    volume = require_positive(volume_m3, "volume_m3")
+    volume = require_positive(volume, "volume")
     area = require_positive(excited_area_m2, "excited_area_m2")
     if background_db is not None:
         background = require_finite_array(background_db, "background_db")

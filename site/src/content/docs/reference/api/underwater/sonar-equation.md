@@ -280,7 +280,7 @@ DetectionRangeResult(
     frequency: float,
     range_m: NDArray[np.float64],
     propagation_loss: NDArray[np.float64],
-    absorption_coefficient: float,
+    absorption_db_per_km: float,
     law: str,
     model: str,
 )
@@ -297,7 +297,7 @@ Detection range obtained by inverting a propagation-loss law.
 | `frequency` | Acoustic frequency, in Hz. |
 | `range_m` | Range grid over which the loss was evaluated, in metres. |
 | `propagation_loss` | Propagation loss at each range, in dB. |
-| `absorption_coefficient` | Absorption coefficient $\alpha$, in dB/km. |
+| `absorption_db_per_km` | Absorption coefficient $\alpha$, in dB/km. |
 | `law` | The spreading law used. |
 | `model` | The absorption model used. |
 

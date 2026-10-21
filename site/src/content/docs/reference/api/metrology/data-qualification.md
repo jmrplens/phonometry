@@ -132,7 +132,7 @@ LevelCrossingResult(
     zero_crossing_rate_rice: float,
     apparent_frequency: float,
     sigma: float,
-    duration: float,
+    duration_s: float,
     fs: float,
 )
 ```
@@ -157,7 +157,7 @@ it are themselves a useful non-Gaussianity screen (B&P Sec. 5.5.1.1).
 | `zero_crossing_rate_rice` | Expected $N_0 = 2\sqrt{m_2/m_0}$ from the record's Welch autospectrum moments (Eq. (5.195)), in 1/s. |
 | `apparent_frequency` | `N0 / 2` from the spectral moments, in Hz (a 60 Hz sine crosses zero 120 times per second). |
 | `sigma` | RMS value of the demeaned record, in signal units. |
-| `duration` | Record duration used for the rates, in seconds. |
+| `duration_s` | Record duration used for the rates, in seconds. |
 | `fs` | Sample rate, in Hz. |
 
 ### LevelCrossingResult.plot()
@@ -234,7 +234,7 @@ PeakStatisticsResult(
     irregularity_factor: float,
     peak_values: NDArray[np.float64],
     sigma: float,
-    duration: float,
+    duration_s: float,
     fs: float,
 )
 ```
@@ -260,7 +260,7 @@ as $r \to 0$ (Sec. 5.5.4).
 | `irregularity_factor` | `N0 / (2 M)` from the spectral moments. |
 | `peak_values` | Standardized heights $z = \text{peak} / \sigma$ of the detected maxima. |
 | `sigma` | RMS value of the demeaned record, in signal units. |
-| `duration` | Record duration used for the rates, in seconds. |
+| `duration_s` | Record duration used for the rates, in seconds. |
 | `fs` | Sample rate, in Hz. |
 
 ### PeakStatisticsResult.peak_density()

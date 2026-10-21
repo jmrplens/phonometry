@@ -110,7 +110,7 @@ bending_stress(
     peak_velocity_m_s: ArrayLike,
     *,
     dynamic_modulus_pa: float,
-    density_kg_m3: float,
+    density: float,
     load_ratio: float = 1.0,
     mode_factor: float = 1.0,
 ) -> np.ndarray | float
@@ -137,7 +137,7 @@ cases, so it moves the answer by less than a third.
 | :--- | :--- |
 | `peak_velocity_m_s` | Peak velocity over the beam length, in metres per second (scalar or array). Note the unit: the guideline tables are in millimetres per second and this formula is not. |
 | `dynamic_modulus_pa` | Dynamic modulus of elasticity $E_\mathrm{dyn}$, in pascals. |
-| `density_kg_m3` | Material density $\varrho$, in kilograms per cubic metre. |
+| `density` | Material density $\varrho$, in kilograms per cubic metre. |
 | `load_ratio` | The load coefficient $G_\mathrm{ges}/G_\mathrm{balken}$, the beam's own weight plus any uniformly distributed load it carries over its own weight. 1 for a beam carrying nothing else. |
 | `mode_factor` | The mode coefficient $k_n$, dimensionless. |
 

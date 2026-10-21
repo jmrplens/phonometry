@@ -141,7 +141,7 @@ palabra clave.
 
 | 3.3.0 | 4.0 |
 | --- | --- |
-| `impedance_tube.air_density_iso(T_kelvin, p_kPa)` | `materials.air_density_iso10534(temperature_c=T_kelvin - 273.15, atmospheric_pressure_kpa=p_kPa)` |
+| `impedance_tube.air_density_iso(T_kelvin, p_kPa)` | `materials.air_density_iso10534(temperature_c=T_kelvin - 273.15, static_pressure_kpa=p_kPa)` |
 | `impedance_tube.speed_of_sound_iso(T_kelvin)` | `materials.speed_of_sound_iso10534(temperature_c=T_kelvin - 273.15)` |
 
 Con la conversión aplicada, los dos devuelven exactamente lo que devolvían en
@@ -199,7 +199,7 @@ desaparecido del todo:
 
 | 3.3.0 | 4.0 |
 | --- | --- |
-| `airport_noise.event_level(..., temperature=15.0, pressure=101.325)` | `event_level(..., atmosphere=AerodromeAtmosphere(temperature_c=15.0, atmospheric_pressure_kpa=101.325))` |
+| `airport_noise.event_level(..., temperature=15.0, pressure=101.325)` | `event_level(..., atmosphere=AerodromeAtmosphere(temperature_c=15.0, static_pressure_kpa=101.325))` |
 | `airport_noise.noise_contour(...)` | lo mismo, con `AerodromeAtmosphere` |
 | `rotorcraft_noise.rotorcraft_event_level(..., temperature=15.0, relative_humidity=70.0)` | `rotorcraft_event_level(..., atmosphere=RotorcraftAtmosphere(temperature_c=15.0, relative_humidity_percent=70.0))` |
 | `rotorcraft_noise.rotorcraft_noise_contour(...)` | lo mismo, con `RotorcraftAtmosphere` |
@@ -212,8 +212,8 @@ Las sustituciones punto a punto del rotorcraft fueron por el mismo camino:
 ```python
 from phonometry.aircraft.airport_noise import AerodromeAtmosphere
 
-atmosphere = AerodromeAtmosphere(temperature_c=15.0, atmospheric_pressure_kpa=101.325)
-print(atmosphere.temperature_c, atmosphere.atmospheric_pressure_kpa)
+atmosphere = AerodromeAtmosphere(temperature_c=15.0, static_pressure_kpa=101.325)
+print(atmosphere.temperature_c, atmosphere.static_pressure_kpa)
 ```
 
 ## Un parámetro que nombra una magnitud lleva su unidad
@@ -227,12 +227,25 @@ las dos presiones legítimas en esta biblioteca.
 | 3.3.0 | 4.0 |
 | --- | --- |
 | `temperature=` | `temperature_c=` |
-| `pressure=`, `static_pressure=`, `barometric_pressure=`, `ambient_pressure=`, `atmospheric_pressure=` | `atmospheric_pressure_kpa=`, o `_pa=` donde el apartado esté escrito en pascales |
+| `pressure=` en `air_attenuation`, `air_attenuation_m`, `atmospheric_attenuation`, `atmospheric_absorption`, `outdoor_propagation_attenuation`, `sae_band_attenuation`, `impedance_adjustment` y `atmospheric_adjustment`, y en los métodos `event_level` y `noise_contour` de `AnpAircraft` y `AnpDatabase`; `static_pressure=` en `meteorological_corrections`, `sound_power_anechoic`, `sound_power_reverberation` y `sound_power_comparison`; los campos `AtmosphericAttenuation.pressure`, `AircraftBandAttenuation.pressure` y `ReportMetadata.pressure`, todos en kPa | `static_pressure_kpa=` y `.static_pressure_kpa` |
+| `static_pressure=` en `alternating_airflow_resistance`, `barometric_pressure=` en `sound_power_intensity_precision`, `atmospheric_pressure=` en `enclosed_gas_stiffness` y `floating_floor_resonance` | `static_pressure_pa=` |
+| `atmospheric_pressure=` en `air_density_iso` y `air_density_astm` | `static_pressure_kpa=` en `air_density_iso10534` y `air_density_astm` |
+| `atmospheric_pressure=` en `johnson_champoux_allard` y en las funciones de sonido lento | el `fluid=` que reciben ahora, que lleva su propia presión estática |
 | `humidity=`, `relative_humidity=` | `relative_humidity_percent=` |
 | `diameter=` y sus trece compuestos | `diameter_m=` |
 | `angle=`, `angles=`, `bank_angle=`, `path_angle=`, `grazing_angle=`, `launch_angles=` | `_deg=` o `_rad=`, según lo que lea la función |
 | `runway_gradient=` | `runway_gradient_ratio=` |
 | `sound_speed_gradient=` | `sound_speed_gradient_per_s=` |
+
+La presión del medio tiene un solo nombre. `static_pressure_kpa` o
+`static_pressure_pa` es la presión absoluta del medio en el que se calcula la
+magnitud (el aire, un gas o el agua de mar), en la unidad en la que la escribe su apartado; la presión
+de una corriente medida en un conducto es manométrica y lo dice
+(`static_gauge_pressure_pa`), o es la `static_pressure_pa` de
+`velocity_pressure_pa` y `total_pressure`, cuyas fórmulas la leen así.
+`atmospheric_pressure_pa` se reserva para la atmósfera exterior allí donde el
+mismo método mide a su lado la presión de una corriente: `pipe_transmission_loss`,
+`DownstreamPipe`, `normal_air_density` y `gas_density_kg_m3`.
 
 Un caso merece mención propia porque era una trampa y no una incomodidad.
 `critical_angle` era un campo en radianes en un resultado y un parámetro en
@@ -301,12 +314,67 @@ campos `distance_m`, `spacing_m` y `source_height_m` de `RotorcraftHemisphere`,
 que `JunctionTransmissionResult` guarda para su dibujo, y los `source_height_m`
 y `microphone_height_m` de la ISO 13472-1 en `geometric_spreading_factor`,
 `geometric_spreading_factor_angle` e `InsituAbsorptionResult`. La sección de
-conducto que lee `duct_path` es `{"width": a, "height_m": b}`, y
+conducto que lee `duct_path` es `{"width_m": a, "height_m": b}`, y
 `TABLE_D1_QUANTITIES` nombra `thickness_m` entre las magnitudes que describen
 una fila de la Tabla D.1. Las filas de los catálogos conservan `thickness_mm`,
 la unidad en la que el catálogo guarda todas sus filas, sea cual sea la que
 imprime su fuente, y `vertical_directivity(height=1)` conserva su nombre,
 porque 1 o 2 elige una línea de fuente y no es una longitud.
+
+Una tasa, una velocidad y una fase también llevan su unidad. Un coeficiente de
+absorción en dB/km junto al coeficiente de absorción adimensional de una pared,
+la velocidad de un vehículo en km/h junto a una velocidad del viento en m/s y
+una de vuelo en nudos, y una fase en radianes en una función de transferencia
+junto a otra en grados en un registro de calibración eran, cada una, la misma
+palabra para dos cosas:
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `absorption_coefficient` en `PropagationLossResult`, `GaussianBeamResult` y `DetectionRangeResult`, en dB/km | `absorption_db_per_km` |
+| `air_absorption_coefficient=` en `sound_power_anechoic` y `meteorological_corrections`, en dB/m | `air_absorption_db_per_m=`, la grafía que usa `CalibrationConditions` |
+| `AtmosphericAttenuation.attenuation_coefficient`, en dB/m | `.attenuation_db_per_m` |
+| `air_attenuation=` en `sabine_reverberation_time`, `eyring_reverberation_time`, `millington_sette_reverberation_time`, `fitzroy_reverberation_time`, `arau_puchades_reverberation_time`, `reverberation_time_models` e `image_source_rir`, y `SoundAbsorptionMeasurement.air_attenuation` | `air_attenuation_per_m` |
+| `attenuation=` en `tube_wavenumber` y `two_microphone_impedance`, en Np/m | `attenuation_np_per_m=` |
+| `attenuation_source=` y `attenuation_receiving=` en `plenum_flanking_reduction_index` | `attenuation_source_per_m=` y `attenuation_receiving_per_m=` |
+| `speed=` en `road_rolling_noise`, `road_propulsion_noise`, `road_vehicle_sound_power`, `aerodynamic_sound_power` y `roughness_to_frequency`; `RoadTraffic.speed`, `RailwayVehicle.speed` y `RoadSurfaceCoefficients.speed_range`; `railway_source_power(minimum_speed=)`, todos en km/h | `speed_kmh`, `speed_range_kmh` y `minimum_speed_kmh=`; `RailwayVehicle` toma `speed_kmh=` por su nombre |
+| `reference_speed=` en `event_level`, `noise_contour` y `duration_correction`, y `segment_speed=` en `duration_correction` | `reference_speed_m_s=` y `segment_speed_m_s=` |
+| `FlightPathKinematics.airspeed` y `.ground_speed`, en m/s | `.airspeed_m_s` y `.ground_speed_m_s` |
+| `ground_speed=` en `linear_sound_speed_profile`, `log_linear_sound_speed_profile`, `ray_curvature_radius` y `shadow_zone_distance`, la velocidad del sonido junto al suelo | `ground_speed_of_sound=` |
+| `RayTraceResult.profile_speeds` | `.profile_speeds_of_sound` |
+| `blade_passing_frequency(rotational_speed=)` | `rotational_speed_rpm=` |
+| `.phase` en `FrequencyResponseResult`, `CrossSpectralDensityResult`, `PhaseDecompositionResult`, `EnvelopeResult` y `MobilityResult`; `.minimum_phase` y `.excess_phase` en `PhaseDecompositionResult`; `CrossSpectralDensityResult.phase_std`, todos en radianes | `.phase_rad`, `.minimum_phase_rad`, `.excess_phase_rad` y `.phase_standard_deviation_rad` |
+| `residual_index_from_phase_mismatch(phase_mismatch=)` e `IntensityInstrumentComplianceResult.phase_mismatch()`, en grados | `phase_mismatch_deg=` y `.phase_mismatch_deg()` |
+
+Un nombre tiene además una sola grafía dentro de un paquete. Donde una palabra
+era pública a la vez sin unidad y con ella en un mismo paquete, ahora conserva la
+unidad si otra unidad compite por ella, como en la primera tabla de abajo, y la
+pierde si la palabra solo tuvo nunca una, como en la tabla de «Una grafía por
+concepto»:
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `RotorcraftHemisphere.azimuth` y `.polar`, `RotorcraftEventResult.azimuth` y `.polar`, en grados | `.azimuth_deg` y `.polar_deg`, como los recibe `hemisphere_source_level` |
+| `sae_band_attenuation(path_length=)` y `AircraftBandAttenuation.path_length` | `path_length_m` |
+| `gap=` en `double_wall_transmission_loss`, `mass_spring_mass_resonance` y `plot_double_wall_geometry`, y `SoundReductionResult.gap`, en metros | `gap_m`, junto al `gap_mm` de una serie de juntas |
+| `HeavyImpactSourceSpec.tolerance` y `HeavyImpactSourceCheck.tolerance`, en dB | `.tolerance_db` |
+| `LoudspeakerCharacteristics.input_voltage` y `loudspeaker_characteristics(input_voltage=)`, `MicrophoneNoise.voltage` | `input_voltage_v` y `voltage_v`, como los escriben los registros de bucle de inducción |
+| `LoudspeakerCharacteristics.rated_frequency_range`, `MicrophoneCharacteristics.reference_frequency` y `microphone_characteristics(reference_frequency=)` | `rated_frequency_range_hz` y `reference_frequency_hz`, como los escriben los registros de auriculares |
+| `SweptSineDistortionResult.thd`, una razón | `.thd_ratio`, junto al `thd_percent` de los registros de altavoz y de micrófono |
+| `roughness_to_frequency(wavelengths=)`, en milímetros | `wavelengths_mm=`, junto al `wavelengths_m` de un espectro de la EN 15610 |
+| `sea_water_sound_speed(salinity=, depth=, latitude=)` | `salinity_psu=`, `depth_m=` y `latitude_deg=`, como los reciben `sea_water` y `sea_water_density` |
+| `depth=` en `metadiffuser_reflection`, `metadiffuser_polar_response`, `metadiffuser_diffusion_spectrum` y `plot_metadiffuser_panel_geometry`, y `MetadiffuserResult.depth`, en metros | `depth_m`, junto al `depth_mm` de una muestra de techo |
+| `DynamicStiffnessResult.resonant_frequency`, `.apparent_stiffness`, `.dynamic_stiffness`, `.gas_stiffness` y `.floor_mass_per_area` | `.resonant_frequency_hz`, `.apparent_stiffness_n_m3`, `.dynamic_stiffness_n_m3`, `.gas_stiffness_n_m3` y `.floor_mass_per_area_kg_m2`, como los reciben las funciones de la EN 29052-1 junto a los MN/m³ que imprime la norma |
+| `johnson_champoux_allard(viscous_length=, thermal_length=)`, en metros | `viscous_length_m=` y `thermal_length_m=`, junto a los micrómetros de una fila de catálogo |
+| `CorrelationResult.duration` y `correlation_random_error(duration=)`, en segundos | `duration_s`, junto al `duration_hours` de `lex_8h` |
+| `LevelCrossingResult.duration` y `PeakStatisticsResult.duration`, en segundos | `.duration_s`, junto al `duration_ms` de una ráfaga tonal de la IEC 61672-1 |
+| `RigidMassCalibrationResult.tolerance` y `.deviation`, y `tolerance=` en `seat_transmission` y `mean_of_test_runs`, cifras relativas | `relative_tolerance` y `relative_deviation` |
+| `LabAirborneInsulationResult.absorption` y `LabImpactInsulationResult.absorption`, el área A en m² | `.absorption_area` |
+| `HelmholtzResonator(neck_length=, neck_side=, cavity_length=, cavity_side=)`; `lattice_step=` en `slit_helmholtz_absorber`, `helmholtz_resonator_impedance`, `critical_coupling_design`, `plot_slit_absorber_geometry` y `SlitResonatorAbsorberResult`; `critical_coupling_design(cavity_length_bounds=)` y `rectangular_duct_properties(side=)` | los mismos nombres terminados en `_m` |
+| `width=` en `plane_wave_limit`, `rectangular_duct_cut_on`, `elbow_insertion_loss`, `lined_rectangular_duct_attenuation`, `unlined_rectangular_duct_attenuation` y `hydraulic_diameter` | `width_m=`, junto a su `height_m=` |
+| `width=` en `outdoor_attenuation`, `typical_element_mobility`, `slit_transmission_coefficient`, `slit_resonance_frequencies` y `plot_aperture_geometry`, y `ApertureTransmissionResult.width`, en metros | `width_m`, junto al `height_m` de una fachada y al `joint_width_mm` de una junta |
+| `AircraftBandAttenuation.coefficient`, en dB/m | `.coefficient_db_per_m`, junto al `coefficient_db_per_100m` de un resultado de la ARP 866A |
+| `LoudspeakerCharacteristics.rated_impedance`, `.minimum_impedance` y `.impedance_modulus`, y `loudspeaker_characteristics(rated_impedance=)`; `rated_impedance` y `minimum_load_impedance` en `MicrophoneCharacteristics` y `MicrophoneElectrical`, y `microphone_characteristics(rated_impedance=, minimum_load_impedance=)` de la 3.3.0, todos en ohmios | los mismos nombres terminados en `_ohm`, como los escriben los registros de auriculares y de bucle de inducción junto a las impedancias mecánicas de un pistón; el par del micrófono se da como `microphone_characteristics(..., electrical=MicrophoneElectrical(rated_impedance_ohm=..., minimum_load_impedance_ohm=...))` |
+| `flow_resistivity=` en `ground_effect`, `atmospheric_parabolic_equation`, `delany_bazley`, `miki`, `johnson_champoux_allard` y `decoupling_frequency`, `PorousMediumResult.flow_resistivity` y `barrier_insertion_loss(ground_flow_resistivity=)`, en Pa s/m² | `flow_resistivity_pa_s_m2` y `ground_flow_resistivity_pa_s_m2`, junto a los kPa s/m² de las clases de suelo de la IEC TS 61400-11-2 y de la EN 29052-1 |
 
 Una constante publicada sigue la misma regla, y la necesita más, porque un
 número suelto no tiene más que su nombre para decir en qué está: `10.0` son
@@ -395,7 +463,7 @@ muestreo es `fs` en todas las funciones.
 | 3.3.0 o 4.0.0rc1 | 4.0 |
 | --- | --- |
 | `sound_speed` (válvulas de control, medición de silenciadores, regímenes de Weston, ruido ambiente, `FluidSeabed`, `ShipSourceLevelResult`) | `speed_of_sound` |
-| `c=` y `rho=` en `sound_intensity`, `c=` en las dos conversiones de desajuste de fase, `phase_mismatch()`, `absorption_coefficient_uncertainty` y `monopole_source_level` | `speed_of_sound=`, `density=` |
+| `c=` y `rho=` en `sound_intensity`, `c=` en las dos conversiones de desajuste de fase, `phase_mismatch()` (ahora `phase_mismatch_deg()`), `absorption_coefficient_uncertainty` y `monopole_source_level` | `speed_of_sound=`, `density=` |
 | `speed_of_sound_m_s=` en `thickness_critical_frequency_product` | `speed_of_sound=` |
 | `sample_rate` en el `SignalSource` de FDTD, `STOIResult` e `impact_force_exposure_level` | `fs` |
 | `freq=` en `linkwitz_riley` y `adaptation_term_kc` | `frequency=` y `frequencies=` |
@@ -414,6 +482,10 @@ muestreo es `fs` en todas las funciones.
 | `level=`, `measured_level=`, `operational_level=` en `sti_from_impulse_response`, `stipa`, `sti_adjusted_for_levels` y `STIResult.adjusted_for_levels` | `levels=`, `measured_levels=`, `operational_levels=` |
 | `.passed` en `AircraftSystemComplianceResult`, `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck`, `RigidMassCalibrationResult` | `.passes`, como en todos los demás verificadores |
 | `MicrophoneNoise(weighting="CCIR")` | `MicrophoneNoise(weighting="468")`, la grafía que usan `weighting_filter` y `weighted_thd` para la curva UIT-R BS.468-4 |
+| `atmospheric_pressure_kpa=` en las funciones de la ISO 9613-1, `atmospheric_absorption`, `outdoor_propagation_attenuation`, `AtmosphericAttenuation`, `AtmosphericConditions`, `sae_band_attenuation`, `AircraftBandAttenuation`, `AerodromeAtmosphere`, `RotorcraftAtmosphere`, `impedance_adjustment`, `atmospheric_adjustment`, los métodos de `AnpAircraft` y `AnpDatabase`, `air_density_iso10534` y `air_density_astm`; `atmospheric_pressure_pa=` en `enclosed_gas_stiffness` y `floating_floor_resonance`; `barometric_pressure_pa=` en `sound_power_intensity_precision`; `absolute_pressure_pa=` en `sea_water_density` | `static_pressure_kpa=` o `static_pressure_pa=`, en la misma unidad |
+| `ambient_pressure_pa=` en `normal_air_density` | `atmospheric_pressure_pa=`, la atmósfera exterior junto a la presión estática manométrica del conducto |
+| `environmental_ratio_from_absorption(absorption_area_m2=)`, `running_rms_decay_time(integration_time_s=)` y `verify_running_rms_decay(integration_time_s=)` | `absorption_area=` e `integration_time=`, la grafía del resto de sus paquetes |
+| `bending_stress(density_kg_m3=)` | `density=`, la grafía del resto de `vibration` |
 
 `times, levels = decay_curve(ir, fs)` sigue desempaquetando la curva de
 caída, en el mismo orden. Los solvers FDTD conservan `c` y `rho`, que nombran
@@ -839,14 +911,14 @@ veredicto que se guardaba junto a su límite se lee también de los campos
 medidos, o se contrasta con ellos al construir el resultado, de modo que no
 puede contradecir el límite. Las funciones que devuelven estos veredictos
 reciben los mismos argumentos y dan las mismas respuestas, y cada nombre de la
-tabla sigue leyendo el mismo valor; solo cambia el código que construye un
+tabla, con su grafía de la 4.0, sigue leyendo el mismo valor; solo cambia el código que construye un
 veredicto directamente o que sustituye uno de estos campos. La última columna
 indica en qué versión apareció cada veredicto.
 
 | Veredicto | Ya no son campos del constructor | Campos que conserva o gana | Desde |
 | --- | --- | --- | --- |
 | `building.PositionSpreadCheck` | `limit_db`, `stage`, `spread_db`, `action`, `next_positions`, `corner_standard_deviation_db` | `levels`, del que se leen todos | después de 4.0.0rc1 |
-| `building.HeavyImpactSourceCheck` | `frequencies`, `nominal`, `tolerance`, `deviation`, `within_tolerance`, `passes` | `source`, `measured` | 4.0.0rc1 |
+| `building.HeavyImpactSourceCheck` | `frequencies`, `nominal`, `tolerance_db`, `deviation`, `within_tolerance`, `passes` | `source`, `measured` | 4.0.0rc1 |
 | `noise_control.BandFlatnessCheck` | `limit_db`, `satisfied` | `octave_frequencies`, `spread_db` | después de 4.0.0rc1 |
 | `noise_control.SourcePositionCheck` | `required_positions`, `satisfied`, `exceeds_maximum` | `positions_used`, `max_octave_spread_db` | después de 4.0.0rc1 |
 | `noise_control.TestEnvironmentApplicability` | `environmental_correction_limit_db`, `background_margin_limit_db`, `required_area_ratio`, `applicable` | `base_standard`, `actual_area_ratio`, `mean_absorption_coefficient` | después de 4.0.0rc1 |
@@ -868,20 +940,20 @@ indica en qué versión apareció cada veredicto.
 | `underwater.WeightedExposureResult` | `criteria` | gana `impulsive` | 4.0.0rc1 |
 | `vibration.ExposureAssessment` | `action_value`, `limit_value`, `exceeds_action`, `exceeds_limit`, `zone` | `value`, `kind`, `metric` | 3.3.0 |
 | `vibration.PhaseVerification`, `vibration.WeightingVerification` | `tolerance_deg` (fase), `within_tolerance` | la ponderación y las frecuencias | 4.0.0rc1 |
-| `vibration.RunningRmsDecayVerification` | `printed_time_s`, `tolerance_s` | `method`, `integration_time_s`, `measured_time_s` | después de 4.0.0rc1 |
+| `vibration.RunningRmsDecayVerification` | `printed_time_s`, `tolerance_s` | `method`, `integration_time`, `measured_time_s` | después de 4.0.0rc1 |
 | `vibration.SignalBurstVerification` | `printed`, `deviation_percent`, `tolerance_percent`, `within_tolerance` | la fila de la tabla, las columnas y `measured` | 4.0.0rc1 |
 | `vibration.VibrationMeterVerification` | `lower_percent`, `upper_percent`, `within_tolerance` | gana `measured_response` | después de 4.0.0rc1 |
 | `vibration.AssessmentVelocity` | `guide_value_mm_s` | lo selecciona `building_class` | después de 4.0.0rc1 |
 | `vibration.MountingCheck` | `acceptable`, `frequency_limit_hz`, `peak_acceleration_limit_m_s2`, `device` | gana `peak_acceleration_m_s2` y `upper_frequency_hz` | después de 4.0.0rc1 |
 | `vibration.DamageAssessment` | `guideline_mm_s` | gana `massive_structure`, solo por nombre | 4.0.0rc1 |
-| `vibration.RigidMassCalibrationResult` | `expected`, `deviation`, `within_tolerance`, `passes`, `tolerance` | `frequencies`, `measured`, `mass`, `quantity` | 3.3.0 |
+| `vibration.RigidMassCalibrationResult` | `expected`, `relative_deviation`, `within_tolerance`, `passes`, `relative_tolerance` | `frequencies`, `measured`, `mass`, `quantity` | 3.3.0 |
 | `vibration.LevelDifferenceCheck` | `limit_db` | lo selecciona `condition` | después de 4.0.0rc1 |
 | `vibration.OutputMassCheck` | `mass_limit_kg` | gana `output_apparent_mass_kg`, la fuerza de salida medida entre la aceleración de salida | después de 4.0.0rc1 |
 
 También cambian dos llamadas. `rigid_mass_calibration_check` ya no recibe
 `tolerance`: el apartado 7.5.2 de ISO 7626-2:2015 dice que el bloque «shall
 agree within ±5 %», así que una aceptación interna más estricta se lee de
-`.deviation`. Y `HeavyImpactSourceCheck` y `RigidMassCalibrationResult`, cuyo
+`.relative_deviation`. Y `HeavyImpactSourceCheck` y `RigidMassCalibrationResult`, cuyo
 `passes` era un campo almacenado, se niegan a leerse como valor de verdad
 igual que los demás veredictos: `if check:` lanza `TypeError` y el veredicto
 es `.passes`.
@@ -900,7 +972,7 @@ except TypeError as error:
     print(type(error).__name__)
 # TypeError
 calibration = vibration.rigid_mass_calibration_check([0.104, 0.093], [50.0, 500.0], 10.0)
-print(calibration.tolerance, calibration.within_tolerance.tolist())
+print(calibration.relative_tolerance, calibration.within_tolerance.tolist())
 # 0.05 [True, False]
 ```
 
@@ -995,7 +1067,7 @@ marca un campo que solo se pasa por nombre.
 | `building.ServiceEquipmentBackgroundResult` | `difference_db`, `correction_db`, `corrected_db`, `regime` | `measured_db`, `background_db` | después de 4.0.0rc1 |
 | `building.ServiceEquipmentResult` | `standardizable` | `frequencies`, `band` | después de 4.0.0rc1 |
 | `emission.SoundPowerIntensityResult` | `partial_power_level`, `sound_power`, `sound_power_level`, `negative_band`, `negative_partial_power_index`, `dynamic_capability_index`, `achieved_grade`, `a_weighting_omitted_bands`, `sound_power_level_a` | `partial_power` y los indicadores; gana `pressure_residual_index_db`, `band_type`, `repeatability_limit_db` | 3.1.0 |
-| `emission.PrecisionIntensityResult` | `sound_power`, `sound_power_level`, `sound_power_level_normalized`, `not_applicable_band`, `sound_power_level_a` | `partial_power`; gana `temperature_c`, `barometric_pressure_pa`, solo por nombre | 3.1.0 |
+| `emission.PrecisionIntensityResult` | `sound_power`, `sound_power_level`, `sound_power_level_normalized`, `not_applicable_band`, `sound_power_level_a` | `partial_power`; gana `temperature_c`, `static_pressure_pa`, solo por nombre | 3.1.0 |
 | `emission.InDuctSoundPowerResult` | `information_only_band` | `frequencies`, `flow_velocity` | 4.0.0rc1 |
 | `emission.SourceLocationPlan` | `spectral_character`, `a_weighted_spectral_character` | `standard`, `standard_deviation_db`, `a_weighted_standard_deviation_db` | después de 4.0.0rc1 |
 | `environment.ImpulsiveSoundResult` | `prominence`, `adjustment`, `category`, `adjusted_laeq` | `onsets`, `laeq` | 3.3.0 |
@@ -1095,7 +1167,7 @@ lee `band_type` de `vibration_reduction_index` (véase debajo de la tabla).
 
 | Resultado | Ya no es campo del constructor | Se lee de | Desde |
 | --- | --- | --- | --- |
-| `building.TappingForceResult` | `over_critical`, K m ≥ 4 Zdp² (Hopkins, ecuación 3.95) | `contact_stiffness`, `impedance`; gana `mass_kg`, solo por nombre | 4.0.0rc1 |
+| `building.TappingForceResult` | `over_critical`, K m ≥ 4 Zdp² (Hopkins, ecuación 3.95) | `contact_stiffness`, `impedance`; gana `mass`, solo por nombre | 4.0.0rc1 |
 | `noise_control.HydrodynamicValveNoise` | `regime`, con cavitación cuando Δp supera x_Fzp1 (p1 - pv) (IEC 60534-8-4, 5.1) | `differential`, `corrected_ratio`; gana `inlet_pressure_pa`, `vapour_pressure_pa` | 4.0.0rc1 |
 | `noise_control.AerodynamicValveNoise` | `regime`, los cinco intervalos de IEC 60534-8-3, 5.2 | `pressure_ratio`, `boundaries`; gana `specific_heat_ratio`, `pressure_recovery`, `efficiency_correction`, solo por nombre | 4.0.0rc1 |
 | `aircraft.TerrainScreeningResult` | `screened`, terreno estrictamente por encima de la línea de visión | `source`, `receiver`, `distances_m`, `heights_m` | 3.3.0 |
@@ -1105,7 +1177,7 @@ lee `band_type` de `vibration_reduction_index` (véase debajo de la tabla).
 | `noise_control.CabinInsulationResult` | `apparent` (ISO 11957, 3.6) | `method` | después de 4.0.0rc1 |
 | `environment.WindTurbineTonalityResult` | `has_identified_tone` (IEC 61400-11, 9.5.2 a 9.5.4) | `levels`, `frequencies`; gana `candidate_frequency_hz`, solo por nombre | 3.3.0 |
 | `building.LabJointInsulationResult` | `regime` (ISO 10140-1, J.1) | `r_s_measured_db`, `r_s_max_db`; gana `limit_at_maximum`, solo por nombre | después de 4.0.0rc1 |
-| `environment.TurbineSoundLevels` | `regimes` (IEC TS 61400-11-2, 11.7) | `total_levels_db`, `background_levels_db` | después de 4.0.0rc1 |
+| `environment.TurbineSoundLevels` | `regimes` (IEC TS 61400-11-2, 11.7) | `total_levels_db`, `background_levels` | después de 4.0.0rc1 |
 | `underwater.WestonPropagationResult` | `regime` | `range_m`, `boundaries` | 4.0.0rc1 |
 | `signals.SynchronousAverageResult` | `interpolated`, f_s T no es un número entero de muestras | `fs`, `period_s` | 4.0.0rc1 |
 

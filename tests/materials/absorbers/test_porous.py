@@ -158,7 +158,9 @@ class TestDelanyBazley:
             ValueError, match=r"'coefficients' must provide exactly 8 values"
         ):
             delany_bazley(f, 10000.0, coefficients=(1.0, 2.0))
-        with pytest.raises(ValueError, match="'flow_resistivity' must be positive"):
+        with pytest.raises(
+            ValueError, match="'flow_resistivity_pa_s_m2' must be positive"
+        ):
             delany_bazley(f, -1.0)
 
 
@@ -220,8 +222,8 @@ class TestJohnsonChampouxAllard:
             self.SIGMA,
             porosity=self.PHI,
             tortuosity=tort,
-            viscous_length=lam,
-            thermal_length=2.0 * lam,
+            viscous_length_m=lam,
+            thermal_length_m=2.0 * lam,
             fluid=PUBLISHED_AIR,
         )
 
@@ -261,8 +263,8 @@ class TestJohnsonChampouxAllard:
             self.SIGMA,
             porosity=self.PHI,
             tortuosity=1.0,
-            viscous_length=lam,
-            thermal_length=lam,
+            viscous_length_m=lam,
+            thermal_length_m=lam,
             fluid=PUBLISHED_AIR,
         )
         db = delany_bazley(f, self.SIGMA, fluid=PUBLISHED_AIR)
@@ -298,8 +300,8 @@ class TestJohnsonChampouxAllard:
                 1e4,
                 porosity=1.2,
                 tortuosity=1.0,
-                viscous_length=1e-4,
-                thermal_length=2e-4,
+                viscous_length_m=1e-4,
+                thermal_length_m=2e-4,
             )
         with pytest.raises(ValueError, match=r"'tortuosity' must be >= 1"):
             johnson_champoux_allard(
@@ -307,8 +309,8 @@ class TestJohnsonChampouxAllard:
                 1e4,
                 porosity=0.9,
                 tortuosity=0.5,
-                viscous_length=1e-4,
-                thermal_length=2e-4,
+                viscous_length_m=1e-4,
+                thermal_length_m=2e-4,
             )
 
 

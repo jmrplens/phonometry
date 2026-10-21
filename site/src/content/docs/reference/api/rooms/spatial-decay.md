@@ -144,7 +144,7 @@ The clause offers no correction for those. Judged settled.
 ```python
 check_background_margin(
     levels: ArrayLike,
-    background_levels_db: ArrayLike,
+    background_levels: ArrayLike,
 ) -> BackgroundMarginCheck
 ```
 
@@ -171,7 +171,7 @@ read band by band.
 | Name | Description |
 | :--- | :--- |
 | `levels` | $L_p$ with the test source running, in decibels, one value per measured position of one octave band. |
-| `background_levels_db` | The background at the same positions, in decibels, as a scalar or one value per position. |
+| `background_levels` | The background at the same positions, in decibels, as a scalar or one value per position. |
 
 **Returns:** The verdict, as a [`BackgroundMarginCheck`](/phonometry/reference/api/rooms/spatial-decay/#backgroundmargincheck).
 
@@ -237,7 +237,7 @@ DECADE_TO_DOUBLING = 0.3
 
 ```python
 distance_region(
-    distance_m: float,
+    distance: float,
     *,
     near_limit_m: float = 5.0,
     far_limit_m: float = 16.0,
@@ -255,7 +255,7 @@ recorded and reported, which is why they are arguments here.
 
 | Name | Description |
 | :--- | :--- |
-| `distance_m` | The distance from the acoustical centre, in metres. |
+| `distance` | The distance from the acoustical centre, in metres. |
 | `near_limit_m` | $d_1$, in metres. |
 | `far_limit_m` | $d_2$, in metres. |
 
@@ -381,7 +381,7 @@ $$
 level_excess_at(
     distribution_values_db: ArrayLike,
     distances: ArrayLike,
-    distance_m: float,
+    distance: float,
 ) -> float
 ```
 
@@ -407,7 +407,7 @@ the errata registry records it.
 | :--- | :--- |
 | `distribution_values_db` | $D_i$ at the positions of the range, in decibels. |
 | `distances` | $r_i$ at the same positions, in metres. |
-| `distance_m` | $r$, the distance to read at, in metres. |
+| `distance` | $r$, the distance to read at, in metres. |
 
 **Returns:** $\mathrm{DL}'_{\mathrm{f}r}$, in decibels.
 
@@ -680,7 +680,7 @@ spatial_decay_curve(
     near_limit_m: float = 5.0,
     far_limit_m: float = 16.0,
     region: str = 'middle',
-    band_hz: float | None = None,
+    band: float | None = None,
 ) -> SpatialDecayResult
 ```
 
@@ -695,7 +695,7 @@ The curve of one region with its two descriptors, clause 6.
 | `near_limit_m` | $d_1$ of 6.2, in metres. |
 | `far_limit_m` | $d_2$ of 6.2, in metres. |
 | `region` | `"near"`, `"middle"`, `"far"` or `"whole"`. |
-| `band_hz` | The octave centre the curve belongs to, in hertz. |
+| `band` | The octave centre the curve belongs to, in hertz. |
 
 **Returns:** The curve and its descriptors, as a [`SpatialDecayResult`](/phonometry/reference/api/rooms/spatial-decay/#spatialdecayresult).
 
@@ -754,7 +754,7 @@ SpatialDecayResult(
     decay_rate_db: float,
     mean_excess_db: float,
     region: str,
-    band_hz: float | None = None,
+    band: float | None = None,
 )
 ```
 
@@ -771,7 +771,7 @@ A spatial sound distribution curve and what clause 6 reads off it.
 | `decay_rate_db` | $\mathrm{DL}_2$ over the range, in decibels per distance doubling. |
 | `mean_excess_db` | $\mathrm{DL}_\mathrm{f}(r_n, r_m)$ over the range, in decibels. |
 | `region` | `"near"`, `"middle"`, `"far"` or `"whole"`. |
-| `band_hz` | The nominal octave centre the curve belongs to, in hertz, or `None` for a curve that stands for a spectrum. |
+| `band` | The nominal octave centre the curve belongs to, in hertz, or `None` for a curve that stands for a spectrum. |
 
 ### SpatialDecayResult.plot()
 

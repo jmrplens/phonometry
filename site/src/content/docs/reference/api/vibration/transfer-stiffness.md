@@ -807,11 +807,11 @@ Requires matplotlib (`pip install phonometry[plot]`).
 ```python
 effective_blocking_mass(
     frequencies: ArrayLike,
-    force_n: ArrayLike,
+    force: ArrayLike,
     first_acceleration_m_s2: ArrayLike,
     second_acceleration_m_s2: ArrayLike,
     *,
-    blocking_mass_kg: float,
+    blocking_mass: float,
 ) -> EffectiveBlockingMass
 ```
 
@@ -831,10 +831,10 @@ follow ISO 7626-1 and ISO 7626-2. See [`EffectiveBlockingMass`](/phonometry/refe
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz, strictly increasing. |
-| `force_n` | Excitation force phasor `F2`, in N, one per frequency. |
+| `force` | Excitation force phasor `F2`, in N, one per frequency. |
 | `first_acceleration_m_s2` | Acceleration phasor $a'_1$, in m/s², one per frequency. |
 | `second_acceleration_m_s2` | Acceleration phasor $a''_1$, in m/s², one per frequency. |
-| `blocking_mass_kg` | The mass `m2` of the block, in kg. |
+| `blocking_mass` | The mass `m2` of the block, in kg. |
 
 **Returns:** The [`EffectiveBlockingMass`](/phonometry/reference/api/vibration/transfer-stiffness/#effectiveblockingmass).
 
@@ -850,7 +850,7 @@ follow ISO 7626-1 and ISO 7626-2. See [`EffectiveBlockingMass`](/phonometry/refe
 EffectiveBlockingMass(
     frequencies: np.ndarray,
     effective_mass_kg: np.ndarray,
-    blocking_mass_kg: float,
+    blocking_mass: float,
 )
 ```
 
@@ -881,7 +881,7 @@ is ignored in finding `f3`.
 | :--- | :--- |
 | `frequencies` | Frequencies, in hertz, strictly increasing. |
 | `effective_mass_kg` | $m_{2,\mathrm{eff}}$ at each frequency, in kg. |
-| `blocking_mass_kg` | The mass `m2` of the block, in kg. |
+| `blocking_mass` | The mass `m2` of the block, in kg. |
 
 ### EffectiveBlockingMass.deviation_db
 

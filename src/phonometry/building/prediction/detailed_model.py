@@ -1330,10 +1330,10 @@ class HomogeneousElement(RichDisplay):
         *,
         thickness_m: float,
         internal_loss_factor: float,
-        area_m2: float,
-        length1_m: float,
-        length2_m: float,
-        perimeter_absorption_m: float = 0.0,
+        area: float,
+        length1: float,
+        length2: float,
+        perimeter_absorption: float = 0.0,
         label: str = "",
         fluid: Fluid = EN_12354_AIR,
     ) -> HomogeneousElement:
@@ -1365,10 +1365,10 @@ class HomogeneousElement(RichDisplay):
             catalogue file of your own.
         :param thickness_m: Element thickness ``t``, in metres.
         :param internal_loss_factor: Internal loss factor ``ηint``.
-        :param area_m2: Element area ``S``, in m².
-        :param length1_m: One side length of the rectangular element, in m.
-        :param length2_m: The other side length, in m.
-        :param perimeter_absorption_m: :math:`\sum l_k \alpha_k` over the
+        :param area: Element area ``S``, in m².
+        :param length1: One side length of the rectangular element, in m.
+        :param length2: The other side length, in m.
+        :param perimeter_absorption: :math:`\sum l_k \alpha_k` over the
             element's perimeter, in m (Default: 0).
         :param label: The element's name (Default: the row's
             :attr:`~phonometry.io.CatalogueRow.name`).
@@ -1396,15 +1396,15 @@ class HomogeneousElement(RichDisplay):
         speed = row.printed("plate_longitudinal_speed_m_s", wanted_by=wanted_by)
         return cls(
             label=label or row.name,
-            area=area_m2,
-            length1=length1_m,
-            length2=length2_m,
+            area=area,
+            length1=length1,
+            length2=length2,
             mass_per_area=density * thickness,
             critical_frequency=critical_frequency(
                 speed, thickness, speed_of_sound=fluid.speed_of_sound
             ),
             internal_loss_factor=eta,
-            perimeter_absorption=perimeter_absorption_m,
+            perimeter_absorption=perimeter_absorption,
             density=density,
             longitudinal_velocity=speed,
         )

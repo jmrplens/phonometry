@@ -89,7 +89,7 @@ PropagationLossResult(
     spreading: NDArray[np.float64],
     absorption: NDArray[np.float64],
     frequency: float,
-    absorption_coefficient: float,
+    absorption_db_per_km: float,
     law: str,
     model: str,
 )
@@ -106,7 +106,7 @@ Propagation loss versus range (closed-form).
 | `spreading` | Geometrical-spreading contribution per range, in dB. |
 | `absorption` | Volume-absorption contribution per range, in dB. |
 | `frequency` | The acoustic frequency, in Hz. |
-| `absorption_coefficient` | The absorption coefficient $\alpha$, in dB/km. |
+| `absorption_db_per_km` | The absorption coefficient $\alpha$, in dB/km. |
 | `law` | The spreading law used. |
 | `model` | The absorption model used. |
 

@@ -206,7 +206,7 @@ already the rolling term.
 from phonometry import environment
 
 row = environment.road_surface_coefficients(environment.RoadSurface.TWO_LAYER_ZOAB_FINE)
-row.speed_range          # (80.0, 130.0) km/h, the printed validity range
+row.speed_range_kmh          # (80.0, 130.0) km/h, the printed validity range
 row.alpha["1"]           # alpha per octave band for light vehicles
 row.beta["1"]            # -0.1, the speed coefficient
 ```

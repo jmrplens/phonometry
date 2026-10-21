@@ -984,7 +984,7 @@ class LevelCrossingResult(OwnsArrays):
     :ivar apparent_frequency: ``N0 / 2`` from the spectral moments, in Hz
         (a 60 Hz sine crosses zero 120 times per second).
     :ivar sigma: RMS value of the demeaned record, in signal units.
-    :ivar duration: Record duration used for the rates, in seconds.
+    :ivar duration_s: Record duration used for the rates, in seconds.
     :ivar fs: Sample rate, in Hz.
     """
 
@@ -998,7 +998,7 @@ class LevelCrossingResult(OwnsArrays):
     zero_crossing_rate_rice: float
     apparent_frequency: float
     sigma: float
-    duration: float
+    duration_s: float
     fs: float
 
     def __post_init__(self) -> None:
@@ -1115,7 +1115,7 @@ def level_crossing_rate(
         zero_crossing_rate_rice=n0_rice,
         apparent_frequency=n0_rice / 2.0,
         sigma=sigma,
-        duration=duration,
+        duration_s=duration,
         fs=fs_v,
     )
 
@@ -1174,7 +1174,7 @@ def _check_measured_peak_rate(
     hand: the count is how many entries :attr:`PeakStatisticsResult.
     peak_values` holds -- every detected maximum is standardized and kept,
     none are dropped -- and the length is :attr:`~PeakStatisticsResult.
-    duration`. The plot draws the empirical exceedance from that same count
+    duration_s`. The plot draws the empirical exceedance from that same count
     and floors the axis at ``1/n``, so a rate that disagrees with it puts a
     number in the caller's hands that the figure beside it contradicts,
     with neither one wrong on its face.
@@ -1191,10 +1191,10 @@ def _check_measured_peak_rate(
     :raises ValueError: if the duration is not a positive finite record
         length, or the rate is not the peak count over it.
     """
-    require_scalar(duration, "duration")
+    require_scalar(duration, "duration_s")
     if not math.isfinite(duration) or duration <= 0.0:
         msg = (
-            f"{owner}: 'duration' must be a positive, finite record length "
+            f"{owner}: 'duration_s' must be a positive, finite record length "
             f"for 'peak_rate' to be a rate over it; got {duration!r}."
         )
         raise ValueError(msg)
@@ -1291,7 +1291,7 @@ class PeakStatisticsResult(OwnsArrays):
     :ivar peak_values: Standardized heights
         :math:`z = \text{peak} / \sigma` of the detected maxima.
     :ivar sigma: RMS value of the demeaned record, in signal units.
-    :ivar duration: Record duration used for the rates, in seconds.
+    :ivar duration_s: Record duration used for the rates, in seconds.
     :ivar fs: Sample rate, in Hz.
     """
 
@@ -1301,7 +1301,7 @@ class PeakStatisticsResult(OwnsArrays):
     irregularity_factor: float
     peak_values: NDArray[np.float64]
     sigma: float
-    duration: float
+    duration_s: float
     fs: float
 
     def __post_init__(self) -> None:
@@ -1328,7 +1328,7 @@ class PeakStatisticsResult(OwnsArrays):
 
         The rates beside the heights are pinned too, each against what the
         result already holds: :attr:`peak_rate` against the peaks it counts
-        over :attr:`duration`, and :attr:`irregularity_factor` against the
+        over :attr:`duration_s`, and :attr:`irregularity_factor` against the
         two expected rates it was derived from. See
         :func:`_check_measured_peak_rate` and :func:`_check_rice_peak_rate`
         for why each one closes.
@@ -1350,7 +1350,7 @@ class PeakStatisticsResult(OwnsArrays):
             )
             raise ValueError(msg)
         owner = type(self).__name__
-        _check_measured_peak_rate(self.peak_rate, values.size, self.duration, owner)
+        _check_measured_peak_rate(self.peak_rate, values.size, self.duration_s, owner)
         _check_rice_peak_rate(
             self.peak_rate_rice,
             self.zero_crossing_rate_rice,
@@ -1460,6 +1460,6 @@ def peak_statistics(
         irregularity_factor=min(1.0, n0_rice / (2.0 * m_rice)),
         peak_values=np.asarray(np.sort(peaks) / sigma, dtype=np.float64),
         sigma=sigma,
-        duration=duration,
+        duration_s=duration,
         fs=fs_v,
     )

@@ -80,7 +80,7 @@ l2 = np.full(16, 40.0)
 t2 = np.full(16, 0.5)
 lab = building.lab_airborne_insulation(l1, l2, t2, area=10.0, volume=50.0)
 print(round(float(lab.r[0]), 1))              # 38.0  R = L1 - L2 + 10 lg(S/A)
-print(round(float(lab.absorption[0]), 1))     # 16.0  A = 0.16 V / T (m^2)
+print(round(float(lab.absorption_area[0]), 1))     # 16.0  A = 0.16 V / T (m^2)
 print(lab.rating.rating, lab.rating.c, lab.rating.ctr)   # 38 0 0  ->  Rw(C;Ctr)
 
 # Impact: the tapping-machine level Li normalized to A0 = 10 m^2 gives Ln
@@ -165,8 +165,8 @@ plt.show()
 | `volume` | float | m³ | > 0 | Receiving-room volume $V$ |
 
 `lab_airborne_insulation()` returns a `LabAirborneInsulationResult` (`r`,
-`absorption`, `rating`); `lab_impact_insulation()` a
-`LabImpactInsulationResult` (`l_n`, `absorption`, `rating`);
+`absorption_area`, `rating`); `lab_impact_insulation()` a
+`LabImpactInsulationResult` (`l_n`, `absorption_area`, `rating`);
 `background_correction(signal_and_background, background)` returns the corrected
 levels directly.
 

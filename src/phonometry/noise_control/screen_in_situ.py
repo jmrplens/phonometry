@@ -177,7 +177,7 @@ class ScreenInSituWarning(PhonometryWarning):
 
 
 def background_corrected_level_db(
-    levels: ArrayLike, background_levels_db: ArrayLike
+    levels: ArrayLike, background_levels: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The level with the background taken off, clause 5.7.
 
@@ -196,16 +196,16 @@ def background_corrected_level_db(
     the remedy is to wait for a quieter day rather than to correct harder.
 
     :param levels: The level with the sources on, per band, in decibels.
-    :param background_levels_db: The level with them off, per band, in
+    :param background_levels: The level with them off, per band, in
         decibels.
     :return: The corrected level per band, in decibels.
     :raises ValueError: For inputs that do not match band for band, or a
         margin under :data:`ISO11821_MINIMUM_BACKGROUND_MARGIN_DB`.
     """
     levels = require_finite_array(levels, "levels")
-    background = require_finite_array(background_levels_db, "background_levels_db")
+    background = require_finite_array(background_levels, "background_levels")
     if levels.shape != background.shape:
-        msg = "'levels' and 'background_levels_db' must match band for band."
+        msg = "'levels' and 'background_levels' must match band for band."
         raise ValueError(msg)
     lower, upper = BACKGROUND_CORRECTION_WINDOW_DB
     margin = levels - background
@@ -342,7 +342,7 @@ class ScreenInSituResult(OwnsArrays):
     :ivar a_weighted_attenuation_db: :math:`D_{p\mathrm{A}}`, in decibels, or ``None``.
         Clause 5.9 allows it only with the actual source.
     :ivar source_kind: ``"actual"`` or ``"artificial"``.
-    :ivar distance_m: How far the position stands from the screen, in metres,
+    :ivar distance: How far the position stands from the screen, in metres,
         or ``None``.
     """
 
@@ -352,7 +352,7 @@ class ScreenInSituResult(OwnsArrays):
     attenuation_db: NDArray[np.float64]
     a_weighted_attenuation_db: float | None
     source_kind: str
-    distance_m: float | None
+    distance: float | None
 
     def rounded(self) -> NDArray[np.int_]:
         """The band values as 7.4 c) reports them, to the nearest integer.
@@ -401,7 +401,7 @@ def screen_attenuation(
     source_kind: SourceKind = "actual",
     a_weighted_unscreened_level_db: float | None = None,
     a_weighted_screened_level_db: float | None = None,
-    distance_m: float | None = None,
+    distance: float | None = None,
 ) -> ScreenInSituResult:
     r"""The in-situ attenuation of a screen, clauses 5.8 and 5.9.
 
@@ -425,7 +425,7 @@ def screen_attenuation(
     :param source_kind: ``"actual"`` (default) or ``"artificial"``.
     :param a_weighted_unscreened_level_db: :math:`L_{p\mathrm{A}1}`, in decibels.
     :param a_weighted_screened_level_db: :math:`L_{p\mathrm{A}2}`, in decibels.
-    :param distance_m: How far this position stands from the screen, in
+    :param distance: How far this position stands from the screen, in
         metres, carried into the result because 5.5.2 reports the spread over
         the line rather than one number.
     :return: The attenuation, as a :class:`ScreenInSituResult`.
@@ -478,7 +478,5 @@ def screen_attenuation(
         attenuation_db=np.asarray(unscreened - screened, dtype=np.float64),
         a_weighted_attenuation_db=weighted,
         source_kind=kind,
-        distance_m=(
-            None if distance_m is None else require_positive(distance_m, "distance_m")
-        ),
+        distance=(None if distance is None else require_positive(distance, "distance")),
     )

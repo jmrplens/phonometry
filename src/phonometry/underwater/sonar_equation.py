@@ -322,7 +322,7 @@ class DetectionRangeResult(OwnsArrays):
     :ivar frequency: Acoustic frequency, in Hz.
     :ivar range_m: Range grid over which the loss was evaluated, in metres.
     :ivar propagation_loss: Propagation loss at each range, in dB.
-    :ivar absorption_coefficient: Absorption coefficient :math:`\alpha`, in
+    :ivar absorption_db_per_km: Absorption coefficient :math:`\alpha`, in
         dB/km.
     :ivar law: The spreading law used.
     :ivar model: The absorption model used.
@@ -333,7 +333,7 @@ class DetectionRangeResult(OwnsArrays):
     frequency: float
     range_m: NDArray[np.float64]
     propagation_loss: NDArray[np.float64]
-    absorption_coefficient: float
+    absorption_db_per_km: float
     law: str
     model: str
 
@@ -430,7 +430,7 @@ def detection_range(
         frequency=curve.frequency,
         range_m=curve.range_m,
         propagation_loss=curve.pl,
-        absorption_coefficient=curve.absorption_coefficient,
+        absorption_db_per_km=curve.absorption_db_per_km,
         law=curve.law,
         model=curve.model,
     )

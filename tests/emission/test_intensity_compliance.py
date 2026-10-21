@@ -423,7 +423,7 @@ def test_index_follows_note1_when_the_spacer_changes() -> None:
 
 def test_phase_conversion_rejects_invalid_inputs() -> None:
     with pytest.raises(
-        ValueError, match=r"'phase_mismatch' must be finite and positive"
+        ValueError, match=r"'phase_mismatch_deg' must be finite and positive"
     ):
         emission.residual_index_from_phase_mismatch(0.0, 1000.0, 0.025)
     with pytest.raises(
@@ -447,7 +447,7 @@ def test_result_phase_mismatch_matches_the_standalone_conversion() -> None:
     expected = emission.phase_mismatch_from_residual_index(
         np.asarray(measured), np.asarray(_BANDS), 0.012
     )
-    assert result.phase_mismatch() == pytest.approx(expected)
+    assert result.phase_mismatch_deg() == pytest.approx(expected)
 
 
 # --------------------------------------------------------------------------

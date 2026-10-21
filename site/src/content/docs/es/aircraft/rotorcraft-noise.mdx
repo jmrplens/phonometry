@@ -133,8 +133,8 @@ acimut/polar.
 | Campo | Forma | Unidades y convenio |
 |---|---|---|
 | `frequencies` | `(F,)` | centros de banda de tercio de octava en Hz; el formato NORAH lleva 31 bandas de 10 Hz a 10 kHz |
-| `azimuth` $\varphi$ | `(A,)` | grados alrededor del eje del morro: $0$ recto hacia abajo, $+90$ a estribor, $-90$ a babor; 19 valores cada 10° |
-| `polar` $\theta$ | `(P,)` | grados desde el morro: $0$ hacia delante, $90$ al través de la aeronave, $180$ hacia atrás; 19 valores cada 10° |
+| `azimuth_deg` $\varphi$ | `(A,)` | grados alrededor del eje del morro: $0$ recto hacia abajo, $+90$ a estribor, $-90$ a babor; 19 valores cada 10° |
+| `polar_deg` $\theta$ | `(P,)` | grados desde el morro: $0$ hacia delante, $90$ al través de la aeronave, $180$ hacia atrás; 19 valores cada 10° |
 | `levels` | `(A, P, F)` | niveles de presión acústica de banda en dB a la distancia de referencia; `NaN` en los bins que la medida no cubrió |
 | `distance_m` | escalar | distancia de referencia en metros, 60 por defecto |
 
@@ -171,7 +171,7 @@ from phonometry import aircraft
 # bloque (19, 19, 31) de niveles es el que midió la campaña.
 freqs = 1000.0 * 10.0 ** (np.arange(-20, 11) / 10.0)   # tercios 10 Hz-10 kHz
 phi, theta = np.arange(-90.0, 91.0, 10.0), np.arange(0.0, 181.0, 10.0)
-h = aircraft.RotorcraftHemisphere(frequencies=freqs, azimuth=phi, polar=theta,
+h = aircraft.RotorcraftHemisphere(frequencies=freqs, azimuth_deg=phi, polar_deg=theta,
                                   levels=measured_levels)
 lv = aircraft.hemisphere_source_level(h, 0.0, 90.0)   # recto hacia abajo, por banda, a 60 m
 h.plot()                                          # directividad proa-popa
@@ -575,7 +575,7 @@ recomienda suavizar las trazas radar
 
 ```python
 kin = aircraft.flight_path_kinematics(times, positions)   # posiciones (N, 3), m
-kin.airspeed, kin.path_angle_deg          # seleccionan el hemisferio por punto
+kin.airspeed_m_s, kin.path_angle_deg          # seleccionan el hemisferio por punto
 kin.bank_angle_deg                        # inclina el hemisferio en virajes
 kin.plot()                            # perfiles de velocidad y ángulos
 ```

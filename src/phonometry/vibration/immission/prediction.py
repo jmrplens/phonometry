@@ -404,23 +404,21 @@ def material_damping_factor(
     return np.asarray(np.exp(-alpha * distances), dtype=np.float64)
 
 
-def soil_building_natural_frequency_hz(
-    stiffness_n_per_m: float, *, mass_kg: float
-) -> float:
+def soil_building_natural_frequency_hz(stiffness: float, *, mass: float) -> float:
     r"""The natural frequency of a building on its ground, Formula (3).
 
     :math:`f_B = \frac{1}{2\pi}\sqrt{k_B / m_B}`: the ground as a spring under
     the mass of the building that moves in phase, for the vertical direction
     and predominantly harmonic vibration in the lower frequency range.
 
-    :param stiffness_n_per_m: :math:`k_B`, the spring stiffness of the
+    :param stiffness: :math:`k_B`, the spring stiffness of the
         ground, in newtons per metre.
-    :param mass_kg: :math:`m_B`, in kilograms.
+    :param mass: :math:`m_B`, in kilograms.
     :return: :math:`f_B`, in hertz.
     :raises ValueError: For a non-positive stiffness or mass.
     """
-    stiffness = require_positive(stiffness_n_per_m, "stiffness_n_per_m")
-    mass = require_positive(mass_kg, "mass_kg")
+    stiffness = require_positive(stiffness, "stiffness")
+    mass = require_positive(mass, "mass")
     return math.sqrt(stiffness / mass) / (2.0 * math.pi)
 
 

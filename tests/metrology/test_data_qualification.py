@@ -495,7 +495,7 @@ def test_peak_statistics_validation_and_fields() -> None:
     assert 0.0 < res.irregularity_factor <= 1.0
     assert res.peak_values.size > 0
     assert np.all(np.diff(res.peak_values) >= 0.0)  # sorted
-    assert res.duration == pytest.approx((x.size - 1) / FS)
+    assert res.duration_s == pytest.approx((x.size - 1) / FS)
     constant = np.zeros(4096)
     with pytest.raises(ValueError, match=r"'x' must not be constant"):
         ph.metrology.peak_statistics(constant, FS)
@@ -548,17 +548,17 @@ def test_peak_statistics_rejects_rate_that_miscounts_its_peaks() -> None:
     """A rate is a count over a duration, and both are stored here.
 
     ``peak_values`` holds every detected maximum -- none are dropped on the
-    way in -- and ``duration`` is the record length the rate was taken
+    way in -- and ``duration_s`` is the record length the rate was taken
     over, so ``peak_rate`` restates the two beside it. Halving the heights
     used to leave the rate untouched: the figure then drew 2731 peaks and
     floored its axis at 1/2731 = 3.662e-04, stating 1365.5833 maxima per
     second, while ``peak_rate`` reported 2730.6667 over the very same
-    ``duration``.
+    ``duration_s``.
     """
     res = ph.metrology.peak_statistics(
         np.random.default_rng(9).standard_normal(1 << 14), FS
     )
-    assert res.peak_rate == res.peak_values.size / res.duration
+    assert res.peak_rate == res.peak_values.size / res.duration_s
     half = res.peak_values[::2]
     with pytest.raises(ValueError, match=r"'peak_rate' must be the number of maxima"):
         dataclasses.replace(res, peak_values=half)

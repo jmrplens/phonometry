@@ -53,6 +53,7 @@ _BAR_PER_MPA = 10.0
 #: kg/cm² per bar (100 kPa = 1.019716 kg/cm²; 1 bar = 100 kPa).
 _KGCM2_PER_BAR = 1.019716
 _MODELS = ("unesco", "del_grosso", "mackenzie", "medwin")
+_DEPTH_NEGATIVE_MSG = "'depth_m' must be non-negative."
 
 
 def _positive(value: float, name: str) -> float:
@@ -92,8 +93,7 @@ def depth_to_gauge_pressure_mpa(*, depth_m: float, latitude_deg: float = 45.0) -
     """
     z = _finite(depth_m, "depth_m")
     if z < 0.0:
-        msg = "'depth_m' must be non-negative."
-        raise ValueError(msg)
+        raise ValueError(_DEPTH_NEGATIVE_MSG)
     return float(_pressure_mpa(z, _finite(latitude_deg, "latitude_deg")))
 
 
@@ -243,41 +243,41 @@ def _del_grosso(
 @overload
 def sea_water_sound_speed(
     temperature_c: float,
-    salinity: float,
-    depth: float,
+    salinity_psu: float,
+    depth_m: float,
     *,
     model: str = ...,
-    latitude: float = ...,
+    latitude_deg: float = ...,
 ) -> float: ...
 
 
 @overload
 def sea_water_sound_speed(
     temperature_c: ArrayLike,
-    salinity: ArrayLike,
-    depth: ArrayLike,
+    salinity_psu: ArrayLike,
+    depth_m: ArrayLike,
     *,
     model: str = ...,
-    latitude: float = ...,
+    latitude_deg: float = ...,
 ) -> float | NDArray[np.float64]: ...
 
 
 def sea_water_sound_speed(
     temperature_c: ArrayLike,
-    salinity: ArrayLike,
-    depth: ArrayLike,
+    salinity_psu: ArrayLike,
+    depth_m: ArrayLike,
     *,
     model: str = "unesco",
-    latitude: float = 45.0,
+    latitude_deg: float = 45.0,
 ) -> float | NDArray[np.float64]:
     """Speed of sound in sea water, in metres per second.
 
     :param temperature_c: Temperature ``T``, in degrees Celsius.
-    :param salinity: Salinity ``S``, in parts per thousand (PSU).
-    :param depth: Depth below the surface, in metres (``>= 0``).
+    :param salinity_psu: Salinity ``S``, in parts per thousand (PSU).
+    :param depth_m: Depth below the surface, in metres (``>= 0``).
     :param model: ``"unesco"`` (default), ``"del_grosso"``, ``"mackenzie"`` or
         ``"medwin"``.
-    :param latitude: Latitude for the depth→pressure conversion, in degrees
+    :param latitude_deg: Latitude for the depth→pressure conversion, in degrees
         (used by ``"unesco"`` and ``"del_grosso"``; default 45°).
     :return: The sound speed ``c``, in m/s.
     :raises ValueError: If ``model`` is unknown or an input is non-finite.
@@ -293,17 +293,20 @@ def sea_water_sound_speed(
         Ainslie's words) and drifts by a few m/s against the UNESCO standard
         away from mid-range temperatures and shallow depths.
     """
-    scalar = np.isscalar(temperature_c) and np.isscalar(salinity) and np.isscalar(depth)
+    scalar = (
+        np.isscalar(temperature_c)
+        and np.isscalar(salinity_psu)
+        and np.isscalar(depth_m)
+    )
     t = require_above_absolute_zero_array(temperature_c, "temperature_c")
-    s = require_finite_array(salinity, "salinity")
-    z = require_finite_array(depth, "depth")
+    s = require_finite_array(salinity_psu, "salinity_psu")
+    z = require_finite_array(depth_m, "depth_m")
     t, s, z = np.broadcast_arrays(t, s, z)
     if np.any(s < 0.0):
-        msg = "'salinity' must be non-negative."
+        msg = "'salinity_psu' must be non-negative."
         raise ValueError(msg)
     if np.any(z < 0.0):
-        msg = "'depth' must be non-negative."
-        raise ValueError(msg)
+        raise ValueError(_DEPTH_NEGATIVE_MSG)
     key = model.strip().lower()
     if key == "mackenzie":
         c = np.asarray(_mackenzie(t, s, z), dtype=np.float64)
@@ -311,7 +314,8 @@ def sea_water_sound_speed(
         c = np.asarray(_medwin(t, s, z), dtype=np.float64)
     elif key in ("unesco", "del_grosso"):
         pressure_bar = (
-            np.asarray(_pressure_mpa(z, _finite(latitude, "latitude"))) * _BAR_PER_MPA
+            np.asarray(_pressure_mpa(z, _finite(latitude_deg, "latitude_deg")))
+            * _BAR_PER_MPA
         )
         c = np.asarray(
             _unesco(t, s, pressure_bar)
@@ -380,8 +384,7 @@ def depth_to_absolute_pressure_pa(
     """
     z = _finite(depth_m, "depth_m")
     if z < 0.0:
-        msg = "'depth_m' must be non-negative."
-        raise ValueError(msg)
+        raise ValueError(_DEPTH_NEGATIVE_MSG)
     phi = math.radians(_finite(latitude_deg, "latitude_deg"))
     return float(
         _AINSLIE_P_SCALE
@@ -394,7 +397,7 @@ def depth_to_absolute_pressure_pa(
 
 
 def sea_water_density(
-    *, temperature_c: float, salinity_psu: float, absolute_pressure_pa: float
+    *, temperature_c: float, salinity_psu: float, static_pressure_pa: float
 ) -> float:
     r"""Density of sea water, in kilograms per cubic metre.
 
@@ -412,7 +415,7 @@ def sea_water_density(
 
     :param temperature_c: Temperature ``T``, in degrees Celsius.
     :param salinity_psu: Practical salinity ``S``, dimensionless.
-    :param absolute_pressure_pa: Absolute static pressure ``P_w``, in pascals.
+    :param static_pressure_pa: Absolute static pressure ``P_w``, in pascals.
     :return: Density ``rho``, in kg/m3.
     :raises ValueError: For a temperature at or below absolute zero, a negative
         salinity, or a non-positive pressure.
@@ -424,7 +427,7 @@ def sea_water_density(
     if s < 0.0:
         msg = "'salinity_psu' must be non-negative."
         raise ValueError(msg)
-    p = _positive(absolute_pressure_pa, "absolute_pressure_pa")
+    p = _positive(static_pressure_pa, "static_pressure_pa")
     return float(
         _AINSLIE_RHO_REF
         + _AINSLIE_PRESSURE * p
@@ -464,7 +467,7 @@ def sea_water(
         salinity_psu,
         depth_m,
         model=sound_speed_model,
-        latitude=latitude_deg,
+        latitude_deg=latitude_deg,
     )
     absolute_pa = depth_to_absolute_pressure_pa(
         depth_m=depth_m, latitude_deg=latitude_deg
@@ -472,7 +475,7 @@ def sea_water(
     density = sea_water_density(
         temperature_c=temperature_c,
         salinity_psu=salinity_psu,
-        absolute_pressure_pa=absolute_pa,
+        static_pressure_pa=absolute_pa,
     )
     return Fluid(
         temperature_c=float(temperature_c),

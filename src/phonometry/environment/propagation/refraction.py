@@ -40,7 +40,7 @@ Salomons (a passive ground has :math:`\operatorname{Im}(Z) > 0`), shared with
 :mod:`phonometry.environment.propagation.ground_barriers`. The porous models of
 :mod:`phonometry.materials` work in the opposite :math:`\mathrm{e}^{+j \omega t}`
 convention (:math:`\operatorname{Im}(Z) < 0`), so an impedance derived from
-them (``flow_resistivity=`` or a
+them (``flow_resistivity_pa_s_m2=`` or a
 ``PorousMediumResult``) is conjugated internally before entering the PE ground
 condition. Heights and ranges are in metres, sound speeds in m/s and
 frequencies in Hz.
@@ -146,7 +146,7 @@ class EffectiveSoundSpeedProfile(OwnsArrays):
 def linear_sound_speed_profile(
     gradient_per_s: float,
     *,
-    ground_speed: float = _C_SOUND,
+    ground_speed_of_sound: float = _C_SOUND,
     max_height_m: float = 100.0,
 ) -> EffectiveSoundSpeedProfile:
     r"""Linear effective sound-speed profile (constant vertical gradient).
@@ -157,13 +157,13 @@ def linear_sound_speed_profile(
     and creates an acoustic shadow near the ground (Salomons Sec. 4.2).
 
     :param gradient_per_s: Vertical gradient ``dc/dz``, in s^-1 (m/s per m).
-    :param ground_speed: Sound speed ``c0`` at the ground, in m/s.
+    :param ground_speed_of_sound: Sound speed ``c0`` at the ground, in m/s.
     :param max_height_m: Top of the sampled profile, in metres.
     :return: A two-point :class:`EffectiveSoundSpeedProfile`.
-    :raises ValueError: If ``max_height_m`` or ``ground_speed`` is not positive, or
-        the profile turns non-positive within ``[0, max_height]``.
+    :raises ValueError: If ``max_height_m`` or ``ground_speed_of_sound`` is not positive, or
+        the profile turns non-positive within ``[0, max_height_m]``.
     """
-    c0 = require_positive(ground_speed, "ground_speed")
+    c0 = require_positive(ground_speed_of_sound, "ground_speed_of_sound")
     h = require_positive(max_height_m, "max_height_m")
     if not np.isfinite(gradient_per_s):
         msg = "'gradient_per_s' must be finite."
@@ -186,7 +186,7 @@ def linear_sound_speed_profile(
 def log_linear_sound_speed_profile(
     b: float,
     *,
-    ground_speed: float = 340.0,
+    ground_speed_of_sound: float = 340.0,
     roughness_length: float = 0.1,
     max_height_m: float = 100.0,
     n_points: int = 128,
@@ -201,7 +201,7 @@ def log_linear_sound_speed_profile(
     near the ground is resolved by sampling the height grid logarithmically.
 
     :param b: Profile strength ``b``, in m/s (positive: downward refraction).
-    :param ground_speed: Sound speed ``c0`` at the ground, in m/s.
+    :param ground_speed_of_sound: Sound speed ``c0`` at the ground, in m/s.
     :param roughness_length: Aerodynamic roughness length ``z0``, in metres.
     :param max_height_m: Top of the sampled profile, in metres.
     :param n_points: Number of samples of the height grid (>= 2).
@@ -209,7 +209,7 @@ def log_linear_sound_speed_profile(
     :raises ValueError: On non-positive ``c0``, ``z0`` or ``max_height_m``, fewer
         than two points, or a profile that turns non-positive.
     """
-    c0 = require_positive(ground_speed, "ground_speed")
+    c0 = require_positive(ground_speed_of_sound, "ground_speed_of_sound")
     z0 = require_positive(roughness_length, "roughness_length")
     h = require_positive(max_height_m, "max_height_m")
     if not np.isfinite(b):
@@ -277,7 +277,7 @@ def _clean_profile(
 def ray_curvature_radius(
     gradient_per_s: float,
     *,
-    ground_speed: float = _C_SOUND,
+    ground_speed_of_sound: float = _C_SOUND,
     launch_angle_deg: float = 0.0,
 ) -> float:
     r"""Radius of curvature of a sound ray in a linear sound-speed gradient.
@@ -286,17 +286,17 @@ def ray_curvature_radius(
     arc of radius :math:`R_\mathrm{c} = 1/(|\text{gradient}| \, \xi)` with the Snell
     invariant :math:`\xi = \cos(\theta_0)/c`, evaluated at the launch height
     (Salomons Sec. 4.4; Attenborough Ch. 11). For a ray launched from the
-    height where the speed is ``ground_speed`` (:math:`c_0`),
+    height where the speed is ``ground_speed_of_sound`` (:math:`c_0`),
     :math:`R_\mathrm{c} = c_0 / (|\text{gradient}| \cos\theta_0)`.
 
     :param gradient_per_s: Vertical gradient ``dc/dz``, in s^-1 (must be non-zero).
-    :param ground_speed: Sound speed at the launch height, in m/s.
+    :param ground_speed_of_sound: Sound speed at the launch height, in m/s.
     :param launch_angle_deg: Launch angle from the horizontal, in degrees.
     :return: The radius of curvature ``Rc``, in metres (always positive).
     :raises ValueError: If the gradient is zero (a straight ray) or the launch
         angle is not within ``(-90, 90)`` degrees.
     """
-    c0 = require_positive(ground_speed, "ground_speed")
+    c0 = require_positive(ground_speed_of_sound, "ground_speed_of_sound")
     if not (np.isfinite(gradient_per_s) and abs(gradient_per_s) > 0.0):
         msg = "'gradient_per_s' must be finite and non-zero (a curved ray)."
         raise ValueError(msg)
@@ -311,7 +311,7 @@ def shadow_zone_distance(
     source_height_m: float,
     receiver_height_m: float,
     *,
-    ground_speed: float = _C_SOUND,
+    ground_speed_of_sound: float = _C_SOUND,
 ) -> float:
     r"""Distance to the acoustic shadow boundary, upward-refracting profile.
 
@@ -332,11 +332,11 @@ def shadow_zone_distance(
         shadow zone to exist).
     :param source_height_m: Source height ``hs``, in metres (>= 0).
     :param receiver_height_m: Receiver height ``hr``, in metres (>= 0).
-    :param ground_speed: Sound speed ``c0`` at the ground, in m/s.
+    :param ground_speed_of_sound: Sound speed ``c0`` at the ground, in m/s.
     :return: The horizontal shadow-boundary distance, in metres.
     :raises ValueError: If the gradient is not negative, or a height is negative.
     """
-    c0 = require_positive(ground_speed, "ground_speed")
+    c0 = require_positive(ground_speed_of_sound, "ground_speed_of_sound")
     if not np.isfinite(gradient_per_s) or gradient_per_s >= 0.0:
         msg = (
             "'gradient_per_s' must be negative (an upward-refracting profile) for an "
@@ -654,7 +654,7 @@ def atmospheric_parabolic_equation(
     *,
     source_height_m: float,
     impedance: ArrayLike | PorousMediumResult | None = None,
-    flow_resistivity: float | None = None,
+    flow_resistivity_pa_s_m2: float | None = None,
     model: Literal["delany_bazley", "miki"] = "delany_bazley",
     max_range: float = 1000.0,
     max_height_m: float = 100.0,
@@ -688,10 +688,10 @@ def atmospheric_parabolic_equation(
     The ground surface impedance is either supplied through ``impedance`` (a
     normalized complex value/array, or a
     :class:`~phonometry.materials.PorousMediumResult`) or derived from an
-    effective ``flow_resistivity`` (Pa s/m2) via the ``model`` porous model.
+    effective ``flow_resistivity_pa_s_m2`` (Pa s/m2) via the ``model`` porous model.
     Exactly one of the two must be given. A plain ``impedance`` value is taken
     in the :math:`\mathrm{e}^{-i \omega t}` convention (:math:`\operatorname{Im}(Z) > 0`
-    for a passive ground); a ``PorousMediumResult`` or ``flow_resistivity`` is
+    for a passive ground); a ``PorousMediumResult`` or ``flow_resistivity_pa_s_m2`` is
     conjugated internally from the materials' :math:`\mathrm{e}^{+j \omega t}`
     convention.
 
@@ -699,9 +699,9 @@ def atmospheric_parabolic_equation(
     :param profile: The effective sound-speed profile.
     :param source_height_m: Source height ``zs``, in metres (> 0).
     :param impedance: Normalized ground impedance, or a ``PorousMediumResult``.
-    :param flow_resistivity: Effective flow resistivity ``sigma`` (Pa s/m2), as
+    :param flow_resistivity_pa_s_m2: Effective flow resistivity ``sigma`` (Pa s/m2), as
         an alternative to ``impedance``.
-    :param model: Porous model for ``flow_resistivity``.
+    :param model: Porous model for ``flow_resistivity_pa_s_m2``.
     :param max_range: Maximum range, in metres.
     :param max_height_m: Top of the output height grid, in metres (the receiver
         region of interest; an absorbing layer is added above it).
@@ -752,7 +752,9 @@ def atmospheric_parabolic_equation(
     ground_air = dataclasses.replace(
         fluid, properties={**fluid.properties, "speed_of_sound": c_ref}
     )
-    z_imp = _resolve_pe_impedance(f, impedance, flow_resistivity, model, ground_air)
+    z_imp = _resolve_pe_impedance(
+        f, impedance, flow_resistivity_pa_s_m2, model, ground_air
+    )
 
     # Grid: physical region [0, zmax] plus a 50-wavelength absorbing layer, then
     # padded to N = 2M so only the lower half carries the (positive-height) field

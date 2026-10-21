@@ -350,8 +350,8 @@ from phonometry import vibration
 v_p, v_s, rho = 400.0, 180.0, 1900.0  # a medium-dense sand, m/s and kg/m3
 
 nu = vibration.poisson_ratio_from_wave_speeds(v_p, v_s)
-g = vibration.shear_modulus_from_wave_speed(v_s, density_kg_m3=rho)
-e = vibration.youngs_modulus_from_wave_speeds(v_p, v_s, density_kg_m3=rho)
+g = vibration.shear_modulus_from_wave_speed(v_s, density=rho)
+e = vibration.youngs_modulus_from_wave_speeds(v_p, v_s, density=rho)
 print(f"nu = {nu:.3f}, G = {g / 1e6:.1f} MPa, E = {e / 1e6:.0f} MPa")
 # nu = 0.373, G = 61.6 MPa, E = 169 MPa
 print(f"E as Formula (5) prints it: {v_p**2 * rho / 1e6:.0f} MPa")  # 304 MPa
@@ -374,7 +374,7 @@ from phonometry import vibration
 
 nu = np.linspace(0.0, 0.49, 300)
 continuum = [
-    vibration.compression_wave_speed(1.0, poisson_ratio=n, density_kg_m3=1.0)
+    vibration.compression_wave_speed(1.0, poisson_ratio=n, density=1.0)
     for n in nu
 ]
 fig, ax = plt.subplots(figsize=(10, 6))

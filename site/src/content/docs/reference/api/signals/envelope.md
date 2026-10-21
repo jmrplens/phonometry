@@ -180,7 +180,7 @@ untouched) before the detector, the Figure 13.11 front end.
 EnvelopeResult(
     times: NDArray[np.float64],
     envelope: NDArray[np.float64],
-    phase: NDArray[np.float64],
+    phase_rad: NDArray[np.float64],
     instantaneous_frequency: NDArray[np.float64],
     fs: float,
     signal: Signal | NDArray[np.float64],
@@ -202,7 +202,7 @@ All output arrays share the (possibly decimated) time axis
 | :--- | :--- |
 | `times` | Time axis of the outputs, in seconds. |
 | `envelope` | Envelope $A(t) = \lvert z(t) \rvert$ (Eq. 13.17). |
-| `phase` | Unwrapped instantaneous phase $\theta(t)$, in radians (Eq. 13.18). |
+| `phase_rad` | Unwrapped instantaneous phase $\theta(t)$, in radians (Eq. 13.18). |
 | `instantaneous_frequency` | $f(t) = (1/2\pi) \, d\theta/dt$, in Hz (Eq. 13.19), differentiated at full rate before any decimation. |
 | `fs` | Sample rate of the outputs, in Hz (`signal_fs` divided by `decimation_factor`). |
 | `signal` | The analysed record, at full rate, in the type it arrived as: a [`Signal`](/phonometry/reference/api/io/io/#signal) when the input was one (in pascals and carrying `calibration_factor=1.0` when the input was calibrated), a bare array otherwise. |

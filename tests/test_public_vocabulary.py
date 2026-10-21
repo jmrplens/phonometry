@@ -60,6 +60,8 @@ _MINORITY = {
     "band_frequencies": "frequencies",
     "bands_hz": "frequencies",
     "levels_db": "levels",
+    "background_levels_db": "background_levels",
+    "pressure_levels_db": "pressure_levels",
     "times_s": "times",
     "time_s": "times",
     "distances_m": "distances",

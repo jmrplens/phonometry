@@ -274,7 +274,7 @@ def test_check_source_reads_the_printed_tolerance_band_from_the_source() -> None
     assert names == {"source", "measured"}
     # ISO 16283-2:2020 Table A.1 (PDF page 29, printed folio 23), as printed.
     np.testing.assert_array_equal(check.nominal, [v for v, _ in RUBBER_BALL_LFE])
-    np.testing.assert_array_equal(check.tolerance, [t for _, t in RUBBER_BALL_LFE])
+    np.testing.assert_array_equal(check.tolerance_db, [t for _, t in RUBBER_BALL_LFE])
     with pytest.raises(TypeError, match="passes"):
         bool(check)
 

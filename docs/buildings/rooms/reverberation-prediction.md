@@ -43,7 +43,7 @@ alpha_z = [0.30, 0.50, 0.65, 0.78, 0.82, 0.80]
 m = environment.air_attenuation_m(bands, temperature_c=20.0, relative_humidity_percent=50.0)   # air at 20 C / 50 % RH
 res = room.reverberation_time_models((10.0, 7.0, 3.5),
                                      (alpha_x, alpha_y, alpha_z),
-                                     air_attenuation=m, frequencies=bands)
+                                     air_attenuation_per_m=m, frequencies=bands)
 res.plot()   # the five model curves per band
 plt.show()
 ```
@@ -80,8 +80,10 @@ For a **uniform** distribution Eyring and Millington-Sette coincide, and both
 fall below Sabine; Sabine's over-estimate at high absorption is the reason
 Eyring exists. As $\alpha \to 0$, $-S\ln(1-\bar\alpha) \to \sum_i S_i\alpha_i$
 and Eyring reduces to Sabine. Air absorption enters every model through the
-power-attenuation coefficient $m$ (in neper per metre, from the ISO 9613-1
-[atmospheric absorption](../../environment/propagation/outdoor-propagation.md)):
+power attenuation coefficient $m$, in reciprocal metres: ISO 354 8.1.2.1
+writes $m = \alpha / (10 \lg \mathrm{e})$ from the ISO 9613-1
+[atmospheric absorption](../../environment/propagation/outdoor-propagation.md)
+$\alpha$ in dB/m:
 
 ```python
 from phonometry import environment, room
@@ -89,7 +91,7 @@ from phonometry import environment, room
 m = environment.air_attenuation_m(2000.0, temperature_c=20.0, relative_humidity_percent=50.0)
 surfaces = [(40.0, 0.3), (40.0, 0.3), (24.0, 0.3),
             (24.0, 0.3), (15.0, 0.3), (15.0, 0.3)]
-print(round(room.eyring_reverberation_time(120.0, surfaces, air_attenuation=m), 3))
+print(round(room.eyring_reverberation_time(120.0, surfaces, air_attenuation_per_m=m), 3))
 ```
 
 Every statistical model also assumes a **diffuse field**, and low
@@ -192,7 +194,7 @@ room.reverberation_time_models(
         [0.12, 0.14, 0.16, 0.18, 0.20, 0.20],
         [0.30, 0.50, 0.65, 0.78, 0.82, 0.80],
     ),
-    air_attenuation=m,
+    air_attenuation_per_m=m,
     frequencies=[125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0],
 ).plot()
 plt.show()

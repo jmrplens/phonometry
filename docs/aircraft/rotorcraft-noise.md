@@ -46,7 +46,7 @@ from phonometry import aircraft
 # block of levels is the campaign's own.
 freqs = 1000.0 * 10.0 ** (np.arange(-20, 11) / 10.0)   # 10 Hz-10 kHz thirds
 phi, theta = np.arange(-90.0, 91.0, 10.0), np.arange(0.0, 181.0, 10.0)
-h = aircraft.RotorcraftHemisphere(frequencies=freqs, azimuth=phi, polar=theta,
+h = aircraft.RotorcraftHemisphere(frequencies=freqs, azimuth_deg=phi, polar_deg=theta,
                                   levels=measured_levels)
 h.plot()                                   # fore-aft directivity (needs matplotlib)
 lv = aircraft.hemisphere_source_level(h, 0.0, 90.0)   # level per band abeam-below
@@ -305,7 +305,7 @@ The guidance recommends smoothing radar tracks (e.g. spline resampling to a
 ```python
 kin = aircraft.flight_path_kinematics(times, positions)   # positions (N, 3), m
 kin.plot()                                # speed and angle profiles
-kin.airspeed, kin.path_angle_deg              # select the hemisphere per point
+kin.airspeed_m_s, kin.path_angle_deg              # select the hemisphere per point
 kin.bank_angle_deg                            # tilts the hemisphere in turns
 ```
 

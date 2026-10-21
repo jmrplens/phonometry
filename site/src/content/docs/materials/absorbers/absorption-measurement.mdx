@@ -97,7 +97,7 @@ value per measurement as `m1`/`m2` (with `temperature1_c`/`temperature2_c`);
 `measure_sound_absorption` assumes one climate. The per-band $m$ comes from
 an ISO 9613-1 attenuation $\alpha$ in dB/m:
 `environment.air_attenuation(freqs, temperature_c=21.4,
-relative_humidity_percent=54.0, atmospheric_pressure_kpa=101.325)`, converted
+relative_humidity_percent=54.0, static_pressure_kpa=101.325)`, converted
 with `materials.attenuation_from_alpha(alpha)`,
 which is ISO 354's own $m = \alpha/(10 \lg e)$.
 

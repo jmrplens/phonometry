@@ -117,7 +117,7 @@ def _arp5534_coefficient(
     frequencies: NDArray[np.float64],
     temperature_c: float,
     relative_humidity_percent: float,
-    atmospheric_pressure_kpa: float,
+    static_pressure_kpa: float,
 ) -> NDArray[np.float64]:
     """Pure-tone coefficient ``α`` at the exact mid-band frequencies (ARP 5534 Eqs. 1-6, 10).
 
@@ -129,14 +129,14 @@ def _arp5534_coefficient(
     :return: ``α`` per band, in dB/m.
     """
     _validate(
-        frequencies, temperature_c, relative_humidity_percent, atmospheric_pressure_kpa
+        frequencies, temperature_c, relative_humidity_percent, static_pressure_kpa
     )
     temperature_k = temperature_c + _KELVIN
     f2, bracket = _pure_tone_terms(
         _exact_midband(frequencies),
         temperature_k,
         relative_humidity_percent,
-        atmospheric_pressure_kpa,
+        static_pressure_kpa,
         saturation_ratio=_arp5534_saturation_ratio(temperature_k),
     )
     return np.asarray(_EIGHT_686 * f2 * bracket, dtype=np.float64)
@@ -151,22 +151,22 @@ class AircraftBandAttenuation(OwnsArrays):
     :ivar midband_attenuation: Pure-tone mid-band path-length attenuation
         :math:`\delta_\mathrm{t} = \alpha \cdot s` per band, in dB (ARP 5534
         Eqs. 1-6 coefficient).
-    :ivar coefficient: Pure-tone mid-band attenuation coefficient ``α`` per band,
+    :ivar coefficient_db_per_m: Pure-tone mid-band attenuation coefficient ``α`` per band,
         in dB/m.
-    :ivar path_length: Propagation path length ``s``, in metres.
+    :ivar path_length_m: Propagation path length ``s``, in metres.
     :ivar temperature_c: Air temperature, in degrees Celsius.
     :ivar relative_humidity_percent: Relative humidity, in percent.
-    :ivar atmospheric_pressure_kpa: Ambient atmospheric pressure, in kPa.
+    :ivar static_pressure_kpa: Ambient atmospheric pressure, in kPa.
     """
 
     frequencies: NDArray[np.float64]
     band_attenuation: NDArray[np.float64]
     midband_attenuation: NDArray[np.float64]
-    coefficient: NDArray[np.float64]
-    path_length: float
+    coefficient_db_per_m: NDArray[np.float64]
+    path_length_m: float
     temperature_c: float
     relative_humidity_percent: float
-    atmospheric_pressure_kpa: float
+    static_pressure_kpa: float
 
     def __post_init__(self) -> None:
         """Reject an attenuation whose arrays do not all run over the same bands.
@@ -178,7 +178,7 @@ class AircraftBandAttenuation(OwnsArrays):
         mistake is. The figure draws ``band_attenuation`` and
         ``midband_attenuation`` against ``frequencies``, so any disagreement
         among those three stops it, with matplotlib's complaint about an x and
-        a y that name neither field. ``coefficient`` reaches no figure and no
+        a y that name neither field. ``coefficient_db_per_m`` reaches no figure and no
         reader in this library: it leaves as dB/m for the caller to multiply
         by a path length, so a wrong length here passes in silence, and one
         collapsed to a single value is broadcast by numpy over the caller's
@@ -197,14 +197,14 @@ class AircraftBandAttenuation(OwnsArrays):
             frequencies=1,
             band_attenuation=1,
             midband_attenuation=1,
-            coefficient=1,
+            coefficient_db_per_m=1,
         )
         require_same_length(
             self,
             "frequencies",
             "band_attenuation",
             "midband_attenuation",
-            "coefficient",
+            "coefficient_db_per_m",
         )
 
     def plot(
@@ -221,11 +221,11 @@ class AircraftBandAttenuation(OwnsArrays):
 
 def sae_band_attenuation(
     frequencies: NDArray[np.float64] | list[float],
-    path_length: float,
+    path_length_m: float,
     *,
     temperature_c: float = 25.0,
     relative_humidity_percent: float = 70.0,
-    atmospheric_pressure_kpa: float = 101.325,
+    static_pressure_kpa: float = 101.325,
 ) -> AircraftBandAttenuation:
     r"""One-third-octave-band atmospheric attenuation (SAE ARP 5534, SAE Method).
 
@@ -240,20 +240,20 @@ def sae_band_attenuation(
 
     :param frequencies: Nominal one-third-octave-band centre frequencies, in Hz
         (standard range 50 Hz-10 kHz; the method extends to 25 Hz-20 kHz).
-    :param path_length: Propagation path length ``s``, in metres (``>= 0``).
+    :param path_length_m: Propagation path length ``s``, in metres (``>= 0``).
     :param temperature_c: Air temperature, in degrees Celsius (SAE window
         ~6-32 °C; default 25 °C, the ARP 5534 reference point).
     :param relative_humidity_percent: Relative humidity, in percent (SAE window
         ~20-95 %; default 70 %).
-    :param atmospheric_pressure_kpa: Ambient atmospheric pressure, in kPa (default 101.325).
+    :param static_pressure_kpa: Ambient atmospheric pressure, in kPa (default 101.325).
     :return: An :class:`AircraftBandAttenuation`.
     :raises ValueError: If the inputs are invalid.
     """
     f = require_positive_array(frequencies, "frequencies")
-    s = require_non_negative(path_length, "path_length")
+    s = require_non_negative(path_length_m, "path_length_m")
 
     alpha = _arp5534_coefficient(
-        f, temperature_c, relative_humidity_percent, atmospheric_pressure_kpa
+        f, temperature_c, relative_humidity_percent, static_pressure_kpa
     )
     delta_t = alpha * s
     delta_b = _sae_band(delta_t)
@@ -261,11 +261,11 @@ def sae_band_attenuation(
         frequencies=f,
         band_attenuation=delta_b,
         midband_attenuation=np.asarray(delta_t, dtype=np.float64),
-        coefficient=alpha,
-        path_length=s,
+        coefficient_db_per_m=alpha,
+        path_length_m=s,
         temperature_c=float(temperature_c),
         relative_humidity_percent=float(relative_humidity_percent),
-        atmospheric_pressure_kpa=float(atmospheric_pressure_kpa),
+        static_pressure_kpa=float(static_pressure_kpa),
     )
 
 

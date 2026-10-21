@@ -967,7 +967,7 @@ for method in ("linear", "exponential"):
     crossed = np.flatnonzero((t >= cut_s) & (trace < 0.1 * initial))
     decay_s = float(t[crossed[0]] - cut_s)
     verdict = vibration.verify_running_rms_decay(
-        decay_s, integration_time_s=1.0, method=method)
+        decay_s, integration_time=1.0, method=method)
     print(method, round(decay_s, 3), verdict.passes,
           round(verdict.lower_time_s, 3), round(verdict.upper_time_s, 3))
 # linear 0.98 True 0.94 1.04
@@ -1034,11 +1034,11 @@ against a band the standard does not give:
 ```python
 try:
     vibration.verify_running_rms_decay(
-        2.0, integration_time_s=2.0, method="linear"
+        2.0, integration_time=2.0, method="linear"
     )
 except ValueError as error:
     print(error)
-# 'integration_time_s' must be one of the time constants Tables 10 and 11
+# 'integration_time' must be one of the time constants Tables 10 and 11
 # print (0.125, 1, 8 s); 2 s has no printed decay band.
 ```
 

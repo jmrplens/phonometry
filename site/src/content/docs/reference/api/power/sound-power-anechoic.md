@@ -52,7 +52,7 @@ meteorological_corrections(
     *,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
-    air_absorption_coefficient: float | np.ndarray | None = None,
+    air_absorption_db_per_m: float | np.ndarray | None = None,
     radius: float = 1.0,
 ) -> MeteorologicalCorrection
 ```
@@ -88,7 +88,7 @@ from ISO 9613-1 (not computed here); without it $C_3 = 0$.
 | :--- | :--- |
 | `temperature_c` | Air temperature `theta` at the test, in degrees C. |
 | `static_pressure_kpa` | Static pressure `ps` at the test, in kilopascals. |
-| `air_absorption_coefficient` | `a(f)` (dB/m), scalar or per band, for C3; `None` leaves $C_3 = 0$. |
+| `air_absorption_db_per_m` | `a(f)` (dB/m), scalar or per band, for C3; `None` leaves $C_3 = 0$. |
 | `radius` | Measurement radius `r` (m), used only in $A_0 = \alpha(f)\,r$. |
 
 **Returns:** [`MeteorologicalCorrection`](/phonometry/reference/api/power/sound-power-anechoic/#meteorologicalcorrection).
@@ -316,7 +316,7 @@ sound_power_anechoic(
     areas: np.ndarray | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_coefficient: float | np.ndarray | None = ...,
+    air_absorption_db_per_m: float | np.ndarray | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
@@ -331,7 +331,7 @@ sound_power_anechoic(
     areas: np.ndarray | None = ...,
     temperature_c: float = ...,
     static_pressure_kpa: float = ...,
-    air_absorption_coefficient: float | np.ndarray | None = ...,
+    air_absorption_db_per_m: float | np.ndarray | None = ...,
     sigma_omc_db: float = ...,
     coverage_factor: float = ...,
     room_qualification: FreeFieldCheck | None = ...,
@@ -370,7 +370,7 @@ environmental term. The reproducibility `sigma_R0` is taken from Table 3
 | `areas` | `(NM,)` partial areas `Si` for the area-weighted average (Eq. 13); omit for the equal-area average (Eq. 12). |
 | `temperature_c` | Air temperature `theta` (deg C), for C1/C2. |
 | `static_pressure_kpa` | Static pressure `ps` (kPa), for C1/C2. |
-| `air_absorption_coefficient` | `a(f)` (dB/m) for C3, scalar or per band; `None` leaves $C_3 = 0$. |
+| `air_absorption_db_per_m` | `a(f)` (dB/m) for C3, scalar or per band; `None` leaves $C_3 = 0$. |
 | `sigma_omc_db` | Operating/mounting standard deviation, dB. |
 | `coverage_factor` | `k` (2 two-sided, 1.6 one-sided). |
 | `room_qualification` | The [`check_free_field`](/phonometry/reference/api/power/free-field-qualification/#check_free_field) verdict of the room (Annex A as Amendment 1:2017 wrote it). Its room type must match `surface`; a [`SoundPowerWarning`](/phonometry/reference/api/power/sound-power/#soundpowerwarning) says when the room is not qualified, when `radius` lies beyond the qualified radius, or when a band lies outside the qualified frequency range. |

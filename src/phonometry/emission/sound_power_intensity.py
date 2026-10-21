@@ -1165,7 +1165,7 @@ class PrecisionIntensityResult(OwnsArrays):
     where :math:`P \le 0` (``not_applicable_band`` True, clause 9.2).
     ``sound_power_level_normalized`` is ``LW0`` normalized to 23 deg C /
     101 325 Pa (Eq. 10) from the air temperature ``temperature_c`` and the
-    barometric pressure ``barometric_pressure_pa`` of the measurement.
+    barometric pressure ``static_pressure_pa`` of the measurement.
     ``sound_power_level_a`` is the A-weighted total over applicable bands
     (``NaN`` without ``frequencies`` and more than one band). Everything read
     from the partial powers is a read-only property, so the totals, the levels
@@ -1177,7 +1177,7 @@ class PrecisionIntensityResult(OwnsArrays):
     surface_area: float
     _: KW_ONLY
     temperature_c: float = 23.0
-    barometric_pressure_pa: float = 101325.0
+    static_pressure_pa: float = 101325.0
 
     def __post_init__(self) -> None:
         """Reject a determination whose per-band quantities disagree.
@@ -1216,9 +1216,9 @@ class PrecisionIntensityResult(OwnsArrays):
         require_same_length(self, "frequencies", ("partial_power", 1))
         require_finite_fields(self, "surface_area")
         require_above_absolute_zero(self.temperature_c, "temperature_c")
-        pressure = self.barometric_pressure_pa
+        pressure = self.static_pressure_pa
         if math.isnan(pressure) or pressure <= 0.0:
-            msg = "'barometric_pressure_pa' must be positive (Pa)."
+            msg = "'static_pressure_pa' must be positive (Pa)."
             raise ValueError(msg)
 
     @property
@@ -1252,7 +1252,7 @@ class PrecisionIntensityResult(OwnsArrays):
     def sound_power_level_normalized(self) -> np.ndarray:
         """``LW0``, the band level normalized to 23 deg C and 101 325 Pa (Eq. 10)."""
         norm = 15.0 * np.log10(
-            (self.barometric_pressure_pa / 101325.0)
+            (self.static_pressure_pa / 101325.0)
             * (296.15 / (273.15 + self.temperature_c))
         )
         return np.asarray(self.sound_power_level - norm, dtype=np.float64)
@@ -1635,7 +1635,7 @@ def sound_power_intensity_precision(
     *,
     frequencies: np.ndarray | None = None,
     temperature_c: float = 23.0,
-    barometric_pressure_pa: float = 101325.0,
+    static_pressure_pa: float = 101325.0,
 ) -> PrecisionIntensityResult:
     r"""Sound power by intensity scanning, precision (ISO 9614-3:2002).
 
@@ -1657,7 +1657,7 @@ def sound_power_intensity_precision(
     :param areas: ``(N,)`` partial surface areas ``Si``, m^2.
     :param frequencies: ``(NB,)`` nominal mid-band frequencies (Hz), for LWA.
     :param temperature_c: Air temperature ``theta`` (deg C), for LW0 (Eq. 10).
-    :param barometric_pressure_pa: Barometric pressure ``B`` (Pa), for LW0.
+    :param static_pressure_pa: Barometric pressure ``B`` (Pa), for LW0.
     :return: :class:`PrecisionIntensityResult`.
     """
     raw_intensity = np.asarray(partial_intensity, dtype=np.float64)
@@ -1689,9 +1689,9 @@ def sound_power_intensity_precision(
         msg = "All 'areas' must be positive."
         raise ValueError(msg)
     require_above_absolute_zero(temperature_c, "temperature_c")
-    require_scalar(barometric_pressure_pa, "barometric_pressure_pa")
-    if barometric_pressure_pa <= 0.0:
-        msg = "'barometric_pressure_pa' must be positive (Pa)."
+    require_scalar(static_pressure_pa, "static_pressure_pa")
+    if static_pressure_pa <= 0.0:
+        msg = "'static_pressure_pa' must be positive (Pa)."
         raise ValueError(msg)
     n_bands = intensity.shape[1]
     if frequencies is not None and np.asarray(frequencies).shape != (n_bands,):
@@ -1715,5 +1715,5 @@ def sound_power_intensity_precision(
         partial_power=np.asarray(partial_power, dtype=np.float64),
         surface_area=float(np.sum(seg)),
         temperature_c=float(temperature_c),
-        barometric_pressure_pa=float(barometric_pressure_pa),
+        static_pressure_pa=float(static_pressure_pa),
     )

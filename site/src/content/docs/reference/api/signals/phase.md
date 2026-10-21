@@ -201,9 +201,9 @@ delays quantify both in seconds.
 PhaseDecompositionResult(
     frequencies: NDArray[np.float64],
     magnitude: NDArray[np.float64],
-    phase: NDArray[np.float64],
-    minimum_phase: NDArray[np.float64],
-    excess_phase: NDArray[np.float64],
+    phase_rad: NDArray[np.float64],
+    minimum_phase_rad: NDArray[np.float64],
+    excess_phase_rad: NDArray[np.float64],
     group_delay: NDArray[np.float64],
     excess_group_delay: NDArray[np.float64],
     minimum_phase_response: NDArray[np.complex128],
@@ -219,12 +219,12 @@ Minimum-phase / all-pass decomposition of a frequency response.
 | :--- | :--- |
 | `frequencies` | Frequency axis, in Hz. |
 | `magnitude` | $\lvert H(f) \rvert$ (shared by the measured and minimum-phase responses). |
-| `phase` | Measured phase, unwrapped and referenced to DC, rad. |
-| `minimum_phase` | Phase reconstructed from $\lvert H \rvert$ alone, rad. |
-| `excess_phase` | `phase - minimum_phase`: the all-pass part, rad. |
+| `phase_rad` | Measured phase, unwrapped and referenced to DC, rad. |
+| `minimum_phase_rad` | Phase reconstructed from $\lvert H \rvert$ alone, rad. |
+| `excess_phase_rad` | `phase_rad - minimum_phase_rad`: the all-pass part, rad. |
 | `group_delay` | Group delay of the measured response, s. |
 | `excess_group_delay` | Group delay of the all-pass part alone, s (constant $t_0$ for a pure latency). |
-| `minimum_phase_response` | Complex minimum-phase response $\lvert H \rvert \exp(j \, \text{minimum\_phase})$. |
+| `minimum_phase_response` | Complex minimum-phase response $\lvert H \rvert \exp(j \, \text{minimum\_phase\_rad})$. |
 | `fs` | Sample rate of the underlying record, in Hz. |
 
 ### PhaseDecompositionResult.plot()

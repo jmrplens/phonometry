@@ -158,7 +158,7 @@ one hour (the definition under Table H.1).
 ```python
 rainfall_reference_correction(
     l_i_ref_db: ArrayLike,
-    structural_reverberation_time_s: ArrayLike,
+    structural_reverberation_time: ArrayLike,
     frequencies: ArrayLike | None = None,
 ) -> RainfallReferenceCorrection
 ```
@@ -184,7 +184,7 @@ $f$ in Formula (I.1) is taken as the band centre frequency given.
 | Name | Description |
 | :--- | :--- |
 | `l_i_ref_db` | $L_{I,\mathrm{ref}}$ of the reference specimen per band, in dB re 1 pW/m² (e.g. `rainfall_sound(...).l_i_db`). |
-| `structural_reverberation_time_s` | Its structural reverberation time per band, measured to ISO 10140-4, in s. |
+| `structural_reverberation_time` | Its structural reverberation time per band, measured to ISO 10140-4, in s. |
 | `frequencies` | Band centre frequencies, in Hz, each one of the 18 bands of Table I.1 (100 Hz to 5 000 Hz); `None` takes all 18. |
 
 **Returns:** A [`RainfallReferenceCorrection`](/phonometry/reference/api/building/rainfall-sound/#rainfallreferencecorrection).
@@ -216,10 +216,10 @@ RAINFALL_REFERENCE_LOSS_FACTOR_DB = {100.0: -10.0, 125.0: -11.0, 160.0: -11.0, 2
 ```python
 rainfall_sound(
     l_pr_db: ArrayLike,
-    reverberation_time_s: ArrayLike,
+    reverberation_time: ArrayLike,
     frequencies: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     excited_area_m2: float,
     background_db: ArrayLike | None = None,
     reference_correction: RainfallReferenceCorrection | ArrayLike | None = None,
@@ -253,9 +253,9 @@ for comparison between laboratories.
 | Name | Description |
 | :--- | :--- |
 | `l_pr_db` | Room-averaged sound pressure level per band, in dB: `(bands,)` for one position of the rain generator or `(positions, bands)` for several, which are added energetically. |
-| `reverberation_time_s` | Reverberation time of the test room per band, in s. |
+| `reverberation_time` | Reverberation time of the test room per band, in s. |
 | `frequencies` | Band centre frequencies, in Hz. |
-| `volume_m3` | Volume of the test room, in m³. |
+| `volume` | Volume of the test room, in m³. |
 | `excited_area_m2` | Area of the specimen directly excited by the rain, $S_\mathrm{e}$, in m². |
 | `background_db` | Background noise level per band, in dB, or `None`. When given, each position's level is corrected by ISO 10140-4 ([`background_correction`](/phonometry/reference/api/building/lab-insulation/#background_correction)) before the sum. |
 | `reference_correction` | The laboratory correction: a [`RainfallReferenceCorrection`](/phonometry/reference/api/building/rainfall-sound/#rainfallreferencecorrection) covering every band, or $\Delta L_{I\mathrm{c}}$ per band in dB, or `None`. |
@@ -315,7 +315,7 @@ then follow as in K.4.2.
 RainfallReferenceCorrection(
     frequencies: np.ndarray,
     l_i_ref_db: np.ndarray,
-    structural_reverberation_time_s: np.ndarray,
+    structural_reverberation_time: np.ndarray,
     loss_factor: np.ndarray,
     reference_loss_factor: np.ndarray,
     l_i_m_ref_db: np.ndarray,
@@ -332,7 +332,7 @@ The normalization correction from the reference glass pane (Annex I).
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in Hz. |
 | `l_i_ref_db` | Measured sound intensity level of the reference specimen, $L_{I,\mathrm{ref}}$, in dB re 1 pW/m². |
-| `structural_reverberation_time_s` | Its structural reverberation time $T_\mathrm{s}$, in s. |
+| `structural_reverberation_time` | Its structural reverberation time $T_\mathrm{s}$, in s. |
 | `loss_factor` | Its total loss factor $\eta = 2.2/(f T_\mathrm{s})$ (Formula (I.1)), a linear ratio. |
 | `reference_loss_factor` | The reference loss factor $\eta_\mathrm{ref}$ of Table I.1 as a linear ratio, like `loss_factor`: $10^{x/10}$ of the decibel value $x$ the table prints ([`RAINFALL_REFERENCE_LOSS_FACTOR_DB`](/phonometry/reference/api/building/rainfall-sound/#rainfall_reference_loss_factor_db)). |
 | `l_i_m_ref_db` | The level corrected to the reference loss factor, $L_{I,\mathrm{m,ref}}$, in dB (Formula (I.2)). |

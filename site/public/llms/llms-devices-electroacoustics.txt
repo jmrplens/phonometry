@@ -395,7 +395,7 @@ coherence down to $\mathrm{SNR}/(1+\mathrm{SNR})$.
 from phonometry import electroacoustics
 
 res = electroacoustics.transfer_function(x, y, fs, estimator="H1")
-print(res.magnitude_db, res.phase, res.coherence)
+print(res.magnitude_db, res.phase_rad, res.coherence)
 res.plot()   # Bode magnitude/phase + coherence (needs matplotlib)
 
 freqs, gamma2 = electroacoustics.coherence(x, y, fs)
@@ -698,7 +698,7 @@ spl -= 10 * np.log10(1 + (50.0 / freqs) ** 6)       # low-frequency roll-off
 spl -= 10 * np.log10(1 + (freqs / 16000.0) ** 7)    # high-frequency roll-off
 
 result = electroacoustics.loudspeaker_characteristics(
-    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    freqs, spl, rated_impedance_ohm=8.0, sensitivity_band=(200.0, 4000.0),
     impedance=(np.geomspace(20, 20000, 260),
                6.6 + 24 * np.exp(-(np.log2(np.geomspace(20, 20000, 260) / 52.0) ** 2) / 0.12)),
     distortion=(np.geomspace(50, 5000, 140),
@@ -717,7 +717,7 @@ result.report("loudspeaker.pdf", metadata=ReportMetadata(measurement_standard="I
 
 `loudspeaker_characteristics` returns a `LoudspeakerCharacteristics` with the
 computed `sensitivity_level_db`, `effective_range`, `reference_level_db`,
-`characteristic_sensitivity_pa` and `minimum_impedance`, and a `.report()` that
+`characteristic_sensitivity_pa` and `minimum_impedance_ohm`, and a `.report()` that
 writes the fiche. The on-axis response is drawn with its tolerance band and the
 effective-range markers to the IEC 60263 proportion (one frequency decade equal
 to 25 dB), and the polar directivity on the IEC 60263 25 dB reference circle.
@@ -758,7 +758,7 @@ spl = 87.0 + 1.2 * np.sin(2 * np.log2(freqs / 900.0))
 spl -= 10 * np.log10(1 + (50.0 / freqs) ** 6)       # low-frequency roll-off
 spl -= 10 * np.log10(1 + (freqs / 16000.0) ** 7)    # high-frequency roll-off
 
-result = electroacoustics.loudspeaker_characteristics(freqs, spl, rated_impedance=8.0,
+result = electroacoustics.loudspeaker_characteristics(freqs, spl, rated_impedance_ohm=8.0,
                                                       sensitivity_band=(200.0, 4000.0))
 result.plot()   # quantity="response" (the default)
 plt.show()
@@ -781,7 +781,7 @@ spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
 fz = np.geomspace(20, 20000, 260)
 
 result = electroacoustics.loudspeaker_characteristics(
-    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    freqs, spl, rated_impedance_ohm=8.0, sensitivity_band=(200.0, 4000.0),
     impedance=(fz, 6.6 + 24 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
 )
 result.plot(quantity="impedance")
@@ -805,7 +805,7 @@ spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
 thd_f = np.geomspace(50, 5000, 140)
 
 result = electroacoustics.loudspeaker_characteristics(
-    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    freqs, spl, rated_impedance_ohm=8.0, sensitivity_band=(200.0, 4000.0),
     distortion=(thd_f, 0.3 + 2.6 * np.exp(-(np.log2(thd_f / 70.0) ** 2) / 0.45)),
 )
 result.plot(quantity="thd")
@@ -828,7 +828,7 @@ freqs = np.geomspace(30, 24000, 320)
 spl = 87.0 - 10 * np.log10(1 + (50.0 / freqs) ** 6)
 
 result = electroacoustics.loudspeaker_characteristics(
-    freqs, spl, rated_impedance=8.0, sensitivity_band=(200.0, 4000.0),
+    freqs, spl, rated_impedance_ohm=8.0, sensitivity_band=(200.0, 4000.0),
     directivity=electroacoustics.LoudspeakerDirectivity(
         piston=electroacoustics.radiating_piston(0.075, np.array([1000.0, 2000.0, 4000.0]),
                                                  angles_rad=np.radians(np.linspace(0, 90, 46))),
@@ -1142,7 +1142,7 @@ result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,          # 12.5 mV/Pa at 1 kHz
     directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, cardioid), frequency=1000.0),
     noise=electroacoustics.MicrophoneNoise(                             # A-weighted, V
-        voltage=1.25e-6,
+        voltage_v=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
     ),
     overload=electroacoustics.MicrophoneOverload(
@@ -1151,7 +1151,7 @@ result = electroacoustics.microphone_characteristics(
         thd_percent=0.5,
     ),
     electrical=electroacoustics.MicrophoneElectrical(
-        rated_impedance=150.0, minimum_load_impedance=1000.0,
+        rated_impedance_ohm=150.0, minimum_load_impedance_ohm=1000.0,
         powering="Phantom P48 (IEC 61938)", supply_current_ma=3.1,
     ),
 )
@@ -1255,7 +1255,7 @@ noise_f = np.geomspace(20, 20000, 31)
 result = electroacoustics.microphone_characteristics(
     freqs, response, 12.5, tolerance_db=3.0,
     noise=electroacoustics.MicrophoneNoise(
-        voltage=1.25e-6,
+        voltage_v=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
     ),
 )
@@ -1416,7 +1416,7 @@ y = x + 0.12 * x**2 + 0.08 * x**3     # a memoryless cubic stands in for the rec
 res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3)
 
 res.harmonic_responses    # complex H1..H3 on res.frequencies
-res.thd, res.thd_frequencies
+res.thd_ratio, res.thd_frequencies
 res.distortion_ratios     # |Hn(n f)| / |H1(f)| per order
 res.plot()                # |Hn| magnitudes + THD(f)
 ```
@@ -1441,7 +1441,7 @@ res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=second
 
 h1 = 1.0 + 3.0 * a3 / 4.0                              # Chebyshev gain
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.loglog(res.thd_frequencies, 100.0 * res.thd, label="Total THD(f)")
+ax.loglog(res.thd_frequencies, 100.0 * res.thd_ratio, label="Total THD(f)")
 ax.loglog(res.thd_frequencies, 100.0 * res.distortion_ratios[0],
           ls="--", label="2nd harmonic d2(f)")
 ax.loglog(res.thd_frequencies, 100.0 * res.distortion_ratios[1],
@@ -1630,7 +1630,7 @@ grids.
 - [`impulse_response`](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) recovers the *linear* IR from the
   same sweep recording and simply discards the negative-time distortion
   products; `swept_sine_distortion` is the tool that reads them.
-- [`thd` / `harmonic_analysis`](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/) measure distortion
+- [`thd_ratio` / `harmonic_analysis`](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/) measure distortion
   from a steady tone at one frequency; the sweep separator returns the same
   ratios as a continuous function of frequency, from one measurement.
 - The phase utilities operate on any one-sided *complex* response: an

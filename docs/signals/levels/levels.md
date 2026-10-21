@@ -440,7 +440,8 @@ plt.show()
   `times` by name, or draw it with `result.plot()`.
 - Multichannel input `(channels, samples)` gives `levels` shaped
   `(channels, bands, frames)`; `result.plot(channel=0)` draws one channel.
-- `times` holds each window's center in seconds.
+- `times` holds each window's center in seconds, and `lower_edges` and
+  `upper_edges` hold each band's edges, between which the plot draws its row.
 - `mode='peak'` gives per-window peak-holding levels instead of RMS.
 - `zero_phase=True` filters bands forward-backward so per-band group delay does
   not skew the frames (offline analysis only).

@@ -3742,10 +3742,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - **Results that were tuples are records: the spectrogram, the band set, the
   octave bands of the building improvements and the EPNL integration.**
   `OctaveFilterBank.spectrogram` returns a `filters.OctaveSpectrogramResult`
-  (`levels`, `frequencies` as a read-only array, `times`) that checks its
-  level grid against both axes and draws itself with `.plot()`: one raster on
-  a logarithmic frequency axis, each row the band it was measured in, with a
-  dB colour bar, and `channel=` to pick the channel of a multichannel result.
+  (`levels`, `frequencies` as a read-only array, `times`, and the
+  `lower_edges` and `upper_edges` of the bank's bands) that checks its level
+  grid against every axis and draws itself with `.plot()`: one raster on a
+  logarithmic frequency axis, each row the band it was measured in, between
+  that band's edges, with a dB colour bar, and `channel=` to pick the channel
+  of a multichannel result.
   `filters.nominal_frequencies` returns a `filters.FractionalOctaveBands`
   (`frequencies`, `lower_edges`, `upper_edges` and the nominal `labels` as a
   tuple of text). `building.improvement_octave_bands` and the `octave_bands()`

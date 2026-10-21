@@ -22,6 +22,7 @@ from .._internal.validation import (
     is_scalar,
     require_choice,
     require_positive,
+    require_present,
     require_real,
     require_scalar,
 )
@@ -215,6 +216,33 @@ class OctaveFilterResult(OwnsArrays):
 _SPECTROGRAM_RANKS = (2, 3)
 
 
+def _spectrogram_axis(value: object, name: str, count: int) -> NDArray[np.float64]:
+    """One axis of a spectrogram as a float array of ``count`` entries.
+
+    :param value: The axis as the record was given it.
+    :param name: Its field name, for the message.
+    :param count: The length of the matching axis of ``levels``.
+    :return: The axis as a one-dimensional ``float64`` array.
+    :raises ValueError: if the axis is not one-dimensional or not ``count``
+        long.
+    """
+    axis = np.asarray(value, dtype=np.float64)
+    if axis.ndim != 1:
+        msg = (
+            f"OctaveSpectrogramResult: '{name}' must be one-dimensional; "
+            f"got shape {axis.shape}."
+        )
+        raise ValueError(msg)
+    if axis.size != count:
+        what = "frames" if name == "times" else "bands"
+        msg = (
+            f"OctaveSpectrogramResult: 'levels' holds {count} {what} and "
+            f"'{name}' {axis.size}."
+        )
+        raise ValueError(msg)
+    return axis
+
+
 @dataclass(frozen=True)
 class OctaveSpectrogramResult(OwnsArrays):
     """Band levels over time: what :meth:`OctaveFilterBank.spectrogram` returns.
@@ -229,55 +257,48 @@ class OctaveSpectrogramResult(OwnsArrays):
     :ivar frequencies: The exact mid-band frequency of each band, in hertz,
         as a read-only array.
     :ivar times: The centre of each analysis window, in seconds.
+    :ivar lower_edges: The lower edge of each band, in hertz, as the bank
+        designed it.
+    :ivar upper_edges: The upper edge of each band, in hertz.
     """
 
     levels: NDArray[np.float64]
     frequencies: NDArray[np.float64]
     times: NDArray[np.float64]
+    lower_edges: NDArray[np.float64]
+    upper_edges: NDArray[np.float64]
 
     def __post_init__(self) -> None:
-        """Hold the axes as float arrays and pin the level grid to both of them.
+        """Hold the axes as float arrays and pin the level grid to all of them.
 
-        The plot places the raster by the ends of :attr:`frequencies` and
-        :attr:`times`, so a grid with one band or one frame too many would be
-        stretched across the axes without complaint. It is refused here.
+        The plot places the raster by the ends of :attr:`times` and by the
+        edges of the first and the last band, so a grid with one band or one
+        frame too many would be stretched across the axes without complaint.
+        It is refused here.
 
+        :raises TypeError: if ``lower_edges`` or ``upper_edges`` is ``None``.
         :raises ValueError: if ``levels`` is neither two- nor
             three-dimensional, an axis is not one-dimensional, or the band or
-            frame axis of ``levels`` disagrees with ``frequencies`` or
-            ``times``.
+            frame axis of ``levels`` disagrees with ``frequencies``, an edge
+            array or ``times``.
         """
+        require_present(self, "lower_edges", "upper_edges")
         levels = np.asarray(self.levels, dtype=np.float64)
-        frequencies = np.asarray(self.frequencies, dtype=np.float64)
-        times = np.asarray(self.times, dtype=np.float64)
         if levels.ndim not in _SPECTROGRAM_RANKS:
             msg = (
                 "OctaveSpectrogramResult: 'levels' must be (bands, frames) or "
                 f"(channels, bands, frames); got shape {levels.shape}."
             )
             raise ValueError(msg)
-        for name, axis in (("frequencies", frequencies), ("times", times)):
-            if axis.ndim != 1:
-                msg = (
-                    f"OctaveSpectrogramResult: '{name}' must be one-dimensional; "
-                    f"got shape {axis.shape}."
-                )
-                raise ValueError(msg)
-        if levels.shape[-2] != frequencies.size:
-            msg = (
-                f"OctaveSpectrogramResult: 'levels' holds {levels.shape[-2]} "
-                f"bands and 'frequencies' {frequencies.size}."
+        axes = {
+            name: _spectrogram_axis(
+                getattr(self, name), name, levels.shape[-1 if name == "times" else -2]
             )
-            raise ValueError(msg)
-        if levels.shape[-1] != times.size:
-            msg = (
-                f"OctaveSpectrogramResult: 'levels' holds {levels.shape[-1]} "
-                f"frames and 'times' {times.size}."
-            )
-            raise ValueError(msg)
+            for name in ("frequencies", "times", "lower_edges", "upper_edges")
+        }
         object.__setattr__(self, "levels", read_only(levels))
-        object.__setattr__(self, "frequencies", read_only(frequencies))
-        object.__setattr__(self, "times", read_only(times))
+        for name, axis in axes.items():
+            object.__setattr__(self, name, read_only(axis))
 
     def plot(
         self,
@@ -882,6 +903,8 @@ class OctaveFilterBank:
             levels=levels if is_multichannel else levels[0],
             frequencies=self.frequencies,
             times=times,
+            lower_edges=self.lower_edges,
+            upper_edges=self.upper_edges,
         )
 
     def _process_bands(

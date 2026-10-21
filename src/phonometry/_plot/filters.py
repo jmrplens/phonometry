@@ -1177,22 +1177,6 @@ def plot_octave_levels(
 _SPECTROGRAM_RANGE_DB = 80.0
 
 
-def _log_band_extent(frequencies: np.ndarray) -> tuple[float, float]:
-    """The lower edge of the first row and the upper edge of the last.
-
-    A filter bank's centres form a geometric series, so on a logarithmic axis
-    the rows of the raster are equally tall, and each one spans half a step
-    of the series either side of its centre. A single band carries no step,
-    and is drawn one octave tall.
-    """
-    first, last = float(frequencies[0]), float(frequencies[-1])
-    if frequencies.size > 1:
-        half_step = (last / first) ** (1.0 / (2.0 * (frequencies.size - 1)))
-    else:
-        half_step = math.sqrt(2.0)
-    return first / half_step, last * half_step
-
-
 def _frame_extent(times: np.ndarray) -> tuple[float, float]:
     """The start of the first window column and the end of the last.
 
@@ -1265,12 +1249,12 @@ def plot_octave_spectrogram(
     """Band levels over time, as one raster on a logarithmic frequency axis.
 
     The grid is drawn as a single ``imshow`` image rather than one vector
-    quad per cell, which keeps the figure light and free of moire. Its rows
-    are placed by the band centres: on the logarithmic axis a geometric
-    series of centres gives rows of equal height, each spanning half a band
-    step either side of its centre, so the image needs no resampling to land
-    every band where it was measured. The columns are centred on the window
-    times, one hop wide. The default colour range spans the 80 dB below the
+    quad per cell, which keeps the figure light and free of moire. It spans
+    the bank's bands, from the lower edge of the first to the upper edge of
+    the last: a filter bank's bands are equally wide on the logarithmic axis,
+    so the rows are equally tall and each one covers the band it measured,
+    with no resampling, a single band included. The columns are centred on
+    the window times, one hop wide. The default colour range spans the 80 dB below the
     loudest finite cell; pass ``vmin``/``vmax`` to change it.
 
     :param result: An :class:`~phonometry.filters.OctaveSpectrogramResult`.
@@ -1288,14 +1272,13 @@ def plot_octave_spectrogram(
     from .._i18n import localize_axes
 
     grid = _spectrogram_grid(result, channel)
-    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     times = np.asarray(result.times, dtype=np.float64)
     finite = grid[np.isfinite(grid)]
     vmax = float(np.max(finite)) if finite.size else 0.0
     new_figure = ax is None
     axw = _new_axes() if ax is None else ax
     left, right = _frame_extent(times)
-    bottom, top = _log_band_extent(frequencies)
+    bottom, top = float(result.lower_edges[0]), float(result.upper_edges[-1])
     axw.set_yscale("log")
     img = axw.imshow(
         grid,

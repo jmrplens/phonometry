@@ -352,6 +352,8 @@ OctaveSpectrogramResult(
     levels: NDArray[np.float64],
     frequencies: NDArray[np.float64],
     times: NDArray[np.float64],
+    lower_edges: NDArray[np.float64],
+    upper_edges: NDArray[np.float64],
 )
 ```
 
@@ -368,6 +370,8 @@ tuple, so it cannot be unpacked by position: read `.levels`,
 | `levels` | The level of each band in each analysis window, in decibels: shaped `(bands, frames)` for a single-channel input and `(channels, bands, frames)` for a multichannel one. |
 | `frequencies` | The exact mid-band frequency of each band, in hertz, as a read-only array. |
 | `times` | The centre of each analysis window, in seconds. |
+| `lower_edges` | The lower edge of each band, in hertz, as the bank designed it. |
+| `upper_edges` | The upper edge of each band, in hertz. |
 
 ### OctaveSpectrogramResult.plot()
 

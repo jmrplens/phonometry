@@ -124,17 +124,66 @@ def test_the_spectrogram_record_pins_its_grid_to_both_axes() -> None:
     """A level grid one band or one frame off its axes is refused, not stretched."""
     grid = np.zeros((3, 4))
     centres = np.array([250.0, 500.0, 1000.0])
+    lower, upper = centres / np.sqrt(2.0), centres * np.sqrt(2.0)
     times = np.array([0.0625, 0.125, 0.1875, 0.25])
     flat = np.zeros(3)
     square_times = times.reshape(2, 2)
     with pytest.raises(ValueError, match="holds 3 bands and 'frequencies' 2"):
-        filters.OctaveSpectrogramResult(grid, centres[:2], times)
+        filters.OctaveSpectrogramResult(grid, centres[:2], times, lower, upper)
     with pytest.raises(ValueError, match="holds 4 frames and 'times' 3"):
-        filters.OctaveSpectrogramResult(grid, centres, times[:3])
+        filters.OctaveSpectrogramResult(grid, centres, times[:3], lower, upper)
     with pytest.raises(ValueError, match=r"'levels' must be \(bands, frames\)"):
-        filters.OctaveSpectrogramResult(flat, centres, times)
+        filters.OctaveSpectrogramResult(flat, centres, times, lower, upper)
     with pytest.raises(ValueError, match="'times' must be one-dimensional"):
-        filters.OctaveSpectrogramResult(grid, centres, square_times)
+        filters.OctaveSpectrogramResult(grid, centres, square_times, lower, upper)
+    with pytest.raises(ValueError, match="holds 3 bands and 'lower_edges' 2"):
+        filters.OctaveSpectrogramResult(grid, centres, times, lower[:2], upper)
+    with pytest.raises(ValueError, match="holds 3 bands and 'upper_edges' 4"):
+        filters.OctaveSpectrogramResult(grid, centres, times, lower, np.ones(4))
+
+
+@pytest.mark.parametrize("field", ["lower_edges", "upper_edges"])
+def test_the_spectrogram_record_requires_the_band_edges(field: str) -> None:
+    """The plot draws each band between its edges, so the record holds them."""
+    import dataclasses
+
+    bank = filters.OctaveFilterBank(fs=FS, fraction=1, limits=[100, 5000])
+    result = bank.spectrogram(np.zeros(FS))
+    with pytest.raises(TypeError, match=f"'{field}' is required"):
+        dataclasses.replace(result, **{field: None})
+
+
+def test_the_spectrogram_carries_the_edges_of_its_bank() -> None:
+    bank = filters.OctaveFilterBank(fs=FS, fraction=3, limits=[250, 4000])
+    result = bank.spectrogram(np.zeros(FS // 2), window_time=0.125)
+    np.testing.assert_array_equal(result.lower_edges, bank.lower_edges)
+    np.testing.assert_array_equal(result.upper_edges, bank.upper_edges)
+    assert not result.lower_edges.flags.writeable
+    assert not result.upper_edges.flags.writeable
+
+
+def test_a_one_band_spectrogram_is_drawn_between_its_own_edges() -> None:
+    """A single third-octave band is not drawn one octave tall.
+
+    The centres alone carry no band width when there is one of them, and the
+    plot fell back on an octave, painting colour from 707 Hz to 1.41 kHz over
+    a band measured from 891 Hz to 1.12 kHz.
+    """
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    bank = filters.OctaveFilterBank(fs=FS, fraction=3, limits=[990, 1010])
+    signal = np.random.default_rng(7).standard_normal(FS // 2)
+    result = bank.spectrogram(signal, window_time=0.125)
+    assert result.frequencies.size == 1
+    ax = result.plot()
+    _, _, bottom, top = ax.images[0].get_extent()
+    assert 10.0**bottom == pytest.approx(bank.lower_edges[0])
+    assert 10.0**top == pytest.approx(bank.upper_edges[0])
+    assert ax.get_ylim() == pytest.approx((891.25, 1122.02), abs=0.01)
+    plt.close("all")
 
 
 def _third_octave_spectrogram(channels: int = 1) -> filters.OctaveSpectrogramResult:

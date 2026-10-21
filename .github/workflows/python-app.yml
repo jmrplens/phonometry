@@ -1306,11 +1306,15 @@ jobs:
           requirements.txt
           requirements-dev.txt
           requirements-torch.txt
+    # torch alone from its CPU index, at the pin requirements-torch.txt
+    # holds: with PyPI beside that index pip takes the newest torch on either,
+    # and PyPI's brings the CUDA wheels. The second line finds the pin met.
     - name: Install dependencies (torch from its CPU index)
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt -r requirements-dev.txt
-        pip install --extra-index-url https://download.pytorch.org/whl/cpu -r requirements-torch.txt
+        pip install --index-url https://download.pytorch.org/whl/cpu torch -c requirements-torch.txt
+        pip install -r requirements-torch.txt
         pip install -e .
     # -rfEP keeps the failure summary and prints what each passing
     # tolerance test measured, and where, so every run leaves its number
@@ -1395,8 +1399,10 @@ jobs:
         cat minimum-requirements.txt
         # The test tools at the versions the main matrix pins.
         grep -E '^(pytest|pytest-xdist|pypdf|pypdfium2|pystoi|pyyaml|jsonschema)==' requirements-dev.txt | cut -d' ' -f1 > test-tools.txt
-        # torch's floor from its CPU index: the CUDA wheels are gigabytes.
-        pip install --extra-index-url https://download.pytorch.org/whl/cpu -r minimum-requirements.txt -r test-tools.txt
+        # torch's floor alone from its CPU index: the CUDA wheels are
+        # gigabytes, and with PyPI beside that index pip could take them.
+        pip install --index-url https://download.pytorch.org/whl/cpu torch -c minimum-requirements.txt
+        pip install -r minimum-requirements.txt -r test-tools.txt
         pip install --no-deps -e .
         python scripts/minimum_requirements.py --check
     - name: Check the jitted kernels compile at the numba floor

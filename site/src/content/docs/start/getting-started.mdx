@@ -66,11 +66,16 @@ weighting faster, so if you need the newest NumPy the day it ships, install
 
 `[full]` leaves `[torch]` out on purpose: the torch wheels PyPI serves on Linux
 bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
-take torch from PyTorch's CPU index and those libraries stay out:
+install torch from PyTorch's CPU index first, then the extra, which keeps
+the torch it finds, and those libraries stay out:
 
 ```bash
-pip install phonometry[torch] --extra-index-url https://download.pytorch.org/whl/cpu
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install phonometry[torch]
 ```
+
+Adding that index with `--extra-index-url` is not enough: pip takes the
+newest torch it finds on either index, PyPI's CUDA build included.
 
 [Where a simulation runs](/phonometry/simulation/compute/) says what each device of the FDTD engines
 needs, CuPy's wheel for an NVIDIA GPU among them.

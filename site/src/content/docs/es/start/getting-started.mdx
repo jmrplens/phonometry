@@ -69,12 +69,18 @@ mismo día que sale, instala `phonometry[plot,report]` y deja fuera `[perf]`.
 
 `[full]` deja fuera `[torch]` a propósito: los wheels de torch que sirve PyPI
 para Linux traen gigabytes de bibliotecas de CUDA. En una máquina Linux sin GPU
-de NVIDIA, toma torch del índice de CPU de PyTorch y esas bibliotecas se quedan
+de NVIDIA, instala primero torch desde el índice de CPU de PyTorch y después
+el extra, que conserva el torch que encuentra, y esas bibliotecas se quedan
 fuera:
 
 ```bash
-pip install phonometry[torch] --extra-index-url https://download.pytorch.org/whl/cpu
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install phonometry[torch]
 ```
+
+Añadir ese índice con `--extra-index-url` no basta: pip toma el torch más
+reciente que encuentra en cualquiera de los dos índices, también el de
+PyPI con CUDA.
 
 [Dónde se calcula una simulación](/phonometry/es/simulation/compute/) explica
 qué necesita cada dispositivo de las simulaciones FDTD, entre ellos el wheel

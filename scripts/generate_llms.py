@@ -664,8 +664,9 @@ def _summary(version: str) -> list[str]:
             "and on an NVIDIA GPU once CuPy is installed. `[full]` leaves torch "
             "out because the torch wheels PyPI serves on Linux bring gigabytes "
             "of CUDA libraries; on a Linux machine without an NVIDIA GPU, "
-            "`pip install phonometry[torch] --extra-index-url "
-            "https://download.pytorch.org/whl/cpu` takes the CPU wheels instead."
+            "running `pip install torch --index-url "
+            "https://download.pytorch.org/whl/cpu` before "
+            "`pip install phonometry[torch]` takes the CPU wheels instead."
         ),
         "",
         (

@@ -96,11 +96,16 @@ was: each sample is cast once on its way off the device.
 
 `[full]` leaves torch out on purpose: the torch wheels PyPI serves for Linux
 bring gigabytes of CUDA libraries. On a Linux machine without an NVIDIA GPU,
-take torch from PyTorch's CPU index and those libraries stay out:
+install torch from PyTorch's CPU index first, then the extra, which keeps
+the torch it finds, and those libraries stay out:
 
 ```bash
-pip install phonometry[torch] --extra-index-url https://download.pytorch.org/whl/cpu
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install phonometry[torch]
 ```
+
+Adding that index with `--extra-index-url` is not enough: pip takes the
+newest torch it finds on either index, PyPI's CUDA build included.
 
 `"torch:mps"` needs a Mac with Apple silicon and steps in float32 only. CuPy
 needs an NVIDIA GPU and its driver; the proof of section 6 ran on
@@ -448,8 +453,8 @@ number of steps: on NumPy by at most 3×10⁻⁶ relative over the matrix, and b
 
 Install CuPy for your CUDA version (`pip install cupy-cuda12x`) or the
 `[torch]` extra, then pass `compute=simulation.Compute(device="cupy")` or
-`device="torch:cuda"` to the engine (`FDTD2D` or `ElasticFDTD2D`) or the
-simulation function. To move a whole script, wrap it in
+`compute=simulation.Compute(device="torch:cuda")` to the engine (`FDTD2D` or
+`ElasticFDTD2D`) or the simulation function. To move a whole script, wrap it in
 `with simulation.use(...)` or set `PHONOMETRY_COMPUTE=cupy` in its environment.
 `result.provenance` says where each run stepped.
 

@@ -109,12 +109,18 @@ salir del dispositivo.
 
 `[full]` deja fuera torch a propósito: los wheels de torch que sirve PyPI para
 Linux traen gigabytes de bibliotecas de CUDA. En una máquina Linux sin GPU de
-NVIDIA, toma torch del índice de CPU de PyTorch y esas bibliotecas se quedan
+NVIDIA, instala primero torch desde el índice de CPU de PyTorch y después el
+extra, que conserva el torch que encuentra, y esas bibliotecas se quedan
 fuera:
 
 ```bash
-pip install phonometry[torch] --extra-index-url https://download.pytorch.org/whl/cpu
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install phonometry[torch]
 ```
+
+Añadir ese índice con `--extra-index-url` no basta: pip toma el torch más
+reciente que encuentra en cualquiera de los dos índices, también el de
+PyPI con CUDA.
 
 `"torch:mps"` necesita un Mac con Apple silicon y calcula solo en float32.
 CuPy necesita una GPU de NVIDIA y su controlador; la prueba de la sección 6 se
@@ -486,8 +492,8 @@ sobre la matriz, y en 8,0×10⁻⁶ en una ejecución medida de 8085 pasos.
 
 Instala CuPy para tu versión de CUDA (`pip install cupy-cuda12x`) o el extra
 `[torch]`, y pasa `compute=simulation.Compute(device="cupy")` o
-`device="torch:cuda"` al motor (`FDTD2D` o `ElasticFDTD2D`) o a la función de
-simulación. Para llevar todo un script, envuélvelo en
+`compute=simulation.Compute(device="torch:cuda")` al motor (`FDTD2D` o
+`ElasticFDTD2D`) o a la función de simulación. Para llevar todo un script, envuélvelo en
 `with simulation.use(...)` o fija `PHONOMETRY_COMPUTE=cupy` en su entorno.
 `result.provenance` dice dónde se calculó cada ejecución.
 

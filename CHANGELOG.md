@@ -78,9 +78,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   later, the oldest releases the backend's tests pass with, which the
   minimum-versions CI job installs. `[full]` leaves it out on purpose,
   because the torch wheels PyPI serves on Linux bring gigabytes of CUDA
-  libraries; on a Linux machine without an NVIDIA GPU,
-  `pip install phonometry[torch] --extra-index-url https://download.pytorch.org/whl/cpu`
-  takes the CPU wheels instead. The install pages, the README and llms.txt
+  libraries; on a Linux machine without an NVIDIA GPU, running
+  `pip install torch --index-url https://download.pytorch.org/whl/cpu` before
+  `pip install phonometry[torch]` takes the CPU wheels instead. The install pages, the README and llms.txt
   say so in English and Spanish.
 
 - **Contributors and coding agents have one written style guide.**

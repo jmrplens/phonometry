@@ -23,7 +23,7 @@ import os
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Final, Literal, get_args
 
 import numpy as np
 
@@ -48,10 +48,13 @@ Device = Literal["cpu", "cupy", "torch:cpu", "torch:cuda", "torch:mps"]
 #: The floating-point type of every field.
 Dtype = Literal["float64", "float32"]
 
-_DEVICES: tuple[Device, ...] = ("cpu", "cupy", "torch:cpu", "torch:cuda", "torch:mps")
-_DTYPES: tuple[Dtype, ...] = ("float64", "float32")
+_DEVICES: tuple[Device, ...] = get_args(Device)
+_DTYPES: tuple[Dtype, ...] = get_args(Dtype)
+#: torch on the host's CPU, and on Apple silicon, which has no float64.
+_TORCH_CPU: Final = "torch:cpu"
+_TORCH_MPS: Final = "torch:mps"
 #: Devices with one instance per machine, where an index means nothing.
-_SINGLE: tuple[Device, ...] = ("cpu", "torch:cpu", "torch:mps")
+_SINGLE: tuple[Device, ...] = ("cpu", _TORCH_CPU, _TORCH_MPS)
 
 #: The environment variable that names a default placement.
 _ENV_VAR = "PHONOMETRY_COMPUTE"
@@ -107,7 +110,7 @@ class Compute(RichDisplay):
             msg = f"'fallback' must be True or False, got {self.fallback!r}."
             raise TypeError(msg)
         object.__setattr__(self, "fallback", bool(self.fallback))
-        if self.device == "torch:mps" and self.dtype == "float64":
+        if self.device == _TORCH_MPS and self.dtype == "float64":
             msg = "device 'torch:mps' needs dtype='float32': MPS has no float64"
             raise ValueError(msg)
         if self.device in _SINGLE and self.device_index != 0:

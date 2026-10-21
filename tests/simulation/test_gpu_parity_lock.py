@@ -43,12 +43,11 @@ _RERUN = "run `make gpu-parity` on a machine with an NVIDIA GPU and commit the l
 
 
 def _lock() -> dict[str, Any]:
-    """The committed lock, read when a test asks, so a broken one says what to do."""
+    """The committed lock, read when a test asks, so a missing one says what to do."""
     path = _ROOT / "gpu-parity.lock"
-    try:
-        lock: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError) as exc:
-        pytest.fail(f"gpu-parity.lock cannot be read ({exc}); {_RERUN}")
+    if not path.is_file():
+        pytest.fail(f"gpu-parity.lock is missing; {_RERUN}")
+    lock: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
     return lock
 
 

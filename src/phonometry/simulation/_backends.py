@@ -341,11 +341,11 @@ def _torch(compute: Compute) -> Backend:
         compute,
         lambda: (torch.ones(4, device=device, dtype=run_dtype) + 1).sum().item(),
     )
-    gpu = (
-        torch.cuda.get_device_name(compute.device_index)
-        if kind == "cuda"
-        else ("Apple MPS" if kind == "mps" else None)
-    )
+    gpu: str | None = None
+    if kind == "cuda":
+        gpu = torch.cuda.get_device_name(compute.device_index)
+    elif kind == "mps":
+        gpu = "Apple MPS"
     return Backend(
         xp=xp,
         name=f"torch:{kind}",

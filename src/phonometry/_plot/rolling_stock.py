@@ -438,8 +438,12 @@ def plot_stationary_test(
     ax.bar(
         positions,
         means,
-        width=0.7,
-        **styled(kwargs, color=_C_PRIMARY, label=_t("Mean over the sets", language)),
+        **styled(
+            kwargs,
+            width=0.7,
+            color=_C_PRIMARY,
+            label=_t("Mean over the sets", language),
+        ),
     )
     ax.axhline(
         result.reported_level,
@@ -620,9 +624,10 @@ def plot_adjacent_neutrality(
     ax.bar(
         [0.0, 1.0],
         levels,
-        width=0.55,
         **styled(
-            kwargs, color=[_C_PRIMARY, _C_TERTIARY if result.passes else _C_REFERENCE]
+            kwargs,
+            width=0.55,
+            color=[_C_PRIMARY, _C_TERTIARY if result.passes else _C_REFERENCE],
         ),
     )
     ax.axhline(
@@ -928,7 +933,7 @@ def plot_pass_by_uncertainty(
     ax = ax if ax is not None else _new_axes()
     ratios = sorted(result.variance_ratios.items(), key=lambda item: -item[1])
     x = np.arange(len(ratios), dtype=np.float64)
-    ax.bar(x, [r for _, r in ratios], width=0.6, **styled(kwargs, color=_C_QUATERNARY))
+    ax.bar(x, [r for _, r in ratios], **styled(kwargs, width=0.6, color=_C_QUATERNARY))
     ax.set_xticks(x)
     ax.set_xticklabels(
         [name for name, _ in ratios], rotation=60, ha="right", fontsize="small"

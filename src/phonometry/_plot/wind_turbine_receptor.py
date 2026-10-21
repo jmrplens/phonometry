@@ -560,10 +560,10 @@ def plot_binned_sound_levels(
     ax.errorbar(
         result.wind_speeds_m_s,
         result.mean_levels,
-        yerr=errors,
-        capsize=3,
         **styled(
             kwargs,
+            yerr=errors,
+            capsize=3,
             color=_C_PRIMARY,
             lw=1.5,
             ls="none",
@@ -893,8 +893,7 @@ def plot_sound_emergence(
     ax.bar(
         x,
         emergence,
-        width=0.6,
-        **styled(kwargs, color=_C_PRIMARY, label="$E(j)$"),
+        **styled(kwargs, width=0.6, color=_C_PRIMARY, label="$E(j)$"),
     )
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     ax.set_xlabel(xlabel)
@@ -922,7 +921,7 @@ def plot_wind_turbine_rating_level(
     ]
     values = [result.adjustments[name] for name in names]
     positions = np.arange(3, dtype=np.float64)
-    bars = ax.bar(positions, values, width=0.6, **styled(kwargs, color=_C_PRIMARY))
+    bars = ax.bar(positions, values, **styled(kwargs, width=0.6, color=_C_PRIMARY))
     if result.governing is not None:
         governing = bars[names.index(result.governing)]
         governing.set_edgecolor(_C_REFERENCE)

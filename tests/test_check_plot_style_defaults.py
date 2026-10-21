@@ -201,3 +201,22 @@ def test_a_keyword_that_cannot_reach_the_spread_is_left_alone(
         "    ax.plot([1], zorder=3, **options)\n"
     )
     assert gate._findings(_module(source, tmp_path)) == []
+
+
+def test_a_keyword_beside_a_mapping_built_from_the_spread_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``**{"label": ..., **kwargs}`` and ``**styled(kwargs, ...)`` carry the caller's too."""
+    source = (
+        "def f(ax, **kwargs):\n"
+        "    ax.plot([1], zorder=2, **{'label': 'x', **kwargs})\n"
+        "    ax.bar([1], [2], width=0.6, **styled(kwargs, color='r'))\n"
+        "    ax.bar([1], [2], **styled(kwargs, width=0.6, color='r'))\n"
+    )
+    assert gate._findings(_module(source, tmp_path)) == [
+        (
+            2,
+            "'zorder' written beside **kwargs in ax.plot(), so a caller cannot pass it",
+        ),
+        (3, "'width' written beside **kwargs in ax.bar(), so a caller cannot pass it"),
+    ]

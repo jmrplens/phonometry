@@ -2952,10 +2952,10 @@ def plot_round_robin_precision(
     ax.bar(
         edges[:-1],
         counts,
-        width=np.diff(edges),
-        align="edge",
         **styled(
             kwargs,
+            width=np.diff(edges),
+            align="edge",
             color=theme_fill(_C_PRIMARY, ax),
             edgecolor=_C_PRIMARY,
             lw=0.9,

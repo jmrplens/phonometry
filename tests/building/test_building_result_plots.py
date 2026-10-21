@@ -425,6 +425,23 @@ def test_a_background_record_of_several_positions_draws_one_line_each() -> None:
     plt.close("all")
 
 
+def test_the_position_lines_take_the_callers_zorder() -> None:
+    """``plot(zorder=...)`` reaches the line of each position as it reaches the bars.
+
+    The lines were drawn with ``zorder=2`` written beside the caller's
+    keywords, so a ``(positions, bands)`` record raised ``TypeError: got
+    multiple values`` where a one-position record drew.
+    """
+    background = np.full((2, 3), 30.0)
+    result = ph.building.background_corrected_level(
+        background + [[20.0, 10.0, 3.0], [18.0, 8.0, 2.0]], background
+    )
+    ax = result.plot(zorder=4)
+    lines = [line for line in ax.lines if line.get_label().startswith("Position")]
+    assert [line.get_zorder() for line in lines] == [4, 4]
+    plt.close("all")
+
+
 def test_the_band_frequencies_of_a_background_record_are_one_per_band() -> None:
     with pytest.raises(ValueError, match="'frequencies' must be one positive"):
         ph.building.background_corrected_level(

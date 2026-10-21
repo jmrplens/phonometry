@@ -398,9 +398,9 @@ def plot_programme_characteristic_voltage(
     ax.bar(
         positions,
         levels - floor,
-        bottom=floor,
         **styled(
             kwargs,
+            bottom=floor,
             color=_C_PRIMARY,
             edgecolor=_C_EDGE,
             width=0.7,

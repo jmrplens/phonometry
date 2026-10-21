@@ -4226,8 +4226,11 @@ def plot_background_corrected_level(
             ax.plot(
                 positions,
                 row,
-                zorder=2,
-                **{"label": _t("Position {n}", language).format(n=n), **kwargs},
+                **{
+                    "zorder": 2,
+                    "label": _t("Position {n}", language).format(n=n),
+                    **kwargs,
+                },
             )
     ax.set_ylim(low, high)
     ax.set_ylabel(_t(r"Margin above the background $L' - L_\mathrm{b}$ [dB]", language))

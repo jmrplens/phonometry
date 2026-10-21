@@ -231,11 +231,19 @@ def _written_beside(
 
 
 def _spreads(call: ast.Call, name: str) -> bool:
-    """Whether ``call`` unpacks the mapping ``name`` with ``**``."""
+    """Whether ``call`` unpacks, with ``**``, anything built from the mapping ``name``.
+
+    The caller's keywords arrive as much through ``**kwargs`` as through
+    ``**{"label": ..., **kwargs}`` or ``**styled(kwargs, ...)``: whatever the
+    unpacked expression reads ``name`` in, a keyword written beside it meets
+    the caller's.
+    """
     return any(
         keyword.arg is None
-        and isinstance(keyword.value, ast.Name)
-        and keyword.value.id == name
+        and any(
+            isinstance(node, ast.Name) and node.id == name
+            for node in ast.walk(keyword.value)
+        )
         for keyword in call.keywords
     )
 

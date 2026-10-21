@@ -22,6 +22,7 @@ from .common import (
     _new_axes,
     format_frequency_axis,
     place_legend_clear,
+    refuse_fixed_keywords,
     styled,
 )
 
@@ -242,9 +243,9 @@ def _draw_block_spectrum(
         ax.bar(
             freqs[mask],
             spectrum[mask],
-            width=width,
             **styled(
                 kwargs,
+                width=width,
                 color=_C_PRIMARY,
                 label=_t("Lines in the inverse transform", language),
             ),
@@ -253,9 +254,11 @@ def _draw_block_spectrum(
         ax.bar(
             freqs,
             spectrum,
-            width=width,
             **styled(
-                kwargs, color=_C_MUTED, label=_t("Prominence-failed block", language)
+                kwargs,
+                width=width,
+                color=_C_MUTED,
+                label=_t("Prominence-failed block", language),
             ),
         )
     low, high = result.modulation_frequency_range_hz
@@ -542,7 +545,10 @@ def plot_binned_sound_levels(
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
-    """The interval levels against wind speed with the bin averages over them."""
+    """The interval levels against wind speed with the bin averages over them.
+
+    :raises TypeError: for ``yerr``, which the uncertainty of each mean sets.
+    """
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
@@ -557,6 +563,12 @@ def plot_binned_sound_levels(
         label=_t("Interval levels", language),
     )
     errors = np.nan_to_num(np.asarray(result.combined_uncertainty_db), nan=0.0)
+    refuse_fixed_keywords(
+        kwargs,
+        "plot_binned_sound_levels",
+        "yerr",
+        reason="draws the uncertainty of each bin's mean",
+    )
     ax.errorbar(
         result.wind_speeds_m_s,
         result.mean_levels,

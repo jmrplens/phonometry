@@ -975,6 +975,18 @@ def test_every_plot_forwards_kwargs_to_primary_artist(
         )
     plt.close("all")
 
+    # A property no renderer thought of as the caller's: `zorder` was written
+    # beside the caller's keywords, or a copy of them, in renderers across the
+    # package, so a caller who stacked a curve got `TypeError: got multiple
+    # values for keyword argument 'zorder'` instead of a figure.
+    out = res.plot(zorder=7)
+    ax = out[0] if isinstance(out, np.ndarray) else out
+    artists = ax.lines if kind == "line" else ax.patches
+    assert any(a.get_zorder() == 7 for a in artists), (
+        f"{name}: zorder kwarg did not reach the primary artist"
+    )
+    plt.close("all")
+
 
 # --------------------------------------------------------------------------
 # One signature for every .plot(): ax first, everything else by name
@@ -1344,3 +1356,38 @@ def test_no_renderer_defaults_a_label_on_the_shared_kwargs_inside_a_loop() -> No
         "a label default on the shared kwargs inside a loop names every curve "
         f"after the first one: {offenders}. Take a copy per iteration."
     )
+
+
+def _obstacle_domain() -> object:
+    from phonometry.simulation import FDTD2D
+
+    mask = np.zeros((20, 20), dtype=bool)
+    mask[8:12, 8:12] = True
+    return FDTD2D(343.0, 0.05, shape=(20, 20), obstacle_mask=mask)
+
+
+@pytest.mark.parametrize(
+    ("factory", "draw", "keyword", "value"),
+    [
+        (_round_robin_precision, "plot", "width", 0.1),
+        (_round_robin_precision, "plot", "align", "center"),
+        (_programme_characteristic_voltage, "plot", "bottom", 0.0),
+        (_binned_levels, "plot", "yerr", 0.0),
+        (_obstacle_domain, "plot_geometry", "extent", (0.0, 1.0, 1.0, 0.0)),
+        (_obstacle_domain, "plot_geometry", "origin", "lower"),
+    ],
+)
+def test_a_keyword_the_renderer_computes_from_the_data_is_refused(
+    factory: Callable[[], object], draw: str, keyword: str, value: object
+) -> None:
+    """The caller's style wins over the renderer's, its data does not.
+
+    A bar baseline measured from a floor, the error bars of a mean, the bins
+    of a histogram and the extent of a field drawn from the caller would put
+    the data where it was not measured, so the renderer names and refuses
+    them instead of drawing the caller's numbers over its own.
+    """
+    method = getattr(factory(), draw)
+    with pytest.raises(TypeError, match=f"{keyword} cannot be overridden"):
+        method(**{keyword: value})
+    plt.close("all")

@@ -64,27 +64,21 @@ _REPO = Path(__file__).resolve().parent.parent
 #: The package whose renderers forward keyword arguments to artists.
 _ROOT = _REPO / "src" / "phonometry"
 
-#: Every spelling of every property matplotlib aliases, long and short. Taken
-#: from ``_STYLE_ALIASES`` in ``_plot/common.py``, which is the table
-#: :func:`style_default` itself reads, so the two cannot drift apart.
-_ALIASED: frozenset[str] = frozenset(
-    {
-        "color",
-        "c",
-        "linestyle",
-        "ls",
-        "linewidth",
-        "lw",
-        "markeredgecolor",
-        "mec",
-        "markeredgewidth",
-        "mew",
-        "markerfacecolor",
-        "mfc",
-        "markersize",
-        "ms",
-    }
-)
+#: The long and the short spelling of every property matplotlib aliases, as
+#: ``_STYLE_ALIASES`` in ``_plot/common.py`` writes them: the table
+#: :func:`style_default` itself reads, compared with this one so the two
+#: cannot drift apart.
+_ALIAS_PAIRS: dict[str, str] = {
+    "color": "c",
+    "linestyle": "ls",
+    "linewidth": "lw",
+    "markeredgecolor": "mec",
+    "markeredgewidth": "mew",
+    "markerfacecolor": "mfc",
+    "markersize": "ms",
+}
+#: Every spelling of every aliased property, long and short.
+_ALIASED: frozenset[str] = frozenset(_ALIAS_PAIRS) | frozenset(_ALIAS_PAIRS.values())
 
 
 def _kwarg_names(tree: ast.AST) -> set[str]:
@@ -202,48 +196,169 @@ def _unoverridable(tree: ast.AST) -> set[tuple[int, str]]:
 def _written_beside(
     function: ast.FunctionDef | ast.AsyncFunctionDef, own: set[str]
 ) -> Iterator[tuple[int, str]]:
-    """The keywords one function writes beside its own ``**kwargs``.
+    """The keywords one function writes beside the caller's keywords.
 
-    A keyword that names a parameter of the function cannot be in its
-    ``**kwargs``, so it cannot collide and is left alone.
+    The caller's keywords arrive in the function's ``**kwargs``, or, in a
+    helper a renderer hands them on to, in a parameter named ``kwargs`` (or
+    ``..._kwargs``). They travel on in every mapping the function builds from
+    them (``options = dict(kwargs)``). A keyword that names a parameter of a
+    function with ``**kwargs`` cannot be in them, nor can one the function
+    takes out first (``kwargs.pop("zorder", 3)``, ``del kwargs["zorder"]``,
+    :func:`style_pop`) or refuses by name (:func:`refuse_fixed_keywords`), so
+    none of those can collide and they are left alone.
     """
-    if function.args.kwarg is None:
+    seeds = _seeds(function)
+    if not seeds:
         return
-    spread = function.args.kwarg.arg
+    carriers = _carriers(function, seeds)
     arguments = function.args
-    bound = {
-        arg.arg
-        for arg in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
-    }
+    absent = _taken_out(function, carriers)
+    if arguments.kwarg is not None:
+        absent |= {
+            arg.arg
+            for arg in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
+        }
     for call in ast.walk(function):
         if not isinstance(call, ast.Call) or _call_root(call.func) in own:
             continue
-        if not _spreads(call, spread):
+        if not _spreads(call, carriers):
             continue
         callee = ast.unparse(call.func)
         for keyword in call.keywords:
-            if keyword.arg is not None and keyword.arg not in bound:
+            if keyword.arg is not None and keyword.arg not in absent:
                 yield (
                     call.lineno,
-                    f"{keyword.arg!r} written beside **{spread} in {callee}(), "
+                    f"{keyword.arg!r} written beside **kwargs in {callee}(), "
                     "so a caller cannot pass it",
                 )
 
 
-def _spreads(call: ast.Call, name: str) -> bool:
-    """Whether ``call`` unpacks, with ``**``, anything built from the mapping ``name``.
+def _seeds(function: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
+    """The names the caller's keywords arrive under in ``function``."""
+    arguments = function.args
+    seeds = {
+        arg.arg
+        for arg in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
+        if arg.arg == "kwargs" or arg.arg.endswith("_kwargs")
+    }
+    if arguments.kwarg is not None:
+        seeds.add(arguments.kwarg.arg)
+    return seeds
+
+
+def _carriers(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, seeds: set[str]
+) -> set[str]:
+    """``seeds`` and every name the function binds to something built from them."""
+    carriers = set(seeds)
+    grew = True
+    while grew:
+        grew = False
+        for node in ast.walk(function):
+            if not isinstance(node, ast.Assign) or not _reads(node.value, carriers):
+                continue
+            bound = {
+                name.id
+                for target in node.targets
+                for name in ast.walk(target)
+                if isinstance(name, ast.Name)
+            }
+            if bound - carriers:
+                carriers |= bound
+                grew = True
+    return carriers
+
+
+def _taken_out(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, carriers: set[str]
+) -> set[str]:
+    """The keys the function takes out of the caller's keywords, or refuses, by name.
+
+    ``kwargs.pop("width", 0.7)``, ``del kwargs["width"]``, ``style_pop(kwargs,
+    "color", ...)`` (both spellings) and ``refuse_fixed_keywords(kwargs, ...,
+    "bottom")``, on ``kwargs`` or on a copy of it.
+    """
+    taken: set[str] = set()
+    for node in ast.walk(function):
+        if isinstance(node, ast.Delete):
+            taken.update(
+                target.slice.value
+                for target in node.targets
+                if isinstance(target, ast.Subscript)
+                and _reads(target.value, carriers)
+                and isinstance(target.slice, ast.Constant)
+                and isinstance(target.slice.value, str)
+            )
+        elif isinstance(node, ast.Call):
+            taken.update(_removed_by(node, carriers))
+    return taken
+
+
+def _removed_by(call: ast.Call, carriers: set[str]) -> set[str]:
+    """The keys one call takes out of a carrier of the caller's keywords."""
+    called = _called(call)
+    if (
+        called == "pop"
+        and isinstance(call.func, ast.Attribute)
+        and _reads(call.func.value, carriers)
+    ):
+        return _strings(call.args[:1])
+    if not call.args or not _reads(call.args[0], carriers):
+        return set()
+    if called == "style_pop":
+        return {
+            spelling
+            for name in _strings(call.args[1:2])
+            for spelling in (name, *_alias_of(name))
+        }
+    if called == "refuse_fixed_keywords":
+        return _strings(call.args[1:])
+    return set()
+
+
+def _alias_of(name: str) -> tuple[str, ...]:
+    """The other spelling of an aliased property, or nothing."""
+    pairs = (
+        *_ALIAS_PAIRS.items(),
+        *((short, long) for long, short in _ALIAS_PAIRS.items()),
+    )
+    return tuple(other for one, other in pairs if one == name)
+
+
+def _called(call: ast.Call) -> str:
+    """The last name of what ``call`` calls: ``f`` for ``f()`` and ``m.f()``."""
+    func = call.func
+    if isinstance(func, ast.Attribute):
+        return func.attr
+    return func.id if isinstance(func, ast.Name) else ""
+
+
+def _strings(nodes: list[ast.expr]) -> set[str]:
+    """The string constants among ``nodes``."""
+    return {
+        node.value
+        for node in nodes
+        if isinstance(node, ast.Constant) and isinstance(node.value, str)
+    }
+
+
+def _reads(expression: ast.AST, names: set[str]) -> bool:
+    """Whether ``expression`` reads one of ``names``."""
+    return any(
+        isinstance(node, ast.Name) and node.id in names for node in ast.walk(expression)
+    )
+
+
+def _spreads(call: ast.Call, carriers: set[str]) -> bool:
+    """Whether ``call`` unpacks, with ``**``, anything built from the caller's keywords.
 
     The caller's keywords arrive as much through ``**kwargs`` as through
-    ``**{"label": ..., **kwargs}`` or ``**styled(kwargs, ...)``: whatever the
-    unpacked expression reads ``name`` in, a keyword written beside it meets
-    the caller's.
+    ``**{"label": ..., **kwargs}``, ``**styled(kwargs, ...)`` or a copy the
+    function made: whatever the unpacked expression reads one of
+    ``carriers`` in, a keyword written beside it meets the caller's.
     """
     return any(
-        keyword.arg is None
-        and any(
-            isinstance(node, ast.Name) and node.id == name
-            for node in ast.walk(keyword.value)
-        )
+        keyword.arg is None and _reads(keyword.value, carriers)
         for keyword in call.keywords
     )
 

@@ -40,6 +40,7 @@ from .common import (
     _new_axes_column,
     format_frequency_axis,
     place_legend_clear,
+    refuse_fixed_keywords,
     style_default,
     style_pop,
     styled,
@@ -671,6 +672,9 @@ def _draw_margins(
         if unusable is None
         else list(unusable)
     )
+    refuse_fixed_keywords(
+        kwargs, "The margin plot", "yerr", reason="draws each result's own uncertainty"
+    )
     for x, v, hollow in zip(positions, verifications, flags, strict=True):
         key, style = _margin_marker(
             v, kwargs, hollow=hollow, unusable_label=unusable_label
@@ -682,11 +686,7 @@ def _draw_margins(
             [x],
             [_margin_db(v)],
             yerr=[v.uncertainty],
-            ecolor=_C_MUTED,
-            elinewidth=1.0,
-            capsize=3,
-            zorder=3,
-            **style,
+            **styled(style, ecolor=_C_MUTED, elinewidth=1.0, capsize=3, zorder=3),
         )
 
 

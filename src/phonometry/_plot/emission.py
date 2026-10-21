@@ -27,6 +27,7 @@ from .common import (
     _sound_power_designation,
     format_frequency_axis,
     place_legend_clear,
+    refuse_fixed_keywords,
     style_default,
     styled,
     theme_fill,
@@ -336,13 +337,14 @@ def plot_emission_pressure(
     # silently overridden, because a bar chart whose bottoms come from the
     # caller is not this figure any more. Everything the caller may reasonably
     # want, colour included, goes through setdefault so a kwarg wins.
-    fixed = {"x", "height", "bottom"} & set(kwargs)
-    if fixed:
-        msg = (
-            f"plot_emission_pressure positions its own bars; "
-            f"{', '.join(sorted(fixed))} cannot be overridden."
-        )
-        raise TypeError(msg)
+    refuse_fixed_keywords(
+        kwargs,
+        "plot_emission_pressure",
+        "x",
+        "height",
+        "bottom",
+        reason="positions its own bars",
+    )
     kwargs.setdefault("width", 0.62)
     style_default(kwargs, "color", colours)
     kwargs.setdefault("edgecolor", _C_EDGE)

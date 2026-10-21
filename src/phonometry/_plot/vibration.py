@@ -727,9 +727,7 @@ def plot_daily_exposure(
             width=width,
             color=_OP_COLORS[i % len(_OP_COLORS)],
             edgecolor=edgecolor,
-            linewidth=0.6,
-            zorder=3,
-            **task_kwargs,
+            **styled(task_kwargs, linewidth=0.6, zorder=3),
         )
     total_kwargs = dict(kwargs)
     total_kwargs.setdefault("label", "$A(8)$")
@@ -739,9 +737,7 @@ def plot_daily_exposure(
         width=width,
         color=_A8_COLOR,
         edgecolor=edgecolor,
-        linewidth=0.6,
-        zorder=3,
-        **total_kwargs,
+        **styled(total_kwargs, linewidth=0.6, zorder=3),
     )
     # The legend carries the bar identity, so the crowded category ticks go.
     ax.set_xticks([])

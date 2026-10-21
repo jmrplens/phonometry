@@ -28,6 +28,7 @@ from .common import (
     _plot_two_runs,
     format_frequency_axis,
     place_legend_clear,
+    refuse_fixed_keywords,
     style_default,
     styled,
     theme_fill,
@@ -2938,6 +2939,7 @@ def plot_round_robin_precision(
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the histogram bars.
     :return: The axes.
+    :raises TypeError: for ``width`` or ``align``, which the classes set.
     """
     from .._i18n import format_number, localize_axes
 
@@ -2949,6 +2951,13 @@ def plot_round_robin_precision(
     edges = width * np.arange(classes + 1, dtype=np.float64)
     edges[-1] = max(float(edges[-1]), largest)
     counts, _ = np.histogram(maxima, bins=edges)
+    refuse_fixed_keywords(
+        kwargs,
+        "plot_round_robin_precision",
+        "width",
+        "align",
+        reason="draws each bar over the class it counts",
+    )
     ax.bar(
         edges[:-1],
         counts,

@@ -185,8 +185,10 @@ def test_a_keyword_that_cannot_reach_the_spread_is_left_alone(
 
     A parameter of the function itself is bound before ``**kwargs`` is
     filled, a helper of the package takes its own parameters beside the
-    caller's properties, and a spread of a local mapping, or the merge
-    through ``styled``, is the renderer's own.
+    caller's properties, the merge through ``styled`` lets the caller win, a
+    key the function takes out of the caller's keywords (or of a copy) or
+    refuses by name is not there to collide, and a mapping the renderer
+    builds without them is its own.
     """
     source = (
         "from .common import draw_rating\n"
@@ -197,10 +199,31 @@ def test_a_keyword_that_cannot_reach_the_spread_is_left_alone(
         "    draw_rating(ax, title='t', **kwargs)\n"
         "    ax.plot([1], language=language, **kwargs)\n"
         "    ax.plot([1], **styled(kwargs, zorder=3))\n"
+        "    width = kwargs.pop('width', 0.7)\n"
+        "    style_pop(kwargs, 'c', None)\n"
+        "    refuse_fixed_keywords(kwargs, 'f', 'bottom', reason='r')\n"
         "    options = dict(kwargs)\n"
-        "    ax.plot([1], zorder=3, **options)\n"
+        "    del options['hatch']\n"
+        "    ax.bar([1], [2], width=width, color='r', bottom=0, hatch='/', **options)\n"
+        "    own = {'lw': 2}\n"
+        "    ax.plot([1], zorder=3, **own)\n"
     )
     assert gate._findings(_module(source, tmp_path)) == []
+
+
+def test_a_keyword_beside_a_copy_of_the_callers_keywords_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``options = dict(kwargs)`` carries the caller's keywords as ``kwargs`` does."""
+    source = (
+        "def f(ax, **kwargs):\n"
+        "    options = dict(kwargs)\n"
+        "    options.setdefault('label', 'x')\n"
+        "    ax.plot([1], zorder=3, **options)\n"
+    )
+    assert gate._findings(_module(source, tmp_path)) == [
+        (4, "'zorder' written beside **kwargs in ax.plot(), so a caller cannot pass it")
+    ]
 
 
 def test_a_keyword_beside_a_mapping_built_from_the_spread_is_refused(

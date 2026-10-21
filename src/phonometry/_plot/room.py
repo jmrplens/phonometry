@@ -1075,10 +1075,7 @@ def plot_reverberation_models(
         ax.plot(
             freq,
             np.asarray(curve, dtype=np.float64),
-            color=color,
-            marker=marker,
-            lw=lw,
-            **model_kwargs,
+            **styled(model_kwargs, color=color, marker=marker, lw=lw),
         )
     _freq_axis(ax, freq, language=language)
     ax.set_ylabel(_t(_REVERBERATION_TIME_LABEL, language))
@@ -1632,9 +1629,7 @@ def plot_room_modes(
             freqs[mask],
             row - 0.35,
             row + 0.35,
-            color=colors[kind],
-            lw=1.2,
-            **kind_kwargs,
+            **styled(kind_kwargs, color=colors[kind], lw=1.2),
         )
     ladder.set_ylim(0.4, 4.1)
     order = ("oblique", "tangential", "axial")
@@ -1721,9 +1716,7 @@ def plot_crowd_noise(
         ax.plot(
             n,
             curve,
-            color=palette[row % len(palette)],
-            lw=1.8,
-            **area_kwargs,
+            **styled(area_kwargs, color=palette[row % len(palette)], lw=1.8),
         )
     ax.axhline(
         result.signal_level,

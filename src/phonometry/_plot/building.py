@@ -30,6 +30,7 @@ from .common import (
     _plot_rating,
     format_frequency_axis,
     place_legend_clear,
+    refuse_fixed_keywords,
     style_default,
     styled,
     theme_fill,
@@ -1276,6 +1277,12 @@ def _plot_path_shares(
         _C_PRIMARY_LIGHT,
         _C_SECONDARY_LIGHT,
     )
+    refuse_fixed_keywords(
+        kwargs,
+        "_plot_path_shares",
+        "bottom",
+        reason="stacks each path's share on the paths below it",
+    )
     bottom = np.zeros(positions.size, dtype=np.float64)
     for colour, k in zip(palette, named, strict=False):  # fewer paths than colours
         share = 100.0 * fractions[k]
@@ -1288,11 +1295,7 @@ def _plot_path_shares(
             positions,
             share,
             bottom=bottom,
-            width=0.85,
-            color=colour,
-            edgecolor="none",
-            zorder=0,
-            **path_kwargs,
+            **styled(path_kwargs, width=0.85, color=colour, edgecolor="none", zorder=0),
         )
         bottom = bottom + share
     if pooled:
@@ -1303,11 +1306,9 @@ def _plot_path_shares(
             positions,
             share,
             bottom=bottom,
-            width=0.85,
-            color=_C_MUTED,
-            edgecolor="none",
-            zorder=0,
-            **pooled_kwargs,
+            **styled(
+                pooled_kwargs, width=0.85, color=_C_MUTED, edgecolor="none", zorder=0
+            ),
         )
     ax.set_ylabel(_t(_SHARE_LABEL, language))
     ax.set_ylim(0.0, 100.0)
@@ -2533,7 +2534,7 @@ def _plot_low_frequency(
     style_default(bar_kwargs, "color", _C_PRIMARY)
     bar_kwargs.setdefault("edgecolor", "none")
     bar_kwargs.setdefault("zorder", 0)
-    ax.bar(positions, r_i, width=_BAR_WIDTH, **bar_kwargs)
+    ax.bar(positions, r_i, **styled(bar_kwargs, width=_BAR_WIDTH))
     # Hatch on top of the bar rather than recolouring it: the refused bands
     # still carry a computed index, the hatch says it is not qualified.
     if not qualified.all():

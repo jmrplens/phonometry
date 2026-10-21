@@ -31,7 +31,7 @@ import numpy as np
 from .._internal.validation import require_scalar
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
     from types import ModuleType
 
     from matplotlib.axes import Axes
@@ -711,6 +711,29 @@ def style_pop[StyleT](kwargs: dict[str, Any], name: str, default: StyleT) -> Sty
     return default if taken is _MISSING else cast("StyleT", taken)
 
 
+def refuse_fixed_keywords(
+    kwargs: Mapping[str, Any], renderer: str, *names: str, reason: str
+) -> None:
+    """Refuse a keyword a renderer computes from the result it draws.
+
+    A renderer's keywords reach the artist under the caller's
+    (:func:`styled`), so a style the caller passes wins. A few are not style:
+    the baseline of a bar measured from a floor, the error bars of a mean, the
+    bins of a histogram, the extent of a field. One of those from the caller
+    would draw the data where it was not measured, so it is refused, by name.
+
+    :param kwargs: What the caller passed.
+    :param renderer: The renderer's name, for the message.
+    :param names: The keywords the renderer computes.
+    :param reason: What the renderer computes them from, for the message.
+    :raises TypeError: naming each of *names* the caller passed.
+    """
+    fixed = sorted(set(names) & set(kwargs))
+    if fixed:
+        msg = f"{renderer} {reason}; {', '.join(fixed)} cannot be overridden."
+        raise TypeError(msg)
+
+
 def styled(kwargs: dict[str, Any], **defaults: Any) -> dict[str, Any]:
     """The caller's keywords over a renderer's defaults, alias for alias.
 
@@ -1184,8 +1207,7 @@ def _draw_decay_times(
         bars = ax.bar(
             positions + offset,
             np.nan_to_num(vals),
-            width=width,
-            **bar_kwargs,
+            **styled(bar_kwargs, width=width),
         )
         _hatch_invalid(bars, ~valid_arr)
 

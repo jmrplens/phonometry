@@ -358,6 +358,17 @@ class TestReflectionIndex:
         with pytest.raises(ValueError, match=match):
             dataclasses.replace(result, **{field: wrong})
 
+    def test_a_result_of_single_numbers_is_refused(self) -> None:
+        """Scalars in every required field passed the rank check, then broke the plot."""
+        result = prop.reflection_index_from_positions(np.full((2, 18), 0.5))
+        fields = {
+            "frequencies": 1000.0,
+            "reflection_index": 0.5,
+            "position_values": 0.5,
+        }
+        with pytest.raises(ValueError, match="'frequencies' must have one axis"):
+            dataclasses.replace(result, **fields)
+
     @pytest.mark.parametrize(
         "field", ["frequencies", "reflection_index", "position_values"]
     )
@@ -871,6 +882,12 @@ class TestLowFrequencyLimit:
         short = getattr(limit, field)[:8]
         with pytest.raises(ValueError, match="one value per microphone"):
             dataclasses.replace(limit, **{field: short})
+
+    def test_a_limit_of_single_numbers_is_refused(self) -> None:
+        limit = prop.reflection_low_frequency_limit(4.0, speed_of_sound=340.0)
+        fields = {"window_length_s": 0.005, "low_frequency_limit_hz": 170.0}
+        with pytest.raises(ValueError, match="'window_length_s' must have one axis"):
+            dataclasses.replace(limit, **fields)
 
     def test_the_window_ends_at_the_ground_reflection(self) -> None:
         limit = prop.reflection_low_frequency_limit(4.0, speed_of_sound=340.0)

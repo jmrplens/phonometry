@@ -110,6 +110,7 @@ from scipy.optimize import minimize_scalar
 
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
+    require_axis_rank,
     require_choice,
     require_finite_fields,
     require_non_negative,
@@ -1113,6 +1114,22 @@ def _agree_rate(
 # --------------------------------------------------------------------------- #
 # The sound reflection index (Formula (1))
 # --------------------------------------------------------------------------- #
+def _require_exact_ranks(owner: object, **ranks: int) -> None:
+    """Require each named field of *owner* that holds a value to have its rank.
+
+    :func:`require_ranks` passes over a record whose every field is a single
+    number, for the results that take one frequency; a record that always
+    holds per-band or per-microphone arrays refuses that as any other wrong
+    rank. ``None`` fields are left to :func:`require_present`.
+
+    :raises ValueError: if a field has a different number of axes.
+    """
+    for name, rank in ranks.items():
+        value = getattr(owner, name)
+        if value is not None:
+            require_axis_rank(value, type(owner).__name__, name, rank)
+
+
 @dataclass(frozen=True)
 class ReflectionIndexResult(OwnsArrays):
     r"""The sound reflection index of a device, per one-third octave band.
@@ -1154,6 +1171,10 @@ class ReflectionIndexResult(OwnsArrays):
     def __post_init__(self) -> None:
         """Refuse arrays that disagree about the bands, positions or microphones.
 
+        A single number is refused as any other wrong rank: the record always
+        holds band arrays, unlike the single-frequency results the shared rank
+        check passes over.
+
         :raises TypeError: If ``frequencies``, ``reflection_index`` or
             ``position_values`` is ``None``.
         :raises ValueError: If an array has the wrong number of axes, or two of
@@ -1161,7 +1182,7 @@ class ReflectionIndexResult(OwnsArrays):
             microphones.
         """
         require_present(self, "frequencies", "reflection_index", "position_values")
-        require_ranks(
+        _require_exact_ranks(
             self,
             frequencies=1,
             reflection_index=1,
@@ -1626,7 +1647,7 @@ class ReflectionFrequencyLimit(OwnsArrays):
         require_present(
             self, "window_length_s", "low_frequency_limit_hz", "limiting_component"
         )
-        require_ranks(self, window_length_s=1, low_frequency_limit_hz=1)
+        _require_exact_ranks(self, window_length_s=1, low_frequency_limit_hz=1)
         require_same_length(
             self,
             "window_length_s",

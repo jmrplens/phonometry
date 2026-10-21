@@ -407,12 +407,12 @@ Plot the outdoor and indoor band levels.
 
 **Returns:** The axes.
 
-## MODELLING_UNCERTAINTY_DB
+## MODELING_UNCERTAINTY_DB
 
 *Constant* (`float`).
 
 ```python
-MODELLING_UNCERTAINTY_DB = 0.5
+MODELING_UNCERTAINTY_DB = 0.5
 ```
 
 ## power_law_wind_speed
@@ -458,7 +458,7 @@ predicted_receptor_level(
     sound_power_uncertainty_db: ArrayLike,
     *,
     prediction_model_uncertainty_db: float = 2.0,
-    modelling_uncertainty_db: float = 0.5,
+    modeling_uncertainty_db: float = 0.5,
 ) -> PredictedReceptorLevel
 ```
 
@@ -482,7 +482,7 @@ prediction model and the modelling in quadrature.
 | `turbine_levels_db` | Predicted level at the receptor from each turbine, in dB. |
 | `sound_power_uncertainty_db` | Uncertainty of each turbine's sound power level, from IEC 61400-11, in dB (one value for all or one each). |
 | `prediction_model_uncertainty_db` | Standard uncertainty of the prediction model, in dB (2 dB by default, 10.3.4 NOTE). |
-| `modelling_uncertainty_db` | Uncertainty of the propagation modelling, in dB (0.5 dB by default). |
+| `modeling_uncertainty_db` | Uncertainty of the propagation modelling, in dB (0.5 dB by default). |
 
 **Returns:** A [`PredictedReceptorLevel`](/phonometry/reference/api/environment/wind-turbine-receptor/#predictedreceptorlevel).
 
@@ -503,7 +503,7 @@ PredictedReceptorLevel(
     combined_uncertainty_db: float,
     *,
     prediction_model_uncertainty_db: float,
-    modelling_uncertainty_db: float,
+    modeling_uncertainty_db: float,
 )
 ```
 
@@ -519,7 +519,7 @@ A predicted receptor level and its uncertainty (10.3.4).
 | `propagated_uncertainty_db` | Equation (10), the level-weighted mean of the turbines' sound power uncertainties, in dB. |
 | `combined_uncertainty_db` | Equation (11), in dB. |
 | `prediction_model_uncertainty_db` | The model's uncertainty used, in dB. |
-| `modelling_uncertainty_db` | The modelling uncertainty used, in dB. |
+| `modeling_uncertainty_db` | The modelling uncertainty used, in dB. |
 
 ### PredictedReceptorLevel.plot()
 

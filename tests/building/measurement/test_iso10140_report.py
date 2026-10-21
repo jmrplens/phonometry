@@ -234,7 +234,7 @@ def test_rating_without_per_band_data_rejected(tmp_path: Path) -> None:
     # A backward-compatibly constructed rating (frequencies / measured /
     # shifted_reference default to None) would otherwise crash the table.
     bare_rating = building.WeightedRatingResult(
-        rating=30, c=-2, ctr=-3, unfavourable_sum=0.0
+        rating=30, c=-2, ctr=-3, unfavorable_sum=0.0
     )
     result = building.LabAirborneInsulationResult(
         r=np.asarray(_AIRBORNE_R, dtype=np.float64),
@@ -277,7 +277,7 @@ def test_report_rejects_band_count_mismatch(tmp_path: Path) -> None:
         shifted_reference=shifted,
         # Dropping the top band drops its unfavourable deviation with it, and
         # WeightedRatingResult refuses a sum its own two curves do not state.
-        unfavourable_sum=float(np.sum(np.maximum(shifted - measured, 0.0))),
+        unfavorable_sum=float(np.sum(np.maximum(shifted - measured, 0.0))),
     )
     bad = dataclasses.replace(res, rating=short)
     out = str(tmp_path / "x.pdf")

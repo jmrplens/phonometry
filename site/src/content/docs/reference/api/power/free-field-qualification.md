@@ -652,7 +652,7 @@ One straight microphone traverse of ISO 26101:2017 5.1.3.2.
 | `monitor_levels_db` | The monitor microphone level $L_{p,\mathrm{ref},i}$ recorded with each point, same shape; the first row is the level for the initial point 0, which every point is corrected to. It is finite wherever a level was measured and in the first row of every frequency measured. `None` applies no stability correction. |
 | `background_levels` | The background level at each point, same shape, or one row for the whole traverse, finite wherever a level was measured; `None` leaves the 6 dB requirement of ISO 26101 5.1.2.2 c) unjudged. |
 | `name` | A label for the traverse (the path it follows: a dihedral corner, the nearest wall, a door). |
-| `targets` | What the path is selected towards, among the five of the amended ISO 3745 A.3.3 a) to e): `"dihedral corner"`, `"trihedral corner"`, `"boundary centre"` (the centre of the most uniform boundary surface), `"closest boundary"` and `"unique features"` (a door, a window, a ventilation opening). One path may serve more than one target, as A.3.3 NOTE 1 allows for c) and d); an empty tuple names none. |
+| `targets` | What the path is selected towards, among the five of the amended ISO 3745 A.3.3 a) to e): `"dihedral corner"`, `"trihedral corner"`, `"boundary center"` (the centre of the most uniform boundary surface), `"closest boundary"` and `"unique features"` (a door, a window, a ventilation opening). One path may serve more than one target, as A.3.3 NOTE 1 allows for c) and d); an empty tuple names none. |
 
 ### MicrophoneTraverse.along()
 

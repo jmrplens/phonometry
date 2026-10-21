@@ -125,20 +125,20 @@ for a railway one, on the same weighting as the absorption rating above.
 INSULATION_CATEGORIES = (('B1', -2147483648, 14), ('B2', 15, 24), ('B3', 25, 34), ('B4', 35, 2147483648))
 ```
 
-## NORMALISED_RAILWAY_NOISE_SPECTRUM_DB
+## NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB
 
 *Constant* (`tuple`).
 
 ```python
-NORMALISED_RAILWAY_NOISE_SPECTRUM_DB = (-27.0, -25.0, -23.0, -21.0, -19.0, -17.0, -15.0, -13.0, -12.0, -11.0, -10.0, -9.0, -9.0, -9.0, -9.0, -10.0, -13.0, -17.0)
+NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB = (-27.0, -25.0, -23.0, -21.0, -19.0, -17.0, -15.0, -13.0, -12.0, -11.0, -10.0, -9.0, -9.0, -9.0, -9.0, -10.0, -13.0, -17.0)
 ```
 
-## NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB
+## NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB
 
 *Constant* (`tuple`).
 
 ```python
-NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB = (-20.0, -20.0, -18.0, -16.0, -15.0, -14.0, -13.0, -12.0, -11.0, -9.0, -8.0, -9.0, -10.0, -11.0, -13.0, -15.0, -16.0, -18.0)
+NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB = (-20.0, -20.0, -18.0, -16.0, -15.0, -14.0, -13.0, -12.0, -11.0, -9.0, -8.0, -9.0, -10.0, -11.0, -13.0, -15.0, -16.0, -18.0)
 ```
 
 ## RoadDeviceRating

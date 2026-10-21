@@ -49,7 +49,7 @@ from phonometry.materials.resilient.dynamic_stiffness import (
     floating_floor_resonance,
 )
 from phonometry.materials.surfaces.road_absorption import (
-    InsituAbsorptionResult,
+    InSituAbsorptionResult,
 )
 
 if TYPE_CHECKING:
@@ -95,8 +95,8 @@ def _diffusion() -> materials.DiffusionResult:
     return directional_diffusion([-30.0, 0.0, 30.0], [70.0, 72.0, 69.0])
 
 
-def _insitu() -> InsituAbsorptionResult:
-    return InsituAbsorptionResult(
+def _insitu() -> InSituAbsorptionResult:
+    return InSituAbsorptionResult(
         frequencies=np.array([250.0, 500.0, 1000.0, 2000.0]),
         absorption=np.array([0.2, 0.4, 0.6, 0.5]),
     )

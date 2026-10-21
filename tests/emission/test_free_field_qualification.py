@@ -61,7 +61,7 @@ _DIRECTIONS = (
 _TARGETS: tuple[tuple[str, ...], ...] = (
     ("trihedral corner",),
     ("dihedral corner",),
-    ("boundary centre",),
+    ("boundary center",),
     ("closest boundary",),
     ("unique features",),
     (),

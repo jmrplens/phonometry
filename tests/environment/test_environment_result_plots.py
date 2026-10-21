@@ -69,7 +69,7 @@ def test_road_device_plot_draws_the_bands_against_the_spectrum() -> None:
         twin = next(other for other in ax.figure.axes if other is not ax)
         (line,) = twin.get_lines()
         np.testing.assert_allclose(
-            line.get_ydata(), prop.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB
+            line.get_ydata(), prop.NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB
         )
 
         title = ax.get_title()

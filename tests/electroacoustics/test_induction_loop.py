@@ -842,7 +842,7 @@ def test_inductive_loop_doubles_before_the_table_frequency() -> None:
 def test_doubling_above_the_table_frequency_extends_the_sweep() -> None:
     impedance = ea.loop_impedance(2.0, 109e-6)
     result = ea.verify_amplifier_overload(
-        1.0, impedance, 20.0, programme="transient_speech"
+        1.0, impedance, 20.0, program="transient_speech"
     )
     expected = _doubling_frequency(2.0, 109e-6)
     assert expected > 2500.0
@@ -851,7 +851,7 @@ def test_doubling_above_the_table_frequency_extends_the_sweep() -> None:
 
 def test_resistive_loop_that_never_doubles_stops_at_table_4() -> None:
     impedance = ea.loop_impedance(8.0, 10e-6)
-    result = ea.verify_amplifier_overload(1.0, impedance, 20.0, programme="music")
+    result = ea.verify_amplifier_overload(1.0, impedance, 20.0, program="music")
     assert math.isinf(result.doubling_frequency_hz)
     assert result.end_frequency_hz == pytest.approx(4000.0)
 
@@ -874,13 +874,13 @@ def test_overload_is_judged_at_the_table_4_frequency() -> None:
     impedance = ea.loop_impedance(2.0, 109e-6)
     at_table_4 = 10 ** (-7 / 20) * float(impedance.at(2500.0))
     probe = ea.verify_amplifier_overload(
-        1.0, impedance, 100.0, programme="transient_speech"
+        1.0, impedance, 100.0, program="transient_speech"
     )
     assert probe.test_frequency_voltage_v == pytest.approx(at_table_4, rel=1e-12)
     assert probe.max_voltage_v > 1.2 * at_table_4
     between = 0.5 * (at_table_4 + probe.max_voltage_v)
     result = ea.verify_amplifier_overload(
-        1.0, impedance, between, programme="transient_speech"
+        1.0, impedance, between, program="transient_speech"
     )
     assert result.passes
     assert result.headroom_db == pytest.approx(
@@ -986,7 +986,7 @@ def test_overload_sweep_stops_at_the_first_doubling_of_a_peaked_response() -> No
     currents = [1.0, 1.0, 1.2, 1.5, 1.8, 2.6, 1.5, 0.6, 0.3]
     response = ea.amplifier_frequency_response(frequencies, currents)
     result = ea.verify_amplifier_overload(
-        1.0, impedance, 10.0, programme="music", current_response=response
+        1.0, impedance, 10.0, program="music", current_response=response
     )
     expected = _first_doubling(impedance, frequencies, currents)
     assert 4000.0 < expected < 5000.0
@@ -1022,8 +1022,8 @@ def test_overload_verdict_has_no_truth_value() -> None:
 
 def test_overload_refuses_an_unknown_programme() -> None:
     impedance = ea.loop_impedance(0.69, 109e-6)
-    with pytest.raises(ValueError, match="programme"):
-        ea.verify_amplifier_overload(3.0, impedance, 20.0, programme="opera")
+    with pytest.raises(ValueError, match="program"):
+        ea.verify_amplifier_overload(3.0, impedance, 20.0, program="opera")
 
 
 # ---------------------------------------------------------------------------
@@ -1076,7 +1076,7 @@ def test_overload_plot_draws_the_sweep_the_compliance_and_the_verdict(
 ) -> None:
     plt = pytest.importorskip("matplotlib.pyplot")
     result = ea.verify_amplifier_overload(
-        1.0, ea.loop_impedance(2.0, 109e-6), compliance, programme="transient_speech"
+        1.0, ea.loop_impedance(2.0, 109e-6), compliance, program="transient_speech"
     )
     ax = result.plot(language=language)
     np.testing.assert_array_equal(ax.lines[0].get_xdata(), result.frequencies)
@@ -1086,7 +1086,7 @@ def test_overload_plot_draws_the_sweep_the_compliance_and_the_verdict(
     judged = [
         line
         for line in ax.lines
-        if tuple(line.get_xdata()) == (result.programme.test_frequency_hz,)
+        if tuple(line.get_xdata()) == (result.program.test_frequency_hz,)
     ]
     assert len(judged) == 1
     assert tuple(judged[0].get_ydata()) == (result.test_frequency_voltage_v,)

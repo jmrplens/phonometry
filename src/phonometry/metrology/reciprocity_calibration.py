@@ -553,7 +553,7 @@ IEC61094_3_TABLE_1: Mapping[str, ReciprocityUncertaintyRow] = MappingProxyType(
         ),
         **_rows(
             _MICROPHONE,
-            ("acoustic_centres", "Acoustic centres", ("6.5",)),
+            ("acoustic_centers", "Acoustic centres", ("6.5",)),
             ("polarizing_voltage", "Polarizing voltage", ("6.2", "7.5")),
         ),
         **_rows(

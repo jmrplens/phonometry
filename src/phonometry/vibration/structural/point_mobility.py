@@ -86,11 +86,11 @@ __all__ = [
 
 #: Cremer 3e Table 5.1, PDF page 298 (printed p. 288): point-impedance
 #: constants for a thin plate in bending.
-_PLATE_CONSTANT: dict[str, float] = {"centre": 8.0, "edge": 3.5}
+_PLATE_CONSTANT: dict[str, float] = {"center": 8.0, "edge": 3.5}
 #: Cremer 3e Table 5.1, PDF page 298 (printed p. 288): point-impedance
 #: constants for a slender beam in bending (the ``(1 + j)`` prefactor is
 #: applied separately).
-_BEAM_CONSTANT: dict[str, float] = {"centre": 2.0, "end": 0.5}
+_BEAM_CONSTANT: dict[str, float] = {"center": 2.0, "end": 0.5}
 
 
 def plate_bending_stiffness(
@@ -169,7 +169,7 @@ def _omega(frequency: ArrayLike) -> NDArray[np.float64]:
 
 
 def infinite_plate_impedance(
-    bending_stiffness: float, mass_per_area: float, *, location: str = "centre"
+    bending_stiffness: float, mass_per_area: float, *, location: str = "center"
 ) -> float:
     r"""Point impedance of an infinite thin plate (Cremer Table 5.1).
 
@@ -182,7 +182,7 @@ def infinite_plate_impedance(
     :param bending_stiffness: Plate bending stiffness per unit width ``B'``,
         in N.m (see :func:`plate_bending_stiffness`).
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2.
-    :param location: ``"centre"`` (:math:`C = 8`) or ``"edge"``
+    :param location: ``"center"`` (:math:`C = 8`) or ``"edge"``
         (:math:`C = 3.5`).
     :return: The point impedance ``Z``, in N.s/m.
     :raises ValueError: for a non-positive stiffness/mass or unknown location.
@@ -190,13 +190,13 @@ def infinite_plate_impedance(
     b = require_positive(bending_stiffness, "bending_stiffness")
     m2 = require_positive(mass_per_area, "mass_per_area")
     if location not in _PLATE_CONSTANT:
-        msg = "'location' must be 'centre' or 'edge'."
+        msg = "'location' must be 'center' or 'edge'."
         raise ValueError(msg)
     return float(_PLATE_CONSTANT[location] * np.sqrt(b * m2))
 
 
 def infinite_plate_mobility(
-    bending_stiffness: float, mass_per_area: float, *, location: str = "centre"
+    bending_stiffness: float, mass_per_area: float, *, location: str = "center"
 ) -> float:
     r"""Point mobility of an infinite thin plate
     :math:`Y = 1 / (C \sqrt{B' m''})`.
@@ -207,7 +207,7 @@ def infinite_plate_mobility(
     :param bending_stiffness: Plate bending stiffness per unit width ``B'``,
         in N.m.
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2.
-    :param location: ``"centre"`` (:math:`C = 8`) or ``"edge"``
+    :param location: ``"center"`` (:math:`C = 8`) or ``"edge"``
         (:math:`C = 3.5`).
     :return: The point mobility ``Y``, in m/(N.s).
     :raises ValueError: for a non-positive stiffness/mass or unknown location.
@@ -227,7 +227,7 @@ def infinite_beam_impedance(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = "centre",
+    location: str = "center",
 ) -> NDArray[np.complex128]:
     r"""Point impedance of an infinite beam in bending (Cremer Table 5.1).
 
@@ -239,12 +239,12 @@ def infinite_beam_impedance(
     :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
     :param bending_stiffness: Beam bending stiffness :math:`B = E I`, in N.m^2.
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
-    :param location: ``"centre"`` or ``"end"``.
+    :param location: ``"center"`` or ``"end"``.
     :return: The complex point impedance ``Z``, in N.s/m.
     :raises ValueError: for a non-positive input or unknown location.
     """
     if location not in _BEAM_CONSTANT:
-        msg = "'location' must be 'centre' or 'end'."
+        msg = "'location' must be 'center' or 'end'."
         raise ValueError(msg)
     m1 = require_positive(mass_per_length, "mass_per_length")
     c_b = beam_bending_wave_speed(frequency, bending_stiffness, m1)
@@ -257,7 +257,7 @@ def infinite_beam_mobility(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = "centre",
+    location: str = "center",
 ) -> NDArray[np.complex128]:
     r"""Point mobility of an infinite beam in bending (Cremer Table 5.1).
 
@@ -269,7 +269,7 @@ def infinite_beam_mobility(
     :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
     :param bending_stiffness: Beam bending stiffness :math:`B = E I`, in N.m^2.
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
-    :param location: ``"centre"`` or ``"end"``.
+    :param location: ``"center"`` or ``"end"``.
     :return: The complex point mobility ``Y``, in m/(N.s).
     :raises ValueError: for a non-positive input or unknown location.
     """
@@ -371,7 +371,7 @@ def infinite_plate_point_mobility(
     bending_stiffness: float,
     mass_per_area: float,
     *,
-    location: str = "centre",
+    location: str = "center",
 ) -> MobilityResult:
     """Infinite-plate point mobility bundled as a :class:`MobilityResult`.
 
@@ -383,7 +383,7 @@ def infinite_plate_point_mobility(
     :param bending_stiffness: Plate bending stiffness per unit width ``B'``,
         in N.m.
     :param mass_per_area: Mass per unit area ``m''``, in kg/m^2.
-    :param location: ``"centre"`` or ``"edge"``.
+    :param location: ``"center"`` or ``"edge"``.
     :return: The :class:`MobilityResult` (driving point).
     """
     freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))
@@ -400,14 +400,14 @@ def infinite_beam_point_mobility(
     bending_stiffness: float,
     mass_per_length: float,
     *,
-    location: str = "centre",
+    location: str = "center",
 ) -> MobilityResult:
     r"""Infinite-beam point mobility bundled as a :class:`MobilityResult`.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array, > 0).
     :param bending_stiffness: Beam bending stiffness :math:`B = E I`, in N.m^2.
     :param mass_per_length: Mass per unit length ``m'``, in kg/m.
-    :param location: ``"centre"`` or ``"end"``.
+    :param location: ``"center"`` or ``"end"``.
     :return: The :class:`MobilityResult` (driving point).
     """
     freq = np.atleast_1d(np.asarray(frequency, dtype=np.float64))

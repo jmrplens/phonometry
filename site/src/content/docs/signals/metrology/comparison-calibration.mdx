@@ -967,7 +967,7 @@ print(check.difference_db[8].round(3), check.expanded_uncertainty_db[8].round(3)
 The jig agrees with the coupler at every frequency they share but 6,3 kHz,
 where they differ by 0,247 dB against 0,128 dB, and above 10 kHz it is not
 validated at all, the coupler not reaching there: a second set-up has to
-validate it there, as 6.7 allows. `check.normalised_difference` is the
+validate it there, as 6.7 allows. `check.normalized_difference` is the
 difference in units of its expanded uncertainty, -1,93 at 6,3 kHz.
 
 ### Calibrations that share a reference
@@ -998,7 +998,7 @@ $$
 ```python
 shared = metrology.verify_jig_or_coupler(jig, coupler, shared_standard_uncertainty_db=0.025)
 print(shared.passes, shared.failing_frequencies_hz.round())                                # False [6310.]
-print(shared.expanded_uncertainty_db[8].round(3), shared.normalised_difference[8].round(2))   # 0.106 -2.32
+print(shared.expanded_uncertainty_db[8].round(3), shared.normalized_difference[8].round(2))   # 0.106 -2.32
 print(shared.correlation_coefficient[8].round(2))                                           # 0.31
 ```
 

@@ -122,10 +122,10 @@ $10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}$, the energy sum of the bands.
 | :--- | :--- |
 | ValueError | For an empty or non-finite input. |
 
-## centred_interval
+## centered_interval
 
 ```python
-centred_interval(
+centered_interval(
     velocity_mm_s: ArrayLike,
     fs: float,
     *,

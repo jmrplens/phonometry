@@ -88,7 +88,7 @@ def test_impact_rating_uses_opposite_sign_mask() -> None:
 
 def test_rating_without_curve_data_raises() -> None:
     bare = ph.building.WeightedRatingResult(
-        rating=52, c=-1, ctr=-3, unfavourable_sum=10.0
+        rating=52, c=-1, ctr=-3, unfavorable_sum=10.0
     )
     with pytest.raises(ValueError, match="no band curve"):
         bare.plot()

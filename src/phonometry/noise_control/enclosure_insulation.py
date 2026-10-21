@@ -332,7 +332,7 @@ class WeightedEnclosureInsulation(OwnsArrays):
     :ivar rating: :math:`D_{W,\mathrm{w}}` or :math:`D_{p\mathrm{r},\mathrm{w}}`, in decibels.
     :ivar c: The spectrum adaptation term :math:`C`, in decibels.
     :ivar ctr: The spectrum adaptation term :math:`C_{tr}`, in decibels.
-    :ivar unfavourable_sum: The sum of unfavourable deviations the shift left,
+    :ivar unfavorable_sum: The sum of unfavourable deviations the shift left,
         in decibels.
     :ivar frequencies: The bands the rating was read over, in hertz.
     :ivar quantity: What was rated, ``"sound_power"`` or ``"reciprocity"``.
@@ -341,7 +341,7 @@ class WeightedEnclosureInsulation(OwnsArrays):
     rating: int
     c: int
     ctr: int
-    unfavourable_sum: float
+    unfavorable_sum: float
     frequencies: NDArray[np.float64]
     quantity: str
 
@@ -762,7 +762,7 @@ def weighted_enclosure_insulation(
         rating=int(result.rating),
         c=int(result.c),
         ctr=int(result.ctr),
-        unfavourable_sum=float(result.unfavourable_sum),
+        unfavorable_sum=float(result.unfavorable_sum),
         frequencies=bands,
         quantity=kind,
     )

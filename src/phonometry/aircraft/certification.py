@@ -388,7 +388,7 @@ def tone_correction(
         ``start_band`` is not an integer between 0 and 3.
     """
     # An integral float (0.0, 2.0) carries the same band index and is taken;
-    # anything the index cannot be (2.9, "aeroplane", None) is refused by name
+    # anything the index cannot be (2.9, "airplane", None) is refused by name
     # rather than left to fail inside int(), and so is an array, by its rank:
     # numpy before 2.4 converts a one-element array instead of refusing it.
     start, integral = -1, False
@@ -708,7 +708,7 @@ class EPNLResult(OwnsArrays):
 #: Tone-correction start band per certification procedure (App. 2 §4.3.1
 #: Step 1): aeroplanes start the slope analysis at band 3 (80 Hz, 0-based
 #: index 2); helicopters and tilt-rotors at band 1 (50 Hz, index 0).
-_PROCEDURE_START_BAND: dict[str, int] = {"aeroplane": _TONE_START, "helicopter": 0}
+_PROCEDURE_START_BAND: dict[str, int] = {"airplane": _TONE_START, "helicopter": 0}
 
 
 def effective_perceived_noise_level(
@@ -716,7 +716,7 @@ def effective_perceived_noise_level(
     dt: float | NDArray[np.float64] | list[float] = 0.5,
     *,
     reference_time: float = _EPNL_REFERENCE_TIME,
-    procedure: str = "aeroplane",
+    procedure: str = "airplane",
 ) -> EPNLResult:
     r"""Effective Perceived Noise Level from a spectral time history (ICAO Annex 16).
 
@@ -730,12 +730,12 @@ def effective_perceived_noise_level(
     :param dt: Per-record duration, in s (scalar or per record, default 0.5).
     :param reference_time: Normalising time ``T0``, in s (default 10).
     :param procedure: Tone-correction procedure of App. 2 §4.3.1 Step 1:
-        ``"aeroplane"`` (default) starts the slope analysis at the 80 Hz band
+        ``"airplane"`` (default) starts the slope analysis at the 80 Hz band
         (band 3), ``"helicopter"`` (helicopters and tilt-rotors) at the 50 Hz
         band (band 1), so rotor tones in the 50-80 Hz bands are not missed.
     :return: An :class:`EPNLResult`.
     :raises ValueError: If the input is not a ``(K, 24)`` finite array, or
-        ``procedure`` is not ``"aeroplane"`` or ``"helicopter"``.
+        ``procedure`` is not ``"airplane"`` or ``"helicopter"``.
     """
     arr = np.asarray(spectra, dtype=np.float64)
     if arr.ndim != 2 or arr.shape[1] != NOY_BANDS_HZ.size or arr.shape[0] < 1:  # noqa: PLR2004
@@ -747,7 +747,7 @@ def effective_perceived_noise_level(
     start_band = _PROCEDURE_START_BAND.get(procedure)
     if start_band is None:
         msg = (
-            f"Unknown procedure {procedure!r}; use 'aeroplane' (tone "
+            f"Unknown procedure {procedure!r}; use 'airplane' (tone "
             "correction from 80 Hz) or 'helicopter' (from 50 Hz, ICAO "
             "Annex 16 Vol I App. 2 4.3.1 Step 1)."
         )

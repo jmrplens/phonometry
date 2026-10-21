@@ -224,7 +224,7 @@ def test_tone_correction_start_band_must_be_an_integral_index() -> None:
     with pytest.raises(ValueError, match="'start_band' must be an integer"):
         tone_correction(spl, start_band=None)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="'start_band' must be an integer"):
-        tone_correction(spl, start_band="aeroplane")  # type: ignore[arg-type]
+        tone_correction(spl, start_band="airplane")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="'start_band' must be an integer"):
         tone_correction(spl, start_band=-0.4)
     with pytest.raises(ValueError, match="'start_band' must be an integer"):

@@ -3399,7 +3399,7 @@ def generate_road_device_ratings(output_dir: str) -> None:
     from phonometry import environment
 
     bands = np.asarray(environment.TRAFFIC_NOISE_BANDS_HZ)
-    spectrum = np.asarray(environment.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB)
+    spectrum = np.asarray(environment.NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB)
     x = np.arange(len(bands))
 
     # Two devices of each kind, with the per-band performance a maker of that
@@ -3486,7 +3486,7 @@ def generate_road_device_ratings(output_dir: str) -> None:
     )
     axes[0].plot(
         x,
-        np.asarray(environment.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB),
+        np.asarray(environment.NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB),
         marker="o",
         markersize=4.5,
         color=COLOR_SECONDARY,

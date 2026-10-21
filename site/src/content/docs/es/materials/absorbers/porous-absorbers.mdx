@@ -390,7 +390,7 @@ válida cuando las fibras son macizas y el aglomerante tiene masa despreciable.
 `airflow_resistivity_from_bulk_density` es su ec. (1.165),
 $r = k_1\rho_\mathrm{bulk}^{1+k_2}/d_\mathrm{fibre}^2$, con el diámetro de fibra
 en micrómetros. Las constantes pertenecen a un material, no a la lana mineral en
-general, así que viajan dentro de un `FibreResistivityFit` que lleva el diámetro
+general, así que viajan dentro de un `FiberResistivityFit` que lleva el diámetro
 de fibra con el que se ajustaron y el rango de densidad aparente sobre el que se
 ajustaron, y una densidad fuera de ese rango se avisa en vez de extrapolarse en
 silencio. Se publican dos, para la misma lana de roca medida en los dos
@@ -404,7 +404,7 @@ sigma = materials.airflow_resistivity_from_bulk_density(
     60.0, fit=materials.ROCK_WOOL_LONGITUDINAL_FIT
 )
 phi = materials.porosity_from_bulk_density(
-    60.0, fibre_density_kg_m3=materials.ROCK_WOOL_FIBRE_DENSITY_KG_M3
+    60.0, fiber_density_kg_m3=materials.ROCK_WOOL_FIBER_DENSITY_KG_M3
 )
 print(round(sigma), round(phi, 3))
 # 23226 0.977
@@ -435,7 +435,7 @@ modelo. Así que la relación vale un factor dos en un absorbente fibroso o de
 espuma de celda abierta, y no vale nada en un revestimiento de suelo.
 
 **Las dos longitudes a partir de la geometría de la fibra.**
-`fibre_characteristic_lengths` son sus ecs. (5.29) y (5.30) para un haz de
+`fiber_characteristic_lengths` son sus ecs. (5.29) y (5.30) para un haz de
 cilindros, $\Lambda = 1/(2\pi L R)$ y $\Lambda' = 2\Lambda$, con la longitud de
 fibra por unidad de volumen $L$ eliminada por su propia definición, lo que deja
 $\Lambda = R\rho_\mathrm{fibre}/(2\rho_\mathrm{bulk})$.
@@ -450,10 +450,10 @@ estimación más baja en todo el rango, por 1,4 a 38 kg/m³ y por 1,9 a
 from_parameters = materials.viscous_characteristic_length(
     sigma, porosity=phi, tortuosity=1.0
 )
-from_geometry = materials.fibre_characteristic_lengths(
+from_geometry = materials.fiber_characteristic_lengths(
     2.375e-6,  # la mitad del diámetro de fibra de 4,75 um de Hopkins
     bulk_density_kg_m3=60.0,
-    fibre_density_kg_m3=materials.ROCK_WOOL_FIBRE_DENSITY_KG_M3,
+    fiber_density_kg_m3=materials.ROCK_WOOL_FIBER_DENSITY_KG_M3,
 )
 print(round(from_parameters * 1e6, 1), round(from_geometry.viscous_length_m * 1e6, 1))
 # 80.5 51.5

@@ -253,10 +253,10 @@ cosine is unity and `Kr,theta` collapses to `Kr` (Clause 4.1).
 
 **Returns:** Oblique factor `Kr,theta` (positive root, dimensionless).
 
-## insitu_absorption_coefficient
+## in_situ_absorption_coefficient
 
 ```python
-insitu_absorption_coefficient(
+in_situ_absorption_coefficient(
     incident_ir: Signal | Sequence[float] | np.ndarray,
     reflected_ir: Signal | Sequence[float] | np.ndarray,
     *,
@@ -288,10 +288,10 @@ is treated as absorbed, so `alpha` may be slightly overestimated
 
 **Returns:** Absorption coefficient `alpha(f)` at the `rfft` frequency bins.
 
-## insitu_absorption_from_reflection
+## in_situ_absorption_from_reflection
 
 ```python
-insitu_absorption_from_reflection(
+in_situ_absorption_from_reflection(
     reflection: ArrayLike,
 ) -> NDArray[np.float64]
 ```
@@ -300,9 +300,9 @@ Absorption coefficient from the reflection factor (ISO 13472-1, 4.1).
 
 $\alpha = 1 - \lvert r \rvert^2$. With `r` already carrying the
 $1 / K_\mathrm{r}$ factor
-(see [`insitu_reflection_factor`](/phonometry/reference/api/materials/road-absorption/#insitu_reflection_factor)) this is the **reflection-factor route** to
+(see [`in_situ_reflection_factor`](/phonometry/reference/api/materials/road-absorption/#in_situ_reflection_factor)) this is the **reflection-factor route** to
 `alpha` and equals the direct energy route of
-[`insitu_absorption_coefficient`](/phonometry/reference/api/materials/road-absorption/#insitu_absorption_coefficient).
+[`in_situ_absorption_coefficient`](/phonometry/reference/api/materials/road-absorption/#in_situ_absorption_coefficient).
 
 **Parameters**
 
@@ -312,10 +312,10 @@ $1 / K_\mathrm{r}$ factor
 
 **Returns:** Absorption coefficient `alpha` (real).
 
-## insitu_absorption_spectrum
+## in_situ_absorption_spectrum
 
 ```python
-insitu_absorption_spectrum(
+in_situ_absorption_spectrum(
     incident_ir: Signal | Sequence[float] | np.ndarray,
     reflected_ir: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
@@ -327,16 +327,16 @@ insitu_absorption_spectrum(
     f_min: float = 250.0,
     f_max: float = 4000.0,
     clip_negative: bool = True,
-) -> InsituAbsorptionResult
+) -> InSituAbsorptionResult
 ```
 
 In-situ one-third-octave absorption spectrum (ISO 13472-1, Clause 4.1).
 
 End-to-end convenience: the windowed incident and reflected impulse
 responses give the narrow-band absorption via
-[`insitu_absorption_coefficient`](/phonometry/reference/api/materials/road-absorption/#insitu_absorption_coefficient), which is then reduced to
+[`in_situ_absorption_coefficient`](/phonometry/reference/api/materials/road-absorption/#in_situ_absorption_coefficient), which is then reduced to
 one-third-octave bands with [`one_third_octave_absorption`](/phonometry/reference/api/materials/road-absorption/#one_third_octave_absorption) and wrapped
-in a plottable [`InsituAbsorptionResult`](/phonometry/reference/api/materials/road-absorption/#insituabsorptionresult).
+in a plottable [`InSituAbsorptionResult`](/phonometry/reference/api/materials/road-absorption/#insituabsorptionresult).
 
 **Parameters**
 
@@ -353,7 +353,7 @@ in a plottable [`InsituAbsorptionResult`](/phonometry/reference/api/materials/ro
 | `f_max` | Highest band centre to report, in hertz (default 4000 Hz). |
 | `clip_negative` | Clip negative band results to zero (default `True`). |
 
-**Returns:** An [`InsituAbsorptionResult`](/phonometry/reference/api/materials/road-absorption/#insituabsorptionresult) with `.plot()`.
+**Returns:** An [`InSituAbsorptionResult`](/phonometry/reference/api/materials/road-absorption/#insituabsorptionresult) with `.plot()`.
 
 **Raises**
 
@@ -361,10 +361,10 @@ in a plottable [`InsituAbsorptionResult`](/phonometry/reference/api/materials/ro
 | :--- | :--- |
 | ValueError | On empty inputs, invalid geometry, or a non-positive `fs`. |
 
-## insitu_reflection_factor
+## in_situ_reflection_factor
 
 ```python
-insitu_reflection_factor(
+in_situ_reflection_factor(
     incident_ir: Signal | Sequence[float] | np.ndarray,
     reflected_ir: Signal | Sequence[float] | np.ndarray,
     *,
@@ -411,10 +411,10 @@ Annex C; the frequency-dependent form of Annex G).
 | :--- | :--- |
 | ValueError | On empty inputs, invalid geometry, or `delay` given without `fs`. |
 
-## InsituAbsorptionResult
+## InSituAbsorptionResult
 
 ```python
-InsituAbsorptionResult(
+InSituAbsorptionResult(
     frequencies: NDArray[np.float64],
     absorption: NDArray[np.float64],
     *,
@@ -434,10 +434,10 @@ An in-situ one-third-octave absorption spectrum (ISO 13472-1).
 | `source_height_m` | Source height the spectrum was reduced with, in metres, retained (with `microphone_height_m`) so `plot_geometry` can draw the set-up; `None` for hand-built results. |
 | `microphone_height_m` | Microphone height, in metres, or `None`. |
 
-### InsituAbsorptionResult.plot()
+### InSituAbsorptionResult.plot()
 
 ```python
-InsituAbsorptionResult.plot(
+InSituAbsorptionResult.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -450,10 +450,10 @@ Plot the in-situ absorption spectrum `alpha(f)`.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes` and never calls `plt.show`.
 
-### InsituAbsorptionResult.plot_geometry()
+### InSituAbsorptionResult.plot_geometry()
 
 ```python
-InsituAbsorptionResult.plot_geometry(
+InSituAbsorptionResult.plot_geometry(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -609,10 +609,10 @@ Clause 6.6 step 5); Part 1 does not mandate clipping, so pass
 PART1_FREQUENCY_RANGE_HZ = (250.0, 4000.0)
 ```
 
-## plot_insitu_geometry
+## plot_in_situ_geometry
 
 ```python
-plot_insitu_geometry(
+plot_in_situ_geometry(
     ax: Axes | None = None,
     *,
     source_height_m: float = 1.25,
@@ -669,7 +669,7 @@ The **direct energy route**
 $Q_W(f) = (1 / K_\mathrm{r}^2) \lvert H_\mathrm{r}(f) / H_\mathrm{i}(f) \rvert^2$
 (`Kr,theta` for oblique incidence). It equals
 $\lvert r \rvert^2$ from
-[`insitu_reflection_factor`](/phonometry/reference/api/materials/road-absorption/#insitu_reflection_factor) but is formed from magnitudes only, so it is
+[`in_situ_reflection_factor`](/phonometry/reference/api/materials/road-absorption/#in_situ_reflection_factor) but is formed from magnitudes only, so it is
 independent of any reflected-path time offset.
 
 **Parameters**
@@ -699,7 +699,7 @@ Reflected-path arrival delay `dtau` (ISO 13472-1:2002, Annex C).
 $\Delta\tau = 2 d_\mathrm{m} / c$ is the time difference between the direct
 and the surface-reflected impulses for the normal-incidence geometry; it
 is the delay undone by the phase-restoration term of
-[`insitu_reflection_factor`](/phonometry/reference/api/materials/road-absorption/#insitu_reflection_factor).
+[`in_situ_reflection_factor`](/phonometry/reference/api/materials/road-absorption/#in_situ_reflection_factor).
 
 **Parameters**
 

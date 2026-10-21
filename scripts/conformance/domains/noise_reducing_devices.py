@@ -67,7 +67,7 @@ def _chk_traffic_spectrum() -> Outcome:
     levels = dict(
         zip(
             ph.environment.TRAFFIC_NOISE_BANDS_HZ,
-            ph.environment.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB,
+            ph.environment.NORMALIZED_TRAFFIC_NOISE_SPECTRUM_DB,
             strict=True,
         )
     )
@@ -171,7 +171,7 @@ def _chk_railway_spectrum() -> Outcome:
     levels = dict(
         zip(
             ph.environment.TRAFFIC_NOISE_BANDS_HZ,
-            ph.environment.NORMALISED_RAILWAY_NOISE_SPECTRUM_DB,
+            ph.environment.NORMALIZED_RAILWAY_NOISE_SPECTRUM_DB,
             strict=True,
         )
     )

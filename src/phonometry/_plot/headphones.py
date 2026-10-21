@@ -2,7 +2,7 @@
 """Plot renderers for headphones and the programme signal (lazy imports from result .plot()).
 
 The results of :mod:`phonometry.electroacoustics.headphones` (IEC
-60268-7:2010) and of :mod:`phonometry.electroacoustics.programme_signal` (IEC
+60268-7:2010) and of :mod:`phonometry.electroacoustics.program_signal` (IEC
 60268-1:1985 Clause 7). The Spanish labels follow the UNE-EN 60268 series:
 *auricular*, *señal de programa simulado*, *impedancia asignada*, *tensión
 característica*, *simulador de oído*, *atenuación de diafonía*.
@@ -39,11 +39,11 @@ if TYPE_CHECKING:
         EarCanalMicrophoneVerification,
         FieldComparisonResponse,
         LimitingTestSignalCheck,
-        ProgrammeCharacteristicVoltage,
+        ProgramCharacteristicVoltage,
         ProtectionVoltage,
         RatedImpedanceVerification,
     )
-    from ..electroacoustics.programme_signal import ProgrammeSignalCheck
+    from ..electroacoustics.program_signal import ProgramSignalCheck
 
 #: Shared axis label of the frequency panels.
 _FREQUENCY = "Frequency [Hz]"
@@ -190,7 +190,7 @@ def _verdict(*, passes: bool, language: str) -> str:
 
 
 def _draw_programme_check(
-    check: ProgrammeSignalCheck, ax: Axes, language: str, kwargs: dict[str, Any]
+    check: ProgramSignalCheck, ax: Axes, language: str, kwargs: dict[str, Any]
 ) -> None:
     """The referred band levels inside Table II's tolerances, without a title."""
     from .._i18n import localize_axes
@@ -228,7 +228,7 @@ def _draw_programme_check(
 
 
 def plot_programme_signal_check(
-    check: ProgrammeSignalCheck,
+    check: ProgramSignalCheck,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -236,7 +236,7 @@ def plot_programme_signal_check(
 ) -> Axes:
     """Band levels, referred by the check's offset, inside Table II of IEC 60268-1.
 
-    :param check: A :class:`~phonometry.electroacoustics.programme_signal.ProgrammeSignalCheck`.
+    :param check: A :class:`~phonometry.electroacoustics.program_signal.ProgramSignalCheck`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language.
     :param kwargs: Forwarded to the band levels' ``Axes.plot``.
@@ -370,7 +370,7 @@ def plot_rated_impedance(
 
 
 def plot_programme_characteristic_voltage(
-    result: ProgrammeCharacteristicVoltage,
+    result: ProgramCharacteristicVoltage,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -378,7 +378,7 @@ def plot_programme_characteristic_voltage(
 ) -> Axes:
     """The band levels at the characteristic voltage, whose power sum is 94 dB.
 
-    :param result: A :class:`~phonometry.electroacoustics.headphones.ProgrammeCharacteristicVoltage`.
+    :param result: A :class:`~phonometry.electroacoustics.headphones.ProgramCharacteristicVoltage`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language.
     :param kwargs: Forwarded to the bars' ``Axes.bar``.
@@ -868,7 +868,7 @@ def plot_ear_canal_microphone(
         100.0 * result.entrance_area_mm2 / hp._MAX_ENTRANCE_AREA_MM2,
         100.0 * result.area_ratio / hp._MAX_CANAL_AREA_RATIO,
         100.0 * result.volume_mm3 / hp._MAX_VOLUME_MM3,
-        100.0 * result.neighbour_difference_db / hp._MAX_NEIGHBOUR_DIFFERENCE_DB,
+        100.0 * result.neighbor_difference_db / hp._MAX_NEIGHBOUR_DIFFERENCE_DB,
         100.0 * result.sealed_attenuation_db / hp._MIN_SEALED_ATTENUATION_DB,
     ]
     verdicts = result.requirements

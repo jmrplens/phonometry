@@ -74,8 +74,8 @@ _REMOVED_CONSTANTS = [
 #: signature the package publishes today.
 _REMOVED_KEYWORDS = [
     ("materials", "adrienne_window", "sample_rate"),
-    ("materials", "insitu_reflection_factor", "sample_rate"),
-    ("materials", "insitu_absorption_spectrum", "sample_rate"),
+    ("materials", "in_situ_reflection_factor", "sample_rate"),
+    ("materials", "in_situ_absorption_spectrum", "sample_rate"),
     ("environment", "atmospheric_absorption", "humidity"),
     ("environment", "outdoor_propagation_attenuation", "humidity"),
     ("environment", "predicted_receiver_level", "humidity"),
@@ -408,7 +408,7 @@ def test_the_names_the_second_addresses_pointed_at_are_all_here() -> None:
 # --------------------------------------------------------------------------- #
 _REMOVED_4_0_FUNCTION_NAMES = [
     # DIN 4150-1 Formula (4) is the storey estimate of DIN 4150-3 6.4 and
-    # ISO 4866 D.2; vibration.storey_fundamental_frequency is the one function.
+    # ISO 4866 D.2; vibration.story_fundamental_frequency is the one function.
     *(
         (module, name)
         for module in (
@@ -459,7 +459,7 @@ def test_the_reflection_index_has_no_uncertainty_method_of_its_own() -> None:
 
 def test_the_one_name_each_retired_function_left_is_here() -> None:
     """Each retired name left one function computing what it computed."""
-    assert ph.vibration.storey_fundamental_frequency(8) == pytest.approx(1.25)
+    assert ph.vibration.story_fundamental_frequency(8) == pytest.approx(1.25)
     assert ph.metrology.combined_standard_uncertainty([3.0, 4.0]) == pytest.approx(5.0)
     assert ph.noise_control.combined_stage_level([80.0, 80.0]) == pytest.approx(
         80.0 + 10.0 * np.log10(2.0)
@@ -469,3 +469,93 @@ def test_the_one_name_each_retired_function_left_is_here() -> None:
     m = ph.environment.air_power_attenuation_per_m([1000.0], temperature_c=20.0)
     expected = ph.environment.air_attenuation([1000.0], temperature_c=20.0) / alpha
     np.testing.assert_allclose(m, expected, rtol=1e-12)
+
+
+# --------------------------------------------------------------------------- #
+# 4.0 spells every identifier in American English, and in situ as ``in_situ``.
+# The British spellings and the run-together ``insitu`` went with no alias: a
+# sample of each kind, a function, a class, a constant, a module, a keyword and
+# a choice the caller types.
+# --------------------------------------------------------------------------- #
+_REMOVED_4_0_SPELLINGS = [
+    ("phonometry.materials", "insitu_absorption_coefficient"),
+    ("phonometry.materials", "insitu_absorption_from_reflection"),
+    ("phonometry.materials", "insitu_absorption_spectrum"),
+    ("phonometry.materials", "insitu_reflection_factor"),
+    ("phonometry.materials", "plot_insitu_geometry"),
+    ("phonometry.materials", "InsituAbsorptionResult"),
+    ("phonometry.materials", "fibre_characteristic_lengths"),
+    ("phonometry.materials", "FibreResistivityFit"),
+    ("phonometry.metrology", "acoustic_centre"),
+    ("phonometry.metrology", "AcousticCentre"),
+    ("phonometry.electroacoustics", "check_programme_signal"),
+    ("phonometry.electroacoustics", "loop_centre_field"),
+    ("phonometry.vibration", "storey_fundamental_frequency"),
+    ("phonometry.vibration", "STOREY_FREQUENCY_MIN_STOREYS"),
+    ("phonometry.vibration", "centred_interval"),
+    ("phonometry.simulation", "ALUMINIUM"),
+    ("phonometry.environment", "MODELLING_UNCERTAINTY_DB"),
+    ("phonometry.building", "DB_HR_NORMALISED_SPECTRA"),
+]
+
+
+@pytest.mark.parametrize(("module", "name"), _REMOVED_4_0_SPELLINGS)
+def test_a_british_spelling_the_4_0_retired_is_gone(module: str, name: str) -> None:
+    home = importlib.import_module(module)
+    with pytest.raises(AttributeError, match=rf"has no attribute '{name}'"):
+        getattr(home, name)
+
+
+def test_the_programme_signal_module_path_is_gone() -> None:
+    path = "phonometry.electroacoustics.programme_signal"
+    with pytest.raises(
+        ModuleNotFoundError,
+        match=r"No module named 'phonometry\.electroacoustics\.programme_signal'",
+    ):
+        importlib.import_module(path)
+
+
+#: ``(package, function, keyword)``: a British keyword 4.0 renamed.
+_REMOVED_4_0_SPELLING_KEYWORDS = [
+    ("room", "filter_bandwidth", "centre"),
+    ("room", "source_directivity_limit", "centre"),
+    ("environment", "tonal_audibility", "centre_frequency"),
+    ("environment", "outdoor_quality_objectives", "urbanisation"),
+    ("underwater", "monopole_source_level", "draught"),
+    ("vibration", "fundamental_period", "storeys"),
+    ("electroacoustics", "verify_amplifier_overload", "programme"),
+    ("noise_control", "stage_conditions", "vapour_pressure_pa"),
+]
+
+
+@pytest.mark.parametrize(("package", "func", "keyword"), _REMOVED_4_0_SPELLING_KEYWORDS)
+def test_a_british_keyword_the_4_0_retired_is_gone(
+    package: str, func: str, keyword: str
+) -> None:
+    home = getattr(ph, package)
+    assert keyword not in inspect.signature(getattr(home, func)).parameters
+
+
+def test_a_british_choice_the_4_0_retired_is_refused() -> None:
+    """A choice is typed like a name, and the British one is refused by name."""
+    spectra = np.zeros((5, 24))
+    with pytest.raises(ValueError, match=r"'model' must be one of"):
+        ph.vibration.fundamental_period("storeys", stories=10)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match=r"'location' must be 'center' or 'edge'"):
+        ph.vibration.infinite_plate_impedance(1.0, 10.0, location="centre")
+    with pytest.raises(ValueError, match=r"Unknown procedure 'aeroplane'"):
+        ph.aircraft.effective_perceived_noise_level(spectra, procedure="aeroplane")
+
+
+def test_the_american_spellings_are_all_here() -> None:
+    """The British spelling went; the American one each name took did not."""
+    for module, name in (
+        ("phonometry.materials", "in_situ_absorption_spectrum"),
+        ("phonometry.materials", "InSituAbsorptionResult"),
+        ("phonometry.metrology", "acoustic_center"),
+        ("phonometry.electroacoustics", "check_program_signal"),
+        ("phonometry.electroacoustics.program_signal", "check_program_signal"),
+        ("phonometry.vibration", "story_fundamental_frequency"),
+        ("phonometry.simulation", "ALUMINUM"),
+    ):
+        assert hasattr(importlib.import_module(module), name), (module, name)

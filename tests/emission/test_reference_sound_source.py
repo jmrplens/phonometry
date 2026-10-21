@@ -464,7 +464,7 @@ def _hemi_check(radius_end: float) -> emission.FreeFieldCheck:
     directions = (
         ((1, 1, 1), ("trihedral corner",)),
         ((1, 1, 0.3), ("dihedral corner",)),
-        ((0, 1, 0.5), ("boundary centre",)),
+        ((0, 1, 0.5), ("boundary center",)),
         ((1, 0, 0.2), ("closest boundary",)),
         ((-1, 0.5, 0.6), ("unique features",)),
         ((0.3, -1, 0.8), ()),

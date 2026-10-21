@@ -102,7 +102,7 @@ def _ship_source_level(language: str) -> Axes:
     result = underwater.monopole_source_level(
         [150.0, 149.0, 148.0, 147.0, 146.0],
         [1000.0, 1250.0, 1600.0, 2000.0, 2500.0],
-        draught=10.0,
+        draft_m=10.0,
     )
     return np.atleast_1d(result.plot(language=language))[0]
 
@@ -251,7 +251,7 @@ def test_a_pinned_frequency_axis_is_left_to_its_own_helper() -> None:
     """
     freqs = np.array([31.5, 63.0, 125.0, 250.0, 500.0, 1000.0])
     result = underwater.monopole_source_level(
-        [150.0, 149.0, 148.0, 147.0, 146.0, 145.0], freqs, draught=10.0
+        [150.0, 149.0, 148.0, 147.0, 146.0, 145.0], freqs, draft_m=10.0
     )
     axes = np.atleast_1d(result.plot(language="es"))[0]
     assert "31,5" in _labels(axes, "x"), _labels(axes, "x")

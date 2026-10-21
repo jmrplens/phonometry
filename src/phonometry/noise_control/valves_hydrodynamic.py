@@ -272,7 +272,7 @@ _SERIES_LAW_TOLERANCE = 0.05
 
 
 def differential_pressure_ratio(
-    *, inlet_pressure_pa: float, outlet_pressure_pa: float, vapour_pressure_pa: float
+    *, inlet_pressure_pa: float, outlet_pressure_pa: float, vapor_pressure_pa: float
 ) -> float:
     r"""Equation (1): the differential pressure ratio.
 
@@ -286,7 +286,7 @@ def differential_pressure_ratio(
 
     :param inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
     :param outlet_pressure_pa: :math:`p_2`, absolute, in Pa.
-    :param vapour_pressure_pa: :math:`p_v` of the liquid at the inlet
+    :param vapor_pressure_pa: :math:`p_v` of the liquid at the inlet
         temperature, absolute, in Pa.
     :return: :math:`x_F`, dimensionless.
     :raises ValueError: If a pressure is not positive and finite, if the
@@ -295,7 +295,7 @@ def differential_pressure_ratio(
     """
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
-    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
+    pv = require_positive(vapor_pressure_pa, "vapor_pressure_pa")
     if p2 > p1:
         msg = (
             "A control valve drops pressure, so 'outlet_pressure_pa' cannot be "
@@ -307,7 +307,7 @@ def differential_pressure_ratio(
         msg = (
             "Equation (1) divides by p_1 - p_v, so the liquid must arrive "
             f"above its vapour pressure; got p_1 = {inlet_pressure_pa!r} Pa and "
-            f"p_v = {vapour_pressure_pa!r} Pa."
+            f"p_v = {vapor_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     return float((p1 - p2) / (p1 - pv))
@@ -317,7 +317,7 @@ def cavitation_differential(
     *,
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
     pressure_recovery: float,
 ) -> float:
     r"""Equation (2): the differential the jet velocity is computed from.
@@ -336,7 +336,7 @@ def cavitation_differential(
 
     :param inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
     :param outlet_pressure_pa: :math:`p_2`, absolute, in Pa.
-    :param vapour_pressure_pa: :math:`p_v`, absolute, in Pa.
+    :param vapor_pressure_pa: :math:`p_v`, absolute, in Pa.
     :param pressure_recovery: :math:`F_L` of the valve, dimensionless.
     :return: :math:`\Delta p_c`, in Pa.
     :raises ValueError: If a pressure is not positive and finite, if the
@@ -345,7 +345,7 @@ def cavitation_differential(
     """
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
-    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
+    pv = require_positive(vapor_pressure_pa, "vapor_pressure_pa")
     recovery = _require_recovery(pressure_recovery)
     if p2 > p1:
         msg = (
@@ -357,7 +357,7 @@ def cavitation_differential(
     if pv >= p1:
         msg = (
             "Equation (2) needs the inlet above the vapour pressure; got "
-            f"p_1 = {inlet_pressure_pa!r} Pa and p_v = {vapour_pressure_pa!r} Pa."
+            f"p_1 = {inlet_pressure_pa!r} Pa and p_v = {vapor_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     return float(min(p1 - p2, recovery**2 * (p1 - pv)))
@@ -700,7 +700,7 @@ def jet_strouhal_number(  # noqa: PLR0913
     valve_diameter_m: float,
     seat_diameter_m: float,
     inlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
     coefficient: str = "Cv",
     form: str = "annex",
 ) -> float:
@@ -731,7 +731,7 @@ def jet_strouhal_number(  # noqa: PLR0913
         m.
     :param seat_diameter_m: :math:`d_o`, the seat or orifice diameter, in m.
     :param inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
-    :param vapour_pressure_pa: :math:`p_v`, absolute, in Pa.
+    :param vapor_pressure_pa: :math:`p_v`, absolute, in Pa.
     :param coefficient: ``"Cv"`` or ``"Kv"``, selecting :math:`N_{34}`.
     :param form: Which printing of Equation (12) to use, ``"annex"`` or
         ``"clause"``.
@@ -749,11 +749,11 @@ def jet_strouhal_number(  # noqa: PLR0913
     inlet = require_positive(valve_diameter_m, "valve_diameter_m")
     seat = require_positive(seat_diameter_m, "seat_diameter_m")
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
-    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
+    pv = require_positive(vapor_pressure_pa, "vapor_pressure_pa")
     if pv >= p1:
         msg = (
             "Equation (12) divides by p_1 - p_v; got p_1 = "
-            f"{inlet_pressure_pa!r} Pa and p_v = {vapour_pressure_pa!r} Pa."
+            f"{inlet_pressure_pa!r} Pa and p_v = {vapor_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     style = modifier**0.75 if printing == "annex" else 1.0
@@ -1163,7 +1163,7 @@ class HydrodynamicValveNoise(OwnsArrays):
     :ivar pressure_ratio: :math:`x_F` of Equation (1).
     :ivar differential: :math:`p_1 - p_2`, in Pa.
     :ivar inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
-    :ivar vapour_pressure_pa: :math:`p_v` of the liquid at the inlet
+    :ivar vapor_pressure_pa: :math:`p_v` of the liquid at the inlet
         temperature, absolute, in Pa.
     :ivar cavitation_differential: :math:`\Delta p_c` of Equation (2), in Pa.
         It stops following the differential once the flow chokes.
@@ -1212,7 +1212,7 @@ class HydrodynamicValveNoise(OwnsArrays):
     pressure_ratio: float
     differential: float
     inlet_pressure_pa: float
-    vapour_pressure_pa: float
+    vapor_pressure_pa: float
     cavitation_differential: float
     incipient_ratio: float
     corrected_ratio: float
@@ -1258,10 +1258,10 @@ class HydrodynamicValveNoise(OwnsArrays):
             fields disagree with the regime.
         """
         p1 = require_positive(self.inlet_pressure_pa, "inlet_pressure_pa")
-        pv = require_positive(self.vapour_pressure_pa, "vapour_pressure_pa")
+        pv = require_positive(self.vapor_pressure_pa, "vapor_pressure_pa")
         if pv >= p1:
             msg = (
-                "HydrodynamicValveNoise: 'vapour_pressure_pa' must be below "
+                "HydrodynamicValveNoise: 'vapor_pressure_pa' must be below "
                 "'inlet_pressure_pa', or the liquid is not a liquid at the inlet."
             )
             raise ValueError(msg)
@@ -1314,7 +1314,7 @@ class HydrodynamicValveNoise(OwnsArrays):
             self.differential,
             self.corrected_ratio,
             self.inlet_pressure_pa,
-            self.vapour_pressure_pa,
+            self.vapor_pressure_pa,
         )
 
 
@@ -1327,12 +1327,12 @@ def _flow_regime(
     differential: float,
     corrected_ratio: float,
     inlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
 ) -> str:
     r"""The regime of 5.1: cavitating when :math:`p_1 - p_2` exceeds
     :math:`x_{Fzp1}(p_1 - p_v)`, turbulent otherwise.
     """
-    threshold = corrected_ratio * (inlet_pressure_pa - vapour_pressure_pa)
+    threshold = corrected_ratio * (inlet_pressure_pa - vapor_pressure_pa)
     return _CAVITATING if differential > threshold else _TURBULENT
 
 
@@ -1368,7 +1368,7 @@ class LiquidStream(RichDisplay):
     :ivar mass_flow: :math:`\dot m`, in kg/s.
     :ivar inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
     :ivar outlet_pressure_pa: :math:`p_2`, absolute, in Pa.
-    :ivar vapour_pressure_pa: :math:`p_v` of the liquid at the inlet
+    :ivar vapor_pressure_pa: :math:`p_v` of the liquid at the inlet
         temperature, absolute, in Pa.
     :ivar density: :math:`\rho_L`, in kg/m³.
     :ivar speed_of_sound: :math:`c_L`, in m/s.
@@ -1377,7 +1377,7 @@ class LiquidStream(RichDisplay):
     mass_flow: float
     inlet_pressure_pa: float
     outlet_pressure_pa: float
-    vapour_pressure_pa: float
+    vapor_pressure_pa: float
     density: float
     speed_of_sound: float
 
@@ -1473,7 +1473,7 @@ def valve_hydrodynamic_noise(
     mass_flow = stream.mass_flow
     inlet_pressure_pa = stream.inlet_pressure_pa
     outlet_pressure_pa = stream.outlet_pressure_pa
-    vapour_pressure_pa = stream.vapour_pressure_pa
+    vapor_pressure_pa = stream.vapor_pressure_pa
     liquid_density = stream.density
     liquid_sound_speed = stream.speed_of_sound
     flow_coefficient = valve.flow_coefficient
@@ -1492,7 +1492,7 @@ def valve_hydrodynamic_noise(
     air_sound_speed = pipe.air_sound_speed
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
-    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
+    pv = require_positive(vapor_pressure_pa, "vapor_pressure_pa")
     rho = require_positive(liquid_density, "liquid_density")
     sonic = require_positive(liquid_sound_speed, "liquid_sound_speed")
     recovery = _require_recovery(pressure_recovery)
@@ -1501,14 +1501,14 @@ def valve_hydrodynamic_noise(
     thickness = require_positive(wall_thickness, "wall_thickness_m")
 
     ratio = differential_pressure_ratio(
-        inlet_pressure_pa=p1, outlet_pressure_pa=p2, vapour_pressure_pa=pv
+        inlet_pressure_pa=p1, outlet_pressure_pa=p2, vapor_pressure_pa=pv
     )
     _require_below_flashing(ratio)
     differential = p1 - p2
     choked = cavitation_differential(
         inlet_pressure_pa=p1,
         outlet_pressure_pa=p2,
-        vapour_pressure_pa=pv,
+        vapor_pressure_pa=pv,
         pressure_recovery=recovery,
     )
     threshold = corrected_incipient_ratio(incipient_ratio, p1)
@@ -1548,7 +1548,7 @@ def valve_hydrodynamic_noise(
         valve_diameter_m=valve_diameter_m,
         seat_diameter_m=seat_diameter_m,
         inlet_pressure_pa=p1,
-        vapour_pressure_pa=pv,
+        vapor_pressure_pa=pv,
         coefficient=coefficient,
         form=strouhal_form,
     )
@@ -1604,7 +1604,7 @@ def valve_hydrodynamic_noise(
         pressure_ratio=float(ratio),
         differential=float(differential),
         inlet_pressure_pa=p1,
-        vapour_pressure_pa=pv,
+        vapor_pressure_pa=pv,
         cavitation_differential=float(choked),
         incipient_ratio=float(incipient_ratio),
         corrected_ratio=float(threshold),
@@ -1662,7 +1662,7 @@ def stage_conditions(
     *,
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
     stage_coefficients: Sequence[float],
     flow_coefficient: float,
 ) -> tuple[StageConditions, ...]:
@@ -1691,7 +1691,7 @@ def stage_conditions(
 
     :param inlet_pressure_pa: :math:`p_1` at the valve, absolute, in Pa.
     :param outlet_pressure_pa: :math:`p_2` at the valve, absolute, in Pa.
-    :param vapour_pressure_pa: :math:`p_v`, absolute, in Pa.
+    :param vapor_pressure_pa: :math:`p_v`, absolute, in Pa.
     :param stage_coefficients: :math:`C_i`, the rated flow coefficient of
         each stage in flow order, two or more of them.
     :param flow_coefficient: :math:`C` of the whole valve, in the same units.
@@ -1705,7 +1705,7 @@ def stage_conditions(
     """
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
-    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
+    pv = require_positive(vapor_pressure_pa, "vapor_pressure_pa")
     capacity = require_positive(flow_coefficient, "flow_coefficient")
     stages = require_positive_array(stage_coefficients, "stage_coefficients")
     if stages.size < _MINIMUM_STAGES:
@@ -1725,7 +1725,7 @@ def stage_conditions(
     if pv >= p2:
         msg = (
             "Equation (26) needs every stage above the vapour pressure; got "
-            f"p_2 = {outlet_pressure_pa!r} Pa and p_v = {vapour_pressure_pa!r} Pa."
+            f"p_2 = {outlet_pressure_pa!r} Pa and p_v = {vapor_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     shares = float(np.sum((capacity / stages) ** 2))
@@ -1796,7 +1796,7 @@ def last_stage_differential(
     *,
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
-    vapour_pressure_pa: float,
+    vapor_pressure_pa: float,
     corrected_ratio: float,
 ) -> float:
     r"""Equation (28): the differential of the last stage of a fixed device.
@@ -1815,7 +1815,7 @@ def last_stage_differential(
 
     :param inlet_pressure_pa: :math:`p_{1,n}` of the last stage, in Pa.
     :param outlet_pressure_pa: :math:`p_2` at the valve outlet, in Pa.
-    :param vapour_pressure_pa: :math:`p_v`, in Pa.
+    :param vapor_pressure_pa: :math:`p_v`, in Pa.
     :param corrected_ratio: :math:`x_{Fzp1,n}` of the last stage.
     :return: :math:`\Delta p_c`, in Pa.
     :raises ValueError: If a value is not positive and finite, or the last
@@ -1823,7 +1823,7 @@ def last_stage_differential(
     """
     p1n = require_positive(inlet_pressure_pa, "inlet_pressure_pa")
     p2 = require_positive(outlet_pressure_pa, "outlet_pressure_pa")
-    pv = require_positive(vapour_pressure_pa, "vapour_pressure_pa")
+    pv = require_positive(vapor_pressure_pa, "vapor_pressure_pa")
     threshold = _require_threshold(corrected_ratio, "corrected_ratio")
     if p2 >= p1n:
         msg = (
@@ -1836,7 +1836,7 @@ def last_stage_differential(
         msg = (
             "Equation (28) needs the last stage above the vapour pressure; "
             f"got p_1n = {inlet_pressure_pa!r} Pa and p_v = "
-            f"{vapour_pressure_pa!r} Pa."
+            f"{vapor_pressure_pa!r} Pa."
         )
         raise ValueError(msg)
     return float(min(p1n - p2, threshold * (p1n - pv)))

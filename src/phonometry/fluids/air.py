@@ -344,7 +344,7 @@ def air(
         composition={
             "relative_humidity_percent": humidity,
             "co2_mole_fraction": carbon_dioxide,
-            "water_vapour_mole_fraction": water,
+            "water_vapor_mole_fraction": water,
         },
         model=_MODEL,
         validity=_VALIDITY,

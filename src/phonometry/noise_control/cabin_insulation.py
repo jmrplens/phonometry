@@ -108,8 +108,8 @@ __all__ = [
     "BAND_FLATNESS_LIMIT_DB",
     "DEFAULT_BAND_FLATNESS_LIMIT_DB",
     "INCREASED_UNCERTAINTY_BAND_RANGE_HZ",
-    "INTERNAL_NOISE_CENTRE_HEIGHT_M",
-    "INTERNAL_NOISE_CENTRE_TOLERANCE_M",
+    "INTERNAL_NOISE_CENTER_HEIGHT_M",
+    "INTERNAL_NOISE_CENTER_TOLERANCE_M",
     "INTERNAL_NOISE_CORRECTION_WINDOW_DB",
     "IN_SITU_EXCESS_STANDARD_DEVIATION_DB",
     "LOW_BAND_CLEARANCE_M",
@@ -195,8 +195,8 @@ OPERATOR_PATH_INCLINATION_DEG: float = 45.0
 
 #: 6.7: the height of the centre of that sphere when the cabin has no defined
 #: operator position, and the tolerance on it.
-INTERNAL_NOISE_CENTRE_HEIGHT_M: float = 1.55
-INTERNAL_NOISE_CENTRE_TOLERANCE_M: float = 0.075
+INTERNAL_NOISE_CENTER_HEIGHT_M: float = 1.55
+INTERNAL_NOISE_CENTER_TOLERANCE_M: float = 0.075
 
 #: 6.4, 6.5.1 and 7.4: the fewest fixed microphone positions. In situ 7.4
 #: fixes the number at exactly six rather than at least six.
@@ -421,7 +421,7 @@ class WeightedCabinInsulation(OwnsArrays):
     :ivar rating: :math:`D_{p,\mathrm{w}}` or :math:`D'_{p,\mathrm{w}}`, in decibels.
     :ivar c: The spectrum adaptation term :math:`C`, in decibels.
     :ivar ctr: The spectrum adaptation term :math:`C_{tr}`, in decibels.
-    :ivar unfavourable_sum: The sum of unfavourable deviations at the shift
+    :ivar unfavorable_sum: The sum of unfavourable deviations at the shift
         the rating was read at, in decibels.
     :ivar frequencies: The bands the rating was read over, in hertz.
     :ivar apparent: Whether the rating carries the prime of 3.9.
@@ -430,7 +430,7 @@ class WeightedCabinInsulation(OwnsArrays):
     rating: int
     c: int
     ctr: int
-    unfavourable_sum: float
+    unfavorable_sum: float
     frequencies: NDArray[np.float64]
     apparent: bool
 
@@ -797,7 +797,7 @@ def weighted_cabin_insulation(
         rating=int(result.rating),
         c=int(result.c),
         ctr=int(result.ctr),
-        unfavourable_sum=float(result.unfavourable_sum),
+        unfavorable_sum=float(result.unfavorable_sum),
         frequencies=bands,
         apparent=bool(apparent),
     )

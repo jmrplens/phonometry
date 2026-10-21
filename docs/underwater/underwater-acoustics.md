@@ -87,7 +87,7 @@ freqs = np.array([20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315,
                   400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150,
                   4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000.0])
 rnl = 175.0 - 12.0 * np.log10(freqs / 20.0)
-res = underwater.monopole_source_level(rnl, freqs, draught=6.0)
+res = underwater.monopole_source_level(rnl, freqs, draft_m=6.0)
 res.plot()
 ```
 
@@ -105,7 +105,7 @@ print(np.round(rnl, 1))   # [172.7 168.9 165.6 161.6 158.1 154.6] dB re 1 uPa.m
 
 # The surface correction is frequency-dependent, so the conversion is normally
 # run on the whole band vector at once.
-res = underwater.monopole_source_level(rnl, freqs, draught=6.0)
+res = underwater.monopole_source_level(rnl, freqs, draft_m=6.0)
 print(np.round(res.source_level, 1))       # [177.8 168.4 161.7 157.8 154.8 151.6]
 print(np.round(res.surface_correction, 2))  # [ 5.15 -0.51 -3.86 -3.78 -3.27 -3.08]
 print(round(res.source_depth, 2))           # 4.2 m = 0.7 x draught

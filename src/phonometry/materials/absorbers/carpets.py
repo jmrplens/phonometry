@@ -73,7 +73,7 @@ class Carpet(CatalogueRow):
         prints its SI half.
     :ivar pile_height_mm: The height of the pile, in millimetres.
     :ivar pile_surface: Whether the pile is cut or looped, in the page's words.
-    :ivar fibre: The fibre, in the page's words.
+    :ivar fiber: The fibre, in the page's words.
     :ivar mounting: What the carpet is laid on, which is what separates the two
         tables and raises the rating.
     :ivar noise_reduction_coefficient: The NRC, dimensionless.
@@ -82,7 +82,7 @@ class Carpet(CatalogueRow):
     pile_weight_kg_m2: float | None = None
     pile_height_mm: float | None = None
     pile_surface: str = ""
-    fibre: str = ""
+    fiber: str = ""
     mounting: str = ""
     noise_reduction_coefficient: float | None = None
 
@@ -133,5 +133,5 @@ def carpets_named(
     return tuple(
         row
         for row in rows_to_search(catalogue, PUBLISHED_CARPETS, Carpet, "carpets_named")
-        if wanted in search_text(f"{row.name} {row.pile_surface} {row.fibre}")
+        if wanted in search_text(f"{row.name} {row.pile_surface} {row.fiber}")
     )

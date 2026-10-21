@@ -90,7 +90,7 @@ __all__ = [
     "TrainPassage",
     "amplitude_distribution",
     "band_sum_level",
-    "centred_interval",
+    "centered_interval",
     "combined_event_velocity",
     "elastic_insertion_loss",
     "evaluate_train_passage",
@@ -712,7 +712,7 @@ def band_sum_level(levels: ArrayLike) -> float:
     return float(energy_sum(levels))
 
 
-def centred_interval(
+def centered_interval(
     velocity_mm_s: ArrayLike, fs: float, *, duration_s: float = T1_DURATION_S
 ) -> tuple[float, float]:
     """The stretch :math:`T_1` of Clause 5 a), centred on the largest amplitude.
@@ -865,7 +865,7 @@ def _stretch_bounds(
     t2 = _slice(x.size, fs, t2_s)
     if t1_s is None:
         t2_duration = (t2.stop - t2.start) / fs
-        start, end = centred_interval(
+        start, end = centered_interval(
             x[t2], fs, duration_s=min(T1_DURATION_S, t2_duration)
         )
         offset = t2.start / fs

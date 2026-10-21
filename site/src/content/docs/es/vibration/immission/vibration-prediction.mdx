@@ -135,7 +135,7 @@ cercana, móvil o impulsiva. Y la frecuencia propia horizontal más baja de un
 edificio de cinco plantas o más es de unos `10 / n` Hz (fórmula (4)), que
 importa donde un edificio alto y esbelto se encuentra con una frecuencia de
 excitación baja. DIN 4150-3 imprime la misma estimación en el 6.4 e ISO 4866
-en el D.2, así que una sola función, `storey_fundamental_frequency`, responde
+en el D.2, así que una sola función, `story_fundamental_frequency`, responde
 por las tres.
 
 ```python
@@ -145,7 +145,7 @@ print(f"{vibration.soil_building_natural_frequency(2.5e9, mass=4.0e5):.1f} Hz") 
 print(vibration.soil_building_frequency_guide(4))  # (8.0, 12.0)
 print(vibration.foundation_transfer_max())  # 2.0
 print(f"{vibration.floor_transfer_max(0.03):.1f}")  # 16.7
-print(vibration.storey_fundamental_frequency(8))  # 1.25
+print(vibration.story_fundamental_frequency(8))  # 1.25
 ```
 
 ## 3. Sucesos aislados: una voladura y una masa que cae

@@ -130,7 +130,7 @@ field = electroacoustics.rectangular_loop_field(current, 10.0, 14.0, x, 0.0, 1.2
 level = field.level_db("z")
 print(x[np.abs(level) <= 3.0][[0, -1]])       # [-4.75  4.75] m within ±3 dB
 
-print(round(electroacoustics.loop_centre_field(1.0, 10.0, width_m=14.0), 4))  # 0.0761 A/m (E.1)
+print(round(electroacoustics.loop_center_field(1.0, 10.0, width_m=14.0), 4))  # 0.0761 A/m (E.1)
 exact = electroacoustics.rectangular_loop_field(1.0, 10.0, 14.0, 0.0, 0.0, 0.0)
 print(round(float(exact.h_z_a_per_m), 4))                                   # 0.0782 A/m
 
@@ -510,7 +510,7 @@ speech = electroacoustics.verify_amplifier_overload(current, z, 11.0, current_re
 print(round(speech.test_current_a, 2), round(speech.doubling_frequency_hz))  # 2.65 A 2091 Hz
 print(round(speech.end_frequency_hz), round(speech.test_frequency_voltage_v, 2), speech.passes)  # 3150 8.71 True
 music = electroacoustics.verify_amplifier_overload(
-    current, z, 11.0, programme="music", current_response=lift
+    current, z, 11.0, program="music", current_response=lift
 )
 print(round(music.test_frequency_voltage_v, 2), round(music.headroom_db, 2), music.passes)  # 11.99 -0.75 False
 ```

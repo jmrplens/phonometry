@@ -90,7 +90,7 @@ CATALOGUES: tuple[tuple[str, Mapping[str, CatalogueRow], tuple[str, ...]], ...] 
             "tortuosity",
             "viscous_length_um",
             "thermal_length_um",
-            "fibre_diameter_um",
+            "fiber_diameter_um",
         ),
     ),
     (

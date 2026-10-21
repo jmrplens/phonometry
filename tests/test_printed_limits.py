@@ -251,7 +251,7 @@ _DERIVED_LIMITS = {
     "phonometry.electroacoustics.induction_loop_components.NeckLoopVerification": (
         "limits",
     ),
-    "phonometry.electroacoustics.programme_signal.ProgrammeSignalCheck": (
+    "phonometry.electroacoustics.program_signal.ProgramSignalCheck": (
         "relative_levels_db",
         "tolerance_plus_db",
         "tolerance_minus_db",
@@ -606,9 +606,9 @@ _STATED_FLAGS = {
     "phonometry.building.measurement.uncertainty.BandUncertainty.upper_limit": _CALLER,
     "phonometry.building.measurement.uncertainty.UncertainValue.one_sided": _CALLER,
     "phonometry.building.prediction.linings.LiningImprovementResult.anchors": _CALLER,
-    "phonometry.electroacoustics.headphones.ProgrammeCharacteristicVoltage."
+    "phonometry.electroacoustics.headphones.ProgramCharacteristicVoltage."
     "a_weighted": _CALLER,
-    "phonometry.electroacoustics.headphones.ProgrammeCharacteristicVoltage."
+    "phonometry.electroacoustics.headphones.ProgramCharacteristicVoltage."
     "free_field_compensated": _CALLER,
     "phonometry.electroacoustics.induction_loop.BackgroundNoiseAssessment."
     "noise_is_tonal": _CALLER,
@@ -623,7 +623,7 @@ _STATED_FLAGS = {
     "phonometry.emission.sound_power_plant.PlantRequirement.advisory": _RECORD,
     "phonometry.emission.sound_power_plant.PlantRequirement.holds": _RECORD,
     "phonometry.emission.sound_power_special_room.SpecialRoomReverberationCheck."
-    "centred": _CALLER,
+    "centered": _CALLER,
     "phonometry.emission.turbine_noise.TurbineNoiseDeclaration.tonal": _CALLER,
     "phonometry.environment.assessment.soundscape.QuestionnaireScale.continuous": _ROW,
     "phonometry.environment.assessment.soundscape_binaural.BinauralParameter."

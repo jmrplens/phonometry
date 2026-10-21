@@ -285,7 +285,7 @@ def test_insitu_geometry_refuses_a_nan_source_height() -> None:
     waved one into every path length of the set-up.
     """
     with pytest.raises(ValueError, match="'source_height_m' must be positive"):
-        m.plot_insitu_geometry(source_height_m=float("nan"))
+        m.plot_in_situ_geometry(source_height_m=float("nan"))
 
 
 def test_metadiffuser_panel_geometry_refuses_a_nan_depth() -> None:

@@ -25,7 +25,7 @@ of a single-turn square loop of side :math:`d`, in its own plane,
 and extends it to a rectangle of sides :math:`d_1` and :math:`d_2`:
 "Provided that the sides d1, d2 of a rectangular loop are not extremely
 different", :math:`d` is taken as :math:`\sqrt{d_1 d_2}`
-(:func:`loop_centre_field`). Everything else about the field is a figure in
+(:func:`loop_center_field`). Everything else about the field is a figure in
 that standard. Here it is computed: :func:`rectangular_loop_field` sums the
 Biot-Savart field of the four straight sides exactly, at any point, which is
 how the E.1 formula is checked (it is exact for the square and off by 0,35 dB
@@ -186,7 +186,7 @@ __all__ = [
     "amplifier_signal_to_noise_ratio",
     "compliance_voltage",
     "equivalent_input_noise_voltage",
-    "loop_centre_field",
+    "loop_center_field",
     "loop_current",
     "loop_dimensions",
     "loop_impedance",
@@ -545,7 +545,7 @@ def rectangular_loop_field(
     )
 
 
-def loop_centre_field(
+def loop_center_field(
     current_a: float, length_m: float, *, width_m: float | None = None, turns: int = 1
 ) -> float:
     r"""The field at the centre of a loop, in its plane (IEC 60118-4:2014 E.1).

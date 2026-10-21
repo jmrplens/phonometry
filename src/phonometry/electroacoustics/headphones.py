@@ -7,7 +7,7 @@ Most of the clauses describe a set-up and a reading; this module holds the
 parts that are arithmetic on what was read, and the verdicts where the part
 sets a limit. The simulated programme signal several of them use is the one
 of IEC 60268-1:1985 Clause 7, in
-:mod:`phonometry.electroacoustics.programme_signal`.
+:mod:`phonometry.electroacoustics.program_signal`.
 
 The code (Clause 4)
 -------------------
@@ -50,7 +50,7 @@ response of the head and torso simulator of IEC 60959 to the coupler's output.
 The NOTE under Figure 3 says how to do that without filters: "Power summation
 of the 1/3-octave-analized data multiplied by filtering coefficients given by
 IEC 61672-1 and/or IEC 60969 gives the corrected voltage" (the second
-standard is IEC 60959, see ``docs/ERRATA.md``). :func:`programme_signal_level`
+standard is IEC 60959, see ``docs/ERRATA.md``). :func:`program_signal_level`
 is that power sum,
 
 .. math::
@@ -59,7 +59,7 @@ is that power sum,
 
 with :math:`A_k` the A-weighting at the exact centre of band :math:`k` and
 :math:`F_k` the free-field response, and
-:func:`programme_characteristic_voltage` turns it into the e.m.f. for 94 dB,
+:func:`program_characteristic_voltage` turns it into the e.m.f. for 94 dB,
 for each fitting of the headphone, and averages the e.m.f. of the fittings as
 8.3.5 g) asks ("3 to 5 measurements").
 
@@ -177,7 +177,7 @@ from .._internal.boundary import settled
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_count, require_positive, require_scalar
-from .programme_signal import ProgrammeSignalCheck, check_programme_signal
+from .program_signal import ProgramSignalCheck, check_program_signal
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -199,7 +199,7 @@ __all__ = [
     "FieldComparisonResponse",
     "HeadphoneClassification",
     "LimitingTestSignalCheck",
-    "ProgrammeCharacteristicVoltage",
+    "ProgramCharacteristicVoltage",
     "ProtectionVoltage",
     "RatedImpedanceVerification",
     "characteristic_voltage",
@@ -214,8 +214,8 @@ __all__ = [
     "headphone_source_emf",
     "impedance_code",
     "parse_classification_code",
-    "programme_characteristic_voltage",
-    "programme_signal_level",
+    "program_characteristic_voltage",
+    "program_signal_level",
     "protection_voltage",
     "verify_ear_canal_microphone",
     "verify_rated_impedance",
@@ -721,7 +721,7 @@ def characteristic_voltage(
     ``sound_pressure_level_db`` at ``source_emf_v`` scales to it:
     :math:`E\,10^{(94 - L)/20}`. The same scaling serves the programme signal
     of 8.3.4 with the level of the whole signal
-    (:func:`programme_signal_level`).
+    (:func:`program_signal_level`).
 
     :param source_emf_v: The source e.m.f. of the reading, in volts (RMS).
     :param sound_pressure_level_db: The level it produced in the coupler or ear
@@ -819,7 +819,7 @@ def working_sound_pressure_level(
     dissipated in a pure resistance equal to the rated impedance of the
     headphone, connected in place of it", scaled from a reading at another
     e.m.f. With a 500 Hz sine it is 8.5.2 b); with the level of the
-    simulated programme signal (:func:`programme_signal_level`) it is c), and
+    simulated programme signal (:func:`program_signal_level`) it is c), and
     d) when that level is A-weighted and free-field compensated.
 
     The method of 8.5.3 c) sets that e.m.f. another way: "so that the
@@ -890,7 +890,7 @@ def _band_corrections(
     return np.asarray(corrections, dtype=np.float64)
 
 
-def programme_signal_level(
+def program_signal_level(
     frequencies: ArrayLike,
     band_levels_db: ArrayLike,
     *,
@@ -934,7 +934,7 @@ def programme_signal_level(
 
 
 @dataclass(frozen=True)
-class ProgrammeCharacteristicVoltage(OwnsArrays):
+class ProgramCharacteristicVoltage(OwnsArrays):
     """The simulated programme signal characteristic voltage (IEC 60268-7 8.3.4, 8.3.5).
 
     :ivar frequencies: The band centre frequencies, in Hz.
@@ -1021,21 +1021,21 @@ class ProgrammeCharacteristicVoltage(OwnsArrays):
         )
 
 
-def programme_characteristic_voltage(
+def program_characteristic_voltage(
     source_emf_v: ArrayLike,
     frequencies: ArrayLike,
     band_levels_db: ArrayLike,
     *,
     a_weighted: bool = False,
     free_field_response_db: ArrayLike | None = None,
-) -> ProgrammeCharacteristicVoltage:
+) -> ProgramCharacteristicVoltage:
     """The simulated programme signal characteristic voltage of IEC 60268-7.
 
     The source e.m.f. of the simulated programme signal of IEC 60268-1 that
     produces 94 dB in the coupler or ear simulator (8.3.4), or 94 dB after the
     A-weighting and the free-field compensation of 8.3.5. Each fitting's
     one-third-octave band levels, read at a known e.m.f., are power-summed as
-    the NOTE under Figure 3 describes (:func:`programme_signal_level`) and
+    the NOTE under Figure 3 describes (:func:`program_signal_level`) and
     scaled to 94 dB; 8.3.5 g) removes and refits the headphone between
     readings and states "the average value of source e.m.f. of 3 to 5
     measurements".
@@ -1049,7 +1049,7 @@ def programme_characteristic_voltage(
     :param free_field_response_db: The free-field response of the head and
         torso simulator in each band, in dB, compensated by its inverse
         (8.3.5); ``None`` for none.
-    :return: A :class:`ProgrammeCharacteristicVoltage`.
+    :return: A :class:`ProgramCharacteristicVoltage`.
     :raises ValueError: If the shapes disagree or a value is out of range.
     """
     f = _frequencies(frequencies)
@@ -1068,7 +1068,7 @@ def programme_characteristic_voltage(
     corrections = _band_corrections(
         f, a_weighted=a_weighted, free_field_response_db=free_field_response_db
     )
-    return ProgrammeCharacteristicVoltage(
+    return ProgramCharacteristicVoltage(
         frequencies=f,
         band_levels_db=levels,
         source_emf_v=emf,
@@ -1093,7 +1093,7 @@ class LimitingTestSignalCheck(RichDisplay):
     """
 
     peak_to_rms: float
-    spectrum: ProgrammeSignalCheck
+    spectrum: ProgramSignalCheck
 
     @property
     def peak_to_rms_passes(self) -> bool:
@@ -1147,9 +1147,9 @@ def check_limiting_test_signal(
     ratio between 1,8 and 2,2." The record's one-third-octave bands from
     20 Hz up to the highest whose upper edge lies below the Nyquist frequency
     are judged against Table II of IEC 60268-1
-    (:func:`~phonometry.electroacoustics.check_programme_signal`), and its
+    (:func:`~phonometry.electroacoustics.check_program_signal`), and its
     peak over its RMS against the two limits.
-    :func:`~phonometry.electroacoustics.simulated_programme_signal` with
+    :func:`~phonometry.electroacoustics.simulated_program_signal` with
     ``peak_to_rms`` generates such a record.
 
     :param signal: The record (1-D), or a :class:`phonometry.io.Signal`.
@@ -1189,7 +1189,7 @@ def check_limiting_test_signal(
     if analysis.levels is None:  # pragma: no cover - the bank always returns levels
         msg = "The one-third-octave analysis returned no band levels."
         raise RuntimeError(msg)
-    spectrum = check_programme_signal(analysis.frequencies, analysis.levels)
+    spectrum = check_program_signal(analysis.frequencies, analysis.levels)
     return LimitingTestSignalCheck(peak_to_rms=peak_to_rms, spectrum=spectrum)
 
 
@@ -1862,7 +1862,7 @@ class EarCanalMicrophoneVerification(RichDisplay):
         mm² (b; 45 mm² for an average adult).
     :ivar volume_mm3: The microphone's volume with its mounting parts, in mm³
         (c).
-    :ivar neighbour_difference_db: The largest difference between the
+    :ivar neighbor_difference_db: The largest difference between the
         responses to neighbouring one-third-octave bands of pink noise, in dB
         (d).
     :ivar sealed_attenuation_db: The smallest drop of the output level when
@@ -1873,7 +1873,7 @@ class EarCanalMicrophoneVerification(RichDisplay):
     canal_section_area_mm2: float
     ear_canal_area_mm2: float
     volume_mm3: float
-    neighbour_difference_db: float
+    neighbor_difference_db: float
     sealed_attenuation_db: float
 
     @property
@@ -1892,7 +1892,7 @@ class EarCanalMicrophoneVerification(RichDisplay):
                 # out either side of it in binary; settled, it is 0,6.
                 "b": float(settled(self.area_ratio)) < _MAX_CANAL_AREA_RATIO,
                 "c": self.volume_mm3 < _MAX_VOLUME_MM3,
-                "d": self.neighbour_difference_db
+                "d": self.neighbor_difference_db
                 <= _MAX_NEIGHBOUR_DIFFERENCE_DB * (1.0 + _LIMIT_SLACK),
                 "e": self.sealed_attenuation_db
                 >= _MIN_SEALED_ATTENUATION_DB * (1.0 - _LIMIT_SLACK),
@@ -1995,7 +1995,7 @@ def verify_ear_canal_microphone(
         canal_section_area_mm2=section,
         ear_canal_area_mm2=canal,
         volume_mm3=volume,
-        neighbour_difference_db=float(np.max(np.abs(np.diff(bands)))),
+        neighbor_difference_db=float(np.max(np.abs(np.diff(bands)))),
         sealed_attenuation_db=float(np.min(opened - sealed)),
     )
 

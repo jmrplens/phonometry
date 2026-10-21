@@ -280,7 +280,7 @@ def test_air_that_can_exist_is_not_refused_by_that_guard(
             static_pressure_pa=static_pressure_pa,
             relative_humidity_percent=relative_humidity_percent,
         )
-    assert 0.0 < fluid.composition["water_vapour_mole_fraction"] < 1.0
+    assert 0.0 < fluid.composition["water_vapor_mole_fraction"] < 1.0
     assert fluid.density > 0.0
 
 

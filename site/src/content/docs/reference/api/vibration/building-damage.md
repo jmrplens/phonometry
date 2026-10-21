@@ -53,7 +53,7 @@ has the tables needs them in the same breath:
   more is roughly $f_i \approx 10/n$ with $n$ the storey count
   (6.4), which is the estimate that tells you whether the topmost floor plane
   will be excited at all. DIN 4150-1 prints it as Formula (4) and ISO 4866 in
-  D.2, and [`storey_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#storey_fundamental_frequency) is the one function for all
+  D.2, and [`story_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#story_fundamental_frequency) is the one function for all
   three.
 
 Clause 6.2 turns a measured velocity into a bending stress for a beam or a
@@ -171,8 +171,8 @@ BUILDING_CLASSES = ('commercial', 'residential', 'sensitive')
 
 A DIN 4150-3 rule is used outside the range the standard offers it for.
 
-Raised by [`storey_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#storey_fundamental_frequency) below
-[`STOREY_FREQUENCY_MIN_STOREYS`](/phonometry/reference/api/vibration/building-damage/#storey_frequency_min_storeys). The estimate is still returned:
+Raised by [`story_fundamental_frequency`](/phonometry/reference/api/vibration/building-damage/#story_fundamental_frequency) below
+[`STORY_FREQUENCY_MIN_STORIES`](/phonometry/reference/api/vibration/building-damage/#story_frequency_min_stories). The estimate is still returned:
 DIN 4150-3 6.4 offers `10 / n` from about five storeys up, DIN 4150-1
 Formula (4) for five and more, ISO 4866 D.2 for tall buildings, and below
 five none of them says anything, so the number is an extrapolation
@@ -433,26 +433,26 @@ SHORT_TERM_FOUNDATION_MM_S = {'commercial': (20.0, 20.0, 40.0, 50.0), 'residenti
 SHORT_TERM_TOP_FLOOR_MM_S = {'commercial': 40.0, 'residential': 15.0, 'sensitive': 8.0}
 ```
 
-## STOREY_FREQUENCY_MIN_STOREYS
+## STORY_FREQUENCY_MIN_STORIES
 
 *Constant* (`int`).
 
 ```python
-STOREY_FREQUENCY_MIN_STOREYS = 5
+STORY_FREQUENCY_MIN_STORIES = 5
 ```
 
-## STOREY_FREQUENCY_NUMERATOR_HZ
+## STORY_FREQUENCY_NUMERATOR_HZ
 
 *Constant* (`float`).
 
 ```python
-STOREY_FREQUENCY_NUMERATOR_HZ = 10.0
+STORY_FREQUENCY_NUMERATOR_HZ = 10.0
 ```
 
-## storey_fundamental_frequency
+## story_fundamental_frequency
 
 ```python
-storey_fundamental_frequency(storeys: int) -> float
+story_fundamental_frequency(stories: int) -> float
 ```
 
 The rough lowest horizontal natural frequency of a building.
@@ -470,7 +470,7 @@ at which the topmost floor plane will answer.
 
 | Name | Description |
 | :--- | :--- |
-| `storeys` | The number of storeys `n`. |
+| `stories` | The number of storeys `n`. |
 
 **Returns:** The estimated lowest horizontal natural frequency, in hertz.
 
@@ -484,4 +484,4 @@ at which the topmost floor plane will answer.
 
 | Warning | When |
 | :--- | :--- |
-| BuildingDamageWarning | Below [`STOREY_FREQUENCY_MIN_STOREYS`](/phonometry/reference/api/vibration/building-damage/#storey_frequency_min_storeys), where the estimate is an extrapolation of a rule the standard offers for taller buildings. |
+| BuildingDamageWarning | Below [`STORY_FREQUENCY_MIN_STORIES`](/phonometry/reference/api/vibration/building-damage/#story_frequency_min_stories), where the estimate is an extrapolation of a rule the standard offers for taller buildings. |

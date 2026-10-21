@@ -1345,14 +1345,14 @@ def verify_small_volume_system(
 class OverloadTestFrequency(RichDisplay):
     """One row of Table 4 of IEC 60118-4:2014/A1:2017.
 
-    :ivar programme: The typical programme material of the system.
+    :ivar program: The typical programme material of the system.
     :ivar power_bandwidth_limit_hz: The upper limit of the maximum power
         bandwidth it needs, in hertz.
     :ivar test_frequency_hz: The frequency the overload test is run to, about
         twice that limit, in hertz.
     """
 
-    programme: str
+    program: str
     power_bandwidth_limit_hz: float
     test_frequency_hz: float
 
@@ -1365,17 +1365,17 @@ class OverloadTestFrequency(RichDisplay):
 OVERLOAD_TEST_FREQUENCIES: Mapping[str, OverloadTestFrequency] = MappingProxyType(
     {
         "transient_speech": OverloadTestFrequency(
-            programme="speech for transient use, for example small-volume systems",
+            program="speech for transient use, for example small-volume systems",
             power_bandwidth_limit_hz=1250.0,
             test_frequency_hz=2500.0,
         ),
         "speech": OverloadTestFrequency(
-            programme="speech (default)",
+            program="speech (default)",
             power_bandwidth_limit_hz=1600.0,
             test_frequency_hz=3150.0,
         ),
         "music": OverloadTestFrequency(
-            programme="music",
+            program="music",
             power_bandwidth_limit_hz=2000.0,
             test_frequency_hz=4000.0,
         ),
@@ -1394,7 +1394,7 @@ class AmplifierOverloadVerification(OwnsArrays):
     sweep on to the doubling; the voltage there is drawn and kept in
     :attr:`max_voltage_v`, and 10.3.3 does not judge it.
 
-    :ivar programme: The row of Table 4 the test used.
+    :ivar program: The row of Table 4 the test used.
     :ivar test_current_a: The loop current at 1 kHz, 7 dB below the one that
         gives the required field, in amperes.
     :ivar doubling_frequency_hz: Where the loop voltage first reaches twice
@@ -1410,7 +1410,7 @@ class AmplifierOverloadVerification(OwnsArrays):
         62489-1:2010 5.4.8), in volts.
     """
 
-    programme: OverloadTestFrequency
+    program: OverloadTestFrequency
     test_current_a: float
     doubling_frequency_hz: float
     end_frequency_hz: float
@@ -1475,7 +1475,7 @@ def verify_amplifier_overload(
     impedance: LoopImpedance,
     compliance_voltage_v: float,
     *,
-    programme: str = "speech",
+    program: str = "speech",
     current_response: AmplifierFrequencyResponse | None = None,
 ) -> AmplifierOverloadVerification:
     r"""Does the amplifier clip in the overload test of 10.3 as amended?
@@ -1514,7 +1514,7 @@ def verify_amplifier_overload(
         (:func:`~phonometry.electroacoustics.induction_loop_components.loop_impedance`).
     :param compliance_voltage_v: The amplifier's compliance voltage, in
         volts (:func:`~phonometry.electroacoustics.induction_loop_components.compliance_voltage`).
-    :param programme: The row of :data:`OVERLOAD_TEST_FREQUENCIES`:
+    :param program: The row of :data:`OVERLOAD_TEST_FREQUENCIES`:
         ``"transient_speech"``, ``"speech"`` (the default of Table 4) or
         ``"music"``.
     :param current_response: The amplifier's current response into the loop,
@@ -1526,7 +1526,7 @@ def verify_amplifier_overload(
     required = require_positive(required_current_a, "required_current_a")
     compliance = require_positive(compliance_voltage_v, "compliance_voltage_v")
     row = OVERLOAD_TEST_FREQUENCIES[
-        require_choice(programme, "programme", tuple(OVERLOAD_TEST_FREQUENCIES))
+        require_choice(program, "program", tuple(OVERLOAD_TEST_FREQUENCIES))
     ]
     test_current = required * 10.0 ** (_OVERLOAD_TEST_OFFSET_DB / 20.0)
     top = _OVERLOAD_SWEEP_LIMIT_HZ
@@ -1578,7 +1578,7 @@ def verify_amplifier_overload(
         np.linspace(math.log(_OVERLOAD_START_HZ), math.log(end), _OVERLOAD_POINTS)
     )
     return AmplifierOverloadVerification(
-        programme=row,
+        program=row,
         test_current_a=test_current,
         doubling_frequency_hz=doubling,
         end_frequency_hz=end,

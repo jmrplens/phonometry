@@ -33,7 +33,7 @@ con todos.
 
 El más simple cuenta plantas. $f = 10/n$ hercios, que es la misma regla que
 imprime DIN 4150-3 en su 6.4 y que esta biblioteca ya publica como
-`storey_fundamental_frequency`; aquí es el modelo ``"storeys"``, para poder
+`story_fundamental_frequency`; aquí es el modelo ``"stories"``, para poder
 comparar los cuatro predictores por la misma puerta.
 
 Los otros tres son las formas que toma el periodo $T$ en las normas nacionales,
@@ -76,7 +76,7 @@ from phonometry import vibration
 
 # El mismo edificio de sesenta metros, quince de ancho, por cada uno de los cuatro.
 for model, kwargs in (
-    ("storeys", {"storeys": 18}),        # 18 plantas, de unos 3,3 m
+    ("stories", {"stories": 18}),        # 18 plantas, de unos 3,3 m
     ("height", {"height_m": 60.0}),
     ("height_width", {"height_m": 60.0, "width_m": 15.0}),
     ("slenderness", {"height_m": 60.0, "width_m": 15.0}),

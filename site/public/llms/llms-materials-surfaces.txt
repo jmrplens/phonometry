@@ -138,7 +138,7 @@ kr = materials.geometric_spreading_factor()          # (ds - dm)/(ds + dm) = 2/3
 hr = kr * 0.4 * np.roll(hi, 96)
 
 # Narrow-band absorption, then reduced to one-third octaves over 250-4000 Hz.
-alpha = materials.insitu_absorption_coefficient(hi, hr)   # 1 - (1/Kr^2)|Hr/Hi|^2
+alpha = materials.in_situ_absorption_coefficient(hi, hr)   # 1 - (1/Kr^2)|Hr/Hi|^2
 freq = np.fft.rfftfreq(n, 1.0 / fs)
 centres, band = materials.one_third_octave_absorption(freq, alpha)
 print(round(kr, 4))                # 0.6667
@@ -159,10 +159,10 @@ print(w.shape[0])          # 504 samples at 48 kHz
 print(round(float(w.max()), 3))   # 1.0  (flat top and edges meet at unity)
 ```
 
-**End-to-end spectrum.** `insitu_absorption_spectrum` runs the whole chain (the
+**End-to-end spectrum.** `in_situ_absorption_spectrum` runs the whole chain (the
 windowed incident and reflected impulse responses to the narrow-band absorption
 and on to one-third-octave bands) and returns a plottable
-`InsituAbsorptionResult`:
+`InSituAbsorptionResult`:
 
 ```python
 import numpy as np
@@ -183,7 +183,7 @@ taps = taps / taps.sum()
 shift = int(round(2.0 * 0.25 / 340.0 * fs))     # reflected-path delay 2 dm / c
 hr = kr * 0.85 * np.roll(lfilter(taps, 1.0, hi), shift)
 
-result = materials.insitu_absorption_spectrum(hi, hr, fs)
+result = materials.in_situ_absorption_spectrum(hi, hr, fs)
 print(result.frequencies[[0, -1]].astype(int))     # [ 250 4000]
 print(np.round(result.absorption[[0, 6, 12]], 2))  # [0.31 0.65 1.  ]
 result.plot()   # alpha(f) bar chart over 250-4000 Hz (needs matplotlib)
@@ -217,9 +217,9 @@ taps = firwin(41, 1200.0, fs=fs)
 taps = taps / taps.sum()
 shift = int(round(2.0 * 0.25 / 340.0 * fs))     # reflected-path delay 2 dm / c
 hr = kr * 0.85 * np.roll(lfilter(taps, 1.0, hi), shift)
-result = materials.insitu_absorption_spectrum(hi, hr, fs)
+result = materials.in_situ_absorption_spectrum(hi, hr, fs)
 
-# result is the InsituAbsorptionResult computed above. One line:
+# result is the InSituAbsorptionResult computed above. One line:
 result.plot()
 plt.show()
 
@@ -250,9 +250,9 @@ from phonometry import materials
 print(round(materials.max_sampled_area_radius(5.0e-3), 3))   # 1.343  (metres)
 ```
 
-The whole arrangement fits in one to-scale drawing. `plot_insitu_geometry`
+The whole arrangement fits in one to-scale drawing. `plot_in_situ_geometry`
 draws the standard set-up with that sampled radius on the surface, and a
-measured `InsituAbsorptionResult` that retained its heights redraws its own
+measured `InSituAbsorptionResult` that retained its heights redraws its own
 with `result.plot_geometry()`.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_setup_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insitu_setup_geometry.svg" alt="To-scale side view of the in-situ absorption set-up: the loudspeaker on its mast 1.25 m above the hatched road surface, the microphone on the same vertical at 0.25 m, the dashed surface-reflected path below it and the 1.34 m radius of the sampled area dimensioned on the surface" width="88%"></picture>
@@ -270,11 +270,11 @@ from phonometry import materials
 
 # The standard geometry: source at 1.25 m, microphone at 0.25 m, and the
 # 1.34 m sampled-area radius of the 5 ms window.
-materials.plot_insitu_geometry()
+materials.plot_in_situ_geometry()
 plt.show()
 
 # A measured spectrum retains its heights and redraws its own set-up:
-#   result = materials.insitu_absorption_spectrum(hi, hr, fs)
+#   result = materials.in_situ_absorption_spectrum(hi, hr, fs)
 #   result.plot_geometry()
 ```
 

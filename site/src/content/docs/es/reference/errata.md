@@ -11533,7 +11533,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   16 impresas), y el capítulo 2 en la página 9 del PDF (p. 7 impresa), de IEC
   60268-7:2010, edición 3.0.
 - **Comportamiento de la biblioteca:** no hace falta ninguno.
-  [`programme_signal_level`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/electroacoustics/headphones.py)
+  [`program_signal_level`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/electroacoustics/headphones.py)
   recibe la respuesta en campo libre del simulador de cabeza y torso como dato
   y la compensa.
 - **Estado:** sin notificar (defecto de referencia cruzada, sin consecuencia
@@ -11627,7 +11627,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   página 23 del PDF (p. 21 impresa) y las figuras 1 y 2 en la página 24 del
   PDF (p. 22 impresa) de IEC 60268-1:1985.
 - **Comportamiento de la biblioteca:** no hace falta ninguno.
-  [`simulated_programme_signal`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/electroacoustics/programme_signal.py)
+  [`simulated_program_signal`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/electroacoustics/program_signal.py)
   no recorta por defecto, como pide el capítulo 7, y solo recorta a una
   relación pico/eficaz cuando se le da `peak_to_rms`, que la biblioteca
   atribuye a 8.3.2.2 b).

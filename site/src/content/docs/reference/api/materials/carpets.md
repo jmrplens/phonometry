@@ -71,7 +71,7 @@ Carpet(
     pile_weight_kg_m2: float | None = None,
     pile_height_mm: float | None = None,
     pile_surface: str = '',
-    fibre: str = '',
+    fiber: str = '',
     mounting: str = '',
     noise_reduction_coefficient: float | None = None,
 )
@@ -92,7 +92,7 @@ apart.
 | `pile_weight_kg_m2` | The weight of the pile, in kg/m2, as the page prints its SI half. |
 | `pile_height_mm` | The height of the pile, in millimetres. |
 | `pile_surface` | Whether the pile is cut or looped, in the page's words. |
-| `fibre` | The fibre, in the page's words. |
+| `fiber` | The fibre, in the page's words. |
 | `mounting` | What the carpet is laid on, which is what separates the two tables and raises the rating. |
 | `noise_reduction_coefficient` | The NRC, dimensionless. |
 | `name` | The material as the table names it, attribution stripped. |

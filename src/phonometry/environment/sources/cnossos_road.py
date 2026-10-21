@@ -192,7 +192,7 @@ class RoadSurface(Enum):
     SMA_NL5 = "SMA-NL5"
     SMA_NL8 = "SMA-NL8"
     BRUSHED_DOWN_CONCRETE = "brushed down concrete"
-    OPTIMISED_BRUSHED_DOWN_CONCRETE = "optimised brushed down concrete"
+    OPTIMIZED_BRUSHED_DOWN_CONCRETE = "optimised brushed down concrete"
     FINE_BROOMED_CONCRETE = "fine broomed concrete"
     WORKED_SURFACE = "worked surface"
     HARD_ELEMENTS_HERRINGBONE = "hard elements in herringbone"
@@ -356,7 +356,7 @@ _TABLE_F4: dict[
         ((0.3, 4.5, 2.5, -0.2, -0.1, -0.5, -0.9, -0.8), 5.0),
         ((0.2, 5.3, 2.5, -0.2, -0.1, -0.6, -1.0, -0.9), 5.5),
     ),
-    RoadSurface.OPTIMISED_BRUSHED_DOWN_CONCRETE.value: _surface_row(
+    RoadSurface.OPTIMIZED_BRUSHED_DOWN_CONCRETE.value: _surface_row(
         70.0,
         80.0,
         ((-0.2, -0.7, 1.4, 1.2, 1.1, -1.6, -2.0, -1.8), 1.0),

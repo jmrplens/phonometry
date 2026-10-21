@@ -89,7 +89,7 @@ __all__ = [
     "LOW_FREQUENCY_FACADE_INSULATION_DB",
     "LOW_FREQUENCY_GROUND_CORRECTION_DB",
     "LOW_FREQUENCY_GROUND_IMPEDANCE_CLASSES",
-    "MODELLING_UNCERTAINTY_DB",
+    "MODELING_UNCERTAINTY_DB",
     "PREDICTION_MODEL_UNCERTAINTY_DB",
     "REFERENCE_ROUGHNESS_LENGTH_M",
     "ROUGHNESS_LENGTHS_M",
@@ -165,7 +165,7 @@ TYPE_B_UNCERTAINTY_EXAMPLES_DB: Mapping[str, tuple[float, float]] = MappingProxy
 PREDICTION_MODEL_UNCERTAINTY_DB: float = 2.0
 
 #: Uncertainty contribution of the propagation modelling, in dB (10.3.4).
-MODELLING_UNCERTAINTY_DB: float = 0.5
+MODELING_UNCERTAINTY_DB: float = 0.5
 
 #: Nominal one-third-octave centre frequencies of Annex C, 10 Hz to 200 Hz.
 LOW_FREQUENCY_BANDS_HZ: NDArray[np.float64] = read_only(
@@ -1320,7 +1320,7 @@ class PredictedReceptorLevel(OwnsArrays):
         the turbines' sound power uncertainties, in dB.
     :ivar combined_uncertainty_db: Equation (11), in dB.
     :ivar prediction_model_uncertainty_db: The model's uncertainty used, in dB.
-    :ivar modelling_uncertainty_db: The modelling uncertainty used, in dB.
+    :ivar modeling_uncertainty_db: The modelling uncertainty used, in dB.
     """
 
     turbine_levels_db: NDArray[np.float64]
@@ -1330,7 +1330,7 @@ class PredictedReceptorLevel(OwnsArrays):
     combined_uncertainty_db: float
     _: KW_ONLY
     prediction_model_uncertainty_db: float
-    modelling_uncertainty_db: float
+    modeling_uncertainty_db: float
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1355,7 +1355,7 @@ def predicted_receptor_level(
     sound_power_uncertainty_db: ArrayLike,
     *,
     prediction_model_uncertainty_db: float = PREDICTION_MODEL_UNCERTAINTY_DB,
-    modelling_uncertainty_db: float = MODELLING_UNCERTAINTY_DB,
+    modeling_uncertainty_db: float = MODELING_UNCERTAINTY_DB,
 ) -> PredictedReceptorLevel:
     r"""Sum a prediction over the turbines, with its uncertainty (10.3.4).
 
@@ -1377,7 +1377,7 @@ def predicted_receptor_level(
         power level, from IEC 61400-11, in dB (one value for all or one each).
     :param prediction_model_uncertainty_db: Standard uncertainty of the
         prediction model, in dB (2 dB by default, 10.3.4 NOTE).
-    :param modelling_uncertainty_db: Uncertainty of the propagation
+    :param modeling_uncertainty_db: Uncertainty of the propagation
         modelling, in dB (0.5 dB by default).
     :return: A :class:`PredictedReceptorLevel`.
     :raises ValueError: If a value is not finite or an uncertainty is
@@ -1393,7 +1393,7 @@ def predicted_receptor_level(
     u_model = require_finite(
         prediction_model_uncertainty_db, "prediction_model_uncertainty_db"
     )
-    u_modelling = require_finite(modelling_uncertainty_db, "modelling_uncertainty_db")
+    u_modelling = require_finite(modeling_uncertainty_db, "modeling_uncertainty_db")
     if u_model < 0.0 or u_modelling < 0.0:
         msg = "The model and modelling uncertainties must not be negative."
         raise ValueError(msg)
@@ -1406,7 +1406,7 @@ def predicted_receptor_level(
         propagated_uncertainty_db=propagated,
         combined_uncertainty_db=math.sqrt(propagated**2 + u_model**2 + u_modelling**2),
         prediction_model_uncertainty_db=u_model,
-        modelling_uncertainty_db=u_modelling,
+        modeling_uncertainty_db=u_modelling,
     )
 
 

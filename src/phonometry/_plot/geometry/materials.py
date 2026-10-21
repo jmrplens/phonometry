@@ -65,7 +65,7 @@ if TYPE_CHECKING:
         MetadiffuserResult,
         MetadiffuserWell,
     )
-    from ...materials.surfaces.road_absorption import InsituAbsorptionResult
+    from ...materials.surfaces.road_absorption import InSituAbsorptionResult
 
 #: Spanish translations of the fixed strings rendered here, keyed by their
 #: verbatim English text. ``_t`` returns the English key unchanged for any
@@ -1319,7 +1319,7 @@ def plot_transfer_matrix_geometry(
 # ---------------------------------------------------------------------------
 # In-situ absorption set-up (source over the road, microphone below).
 # ---------------------------------------------------------------------------
-def plot_insitu_geometry(
+def plot_in_situ_geometry(
     ax: Axes | None = None,
     *,
     source_height_m: float = 1.25,
@@ -1438,8 +1438,8 @@ def plot_insitu_geometry(
     return ax
 
 
-def plot_insitu_result_geometry(
-    result: InsituAbsorptionResult,
+def plot_in_situ_result_geometry(
+    result: InSituAbsorptionResult,
     ax: Axes | None = None,
     *,
     language: str = "en",
@@ -1449,10 +1449,10 @@ def plot_insitu_result_geometry(
     if result.source_height_m is None or result.microphone_height_m is None:
         msg = (
             "This result does not retain its set-up heights; call "
-            "plot_insitu_geometry(source_height_m=..., microphone_height_m=...)."
+            "plot_in_situ_geometry(source_height_m=..., microphone_height_m=...)."
         )
         raise ValueError(msg)
-    return plot_insitu_geometry(
+    return plot_in_situ_geometry(
         ax=ax,
         source_height_m=result.source_height_m,
         microphone_height_m=result.microphone_height_m,

@@ -137,24 +137,24 @@ def _finite(value: float, name: str) -> float:
 # --------------------------------------------------------------------------- #
 # Tonal audibility -- engineering method (ISO 1996-2:2007 Annex C)
 # --------------------------------------------------------------------------- #
-def critical_bandwidth(centre_frequency: float) -> float:
+def critical_bandwidth(center_frequency: float) -> float:
     """Critical bandwidth around a tone (ISO 1996-2 Annex C, Table C.1).
 
     100 Hz for a centre frequency up to 500 Hz, 20 % of the centre frequency
     above 500 Hz.
 
-    :param centre_frequency: Critical-band centre frequency ``fc``, in Hz.
+    :param center_frequency: Critical-band centre frequency ``fc``, in Hz.
     :return: Critical bandwidth, in Hz.
-    :raises ValueError: If ``centre_frequency`` is not positive/finite.
+    :raises ValueError: If ``center_frequency`` is not positive/finite.
     """
-    fc = _positive(centre_frequency, "centre_frequency")
+    fc = _positive(center_frequency, "center_frequency")
     if fc <= _CRITICAL_BAND_SPLIT:
         return _CRITICAL_BAND_LOW_WIDTH
     return _CRITICAL_BAND_HIGH_FRACTION * fc
 
 
 def tonal_audibility(
-    tone_level: float, masking_noise_level: float, centre_frequency: float
+    tone_level: float, masking_noise_level: float, center_frequency: float
 ) -> float:
     r"""Tonal audibility above the masking threshold (Formula (C.3)).
 
@@ -165,14 +165,14 @@ def tonal_audibility(
         in dB (see Formula (C.1)).
     :param masking_noise_level: Masking-noise level ``Lpn`` in the critical
         band, in dB (see Formula (C.2)/(C.11)).
-    :param centre_frequency: Critical-band centre frequency ``fc``, in Hz.
+    :param center_frequency: Critical-band centre frequency ``fc``, in Hz.
     :return: Tonal audibility ``ΔLta``, in dB (dB above the masking threshold).
-    :raises ValueError: If ``centre_frequency`` is not positive/finite or the
+    :raises ValueError: If ``center_frequency`` is not positive/finite or the
         levels are not finite.
     """
     lpt = _finite(tone_level, "tone_level")
     lpn = _finite(masking_noise_level, "masking_noise_level")
-    fc = _positive(centre_frequency, "centre_frequency")
+    fc = _positive(center_frequency, "center_frequency")
     masking_threshold = _MASKING_OFFSET + np.log10(
         1.0 + (fc / _MASKING_REFERENCE_FREQUENCY) ** _MASKING_EXPONENT
     )
@@ -206,7 +206,7 @@ class TonalAssessmentResult(RichDisplay):
 
     :ivar tone_level: Energy-summed tone level ``Lpt``, in dB.
     :ivar masking_noise_level: Masking-noise level ``Lpn``, in dB.
-    :ivar centre_frequency: Critical-band centre frequency ``fc``, in Hz.
+    :ivar center_frequency: Critical-band centre frequency ``fc``, in Hz.
     :ivar critical_bandwidth: Critical bandwidth, in Hz (Table C.1).
     :ivar audibility: Tonal audibility ``ΔLta``, in dB (Formula (C.3)).
     :ivar adjustment: Tonal adjustment ``Kt``, in dB (Formulae (C.4)–(C.6)).
@@ -214,7 +214,7 @@ class TonalAssessmentResult(RichDisplay):
 
     tone_level: float
     masking_noise_level: float
-    centre_frequency: float
+    center_frequency: float
     critical_bandwidth: float
     audibility: float
     adjustment: float
@@ -232,7 +232,7 @@ class TonalAssessmentResult(RichDisplay):
 
 
 def assess_tonal_audibility(
-    tone_level: float, masking_noise_level: float, centre_frequency: float
+    tone_level: float, masking_noise_level: float, center_frequency: float
 ) -> TonalAssessmentResult:
     """Assess a tone's audibility and adjustment (ISO 1996-2 Annex C).
 
@@ -241,15 +241,15 @@ def assess_tonal_audibility(
 
     :param tone_level: Energy-summed tone level ``Lpt``, in dB.
     :param masking_noise_level: Masking-noise level ``Lpn``, in dB.
-    :param centre_frequency: Critical-band centre frequency ``fc``, in Hz.
+    :param center_frequency: Critical-band centre frequency ``fc``, in Hz.
     :return: A :class:`TonalAssessmentResult`.
     """
-    audibility = tonal_audibility(tone_level, masking_noise_level, centre_frequency)
+    audibility = tonal_audibility(tone_level, masking_noise_level, center_frequency)
     return TonalAssessmentResult(
         tone_level=float(tone_level),
         masking_noise_level=float(masking_noise_level),
-        centre_frequency=float(centre_frequency),
-        critical_bandwidth=critical_bandwidth(centre_frequency),
+        center_frequency=float(center_frequency),
+        critical_bandwidth=critical_bandwidth(center_frequency),
         audibility=audibility,
         adjustment=tonal_adjustment(audibility),
     )

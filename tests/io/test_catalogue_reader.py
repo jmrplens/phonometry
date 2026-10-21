@@ -509,7 +509,7 @@ def test_a_row_standard_narrows_the_document_standards_field_by_field() -> None:
             PorousMaterial,
             "fibre_diameter_distribution_paramter",
             "no field 'fibre_diameter_distribution_paramter' on PorousMaterial; "
-            "did you mean 'fibre_diameter_distribution_parameter'?",
+            "did you mean 'fiber_diameter_distribution_parameter'?",
         ),
         (
             solids.SolidMaterial,

@@ -870,7 +870,7 @@ def _area_key(area_type: str, table: Mapping[str, Any]) -> str:
 
 
 def outdoor_quality_objectives(
-    area_type: str, *, urbanisation: str = "existing"
+    area_type: str, *, urbanization: str = "existing"
 ) -> RegulationLimits:
     """Outdoor acoustic quality objectives ``Ld``/``Le``/``Ln`` (Annex II Table A).
 
@@ -884,15 +884,15 @@ def outdoor_quality_objectives(
 
     :param area_type: Acoustic area type: the letter ``"e"``, ``"a"``, ``"d"``,
         ``"c"`` or ``"b"``, or an alias such as ``"residential"``.
-    :param urbanisation: ``"existing"`` (default) for areas already urbanised
+    :param urbanization: ``"existing"`` (default) for areas already urbanised
         on 24 October 2007, or ``"new"`` for the rest (5 dB stricter).
     :return: The applicable :class:`RegulationLimits` for the index ``Lx``.
     :raises ValueError: For an unknown area type or urbanisation state.
     """
     key = _area_key(area_type, _OUTDOOR_OBJECTIVES)
-    state = str(urbanisation).strip().lower()
+    state = str(urbanization).strip().lower()
     if state not in ("existing", "new"):
-        msg = f"'urbanisation' must be 'existing' or 'new'; got {urbanisation!r}."
+        msg = f"'urbanization' must be 'existing' or 'new'; got {urbanization!r}."
         raise ValueError(msg)
     offset = 0.0 if state == "existing" else -5.0
     suffix = (

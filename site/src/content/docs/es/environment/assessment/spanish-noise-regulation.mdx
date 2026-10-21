@@ -285,13 +285,13 @@ públicos) no tiene valor numérico: la nota 2 la remite a los objetivos de las
 áreas colindantes, y por eso `ACOUSTIC_AREA_TYPES` la lista pero las funciones
 de límites no la admiten. Y en las áreas urbanizadas con posterioridad a la
 entrada en vigor del reglamento (24 de octubre de 2007) el objetivo es 5 dB más
-estricto (artículo 14.2), que es lo que aplica `urbanisation="new"`.
+estricto (artículo 14.2), que es lo que aplica `urbanization="new"`.
 
 ```python
 from phonometry import environment
 
 environment.outdoor_quality_objectives("a")                       # 65 / 65 / 55 dB
-environment.outdoor_quality_objectives("a", urbanisation="new")   # 60 / 60 / 50 dB
+environment.outdoor_quality_objectives("a", urbanization="new")   # 60 / 60 / 50 dB
 environment.indoor_quality_objectives("residential", "bedrooms")  # 40 / 40 / 30 dB
 environment.infrastructure_limits("a")                            # 60 / 60 / 50 dB
 environment.max_infrastructure_limit("a")                         # 85 dB (LAmax)

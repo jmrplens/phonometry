@@ -148,7 +148,7 @@ def generate_insulation_rating(output_dir: str) -> None:
         (
             0.90,
             (
-                f"Sum of unfavourable deviations = {result.unfavourable_sum:.1f}"
+                f"Sum of unfavourable deviations = {result.unfavorable_sum:.1f}"
                 f" dB  (limit 32.0 dB)"
             ),
         ),
@@ -326,7 +326,7 @@ def generate_impact_rating(output_dir: str) -> None:
         (
             0.90,
             (
-                f"Sum of unfavourable deviations = {result.unfavourable_sum:.1f}"
+                f"Sum of unfavourable deviations = {result.unfavorable_sum:.1f}"
                 f" dB  (limit 32.0 dB)"
             ),
         ),

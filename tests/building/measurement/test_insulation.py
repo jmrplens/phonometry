@@ -141,14 +141,14 @@ def test_annex_c_worked_example_third_octave() -> None:
     assert res.c == -2
     assert res.ctr == -3
     # Sum of unfavourable deviations at the final shift: 31,8 dB (< 32,0).
-    assert res.unfavourable_sum == pytest.approx(31.8, abs=1e-9)
+    assert res.unfavorable_sum == pytest.approx(31.8, abs=1e-9)
 
 
 def test_reference_curve_rates_itself() -> None:
     """Measured == reference => shift up by 2 dB (16 * 2 = 32,0), Rw = 54."""
     res = building.weighted_rating(_REF_THIRD)
     assert res.rating == 54
-    assert res.unfavourable_sum == pytest.approx(32.0, abs=1e-9)
+    assert res.unfavorable_sum == pytest.approx(32.0, abs=1e-9)
 
 
 def test_unfavourable_sum_exactly_at_bound_third_octave() -> None:
@@ -156,7 +156,7 @@ def test_unfavourable_sum_exactly_at_bound_third_octave() -> None:
     measured = [r - 2.0 for r in _REF_THIRD]
     res = building.weighted_rating(measured)
     assert res.rating == 52
-    assert res.unfavourable_sum == pytest.approx(32.0, abs=1e-9)
+    assert res.unfavorable_sum == pytest.approx(32.0, abs=1e-9)
 
 
 def test_unfavourable_sum_tips_over_forces_one_more_db() -> None:
@@ -167,7 +167,7 @@ def test_unfavourable_sum_tips_over_forces_one_more_db() -> None:
     assert res.rating == 51
     # At Rw = 51 the 15 untouched bands contribute 1,0 dB each and the
     # tipped band 1,1 dB => 16,1 dB (<= 32,0).
-    assert res.unfavourable_sum == pytest.approx(16.1, abs=1e-9)
+    assert res.unfavorable_sum == pytest.approx(16.1, abs=1e-9)
 
 
 def test_octave_band_rating_bound() -> None:
@@ -175,14 +175,14 @@ def test_octave_band_rating_bound() -> None:
     measured = [r - 2.0 for r in _REF_OCTAVE]
     res = building.weighted_rating(measured)
     assert res.rating == 52
-    assert res.unfavourable_sum == pytest.approx(10.0, abs=1e-9)
+    assert res.unfavorable_sum == pytest.approx(10.0, abs=1e-9)
 
 
 def test_octave_reference_rates_itself() -> None:
     """Octave reference == measured => 5 * 2 = 10,0 => Rw = 54."""
     res = building.weighted_rating(_REF_OCTAVE)
     assert res.rating == 54
-    assert res.unfavourable_sum == pytest.approx(10.0, abs=1e-9)
+    assert res.unfavorable_sum == pytest.approx(10.0, abs=1e-9)
 
 
 def test_explicit_band_set_override() -> None:
@@ -227,7 +227,7 @@ def test_engine_matches_brute_force_third_octave() -> None:
         assert res.rating == rating
         assert res.c == c
         assert res.ctr == ctr
-        assert res.unfavourable_sum == pytest.approx(dev, abs=1e-9)
+        assert res.unfavorable_sum == pytest.approx(dev, abs=1e-9)
 
 
 def test_engine_matches_brute_force_octave() -> None:
@@ -244,7 +244,7 @@ def test_engine_matches_brute_force_octave() -> None:
         assert res.rating == rating
         assert res.c == c
         assert res.ctr == ctr
-        assert res.unfavourable_sum == pytest.approx(dev, abs=1e-9)
+        assert res.unfavorable_sum == pytest.approx(dev, abs=1e-9)
 
 
 # --------------------------------------------------------------------------
@@ -748,7 +748,7 @@ def test_rating_unfavourable_sum_must_restate_its_own_curves() -> None:
     with pytest.raises(
         ValueError,
         match=(
-            r"WeightedRatingResult: 'unfavourable_sum' must be the sum of the "
+            r"WeightedRatingResult: 'unfavorable_sum' must be the sum of the "
             r"unfavourable deviations of its own curves"
         ),
     ):
@@ -769,7 +769,7 @@ def test_impact_unfavourable_sum_must_restate_its_own_curves() -> None:
     with pytest.raises(
         ValueError,
         match=(
-            r"ImpactRatingResult: 'unfavourable_sum' must be the sum of the "
+            r"ImpactRatingResult: 'unfavorable_sum' must be the sum of the "
             r"unfavourable deviations of its own curves, 'measured' above "
             r"'shifted_reference'"
         ),
@@ -795,6 +795,6 @@ def test_unfavourable_sum_accepts_a_variant_that_keeps_its_curves() -> None:
         result,
         measured=measured,
         shifted_reference=shifted,
-        unfavourable_sum=recomputed,
+        unfavorable_sum=recomputed,
     )
-    assert moved.unfavourable_sum == pytest.approx(31.8, abs=1e-9)
+    assert moved.unfavorable_sum == pytest.approx(31.8, abs=1e-9)

@@ -32,7 +32,7 @@ useful it is. It offers four predictors and is candid about every one.
 
 The simplest counts storeys. $f = 10/n$ hertz, which is the same rule
 DIN 4150-3 prints in its 6.4 and this library already publishes as
-`storey_fundamental_frequency`; here it is the ``"storeys"`` model, so the
+`story_fundamental_frequency`; here it is the ``"stories"`` model, so the
 four predictors can be compared through one entry point.
 
 The other three are the shapes the period $T$ takes in national codes, each
@@ -74,7 +74,7 @@ from phonometry import vibration
 
 # The same sixty-metre building, fifteen wide, by each of the four predictors.
 for model, kwargs in (
-    ("storeys", {"storeys": 18}),        # 18 storeys, about 3.3 m each
+    ("stories", {"stories": 18}),        # 18 storeys, about 3.3 m each
     ("height", {"height_m": 60.0}),
     ("height_width", {"height_m": 60.0, "width_m": 15.0}),
     ("slenderness", {"height_m": 60.0, "width_m": 15.0}),

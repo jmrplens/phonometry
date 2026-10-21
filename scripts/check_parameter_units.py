@@ -1016,26 +1016,51 @@ def _where(obj: object) -> str:
     return where
 
 
+def _resolved_members(cls: type) -> Iterator[tuple[type, str, object]]:
+    """Each public attribute a class answers to, with the class that defines it.
+
+    The class's own namespace is not enough: a method or a property a
+    published class inherits from a base no module exports
+    (``_DrawableLayer.plot``) is called on the published class all the same.
+    The method resolution order is walked, an attribute is taken from the
+    first class that defines it, as Python resolves it, and only the classes
+    of this package are read.
+
+    :param cls: A published class.
+    :return: ``(defining class, attribute, member)`` per public attribute.
+    """
+    resolved: set[str] = set()
+    for klass in inspect.getmro(cls):
+        ours = (getattr(klass, "__module__", "") or "").startswith("phonometry")
+        for attribute, member in vars(klass).items():
+            if attribute in resolved:
+                continue
+            resolved.add(attribute)
+            if ours and _is_public(attribute):
+                yield klass, attribute, member
+
+
 def _members(name: str, obj: object) -> Iterator[tuple[str, object]]:
     """One callable per name a caller can call: the object and its methods.
 
     A classmethod or a staticmethod is a descriptor in the class dictionary,
     not a function, so the function it wraps is the one yielded: an
     alternative constructor takes its parameters by name as much as
-    ``__init__`` does.
+    ``__init__`` does. A member the class inherits from a base of this
+    package is named by the class that defines it (:func:`_resolved_members`),
+    so a method shared by many published classes is read once.
     """
     yield name, obj
     if not inspect.isclass(obj):
         return
-    for attribute, member in vars(obj).items():
-        if not _is_public(attribute):
-            continue
+    for klass, attribute, member in _resolved_members(obj):
+        owner = name if klass is obj else klass.__qualname__
         if isinstance(member, property) and member.fget is not None:
-            yield f"{name}.{attribute}", member.fget
+            yield f"{owner}.{attribute}", member.fget
         elif isinstance(member, (classmethod, staticmethod)):
-            yield f"{name}.{attribute}", member.__func__
+            yield f"{owner}.{attribute}", member.__func__
         elif inspect.isfunction(member):
-            yield f"{name}.{attribute}", member
+            yield f"{owner}.{attribute}", member
 
 
 def documented(doc: str | None, name: str) -> str:
@@ -1061,39 +1086,46 @@ def _first_paragraph(doc: str | None) -> str:
     return " ".join(inspect.cleandoc(doc).split("\n\n", 1)[0].split())
 
 
-def _properties(obj: object) -> Iterator[tuple[str, Callable[..., object]]]:
+def _properties(
+    obj: object,
+) -> Iterator[tuple[type, str, Callable[..., object]]]:
     """The public properties of a class, ``functools.cached_property`` included.
 
     A property is a name a caller reads off a result like a field, so the
-    unit rule holds it as it holds the field beside it.
+    unit rule holds it as it holds the field beside it. The inherited ones
+    count as much as the class's own (:func:`_resolved_members`).
+
+    :return: ``(defining class, attribute, getter)`` per property.
     """
     if not inspect.isclass(obj):
         return
-    for attribute, member in vars(obj).items():
-        if not _is_public(attribute):
-            continue
+    for klass, attribute, member in _resolved_members(obj):
         if isinstance(member, property) and member.fget is not None:
-            yield attribute, member.fget
+            yield klass, attribute, member.fget
         elif isinstance(member, functools.cached_property):
-            yield attribute, member.func
+            yield klass, attribute, member.func
 
 
 def _property_parameters(
     module_name: str, exported: str, obj: object
 ) -> Iterator[Parameter]:
-    """One :class:`Parameter` per public property of an exported class."""
-    for attribute, getter in _properties(obj):
+    """One :class:`Parameter` per public property of an exported class.
+
+    A property the class inherits is named by the class that defines it, so
+    one shared by many published classes is reported once.
+    """
+    for klass, attribute, getter in _properties(obj):
         try:
             returns = inspect.signature(getter).return_annotation
         except (TypeError, ValueError):
             continue
         declared = "" if returns is inspect.Signature.empty else str(returns)
-        home = getattr(obj, "__module__", module_name)
+        home = getattr(klass, "__module__", module_name)
         yield Parameter(
             home,
-            exported,
+            exported if klass is obj else klass.__qualname__,
             attribute,
-            _where(obj),
+            _where(klass),
             annotation=declared,
             doc=_first_paragraph(getattr(getter, "__doc__", None)),
             publisher=module_name,
@@ -1752,6 +1784,18 @@ def public_names(
             members = {a for a in vars(obj) if _is_public(a)} | set(_fields(obj))
             for attribute in sorted(members):
                 yield from once(PublicName(home, exported, attribute, _where(obj)))
+            # What the class inherits from a base of this package is written
+            # on it as much, and is named by the class that defines it.
+            for klass, attribute, _ in _resolved_members(obj):
+                if klass is not obj and attribute not in members:
+                    yield from once(
+                        PublicName(
+                            klass.__module__,
+                            klass.__qualname__,
+                            attribute,
+                            _where(klass),
+                        )
+                    )
     for parameter in public_parameters() if parameters is None else parameters:
         yield from once(
             PublicName(
@@ -2363,30 +2407,17 @@ def unitless_constants() -> tuple[list[PublicName], list[tuple[str, str]]]:
 def _class_methods(cls: type) -> Iterator[tuple[str, object]]:
     """Each public method a class answers to, named by the class that defines it.
 
-    The class's own namespace is not enough: a method a published class
-    inherits from a base no module exports (``_DrawableLayer.plot``,
-    ``ScatteringBands.scattering_coefficient``) is called on the published
-    class all the same. The method resolution order is walked, an attribute
-    is taken from the first class that defines it, as Python resolves it, and
-    only the classes of this package are read. Keying by the defining class
-    reports a method shared by many published classes once.
+    A method a published class inherits from a base no module exports
+    (``_DrawableLayer.plot``, ``ScatteringBands.scattering_coefficient``) is
+    called on the published class all the same (:func:`_resolved_members`).
+    Keying by the defining class reports a method shared by many published
+    classes once.
     """
-    resolved: set[str] = set()
-    for klass in inspect.getmro(cls):
-        ours = (getattr(klass, "__module__", "") or "").startswith("phonometry")
-        for attribute, member in vars(klass).items():
-            if attribute in resolved:
-                continue
-            resolved.add(attribute)
-            if (
-                ours
-                and _is_public(attribute)
-                and (
-                    inspect.isfunction(member)
-                    or isinstance(member, (classmethod, staticmethod))
-                )
-            ):
-                yield f"{klass.__qualname__}.{attribute}", member
+    for klass, attribute, member in _resolved_members(cls):
+        if inspect.isfunction(member) or isinstance(
+            member, (classmethod, staticmethod)
+        ):
+            yield f"{klass.__qualname__}.{attribute}", member
 
 
 def _public_functions() -> Iterator[PublicName]:
@@ -3088,19 +3119,16 @@ def _public_property_targets() -> Iterator[tuple[PublicName, Callable[..., objec
             obj = getattr(module, exported, None)
             if not inspect.isclass(obj):
                 continue
-            for klass in inspect.getmro(obj):
-                home = getattr(klass, "__module__", "") or ""
-                if not home.startswith("phonometry"):
+            for klass, attribute, getter in _properties(obj):
+                home = klass.__module__
+                qualname = f"{klass.__qualname__}.{attribute}"
+                if (home, qualname) in seen:
                     continue
-                for attribute, getter in _properties(klass):
-                    qualname = f"{klass.__qualname__}.{attribute}"
-                    if (home, qualname) in seen:
-                        continue
-                    seen.add((home, qualname))
-                    yield (
-                        PublicName(home, qualname, attribute, _where(getter)),
-                        getter,
-                    )
+                seen.add((home, qualname))
+                yield (
+                    PublicName(home, qualname, attribute, _where(getter)),
+                    getter,
+                )
 
 
 def tuple_returns() -> tuple[

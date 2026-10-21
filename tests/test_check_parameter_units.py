@@ -434,6 +434,57 @@ def test_a_method_inherited_from_a_base_no_module_exports_is_reported(
     assert [entry.qualname for entry in found] == ["_DrawableLayer.margin_db"]
 
 
+def test_a_property_inherited_from_a_base_no_module_exports_is_reported(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A property a published class inherits from its private base is read too.
+
+    Every layer reads ``insertion_loss_db`` off ``_DrawableLayer`` when it is
+    planted there, and the walk read only each published class's own
+    namespace, so it was never seen. It is reported once, under the class
+    that defines it, by the decibel rule and by the unit rule's walk.
+    """
+    from phonometry.materials.absorbers import layered
+
+    monkeypatch.setattr(
+        layered._DrawableLayer,
+        "insertion_loss_db",
+        property(lambda self: 0.0),
+        raising=False,
+    )
+    found, _ = cpu.decibel_suffixed()
+    assert [(entry.qualname, entry.name) for entry, _ in found] == [
+        ("_DrawableLayer", "insertion_loss_db")
+    ]
+    read = [
+        (parameter.qualname, parameter.name)
+        for parameter in cpu.public_parameters()
+        if parameter.name == "insertion_loss_db"
+    ]
+    assert read == [("_DrawableLayer", "insertion_loss_db")]
+
+
+def test_a_parameter_of_an_inherited_method_is_read(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The parameters of a method a published class inherits are its parameters."""
+    from phonometry.materials.absorbers import layered
+
+    def shade(self: object, depth_mm: float = 0.0, opacity_db: float = 0.0) -> None:
+        """Shade the layer."""
+
+    monkeypatch.setattr(layered._DrawableLayer, "shade", shade, raising=False)
+    read = [
+        (parameter.qualname, parameter.name)
+        for parameter in cpu.public_parameters()
+        if parameter.qualname.endswith(".shade")
+    ]
+    assert read == [
+        ("_DrawableLayer.shade", "depth_mm"),
+        ("_DrawableLayer.shade", "opacity_db"),
+    ]
+
+
 def test_a_function_exemption_nothing_needs_is_stale(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -153,6 +153,28 @@ def test_the_spectrogram_record_requires_the_band_edges(field: str) -> None:
         dataclasses.replace(result, **{field: None})
 
 
+@pytest.mark.parametrize(
+    ("lower", "upper", "match"),
+    [
+        ([0.0, 354.0, 707.0], None, "must be positive and finite"),
+        ([177.0, np.nan, 707.0], None, "must be positive and finite"),
+        ([300.0, 354.0, 707.0], None, "must enclose its centre"),
+        ([177.0, 400.0, 707.0], [400.0, 707.0, 1414.0], "contiguous and equally wide"),
+    ],
+)
+def test_the_spectrogram_record_holds_the_edges_of_one_bank(
+    lower: list[float], upper: list[float] | None, match: str
+) -> None:
+    """The plot draws equal rows from the first edge to the last, so the edges are a bank's."""
+    grid = np.zeros((3, 4))
+    centres = np.array([250.0, 500.0, 1000.0])
+    times = np.array([0.0625, 0.125, 0.1875, 0.25])
+    lower_edges = np.asarray(lower)
+    upper_edges = centres * np.sqrt(2.0) if upper is None else np.asarray(upper)
+    with pytest.raises(ValueError, match=match):
+        filters.OctaveSpectrogramResult(grid, centres, times, lower_edges, upper_edges)
+
+
 def test_the_spectrogram_carries_the_edges_of_its_bank() -> None:
     bank = filters.OctaveFilterBank(fs=FS, fraction=3, limits=[250, 4000])
     result = bank.spectrogram(np.zeros(FS // 2), window_time=0.125)

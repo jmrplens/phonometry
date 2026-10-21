@@ -189,3 +189,26 @@ def test_every_cached_clip_field_is_registered() -> None:
         and value not in registered
     )
     assert unregistered == []
+
+
+def test_the_device_is_released_after_the_field_and_before_the_variants(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """The fields are host arrays when the builder returns; CuPy's pool is not.
+
+    Four forked children would each inherit the claim on the blocks the
+    builder stepped in, so the parent frees them first.
+    """
+    if "fork" not in mp.get_all_start_methods():
+        pytest.skip("this platform cannot fork")
+    import clip_placement
+
+    events: list[str] = []
+    clip = "test_only_clip"
+    monkeypatch.setitem(registry._ANIM_FIELDS, clip, lambda: events.append("field"))
+    monkeypatch.setattr(
+        clip_placement, "release_device", lambda: events.append("released")
+    )
+    monkeypatch.setitem(registry._ANIMATIONS, clip, lambda output_dir: None)
+    registry._render_anim_variants(clip, str(tmp_path))
+    assert events == ["field", "released"]

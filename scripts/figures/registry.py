@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 import assets_dir
+import clip_placement
 import matplotlib.pyplot as plt
 
 from phonometry._i18n import Language
@@ -1830,6 +1831,9 @@ def _render_anim_variants(clip: str, output_dir: str) -> None:
         return
     if builder is not None:
         builder()
+        # The field is on the host now; give its device blocks back before
+        # four children inherit a claim on them.
+        clip_placement.release_device()
     ctx = mp.get_context("fork")
 
     def side_by_side() -> None:
@@ -2171,6 +2175,48 @@ if not _ANIM_WEIGHTS.keys() <= _ANIMATIONS.keys():
     msg = f"animation names not in _ANIMATIONS: {_unknown_anim}"
     raise RuntimeError(msg)
 
+# Where each clip's field is computed (scripts/clip_placement.py): measured
+# per clip, the wall time of its field on CuPy against NumPy's, on the GPU
+# node. A clip not yet measured steps on NumPy, as every clip did before;
+# "gpu" shares the GPU with the other render lane, "gpu-whole" takes all
+# the GPU memory that is free and runs alone. Kept here beside the
+# scheduling weights, and out of every clip's fingerprint: the engines step
+# bit for bit on CuPy (gpu-parity.lock), and a clip goes to the GPU only once
+# its whole field, the scene's own arithmetic on the device included, has
+# been measured against its NumPy field.
+_ANIM_DEVICES: dict[str, clip_placement.ClipDevice] = {
+    "anim_fdtd_open_end": "cpu",
+    "anim_fdtd_room_modes": "cpu",
+    "anim_fdtd_barrier": "cpu",
+    "anim_fdtd_critical_angle": "cpu",
+    "anim_fdtd_ground_effect": "cpu",
+    "anim_fdtd_ducting": "cpu",
+    "anim_fdtd_diffusion": "cpu",
+    "anim_fdtd_dispersion": "cpu",
+    "anim_fdtd_duct_cut_on": "cpu",
+    "anim_fdtd_metadiffuser": "cpu",
+    "anim_fdtd_impedance_tube": "cpu",
+    "anim_fdtd_transmission_tube": "cpu",
+    "anim_fdtd_slit_absorber": "cpu",
+    "anim_fdtd_expansion_chamber": "cpu",
+    "anim_fdtd_side_branch": "cpu",
+    "anim_fdtd_absorption_placement": "cpu",
+    "anim_fdtd_aperture_slit": "cpu",
+    "anim_fdtd_refraction": "cpu",
+    "anim_elastic_plate_junction": "cpu",
+    "anim_elastic_coincidence": "cpu",
+    "anim_elastic_halfspace_waves": "cpu",
+    "anim_elastic_mode_conversion": "cpu",
+    "anim_elastic_radiation_efficiency": "cpu",
+    "anim_fdtd_pillar_hall": "cpu",
+}
+
+# Every clip with a field has a device, and nothing else does; fail fast.
+if _ANIM_DEVICES.keys() != _ANIM_FIELDS.keys():
+    _mismatch = sorted(_ANIM_DEVICES.keys() ^ _ANIM_FIELDS.keys())
+    msg = f"_ANIM_DEVICES and _ANIM_FIELDS name different clips: {_mismatch}"
+    raise RuntimeError(msg)
+
 
 def _run_anim_task(clip: str, img_dir: str) -> str:
     """Render one clip in all four language/theme variants (worker entry).
@@ -2199,6 +2245,7 @@ def _run_anim_task(clip: str, img_dir: str) -> str:
         # The banner's 2.5 mm frame stack is ~2.5 GB; do not let it stay
         # pinned in this worker while it renders the next clip.
         _pillar_fields.cache_clear()
+        clip_placement.release_device()
     return clip
 
 

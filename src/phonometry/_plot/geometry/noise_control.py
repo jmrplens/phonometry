@@ -37,6 +37,7 @@ from ..common import (
     _new_axes,
     style_default,
     style_pop,
+    styled,
 )
 from ._draft import (
     _check_language,
@@ -972,7 +973,7 @@ def plot_plenum_geometry(
         ((box_w, box_w), (y_out + 0.5 * mouth, box_h)),
     ]
     for x_pair, y_pair in walls:
-        ax.plot(x_pair, y_pair, color=colour, linewidth=lw, **kwargs)
+        ax.plot(x_pair, y_pair, **styled(kwargs, color=colour, linewidth=lw))
     stub = 0.35 * r
     wall_t = max(0.05 * duct, 0.002)
     ax.add_patch(

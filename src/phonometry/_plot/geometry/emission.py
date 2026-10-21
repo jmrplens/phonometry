@@ -31,6 +31,7 @@ from ..common import (
     _page_color,
     style_default,
     style_get,
+    styled,
     theme_fill,
     theme_fill_alpha,
 )
@@ -260,7 +261,7 @@ def plot_microphone_positions(
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("s", 30)
     kwargs.setdefault("depthshade", False)
-    ax.scatter(pts[:, 0], pts[:, 1], pts[:, 2], zorder=2, **kwargs)
+    ax.scatter(pts[:, 0], pts[:, 1], pts[:, 2], **styled(kwargs, zorder=2))
 
     _number_points(ax, pts, style_get(kwargs, "color", _C_PRIMARY))
     ax.set_xlabel(_t(_AXIS_X, language))

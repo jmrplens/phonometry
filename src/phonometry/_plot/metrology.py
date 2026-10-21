@@ -71,6 +71,7 @@ from .common import (
     format_frequency_axis,
     place_legend_clear,
     style_default,
+    styled,
     theme_fill,
 )
 
@@ -658,8 +659,7 @@ def plot_peak_statistics(
     ax.plot(
         peaks,
         exceedance,
-        drawstyle="steps-post",
-        **kwargs,
+        **styled(kwargs, drawstyle="steps-post"),
     )
     floor = max(1.0 / peaks.size, 1e-6)
     ax.set_yscale("log")

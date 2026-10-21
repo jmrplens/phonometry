@@ -24,6 +24,7 @@ from .common import (
     place_legend_clear,
     style_default,
     style_get,
+    styled,
     theme_fill_alpha,
 )
 
@@ -442,7 +443,7 @@ def plot_scattering_report(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", r"$s$")
-    ax.plot(positions, s, ms=4, zorder=3, **kwargs)
+    ax.plot(positions, s, **styled(kwargs, ms=4, zorder=3))
     ax.set_ylabel(_t("Coefficient", language))
     top = max(1.05, float(np.nanmax(s)) * 1.05) if s.size else 1.05
     ax.set_ylim(0.0, top)
@@ -501,7 +502,7 @@ def plot_diffusion_report(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", r"$d$")
-    ax.plot(positions, d, ms=4, zorder=3, **kwargs)
+    ax.plot(positions, d, **styled(kwargs, ms=4, zorder=3))
     ax.set_ylabel(_t("Coefficient", language))
     ax.set_ylim(0.0, 1.05)
     ax.set_title(_t(_DIFFUSION_TITLE, language))
@@ -537,7 +538,7 @@ def plot_diffusion_polar_report(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "color", _C_PRIMARY)
     ax.fill(angles, levels, color=_C_PRIMARY_LIGHT, edgecolor="none", zorder=1)
-    ax.plot(angles, levels, ms=4, zorder=3, **kwargs)
+    ax.plot(angles, levels, **styled(kwargs, ms=4, zorder=3))
     # The theta-orientation setters live on the polar axes, not the base Axes.
     polar_ax: Any = ax
     polar_ax.set_theta_zero_location("N")
@@ -1138,7 +1139,7 @@ def plot_diffuser_polar_response(
         color=style_get(kwargs, "color", _C_PRIMARY),
         alpha=theme_fill_alpha(style_get(kwargs, "color", _C_PRIMARY), ax),
     )
-    ax.plot(angles, levels, ms=4, **kwargs)
+    ax.plot(angles, levels, **styled(kwargs, ms=4))
     polar_ax: Any = ax
     polar_ax.set_theta_zero_location("N")
     polar_ax.set_theta_direction(-1)

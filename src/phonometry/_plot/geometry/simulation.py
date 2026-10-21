@@ -22,6 +22,7 @@ from ..common import (
     _C_REFERENCE,
     _C_SECONDARY,
     _new_axes,
+    styled,
 )
 from ._draft import (
     _AXIS_X,
@@ -160,7 +161,8 @@ def plot_fdtd_domain(
         kwargs.setdefault("vmin", 0.0)
         kwargs.setdefault("vmax", 2.0)
         ax.imshow(
-            overlay, extent=extent, origin="upper", interpolation="nearest", **kwargs
+            overlay,
+            **styled(kwargs, extent=extent, origin="upper", interpolation="nearest"),
         )
     _fdtd_sponge_bands(ax, sim, lx, ly, handles)
     _fdtd_edges(ax, sim, lx, ly, handles)

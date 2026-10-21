@@ -172,6 +172,29 @@ def test_the_survey_plot_draws_the_bands_the_tones_and_what_each_needs(
         plt.close(ax.figure)
 
 
+def test_the_survey_plot_takes_the_band_bars_zorder_from_the_caller() -> None:
+    """``plot(zorder=...)`` reaches the band bars it is documented to style.
+
+    The bars were drawn with ``zorder=3`` written beside ``**kwargs``, so a
+    caller passing ``zorder`` got ``TypeError: got multiple values`` and no
+    figure.
+    """
+    pytest.importorskip("matplotlib")
+    import matplotlib as mpl
+
+    mpl.use("Agg")
+    import matplotlib.pyplot as plt
+
+    survey = environment.assess_tonal_survey(
+        [40.0, 60.0, 40.0, 50.0, 41.0], frequencies=[100.0, 125.0, 160.0, 500.0, 630.0]
+    )
+    ax = survey.plot(zorder=2)
+    try:
+        assert [patch.get_zorder() for patch in ax.patches[:5]] == [2] * 5
+    finally:
+        plt.close(ax.figure)
+
+
 def test_a_survey_record_refuses_a_spectrum_the_method_cannot_read() -> None:
     with pytest.raises(ValueError, match="at least three bands"):
         environment.TonalSurveyAssessment(

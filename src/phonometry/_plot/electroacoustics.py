@@ -23,6 +23,7 @@ from .common import (
     format_frequency_axis,
     style_default,
     style_pop,
+    styled,
 )
 
 if TYPE_CHECKING:
@@ -368,7 +369,7 @@ def plot_frequency_response(
 
     def _magnitude(axm: Axes) -> None:
         kwargs.setdefault("label", f"$|H|$ ({result.estimator})")
-        axm.semilogx(freqs[pos], mag[pos], color=color, **kwargs)
+        axm.semilogx(freqs[pos], mag[pos], **styled(kwargs, color=color))
         axm.set_ylabel(_t(_MAGNITUDE_LABEL, language))
         axm.grid(visible=True, which="both", alpha=0.3)
         axm.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
@@ -514,7 +515,7 @@ def plot_piston_impedance(
     ka = np.asarray(result.ka, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("$R_1$ (resistance)", language))
-    ax.semilogx(ka, np.asarray(result.resistance), lw=1.8, **kwargs)
+    ax.semilogx(ka, np.asarray(result.resistance), **styled(kwargs, lw=1.8))
     ax.semilogx(
         ka,
         np.asarray(result.reactance),
@@ -1074,11 +1075,7 @@ def plot_feedback_stability(
     ax.bar(
         np.arange(values.size),
         values,
-        color=colors,
-        edgecolor=_C_EDGE,
-        linewidth=0.6,
-        zorder=3,
-        **kwargs,
+        **styled(kwargs, color=colors, edgecolor=_C_EDGE, linewidth=0.6, zorder=3),
     )
     for i, value in enumerate(values):
         ax.annotate(

@@ -22,6 +22,7 @@ from .common import (
     format_frequency_axis,
     style_default,
     style_get,
+    styled,
     theme_fill,
 )
 
@@ -816,7 +817,7 @@ def plot_tone_assessment(
     style_default(kwargs, "markersize", 9)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("assessed tone", language))
-    ax.plot([ft], [ratio], markeredgecolor=_C_EDGE, zorder=4, **kwargs)
+    ax.plot([ft], [ratio], **styled(kwargs, markeredgecolor=_C_EDGE, zorder=4))
     ax.annotate(
         _t("margin {m} dB", language).format(
             m=format_number(ratio - criterion, language, decimals=1),
@@ -876,7 +877,7 @@ def plot_tone_audibility(
     colors[decisive] = _C_REFERENCE
 
     kwargs.setdefault("width", 0.7)
-    bars = ax.bar(positions, delta, color=colors, edgecolor=_C_EDGE, **kwargs)
+    bars = ax.bar(positions, delta, **styled(kwargs, color=colors, edgecolor=_C_EDGE))
     bars[decisive].set_label(
         _t(r"decisive $\Delta L$ = {da} dB @ {df} Hz", language).format(
             da=format_number(result.decisive_audibility, language, decimals=1),
@@ -986,10 +987,7 @@ def plot_tone_audibility_levels(
     ax.plot(
         freqs,
         lt,
-        color=_C_PRIMARY,
-        markeredgecolor=_C_EDGE,
-        zorder=4,
-        **kwargs,
+        **styled(kwargs, color=_C_PRIMARY, markeredgecolor=_C_EDGE, zorder=4),
     )
     ax.plot(
         [freqs[decisive]],

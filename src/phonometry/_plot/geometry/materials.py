@@ -34,6 +34,7 @@ from ..common import (
     _C_SECONDARY,
     _new_axes,
     style_default,
+    styled,
 )
 from ._draft import (
     _check_language,
@@ -1594,7 +1595,7 @@ def plot_goniometer_geometry(
     ys = receiver_radius * np.cos(angles)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("s", 14)
-    ax.scatter(xs, ys, zorder=5, **kwargs)
+    ax.scatter(xs, ys, **styled(kwargs, zorder=5))
     ax.plot(xs, ys, color=_C_MUTED, linewidth=0.6, linestyle=":", zorder=2)
     # Sample slab at the origin on the baseline.
     _material_rect(

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail on a style default that ignores the other spelling of its property.
+"""Fail on a style default the caller cannot override.
 
 Matplotlib aliases seven artist properties: ``color`` is also ``c``,
 ``linewidth`` is ``lw``, ``linestyle`` is ``ls``, ``markersize`` is ``ms``, and
@@ -27,14 +27,24 @@ The three helpers of :mod:`phonometry._plot.common` are the fix:
 :func:`style_default`, :func:`style_get` and :func:`style_pop`, and
 :func:`styled` for the literal. Each honours both spellings.
 
+A fourth shape is refused for every property, aliased or not:
+``ax.bar(x, h, zorder=3, **kwargs)``, a keyword the renderer writes beside the
+caller's. A caller who passes ``zorder`` too gets ``TypeError: got multiple
+values for keyword argument 'zorder'`` and no figure, although the renderer
+documents its keywords as forwarded to that very call. The fix is the same
+merge, ``ax.bar(x, h, **styled(kwargs, zorder=3))``. A keyword that names a
+parameter of the function itself cannot be in ``**kwargs``, and a call to one
+of the package's own helpers passes that helper its parameters beside the
+caller's properties, so neither is refused.
+
 Only the aliased properties are refused. ``kwargs.setdefault("label", ...)`` and
 ``kwargs.setdefault("marker", ...)`` are fine, because matplotlib gives those no
 second name, and this says nothing about them. The read-back and literal shapes
 are refused only on a mapping that is the function's own ``**kwargs``: a local
 dictionary the caller never sees may hold whatever it likes.
 
-Exit status 0 when no aliased property is defaulted or read back by hand,
-1 otherwise.
+Exit status 0 when no aliased property is defaulted or read back by hand and
+no keyword is written beside the caller's, 1 otherwise.
 """
 
 from __future__ import annotations
@@ -139,7 +149,77 @@ def _findings(path: Path) -> list[tuple[int, str]]:
                 (node.lineno, f"literal default of the aliased property {name!r}")
                 for name in sorted(named & set(_ALIASED))
             )
+    found.extend(_unoverridable(tree))
     return sorted(found)
+
+
+def _own_names(tree: ast.AST) -> set[str]:
+    """What one module defines, or imports from the package, by name.
+
+    A call to one of them passes a helper of the package its parameters beside
+    the caller's properties, which is not a default the caller could override.
+    ``cls`` and ``self`` reach the class being defined, which is the package's
+    too.
+    """
+    names: set[str] = {"cls", "self"}
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            names.add(node.name)
+        elif isinstance(node, ast.ImportFrom) and (
+            node.level > 0 or (node.module or "").startswith("phonometry")
+        ):
+            names.update(alias.asname or alias.name for alias in node.names)
+    return names
+
+
+def _call_root(func: ast.expr) -> str:
+    """The name a call starts from: ``ax`` for ``ax.bar``, ``f`` for ``f``."""
+    while isinstance(func, (ast.Attribute, ast.Subscript, ast.Call)):
+        func = func.func if isinstance(func, ast.Call) else func.value
+    return func.id if isinstance(func, ast.Name) else ""
+
+
+def _unoverridable(tree: ast.AST) -> set[tuple[int, str]]:
+    """Every keyword written beside a function's own ``**kwargs`` in one call.
+
+    :param tree: One parsed module.
+    :return: ``(line, reason)`` per keyword, for the calls that do not go to
+        one of the package's own helpers.
+    """
+    own = _own_names(tree)
+    found: set[tuple[int, str]] = set()
+    for function in ast.walk(tree):
+        if not isinstance(function, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        if function.args.kwarg is None:
+            continue
+        spread = function.args.kwarg.arg
+        arguments = function.args
+        bound = {
+            arg.arg
+            for arg in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
+        }
+        for call in ast.walk(function):
+            if not isinstance(call, ast.Call) or _call_root(call.func) in own:
+                continue
+            if not any(
+                keyword.arg is None
+                and isinstance(keyword.value, ast.Name)
+                and keyword.value.id == spread
+                for keyword in call.keywords
+            ):
+                continue
+            callee = ast.unparse(call.func)
+            found.update(
+                (
+                    call.lineno,
+                    f"{keyword.arg!r} written beside **{spread} in {callee}(), "
+                    "so a caller cannot pass it",
+                )
+                for keyword in call.keywords
+                if keyword.arg is not None and keyword.arg not in bound
+            )
+    return found
 
 
 def _helper_aliases() -> set[str] | None:
@@ -217,13 +297,16 @@ def main() -> int:
     if bad:
         print()
         print(
-            f"{bad} style default(s) would collide with the caller's own "
-            "spelling. Use style_default, style_get, style_pop or styled from "
-            "phonometry._plot.common, each of which reads and writes both "
-            "spellings of the property."
+            f"{bad} style default(s) would collide with what the caller passes. "
+            "Use style_default, style_get, style_pop or styled from "
+            "phonometry._plot.common, each of which lets the caller's keyword "
+            "win under either spelling of the property."
         )
         return 1
-    print(f"No style default collides with its alias: {files} modules.")
+    print(
+        "No style default collides with its alias or with the caller's own "
+        f"keyword: {files} modules."
+    )
     return 0
 
 

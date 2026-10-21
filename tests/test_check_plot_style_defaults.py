@@ -152,3 +152,52 @@ def test_a_table_that_is_not_a_literal_fails_closed(
 def test_the_package_is_clean() -> None:
     """The corpus itself, which is what the gate protects."""
     assert gate.main() == 0
+
+
+def test_a_keyword_written_beside_the_spread_is_refused(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``ax.bar(x, h, zorder=3, **kwargs)`` cannot take the caller's ``zorder``.
+
+    The caller who passes it gets ``TypeError: got multiple values for keyword
+    argument 'zorder'`` and no figure, whatever the property, aliased or not.
+    """
+    source = (
+        "def f(ax, **kwargs):\n"
+        "    ax.bar([1], [2], zorder=3, width=0.5, **kwargs)\n"
+        "    Rectangle((0, 0), 1, 1, hatch='//', **kwargs)\n"
+    )
+    assert gate._findings(_module(source, tmp_path)) == [
+        (2, "'width' written beside **kwargs in ax.bar(), so a caller cannot pass it"),
+        (2, "'zorder' written beside **kwargs in ax.bar(), so a caller cannot pass it"),
+        (
+            3,
+            "'hatch' written beside **kwargs in Rectangle(), so a caller cannot "
+            "pass it",
+        ),
+    ]
+
+
+def test_a_keyword_that_cannot_reach_the_spread_is_left_alone(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Only a name the caller can put in ``**kwargs`` can collide.
+
+    A parameter of the function itself is bound before ``**kwargs`` is
+    filled, a helper of the package takes its own parameters beside the
+    caller's properties, and a spread of a local mapping, or the merge
+    through ``styled``, is the renderer's own.
+    """
+    source = (
+        "from .common import draw_rating\n"
+        "def _helper(ax, *, title, **kwargs):\n"
+        "    return ax\n"
+        "def f(ax=None, language='en', **kwargs):\n"
+        "    _helper(ax, title='t', **kwargs)\n"
+        "    draw_rating(ax, title='t', **kwargs)\n"
+        "    ax.plot([1], language=language, **kwargs)\n"
+        "    ax.plot([1], **styled(kwargs, zorder=3))\n"
+        "    options = dict(kwargs)\n"
+        "    ax.plot([1], zorder=3, **options)\n"
+    )
+    assert gate._findings(_module(source, tmp_path)) == []

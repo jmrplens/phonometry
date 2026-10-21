@@ -42,6 +42,7 @@ from .common import (
     place_legend_clear,
     style_default,
     style_pop,
+    styled,
     theme_fill,
     theme_line,
 )
@@ -991,7 +992,7 @@ def plot_parametric_eq(
                 )
         style_default(kwargs, "lw", 1.8)
         kwargs.setdefault("label", _t("Cascade", language))
-        axm.semilogx(freqs, result.magnitude_db, color=color, **kwargs)
+        axm.semilogx(freqs, result.magnitude_db, **styled(kwargs, color=color))
         # Quiet by colour, not by opacity: half opacity on a 0.8 pt line
         # composites to within a level or two of the dark page and the
         # reference disappears, while reading fine on the white one.

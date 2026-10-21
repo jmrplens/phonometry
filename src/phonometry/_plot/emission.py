@@ -28,6 +28,7 @@ from .common import (
     format_frequency_axis,
     place_legend_clear,
     style_default,
+    styled,
     theme_fill,
     theme_line,
 )
@@ -345,7 +346,7 @@ def plot_emission_pressure(
     kwargs.setdefault("width", 0.62)
     style_default(kwargs, "color", colours)
     kwargs.setdefault("edgecolor", _C_EDGE)
-    bars = ax.bar(range(len(heights)), heights, bottom=bottoms, **kwargs)
+    bars = ax.bar(range(len(heights)), heights, **styled(kwargs, bottom=bottoms))
     if result.upper_bound:
         _hatch_invalid(bars, np.array([True, False, False, True]))
 

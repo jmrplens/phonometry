@@ -31,6 +31,7 @@ from .common import (
     format_frequency_axis,
     place_legend_clear,
     style_default,
+    styled,
     theme_fill,
 )
 
@@ -1779,7 +1780,7 @@ def plot_db_hr_global_index(
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("alpha", 0.85)
     kwargs.setdefault("label", _t("band insulation", language))
-    ax.bar(positions, values, width=0.72, **kwargs)
+    ax.bar(positions, values, **styled(kwargs, width=0.72))
     ax.set_ylabel(_t("Band insulation $X_i$ [dB]", language))
 
     # The two quantities live on disjoint ranges (a positive insulation of
@@ -1858,7 +1859,7 @@ def plot_db_hr_assessment(
     kwargs.setdefault("marker", "o")
     kwargs.setdefault("s", 55)
     kwargs.setdefault("label", _t("achieved", language))
-    ax.scatter(achieved, rows, color=colours, zorder=5, **kwargs)
+    ax.scatter(achieved, rows, **styled(kwargs, color=colours, zorder=5))
 
     ax.set_yticks(rows)
     ax.set_yticklabels(
@@ -2061,7 +2062,7 @@ def plot_a_weighted_maximum_impact(
     positions = _band_axis(ax, result.frequencies, language=language)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("A-weighted contribution", language))
-    ax.bar(positions, result.corrected, width=0.7, zorder=2, **kwargs)
+    ax.bar(positions, result.corrected, **styled(kwargs, width=0.7, zorder=2))
     ax.plot(
         positions,
         result.levels,
@@ -2893,7 +2894,7 @@ def plot_position_spread(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "ms", 8)
     kwargs.setdefault("label", _t("room positions", language))
-    ax.plot(x[~corner], levels[~corner], ls="", zorder=4, **kwargs)
+    ax.plot(x[~corner], levels[~corner], **styled(kwargs, ls="", zorder=4))
     ax.set_xticks(x)
     ax.set_xticklabels(_reading_names(levels.size))
     ax.set_xlim(-0.5, levels.size - 0.5)
@@ -3034,7 +3035,7 @@ def plot_service_equipment_positions(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "ms", 9)
     kwargs.setdefault("label", _t("reverberant-field positions", language))
-    ax.plot(rooms[:, 0], rooms[:, 1], ls="", zorder=6, **kwargs)
+    ax.plot(rooms[:, 0], rooms[:, 1], **styled(kwargs, ls="", zorder=6))
     # Numbered as the draft numbers them: the corner is position 1 (7.2) and
     # the reverberant-field positions follow from 2.
     points = [(float(corner[0]), float(corner[1]))]
@@ -3147,7 +3148,7 @@ def plot_calibration_deviation(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "ms", 9)
     kwargs.setdefault("label", _t(_THIS_MEASUREMENT_LABEL, language))
-    ax.plot(x_levels, levels, ls="", zorder=5, **kwargs)
+    ax.plot(x_levels, levels, **styled(kwargs, ls="", zorder=5))
     for x, level, deviation in zip(x_levels, levels, result.deviations_db, strict=True):
         if not np.isfinite(deviation):
             continue
@@ -3232,7 +3233,7 @@ def plot_background_duration(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "ms", 9)
     kwargs.setdefault("label", _t("measurement time", language))
-    ax.plot(x, durations, ls="", zorder=5, **kwargs)
+    ax.plot(x, durations, **styled(kwargs, ls="", zorder=5))
     outside = ~np.asarray(result.within_tolerance)
     if np.any(outside):
         # A ring round each duration beyond the tolerance, which leaves the
@@ -3397,7 +3398,7 @@ def plot_measurement_disturbance(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "ms", 9)
     kwargs.setdefault("label", _t("difference per period", language))
-    ax.plot(x, differences, ls="", zorder=5, **kwargs)
+    ax.plot(x, differences, **styled(kwargs, ls="", zorder=5))
     ax.set_xticks(x)
     ax.set_xlim(0.4, differences.size + 0.6)
     ax.set_ylim(min(0.0, float(np.min(differences))), top)
@@ -3451,7 +3452,7 @@ def plot_instrument_agreement(
     kwargs.setdefault("marker", "o")
     style_default(kwargs, "ms", 9)
     kwargs.setdefault("label", _t("calculated less instrument", language))
-    ax.plot(x, differences, ls="", zorder=5, **kwargs)
+    ax.plot(x, differences, **styled(kwargs, ls="", zorder=5))
     ax.set_xticks(x)
     ax.set_xticklabels([_rating_symbol(k) for k in keys])
     ax.set_xlim(-0.6, differences.size - 0.4)
@@ -4218,7 +4219,7 @@ def plot_background_corrected_level(
     if margins.ndim == 1:
         style_default(kwargs, "color", _C_PRIMARY)
         style_default(kwargs, "width", 0.6)
-        ax.bar(positions, margins, zorder=2, **kwargs)
+        ax.bar(positions, margins, **styled(kwargs, zorder=2))
     else:
         style_default(kwargs, "marker", "o")
         for n, row in enumerate(margins.reshape(-1, n_bands), start=1):
@@ -4297,7 +4298,7 @@ def plot_strong_coupling_check(
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "marker", "o")
     kwargs.setdefault("label", r"$D_{\mathrm{v},ij}$")
-    ax.plot(positions, difference, zorder=2, **kwargs)
+    ax.plot(positions, difference, **styled(kwargs, zorder=2))
     if not np.all(holds):
         ax.plot(
             positions[~holds],

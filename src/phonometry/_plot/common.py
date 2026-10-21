@@ -1364,7 +1364,7 @@ def _plot_band_level_bars(
         ax.set_xlabel(_t("Band", language))
     positions = np.arange(n)
     style_default(kwargs, "color", _C_PRIMARY)
-    ax.bar(positions, lw, width=0.7, edgecolor=_C_EDGE, linewidth=0.6, **kwargs)
+    ax.bar(positions, lw, **styled(kwargs, width=0.7, edgecolor=_C_EDGE, linewidth=0.6))
     ax.set_xticks(positions)
     ax.set_xticklabels(labels)
     ax.axhline(

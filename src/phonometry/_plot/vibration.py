@@ -28,6 +28,7 @@ from .common import (
     place_legend_clear,
     style_default,
     style_pop,
+    styled,
 )
 
 #: The three phasors of the ISO 20816-1 Figure D.1 diagram, named once so
@@ -902,7 +903,9 @@ def plot_rigid_mass_calibration(
         axd.axhspan(-tol_pct, tol_pct, color=_C_REFERENCE, alpha=0.15, label=band_label)
         axd.axhline(0.0, color=_C_MUTED, ls=":", lw=0.9)
         style_default(line_kwargs, "color", _C_PRIMARY)
-        axd.semilogx(freq, 100.0 * deviation, "-", lw=1.4, zorder=2, **line_kwargs)
+        axd.semilogx(
+            freq, 100.0 * deviation, "-", **styled(line_kwargs, lw=1.4, zorder=2)
+        )
         axd.plot(
             freq[within],
             100.0 * deviation[within],
@@ -944,7 +947,7 @@ def plot_rigid_mass_calibration(
     )
     axm.loglog(freq, expected, ls="--", color=_C_REFERENCE, lw=1.4, label=exp_label)
     kwargs.setdefault("label", within_label)
-    axm.loglog(freq, measured, "o-", lw=1.4, **kwargs)
+    axm.loglog(freq, measured, "o-", **styled(kwargs, lw=1.4))
     if not np.all(within):
         axm.plot(
             freq[~within],
@@ -1500,7 +1503,9 @@ def plot_seat_transmission(
     )
     style_default(kwargs, "color", _C_TERTIARY)
     kwargs.setdefault("label", _t(r"seat $a_\mathrm{wS}$", language))
-    seat_bars = ax.bar(runs + width / 2, result.seat_runs, width=width, **kwargs)
+    seat_bars = ax.bar(
+        runs + width / 2, result.seat_runs, **styled(kwargs, width=width)
+    )
     means = [
         ax.axhline(
             value,
@@ -3465,7 +3470,7 @@ def plot_exponential_window_correction(
     added = 100.0 * np.asarray(result.window_damping_ratio, dtype=np.float64)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(_TRUE_DAMPING_LABEL, language))
-    ax.bar(positions, true, width=0.55, **kwargs)
+    ax.bar(positions, true, **styled(kwargs, width=0.55))
     ax.bar(
         positions,
         added,

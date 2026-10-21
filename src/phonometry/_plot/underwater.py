@@ -266,7 +266,7 @@ def plot_pile_strike(
     color = style_pop(kwargs, "color", _C_PRIMARY)
 
     def _waveform(axw: Axes) -> None:
-        axw.plot(t, pressure, color=color, lw=0.8, **kwargs)
+        axw.plot(t, pressure, **styled(kwargs, color=color, lw=0.8))
         axw.plot(
             [t[peak_idx]],
             [pressure[peak_idx]],
@@ -801,7 +801,10 @@ def plot_eigenrays(
             ax.vlines(t[direct], base, loss[direct], color=_C_PRIMARY, lw=1.4, zorder=4)
             kwargs.setdefault("label", _t("Refracted or direct", language))
             ax.plot(
-                t[direct], loss[direct], "o", color=_C_PRIMARY, ms=6, zorder=5, **kwargs
+                t[direct],
+                loss[direct],
+                "o",
+                **styled(kwargs, color=_C_PRIMARY, ms=6, zorder=5),
             )
         ax.set_ylim(base, float(loss.min()) - 3.0)
         ax.legend(loc=_LEGEND_LOWER_RIGHT, fontsize="small")

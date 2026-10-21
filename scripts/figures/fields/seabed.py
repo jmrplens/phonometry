@@ -30,6 +30,7 @@ from ..theme import (
     COLOR_PRIMARY,
     COLOR_SECONDARY,
 )
+from ._core import _host
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -122,9 +123,12 @@ def _seabed_fields() -> tuple[Any, ...]:
     seabed flux of each run, the range axis of that flux and the two closed
     forms it is read against.
     """
-    import fdtd2d
+    import clip_placement
 
     from phonometry import underwater
+    from phonometry.simulation import FDTD2D, SignalSource
+
+    compute = clip_placement.compute_for("anim_fdtd_critical_angle")
 
     n_vis, n_rows, rows_water, ix_src, iy_src = _sb_geometry()
     n_x = n_vis + 2 * _SB_SPONGE
@@ -147,11 +151,13 @@ def _seabed_fields() -> tuple[Any, ...]:
         rho_map = np.full((n_y, n_x), _SB_RHO1)
         c_map[i_bed:, :] = c2
         rho_map[i_bed:, :] = rho2
-        sim = fdtd2d.FDTD2D(c_map, _SB_DX, rho=rho_map, sponge_width=_SB_SPONGE)
-        sim.add_source(
-            fdtd2d.SignalSource(ix=ix_src, iy=iy_src, samples=burst, fs=sample_rate)
+        sim = FDTD2D(
+            c_map, _SB_DX, rho=rho_map, sponge_width=_SB_SPONGE, compute=compute
         )
-        flux = np.zeros(n_vis)
+        sim.add_source(
+            SignalSource(ix=ix_src, iy=iy_src, samples=burst, fs=sample_rate)
+        )
+        flux = sim._backend.zeros((n_vis,))
         ps: list[Any] = []
         fs_: list[Any] = []
         ts: list[float] = []
@@ -161,11 +167,9 @@ def _seabed_fields() -> tuple[Any, ...]:
             face = 0.5 * (sim.p[i_bed - 1, cut] + sim.p[i_bed, cut])
             flux += face * sim.vy[i_bed - 1, cut] * sim.dt
             ps.append(
-                sim.p[_SB_SPONGE : _SB_SPONGE + n_rows, cut][::2, ::2].astype(
-                    np.float32
-                )
+                _host(sim, sim.p[_SB_SPONGE : _SB_SPONGE + n_rows, cut][::2, ::2])
             )
-            fs_.append(flux.astype(np.float32).copy())
+            fs_.append(_host(sim, flux))
             ts.append(sim.time)
         raw_frames.append(np.stack(ps))
         raw_flux.append(np.stack(fs_))

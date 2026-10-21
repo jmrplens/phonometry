@@ -52,6 +52,7 @@ from ..theme import (
     COLOR_SECONDARY,
     FIELD_STROKE,
 )
+from ._core import _host
 
 if TYPE_CHECKING:
     from phonometry.simulation.fdtd import Side
@@ -148,7 +149,11 @@ def _absorption_placement_fields() -> tuple[Any, ...]:
     reverberation times (spread; concentrated early and late) and the two
     linings' statistical absorptions.
     """
-    import fdtd2d
+    import clip_placement
+
+    from phonometry.simulation import FDTD2D, SignalSource
+
+    compute = clip_placement.compute_for("anim_fdtd_absorption_placement")
 
     zeta_a, zeta_b, a_a, a_b = _ap_linings()
     area, per = _AP_LX * _AP_LY, 2.0 * (_AP_LX + _AP_LY)
@@ -174,42 +179,42 @@ def _absorption_placement_fields() -> tuple[Any, ...]:
     e_all: list[Any] = []
     times = np.zeros(0)
     for edge_imp in edges:
-        sim = fdtd2d.FDTD2D(_AP_C0, _AP_DX, shape=(ny, nx), edge_impedance=edge_imp)
+        sim = FDTD2D(
+            _AP_C0, _AP_DX, shape=(ny, nx), edge_impedance=edge_imp, compute=compute
+        )
         sim.add_source(
-            fdtd2d.SignalSource(
+            SignalSource(
                 ix=round(_AP_SRC[0] / _AP_DX),
                 iy=round(_AP_SRC[1] / _AP_DX),
                 samples=burst,
                 fs=fs,
             )
         )
+        backend = sim._backend
+        xp = backend.xp
         beta = float(np.exp(-sim.dt * _AP_F0 / 2.0))
-        ms = np.zeros_like(sim.p)
+        ms = backend.zeros(tuple(sim.p.shape))
         ps: list[Any] = []
         rs: list[Any] = []
-        es: list[float] = []
+        es: list[Any] = []
         ts: list[float] = []
         for i in range(_AP_EVERY * _AP_FRAMES):
             sim.step()
             ms = beta * ms + (1.0 - beta) * sim.p**2
             if (i + 1) % _AP_EVERY == 0:
-                ps.append(sim.p.astype(np.float16))
+                ps.append(_host(sim, sim.p, dtype=np.float16))
                 # Re-referenced per frame: the panel shows where the
                 # energy lives, the decay axis says how much is left.
                 with np.errstate(divide="ignore", invalid="ignore"):
-                    db = 10.0 * np.log10(ms / max(float(ms.max()), 1e-300))
-                rs.append(np.clip(db, -_AP_RMS_SPAN, 0.0).astype(np.float16))
-                pe = float(np.sum(sim.p**2)) / (2.0 * _AP_RHO * _AP_C0**2)
-                ke = (
-                    0.5
-                    * _AP_RHO
-                    * (float(np.sum(sim.vx**2)) + float(np.sum(sim.vy**2)))
-                )
+                    db = 10.0 * xp.log10(ms / max(backend.scalar(xp.max(ms)), 1e-300))
+                rs.append(_host(sim, xp.clip(db, -_AP_RMS_SPAN, 0.0), dtype=np.float16))
+                pe = xp.sum(sim.p**2) / (2.0 * _AP_RHO * _AP_C0**2)
+                ke = 0.5 * _AP_RHO * (xp.sum(sim.vx**2) + xp.sum(sim.vy**2))
                 es.append((pe + ke) * _AP_DX**2)
                 ts.append(sim.time)
         p_all.append(np.stack(ps))
         db_all.append(np.stack(rs))
-        e_all.append(np.asarray(es))
+        e_all.append(_host(sim, xp.stack(es), dtype=np.float64))
         times = np.asarray(ts)
 
     e_ref = max(float(e.max()) for e in e_all)

@@ -14,6 +14,7 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
+from ._core import _host
 
 # Room-modes timeline. Mesh: the highest carrier is the off-mode drive at
 # 91.2 Hz (lambda = 3.76 m, lambda / 8 = 0.47 m) and the smallest geometric
@@ -50,7 +51,11 @@ def _room_mode_fields(
     off-mode drive frequencies. ``n_frames`` sets the captured window at the
     fixed ``_ROOM_EVERY`` capture stride (see the timeline note above).
     """
-    import fdtd2d
+    import clip_placement
+
+    from phonometry.simulation import FDTD2D, CWSource
+
+    compute = clip_placement.compute_for("anim_fdtd_room_modes")
 
     lx, ly, c0 = 5.0, 3.5, 343.0
     dx = 0.01  # 500 x 350 cells
@@ -64,12 +69,13 @@ def _room_mode_fields(
     p_all, r_all = [], []
     times = np.zeros(0)
     for f in (f_mode, f_off):
-        sim = fdtd2d.FDTD2D(c0, dx, shape=(ny, nx), damping=6.9077 / t60)
-        sim.add_source(fdtd2d.CWSource(ix=25, iy=25, frequency=f, ramp_cycles=2.0))
+        sim = FDTD2D(c0, dx, shape=(ny, nx), damping=6.9077 / t60, compute=compute)
+        sim.add_source(CWSource(ix=25, iy=25, frequency=f, ramp_cycles=2.0))
+        xp = sim._backend.xp
         # Running mean square with a two-period time constant: the pattern
         # (the mode map) builds up as the resonance settles.
         beta = float(np.exp(-sim.dt * f / 2.0))
-        ms = np.zeros_like(sim.p)
+        ms = sim._backend.zeros(tuple(sim.p.shape))
         ps: list[Any] = []
         rs: list[Any] = []
         ts: list[float] = []
@@ -77,8 +83,8 @@ def _room_mode_fields(
             sim.step()
             ms = beta * ms + (1.0 - beta) * sim.p**2
             if (i + 1) % every == 0 and len(ps) < n_frames:
-                ps.append(sim.p[::2, ::2].astype(np.float32))
-                rs.append(np.sqrt(ms[::2, ::2]).astype(np.float32))
+                ps.append(_host(sim, sim.p[::2, ::2]))
+                rs.append(_host(sim, xp.sqrt(ms[::2, ::2])))
                 ts.append(sim.time)
         p_all.append(np.stack(ps))
         r_all.append(np.stack(rs))

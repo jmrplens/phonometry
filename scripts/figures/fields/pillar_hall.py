@@ -45,9 +45,9 @@ def _poster_ss_for(webm: str) -> float | None:
     # re-render that would draw the very same frames.
     name = os.path.basename(webm)  # noqa: PTH119
     if _PILLAR_STEM in name:
-        import fdtd2d
+        from phonometry.simulation import FDTD2D, Compute
 
-        dt = fdtd2d.FDTD2D(343.0, _PILLAR_DX, shape=(3, 8)).dt
+        dt = FDTD2D(343.0, _PILLAR_DX, shape=(3, 8), compute=Compute()).dt
         dt_frame = _PILLAR_EVERY * dt
         return float((6.0e-3 / dt_frame - _PILLAR_WARM) / _PILLAR_FPS)
     if "anim_fdtd_transmission_tube" in name:
@@ -151,12 +151,13 @@ def _pillar_fields(n_frames: int = _PILLAR_FRAMES) -> tuple[Any, Any]:
     structured coda behind it, and the hall then empties through the
     absorbing ends; a mild bulk damping (25 1/s, a ~0.28 s T60 stand-in
     for air and wall absorption) keeps the decay physical. 704 k cells
-    and 7520 steps, still comfortably a CPU job, so the GPU runner is
-    not involved.
+    and 7520 steps; the registry records where it steps.
     """
-    import fdtd2d
+    import clip_placement
 
-    sim = fdtd2d.FDTD2D(
+    from phonometry.simulation import FDTD2D
+
+    sim = FDTD2D(
         343.0,
         _PILLAR_DX,
         shape=(_PILLAR_NY, _PILLAR_NX),
@@ -164,6 +165,7 @@ def _pillar_fields(n_frames: int = _PILLAR_FRAMES) -> tuple[Any, Any]:
         sponge_sides=("left", "right"),
         damping=25.0,
         obstacle_mask=_pillar_mask(),
+        compute=clip_placement.compute_for("anim_fdtd_pillar_hall"),
     )
 
     lam0 = 343.0 / _PILLAR_F0
@@ -175,7 +177,7 @@ def _pillar_fields(n_frames: int = _PILLAR_FRAMES) -> tuple[Any, Any]:
     for k in range(n_frames):
         for _ in range(_PILLAR_EVERY):
             sim.step()
-        frames[k] = sim.p
+        frames[k] = sim._backend.to_host(sim.p)
         ts[k] = sim.time
     return frames, ts
 

@@ -17,6 +17,7 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
+from ._core import _host
 
 _REFR_B = 1.0  # log-profile strength [m/s]
 _REFR_C0 = 340.0  # ground-level effective speed
@@ -91,9 +92,12 @@ def _refraction_fields(
     two c(z) profiles sampled on it, and the library ray fans traced
     through the same profiles.
     """
-    import fdtd2d
+    import clip_placement
 
     from phonometry import environment
+    from phonometry.simulation import FDTD2D, CWSource
+
+    compute = clip_placement.compute_for("anim_fdtd_refraction")
 
     dx = _REFR_DX
     ny, nx = 440, 1507  # 132 m x 452 m
@@ -140,16 +144,19 @@ def _refraction_fields(
         c_prof = prof.speed_at(z)
         c_map = np.repeat(c_prof[:, np.newaxis], nx, axis=1)
         # Row 0 is the ground (rigid, no sponge); "bottom" is the sky in
-        # the low-row-origin naming of fdtd2d, as in the barrier clip.
-        sim = fdtd2d.FDTD2D(
-            c_map, dx, sponge_width=40, sponge_sides=("left", "right", "bottom")
+        # the low-row-origin naming of the engine, as in the barrier clip.
+        sim = FDTD2D(
+            c_map,
+            dx,
+            sponge_width=40,
+            sponge_sides=("left", "right", "bottom"),
+            compute=compute,
         )
         ix, iy = round(_REFR_SRC[0] / dx), round(_REFR_SRC[1] / dx)
-        sim.add_source(
-            fdtd2d.CWSource(ix=ix, iy=iy, frequency=_REFR_F, ramp_cycles=2.0)
-        )
+        sim.add_source(CWSource(ix=ix, iy=iy, frequency=_REFR_F, ramp_cycles=2.0))
+        xp = sim._backend.xp
         beta = float(np.exp(-sim.dt * _REFR_F / 2.0))
-        ms = np.zeros_like(sim.p)
+        ms = sim._backend.zeros(tuple(sim.p.shape))
         settle = round(1.30 / sim.dt)  # domain transit + ring-up
         for _ in range(settle):
             sim.step()
@@ -160,10 +167,10 @@ def _refraction_fields(
             sim.step()
             ms = beta * ms + (1.0 - beta) * sim.p**2
             if sim.n % every == 0:
-                ps.append(sim.p[::3, ::3].astype(np.float32))
+                ps.append(_host(sim, sim.p[::3, ::3]))
                 ts.append(sim.time)
         p_all.append(np.stack(ps))
-        r_all.append(np.sqrt(ms))
+        r_all.append(_host(sim, xp.sqrt(ms), dtype=np.float64))
         times = np.asarray(ts)
     rms_maps = np.stack(r_all)
     # Verdict overlay: the steady RMS map times sqrt(r) to undo the 2D

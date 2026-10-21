@@ -21,7 +21,7 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
-from ._core import _rms_to_db
+from ._core import _host, _rms_to_db
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -72,20 +72,21 @@ def _ground_effect_fields(
     two-path image-source model levels on the same arc, and the predicted
     null angles where the path difference is an odd multiple of lambda/2.
     """
-    import fdtd2d
+    import clip_placement
+
+    from phonometry.simulation import FDTD2D, CWSource
 
     c0, dx = 343.0, 0.02
     ny, nx = 400, 700  # 8 m x 14 m
-    sim = fdtd2d.FDTD2D(
+    sim = FDTD2D(
         c0,
         dx,
         shape=(ny, nx),
         sponge_width=40,
         sponge_sides=("left", "right", "bottom"),
+        compute=clip_placement.compute_for("anim_fdtd_ground_effect"),
     )
-    sim.add_source(
-        fdtd2d.CWSource(ix=80, iy=75, frequency=_GROUND_FREQ, ramp_cycles=2.0)
-    )
+    sim.add_source(CWSource(ix=80, iy=75, frequency=_GROUND_FREQ, ramp_cycles=2.0))
     every = _GROUND_EVERY
     lam = c0 / _GROUND_FREQ
     theta = np.arange(1.0, 62.5, 0.5)
@@ -95,8 +96,11 @@ def _ground_effect_fields(
     ix_arc = np.round(arc_x / dx).astype(int)
     iy_arc = np.round(arc_y / dx).astype(int)
 
+    backend = sim._backend
+    xp = backend.xp
+    arc_flat = backend.index(iy_arc * nx + ix_arc)
     beta = float(np.exp(-sim.dt * _GROUND_FREQ / 2.0))
-    ms = np.zeros_like(sim.p)
+    ms = backend.zeros(tuple(sim.p.shape))
     ps: list[Any] = []
     rs: list[Any] = []
     ts: list[float] = []
@@ -105,11 +109,11 @@ def _ground_effect_fields(
         sim.step()
         ms = beta * ms + (1.0 - beta) * sim.p**2
         if sim.n % every == 0 and len(ps) < n_frames:
-            ps.append(sim.p[::2, ::2].astype(np.float32))
-            rs.append(np.sqrt(ms[::2, ::2]).astype(np.float32))
+            ps.append(_host(sim, sim.p[::2, ::2]))
+            rs.append(_host(sim, xp.sqrt(ms[::2, ::2])))
             ts.append(sim.time)
-            arc.append(np.sqrt(ms[iy_arc, ix_arc]))
-    arc_rms = np.stack(arc)
+            arc.append(xp.sqrt(xp.take(xp.reshape(ms, (-1,)), arc_flat)))
+    arc_rms = _host(sim, xp.stack(arc), dtype=np.float64)
     with np.errstate(divide="ignore"):
         arc_db = 20.0 * np.log10(arc_rms / float(arc_rms[-1].max()))
     arc_db = np.clip(arc_db, -45.0, None)

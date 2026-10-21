@@ -19092,8 +19092,8 @@ section 6:
 
 ```python
 lift = electroacoustics.amplifier_frequency_response(
-    [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],
-    frequencies=[100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],       # output current, A
+    [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],       # output current, A
+    frequencies=[100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],
 )
 print(lift.response_db.round(2))                # [0.   0.   1.58 3.23 4.08 4.86 5.11] dB re 1 kHz
 speech = electroacoustics.verify_amplifier_overload(current, z, 11.0, current_response=lift)
@@ -20483,7 +20483,7 @@ grids.
 - [`impulse_response`](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) recovers the *linear* IR from the
   same sweep recording and simply discards the negative-time distortion
   products; `swept_sine_distortion` is the tool that reads them.
-- [`thd_ratio` / `harmonic_analysis`](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/) measure distortion
+- [`thd` / `harmonic_analysis`](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/) measure distortion
   from a steady tone at one frequency; the sweep separator returns the same
   ratios as a continuous function of frequency, from one measurement.
 - The phase utilities operate on any one-sided *complex* response: an
@@ -30554,9 +30554,9 @@ operator = [(25.0, [0.08, 0.24, 0.57, 0.69, 0.71, 0.73]),
             (25.0, ceiling), (60.0, walls)]
 
 chain = noise_control.room_to_room_transmission(
-    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
-    5.0 * 3.0,       # TL of the separating wall
-    room.equivalent_absorption_area(operator),                                  # the wall is 5 m x 3 m
+    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],       # TL of the separating wall
+    5.0 * 3.0,                                  # the wall is 5 m x 3 m
+    room.equivalent_absorption_area(operator),
     frequencies=bands,
     source=noise_control.SourceRoom(
         power_level=[105.0, 103.0, 98.0, 108.0, 107.0, 109.0],
@@ -63949,9 +63949,9 @@ def free_field_budget(fx):
 
 free = metrology.sequential_comparison(
     l_ref_p,
-    l_ref_p + c_ff + field_1,
-    l_ws2f + field_2,     # the reference's output, dB re 1 V
-    frequencies=ff,             # the WS2F's output in its place
+    l_ref_p + c_ff + field_1,     # the reference's output, dB re 1 V
+    l_ws2f + field_2,             # the WS2F's output in its place
+    frequencies=ff,
     monitor=metrology.MonitorReadings(
         reference_level=monitor + field_1, test_level=monitor + field_2
     ),
@@ -65326,11 +65326,11 @@ pressure = -0.1 * x**1.5                        # the meter on the calibrator, r
 spread = np.array([[0.0], [0.02], [-0.03]]) * x**0.8   # three microphones of the model
 
 c = metrology.sound_calibrator_correction(
-    94.0 + free + spread,
-    94.0 + c_ff_rm,          # L_ind1: the meter in the free field
-    94.0 + pressure + spread / 2,                # L_ind2: the reference in its place
-    94.0,  # L_ind3: the calibrator on the meter
-    frequencies=f,                          # L_ind4: the calibrator on the reference
+    94.0 + free + spread,          # L_ind1: the meter in the free field
+    94.0 + c_ff_rm,                # L_ind2: the reference in its place
+    94.0 + pressure + spread / 2,  # L_ind3: the calibrator on the meter
+    94.0,                          # L_ind4: the calibrator on the reference
+    frequencies=f,
     reference_free_field_correction=c_ff_rm,
 )
 print(c.correction.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]
@@ -66082,9 +66082,9 @@ print(metrology.IEC61183_TABLE_B1[8000.0])
 delta_dp = np.array([metrology.IEC61183_TABLE_B1[f].diffuse_pressure_difference_db
                      for f in bands])
 dd = metrology.diffuse_field_sensitivity(
-    80.0 + r.random_incidence_level,
-    80.0 + delta_dp,  # L_D, the meter under test
-    frequencies=bands,                     # L_D,ref, a pressure-calibrated LS2aP
+    80.0 + r.random_incidence_level,  # L_D, the meter under test
+    80.0 + delta_dp,                  # L_D,ref, a pressure-calibrated LS2aP
+    frequencies=bands,
     reference_pressure_level=0.0,     # G_P,ref; Delta_DP from Table B.1
 )
 print(dd.reference_correction[shown])            # [0.   0.25 1.2  3.05]

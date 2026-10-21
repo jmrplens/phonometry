@@ -460,9 +460,9 @@ def free_field_budget(fx):
 
 free = metrology.sequential_comparison(
     l_ref_p,
-    l_ref_p + c_ff + field_1,
-    l_ws2f + field_2,     # the reference's output, dB re 1 V
-    frequencies=ff,             # the WS2F's output in its place
+    l_ref_p + c_ff + field_1,     # the reference's output, dB re 1 V
+    l_ws2f + field_2,             # the WS2F's output in its place
+    frequencies=ff,
     monitor=metrology.MonitorReadings(
         reference_level=monitor + field_1, test_level=monitor + field_2
     ),

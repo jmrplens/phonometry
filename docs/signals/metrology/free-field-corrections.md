@@ -77,11 +77,11 @@ pressure = -0.1 * x**1.5                        # the meter on the calibrator, r
 spread = np.array([[0.0], [0.02], [-0.03]]) * x**0.8   # three microphones of the model
 
 c = metrology.sound_calibrator_correction(
-    94.0 + free + spread,
-    94.0 + c_ff_rm,          # L_ind1: the meter in the free field
-    94.0 + pressure + spread / 2,                # L_ind2: the reference in its place
-    94.0,  # L_ind3: the calibrator on the meter
-    frequencies=f,                          # L_ind4: the calibrator on the reference
+    94.0 + free + spread,          # L_ind1: the meter in the free field
+    94.0 + c_ff_rm,                # L_ind2: the reference in its place
+    94.0 + pressure + spread / 2,  # L_ind3: the calibrator on the meter
+    94.0,                          # L_ind4: the calibrator on the reference
+    frequencies=f,
     reference_free_field_correction=c_ff_rm,
 )
 print(c.correction.round(2))  # [-0.04 -0.09 -0.1  -0.05  0.05  0.23  0.63  1.72  4.95]

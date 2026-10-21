@@ -1631,7 +1631,7 @@ grids.
 - [`impulse_response`](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/) recovers the *linear* IR from the
   same sweep recording and simply discards the negative-time distortion
   products; `swept_sine_distortion` is the tool that reads them.
-- [`thd_ratio` / `harmonic_analysis`](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/) measure distortion
+- [`thd` / `harmonic_analysis`](https://docs.jmrp.io/phonometry/devices/electroacoustics/electroacoustics/) measure distortion
   from a steady tone at one frequency; the sweep separator returns the same
   ratios as a continuous function of frequency, from one measurement.
 - The phase utilities operate on any one-sided *complex* response: an
@@ -2165,8 +2165,8 @@ section 6:
 
 ```python
 lift = electroacoustics.amplifier_frequency_response(
-    [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],
-    frequencies=[100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],       # output current, A
+    [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],       # output current, A
+    frequencies=[100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],
 )
 print(lift.response_db.round(2))                # [0.   0.   1.58 3.23 4.08 4.86 5.11] dB re 1 kHz
 speech = electroacoustics.verify_amplifier_overload(current, z, 11.0, current_response=lift)

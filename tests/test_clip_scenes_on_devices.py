@@ -19,8 +19,12 @@ from __future__ import annotations
 
 import ast
 import pathlib
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 _FIELDS_DIR = (
     pathlib.Path(__file__).resolve().parents[1] / "scripts" / "figures" / "fields"
@@ -32,8 +36,12 @@ _FIELD_NAMES = frozenset({"p", "vx", "vy", "txx", "tyy", "txy"})
 _DEVICE_MAKERS = frozenset({"zeros", "asarray", "index", "collocated"})
 #: Calls that return a host array.
 _HOST_ARRAYS = frozenset({"_host", "_blanked", "to_host", "host_field"})
-#: Calls that return a Python number.
-_SCALARS = frozenset({"float", "int", "scalar", "len", "min", "max", "round", "abs"})
+#: The names the engine's array namespace goes by: ``xp``, ``sim._xp``,
+#: ``sim._backend.xp``.
+_DEVICE_NAMESPACES = frozenset({"xp", "_xp"})
+#: Builtins that make a Python number of a device value, bringing it to the
+#: host. ``abs`` is not one: on a device array it gives a device array.
+_HOST_PULLS = frozenset({"float", "int", "max", "min", "round"})
 
 #: Scenes not yet moved onto the public engines. Each is taken out as it is.
 _NOT_YET: frozenset[str] = frozenset(
@@ -63,14 +71,21 @@ _NOT_YET: frozenset[str] = frozenset(
 
 
 def _callee(call: ast.Call) -> tuple[str | None, str]:
-    """The receiver name (None for a bare function) and the name called."""
+    """The receiver name (None for a bare function) and the name called.
+
+    The receiver is the last name before the call: ``xp`` for ``xp.max`` and
+    for ``sim._backend.xp.max`` alike, ``""`` when it is not a name.
+    """
     func = call.func
     if isinstance(func, ast.Name):
         return None, func.id
-    if isinstance(func, ast.Attribute):
-        receiver = func.value.id if isinstance(func.value, ast.Name) else ""
-        return receiver, func.attr
-    return None, ""
+    if not isinstance(func, ast.Attribute):
+        return None, ""
+    if isinstance(func.value, ast.Name):
+        return func.value.id, func.attr
+    if isinstance(func.value, ast.Attribute):
+        return func.value.attr, func.attr
+    return "", func.attr
 
 
 def _is_field(node: ast.AST) -> bool:
@@ -87,21 +102,40 @@ def _call_kind(call: ast.Call) -> str | None:
         return "host"
     if receiver == "np":
         return None if name == "errstate" else "host"
-    if receiver == "xp" or (name in _DEVICE_MAKERS and receiver not in (None, "np")):
+    if receiver in _DEVICE_NAMESPACES:
+        return "device"
+    if name in _DEVICE_MAKERS and receiver not in (None, "np"):
         return "device"
     return None
 
 
+def _merge(kinds: Iterable[str | None]) -> str | None:
+    """``"device"`` if any of *kinds* is, else ``"host"`` if any is, else None."""
+    found = set(kinds)
+    if "device" in found:
+        return "device"
+    if "host" in found:
+        return "host"
+    return None
+
+
 def _kind(node: ast.AST, device: set[str], host: set[str]) -> str | None:
-    """``"device"``, ``"host"`` or None (a number, or something unknown)."""
+    """``"device"``, ``"host"`` or None (a number, or something unknown).
+
+    A call is what it returns, except ``abs``, which leaves its argument
+    where it is; any other expression holds what its parts hold.
+    """
     if _is_field(node):
         return "device"
     if isinstance(node, ast.Name):
-        return "device" if node.id in device else "host" if node.id in host else None
-    if isinstance(node, ast.Call):
+        return _merge(
+            kind
+            for kind, names in (("device", device), ("host", host))
+            if node.id in names
+        )
+    if isinstance(node, ast.Call) and _callee(node) != (None, "abs"):
         return _call_kind(node)
-    kinds = {_kind(child, device, host) for child in ast.iter_child_nodes(node)}
-    return "device" if "device" in kinds else "host" if "host" in kinds else None
+    return _merge(_kind(child, device, host) for child in ast.iter_child_nodes(node))
 
 
 def _assignments(func: ast.AST) -> list[tuple[list[ast.expr], ast.expr]]:
@@ -123,9 +157,10 @@ def _names(func: ast.AST) -> tuple[set[str], set[str]]:
         for targets, value in pairs:
             kind = _kind(value, device, host)
             names = {t.id for t in targets if isinstance(t, ast.Name)}
-            (device if kind == "device" else host if kind == "host" else set()).update(
-                names
-            )
+            if kind == "device":
+                device.update(names)
+            elif kind == "host":
+                host.update(names)
     return device, host
 
 
@@ -159,7 +194,7 @@ def _call_problem(node: ast.Call, device: set[str], host: set[str]) -> str | Non
         return f"np.{name} on a device array; use the engine's namespace"
     if (
         receiver is None
-        and name in ("float", "int")
+        and name in _HOST_PULLS
         and any(_kind(a, device, host) == "device" for a in node.args)
     ):
         return f"{name}() pulls a device value to the host on every turn"
@@ -170,16 +205,24 @@ def _call_problem(node: ast.Call, device: set[str], host: set[str]) -> str | Non
     return None
 
 
+_DEVICE_INTO_HOST = (
+    "a device value written into a host array; bring it to the host with _host"
+)
+_HOST_INTO_DEVICE = "a host array written into a device array; move it to the device once, before the loop"
+
+
 def _write_problem(
     target: ast.expr, value: ast.expr, device: set[str], host: set[str]
 ) -> str | None:
     kind = _kind(value, device, host)
+    if _is_field(target) and kind == "host":
+        return _HOST_INTO_DEVICE
     if isinstance(target, ast.Subscript):
         base = _kind(target.value, device, host)
         if base != "device" and kind == "device":
-            return "a device value written into a host array; bring it to the host with _host"
+            return _DEVICE_INTO_HOST
         if base == "device" and kind == "host":
-            return "a host array written into a device array; move it to the device once, before the loop"
+            return _HOST_INTO_DEVICE
     if isinstance(target, ast.Name) and target.id in host and kind == "device":
         return f"{target.id} is a host array and takes a device value; make it with the backend"
     return None
@@ -235,7 +278,7 @@ def test_a_scene_keeps_its_fields_on_the_device_between_captures(
 
 def test_every_kind_of_round_trip_is_seen() -> None:
     source = """
-def build(sim, frames):
+def build(sim, sims, frames):
     taper = np.hanning(10)
     trace = np.empty(10)
     energy = np.zeros_like(sim.p)
@@ -247,14 +290,28 @@ def build(sim, frames):
         frames.append(sim.p[::2, ::2].astype(np.float32))
         energy += sim.p**2
         np.maximum(trace, np.abs(sim.p[0]), out=trace)
+        trace[i] = abs(sim.p[1, 2])
+        trace[i] = sim._backend.xp.max(sim.p)
+        sim.vy += taper
+        sims[0].p *= taper
+        count = int(sim.p[2, 2])
+        peak = max(sim.p[0])
+        snapshot = sim.p.copy()
 """
     reasons = [line.split(": ", 1)[1] for line in problems(source, "scene")]
     assert sorted(reasons) == sorted(
         [
-            "a host array written into a device array; move it to the device once, before the loop",
-            "a device value written into a host array; bring it to the host with _host",
+            _HOST_INTO_DEVICE,
+            _HOST_INTO_DEVICE,
+            _HOST_INTO_DEVICE,
+            _DEVICE_INTO_HOST,
+            _DEVICE_INTO_HOST,
+            _DEVICE_INTO_HOST,
             "float() pulls a device value to the host on every turn",
+            "int() pulls a device value to the host on every turn",
+            "max() pulls a device value to the host on every turn",
             ".astype() on a device array; bring it to the host with _host",
+            ".copy() on a device array; bring it to the host with _host",
             "energy is a host array and takes a device value; make it with the backend",
             "np.abs on a device array; use the engine's namespace",
         ]
@@ -269,11 +326,14 @@ def build(sim, frames):
     taper = backend.asarray(np.hanning(10))
     history = backend.zeros((10,))
     energy = backend.zeros((4, 4))
+    envelope = backend.zeros((4, 4))
     for i in range(10):
         sim.step()
         sim.vy[3] += taper * xp.sin(1.0 * i)
+        sim.vy *= taper
         history[i] = sim.p[1, 2]
         energy += sim.p**2
+        envelope = sim._backend.xp.maximum(envelope, abs(sim.p))
         if i % 2 == 0:
             frames.append(_host(sim, sim.p[::2, ::2]))
             with np.errstate(divide="ignore"):

@@ -72,6 +72,24 @@ class ComputeFallbackWarning(PhonometryWarning):
     """A requested device was not available and the run went to NumPy."""
 
 
+def _refuse_impossible_placement(device: Device, dtype: Dtype, index: int) -> None:
+    """Refuse a device, dtype and index no run can step on together.
+
+    Shared by :class:`Compute`, the request, and :class:`RunProvenance`, the
+    record of a run, so a record rebuilt by hand cannot hold a placement no
+    request could have asked for.
+
+    :raises ValueError: for ``"torch:mps"`` in float64, or an index other
+        than 0 on a device that has one instance.
+    """
+    if device == _TORCH_MPS and dtype == "float64":
+        msg = "device 'torch:mps' needs dtype='float32': MPS has no float64"
+        raise ValueError(msg)
+    if device in _SINGLE and index != 0:
+        msg = f"device {device!r} has no device index; leave device_index at 0"
+        raise ValueError(msg)
+
+
 @dataclass(frozen=True, kw_only=True)
 class Compute(RichDisplay):
     """Where an FDTD simulation steps, in which dtype, and whether it may fall back.
@@ -110,12 +128,7 @@ class Compute(RichDisplay):
             msg = f"'fallback' must be True or False, got {self.fallback!r}."
             raise TypeError(msg)
         object.__setattr__(self, "fallback", bool(self.fallback))
-        if self.device == _TORCH_MPS and self.dtype == "float64":
-            msg = "device 'torch:mps' needs dtype='float32': MPS has no float64"
-            raise ValueError(msg)
-        if self.device in _SINGLE and self.device_index != 0:
-            msg = f"device {self.device!r} has no device index; leave device_index at 0"
-            raise ValueError(msg)
+        _refuse_impossible_placement(self.device, self.dtype, self.device_index)
         if self.device == "cpu" and self.fallback:
             msg = "device 'cpu' is already the fallback; fallback=True means nothing there"
             raise ValueError(msg)
@@ -143,8 +156,9 @@ class RunProvenance(RichDisplay):
         ``numpy_version`` that is not text, or a ``host``,
         ``array_library``, ``cuda_runtime``, ``cuda_driver_api`` or ``gpu``
         that is neither text nor ``None``.
-    :raises ValueError: for an unknown device or dtype, or an index that is
-        not a whole number of 0 or more.
+    :raises ValueError: for an unknown device or dtype, ``"torch:mps"`` in
+        float64, an index on a device that has one instance, or an index
+        that is not a whole number of 0 or more.
     """
 
     host: str | None
@@ -164,6 +178,7 @@ class RunProvenance(RichDisplay):
         # Held as an int, as Compute holds it.
         index = require_count(self.device_index, "device_index", at_least=0)
         object.__setattr__(self, "device_index", index)
+        _refuse_impossible_placement(self.device, self.dtype, index)
         if not isinstance(self.numpy_version, str):
             msg = f"'numpy_version' must be a text, got {self.numpy_version!r}."
             raise TypeError(msg)

@@ -104,7 +104,7 @@ Where a run actually stepped, recorded by the result.
 | Exception | When |
 | :--- | :--- |
 | TypeError | for a `device` or `dtype` that is not text, a `device_index` that is not a number (a bool is not one), a `numpy_version` that is not text, or a `host`, `array_library`, `cuda_runtime`, `cuda_driver_api` or `gpu` that is neither text nor `None`. |
-| ValueError | for an unknown device or dtype, or an index that is not a whole number of 0 or more. |
+| ValueError | for an unknown device or dtype, `"torch:mps"` in float64, an index on a device that has one instance, or an index that is not a whole number of 0 or more. |
 
 ## use
 

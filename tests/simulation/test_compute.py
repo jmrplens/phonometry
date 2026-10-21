@@ -249,6 +249,17 @@ def test_a_run_provenance_holds_what_a_run_wrote() -> None:
         ({"device_index": 1.5}, ValueError, "'device_index' must be a whole number"),
         ({"device_index": True}, TypeError, "'device_index' must be a whole number"),
         ({"device_index": "0"}, TypeError, "'device_index' must be a whole number"),
+        (
+            {"device": "torch:mps", "dtype": "float64"},
+            ValueError,
+            "'torch:mps' needs dtype='float32'",
+        ),
+        ({"device": "cpu", "device_index": 1}, ValueError, "'cpu' has no device index"),
+        (
+            {"device": "torch:cpu", "device_index": 2},
+            ValueError,
+            "'torch:cpu' has no device index",
+        ),
         ({"numpy_version": None}, TypeError, "'numpy_version' must be a text"),
         ({"host": b"node"}, TypeError, "'host' must be a text or None"),
         ({"array_library": 14.2}, TypeError, "'array_library' must be a text or None"),

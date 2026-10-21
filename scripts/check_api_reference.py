@@ -776,9 +776,9 @@ def _package_binding(parent: ModuleType | None, leaf: str) -> str | None:
     Reading the package source closes what reading its attributes cannot: a
     module that some other import reached first has already replaced the
     published object, and then the attribute shows the module. Only importing
-    the submodule itself (``from . import leaf``, ``import pkg.leaf``) binds
-    the name to it; any other import, assignment, function or class of that
-    name hides it.
+    the submodule itself (``from . import leaf``, ``from ..pkg import leaf``,
+    ``import pkg.leaf``, ``import pkg.leaf as leaf``) binds the name to it;
+    any other import, assignment, function or class of that name hides it.
 
     :param parent: The package, or ``None`` for a top-level module.
     :param leaf: The last component of the module's dotted name.
@@ -827,7 +827,7 @@ def _binding_other_than_submodule(
         return f"class {leaf}" if node.name == leaf else None
     if isinstance(node, ast.ImportFrom):
         source = "." * node.level + (node.module or "")
-        submodule_itself = source in {".", package}
+        submodule_itself = _resolved_source(source, package) == package
         for alias in node.names:
             if (alias.asname or alias.name) == leaf and not (
                 submodule_itself and alias.name == leaf
@@ -837,7 +837,7 @@ def _binding_other_than_submodule(
         return None
     if isinstance(node, ast.Import):
         for alias in node.names:
-            if alias.asname == leaf:
+            if alias.asname == leaf and alias.name != f"{package}.{leaf}":
                 return f"import {alias.name} as {leaf}"
         return None
     targets: list[ast.expr] = []
@@ -852,6 +852,23 @@ def _binding_other_than_submodule(
     ):
         return f"{leaf} = ..."
     return None
+
+
+def _resolved_source(source: str, package: str) -> str:
+    """The absolute module a ``from <source> import`` statement of ``package`` reads.
+
+    ``from ..pkg import leaf`` inside ``outer.pkg`` reads ``outer.pkg`` itself,
+    which the written source does not show.
+
+    :param source: The dots and the module name as written (``"..pkg"``).
+    :param package: The dotted name of the package whose ``__init__`` holds it.
+    :return: The absolute module name, or ``""`` for a relative import that
+        climbs past the top-level package and so reads nothing.
+    """
+    try:
+        return importlib.util.resolve_name(source, package)
+    except (ImportError, ValueError):
+        return ""
 
 
 def _unlisted_problems(

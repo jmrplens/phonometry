@@ -449,6 +449,8 @@ _BINDINGS = {
     "from . import probe": None,
     "from fake_pkg import probe": None,
     "import fake_pkg.probe": None,
+    "import fake_pkg.probe as probe": None,
+    "import other_pkg.probe as probe": "import other_pkg.probe as probe",
     "from .probe import probe": "from .probe import probe",
     "from ._impl import run as probe": "from ._impl import run as probe",
     "import json as probe": "import json as probe",
@@ -472,6 +474,30 @@ def test_only_importing_the_submodule_itself_leaves_its_name_alone() -> None:
         ]
         first = next((text for text in found if text is not None), None)
         assert first == binding, statement
+
+
+_NESTED_BINDINGS = {
+    "from ..fake_pkg import probe": None,
+    "from ..fake_pkg import run as probe": "from ..fake_pkg import run as probe",
+    "from .. import probe": "from .. import probe",
+    "from ...beyond import probe": "from ...beyond import probe",
+}
+
+
+def test_a_relative_import_is_read_from_where_it_resolves() -> None:
+    """``from ..pkg import leaf`` inside ``outer.pkg`` names the package itself.
+
+    Comparing the written source with the package name missed it, so a correct
+    ``__init__`` failed the gate. ``from .. import probe`` reaches ``outer``
+    instead, and an import that climbs past the top-level package resolves to
+    nothing, so both still hide the module.
+    """
+    import ast
+
+    for statement, binding in _NESTED_BINDINGS.items():
+        (node,) = ast.parse(statement).body
+        found = gate._binding_other_than_submodule(node, "outer.fake_pkg", "probe")
+        assert found == binding, statement
 
 
 def test_the_library_reaches_every_public_module_by_its_name() -> None:

@@ -220,9 +220,24 @@ def test_a_keyword_beside_a_copy_of_the_callers_keywords_is_refused(
         "    options = dict(kwargs)\n"
         "    options.setdefault('label', 'x')\n"
         "    ax.plot([1], zorder=3, **options)\n"
+        "    typed: dict[str, object] = dict(kwargs)\n"
+        "    ax.plot([1], zorder=3, **typed)\n"
+        "    if (walrus := dict(kwargs)):\n"
+        "        ax.plot([1], zorder=3, **walrus)\n"
     )
     assert gate._findings(_module(source, tmp_path)) == [
-        (4, "'zorder' written beside **kwargs in ax.plot(), so a caller cannot pass it")
+        (
+            4,
+            "'zorder' written beside **kwargs in ax.plot(), so a caller cannot pass it",
+        ),
+        (
+            6,
+            "'zorder' written beside **kwargs in ax.plot(), so a caller cannot pass it",
+        ),
+        (
+            8,
+            "'zorder' written beside **kwargs in ax.plot(), so a caller cannot pass it",
+        ),
     ]
 
 

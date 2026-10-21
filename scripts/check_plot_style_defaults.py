@@ -272,17 +272,32 @@ def _lineage(
     while grew:
         grew = False
         for node in ast.walk(function):
-            if not isinstance(node, ast.Assign):
+            binding = _binding(node)
+            if binding is None:
                 continue
-            read = _names(node.value) & set(born)
+            targets, value, line = binding
+            read = _names(value) & set(born)
             if not read:
                 continue
-            for target in node.targets:
-                for name in _names(target) - set(born):
-                    born[name] = node.lineno
-                    parents[name] = read
-                    grew = True
+            for name in _names(targets) - set(born):
+                born[name] = line
+                parents[name] = read
+                grew = True
     return _Lineage(born, parents)
+
+
+def _binding(node: ast.AST) -> tuple[ast.AST, ast.AST, int] | None:
+    """``(targets, value, line)`` of an assignment of any form, or ``None``.
+
+    ``options = dict(kwargs)``, ``options: dict[str, Any] = dict(kwargs)`` and
+    ``(options := dict(kwargs))`` all bind a copy of the caller's keywords.
+    """
+    if isinstance(node, ast.Assign):
+        targets = ast.Tuple(elts=list(node.targets), ctx=ast.Store())
+        return targets, node.value, node.lineno
+    if isinstance(node, (ast.AnnAssign, ast.NamedExpr)) and node.value is not None:
+        return node.target, node.value, node.lineno
+    return None
 
 
 def _names(expression: ast.AST) -> set[str]:

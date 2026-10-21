@@ -640,11 +640,12 @@ def test_a_band_edge_that_is_not_numeric_is_refused(
     The conversion to ``float`` already stopped these, but with its own
     wording: ``could not convert string to float: 'low'`` for the strings and
     a ``TypeError`` from inside ``float`` for the objects, neither naming the
-    field nor the result, and the second not even the documented type.
+    field nor the result. Both are the wrong type: a text is refused whatever
+    it reads as, as an object is.
     """
     result = _example_result()
     with pytest.raises(
-        ValueError,
+        TypeError,
         match=rf"LoudspeakerCharacteristics: '{field}' must be numeric\.",
     ):
         dataclasses.replace(result, **{field: pair})

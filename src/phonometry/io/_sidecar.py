@@ -85,6 +85,7 @@ from .._internal.json_input import (
     text_location,
     write_beside,
 )
+from .._internal.validation import require_scalar
 
 #: The schema identifier and the layout version this module writes.
 SIDECAR_SCHEMA = "phonometry-calibration"
@@ -413,6 +414,7 @@ def check_sidecar_labels(
     :raises ValueError: naming the sidecar, for a count of labels that is
         not *channels*.
     """
+    require_scalar(channels, "channels")
     if labels is not None and len(labels) != channels:
         msg = (
             f"{_named(sidecar_path(audio_path))}: sidecar gives "
@@ -507,8 +509,9 @@ def _optional_number(
         return None
     if isinstance(value, bool) or not isinstance(value, int | float):
         msg = f"{_named(path)}: {name} must be a number or null; got {value!r}"
-        # ValueError keeps the module validation errors uniform.
-        raise ValueError(msg)  # noqa: TRY004
+        # A field of the wrong type in the file is a malformed file: a
+        # ValueError that names the file, not a mistake in the call.
+        raise ValueError(msg)
     number = _as_float(value, name, path)
     if not math.isfinite(number):
         msg = f"{_named(path)}: {name} must be a finite number or null; got {value!r}"
@@ -576,8 +579,9 @@ def _load_sidecar_payload(source: Path, raw: bytes) -> dict[str, object]:
     version = payload.get("schema_version")
     if not isinstance(version, int) or isinstance(version, bool):
         msg = f"{_named(source)}: schema_version must be an integer"
-        # ValueError keeps the module validation errors uniform.
-        raise ValueError(msg)  # noqa: TRY004
+        # A field of the wrong type in the file is a malformed file: a
+        # ValueError that names the file, not a mistake in the call.
+        raise ValueError(msg)
     if version > SIDECAR_VERSION:
         msg = (
             f"{_named(source)}: sidecar schema version {version} is newer than the "
@@ -593,8 +597,9 @@ def _required_factor(payload: dict[str, object], source: Path) -> float:
     factor = payload.get("calibration_factor")
     if isinstance(factor, bool) or not isinstance(factor, int | float):
         msg = f"{_named(source)}: calibration_factor must be a number; got {factor!r}"
-        # ValueError keeps the module validation errors uniform.
-        raise ValueError(msg)  # noqa: TRY004
+        # A field of the wrong type in the file is a malformed file: a
+        # ValueError that names the file, not a mistake in the call.
+        raise ValueError(msg)
     return _as_float(factor, "calibration_factor", source)
 
 
@@ -607,8 +612,9 @@ def _calibrator_fields(
         calibrator = {}
     if not isinstance(calibrator, dict):
         msg = f"{_named(source)}: calibrator must be an object or null"
-        # ValueError keeps the module validation errors uniform.
-        raise ValueError(msg)  # noqa: TRY004
+        # A field of the wrong type in the file is a malformed file: a
+        # ValueError that names the file, not a mistake in the call.
+        raise ValueError(msg)
     model = calibrator.get("model")
     if model is not None and not isinstance(model, str):
         msg = f"{_named(source)}: calibrator model must be a string or null"

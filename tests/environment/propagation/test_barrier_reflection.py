@@ -515,7 +515,7 @@ class TestSignalContract:
         front, free = _grid()
         mixed = [Signal(front, int(_FS)), 0.0]
         with pytest.raises(
-            ValueError, match="'in_front_irs' mixes Signals with bare numbers"
+            TypeError, match="'in_front_irs' mixes Signals with bare numbers"
         ):
             prop.reflection_index(mixed, free, speed_of_sound=_C)  # type: ignore[arg-type]
 

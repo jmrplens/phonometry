@@ -24,7 +24,11 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ..._internal.validation import require_non_negative, require_positive
+from ..._internal.validation import (
+    require_non_negative,
+    require_positive,
+    require_scalar,
+)
 from ..common import (
     _C_EDGE,
     _C_PRIMARY,
@@ -156,6 +160,11 @@ def _draw_chamber(
     **kwargs: Any,
 ) -> None:
     """Expansion chamber (optionally with extended inlet/outlet tubes)."""
+    require_scalar(inlet_extension, "inlet_extension")
+    require_scalar(outlet_extension, "outlet_extension")
+    require_scalar(chamber_area, "chamber_area")
+    require_scalar(length, "length")
+    require_scalar(pipe_area, "pipe_area")
     d_p = _duct_diameter(pipe_area, "pipe_area")
     d_c = _duct_diameter(chamber_area, "chamber_area")
     if chamber_area <= pipe_area:
@@ -389,6 +398,8 @@ def _validate_chamber_geometry(
     outlet_extension: float,
 ) -> None:
     """Chamber parameter validation, before any figure exists."""
+    require_scalar(chamber_area, "chamber_area")
+    require_scalar(pipe_area, "pipe_area")
     if length is None or chamber_area is None or pipe_area is None:
         msg = "A chamber drawing needs 'length', 'chamber_area' and 'pipe_area'."
         raise ValueError(msg)
@@ -866,6 +877,7 @@ def plot_plenum_geometry(
     :raises ValueError: naming the first of the three that is not finite and
         positive, or for an angle outside ``[0, pi/2)``.
     """
+    require_scalar(angle_rad, "angle_rad")
     from matplotlib.patches import Rectangle
 
     _check_language(language)

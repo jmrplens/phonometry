@@ -70,6 +70,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
+    _as_float64,
     require_choice,
     require_equal_shapes,
     require_finite_array,
@@ -895,15 +896,12 @@ def rainfall_sound(
         :class:`RainfallReferenceCorrection` covering every band, or
         :math:`\Delta L_{I\mathrm{c}}` per band in dB, or ``None``.
     :return: A :class:`RainfallSoundResult`.
+    :raises TypeError: If ``l_pr`` holds an element that is not a number.
     :raises ValueError: If the shapes disagree, a level is not finite, a time,
         frequency, volume or area is not positive, or a band has no correction.
     """
     freqs = require_positive_array(frequencies, "frequencies")
-    try:
-        levels = np.asarray(l_pr, dtype=np.float64)
-    except (TypeError, ValueError) as exc:
-        msg = "'l_pr' must be numeric."
-        raise ValueError(msg) from exc
+    levels = _as_float64(l_pr, "l_pr")
     if levels.ndim == 1:
         levels = levels[np.newaxis, :]
     if levels.ndim != 2 or levels.shape[0] == 0:  # noqa: PLR2004

@@ -32,7 +32,7 @@ Equation (4.4) as the atmosphere plus the water column above.
 
 Sea water has no ratio of specific heats or thermal diffusivity here: no source
 in this library prints them, so a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) built from
-this module raises [`FluidPropertyUnavailable`](/phonometry/reference/api/fluids/fluids/#fluidpropertyunavailable) for
+this module raises [`FluidPropertyUnavailableError`](/phonometry/reference/api/fluids/fluids/#fluidpropertyunavailableerror) for
 them rather than inventing a number.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.

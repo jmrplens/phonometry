@@ -58,6 +58,7 @@ from ..._internal.validation import (
     require_choice,
     require_positive,
     require_positive_array,
+    require_scalar,
 )
 from ._shared import _TOLERANCE
 
@@ -175,6 +176,7 @@ def _response_magnitudes(responses: ArrayLike, band_count: int) -> NDArray[np.fl
     :raises ValueError: For a shape that is not one column per band, or a
         magnitude that is not positive and finite.
     """
+    require_scalar(band_count, "band_count")
     matrix = np.asarray(responses, dtype=np.float64)
     if matrix.ndim == 1:
         matrix = matrix[:, None]
@@ -338,14 +340,15 @@ class TrackDecayRate(OwnsArrays):
 
         :param frequency_hz: A nominal band frequency, in hertz.
         :return: The rate of that band.
-        :raises KeyError: If the spectrum has no such band.
+        :raises ValueError: If the spectrum has no band at that frequency: a
+            number outside what the result covers, not a missing key.
         """
         band = round(10.0 * np.log10(require_positive(frequency_hz, "frequency_hz")))
         bands = np.round(10.0 * np.log10(self.frequencies)).astype(int)
         matches = np.flatnonzero(bands == band)
         if matches.size == 0:
             msg = f"the rates have no band at {frequency_hz:g} Hz."
-            raise KeyError(msg)
+            raise ValueError(msg)
         return float(self.decay_rates_db_per_m[matches[0]])
 
     def plot(

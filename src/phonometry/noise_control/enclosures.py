@@ -415,6 +415,11 @@ def enclosure_insertion_loss(
         ``"norton"`` the bare :math:`C = 10 \log_{10}(S_\mathrm{E} / R_\mathrm{i})` of Norton & Karczub
         Equation (4.115).
     :return: An :class:`EnclosureInsertionLossResult`.
+    :raises TypeError: if ``panel_transmission_loss`` is none of the forms
+        above.
+    :raises ValueError: if an area is not positive, ``internal_absorption`` is
+        not in ``(0, 1)`` or does not carry one value per band, a callable is
+        given without ``frequencies``, or ``model`` is unknown.
     """
     if not callable(panel_transmission_loss) and not isinstance(
         panel_transmission_loss, (np.ndarray, list, tuple)

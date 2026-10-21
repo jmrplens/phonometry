@@ -1863,6 +1863,7 @@ def _vdi2081_straight_run(
     ``size`` is the largest clear side length of a rectangular duct or the
     internal diameter of a round one, which is what selects the table's row.
     """
+    require_scalar(size, "size")
     rows = _VDI2081_STRAIGHT_DUCT[shape]
     upper = rows[-1][0]
     if size > upper:
@@ -2347,6 +2348,7 @@ def split_loss(
     :raises ValueError: If the areas are not positive or ``branch`` is out of
         range.
     """
+    require_scalar(branch, "branch")
     s_m = require_positive(main_area, "main_area")
     areas = np.atleast_1d(np.asarray(branch_areas, dtype=np.float64))
     if areas.ndim != 1 or areas.size == 0:

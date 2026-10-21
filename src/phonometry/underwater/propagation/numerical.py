@@ -51,6 +51,7 @@ frequencies in Hz. The water column has a pressure-release surface at z = 0.
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any, NamedTuple
 
@@ -60,12 +61,14 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, handed_over
 from ..._internal.rays import DynamicRays, SlopingBoundary, march_rays
 from ..._internal.validation import (
+    require_count,
     require_equal_shapes,
     require_positive,
     require_ranks,
     require_same_length,
     require_scalar,
 )
+from ..._internal.warnings import PhonometryWarning
 from ._seabed_reflection import reflection_coefficient
 from .closed_form import _ABSORPTION_MODELS, _M_PER_KM, seawater_absorption
 
@@ -81,6 +84,7 @@ __all__ = [
     "FluidSeabed",
     "GaussianBeamResult",
     "NormalModeResult",
+    "NumericalPropagationWarning",
     "ParabolicEquationResult",
     "RayTraceResult",
     "VolumeAbsorption",
@@ -90,6 +94,19 @@ __all__ = [
     "parabolic_equation",
     "ray_trace",
 ]
+
+
+class NumericalPropagationWarning(PhonometryWarning):
+    """A numerical propagation result the solver can only partly vouch for.
+
+    Emitted by :func:`normal_modes` when a retained mode sits near cutoff,
+    inside ten times the finite-difference error band; by :func:`eigenrays`
+    when more eigenrays connect the receiver than ``max_n_arrivals`` keeps; and
+    by :func:`gaussian_beams` when the source sits on a kink of the profile,
+    or a marching step carries the steepest beam across a large part of the
+    water column.
+    """
+
 
 _BOTTOM_TYPES = ("pressure-release", "rigid")
 #: What every solver here says when the source is handed to it outside the
@@ -487,15 +504,11 @@ def _propagating_band(
     fd_floor = k2_max**2 * dz**2 / 12.0
     prop = eigvals > fd_floor
     if np.any(prop & (eigvals <= 10.0 * fd_floor)):
-        import warnings
-
-        from ..._internal.warnings import PhonometryWarning
-
         warnings.warn(
             "normal_modes: retained near-cutoff mode(s) lie within 10x the"
             " finite-difference error band; increase 'n_depth_points' to"
             " resolve them accurately.",
-            PhonometryWarning,
+            NumericalPropagationWarning,
             stacklevel=3,
         )
     kr = np.sqrt(eigvals[prop])
@@ -526,7 +539,7 @@ def normal_modes(
     fine grid. Two guards apply: eigenvalues inside the scheme's error band
     (:math:`k_r^2 \le \max(k^2)^2 \, dz^2 / 12`) are discarded as numerically
     indistinguishable from cutoff, and a
-    :class:`~phonometry.PhonometryWarning` is emitted when a
+    :class:`NumericalPropagationWarning` is emitted when a
     retained mode sits within ten times that band (increase ``n_depth_points``
     to resolve it).
 
@@ -572,7 +585,10 @@ def normal_modes(
             max(400, int(np.ceil(60.0 * water_depth * f / float(np.min(c_prof))))),
         )
     require_scalar(n_depth_points, "n_depth_points")
-    if int(n_depth_points) < _MIN_MODE_GRID_POINTS:
+    if (
+        require_count(n_depth_points, "n_depth_points", at_least=None)
+        < _MIN_MODE_GRID_POINTS
+    ):
         msg = "'n_depth_points' must be at least 8."
         raise ValueError(msg)
 
@@ -586,7 +602,7 @@ def normal_modes(
         raise ValueError(msg)
 
     omega = 2.0 * np.pi * f
-    n = int(n_depth_points)
+    n = require_count(n_depth_points, "n_depth_points", at_least=None)
     z = np.linspace(0.0, water_depth, n)
     dz = z[1] - z[0]
     c = np.interp(z, z_prof, c_prof)
@@ -927,7 +943,7 @@ def ray_trace(
         raise ValueError(_SOURCE_OUTSIDE)
     rmax = require_positive(max_range, "max_range")
     require_scalar(n_steps, "n_steps")
-    if int(n_steps) < _MIN_RAY_STEPS:
+    if require_count(n_steps, "n_steps", at_least=None) < _MIN_RAY_STEPS:
         msg = "'n_steps' must be at least 2."
         raise ValueError(msg)
     angles = np.asarray(launch_angles_deg, dtype=np.float64).ravel()
@@ -938,7 +954,7 @@ def ray_trace(
         msg = "'launch_angles_deg' must be within (-90, 90) degrees (forward rays)."
         raise ValueError(msg)
 
-    ns = int(n_steps)
+    ns = require_count(n_steps, "n_steps", at_least=None)
     ranges = np.linspace(0.0, rmax, ns)
     c0 = float(np.interp(zs, z_prof, c_prof))
     th = np.radians(angles)
@@ -1361,19 +1377,16 @@ def _earliest_arrivals(
 ) -> NDArray[np.intp]:
     """The stable order of the arrival times, truncated to the cap and said."""
     order = np.argsort(times, kind="stable")
-    if order.size > int(max_n_arrivals):
-        import warnings
-
-        from ..._internal.warnings import PhonometryWarning
-
+    cap = require_count(max_n_arrivals, "max_n_arrivals", at_least=None)
+    if order.size > cap:
         warnings.warn(
             f"eigenrays: {order.size} eigenrays connect the receiver within"
-            f" the traced fan; keeping the {int(max_n_arrivals)} earliest."
+            f" the traced fan; keeping the {cap} earliest."
             " Raise 'max_n_arrivals' to keep them all.",
-            PhonometryWarning,
+            NumericalPropagationWarning,
             stacklevel=3,
         )
-        order = order[: int(max_n_arrivals)]
+        order = order[:cap]
     return order
 
 
@@ -1470,7 +1483,7 @@ def eigenrays(
     ``max_n_arrivals`` arrivals are kept, because the early paths are the flat,
     least-bounced, least-attenuated ones that carry the energy, and the tail
     being discarded is the part every physical seabed drains fastest. A
-    :class:`~phonometry.PhonometryWarning` says when the cap truncated; raise
+    :class:`NumericalPropagationWarning` says when the cap truncated; raise
     it to keep everything the fan bracketed.
 
     :param trace: A :func:`ray_trace` result: the fan to bracket on, the
@@ -1525,7 +1538,7 @@ def eigenrays(
         )
         raise ValueError(msg)
     require_scalar(max_n_arrivals, "max_n_arrivals")
-    if int(max_n_arrivals) < 1:
+    if require_count(max_n_arrivals, "max_n_arrivals", at_least=None) < 1:
         msg = "'max_n_arrivals' must be at least 1."
         raise ValueError(msg)
     if trace.launch_angles_deg.size < 2:  # noqa: PLR2004
@@ -1535,7 +1548,7 @@ def eigenrays(
         ns = max(2, int(np.ceil(r_rec / float(r_grid[1] - r_grid[0]))) + 1)
     else:
         require_scalar(n_steps, "n_steps")
-        ns = int(n_steps)
+        ns = require_count(n_steps, "n_steps", at_least=None)
         if ns < _MIN_RAY_STEPS:
             msg = "'n_steps' must be at least 2."
             raise ValueError(msg)
@@ -2769,19 +2782,17 @@ def _warn_beams(
     *,
     nested: int = 0,
 ) -> None:
-    """Raise a :class:`~phonometry.PhonometryWarning` at the caller's call site.
+    """Emit a :class:`NumericalPropagationWarning` at the caller's call site.
 
     The frame the warning is reported against is the one that called
     :func:`gaussian_beams`, which is where the input that provoked it was
     written. ``nested`` counts the frames between this one and
     :func:`gaussian_beams` for a check that lives in a helper of its own.
     """
-    import warnings
-
-    from ..._internal.warnings import PhonometryWarning
-
     warnings.warn(
-        f"gaussian_beams: {message}", PhonometryWarning, stacklevel=3 + nested
+        f"gaussian_beams: {message}",
+        NumericalPropagationWarning,
+        stacklevel=3 + nested,
     )
 
 
@@ -2832,6 +2843,8 @@ def _beam_range_grid(
     last column is the one nearest ``max_range`` and a caller who asks for
     exactly that is asking for a column that exists.
     """
+    require_scalar(dr, "dr")
+    require_scalar(rmax, "rmax")
     ranges = np.asarray(
         np.arange(n_steps) * dr if ranges_m is None else ranges_m, dtype=np.float64
     ).ravel()
@@ -2857,9 +2870,10 @@ def _beam_receiver_grid(
     stay inside the column: the image ladder of :func:`_image_ladder` folds the
     receiver about the two boundaries, which only means anything between them.
     """
+    require_scalar(water_depth, "water_depth")
     if receiver_depths_m is None:
         require_scalar(n_depth_points, "n_depth_points")
-        n_z = int(n_depth_points)
+        n_z = require_count(n_depth_points, "n_depth_points", at_least=None)
         if n_z < _MIN_RECEIVER_DEPTHS:
             msg = "'n_depth_points' must be at least 2."
             raise ValueError(msg)
@@ -3326,7 +3340,7 @@ def gaussian_beams(
         every validation number of this module.
     :return: A :class:`GaussianBeamResult`.
     :raises ValueError: If the inputs are invalid.
-    :warns PhonometryWarning: when the source sits on a kink of the profile
+    :warns NumericalPropagationWarning: when the source sits on a kink of the profile
         (Sect. 3.7.4's spurious horizontal jet), and when one marching step
         carries the steepest beam of the fan across more than a quarter of
         the water column, which is the pairing between
@@ -3713,7 +3727,7 @@ def parabolic_equation(
         msg = "'range_step' must not exceed 'max_range'."
         raise ValueError(msg)
     require_scalar(n_depth_points, "n_depth_points")
-    n = int(n_depth_points)
+    n = require_count(n_depth_points, "n_depth_points", at_least=None)
     if n < _MIN_PE_DEPTH_POINTS:
         msg = "'n_depth_points' must be at least 16."
         raise ValueError(msg)

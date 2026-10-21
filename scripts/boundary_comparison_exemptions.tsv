@@ -157,8 +157,12 @@ psychoacoustics/quality/_fluctuation_strength_ecma.py	_round_half_away	v >= 0.0	
 psychoacoustics/quality/_fluctuation_strength_ecma.py	_select_line_pairs	peak <= 0.0	numerical algorithm or signal-analysis internal (solver, bracket, grid, interpolation, band selection) (recorded with the fix)
 psychoacoustics/quality/_fluctuation_strength_ecma.py	_w_lh	f_hz <= 0.0	modulation rates of a measured envelope spectrum; a quantity of a measured signal (spectra, level histories, correlations, fits), not a decimal reading a user types
 psychoacoustics/quality/_fluctuation_strength_ecma.py	_w_lh	f_hz <= _F_MAX_W	the two pieces of ECMA-418-2 Formula (148) meet at f_max, so no weight jumps there
+psychoacoustics/quality/_tonality_ecma.py	_assemble_tonality	snr > _Q_B	the two pieces of ECMA-418-2 Formula (50) meet at q_b, where 1 - exp(0) is 0, so no gate value jumps there
+psychoacoustics/quality/_tonality_ecma.py	_assemble_tonality	t_win > _T_GATE	specific tonality of a measured signal (Formulae 53 to 55), a product of a loudness and an exponential gate; a quantity of a measured signal (spectra, level histories, correlations, fits), not a decimal reading a user types
+psychoacoustics/quality/_tonality_ecma.py	_assemble_tonality	t_time_win > _T_GATE	time-dependent tonality of a measured signal (Formulae 63 and 64), the largest specific tonality of a block; a quantity of a measured signal (spectra, level histories, correlations, fits), not a decimal reading a user types
 psychoacoustics/quality/_tone_audibility.py	_is_distinct	lower < _DISTINCT_EDGE_STEEPNESS	quantity through logs, powers, fits or signal analysis; not decimal-reachable (recorded with the fix)
 psychoacoustics/quality/_tone_audibility.py	_is_distinct	upper < _DISTINCT_EDGE_STEEPNESS	quantity through logs, powers, fits or signal analysis; not decimal-reachable (recorded with the fix)
+psychoacoustics/quality/sharpness.py	_moment	n_total <= 0	a sum of specific loudness, which is never negative, zero only when every band is; the guard keeps an empty pattern from dividing by zero and is no verdict
 room/acoustics.py	_band_parameters	late > 0.0	operands are inputs, table rows or continuous branches (recorded with the fix)
 room/acoustics.py	_band_parameters	late > 0.0	operands are inputs, table rows or continuous branches (recorded with the fix)
 room/acoustics.py	_band_parameters	noise > 0.0	operands are inputs, table rows or continuous branches (recorded with the fix)
@@ -219,3 +223,4 @@ vibration/structural/_impact_mobility.py	_solve_mode	denominator > 0.0	quantity 
 vibration/structural/_impact_mobility.py	single_mode_fit	a1 > _FIT_TOLERANCE	numerical algorithm internal (a search, a bracket, a series switch, a degenerate fit), no verdict (degeneracy tests of a least-squares fit at the square root of the machine epsilon)
 vibration/structural/_impact_mobility.py	single_mode_fit	determination > _FIT_TOLERANCE	numerical algorithm internal (a search, a bracket, a series switch, a degenerate fit), no verdict (degeneracy tests of a least-squares fit at the square root of the machine epsilon)
 vibration/structural/_impact_mobility.py	single_mode_fit	discriminant > _FIT_TOLERANCE	numerical algorithm internal (a search, a bracket, a series switch, a degenerate fit), no verdict (degeneracy tests of a least-squares fit at the square root of the machine epsilon)
+vibration/structural/transfer_stiffness.py	OutputMassCheck.bias_bound_db	r < 1.0	the two pieces meet at r = 1, where -20 lg(1 - r) is infinite, the value the other piece gives, so no bound jumps there

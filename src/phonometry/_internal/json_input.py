@@ -34,6 +34,8 @@ import stat
 import sys
 from typing import TYPE_CHECKING
 
+from .validation import require_scalar
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -375,6 +377,7 @@ def read_at_most(path: Path, limit: int) -> bytes:
     :raises TooLargeError: for a file that holds more than *limit* bytes.
     :raises OSError: as the file system raises it, untouched.
     """
+    require_scalar(limit, "limit")
     kind = _not_regular(path.stat().st_mode)
     if kind is not None:
         raise NotRegularError(kind)

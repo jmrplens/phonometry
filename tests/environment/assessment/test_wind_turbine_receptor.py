@@ -1049,13 +1049,18 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
     ]
 
 
+#: The refusals of a wrong type: a text where a flag belongs.
+_TYPE_REFUSALS = frozenset({"a string as the weighting flag"})
+
+
 @pytest.mark.parametrize(
-    ("call", "match"),
-    [case[1:] for case in _refusal_cases()],
+    ("name", "call", "match"),
+    _refusal_cases(),
     ids=[case[0] for case in _refusal_cases()],
 )
 def test_the_receptor_functions_refuse_what_they_cannot_compute(
-    call: Callable[[], object], match: str
+    name: str, call: Callable[[], object], match: str
 ) -> None:
-    with pytest.raises(ValueError, match=match):
+    refusal = TypeError if name in _TYPE_REFUSALS else ValueError
+    with pytest.raises(refusal, match=match):
         call()

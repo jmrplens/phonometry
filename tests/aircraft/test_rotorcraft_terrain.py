@@ -387,7 +387,7 @@ def test_event_and_contour_array_argument_validation() -> None:
         terrain=dem, ground_elevation=np.zeros(4)
     )
     with pytest.raises(
-        ValueError,
+        TypeError,
         match=r"A single receiver takes scalar 'flow_resistivity' and 'ground_elevation'",
     ):
         aircraft.rotorcraft_event_level(

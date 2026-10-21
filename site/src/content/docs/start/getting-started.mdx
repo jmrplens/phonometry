@@ -368,7 +368,7 @@ which they are made decide what the levels are worth:
   longer be turned into a sound pressure level. A clipped one cannot either.
 - **Record at 48 kHz or more.** At 44.1 kHz the bands above $f_\mathrm{s}/2$ are dropped:
   the bank returns 32 bands ending at 15848.9 Hz instead of the 33 ending at
-  19952.6 Hz shown above, and says so with a `PhonometryWarning`.
+  19952.6 Hz shown above, and says so with a `filters.FilterBankWarning`.
 - **Repeat the calibrator check at the end.** The pre/post difference is the
   drift bound for everything captured in between, and a common criterion
   invalidates the series when it exceeds 0.5 dB.

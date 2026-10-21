@@ -375,6 +375,8 @@ def qualification_frequencies(
     :return: The nominal frequencies to evaluate, ascending, in hertz.
     :raises ValueError: if the range is empty.
     """
+    require_scalar(high_hz, "high_hz")
+    require_scalar(low_hz, "low_hz")
     k_lo, k_hi = _band_index(low_hz), _band_index(high_hz)
     if k_hi < k_lo:
         msg = "'high_hz' must not lie below 'low_hz'."
@@ -407,6 +409,7 @@ def _wavelength_m(frequency_hz: float, speed_of_sound: float) -> float:
 
 
 def _as_levels(value: ArrayLike, n_points: int, name: str) -> np.ndarray:
+    require_scalar(n_points, "n_points")
     arr = np.asarray(value, dtype=np.float64)
     if arr.ndim == 1:
         arr = arr[:, np.newaxis]
@@ -1035,6 +1038,7 @@ def _prepared_traverses(
     traverses: Sequence[MicrophoneTraverse], n_bands: int
 ) -> _Prepared:
     """Correct every traverse by Formula (1), refusing one that cannot be fitted."""
+    require_scalar(n_bands, "n_bands")
     positions: list[np.ndarray] = []
     levels: list[np.ndarray] = []
     margins: list[np.ndarray | None] = []
@@ -1986,7 +1990,7 @@ def _checked_declaration(value: object, name: str) -> bool | None:
             f"'{name}' must be True, False or None: a declaration of another type "
             "would be read as a verdict."
         )
-        raise ValueError(msg)
+        raise TypeError(msg)
     return bool(value)
 
 
@@ -2017,6 +2021,7 @@ def _aligned_directionality(
     room: str,
 ) -> tuple[SourceDirectionalityResult | None, ...]:
     """One directionality result, or ``None``, per test source, all for ``room``."""
+    require_scalar(n_sources, "n_sources")
     if isinstance(source_directionality, SourceDirectionalityResult) or (
         source_directionality is None
     ):

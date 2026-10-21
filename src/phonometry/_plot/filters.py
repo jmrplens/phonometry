@@ -25,6 +25,7 @@ if TYPE_CHECKING:
     from ..filters.weighting import TimeWeightedEnvelope
     from ..metrology.conformance import ConformanceVerification
 
+from .._internal.validation import require_count
 from .common import (
     _C_EDGE,
     _C_MUTED,
@@ -1219,8 +1220,9 @@ def _spectrogram_grid(
 ) -> np.ndarray:
     """The ``(bands, frames)`` grid of the channel to draw.
 
-    :raises ValueError: for a multichannel result without a channel, or a
-        channel the result does not hold.
+    :raises TypeError: for a channel that is not a number, or is a bool.
+    :raises ValueError: for a multichannel result without a channel, a
+        channel that is not a whole number, or one the result does not hold.
     """
     levels = np.asarray(result.levels, dtype=np.float64)
     if levels.ndim == 2:  # noqa: PLR2004
@@ -1238,16 +1240,14 @@ def _spectrogram_grid(
             f"(0 to {n_channels - 1}) to choose the one to draw"
         )
         raise ValueError(msg)
-    if isinstance(channel, bool) or not isinstance(channel, int | np.integer):
-        msg = f"'channel' must be an integer; got {type(channel).__name__}"
-        raise TypeError(msg)
-    if not 0 <= int(channel) < n_channels:
+    index = require_count(channel, "channel", at_least=None)
+    if not 0 <= index < n_channels:
         msg = (
             f"channel={channel} is not one of this spectrogram's "
             f"{n_channels} channels (0 to {n_channels - 1})"
         )
         raise ValueError(msg)
-    return np.asarray(levels[int(channel)], dtype=np.float64)
+    return np.asarray(levels[index], dtype=np.float64)
 
 
 def plot_octave_spectrogram(
@@ -1323,7 +1323,11 @@ def plot_octave_spectrogram(
         title = (
             _t("Band levels over time", language)
             if channel is None or np.ndim(result.levels) == 2  # noqa: PLR2004
-            else _t("Band levels over time, channel {n}", language, n=int(channel) + 1)
+            else _t(
+                "Band levels over time, channel {n}",
+                language,
+                n=require_count(channel, "channel", at_least=None) + 1,
+            )
         )
         axw.set_title(title)
     localize_axes(axw, language)

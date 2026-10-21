@@ -11,7 +11,7 @@ from phonometry import PhonometryWarning
 from phonometry.fluids import (
     Fluid,
     FluidAssumptionWarning,
-    FluidPropertyUnavailable,
+    FluidPropertyUnavailableError,
     FluidWarning,
     air,
     characteristic_impedance,
@@ -123,7 +123,7 @@ def test_a_quantity_the_model_did_not_fix_names_the_model(reference_air: Fluid) 
         validity="",
         properties={"speed_of_sound": 1500.0},
     )
-    with pytest.raises(FluidPropertyUnavailable, match="only a speed of sound"):
+    with pytest.raises(FluidPropertyUnavailableError, match="only a speed of sound"):
         _ = lean.density
     assert lean.speed_of_sound == pytest.approx(1500.0)
 
@@ -138,7 +138,7 @@ def test_a_lean_fluid_cannot_close_an_identity_it_lacks_a_term_for() -> None:
         validity="",
         properties={"speed_of_sound": 343.0},
     )
-    with pytest.raises(FluidPropertyUnavailable, match="'density'"):
+    with pytest.raises(FluidPropertyUnavailableError, match="'density'"):
         _ = lean.characteristic_impedance
 
 

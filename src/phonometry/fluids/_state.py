@@ -6,8 +6,8 @@ the state it was asked for, the quantities the model determined, and the name of
 the model, so a result can always say where its numbers came from.
 
 Not every model determines every quantity. Reading one it did not raises
-:class:`FluidPropertyUnavailable` naming the model and the quantity, rather than
-returning a plausible number nobody printed.
+:class:`FluidPropertyUnavailableError` naming the model and the quantity,
+rather than returning a plausible number nobody printed.
 """
 
 from __future__ import annotations
@@ -40,8 +40,13 @@ class FluidAssumptionWarning(PhonometryWarning):
     """
 
 
-class FluidPropertyUnavailable(AttributeError):
-    """A quantity the model that built this fluid does not determine."""
+class FluidPropertyUnavailableError(AttributeError):
+    """A quantity the model that built this fluid does not determine.
+
+    An :class:`AttributeError`, as reading an attribute that is not there is,
+    so ``hasattr(fluid, "viscosity")`` answers ``False`` and
+    ``getattr(fluid, "viscosity", None)`` returns the default.
+    """
 
 
 def characteristic_impedance(density: float, speed_of_sound: float) -> float:
@@ -98,7 +103,7 @@ class Fluid(RichDisplay):
         prose and reducing them to a box loses the conditions attached to them.
     :param properties: The quantities the model determined, in SI. Reached
         through the named accessors, which raise
-        :class:`FluidPropertyUnavailable` for a quantity that is absent.
+        :class:`FluidPropertyUnavailableError` for a quantity that is absent.
     """
 
     temperature_c: float
@@ -155,7 +160,7 @@ class Fluid(RichDisplay):
                 f"{known}. Supply the quantity yourself, or use a model that "
                 f"prints it."
             )
-            raise FluidPropertyUnavailable(msg) from None
+            raise FluidPropertyUnavailableError(msg) from None
 
     @property
     def density(self) -> float:

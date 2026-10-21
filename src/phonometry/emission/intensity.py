@@ -84,6 +84,7 @@ from .._internal.validation import (
     require_present,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ..filters.frequencies import _genfreqs
 from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
@@ -633,6 +634,10 @@ def _validate_probe_signals(x1: np.ndarray, x2: np.ndarray) -> None:
 
 def _validate_probe_medium(fs: int, spacing: float, rho: float, c: float) -> None:
     """Reject a non-physical sample rate, probe spacing or medium."""
+    require_scalar(c, "c")
+    require_scalar(fs, "fs")
+    require_scalar(rho, "rho")
+    require_scalar(spacing, "spacing")
     if fs <= 0:
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)
@@ -993,6 +998,7 @@ def _temporal_indicator_for(
     :raises ValueError: If the samples do not carry one column per band of the
         surface input.
     """
+    require_scalar(n_bands, "n_bands")
     if temporal_intensity is None:
         return None
     f1 = temporal_variability_indicator(temporal_intensity)
@@ -1137,6 +1143,10 @@ def dynamic_capability_index(
     :param bias_error_factor: K in decibels (default 10.0).
     :return: Ld in decibels.
     """
+    require_scalar(
+        pressure_residual_intensity_index, "pressure_residual_intensity_index"
+    )
+    require_scalar(bias_error_factor, "bias_error_factor")
     if bias_error_factor <= 0:
         msg = "'bias_error_factor' must be positive."
         raise ValueError(msg)

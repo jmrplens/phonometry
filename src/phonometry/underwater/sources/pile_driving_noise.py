@@ -32,6 +32,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays
 from ..._internal.levels_math import energy_sum
 from ..._internal.validation import (
+    require_count,
     require_finite_fields,
     require_ranks,
     require_real,
@@ -129,6 +130,7 @@ def cumulative_sel_identical(sel_ss: float, n_strikes: int) -> float:
     :raises ValueError: If ``n_strikes`` is not a whole number
         :math:`\ge 1`.
     """
+    require_scalar(sel_ss, "sel_ss")
     require_scalar(n_strikes, "n_strikes")
     n_float = float(n_strikes)
     if not n_float.is_integer():
@@ -497,7 +499,11 @@ def strike_sel_spectrum(
     :param fraction: Bandwidth fraction: 1 (octave) or 3 (one-third octave).
     :param limits: Lower and upper band-centre limits, in Hz.
     :return: A :class:`StrikeSELSpectrum`.
-    :raises ValueError: If the inputs are invalid.
+    :raises TypeError: If ``limits`` is not a sequence, or holds a text or
+        anything else that is not a number.
+    :raises ValueError: If the inputs are invalid: a ``fraction`` other than 1
+        or 3, ``limits`` that are not a finite, increasing, positive pair, or
+        a pressure or sampling rate the analysis cannot take.
     """
     from ...filters.frequencies import nominal_frequencies
 
@@ -515,13 +521,17 @@ def strike_sel_spectrum(
     msg = "'limits' must be a (lower, upper) pair of frequencies in Hz."
     try:
         lo, hi = (require_real(v, msg) for v in limits)
-    except (TypeError, ValueError):
+    except TypeError:
+        raise TypeError(msg) from None
+    except ValueError:
         raise ValueError(msg) from None
     if not (np.isfinite(lo) and np.isfinite(hi)) or not (0.0 < lo < hi):
         msg = "'limits' must be a finite, increasing, positive pair."
         raise ValueError(msg)
 
-    bands = nominal_frequencies(int(fraction), [lo, hi])
+    bands = nominal_frequencies(
+        require_count(fraction, "fraction", at_least=None), [lo, hi]
+    )
     centres, lower, upper = bands.frequencies, bands.lower_edges, bands.upper_edges
     n = sig.size
     spectrum = np.fft.rfft(sig)
@@ -555,7 +565,7 @@ def strike_sel_spectrum(
         band_sel=np.asarray(band_sel, dtype=np.float64),
         total_sel=float(10.0 * np.log10(total / e0)),
         broadband_sel=sound_exposure_level(sig, fs_v),
-        fraction=int(fraction),
+        fraction=require_count(fraction, "fraction", at_least=None),
         fs=fs_v,
     )
 

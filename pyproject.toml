@@ -357,7 +357,7 @@ markers = [
     "pinned_stack: tests the figure, diagram or badge tooling, which runs on the pinned figure stack only",
 ]
 filterwarnings = [
-    "ignore:Low sampling rate:UserWarning",
+    "ignore:Low sampling rate:phonometry.filters.FilterBankWarning",
     # 4.0 carries no deprecated names: the aliases the 3.x layout left behind
     # were removed with the shims that served them. The rule stays as a guard,
     # so the day a deprecation is introduced the suite fails instead of

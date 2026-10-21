@@ -604,18 +604,16 @@ def attribute_module(name: str, obj: object) -> str:
     if override is not None:
         return override
     module = getattr(obj, "__module__", None)
-    if isinstance(module, str) and (
-        _is_public_module(module) or is_documented_module(module)
-    ):
-        return module
     if isinstance(module, str):
+        # A name a function or class carries: its module answers, or the
+        # taxonomy has to say where it is documented.
+        if _is_public_module(module) or is_documented_module(module):
+            return module
         msg = (
             f"public name {name!r} is defined in private module {module!r}; "
             "add it to OBJECT_MODULE_OVERRIDES in scripts/api_taxonomy.py"
         )
-        raise LookupError(  # noqa: TRY004 - a private-module lookup is a configuration error, not a type error
-            msg
-        )
+        raise LookupError(msg)
     # Module-level constant: find the taxonomy module that defines it.
     hits: list[str] = []
     for section in SECTIONS.values():

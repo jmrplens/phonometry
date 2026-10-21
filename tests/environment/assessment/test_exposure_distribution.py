@@ -563,7 +563,7 @@ def test_refuses_a_non_finite_level() -> None:
 
 def test_refuses_a_complex_level() -> None:
     levels = np.array([40.0 + 1j, 44.0])
-    with pytest.raises(ValueError, match="'levels' must be real"):
+    with pytest.raises(TypeError, match="'levels' must be real"):
         sd.long_term_sel(levels, [0.5, 0.5])
 
 

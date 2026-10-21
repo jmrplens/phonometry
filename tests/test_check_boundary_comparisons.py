@@ -767,3 +767,26 @@ def test_the_listing_exits_zero(
     package = _package(tmp_path, _MARGIN_MODULE)
     assert cbc.main(["--list", "--root", str(package)]) == 0
     assert "verdict.py:5 [correct] margin >= _MARGIN_DB" in capsys.readouterr().out
+
+
+def test_a_parameter_rebound_to_a_value_of_itself_keeps_the_caller_value(
+    tmp_path: pathlib.Path,
+) -> None:
+    """``levels = np.asarray(levels)`` is still the caller's levels.
+
+    The binding reads the parameter it rebinds, and reading that name inside
+    its own binding is a cycle, which the reader cut as opaque: the caller's
+    decimal went missing, and a spread of the levels judged against a printed
+    limit was let through as soon as the function converted its argument on
+    the first line. The parameter is what the name holds before the binding.
+    """
+    source = """
+    import numpy as np
+    _SPREAD_LIMIT_DB = 3.0
+    def judge(levels):
+        levels = np.asarray(levels, dtype=float)
+        return np.max(levels) - np.min(levels) <= _SPREAD_LIMIT_DB
+    """
+    assert _texts(source, tmp_path) == [
+        "np.max(levels) - np.min(levels) <= _SPREAD_LIMIT_DB"
+    ]

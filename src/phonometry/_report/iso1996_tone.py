@@ -46,6 +46,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import require_count
 from ._i18n import format_number, t
 from ._layout import (
     _ACCENT_HEX,
@@ -145,7 +146,9 @@ def _type_label(group_size: int | None, language: str = "en") -> str:
     """The entry-type label: a single tone or a combined ``FG`` group."""
     if group_size is None or group_size <= 1:
         return t("Single", language)
-    return t("FG ({n})", language).format(n=int(group_size))
+    return t("FG ({n})", language).format(
+        n=require_count(group_size, "group_size", at_least=None)
+    )
 
 
 def _key_quantity_table(

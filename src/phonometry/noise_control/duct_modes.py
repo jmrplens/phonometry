@@ -50,6 +50,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 
@@ -234,6 +235,7 @@ def circular_duct_cut_on(
     :raises ValueError: For a non-positive diameter, a sonic or supersonic
         flow, or an ``n_modes`` outside 1 to 12.
     """
+    require_scalar(n_modes, "n_modes")
     d = require_positive(diameter_m, "diameter_m")
     mach, beta = _mach(flow_velocity, speed_of_sound)
     if not 1 <= n_modes <= len(_CIRCULAR_EIGENVALUES):
@@ -288,6 +290,7 @@ def rectangular_duct_cut_on(
     :raises ValueError: For non-positive dimensions, a sonic or supersonic
         flow, or a non-positive ``n_modes``.
     """
+    require_scalar(n_modes, "n_modes")
     a = require_positive(width_m, "width_m")
     b = require_positive(height_m, "height_m")
     mach, beta = _mach(flow_velocity, speed_of_sound)

@@ -422,7 +422,7 @@ def test_a_fractional_rating_is_refused_by_name(field: str) -> None:
     freqs = ref.ISO717_2_REFERENCE_FLOOR_FREQ
     bare = np.full(16, 75.0)
     res = building.impact_improvement(bare, bare - 5.0, freqs)
-    with pytest.raises(ValueError, match=rf"'{field}' must be an integer number"):
+    with pytest.raises(TypeError, match=rf"'{field}' must be an integer number"):
         dataclasses.replace(res, **{field: -1.0})
 
 

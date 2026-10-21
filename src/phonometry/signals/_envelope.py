@@ -56,6 +56,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    require_count,
     require_ranks,
     require_real,
     require_same_length,
@@ -231,7 +232,7 @@ def envelope(
     xa = _validate_signal(x, "x", context="envelope analysis")
     fs_v = _positive(resolve_fs(x, fs), "fs")
     require_scalar(decimation_factor, "decimation_factor")
-    factor = int(decimation_factor)
+    factor = require_count(decimation_factor, "decimation_factor", at_least=None)
     if factor < 1:
         msg = "'decimation_factor' must be a positive integer."
         raise ValueError(msg)
@@ -406,12 +407,15 @@ def _bandpass_pre_filter(
 
     Returns the filtered record and the validated ``(low, high)`` edges.
     """
+    require_scalar(fs, "fs")
     from scipy import signal as sp_signal
 
     msg = f"'band' must be a pair of numeric (low, high) edges in Hz, got {band!r}."
     try:
         low, high = (require_real(edge, msg) for edge in band)
-    except (TypeError, ValueError) as exc:
+    except TypeError as exc:
+        raise TypeError(msg) from exc
+    except ValueError as exc:
         raise ValueError(msg) from exc
     if not 0.0 < low < high < fs / 2.0:
         msg = (
@@ -514,7 +518,7 @@ def envelope_spectrum(
         msg = f"'kind' must be 'magnitude' or 'squared', got {kind!r}."
         raise ValueError(msg)
     n = xa.size
-    nfft_v = n if nfft is None else int(nfft)
+    nfft_v = n if nfft is None else require_count(nfft, "nfft", at_least=None)
     if nfft_v < n:
         msg = f"'nfft' must be at least the record length ({n} samples)."
         raise ValueError(msg)

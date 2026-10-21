@@ -458,10 +458,13 @@ def _as_responses(
     """
     if np.iscomplexobj(values):
         msg = f"'{name}' must hold real scale values."
-        raise ValueError(msg)
+        raise TypeError(msg)
     try:
         array = np.asarray(values, dtype=np.float64).ravel()
-    except (TypeError, ValueError) as exc:
+    except TypeError as exc:
+        msg = f"'{name}' must hold numeric scale values."
+        raise TypeError(msg) from exc
+    except ValueError as exc:
         msg = f"'{name}' must hold numeric scale values."
         raise ValueError(msg) from exc
     given = array[~np.isnan(array)]
@@ -483,6 +486,7 @@ def _site_groups(
     sites: ArrayLike | Sequence[object] | None, n: int
 ) -> tuple[tuple[str, ...], list[NDArray[np.intp]]]:
     """The site labels in order of first appearance, and each site's rows."""
+    require_scalar(n, "n")
     if sites is None:
         return (_ALL,), [np.arange(n)]
     labels = [str(site) for site in np.asarray(sites, dtype=object).ravel()]
@@ -573,8 +577,10 @@ def _answer_counts(
 
 
 def _method_a_scale(part: int) -> QuestionnaireScale:
-    if isinstance(part, bool) or part not in METHOD_A_SCALES:
-        msg = f"'part' must be 1, 2, 3 or 4 (the parts of Method A), got {part!r}."
+    msg = f"'part' must be 1, 2, 3 or 4 (the parts of Method A), got {part!r}."
+    if isinstance(part, bool):
+        raise TypeError(msg)
+    if part not in METHOD_A_SCALES:
         raise ValueError(msg)
     return METHOD_A_SCALES[part]
 
@@ -978,6 +984,8 @@ class SoundscapeCorrelation(OwnsArrays):
         :raises ValueError: if the coefficient or the probability is out of
             range, or the paired columns disagree.
         """
+        require_scalar(self.coefficient, "coefficient")
+        require_scalar(self.p_value, "p_value")
         if not -1.0 <= self.coefficient <= 1.0:
             msg = "SoundscapeCorrelation: 'coefficient' must be in [-1, 1]."
             raise ValueError(msg)
@@ -1022,7 +1030,7 @@ def _paired(
     for name, values in (("x", x), ("y", y)):
         if np.iscomplexobj(values):
             msg = f"'{name}' must be real."
-            raise ValueError(msg)
+            raise TypeError(msg)
         # A copy, so the result never shares memory with the caller's array:
         # a later change to it would otherwise rewrite the result's x and y
         # and leave its coefficient and ranks describing other data.
@@ -1266,6 +1274,7 @@ class MethodBSummary(OwnsArrays):
         :raises ValueError: if a matrix is not ``(sites, items)`` or the
             confidence level is not strictly between 0 and 1.
         """
+        require_scalar(self.confidence, "confidence")
         shape = (len(self.sites), len(self.items))
         for name in (
             "means",
@@ -1455,18 +1464,20 @@ def method_b_source_ranking(
     :param sites: The site of each participant; ``None`` puts every
         participant at one site named ``"all"``.
     :return: A :class:`SourceRanking`.
+    :raises TypeError: for ``rankings``, or a participant's list in it, that
+        is a text or not a sequence.
     :raises ValueError: for a list longer than eight, a source listed twice by
         one participant, an empty source name, no participants, or sites
         that do not match the participants.
     """
     if isinstance(rankings, str) or not isinstance(rankings, Sequence):
         msg = "'rankings' must be a sequence of lists of source names, one list per participant."
-        raise ValueError(msg)
+        raise TypeError(msg)
     lists: list[tuple[str, ...]] = []
     for k, listed in enumerate(rankings):
         if isinstance(listed, str) or not isinstance(listed, Sequence):
             msg = f"'rankings[{k}]' must be a list of source names, the most noticeable first."
-            raise ValueError(msg)
+            raise TypeError(msg)
         names = tuple(str(name).strip() for name in listed)
         if len(names) > METHOD_B_MAX_SOURCES:
             msg = (
@@ -1525,8 +1536,10 @@ _REQUIRED_RESULTS = ("LAeq,T", "LCeq,T", "LAF5,T", "LAF95,T", "N5", "N95", "Nrmc
 
 def _require_text(owner: str, item: str, value: object) -> None:
     """A required Annex A item must be stated, not left empty."""
-    if not isinstance(value, str) or not value.strip():
-        msg = f"{owner}: ISO/TS 12913-2 {item} must be reported; got {value!r}."
+    msg = f"{owner}: ISO/TS 12913-2 {item} must be reported; got {value!r}."
+    if not isinstance(value, str):
+        raise TypeError(msg)
+    if not value.strip():
         raise ValueError(msg)
 
 
@@ -1616,6 +1629,8 @@ class SoundscapeAcousticEnvironment(RichDisplay):
 
         The results are frozen into a read-only mapping of floats.
 
+        :raises TypeError: for an item that is not a text, results that are
+            not a mapping, or a result that is not one number.
         :raises ValueError: for an unknown environment type, an empty item, a
             required conditional item left out, or a missing or non-finite
             result.
@@ -1628,7 +1643,7 @@ class SoundscapeAcousticEnvironment(RichDisplay):
         _require_text(owner, "A.3 e)", self.measurement_points)
         if not isinstance(self.measurement_results, Mapping):
             msg = f"{owner}: ISO/TS 12913-2 A.3 f) must be a mapping from symbol to value."
-            raise ValueError(msg)
+            raise TypeError(msg)
         missing = [
             key for key in _REQUIRED_RESULTS if key not in self.measurement_results
         ]
@@ -1718,7 +1733,7 @@ class SoundscapeReport(RichDisplay):
     def __post_init__(self) -> None:
         """Refuse a part of the report that is not the record for it.
 
-        :raises ValueError: if a field holds anything but its record type.
+        :raises TypeError: if a field holds anything but its record type.
         """
         for name, kind in (
             ("participants", SoundscapeParticipants),
@@ -1727,4 +1742,4 @@ class SoundscapeReport(RichDisplay):
         ):
             if not isinstance(getattr(self, name), kind):
                 msg = f"SoundscapeReport: '{name}' must be a {kind.__name__}."
-                raise ValueError(msg)
+                raise TypeError(msg)

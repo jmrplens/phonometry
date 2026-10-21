@@ -88,6 +88,7 @@ from .._internal.validation import (
     require_positive,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -520,6 +521,8 @@ def steady_state_field(
         :math:`10 \log_{10}(\rho c / 400)` term (``None`` omits it).
     :return: A :class:`SteadyFieldResult`.
     """
+    require_scalar(mean_absorption, "mean_absorption")
+    require_scalar(sound_power_level, "sound_power_level")
     lw = float(sound_power_level)
     r_const = float(room_constant(surface_area, mean_absorption))
     q = require_positive(directivity, "directivity")

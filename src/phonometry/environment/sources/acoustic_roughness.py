@@ -90,6 +90,7 @@ from ..._internal.validation import (
     require_choice,
     require_finite_array,
     require_positive,
+    require_scalar,
 )
 from ._shared import _TOLERANCE
 
@@ -513,14 +514,15 @@ class AcousticRoughnessSpectrum(OwnsArrays):
 
         :param wavelength_m: A nominal band wavelength, in metres.
         :return: The level of that band.
-        :raises KeyError: If the spectrum has no such band.
+        :raises ValueError: If the spectrum has no band at that wavelength: a
+            number outside what the result covers, not a missing key.
         """
         band = _band_of_wavelength(require_positive(wavelength_m, "wavelength_m"))
         try:
             index = self.bands.index(band)
         except ValueError:
             msg = f"the spectrum has no band at {wavelength_m:g} m."
-            raise KeyError(msg) from None
+            raise ValueError(msg) from None
         return float(self.levels[index])
 
     def plot(
@@ -555,6 +557,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
 
 def _require_sampling_interval(spacing: float) -> None:
     """Refuse a sampling interval above the 1 mm of 5.5."""
+    require_scalar(spacing, "spacing")
     if spacing > _MAXIMUM_SAMPLING_INTERVAL_M * (1.0 + _TOLERANCE):
         msg = f"'sample_spacing_m' is {spacing:g} m; 5.5 asks for 1 mm or less."
         raise ValueError(msg)

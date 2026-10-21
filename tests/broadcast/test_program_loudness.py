@@ -426,9 +426,9 @@ def test_true_peak_defaults_and_validation() -> None:
     x = _sine(-6.0, 0.5)
     # Explicit 4x equals the default at 48 kHz.
     assert true_peak_level(x, FS) == true_peak_level(x, FS, oversample=4)
-    with pytest.raises(ValueError, match=r"oversample must be an integer"):
+    with pytest.raises(ValueError, match=r"'oversample' must be a whole number"):
         true_peak_level(x, FS, oversample=0)
-    with pytest.raises(ValueError, match=r"oversample must be an integer"):
+    with pytest.raises(TypeError, match=r"'oversample' must be a whole number"):
         true_peak_level(x, FS, oversample=True)  # type: ignore[arg-type]
     empty = np.empty(0)
     with pytest.raises(ValueError, match=r"Input signal 'x' cannot be empty"):

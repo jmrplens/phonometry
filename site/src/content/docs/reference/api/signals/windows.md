@@ -59,7 +59,8 @@ the Welch estimators apply it.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the inputs or parameters are invalid. |
+| TypeError | If `n` is not a whole number's type (a bool, a text, an array), or `window` is a specification of a type `scipy.signal.get_window` does not take. |
+| ValueError | If `n` is not whole or is below 16, the window name is unknown, or the window is degenerate. |
 
 ## WindowMetricsResult
 

@@ -284,7 +284,7 @@ def test_strike_sel_spectrum_rejects_a_malformed_limits_pair() -> None:
     x = _pulse(50.0, 0.2)
     with pytest.raises(ValueError, match=r"'limits' must be a \(lower, upper\) pair"):
         underwater.strike_sel_spectrum(x, FS, limits=(10.0,))  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match=r"'limits' must be a \(lower, upper\) pair"):
+    with pytest.raises(TypeError, match=r"'limits' must be a \(lower, upper\) pair"):
         underwater.strike_sel_spectrum(x, FS, limits=None)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match=r"'limits' must be a \(lower, upper\) pair"):
         underwater.strike_sel_spectrum(

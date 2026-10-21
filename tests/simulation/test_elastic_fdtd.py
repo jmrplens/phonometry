@@ -647,7 +647,7 @@ def test_source_validation() -> None:
         sim.add_source(explosion_in_obstacle)
     with pytest.raises(ValueError, match="source position lies inside an obstacle"):
         sim.add_source(force_in_obstacle)
-    with pytest.raises(ValueError, match="source ix must be an integer"):
+    with pytest.raises(ValueError, match="'source ix' must be a whole number"):
         sim.add_source(explosion_bad_ix)
 
 

@@ -662,13 +662,16 @@ def test_a_volume_column_of_another_length_is_refused() -> None:
 
 
 @pytest.mark.parametrize(
-    ("volume", "match"),
-    [("ten", "must be numeric"), (np.nan, "must contain only finite values")],
+    ("volume", "refusal", "match"),
+    [
+        ("ten", TypeError, "must be numbers, not text"),
+        (np.nan, ValueError, "must contain only finite values"),
+    ],
 )
 def test_a_volume_that_is_not_a_finite_number_is_refused(
-    volume: object, match: str
+    volume: object, refusal: type[Exception], match: str
 ) -> None:
-    with pytest.raises(ValueError, match=f"reference_equivalent_volume_m3' {match}"):
+    with pytest.raises(refusal, match=f"reference_equivalent_volume_m3' {match}"):
         metrology.impedance_pressure_ratio(
             _F,
             reference_equivalent_volume_m3=volume,  # type: ignore[arg-type]

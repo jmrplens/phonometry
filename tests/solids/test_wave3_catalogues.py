@@ -320,7 +320,7 @@ def test_every_fluid_state_is_the_printed_one(
     assert state.speed_of_sound == pytest.approx(_number(speed))
     if gamma.strip() in _RULES:
         with pytest.raises(
-            fluids.FluidPropertyUnavailable, match="heat_capacity_ratio"
+            fluids.FluidPropertyUnavailableError, match="heat_capacity_ratio"
         ):
             _ = state.heat_capacity_ratio
     else:

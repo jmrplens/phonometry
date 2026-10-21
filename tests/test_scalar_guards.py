@@ -35,13 +35,17 @@ from __future__ import annotations
 
 import ast
 import importlib
+import inspect
+import pkgutil
 import types
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
 
+import phonometry
 from phonometry import (
     aircraft,
     building,
@@ -148,13 +152,22 @@ def test_anything_with_an_axis_is_not(value: object) -> None:
 
 @pytest.mark.parametrize("value", _one_element_arrays(54.0), ids=_ARRAY_IDS)
 def test_require_real_refuses_an_array_with_its_own_message(value: np.ndarray) -> None:
-    with pytest.raises(ValueError, match="'humidity' is wrong"):
+    with pytest.raises(TypeError, match="'humidity' is wrong"):
         validation.require_real(value, "'humidity' is wrong")
 
 
-@pytest.mark.parametrize("value", ["fifty", object(), 10**400])
-def test_require_real_renames_what_float_refuses(value: object) -> None:
+def test_require_real_renames_a_value_float_refuses() -> None:
     with pytest.raises(ValueError, match="'x' is wrong"):
+        validation.require_real(10**400, "'x' is wrong")
+
+
+@pytest.mark.parametrize(
+    "value",
+    [None, object(), "fifty", "0.5", b"0.5", np.array("0.5")],
+    ids=["none", "object", "word", "numeric-text", "bytes", "text-0d"],
+)
+def test_require_real_renames_a_type_float_refuses(value: object) -> None:
+    with pytest.raises(TypeError, match="'x' is wrong"):
         validation.require_real(value, "'x' is wrong")
 
 
@@ -166,32 +179,88 @@ def test_every_shared_scalar_guard_refuses_an_array(
     guard: str, value: np.ndarray
 ) -> None:
     check: Callable[[object, str], float] = getattr(validation, guard)
-    with pytest.raises(ValueError, match="'probe' must be one number"):
+    with pytest.raises(TypeError, match="'probe' must be one number"):
         check(value, "probe")
 
 
 @pytest.mark.parametrize(
     "guard", sorted(_SHARED_GUARDS), ids=lambda name: name.removeprefix("require_")
 )
-def test_every_shared_scalar_guard_takes_what_float_takes(guard: str) -> None:
-    """A numeric string reached the guards through ``float()`` before they
-    asked the rank, and still does.
-    """
+def test_every_shared_scalar_guard_takes_a_number(guard: str) -> None:
     check: Callable[[object, str], float] = getattr(validation, guard)
-    assert check("0.5", "probe") == pytest.approx(0.5)
+    assert check(np.float32(0.5), "probe") == pytest.approx(0.5)
 
 
 @pytest.mark.parametrize(
     "guard", sorted(_SHARED_GUARDS), ids=lambda name: name.removeprefix("require_")
 )
-@pytest.mark.parametrize(
-    "value", ["fifty", None, object()], ids=["word", "none", "object"]
+@pytest.mark.parametrize("text", ["fifty", "0.5"], ids=["word", "numeric"])
+def test_every_shared_scalar_guard_refuses_a_text_as_a_type(
+    guard: str, text: str
+) -> None:
+    """A text is the wrong type where a number belongs, whatever it reads as.
+
+    :func:`float` parses one, which is what it is for; a guard is not a parser,
+    and ``math.sqrt("4")`` refuses it with :class:`TypeError` as a numerical
+    function does.
+    """
+    check: Callable[[object, str], float] = getattr(validation, guard)
+    with pytest.raises(TypeError, match="'probe' must be one number, not a text"):
+        check(text, "probe")
+
+
+_SCALAR_AND_ARRAY_GUARDS = (
+    ("require_positive", "scalar"),
+    ("require_finite", "scalar"),
+    ("require_count", "scalar"),
+    ("require_positive_array", "array"),
+    ("require_finite_array", "array"),
+    ("require_above_absolute_zero_array", "array"),
 )
-def test_every_shared_scalar_guard_names_what_float_refuses(
+
+
+@pytest.mark.parametrize(
+    ("guard", "shape"),
+    _SCALAR_AND_ARRAY_GUARDS,
+    ids=[g for g, _ in _SCALAR_AND_ARRAY_GUARDS],
+)
+@pytest.mark.parametrize("text", ["fifty", "94.0"], ids=["word", "numeric"])
+def test_a_text_where_a_number_belongs_is_one_class_everywhere(
+    guard: str, shape: str, text: str
+) -> None:
+    """The same text, given one at a time or as an array, is one refusal.
+
+    The scalar guards and the array guards used to disagree: an array of
+    numeric text was parsed into numbers while one text was not, and a text
+    that reads as no number was a ``ValueError`` in one place and a
+    ``TypeError`` in the next.
+    """
+    check: Callable[[object, str], object] = getattr(validation, guard)
+    value: object = text if shape == "scalar" else [text, text]
+    with pytest.raises(TypeError, match="'probe'"):
+        check(value, "probe")
+
+
+def test_a_field_of_text_is_a_type_error() -> None:
+    """``require_finite_fields`` refuses text as the array guards do."""
+
+    class Owner:
+        readings = ("94.0", "94.1")
+
+    owner = Owner()
+    with pytest.raises(TypeError, match="'readings' must be numeric, not text"):
+        validation.require_finite_fields(owner, "readings")
+
+
+@pytest.mark.parametrize(
+    "guard", sorted(_SHARED_GUARDS), ids=lambda name: name.removeprefix("require_")
+)
+@pytest.mark.parametrize("value", [None, object()], ids=["none", "object"])
+def test_every_shared_scalar_guard_names_a_type_float_refuses(
     guard: str, value: object
 ) -> None:
     check: Callable[[object, str], float] = getattr(validation, guard)
-    with pytest.raises(ValueError, match="'probe' must be a number"):
+    with pytest.raises(TypeError, match="'probe' must be a number"):
         check(value, "probe")
 
 
@@ -205,7 +274,7 @@ _T = np.array([2.0, 2.1, 2.2])
 
 @pytest.mark.parametrize("humidity", _one_element_arrays(54.0), ids=_ARRAY_IDS)
 def test_iso354_humidity_refuses_an_array(humidity: np.ndarray) -> None:
-    with pytest.raises(ValueError, match="'relative_humidity_percent'"):
+    with pytest.raises(TypeError, match="'relative_humidity_percent'"):
         materials.measure_sound_absorption(
             _FREQS,
             _T,
@@ -219,20 +288,20 @@ def test_iso354_humidity_refuses_an_array(humidity: np.ndarray) -> None:
 @pytest.mark.parametrize("start_band", _one_element_arrays(2), ids=_ARRAY_IDS)
 def test_icao_start_band_refuses_an_array(start_band: np.ndarray) -> None:
     spl = np.full(24, 60.0)
-    with pytest.raises(ValueError, match="'start_band'"):
+    with pytest.raises(TypeError, match="'start_band'"):
         aircraft.tone_correction(spl, start_band=start_band)
 
 
 @pytest.mark.parametrize("lowest", _one_element_arrays(12.0), ids=_ARRAY_IDS)
 def test_a_filter_bank_limit_refuses_an_array(lowest: np.ndarray) -> None:
     limits = [lowest, 20_000.0]
-    with pytest.raises(ValueError, match="two frequencies"):
+    with pytest.raises(TypeError, match="two frequencies"):
         OctaveFilterBank(48_000, limits=limits)
 
 
 @pytest.mark.parametrize("level", _one_element_arrays(120.0), ids=_ARRAY_IDS)
 def test_an_underwater_level_refuses_an_array(level: np.ndarray) -> None:
-    with pytest.raises(ValueError, match="'level'"):
+    with pytest.raises(TypeError, match="'level'"):
         underwater.underwater_to_in_air_spl(level)
 
 
@@ -272,7 +341,6 @@ _NAMED_GUARDS: list[tuple[str, str]] = [
     ("materials.diffusers.reverberation_room_scattering", "_positive_scalar"),
     ("metrology.comparison_calibration", "_relative_humidity"),
     ("metrology.sound_level_meter", "_scalar"),
-    ("noise_control.valves_hydrodynamic", "_require_count"),
     ("psychoacoustics.quality.annoyance", "_nonnegative"),
     ("psychoacoustics.quality._tone_audibility", "_positive"),
     ("psychoacoustics.quality._tone_audibility", "_finite"),
@@ -282,7 +350,6 @@ _NAMED_GUARDS: list[tuple[str, str]] = [
     ("underwater.propagation.closed_form", "_positive"),
     ("underwater.sonar_equation", "_finite"),
     ("vibration.human.instrumentation", "_checked_uncertainty"),
-    ("vibration.machinery.diagnostics", "_require_count"),
 ]
 
 
@@ -297,7 +364,7 @@ def test_every_named_guard_refuses_an_array(
     # The number itself passes, so the array can only be refused for its rank.
     guard(3.0, "probe")
     value = wrap(3.0)
-    with pytest.raises(ValueError, match="'probe'"):
+    with pytest.raises(TypeError, match="'probe'"):
         guard(value, "probe")
 
 
@@ -473,7 +540,7 @@ def test_every_guard_with_its_own_signature_refuses_an_array(
     # The number itself passes, so the array can only be refused for its rank.
     guard(*arguments(probe))
     args = arguments(wrap(probe))
-    with pytest.raises(ValueError, match=refused):
+    with pytest.raises(TypeError, match=refused):
         guard(*args)
 
 
@@ -481,7 +548,7 @@ def test_every_guard_with_its_own_signature_refuses_an_array(
 def test_a_frequency_pair_member_refuses_an_array(value: np.ndarray) -> None:
     owner = types.SimpleNamespace(band=(value, 2000.0))
     guard = _helper("electroacoustics.loudspeaker", "_require_frequency_pair")
-    with pytest.raises(ValueError, match="'band'"):
+    with pytest.raises(TypeError, match="'band'"):
         guard(owner, "band")
 
 
@@ -489,7 +556,7 @@ def test_a_frequency_pair_member_refuses_an_array(value: np.ndarray) -> None:
 def test_an_envelope_band_edge_refuses_an_array(value: np.ndarray) -> None:
     guard = _helper("signals._envelope", "_bandpass_pre_filter")
     record = np.zeros(4096)
-    with pytest.raises(ValueError, match="'band'"):
+    with pytest.raises(TypeError, match="'band'"):
         guard(record, 48_000.0, (value, 1000.0))
 
 
@@ -497,7 +564,7 @@ def test_an_envelope_band_edge_refuses_an_array(value: np.ndarray) -> None:
 def test_a_pile_strike_limit_refuses_an_array(value: np.ndarray) -> None:
     rng = np.random.default_rng(1)
     pressure = rng.standard_normal(4800)
-    with pytest.raises(ValueError, match="'limits'"):
+    with pytest.raises(TypeError, match="'limits'"):
         underwater.strike_sel_spectrum(pressure, 48_000.0, limits=(value, 10_000.0))
 
 
@@ -596,7 +663,7 @@ def test_a_public_guard_refuses_an_array(
     # The number itself passes, so the array can only be refused for its rank.
     call(probe)
     value = wrap(probe)
-    with pytest.raises(ValueError, match=f"'{refused}' must be one number"):
+    with pytest.raises(TypeError, match=f"'{refused}' must be one number"):
         call(value)
 
 
@@ -617,7 +684,7 @@ def test_a_soundscape_result_refuses_an_array(value: np.ndarray) -> None:
         "measurement_results": results,
         "site_description": "street",
     }
-    with pytest.raises(ValueError, match="'LAeq,T'"):
+    with pytest.raises(TypeError, match="'LAeq,T'"):
         sc.SoundscapeAcousticEnvironment(**fields)  # type: ignore[arg-type]
 
 
@@ -932,11 +999,166 @@ def guards_without_rank(source: str) -> list[str]:
     return found
 
 
+#: The annotations that promise one number: a parameter or a field written
+#: with one of these (``| None`` aside) is a scalar, and a guard that compares
+#: it has to have its rank settled first.
+_SCALAR_ANNOTATIONS = frozenset(
+    {"float", "int", "Real", "numbers.Real", "np.floating", "np.integer", "np.float64"}
+)
+
+
+def _is_scalar_annotation(annotation: ast.expr | None) -> bool:
+    if annotation is None:
+        return False
+    if isinstance(annotation, ast.Constant) and isinstance(annotation.value, str):
+        text = annotation.value
+    else:
+        text = ast.unparse(annotation)
+    parts = [part.strip() for part in text.split("|")]
+    kept = [part for part in parts if part != "None"]
+    return bool(kept) and all(part in _SCALAR_ANNOTATIONS for part in kept)
+
+
+def _scalar_subjects(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, fields: frozenset[str]
+) -> frozenset[str]:
+    """The parameters (or, in ``__post_init__``, the fields) annotated scalar."""
+    arguments = function.args
+    names = {
+        arg.arg
+        for arg in arguments.posonlyargs + arguments.args + arguments.kwonlyargs
+        if arg.arg not in {"self", "cls"} and _is_scalar_annotation(arg.annotation)
+    }
+    if function.name == "__post_init__":
+        names |= {f"self.{name}" for name in fields}
+    return frozenset(names)
+
+
+def _class_scalar_fields(cls: ast.ClassDef) -> frozenset[str]:
+    return frozenset(
+        statement.target.id
+        for statement in cls.body
+        if isinstance(statement, ast.AnnAssign)
+        and isinstance(statement.target, ast.Name)
+        and _is_scalar_annotation(statement.annotation)
+    )
+
+
+def _functions_with_fields(
+    tree: ast.AST, fields: frozenset[str] = frozenset()
+) -> Iterator[tuple[ast.FunctionDef | ast.AsyncFunctionDef, frozenset[str]]]:
+    for node in ast.iter_child_nodes(tree):
+        if isinstance(node, ast.ClassDef):
+            yield from _functions_with_fields(node, _class_scalar_fields(node))
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            yield node, fields
+            yield from _functions_with_fields(node)
+        else:
+            yield from _functions_with_fields(node, fields)
+
+
+#: The calls a comparison may wrap its operand in and still order the value
+#: itself: ``abs(frequency - f) <= tolerance`` compares ``frequency``.
+_ARITHMETIC_WRAPPERS = frozenset({"abs", "fabs", "absolute"})
+
+
+def _ordered_inside(
+    operand: ast.AST, subject: Callable[[ast.AST], str | None]
+) -> list[str]:
+    """The values an operand of a comparison orders, through arithmetic.
+
+    A parameter read inside ``abs(...)``, a sum, a difference or a sign change
+    is ordered by the comparison as surely as one compared bare; one read
+    inside any other call (``len(x)``, ``np.max(x)``) is not, because that
+    call reduces it first.
+    """
+    read = subject(operand)
+    if read is not None:
+        return [read]
+    if isinstance(operand, ast.BinOp):
+        return _ordered_inside(operand.left, subject) + _ordered_inside(
+            operand.right, subject
+        )
+    if isinstance(operand, ast.UnaryOp):
+        return _ordered_inside(operand.operand, subject)
+    if (
+        isinstance(operand, ast.Call)
+        and _called_name(operand).rsplit(".", 1)[-1] in _ARITHMETIC_WRAPPERS
+        and len(operand.args) == 1
+    ):
+        return _ordered_inside(operand.args[0], subject)
+    return []
+
+
+def _compared_through_arithmetic(
+    part: ast.AST, subject: Callable[[ast.AST], str | None]
+) -> list[str]:
+    """What a comparison orders, its operands read through arithmetic."""
+    if not isinstance(part, ast.Compare) or any(
+        isinstance(op, (ast.Is, ast.IsNot, ast.In, ast.NotIn)) for op in part.ops
+    ):
+        return []
+    return [
+        read
+        for operand in (part.left, *part.comparators)
+        for read in _ordered_inside(operand, subject)
+    ]
+
+
+def _returns(statements: list[ast.stmt]) -> bool:
+    return any(isinstance(statement, ast.Return) for statement in statements)
+
+
+def compared_without_rank(source: str) -> list[str]:
+    """Every guard that only compares a scalar-annotated value, unasked its rank.
+
+    ``if volume <= 0.0: raise`` reads ``volume`` through no conversion, so the
+    conversion rules above never see it, and on every numpy a one-element
+    array passes the comparison as its element while a longer one raises
+    numpy's anonymous "truth value of an array is ambiguous". A parameter (a
+    field, in ``__post_init__``) annotated as one number that a guard compares
+    has its rank settled in the same function, by ``require_scalar``, a shared
+    scalar guard, ``require_count`` or an :func:`isinstance` against a number
+    type, which refuses an array as the wrong type, naming it.
+
+    A guard is an ``if`` whose body raises, or one whose body returns in a
+    function that raises further on: a lookup that returns the row it matches
+    and refuses what matches none (``for f, row in table: if abs(frequency -
+    f) <= tol: return row`` and then ``raise``) is the same guard turned
+    inside out. The comparison is read through arithmetic, so a parameter
+    inside ``abs(...)`` or a difference is compared too.
+    """
+    found: list[str] = []
+    for function, fields in _functions_with_fields(ast.parse(source)):
+        scalars = _scalar_subjects(function, fields)
+        if not scalars:
+            continue
+        subject = _subjects(function)
+        raises_later = _raises(function.body)
+        reads: dict[str, int] = {}
+        for node in ast.walk(function):
+            if not isinstance(node, ast.If):
+                continue
+            if not (_raises(node.body) or (raises_later and _returns(node.body))):
+                continue
+            for part in ast.walk(node.test):
+                for ordered in _compared_through_arithmetic(part, subject):
+                    if ordered in scalars:
+                        reads.setdefault(ordered, part.lineno)
+        found += [
+            f"{function.name}({read}):{line}"
+            for read, line in sorted(reads.items())
+            if not _rank_settled(function, read)
+        ]
+    return found
+
+
 _RULES: dict[str, Callable[[str], list[str]]] = {
     "renaming": renaming_guards,
     "private": scalar_guards_without_rank,
     "converted": converted_before_the_guard,
     "unasked": guards_without_rank,
+    "compared": compared_without_rank,
 }
 
 
@@ -999,6 +1221,27 @@ def resampled(fs):
         raise ValueError("'fs' must be positive")
     return float(fs) / 2.0
 """,
+    "compared": """
+def wall_area(height_m: float, width_m: float | None = None) -> float:
+    if height_m <= 0.0:
+        raise ValueError("'height_m' must be positive")
+    if width_m is not None and width_m <= 0.0:
+        raise ValueError("'width_m' must be positive")
+    return height_m * (width_m or 1.0)
+
+class Room:
+    volume: float
+
+    def __post_init__(self) -> None:
+        if self.volume <= 0.0:
+            raise ValueError("'volume' must be positive")
+
+def row(frequency: float) -> tuple[float, float]:
+    for f, params in TABLE.items():
+        if abs(frequency - f) <= 1e-6 * f:
+            return params
+    raise ValueError("no row at 'frequency'")
+""",
 }
 
 _ANSWERED = {
@@ -1050,6 +1293,29 @@ def resampled(fs):
         raise ValueError("'fs' must be positive")
     return float(fs) / 2.0
 """,
+    "compared": """
+def wall_area(height_m: float, width_m: float | None = None) -> float:
+    require_scalar(height_m, "height_m")
+    require_scalar(width_m, "width_m")
+    if height_m <= 0.0:
+        raise ValueError("'height_m' must be positive")
+    if width_m is not None and width_m <= 0.0:
+        raise ValueError("'width_m' must be positive")
+    return height_m * (width_m or 1.0)
+
+def spectrum(levels: ArrayLike, floor: ArrayLike) -> ArrayLike:
+    if levels < floor:
+        raise ValueError("'levels' must not fall below 'floor'")
+    return levels
+
+class Room:
+    volume: float
+
+    def __post_init__(self) -> None:
+        require_scalar(self.volume, "volume")
+        if self.volume <= 0.0:
+            raise ValueError("'volume' must be positive")
+""",
 }
 
 
@@ -1071,3 +1337,167 @@ def test_the_unasked_rule_finds_every_shape_of_the_guard() -> None:
         "low_frequency_procedure_applies(volume)",
         "resampled(fs)",
     ]
+
+
+def test_the_compared_rule_reads_a_lookup_that_returns_and_then_raises() -> None:
+    """A comparison in an ``if`` that returns, with the raise after the loop,
+    is a guard; and one inside ``abs(...)`` or a difference compares the value.
+    """
+    found = compared_without_rank(_PLANTED["compared"])
+    assert sorted(where.split(":")[0] for where in found) == [
+        "__post_init__(self.volume)",
+        "row(frequency)",
+        "wall_area(height_m)",
+        "wall_area(width_m)",
+    ]
+
+
+# ---------------------------------------------------------------------------
+# Every public scalar parameter, called
+# ---------------------------------------------------------------------------
+
+#: The annotations of a parameter that takes one number.
+_ONE_NUMBER = frozenset({"float", "int"})
+#: Values tried, in turn, until a call with every required parameter set to one
+#: of them goes through; a function no value of these satisfies is not probed.
+_FLOAT_TRIES = (1.0, 0.5, 2.0, 10.0, 100.0, 1000.0, 0.1, 3.0, 20.0, 50.0, 0.0)
+_INT_TRIES = (1, 2, 3, 10, 4, 100, 0)
+
+
+def _one_number(annotation: object) -> str | None:
+    """``"float"`` or ``"int"`` when *annotation* promises one number."""
+    if annotation is inspect.Parameter.empty:
+        return None
+    text = (
+        annotation
+        if isinstance(annotation, str)
+        else getattr(annotation, "__name__", "")
+    )
+    kept = [part.strip() for part in str(text).split("|") if part.strip() != "None"]
+    if kept and all(part in _ONE_NUMBER for part in kept):
+        return kept[0]
+    return None
+
+
+def _quietly(function: Callable[..., object], arguments: dict[str, object]) -> object:
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        return function(**arguments)
+
+
+def _public_functions() -> Iterator[tuple[str, Callable[..., object]]]:
+    seen: set[int] = set()
+    for info in pkgutil.iter_modules(phonometry.__path__):
+        if info.name.startswith("_"):
+            continue
+        domain = importlib.import_module(f"phonometry.{info.name}")
+        for name in getattr(domain, "__all__", ()):
+            function = getattr(domain, name)
+            if inspect.isfunction(function) and id(function) not in seen:
+                seen.add(id(function))
+                yield f"{info.name}.{name}", function
+
+
+def _baseline(
+    function: Callable[..., object], required: dict[str, str]
+) -> dict[str, object] | None:
+    """Arguments for the required parameters that the function takes, if any."""
+    for attempt in range(len(_FLOAT_TRIES)):
+        arguments: dict[str, object] = {
+            name: _INT_TRIES[attempt % len(_INT_TRIES)]
+            if kind == "int"
+            else _FLOAT_TRIES[attempt]
+            for name, kind in required.items()
+        }
+        try:
+            _quietly(function, arguments)
+        except Exception:  # noqa: BLE001 - any refusal means: try the next value
+            continue
+        return arguments
+    return None
+
+
+def _scalar_parameters(
+    function: Callable[..., object],
+) -> tuple[dict[str, str], dict[str, float]] | None:
+    """The required one-number parameters and the optional ones with a number.
+
+    ``None`` when a required parameter takes something else, which the probe
+    cannot build.
+    """
+    required: dict[str, str] = {}
+    optional: dict[str, float] = {}
+    for parameter in inspect.signature(function).parameters.values():
+        if parameter.kind in (parameter.VAR_POSITIONAL, parameter.VAR_KEYWORD):
+            continue
+        kind = _one_number(parameter.annotation)
+        if parameter.default is inspect.Parameter.empty:
+            if kind is None:
+                return None
+            required[parameter.name] = kind
+        elif (
+            kind is not None
+            and isinstance(parameter.default, (int, float))
+            and not isinstance(parameter.default, bool)
+        ):
+            optional[parameter.name] = parameter.default
+    return required, optional
+
+
+def _wrong_types(value: float) -> tuple[object, ...]:
+    """What a one-number parameter must refuse as the wrong type."""
+    return (np.array([value]), np.array([value, value]), str(value), "fifty")
+
+
+def _array_refusals() -> tuple[list[str], int]:
+    """Each public one-number parameter an array or a text reaches unrefused.
+
+    For every public function whose required parameters all take one number,
+    a call that goes through is found first; then each one-number parameter,
+    required or defaulted, is given a one-element and a two-element array, the
+    text of its own number and a text that reads as none, in turn, and must
+    be refused with a ``TypeError`` that names it.
+    """
+    offences: list[str] = []
+    probed = 0
+    for qualified, function in _public_functions():
+        parameters = _scalar_parameters(function)
+        if parameters is None:
+            continue
+        required, optional = parameters
+        if not (required or optional):
+            continue
+        baseline = _baseline(function, required)
+        if baseline is None:
+            continue
+        for name, value in {**baseline, **optional}.items():
+            probed += 1
+            for wrapped in _wrong_types(value):
+                try:
+                    _quietly(function, {**baseline, name: wrapped})
+                except TypeError as refusal:
+                    if name in str(refusal):
+                        continue
+                    outcome = f"an anonymous TypeError ({refusal})"
+                except Exception as refusal:  # noqa: BLE001 - reported, not hidden
+                    outcome = f"{type(refusal).__name__} ({refusal})"
+                else:
+                    outcome = "accepted"
+                offences.append(f"{qualified}({name}) given {wrapped!r}: {outcome}")
+    return offences, probed
+
+
+def test_every_public_scalar_parameter_refuses_an_array_or_a_text_by_name() -> None:
+    """A parameter written as one number refuses an array or a text, naming itself.
+
+    The structural rules above read one function at a time, so a guard whose
+    comparison sits in one function and whose conversion sits in a helper is
+    invisible to them. This calls the public interface: a one-element array
+    used to pass as its element (or, from numpy 2.4 on, die in an anonymous
+    ``float()``), a longer one raised numpy's anonymous "truth value is
+    ambiguous" or broadcast into an answer of the wrong shape, and a text was
+    parsed into a number by one guard and refused as a value by the next.
+    """
+    offences, probed = _array_refusals()
+    assert probed > 500, f"only {probed} parameters were probed"
+    assert offences == [], "\n".join(offences)

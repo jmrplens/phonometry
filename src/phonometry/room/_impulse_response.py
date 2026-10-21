@@ -257,6 +257,10 @@ def sweep_signal(
         fade.
     :return: The sweep samples, length ``round(duration_s*fs)``.
     """
+    require_scalar(fs, "fs")
+    require_scalar(f1, "f1")
+    require_scalar(f2, "f2")
+    require_scalar(fade, "fade")
     if f1 <= 0.0:
         msg = "f1 must be positive"
         raise ValueError(msg)
@@ -551,6 +555,7 @@ def mls_signal(order: int) -> np.ndarray:
         ``2**order - 1``.
     :return: The bipolar MLS samples (values in ``{-1.0, +1.0}``).
     """
+    require_scalar(order, "order")
     if order not in _MLS_TAPS:
         msg = f"order must be one of {sorted(_MLS_TAPS)} (got {order})"
         raise ValueError(msg)
@@ -713,6 +718,7 @@ def golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]:
         :math:`L = 2^{\text{order}}` samples.
     :return: The pair ``(a, b)`` as bipolar float arrays (values ``+1/-1``).
     """
+    require_scalar(order, "order")
     if not 1 <= order <= _GOLAY_MAX_ORDER:
         msg = f"order must be between 1 and {_GOLAY_MAX_ORDER} (got {order})"
         raise ValueError(msg)
@@ -1091,6 +1097,9 @@ def shaped_sweep_signal(
         the synthesis metadata (grid, imposed magnitude, group delay,
         crest factor).
     """
+    require_scalar(amplitude, "amplitude")
+    require_scalar(fade, "fade")
+    require_scalar(duration_s, "duration_s")
     require_scalar(fs, "fs")
     fs_v = float(fs)
     if fs_v <= 0.0:

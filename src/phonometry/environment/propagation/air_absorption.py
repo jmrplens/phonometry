@@ -439,6 +439,7 @@ class AtmosphericAttenuation(OwnsArrays):
             shape -- a different length either way, a scalar against an array,
             or an extra axis on one of the two.
         """
+        require_scalar(self.distance, "distance")
         if self.distance is not None and (
             not np.isfinite(self.distance) or self.distance < 0.0
         ):

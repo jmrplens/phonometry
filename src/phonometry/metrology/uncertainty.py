@@ -51,6 +51,7 @@ from .._internal.validation import (
     require_non_negative,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
 
@@ -118,6 +119,7 @@ class Quantity(RichDisplay):
         the budget plot draws as an invisible bar -- indistinguishable from a
         zero contribution -- under a legend reading ``u_c = nan``.
         """
+        require_scalar(self.dof, "dof")
         require_non_negative(self.uncertainty, "uncertainty")
         if self.distribution not in _DISTRIBUTIONS:
             msg = (
@@ -135,6 +137,8 @@ def rectangular(value: float, half_width: float, name: str = "") -> Quantity:
 
     The standard uncertainty is :math:`a / \sqrt{3}`.
     """
+    require_scalar(half_width, "half_width")
+    require_scalar(value, "value")
     return Quantity(value, half_width / math.sqrt(3.0), "rectangular", name=name)
 
 
@@ -143,6 +147,8 @@ def triangular(value: float, half_width: float, name: str = "") -> Quantity:
 
     The standard uncertainty is :math:`a / \sqrt{6}`.
     """
+    require_scalar(half_width, "half_width")
+    require_scalar(value, "value")
     return Quantity(value, half_width / math.sqrt(6.0), "triangular", name=name)
 
 
@@ -151,6 +157,8 @@ def u_shaped(value: float, half_width: float, name: str = "") -> Quantity:
 
     The standard uncertainty is :math:`a / \sqrt{2}`.
     """
+    require_scalar(half_width, "half_width")
+    require_scalar(value, "value")
     return Quantity(value, half_width / math.sqrt(2.0), "u-shaped", name=name)
 
 
@@ -614,6 +622,8 @@ def coverage_factor(coverage: float = 0.95, dof: float = math.inf) -> float:
         :math:`k = t_p(\text{dof})`.
     :raises ValueError: for a coverage outside (0, 1).
     """
+    require_scalar(dof, "dof")
+    require_scalar(coverage, "coverage")
     if not 0.0 < coverage < 1.0:
         msg = f"coverage must be in (0, 1); got {coverage}."
         raise ValueError(msg)
@@ -690,6 +700,8 @@ def monte_carlo(
     :raises ValueError: for no inputs, fewer than 2 trials or bad coverage,
         or when the model returns a non-finite output for any trial.
     """
+    require_scalar(coverage, "coverage")
+    require_scalar(n_trials, "n_trials")
     if len(quantities) == 0:
         msg = "at least one input quantity is required."
         raise ValueError(msg)

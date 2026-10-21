@@ -781,6 +781,7 @@ def _validate_reverberation(t: np.ndarray, t0: float) -> None:
     time ``T0`` must be positive; the same requirement applies to every
     ISO 16283 part.
     """
+    require_scalar(t0, "t0")
     if t.ndim != 1:
         msg = "'t2' must be one-dimensional (one value per band)."
         raise ValueError(msg)
@@ -811,6 +812,7 @@ def _checked_frequency_axis(
     :raises ValueError: If the vector is not one-dimensional or its length is
         not ``band_count``.
     """
+    require_scalar(band_count, "band_count")
     if frequencies is None:
         return None
     axis = np.asarray(frequencies, dtype=np.float64)

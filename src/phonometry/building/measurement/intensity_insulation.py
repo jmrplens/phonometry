@@ -84,7 +84,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
-    is_scalar,
+    require_count,
     require_equal_counts,
     require_equal_shapes,
     require_finite_fields,
@@ -94,6 +94,7 @@ from ..._internal.validation import (
     require_scalar,
 )
 from .insulation import _as_band_levels
+from .laboratory_insulation import LaboratoryInsulationWarning
 from .ratings import WeightedRatingResult, weighted_rating
 
 if TYPE_CHECKING:
@@ -796,6 +797,8 @@ def intensity_element_normalized_difference(
     :raises ValueError: If the band counts differ, if ``measurement_area`` is
         not positive, if ``n`` is not a positive integer, or if inputs are
         non-finite.
+    :warns LaboratoryInsulationWarning: If ``n > 1``, where the result departs
+        from the printed sign of Formula (8).
     """
     lp1_bands = _as_band_levels(lp1, "lp1")
     l_in_bands = _as_band_levels(l_in, "l_in")
@@ -805,17 +808,14 @@ def intensity_element_normalized_difference(
         "band",
     )
     sm = _positive_area(measurement_area, "measurement_area")
-    require_scalar(n, "n")
-    if int(n) != n or n < 1:
-        msg = "'n' must be a positive integer."
-        raise ValueError(msg)
+    n = require_count(n, "n")
     if n > 1:
         warnings.warn(
             "ISO 15186-1:2000 Formula (8) as printed subtracts 10 lg(N); "
             "that sign is physically inconsistent (see docs/ERRATA.md). The "
             "per-unit DI,n,e is returned with the corrected +10 lg(N) term, "
             "consistent with ISO 10140-2:2010 Formula (6).",
-            UserWarning,
+            LaboratoryInsulationWarning,
             stacklevel=2,
         )
 
@@ -999,22 +999,11 @@ def _validated_element_count(n_elements: object) -> int:
 
     :param n_elements: The caller's ``n_elements`` argument, of any type.
     :return: ``N`` as a built-in ``int``.
-    :raises ValueError: for a bool (``True`` counts no units), a value that is
-        not a whole number, one below 1, or anything an integer cannot be
-        taken from.
+    :raises TypeError: for a bool (``True`` counts no units), an array, or
+        anything else that is not a number.
+    :raises ValueError: for a number that is not whole, or one below 1.
     """
-    msg = "'n_elements' must be a positive integer."
-    # An array is refused by its rank: numpy before 2.4 converts a
-    # one-element array through int() instead of refusing it.
-    if isinstance(n_elements, (bool, np.bool_)) or not is_scalar(n_elements):
-        raise ValueError(msg)
-    try:
-        count = int(n_elements)  # type: ignore[call-overload]
-    except (TypeError, ValueError) as exc:
-        raise ValueError(msg) from exc
-    if count != n_elements or count < 1:
-        raise ValueError(msg)
-    return int(count)
+    return require_count(n_elements, "n_elements")
 
 
 def _validated_absorbing_flag(absorbing_specimen_surface: object) -> bool:
@@ -1026,7 +1015,7 @@ def _validated_absorbing_flag(absorbing_specimen_surface: object) -> bool:
 
     :param absorbing_specimen_surface: The caller's argument, of any type.
     :return: The flag as a built-in ``bool``.
-    :raises ValueError: for anything that is not a bool.
+    :raises TypeError: for anything that is not a bool.
     """
     if not isinstance(absorbing_specimen_surface, (bool, np.bool_)):
         msg = (
@@ -1034,7 +1023,7 @@ def _validated_absorbing_flag(absorbing_specimen_surface: object) -> bool:
             "between the two limits of Clause 6.4.2, and a truthy value of "
             "another type would silently pick the tighter one."
         )
-        raise ValueError(msg)
+        raise TypeError(msg)
     return bool(absorbing_specimen_surface)
 
 

@@ -922,6 +922,13 @@ that gives 0 dB, where the scaling does nothing.
 
 **Returns:** A [`NeckLoopCharacteristics`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neckloopcharacteristics).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | If `impedance_ohm` holds an element that is not a number. |
+| ValueError | If the frequencies are not positive and ascending or miss 1000 Hz, the arrays differ in length, a level is not finite, or a real impedance is not positive. |
+
 ## NECK_LOOP_TYPES
 
 *Constant* (`mapping`).
@@ -1306,3 +1313,10 @@ input ([`NECK_LOOP_TYPES`](/phonometry/reference/api/electroacoustics/induction-
 | `neck_loop_type` | 1 or 2. |
 
 **Returns:** A [`NeckLoopVerification`](/phonometry/reference/api/electroacoustics/induction-loop-components/#neckloopverification).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `neck_loop_type` is not a number, a bool included. |
+| ValueError | if `neck_loop_type` is a number but not 1 or 2. |

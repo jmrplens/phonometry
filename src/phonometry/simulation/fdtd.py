@@ -49,6 +49,7 @@ from numpy.typing import ArrayLike, NDArray
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, handed_over, read_only_copy
 from .._internal.validation import (
+    require_count,
     require_equal_counts,
     require_positive,
     require_ranks,
@@ -104,12 +105,15 @@ def _finite(name: str, value: float) -> float:
 
 
 def _integer(name: str, value: int) -> int:
-    """Validate that *value* is an integral scalar (bool is rejected)."""
-    if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
-        msg = f"{name} must be an integer"
-        # ValueError keeps the module validation errors uniform.
-        raise ValueError(msg)  # noqa: TRY004
-    return int(value)
+    """Validate that *value* is an integral scalar (bool is rejected).
+
+    A count or a cell index of the grid, refused as
+    :func:`~phonometry._internal.validation.require_count` refuses one: a
+    :class:`TypeError` for anything that is not a number, a
+    :class:`ValueError` for a number that is not whole. The bound each one
+    has is checked where it is read.
+    """
+    return require_count(value, name, at_least=None)
 
 
 def _positive_map(name: str, field: Field2D) -> None:
@@ -178,6 +182,7 @@ class CWSource(RichDisplay):
 
     def __post_init__(self) -> None:
         """Require a positive ``frequency`` and a non-negative ``ramp_cycles``."""
+        require_scalar(self.ramp_cycles, "ramp_cycles")
         _positive_finite("frequency", self.frequency)
         _finite("amplitude", self.amplitude)
         if not np.isfinite(self.ramp_cycles) or self.ramp_cycles < 0.0:
@@ -285,11 +290,13 @@ class PlaneWaveSource(RichDisplay):
 
         ``direction`` and ``offset`` are checked against the grid in
         :meth:`FDTD2D.add_source`, which is the first place a grid exists.
+
+        :raises TypeError: if ``waveform`` is not callable.
+        :raises ValueError: if ``amplitude`` is not finite.
         """
         if not callable(self.waveform):
             msg = "waveform must be callable"
-            # ValueError keeps the module validation errors uniform.
-            raise ValueError(msg)  # noqa: TRY004
+            raise TypeError(msg)
         _finite("amplitude", self.amplitude)
 
 
@@ -353,6 +360,8 @@ def _validate_sponge_damping(
     nx: int,
 ) -> tuple[int, NDArray[np.float64]]:
     """Validate the sponge/damping spec into ``(width, damping map)``."""
+    require_scalar(sponge_reflection, "sponge_reflection")
+    require_scalar(sponge_width, "sponge_width")
     sponge_width = _integer("sponge_width", sponge_width)
     if sponge_width < 0:
         msg = "sponge_width must be non-negative"
@@ -401,6 +410,9 @@ def _run_recording(
     for the initial state, then one every ``record_every`` steps), so the
     recording is never held twice, as a list of frames and their stack.
     """
+    require_scalar(decimate, "decimate")
+    require_scalar(record_every, "record_every")
+    require_scalar(n_steps, "n_steps")
     n_steps = _integer("n_steps", n_steps)
     if n_steps < 0:
         msg = "'n_steps' must be non-negative"
@@ -440,32 +452,50 @@ def _validated_obstacle(
         raise ValueError(msg)
     if mask.dtype != np.bool_:
         msg = "obstacle_mask must be a boolean array"
-        raise ValueError(msg)
+        raise TypeError(msg)
     if bool(mask.all()):
         msg = "obstacle_mask must leave open cells"
         raise ValueError(msg)
     return mask.copy() if bool(mask.any()) else None
 
 
+def _grid_shape(shape: object) -> tuple[int, int]:
+    """The ``(ny, nx)`` grid a scalar sound speed is spread over.
+
+    A value that is not a pair, or a cell count that is not a number, is the
+    wrong type; a pair of another length, or a count that is not a whole
+    number of one cell or more, is a wrong value. A whole float is kept as
+    the count it names.
+
+    :raises TypeError: for a value that is not a tuple or a list, or a count
+        that is not a number.
+    :raises ValueError: for a sequence of another length than two, or a count
+        that is not a whole number of at least one.
+    """
+    msg = f"shape must be a pair of positive integers (ny, nx); got {shape!r}"
+    if not isinstance(shape, (tuple, list)):
+        raise TypeError(msg)
+    if len(shape) != 2:  # noqa: PLR2004
+        raise ValueError(msg)
+    try:
+        ny, nx = (require_count(n, "shape") for n in shape)
+    except TypeError:
+        raise TypeError(msg) from None
+    except ValueError:
+        raise ValueError(msg) from None
+    return ny, nx
+
+
 def _resolve_c_map(c: float | Field2D, shape: tuple[int, int] | None) -> Field2D:
     """Broadcast/validate the sound-speed spec into a positive 2D map."""
     if np.iscomplexobj(c):
         msg = "c must be real; a complex sound speed is not supported"
-        raise ValueError(msg)
+        raise TypeError(msg)
     if np.isscalar(c):
         if shape is None:
             msg = "shape is required when c is a scalar"
             raise ValueError(msg)
-        valid = isinstance(shape, (tuple, list)) and len(shape) == 2  # noqa: PLR2004
-        if valid:
-            valid = all(
-                not isinstance(n, bool) and isinstance(n, (int, np.integer)) and n >= 1
-                for n in shape
-            )
-        if not valid:
-            msg = f"shape must be a pair of positive integers (ny, nx); got {shape!r}"
-            raise ValueError(msg)
-        c_map = np.full(shape, float(np.real(c)), dtype=np.float64)
+        c_map = np.full(_grid_shape(shape), float(np.real(c)), dtype=np.float64)
     else:
         c_map = np.asarray(c, dtype=np.float64)
     if c_map.ndim != 2:  # noqa: PLR2004
@@ -479,7 +509,7 @@ def _resolve_rho_map(rho: float | Field2D, ny: int, nx: int) -> Field2D:
     """Broadcast/validate the density spec into a positive ``(ny, nx)`` map."""
     if np.iscomplexobj(rho):
         msg = "rho must be real; a complex density is not supported"
-        raise ValueError(msg)
+        raise TypeError(msg)
     rho_map = (
         np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
         if np.isscalar(rho)
@@ -614,6 +644,10 @@ class ContourProbe:
         iy1: int,
         frequencies: ArrayLike,
     ) -> None:
+        require_scalar(ix0, "ix0")
+        require_scalar(ix1, "ix1")
+        require_scalar(iy0, "iy0")
+        require_scalar(iy1, "iy1")
         ny, nx = sim.p.shape
         ix0 = _integer("ix0", ix0)
         ix1 = _integer("ix1", ix1)
@@ -822,6 +856,7 @@ class FDTD2D:
         edge_impedance: Mapping[str, float | NDArray[np.float64]] | None = None,
         obstacle_mask: NDArray[np.bool_] | None = None,
     ) -> None:
+        require_scalar(cfl, "cfl")
         c_map = _resolve_c_map(c, shape)
         if not np.isfinite(cfl) or not 0.0 < cfl < 1.0:
             msg = (
@@ -861,7 +896,7 @@ class FDTD2D:
 
         sides = _resolve_sponge_sides(sponge_sides)
         #: Sponge-layer width in cells (read-only configuration record).
-        self.sponge_width = int(sponge_width)
+        self.sponge_width = require_count(sponge_width, "sponge_width", at_least=None)
         #: Sides carrying a sponge layer when ``sponge_width > 0``.
         self.sponge_sides: tuple[str, ...] = sides if sponge_width > 0 else ()
         self._init_decay(sides, sponge_width, sponge_reflection, damping_map, c_max)
@@ -1431,7 +1466,10 @@ def _probe_indices(
     for k, entry in enumerate(probes):
         try:
             ix, iy = entry
-        except (TypeError, ValueError):
+        except TypeError:
+            msg = f"probes must hold (ix, iy) index pairs; entry {k} is {entry!r}"
+            raise TypeError(msg) from None
+        except ValueError:
             msg = f"probes must hold (ix, iy) index pairs; entry {k} is {entry!r}"
             raise ValueError(msg) from None
         ix = _integer("probe ix", ix)
@@ -1542,8 +1580,13 @@ def fdtd_simulation(
     :param snapshot_every: Record a full pressure-field snapshot every this
         many steps (and at :math:`t = 0`); ``None`` records none.
     :return: A :class:`FDTDResult`.
+    :raises TypeError: If an input is of the wrong type: a count that is not
+        a number, a ``shape`` that is not a pair, a complex medium, or an
+        ``obstacle_mask`` that is not boolean.
     :raises ValueError: If the inputs are invalid.
     """
+    require_scalar(absorbing_layer_cells, "absorbing_layer_cells")
+    require_scalar(snapshot_every, "snapshot_every")
     if len(sources) == 0:
         msg = "at least one source is required"
         raise ValueError(msg)

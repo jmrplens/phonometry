@@ -175,6 +175,7 @@ from scipy.integrate import quad
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_choice,
+    require_count,
     require_positive,
     require_ranks,
     require_same_length,
@@ -421,6 +422,7 @@ def angular_average_transmission_coefficient(
     :raises ValueError: for a non-positive ``chi``/``psi``, an unknown junction
         or section, or a straight section that does not exist.
     """
+    require_scalar(chi, "chi")
     section = require_choice(str(section).lower(), "section", ("corner", "straight"))
     if section == "corner":
 
@@ -612,7 +614,7 @@ def point_connection_coupling_loss_factor(
         msg = "'frequency' must be positive."
         raise ValueError(msg)
     require_scalar(n_connections, "n_connections")
-    n = int(n_connections)
+    n = require_count(n_connections, "n_connections", at_least=None)
     if n < 1:
         msg = "'n_connections' must be a positive integer."
         raise ValueError(msg)

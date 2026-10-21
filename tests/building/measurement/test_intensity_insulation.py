@@ -11,6 +11,7 @@ import pytest
 import reference_data as ref
 
 from phonometry import building
+from phonometry.building import LaboratoryInsulationWarning
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -171,7 +172,8 @@ def test_element_normalized_difference_formula_8() -> None:
     )
     assert d.d_i_n_e[0] == pytest.approx(34.0)  # Sm = A0, N = 1
     with pytest.warns(
-        UserWarning, match=r"Formula \(8\) as printed subtracts 10 lg\(N\)"
+        LaboratoryInsulationWarning,
+        match=r"Formula \(8\) as printed subtracts 10 lg\(N\)",
     ):
         d2 = building.intensity_element_normalized_difference(
             [80.0], [40.0], measurement_area=10.0, n=2
@@ -182,7 +184,7 @@ def test_element_normalized_difference_formula_8() -> None:
 
 
 def test_element_normalized_rejects_bad_n() -> None:
-    with pytest.raises(ValueError, match=r"'n' must be a positive integer"):
+    with pytest.raises(ValueError, match=r"'n' must be a whole number"):
         building.intensity_element_normalized_difference(
             [80.0], [40.0], measurement_area=10.0, n=0
         )
@@ -644,10 +646,19 @@ def test_low_frequency_element_carries_the_clause_6_4_2_verdict() -> None:
     assert bare.qualified is None
 
 
-@pytest.mark.parametrize("bad", [0, -1, 2.5, True])
-def test_low_frequency_element_rejects_a_bad_unit_count(bad: object) -> None:
-    """N counts installed units, so it is a positive integer and not a bool."""
-    with pytest.raises(ValueError, match="'n_elements' must be a positive integer"):
+@pytest.mark.parametrize(
+    ("bad", "refusal"),
+    [(0, ValueError), (-1, ValueError), (2.5, ValueError), (True, TypeError)],
+)
+def test_low_frequency_element_rejects_a_bad_unit_count(
+    bad: object, refusal: type[Exception]
+) -> None:
+    """N counts installed units: a whole number from 1, and never a bool.
+
+    A bool is the wrong type for a count; a number that is not whole or is
+    below one is the right type with the wrong value.
+    """
+    with pytest.raises(refusal, match="'n_elements' must be a whole number"):
         building.low_frequency_element_normalized_difference(
             [90.0], [60.0], measurement_area=10.0, n_elements=bad
         )
@@ -728,7 +739,7 @@ def test_low_frequency_refuses_a_grid_of_frequencies(
 @pytest.mark.parametrize("bad", ["reflecting", 1, 0, None])
 def test_low_frequency_refuses_a_non_boolean_clause_6_4_2_case(bad: object) -> None:
     """Every non-empty string is truthy and would pick the tighter limit."""
-    with pytest.raises(ValueError, match="absorbing_specimen_surface"):
+    with pytest.raises(TypeError, match="absorbing_specimen_surface"):
         building.low_frequency_intensity_reduction(
             [80.0],
             [60.0],
@@ -737,7 +748,7 @@ def test_low_frequency_refuses_a_non_boolean_clause_6_4_2_case(bad: object) -> N
             l_p=[70.0],
             absorbing_specimen_surface=bad,
         )
-    with pytest.raises(ValueError, match="absorbing_specimen_surface"):
+    with pytest.raises(TypeError, match="absorbing_specimen_surface"):
         building.low_frequency_element_normalized_difference(
             [80.0], [60.0], measurement_area=10.0, absorbing_specimen_surface=bad
         )
@@ -759,7 +770,7 @@ def test_low_frequency_accepts_numpy_booleans_and_integers() -> None:
     )
     assert counted.n_elements == 4
     # np.bool_ is not a bool subclass, so the unit-count guard has to name it.
-    with pytest.raises(ValueError, match="'n_elements' must be a positive integer"):
+    with pytest.raises(TypeError, match="'n_elements' must be a whole number"):
         building.low_frequency_element_normalized_difference(
             [90.0], [60.0], measurement_area=10.0, n_elements=np.True_
         )

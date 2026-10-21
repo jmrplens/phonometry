@@ -67,6 +67,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
 from .._internal.display import RichDisplay
+from .._internal.validation import require_scalar
 
 if TYPE_CHECKING:
     from typing import BinaryIO
@@ -629,6 +630,9 @@ def _check_chunk_extent(
     byte is deliberately not demanded: some writers omit the final pad
     of an odd last chunk, and the payload itself is whole either way.
     """
+    require_scalar(offset, "offset")
+    require_scalar(size, "size")
+    require_scalar(file_size, "file_size")
     if offset + size > file_size:
         msg = (
             f"{path}: chunk {chunk_id!r} claims {size} bytes but only "
@@ -645,6 +649,7 @@ def _read_chunk_payload(
     The extent was already checked against the file size; the short-read
     guard stays for the race where the file shrinks under the walker.
     """
+    require_scalar(size, "size")
     payload = fh.read(size)
     if len(payload) < size:
         msg = (
@@ -661,6 +666,7 @@ def _true_data_size(
     size: int, container: WavContainer, ds64: Ds64Chunk | None, path: str | Path
 ) -> int:
     """Resolve the ``data`` size, through ``ds64`` for the RF64 sentinel."""
+    require_scalar(size, "size")
     if size != _RF64_SIZE_SENTINEL or container == "WAV":
         return size
     if ds64 is None:

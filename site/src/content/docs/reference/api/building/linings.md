@@ -97,6 +97,12 @@ than folded into the fit.
 | :--- | :--- |
 | ValueError | If an input is not positive and finite, `system` is unknown, or `glued_area` is out of range or combined with `system="studs"`. |
 
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| BuildingPredictionWarning | If `resonance_frequency` lies outside the range Annex D puts lining resonances on. |
+
 ## lining_improvement_in_situ
 
 ```python
@@ -272,3 +278,9 @@ takes the more conservative −10 dB there (see `docs/ERRATA.md`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `fo` is outside the tabulated range or an input is not finite. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| BuildingPredictionWarning | If `base_rating` lies outside the range Clause D.2.2 states Table D.1 for. |

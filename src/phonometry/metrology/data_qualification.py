@@ -81,6 +81,7 @@ from scipy import special
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_axis_count,
+    require_count,
     require_equal_counts,
     require_finite_fields,
     require_ranks,
@@ -430,6 +431,7 @@ def _acceptance_region(
     :raises ValueError: if the method is unknown, ``alpha`` is not inside
         (0, 1), or a runs sequence has no median or nothing on one side of it.
     """
+    require_scalar(alpha, "alpha")
     if method not in _METHODS:
         msg = f"{owner}: 'method' must be one of {_METHODS}, got {method!r}."
         raise ValueError(msg)
@@ -644,6 +646,7 @@ def _trend_test_runs(values: NDArray[np.float64], alpha: float) -> TrendTestResu
 def _validate_trend_inputs(
     values: NDArray[np.float64] | list[float], method: str, alpha: float
 ) -> NDArray[np.float64]:
+    require_scalar(alpha, "alpha")
     seq = np.asarray(values, dtype=np.float64)
     if seq.ndim != 1:
         msg = "'values' must be one-dimensional."
@@ -898,7 +901,7 @@ def stationarity_test(
         msg = f"'statistic' must be one of {_STATISTICS}, got {statistic!r}."
         raise ValueError(msg)
     require_scalar(n_segments, "n_segments")
-    segments = int(n_segments)
+    segments = require_count(n_segments, "n_segments", at_least=None)
     if not _MIN_OBSERVATIONS <= segments <= xa.size:
         msg = (
             f"'n_segments' must be between {_MIN_OBSERVATIONS} and the "
@@ -1253,6 +1256,7 @@ def _check_rice_peak_rate(
     :raises ValueError: if the expected maxima rate is zero or negative, or
         the three rates do not state one irregularity factor.
     """
+    require_scalar(peak_rate_rice, "peak_rate_rice")
     if peak_rate_rice <= 0.0:
         msg = (
             f"{owner}: 'peak_rate_rice' must be a positive expected rate of "

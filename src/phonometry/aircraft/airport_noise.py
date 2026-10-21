@@ -177,6 +177,7 @@ def noise_fraction(q: float, segment_length: float, scaled_distance_m: float) ->
     :raises ValueError: If ``segment_length`` or ``scaled_distance_m`` is not
         positive.
     """
+    require_scalar(q, "q")
     require_scalar(segment_length, "segment_length")
     lam = float(segment_length)
     require_scalar(scaled_distance_m, "scaled_distance_m")
@@ -1333,6 +1334,7 @@ def _grid_event_levels(
     both paths agree to machine precision; the golden baseline and the
     scalar-equivalence test guard that.
     """
+    require_scalar(vref, "vref")
     mount_key = mounting.strip().lower()
     engine_installation_correction(0.0, mounting)  # validate 'mounting' once
     if not (np.isfinite(vref) and vref > 0.0):

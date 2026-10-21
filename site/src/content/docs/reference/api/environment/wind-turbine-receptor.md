@@ -1132,6 +1132,7 @@ criterion of C.6.1 sums 10 Hz to 160 Hz, so pass those bands for it.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | If `weighting` is not a text. |
 | ValueError | If the shapes disagree, a distance or height is not positive, an air attenuation coefficient is negative, a default table has no value at a supplied band, or `weighting` is neither `"A"` nor `"Z"`. |
 
 ## wind_turbine_rating_level

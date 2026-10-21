@@ -14,6 +14,7 @@ the identifier it names.
 from __future__ import annotations
 
 import math
+import warnings
 from typing import TYPE_CHECKING
 
 import pytest
@@ -32,6 +33,7 @@ from doc29_appendix_b_data import (
     PROP_COEFFICIENTS,
 )
 
+from phonometry.aircraft import FlightProfileWarning
 from phonometry.aircraft.flight_performance import (
     Aerodrome,
     AerodynamicCoefficients,
@@ -938,7 +940,61 @@ def test_consecutive_level_idle_steps_at_different_altitudes_warn() -> None:
         start_calibrated_airspeed_kt=250.0,
         distance_ft=16500.0,
     )
-    with pytest.warns(UserWarning, match=r"one altitude"):
+    with pytest.warns(FlightProfileWarning, match=r"Case 1\); 4000\.0 ft"):
+        approach_profile(aircraft, steps, aerodrome=_SEA_LEVEL)
+
+
+def test_a_level_idle_step_above_the_descend_step_after_it_warns() -> None:
+    """B7.1.4 Case 2 (folio B-43) asks the same warning of any following step.
+
+    A Level-Idle step followed by a step that is neither a Level-Idle nor a
+    Descend-Idle step should start at that step's altitude, "If not, the
+    system should warn the user".
+    """
+    aircraft = _aircraft("JETW")
+    steps = _approach_steps("JETW", "Level_Idle")
+    steps[1:3] = [
+        ApproachStep(
+            step_type="Level-Idle",
+            flap_id="ZERO",
+            start_altitude_ft=3500.0,
+            start_calibrated_airspeed_kt=250.0,
+            distance_ft=16500.0,
+        ),
+        ApproachStep(
+            step_type="Descend",
+            flap_id="ZERO",
+            start_altitude_ft=3200.0,
+            start_calibrated_airspeed_kt=189.0,
+            descent_angle_deg=3.0,
+        ),
+    ]
+    with pytest.warns(
+        FlightProfileWarning, match=r"Case 2\); 3500\.0 ft .* Descend step at 3200"
+    ):
+        approach_profile(aircraft, steps, aerodrome=_SEA_LEVEL)
+
+
+def test_a_level_idle_step_before_a_descend_idle_step_is_held_to_no_note() -> None:
+    """Case 1 writes its notes for a following Level-Idle step only."""
+    aircraft = _aircraft("JETW")
+    steps = _approach_steps("JETW", "Level_Idle")
+    steps[2] = ApproachStep(
+        step_type="Level-Idle",
+        flap_id="ZERO",
+        start_altitude_ft=3500.0,
+        start_calibrated_airspeed_kt=150.0,
+        distance_ft=5000.0,
+    )
+    steps[1] = ApproachStep(
+        step_type="Level-Idle",
+        flap_id="ZERO",
+        start_altitude_ft=3500.0,
+        start_calibrated_airspeed_kt=250.0,
+        distance_ft=16500.0,
+    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FlightProfileWarning)
         approach_profile(aircraft, steps, aerodrome=_SEA_LEVEL)
 
 
@@ -952,7 +1008,7 @@ def test_a_level_idle_step_that_accelerates_warns() -> None:
         start_calibrated_airspeed_kt=100.0,
         distance_ft=16500.0,
     )
-    with pytest.warns(UserWarning, match=r"start CAS"):
+    with pytest.warns(FlightProfileWarning, match=r"start CAS"):
         approach_profile(aircraft, steps, aerodrome=_SEA_LEVEL)
 
 

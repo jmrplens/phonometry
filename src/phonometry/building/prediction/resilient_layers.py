@@ -88,6 +88,7 @@ from ..._internal.validation import (
     require_positive_array,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 
@@ -243,6 +244,7 @@ def plate_contact_stiffness(
     :raises ValueError: If an input is not positive and finite, or
         :math:`\lvert \nu \rvert \ge 1`.
     """
+    require_scalar(poisson_ratio, "poisson_ratio")
     e = require_positive(youngs_modulus, "youngs_modulus")
     r = require_positive(radius, "radius")
     if not -1.0 < poisson_ratio < 1.0:

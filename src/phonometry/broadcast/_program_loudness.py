@@ -62,6 +62,7 @@ from .._internal.peaks import inter_sample_peak
 from .._internal.types import as_float_or_array
 from .._internal.validation import (
     check_engine,
+    require_count,
     require_positive,
     require_ranks,
     require_same_length,
@@ -387,7 +388,9 @@ def k_weighting_response(
         if n < 1:
             msg = f"n must be a positive integer; got {n}."
             raise ValueError(msg)
-        freqs = np.logspace(np.log10(10.0), np.log10(nyquist), int(n))
+        freqs = np.logspace(
+            np.log10(10.0), np.log10(nyquist), require_count(n, "n", at_least=None)
+        )
     else:
         freqs = np.asarray(frequencies, dtype=np.float64).ravel()
         if freqs.size == 0:
@@ -448,6 +451,7 @@ def channel_weight(
 
 def _resolve_weights(n_channels: int, weights: ArrayLike | None) -> np.ndarray:
     """Return the per-channel weights, defaulting by channel count."""
+    require_scalar(n_channels, "n_channels")
     if weights is None:
         try:
             return np.array(DEFAULT_CHANNEL_WEIGHTS[n_channels])
@@ -621,13 +625,7 @@ def true_peak_level(
     fs = require_positive(resolve_fs(x, fs), "fs")
     if oversample is None:
         oversample = max(1, ceil(_TRUE_PEAK_RATE / fs))
-    if (
-        isinstance(oversample, bool)
-        or not isinstance(oversample, (int, np.integer))
-        or oversample < 1
-    ):
-        msg = "oversample must be an integer >= 1."
-        raise ValueError(msg)
+    oversample = require_count(oversample, "oversample")
     x_proc = resolve_samples(x, calibrate=False)
     if x_proc.shape[-1] == 0:
         raise ValueError(_EMPTY_SIGNAL)

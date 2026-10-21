@@ -502,7 +502,7 @@ def test_the_band_average_refuses_a_repeated_line() -> None:
 def test_the_band_average_refuses_a_mask_that_is_not_boolean() -> None:
     k = np.full(_TWO_BANDS_HZ.size, 1.0e6)
     mask = np.ones(k.size)
-    with pytest.raises(ValueError, match="'valid' must be boolean"):
+    with pytest.raises(TypeError, match="'valid' must be boolean"):
         vibration.band_averaged_stiffness(_TWO_BANDS_HZ, k, valid=mask)
 
 

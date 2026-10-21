@@ -307,8 +307,7 @@ residual step of up to
 $\text{amplitude} \cdot \sin(\pi \cdot \text{frequency}/f_\mathrm{s})$
 there
 (e.g. 10 cycles of 997 Hz at 48 kHz span 481.44 samples, gated at
-481); a [`PhonometryWarning`](/phonometry/reference/api/filters/phonometry/#phonometrywarning) quantifies the
-realized residual.
+481); a [`ToneBurstWarning`](/phonometry/reference/api/signals/test-signals/#toneburstwarning) quantifies the realized residual.
 
 **Parameters**
 
@@ -330,6 +329,12 @@ realized residual.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+
+**Warns**
+
+| Warning | When |
+| :--- | :--- |
+| ToneBurstWarning | If `fs` and `frequency` are incommensurate. |
 
 ## ToneBurstResult
 
@@ -394,3 +399,11 @@ Plot the burst waveform with its gating envelope.
 | Name | Description |
 | :--- | :--- |
 | `language` | Label language, `"en"` (default) or `"es"`. |
+
+## ToneBurstWarning
+
+A tone burst whose gate cannot close on the tone's zero crossing.
+
+Emitted by [`tone_burst`](/phonometry/reference/api/signals/test-signals/#tone_burst) when the sample rate and the tone frequency
+are incommensurate, so the gate closes away from the final zero crossing
+and leaves a residual step, which the message quantifies.

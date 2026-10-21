@@ -144,7 +144,7 @@ def _validate_sources(
         waveform = spec.get("waveform")
         if not isinstance(waveform, dict):
             msg = f"sources[{index}] needs a 'waveform' dict"
-            raise ValueError(msg)
+            raise TypeError(msg)
         fdtd_gpu.check_waveform(waveform)
         if kind == "point":
             ix = fdtd_gpu._integer(f"sources[{index}] ix", spec["ix"])
@@ -234,7 +234,7 @@ def _whole(value: Any, name: str) -> int:  # noqa: ANN401 - whatever the caller 
     """The integer *value* stands for, refusing anything that is not one."""
     if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
         msg = f"{name} must be an integer; got {value!r}"
-        raise ValueError(msg)
+        raise TypeError(msg)
     return int(value)
 
 

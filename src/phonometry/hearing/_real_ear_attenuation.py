@@ -612,6 +612,7 @@ def _band_values(values: ArrayLike, count: int | None, name: str) -> np.ndarray:
     :raises ValueError: for a shape that does not fit or a value that is not
         finite.
     """
+    require_scalar(count, "count")
     array = np.array(values, dtype=np.float64)
     if array.ndim == 0 and count is not None:
         array = np.full(count, float(array))

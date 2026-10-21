@@ -74,6 +74,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
     require_choice,
+    require_count,
     require_finite_array,
     require_non_negative,
     require_positive,
@@ -433,7 +434,7 @@ def multihole_incipient_cavitation_ratio(
     :raises ValueError: If the passage count is not a whole number of one or
         more, or another value is not positive and finite.
     """
-    count = _require_count(n_passages, "n_passages")
+    count = require_count(n_passages, "n_passages")
     diameter_m = require_positive(hole_diameter_m, "hole_diameter_m")
     recovery = _require_recovery(pressure_recovery)
     inner = _MULTIHOLE_OFFSET + _MULTIHOLE_FACTOR * count * diameter_m**2 / recovery
@@ -1342,6 +1343,7 @@ def _require_below_flashing(ratio: float) -> float:
     :raises ValueError: if :math:`x_F` is 1 or more, where the outlet is at
         the vapour pressure and Equation (9) divides by zero.
     """
+    require_scalar(ratio, "ratio")
     if ratio >= _FLASHING_RATIO:
         msg = (
             "At x_F = 1 the outlet is at the vapour pressure and the liquid "
@@ -1699,7 +1701,7 @@ def stage_conditions(
     :raises ValueError: If a value is not positive and finite, if fewer than
         two stages were given, or if the stages between them would take more
         than the differential the valve has.
-    :raises ValveNoiseWarning: If the stage coefficients miss the series law
+    :warns ValveNoiseWarning: If the stage coefficients miss the series law
         by more than 5 %, which leaves the last stage carrying a differential
         nobody chose.
     """
@@ -1861,7 +1863,7 @@ def uniform_passage_style_modifier(n_passages: int) -> float:
     :return: :math:`F_d`, dimensionless.
     :raises ValueError: If the count is not a whole number of one or more.
     """
-    count = _require_count(n_passages, "n_passages")
+    count = require_count(n_passages, "n_passages")
     return float(math.sqrt(1.0 / count))
 
 
@@ -1946,16 +1948,3 @@ def _require_share(value: float, name: str) -> float:
         )
         raise ValueError(msg)
     return share
-
-
-def _require_count(value: int, name: str) -> int:
-    """A count of passages or openings: a whole number of one or more."""
-    require_scalar(value, name)
-    count = int(value)
-    if count != value or count < 1:
-        msg = (
-            f"'{name}' counts flow passages, so it must be a whole number of "
-            f"one or more; got {value!r}."
-        )
-        raise ValueError(msg)
-    return count

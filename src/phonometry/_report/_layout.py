@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.validation import require_count, require_scalar
 from ._i18n import format_number, t
 
 if TYPE_CHECKING:
@@ -183,7 +184,7 @@ def display_round(value: float, decimals: int = 1) -> float:
     numbers that contradict its own verdict at the tolerance boundary. A
     result that rounds to zero returns an unsigned ``0.0`` (never ``-0.0``).
     """
-    scale = 10.0 ** int(decimals)
+    scale = 10.0 ** require_count(decimals, "decimals", at_least=None)
     magnitude = math.floor(abs(float(value)) * scale + 0.5) / scale
     if magnitude <= 0.0:  # magnitude is non-negative; <= avoids float equality
         return 0.0
@@ -561,6 +562,7 @@ def band_table(
         answer for a goniometer angle axis or a linear sweep and keeps the
         octave rules off a table that has no octaves.
     """
+    require_scalar(n_data, "n_data")
     from reportlab.lib import colors
     from reportlab.platypus import Table, TableStyle
 

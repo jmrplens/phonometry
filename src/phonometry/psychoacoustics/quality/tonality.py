@@ -381,6 +381,9 @@ def tone_to_noise_ratio(
         must stay within 15 % of the critical bandwidth, clause 11.2).
     :return: :class:`ToneAssessment` with ``ratio_db`` = TNR in dB.
     """
+    require_scalar(fs, "fs")
+    require_scalar(resolution_hz, "resolution_hz")
+    require_scalar(tone_frequency, "tone_frequency")
     fs = resolve_fs(x, fs)
     x_proc = apply_calibration(x, _typesignal(x))
     if x_proc.ndim != 1:
@@ -471,6 +474,7 @@ def _fitted_edge(
 ) -> float:
     # Peaks marginally outside the range of interest (the verdict already
     # reports them as non-prominent) are clipped to the table span.
+    require_scalar(ft, "ft")
     ft = min(max(ft, _F_MIN), _F_MAX)
     for lo, hi, (c0, c1, c2) in table:
         if lo <= ft <= hi:
@@ -509,6 +513,9 @@ def prominence_ratio(
     :param resolution_hz: FFT bin spacing (default 1.0 Hz).
     :return: :class:`ToneAssessment` with ``ratio_db`` = PR in dB.
     """
+    require_scalar(fs, "fs")
+    require_scalar(resolution_hz, "resolution_hz")
+    require_scalar(tone_frequency, "tone_frequency")
     fs = resolve_fs(x, fs)
     x_proc = apply_calibration(x, _typesignal(x))
     if x_proc.ndim != 1:

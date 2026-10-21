@@ -291,6 +291,7 @@ def _band_values(values: ArrayLike, count: int | None, name: str) -> np.ndarray:
     :raises ValueError: for a shape that does not fit or a value that is not
         finite.
     """
+    require_scalar(count, "count")
     array = np.array(values, dtype=np.float64)
     if array.ndim != 1 or array.size == 0 or not np.all(np.isfinite(array)):
         msg = f"'{name}' must be a non-empty one-dimensional array of finite values."
@@ -318,6 +319,7 @@ def _frequency_axis(
         positive, finite and increasing, or no frequencies are given and the
         default has another length.
     """
+    require_scalar(count, "count")
     if frequencies is None:
         fallback = np.array(default, dtype=np.float64)
         if fallback.size != count:

@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from .._internal.validation import require_scalar
+from .._internal.validation import require_count, require_scalar
 from ._backends import _import_soundfile, _sniff, _warn_lossy, info, soundfile_stamp
 from ._chunks import (
     WAVE_FORMAT_IEEE_FLOAT,
@@ -234,9 +234,9 @@ def read_blocks(
         is not installed.
     """
     require_scalar(block_size, "block_size")
-    block_size = int(block_size)
+    block_size = require_count(block_size, "block_size", at_least=None)
     require_scalar(overlap, "overlap")
-    overlap = int(overlap)
+    overlap = require_count(overlap, "overlap", at_least=None)
     if block_size < 1:
         msg = f"block_size must be at least 1; got {block_size}"
         raise ValueError(msg)

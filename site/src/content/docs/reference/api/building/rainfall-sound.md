@@ -268,6 +268,7 @@ for comparison between laboratories.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | If `l_pr` holds an element that is not a number. |
 | ValueError | If the shapes disagree, a level is not finite, a time, frequency, volume or area is not positive, or a band has no correction. |
 
 ## rainfall_sound_from_intensity

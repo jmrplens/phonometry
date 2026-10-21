@@ -86,7 +86,7 @@ from typing import TYPE_CHECKING, Any
 
 from .._internal.boundary import settled
 from .._internal.display import RichDisplay
-from .._internal.validation import require_scalar
+from .._internal.validation import require_count, require_scalar
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -120,7 +120,7 @@ def open_microphone_correction(n_open_microphones: int) -> float:
     :return: The correction :math:`\Delta L_\text{nom}`, dB.
     """
     require_scalar(n_open_microphones, "n_open_microphones")
-    n = int(n_open_microphones)
+    n = require_count(n_open_microphones, "n_open_microphones", at_least=None)
     if n != n_open_microphones or n < 1:
         msg = "'n_open_microphones' must be an integer of at least 1."
         raise ValueError(msg)
@@ -149,6 +149,9 @@ def feedback_loop_gain(
         :data:`CARDIOID_RELATIVE_DIRECTIVITY_DB` for a cardioid).
     :return: The feedback-loop gain :math:`G_\mathrm{S}`, dB.
     """
+    require_scalar(level_loudspeaker_at_listener, "level_loudspeaker_at_listener")
+    require_scalar(level_loudspeaker_at_microphone, "level_loudspeaker_at_microphone")
+    require_scalar(microphone_directivity, "microphone_directivity")
     named = (
         ("level_loudspeaker_at_microphone", float(level_loudspeaker_at_microphone)),
         ("level_loudspeaker_at_listener", float(level_loudspeaker_at_listener)),
@@ -275,6 +278,9 @@ def feedback_stability(
         :data:`DEFAULT_STABILITY_MARGIN_DB`, Long's equalised-system value).
     :return: A :class:`FeedbackStabilityResult`.
     """
+    require_scalar(level_loudspeaker_at_listener, "level_loudspeaker_at_listener")
+    require_scalar(level_loudspeaker_at_microphone, "level_loudspeaker_at_microphone")
+    require_scalar(microphone_directivity, "microphone_directivity")
     require_scalar(open_loop_gain, "open_loop_gain")
     z_s = float(open_loop_gain)
     if not math.isfinite(z_s):
@@ -310,5 +316,7 @@ def feedback_stability(
         level_loudspeaker_at_microphone=l_hm,
         level_loudspeaker_at_listener=l_hl,
         microphone_directivity=d_m,
-        n_open_microphones=int(n_open_microphones),
+        n_open_microphones=require_count(
+            n_open_microphones, "n_open_microphones", at_least=None
+        ),
     )

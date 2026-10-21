@@ -775,15 +775,28 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
     ]
 
 
+#: The refusals of a wrong type: a text where band numbers belong, and flags
+#: that are neither booleans nor integers.
+_TYPE_REFUSALS = frozenset(
+    {
+        "bands as a string",
+        "block exclusion flags as strings",
+        "block exclusion flags of NaN",
+        "period exclusion flags as strings",
+    }
+)
+
+
 @pytest.mark.parametrize(
-    ("call", "match"),
-    [case[1:] for case in _refusal_cases()],
+    ("name", "call", "match"),
+    _refusal_cases(),
     ids=[case[0] for case in _refusal_cases()],
 )
 def test_the_clause_13_functions_refuse_what_they_cannot_rate(
-    call: Callable[[], object], match: str
+    name: str, call: Callable[[], object], match: str
 ) -> None:
-    with pytest.raises(ValueError, match=match):
+    refusal = TypeError if name in _TYPE_REFUSALS else ValueError
+    with pytest.raises(refusal, match=match):
         call()
 
 

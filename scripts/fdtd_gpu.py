@@ -69,7 +69,7 @@ def _integer(name: str, value: int) -> int:
     """Validate that *value* is an integral scalar (bool is rejected)."""
     if isinstance(value, bool) or not isinstance(value, (int, np.integer)):
         msg = f"{name} must be an integer"
-        raise ValueError(msg)  # noqa: TRY004 - ValueError keeps the module validation errors uniform
+        raise TypeError(msg)
     return int(value)
 
 

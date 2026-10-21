@@ -191,10 +191,12 @@ def test_per_event_array_with_events_raises() -> None:
 def test_bad_rank_and_bad_events_raise() -> None:
     with pytest.raises(ValueError, match="'levels_positions' must be a 2D"):
         emission.sound_energy_pressure(np.zeros((2, 2, 2, 2)), "hemisphere", radius=1.0)
-    with pytest.raises(ValueError, match="'n_events' must be a positive integer"):
+    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
         emission.mean_single_event_level(np.zeros(3), n_events=0)
-    with pytest.raises(ValueError, match="'n_events' must be an integer"):
+    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
         emission.mean_single_event_level(np.zeros(3), n_events=2.5)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'n_events' must be a whole number"):
+        emission.mean_single_event_level(np.zeros(3), n_events="2")  # type: ignore[arg-type]
     with pytest.raises(
         ValueError, match="'levels' must carry one entry per single event"
     ):
@@ -347,13 +349,15 @@ def test_result_rejects_inconsistent_fields() -> None:
         dataclasses.replace(base, background_correction=np.zeros(3))
     with pytest.raises(ValueError, match="'grade' must be one of"):
         dataclasses.replace(base, grade="precision")
-    with pytest.raises(ValueError, match="'n_events' must be at least 1"):
+    with pytest.raises(
+        ValueError, match="'n_events' must be a whole number, at least 1"
+    ):
         dataclasses.replace(base, n_events=0)
     with pytest.raises(ValueError, match="'n_events' must be a whole number"):
         dataclasses.replace(base, n_events=2.5)
-    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
+    with pytest.raises(TypeError, match="'n_events' must be a whole number"):
         dataclasses.replace(base, n_events=True)
-    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
+    with pytest.raises(TypeError, match="'n_events' must be a whole number"):
         dataclasses.replace(base, n_events="5")
     with pytest.raises(ValueError, match="'integration_time' must be positive"):
         dataclasses.replace(base, integration_time=0.0)
@@ -667,11 +671,13 @@ def test_room_result_rejects_inconsistent_fields() -> None:
     )
     with pytest.raises(ValueError, match="'method' must be one of"):
         dataclasses.replace(base, method="survey")
-    with pytest.raises(ValueError, match="'n_events' must be at least 1"):
+    with pytest.raises(
+        ValueError, match="'n_events' must be a whole number, at least 1"
+    ):
         dataclasses.replace(base, n_events=0)
     with pytest.raises(ValueError, match="'n_events' must be a whole number"):
         dataclasses.replace(base, n_events=2.5)
-    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
+    with pytest.raises(TypeError, match="'n_events' must be a whole number"):
         dataclasses.replace(base, n_events=True)
     with pytest.raises(ValueError, match="'integration_time' must be positive"):
         dataclasses.replace(base, integration_time=-1.0)

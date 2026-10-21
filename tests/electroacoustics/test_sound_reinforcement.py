@@ -249,9 +249,24 @@ def test_geometry_drawing_annotates_every_path() -> None:
         electroacoustics.plot_sound_reinforcement_geometry(0.3, 4.0, math.nan)
 
 
-@pytest.mark.parametrize("bad", [0, -1, 2.5])
-def test_open_microphone_validation(bad: float) -> None:
-    with pytest.raises(ValueError, match="integer of at least 1"):
+@pytest.mark.parametrize(
+    ("bad", "words"),
+    [
+        (0, "integer of at least 1"),
+        (-1, "integer of at least 1"),
+        (2.5, "whole number"),
+    ],
+)
+def test_open_microphone_validation(bad: float, words: str) -> None:
+    with pytest.raises(ValueError, match=words):
+        electroacoustics.open_microphone_correction(bad)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("bad", [True, "3"], ids=["bool", "text"])
+def test_an_open_microphone_count_of_the_wrong_type_is_a_type_error(
+    bad: object,
+) -> None:
+    with pytest.raises(TypeError, match="'n_open_microphones' must be"):
         electroacoustics.open_microphone_correction(bad)  # type: ignore[arg-type]
 
 

@@ -53,7 +53,8 @@ only; see [`underwater_to_in_air_spl`](/phonometry/reference/api/underwater/acou
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the level is not a finite number. |
+| TypeError | If the level is an array or not a number. |
+| ValueError | If the level is not finite. |
 
 ## peak_sound_pressure_level
 
@@ -190,4 +191,5 @@ impedances.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the level is not a finite number. |
+| TypeError | If the level is an array or not a number. |
+| ValueError | If the level is not finite. |

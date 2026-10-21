@@ -683,10 +683,12 @@ def test_events_argument_is_checked_against_the_form() -> None:
     three_d = np.repeat(ST[:, None, :], 5, axis=1)
     with pytest.raises(ValueError, match="'n_events' is counted from the second axis"):
         emission.sound_energy_in_situ(three_d, RSS, LW_RSS, FREQS, n_events=5)
-    with pytest.raises(ValueError, match="'n_events' must be a positive integer"):
+    with pytest.raises(ValueError, match="'n_events' must be given"):
         emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS)
-    with pytest.raises(ValueError, match="'n_events' must be a positive integer"):
+    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
         emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS, n_events=0)
+    with pytest.raises(TypeError, match="'n_events' must be a whole number"):
+        emission.sound_energy_in_situ(ST, RSS, LW_RSS, FREQS, n_events="5")
     with pytest.raises(ValueError, match="'event_levels' must be a non-empty 2D or 3D"):
         emission.sound_energy_in_situ(ST[0], RSS, LW_RSS, FREQS, n_events=5)
 
@@ -711,9 +713,9 @@ def test_altitude_is_validated() -> None:
     with pytest.raises(ValueError, match="'altitude' must be finite and below"):
         emission.static_pressure_from_altitude(not_a_number)
     two_altitudes = np.array([0.0, 500.0])
-    with pytest.raises(ValueError, match="'altitude' must be a single value"):
+    with pytest.raises(TypeError, match="'altitude' must be a single value"):
         emission.static_pressure_from_altitude(two_altitudes)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'altitude' must be numeric"):
+    with pytest.raises(TypeError, match="'altitude' must be numbers, not text"):
         emission.static_pressure_from_altitude("high")  # type: ignore[arg-type]
 
 

@@ -515,7 +515,7 @@ def _require_finite_dimension(key: str, value: float) -> None:
         finite = math.isfinite(value)
     except TypeError as exc:
         msg = f"'geometry[{key!r}]' must be numeric."
-        raise ValueError(msg) from exc
+        raise TypeError(msg) from exc
     if not finite:
         msg = f"'geometry[{key!r}]' must be finite."
         raise ValueError(msg)

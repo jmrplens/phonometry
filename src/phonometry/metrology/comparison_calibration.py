@@ -219,6 +219,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.types import CALIBRATION_FIELDS, CalibrationField
 from .._internal.validation import (
+    refuse_text,
     require_above_absolute_zero,
     require_choice,
     require_finite_array,
@@ -2915,6 +2916,7 @@ def _validation_columns(
         a validation without an expanded uncertainty.
     :raises TypeError: for anything but the two calibrations.
     """
+    require_scalar(microphone, "microphone")
     from .reciprocity_calibration import ReciprocityCalibration
 
     if isinstance(validation, ReciprocityCalibration):
@@ -3187,6 +3189,8 @@ def free_field_region(
     :raises ValueError: for a separation or window that is not positive, or
         conditions Annex F refuses.
     """
+    require_scalar(relative_humidity_percent, "relative_humidity_percent")
+    require_scalar(temperature_c, "temperature_c")
     return FreeFieldRegion(
         source_distance_m=source_distance_m,
         window_time_s=window_time_s,
@@ -3310,9 +3314,14 @@ def _complex_column(values: ArrayLike, name: str, count: int) -> NDArray[np.comp
     :raises ValueError: for a value that is not finite or a column that is
         neither a scalar nor one value per frequency.
     """
+    require_scalar(count, "count")
+    refuse_text(values, f"'{name}' must be numbers, not text.")
     try:
         column = np.asarray(values, dtype=np.complex128).reshape(-1)
-    except (TypeError, ValueError) as exc:
+    except TypeError as exc:
+        msg = f"'{name}' must be numeric."
+        raise TypeError(msg) from exc
+    except ValueError as exc:
         msg = f"'{name}' must be numeric."
         raise ValueError(msg) from exc
     if column.size == 0 or not np.all(np.isfinite(column)):

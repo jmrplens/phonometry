@@ -981,9 +981,17 @@ class TestStageCorrection:
         eight = valves.stage_level_correction(150.0, 8, 7.0e6, 2.1e6) - 150.0
         assert eight / two == pytest.approx(1.0 / 7.0**0.125, rel=1e-9)
 
-    @pytest.mark.parametrize("bad", [1, 0, -2, 2.5])
-    def test_it_refuses_a_stage_count_below_two(self, bad: float) -> None:
-        with pytest.raises(ValueError, match="two or more"):
+    @pytest.mark.parametrize(
+        ("bad", "words"),
+        [
+            (1, "two or more"),
+            (0, "two or more"),
+            (-2, "two or more"),
+            (2.5, "whole number"),
+        ],
+    )
+    def test_it_refuses_a_stage_count_below_two(self, bad: float, words: str) -> None:
+        with pytest.raises(ValueError, match=words):
             valves.stage_level_correction(150.0, bad, 7.0e6, 2.1e6)  # type: ignore[arg-type]
 
     def test_it_refuses_a_stagnation_pressure_above_the_inlet(self) -> None:

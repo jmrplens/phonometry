@@ -425,6 +425,20 @@ def test_regulation_limits_lookup_by_period() -> None:
     assert limits.as_dict() == {"day": 55.0, "evening": 55.0, "night": 45.0}
 
 
+@pytest.mark.parametrize("key", ["noon", "Day", " night ", "NIGHT"])
+def test_regulation_limits_lookup_of_a_period_it_does_not_hold_is_a_key_error(
+    key: str,
+) -> None:
+    """A row is read like a mapping, so a key it lacks is a ``KeyError``.
+
+    The key is matched exactly, as a ``dict`` key is: a capitalised or padded
+    spelling of a period it holds is a key it does not hold.
+    """
+    limits = rd.activity_limits("a")
+    with pytest.raises(KeyError, match="RegulationLimits holds the periods"):
+        limits[key]
+
+
 # --------------------------------------------------------------------------- #
 # Compliance assessment (Article 25) - Manual Ejemplo 3.3
 # --------------------------------------------------------------------------- #
@@ -653,7 +667,7 @@ def test_limit_lookup_validation() -> None:
         rd.indoor_quality_objectives("residential", "classrooms")
     with pytest.raises(ValueError, match=r"'urbanization' must be 'existing'"):
         rd.outdoor_quality_objectives("a", urbanization="future")
-    with pytest.raises(ValueError, match=r"'period' must be one of"):
+    with pytest.raises(KeyError, match=r"RegulationLimits holds the periods"):
         rd.activity_limits("a")["afternoon"]
 
 
@@ -682,18 +696,14 @@ def test_assess_activity_validation() -> None:
         rd.assess_activity(day, limits, operating_days=10, year_days=0)
     # 'year_days' is validated even when it is the only annual input given,
     # and a fractional count of days is rejected rather than truncated.
-    with pytest.raises(
-        ValueError, match=r"'year_days' must be a positive whole number"
-    ):
+    with pytest.raises(ValueError, match=r"'year_days' must be a whole number"):
         rd.assess_activity(
             day,
             limits,
             long_term_levels={"day": 50.0},
             year_days=365.5,  # type: ignore[arg-type]
         )
-    with pytest.raises(
-        ValueError, match=r"'operating_days' must be a whole number of days"
-    ):
+    with pytest.raises(ValueError, match=r"'operating_days' must be a whole number"):
         rd.assess_activity(
             day,
             limits,
@@ -798,5 +808,5 @@ def test_an_area_type_that_is_not_a_string_is_refused_by_name() -> None:
     with an anonymous ``AttributeError``; the refusal names the argument, and
     it is a ``ValueError`` like every other refusal in this module.
     """
-    with pytest.raises(ValueError, match=r"'area_type' must be a string"):
+    with pytest.raises(TypeError, match=r"'area_type' must be a string"):
         rd.infrastructure_limits(5)  # type: ignore[arg-type]

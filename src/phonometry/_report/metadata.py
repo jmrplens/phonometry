@@ -17,6 +17,7 @@ from dataclasses import dataclass, fields
 from typing import TYPE_CHECKING
 
 from .._internal.display import RichDisplay
+from .._internal.validation import require_count
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -273,21 +274,29 @@ class ReportMetadata(RichDisplay):
     def _validate_counts(self) -> None:
         """Hold each supplied count of positions to a positive whole number.
 
-        :raises ValueError: If a count is not a positive integer.
+        :raises TypeError: If a count is not a number, a bool included.
+        :raises ValueError: If a count is not a whole number, or is not
+            positive.
         """
         for name in self._POSITIVE_INT_FIELDS:
             value = getattr(self, name)
             if value is None:
                 continue
-            # A count is a whole number of positions: reject non-integers
-            # (a bool is an int in Python, so it is excluded explicitly) and
-            # anything not strictly positive.
-            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
-                msg = (
-                    f"ReportMetadata.{name} must be a positive integer when "
-                    f"given; got {value!r}."
-                )
-                raise ValueError(msg)
+            # A count is a whole number of positions, read by the shared
+            # check every count goes through: what is not a number is the
+            # wrong type, a fraction or a count below one the wrong value,
+            # and a whole float is kept as the integer it names.
+            msg = (
+                f"ReportMetadata.{name} must be a positive integer when "
+                f"given; got {value!r}."
+            )
+            try:
+                count = require_count(value, name)
+            except TypeError:
+                raise TypeError(msg) from None
+            except ValueError:
+                raise ValueError(msg) from None
+            object.__setattr__(self, name, count)
 
     def _validate_choices(self) -> None:
         """Hold each supplied choice to the values it can take.

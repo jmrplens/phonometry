@@ -878,7 +878,7 @@ def _as_levels(value: ArrayLike, name: str) -> np.ndarray:
 
 
 def _positive_number(value: ArrayLike, name: str) -> float:
-    """One positive, finite, real number, or a ``ValueError`` naming it.
+    """One positive, finite, real number, or a refusal naming it.
 
     A string, a flag, a complex number or an array of numbers is refused
     rather than converted, whether it comes bare or wrapped in a 0-d array of
@@ -886,17 +886,22 @@ def _positive_number(value: ArrayLike, name: str) -> float:
     and so would ``np.array("50")``, ``np.array(True)`` and
     ``np.array(True, dtype=object)``; a one-element array would reach
     :func:`float` only to raise an anonymous ``TypeError``, and a ragged list
-    fails in numpy before any guard could name it.
+    fails in numpy before any guard could name it. Each of those is the wrong
+    type for one number, and is a :class:`TypeError`; a number that is not
+    positive and finite is a :class:`ValueError`.
     """
     msg = f"'{name}' must be one positive number."
     try:
         arr = np.asarray(value)
     except (TypeError, ValueError) as exc:
-        raise ValueError(msg) from exc
+        # A ragged nesting of lists, which numpy cannot shape: a sequence
+        # where one number belongs is the wrong type, whatever is inside it.
+        raise TypeError(msg) from exc
     # The element itself decides, so a flag or a text inside an object array
-    # is refused like a bare one.
-    if arr.ndim != 0 or isinstance(arr.item(), _NOT_A_NUMBER_TYPES):
-        raise ValueError(msg)
+    # is refused like a bare one, and so is None, which float64 reads as NaN.
+    element = arr.item() if arr.ndim == 0 else None
+    if arr.ndim != 0 or element is None or isinstance(element, _NOT_A_NUMBER_TYPES):
+        raise TypeError(msg)
     return require_positive(_as_float64(value, name).item(), name)
 
 
@@ -909,7 +914,10 @@ def _numbers(value: ArrayLike, name: str) -> np.ndarray:
     """
     try:
         raw = np.asarray(value)
-    except (TypeError, ValueError) as exc:  # a ragged nesting of lists
+    except TypeError as exc:  # a ragged nesting of lists
+        msg = f"'{name}' must be numeric."
+        raise TypeError(msg) from exc
+    except ValueError as exc:  # a ragged nesting of lists
         msg = f"'{name}' must be numeric."
         raise ValueError(msg) from exc
     if raw.dtype.kind in "USb" or (
@@ -917,7 +925,7 @@ def _numbers(value: ArrayLike, name: str) -> np.ndarray:
         and any(isinstance(item, _NOT_A_NUMBER_TYPES) for item in raw.ravel())
     ):
         msg = f"'{name}' must be numbers, not text or flags."
-        raise ValueError(msg)
+        raise TypeError(msg)
     return _as_float64(value, name)
 
 
@@ -1688,9 +1696,10 @@ def loudest_corner(
         from 0 in the order of ``c_weighted_levels``.
     :return: The index of the loudest corner left, counted from 0; the first of
         a tie.
-    :raises ValueError: If a level is not finite, ``excluded`` is not a
-        sequence of whole numbers, an index is out of range, or every corner
-        is excluded.
+    :raises TypeError: If ``excluded`` is not a sequence, or holds a bool, a
+        text or anything else that is not a number.
+    :raises ValueError: If a level is not finite, an index is not a whole
+        number or is out of range, or every corner is excluded.
     """
     levels = np.atleast_1d(_as_levels(c_weighted_levels, "c_weighted_levels"))
     if levels.ndim != 1:
@@ -1699,10 +1708,12 @@ def loudest_corner(
     msg = "'excluded' must be a sequence of corner indices, such as [1]."
     try:
         rank = np.ndim(excluded)
-    except (TypeError, ValueError) as exc:  # a ragged nesting of lists
+    except TypeError as exc:  # a ragged nesting of lists
+        raise TypeError(msg) from exc
+    except ValueError as exc:  # a ragged nesting of lists
         raise ValueError(msg) from exc
     if isinstance(excluded, (str, bytes)) or rank != 1:
-        raise ValueError(msg)
+        raise TypeError(msg)
     left = np.ones(levels.size, dtype=bool)
     for value in excluded:
         # A bool, a string or 1,7 is not the number of a corner: int() would
@@ -2011,17 +2022,18 @@ def check_service_equipment_positions(
         to the nearest obstacle, or one distance per obstacle near it, in m,
         measured on site; ``None`` (default) leaves the 0,2 m of 7.2 unjudged.
     :return: :class:`ServiceEquipmentPositionCheck`.
-    :raises ValueError: If a dimension is not positive, a coordinate is not a
-        finite real number, no room position is given, a position lies
-        outside the room, ``small_room`` is not ``True`` or ``False``, or an
-        obstacle distance is not a finite distance of 0 m or more.
+    :raises TypeError: If ``small_room`` is not ``True`` or ``False``, or a
+        coordinate or distance is text or not a number.
+    :raises ValueError: If a dimension is not positive, a coordinate is not
+        finite, no room position is given, a position lies outside the room,
+        or an obstacle distance is not a finite distance of 0 m or more.
     """
     dims = _room(room_dimensions_m)
     if not isinstance(small_room, (bool, np.bool_)):
         # 'no' and 0.3 are truthy: read as flags they would each switch the
         # surface distance to the small-room 0,30 m.
         msg = f"'small_room' must be True or False, got {small_room!r}."
-        raise ValueError(msg)
+        raise TypeError(msg)
     corner = _points(corner_position_m, "corner_position_m")
     if corner.shape[0] != 1:
         msg = "'corner_position_m' must be one (x, y, z) position."
@@ -2408,8 +2420,10 @@ def check_background_duration(
     :param tolerance_s: The departure from 30 s, either way, accepted as
         "approximately", in s. Required: the draft prints none.
     :return: :class:`BackgroundDurationCheck`.
+    :raises TypeError: If a duration or the tolerance is a text or a flag,
+        or the tolerance is an array.
     :raises ValueError: If a duration is not a positive, finite number, or
-        the tolerance is not one finite number of 0 s or more.
+        the tolerance is not a finite number of 0 s or more.
     """
     durations = np.atleast_1d(_numbers(durations_s, "durations_s"))
     if (
@@ -2421,8 +2435,10 @@ def check_background_duration(
         msg = "'durations_s' must be one or more positive, finite durations in seconds."
         raise ValueError(msg)
     tolerance = _numbers(tolerance_s, "tolerance_s")
-    if tolerance.ndim != 0 or not np.isfinite(tolerance) or tolerance < 0.0:
-        msg = "'tolerance_s' must be one finite duration of 0 s or more."
+    msg = "'tolerance_s' must be one finite duration of 0 s or more."
+    if tolerance.ndim != 0:
+        raise TypeError(msg)
+    if not np.isfinite(tolerance) or tolerance < 0.0:
         raise ValueError(msg)
     return BackgroundDurationCheck(durations_s=durations, tolerance_s=float(tolerance))
 

@@ -104,7 +104,7 @@ import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.frozen import read_only
-from .._internal.validation import is_class_designation, require_positive
+from .._internal.validation import is_class_designation, require_count, require_positive
 from ..metrology.conformance import ConformanceVerification, verify_conformance
 from .compliance import _map_breakpoint
 
@@ -271,7 +271,10 @@ def _sequence(values: Sequence[float] | None, name: str) -> tuple[float, ...] | 
         return None
     try:
         arr = np.asarray(values, dtype=np.float64)
-    except (TypeError, ValueError):
+    except TypeError:
+        msg = f"'{name}' must be a sequence of numbers."
+        raise TypeError(msg) from None
+    except ValueError:
         msg = f"'{name}' must be a sequence of numbers."
         raise ValueError(msg) from None
     if arr.ndim != 1 or arr.size == 0:
@@ -291,7 +294,10 @@ def _rows(
         return None
     try:
         arr = np.asarray(values, dtype=np.float64)
-    except (TypeError, ValueError):
+    except TypeError:
+        msg = f"'{name}' must be rows of numbers."
+        raise TypeError(msg) from None
+    except ValueError:
         msg = f"'{name}' must be rows of numbers."
         raise ValueError(msg) from None
     if arr.ndim == 1:
@@ -1076,7 +1082,7 @@ def verify_filter_periodic(
         msg = f"'filter_class' must be 1 or 2 (IEC 61260-1:2014); got {filter_class!r}."
         raise ValueError(msg)
     fraction = require_positive(fraction, "fraction")
-    cls = int(filter_class)
+    cls = require_count(filter_class, "filter_class", at_least=None)
     m = measurements
     clauses: list[PeriodicTestClause] = []
     if m.midband_attenuations is not None and m.midband_uncertainties_db is not None:

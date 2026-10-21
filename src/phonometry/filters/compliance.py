@@ -324,6 +324,7 @@ def class_limits(
         rows, which the masks match
         exactly.
     """
+    require_scalar(fraction, "fraction")
     spec = _FILTER_EDITIONS.get(edition)
     if spec is None:
         msg = "edition must be '2014' or '1995'."
@@ -1139,7 +1140,7 @@ def verify_filter_class(
         frequencies=np.asarray(bank.frequencies, dtype=np.float64),
         factors=tuple(int(f) for f in bank.factor),
         fs=float(bank.fs),
-        n_points=int(n_points),
+        n_points=require_count(n_points, "n_points", at_least=None),
         points_per_bandwidth=points_per_bandwidth,
     )
 
@@ -1459,8 +1460,10 @@ class FilterComplianceResult(OwnsArrays):
         :param requirement: One of :attr:`requirements`.
         :param filter_class: One of :meth:`available_classes`.
         :return: The binding margin; negative when a band misses the class.
-        :raises KeyError: for a requirement this verdict did not grade, or a
-            class it carries no margins for.
+        :raises KeyError: for a requirement this verdict did not grade, a name
+            it does not hold.
+        :raises ValueError: for a class it carries no margins for, a number
+            outside the classes the edition defines.
         """
         template = self._requirement_template(requirement)
         if filter_class not in self.available_classes():
@@ -1468,7 +1471,7 @@ class FilterComplianceResult(OwnsArrays):
                 f"class {filter_class!r} is not one of {self.available_classes()} "
                 f"for edition {self.edition!r}"
             )
-            raise KeyError(msg)
+            raise ValueError(msg)
         key = template.format(c=filter_class)
         return float(min(band[key] for band in self.bands if band[key] is not None))
 

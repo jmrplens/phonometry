@@ -250,7 +250,7 @@ cuatro bandas de 500 Hz y por debajo y se tolera hasta 5 dB antes de colorear el
 sonido, mientras que un exceso en alta frecuencia a 1 kHz o por encima cae de
 lleno en el rango del habla y resulta molesto ya con 3 dB. La etiqueta se calcula
 solo sobre las bandas realmente suministradas, y por eso un espectro al que le
-falten bandas se valora igualmente pero emite un `UserWarning`.
+falten bandas se valora igualmente pero emite un `room.NoiseCriterionWarning`.
 
 ```python
 import numpy as np
@@ -345,7 +345,7 @@ desviaciones de retumbo y siseo, la biblioteca informa de la combinación `RH` c
 extensión de diagnóstico. Cada resultado expone un `.plot()` que dibuja su
 panel de arriba. El apartado D.4 espera al menos las bandas de octava de
 31,5 Hz a 4000 Hz: un espectro al que le falte alguna se valora igualmente,
-pero emite un `UserWarning` porque las bandas ausentes se omiten en las pruebas
+pero emite un `room.NoiseCriterionWarning` porque las bandas ausentes se omiten en las pruebas
 de desviación de la etiqueta.
 
 ## 3. Elegir un criterio: NC, RC Mark II o NR

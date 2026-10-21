@@ -21,6 +21,7 @@ import pytest
 from scipy import signal
 
 from phonometry import room
+from phonometry.room import ImpulseResponseWarning
 from phonometry.room._impulse_response import _MLS_TAPS
 
 FS = 48000
@@ -275,7 +276,8 @@ def test_mls_short_period_aliasing_warns() -> None:
         hh[i % length] += h[i]  # circular wrap into one period
     y = np.real(np.fft.ifft(np.fft.fft(a) * np.fft.fft(hh)))
     with pytest.warns(
-        UserWarning, match=r"likely longer than one period and aliases circularly"
+        ImpulseResponseWarning,
+        match=r"likely longer than one period and aliases circularly",
     ):
         room.mls_impulse_response(y, a)
 

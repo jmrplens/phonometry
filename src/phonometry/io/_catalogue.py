@@ -130,6 +130,7 @@ from .._internal.json_input import (
     text_location,
     write_beside,
 )
+from .._internal.validation import require_scalar
 from .._internal.warnings import PhonometryWarning
 from ._sidecar import _SIDECAR_TAIL
 
@@ -1749,6 +1750,7 @@ def _check_size(
 
     :raises CatalogueError: for more than *limit* bytes, naming *label*.
     """
+    require_scalar(limit, "limit")
     limit = _MAX_BYTES if limit is None else limit
     if len(data) > limit:
         raise _size_refusal(label, len(data), limit=limit, held_as=held_as)

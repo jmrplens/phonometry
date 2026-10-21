@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **The survey positions for a source beside three reflecting planes
+  (ISO 3746).** `emission.measurement_positions("hemisphere", ...,
+  n_reflecting_planes=3, grade="survey")` raised `NotImplementedError`, because
+  positions 21 and 22 of ISO 3746:2010 Table B.2 had not been transcribed. The
+  table is now held whole, read from the printed page, and serves positions 14,
+  21 and 22 for three planes and 14, 15 and 18 for two, as clause 8.2.1 asks;
+  the coordinates for two planes are the numbers they were.
+
 - **Results read well in a notebook.** Jupyter, JupyterLab, VS Code and Colab
   display the last line of a cell, and every public result, verdict and record
   now displays as a table of its fields instead of the dataclass repr: a
@@ -1947,6 +1955,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The survey positions over one reflecting plane are those of ISO 3746.**
+  `emission.measurement_positions("hemisphere", ..., grade="survey")` over one
+  plane returned positions 4, 5, 6 and 10 of ISO 3744 Table B.1, the array
+  for a source with tones, so the four microphones sat at the wrong points.
+  ISO 3746:2010 clause 8.2.1 takes them from its own Table B.1, which prints
+  the broadband positions of those numbers in ISO 3744 Table B.2; that table
+  is now held as printed (BS EN ISO 3746:2010, PDF page 34, printed folio 25)
+  and serves them, whatever `tones` says, since ISO 3746 has one array. The
+  docstring and the guide name the 3 m least radius the annex sets beside two
+  or three planes, and say that `plot_microphone_positions` numbers the points
+  1 to N rather than with the standard's position numbers.
+
+- **`aircraft.approach_profile` warns for a Level-Idle step above a step that
+  is neither Level-Idle nor Descend-Idle.** Doc 29 B7.1.4 asks the system to
+  warn the user when a Level-Idle step starts at another altitude than the
+  step after it, in Case 1 (a following Level-Idle step) and in Case 2 (any
+  other step but Descend-Idle); only Case 1 was checked. Both emit
+  `aircraft.FlightProfileWarning` now, and the start CAS note of each case is
+  reported with it, as a consistency note the clause states without asking
+  for a warning.
+
 - **The API reference's front page and the site's home page show a 4.0
   call.** Both unpacked `spl, freq = filters.octave_filter(...)`, which 4.0
   answers with an `OctaveFilterResult`, and the reference said every
@@ -3143,8 +3172,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `SoundPowerIntensityResult`, `DiscretePointIntensityResult`), and the
   published table read by band set is keyed by the same integer:
   `building.HEAVY_IMPACT_A_WEIGHTING[3]`. A word, a flag or a float is
-  refused with a message that names `fraction`, so `fraction=True` is not
-  read as octaves. The ISO 10848 junction fiche now averages over the Annex A
+  refused with a `TypeError` that names `fraction`, so `fraction=True` is not
+  read as octaves, and an integer other than 1 or 3 with a `ValueError`. The ISO 10848 junction fiche now averages over the Annex A
   range of the band set a `VibrationReductionResult` states, as
   `single_number` does, instead of reading it again from the spacing. The
   functions added since 4.0.0rc1 that pick a band set take `fraction` as
@@ -3362,6 +3391,132 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   (the clause leaves a half open, and the library rounds it up), instead of a
   field passed in, so it cannot disagree with the data. A record built with
   `rounded=` raises `TypeError`.
+
+- **A wrong type raises `TypeError`, and a right type with a wrong value
+  `ValueError`, everywhere.** The line is the one the Python documentation
+  draws, and seventy-six refusals had it the other way round: they asked an
+  argument for its type and raised `ValueError`, nine of them behind a
+  suppression comment that said so on purpose, and thirty-two handlers caught
+  a `TypeError` and raised it again as a `ValueError`, while a few others
+  raised `TypeError` for the same mistake. An array where one number belongs,
+  `None` or an object that is not a number on any scalar parameter, a complex
+  value where a real one belongs, a count given as a text, a bool or an
+  array, a flag that is not `True` or `False`, a name that is not a text, a
+  choice among named options given as something other than a text, an
+  object of the wrong class, an array of the wrong dtype (a mask that is not
+  boolean, counts that are not integers, text where readings belong) and a
+  number where a pair or a sequence belongs now raise `TypeError`, naming the
+  parameter. A text is the wrong type wherever a number belongs, whatever it
+  reads as: `"20"` and `"fifty"` are both `TypeError`, given alone or in an
+  array, where a scalar guard used to parse the first into a number and an
+  array guard to parse a column of them. A count that is not whole or is too
+  small, an empty description, a choice that names none of the options and a
+  value out of range stay `ValueError`. A sequence where one measurement
+  belongs is a `TypeError` too, a one-element sequence included: the ISO 7235
+  pressures and temperatures of `noise_control` read one as its element, and
+  `emission.static_pressure_from_altitude` and the tolerance of
+  `building.check_background_duration` raised `ValueError`. Every parameter
+  written as a whole number goes through one check, `require_count`, never
+  through `int()` alone, which truncated `n_points=100.6` of
+  `signals.zoom_fft` to 100 points without a word and took `True` as 1: a
+  whole float such as `5.0` is taken as `5`, a fraction is a `ValueError`,
+  and a bool, a text or an array is a `TypeError`. Among them are
+  `signals.window_metrics(window, n)`, `oversample=` of
+  `signals.min_phase`, `n_segments=` of `metrology.stationarity_test`,
+  `n_harmonics=` of `electroacoustics.swept_sine_distortion`, the step and arrival
+  counts of the `underwater` ray and mode solvers,
+  `vibration.story_fundamental_frequency(n_stories)`,
+  `n_events=` of the sound energy functions and results, `n=` of
+  `building.prediction_input_uncertainty` and
+  `building.intensity_element_normalized_difference`, `oversample=` of
+  `signals.lc_peak` and `broadcast.true_peak_level`, `max_order=` of
+  `room.image_source_rir` and `room.audible_image_count`, the grid indices and
+  step counts of `simulation.FDTD2D`, `duration_days=` of
+  `vibration.construction_guide_values`, `start_band=` of
+  `aircraft.tone_correction`, `n_level_ranges=` of
+  `metrology.SoundLevelMeterFeatures` and `n_impacts` of
+  `vibration.ImpactMobilityResult`, and the position counts of
+  `ReportMetadata`. The other public calls whose class changed
+  are the flags of `building.check_service_equipment_positions`, the ISO 15186
+  insulation, the free-field qualification in `emission` and the two sound
+  level meter records; the names of the RD 1367/2007 and DB-HR functions and
+  of the soundscape report; the turbine functions of `emission`
+  (`turbine_measurement_surface`, `turbine_microphone_positions`,
+  `check_turbine_test_environment`, `turbine_noise_declaration`),
+  `environment.SoundscapeReport`, the elastic FDTD materials, a `waveform` that
+  is not callable, `io.write(..., sidecar=True)` with a bare array and
+  `emission.high_frequency_sound_power_comparison` given a calibration for
+  tones; `environment.method_b_source_ranking`,
+  `environment.bin_amplitude_modulation`, the frequency pairs of the
+  ISO 7626-5 mobility, the IEC 61094-8 corrections, the limits of a filter
+  bank, the grid shape of `simulation.FDTD2D` and the band edges of the
+  loudspeaker and microphone characteristics;
+  `hearing.assumed_protection_value`, `hearing.hml_rating`,
+  `metrology.max_expanded_uncertainty` and
+  `environment.method_a_scale_values`. A guard that only compared a parameter
+  written as one number (`if volume <= 0: raise`, or a lookup that returns
+  the row whose frequency matches and raises after the loop, as
+  `psychoacoustics.loudness_level` did) took a one-element array as its
+  element and answered a longer one with numpy's anonymous "truth value is
+  ambiguous"; the 361 of them ask the rank first, and so do the 104 public
+  parameters a call with an array still reached, where the comparison sat in
+  one function and the conversion in another (`environment.lden`,
+  `aircraft.noise_fraction`, `fluids.air(temperature_c=...)`).
+  CONTRIBUTING states the rule, the migration guide lists each call, and
+  `tests/test_error_kinds.py` reads the tree for every shape a type refusal
+  takes, with the sidecar parser and `CalibrationSidecar`'s own checks named
+  as the exemptions, because a field of the wrong type in a file is a
+  malformed file and a `ValueError` naming it. It also reads every `int()` of
+  a parameter written as an `int`, and every public function that raises
+  `TypeError` for a `:raises TypeError:` field, so the API reference names
+  the class a call raises; `tests/test_scalar_guards.py` calls every public
+  function whose parameters all take one number with an array and a text in
+  each of them.
+
+- **A lookup that misses a key raises `KeyError`, and a number outside what a
+  result covers raises `ValueError`.** `RegulationLimits["noon"]` raised the
+  `ValueError` of the period check; it raises `KeyError`, as a mapping does,
+  and matches its key exactly, as a mapping does: `limits["Day"]` and
+  `limits[" night "]`, which were read as `"day"` and `"night"`, raise
+  `KeyError` too. The period of `environment.PeriodAssessment`, a choice,
+  keeps its `ValueError`. `TrackDecayRate.rate_at` and
+  `AcousticRoughnessSpectrum.level_at` raise `ValueError` for a frequency or
+  a wavelength the result carries no band at, and
+  `FilterComplianceResult.binding_margin` for a class the edition does not
+  define, while a requirement the verdict did not grade is a `KeyError`. The
+  selectors of a plot, `FilterComplianceResult.plot(requirement=...)` and
+  `BinauralIndicators.plot(parameter=...)`, are choices and keep their
+  `ValueError`. CONTRIBUTING writes the criterion down beside the judgement
+  verbs.
+
+- **Every warning is a `PhonometryWarning` with a topic of its own.** Seven
+  warnings were emitted as a plain `UserWarning`, two of them naming no class
+  at all, five as the bare `PhonometryWarning`, and `RoadDeviceWarning`
+  derived from `UserWarning` alone, so `warnings.simplefilter("error",
+  PhonometryWarning)` let it through and no filter could single the others
+  out. `environment.RoadDeviceWarning` is a `PhonometryWarning`; the
+  extrapolations of `building.equivalent_impact_level`,
+  `building.weighted_lining_improvement` and `building.lining_improvement`
+  emit the new `building.BuildingPredictionWarning`; the ISO 15186-1 element
+  count of `building.intensity_element_normalized_difference` emits
+  `building.LaboratoryInsulationWarning`; `room.room_criterion` the new
+  `room.NoiseCriterionWarning`; `aircraft.approach_profile` the new
+  `aircraft.FlightProfileWarning`; `signals.tone_burst` the new
+  `signals.ToneBurstWarning`; `underwater.normal_modes`,
+  `underwater.eigenrays` and `underwater.gaussian_beams` the new
+  `underwater.NumericalPropagationWarning`; and the filter bank's low sampling
+  rate `filters.FilterBankWarning`, which now lives where the band calculation
+  can import it. Each is still a `UserWarning`. `vibration.evaluate_train_passage`
+  silenced every `UserWarning` raised while it built its third-octave bank,
+  and now silences only the `FilterBankWarning` it means. A test reads
+  every `warnings.warn` in the package for an explicit, published topic below
+  the root, every filter the library sets for a topic, and every published
+  warning and exception for its place in the hierarchy and its name.
+
+- **`fluids.FluidPropertyUnavailable` is `fluids.FluidPropertyUnavailableError`.**
+  An exception is named `<Topic>Error`, as `io.CatalogueError` is. It is still
+  an `AttributeError`, so `hasattr(fluid, "viscosity")` answers `False` and
+  `getattr` with a default returns it, as before.
 
 - **A function is named for what it returns, and a unit stays in the name only
   where the quantity has two.** A level, a correction, a difference, an index
@@ -4288,8 +4443,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   goes through clause 8.2: `natural_frequency` takes the lateral airflow
   resistivity as `airflow_resistivity_pa_s_m2`, in the unit every catalogue
   holds it in, and below 100 kPa·s/m² the enclosed-gas stiffness as
-  `gas_stiffness_n_m3`, and without the resistivity it refuses with
-  `io.CatalogueError`, saying that `s't` is not `s'` and what to pass. A row
+  `gas_stiffness_n_m3`, and without the resistivity it refuses with a
+  `ValueError`, saying that `s't` is not `s'` and what to pass. A row
   whose `s't` cell holds a declared bound rather than a value is refused by
   name, bound included. The
   module's functions carry their units in their parameter names:
@@ -7821,7 +7976,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   Sea water has no ratio of specific heats, viscosity or thermal diffusivity
   here, because no source in this library prints one. Reading any of them
-  raises `FluidPropertyUnavailable` naming the model, which is the case that
+  raises `FluidPropertyUnavailableError` naming the model, which is the case that
   accessor was built for and the reason air and water can share a type at all.
 
 - `phonometry.fluids`, a twentieth domain package holding the state of the
@@ -7865,7 +8020,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The `Fluid` says what it was computed for and what fixed it: the conditions,
   the composition, the model by name, and the domain that model states for
   itself. Reading a quantity the model does not determine raises
-  `FluidPropertyUnavailable` naming the model, rather than returning a
+  `FluidPropertyUnavailableError` naming the model, rather than returning a
   plausible number nobody printed. This matters as soon as a second fluid
   arrives: sea water has no ratio of specific heats to give.
 

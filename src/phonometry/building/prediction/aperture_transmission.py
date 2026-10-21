@@ -67,6 +67,7 @@ from ..._internal.validation import (
     require_present,
     require_ranks,
     require_same_length,
+    require_scalar,
 )
 
 if TYPE_CHECKING:
@@ -327,6 +328,7 @@ def slit_resonance_frequencies(
         non-positive (no resonance exists; ``width_m`` must be much less than the
         wavelength).
     """
+    require_scalar(n_orders, "n_orders")
     d = require_positive(depth, "depth")
     w = require_positive(width_m, "width_m")
     c0 = require_positive(speed_of_sound, "speed_of_sound")

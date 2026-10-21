@@ -184,14 +184,22 @@ class MountingCheck(RichDisplay):
         return _DEVICES[self.surface]
 
     @property
-    def acceptable(self) -> bool:
-        """``True`` when both the peak acceleration and the highest frequency
-        of interest are within what a loose mounting carries.
+    def passes(self) -> bool:
+        """The verdict: the peak acceleration and the highest frequency of
+        interest are both within what a loose mounting carries.
         """
         return (
             self.peak_acceleration_m_s2 <= self.peak_acceleration_limit_m_s2
             and self.upper_frequency_hz <= self.frequency_limit_hz
         )
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a MountingCheck has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
 
 def check_loose_mounting(

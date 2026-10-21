@@ -34,10 +34,10 @@ variants rather than delegating:
   ISO 1996-2 Annex C engineering method: a critical-band audibility
   ``ΔLta`` mapped to a *continuous* ``Kt`` in 0 to 6 dB. The RD works on
   one-third-octave band differences and yields 0/3/6 dB only.
-  :func:`~phonometry.environment.assessment.measurement.tonal_seeking_survey` is the
+  :func:`~phonometry.environment.assessment.measurement.assess_tonal_survey` is the
   closest relative (ISO 1996-2:2017 Annex K also splits the spectrum at
   125/400 Hz), but it requires the band to exceed *both* neighbours by
-  15/8/5 dB and returns a boolean flag, whereas the RD compares against the
+  15/8/5 dB and only says which bands are prominent, whereas the RD compares against the
   *mean* of the neighbours with 8/5/3 dB thresholds and grades the result.
 * :func:`~phonometry.environment.assessment.impulsive_sound.impulsive_sound_adjustment`
   is the ISO/PAS 1996-3 onset-rate method on a calibrated time signal. The
@@ -520,7 +520,7 @@ def tonal_correction(
     .. note::
        This is *not* the ISO 1996-2 tonal adjustment. The closest ISO relative
        is the Annex K survey method
-       (:func:`~phonometry.environment.assessment.measurement.tonal_seeking_survey`),
+       (:func:`~phonometry.environment.assessment.measurement.assess_tonal_survey`),
        which compares the band against *both* neighbours with 15/8/5 dB
        thresholds and only flags prominence; the RD compares against their
        arithmetic mean with 8/5/3 dB thresholds and grades the result 0/3/6 dB.
@@ -1160,11 +1160,19 @@ class PeriodAssessment(RichDisplay):
         return self.limit + _DAILY_ALLOWANCE
 
     @property
-    def complies(self) -> bool:
-        """Whether every evaluated criterion of this period is met."""
+    def passes(self) -> bool:
+        """The verdict: every evaluated criterion of this period is met."""
         return (
             self.phase_pass and self.daily_pass and (self.long_term_pass is not False)
         )
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a PeriodAssessment has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
 
 @dataclass(frozen=True)
@@ -1191,7 +1199,7 @@ class ActivityAssessment(RichDisplay):
 
         An empty ``periods`` is not an assessment that found nothing, it is
         an assessment that never happened, and every reader of it says the
-        opposite: :attr:`complies` is an ``all()`` over nothing and answers
+        opposite: :attr:`passes` is an ``all()`` over nothing and answers
         ``True``, and the *acta* renders its title, its limit row, its
         conclusion and its PASS verdict over a phase table with no rows --
         a complete inspection report of a measurement campaign that does not
@@ -1211,7 +1219,7 @@ class ActivityAssessment(RichDisplay):
         if not self.periods:
             msg = (
                 "ActivityAssessment: 'periods' must carry at least one "
-                "evaluation period; an assessment over none complies "
+                "evaluation period; an assessment over none passes "
                 "vacuously and renders an inspection report with no data."
             )
             raise ValueError(msg)
@@ -1223,9 +1231,17 @@ class ActivityAssessment(RichDisplay):
             raise ValueError(msg)
 
     @property
-    def complies(self) -> bool:
-        """Whether every period meets every evaluated criterion."""
-        return all(p.complies for p in self.periods)
+    def passes(self) -> bool:
+        """The verdict: every period meets every evaluated criterion."""
+        return all(p.passes for p in self.periods)
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "an ActivityAssessment has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

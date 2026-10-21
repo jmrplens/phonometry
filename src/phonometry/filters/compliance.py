@@ -1372,6 +1372,14 @@ class FilterComplianceResult(OwnsArrays):
             return None
         return int(max(classes))
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is the class, :attr:`overall_class`.
+        """
+        msg = "a FilterComplianceResult has no truth value; read its '.overall_class'"
+        raise TypeError(msg)
+
     @property
     def range_limited(self) -> bool:
         """Whether a band's Table 1 mask reaches beyond half the input rate.

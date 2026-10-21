@@ -269,7 +269,7 @@ def _result_row(
             value_style,
         ),
         fiche_paragraph(
-            _status_markup(passed=period.complies, language=language), value_style
+            _status_markup(passed=period.passes, language=language), value_style
         ),
     ]
 
@@ -326,7 +326,7 @@ def _statement(
         return max(margins)
 
     governing: PeriodAssessment = max(result.periods, key=_worst_margin)
-    if result.complies:
+    if result.passes:
         statement = t(
             "The activity <b>meets</b> the immission limit values of RD 1367/2007",
             language,
@@ -356,7 +356,7 @@ def _statement(
 
 def _verdict(result: ActivityAssessment, language: str = "en") -> tuple[str, bool]:
     """Verdict text and PASS flag against the Article 25 criteria."""
-    failed = [p for p in result.periods if not p.complies]
+    failed = [p for p in result.periods if not p.passes]
     if not failed:
         text = t(
             "every assessed index is within the applicable limit values "

@@ -177,6 +177,14 @@ class AircraftSystemComplianceResult(OwnsArrays):
         """
         return bool(self.checks) and all(bool(check["ok"]) for check in self.checks)
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "an AircraftSystemComplianceResult has no truth value; read its '.passes'"
+        raise TypeError(msg)
+
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
         """Travel with plain dictionaries, which pickle; they are frozen again on arrival."""
         return _rebuilt_result, (

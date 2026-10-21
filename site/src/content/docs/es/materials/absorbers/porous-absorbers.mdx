@@ -544,8 +544,8 @@ print(round(materials.decoupling_frequency(
 print(round(float(limp.effective_density[0].real), 1))     # 31.2 = rho_t
 # Los dos argumentos son un módulo de compresibilidad del esqueleto en
 # pascales, no una resistividad al flujo: el criterio son los 20 kPa del libro.
-print(materials.limp_frame_applicable(20e3),
-      materials.limp_frame_applicable(25e3))  # True False
+print(materials.check_limp_frame(20e3).passes,
+      materials.check_limp_frame(25e3).passes)  # True False
 
 limp.plot(language="es")   # Zc y k normalizados del medio corregido
 plt.show()
@@ -567,7 +567,7 @@ Beranek (1947) exigía $|K_c/K_\mathrm{f}| < 0,05$ entre el módulo de compresib
 esqueleto en vacío y el del fluido de los poros; el estudio de interacción
 esqueleto-estructura de Doutres et al. (2007) lo relajó a $0,2$, que para el
 aire ($K_\mathrm{f} \approx P_0 = 101,3$ kPa) es la regla práctica de que el esqueleto
-ha de ser más blando que unos 20 kPa. `limp_frame_applicable` aplica cualquiera
+ha de ser más blando que unos 20 kPa. `check_limp_frame` aplica cualquiera
 de los dos umbrales. Ninguno tiene en cuenta el montaje: una espuma fina y
 ligera desacoplada de una estructura vibrante por una cámara de aire se
 comporta como flexible muy por encima del límite, y un material adherido a una
@@ -1405,7 +1405,7 @@ esqueleto ligero se mueve con el fluido de los poros, y `limp_frame` añade su
 inercia (Allard & Atalla, ecs. 11.53-11.55). Úsalo con fieltros, velos y fibra
 de vidrio ligera, con cualquier material medido sin sujeción en un tubo de
 impedancia y siempre que el esqueleto en vacío sea más blando que unos 20 kPa
-(`limp_frame_applicable`); no lo uses, ni tampoco el modelo rígido, con un
+(`check_limp_frame`); no lo uses, ni tampoco el modelo rígido, con un
 material adherido a una estructura vibrante. Cuando el esqueleto es lo bastante
 rígido y pesado como para resonar en la banda de interés no vale ningún fluido
 equivalente: usa una `PoroelasticLayer` y la teoría de Biot completa.

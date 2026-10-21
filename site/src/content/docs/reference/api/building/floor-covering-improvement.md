@@ -89,7 +89,7 @@ $L_a = 10 \log_{10}(a_\mathrm{rms}^2 / a_0^2) = 20 \log_{10}(a_\mathrm{rms} / a_
 background_corrected_level(
     signal_and_background: float | Sequence[float] | np.ndarray,
     background: float | Sequence[float] | np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]
+) -> BackgroundCorrectedLevel
 ```
 
 Correct a measured level for background noise (ISO 16251-1 F. (2)).
@@ -98,16 +98,63 @@ Correct a measured level for background noise (ISO 16251-1 F. (2)).
 
 | Name | Description |
 | :--- | :--- |
-| `signal_and_background` | Measured level `L'` (with background) per band, in dB. |
-| `background` | Background-noise level `Lb` per band, in dB. |
+| `signal_and_background` | Measured level `L'` (with background) per band, in dB; a (positions, bands) array is corrected position by position. |
+| `background` | Background-noise level `Lb` per band, in dB, of the same shape. |
 
-**Returns:** `(corrected, limited)`: the corrected levels `L` per band, in dB, and a boolean mask of bands at the 1.3 dB limit of measurement (report as $> \Delta L$).
+**Returns:** The correction, as a [`BackgroundCorrectedLevel`](/phonometry/reference/api/building/floor-covering-improvement/#backgroundcorrectedlevel): the corrected levels `L` in its `corrected_levels`, and in its `limited` the bands at the 1.3 dB limit of measurement (report as $> \Delta L$).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | Mismatched shapes or non-finite values. |
+
+## BackgroundCorrectedLevel
+
+```python
+BackgroundCorrectedLevel(
+    signal_and_background: NDArray[np.float64],
+    background: NDArray[np.float64],
+)
+```
+
+A measured level corrected for background noise (ISO 16251-1 F. (2)).
+
+At a margin $L' - L_\mathrm{b}$ of 15 dB or more the level is used
+unchanged; between 6 dB and 15 dB the background is subtracted in energy;
+under 6 dB the correction is held at 1,3 dB, the limit of measurement,
+and the band is reported as $> \Delta L$. The margins, the corrected
+levels and the bands at the limit are read from the two readings, so they
+are not fields: a record cannot be built to claim a band clear of the
+limit that its readings put on it.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `signal_and_background` | Measured level `L'` (with background), in dB; one value per band, or a (positions, bands) array. |
+| `background` | Background-noise level `Lb`, in dB, of the same shape. |
+
+### BackgroundCorrectedLevel.corrected_levels
+
+*property*
+
+The corrected levels `L`, in dB, in the shape of the readings.
+
+### BackgroundCorrectedLevel.limited
+
+*property*
+
+Where the margin is under 6 dB, so the band is at the limit of measurement.
+
+Judged settled: 32,3 - 26,3 dB is 5,999 999 999 999 996 in binary and
+still the 6 dB it is.
+
+### BackgroundCorrectedLevel.margins_db
+
+*property*
+
+$L' - L_\mathrm{b}$, in dB, in the shape of the readings.
 
 ## FloorCoveringImprovementResult
 

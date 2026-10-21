@@ -21,20 +21,20 @@ def test_a_loose_mounting_carries_the_direction_to_its_limit(
 ) -> None:
     """5.3.2.1 and 5.3.2.2: 100 Hz vertically, 40 Hz horizontally, at 3 m/s²."""
     inside = im.check_loose_mounting(3.0, limit_hz, direction=direction)
-    assert inside.acceptable
+    assert inside.passes
     assert inside.frequency_limit_hz == limit_hz
     assert inside.peak_acceleration_limit_m_s2 == 3.0
     too_high = im.check_loose_mounting(3.0, limit_hz * 1.01, direction=direction)
-    assert not too_high.acceptable
+    assert not too_high.passes
     too_strong = im.check_loose_mounting(3.01, limit_hz, direction=direction)
-    assert not too_strong.acceptable
+    assert not too_strong.passes
 
 
 def test_a_soft_covering_has_the_same_limits_and_needs_the_spiked_device() -> None:
     """5.3.3: the limits do not change, what the transducer stands on does."""
     hard = im.check_loose_mounting(1.0, 80.0, direction="vertical")
     soft = im.check_loose_mounting(1.0, 80.0, direction="vertical", surface="soft")
-    assert soft.acceptable == hard.acceptable
+    assert soft.passes == hard.passes
     assert soft.frequency_limit_hz == hard.frequency_limit_hz
     assert "spikes" in soft.device
     assert "rounded feet" in hard.device
@@ -89,6 +89,6 @@ def test_bad_arguments_are_refused_by_name() -> None:
         im.check_loose_mounting(1.0, 10.0, direction="vertical", surface="wet")
     with pytest.raises(ValueError, match="peak_acceleration_m_s2"):
         im.check_loose_mounting(-0.1, 10.0, direction="vertical")
-    assert im.check_loose_mounting(0.0, 10.0, direction="vertical").acceptable
+    assert im.check_loose_mounting(0.0, 10.0, direction="vertical").passes
     with pytest.raises(ValueError, match="upper_frequency_hz"):
         im.check_loose_mounting(1.0, -10.0, direction="vertical")

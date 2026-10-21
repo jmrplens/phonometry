@@ -195,7 +195,7 @@ plt.show()
 </details>
 
 **Validity.** $K_{ij}$ rests on a statistical-energy-analysis simplification:
-`strong_coupling_satisfied()` checks the Formula (15) inequality and, for the
+`check_strong_coupling()` checks the Formula (15) inequality and, for the
 heavy junctions of Part 4, `modal_density()`, `band_mode_count()` and
 `modal_overlap_factor()` (Formulae (5)/(4)/(6)) quantify where the mode count
 is too low for $K_{ij}$ to be reliable. Pass the per-band modal overlap factor
@@ -615,7 +615,7 @@ via `building.normalized_flanking_level_difference` and
 `building.normalized_flanking_impact_level`; the strong-coupling check
 (Formula (15)) and the ISO 10848-4:2010 modal-density, band-mode-count and
 modal-overlap validity checks that bracket unreliable bands
-(`building.strong_coupling_satisfied`, `building.modal_density`,
+(`building.check_strong_coupling`, `building.modal_density`,
 `building.band_mode_count`, `building.modal_overlap_factor`); and the three
 one-page fiches through `.report()`.
 </ScopeClaim>

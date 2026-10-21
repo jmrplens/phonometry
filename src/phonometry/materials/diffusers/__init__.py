@@ -38,6 +38,7 @@ from .predicted_scattering import (
 from .reverberation_room_scattering import (
     BASE_PLATE_BANDS_HZ,
     BASE_PLATE_MAX_SCATTERING,
+    BasePlateScatteringCheck,
     ScatteringDiffusionWarning,
     ScatteringResult,
     ScatteringUncertainty,
@@ -67,6 +68,7 @@ from .scattering_diffusion import (
 __all__ = [
     "BASE_PLATE_BANDS_HZ",
     "BASE_PLATE_MAX_SCATTERING",
+    "BasePlateScatteringCheck",
     "DEFAULT_POLAR_ANGLES_DEG",
     "DIFFUSION_BANDS_HZ",
     "PUBLISHED_DIFFUSION",

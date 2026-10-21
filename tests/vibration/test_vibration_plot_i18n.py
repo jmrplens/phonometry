@@ -41,7 +41,7 @@ def test_rigid_mass_spanish_labels() -> None:
 
     mpl.use("Agg")
     f = np.array([20.0, 100.0, 500.0])
-    res = vibration.rigid_mass_calibration_check([0.100, 0.102, 0.097], f, mass=10.0)
+    res = vibration.verify_rigid_mass_calibration([0.100, 0.102, 0.097], f, mass=10.0)
 
     axes_en = res.plot(language="en")
     assert axes_en[0].get_title() == "ISO 7626-2 rigid-mass calibration check (PASS)"

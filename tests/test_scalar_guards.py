@@ -527,8 +527,8 @@ _PUBLIC_CALLS: list[tuple[str, Callable[[object], object], float, str]] = [
         "detector_time",
     ),
     (
-        "vibration.machinery.is_significant_change",
-        lambda v: vibration.machinery.is_significant_change(v, 4.5),
+        "vibration.machinery.assess_operational_change",
+        lambda v: vibration.machinery.assess_operational_change(v, 4.5),
         3.0,
         "change",
     ),

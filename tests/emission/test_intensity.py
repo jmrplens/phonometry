@@ -9,6 +9,8 @@ Physics anchors:
 - Field indicators from ISO 9614-1:1993 Annex A, equations (A.3)-(A.9).
 """
 
+import math
+
 import numpy as np
 import pytest
 
@@ -579,7 +581,7 @@ def test_f1_follows_the_shape_of_its_sibling_indicators() -> None:
     )
     assert np.ndim(scalar.f1) == 0
     assert np.ndim(scalar.f2) == 0
-    assert scalar.field_is_stationary() is True
+    assert scalar.check_field_stationarity().stationary is True
 
     per_band = emission.field_indicators(
         np.full((4, 1), 80.0),
@@ -590,7 +592,7 @@ def test_f1_follows_the_shape_of_its_sibling_indicators() -> None:
     assert np.ndim(per_band.f1) == 1
     assert np.size(per_band.f1) == 1
     assert np.ndim(per_band.f4) == 1
-    assert np.asarray(per_band.field_is_stationary()).shape == (1,)
+    assert np.asarray(per_band.check_field_stationarity().stationary).shape == (1,)
 
 
 def test_field_indicators_carries_f1_when_given_the_samples() -> None:
@@ -611,13 +613,13 @@ def test_field_indicators_f1_column_count_must_match_the_bands() -> None:
         emission.field_indicators(lp, i_n, temporal_intensity=two_band_samples)
 
 
-def test_field_is_stationary_against_the_table_b3_limit() -> None:
+def test_field_stationarity_against_the_table_b3_limit() -> None:
     """ISO 9614-1 Table B.3 calls for action when F1 exceeds 0,6."""
     assert emission.TEMPORAL_VARIABILITY_LIMIT == 0.6
     lp = np.full(4, 80.0)
     i_n = np.full(4, 1.0e-5)
     steady = emission.field_indicators(lp, i_n, temporal_intensity=np.full(10, 1.0e-5))
-    assert steady.field_is_stationary() is True
+    assert steady.check_field_stationarity().passes is True
     # A pair chosen so equation (A.1) lands exactly on the 0,6 threshold, and
     # a wilder pair above it: sqrt(2)*(b - a)/(a + b) with a = 1, b = r.
     r = (np.sqrt(2.0) + 0.6) / (np.sqrt(2.0) - 0.6)
@@ -625,12 +627,35 @@ def test_field_is_stationary_against_the_table_b3_limit() -> None:
         lp, i_n, temporal_intensity=[1.0e-5, r * 1.0e-5]
     )
     assert float(np.asarray(on_limit.f1)) == pytest.approx(0.6)
-    assert on_limit.field_is_stationary() is True  # the limit itself passes
+    assert on_limit.check_field_stationarity().passes is True  # the limit passes
     varying = emission.field_indicators(lp, i_n, temporal_intensity=[1.0e-5, 5.0e-5])
-    assert varying.field_is_stationary() is False
+    check = varying.check_field_stationarity()
+    assert check.passes is False
+    assert check.stationary is False
+    assert check.limit == emission.TEMPORAL_VARIABILITY_LIMIT
     without_f1 = emission.field_indicators(lp, i_n)
     with pytest.raises(ValueError, match=r"This result carries no F1"):
-        without_f1.field_is_stationary()
+        without_f1.check_field_stationarity()
+
+
+def test_field_stationarity_needs_every_band_within_the_limit() -> None:
+    check = emission.FieldStationarityCheck(np.array([0.2, 0.6, 0.9]))
+    assert check.stationary.tolist() == [True, True, False]
+    assert check.passes is False
+    assert emission.FieldStationarityCheck(np.array([0.2, 0.6])).passes is True
+
+
+@pytest.mark.parametrize("f1", [math.nan, math.inf])
+def test_field_stationarity_refuses_an_indicator_it_cannot_judge(f1: float) -> None:
+    # A NaN is never over the limit, so it would pass every band unread.
+    with pytest.raises(ValueError, match="'f1' must contain only finite values"):
+        emission.FieldStationarityCheck(f1)
+
+
+def test_field_stationarity_refuses_an_indicator_of_two_dimensions() -> None:
+    f1 = np.zeros((2, 2))
+    with pytest.raises(ValueError, match="'f1' must be a non-empty 1-D array"):
+        emission.FieldStationarityCheck(f1)
 
 
 def test_field_indicators_plot_draws_f1_and_its_limit() -> None:
@@ -677,9 +702,9 @@ def test_an_f1_off_the_band_axis_is_refused(kind: str) -> None:
     scalar dropped in beside per-band F2/F3/F4 is the mistake nearest to hand.
     Nothing downstream reads it as short: plot() broadcasts F1 onto the band
     axis, so the quietest band's 0,49 is drawn as a flat line under the
-    Table B.3 limit across the whole spectrum, and field_is_stationary()
-    answers a single True where these bands carry [1,19 0,92 0,49 0,55] and
-    two of the four exceed the limit.
+    Table B.3 limit across the whole spectrum, and check_field_stationarity()
+    passes where these bands carry [1,19 0,92 0,49 0,55] and two of the four
+    exceed the limit.
     """
     import dataclasses
 

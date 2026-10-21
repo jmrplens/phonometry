@@ -113,6 +113,10 @@ _CHOSEN_LIMITS = {
     "phonometry.building.regulation.spain.DBHRCheck.requirement": (
         "the CTE DB-HR requirement the user looked up for the building"
     ),
+    "phonometry.building.measurement.uncertainty.RequirementConformity."
+    "requirement_db": (
+        "ISO 12999-1 Clause 8: the requirement the building code sets, taken as given"
+    ),
     "phonometry.building.regulation.spain.DBHRRequirement.limit": (
         "the requirement object is the looked-up limit itself"
     ),
@@ -220,6 +224,10 @@ _NOT_LIMITS = {
     ),
     "phonometry.environment.sources._statistical_pass_by.PassByRegression."
     "max_levels": "the measured maximum level of each pass-by",
+    "phonometry.materials.absorbers.porous.LimpFrameCheck.criterion": (
+        "the name of the published criterion to apply; its threshold is a "
+        "read-only property"
+    ),
     "phonometry.metrology.sound_level_meter.SoundLevelMeterPeriodicRequirement."
     "over_max_by_correction_data": "the names of the results it concerns",
     "phonometry.noise_control._cabin_insulation.SourcePositionCheck."
@@ -294,7 +302,7 @@ _DERIVED_LIMITS = {
         "limits_db",
         "table_bands_hz",
     ),
-    "phonometry.hearing._earmuff_insertion_loss.FixtureIsolationCheck": (
+    "phonometry.hearing._earmuff_insertion_loss.FixtureIsolationVerification": (
         "required_db",
     ),
     "phonometry.environment.propagation.barrier_reflection.ReflectionGridCheck": (
@@ -314,18 +322,19 @@ _DERIVED_LIMITS = {
     ),
     "phonometry.noise_control._cabin_insulation.BandFlatnessCheck": (
         "limit_db",
-        "satisfied",
+        "within_limit",
+        "passes",
     ),
     "phonometry.noise_control._cabin_insulation.SourcePositionCheck": (
         "n_required_positions",
-        "satisfied",
+        "passes",
         "exceeds_max",
     ),
-    "phonometry.noise_control.enclosure_insulation.TestEnvironmentApplicability": (
+    "phonometry.noise_control.enclosure_insulation.EnclosureTestEnvironmentCheck": (
         "environmental_correction_limit_db",
         "background_margin_limit_db",
         "required_area_ratio",
-        "applicable",
+        "passes",
     ),
     "phonometry.psychoacoustics.quality.tonality.ToneAssessment": (
         "criterion_db",
@@ -357,7 +366,7 @@ _DERIVED_LIMITS = {
     "phonometry.vibration.immission.coupling.MountingCheck": (
         "frequency_limit_hz",
         "peak_acceleration_limit_m_s2",
-        "acceptable",
+        "passes",
     ),
     "phonometry.vibration.immission.vibration_meter.AssessmentVelocity": (
         "guide_value_mm_s",
@@ -991,7 +1000,7 @@ _DERIVED_FLAGS = {
     "phonometry.building.regulation.spain.DBHRCheck": (
         "reported",
         "margin",
-        "complies",
+        "passes",
     ),
     "phonometry.aircraft.rotorcraft_propagation.TerrainScreeningResult": ("screened",),
     "phonometry.electroacoustics.induction_loop.BackgroundNoiseAssessment": (
@@ -1203,7 +1212,7 @@ _DERIVED_FLAGS = {
         "supports_ok",
         "humidity_ok",
         "ce_marking_depth",
-        "satisfied",
+        "passes",
     ),
     "phonometry.metrology.data_qualification.StationarityTestResult": (
         "bounds",
@@ -1245,10 +1254,10 @@ _DERIVED_FLAGS = {
     "phonometry.room.spatial_decay.BackgroundMarginCheck": (
         "needs_correction",
         "unusable",
-        "satisfied",
+        "passes",
     ),
-    "phonometry.room.workroom_prediction.DetailVerdict": (
-        "satisfied",
+    "phonometry.room.workroom_prediction.PredictionDetailCheck": (
+        "passes",
         "room_ok",
         "fittings_ok",
         "sources_ok",
@@ -1264,7 +1273,7 @@ _DERIVED_FLAGS = {
         "regime",
     ),
     "phonometry.vibration.immission.people.PeopleAssessment": (
-        "complies",
+        "passes",
         "criterion",
         "within_uncertainty",
     ),
@@ -1273,7 +1282,7 @@ _DERIVED_FLAGS = {
         "kb_ftr_increase_percent",
         "kb_fmax_met",
         "kb_ftr_met",
-        "complies",
+        "passes",
     ),
     "phonometry.vibration.structural.transfer_stiffness.DrivingPointStiffnessResult": (
         "adequate",

@@ -108,7 +108,7 @@ measurement surface, which is Figure C.1 in closed form: the curve the annex
 asks the reader to read off by eye.
 
 ```python
-verdict = noise_control.test_environment_applicability(
+verdict = noise_control.check_enclosure_test_environment(
     base_standard="ISO 3744",
     mean_absorption_coefficient=0.15,
     room_surface_area_m2=520.0,
@@ -116,7 +116,7 @@ verdict = noise_control.test_environment_applicability(
 )
 print(round(verdict.required_area_ratio, 1))  # 45.6
 print(round(verdict.actual_area_ratio, 1))    # 36.9
-print(verdict.applicable)                     # False
+print(verdict.passes)                     # False
 ```
 
 That room cannot carry a precision determination. It can carry a survey one,
@@ -181,7 +181,7 @@ by_position = [
 check = noise_control.check_source_positions(by_position)
 print(check.max_octave_spread_db)   # 4.5
 print(check.n_required_positions)     # 5
-print(check.satisfied)              # False
+print(check.passes)                   # False
 ```
 
 Two more positions, and the clause adds that the three used first should not be

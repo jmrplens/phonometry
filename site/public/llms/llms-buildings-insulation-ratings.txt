@@ -1305,7 +1305,7 @@ building.db_hr_party_wall_requirement("DnT,A").limit                  # 50 dBA b
 building.db_hr_reverberation_requirement("classroom").limit           # 0.7 s
 
 check = building.assess_db_hr([(33.0, facade), (51.44, airborne[0])])
-check.complies                                      # True
+check.passes                                      # True
 ```
 
 `check_db_hr_requirement()` rounds the achieved value the way DB-HR asks before

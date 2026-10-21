@@ -23,7 +23,7 @@ edition defers the full engineering method to ISO/PAS 20065; the detailed,
 self-contained algorithm implemented here is the 2007/2009 Annex C one.)
 
 **Survey method (ISO 1996-2:2017 Annex K).**
-:func:`tonal_seeking_survey` flags a one-third-octave band that exceeds *both*
+:func:`assess_tonal_survey` flags a one-third-octave band that exceeds *both*
 neighbours by 15 dB (25–125 Hz), 8 dB (160–400 Hz) or 5 dB (500–10 000 Hz).
 
 **Mean-audibility route (ISO 1996-2:2017 Table J.1).**
@@ -54,6 +54,7 @@ import numpy as np
 
 from ..._internal.boundary import settled
 from ..._internal.display import RichDisplay
+from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import require_equal_counts, require_scalar
 from ..._internal.warnings import PhonometryWarning
 
@@ -61,13 +62,16 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
     "EnvironmentalMeasurementWarning",
     "RepeatedMeasurementResult",
     "ResidualCorrectionResult",
     "TonalAssessmentResult",
+    "TonalSurveyAssessment",
     "assess_tonal_audibility",
+    "assess_tonal_survey",
     "critical_bandwidth",
     "environmental_expanded_uncertainty",
     "gaussian_residual_level",
@@ -76,7 +80,6 @@ __all__ = [
     "tonal_adjustment",
     "tonal_adjustment_from_mean_audibility",
     "tonal_audibility",
-    "tonal_seeking_survey",
     "uncertainty_from_repeated_measurements",
 ]
 
@@ -237,6 +240,14 @@ class TonalAssessmentResult(RichDisplay):
     audibility: float
     adjustment: float
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the answer it carries.
+
+        :raises TypeError: Always; the answer is :attr:`adjustment`.
+        """
+        msg = "a TonalAssessmentResult has no truth value; read its '.adjustment'"
+        raise TypeError(msg)
+
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
     ) -> Axes:
@@ -308,35 +319,17 @@ def tonal_adjustment_from_mean_audibility(
 # --------------------------------------------------------------------------- #
 # Survey / simplified tonal method (ISO 1996-2:2017 Annex K)
 # --------------------------------------------------------------------------- #
-def tonal_seeking_survey(
-    levels: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray,
-) -> np.ndarray:
-    """Flag prominent tones by the one-third-octave survey method (Annex K).
-
-    A band is flagged when it exceeds *both* adjacent one-third-octave bands by
-    the level difference for its range: 15 dB (25–125 Hz), 8 dB (160–400 Hz),
-    5 dB (500–10 000 Hz). The two end bands (no pair of neighbours) are never
-    flagged.
-
-    .. note::
-        Annex K defines the thresholds for 25 Hz to 10 kHz only. Bands
-        supplied outside that span are extrapolated with the nearest rule
-        (15 dB below 25 Hz, 5 dB above 10 kHz), outside the standard.
-
-    :param levels: One-third-octave-band time-average levels, in dB.
-    :param frequencies: The band centre frequencies, in Hz (same length).
-    :return: Boolean array, ``True`` where a prominent tone is present.
-    :raises ValueError: If the inputs are empty, non-finite, or differ in
-        length.
-    """
+def _survey_spectrum(
+    owner: str, levels: ArrayLike, frequencies: ArrayLike
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    """The levels and band centres the survey method can read, as float arrays."""
     lev = np.asarray(levels, dtype=np.float64)
     freq = np.asarray(frequencies, dtype=np.float64)
     if lev.ndim != 1 or freq.ndim != 1:
         msg = "'levels' and 'frequencies' must be one-dimensional."
         raise ValueError(msg)
     require_equal_counts(
-        "tonal_seeking_survey",
+        owner,
         {"levels": lev.size, "frequencies": freq.size},
         "band",
     )
@@ -346,12 +339,125 @@ def tonal_seeking_survey(
     if not (np.all(np.isfinite(lev)) and np.all(np.isfinite(freq))):
         msg = "'levels' and 'frequencies' must be finite."
         raise ValueError(msg)
-    flags = np.zeros(lev.size, dtype=np.bool_)
-    for i in range(1, lev.size - 1):
-        threshold = _survey_threshold(freq[i])
-        margin = lev[i] - max(lev[i - 1], lev[i + 1])
-        flags[i] = settled(margin) >= threshold
-    return flags
+    return lev, freq
+
+
+@dataclass(frozen=True)
+class TonalSurveyAssessment(OwnsArrays):
+    """Prominent tones in a one-third-octave spectrum, by the survey method (Annex K).
+
+    A band holds a prominent tone when it exceeds *both* adjacent
+    one-third-octave bands by the level difference for its range: 15 dB
+    (25–125 Hz), 8 dB (160–400 Hz), 5 dB (500–10 000 Hz). The two end bands,
+    with no pair of neighbours, never do. The thresholds, the level
+    differences and the answer are read from the levels and the band centres,
+    so they are not fields.
+
+    .. note::
+        Annex K defines the thresholds for 25 Hz to 10 kHz only. Bands
+        supplied outside that span are judged with the nearest rule
+        (15 dB below 25 Hz, 5 dB above 10 kHz), outside the standard.
+
+    :ivar levels: One-third-octave-band time-average levels, in dB.
+    :ivar frequencies: The band centre frequencies, in Hz (same length).
+    """
+
+    levels: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+
+    def __post_init__(self) -> None:
+        """Hold the spectrum read-only and reject one the method cannot read.
+
+        :raises ValueError: If the inputs are not one-dimensional, differ in
+            length, hold fewer than three bands or a value that is not finite.
+        """
+        lev, freq = _survey_spectrum(type(self).__name__, self.levels, self.frequencies)
+        object.__setattr__(self, "levels", read_only(lev))
+        object.__setattr__(self, "frequencies", read_only(freq))
+
+    @property
+    def thresholds_db(self) -> NDArray[np.float64]:
+        """The level difference Annex K asks of each band, in dB."""
+        return np.array(
+            [_survey_threshold(f) for f in self.frequencies.tolist()], dtype=np.float64
+        )
+
+    @property
+    def level_differences(self) -> NDArray[np.float64]:
+        """Each band less the louder of its two neighbours, in dB; NaN at the ends."""
+        lev = np.asarray(self.levels, dtype=np.float64)
+        differences = np.full(lev.size, np.nan)
+        differences[1:-1] = lev[1:-1] - np.maximum(lev[:-2], lev[2:])
+        return differences
+
+    @property
+    def prominent(self) -> NDArray[np.bool_]:
+        """Whether each band holds a prominent tone; the two end bands never do.
+
+        Judged settled: a band 5 dB above its neighbours in decimal reaches the
+        threshold whichever way the last bits of the subtraction fall.
+        """
+        differences = self.level_differences
+        flags = np.zeros(differences.size, dtype=np.bool_)
+        inner = slice(1, -1)
+        flags[inner] = settled(differences[inner]) >= self.thresholds_db[inner]
+        return flags
+
+    @property
+    def tone_frequencies(self) -> NDArray[np.float64]:
+        """The centres of the bands that hold a prominent tone, in Hz."""
+        return np.asarray(self.frequencies, dtype=np.float64)[self.prominent]
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the answer it carries.
+
+        :raises TypeError: Always; the answer, band by band, is
+            :attr:`prominent`.
+        """
+        msg = (
+            "a TonalSurveyAssessment has no truth value; read its '.prominent' "
+            "or '.tone_frequencies'"
+        )
+        raise TypeError(msg)
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Draw the spectrum with the prominent bands marked and each band's bar.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the band bars.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.environment import plot_tonal_survey
+
+        return plot_tonal_survey(
+            self, ax=ax, language=check_language(language), **kwargs
+        )
+
+
+def assess_tonal_survey(
+    levels: Sequence[float] | np.ndarray,
+    frequencies: Sequence[float] | np.ndarray,
+) -> TonalSurveyAssessment:
+    """Which one-third-octave bands hold a prominent tone? (Annex K, survey method).
+
+    ISO 1996-2:2017 Annex K, the objective survey method for the audibility
+    of tones in noise: a band is a prominent tone when it exceeds both
+    neighbours by 15 dB (25–125 Hz), 8 dB (160–400 Hz) or 5 dB
+    (500–10 000 Hz).
+
+    :param levels: One-third-octave-band time-average levels, in dB.
+    :param frequencies: The band centre frequencies, in Hz (same length).
+    :return: The answer, as a :class:`TonalSurveyAssessment`; the bands with
+        a prominent tone are its ``prominent`` and ``tone_frequencies``.
+    :raises ValueError: If the inputs are empty, non-finite, or differ in
+        length.
+    """
+    lev, freq = _survey_spectrum("assess_tonal_survey", levels, frequencies)
+    return TonalSurveyAssessment(lev, freq)
 
 
 def _survey_threshold(frequency: float) -> float:

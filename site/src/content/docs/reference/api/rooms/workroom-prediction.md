@@ -52,16 +52,16 @@ British cover.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## detail_is_sufficient
+## check_prediction_detail
 
 ```python
-detail_is_sufficient(
+check_prediction_detail(
     category: str,
     *,
     room_detail: int,
     fitting_detail: int,
     source_detail: int,
-) -> DetailVerdict
+) -> PredictionDetailCheck
 ```
 
 Does the data in hand match what Table E.1 asks of this category?
@@ -80,62 +80,13 @@ room shape has to go and gather a level-4 description of it.
 | `fitting_detail` | The level of Table 2 the fittings are described at. |
 | `source_detail` | The level of Table 3 the sources are described at. |
 
-**Returns:** The verdict, as a [`DetailVerdict`](/phonometry/reference/api/rooms/workroom-prediction/#detailverdict).
+**Returns:** The verdict, as a [`PredictionDetailCheck`](/phonometry/reference/api/rooms/workroom-prediction/#predictiondetailcheck).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown category or a level no table prints. |
-
-## DetailVerdict
-
-```python
-DetailVerdict(
-    category: str,
-    room_detail: int,
-    fitting_detail: int,
-    source_detail: int,
-)
-```
-
-Whether the data in hand is what a category of method asks for.
-
-The verdicts are read from the three levels and the row of Table E.1 the
-category selects, so they are not fields.
-
-**Attributes**
-
-| Name | Description |
-| :--- | :--- |
-| `category` | The category asked about. |
-| `room_detail` | The level of Table 1 the room is described at. |
-| `fitting_detail` | The level of Table 2 the fittings are described at. |
-| `source_detail` | The level of Table 3 the sources are described at. |
-
-### DetailVerdict.fittings_ok
-
-*property*
-
-Whether the fitting description falls inside Table E.1.
-
-### DetailVerdict.room_ok
-
-*property*
-
-Whether the room description falls inside Table E.1.
-
-### DetailVerdict.satisfied
-
-*property*
-
-Whether all three levels fall inside Table E.1.
-
-### DetailVerdict.sources_ok
-
-*property*
-
-Whether the source description falls inside Table E.1.
 
 ## fitting_density
 
@@ -206,6 +157,55 @@ One category of Table 4, with the detail levels of Table E.1.
 ```python
 PREDICTION_METHODS = {'1': PredictionMethod(category='1', family='diffuse field', rooms='rooms whose field may be treated as diffuse', room_detail=(1,), fitting_detail=(1,), source_detail=(1, 2, 3)), '2a': PredictionMethod(category='2a', family='geometrical', rooms='rooms that can be approximated by one mean absorption coefficient for each wall and one mean density for the fittings', room_detail=(1, 2), fitting_detail=(1, 2), source_detail=(1, 2, 3)), '2b': PredictionMethod(category='2b', family='geometrical', rooms='rooms that can be approximated by one mean absorption coefficient for each room surface and one mean density for the fittings in each zone', room_detail=(1, 2, 3), fitting_detail=(1, 2, 3), source_detail=(1, 2, 3)), '2c': PredictionMethod(category='2c', family='geometrical', rooms='rooms for which the individual distribution of absorption and fittings has to be considered', room_detail=(1, 2, 3, 4), fitting_detail=(1, 2, 3, 4), source_detail=(1, 2, 3))}
 ```
+
+## PredictionDetailCheck
+
+```python
+PredictionDetailCheck(
+    category: str,
+    room_detail: int,
+    fitting_detail: int,
+    source_detail: int,
+)
+```
+
+Whether the data in hand is what a category of method asks for.
+
+The verdicts are read from the three levels and the row of Table E.1 the
+category selects, so they are not fields.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `category` | The category asked about. |
+| `room_detail` | The level of Table 1 the room is described at. |
+| `fitting_detail` | The level of Table 2 the fittings are described at. |
+| `source_detail` | The level of Table 3 the sources are described at. |
+
+### PredictionDetailCheck.fittings_ok
+
+*property*
+
+Whether the fitting description falls inside Table E.1.
+
+### PredictionDetailCheck.passes
+
+*property*
+
+The verdict: all three levels fall inside Table E.1.
+
+### PredictionDetailCheck.room_ok
+
+*property*
+
+Whether the room description falls inside Table E.1.
+
+### PredictionDetailCheck.sources_ok
+
+*property*
+
+Whether the source description falls inside Table E.1.
 
 ## PredictionMethod
 

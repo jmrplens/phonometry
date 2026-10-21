@@ -76,7 +76,7 @@ in.
 :func:`check_coherence` (9.1); :func:`verify_channel_match` judges the
 channel-to-channel match of the analyser (8.1). The operational calibration of
 7.2 is the rigid-mass check of ISO 7626-2:2015, 7.5.2, which 7.2 calls
-essentially the same procedure: :func:`.rigid_mass_calibration_check`.
+essentially the same procedure: :func:`.verify_rigid_mass_calibration`.
 
 The part prints no worked example, so the implementation is anchored in closed
 form: a single-degree-of-freedom structure struck by a smooth pulse gives its

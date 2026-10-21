@@ -218,15 +218,6 @@ values and the 25 % of 6.5.3.6, so they are not fields.
 | `guide` | The guide values the planned case was held to. |
 | `time_of_day` | `"day"` or `"night"`. |
 
-### RailwayChange.complies
-
-*property*
-
-Whether the requirements count as met for the planned case.
-
-$KB_\mathrm{Fmax}$ keeps to $A_\mathrm{u}$, or both the
-$KB_\mathrm{Fmax}$ and the $KB_\mathrm{FTr}$ condition hold.
-
 ### RailwayChange.kb_fmax_increase_percent
 
 *property*
@@ -259,6 +250,15 @@ Whether $KB_\mathrm{FTr}$ of the planned case meets 6.5.3.6.
 It keeps to $A_\mathrm{r}$, or exceeds it by an increase under 25 %;
 true without looking when $KB_\mathrm{Fmax}$ keeps to
 $A_\mathrm{u}$, which settles the verdict on its own.
+
+### RailwayChange.passes
+
+*property*
+
+The verdict: the requirements count as met for the planned case.
+
+$KB_\mathrm{Fmax}$ keeps to $A_\mathrm{u}$, or both the
+$KB_\mathrm{Fmax}$ and the $KB_\mathrm{FTr}$ condition hold.
 
 ## train_assessment_severity
 

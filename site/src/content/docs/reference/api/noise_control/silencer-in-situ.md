@@ -63,7 +63,7 @@ Where the extraneous sound can be measured on its own, 9.1.1 and 9.1.2 offer
 the energy route of Equations (17) and (18) instead, and cap it: **the maximum
 correction is 3 dB**. A measurement that needs more than that does not yield
 the quantity at all, and the clause says what may be stated instead, which is
-an inequality. [`extraneous_corrected_mean_level`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level) returns whether the
+an inequality. [`extraneous_corrected_mean_level`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneous_corrected_mean_level) says whether the
 cap was reached so that a capped value cannot be reported as a determination.
 
 Clause 9.1.5 is the one prohibition worth reading twice: converting
@@ -89,16 +89,17 @@ DOWNSTREAM_DISTANCE_COEFFICIENTS = (12.0, 10.0)
 extraneous_corrected_mean_level(
     levels: ArrayLike,
     extraneous_levels: ArrayLike,
-) -> tuple[float, bool]
+) -> ExtraneousCorrectionResult
 ```
 
 The mean level with the extraneous sound taken off, Equations (17) and (18).
 
 $$
-\overline{L_p} = 10 \lg \left[\frac{1}{N} \sum_j \left(10^{0,1 L_{pj}} - 10^{0,1 L_{ej}}\right)\right]
+\overline{L_{p1}} = 10 \lg \left[\frac{1}{N} \sum_j \left(10^{0,1 L_{pj}} - 10^{0,1 L_{ej}}\right)\right]
 $$
 
-The energy route 9.1.1 and 9.1.2 offer instead of Table 1, for the case
+printed $\overline{L_{p1}}$ in Equation (17) and
+$\overline{L_{pI}}$ in Equation (18). The energy route 9.1.1 and 9.1.2 offer instead of Table 1, for the case
 where the sources the silencer works on can be switched off and the
 extraneous sound measured at the same positions: corrections are made
 "using table 1 or the relationship" (9.1.1, printed folio 10, PDF page 18
@@ -111,7 +112,8 @@ correction of 3 dB that "is not sufficient", and Table 1 (folio 5, PDF
 page 13) prints where that starts: a margin under 3 dB is invalid, and a
 margin of 3 dB takes off 3 dB. The subtraction reaches 3,0206 dB at that
 same margin, which is the printed 3 dB unrounded, so the cap is judged on
-the margin of the two energy means:
+the margin of the two energy means, $\overline{L_p}$ of the levels
+as measured (Equation (2)) over that of the extraneous levels:
 
 $$
 \overline{L_p} - \overline{L_e} \ge 3\ \mathrm{dB}
@@ -119,13 +121,12 @@ $$
 
 That is the same condition as a correction of at most
 $-10 \lg(1 - 10^{-0,3})$ dB, and it keeps the two routes of the
-standard in agreement at their shared boundary. A margin that floating
-point leaves a few parts in $10^{14}$ under 3 dB counts as 3 dB.
+standard in agreement at their shared boundary.
 
-The second return value says whether the cap was reached, so that a
-capped number cannot be written down as a determination, and a capped
+The result's `capped` says whether the cap was reached, so that a capped
+number cannot be written down as a determination, and a capped
 measurement also emits a [`SilencerInSituWarning`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituwarning). The corrected
-level itself is returned either way.
+level itself is given either way.
 
 **Parameters**
 
@@ -134,13 +135,45 @@ level itself is returned either way.
 | `levels` | The levels with everything running, in decibels. |
 | `extraneous_levels` | The extraneous levels at the same positions, in decibels. |
 
-**Returns:** The corrected mean level in decibels, and whether the correction reached the cap, which is a margin under 3 dB.
+**Returns:** The corrected mean level and the margin it was read at, as an [`ExtraneousCorrectionResult`](/phonometry/reference/api/noise_control/silencer-in-situ/#extraneouscorrectionresult).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match point for point, or an extraneous level at or above the level it is subtracted from. |
+
+## ExtraneousCorrectionResult
+
+```python
+ExtraneousCorrectionResult(corrected_level: float, margin_db: float)
+```
+
+The mean level with the extraneous sound taken off, and whether it is capped.
+
+9.1.1 and 9.1.2 cap the correction at 3 dB, and Table 1 prints where that
+starts: a margin of the two energy means under 3 dB. Whether the cap was
+reached is read from the margin, so it is not a field: a capped level
+cannot be written down as a determination.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `corrected_level` | The corrected mean level, printed $\overline{L_{p1}}$ in Equation (17) and $\overline{L_{pI}}$ in Equation (18), in decibels; given either way, capped or not. |
+| `margin_db` | $\overline{L_p} - \overline{L_e}$, the margin of the energy mean of the levels as measured ($\overline{L_p}$ of Equation (2), before any correction) over that of the extraneous levels, in decibels. |
+
+### ExtraneousCorrectionResult.capped
+
+*property*
+
+Whether the correction reached the 3 dB cap: a margin under 3 dB.
+
+The cap is judged on the margin of the two energy means and not on the
+correction itself: the printed 3 dB is what Table 1 takes off at its
+3 dB row, which the subtraction writes unrounded as 3,0206 dB. A
+margin that floating point leaves a few parts in $10^{14}$ under
+3 dB counts as 3 dB, on the side Table 1 accepts.
 
 ## flow_velocity_m_s
 

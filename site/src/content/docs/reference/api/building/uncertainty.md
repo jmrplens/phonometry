@@ -50,6 +50,45 @@ Clause/table numbers refer to ISO 12999-1:2020(E).
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
+## assess_requirement_conformity
+
+```python
+assess_requirement_conformity(
+    value_db: float,
+    expanded_uncertainty_db: float,
+    requirement_db: float,
+    *,
+    bound: Literal['minimum', 'maximum'],
+) -> RequirementConformity
+```
+
+Does a measured value meet a requirement beyond its uncertainty? (Clause 8).
+
+The expanded uncertainty is worked with the one-sided coverage factor of
+Table 8 ([`insulation_coverage_factor`](/phonometry/reference/api/building/uncertainty/#insulation_coverage_factor) with `one_sided=True`) and
+then taken off the best estimate for a minimum,
+$y - U > Y_\mathrm{required}$ (Formula (5)), or added to it for a
+maximum, $y + U < Y_\mathrm{required}$ (Formula (4)): an apparent
+sound reduction index `R'w` provably above its minimum, a normalized
+impact level `L'n,w` provably below its maximum.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `value_db` | The best estimate $y$, in dB. |
+| `expanded_uncertainty_db` | $U$, one-sided, in dB. |
+| `requirement_db` | $Y_\mathrm{required}$, in dB. |
+| `bound` | `"minimum"` (Formula (5)) or `"maximum"` (Formula (4)). |
+
+**Returns:** The verdict, as a [`RequirementConformity`](/phonometry/reference/api/building/uncertainty/#requirementconformity).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For an unknown `bound`, a value that is not finite or a negative uncertainty. |
+
 ## band_uncertainty
 
 ```python
@@ -263,43 +302,54 @@ equipment lower the in-situ uncertainty.
 | :--- | :--- |
 | ValueError | Non-positive `m` or negative `u`. |
 
-## satisfies_lower_requirement
+## RequirementConformity
 
 ```python
-satisfies_lower_requirement(
-    value: float,
-    expanded_uncertainty_value: float,
-    requirement: float,
-) -> bool
+RequirementConformity(
+    value_db: float,
+    expanded_uncertainty_db: float,
+    requirement_db: float,
+    *,
+    bound: Literal['minimum', 'maximum'],
+)
 ```
 
-Test a minimum requirement with one-sided uncertainty (Formula 5).
+A measured value against a requirement, with its uncertainty (Clause 8).
 
-Returns `True` when
-$\text{value} - U > \text{requirement}$, e.g. an apparent sound
-reduction index `R'w` provably exceeds a minimum. `U` should be computed
-with the one-sided coverage factor. The margin is settled before it is
-judged, so a value exactly `U` above the requirement in decimal does not
-pass on the last bits of the subtraction.
+ISO 12999-1:2020 Clause 8 declares conformity only when the whole one-sided
+interval clears the requirement: $y - U > Y_\mathrm{required}$ for a
+minimum (Formula (5)) and $y + U < Y_\mathrm{required}$ for a maximum
+(Formula (4)). Both are strict, so a value that clears the requirement by
+exactly $U$ does not conform. The margin and the verdict are read
+from the three values and the side, so they are not fields: a record cannot
+be built to conform with a value the clause refuses.
 
-## satisfies_upper_requirement
+**Attributes**
 
-```python
-satisfies_upper_requirement(
-    value: float,
-    expanded_uncertainty_value: float,
-    requirement: float,
-) -> bool
-```
+| Name | Description |
+| :--- | :--- |
+| `value_db` | The best estimate $y$, in dB. |
+| `expanded_uncertainty_db` | $U$, worked with the one-sided coverage factor, in dB. |
+| `requirement_db` | $Y_\mathrm{required}$, in dB. |
+| `bound` | `"minimum"` when the requirement is a value to exceed (an apparent sound reduction index `R'w`) or `"maximum"` when it is one to stay under (a normalized impact level `L'n,w`). |
 
-Test a maximum requirement with one-sided uncertainty (Formula 4).
+### RequirementConformity.margin_db
 
-Returns `True` when
-$\text{value} + U < \text{requirement}$, e.g. a normalized impact
-level `L'n,w` provably stays below a maximum. `U` should be computed with
-the one-sided coverage factor. The margin is settled before it is judged,
-so a value exactly `U` below the requirement in decimal does not pass on
-the last bits of the sum.
+*property*
+
+How far the uncertain interval clears the requirement, in dB.
+
+$y - U - Y_\mathrm{required}$ for a minimum and
+$Y_\mathrm{required} - (y + U)$ for a maximum: positive when the
+value conforms. Settled, so a value exactly $U$ from the
+requirement in decimal gives a margin of zero whichever way the last
+bits of the subtraction fall.
+
+### RequirementConformity.passes
+
+*property*
+
+The verdict: the margin is positive, Formula (5) or (4) holds.
 
 ## single_number_uncertainty
 

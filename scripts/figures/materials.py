@@ -1979,6 +1979,49 @@ def _goniometer_path_times(
     )
 
 
+def generate_base_plate_scattering(output_dir: str) -> None:
+    """ISO 17497-1 6.2: the base plate alone against the stepped limit of Table 1.
+
+    One concept: the turntable is qualified band by band, and a plate a hair
+    over the limit in one band is disqualified in that band. The measured
+    coefficients climb with frequency, as a slightly asymmetric plate's do,
+    and cross the 0,10 ceiling at 1 kHz, the last band before it steps up.
+    """
+    print("Generating base_plate_scattering...")
+    import warnings
+
+    from phonometry import materials
+
+    measured = [
+        0.010,
+        0.012,
+        0.013,
+        0.015,
+        0.018,
+        0.021,
+        0.025,
+        0.030,
+        0.045,
+        0.070,
+        0.105,
+        0.090,
+        0.110,
+        0.125,
+        0.140,
+        0.160,
+        0.175,
+        0.205,
+    ]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", materials.ScatteringDiffusionWarning)
+        check = materials.check_base_plate_scattering(measured)
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    check.plot(ax=ax, language=_LANG)
+    plt.tight_layout()
+    save_figure(output_dir, "base_plate_scattering.svg")
+    plt.close()
+
+
 def generate_diffusion_measurement_chain(output_dir: str) -> None:
     """ISO 17497-2 Clause 7.4: h1, h2, their difference, h4 and the window."""
     print("Generating diffusion_measurement_chain...")

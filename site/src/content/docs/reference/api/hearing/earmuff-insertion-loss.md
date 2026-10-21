@@ -420,10 +420,10 @@ The combined standard uncertainty per band (Formula (B.2)), in dB.
 
 **Returns:** One value per band.
 
-## FixtureIsolationCheck
+## FixtureIsolationVerification
 
 ```python
-FixtureIsolationCheck(frequencies: np.ndarray, isolation: np.ndarray)
+FixtureIsolationVerification(frequencies: np.ndarray, isolation: np.ndarray)
 ```
 
 Whether the test fixture isolates its microphone well enough (5.1.4).
@@ -438,7 +438,7 @@ The requirement is the clause's, read from the bands as
 | `frequencies` | The centre frequencies, in hertz. |
 | `isolation` | The acoustic isolation (3.7), the level with the isolation cup absent less the level with it sealed on, per band, in dB. |
 
-### FixtureIsolationCheck.margin_db
+### FixtureIsolationVerification.margin_db
 
 *property*
 
@@ -446,7 +446,7 @@ The isolation less the requirement per band, in dB.
 
 **Returns:** Negative where the fixture falls short, NaN where nothing is required.
 
-### FixtureIsolationCheck.passes
+### FixtureIsolationVerification.passes
 
 *property*
 
@@ -454,10 +454,10 @@ Whether the fixture's isolation meets 5.1.4 in every band.
 
 **Returns:** `True` when no band falls short.
 
-### FixtureIsolationCheck.plot()
+### FixtureIsolationVerification.plot()
 
 ```python
-FixtureIsolationCheck.plot(
+FixtureIsolationVerification.plot(
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -477,7 +477,7 @@ Draw the isolation against the requirement, band by band.
 
 **Returns:** The axes.
 
-### FixtureIsolationCheck.required_db
+### FixtureIsolationVerification.required_db
 
 *property*
 
@@ -485,7 +485,7 @@ The least isolation 5.1.4 asks per band, in dB.
 
 **Returns:** 50 dB from 63 Hz to 250 Hz, 65 dB from 315 Hz to 4 kHz and 55 dB above; NaN below 63 Hz, where it asks nothing.
 
-### FixtureIsolationCheck.sufficient
+### FixtureIsolationVerification.sufficient
 
 *property*
 
@@ -688,7 +688,7 @@ verify_fixture_isolation(
     cup_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-) -> FixtureIsolationCheck
+) -> FixtureIsolationVerification
 ```
 
 Does the test fixture isolate its microphone well enough? (5.1.4).
@@ -709,7 +709,7 @@ resilient mounting (5.1.2).
 | `cup_levels` | The level with the cup sealed on, per band, in dB. |
 | `frequencies` | The centre frequencies, in hertz, or `None` for the 22 bands of 63 Hz to 8 kHz. |
 
-**Returns:** [`FixtureIsolationCheck`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#fixtureisolationcheck).
+**Returns:** [`FixtureIsolationVerification`](/phonometry/reference/api/hearing/earmuff-insertion-loss/#fixtureisolationverification).
 
 **Raises**
 

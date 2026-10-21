@@ -141,7 +141,7 @@ def test_a_conforming_arrangement_passes() -> None:
         substructure_width_mm=25.0,
         substructure_height_mm=45.0,
     )
-    assert check.satisfied is True
+    assert check.passes is True
     assert check.ce_marking_depth is True
     assert check.area_error_m2 == pytest.approx(0.0)
 
@@ -152,7 +152,7 @@ def test_a_sagging_ceiling_fails_the_deflection_rule() -> None:
             area=10.8, depth_mm=200.0, deflection_mm=8.0
         )
     assert check.deflection_ok is False
-    assert check.satisfied is False
+    assert check.passes is False
 
 
 def test_a_deep_substructure_fails_its_own_rule() -> None:
@@ -180,7 +180,7 @@ def test_another_depth_is_allowed_but_is_not_the_ce_marking_one() -> None:
     """
     with pytest.warns(SuspendedCeilingWarning, match="CE marking") as caught:
         check = materials.check_ceiling_specimen(area=10.8, depth_mm=400.0)
-    assert check.satisfied is True
+    assert check.passes is True
     assert check.ce_marking_depth is False
     assert all("outside EN 16487" not in str(entry.message) for entry in caught)
 
@@ -196,7 +196,7 @@ def test_a_limit_left_and_another_depth_are_told_apart_in_one_warning() -> None:
     assert outside == "the specimen deflects 8 mm, over the 5 mm of 4.1.1.2.3.5"
     assert "CE marking" in rest
     assert "outside" not in rest
-    assert check.satisfied is False
+    assert check.passes is False
 
 
 def test_supports_inside_the_printed_section_and_spacing_pass() -> None:
@@ -211,7 +211,7 @@ def test_supports_inside_the_printed_section_and_spacing_pass() -> None:
             support_center_distance_m=1.2,
         )
     assert check.supports_ok is True
-    assert check.satisfied is True
+    assert check.passes is True
 
 
 def test_the_printed_support_limits_are_the_printed_ones() -> None:
@@ -232,7 +232,7 @@ def test_a_support_over_the_printed_section_fails(field: str, value: float) -> N
     with pytest.warns(SuspendedCeilingWarning, match=r"4\.1\.1\.2\.3\.6"):
         check = materials.check_ceiling_specimen(area=10.8, depth_mm=200.0, **dimension)
     assert check.supports_ok is False
-    assert check.satisfied is False
+    assert check.passes is False
 
 
 def test_supports_closer_than_the_printed_spacing_fail() -> None:
@@ -246,7 +246,7 @@ def test_supports_closer_than_the_printed_spacing_fail() -> None:
             support_center_distance_m=1.0,
         )
     assert check.supports_ok is False
-    assert check.satisfied is False
+    assert check.passes is False
 
 
 @pytest.mark.parametrize("value", [0.0, -1.2, float("nan"), float("inf")])
@@ -268,7 +268,7 @@ def test_a_dry_room_fails_the_humidity_floor() -> None:
             area=10.8, depth_mm=200.0, relative_humidity_percent=[41.0, 44.0]
         )
     assert check.humidity_ok is False
-    assert check.satisfied is False
+    assert check.passes is False
 
 
 @pytest.mark.parametrize("humidity", [[62.0, 58.0], [50.0, 50.0], 55.0])
@@ -279,7 +279,7 @@ def test_a_room_at_or_over_the_floor_passes(humidity: float | list[float]) -> No
             area=10.8, depth_mm=200.0, relative_humidity_percent=humidity
         )
     assert check.humidity_ok is True
-    assert check.satisfied is True
+    assert check.passes is True
 
 
 def test_one_dry_measurement_among_humid_ones_fails() -> None:
@@ -294,7 +294,7 @@ def test_an_omitted_humidity_is_not_judged() -> None:
     check = materials.check_ceiling_specimen(area=10.8, depth_mm=200.0)
     assert check.humidity_ok is None
     assert check.supports_ok is True
-    assert check.satisfied is True
+    assert check.passes is True
 
 
 @pytest.mark.parametrize(
@@ -316,7 +316,7 @@ def test_the_ce_marking_depth_belongs_to_the_type_e_mounting_alone() -> None:
         area=10.8, mounting="A", depth_mm=TYPE_E_DEPTH_MM
     )
     assert check.ce_marking_depth is False
-    assert check.satisfied is True
+    assert check.passes is True
 
 
 def test_a_type_e_arrangement_without_a_depth_is_refused() -> None:
@@ -367,7 +367,7 @@ def test_an_area_away_from_the_target_is_reported_and_not_warned_about() -> None
         warnings.simplefilter("error", SuspendedCeilingWarning)
         check = materials.check_ceiling_specimen(area=9.6, depth_mm=200.0)
     assert check.area_error_m2 == pytest.approx(-1.2)
-    assert check.satisfied is True
+    assert check.passes is True
 
 
 def test_an_air_correction_over_the_cap_is_warned_about() -> None:
@@ -717,7 +717,7 @@ def test_real_arrangements_against_the_printed_geometry() -> None:
             )
         assert got.area_error_m2 == pytest.approx(area_error_m2, abs=5e-9), report
         assert got.ce_marking_depth is ce_marking, report
-        assert got.satisfied is True, report
+        assert got.passes is True, report
 
 
 def test_the_humidity_floor_against_real_room_climates() -> None:
@@ -757,7 +757,7 @@ def test_the_humidity_floor_against_real_room_climates() -> None:
                 relative_humidity_percent=printed,
             )
         assert got.humidity_ok is (report not in below_the_floor), report
-        assert got.satisfied is (report not in below_the_floor), report
+        assert got.passes is (report not in below_the_floor), report
 
 
 @pytest.mark.parametrize(

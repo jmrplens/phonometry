@@ -375,9 +375,9 @@ def _background_correction_db(margin_db: float) -> float:
         # governs what may be reported; this row is about the arithmetic under
         # it, which the module returns uncapped either way.
         warnings.simplefilter("ignore", ph.noise_control.SilencerInSituWarning)
-        corrected, _ = ph.noise_control.extraneous_corrected_mean_level(
+        corrected = ph.noise_control.extraneous_corrected_mean_level(
             [_CARRIER_DB], [_CARRIER_DB - margin_db]
-        )
+        ).corrected_level
     return _CARRIER_DB - corrected
 
 
@@ -544,9 +544,9 @@ def _chk_worked_background_subtractions() -> Outcome:
     printed = {name: values[2] for name, values in _WORKED_SUBTRACTIONS.items()}
     computed = {
         name: round(
-            ph.noise_control.extraneous_corrected_mean_level([values[0]], [values[1]])[
-                0
-            ],
+            ph.noise_control.extraneous_corrected_mean_level(
+                [values[0]], [values[1]]
+            ).corrected_level,
             1,
         )
         for name, values in _WORKED_SUBTRACTIONS.items()
@@ -1347,30 +1347,44 @@ def _chk_iso10847_wind_classes() -> Outcome:
 @register(
     _IN_SITU,
     "ISO 10847:1997 6.3.1",
-    "The short-distance ratio is strict at 0,1, and the after case needs "
-    "both of its two inequalities",
+    "The short-distance ratio is strict at 0,1, the after case needs both "
+    "of its two inequalities, and a geometry past 0,1 on every ratio is short",
 )
 def _chk_iso10847_short_distance() -> Outcome:
-    at_the_ratio, _ = ph.environment.is_short_distance(
+    at_the_ratio = ph.environment.check_short_distance(
         source_height_m=1.0,
         receiver_height_m=1.0,
         barrier_height_m=4.0,
         source_to_barrier_m=10.0,
         barrier_to_receiver_m=10.0,
-    )
-    _, one_half_fails = ph.environment.is_short_distance(
+    ).before
+    one_half_fails = ph.environment.check_short_distance(
         source_height_m=1.0,
         receiver_height_m=1.0,
         barrier_height_m=1.0,
         source_to_barrier_m=10.0,
         barrier_to_receiver_m=100.0,
+    ).after
+    # (2 + 2) / 20 = 0,2 before, (2 + 3) / 10 = 0,5 on each side after.
+    short = ph.environment.check_short_distance(
+        source_height_m=2.0,
+        receiver_height_m=2.0,
+        barrier_height_m=3.0,
+        source_to_barrier_m=10.0,
+        barrier_to_receiver_m=10.0,
     )
-    agrees = at_the_ratio is False and one_half_fails is False
+    agrees = (
+        at_the_ratio is False
+        and one_half_fails is False
+        and short.before is True
+        and short.after is True
+    )
     return count(
         int(agrees),
         1,
         subject="readings of 6.3.1",
-        expected_label="0,1 exactly is not short, and both halves must hold",
+        expected_label="0,1 exactly is not short, both halves must hold, "
+        "and 0,2 and 0,5 are short",
     )
 
 

@@ -907,9 +907,17 @@ class PeopleAssessment(RichDisplay):
         _people_verdict(self)
 
     @property
-    def complies(self) -> bool:
-        """Whether the requirement of the standard is met."""
+    def passes(self) -> bool:
+        """The verdict: the requirement of the standard is met."""
         return _people_verdict(self)[0]
+
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a PeopleAssessment has no truth value; read its '.passes'"
+        raise TypeError(msg)
 
     @property
     def criterion(self) -> str:
@@ -972,7 +980,7 @@ def _people_decision(
 ) -> tuple[bool, str, bool] | None:
     r"""Clause 6.2 on :math:`KB_\mathrm{Fmax}` alone, or ``None`` when :math:`KB_\mathrm{FTr}` decides.
 
-    :return: ``(complies, criterion, within uncertainty)``.
+    :return: ``(passes, criterion, within uncertainty)``.
     """
     year = guide.edition
     if _keeps_to(peak, guide.a_u):

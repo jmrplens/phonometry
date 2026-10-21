@@ -42,7 +42,7 @@ def test_example_1_meets_the_lower_value() -> None:
     """C.1: KB_Fmax = 0,25 against A_u = 0,3 of a commercial area, met."""
     guide = im.guide_values("commercial")
     verdict = im.assess_people_in_buildings(0.25, guide)
-    assert verdict.complies
+    assert verdict.passes
     assert verdict.criterion == "A_u"
     assert verdict.kb_ftr is None
 
@@ -54,13 +54,13 @@ def test_example_3_exceeds_a_u_within_the_measurement_uncertainty() -> None:
     """
     guide = im.guide_values("mixed", time_of_day="night")
     verdict = im.assess_people_in_buildings(0.17, guide)
-    assert verdict.complies
+    assert verdict.passes
     assert verdict.criterion == "A_u"
     assert verdict.within_uncertainty
     assert verdict.kb_ftr is None
     # A hair over the 15 % and the verdict comes down to KB_FTr again.
     strict = im.assess_people_in_buildings(0.18, guide, kb_ftr=0.18)
-    assert not strict.complies
+    assert not strict.passes
     assert strict.criterion == "A_r"
     assert not strict.within_uncertainty
 
@@ -70,17 +70,17 @@ def test_a_reading_is_compared_as_printed_half_up() -> None:
     0,155 is written 0,16, as a hand rounds, and is not.
     """
     guide = im.guide_values("commercial")
-    assert im.assess_people_in_buildings(0.47, guide, kb_ftr=0.154).complies
-    assert not im.assess_people_in_buildings(0.47, guide, kb_ftr=0.155).complies
+    assert im.assess_people_in_buildings(0.47, guide, kb_ftr=0.154).passes
+    assert not im.assess_people_in_buildings(0.47, guide, kb_ftr=0.155).passes
     # A guide value raised by 1,5 carries three decimals and is compared at three.
     urban = im.guide_values("residential", time_of_day="night", source="urban_railway")
     assert urban.a_r == 0.075
     assert im.assess_people_in_buildings(
         0.9, urban, kb_ftr=0.0754, source="urban_railway"
-    ).complies
+    ).passes
     assert not im.assess_people_in_buildings(
         0.9, urban, kb_ftr=0.0755, source="urban_railway"
-    ).complies
+    ).passes
 
 
 def test_quarry_blasting_takes_the_a_o_of_row_1_by_day_in_rows_3_and_4() -> None:
@@ -99,7 +99,7 @@ def test_quarry_blasting_takes_the_a_o_of_row_1_by_day_in_rows_3_and_4() -> None
     )
     assert night == im.guide_values("residential", time_of_day="night")
     verdict = im.assess_people_in_buildings(4.0, quarry, source="quarry_blasting")
-    assert verdict.complies
+    assert verdict.passes
     assert verdict.criterion == "A_o"
     assert im.BLASTING_EXCEPTION_KB_FMAX == 8.0
     assert im.RAILWAY_NIGHT_INVESTIGATION_KB == {"surface": 0.6, "underground": 0.3}
@@ -111,7 +111,7 @@ def test_example_6_meets_a_u_and_needs_no_a_r() -> None:
     """
     guide = im.guide_values("commercial")
     verdict = im.assess_people_in_buildings(0.23, guide)
-    assert verdict.complies
+    assert verdict.passes
     assert verdict.criterion == "A_u"
     kb_ftr = im.assessment_vibration_severity(
         [0.16, 0.16], [12.0 * HOUR, 4.0 * HOUR], in_rest_time=[False, True]
@@ -123,10 +123,10 @@ def test_example_6_meets_a_u_and_needs_no_a_r() -> None:
 def test_above_a_o_fails_unless_the_events_are_rare() -> None:
     """6.2 and 6.5.1: A_o ends the question either way."""
     guide = im.guide_values("residential")
-    assert not im.assess_people_in_buildings(3.5, guide).complies
+    assert not im.assess_people_in_buildings(3.5, guide).passes
     assert im.assess_people_in_buildings(3.5, guide).criterion == "A_o"
     rare = im.assess_people_in_buildings(2.0, guide, rare_short_events=True)
-    assert rare.complies
+    assert rare.passes
     assert rare.criterion == "A_o"
 
 
@@ -134,7 +134,7 @@ def test_example_7_a_blast_is_met_on_a_o_alone() -> None:
     """C.7: one event a day, KB_Fmax = 2 against A_o = 3 of a dwelling."""
     guide = im.guide_values("residential")
     verdict = im.assess_people_in_buildings(2.0, guide, rare_short_events=True)
-    assert verdict.complies
+    assert verdict.passes
     assert verdict.criterion == "A_o"
 
 
@@ -148,7 +148,7 @@ def test_a_railway_is_judged_on_a_u_and_a_r_only() -> None:
     """6.5.3.1 and 6.5.3.5: A_o is not a verdict for rail traffic."""
     guide = im.guide_values("residential", time_of_day="night", source="railway")
     verdict = im.assess_people_in_buildings(0.9, guide, kb_ftr=0.04, source="railway")
-    assert verdict.complies
+    assert verdict.passes
     assert verdict.criterion == "A_r"
     assert guide.a_o < 0.9
 
@@ -183,7 +183,7 @@ def test_example_4_two_hammers_formula_4a() -> None:
     assert kb_ftr > 0.15
     guide = im.guide_values("commercial")
     verdict = im.assess_people_in_buildings(0.47, guide, kb_ftr=kb_ftr)
-    assert verdict.complies
+    assert verdict.passes
     assert verdict.criterion == "A_r"
 
 
@@ -264,7 +264,7 @@ def test_example_8_formula_a3_and_its_interval() -> None:
     assert result.kb_ftr - result.lower == pytest.approx(0.073, abs=0.0015)
     assert not im.assess_people_in_buildings(
         0.92, im.guide_values("residential"), kb_ftr=result.kb_ftr, source="railway"
-    ).complies
+    ).passes
 
 
 def test_example_8_formula_3_over_the_whole_record_agrees() -> None:
@@ -341,7 +341,7 @@ def test_figure_3_interpolates_two_to_six_days() -> None:
     assert steps == [0.73, 0.67, 0.6, 0.53, 0.47]
     assert im.construction_guide_values(4, stage="I").a_r == 0.35
     sixth = im.construction_guide_values(6, stage="I")
-    assert im.assess_people_in_buildings(0.47, sixth).complies
+    assert im.assess_people_in_buildings(0.47, sixth).passes
 
 
 def test_a_commercial_site_has_a_o_of_six_and_the_table_ends_at_78_days() -> None:
@@ -399,18 +399,18 @@ def test_draft_example_3_goes_on_to_a_r_and_fails() -> None:
     """
     guide = im.guide_values("mixed", time_of_day="night", edition="2023")
     verdict = im.assess_people_in_buildings(0.114, guide, kb_ftr=0.075, edition="2023")
-    assert not verdict.complies
+    assert not verdict.passes
     assert verdict.criterion == "A_r"
     assert not verdict.within_uncertainty
     with pytest.raises(ValueError, match="supply kb_ftr"):
         im.assess_people_in_buildings(0.114, guide, edition="2023")
     # The edition is the one the guide values were read from; the 1999
     # edition reads the same numbers as met, and mixing the two is refused.
-    assert not im.assess_people_in_buildings(0.114, guide, kb_ftr=0.075).complies
+    assert not im.assess_people_in_buildings(0.114, guide, kb_ftr=0.075).passes
     with pytest.raises(ValueError, match="2023 edition"):
         im.assess_people_in_buildings(0.114, guide, edition="1999")
     old = im.guide_values("mixed", time_of_day="night")
-    assert im.assess_people_in_buildings(0.114, old).complies
+    assert im.assess_people_in_buildings(0.114, old).passes
     with pytest.raises(ValueError, match="1999 edition"):
         im.assess_people_in_buildings(0.114, old, edition="2023")
 
@@ -420,7 +420,7 @@ def test_the_draft_holds_a_railway_to_a_o_and_drops_the_urban_factor() -> None:
     verdict = im.assess_people_in_buildings(
         0.85, guide, kb_ftr=0.04, source="railway", edition="2023"
     )
-    assert not verdict.complies
+    assert not verdict.passes
     assert verdict.criterion == "A_o"
     with pytest.raises(ValueError, match="source"):
         im.guide_values("residential", source="urban_railway", edition="2023")
@@ -455,7 +455,7 @@ def test_the_draft_bounds_an_induced_seismic_event_by_the_daytime_a_o() -> None:
     verdict = im.assess_people_in_buildings(
         im.induced_seismic_kb_fmax(5.0), night, source="induced_seismic", edition="2023"
     )
-    assert verdict.complies
+    assert verdict.passes
     assert verdict.criterion == "A_o"
     assert verdict.kb_ftr is None
     with pytest.raises(ValueError, match="peak_velocity_mm_s"):
@@ -495,18 +495,18 @@ def test_the_draft_does_not_judge_a_road_on_a_o_by_night() -> None:
         "residential", time_of_day="night", source="road", edition="2023"
     )
     verdict = im.assess_people_in_buildings(0.25, night, kb_ftr=0.03, source="road")
-    assert verdict.complies
+    assert verdict.passes
     assert verdict.criterion == "A_r"
     existing = im.guide_values(
         "residential", time_of_day="night", source="road_existing", edition="2023"
     )
     assert im.assess_people_in_buildings(
         0.25, existing, kb_ftr=0.03, source="road_existing"
-    ).complies
+    ).passes
     assert im.ROAD_NIGHT_INVESTIGATION_KB == 0.6
     day = im.guide_values("residential", source="road", edition="2023")
-    assert not im.assess_people_in_buildings(3.5, day, source="road").complies
+    assert not im.assess_people_in_buildings(3.5, day, source="road").passes
     old = im.guide_values("residential", time_of_day="night", source="road")
     assert not im.assess_people_in_buildings(
         0.25, old, kb_ftr=0.03, source="road"
-    ).complies
+    ).passes

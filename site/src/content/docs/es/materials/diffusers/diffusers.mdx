@@ -384,8 +384,21 @@ print(materials.BASE_PLATE_BANDS_HZ[0], materials.BASE_PLATE_MAX_SCATTERING[100]
 
 # Una placa base cuya dispersión medida se mantiene bajo el techo pasa en silencio;
 # una banda que lo supera lanza un ScatteringDiffusionWarning que lista las infractoras.
-materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS_HZ))
+check = materials.check_base_plate_scattering([0.02] * len(materials.BASE_PLATE_BANDS_HZ))
+print(check.passes, check.exceeded_frequencies.size)   # True 0
 ```
+
+La comprobación enfrenta los dieciocho coeficientes medidos con los dieciocho
+límites, banda a banda: `margins` es lo que le queda a cada banda, `exceeds`
+marca las bandas que superan su límite y `exceeded_frequencies` las nombra, y
+`.plot()` dibuja los coeficientes frente al límite escalonado con las bandas que
+lo superan rodeadas. Una banda que está justo en su límite está dentro, porque
+la tabla 1 es un techo que «no se debe superar». Las bandas son las frecuencias
+a escala real $f/N$ con las que se indexa la tabla 1, y también lo es el eje de
+la figura: en un modelo a escala 1:N cada banda se mide a N veces la frecuencia
+que se muestra.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/base_plate_scattering.svg" alt="El coeficiente de dispersión de la placa base sola en las 18 bandas de tercio de octava de la tabla 1, a la frecuencia a escala real f/N, de 100 Hz a 5 kHz, que sube de 0,01 a 0,2, frente al límite escalonado de la tabla, que se mantiene en 0,05 hasta 500 Hz y sube a 0,10, 0,15, 0,20 y 0,25; el punto de 1 kHz, 0,105 frente a 0,10, aparece rodeado por estar por encima del límite" width="88%" />
 
 **Incertidumbre (Anexo A).** Las seis mediciones de posición de cada situación
 dan una incertidumbre típica de su tiempo de reverberación medio (ecs. (A.1) y

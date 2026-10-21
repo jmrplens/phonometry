@@ -638,10 +638,13 @@ print(round(uv.lower, 1), round(uv.upper, 1))      # 50.2 53.8  ->  52 ± 1.8 dB
 uc = building.uncertain_value(52.0, "rprime_w", "B", one_sided=True)
 print(round(uc.expanded_uncertainty, 2))                # 1.48  = 1.65 x 0.9
 print(round(52.0 - uc.expanded_uncertainty, 2))         # 50.52 = la cota inferior
-print(building.satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))   # True
+conformity = building.assess_requirement_conformity(
+    52.0, uc.expanded_uncertainty, 50.0, bound="minimum"
+)
+print(conformity.passes)   # True
 ```
 
-Eso es todo lo que hay dentro de `satisfies_lower_requirement`: los 52,0
+Eso es todo lo que hay dentro de `assess_requirement_conformity`: los 52,0
 medidos menos la incertidumbre expandida unilateral de 1,48 son 50,52, que
 siguen superando los 50,0, así que la conformidad se puede *declarar* y no solo
 observar. La elección del factor es lo importante. Declarar un valor es una

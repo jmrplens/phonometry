@@ -115,8 +115,8 @@ not do is go out unlabelled.
 ```python
 from phonometry import emission
 
-k1, upper_bound = emission.background_noise_correction_at_workstation(79.0, 70.0)
-print(round(k1, 1), upper_bound)
+background = emission.background_noise_correction_at_workstation(79.0, 70.0)
+print(round(background.correction, 1), background.upper_bound)
 # 0.6 False
 ```
 

@@ -3134,7 +3134,7 @@ def generate_rd1367_vs_iso_tonal(output_dir: str) -> None:
         (axes[1], shallow, r"$L_{\mathrm{t}}$ = 7.5 dB: the verdicts split"),
     ):
         rd = environment.tonal_correction(spectrum, freqs)
-        flags = np.asarray(environment.tonal_seeking_survey(spectrum, freqs))
+        flags = np.asarray(environment.assess_tonal_survey(spectrum, freqs).prominent)
         colors = [
             COLOR_SECONDARY if i == 4 else COLOR_PRIMARY for i in range(spectrum.size)
         ]

@@ -347,10 +347,11 @@ prints one inequality for the "before" campaign and two for the "after" one, all
 against the same ratio of 0,1, and the two campaigns can disagree:
 
 ```python
-print(environment.is_short_distance(
+geometry = environment.check_short_distance(
     source_height_m=1.0, receiver_height_m=1.5, barrier_height_m=4.0,
     source_to_barrier_m=10.0, barrier_to_receiver_m=20.0,
-))   # (False, True)
+)
+print(geometry.before, geometry.after)   # False True
 ```
 
 Above 5 m/s in absolute value no measurement is made at all, which is a refusal
@@ -404,9 +405,9 @@ ISO 11820 offers a second route around extraneous sound, for the case where the
 sources it works on can be switched off and measured on their own: the energy
 subtraction of Equations (17) and (18), capped at 3 dB. Past the cap the quantity
 is not determined, and what may be stated instead is the inequality of clause 4.
-`extraneous_corrected_mean_level` returns the corrected level and whether the
-cap was reached, so that a capped number cannot be written down as a
-determination. The cap is judged on the margin, where Table 1 draws it. At a
+`extraneous_corrected_mean_level` returns the corrected level, the margin it was
+read at and whether the cap was reached (`capped`), so that a capped number
+cannot be written down as a determination. The cap is judged on the margin, where Table 1 draws it. At a
 margin of exactly 3 dB the subtraction takes off 3,02 dB, which is the printed
 3 dB unrounded and the correction Table 1 applies at that row, so the level is
 still determined; under 3 dB it is not.

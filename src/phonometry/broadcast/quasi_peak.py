@@ -821,6 +821,14 @@ class QuasiPeakDynamicsResult(OwnsArrays):
         """Whether every reading fell inside its window."""
         return all(float(row["margin_db"]) >= 0.0 for row in self.stimuli)
 
+    def __bool__(self) -> bool:
+        """Refuse to stand in for the verdict it carries.
+
+        :raises TypeError: Always; the verdict is :attr:`passes`.
+        """
+        msg = "a QuasiPeakDynamicsResult has no truth value; read its '.passes'"
+        raise TypeError(msg)
+
     @property
     def worst_margin_db(self) -> float:
         """The smallest of the margins, negative when one reading is outside its window."""

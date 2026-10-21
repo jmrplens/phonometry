@@ -10,6 +10,7 @@ an edge is an explicit, reviewed decision.
 from __future__ import annotations
 
 import ast
+import dataclasses
 import re
 import subprocess
 import sys
@@ -1652,6 +1653,31 @@ def _logging_imports(tree: ast.AST) -> dict[str, str]:
     return names
 
 
+def _package_imports(tree: ast.AST) -> dict[str, str]:
+    """Each name *tree* binds by importing from the package, with its name there.
+
+    A relative import is one from the package. ``import phonometry.x`` binds
+    ``phonometry``, and ``import phonometry.x as y`` binds ``y`` to ``x``.
+    """
+    names: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and (
+            node.level > 0 or (node.module or "").split(".")[0] == "phonometry"
+        ):
+            names.update(
+                (alias.asname or alias.name, alias.name) for alias in node.names
+            )
+        elif isinstance(node, ast.Import):
+            names.update(
+                (alias.asname, alias.name.rpartition(".")[2])
+                if alias.asname
+                else ("phonometry", "phonometry")
+                for alias in node.names
+                if alias.name.split(".")[0] == "phonometry"
+            )
+    return names
+
+
 def _dotted(expression: ast.expr, names: dict[str, str]) -> str | None:
     """The dotted name *expression* spells, its first name read through *names*.
 
@@ -1663,6 +1689,13 @@ def _dotted(expression: ast.expr, names: dict[str, str]) -> str | None:
         owner = _dotted(expression.value, names)
         return None if owner is None else f"{owner}.{expression.attr}"
     return None
+
+
+def _first_name(expression: ast.expr) -> str | None:
+    """The name a chain of attributes *expression* starts from, or ``None``."""
+    while isinstance(expression, ast.Attribute):
+        expression = expression.value
+    return expression.id if isinstance(expression, ast.Name) else None
 
 
 def _takes_a_logger(node: ast.AST | None, names: dict[str, str]) -> TypeGuard[ast.Call]:
@@ -1685,75 +1718,230 @@ def _names_a_library_logger(call: ast.Call) -> bool:
     )
 
 
-def _logging_misuse_at(
-    node: ast.AST, names: dict[str, str], loggers: set[str]
-) -> str | None:
-    """What *node* does that the logging rule refuses, or ``None``."""
+@dataclasses.dataclass
+class _Loggers:
+    """What one module holds as a logger.
 
-    def is_a_logger(expression: ast.expr) -> bool:
-        return ast.unparse(expression) in loggers or _takes_a_logger(expression, names)
+    ``names`` are its imports of ``logging``, ``imported`` the names it
+    imports from the package (each with its name there), ``shared`` the names
+    the package's modules bind to a logger, and ``held`` the expressions that
+    hold a logger in this module.
+    """
 
-    if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
-        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-        return next(
-            (
-                f"sets {ast.unparse(target)}"
-                for target in targets
-                if isinstance(target, ast.Attribute) and is_a_logger(target.value)
-            ),
-            None,
+    names: dict[str, str]
+    imported: dict[str, str]
+    shared: frozenset[str]
+    held: set[str] = dataclasses.field(default_factory=set)
+
+    def holds(self, expression: ast.expr) -> bool:
+        """Whether *expression* is a logger.
+
+        It is when this module holds it, when it takes one from
+        ``getLogger``, when it is the ``getChild`` of one, or when it is a
+        logger another module binds, read through the module it was imported
+        with (``client._LOG``).
+        """
+        if ast.unparse(expression) in self.held or _takes_a_logger(
+            expression, self.names
+        ):
+            return True
+        if isinstance(expression, ast.Call):
+            return (
+                isinstance(expression.func, ast.Attribute)
+                and expression.func.attr == "getChild"
+                and self.holds(expression.func.value)
+            )
+        return (
+            isinstance(expression, ast.Attribute)
+            and expression.attr in self.shared
+            and _first_name(expression.value) in self.imported
         )
+
+    def reaches_into(self, expression: ast.expr) -> bool:
+        """Whether *expression* is a part of a logger or of ``logging``.
+
+        A part is reached through an attribute or an index: ``_LOG.handlers``,
+        ``_LOG.handlers[:]``, ``logging.raiseExceptions``.
+        """
+        while isinstance(expression, (ast.Attribute, ast.Subscript)):
+            expression = expression.value
+            if self.holds(expression) or _dotted(expression, self.names) == "logging":
+                return True
+        return False
+
+
+def _read_loggers(tree: ast.AST, shared: frozenset[str]) -> _Loggers:
+    """Every logger *tree* holds, followed through its assignments.
+
+    A name imported from the package is a logger when the package binds it to
+    one. An assignment whose value is a logger binds its targets to one, until
+    no assignment adds one more (an alias of an alias, a child of a child). A
+    logger bound in a class body is held as ``self.<name>``, ``cls.<name>``
+    and ``<Class>.<name>`` too.
+    """
+    imported = _package_imports(tree)
+    loggers = _Loggers(_logging_imports(tree), imported, shared)
+    loggers.held.update(name for name, there in imported.items() if there in shared)
+    classes = {
+        id(statement): node.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ClassDef)
+        for statement in node.body
+    }
+    assignments = [
+        (node.targets if isinstance(node, ast.Assign) else [node.target], node)
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.Assign, ast.AnnAssign))
+    ]
+    grown = True
+    while grown:
+        bound = {
+            f"{owner}{ast.unparse(target)}"
+            for targets, node in assignments
+            if node.value is not None and loggers.holds(node.value)
+            for target in targets
+            for owner in (
+                ("", "self.", "cls.", f"{classes[id(node)]}.")
+                if id(node) in classes
+                else ("",)
+            )
+        }
+        grown = not bound <= loggers.held
+        loggers.held |= bound
+    return loggers
+
+
+def _logging_set_by(statement: ast.stmt, loggers: _Loggers) -> str | None:
+    """The part of a logger or of ``logging`` *statement* sets or deletes.
+
+    ``None`` when it changes neither.
+    """
+    if isinstance(statement, ast.Delete):
+        verb, targets = "deletes", statement.targets
+    elif isinstance(statement, ast.Assign):
+        verb, targets = "sets", statement.targets
+    elif isinstance(statement, (ast.AnnAssign, ast.AugAssign)):
+        verb, targets = "sets", [statement.target]
+    else:
+        return None
+    return next(
+        (
+            f"{verb} {ast.unparse(target)}"
+            for target in targets
+            if loggers.reaches_into(target)
+        ),
+        None,
+    )
+
+
+def _logging_misuse_at(node: ast.AST, loggers: _Loggers) -> str | None:
+    """What *node* does that the logging rule refuses, or ``None``."""
+    if isinstance(node, ast.stmt):
+        return _logging_set_by(node, loggers)
     if not isinstance(node, ast.Call):
         return None
-    function = _dotted(node.func, names)
+    function = _dotted(node.func, loggers.names)
     if function is not None and function.startswith("logging."):
         return None if function == "logging.getLogger" else f"calls {function}"
     if not isinstance(node.func, ast.Attribute):
         return None
-    owner, attribute = ast.unparse(node.func.value), node.func.attr
-    if is_a_logger(node.func.value) and attribute in _LOUD | _CONFIGURING:
-        return f"calls {owner}.{attribute}"
+    owner, attribute = node.func.value, node.func.attr
+    if loggers.holds(owner):
+        loud = attribute in _LOUD | _CONFIGURING
+        return f"calls {ast.unparse(node.func)}" if loud else None
+    if loggers.reaches_into(owner):
+        return f"calls {ast.unparse(node.func)}"
     if attribute in _CONFIGURING:
         return f"configures logging with {attribute}"
     return None
 
 
-def logging_misuse(source: str, where: str) -> list[str]:
+def logging_misuse(
+    source: str, where: str, *, shared_loggers: frozenset[str] = frozenset()
+) -> list[str]:
     """Each place in *source* that logs louder than INFO, configures logging, or uses a logger not the library's.
 
     The source is read through its imports: an alias of ``logging``, or a name
-    imported from it, is the call it stands for. A logger is whatever a
-    ``logging.getLogger`` result is bound to (a name or an attribute,
-    annotated or not), or that call itself; setting an attribute of one
-    configures it. The places come in the order of the source.
+    imported from it, is the call it stands for, and a name imported from the
+    package that the package binds to a logger (*shared_loggers*, from
+    :func:`shared_loggers`) is a logger here too. A logger is followed through
+    every assignment (see :func:`_read_loggers`); calling into one, or setting
+    or deleting a part of one or of ``logging``, configures logging. The places
+    come in the order of the source.
     """
     tree = ast.parse(source)
-    names = _logging_imports(tree)
-    loggers: set[str] = set()
-    found: list[tuple[int, str]] = []
-    for node in ast.walk(tree):
-        if _takes_a_logger(node, names) and not _names_a_library_logger(node):
-            found.append((node.lineno, "takes a logger that is not phonometry's"))
-        if isinstance(node, (ast.Assign, ast.AnnAssign)) and _takes_a_logger(
-            node.value, names
-        ):
-            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-            loggers.update(ast.unparse(target) for target in targets)
+    loggers = _read_loggers(tree, shared_loggers)
+    found = [
+        (node.lineno, "takes a logger that is not phonometry's")
+        for node in ast.walk(tree)
+        if _takes_a_logger(node, loggers.names) and not _names_a_library_logger(node)
+    ]
     found.extend(
         (node.lineno, offence)
         for node in ast.walk(tree)
         if isinstance(node, (ast.stmt, ast.expr))
-        and (offence := _logging_misuse_at(node, names, loggers))
+        and (offence := _logging_misuse_at(node, loggers))
     )
     return [f"{where}:{line} {what}" for line, what in sorted(found)]
 
 
+def _may_hold_a_logger(source: str, shared: frozenset[str]) -> bool:
+    """Whether *source* names ``logging`` or a logger the package binds.
+
+    A module that names neither can neither take a logger nor import one.
+    """
+    return "logging" in source or any(name in source for name in shared)
+
+
+def shared_loggers(sources: list[str]) -> frozenset[str]:
+    """The names the modules in *sources* bind to a logger at their top level.
+
+    A module that imports a logger from another binds it too, under its own
+    name, so the names are read again until no module adds one.
+    """
+    shared: frozenset[str] = frozenset()
+    while True:
+        bound: set[str] = set()
+        for source in sources:
+            if not _may_hold_a_logger(source, shared):
+                continue
+            tree = ast.parse(source)
+            held = _read_loggers(tree, shared).held
+            bound.update(
+                name
+                for statement in tree.body
+                if isinstance(statement, (ast.Assign, ast.AnnAssign, ast.ImportFrom))
+                for name in _top_level_names(statement)
+                if name in held
+            )
+        if bound <= shared:
+            return shared
+        shared |= bound
+
+
+def _top_level_names(
+    statement: ast.Assign | ast.AnnAssign | ast.ImportFrom,
+) -> list[str]:
+    """The names a top-level assignment or import *statement* binds."""
+    if isinstance(statement, ast.ImportFrom):
+        return [alias.asname or alias.name for alias in statement.names]
+    targets = (
+        statement.targets if isinstance(statement, ast.Assign) else [statement.target]
+    )
+    return [target.id for target in targets if isinstance(target, ast.Name)]
+
+
 def test_the_library_logs_quietly_to_loggers_of_its_own() -> None:
+    sources = {
+        path.relative_to(SRC).as_posix(): path.read_text(encoding="utf-8")
+        for path in sorted(SRC.rglob("*.py"))
+    }
+    shared = shared_loggers(list(sources.values()))
     found = [
         offence
-        for path in sorted(SRC.rglob("*.py"))
-        if "logging" in (text := path.read_text(encoding="utf-8"))
-        for offence in logging_misuse(text, path.relative_to(SRC).as_posix())
+        for where, text in sources.items()
+        if _may_hold_a_logger(text, shared)
+        for offence in logging_misuse(text, where, shared_loggers=shared)
     ]
     assert not found, "logging the library must not do:\n  " + "\n  ".join(found)
 
@@ -1778,37 +1966,113 @@ def test_the_logging_rule_reads_a_loud_logger() -> None:
 
 
 def test_the_logging_rule_reads_every_spelling_of_a_logger() -> None:
-    """A logger is read however the module spells it.
+    """A logger is read however the module spells it, and nothing else is.
 
-    An alias of ``logging``, a name imported from it, a logger held by an
-    annotated name or by an attribute, a logger used where it is taken and a
-    call written over several lines are each read as the call they stand for.
+    An alias of ``logging``, a name imported from it, a logger imported from
+    another module (by name or through its module), a logger held by an
+    annotated name, an attribute or a class, an alias, a child, a logger used
+    where it is taken and a call written over several lines are each read as
+    the call they stand for. A call named like a loud one on anything else
+    (``np.log``, ``warnings.warn``, the ``error`` of a list of issues) is its
+    own business.
     """
     source = (
         "import logging as log\n"
-        "import logging.config\n"
+        "import warnings\n"
+        "import numpy as np\n"
         "from logging import getLogger, warning as warn_root\n"
-        "_LOG: log.Logger = getLogger(name='phonometry.io')\n"
+        "from . import client\n"
+        "from .client import _LOG\n"
+        "_OWN: log.Logger = getLogger(name='phonometry.io')\n"
         "_ROOT = log.getLogger()\n"
         "class Run:\n"
-        "    def __init__(self):\n"
-        "        self._log = log.getLogger('phonometry.simulation')\n"
-        "        self._log.error(\n"
+        "    _log = _OWN.getChild('run')\n"
+        "    def __init__(self, issues):\n"
+        "        self.issues = issues\n"
+        "        self.held = log.getLogger('phonometry.simulation')\n"
+        "        self.held.error(\n"
         "            'slow'\n"
         "        )\n"
-        "        _LOG.propagate = False\n"
         "        getLogger('phonometry.io').critical('lost')\n"
         "        warn_root('lost')\n"
-        "        logging.config.dictConfig({})\n"
-        "        _LOG.debug('fine')\n"
-        "        self._log.info('fine')\n"
+        "        _LOG.warning('slow')\n"
+        "        client._LOG.error('lost')\n"
+        "        self._log.exception('lost')\n"
+        "        alias = _OWN\n"
+        "        alias.fatal('lost')\n"
+        "        _OWN.debug('fine')\n"
+        "        self.held.info('fine')\n"
         "        getLogger('phonometry.io').info('fine')\n"
+        "        np.log(2.0)\n"
+        "        warnings.warn('x', RuntimeWarning, stacklevel=1)\n"
+        "        self.issues.error('row 3', 'fine')\n"
+        "    @classmethod\n"
+        "    def make(cls):\n"
+        "        cls._log.warning('slow')\n"
+    )
+    assert logging_misuse(source, "x.py", shared_loggers=frozenset({"_LOG"})) == [
+        "x.py:8 takes a logger that is not phonometry's",
+        "x.py:14 calls self.held.error",
+        "x.py:17 calls getLogger('phonometry.io').critical",
+        "x.py:18 calls logging.warning",
+        "x.py:19 calls _LOG.warning",
+        "x.py:20 calls client._LOG.error",
+        "x.py:21 calls self._log.exception",
+        "x.py:23 calls alias.fatal",
+        "x.py:32 calls cls._log.warning",
+    ]
+
+
+def test_the_logging_rule_reads_every_way_of_configuring() -> None:
+    source = (
+        "import logging\n"
+        "import logging.config\n"
+        "_LOG = logging.getLogger('phonometry.simulation')\n"
+        "def configure(handler):\n"
+        "    _LOG.propagate = False\n"
+        "    _LOG.handlers.clear()\n"
+        "    _LOG.handlers[:] = []\n"
+        "    del _LOG.filters[:]\n"
+        "    _LOG.removeHandler(handler)\n"
+        "    _LOG.level += 10\n"
+        "    logging.raiseExceptions = False\n"
+        "    logging.lastResort = None\n"
+        "    logging.root.handlers = []\n"
+        "    logging.config.dictConfig({})\n"
+        "    handler.setLevel(logging.DEBUG)\n"
     )
     assert logging_misuse(source, "x.py") == [
-        "x.py:5 takes a logger that is not phonometry's",
-        "x.py:9 calls self._log.error",
-        "x.py:12 sets _LOG.propagate",
-        "x.py:13 calls getLogger('phonometry.io').critical",
-        "x.py:14 calls logging.warning",
-        "x.py:15 calls logging.config.dictConfig",
+        "x.py:5 sets _LOG.propagate",
+        "x.py:6 calls _LOG.handlers.clear",
+        "x.py:7 sets _LOG.handlers[:]",
+        "x.py:8 deletes _LOG.filters[:]",
+        "x.py:9 calls _LOG.removeHandler",
+        "x.py:10 sets _LOG.level",
+        "x.py:11 sets logging.raiseExceptions",
+        "x.py:12 sets logging.lastResort",
+        "x.py:13 sets logging.root.handlers",
+        "x.py:14 calls logging.config.dictConfig",
+        "x.py:15 configures logging with setLevel",
     ]
+
+
+def test_the_logging_rule_follows_a_logger_from_module_to_module() -> None:
+    """A logger imported, renamed and imported again is still the library's.
+
+    A name no module binds to a logger stays its own business.
+    """
+    sources = [
+        "import logging\n_LOG = logging.getLogger('phonometry.simulation')\n",
+        (
+            "from .client import _LOG as remote_log\n"
+            "node_log = remote_log.getChild('node')\n"
+        ),
+        "from .node import node_log\ndef f():\n    node_log.error('lost')\n",
+        "from .reader import log\nlog.error('a reader of its own')\n",
+    ]
+    shared = shared_loggers(sources)
+    assert shared == {"_LOG", "remote_log", "node_log"}
+    assert logging_misuse(sources[2], "x.py", shared_loggers=shared) == [
+        "x.py:3 calls node_log.error"
+    ]
+    assert logging_misuse(sources[3], "y.py", shared_loggers=shared) == []

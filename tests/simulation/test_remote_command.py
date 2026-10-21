@@ -11,6 +11,7 @@ import shlex
 import subprocess
 import sys
 from pathlib import Path
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 import pytest
@@ -20,6 +21,8 @@ from phonometry.simulation._remote import bootstrap, command, node
 from phonometry.simulation._remote.hosts import HostEntry
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from phonometry.simulation.compute import Device, Dtype
 
 _DOCKER = HostEntry(
@@ -61,17 +64,54 @@ def _stand_in(path: Path) -> Path:
     return path
 
 
-def _through_a_shell(remote: str, home: Path, path: str) -> list[str]:
+def _through_a_shell(
+    remote: str,
+    home: Path,
+    path: str,
+    environment: Mapping[str, str] = MappingProxyType({}),
+) -> list[str]:
     """The words the node's program is given when a POSIX shell runs *remote*, as sshd does."""
     done = subprocess.run(
         ["sh", "-c", remote],
         capture_output=True,
         check=True,
         cwd=home,
-        env={"HOME": str(home), "PATH": path},
+        env={"HOME": str(home), "PATH": path, **environment},
         timeout=60,
     )
     return done.stdout.decode().split("\0")[:-1]
+
+
+def test_ssh_takes_these_options_and_no_others() -> None:
+    # Every one of them overrides what ~/.ssh/config says for the host; one
+    # more that weakens them cannot slip in beside the checks of each.
+    assert command.SSH_OPTIONS == (
+        "-T",
+        "-a",
+        "-x",
+        "-o",
+        "RequestTTY=no",
+        "-o",
+        "RemoteCommand=none",
+        "-o",
+        "SessionType=default",
+        "-o",
+        "StdinNull=no",
+        "-o",
+        "ForkAfterAuthentication=no",
+        "-o",
+        "ClearAllForwardings=yes",
+        "-o",
+        "PermitLocalCommand=no",
+        "-o",
+        "BatchMode=yes",
+        "-o",
+        "ServerAliveInterval=15",
+        "-o",
+        "ServerAliveCountMax=4",
+        "-o",
+        "ConnectTimeout=30",
+    )
 
 
 def test_ssh_never_prompts_and_ends_its_options_before_the_destination(
@@ -129,6 +169,42 @@ def test_a_docker_node_runs_the_image_s_bootstrap_cut_off_from_the_network() -> 
     assert docker[docker.index("-v") + 1] == "$cache:/cache"
     assert docker[-4:] == ["phonometry-node:gpu", "python", "-I", bootstrap.IMAGE_PATH]
     assert 'mkdir -p "$cache"' in script
+
+
+def test_a_docker_node_s_bootstrap_reads_its_cache_from_the_volume() -> None:
+    _, _, script = shlex.split(command.remote_command(_DOCKER, Compute(host="nas")))
+    words = shlex.split(script)
+    pairs = set(zip(words, words[1:], strict=False))
+    assert ("-e", f"{bootstrap.CACHE_VAR}=/cache") in pairs
+    assert ("-v", "$cache:/cache") in pairs
+
+
+@_posix_only
+@pytest.mark.parametrize("xdg", [None, "", "relative/cache", "absolute"])
+def test_a_docker_node_s_cache_is_where_its_bootstrap_would_look(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, xdg: str | None
+) -> None:
+    # XDG ignores a relative XDG_CACHE_HOME, and so do the bootstrap and the
+    # shell that mounts the cache: a node's cache is read one way.
+    bin_dir = tmp_path / "bin"
+    _stand_in(bin_dir / "docker")
+    value = str(tmp_path / "xdg") if xdg == "absolute" else xdg
+    environment = {} if value is None else {"XDG_CACHE_HOME": value}
+    words = _through_a_shell(
+        command.remote_command(_DOCKER, Compute(host="nas")),
+        tmp_path,
+        f"{bin_dir}{os.pathsep}{os.environ['PATH']}",
+        environment,
+    )
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.delenv(bootstrap.CACHE_VAR, raising=False)
+    monkeypatch.delenv("XDG_CACHE_HOME", raising=False)
+    for name, setting in environment.items():
+        monkeypatch.setenv(name, setting)
+    expected = bootstrap.cache_dir()
+    assert words[words.index("-v") + 1] == f"{expected}:/cache"
+    assert expected.is_dir()
+    assert not (tmp_path / "relative").exists()
 
 
 def test_a_numpy_run_on_a_docker_node_asks_for_no_gpu() -> None:

@@ -21,21 +21,37 @@ if TYPE_CHECKING:
     from .hosts import HostEntry
 
 #: The options every connection takes, whatever ``~/.ssh/config`` says for
-#: the host (options on the command line win over the file). No terminal: a
-#: pty turns every LF of a frame into CRLF and reads the package's bytes as
-#: keys (0x03 interrupts, 0x04 ends the input). No agent, X11 or port
-#: forwarding: the node runs code the client sends, and gets nothing of the
-#: client's. Never a prompt, which would hang a notebook; keep-alives that
-#: notice a dead link in about a minute; a connection given up after 30 s.
+#: the host: options on the command line win over the file.
 SSH_OPTIONS: tuple[str, ...] = (
+    # No terminal (-T and RequestTTY): a pty turns every LF of a frame into
+    # CRLF and reads the package's bytes as keys (0x03 interrupts, 0x04 ends
+    # the input).
     "-T",
+    # No agent and no X11 forwarding: the node runs code the client sends,
+    # and gets nothing of the client's.
     "-a",
     "-x",
     *(
         word
         for setting in (
             "RequestTTY=no",
+            # The session runs the command it is given, in the foreground, on
+            # the frames. A RemoteCommand of the file makes ssh refuse to run
+            # beside it; a SessionType of none (no session), a StdinNull (the
+            # node reads /dev/null, not the frames) or a
+            # ForkAfterAuthentication (ssh goes to the background) hangs a
+            # run until its timeout, and one of subsystem runs no command.
+            "RemoteCommand=none",
+            "SessionType=default",
+            "StdinNull=no",
+            "ForkAfterAuthentication=no",
+            # No port forwarding, and no LocalCommand, whose output on this
+            # machine would land among the frames.
             "ClearAllForwardings=yes",
+            "PermitLocalCommand=no",
+            # Never a prompt, which would hang a notebook; keep-alives that
+            # notice a dead link in about a minute; a connection given up
+            # after 30 s.
             "BatchMode=yes",
             "ServerAliveInterval=15",
             "ServerAliveCountMax=4",
@@ -112,9 +128,13 @@ def remote_command(entry: HostEntry, request: Compute) -> str:
     for setting in _DOCKER_ENVIRONMENT:
         docker += ["-e", setting]
     image = shlex.join([entry.target, "python", "-I", bootstrap.IMAGE_PATH])
-    # The user and the cache are the node's: the shell there expands them.
+    # The user and the cache are the node's: the shell there expands them. The
+    # cache is where the bootstrap looks for it: XDG's, which ignores a
+    # relative XDG_CACHE_HOME, else ~/.cache.
     script = (
-        'cache="${XDG_CACHE_HOME:-$HOME/.cache}/phonometry/remote" && '
+        'case "$XDG_CACHE_HOME" in /*) base="$XDG_CACHE_HOME" ;; '
+        '*) base="$HOME/.cache" ;; esac && '
+        'cache="$base/phonometry/remote" && '
         'mkdir -p "$cache" && '
         f'exec {shlex.join(docker)} --user "$(id -u):$(id -g)" -v "$cache:/cache" {image}'
     )

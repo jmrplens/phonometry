@@ -163,6 +163,15 @@ def _target(where: str, table: dict[str, object], runner: Runner) -> str:
     if runner == "python" and ("\n" in value or "\x00" in value):
         msg = f"{where}: 'python' must be one line, the interpreter's path"
         raise ValueError(msg)
+    if runner == "python" and value.startswith("~"):
+        # The remote command quotes the path, so the node's shell never
+        # expands the "~".
+        msg = (
+            f"{where}: 'python' starts with '~', which the node does not expand; "
+            "write the path absolute or relative to the home directory, where "
+            f"ssh runs the command, got {value!r}"
+        )
+        raise ValueError(msg)
     return value
 
 

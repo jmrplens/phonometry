@@ -137,6 +137,11 @@ def test_a_missing_file_is_a_missing_key_that_names_the_file(hosts_at: Path) -> 
             "'python' is missing",
         ),
         (_PYTHON.replace("/opt/conda", "/opt/con\\nda"), "'python' must be one line"),
+        # The command quotes the path, so the node's shell never expands "~".
+        (
+            _PYTHON.replace("/opt/conda envs", "~/conda envs"),
+            "'python' starts with '~'.*absolute or relative to the home directory",
+        ),
         (
             _DOCKER.replace("7200", "0"),
             "'timeout_s' must be a positive number of seconds",

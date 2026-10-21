@@ -162,7 +162,7 @@ $1/\sqrt{r}$ amplitude spreading.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an input is of the wrong type, among them a `cfl` or `dx` that is not one number, a `snapshot_every` or `snapshot_decimation` of the recording that is a flag, a text or an array where a count goes, or a `compute` that is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
+| TypeError | If an input is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is not an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording), or a `compute` that is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
 | ValueError | If the inputs are invalid. |
 | ComputeImportError | When the device's library is not installed or does not import. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
@@ -545,6 +545,13 @@ nothing (the default) runs the physics and keeps only the time axis.
 | `snapshot_every` | Record a full field snapshot every this many steps (and at $t = 0$); `None` records none. |
 | `snapshot_field` | Field recorded in the snapshots (`"p"`/`"vx"`/`"vy"`, interpolated to cell centres). |
 | `snapshot_decimation` | Keep every this many cells along each axis in a snapshot (default 1, every cell); the result records it. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for a probe that is not a pair or has an index that is not a number, or a `snapshot_every` or `snapshot_decimation` that is a flag, a text, an array or anything else that is not a number. |
+| ValueError | for `probe_fields` that are empty, repeat a field or name one that is not `"p"`, `"vx"` or `"vy"`, a `snapshot_field` that is none of them, a probe of more or fewer than two indices or with an index that is not a whole number, or a `snapshot_every` or `snapshot_decimation` that is not a whole number of 1 or more. |
 
 ## ExplosionSource
 

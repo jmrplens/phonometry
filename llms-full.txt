@@ -70780,10 +70780,12 @@ that record ``p``, ``vx`` or ``vy``, the same sponge and obstacle
 machinery, and a frozen `ElasticFDTDResult` with the same `.plot()`. What
 the run writes down travels as one `ElasticRecording` (the probe cells and
 their fields, the snapshot cadence and its field) and how the domain ends
-as one `ElasticBoundaries` (the sides and the sponge thickness). The
-Courant bound depends only on the fastest $c_\mathrm{P}$ in the map (Virieux
-Eqs. 6-7), while the resolution rule uses the slowest wave speed anywhere
-in the domain -- the slowest non-zero $c_\mathrm{S}$ of the solid cells or, if a
+as one `ElasticBoundaries` (the sides and the sponge thickness). Like the
+acoustic `FDTDRecording`, the recording refuses a malformed probe, field or
+count when it is built. The Courant bound depends only on the fastest
+$c_\mathrm{P}$ in the map (Virieux Eqs. 6-7), while the resolution rule
+uses the slowest wave speed anywhere in the domain -- the slowest
+non-zero $c_\mathrm{S}$ of the solid cells or, if a
 fluid region carries a still slower $c_\mathrm{P}$, that fluid speed:
 $\Delta x \le c_\text{min} / (10 f)$ (in a wholly solid map the S wavelength is always
 the shortest; in mixed domains the fluid P wavelength can be shorter, as
@@ -73863,6 +73865,7 @@ of the signal functions always used; called by position, nothing changes. The
 | the `steps` of `FDTD2D.run` and `ElasticFDTD2D.run`, and `max_arrivals=` on `underwater.eigenrays` | `n_steps` and `max_n_arrivals=` |
 | `record_every=` and `decimate=` on `FDTD2D.run` and `ElasticFDTD2D.run` | `snapshot_every=` and `snapshot_decimation=`, the names `FDTDRecording` and `ElasticRecording` take for the same two counts |
 | `fdtd_simulation(probes=..., snapshot_every=..., snapshot_decimation=...)` | `fdtd_simulation(recording=FDTDRecording(probes=..., snapshot_every=..., snapshot_decimation=...))`: what an acoustic run records travels as one record, as an elastic run's travels as one `ElasticRecording`; a run without one records only its time axis, as before |
+| an `ElasticRecording` with a malformed probe, an unknown or repeated field or a bad snapshot count, refused only when `elastic_fdtd_simulation` ran it; a `recording=` of another type, which failed inside the run | refused when the record is built, with the same class and the same words, and a probe off the grid still refused by the run; a `recording=` that is not the function's own record (`FDTDRecording` or `ElasticRecording`) raises `TypeError` naming it |
 | `sidebands=` on `gear_mesh_frequencies` and `induction_motor_frequencies`, the `poles`, `rotor_bars` and `slot_harmonics` of `induction_motor_frequencies`, and `lobe_orders=` on `blade_pass_frequencies` | `n_sidebands`, `n_poles`, `n_rotor_bars`, `n_slot_harmonics` and `n_lobe_orders` |
 | `years=` on `hearing.nipts` and `htlan` and on `vibration.injury_risk` and `multiple_shock_assessment`, and `.years` on the ISO 1999 results (`NiptsResult` and `HtlanResult` in 3.3.0) and on `MultipleShockResult` | `exposure_duration_years`: a duration names its quantity before its unit |
 | `environment.NoisePhase.hours` and `hours=` on `evaluation_period_level` | `duration_hours` |

@@ -518,7 +518,7 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an input is of the wrong type: a `duration`, `cfl` or `dx` that is not one number, an `absorbing_layer_cells` that is not a number, a `shape` that is not a pair, a complex medium, an `obstacle_mask` that is not boolean, or a `compute` that is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
+| TypeError | If an input is of the wrong type: a `duration`, `cfl` or `dx` that is not one number, a `recording` that is not an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording), an `absorbing_layer_cells` that is not a number, a `shape` that is not a pair, a complex medium, an `obstacle_mask` that is not boolean, or a `compute` that is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
 | ValueError | If the inputs are invalid. |
 | ComputeImportError | When the device's library is not installed or does not import. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |

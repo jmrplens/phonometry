@@ -114,7 +114,9 @@ pieza: mapas de velocidades `c_p` y `c_s` (más `rho`) en lugar de `c`,
 `ElasticFDTDResult` congelado con el mismo `.plot()`. Lo que la ejecución
 anota viaja en un `ElasticRecording` (las celdas de sonda y sus campos, la
 cadencia de instantáneas y su campo) y cómo terminan los bordes del dominio
-en un `ElasticBoundaries` (los lados y el grosor de la esponja).
+en un `ElasticBoundaries` (los lados y el grosor de la esponja). Como el
+`FDTDRecording` acústico, el registro rechaza una sonda, un campo o una
+cuenta mal dados al construirse.
 
 Dos números gobiernan cada ejecución, y leen extremos opuestos de los mapas
 de material. **Estabilidad**: el paso temporal sigue a la onda *más rápida*

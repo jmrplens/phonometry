@@ -108,7 +108,9 @@ that record ``p``, ``vx`` or ``vy``, the same sponge and obstacle
 machinery, and a frozen `ElasticFDTDResult` with the same `.plot()`. What
 the run writes down travels as one `ElasticRecording` (the probe cells and
 their fields, the snapshot cadence and its field) and how the domain ends
-as one `ElasticBoundaries` (the sides and the sponge thickness).
+as one `ElasticBoundaries` (the sides and the sponge thickness). Like the
+acoustic `FDTDRecording`, the recording refuses a malformed probe, field or
+count when it is built.
 
 Two numbers govern every run, and they read opposite ends of the material
 maps. **Stability**: the time step follows the *fastest* wave in the domain,

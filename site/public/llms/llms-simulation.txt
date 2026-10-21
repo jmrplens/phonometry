@@ -695,10 +695,12 @@ that record ``p``, ``vx`` or ``vy``, the same sponge and obstacle
 machinery, and a frozen `ElasticFDTDResult` with the same `.plot()`. What
 the run writes down travels as one `ElasticRecording` (the probe cells and
 their fields, the snapshot cadence and its field) and how the domain ends
-as one `ElasticBoundaries` (the sides and the sponge thickness). The
-Courant bound depends only on the fastest $c_\mathrm{P}$ in the map (Virieux
-Eqs. 6-7), while the resolution rule uses the slowest wave speed anywhere
-in the domain -- the slowest non-zero $c_\mathrm{S}$ of the solid cells or, if a
+as one `ElasticBoundaries` (the sides and the sponge thickness). Like the
+acoustic `FDTDRecording`, the recording refuses a malformed probe, field or
+count when it is built. The Courant bound depends only on the fastest
+$c_\mathrm{P}$ in the map (Virieux Eqs. 6-7), while the resolution rule
+uses the slowest wave speed anywhere in the domain -- the slowest
+non-zero $c_\mathrm{S}$ of the solid cells or, if a
 fluid region carries a still slower $c_\mathrm{P}$, that fluid speed:
 $\Delta x \le c_\text{min} / (10 f)$ (in a wholly solid map the S wavelength is always
 the shortest; in mixed domains the fluid P wavelength can be shorter, as

@@ -657,28 +657,6 @@ def test_source_validation() -> None:
         ({"sources": []}, "at least one source"),
         ({"duration": 1e-9}, "at least one time step"),
         (
-            {"recording": ElasticRecording(probe_fields=())},
-            "probe_fields must not be empty",
-        ),
-        ({"recording": ElasticRecording(probe_fields=("vz",))}, "unknown probe fields"),
-        ({"recording": ElasticRecording(probe_fields=("vy", "vy"))}, "must not repeat"),
-        (
-            {"recording": ElasticRecording(snapshot_field="txx")},
-            "snapshot_field must be one of",
-        ),
-        (
-            {"recording": ElasticRecording(snapshot_every=0)},
-            "'snapshot_every' must be a whole number, at least 1",
-        ),
-        (
-            {"recording": ElasticRecording(snapshot_every=-1)},
-            "'snapshot_every' must be a whole number, at least 1",
-        ),
-        (
-            {"recording": ElasticRecording(snapshot_every=2.5)},  # type: ignore[arg-type]
-            "'snapshot_every' must be a whole number",
-        ),
-        (
             {"recording": ElasticRecording(probes=[(99, 0)])},
             r"probe .* lies outside the grid",
         ),
@@ -722,6 +700,46 @@ def test_simulation_rejects_invalid_arguments(
         elastic_fdtd_simulation(
             6000.0, 3000.0, 0.05, duration, rho=2700.0, shape=(30, 30), **full
         )
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        ({"probe_fields": ()}, "probe_fields must not be empty"),
+        ({"probe_fields": ("vz",)}, "unknown probe fields"),
+        ({"probe_fields": ("vy", "vy")}, "must not repeat"),
+        ({"snapshot_field": "txx"}, "snapshot_field must be one of"),
+        ({"snapshot_every": 0}, "'snapshot_every' must be a whole number, at least 1"),
+        ({"snapshot_every": -1}, "'snapshot_every' must be a whole number, at least 1"),
+        ({"snapshot_every": 2.5}, "'snapshot_every' must be a whole number"),
+        ({"probes": [(2.5, 3)]}, "'probe ix' must be a whole number"),
+        ({"probes": [(2, 3.5)]}, "'probe iy' must be a whole number"),
+        ({"probes": [(1, 2, 3)]}, r"probes must hold \(ix, iy\) index pairs"),
+    ],
+)
+def test_a_recording_rejects_invalid_probes_fields_and_counts(
+    kwargs: dict[str, object],
+    match: str,
+) -> None:
+    """Refused when the record is built, before any run is asked for."""
+    with pytest.raises(ValueError, match=match):
+        ElasticRecording(**kwargs)
+
+
+def test_an_elastic_recording_holds_tuples_and_plain_counts() -> None:
+    """A list, a whole float or a NumPy integer reads back as tuples and ints."""
+    fields = ["p", "vy"]
+    recording = ElasticRecording(
+        probes=[(np.int64(3), 4.0)],  # type: ignore[list-item]
+        probe_fields=fields,
+        snapshot_every=np.int64(5),  # type: ignore[arg-type]
+        snapshot_decimation=2.0,  # type: ignore[arg-type]
+    )
+    fields.append("vx")
+    assert recording.probes == ((3, 4),)
+    assert recording.probe_fields == ("p", "vy")
+    assert type(recording.snapshot_every) is int
+    assert type(recording.snapshot_decimation) is int
 
 
 # --- Simulation driver: recording, determinism -----------------------------

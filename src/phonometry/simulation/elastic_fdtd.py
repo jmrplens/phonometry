@@ -107,6 +107,8 @@ from .fdtd import (
     _positive_finite,
     _positive_map,
     _probe_indices,
+    _probe_pairs,
+    _recording_or_empty,
     _require_courant,
     _require_grid_axes,
     _require_provenance,
@@ -1461,6 +1463,15 @@ class ElasticRecording(RichDisplay):
         (``"p"``/``"vx"``/``"vy"``, interpolated to cell centres).
     :param snapshot_decimation: Keep every this many cells along each axis
         in a snapshot (default 1, every cell); the result records it.
+    :raises TypeError: for a probe that is not a pair or has an index that is
+        not a number, or a ``snapshot_every`` or ``snapshot_decimation`` that
+        is a flag, a text, an array or anything else that is not a number.
+    :raises ValueError: for ``probe_fields`` that are empty, repeat a field or
+        name one that is not ``"p"``, ``"vx"`` or ``"vy"``, a
+        ``snapshot_field`` that is none of them, a probe of more or fewer than
+        two indices or with an index that is not a whole number, or a
+        ``snapshot_every`` or ``snapshot_decimation`` that is not a whole
+        number of 1 or more.
     """
 
     probes: Sequence[tuple[int, int]] = ()
@@ -1468,6 +1479,27 @@ class ElasticRecording(RichDisplay):
     snapshot_every: int | None = None
     snapshot_field: Field = "p"
     snapshot_decimation: int = 1
+
+    def __post_init__(self) -> None:
+        """Refuse a malformed probe, field or count when the record is built.
+
+        Whether a probe lies on the grid, and outside the obstacle, is checked
+        by :func:`elastic_fdtd_simulation`, the first place a grid exists.
+        """
+        fields = _resolve_probe_fields(self.probe_fields)
+        if self.snapshot_field not in _FIELD_NAMES:
+            msg = f"snapshot_field must be one of {_FIELD_NAMES}"
+            raise ValueError(msg)
+        every, decimation = _snapshot_options(
+            self.snapshot_every, self.snapshot_decimation
+        )
+        # Held as tuples and plain ints, so a list handed in cannot change the
+        # record after it is built, and a whole float or a NumPy integer reads
+        # back as the count a slice takes.
+        object.__setattr__(self, "probes", _probe_pairs(self.probes))
+        object.__setattr__(self, "probe_fields", fields)
+        object.__setattr__(self, "snapshot_every", every)
+        object.__setattr__(self, "snapshot_decimation", decimation)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1664,20 +1696,6 @@ def _record_elastic_run(
         signals[...] = b.to_host(buffer)
 
 
-def _validated_snapshot_options(
-    recording: ElasticRecording,
-) -> tuple[int | None, Field, int]:
-    """Validate and normalise the snapshot cadence, field and decimation."""
-    snapshot_field = recording.snapshot_field
-    if snapshot_field not in _FIELD_NAMES:
-        msg = f"snapshot_field must be one of {_FIELD_NAMES}"
-        raise ValueError(msg)
-    snapshot_every, decimation = _snapshot_options(
-        recording.snapshot_every, recording.snapshot_decimation
-    )
-    return snapshot_every, snapshot_field, decimation
-
-
 def _validated_absorbing_layer(
     boundaries: ElasticBoundaries,
     absorbing_sides: tuple[str, ...],
@@ -1753,9 +1771,8 @@ def elastic_fdtd_simulation(
         :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :return: An :class:`ElasticFDTDResult`.
     :raises TypeError: If an input is of the wrong type, among them a ``cfl``
-        or ``dx`` that is not one number, a ``snapshot_every`` or
-        ``snapshot_decimation`` of the recording that is a flag, a text or an
-        array where a count goes, or a ``compute`` that is not a
+        or ``dx`` that is not one number, a ``recording`` that is not an
+        :class:`ElasticRecording`, or a ``compute`` that is not a
         :class:`Compute`.
     :raises ValueError: If the inputs are invalid.
     :raises ComputeImportError: When the device's library is not installed
@@ -1764,14 +1781,16 @@ def elastic_fdtd_simulation(
         first small computation; with ``fallback=True`` the run warns with
         :class:`ComputeFallbackWarning` and steps on NumPy instead.
     """
-    recording = ElasticRecording() if recording is None else recording
+    recording = _recording_or_empty(recording, ElasticRecording)
     boundaries = ElasticBoundaries() if boundaries is None else boundaries
     if len(sources) == 0:
         msg = "at least one source is required"
         raise ValueError(msg)
     duration = _positive_finite("duration", duration)
-    fields = _resolve_probe_fields(recording.probe_fields)
-    snapshot_every, snapshot_field, d = _validated_snapshot_options(recording)
+    fields = tuple(recording.probe_fields)
+    snapshot_every = recording.snapshot_every
+    snapshot_field = recording.snapshot_field
+    d = recording.snapshot_decimation
     absorbing_sides, free_sides = _parse_elastic_boundaries(boundaries.sides)
     absorbing_layer_cells = _validated_absorbing_layer(boundaries, absorbing_sides)
 

@@ -3286,9 +3286,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   recordings do.** The `probes=`, `snapshot_every=` and
   `snapshot_decimation=` of `fdtd_simulation` are the fields of
   `simulation.FDTDRecording`, passed as `recording=`, as
-  `elastic_fdtd_simulation` takes an `ElasticRecording`; the record refuses
-  a malformed probe or count when it is built, and a run without one
-  records only its time axis, as before. `record_every=` is
+  `elastic_fdtd_simulation` takes an `ElasticRecording`. Both records refuse
+  a malformed probe, an unknown or repeated field and a bad count when they
+  are built, where an `ElasticRecording` used to be refused only when a run
+  read it; a probe off the grid is still the run's to refuse, and with two
+  bad probes the first is named. Each function raises `TypeError` for a
+  `recording` that is not its own record, the other engine's included, and
+  a run without one records only its time axis, as before. `record_every=` is
   `snapshot_every=` and `decimate=` is `snapshot_decimation=`, the names
   `FDTDRecording` and `ElasticRecording` take, and every route refuses a bad
   count with the same class and the same words: a flag, a text or an array

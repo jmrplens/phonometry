@@ -213,7 +213,7 @@ _BAD_COUNTS: dict[str, object] = {
 def test_a_bad_snapshot_count_is_refused_alike_on_every_route(
     route: str, option: str, bad: str
 ) -> None:
-    """The engines' ``run()``, ``FDTDRecording`` and ``elastic_fdtd_simulation`` share one check."""
+    """The engines' ``run()`` and the two recordings share one check."""
     counts: dict[str, object] = {"snapshot_every": 2, "snapshot_decimation": 1}
     counts[option] = _BAD_COUNTS[bad]
     error, message = _SNAPSHOT_REFUSALS[bad]
@@ -330,9 +330,8 @@ def test_a_decimated_elastic_snapshot_is_every_d_th_cell_of_the_full_one(
 def test_the_elastic_decimation_is_a_count_of_one_or_more(
     value: object, error: type[Exception]
 ) -> None:
-    recording = ElasticRecording(snapshot_every=4, snapshot_decimation=value)  # type: ignore[arg-type]
     with pytest.raises(error, match="snapshot_decimation"):
-        _elastic(recording)
+        ElasticRecording(snapshot_every=4, snapshot_decimation=value)  # type: ignore[arg-type]
 
 
 def test_an_elastic_result_holds_its_decimation_as_an_int() -> None:
@@ -375,6 +374,68 @@ def test_a_decimated_run_on_the_strict_backend_agrees_with_numpy(
     assert elastic_got.snapshots is not None
     assert elastic_want.snapshots is not None
     assert np.array_equal(elastic_got.snapshots, elastic_want.snapshots)
+
+
+#: The record each simulation function takes.
+_RECORDS: dict[str, type[FDTDRecording] | type[ElasticRecording]] = {
+    "acoustic": FDTDRecording,
+    "elastic": ElasticRecording,
+}
+
+
+def _run(kind: str, recording: object) -> object:
+    """A small run of the *kind* engine, handed *recording* as it is."""
+    if kind == "acoustic":
+        return _acoustic(recording)  # type: ignore[arg-type]
+    return _elastic(recording)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("wrong", ["dict", "other record", "text"])
+@pytest.mark.parametrize("kind", sorted(_RECORDS))
+def test_a_simulation_takes_only_its_own_recording(kind: str, wrong: str) -> None:
+    """The elastic record has the acoustic one's fields, and would run unread."""
+    other = ElasticRecording() if kind == "acoustic" else FDTDRecording()
+    recording = {"dict": {"probes": [(4, 4)]}, "other record": other, "text": "p"}[
+        wrong
+    ]
+    message = (
+        f"'recording' must be an {_RECORDS[kind].__name__} or None, "
+        f"got {type(recording).__name__}."
+    )
+    with pytest.raises(TypeError, match=re.escape(message)):
+        _run(kind, recording)
+
+
+@pytest.mark.parametrize("kind", sorted(_RECORDS))
+def test_a_recording_takes_any_iterable_of_probes_as_int_pairs(kind: str) -> None:
+    probes = ((np.int64(i), 2.0 * i) for i in (1, 3))
+    recording = _RECORDS[kind](probes=probes)  # type: ignore[arg-type]
+    assert recording.probes == ((1, 2), (3, 6))
+    assert all(type(i) is int for pair in recording.probes for i in pair)
+
+
+@pytest.mark.parametrize(
+    ("probes", "error", "entry"),
+    [
+        ([(1, 2), (1, 2, 3), 5], ValueError, "entry 1 is (1, 2, 3)"),
+        ([(1, 2), 5, (1, 2, 3)], TypeError, "entry 1 is 5"),
+    ],
+    ids=["triple first", "bare index first"],
+)
+@pytest.mark.parametrize("kind", sorted(_RECORDS))
+def test_a_recording_reports_its_first_malformed_probe(
+    kind: str, probes: list[object], error: type[Exception], entry: str
+) -> None:
+    message = f"probes must hold (ix, iy) index pairs; {entry}"
+    with pytest.raises(error, match=re.escape(message)):
+        _RECORDS[kind](probes=probes)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("kind", sorted(_RECORDS))
+def test_a_run_reports_its_first_probe_off_the_grid(kind: str) -> None:
+    recording = _RECORDS[kind](probes=[(1, 1), (99, 0), (0, 99)])
+    with pytest.raises(ValueError, match=re.escape("probe (99, 0) lies outside")):
+        _run(kind, recording)
 
 
 @pytest.mark.parametrize(

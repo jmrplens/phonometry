@@ -1870,6 +1870,27 @@ def _probe_indices(
     return probe_ix
 
 
+def _recording_or_empty[R: RichDisplay](recording: object, record: type[R]) -> R:
+    """A simulation function's ``recording``, or an empty *record* for ``None``.
+
+    Shared by :func:`fdtd_simulation` and :func:`elastic_fdtd_simulation`, so
+    each takes its own record and nothing else, the other engine's included:
+    the elastic record has the acoustic one's fields, and would otherwise run
+    with its probe fields and snapshot field silently ignored.
+
+    :raises TypeError: for anything but ``None`` or a *record*.
+    """
+    if recording is None:
+        return record()
+    if not isinstance(recording, record):
+        msg = (
+            f"'recording' must be an {record.__name__} or None, got "
+            f"{type(recording).__name__}."
+        )
+        raise TypeError(msg)
+    return recording
+
+
 def _record_run(
     sim: FDTD2D,
     steps: int,
@@ -1990,10 +2011,11 @@ def fdtd_simulation(
         :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :return: A :class:`FDTDResult`.
     :raises TypeError: If an input is of the wrong type: a ``duration``,
-        ``cfl`` or ``dx`` that is not one number, an ``absorbing_layer_cells``
-        that is not a number, a ``shape`` that is not a pair, a complex
-        medium, an ``obstacle_mask`` that is not boolean, or a ``compute``
-        that is not a :class:`Compute`.
+        ``cfl`` or ``dx`` that is not one number, a ``recording`` that is not
+        an :class:`FDTDRecording`, an ``absorbing_layer_cells`` that is not a
+        number, a ``shape`` that is not a pair, a complex medium, an
+        ``obstacle_mask`` that is not boolean, or a ``compute`` that is not a
+        :class:`Compute`.
     :raises ValueError: If the inputs are invalid.
     :raises ComputeImportError: When the device's library is not installed
         or does not import.
@@ -2001,7 +2023,7 @@ def fdtd_simulation(
         first small computation; with ``fallback=True`` the run warns with
         :class:`ComputeFallbackWarning` and steps on NumPy instead.
     """
-    recording = FDTDRecording() if recording is None else recording
+    recording = _recording_or_empty(recording, FDTDRecording)
     snapshot_every, d = recording.snapshot_every, recording.snapshot_decimation
     require_scalar(absorbing_layer_cells, "absorbing_layer_cells")
     if len(sources) == 0:

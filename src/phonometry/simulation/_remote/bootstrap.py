@@ -193,7 +193,8 @@ def read_header(stream: IO[bytes], max_header: int = MAX_HEADER) -> dict[str, ob
     text = read_exact(stream, length)
     try:
         header = json.loads(text.decode("utf-8"))
-    except (UnicodeDecodeError, ValueError) as exc:
+    # A UnicodeDecodeError is a ValueError too.
+    except ValueError as exc:
         msg = f"a frame header is not JSON: {exc}"
         raise FrameError(msg) from None
     except RecursionError:
@@ -218,10 +219,11 @@ def _is_count(value: object) -> bool:
 def field(header: Mapping[str, object], key: str, kind: type[T]) -> T:
     """The field *key* of a frame header, or of an object inside one, of type *kind*.
 
-    :raises FrameError: when the field is missing or of another type; a
-        ``bool`` is not taken for an ``int``.
+    :raises FrameError: when *header* is not an object (a node may send any
+        JSON value where one is expected), or the field is missing or of
+        another type; a ``bool`` is not taken for an ``int``.
     """
-    value = header.get(key)
+    value = header.get(key) if isinstance(header, dict) else None
     if (isinstance(value, bool) and kind is not bool) or not isinstance(value, kind):
         msg = f"{key!r} of a frame is {value!r:.80}, not a {kind.__name__}"
         raise FrameError(msg)

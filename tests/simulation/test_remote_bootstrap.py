@@ -18,11 +18,13 @@ import io
 import os
 import platform
 import re
+import selectors
 import struct
 import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import NoReturn
 
 import pytest
 
@@ -145,6 +147,11 @@ def test_a_field_of_another_type_is_refused_and_a_bool_is_no_count() -> None:
     ):
         bootstrap.field({"protocol": True}, "protocol", int)
     assert bootstrap.field({"protocol": 1}, "protocol", int) == 1
+    # Where a node owes an object (an element of a list it sent, say), any
+    # other JSON value is a broken frame too, never an AttributeError.
+    for not_an_object in (5, "abc", [1, 2], None):
+        with pytest.raises(bootstrap.FrameError, match="'name' of a frame is None"):
+            bootstrap.field(not_an_object, "name", str)
 
 
 # The package digest.
@@ -474,6 +481,18 @@ def test_a_node_that_holds_the_package_does_not_ask_for_it_again(
     assert [a["type"] for a in answers] == ["hello", "error"]
 
 
+#: The longest a test waits on a node it runs before failing [s].
+_NODE_WAIT_S = 120.0
+
+
+def _stop_and_fail(nodes: list[subprocess.Popen[bytes]], what: str) -> NoReturn:
+    """Stop every node and fail with *what*, quoting each node's standard error."""
+    for node in nodes:
+        node.kill()
+    said = [node.communicate(timeout=_NODE_WAIT_S)[1] for node in nodes]
+    pytest.fail(f"{what}; the nodes wrote on standard error: {said!r}")
+
+
 @pytest.mark.skipif(
     sys.platform == "win32",
     reason="a node is POSIX; on Windows the bootstrap locks nothing",
@@ -481,7 +500,11 @@ def test_a_node_that_holds_the_package_does_not_ask_for_it_again(
 def test_two_clients_that_send_one_package_at_once_both_store_it(
     tmp_path: Path,
 ) -> None:
-    """Two notebooks on the first run of a new version, on one node at the same time."""
+    """Two notebooks on the first run of a new version, on one node at the same time.
+
+    Every wait is bounded: a lock that is never released fails the test with
+    what the nodes said, instead of holding the suite.
+    """
     digest, package = _package(*_FILES)
     hello = _hello(digest, floors={"numpy": "999.0"})
     env = {**os.environ, bootstrap.CACHE_VAR: str(tmp_path)}
@@ -492,7 +515,7 @@ def test_two_clients_that_send_one_package_at_once_both_store_it(
                     [sys.executable, "-I", str(_SOURCE)],
                     stdin=subprocess.PIPE,
                     stdout=subprocess.PIPE,
-                    stderr=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
                     env=env,
                 )
             )
@@ -506,17 +529,27 @@ def test_two_clients_that_send_one_package_at_once_both_store_it(
         # has sent a byte of it, so both send it, and both store it.
         for node in nodes:
             assert node.stdout is not None
+            with selectors.DefaultSelector() as selector:
+                selector.register(node.stdout, selectors.EVENT_READ)
+                if not selector.select(_NODE_WAIT_S):
+                    _stop_and_fail(nodes, "a node did not answer its hello")
             assert bootstrap.read_header(node.stdout)["have"] is False
         for node in nodes:
             assert node.stdin is not None
             node.stdin.write(package)
-            node.stdin.close()
+            node.stdin.flush()  # left open: communicate closes it
+        # A node says nothing after its hello until it has the package, so
+        # none of what follows waits in the reader's buffer: communicate reads
+        # all of it from the pipe.
         for node in nodes:
-            assert node.stdout is not None
-            answers = _answers(node.stdout.read())
-            assert node.wait(timeout=120) == 2
-            assert [a["type"] for a in answers] == ["stored", "error"]
-            assert answers[1]["stage"] == "floors"
+            try:
+                out, err = node.communicate(timeout=_NODE_WAIT_S)
+            except subprocess.TimeoutExpired:
+                _stop_and_fail(nodes, "a node did not finish with its package")
+            answers = _answers(out)
+            assert node.returncode == 2, err
+            assert [a["type"] for a in answers] == ["stored", "error"], err
+            assert answers[1]["stage"] == "floors", err
     assert _packages(tmp_path) == [digest]
     assert bootstrap.is_stored(tmp_path / digest)
 

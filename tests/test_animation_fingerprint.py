@@ -929,7 +929,7 @@ def test_a_rewrite_of_the_engine_source_moves_no_clip(tmp_path: pathlib.Path) ->
 def test_a_missing_digest_file_is_named(tmp_path: pathlib.Path) -> None:
     tree = _engine_tree(tmp_path)
     (tree / fp.ENGINE_DIGESTS).unlink()
-    with pytest.raises(FileNotFoundError, match=r"make engine-digests"):
+    with pytest.raises(FileNotFoundError, match=r"engine-digests\.json is missing"):
         fp.fingerprints(tree)
 
 

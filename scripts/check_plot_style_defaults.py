@@ -53,7 +53,7 @@ from __future__ import annotations
 import ast
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -202,35 +202,42 @@ def _written_beside(
     helper a renderer hands them on to, in a parameter named ``kwargs`` (or
     ``..._kwargs``). They travel on in every mapping the function builds from
     them (``options = dict(kwargs)``). A keyword that names a parameter of a
-    function with ``**kwargs`` cannot be in them, nor can one the function
-    takes out first (``kwargs.pop("zorder", 3)``, ``del kwargs["zorder"]``,
-    :func:`style_pop`) or refuses by name (:func:`refuse_fixed_keywords`), so
-    none of those can collide and they are left alone.
+    function with ``**kwargs`` cannot be in them. Nor can one the function
+    takes out (``kwargs.pop("zorder", 3)``, ``del kwargs["zorder"]``,
+    :func:`style_pop`) or refuses by name (:func:`refuse_fixed_keywords`),
+    provided it does so before the call, on the very mapping the call spreads
+    or on one that mapping was copied from afterwards. None of those can
+    collide, and they are left alone.
     """
     seeds = _seeds(function)
     if not seeds:
         return
-    carriers = _carriers(function, seeds)
+    lineage = _lineage(function, seeds)
     arguments = function.args
-    absent = _taken_out(function, carriers)
+    bound: set[str] = set()
     if arguments.kwarg is not None:
-        absent |= {
+        bound = {
             arg.arg
             for arg in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
         }
+    removals = _removals(function, lineage)
     for call in ast.walk(function):
         if not isinstance(call, ast.Call) or _call_root(call.func) in own:
             continue
-        if not _spreads(call, carriers):
+        spread = _spread_carriers(call, lineage)
+        if not spread:
             continue
         callee = ast.unparse(call.func)
         for keyword in call.keywords:
-            if keyword.arg is not None and keyword.arg not in absent:
-                yield (
-                    call.lineno,
-                    f"{keyword.arg!r} written beside **kwargs in {callee}(), "
-                    "so a caller cannot pass it",
-                )
+            if keyword.arg is None or keyword.arg in bound:
+                continue
+            if _removed_before(keyword.arg, call.lineno, spread, removals, lineage):
+                continue
+            yield (
+                call.lineno,
+                f"{keyword.arg!r} written beside **kwargs in {callee}(), "
+                "so a caller cannot pass it",
+            )
 
 
 def _seeds(function: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
@@ -246,74 +253,134 @@ def _seeds(function: ast.FunctionDef | ast.AsyncFunctionDef) -> set[str]:
     return seeds
 
 
-def _carriers(
+class _Lineage(NamedTuple):
+    """Which names carry the caller's keywords, from where and since when."""
+
+    #: The line each carrier is first bound on, 0 for the ones it arrives in.
+    born: dict[str, int]
+    #: The carriers each carrier was built from.
+    parents: dict[str, set[str]]
+
+
+def _lineage(
     function: ast.FunctionDef | ast.AsyncFunctionDef, seeds: set[str]
-) -> set[str]:
+) -> _Lineage:
     """``seeds`` and every name the function binds to something built from them."""
-    carriers = set(seeds)
+    born = dict.fromkeys(seeds, 0)
+    parents: dict[str, set[str]] = {seed: set() for seed in seeds}
     grew = True
     while grew:
         grew = False
         for node in ast.walk(function):
-            if not isinstance(node, ast.Assign) or not _reads(node.value, carriers):
+            if not isinstance(node, ast.Assign):
                 continue
-            bound = {
-                name.id
-                for target in node.targets
-                for name in ast.walk(target)
-                if isinstance(name, ast.Name)
-            }
-            if bound - carriers:
-                carriers |= bound
-                grew = True
-    return carriers
+            read = _names(node.value) & set(born)
+            if not read:
+                continue
+            for target in node.targets:
+                for name in _names(target) - set(born):
+                    born[name] = node.lineno
+                    parents[name] = read
+                    grew = True
+    return _Lineage(born, parents)
 
 
-def _taken_out(
-    function: ast.FunctionDef | ast.AsyncFunctionDef, carriers: set[str]
-) -> set[str]:
-    """The keys the function takes out of the caller's keywords, or refuses, by name.
+def _names(expression: ast.AST) -> set[str]:
+    """Every name ``expression`` reads or binds."""
+    return {node.id for node in ast.walk(expression) if isinstance(node, ast.Name)}
+
+
+def _spread_carriers(call: ast.Call, lineage: _Lineage) -> set[str]:
+    """The carriers ``call`` unpacks with ``**``, in any expression.
+
+    The caller's keywords arrive as much through ``**kwargs`` as through
+    ``**{"label": ..., **kwargs}``, ``**styled(kwargs, ...)`` or a copy the
+    function made.
+    """
+    return {
+        name
+        for keyword in call.keywords
+        if keyword.arg is None
+        for name in _names(keyword.value) & set(lineage.born)
+    }
+
+
+def _removals(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, lineage: _Lineage
+) -> list[tuple[str, str, int]]:
+    """``(mapping, key, line)`` for each key the function takes out or refuses.
 
     ``kwargs.pop("width", 0.7)``, ``del kwargs["width"]``, ``style_pop(kwargs,
     "color", ...)`` (both spellings) and ``refuse_fixed_keywords(kwargs, ...,
-    "bottom")``, on ``kwargs`` or on a copy of it.
+    "bottom")``, on a carrier of the caller's keywords.
     """
-    taken: set[str] = set()
+    removals: list[tuple[str, str, int]] = []
     for node in ast.walk(function):
         if isinstance(node, ast.Delete):
-            taken.update(
-                target.slice.value
+            removals.extend(
+                (target.value.id, target.slice.value, node.lineno)
                 for target in node.targets
                 if isinstance(target, ast.Subscript)
-                and _reads(target.value, carriers)
+                and isinstance(target.value, ast.Name)
+                and target.value.id in lineage.born
                 and isinstance(target.slice, ast.Constant)
                 and isinstance(target.slice.value, str)
             )
         elif isinstance(node, ast.Call):
-            taken.update(_removed_by(node, carriers))
-    return taken
+            removals.extend(_removed_by(node, lineage))
+    return removals
 
 
-def _removed_by(call: ast.Call, carriers: set[str]) -> set[str]:
+def _removed_by(call: ast.Call, lineage: _Lineage) -> list[tuple[str, str, int]]:
     """The keys one call takes out of a carrier of the caller's keywords."""
     called = _called(call)
-    if (
-        called == "pop"
-        and isinstance(call.func, ast.Attribute)
-        and _reads(call.func.value, carriers)
-    ):
-        return _strings(call.args[:1])
-    if not call.args or not _reads(call.args[0], carriers):
-        return set()
-    if called == "style_pop":
-        return {
-            spelling
-            for name in _strings(call.args[1:2])
-            for spelling in (name, *_alias_of(name))
-        }
-    if called == "refuse_fixed_keywords":
-        return _strings(call.args[1:])
-    return set()
+    if called == "pop" and isinstance(call.func, ast.Attribute):
+        mapping = call.func.value
+        keys = _strings(call.args[:1])
+    elif called in {"style_pop", "refuse_fixed_keywords"} and call.args:
+        mapping = call.args[0]
+        if called == "style_pop":
+            keys = {
+                spelling
+                for name in _strings(call.args[1:2])
+                for spelling in (name, *_alias_of(name))
+            }
+        else:
+            keys = _strings(call.args[1:])
+    else:
+        return []
+    if not isinstance(mapping, ast.Name) or mapping.id not in lineage.born:
+        return []
+    return [(mapping.id, key, call.lineno) for key in sorted(keys)]
+
+
+def _removed_before(
+    key: str,
+    line: int,
+    spread: set[str],
+    removals: list[tuple[str, str, int]],
+    lineage: _Lineage,
+) -> bool:
+    """Whether ``key`` is out of every mapping a call on ``line`` spreads.
+
+    It is when it was taken out before the call, of the mapping spread, or of
+    a mapping that one was copied from after the removal.
+    """
+    return any(
+        removed == key
+        and at < line
+        and all(_inherits(name, mapping, at, lineage) for name in spread)
+        for mapping, removed, at in removals
+    )
+
+
+def _inherits(name: str, mapping: str, at: int, lineage: _Lineage) -> bool:
+    """Whether ``name`` is ``mapping``, or was built from it after line ``at``."""
+    if name == mapping:
+        return True
+    return lineage.born[name] > at and any(
+        _inherits(parent, mapping, at, lineage) for parent in lineage.parents[name]
+    )
 
 
 def _alias_of(name: str) -> tuple[str, ...]:
@@ -340,27 +407,6 @@ def _strings(nodes: list[ast.expr]) -> set[str]:
         for node in nodes
         if isinstance(node, ast.Constant) and isinstance(node.value, str)
     }
-
-
-def _reads(expression: ast.AST, names: set[str]) -> bool:
-    """Whether ``expression`` reads one of ``names``."""
-    return any(
-        isinstance(node, ast.Name) and node.id in names for node in ast.walk(expression)
-    )
-
-
-def _spreads(call: ast.Call, carriers: set[str]) -> bool:
-    """Whether ``call`` unpacks, with ``**``, anything built from the caller's keywords.
-
-    The caller's keywords arrive as much through ``**kwargs`` as through
-    ``**{"label": ..., **kwargs}``, ``**styled(kwargs, ...)`` or a copy the
-    function made: whatever the unpacked expression reads one of
-    ``carriers`` in, a keyword written beside it meets the caller's.
-    """
-    return any(
-        keyword.arg is None and _reads(keyword.value, carriers)
-        for keyword in call.keywords
-    )
 
 
 def _helper_aliases() -> set[str] | None:

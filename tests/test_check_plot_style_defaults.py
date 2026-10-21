@@ -243,3 +243,41 @@ def test_a_keyword_beside_a_mapping_built_from_the_spread_is_refused(
         ),
         (3, "'width' written beside **kwargs in ax.bar(), so a caller cannot pass it"),
     ]
+
+
+def test_a_key_taken_out_counts_only_before_the_call_and_on_its_mapping(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A pop after the call, or from another copy, leaves the collision in place.
+
+    A copy made after the pop inherits it; one made before does not.
+    """
+    source = (
+        "def f(ax, **kwargs):\n"
+        "    ax.plot([1], zorder=3, **kwargs)\n"
+        "    kwargs.pop('zorder', None)\n"
+        "def g(ax, **kwargs):\n"
+        "    options = dict(kwargs)\n"
+        "    options.pop('zorder', None)\n"
+        "    ax.plot([1], zorder=3, **kwargs)\n"
+        "def h(ax, **kwargs):\n"
+        "    early = dict(kwargs)\n"
+        "    kwargs.pop('zorder', None)\n"
+        "    late = dict(kwargs)\n"
+        "    ax.plot([1], zorder=3, **late)\n"
+        "    ax.plot([1], zorder=3, **early)\n"
+    )
+    assert gate._findings(_module(source, tmp_path)) == [
+        (
+            2,
+            "'zorder' written beside **kwargs in ax.plot(), so a caller cannot pass it",
+        ),
+        (
+            7,
+            "'zorder' written beside **kwargs in ax.plot(), so a caller cannot pass it",
+        ),
+        (
+            13,
+            "'zorder' written beside **kwargs in ax.plot(), so a caller cannot pass it",
+        ),
+    ]

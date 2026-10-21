@@ -25,8 +25,6 @@ if TYPE_CHECKING:
 
     from numpy.typing import NDArray
 
-pytest.importorskip("array_api_strict")
-
 
 @pytest.mark.parametrize(
     "scenario",

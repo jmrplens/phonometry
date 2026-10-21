@@ -1,12 +1,14 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """A record's required fields refuse ``None``, not only a missing argument.
 
-The fields below used to default to ``None`` so that a result built by hand
-from a few of its numbers would still construct. They are required now, and
-leaving one out of the call raises ``TypeError``. ``None`` can still be passed
-for one explicitly, or put there with :func:`dataclasses.replace`, and the
-shape and value guards skip ``None`` on purpose, so each record also refuses
-it by name at construction instead of failing later in a report or a plot.
+Most of the fields below used to default to ``None`` so that a result built
+by hand from a few of its numbers would still construct; the columns of an
+:class:`~phonometry.building.OctaveBandSpectrum` never did. All of them are
+required now, and leaving one out of the call raises ``TypeError``. ``None``
+can still be passed for one explicitly, or put there with
+:func:`dataclasses.replace`, and the shape and value guards skip ``None`` on
+purpose, so each record also refuses it by name at construction instead of
+failing later in a report or a plot.
 """
 
 from __future__ import annotations
@@ -131,8 +133,15 @@ def _slit_absorber() -> ph.materials.SlitResonatorAbsorberResult:
     )
 
 
+def _octave_bands() -> ph.building.OctaveBandSpectrum:
+    return ph.building.improvement_octave_bands(
+        np.arange(6.0), frequencies=[100.0, 125.0, 160.0, 200.0, 250.0, 315.0]
+    )
+
+
 _REQUIRED: tuple[tuple[Callable[[], Any], str], ...] = (
     (_open_plan, "positions_m"),
+    *((_octave_bands, f) for f in ("frequencies", "values")),
     *((_metadiffuser, f) for f in ("wells", "depth_m", "period_m")),
     *((_junction, f) for f in ("thickness1_m", "thickness2_m")),
     *((_in_situ, f) for f in ("source_height_m", "microphone_height_m")),

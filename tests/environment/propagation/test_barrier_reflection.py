@@ -337,6 +337,35 @@ class TestReflectionIndex:
         np.testing.assert_allclose(result.gain_corrections, 1.08**2, rtol=1e-6)
         np.testing.assert_allclose(result.reflection_index, 0.25, atol=1e-5)
 
+    @pytest.mark.parametrize(
+        ("field", "shape", "match"),
+        [
+            ("reflection_index", (17,), "must each carry one value per band"),
+            ("position_values", (1, 17), "must each carry one value per band"),
+            ("microphone_values", (1, 9, 17), "must each carry one value per band"),
+            ("gain_corrections", (2, 9), "must each carry one value per position"),
+            ("subtraction_reductions", (1, 8), "one value per microphone"),
+            ("position_values", (18,), "'position_values' must have 2 axes"),
+        ],
+    )
+    def test_a_hand_built_result_is_held_to_its_axes(
+        self, field: str, shape: tuple[int, ...], match: str
+    ) -> None:
+        """Bands, grid positions and microphones agree across every array."""
+        front, free = _grid()
+        result = _index(front, free)
+        wrong = np.ones(shape)
+        with pytest.raises(ValueError, match=match):
+            dataclasses.replace(result, **{field: wrong})
+
+    @pytest.mark.parametrize(
+        "field", ["frequencies", "reflection_index", "position_values"]
+    )
+    def test_a_result_requires_its_bands(self, field: str) -> None:
+        result = prop.reflection_index_from_positions(np.full((2, 18), 0.5))
+        with pytest.raises(TypeError, match=f"'{field}' is required"):
+            dataclasses.replace(result, **{field: None})
+
     def test_a_gain_change_above_20_percent_warns(self) -> None:
         front, free = _grid(reflection=0.5, gain=1.2)
         with pytest.warns(prop.BarrierReflectionWarning, match="20 %"):
@@ -669,6 +698,70 @@ class TestAnnexB:
         with pytest.raises(ValueError, match="'estimate' must be one of"):
             prop.reflection_index_expanded_uncertainty(estimate="mean")  # type: ignore[arg-type]
 
+    @pytest.mark.parametrize(
+        ("field", "value", "error", "match"),
+        [
+            (
+                "expanded_uncertainty",
+                np.array([0.5]),
+                ValueError,
+                "'expanded_uncertainty' must hold one value per band",
+            ),
+            (
+                "frequencies",
+                np.array([100.0]),
+                ValueError,
+                "'frequencies' must hold one value per band",
+            ),
+            (
+                "expanded_uncertainty",
+                np.full(18, -0.1),
+                ValueError,
+                "'expanded_uncertainty' must be non-negative",
+            ),
+            (
+                "expanded_uncertainty",
+                np.full(18, np.nan),
+                ValueError,
+                "'expanded_uncertainty' must contain only finite values",
+            ),
+            (
+                "rating_expanded_uncertainty_db",
+                math.nan,
+                ValueError,
+                "'rating_expanded_uncertainty_db' must be finite",
+            ),
+            (
+                "rating_expanded_uncertainty_db",
+                -0.5,
+                ValueError,
+                "'rating_expanded_uncertainty_db' must be non-negative",
+            ),
+            ("estimate", "bogus", ValueError, "'estimate' must be one of"),
+            ("coverage_factor", -1.0, ValueError, "'coverage_factor' must be positive"),
+            ("coverage_factor", 0.0, ValueError, "'coverage_factor' must be positive"),
+            ("frequencies", None, TypeError, "'frequencies' is required"),
+            (
+                "expanded_uncertainty",
+                None,
+                TypeError,
+                "'expanded_uncertainty' is required",
+            ),
+        ],
+    )
+    def test_a_hand_built_uncertainty_is_held_to_the_bands(
+        self, field: str, value: object, error: type[Exception], match: str
+    ) -> None:
+        """A record built by hand meets the checks the builder's answer meets.
+
+        One ``U_j`` for eighteen bands drew eighteen bars at that value, and
+        an unknown column failed later inside the plot; ``U = k_p s_R``
+        cannot be negative or undetermined either.
+        """
+        uncertainty = prop.reflection_index_expanded_uncertainty()
+        with pytest.raises(error, match=match):
+            dataclasses.replace(uncertainty, **{field: value})
+
     def test_a_band_left_unmeasured_is_left_out(self) -> None:
         values = self._positions().copy()
         values[0, 0] = np.nan
@@ -767,6 +860,17 @@ class TestLowFrequencyLimit:
             oracle.LOW_FREQUENCY_LIMITS_4M_HZ[5], rel=0.02
         )
         assert limit.limiting_component[4] == "ground"
+
+    @pytest.mark.parametrize(
+        "field", ["window_length_s", "low_frequency_limit_hz", "limiting_component"]
+    )
+    def test_a_hand_built_limit_holds_one_value_per_microphone(
+        self, field: str
+    ) -> None:
+        limit = prop.reflection_low_frequency_limit(4.0, speed_of_sound=340.0)
+        short = getattr(limit, field)[:8]
+        with pytest.raises(ValueError, match="one value per microphone"):
+            dataclasses.replace(limit, **{field: short})
 
     def test_the_window_ends_at_the_ground_reflection(self) -> None:
         limit = prop.reflection_low_frequency_limit(4.0, speed_of_sound=340.0)

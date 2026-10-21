@@ -111,7 +111,10 @@ from scipy.optimize import minimize_scalar
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.validation import (
     require_choice,
+    require_finite_fields,
+    require_non_negative,
     require_positive,
+    require_present,
     require_ranks,
     require_same_length,
 )
@@ -1148,6 +1151,48 @@ class ReflectionIndexResult(OwnsArrays):
     gain_corrections: NDArray[np.float64] | None = None
     subtraction_reductions: NDArray[np.float64] | None = None
 
+    def __post_init__(self) -> None:
+        """Refuse arrays that disagree about the bands, positions or microphones.
+
+        :raises TypeError: If ``frequencies``, ``reflection_index`` or
+            ``position_values`` is ``None``.
+        :raises ValueError: If an array has the wrong number of axes, or two of
+            them disagree about the bands, the grid positions or the
+            microphones.
+        """
+        require_present(self, "frequencies", "reflection_index", "position_values")
+        require_ranks(
+            self,
+            frequencies=1,
+            reflection_index=1,
+            position_values=2,
+            microphone_values=3,
+            gain_corrections=2,
+            subtraction_reductions=2,
+        )
+        require_same_length(
+            self,
+            "frequencies",
+            "reflection_index",
+            ("position_values", 1),
+            ("microphone_values", 2),
+        )
+        require_same_length(
+            self,
+            "position_values",
+            "microphone_values",
+            "gain_corrections",
+            "subtraction_reductions",
+            axis="position",
+        )
+        require_same_length(
+            self,
+            ("microphone_values", 1),
+            ("gain_corrections", 1),
+            ("subtraction_reductions", 1),
+            axis="microphone",
+        )
+
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
@@ -1194,6 +1239,46 @@ class ReflectionIndexUncertainty(OwnsArrays):
     rating_expanded_uncertainty_db: float
     estimate: Literal["median", "low", "high"]
     coverage_factor: float
+
+    def __post_init__(self) -> None:
+        r"""Refuse an uncertainty that is not one non-negative value per band.
+
+        A record built by hand meets the checks the builder's answer meets:
+        one :math:`U_j` for eighteen bands would draw eighteen bars at that
+        value, and :math:`U = k_p s_\mathrm{R}` is never negative.
+
+        :raises TypeError: If ``frequencies`` or ``expanded_uncertainty`` is
+            ``None``, ``estimate`` is not a text, or ``coverage_factor`` or
+            ``rating_expanded_uncertainty_db`` is not a single number.
+        :raises ValueError: If either array does not hold one value for each
+            of the eighteen bands, a :math:`U_j` or the :math:`U` of
+            :math:`DL_{RI}` is negative or not finite, the column is not one of
+            Table A.1, or the coverage factor is not positive.
+        """
+        require_present(self, "frequencies", "expanded_uncertainty")
+        for name in ("frequencies", "expanded_uncertainty"):
+            shape = np.shape(getattr(self, name))
+            if shape != (len(_BANDS_HZ),):
+                msg = (
+                    f"ReflectionIndexUncertainty: '{name}' must hold one value "
+                    f"per band, the eighteen of EN 1793-5 from 100 Hz to 5 kHz; "
+                    f"got shape {shape}."
+                )
+                raise ValueError(msg)
+        require_finite_fields(
+            self, "expanded_uncertainty", "rating_expanded_uncertainty_db"
+        )
+        if np.any(np.asarray(self.expanded_uncertainty) < 0.0):
+            msg = (
+                "ReflectionIndexUncertainty: 'expanded_uncertainty' must be "
+                "non-negative, as U_j = k_p s_R is."
+            )
+            raise ValueError(msg)
+        require_non_negative(
+            self.rating_expanded_uncertainty_db, "rating_expanded_uncertainty_db"
+        )
+        require_choice(self.estimate, "estimate", ("median", "low", "high"))
+        require_positive(self.coverage_factor, "coverage_factor")
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -1529,6 +1614,26 @@ class ReflectionFrequencyLimit(OwnsArrays):
     window_length_s: NDArray[np.float64]
     low_frequency_limit_hz: NDArray[np.float64]
     limiting_component: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        """Refuse per-microphone fields that disagree about the microphones.
+
+        :raises TypeError: If a per-microphone field is ``None``.
+        :raises ValueError: If ``window_length_s`` or ``low_frequency_limit_hz``
+            is not one-dimensional, or the three per-microphone fields differ
+            in length.
+        """
+        require_present(
+            self, "window_length_s", "low_frequency_limit_hz", "limiting_component"
+        )
+        require_ranks(self, window_length_s=1, low_frequency_limit_hz=1)
+        require_same_length(
+            self,
+            "window_length_s",
+            "low_frequency_limit_hz",
+            "limiting_component",
+            axis="microphone",
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

@@ -133,35 +133,64 @@ def read_page(path: pathlib.Path) -> tuple[list[Rule], list[str]]:
             problems.append(
                 f"{path.name}:{lineno}: {rule_id} needs exactly one '**Enforced by:**' line, has {len(enforced)}"
             )
+        body = [ln.strip() for _, ln in prose[start + 1 : end]]
+        problems.extend(
+            f"{path.name}:{lineno}: {rule_id} needs exactly one '{label}' line, has {count}"
+            for label, count in _part_counts(body)
+            if count != 1
+        )
         rules.append(
             Rule(rule_id, path.name, statement, enforced[0] if enforced else "")
         )
     return rules, problems
 
 
+def _part_counts(body: list[str]) -> list[tuple[str, int]]:
+    """How many times a rule's body opens each of its three parts."""
+    return [
+        ("**Why.**", sum(line.startswith("**Why.**") for line in body)),
+        ("**Do**", body.count("**Do**")),
+        ("**Don't**", body.count("**Don't**")),
+    ]
+
+
+def _fence_problem(label: str, fence: str) -> str | None:
+    """What is wrong with the fence an example label opens, or None."""
+    language = fence.lstrip("`~").split(" ", 1)[0]
+    if label == "**Don't**" and language == "python":
+        return "a Don't example is fenced as python, so it runs; fence it as py"
+    if label == "**Do**" and language == "py":
+        return "a Do example is fenced as py, so it never runs; fence it as python"
+    return None
+
+
 def dont_fence_problems(path: pathlib.Path) -> list[str]:
-    """A fence right after '**Don't**' that would run, or one after '**Do**' that would not."""
+    """A Do or a Don't with no fence after it, or whose fence runs the wrong way.
+
+    A Don't fenced ``python`` would run, a Do fenced ``py`` never would, and a
+    label followed by text instead of a fence has no example at all.
+    """
     lines = path.read_text(encoding="utf-8").splitlines()
     problems: list[str] = []
-    label = None
+    label, label_line = None, 0
     for n, line in enumerate(lines, 1):
         stripped = line.strip()
+        if label is not None and stripped.startswith(("```", "~~~")):
+            if problem := _fence_problem(label, stripped):
+                problems.append(f"{path.name}:{n}: {problem}")
+            label = None
+        elif label is not None and stripped:
+            problems.append(
+                f"{path.name}:{label_line}: a {label} label is followed by text, "
+                "not by its fenced example"
+            )
+            label = None
         if stripped in ("**Do**", "**Don't**"):
-            label = stripped
-            continue
-        if label and stripped.startswith(("```", "~~~")):
-            language = stripped.lstrip("`~").split(" ", 1)[0]
-            if label == "**Don't**" and language == "python":
-                problems.append(
-                    f"{path.name}:{n}: a Don't example is fenced as python, so it runs; fence it as py"
-                )
-            if label == "**Do**" and language == "py":
-                problems.append(
-                    f"{path.name}:{n}: a Do example is fenced as py, so it never runs; fence it as python"
-                )
-            label = None
-        elif stripped:
-            label = None
+            label, label_line = stripped, n
+    if label is not None:
+        problems.append(
+            f"{path.name}:{label_line}: a {label} label ends the page with no example"
+        )
     return problems
 
 
@@ -195,16 +224,7 @@ def enforcer_problem(item: str, root: pathlib.Path) -> str | None:
             else f"no Makefile target {name!r}"
         )
     if target.startswith("ruff "):
-        code = target.removeprefix("ruff ").strip()
-        if code == "format":
-            return None
-        config = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
-        selected = config["tool"]["ruff"]["lint"]["select"]
-        return (
-            None
-            if any(code.startswith(prefix) for prefix in selected)
-            else f"ruff {code} is not selected"
-        )
+        return _ruff_problem(target.removeprefix("ruff ").strip(), root)
     if target.startswith("CI: "):
         # A job's name, or the name of one step of a job (``- name:``).
         job = target.removeprefix("CI: ").strip().strip('"')
@@ -238,6 +258,30 @@ def enforcer_problem(item: str, root: pathlib.Path) -> str | None:
         encoding="utf-8"
     ):
         return f"{file_part} has no {test_name}"
+    return None
+
+
+def _ruff_problem(code: str, root: pathlib.Path) -> str | None:
+    """Why ruff does not run ``code`` on this tree, or None when it does.
+
+    A family in ``select`` runs every code under it except those ``ignore``
+    takes out. Ruff settles a clash by specificity: the longer selector wins,
+    and an ignore as specific as the select wins too, so ``D2`` selected and
+    ``D205`` ignored leaves ``D205`` off.
+    """
+    if code == "format":
+        return None
+    config = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+    lint = config["tool"]["ruff"]["lint"]
+
+    def specificity(selectors: list[str]) -> int:
+        return max((len(s) for s in selectors if code.startswith(s)), default=0)
+
+    selected = specificity([*lint.get("select", ()), *lint.get("extend-select", ())])
+    if not selected:
+        return f"ruff {code} is not selected"
+    if specificity(list(lint.get("ignore", ()))) >= selected:
+        return f"ruff {code} is ignored"
     return None
 
 
@@ -322,7 +366,12 @@ def _write(path: pathlib.Path, text: str) -> pathlib.Path:
     return path
 
 
-_GOOD_RULE = '<a id="n1"></a>\n### N1. A name says what it returns\n\n**Why.** Because.\n\n**Enforced by:** review\n'
+_GOOD_RULE = (
+    '<a id="n1"></a>\n### N1. A name says what it returns\n\n**Why.** Because.\n\n'
+    "**Do**\n\n```python\nlevel = 1.0\n```\n\n"
+    "**Don't**\n\n```py\nget_level()\n```\n\n"
+    "**Enforced by:** review\n"
+)
 
 
 def test_a_rule_without_its_anchor_is_reported(tmp_path: pathlib.Path) -> None:
@@ -347,6 +396,34 @@ def test_a_well_formed_rule_reads_back(tmp_path: pathlib.Path) -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("part", "label"),
+    [
+        ("**Why.** Because.\n", "**Why.**"),
+        ("**Do**\n", "**Do**"),
+        ("**Don't**\n", "**Don't**"),
+    ],
+)
+def test_a_rule_missing_a_part_is_reported(
+    tmp_path: pathlib.Path, part: str, label: str
+) -> None:
+    """The index promises the shape of a rule: a Why, a Do and a Don't."""
+    page = _write(tmp_path / "naming.md", _GOOD_RULE.replace(part, "", 1))
+    _, problems = read_page(page)
+    assert problems == [f"naming.md:2: N1 needs exactly one '{label}' line, has 0"]
+
+
+def test_a_label_without_its_example_is_reported(tmp_path: pathlib.Path) -> None:
+    """A Do or a Don't is an example, so its label is followed by a fence."""
+    page = _write(
+        tmp_path / "naming.md",
+        _GOOD_RULE.replace("```py\nget_level()\n```\n", "It reads badly.\n"),
+    )
+    assert dont_fence_problems(page) == [
+        "naming.md:12: a **Don't** label is followed by text, not by its fenced example"
+    ]
+
+
 def test_a_dont_example_that_would_run_is_reported(tmp_path: pathlib.Path) -> None:
     page = _write(
         tmp_path / "naming.md",
@@ -366,6 +443,29 @@ def test_an_enforcer_that_does_not_exist_is_reported() -> None:
         == "no Makefile target 'no-such-target'"
     )
     assert enforcer_problem("`ruff ZZZ999`", _ROOT) == "ruff ZZZ999 is not selected"
+
+
+def test_a_ruff_code_the_configuration_ignores_is_reported(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A selected family does not run the codes ``ignore`` takes out of it.
+
+    Ruff settles a clash by specificity: the longer selector wins, and an
+    ignore as specific as the select wins too.
+    """
+    _write(
+        tmp_path / "pyproject.toml",
+        "[tool.ruff.lint]\n"
+        'select = ["D2", "D205", "E4"]\n'
+        'ignore = ["D213", "D205", "E"]\n',
+    )
+    assert enforcer_problem("`ruff D213`", tmp_path) == "ruff D213 is ignored"
+    assert enforcer_problem("`ruff D205`", tmp_path) == "ruff D205 is ignored"
+    assert enforcer_problem("`ruff D212`", tmp_path) is None
+    assert enforcer_problem("`ruff E402`", tmp_path) is None
+    assert enforcer_problem("`ruff D105`", tmp_path) == "ruff D105 is not selected"
+    assert enforcer_problem("`ruff D205`", _ROOT) == "ruff D205 is ignored"
+    assert enforcer_problem("`ruff D212`", _ROOT) is None
 
 
 def test_a_ci_job_or_one_of_its_steps_is_an_enforcer(tmp_path: pathlib.Path) -> None:

@@ -2288,7 +2288,7 @@ def _measured_spectrum_vectors(
     argument or the field inside it.
 
     :param spectrum: The measured spectrum drawn under the fault lines.
-    :returns: Its frequency and amplitude vectors, as ``float64``.
+    :return: Its frequency and amplitude vectors, as ``float64``.
     :raises ValueError: if either vector is not a non-empty one-dimensional
         run of bins, if the two disagree in shape, or if either carries a
         non-finite sample.

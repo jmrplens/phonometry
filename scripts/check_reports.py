@@ -133,7 +133,8 @@ def pdf_problem(old: bytes, new: bytes) -> str | None:
     try:
         old_pages = pdf_pages_text(old)
         new_pages = pdf_pages_text(new)
-    except Exception as exc:  # noqa: BLE001 - a corrupt fiche is a failure, not a crash
+    # A corrupt fiche is a failure, not a crash
+    except Exception as exc:  # noqa: BLE001
         return f"could not extract text ({exc})"
     if len(old_pages) != len(new_pages):
         return f"page count changed {len(old_pages)} != {len(new_pages)}"

@@ -188,8 +188,8 @@ DARK = Theme(
 #: their plates while $L_i$ stays an italic index on the next one. That is
 #: what brings the plates under the file-level rule the prose follows,
 #: where a symbol is set by what it means in the guide that carries it and
-#: two files may legitimately disagree (CONTRIBUTING.md, "Setting a
-#: subscript"): a plate is set as the page that embeds it is, and
+#: two files may legitimately disagree (docs/contributing/docstrings.md#d19):
+#: a plate is set as the page that embeds it is, and
 #: ``scripts/check_subscript_slope.py`` reads the plates beside the page's
 #: own mathematics to keep it so. The ``sloped`` keys are the other
 #: direction, for the source that prints a letter of this set italic, as

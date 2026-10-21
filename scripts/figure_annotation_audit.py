@@ -609,7 +609,8 @@ def _paints_a_stroke(artist: _Ink) -> bool:
             return False
         faces = np.atleast_2d(artist.get_facecolor())
         return faces.size == 0 or not bool(np.allclose(edges, faces))
-    except Exception:  # noqa: BLE001 - an artist that cannot answer is measured
+    # An artist that cannot answer is measured
+    except Exception:  # noqa: BLE001
         return True
 
 

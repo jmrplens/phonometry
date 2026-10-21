@@ -439,11 +439,8 @@ def _two_product(
     call sites guarantee: their operands live within a few binades of one.
 
     :param a: First factor.
-    :type a: np.ndarray
     :param b: Second factor.
-    :type b: np.ndarray
     :return: The rounded product and its exact error.
-    :rtype: tuple[np.ndarray, np.ndarray]
     """
     p = a * b
     ta = a * _SPLIT
@@ -462,11 +459,8 @@ def _two_sum(
     """Knuth's exact sum: ``a + b == s + e`` with ``s = fl(a + b)``.
 
     :param a: First addend.
-    :type a: np.ndarray
     :param b: Second addend.
-    :type b: np.ndarray
     :return: The rounded sum and its exact error.
-    :rtype: tuple[np.ndarray, np.ndarray]
     """
     s = a + b
     t = s - a
@@ -491,13 +485,9 @@ def _fused_multiply_add(
     comfortably inside the no-underflow range the transformation needs.
 
     :param a: First factor.
-    :type a: np.ndarray
     :param b: Second factor.
-    :type b: np.ndarray
     :param c: Addend.
-    :type c: np.ndarray
     :return: The fused multiply-add, correctly rounded once.
-    :rtype: np.ndarray
     """
     p, p_err = _two_product(a, b)
     s, s_err = _two_sum(c, p_err)
@@ -519,9 +509,7 @@ def _main_path(x: np.ndarray) -> np.ndarray:
     boundary divergence the module docstring bounds comes from.
 
     :param x: Positive normal doubles.
-    :type x: np.ndarray
     :return: Their logarithms, bit for bit the C routine's.
-    :rtype: np.ndarray
     """
     bits = x.view(np.uint64)
     offset = bits - _OFF
@@ -554,9 +542,7 @@ def _near_one_path(x: np.ndarray) -> np.ndarray:
     in it.
 
     :param x: Doubles inside the near-one window.
-    :type x: np.ndarray
     :return: Their logarithms, bit for bit the C routine's.
-    :rtype: np.ndarray
     """
     r = x - 1.0
     r2 = r * r
@@ -593,9 +579,7 @@ def pinned_log(values: np.ndarray) -> np.ndarray:
     propagates and ``nan`` propagates canonicalised.
 
     :param values: Any real array-like of positive values.
-    :type values: np.ndarray
     :return: The natural logarithm, elementwise, in the same shape.
-    :rtype: np.ndarray
     :raises ValueError: If any element is zero or negative.
     """
     x = np.asarray(values, dtype=np.float64)

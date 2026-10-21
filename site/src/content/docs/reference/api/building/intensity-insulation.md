@@ -272,6 +272,8 @@ Per-band intensity element normalized level difference (ISO 15186-1).
 ```python
 IntensityElementNormalizedResult.plot(
     ax: Axes | None = None,
+    *,
+    language: str = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -379,7 +381,12 @@ Per-band intensity sound reduction index (ISO 15186-1:2000).
 ### IntensityReductionResult.plot()
 
 ```python
-IntensityReductionResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+IntensityReductionResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Plot `RI` against the shifted ISO 717-1 reference curve.

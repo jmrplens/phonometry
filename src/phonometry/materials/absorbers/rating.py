@@ -245,7 +245,7 @@ def _unfavourable_deviation_sum(
 
     :param shifted_reference: The reference curve of Figure 1 after the shift.
     :param measured: The practical coefficients rated against it.
-    :returns: The sum of the deviations, in absorption-coefficient units.
+    :return: The sum of the deviations, in absorption-coefficient units.
     """
     return float(np.sum(np.maximum(shifted_reference - measured, 0.0)))
 
@@ -518,7 +518,7 @@ def practical_absorption_coefficient(
         low to high or a mapping keyed by band centre frequency (Hz).
         Values may exceed 1,00 (reverberation-room measurement); the
         resulting octave coefficient is capped at 1,00.
-    :returns: The five octave practical coefficients for 250, 500, 1000,
+    :return: The five octave practical coefficients for 250, 500, 1000,
         2000 and 4000 Hz, each the mean of its three one-third octaves
         rounded in steps of 0,05.
     :raises ValueError: if any coefficient is negative or the wrong number
@@ -571,7 +571,7 @@ def weighted_absorption(
         :func:`practical_absorption_coefficient`), as a sequence ordered
         low to high or a mapping keyed by band centre frequency (Hz).
         Inputs are snapped to the 0,05 grid of Clause 4.1.
-    :returns: A frozen :class:`AbsorptionRatingResult` with ``alpha_w``, the
+    :return: A frozen :class:`AbsorptionRatingResult` with ``alpha_w``, the
         shape indicators, the applied shift, the fitted reference curve and
         the absorption class.
     :raises ValueError: if any coefficient is negative or the wrong number
@@ -593,7 +593,7 @@ def _rate(
     :param measured: The five octave practical coefficients, already coerced.
     :param third_octave: The one-third-octave coefficients they were formed
         from, when the caller has them; retained on the result as given.
-    :returns: The frozen rating of ISO 11654 Clause 4.2.
+    :return: The frozen rating of ISO 11654 Clause 4.2.
     """
     measured_units = [_to_units(v) for v in measured]
 
@@ -655,7 +655,7 @@ def weighted_absorption_from_third_octave(
         to high or a mapping keyed by band centre frequency (Hz). Values may
         exceed 1,00 (reverberation-room measurement); the octave coefficient is
         capped at 1,00.
-    :returns: A frozen :class:`AbsorptionRatingResult` identical to
+    :return: A frozen :class:`AbsorptionRatingResult` identical to
         :func:`weighted_absorption` on the derived ``alpha_p``, additionally
         carrying ``third_octave_alpha_s`` (the input as given) and
         ``third_octave_bands`` (:data:`RATING_THIRD_OCTAVE_BANDS_HZ`).
@@ -674,7 +674,7 @@ def absorption_class(alpha_w: float) -> str:
 
     :param alpha_w: Weighted sound absorption coefficient (a multiple of
         0,05 in ``[0, 1]``).
-    :returns: ``"A"``, ``"B"``, ``"C"``, ``"D"``, ``"E"`` or
+    :return: ``"A"``, ``"B"``, ``"C"``, ``"D"``, ``"E"`` or
         ``"Not classified"``.
     :raises ValueError: if ``alpha_w`` is not a finite value in ``[0, 1]``.
     :raises TypeError: if ``alpha_w`` is not a single number.

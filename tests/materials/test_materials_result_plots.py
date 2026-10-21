@@ -105,6 +105,25 @@ def test_layered_absorber_plot_alpha_and_reflection() -> None:
     plt.close("all")
 
 
+def test_the_reflection_overlay_keeps_the_frequency_labels() -> None:
+    """The ``|R|`` overlay leaves the octave-center labels the spectrum set.
+
+    It was drawn with a second ``semilogx``, which reset the scale and put
+    matplotlib's 10^2 and 10^3 back on the frequency axis; the one guide
+    figure drawn by this renderer relabeled the axis after the call to hide it.
+    """
+    from matplotlib.ticker import LogFormatter
+
+    res = _layered_absorber()
+    ax = res.plot(language="es")
+    labels = [label.get_text() for label in ax.get_xticklabels() if label.get_text()]
+    assert ax.get_xscale() == "log"
+    assert not isinstance(ax.xaxis.get_major_formatter(), LogFormatter)
+    assert labels
+    assert not any("10^" in label for label in labels), labels
+    plt.close("all")
+
+
 def test_porous_medium_plot_normalized_components() -> None:
     res = _porous_medium()
     ax = res.plot()

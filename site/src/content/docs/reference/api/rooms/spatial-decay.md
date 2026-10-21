@@ -789,7 +789,12 @@ A spatial sound distribution curve and what clause 6 reads off it.
 ### SpatialDecayResult.plot()
 
 ```python
-SpatialDecayResult.plot(ax: Axes | None = None, **kwargs: Any) -> Axes
+SpatialDecayResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
 ```
 
 Draw the curve, the free-field reference and the fitted slope.
@@ -799,7 +804,8 @@ Draw the curve, the free-field reference and the fitted slope.
 | Name | Description |
 | :--- | :--- |
 | `ax` | Axes to draw on; a new figure is made when omitted. |
-| `kwargs` | Passed to the renderer, including `language`. |
+| `language` | `"en"` (default) or `"es"` for the labels. |
+| `kwargs` | Passed to the renderer. |
 
 **Returns:** The axes drawn on.
 

@@ -203,7 +203,7 @@ coefficient and step tables the export carries.
 ANPDatabase.aircraft(aircraft_id: str) -> ANPAircraft
 ```
 
-Return the [`ANPAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraft) for an identifier.
+The [`ANPAircraft`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpaircraft) for an identifier.
 
 **Raises**
 

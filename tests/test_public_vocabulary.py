@@ -687,8 +687,9 @@ def _helper_name_defaults() -> dict[str, dict[str, tuple[int | None, str]]]:
 def _named_by_helper_defaults(node: ast.AST) -> set[str]:
     """The names a shared helper's message gives a value it was handed unnamed.
 
-    ``require_1d_signal(x)`` with a defaulted ``name="signal"`` tells the
-    caller of a function that takes ``x`` that its ``signal`` is wrong.
+    A helper such as ``resolve_samples(x)`` with a defaulted ``name="signal"``
+    would tell the caller of a function that takes ``x`` that its ``signal``
+    is wrong.
     """
     helpers = _helper_name_defaults()
     names: set[str] = set()

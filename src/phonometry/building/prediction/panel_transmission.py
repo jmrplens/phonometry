@@ -117,6 +117,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     from ..._internal.types import BandFraction
+    from ..._report.metadata import ReportMetadata
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
     from ..measurement.ratings import WeightedRatingResult
@@ -359,7 +360,14 @@ class SoundReductionResult(OwnsArrays):
 
         return weighted_rating(self.transmission_loss, fraction)
 
-    def report(self, path: str, **kwargs: Any) -> str:
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: ReportMetadata | None = None,
+        language: str = "en",
+        **kwargs: Any,
+    ) -> str:
         """Render the ISO 717-1 Annex C rating fiche of ``R(f)`` to a PDF.
 
         Convenience wrapper delegating to
@@ -369,12 +377,17 @@ class SoundReductionResult(OwnsArrays):
         (125 Hz to 2000 Hz).
 
         :param path: Destination path of the PDF file.
+        :param metadata: The laboratory, client and specimen block, a
+            :class:`~phonometry.ReportMetadata`; ``None`` leaves it blank.
+        :param language: ``"en"`` (default) or ``"es"`` for the fiche.
         :param kwargs: Forwarded to
             :meth:`~phonometry.building.measurement.ratings.WeightedRatingResult.report`
             (e.g. ``engine``).
         :return: The written ``path`` as a :class:`str`.
         """
-        return self.rating().report(path, **kwargs)
+        return self.rating().report(
+            path, metadata=metadata, language=language, **kwargs
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

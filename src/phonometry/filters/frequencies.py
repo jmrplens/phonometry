@@ -310,7 +310,7 @@ def _format_nominal_freq(f: float) -> str:
 
 
 def normalized_frequencies(fraction: int) -> list[float]:
-    """Get standardized IEC center frequencies.
+    """Standardized IEC center frequencies.
 
     :param fraction: 1 or 3 (Octave or 1/3 Octave).
     :return: List of standard frequencies.

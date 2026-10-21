@@ -320,12 +320,12 @@ def test_collected_test_modules_have_unique_import_names() -> None:
 
     With the default import mode pytest names a module by walking up from the
     file while ``__init__.py`` exists: a file inside a package keeps its dotted
-    path, and a file outside one is imported by its bare basename. The suite
-    has no ``__init__.py``, so every test file there competes for its basename,
-    and a second ``test_spain.py`` anywhere is an import mismatch that only
-    shows up when the whole tree is collected at once. Renaming test files to
-    follow their modules, which is what the taxonomy work does, is exactly how
-    the collision gets introduced.
+    path, and a file outside one is imported by its bare basename. No folder
+    that holds a test file has an ``__init__.py``, so every test file competes
+    for its basename, and a second ``test_spain.py`` anywhere is an import
+    mismatch that only shows up when the whole tree is collected at once.
+    Renaming test files to follow their modules, which is what the taxonomy
+    work does, is exactly how the collision gets introduced.
 
     ``src`` is scanned too, because pytest collects from the repository root
     and ``phonometry.signals.test_signals`` matches the default patterns. It
@@ -627,7 +627,8 @@ def test_every_warning_a_package_can_raise_is_published() -> None:
                 continue
             try:
                 module = importlib.import_module(modname)
-            except Exception:  # noqa: BLE001 - an optional dependency is absent
+            # An optional dependency is absent
+            except Exception:  # noqa: BLE001
                 continue
             for name, obj in vars(module).items():
                 if (
@@ -939,20 +940,34 @@ def test_no_suppression_comment_hides_its_reason_from_the_parser() -> None:
     a dash, a double dash and a second hash, and SonarCloud only saw the
     fourteenth because it was new code in a pull request. The reason belongs on
     the line above, where nothing has to parse it.
+
+    The scripts and the tests are read too: fifty-two directives there carried
+    their reason after the codes, in the same three shapes and a parenthesis.
+    Only comments are read, so a docstring that quotes the directive is not one.
     """
     import pathlib
     import re
+    import tokenize
 
     directive = re.compile(r"#\s*noqa:\s*(?P<tail>.*)$")
     codes = re.compile(r"^[A-Z]+[0-9]+(?:\s*,\s*[A-Z]+[0-9]+)*\s*$")
     trailing: list[str] = []
-    for path in sorted(pathlib.Path("src/phonometry").rglob("*.py")):
-        for number, line in enumerate(
-            path.read_text(encoding="utf-8").splitlines(), start=1
-        ):
-            match = directive.search(line)
+    files = [
+        path
+        for folder in ("src/phonometry", "scripts", "tests")
+        for path in sorted(pathlib.Path(folder).rglob("*.py"))
+    ]
+    for path in files:
+        with path.open("rb") as handle:
+            comments = [
+                token
+                for token in tokenize.tokenize(handle.readline)
+                if token.type == tokenize.COMMENT
+            ]
+        for token in comments:
+            match = directive.search(token.string)
             if match and not codes.match(match.group("tail")):
-                trailing.append(f"{path.relative_to('src')}:{number} {line.strip()}")
+                trailing.append(f"{path}:{token.start[0]} {token.line.strip()}")
 
     assert not trailing, (
         "suppression comments carrying prose after their codes:\n  "
@@ -1056,7 +1071,7 @@ def test_a_judgement_summary_does_not_open_with_another_family_verb() -> None:
     `verify_` judges an instrument against the requirements a standard sets for
     it, `assess_` judges a measured situation against limits or categories, and
     `check_` judges the arrangement a method needs before its numbers mean
-    anything (CONTRIBUTING, "The three verbs of a judgement"). A summary may
+    anything (docs/contributing/naming.md#n9). A summary may
     open however it reads best, as a question or with any other verb, but one
     that opens with a *different* family's verb tells a reader the prefix was
     picked at random: `check_base_plate_scattering` used to begin "Verify", and
@@ -1076,8 +1091,9 @@ def test_a_judgement_summary_does_not_open_with_another_family_verb() -> None:
             continue
         try:
             imported = importlib.import_module(module.name)
-        except Exception:  # noqa: BLE001 - a module that will not import is
-            continue  # another test's finding, not this one's
+        # A module that will not import is another test's finding, not this one's
+        except Exception:  # noqa: BLE001
+            continue
         for name in getattr(imported, "__all__", []):
             obj = getattr(imported, name, None)
             if not inspect.isfunction(obj) or name in seen:

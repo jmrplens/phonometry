@@ -13,13 +13,13 @@ b. **A judgement carries its verb.** A public function, or a public method
    of a published class, that answers with a ``bool``, a tuple of them, a
    boolean array or a verdict record is named ``verify_`` (an instrument),
    ``assess_`` (a measured situation) or ``check_`` (the setup a method
-   needs), as CONTRIBUTING sets out; and each of those returns a record, or
-   ``None`` when the answer is only a warning. Two regime predicates stay,
-   because CONTRIBUTING keeps a verb for a predicate: they say which procedure
-   a clause selects, not whether anything passed. A method that tests
-   membership or provenance, looks up one requirement of a verdict by its
-   clause, or says how a value is reported answers no pass or fail either,
-   and is keyed by location with its reason.
+   needs), as docs/contributing/naming.md#n9 sets out; and each of those
+   returns a record, or ``None`` when the answer is only a warning. Two regime
+   predicates stay, because the same rule keeps a verb for a predicate: they
+   say which procedure a clause selects, not whether anything passed. A method
+   that tests membership or provenance, looks up one requirement of a verdict
+   by its clause, or says how a value is reported answers no pass or fail
+   either, and is keyed by location with its reason.
 c. **A verdict refuses to stand in for a bool.** Every class a judging
    function returns, and every public class with a scalar ``passes``, defines
    a ``__bool__`` that raises ``TypeError``: ``if result:`` on a record is
@@ -56,7 +56,7 @@ import phonometry
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
 
-#: The prefixes of a judgement (CONTRIBUTING, "The three verbs of a judgement").
+#: The prefixes of a judgement (docs/contributing/naming.md#n9).
 VERBS = ("verify_", "assess_", "check_")
 
 #: Public callables that return a ``bool`` and keep a name without a judging
@@ -239,7 +239,8 @@ def _resolve(annotation: object, owner: object) -> object:
     namespace.setdefault("np", np)
     namespace.setdefault("NDArray", NDArray)
     try:
-        return eval(annotation, {}, namespace)  # noqa: S307 - annotations of our own source
+        # Annotations of our own source
+        return eval(annotation, {}, namespace)  # noqa: S307
     except (NameError, TypeError, SyntaxError):  # pragma: no cover - reported below
         return annotation
 

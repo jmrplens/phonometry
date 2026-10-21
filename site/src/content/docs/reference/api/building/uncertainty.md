@@ -101,7 +101,7 @@ band_uncertainty(
 ) -> BandUncertainty
 ```
 
-Return the one-third-octave standard uncertainties for a measurand.
+The one-third-octave standard uncertainties for a measurand.
 
 Airborne (Table 2) offers situations A/B/C; impact (Table 4) only B/C; the
 reduction `ΔL` (Table 6) only A. `upper_limit=True` selects the `σR95`
@@ -181,7 +181,7 @@ insulation_coverage_factor(
 ) -> float
 ```
 
-Return the coverage factor `k` for a coverage probability (Table 8).
+The coverage factor `k` for a coverage probability (Table 8).
 
 **Parameters**
 
@@ -208,7 +208,7 @@ insulation_expanded_uncertainty(
 ) -> float
 ```
 
-Return the expanded uncertainty $U = k\,u$ (Formula 2, Clause 8).
+The expanded uncertainty $U = k\,u$ (Formula 2, Clause 8).
 
 The coverage factor `k` is taken from Table 8 for the requested coverage
 probability; a minimum of $k = 1$ is enforced (Clause 8).
@@ -234,7 +234,7 @@ probability; a minimum of $k = 1$ is enforced (Clause 8).
 max_repeatability_standard_deviation() -> BandUncertainty
 ```
 
-Return Table 1, the maximum repeatability standard deviation per band (Clause 5.8).
+Table 1: the maximum repeatability standard deviation per band (Clause 5.8).
 
 A laboratory verifies its own procedure when the repeatability standard
 deviation of `nx` repeated measurements stays below these values.
@@ -249,7 +249,7 @@ prediction_input_uncertainty(
 ) -> float
 ```
 
-Return the prediction input uncertainty `u_input` (Formula A.1).
+The prediction input uncertainty `u_input` (Formula A.1).
 
 $$
 u_{\mathrm{input}} = \sqrt{\frac{\sigma_\mathrm{R}^2 + \sigma_{\mathrm{product}}^2}{n} + \sigma_{\mathrm{product}}^2}
@@ -360,7 +360,7 @@ single_number_uncertainty(
 ) -> float
 ```
 
-Return the tabulated single-number standard uncertainty `u`, in dB.
+The tabulated single-number standard uncertainty `u`, in dB.
 
 Descriptors (case-insensitive, with aliases) cover the ISO 717 ratings:
 `"r_w"` (also `rprime_w`/`dn_w`/`dnt_w`) and its spectrum-adaptation

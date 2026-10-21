@@ -35,7 +35,8 @@ from phonometry.solids import DampingMaterial, SolidMaterial
 _SOURCE = "Panel 40 technical data sheet (Example Acoustics Ltd), Rev. 4"
 
 
-def _built(cls: type[io.CatalogueRow], **cells: Any) -> Any:  # noqa: ANN401 - the row of the class asked for
+# The row of the class asked for
+def _built(cls: type[io.CatalogueRow], **cells: Any) -> Any:  # noqa: ANN401
     return cls.from_printed(name="Panel 40 core", source=_SOURCE, **cells)
 
 

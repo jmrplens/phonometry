@@ -1,11 +1,12 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Fail on a public identifier spelled the British way, or on ``insitu``.
 
-The library is written in American English (CONTRIBUTING, Spelling), and an
-identifier is the one place where the spelling is not a matter of style: a
-caller types it, and a caller who wrote ``center_frequency`` on one function
-and gets a ``TypeError`` from the next one, which wanted ``centre_frequency``,
-has learned nothing about acoustics. The names had drifted into both
+The library is written in American English
+(docs/contributing/naming.md#n32), and an identifier is the one place where
+the spelling is not a matter of style: a caller types it, and a caller who
+wrote ``center_frequency`` on one function and gets a ``TypeError`` from the
+next one, which wanted ``centre_frequency``, has learned nothing about
+acoustics. The names had drifted into both
 spellings, ``acoustic_centre`` beside ``center_frequencies``, ``programme``
 beside ``program_loudness``, ``normalised_difference`` beside
 ``NORMALIZED_IMPEDANCE_PA_S_M``, and nothing looked at the whole API. This

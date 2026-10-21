@@ -165,7 +165,7 @@ Published TTS and injury onset criteria of a hearing group.
 
 ```python
 ExposureCriteria(
-    group: str,
+    group: Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'],
     guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'],
     *,
     impulsive: bool,
@@ -207,7 +207,7 @@ is not published by that guidance version.
 ```python
 hearing_groups(
     guidance: Literal['nmfs-2024', 'nmfs-2018', 'southall-2019'] = 'nmfs-2024',
-) -> tuple[str, ...]
+) -> tuple[Literal['LF', 'MF', 'HF', 'VHF', 'PW', 'OW', 'PA', 'OA', 'SI', 'PCW', 'OCW', 'PCA', 'OCA'], ...]
 ```
 
 Hearing-group codes defined by a guidance version.

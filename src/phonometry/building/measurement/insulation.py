@@ -99,6 +99,7 @@ from ..._internal.validation import (
     is_positive,
     require_equal_counts,
     require_equal_shapes,
+    require_present,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -165,14 +166,12 @@ class AirborneInsulationResult(OwnsArrays):
         (Clause 3.14, Formula (4)), or ``None`` when the partition area
         and receiving-room volume were not supplied.
     :ivar l1: Energy-average source-room levels the quantities were formed
-        from, in dB (after any position averaging, Formula (9)). Defaults
-        to ``None`` for backward-compatible construction.
-    :ivar l2: Energy-average receiving-room levels, in dB. Defaults to
-        ``None``.
+        from, in dB (after any position averaging, Formula (9)).
+    :ivar l2: Energy-average receiving-room levels, in dB.
     :ivar t2: Receiving-room reverberation time per band, in seconds, after any
-        63 Hz octave substitution. Defaults to ``None``.
+        63 Hz octave substitution.
     :ivar t0: Reference reverberation time ``T0`` used for ``DnT``, in
-        seconds. Defaults to ``None``.
+        seconds.
     :ivar source_low_frequency: What the ISO 16283-1 Clause 8 low-frequency
         procedure did to ``l1``, or ``None`` when the source room was not under
         25 m³ or carried no corner measurements.
@@ -183,10 +182,10 @@ class AirborneInsulationResult(OwnsArrays):
     d: np.ndarray
     dnt: np.ndarray
     r_prime: np.ndarray | None
-    l1: np.ndarray | None = None
-    l2: np.ndarray | None = None
-    t2: np.ndarray | None = None
-    t0: float | None = None
+    l1: np.ndarray
+    l2: np.ndarray
+    t2: np.ndarray
+    t0: float
     source_low_frequency: LowFrequencyResult | None = None
     receiver_low_frequency: LowFrequencyResult | None = None
 
@@ -205,8 +204,8 @@ class AirborneInsulationResult(OwnsArrays):
         formed rather than recomputed from the chain printed next to them, so
         nothing downstream compares the two.
 
-        ``None`` stands for a quantity the measurement did not produce, so it
-        is passed over rather than counted.
+        ``r_prime`` is ``None`` when the measurement did not produce it, and
+        is then passed over rather than counted.
 
         Every column must also be finite. No measurement here has an
         undeterminable band: :func:`airborne_insulation` refuses non-finite
@@ -217,7 +216,9 @@ class AirborneInsulationResult(OwnsArrays):
 
         :raises ValueError: if any per-band column disagrees with the rest,
             or carries a non-finite value.
+        :raises TypeError: if a required field is ``None``.
         """
+        require_present(self, "d", "dnt", "l1", "l2", "t2", "t0")
         require_ranks(self, d=1, dnt=1, r_prime=1, l1=1, l2=1, t2=1)
         require_same_length(self, "d", "dnt", "r_prime", "l1", "l2", "t2")
         for name in ("d", "dnt", "r_prime", "l1", "l2", "t2"):
@@ -278,15 +279,14 @@ class AirborneInsulationResult(OwnsArrays):
         :param verbose: When ``True``, the table shows the measurement chain
             per band (energy-average ``L1`` and ``L2``, reverberation time
             ``T`` and the quantity) instead of the two-column ``f | value``
-            form; it requires the result to carry ``l1``, ``l2`` and ``t2``
-            (populated by :func:`airborne_insulation`).
+            form.
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` or ``quantity`` is unknown, the
             selected quantity is not available, the result does not hold the
             16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1
-            rating needs, or ``verbose=True`` without the per-band chain.
+            rating needs.
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``), or matplotlib is missing for
             the embedded figure (``pip install phonometry[plot]``).
@@ -315,12 +315,11 @@ class ImpactInsulationResult(OwnsArrays):
         supplied.
     :ivar li: Energy-average impact sound pressure levels the quantities
         were formed from, in dB (after any position averaging,
-        Formula (11)). Defaults to ``None`` for backward-compatible
-        construction.
+        Formula (11)).
     :ivar t2: Receiving-room reverberation time per band, in seconds, after any
-        63 Hz octave substitution. Defaults to ``None``.
+        63 Hz octave substitution.
     :ivar t0: Reference reverberation time ``T0`` used for ``L'nT``, in
-        seconds. Defaults to ``None``.
+        seconds.
     :ivar low_frequency: What the ISO 16283-2 Clause 8 low-frequency procedure
         did to ``li`` and, through Clause 10.4, to ``t2``; ``None`` when the
         receiving room was not under 25 m³ or carried no corner measurements.
@@ -328,9 +327,9 @@ class ImpactInsulationResult(OwnsArrays):
 
     l_n_t: np.ndarray
     l_n: np.ndarray | None
-    li: np.ndarray | None = None
-    t2: np.ndarray | None = None
-    t0: float | None = None
+    li: np.ndarray
+    t2: np.ndarray
+    t0: float
     low_frequency: LowFrequencyResult | None = None
 
     def __post_init__(self) -> None:
@@ -346,8 +345,8 @@ class ImpactInsulationResult(OwnsArrays):
         levels are carried already formed, not recomputed from the chain beside
         them, so nothing downstream compares the two.
 
-        ``None`` stands for a quantity the measurement did not produce, so it
-        is passed over rather than counted.
+        ``l_n`` is ``None`` when the measurement did not produce it, and is
+        then passed over rather than counted.
 
         Every column must also be finite. No measurement here has an
         undeterminable band: :func:`impact_insulation` refuses non-finite
@@ -358,7 +357,9 @@ class ImpactInsulationResult(OwnsArrays):
 
         :raises ValueError: if any per-band column disagrees with the rest,
             or carries a non-finite value.
+        :raises TypeError: if a required field is ``None``.
         """
+        require_present(self, "l_n_t", "li", "t2", "t0")
         require_ranks(self, l_n_t=1, l_n=1, li=1, t2=1)
         require_same_length(self, "l_n_t", "l_n", "li", "t2")
         for name in ("l_n_t", "l_n", "li", "t2"):
@@ -417,16 +418,14 @@ class ImpactInsulationResult(OwnsArrays):
         :param engine: Rendering back end; only ``"reportlab"`` is supported.
         :param verbose: When ``True``, the table shows the measurement chain
             per band (energy-average ``Li``, reverberation time ``T`` and the
-            quantity) instead of the two-column ``f | value`` form; it
-            requires the result to carry ``li`` and ``t2`` (populated by
-            :func:`impact_insulation`).
+            quantity) instead of the two-column ``f | value`` form.
         :param language: Fiche language: ``"en"`` (default, English) or
             ``"es"`` (Spanish, with a comma decimal separator).
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` or ``quantity`` is unknown, the
             selected quantity is not available, the result does not hold the
             16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-2
-            rating needs, or ``verbose=True`` without the per-band chain.
+            rating needs.
         :raises ImportError: If reportlab is not installed
             (``pip install phonometry[report]``), or matplotlib is missing for
             the embedded figure (``pip install phonometry[plot]``).
@@ -587,12 +586,11 @@ class FacadeInsulationResult(OwnsArrays):
         )
 
 
-#: The field quantities each result kind can report, mapping the ``quantity``
-#: argument of ``report()`` to the attribute holding the per-band curve and
-#: the per-band chain columns ``verbose=True`` needs.
-_FIELD_QUANTITIES: dict[type, tuple[tuple[str, ...], tuple[str, ...]]] = {
-    AirborneInsulationResult: (("dnt", "r_prime"), ("l1", "l2", "t2")),
-    ImpactInsulationResult: (("l_n_t", "l_n"), ("li", "t2")),
+#: The field quantities each result kind can report: the ``quantity``
+#: argument of ``report()`` names the attribute holding the per-band curve.
+_FIELD_QUANTITIES: dict[type, tuple[str, ...]] = {
+    AirborneInsulationResult: ("dnt", "r_prime"),
+    ImpactInsulationResult: ("l_n_t", "l_n"),
 }
 
 
@@ -620,7 +618,7 @@ def _render_iso16283(
 
     check_language(language)
     check_engine(engine)
-    quantities, chain_attrs = _FIELD_QUANTITIES[type(result)]
+    quantities = _FIELD_QUANTITIES[type(result)]
     if quantity not in quantities:
         expected = " or ".join(repr(q) for q in quantities)
         msg = f"Unknown field quantity {quantity!r}; expected {expected}."
@@ -641,16 +639,6 @@ def _render_iso16283(
             f"Clause 5.1); got {curve.shape} band values."
         )
         raise ValueError(msg)
-    if verbose:
-        missing = [a for a in chain_attrs if getattr(result, a) is None]
-        if missing:
-            msg = (
-                "verbose=True needs the per-band measurement chain "
-                f"({', '.join(chain_attrs)}); {', '.join(missing)} "
-                "missing. Build the result with airborne_insulation() / "
-                "impact_insulation() so they are populated."
-            )
-            raise ValueError(msg)
     if isinstance(result, ImpactInsulationResult):
         rating: WeightedRatingResult | ImpactRatingResult = weighted_impact_rating(
             curve

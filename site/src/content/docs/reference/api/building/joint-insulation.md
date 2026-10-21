@@ -740,14 +740,17 @@ Bands whose $R_\mathrm{s}$ is a minimum value (`"limit"` or `"maximum"`).
 ### LaboratoryJointInsulationResult.octave_bands()
 
 ```python
-LaboratoryJointInsulationResult.octave_bands() -> tuple[np.ndarray, np.ndarray]
+LaboratoryJointInsulationResult.octave_bands() -> OctaveBandSpectrum
 ```
 
-`(octave centres in Hz, Rs,oct in dB)` from the three thirds of each octave.
+$R_\mathrm{s}$ in octave bands, from the three thirds of each octave.
 
-$R_\mathrm{oct} = -10 \lg[(1/3) \sum 10^{-R_j/10}]$: the
+$-10 \lg[(1/3) \sum 10^{-R_{\mathrm{s},j}/10}]$: the
 transmitted power of the three thirds averaged, as Figure J.9 plots
-a joint at several gap widths in octave bands.
+a joint at several gap widths in octave bands. The standard prints
+no octave symbol for the joint; Figure J.9 keys it $R_\mathrm{s}$
+against the octave band, and the form is that of ISO 717-1:2020
+Formula (D.1).
 
 ### LaboratoryJointInsulationResult.plot()
 

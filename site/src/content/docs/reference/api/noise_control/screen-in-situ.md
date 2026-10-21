@@ -447,11 +447,9 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The `Axes`.
 
-### ScreenInSituResult.rounded()
+### ScreenInSituResult.rounded
 
-```python
-ScreenInSituResult.rounded() -> NDArray[np.int_]
-```
+*property*
 
 The band values as 7.4 c) reports them, to the nearest integer.
 
@@ -459,11 +457,9 @@ The band values as 7.4 c) reports them, to the nearest integer.
 the even decibel, Rule A of ISO 80000-1:2009 Annex B, as in the other
 in-situ standards of this library.
 
-### ScreenInSituResult.rounded_a_weighted()
+### ScreenInSituResult.rounded_a_weighted
 
-```python
-ScreenInSituResult.rounded_a_weighted() -> int | None
-```
+*property*
 
 $D_{p\mathrm{A}}$ as 7.4 c) reports it, to the nearest integer.
 

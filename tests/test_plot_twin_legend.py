@@ -468,6 +468,7 @@ def _intensity() -> Axes:
         total_pressure_intensity_index=2.0,
         total_direction=1,
         max_valid_frequency=5000.0,
+        spacing_m=0.012,
     )
     return result.plot()
 

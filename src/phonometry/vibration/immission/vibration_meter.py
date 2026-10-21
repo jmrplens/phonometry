@@ -10,9 +10,9 @@ transfer functions and exact time weightings, then grades a real meter against
 them.
 
 **The chain.** A velocity signal is band-limited (5.2.3.2, Formula (3)), which
-is two Butterworth pairs: a two-pole high pass at :math:`0{,}8 f_u` and a
-two-pole low pass at :math:`f_o / 0{,}8`. The working range is
-:math:`f_u = 1` Hz to :math:`f_o = 80` Hz for buildings, and 4 Hz to 315 Hz
+is two Butterworth pairs: a two-pole high pass at :math:`0{,}8 f_\mathrm{u}` and a
+two-pole low pass at :math:`f_\mathrm{o} / 0{,}8`. The working range is
+:math:`f_\mathrm{u} = 1` Hz to :math:`f_\mathrm{o} = 80` Hz for buildings, and 4 Hz to 315 Hz
 next to a railway, which is where DIN 45672-1 works. Frequency weighting
 (Formula (4)) divides that by :math:`1 - \mathrm{j}\,5{,}6\,\mathrm{Hz}/f`,
 one more pole and one more zero, and normalising by 1 mm/s turns the result
@@ -204,7 +204,10 @@ KB_DETECTION_LIMIT: float = 0.02
 #: of the working range. A band is entered as ``lower * f_u <= f`` and
 #: ``f <= upper * f_o`` where the factor applies to the limit it is written
 #: against; outside all of them the standard stops constraining the response
-#: from below, which is what 100 % means.
+#: from below. The limit is the magnitude ``G_u`` the table prints, which the
+#: condition ``-G_u <= F(f) <= G_o`` applies with a minus sign;
+#: :func:`response_tolerance_percent` returns it signed (``-10.0``,
+#: ``-20.0``, and ``-100.0`` where there is no lower limit).
 RESPONSE_TOLERANCE_LOWER_PERCENT: tuple[tuple[float, float, float], ...] = (
     (1.25, 0.8, 10.0),
     (0.5, 2.0, 20.0),
@@ -425,23 +428,35 @@ def kb_weighting_response(
 def response_tolerance_percent(
     frequencies: ArrayLike, *, working_range: WorkingRange = "building"
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """The limits of Tables 2 and 3 at each frequency, in per cent.
+    r"""The limits of Tables 2 and 3 at each frequency, in per cent.
 
     :param frequencies: Frequencies, in hertz.
     :param working_range: See :func:`band_limitation_response`.
-    :return: ``(lower, upper)``: the largest deviation allowed below and above
-        the design response, both as positive percentages. A lower limit of
-        100 % is the standard declining to constrain the response from below
-        outside the working range.
+    :return: ``(lower, upper)``, lower first and signed: the deviation
+        allowed below the design response as a negative percentage and above
+        it as a positive one, so that a deviation keeps to them when
+        ``lower <= F(f) <= upper``. Table 2 prints the lower limit
+        :math:`G_\mathrm{u}` as a magnitude, and 5.2.3.3 states the condition
+        as :math:`-G_\mathrm{u} \le F(f) \le G_\mathrm{o}`; ``lower`` is
+        :math:`-G_\mathrm{u}`. It is ``-10.0`` from
+        :math:`1{,}25\,f_\mathrm{u}` to :math:`0{,}8\,f_\mathrm{o}`,
+        ``-20.0`` from :math:`0{,}5\,f_\mathrm{u}` to
+        :math:`1{,}25\,f_\mathrm{u}` and from :math:`0{,}8\,f_\mathrm{o}` to
+        :math:`2\,f_\mathrm{o}`, and ``-100.0`` outside
+        :math:`0{,}5\,f_\mathrm{u}` to :math:`2\,f_\mathrm{o}`, where the
+        standard declines to constrain the response from below: a response
+        of zero deviates by -100 % and still keeps to it. ``upper`` is the
+        Table 3 limit, ``10.0`` from :math:`1{,}25\,f_\mathrm{u}` to
+        :math:`0{,}8\,f_\mathrm{o}` and ``20.0`` elsewhere.
     :raises ValueError: For a non-positive frequency or an unknown range.
     """
     f = _frequencies(frequencies)
     lower_hz, upper_hz = _range_limits(working_range)
     central = (f >= 1.25 * lower_hz) & (f <= BAND_LIMIT_CORNER_FACTOR * upper_hz)
     skirt = (f > 0.5 * lower_hz) & (f < 2.0 * upper_hz)
-    lower = np.full(f.shape, 100.0)
-    lower[skirt] = 20.0
-    lower[central] = 10.0
+    lower = np.full(f.shape, -100.0)
+    lower[skirt] = -20.0
+    lower[central] = -10.0
     upper = np.full(f.shape, 20.0)
     upper[central] = 10.0
     return lower, upper
@@ -496,7 +511,14 @@ class VibrationMeterVerification(OwnsArrays):
 
     @property
     def lower_percent(self) -> NDArray[np.float64]:
-        """The Table 2 limit at each frequency, in per cent."""
+        r"""The Table 2 lower limit at each frequency, in per cent.
+
+        Negative, as :func:`response_tolerance_percent` returns it: ``-10.0``
+        from :math:`1{,}25\,f_\mathrm{u}` to :math:`0{,}8\,f_\mathrm{o}`,
+        ``-20.0`` on the skirts out to :math:`0{,}5\,f_\mathrm{u}` and
+        :math:`2\,f_\mathrm{o}`, and ``-100.0`` beyond them, where the
+        standard sets no lower limit.
+        """
         return response_tolerance_percent(
             self.frequencies, working_range=self.working_range
         )[0]
@@ -518,7 +540,7 @@ class VibrationMeterVerification(OwnsArrays):
     def within_tolerance(self) -> NDArray[np.bool_]:
         """Whether each frequency keeps to both limits."""
         deviation = np.asarray(self.deviation_percent, dtype=np.float64)
-        within = (deviation >= -self.lower_percent) & (deviation <= self.upper_percent)
+        within = (deviation >= self.lower_percent) & (deviation <= self.upper_percent)
         return np.asarray(within, dtype=np.bool_)
 
     @property
@@ -538,7 +560,7 @@ class VibrationMeterVerification(OwnsArrays):
     def worst_frequency_hz(self) -> float:
         """The frequency that uses the largest share of its allowance."""
         allowance = np.where(
-            self.deviation_percent >= 0.0, self.upper_percent, self.lower_percent
+            self.deviation_percent >= 0.0, self.upper_percent, -self.lower_percent
         )
         used = np.abs(self.deviation_percent) / allowance
         return float(self.frequencies[int(np.argmax(used))])

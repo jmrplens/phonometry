@@ -85,8 +85,8 @@ ExtendedImpactRatingResult(
     ci: float,
     ci_50_2500: float | None,
     core: ImpactRatingResult,
-    frequencies: np.ndarray | None = None,
-    measured: np.ndarray | None = None,
+    frequencies: np.ndarray,
+    measured: np.ndarray,
 )
 ```
 
@@ -102,8 +102,8 @@ Values are integers unless computed with `one_decimal=True`.
 | `ci` | Core spectrum adaptation term `CI` (100-2500 Hz), in dB. |
 | `ci_50_2500` | Enlarged-range term `CI,50-2500`, in dB, or `None` when the supplied bands do not cover 50-2500 Hz. |
 | `core` | The integer-mode [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult) of the core bands (independent of `one_decimal`). |
-| `frequencies` | Band centre frequencies of the full (enlarged-range) measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
-| `measured` | The measured impact levels over the full enlarged range (after the one-decimal reduction of Clause 4.3), in dB. Defaults to `None`. |
+| `frequencies` | Band centre frequencies of the full (enlarged-range) measured curve, in Hz. |
+| `measured` | The measured impact levels over the full enlarged range (after the one-decimal reduction of Clause 4.3), in dB. |
 
 ### ExtendedImpactRatingResult.plot()
 
@@ -141,8 +141,8 @@ ExtendedWeightedRatingResult(
     ctr_50_5000: float | None,
     ctr_100_5000: float | None,
     core: WeightedRatingResult,
-    frequencies: np.ndarray | None = None,
-    measured: np.ndarray | None = None,
+    frequencies: np.ndarray,
+    measured: np.ndarray,
 )
 ```
 
@@ -168,8 +168,8 @@ frequency range.
 | `ctr_50_5000` | `Ctr,50-5000`, in dB, or `None`. |
 | `ctr_100_5000` | `Ctr,100-5000`, in dB, or `None`. |
 | `core` | The integer-mode [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult) of the core bands (independent of `one_decimal`), for plotting and the unfavourable-deviation sum. |
-| `frequencies` | Band centre frequencies of the full (enlarged-range) measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
-| `measured` | The measured band quantities over the full enlarged range (after the one-decimal reduction of Clause 4.4), in dB. Defaults to `None`. |
+| `frequencies` | Band centre frequencies of the full (enlarged-range) measured curve, in Hz. |
+| `measured` | The measured band quantities over the full enlarged range (after the one-decimal reduction of Clause 4.4), in dB. |
 
 ### ExtendedWeightedRatingResult.plot()
 
@@ -317,9 +317,9 @@ ImpactRatingResult(
     rating: int,
     ci: int,
     unfavorable_sum: float,
-    frequencies: np.ndarray | None = None,
-    measured: np.ndarray | None = None,
-    shifted_reference: np.ndarray | None = None,
+    frequencies: np.ndarray,
+    measured: np.ndarray,
+    shifted_reference: np.ndarray,
     quantity: Literal['impact'] = 'impact',
 )
 ```
@@ -332,10 +332,10 @@ Single-number weighted impact rating and CI (ISO 717-2).
 | :--- | :--- |
 | `rating` | Weighted impact rating (`Ln,w`, `L'n,w`, `L'nT,w`), the shifted reference read at 500 Hz, in dB (Clause 4.3; octave-band ratings include the -5 dB reduction of Clause 4.3.2). Integer. |
 | `ci` | Spectrum adaptation term `CI` (Clause A.2.1), in dB. Integer. |
-| `unfavorable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5 bands). Restates `measured` against `shifted_reference`, with the impact sign, and is checked against them when both are present. |
-| `frequencies` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
-| `measured` | The measured impact levels used for the rating (after the one-decimal reduction of Clause 4.3.1), in dB. Defaults to `None`. |
-| `shifted_reference` | Table 3 impact reference curve after the final shift, in dB. Defaults to `None`. |
+| `unfavorable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.3); at most 32,0 (16 bands) or 10,0 (5 bands). Restates `measured` against `shifted_reference`, with the impact sign, and is checked against them. |
+| `frequencies` | Band centre frequencies of the measured curve, in Hz. |
+| `measured` | The measured impact levels used for the rating (after the one-decimal reduction of Clause 4.3.1), in dB. |
+| `shifted_reference` | Table 3 impact reference curve after the final shift, in dB. |
 | `quantity` | Always `"impact"` (ISO 717-2), selecting the impact labels of the ISO 717 Annex C report. |
 
 ### ImpactRatingResult.plot()
@@ -760,9 +760,9 @@ WeightedRatingResult(
     c: int,
     ctr: int,
     unfavorable_sum: float,
-    frequencies: np.ndarray | None = None,
-    measured: np.ndarray | None = None,
-    shifted_reference: np.ndarray | None = None,
+    frequencies: np.ndarray,
+    measured: np.ndarray,
+    shifted_reference: np.ndarray,
     quantity: Literal['airborne'] = 'airborne',
 )
 ```
@@ -776,10 +776,10 @@ Single-number weighted rating and adaptation terms (ISO 717-1).
 | `rating` | Weighted rating (`Rw`, `R'w`, `DnT,w` ...), the shifted reference read at 500 Hz, in dB (Clause 4.4). Integer. |
 | `c` | Spectrum adaptation term `C` (spectrum No. 1), in dB (Clause 4.5). Integer. |
 | `ctr` | Spectrum adaptation term `Ctr` (spectrum No. 2), in dB (Clause 4.5). Integer. |
-| `unfavorable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5 bands). Restates `measured` against `shifted_reference` and is checked against them when both are present. |
-| `frequencies` | Band centre frequencies of the measured curve, in Hz. Defaults to `None` for backward-compatible construction. |
-| `measured` | The measured band quantities used for the rating (after the one-decimal reduction of Clause 4.4), in dB. Defaults to `None`. |
-| `shifted_reference` | Table 3 reference curve after the final shift, in dB. Defaults to `None`. |
+| `unfavorable_sum` | Sum of unfavourable deviations at the final shift, in dB (Clause 4.4); at most 32,0 (16 bands) or 10,0 (5 bands). Restates `measured` against `shifted_reference` and is checked against them. |
+| `frequencies` | Band centre frequencies of the measured curve, in Hz. |
+| `measured` | The measured band quantities used for the rating (after the one-decimal reduction of Clause 4.4), in dB. |
+| `shifted_reference` | Table 3 reference curve after the final shift, in dB. |
 | `quantity` | Always `"airborne"`: this class carries the ISO 717-1 airborne rating, and the renderers dispatch on this tag when handed the union with [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult), which carries `"impact"`. The field used to admit both values and promise that `"impact"` would select the impact labels; it never could, since the impact labels read `ci` off the result and this class does not have one, so the promise ended in the renderer's `AttributeError`. |
 
 ### WeightedRatingResult.plot()

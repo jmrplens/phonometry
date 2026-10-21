@@ -110,6 +110,7 @@ from .building_lab_rules import (
     generate_joint_insulation,
     generate_lab_floor_covering_improvement,
     generate_lab_lining_improvement,
+    generate_rainfall_octave_bands,
     generate_rainfall_sound,
 )
 from .correlation_analysis import (
@@ -860,6 +861,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_lab_lining_improvement,
     generate_lab_floor_covering_improvement,
     generate_rainfall_sound,
+    generate_rainfall_octave_bands,
     generate_joint_insulation,
     generate_heavy_impact_sources,
     generate_ceiling_plenum_flanking,

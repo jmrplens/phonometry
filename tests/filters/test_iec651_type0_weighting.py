@@ -142,12 +142,14 @@ def test_plain_bilinear_fails_type0_while_passing_class1() -> None:
 
     historic = filters.verify_weighting_class(wf, edition="1979")
     assert historic.overall_class == 1
-    failed = {band["freq"] for band in historic.bands if band["margin_class0_db"] < 0}
+    failed = {
+        band["frequency"] for band in historic.bands if band["margin_class0_db"] < 0
+    }
     assert failed == {16000.0, 20000.0}
     # Same deviation, opposite verdict: the mask is what differs, not the
     # measurement.
-    per_freq = {band["freq"]: band for band in historic.bands}
-    modern_per_freq = {band["freq"]: band for band in modern.bands}
+    per_freq = {band["frequency"]: band for band in historic.bands}
+    modern_per_freq = {band["frequency"]: band for band in modern.bands}
     for freq in failed:
         assert per_freq[freq]["deviation_db"] == modern_per_freq[freq]["deviation_db"]
         assert per_freq[freq]["class"] == 1
@@ -160,8 +162,8 @@ def test_band_and_sweep_carry_one_margin_per_type() -> None:
     )
     expected = [f"margin_class{cls}_db" for cls in (0, 1, 2, 3)]
     for band in result.bands:
-        assert list(band) == ["freq", "class", "deviation_db", *expected]
-    assert list(result.between_nominals) == ["worst_freq", *expected]
+        assert list(band) == ["frequency", "class", "deviation_db", *expected]
+    assert list(result.between_nominals) == ["worst_frequency", *expected]
 
 
 def test_b_is_graded_against_table_v_not_the_ansi_mask() -> None:
@@ -175,7 +177,7 @@ def test_b_is_graded_against_table_v_not_the_ansi_mask() -> None:
     wf = filters.WeightingFilter(48000, "B")
     result = filters.verify_weighting_class(wf, edition="1979")
     assert result.overall_class == 0
-    band_10 = next(band for band in result.bands if band["freq"] == 10.0)
+    band_10 = next(band for band in result.bands if band["frequency"] == 10.0)
     # Upper-only: the margin is the distance to the +2 dB ceiling alone.
     assert band_10["margin_class0_db"] == pytest.approx(
         2.0 - band_10["deviation_db"], abs=1e-9

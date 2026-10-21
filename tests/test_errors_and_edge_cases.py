@@ -268,10 +268,15 @@ def test_octavefilter_limits_none() -> None:
     spl = filters.octave_filter(rng.standard_normal(1000), 1000, limits=None).levels
     assert len(spl) > 0
 
-    freq, freq_d, freq_u, labels = nominal_frequencies(1, limits=None)
-    assert len(freq) > 0
-    assert len(freq) == len(freq_d) == len(freq_u) == len(labels)
-    assert all(isinstance(label, str) for label in labels)
+    bands = nominal_frequencies(1, limits=None)
+    assert bands.frequencies.size > 0
+    assert (
+        bands.frequencies.size
+        == bands.lower_edges.size
+        == bands.upper_edges.size
+        == len(bands.labels)
+    )
+    assert all(isinstance(label, str) for label in bands.labels)
 
 
 def test_calculate_level_invalid_mode() -> None:
@@ -379,11 +384,11 @@ def test_a_refusal_names_the_parameter_of_the_entry_point_that_was_called() -> N
 def test_process_bands_without_level_calculation() -> None:
     """Verify internal band processing can skip level calculation."""
     bank = filters.OctaveFilterBank(48000)
-    x = np.zeros((bank.num_bands, 100))
+    x = np.zeros((bank.n_bands, 100))
 
     spl, filtered = bank._process_bands(
         x,
-        num_channels=bank.num_bands,
+        num_channels=bank.n_bands,
         calculate_level=False,
         sigbands=True,
     )

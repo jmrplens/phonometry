@@ -317,10 +317,10 @@ Improvement of impact sound insulation by a floor covering (Annex H).
 ### LaboratoryFloorCoveringImprovementResult.octave_bands()
 
 ```python
-LaboratoryFloorCoveringImprovementResult.octave_bands() -> tuple[np.ndarray, np.ndarray]
+LaboratoryFloorCoveringImprovementResult.octave_bands() -> OctaveBandSpectrum
 ```
 
-`(octave centres in Hz, ΔLoct in dB)` by Formula (H.2).
+$\Delta L_\mathrm{oct}$ in octave bands, by Formula (H.2).
 
 $\Delta L_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta L_j/10}]$
 over the three one-third-octave bands of each octave present.
@@ -437,10 +437,10 @@ Improvement of airborne sound insulation by a lining (ISO 10140-1 Annex G).
 ### LaboratoryLiningImprovementResult.octave_bands()
 
 ```python
-LaboratoryLiningImprovementResult.octave_bands() -> tuple[np.ndarray, np.ndarray]
+LaboratoryLiningImprovementResult.octave_bands() -> OctaveBandSpectrum
 ```
 
-`(octave centres in Hz, ΔRoct in dB)` (ISO 717-1:2020 Formula (D.1)).
+$\Delta R_\mathrm{oct}$ in octave bands (ISO 717-1:2020 Formula (D.1)).
 
 $\Delta R_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta R_j/10}]$
 over the three one-third-octave bands of each octave, for every octave

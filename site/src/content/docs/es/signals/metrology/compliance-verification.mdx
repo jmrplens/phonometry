@@ -175,7 +175,7 @@ cuánto le faltó al veredicto:
 worst = min(bands.bands, key=lambda b: b["margin_class1_db"])
 print(round(worst["margin_class1_db"], 3))   # 0.4
 print(weighting.bands[20])
-# {'freq': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
+# {'frequency': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
 ```
 
 La clase de un banco es la clase más estricta que cumple en todos los
@@ -225,7 +225,7 @@ ax.plot(freqs, lo2, ":", drawstyle="steps-mid", color="C2")
 
 for curve, marker in (("A", "o"), ("C", "s")):
     verdict = filters.verify_weighting_class(filters.WeightingFilter(48000, curve))
-    f = [b["freq"] for b in verdict.bands]
+    f = [b["frequency"] for b in verdict.bands]
     dev = [b["deviation_db"] for b in verdict.bands]
     ax.plot(f, dev, marker=marker,
             label=f"Desviación de la ponderación {curve} (48 kHz)")

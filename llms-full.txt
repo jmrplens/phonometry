@@ -437,6 +437,7 @@ The theory pages travel in their own shard (https://docs.jmrp.io/phonometry/llms
 One file per area, each small enough to fetch whole. `llms-full.txt` is the complete concatenation and is far too large for a single fetch in most clients.
 
 - [Start here](https://docs.jmrp.io/phonometry/llms/llms-start.txt)
+- [Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/llms/llms-upgrading.txt)
 - [Theory and reference](https://docs.jmrp.io/phonometry/llms/llms-theory.txt)
 - [Signal analysis](https://docs.jmrp.io/phonometry/llms/llms-signals.txt)
 - [Octave filtering](https://docs.jmrp.io/phonometry/llms/llms-signals-filters.txt)
@@ -868,7 +869,9 @@ the `epnl` and the 10 dB-down `band_limits`. The reference-condition
 integrated-method example of ETM Vol. I **Table 4-4** (a 31-record
 $\mathrm{PNLT}$ history with non-uniform durations) is reproduced as
 $\mathrm{EPNL} = 92.6\ \text{EPNdB}$. `epnl_from_pnlt` exposes the
-duration/limit machinery directly from a $\mathrm{PNLT}$ series.
+duration/limit machinery directly from a $\mathrm{PNLT}$ series, as an
+`EPNLIntegration` record that names `epnl`, `pnltm`, `bandsharing_adjustment`,
+`band_limits` and `duration_correction`.
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -3416,7 +3419,7 @@ res.improvement       # delta-L per band
 res.delta_lw          # weighted single number (rated on the 100-3150 Hz sub-range)
 res.ci_delta          # spectrum adaptation term CI,delta (Formula (A.4))
 res.limited           # bands at the 1.3 dB limit of measurement (> delta-L)
-res.octave_bands()    # (octave freqs, delta-L_oct) via Formula (5)
+res.octave_bands()    # .frequencies and .values (delta-L_oct) via Formula (5)
 res.plot()            # the delta-L(f) improvement spectrum above (needs matplotlib)
 ```
 
@@ -10518,8 +10521,8 @@ t = np.array([1.9, 1.8, 1.7, 1.6, 1.5, 1.45, 1.4, 1.35, 1.3, 1.25, 1.2, 1.15,
 rain = building.rainfall_sound(l_pr, t, freqs, volume=62.0,
                                excited_area_m2=1.875,
                                reference_correction=correction)
-print(round(rain.l_ia, 1), round(rain.l_ia_norm, 1))     # 69.3 67.5
-print(rain.octave_bands()[0])       # [ 125.  250.  500. 1000. 2000. 4000.]
+print(round(rain.l_ia, 1), round(rain.l_ia_norm, 1))  # 69.3 67.5
+print(rain.octave_bands().frequencies)                # [ 125.  250.  500. 1000. 2000. 4000.]
 ```
 
 K.5 e) asks for $L_I$, $L_{I\mathrm{norm}}$, $L_{I\mathrm{A}}$ and
@@ -10564,6 +10567,41 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5.6))
 correction.plot(ax=ax1)
 rain.plot(ax=ax2)
 plt.tight_layout()
+plt.show()
+```
+
+</details>
+
+Formula (K.3) folds the intensity level into octaves, the energy sum of the
+three one-third-octave bands of each octave, and `rain.octave_bands()` returns
+it as one record that names its bands, its values and the quantity they hold,
+`"LI"` (or `"LI,norm"` with `normalized=True`), and draws itself:
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rainfall_octave_bands_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rainfall_octave_bands.svg" alt="One panel over the six octave bands from 125 Hz to 4000 Hz: the sound intensity level of the rooflight under heavy rain, folded into octaves, rising from 54.7 dB at 125 Hz through 61.3 dB at 250 Hz and 64.4 dB at 500 Hz to a peak of 65.2 dB at 1000 Hz, then falling to 63.3 dB at 2000 Hz and 58.9 dB at 4000 Hz, drawn as square markers joined by a line" width="70%"></picture>
+
+*The rooflight's sound intensity level in the six octave bands Formula (K.3)
+forms from the eighteen thirds: the peak at 1000 Hz is the octave of the
+800 Hz third where the one-third-octave spectrum peaks.*
+
+<details>
+<summary>Show the code for this figure</summary>
+
+```python
+# One line:
+rain.octave_bands().plot()
+plt.show()
+
+# By hand, from the record's fields: one point per octave, on one
+# categorical tick per octave band.
+octaves = rain.octave_bands()
+positions = np.arange(octaves.frequencies.size)
+fig, ax = plt.subplots()
+ax.plot(positions, octaves.values, "s-", label=octaves.quantity)
+ax.set_xticks(positions, [f"{f:g}" for f in octaves.frequencies])
+ax.set(xlabel="Octave band [Hz]",
+       ylabel="Sound intensity level $L_I$ [dB re 1 pW/m²]",
+       title="In octave bands")
+ax.legend()
 plt.show()
 ```
 
@@ -29355,7 +29393,7 @@ with_box = [88.0, 86.0, 81.0, 74.0, 68.0, 63.0]  # dB, enclosure fitted
 res = noise_control.enclosure_sound_power_insulation(
     without, with_box, frequencies=bands, fraction=1,
 )
-print(res.rounded())                    # [ 8 12 18 23 26 26] dB
+print(res.rounded)                    # [ 8 12 18 23 26 26] dB
 print(round(res.a_weighted_insulation, 1))   # 19.3 dB
 ```
 
@@ -29453,7 +29491,7 @@ cab = noise_control.cabin_insulation(
     room, inside, frequencies=bands, fraction=1,
     method="in-situ-loudspeaker",
 )
-print(cab.symbol, cab.rounded())   # D'_p [12 18 25 30 34 35] dB
+print(cab.symbol, cab.rounded)   # D'_p [12 18 25 30 34 35] dB
 ```
 
 There is a third method, and it is the one a workplace usually wants: drive the
@@ -29692,7 +29730,7 @@ A-weighted pair of 5.9 is refused with an artificial source, because then the
 spectrum weighted is the loudspeaker's. An artificial source has its own test to
 pass first, the twelve-position directivity index of definition 3.10 with the
 8 dB limit of 5.2.2. 7.4 c) reports the attenuation and its A-weighted value to
-the nearest whole decibel: `rounded()` and `rounded_a_weighted()` give them that
+the nearest whole decibel: `rounded` and `rounded_a_weighted` give them that
 way, with an exact half going to the even decibel, while `attenuation` keeps
 the unrounded difference.
 
@@ -38035,7 +38073,7 @@ over the length analysed: a 5 m record reports from 0,25 m, a 20 m one from
 from phonometry import filters
 
 bank = environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
-print(bank.order, bank.num_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
+print(bank.order, bank.n_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
 # 4 24 0
 x = np.arange(0.0, 20.0, 1.0e-3)
 record = 3.0 * np.cos(2.0 * np.pi * 100.0 * x)       # 3 um at 1 cm wavelength
@@ -52151,14 +52189,15 @@ documents, one page per module.
 | :--- | :--- | :--- | :--- |
 | `octave_filter` | `function` | **High-level analysis.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc. (Default: 1)<br>• `order`: Filter order (Default: 6)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `sigbands`: Return time signals (Default: False)<br>• `detrend`: Remove DC offset (Default: True)<br>• `mode`: 'rms' or 'peak' (Default: 'rms')<br>• `nominal`: IEC 61260-1 nominal labels (Default: False)<br>• `design`: `FilterDesign` (family, ripple, attenuation, decimation)<br>• `calibration`: `LevelCalibration` (factor, dBFS)<br>• `response_plot`: `ResponsePlot` (show, file) | `r = filters.octave_filter(x, fs, ...)`<br>• `r.levels`: band levels [dB]<br>• `r.frequencies`: band centres [Hz]<br>• `r.bands`: one waveform per band, or `None`<br><br>**With `sigbands=True`:**<br>`bands = filters.octave_filter(x, fs, sigbands=True).require_bands()`<br><br>**Calibrated usage:**<br>`filters.octave_filter(x, fs, calibration=filters.LevelCalibration(factor=0.05)).levels` |
 | `OctaveFilterResult` | `dataclass` | **What a filter bank gives back for one signal.**<br>• `levels`: band levels [dB], `(bands,)` or `(channels, bands)`, `None` when the call asked for no level<br>• `frequencies`: one band centre per level, exact or IEC 61260-1 nominal labels<br>• `bands`: one waveform per band, `None` unless `sigbands=True`<br>• `.require_levels()` / `.require_bands()`: the value, or a `ValueError` naming the argument that was missing<br>• `.plot()`: the band spectrum on a log frequency axis | `r = filters.octave_filter(x, fs, fraction=3)`<br>`r.levels[r.frequencies.index(1000.0)]`<br><br>• `ax = r.plot()` |
-| `OctaveFilterBank` | `class` | **Efficient bank implementation.**<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc.<br>• `order`: Filter order<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `design`: `FilterDesign` (family, ripple, attenuation, decimation)<br>• `calibration`: `LevelCalibration` (factor, dBFS)<br>• `block_processing`: `BlockProcessing` (stateful, steady_ic)<br>• `response_plot`: `ResponsePlot` (show, file) | `bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6, design=filters.FilterDesign(filter_type='butter'))`<br>`r = bank.filter(x, sigbands=False, mode='rms', detrend=True, zero_phase=False)`<br>• `r.levels`, `r.frequencies`, `r.bands` (an `OctaveFilterResult`)<br><br>• `bank`: Instance of the filter bank<br>• `bank.freq` / `bank.freq_d` / `bank.freq_u` / `bank.sos`: computed properties |
+| `OctaveFilterBank` | `class` | **Efficient bank implementation.**<br>• `fs`: Sample rate [Hz]<br>• `fraction`: 1, 3, etc.<br>• `order`: Filter order<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `design`: `FilterDesign` (family, ripple, attenuation, decimation)<br>• `calibration`: `LevelCalibration` (factor, dBFS)<br>• `block_processing`: `BlockProcessing` (stateful, steady_ic)<br>• `response_plot`: `ResponsePlot` (show, file) | `bank = filters.OctaveFilterBank(fs=48000, fraction=3, order=6, design=filters.FilterDesign(filter_type='butter'))`<br>`r = bank.filter(x, sigbands=False, mode='rms', detrend=True, zero_phase=False)`<br>• `r.levels`, `r.frequencies`, `r.bands` (an `OctaveFilterResult`)<br><br>• `bank`: Instance of the filter bank<br>• `bank.frequencies` / `bank.lower_edges` / `bank.upper_edges` [Hz], `bank.labels`, `bank.n_bands`: the band set, read-only<br>• `bank.sos`: the second-order sections |
 | `FilterDesign` | `dataclass` | **How the band filters are designed.**<br>• `filter_type`: 'butter', 'cheby1', 'cheby2', 'ellip', 'bessel' (Default: 'butter')<br>• `ripple`: Passband ripple [dB] (for cheby1/ellip; Default: 0.1)<br>• `attenuation`: Stopband attenuation [dB] (Default: 72; cheby2 needs >= 70 dB for class 1)<br>• `resample`: Multirate decimation (Default: True) | `OctaveFilterBank(48000, 3, design=filters.FilterDesign(filter_type='cheby2'))` |
 | `LevelCalibration` | `dataclass` | **How band energy becomes a level.**<br>• `factor`: Sensitivity multiplier, Pa per digital unit (Default: 1.0)<br>• `dbfs`: Output in dBFS instead of dB SPL (Default: False) | `octave_filter(x, fs, calibration=filters.LevelCalibration(factor=0.05))` |
 | `BlockProcessing` | `dataclass` | **Filter state carried between calls.**<br>• `stateful`: Carry filter state between calls (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False) | `OctaveFilterBank(48000, 1, design=filters.FilterDesign(resample=False), block_processing=filters.BlockProcessing(stateful=True))` |
 | `ResponsePlot` | `dataclass` | **Response plot drawn while designing.**<br>• `show`: Show the plot (Default: False)<br>• `file`: Path to save the plot (Default: None) | `OctaveFilterBank(48000, 3, response_plot=filters.ResponsePlot(show=True))` |
-| `OctaveFilterBank.spectrogram` | `method` | **Band levels over time.**<br>• `x`: Signal array (1D or 2D)<br>• `window_time`: Window length [s] (Default: 0.125)<br>• `overlap`: Fraction in [0, 1) (Default: 0.5)<br>• `mode`: 'rms' or 'peak'<br>• `zero_phase`: Group-delay-free frames (Default: False) | `levels, freq, times = bank.spectrogram(x)`<br><br>• `levels`: (bands, frames) or (channels, bands, frames)<br>• `times`: window centers [s] |
+| `OctaveFilterBank.spectrogram` | `method` | **Band levels over time.**<br>• `x`: Signal array (1D or 2D)<br>• `window_time`: Window length [s] (Default: 0.125)<br>• `overlap`: Fraction in [0, 1) (Default: 0.5)<br>• `mode`: 'rms' or 'peak'<br>• `zero_phase`: Group-delay-free frames (Default: False) | `r = bank.spectrogram(x)`<br><br>• an `OctaveSpectrogramResult`: `r.levels`, `r.frequencies`, `r.times` |
+| `OctaveSpectrogramResult` | `dataclass` | **Band levels over time, as a record.**<br>• `levels` [dB]: `(bands, frames)` or `(channels, bands, frames)`<br>• `frequencies` [Hz]: exact mid-band frequencies, read-only<br>• `times` [s]: window centres<br>• the level grid is checked against both axes when the record is built<br>• `.plot(channel=None)`: one raster on a log frequency axis with a dB colour bar; a multichannel result needs `channel` | `r = bank.spectrogram(x)`<br>`ax = r.plot()` |
 | `weighting_filter` | `function` | **Acoustic weighting.**<br>• `x`: Signal array<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical), 'D' (withdrawn IEC 537, aircraft), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012), '468' (ITU-R BS.468-4 psophometric) or 'Z' (Default: 'A')<br>• `high_accuracy`: fit the analog prototype at `fs` instead of transforming it blind, for IEC class 1 accuracy at every rate (Default: True; '468' requires it) | `y = filters.weighting_filter(x, fs, weighting='A')`<br><br>• `y`: weighted signal |
-| `WeightingFilter` | `class` | **Reusable weighting filter.**<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'A', 'B', 'C', 'D', 'G', 'AU', '468' or 'Z'<br>• `stateful`: Block processing (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `high_accuracy`: Fitted design, independent of `stateful` (Default: True; '468' refuses False) | `wf = filters.WeightingFilter(fs, 'A')`<br>`y = wf.filter(x)` |
+| `WeightingFilter` | `class` | **Reusable weighting filter.**<br>• `fs`: Sample rate [Hz]<br>• `weighting`: 'A', 'B', 'C', 'D', 'G', 'AU', '468' or 'Z'<br>• `stateful`: Block processing (Default: False)<br>• `steady_ic`: Steady-state initial conditions (Default: False)<br>• `high_accuracy`: Fitted design, independent of `stateful`, a `bool` (Default: True; '468' refuses False) | `wf = filters.WeightingFilter(fs, 'A')`<br>`y = wf.filter(x)` |
 | `time_weighting` | `function` | **Energy capture.**<br>• `x`: Raw signal array (squared internally; time is the last axis)<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', or 'impulse'<br>• `initial_state`: None, 'zero', 'first', scalar, or array (Default: None) | `env = filters.time_weighting(x, fs, mode='fast')`<br><br>• `env`: energy envelope (Mean Square), same shape as `x` |
 | `TimeWeightedEnvelope` | `dataclass` | **Exponentially averaged mean square of a record, with its rate.**<br>• `mean_square` [Pa² when calibrated], `fs` [Hz], `mode`, `calibrated`<br>• stands in for the bare array it replaced (`np.asarray`, indexing, `shape`)<br>• returned by `time_weighting`/`TimeWeighting.process` for a `Signal` input; a mean square is not a pressure record, so it is not a `Signal` | `env = filters.time_weighting(filters.weighting_filter(sig, weighting='A'), mode='fast')`<br>`env.plot()`  # the L_pAF trace in dB |
 | `TimeWeighting` | `class` | **Stateful time weighting.**<br>• `fs`: Sample rate [Hz]<br>• `mode`: 'fast', 'slow', 'impulse' (Default: 'fast') | `tw = filters.TimeWeighting(fs, mode='fast')`<br>`env = tw.process(block)` per block<br>`tw.reset()` to start over |
@@ -52171,7 +52210,7 @@ documents, one page per module.
 | `lex_8h` | `function` | **Daily exposure LEX,8h / LEP,d.**<br>• Same params as `sound_exposure` | `lex = signals.lex_8h(x, fs, duration_hours=4)`<br><br>• Normalized 8 h level [dB] |
 | `loudness_zwicker` | `function` | **Zwicker loudness (ISO 532-1:2017).**<br>• `x`: Calibrated signal in Pa (1D)<br>• `fs`: Sample rate [Hz]<br>• `field`: 'free' or 'diffuse' (Default: 'free')<br>• `stationary`: Clause 5 stationary method (Default: False)<br>• `time_skip`: seconds excluded from the stationary mean square (Annex B.1 uses 0.2 s; Default: 0.0)<br>• `calibration_factor`: Digital units to Pa (Default: 1.0) | `res = psychoacoustics.loudness_zwicker(x, fs)`<br><br>• `ZwickerLoudness`; time-varying runs add N5/N10 and the 500 Hz N(t) trace |
 | `loudness_zwicker_from_spectrum` | `function` | **Stationary loudness from band levels.**<br>• `levels`: 28 one-third-octave levels, 25 Hz-12.5 kHz [dB SPL]<br>• `field`: 'free' or 'diffuse' (Default: 'free') | `res = psychoacoustics.loudness_zwicker_from_spectrum(levels)`<br><br>• `res.loudness` [sone], `res.loudness_level` [phon] |
-| `ZwickerLoudness` | `dataclass` | **Loudness result.**<br>• `loudness`: N [sone]<br>• `loudness_level`: LN [phon]<br>• `specific`: N′(z), 240 bins of 0.1 Bark<br>• `n5` / `n10`: percentile loudness (time-varying only)<br>• `times` / `loudness_vs_time`: 500 Hz trace<br>• `field`: sound field assumed ('free'/'diffuse') | `res.loudness, res.n5`<br><br>• Time-varying fields are `None` for stationary results |
+| `ZwickerLoudness` | `dataclass` | **Loudness result.**<br>• `loudness`: N [sone]<br>• `loudness_level`: LN [phon]<br>• `specific`: N′(z), 240 bins of 0.1 Bark<br>• `n5` / `n10`: percentile loudness (time-varying only)<br>• `times` / `loudness_vs_time`: 500 Hz trace<br>• `field`: sound field assumed ('free'/'diffuse'), required, the fourth field | `res.loudness, res.n5`<br><br>• Time-varying fields are `None` for stationary results |
 | `sharpness_din` | `function` | **Sharpness in acum (DIN 45692).**<br>• `x`: Signal (1D)<br>• `fs`: Sample rate [Hz]<br>• `field`: 'free' or 'diffuse' (Default: 'free')<br>• `method`: 'din', 'aures' or 'bismarck' (Default: 'din')<br>• `calibration_factor`: Digital units to Pa (Default: 1.0) | `s = psychoacoustics.sharpness_din(x, fs)`<br><br>• `s`: sharpness [acum] |
 | `sharpness_din_from_specific` | `function` | **Sharpness from a specific-loudness pattern.**<br>• `specific`: N′(z), 240 values at 0.1 Bark (e.g. `ZwickerLoudness.specific`)<br>• `method`: 'din', 'aures' or 'bismarck' (Default: 'din') | `s = psychoacoustics.sharpness_din_from_specific(res.specific)`<br><br>• `s`: sharpness [acum] |
 | `erb_bandwidth` | `function` | **Auditory-filter equivalent rectangular bandwidth ERB_N (Glasberg & Moore 1990; Moore 6e p. 76).**<br>• `frequency` [Hz] (scalar or array, ≥ 0)<br>• `ERB_N = 24.673(0.004368 f + 1)` [Hz] | `erb_bandwidth(1000.0)  # 132.4` |
@@ -52231,7 +52270,7 @@ documents, one page per module.
 | `STIResult` | `dataclass` | **STI result.**<br>• `sti`: 0 to 1<br>• `mti`: band indices (7,)<br>• `mtf`: corrected m values (7×14 or 7×2)<br>• `band_levels` / `ambient_levels`: levels used or None<br>• `rating`: Annex F letter 'A+'…'U'<br>• `.adjusted_for_levels(operational_levels=…, operational_ambient=…)`: the same result at another condition (Annex M) | `res = speech.stipa(x, fs)`<br>`print(res.sti, res.rating)` |
 | `sound_intensity` | `function` | **p-p sound intensity (IEC 61043).**<br>• `p1`, `p2`: Microphone signals [Pa], equal length<br>• `fs`: Sample rate [Hz]<br>• `spacing_m`: Microphone separation Δr [m]<br>• `density`: Air density (Default: 1.204)<br>• `speed_of_sound`: Speed of sound (Default: 343.0)<br>• `fraction`: None, 1 or 3 (Default: None)<br>• `limits`: [f_min, f_max] (Default: [12, 20000])<br>• `bias_correct`: undo finite-difference under-read of band/broadband totals near `max_valid_frequency` (Default: False) | `res = emission.sound_intensity(p1, p2, fs, spacing_m=0.012, fraction=3)`<br><br>• `IntensityResult` |
 | `plot_pp_probe_geometry` | `function` | **Face-to-face p-p probe to scale.**<br>• `spacing_m` dr [m] (Default: 12 mm)<br>• `language` | `plot_pp_probe_geometry()`<br><br>• Also `IntensityResult.plot_geometry()` |
-| `IntensityResult` | `dataclass` | **Intensity result.**<br>• Per band (with `fraction`): `frequencies`, `intensity` [W/m²], `intensity_level`, `pressure_level`, `pressure_intensity_index`, `direction` (±1), `bias_correction`<br>• Broadband: `total_*` counterparts<br>• `max_valid_frequency`: 0.1·c/Δr | `res.total_intensity_level`<br>`res.total_direction` |
+| `IntensityResult` | `dataclass` | **Intensity result.**<br>• Per band (with `fraction`): `frequencies`, `intensity` [W/m²], `intensity_level`, `pressure_level`, `pressure_intensity_index`, `direction` (±1), `bias_correction`<br>• Broadband: `total_*` counterparts<br>• `max_valid_frequency`: 0.1·c/Δr<br>• `spacing_m`: the probe spacer [m], keyword-only and required | `res.total_intensity_level`<br>`res.total_direction` |
 | `field_indicators` | `function` | **ISO 9614-1 Annex A field indicators.**<br>• `pressure_levels`: Lpi per position [dB]<br>• `normal_intensity`: Signed Ini per position [W/m²]<br>• `temporal_intensity`: optional M short-time Ink samples at one fixed position, filling `f1` | `fi = emission.field_indicators(lp, i_n)`<br><br>• `FieldIndicators(f2, f3, f4, f1)` |
 | `FieldIndicators` | `dataclass` | **ISO 9614-1 Annex A indicators.**<br>• `f1`: temporal variability indicator (Eq. A.1), or `None` when no `temporal_intensity` was given<br>• `f2`: surface pressure-intensity indicator (Eq. A.3)<br>• `f3`: negative partial power indicator (Eq. A.6)<br>• `f4`: field non-uniformity indicator (Eq. A.8)<br>• f3 − f2 > 0 reveals negative partial power<br>• `.check_field_stationarity()`: the Table B.3 check on F1, a `FieldStationarityCheck` | `fi.f2, fi.f3, fi.f4`<br><br>• Criteria: Ld > F2, N > C·F4² |
 | `FieldStationarityCheck` | `dataclass` | **Is the field steady enough? F1 against the ISO 9614-1 Table B.3 limit.**<br>• `f1`: temporal variability indicator (Eq. A.1), a number or one value per band<br>• result: `limit` (0.6, `TEMPORAL_VARIABILITY_LIMIT`), `stationary` per band (F1 at most the limit, since Table B.3 acts only on F1 > 0.6), `passes` over them; no truth value: `bool()` raises<br>• `limit`, `stationary`, `passes` are read-only, read from `f1` | `fi.check_field_stationarity().passes` |
@@ -52240,7 +52279,7 @@ documents, one page per module.
 | `TEMPORAL_VARIABILITY_LIMIT` | `constant` | **ISO 9614-1 Table B.3 limit on F1** (0.6): above it the field is too variable and action code (e) applies | `fi.check_field_stationarity().limit == TEMPORAL_VARIABILITY_LIMIT` |
 | `residual_index_limits` | `function` | **IEC 61043 Table 2 minimum δpI0.**<br>• `device`: `'probe'`, `'processor'` or `'instrument'` (Default: `'instrument'`)<br>• `spacing_m`: microphone separation [m] (Default: 0.025; Note 1 adds 10 lg(x/25))<br>• `frequencies`: bands to report (Default: all 22, 50 Hz to 6.3 kHz) | `f, c1, c2 = emission.residual_index_limits("probe", spacing_m=0.012)`<br><br>• `(frequencies, class1, class2)` minima [dB] |
 | `verify_intensity_class` | `function` | **IEC 61043 Table 2 class check.**<br>• `residual_index`: measured δpI0 per band [dB]<br>• `frequencies`: band centres [Hz]<br>• keyword-only: `device`, `spacing_m`, as above | `res = emission.verify_intensity_class(d, f, spacing_m=0.012)`<br>`res.report("iec61043.pdf")`<br><br>• `IntensityInstrumentComplianceResult` |
-| `IntensityInstrumentComplianceResult` | `dataclass` | **IEC 61043 instrument class verdict.**<br>• `overall_class`: loosest class every band meets (1/2), or `None`<br>• `bands`, `frequencies`, `residual_index`, `spacing_m`, `device`, `range_limited`<br>• read-only from the device and the separation: `limit_class1`, `limit_class2`, `spacing_offset_db`; the band rows and the class are read from them and the measured index<br>• `.binding_margin()` / `.failing_bands()` / `.reference_class()`<br>• `.phase_mismatch_deg(speed_of_sound=343.0)`: equivalent channel phase error per band [deg]<br>• `.plot()`: measured δpI0 over the two Table 2 masks<br>• `.report(path, *, metadata=None)`: one-page PDF fiche<br>• takes `frequencies`, `residual_index`, `device`, `spacing_m`; `bands`, `overall_class`, `range_limited` are read-only, read from them<br>• no truth value: `bool()` raises; read `overall_class` | `res.overall_class, res.binding_margin()` |
+| `IntensityInstrumentComplianceResult` | `dataclass` | **IEC 61043 instrument class verdict.**<br>• `overall_class`: loosest class every band meets (1/2), or `None`<br>• `bands` (per-band rows keyed `frequency`, `class`, `residual_index_db`, the limits and the margins), `frequencies`, `residual_index`, `spacing_m`, `device`, `range_limited`<br>• read-only from the device and the separation: `limit_class1`, `limit_class2`, `spacing_offset_db`; the band rows and the class are read from them and the measured index<br>• `.binding_margin()` / `.failing_bands()` / `.reference_class()`<br>• `.phase_mismatch_deg(speed_of_sound=343.0)`: equivalent channel phase error per band [deg]<br>• `.plot()`: measured δpI0 over the two Table 2 masks<br>• `.report(path, *, metadata=None)`: one-page PDF fiche<br>• takes `frequencies`, `residual_index`, `device`, `spacing_m`; `bands`, `overall_class`, `range_limited` are read-only, read from them<br>• no truth value: `bool()` raises; read `overall_class` | `res.overall_class, res.binding_margin()` |
 | `instrument_class_from_components` | `function` | **IEC 61043 clause 8 combination rule.**<br>• `probe_class`, `processor_class`: 1 or 2 | `instrument_class_from_components(1, 2)`<br><br>• 1 only when both are class 1, else 2 |
 | `phase_mismatch_from_residual_index` | `function` | **δpI0 → channel phase mismatch.**<br>• `residual_index`: δpI0 [dB]<br>• `frequency` [Hz], `spacing_m` [m], `speed_of_sound` (Default: 343.0)<br>• φs = kd·10^(−δpI0/10) | `phase_mismatch_from_residual_index(20.0, 1000.0, 0.025)`<br><br>• 0.26 degrees |
 | `residual_index_from_phase_mismatch` | `function` | **Channel phase mismatch → δpI0.**<br>• `phase_mismatch_deg`: φs [deg], > 0<br>• `frequency` [Hz], `spacing_m` [m], `speed_of_sound` (Default: 343.0)<br>• δpI0 = 10 lg(kd/φs) | `residual_index_from_phase_mismatch(0.05, 1000.0, 0.012)`<br><br>• 24.0 dB |
@@ -52327,7 +52366,7 @@ documents, one page per module.
 | `CatalogueIssue` | `dataclass` | **One problem in a catalogue, or one note, and where.**<br>• `file`, `location` (a JSON pointer; a line and a column of a CSV file, `'line 3, column E (porosity)'`; or `'<Python>'` for a row built in Python), `row_key`, `field`, `message`<br>• `severity`: `'error'` or `'note'`<br>`str()` is one line: file, place, row and message | `error.issues[0].location  # '/rows/1/porosity'` |
 | `CatalogueWarning` | `warning class` | **A catalogue was read with notes on it:** a measured value with no report or laboratory named, a word in place of a number long enough to be a sentence, or what the row's own class notes. Nothing is changed; the notes are in `Catalogue.notes`. Subclass of `PhonometryWarning`<br>Emitted once per document by `io.read_catalogue` and `io.parse_catalogue` | `warnings.simplefilter('error', io.CatalogueWarning)` |
 | `verify_filter_class` | `function` | **IEC 61260 class check of a bank design.** Each band is read at the bank's input rate up to half of it, the alias images of a decimated band included. For `'2014'` it grades Table 1 (5.10), the effective bandwidth deviation (5.12) and the summation of output signals (5.16), the last two as IEC 61260-2:2016 tests them (Formulas (1) to (3)); for `'1995'` Table 1, the filter integrated response (4.5.3) and the summation of output signals (4.9), as its clause 5 tests them.<br>• `bank`: an `OctaveFilterBank`<br>• keyword-only: `n_points`, frequency grid points per band on its decimated half-band, the images read at the same spacing (Default: 32768)<br>• keyword-only: `edition`, `'2014'` (classes 1/2, default) or `'1995'` (IEC 61260:1995 / ANSI S1.11-2004, adds class 0)<br>• keyword-only: `points_per_bandwidth`, S of IEC 61260-2 Formula (1), at least 24; for `'1995'` where S starts, raised in steps of 12 as its 5.3.3 asks (Default: 24) | `result = filters.verify_filter_class(bank)`<br>`result.requirement_class("summation")`<br><br>• `FilterComplianceResult` |
-| `FilterComplianceResult` | `dataclass` | **IEC 61260 filter class-compliance result.**<br>• `overall_class`: strictest class every band meets on every requirement graded: 1/2 (`'2014'`), 0/1/2 (`'1995'`), or `None`<br>• `bands`: per-band verdict dictionaries, with `bandwidth_deviation_db` and `summation_min_db` / `summation_max_db`<br>• `requirements`, `.requirement_class(name)`, `.binding_margin(name, cls)`: each requirement on its own<br>• `range_limited`: stop-band mask beyond half the input sampling rate not exercised<br>• `.available_classes()` / `.reference_class()`: the edition's classes and the fiche's reference class<br>• `.plot(requirement=...)`: the relative attenuation over its corridor (default), `'effective_bandwidth'` or `'summation'`<br>• `.report(path, *, metadata=None, required_class via metadata)`: one-page PDF fiche<br>• takes `band_margins` (held as read-only copies), `fraction`, `edition`, `sos`, `frequencies`, `factors`, `fs`, `n_points`, `points_per_bandwidth`; `bands`, `overall_class`, `range_limited` are read-only, read from them<br>• no truth value: `bool()` raises; read `overall_class` | `verify_filter_class(bank).report("iec61260.pdf")` |
+| `FilterComplianceResult` | `dataclass` | **IEC 61260 filter class-compliance result.**<br>• `overall_class`: strictest class every band meets on every requirement graded: 1/2 (`'2014'`), 0/1/2 (`'1995'`), or `None`<br>• `bands`: per-band verdict dictionaries keyed `frequency`, `class` and the margins, with `bandwidth_deviation_db` and `summation_min_db` / `summation_max_db`<br>• `requirements`, `.requirement_class(name)`, `.binding_margin(name, cls)`: each requirement on its own<br>• `range_limited`: stop-band mask beyond half the input sampling rate not exercised<br>• `.available_classes()` / `.reference_class()`: the edition's classes and the fiche's reference class<br>• `.plot(requirement=...)`: the relative attenuation over its corridor (default), `'effective_bandwidth'` or `'summation'`<br>• `.report(path, *, metadata=None, required_class via metadata)`: one-page PDF fiche<br>• takes `band_margins` (held as read-only copies), `fraction`, `edition`, `sos`, `frequencies`, `factors`, `fs`, `n_points`, `points_per_bandwidth`; `bands`, `overall_class`, `range_limited` are read-only, read from them<br>• no truth value: `bool()` raises; read `overall_class` | `verify_filter_class(bank).report("iec61260.pdf")` |
 | `verify_time_invariance` | `function` | **Time-invariant operation of a bank, IEC 61260-1:2014 5.14 (IEC 61260-2:2016 7.4).** An exponential sweep through the bank itself, decimation included, against Formula (17), ±0.4 dB (class 1) or ±0.6 dB (class 2).<br>• `bank`: an `OctaveFilterBank`<br>• keyword-only: `seconds_per_decade`, the sweep rates, each 2 s to 5 s (Default: `(2.0, 5.0)`) | `res = filters.verify_time_invariance(bank)`<br><br>• `TimeInvarianceResult` |
 | `TimeInvarianceResult` | `dataclass` | **The swept verdict of a bank.**<br>• `output_levels` / `expected_levels`: (rates, bands), re the sweep level; `deviations_db`<br>• `band_classes`, `overall_class`, `worst_deviation_db`<br>• `seconds_per_decade`, `start_frequency_hz`, `end_frequency_hz`, `sweep_durations_s`, `averaging_times_s`<br>• no truth value; `.plot()` draws each band's deviation per rate | `res.overall_class` |
 | `swept_band_level` | `function` | **IEC 61260-1:2014 Formula (17): the time-averaged output of an exponential sweep.**<br>• `input_level`<br>• keyword-only: `fraction`, `sweep_duration_s`, `averaging_time_s`, `start_frequency_hz`, `end_frequency_hz`, `reference_attenuation` (Default: 0) | `filters.swept_band_level(127.0, fraction=3, sweep_duration_s=30, averaging_time_s=30, start_frequency_hz=0.01, end_frequency_hz=1e6)`<br><br>• `107.969...` (IEC 61260-2 and -3 Annex B, 107,97 dB) |
@@ -52340,9 +52379,10 @@ documents, one page per module.
 | `FilterPeriodicVerification` | `dataclass` | **The IEC 61260-3:2016 verdict.**<br>• `filter_class`, `fraction`, `pattern_approval_public`, `measurements`, `clauses`; `clause(id)`<br>• `passes`: every clause a complete test grades was measured on the filters and frequencies it requires and every result conforms<br>• `missing`, `incomplete` (11.3, 13.1, 13.4), `coverage_checked`, `failed`, `unusable`<br>• `statement`: the text of Clause 14 k), l) or m), with the caveat of 1.5 when the pattern approval is not public<br>• no truth value; `.plot()` draws every result's margin, clause by clause | `res.passes, res.statement` |
 | `class_limits` | `function` | **IEC 61260 Table 1 acceptance limits.**<br>• `fraction`: bandwidth designator denominator b (1, 3, ...)<br>• `filter_class`: 1 or 2 (`'2014'`); 0, 1 or 2 (`'1995'`)<br>• `omega`: normalized frequencies f/fm<br>• `edition`: `'2014'` (default) or `'1995'` | `lo, hi = filters.class_limits(3, 0, omega, edition="1995")`<br><br>• `lo` / `hi`: min/max relative attenuation [dB] (`hi` is `inf` outside the pass-band) |
 | `verify_weighting_class` | `function` | **Weighting tolerance check** against IEC 61672-1:2013 Table 3 (A/C/Z), ANSI S1.4-1983 Tables IV/V (B, Types as classes) or IEC 61012:1990 Table 1 (AU), at the exact base-10 frequencies, plus the 5.5.7 between-nominals sweep. `edition="1979"` grades against IEC 651:1979 Table V instead, which publishes the laboratory-grade Type 0 (A, B and C).<br>• `wf`: a `WeightingFilter` (A, B, C, AU or Z)<br>• keyword-only: `n_sweep_points` (Default: 4096)<br>• keyword-only: `edition` (Default: `"2013"`; `"1979"` for Types 0-3) | `result = filters.verify_weighting_class(wf)`<br><br>• `WeightingComplianceResult` |
-| `WeightingComplianceResult` | `dataclass` | **Weighting class verdict of a `WeightingFilter`.**<br>• `overall_class`: 1, 2 or `None` (0-3 or `None` for `'1979'`)<br>• `bands`: per-frequency class, deviation and `margin_class<c>_db` [dB]<br>• `between_nominals`: the 5.5.7 sweep, or `None` when no row was in range<br>• `weighting`, `edition`, `fs` [Hz], `n_sweep_points`<br>• `range_limited`: finite-lower-limit rows beyond Nyquist<br>• takes `band_margins`, `between_nominals` (both held as read-only copies), `weighting`, `edition`, `fs`, `n_sweep_points`; `bands`, `overall_class`, `range_limited` are read-only, read from them<br>• no truth value: `bool()` raises; read `overall_class` | `result.overall_class, result.range_limited` |
+| `WeightingComplianceResult` | `dataclass` | **Weighting class verdict of a `WeightingFilter`.**<br>• `overall_class`: 1, 2 or `None` (0-3 or `None` for `'1979'`)<br>• `bands`: per-frequency rows keyed `frequency`, `class`, `deviation_db` and `margin_class<c>_db` [dB]<br>• `between_nominals`: the 5.5.7 sweep (`worst_frequency` and the margins), or `None` when no row was in range<br>• `weighting`, `edition`, `fs` [Hz], `n_sweep_points`<br>• `range_limited`: finite-lower-limit rows beyond Nyquist<br>• takes `band_margins`, `between_nominals` (both held as read-only copies), `weighting`, `edition`, `fs`, `n_sweep_points`; `bands`, `overall_class`, `range_limited` are read-only, read from them<br>• no truth value: `bool()` raises; read `overall_class` | `result.overall_class, result.range_limited` |
 | `weighting_class_limits` | `function` | **IEC 61672-1:2013 Table 3 acceptance limits**, or the IEC 651:1979 Table V ones with `edition="1979"`.<br>• `weighting_class`: 1 or 2 (0-3 for `"1979"`, where class N is instrument Type N)<br>• `edition` (Default: `"2013"`) | `f, lo, hi = filters.weighting_class_limits(1)`<br><br>• `f`: 34 nominal frequencies [Hz]<br>• `lo` / `hi`: lower/upper deviation limits [dB] (`lo` is `-inf` where one-sided) |
-| `nominal_frequencies` | `function` | **ANSI Frequency generator.**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `f_cen, f_low, f_high, labels = filters.nominal_frequencies(fraction=3)`<br><br>• `f_cen`: List of center frequencies [Hz]<br>• `f_low`: List of lower edges [Hz]<br>• `f_high`: List of upper edges [Hz]<br>• `labels`: IEC nominal frequency labels |
+| `nominal_frequencies` | `function` | **The fractional-octave bands that cover a range (IEC 61260-1 5.4).**<br>• `fraction`: 1, 3, etc. (Required)<br>• `limits`: [f_min, f_max] (Default: [12, 20000]) | `bands = filters.nominal_frequencies(fraction=3)`<br><br>• a `FractionalOctaveBands`: `bands.frequencies`, `bands.lower_edges`, `bands.upper_edges` [Hz], `bands.labels` |
+| `FractionalOctaveBands` | `dataclass` | **A set of fractional-octave bands.**<br>• `frequencies`: exact mid-band frequencies [Hz]<br>• `lower_edges` / `upper_edges`: band edges [Hz]<br>• `labels`: IEC 61260-1 nominal mid-band frequencies, a tuple of text<br>• read-only arrays, one entry per band; edges must enclose the centre; no unpacking by position | `filters.nominal_frequencies(1, [125, 1000]).labels`<br><br>• ('125', '250', '500', '1k') |
 | `normalized_frequencies` | `function` | **Standard IEC Frequencies.**<br>• `fraction`: 1 or 3 | `freqs = filters.normalized_frequencies(fraction=3)`<br><br>• `freqs`: List of standard center frequencies [Hz] |
 | `sweep_signal` | `function` | **ESS excitation (ISO 18233 Annex B).**<br>• `fs`: Sample rate [Hz]<br>• `f1`: Start frequency [Hz]<br>• `f2`: Stop frequency [Hz] (≤ fs/2)<br>• `duration_s`: Duration [s]<br>• `amplitude`: Peak (Default: 1.0)<br>• `fade`: Half-Hann fraction (Default: 0.01) | `s = room.sweep_signal(48000, 20, 20000, 3.0)`<br><br>• 1D exponential sine sweep |
 | `inverse_filter` | `function` | **Farina inverse filter for an ESS.**<br>• Same parameters as `sweep_signal` | `inv = room.inverse_filter(48000, 20, 20000, 3.0)`<br><br>• Time-reversed, +6 dB/oct compensated sweep |
@@ -52461,7 +52501,7 @@ documents, one page per module.
 | `airborne_insulation` | `function` | **Field airborne insulation (ISO 16283-1).**<br>• `l1`/`l2`: Source/receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Partition S [m²] (for R')<br>• `volume`: Receiving V [m³] (for R')<br>• `t0`: Reference T0 [s] (Default: 0.5)<br>• `frequencies` [Hz] (required with either low-frequency argument)<br>• `source_low_frequency` / `receiver_low_frequency`: `LowFrequencyProcedure` per room (ISO 16283-1 Clause 8)<br>• Warns (`LowFrequencyWarning`) when `volume` rounds below 25 m³, `frequencies` names 50/63/80 Hz and no `receiver_low_frequency` is given | `ins = building.airborne_insulation(l1, l2, t2, area=10, volume=50)`<br><br>• `AirborneInsulationResult` |
 | `weighted_rating` | `function` | **Single-number rating + C/Ctr (ISO 717-1).**<br>• `values_by_band`: 16 thirds or 5 octaves [dB], or a mapping of band centre in Hz to dB such as a catalogue row's `.spectrum()`: read band by band, a missing rating band refused, never filled<br>• `fraction`: 3 (one-third octaves), 1 (octaves) or None (a mapping holding a one-third-octave band that is not an octave centre is read as thirds) | `w = building.weighted_rating(R)`<br><br>• `WeightedRatingResult` (Rw, C, Ctr) |
 | `weighted_rating_extended` | `function` | **Rating + enlarged-range terms (ISO 717-1 Annex B).**<br>• `values_by_band` [dB] with `frequencies` [Hz] (None = the 16 core bands)<br>• `one_decimal`: 0.1 dB shift + one-decimal reductions for uncertainty statements (Default: False) | `ext = building.weighted_rating_extended(r, freqs)`<br><br>• `ExtendedWeightedRatingResult` (rating, c, ctr, c_50_3150 … ctr_100_5000) |
-| `ExtendedWeightedRatingResult` | `dataclass` | **Weighted rating with the enlarged-range adaptation terms (ISO 717-1 Annex B).**<br>• `rating` + `c`, `ctr`<br>• `c_50_3150`, `c_50_5000`, `c_100_5000` and the `ctr_` twins<br>• `core`: the base `WeightedRatingResult` | `res = building.weighted_rating_extended(freqs, r)` |
+| `ExtendedWeightedRatingResult` | `dataclass` | **Weighted rating with the enlarged-range adaptation terms (ISO 717-1 Annex B).**<br>• `rating` + `c`, `ctr`<br>• `c_50_3150`, `c_50_5000`, `c_100_5000` and the `ctr_` twins<br>• `core`: the base `WeightedRatingResult`<br>• `frequencies`, `measured`: the enlarged-range curve, required | `res = building.weighted_rating_extended(freqs, r)` |
 | `db_hr_global_index` | `function` | **A-weighted global index Ix = −10 lg Σ 10^((Lx,i−Xi)/10) (CTE DB-HR Annex A, A.5-A.7).**<br>• `band_values` Xi [dB] over the 18 bands 100 Hz-5 kHz<br>• `spectrum`: 'pink','traffic','railway','aircraft'<br>• `frequencies` [Hz], `name` | `idx = building.db_hr_global_index(r, "pink")`<br><br>• `DBHRGlobalIndexResult` |
 | `ra` | `function` | **RA for pink noise (DB-HR Annex A).**<br>• `reduction_index` R or R' [dB]; `frequencies` | `ra(r_prime).intermediate  # 51.4 dBA` |
 | `ra_tr` | `function` | **RA,tr for road-traffic noise (DB-HR Annex A).**<br>• `reduction_index` [dB]; `frequencies` | `ra_tr(r).reported` |
@@ -52483,22 +52523,23 @@ documents, one page per module.
 | `assess_db_hr` | `function` | **Check a set of (value, requirement) pairs.**<br>• `items` | `assess_db_hr([(33.0, req)])`<br><br>• `DBHRAssessment` |
 | `DBHRAssessment` | `dataclass` | **A set of DB-HR requirement checks.**<br>• `checks`; `.passes`; no truth value: `bool()` raises<br>• `.plot()` | `a.passes` |
 | `energy_average_level` | `function` | **Energy-average level (ISO 16283-1 (9)).**<br>• `levels`: Levels [dB] to average<br>• `axis`: Averaging axis (Default: -1) | `L = building.energy_average_level([60, 66])`<br><br>• `10 lg( mean(10^(Li/10)) )` |
-| `AirborneInsulationResult` | `dataclass` | **Field insulation per band.**<br>• `d`: Level difference D [dB]<br>• `dnt`: Standardized DnT [dB]<br>• `r_prime`: Apparent R' [dB] or None<br>• `l1`, `l2`, `t2`, `t0`: retained measurement chain (or None)<br>• `source_low_frequency`, `receiver_low_frequency`: `LowFrequencyResult` or None<br>• `.report(path, quantity='dnt'/'r_prime', ...)`: ISO 16283-1 field test report (Annex B form) with the ISO 717-1 rating → PDF | `res.report("DnTw.pdf", metadata=ReportMetadata(requirement=50.0))` |
-| `WeightedRatingResult` | `dataclass` | **Weighted rating result.**<br>• `rating`: Rw/DnT,w … [dB], int<br>• `c`: Spectrum term C, int<br>• `ctr`: Spectrum term Ctr, int<br>• `unfavorable_sum`: [dB]<br>• `frequencies`: Measured-curve centres [Hz] or None<br>• `measured`: Measured band values [dB] or None<br>• `shifted_reference`: Shifted Table 3 reference [dB] or None | `w.rating, w.c, w.ctr` |
+| `AirborneInsulationResult` | `dataclass` | **Field insulation per band.**<br>• `d`: Level difference D [dB]<br>• `dnt`: Standardized DnT [dB]<br>• `r_prime`: Apparent R' [dB] or None<br>• `l1`, `l2`, `t2`, `t0`: the measurement chain, required<br>• `source_low_frequency`, `receiver_low_frequency`: `LowFrequencyResult` or None<br>• `.report(path, quantity='dnt'/'r_prime', ...)`: ISO 16283-1 field test report (Annex B form) with the ISO 717-1 rating → PDF | `res.report("DnTw.pdf", metadata=ReportMetadata(requirement=50.0))` |
+| `WeightedRatingResult` | `dataclass` | **Weighted rating result.**<br>• `rating`: Rw/DnT,w … [dB], int<br>• `c`: Spectrum term C, int<br>• `ctr`: Spectrum term Ctr, int<br>• `unfavorable_sum`: [dB]<br>• `frequencies`: Measured-curve centres [Hz]<br>• `measured`: Measured band values [dB]<br>• `shifted_reference`: Shifted Table 3 reference [dB]<br>• the three curves are required | `w.rating, w.c, w.ctr` |
 | `impact_insulation` | `function` | **Field impact insulation (ISO 16283-2).**<br>• `li`: Impact SPL [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `volume`: Receiving V [m³] (for L'n)<br>• `t0`: Reference T0 [s] (Default: 0.5)<br>• `frequencies` [Hz] (required with `low_frequency`)<br>• `low_frequency`: receiving-room `LowFrequencyProcedure` (ISO 16283-2 Clause 8)<br>• Warns (`LowFrequencyWarning`) when `volume` rounds below 25 m³, `frequencies` names 50/63/80 Hz and no `low_frequency` is given | `imp = building.impact_insulation(li, t2, volume=50)`<br><br>• `ImpactInsulationResult` (`l_n_t`, `l_n`) |
 | `weighted_impact_rating` | `function` | **Single-number impact rating + CI (ISO 717-2).**<br>• `values_by_band`: 16 thirds (100-3150 Hz) or 5 octaves (125-2000 Hz) [dB], or a mapping of band centre in Hz to dB, read as `weighted_rating` reads one<br>• `fraction`: 3 (one-third octaves), 1 (octaves) or None | `r = building.weighted_impact_rating(imp.l_n_t)`<br><br>• `ImpactRatingResult` (Ln,w, CI); octave rating carries the -5 dB rule |
 | `weighted_impact_rating_extended` | `function` | **Impact rating + CI,50-2500 (ISO 717-2:2020 A.2.1 NOTE).**<br>• `values_by_band` [dB] with `frequencies` [Hz] (None = the 16 core bands)<br>• `one_decimal`: 0.1 dB shift (reproduces Ln,r,0,w = 77.6, CI,r,0 = -10.3 of A.2.2) (Default: False) | `ext = building.weighted_impact_rating_extended(ln, freqs)`<br><br>• `ExtendedImpactRatingResult` (rating, ci, ci_50_2500) |
-| `ExtendedImpactRatingResult` | `dataclass` | **Weighted impact rating with CI,50-2500 (ISO 717-2:2020 A.2.1).**<br>• `rating`, `ci`, `ci_50_2500`<br>• `core`: the base `ImpactRatingResult` | `res = building.weighted_impact_rating_extended(freqs, ln)` |
+| `ExtendedImpactRatingResult` | `dataclass` | **Weighted impact rating with CI,50-2500 (ISO 717-2:2020 A.2.1).**<br>• `rating`, `ci`, `ci_50_2500`<br>• `core`: the base `ImpactRatingResult`<br>• `frequencies`, `measured`: the enlarged-range curve, required | `res = building.weighted_impact_rating_extended(freqs, ln)` |
 | `weighted_impact_improvement` | `function` | **Weighted improvement ΔLw or ΔLt,w (ISO 717-2:2020 Clauses 5 and 6).**<br>• `delta_l`: 16 one-third-octave ΔL (100-3150 Hz) [dB], or a mapping of band centre in Hz to ΔL holding those 16 bands<br>• `reference_floor`: 'heavyweight' / 'lightweight_1' / 'lightweight_2' / 'lightweight_3' (Default: 'heavyweight')<br>• `one_decimal`: 0.1 dB shift, one-decimal result (Default: False)<br>Rates Ln,r = Ln,r,0 − ΔL on the Table 4 curve: ΔLw = Ln,r,0,w − Ln,r,w | `weighted_impact_improvement(delta_l, reference_floor='lightweight_3')`<br><br>• ΔLw [dB], int (e.g. 19), or float with `one_decimal` |
 | `impact_improvement_adaptation_term` | `function` | **Spectrum adaptation term CI,Δ or CIΔ,t (ISO 717-2:2020 Formulas (A.4) and (A.6)).**<br>• `delta_l`: 16 one-third-octave ΔL (100-3150 Hz) [dB], or a mapping of band centre in Hz to ΔL holding those 16 bands<br>• `reference_floor` (Default: 'heavyweight'), `one_decimal` (Default: False)<br>CI,Δ = CI,r,0 − CI,r (CI,r,0 = −11 dB; CI,t,r,0 = 0 / −3 dB on the lightweight floors); ISO 16251-1 clause 8 e), ISO 10140-1:2021 H.5 h) | `impact_improvement_adaptation_term(delta_l)`<br><br>• CI,Δ [dB], int, or float with `one_decimal` |
 | `impact_improvement` | `function` | **Floor-covering improvement ΔL (ISO 16251-1).**<br>• `bare`, `with_covering`: acceleration levels L0/L1 per band [dB]<br>• `frequencies` [Hz] (a clause 6.3 spectrum is rated on its 100-3150 Hz sub-range)<br>• `background`: optional Lb per band [dB] (Formula 2) | `res = building.impact_improvement(l0, l1, f)`<br><br>• `FloorCoveringImprovementResult` |
 | `acceleration_level` | `function` | **Vibratory acceleration level La (ISO 16251-1 Formula 1).**<br>• `acceleration`: RMS a per band [m/s²]<br>• `reference`: a0 (Default: 1e-6) | `acceleration_level(1e-3)  # 60 dB` |
 | `background_corrected_level` / `BackgroundCorrectedLevel` | `function` / `dataclass` | **Background correction (ISO 16251-1 Formula 2).**<br>• `signal_and_background`, `background` [dB], per band or (positions, bands)<br>• result: `margins_db`, `corrected_levels` [dB] (unchanged from 15 dB of margin, energy subtraction from 6 dB, 1,3 dB under it) and `limited`, the bands at the limit of measurement, to be reported as > ΔL<br>• `BackgroundCorrectedLevel` takes `signal_and_background`, `background`; `margins_db`, `corrected_levels`, `limited` are read-only, read from them | `building.background_corrected_level(lp, lb).corrected_levels` |
-| `improvement_octave_bands` | `function` | **Thirds → octaves for ΔL (ISO 16251-1 Formula 5).**<br>• `improvement`, `frequencies` (whole octave triplets) | `f_oct, dl_oct = building.improvement_octave_bands(dl, f)` |
+| `improvement_octave_bands` | `function` | **Thirds → octaves for ΔL (ISO 16251-1 Formula 5).**<br>• `improvement`, `frequencies` (whole octave triplets)<br>• `quantity`: 'ΔL' (Default), 'ΔR' or 'Rs', keyword-only | `oct = building.improvement_octave_bands(dl, f)`<br><br>• an `OctaveBandSpectrum`: `oct.frequencies`, `oct.values` |
+| `OctaveBandSpectrum` | `dataclass` | **A one-third-octave result folded into octaves.**<br>• `frequencies` [Hz]: the octave centres<br>• `values` [dB]: the octave value of `quantity`<br>• `quantity`: 'ΔL', 'ΔR', 'Rs', 'LI' or 'LI,norm'<br>• returned by `improvement_octave_bands` and the `octave_bands()` of the floor-covering, laboratory lining, laboratory floor-covering, joint and rainfall results<br>• `.plot()`: one point per octave, labelled by the quantity | `res.octave_bands().values` |
 | `FloorCoveringImprovementResult` | `dataclass` | **Floor-covering improvement (ISO 16251-1).**<br>• `improvement` ΔL [dB], `delta_lw`, `ci_delta` (or None)<br>• `background_margin_db`: smallest margin over the background per band [dB] (or None)<br>• `limited`: > ΔL mask, the margin under the 6 dB of Formula (2); `.octave_bands()`, `.plot()`<br>• takes `frequencies`, `improvement`, `delta_lw`, `ci_delta`, `background_margin_db`; `limited` is read-only, read from them | `res.delta_lw, res.ci_delta` |
 | `ImpactImprovementRatingResult` | `dataclass` | **A covering's ΔLw with both adaptation terms (ISO 717-2:2020 Formula (2), Clause A.2.2).**<br>• `delta_lw`, `ci_delta` (CI,Δ, Formula (A.4)) and `ci_r` (CI,r = CI,r,0 − CI,Δ, CI,r,0 = −11 dB), whole decibels<br>• `frequencies` (the 16 thirds 100-3150 Hz), `improvement` (ΔL as given)<br>• refuses a `ci_r` that is not −11 − `ci_delta`; `.plot()` draws ΔL with the three numbers in the title, and an axis that keeps a negative band in view | `r = row.rating()  # an ImpactImprovementSpectrum`<br>`r.delta_lw, r.ci_delta, r.ci_r`<br><br>• `ImpactImprovementSpectrum` |
-| `ImpactInsulationResult` | `dataclass` | **Impact insulation per band.**<br>• `l_n_t`: Standardized L'nT [dB]<br>• `l_n`: Normalized L'n [dB] or None<br>• `li`, `t2`, `t0`: retained measurement chain (or None)<br>• `low_frequency`: `LowFrequencyResult` or None<br>• `.report(path, quantity='l_n_t'/'l_n', ...)`: ISO 16283-2 field test report (Annex C form) with the ISO 717-2 rating → PDF | `imp.report("LnTw.pdf", metadata=ReportMetadata(requirement=58.0))` |
-| `ImpactRatingResult` | `dataclass` | **Weighted impact rating.**<br>• `rating`: Ln,w/L'n,w/L'nT,w [dB], int<br>• `ci`: Spectrum term CI, int<br>• `unfavorable_sum`: [dB]<br>• `frequencies`: Measured-curve centres [Hz] or None<br>• `measured`: Measured impact levels [dB] or None<br>• `shifted_reference`: Shifted impact reference [dB] or None | `r.rating, r.ci` |
+| `ImpactInsulationResult` | `dataclass` | **Impact insulation per band.**<br>• `l_n_t`: Standardized L'nT [dB]<br>• `l_n`: Normalized L'n [dB] or None<br>• `li`, `t2`, `t0`: the measurement chain, required<br>• `low_frequency`: `LowFrequencyResult` or None<br>• `.report(path, quantity='l_n_t'/'l_n', ...)`: ISO 16283-2 field test report (Annex C form) with the ISO 717-2 rating → PDF | `imp.report("LnTw.pdf", metadata=ReportMetadata(requirement=58.0))` |
+| `ImpactRatingResult` | `dataclass` | **Weighted impact rating.**<br>• `rating`: Ln,w/L'n,w/L'nT,w [dB], int<br>• `ci`: Spectrum term CI, int<br>• `unfavorable_sum`: [dB]<br>• `frequencies`: Measured-curve centres [Hz]<br>• `measured`: Measured impact levels [dB]<br>• `shifted_reference`: Shifted impact reference [dB]<br>• the three curves are required | `r.rating, r.ci` |
 | `ReportMetadata` | `dataclass` | **Metadata for the accredited ISO 717 `.report()` PDF fiche.**<br>• All fields optional; only the supplied ones render<br>• `specimen`, `client`, `manufacturer`, `product`, `test_room`, `instrumentation`, `calibration`, `mounting`, `measurement_standard`, `test_date`, `separating_element`, `test_signal`<br>• numeric (finite, positive): `area`, `mass_per_area`, `source_volume`, `receiving_volume`, `temperature_c`, `relative_humidity_percent`, `static_pressure_kpa`, `requirement`; the lengths `tube_diameter_m`, `microphone_spacing_m`, `thickness_m` [m]; `curing_time_hours` (finite, not negative)<br>• counts (whole, positive): `n_source_positions`, `n_receiver_positions` (ISO 3382)<br>• `laboratory`, `operator`, `report_id`, `notes` | `w.report("f.pdf", metadata=ReportMetadata(area=10.0, requirement=52.0))` |
 | `facade_insulation` | `function` | **Field façade insulation (ISO 16283-3).**<br>• `l1_2m`/`l2`: Level 2 m in front / receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Element S [m²], `volume`: Receiving V [m³], `surface_level`: L1,s [dB] (all three for R')<br>• `method`: 'loudspeaker' (−1.5 dB) / 'road_traffic' (−3 dB)<br>• `t0`: Reference T0 [s] (Default: 0.5)<br>• `frequencies` [Hz] (required with `low_frequency`)<br>• `low_frequency`: receiving-room `LowFrequencyProcedure` (ISO 16283-3 Clause 7.3); loudspeaker methods only<br>• Warns (`LowFrequencyWarning`) when a loudspeaker-method `volume` rounds below 25 m³, `frequencies` names 50/63/80 Hz and no `low_frequency` is given | `fac = building.facade_insulation(l1_2m, l2, t2, volume=50, area=11.5, surface_level=ls)`<br><br>• `FacadeInsulationResult` |
 | `FacadeInsulationResult` | `dataclass` | **Façade insulation per band.**<br>• `d_2m`: Level difference D2m [dB]<br>• `d_2m_nt`: Standardized D2m,nT [dB]<br>• `d_2m_n`: Normalized D2m,n [dB] or None<br>• `r_prime`: Apparent R'45°/R'tr,s [dB] or None<br>• `frequencies` [Hz] or None<br>• `method`: the incidence correction used<br>• `low_frequency`: `LowFrequencyResult` or None<br>• `.plot()` | `fac.d_2m_nt, fac.r_prime` |
@@ -52592,7 +52633,7 @@ documents, one page per module.
 | `standardized_level_difference` | `function` | **DnT,w from R'w (EN 12354-1 Formula 5b, exact 0.32·V/Ss form).**<br>• `r_prime_w`: R'w [dB]<br>• `volume` V [m³], `separating_area` Ss [m²] | `dnt = building.standardized_level_difference(52.2, 50.0, 11.5)`<br><br>• DnT,w = 53.6 → 54 [dB] |
 | `facade_sound_reduction` | `function` | **Predicted façade insulation D2m,nT (EN 12354-3 Formula 10/13).**<br>• `elements`: sequence of `FacadeElement`<br>• `area`: Façade S [m²], `volume`: Receiving V [m³]<br>• `delta_l_fs`: ΔLfs [dB] (Default: 0), `fraction`: 1, 3 or None (from the band count)<br>• `frequencies`: band centres [Hz] (Default: None; length must equal the band count), carried on the result for plotting | `fac = building.facade_sound_reduction(elements, area=11.3, volume=50.0, fraction=1)`<br><br>• `FacadePredictionResult` |
 | `plot_facade_elements` | `function` | **Composite façade elevation, element areas to scale.**<br>• `elements`: `FacadeElement` sequence<br>• `language` | `plot_facade_elements(elements)`<br><br>• Also `FacadePredictionResult.plot_geometry()` |
-| `FacadePredictionResult` | `dataclass` | **Predicted façade airborne insulation (EN 12354-3:2000).**<br>• `r_prime`, `r_45`, `r_tr_s`, `d_2m_nt` per band<br>• `r_tr_s_w`, `d_2m_nt_w`, `c_tr` single numbers | `res = building.facade_sound_reduction(...)` |
+| `FacadePredictionResult` | `dataclass` | **Predicted façade airborne insulation (EN 12354-3:2000).**<br>• `r_prime`, `r_45`, `r_tr_s`, `d_2m_nt` per band<br>• `r_tr_s_w`, `d_2m_nt_w`, `c_tr` single numbers<br>• `elements`: the element sequence, required, drawn by `.plot_geometry()` | `res = building.facade_sound_reduction(...)` |
 | `radiated_sound_power` | `function` | **Radiated sound power LW (EN 12354-4 Formula 2/3).**<br>• `elements`, `lp_in`: Inside Lp,in [dB]<br>• `area`: Segment S [m²]<br>• `c_d`: Cd [dB] (Default: -6), `r_prime_cap`: optional R' cap [dB] (Default: None; the Annex G example footnote uses 40), `octave_bands` | `seg = building.radiated_sound_power(elements, lp_in=lp, area=200.0, c_d=-5.0)`<br><br>• `RadiatedPowerResult` |
 | `RadiatedPowerResult` | `dataclass` | **Sound power radiated outside by a façade segment (EN 12354-4).**<br>• `l_w`, `r_prime` per band<br>• `l_w_dba`: A-weighted total | `res = building.radiated_sound_power(...)` |
 | `outdoor_attenuation` | `function` | **Finite radiating-side attenuation A'tot (EN 12354-4 Annex E).**<br>• `width_m`, `height_m`: Side dimensions [m]<br>• `distance`: Perpendicular d [m] | `a = building.outdoor_attenuation(60.0, 10.0, 5.0)`<br><br>• A'tot = 26.3 [dB] |
@@ -52696,7 +52737,7 @@ documents, one page per module.
 | `heavy_impact_octave_levels` | `function` | **One-third-octave to octave synthesis (ISO 16283-2 Formula (20)).**<br>• `levels`: thirds in ascending order, length a multiple of 3 | `oct = building.heavy_impact_octave_levels(thirds)`<br><br>• [dB] |
 | `a_weighted_max_impact_level` / `HEAVY_IMPACT_A_WEIGHTING` / `AWeightedMaxImpactResult` | `function` / `mapping` / `dataclass` | **A-weighted maximum impact level XiA,Fmax (ISO 717-2 Annex D, Formula (D.1)).**<br>• `levels`: 12 thirds (50-630 Hz) or 4 octaves (63-500 Hz) [dB]<br>• `fraction`: 3 (one-third octaves) / 1 (octaves), inferred from the length<br>• Table D.3 corrections, rounded half-up<br>• `.plot()` | `res = building.a_weighted_max_impact_level([65.3, 64.5, 58.0, 55.8])`<br><br>• `AWeightedMaxImpactResult` (`rating` = 55 dB) |
 | `normalized_ceiling_attenuation` | `function` | **Normalized ceiling attenuation Dn,c (ISO 140-9 clause 3.3).**<br>• `level_source` L1, `level_receiving` L2 [dB], `absorption_area` A [m²]<br>• `reference_area` A0 (Default: 10 m² ISO; ASTM E1414 uses 12 m²) | `dnc = building.normalized_ceiling_attenuation(l1, l2, a)` |
-| `ceiling_attenuation_class` / `CEILING_ATTENUATION_CONTOUR` / `CeilingAttenuationResult` | `function` / `mapping` / `dataclass` | **Ceiling attenuation class CAC (ASTM E413-22 clause 5, via ASTM E1414).**<br>• `attenuation` Dn,c: 16 thirds 125-4000 Hz [dB]<br>• data rounded to integers (5.2), Σ deficiencies ≤ 32 dB, max ≤ 8 dB<br>• `.plot()` | `res = building.ceiling_attenuation_class(dnc)`<br><br>• `CeilingAttenuationResult` (`rating`, `deficiencies`) |
+| `ceiling_attenuation_class` / `CEILING_ATTENUATION_CONTOUR` / `CeilingAttenuationResult` | `function` / `mapping` / `dataclass` | **Ceiling attenuation class CAC (ASTM E413-22 clause 5, via ASTM E1414).**<br>• `attenuation` Dn,c: 16 thirds 125-4000 Hz [dB]<br>• data rounded to integers (5.2), Σ deficiencies ≤ 32 dB, max ≤ 8 dB; `.rounded` is read-only, read from `measured`<br>• `.plot()` | `res = building.ceiling_attenuation_class(dnc)`<br><br>• `CeilingAttenuationResult` (`rating`, `deficiencies`) |
 | `plenum_flanking_reduction_index` / `partition_referenced_reduction_index` / `PlenumFlankingResult` | `function` / `dataclass` | **Suspended-ceiling plenum flanking path Rcl (Vigran Eqs. (9.13), (9.18)-(9.20)).**<br>• `reduction_index_source` RS / `_receiving` RR [dB]<br>• `ceiling_length` LR, `plenum_height_m` h [m]<br>• `sidewalls`: 'reflecting' (ε = 2) / 'absorbing' (ε = 1)<br>• `attenuation_source_per_m` / `attenuation_receiving_per_m` m [1/m] switch to Eq. (9.18)<br>• `.plot()` | `res = building.plenum_flanking_reduction_index(rs, rr, ceiling_length=4.75, plenum_height_m=0.43)`<br><br>• `PlenumFlankingResult` |
 | `wall_tie_stiffness` / `wall_tie_stiffness_per_area` / `WALL_TIE_STIFFNESS` | `function` / `mapping` | **Dynamic stiffness of masonry wall ties (Hopkins Table A4).**<br>• `tie`: 'butterfly' (1.7 MN/m) / 'double_triangle' (16.1) / 'vertical_twist' (94.0) at 50 mm, 'vertical_twist_100mm' (43.4)<br>• `ties_per_area` n [1/m²] → N·k/S [N/m³] for `tie_stiffness_per_area` | `s = building.wall_tie_stiffness_per_area(2.5, 'vertical_twist_100mm')`<br><br>• feeds `mass_spring_mass_resonance` / `double_wall_transmission_loss` |
 | `wall_tie_coupling_loss_factor` / `WallTieCouplingResult` | `function` / `dataclass` | **Structure-borne coupling of a tie array (Hopkins Eqs. 4.87/4.88).**<br>• `frequency` [Hz], `mass1`/`mass2` [kg/m²], `bending_stiffness1`/`2` [N·m]<br>• `ties_per_area` n [1/m²], `tie`: name, k [N/m], or None (rigid, Yc = 0)<br>• `.plot()` | `res = building.wall_tie_coupling_loss_factor(f, 150, 170, b1, b2, ties_per_area=2.5, tie='butterfly')`<br><br>• `WallTieCouplingResult` |
@@ -52706,7 +52747,7 @@ documents, one page per module.
 | `circular_aperture_transmission_coefficient` | `function` | **Circular hole τ (Hopkins Eq. 4.102, Wilson-Soroka).**<br>• `frequency` [Hz], `radius` a [m], `depth` d [m]<br>• τ → 1 for a large hole | `res = building.circular_aperture_transmission_coefficient(f, 0.01, 0.002)`<br><br>• `ApertureTransmissionResult` |
 | `plot_aperture_geometry` | `function` | **Wall-aperture section to scale.**<br>• `depth` d [m]<br>• Exactly one of `width_m` w / `radius` [m]<br>• `language` | `plot_aperture_geometry(0.1, width_m=0.003)`<br><br>• Also `ApertureTransmissionResult.plot_geometry()` |
 | `composite_transmission_loss` / `transmission_loss_from_coefficient` | `function` | **Composite R of parallel elements (Hopkins Eq. 4.92).**<br>• `areas` Sₙ [m²], `reduction_indices` Rₙ [dB] (1-D or (N, bands))<br>• a bare opening (Sₐ/S) caps R at 10 lg(S/Sₐ) | `r = building.composite_transmission_loss([0.99, 0.01], [55, 0])` |
-| `ApertureTransmissionResult` | `dataclass` | **Slit / hole transmission (Hopkins 4.3.10).**<br>• `transmission_coefficient` τ, `transmission_loss` R = −10 lg(τ)<br>• `kind`: 'slit'/'circular', `.plot()` | `res.transmission_loss` |
+| `ApertureTransmissionResult` | `dataclass` | **Slit / hole transmission (Hopkins 4.3.10).**<br>• `transmission_coefficient` τ, `transmission_loss` R = −10 lg(τ)<br>• `kind`: 'slit'/'circular', `.plot()`<br>• `depth` [m], required; `width_m` for a slit or `radius` for a circular aperture, drawn by `.plot_geometry()` | `res.transmission_loss` |
 | `band_uncertainty` | `function` | **One-third-octave standard uncertainty u (ISO 12999-1 Tables 2/4/6).**<br>• `measurand`: 'airborne'/'impact'/'impact_reduction'<br>• `situation`: 'A'/'B'/'C'<br>• `upper_limit`: σR95 (airborne A, Annex D) (Default: False) | `u = building.band_uncertainty('airborne', 'B')`<br><br>• `BandUncertainty` |
 | `single_number_uncertainty` | `function` | **Single-number standard uncertainty u (ISO 12999-1 Tables 3/5/7).**<br>• `quantity`: 'r_w'/'ln_w'/'delta_lw' (+ aliases, +c/+ctr variants)<br>• `situation`: 'A'/'B'/'C'<br>• `upper_limit` (Default: False) | `u = building.single_number_uncertainty('r_w', 'B')`<br><br>• u [dB] (0.9) |
 | `single_number_uncertainty_uncorrelated` | `function` | **Uncorrelated single-number u from bands (ISO 12999-1 Formula B.2).**<br>• `band_uncertainties`: per-band u_i [dB]<br>• `reference_differences`: L_i − R_i [dB] | `u = building.single_number_uncertainty_uncorrelated(u_i, d_i)`<br><br>• Energy-weighted quadrature u [dB] |
@@ -52855,7 +52896,7 @@ documents, one page per module.
 | `mean_path_height` | `function` | **Mean path height hm above a ground profile (ISO 9613-2 Figure 3).**<br>• `profile_distances` [m], strictly increasing, `profile_heights_m` [m]<br>• `source_height_m` hs, `receiver_height_m` hr [m]<br>• `distance` d [m] (Default: the slant distance the profile implies) | `hm = environment.mean_path_height([0, 112.4, 178.8, 194.2], [0, 0, 10, 10], 1, 4)`<br><br>• hm = F/d [m], for the 7.3.2 method |
 | `Barrier` | `dataclass` | **Barrier diffraction geometry (ISO 9613-2 7.4).**<br>• `source_to_edge` dss, `edge_to_receiver` dsr [m]<br>• `parallel_distance` a [m] (Default: 0)<br>• `edge_separation` e [m] (Default: None → single diffraction)<br>• `ground_reflections_by_image` (Default: False → C₂=20)<br>• `lateral` (Default: False → top-edge)<br>• `line_of_sight_clear` (Default: False; True gives z the negative sign of Eq. 16 when the sight line passes above the edge) | `b = environment.Barrier(source_to_edge=101, edge_to_receiver=101)`<br><br>• `.is_double` when e is given |
 | `barrier_attenuation` | `function` | **Barrier diffraction Dz (ISO 9613-2 Eq. 14).**<br>• `barrier`: `Barrier`<br>• `distance` d [m]<br>• `frequencies` [Hz] | `dz = environment.barrier_attenuation(b, 200, bands)`<br><br>• 10 lg[3+(C₂/λ)C₃ z Kmet], capped 20/25 dB; 10 lg 3 at grazing (z = 0), decaying to ≥ 0 for negative z |
-| `measured_insertion_loss_direct` / `measured_insertion_loss_indirect` / `MeasuredBarrierInsertionLoss` | `function` / `function` / `dataclass` | **What a barrier is worth once it is built, ISO 10847 8.2.1 and 8.2.2.**<br>• direct: D_IL = (L_ref,A − L_ref,B) − (L_r,A − L_r,B), the reference microphone normalising whatever the source did differently between campaigns<br>• indirect: the "before" pair comes from an equivalent site, which makes it an estimate, and each campaign carries its receiver correction C_r<br>• `receiver_type_before` / `receiver_type_after`: 'hemi_free_field' (Default, 0 dB) or 'reflecting_surface' (6 dB)<br>• result: `insertion_loss`, `method`, the four spectra and the two corrections, `.plot()` | `environment.measured_insertion_loss_direct(ref_b, ref_a, rec_b, rec_a, frequencies=f)` |
+| `measured_insertion_loss_direct` / `measured_insertion_loss_indirect` / `MeasuredBarrierInsertionLoss` | `function` / `function` / `dataclass` | **What a barrier is worth once it is built, ISO 10847 8.2.1 and 8.2.2.**<br>• direct: D_IL = (L_ref,A − L_ref,B) − (L_r,A − L_r,B), the reference microphone normalising whatever the source did differently between campaigns<br>• indirect: the "before" pair comes from an equivalent site, which makes it an estimate, and each campaign carries its receiver correction C_r<br>• `receiver_type_before` / `receiver_type_after`: 'hemi_free_field' (Default, 0 dB) or 'reflecting_surface' (6 dB)<br>• result: `insertion_loss`, `method`, the four spectra and the two corrections, `.rounded` (read-only: the whole decibels clause 10 c) reports), `.plot()` | `environment.measured_insertion_loss_direct(ref_b, ref_a, rec_b, rec_a, frequencies=f)` |
 | `barrier_background_correction` / `ISO10847_BACKGROUND_CORRECTIONS` / `ISO10847_MIN_BACKGROUND_MARGIN_DB` / `ISO10847_PREFERRED_BACKGROUND_MARGIN_DB` | `function` / `mapping` / `constant` | **Table 3 of ISO 10847, in decibels to add.**<br>• 2 dB comes off at a margin of 4 or 5 dB, 1 dB from 6 to 9 dB, nothing from 10 dB up, which is the margin 6.4 asks for in the first place<br>• the column reads "correction to be made to", so the values are negative and are added, where ISO 11820 prints the same physical thing positive and subtracts it<br>• under 4 dB the results "are not valid", which is a refusal | `environment.barrier_background_correction([5.0, 7.0])  # -2.0, -1.0` |
 | `wind_class` / `WIND_CLASSES` / `MAX_WIND_SPEED_M_S` / `WIND_VECTOR_TOLERANCE_M_S` / `TEMPERATURE_TOLERANCE_C` / `CLOUD_COVER_CLASSES` | `function` / `mapping` / `constant` | **The weather the two campaigns have to share, ISO 10847 Table 1 and 6.2.**<br>• the vector component of the wind on the source-to-receiver line: positive downwind, negative upwind<br>• downwind 1 m/s to 5 m/s and calm ± 1 m/s over any distance; the upwind class exists over short distances alone<br>• past 5 m/s no measurement is made, which is a refusal rather than a class<br>• the two campaigns must agree within 2 m/s on the component and 10 °C on the temperature, and the cloud cover is recorded in the four classes of Table 2 | `environment.wind_class(2.5)  # 'downwind'` |
 | `check_short_distance` / `ShortDistanceCheck` / `SHORT_DISTANCE_RATIO` / `LONG_DISTANCE_M` / `CLOSE_SOURCE_DISTANCE_M` / `POINT_SOURCE_DIVERGENCE_DB` / `LINE_SOURCE_DIVERGENCE_DB` | `function` / `dataclass` / `constant` | **Short distance or long? ISO 10847 6.3.1, and what hangs on it.**<br>• (H_s + H_R)/(d₁ + d₂) > 0,1 for the "before" campaign, and both of (H_s + H)/d₁ and (H + H_R)/d₂ > 0,1 for the "after" one<br>• the inequalities are strict, so exactly 0,1 is not a short distance<br>• result: the five lengths, `before_ratio`, `after_source_side_ratio`, `after_receiver_side_ratio`, and `before` and `after`, one answer per campaign to hand to `wind_class`; no verdict and no truth value: `bool()` raises<br>• only a short distance may be measured into the wind; past a source-receiver distance of 250 m (`LONG_DISTANCE_M`) 8.1.4 says more than the minimum three repetitions may be needed<br>• 6 dB per doubling for a point source and 3 dB for a line one, the divergence the geometry is read against | `environment.check_short_distance(source_height_m=1.0, receiver_height_m=1.5, barrier_height_m=4.0, source_to_barrier_m=10.0, barrier_to_receiver_m=20.0).after` |
@@ -53031,7 +53072,7 @@ documents, one page per module.
 | `REFLECTION_INDEX_PRECISION` / `REFLECTION_RATING_PRECISION_DB` | `mapping` | **Table A.1 of EN 1793-5: the standard deviations of repeatability and reproducibility of `RI` per band and of `DL_RI`, each `(median, low, high)`, from the QUIESST inter-laboratory test.** | `environment.REFLECTION_INDEX_PRECISION[100.0]['reproducibility']  # (0.27, 0.23, 0.32)` |
 | `BarrierReflectionWarning` | `warning class` | **A reflection measurement EN 1793-5 flags as suspect: an `R_sub` below 10 dB (5.5.4), a gain factor more than 20 % from 1 (5.5.1), a sample rate below 44 kHz (5.5.2).** | `warnings.catch_warnings()`<br>Emitted by `environment.propagation.barrier_reflection` |
 | `plot_barrier_geometry` | `function` | **Source-barrier-receiver section to scale.**<br>• `source_height_m`, `barrier_distance`, `barrier_height_m`, `receiver_distance`, `receiver_height_m` [m]<br>• `thickness_m` [m] (Default: None → thin screen)<br>• `language` | `plot_barrier_geometry(source_height_m=1.5, barrier_distance=5.0, barrier_height_m=3.0, receiver_distance=20.0, receiver_height_m=1.5)`<br><br>• Direct + diffracted paths, path difference annotated; also `BarrierInsertionLoss.plot_geometry()` |
-| `BarrierInsertionLoss` | `dataclass` | **Per-band barrier insertion loss.**<br>• `insertion_loss` [dB], `fresnel_number`, `method`, `ground`<br>• `.plot()` (IL vs frequency) | `il.insertion_loss` |
+| `BarrierInsertionLoss` | `dataclass` | **Per-band barrier insertion loss.**<br>• `insertion_loss` [dB], `fresnel_number`, `method`, `ground`<br>• `source_height_m`, `barrier_distance`, `barrier_height_m`, `receiver_distance`, `receiver_height_m`: the geometry, keyword-only and required; `thickness_m` for a thick barrier<br>• `.plot()` (IL vs frequency) | `il.insertion_loss` |
 | `linear_sound_speed_profile` | `function` | **Linear effective sound-speed profile c_eff(z) = c0 + g·z (Salomons Sec. 4.2).**<br>• `gradient_per_s` g [s⁻¹]<br>• `ground_speed_of_sound` c0 [m/s], `max_height_m` [m] | `p = environment.linear_sound_speed_profile(0.1)`<br><br>• `EffectiveSoundSpeedProfile` |
 | `log_linear_sound_speed_profile` | `function` | **Logarithmic surface-layer profile c_eff(z) = c0 + b·ln(1+z/z0) (Salomons Eq. 4.5).**<br>• `b` [m/s] (downward > 0)<br>• `ground_speed_of_sound` c0, `roughness_length` z0, `max_height_m` [m], `n_points` | `p = environment.log_linear_sound_speed_profile(1.0)`<br><br>• `EffectiveSoundSpeedProfile` |
 | `EffectiveSoundSpeedProfile` | `dataclass` | **Effective sound-speed profile c_eff(z).**<br>• `heights_m` z [m], `speeds_of_sound` [m/s], `description`<br>• `.speed_at(z)`, `.plot()` | `p.speed_at(10.0)` |
@@ -53290,7 +53331,7 @@ documents, one page per module.
 | `enclosure_insertion_loss` / `ENCLOSURE_MODELS` | `function` / `mapping` | **Machine-enclosure insertion loss IL = R − C (Bies Eqs. 7.103/7.111); panel R supplied by the caller, never predicted.**<br>• `panel_transmission_loss` (per-band array or callable of f)<br>• `external_area`, `internal_area`, `internal_absorption`<br>• `frequencies` (required for a callable R)<br>• `model`: `ENCLOSURE_MODELS` (`'bies'` keeps the 0.3 floor of Eq. 7.111, `'norton'` the bare `C = 10 lg(S_E/R_i)` of Eq. 4.115) | `enclosure_insertion_loss(R, 6.0, 5.0, 0.3)`<br><br>• `EnclosureInsertionLossResult` |
 | `enclosure_required_transmission_loss` | `function` | **The same equation solved for the panel R: `R = IL + C` (Norton Eq. 4.115 design use).**<br>• `insertion_loss` (required IL per band, e.g. the room level minus an NC curve)<br>• `external_area`, `internal_area`, `internal_absorption`, `frequencies`, `model` | `enclosure_required_transmission_loss(lp1 - nc45, 38.75, 59.5, alpha)`<br><br>• `EnclosureInsertionLossResult` whose `panel_transmission_loss` is the required R |
 | `enclosure_sound_power_insulation` / `enclosure_sound_pressure_insulation` / `enclosure_reciprocity_insulation` / `enclosure_artificial_source_insulation` | `function` | **What an enclosure is worth once it is built, ISO 11546-1 and -2 Eqs. (1) to (5).**<br>• `enclosure_sound_power_insulation(level_without, level_with, frequencies=…)`: D_W band by band, and D_WA from the A-weighted totals or from an explicit pair<br>• `enclosure_sound_pressure_insulation(…)`: the same subtraction on a level at a stated position, D_p and D_pA<br>• `enclosure_reciprocity_insulation(external_levels, internal_levels, …)`: D_pr of part 1 clause 7.2, for an enclosure that cannot be measured with its machine<br>• `enclosure_artificial_source_insulation(without_by_position, with_by_position, …)`: the tapping plate of Annex A, averaged over source positions arithmetically, which is the standard's own word and not the energy mean used elsewhere<br>• `condition`: 'laboratory' (part 1, for declaration) or 'in-situ' (part 2, for acceptance); `base_standard`: the row of Table 1 the levels came from | `noise_control.enclosure_sound_power_insulation(lw_off, lw_on, frequencies=f)`<br><br>• `EnclosureInsulationResult` |
-| `EnclosureInsulationResult` | `dataclass` | **The measured insulation D_W, D_p or D_pr of an enclosure, band by band (ISO 11546).**<br>• `frequencies` [Hz], `level_without`, `level_with`, `insulation` [dB]<br>• `quantity`: 'sound_power', 'sound_pressure' or 'reciprocity'; `a_weighted_insulation` [dB]<br>• `condition`, `source_kind`, `base_standard`, `fraction`<br>• `.rounded()`: the integers clause 9.4 reports; `.plot()`: the two runs, the area between them and the difference | `res.rounded(), res.a_weighted_insulation` |
+| `EnclosureInsulationResult` | `dataclass` | **The measured insulation D_W, D_p or D_pr of an enclosure, band by band (ISO 11546).**<br>• `frequencies` [Hz], `level_without`, `level_with`, `insulation` [dB]<br>• `quantity`: 'sound_power', 'sound_pressure' or 'reciprocity'; `a_weighted_insulation` [dB]<br>• `condition`, `source_kind`, `base_standard`, `fraction`<br>• `.rounded` (read-only): the integers clause 9.4 reports; `.plot()`: the two runs, the area between them and the difference | `res.rounded, res.a_weighted_insulation` |
 | `weighted_enclosure_insulation` / `WeightedEnclosureInsulation` | `function` / `dataclass` | **The single-number rating of an insertion loss, 7.4 of part 1 and 7.3 of part 2.**<br>• `insulation` over the 16 one-third-octave rating bands or the 5 octave ones [dB], `quantity`, `fraction`<br>• ISO 717-1 with D_W or D_pr written where that standard writes R, delegated to `building.weighted_rating` rather than re-derived<br>• result: `rating`, `c`, `ctr`, `unfavorable_sum`, `frequencies`, `quantity` | `noise_control.weighted_enclosure_insulation(d_w[:16]).rating` |
 | `estimated_a_weighted_enclosure_insulation` | `function` | **What an enclosure would be worth against a stated spectrum, Annex C of part 1 and Annex D of part 2.**<br>• `spectrum_levels` L_i [dB], `insulation` D_i [dB], `frequencies` [Hz]<br>• `D_WA,e = L_A − 10 lg Σ 10^(0.1 (L_i − A_i − D_i))`, with A_i the printed attenuation, so A_i = −C_k against this library's band corrections<br>• both terms are built from the same table, so the answer cannot disagree with its own inputs and an insulation of zero returns exactly zero | `noise_control.estimated_a_weighted_enclosure_insulation(spectrum, d_w, frequencies=f)` |
 | `applicable_methods` / `MethodEntry` | `function` / `dataclass` | **Table 1 of ISO 11546 as data: which base standard may be used, and what it can give.**<br>• `condition`: 'laboratory' (Default) or 'in-situ'; `source_kind`: 'actual' (Default), 'reciprocity' or 'artificial'<br>• each row carries `base_standard`, `quantities`, `subclause` and `band_values`: a survey-grade determination hands back an A-weighted number and nothing per band, so D_W cannot be declared from it<br>• the reciprocity method exists in part 1 only, and asking for it in situ is refused | `noise_control.applicable_methods(condition='in-situ')` |
@@ -53299,7 +53340,7 @@ documents, one page per module.
 | `UNRESTRICTED_ENCLOSURE_VOLUME_M3` / `ARTIFICIAL_SOURCE_MAX_FILL_RATIO` / `ARTIFICIAL_SOURCE_LEAK_RATIO_ADVISORY` / `ARTIFICIAL_SOURCE_PLATE_MM` / `ARTIFICIAL_SOURCE_DROP_MM` / `ARTIFICIAL_SOURCE_STANDOFF_MM` / `ARTIFICIAL_SOURCE_EXAMPLE_LWA` / `SOURCE_WALL_CLEARANCE_FACTOR` | `constant` | **The numbers of clause 1, clause 4 and Annex A of ISO 11546.**<br>• clause 1 applies the part without restriction to a free-standing enclosure smaller than 2 m³, and lets a larger one be measured with its actual source while the base standard's own volume limit is met; the artificial source fills at most a quarter of the interior, and clause 4 would rather keep the leak ratio under 2 %<br>• the Annex A source is a 4 mm steel plate of 800 mm by 300 mm, dropped 40 mm onto a 60 mm standoff<br>• the spectrum Annex B prints as an illustration totals 110 dB(A), and it was measured on a 600 mm plate rather than on the Annex A one (see the errata)<br>• the plate stands 0,2 d from any wall | `noise_control.ARTIFICIAL_SOURCE_PLATE_MM` |
 | `MANDATORY_BAND_RANGE_HZ` / `PREFERRED_BAND_RANGE_HZ` | `mapping` | **The band range ISO 11546 and ISO 11957 require, and the one they would rather have, keyed by band fraction.**<br>• required: 100 Hz to 5 kHz in one-third octaves, 125 Hz to 4 kHz in octaves<br>• preferred: 50 Hz to 10 kHz and 63 Hz to 8 kHz<br>• a spectrum that does not cover the required range raises the warning of its own standard | `noise_control.MANDATORY_BAND_RANGE_HZ[3]  # (100.0, 5000.0)` |
 | `EnclosureInsulationWarning` / `CabinInsulationWarning` | `warning class` | **The measurement is outside a condition ISO 11546 or ISO 11957 states.**<br>• a band range short of the required one, a base standard that gives only an A-weighted value, a margin under 6 dB over the background<br>• a room-to-cabin volume ratio under 20, a lowest band outside the range clause 6.2 covers | `warnings.simplefilter('error', CabinInsulationWarning)`<br>Emitted by `noise_control.enclosure_insulation` |
-| `cabin_insulation` / `CabinInsulationResult` | `function` / `dataclass` | **What a cabin keeps out, ISO 11957 Eqs. (1), (2) and (3).**<br>• `room_levels`, `cabin_levels` [dB], `frequencies` [Hz], `fraction`<br>• `method`: 'laboratory' (Default), 'in-situ-loudspeaker' or 'in-situ-actual-noise'; the in-situ pair carries the prime of definition 3.6<br>• `room_background_levels` / `cabin_background_levels`: taken off by the ISO 3741 correction 6.4 asks for<br>• `a_weighted_room_level` / `a_weighted_cabin_level`: Eq. (3), defined for the actual-noise method alone, and refused under any other<br>• result: `insulation`, `symbol`, `a_weighted_insulation`, `internal_noise_level`, `.rounded()`, `.plot()`; `apparent` is read-only, read from `method`, which also decides whether `a_weighted_insulation` can be given | `noise_control.cabin_insulation(room, cabin, frequencies=f)` |
+| `cabin_insulation` / `CabinInsulationResult` | `function` / `dataclass` | **What a cabin keeps out, ISO 11957 Eqs. (1), (2) and (3).**<br>• `room_levels`, `cabin_levels` [dB], `frequencies` [Hz], `fraction`<br>• `method`: 'laboratory' (Default), 'in-situ-loudspeaker' or 'in-situ-actual-noise'; the in-situ pair carries the prime of definition 3.6<br>• `room_background_levels` / `cabin_background_levels`: taken off by the ISO 3741 correction 6.4 asks for<br>• `a_weighted_room_level` / `a_weighted_cabin_level`: Eq. (3), defined for the actual-noise method alone, and refused under any other<br>• result: `insulation`, `symbol`, `a_weighted_insulation`, `internal_noise_level`, `.rounded` (read-only), `.plot()`; `apparent` is read-only, read from `method`, which also decides whether `a_weighted_insulation` can be given | `noise_control.cabin_insulation(room, cabin, frequencies=f)` |
 | `weighted_cabin_insulation` / `WeightedCabinInsulation` | `function` / `dataclass` | **The single-number rating of a cabin, ISO 11957 clause 8.**<br>• `insulation` over the rating bands [dB], `method` (as `cabin_insulation` takes it, Default: 'laboratory'), `fraction`; `apparent` is read from the method<br>• ISO 717-1 with D_p or D'_p written where that standard writes R<br>• clause 4 calls this the preferred single number and then warns against reading too much into it, because what a cabin is worth depends on the spectrum it stands in | `noise_control.weighted_cabin_insulation(d_p[:16]).rating` |
 | `estimated_cabin_noise_insulation` / `internal_noise_level` | `function` | **Annex A and 6.7 of ISO 11957: the cabin against a stated spectrum, and the noise it makes on its own.**<br>• `estimated_cabin_noise_insulation(spectrum_levels, insulation, frequencies=…)`: `D_pA,e = L_A − 10 lg Σ 10^(0.1 (L_i − A_i − D_pi))`, the same identity and the same A_i sign as the enclosure annexes<br>• `internal_noise_level(levels, background_level=…)`: L_pA, the energy mean over the 0,3 m sphere with the external sources off<br>• the background rule of 6.7 is not the one of 6.4: the correction is made only while the margin stays between 6 dB and 10 dB, and below 6 dB the answer is an upper bound | `noise_control.internal_noise_level([58.2, 59.1, 58.7], background_level=51.0)` |
 | `check_source_positions` / `SourcePositionCheck` / `MIN_SOURCE_POSITIONS_IN_SITU` / `MAX_SOURCE_POSITIONS_IN_SITU` | `function` / `dataclass` / `constant` | **Were there enough loudspeaker positions? ISO 11957 7.2.1.**<br>• `insulation_by_position`: D'_p in octave bands, one row per source position<br>• the number of positions shall be at least the largest difference in decibels between any two of them, three to begin with and six at most<br>• result: `n_positions_used`, `max_octave_spread_db`, `n_required_positions`, `passes`, `exceeds_max`, the last of which 7.2.1 says shall be stated in the report; no truth value: `bool()` raises<br>• the clause says octave bands, so one-third-octave data is folded at the level and not at the difference | `noise_control.check_source_positions(d_p_by_position).passes` |
@@ -53318,7 +53359,7 @@ documents, one page per module.
 | `total_pressure_loss_pa` / `static_pressure_difference_pa` / `velocity_pressure_pa` / `flow_velocity_m_s` / `gas_density_kg_m3` / `silencer_flow_velocity_m_s` / `ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K` / `ISO11820_AIR_GAS_CONSTANT_J_KG_K` / `ISO11820_ATMOSPHERIC_PRESSURE_PA` / `VELOCITY_UNIFORMITY_TOLERANCE_PERCENT` | `function` / `constant` | **The flow side of the measurement, Eqs. (13) to (16) and (27) to (31).**<br>• pressure loss Δp_T, the static difference Δp_S behind a change of area, the velocity pressure and the velocity it stands for<br>• `gas_density_kg_m3(temperature_c=, molar_mass_kg_kmol=None)`: ρ = M p_amb / [R (273 + θ)], with R/M = 287 N m per kg K for air<br>• `silencer_flow_velocity_m_s`: the upstream mean velocity scaled by S_u/S_f, which is the velocity the regenerated noise answers to<br>• 9.2 asks the velocity profile to be uniform within 10 % | `noise_control.gas_density_kg_m3(temperature_c=120.0)` |
 | `measurement_distance_upstream_m` / `measurement_distance_downstream_m` / `UPSTREAM_DISTANCE_DIAMETERS` / `DOWNSTREAM_DISTANCE_COEFFICIENTS` | `function` / `constant` | **Where the measurement surfaces stand along the duct, Eqs. (15) and (16).**<br>• upstream: one and a half equivalent diameters of the measurement cross-section<br>• downstream: 12 √S_d − 10 √S_f, which can fall to zero for a silencer whose free area is most of the duct, and 8.3.1 then sends the parties to agree<br>• S_f is the free cross-section, which NOTE 18 warns is not the intake one | `noise_control.measurement_distance_downstream_m(0.9, 0.45)` |
 | `SilencerInSituWarning` | `warning class` | **The measurement is outside a condition ISO 11820 states.**<br>• a downstream distance the geometry cannot give, a field correction past what NOTE 4 expects, a velocity profile outside the 10 % the standard asks for | `warnings.catch_warnings()`<br>Emitted by `noise_control.silencer_in_situ` |
-| `screen_attenuation` / `ScreenInSituResult` | `function` / `dataclass` | **What a removable screen is worth where it stands, ISO 11821 clauses 5.8 and 5.9.**<br>• `unscreened_levels`, `screened_levels` [dB], `frequencies` [Hz], `distance`<br>• `source_kind`: 'actual' (Default) or 'artificial'<br>• `a_weighted_unscreened_level` / `a_weighted_screened_level`: the pair of 5.9, refused with an artificial source because the spectrum would be the loudspeaker's<br>• result: `attenuation`, `a_weighted_attenuation`, `.plot()`<br>• `.rounded()` and `.rounded_a_weighted()`: the whole decibels 7.4 c) reports, an exact half to the even one | `noise_control.screen_attenuation(without, with_screen, frequencies=f)` |
+| `screen_attenuation` / `ScreenInSituResult` | `function` / `dataclass` | **What a removable screen is worth where it stands, ISO 11821 clauses 5.8 and 5.9.**<br>• `unscreened_levels`, `screened_levels` [dB], `frequencies` [Hz], `distance`<br>• `source_kind`: 'actual' (Default) or 'artificial'<br>• `a_weighted_unscreened_level` / `a_weighted_screened_level`: the pair of 5.9, refused with an artificial source because the spectrum would be the loudspeaker's<br>• result: `attenuation`, `a_weighted_attenuation`, `.plot()`<br>• `.rounded` and `.rounded_a_weighted` (read-only): the whole decibels 7.4 c) reports, an exact half to the even one | `noise_control.screen_attenuation(without, with_screen, frequencies=f)` |
 | `screen_background_corrected_level` / `BACKGROUND_CORRECTION_WINDOW_DB` / `ISO11821_MIN_BACKGROUND_MARGIN_DB` / `ISO11821_PREFERRED_BACKGROUND_MARGIN_DB` | `function` / `constant` | **The background correction ISO 11821 boxes, clause 5.7.**<br>• `L_p = 10 lg(10^(L_ps/10) − 10^(L_pb/10))`, the plain energy subtraction, band by band and position by position<br>• over 10 dB of margin nothing is corrected; under 6 dB the conditions are "not acceptable", which is a refusal, because the background it names includes wind noise<br>• where ISO 11820 corrects from a stepped table, this standard prints the formula | `noise_control.screen_background_corrected_level(levels, background)` |
 | `screen_source_directivity_index` / `DIRECTIVITY_POSITIONS` / `DIRECTIVITY_INDEX_LIMIT_DB` / `DIRECTIVITY_CIRCLE_RADIUS_M` | `function` / `constant` | **Is this loudspeaker omnidirectional enough? ISO 11821 definition 3.10 and 5.2.2.**<br>• twelve positions evenly spaced on a horizontal circle of about 1,5 m radius<br>• `DI_i = L₃₆₀ − L₃₀,i`, the logarithmic mean less the position, so the index is positive where the position is quieter than the mean<br>• the source qualifies while no position falls more than 8 dB below the mean | `noise_control.screen_source_directivity_index(levels_at_twelve)` |
 | `microphone_distances_m` / `SCREEN_DISTANCE_FACTORS` / `MIN_MICROPHONE_DISTANCE_M` / `MIN_SCREEN_DIMENSION_M` | `function` / `constant` | **Where the microphones stand in front of a screen, ISO 11821 5.5.2.**<br>• a quarter, a half, once and twice the screen height, never closer than 1 m, so for a low screen the two nearest positions coincide<br>• NOTE 2 reads the spread: the smallest attenuation at the most remote position, the largest at the nearest<br>• a screen under 1,5 m in either dimension is outside the standard, and that is reported | `noise_control.microphone_distances_m(3.0)` |
@@ -53478,8 +53519,8 @@ documents, one page per module.
 | `perceived_noise_level` | `function` | **Perceived noise level PNL (ICAO Annex 16), PNdB.**<br>• `spl`: 24 band levels [dB]<br>= 40 + (10/lg2)·lg N | `perceived_noise_level(spl)` |
 | `tone_correction` | `function` | **Tone correction C (ICAO Annex 16, slope method), dB.**<br>• `spl`: 24 band levels [dB]<br>1.5 dB threshold, cap 6⅔ dB | `tone_correction(spl)` |
 | `effective_perceived_noise_level` | `function` | **EPNL from a spectral time history (ICAO Annex 16), EPNdB.**<br>• `spectra`: (K, 24) band levels [dB]<br>• `dt` (Default: 0.5) [s]<br>• `reference_time` (Default: 10) [s]<br>• `procedure`: 'airplane' (tone correction from 80 Hz, Default) / 'helicopter' (from 50 Hz, App. 2 4.3.1)<br>EPNL = PNLTM + D | `res = aircraft.effective_perceived_noise_level(spectra)`<br><br>• `EPNLResult` |
-| `epnl_from_pnlt` | `function` | **EPNL + 10 dB-down limits from a PNLT series (ICAO Annex 16).**<br>• `pnlt`: PNLT(k) [PNdB]<br>• `dt` (Default: 0.5) [s]<br>• `reference_time` (Default: 10) [s] | `epnl, pnltm, kf, kl = aircraft.epnl_from_pnlt(pnlt)` |
-| `EPNLResult` | `dataclass` | **EPNL result.**<br>• `frequencies` [Hz] / `times` [s]<br>• `pnl` / `tone_correction` / `pnlt` [PNdB, dB]<br>• `pnltm` / `duration_correction` / `epnl`<br>• `band_limits` (kF, kL)<br>• `.plot()`: PNL/PNLT time history | `res.epnl, res.pnltm, res.band_limits` |
+| `epnl_from_pnlt` / `EPNLIntegration` | `function` / `dataclass` | **EPNL + 10 dB-down limits from a PNLT series (ICAO Annex 16).**<br>• `pnlt`: PNLT(k) [TPNdB]<br>• `dt` (Default: 0.5) [s]<br>• `reference_time` (Default: 10) [s]<br>• `tone_corrections`: C(k) [dB] for the bandsharing adjustment<br>• result: `epnl` [EPNdB], `pnltm` [TPNdB, with ΔB], `bandsharing_adjustment` [dB], `band_limits` (kF, kL), and `duration_correction` read from them | `r = aircraft.epnl_from_pnlt(pnlt)`<br>`r.epnl, r.band_limits` |
+| `EPNLResult` | `dataclass` | **EPNL result.**<br>• `frequencies` [Hz] / `times` [s]<br>• `pnl` [PNdB] / `tone_correction` [dB] / `pnlt` [TPNdB]<br>• `pnltm` [TPNdB] / `duration_correction` [dB] / `epnl` [EPNdB]<br>• `band_limits` (kF, kL)<br>• `.plot()`: PNL/PNLT time history | `res.epnl, res.pnltm, res.band_limits` |
 | `verify_aircraft_noise_system` | `function` | **IEC 61265 measurement-system verification.**<br>• `directional`: {f: {angle: \|Δsens\| dB}} (Table 1)<br>• `frequency_response` / `linearity` / `resolution`<br>filters via `verify_filter_class` | `res = verify_aircraft_noise_system(directional=meas)`<br><br>• `AircraftSystemComplianceResult` |
 | `AircraftSystemComplianceResult` | `dataclass` | **IEC 61265 verdict on a measurement chain.**<br>• `passes`: conjunction of the checks, `False` over no measurement; no truth value: `bool()` raises<br>• `checks`: one read-only row per checked quantity, with `quantity`, the printed `limit`, the measured `value` and `ok`<br>• takes `directional`, `frequency_response`, `linearity`, `resolution` (the measurements, held as read-only copies); `checks`, `passes` are read-only, read from them and the tables of the standard | `res.passes, res.checks` |
 | `sae_band_attenuation` | `function` | **One-third-octave-band atmospheric absorption (SAE ARP 5534).**<br>• `frequencies` [Hz] / `path_length_m` [m]<br>• `temperature_c` (Default: 25) / `relative_humidity_percent` (Default: 70) / `static_pressure_kpa` (Default: 101.325)<br>δ_B from pure-tone δ_t=α·s (α: ISO 9613-1 terms, ARP 5534 Eq. 6 saturation pressure) | `sae_band_attenuation(freqs, 7620.0)`<br><br>• `AircraftBandAttenuation` |
@@ -54401,8 +54442,8 @@ documents, one page per module.
 | `NOMINAL_FREQUENCY_RANGE_HZ` | `constant` | **The nominal frequency range of each weighting (ISO 8041-1 Table 1).**<br>• `Wh` 8 to 1 000, whole-body 0,5 to 80, `Wm` 1 to 80, `Wf` 0,1 to 0,5<br>• the printed round numbers, not the band centres `10**(k/10)` Annex B tabulates at | `vibration.NOMINAL_FREQUENCY_RANGE_HZ['Wm']  # (1.0, 80.0)` |
 | `ISO8041_COVERAGE_FACTOR` / `MAX_EXPANDED_UNCERTAINTY_PERCENT` | `constant` | **What a testing laboratory's uncertainty is expanded with, and how far it may reach.**<br>• `k = 2` (13.1 and 14.1; 12.1 prints "no less than 2"), named for its standard because `hearing.COVERAGE_FACTOR` is a different one (1,65, ISO 9612)<br>• the maximum permitted expanded uncertainty per test clause, e.g. 4,5 % for 12.11.2 and 0,01 % for the timing clauses | `vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT['12.13']  # 3.0 %` |
 | `PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT` | `constant` | **The same limits for a personal vibration exposure meter (ISO 8041-2:2021 clauses 12 and 13).**<br>• keyed by the Part 2 clause number: 11 figures over 10 clauses (12.10.2 prints one for the reference range and one for the other ranges), each 12.x figure the one Part 1 prints for the same clause<br>• 13.9 is Part 2's periodic verification (5 %), not Part 1's one-off indication test (2 %), which is why each part has its own table | `vibration.PVEM_MAX_EXPANDED_UNCERTAINTY_PERCENT['12.11.2']  # 4.5 %` |
-| `weighting_tolerance_percent` / `phase_tolerance_deg` | `function` | **The band ISO 8041-1 Table 5 allows, region by region.**<br>• `+12 %` / `−11 %` in the central region, `+26 %` / `−21 %` in the skirts, no lower limit in the tails<br>• the phase band applies only to a meter reporting a parameter not based on r.m.s. values (Table 5 footnote a), which is why it is a separate call | `vibration.weighting_tolerance_percent('Wk', [16.0])  # (12.0, -11.0)` |
-| `TRANSITION_FREQUENCIES_HZ` / `CENTRAL_TOLERANCE_PERCENT` / `SKIRT_TOLERANCE_PERCENT` / `TAIL_TOLERANCE_PERCENT` / `UNCONSTRAINED_BELOW_PERCENT` | `constant` | **Tables 4 and 5 of ISO 8041-1, as data.**<br>• the four transition frequencies per weighting, built from the printed `10**(k/10)` exponents<br>• the three bands, each `(upper %, lower %, phase °)`<br>• `−100 %`, which is the absence of a lower limit rather than a wide one | `vibration.TRANSITION_FREQUENCIES_HZ['Wk']`<br><br>• (0.251, 0.631, 63.1, 158.5) Hz |
+| `weighting_tolerance_percent` / `phase_tolerance_deg` | `function` | **The band ISO 8041-1 Table 5 allows, region by region.**<br>• `(lower, upper)`, lower first and signed: `−11 %` / `+12 %` in the central region, `−21 %` / `+26 %` in the skirts, `−100 %` (no lower limit) in the tails<br>• the phase band applies only to a meter reporting a parameter not based on r.m.s. values (Table 5 footnote a), which is why it is a separate call | `vibration.weighting_tolerance_percent('Wk', [16.0])  # (-11.0, 12.0)` |
+| `TRANSITION_FREQUENCIES_HZ` / `CENTRAL_TOLERANCE_PERCENT` / `SKIRT_TOLERANCE_PERCENT` / `TAIL_TOLERANCE_PERCENT` / `UNCONSTRAINED_BELOW_PERCENT` | `constant` | **Tables 4 and 5 of ISO 8041-1, as data.**<br>• the four transition frequencies per weighting, built from the printed `10**(k/10)` exponents<br>• the three bands, each `(lower %, upper %, phase °)`, the lower limit signed<br>• `−100 %`, which is the absence of a lower limit rather than a wide one | `vibration.TRANSITION_FREQUENCIES_HZ['Wk']`<br><br>• (0.251, 0.631, 63.1, 158.5) Hz |
 | `REFERENCE_FREQUENCY_HZ` / `REFERENCE_ACCELERATION_M_S2` / `reference_indication` | `constant` / `function` | **The ISO 8041-1 Table 1 reference conditions.**<br>• the calibration frequency per weighting, from the radians per second the standard prints<br>• the reference r.m.s. acceleration, 1 m/s² whole-body, 10 hand-transmitted, 0,1 low-frequency<br>• `reference_indication(name)` is their product with the weighting factor there, which is what a conforming meter shows | `vibration.reference_indication('Wh')  # 2.02 m/s²` |
 | `indication_tolerance_percent` / `INDICATION_TOLERANCE_PERCENT` / `LOW_FREQUENCY_INDICATION_TOLERANCE_PERCENT` / `LOW_FREQUENCY_WEIGHTING` | `function` / `constant` | **How far the indication itself may sit from the truth (ISO 8041-1 Table 2).**<br>• 4 % at the reference frequency, and 5 % for the low-frequency whole-body case, which is `Wf` | `vibration.indication_tolerance_percent('Wf')  # 5.0` |
 | `PVEM_INDICATION_TOLERANCES_PERCENT` | `constant` | **Table 2 of a personal vibration exposure meter (ISO 8041-2:2021).**<br>• `'indication'` 4 %, `'low-frequency indication'` 5 %, `'weighting consistency'` 3 %: the first two rows of the Part 1 table<br>• no running r.m.s. row, because Part 2 5.13 declares the running r.m.s. not applicable to a PVEM | `vibration.PVEM_INDICATION_TOLERANCES_PERCENT['weighting consistency']  # 3.0` |
@@ -54425,8 +54466,8 @@ documents, one page per module.
 | `kb_signal` / `kbf_signal` | `function` | **The KB signal and the weighted vibration severity (3.10.1, Formula (1)).**<br>• `KB(t)` is the velocity band-limited, frequency-weighted and normalised by 1 mm/s, so it is dimensionless<br>• `KB_F(t)` is its running r.m.s. with τ = 0,125 s ("Fast")<br>• keyword-only: `working_range`, and `time_constant_s` for a comparison the standard does not allow a meter | `vibration.kbf_signal(v, 2048.0).max()  # KB_Fmax` |
 | `takt_maxima` / `takt_max_rms` | `function` | **The clock maxima and their r.m.s., Formula (2).**<br>• one maximum per whole 30 s clock interval; a part-interval is dropped (5.1.6.4)<br>• a maximum at or below 0,1 enters the sum as zero and its interval still counts in N | `vibration.takt_max_rms([0.8, 0.05])  # 0.566` |
 | `band_limitation_response` / `kb_weighting_response` | `function` | **Formulae (3) and (4), complex, at the frequencies asked for.**<br>• two-pole Butterworth pairs at `0,8 f_u` and `f_o / 0,8`, and the 5,6 Hz pole that makes the KB weighting<br>• the magnitudes are Formulae (5) and (6) | `abs(vibration.kb_weighting_response([16.0]))  # 0.944` |
-| `verify_vibration_meter` / `VibrationMeterVerification` | `function` / `dataclass` | **Does a meter's amplitude response meet DIN 45669-1 Tables 2 and 3?**<br>• `frequencies`, `measured_response` (any consistent unit: only the shape is graded)<br>• keyword-only: `weighting` (`'kb'` Default, or `'Z'` for none), `working_range`, `reference_frequency_hz` (Default: 16)<br>• `.deviation_percent` (Formula (7)), `.lower_percent`, `.upper_percent`, `.within_tolerance`, `.passes`, `.worst_frequency_hz`, `.plot()`; no truth value: `bool()` raises<br>• the response only: Clause 6 also asks for linearity, overload and the environmental tests | `vibration.verify_vibration_meter(f, measured).passes` |
-| `response_tolerance_percent` / `RESPONSE_TOLERANCE_LOWER_PERCENT` / `RESPONSE_TOLERANCE_UPPER_PERCENT` | `function` / `constant` | **Tables 2 and 3, as bands of the working range.**<br>• 10 % from `1,25 f_u` to `0,8 f_o`, 20 % out to `0,5 f_u` and `2 f_o`<br>• 100 % below that band is the absence of a lower limit, and the upper limit applies only where the response is above 0,01 | `vibration.response_tolerance_percent([100.0])`<br><br>• (20.0, 20.0) % |
+| `verify_vibration_meter` / `VibrationMeterVerification` | `function` / `dataclass` | **Does a meter's amplitude response meet DIN 45669-1 Tables 2 and 3?**<br>• `frequencies`, `measured_response` (any consistent unit: only the shape is graded)<br>• keyword-only: `weighting` (`'kb'` Default, or `'Z'` for none), `working_range`, `reference_frequency_hz` (Default: 16)<br>• `.deviation_percent` (Formula (7)), `.lower_percent` (negative), `.upper_percent`, `.within_tolerance`, `.passes`, `.worst_frequency_hz`, `.plot()`; no truth value: `bool()` raises<br>• the response only: Clause 6 also asks for linearity, overload and the environmental tests | `vibration.verify_vibration_meter(f, measured).passes` |
+| `response_tolerance_percent` / `RESPONSE_TOLERANCE_LOWER_PERCENT` / `RESPONSE_TOLERANCE_UPPER_PERCENT` | `function` / `constant` | **Tables 2 and 3, as bands of the working range.**<br>• `(lower, upper)`, lower first and signed: `−10 %` / `+10 %` from `1,25 f_u` to `0,8 f_o`, `−20 %` / `+20 %` out to `0,5 f_u` and `2 f_o`<br>• a lower `−100 %` beyond that band is the absence of a lower limit, and the upper limit applies only where the response is above 0,01<br>• the two constants hold the printed magnitudes `G_u` and `G_o` | `vibration.response_tolerance_percent([100.0])`<br><br>• (-20.0, 20.0) % |
 | `assessment_weighting_response` / `assessment_weighting_taps` | `function` | **The three Annex E weighting filters (Table E.1).**<br>• the target magnitude is the guideline curve of DIN 4150-3 Table 1 inverted and normalised to its 1-10 Hz value<br>• `assessment_weighting_taps(fs, *, building_class, n_taps=None)` designs the symmetric FIR the annex asks for, which has the linear phase a peak measurement needs | `vibration.assessment_weighting_response([50.0], building_class='residential')`<br><br>• 0.333 |
 | `assessment_velocity` / `assess_short_term_vibration` / `AssessmentVelocity` | `function` / `dataclass` | **Short-term vibration on a building judged without a dominant frequency (Annex E).**<br>• `velocity_mm_s` [mm/s], `fs` [Hz], keyword-only `building_class` and `n_taps`<br>• `.assessment_velocity_mm_s` = `\|v_Bn\|max`, `.guide_value_mm_s`, `.ratio`, `.within_guideline`, `.plot()`; no truth value: `bool()` raises, read `within_guideline`<br>• the verdict reads like DIN 4150-3: keeping to the value is what the standard promises about, exceeding it moves the question to Clauses 4.2 to 4.4 | `vibration.assess_short_term_vibration(v, 2048.0, building_class='residential').within_guideline` |
 | `dominant_frequency` / `DominantFrequency` | `function` / `dataclass` | **The dominant frequency of a short-term event (Annex D).**<br>• `method='zero_crossing'` (Default: the crossings around the largest amplitude are half a period apart) or `'fourier'`<br>• `.frequency_hz`, `.method`, `.candidates` (the two largest spectral values, Fourier only)<br>• the two can disagree, which is the ambiguity Annex E removes | `vibration.dominant_frequency(v, 2048.0).frequency_hz` |
@@ -56473,9 +56514,9 @@ check that pins each quantity to its standard's own expected value.
 | Symbol | Definition | Unit | Defined in | Computed in |
 | :--- | :--- | :--- | :--- | :--- |
 | PNL | Perceived noise level: the 24 one-third-octave band levels converted to noisiness in noys and recombined. | PNdB | ICAO Annex 16, Vol. I, Appendix 2 (noisiness law in Table A2-3) | [Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/) |
-| PNLT | Tone-corrected perceived noise level: PNL plus the penalty for spectral irregularities such as fan and turbine tones. | PNdB | ICAO Annex 16, Vol. I, Appendix 2 | [Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/) |
+| PNLT | Tone-corrected perceived noise level: PNL plus the penalty for spectral irregularities such as fan and turbine tones. | TPNdB | ICAO Annex 16, Vol. I, Appendix 2 | [Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/) |
 | EPNL | Effective perceived noise level: the maximum PNLT plus the duration correction over the 10 dB-down window, the noise-certification metric. | EPNdB | ICAO Annex 16, Vol. I, Appendix 2 | [Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/) |
-| PNLTM | Maximum tone-corrected perceived noise level: the largest PNLT of the half-second time history, after the bandsharing adjustment. It is the peak the certification metric is built on, since $\mathrm{EPNL} = \mathrm{PNLTM} + D$ and the 10 dB-down integration window is measured down from it. | PNdB | ICAO Annex 16, Vol. I, Appendix 2, 4.4 | [Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/) |
+| PNLTM | Maximum tone-corrected perceived noise level: the largest PNLT of the half-second time history, after the bandsharing adjustment. It is the peak the certification metric is built on, since $\mathrm{EPNL} = \mathrm{PNLTM} + D$ and the 10 dB-down integration window is measured down from it. | TPNdB | ICAO Annex 16, Vol. I, Appendix 2, 4.4 | [Aircraft noise: Effective Perceived Noise Level](https://docs.jmrp.io/phonometry/aircraft/aircraft-noise/) |
 | NPD | Noise-power-distance table: the event level of one aircraft ($L_\mathrm{Amax}$ or SEL) tabulated against distance for a handful of engine power settings, measured in steady flight along a notionally infinite straight path at a reference speed. A calculation interpolates it linearly in power and logarithmically in distance, then corrects that baseline segment by segment. | dB | ECAC Doc 29, 4th ed., Volume 2, section 4.2 | [Airport Noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/) |
 | ANP database | Aircraft Noise and Performance database: the international collection of NPD tables, aircraft and engine performance coefficients and default departure and approach profiles, supplied mostly by the manufacturers, that an airport-noise calculation is normally run from. |  | ECAC Doc 29, 4th ed., Volume 2, Appendix G | [The ANP fleet database](https://docs.jmrp.io/phonometry/aircraft/anp-fleet/) |
 | $d_p$ | Slant distance: the perpendicular distance from the receiver to the flight-path segment, which is the abscissa of every NPD table. It is not the distance along the ground and not the aircraft's altitude, and to the side of the track it is the minimum distance to the segment rather than to the whole path. | m | ECAC Doc 29, 4th ed., Volume 2, section 4.5.2 | [Airport Noise (ECAC Doc 29)](https://docs.jmrp.io/phonometry/aircraft/airport-noise/) |
@@ -58233,8 +58274,10 @@ You can inspect the exact bands with:
 ```python
 from phonometry import filters
 
-fc, fl, fu, labels = filters.nominal_frequencies(fraction=3, limits=[12, 20000])
-for label, center, lower, upper in zip(labels, fc, fl, fu):
+bands = filters.nominal_frequencies(fraction=3, limits=[12, 20000])
+for label, center, lower, upper in zip(
+    bands.labels, bands.frequencies, bands.lower_edges, bands.upper_edges
+):
     print(label, center, lower, upper, upper - lower)
 ```
 
@@ -58261,7 +58304,8 @@ filtered = filters.octave_filter(
 levels, centers = filtered.levels, filtered.frequencies
 
 # Same standardized band definitions, including lower/upper edges.
-fc, fl, fu, labels = filters.nominal_frequencies(fraction=3, limits=[12, 20_000])
+bands = filters.nominal_frequencies(fraction=3, limits=[12, 20_000])
+fc, fl, fu = bands.frequencies, bands.lower_edges, bands.upper_edges
 
 # Narrowband Welch estimate on the original signal.
 nperseg = min(2**15, len(x))
@@ -58278,7 +58322,7 @@ freq_bins, psd = signal.welch(
 band_index = int(np.argmin(np.abs(np.asarray(fc) - 1000.0)))
 in_band = (freq_bins >= fl[band_index]) & (freq_bins <= fu[band_index])
 
-print("Selected third-octave band:", labels[band_index])
+print("Selected third-octave band:", bands.labels[band_index])
 print("Welch bin spacing:", freq_bins[1] - freq_bins[0], "Hz")
 for f, pxx in zip(freq_bins[in_band], psd[in_band]):
     print(f, pxx)
@@ -59419,7 +59463,7 @@ fig, ax = plt.subplots(figsize=(9, 5))
 for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
     bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
                             design=filters.FilterDesign(filter_type=ftype))
-    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
     fsd = fs / bank.factor[idx]
     # Group delay of an SOS cascade = sum of the sections' group delays
     gd = sum(group_delay((sec[:3], sec[3:]), w=w, fs=fsd)[1]
@@ -59603,7 +59647,7 @@ print(result.overall_class)          # 1
 print(result.requirements)
 # ('relative_attenuation', 'effective_bandwidth', 'summation')
 band = result.bands[0]
-print(band["freq"], band["class"], band["checked_to_omega"])
+print(band["frequency"], band["class"], band["checked_to_omega"])
 # 12.589254117941678 1 1906.3877633382747
 print(band["margin_class1_db"], band["bandwidth_margin_class1_db"])
 # 0.39999977486865645 0.35126579320766144
@@ -59687,7 +59731,7 @@ print([int(m) for m in bank.factor[:4]])   # [22, 11, 5, 2]: decimated bands
 result = filters.verify_filter_class(bank)
 print(result.requirement_class("relative_attenuation"))   # 1
 band = result.bands[0]
-print(band["checked_to_omega"] * band["freq"])
+print(band["checked_to_omega"] * band["frequency"])
 # 8000.0: half the input rate, not the 364 Hz of the decimated rate
 ```
 
@@ -59713,8 +59757,8 @@ from phonometry import filters
 
 fs = 48000
 bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
-idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
-fm, fsd = bank.freq[idx], fs / bank.factor[idx]
+idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
+fm, fsd = bank.frequencies[idx], fs / bank.factor[idx]
 w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
 att = -20 * np.log10(np.abs(h) + 1e-12)
 delta_a = att - np.interp(fm, w, att)     # relative attenuation
@@ -60000,8 +60044,8 @@ from phonometry import filters
 
 fs = 48000
 bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
-idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
-fm, fsd = bank.freq[idx], fs / bank.factor[idx]
+idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
+fm, fsd = bank.frequencies[idx], fs / bank.factor[idx]
 w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
 att = -20 * np.log10(np.abs(h) + 1e-12)
 delta_a = att - np.interp(fm, w, att)
@@ -60413,7 +60457,7 @@ for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
     # limits picks out the single 1 kHz octave band
     bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
                             design=filters.FilterDesign(filter_type=ftype))
-    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
     fsd = fs / bank.factor[idx]           # rate the band actually runs at
     w, h = sosfreqz(bank.sos[idx], worN=16384, fs=fsd)
     ax.semilogx(w, 20 * np.log10(np.abs(h) + 1e-9), label=ftype)
@@ -61039,7 +61083,7 @@ bank = filters.OctaveFilterBank(
     fs=48000, fraction=3, design=filters.FilterDesign(filter_type='butter'))
 
 # Access computed properties
-# bank.freq (center), bank.freq_d (lower), bank.freq_u (upper), bank.sos (coefficients)
+# bank.frequencies (center), bank.lower_edges (lower), bank.upper_edges (upper), bank.sos (coefficients)
 
 # Process multiple signals efficiently
 stream = [stereo]                 # your sequence of multichannel frames
@@ -61824,8 +61868,9 @@ fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=3)
-levels, freq, times = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
-# levels: (bands, frames) — ready for pcolormesh(times, freq, levels)
+result = bank.spectrogram(recording, window_time=0.125, overlap=0.5)
+# result.levels: (bands, frames), on the axes result.frequencies and result.times
+print(result.levels.shape == (result.frequencies.size, result.times.size))  # True
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example_dark.webp"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/spectrogram_example.webp" alt="One-twelfth-octave spectrogram of a logarithmic sweep with two tone bursts" width="80%"></picture>
@@ -61851,19 +61896,44 @@ x[int(2.5 * fs):int(2.8 * fs)] += np.sin(2 * np.pi * 250 * t[: int(0.3 * fs)])
 x += 0.01 * np.random.default_rng(42).standard_normal(t.size)
 
 bank = filters.OctaveFilterBank(fs=fs, fraction=12, order=6, limits=[50.0, 12000.0])
-levels, freq, times = bank.spectrogram(x, window_time=0.125, overlap=0.875)
+result = bank.spectrogram(x, window_time=0.125, overlap=0.875)
 
+# One line:
+result.plot()
+plt.show()
+
+# By hand, from the result's fields. The rows are spaced evenly in log10
+# of the frequency, so the raster is laid out there, half a band step
+# either side of each centre, and carried onto the logarithmic axis through
+# 10**y: an image placed straight on a log axis spreads its rows evenly in Hz.
+from matplotlib.scale import LogTransform
+from matplotlib.transforms import IdentityTransform, blended_transform_factory
+
+f, t = result.frequencies, result.times
+half_band = np.log10(f[-1] / f[0]) / (2 * (f.size - 1))
+half_hop = (t[1] - t[0]) / 2
 fig, ax = plt.subplots()
-mesh = ax.pcolormesh(times, freq, levels, shading="auto")
 ax.set_yscale("log")
+rows = blended_transform_factory(IdentityTransform(),
+                                 LogTransform(10).inverted()) + ax.transData
+image = ax.imshow(result.levels, origin="lower", aspect="auto", cmap="magma",
+                  interpolation="nearest", transform=rows,
+                  vmin=result.levels.max() - 80.0, vmax=result.levels.max(),
+                  extent=(t[0] - half_hop, t[-1] + half_hop,
+                          np.log10(f[0]) - half_band, np.log10(f[-1]) + half_band))
+ax.set_xlim(t[0] - half_hop, t[-1] + half_hop)
+ax.set_ylim(f[0] / 10**half_band, f[-1] * 10**half_band)
 ax.set(xlabel="Time [s]", ylabel="Frequency [Hz]")
-fig.colorbar(mesh, label="Level [dB]")
+fig.colorbar(image, label="Band level [dB]")
 plt.show()
 ```
 
 </details>
 
-- Multichannel input `(channels, samples)` returns `(channels, bands, frames)`.
+- The result is an `OctaveSpectrogramResult`: read `levels`, `frequencies` and
+  `times` by name, or draw it with `result.plot()`.
+- Multichannel input `(channels, samples)` gives `levels` shaped
+  `(channels, bands, frames)`; `result.plot(channel=0)` draws one channel.
 - `times` holds each window's center in seconds.
 - `mode='peak'` gives per-window peak-holding levels instead of RMS.
 - `zero_phase=True` filters bands forward-backward so per-band group delay does
@@ -62951,9 +63021,9 @@ from phonometry import filters
 result = filters.verify_weighting_class(filters.WeightingFilter(48000, "A"))
 print(result.overall_class)          # 1
 print(result.range_limited)          # False
-print(result.between_nominals)       # {'worst_freq': ..., 'margin_class1_db': ...}
+print(result.between_nominals)       # {'worst_frequency': ..., 'margin_class1_db': ...}
 print(result.bands[20])
-# {'freq': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
+# {'frequency': 1000.0, 'class': 1, 'deviation_db': 0.0, 'margin_class1_db': 0.7, 'margin_class2_db': 1.0}
 ```
 
 The Table 3 acceptance mask itself is public too: `weighting_class_limits(1)`
@@ -63017,7 +63087,7 @@ ax.plot(freqs, lo2, ":", drawstyle="steps-mid", color="C2")
 
 for curve, marker in (("A", "o"), ("C", "s")):
     bands = filters.verify_weighting_class(filters.WeightingFilter(48000, curve)).bands
-    f = [b["freq"] for b in bands]
+    f = [b["frequency"] for b in bands]
     dev = [b["deviation_db"] for b in bands]
     ax.plot(f, dev, marker=marker, label=f"{curve} weighting deviation (48 kHz)")
 
@@ -72429,8 +72499,7 @@ code that reached through the root:
 ```python
 from phonometry import filters
 
-_, _, _, labels = filters.nominal_frequencies(1)
-print(labels)
+print(filters.nominal_frequencies(1).labels)
 ```
 
 ### Finding the new home of a name
@@ -72843,6 +72912,7 @@ hertz, `levels` in decibels and the sample rate is `fs` on every function.
 | `speed_of_sound_m_s=` on `thickness_critical_frequency_product` | `speed_of_sound=` |
 | `sample_rate` on the FDTD `SignalSource`, `STOIResult` and `impact_force_exposure_level` | `fs` |
 | `freq=` on `linkwitz_riley` and `adaptation_term_kc` | `frequency=` and `frequencies=` |
+| `band["freq"]` in the `bands` rows of `FilterComplianceResult`, `WeightingComplianceResult` and `IntensityInstrumentComplianceResult`, and `between_nominals["worst_freq"]` on `WeightingComplianceResult` | `band["frequency"]` and `between_nominals["worst_frequency"]` |
 | `.frequency` on the results that carry a frequency axis: `IntensityResult`, `FieldIndicators`, `IntensityInstrumentComplianceResult`, `RoomAcousticsResult`, the five auditorium results, `ImpedanceTubeResult`, `PorousMediumResult`, `LayeredAbsorberResult`, `DiffuseFieldAbsorptionResult`, `BiotWavesResult`, `SlitResonatorAbsorberResult`, `MetadiffuserResult`, `TransferMatrix`, the two valve-noise results, `AircraftBandAttenuation`, `AmbientNoiseResult`, `ShipTrafficSpectrum` | `.frequencies` |
 | `.band_centers` on the ISO 717 and ISO 11654 ratings (`WeightedRatingResult`, `ImpactRatingResult`, `ExtendedWeightedRatingResult`, `ExtendedImpactRatingResult`, `AbsorptionRatingResult`), `.centre_frequencies` on `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `EcmaFluctuationStrength` and `MooreGlasbergLoudness`, `.band_frequencies` on `FilterComplianceResult` and `STOIResult`, `.bands_hz` on `RoadDeviceRating` | `.frequencies`, the band axis of every result |
 | `frequency=` holding an array: the flanking-transmission functions, `internal_spectrum`, `pipe_transmission_loss`, `expander_noise`, `transfer_matrix_one_load`, `transfer_matrix_two_load`, `TransferMatrix.plot` | `frequencies=` |
@@ -73315,8 +73385,10 @@ answer depended on a keyword, which is why the pair needed twelve `@overload`
 declarations to be typed at all, and why `_, _, bands = bank.filter(...)` was
 a line you had to count commas in.
 
-They now return an `OctaveFilterResult` with named fields, like every other
-computation in the library.
+They now return an `OctaveFilterResult` with named fields. The other answers
+of the bank that were tuples are records too: the spectrogram is an
+`OctaveSpectrogramResult`, and the band set the bank is designed on is read
+from attributes spelled out in full.
 
 | 3.3.0 | 4.0 |
 | --- | --- |
@@ -73324,6 +73396,8 @@ computation in the library.
 | `spl, _ = octave_filter(x, fs)` | `octave_filter(x, fs).levels` |
 | `_, freq = octave_filter(x, fs)` | `octave_filter(x, fs).frequencies` |
 | `_, _, bands = bank.filter(x, sigbands=True)` | `bank.filter(x, sigbands=True).require_bands()` |
+| `levels, freq, times = bank.spectrogram(x)` | `r = bank.spectrogram(x)`, then `r.levels`, `r.frequencies` and `r.times` (an `OctaveSpectrogramResult`, drawn with `r.plot()`) |
+| `bank.freq`, `bank.freq_d`, `bank.freq_u`, `bank.nominal_freq`, `bank.num_bands` | `bank.frequencies`, `bank.lower_edges`, `bank.upper_edges`, `bank.labels`, `bank.n_bands`, read-only: the arrays refuse writes and `labels` is a tuple |
 
 ```python
 import numpy as np
@@ -73345,6 +73419,96 @@ The result also draws itself, so the band spectrum is one call:
 ```python
 ax = result.plot()
 ```
+
+## Other answers that were tuples are records
+
+Four more answers came back as a tuple to be unpacked by position. Each is a
+record with named fields now, and none of them unpacks: a line that still
+does raises `TypeError: cannot unpack non-iterable ...` instead of handing
+back the wrong column.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `freq, lower, upper, labels = filters.nominal_frequencies(3)` | `b = filters.nominal_frequencies(3)`, then `b.frequencies`, `b.lower_edges`, `b.upper_edges` and `b.labels` (a `FractionalOctaveBands`) |
+| `epnl, pnltm, kf, kl = aircraft.epnl_from_pnlt(pnlt)` | `r = aircraft.epnl_from_pnlt(pnlt)`, then `r.epnl`, `r.pnltm`, `r.band_limits` (the pair `(kF, kL)`), `r.bandsharing_adjustment` and `r.duration_correction` (an `EPNLIntegration`) |
+| `freqs, delta_l = building.improvement_octave_bands(dl, f)` | `s = building.improvement_octave_bands(dl, f)`, then `s.frequencies` and `s.values` (an `OctaveBandSpectrum`, whose `quantity` says what the values are) |
+| `freqs, values = result.octave_bands()` on a `building.FloorCoveringImprovementResult` | `result.octave_bands().frequencies` and `.values`, the same `OctaveBandSpectrum` |
+
+```python
+import numpy as np
+from phonometry import aircraft, filters
+
+bands = filters.nominal_frequencies(1, [125, 1000])
+print(bands.labels)
+# ('125', '250', '500', '1k')
+
+epnl = aircraft.epnl_from_pnlt(np.array([90.0, 95.0, 90.0]), 0.5)
+print(epnl.band_limits, round(epnl.duration_correction, 2))
+# (0, 2) -10.88
+```
+
+The octave spectrum draws itself with `.plot()`, labelled by its quantity.
+
+## Tolerance limits come lower first, and signed
+
+`vibration.weighting_tolerance_percent` returned the Table 5 band of
+ISO 8041-1 as `(upper, lower)`, and the three constants
+`CENTRAL_TOLERANCE_PERCENT`, `SKIRT_TOLERANCE_PERCENT` and
+`TAIL_TOLERANCE_PERCENT` held `(upper %, lower %, phase °)`. Every other pair of
+limits in the library is `(lower, upper)`, so these two now are too. The lower
+limit stays negative, as the table prints it, and `-100.0` still means that
+the standard sets no lower limit.
+
+This one changes no name and raises nothing: `upper, lower = ...` still
+unpacks two arrays, and swaps them. Read every unpacking of the four:
+
+| 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `upper, lower = vibration.weighting_tolerance_percent(name, f)` | `lower, upper = vibration.weighting_tolerance_percent(name, f)` |
+| `vibration.CENTRAL_TOLERANCE_PERCENT == (12.0, -11.0, 6.0)` | `(-11.0, 12.0, 6.0)` |
+| `vibration.SKIRT_TOLERANCE_PERCENT == (26.0, -21.0, 12.0)` | `(-21.0, 26.0, 12.0)` |
+| `vibration.TAIL_TOLERANCE_PERCENT == (26.0, -100.0, inf)` | `(-100.0, 26.0, inf)` |
+
+```python
+from phonometry import vibration
+
+lower, upper = vibration.weighting_tolerance_percent("Wk", [16.0])
+print(lower, upper)
+# [-11.] [12.]
+```
+
+## A record's fields are required
+
+Several records carried fields that defaulted to `None`, so that a result
+built by hand from a few of its numbers would still construct. Every reader
+then had to ask whether the field was there: the fiche refused a bare rating
+only once a report was asked for, and a plot of the geometry raised that the
+result "does not retain its geometry". The fields are required now, and a
+record built without one, or with `None` for one (`dataclasses.replace`
+included), raises `TypeError` naming it.
+
+| Record | Required now |
+| --- | --- |
+| `building.AirborneInsulationResult` | `l1`, `l2`, `t2`, `t0` |
+| `building.ImpactInsulationResult` | `li`, `t2`, `t0` |
+| `building.WeightedRatingResult`, `building.ImpactRatingResult` | `frequencies`, `measured`, `shifted_reference` |
+| `building.ExtendedWeightedRatingResult`, `building.ExtendedImpactRatingResult` | `frequencies`, `measured` |
+| `building.ApertureTransmissionResult` | `depth`, now the fourth field; and `width_m` for a slit or `radius` for a circular aperture |
+| `building.FacadePredictionResult` | `elements`, now the sixth field |
+| `emission.IntensityResult` | `spacing_m`, keyword-only |
+| `environment.BarrierInsertionLoss` | `source_height_m`, `barrier_distance`, `barrier_height_m`, `receiver_distance`, `receiver_height_m`, keyword-only |
+| `psychoacoustics.ZwickerLoudness` | `field` (`"free"` or `"diffuse"`), now the fourth field, before `n5` |
+
+`filters.WeightingFilter(..., high_accuracy=None)` used to select the
+default. `high_accuracy` is a plain `bool` now, `True` by default, and `None`
+raises `TypeError` rather than being read as false, which would pick the plain
+design.
+
+`building.CeilingAttenuationResult.rounded` was a field the caller passed in.
+It is read from `measured` now, rounded to the nearest integer as ASTM E413
+clause 5.2 asks (the clause leaves a half open, and the library rounds
+it up), so it cannot disagree with the data;
+leave it out when building the record by hand.
 
 ## Waveforms inside results come back as the `Signal` they came from
 
@@ -77322,7 +77486,7 @@ print([round(f, 4) for f in vibration.TRANSITION_FREQUENCIES_HZ["Wk"]])
 # [0.2512, 0.631, 63.0957, 158.4893]
 
 # Table 5 read across them: tail, skirt, central, skirt, tail.
-upper, lower = vibration.weighting_tolerance_percent(
+lower, upper = vibration.weighting_tolerance_percent(
     "Wk", [0.2, 0.5, 16.0, 100.0, 200.0]
 )
 print(upper)   # [26. 26. 12. 26. 26.]
@@ -77339,7 +77503,7 @@ thing about the weighting factors: use the actual centre frequencies, never the
 nominal band labels.
 
 ```python
-print(vibration.weighting_tolerance_percent("Wk", [10 ** 1.8, 63.1])[1])
+print(vibration.weighting_tolerance_percent("Wk", [10 ** 1.8, 63.1])[0])
 # [-11. -21.]
 ```
 
@@ -77363,7 +77527,7 @@ from phonometry import vibration
 ft1, ft2, ft3, ft4 = vibration.TRANSITION_FREQUENCIES_HZ["Wk"]
 corners = [ft1, ft2, 6.31, ft3, ft4]
 design = vibration.weighting_factors("Wk", corners)
-upper, _ = vibration.weighting_tolerance_percent("Wk", corners)
+_, upper = vibration.weighting_tolerance_percent("Wk", corners)
 
 print(design.round(4))                   # [0.1832 0.4588 1.0544 0.1857 0.0292]
 print((design * upper / 100).round(4))   # [0.0476 0.0551 0.1265 0.0223 0.0076]
@@ -77437,7 +77601,7 @@ plt.show()
 
 # By hand, from the result's fields, mirroring what
 # WeightingVerification.plot() draws:
-upper, lower = vibration.weighting_tolerance_percent(
+lower, upper = vibration.weighting_tolerance_percent(
     check.weighting, check.frequencies
 )
 inside = check.within_tolerance
@@ -77504,7 +77668,7 @@ of them is wrong in the direction that lets an instrument through.
 The first is the sentence of 5.6.6 quoted at the end of section 1: the
 tolerance limits of Table 5 *include* the applicable **maximum** expanded
 uncertainties of measurement. That is a statement about how the table was
-drawn. It is why `weighting_tolerance_percent` returns +12 % and −11 % and
+drawn. It is why `weighting_tolerance_percent` returns −11 % and +12 % and
 never anything wider: the allowance for a careful bench is already inside
 those numbers, and adding to them would spend it twice.
 
@@ -77614,11 +77778,11 @@ plt.show()
 # them draws the staircase exactly.
 edges = np.sort(np.concatenate((corners * (1 - 1e-9), corners * (1 + 1e-9),
                                 [0.1, 400.0])))
-band_upper, band_lower = vibration.weighting_tolerance_percent("Wk", edges)
+band_lower, band_upper = vibration.weighting_tolerance_percent("Wk", edges)
 
 # In the two tails the lower limit is -100 %, which verify_weighting subtracts
 # nothing from, so the bar there has one arm.
-_ceiling, floor = vibration.weighting_tolerance_percent("Wk", sweep_hz)
+floor, _ceiling = vibration.weighting_tolerance_percent("Wk", sweep_hz)
 arms = np.vstack((np.where(floor <= vibration.UNCONSTRAINED_BELOW_PERCENT, 0.0, u),
                   np.full(sweep_hz.shape, u)))
 kept = graded.within_tolerance

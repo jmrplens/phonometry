@@ -29,6 +29,7 @@ import importlib
 import inspect
 import pkgutil
 import re
+import textwrap
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -286,13 +287,81 @@ def _class_names(where: str, cls: type) -> Iterator[tuple[str, str, str, str, st
             yield from _parameters(f"{where}.{name}", member)
 
 
+def _self_targets(func: object) -> Iterator[str]:
+    """The public names *func* assigns on ``self`` (``self.fs = fs``)."""
+    try:
+        source = textwrap.dedent(inspect.getsource(func))  # type: ignore[arg-type]
+    except (OSError, TypeError):  # pragma: no cover - no source to read
+        return
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Assign):
+            targets = list(node.targets)
+        elif isinstance(node, ast.AnnAssign | ast.AugAssign):
+            targets = [node.target]
+        else:
+            continue
+        for target in targets:
+            for element in target.elts if isinstance(target, ast.Tuple) else [target]:
+                if (
+                    isinstance(element, ast.Attribute)
+                    and isinstance(element.value, ast.Name)
+                    and element.value.id == "self"
+                    and not element.attr.startswith("_")
+                ):
+                    yield element.attr
+
+
+def _instance_attributes() -> Iterator[tuple[str, str]]:
+    """``(where, name)`` for every public attribute a public plain class sets.
+
+    A dataclass declares its fields, a property is a member of its class, and
+    the walk above reads both. A plain class such as ``OctaveFilterBank``
+    writes its public attributes in a method (``self.fs = fs``), where no
+    signature, field list or member shows them, so they are read from the
+    source of every method of the class and of its phonometry bases. That is
+    how ``bank.freq``, ``bank.freq_d`` and ``bank.num_bands`` stayed public
+    long after every field and parameter of the same quantities was spelled
+    out.
+    """
+    seen: set[str] = set()
+    for module in _public_modules():
+        for attr, obj in vars(module).items():
+            if attr.startswith("_") or not inspect.isclass(obj):
+                continue
+            owner = getattr(obj, "__module__", "") or ""
+            if not owner.startswith("phonometry") or dataclasses.is_dataclass(obj):
+                continue
+            key = f"{owner}.{obj.__qualname__}"
+            if key in seen:
+                continue
+            seen.add(key)
+            names: set[str] = set()
+            for klass in obj.__mro__:
+                if not (getattr(klass, "__module__", "") or "").startswith(
+                    "phonometry"
+                ):
+                    continue
+                for member in vars(klass).values():
+                    if inspect.isfunction(member):
+                        names.update(_self_targets(member))
+            yield from ((f"{key}.{name}", name) for name in sorted(names))
+
+
+def test_the_attribute_walk_reads_the_plain_classes() -> None:
+    """The walk sees what a plain class writes on ``self``, or it proves nothing."""
+    found = {where for where, _ in _instance_attributes()}
+    assert "phonometry.filters.core.OctaveFilterBank.fs" in found
+    assert "phonometry.filters.weighting.WeightingFilter.high_accuracy" in found
+
+
 def test_one_concept_is_spelled_one_way() -> None:
     """The minority spellings of a bare concept name are gone and stay gone."""
-    names = list(_public_names())
+    names = [(where, name) for where, name, *_ in _public_names()]
     assert len(names) > 5000, "the walk found too few names to mean anything"
+    names += list(_instance_attributes())
     offenders = sorted(
         f"{where}: {name!r} is spelled {_MINORITY[name]!r} everywhere else"
-        for where, name, *_ in names
+        for where, name in names
         if name in _MINORITY and where not in _MINORITY_EXEMPT
     )
     assert not offenders, "\n".join(offenders)
@@ -839,6 +908,8 @@ _SPELLED_OUT = {
     "mics": "microphones",
     "lab": "laboratory",
     "std": "standard_deviation",
+    "freq": "frequency",
+    "freqs": "frequencies",
 }
 
 #: ``minimum`` and ``maximum`` written as the library writes them, by kind.
@@ -953,8 +1024,8 @@ def _module_names() -> Iterator[tuple[str, str, str]]:
 def test_words_are_spelled_out() -> None:
     """``microphone``, ``laboratory``, ``standard_deviation``, ``n_points``, ``max_``.
 
-    One spelling per word across the library: ``mic``, ``lab`` and ``std``
-    are spelled out, a count is ``n_<plural>`` (never ``num_points``,
+    One spelling per word across the library: ``mic``, ``lab``, ``std`` and
+    ``freq`` are spelled out, a count is ``n_<plural>`` (never ``num_points``,
     ``point_count`` or ``numtaps``), and ``minimum`` and ``maximum`` are
     written ``min`` and ``max`` in every public name, ``MIN``/``MAX`` in a
     constant and ``Min``/``Max`` in a class, as numpy, SciPy, scikit-learn
@@ -963,7 +1034,8 @@ def test_words_are_spelled_out() -> None:
     Lmax and Lmin. A maximum in decibels is the maximum level, ``max_level``,
     never a bare ``max_db``. A confidence bound is ``confidence_lower`` or
     ``confidence_upper``, so ``ci`` is a word of no public name, the ISO 717-2
-    adaptation term C_I aside.
+    adaptation term C_I aside. The attributes a plain class writes on
+    ``self`` are held to the same words as the fields of a dataclass.
     """
     offenders: list[str] = []
     seen: set[str] = set()
@@ -984,6 +1056,13 @@ def test_words_are_spelled_out() -> None:
         offenders += [
             f"{where}: {problem}" for problem in _spelling_problems(name, kind=kind)
         ]
+    for where, name in _instance_attributes():
+        if where in seen or where in _SPELLING_EXEMPT:
+            continue
+        seen.add(where)
+        offenders += [
+            f"{where}: {problem}" for problem in _spelling_problems(name, kind="field")
+        ]
     for module in _public_modules():
         path = module.__name__  # type: ignore[attr-defined]
         leaf = path.rsplit(".", 1)[-1]
@@ -993,11 +1072,70 @@ def test_words_are_spelled_out() -> None:
     assert not offenders, "\n".join(sorted(set(offenders)))
 
 
+#: Row keys a spelling rule does not apply to, each with its reason.
+_ROW_KEY_EXEMPT = {
+    ("FilterComplianceResult", "summation_max_db"): (
+        "the upper end of the range of the summation of output signals "
+        "Delta P_j of IEC 61260-1 5.16, paired with summation_min_db: a bound "
+        "of a deviation, not the maximum level Lmax"
+    ),
+}
+
+
+def test_the_row_keys_of_a_verdict_are_spelled_out() -> None:
+    """A key of the per-band rows a verifier returns is held to the same words.
+
+    The rows of ``FilterComplianceResult``, ``WeightingComplianceResult`` and
+    ``IntensityInstrumentComplianceResult`` are dictionaries, so no signature
+    or field list shows their keys, and ``band["freq"]`` stayed in all three
+    after every attribute of the same quantity was spelled ``frequency``.
+    They are read from a verdict of each kind.
+    """
+    from phonometry import emission, filters
+
+    frequencies, class1, _ = emission.residual_index_limits("probe")
+    verdicts = {
+        "FilterComplianceResult": filters.verify_filter_class(
+            filters.OctaveFilterBank(48000, fraction=1, limits=[500, 2000]),
+            n_points=1024,
+        ),
+        "WeightingComplianceResult": filters.verify_weighting_class(
+            filters.WeightingFilter(48000, "A"), n_sweep_points=256
+        ),
+        "IntensityInstrumentComplianceResult": emission.verify_intensity_class(
+            class1 + 1.0, frequencies, device="probe"
+        ),
+    }
+    offenders: list[str] = []
+    seen: set[tuple[str, str]] = set()
+    for owner, verdict in verdicts.items():
+        rows = list(verdict.bands)
+        between = getattr(verdict, "between_nominals", None)
+        if between is not None:
+            rows.append(between)
+        assert rows, f"{owner} returned no rows to read"
+        for key in sorted({key for row in rows for key in row}):
+            seen.add((owner, key))
+            if (owner, key) in _ROW_KEY_EXEMPT:
+                continue
+            offenders += [
+                f"{owner} row key {key!r}: {problem}"
+                for problem in _spelling_problems(key, kind="field")
+            ]
+    offenders += [
+        f"{owner} row key {key!r} is exempt but no longer exists"
+        for owner, key in sorted(set(_ROW_KEY_EXEMPT) - seen)
+    ]
+    assert not offenders, "\n".join(offenders)
+
+
 def test_every_kept_spelling_still_exists() -> None:
     """An exemption from the spelling rules that names nothing is a stale one."""
-    found = {where for where, *_ in _public_names()} | {
-        where for where, *_ in _module_names()
-    }
+    found = (
+        {where for where, *_ in _public_names()}
+        | {where for where, *_ in _module_names()}
+        | {where for where, _ in _instance_attributes()}
+    )
     stale = sorted(set(_SPELLING_EXEMPT) - found)
     assert not stale, "\n".join(stale)
 
@@ -1009,6 +1147,10 @@ def test_every_kept_spelling_still_exists() -> None:
         ("LabInsulationWarning", "class", "", ["'lab' is spelled 'laboratory'"]),
         ("lab_insulation", "module", "", ["'lab' is spelled 'laboratory'"]),
         ("delay_std", "field", "float", ["'std' is spelled 'standard_deviation'"]),
+        ("freq_d", "field", "", ["'freq' is spelled 'frequency'"]),
+        ("nominal_freq", "field", "", ["'freq' is spelled 'frequency'"]),
+        ("band_freqs", "param", "ArrayLike", ["'freqs' is spelled 'frequencies'"]),
+        ("lower_edges", "field", "", []),
         ("num_points", "param", "int", [_COUNT_RULE]),
         ("numtaps", "param", "int | None", [_COUNT_RULE]),
         ("point_count", "param", "int", [_COUNT_RULE]),

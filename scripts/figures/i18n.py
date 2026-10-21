@@ -2753,7 +2753,7 @@ _ES_EXACT = {
     "Number of strikes $N$": "Número de golpes $N$",
     "Cumulative SEL [dB re 1 µPa²·s]": "SEL acumulado [dB re 1 µPa²·s]",
     "ICAO Aircraft Flyover: Effective Perceived Noise Level (Annex 16)": "Sobrevuelo de aeronave ICAO: Nivel efectivo de ruido percibido (Anexo 16)",
-    "Level [PNdB]": "Nivel [PNdB]",
+    "Level [PNdB, TPNdB]": "Nivel [PNdB, TPNdB]",
     "10 dB-down window": "Ventana 10 dB por debajo",
     # anim_epnl_flyover: EPNL assembled in the order the standard builds it.
     "EPNL, record by record (ICAO Annex 16 Appendix 2)": "EPNL, registro a registro (OACI Anexo 16 Apéndice 2)",
@@ -6422,7 +6422,7 @@ _ES_PATTERNS = [
         ),
         "Audibilidad tonal $\\\\Delta L_{\\\\mathrm{a}}$ = \\1,\\2 dB\nno audible",
     ),
-    (r"^PNLTM = (\d+)\.(\d+) PNdB$", r"PNLTM = \1,\2 PNdB"),
+    (r"^PNLTM = (\d+)\.(\d+) TPNdB$", r"PNLTM = \1,\2 TPNdB"),
     (
         r"^EPNL = (\d+)\.(\d+) EPNdB\n\$D\$ = ([+−]?\d+)\.(\d+) dB$",
         "EPNL = \\1,\\2 EPNdB\n$D$ = \\3,\\4 dB",

@@ -43,7 +43,7 @@ print(result.overall_class)          # 1
 print(result.requirements)
 # ('relative_attenuation', 'effective_bandwidth', 'summation')
 band = result.bands[0]
-print(band["freq"], band["class"], band["checked_to_omega"])
+print(band["frequency"], band["class"], band["checked_to_omega"])
 # 12.589254117941678 1 1906.3877633382747
 print(band["margin_class1_db"], band["bandwidth_margin_class1_db"])
 # 0.39999977486865645 0.35126579320766144
@@ -127,7 +127,7 @@ print([int(m) for m in bank.factor[:4]])   # [22, 11, 5, 2]: decimated bands
 result = filters.verify_filter_class(bank)
 print(result.requirement_class("relative_attenuation"))   # 1
 band = result.bands[0]
-print(band["checked_to_omega"] * band["freq"])
+print(band["checked_to_omega"] * band["frequency"])
 # 8000.0: half the input rate, not the 364 Hz of the decimated rate
 ```
 
@@ -153,8 +153,8 @@ from phonometry import filters
 
 fs = 48000
 bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
-idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
-fm, fsd = bank.freq[idx], fs / bank.factor[idx]
+idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
+fm, fsd = bank.frequencies[idx], fs / bank.factor[idx]
 w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
 att = -20 * np.log10(np.abs(h) + 1e-12)
 delta_a = att - np.interp(fm, w, att)     # relative attenuation
@@ -440,8 +440,8 @@ from phonometry import filters
 
 fs = 48000
 bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200])
-idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
-fm, fsd = bank.freq[idx], fs / bank.factor[idx]
+idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
+fm, fsd = bank.frequencies[idx], fs / bank.factor[idx]
 w, h = sosfreqz(bank.sos[idx], worN=2**15, fs=fsd)
 att = -20 * np.log10(np.abs(h) + 1e-12)
 delta_a = att - np.interp(fm, w, att)

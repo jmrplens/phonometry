@@ -276,22 +276,6 @@ def test_non_iso_band_count_rejected(tmp_path: Path) -> None:
         result.report(out)
 
 
-def test_rating_without_per_band_data_rejected(tmp_path: Path) -> None:
-    """A manually built rating lacking the per-band arrays is rejected."""
-    bare_rating = building.WeightedRatingResult(
-        rating=30, c=-2, ctr=-3, unfavorable_sum=0.0
-    )
-    result = IntensityReductionResult(
-        r_i=np.asarray(ref.ISO15186_1_REF_RI, dtype=np.float64),
-        r_i_modified=None,
-        rating=bare_rating,
-        rating_modified=None,
-    )
-    out = str(tmp_path / "x.pdf")
-    with pytest.raises(ValueError, match=r"needs the ISO 717 per-band rating data"):
-        result.report(out)
-
-
 def test_clause8_areas_stated_in_statement(tmp_path: Path) -> None:
     """The statement carries S and Sm when the result holds them (Clause 8 g)."""
     out = tmp_path / "areas.pdf"

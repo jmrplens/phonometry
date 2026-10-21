@@ -186,7 +186,7 @@ print([round(f, 4) for f in vibration.TRANSITION_FREQUENCIES_HZ["Wk"]])
 # [0.2512, 0.631, 63.0957, 158.4893]
 
 # Table 5 read across them: tail, skirt, central, skirt, tail.
-upper, lower = vibration.weighting_tolerance_percent(
+lower, upper = vibration.weighting_tolerance_percent(
     "Wk", [0.2, 0.5, 16.0, 100.0, 200.0]
 )
 print(upper)   # [26. 26. 12. 26. 26.]
@@ -203,7 +203,7 @@ thing about the weighting factors: use the actual centre frequencies, never the
 nominal band labels.
 
 ```python
-print(vibration.weighting_tolerance_percent("Wk", [10 ** 1.8, 63.1])[1])
+print(vibration.weighting_tolerance_percent("Wk", [10 ** 1.8, 63.1])[0])
 # [-11. -21.]
 ```
 
@@ -227,7 +227,7 @@ from phonometry import vibration
 ft1, ft2, ft3, ft4 = vibration.TRANSITION_FREQUENCIES_HZ["Wk"]
 corners = [ft1, ft2, 6.31, ft3, ft4]
 design = vibration.weighting_factors("Wk", corners)
-upper, _ = vibration.weighting_tolerance_percent("Wk", corners)
+_, upper = vibration.weighting_tolerance_percent("Wk", corners)
 
 print(design.round(4))                   # [0.1832 0.4588 1.0544 0.1857 0.0292]
 print((design * upper / 100).round(4))   # [0.0476 0.0551 0.1265 0.0223 0.0076]
@@ -301,7 +301,7 @@ plt.show()
 
 # By hand, from the result's fields, mirroring what
 # WeightingVerification.plot() draws:
-upper, lower = vibration.weighting_tolerance_percent(
+lower, upper = vibration.weighting_tolerance_percent(
     check.weighting, check.frequencies
 )
 inside = check.within_tolerance
@@ -368,7 +368,7 @@ of them is wrong in the direction that lets an instrument through.
 The first is the sentence of 5.6.6 quoted at the end of section 1: the
 tolerance limits of Table 5 *include* the applicable **maximum** expanded
 uncertainties of measurement. That is a statement about how the table was
-drawn. It is why `weighting_tolerance_percent` returns +12 % and −11 % and
+drawn. It is why `weighting_tolerance_percent` returns −11 % and +12 % and
 never anything wider: the allowance for a careful bench is already inside
 those numbers, and adding to them would spend it twice.
 
@@ -478,11 +478,11 @@ plt.show()
 # them draws the staircase exactly.
 edges = np.sort(np.concatenate((corners * (1 - 1e-9), corners * (1 + 1e-9),
                                 [0.1, 400.0])))
-band_upper, band_lower = vibration.weighting_tolerance_percent("Wk", edges)
+band_lower, band_upper = vibration.weighting_tolerance_percent("Wk", edges)
 
 # In the two tails the lower limit is -100 %, which verify_weighting subtracts
 # nothing from, so the bar there has one arm.
-_ceiling, floor = vibration.weighting_tolerance_percent("Wk", sweep_hz)
+floor, _ceiling = vibration.weighting_tolerance_percent("Wk", sweep_hz)
 arms = np.vstack((np.where(floor <= vibration.UNCONSTRAINED_BELOW_PERCENT, 0.0, u),
                   np.full(sweep_hz.shape, u)))
 kept = graded.within_tolerance

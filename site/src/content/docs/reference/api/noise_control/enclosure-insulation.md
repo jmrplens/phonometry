@@ -448,11 +448,9 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The `Axes`.
 
-### EnclosureInsulationResult.rounded()
+### EnclosureInsulationResult.rounded
 
-```python
-EnclosureInsulationResult.rounded() -> NDArray[np.int_]
-```
+*property*
 
 The band values as clause 9.4 reports them, to the nearest decibel.
 

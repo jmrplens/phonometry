@@ -241,30 +241,16 @@ def test_non_core_band_count_rejected(tmp_path: Path) -> None:
         result.report(out)
 
 
-def test_verbose_needs_measurement_chain(tmp_path: Path) -> None:
-    """``verbose=True`` on a manually built result (no chain) is rejected."""
+def test_a_field_result_cannot_be_built_without_its_measurement_chain() -> None:
+    """``l1``/``l2``/``t2``/``t0`` and ``li``/``t2``/``t0`` are required fields.
+
+    They used to default to ``None``, so the verbose fiche had to refuse a
+    hand-built result after the fact. A field result is now the record of the
+    chain it was formed from.
+    """
     curve = np.asarray(_AIRBORNE_R, dtype=np.float64)
-    bare = building.AirborneInsulationResult(d=curve, dnt=curve, r_prime=None)
-    rejected = str(tmp_path / "x.pdf")
-    with pytest.raises(
-        ValueError, match=r"verbose=True needs the per-band measurement chain"
-    ):
-        bare.report(rejected, verbose=True)
-    # The non-verbose form still renders from the quantity alone.
-    out = tmp_path / "bare.pdf"
-    bare.report(str(out))
-    assert_one_page(str(out))
-
-
-def test_manual_impact_result_renders_without_chain(tmp_path: Path) -> None:
-    """A backward-compatibly built impact result reports its L'nT fiche."""
-    curve = np.asarray(_IMPACT_LN, dtype=np.float64)
-    bare = building.ImpactInsulationResult(l_n_t=curve, l_n=None)
-    out = tmp_path / "bare_impact.pdf"
-    bare.report(str(out))
-    assert_one_page(str(out))
-    rejected = str(tmp_path / "x.pdf")
-    with pytest.raises(
-        ValueError, match=r"verbose=True needs the per-band measurement chain"
-    ):
-        bare.report(rejected, verbose=True)
+    impact = np.asarray(_IMPACT_LN, dtype=np.float64)
+    with pytest.raises(TypeError, match="'l1'"):
+        building.AirborneInsulationResult(d=curve, dnt=curve, r_prime=None)
+    with pytest.raises(TypeError, match="'li'"):
+        building.ImpactInsulationResult(l_n_t=impact, l_n=None)

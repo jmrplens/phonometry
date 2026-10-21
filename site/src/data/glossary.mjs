@@ -2945,7 +2945,7 @@ export const glossary = [
       {
         id: "pnlt",
         symbol: "PNLT",
-        unit: "PNdB",
+        unit: "TPNdB",
         standard: {
           en: "ICAO Annex 16, Vol. I",
           es: "Anexo 16 OACI, Vol. I",
@@ -2981,7 +2981,7 @@ export const glossary = [
       {
         id: "pnltm",
         symbol: "PNLTM",
-        unit: "PNdB",
+        unit: "TPNdB",
         standard: {
           en: "ICAO Annex 16, Vol. I",
           es: "Anexo 16 OACI, Vol. I",

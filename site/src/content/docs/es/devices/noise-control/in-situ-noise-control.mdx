@@ -221,14 +221,14 @@ res = noise_control.screen_attenuation(
     a_weighted_unscreened_level=84.1,
     a_weighted_screened_level=74.6,
 )
-print(res.attenuation)                   # [ 4.  6.  9. 11. 13. 14.] dB
-print(res.a_weighted_attenuation)        # 9.5 dB
-print(res.rounded())                        # [ 4  6  9 11 13 14] dB
-print(res.rounded_a_weighted())             # 10 dB
+print(res.attenuation)             # [ 4.  6.  9. 11. 13. 14.] dB
+print(res.a_weighted_attenuation)  # 9.5 dB
+print(res.rounded)                 # [ 4  6  9 11 13 14] dB
+print(res.rounded_a_weighted)      # 10 dB
 ```
 
 El apartado 7.4 c) informa de las dos al decibelio entero más próximo.
-`rounded()` y `rounded_a_weighted()` las dan así, como enteros, mientras que
+`rounded` y `rounded_a_weighted` las dan así, como enteros, mientras que
 `attenuation` conserva la diferencia sin redondear para seguir calculando. Un
 medio exacto va al decibelio par, como en los demás resultados in situ de la
 biblioteca, así que los 9,5 dB de arriba se informan como 10 dB.

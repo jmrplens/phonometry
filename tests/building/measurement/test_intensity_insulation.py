@@ -684,7 +684,7 @@ def test_low_frequency_accepts_the_exact_band_series() -> None:
     """The same band is written 63 Hz on a filter and 63,096 Hz exactly."""
     from phonometry.filters import nominal_frequencies
 
-    exact = nominal_frequencies(fraction=3, limits=[50, 160])[0]
+    exact = nominal_frequencies(fraction=3, limits=[50, 160]).frequencies
     assert len(exact) == len(ref.ISO15186_3_ANNEX_A_BANDS)
     nominal = building.low_frequency_intensity_reduction(
         [80.0] * 6,

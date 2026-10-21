@@ -215,7 +215,7 @@ def test_a_short_band_range_is_reported() -> None:
 
 def test_rounding_is_the_report_rule() -> None:
     res = noise_control.cabin_insulation(_room(), _cabin(), frequencies=THIRD_OCTAVES)
-    assert res.rounded().tolist() == np.rint(res.insulation).astype(int).tolist()
+    assert res.rounded.tolist() == np.rint(res.insulation).astype(int).tolist()
 
 
 def test_the_internal_noise_level_rides_along() -> None:

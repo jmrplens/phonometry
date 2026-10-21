@@ -239,16 +239,20 @@ def _chk_kb_corner() -> Outcome:
 
 @register(_IMMISSION, f"{_EDITION} Table 2", "Lower limit of F(f) inside the band, %")
 def _chk_central_lower() -> Outcome:
-    """From 1,25 f_u to 0,8 f_o the response may fall 10 % short."""
+    """From 1,25 f_u to 0,8 f_o the response may fall 10 % short.
+
+    Table 2 prints the magnitude G_u; the library returns the signed limit
+    ``-G_u`` that F(f) is compared with.
+    """
     lower, _ = ph.vibration.response_tolerance_percent([16.0])
-    return numeric(10.0, float(lower[0]), 1e-9, unit="%", places=3)
+    return numeric(10.0, -float(lower[0]), 1e-9, unit="%", places=3)
 
 
 @register(_IMMISSION, f"{_EDITION} Table 2", "Lower limit of F(f) in the skirt, %")
 def _chk_skirt_lower() -> Outcome:
     """Outside that band and inside 0,5 f_u to 2 f_o, twice as much."""
     lower, _ = ph.vibration.response_tolerance_percent([1.0])
-    return numeric(20.0, float(lower[0]), 1e-9, unit="%", places=3)
+    return numeric(20.0, -float(lower[0]), 1e-9, unit="%", places=3)
 
 
 @register(_IMMISSION, f"{_EDITION} Table 3", "Upper limit of F(f) outside the band, %")

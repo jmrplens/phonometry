@@ -284,7 +284,7 @@ def _band_verdicts(
             band_class = 2
         bands.append(
             {
-                "freq": float(freq),
+                "frequency": float(freq),
                 "class": band_class,
                 "residual_index_db": float(measured[i]),
                 "limit_class1_db": float(class1[i]),
@@ -441,7 +441,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
     def bands(self) -> tuple[dict[str, Any], ...]:
         """The per-band verdicts, read from the spectrum and Table 2.
 
-        One ``{"freq", "class", "residual_index_db", "limit_class1_db",
+        One ``{"frequency", "class", "residual_index_db", "limit_class1_db",
         "limit_class2_db", "margin_class1_db", "margin_class2_db"}`` per band:
         a band meets a class when its index is at least that class's minimum,
         so a band exactly on the limit passes. A fresh copy at every read.
@@ -555,7 +555,7 @@ class IntensityInstrumentComplianceResult(OwnsArrays):
             msg = "'device_class' must be 1 or 2."
             raise ValueError(msg)
         key = f"margin_class{cls}_db"
-        return [float(b["freq"]) for b in self.bands if float(b[key]) < 0.0]
+        return [float(b["frequency"]) for b in self.bands if float(b[key]) < 0.0]
 
     def phase_mismatch_deg(self, speed_of_sound: float = 343.0) -> np.ndarray:
         """Equivalent channel phase mismatch per band, in degrees.

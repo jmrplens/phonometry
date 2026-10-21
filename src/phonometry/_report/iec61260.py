@@ -248,7 +248,7 @@ def _metric_rows(
         )
         margin = _band_margin(band, cls)
         freq = decimal_comma(
-            _band_label(float(band["freq"]), result.fraction), language
+            _band_label(float(band["frequency"]), result.fraction), language
         )
         margin_text = decimal_comma(f"{margin:+.2f}", language)
         rows.append((freq, f"{class_text} ({margin_text} dB)"))

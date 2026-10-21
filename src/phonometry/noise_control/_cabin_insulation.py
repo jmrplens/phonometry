@@ -56,7 +56,7 @@ clause 1 of ISO 11957 makes it a condition of applicability.
 Instrumentation, mounting, the ten operations of every movable part and the
 report template are procedure, and procedure is not arithmetic. The one piece
 of clause 11 that computes is the rounding of 11.4 e), which is
-:meth:`CabinInsulationResult.rounded`.
+:attr:`CabinInsulationResult.rounded`.
 
 The document prints no worked example, so the tests are anchored on the
 algebraic identities of the subtraction, on the printed thresholds, and on the
@@ -394,6 +394,7 @@ class CabinInsulationResult(OwnsArrays):
         r"""The symbol clause 12 reports this as, ``"D_p"`` or ``"D'_p"``."""
         return "D'_p" if self.apparent else "D_p"
 
+    @property
     def rounded(self) -> NDArray[np.int_]:
         """The band values as 11.4 e) reports them, to the nearest decibel."""
         return np.asarray(round_half_even(self.insulation), dtype=np.int_)

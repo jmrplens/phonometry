@@ -61,7 +61,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from .floor_covering_improvement import improvement_octave_bands
+from .floor_covering_improvement import OctaveBandSpectrum, improvement_octave_bands
 from .ratings import IMPACT_REFERENCE_FLOORS as _REFERENCE_FLOORS
 from .ratings import LINING_REFERENCE_ELEMENTS as _BASIC_ELEMENTS
 from .ratings import (
@@ -210,14 +210,14 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
         if self.basic_element is not None:
             require_choice(self.basic_element, "basic_element", tuple(_BASIC_ELEMENTS))
 
-    def octave_bands(self) -> tuple[np.ndarray, np.ndarray]:
-        r"""``(octave centres in Hz, ΔRoct in dB)`` (ISO 717-1:2020 Formula (D.1)).
+    def octave_bands(self) -> OctaveBandSpectrum:
+        r""":math:`\Delta R_\mathrm{oct}` in octave bands (ISO 717-1:2020 Formula (D.1)).
 
         :math:`\Delta R_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta R_j/10}]`
         over the three one-third-octave bands of each octave, for every octave
         whose three bands are present.
         """
-        return improvement_octave_bands(self.delta_r, self.frequencies)
+        return improvement_octave_bands(self.delta_r, self.frequencies, quantity="ΔR")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -507,8 +507,8 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
         """``"ΔLw"`` on the heavyweight floor, ``"ΔLt,n,w"`` on floor No n (H.1)."""
         return _FLOOR_DESIGNATIONS[self.reference_floor]
 
-    def octave_bands(self) -> tuple[np.ndarray, np.ndarray]:
-        r"""``(octave centres in Hz, ΔLoct in dB)`` by Formula (H.2).
+    def octave_bands(self) -> OctaveBandSpectrum:
+        r""":math:`\Delta L_\mathrm{oct}` in octave bands, by Formula (H.2).
 
         :math:`\Delta L_\mathrm{oct} = -10 \log_{10}[(1/3) \sum 10^{-\Delta L_j/10}]`
         over the three one-third-octave bands of each octave present.

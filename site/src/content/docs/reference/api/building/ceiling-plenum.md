@@ -150,7 +150,6 @@ CEILING_ATTENUATION_CONTOUR = {125.0: -16.0, 160.0: -13.0, 200.0: -10.0, 250.0: 
 CeilingAttenuationResult(
     frequencies: np.ndarray,
     measured: np.ndarray,
-    rounded: np.ndarray,
     shifted_reference: np.ndarray,
     deficiencies: np.ndarray,
     deficiency_sum: float,
@@ -167,7 +166,6 @@ Ceiling attenuation class (ASTM E1414 rated through ASTM E413).
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in Hz. |
 | `measured` | Normalized ceiling attenuation `Dn,c` per band, in dB, as supplied. |
-| `rounded` | The same data rounded to the nearest integer (clause 5.2), which is what the contour is fitted to. |
 | `shifted_reference` | The fitted reference contour, in dB. |
 | `deficiencies` | Per-band deficiency (shifted contour minus data, floored at zero), in dB. |
 | `deficiency_sum` | Sum of `deficiencies`, in dB (at most 32). |
@@ -189,6 +187,17 @@ Plot `Dn,c` against the fitted ASTM E413 contour.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+### CeilingAttenuationResult.rounded
+
+*property*
+
+The measured data rounded to the nearest integer, which the contour is fitted to.
+
+ASTM E413 clause 5.2 rounds the data to the nearest integer before the
+contour is fitted. The clause does not say which way a half goes; the
+library rounds it up (`floor(measured + 0.5)`). Read from
+`measured`, so it cannot disagree with it.
 
 ## normalized_ceiling_attenuation
 

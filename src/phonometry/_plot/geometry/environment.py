@@ -235,19 +235,7 @@ def plot_barrier_result_geometry(
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
-    """Barrier section for a result that retained its geometry."""
-    if (
-        result.source_height_m is None
-        or result.barrier_distance is None
-        or result.barrier_height_m is None
-        or result.receiver_distance is None
-        or result.receiver_height_m is None
-    ):
-        msg = (
-            "This result does not retain its geometry; call "
-            "plot_barrier_geometry(...) with the original arguments."
-        )
-        raise ValueError(msg)
+    """Barrier section for a result, drawn from the geometry it keeps."""
     return plot_barrier_geometry(
         ax=ax,
         source_height_m=result.source_height_m,

@@ -179,7 +179,7 @@ one-sided, and it always under-reads.
 The band version is the same accumulator with a vector on the left:
 
 ```python
-band_squares = np.zeros(bank.num_bands)   # from your stateful OctaveFilterBank
+band_squares = np.zeros(bank.n_bands)   # from your stateful OctaveFilterBank
 
 for x in audio_stream(block):        # your capture callback
     bands = bank.filter(x, sigbands=True, detrend=False,

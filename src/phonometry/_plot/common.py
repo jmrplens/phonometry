@@ -41,7 +41,6 @@ if TYPE_CHECKING:
     from matplotlib.transforms import Bbox
     from matplotlib.typing import ColorType, LegendLocType
 
-    from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from ..emission._sound_power_anechoic import PrecisionSoundPowerResult
     from ..emission._sound_power_in_duct import InDuctSoundPowerResult
     from ..emission._sound_power_intensity import (
@@ -840,8 +839,9 @@ def format_frequency_axis(
     *,
     minor: str | None = "thirds",
     language: str = "en",
+    axis: str = "x",
 ) -> None:
-    """Label a *continuous* logarithmic frequency x-axis with band centres.
+    """Label a *continuous* logarithmic frequency axis with band centres.
 
     Places major ticks at the nominal octave centres (16 Hz, 31.5 Hz, ...,
     16 kHz) that fall inside the axis range, labels them with the short
@@ -858,12 +858,21 @@ def format_frequency_axis(
     explicitly, otherwise the current axis limits (read after the data has
     been drawn) are used, so a plot that starts at 100 Hz is never dragged
     back to 16 Hz.  The function only touches ticks and never changes data.
+    ``axis="y"`` labels the y-axis instead, for a display that puts time on
+    the abscissa and frequency up the side, such as a spectrogram.
     """
     import matplotlib.ticker as mticker
 
-    if ax.get_xscale() != "log":
-        ax.set_xscale("log")
-    lo, hi = ax.get_xlim()
+    if axis not in {"x", "y"}:
+        msg = f"axis must be 'x' or 'y'; got {axis!r}"
+        raise ValueError(msg)
+    target = ax.xaxis if axis == "x" else ax.yaxis
+    if target.get_scale() != "log":
+        if axis == "x":
+            ax.set_xscale("log")
+        else:
+            ax.set_yscale("log")
+    lo, hi = ax.get_xlim() if axis == "x" else ax.get_ylim()
     if fmin is not None:
         lo = fmin
     if fmax is not None:
@@ -879,18 +888,18 @@ def format_frequency_axis(
     # the axis still reads as one.
     stride = 3 if hi > lo * 10**4 else 1
     labelled = majors[::stride]
-    ax.xaxis.set_major_locator(mticker.FixedLocator(majors))
-    ax.xaxis.set_major_formatter(
+    target.set_major_locator(mticker.FixedLocator(majors))
+    target.set_major_formatter(
         mticker.FixedFormatter(
             [_format_freq(f, language) if f in labelled else "" for f in majors]
         )
     )
     if minor == "thirds":
         minors = [f for f in _THIRD_NOMINAL if lo <= f <= hi and f not in majors]
-        ax.xaxis.set_minor_locator(mticker.FixedLocator(minors))
+        target.set_minor_locator(mticker.FixedLocator(minors))
     else:
-        ax.xaxis.set_minor_locator(mticker.NullLocator())
-    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
+        target.set_minor_locator(mticker.NullLocator())
+    target.set_minor_formatter(mticker.NullFormatter())
 
 
 def _band_axis(
@@ -1121,21 +1130,6 @@ def _annotate_impact_500(
             arrowprops={"arrowstyle": "->", "color": _C_EDGE},
         )
     ax.legend(loc="best", fontsize="small")
-
-
-def _require_rating_curve(
-    result: WeightedRatingResult | ImpactRatingResult,
-) -> None:
-    if (
-        result.frequencies is None
-        or result.measured is None
-        or result.shifted_reference is None
-    ):
-        msg = (
-            "This rating result carries no band curve to plot (it was "
-            "constructed without measured/reference data)."
-        )
-        raise ValueError(msg)
 
 
 def _facade_x_axis(

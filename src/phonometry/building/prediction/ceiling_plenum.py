@@ -338,8 +338,6 @@ class CeilingAttenuationResult(OwnsArrays):
     :ivar frequencies: One-third-octave band centre frequencies, in Hz.
     :ivar measured: Normalized ceiling attenuation ``Dn,c`` per band, in dB,
         as supplied.
-    :ivar rounded: The same data rounded to the nearest integer (clause 5.2),
-        which is what the contour is fitted to.
     :ivar shifted_reference: The fitted reference contour, in dB.
     :ivar deficiencies: Per-band deficiency (shifted contour minus data, floored
         at zero), in dB.
@@ -351,7 +349,6 @@ class CeilingAttenuationResult(OwnsArrays):
 
     frequencies: np.ndarray
     measured: np.ndarray
-    rounded: np.ndarray
     shifted_reference: np.ndarray
     deficiencies: np.ndarray
     deficiency_sum: float
@@ -363,12 +360,12 @@ class CeilingAttenuationResult(OwnsArrays):
 
         ASTM E413 is a contour fitted band by band: the sum of the
         deficiencies and the largest of them are what stop the contour rising,
-        and the plot draws the data against that fitted contour. Of the five
+        and the plot draws the data against that fitted contour. Of the four
         per-band curves the plot reads three, and one of those of the wrong
         length is refused by matplotlib either way, but only once the figure
         is drawn and in terms of two shapes it cannot put a name to. The
-        other two, ``rounded`` and ``deficiencies``, no reader in the library
-        opens at all: a deficiency column that has lost or gained a band is
+        other, ``deficiencies``, no reader in the library opens at all: a
+        deficiency column that has lost or gained a band is
         paired with the frequencies by whoever prints it, and ``zip``
         truncates the two to the shorter without a word.
 
@@ -383,7 +380,6 @@ class CeilingAttenuationResult(OwnsArrays):
             self,
             frequencies=1,
             measured=1,
-            rounded=1,
             shifted_reference=1,
             deficiencies=1,
         )
@@ -391,11 +387,22 @@ class CeilingAttenuationResult(OwnsArrays):
             self,
             "frequencies",
             "measured",
-            "rounded",
             "shifted_reference",
             "deficiencies",
         )
         _require_deficiency_totals(self)
+
+    @property
+    def rounded(self) -> np.ndarray:
+        """The measured data rounded to the nearest integer, which the contour is fitted to.
+
+        ASTM E413 clause 5.2 rounds the data to the nearest integer before the
+        contour is fitted. The clause does not say which way a half goes; the
+        library rounds it up (``floor(measured + 0.5)``). Read from
+        :attr:`measured`, so it cannot disagree with it.
+        """
+        measured = np.asarray(self.measured, dtype=np.float64)
+        return np.asarray(np.floor(measured + 0.5), dtype=np.float64)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -467,7 +474,6 @@ def ceiling_attenuation_class(
     return CeilingAttenuationResult(
         frequencies=bands,
         measured=values,
-        rounded=rounded,
         shifted_reference=reference,
         deficiencies=deficiencies,
         deficiency_sum=float(np.sum(deficiencies)),

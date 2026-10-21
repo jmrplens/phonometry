@@ -366,7 +366,7 @@ fig, ax = plt.subplots(figsize=(9, 5))
 for ftype in ("butter", "cheby1", "cheby2", "ellip", "bessel"):
     bank = filters.OctaveFilterBank(fs, fraction=1, order=6, limits=[800, 1200],
                             design=filters.FilterDesign(filter_type=ftype))
-    idx = int(np.argmin(np.abs(np.array(bank.freq) - 1000)))
+    idx = int(np.argmin(np.abs(np.array(bank.frequencies) - 1000)))
     fsd = fs / bank.factor[idx]
     # Group delay of an SOS cascade = sum of the sections' group delays
     gd = sum(group_delay((sec[:3], sec[3:]), w=w, fs=fsd)[1]

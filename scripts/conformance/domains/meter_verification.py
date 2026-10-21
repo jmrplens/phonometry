@@ -114,7 +114,7 @@ _register_table_1()
 )
 def _chk_central_upper() -> Outcome:
     """The ``+12 %`` of the region between ft2 and ft3."""
-    upper, _ = ph.vibration.weighting_tolerance_percent("Wk", [16.0])
+    _, upper = ph.vibration.weighting_tolerance_percent("Wk", [16.0])
     return numeric(12.0, float(upper[0]), _TOLERANCE, unit="%", places=4)
 
 
@@ -125,7 +125,7 @@ def _chk_central_upper() -> Outcome:
 )
 def _chk_central_lower() -> Outcome:
     """And its ``-11 %``, which is not the mirror of the upper one."""
-    _, lower = ph.vibration.weighting_tolerance_percent("Wk", [16.0])
+    lower, _ = ph.vibration.weighting_tolerance_percent("Wk", [16.0])
     return numeric(-11.0, float(lower[0]), _TOLERANCE, unit="%", places=4)
 
 
@@ -137,7 +137,7 @@ def _chk_central_lower() -> Outcome:
 def _chk_skirt_upper() -> Outcome:
     """The ``+26 %`` between ft1 and ft2, read just inside the corner."""
     ft1, ft2, _, _ = ph.vibration.TRANSITION_FREQUENCIES_HZ["Wk"]
-    upper, _ = ph.vibration.weighting_tolerance_percent("Wk", [(ft1 + ft2) / 2.0])
+    _, upper = ph.vibration.weighting_tolerance_percent("Wk", [(ft1 + ft2) / 2.0])
     return numeric(26.0, float(upper[0]), _TOLERANCE, unit="%", places=4)
 
 
@@ -149,7 +149,7 @@ def _chk_skirt_upper() -> Outcome:
 def _chk_skirt_lower() -> Outcome:
     """And its ``-21 %``."""
     ft1, ft2, _, _ = ph.vibration.TRANSITION_FREQUENCIES_HZ["Wk"]
-    _, lower = ph.vibration.weighting_tolerance_percent("Wk", [(ft1 + ft2) / 2.0])
+    lower, _ = ph.vibration.weighting_tolerance_percent("Wk", [(ft1 + ft2) / 2.0])
     return numeric(-21.0, float(lower[0]), _TOLERANCE, unit="%", places=4)
 
 
@@ -161,7 +161,7 @@ def _chk_skirt_lower() -> Outcome:
 def _chk_tail_lower() -> Outcome:
     """The ``-100 %``, which is the absence of a lower limit rather than a wide one."""
     ft1 = ph.vibration.TRANSITION_FREQUENCIES_HZ["Wk"][0]
-    _, lower = ph.vibration.weighting_tolerance_percent("Wk", [ft1 / 2.0])
+    lower, _ = ph.vibration.weighting_tolerance_percent("Wk", [ft1 / 2.0])
     return numeric(-100.0, float(lower[0]), _TOLERANCE, unit="%", places=4)
 
 

@@ -1716,8 +1716,10 @@ You can inspect the exact bands with:
 ```python
 from phonometry import filters
 
-fc, fl, fu, labels = filters.nominal_frequencies(fraction=3, limits=[12, 20000])
-for label, center, lower, upper in zip(labels, fc, fl, fu):
+bands = filters.nominal_frequencies(fraction=3, limits=[12, 20000])
+for label, center, lower, upper in zip(
+    bands.labels, bands.frequencies, bands.lower_edges, bands.upper_edges
+):
     print(label, center, lower, upper, upper - lower)
 ```
 
@@ -1744,7 +1746,8 @@ filtered = filters.octave_filter(
 levels, centers = filtered.levels, filtered.frequencies
 
 # Same standardized band definitions, including lower/upper edges.
-fc, fl, fu, labels = filters.nominal_frequencies(fraction=3, limits=[12, 20_000])
+bands = filters.nominal_frequencies(fraction=3, limits=[12, 20_000])
+fc, fl, fu = bands.frequencies, bands.lower_edges, bands.upper_edges
 
 # Narrowband Welch estimate on the original signal.
 nperseg = min(2**15, len(x))
@@ -1761,7 +1764,7 @@ freq_bins, psd = signal.welch(
 band_index = int(np.argmin(np.abs(np.asarray(fc) - 1000.0)))
 in_band = (freq_bins >= fl[band_index]) & (freq_bins <= fu[band_index])
 
-print("Selected third-octave band:", labels[band_index])
+print("Selected third-octave band:", bands.labels[band_index])
 print("Welch bin spacing:", freq_bins[1] - freq_bins[0], "Hz")
 for f, pxx in zip(freq_bins[in_band], psd[in_band]):
     print(f, pxx)

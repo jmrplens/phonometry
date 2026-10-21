@@ -763,9 +763,9 @@ def _chk_ac_tone() -> Outcome:
     "Integrated-method reference EPNL, EPNdB",
 )
 def _chk_ac_epnl() -> Outcome:
-    epnl, _, _, _ = ph.aircraft.epnl_from_pnlt(
+    epnl = ph.aircraft.epnl_from_pnlt(
         np.array(_ETM_PNLTR_44), np.array(_ETM_DTR_44)
-    )
+    ).epnl
     return numeric(92.61892, epnl, 1e-2, unit="EPNdB", places=3)
 
 

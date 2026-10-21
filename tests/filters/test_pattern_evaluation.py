@@ -278,7 +278,7 @@ def test_the_summation_is_what_tones_through_the_bank_read(i: int) -> None:
     assert bank.factor[1] > 1
     j = 2
     time_s = np.arange(4 * fs) / fs
-    mid = float(bank.freq[j])
+    mid = float(bank.frequencies[j])
     reference = bank.filter(np.sin(2.0 * np.pi * mid * time_s)).levels[j]
     tone_hz = mid * _G ** (i / 24)
     levels = bank.filter(np.sin(2.0 * np.pi * tone_hz * time_s)).levels
@@ -286,7 +286,7 @@ def test_the_summation_is_what_tones_through_the_bank_read(i: int) -> None:
         sum(10.0 ** (levels[k] / 10.0) for k in (j - 1, j, j + 1))
     ) - float(reference)
     omega, curve = _bank_summation(
-        bank.sos, bank.factor, fs, np.asarray(bank.freq, dtype=float), 1, 24, j
+        bank.sos, bank.factor, fs, np.asarray(bank.frequencies, dtype=float), 1, 24, j
     )
     computed = float(curve[np.argmin(np.abs(omega - _G ** (i / 24)))])
     assert computed > 0.45

@@ -346,7 +346,7 @@ los saca de todas las clases de la EN 61260 (apartado 7).
 from phonometry import filters
 
 bank = environment.roughness_filter_bank(sample_spacing_m=1.0e-3)
-print(bank.order, bank.num_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
+print(bank.order, bank.n_bands, filters.verify_filter_class(bank, edition="1995").overall_class)
 # 4 24 0   orden, bandas de 0,5 m a 2,5 mm, clase según la EN 61260:1995
 filtered = [
     environment.filtered_roughness_spectrum(r, sample_spacing_m=1.0e-3)

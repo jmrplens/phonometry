@@ -1010,11 +1010,11 @@ def _chk_iso11821_printed_rounded_reductions() -> Outcome:
             strict=True,
         )
     }
-    # The raw differences are 9,8 / 15,2 / 19,6 dB; rounded() is the integer
+    # The raw differences are 9,8 / 15,2 / 19,6 dB; rounded is the integer
     # report 7.4 c) asks for.
     computed = {
         band: float(value)
-        for band, value in zip(printed, result.rounded().tolist(), strict=True)
+        for band, value in zip(printed, result.rounded.tolist(), strict=True)
     }
     return record(printed, computed, unit="dB")
 
@@ -1474,7 +1474,7 @@ def _cordero(case: str) -> tuple[float, int]:
     result = ph.environment.measured_insertion_loss_direct(
         [reference_before], [reference_after], [receiver_before], [receiver_after]
     )
-    return float(result.insertion_loss[0]), int(result.rounded()[0])
+    return float(result.insertion_loss[0]), int(result.rounded[0])
 
 
 @register(
@@ -1632,7 +1632,7 @@ def _chk_iso10847_rounding_tie_break() -> Outcome:
     computed = {
         label: float(reported) * scale
         for (label, (_, scale, _)), reported in zip(
-            ties.items(), result.rounded(), strict=True
+            ties.items(), result.rounded, strict=True
         )
     }
     printed = {

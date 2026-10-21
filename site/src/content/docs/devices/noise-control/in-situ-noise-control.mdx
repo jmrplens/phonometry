@@ -214,14 +214,14 @@ res = noise_control.screen_attenuation(
     a_weighted_unscreened_level=84.1,
     a_weighted_screened_level=74.6,
 )
-print(res.attenuation)                   # [ 4.  6.  9. 11. 13. 14.] dB
-print(res.a_weighted_attenuation)        # 9.5 dB
-print(res.rounded())                        # [ 4  6  9 11 13 14] dB
-print(res.rounded_a_weighted())             # 10 dB
+print(res.attenuation)             # [ 4.  6.  9. 11. 13. 14.] dB
+print(res.a_weighted_attenuation)  # 9.5 dB
+print(res.rounded)                 # [ 4  6  9 11 13 14] dB
+print(res.rounded_a_weighted)      # 10 dB
 ```
 
-7.4 c) reports both to the nearest whole decibel. `rounded()` and
-`rounded_a_weighted()` give them that way, as integers, while `attenuation`
+7.4 c) reports both to the nearest whole decibel. `rounded` and
+`rounded_a_weighted` give them that way, as integers, while `attenuation`
 keeps the unrounded difference to compute with. An exact half goes to the even
 decibel, as in the other in-situ results of the library, so the 9,5 dB above is
 reported as 10 dB.

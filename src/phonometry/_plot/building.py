@@ -28,7 +28,6 @@ from .common import (
     _plot_band_level_bars,
     _plot_insulation_bands,
     _plot_rating,
-    _require_rating_curve,
     format_frequency_axis,
     place_legend_clear,
     style_default,
@@ -48,6 +47,7 @@ if TYPE_CHECKING:
     from ..building.measurement.flanking_transmission import VibrationReductionResult
     from ..building.measurement.floor_covering_improvement import (
         FloorCoveringImprovementResult,
+        OctaveBandSpectrum,
     )
     from ..building.measurement.heavy_impact import (
         AWeightedMaxImpactResult,
@@ -579,7 +579,6 @@ def plot_weighted_rating(
     """
     from .._i18n import format_number, localize_axes
 
-    _require_rating_curve(result)
     ax = _plot_rating(
         np.asarray(result.frequencies, dtype=np.float64),
         np.asarray(result.measured, dtype=np.float64),
@@ -624,7 +623,6 @@ def plot_impact_rating(
     """
     from .._i18n import format_number, localize_axes
 
-    _require_rating_curve(result)
     frequencies = np.asarray(result.frequencies, dtype=np.float64)
     reference = np.asarray(result.shifted_reference, dtype=np.float64)
     ax = _plot_rating(
@@ -654,17 +652,6 @@ def plot_impact_rating(
     return ax
 
 
-def _require_extended_curve(
-    result: ExtendedWeightedRatingResult | ExtendedImpactRatingResult,
-) -> None:
-    if result.frequencies is None or result.measured is None:
-        msg = (
-            "This extended rating result carries no band curve to plot (it "
-            "was constructed without frequencies/measured data)."
-        )
-        raise ValueError(msg)
-
-
 def _plot_extended_rating(
     result: ExtendedWeightedRatingResult | ExtendedImpactRatingResult,
     *,
@@ -680,8 +667,6 @@ def _plot_extended_rating(
     from .._i18n import localize_axes
     from .common import _t as _t_common
 
-    _require_extended_curve(result)
-    _require_rating_curve(result.core)
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     measured = np.asarray(result.measured, dtype=np.float64)
@@ -3529,6 +3514,49 @@ _LAB_STRINGS: dict[str, str] = {
 }
 _STRINGS.update(_LAB_STRINGS)
 
+#: The ordinate of an :class:`OctaveBandSpectrum` figure, by the quantity it
+#: holds. Three are the labels the one-third-octave figures already use; the
+#: joint and the normalized rainfall level are named here.
+_JOINT_INDEX_LABEL = r"Sound reduction index of the joint $R_\mathrm{s}$ [dB]"
+_NORMALIZED_INTENSITY_LABEL = (
+    r"Normalized sound intensity level $L_{I\mathrm{norm}}$ [dB re 1 pW/m²]"
+)
+_OCTAVE_QUANTITY_LABELS: dict[str, str] = {
+    "ΔL": _IMPROVEMENT_LABEL,
+    "ΔR": _DELTA_R_LABEL,
+    "Rs": _JOINT_INDEX_LABEL,
+    "LI": _INTENSITY_LEVEL_LABEL,
+    "LI,norm": _NORMALIZED_INTENSITY_LABEL,
+}
+#: The legend symbol of each quantity, in octave bands, as its source prints
+#: it: the octave form where one is printed (ISO 10140-1:2021 Formula (H.2)
+#: for ΔL and (K.3) for LI, ISO 717-1:2020 Formula (D.1) for ΔR), and the
+#: plain symbol where none is, as Figure J.9 keys the joint ``Rs`` and Annex K
+#: defines ``LInorm`` in one-third-octave bands only. The abscissa says that
+#: the bands are octaves.
+_OCTAVE_QUANTITY_SYMBOLS: dict[str, str] = {
+    "ΔL": r"$\Delta L_\mathrm{oct}$",
+    "ΔR": r"$\Delta R_\mathrm{oct}$",
+    "Rs": r"$R_\mathrm{s}$",
+    "LI": r"$L_{I\mathrm{oct}}$",
+    "LI,norm": r"$L_{I\mathrm{norm}}$",
+}
+_OCTAVE_BAND_AXIS = "Octave band [Hz]"
+_OCTAVE_BAND_TITLE = "In octave bands"
+_STRINGS.update(
+    {
+        _JOINT_INDEX_LABEL: (
+            r"Índice de reducción acústica de la junta $R_\mathrm{s}$ [dB]"
+        ),
+        _NORMALIZED_INTENSITY_LABEL: (
+            r"Nivel de intensidad acústica normalizado $L_{I\mathrm{norm}}$ "
+            r"[dB re 1 pW/m²]"
+        ),
+        _OCTAVE_BAND_AXIS: "Banda de octava [Hz]",
+        _OCTAVE_BAND_TITLE: "En bandas de octava",
+    }
+)
+
 #: Localised names of the three standard basic elements and the four
 #: reference floors, as the figure titles write them.
 _BASIC_ELEMENT_LABELS = {
@@ -3607,12 +3635,6 @@ def plot_reduction_improvement_rating(
 
     ax = ax if ax is not None else _new_axes()
     without, with_ = result.without_lining, result.with_lining
-    if without.frequencies is None or without.measured is None:
-        msg = "The rating carries no reference curve to plot."
-        raise ValueError(msg)
-    if with_.measured is None:
-        msg = "The rating carries no curve with the lining to plot."
-        raise ValueError(msg)
     positions = _band_axis(ax, without.frequencies, language=language)
     ax.plot(
         positions,
@@ -4019,6 +4041,41 @@ def plot_rainfall_sound(
                 f"{_db(round(result.l_ia_norm, 1), language)} dB"
             )
     ax.set_title(title)
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_octave_band_spectrum(
+    result: OctaveBandSpectrum,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One value per octave band, labelled by the quantity it holds.
+
+    :param result: A
+        :class:`~phonometry.building.measurement.floor_covering_improvement.OctaveBandSpectrum`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the octave curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    positions = _band_axis(ax, result.frequencies, xlabel=None, language=language)
+    ax.set_xlabel(_t(_OCTAVE_BAND_AXIS, language))
+    if result.quantity in {"ΔL", "ΔR"}:
+        ax.axhline(0.0, color=_C_MUTED, lw=1.0, zorder=1)
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("marker", "s")
+    kwargs.setdefault("label", _OCTAVE_QUANTITY_SYMBOLS[result.quantity])
+    ax.plot(positions, result.values, **kwargs)
+    ax.set_ylabel(_t(_OCTAVE_QUANTITY_LABELS[result.quantity], language))
+    ax.set_title(_t(_OCTAVE_BAND_TITLE, language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)

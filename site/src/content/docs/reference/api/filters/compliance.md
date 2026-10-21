@@ -184,7 +184,7 @@ state a class its margins do not reach.
 
 | Name | Description |
 | :--- | :--- |
-| `band_margins` | What each band was measured to, without its class: one `{"freq", "checked_to_omega", "margin_class<c>_db", ...}` per band, as an immutable tuple of read-only rows, copied at construction so a write into a caller's dictionary cannot move the verdict; `bands` adds the class each band reaches. |
+| `band_margins` | What each band was measured to, without its class: one `{"frequency", "checked_to_omega", "margin_class<c>_db", ...}` per band, as an immutable tuple of read-only rows, copied at construction so a write into a caller's dictionary cannot move the verdict; `bands` adds the class each band reaches. |
 | `fraction` | Bandwidth designator `b` (1 for octave, 3 for one-third-octave). |
 | `edition` | `"2014"` (IEC 61260-1:2014, classes 1/2) or `"1995"` (IEC 61260:1995 / ANSI S1.11-2004, classes 0/1/2). |
 | `sos` | Per-band second-order sections of the analysed bank (one array per band), kept so the relative attenuation can be recomputed exactly as the verifier does. |
@@ -234,7 +234,7 @@ to the same margin classes.
 
 The per-band verdicts, each margin row with the class it reaches.
 
-One `{"freq", "class", "checked_to_omega", "margin_class<c>_db",
+One `{"frequency", "class", "checked_to_omega", "margin_class<c>_db",
 ...}` per band: the `class` is the strictest class of the edition
 the band meets on every requirement graded, or `None`. A fresh copy
 at every read.

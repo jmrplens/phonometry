@@ -11,6 +11,8 @@ Everything here is embedded by
 ``buildings/insulation/lab-application-rules``.
 """
 
+from typing import TYPE_CHECKING
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -22,6 +24,9 @@ from .theme import (
     COLOR_TERTIARY,
     save_figure,
 )
+
+if TYPE_CHECKING:
+    from phonometry import building
 
 #: One-third-octave bands of ISO 717-1:2020 Table E.1, 50 Hz to 5000 Hz.
 _BANDS_50_5000 = [
@@ -127,9 +132,10 @@ def generate_lab_floor_covering_improvement(output_dir: str) -> None:
     plt.close()
 
 
-def generate_rainfall_sound(output_dir: str) -> None:
-    """ISO 10140-1 Annex K: the reference pane, and a rooflight under heavy rain."""
-    print("Generating rainfall_sound...")
+def _rooflight_under_heavy_rain() -> tuple[
+    "building.RainfallReferenceCorrection", "building.RainfallSoundResult"
+]:
+    """The reference-pane correction and the rooflight result of the guide."""
     from phonometry import building
 
     # The laboratory's 6 mm reference pane: mounted a little more lossily
@@ -162,12 +168,35 @@ def generate_rainfall_sound(output_dir: str) -> None:
         excited_area_m2=1.875,
         reference_correction=correction,
     )
+    return correction, res
+
+
+def generate_rainfall_sound(output_dir: str) -> None:
+    """ISO 10140-1 Annex K: the reference pane, and a rooflight under heavy rain."""
+    print("Generating rainfall_sound...")
+    correction, res = _rooflight_under_heavy_rain()
 
     _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13.0, 5.6))
     correction.plot(ax=ax1, language=_LANG, color=COLOR_PRIMARY)
     res.plot(ax=ax2, language=_LANG, color=COLOR_PRIMARY)
     plt.tight_layout()
     save_figure(output_dir, "rainfall_sound.png")
+    plt.close()
+
+
+def generate_rainfall_octave_bands(output_dir: str) -> None:
+    """ISO 10140-1 Formula (K.3): the rooflight's intensity level in octaves.
+
+    Drawn by the ``OctaveBandSpectrum`` the result's ``octave_bands()``
+    returns, so the figure is the record a user gets back.
+    """
+    print("Generating rainfall_octave_bands...")
+    _correction, res = _rooflight_under_heavy_rain()
+
+    _fig, ax = plt.subplots(figsize=(8.0, 5.0))
+    res.octave_bands().plot(ax=ax, language=_LANG, color=COLOR_PRIMARY)
+    plt.tight_layout()
+    save_figure(output_dir, "rainfall_octave_bands.png")
     plt.close()
 
 

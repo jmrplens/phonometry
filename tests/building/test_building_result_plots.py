@@ -86,14 +86,6 @@ def test_impact_rating_uses_opposite_sign_mask() -> None:
     plt.close("all")
 
 
-def test_rating_without_curve_data_raises() -> None:
-    bare = ph.building.WeightedRatingResult(
-        rating=52, c=-1, ctr=-3, unfavorable_sum=10.0
-    )
-    with pytest.raises(ValueError, match="no band curve"):
-        bare.plot()
-
-
 def test_rating_plot_forwards_kwargs_without_typeerror() -> None:
     # Regression: _plot_rating used to lack **kwargs, so any styling kwarg
     # forwarded by plot_weighted_rating/plot_impact_rating raised TypeError.

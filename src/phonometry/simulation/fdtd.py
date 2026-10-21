@@ -80,7 +80,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from . import _backends, _observer
-from .compute import RunProvenance, _local_request, _requested
+from .compute import Compute, RunProvenance, _local_request, _requested
 from .ntff import ContourPhasors
 
 if TYPE_CHECKING:
@@ -89,7 +89,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from .._i18n import Language
-    from .compute import Compute
+    from ._remote.client import Expected
 
 __all__ = [
     "FDTD2D",
@@ -2150,6 +2150,51 @@ def _acoustic_engine(run: FDTDRun, compute: Compute | None) -> FDTD2D:
     return sim
 
 
+def _expected_arrays(
+    histories: tuple[str, tuple[int, ...]],
+    frames: tuple[int, int, int] | None,
+    dtype: str,
+) -> Expected:
+    """What a node sends back for a run, in the order it sends it.
+
+    The probe histories, named and shaped as *histories* says and float64
+    whatever the run's dtype, then the snapshots in the run's dtype when the
+    run records them. Shared by both simulation functions, whose records
+    differ only in the name and the shape of the histories.
+    """
+    from ._remote.client import ArraySpec, Expected
+
+    name, shape = histories
+    first = ArraySpec(name, "float64", shape)
+    if frames is None:
+        return Expected(arrays=(first,))
+    return Expected(arrays=(first, ArraySpec("snapshots", dtype, frames)))
+
+
+def _acoustic_expected(run: FDTDRun, dtype: str) -> Expected:
+    """The arrays a node must send back for *run*, in the order it sends them."""
+    checks = run._checked
+    pressures = (checks.probe_ix.shape[0], checks.steps + 1)
+    return _expected_arrays(("pressures", pressures), checks.snapshot_shape(), dtype)
+
+
+def _placement_here(request: Compute) -> Compute:
+    """Where a run steps on this machine, for either simulation function.
+
+    As asked when the request names no host. When it names one, this is the
+    fallback after the node failed: NumPy, in the dtype the request asked
+    for.
+    """
+    return request if request.host is None else Compute(dtype=request.dtype)
+
+
+def _cleared(first: NDArray[np.floating], second: NDArray[np.floating] | None) -> None:
+    """Zero what a failed remote run may have half written, before the run here."""
+    first[...] = 0.0
+    if second is not None:
+        second[...] = 0.0
+
+
 def _parse_boundaries(
     boundaries: AcousticBoundary
     | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]],
@@ -2334,16 +2379,27 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
     :param run: The simulation (:class:`FDTDRun`): the domain, its sources
         and what it records, every argument checked when the run was built.
     :param compute: Where the run steps (:class:`Compute`); ``None`` follows
-        :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
+        :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy. With a
+        ``host`` the whole run goes to that node, named in the hosts file,
+        and comes back as this function's record (see the guide on remote
+        nodes).
     :return: A :class:`FDTDResult`.
-    :raises TypeError: For a ``run`` that is not an :class:`FDTDRun`, or a
-        ``compute`` that is neither a :class:`Compute` nor ``None``.
-    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse.
+    :raises TypeError: For a ``run`` that is not an :class:`FDTDRun`, a
+        ``compute`` that is neither a :class:`Compute` nor ``None``, or,
+        when ``compute`` names a host, a run that cannot travel to a node: a
+        source whose waveform is a callable other than the ``value`` of a
+        :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`.
+    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
+        a malformed hosts file.
+    :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
         or does not import.
     :raises ComputeDeviceError: When the device is not present, or fails a
         first small computation; with ``fallback=True`` the run warns with
         :class:`ComputeFallbackWarning` and steps on NumPy instead.
+    :raises ComputeRemoteError: For a failure of the connection or of the
+        node; with ``fallback=True`` the run warns with
+        :class:`ComputeFallbackWarning` and steps on NumPy here instead.
     """
     if not isinstance(run, FDTDRun):
         msg = f"'run' must be an FDTDRun, got {type(run).__name__}."
@@ -2353,22 +2409,38 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
     # The record keeps these two as they are (handed_over): the snapshots are
     # most of the result, and a copy would hold them twice while it is built.
     # The probe histories are float64 whatever the run's dtype; the snapshots
-    # keep it, a float32 run's being half the size.
+    # keep it, a float32 run's being half the size. Either route fills them.
     pressures = np.zeros((checks.probe_ix.shape[0], checks.steps + 1), dtype=np.float64)
     frames = checks.snapshot_shape()
     snapshots = (
         None if frames is None else np.zeros(frames, dtype=np.dtype(request.dtype))
     )
-    sim = _acoustic_engine(run, compute)
-    _record_run(
-        sim,
-        checks.steps,
-        checks.probe_ix,
-        checks.snapshot_every,
-        checks.snapshot_decimation,
-        pressures,
-        snapshots,
-    )
+    provenance: RunProvenance | None = None
+    if request.host is not None:
+        # Called here, not from a helper the two functions share: the record
+        # keeps these arrays without a copy, which holds only for arrays that
+        # reach the code writing into them within three calls.
+        from ._remote.client import run_remote
+
+        expected = _acoustic_expected(run, request.dtype)
+        provenance = run_remote(
+            "fdtd_simulation", request, {"run": run}, expected, pressures, snapshots
+        )
+        if provenance is None:
+            # The node failed and the request asked to run here instead.
+            _cleared(pressures, snapshots)
+    if provenance is None:
+        sim = _acoustic_engine(run, _placement_here(request))
+        _record_run(
+            sim,
+            checks.steps,
+            checks.probe_ix,
+            checks.snapshot_every,
+            checks.snapshot_decimation,
+            pressures,
+            snapshots,
+        )
+        provenance = sim.provenance
     return FDTDResult(
         times=np.arange(checks.steps + 1, dtype=np.float64) * checks.dt,
         pressures=handed_over(pressures),
@@ -2382,5 +2454,5 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
         snapshot_times=_snapshot_times(checks.steps, checks.snapshot_every, checks.dt),
         obstacle_mask=checks.obstacle,
         snapshot_decimation=checks.snapshot_decimation,
-        provenance=sim.provenance,
+        provenance=provenance,
     )

@@ -114,9 +114,12 @@ from .fdtd import (
     _SIDES,
     Field2D,
     Side,
+    _cleared,
+    _expected_arrays,
     _finite,
     _hold_cells,
     _integer,
+    _placement_here,
     _positive_finite,
     _positive_map,
     _probe_indices,
@@ -143,6 +146,7 @@ if TYPE_CHECKING:
 
     from .._i18n import Language
     from ._backends import DeviceArray
+    from ._remote.client import Expected
     from .compute import Compute, RunProvenance
 
 Field = Literal["p", "vx", "vy"]
@@ -1859,6 +1863,13 @@ def _elastic_engine(run: ElasticRun, compute: Compute | None) -> ElasticFDTD2D:
     return sim
 
 
+def _elastic_expected(run: ElasticRun, dtype: str) -> Expected:
+    """The arrays a node must send back for *run*, in the order it sends them."""
+    checks = run._checked
+    signals = (checks.probe_ix.shape[0], len(checks.fields), checks.steps + 1)
+    return _expected_arrays(("signals", signals), checks.snapshot_shape(), dtype)
+
+
 def _parse_elastic_boundaries(
     boundaries: ElasticBoundary | Mapping[Side, ElasticBoundary],
 ) -> tuple[tuple[Side, ...], tuple[Side, ...]]:
@@ -2081,16 +2092,30 @@ def elastic_fdtd_simulation(
         sources and what it records, every argument checked when the run was
         built.
     :param compute: Where the run steps (:class:`Compute`); ``None`` follows
-        :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
+        :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy. With a
+        ``host`` the whole run goes to that node, named in the hosts file,
+        and comes back as this function's record (see the guide on remote
+        nodes).
     :return: An :class:`ElasticFDTDResult`.
-    :raises TypeError: For a ``run`` that is not an :class:`ElasticRun`, or a
-        ``compute`` that is neither a :class:`Compute` nor ``None``.
-    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse.
+    :raises TypeError: For a ``run`` that is not an :class:`ElasticRun`, a
+        ``compute`` that is neither a :class:`Compute` nor ``None``, or,
+        when ``compute`` names a host, a run that cannot travel to a node: an
+        :class:`ExplosionSource` or a :class:`ForceSource` whose waveform is
+        a callable other than the ``value`` of a
+        :class:`~phonometry.simulation.GaussianPulse`,
+        :class:`~phonometry.simulation.CWSource` or
+        :class:`~phonometry.simulation.SignalSource`.
+    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
+        a malformed hosts file.
+    :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
         or does not import.
     :raises ComputeDeviceError: When the device is not present, or fails a
         first small computation; with ``fallback=True`` the run warns with
         :class:`ComputeFallbackWarning` and steps on NumPy instead.
+    :raises ComputeRemoteError: For a failure of the connection or of the
+        node; with ``fallback=True`` the run warns with
+        :class:`ComputeFallbackWarning` and steps on NumPy here instead.
     """
     if not isinstance(run, ElasticRun):
         msg = f"'run' must be an ElasticRun, got {type(run).__name__}."
@@ -2100,7 +2125,7 @@ def elastic_fdtd_simulation(
     # The record keeps these two as they are (handed_over): the snapshots are
     # most of the result, and a copy would hold them twice while it is built.
     # The probe histories are float64 whatever the run's dtype; the snapshots
-    # keep it, a float32 run's being half the size.
+    # keep it, a float32 run's being half the size. Either route fills them.
     signals = np.zeros(
         (checks.probe_ix.shape[0], len(checks.fields), checks.steps + 1),
         dtype=np.float64,
@@ -2109,18 +2134,39 @@ def elastic_fdtd_simulation(
     snapshots = (
         None if frames is None else np.zeros(frames, dtype=np.dtype(request.dtype))
     )
-    sim = _elastic_engine(run, compute)
-    _record_elastic_run(
-        sim,
-        checks.steps,
-        checks.probe_ix,
-        checks.fields,
-        checks.snapshot_every,
-        checks.snapshot_field,
-        checks.snapshot_decimation,
-        signals,
-        snapshots,
-    )
+    provenance: RunProvenance | None = None
+    if request.host is not None:
+        # Called here, as in fdtd_simulation, not from a shared helper: the
+        # record keeps these arrays without a copy, which holds only for
+        # arrays that reach the code writing into them within three calls.
+        from ._remote.client import run_remote
+
+        expected = _elastic_expected(run, request.dtype)
+        provenance = run_remote(
+            "elastic_fdtd_simulation",
+            request,
+            {"run": run},
+            expected,
+            signals,
+            snapshots,
+        )
+        if provenance is None:
+            # The node failed and the request asked to run here instead.
+            _cleared(signals, snapshots)
+    if provenance is None:
+        sim = _elastic_engine(run, _placement_here(request))
+        _record_elastic_run(
+            sim,
+            checks.steps,
+            checks.probe_ix,
+            checks.fields,
+            checks.snapshot_every,
+            checks.snapshot_field,
+            checks.snapshot_decimation,
+            signals,
+            snapshots,
+        )
+        provenance = sim.provenance
     return ElasticFDTDResult(
         times=np.arange(checks.steps + 1, dtype=np.float64) * checks.dt,
         signals=handed_over(signals),
@@ -2137,5 +2183,5 @@ def elastic_fdtd_simulation(
         obstacle_mask=checks.obstacle,
         free_sides=checks.free_sides,
         snapshot_decimation=checks.snapshot_decimation,
-        provenance=sim.provenance,
+        provenance=provenance,
     )

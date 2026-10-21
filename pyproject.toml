@@ -180,6 +180,11 @@ target-version = "py312"
 # comments those snippets use to show expected output are a teaching device,
 # not an accident.
 extend-exclude = ["*.md"]
+# The node bootstrap runs on whatever Python a node has, so that an old one
+# can say it is too old instead of failing to parse the file: it is held to
+# Python 3.8 syntax, and tests/simulation/test_remote_bootstrap.py parses it
+# with that grammar.
+per-file-target-version = { "src/phonometry/simulation/_remote/bootstrap.py" = "py38" }
 
 [tool.ruff.lint]
 # The default set (E4, E7, E9, F) plus the families this tree already satisfies

@@ -116,24 +116,78 @@ def _iter_modules() -> list[Path]:
     return [p for p in SRC.rglob("*.py") if p.name != "__init__.py" or p.parent != SRC]
 
 
+#: The files of the package that run as scripts outside it, each with the
+#: modules of the package it may import by absolute name. The node bootstrap
+#: is the one: a node runs it before the package is there (from the node
+#: image, or sent inline), so it has no package to be relative to, and once
+#: the client has sent the package it imports it from the node's cache by
+#: name. Every other file imports the package relatively.
+SCRIPT_SELF_IMPORTS: dict[str, frozenset[str]] = {
+    "simulation/_remote/bootstrap.py": frozenset(
+        {"phonometry", "phonometry.simulation._remote"}
+    ),
+}
+
+
+def _is_main_guard(node: ast.stmt) -> bool:
+    """Whether *node* is ``if __name__ == "__main__":``."""
+    return (
+        isinstance(node, ast.If)
+        and isinstance(node.test, ast.Compare)
+        and isinstance(node.test.left, ast.Name)
+        and node.test.left.id == "__name__"
+        and len(node.test.ops) == 1
+        and isinstance(node.test.ops[0], ast.Eq)
+        and isinstance(node.test.comparators[0], ast.Constant)
+        and node.test.comparators[0].value == "__main__"
+    )
+
+
+def _absolute_self_imports(tree: ast.AST) -> set[str]:
+    """The modules of this package *tree* imports by absolute name, in any form.
+
+    ``import phonometry.x``, with or without ``as``, counts as much as
+    ``from phonometry.x import y``: either would bypass the relative-import
+    rules below.
+    """
+    found: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names = [alias.name for alias in node.names]
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            names = [node.module]
+        else:
+            continue
+        found.update(
+            name
+            for name in names
+            if name == "phonometry" or name.startswith("phonometry.")
+        )
+    return found
+
+
+def _unlisted_self_imports(rel: str, tree: ast.AST) -> set[str]:
+    """The absolute self-imports of the file *rel* that its entry does not list."""
+    return _absolute_self_imports(tree) - SCRIPT_SELF_IMPORTS.get(rel, frozenset())
+
+
 def _edges() -> set[tuple[str, str, str]]:
     """(from_pkg, to_pkg, 'file: import') for every relative import in src."""
     out: set[tuple[str, str, str]] = set()
     for path in _iter_modules():
         pkg = _package_of(path)
         tree = ast.parse(path.read_text(encoding="utf-8"))
+        unlisted = _unlisted_self_imports(path.relative_to(SRC).as_posix(), tree)
+        if unlisted:
+            pytest.fail(
+                f"{path.relative_to(SRC)}: absolute self-import "
+                f"{', '.join(repr(name) for name in sorted(unlisted))} "
+                "(use relative imports)"
+            )
         for node in ast.walk(tree):
-            if not isinstance(node, ast.ImportFrom):
-                continue
-            if node.level == 0:
-                # Absolute self-imports would bypass the relative-import rules.
-                if node.module and (
-                    node.module == "phonometry" or node.module.startswith("phonometry.")
-                ):
-                    pytest.fail(
-                        f"{path.relative_to(SRC)}: absolute self-import "
-                        f"'{node.module}' (use relative imports)"
-                    )
+            # An absolute import is a third-party one here: the package's own
+            # were refused above.
+            if not isinstance(node, ast.ImportFrom) or node.level == 0:
                 continue
             target = node.module or ""
             head = target.split(".")[0] if target else ""
@@ -191,6 +245,50 @@ def test_family_edges_are_whitelisted() -> None:
     assert not violations, "unlisted family-to-family imports:\n" + "\n".join(
         violations
     )
+
+
+def test_the_scripts_allowed_an_absolute_self_import_are_scripts_that_make_it() -> None:
+    """Each listed file runs as a script and imports by name exactly what it lists.
+
+    A listed import the file no longer makes is a stale entry, and one it
+    makes beyond its list is refused like any other.
+    """
+    for rel, listed in SCRIPT_SELF_IMPORTS.items():
+        path = SRC / rel
+        assert path.is_file(), f"{rel} is listed but does not exist"
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        assert any(_is_main_guard(node) for node in tree.body), (
+            f'{rel} is listed as a script but has no `if __name__ == "__main__":`'
+        )
+        assert _absolute_self_imports(tree) == listed, rel
+
+
+def test_an_absolute_self_import_is_refused_unless_the_list_names_it() -> None:
+    """The guard sees each way of writing the import, and the list admits nothing else."""
+    every_form = ast.parse(
+        "import phonometry\n"
+        "import phonometry.signals as signals\n"
+        "from phonometry import filters\n"
+        "from phonometry.simulation._remote import node\n"
+        "def later():\n"
+        "    import phonometry.io\n"
+    )
+    names = {
+        "phonometry",
+        "phonometry.signals",
+        "phonometry.simulation._remote",
+        "phonometry.io",
+    }
+    assert _absolute_self_imports(every_form) == names
+    # A relative import, or a package whose name only starts the same, is not one.
+    assert not _absolute_self_imports(
+        ast.parse("from . import node\nfrom .. import io\nimport phonometryx\n")
+    )
+    # A file the list does not name is allowed none, a module beside the
+    # script included; the script is allowed what it lists and nothing more.
+    assert _unlisted_self_imports("simulation/_remote/node.py", every_form) == names
+    for rel, listed in SCRIPT_SELF_IMPORTS.items():
+        assert _unlisted_self_imports(rel, every_form) == names - listed
 
 
 def test_internal_imports_no_domain_code() -> None:

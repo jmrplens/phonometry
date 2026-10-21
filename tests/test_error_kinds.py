@@ -102,6 +102,12 @@ EXEMPT: dict[str, str] = {
     "simulation/_remote/hosts.py:_entry": "parses the hosts file",
     "simulation/_remote/hosts.py:_optional_text": "parses the hosts file",
     "simulation/_remote/hosts.py:_timeout": "parses the hosts file",
+    # The frames of a remote run: a field of the wrong type in what the other
+    # end sent is a broken stream, refused as one, not the caller's mistake.
+    "simulation/_remote/bootstrap.py:read_header": "reads a frame the other end sent",
+    "simulation/_remote/bootstrap.py:field": "reads a frame the other end sent",
+    "simulation/_remote/bootstrap.py:_check_listing": "reads a frame the other end sent",
+    "simulation/_remote/bootstrap.py:_floors": "reads a frame the other end sent",
 }
 
 

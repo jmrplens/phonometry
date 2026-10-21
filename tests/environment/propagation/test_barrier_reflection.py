@@ -358,6 +358,34 @@ class TestReflectionIndex:
         with pytest.raises(ValueError, match=match):
             dataclasses.replace(result, **{field: wrong})
 
+    def test_a_result_holds_the_layout_of_the_standard(self) -> None:
+        """Seventeen bands, or eight microphones, everywhere at once still agree."""
+        front, free = _grid()
+        result = _index(front, free)
+        bands = {
+            "frequencies": result.frequencies[:17],
+            "reflection_index": result.reflection_index[:17],
+            "position_values": result.position_values[:, :17],
+            "microphone_values": result.microphone_values[:, :, :17],
+        }
+        microphones = {
+            "microphone_values": result.microphone_values[:, :8, :],
+            "gain_corrections": result.gain_corrections[:, :8],
+            "subtraction_reductions": result.subtraction_reductions[:, :8],
+        }
+        with pytest.raises(ValueError, match="must hold the 18 bands of EN 1793-5"):
+            dataclasses.replace(result, **bands)
+        with pytest.raises(
+            ValueError, match="must hold the 9 microphones of EN 1793-5"
+        ):
+            dataclasses.replace(result, **microphones)
+
+    @pytest.mark.parametrize("field", ["lowest_band_hz", "rating"])
+    def test_a_result_requires_its_rating(self, field: str) -> None:
+        result = prop.reflection_index_from_positions(np.full((2, 18), 0.5))
+        with pytest.raises(TypeError, match=f"'{field}' is required"):
+            dataclasses.replace(result, **{field: None})
+
     def test_a_result_of_single_numbers_is_refused(self) -> None:
         """Scalars in every required field passed the rank check, then broke the plot."""
         result = prop.reflection_index_from_positions(np.full((2, 18), 0.5))
@@ -748,6 +776,12 @@ class TestAnnexB:
                 ValueError,
                 "'rating_expanded_uncertainty_db' must be non-negative",
             ),
+            (
+                "frequencies",
+                np.full(18, np.nan),
+                ValueError,
+                "'frequencies' must contain only finite values",
+            ),
             ("estimate", "bogus", ValueError, "'estimate' must be one of"),
             ("coverage_factor", -1.0, ValueError, "'coverage_factor' must be positive"),
             ("coverage_factor", 0.0, ValueError, "'coverage_factor' must be positive"),
@@ -882,6 +916,18 @@ class TestLowFrequencyLimit:
         short = getattr(limit, field)[:8]
         with pytest.raises(ValueError, match="one value per microphone"):
             dataclasses.replace(limit, **{field: short})
+
+    def test_a_limit_holds_the_nine_microphones(self) -> None:
+        limit = prop.reflection_low_frequency_limit(4.0, speed_of_sound=340.0)
+        eight = {
+            "window_length_s": limit.window_length_s[:8],
+            "low_frequency_limit_hz": limit.low_frequency_limit_hz[:8],
+            "limiting_component": limit.limiting_component[:8],
+        }
+        with pytest.raises(
+            ValueError, match="must hold the 9 microphones of EN 1793-5"
+        ):
+            dataclasses.replace(limit, **eight)
 
     def test_a_limit_of_single_numbers_is_refused(self) -> None:
         limit = prop.reflection_low_frequency_limit(4.0, speed_of_sound=340.0)

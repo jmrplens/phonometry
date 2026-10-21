@@ -1114,6 +1114,27 @@ def _agree_rate(
 # --------------------------------------------------------------------------- #
 # The sound reflection index (Formula (1))
 # --------------------------------------------------------------------------- #
+def _require_layout(
+    owner: object, name: str, layout: Sequence[object], *, axis: int = 0
+) -> None:
+    """Require a field to hold one entry per band or microphone of EN 1793-5.
+
+    :param owner: The record being built.
+    :param name: The field, read off ``owner`` and named in the message.
+    :param layout: The standard's bands (:data:`_BANDS_HZ`) or microphones.
+    :param axis: The axis of the field that runs along ``layout``.
+    :raises ValueError: if the field holds another number of them.
+    """
+    count = np.shape(getattr(owner, name))[axis]
+    if count != len(layout):
+        what = "bands" if layout is _BANDS_HZ else "microphones"
+        msg = (
+            f"{type(owner).__name__}: '{name}' must hold the {len(layout)} {what} "
+            f"of EN 1793-5; it holds {count}."
+        )
+        raise ValueError(msg)
+
+
 def _require_exact_ranks(owner: object, **ranks: int) -> None:
     """Require each named field of *owner* that holds a value to have its rank.
 
@@ -1173,15 +1194,26 @@ class ReflectionIndexResult(OwnsArrays):
 
         A single number is refused as any other wrong rank: the record always
         holds band arrays, unlike the single-frequency results the shared rank
-        check passes over.
+        check passes over. The layout is the standard's: eighteen bands, and
+        nine microphones wherever the microphones are kept.
 
-        :raises TypeError: If ``frequencies``, ``reflection_index`` or
-            ``position_values`` is ``None``.
-        :raises ValueError: If an array has the wrong number of axes, or two of
+        :raises TypeError: If ``frequencies``, ``reflection_index``,
+            ``position_values``, ``lowest_band_hz`` or ``rating`` is ``None``,
+            or ``lowest_band_hz`` is not a single number.
+        :raises ValueError: If an array has the wrong number of axes, two of
             them disagree about the bands, the grid positions or the
-            microphones.
+            microphones, there are not eighteen bands or nine microphones, or
+            ``lowest_band_hz`` is not positive.
         """
-        require_present(self, "frequencies", "reflection_index", "position_values")
+        require_present(
+            self,
+            "frequencies",
+            "reflection_index",
+            "position_values",
+            "lowest_band_hz",
+            "rating",
+        )
+        require_positive(self.lowest_band_hz, "lowest_band_hz")
         _require_exact_ranks(
             self,
             frequencies=1,
@@ -1213,6 +1245,10 @@ class ReflectionIndexResult(OwnsArrays):
             ("subtraction_reductions", 1),
             axis="microphone",
         )
+        _require_layout(self, "frequencies", _BANDS_HZ)
+        for name in ("microphone_values", "gain_corrections", "subtraction_reductions"):
+            if getattr(self, name) is not None:
+                _require_layout(self, name, range(_MICROPHONES), axis=1)
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
@@ -1287,7 +1323,10 @@ class ReflectionIndexUncertainty(OwnsArrays):
                 )
                 raise ValueError(msg)
         require_finite_fields(
-            self, "expanded_uncertainty", "rating_expanded_uncertainty_db"
+            self,
+            "frequencies",
+            "expanded_uncertainty",
+            "rating_expanded_uncertainty_db",
         )
         if np.any(np.asarray(self.expanded_uncertainty) < 0.0):
             msg = (
@@ -1641,8 +1680,8 @@ class ReflectionFrequencyLimit(OwnsArrays):
 
         :raises TypeError: If a per-microphone field is ``None``.
         :raises ValueError: If ``window_length_s`` or ``low_frequency_limit_hz``
-            is not one-dimensional, or the three per-microphone fields differ
-            in length.
+            is not one-dimensional, the three per-microphone fields differ in
+            length, or they do not hold the nine microphones of the grid.
         """
         require_present(
             self, "window_length_s", "low_frequency_limit_hz", "limiting_component"
@@ -1655,6 +1694,7 @@ class ReflectionFrequencyLimit(OwnsArrays):
             "limiting_component",
             axis="microphone",
         )
+        _require_layout(self, "window_length_s", range(_MICROPHONES))
 
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any

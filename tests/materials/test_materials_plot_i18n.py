@@ -22,7 +22,7 @@ mpl.use("Agg")
 import matplotlib.pyplot as plt
 
 from phonometry import materials
-from phonometry.materials.absorbers.airflow_resistance import (
+from phonometry.materials.absorbers import (
     static_airflow_resistance,
 )
 from phonometry.materials.absorbers.impedance_tube import ImpedanceTubeResult

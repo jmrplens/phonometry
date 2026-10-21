@@ -26,6 +26,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "SoundSpeedProfile",
+    "sound_speed_profile",
+]
+
 #: The minimum number of nodes a depth polyline can have.
 _MIN_POLYLINE_NODES = 2
 

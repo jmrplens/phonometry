@@ -62,6 +62,17 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+__all__ = [
+    "FDTD2D",
+    "CWSource",
+    "ContourProbe",
+    "FDTDResult",
+    "GaussianPulse",
+    "PlaneWaveSource",
+    "SignalSource",
+    "fdtd_simulation",
+]
+
 Field2D = NDArray[np.float64]
 
 _SIDES = ("left", "right", "top", "bottom")

@@ -129,11 +129,11 @@ def _band_labels(language: str = "en") -> list[str]:
     a Spanish sheet writes it with the decimal comma the level beside it in the
     same row already uses.
     """
-    from ..room.noise_criteria import OCTAVE_BANDS
+    from ..room.noise_criteria import NC_OCTAVE_BANDS_HZ
 
     return [
         decimal_comma(f"{f:g}", language)
-        for f in np.asarray(OCTAVE_BANDS, dtype=np.float64)
+        for f in np.asarray(NC_OCTAVE_BANDS_HZ, dtype=np.float64)
     ]
 
 
@@ -198,18 +198,18 @@ def _nc_contour_column(levels: np.ndarray, language: str) -> list[str]:
     an em dash; a band outside the Table 1 family shows ``"<15"`` / ``">70"``
     (no NC contour passes through it), never a fabricated number.
     """
-    from ..room.noise_criteria import NC_CURVES, NC_INDICES
+    from ..room.noise_criteria import NC_CURVES_DB, NC_RATINGS
 
     cells: list[str] = []
     for k, level in enumerate(levels):
         if not math.isfinite(level):
             cells.append("—")
-        elif level > NC_CURVES[-1, k]:
+        elif level > NC_CURVES_DB[-1, k]:
             cells.append(">70")
-        elif level < NC_CURVES[0, k]:
+        elif level < NC_CURVES_DB[0, k]:
             cells.append("<15")
         else:
-            contour = float(np.interp(level, NC_CURVES[:, k], NC_INDICES))
+            contour = float(np.interp(level, NC_CURVES_DB[:, k], NC_RATINGS))
             cells.append(format_number(contour, language, decimals=1))
     return cells
 

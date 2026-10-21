@@ -14,8 +14,15 @@ Physics / standard anchors:
 import numpy as np
 import pytest
 
-from phonometry.emission.sound_power import SoundPowerWarning
-from phonometry.emission.sound_power_anechoic import (
+from phonometry.emission import (
+    PrecisionCriteria,
+    PrecisionFieldIndicators,
+    PrecisionIntensityResult,
+    precision_field_indicators,
+    precision_qualification,
+    sound_power_intensity_precision,
+)
+from phonometry.emission._sound_power_anechoic import (
     _TABLE_D1,
     _TABLE_E1,
     _TABLE_E2,
@@ -27,14 +34,7 @@ from phonometry.emission.sound_power_anechoic import (
     precision_uncertainty,
     sound_power_anechoic,
 )
-from phonometry.emission.sound_power_intensity import (
-    PrecisionCriteria,
-    PrecisionFieldIndicators,
-    PrecisionIntensityResult,
-    precision_field_indicators,
-    precision_qualification,
-    sound_power_intensity_precision,
-)
+from phonometry.emission.sound_power import SoundPowerWarning
 
 _P0 = 1.0e-12
 

@@ -1,9 +1,11 @@
 ---
-title: "underwater.propagation.seabed_reflection"
+title: "underwater: seabed reflection"
 description: "Plane-wave reflection at the seabed (fluid-fluid Rayleigh model)."
 sidebar:
   label: "seabed_reflection"
 ---
+
+Every name on this page is published by `phonometry.underwater`: `from phonometry import underwater`, then `underwater.<name>`.
 
 Plane-wave reflection at the seabed (fluid-fluid Rayleigh model).
 

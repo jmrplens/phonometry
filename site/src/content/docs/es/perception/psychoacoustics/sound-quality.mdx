@@ -332,16 +332,18 @@ de pala y su serie armónica muestra varios picos así; un siseo muestra un
 patrón plano y bajo. Llamar a `.plot()` sin ejes añade el panel de $T(l)$
 dependiente del tiempo, que es donde aparece un tono intermitente.
 
-**Cómo se lee una tonalidad.** El apartado 6.3 de ECMA-418-2 ata su criterio de
-prominencia al *patrón*, no al valor único: una componente tonal en la banda
-$z_\text{tonal}$ cuenta como prominente cuando la tonalidad específica
-$T'(z_\text{tonal})$ supera 0,4 tu_HMS, es un máximo local a lo largo de $z$ y
-lleva una frecuencia tonal comprendida entre los centros de las bandas vecinas.
-Así que una afirmación de prominencia se lee de `specific_tonality` y
-`tonal_frequencies`, nunca de $T$ a secas. La norma no fija ningún límite a la
-$T$ global, lo que la convierte en una magnitud para comparar diseños y no en
-un ensayo de cumple/no cumple; el ensayo es la relación tono-ruido y la
-relación de prominencia de ECMA-418-1 de
+**Cómo se lee una tonalidad.** El apartado 6.3 de ECMA-418-2 da dos criterios
+de prominencia, ambos de 0,4 tu_HMS, y `tonality_ecma()` no aplica ninguno:
+devuelve los valores de los que se leen. En un sonido estacionario, una
+componente tonal en la banda $z_\text{tonal}$ cuenta como prominente cuando la
+tonalidad específica $T'(z_\text{tonal})$ supera 0,4 tu_HMS, es un máximo local
+a lo largo de $z$ y lleva una frecuencia tonal comprendida entre las
+frecuencias centrales $F(z_\text{tonal} - 1)$ y $F(z_\text{tonal} + 1)$; esa
+afirmación se lee de `specific_tonality` y `tonal_frequencies`. En un sonido no
+estacionario, la señal contiene tonalidades prominentes cuando el valor único
+$T$ de la fórmula (63) supera 0,4 tu_HMS. El ensayo de un tono discreto frente
+al ruido que lo rodea es la relación tono-ruido y la relación de prominencia de
+ECMA-418-1 de
 [Tonos discretos prominentes](/phonometry/es/perception/psychoacoustics/tone-prominence/).
 
 ### Parámetros de `tonality_ecma()`
@@ -649,7 +651,7 @@ psicoacústica](/phonometry/es/perception/psychoacoustics/psychoacoustic-annoyan
 
 ## Véase también
 
-- Referencia de la API: [`psychoacoustics.quality.sharpness`](/phonometry/es/reference/api/psychoacoustics/sharpness/), [`psychoacoustics.quality.tonality_ecma`](/phonometry/es/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics.quality.roughness_ecma`](/phonometry/es/reference/api/psychoacoustics/roughness-ecma/) y [`psychoacoustics.quality.fluctuation_strength_ecma`](/phonometry/es/reference/api/psychoacoustics/fluctuation-strength-ecma/).
+- Referencia de la API: [`psychoacoustics.quality.sharpness`](/phonometry/es/reference/api/psychoacoustics/sharpness/), [`psychoacoustics`: tonality (Sottek model)](/phonometry/es/reference/api/psychoacoustics/tonality-ecma/), [`psychoacoustics`: roughness (Sottek model)](/phonometry/es/reference/api/psychoacoustics/roughness-ecma/) y [`psychoacoustics`: fluctuation strength (Sottek model)](/phonometry/es/reference/api/psychoacoustics/fluctuation-strength-ecma/).
 - Teoría: [Modelos avanzados de sonoridad y calidad sonora](/phonometry/es/reference/theory/perception/#modelos-avanzados-de-sonoridad-y-calidad-sonora): el patrón de sonoridad específica sobre el que se construyen la agudeza, la aspereza y la intensidad de fluctuación.
 
 </SeeAlso>

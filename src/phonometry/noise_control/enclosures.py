@@ -82,6 +82,13 @@ from ..room.steady_field import room_constant
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+__all__ = [
+    "ENCLOSURE_MODELS",
+    "EnclosureResult",
+    "enclosure_insertion_loss",
+    "enclosure_required_transmission_loss",
+]
+
 #: Interior build-up correction models. The value is the additive floor inside
 #: the logarithm of ``C = 10 lg(floor + S_E / R_i)``: Bies, Hansen & Howard
 #: (Equation (7.111)) carry ``0.3``, which caps the insertion loss of a fully

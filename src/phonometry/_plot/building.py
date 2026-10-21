@@ -40,6 +40,11 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..building.measurement._rainfall_sound import (
+        RainfallReferenceCorrection,
+        RainfallSoundResult,
+        RainGeneratorVerification,
+    )
     from ..building.measurement.flanking_transmission import VibrationReductionResult
     from ..building.measurement.floor_covering_improvement import (
         FloorCoveringImprovementResult,
@@ -65,11 +70,6 @@ if TYPE_CHECKING:
         LiningCuringCheck,
     )
     from ..building.measurement.low_frequency import LowFrequencyResult
-    from ..building.measurement.rainfall_sound import (
-        RainfallReferenceCorrection,
-        RainfallSoundResult,
-        RainGeneratorVerification,
-    )
     from ..building.measurement.ratings import (
         ExtendedImpactRatingResult,
         ExtendedWeightedRatingResult,
@@ -3855,7 +3855,7 @@ def plot_rain_generator_verification(
     as a strip of points.
 
     :param result: A
-        :class:`~phonometry.building.measurement.rainfall_sound.RainGeneratorVerification`.
+        :class:`~phonometry.building.measurement.RainGeneratorVerification`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the rainfall-rate marker.
@@ -3936,7 +3936,7 @@ def plot_rainfall_reference_correction(
     """Corrected level of the reference pane against Table I.1 (Annex I).
 
     :param result: A
-        :class:`~phonometry.building.measurement.rainfall_sound.RainfallReferenceCorrection`.
+        :class:`~phonometry.building.measurement.RainfallReferenceCorrection`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the corrected-level curve ``plot`` call.
@@ -3984,7 +3984,7 @@ def plot_rainfall_sound(
     """Sound intensity level of a specimen under rain, per band (Annex K).
 
     :param result: A
-        :class:`~phonometry.building.measurement.rainfall_sound.RainfallSoundResult`.
+        :class:`~phonometry.building.measurement.RainfallSoundResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the ``L_I`` curve ``plot`` call.

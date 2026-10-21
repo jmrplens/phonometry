@@ -47,6 +47,11 @@ if TYPE_CHECKING:
 
     from ..io._signal import Signal
 
+__all__ = [
+    "dynamic_range",
+    "idle_channel_noise",
+]
+
 #: AES17-2015 5.2.7: the CCIR-RMS weighting is the ITU-R BS.468-4 curve with an
 #: additional flat gain of -5,63 dB, which places unity gain at 2 kHz. Table 1
 #: tabulates the result (for example -5,6 dB at 1 kHz, 0 dB at 2 kHz).

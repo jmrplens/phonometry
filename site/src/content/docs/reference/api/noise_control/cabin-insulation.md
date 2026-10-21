@@ -1,9 +1,11 @@
 ---
-title: "noise_control.cabin_insulation"
+title: "noise_control: cabin insulation"
 description: "What a cabin keeps out, measured in the room it stands in (ISO 11957)."
 sidebar:
   label: "cabin_insulation"
 ---
+
+Every name on this page is published by `phonometry.noise_control`: `from phonometry import noise_control`, then `noise_control.<name>`.
 
 What a cabin keeps out, measured in the room it stands in (ISO 11957).
 

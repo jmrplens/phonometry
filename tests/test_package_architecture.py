@@ -1012,7 +1012,7 @@ def test_clause_poles_are_not_migrated_to_the_physical_bound() -> None:
     """
     clause_poles = {
         "emission/_shared.py": "273",
-        "emission/sound_power_anechoic.py": "273",
+        "emission/_sound_power_anechoic.py": "273",
         "building/measurement/intensity_insulation.py": "273",
     }
     for relative, printed in clause_poles.items():

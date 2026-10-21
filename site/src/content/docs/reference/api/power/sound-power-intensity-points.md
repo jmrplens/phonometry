@@ -1,9 +1,11 @@
 ---
-title: "emission.sound_power_intensity_points"
+title: "emission: sound power by intensity at points"
 description: "Sound power level of a noise source from sound intensity measured at discrete points: ISO 9614-1:1993."
 sidebar:
   label: "sound_power_intensity_points"
 ---
+
+Every name on this page is published by `phonometry.emission`: `from phonometry import emission`, then `emission.<name>`.
 
 Sound power level of a noise source from sound intensity measured at
 **discrete points**: ISO 9614-1:1993.
@@ -118,7 +120,7 @@ discrete-point survey fails.
 Two things this module does not do. It does not scan: the continuous sweep of
 ISO 9614-2:1996 and ISO 9614-3:2002, whose indicators are area weighted and
 whose criteria are numbered differently, is
-[`phonometry.emission.sound_power_intensity`](/phonometry/reference/api/power/sound-power-intensity/). And it does not grade the
+[`phonometry.emission.sound_power_intensity`](/phonometry/reference/api/power/sound-power-intensity/#sound_power_intensity). And it does not grade the
 instrument: $\delta_{pI0}$ is a property of the probe-spacer-analyser
 chain, classified against IEC 61043:1993 Table 2 by
 [`phonometry.emission.verify_intensity_class`](/phonometry/reference/api/power/intensity-compliance/#verify_intensity_class).

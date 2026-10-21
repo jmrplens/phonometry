@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from .airflow_resistance import (
+from ._airflow_resistance import (
     ANNEX_A_AIR,
     AirflowResistanceWarning,
     StaticAirflowResult,

@@ -75,6 +75,15 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "MODE_KINDS",
+    "RoomModesResult",
+    "room_modal_density",
+    "room_mode_count",
+    "room_mode_frequency",
+    "room_modes",
+]
+
 #: Speed of sound in air used when none is given, in m/s (20 degC).
 _SPEED_OF_SOUND_M_S = 343.0
 
@@ -87,7 +96,7 @@ MODE_KINDS: tuple[str, str, str] = ("axial", "tangential", "oblique")
 #: exhausting memory. Enumeration is a low-frequency tool anyway: above the
 #: Schroeder frequency use :func:`room_mode_count` and
 #: :func:`room_modal_density`.
-MAX_ENUMERATED_LATTICE = 20_000_000
+_MAX_ENUMERATED_LATTICE = 20_000_000
 
 # One room dimension (lx, ly, lz) and one mode order (nx, ny, nz) per
 # coordinate axis of the rectangular box.
@@ -400,12 +409,12 @@ def room_modes(
     # f(n,0,0) = n c0 / (2 lx) <= f_max.
     n_max = np.floor(2.0 * f_max * dims / c0).astype(int)
     lattice = float(np.prod(n_max + 1, dtype=np.float64))
-    if lattice > MAX_ENUMERATED_LATTICE:
+    if lattice > _MAX_ENUMERATED_LATTICE:
         msg = (
             f"Enumerating the modes of a "
             f"{dims[0]:g} x {dims[1]:g} x {dims[2]:g} m room up to "
             f"{f_max:g} Hz needs {lattice:.3g} order triples, above the "
-            f"{MAX_ENUMERATED_LATTICE:g} limit. Lower 'max_frequency', or use "
+            f"{_MAX_ENUMERATED_LATTICE:g} limit. Lower 'max_frequency', or use "
             f"room_mode_count / room_modal_density, which are accurate "
             f"wherever the count is this large."
         )

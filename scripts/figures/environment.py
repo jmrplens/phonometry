@@ -752,7 +752,7 @@ def generate_impulse_prominence(output_dir: str) -> None:
     print("Generating impulse_prominence.png...")
     from phonometry import environment
     from phonometry.environment.assessment.impulsive_sound import (
-        ADJUSTMENT_THRESHOLD,
+        _ADJUSTMENT_THRESHOLD,
     )
 
     _fig, (ax_p, ax_k) = plt.subplots(1, 2, figsize=(12.5, 5.4))
@@ -791,10 +791,10 @@ def generate_impulse_prominence(output_dir: str) -> None:
         label=r"$K_{\mathrm{I}} = 1.8\,(P-5)$",
     )
     ax_k.axvline(
-        ADJUSTMENT_THRESHOLD,
+        _ADJUSTMENT_THRESHOLD,
         color="#7f7f7f",
         linestyle=":",
-        label=f"threshold $P = {ADJUSTMENT_THRESHOLD:g}$",
+        label=f"threshold $P = {_ADJUSTMENT_THRESHOLD:g}$",
     )
     ax_k.scatter(
         result.per_impulse,

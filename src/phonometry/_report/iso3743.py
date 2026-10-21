@@ -5,12 +5,12 @@ Renders the two ISO 3743 determinations to the one-page sound-power test sheet
 the other sound-power methods print (:mod:`._sound_power_fiche`):
 
 * a
-  :class:`~phonometry.emission.sound_power_hard_walled.HardWalledSoundPowerResult`
+  :class:`~phonometry.emission.HardWalledSoundPowerResult`
   (ISO 3743-1:2010, the comparison with a reference sound source in a
   hard-walled test room), for the sound power level of Eq. 14 or the sound
   energy level of a burst of Eq. 20;
 * a
-  :class:`~phonometry.emission.sound_power_special_room.SpecialRoomSoundPowerResult`
+  :class:`~phonometry.emission.SpecialRoomSoundPowerResult`
   (ISO 3743-2:2018, the direct method of Formula 9 or the comparison method of
   Formula 10 in a special reverberation test room).
 
@@ -57,8 +57,8 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
-    from ..emission.sound_power_hard_walled import HardWalledSoundPowerResult
-    from ..emission.sound_power_special_room import SpecialRoomSoundPowerResult
+    from ..emission._sound_power_hard_walled import HardWalledSoundPowerResult
+    from ..emission._sound_power_special_room import SpecialRoomSoundPowerResult
     from .metadata import ReportMetadata
 
 

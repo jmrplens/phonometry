@@ -558,7 +558,7 @@ def _fit(
     sxx = float(np.sum(dx * dx))
     syy = float(np.sum(dy * dy))
     sxy = float(np.sum(dx * dy))
-    if not sxx > 0.0:
+    if sxx <= 0.0:
         msg = (
             f"the pass-bys of category {vehicle_category!r} all have the same "
             "speed, so no line can be fitted through them."

@@ -682,7 +682,7 @@ def _lossy_image_loss(
     incidence for this sand), so 400 periods is already indistinguishable
     from 1600 at the printed precision.
     """
-    from phonometry.underwater.propagation.seabed_reflection import (
+    from phonometry.underwater.propagation import (
         reflection_coefficient,
     )
 
@@ -742,7 +742,7 @@ def test_a_lossy_seabed_is_the_image_sum_with_R_at_each_images_own_angle() -> No
     under the 8 dB the ideal guide differs by and far under either failure
     the test exists to catch.
     """
-    from phonometry.underwater.propagation.seabed_reflection import (
+    from phonometry.underwater.propagation import (
         critical_angle,
         reflection_coefficient,
     )

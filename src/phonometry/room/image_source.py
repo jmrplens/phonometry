@@ -89,12 +89,19 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "ImageSourceResult",
+    "audible_image_count",
+    "image_source_rir",
+    "reflection_density",
+]
+
 #: Default speed of sound ``c0`` (20 degC dry air), in m/s.
 _SPEED_OF_SOUND_M_S = 343.0
 
 #: Wall order for a six-tuple of coefficients: the low and high wall of each
 #: axis. ``x0``/``xL`` are the walls at ``x = 0`` / ``x = Lx`` and so on.
-WALL_ORDER = ("x0", "xL", "y0", "yL", "z0", "zL")
+_WALL_ORDER = ("x0", "xL", "y0", "yL", "z0", "zL")
 
 
 def _resolve_walls(
@@ -136,8 +143,8 @@ def _resolve_walls(
         walls = np.full((6, 1), float(alpha), dtype=np.float64)
     elif (
         alpha.ndim == 1
-        and alpha.shape[0] == len(WALL_ORDER)
-        and n_freq != len(WALL_ORDER)
+        and alpha.shape[0] == len(_WALL_ORDER)
+        and n_freq != len(_WALL_ORDER)
     ):
         # Length 6 with no matching frequencies -> the six per-wall values.
         walls = alpha[:, np.newaxis]
@@ -145,7 +152,7 @@ def _resolve_walls(
         # A per-band curve, uniform across walls (this branch also handles a
         # length-6 curve when frequencies declares six bands).
         walls = np.broadcast_to(alpha, (6, alpha.shape[0])).copy()
-    elif alpha.ndim == 2 and alpha.shape[0] == len(WALL_ORDER):  # noqa: PLR2004
+    elif alpha.ndim == 2 and alpha.shape[0] == len(_WALL_ORDER):  # noqa: PLR2004
         walls = alpha
     else:
         msg = (
@@ -592,8 +599,8 @@ def image_source_rir(
     :param source: Source position ``(x, y, z)``, m, strictly inside the room.
     :param receiver: Receiver position ``(x, y, z)``, m, strictly inside.
     :param absorption: Wall absorption coefficient(s) in ``[0, 1]``: a scalar
-        (uniform), a length-6 per-wall vector (order
-        :data:`WALL_ORDER`), a per-band vector, or a ``(6, n_bands)`` per-wall
+        (uniform), a length-6 per-wall vector (in the order ``x0``, ``xL``,
+        ``y0``, ``yL``, ``z0``, ``zL``), a per-band vector, or a ``(6, n_bands)`` per-wall
         per-band array. A length-6 vector is read as the six per-wall values
         *unless* ``frequencies`` declares six bands, in which case it is a
         per-band curve (uniform across walls); use the ``(6, n_bands)`` form

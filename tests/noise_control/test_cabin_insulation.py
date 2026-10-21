@@ -29,7 +29,7 @@ from reference_data import enclosure_cabin_insulation as oracle
 
 from phonometry import noise_control
 from phonometry.emission import reverberation_background_correction
-from phonometry.noise_control.cabin_insulation import (
+from phonometry.noise_control import (
     BAND_FLATNESS_LIMIT_DB,
     DEFAULT_BAND_FLATNESS_LIMIT_DB,
     IN_SITU_EXCESS_STANDARD_DEVIATION_DB,
@@ -527,7 +527,7 @@ def test_the_leak_ratio_is_shared_with_the_enclosure_module() -> None:
 
     from phonometry.noise_control import enclosure_insulation
 
-    cabin = importlib.import_module("phonometry.noise_control.cabin_insulation")
+    cabin = importlib.import_module("phonometry.noise_control._cabin_insulation")
     assert noise_control.leak_ratio is enclosure_insulation.leak_ratio
     for name in (
         "MANDATORY_BAND_RANGE_HZ",

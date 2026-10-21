@@ -11,6 +11,11 @@ import numpy as np
 from .._internal.validation import require_positive
 from .._internal.warnings import PhonometryWarning
 
+__all__ = [
+    "nominal_frequencies",
+    "normalized_frequencies",
+]
+
 # IEC 61260-1 Annex E.3: a most-significant digit of 1-4 keeps three
 # significant figures, one of 5-9 keeps two.
 _ANNEX_E3_MSD_THRESHOLD = 5.0

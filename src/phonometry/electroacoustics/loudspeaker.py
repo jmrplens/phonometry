@@ -74,6 +74,13 @@ if TYPE_CHECKING:
     from .piston import RadiatingPistonResult
     from .swept_sine import SweptSineDistortionResult
 
+__all__ = [
+    "LoudspeakerCharacteristics",
+    "LoudspeakerDirectivity",
+    "LoudspeakerRatings",
+    "loudspeaker_characteristics",
+]
+
 #: Standard reference sound pressure, 20 uPa (IEC 60268-5 20.2), which is
 #: the ISO 1683:2015 Table 1 value.
 _P_REF = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value

@@ -21,7 +21,7 @@ import numpy as np
 import reference_data as ref
 
 import phonometry as ph
-from phonometry.psychoacoustics.quality.sharpness import reference_sound
+from phonometry.psychoacoustics.quality.sharpness import _reference_sound
 
 from ..registry import _DATA, Outcome, numeric, register
 from .levels import _FS
@@ -158,7 +158,7 @@ def _chk_iso532_b5_diffuse() -> Outcome:
 def _chk_sharpness_reference() -> Outcome:
     # Definitional: the clause 5.2 constant k is derived so this very signal
     # reads 1.00 acum. The independent Table A.2 oracle is checked below.
-    computed = float(ph.psychoacoustics.sharpness_din(reference_sound(), _FS))
+    computed = float(ph.psychoacoustics.sharpness_din(_reference_sound(), _FS))
     return numeric(1.0, computed, 1e-9, unit="acum", places=6)
 
 

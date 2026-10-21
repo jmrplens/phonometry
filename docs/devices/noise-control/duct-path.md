@@ -784,7 +784,7 @@ its band and so understates how a pure tone will be judged.
 - [Steady-state room field](../../buildings/rooms/room-image-sources.md): the room constant
   behind the room effect and the plenum reverberant term.
 - API reference:
-  [`noise_control.duct_path`](https://docs.jmrp.io/phonometry/reference/api/noise_control/duct-path/),
+  [`noise_control`: duct path](https://docs.jmrp.io/phonometry/reference/api/noise_control/duct-path/),
   [`noise_control.duct_modes`](https://docs.jmrp.io/phonometry/reference/api/noise_control/duct-modes/),
   [`noise_control.hvac`](https://docs.jmrp.io/phonometry/reference/api/noise_control/hvac/).
 

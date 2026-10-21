@@ -28,7 +28,7 @@ _SII = "Speech intelligibility (ANSI S3.5-1997)"
 
 @register(_SII, "ANSI S3.5-1997 Table 3", "Band-importance function normalisation")
 def _chk_sii_band_importance_sum() -> Outcome:
-    total = float(ph.speech.sii.BAND_IMPORTANCE.sum())
+    total = float(ph.speech.sii_procedure("one-third-octave").band_importance.sum())
     return numeric(ref.ANSIS3_5_BAND_IMPORTANCE_SUM, total, 1e-9, places=6)
 
 
@@ -355,7 +355,7 @@ _STOI = "Objective intelligibility (STOI / ESTOI)"
 
 def _stoi_speech_like(seed: int) -> np.ndarray:
     """A deterministic speech-like signal at the 10 kHz STOI internal rate."""
-    fs = ph.speech.objective_intelligibility.SAMPLE_RATE
+    fs = ph.speech.objective_intelligibility._SAMPLE_RATE
     rng = np.random.default_rng(seed)
     t = np.arange(3 * fs) / fs
     sig = np.zeros_like(t)
@@ -379,7 +379,7 @@ def _chk_stoi_identity() -> Outcome:
     x = _stoi_speech_like(1)
     return numeric(
         1.0,
-        ph.speech.stoi(x, x, ph.speech.objective_intelligibility.SAMPLE_RATE).value,
+        ph.speech.stoi(x, x, ph.speech.objective_intelligibility._SAMPLE_RATE).value,
         1e-6,
         places=6,
     )
@@ -392,7 +392,7 @@ def _chk_stoi_identity() -> Outcome:
 )
 def _chk_estoi_identity() -> Outcome:
     x = _stoi_speech_like(1)
-    fs = ph.speech.objective_intelligibility.SAMPLE_RATE
+    fs = ph.speech.objective_intelligibility._SAMPLE_RATE
     return numeric(1.0, ph.speech.stoi(x, x, fs, extended=True).value, 1e-6, places=6)
 
 
@@ -402,7 +402,7 @@ def _chk_estoi_identity() -> Outcome:
     "STOI rises from -15 dB to +25 dB SNR speech-shaped noise",
 )
 def _chk_stoi_monotonic() -> Outcome:
-    fs = ph.speech.objective_intelligibility.SAMPLE_RATE
+    fs = ph.speech.objective_intelligibility._SAMPLE_RATE
     x = _stoi_speech_like(2)
     rng = np.random.default_rng(10)
     noise = rng.standard_normal(x.size)

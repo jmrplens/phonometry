@@ -1452,6 +1452,8 @@ from .resistive_sheets import VER_BERANEK_8_6_COLUMNS as VER_BERANEK_8_6_COLUMNS
 from .resistive_sheets import VER_BERANEK_8_7 as VER_BERANEK_8_7
 from .resistive_sheets import VER_BERANEK_8_7_COLUMNS as VER_BERANEK_8_7_COLUMNS
 from .room import ANSIS12_2_NC40_SELF as ANSIS12_2_NC40_SELF
+from .room import ANSIS12_2_NC_TABLE_1 as ANSIS12_2_NC_TABLE_1
+from .room import ANSIS12_2_NC_TABLE_1_BANDS_HZ as ANSIS12_2_NC_TABLE_1_BANDS_HZ
 from .room import ANSIS12_2_RC31_63HZ as ANSIS12_2_RC31_63HZ
 from .room import ANSIS12_2_RC35_LMF as ANSIS12_2_RC35_LMF
 from .room import EN12354_6_A_BARE as EN12354_6_A_BARE

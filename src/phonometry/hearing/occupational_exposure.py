@@ -70,6 +70,20 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
+__all__ = [
+    "COVERAGE_FACTOR",
+    "INSTRUMENT_U2",
+    "ExposureResult",
+    "OccupationalExposureWarning",
+    "Task",
+    "TaskContribution",
+    "full_day_exposure",
+    "job_based_exposure",
+    "minimum_cumulative_duration_hours",
+    "table_c4_contribution",
+    "task_based_exposure",
+]
+
 #: Reference duration T0 = 8 h (Clause 4).
 _T0: float = 8.0
 

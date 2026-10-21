@@ -59,6 +59,12 @@ from ._zwicker_data import (
     ZUP_BARK_LIMITS,
 )
 
+__all__ = [
+    "ZwickerLoudness",
+    "loudness_zwicker",
+    "loudness_zwicker_from_spectrum",
+]
+
 # Reference intensity for band levels: I_REF = (20 uPa)^2, so that
 # L = 10*lg(p^2 / I_REF) equals the SPL re 20 uPa of a pressure signal
 # expressed in pascals (ISO 532-1:2017 Annex A, constant I_REF). It is a

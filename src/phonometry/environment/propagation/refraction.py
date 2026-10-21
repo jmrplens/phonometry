@@ -72,6 +72,18 @@ if TYPE_CHECKING:
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
 
+__all__ = [
+    "AtmosphericPEResult",
+    "AtmosphericRayResult",
+    "EffectiveSoundSpeedProfile",
+    "atmospheric_parabolic_equation",
+    "atmospheric_ray_paths",
+    "linear_sound_speed_profile",
+    "log_linear_sound_speed_profile",
+    "ray_curvature_radius",
+    "shadow_zone_distance",
+]
+
 #: Default reference speed of sound ``c`` in air at the ground, in m/s (matches
 #: the environmental domain).
 _C_SOUND = 343.0

@@ -103,6 +103,18 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "BAND_LIMITING",
+    "BURST_TOLERANCE_PERCENT",
+    "SAWTOOTH_BURST_TESTS",
+    "SIGNAL_BURST_RESPONSE",
+    "SawtoothBurstTest",
+    "SignalBurstVerification",
+    "sawtooth_burst",
+    "signal_burst_indications",
+    "verify_signal_burst_response",
+]
+
 #: The row of Tables 7 to 9 that grades the band-limiting response instead of
 #: a frequency weighting, named rather than spelled out at every call site.
 BAND_LIMITING = "band-limiting"

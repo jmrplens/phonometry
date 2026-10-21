@@ -1,9 +1,11 @@
 ---
-title: "emission.sound_power_in_duct"
+title: "emission: sound power in a duct"
 description: "Sound power radiated into a duct by a fan, in-duct method: ISO 5136:2003."
 sidebar:
   label: "sound_power_in_duct"
 ---
+
+Every name on this page is published by `phonometry.emission`: `from phonometry import emission`, then `emission.<name>`.
 
 Sound power radiated into a duct by a fan, in-duct method: ISO 5136:2003.
 

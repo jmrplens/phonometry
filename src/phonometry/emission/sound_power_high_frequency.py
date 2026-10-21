@@ -149,6 +149,20 @@ if TYPE_CHECKING:
 
     from .reference_sound_source import ReferenceSourceCalibration
 
+__all__ = [
+    "HighFrequencySoundPowerResult",
+    "air_absorption_np_per_m",
+    "free_field_absorption_correction",
+    "high_frequency_levels_to_determine",
+    "high_frequency_sound_power",
+    "high_frequency_sound_power_comparison",
+    "minimum_analyzer_bandwidth",
+    "room_absorption_coefficient",
+    "room_constant_from_air_absorption",
+    "room_constant_from_reverberation_time",
+    "tone_level_from_sidebands",
+]
+
 #: The 16 kHz octave band the standard covers, in hertz (ISO 9295:2015,
 #: clause 1: "frecuencias comprendidas entre 11,2 kHz y 22,4 kHz").
 _OCTAVE_LOW_HZ = 11_200.0

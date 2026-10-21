@@ -38,6 +38,16 @@ if TYPE_CHECKING:
 
     from ..io._signal import Signal
 
+__all__ = [
+    "laeq",
+    "lc_peak",
+    "leq",
+    "lex_8h",
+    "ln_levels",
+    "sel",
+    "sound_exposure",
+]
+
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
 _REF_PRESSURE = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 

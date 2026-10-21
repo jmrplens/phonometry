@@ -61,6 +61,16 @@ if TYPE_CHECKING:
 
     from ...io._signal import Signal
 
+__all__ = [
+    "PileStrikeResult",
+    "StrikeSELSpectrum",
+    "cumulative_sel",
+    "cumulative_sel_identical",
+    "pile_strike_metrics",
+    "single_strike_sel",
+    "strike_sel_spectrum",
+]
+
 #: Lower/upper cumulative-energy fractions defining the 90 % pulse duration.
 _ENERGY_LOW = 0.05
 _ENERGY_HIGH = 0.95

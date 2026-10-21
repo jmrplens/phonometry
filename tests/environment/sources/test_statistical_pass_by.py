@@ -25,7 +25,7 @@ from reference_data import statistical_pass_by as ref
 from scipy import stats
 
 from phonometry import environment
-from phonometry.environment.sources.statistical_pass_by import (
+from phonometry.environment.sources import (
     SPB_ANNEX_D_SURFACES_DB,
     SPB_CONFIDENCE_INTERVALS_DB,
     SPB_MIN_VEHICLE_COUNTS,

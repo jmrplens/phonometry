@@ -31,9 +31,8 @@ of Noise and Vibration Analysis for Engineers* 2nd ed., section 7.3:
 The practical consequence in a ventilation duct is blunt: a 0.65 m x 0.4 m
 air-conditioning duct cuts on at 264 Hz, so plane-wave silencer algebra is
 valid only in the 63 Hz to 250 Hz octaves. :func:`plane_wave_limit` returns
-that frequency and :func:`warn_above_plane_wave_limit` issues the
-:class:`PlaneWaveWarning` the silencer and duct-path results raise on the
-caller's behalf.
+that frequency, and the silencer and duct-path results raise
+:class:`PlaneWaveWarning` on the caller's behalf above it.
 """
 
 from __future__ import annotations
@@ -60,6 +59,14 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+__all__ = [
+    "DuctModeResult",
+    "PlaneWaveWarning",
+    "circular_duct_cut_on",
+    "plane_wave_limit",
+    "rectangular_duct_cut_on",
+]
+
 _C_AIR = 343.0
 
 #: Norton & Karczub (2003) Table 7.1, PDF page 468 (printed p. 448): the
@@ -67,7 +74,7 @@ _C_AIR = 343.0
 #: first twelve higher-order acoustic modes of a rigid circular duct, keyed
 #: by the mode order ``(p, q)``: ``p`` plane diametral nodal surfaces and
 #: ``q`` cylindrical nodal surfaces.
-CIRCULAR_EIGENVALUES: Mapping[tuple[int, int], float] = MappingProxyType(
+_CIRCULAR_EIGENVALUES: Mapping[tuple[int, int], float] = MappingProxyType(
     {
         (1, 0): 1.8412,
         (2, 0): 3.0542,
@@ -83,10 +90,6 @@ CIRCULAR_EIGENVALUES: Mapping[tuple[int, int], float] = MappingProxyType(
         (1, 2): 8.5363,
     }
 )
-
-#: The plane-wave eigenvalue ``k a_i = 1.8412`` of the ``(1, 0)`` mode: below it
-#: a rigid circular duct carries plane waves only.
-PLANE_WAVE_EIGENVALUE = 1.8412
 
 
 class PlaneWaveWarning(PhonometryWarning):
@@ -233,11 +236,11 @@ def circular_duct_cut_on(
     """
     d = require_positive(diameter_m, "diameter_m")
     mach, beta = _mach(flow_velocity, speed_of_sound)
-    if not 1 <= n_modes <= len(CIRCULAR_EIGENVALUES):
-        msg = f"'n_modes' must be between 1 and {len(CIRCULAR_EIGENVALUES)}."
+    if not 1 <= n_modes <= len(_CIRCULAR_EIGENVALUES):
+        msg = f"'n_modes' must be between 1 and {len(_CIRCULAR_EIGENVALUES)}."
         raise ValueError(msg)
     radius = 0.5 * d
-    ordered = sorted(CIRCULAR_EIGENVALUES.items(), key=lambda item: item[1])[:n_modes]
+    ordered = sorted(_CIRCULAR_EIGENVALUES.items(), key=lambda item: item[1])[:n_modes]
     modes = tuple(mode for mode, _ in ordered)
     kappa = np.array([value / radius for _, value in ordered])
     no_flow = kappa * speed_of_sound / (2.0 * np.pi)
@@ -363,7 +366,7 @@ def plane_wave_limit(
     ).plane_wave_limit
 
 
-def warn_above_plane_wave_limit(
+def _warn_above_plane_wave_limit(
     frequencies: ArrayLike, limit: float, context: str, *, stacklevel: int = 3
 ) -> NDArray[np.bool_]:
     """Warn when analysis frequencies exceed a duct's first cut-on frequency.

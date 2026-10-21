@@ -92,7 +92,7 @@ A = d + \tau c
 $$
 
 at the speed of sound $c$ of IEC 61094-2 Annex F for the conditions of
-the test ([`air`](/phonometry/reference/api/fluids/air/)). Turned round,
+the test ([`air`](/phonometry/reference/api/fluids/air/#air)). Turned round,
 [`reflection_free_window_s`](/phonometry/reference/api/metrology/comparison-calibration/#reflection_free_window_s) gives the longest window that keeps a
 reflection of a known path outside it.
 
@@ -961,7 +961,7 @@ B.1).
 
 Formula (B.1), $A = d + \tau c$, with $c$ "the speed of sound
 at the prevailing environmental conditions", which is taken from the
-IEC 61094-2:2009 Annex F air of [`air`](/phonometry/reference/api/fluids/air/). The
+IEC 61094-2:2009 Annex F air of [`air`](/phonometry/reference/api/fluids/air/#air). The
 conditions default to the reference conditions of clause 4, 23,0 °C,
 101,325 kPa and 50 %.
 
@@ -2200,7 +2200,7 @@ response.
 
 The impulse response may come from any method of Annex B: a stepped sine
 by [`stepped_sine_impulse_response`](/phonometry/reference/api/metrology/comparison-calibration/#stepped_sine_impulse_response), a sweep or a maximum length
-sequence by [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/) and
+sequence by [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response) and
 [`phonometry.room.mls_impulse_response`](/phonometry/reference/api/rooms/impulse-response/#mls_impulse_response), or a direct impulse (B.6), in
 which case `excitation` divides the spectrum of the pulse out. The
 reference and the test microphone are windowed alike, and the levels of

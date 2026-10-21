@@ -87,7 +87,7 @@ one-at-a-time recalculation 7.5 describes.
 
 The properties of the gas, $\rho$, $c$, $\kappa$,
 $\eta$ and $\alpha_t$, are those of humid air by Annex F
-([`air`](/phonometry/reference/api/fluids/air/)) at the conditions of the calibration, or of
+([`air`](/phonometry/reference/api/fluids/air/#air)) at the conditions of the calibration, or of
 any [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) passed as `gas`: 7.3.2.1 allows the
 coupler to be filled with hydrogen or helium.
 

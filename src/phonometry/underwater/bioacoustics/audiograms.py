@@ -54,6 +54,17 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "AUDIOGRAM_GROUPS",
+    "BEST_HEARING_FREQUENCY_KHZ",
+    "ORCA_AUDIOGRAM_RANGE_KHZ",
+    "AudiogramParameters",
+    "AudiogramResult",
+    "audiogram_parameters",
+    "group_audiogram",
+    "orca_audiogram",
+]
+
 
 @dataclass(frozen=True)
 class AudiogramParameters(RichDisplay):

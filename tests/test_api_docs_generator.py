@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import inspect
 import pathlib
+import re
 import sys
 
 import pytest
@@ -512,7 +513,7 @@ def test_overloaded_function_publishes_every_call_form() -> None:
 
 def test_overload_placeholder_default_reads_as_ellipsis() -> None:
     """``= ...`` is the head's placeholder; ``repr`` would print ``Ellipsis``."""
-    from phonometry.emission.sound_power_anechoic import sound_power_anechoic
+    from phonometry.emission import sound_power_anechoic
 
     rendered = gad.format_signature("sound_power_anechoic", sound_power_anechoic)
     assert "= ..." in rendered
@@ -699,3 +700,104 @@ def test_the_top_level_page_says_where_each_of_its_objects_is_documented() -> No
         module = gad.attribute_module(name, getattr(phonometry, name))
         assert f"`{name}` with `{module}`" in top.intro
     assert "can also be imported directly" not in top.intro
+
+
+def test_no_page_claims_a_module_address_that_does_not_import() -> None:
+    """A public page's title is an address that imports; a private one's is not.
+
+    ``signals/_correlation.py`` used to be ``signals/correlation.py``, hidden
+    behind the function ``signals.correlation``. Its page keeps the URL it had,
+    so no link breaks, but it is titled by its domain and subject and opens by
+    naming the package its names are imported from. Every other page's title is
+    a module path, and ``import phonometry.<title>`` binds that module.
+    """
+    import importlib
+
+    pages, xref, _ = gad.build_model()
+    private = [page for page in pages if page.home]
+    assert {page.module for page in private} == set(api_taxonomy.PRIVATE_MODULE_TOPICS)
+    for page in pages:
+        if page.home:
+            package = page.home.removeprefix("phonometry.")
+            assert page.title.startswith(f"{package}: "), page.module
+            assert "._" not in page.url, page.url
+            assert "/_" not in page.url, page.url
+            assert page.label == page.module.rsplit(".", 1)[-1].lstrip("_")
+            text = gad.render_module_page(page, xref, gad.RoleStats(), [])
+            assert gad.home_sentence(page) in text, page.module
+            continue
+        if page.module == "phonometry":
+            continue
+        address = f"phonometry.{page.title}"
+        parent, _, leaf = address.rpartition(".")
+        module = importlib.import_module(address)
+        assert getattr(importlib.import_module(parent), leaf) is module, address
+
+
+def test_no_page_title_carries_a_number() -> None:
+    """A title is a module address or a subject in words, never a designation.
+
+    The site search weighs a page's title above the standards a guide's
+    bibliography declares, so a reference page titled ``psychoacoustics:
+    tonality (ECMA-418-2)`` came within 1.6 times of the guides written to
+    ECMA-418-2 on a search for it, where ``check:search`` asks them to keep
+    twice its score. A designation always carries a number; a module address
+    and a subject in words do not.
+    """
+    pages, _, _ = gad.build_model()
+    numbered = sorted(page.title for page in pages if re.search(r"\d", page.title))
+    assert not numbered, numbered
+
+
+def test_every_page_title_fits_the_browser_title() -> None:
+    """The site prints ``<title> | phonometry``, and html-validate allows 70."""
+    pages, _, _ = gad.build_model()
+    long = sorted(p.title for p in pages if len(f"{p.title} | phonometry") > 70)
+    assert not long, long
+
+
+def test_a_private_page_is_indexed_by_its_domain() -> None:
+    """The index row names the domain in code and the subject in words."""
+    pages, xref, _ = gad.build_model()
+    page = next(p for p in pages if p.module == "phonometry.signals._correlation")
+    assert page.title == "signals: correlation"
+    assert page.url.endswith("/signals/correlation/")
+    assert gad.home_sentence(page) == (
+        "Every name on this page is published by `phonometry.signals`: "
+        "`from phonometry import signals`, then `signals.<name>`."
+    )
+    index = gad.render_index(pages, xref, gad.RoleStats())
+    assert f"| [`signals`: correlation]({page.url}) |" in index
+
+
+def test_a_private_page_names_the_package_of_every_name_on_it() -> None:
+    """The opening holds for each name: its package, or the one named for it.
+
+    ``plot_junction_geometry`` is documented beside the junctions of
+    ``vibration`` and published by ``building``; an opening that sent the
+    reader to ``vibration`` for every name would send them to an
+    ``AttributeError`` for that one.
+    """
+    import importlib
+
+    pages, _, _ = gad.build_model()
+    for page in (p for p in pages if p.home):
+        owners = dict(page.elsewhere)
+        for member in page.members:
+            package = importlib.import_module(owners.get(member.name, page.home))
+            assert member.name in package.__all__, (page.module, member.name)
+        sentence = gad.home_sentence(page)
+        for name, owner in page.elsewhere:
+            assert f"`{name}` is published by `{owner}`." in sentence
+    junction = next(
+        p
+        for p in pages
+        if p.module == "phonometry.vibration.structural._junction_transmission"
+    )
+    assert junction.elsewhere == (("plot_junction_geometry", "phonometry.building"),)
+    assert gad.home_sentence(junction) == (
+        "Every name on this page but `plot_junction_geometry` is published by "
+        "`phonometry.vibration`: `from phonometry import vibration`, then "
+        "`vibration.<name>`. `plot_junction_geometry` is published by "
+        "`phonometry.building`."
+    )

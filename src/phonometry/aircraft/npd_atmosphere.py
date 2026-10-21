@@ -75,6 +75,14 @@ if TYPE_CHECKING:
 
     from .anp_fleet import ANPNPDCurves
 
+__all__ = [
+    "SAE_AIR1845_ATTENUATION_DB_PER_100M",
+    "npd_atmosphere_increment",
+    "revise_npd_curves",
+    "NPDAtmosphereIncrement",
+    "RevisedNPDCurves",
+]
+
 #: ECAC Doc 29 Vol. 2 Table D-1: the average atmospheric attenuation rates of
 #: SAE AIR-1845 that normalise the ANP NPD data, in dB per 100 m, keyed by the
 #: nominal one-third-octave-band centre frequency in Hz (50 Hz to 10 kHz).

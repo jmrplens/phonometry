@@ -15,7 +15,7 @@ import pytest
 
 from phonometry.building.prediction.detailed_model import EN_12354_AIR
 from phonometry.fluids import PUBLISHED_FLUIDS, Fluid
-from phonometry.materials.absorbers.airflow_resistance import ANNEX_A_AIR
+from phonometry.materials.absorbers import ANNEX_A_AIR
 from phonometry.materials.absorbers.porous import ABSORBER_AIR
 from phonometry.simulation.ntff import SIMULATION_AIR
 

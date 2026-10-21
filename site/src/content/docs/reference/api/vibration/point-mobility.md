@@ -415,7 +415,7 @@ Bending stiffness of a thin plate per unit width (Cremer Eq. 4.22).
 
 $B' = E h^3 / (12 (1 - \nu^2))$, the plate bending stiffness `B'`
 in N.m used throughout this module and by the coincidence frequency of
-[`phonometry.vibration.structural.radiation_efficiency.coincidence_frequency`](/phonometry/reference/api/vibration/radiation-efficiency/#coincidence_frequency).
+[`phonometry.vibration.structural.coincidence_frequency`](/phonometry/reference/api/vibration/radiation-efficiency/#coincidence_frequency).
 
 **Parameters**
 

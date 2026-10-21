@@ -140,7 +140,7 @@ reproduces the Eyring reverberation time of the room (Kuttruff Equation
 | `dimensions` | Room lengths `(Lx, Ly, Lz)`, m. |
 | `source` | Source position `(x, y, z)`, m, strictly inside the room. |
 | `receiver` | Receiver position `(x, y, z)`, m, strictly inside. |
-| `absorption` | Wall absorption coefficient(s) in `[0, 1]`: a scalar (uniform), a length-6 per-wall vector (order `WALL_ORDER`), a per-band vector, or a `(6, n_bands)` per-wall per-band array. A length-6 vector is read as the six per-wall values *unless* `frequencies` declares six bands, in which case it is a per-band curve (uniform across walls); use the `(6, n_bands)` form for six per-wall values that also vary with frequency. |
+| `absorption` | Wall absorption coefficient(s) in `[0, 1]`: a scalar (uniform), a length-6 per-wall vector (in the order `x0`, `xL`, `y0`, `yL`, `z0`, `zL`), a per-band vector, or a `(6, n_bands)` per-wall per-band array. A length-6 vector is read as the six per-wall values *unless* `frequencies` declares six bands, in which case it is a per-band curve (uniform across walls); use the `(6, n_bands)` form for six per-wall values that also vary with frequency. |
 | `fs` | Sample rate, Hz. |
 | `max_order` | Reflection-order cut-off (total wall reflections). The shoebox has $(2/3)(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order `i0` (Kuttruff Equation (9.23)). Default 20. |
 | `speed_of_sound` | Speed of sound `c`, m/s (default 343 m/s, dry air at 20 °C). |

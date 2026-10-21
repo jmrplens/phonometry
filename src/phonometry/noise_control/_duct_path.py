@@ -315,37 +315,33 @@ class DuctPathResult(OwnsArrays):
             }
         ]
         for stage in self.stages:
-            rows.append(
-                {
-                    "code": stage.code,
-                    "label": stage.label,
-                    "kind": "attenuation",
-                    "values": -stage.attenuation,
-                }
-            )
-            rows.append(
-                {
-                    "code": "",
-                    "label": "Sum",
-                    "kind": "sum",
-                    "values": stage.attenuated,
-                }
-            )
-            rows.append(
-                {
-                    "code": "",
-                    "label": "Self-noise",
-                    "kind": "self_noise",
-                    "values": stage.self_noise,
-                }
-            )
-            rows.append(
-                {
-                    "code": "",
-                    "label": "Combined",
-                    "kind": "level",
-                    "values": stage.levels,
-                }
+            rows.extend(
+                [
+                    {
+                        "code": stage.code,
+                        "label": stage.label,
+                        "kind": "attenuation",
+                        "values": -stage.attenuation,
+                    },
+                    {
+                        "code": "",
+                        "label": "Sum",
+                        "kind": "sum",
+                        "values": stage.attenuated,
+                    },
+                    {
+                        "code": "",
+                        "label": "Self-noise",
+                        "kind": "self_noise",
+                        "values": stage.self_noise,
+                    },
+                    {
+                        "code": "",
+                        "label": "Combined",
+                        "kind": "level",
+                        "values": stage.levels,
+                    },
+                ]
             )
         if self.contributions:
             for name, spectrum in self.contributions:
@@ -524,12 +520,12 @@ def duct_path(
     family, goal = validate_target(criterion, target)
 
     if section is not None:
-        from .duct_modes import plane_wave_limit, warn_above_plane_wave_limit
+        from .duct_modes import _warn_above_plane_wave_limit, plane_wave_limit
 
         limit = plane_wave_limit(
             flow_velocity=flow_velocity, speed_of_sound=speed_of_sound, **section
         )
-        warn_above_plane_wave_limit(f, limit, label)
+        _warn_above_plane_wave_limit(f, limit, label)
 
     stages: list[DuctPathStage] = []
     for position, element in enumerate(elements, start=1):

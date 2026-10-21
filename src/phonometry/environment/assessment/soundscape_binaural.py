@@ -77,17 +77,17 @@ from ..._internal.warnings import PhonometryWarning
 from ...filters.weighting import weighting_filter
 from ...io._resolve import resolve_calibration, resolve_fs, resolve_samples
 from ...psychoacoustics.loudness.zwicker import _percentile, loudness_zwicker
-from ...psychoacoustics.quality.fluctuation_strength_ecma import (
+from ...psychoacoustics.quality._fluctuation_strength_ecma import (
     _TRANSIENT as _FLUCTUATION_SETTLING_FRAMES,
 )
-from ...psychoacoustics.quality.fluctuation_strength_ecma import (
+from ...psychoacoustics.quality._fluctuation_strength_ecma import (
     fluctuation_strength_ecma,
 )
-from ...psychoacoustics.quality.roughness_ecma import (
+from ...psychoacoustics.quality._roughness_ecma import (
     _TRANSIENT as _ROUGHNESS_SETTLING_FRAMES,
 )
-from ...psychoacoustics.quality.roughness_ecma import roughness_ecma
-from ...psychoacoustics.quality.tonality_ecma import tonality_ecma
+from ...psychoacoustics.quality._roughness_ecma import roughness_ecma
+from ...psychoacoustics.quality._tonality_ecma import tonality_ecma
 from ...signals.levels import laeq, leq, ln_levels
 
 if TYPE_CHECKING:

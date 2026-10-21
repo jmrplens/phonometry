@@ -1,9 +1,11 @@
 ---
-title: "emission.sound_power_special_room"
+title: "emission: sound power in a special reverberation room"
 description: "Sound power level of a small movable source in a special reverberation test room: ISO 3743-2:2018 (engineering grade 2), the direct method and the comparison method."
 sidebar:
   label: "sound_power_special_room"
 ---
+
+Every name on this page is published by `phonometry.emission`: `from phonometry import emission`, then `emission.<name>`.
 
 Sound power level of a small movable source in a special reverberation
 test room: ISO 3743-2:2018 (engineering grade 2), the direct method and the

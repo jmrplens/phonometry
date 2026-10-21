@@ -218,7 +218,7 @@ def test_the_sphere_is_the_one_the_cabin_standard_prints() -> None:
     """ISO 11821 reuses the ISO 11957 sphere, published once, by the cabin module."""
     import importlib
 
-    cabin = importlib.import_module("phonometry.noise_control.cabin_insulation")
+    cabin = importlib.import_module("phonometry.noise_control._cabin_insulation")
     screen = importlib.import_module("phonometry.noise_control.screen_in_situ")
     assert "OPERATOR_SPHERE_RADIUS_M" in cabin.__all__
     assert "OPERATOR_SPHERE_RADIUS_M" not in screen.__all__

@@ -56,13 +56,25 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
+__all__ = [
+    "NC_CURVES_DB",
+    "NC_OCTAVE_BANDS_HZ",
+    "NC_RATINGS",
+    "NCResult",
+    "RCResult",
+    "nc_curve",
+    "noise_criterion",
+    "rc_curve",
+    "room_criterion",
+]
+
 
 # ---------------------------------------------------------------------------
 # Normative constants - ANSI/ASA S12.2-2019.
 # ---------------------------------------------------------------------------
 
 #: Octave-band centre frequencies, in hertz (Table 1 / Table D.1).
-OCTAVE_BANDS: np.ndarray = read_only(
+NC_OCTAVE_BANDS_HZ: np.ndarray = read_only(
     np.array(
         [16.0, 31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0],
         dtype=np.float64,
@@ -70,13 +82,13 @@ OCTAVE_BANDS: np.ndarray = read_only(
 )
 
 #: NC curve designations (value at 1000 Hz), Table 1.
-NC_INDICES: np.ndarray = read_only(
+NC_RATINGS: np.ndarray = read_only(
     np.array([15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70], dtype=np.float64)
 )
 
 #: NC curve octave-band sound pressure levels, in dB (Table 1), one row per
-#: entry of :data:`NC_INDICES`, columns aligned with :data:`OCTAVE_BANDS`.
-NC_CURVES: np.ndarray = read_only(
+#: entry of :data:`NC_RATINGS`, columns aligned with :data:`NC_OCTAVE_BANDS_HZ`.
+NC_CURVES_DB: np.ndarray = read_only(
     np.array(
         [
             [78, 61, 47, 36, 28, 22, 18, 14, 12, 11],  # NC-15
@@ -102,7 +114,7 @@ _RC_OCTAVE_STEPS: np.ndarray = np.array(
 )
 _RC_LOW_FREQUENCY_FLOOR = 55.0  # dB, the 31.5 Hz floor (Annex D).
 
-_N_BANDS = OCTAVE_BANDS.size
+_N_BANDS = NC_OCTAVE_BANDS_HZ.size
 
 #: Indices of the four speech-interference bands 500/1000/2000/4000 Hz
 #: (clause 3.2: SIL is their arithmetic average).
@@ -149,8 +161,8 @@ def _require_table1_bands(owner: str, frequencies: np.ndarray) -> None:
     :raises ValueError: if the axis is not the ten tabulated octave bands.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
-    if freqs.shape == OCTAVE_BANDS.shape and np.all(
-        np.isclose(freqs, OCTAVE_BANDS, rtol=0.03)
+    if freqs.shape == NC_OCTAVE_BANDS_HZ.shape and np.all(
+        np.isclose(freqs, NC_OCTAVE_BANDS_HZ, rtol=0.03)
     ):
         return
     msg = (
@@ -510,17 +522,17 @@ def nc_curve(index: float) -> np.ndarray:
     :param index: The NC designation. Integer designations from 15 to 70 in
         steps of five return the tabulated curve; intermediate values are
         linearly interpolated band by band.
-    :return: The 10-band curve levels, in dB, aligned with :data:`OCTAVE_BANDS`.
+    :return: The 10-band curve levels, in dB, aligned with :data:`NC_OCTAVE_BANDS_HZ`.
     :raises ValueError: if ``index`` is outside the tabulated range.
     """
-    if index < NC_INDICES[0] or index > NC_INDICES[-1]:
+    if index < NC_RATINGS[0] or index > NC_RATINGS[-1]:
         msg = (
             f"NC index {index} is outside the tabulated range "
-            f"[{NC_INDICES[0]:.0f}, {NC_INDICES[-1]:.0f}]."
+            f"[{NC_RATINGS[0]:.0f}, {NC_RATINGS[-1]:.0f}]."
         )
         raise ValueError(msg)
     return np.array(
-        [np.interp(index, NC_INDICES, NC_CURVES[:, k]) for k in range(_N_BANDS)]
+        [np.interp(index, NC_RATINGS, NC_CURVES_DB[:, k]) for k in range(_N_BANDS)]
     )
 
 
@@ -532,7 +544,7 @@ def rc_curve(index: float) -> np.ndarray:
     equals the 31.5 Hz level.
 
     :param index: The RC designation (value at 1000 Hz).
-    :return: The 10-band curve levels, in dB, aligned with :data:`OCTAVE_BANDS`.
+    :return: The 10-band curve levels, in dB, aligned with :data:`NC_OCTAVE_BANDS_HZ`.
     """
     curve = index - 5.0 * _RC_OCTAVE_STEPS
     low = max(index + 25.0, _RC_LOW_FREQUENCY_FLOOR)
@@ -559,19 +571,19 @@ def _criterion_curve_at(
     curve = nc_curve(index) if family == "NC" else rc_curve(index)
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     return np.array(
-        [curve[int(np.argmin(np.abs(np.log2(OCTAVE_BANDS / f))))] for f in freqs]
+        [curve[int(np.argmin(np.abs(np.log2(NC_OCTAVE_BANDS_HZ / f))))] for f in freqs]
     )
 
 
 def _align_levels(
     levels: ArrayLike, frequencies: ArrayLike | None, owner: str
 ) -> np.ndarray:
-    """Validate levels and align them to :data:`OCTAVE_BANDS`.
+    """Validate levels and align them to :data:`NC_OCTAVE_BANDS_HZ`.
 
     :param levels: Octave-band sound pressure levels, in dB.
     :param frequencies: Optional band centre frequencies matching ``levels``.
     :param owner: Name of the entry point the caller typed, for the messages.
-    :return: The levels on the ten :data:`OCTAVE_BANDS`, absent bands NaN.
+    :return: The levels on the ten :data:`NC_OCTAVE_BANDS_HZ`, absent bands NaN.
     :raises ValueError: for malformed inputs or unknown band frequencies.
     """
     lv = np.atleast_1d(np.asarray(levels, dtype=np.float64))
@@ -590,7 +602,7 @@ def _align_levels(
     require_equal_shapes(owner, {"levels": lv.shape, "frequencies": fr.shape}, "band")
     aligned = np.full(_N_BANDS, np.nan)
     for f, level in zip(fr, lv, strict=True):
-        matches = np.isclose(OCTAVE_BANDS, f, rtol=0.03)
+        matches = np.isclose(NC_OCTAVE_BANDS_HZ, f, rtol=0.03)
         if not matches.any():
             msg = (
                 f"frequency {f} Hz is not one of the ANSI S12.2 octave bands "
@@ -643,10 +655,10 @@ def noise_criterion(
     per_band = np.full(_N_BANDS, np.nan)
     above = np.zeros(_N_BANDS, dtype=bool)
     for k in np.flatnonzero(valid):
-        if aligned[k] > NC_CURVES[-1, k]:
+        if aligned[k] > NC_CURVES_DB[-1, k]:
             above[k] = True  # louder than the NC-70 curve in this band.
-        elif aligned[k] >= NC_CURVES[0, k]:
-            per_band[k] = np.interp(aligned[k], NC_CURVES[:, k], NC_INDICES)
+        elif aligned[k] >= NC_CURVES_DB[0, k]:
+            per_band[k] = np.interp(aligned[k], NC_CURVES_DB[:, k], NC_RATINGS)
         # A band below the NC-15 curve touches no curve and stays NaN.
 
     def build(
@@ -659,7 +671,7 @@ def noise_criterion(
         return NCResult(
             rating=rating,
             governing_frequency=governing_frequency,
-            frequencies=OCTAVE_BANDS,
+            frequencies=NC_OCTAVE_BANDS_HZ,
             levels=aligned,
             sil=sil,
             tangency_rating=tangency_rating,
@@ -670,11 +682,11 @@ def noise_criterion(
     if above.any():
         # Above the family: no NC rating exists; the governing band is the
         # one with the maximum exceedance over the NC-70 curve.
-        exceedance = np.where(above, aligned - NC_CURVES[-1], -np.inf)
+        exceedance = np.where(above, aligned - NC_CURVES_DB[-1], -np.inf)
         governing = int(np.argmax(exceedance))
         return build(
             float("nan"),
-            float(OCTAVE_BANDS[governing]),
+            float(NC_OCTAVE_BANDS_HZ[governing]),
             float("nan"),
             "tangency",
             "above",
@@ -688,13 +700,15 @@ def noise_criterion(
 
     if math.isfinite(sil):
         nc_sil = float(round_half_even(sil))
-        if NC_INDICES[0] <= nc_sil <= NC_INDICES[-1]:
+        if NC_RATINGS[0] <= nc_sil <= NC_RATINGS[-1]:
             curve = nc_curve(nc_sil)
             if not np.any(aligned[valid] > curve[valid]):
                 # Clause 5.2.2: no band exceeds the NC-(SIL) curve, so the
                 # spectrum is designated NC-(SIL) with no governing band.
                 return build(nc_sil, float("nan"), tangency, "SIL", None)
-    return build(tangency, float(OCTAVE_BANDS[governing]), tangency, "tangency", None)
+    return build(
+        tangency, float(NC_OCTAVE_BANDS_HZ[governing]), tangency, "tangency", None
+    )
 
 
 def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> RCResult:
@@ -734,7 +748,7 @@ def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> R
         raise ValueError(msg)
     required = aligned[_RC_REQUIRED_BANDS]
     if np.isnan(required).any():
-        missing = OCTAVE_BANDS[_RC_REQUIRED_BANDS][np.isnan(required)]
+        missing = NC_OCTAVE_BANDS_HZ[_RC_REQUIRED_BANDS][np.isnan(required)]
         warnings.warn(
             "ANSI/ASA S12.2-2019, clause D.4 rates a spectrum that includes "
             "at least the 31.5 Hz to 4000 Hz octave bands; the missing bands "
@@ -761,6 +775,6 @@ def room_criterion(levels: ArrayLike, frequencies: ArrayLike | None = None) -> R
         lmf=lmf,
         classification=classification,
         reference_curve=reference,
-        frequencies=OCTAVE_BANDS,
+        frequencies=NC_OCTAVE_BANDS_HZ,
         levels=aligned,
     )

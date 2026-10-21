@@ -66,6 +66,17 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "DetectionRangeResult",
+    "SonarEquationResult",
+    "active_sonar_equation",
+    "array_directivity_index",
+    "detection_range",
+    "detection_range_from_curve",
+    "detection_threshold",
+    "passive_sonar_equation",
+]
+
 #: The false-alarm probability at which Equation (11.22) diverges: its inner
 #: logarithm is log2(1/(2 p_fa)), which is zero here. Half the empty beams are
 #: already being declared detections, so no threshold makes the decision.

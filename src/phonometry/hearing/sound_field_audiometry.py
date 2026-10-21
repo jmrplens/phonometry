@@ -404,7 +404,7 @@ def _variation_limits(standard: str) -> tuple[tuple[float, float], ...]:
     if standard == _SOUND_FIELD_CLAUSE:
         return DIFFUSE_FIELD_VARIATION_LIMITS
     if standard == _RANDOM_INCIDENCE_CLAUSE:
-        from .earmuff_insertion_loss import RANDOM_INCIDENCE_VARIATION_LIMITS
+        from ._earmuff_insertion_loss import RANDOM_INCIDENCE_VARIATION_LIMITS
 
         return RANDOM_INCIDENCE_VARIATION_LIMITS
     msg = (

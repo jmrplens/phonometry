@@ -8,7 +8,7 @@ sidebar:
 Fluid states read from a printed page.
 
 A density and a speed of sound stand behind every level this library computes,
-and most of them are computed: [`air`](/phonometry/reference/api/fluids/air/),
+and most of them are computed: [`air`](/phonometry/reference/api/fluids/air/#air),
 [`ideal_gas`](/phonometry/reference/api/fluids/gas/#ideal_gas) and [`sea_water`](/phonometry/reference/api/fluids/water/#sea_water)
 take the conditions that were measured and return the state that follows. A
 few are not. Some books print a table of fluids the way they print a table of
@@ -59,7 +59,7 @@ different readings of the same gas.
 What it is not
 --------------
 It is not a table of fluid properties to look values up in. Air at 23 degC and
-50 per cent relative humidity is [`air`](/phonometry/reference/api/fluids/air/), which computes
+50 per cent relative humidity is [`air`](/phonometry/reference/api/fluids/air/#air), which computes
 it from the conditions that were measured; sea water is
 [`sea_water`](/phonometry/reference/api/fluids/water/#sea_water). Use a row here to reproduce a book's own
 number.

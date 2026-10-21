@@ -141,8 +141,8 @@ def test_ultimate_strength_formula_c4() -> None:
 def test_annex_c_male_worked_example() -> None:
     # 5 x 40 m/s2, 82 kg male, b = 20, n = 20, N = 120: R = 1.22, Pi = 0.37.
     dz = v.dose_from_peaks([40.0] * 5)
-    sd = v.compression_dose(dz, mz=v.MZ_MALE)
-    assert sd == pytest.approx(v.MZ_MALE * ISO2631_5_DZD_MALE, abs=1e-3)
+    sd = v.compression_dose(dz, mz=v._MZ_MALE)
+    assert sd == pytest.approx(v._MZ_MALE * ISO2631_5_DZD_MALE, abs=1e-3)
     r = v.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
     assert r == pytest.approx(ISO2631_5_R_MALE, abs=0.01)
     pi = v.injury_probability(r, sex="male")
@@ -152,7 +152,7 @@ def test_annex_c_male_worked_example() -> None:
 def test_annex_c_female_worked_example() -> None:
     # Same exposure, 64 kg female: Sd = 1,40 MPa, R = 0,97 (Annex C NOTE 5).
     dz = v.dose_from_peaks([40.0] * 5)
-    sd = v.compression_dose(dz, mz=v.MZ_FEMALE)
+    sd = v.compression_dose(dz, mz=v._MZ_FEMALE)
     assert sd == pytest.approx(ISO2631_5_SD_FEMALE, abs=0.01)
     r = v.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="female")
     assert r == pytest.approx(ISO2631_5_R_FEMALE, abs=0.02)
@@ -161,8 +161,8 @@ def test_annex_c_female_worked_example() -> None:
 def test_static_stress_male() -> None:
     # Sstat = mz * 9.81; the exact product is 0.284 MPa (the standard's Annex C
     # text rounds this to 0.281, but the worked R = 1.22 uses the exact value).
-    assert v.static_stress(v.MZ_MALE) == pytest.approx(v.MZ_MALE * v.GRAVITY)
-    assert v.static_stress(v.MZ_MALE) == pytest.approx(0.284, abs=1e-3)
+    assert v.static_stress(v._MZ_MALE) == pytest.approx(v._MZ_MALE * v._GRAVITY)
+    assert v.static_stress(v._MZ_MALE) == pytest.approx(0.284, abs=1e-3)
 
 
 def test_injury_probability_bounds_and_monotonic() -> None:
@@ -184,7 +184,9 @@ def test_injury_probability_accepts_arrays() -> None:
 
 def test_injury_probability_at_thresholds() -> None:
     # Table C.2: the R for 10 / 50 / 90 % risk should map back to those risks.
-    for r_val, expected in zip(v.RISK_THRESHOLDS_MALE, (0.10, 0.50, 0.90), strict=True):
+    for r_val, expected in zip(
+        v._RISK_THRESHOLDS_MALE, (0.10, 0.50, 0.90), strict=True
+    ):
         assert v.injury_probability(r_val, sex="male") == pytest.approx(
             expected, abs=0.02
         )
@@ -204,7 +206,7 @@ def test_multiple_shock_assessment_end_to_end() -> None:
     assert result.sex == "male"
     assert result.acceleration_dose > 0.0
     assert 0.0 <= result.probability <= 1.0
-    assert result.risk_thresholds == v.RISK_THRESHOLDS_MALE
+    assert result.risk_thresholds == v._RISK_THRESHOLDS_MALE
     assert result.peaks.size > 0
 
 

@@ -554,11 +554,11 @@ _BARE_ON_PURPOSE = {
     "phonometry.electroacoustics.swept_sine.SweptSineDistortionResult.harmonic_irs": (
         "rows are harmonic orders, not channels, and time zero is mid-window"
     ),
-    "phonometry.room.impulse_response.ImpulseResponseResult.ir": (
+    "phonometry.room._impulse_response.ImpulseResponseResult.ir": (
         "a transfer function whose rate may be unknown; the result is itself "
         "the array stand-in"
     ),
-    "phonometry.room.impulse_response.ShapedSweepResult.signal": (
+    "phonometry.room._impulse_response.ShapedSweepResult.signal": (
         "a generated excitation: no input to take a type from"
     ),
     "phonometry.signals.test_signals.ToneBurstResult.signal": (
@@ -573,15 +573,15 @@ _BARE_ON_PURPOSE = {
     "phonometry.simulation.fdtd.SignalSource.samples": (
         "an excitation the caller supplies, not a result"
     ),
-    "phonometry.vibration.structural.impact_mobility.DoubleHitCheck.force": (
+    "phonometry.vibration.structural._impact_mobility.DoubleHitCheck.force": (
         "a force in newtons, read without the Signal's digital-to-pascal "
         "factor: a Signal would claim a conversion that never happened"
     ),
-    "phonometry.vibration.structural.impact_mobility.OverloadCheck.record": (
+    "phonometry.vibration.structural._impact_mobility.OverloadCheck.record": (
         "the raw samples judged against the channel's full scale, in the "
         "channel's own unit: a calibrated Signal would present other numbers"
     ),
-    "phonometry.vibration.structural.impact_mobility.ResponseDecayCheck.record": (
+    "phonometry.vibration.structural._impact_mobility.ResponseDecayCheck.record": (
         "a motion, not a pressure, read without the Signal's factor: a "
         "Signal would claim a conversion that never happened"
     ),

@@ -1,9 +1,11 @@
 ---
-title: "signals.correlation"
+title: "signals: correlation"
 description: "Correlation analysis and time-delay estimation."
 sidebar:
   label: "correlation"
 ---
+
+Every name on this page is published by `phonometry.signals`: `from phonometry import signals`, then `signals.<name>`.
 
 Correlation analysis and time-delay estimation.
 

@@ -47,6 +47,12 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "VESSEL_CLASSES",
+    "ShipTrafficSpectrum",
+    "ship_source_spectrum",
+]
+
 #: Reference length ``l0`` = 300 ft, expressed in metres.
 _L_REF_M = 300.0 / 3.28084
 

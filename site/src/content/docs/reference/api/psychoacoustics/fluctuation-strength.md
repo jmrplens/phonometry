@@ -1,9 +1,11 @@
 ---
-title: "psychoacoustics.quality.fluctuation_strength"
+title: "psychoacoustics: fluctuation strength"
 description: "Fluctuation strength after Fastl & Zwicker / Osses et al."
 sidebar:
   label: "fluctuation_strength"
 ---
+
+Every name on this page is published by `phonometry.psychoacoustics`: `from phonometry import psychoacoustics`, then `psychoacoustics.<name>`.
 
 Fluctuation strength after Fastl & Zwicker / Osses et al.
 

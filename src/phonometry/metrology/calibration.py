@@ -16,6 +16,11 @@ from .sound_calibrator import _designation, _fluctuation_limit_db
 if TYPE_CHECKING:
     from ..io._signal import Signal
 
+__all__ = [
+    "CalibrationWarning",
+    "sensitivity",
+]
+
 # Minimum sample count for the Hann-windowed coherent (Goertzel) tone
 # estimate; a shorter take falls back to broadband RMS.
 _MIN_COHERENT_SAMPLES = 4

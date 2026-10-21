@@ -66,14 +66,30 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
+from ._seabed_reflection import reflection_coefficient
 from .closed_form import _ABSORPTION_MODELS, _M_PER_KM, seawater_absorption
-from .seabed_reflection import reflection_coefficient
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
     from ..._internal.rays import RayDerivative, RayMarch
+
+__all__ = [
+    "BeamFan",
+    "EigenrayResult",
+    "FluidSeabed",
+    "GaussianBeamResult",
+    "NormalModeResult",
+    "ParabolicEquationResult",
+    "RayTraceResult",
+    "VolumeAbsorption",
+    "eigenrays",
+    "gaussian_beams",
+    "normal_modes",
+    "parabolic_equation",
+    "ray_trace",
+]
 
 _BOTTOM_TYPES = ("pressure-release", "rigid")
 #: What every solver here says when the source is handed to it outside the
@@ -243,7 +259,7 @@ class FluidSeabed(RichDisplay):
     r"""A lossy fluid seabed, passed as the ``bottom`` of a solver.
 
     The fluid half-space of
-    :func:`~phonometry.underwater.propagation.seabed_reflection.reflection_coefficient`
+    :func:`~phonometry.underwater.propagation.reflection_coefficient`
     under the water column: handing one to :func:`eigenrays` or
     :func:`gaussian_beams` as ``bottom=`` replaces the perfect reflector with
     the Rayleigh interface, and every bottom touch of a path is charged the
@@ -1420,7 +1436,7 @@ def eigenrays(
       powers because Snell's invariant fixes one crossing angle per ray at a
       flat boundary. With a :class:`FluidSeabed` as the ``bottom``,
       :math:`\mathcal{R}` is the Rayleigh coefficient of
-      :func:`~phonometry.underwater.propagation.seabed_reflection.reflection_coefficient`
+      :func:`~phonometry.underwater.propagation.reflection_coefficient`
       at that angle, **not conjugated**: that function returns the
       coefficient in the :math:`\mathrm{e}^{-i\omega t}` convention these amplitudes
       are declared in, so it enters as printed. (:func:`gaussian_beams`
@@ -1747,7 +1763,7 @@ class GaussianBeamResult(OwnsArrays):
         perfect reflectors (the default).
     :ivar seabed_sound_speed: Sediment sound speed of that seabed, in m/s, or
         ``None`` likewise. Together the pair names the Rayleigh interface of
-        :func:`~phonometry.underwater.propagation.seabed_reflection.reflection_coefficient`
+        :func:`~phonometry.underwater.propagation.reflection_coefficient`
         each beam's bottom reflections multiplied it by.
     :ivar source_depth: Source depth, in metres.
     :ivar water_depth: Water-column depth, in metres: the sound-speed
@@ -3183,7 +3199,7 @@ def gaussian_beams(
     leaves out: the seabed absorbs part of every bottom bounce. Passing
     a :class:`FluidSeabed` as the ``bottom`` replaces the perfect
     reflector with the lossy fluid half-space of
-    :func:`~phonometry.underwater.propagation.seabed_reflection.reflection_coefficient`
+    :func:`~phonometry.underwater.propagation.reflection_coefficient`
     (the Rayleigh interface, ``density`` standing for the water above it and
     the profile's own bottom sound speed for its ``c1``). This is Sect. 3.6.3
     done as printed: "most ray codes treat the bottom simply as a reflector",

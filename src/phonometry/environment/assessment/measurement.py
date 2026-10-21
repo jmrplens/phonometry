@@ -62,6 +62,24 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+__all__ = [
+    "EnvironmentalMeasurementWarning",
+    "RepeatedMeasurementResult",
+    "ResidualCorrectionResult",
+    "TonalAssessmentResult",
+    "assess_tonal_audibility",
+    "critical_bandwidth",
+    "environmental_expanded_uncertainty",
+    "gaussian_residual_level",
+    "residual_correction_uncertainty",
+    "residual_sound_correction",
+    "tonal_adjustment",
+    "tonal_adjustment_from_mean_audibility",
+    "tonal_audibility",
+    "tonal_seeking_survey",
+    "uncertainty_from_repeated_measurements",
+]
+
 #: Masking-threshold reference frequency in Formula (C.3), in Hz.
 _MASKING_REFERENCE_FREQUENCY = 502.0
 #: Exponent of the masking-threshold term in Formula (C.3).

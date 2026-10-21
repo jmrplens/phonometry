@@ -9,7 +9,7 @@ Room acoustic parameters from impulse responses per ISO 3382-1:2009
 (performance spaces) and ISO 3382-2:2008 (ordinary rooms).
 
 The measured impulse response (acquired e.g. with the swept-sine or MLS
-front end of [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/), ISO 18233) is filtered into
+front end of [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response), ISO 18233) is filtered into
 fractional-octave bands (IEC 61260) and converted to a decay curve by
 Schroeder backward integration of the squared impulse response
 (ISO 3382-1:2009, 5.3.3, Equation (1)). To limit the influence of
@@ -70,7 +70,7 @@ integrated impulse response, Clause 6).
 
 | Name | Description |
 | :--- | :--- |
-| `ir` | Measured impulse response (1D), e.g. from [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/) (ISO 18233). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: the curve is normalised to 0 dB at its start, so a factor on the record moves neither the levels nor the decay times read off them. |
+| `ir` | Measured impulse response (1D), e.g. from [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response) (ISO 18233). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: the curve is normalised to 0 dB at its start, so a factor on the record moves neither the levels nor the decay times read off them. |
 | `fs` | Sample rate in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `band` | Optional band centre frequency in Hz. When given, the impulse response is first filtered with the matching IEC 61260 fractional-octave filter; when None the broadband response is integrated directly. |
 | `fraction` | Bandwidth fraction of the band filter (1 = octave, 3 = one-third octave). Only used when `band` is not None. |
@@ -294,7 +294,7 @@ room_parameters(
 Room acoustic parameters per ISO 3382-1:2009 / ISO 3382-2:2008.
 
 The impulse response (e.g. acquired with the ISO 18233 swept-sine or
-MLS methods of [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/)) is filtered into
+MLS methods of [`phonometry.room.impulse_response`](/phonometry/reference/api/rooms/impulse-response/#impulse_response)) is filtered into
 fractional-octave bands (IEC 61260) and each band decay curve is
 obtained by Schroeder backward integration with noise truncation and
 tail compensation (ISO 3382-1:2009, 5.3.3). Least-squares line fits

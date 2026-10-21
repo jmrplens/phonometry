@@ -43,7 +43,7 @@ with their accuracy stated instead of implied.
 * :func:`fractional_delay` - band-limited delay by an arbitrary
   (sub-sample) number of samples via a frequency-domain phase ramp,
   ``linear`` (zero-padded, for transients and impulse responses; the same
-  kernel :func:`~phonometry.signals.correlation.align_impulse_responses`
+  kernel :func:`~phonometry.signals.align_impulse_responses`
   uses) or ``circular`` (for periodic records, exact to machine precision
   on bin-centered tones).
 """
@@ -725,7 +725,7 @@ def _fractional_advance(x: NDArray[np.float64], shift: float) -> NDArray[np.floa
     :math:`\mathrm{e}^{+j 2 \pi k \cdot \text{shift} / \text{nfft}}` over a record
     zero-padded past the shift, so the advanced samples leaving one end
     land in the padding instead of wrapping around. This is the alignment
-    kernel of :func:`~phonometry.signals.correlation.align_impulse_responses`.
+    kernel of :func:`~phonometry.signals.align_impulse_responses`.
     """
     from scipy import fft as sp_fft
 

@@ -98,7 +98,7 @@ def test_k_weighting_tables_verbatim_at_48k() -> None:
 
 def test_k_weighting_redesign_round_trip() -> None:
     """The analog round trip reproduces the 48 kHz tables to double precision."""
-    from phonometry.broadcast.program_loudness import (
+    from phonometry.broadcast._program_loudness import (
         _STAGE1_A48,
         _STAGE1_B48,
         _STAGE2_A48,

@@ -98,6 +98,23 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "AIR",
+    "CONCRETE",
+    "STEEL",
+    "WATER",
+    "ElasticBoundaries",
+    "ElasticFDTD2D",
+    "ElasticFDTDResult",
+    "ElasticRecording",
+    "ExplosionSource",
+    "ForceSource",
+    "Material",
+    "elastic_fdtd_simulation",
+    "scholte_speed",
+    "ALUMINUM",
+]
+
 #: Boundary-condition names accepted by :func:`elastic_fdtd_simulation`.
 _BOUNDARY_NAMES = ("rigid", "absorbing", "free")
 

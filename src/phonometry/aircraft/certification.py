@@ -43,6 +43,16 @@ if TYPE_CHECKING:
 
     from .._report.metadata import ReportMetadata
 
+__all__ = [
+    "NOY_BANDS_HZ",
+    "EPNLResult",
+    "effective_perceived_noise_level",
+    "epnl_from_pnlt",
+    "perceived_noise_level",
+    "perceived_noisiness",
+    "tone_correction",
+]
+
 #: The 24 one-third-octave band centre frequencies (Hz) used by PNL/EPNL.
 NOY_BANDS_HZ: NDArray[np.float64] = read_only(
     np.array(

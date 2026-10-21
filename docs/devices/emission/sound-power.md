@@ -286,7 +286,7 @@ the clause 6.2 verification verdict.*
   absorption area that feed the room corrections.
 - [Levels](../../signals/levels/levels.md): energy averaging and the A-weighting behind $L_{W\mathrm{A}}$.
 - [Theory](../../reference/theory/environment-transport.md): the Waterhouse, $K_1$/$K_2$ and $C_1$/$C_2$ derivations.
-- API reference: [`emission.sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power/), [`emission.sound_power_reverberation`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-reverberation/) and [`emission.sound_power_intensity`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-intensity/).
+- API reference: [`emission.sound_power`](https://docs.jmrp.io/phonometry/reference/api/power/sound-power/), [`emission`: sound power in a reverberation room](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-reverberation/) and [`emission`: sound power by intensity scanning](https://docs.jmrp.io/phonometry/reference/api/power/sound-power-intensity/).
 
 ## Quick answers
 

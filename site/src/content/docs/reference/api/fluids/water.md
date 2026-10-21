@@ -21,7 +21,7 @@ temperature, salinity and depth or pressure, selectable through
 
 Unlike air, sea water has four competing fits to one quantity rather than one
 model of a substance, which is why this constructor takes a model and
-[`air`](/phonometry/reference/api/fluids/air/) does not: those four are answers to the same
+[`air`](/phonometry/reference/api/fluids/air/#air) does not: those four are answers to the same
 question, while the air formulas scattered through the library are clauses of
 different measurement standards and must never be substitutable.
 

@@ -76,6 +76,19 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+__all__ = [
+    "WEIGHTING_GUIDANCE",
+    "AuditoryWeightingResult",
+    "ExposureCriteria",
+    "WeightedExposureResult",
+    "WeightingParameters",
+    "auditory_weighting",
+    "exposure_criteria",
+    "hearing_groups",
+    "weighted_exposure",
+    "weighting_parameters",
+]
+
 #: Selectable guidance versions, most recent first.
 WEIGHTING_GUIDANCE = ("nmfs-2024", "nmfs-2018", "southall-2019")
 
@@ -510,7 +523,7 @@ _CRITERIA: dict[
 }
 
 
-def check_guidance(guidance: str) -> str:
+def _check_guidance(guidance: str) -> str:
     """Normalise and validate a guidance-version name.
 
     :param guidance: One of :data:`WEIGHTING_GUIDANCE` (case-insensitive,
@@ -532,7 +545,7 @@ def hearing_groups(guidance: str = "nmfs-2024") -> tuple[str, ...]:
     :return: The group codes, in the order the source tabulates them.
     :raises ValueError: If the version is unknown.
     """
-    return tuple(_PARAMETERS[check_guidance(guidance)])
+    return tuple(_PARAMETERS[_check_guidance(guidance)])
 
 
 def weighting_parameters(
@@ -545,7 +558,7 @@ def weighting_parameters(
     :return: The :class:`WeightingParameters` row.
     :raises ValueError: If the version or the group is unknown.
     """
-    key = check_guidance(guidance)
+    key = _check_guidance(guidance)
     table = _PARAMETERS[key]
     name = str(group).strip().upper()
     if name not in table:

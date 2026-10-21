@@ -18,18 +18,18 @@ ceasing to reproduce the standard it claims.
 
 from __future__ import annotations
 
+from ._air import (
+    DEFAULT_CO2_MOLE_FRACTION,
+    DEFAULT_RELATIVE_HUMIDITY_PERCENT,
+    DEFAULT_STATIC_PRESSURE_PA,
+    air,
+)
 from ._state import (
     Fluid,
     FluidAssumptionWarning,
     FluidPropertyUnavailable,
     FluidWarning,
     characteristic_impedance,
-)
-from .air import (
-    DEFAULT_CO2_MOLE_FRACTION,
-    DEFAULT_RELATIVE_HUMIDITY_PERCENT,
-    DEFAULT_STATIC_PRESSURE_PA,
-    air,
 )
 from .catalogue import (
     PUBLISHED_FLUIDS,

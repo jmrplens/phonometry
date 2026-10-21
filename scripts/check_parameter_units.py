@@ -477,7 +477,7 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
     **_exempt(_A_COUNT, "environment.propagation.software_quality", "MIN_SAMPLE_SIZE"),
     **_exempt(
         "how many standard deviations of the measured speed, a pure number",
-        "environment.sources.statistical_pass_by",
+        "environment.sources._statistical_pass_by",
         "SPB_SPEED_WINDOW_STANDARD_DEVIATIONS",
     ),
     **_exempt(
@@ -493,7 +493,7 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
     ),
     **_exempt(
         _A_COUNT,
-        "noise_control.cabin_insulation",
+        "noise_control._cabin_insulation",
         "MAX_SOURCE_POSITIONS_IN_SITU",
         "MIN_FIXED_MICROPHONE_POSITIONS",
         "MIN_LOUDSPEAKER_POSITIONS",
@@ -584,7 +584,7 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
     **_exempt(_A_COUNT, "room.auditorium", "STAGE_SUPPORT_POSITIONS"),
     **_exempt(
         "the directivity factor Q, a ratio of two intensities and a pure number",
-        "room.crowd_noise",
+        "room._crowd_noise",
         "TALKER_DIRECTIVITY",
     ),
     **_exempt(
@@ -686,13 +686,13 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
     ),
     **_exempt(
         _A_FRACTION,
-        "vibration.structural.impact_mobility",
+        "vibration.structural._impact_mobility",
         "CHANNEL_MAGNITUDE_TOLERANCE",
     ),
-    **_exempt(_A_COUNT, "vibration.structural.impact_mobility", "COHERENCE_RECORDS"),
+    **_exempt(_A_COUNT, "vibration.structural._impact_mobility", "COHERENCE_RECORDS"),
     **_exempt(
         "a coherence, a pure number",
-        "vibration.structural.impact_mobility",
+        "vibration.structural._impact_mobility",
         "HIGH_COHERENCE",
     ),
     **_exempt(
@@ -837,7 +837,7 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         ("simultaneous_comparison", "phase"),
     ),
     (
-        "phonometry.signals.cepstrum",
+        "phonometry.signals._cepstrum",
         "CepstrumResult",
         "linear_phase_samples",
     ): "a count of samples, which is what the name already says",
@@ -859,7 +859,7 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         ("FreeFieldCheck", "iso26101_spacing_met"),
     ),
     (
-        "phonometry.vibration.structural.impact_mobility",
+        "phonometry.vibration.structural._impact_mobility",
         "ChannelMatchVerification",
         "phase_within",
     ): "a per-line verdict array, True where the phase match holds; no angle",
@@ -871,7 +871,7 @@ EXEMPT: dict[tuple[str, str, str], str] = {
     # Speeds that are a label, a logarithm or a database's own unit.
     **_exempt_parameters(
         'the ISO 11819-1 road speed category "low", "medium" or "high", a label',
-        "environment.sources.statistical_pass_by",
+        "environment.sources._statistical_pass_by",
         ("PassByRegression", "road_speed_category"),
         ("StatisticalPassByResult", "road_speed_category"),
         ("pass_by_regression", "road_speed_category"),
@@ -879,7 +879,7 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         ("statistical_pass_by_index", "road_speed_category"),
     ),
     (
-        "phonometry.environment.sources.statistical_pass_by",
+        "phonometry.environment.sources._statistical_pass_by",
         "PassByRegression",
         "lg_speed_standard_deviation",
     ): (

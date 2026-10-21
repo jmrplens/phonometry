@@ -124,7 +124,7 @@ HTLANResult(
 
 Hearing threshold level associated with age and noise (clause 6.1).
 
-All arrays are in dB and aligned with `NIPTS_FREQUENCIES`.
+All arrays are in dB and aligned with `frequencies`.
 
 **Attributes**
 
@@ -240,9 +240,8 @@ zero.
 | :--- | :--- |
 | ValueError | for a non-positive duration, a fractile outside (0, 1), or an unknown frequency. |
 
-Outside the standard's validated domain (durations of
-`VALIDATED_YEARS`, fractiles of `VALIDATED_FRACTILES`,
-exposure levels up to `VALIDATED_L_EX_MAX`) the computation still
+Outside the standard's validated domain (durations of 1 to 40 years,
+fractiles of 0.05 to 0.95, exposure levels up to 100 dB) the computation still
 runs but a [`NoiseInducedHearingLossWarning`](/phonometry/reference/api/hearing/noise-induced-hearing-loss/#noiseinducedhearinglosswarning) marks the result as an
 extrapolation, and the `.report()` fiche prints the matching caveat.
 
@@ -263,7 +262,7 @@ NIPTSResult(
 
 Noise-induced permanent threshold shift (ISO 1999:2013, clause 6.3).
 
-All arrays are in dB and aligned with `NIPTS_FREQUENCIES`.
+All arrays are in dB and aligned with `frequencies`.
 
 **Attributes**
 

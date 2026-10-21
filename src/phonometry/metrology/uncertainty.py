@@ -54,6 +54,20 @@ from .._internal.validation import (
 )
 from .._internal.warnings import PhonometryWarning
 
+__all__ = [
+    "MonteCarloResult",
+    "Quantity",
+    "UncertaintyResult",
+    "UncertaintyWarning",
+    "combined_standard_uncertainty",
+    "coverage_factor",
+    "monte_carlo",
+    "rectangular",
+    "triangular",
+    "u_shaped",
+    "uncertainty_propagation",
+]
+
 Model = Callable[..., float]
 
 # Eigenvalues of a caller-supplied correlation matrix down to minus this
@@ -74,7 +88,7 @@ class UncertaintyWarning(PhonometryWarning):
 
 
 #: Recognised probability density functions for the Monte Carlo method.
-DISTRIBUTIONS: tuple[str, ...] = ("gaussian", "rectangular", "triangular", "u-shaped")
+_DISTRIBUTIONS: tuple[str, ...] = ("gaussian", "rectangular", "triangular", "u-shaped")
 
 
 @dataclass(frozen=True)
@@ -105,9 +119,9 @@ class Quantity(RichDisplay):
         zero contribution -- under a legend reading ``u_c = nan``.
         """
         require_non_negative(self.uncertainty, "uncertainty")
-        if self.distribution not in DISTRIBUTIONS:
+        if self.distribution not in _DISTRIBUTIONS:
             msg = (
-                f"distribution must be one of {DISTRIBUTIONS}; "
+                f"distribution must be one of {_DISTRIBUTIONS}; "
                 f"got {self.distribution!r}."
             )
             raise ValueError(msg)

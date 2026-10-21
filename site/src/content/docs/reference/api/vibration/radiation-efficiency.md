@@ -1,9 +1,11 @@
 ---
-title: "vibration.structural.radiation_efficiency"
+title: "vibration: radiation efficiency"
 description: "Radiation efficiency of a plate in bending (Hopkins 2007, Sound Insulation, Section 2.9; Leppington et al. 1982; Maidanik 1962)."
 sidebar:
   label: "radiation_efficiency"
 ---
+
+Every name on this page is published by `phonometry.vibration`: `from phonometry import vibration`, then `vibration.<name>`.
 
 Radiation efficiency of a plate in bending (Hopkins 2007, Sound Insulation,
 Section 2.9; Leppington et al. 1982; Maidanik 1962).

@@ -36,6 +36,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..room._crowd_noise import CrowdNoiseResult
+    from ..room._impulse_response import ImpulseResponseResult, ShapedSweepResult
     from ..room.acoustics import DecayCurve, RoomAcousticsResult
     from ..room.auditorium import (
         InterauralCorrelationResult,
@@ -44,10 +46,8 @@ if TYPE_CHECKING:
         SoundStrengthResult,
         StageSupportResult,
     )
-    from ..room.crowd_noise import CrowdNoiseResult
     from ..room.enclosed_space_absorption import ReverberationResult
     from ..room.image_source import ImageSourceResult
-    from ..room.impulse_response import ImpulseResponseResult, ShapedSweepResult
     from ..room.modes import RoomModesResult
     from ..room.noise_criteria import NCResult, RCResult
     from ..room.open_plan import OpenPlanResult
@@ -819,7 +819,7 @@ def plot_impulse_response(
     backward-integrated energy-decay curve overlaid. With ``ax`` given, only
     the decay panel is drawn on it.
 
-    :param result: An :class:`~phonometry.room.impulse_response.ImpulseResponseResult`.
+    :param result: An :class:`~phonometry.room.ImpulseResponseResult`.
     :param ax: Existing axes for the decay panel, or ``None`` for a fresh
         two-panel figure.
     :param kwargs: Forwarded to the waveform / envelope ``plot`` calls.
@@ -897,16 +897,16 @@ def plot_noise_criterion(
     :return: The axes.
     """
     from .._i18n import decimal_comma, localize_axes
-    from ..room.noise_criteria import NC_CURVES, NC_INDICES, OCTAVE_BANDS
+    from ..room.noise_criteria import NC_CURVES_DB, NC_OCTAVE_BANDS_HZ, NC_RATINGS
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     levels = np.asarray(result.levels, dtype=np.float64)
-    for row, idx in zip(NC_CURVES, NC_INDICES, strict=True):
-        ax.plot(OCTAVE_BANDS, row, color=_C_MUTED, lw=0.8, zorder=1)
+    for row, idx in zip(NC_CURVES_DB, NC_RATINGS, strict=True):
+        ax.plot(NC_OCTAVE_BANDS_HZ, row, color=_C_MUTED, lw=0.8, zorder=1)
         ax.annotate(
             f"{idx:.0f}",
-            (OCTAVE_BANDS[-1], row[-1]),
+            (NC_OCTAVE_BANDS_HZ[-1], row[-1]),
             fontsize="x-small",
             color=_C_MUTED,
             va="center",
@@ -937,7 +937,7 @@ def plot_noise_criterion(
                 f"({_format_freq(result.governing_frequency, language)})"
             ),
         )
-    _freq_axis(ax, OCTAVE_BANDS, language=language)
+    _freq_axis(ax, NC_OCTAVE_BANDS_HZ, language=language)
     ax.set_ylabel(_t(_OCTAVE_BAND_SPL_LABEL, language))
     # The designation is the result's own ``:g`` label, so an interpolated
     # rating and a 31.5 Hz governing band both carry a decimal point.
@@ -1478,7 +1478,7 @@ def plot_shaped_sweep(
     in dB re their in-band maximum, so the match is read directly). With
     ``ax`` given, only the spectrum panel is drawn on it.
 
-    :param result: A :class:`~phonometry.room.impulse_response.ShapedSweepResult`.
+    :param result: A :class:`~phonometry.room.ShapedSweepResult`.
     :param ax: Existing axes for the spectrum panel, or ``None`` for a
         fresh two-panel figure.
     :param kwargs: Forwarded to the waveform ``plot`` call.
@@ -1680,7 +1680,7 @@ def plot_crowd_noise(
     speech-to-noise ratio falls to the -6 dB communication limit of
     Equation (17.53).
 
-    :param result: A :class:`~phonometry.room.crowd_noise.CrowdNoiseResult`.
+    :param result: A :class:`~phonometry.room.CrowdNoiseResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to each ``Axes.plot`` call.

@@ -57,9 +57,12 @@ def _aperture_fields(
     transmitted fields are directly comparable), the frame times and the
     library transmission of the narrow slit at the drive frequency.
     """
-    import fdtd_dispatch
+    import clip_placement
 
     from phonometry import building
+    from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
+
+    compute = clip_placement.compute_for("anim_fdtd_aperture_slit")
 
     dx = _APERTURE_DX
     ny, nx = 800, 960  # 5 m x 6 m
@@ -83,7 +86,7 @@ def _aperture_fields(
         mask = np.zeros((ny, nx), dtype=bool)
         mask[:, wall_c[0] : wall_c[1]] = True
         mask[(ny - gap) // 2 : (ny + gap) // 2, wall_c[0] : wall_c[1]] = False
-        scene = fdtd_dispatch.Scene(
+        sim = FDTD2D(
             343.0,
             dx,
             shape=(ny, nx),
@@ -91,11 +94,13 @@ def _aperture_fields(
             sponge_sides=("top", "bottom", "right"),
             obstacle_mask=mask,
             edge_impedance={"left": 1.2 * 343.0},
-            sources=(
-                fdtd_dispatch.plane("right", fdtd_dispatch.cw(_APERTURE_F), offset=2),
-            ),
+            compute=compute,
         )
-        ps, rs, times, _ = _fdtd_cw_capture(scene, _APERTURE_F, every, n_frames)
+        tone = CWSource(ix=0, iy=0, frequency=_APERTURE_F)
+        sim.add_source(
+            PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
+        )
+        ps, rs, times, _ = _fdtd_cw_capture(sim, _APERTURE_F, every, n_frames)
         p_all.append(ps)
         r_all.append(rs)
     rms = np.stack(r_all)

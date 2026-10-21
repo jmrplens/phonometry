@@ -107,7 +107,7 @@ def generate_fdtd_domain_geometry(output_dir: str) -> None:
     domain before you run it.
     """
     print("Generating fdtd_domain_geometry...")
-    from phonometry.simulation import FDTD2D, GaussianPulse
+    from phonometry.simulation import FDTD2D, Compute, GaussianPulse
 
     mask = np.zeros((60, 90), dtype=bool)
     mask[25:35, 40:44] = True
@@ -119,6 +119,7 @@ def generate_fdtd_domain_geometry(output_dir: str) -> None:
         sponge_sides=("left", "right"),
         edge_impedance={"top": 413.0},
         obstacle_mask=mask,
+        compute=Compute(),
     )
     sim.add_source(GaussianPulse(ix=10, iy=30, half_width_s=1e-3))
     _fig, ax = plt.subplots(figsize=(10, 6.6))
@@ -132,6 +133,7 @@ def generate_fdtd_simulation(output_dir: str) -> None:
     """2D FDTD simulation: diffraction snapshot and the probe histories."""
     print("Generating fdtd_simulation.png...")
     from phonometry import simulation
+    from phonometry.simulation import Compute
 
     # A 3.0 x 2.0 m free field (absorbing edges) with a thin rigid barrier:
     # probe A sees the direct pulse plus the barrier reflection, probe B sits
@@ -153,7 +155,8 @@ def generate_fdtd_simulation(output_dir: str) -> None:
             boundaries=simulation.FDTDBoundaries(
                 sides="absorbing", absorbing_layer_cells=30
             ),
-        )
+        ),
+        compute=Compute(),
     )
 
     _fig, (ax_f, ax_p) = plt.subplots(
@@ -173,7 +176,7 @@ def generate_elastic_halfspace_waves(output_dir: str) -> None:
     """Elastic FDTD: P, S and Rayleigh waves in an aluminium half-space."""
     print("Generating elastic_halfspace_waves...")
     from phonometry import simulation
-    from phonometry.simulation import ALUMINUM
+    from phonometry.simulation import ALUMINUM, Compute
 
     # A 0.6 x 0.3 m aluminium block with a free upper surface, struck by a
     # short vertical force at the middle of that surface (Lamb's problem):
@@ -209,7 +212,8 @@ def generate_elastic_halfspace_waves(output_dir: str) -> None:
             recording=simulation.ElasticRecording(
                 snapshot_every=steps, snapshot_field="vy"
             ),
-        )
+        ),
+        compute=Compute(),
     )
 
     _fig, ax = plt.subplots(figsize=(9.5, 5.4))
@@ -271,6 +275,7 @@ def _scholte_interface_result() -> ElasticFDTDResult:
     crawled ~330 m along the contact.
     """
     from phonometry import simulation
+    from phonometry.simulation import Compute
 
     ny, nx, dx = 200, 500, 1.0
     c_p = np.full((ny, nx), 1500.0)
@@ -302,7 +307,8 @@ def _scholte_interface_result() -> ElasticFDTDResult:
             recording=simulation.ElasticRecording(
                 snapshot_every=steps, snapshot_field="vy"
             ),
-        )
+        ),
+        compute=Compute(),
     )
 
 
@@ -347,6 +353,7 @@ def generate_fdtd_room_modes(output_dir: str) -> None:
     """Rigid-box FDTD probe spectrum against the analytic room modes."""
     print("Generating fdtd_room_modes...")
     from phonometry import simulation
+    from phonometry.simulation import Compute
 
     # The fdtd-simulation guide's oracle run: a rigid 1.0 x 0.7 m box excited
     # by a Gaussian pulse; the probe spectrum peaks at the analytic rigid-room
@@ -361,7 +368,8 @@ def generate_fdtd_room_modes(output_dir: str) -> None:
             shape=(ny, nx),
             sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
             recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
-        )
+        ),
+        compute=Compute(),
     )
     p = res.pressures[0]
     spec = np.abs(np.fft.rfft(p * np.hanning(p.size), n=8 * p.size))
@@ -428,11 +436,16 @@ def generate_fdtd_plane_wave_launch(output_dir: str) -> None:
     scene, and the second one is the sponge's doing.
     """
     print("Generating fdtd_plane_wave_launch...")
-    from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
+    from phonometry.simulation import FDTD2D, Compute, CWSource, PlaneWaveSource
 
     dx, offset, sponge = 0.01, 22, 20
     sim = FDTD2D(
-        343.0, dx, shape=(160, 80), sponge_width=sponge, sponge_sides=("top", "bottom")
+        343.0,
+        dx,
+        shape=(160, 80),
+        sponge_width=sponge,
+        sponge_sides=("top", "bottom"),
+        compute=Compute(),
     )
     sim.add_source(
         PlaneWaveSource(

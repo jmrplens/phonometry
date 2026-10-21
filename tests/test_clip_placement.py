@@ -29,7 +29,7 @@ if str(_ROOT / "scripts") not in sys.path:
 import animation_fingerprint as fp
 import clip_placement
 
-from phonometry.simulation import Compute
+from phonometry.simulation import FDTD2D, Compute, CWSource
 
 # The registry imports the whole figure stack, which the pinned job owns.
 pytestmark = pytest.mark.pinned_stack
@@ -241,3 +241,74 @@ def test_a_ram_budget_that_is_not_a_positive_count_is_refused(
     monkeypatch.setenv(clip_placement.HOST_BYTES_ENV, text)
     with pytest.raises(ValueError, match=r"PHONOMETRY_CLIP_HOST_BYTES"):
         clip_placement.host_bytes()
+
+
+def _small_cw_run() -> FDTD2D:
+    sim = FDTD2D(343.0, 0.05, shape=(40, 50), sponge_width=6)
+    sim.add_source(CWSource(ix=20, iy=20, frequency=300.0, ramp_cycles=1.0))
+    return sim
+
+
+def test_the_capture_matches_the_loop_it_replaced() -> None:
+    """The reductions the remote runner computed, term for term, on NumPy."""
+    import numpy as np
+    from figures.fields import _core
+
+    sim, ref = _small_cw_run(), _small_cw_run()
+    beta, steps, every = 0.9, 60, 10
+    cap = _core._step_and_capture(
+        sim,
+        steps=steps,
+        sample_steps=range(every, steps + 1, every),
+        stride=2,
+        rms_beta=beta,
+        settle=(40, 60),
+    )
+    ms = np.zeros_like(ref.p)
+    acc = np.zeros_like(ref.p)
+    frames, rms = [], []
+    for step in range(1, steps + 1):
+        ref.step()
+        ms *= beta
+        ms += (1.0 - beta) * ref.p**2
+        if 40 < step <= 60:
+            acc += ref.p**2
+        if step % every == 0:
+            frames.append(ref.p[::2, ::2].astype(np.float32))
+            rms.append(np.sqrt(ms)[::2, ::2].astype(np.float32))
+    assert np.array_equal(cap.frames, np.stack(frames))
+    assert np.array_equal(cap.rms_frames, np.stack(rms))
+    assert np.array_equal(cap.rms_final, np.sqrt(ms))
+    assert np.array_equal(cap.settled_rms, np.sqrt(acc / 20))
+    assert np.array_equal(cap.times, np.arange(every, steps + 1, every) * ref.dt)
+
+
+def test_a_sample_step_outside_the_run_is_refused() -> None:
+    from figures.fields import _core
+
+    sim = _small_cw_run()
+    with pytest.raises(ValueError, match=r"sample steps"):
+        _core._step_and_capture(sim, steps=10, sample_steps=[0, 5], stride=1)
+
+
+def test_what_was_not_asked_for_comes_back_empty() -> None:
+    from figures.fields import _core
+
+    cap = _core._step_and_capture(_small_cw_run(), steps=5, sample_steps=[5], stride=1)
+    assert cap.rms_frames.size == 0
+    assert cap.rms_final.size == 0
+    assert cap.settled_rms.size == 0
+
+
+def test_a_blanked_frame_is_nan_where_asked_and_the_field_elsewhere() -> None:
+    import numpy as np
+    from figures.fields import _core
+
+    sim = _small_cw_run()
+    sim.run(5)
+    blank = np.zeros(sim.p.shape, dtype=bool)
+    blank[:, :3] = True
+    frame = _core._blanked(sim, sim.p, blank)
+    assert frame.dtype == np.float32
+    assert np.isnan(frame[:, :3]).all()
+    assert np.array_equal(frame[:, 3:], sim.p[:, 3:].astype(np.float32))

@@ -182,6 +182,13 @@ class ConformanceVerification(RichDisplay):
             ``upper_limit`` or ``max_uncertainty`` is an array or a text rather
             than one number.
         """
+        # Each number's rank before anything converts it: the limits go
+        # through float() in _open_limit, which would parse a text.
+        require_scalar(self.deviation, "deviation")
+        require_scalar(self.uncertainty, "uncertainty")
+        require_scalar(self.max_uncertainty, "max_uncertainty")
+        require_scalar(self.lower_limit, "lower_limit")
+        require_scalar(self.upper_limit, "upper_limit")
         for name in ("deviation", "uncertainty", "max_uncertainty"):
             object.__setattr__(self, name, require_finite(getattr(self, name), name))
         object.__setattr__(

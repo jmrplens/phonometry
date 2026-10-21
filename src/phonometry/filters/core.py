@@ -216,16 +216,21 @@ class OctaveFilterResult(OwnsArrays):
 _SPECTROGRAM_RANKS = (2, 3)
 
 
-def _spectrogram_axis(value: object, name: str, count: int) -> NDArray[np.float64]:
-    """One axis of a spectrogram as a float array of ``count`` entries.
+def _spectrogram_axis(
+    value: object, name: str, levels: NDArray[np.float64]
+) -> NDArray[np.float64]:
+    """One axis of a spectrogram as a float array as long as its axis of ``levels``.
 
     :param value: The axis as the record was given it.
-    :param name: Its field name, for the message.
-    :param count: The length of the matching axis of ``levels``.
+    :param name: Its field name, for the message: ``times`` runs along the
+        frames of ``levels``, every other axis along its bands.
+    :param levels: The level grid, ``(bands, frames)`` or ``(channels, bands,
+        frames)``.
     :return: The axis as a one-dimensional ``float64`` array.
-    :raises ValueError: if the axis is not one-dimensional or not ``count``
-        long.
+    :raises ValueError: if the axis is not one-dimensional or not as long as
+        its axis of ``levels``.
     """
+    count = levels.shape[-1 if name == "times" else -2]
     axis = np.asarray(value, dtype=np.float64)
     if axis.ndim != 1:
         msg = (
@@ -291,9 +296,7 @@ class OctaveSpectrogramResult(OwnsArrays):
             )
             raise ValueError(msg)
         axes = {
-            name: _spectrogram_axis(
-                getattr(self, name), name, levels.shape[-1 if name == "times" else -2]
-            )
+            name: _spectrogram_axis(getattr(self, name), name, levels)
             for name in ("frequencies", "times", "lower_edges", "upper_edges")
         }
         object.__setattr__(self, "levels", read_only(levels))

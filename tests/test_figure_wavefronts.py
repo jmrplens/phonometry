@@ -29,6 +29,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
 from figures import schematics
 
+pytestmark = pytest.mark.pinned_stack
+
 
 def test_a_closed_figure_takes_its_wavefronts_with_it() -> None:
     fig, ax = plt.subplots()

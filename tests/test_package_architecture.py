@@ -14,6 +14,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import TypeGuard
 
 import pytest
 
@@ -1606,3 +1607,208 @@ def test_a_docstring_lists_a_warning_under_warns() -> None:
         if field.search(line)
     ]
     assert not found, "warnings documented as raised:\n  " + "\n  ".join(found)
+
+
+#: Logger calls louder than INFO: an advisory is a warning (A52), and a
+#: logger at WARNING or above prints to standard error by default.
+_LOUD = frozenset({"warning", "warn", "error", "critical", "exception", "fatal", "log"})
+#: Calls that configure logging, which is the caller's business.
+_CONFIGURING = frozenset(
+    {
+        "basicConfig",
+        "addHandler",
+        "removeHandler",
+        "addFilter",
+        "removeFilter",
+        "setLevel",
+        "dictConfig",
+        "fileConfig",
+    }
+)
+
+
+def _logging_imports(tree: ast.AST) -> dict[str, str]:
+    """Each name *tree* binds to ``logging`` or to a member of it.
+
+    The value is the dotted name the bound name stands for.
+    """
+    names = {"logging": "logging"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names.update(
+                (alias.asname, alias.name) if alias.asname else ("logging", "logging")
+                for alias in node.names
+                if alias.name.split(".")[0] == "logging"
+            )
+        elif (
+            isinstance(node, ast.ImportFrom)
+            and node.level == 0
+            and (node.module or "").split(".")[0] == "logging"
+        ):
+            names.update(
+                (alias.asname or alias.name, f"{node.module}.{alias.name}")
+                for alias in node.names
+            )
+    return names
+
+
+def _dotted(expression: ast.expr, names: dict[str, str]) -> str | None:
+    """The dotted name *expression* spells, its first name read through *names*.
+
+    ``None`` when *expression* is not a dotted name.
+    """
+    if isinstance(expression, ast.Name):
+        return names.get(expression.id, expression.id)
+    if isinstance(expression, ast.Attribute):
+        owner = _dotted(expression.value, names)
+        return None if owner is None else f"{owner}.{expression.attr}"
+    return None
+
+
+def _takes_a_logger(node: ast.AST | None, names: dict[str, str]) -> TypeGuard[ast.Call]:
+    """Whether *node* calls ``logging.getLogger``, however the module spells it."""
+    return (
+        isinstance(node, ast.Call) and _dotted(node.func, names) == "logging.getLogger"
+    )
+
+
+def _names_a_library_logger(call: ast.Call) -> bool:
+    """Whether a ``getLogger`` *call* names ``phonometry`` or a logger under it."""
+    name = next(
+        (keyword.value for keyword in call.keywords if keyword.arg == "name"),
+        call.args[0] if call.args else None,
+    )
+    return (
+        isinstance(name, ast.Constant)
+        and isinstance(name.value, str)
+        and name.value.split(".")[0] == "phonometry"
+    )
+
+
+def _logging_misuse_at(
+    node: ast.AST, names: dict[str, str], loggers: set[str]
+) -> str | None:
+    """What *node* does that the logging rule refuses, or ``None``."""
+
+    def is_a_logger(expression: ast.expr) -> bool:
+        return ast.unparse(expression) in loggers or _takes_a_logger(expression, names)
+
+    if isinstance(node, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
+        targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+        return next(
+            (
+                f"sets {ast.unparse(target)}"
+                for target in targets
+                if isinstance(target, ast.Attribute) and is_a_logger(target.value)
+            ),
+            None,
+        )
+    if not isinstance(node, ast.Call):
+        return None
+    function = _dotted(node.func, names)
+    if function is not None and function.startswith("logging."):
+        return None if function == "logging.getLogger" else f"calls {function}"
+    if not isinstance(node.func, ast.Attribute):
+        return None
+    owner, attribute = ast.unparse(node.func.value), node.func.attr
+    if is_a_logger(node.func.value) and attribute in _LOUD | _CONFIGURING:
+        return f"calls {owner}.{attribute}"
+    if attribute in _CONFIGURING:
+        return f"configures logging with {attribute}"
+    return None
+
+
+def logging_misuse(source: str, where: str) -> list[str]:
+    """Each place in *source* that logs louder than INFO, configures logging, or uses a logger not the library's.
+
+    The source is read through its imports: an alias of ``logging``, or a name
+    imported from it, is the call it stands for. A logger is whatever a
+    ``logging.getLogger`` result is bound to (a name or an attribute,
+    annotated or not), or that call itself; setting an attribute of one
+    configures it. The places come in the order of the source.
+    """
+    tree = ast.parse(source)
+    names = _logging_imports(tree)
+    loggers: set[str] = set()
+    found: list[tuple[int, str]] = []
+    for node in ast.walk(tree):
+        if _takes_a_logger(node, names) and not _names_a_library_logger(node):
+            found.append((node.lineno, "takes a logger that is not phonometry's"))
+        if isinstance(node, (ast.Assign, ast.AnnAssign)) and _takes_a_logger(
+            node.value, names
+        ):
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            loggers.update(ast.unparse(target) for target in targets)
+    found.extend(
+        (node.lineno, offence)
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.stmt, ast.expr))
+        and (offence := _logging_misuse_at(node, names, loggers))
+    )
+    return [f"{where}:{line} {what}" for line, what in sorted(found)]
+
+
+def test_the_library_logs_quietly_to_loggers_of_its_own() -> None:
+    found = [
+        offence
+        for path in sorted(SRC.rglob("*.py"))
+        if "logging" in (text := path.read_text(encoding="utf-8"))
+        for offence in logging_misuse(text, path.relative_to(SRC).as_posix())
+    ]
+    assert not found, "logging the library must not do:\n  " + "\n  ".join(found)
+
+
+def test_the_logging_rule_reads_a_loud_logger() -> None:
+    source = (
+        "import logging\n"
+        "_LOG = logging.getLogger('phonometry.simulation')\n"
+        "_OTHER = logging.getLogger(__name__ + 'x')\n"
+        "def f():\n"
+        "    _LOG.warning('slow')\n"
+        "    _LOG.addHandler(None)\n"
+        "    logging.basicConfig()\n"
+        "    _LOG.info('fine')\n"
+    )
+    assert logging_misuse(source, "x.py") == [
+        "x.py:3 takes a logger that is not phonometry's",
+        "x.py:5 calls _LOG.warning",
+        "x.py:6 calls _LOG.addHandler",
+        "x.py:7 calls logging.basicConfig",
+    ]
+
+
+def test_the_logging_rule_reads_every_spelling_of_a_logger() -> None:
+    """A logger is read however the module spells it.
+
+    An alias of ``logging``, a name imported from it, a logger held by an
+    annotated name or by an attribute, a logger used where it is taken and a
+    call written over several lines are each read as the call they stand for.
+    """
+    source = (
+        "import logging as log\n"
+        "import logging.config\n"
+        "from logging import getLogger, warning as warn_root\n"
+        "_LOG: log.Logger = getLogger(name='phonometry.io')\n"
+        "_ROOT = log.getLogger()\n"
+        "class Run:\n"
+        "    def __init__(self):\n"
+        "        self._log = log.getLogger('phonometry.simulation')\n"
+        "        self._log.error(\n"
+        "            'slow'\n"
+        "        )\n"
+        "        _LOG.propagate = False\n"
+        "        getLogger('phonometry.io').critical('lost')\n"
+        "        warn_root('lost')\n"
+        "        logging.config.dictConfig({})\n"
+        "        _LOG.debug('fine')\n"
+        "        self._log.info('fine')\n"
+        "        getLogger('phonometry.io').info('fine')\n"
+    )
+    assert logging_misuse(source, "x.py") == [
+        "x.py:5 takes a logger that is not phonometry's",
+        "x.py:9 calls self._log.error",
+        "x.py:12 sets _LOG.propagate",
+        "x.py:13 calls getLogger('phonometry.io').critical",
+        "x.py:14 calls logging.warning",
+        "x.py:15 calls logging.config.dictConfig",
+    ]

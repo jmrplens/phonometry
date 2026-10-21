@@ -616,6 +616,7 @@ _EXAMPLES = (
     "| `withdrawn` | `function` | prose | `fake.withdrawn(1)` |\n"
     "| `res.plot` | `method` | prose | `res.plot(ax, 1, 2, 3)`, `np.zeros(3, 4, 5, 6)` |\n"
     "| `grouped` | `function` | prose | `fake.measured(2 600.0, 1, 2, thickness_m=1)` |\n"
+    "| `nested` | `function` | prose | `fake.measured(fake.measured(), dp, area=1, ...)` |\n"
 )
 
 
@@ -638,6 +639,9 @@ def test_an_example_its_function_refuses_is_reported() -> None:
         "_Drawn.plot_geometry, which refuses it: too many positional arguments",
         "withdrawn: `fake.withdrawn(1)` calls fake.withdrawn, which does not "
         "exist: fake has no attribute 'withdrawn'",
+        "nested: `fake.measured(fake.measured(), dp, area=1, ...)` calls "
+        "fake.measured, which refuses it: missing a required argument: "
+        "'velocities'",
     ]
 
 

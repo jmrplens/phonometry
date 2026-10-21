@@ -309,6 +309,10 @@ _GROUPED_DIGITS = re.compile(r"(?<=\d)\u202f(?=\d)")
 #: also writes after keywords, where Python refuses it.
 _ELIDED_TAIL = re.compile(r",\s*\.\.\.\s*\)")
 
+#: What an elided tail is read as: a ``**`` spread of this name, which Python
+#: takes after keywords and which marks the one call that elides.
+_ELIDED = "__elided__"
+
 
 def usage_roots() -> dict[str, object]:
     """What a usage example may start a call from, by the name it is written with.
@@ -375,8 +379,7 @@ def _fragment_problems(fragment: str, roots: Mapping[str, object]) -> Iterator[s
         fragment that is not Python (``.plot()``, ``10 lg(...)``).
     """
     source = _GROUPED_DIGITS.sub("", fragment)
-    elided = bool(_ELIDED_TAIL.search(source))
-    source = _ELIDED_TAIL.sub(")", source)
+    source = _ELIDED_TAIL.sub(f", **{_ELIDED})", source)
     if source.rstrip().endswith(":"):
         source += " pass"  # ``with simulation.use(...):`` opens a block.
     try:
@@ -395,7 +398,7 @@ def _fragment_problems(fragment: str, roots: Mapping[str, object]) -> Iterator[s
             yield f"{dotted}, which does not exist: {target}"
             continue
         callee, takes_self = target
-        if refusal := _refusal(call, callee, takes_self=takes_self, elided=elided):
+        if refusal := _refusal(call, callee, takes_self=takes_self):
             yield f"{dotted}, which refuses it: {refusal}"
 
 
@@ -437,21 +440,30 @@ def _call_target(
     return target, takes_self
 
 
-def _refusal(call: ast.Call, target: object, *, takes_self: bool, elided: bool) -> str:
+def _refusal(call: ast.Call, target: object, *, takes_self: bool) -> str:
     """Why ``target``'s signature refuses ``call``, or ``""`` when it binds.
+
+    A call that elides its arguments (a positional ``...``, or the ``, ...)``
+    tail read as ``**__elided__``) is held only to what it writes, and the
+    elision is this call's alone: a call nested in its arguments is held to
+    all of its own.
 
     :param call: The call as the example writes it.
     :param target: The callable it reaches.
     :param takes_self: Whether the call leaves out the instance a method takes.
-    :param elided: Whether the fragment elides arguments after its keywords.
     :return: The :class:`TypeError` text :meth:`inspect.Signature.bind` raises.
     """
-    if any(isinstance(arg, ast.Starred) for arg in call.args) or any(
-        keyword.arg is None for keyword in call.keywords
-    ):
-        return ""  # ``*args`` and ``**options`` hide what they pass.
-    if not callable(target):
-        return ""
+    if not callable(target) or any(isinstance(arg, ast.Starred) for arg in call.args):
+        return ""  # Not callable, or ``*args`` hides what it passes.
+    elided = False
+    keywords: dict[str, None] = {}
+    for keyword in call.keywords:
+        if keyword.arg is not None:
+            keywords[keyword.arg] = None
+        elif isinstance(keyword.value, ast.Name) and keyword.value.id == _ELIDED:
+            elided = True
+        else:
+            return ""  # ``**options`` hides what it passes.
     try:
         signature = inspect.signature(target)
     except ValueError:
@@ -461,7 +473,6 @@ def _refusal(call: ast.Call, target: object, *, takes_self: bool, elided: bool) 
         if isinstance(arg, ast.Constant) and arg.value is Ellipsis:
             positional, elided = positional[:index], True
             break
-    keywords = dict.fromkeys(keyword.arg for keyword in call.keywords if keyword.arg)
     bind = signature.bind_partial if elided else signature.bind
     try:
         bind(*[None] * (len(positional) + takes_self), **keywords)

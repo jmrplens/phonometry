@@ -71,7 +71,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from . import _backends
-from .compute import RunProvenance
+from .compute import RunProvenance, _local_request
 from .ntff import ContourPhasors
 
 if TYPE_CHECKING:
@@ -721,6 +721,70 @@ def _acoustic_grid(
     return c_map, dx, _time_step(cfl, dx, float(c_map.max()))
 
 
+@dataclass(frozen=True)
+class _AcousticMedium:
+    """An acoustic medium checked on the host, before any device is asked for.
+
+    What :class:`FDTD2D` builds its maps from, and what an
+    :class:`FDTDRun` checks when it is built: the same function checks both,
+    so a bad argument raises the same error on every route.
+    """
+
+    c_map: Field2D
+    rho_map: Field2D
+    dx: float
+    dt: float
+    sponge_width: int
+    sides: tuple[Side, ...]
+    sponge_sides: tuple[Side, ...]
+    damping_map: NDArray[np.float64]
+    impedances: list[tuple[str, Field2D]]
+    obstacle: NDArray[np.bool_] | None
+
+
+def _acoustic_medium(
+    c: float | Field2D,
+    dx: float,
+    *,
+    rho: float | Field2D,
+    cfl: float,
+    sponge_width: int,
+    sponge_sides: Side | Iterable[Side] | None,
+    sponge_reflection: float,
+    damping: float | NDArray[np.float64],
+    shape: tuple[int, int] | None,
+    edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None,
+    obstacle_mask: NDArray[np.bool_] | None,
+) -> _AcousticMedium:
+    """Check every argument of :class:`FDTD2D` that describes the medium.
+
+    In the order the constructor always checked them: the grid and the
+    time step, the density, the sponge and the damping, the sponge sides,
+    the impedance edges, the obstacle.
+    """
+    c_map, dx, dt = _acoustic_grid(c, shape, cfl, dx)
+    ny, nx = c_map.shape
+    rho_map = _resolve_rho_map(rho, ny, nx)
+    width, damping_map = _validate_sponge_damping(
+        sponge_width, sponge_reflection, damping, ny, nx
+    )
+    sides = _resolve_sponge_sides(sponge_sides)
+    width = require_count(width, "sponge_width", at_least=None)
+    used = sides if width > 0 else ()
+    return _AcousticMedium(
+        c_map=c_map,
+        rho_map=rho_map,
+        dx=dx,
+        dt=dt,
+        sponge_width=width,
+        sides=sides,
+        sponge_sides=used,
+        damping_map=damping_map,
+        impedances=_validated_impedances(edge_impedance, used, ny, nx),
+        obstacle=_validated_obstacle(obstacle_mask, ny, nx),
+    )
+
+
 def _step_count(duration: float, dt: float) -> int:
     """The number of steps of *dt* that cover *duration*, at least one."""
     steps = round(duration / dt)
@@ -1143,6 +1207,9 @@ class FDTD2D:
     :raises TypeError: if ``cfl``, ``dx`` or ``sponge_reflection`` is not a single
         number, ``sponge_width`` is a flag, a text or an array where a count goes,
         or ``compute`` is neither a :class:`Compute` nor ``None``.
+    :raises ValueError: for an argument out of its range, and for a ``compute``
+        that names a host: an engine steps in this process, and only
+        :func:`fdtd_simulation` runs on a node.
     :raises ComputeImportError: when the library of the device ``compute``
         asks for is not installed or does not import.
     :raises ComputeDeviceError: when that device is not present, or fails a
@@ -1166,26 +1233,33 @@ class FDTD2D:
         obstacle_mask: NDArray[np.bool_] | None = None,
         compute: Compute | None = None,
     ) -> None:
-        c_map, self.dx, self.dt = _acoustic_grid(c, shape, cfl, dx)
+        medium = _acoustic_medium(
+            c,
+            dx,
+            rho=rho,
+            cfl=cfl,
+            sponge_width=sponge_width,
+            sponge_sides=sponge_sides,
+            sponge_reflection=sponge_reflection,
+            damping=damping,
+            shape=shape,
+            edge_impedance=edge_impedance,
+            obstacle_mask=obstacle_mask,
+        )
+        c_map, rho_map = medium.c_map, medium.rho_map
+        self.dx, self.dt = medium.dx, medium.dt
         ny, nx = c_map.shape
-        rho_map = _resolve_rho_map(rho, ny, nx)
-        sponge_width, damping_map = _validate_sponge_damping(
-            sponge_width, sponge_reflection, damping, ny, nx
-        )
-        sides = _resolve_sponge_sides(sponge_sides)
         #: Sponge-layer width in cells (read-only configuration record).
-        self.sponge_width = require_count(sponge_width, "sponge_width", at_least=None)
+        self.sponge_width = medium.sponge_width
         #: Sides carrying a sponge layer when ``sponge_width > 0``.
-        self.sponge_sides: tuple[str, ...] = sides if sponge_width > 0 else ()
-        impedances = _validated_impedances(edge_impedance, self.sponge_sides, ny, nx)
-        self._obstacle: NDArray[np.bool_] | None = _validated_obstacle(
-            obstacle_mask, ny, nx
-        )
+        self.sponge_sides: tuple[str, ...] = medium.sponge_sides
+        self._obstacle: NDArray[np.bool_] | None = medium.obstacle
 
         # Every argument is checked on the host before the device is asked
         # for, so a bad one raises its own error, never a missing library's
-        # or a fallback warning first.
-        backend = _backends.backend_for(compute)
+        # or a fallback warning first. Then a host is refused: an engine
+        # steps in this process.
+        backend = _backends.backend_for(_local_request(compute, owner="FDTD2D"))
         self._backend = backend
         self._xp = backend.xp
         # The medium the simulation was built on, as read-only copies of its
@@ -1217,7 +1291,13 @@ class FDTD2D:
         self._contour_probes: list[ContourProbe] = []
         self.n = 0  # completed steps
 
-        self._init_decay(sides, sponge_width, sponge_reflection, damping_map, c_max)
+        self._init_decay(
+            medium.sides,
+            medium.sponge_width,
+            sponge_reflection,
+            medium.damping_map,
+            c_max,
+        )
         rho_edges = {
             "left": self.rho[:, 0],
             "right": self.rho[:, -1],
@@ -1226,7 +1306,7 @@ class FDTD2D:
         }
         self._edges = [
             _ImpedanceEdge(side, z, rho_edges[side], self.dt, self.dx, backend)
-            for side, z in impedances
+            for side, z in medium.impedances
         ]
         #: Per-side impedance boundaries as supplied (immutable record), read
         #: once the edges have validated them; an array profile is kept as a

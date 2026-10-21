@@ -256,6 +256,7 @@ interfaces converge to the physical traction continuity.
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `cfl` is not a single number, `sponge_width` is a flag, a text or an array where a count goes, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | for an argument out of its range, and for a `compute` that names a host: an engine steps in this process, and only [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) runs on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 
@@ -349,7 +350,7 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them. |
+| ValueError | If a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them, or a `compute` keyword names a host: the engine steps in this process. |
 | TypeError | For a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, or a `compute` keyword that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ComputeImportError | When the library of the device a `compute` keyword asks for is not installed or does not import. |
 | ComputeDeviceError | When that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), pointing at the line that called this method, and steps on NumPy instead. |

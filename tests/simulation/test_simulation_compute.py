@@ -21,6 +21,7 @@ from phonometry.simulation import (
     ExplosionSource,
     FDTDRecording,
     GaussianPulse,
+    Material,
     PlaneWaveSource,
     elastic_fdtd_simulation,
     fdtd_simulation,
@@ -449,3 +450,63 @@ def test_a_result_refuses_a_provenance_that_is_not_a_run_provenance(
     res = _acoustic() if kind == "acoustic" else _elastic(ElasticRecording())
     with pytest.raises(TypeError, match="'provenance' must be a RunProvenance"):
         replace(res, provenance=provenance)
+
+
+# An engine steps in this process: it refuses a node, after its arguments.
+
+
+def _acoustic_engine(**kwargs: Any) -> FDTD2D:
+    return FDTD2D(343.0, 0.01, shape=(8, 8), **kwargs)
+
+
+def _elastic_engine(**kwargs: Any) -> ElasticFDTD2D:
+    return ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(8, 8), **kwargs)
+
+
+def _elastic_from_regions(**kwargs: Any) -> ElasticFDTD2D:
+    solid = Material(c_p=4000.0, c_s=2300.0, rho=2500.0)
+    return ElasticFDTD2D.from_regions((8, 8), 0.01, background=solid, **kwargs)
+
+
+@pytest.mark.parametrize(
+    ("build", "owner"),
+    [
+        (_acoustic_engine, "FDTD2D"),
+        (_elastic_engine, "ElasticFDTD2D"),
+        (_elastic_from_regions, "ElasticFDTD2D"),
+    ],
+)
+def test_an_engine_refuses_a_host_it_is_given(
+    build: Callable[..., object], owner: str
+) -> None:
+    request = Compute(device="cupy", host="nas")
+    with pytest.raises(
+        ValueError, match=f"{owner} steps in this process and cannot run on a node"
+    ):
+        build(compute=request)
+
+
+def test_an_engine_under_a_host_from_the_environment_asks_for_compute_explicitly(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", "cupy@nas")
+    with pytest.raises(
+        ValueError, match="PHONOMETRY_COMPUTE names host 'nas': pass compute="
+    ):
+        _acoustic_engine()
+
+
+@pytest.mark.parametrize(
+    ("build", "bad", "match"),
+    [
+        (_acoustic_engine, {"rho": -1.0}, "rho must be strictly positive"),
+        (_acoustic_engine, {"sponge_width": 9}, "sponge_width must be narrower"),
+        (_elastic_engine, {"free_sides": "middle"}, "unknown free sides"),
+    ],
+)
+def test_an_engine_checks_its_arguments_before_it_refuses_the_host(
+    build: Callable[..., object], bad: dict[str, object], match: str
+) -> None:
+    request = Compute(host="nas")
+    with pytest.raises(ValueError, match=match):
+        build(compute=request, **bad)

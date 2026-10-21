@@ -98,6 +98,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from . import _backends
+from .compute import _local_request
 from .fdtd import (
     _SIDES,
     Field2D,
@@ -561,6 +562,116 @@ def _elastic_grid(
     return cp_map, dx, _time_step(cfl, dx, float(cp_map.max()))
 
 
+def _checked_shear_speed(c_s: float | Field2D, cp_map: Field2D) -> Field2D:
+    """The S-wave speed map on the grid of *cp_map*, checked against it."""
+    ny, nx = cp_map.shape
+    cs_map = _resolve_speed_map("c_s", c_s, (ny, nx))
+    if cs_map.shape != (ny, nx):
+        msg = "c_s map must match the shape of c_p"
+        raise ValueError(msg)
+    if not np.all(np.isfinite(cs_map)) or bool(np.any(cs_map < 0.0)):
+        msg = "c_s must be non-negative and finite everywhere"
+        raise ValueError(msg)
+    # lambda >= 0 <=> c_p**2 >= 2 c_s**2 (a small relative tolerance
+    # admits c_s = c_p / sqrt(2) given in rounded floats).
+    if bool(np.any(cp_map**2 < 2.0 * cs_map**2 * (1.0 - 1e-9))):
+        msg = (
+            "c_p**2 must be at least 2 * c_s**2 in every "
+            "cell (non-negative lambda); c_s = 0 marks a "
+            "fluid cell"
+        )
+        raise ValueError(msg)
+    return cs_map
+
+
+def _checked_density(rho: float | Field2D, ny: int, nx: int) -> Field2D:
+    """The density map on the ``(ny, nx)`` grid, strictly positive."""
+    rho_map = (
+        np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
+        if np.isscalar(rho)
+        else np.asarray(rho, dtype=np.float64)
+    )
+    if rho_map.shape != (ny, nx):
+        msg = "rho map must match the shape of c_p"
+        raise ValueError(msg)
+    _positive_map("rho", rho_map)
+    return rho_map
+
+
+@dataclass(frozen=True)
+class _ElasticMedium:
+    """An elastic medium checked on the host, before any device is asked for.
+
+    What :class:`ElasticFDTD2D` builds its maps from, and what an
+    :class:`ElasticRun` checks when it is built: the same function checks
+    both, so a bad argument raises the same error on every route.
+    """
+
+    cp_map: Field2D
+    cs_map: Field2D
+    rho_map: Field2D
+    dx: float
+    dt: float
+    sponge_width: int
+    sides: tuple[Side, ...]
+    sponge_sides: tuple[Side, ...]
+    damping_map: NDArray[np.float64]
+    free_sides: tuple[str, ...]
+    obstacle: NDArray[np.bool_] | None
+
+
+def _elastic_medium(
+    c_p: float | Field2D,
+    c_s: float | Field2D,
+    dx: float,
+    *,
+    rho: float | Field2D,
+    cfl: float,
+    sponge_width: int,
+    sponge_sides: Side | Iterable[Side] | None,
+    sponge_reflection: float,
+    damping: float | NDArray[np.float64],
+    shape: tuple[int, int] | None,
+    free_sides: str | Iterable[str] | None,
+    obstacle_mask: NDArray[np.bool_] | None,
+) -> _ElasticMedium:
+    """Check every argument of :class:`ElasticFDTD2D` that describes the medium.
+
+    In the order the constructor always checked them: the grid, ``c_s``
+    against ``c_p``, the density, the sponge and the damping, the sides,
+    the free surfaces against the sponge, the obstacle. An
+    :class:`ElasticRun` calls it too, when it is built.
+    """
+    cp_map, dx, dt = _elastic_grid(c_p, shape, cfl, dx)
+    ny, nx = cp_map.shape
+    cs_map = _checked_shear_speed(c_s, cp_map)
+    rho_map = _checked_density(rho, ny, nx)
+    width, damping_map = _validate_sponge_damping(
+        sponge_width, sponge_reflection, damping, ny, nx
+    )
+    sides = _resolve_sponge_sides(sponge_sides)
+    width = require_count(width, "sponge_width", at_least=None)
+    used = sides if width > 0 else ()
+    free = _resolve_free_sides(free_sides)
+    overlap = set(free) & set(used)
+    if overlap:
+        msg = f"sides {sorted(overlap)} cannot be both free and absorbing"
+        raise ValueError(msg)
+    return _ElasticMedium(
+        cp_map=cp_map,
+        cs_map=cs_map,
+        rho_map=rho_map,
+        dx=dx,
+        dt=dt,
+        sponge_width=width,
+        sides=sides,
+        sponge_sides=used,
+        damping_map=damping_map,
+        free_sides=free,
+        obstacle=_validated_obstacle(obstacle_mask, ny, nx),
+    )
+
+
 def _check_elastic_source(
     source: ElasticSource,
     shape: tuple[int, ...],
@@ -684,6 +795,9 @@ class ElasticFDTD2D:
     :raises TypeError: if ``cfl`` is not a single number, ``sponge_width`` is a flag,
         a text or an array where a count goes, or ``compute`` is neither a
         :class:`Compute` nor ``None``.
+    :raises ValueError: for an argument out of its range, and for a ``compute``
+        that names a host: an engine steps in this process, and only
+        :func:`elastic_fdtd_simulation` runs on a node.
     :raises ComputeImportError: when the library of the device ``compute``
         asks for is not installed or does not import.
     :raises ComputeDeviceError: when that device is not present, or fails a
@@ -708,55 +822,36 @@ class ElasticFDTD2D:
         obstacle_mask: NDArray[np.bool_] | None = None,
         compute: Compute | None = None,
     ) -> None:
-        cp_map, self.dx, self.dt = _elastic_grid(c_p, shape, cfl, dx)
+        medium = _elastic_medium(
+            c_p,
+            c_s,
+            dx,
+            rho=rho,
+            cfl=cfl,
+            sponge_width=sponge_width,
+            sponge_sides=sponge_sides,
+            sponge_reflection=sponge_reflection,
+            damping=damping,
+            shape=shape,
+            free_sides=free_sides,
+            obstacle_mask=obstacle_mask,
+        )
+        cp_map, cs_map, rho_map = medium.cp_map, medium.cs_map, medium.rho_map
+        self.dx, self.dt = medium.dx, medium.dt
         ny, nx = cp_map.shape
-        cs_map = _resolve_speed_map("c_s", c_s, (ny, nx))
-        if cs_map.shape != (ny, nx):
-            msg = "c_s map must match the shape of c_p"
-            raise ValueError(msg)
-        if not np.all(np.isfinite(cs_map)) or bool(np.any(cs_map < 0.0)):
-            msg = "c_s must be non-negative and finite everywhere"
-            raise ValueError(msg)
-        # lambda >= 0 <=> c_p**2 >= 2 c_s**2 (a small relative tolerance
-        # admits c_s = c_p / sqrt(2) given in rounded floats).
-        if bool(np.any(cp_map**2 < 2.0 * cs_map**2 * (1.0 - 1e-9))):
-            msg = (
-                "c_p**2 must be at least 2 * c_s**2 in every "
-                "cell (non-negative lambda); c_s = 0 marks a "
-                "fluid cell"
-            )
-            raise ValueError(msg)
-        rho_map = (
-            np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
-            if np.isscalar(rho)
-            else np.asarray(rho, dtype=np.float64)
-        )
-        if rho_map.shape != (ny, nx):
-            msg = "rho map must match the shape of c_p"
-            raise ValueError(msg)
-        _positive_map("rho", rho_map)
-        sponge_width, damping_map = _validate_sponge_damping(
-            sponge_width, sponge_reflection, damping, ny, nx
-        )
-        sides = _resolve_sponge_sides(sponge_sides)
         #: Sponge-layer width in cells (read-only configuration record).
-        self.sponge_width = require_count(sponge_width, "sponge_width", at_least=None)
+        self.sponge_width = medium.sponge_width
         #: Sides carrying a sponge layer when ``sponge_width > 0``.
-        self.sponge_sides: tuple[str, ...] = sides if sponge_width > 0 else ()
+        self.sponge_sides: tuple[str, ...] = medium.sponge_sides
         #: Sides carrying a traction-free surface (immutable record).
-        self.free_sides: tuple[str, ...] = _resolve_free_sides(free_sides)
-        overlap = set(self.free_sides) & set(self.sponge_sides)
-        if overlap:
-            msg = f"sides {sorted(overlap)} cannot be both free and absorbing"
-            raise ValueError(msg)
-        self._obstacle: NDArray[np.bool_] | None = _validated_obstacle(
-            obstacle_mask, ny, nx
-        )
+        self.free_sides: tuple[str, ...] = medium.free_sides
+        self._obstacle: NDArray[np.bool_] | None = medium.obstacle
 
         # Every argument is checked on the host before the device is asked
         # for, so a bad one raises its own error, never a missing library's
-        # or a fallback warning first.
-        backend = _backends.backend_for(compute)
+        # or a fallback warning first. Then a host is refused: an engine
+        # steps in this process.
+        backend = _backends.backend_for(_local_request(compute, owner="ElasticFDTD2D"))
         self._backend = backend
         self._xp = backend.xp
         # Read-only copies of their own, so the maps the simulation reports
@@ -813,7 +908,13 @@ class ElasticFDTD2D:
         self._sources: list[ElasticSource] = []
         self.n = 0  # completed steps
 
-        self._init_decay(sides, sponge_width, sponge_reflection, damping_map, c_max)
+        self._init_decay(
+            medium.sides,
+            medium.sponge_width,
+            sponge_reflection,
+            medium.damping_map,
+            c_max,
+        )
         self._init_obstacle()
 
     @classmethod
@@ -861,7 +962,9 @@ class ElasticFDTD2D:
             ``damping``, ``free_sides``, ``obstacle_mask``, ``compute``).
         :return: The configured stepping engine.
         :raises ValueError: If a mask does not match ``shape`` or a
-            material spec is invalid, a catalogue row's refusal among them.
+            material spec is invalid, a catalogue row's refusal among them,
+            or a ``compute`` keyword names a host: the engine steps in this
+            process.
         :raises TypeError: For a mask array that is not boolean, a
             catalogue row of a class that lacks any of the bulk longitudinal
             speed, the transverse speed and the density, or a ``compute``

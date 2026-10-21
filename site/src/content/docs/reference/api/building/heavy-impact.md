@@ -137,6 +137,7 @@ corrections of Table D.3. The same formula rates `LiA,Fmax`,
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a wrong number of values or mismatched bands. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## AWeightedMaxImpactResult
 
@@ -212,6 +213,7 @@ Table A.1 (bang machine).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown source or a wrong number of bands. |
+| TypeError | if `force_exposure_level` holds a text or a value that is not a real number. |
 
 ## fast_reverberation_correction
 
@@ -249,6 +251,7 @@ when $T = T_0$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive reverberation time. |
+| TypeError | if `reference_time` is not a single number, or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## HEAVY_IMPACT_A_WEIGHTING
 
@@ -298,13 +301,14 @@ octaves with [`a_weighted_max_impact_level`](/phonometry/reference/api/building/
 | Exception | When |
 | :--- | :--- |
 | ValueError | when the length is not a positive multiple of three. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## heavy_impact_source_limits
 
 ```python
 heavy_impact_source_limits(
     source: str = 'rubber_ball',
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]
+) -> HeavyImpactSourceLimits
 ```
 
 Octave-band `LFE` tolerance band of a heavy impact source.
@@ -315,7 +319,7 @@ Octave-band `LFE` tolerance band of a heavy impact source.
 | :--- | :--- |
 | `source` | `"rubber_ball"` or `"bang_machine"`. |
 
-**Returns:** `(frequencies, lower, upper)`: the five octave-band centre frequencies in Hz and the `LFE` tolerance limits in dB re 1 N.
+**Returns:** The five octave-band centre frequencies in Hz and the `LFE` tolerance limits in dB re 1 N, lower first, as a [`HeavyImpactSourceLimits`](/phonometry/reference/api/building/heavy-impact/#heavyimpactsourcelimits).
 
 **Raises**
 
@@ -346,6 +350,7 @@ Printed specification of a standard heavy and soft impact source.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown source name. |
+| TypeError | if `source` is not a text. |
 
 ## HEAVY_IMPACT_SOURCES
 
@@ -426,6 +431,30 @@ Printed tolerance per band, in dB.
 *property*
 
 Per-band boolean mask of conforming bands.
+
+## HeavyImpactSourceLimits
+
+```python
+HeavyImpactSourceLimits(
+    frequencies: np.ndarray,
+    lower: np.ndarray,
+    upper: np.ndarray,
+)
+```
+
+The octave-band `LFE` tolerance band of a heavy impact source.
+
+What [`heavy_impact_source_limits`](/phonometry/reference/api/building/heavy-impact/#heavy_impact_source_limits) returns: the bands and the two
+limits, named, lower first, where a `(frequencies, lower, upper)` tuple
+used to be unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The five octave-band centre frequencies, in Hz. |
+| `lower` | The lower limit of the force exposure level `LFE` in each band, in dB re 1 N. |
+| `upper` | The upper limit, in dB re 1 N. |
 
 ## HeavyImpactSourceSpec
 
@@ -526,6 +555,7 @@ supplied record with the trapezoidal rule, so pass one isolated impact.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a malformed record or a non-positive parameter. |
+| TypeError | if `reference_force` or `reference_time` is not a single number. |
 
 ## standardized_max_impact_level
 
@@ -566,6 +596,7 @@ floor excited by the rubber ball. The reverberation term is
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched shapes or non-positive inputs. |
+| TypeError | if `reference_volume` or `volume` is not a single number, or `frequencies`, `levels` or `reverberation_time` holds a text or a value that is not a real number. |
 
 ## StandardizedMaxImpactResult
 

@@ -99,7 +99,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 
@@ -137,6 +137,7 @@ __all__ = [
     "fast_reverberation_correction",
     "heavy_impact_octave_levels",
     "heavy_impact_source_limits",
+    "HeavyImpactSourceLimits",
     "heavy_impact_source_specification",
     "impact_force_exposure_level",
     "standardized_max_impact_level",
@@ -323,28 +324,53 @@ def heavy_impact_source_specification(
         ``"bang_machine"`` (JIS A 1418-2 impact force characteristic 1).
     :return: The :class:`HeavyImpactSourceSpec`.
     :raises ValueError: for an unknown source name.
+    :raises TypeError: if ``source`` is not a text.
     """
     key = require_choice(source, "source", tuple(_SPECS))
     return _SPECS[key]
 
 
+@dataclass(frozen=True)
+class HeavyImpactSourceLimits(OwnsArrays):
+    """The octave-band ``LFE`` tolerance band of a heavy impact source.
+
+    What :func:`heavy_impact_source_limits` returns: the bands and the two
+    limits, named, lower first, where a ``(frequencies, lower, upper)`` tuple
+    used to be unpacked by position.
+
+    :ivar frequencies: The five octave-band centre frequencies, in Hz.
+    :ivar lower: The lower limit of the force exposure level ``LFE`` in each
+        band, in dB re 1 N.
+    :ivar upper: The upper limit, in dB re 1 N.
+    """
+
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {"lower": "dB", "upper": "dB"}
+    )
+
+    frequencies: np.ndarray
+    lower: np.ndarray
+    upper: np.ndarray
+
+
 def heavy_impact_source_limits(
     source: str = "rubber_ball",
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> HeavyImpactSourceLimits:
     """Octave-band ``LFE`` tolerance band of a heavy impact source.
 
     :param source: ``"rubber_ball"`` or ``"bang_machine"``.
-    :return: ``(frequencies, lower, upper)``: the five octave-band centre
-        frequencies in Hz and the ``LFE`` tolerance limits in dB re 1 N.
+    :return: The five octave-band centre frequencies in Hz and the ``LFE``
+        tolerance limits in dB re 1 N, lower first, as a
+        :class:`HeavyImpactSourceLimits`.
     :raises ValueError: for an unknown source name.
     """
     spec = heavy_impact_source_specification(source)
     nominal = np.asarray(spec.force_exposure_level, dtype=np.float64)
     tol = np.asarray(spec.tolerance_db, dtype=np.float64)
-    return (
-        np.asarray(spec.frequencies, dtype=np.float64),
-        nominal - tol,
-        nominal + tol,
+    return HeavyImpactSourceLimits(
+        frequencies=np.asarray(spec.frequencies, dtype=np.float64),
+        lower=nominal - tol,
+        upper=nominal + tol,
     )
 
 
@@ -389,6 +415,8 @@ def impact_force_exposure_level(
         (Default: 1 s).
     :return: The impact force exposure level ``LFE``, in dB re 1 N.
     :raises ValueError: for a malformed record or a non-positive parameter.
+    :raises TypeError: if ``reference_force`` or ``reference_time`` is not a single
+        number.
     """
     rate = resolve_fs(force, fs, name="force")
     # calibrate=False: a Signal may carry a digital-to-pascal factor and
@@ -437,6 +465,7 @@ class HeavyImpactSourceCheck(OwnsArrays):
 
         :raises ValueError: if ``source`` is not a standard source name, or
             ``measured`` does not hold one finite level per printed band.
+        :raises TypeError: if ``source`` is not a text.
         """
         require_choice(self.source, "source", tuple(_SPECS))
         n = len(_SPECS[self.source].frequencies)
@@ -522,6 +551,8 @@ def check_heavy_impact_source(
     :param source: ``"rubber_ball"`` or ``"bang_machine"``.
     :return: A :class:`HeavyImpactSourceCheck`.
     :raises ValueError: for an unknown source or a wrong number of bands.
+    :raises TypeError: if ``force_exposure_level`` holds a text or a value that is not a
+        real number.
     """
     spec = heavy_impact_source_specification(source)
     measured = require_finite_array(force_exposure_level, "force_exposure_level")
@@ -574,6 +605,8 @@ def fast_reverberation_correction(
         (Default: 0,5 s).
     :return: The correction per band, in dB.
     :raises ValueError: for a non-positive reverberation time.
+    :raises TypeError: if ``reference_time`` is not a single number, or
+        ``reverberation_time`` holds a text or a value that is not a real number.
     """
     t = require_finite_array(reverberation_time, "reverberation_time")
     if np.any(t <= 0.0):
@@ -691,6 +724,9 @@ def standardized_max_impact_level(
         for dwellings).
     :return: A :class:`StandardizedMaxImpactResult`.
     :raises ValueError: for mismatched shapes or non-positive inputs.
+    :raises TypeError: if ``reference_volume`` or ``volume`` is not a single number, or
+        ``frequencies``, ``levels`` or ``reverberation_time`` holds a text or a value
+        that is not a real number.
     """
     li = require_finite_array(levels, "levels")
     v = require_positive(volume, "volume")
@@ -740,6 +776,7 @@ def heavy_impact_octave_levels(levels: ArrayLike) -> np.ndarray:
     :param levels: One-third-octave levels in ascending order, in dB.
     :return: The octave-band levels, in dB.
     :raises ValueError: when the length is not a positive multiple of three.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     x = require_finite_array(levels, "levels")
     if x.size % 3 != 0:
@@ -798,6 +835,8 @@ class AWeightedMaxImpactResult(OwnsArrays):
 
         :raises ValueError: if any per-band column disagrees with the rest,
             or ``fraction`` is not 1 or 3.
+        :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a
+            float).
         """
         require_band_fraction(self.fraction, "fraction")
         require_ranks(self, frequencies=1, levels=1, a_weighting=1, corrected=1)
@@ -854,6 +893,8 @@ def a_weighted_max_impact_level(
         when omitted.
     :return: An :class:`AWeightedMaxImpactResult`.
     :raises ValueError: for a wrong number of values or mismatched bands.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
+        ``frequencies`` or ``levels`` holds a text or a value that is not a real number.
     """
     x = require_finite_array(levels, "levels")
     if fraction is None:

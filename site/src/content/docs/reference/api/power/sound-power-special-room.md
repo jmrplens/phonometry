@@ -157,6 +157,7 @@ but keeps it out of the verdict, the clause saying "should".
 | Exception | When |
 | :--- | :--- |
 | ValueError | for reverberation times that are not positive and finite, a length mismatch, the refusals of [`reverberation_parameter`](/phonometry/reference/api/power/sound-power-special-room/#reverberation_parameter), an unknown method, a climate given in part or out of range, or a source volume that is not positive. |
+| TypeError | if `method` is not a text, or `nominal_reverberation_time_s` or `source_volume_m3` is not a single number. |
 
 ## check_special_room_suitability
 
@@ -300,6 +301,7 @@ that volume too and nothing is read off the figure.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency, volume, area or speed, or only one of the NOTE's two inputs. |
+| TypeError | if `speed_of_sound`, `surface_area` or `volume` is not a single number. |
 
 ## sound_power_special_room
 
@@ -359,6 +361,7 @@ Annex F total of the octave bands.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels or a background of an inadmissible shape or not finite, frequencies outside Table F.1, a non-positive volume or nominal reverberation time, a climate out of range, a negative `sigma_omc_db` or a coverage factor that is not positive. |
+| TypeError | if `nominal_reverberation_time_s` or `volume` is not a single number. |
 
 ## sound_power_special_room_comparison
 
@@ -506,6 +509,7 @@ shall be reported.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for levels that are not a finite 2D array of at least two positions, bands outside 125 Hz to 8 kHz, a column Table 3 does not have, or A-weighted levels not one per position. |
+| TypeError | if `n_microphone_positions` is a flag, a text or an array where a count goes. |
 
 ## SpecialRoomReverberationCheck
 

@@ -72,6 +72,7 @@ def characteristic_impedance(density: float, speed_of_sound: float) -> float:
     :param speed_of_sound: Speed of sound ``c``, in m/s.
     :return: Characteristic impedance ``rho c``, in Pa*s/m (rayl).
     :raises ValueError: if either argument is not a positive finite number.
+    :raises TypeError: if ``density`` or ``speed_of_sound`` is not a single number.
     """
     # A bare `<= 0.0` lets NaN through, since every comparison with NaN is
     # false, and the product then comes back as NaN rather than raising. The

@@ -125,6 +125,7 @@ class DiffusionResult(OwnsArrays):
         :raises ValueError: if ``angles_deg`` and ``levels`` disagree, if
             ``angles_deg`` / ``coefficient`` is non-finite, or if ``levels``
             carries a ``NaN`` or a ``+inf``.
+        :raises TypeError: if ``coefficient`` is not a single number.
         """
         require_ranks(self, angles_deg=1, levels=1)
         require_same_length(self, "angles_deg", "levels", axis="receiver")

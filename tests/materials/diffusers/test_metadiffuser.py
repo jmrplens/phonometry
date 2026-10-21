@@ -18,6 +18,8 @@ alone).
 
 from __future__ import annotations
 
+import dataclasses
+
 import numpy as np
 import pytest
 
@@ -269,8 +271,6 @@ def test_result_plots_render_and_validate() -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    from phonometry.materials.diffusers.metadiffuser import MetadiffuserResult
-
     f = np.arange(400.0, 601.0, 50.0)
     result = metadiffuser_reflection(
         f, [ABSORBER, INVERTER], depth_m=0.03, period_m=0.10
@@ -282,12 +282,6 @@ def test_result_plots_render_and_validate() -> None:
         ax = result.plot_geometry(language=language)
         assert ax.patches
         plt.close(ax.figure)
-    bare = MetadiffuserResult(
-        frequencies=f,
-        reflection=result.reflection,
-        absorption=result.absorption,
-        well_absorption=result.well_absorption,
-    )
-    with pytest.raises(ValueError, match=r"This result does not retain its geometry"):
-        bare.plot_geometry()
+    with pytest.raises(TypeError, match=r"MetadiffuserResult: 'wells' is required"):
+        dataclasses.replace(result, wells=None)
     plt.close("all")

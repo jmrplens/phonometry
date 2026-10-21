@@ -628,7 +628,7 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
         ("frequencies", float("nan")),
         ("frequencies", float("inf")),
         ("response_db", float("nan")),
-        ("polar_db", float("nan")),
+        ("polar_response_db", float("nan")),
         ("noise_band_levels", float("nan")),
     ],
 )

@@ -60,7 +60,8 @@ spec = building.heavy_impact_source_specification("rubber_ball")
 print(spec.drop_height_m, spec.effective_mass)      # 1.0 m, 2.5 kg
 print(spec.contact_time, spec.contact_time_tolerance)   # 0.02 s +/- 0.002 s
 
-freqs, lower, upper = building.heavy_impact_source_limits("bang_machine")
+limits = building.heavy_impact_source_limits("bang_machine")
+freqs, lower, upper = limits.frequencies, limits.lower, limits.upper
 print(list(zip(freqs, lower, upper))[0])          # (31.5, 46.0, 48.0)
 
 # A calibration run: five measured octave-band LFE against the printed table.

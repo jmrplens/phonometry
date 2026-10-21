@@ -49,7 +49,7 @@ results (Clause 8 e)) also carries the spectrum adaptation term ``CI,Δ`` (ISO
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, ClassVar
 
@@ -138,6 +138,7 @@ def acceleration_level(
     :return: The acceleration level ``La`` per band, in dB.
     :raises ValueError: Non-finite or non-positive acceleration, or a
         non-positive reference.
+    :raises TypeError: if ``reference`` is not a single number.
     """
     require_scalar(reference, "reference")
     a = _finite(acceleration, "acceleration")
@@ -165,16 +166,22 @@ class BackgroundCorrectedLevel(OwnsArrays):
     :ivar signal_and_background: Measured level ``L'`` (with background), in
         dB; one value per band, or a (positions, bands) array.
     :ivar background: Background-noise level ``Lb``, in dB, of the same shape.
+    :ivar frequencies: The band centre frequencies, in Hz, one per band (the
+        last axis of the readings), or ``None`` where the bands were not
+        named; only the plot reads them.
     """
 
     signal_and_background: NDArray[np.float64]
     background: NDArray[np.float64]
+    _: KW_ONLY
+    frequencies: NDArray[np.float64] | None = None
 
     def __post_init__(self) -> None:
         """Hold the readings read-only and reject readings that do not pair.
 
-        :raises ValueError: For readings of different shapes or values that are
-            not finite.
+        :raises ValueError: For readings of different shapes, values that are
+            not finite, or band frequencies that are not one positive value per
+            band.
         """
         lp = _finite(self.signal_and_background, "signal_and_background")
         lb = _finite(self.background, "background")
@@ -185,6 +192,15 @@ class BackgroundCorrectedLevel(OwnsArrays):
         )
         object.__setattr__(self, "signal_and_background", read_only(lp))
         object.__setattr__(self, "background", read_only(lb))
+        if self.frequencies is not None:
+            freqs = _finite(self.frequencies, "frequencies")
+            if freqs.ndim != 1 or freqs.size != lp.shape[-1] or np.any(freqs <= 0.0):
+                msg = (
+                    f"'frequencies' must be one positive centre frequency per "
+                    f"band, {lp.shape[-1]} of them; got shape {freqs.shape}."
+                )
+                raise ValueError(msg)
+            object.__setattr__(self, "frequencies", read_only(freqs))
 
     @property
     def margins_db(self) -> NDArray[np.float64]:
@@ -217,10 +233,37 @@ class BackgroundCorrectedLevel(OwnsArrays):
             np.where(self.limited, lp - _LIMIT_CORRECTION, corrected), dtype=np.float64
         )
 
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        r"""Plot the margin :math:`L' - L_\mathrm{b}` of each band against the criterion.
+
+        The bands at 15 dB or more are used unchanged, those between 6 dB
+        and 15 dB have the background subtracted in energy, and those under
+        6 dB are held at the 1.3 dB limit of measurement; the two boundaries
+        are drawn across the bands and the three regimes are told apart. A
+        (positions, bands) record draws one line per position.
+
+        Requires matplotlib (``pip install phonometry[plot]``).
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the margin bars, or to the line of each
+            position.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.building import plot_background_corrected_level
+
+        check_language(language)
+        return plot_background_corrected_level(self, ax=ax, language=language, **kwargs)
+
 
 def background_corrected_level(
     signal_and_background: float | Sequence[float] | np.ndarray,
     background: float | Sequence[float] | np.ndarray,
+    *,
+    frequencies: Sequence[float] | np.ndarray | None = None,
 ) -> BackgroundCorrectedLevel:
     r"""Correct a measured level for background noise (ISO 16251-1 F. (2)).
 
@@ -229,11 +272,14 @@ def background_corrected_level(
         position.
     :param background: Background-noise level ``Lb`` per band, in dB, of the
         same shape.
+    :param frequencies: The band centre frequencies, in Hz, one per band, for
+        the plot to name the bands by; ``None`` (the default) numbers them.
     :return: The correction, as a :class:`BackgroundCorrectedLevel`: the
         corrected levels ``L`` in its ``corrected_levels``, and in its
         ``limited`` the bands at the 1.3 dB limit of measurement (report as
         :math:`> \Delta L`).
-    :raises ValueError: Mismatched shapes or non-finite values.
+    :raises ValueError: Mismatched shapes, non-finite values, or band
+        frequencies that are not one positive value per band.
     """
     lp = _finite(signal_and_background, "signal_and_background")
     lb = _finite(background, "background")
@@ -242,7 +288,13 @@ def background_corrected_level(
         {"signal_and_background": lp.shape, "background": lb.shape},
         "band",
     )
-    return BackgroundCorrectedLevel(lp, lb)
+    return BackgroundCorrectedLevel(
+        lp,
+        lb,
+        frequencies=None
+        if frequencies is None
+        else np.asarray(frequencies, dtype=np.float64),
+    )
 
 
 @dataclass(frozen=True)
@@ -588,6 +640,7 @@ class OctaveBandSpectrum(OwnsArrays):
         :raises ValueError: if ``quantity`` is not one of the five above, or
             the two columns are not one-dimensional arrays of one value per
             octave.
+        :raises TypeError: if ``quantity`` is not a text.
         """
         require_choice(self.quantity, "quantity", _OCTAVE_BAND_QUANTITIES)
         require_ranks(self, frequencies=1, values=1)
@@ -634,6 +687,7 @@ def improvement_octave_bands(
         (``.frequencies``) and the octave values (``.values``).
     :raises ValueError: The thirds do not group into complete octave triplets,
         or ``quantity`` is not one of the three.
+    :raises TypeError: if ``quantity`` is not a text.
     """
     require_choice(quantity, "quantity", _OCTAVE_BAND_QUANTITIES[:3])
     dl = _finite(improvement, "improvement")

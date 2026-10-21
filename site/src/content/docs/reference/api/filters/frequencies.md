@@ -71,6 +71,7 @@ reaches `limits[1]`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive or non-finite `fraction`. |
+| TypeError | if `fraction` is not a single number. |
 
 ## normalized_frequencies
 
@@ -87,3 +88,9 @@ Get standardized IEC center frequencies.
 | `fraction` | 1 or 3 (Octave or 1/3 Octave). |
 
 **Returns:** List of standard frequencies.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fraction` is not a single number. |

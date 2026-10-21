@@ -436,7 +436,7 @@ class MicrophoneCharacteristics(OwnsArrays):
         dB SPL (17.2 b), or ``None``.
     :ivar polar_angles_deg: Directional-pattern angles, in degrees (13.1), or
         ``None``.
-    :ivar polar_db: Directional pattern :math:`G(\theta)` relative to the
+    :ivar polar_response_db: Directional pattern :math:`G(\theta)` relative to the
         reference-axis response, in dB (13.1.2), or ``None``.
     :ivar polar_frequency: Stated frequency of the directional pattern, in Hz,
         or ``None``.
@@ -466,7 +466,7 @@ class MicrophoneCharacteristics(OwnsArrays):
     noise_frequencies: NDArray[np.float64] | None
     noise_band_levels: NDArray[np.float64] | None
     polar_angles_deg: NDArray[np.float64] | None
-    polar_db: NDArray[np.float64] | None
+    polar_response_db: NDArray[np.float64] | None
     polar_frequency: float | None
     directivity_index: float | None
     powering: str | None
@@ -521,6 +521,7 @@ class MicrophoneCharacteristics(OwnsArrays):
             the other, a curve or a scalar field is not finite, the effective
             range is not an ordered pair of finite frequencies, or the noise
             weighting is not an IEC 60268-1 measurement.
+        :raises TypeError: if ``noise_weighting`` is not a text.
         """
         require_ranks(
             self,
@@ -531,11 +532,11 @@ class MicrophoneCharacteristics(OwnsArrays):
             noise_frequencies=1,
             noise_band_levels=1,
             polar_angles_deg=1,
-            polar_db=1,
+            polar_response_db=1,
         )
         require_same_length(self, "frequencies", "response_db", axis="frequency")
         require_same_length(
-            self, "polar_angles_deg", "polar_db", axis="angle of incidence"
+            self, "polar_angles_deg", "polar_response_db", axis="angle of incidence"
         )
         require_same_length(self, "noise_frequencies", "noise_band_levels", axis="band")
         require_same_length(
@@ -553,7 +554,7 @@ class MicrophoneCharacteristics(OwnsArrays):
             "noise_frequencies",
             "noise_band_levels",
             "polar_angles_deg",
-            "polar_db",
+            "polar_response_db",
             "reference_frequency_hz",
             "sensitivity_mv_per_pa",
             "sensitivity_level",
@@ -807,6 +808,8 @@ def microphone_characteristics(
         (Clause 9) as a :class:`MicrophoneElectrical`.
     :return: A :class:`MicrophoneCharacteristics`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``reference_frequency_hz``, ``sensitivity_mv_per_pa`` or
+        ``tolerance_db`` is not a single number.
     """
     f, resp = _as_curve(frequencies, response_db, "frequency response")
     m_mv = require_positive(sensitivity_mv_per_pa, "sensitivity_mv_per_pa")
@@ -859,7 +862,7 @@ def microphone_characteristics(
         noise_frequencies=n_f,
         noise_band_levels=n_db,
         polar_angles_deg=p_ang,
-        polar_db=p_db,
+        polar_response_db=p_db,
         polar_frequency=(
             require_positive(directivity.frequency, "directivity.frequency")
             if directivity.frequency is not None

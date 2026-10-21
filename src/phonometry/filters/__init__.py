@@ -48,6 +48,7 @@ from .weighting import (
     weighting_filter,
 )
 from .weighting_compliance import (
+    WeightingClassLimits,
     WeightingComplianceResult,
     verify_weighting_class,
     weighting_class_limits,
@@ -91,5 +92,6 @@ __all__ = [
     "verify_time_invariance",
     "verify_weighting_class",
     "weighting_class_limits",
+    "WeightingClassLimits",
     "weighting_filter",
 ]

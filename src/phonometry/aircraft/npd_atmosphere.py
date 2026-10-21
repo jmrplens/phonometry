@@ -381,6 +381,8 @@ def npd_atmosphere_increment(
     :raises ValueError: for a spectrum that is not 24 finite levels, an unknown
         absorption route, a distance that is not positive, or an atmosphere
         the chosen route refuses.
+    :raises TypeError: if ``absorption`` is not a text, or ``distances_m`` holds a text
+        or a value that is not a real number.
     """
     levels = _spectrum_levels(spectrum)
     route = require_choice(absorption, "absorption", _ABSORPTION)

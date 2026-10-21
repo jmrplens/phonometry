@@ -305,6 +305,7 @@ def cepstrum(
         time-aliasing of sharp log-spectrum features.
     :return: A :class:`CepstrumResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes.
     """
     xa = _validate_signal(x, "x", context="a cepstrum")
     fs_v = _positive(resolve_fs(x, fs), "fs")
@@ -338,7 +339,7 @@ class LifterResult(OwnsArrays):
 
     :ivar frequencies: Frequency axis, in Hz.
     :ivar spectrum_db: Log-magnitude spectrum of the record, in dB.
-    :ivar liftered_db: Log-magnitude spectrum rebuilt from the kept
+    :ivar liftered_spectrum_db: Log-magnitude spectrum rebuilt from the kept
         quefrencies alone, in dB. Lowpass and highpass parts add up to
         :attr:`spectrum_db` exactly (the split is linear in the log).
     :ivar quefrencies: Quefrency axis of the underlying real cepstrum, s.
@@ -352,7 +353,7 @@ class LifterResult(OwnsArrays):
 
     frequencies: NDArray[np.float64]
     spectrum_db: NDArray[np.float64]
-    liftered_db: NDArray[np.float64]
+    liftered_spectrum_db: NDArray[np.float64]
     quefrencies: NDArray[np.float64]
     cepstrum: NDArray[np.float64]
     cutoff: float
@@ -369,7 +370,7 @@ class LifterResult(OwnsArrays):
         window was applied to. Each is checked against its own companions
         only, and the two fail in different ways.
 
-        :meth:`plot` overlays :attr:`spectrum_db` and :attr:`liftered_db` on
+        :meth:`plot` overlays :attr:`spectrum_db` and :attr:`liftered_spectrum_db` on
         :attr:`frequencies` with one ``Axes.plot`` call each, and those
         refuse a mis-sized curve outright, in either direction ("x and y must
         have same first dimension"). What the check adds there is where and
@@ -390,12 +391,12 @@ class LifterResult(OwnsArrays):
             self,
             frequencies=1,
             spectrum_db=1,
-            liftered_db=1,
+            liftered_spectrum_db=1,
             quefrencies=1,
             cepstrum=1,
         )
         require_same_length(
-            self, "frequencies", "spectrum_db", "liftered_db", axis="frequency"
+            self, "frequencies", "spectrum_db", "liftered_spectrum_db", axis="frequency"
         )
         require_same_length(self, "quefrencies", "cepstrum", axis="quefrency")
 
@@ -437,7 +438,7 @@ def lifter(
         calibration is applied to the samples, though a cepstrum is a
         log-spectrum transform: the factor lands on the zeroth quefrency
         alone. ``spectrum_db`` shifts by 20 lg of it either way; the
-        zeroth quefrency shifts with it; and ``liftered_db`` shifts too
+        zeroth quefrency shifts with it; and ``liftered_spectrum_db`` shifts too
         under ``mode='lowpass'``, which keeps that quefrency, but not
         under ``'highpass'``, which is what lifters it away.
     :param fs: Sample rate, in Hz. Required for a bare array; a
@@ -450,6 +451,7 @@ def lifter(
         length, rounded up to even).
     :return: A :class:`LifterResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes.
     """
     xa = _validate_signal(x, "x", context="liftering")
     fs_v = _positive(resolve_fs(x, fs), "fs")
@@ -477,7 +479,7 @@ def lifter(
     return LifterResult(
         frequencies=np.fft.rfftfreq(n, 1.0 / fs_v),
         spectrum_db=np.asarray(_NEPER_TO_DB * log_mag, dtype=np.float64),
-        liftered_db=np.asarray(_NEPER_TO_DB * liftered_log, dtype=np.float64),
+        liftered_spectrum_db=np.asarray(_NEPER_TO_DB * liftered_log, dtype=np.float64),
         quefrencies=np.arange(n, dtype=np.float64) / fs_v,
         cepstrum=values,
         cutoff=cut / fs_v,

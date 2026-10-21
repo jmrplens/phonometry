@@ -63,9 +63,8 @@ J1J2J3 = {
 # ---------------------------------------------------------------------------
 def test_wave_parameters_closed_form() -> None:
     # h1 cL1 = 0.1*3200, h2 cL2 = 0.2*3200 -> chi = sqrt(0.5), psi = 2*(480/240).
-    chi, psi = vibration.junction_wave_parameters(
-        0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0
-    )
+    params = vibration.junction_wave_parameters(0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0)
+    chi, psi = params.chi, params.psi
     assert chi == pytest.approx(math.sqrt(0.1 * 3200.0 / (0.2 * 3200.0)))
     assert chi == pytest.approx(math.sqrt(0.5))
     assert psi == pytest.approx((0.2 * 3200.0 * 480.0) / (0.1 * 3200.0 * 240.0))
@@ -73,16 +72,17 @@ def test_wave_parameters_closed_form() -> None:
 
 
 def test_wave_parameters_identical_plates_are_unity() -> None:
-    chi, psi = vibration.junction_wave_parameters(
+    params = vibration.junction_wave_parameters(
         0.15, 3100.0, 375.0, 0.15, 3100.0, 375.0
     )
+    chi, psi = params.chi, params.psi
     assert chi == pytest.approx(1.0)
     assert psi == pytest.approx(1.0)
 
 
 def test_chi_equals_sqrt_critical_frequency_ratio() -> None:
     # chi = sqrt(fc2 / fc1); fc ~ 1 / (cL h), so fc2/fc1 = (h1 cL1)/(h2 cL2).
-    chi, _ = vibration.junction_wave_parameters(0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0)
+    chi = vibration.junction_wave_parameters(0.1, 3200.0, 240.0, 0.2, 3200.0, 480.0).chi
     fc1 = 1.0 / (3200.0 * 0.1)
     fc2 = 1.0 / (3200.0 * 0.2)
     assert chi == pytest.approx(math.sqrt(fc2 / fc1))

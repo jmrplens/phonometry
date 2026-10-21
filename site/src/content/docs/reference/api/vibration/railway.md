@@ -77,6 +77,7 @@ normalised to unit area: equal bins across the range of the stretch.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record or fewer than two bins. |
+| TypeError | if `n_bins` is a flag, a text or an array where a count goes. |
 
 ## AmplitudeDistribution
 
@@ -121,6 +122,7 @@ $10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}$, the energy sum of the bands.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty or non-finite input. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## centered_interval
 
@@ -155,6 +157,7 @@ rather than cut, so it keeps its length.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record or a non-positive rate or duration. |
+| TypeError | if `duration_s` or `fs` is not a single number. |
 
 ## combined_event_velocity
 
@@ -180,6 +183,7 @@ passage spread over the same hour: $v_{\mathrm{E\,ges}} = \sqrt{\sum v_{\mathrm{
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty, non-finite or negative input. |
+| TypeError | if `event_velocities_mm_s` holds a text or a value that is not a real number. |
 
 ## elastic_insertion_loss
 
@@ -212,6 +216,7 @@ two spectra.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two do not match band for band. |
+| TypeError | if `levels_after` or `levels_before` holds a text or a value that is not a real number. |
 
 ## evaluate_train_passage
 
@@ -253,6 +258,7 @@ severity DIN 4150-2 reads, and the third-octave levels of Figure 6.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a rate the chain or the upper band cannot take, a stretch outside the record, stretches that do not nest or a $T_1$ longer than $T_2$, or an upper band that is not a nominal centre from 80 Hz to 315 Hz. |
+| TypeError | if `upper_band_hz` is not a single number. |
 
 ## EVENT_REFERENCE_DURATION_S
 
@@ -288,6 +294,7 @@ velocity that, held for an hour, carries the energy the passage carried.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative velocity or a non-positive duration. |
+| TypeError | if `duration_s` or `interval_rms_mm_s` is not a single number. |
 
 ## event_velocity_level
 
@@ -315,6 +322,7 @@ is [`event_velocity`](/phonometry/reference/api/vibration/railway/#event_velocit
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive velocity or duration. |
+| TypeError | if `duration_s` or `interval_rms_mm_s` is not a single number. |
 
 ## interval_rms
 
@@ -349,6 +357,7 @@ Formula (4) and which is what a meter reading its display produces.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a non-positive rate, or an interval that is empty or runs outside the record. |
+| TypeError | if `fs` is not a single number. |
 
 ## narrowband_psd
 
@@ -384,6 +393,7 @@ back to the mean square of the stretch, which is Formula (14).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a non-positive rate or resolution, or a stretch shorter than one block. |
+| TypeError | if `fs` or `resolution_hz` is not a single number. |
 
 ## NARROWBAND_RESOLUTION_HZ
 
@@ -422,6 +432,7 @@ $10 \lg \langle 10^{L/10} \rangle$, the level of
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty or non-finite input. |
+| TypeError | if `axis` is a flag, a text or an array where a count goes. |
 
 ## passage_average_velocity
 
@@ -448,6 +459,7 @@ spectral densities average arithmetically line by line.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty, non-finite or negative input. |
+| TypeError | if `interval_rms_mm_s` holds a text or a value that is not a real number. |
 
 ## PASSAGE_BANDS_HZ
 
@@ -488,6 +500,7 @@ all of its mean square. This returns the formula as printed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative or non-finite density or a non-positive duration. |
+| TypeError | if `duration_s` is not a single number, or `psd` holds a text or a value that is not a real number. |
 
 ## running_acceleration_level
 
@@ -607,6 +620,7 @@ hertz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative or non-finite density. |
+| TypeError | if `psd` holds a text or a value that is not a real number. |
 
 ## T1_DURATION_S
 
@@ -631,7 +645,7 @@ third_octaves_from_narrowband(
     psd: ArrayLike,
     *,
     frequencies: ArrayLike,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]
+) -> ThirdOctaveVelocities
 ```
 
 Add a narrow-band spectrum back into third octaves, Formula (23).
@@ -662,13 +676,36 @@ bands out rather than filling them with the lines of a neighbour.
 | `frequencies` | The line frequencies of the spectrum, in hertz, evenly spaced at 1,25 Hz. |
 | `psd` | The one-sided power spectral density at those lines, in (mm/s)²/Hz. |
 
-**Returns:** `(centres, rms)`: the nominal centres of the bands the spectrum holds whole, from [`THIRD_OCTAVE_LINES`](/phonometry/reference/api/vibration/railway/#third_octave_lines), in hertz, and the band r.m.s. in each, in mm/s.
+**Returns:** The nominal centres of the bands the spectrum holds whole, from [`THIRD_OCTAVE_LINES`](/phonometry/reference/api/vibration/railway/#third_octave_lines), in hertz, and the band r.m.s. in each, in mm/s, as a [`ThirdOctaveVelocities`](/phonometry/reference/api/vibration/railway/#thirdoctavevelocities).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | For mismatched or non-finite inputs, a negative density, uneven spacing, or a spacing Table 1 is not written for. |
+| TypeError | if `frequencies` or `psd` holds a text or a value that is not a real number. |
+
+## ThirdOctaveVelocities
+
+```python
+ThirdOctaveVelocities(
+    frequencies: NDArray[np.float64],
+    velocities_mm_s: NDArray[np.float64],
+)
+```
+
+Band r.m.s. velocities added back from a narrow-band spectrum (Formula (23)).
+
+What [`third_octaves_from_narrowband`](/phonometry/reference/api/vibration/railway/#third_octaves_from_narrowband) returns: the band centres and
+the band r.m.s. values, named, where a `(centres, rms)` tuple used to be
+unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The nominal centres of the bands the spectrum holds whole, in hertz. |
+| `velocities_mm_s` | The band r.m.s. velocity in each, in mm/s. |
 
 ## TrainPassage
 
@@ -799,3 +836,4 @@ square: $G_{vv} = G_{\mathrm{V}} / (\kappa_A^2 \kappa_V^2)$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative or non-finite density or a non-positive coefficient. |
+| TypeError | if `gain` or `sensitivity_v_per_mm_s` is not a single number, or `psd_v2_per_hz` holds a text or a value that is not a real number. |

@@ -67,6 +67,7 @@ Predicted underwater source-level spectrum of a ship.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `model`/`vessel_class` is unknown or an input is invalid. |
+| TypeError | if `length_m` or `speed_kt` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## ShipTrafficSpectrum
 

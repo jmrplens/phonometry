@@ -52,7 +52,8 @@ TABLE_B2 = [
 
 @pytest.mark.parametrize(("phon", "freq", "expected"), TABLE_B1)
 def test_contour_matches_annex_b1(phon: float, freq: float, expected: float) -> None:
-    freqs, spl = psychoacoustics.equal_loudness_contour(phon)
+    contour = psychoacoustics.equal_loudness_contour(phon)
+    freqs, spl = contour.frequencies, contour.levels
     idx = int(np.argmin(np.abs(freqs - freq)))
     assert freqs[idx] == pytest.approx(freq)
     assert spl[idx] == pytest.approx(expected, abs=0.05)
@@ -70,12 +71,14 @@ def test_loudness_level_matches_annex_b2(
 def test_identity_at_1khz() -> None:
     """3.3: at 1 kHz the loudness level equals the SPL by definition."""
     for phon in (20.0, 47.3, 90.0):
-        freqs, spl = psychoacoustics.equal_loudness_contour(phon)
+        contour = psychoacoustics.equal_loudness_contour(phon)
+        freqs, spl = contour.frequencies, contour.levels
         assert spl[freqs == 1000.0][0] == pytest.approx(phon, abs=1e-9)
 
 
 def test_roundtrip() -> None:
-    freqs, spl = psychoacoustics.equal_loudness_contour(55.0)
+    contour = psychoacoustics.equal_loudness_contour(55.0)
+    freqs, spl = contour.frequencies, contour.levels
     back = [
         psychoacoustics.loudness_level(s, f) for f, s in zip(freqs, spl, strict=True)
     ]
@@ -92,8 +95,8 @@ def test_validity_limits() -> None:
         ValueError, match=r"ISO 226:2023 Formula \(1\) is specified for .* phon"
     ):
         psychoacoustics.equal_loudness_contour(91.0)
-    freqs80, _ = psychoacoustics.equal_loudness_contour(80.0)
-    freqs81, _ = psychoacoustics.equal_loudness_contour(81.0)
+    freqs80 = psychoacoustics.equal_loudness_contour(80.0).frequencies
+    freqs81 = psychoacoustics.equal_loudness_contour(81.0).frequencies
     assert freqs80.max() == 12500.0
     assert freqs81.max() == 4000.0
 
@@ -110,7 +113,8 @@ def test_untabulated_frequency_raises() -> None:
 
 
 def test_hearing_threshold_is_table1_tf() -> None:
-    freqs, tf = psychoacoustics.hearing_threshold()
+    threshold = psychoacoustics.hearing_threshold()
+    freqs, tf = threshold.frequencies, threshold.levels
     assert len(freqs) == 29
     assert tf[freqs == 20.0][0] == pytest.approx(78.1)
     assert tf[freqs == 1000.0][0] == pytest.approx(2.4)
@@ -118,7 +122,8 @@ def test_hearing_threshold_is_table1_tf() -> None:
 
 
 def test_multichannel_shapes() -> None:
-    freqs, spl = psychoacoustics.equal_loudness_contour(40.0)
+    contour = psychoacoustics.equal_loudness_contour(40.0)
+    freqs, spl = contour.frequencies, contour.levels
     assert freqs.shape == spl.shape == (29,)
 
 
@@ -131,12 +136,13 @@ def test_contours_result_matches_underlying_functions() -> None:
     assert res.contours.shape == (8, 29)
     # Every row equals equal_loudness_contour() at the frequencies it defines.
     for i, phon in enumerate(res.phons):
-        freqs_p, spl_p = psychoacoustics.equal_loudness_contour(phon)
+        contour = psychoacoustics.equal_loudness_contour(phon)
+        freqs_p, spl_p = contour.frequencies, contour.levels
         for f, s in zip(freqs_p, spl_p, strict=True):
             j = int(np.flatnonzero(np.isclose(res.frequencies, f))[0])
             assert res.contours[i, j] == pytest.approx(s)
     # Threshold row is the Table 1 hearing threshold.
-    _, tf = psychoacoustics.hearing_threshold()
+    tf = psychoacoustics.hearing_threshold().levels
     np.testing.assert_allclose(res.threshold, tf)
 
 

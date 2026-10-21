@@ -89,6 +89,12 @@ the nearest exact midband.
 
 **Returns:** `Aatm` per band, in decibels.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `distance` is not a single number. |
+
 ## AtmosphericConditions
 
 ```python
@@ -197,6 +203,7 @@ line never amplifies).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `distance` or any frequency is not positive. |
+| TypeError | if `distance` is not a single number. |
 
 ## DEFAULT_FREQUENCIES_HZ
 
@@ -234,6 +241,12 @@ $$
 | `projected_distance` | Ground-plane projected distance `dp`, in metres. |
 
 **Returns:** `DOmega`, in decibels (0 to ~3 dB).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `projected_distance`, `receiver_height_m` or `source_height_m` is not a single number. |
 
 ## DirectivityCorrection
 
@@ -286,6 +299,7 @@ reference distance $d_0 = 1$ m from an omnidirectional point source
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `distance` is not positive. |
+| TypeError | if `distance` is not a single number. |
 
 ## ground_attenuation
 
@@ -343,6 +357,7 @@ with $A_\mathrm{m} = -3q$ at 63 Hz and $A_\mathrm{m} = -3q(1 - G_\mathrm{m})$ ab
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a ground factor is outside `[0, 1]`, `distance` is not positive, a height is negative, or a frequency is not positive. |
+| TypeError | if `distance`, `ground_middle`, `ground_receiver`, `ground_source`, `receiver_height_m` or `source_height_m` is not a single number. |
 
 ## ground_attenuation_alternative
 
@@ -380,6 +395,7 @@ solid-angle index [`directivity_omega`](/phonometry/reference/api/environment/ou
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `distance` is not positive. |
+| TypeError | if `distance` or `mean_height_m` is not a single number. |
 
 ## GroundFactors
 
@@ -449,6 +465,7 @@ difference the slant distance is built from.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two sequences disagree in length, describe fewer than two points, the distances are not strictly increasing, `source_height_m` or `receiver_height_m` is negative or not finite, or `distance` is not positive and finite. The profile heights themselves are unrestricted: they are read on any datum, so a ground below it is a negative number rather than a mistake. |
+| TypeError | if `receiver_height_m` or `source_height_m` is not a single number, or `profile_distances` or `profile_heights_m` holds a text or a value that is not a real number. |
 
 :::note
 Ground rising above the ray subtracts from `F`, exactly as the area of
@@ -492,6 +509,12 @@ long-term average level (Eq. (6)).
 | `c0` | Meteorological factor `C0`, in decibels. |
 
 **Returns:** `Cmet`, in decibels (>= 0 for $C_0 \ge 0$).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `c0`, `projected_distance`, `receiver_height_m` or `source_height_m` is not a single number. |
 
 ## outdoor_propagation_attenuation
 
@@ -548,6 +571,7 @@ barrier $A_\mathrm{bar} = D_z$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `distance` is not positive. |
+| TypeError | if `distance`, `ground_middle`, `ground_receiver` or `ground_source` is not a single number. |
 
 ## OutdoorAttenuation
 
@@ -765,6 +789,7 @@ the source.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two sequences disagree in length or are empty, a length is not positive, a factor is outside `[0, 1]`, or a height is negative or not finite. |
+| TypeError | if `receiver_height_m` or `source_height_m` is not a single number, or `segment_ground_factors` or `segment_lengths` holds a text or a value that is not a real number. |
 
 :::note
 Where the two outer regions meet or overlap there is no middle region,

@@ -151,6 +151,7 @@ def refuse_foreign_rate(x: SignalInput, fs: float, what: str) -> None:
     :param fs: The rate the object was designed for.
     :param what: What the object is, for the message ("filter bank").
     :raises ValueError: If *x* is a Signal at a different rate.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     require_scalar(fs, "fs")
     if isinstance(x, Signal) and x.fs != fs:
@@ -342,6 +343,7 @@ def require_signal_rate(
     :param rate: The rate the result states, in Hz.
     :param rate_field: Name of that rate field, for the message.
     :raises ValueError: If the field is a Signal at another rate.
+    :raises TypeError: if ``rate`` is not a single number.
     """
     value = getattr(owner, field)
     require_scalar(rate, "rate")

@@ -22,7 +22,7 @@ t = np.arange(fs) / fs
 x = np.sin(2 * np.pi * 1000 * t) + 0.05 * rng.standard_normal(fs)  # 1 kHz tone in noise
 tnr = psychoacoustics.tone_to_noise_ratio(x, fs)            # highest peak, or tone_frequency=...
 pr = psychoacoustics.prominence_ratio(x, fs, tone_frequency=1000.0)
-print(tnr.ratio_db, tnr.criterion_db, tnr.prominent)
+print(tnr.ratio_db, tnr.prominence_limit_db, tnr.prominent)
 
 tnr.plot()   # the tone against its prominence criterion (needs matplotlib)
 ```
@@ -74,7 +74,7 @@ dfc = 25 + 75 * (1 + 1.4 * (res.frequency / 1000) ** 2) ** 0.69
 sel = (f > 700) & (f < 1400)
 plt.plot(f[sel], 10 * np.log10(p[sel]))
 plt.axvspan(res.frequency - dfc / 2, res.frequency + dfc / 2, alpha=0.15)
-plt.title(f"TNR = {res.ratio_db:.1f} dB (criterion {res.criterion_db:.1f} dB)")
+plt.title(f"TNR = {res.ratio_db:.1f} dB (criterion {res.prominence_limit_db:.1f} dB)")
 plt.xlabel("Frequency [Hz]"); plt.ylabel("Bin power [dB]")
 plt.show()
 ```
@@ -109,7 +109,7 @@ t = np.arange(10 * fs) / fs
 x = (np.sqrt(2) * 0.011 * np.sin(2 * np.pi * 250.0 * t)
      + 0.03 * rng.standard_normal(t.size))
 res = psychoacoustics.tone_to_noise_ratio(x, fs)
-print(round(res.ratio_db, 1), round(res.criterion_db, 1), res.prominent)
+print(round(res.ratio_db, 1), round(res.prominence_limit_db, 1), res.prominent)
 # 15.1 13.0 True
 
 # One line: the tone against the criterion curve of its own method.
@@ -122,7 +122,7 @@ criterion = np.where(f < 1000.0, 8.0 + 8.33 * np.log10(1000.0 / f), 8.0)
 fig, ax = plt.subplots()
 ax.semilogx(f, criterion, color="#d62728", label="prominence criterion")
 ax.plot([res.frequency], [res.ratio_db], "o", label="assessed tone")
-ax.plot([res.frequency] * 2, [res.criterion_db, res.ratio_db], ":", color="0.6")
+ax.plot([res.frequency] * 2, [res.prominence_limit_db, res.ratio_db], ":", color="0.6")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Tone-to-noise ratio TNR [dB]")
 ax.legend()
@@ -166,7 +166,7 @@ calibration (the ratios are level differences).
 
 Both return a `ToneAssessment(frequency, ratio_db, method)`, where `method`
 says which ratio was taken (`"tone_to_noise_ratio"` or `"prominence_ratio"`);
-`criterion_db` and `prominent` are read from the standard's formula for that
+`prominence_limit_db` and `prominent` are read from the standard's formula for that
 ratio, so an assessment cannot carry another criterion.
 
 The `prominent` verdict is the numeric criterion only. The standard also

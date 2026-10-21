@@ -282,6 +282,7 @@ derived from `operating_days`: the reported daily level then represents
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown period key, empty phase list, inconsistent durations, or invalid annual parameters. |
+| TypeError | if `closed_level` is not a single number, or `operating_days` or `year_days` is a flag, a text or an array where a count goes. |
 
 ## corrected_level
 
@@ -318,6 +319,7 @@ expressed in dB by definition.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `laeq` is not finite or a correction is negative. |
+| TypeError | if `laeq` is not a single number. |
 
 ## evaluation_period_level
 
@@ -350,6 +352,7 @@ the regulation asks to report.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `phases` is empty, `duration_hours` is not positive, or the phase durations do not sum to `duration_hours`. |
+| TypeError | if `duration_hours` is not a single number. |
 
 ## impulsive_correction
 
@@ -388,6 +391,7 @@ table.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either level is not finite. |
+| TypeError | if `laeq` or `laieq` is not a single number. |
 
 ## indoor_quality_objectives
 
@@ -516,6 +520,7 @@ $L_\mathrm{f} > 15$) leave no other consistent reading. See
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either level is not finite. |
+| TypeError | if `laeq` or `lceq` is not a single number. |
 
 ## max_infrastructure_limit
 
@@ -823,6 +828,7 @@ for a negative level differs from Python's banker's `round`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `value` is not finite. |
+| TypeError | if `value` is not a single number. |
 
 ## tonal_correction
 

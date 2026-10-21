@@ -138,6 +138,12 @@ Acceptance limits on relative attenuation at normalized frequencies.
 
 **Returns:** Tuple (minimum, maximum) relative attenuation in dB per point; the maximum is `+inf` outside the pass-band.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fraction` is not a single number. |
+
 :::note
 The exact band-edge point $\Omega = G^{1/2}$ is treated as
 pass-band.
@@ -202,9 +208,13 @@ same measurements:
   $\Delta B$ of 5.12 (the filter integrated response of 4.5 in the
   1995 edition), and `bandwidth_margin_class<c>_db`, its distance to
   each class's limit;
-* `summation_min_db` and `summation_max_db`, the range of the
-  summation $\Delta P_j$ of 5.16 (4.9 in the 1995 edition) across
-  the band, and `summation_margin_class<c>_db`, the nearer of its
+* `summation_difference_lower` and `summation_difference_upper`, the
+  lowest and the highest value across the band of the summation
+  $\Delta P_j$ of 5.16 (4.9 in the 1995 edition) as IEC 61260-2
+  Formula (3) prints it: the level of the summed output of adjacent
+  filters less the level of the input signal minus the reference
+  attenuation, (b) minus (a) in the words of 5.16, the sign 7.2.4.5
+  grades (see the errata registry), in dB, lower first; and `summation_margin_class<c>_db`, the nearer of their
   distances to each class's two limits; all three are `None` on a band
   the summation does not apply to: in the 2014 edition the first and the
   last band, which have a neighbour on one side only (IEC 61260-2
@@ -315,6 +325,7 @@ every inner band between the limits of 5.16. Requires matplotlib
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a requirement this verdict did not grade. |
+| TypeError | if `requirement` is not a text. |
 
 ### FilterComplianceResult.range_limited
 
@@ -479,3 +490,9 @@ requirement on its own.
 | `points_per_bandwidth` | `S`, the test frequencies per filter bandwidth of IEC 61260-2:2016 Formula (1) and IEC 61260:1995 equation (15), at least 24 (7.2.1.4 and 5.3.3). For `edition="1995"` it is where S starts: 5.3.3 raises it in steps of 12 until the filter integrated response of every band reads the same to the nearest tenth of a decibel at S and at S + 12, and the result's `points_per_bandwidth` says where it stopped. |
 
 **Returns:** A [`FilterComplianceResult`](/phonometry/reference/api/filters/compliance/#filtercomplianceresult), which carries the verdict together with the sections, mid-band frequencies, decimation factors and sampling rate it was measured through, so it can redraw the relative attenuation and render an accredited `.report()` fiche without keeping a reference to the (possibly stateful) bank.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `n_points` or `points_per_bandwidth` is a flag, a text or an array where a count goes. |

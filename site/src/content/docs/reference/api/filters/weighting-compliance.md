@@ -145,6 +145,7 @@ over the standard's full frequency range.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the edition is unknown, the edition does not define the filter's weighting, or `n_sweep_points` is below 64. |
+| TypeError | if `n_sweep_points` is a flag, a text or an array where a count goes. |
 
 ## weighting_class_limits
 
@@ -153,7 +154,7 @@ weighting_class_limits(
     weighting_class: int,
     *,
     edition: str = '2013',
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]
+) -> WeightingClassLimits
 ```
 
 Acceptance limits of one performance class of a weighting standard.
@@ -174,13 +175,39 @@ footnote makes one mask govern every weighting characteristic, B included.
 | `weighting_class` | Performance class: 1 or 2 for `edition="2013"`; 0, 1, 2 or 3 for `edition="1979"`, where class N is the standard's instrument Type N. |
 | `edition` | `"2013"` (IEC 61672-1:2013, classes 1/2) or `"1979"` (IEC 651:1979, which adds the stricter Type 0 and a Type 3). |
 
-**Returns:** Tuple `(frequencies, lower, upper)` of the 34 nominal frequencies (Hz) and the lower/upper deviation limits in dB. A lower limit of `-inf` means only the upper limit applies.
+**Returns:** The 34 nominal frequencies (Hz) and the lower and upper deviation limits in dB, as a [`WeightingClassLimits`](/phonometry/reference/api/filters/weighting-compliance/#weightingclasslimits). A lower limit of `-inf` means only the upper limit applies.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | if the edition is unknown or does not define the requested class. |
+| TypeError | if `weighting_class` is not a single number. |
+
+## WeightingClassLimits
+
+```python
+WeightingClassLimits(
+    frequencies: np.ndarray,
+    lower: np.ndarray,
+    upper: np.ndarray,
+)
+```
+
+The acceptance limits of one performance class of a weighting standard.
+
+What [`weighting_class_limits`](/phonometry/reference/api/filters/weighting-compliance/#weighting_class_limits) returns: the nominal frequencies and
+the two limits on the deviation from the design goal, named, lower first,
+where a `(frequencies, lower, upper)` tuple used to be unpacked by
+position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The 34 nominal frequencies, in Hz. |
+| `lower` | The lower deviation limit at each, in dB (`-inf` where only the upper limit applies). |
+| `upper` | The upper deviation limit at each, in dB. |
 
 ## WeightingComplianceResult
 

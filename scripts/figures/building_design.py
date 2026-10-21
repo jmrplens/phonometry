@@ -265,7 +265,7 @@ def generate_masonry_wall_ties(output_dir: str) -> None:
             ties_per_area=2.5,
             tie=tie,
         )
-        label = f"{tie.replace('_', ' ')} ({building.wall_tie_stiffness(tie)[1] / 1e6:g} MN/m)"
+        label = f"{tie.replace('_', ' ')} ({building.wall_tie_stiffness(tie).stiffness / 1e6:g} MN/m)"
         ax_clf.loglog(
             freq,
             clf.coupling_loss_factor,
@@ -1502,13 +1502,14 @@ def generate_orthotropic_transmission_loss(output_dir: str) -> None:
     amplitude, pitch, mass_flat = 0.010, 0.100, 7.8
     flat_b = vibration.plate_bending_stiffness(modulus, thickness, poisson)
     flat_fc = vibration.coincidence_frequency(mass_flat, flat_b)
-    b_x, b_z, _b_xz = building.corrugated_plate_stiffness(
+    stiffness = building.corrugated_plate_stiffness(
         thickness,
         amplitude,
         pitch,
         youngs_modulus=modulus,
         poisson_ratio=poisson,
     )
+    b_x, b_z, _b_xz = stiffness.b_x_n_m, stiffness.b_z_n_m, stiffness.b_xz_n_m
     mass_corr = mass_flat * building.corrugated_plate_mass_factor(amplitude, pitch)
     fc1, fc2 = building.orthotropic_critical_frequencies(mass_corr, b_x, b_z)
 

@@ -381,6 +381,8 @@ class HardWalledSoundPowerResult(OwnsArrays):
         :raises ValueError: if ``quantity`` is neither ``'power'`` nor
             ``'energy'``, ``coverage_factor`` is not positive, a count is below
             one, or any per-band array disagrees with the rest.
+        :raises TypeError: if ``quantity`` is not a text, or ``coverage_factor``,
+            ``n_microphone_positions`` or ``n_source_positions`` is not a single number.
         """
         require_scalar(self.n_microphone_positions, "n_microphone_positions")
         require_scalar(self.n_source_positions, "n_source_positions")
@@ -996,6 +998,8 @@ def sound_energy_hard_walled(
         non-integer or non-positive ``n_events``, a background without its
         ``integration_time``, a non-positive ``integration_time``, or any
         refusal of :func:`sound_power_hard_walled`.
+    :raises TypeError: if ``integration_time`` is not a single number, or ``n_events``
+        is a flag, a text or an array where a count goes.
     """
     arr = np.asarray(event_levels, dtype=np.float64)
     if arr.size == 0 or not np.all(np.isfinite(arr)):
@@ -1042,7 +1046,7 @@ def sound_energy_hard_walled(
     )
 
 
-def reproducibility_from_round_robin(total_db: float, operating_db: float) -> float:
+def reproducibility_from_round_robin(sigma_tot_db: float, sigma_omc_db: float) -> float:
     r"""The standard deviation of reproducibility of the method from a round
     robin test (ISO 3743-1:2010 Eq. 24).
 
@@ -1066,23 +1070,24 @@ def reproducibility_from_round_robin(total_db: float, operating_db: float) -> fl
     exceed :math:`\sigma_\mathrm{tot}/\sqrt{2}`. Beyond it this warns; the
     value is still returned.
 
-    :param total_db: :math:`\sigma'_\mathrm{tot}` of the round robin, in
+    :param sigma_tot_db: :math:`\sigma'_\mathrm{tot}` of the round robin, in
         decibels.
-    :param operating_db: :math:`\sigma'_\mathrm{omc}` of the source used in
+    :param sigma_omc_db: :math:`\sigma'_\mathrm{omc}` of the source used in
         it, in decibels.
     :return: :math:`\sigma'_{R0}`, in decibels.
     :raises ValueError: if either is negative or not finite, or
-        ``operating_db`` exceeds ``total_db``, which no round robin can
+        ``sigma_omc_db`` exceeds ``sigma_tot_db``, which no round robin can
         produce.
+    :raises TypeError: if ``sigma_omc_db`` or ``sigma_tot_db`` is not a single number.
     """
-    total = require_non_negative(total_db, "total_db")
-    operating = require_non_negative(operating_db, "operating_db")
+    total = require_non_negative(sigma_tot_db, "sigma_tot_db")
+    operating = require_non_negative(sigma_omc_db, "sigma_omc_db")
     if not math.isfinite(total) or not math.isfinite(operating):
-        msg = "'total_db' and 'operating_db' must be finite."
+        msg = "'sigma_tot_db' and 'sigma_omc_db' must be finite."
         raise ValueError(msg)
     if operating > total:
         msg = (
-            f"'operating_db' ({operating:g} dB) exceeds 'total_db' ({total:g} dB): "
+            f"'sigma_omc_db' ({operating:g} dB) exceeds 'sigma_tot_db' ({total:g} dB): "
             "the total of a round robin includes the operating and mounting "
             f"conditions ({_STANDARD}, 9.3.2)."
         )
@@ -1131,6 +1136,8 @@ class HardWalledRoomCheck(OwnsArrays):
             rank, a band lies outside 125 Hz to 8 kHz, fewer than two
             orientations are recorded, or the room or the box is not
             positive.
+        :raises TypeError: if ``largest_box_dimension_m``, ``n_orientations``,
+            ``reference_box_volume_m3`` or ``volume`` is not a single number.
         """
         require_scalar(self.n_orientations, "n_orientations")
         require_ranks(self, frequencies=1, level_range_db=1)
@@ -1303,6 +1310,7 @@ def check_hard_walled_room(
     :raises ValueError: for levels that are not a finite 2D array of at least
         two orientations, frequencies outside 125 Hz to 8 kHz, a non-positive
         volume or box dimension, or an absorption coefficient outside [0, 1].
+    :raises TypeError: if ``volume`` is not a single number.
     """
     levels = _finite(orientation_levels, "orientation_levels", (2,))
     n_orientations, n_bands = levels.shape
@@ -1398,6 +1406,7 @@ class SourceLocationPlan(OwnsArrays):
         :raises ValueError: if the per-band arrays differ in length or rank,
             the spectral character does not name one class per band, or the
             standard is not one of the two parts.
+        :raises TypeError: if ``standard`` is not a text.
         """
         require_choice(
             self.standard, "standard", ("ISO 3743-1:2010", "ISO 3743-2:2018")

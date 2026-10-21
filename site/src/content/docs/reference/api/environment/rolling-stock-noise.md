@@ -119,6 +119,7 @@ and 17 m and 44 m behind its front).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a length that is not positive. |
+| TypeError | if `unit_length_m` is not a single number. |
 
 ## AdjacentVehicleNeutrality
 
@@ -204,6 +205,7 @@ spectrum.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For levels that are not finite, of different lengths, or no more than 3 dB above the background. |
+| TypeError | if `background_level` or `measured_level` holds a text or a value that is not a real number. |
 
 ## check_adjacent_vehicle_neutrality
 
@@ -237,6 +239,7 @@ made at least once for each tested speed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a level that is not finite. |
+| TypeError | if `unit_level` or `with_adjacent_level` is not a single number. |
 
 ## check_reference_track
 
@@ -299,6 +302,7 @@ direct one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a speed that is not positive, a radius or gradient that is not a valid number, decay limits that leave out a direction, limits with a band that is not positive or two keys in one one-third octave band, or an Annex C verdict of another speed, of another roughness or against another roughness limit. |
+| TypeError | if `speed_kmh` is not a single number. |
 
 ## check_small_roughness_deviations
 
@@ -349,6 +353,7 @@ speed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a speed that is not positive, a noise spectrum that does not match its bands, or a limit with a wavelength that is not positive or two in one one-third octave band. |
+| TypeError | if `speed_kmh` is not a single number, or `frequencies` or `noise_levels` holds a text or a value that is not a real number. |
 
 ## impulsiveness_rise_speed
 
@@ -389,6 +394,7 @@ derivative to mean something; [`pass_by_measurement`](/phonometry/reference/api/
 | Exception | When |
 | :--- | :--- |
 | ValueError | For arrays of different lengths, fewer than two samples, or times that do not increase. |
+| TypeError | if `levels` or `times` holds a text or a value that is not a real number. |
 
 ## min_curve_radius
 
@@ -414,6 +420,7 @@ The smallest radius of curvature the test track may have, 6.2.2.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a speed that is not positive. |
+| TypeError | if `speed_kmh` is not a single number. |
 
 ## pass_by_measurement
 
@@ -475,6 +482,7 @@ level at its rear; the result keeps both margins.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a record of more than one channel, an empty record, an interval that is empty or runs past the record, or times that are negative. |
+| TypeError | if `end_s`, `history_interval_s`, `pass_by_time_s` or `start_s` is not a single number. |
 
 ## pass_by_time
 
@@ -503,12 +511,13 @@ length.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a length or speed that is not positive. |
+| TypeError | if `speed_kmh` or `unit_length_m` is not a single number. |
 
 ## pass_by_uncertainty
 
 ```python
 pass_by_uncertainty(
-    reading_db: float,
+    pressure_level: float,
     inputs: Sequence[Quantity],
     *,
     coverage_factor: float = 2.0,
@@ -532,7 +541,7 @@ G.2): build it with [`phonometry.metrology.rectangular`](/phonometry/reference/a
 
 | Name | Description |
 | :--- | :--- |
-| `reading_db` | The reading $L_p$, in dB. |
+| `pressure_level` | The reading $L_p$, in dB. |
 | `inputs` | The input quantities as [`phonometry.metrology.Quantity`](/phonometry/reference/api/metrology/uncertainty/#quantity) objects, whose `value` is the mean value correction in dB and whose `uncertainty` is the standard uncertainty in dB. An input without a name is called by its place, `x1`, `x2`, ..., primed (`x1'`) when another input was given that name. |
 | `coverage_factor` | $k$; 2 by G.5. |
 
@@ -647,7 +656,7 @@ How far the record starts below the level at the front, in dB (6.6.3).
 
 ```python
 PassByUncertainty(
-    reading_db: float,
+    pressure_level: float,
     names: tuple[str, ...],
     corrections: tuple[float, ...],
     standard_uncertainties_db: tuple[float, ...],
@@ -665,7 +674,7 @@ $Y = \sum X_i$ (Formula G.1), so every sensitivity coefficient is 1
 
 | Name | Description |
 | :--- | :--- |
-| `reading_db` | The reading $L_p$, in dB. |
+| `pressure_level` | The reading $L_p$, in dB. |
 | `names` | The name of each input quantity. |
 | `corrections` | The mean value correction $\Delta L_p$ of each input, in dB (0 for a symmetric interval). |
 | `standard_uncertainties_db` | Its standard uncertainty $u(x_i)$, in dB. |
@@ -826,6 +835,12 @@ Draw the roughness spectra against Figure 2, or the decay rates against Figure 3
 
 **Returns:** The axes drawn on.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `panel` is not a text. |
+
 ## RiseSpeedResult
 
 ```python
@@ -881,7 +896,7 @@ The rise speed $s = \max(s_j)$, in dB/s; `None` when no slope rises 10 dB.
 
 ```python
 rolling_stock_test(
-    samples_db: Mapping[str, ArrayLike],
+    run_levels: Mapping[str, ArrayLike],
     *,
     method: str = 'constant_speed',
 ) -> RollingStockTestResult
@@ -900,7 +915,7 @@ normalisation, when one is required, goes on the runs before this
 
 | Name | Description |
 | :--- | :--- |
-| `samples_db` | The runs of each position, in dB, keyed by a name for the position (`"left"`, `"right"`, `"front, direction 1"`). |
+| `run_levels` | The runs of each position, in dB, keyed by a name for the position (`"left"`, `"right"`, `"front, direction 1"`). |
 | `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). |
 
 **Returns:** The test.
@@ -924,7 +939,7 @@ ROLLING_STOCK_TEST_METHODS = ('constant_speed', 'acceleration_maximum', 'acceler
 ```python
 RollingStockTestResult(
     method: str,
-    samples_db: Mapping[str, tuple[float, ...]],
+    run_levels: Mapping[str, tuple[float, ...]],
 )
 ```
 
@@ -935,7 +950,7 @@ A test decided by the highest rounded mean of three runs per position.
 | Name | Description |
 | :--- | :--- |
 | `method` | One of [`ROLLING_STOCK_TEST_METHODS`](/phonometry/reference/api/environment/rolling-stock-noise/#rolling_stock_test_methods). |
-| `samples_db` | The runs of each position, in dB, keyed by the position's name: $L_{p\mathrm{Aeq},T_p}$ at constant speed, $L_{p\mathrm{AFmax}}$ when starting (maximum level method) and braking, $L_{p\mathrm{Aeq},T}$ when starting (averaged level method). |
+| `run_levels` | The runs of each position, in dB, keyed by the position's name: $L_{p\mathrm{Aeq},T_p}$ at constant speed, $L_{p\mathrm{AFmax}}$ when starting (maximum level method) and braking, $L_{p\mathrm{Aeq},T}$ when starting (averaged level method). |
 
 ### RollingStockTestResult.final_level
 
@@ -1051,6 +1066,7 @@ for roughness alone, not a prediction (E.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra with no band in common, a speed that is not positive, or noise spectra that do not match their bands. |
+| TypeError | if `speed_kmh` is not a single number, or `frequencies`, `noise_levels_1` or `noise_levels_2` holds a text or a value that is not a real number. |
 
 ## RoughnessComparability
 
@@ -1158,7 +1174,7 @@ The acceptance of small roughness exceedances by their effect on the noise, Anne
 
 Whether the measured roughness exceeds the limit in any band at all.
 
-### SmallRoughnessDeviation.impact_db
+### SmallRoughnessDeviation.level_increase
 
 *property*
 
@@ -1272,6 +1288,7 @@ end position stands for [`STATIONARY_END_POSITION_LENGTH_M`](/phonometry/referen
 | Exception | When |
 | :--- | :--- |
 | ValueError | For levels that are not finite, lengths that are not positive, or arrays of different lengths. |
+| TypeError | if `lengths_m` or `levels` holds a text or a value that is not a real number. |
 
 ## StationaryTestResult
 
@@ -1407,6 +1424,7 @@ equivalent level.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a level that is not finite or times that are not positive. |
+| TypeError | if `equivalent_level`, `measurement_time_s` or `pass_by_time_s` is not a single number. |
 
 ## type_test_speeds
 
@@ -1433,3 +1451,4 @@ the maximum speed alone. Further tests are run at the preferred speeds of
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a speed that is not positive. |
+| TypeError | if `max_speed_kmh` is not a single number. |

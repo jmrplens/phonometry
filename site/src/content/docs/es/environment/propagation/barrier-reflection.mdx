@@ -386,7 +386,7 @@ print(annex_b.rating.reported)                 # 8 dB, lo impreso bajo la tabla
 print(round(annex_b.rating.rating, 2))         # 7.65 dB antes de redondear, véase abajo
 
 u = environment.reflection_index_expanded_uncertainty()  # tabla A.1, columna alta, k = 1,96
-print(round(u.rating_db, 2))                             # 1.59 dB, tabla B.2
+print(round(u.rating_expanded_uncertainty_db, 2))                             # 1.59 dB, tabla B.2
 ```
 
 <ThemeImage

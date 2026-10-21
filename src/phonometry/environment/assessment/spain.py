@@ -358,6 +358,7 @@ def round_reported_level(value: float) -> int:
     :param value: Sound level, in dB.
     :return: The rounded level, as an :class:`int`.
     :raises ValueError: If ``value`` is not finite.
+    :raises TypeError: if ``value`` is not a single number.
     """
     return math.floor(_finite(value, "value") + 0.5)
 
@@ -589,6 +590,7 @@ def low_frequency_correction(lceq: float, laeq: float) -> float:
     :param laeq: A-weighted equivalent continuous level ``LAeq,Ti``, in dB.
     :return: ``Kf`` in dB (0, 3 or 6).
     :raises ValueError: If either level is not finite.
+    :raises TypeError: if ``laeq`` or ``lceq`` is not a single number.
     """
     return _graded_correction(_finite(lceq, "lceq") - _finite(laeq, "laeq"))
 
@@ -614,6 +616,7 @@ def impulsive_correction(laieq: float, laeq: float) -> float:
     :param laeq: A-weighted equivalent continuous level ``LAeq,Ti``, in dB.
     :return: ``Ki`` in dB (0, 3 or 6).
     :raises ValueError: If either level is not finite.
+    :raises TypeError: if ``laeq`` or ``laieq`` is not a single number.
     """
     return _graded_correction(_finite(laieq, "laieq") - _finite(laeq, "laeq"))
 
@@ -668,6 +671,7 @@ def corrected_level(
     :param ki: Impulsive correction, in dB.
     :return: ``LKeq,T`` in dB.
     :raises ValueError: If ``laeq`` is not finite or a correction is negative.
+    :raises TypeError: if ``laeq`` is not a single number.
     """
     return _finite(laeq, "laeq") + total_correction(kt, kf, ki)
 
@@ -705,7 +709,10 @@ class NoisePhase(RichDisplay):
     label: str | None = None
 
     def __post_init__(self) -> None:
-        """Validate the duration, level and corrections."""
+        """Validate the duration, level and corrections.
+
+        :raises TypeError: if ``duration_hours`` or ``laeq`` is not a single number.
+        """
         _positive(self.duration_hours, "duration_hours")
         _finite(self.laeq, "laeq")
         total_correction(self.kt, self.kf, self.ki)
@@ -739,6 +746,7 @@ def evaluation_period_level(
     :return: ``LKeq,T`` in dB.
     :raises ValueError: If ``phases`` is empty, ``duration_hours`` is not positive, or
         the phase durations do not sum to ``duration_hours``.
+    :raises TypeError: if ``duration_hours`` is not a single number.
     """
     items = list(phases)
     if not items:
@@ -1122,6 +1130,7 @@ class PeriodAssessment(RichDisplay):
         :raises ValueError: if ``period`` is not one of
             :data:`RD1367_EVALUATION_PERIODS`, or the period carries no
             noise phase.
+        :raises TypeError: if ``period`` is not a text.
         """
         require_choice(self.period, "period", RD1367_EVALUATION_PERIODS)
         if not self.phases:
@@ -1478,6 +1487,8 @@ def assess_activity(
     :return: An :class:`ActivityAssessment`.
     :raises ValueError: For an unknown period key, empty phase list,
         inconsistent durations, or invalid annual parameters.
+    :raises TypeError: if ``closed_level`` is not a single number, or ``operating_days``
+        or ``year_days`` is a flag, a text or an array where a count goes.
     """
     if not measurements:
         msg = "At least one evaluation period must be supplied."

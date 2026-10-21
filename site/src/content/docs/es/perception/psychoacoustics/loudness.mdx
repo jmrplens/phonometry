@@ -381,7 +381,8 @@ umbral en un resultado `EqualLoudnessContours` representable:
 ```python
 from phonometry import psychoacoustics
 
-freqs, spl = psychoacoustics.equal_loudness_contour(40.0)   # la clásica isofónica de 40 fonios
+contour = psychoacoustics.equal_loudness_contour(40.0)
+freqs, spl = contour.frequencies, contour.levels   # la clásica isofónica de 40 fonios
 phon = psychoacoustics.loudness_level(73.0, 63.0)           # 73 dB @ 63 Hz -> 40 fonios
 
 # Toda la familia (20-90 fonios por defecto) más el umbral de audición:
@@ -409,10 +410,12 @@ plt.show()
 # frecuencias preferentes de la Tabla 1, una curva por nivel de sonoridad:
 fig, ax = plt.subplots()
 for phon in [20, 40, 60, 80, 90]:
-    freqs, spl = psychoacoustics.equal_loudness_contour(float(phon))
+    contour = psychoacoustics.equal_loudness_contour(float(phon))
+    freqs, spl = contour.frequencies, contour.levels
     ax.semilogx(freqs, spl, color="C0")
     ax.annotate(f"{phon} fonios", xy=(1000, phon + 1), fontsize=9)
-ft, tf = psychoacoustics.hearing_threshold()
+threshold = psychoacoustics.hearing_threshold()
+ft, tf = threshold.frequencies, threshold.levels
 ax.semilogx(ft, tf, "--", color="C1", label="Umbral de audición $T_f$")
 ax.set(xlabel="Frecuencia [Hz]", ylabel="Nivel de presión acústica [dB re 20 µPa]")
 ax.grid(True, which="both", alpha=0.3)

@@ -311,6 +311,7 @@ def reciprocity_air_attenuation(
     :raises ValueError: for frequencies that are not positive and increasing,
         a pressure that is not positive, a humidity outside 0 % to 100 %, or a
         temperature at or below absolute zero.
+    :raises TypeError: if ``static_pressure_pa`` is not a single number.
     """
     from ..fluids import air
 
@@ -620,6 +621,7 @@ def free_field_reciprocity_pair(
         microphones.
     :raises ValueError: for a distance that is not positive or that the
         acoustic centres use up, or values that are zero or not finite.
+    :raises TypeError: if ``diaphragm_distance_m`` is not a single number.
     """
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
@@ -692,6 +694,7 @@ def free_field_transfer_impedance(
     :return: :math:`U_2/i_1`, complex, in Ω, at each frequency.
     :raises ValueError: for a distance that is not positive or that the
         acoustic centres use up, or values that are zero or not finite.
+    :raises TypeError: if ``diaphragm_distance_m`` is not a single number.
     """
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
@@ -818,6 +821,7 @@ def acoustic_center(
     :raises ValueError: for fewer than three distances, columns of different
         lengths, values that are not positive and finite, or distances that
         are all the same.
+    :raises TypeError: if ``attenuation_np_per_m`` is not a single number.
     """
     distances = np.asarray(distances, dtype=np.float64).reshape(-1)
     pressures = np.abs(np.asarray(sound_pressures_pa, dtype=np.float64)).reshape(-1)
@@ -990,6 +994,8 @@ def check_free_field_arrangement(
     :return: The :class:`FreeFieldArrangementCheck`.
     :raises ValueError: for no distance, or a distance, diameter or length that
         is not positive.
+    :raises TypeError: if ``microphone_diameter_m`` or ``support_length_m`` is not a
+        single number.
     """
     distances = tuple(
         require_positive(value, f"diaphragm_distances_m[{index}]")
@@ -1031,14 +1037,14 @@ class FreeFieldParameterUncertainty(OwnsArrays):
     ``field="free"``.
 
     :ivar frequencies: The frequencies, in Hz.
-    :ivar components_db: The component of each parameter, keyed by its name in
+    :ivar component_uncertainties_db: The component of each parameter, keyed by its name in
         :data:`~phonometry.metrology.IEC61094_3_TABLE_1`, in dB at each
         frequency.
     :ivar microphone: The microphone whose level they are for, 1, 2 or 3.
     """
 
     frequencies: NDArray[np.float64]
-    components_db: Mapping[str, NDArray[np.float64]]
+    component_uncertainties_db: Mapping[str, NDArray[np.float64]]
     microphone: int
 
     def __post_init__(self) -> None:
@@ -1051,7 +1057,7 @@ class FreeFieldParameterUncertainty(OwnsArrays):
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
         components = {}
-        for name, value in self.components_db.items():
+        for name, value in self.component_uncertainties_db.items():
             column = np.asarray(value, dtype=np.float64).reshape(-1)
             if (
                 column.size != frequencies.size
@@ -1059,12 +1065,14 @@ class FreeFieldParameterUncertainty(OwnsArrays):
                 or np.any(column < 0.0)
             ):
                 msg = (
-                    f"FreeFieldParameterUncertainty: 'components_db[{name!r}]' must "
+                    f"FreeFieldParameterUncertainty: 'component_uncertainties_db[{name!r}]' must "
                     "be one finite, non-negative value per frequency."
                 )
                 raise ValueError(msg)
             components[str(name)] = read_only(column)
-        object.__setattr__(self, "components_db", MappingProxyType(components))
+        object.__setattr__(
+            self, "component_uncertainties_db", MappingProxyType(components)
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1297,5 +1305,7 @@ def free_field_parameter_uncertainty(
             level(scale=1.0 + u.u_air_attenuation_ratio) - nominal
         )
     return FreeFieldParameterUncertainty(
-        frequencies=frequencies, components_db=components, microphone=microphone
+        frequencies=frequencies,
+        component_uncertainties_db=components,
+        microphone=microphone,
     )

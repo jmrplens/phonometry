@@ -135,9 +135,10 @@ def _chk_flat_plate_first_mode() -> Outcome:
     "Corrugated 1 mm steel plate (H = 10 mm, L = 100 mm), f(2,2)",
 )
 def _chk_corrugated_plate_mode_22() -> Outcome:
-    b_x, b_z, b_xz = ph.building.corrugated_plate_stiffness(
+    stiffness = ph.building.corrugated_plate_stiffness(
         1.0e-3, 0.010, 0.100, youngs_modulus=2.1e11, poisson_ratio=0.3
     )
+    b_x, b_z, b_xz = stiffness.b_x_n_m, stiffness.b_z_n_m, stiffness.b_xz_n_m
     mass = 7.8 * ph.building.corrugated_plate_mass_factor(0.010, 0.100)
     f22 = ph.building.orthotropic_plate_resonance(
         2,

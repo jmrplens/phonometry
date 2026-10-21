@@ -891,6 +891,7 @@ def pleasantness_eventfulness(
     :raises ValueError: for a mapping that does not name the eight
         attributes, a value outside 1 to 5, or sites that do not match the
         respondents.
+    :raises TypeError: if ``central_tendency`` is not a text.
     """
     require_choice(central_tendency, "central_tendency", _CENTRAL_TENDENCIES)
     if isinstance(scale_values, Mapping):
@@ -983,6 +984,7 @@ class SoundscapeCorrelation(OwnsArrays):
 
         :raises ValueError: if the coefficient or the probability is out of
             range, or the paired columns disagree.
+        :raises TypeError: if ``coefficient`` or ``p_value`` is not a single number.
         """
         require_scalar(self.coefficient, "coefficient")
         require_scalar(self.p_value, "p_value")
@@ -1118,6 +1120,7 @@ def spearman_rank_correlation(
     :return: A :class:`SoundscapeCorrelation`.
     :raises ValueError: for variables of different lengths, fewer than three
         pairs, a non-finite value or a constant variable.
+    :raises TypeError: if ``alternative`` is not a text.
     """
     require_choice(alternative, "alternative", _ALTERNATIVES)
     x_arr, y_arr = _paired(x, y)
@@ -1181,6 +1184,7 @@ def pearson_correlation(
     :return: A :class:`SoundscapeCorrelation`.
     :raises ValueError: for variables of different lengths, fewer than three
         pairs, a non-finite value or a constant variable.
+    :raises TypeError: if ``alternative`` is not a text.
     """
     require_choice(alternative, "alternative", _ALTERNATIVES)
     x_arr, y_arr = _paired(x, y)
@@ -1273,6 +1277,7 @@ class MethodBSummary(OwnsArrays):
 
         :raises ValueError: if a matrix is not ``(sites, items)`` or the
             confidence level is not strictly between 0 and 1.
+        :raises TypeError: if ``confidence`` is not a single number.
         """
         require_scalar(self.confidence, "confidence")
         shape = (len(self.sites), len(self.items))
@@ -1337,6 +1342,7 @@ def method_b_summary(
     :return: A :class:`MethodBSummary`.
     :raises ValueError: for a value outside 1 to 5, a confidence level not
         strictly between 0 and 1, or sites that do not match the responses.
+    :raises TypeError: if ``confidence`` is not a single number.
     """
     require_scalar(confidence, "confidence")
     if not 0.0 < confidence < 1.0:
@@ -1629,8 +1635,9 @@ class SoundscapeAcousticEnvironment(RichDisplay):
 
         The results are frozen into a read-only mapping of floats.
 
-        :raises TypeError: for an item that is not a text, results that are
-            not a mapping, or a result that is not one number.
+        :raises TypeError: for an ``environment_type`` or an item that is not
+            a text, results that are not a mapping, or a result that is not
+            one number.
         :raises ValueError: for an unknown environment type, an empty item, a
             required conditional item left out, or a missing or non-finite
             result.

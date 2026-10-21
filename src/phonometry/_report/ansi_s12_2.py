@@ -198,18 +198,18 @@ def _nc_contour_column(levels: np.ndarray, language: str) -> list[str]:
     an em dash; a band outside the Table 1 family shows ``"<15"`` / ``">70"``
     (no NC contour passes through it), never a fabricated number.
     """
-    from ..room.noise_criteria import NC_CURVES_DB, NC_RATINGS
+    from ..room.noise_criteria import NC_CURVE_LEVELS, NC_RATINGS
 
     cells: list[str] = []
     for k, level in enumerate(levels):
         if not math.isfinite(level):
             cells.append("—")
-        elif level > NC_CURVES_DB[-1, k]:
+        elif level > NC_CURVE_LEVELS[-1, k]:
             cells.append(">70")
-        elif level < NC_CURVES_DB[0, k]:
+        elif level < NC_CURVE_LEVELS[0, k]:
             cells.append("<15")
         else:
-            contour = float(np.interp(level, NC_CURVES_DB[:, k], NC_RATINGS))
+            contour = float(np.interp(level, NC_CURVE_LEVELS[:, k], NC_RATINGS))
             cells.append(format_number(contour, language, decimals=1))
     return cells
 

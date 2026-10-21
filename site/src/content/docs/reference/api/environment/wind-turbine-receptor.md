@@ -147,7 +147,7 @@ whose first member is centred on north. Per bin:
 | `wind_speeds_m_s` | The binning wind speed of each interval, in m/s. |
 | `wind_directions_deg` | Optional wind direction of each interval, in degrees from north. |
 | `averaging` | `"energy"` (Equation (1), for `LAeq`) or `"arithmetic"` (Equation (8), for statistical levels). |
-| `type_b_uncertainty_db` | Combined type B standard uncertainty of each interval, Equation (3), in dB: one value for all or one per interval. Combine the components in quadrature, for example those of [`TYPE_B_UNCERTAINTY_EXAMPLES_DB`](/phonometry/reference/api/environment/wind-turbine-receptor/#type_b_uncertainty_examples_db). |
+| `type_b_uncertainty_db` | Combined type B standard uncertainty of each interval, Equation (3), in dB: one value for all or one per interval. Combine the components in quadrature, for example those of [`EXAMPLE_TYPE_B_UNCERTAINTIES_DB`](/phonometry/reference/api/environment/wind-turbine-receptor/#example_type_b_uncertainties_db). |
 | `bin_width_m_s` | Width of the wind speed bins, in m/s (1 m/s by default, 10.1). |
 | `sector_width_deg` | Width of the direction sectors, in degrees (30 by default, 10.1); it must divide 360. |
 
@@ -158,6 +158,7 @@ whose first member is centred on north. Per bin:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length, a value is not finite, a wind speed or an uncertainty is negative, or `averaging` is unknown. |
+| TypeError | if `bin_width_m_s` or `sector_width_deg` is not a single number, or `levels`, `wind_directions_deg` or `wind_speeds_m_s` holds a text or a value that is not a real number. |
 
 ## BinnedSoundLevels
 
@@ -255,6 +256,14 @@ uncertainty as error bars.
 
 **Returns:** The axes.
 
+## EXAMPLE_TYPE_B_UNCERTAINTIES_DB
+
+*Constant* (`mapping`).
+
+```python
+EXAMPLE_TYPE_B_UNCERTAINTIES_DB = {'calibration': (0.3, 0.2), 'instrument': (0.5, 0.3), 'measurement position': (0.5, 0.3), 'wind screen insertion loss': (0.3, 0.2)}
+```
+
 ## GroundImpedanceClass
 
 ```python
@@ -311,6 +320,7 @@ brought to 10 m is the binning wind speed $V_\mathrm{bin}$ of
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a height or the roughness length is not positive, a height does not exceed the roughness length, or a speed is negative. |
+| TypeError | if `height_m`, `reference_height_m` or `roughness_length` is not a single number. |
 
 ## LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM
 
@@ -449,6 +459,7 @@ profile of IEC 61400-11:2012 D.3 that Table K.1 evaluates for 120 m and
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a height is not positive, a speed is negative or a value is not finite. |
+| TypeError | if `height_m` or `reference_height_m` is not a single number. |
 
 ## predicted_receptor_level
 
@@ -491,6 +502,7 @@ prediction model and the modelling in quadrature.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not finite or an uncertainty is negative. |
+| TypeError | if `modeling_uncertainty_db` or `prediction_model_uncertainty_db` is not a single number, or `turbine_levels` holds a text or a value that is not a real number. |
 
 ## PredictedReceptorLevel
 
@@ -603,6 +615,7 @@ background.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length or are not finite. |
+| TypeError | if `ambient_levels`, `background_levels` or `wind_speeds_m_s` holds a text or a value that is not a real number. |
 
 ## sound_relevant_turbines
 
@@ -636,6 +649,7 @@ turbine the TS leaves out.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the levels are empty or not finite. |
+| TypeError | if `predicted_levels` holds a text or a value that is not a real number. |
 
 ## SoundEmergence
 
@@ -723,6 +737,7 @@ The binning wind speed: the arithmetic mean over the relevant turbines.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the speeds are not one per turbine or not finite. |
+| TypeError | if `turbine_wind_speeds_m_s` holds a text or a value that is not a real number. |
 
 ### SoundRelevantTurbines.indices
 
@@ -885,6 +900,7 @@ other.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length or are not finite, or an uncertainty is infinite or negative. |
+| TypeError | if `background_levels`, `total_levels`, `wind_directions_deg` or `wind_speeds_m_s` holds a text or a value that is not a real number. |
 
 ## TurbineSoundLevels
 
@@ -958,14 +974,6 @@ background, the 3 dB correction where it is at least 0 dB but less
 than 3 dB above, and undetermined where the background is louder. A
 difference within a nanodecibel of 3 dB or of 0 dB is on that limit.
 
-## TYPE_B_UNCERTAINTY_EXAMPLES_DB
-
-*Constant* (`mapping`).
-
-```python
-TYPE_B_UNCERTAINTY_EXAMPLES_DB = {'calibration': (0.3, 0.2), 'instrument': (0.5, 0.3), 'measurement position': (0.5, 0.3), 'wind screen insertion loss': (0.3, 0.2)}
-```
-
 ## TYPICAL_WIND_SHEAR_EXPONENT_RANGE
 
 *Constant* (`tuple`).
@@ -1012,6 +1020,7 @@ top of ISO 9613-1, when no band reaches 20 dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the distance is not positive or the atmosphere is outside what ISO 9613-1 accepts. |
+| TypeError | if `distance` is not a single number. |
 
 ## wind_shear_exponent
 
@@ -1048,6 +1057,7 @@ computed; Table K.2 leaves them blank.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a speed or height is not positive, or the two heights are the same. |
+| TypeError | if `height_m` or `reference_height_m` is not a single number. |
 
 ## wind_shear_profile
 
@@ -1083,6 +1093,7 @@ speed at any height by Equation (K.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a speed or height is not positive or the upper height is not above the lower one. |
+| TypeError | if `lower_height_m`, `lower_speed_m_s`, `upper_height_m` or `upper_speed_m_s` is not a single number. |
 
 ## wind_turbine_low_frequency_level
 
@@ -1132,7 +1143,7 @@ criterion of C.6.1 sums 10 Hz to 160 Hz, so pass those bands for it.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If `weighting` is not a text. |
+| TypeError | If `weighting` is not a text, or `sound_power_levels`, `frequencies`, `facade_insulation`, `ground_correction` or `air_attenuation_db_per_km` holds a text or a value that is not a number. |
 | ValueError | If the shapes disagree, a distance or height is not positive, an air attenuation coefficient is negative, a default table has no value at a supplied band, or `weighting` is neither `"A"` nor `"Z"`. |
 
 ## wind_turbine_rating_level
@@ -1177,6 +1188,7 @@ ISO/PAS 1996-3 for $K_\mathrm{I}$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not finite or an adjustment is negative. |
+| TypeError | if `amplitude_modulation_adjustment`, `equivalent_level`, `impulsive_adjustment` or `tonal_adjustment` is not a single number. |
 
 ## WindShearProfile
 

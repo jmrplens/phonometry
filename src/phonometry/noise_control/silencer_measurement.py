@@ -442,6 +442,8 @@ def substitution_insertion_loss(
     :raises ValueError: If a level is not finite, if the arguments do not all
         carry the same number of bands, or if a reverberation time is not
         positive and finite.
+    :raises TypeError: if ``object_level`` or ``substitution_level`` holds a text or a
+        value that is not a real number.
     """
     without = require_finite_array(substitution_level, "substitution_level")
     with_object = require_finite_array(object_level, "object_level")
@@ -490,6 +492,8 @@ def octave_insertion_loss(insertion_loss: ArrayLike) -> NDArray[np.float64]:
     :return: :math:`D_\mathrm{oct}`, in dB, a third as many values.
     :raises ValueError: If a value is not finite, if the array is empty, or
         if it does not hold a multiple of three bands.
+    :raises TypeError: if ``insertion_loss`` holds a text or a value that is not a real
+        number.
     """
     thirds = require_finite_array(insertion_loss, "insertion_loss")
     if thirds.size % _THIRDS_PER_OCTAVE:
@@ -541,6 +545,7 @@ def microphone_spread_limit(frequency: float) -> float:
     :return: The largest tolerated difference between the three positions, in
         dB.
     :raises ValueError: If the frequency is not positive and finite.
+    :raises TypeError: if ``frequency`` is not a single number.
     """
     band = require_positive(frequency, "frequency")
     for centre, limit in ISO7235_SPREAD_LIMITS:
@@ -560,6 +565,7 @@ def microphone_positions_required(levels: ArrayLike, frequency: float) -> int:
         ``5`` if the standard asks for two more.
     :raises ValueError: If a level is not finite, if there are not three of
         them, or if the frequency is not positive and finite.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     measured = require_finite_array(levels, "levels")
     if measured.shape != (_THIRDS_PER_OCTAVE,):
@@ -585,6 +591,7 @@ def survey_reproducibility(frequency: float) -> float:
     :return: :math:`\sigma_R`, in dB.
     :raises ValueError: If the frequency is not positive and finite, or above
         the 10 kHz the table stops at.
+    :raises TypeError: if ``frequency`` is not a single number.
     """
     return _from_table(
         ISO11691_REPRODUCIBILITY, frequency, "frequency", "ISO 11691 Table 1"
@@ -612,6 +619,8 @@ def measurement_reproducibility(
     :raises ValueError: If the frequency is not positive and finite, if it is
         above the range the column covers, or if the quantity is not one of
         the three the table prints.
+    :raises TypeError: if ``quantity`` is not a text, or ``frequency`` is not a single
+        number.
     """
     column = require_choice(quantity, "quantity", tuple(ISO7235_REPRODUCIBILITY))
     return _from_table(
@@ -656,6 +665,7 @@ def substitution_area_ratio(duct_area: float, element_area: float) -> float:
         substitution duct, in m².
     :return: The ratio of the two areas, dimensionless.
     :raises ValueError: If an area is not positive and finite.
+    :raises TypeError: if ``duct_area`` or ``element_area`` is not a single number.
     :warns SilencerMeasurementWarning: If the ratio is outside 0,6 to 1,7.
     """
     duct = require_positive(duct_area, "duct_area")
@@ -723,6 +733,9 @@ def open_end_transmission_loss(
     :param speed_of_sound: :math:`c`, in m/s.
     :return: :math:`D_\mathrm{td}`, in dB, one value per frequency.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``area``, ``solid_angle_sr`` or ``speed_of_sound`` is not a
+        single number, or ``frequency`` holds a text or a value that is not a real
+        number.
     """
     bands = require_positive_array(frequency, "frequency")
     section = require_positive(area, "area")
@@ -762,6 +775,9 @@ def open_end_reflection_coefficient(
     :param speed_of_sound: :math:`c`, in m/s.
     :return: :math:`r`, dimensionless, one value per frequency.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``area``, ``solid_angle_sr`` or ``speed_of_sound`` is not a
+        single number, or ``frequency`` holds a text or a value that is not a real
+        number.
     """
     bands = require_positive_array(frequency, "frequency")
     section = require_positive(area, "area")
@@ -797,6 +813,8 @@ def measured_transmission_loss(
     :raises ValueError: If a value is not finite, or if the two arrays carry
         different numbers of bands. Both are per-band quantities, so neither
         stands in for a whole run.
+    :raises TypeError: if ``insertion_loss`` or ``open_end_loss`` holds a text or a
+        value that is not a real number.
     """
     insertion = require_finite_array(insertion_loss, "insertion_loss")
     open_end = require_finite_array(open_end_loss, "open_end_loss")
@@ -834,6 +852,8 @@ def flow_noise_power_level(
     :raises ValueError: If a value is not finite, if the level and the
         open-end loss carry different numbers of bands, or if the room
         correction is neither a single value nor one per band.
+    :raises TypeError: if ``open_end_loss``, ``pressure_level`` or ``room_correction``
+        holds a text or a value that is not a real number.
     """
     level = require_finite_array(pressure_level, "pressure_level")
     open_end = require_finite_array(open_end_loss, "open_end_loss")
@@ -881,6 +901,8 @@ def modal_filter_cut_on(
     :return: :math:`f_{Cd}` or :math:`f_{CH}`, in Hz.
     :raises ValueError: If neither dimension or both are given, or if a value
         is not positive and finite.
+    :raises TypeError: if ``diameter_m``, ``larger_dimension`` or ``speed_of_sound`` is
+        not a single number.
     """
     speed = require_positive(speed_of_sound, "speed_of_sound")
     if diameter_m is not None and larger_dimension is None:
@@ -954,6 +976,9 @@ def normal_air_density(
         if the gauge pressure is not finite, if the absolute pressure they
         make is not positive, or if the temperature is at or below the
         printed absolute zero.
+    :raises TypeError: if ``atmospheric_pressure_pa``, ``static_gauge_pressure_pa`` or
+        ``temperature_c`` is not a single number, or ``static_gauge_pressure_pa`` or
+        ``temperature_c`` holds a text or a value that is not a real number.
     """
     ambient = require_positive(atmospheric_pressure_pa, "atmospheric_pressure_pa")
     gauge = _require_finite_scalar(static_gauge_pressure_pa, "static_gauge_pressure_pa")
@@ -999,6 +1024,7 @@ def volume_flow_rate(mass_flow: float, density: float) -> float:
     :param density: :math:`\rho_1` or :math:`\rho_{1n}`, in kg/m³.
     :return: :math:`q_V`, in m³/s.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``density`` or ``mass_flow`` is not a single number.
     """
     flow = require_positive(mass_flow, "mass_flow")
     rho = require_positive(density, "density")
@@ -1024,6 +1050,8 @@ def dynamic_pressure(volume_flow: float, area: float, density: float) -> float:
     :param density: :math:`\rho`, in kg/m³.
     :return: :math:`p_\mathrm{d}`, in Pa.
     :raises ValueError: If a value is not positive and finite.
+    :raises TypeError: if ``area``, ``density`` or ``volume_flow`` is not a single
+        number.
     """
     flow = require_positive(volume_flow, "volume_flow")
     section = require_positive(area, "area")
@@ -1049,6 +1077,8 @@ def total_pressure(
     :return: :math:`p_\mathrm{t}`, in Pa.
     :raises ValueError: If the static pressure is not finite, or if another
         value is not positive and finite.
+    :raises TypeError: if ``static_pressure_pa`` is not a single number, or
+        ``static_pressure_pa`` holds a text or a value that is not a real number.
     """
     static = _require_finite_scalar(static_pressure_pa, "static_pressure_pa")
     return static + dynamic_pressure(volume_flow, area, density)
@@ -1082,6 +1112,9 @@ def total_pressure_loss(
     :return: :math:`\Delta p_\mathrm{t}`, in Pa.
     :raises ValueError: If the static loss is not finite, or if another value
         is not positive and finite.
+    :raises TypeError: if ``inlet_area``, ``inlet_dynamic_pressure_pa``, ``outlet_area``
+        or ``static_pressure_loss_pa`` is not a single number, or
+        ``static_pressure_loss_pa`` holds a text or a value that is not a real number.
     """
     static = _require_finite_scalar(static_pressure_loss_pa, "static_pressure_loss_pa")
     head = require_positive(inlet_dynamic_pressure_pa, "inlet_dynamic_pressure_pa")
@@ -1113,6 +1146,9 @@ def pressure_loss_coefficient(
     :return: :math:`\zeta`, dimensionless.
     :raises ValueError: If the loss is not finite, or if the dynamic pressure
         is not positive and finite.
+    :raises TypeError: if ``inlet_dynamic_pressure_pa`` or ``total_loss`` is not a
+        single number, or ``total_loss`` holds a text or a value that is not a real
+        number.
     :warns SilencerMeasurementWarning: If the loss does not exceed the 10 Pa
         6.5.2.1 asks even the lowest airflow rate of a series to produce.
         The clause reads *greater than*, so a point sitting exactly on 10 Pa
@@ -1168,6 +1204,9 @@ def average_pressure_loss_coefficient(
     :return: :math:`\zeta`, dimensionless.
     :raises ValueError: If a value is not finite, if a dynamic pressure is
         not positive, or if a series' two arrays are of different lengths.
+    :raises TypeError: if ``object_dynamic_pressure_pa``, ``object_static_pressure_pa``,
+        ``substitution_dynamic_pressure_pa`` or ``substitution_static_pressure_pa``
+        holds a text or a value that is not a real number.
     :warns SilencerMeasurementWarning: If either series has fewer points than
         the five 6.5.2.2.1 asks for.
     """
@@ -1221,6 +1260,7 @@ def upstream_straight_length(area: float) -> float:
     :param area: :math:`S`, the cross-sectional area of the duct, in m².
     :return: The straight length required, in m.
     :raises ValueError: If the area is not positive and finite.
+    :raises TypeError: if ``area`` is not a single number.
     """
     section = require_positive(area, "area")
     equivalent = math.sqrt(4.0 * section / math.pi)
@@ -1255,6 +1295,8 @@ def duct_sound_power_level(
     :raises ValueError: If a value is not finite, or if the two arrays carry
         different numbers of bands. Both are per-band quantities, so neither
         stands in for a whole run.
+    :raises TypeError: if ``end_reflection_loss`` or ``room_sound_power_level`` holds a
+        text or a value that is not a real number.
     """
     level = require_finite_array(room_sound_power_level, "room_sound_power_level")
     reflection = require_finite_array(end_reflection_loss, "end_reflection_loss")
@@ -1321,6 +1363,7 @@ class OperatingLine(OwnsArrays):
             :data:`REPORTING_RESOLUTION_DB` carries that, but rounding here
             would compound through a chain.
         :raises ValueError: If the duty is not positive and finite.
+        :raises TypeError: if ``duty`` is not a single number.
         :warns SilencerMeasurementWarning: If the duty is outside the range
             5.5.2 allows the line to be extended over.
         """
@@ -1366,6 +1409,8 @@ def fit_operating_line(duty: ArrayLike, levels: ArrayLike) -> OperatingLine:
     :raises ValueError: If a duty is not positive and finite, if a level is
         not finite, if the two arrays are of different lengths, if there are
         fewer than two points, or if every point is at the same duty.
+    :raises TypeError: if ``duty`` or ``levels`` holds a text or a value that is not a
+        real number.
     :warns SilencerMeasurementWarning: If a point lies further from the line
         than the 3 dB of 5.5.2.
     """

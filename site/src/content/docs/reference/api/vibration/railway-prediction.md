@@ -126,6 +126,7 @@ table has no value for gives `nan`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown floor or statistic, a non-positive frequency, or a non-finite input. |
+| TypeError | if `floor_natural_frequency_hz` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## FOUNDATION_TO_FLOOR_LEVEL_DIFFERENCES
 
@@ -184,6 +185,7 @@ how it is computed here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative damping ratio, a non-positive speed or a non-positive frequency. |
+| TypeError | if `damping_ratio` or `shear_wave_speed_m_s` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## ground_to_floor_level_difference
 
@@ -312,6 +314,7 @@ measured with a point excitation.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive distance, a negative exponent or damping, a damping ratio without a wave speed, or an exponent that does not broadcast to the bands. |
+| TypeError | if `damping_ratio`, `distance_m` or `reference_distance_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## KB_ASSESSMENT_BANDS_HZ
 
@@ -352,13 +355,14 @@ refused.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a band outside Table 2, or mismatched inputs. |
+| TypeError | if `frequencies` or `levels` holds a text or a value that is not a real number. |
 
-## KB_WEIGHTING_TABLE_DB
+## KB_WEIGHTING_CORRECTIONS
 
 *Constant* (`mapping`).
 
 ```python
-KB_WEIGHTING_TABLE_DB = {4.0: -4.7, 5.0: -3.5, 6.3: -2.5, 8.0: -1.7, 10.0: -1.2, 12.5: -0.8, 16.0: -0.5, 20.0: -0.3, 25.0: -0.2, 31.5: -0.1, 40.0: -0.1, 50.0: -0.1, 63.0: 0.0, 80.0: 0.0}
+KB_WEIGHTING_CORRECTIONS = {4.0: -4.7, 5.0: -3.5, 6.3: -2.5, 8.0: -1.7, 10.0: -1.2, 12.5: -0.8, 16.0: -0.5, 20.0: -0.3, 25.0: -0.2, 31.5: -0.1, 40.0: -0.1, 50.0: -0.1, 63.0: 0.0, 80.0: 0.0}
 ```
 
 ## line_source_correction
@@ -394,6 +398,7 @@ the point did, up to the distance of Formula (B.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive distance or a correction outside 0,3 to 0,5. |
+| TypeError | if `distance_m`, `exponent_correction` or `reference_distance_m` is not a single number. |
 
 ## LINE_SOURCE_EXPONENT_CORRECTION
 
@@ -435,6 +440,7 @@ an empirical factor, which is the number a DIN 4150-3 comparison wants.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative input. |
+| TypeError | if `kb_fmax_zug` is not a single number. |
 
 ## point_to_line_transition_distance_m
 
@@ -467,17 +473,18 @@ of Table 1 the line behaviour is the rule.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive length or wavelength. |
+| TypeError | if `train_length_m` or `wavelength_m` is not a single number. |
 
 ## predict_floor_spectrum
 
 ```python
 predict_floor_spectrum(
-    emission_db: ArrayLike,
+    emission_levels: ArrayLike,
     *,
-    ground_db: ArrayLike = 0.0,
-    foundation_db: ArrayLike = 0.0,
-    floor_db: ArrayLike = 0.0,
-    mitigation_db: ArrayLike = 0.0,
+    ground_level_difference: ArrayLike = 0.0,
+    foundation_level_difference: ArrayLike = 0.0,
+    floor_level_difference: ArrayLike = 0.0,
+    mitigation_level_difference: ArrayLike = 0.0,
 ) -> NDArray[np.float64]
 ```
 
@@ -499,11 +506,11 @@ foundation term zero (Annex C does exactly that).
 
 | Name | Description |
 | :--- | :--- |
-| `emission_db` | $L_{v,\mathrm{E}}$, one level per band, in decibels. |
-| `ground_db` | $\Delta L_{v,\mathrm{BB}}$, per band or one value. |
-| `foundation_db` | $\Delta L_{v,\mathrm{FB}}$, per band or one value. |
-| `floor_db` | $\Delta L_{v,\mathrm{DF}}$, per band or one value. |
-| `mitigation_db` | $D_\mathrm{e}$, per band or one value, added as printed, so negative for a mitigation. |
+| `emission_levels` | $L_{v,\mathrm{E}}$, one level per band, in decibels. |
+| `ground_level_difference` | $\Delta L_{v,\mathrm{BB}}$, per band or one value. |
+| `foundation_level_difference` | $\Delta L_{v,\mathrm{FB}}$, per band or one value. |
+| `floor_level_difference` | $\Delta L_{v,\mathrm{DF}}$, per band or one value. |
+| `mitigation_level_difference` | $D_\mathrm{e}$, per band or one value, added as printed, so negative for a mitigation. |
 
 **Returns:** $L_v$, one level per band.
 
@@ -512,18 +519,19 @@ foundation term zero (Annex C does exactly that).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-finite input or a term that does not broadcast to the emission spectrum. |
+| TypeError | if `emission_levels` holds a text or a value that is not a real number. |
 
 ## predict_train_category
 
 ```python
 predict_train_category(
-    emission_db: ArrayLike,
+    emission_levels: ArrayLike,
     *,
     frequencies: ArrayLike = (4.0, 5.0, 6.3, 8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 250.0),
-    ground_db: ArrayLike = 0.0,
-    foundation_db: ArrayLike = 0.0,
-    floor_db: ArrayLike = 0.0,
-    mitigation_db: ArrayLike = 0.0,
+    ground_level_difference: ArrayLike = 0.0,
+    foundation_level_difference: ArrayLike = 0.0,
+    floor_level_difference: ArrayLike = 0.0,
+    mitigation_level_difference: ArrayLike = 0.0,
 ) -> TrainCategoryPrediction
 ```
 
@@ -542,12 +550,12 @@ category at or below 0,1 counting as zero.
 
 | Name | Description |
 | :--- | :--- |
-| `emission_db` | $L_{v,\mathrm{E}}$, one level per band, in decibels. |
+| `emission_levels` | $L_{v,\mathrm{E}}$, one level per band, in decibels. |
 | `frequencies` | The band centres, nominal; the 19 bands from 4 Hz to 250 Hz by default, and at least the 14 from 4 Hz to 80 Hz. |
-| `ground_db` | $\Delta L_{v,\mathrm{BB}}$, per band or one value. |
-| `foundation_db` | $\Delta L_{v,\mathrm{FB}}$, per band or one value. |
-| `floor_db` | $\Delta L_{v,\mathrm{DF}}$, per band or one value. |
-| `mitigation_db` | $D_\mathrm{e}$, per band or one value, added as printed, so negative for a mitigation. |
+| `ground_level_difference` | $\Delta L_{v,\mathrm{BB}}$, per band or one value. |
+| `foundation_level_difference` | $\Delta L_{v,\mathrm{FB}}$, per band or one value. |
+| `floor_level_difference` | $\Delta L_{v,\mathrm{DF}}$, per band or one value. |
+| `mitigation_level_difference` | $D_\mathrm{e}$, per band or one value, added as printed, so negative for a mitigation. |
 
 **Returns:** The chain, as a [`TrainCategoryPrediction`](/phonometry/reference/api/vibration/railway-prediction/#traincategoryprediction).
 
@@ -556,6 +564,7 @@ category at or below 0,1 counting as zero.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a spectrum that does not hold the 14 bands of the KB assessment, or a bad term. |
+| TypeError | if `emission_levels` or `frequencies` holds a text or a value that is not a real number. |
 
 ## PREDICTION_BAND_CENTERS_HZ
 
@@ -608,6 +617,7 @@ refused.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive speed, a change of more than 30 %, or a non-finite spectrum. |
+| TypeError | if `speed_from_kmh` or `speed_to_kmh` is not a single number, or `levels` holds a text or a value that is not a real number. |
 
 ## SPEED_RESCALING_LIMIT
 
@@ -652,6 +662,7 @@ prints 0,4 for a sum level of 78,1 dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty or non-finite input. |
+| TypeError | if `weighted_levels` holds a text or a value that is not a real number. |
 
 ## train_decay_exponent
 
@@ -686,6 +697,7 @@ point exponent below the correction gives a negative result, as printed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative exponent or an unknown fit. |
+| TypeError | if `point_exponent` is not a single number. |
 
 ## train_velocity_ratio
 
@@ -725,16 +737,17 @@ form; this is its reading.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive distance, a reference beyond the transition, a negative exponent or a correction outside Annex B. |
+| TypeError | if `exponent_correction`, `point_exponent`, `reference_distance_m` or `transition_distance_m` is not a single number, or `distance_m` holds a text or a value that is not a real number. |
 
 ## TrainCategoryPrediction
 
 ```python
 TrainCategoryPrediction(
     frequencies: NDArray[np.float64],
-    emission_db: NDArray[np.float64],
-    floor_db: NDArray[np.float64],
+    emission_levels: NDArray[np.float64],
+    floor_levels: NDArray[np.float64],
     weighted_frequencies_hz: NDArray[np.float64],
-    weighted_db: NDArray[np.float64],
+    weighted_levels: NDArray[np.float64],
     sum_level: float,
     kb_ftm: float,
     kb_fmax: float,
@@ -749,10 +762,10 @@ The prediction for one category of train, Clauses 5 and 7.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The band centres. |
-| `emission_db` | $L_{v,\mathrm{E}}$ the prediction started from. |
-| `floor_db` | $L_v$ of Formula (1), the spectrum on the floor. |
+| `emission_levels` | $L_{v,\mathrm{E}}$ the prediction started from. |
+| `floor_levels` | $L_v$ of Formula (1), the spectrum on the floor. |
 | `weighted_frequencies_hz` | The band centres from 4 Hz to 80 Hz the KB assessment sums. |
-| `weighted_db` | $L_{v,KB}$ of Formula (8) over those bands. |
+| `weighted_levels` | $L_{v,KB}$ of Formula (8) over those bands. |
 | `sum_level` | $L_{v,\mathrm{ges}}$ of Formula (9), the energy sum of the weighted bands. |
 | `kb_ftm` | $KB_\mathrm{FTm,Zug}$ of Formula (9). |
 | `kb_fmax` | $KB_\mathrm{Fmax,Zug}$ of Formula (10). |
@@ -807,3 +820,4 @@ curves of VDI 2038 Blatt 2 are drawn in.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-finite input. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |

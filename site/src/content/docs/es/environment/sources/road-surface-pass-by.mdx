@@ -250,7 +250,7 @@ pavimentos bituminosos densos para el rango de velocidad media (cuatro de
 hormigón asfáltico y tres de mezcla bituminosa tipo SMA), e imprime su media.
 `normalized_reference_levels` promedia de la misma forma cualquier conjunto de
 pavimentos, y las filas del anexo D y su media se publican como
-`SPB_ANNEX_D_SURFACES_DB` y `SPB_NORMALIZED_REFERENCE_DB`. La referencia se
+`SPB_ANNEX_D_SURFACE_LEVELS` y `SPB_NORMALIZED_REFERENCE_LEVELS`. La referencia se
 pasa a `statistical_pass_by` como índice, que se usa tal cual, o como sus tres
 niveles, cuyo índice se calcula con ellos a un decimal y con los mismos factores
 de ponderación:
@@ -261,7 +261,7 @@ result = environment.statistical_pass_by(
     speeds,
     levels,
     road_speed_category="medium",
-    reference_db=environment.SPB_NORMALIZED_REFERENCE_DB,
+    reference_levels=environment.SPB_NORMALIZED_REFERENCE_LEVELS,
 )
 print(round(result.reference_index, 2), round(result.difference, 2))
 # 78.92 1.22   dB: este pavimento está 1,2 dB por encima de la referencia del anexo D

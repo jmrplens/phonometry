@@ -349,6 +349,8 @@ def assumed_protection_value(
     :raises ValueError: if the grid is not two-dimensional or holds fewer than
         two subjects, if any value is not finite, if ``performance`` is not one
         Table 1 tabulates, or if ``frequencies`` does not match the grid.
+    :raises TypeError: if ``performance`` is a flag, a text or an array where a count
+        goes.
 
     .. note::
 
@@ -672,6 +674,8 @@ def hml_rating(
     :raises ValueError: if the grid is not two-dimensional, holds fewer than
         two subjects, carries neither seven nor eight bands, or if
         ``performance`` is not one Table 1 tabulates.
+    :raises TypeError: if ``performance`` is a flag, a text or an array where a count
+        goes.
     """
     grid = _subject_attenuations(attenuation)
     alpha = _alpha_for(performance)
@@ -858,6 +862,8 @@ def snr_rating(
     :raises ValueError: if the grid is not two-dimensional, holds fewer than
         two subjects, carries neither seven nor eight bands, or if
         ``performance`` is not one Table 1 tabulates.
+    :raises TypeError: if ``performance`` is a flag, a text or an array where a count
+        goes.
     """
     grid = _subject_attenuations(attenuation)
     alpha = _alpha_for(performance)

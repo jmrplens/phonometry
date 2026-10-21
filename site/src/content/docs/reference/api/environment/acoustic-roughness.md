@@ -133,11 +133,13 @@ Nyquist wavenumber of the sampling.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a sampling interval above 1 mm, a segment shorter than 1 m, or a record shorter than one segment. |
+| TypeError | if `sample_spacing_m` or `segment_length_m` is not a single number, or `roughness_um` holds a text or a value that is not a real number. |
 
 ## AcousticRoughnessSpectrum
 
 ```python
 AcousticRoughnessSpectrum(
+    *,
     wavelengths_m: NDArray[np.float64],
     levels: NDArray[np.float64],
     record_length_m: float | None = None,
@@ -190,6 +192,7 @@ The level of the band a nominal wavelength names, dB re 1 µm.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectrum has no band at that wavelength: a number outside what the result covers, not a missing key. |
+| TypeError | if `wavelength_m` is not a single number. |
 
 ### AcousticRoughnessSpectrum.plot()
 
@@ -294,6 +297,7 @@ of the record can win the maximum, so the search is limited to them.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an invalid record, spacing or radius. |
+| TypeError | if `curve_radius_m` or `sample_spacing_m` is not a single number, or `roughness_um` holds a text or a value that is not a real number. |
 
 ## filtered_roughness_spectrum
 
@@ -345,6 +349,7 @@ whose upper edge lies below the Nyquist wavenumber.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a sampling interval above 1 mm or that is not a whole number of samples per metre, or a record shorter than 5 m (7.4.3 NOTE 1: 1 m left once 2 m are discarded at either end). |
+| TypeError | if `sample_spacing_m` is not a single number, or `roughness_um` holds a text or a value that is not a real number. |
 
 ## redistributed_band_energies
 
@@ -395,6 +400,7 @@ band is dropped.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For edges that are not finite, not increasing within a band or not one per band, or a negative energy. |
+| TypeError | if `energies`, `source_lower`, `source_upper`, `target_lower` or `target_upper` holds a text or a value that is not a real number. |
 
 ## remove_roughness_spikes
 
@@ -445,6 +451,7 @@ is detected" can mean for a peak that is detected and kept.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a record that is not a finite one-dimensional array of at least three samples, or a spacing that is not positive. |
+| TypeError | if `sample_spacing_m` is not a single number, or `roughness_um` holds a text or a value that is not a real number. |
 
 ## roughness_filter_bank
 
@@ -493,11 +500,14 @@ reads is exactly what a record goes through.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a sampling interval above 1 mm or that is not a whole number of samples per metre, or a longest wavelength that leaves no band above the Nyquist band. |
+| TypeError | if `longest_wavelength_m` or `sample_spacing_m` is not a single number. |
 
 ## roughness_measurement_lines
 
 ```python
-roughness_measurement_lines(reference_width_mm: float) -> tuple[int, float]
+roughness_measurement_lines(
+    reference_width_mm: float,
+) -> RoughnessMeasurementLines
 ```
 
 How many parallel lines a rail's reference surface is measured on (6.4.3).
@@ -513,10 +523,30 @@ acceptance criteria follow this rule (6.4.3 NOTE).
 | :--- | :--- |
 | `reference_width_mm` | The width $w_\mathrm{ref}$ of the reference surface, in millimetres. |
 
-**Returns:** The number of lines and the distance between neighbouring lines, in millimetres (0 for a single line).
+**Returns:** The number of lines and the distance between neighbouring lines, in millimetres (0 for a single line), as a [`RoughnessMeasurementLines`](/phonometry/reference/api/environment/acoustic-roughness/#roughnessmeasurementlines).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a width that is not positive. |
+| TypeError | if `reference_width_mm` is not a single number. |
+
+## RoughnessMeasurementLines
+
+```python
+RoughnessMeasurementLines(n_lines: int, spacing_mm: float)
+```
+
+The parallel lines a rail's reference surface is measured on (6.4.3).
+
+What [`roughness_measurement_lines`](/phonometry/reference/api/environment/acoustic-roughness/#roughness_measurement_lines) returns: the count and the
+spacing, named, where an `(n, spacing)` tuple used to be unpacked by
+position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `n_lines` | The number of lines, 1 or 3. |
+| `spacing_mm` | The distance between neighbouring lines, in millimetres (0 for a single line). |

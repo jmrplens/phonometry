@@ -108,6 +108,7 @@ components, plus an optional caller-supplied shipping spectrum.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `frequencies_hz` or `shipping` holds a text or a value that is not a real number. |
 
 ## thermal_noise_spectrum
 
@@ -142,6 +143,7 @@ level is $10 \log_{10}(\langle p^2 \rangle / p_0^2)$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `density`, `speed_of_sound` or `temperature_c` is not a single number, or `frequency_hz` holds a text or a value that is not a real number. |
 
 ## wind_noise_spectrum
 
@@ -179,3 +181,4 @@ outside both the formula extrapolates.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid (a negative wind speed). |
+| TypeError | if `wind_speed_kt` is not a single number, or `frequency_hz` holds a text or a value that is not a real number. |

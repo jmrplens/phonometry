@@ -117,6 +117,12 @@ point.
 
 **Returns:** A [`CriticalCouplingResult`](/phonometry/reference/api/materials/slow-sound/#criticalcouplingresult). A [`SlowSoundAbsorberWarning`](/phonometry/reference/api/materials/slow-sound/#slowsoundabsorberwarning) is emitted (via `warnings.warn`) if the solver does not reach perfect absorption within tolerance.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `angle_rad`, `lattice_step_m`, `period_m` or `target_frequency` is not a single number. |
+
 ## CriticalCouplingResult
 
 ```python
@@ -144,6 +150,30 @@ given, and `absorption` exceeds 0,999. The first two are facts of the
 solve that the result does not keep, so the flag is a field; the third is
 read from `absorption`, so a design that claims convergence with less
 absorption is refused.
+
+## EffectiveFluidProperties
+
+```python
+EffectiveFluidProperties(
+    effective_density: NDArray[np.complex128],
+    bulk_modulus: NDArray[np.complex128],
+)
+```
+
+The visco-thermal equivalent fluid of a narrow channel.
+
+What [`slit_effective_properties`](/phonometry/reference/api/materials/slow-sound/#slit_effective_properties) and
+[`rectangular_duct_properties`](/phonometry/reference/api/materials/slow-sound/#rectangular_duct_properties) return: the effective density and the
+effective bulk modulus, named, where a `(rho, kappa)` tuple used to be
+unpacked by position, with the names
+[`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) gives the same pair.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `effective_density` | $\rho$, the complex effective density, in kg/m³, shaped like the frequency. |
+| `bulk_modulus` | $\kappa$, the complex effective bulk modulus, in Pa, shaped like the frequency. |
 
 ## helmholtz_resonator_impedance
 
@@ -199,6 +229,12 @@ corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
 | `n_sum_terms` | Transverse modes kept per axis in the duct series. |
 
 **Returns:** Complex acoustic impedance `Z_HR`, in Pa s/m3, shaped like `frequency`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `lattice_step_m` or `slit_height_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## HelmholtzResonator
 
@@ -302,6 +338,7 @@ with `period_m` `d`; rigid back wall at the right.
 | Exception | When |
 | :--- | :--- |
 | ValueError | naming the first of the three lengths that is not finite and positive, or for an empty resonator chain. |
+| TypeError | if `lattice_step_m`, `period_m` or `slit_height_m` is not a single number. |
 
 ## rectangular_duct_properties
 
@@ -312,7 +349,7 @@ rectangular_duct_properties(
     side_m: float,
     fluid: Fluid = ...,
     n_sum_terms: int = 40,
-) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]
+) -> EffectiveFluidProperties
 ```
 
 Effective density and bulk modulus of a square duct of the given side.
@@ -349,7 +386,13 @@ $28.454\,\eta/\text{side}^2$ as $\omega \to 0$.
 | `fluid` | State of the air in the duct ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
 | `n_sum_terms` | Transverse modes kept per axis (default 40). |
 
-**Returns:** `(rho, kappa)` complex arrays shaped like `frequency`.
+**Returns:** `rho` and `kappa`, complex arrays shaped like `frequency`, as an [`EffectiveFluidProperties`](/phonometry/reference/api/materials/slow-sound/#effectivefluidproperties).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `side_m` is not a single number, `n_sum_terms` is a flag, a text or an array where a count goes, or `frequency` holds a text or a value that is not a real number. |
 
 ## slit_effective_properties
 
@@ -359,7 +402,7 @@ slit_effective_properties(
     *,
     slit_height_m: float,
     fluid: Fluid = ...,
-) -> tuple[NDArray[np.complex128], NDArray[np.complex128]]
+) -> EffectiveFluidProperties
 ```
 
 Effective density and bulk modulus of a narrow slit of height `h`.
@@ -385,7 +428,13 @@ $\kappa_0 = \gamma P_0$.
 | `slit_height_m` | Slit height `h`, in metres. |
 | `fluid` | State of the air in the slit ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); the density `rho0`, viscosity `eta`, Prandtl number `Pr`, ratio of specific heats `gamma` and static pressure `P0` are read from it. |
 
-**Returns:** `(rho_s, kappa_s)` complex arrays shaped like `frequency`.
+**Returns:** `rho_s` and `kappa_s`, complex arrays shaped like `frequency`, as an [`EffectiveFluidProperties`](/phonometry/reference/api/materials/slow-sound/#effectivefluidproperties).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `slit_height_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
 
 ## slit_helmholtz_absorber
 
@@ -436,6 +485,12 @@ only the front air impedance carries `cos(theta)`.
 
 **Returns:** A [`SlitResonatorAbsorberResult`](/phonometry/reference/api/materials/slow-sound/#slitresonatorabsorberresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `resonator_geometry` is not a text, `angle_rad`, `lattice_step_m`, `period_m` or `slit_height_m` is not a single number, or `frequency` holds a text or a value that is not a real number. |
+
 ## SlitResonatorAbsorberResult
 
 ```python
@@ -450,10 +505,10 @@ SlitResonatorAbsorberResult(
     effective_impedance: NDArray[np.complex128],
     transfer_matrix: NDArray[np.complex128],
     *,
-    resonators: tuple[HelmholtzResonator, ...] | None = None,
-    slit_height_m: float | None = None,
-    lattice_step_m: float | None = None,
-    period_m: float | None = None,
+    resonators: tuple[HelmholtzResonator, ...],
+    slit_height_m: float,
+    lattice_step_m: float,
+    period_m: float,
 )
 ```
 
@@ -471,8 +526,7 @@ matrix with shape `(2, 2, len(frequency))`.
 
 The trailing fields retain the panel geometry the prediction was run
 with (`resonators`, `slit_height_m`, `lattice_step_m`, `period_m`) so
-`plot_geometry` can draw the cross-section; they are appended after
-the original fields and default to `None` for hand-built results.
+`plot_geometry` can draw the cross-section.
 
 ### SlitResonatorAbsorberResult.plot()
 
@@ -505,12 +559,6 @@ Draw one period of the panel cross-section to scale (dimensioned).
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the result does not retain its geometry. |
 
 ## SlowSoundAbsorberWarning
 

@@ -605,6 +605,7 @@ class MooreGlasbergLoudness(OwnsArrays):
         :raises ValueError: if the three arrays disagree, if ``loudness`` is
             not a finite non-negative sone value, or if ``loudness_level``
             does not restate ``loudness`` through Table 5.
+        :raises TypeError: if ``loudness`` is not a single number.
         """
         require_ranks(self, specific=1, erb_number=1, frequencies=1)
         require_same_length(
@@ -1055,6 +1056,7 @@ def loudness_moore_glasberg(
     :param presentation: ``"binaural"`` (default; alias ``"diotic"``) or
         ``"monaural"``.
     :return: A :class:`MooreGlasbergLoudness`.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     _validate_conditions(field, presentation)
     fs = resolve_fs(x, fs)

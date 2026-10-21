@@ -606,6 +606,7 @@ def apply_weighting(x: SignalInput, fs: float | None = None, *, name: str) -> Re
     :return: The frequency-weighted acceleration signal, same length as input.
     :raises ValueError: if ``x`` is not 1-D, ``fs`` is not positive, or
         ``name`` is unknown.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     return _apply_response(x, fs, name=name, band_limiting=False)
 
@@ -638,6 +639,7 @@ def apply_band_limiting(x: SignalInput, fs: float | None = None, *, name: str) -
     :return: The band-limited acceleration signal, same length as input.
     :raises ValueError: if ``x`` is not 1-D, ``fs`` is not positive, or
         ``name`` is unknown.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     return _apply_response(x, fs, name=name, band_limiting=True)
 
@@ -758,6 +760,8 @@ def weighted_acceleration(
     :return: A :class:`WeightedSpectrum` with ``.plot()``.
     :raises ValueError: if the inputs differ in length, are empty or carry
         non-finite values.
+    :raises TypeError: if ``band_accelerations`` or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     # Finiteness is required of both vectors: a NaN band acceleration (or the
     # NaN factor a NaN centre frequency weights it with) flows through the
@@ -834,6 +838,7 @@ def running_rms(
     :return: The running r.m.s. value ``a_w(t0)`` per sample, in m/s2.
     :raises ValueError: for a bad signal, non-positive ``fs``/``tau`` or an
         unknown ``method``.
+    :raises TypeError: if ``fs`` or ``integration_time`` is not a single number.
     """
     fs = resolve_fs(x, fs, name="x")
     x = _weighted_signal(x)
@@ -917,6 +922,7 @@ def vibration_dose_value(x: SignalInput, fs: float | None = None) -> float:
         that disagrees with it raises instead of silently winning.
     :return: The VDV, in m/s^1.75.
     :raises ValueError: for a bad signal or non-positive ``fs``.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     fs = resolve_fs(x, fs, name="x")
     x = _weighted_signal(x)
@@ -940,6 +946,7 @@ def motion_sickness_dose_value(x: SignalInput, fs: float | None = None) -> float
         that disagrees with it raises instead of silently winning.
     :return: The MSDV, in m/s^1.5.
     :raises ValueError: for a bad signal or non-positive ``fs``.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     fs = resolve_fs(x, fs, name="x")
     x = _weighted_signal(x)
@@ -1040,6 +1047,7 @@ def wbv_exposure_basis(a_wx: float, a_wy: float, a_wz: float) -> float:
     :return: The dominant-axis value
         :math:`\max(1.4 a_{\mathrm{w}x}, 1.4 a_{\mathrm{w}y}, a_{\mathrm{w}z})`, in m/s2.
     :raises ValueError: for a negative or non-finite axis value.
+    :raises TypeError: if ``a_wx``, ``a_wy`` or ``a_wz`` is not a single number.
     """
     require_scalar(a_wx, "a_wx")
     require_scalar(a_wy, "a_wy")
@@ -1066,6 +1074,7 @@ def daily_exposure(total_value: float, duration_s: float) -> float:
     :param duration_s: Daily exposure duration ``T``, in seconds.
     :return: The daily exposure ``A(8)``, in m/s2.
     :raises ValueError: for a non-finite or negative magnitude or duration.
+    :raises TypeError: if ``duration_s`` or ``total_value`` is not a single number.
     """
     require_scalar(total_value, "total_value")
     a = float(total_value)
@@ -1171,6 +1180,7 @@ def hav_vwf_lifetime_years(a8: float) -> float:
     :param a8: Daily vibration exposure ``A(8)``, in m/s2 (> 0).
     :return: The lifetime exposure duration :math:`D_\mathrm{y}`, in years.
     :raises ValueError: if ``a8`` is not positive.
+    :raises TypeError: if ``a8`` is not a single number.
     """
     require_scalar(a8, "a8")
     a = float(a8)
@@ -1241,6 +1251,8 @@ class ExposureAssessment(RichDisplay):
 
         :raises ValueError: if ``kind`` is not ``"hav"``/``"wbv"``, ``metric``
             is not ``"a8"``/``"vdv"``, or the pair is ``"hav"``/``"vdv"``.
+        :raises TypeError: if ``kind`` or ``metric`` is not a text, or ``value`` is not
+            a single number.
         """
         require_choice(self.kind, "kind", ("hav", "wbv"))
         require_choice(self.metric, "metric", ("a8", "vdv"))
@@ -1458,6 +1470,8 @@ def daily_vibration_exposure(
     :return: A :class:`DailyVibrationExposure` with ``.plot()``.
     :raises ValueError: if the inputs differ in length, carry non-finite
         values, or ``labels`` mismatches.
+    :raises TypeError: if ``durations_s`` or ``total_values`` holds a text or a value
+        that is not a real number.
     """
     # Finite up front, naming the parameter the caller typed: a NaN magnitude
     # slips every `< 0.0` guard downstream and surfaces as an A(8) of NaN

@@ -280,6 +280,7 @@ The `(lower, upper)` acceptance limits for a class, in decibels.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for another class. |
+| TypeError | if `meter_class` is a flag, a text or an array where a count goes. |
 
 ## PERIODIC_TEST_ENVIRONMENT
 
@@ -359,10 +360,10 @@ SoundLevelMeterPeriodicMeasurements(
     static_pressures_kpa: Sequence[float] | None = None,
     air_temperatures_c: Sequence[float] | None = None,
     relative_humidities_percent: Sequence[float] | None = None,
-    calibration_check_initial_db: float | None = None,
-    calibration_check_adjusted_db: float | None = None,
-    self_noise_microphone_db: float | None = None,
-    self_noise_electrical_db: Mapping[str, float] | None = None,
+    calibration_check_initial_level: float | None = None,
+    calibration_check_adjusted_level: float | None = None,
+    microphone_self_noise_level: float | None = None,
+    electrical_self_noise_levels: Mapping[str, float] | None = None,
     acoustic_weighting_deviations_db: Sequence[float] | None = None,
     acoustic_weighting_uncertainties_db: Sequence[float] | None = None,
     acoustic_weighting_uncertainties_without_correction_data_db: Sequence[float] | None = None,
@@ -379,7 +380,7 @@ SoundLevelMeterPeriodicMeasurements(
     linearity_uncertainties_db: Sequence[float] | None = None,
     linearity_levels: Sequence[float] | None = None,
     linear_operating_range_db: Sequence[float] | None = None,
-    linearity_starting_point_db: float | None = None,
+    linearity_starting_level: float | None = None,
     linearity_overload_level: float | None = None,
     linearity_under_range_level: float | None = None,
     range_linearity_deviations_db: Mapping[str, Sequence[float]] | None = None,
@@ -412,10 +413,10 @@ keyword-only, so the unit in its name is written at the call site.
 | `static_pressures_kpa` | Clause 7: the static pressure at the start and the end of the tests at least (7.2), in kilopascals. |
 | `air_temperatures_c` | The air temperature at the same times, in degrees Celsius. |
 | `relative_humidities_percent` | The relative humidity, in per cent. |
-| `calibration_check_initial_db` | Clause 10: the indication at the calibration check frequency on the sound calibrator before any adjustment. |
-| `calibration_check_adjusted_db` | The indication after adjustment (the same number when none was needed). |
-| `self_noise_microphone_db` | 11.1: the A-weighted self-generated noise with the microphone installed, on the most-sensitive level range; reported for information only, without an uncertainty. |
-| `self_noise_electrical_db` | 11.2: the self-generated noise with the electrical input-signal device, keyed by frequency weighting (`"A"`, `"C"`, `"Z"`), every weighting the meter provides. |
+| `calibration_check_initial_level` | Clause 10: the indication at the calibration check frequency on the sound calibrator before any adjustment. |
+| `calibration_check_adjusted_level` | The indication after adjustment (the same number when none was needed). |
+| `microphone_self_noise_level` | 11.1: the A-weighted self-generated noise with the microphone installed, on the most-sensitive level range; reported for information only, without an uncertainty. |
+| `electrical_self_noise_levels` | 11.2: the self-generated noise with the electrical input-signal device, keyed by frequency weighting (`"A"`, `"C"`, `"Z"`), every weighting the meter provides. |
 | `acoustic_weighting_deviations_db` | 12.16: the deviations of the relative frequency weighting from its design goal at 125 Hz and 8 kHz, in that order ([`ACOUSTIC_TEST_FREQUENCIES_HZ`](/phonometry/reference/api/metrology/sound-level-meter/#acoustic_test_frequencies_hz)), after the corrections of 12.14. |
 | `acoustic_weighting_uncertainties_db` | Their uncertainties. |
 | `acoustic_weighting_uncertainties_without_correction_data_db` | Optional, for 4.4: the same uncertainties without the uncertainty of the manufacturer's free-field or random-incidence correction data, never more than the totals. A result whose total exceeds its maximum and whose uncertainty without that data does not is a result that did not conform, for that reason, rather than one 4.3 forbids using. |
@@ -432,7 +433,7 @@ keyword-only, so the unit in its name is written at the call site.
 | `linearity_uncertainties_db` | Their uncertainties. |
 | `linearity_levels` | The anticipated level of each 16 result, which labels it and shows which steps of 16.3 the record holds. |
 | `linear_operating_range_db` | The lower and the upper boundary of the linear operating range at 8 kHz on the reference level range, as the instruction manual states them (IEC 61672-1 5.6.10): the extent the steps of 16.3 cover and 16.4 holds to the limits. |
-| `linearity_starting_point_db` | The starting point the instruction manual gives for the tests of level linearity at 8 kHz on the reference level range (16.2; IEC 61672-1 5.6.11). |
+| `linearity_starting_level` | The starting point the instruction manual gives for the tests of level linearity at 8 kHz on the reference level range (16.2; IEC 61672-1 5.6.11). |
 | `linearity_overload_level` | The anticipated level of the step that first caused an indication of overload, which the rising steps of 16.3 stop short of. |
 | `linearity_under_range_level` | The anticipated level of the step that first caused an indication of under-range, which the falling steps of 16.3 stop short of. |
 | `range_linearity_deviations_db` | 17.5: the level linearity deviations including the level range control, at 1 kHz, keyed `"17.3"` (the reference sound level of 17.2 held on each level range besides the reference one, NaN where it is not displayed) and `"17.4"` (5 dB above the first indication of under-range on each level range, NaN where not measured). `"17.4"` starts with the reference level range, which 17.4 tests "for each level range" as well, and then takes the other ranges in the order of `"17.3"`, so it holds one value more; 17.3 has no reading on the reference range, where the reference sound level of 17.2 deviates by zero by construction (IEC 61672-1 5.6.3). |
@@ -833,6 +834,7 @@ The `(lower, upper)` acceptance limits for a class, in decibels.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for another class. |
+| TypeError | if `meter_class` is a flag, a text or an array where a count goes. |
 
 ## verify_sound_level_meter_periodic
 
@@ -882,3 +884,4 @@ feature.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a class other than 1 or 2, a Clause 13 row of the wrong length for the class, a record with nothing graded in it, or `features` that the class or a result of the record contradicts. |
+| TypeError | if `meter_class` is a flag, a text or an array where a count goes. |

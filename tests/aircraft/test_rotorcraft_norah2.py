@@ -320,7 +320,11 @@ def r22_set(norah_root: pathlib.Path) -> dict:
         if spd <= 0.0:
             continue  # the hover disk uses a different (ring) format
         phi, theta, freqs, lv = _parse_hem(norah_root / "Hemispheres" / fname)
-        objs.append(RotorcraftHemisphere(freqs, phi, theta, lv))
+        objs.append(
+            RotorcraftHemisphere(
+                frequencies=freqs, azimuth_deg=phi, polar_deg=theta, levels=lv
+            )
+        )
         speeds.append(spd)
         angles.append(ang)
         ids.append(ih)
@@ -650,7 +654,9 @@ def test_reference_hemisphere_node_lookup(
     phi, theta, freqs, levels = _parse_hem(
         norah_root / "Hemispheres" / "R22_Flyover_55kts_0deg.hem"
     )
-    h = RotorcraftHemisphere(freqs, phi, theta, levels)
+    h = RotorcraftHemisphere(
+        frequencies=freqs, azimuth_deg=phi, polar_deg=theta, levels=levels
+    )
     assert phi.size == 19
     assert theta.size == 19
     assert freqs.size == 31

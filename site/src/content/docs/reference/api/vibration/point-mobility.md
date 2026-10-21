@@ -94,6 +94,7 @@ $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive stiffness, mass or frequency. |
+| TypeError | if `bending_stiffness` or `mass_per_length` is not a single number. |
 
 ## infinite_beam_impedance
 
@@ -130,6 +131,7 @@ bending wave speed $c_\mathrm{B} = (B \omega^2 / m')^{1/4}$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input or unknown location. |
+| TypeError | if `mass_per_length` is not a single number. |
 
 ## infinite_beam_mobility
 
@@ -198,6 +200,7 @@ at the driving point.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `bending_stiffness` or `mass_per_length` is not a single number. |
 
 ## infinite_beam_point_mobility
 
@@ -258,6 +261,7 @@ point force.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive stiffness/mass or unknown location. |
+| TypeError | if `bending_stiffness` or `mass_per_area` is not a single number. |
 
 ## infinite_plate_mobility
 
@@ -371,6 +375,7 @@ $Z = \rho c_\mathrm{L} S$, real and frequency independent.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
+| TypeError | if `cross_section_area`, `density` or `longitudinal_wave_speed` is not a single number. |
 
 ## longitudinal_rod_mobility
 
@@ -432,6 +437,7 @@ in N.m used throughout this module and by the coincidence frequency of
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive modulus/thickness or $\lvert\nu\rvert \ge 1$. |
+| TypeError | if `poisson_ratio`, `thickness_m` or `youngs_modulus` is not a single number. |
 
 ## plate_bending_wave_speed
 
@@ -461,3 +467,4 @@ $c_\mathrm{B} = (B' \omega^2 / m'')^{1/4}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive stiffness, mass or frequency. |
+| TypeError | if `bending_stiffness` or `mass_per_area` is not a single number. |

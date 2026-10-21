@@ -53,7 +53,8 @@ def test_h2_recovers_known_magnitude() -> None:
 
 def test_coherence_unity_for_noiseless_path() -> None:
     x, y, _, _ = _known_system()
-    f, g = electroacoustics.coherence(x, y, FS)
+    coh = electroacoustics.coherence(x, y, FS)
+    f, g = coh.frequencies, coh.coherence
     band = (f > 100.0) & (f < 5000.0)
     assert np.mean(g[band]) == pytest.approx(1.0, abs=1e-3)
     assert np.all(g <= 1.0 + 1e-9)
@@ -67,7 +68,8 @@ def test_coherence_matches_snr_formula() -> None:
     x = rng.standard_normal(N)
     noise = rng.standard_normal(N) * np.sqrt(1.0 / ref.COHERENCE_SNR)
     y = x + noise
-    f, g = electroacoustics.coherence(x, y, FS)
+    coh = electroacoustics.coherence(x, y, FS)
+    f, g = coh.frequencies, coh.coherence
     band = (f > 500.0) & (f < 20000.0)
     assert np.mean(g[band]) == pytest.approx(ref.COHERENCE_EXPECTED, abs=0.01)
 

@@ -187,7 +187,8 @@ def test_source_limits_bracket_the_printed_nominal(
     source: str, table: tuple[tuple[float, float], ...]
 ) -> None:
     """The tolerance band is the printed nominal +/- the printed tolerance."""
-    freqs, lower, upper = building.heavy_impact_source_limits(source)
+    limits = building.heavy_impact_source_limits(source)
+    freqs, lower, upper = limits.frequencies, limits.lower, limits.upper
     np.testing.assert_allclose(freqs, building.HEAVY_IMPACT_OCTAVE_BANDS_HZ)
     np.testing.assert_allclose(lower, [v - t for v, t in table])
     np.testing.assert_allclose(upper, [v + t for v, t in table])

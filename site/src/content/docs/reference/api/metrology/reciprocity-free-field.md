@@ -114,6 +114,7 @@ $\mathrm{e}^{\alpha r}$ before it is inverted.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than three distances, columns of different lengths, values that are not positive and finite, or distances that are all the same. |
+| TypeError | if `attenuation_np_per_m` is not a single number. |
 
 ## AcousticCenter
 
@@ -216,6 +217,7 @@ between 150 mm and 500 mm, which is reported without entering the verdict.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for no distance, or a distance, diameter or length that is not positive. |
+| TypeError | if `microphone_diameter_m` or `support_length_m` is not a single number. |
 
 ## free_field_parameter_uncertainty
 
@@ -379,6 +381,7 @@ Formula (7), which the printed Formula (9) drops (module docstring).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a distance that is not positive or that the acoustic centres use up, or values that are zero or not finite. |
+| TypeError | if `diaphragm_distance_m` is not a single number. |
 
 ## free_field_transfer_impedance
 
@@ -430,6 +433,7 @@ sensitivity and the scattering factor (Formula (4)).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a distance that is not positive or that the acoustic centres use up, or values that are zero or not finite. |
+| TypeError | if `diaphragm_distance_m` is not a single number. |
 
 ## FreeFieldArrangementCheck
 
@@ -569,7 +573,7 @@ Each one left at zero contributes no component.
 ```python
 FreeFieldParameterUncertainty(
     frequencies: NDArray[np.float64],
-    components_db: Mapping[str, NDArray[np.float64]],
+    component_uncertainties_db: Mapping[str, NDArray[np.float64]],
     microphone: int,
 )
 ```
@@ -587,7 +591,7 @@ Built by [`free_field_parameter_uncertainty`](/phonometry/reference/api/metrolog
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | The frequencies, in Hz. |
-| `components_db` | The component of each parameter, keyed by its name in [`IEC61094_3_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1), in dB at each frequency. |
+| `component_uncertainties_db` | The component of each parameter, keyed by its name in [`IEC61094_3_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1), in dB at each frequency. |
 | `microphone` | The microphone whose level they are for, 1, 2 or 3. |
 
 ### FreeFieldParameterUncertainty.plot()
@@ -659,6 +663,7 @@ refers to, not with the one it prints (`docs/ERRATA.md`).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for frequencies that are not positive and increasing, a pressure that is not positive, a humidity outside 0 % to 100 %, or a temperature at or below absolute zero. |
+| TypeError | if `static_pressure_pa` is not a single number. |
 
 ## ReciprocityAirAttenuation
 

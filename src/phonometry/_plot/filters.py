@@ -476,7 +476,9 @@ def plot_filter_summation(
     ax = ax if ax is not None else _new_axes()
     mids = np.asarray(result.frequencies, dtype=np.float64)
     graded = [
-        k for k, band in enumerate(result.bands) if band["summation_min_db"] is not None
+        k
+        for k, band in enumerate(result.bands)
+        if band["summation_difference_lower"] is not None
     ]
     cls = result.requirement_class("summation")
     reference = cls if cls is not None else max(result.available_classes())
@@ -1279,6 +1281,7 @@ def plot_octave_spectrogram(
     :return: The axes drawn on.
     :raises ValueError: for a multichannel result drawn without ``channel``,
         or a ``channel`` the result does not hold.
+    :raises TypeError: if ``channel`` is a flag, a text or an array where a count goes.
     """
     from .._i18n import localize_axes
 

@@ -375,6 +375,7 @@ segment must remain long against the record's lowest frequencies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `n_segments` is a flag, a text or an array where a count goes. |
 
 ## StationarityTestResult
 
@@ -504,6 +505,7 @@ non-monotonic clustering.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `alpha` is not a single number. |
 
 ## TrendTestResult
 

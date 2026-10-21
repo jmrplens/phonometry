@@ -93,7 +93,7 @@ octave_band_levels(
     levels: np.ndarray,
     *,
     frequencies: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray]
+) -> OctaveBandLevels
 ```
 
 Octave-band levels from one-third-octave band levels (ISO 3741 Annex F).
@@ -120,13 +120,57 @@ octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6,3, 8 and
 | `levels` | Band levels in decibels, with the bands on the last axis (`(NB,)`, or `(..., NB)` for several spectra at once). |
 | `frequencies` | The `NB` nominal one-third-octave mid-band frequencies of `levels`, in hertz, from 50 Hz to 10 kHz. |
 
-**Returns:** `(octave mid-band frequencies, octave-band levels)`, the frequencies ascending and the levels with the octaves on the last axis.
+**Returns:** The octave mid-band frequencies, ascending, and the octave-band levels with the octaves on the last axis, as an [`OctaveBandLevels`](/phonometry/reference/api/power/sound-power-reverberation/#octavebandlevels).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a frequency outside Table F.1, a repeated frequency, an octave whose three thirds are not all present, or levels that do not carry one value per frequency. |
+
+## OctaveBandLevels
+
+```python
+OctaveBandLevels(frequencies: np.ndarray, levels: np.ndarray)
+```
+
+Octave-band levels summed from one-third-octave bands (ISO 3741 Annex F).
+
+What [`octave_band_levels`](/phonometry/reference/api/power/sound-power-reverberation/#octave_band_levels) returns: the octave centres and the
+levels, named, where a `(frequencies, levels)` tuple used to be
+unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The octave mid-band frequencies, ascending, in Hz. |
+| `levels` | The octave-band levels, in dB, with the octaves on the last axis. |
+
+### OctaveBandLevels.plot()
+
+```python
+OctaveBandLevels.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the octave-band levels against their octaves.
+
+A level array of several spectra draws one curve per spectrum.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the level curves. |
+
+**Returns:** The axes.
 
 ## reverberation_background_correction
 
@@ -168,6 +212,7 @@ this.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For inputs that do not match band for band, that are not finite, or a band centre that is not strictly positive. |
+| TypeError | if `background_levels`, `frequencies` or `levels` holds a text or a value that is not a real number. |
 
 ## ReverberationSoundEnergyResult
 
@@ -392,6 +437,7 @@ time-averaged correction of 9.1.2.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a malformed or non-finite level array, a non-physical climate, a background without its `integration_time` or without `frequencies`, or mismatched band counts. |
+| TypeError | if `integration_time` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
 
 ## sound_energy_reverberation
 
@@ -462,6 +508,7 @@ NOTE 1), so that the energies Eq. (25) subtracts share one reference;
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a malformed or non-finite level array, a non-physical room or climate, a background without its `integration_time`, or mismatched band counts. |
+| TypeError | if `integration_time`, `surface_area` or `volume` is not a single number, or `n_events` is a flag, a text or an array where a count goes. |
 
 ## sound_power_comparison
 
@@ -557,3 +604,9 @@ reference meteorological conditions (clause 4).
 | `static_pressure_kpa` | Static pressure `ps` in the room, in kilopascals. |
 
 **Returns:** [`ReverberationSoundPowerResult`](/phonometry/reference/api/power/sound-power-reverberation/#reverberationsoundpowerresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `surface_area` or `volume` is not a single number. |

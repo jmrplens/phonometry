@@ -187,6 +187,12 @@ Evaluate the five ISO 9614-3:2002 Annex C acceptance criteria per band.
 
 **Returns:** [`PrecisionCriteria`](/phonometry/reference/api/power/sound-power-intensity/#precisioncriteria).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies`, `scan_intensity_level_1` or `scan_intensity_level_2` holds a text or a value that is not a real number. |
+
 ## PrecisionCriteria
 
 ```python
@@ -524,6 +530,12 @@ screening.
 
 **Returns:** [`SoundPowerIntensityResult`](/phonometry/reference/api/power/sound-power-intensity/#soundpowerintensityresult).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `frequencies` holds a text or a value that is not a real number. |
+
 ## sound_power_intensity_precision
 
 ```python
@@ -563,6 +575,12 @@ $$
 | `static_pressure_pa` | Barometric pressure `B` (Pa), for LW0. |
 
 **Returns:** [`PrecisionIntensityResult`](/phonometry/reference/api/power/sound-power-intensity/#precisionintensityresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `static_pressure_pa` or `temperature_c` is not a single number. |
 
 ## SoundPowerIntensityResult
 

@@ -175,6 +175,7 @@ def critical_bandwidth_engineering(tone_frequency: float) -> float:
     :param tone_frequency: Tone frequency ``fT``, in Hz.
     :return: Critical bandwidth ``Δfc``, in Hz.
     :raises ValueError: If ``tone_frequency`` is not positive/finite.
+    :raises TypeError: if ``tone_frequency`` is not a single number.
     """
     ft = _positive(tone_frequency, "tone_frequency")
     inner = 1.0 + _DFC_INNER * (ft / _DFC_REFERENCE) ** 2
@@ -192,6 +193,7 @@ def critical_band_corners(tone_frequency: float) -> tuple[float, float]:
     :param tone_frequency: Tone frequency ``fT``, in Hz.
     :return: ``(f1, f2)`` corner frequencies, in Hz.
     :raises ValueError: If ``tone_frequency`` is not positive/finite.
+    :raises TypeError: if ``tone_frequency`` is not a single number.
     """
     ft = _positive(tone_frequency, "tone_frequency")
     dfc = critical_bandwidth_engineering(ft)
@@ -215,6 +217,7 @@ def masking_index(frequency: float) -> float:
     :param frequency: Frequency ``f``, in Hz.
     :return: Masking index ``av``, in dB.
     :raises ValueError: If ``frequency`` is not positive/finite.
+    :raises TypeError: if ``frequency`` is not a single number.
     """
     f = _positive(frequency, "frequency")
     return float(
@@ -239,6 +242,8 @@ def critical_band_level(
     :return: Critical-band level ``LG``, in dB.
     :raises ValueError: If the level is not finite or a frequency is not
         positive/finite.
+    :raises TypeError: if ``line_spacing_hz`` or ``mean_narrowband_level`` is not a
+        single number.
     """
     ls = _finite(mean_narrowband_level, "mean_narrowband_level")
     df = _positive(line_spacing_hz, "line_spacing_hz")
@@ -259,6 +264,8 @@ def audibility_from_levels(
     :param masking_index: Masking index ``av``, in dB (Formula (13)).
     :return: Audibility ``ΔL``, in dB (dB above the masking threshold).
     :raises ValueError: If any argument is not finite.
+    :raises TypeError: if ``critical_band_level``, ``masking_index`` or ``tone_level``
+        is not a single number.
     """
     lt = _finite(tone_level, "tone_level")
     lg = _finite(critical_band_level, "critical_band_level")
@@ -298,6 +305,7 @@ def energy_sum_level(
     :return: Corrected energy-sum level, in dB.
     :raises ValueError: If ``line_levels`` is empty/non-finite or the factor is
         not positive/finite.
+    :raises TypeError: if ``effective_bandwidth_factor`` is not a single number.
     """
     levels = np.asarray(line_levels, dtype=np.float64)
     if levels.size == 0:
@@ -394,6 +402,8 @@ def mean_narrowband_level(
     :return: Mean narrow-band level ``LS``, in dB.
     :raises ValueError: If the spectrum is invalid, the factor is not
         positive/finite, or no lines fall in the critical band.
+    :raises TypeError: if ``effective_bandwidth_factor`` or ``tone_frequency`` is not a
+        single number.
     """
     ls, _ = _mean_narrowband_level_lines(
         levels,
@@ -481,6 +491,8 @@ def tone_level(
         (the default), 1.0 for a rectangular window.
     :return: Tone level ``LT``, in dB.
     :raises ValueError: If the spectrum is invalid or the levels are not finite.
+    :raises TypeError: if ``mean_narrowband_level`` or ``tone_frequency`` is not a
+        single number.
     """
     lev, freq = _validate_spectrum(levels, frequencies, "tone_level")
     ft = _positive(tone_frequency, "tone_frequency")
@@ -716,6 +728,8 @@ def analyze_spectrum(
     :return: A :class:`ToneAudibilityResult` of the detected audible tones and
         their same-band FG combinations.
     :raises ValueError: If the spectrum is invalid or no audible tone is found.
+    :raises TypeError: if ``effective_bandwidth_factor`` or ``line_spacing_hz`` is not a
+        single number.
     """
     lev, freq = _validate_spectrum(levels, frequencies, "analyze_spectrum")
     df = _positive(line_spacing_hz, "line_spacing_hz")
@@ -887,6 +901,7 @@ def two_tone_separation_frequency(tone_frequency: float) -> float:
     :param tone_frequency: Frequency ``fT`` of the more prominent tone, in Hz.
     :return: Separation-frequency threshold ``fD``, in Hz.
     :raises ValueError: If ``tone_frequency`` is not positive/finite.
+    :raises TypeError: if ``tone_frequency`` is not a single number.
     """
     ft = _positive(tone_frequency, "tone_frequency")
     exponent = (
@@ -924,6 +939,8 @@ def resolve_tones_separately(
     :return: ``True`` if the tones are rated separately, ``False`` if combined.
     :raises ValueError: If a frequency is not positive/finite or an audibility is
         not finite.
+    :raises TypeError: if ``audibility1``, ``audibility2``, ``tone1_frequency`` or
+        ``tone2_frequency`` is not a single number.
     """
     f1 = _positive(tone1_frequency, "tone1_frequency")
     f2 = _positive(tone2_frequency, "tone2_frequency")
@@ -1023,6 +1040,8 @@ def audibility_uncertainty(
     :return: Extended uncertainty ``U`` of the audibility, in dB.
     :raises ValueError: If a line set is empty/non-finite or a parameter is
         not positive/finite.
+    :raises TypeError: if ``coverage_factor``, ``line_spacing_hz``, ``sigma_level_db``
+        or ``tone_frequency`` is not a single number.
     """
     lt = np.asarray(tone_line_levels, dtype=np.float64)
     ls = np.asarray(noise_line_levels, dtype=np.float64)
@@ -1308,6 +1327,8 @@ class ToneAudibilityResult(OwnsArrays):
             any quantity is non-numeric or non-finite, the line spacing is not
             positive, or a group size is not a whole count of one tone or
             more.
+        :raises TypeError: if ``line_spacing_hz`` is not a single number, or
+            ``group_sizes`` holds a text.
         """
         require_ranks(
             self,
@@ -1534,6 +1555,7 @@ def assess_tones(
     :return: A :class:`ToneAudibilityResult`.
     :raises ValueError: If the arrays are empty, differ in length, or contain
         non-finite/non-positive values.
+    :raises TypeError: if ``line_spacing_hz`` is not a single number.
     """
     freqs = np.asarray(tone_frequencies, dtype=np.float64)
     lt = np.asarray(tone_levels, dtype=np.float64)

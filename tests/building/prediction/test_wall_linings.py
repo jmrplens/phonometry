@@ -41,6 +41,11 @@ from phonometry.building.prediction.linings import (
 )
 
 
+def _ratings(result: building.LiningImprovementResult) -> tuple[float, float, float]:
+    """The three Annex D ratings of a result, ``(ΔRw, ΔRA, ΔRA,tr)``, in dB."""
+    return result.delta_rw, result.delta_ra, result.delta_ratr
+
+
 # ===========================================================================
 # Wall linings and additional layers (ISO 12354-1 Annex D)
 # ===========================================================================
@@ -321,7 +326,7 @@ def test_stacked_d5_and_d6_corrections_can_fall_below_the_reference_floor() -> N
     changing it later is a deliberate act rather than a silent one.
     """
     reference = building.lining_improvement(5000.0)
-    assert reference.ratings == (-4.0, -4.0, -4.0)
+    assert _ratings(reference) == (-4.0, -4.0, -4.0)
     corrected = building.lining_improvement(5000.0, anchors=True, glued_area=100.0)
     assert corrected.delta_rw == pytest.approx(0.66 * -4.0 - 1.2 - 5.0 + 2.0, abs=1e-9)
     assert corrected.delta_rw < -4.0
@@ -336,16 +341,16 @@ def test_exterior_lining_formulae_d3_and_d4() -> None:
     -36 lg(fo) + 77,0, each ">= -3".
     """
     wool = building.lining_improvement(100.0)
-    assert wool.ratings == pytest.approx((82.5 - 72.0, 92.0 - 84.0, 87.7 - 78.0))
+    assert _ratings(wool) == pytest.approx((82.5 - 72.0, 92.0 - 84.0, 87.7 - 78.0))
     foam = building.lining_improvement(100.0, system="foam")
-    assert foam.ratings == pytest.approx((76.0 - 66.0, 74.0 - 66.0, 77.0 - 72.0))
+    assert _ratings(foam) == pytest.approx((76.0 - 66.0, 74.0 - 66.0, 77.0 - 72.0))
     # The printed floors bind at a high resonance frequency.
-    assert building.lining_improvement(1000.0).ratings == pytest.approx(
+    assert _ratings(building.lining_improvement(1000.0)) == pytest.approx(
         (-4.0, -4.0, -4.0)
     )
-    assert building.lining_improvement(1000.0, system="foam").ratings == pytest.approx(
-        (-3.0, -3.0, -3.0)
-    )
+    assert _ratings(
+        building.lining_improvement(1000.0, system="foam")
+    ) == pytest.approx((-3.0, -3.0, -3.0))
 
 
 def test_anchor_and_glued_area_corrections_d5_and_d6() -> None:
@@ -361,7 +366,7 @@ def test_anchor_and_glued_area_corrections_d5_and_d6() -> None:
     assert anchored.delta_ra == pytest.approx(0.62 * reference.delta_ra - 1.3)
     assert anchored.delta_ratr == pytest.approx(0.54 * reference.delta_ratr - 1.6)
     at_reference = building.lining_improvement(100.0, glued_area=40.0)
-    assert at_reference.ratings == pytest.approx(reference.ratings)
+    assert _ratings(at_reference) == pytest.approx(_ratings(reference))
     # More glued area couples the layer to the wall and costs improvement.
     assert (
         building.lining_improvement(100.0, glued_area=80.0).delta_rw
@@ -374,7 +379,7 @@ def test_stud_system_formula_d7() -> None:
     ``-22 lg(fo) + 51``, ``-24 lg(fo) + 54``, each ">= -4".
     """
     studs = building.lining_improvement(100.0, system="studs")
-    assert studs.ratings == pytest.approx((48.0 - 40.0, 51.0 - 44.0, 54.0 - 48.0))
+    assert _ratings(studs) == pytest.approx((48.0 - 40.0, 51.0 - 44.0, 54.0 - 48.0))
     assert building.lining_improvement(5000.0, system="studs").delta_rw == -4.0
 
 
@@ -394,10 +399,10 @@ def test_every_annex_d_rating_has_its_own_printed_floor(
     into the floored regime for all three.
     """
     result = building.lining_improvement(5000.0, system=system)  # type: ignore[arg-type]
-    assert result.ratings == (floor, floor, floor)
+    assert _ratings(result) == (floor, floor, floor)
     # Unfloored, all three would be far below it.
     unfloored = building.lining_improvement(100.0, system=system)  # type: ignore[arg-type]
-    assert all(value > floor + 3.0 for value in unfloored.ratings)
+    assert all(value > floor + 3.0 for value in _ratings(unfloored))
 
 
 def test_third_octave_centres_are_the_iso_266_nominal_series() -> None:

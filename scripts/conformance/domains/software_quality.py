@@ -138,7 +138,7 @@ def _chk_example_quantiles() -> Outcome:
     q01, q09 = ref.ISO17534_1_EXAMPLE_QUANTILES_DB
     return record(
         {"q0,1": q01, "q0,9": q09},
-        {"q0,1": result.q01_db, "q0,9": result.q09_db},
+        {"q0,1": result.q01_level_difference, "q0,9": result.q09_level_difference},
         unit="dB",
     )
 

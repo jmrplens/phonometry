@@ -151,6 +151,7 @@ normative fixed set of timings. The lower usable frequency scales as
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `fs` is not positive, a duration is negative, the flat duration is not positive, or an edge shape is unknown. |
+| TypeError | if `flat_duration`, `fs`, `leading_duration` or `trailing_duration` is not a single number. |
 
 ## check_spot_frequency_range
 
@@ -224,6 +225,7 @@ $d_\mathrm{m} = 0.25$ m gives $K_\mathrm{r} = 2/3$ (Clause 4.2).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `ds` or `dm` is not positive or $d_\mathrm{s} \le d_\mathrm{m}$. |
+| TypeError | if `microphone_height_m` or `source_height_m` is not a single number. |
 
 ## geometric_spreading_factor_angle
 
@@ -252,6 +254,12 @@ cosine is unity and `Kr,theta` collapses to `Kr` (Clause 4.1).
 | `microphone_height_m` | Microphone-to-reference-plane distance `dm`, in metres. |
 
 **Returns:** Oblique factor `Kr,theta` (positive root, dimensionless).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `incidence_angle_rad` is not a single number. |
 
 ## in_situ_absorption_coefficient
 
@@ -360,6 +368,7 @@ in a plottable [`InSituAbsorptionResult`](/phonometry/reference/api/materials/ro
 | Exception | When |
 | :--- | :--- |
 | ValueError | On empty inputs, invalid geometry, or a non-positive `fs`. |
+| TypeError | if `fs` is not a single number. |
 
 ## in_situ_reflection_factor
 
@@ -410,6 +419,7 @@ Annex C; the frequency-dependent form of Annex G).
 | Exception | When |
 | :--- | :--- |
 | ValueError | On empty inputs, invalid geometry, or `delay` given without `fs`. |
+| TypeError | if `fs` is not a single number. |
 
 ## InSituAbsorptionResult
 
@@ -418,8 +428,8 @@ InSituAbsorptionResult(
     frequencies: NDArray[np.float64],
     absorption: NDArray[np.float64],
     *,
-    source_height_m: float | None = None,
-    microphone_height_m: float | None = None,
+    source_height_m: float,
+    microphone_height_m: float,
 )
 ```
 
@@ -431,8 +441,8 @@ An in-situ one-third-octave absorption spectrum (ISO 13472-1).
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in hertz. |
 | `absorption` | Sound-absorption coefficient `alpha` per band (a band with no contributing narrow-band samples is `nan`). |
-| `source_height_m` | Source height the spectrum was reduced with, in metres, retained (with `microphone_height_m`) so `plot_geometry` can draw the set-up; `None` for hand-built results. |
-| `microphone_height_m` | Microphone height, in metres, or `None`. |
+| `source_height_m` | Source height the spectrum was reduced with, in metres, retained (with `microphone_height_m`) so `plot_geometry` can draw the set-up. |
+| `microphone_height_m` | Microphone height, in metres. |
 
 ### InSituAbsorptionResult.plot()
 
@@ -465,12 +475,6 @@ Draw the measurement set-up to scale.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If the result does not retain its geometry. |
 
 ## ISO13472_SPEED_OF_SOUND_M_S
 
@@ -521,6 +525,7 @@ $r \approx 1.34$ m.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On non-positive geometry or window width. |
+| TypeError | if `microphone_height_m`, `source_height_m`, `speed_of_sound` or `window_width` is not a single number. |
 
 ## msa_major_axis
 
@@ -559,6 +564,7 @@ source-to-microphone distance projected on the reference plane.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On non-positive window width, speed, or negative `dp`. |
+| TypeError | if `microphone_height_m`, `projected_distance`, `source_height_m`, `speed_of_sound` or `window_width` is not a single number. |
 
 ## one_third_octave_absorption
 
@@ -570,7 +576,7 @@ one_third_octave_absorption(
     f_min: float = 250.0,
     f_max: float = 4000.0,
     clip_negative: bool = True,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]
+) -> OneThirdOctaveAbsorption
 ```
 
 Aggregate narrow-band absorption into one-third-octave bands.
@@ -593,13 +599,58 @@ Clause 6.6 step 5); Part 1 does not mandate clipping, so pass
 | `f_max` | Highest band centre to report, in hertz (4000 Hz for Part 1; pass 1600 Hz for the Part-2 range). |
 | `clip_negative` | Set negative band results to zero (default `True`). |
 
-**Returns:** Tuple `(band_centres, band_absorption)`; a band with no narrow-band samples yields `nan`.
+**Returns:** The band centres and the band absorption, as a [`OneThirdOctaveAbsorption`](/phonometry/reference/api/materials/road-absorption/#onethirdoctaveabsorption); a band with no narrow-band samples yields `nan`.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `frequencies` and `absorption` differ in shape or are empty. |
+
+## OneThirdOctaveAbsorption
+
+```python
+OneThirdOctaveAbsorption(
+    frequencies: NDArray[np.float64],
+    absorption: NDArray[np.float64],
+)
+```
+
+Narrow-band absorption averaged into one-third-octave bands.
+
+What [`one_third_octave_absorption`](/phonometry/reference/api/materials/road-absorption/#one_third_octave_absorption) returns: the band centres and
+the band absorption, named, where a `(band_centres, band_absorption)`
+tuple used to be unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The one-third-octave band centres, in Hz. |
+| `absorption` | The linear average of the narrow-band absorption in each band; `nan` for a band with no narrow-band sample. |
+
+### OneThirdOctaveAbsorption.plot()
+
+```python
+OneThirdOctaveAbsorption.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the band absorption against the band centres.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the absorption curve. |
+
+**Returns:** The axes.
 
 ## PART1_FREQUENCY_RANGE_HZ
 
@@ -648,6 +699,7 @@ with the sampled radius of the standard 5 ms window.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a height or sampled radius that is not finite and positive, or a source no higher than the microphone. |
+| TypeError | if `microphone_height_m`, `sampled_radius` or `source_height_m` is not a single number. |
 
 ## power_reflection_coefficient
 
@@ -716,6 +768,7 @@ is the delay undone by the phase-restoration term of
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `dm` or `c` is not positive. |
+| TypeError | if `microphone_height_m` or `speed_of_sound` is not a single number. |
 
 ## RoadAbsorptionWarning
 
@@ -810,6 +863,7 @@ $s = (81 \pm 4)$ mm.
 | Exception | When |
 | :--- | :--- |
 | ValueError | On non-positive speed or frequency, or `f_min >= f_max`. |
+| TypeError | if `f_max`, `f_min` or `speed_of_sound` is not a single number. |
 
 ## SPOT_NARROW_BAND_RANGE_HZ
 
@@ -850,3 +904,4 @@ top.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `d` or `c0` is not positive. |
+| TypeError | if `diameter_m` or `speed_of_sound` is not a single number. |

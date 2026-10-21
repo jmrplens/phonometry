@@ -1288,8 +1288,8 @@ def test_two_equal_parts_add_3_db() -> None:
     np.testing.assert_allclose(
         parts.total_level - res.sound_power_level, 10.0 * math.log10(2.0)
     )
-    np.testing.assert_allclose(parts.contribution_db, -10.0 * math.log10(2.0))
-    assert parts.a_weighted_total_db == pytest.approx(
+    np.testing.assert_allclose(parts.relative_part_levels, -10.0 * math.log10(2.0))
+    assert parts.a_weighted_total_level == pytest.approx(
         res.a_weighted_sound_power_level + 10.0 * math.log10(2.0)
     )
 

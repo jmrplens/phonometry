@@ -225,6 +225,12 @@ does not, and withholds that relaxation.
 
 **Returns:** A [`BackgroundNoiseAssessment`](/phonometry/reference/api/electroacoustics/induction-loop/#backgroundnoiseassessment).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `noise_levels` holds a text or a value that is not a real number. |
+
 ## BackgroundNoiseAssessment
 
 ```python
@@ -327,6 +333,12 @@ the two exchanged (see `docs/ERRATA.md`). The plus or minus 1 dB flatness
 
 **Returns:** The response, in dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+
 ## combi_signal
 
 ```python
@@ -364,6 +376,12 @@ own zero crossings.
 | `seed` | Seed for the noise generator. |
 
 **Returns:** The signal, starting with a sine burst.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `noise_s` or `sine_s` is not a single number, or `fs` or `n_cycles` is a flag, a text or an array where a count goes. |
 
 ## field_strength
 
@@ -435,6 +453,12 @@ peak programme meter of 6.1.4, is definitive (6.1.1).
 
 **Returns:** A [`FieldStrengthReading`](/phonometry/reference/api/electroacoustics/induction-loop/#fieldstrengthreading).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `weighting` is not a text, `fs` is a flag, a text or an array where a count goes, or `x` holds a text or a value that is not a real number. |
+
 ## FieldStrengthReading
 
 ```python
@@ -444,7 +468,7 @@ FieldStrengthReading(
     times: np.ndarray,
     levels: np.ndarray,
     max_level: float,
-    equivalent_db: float,
+    equivalent_level: float,
 )
 ```
 
@@ -459,7 +483,7 @@ What the true-RMS field strength meter of IEC 60118-4:2014 6.1.3 reads.
 | `times` | The time of each reading, in seconds. |
 | `levels` | The time-weighted level, 125 ms exponential averaging, in dB re 400 mA/m. |
 | `max_level` | The maximum indication over the record, the "maximum value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re 400 mA/m. |
-| `equivalent_db` | The level of the mean square over the whole record, in dB re 400 mA/m. |
+| `equivalent_level` | The level of the mean square over the whole record, in dB re 400 mA/m. |
 
 ### FieldStrengthReading.plot()
 
@@ -610,15 +634,21 @@ allows plus or minus 1 dB for exactly that.
 
 **Returns:** The signal.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `duration_s` or `rms` is not a single number, or `fs` is a flag, a text or an array where a count goes. |
+
 ## LoopRequirement
 
 ```python
 LoopRequirement(
     name: str,
     clause: str,
-    values_db: tuple[float, ...],
-    lower_db: tuple[float, ...],
-    upper_db: tuple[float, ...],
+    levels: tuple[float, ...],
+    lower_limits_db: tuple[float, ...],
+    upper_limits_db: tuple[float, ...],
 )
 ```
 
@@ -634,9 +664,9 @@ of 10.4.7 can differ from point to point.
 | :--- | :--- |
 | `name` | `"field_strength"` (8.4.3), `"field_strength_reached"` (8.2.7, or 9.5 for a small volume), `"frequency_response"` (8.3.7), `"system_noise"` (10.4.7), `"field_strength_range"` or `"standing_area"` (9.5). |
 | `clause` | The subclause that states it, as amended. |
-| `values_db` | The judged values, in dB. |
-| `lower_db` | The lower limit of each, in dB. |
-| `upper_db` | The upper limit of each, in dB. |
+| `levels` | The judged values, in dB. |
+| `lower_limits_db` | The lower limit of each, in dB. |
+| `upper_limits_db` | The upper limit of each, in dB. |
 
 ### LoopRequirement.margins_db
 
@@ -777,6 +807,12 @@ choice and is not part of the points.
 
 **Returns:** The points, shape `(heights, points, 3)`: $x$ across, $y$ away from the reference into the area where people stand, $z$ the height above the floor, all in metres.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `layout` is not a text. |
+
 ## telecoil_response
 
 ```python
@@ -859,6 +895,12 @@ first doubling.
 
 **Returns:** An [`AmplifierOverloadVerification`](/phonometry/reference/api/electroacoustics/induction-loop/#amplifieroverloadverification).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `program` is not a text, or `compliance_voltage_v` or `required_current_a` is not a single number. |
+
 ## verify_induction_loop_system
 
 ```python
@@ -924,6 +966,12 @@ off is also assessed against the recommendations of 7.2
 
 **Returns:** An [`InductionLoopVerification`](/phonometry/reference/api/electroacoustics/induction-loop/#inductionloopverification).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `specified_level` is not a single number, or `frequencies` or `system_noise_levels` holds a text or a value that is not a real number. |
+
 ## verify_small_volume_system
 
 ```python
@@ -982,3 +1030,4 @@ The informative Annex A.4 allows up to +12 dB at 1,45 m for a counter;
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a fixed layout's levels of the wrong shape, or a useful volume without a point at a height of 9.2 or 9.3. |
+| TypeError | if `layout` is not a text, or `frequencies` holds a text or a value that is not a real number. |

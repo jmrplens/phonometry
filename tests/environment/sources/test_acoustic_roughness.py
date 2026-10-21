@@ -352,10 +352,16 @@ def test_the_average_is_on_mean_squares() -> None:
     """7.6: two spectra average as 10 lg of the mean of their energies."""
     wavelengths = [0.1, 0.08, 0.063]
     one = AcousticRoughnessSpectrum(
-        wavelengths, [0.0, 3.0, -2.0], record_length_m=1.0, n_segments=1
+        wavelengths_m=wavelengths,
+        levels=[0.0, 3.0, -2.0],
+        record_length_m=1.0,
+        n_segments=1,
     )
     two = AcousticRoughnessSpectrum(
-        wavelengths, [6.0, 3.0, 4.0], record_length_m=2.0, n_segments=3
+        wavelengths_m=wavelengths,
+        levels=[6.0, 3.0, 4.0],
+        record_length_m=2.0,
+        n_segments=3,
     )
     mean = average_roughness_spectra([one, two])
     expected = 10.0 * np.log10(
@@ -368,8 +374,12 @@ def test_the_average_is_on_mean_squares() -> None:
 
 def test_the_average_keeps_only_the_common_bands() -> None:
     """Bands one spectrum lacks are left out, and lengths nobody knows stay unknown."""
-    one = AcousticRoughnessSpectrum([0.25, 0.2, 0.16], [1.0, 1.0, 1.0])
-    two = AcousticRoughnessSpectrum([0.2, 0.16, 0.125], [1.0, 1.0, 1.0])
+    one = AcousticRoughnessSpectrum(
+        wavelengths_m=[0.25, 0.2, 0.16], levels=[1.0, 1.0, 1.0]
+    )
+    two = AcousticRoughnessSpectrum(
+        wavelengths_m=[0.2, 0.16, 0.125], levels=[1.0, 1.0, 1.0]
+    )
     mean = average_roughness_spectra([one, two])
     np.testing.assert_allclose(mean.wavelengths_m, [0.2, 0.16])
     assert mean.record_length_m is None
@@ -395,12 +405,15 @@ def test_the_lines_follow_the_reference_width(
     width_mm: float, lines: tuple[int, float]
 ) -> None:
     """6.4.3: one line up to 20 mm, three 5 mm apart up to 30 mm, 10 mm apart above."""
-    assert roughness_measurement_lines(width_mm) == lines
+    n_lines, spacing_mm = lines
+    got = roughness_measurement_lines(width_mm)
+    assert got.n_lines == n_lines
+    assert got.spacing_mm == spacing_mm
 
 
 def test_a_spectrum_holds_its_bands_read_only() -> None:
     """The arrays of a spectrum refuse in-place writes."""
-    spectrum = AcousticRoughnessSpectrum([0.1, 0.05], [1.0, 2.0])
+    spectrum = AcousticRoughnessSpectrum(wavelengths_m=[0.1, 0.05], levels=[1.0, 2.0])
     with pytest.raises(ValueError, match="assignment destination is read-only"):
         spectrum.levels[0] = 3.0
 
@@ -408,12 +421,12 @@ def test_a_spectrum_holds_its_bands_read_only() -> None:
 def test_a_spectrum_refuses_increasing_wavelengths() -> None:
     """Bands run from the longest wavelength down, as clause 9 draws them."""
     with pytest.raises(ValueError, match="'wavelengths_m' must name distinct bands"):
-        AcousticRoughnessSpectrum([0.05, 0.1], [1.0, 2.0])
+        AcousticRoughnessSpectrum(wavelengths_m=[0.05, 0.1], levels=[1.0, 2.0])
 
 
 def test_a_wavelength_without_a_band_is_a_value_error() -> None:
     """level_at names the band it could not find."""
-    spectrum = AcousticRoughnessSpectrum([0.1, 0.05], [1.0, 2.0])
+    spectrum = AcousticRoughnessSpectrum(wavelengths_m=[0.1, 0.05], levels=[1.0, 2.0])
     with pytest.raises(ValueError, match=r"no band at 0\.2 m"):
         spectrum.level_at(0.2)
 

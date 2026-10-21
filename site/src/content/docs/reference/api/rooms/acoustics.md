@@ -78,6 +78,12 @@ integrated impulse response, Clause 6).
 
 **Returns:** A [`DecayCurve`](/phonometry/reference/api/rooms/acoustics/#decaycurve) with `times` in seconds from the direct sound and `levels` in dB (0 dB at time zero), up to the noise truncation point. It unpacks as `times, levels = decay_curve(...)` for backward compatibility and exposes [`DecayCurve.plot`](/phonometry/reference/api/rooms/acoustics/#decaycurveplot).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `band` or `fraction` is not a single number. |
+
 ## DECAY_UNCERTAINTY_COEFFICIENTS
 
 *Constant* (`mapping`).
@@ -226,6 +232,7 @@ filtering is time-reversed, which is what
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a bandwidth is not positive and finite, or the detector time is not a finite time of zero seconds or more. |
+| TypeError | if `detector_time` is not a single number. |
 
 ## reverberation_time_standard_deviation
 
@@ -277,6 +284,7 @@ larger absolute uncertainty and a smaller relative one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `evaluation_range` is not one the clause prints coefficients for, if `decays` or `positions` is below one, or if a reverberation time or bandwidth is not positive and finite. An infinite `decays` is taken: it is the limit 7.2 declines to use. |
+| TypeError | if `evaluation_range` is not a single number. |
 
 ## room_parameters
 

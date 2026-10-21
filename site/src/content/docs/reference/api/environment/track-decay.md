@@ -92,6 +92,7 @@ The hammer positions of Figure 2, in metres from the accelerometer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a spacing that is not positive. |
+| TypeError | if `sleeper_spacing_m` is not a single number. |
 
 ## track_decay_rate
 
@@ -133,11 +134,13 @@ the ratio to the direct response enters.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For responses that are not positive and finite, a grid that is not finite, has fewer than two positions, does not start at 0 or does not strictly increase, frequencies that do not name distinct bands in increasing order, or shapes that do not agree. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## TrackDecayRate
 
 ```python
 TrackDecayRate(
+    *,
     direction: str,
     frequencies: NDArray[np.float64],
     decay_rates_db_per_m: NDArray[np.float64],
@@ -230,6 +233,7 @@ The decay rate of the band a nominal frequency names, in dB/m.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectrum has no band at that frequency: a number outside what the result covers, not a missing key. |
+| TypeError | if `frequency_hz` is not a single number. |
 
 ### TrackDecayRate.suitable
 

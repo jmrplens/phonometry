@@ -221,6 +221,8 @@ class QuasiPeakBallistics(RichDisplay):
 
         :raises ValueError: if any constant is not positive and finite, or if
             the charge is not shorter than the discharge.
+        :raises TypeError: if ``charge``, ``discharge`` or ``reading_device`` is not a
+            single number.
         """
         require_positive(self.charge, "charge")
         require_positive(self.discharge, "discharge")
@@ -500,6 +502,7 @@ class QuasiPeakResult(OwnsArrays):
         :raises ValueError: if the trace is not a series, if the reading is
             not the maximum of the trace, or if ``weighting`` is neither
             ``"468"`` nor ``"Z"``.
+        :raises TypeError: if ``weighting`` is not a text.
         """
         require_choice(self.weighting, "weighting", _WEIGHTINGS)
         require_ranks(self, trace=1)
@@ -644,6 +647,8 @@ def quasi_peak_meter(
         positive, if *reference* is not positive, if a calibrated Signal
         arrives without one, or if ``weighting`` is neither ``"468"`` nor
         ``"Z"``.
+    :raises TypeError: if ``weighting`` is not a text, or ``reference`` is not a single
+        number.
     """
     weighting = require_choice(weighting, "weighting", _WEIGHTINGS)
     fs = require_positive(resolve_fs(x, fs), "fs")
@@ -783,6 +788,7 @@ class QuasiPeakDynamicsResult(OwnsArrays):
 
         :raises ValueError: if there are not eleven readings, one is not
             positive and finite, or ``fs`` is not positive.
+        :raises TypeError: if ``fs`` is not a single number.
         """
         readings = tuple(float(r) for r in self.readings_percent)
         if len(readings) != len(_WINDOWS):
@@ -883,6 +889,7 @@ def verify_quasi_peak_dynamics(
         statement about how far each constant can move is reproduced, and
         the reason the chain takes them as an argument at all.
     :raises ValueError: If *fs* is not positive.
+    :raises TypeError: if ``fs`` is not a single number.
     """
     fs = require_positive(fs, "fs")
     readings = [

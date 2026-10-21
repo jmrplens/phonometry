@@ -254,6 +254,7 @@ def transfer_stiffness_level(
     :return: The level ``L_k``, in dB re ``k0``.
     :raises ValueError: for a non-positive reference, a non-finite stiffness,
         or a zero stiffness magnitude (a dead channel has no level).
+    :raises TypeError: if ``reference`` is not a single number.
     """
     reference = require_positive(reference, "reference")
     magnitude = np.abs(np.asarray(stiffness, dtype=np.complex128))
@@ -367,6 +368,7 @@ def transfer_stiffness_indirect(
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The dynamic transfer stiffness :math:`k_{2,1}`, in N/m.
     :raises ValueError: for a non-positive frequency or blocking mass.
+    :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number.
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
@@ -467,6 +469,7 @@ def base_transmissibility(
     :param stiffness: Element stiffness ``k``, in N/m.
     :param damping: Viscous damping ``c``, in N.s/m (Default: 0.0).
     :return: The complex transmissibility ``T``.
+    :raises TypeError: if ``damping``, ``mass`` or ``stiffness`` is not a single number.
     """
     mass = require_positive(mass, "mass")
     stiffness = require_positive(stiffness, "stiffness")
@@ -714,6 +717,7 @@ def indirect_transfer_stiffness_result(
     :param blocking_mass: Blocking mass ``m2``, in kg (> 0).
     :param flange_mass: Output-flange mass ``mf``, in kg (Default: 0.0).
     :return: The :class:`TransferStiffnessResult` (indirect method).
+    :raises TypeError: if ``blocking_mass`` or ``flange_mass`` is not a single number.
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
@@ -1361,6 +1365,7 @@ class OutputMassCheck(OwnsArrays):
         :raises ValueError: if the arrays differ in length or rank, a value
             is not finite, the mass is negative or an apparent mass is not
             positive.
+        :raises TypeError: if ``output_mass_kg`` is not a single number.
         """
         require_ranks(self, frequencies=1, output_apparent_mass_kg=1)
         require_same_length(
@@ -1491,6 +1496,7 @@ def check_output_mass(
     :raises ValueError: for frequencies that are not finite and positive, a
         negative mass, or level spectra that do not carry one finite level per
         frequency.
+    :raises TypeError: if ``output_mass_kg`` is not a single number.
     :warns TransferStiffnessWarning: where ``m0`` exceeds its limit.
     """
     owner = "check_output_mass"
@@ -1612,6 +1618,7 @@ class EffectiveBlockingMass(OwnsArrays):
         :raises ValueError: if the arrays differ in length or rank, a value is
             not finite, a mass is not positive, or the frequencies do not rise
             strictly.
+        :raises TypeError: if ``blocking_mass`` is not a single number.
         """
         owner = type(self).__name__
         require_ranks(self, frequencies=1, effective_mass_kg=1)
@@ -1725,6 +1732,7 @@ def effective_blocking_mass(
     :raises ValueError: for frequencies that are not finite, positive and
         strictly increasing, phasors of another length, a zero or non-finite
         effective mass, or a non-positive ``m2``.
+    :raises TypeError: if ``blocking_mass`` is not a single number.
     """
     owner = "effective_blocking_mass"
     blocking_mass = require_positive(blocking_mass, "blocking_mass")
@@ -2282,6 +2290,8 @@ def driving_point_uncertainty(
     :return: The :class:`DrivingPointUncertainty`.
     :raises ValueError: for a non-finite band level, or a negative or
         non-finite spread or standard uncertainty.
+    :raises TypeError: if ``band_level`` or ``repeatability_range_db`` is not a single
+        number.
     """
     band_level = require_finite(band_level, "band_level")
     spread = require_finite(

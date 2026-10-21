@@ -103,7 +103,8 @@ import numpy as np
 from phonometry import filters, metrology
 
 f3 = metrology.exact_frequencies(63, 16000, fraction=3)   # 25 tercios de octava exactos
-nominal, lower, upper = filters.weighting_class_limits(1)  # IEC 61672-1 Tabla 3, clase 1
+limits = filters.weighting_class_limits(1)
+nominal, lower, upper = limits.frequencies, limits.lower, limits.upper  # IEC 61672-1 Tabla 3, clase 1
 band = (nominal >= 63) & (nominal <= 16000)
 tolerance = np.minimum(upper, -lower)[band]                # el lado más estrecho en cada banda
 

@@ -3523,7 +3523,7 @@ def generate_intensity_class(output_dir: str) -> None:
     # chain grows with frequency instead of staying put, so the index levels
     # off where the requirement does.
     spacing = 0.012
-    freqs, _, _ = emission.residual_index_limits("instrument", spacing_m=spacing)
+    freqs = emission.residual_index_limits("instrument", spacing_m=spacing).frequencies
     phase_mismatch = 0.05 * np.maximum(1.0, freqs / 1000.0)  # degrees
     measured = emission.residual_index_from_phase_mismatch(
         phase_mismatch, frequency=freqs, spacing_m=spacing
@@ -5074,7 +5074,7 @@ def generate_microphone_patterns(output_dir: str) -> None:
     ax: Any = ax_any
     theta = np.radians(np.linspace(0.0, 360.0, 721))
     for (b, name), col in zip(family, colors, strict=True):
-        polar_db = 20.0 * np.log10(
+        polar_response_db = 20.0 * np.log10(
             np.maximum(
                 np.abs((1.0 - b) + b * np.cos(np.radians(angles))), 10 ** (-30.0 / 20.0)
             )
@@ -5085,7 +5085,7 @@ def generate_microphone_patterns(output_dir: str) -> None:
             sensitivity_mv_per_pa=12.5,
             tolerance_db=3.0,
             directivity=electroacoustics.MicrophoneDirectivity(
-                polar=(angles, polar_db), frequency=1000.0
+                polar=(angles, polar_response_db), frequency=1000.0
             ),
         )
         assert res.directivity_index is not None, "polar input gives a DI"

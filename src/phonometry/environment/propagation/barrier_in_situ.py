@@ -300,6 +300,8 @@ def barrier_background_correction(
     :return: The correction to add, in decibels, which is zero or negative.
     :raises ValueError: For a margin under
         :data:`ISO10847_MIN_BACKGROUND_MARGIN_DB`, which 6.4 calls invalid.
+    :raises TypeError: if ``level_difference`` holds a text or a value that is not a
+        real number.
     """
     # Settled: a difference of two readings that is 10 dB in decimal can be
     # 9,999 999 999 999 996 in binary, which would floor to the 9 dB row.
@@ -438,6 +440,9 @@ def check_short_distance(
     :param barrier_to_receiver_m: :math:`d_2`, in metres.
     :return: The answer for each campaign, as a :class:`ShortDistanceCheck`.
     :raises ValueError: For a non-positive height or distance.
+    :raises TypeError: if ``barrier_height_m``, ``barrier_to_receiver_m``,
+        ``receiver_height_m``, ``source_height_m`` or ``source_to_barrier_m`` is not a
+        single number.
     """
     return ShortDistanceCheck(
         source_height_m=require_positive(source_height_m, "source_height_m"),
@@ -478,6 +483,7 @@ def wind_class(
         the table prints, which over long distances is any upwind component.
     :raises ValueError: For a component that is not finite, or past
         :data:`MAX_WIND_SPEED_M_S` in absolute value.
+    :raises TypeError: if ``vector_component_m_s`` is not a single number.
     """
     component = require_finite(vector_component_m_s, "vector_component_m_s")
     if abs(component) > MAX_WIND_SPEED_M_S:
@@ -540,6 +546,8 @@ def reference_microphone_height_m(
         clearance rule.
     :return: The microphone height above the ground, in metres.
     :raises ValueError: For a non-positive height or distance.
+    :raises TypeError: if ``barrier_height_m`` or ``source_to_barrier_m`` is not a
+        single number.
     """
     barrier = require_positive(barrier_height_m, "barrier_height_m")
     clearance = barrier + REFERENCE_MICROPHONE_CLEARANCE_M
@@ -576,6 +584,7 @@ def hemi_free_field_distance_m(barrier_to_receiver_m: float) -> float:
     :param barrier_to_receiver_m: :math:`d`, in metres.
     :return: The least distance to any vertical reflecting surface, in metres.
     :raises ValueError: For a non-positive distance.
+    :raises TypeError: if ``barrier_to_receiver_m`` is not a single number.
     """
     distance = require_positive(barrier_to_receiver_m, "barrier_to_receiver_m")
     return min(HEMI_FREE_FIELD_DISTANCE_M, HEMI_FREE_FIELD_DISTANCE_FACTOR * distance)
@@ -587,10 +596,10 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
 
     :ivar frequencies: Nominal band centres, in hertz, or ``None`` where the
         measurement is an A-weighted level.
-    :ivar reference_before_db: :math:`L_{\mathrm{ref},\mathrm{B}}` per band.
-    :ivar reference_after_db: :math:`L_{\mathrm{ref},\mathrm{A}}` per band.
-    :ivar receiver_before_db: :math:`L_{\mathrm{r},\mathrm{B}}` per band.
-    :ivar receiver_after_db: :math:`L_{\mathrm{r},\mathrm{A}}` per band.
+    :ivar reference_levels_before: :math:`L_{\mathrm{ref},\mathrm{B}}` per band.
+    :ivar reference_levels_after: :math:`L_{\mathrm{ref},\mathrm{A}}` per band.
+    :ivar receiver_levels_before: :math:`L_{\mathrm{r},\mathrm{B}}` per band.
+    :ivar receiver_levels_after: :math:`L_{\mathrm{r},\mathrm{A}}` per band.
     :ivar insertion_loss: :math:`D_\mathrm{IL}` or :math:`D'_\mathrm{IL}` per band, in
         decibels.
     :ivar method: ``"direct"`` or ``"indirect"``.
@@ -601,10 +610,10 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64] | None
-    reference_before_db: NDArray[np.float64]
-    reference_after_db: NDArray[np.float64]
-    receiver_before_db: NDArray[np.float64]
-    receiver_after_db: NDArray[np.float64]
+    reference_levels_before: NDArray[np.float64]
+    reference_levels_after: NDArray[np.float64]
+    receiver_levels_before: NDArray[np.float64]
+    receiver_levels_after: NDArray[np.float64]
     insertion_loss: NDArray[np.float64]
     method: str
     receiver_correction_before: float
@@ -641,10 +650,10 @@ class MeasuredBarrierInsertionLoss(OwnsArrays):
 
 
 def _four_levels(
-    reference_before_db: ArrayLike,
-    reference_after_db: ArrayLike,
-    receiver_before_db: ArrayLike,
-    receiver_after_db: ArrayLike,
+    reference_levels_before: ArrayLike,
+    reference_levels_after: ArrayLike,
+    receiver_levels_before: ArrayLike,
+    receiver_levels_after: ArrayLike,
     frequencies: ArrayLike | None,
 ) -> tuple[
     NDArray[np.float64],
@@ -655,19 +664,19 @@ def _four_levels(
 ]:
     """The four spectra and their band centres, checked against each other."""
     names = (
-        "reference_before_db",
-        "reference_after_db",
-        "receiver_before_db",
-        "receiver_after_db",
+        "reference_levels_before",
+        "reference_levels_after",
+        "receiver_levels_before",
+        "receiver_levels_after",
     )
     values = [
         require_finite_array(data, name)
         for data, name in zip(
             (
-                reference_before_db,
-                reference_after_db,
-                receiver_before_db,
-                receiver_after_db,
+                reference_levels_before,
+                reference_levels_after,
+                receiver_levels_before,
+                receiver_levels_after,
             ),
             names,
             strict=True,
@@ -686,10 +695,10 @@ def _four_levels(
 
 
 def measured_insertion_loss_direct(
-    reference_before_db: ArrayLike,
-    reference_after_db: ArrayLike,
-    receiver_before_db: ArrayLike,
-    receiver_after_db: ArrayLike,
+    reference_levels_before: ArrayLike,
+    reference_levels_after: ArrayLike,
+    receiver_levels_before: ArrayLike,
+    receiver_levels_after: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
 ) -> MeasuredBarrierInsertionLoss:
@@ -710,29 +719,31 @@ def measured_insertion_loss_direct(
     taken down, and 4.1 adds the condition that makes the subtraction mean
     anything: **the same reference and receiver positions in both campaigns**.
 
-    :param reference_before_db: :math:`L_{\mathrm{ref},\mathrm{B}}` per band, in decibels.
-    :param reference_after_db: :math:`L_{\mathrm{ref},\mathrm{A}}` per band, in decibels.
-    :param receiver_before_db: :math:`L_{\mathrm{r},\mathrm{B}}` per band, in decibels.
-    :param receiver_after_db: :math:`L_{\mathrm{r},\mathrm{A}}` per band, in decibels.
+    :param reference_levels_before: :math:`L_{\mathrm{ref},\mathrm{B}}` per band, in decibels.
+    :param reference_levels_after: :math:`L_{\mathrm{ref},\mathrm{A}}` per band, in decibels.
+    :param receiver_levels_before: :math:`L_{\mathrm{r},\mathrm{B}}` per band, in decibels.
+    :param receiver_levels_after: :math:`L_{\mathrm{r},\mathrm{A}}` per band, in decibels.
     :param frequencies: Nominal band centres, in hertz.
     :return: The insertion loss, as a :class:`MeasuredBarrierInsertionLoss`.
     :raises ValueError: For levels that do not match band for band, or a band
         centre that is not strictly positive.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     ref_b, ref_a, rec_b, rec_a, freqs = _four_levels(
-        reference_before_db,
-        reference_after_db,
-        receiver_before_db,
-        receiver_after_db,
+        reference_levels_before,
+        reference_levels_after,
+        receiver_levels_before,
+        receiver_levels_after,
         frequencies,
     )
     loss = (ref_a - ref_b) - (rec_a - rec_b)
     return MeasuredBarrierInsertionLoss(
         frequencies=freqs,
-        reference_before_db=ref_b,
-        reference_after_db=ref_a,
-        receiver_before_db=rec_b,
-        receiver_after_db=rec_a,
+        reference_levels_before=ref_b,
+        reference_levels_after=ref_a,
+        receiver_levels_before=rec_b,
+        receiver_levels_after=rec_a,
         insertion_loss=np.asarray(loss, dtype=np.float64),
         method="direct",
         receiver_correction_before=0.0,
@@ -741,10 +752,10 @@ def measured_insertion_loss_direct(
 
 
 def measured_insertion_loss_indirect(
-    reference_before_db: ArrayLike,
-    reference_after_db: ArrayLike,
-    receiver_before_db: ArrayLike,
-    receiver_after_db: ArrayLike,
+    reference_levels_before: ArrayLike,
+    reference_levels_after: ArrayLike,
+    receiver_levels_before: ArrayLike,
+    receiver_levels_after: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
     receiver_type_before: ReceiverType = "hemi_free_field",
@@ -777,12 +788,12 @@ def measured_insertion_loss_indirect(
     levels. Where they differ, the answer moves by 6 dB, which is why the NOTE
     exists.
 
-    :param reference_before_db: :math:`L_{\mathrm{ref},\mathrm{B}}` per band, at the
+    :param reference_levels_before: :math:`L_{\mathrm{ref},\mathrm{B}}` per band, at the
         substitute site, in decibels.
-    :param reference_after_db: :math:`L_{\mathrm{ref},\mathrm{A}}` per band, in decibels.
-    :param receiver_before_db: :math:`L_{\mathrm{r},\mathrm{B}}` per band, at the substitute
+    :param reference_levels_after: :math:`L_{\mathrm{ref},\mathrm{A}}` per band, in decibels.
+    :param receiver_levels_before: :math:`L_{\mathrm{r},\mathrm{B}}` per band, at the substitute
         site, in decibels.
-    :param receiver_after_db: :math:`L_{\mathrm{r},\mathrm{A}}` per band, in decibels.
+    :param receiver_levels_after: :math:`L_{\mathrm{r},\mathrm{A}}` per band, in decibels.
     :param frequencies: Nominal band centres, in hertz.
     :param receiver_type_before: ``"hemi_free_field"`` (default) or
         ``"reflecting_surface"``, for the substitute site.
@@ -790,12 +801,14 @@ def measured_insertion_loss_indirect(
     :return: The insertion loss, as a :class:`MeasuredBarrierInsertionLoss`.
     :raises ValueError: For levels that do not match band for band, a band
         centre that is not strictly positive, or an unknown receiver type.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     ref_b, ref_a, rec_b, rec_a, freqs = _four_levels(
-        reference_before_db,
-        reference_after_db,
-        receiver_before_db,
-        receiver_after_db,
+        reference_levels_before,
+        reference_levels_after,
+        receiver_levels_before,
+        receiver_levels_after,
         frequencies,
     )
     before_type = require_choice(
@@ -818,10 +831,10 @@ def measured_insertion_loss_indirect(
     delta_after = ref_a - (rec_a - correction_after)
     return MeasuredBarrierInsertionLoss(
         frequencies=freqs,
-        reference_before_db=ref_b,
-        reference_after_db=ref_a,
-        receiver_before_db=rec_b,
-        receiver_after_db=rec_a,
+        reference_levels_before=ref_b,
+        reference_levels_after=ref_a,
+        receiver_levels_before=rec_b,
+        receiver_levels_after=rec_a,
         insertion_loss=np.asarray(delta_after - delta_before, dtype=np.float64),
         method="indirect",
         receiver_correction_before=correction_before,

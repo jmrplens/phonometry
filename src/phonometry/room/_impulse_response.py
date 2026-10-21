@@ -256,6 +256,7 @@ def sweep_signal(
         analysis range (ISO 18233 B.3.1) rather than relying on a smaller
         fade.
     :return: The sweep samples, length ``round(duration_s*fs)``.
+    :raises TypeError: if ``f1``, ``f2``, ``fade`` or ``fs`` is not a single number.
     """
     require_scalar(fs, "fs")
     require_scalar(f1, "f1")
@@ -554,6 +555,7 @@ def mls_signal(order: int) -> np.ndarray:
     :param order: Register length ``N`` (2 to 20). The sequence length is
         ``2**order - 1``.
     :return: The bipolar MLS samples (values in ``{-1.0, +1.0}``).
+    :raises TypeError: if ``order`` is not a single number.
     """
     require_scalar(order, "order")
     if order not in _MLS_TAPS:
@@ -717,6 +719,7 @@ def golay_pair(order: int) -> tuple[np.ndarray, np.ndarray]:
     :param order: Number of recursion steps ``n`` (1 to 22). Each code has
         :math:`L = 2^{\text{order}}` samples.
     :return: The pair ``(a, b)`` as bipolar float arrays (values ``+1/-1``).
+    :raises TypeError: if ``order`` is not a single number.
     """
     require_scalar(order, "order")
     if not 1 <= order <= _GOLAY_MAX_ORDER:
@@ -1096,6 +1099,8 @@ def shaped_sweep_signal(
     :return: A :class:`ShapedSweepResult` wrapping the sweep samples and
         the synthesis metadata (grid, imposed magnitude, group delay,
         crest factor).
+    :raises TypeError: if ``amplitude``, ``duration_s``, ``f1``, ``f2``, ``fade`` or
+        ``fs`` is not a single number.
     """
     require_scalar(amplitude, "amplitude")
     require_scalar(fade, "fade")

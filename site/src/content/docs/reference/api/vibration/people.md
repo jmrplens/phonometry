@@ -111,6 +111,7 @@ the source may run all day and still keep to $A_\mathrm{r}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive severity or guide value, or an unknown time of day. |
+| TypeError | if `a_r` or `kb_ftm` is not a single number. |
 
 ## admissible_trains_per_hour
 
@@ -140,6 +141,7 @@ an $A_\mathrm{r}$ of 0,05 and 14 for 0,07, both at a $KB_\mathrm{FTm}$ of 0,2.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive severity or guide value. |
+| TypeError | if `a_r` or `kb_ftm` is not a single number. |
 
 ## assess_people_in_buildings
 
@@ -213,6 +215,7 @@ under the rules of the other is not an assessment of either.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative severity, an unknown source or edition, an edition other than the guide values are of, or a verdict that needs $KB_\mathrm{FTr}$ without one given. |
+| TypeError | if `kb_fmax` or `kb_ftr` is not a single number. |
 
 ## ASSESSMENT_PERIOD_S
 
@@ -267,6 +270,7 @@ not applied to road or rail traffic.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For mismatched or negative inputs, an unknown time of day, an exposure longer than the period, or a rest-time flag by night. |
+| TypeError | if `exposure_s` or `kb_ftm` holds a text or a value that is not a real number. |
 
 ## BLASTING_EXCEPTION_KB_FMAX
 
@@ -337,6 +341,7 @@ is not applicable to an especially sensitive area, a hospital for one;
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a duration that is not a whole number of days from 1 to 78, an unknown stage, an unknown area or a sensitive one. |
+| TypeError | if `duration_days` is a flag, a text or an array where a count goes. |
 
 ## CONSTRUCTION_STAGES
 
@@ -451,6 +456,7 @@ alone; $KB_\mathrm{FTr}$ is not formed for it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative velocity. |
+| TypeError | if `peak_velocity_mm_s` is not a single number. |
 
 ## INDUCED_SEISMIC_PEAK_FACTOR
 
@@ -523,6 +529,7 @@ the note under the formula says is the KB of the 1975 edition.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative velocity or a non-positive frequency. |
+| TypeError | if `frequency_hz` or `peak_velocity_mm_s` is not a single number. |
 
 ## KB_UNCERTAINTY_PERCENT
 
@@ -660,6 +667,7 @@ how Example 8 reports $0{,}325^{+0{,}059}_{-0{,}073}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For mismatched or negative inputs, more occupied intervals than the period holds, or an unknown time of day. |
+| TypeError | if `kb_ftm`, `occupied_takte` or `spread` holds a text or a value that is not a real number. |
 
 ## RAILWAY_NIGHT_INVESTIGATION_KB
 
@@ -696,6 +704,7 @@ worked Example 8 carry and the print of (A.1b) lost. The rule of Formula
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an empty, non-finite or negative input. |
+| TypeError | if `kb_fti` holds a text or a value that is not a real number. |
 
 ## railway_takt_spread
 
@@ -724,6 +733,7 @@ spread is about the mean square that function returns.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For fewer than two maxima, or a bad input. |
+| TypeError | if `kb_fti` holds a text or a value that is not a real number. |
 
 ## RailwayAssessment
 

@@ -189,6 +189,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any argument is not positive and finite. |
+| TypeError | if `air_sound_speed`, `downstream_sound_speed`, `internal_diameter_m`, `pipe_sound_speed` or `wall_thickness_m` is not a single number. |
 
 ## combined_internal_levels
 
@@ -332,6 +333,7 @@ computed as supersonic is computed at Mach one instead.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a physical quantity is not positive and finite, if the two signed dB corrections are not finite, or if the throat is wider than the pipe. The efficiency correction of Table 4 and the velocity correction of Equation (16) are both signed, and the expander's own row prints $A_\eta = -3{,}0$. |
+| TypeError | if `downstream_density`, `downstream_sound_speed`, `internal_diameter_m`, `mass_flow` or `throat_diameter_m` is not a single number. |
 
 ## EXPANDER_PIPE_MACH_LIMIT
 
@@ -413,6 +415,7 @@ normative text and its list is consistent, so this follows the clause;
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the pressure ratio is not a finite number in (0, 1). |
+| TypeError | if `pressure_ratio` is not a single number. |
 
 ## GasStream
 
@@ -495,6 +498,7 @@ puts 3 dB there for octave bands instead.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the peak frequency is not positive and finite, or a band centre is not. |
+| TypeError | if `peak_frequency` is not a single number. |
 
 ## jet_diameter_m
 
@@ -530,6 +534,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, or the coefficient is not one Table 1 prints a constant for. |
+| TypeError | if `coefficient` is not a text, or `flow_coefficient`, `pressure_recovery` or `style_modifier` is not a single number. |
 
 ## LAST_STAGE_AREA_CONSTANTS
 
@@ -572,6 +577,7 @@ and says to use this only when the manufacturer does not state one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the area is not positive and finite, or the coefficient is not one Table 1 prints a constant for. |
+| TypeError | if `coefficient` is not a text, or `total_area` is not a single number. |
 
 ## MACH_LIMIT_STANDARD_TRIM
 
@@ -636,6 +642,7 @@ passes 0,2.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, or the coefficient is not one Table 1 prints a constant for. |
+| TypeError | if `coefficient` is not a text, or `flow_coefficient`, `passage_diameter_m`, `passage_length` or `style_modifier` is not a single number. |
 
 ## multistage_trim_conditions
 
@@ -690,6 +697,7 @@ directly.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a value is not positive and finite, or the outlet pressure is not below the inlet. |
+| TypeError | if `flow_coefficient`, `inlet_density`, `inlet_pressure_pa`, `last_stage_coefficient` or `outlet_pressure_pa` is not a single number. |
 
 ## MultistageConditions
 
@@ -772,6 +780,7 @@ internal level, so the sign is not a convention this module chose.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an argument is not positive and finite. |
+| TypeError | if `atmospheric_pressure_pa`, `downstream_density`, `downstream_sound_speed`, `pipe_density`, `standard_pressure_pa`, `valve_outlet_diameter_m` or `wall_thickness_m` is not a single number. |
 
 ## PIPE_WALL_MACH_LIMIT
 
@@ -834,6 +843,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either argument is not positive and finite, or if the specific heat ratio is not above one. |
+| TypeError | if `pressure_recovery` or `specific_heat_ratio` is not a single number. |
 
 ## REGIME_CHOKED
 
@@ -945,6 +955,7 @@ only a few decibels.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the stage count is below two, or a pressure is not positive and finite, or the stagnation pressure exceeds the inlet. |
+| TypeError | if `inlet_pressure_pa`, `last_stage_level` or `stagnation_pressure_pa` is not a single number, or `n_stages` is a flag, a text or an array where a count goes. |
 
 ## STANDARD_ATMOSPHERE_PA
 
@@ -1042,6 +1053,7 @@ a single large port has $F_d$ near one.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an argument is not positive and finite, or if the passage count is not a whole number. |
+| TypeError | if `passage_area` or `wetted_perimeter` is not a single number, or `n_passages` is a flag, a text or an array where a count goes. |
 
 ## ValveNoiseWarning
 

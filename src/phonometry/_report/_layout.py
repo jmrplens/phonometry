@@ -183,6 +183,8 @@ def display_round(value: float, decimals: int = 1) -> float:
     convention used across the fiche layer); otherwise a result could print
     numbers that contradict its own verdict at the tolerance boundary. A
     result that rounds to zero returns an unsigned ``0.0`` (never ``-0.0``).
+
+    :raises TypeError: if ``decimals`` is a flag, a text or an array where a count goes.
     """
     scale = 10.0 ** require_count(decimals, "decimals", at_least=None)
     magnitude = math.floor(abs(float(value)) * scale + 0.5) / scale
@@ -561,6 +563,7 @@ def band_table(
         ``None`` says the rows are not frequency bands, which is the honest
         answer for a goniometer angle axis or a linear sweep and keeps the
         octave rules off a table that has no octaves.
+    :raises TypeError: if ``n_data`` is not a single number.
     """
     require_scalar(n_data, "n_data")
     from reportlab.lib import colors

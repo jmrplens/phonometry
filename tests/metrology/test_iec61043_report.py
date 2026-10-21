@@ -37,7 +37,8 @@ def _class1_chain(
     offset: float = 1.5, spacing: float = 0.025
 ) -> emission.IntensityInstrumentComplianceResult:
     """A complete instrument that clears the class 1 minima by ``offset`` dB."""
-    freqs, class1, _ = emission.residual_index_limits("instrument", spacing_m=spacing)
+    limits = emission.residual_index_limits("instrument", spacing_m=spacing)
+    freqs, class1 = limits.frequencies, limits.class_1
     return emission.verify_intensity_class(
         class1 + offset, frequencies=freqs, spacing_m=spacing
     )
@@ -136,7 +137,8 @@ def test_required_class_verdict_both_ways(tmp_path: Path) -> None:
         passing.report(str(tmp_path / "pass.pdf"), metadata=_metadata(required_class=1))
     )
     # 1 dB short of class 1 everywhere, so the chain lands on class 2.
-    freqs, class1, _ = emission.residual_index_limits("instrument")
+    limits = emission.residual_index_limits("instrument")
+    freqs, class1 = limits.frequencies, limits.class_1
     failing = emission.verify_intensity_class(class1 - 1.0, frequencies=freqs)
     assert failing.overall_class == 2
     assert_one_page(
@@ -146,7 +148,8 @@ def test_required_class_verdict_both_ways(tmp_path: Path) -> None:
 
 def test_non_compliant_chain_renders(tmp_path: Path) -> None:
     """A chain meeting neither class boxes a non-conformity statement."""
-    freqs, _, class2 = emission.residual_index_limits("probe")
+    limits = emission.residual_index_limits("probe")
+    freqs, class2 = limits.frequencies, limits.class_2
     result = emission.verify_intensity_class(
         class2 - 2.0, frequencies=freqs, device="probe"
     )
@@ -157,7 +160,8 @@ def test_non_compliant_chain_renders(tmp_path: Path) -> None:
 def test_range_limited_note_renders(tmp_path: Path) -> None:
     """A partial band set adds the clause 6.1 qualifying note."""
     bands = _BANDS[6:14]
-    freqs, class1, _ = emission.residual_index_limits("processor", frequencies=bands)
+    limits = emission.residual_index_limits("processor", frequencies=bands)
+    freqs, class1 = limits.frequencies, limits.class_1
     result = emission.verify_intensity_class(
         class1, frequencies=freqs, device="processor"
     )
@@ -177,7 +181,8 @@ def test_range_limited_note_drops_the_class_wording_when_no_class_is_met(
     attests" has no referent.
     """
     octaves = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
-    freqs, _, class2 = emission.residual_index_limits("processor", frequencies=octaves)
+    limits = emission.residual_index_limits("processor", frequencies=octaves)
+    freqs, class2 = limits.frequencies, limits.class_2
     result = emission.verify_intensity_class(
         class2 - 2.0, frequencies=freqs, device="processor"
     )

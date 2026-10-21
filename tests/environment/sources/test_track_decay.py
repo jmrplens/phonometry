@@ -132,9 +132,9 @@ def test_a_rate_of_exactly_twice_the_floor_is_suitable() -> None:
     positions = track_decay_excitation_positions()
     floor = 4.343 / positions[-1]
     rates = TrackDecayRate(
-        "vertical",
-        [250.0, 315.0, 400.0],
-        [1.95 * floor, 2.0 * floor, 2.05 * floor],
+        direction="vertical",
+        frequencies=[250.0, 315.0, 400.0],
+        decay_rates_db_per_m=[1.95 * floor, 2.0 * floor, 2.05 * floor],
         distances=positions,
         responses=np.ones((positions.size, 3)),
     )
@@ -198,7 +198,9 @@ def test_a_measured_rate_of_exactly_twice_the_floor_is_suitable() -> None:
 
 def test_rates_from_a_report_carry_no_grid() -> None:
     """A TrackDecayRate built from printed rates has no floor and no drop to judge."""
-    rates = TrackDecayRate("lateral", [250.0, 315.0], [2.5, 1.9])
+    rates = TrackDecayRate(
+        direction="lateral", frequencies=[250.0, 315.0], decay_rates_db_per_m=[2.5, 1.9]
+    )
     assert rates.min_measurable_db_per_m is None
     assert rates.far_field_sufficient is None
     assert rates.suitable.all()
@@ -207,7 +209,9 @@ def test_rates_from_a_report_carry_no_grid() -> None:
 
 def test_a_frequency_without_a_band_is_a_value_error() -> None:
     """rate_at names the band it could not find."""
-    rates = TrackDecayRate("vertical", [250.0], [2.5])
+    rates = TrackDecayRate(
+        direction="vertical", frequencies=[250.0], decay_rates_db_per_m=[2.5]
+    )
     with pytest.raises(ValueError, match="no band at 400 Hz"):
         rates.rate_at(400.0)
 
@@ -215,7 +219,9 @@ def test_a_frequency_without_a_band_is_a_value_error() -> None:
 def test_an_unknown_direction_is_refused() -> None:
     """6.6 measures the vertical and the lateral responses only."""
     with pytest.raises(ValueError, match="'direction' must be one of"):
-        TrackDecayRate("longitudinal", [250.0], [2.5])
+        TrackDecayRate(
+            direction="longitudinal", frequencies=[250.0], decay_rates_db_per_m=[2.5]
+        )
 
 
 @pytest.mark.parametrize(
@@ -228,7 +234,11 @@ def test_the_bands_are_distinct_and_increasing(frequencies: list[float]) -> None
     with pytest.raises(
         ValueError, match="'frequencies' must name distinct one-third octave bands"
     ):
-        TrackDecayRate("vertical", frequencies, [0.1, 3.0, 3.0])
+        TrackDecayRate(
+            direction="vertical",
+            frequencies=frequencies,
+            decay_rates_db_per_m=[0.1, 3.0, 3.0],
+        )
 
 
 def test_measured_rates_need_distinct_bands_too() -> None:
@@ -288,7 +298,11 @@ def test_a_rate_built_directly_needs_the_grid_of_6_7(
     responses = np.ones((np.asarray(distances).size, 1))
     with pytest.raises(ValueError, match=f"^{message}\\.$"):
         TrackDecayRate(
-            "vertical", [250.0], [2.5], distances=distances, responses=responses
+            direction="vertical",
+            frequencies=[250.0],
+            decay_rates_db_per_m=[2.5],
+            distances=distances,
+            responses=responses,
         )
 
 
@@ -300,7 +314,11 @@ def test_a_rate_built_directly_needs_positive_finite_magnitudes(direct: float) -
     responses = np.array([[direct], [0.1]])
     with pytest.raises(ValueError, match="'responses' are magnitudes"):
         TrackDecayRate(
-            "vertical", [250.0], [2.5], distances=[0.0, 0.6], responses=responses
+            direction="vertical",
+            frequencies=[250.0],
+            decay_rates_db_per_m=[2.5],
+            distances=[0.0, 0.6],
+            responses=responses,
         )
 
 
@@ -309,16 +327,20 @@ def test_a_rate_built_directly_needs_one_row_per_position() -> None:
     responses = np.ones((3, 1))
     with pytest.raises(ValueError, match="'responses' has 3 rows for 2 positions"):
         TrackDecayRate(
-            "vertical", [250.0], [2.5], distances=[0.0, 0.6], responses=responses
+            direction="vertical",
+            frequencies=[250.0],
+            decay_rates_db_per_m=[2.5],
+            distances=[0.0, 0.6],
+            responses=responses,
         )
 
 
 def test_a_rate_built_directly_on_a_valid_grid_is_judged() -> None:
     """A grid the constructor accepts gives the floor of Formula 2 and the drop of 6.7."""
     rates = TrackDecayRate(
-        "vertical",
-        [250.0],
-        [2.5],
+        direction="vertical",
+        frequencies=[250.0],
+        decay_rates_db_per_m=[2.5],
         distances=[0.0, 0.6, 1.2],
         responses=[1.0, 0.5, 0.25],
     )
@@ -337,7 +359,11 @@ def test_the_arrays_are_read_only() -> None:
 
 def test_the_plot_is_logarithmic_between_the_limits_of_9_2() -> None:
     """EN 15461 9.2: 0,01 dB/m to 100 dB/m, with the lower limit drawn."""
-    rates = TrackDecayRate("vertical", [250.0, 315.0, 400.0], [2.5, 2.4, 7.0])
+    rates = TrackDecayRate(
+        direction="vertical",
+        frequencies=[250.0, 315.0, 400.0],
+        decay_rates_db_per_m=[2.5, 2.4, 7.0],
+    )
     ax = rates.plot(
         limit_db_per_m=environment.REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M["vertical"]
     )

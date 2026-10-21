@@ -226,6 +226,8 @@ def envelope(
         ``True``).
     :return: An :class:`EnvelopeResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``decimation_factor`` is a flag, a text or an array where a
+        count goes.
     """
     from scipy import signal as sp_signal
 
@@ -509,6 +511,7 @@ def envelope_spectrum(
         roll-off). Default ``None``: detect on the record as given.
     :return: An :class:`EnvelopeSpectrumResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``nfft`` is a flag, a text or an array where a count goes.
     """
     from scipy import signal as sp_signal
 

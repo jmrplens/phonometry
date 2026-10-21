@@ -59,6 +59,7 @@ pressure doubling; $S_0 = 1$ m².
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `r1` is not a single number. |
 
 ## slant_distance
 
@@ -95,6 +96,7 @@ $R_0 = H + D/2$
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a dimension is not positive or `rotor_axis` is not one of the two orientations. |
+| TypeError | if `hub_height_m` or `rotor_diameter_m` is not a single number. |
 
 ## wind_turbine_tonality
 
@@ -148,6 +150,7 @@ critical band would extend to negative frequencies) and are rejected.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid or the candidate lies below 20 Hz. |
+| TypeError | if `tone_frequency` is not a single number. |
 
 ## WindTurbineNoiseWarning
 

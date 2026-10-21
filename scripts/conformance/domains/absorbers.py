@@ -246,7 +246,8 @@ _SOFT_FIBROUS = ph.materials.PUBLISHED_POROUS_MATERIALS[
 _GLASS_WOOL = ph.materials.PUBLISHED_POROUS_MATERIALS[
     "allard-2009-table-6-1/domisol_coffrage"
 ]
-_GLASS_WOOL_SHEAR, _GLASS_WOOL_POISSON = _GLASS_WOOL.frame_constants()
+frame = _GLASS_WOOL.frame_constants()
+_GLASS_WOOL_SHEAR, _GLASS_WOOL_POISSON = frame.shear_modulus_pa, frame.poisson_ratio
 # Every quantity of a catalogue row is optional, because the pages print
 # different columns, so the four these rows take part with are narrowed
 # once here rather than at each of the sixteen call sites below.
@@ -508,11 +509,11 @@ def _chk_slow_sound_slit_resistivity() -> Outcome:
     eta = air.viscosity
     h = 1.2e-3
     f = np.array([1.0e-2])
-    rho_s, _ = ph.materials.slit_effective_properties(
+    rho_s = ph.materials.slit_effective_properties(
         f,
         slit_height_m=h,
         fluid=air,
-    )
+    ).effective_density
     sigma = float((1j * 2.0 * math.pi * f * rho_s)[0].real)
     return numeric(12.0 * eta / h**2, sigma, 1e-3, rel=True, unit="Pa s/m2", places=1)
 
@@ -527,11 +528,11 @@ def _chk_slow_sound_duct_resistivity() -> Outcome:
     eta = air.viscosity
     side = 3.0e-3
     f = np.array([1.0e-2])
-    rho, _ = ph.materials.rectangular_duct_properties(
+    rho = ph.materials.rectangular_duct_properties(
         f,
         side_m=side,
         fluid=air,
-    )
+    ).effective_density
     sigma = float((1j * 2.0 * math.pi * f * rho)[0].real)
     return numeric(
         28.454 * eta / side**2, sigma, 2e-3, rel=True, unit="Pa s/m2", places=1

@@ -932,14 +932,14 @@ def test_parameter_uncertainty_returns_one_component_per_parameter() -> None:
         ),
         **_CONDITIONS,
     )
-    assert set(result.components_db) == {
+    assert set(result.component_uncertainties_db) == {
         "coupler_length",
         "temperature",
         "capillary_tube_dimensions",
         "equivalent_volume",
     }
-    assert set(result.components_db) <= set(metrology.IEC61094_2_TABLE_1)
-    for values in result.components_db.values():
+    assert set(result.component_uncertainties_db) <= set(metrology.IEC61094_2_TABLE_1)
+    for values in result.component_uncertainties_db.values():
         assert np.all(values >= 0.0)
         assert np.any(values > 0.0)
 
@@ -973,7 +973,7 @@ def test_parameter_uncertainty_of_the_length_is_the_level_change() -> None:
         acoustic_transfer_impedances=moved,
     )
     np.testing.assert_allclose(
-        result.components_db["coupler_length"],
+        result.component_uncertainties_db["coupler_length"],
         np.abs(changed.sensitivity_level[0] - nominal.sensitivity_level[0]),
         atol=1e-12,
     )
@@ -1015,10 +1015,14 @@ def test_parameter_uncertainty_follows_the_gas_of_the_coupler() -> None:
     )
     key = "coupler_length"
     np.testing.assert_allclose(
-        same_air.components_db[key], in_air.components_db[key], rtol=1e-12
+        same_air.component_uncertainties_db[key],
+        in_air.component_uncertainties_db[key],
+        rtol=1e-12,
     )
     assert not np.allclose(
-        other_gas.components_db[key], in_air.components_db[key], rtol=1e-6
+        other_gas.component_uncertainties_db[key],
+        in_air.component_uncertainties_db[key],
+        rtol=1e-6,
     )
 
 
@@ -1067,7 +1071,7 @@ def test_input_uncertainties_are_keyword_only_and_default_to_zero() -> None:
     result = metrology.coupler_parameter_uncertainty(
         _F, _PLANE, _MICS, nothing, **_CONDITIONS
     )
-    assert dict(result.components_db) == {}
+    assert dict(result.component_uncertainties_db) == {}
 
 
 def test_large_volume_parameters_move_the_volume_and_the_surface() -> None:
@@ -1080,8 +1084,8 @@ def test_large_volume_parameters_move_the_volume_and_the_surface() -> None:
         ),
         **_CONDITIONS,
     )
-    assert np.all(result.components_db["coupler_volume"] > 0.0)
-    assert np.all(result.components_db["coupler_surface_area"] > 0.0)
+    assert np.all(result.component_uncertainties_db["coupler_volume"] > 0.0)
+    assert np.all(result.component_uncertainties_db["coupler_surface_area"] > 0.0)
 
 
 def test_published_tables_are_read_only() -> None:

@@ -61,6 +61,7 @@ second everywhere, so there is no second unit to be confused with.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if either argument is not a positive finite number. |
+| TypeError | if `density` or `speed_of_sound` is not a single number. |
 
 ## Fluid
 

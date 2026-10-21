@@ -79,7 +79,7 @@ reciprocity_uncertainty_budget(
     *,
     frequencies: ArrayLike,
     field: Literal['pressure', 'free'] = 'pressure',
-    additional_components_db: Mapping[str, ArrayLike] | None = None,
+    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
     coverage_factor: float = 2.0,
 ) -> ReciprocityUncertaintyBudget
 ```
@@ -92,7 +92,7 @@ causes, in dB, one value or one per frequency, keyed by the names of the
 field's Table 1 ([`IEC61094_2_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_2_table_1), [`IEC61094_3_TABLE_1`](/phonometry/reference/api/metrology/reciprocity-calibration/#iec61094_3_table_1)).
 Neither table is exhaustive ("Not all of the components may be relevant in
 a given calibration setup"), so a component may be left out and
-`additional_components_db` adds others. The components that come from
+`additional_uncertainties_db` adds others. The components that come from
 the acoustic transfer impedance are what
 [`coupler_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-coupler/#coupler_parameter_uncertainty) and
 [`free_field_parameter_uncertainty`](/phonometry/reference/api/metrology/reciprocity-free-field/#free_field_parameter_uncertainty) return,
@@ -112,7 +112,7 @@ freedom passes its own.
 | `frequencies` | The frequencies, in Hz, increasing. |
 | `standard_uncertainties_db` | The components, keyed by name, each a standard uncertainty in dB, one value or one per frequency. |
 | `field` | `"pressure"` (default) or `"free"`. |
-| `additional_components_db` | Further components, by name, in the same form (Default: none). |
+| `additional_uncertainties_db` | Further components, by name, in the same form (Default: none). |
 | `coverage_factor` | $k$ (Default: 2). |
 
 **Returns:** The [`ReciprocityUncertaintyBudget`](/phonometry/reference/api/metrology/reciprocity-calibration/#reciprocityuncertaintybudget).
@@ -122,6 +122,7 @@ freedom passes its own.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a key that is not in the field's Table 1, an additional component with the name of another, no component at all, or a value that is negative or not finite. |
+| TypeError | if `field` is not a text, or `coverage_factor` is not a single number. |
 
 ## ReciprocityCalibration
 

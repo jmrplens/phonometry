@@ -492,7 +492,7 @@ def plot_partial_plant_contributions(
 
     ax = ax if ax is not None else _new_axes()
     positions = _band_axis(ax, result.frequencies, language=language)
-    total_a = format_number(result.a_weighted_total_db, language, decimals=1)
+    total_a = format_number(result.a_weighted_total_level, language, decimals=1)
     style_default(kwargs, "color", theme_fill(_C_PRIMARY, ax=ax))
     style_default(kwargs, "edgecolor", _C_PRIMARY)
     style_default(

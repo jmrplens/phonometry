@@ -390,6 +390,7 @@ class FieldStationarityCheck(OwnsArrays):
 
         :raises ValueError: For an indicator that is not a number or a
             one-dimensional array of them, or one that is not finite.
+        :raises TypeError: if ``f1`` holds a text or a value that is not a real number.
         """
         require_finite_array(self.f1, "f1")
 
@@ -750,6 +751,8 @@ def sound_intensity(
         per-band ``bias_correction`` factor (same clamped definition) is
         reported either way.
     :return: :class:`IntensityResult`.
+    :raises TypeError: if ``density``, ``fs``, ``spacing_m`` or ``speed_of_sound`` is
+        not a single number.
     """
     fs = resolve_pair_fs(p1, p2, fs, names=("p1", "p2"))
     x1 = apply_calibration(p1, _typesignal(p1, name="p1"))
@@ -1142,6 +1145,8 @@ def dynamic_capability_index(
         decibels.
     :param bias_error_factor: K in decibels (default 10.0).
     :return: Ld in decibels.
+    :raises TypeError: if ``bias_error_factor`` or ``pressure_residual_intensity_index``
+        is not a single number.
     """
     require_scalar(
         pressure_residual_intensity_index, "pressure_residual_intensity_index"

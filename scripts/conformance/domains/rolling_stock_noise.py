@@ -429,8 +429,8 @@ def _chk_method_b_total_length() -> Outcome:
     verdicts = []
     for length_m, holds in ((total, True), (total - 0.1, False)):
         line = ph.environment.AcousticRoughnessSpectrum(
-            np.array(wavelengths),
-            np.array([limit[w] - 2.0 for w in wavelengths]),
+            wavelengths_m=np.array(wavelengths),
+            levels=np.array([limit[w] - 2.0 for w in wavelengths]),
             record_length_m=length_m,
             method="B",
         )
@@ -495,7 +495,7 @@ def _chk_annex_c() -> Outcome:
     levels[wavelengths.index(0.04)] = limit[0.04] + 3.0
     verdict = ph.environment.check_small_roughness_deviations(
         ph.environment.AcousticRoughnessSpectrum(
-            np.array(wavelengths), np.array(levels)
+            wavelengths_m=np.array(wavelengths), levels=np.array(levels)
         ),
         np.full(len(_NOISE_BANDS_HZ), 70.0),
         frequencies=_NOISE_BANDS_HZ,
@@ -503,7 +503,7 @@ def _chk_annex_c() -> Outcome:
     )
     bands = len(_NOISE_BANDS_HZ)
     expected = 10.0 * math.log10(bands) - 10.0 * math.log10(bands - 1 + 10.0**-0.3)
-    return numeric(expected, verdict.impact_db, 1e-9, unit="dB", places=6)
+    return numeric(expected, verdict.level_increase, 1e-9, unit="dB", places=6)
 
 
 @register(

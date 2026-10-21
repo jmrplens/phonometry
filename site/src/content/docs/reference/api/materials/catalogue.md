@@ -71,6 +71,25 @@ right.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
+## FrameConstants
+
+```python
+FrameConstants(shear_modulus_pa: complex, poisson_ratio: float)
+```
+
+The in-vacuo frame constants of a porous material, as its source prints them.
+
+What [`PorousMaterial.frame_constants`](/phonometry/reference/api/materials/catalogue/#porousmaterialframe_constants) returns: the shear modulus and
+the Poisson ratio, named, where an `(N, nu)` tuple used to be unpacked
+by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `shear_modulus_pa` | The complex shear modulus $N(1 + j \eta_s)$, in Pa. |
+| `poisson_ratio` | The Poisson ratio $\nu$. |
+
 ## porous_materials_named
 
 ```python
@@ -229,7 +248,7 @@ and `extended`.
 ### PorousMaterial.frame_constants()
 
 ```python
-PorousMaterial.frame_constants() -> tuple[complex, float]
+PorousMaterial.frame_constants() -> FrameConstants
 ```
 
 The in-vacuo frame constants `(N, nu)` the source prints.
@@ -255,7 +274,7 @@ a frame with `eta_s = 0`: a lossless frame is a claim about the
 material, and a cell the page left empty is not a zero. Every
 published row that prints both moduli prints the loss factor too.
 
-**Returns:** `(shear_modulus_pa, poisson_ratio)`, the first complex.
+**Returns:** The complex shear modulus and the Poisson ratio, as a [`FrameConstants`](/phonometry/reference/api/materials/catalogue/#frameconstants).
 
 **Raises**
 

@@ -35,13 +35,15 @@ conditions of :data:`CONDITIONS` (the speed of sound and the density of the
 medium, a calibration factor, the ground factors) are held to this half
 whatever their suffix, because the name is all a reader of the call has.
 
-A frequency axis is written by name too. A public function or method that
-takes its frequencies (:data:`FREQUENCY_AXES`, or a name that ends in one of
-them such as ``tone_frequencies``) by position beside another array of
-numbers is reported: two arrays of the same length in a row bind
-the other way round without a complaint, and the answer comes back computed
-on the wrong axis. The values stay positional, in their order, and the axis
-goes behind the bare ``*``. :data:`FREQUENCY_AXIS_EXEMPT` is its escape hatch.
+An axis is written by name too. A public function or method that takes
+its frequencies (:data:`FREQUENCY_AXES`, or a name that ends in one of them
+such as ``tone_frequencies``) or its wavelengths (:data:`WAVELENGTH_AXES`,
+or a name that starts with one of them such as ``wavelengths_mm``) by
+position beside another array of numbers is reported: two arrays of the
+same length in a row bind the other way round without a complaint, and the
+answer comes back computed on the wrong axis. The values stay positional, in
+their order, and the axis goes behind the bare ``*``.
+:data:`FUNCTION_AXIS_EXEMPT` is its escape hatch.
 
 :data:`EXEMPT` is the escape hatch for the first half and :data:`POSITIONAL`
 for the second, both keyed by module, qualified name and parameter, and each
@@ -90,6 +92,7 @@ its reason.
 from __future__ import annotations
 
 import argparse
+import ast
 import dataclasses
 import functools
 import importlib
@@ -1889,6 +1892,13 @@ PAIR_EXEMPT: dict[tuple[str, str, str], str] = {
         ("sound_power_level", "sound_power_level_a"),
     ),
     **_pair(
+        "the spectrum at the source line A of CNOSSOS-EU, the lower of its two "
+        "heights, beside the source of a ground path; the letter names the line, "
+        "it is not the A-weighting",
+        "environment",
+        ("source", "source_a"),
+    ),
+    **_pair(
         "the TrackDecayRate records of a reference-track check, beside the "
         "rates in dB/m one of them holds",
         "environment",
@@ -2340,15 +2350,35 @@ _BY_POSITION = (
     inspect.Parameter.POSITIONAL_OR_KEYWORD,
 )
 
-#: Functions that keep their frequency axis positional beside another array,
-#: keyed by module and qualified name, each with its reason.
-FREQUENCY_AXIS_EXEMPT: dict[tuple[str, str], str] = {}
+#: The names a wavelength axis goes by: ``wavelengths``, the axis a roughness
+#: or a contact filter is tabulated over (``wavelengths_mm`` of
+#: ``roughness_to_frequency`` and of ``WavelengthSpectrum``, ``wavelengths_m``
+#: of an EN 15610 spectrum), and ``wavelength`` where a function is vectorised
+#: over it (the ``lambda0`` of each band of an ISO 10534-1 standing-wave
+#: reading), as ``frequency`` is among :data:`FREQUENCY_AXES`. A name that
+#: starts with one of them, its unit after it, is a wavelength axis too. Beside
+#: its levels, or beside another length of the same shape, it binds the other
+#: way round as a frequency axis does.
+WAVELENGTH_AXES = frozenset({"wavelengths", "wavelength"})
+
+#: Functions that keep their frequency or wavelength axis positional beside
+#: another array, keyed by module and qualified name, each with its reason.
+FUNCTION_AXIS_EXEMPT: dict[tuple[str, str], str] = {}
 
 
 def is_frequency_axis(name: str) -> bool:
     """Whether a parameter name says it holds frequencies."""
     return name in FREQUENCY_AXES or any(
         name.endswith(f"_{axis}") for axis in FREQUENCY_AXES
+    )
+
+
+def is_axis(name: str) -> bool:
+    """Whether a parameter or field name says it holds an axis: frequencies or wavelengths."""
+    return (
+        is_frequency_axis(name)
+        or name in WAVELENGTH_AXES
+        or any(name.startswith(f"{axis}_") for axis in WAVELENGTH_AXES)
     )
 
 
@@ -2359,17 +2389,21 @@ def holds_an_array(annotation: object) -> bool:
     return bool(_NUMERIC_ARRAY.search(str(annotation)))
 
 
-def positional_frequency_axes() -> tuple[
+def positional_function_axes() -> tuple[
     list[tuple[PublicName, str, tuple[str, ...]]], list[tuple[str, str]]
 ]:
-    """The public functions that take a frequency axis by position beside an array.
+    """The public functions that take an axis by position beside an array.
+
+    The axis is a frequency axis or a wavelength axis (:func:`is_axis`): a
+    roughness tabulated over wavelength binds its two arrays either way round
+    as a spectrum over frequency does.
 
     Each finding is the function, the axis it takes by position and the other
     arrays a caller passes by position beside it; the second list is the
-    exemptions nothing needs any more. A record is not walked: a result's
-    fields are read by name off it. The few records a caller builds as input
-    (``aircraft.RotorcraftHemisphere``) are outside this rule, and the guides
-    build them with every field named.
+    exemptions nothing needs any more. A record's constructor is not walked
+    here: a result's fields are read by name off it, and the records a caller
+    builds as input (``aircraft.RotorcraftHemisphere``) are held to the same
+    rule by :func:`positional_record_axes`.
     """
     found: list[tuple[PublicName, str, tuple[str, ...]]] = []
     used: set[tuple[str, str]] = set()
@@ -2386,30 +2420,243 @@ def positional_frequency_axes() -> tuple[
         axes = [
             p.name
             for p in by_position
-            if is_frequency_axis(p.name) and holds_an_array(p.annotation)
+            if is_axis(p.name) and holds_an_array(p.annotation)
         ]
         values = tuple(
             p.name
             for p in by_position
-            if not is_frequency_axis(p.name) and holds_an_array(p.annotation)
+            if not is_axis(p.name) and holds_an_array(p.annotation)
         )
         if not axes or not values:
             continue
         key = (entry.module, entry.qualname)
-        if key in FREQUENCY_AXIS_EXEMPT:
+        if key in FUNCTION_AXIS_EXEMPT:
             used.add(key)
             continue
         found.extend((entry, axis, values) for axis in axes)
-    return found, [k for k in FREQUENCY_AXIS_EXEMPT if k not in used]
+    return found, [k for k in FUNCTION_AXIS_EXEMPT if k not in used]
 
 
-def _report_frequency_axes(
+def _handed_on(consumer: str) -> str:
+    return (
+        f"a result the library builds and hands on whole to {consumer}; a "
+        "caller reads its fields by name and does not write them"
+    )
+
+
+#: Public records another public function takes as an argument that keep a
+#: frequency axis by position, keyed by ``(module, qualified name)``, with the
+#: reason. A record a caller builds as input (a hemisphere, a set of periodic
+#: test results, an impedance, a response) is written by name, as a function
+#: call is; what stays here is a result of one function that a second one
+#: takes whole, which no caller writes field by field.
+RECORD_AXIS_EXEMPT: dict[tuple[str, str], str] = {
+    (
+        "phonometry.building.measurement._rainfall_sound",
+        "RainfallReferenceCorrection",
+    ): _handed_on("rainfall_sound"),
+    (
+        "phonometry.building.measurement.joint_insulation",
+        "LaboratoryJointInsulationResult",
+    ): _handed_on("joint_gap_series"),
+    (
+        "phonometry.building.measurement.service_equipment",
+        "ServiceEquipmentResult",
+    ): _handed_on("check_instrument_agreement"),
+    (
+        "phonometry.building.prediction.detailed_model",
+        "InSituElementResult",
+    ): _handed_on("the flanking-path predictions"),
+    ("phonometry.electroacoustics.piston", "RadiatingPistonResult"): _handed_on(
+        "LoudspeakerDirectivity, which holds it whole"
+    ),
+    ("phonometry.electroacoustics.swept_sine", "SweptSineDistortionResult"): _handed_on(
+        "loudspeaker_characteristics"
+    ),
+    ("phonometry.emission._sound_power_intensity", "PrecisionCriteria"): _handed_on(
+        "its result's report"
+    ),
+    (
+        "phonometry.emission.free_field_qualification",
+        "InverseSquareLawResult",
+    ): _handed_on("check_free_field"),
+    (
+        "phonometry.emission.free_field_qualification",
+        "SourceDirectionalityResult",
+    ): _handed_on("check_free_field"),
+    (
+        "phonometry.emission.reference_sound_source",
+        "ReferenceSourceCalibration",
+    ): _handed_on("the comparison methods"),
+    ("phonometry.emission.sound_power_plant", "PlantSoundPowerResult"): _handed_on(
+        "check_plant_measurement"
+    ),
+    (
+        "phonometry.environment.sources.rolling_stock_noise",
+        "SmallRoughnessDeviation",
+    ): _handed_on("check_reference_track"),
+    (
+        "phonometry.hearing._real_ear_attenuation",
+        "RealEarAttenuationResult",
+    ): _handed_on("the attenuation assessments"),
+    (
+        "phonometry.hearing.active_noise_reduction",
+        "ActiveInsertionLossResult",
+    ): _handed_on("anr_total_attenuation"),
+    ("phonometry.hearing.hearing_protectors", "AssumedProtectionResult"): _handed_on(
+        "octave_band_protected_level"
+    ),
+    (
+        "phonometry.metrology.comparison_calibration",
+        "ComparisonCalibration",
+    ): _handed_on("verify_jig_or_coupler"),
+    (
+        "phonometry.metrology.reciprocity_calibration",
+        "ReciprocityCalibration",
+    ): _handed_on("verify_jig_or_coupler"),
+    (
+        "phonometry.metrology.reciprocity_coupler",
+        "CouplerTransferImpedance",
+    ): _handed_on("the reciprocity calibrations"),
+    ("phonometry.noise_control._duct_path", "DuctPathResult"): _handed_on(
+        "combine_duct_paths"
+    ),
+    (
+        "phonometry.vibration.structural._impact_mobility",
+        "ImpactMobilityResult",
+    ): _handed_on("check_coherence"),
+}
+
+
+def _public_records() -> dict[str, type]:
+    """Every public dataclass of the package, by name."""
+    records: dict[str, type] = {}
+    for _, module in public_modules():
+        for exported in getattr(module, "__all__", ()):
+            obj = getattr(module, exported, None)
+            if inspect.isclass(obj) and dataclasses.is_dataclass(obj):
+                records.setdefault(obj.__name__, obj)
+    return records
+
+
+def _annotations_of(target: Callable[..., object]) -> list[str]:
+    try:
+        signature = inspect.signature(target)
+    except (TypeError, ValueError):
+        return []
+    return [str(p.annotation) for p in signature.parameters.values()]
+
+
+def _taken_as_arguments() -> str:
+    """The parameter annotations of every public function, as one text.
+
+    A record a function takes brings in the records its own fields name: a
+    caller builds those too (the wavelength spectra a ``RollingStock`` holds),
+    so their field annotations join the text, until no new record is named.
+    A result of :data:`RECORD_AXIS_EXEMPT` brings in nothing: a caller does
+    not write it, nor the records it holds.
+    """
+    annotations: list[str] = []
+    for _, target in _public_function_targets():
+        annotations.extend(_annotations_of(target))
+    text = "\n".join(annotations)
+    records = _public_records()
+    walked: set[str] = set()
+    grown = True
+    while grown:
+        grown = False
+        for name, record in records.items():
+            if name in walked or not re.search(rf"\b{re.escape(name)}\b", text):
+                continue
+            walked.add(name)
+            if (record.__module__, record.__qualname__) in RECORD_AXIS_EXEMPT:
+                continue
+            text += "\n" + "\n".join(_annotations_of(record))
+            grown = True
+    return text
+
+
+def positional_record_axes() -> tuple[
+    list[tuple[PublicName, str, tuple[str, ...]]], list[tuple[str, str]]
+]:
+    """The input records that take an axis by position beside an array.
+
+    An input record is a public dataclass another public function takes as an
+    argument, or one such a record holds in a field: the caller builds it,
+    field by field, as it would call a function, and the same two arrays of
+    one length bind either way round in it. The axis is a frequency axis or a
+    wavelength axis (:func:`is_axis`). Each finding is the record, the
+    axis its constructor takes by position and the other arrays beside it;
+    the second list is the exemptions nothing needs any more.
+    """
+    taken = _taken_as_arguments()
+    found: list[tuple[PublicName, str, tuple[str, ...]]] = []
+    used: set[tuple[str, str]] = set()
+    seen: set[tuple[str, str]] = set()
+    for _, module in public_modules():
+        for exported in getattr(module, "__all__", ()):
+            obj = getattr(module, exported, None)
+            if not (inspect.isclass(obj) and dataclasses.is_dataclass(obj)):
+                continue
+            key = (obj.__module__, obj.__qualname__)
+            if key in seen:
+                continue
+            seen.add(key)
+            if not re.search(rf"\b{re.escape(obj.__name__)}\b", taken):
+                continue
+            try:
+                signature = inspect.signature(obj)
+            except (TypeError, ValueError):
+                continue
+            by_position = [
+                p for p in signature.parameters.values() if p.kind in _BY_POSITION
+            ]
+            axes = [
+                p.name
+                for p in by_position
+                if is_axis(p.name) and holds_an_array(p.annotation)
+            ]
+            values = tuple(
+                p.name
+                for p in by_position
+                if not is_axis(p.name) and holds_an_array(p.annotation)
+            )
+            if not axes or not values:
+                continue
+            if key in RECORD_AXIS_EXEMPT:
+                used.add(key)
+                continue
+            entry = PublicName(key[0], key[1], obj.__name__, _where(obj))
+            found.extend((entry, axis, values) for axis in axes)
+    return found, [k for k in RECORD_AXIS_EXEMPT if k not in used]
+
+
+def _report_record_axes(
     axes: list[tuple[PublicName, str, tuple[str, ...]]],
 ) -> None:
-    """Print the frequency-axis rule's findings."""
+    """Print the input-record rule's findings."""
     if not axes:
         return
-    print("::error::a frequency axis can still be passed by position beside its values")
+    print("::error::an input record takes its axis by position")
+    print(f"{len(axes)} record(s) take the axis positionally beside another array:")
+    for entry, axis, values in sorted(axes):
+        print(
+            f"  {entry.qualname}({axis}) beside ({', '.join(values)})  <- {entry.where}"
+        )
+    print(
+        "  -> make the record @dataclass(kw_only=True), or put a KW_ONLY marker "
+        "before its axis; a result one function hands whole to another goes in "
+        "RECORD_AXIS_EXEMPT with the reason."
+    )
+
+
+def _report_function_axes(
+    axes: list[tuple[PublicName, str, tuple[str, ...]]],
+) -> None:
+    """Print the function-axis rule's findings."""
+    if not axes:
+        return
+    print("::error::an axis can still be passed by position beside its values")
     print(f"{len(axes)} function(s) take the axis positionally beside another array:")
     for entry, axis, values in sorted(axes):
         print(
@@ -2418,7 +2665,274 @@ def _report_frequency_axes(
     print(
         "  -> put the axis behind a bare '*', keeping the values positional in "
         "their order; a signature that has to keep it goes in "
-        "FREQUENCY_AXIS_EXEMPT with the reason."
+        "FUNCTION_AXIS_EXEMPT with the reason."
+    )
+
+
+#: The ends of one range, lower first: two values of one quantity whose
+#: places are the order every range in the library is written in.
+_BOUNDS = "the two ends of one range, lower first"
+_TWO_AXES = "the extent along x and along y, in the order of the axes"
+
+#: Public functions, methods and properties that keep a fixed-length tuple as
+#: their answer, keyed by ``(module, qualified name)``, with the reason. A
+#: tuple stays only where its items are like items: values of one quantity
+#: whose place in the tuple is an order nobody has to remember (the two ends
+#: of a range, lower first, or a sequence the source itself prints in order).
+#: Several different quantities are a record with a field for each.
+TUPLE_RETURN_EXEMPT: dict[tuple[str, str], str] = {
+    ("phonometry.broadcast._program_loudness", "k_weighting_coefficients"): (
+        "the two biquad stages of BS.1770 in the order they are cascaded, each "
+        "the (b, a) pair of the scipy filter convention"
+    ),
+    (
+        "phonometry.building.measurement.joint_insulation",
+        "JointGapSeries.working_range_mm",
+    ): _BOUNDS,
+    (
+        "phonometry.building.measurement.service_equipment",
+        "ServiceEquipmentPositionCheck.corner_wall_distances_m",
+    ): ("the distances to the two walls of the corner, one quantity twice"),
+    (
+        "phonometry.building.prediction.panel_transmission",
+        "orthotropic_critical_frequencies",
+    ): (
+        "the critical frequencies of the two bending directions, lower first, "
+        "the ends of the coincidence range"
+    ),
+    (
+        "phonometry.building.prediction.resilient_layers",
+        "double_floating_floor_resonances",
+    ): ("the two resonance frequencies of the two-mass system, lower first"),
+    ("phonometry.building.prediction.simplified_model", "flanking_element"): (
+        "the three flanking paths of one element, each a record that names its own path"
+    ),
+    (
+        "phonometry.electroacoustics.headphones",
+        "ProtectionVoltage.measurement_voltages_v",
+    ): ("the two voltages of 8.3.6.2 b), 1 dB below and 1 dB above, lower first"),
+    (
+        "phonometry.emission.free_field_qualification",
+        "FreeFieldCheck.conforming_range_hz",
+    ): _BOUNDS,
+    (
+        "phonometry.emission.reference_sound_source",
+        "ReferenceSourceCalibration.a_weighted_range_hz",
+    ): _BOUNDS,
+    (
+        "phonometry.emission.sound_power_plant",
+        "PlantMeasurementContour.mean_distance_limits_m",
+    ): _BOUNDS,
+    (
+        "phonometry.emission.sound_power_plant",
+        "PlantSoundPowerResult.uncertainty_db",
+    ): _BOUNDS,
+    ("phonometry.emission.sound_power_plant", "plant_mean_distance_limits_m"): _BOUNDS,
+    ("phonometry.emission.sound_power_plant", "plant_method_uncertainty"): _BOUNDS,
+    ("phonometry.environment.propagation.software_quality", "ranking_positions"): (
+        "the ranks of the 0,1- and the 0,9-quantile, lower first"
+    ),
+    (
+        "phonometry.environment.sources._statistical_pass_by",
+        "PassByRegression.speed_window_kmh",
+    ): _BOUNDS,
+    ("phonometry.filters.compliance", "class_limits"): _BOUNDS,
+    ("phonometry.filters.weighting", "linkwitz_riley"): (
+        "the low-pass and the high-pass output of one crossover, low band first"
+    ),
+    ("phonometry.hearing.hearing_protectors", "HMLRatingResult.reported"): (
+        "the H, M and L values in the order the label prints them"
+    ),
+    (
+        "phonometry.materials.absorbers.four_microphone",
+        "plane_wave_frequency_range_astm",
+    ): _BOUNDS,
+    (
+        "phonometry.materials.absorbers.impedance_tube",
+        "plane_wave_frequency_range",
+    ): _BOUNDS,
+    (
+        "phonometry.materials.surfaces.road_absorption",
+        "spot_microphone_spacing_bounds",
+    ): _BOUNDS,
+    (
+        "phonometry.metrology.data_qualification",
+        "StationarityTestResult.bounds",
+    ): _BOUNDS,
+    ("phonometry.metrology.data_qualification", "TrendTestResult.bounds"): _BOUNDS,
+    (
+        "phonometry.metrology.sound_calibrator",
+        "SoundCalibratorRequirement.acceptance_limits",
+    ): _BOUNDS,
+    ("phonometry.metrology.sound_level_meter", "PeakReference.limits_db"): _BOUNDS,
+    ("phonometry.metrology.sound_level_meter", "ToneburstReference.limits_db"): _BOUNDS,
+    (
+        "phonometry.noise_control._cabin_insulation",
+        "CabinUncertainty.increased_uncertainty_band_range_hz",
+    ): _BOUNDS,
+    (
+        "phonometry.noise_control._cabin_insulation",
+        "CabinUncertainty.stated_band_range_hz",
+    ): _BOUNDS,
+    (
+        "phonometry.noise_control.silencer_measurement",
+        "OperatingLine.valid_range",
+    ): _BOUNDS,
+    (
+        "phonometry.psychoacoustics.quality._tone_audibility",
+        "critical_band_corners",
+    ): _BOUNDS,
+    ("phonometry.room._impulse_response", "golay_pair"): (
+        "the two complementary sequences of a Golay pair, a first"
+    ),
+    ("phonometry.simulation.elastic_fdtd", "ElasticFDTDResult.size"): _TWO_AXES,
+    ("phonometry.simulation.fdtd", "FDTDResult.size"): _TWO_AXES,
+    (
+        "phonometry.vibration.human.instrumentation",
+        "weighting_tolerance_percent",
+    ): _BOUNDS,
+    (
+        "phonometry.vibration.immission.prediction",
+        "soil_building_frequency_guide",
+    ): _BOUNDS,
+    ("phonometry.vibration.immission.railway", "centered_interval"): _BOUNDS,
+    (
+        "phonometry.vibration.immission.vibration_meter",
+        "response_tolerance_percent",
+    ): _BOUNDS,
+    ("phonometry.vibration.machinery.evaluation", "ZoneBoundaries.as_tuple"): (
+        "the three zone boundaries in order, the conversion its name asks for"
+    ),
+    (
+        "phonometry.vibration.structural.building_response",
+        "BuildingFrequencyEstimate.bounds_hz",
+    ): _BOUNDS,
+    (
+        "phonometry.vibration.structural.building_response",
+        "empirical_frequency_bounds",
+    ): _BOUNDS,
+}
+
+
+def fixed_tuple_items(annotation: object) -> tuple[str, ...] | None:
+    """The items of a fixed-length tuple an annotation returns, or ``None``.
+
+    ``tuple[A, B]``, ``tuple[A, B] | None`` and ``Optional[tuple[A, B]]`` are
+    fixed-length tuples of two items; ``tuple[A, ...]`` is a sequence of like
+    items of any length and is not, and neither is a one-item ``tuple[A]``.
+    """
+    if annotation is inspect.Signature.empty:
+        return None
+    text = annotation if isinstance(annotation, str) else str(annotation)
+    try:
+        node = ast.parse(text.replace("typing.", ""), mode="eval").body
+    except SyntaxError:
+        return None
+    candidates: list[ast.expr] = [node]
+    while candidates:
+        current = candidates.pop()
+        if isinstance(current, ast.BinOp) and isinstance(current.op, ast.BitOr):
+            candidates.extend((current.left, current.right))
+            continue
+        if not isinstance(current, ast.Subscript):
+            continue
+        head = ast.unparse(current.value)
+        inner = current.slice
+        if head == "Optional":
+            candidates.append(inner)
+            continue
+        if head not in {"tuple", "Tuple"}:
+            continue
+        items = inner.elts if isinstance(inner, ast.Tuple) else [inner]
+        if any(isinstance(i, ast.Constant) and i.value is Ellipsis for i in items):
+            continue
+        if len(items) >= 2:  # noqa: PLR2004 - one item is not a bundle
+            return tuple(ast.unparse(i) for i in items)
+    return None
+
+
+def _returns_a_named_tuple(target: Callable[..., object], annotation: object) -> bool:
+    """Whether the annotation names a ``NamedTuple`` class the module defines."""
+    if not isinstance(annotation, str) or not annotation.isidentifier():
+        return False
+    named = getattr(target, "__globals__", {}).get(annotation)
+    return (
+        inspect.isclass(named)
+        and issubclass(named, tuple)
+        and hasattr(named, "_fields")
+    )
+
+
+def _public_property_targets() -> Iterator[tuple[PublicName, Callable[..., object]]]:
+    """Every public property of a published class, once, beside its getter.
+
+    The method resolution order is walked as :func:`_class_methods` walks it,
+    so a property a published class inherits from an unpublished base of this
+    package is read too, and keyed by the class that defines it.
+    """
+    seen: set[tuple[str, str]] = set()
+    for _, module in public_modules():
+        for exported in getattr(module, "__all__", ()):
+            obj = getattr(module, exported, None)
+            if not inspect.isclass(obj):
+                continue
+            for klass in inspect.getmro(obj):
+                home = getattr(klass, "__module__", "") or ""
+                if not home.startswith("phonometry"):
+                    continue
+                for attribute, getter in _properties(klass):
+                    qualname = f"{klass.__qualname__}.{attribute}"
+                    if (home, qualname) in seen:
+                        continue
+                    seen.add((home, qualname))
+                    yield (
+                        PublicName(home, qualname, attribute, _where(getter)),
+                        getter,
+                    )
+
+
+def tuple_returns() -> tuple[
+    list[tuple[PublicName, tuple[str, ...]]], list[tuple[str, str]]
+]:
+    """The public functions, methods and properties that answer a fixed tuple.
+
+    Each finding is the name and the items its annotation returns (a named
+    tuple reads as its class name); the second list is the exemptions nothing
+    needs any more.
+    """
+    found: list[tuple[PublicName, tuple[str, ...]]] = []
+    used: set[tuple[str, str]] = set()
+    targets = [*_public_function_targets(), *_public_property_targets()]
+    for entry, target in targets:
+        try:
+            returns = inspect.signature(target).return_annotation
+        except (TypeError, ValueError):
+            continue
+        items = fixed_tuple_items(returns)
+        if items is None and _returns_a_named_tuple(target, returns):
+            items = (str(returns),)
+        if items is None:
+            continue
+        key = (entry.module, entry.qualname)
+        if key in TUPLE_RETURN_EXEMPT:
+            used.add(key)
+            continue
+        found.append((entry, items))
+    return found, [k for k in TUPLE_RETURN_EXEMPT if k not in used]
+
+
+def _report_tuple_returns(found: list[tuple[PublicName, tuple[str, ...]]]) -> None:
+    """Print the tuple-return rule's findings."""
+    if not found:
+        return
+    print("::error::a public answer of several values is a tuple read by position")
+    print(f"{len(found)} function(s), method(s) or propert(ies) return one:")
+    for entry, items in sorted(found):
+        print(f"  {entry.qualname} -> ({', '.join(items)})  <- {entry.where}")
+    print(
+        "  -> return a frozen record with a field for each quantity; a tuple of "
+        "like items (the two ends of a range, lower first) goes in "
+        "TUPLE_RETURN_EXEMPT with the reason."
     )
 
 
@@ -2440,15 +2954,10 @@ def unit_named_functions() -> tuple[list[PublicName], list[tuple[str, str]]]:
 #: Names whose head noun says decibel and that keep ``_db``, keyed by
 #: ``(module, qualified name, name)``, with the reason. The suffix stays where
 #: the name holds something else under the word: the same quantity in a
-#: second form, or the uncertainty of the quantity it is named for.
+#: second form.
 _IN_TWO_FORMS = (
     "the same correction as the complex factor the record holds under the bare "
     "name, so the suffix says which of the two this returns"
-)
-_A_BUDGET_COMPONENT = (
-    "a component of an uncertainty budget named for the input it is the "
-    "uncertainty of (ISO 4869-3 Table B.1): it holds a standard uncertainty in "
-    "decibels, not the level"
 )
 
 
@@ -2465,13 +2974,30 @@ LEVEL_SUFFIX_EXEMPT: dict[tuple[str, str, str], str] = {
         "metrology.reciprocity_coupler",
         ("CouplerTransferImpedance", "capillary_correction_db"),
     ),
-    **_level_exempt(
-        _A_BUDGET_COMPONENT,
-        "hearing._earmuff_insertion_loss",
-        ("InsertionLossUncertaintyBudget", "open_level_db"),
-        ("InsertionLossUncertaintyBudget", "occluded_level_db"),
-    ),
 }
+
+
+def _every_written_name() -> tuple[PublicName, ...]:
+    """Every name a caller writes, once: :func:`public_names` and the methods.
+
+    The public functions and the methods of the public classes are added to
+    the exports, members, fields and parameters, so a method named with its
+    unit is read as well as a field.
+    """
+    entries = list(public_names())
+    known = {(e.module, e.qualname, e.name) for e in entries}
+    for entry in _public_functions():
+        owner, _, name = entry.qualname.rpartition(".")
+        if (entry.module, owner, name) not in known:
+            entries.append(PublicName(entry.module, owner, name, entry.where))
+    seen: set[tuple[str, str, str]] = set()
+    unique: list[PublicName] = []
+    for entry in entries:
+        key = (entry.module, entry.qualname, entry.name)
+        if key not in seen:
+            seen.add(key)
+            unique.append(entry)
+    return tuple(unique)
 
 
 def decibel_suffixed() -> tuple[
@@ -2488,18 +3014,8 @@ def decibel_suffixed() -> tuple[
     """
     found: list[tuple[PublicName, str]] = []
     used: set[tuple[str, str, str]] = set()
-    entries = list(public_names())
-    known = {(e.module, e.qualname, e.name) for e in entries}
-    for entry in _public_functions():
-        owner, _, name = entry.qualname.rpartition(".")
-        if (entry.module, owner, name) not in known:
-            entries.append(PublicName(entry.module, owner, name, entry.where))
-    seen: set[tuple[str, str, str]] = set()
-    for entry in entries:
+    for entry in _every_written_name():
         key = (entry.module, entry.qualname, entry.name)
-        if key in seen:
-            continue
-        seen.add(key)
         suffix = decibel_suffix(entry.name, entry.module)
         if suffix is None:
             continue
@@ -2508,6 +3024,244 @@ def decibel_suffixed() -> tuple[
             continue
         found.append((entry, suffix))
     return found, [k for k in LEVEL_SUFFIX_EXEMPT if k not in used]
+
+
+#: The head nouns of a quantity in decibels that is not a level: the name
+#: says what the number is and ``_db`` says its unit, as ``tolerance_db``,
+#: ``expanded_uncertainty_db`` or ``signal_to_noise_ratio_db`` do. A name in
+#: decibels whose head noun is none of these, nor a level or a level
+#: difference (:func:`decibel_head`), is made of qualifiers alone
+#: (``corrected_db``, ``floor_db``, ``threshold_db``) and says its unit
+#: instead of its quantity.
+DECIBEL_QUANTITY_NOUNS = frozenset(
+    {
+        # A spread, a statistic or a bound of a quantity in decibels.
+        "uncertainty",
+        "uncertainties",
+        "deviation",
+        "deviations",
+        "tolerance",
+        "tolerances",
+        "margin",
+        "margins",
+        "limit",
+        "limits",
+        "bound",
+        "bounds",
+        "range",
+        "ranges",
+        "span",
+        "spread",
+        "spreads",
+        "interval",
+        "intervals",
+        "window",
+        "variation",
+        "variations",
+        "stability",
+        "drift",
+        "fluctuation",
+        "repeatability",
+        "reproducibility",
+        "precision",
+        "resolution",
+        "headroom",
+        "exceedance",
+        "step",
+        "steps",
+        "offset",
+        "offsets",
+        "ripple",
+        "flatness",
+        # A change that names no level (a level change says decibel).
+        "change",
+        "drop",
+        "drops",
+        "increment",
+        "increments",
+        "shift",
+        # A ratio, a gain or a response, whose decibels are 10 or 20 lg of it.
+        "ratio",
+        "ratios",
+        "snr",
+        "sinad",
+        "gain",
+        "gains",
+        "magnitude",
+        "response",
+        "responses",
+        "weighting",
+        "weights",
+        "factor",
+        "directivity",
+        "depth",
+        "depths",
+        # A quantity the standard names in decibels by its own word. The
+        # rating is the amplitude-modulation rating of a wind turbine, a
+        # modulation depth (``ModulationPeriod.rating_db``); a single-number
+        # rating of ISO 717 is a level, written bare like ``rating``.
+        "term",
+        "terms",
+        "rating",
+        "ratings",
+        "spectrum",
+        "spectra",
+        "height",
+        "strength",
+        "divergence",
+        "audibility",
+        "slope",
+        "rate",
+    }
+)
+
+#: Names in decibels whose head noun is no quantity, keyed by
+#: ``(module, qualified name, name)``, with the reason. ``_db`` in them is
+#: not the unit of a number they hold.
+_A_FLAG = "a flag, True or False; the decibels are part of the condition it names"
+_PRINTED_SYMBOL = (
+    "the printed symbol of the weighting function of NMFS (2018) and Southall "
+    "et al. (2019), beside a, b, f1 and f2 in the same record"
+)
+_DB_HR = (
+    "DB HR is the Documento Básico HR of the Spanish building code, not a "
+    "unit; the function names the document it judges against"
+)
+QUALIFIER_ONLY_EXEMPT: dict[tuple[str, str, str], str] = {
+    ("phonometry.building.regulation.spain", "", "assess_db_hr"): _DB_HR,
+    ("phonometry.building.regulation.spain", "", "check_db_hr_requirement"): _DB_HR,
+    ("phonometry.electroacoustics.distortion", "thd_plus_noise", "as_db"): _A_FLAG,
+    (
+        "phonometry.emission.sound_power_high_frequency",
+        "HighFrequencySoundPowerResult",
+        "within_10_db_of_max",
+    ): _A_FLAG,
+    (
+        "phonometry.hearing.active_noise_reduction",
+        "ANRLinearityResult",
+        "linear_to_110_db",
+    ): _A_FLAG,
+    (
+        "phonometry.environment.assessment.wind_turbine_receptor",
+        "BackgroundCorrectionRegime",
+        "THREE_DB",
+    ): (
+        "a member of an enumeration that names the regime, the total within 3 dB "
+        "of the background (IEC TS 61400-11-2 Equation (6)); it holds no number"
+    ),
+    (
+        "phonometry.underwater.bioacoustics.weighting",
+        "WeightingParameters",
+        "c_db",
+    ): _PRINTED_SYMBOL,
+    (
+        "phonometry.underwater.bioacoustics.weighting",
+        "WeightingParameters",
+        "c_db_as_printed",
+    ): _PRINTED_SYMBOL,
+    (
+        "phonometry.underwater.bioacoustics.weighting",
+        "WeightingParameters",
+        "k_db",
+    ): _PRINTED_SYMBOL,
+}
+
+#: Words after which the rest of a name is a phrase that qualifies the head
+#: noun before them: ``uncertainties_without_correction_data_db`` is a set of
+#: uncertainties.
+_QUALIFYING_PHRASE = frozenset({*_PREPOSITIONS, "with", "without", "per"})
+
+
+def decibel_quantity_head(name: str, module: str = "") -> str | None:
+    """The head noun of a name in decibels when it names no quantity, else ``None``.
+
+    ``name`` is read up to its ``_db``. The head noun is the last word once
+    the words that qualify it from behind (:data:`_TRAILING_QUALIFIER`) and a
+    phrase after a preposition are set aside. A name whose first word is a
+    statistic symbol (``sigma_omc_db``) names its quantity by that symbol,
+    and a level or a level difference (:func:`decibel_head`) is the level
+    rule's to judge. ``None`` comes back also for a name that carries no
+    ``_db`` or carries it only as part of a rate (``_db_per_m``).
+    """
+    words = name.lower().split("_")
+    for position, word in enumerate(words):
+        if word != "db" or not position:
+            continue
+        if words[position - 1] == "per" or words[position + 1 : position + 2] == [
+            "per"
+        ]:
+            continue
+        stem = words[:position]
+        if stem[0] in _STATISTIC_SYMBOLS:
+            return None
+        cut = next(
+            (i for i, w in enumerate(stem) if i and w in _QUALIFYING_PHRASE), None
+        )
+        readings = [stem] if cut is None else [stem, stem[:cut]]
+        heads = [_names_a_decibel_quantity(reading, module) for reading in readings]
+        if any(head is None for head in heads):
+            return None
+        return heads[0]
+    return None
+
+
+def _names_a_decibel_quantity(stem: list[str], module: str) -> str | None:
+    """``None`` when ``stem`` ends in a quantity in decibels, else its last word."""
+    words = list(stem)
+    while len(words) > 1 and _TRAILING_QUALIFIER.fullmatch(words[-1]):
+        words.pop()
+    if decibel_head("_".join(words), module):
+        return None
+    if words[-1] in DECIBEL_QUANTITY_NOUNS or words[-1] in BOUND_DIFFERENCE_NOUNS:
+        return None
+    return words[-1]
+
+
+def qualifier_only_decibels() -> tuple[
+    list[tuple[PublicName, str]], list[tuple[str, str, str]]
+]:
+    """The public names in decibels that say their unit and not their quantity.
+
+    A name such as ``corrected_db`` or ``threshold_db`` is made of qualifiers
+    and the unit: it says the number is in decibels and never what the number
+    is. A level gets the head noun that says so (``corrected_levels``,
+    ``threshold_level``) and then loses its ``_db`` by the level rule; a
+    quantity that is not a level gets its own noun (``fixture_db`` is the
+    ``fixture_uncertainty_db`` of a budget). The names read are the ones
+    :func:`decibel_suffixed` reads.
+    """
+    found: list[tuple[PublicName, str]] = []
+    used: set[tuple[str, str, str]] = set()
+    for entry in _every_written_name():
+        head = decibel_quantity_head(entry.name, entry.module)
+        if head is None:
+            continue
+        key = (entry.module, entry.qualname, entry.name)
+        if key in QUALIFIER_ONLY_EXEMPT:
+            used.add(key)
+            continue
+        found.append((entry, head))
+    return found, [k for k in QUALIFIER_ONLY_EXEMPT if k not in used]
+
+
+def _report_qualifiers(qualified: list[tuple[PublicName, str]]) -> None:
+    """Print the findings of the rule on names made of qualifiers and ``_db``."""
+    if not qualified:
+        return
+    print("::error::a name in decibels says its unit and not its quantity")
+    print(f"{len(qualified)} name(s) end their words in no quantity before _db:")
+    for entry, head in sorted(qualified):
+        dotted = ".".join(p for p in (entry.qualname, entry.name) if p)
+        print(f"  {dotted} (last word {head!r})  <- {entry.where}")
+    print(
+        "  -> name the quantity: a level takes the noun that says so and loses "
+        "its _db (corrected_level, threshold_level), a level difference its "
+        "own (floor_level_difference), and any other quantity keeps _db after "
+        "its noun (fixture_uncertainty_db, lower_tolerance_db); the nouns read "
+        "as a quantity are DECIBEL_QUANTITY_NOUNS. A name whose _db is not the "
+        "unit of a number it holds goes in QUALIFIER_ONLY_EXEMPT with its "
+        "reason."
+    )
 
 
 def _report_levels(levels: list[tuple[PublicName, str]]) -> None:
@@ -2648,7 +3402,10 @@ def main() -> int:
     pairs, stale_pairs = bare_and_suffixed(parameters)
     functions, stale_functions = unit_named_functions()
     levels, stale_levels = decibel_suffixed()
-    axes, stale_axes = positional_frequency_axes()
+    qualified, stale_qualified = qualifier_only_decibels()
+    axes, stale_axes = positional_function_axes()
+    tuples, stale_tuples = tuple_returns()
+    records, stale_records = positional_record_axes()
     stale_keys = [
         *stale,
         *stale_spellings,
@@ -2658,7 +3415,10 @@ def main() -> int:
         *stale_pairs,
         *stale_functions,
         *stale_levels,
+        *stale_qualified,
         *stale_axes,
+        *stale_tuples,
+        *stale_records,
     ]
     if not (
         unnamed
@@ -2670,14 +3430,20 @@ def main() -> int:
         or pairs
         or functions
         or levels
+        or qualified
         or axes
+        or tuples
+        or records
         or stale_keys
     ):
         print(
             "Every public parameter and constant under the rule names its unit, "
             "in the one spelling the tree uses, and asks for it by name; every "
-            "condition and every frequency axis beside its values is written by "
-            "name; every public function is named for what it returns."
+            "condition and every frequency or wavelength axis beside its values "
+            "is written by name, in a function and in a record a caller builds; "
+            "every name in decibels says the quantity it holds; every "
+            "public function is named for what it returns, and answers several "
+            "quantities as a record."
         )
         return 0
     if unnamed:
@@ -2708,7 +3474,10 @@ def main() -> int:
     _report_closing(rates, pressures, pairs)
     _report_functions(functions)
     _report_levels(levels)
-    _report_frequency_axes(axes)
+    _report_qualifiers(qualified)
+    _report_function_axes(axes)
+    _report_tuple_returns(tuples)
+    _report_record_axes(records)
     for key in stale_keys:
         print(
             f"::error::an exemption at the top of scripts/check_parameter_units.py "

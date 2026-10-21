@@ -85,7 +85,11 @@ TABLE_6_1_TORTUOSITY = _GLASS_WOOL.tortuosity
 TABLE_6_1_FRAME_DENSITY = _GLASS_WOOL.frame_density_kg_m3
 TABLE_6_1_RESISTIVITY = _GLASS_WOOL.flow_resistivity_pa_s_m2
 TABLE_6_1_POROSITY = _GLASS_WOOL.porosity
-TABLE_6_1_SHEAR_MODULUS, TABLE_6_1_POISSON_RATIO = _GLASS_WOOL.frame_constants()
+frame = _GLASS_WOOL.frame_constants()
+TABLE_6_1_SHEAR_MODULUS, TABLE_6_1_POISSON_RATIO = (
+    frame.shear_modulus_pa,
+    frame.poisson_ratio,
+)
 
 TABLE_11_2 = {
     "porosity": _SOFT_FIBROUS.porosity,

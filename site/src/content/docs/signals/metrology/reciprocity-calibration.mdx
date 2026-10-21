@@ -382,12 +382,12 @@ pu = metrology.coupler_parameter_uncertainty(
     ),
     **conditions,
 )
-print(pu.components_db["capillary_tube_dimensions"][[1, 16]].round(4))   # [0.0086 0.0002]
+print(pu.component_uncertainties_db["capillary_tube_dimensions"][[1, 16]].round(4))   # [0.0086 0.0002]
 
 x = f / 10000
 b = metrology.reciprocity_uncertainty_budget(
     {
-        **pu.components_db,
+        **pu.component_uncertainties_db,
         "series_impedance": 0.002, "voltage_ratio": 0.003, "cross_talk": 0.001 + 0.004 * x**2,
         "polarizing_voltage": 0.0025, "radial_wave_motion": 0.03 * x**2,
         "heat_conduction_theory": 0.002, "repeatability": 0.004, "rounding": 0.0006,
@@ -407,7 +407,7 @@ pf = metrology.free_field_parameter_uncertainty(
 xf = ff / 40000
 bf = metrology.reciprocity_uncertainty_budget(
     {
-        **pf.components_db,
+        **pf.component_uncertainties_db,
         "series_impedance": 0.002, "voltage_ratio": 0.003, "cross_talk": 0.002 + 0.01 * xf,
         "noise": 0.005, "reflections": 0.01 + 0.02 * xf, "polarizing_voltage": 0.0025, "repeatability": 0.01,
     },

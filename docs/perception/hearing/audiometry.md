@@ -46,7 +46,7 @@ print(bone.lowest_measurable_hearing_level)                             # 6.0
 by side, its cells are ISO 8253-1 Table 4 less 3 dB. For narrow-band noise as
 the test signal, footnote b asks for lower limits and prints no figure, so the
 check applies the table as printed. A measurement that leaves bands out does not
-pass, and `noise_floor_db=` flags the bands within 6 dB of the meter's own floor
+pass, and `noise_floor_levels=` flags the bands within 6 dB of the meter's own floor
 (11.1).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_test_room_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/audiometry_test_room.svg" alt="The same booth's ambient spectrum against the air-conduction limits from 125 Hz: with supra-aural earphones it exceeds them from 63 Hz to 160 Hz, marked with crosses; with ER-3A insert earphones the limits are raised by the extra attenuation and the room qualifies" width="92%"></picture>
@@ -73,12 +73,12 @@ series = hearing.ascending_method_threshold(
     responses=[1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1],
     familiarization_level=40.0,
 )
-print(series.ascent_levels, series.threshold_db)   # [25. 25. 20. 25.] 25.0
-print(hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35]).threshold_db)  # 35.0
+print(series.ascent_levels, series.threshold_level)   # [25. 25. 20. 25.] 25.0
+print(hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35]).threshold_level)  # 35.0
 tracing = hearing.automatic_audiometry_threshold(
     [38, 22, 31, 21, 32, 20, 30, 29, 31, 19, 30, 20, 31, 21]
 )
-print(tracing.mean_db, tracing.threshold_db)          # 25.75 26.0
+print(tracing.mean_level, tracing.threshold_level)          # 25.75 26.0
 ```
 
 Each rule carries its clause's reliability test: a spread of more than 10 dB
@@ -96,8 +96,8 @@ and about 10 dB lower for the forehead
 ```python
 print(hearing.check_retest_agreement(25.0, 35.0).retest_further_frequencies)  # True
 cautions = hearing.audiogram_cautions(
-    [250, 500, 1000, 2000], air_conduction_db=[20, 25, 30, 45],
-    bone_conduction_db=[40, 20, 25, 40],
+    [250, 500, 1000, 2000], air_conduction_threshold_levels=[20, 25, 30, 45],
+    bone_conduction_threshold_levels=[40, 20, 25, 40],
 )
 print(cautions.cross_hearing, cautions.vibrotactile)
 # [False False False  True] [ True False False False]
@@ -113,8 +113,8 @@ conduction below 4 kHz without masking gives the example of Table A.2:
 
 ```python
 budget = hearing.audiometric_uncertainty(1000.0)
-print(np.round(budget.components_db[:4], 1))                   # [2.5 2.3 2.9 2. ]
-print(round(budget.combined_db, 1), round(budget.expanded_db))  # 4.9 10
+print(np.round(budget.standard_uncertainties_db[:4], 1))                   # [2.5 2.3 2.9 2. ]
+print(round(budget.combined_uncertainty_db, 1), round(budget.expanded_uncertainty_db))  # 4.9 10
 ```
 
 ## The sound field (ISO 8253-2)

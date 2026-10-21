@@ -136,6 +136,8 @@ def comb_filter_response(
         though floating-point cancellation immediately beside a tooth can
         return values above 1 by a few parts in 1e9).
     :raises ValueError: If the parameters are invalid.
+    :raises TypeError: if ``n_averages`` is a flag, a text or an array where a count
+        goes.
     """
     period_v = _positive(period_s, "period_s")
     require_scalar(n_averages, "n_averages")
@@ -263,6 +265,7 @@ class SynchronousAverageResult(OwnsArrays):
             an axis it should not, the waveform is a Signal at a rate other
             than :attr:`fs`, or the period grid is not ``round(fs * T)``
             samples long.
+        :raises TypeError: if ``samples_per_period`` is not a single number.
         """
         require_scalar(self.samples_per_period, "samples_per_period")
         require_ranks(
@@ -426,6 +429,8 @@ def time_synchronous_average(
         returned comb-filter response (default 8).
     :return: A :class:`SynchronousAverageResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``n_averages`` or ``n_harmonics`` is a flag, a text or an
+        array where a count goes.
     """
     xa = _validate_1d_finite(x, "x")
     fs_v = _positive(resolve_fs(x, fs), "fs")

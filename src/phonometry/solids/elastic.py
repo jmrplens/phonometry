@@ -106,6 +106,8 @@ def beam_longitudinal_speed(youngs_modulus_pa: float, *, density_kg_m3: float) -
     :param density_kg_m3: Density ``rho``, in kg/m3 (> 0).
     :return: The wave speed, in m/s.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``density_kg_m3`` or ``youngs_modulus_pa`` is not a single
+        number.
     """
     modulus = require_positive(youngs_modulus_pa, "youngs_modulus_pa")
     density = require_positive(density_kg_m3, "density_kg_m3")
@@ -129,6 +131,8 @@ def plate_longitudinal_speed(
     :param poisson_ratio: Poisson's ratio ``nu``, between -1 and 1.
     :return: The wave speed, in m/s.
     :raises ValueError: for a non-positive input or a ratio out of range.
+    :raises TypeError: if ``density_kg_m3``, ``poisson_ratio`` or ``youngs_modulus_pa``
+        is not a single number.
     """
     modulus = require_positive(youngs_modulus_pa, "youngs_modulus_pa")
     density = require_positive(density_kg_m3, "density_kg_m3")
@@ -151,6 +155,8 @@ def bulk_longitudinal_speed(
     :param poisson_ratio: Poisson's ratio ``nu``, between -1 and 0.5.
     :return: The wave speed, in m/s.
     :raises ValueError: for a non-positive input or a ratio out of range.
+    :raises TypeError: if ``density_kg_m3``, ``poisson_ratio`` or ``youngs_modulus_pa``
+        is not a single number.
     """
     modulus = require_positive(youngs_modulus_pa, "youngs_modulus_pa")
     density = require_positive(density_kg_m3, "density_kg_m3")
@@ -170,6 +176,8 @@ def youngs_modulus_from_beam_speed(
     :param density_kg_m3: Density ``rho``, in kg/m3 (> 0).
     :return: Young's modulus ``E``, in pascals.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``density_kg_m3`` or ``longitudinal_speed_m_s`` is not a
+        single number.
     """
     speed = require_positive(longitudinal_speed_m_s, "longitudinal_speed_m_s")
     density = require_positive(density_kg_m3, "density_kg_m3")
@@ -190,6 +198,8 @@ def youngs_modulus_from_plate_speed(
     :param poisson_ratio: Poisson's ratio ``nu``, between -1 and 1.
     :return: Young's modulus ``E``, in pascals.
     :raises ValueError: for a non-positive input or a ratio out of range.
+    :raises TypeError: if ``density_kg_m3``, ``longitudinal_speed_m_s`` or
+        ``poisson_ratio`` is not a single number.
     """
     speed = require_positive(longitudinal_speed_m_s, "longitudinal_speed_m_s")
     density = require_positive(density_kg_m3, "density_kg_m3")
@@ -209,6 +219,8 @@ def youngs_modulus_from_bulk_speed(
     :param poisson_ratio: Poisson's ratio ``nu``, between -1 and 0.5.
     :return: Young's modulus ``E``, in pascals.
     :raises ValueError: for a non-positive input or a ratio out of range.
+    :raises TypeError: if ``density_kg_m3``, ``longitudinal_speed_m_s`` or
+        ``poisson_ratio`` is not a single number.
     """
     speed = require_positive(longitudinal_speed_m_s, "longitudinal_speed_m_s")
     density = require_positive(density_kg_m3, "density_kg_m3")
@@ -246,6 +258,8 @@ def thickness_critical_frequency_product(
     :param speed_of_sound: Speed of sound in air ``c0``, in m/s (> 0).
     :return: The product ``h f_c``, in Hz m.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``plate_speed_m_s`` or ``speed_of_sound`` is not a single
+        number.
     """
     speed = require_positive(plate_speed_m_s, "plate_speed_m_s")
     air = require_positive(speed_of_sound, "speed_of_sound")

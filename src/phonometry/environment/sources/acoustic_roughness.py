@@ -112,6 +112,7 @@ __all__ = [
     "remove_roughness_spikes",
     "roughness_filter_bank",
     "roughness_measurement_lines",
+    "RoughnessMeasurementLines",
 ]
 
 #: 3.3: the reference roughness :math:`r_0` of the acoustic roughness level,
@@ -319,6 +320,8 @@ def remove_roughness_spikes(
     :return: A new array, the record with the spikes removed, in micrometres.
     :raises ValueError: For a record that is not a finite one-dimensional
         array of at least three samples, or a spacing that is not positive.
+    :raises TypeError: if ``sample_spacing_m`` is not a single number, or
+        ``roughness_um`` holds a text or a value that is not a real number.
     """
     record, spacing = _record(roughness_um, sample_spacing_m)
     processed = record.copy()
@@ -359,6 +362,8 @@ def curvature_processed_roughness(
         0,375 m of 7.3 by default.
     :return: A new array :math:`r'(x)`, in micrometres.
     :raises ValueError: For an invalid record, spacing or radius.
+    :raises TypeError: if ``curve_radius_m`` or ``sample_spacing_m`` is not a single
+        number, or ``roughness_um`` holds a text or a value that is not a real number.
     """
     record, spacing = _record(roughness_um, sample_spacing_m)
     radius_um = require_positive(curve_radius_m, "curve_radius_m") * 1.0e6
@@ -424,6 +429,9 @@ def redistributed_band_energies(
     :return: The energy of each target band.
     :raises ValueError: For edges that are not finite, not increasing within
         a band or not one per band, or a negative energy.
+    :raises TypeError: if ``energies``, ``source_lower``, ``source_upper``,
+        ``target_lower`` or ``target_upper`` holds a text or a value that is not a real
+        number.
     """
     s_lo = require_finite_array(source_lower, "source_lower")
     s_hi = require_finite_array(source_upper, "source_upper")
@@ -449,7 +457,7 @@ def redistributed_band_energies(
     return np.asarray(energy @ share, dtype=np.float64)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class AcousticRoughnessSpectrum(OwnsArrays):
     r"""A one-third octave band spectrum of acoustic rail roughness (EN 15610).
 
@@ -487,6 +495,8 @@ class AcousticRoughnessSpectrum(OwnsArrays):
             that are not finite, arrays of different lengths, bands that are
             not in decreasing order of wavelength, or a method that is
             neither ``"A"`` nor ``"B"``.
+        :raises TypeError: if ``method`` is not a text, or ``levels`` or
+            ``wavelengths_m`` holds a text or a value that is not a real number.
         """
         from ..._internal.validation import require_positive_array
 
@@ -516,6 +526,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
         :return: The level of that band.
         :raises ValueError: If the spectrum has no band at that wavelength: a
             number outside what the result covers, not a missing key.
+        :raises TypeError: if ``wavelength_m`` is not a single number.
         """
         band = _band_of_wavelength(require_positive(wavelength_m, "wavelength_m"))
         try:
@@ -623,6 +634,8 @@ def acoustic_roughness_spectrum(
         and the number of segments averaged.
     :raises ValueError: For a sampling interval above 1 mm, a segment shorter
         than 1 m, or a record shorter than one segment.
+    :raises TypeError: if ``sample_spacing_m`` or ``segment_length_m`` is not a single
+        number, or ``roughness_um`` holds a text or a value that is not a real number.
     """
     record, spacing = _record(roughness_um, sample_spacing_m)
     _require_sampling_interval(spacing)
@@ -730,6 +743,8 @@ def roughness_filter_bank(
     :raises ValueError: For a sampling interval above 1 mm or that is not a
         whole number of samples per metre, or a longest wavelength that leaves
         no band above the Nyquist band.
+    :raises TypeError: if ``longest_wavelength_m`` or ``sample_spacing_m`` is not a
+        single number.
     """
     spacing = require_positive(sample_spacing_m, "sample_spacing_m")
     _require_sampling_interval(spacing)
@@ -834,6 +849,8 @@ def filtered_roughness_spectrum(
     :raises ValueError: For a sampling interval above 1 mm or that is not a
         whole number of samples per metre, or a record shorter than 5 m
         (7.4.3 NOTE 1: 1 m left once 2 m are discarded at either end).
+    :raises TypeError: if ``sample_spacing_m`` is not a single number, or
+        ``roughness_um`` holds a text or a value that is not a real number.
     """
     record, spacing = _record(roughness_um, sample_spacing_m)
     _require_sampling_interval(spacing)
@@ -946,7 +963,24 @@ def average_roughness_spectra(
     )
 
 
-def roughness_measurement_lines(reference_width_mm: float) -> tuple[int, float]:
+@dataclass(frozen=True)
+class RoughnessMeasurementLines(OwnsArrays):
+    """The parallel lines a rail's reference surface is measured on (6.4.3).
+
+    What :func:`roughness_measurement_lines` returns: the count and the
+    spacing, named, where an ``(n, spacing)`` tuple used to be unpacked by
+    position.
+
+    :ivar n_lines: The number of lines, 1 or 3.
+    :ivar spacing_mm: The distance between neighbouring lines, in millimetres
+        (0 for a single line).
+    """
+
+    n_lines: int
+    spacing_mm: float
+
+
+def roughness_measurement_lines(reference_width_mm: float) -> RoughnessMeasurementLines:
     r"""How many parallel lines a rail's reference surface is measured on (6.4.3).
 
     Up to 20 mm wide, one line on the centre line of the reference surface;
@@ -957,13 +991,15 @@ def roughness_measurement_lines(reference_width_mm: float) -> tuple[int, float]:
     :param reference_width_mm: The width :math:`w_\mathrm{ref}` of the
         reference surface, in millimetres.
     :return: The number of lines and the distance between neighbouring lines,
-        in millimetres (0 for a single line).
+        in millimetres (0 for a single line), as a
+        :class:`RoughnessMeasurementLines`.
     :raises ValueError: For a width that is not positive.
+    :raises TypeError: if ``reference_width_mm`` is not a single number.
     """
     width = require_positive(reference_width_mm, "reference_width_mm")
     narrow, wide = _LINE_WIDTHS_MM
     if width <= narrow:
-        return 1, 0.0
+        return RoughnessMeasurementLines(n_lines=1, spacing_mm=0.0)
     if width <= wide:
-        return 3, 5.0
-    return 3, 10.0
+        return RoughnessMeasurementLines(n_lines=3, spacing_mm=5.0)
+    return RoughnessMeasurementLines(n_lines=3, spacing_mm=10.0)

@@ -104,6 +104,7 @@ Compare one measured peak velocity with its guideline value.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the velocity is negative or not finite, or for any reason [`guideline_velocity`](/phonometry/reference/api/vibration/building-damage/#guideline_velocity) raises. |
+| TypeError | if `velocity_mm_s` is not a single number. |
 
 ## bending_stress
 
@@ -150,6 +151,7 @@ cases, so it moves the answer by less than a third.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a material property, the load ratio or the mode factor is not positive and finite, or a velocity is negative. |
+| TypeError | if `density`, `dynamic_modulus_pa`, `load_ratio` or `mode_factor` is not a single number. |
 
 ## BENDING_STRESS_CONSTANT
 
@@ -283,7 +285,7 @@ FOUNDATION_FREQUENCIES_HZ = (1.0, 10.0, 50.0, 100.0)
 foundation_guideline_curve(
     building_class: Literal['commercial', 'residential', 'sensitive'],
     frequency: ArrayLike | None = None,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]
+) -> GuidelineCurve
 ```
 
 Bild 1 as two arrays: frequency and guideline velocity.
@@ -298,13 +300,14 @@ draws; pass *frequency* to sample the same polyline elsewhere.
 | `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). |
 | `frequency` | Frequency or frequencies to sample at, in hertz, or `None` for the four corners of Table 1. |
 
-**Returns:** `(frequency_hz, guideline_mm_s)`.
+**Returns:** The frequencies and the guideline velocities, as a [`GuidelineCurve`](/phonometry/reference/api/vibration/building-damage/#guidelinecurve).
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the class is not one of the three, or a frequency is not positive and finite. |
+| TypeError | if `building_class` is not a text. |
 
 ## guideline_velocity
 
@@ -345,6 +348,29 @@ number for all frequencies, and *frequency* is then not needed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a name is not one of its choices, if the short-term foundation case is asked for without a frequency, if a frequency is given for a case that does not read one, if a frequency is not positive and finite, or if *massive_structure* is asked for outside row 1 of Table 1. |
+| TypeError | if `building_class`, `duration` or `location` is not a text. |
+
+## GuidelineCurve
+
+```python
+GuidelineCurve(
+    frequencies: NDArray[np.float64],
+    velocities_mm_s: NDArray[np.float64],
+)
+```
+
+A guideline velocity polyline of DIN 4150-3 Bild 1, sampled.
+
+What [`foundation_guideline_curve`](/phonometry/reference/api/vibration/building-damage/#foundation_guideline_curve) returns: the frequencies and the
+guideline velocities, named, where a `(frequency_hz, guideline_mm_s)`
+tuple used to be unpacked by position.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `frequencies` | The frequencies, in hertz. |
+| `velocities_mm_s` | The guideline velocity at each, in mm/s. |
 
 ## LONG_TERM_TOP_FLOOR_MM_S
 
@@ -392,6 +418,7 @@ halves the table, which is what 6.3 allows without further evidence.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a name is not one of its choices. |
+| TypeError | if `duration` or `material` is not a text. |
 
 ## PIPELINE_LONG_TERM_FACTOR
 
@@ -478,7 +505,7 @@ at which the topmost floor plane will answer.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If the storey count is not a number. |
+| TypeError | If `n_stories` is a bool, a text or an array rather than a number. |
 | ValueError | If the storey count is not a whole number of at least 1. |
 
 **Warns**

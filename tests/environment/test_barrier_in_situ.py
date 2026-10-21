@@ -499,10 +499,10 @@ def test_the_cordero_campaign_reports_its_two_insertion_losses() -> None:
     for case, levels in oracle.CORDERO_TABLA_1_DBA.items():
         reference_before, reference_after, receiver_before, receiver_after = levels
         results[case] = environment.measured_insertion_loss_direct(
-            reference_before_db=[reference_before],
-            reference_after_db=[reference_after],
-            receiver_before_db=[receiver_before],
-            receiver_after_db=[receiver_after],
+            reference_levels_before=[reference_before],
+            reference_levels_after=[reference_after],
+            receiver_levels_before=[receiver_before],
+            receiver_levels_after=[receiver_after],
         )
     for case, reported in oracle.CORDERO_TABLA_2_DBA.items():
         assert results[case].rounded.tolist() == [reported]
@@ -520,10 +520,10 @@ def test_the_lindeman_direct_runs_reproduce_their_printed_losses() -> None:
         *oracle.LINDEMAN_TABLE_8_DBA.values(), strict=True
     )
     res = environment.measured_insertion_loss_direct(
-        reference_before_db=list(reference_before),
-        reference_after_db=list(reference_after),
-        receiver_before_db=list(receiver_before),
-        receiver_after_db=list(receiver_after),
+        reference_levels_before=list(reference_before),
+        reference_levels_after=list(reference_after),
+        receiver_levels_before=list(receiver_before),
+        receiver_levels_after=list(receiver_after),
     )
     assert res.insertion_loss == pytest.approx(
         list(oracle.LINDEMAN_TABLE_8_INSERTION_LOSS_DBA.values()),
@@ -542,10 +542,10 @@ def test_the_lindeman_first_run_is_a_defect_of_the_source() -> None:
         oracle.LINDEMAN_TABLE_8_RUN_1_DBA
     )
     res = environment.measured_insertion_loss_direct(
-        reference_before_db=[reference_before],
-        reference_after_db=[reference_after],
-        receiver_before_db=[receiver_before],
-        receiver_after_db=[receiver_after],
+        reference_levels_before=[reference_before],
+        reference_levels_after=[reference_after],
+        receiver_levels_before=[receiver_before],
+        receiver_levels_after=[receiver_after],
     )
     assert float(res.insertion_loss[0]) == pytest.approx(5.8, abs=PRINTED_TENTH_DB)
     assert float(res.insertion_loss[0]) != pytest.approx(
@@ -560,10 +560,10 @@ def test_the_lindeman_indirect_runs_and_their_mean() -> None:
     # of 8.2.2 rather than the facade branch.
     levels = oracle.LINDEMAN_TABLE_13_DBA
     res = environment.measured_insertion_loss_indirect(
-        reference_before_db=list(levels["reference before"]),
-        reference_after_db=list(levels["reference after"]),
-        receiver_before_db=list(levels["receiver before"]),
-        receiver_after_db=list(levels["receiver after"]),
+        reference_levels_before=list(levels["reference before"]),
+        reference_levels_after=list(levels["reference after"]),
+        receiver_levels_before=list(levels["receiver before"]),
+        receiver_levels_after=list(levels["receiver after"]),
     )
     assert res.insertion_loss == pytest.approx(
         list(oracle.LINDEMAN_TABLE_13_INSERTION_LOSS_DBA), abs=PRINTED_TENTH_DB
@@ -583,13 +583,13 @@ def test_the_lindeman_fourth_run_takes_its_level_from_the_table_above() -> None:
     levels = oracle.LINDEMAN_TABLE_13_DBA
     run = 3
     res = environment.measured_insertion_loss_indirect(
-        reference_before_db=[levels["reference before"][run]] * 2,
-        reference_after_db=[levels["reference after"][run]] * 2,
-        receiver_before_db=[
+        reference_levels_before=[levels["reference before"][run]] * 2,
+        reference_levels_after=[levels["reference after"][run]] * 2,
+        receiver_levels_before=[
             levels["receiver before"][run],
             oracle.LINDEMAN_TABLE_13_RUN_4_MISPRINT_DBA,
         ],
-        receiver_after_db=[levels["receiver after"][run]] * 2,
+        receiver_levels_after=[levels["receiver after"][run]] * 2,
     )
     from_table_twelve, from_the_misprint = res.insertion_loss.tolist()
     assert from_table_twelve == pytest.approx(
@@ -611,10 +611,10 @@ def test_the_fhwa_worked_example_reaches_both_of_its_printed_answers() -> None:
     edge_db = oracle.FHWA_6_6_3_EDGE_DB
     for receiver_after, printed in oracle.FHWA_6_6_3_PRINTED_DB.values():
         res = environment.measured_insertion_loss_direct(
-            reference_before_db=[oracle.FHWA_6_6_3_REFERENCE_BEFORE_DB],
-            reference_after_db=[oracle.FHWA_6_6_3_REFERENCE_AFTER_DB],
-            receiver_before_db=[oracle.FHWA_6_6_3_RECEIVER_BEFORE_DB],
-            receiver_after_db=[receiver_after],
+            reference_levels_before=[oracle.FHWA_6_6_3_REFERENCE_BEFORE_DB],
+            reference_levels_after=[oracle.FHWA_6_6_3_REFERENCE_AFTER_DB],
+            receiver_levels_before=[oracle.FHWA_6_6_3_RECEIVER_BEFORE_DB],
+            receiver_levels_after=[receiver_after],
         )
         assert float(res.insertion_loss[0]) + edge_db == pytest.approx(
             printed, abs=PRINTED_TENTH_DB
@@ -700,10 +700,10 @@ def test_the_jagniatinskis_campaign_uses_only_the_printed_difference() -> None:
         for offset in (0.0, 6.0, -13.25):
             reference_before = reference_after + offset
             res = environment.measured_insertion_loss_direct(
-                reference_before_db=[reference_before],
-                reference_after_db=[reference_after],
-                receiver_before_db=[reference_before + correction],
-                receiver_after_db=[receiver_after],
+                reference_levels_before=[reference_before],
+                reference_levels_after=[reference_after],
+                receiver_levels_before=[reference_before + correction],
+                receiver_levels_after=[receiver_after],
             )
             assert float(res.insertion_loss[0]) == pytest.approx(
                 insertion_loss, abs=PRINTED_TENTH_DB

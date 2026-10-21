@@ -177,6 +177,12 @@ STI itself stays within ~0.001.
 
 **Returns:** [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) with `mtf` of shape (7, 14).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs` is not a single number. |
+
 ## stipa
 
 ```python
@@ -239,6 +245,12 @@ biased low (an ideal loopback gives STI ~0.956 at 5 s vs ~0.998 at 18 s).
 
 **Returns:** [`STIResult`](/phonometry/reference/api/speech/sti/#stiresult) with `mtf` of shape (7, 2).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `fs` is not a single number. |
+
 ## stipa_signal
 
 ```python
@@ -270,6 +282,12 @@ in amplitude through its square root (Annex B).
 | `seed` | Seed for the pink-noise generator (None: random). |
 
 **Returns:** Test signal, 1D array of `round(duration_s * fs)` samples.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `duration_s` or `fs` is not a single number. |
 
 ## STIResult
 

@@ -118,6 +118,8 @@ def open_microphone_correction(n_open_microphones: int) -> float:
     :param n_open_microphones: Number :math:`N_\mathrm{m}` of microphones open at
         once (>= 1).
     :return: The correction :math:`\Delta L_\text{nom}`, dB.
+    :raises TypeError: if ``n_open_microphones`` is a flag, a text or an array where a
+        count goes.
     """
     require_scalar(n_open_microphones, "n_open_microphones")
     n = require_count(n_open_microphones, "n_open_microphones", at_least=None)
@@ -148,6 +150,9 @@ def feedback_loop_gain(
         dB (0 for an omnidirectional microphone, about
         :data:`CARDIOID_RELATIVE_DIRECTIVITY_DB` for a cardioid).
     :return: The feedback-loop gain :math:`G_\mathrm{S}`, dB.
+    :raises TypeError: if ``level_loudspeaker_at_listener``,
+        ``level_loudspeaker_at_microphone`` or ``microphone_directivity`` is not a
+        single number.
     """
     require_scalar(level_loudspeaker_at_listener, "level_loudspeaker_at_listener")
     require_scalar(level_loudspeaker_at_microphone, "level_loudspeaker_at_microphone")
@@ -277,6 +282,10 @@ def feedback_stability(
     :param stability_margin: Required margin below oscillation, dB (default
         :data:`DEFAULT_STABILITY_MARGIN_DB`, Long's equalised-system value).
     :return: A :class:`FeedbackStabilityResult`.
+    :raises TypeError: if ``level_loudspeaker_at_listener``,
+        ``level_loudspeaker_at_microphone``, ``microphone_directivity``,
+        ``open_loop_gain`` or ``stability_margin`` is not a single number, or
+        ``n_open_microphones`` is a flag, a text or an array where a count goes.
     """
     require_scalar(level_loudspeaker_at_listener, "level_loudspeaker_at_listener")
     require_scalar(level_loudspeaker_at_microphone, "level_loudspeaker_at_microphone")

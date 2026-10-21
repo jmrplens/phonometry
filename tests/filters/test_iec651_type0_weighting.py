@@ -89,7 +89,8 @@ def test_type0_differs_from_ansi_type0_at_the_three_lowest_rows() -> None:
 
 def test_class_limits_return_the_type0_column() -> None:
     """The published Type 0 cells, at the rows the two editions disagree on."""
-    freqs, lower, upper = filters.weighting_class_limits(0, edition="1979")
+    limits = filters.weighting_class_limits(0, edition="1979")
+    freqs, lower, upper = limits.frequencies, limits.lower, limits.upper
     assert len(freqs) == 34
     cells = {
         float(f): (float(u), float(lo))

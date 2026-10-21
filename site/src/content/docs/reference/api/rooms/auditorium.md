@@ -280,6 +280,7 @@ of `ir`, band by band.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `weighting` is not one of [`LATERAL_WEIGHTINGS`](/phonometry/reference/api/rooms/auditorium/#lateral_weightings), if a response is not one-dimensional or is silent, if the two responses do not split into the same number of bands or are of different lengths, or if they are too short for the 80 ms window. |
+| TypeError | if `weighting` is not a text. |
 
 ## EARLY_LATERAL_WINDOW_S
 
@@ -340,6 +341,7 @@ its docstring says what the printed step does and does not determine.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `distance` is not a positive, finite length. |
+| TypeError | if `distance` is not a single number. |
 
 ## gliding_directivity_deviation
 
@@ -377,6 +379,7 @@ deviations.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the bearings do not divide the arc a whole number of times, or there are too few of them to make one. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## IACC_EARLY_WINDOW_S
 
@@ -547,6 +550,7 @@ octaves, in that order.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If four values are not given, or they are not finite. |
+| TypeError | if `levels` holds a text or a value that is not a real number. |
 
 ## LATE_LATERAL_AVERAGE_BANDS_HZ
 
@@ -1207,6 +1211,7 @@ The Table 1 limit for one octave band, in dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If Table 1 has no row for that band. It prints six, 125 Hz to 4 kHz, and a survey in the 63 Hz or 8 kHz octave has no printed limit to be held to rather than the nearest one. |
+| TypeError | if `center` is not a single number. |
 
 ## STAGE_DIRECT_WINDOW_S
 

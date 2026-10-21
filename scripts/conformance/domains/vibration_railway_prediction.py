@@ -112,7 +112,7 @@ def _chk_table_c1(band_hz: float) -> Outcome:
     emission, ground, floor, printed = _TABLE_C1[band_hz]
     computed = float(
         ph.vibration.predict_floor_spectrum(
-            [emission], ground_db=ground, floor_db=floor
+            [emission], ground_level_difference=ground, floor_level_difference=floor
         )[0]
     )
     # Rounding the terms after summing leaves the print a tenth off in three rows.

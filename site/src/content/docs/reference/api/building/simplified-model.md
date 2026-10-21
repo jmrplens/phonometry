@@ -193,6 +193,12 @@ degrading linings degrade further (e.g. −2 and −4 dB combine to
 
 **Returns:** Combined `ΔR`/`ΔRij`, in dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `delta_a` or `delta_b` is not a single number. |
+
 ## equivalent_impact_level
 
 ```python
@@ -221,6 +227,7 @@ Annex B relation is stated for homogeneous floors of 100 kg/m² to
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `mass_per_area` is not positive. |
+| TypeError | if `mass_per_area` is not a single number. |
 
 **Warns**
 
@@ -351,6 +358,7 @@ is used unchanged.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `kind` is unknown, areas/lengths are not positive, or any value is non-finite. |
+| TypeError | if `coupling_length`, `delta_r`, `k_ij`, `kij_min`, `r_receive`, `r_source` or `separating_area` is not a single number. |
 
 ## FlankingPath
 
@@ -398,6 +406,7 @@ nearest edge).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a mass is not positive. |
+| TypeError | if `flanking_mass` or `separating_mass` is not a single number. |
 
 ## ImpactPredictionResult
 
@@ -528,6 +537,7 @@ the minimum is used (Clause 4.4.2).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any argument is not positive. |
+| TypeError | if `coupling_length`, `s_i` or `s_j` is not a single number. |
 
 ## junction_vibration_reduction
 
@@ -615,6 +625,7 @@ Supported `junction_type` values and their formulas:
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `mass_ratio` is not positive, `frequency`/`f1` are not positive, an unknown `junction_type`/`path` is given, the requested path does not exist for the junction, or the E.7 double-leaf branch is requested outside its $m_2/m_1 > 3$ validity. |
+| TypeError | if `f1`, `frequency` or `mass_ratio` is not a single number. |
 
 ## PathContribution
 
@@ -673,6 +684,7 @@ the transmitted energy so the dominant path is visible.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any input is non-finite. |
+| TypeError | if `delta_r_direct` or `r_direct` is not a single number. |
 
 ## predicted_impact_insulation
 
@@ -707,6 +719,7 @@ level may come from
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any input is non-finite. |
+| TypeError | if `delta_l_w`, `k_correction` or `ln_w_eq` is not a single number. |
 
 ## standardized_impact_level
 
@@ -739,6 +752,7 @@ the exact form; both round to the same integer rating in E.3.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `volume` is not positive. |
+| TypeError | if `l_prime_n_w` or `volume` is not a single number. |
 
 ## standardized_level_difference
 
@@ -778,3 +792,4 @@ both round to the same $D_{\mathrm{n}T,\mathrm{w}} = 54$ dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `volume` or `separating_area` is not positive. |
+| TypeError | if `r_prime_w`, `separating_area` or `volume` is not a single number. |

@@ -88,6 +88,7 @@ is what 5.14.3 and IEC 61260-3:2016 10.3.6 grade.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive bandwidth designator, duration, averaging time or frequency, or an end frequency not above the start. |
+| TypeError | if `averaging_time_s`, `end_frequency_hz`, `fraction`, `start_frequency_hz` or `sweep_duration_s` is not a single number. |
 
 ## swept_level_uncertainty
 
@@ -151,6 +152,7 @@ distribution of half-width half the resolution (IEC 61260-3:2016 5.2):
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a negative uncertainty or resolution, a non-positive duration or frequency, or an end frequency not above the start. |
+| TypeError | if `averaging_time_s`, `averaging_time_uncertainty_s`, `display_resolution_db`, `end_frequency_hz`, `end_frequency_uncertainty_hz`, `input_level_uncertainty_db`, `start_frequency_hz`, `start_frequency_uncertainty_hz`, `sweep_duration_s` or `sweep_duration_uncertainty_s` is not a single number. |
 
 ## TimeInvarianceResult
 

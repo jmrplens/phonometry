@@ -175,7 +175,7 @@ def _synthetic_hemisphere() -> RotorcraftHemisphere:
     for i in range(az.size):
         for j, t in enumerate(po):
             lv[i, j, :] = np.array([100.0, 98.0, 96.0]) - 0.05 * t
-    return RotorcraftHemisphere(fr, az, po, lv)
+    return RotorcraftHemisphere(frequencies=fr, azimuth_deg=az, polar_deg=po, levels=lv)
 
 
 def test_hemisphere_exact_at_nodes() -> None:
@@ -207,7 +207,12 @@ def test_hemisphere_nearest_bin_fill_for_missing() -> None:
     h = _synthetic_hemisphere()
     lv = h.levels.copy()
     lv[2, 2, 0] = np.nan  # drop φ=0, θ=90, 500 Hz
-    hole = RotorcraftHemisphere(h.frequencies, h.azimuth_deg, h.polar_deg, lv)
+    hole = RotorcraftHemisphere(
+        frequencies=h.frequencies,
+        azimuth_deg=h.azimuth_deg,
+        polar_deg=h.polar_deg,
+        levels=lv,
+    )
     out = hemisphere_source_level(hole, 0.0, 90.0)
     # The four axis-neighbours (±45°,90°), (0°,45°), (0°,135°) are all exactly
     # equidistant (ρ = 45°), so the fill is their energetic average (Eq. 14/15).
@@ -224,7 +229,12 @@ def test_hemisphere_partial_cell_keeps_valid_corners() -> None:
     h = _synthetic_hemisphere()
     lv = h.levels.copy()
     lv[2, 2, 0] = np.nan  # drop φ=0, θ=90 at 500 Hz
-    hole = RotorcraftHemisphere(h.frequencies, h.azimuth_deg, h.polar_deg, lv)
+    hole = RotorcraftHemisphere(
+        frequencies=h.frequencies,
+        azimuth_deg=h.azimuth_deg,
+        polar_deg=h.polar_deg,
+        levels=lv,
+    )
     got = hemisphere_source_level(hole, 22.5, 112.5)[
         0
     ]  # centre of the φ 0-45/θ 90-135 cell
@@ -244,7 +254,9 @@ def test_hemisphere_single_row_grid() -> None:
     fr = np.array([500.0, 1000.0])
     po = np.array([80.0, 90.0])
     lv = np.array([[[70.0, 68.0], [74.0, 72.0]]])  # shape (1, 2, 2)
-    h = RotorcraftHemisphere(fr, np.array([0.0]), po, lv)
+    h = RotorcraftHemisphere(
+        frequencies=fr, azimuth_deg=np.array([0.0]), polar_deg=po, levels=lv
+    )
     assert np.allclose(hemisphere_source_level(h, 0.0, 80.0), [70.0, 68.0])
     mid = hemisphere_source_level(h, 30.0, 85.0)  # azimuth clamps to the only row
     expected = 10.0 * np.log10(
@@ -259,7 +271,12 @@ def test_hemisphere_all_nan_band_returns_nan() -> None:
     h = _synthetic_hemisphere()
     lv = h.levels.copy()
     lv[:, :, 1] = np.nan
-    hole = RotorcraftHemisphere(h.frequencies, h.azimuth_deg, h.polar_deg, lv)
+    hole = RotorcraftHemisphere(
+        frequencies=h.frequencies,
+        azimuth_deg=h.azimuth_deg,
+        polar_deg=h.polar_deg,
+        levels=lv,
+    )
     out = hemisphere_source_level(hole, 10.0, 70.0)
     assert np.isnan(out[1])
     assert np.isfinite(out[0])
@@ -288,7 +305,12 @@ _A109_LEVELS = np.array(
 
 
 def _a109_hemisphere() -> RotorcraftHemisphere:
-    return RotorcraftHemisphere(_A109_FREQ, _A109_PHI, _A109_THETA, _A109_LEVELS)
+    return RotorcraftHemisphere(
+        frequencies=_A109_FREQ,
+        azimuth_deg=_A109_PHI,
+        polar_deg=_A109_THETA,
+        levels=_A109_LEVELS,
+    )
 
 
 def test_reference_hemisphere_exact_at_nodes() -> None:
@@ -340,7 +362,9 @@ def test_reference_hemisphere_all_types(rotorcraft: str, spectrum: list[float]) 
     levels[0, 0, :] = spec - 3.0
     levels[1, 1, :] = spec + 2.0
     levels[1, 0, :] = spec - 5.0
-    h = RotorcraftHemisphere(_TYPE_BANDS, az, po, levels)
+    h = RotorcraftHemisphere(
+        frequencies=_TYPE_BANDS, azimuth_deg=az, polar_deg=po, levels=levels
+    )
     assert np.allclose(hemisphere_source_level(h, 0.0, 90.0), spec)
     # Physically-plausible helicopter spectrum: mid-frequency content, HF roll-off.
     assert spec[-1] < spec[3]
@@ -460,7 +484,10 @@ def test_reference_bilinear_off_node(rotorcraft: str, cases: list) -> None:
     ):
         lv = np.array(corners, dtype=np.float64).reshape(2, 2, 1)
         h = RotorcraftHemisphere(
-            np.array([500.0]), np.array([a0, a1]), np.array([p0, p1]), lv
+            frequencies=np.array([500.0]),
+            azimuth_deg=np.array([a0, a1]),
+            polar_deg=np.array([p0, p1]),
+            levels=lv,
         )
         got = hemisphere_source_level(h, phi, theta)[0]
         assert got == pytest.approx(expected, abs=5e-4), (rotorcraft, phi, theta)
@@ -983,7 +1010,13 @@ def test_hover_derived_offsets_are_the_published_constants() -> None:
     po = np.arange(0.0, 181.0, 10.0)
     levels = np.random.default_rng(7).uniform(60.0, 90.0, (19, 19, 2))
     levels[3, 4, 0] = np.nan
-    hige = RotorcraftHemisphere(freqs, az, po, levels.copy(), distance_m=70.0)
+    hige = RotorcraftHemisphere(
+        frequencies=freqs,
+        azimuth_deg=az,
+        polar_deg=po,
+        levels=levels.copy(),
+        distance_m=70.0,
+    )
     for condition, offset in (
         ("out_of_ground_hover", 12.0),
         ("reduced_rpm_idle", -12.0),
@@ -1120,7 +1153,10 @@ def _uniform_hemisphere(
     az = np.arange(-90.0, 91.0, 10.0)
     po = np.arange(0.0, 181.0, 10.0)
     return RotorcraftHemisphere(
-        freqs, az, po, np.full((az.size, po.size, freqs.size), level)
+        frequencies=freqs,
+        azimuth_deg=az,
+        polar_deg=po,
+        levels=np.full((az.size, po.size, freqs.size), level),
     )
 
 
@@ -1233,7 +1269,9 @@ def test_hemisphere_mirrored_reverses_azimuth() -> None:
     po = np.arange(0.0, 181.0, 10.0)
     lv = np.zeros((az.size, po.size, 1))
     lv[:, :, 0] = 70.0 + 0.1 * az[:, None]  # port quieter than starboard
-    h = RotorcraftHemisphere(np.array([100.0]), az, po, lv)
+    h = RotorcraftHemisphere(
+        frequencies=np.array([100.0]), azimuth_deg=az, polar_deg=po, levels=lv
+    )
     m = h.mirrored()
     assert np.allclose(
         hemisphere_source_level(m, 30.0, 90.0), hemisphere_source_level(h, -30.0, 90.0)

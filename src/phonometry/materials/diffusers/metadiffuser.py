@@ -33,7 +33,11 @@ import numpy as np
 
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
-from ..._internal.validation import require_positive, require_positive_array
+from ..._internal.validation import (
+    require_positive,
+    require_positive_array,
+    require_present,
+)
 from ..absorbers.porous import ABSORBER_AIR, Complex
 from ..absorbers.slow_sound import HelmholtzResonator, slit_helmholtz_absorber
 from .design import (
@@ -86,7 +90,10 @@ class MetadiffuserWell(RichDisplay):
     resonators: tuple[HelmholtzResonator, ...]
 
     def __post_init__(self) -> None:
-        """Reject a non-positive ``slit_height_m`` and a well with no resonators."""
+        """Reject a non-positive ``slit_height_m`` and a well with no resonators.
+
+        :raises TypeError: if ``slit_height_m`` is not a single number.
+        """
         require_positive(self.slit_height_m, "slit_height_m")
         if not self.resonators:
             msg = "'resonators' must contain at least one resonator."
@@ -104,8 +111,7 @@ class MetadiffuserResult(OwnsArrays):
     ``well_absorption`` the per-well
     :math:`\alpha_n = 1 - \lvert R_n \rvert^2`. The trailing fields retain the geometry the
     prediction was run with (``wells``, ``depth_m``, ``period_m``) so
-    :meth:`plot_geometry` can draw the panel section; they default to
-    ``None`` for hand-built results.
+    :meth:`plot_geometry` can draw the panel section.
     """
 
     frequencies: Real
@@ -113,9 +119,17 @@ class MetadiffuserResult(OwnsArrays):
     absorption: Real
     well_absorption: Real
     _: KW_ONLY
-    wells: tuple[MetadiffuserWell | None, ...] | None = None
-    depth_m: float | None = None
-    period_m: float | None = None
+    wells: tuple[MetadiffuserWell | None, ...]
+    depth_m: float
+    period_m: float
+
+    def __post_init__(self) -> None:
+        """Refuse a panel built without the geometry it was predicted from.
+
+        :raises TypeError: if ``wells``, ``depth_m`` or ``period_m`` is
+            ``None``.
+        """
+        require_present(self, "wells", "depth_m", "period_m")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -138,8 +152,6 @@ class MetadiffuserResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
-
-        :raises ValueError: If the result does not retain its geometry.
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_metadiffuser_geometry
@@ -211,6 +223,8 @@ def metadiffuser_reflection(
         number ``Pr``, ratio of specific heats ``gamma`` and static pressure
         ``P0``.
     :return: A :class:`MetadiffuserResult` with one reflection row per well.
+    :raises TypeError: if ``depth_m`` or ``period_m`` is not a single number, or
+        ``frequency`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequency, "frequency")
     cells = _check_panel(wells, depth_m, period_m)
@@ -283,6 +297,7 @@ def metadiffuser_polar_response(
         speed of sound ``c0`` also carries the far field.
     :return: A
         :class:`~phonometry.materials.diffusers.design.DiffuserPolarResponse`.
+    :raises TypeError: if ``frequency`` is not a single number.
     """
     f = require_positive(frequency, "frequency")
     result = metadiffuser_reflection(
@@ -348,6 +363,7 @@ def metadiffuser_diffusion_spectrum(
     :return: A
         :class:`~phonometry.materials.diffusers.scattering_diffusion.DiffusionSpectrum`
         carrying the raw ``d(f)`` and the normalised ``d_n(f)``.
+    :raises TypeError: if ``depth_m`` or ``period_m`` is not a single number.
     """
     freqs = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
     if freqs.ndim != 1 or freqs.size == 0:

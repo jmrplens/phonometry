@@ -151,6 +151,7 @@ the wrong mean narrow-band level for tones near its edges.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectrum is invalid or no audible tone is found. |
+| TypeError | if `effective_bandwidth_factor` or `line_spacing_hz` is not a single number. |
 
 ## assess_tones
 
@@ -188,6 +189,7 @@ to every tone and bundles them into a plottable [`ToneAudibilityResult`](/phonom
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the arrays are empty, differ in length, or contain non-finite/non-positive values. |
+| TypeError | if `line_spacing_hz` is not a single number. |
 
 ## audibility_from_levels
 
@@ -218,6 +220,7 @@ $\Delta L = L_\mathrm{T} - L_\mathrm{G} - a_\mathrm{v}$ dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any argument is not finite. |
+| TypeError | if `critical_band_level`, `masking_index` or `tone_level` is not a single number. |
 
 ## audibility_uncertainty
 
@@ -280,6 +283,7 @@ consideration; see [`mean_audibility_uncertainty`](/phonometry/reference/api/psy
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a line set is empty/non-finite or a parameter is not positive/finite. |
+| TypeError | if `coverage_factor`, `line_spacing_hz`, `sigma_level_db` or `tone_frequency` is not a single number. |
 
 ## combined_tone_level
 
@@ -346,6 +350,7 @@ $f_2 - f_1 = \Delta f_\mathrm{c}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `tone_frequency` is not positive/finite. |
+| TypeError | if `tone_frequency` is not a single number. |
 
 ## critical_band_level
 
@@ -378,6 +383,7 @@ over the critical bandwidth `Δfc` relative to the line spacing `Δf`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the level is not finite or a frequency is not positive/finite. |
+| TypeError | if `line_spacing_hz` or `mean_narrowband_level` is not a single number. |
 
 ## critical_bandwidth_engineering
 
@@ -405,6 +411,7 @@ stepped ISO 1996-2 Annex C [`critical_bandwidth`](/phonometry/reference/api/envi
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `tone_frequency` is not positive/finite. |
+| TypeError | if `tone_frequency` is not a single number. |
 
 ## energy_sum_level
 
@@ -448,6 +455,7 @@ spectrum.)
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `line_levels` is empty/non-finite or the factor is not positive/finite. |
+| TypeError | if `effective_bandwidth_factor` is not a single number. |
 
 ## HANNING_BANDWIDTH_FACTOR
 
@@ -482,6 +490,7 @@ negative with frequency (see Annex C).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `frequency` is not positive/finite. |
+| TypeError | if `frequency` is not a single number. |
 
 ## mean_audibility
 
@@ -592,6 +601,7 @@ $10 \log_{10}(\Delta f/\Delta f_\mathrm{e})$ is
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectrum is invalid, the factor is not positive/finite, or no lines fall in the critical band. |
+| TypeError | if `effective_bandwidth_factor` or `tone_frequency` is not a single number. |
 
 ## NO_TONE_AUDIBILITY_DB
 
@@ -641,6 +651,7 @@ verification status.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a frequency is not positive/finite or an audibility is not finite. |
+| TypeError | if `audibility1`, `audibility2`, `tone1_frequency` or `tone2_frequency` is not a single number. |
 
 ## tone_audibility
 
@@ -715,6 +726,7 @@ takes its level unchanged (Formula (7), no bandwidth correction).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the spectrum is invalid or the levels are not finite. |
+| TypeError | if `mean_narrowband_level` or `tone_frequency` is not a single number. |
 
 ## ToneAudibilityResult
 
@@ -894,3 +906,4 @@ against the DIN 45681:2005-03 Annex J reference program
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `tone_frequency` is not positive/finite. |
+| TypeError | if `tone_frequency` is not a single number. |

@@ -115,6 +115,12 @@ bound (clause 8.2.3).
 
 **Returns:** `K1` per band, in decibels.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `background_levels` holds a text or a value that is not a real number. |
+
 ## environmental_correction
 
 ```python
@@ -159,6 +165,12 @@ with that shape; scalar inputs return a scalar, unchanged.
 | `room_surface` | Room boundary area `Sv` (m^2), with `alpha`. |
 
 **Returns:** `K2` in decibels; a scalar for scalar inputs, otherwise an array per band.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `room_surface`, `surface_area` or `volume` is not a single number. |
 
 ## mean_single_event_level
 
@@ -256,6 +268,7 @@ Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a surface other than `'hemisphere'`, a radius that is not positive, a number of reflecting planes other than 1, 2 or 3, or an unknown grade. |
+| TypeError | if `radius` is not a single number. |
 
 ## plot_microphone_positions
 
@@ -290,6 +303,12 @@ arrays it accepts directly.
 | `kwargs` | Forwarded to the microphone `scatter`. |
 
 **Returns:** The 3-D axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `radius` is not a single number. |
 
 ## reference_atmosphere_correction
 
@@ -341,6 +360,7 @@ $a = 2.2560 \times 10^{-5}$ m^-1 and $b = 5.2553$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if neither or both of `static_pressure_kpa` and `altitude` are given, or either is out of range, or `temperature_c` is not above absolute zero. |
+| TypeError | if `altitude`, `static_pressure_kpa` or `temperature_c` is not a single number. |
 
 ## ReferenceAtmosphereCorrection
 
@@ -489,6 +509,7 @@ The level holds for the meteorological conditions of the test; above
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a malformed or non-finite level array, a geometry that does not describe the surface, too few positions, a background without its `integration_time`, or a mismatched `frequencies` length. |
+| TypeError | if `distance`, `integration_time`, `radius` or `sigma_omc_db` is not a single number, `n_events` is a flag, a text or an array where a count goes, or `dimensions` holds a text or a value that is not a real number. |
 
 ## sound_power_pressure
 
@@ -544,6 +565,12 @@ sound power level is combined via ISO 3744 Annex E.
 | `sigma_omc_db` | `sigma_omc` (dB), operating/mounting instability. |
 
 **Returns:** [`SoundPowerResult`](/phonometry/reference/api/power/sound-power/#soundpowerresult).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `distance`, `radius` or `sigma_omc_db` is not a single number, or `dimensions` holds a text or a value that is not a real number. |
 
 ## SoundEnergyResult
 

@@ -750,6 +750,8 @@ def road_rolling_noise(
     :param coefficients: The Appendix F database to use.
     :return: ``L_WR,i,m`` over the eight octave bands, in dB re 1 pW.
     :raises ValueError: If an input is invalid.
+    :raises TypeError: if ``junction_distance``, ``speed_kmh``, ``studded_fraction``,
+        ``studded_months`` or ``temperature_c`` is not a single number.
     """
     key = _category_key(category)
     _require_category(key, coefficients)
@@ -816,6 +818,8 @@ def road_propulsion_noise(
     :param coefficients: The Appendix F database to use.
     :return: ``L_WP,i,m`` over the eight octave bands, in dB re 1 pW.
     :raises ValueError: If an input is invalid.
+    :raises TypeError: if ``junction_distance``, ``road_slope_percent`` or ``speed_kmh``
+        is not a single number.
     """
     key = _category_key(category)
     _require_category(key, coefficients)
@@ -973,6 +977,7 @@ class RoadEmissionResult(OwnsArrays):
         :raises ValueError: if a per-category array disagrees with
             ``categories``, a per-band one with ``frequencies``, or the band
             axis is not the eight octave bands of 2.5.5.
+        :raises TypeError: if ``frequencies`` is a single number where an array goes.
         """
         require_ranks(
             self,
@@ -1149,6 +1154,7 @@ def line_source_segment_power(
     :param length: Length ``dL`` of the segment, in m.
     :return: The segment sound power, in dB re 1 pW.
     :raises ValueError: If ``length`` is not positive.
+    :raises TypeError: if ``length`` is not a single number.
     """
     dl = _finite(length, "length")
     if dl <= 0.0:

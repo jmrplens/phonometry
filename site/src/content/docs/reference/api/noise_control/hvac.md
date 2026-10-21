@@ -116,6 +116,7 @@ The table is interpolated linearly between its tabulated pressure ratios
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `pressure_ratio` is not positive or `location` is unknown. |
+| TypeError | if `location` is not a text, or `pressure_ratio` is not a single number. |
 
 ## air_terminal_velocity_limit
 
@@ -153,6 +154,7 @@ has to be reduced accordingly.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the design criterion is not tabulated. |
+| TypeError | if `opening` is not a text, or `design_criterion` is not a single number. |
 
 ## blade_passing_frequency
 
@@ -178,6 +180,7 @@ $f_{bp} = \mathrm{rpm} \times \mathrm{blades} / 60$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `n_blades` is not a positive integer. |
+| TypeError | if `n_blades` or `rotational_speed_rpm` is not a single number. |
 
 ## diffuser_sound_power
 
@@ -254,6 +257,7 @@ which is what `n_devices` applies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a dimension is not positive, `n_devices` is not a positive integer or `shape` is unknown. |
+| TypeError | if `shape` is not a text, or `face_area`, `n_devices`, `pressure_drop_pa` or `volume_flow` is not a single number. |
 
 ## elbow_insertion_loss
 
@@ -307,6 +311,12 @@ one rather than as the width in the plane of the bend.
 
 **Returns:** A [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the insertion loss, dB per bend.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `lined_side` or `model` is not a text, or `speed_of_sound` or `width_m` is not a single number. |
+
 ## end_reflection_loss
 
 ```python
@@ -352,6 +362,12 @@ The two agree within a couple of decibels over the bands both cover.
 
 **Returns:** A [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the reflection loss, dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `method` is not a text, or `aspect_ratio`, `diameter_m`, `max_reduction` or `speed_of_sound` is not a single number. |
+
 ## end_reflection_loss_closed_form
 
 ```python
@@ -391,6 +407,12 @@ whose flare smooths the impedance transition into the room.
 
 **Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the reflection loss, dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `termination` is not a text, or `diameter_m` or `speed_of_sound` is not a single number. |
+
 ## equivalent_diameter
 
 ```python
@@ -406,6 +428,12 @@ Equivalent duct diameter $d = \sqrt{4S/\pi}$ (Long Eq. 14.16).
 | `area` | Duct cross-sectional area `S`, m2. |
 
 **Returns:** The equivalent diameter, m.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `area` is not a single number. |
 
 ## fan_casing_attenuation
 
@@ -462,6 +490,7 @@ the 6 dB step.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the efficiency is not in `(0, 100]`. |
+| TypeError | if `relative_efficiency_percent` is not a single number. |
 
 ## fan_sound_power
 
@@ -567,6 +596,12 @@ duty point, worth 0,1 dB at the optimum itself.
 
 **Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `assembly`, `fan_type` or `model` is not a text, or `blade_frequency`, `fan_speed_rpm`, `fan_static_pressure_pa`, `fan_total_pressure_pa`, `n_blades`, `relative_flow`, `specific_sound_power_level` or `volume_flow` is not a single number. |
+
 ## flexible_duct_insertion_loss
 
 ```python
@@ -598,6 +633,12 @@ value is returned.
 | `length` | Duct run length, m (0.9 m to 3.7 m tabulated). |
 
 **Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the insertion loss, dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `diameter_m` or `length` is not a single number. |
 
 ## flow_noise_bend
 
@@ -669,6 +710,12 @@ $\lg St$ is not real below one.
 
 **Returns:** A [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `model` is not a text, or `area`, `branch_diameter_m`, `density`, `flow_velocity`, `height_m` or `rounding_ratio` is not a single number. |
+
 ## flow_noise_straight_duct
 
 ```python
@@ -701,6 +748,12 @@ Eq. (8.251) prints the two as one line and credits the same guideline.
 | `area` | Duct cross-sectional area `S`, m2. |
 
 **Returns:** A [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the band sound power level, dB re 1e-12 W.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `area` or `flow_velocity` is not a single number. |
 
 ## flow_noise_straight_duct_overall
 
@@ -757,6 +810,7 @@ outside it the sum means nothing.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the speed or the area is not positive, or the weighting is neither of the two the guideline prints. |
+| TypeError | if `weighting` is not a text, or `area` or `flow_velocity` is not a single number. |
 
 ## HVACSpectrumResult
 
@@ -879,6 +933,12 @@ ignores it.
 
 **Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `diameter_m`, `length` or `lining_thickness_m` is not a single number. |
+
 ## lined_rectangular_duct_attenuation
 
 ```python
@@ -918,6 +978,12 @@ ducts). Flanking limits the total to 40 dB.
 
 **Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `height_m`, `length`, `lining_thickness_m` or `width_m` is not a single number. |
+
 ## octave_band_limits
 
 ```python
@@ -953,6 +1019,12 @@ test, since `K_A = -A - 5`.
 | `frequencies` | Octave-band centres, Hz; `None` (default) uses the eight octave bands from 63 Hz to 8 kHz. |
 
 **Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the per-band limit, dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `a_weighted_limit_db` is not a single number. |
 
 ## plenum_attenuation
 
@@ -996,6 +1068,7 @@ with the wavelength; it underpredicts the low-frequency loss by 5-10 dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a dimension is not positive, `mean_absorption` leaves `(0, 1)` or `angle_rad` leaves `[0, pi/2]`. |
+| TypeError | if `angle_rad`, `exit_area`, `line_of_sight` or `wall_area` is not a single number. |
 
 ## plot_plenum_geometry
 
@@ -1039,6 +1112,7 @@ side `sqrt(S_out)`) and the wall area is annotated.
 | Exception | When |
 | :--- | :--- |
 | ValueError | naming the first of the three that is not finite and positive, or for an angle outside `[0, pi/2)`. |
+| TypeError | if `angle_rad`, `exit_area`, `line_of_sight` or `wall_area` is not a single number. |
 
 ## room_effect
 
@@ -1095,6 +1169,7 @@ guideline's directivity comes from a chart against frequency, which is why
 | Exception | When |
 | :--- | :--- |
 | ValueError | unless exactly one absorption measure is given, or if an argument is not positive and finite. |
+| TypeError | if `distance` is not a single number. |
 
 ## section_change_loss
 
@@ -1161,6 +1236,7 @@ VDI 2081 treats the two as separate elements of the chain.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an area, a size, the speed of sound or the cap is not positive, the shape is unknown, a round duct's size contradicts its area, or a rectangular duct meeting a sudden increase is given no size. |
+| TypeError | if `shape` is not a text, or `cap`, `downstream_area`, `speed_of_sound`, `upstream_area` or `upstream_size` is not a single number. |
 
 ## silencer_self_noise
 
@@ -1222,6 +1298,7 @@ correction because the face size enters through `N` and `H`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `n_passages` is not a positive integer. |
+| TypeError | if `model` is not a text, or `airway_velocity`, `airway_width`, `approach_area`, `height_m`, `n_passages` or `pressure_drop_pa` is not a single number. |
 
 ## split_loss
 
@@ -1286,6 +1363,7 @@ records.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the areas are not positive or `branch` is out of range. |
+| TypeError | if `model` is not a text, or `branch` or `main_area` is not a single number. |
 
 ## splitter_silencer_insertion_loss
 
@@ -1343,6 +1421,7 @@ noise is a separate quantity, [`silencer_self_noise`](/phonometry/reference/api/
 | Exception | When |
 | :--- | :--- |
 | ValueError | If any dimension is not positive, or if `airway_widths` is not a non-empty 1-D array. |
+| TypeError | if `splitter_thickness_m` is not a single number. |
 
 ## unlined_circular_duct_attenuation
 
@@ -1380,6 +1459,12 @@ of this element, and it is why `diameter_m` is required there and not here.
 | `model` | `"ashrae"` (default, Long Table 14.1) or `"vdi2081"`. |
 
 **Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `model` is not a text, or `diameter_m` or `length` is not a single number. |
 
 ## unlined_rectangular_duct_attenuation
 
@@ -1428,6 +1513,12 @@ and is refused.
 | `model` | `"ashrae"` (default, Reynolds) or `"vdi2081"` (Table 5, the largest side length selecting the row). |
 
 **Returns:** An [`HVACSpectrumResult`](/phonometry/reference/api/noise_control/hvac/#hvacspectrumresult) of the attenuation, dB.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `model` is not a text, or `height_m`, `length` or `width_m` is not a single number. |
 
 ## VDI2081_SPECTRAL_CORRECTION
 

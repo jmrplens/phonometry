@@ -118,6 +118,7 @@ advisory warning propagates, since `α` is large and extrapolated.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a distance is not strictly positive. |
+| TypeError | if `distance_m` or `reference_distance_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## diffraction_attenuation
 
@@ -171,6 +172,7 @@ $c = 346.1$ m/s.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `edge_height_m` or `edge_span` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## ground_effect_adjustment
 
@@ -210,6 +212,7 @@ $\Delta L_\mathrm{g} = 10 \cdot \log_{10}\{1 + (r_1/r_2)^2 \lvert Q \rvert^2 + 2
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `flow_resistivity`, `horizontal_distance_m`, `receiver_height_m` or `source_height_m` is not a single number, or `frequencies` holds a text or a value that is not a real number. |
 
 ## mean_flow_resistivity
 
@@ -241,6 +244,7 @@ $\bar{\sigma} = 10^{\sum d_i \cdot \log_{10}(\sigma_i) / \sum d_i}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `lengths` or `resistivities` holds a text or a value that is not a real number. |
 
 ## mean_ground_plane
 
@@ -380,6 +384,7 @@ adjustment is $\Delta L_\mathrm{s} = -20 \cdot \log_{10}(r/r_\mathrm{h})$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a distance is not strictly positive. |
+| TypeError | if `distance_m` or `reference_distance_m` is not a single number. |
 
 ## terrain_screening_adjustment
 
@@ -443,6 +448,7 @@ whose diffraction equations follow CNOSSOS-EU.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
+| TypeError | if `flow_resistivity` is not a single number, or `flow_resistivity` or `frequencies` holds a text or a value that is not a real number. |
 
 ## TerrainScreeningResult
 

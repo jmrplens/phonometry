@@ -98,6 +98,7 @@ Judge short-term vibration on a building by Annex E.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a rate below 630 Hz, or an unknown class. |
+| TypeError | if `building_class` is not a text. |
 
 ## ASSESSMENT_GUIDE_VALUES_MM_S
 
@@ -141,6 +142,7 @@ in time with the record it came from.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a rate below 630 Hz, or an unknown class. |
+| TypeError | if `velocity_mm_s` holds a text or a value that is not a real number. |
 
 ## assessment_weighting_response
 
@@ -175,6 +177,7 @@ up to the Nyquist frequency rather than stopping at 100 Hz.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive frequency or an unknown class. |
+| TypeError | if `building_class` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## assessment_weighting_taps
 
@@ -210,6 +213,7 @@ removes.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a rate below 630 Hz, an even or non-positive length, or an unknown class. |
+| TypeError | if `building_class` is not a text, `fs` is not a single number, or `n_taps` is a flag, a text or an array where a count goes. |
 
 ## ASSESSMENT_WEIGHTING_TOLERANCE
 
@@ -324,6 +328,7 @@ The band limitation of the unweighted signal, Formula (3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive frequency or an unknown range. |
+| TypeError | if `working_range` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## dominant_frequency
 
@@ -360,6 +365,7 @@ has to be reported.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a non-positive rate, an unknown method, or a record whose largest amplitude has no zero crossing on both sides of it. |
+| TypeError | if `method` is not a text, `fs` is not a single number, or `velocity_mm_s` holds a text or a value that is not a real number. |
 
 ## DominantFrequency
 
@@ -462,6 +468,7 @@ per second for the result to mean what the standard says.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a rate that cannot carry the working range, or an unknown range. |
+| TypeError | if `working_range` is not a text, `fs` is not a single number, or `velocity_mm_s` holds a text or a value that is not a real number. |
 
 ## KB_TEST_INDICATIONS
 
@@ -505,6 +512,7 @@ The KB frequency weighting, Formula (4).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive frequency or an unknown range. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number. |
 
 ## kbf_signal
 
@@ -543,6 +551,7 @@ why a measurement is started before the event it is about.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a non-positive time constant, or a rate that cannot carry the working range. |
+| TypeError | if `fs` or `time_constant_s` is not a single number. |
 
 ## measure_vibration_immission
 
@@ -583,6 +592,7 @@ of quiet removes it, which is also how a real measurement is made.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad record, a rate that cannot carry the working range, or a non-positive clock interval. |
+| TypeError | if `working_range` is not a text, `fs` is not a single number, or `velocity_mm_s` holds a text or a value that is not a real number. |
 
 ## RESPONSE_TOLERANCE_LOWER_PERCENT
 
@@ -618,6 +628,7 @@ The limits of Tables 2 and 3 at each frequency, in per cent.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive frequency or an unknown range. |
+| TypeError | if `working_range` is not a text, or `frequencies` holds a text or a value that is not a real number. |
 
 ## RESPONSE_TOLERANCE_UPPER_PERCENT
 
@@ -694,6 +705,7 @@ part-interval is dropped rather than scaled up.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad signal or a non-positive rate or interval. |
+| TypeError | if `fs` or `takt_duration_s` is not a single number, or `kbf` holds a text or a value that is not a real number. |
 
 ## TAKT_SUPPRESSION_THRESHOLD
 
@@ -750,6 +762,7 @@ dropped from the verdict rather than passed for free.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the two arrays disagree in shape, if a frequency or a response is not positive and finite, or if the reference frequency is not one of the measured frequencies. |
+| TypeError | if `weighting` or `working_range` is not a text, `reference_frequency_hz` is not a single number, or `frequencies` or `measured_response` holds a text or a value that is not a real number. |
 
 ## VibrationMeterReading
 

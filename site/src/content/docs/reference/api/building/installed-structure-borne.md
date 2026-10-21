@@ -208,6 +208,7 @@ mobility instead of `Y_inf,i` yields the characteristic level
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive receiver or plate mobility. |
+| TypeError | if `plate_mobility` is not a single number. |
 
 ## installed_source_prediction
 
@@ -399,6 +400,7 @@ junctions and 6 dB for three or more, with the resulting `Kij` floored at
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than one junction. |
+| TypeError | if `n_junctions` is not a single number. |
 
 ## REFERENCE_AREA_M2
 
@@ -444,6 +446,7 @@ $$
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive area. |
+| TypeError | if `element_area` or `reference_area` is not a single number. |
 
 ## structure_to_airborne_adjustment
 
@@ -490,6 +493,7 @@ sign included.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency, critical frequency, mass or radiation factor. |
+| TypeError | if `critical_frequency` or `mass_per_area` is not a single number. |
 
 ## TABLE_D1_QUANTITIES
 
@@ -593,6 +597,7 @@ mobility `Y_i`; Annex F Formulae (F.4) to (F.6b) estimate that `Y_i`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency, mobility or mass. |
+| TypeError | if `hammer_mass` is not a single number. |
 
 ## tapping_machine_force_level
 
@@ -651,6 +656,7 @@ bands the standard does not tabulate.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency or a band set other than 1 or 3. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float). |
 
 ## total_structure_borne_pressure_level
 
@@ -761,3 +767,4 @@ which [`coupling_term`](/phonometry/reference/api/building/installed-structure-b
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown row, a missing or surplus describing quantity, a `frequency` that the row does not take (or lacks), or a non-positive value. |
+| TypeError | if `structure` is not a text. |

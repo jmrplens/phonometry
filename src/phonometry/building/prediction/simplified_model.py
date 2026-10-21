@@ -218,6 +218,7 @@ class PathContribution(RichDisplay):
         "cannot convert float NaN to integer", naming no field.
 
         :raises ValueError: if ``r_w`` or ``energy_fraction`` is not finite.
+        :raises TypeError: if ``energy_fraction`` or ``r_w`` is not a single number.
         """
         _check_finite(self.r_w, "r_w")
         _check_finite(self.energy_fraction, "energy_fraction")
@@ -250,6 +251,7 @@ class AirbornePredictionResult(RichDisplay):
         :class:`PathContribution` itself.
 
         :raises ValueError: if ``r_prime_w`` or ``r_direct_w`` is not finite.
+        :raises TypeError: if ``r_direct_w`` or ``r_prime_w`` is not a single number.
         """
         _check_finite(self.r_prime_w, "r_prime_w")
         _check_finite(self.r_direct_w, "r_direct_w")
@@ -351,6 +353,8 @@ class ImpactPredictionResult(RichDisplay):
         integer", naming no field.
 
         :raises ValueError: if any field is not finite.
+        :raises TypeError: if ``delta_l_w``, ``k_correction``, ``l_prime_n_w`` or
+            ``ln_w_eq`` is not a single number.
         """
         _check_finite(self.l_prime_n_w, "l_prime_n_w")
         _check_finite(self.ln_w_eq, "ln_w_eq")
@@ -645,6 +649,8 @@ def junction_vibration_reduction(
         are not positive, an unknown ``junction_type``/``path`` is given, the
         requested path does not exist for the junction, or the E.7 double-leaf
         branch is requested outside its :math:`m_2/m_1 > 3` validity.
+    :raises TypeError: if ``f1``, ``frequency`` or ``mass_ratio`` is not a single
+        number.
     """
     ratio = _check_finite(mass_ratio, "mass_ratio")
     if ratio <= 0.0:
@@ -702,6 +708,8 @@ def junction_min_vibration_reduction(
     :param s_j: Area of element ``j``, in m².
     :return: ``Kij,min``, in dB.
     :raises ValueError: If any argument is not positive.
+    :raises TypeError: if ``coupling_length``, ``s_i`` or ``s_j`` is not a single
+        number.
     """
     lf = _check_finite(coupling_length, "coupling_length")
     si = _check_finite(s_i, "s_i")
@@ -731,6 +739,7 @@ def combined_lining_improvement(delta_a: float, delta_b: float) -> float:
     :param delta_a: Improvement of the first lining, in dB.
     :param delta_b: Improvement of the second lining, in dB.
     :return: Combined ``ΔR``/``ΔRij``, in dB.
+    :raises TypeError: if ``delta_a`` or ``delta_b`` is not a single number.
     """
     a = _check_finite(delta_a, "delta_a")
     b = _check_finite(delta_b, "delta_b")
@@ -793,6 +802,8 @@ def flanking_path(
     :return: The :class:`FlankingPath`.
     :raises ValueError: If ``kind`` is unknown, areas/lengths are not positive,
         or any value is non-finite.
+    :raises TypeError: if ``coupling_length``, ``delta_r``, ``k_ij``, ``kij_min``,
+        ``r_receive``, ``r_source`` or ``separating_area`` is not a single number.
     """
     if kind not in ("Ff", "Df", "Fd"):
         msg = "'kind' must be 'Ff', 'Df' or 'Fd'."
@@ -934,6 +945,7 @@ def predicted_airborne_insulation(
         separating element, in dB.
     :return: The :class:`AirbornePredictionResult`.
     :raises ValueError: If any input is non-finite.
+    :raises TypeError: if ``delta_r_direct`` or ``r_direct`` is not a single number.
     """
     r_dd = _check_finite(r_direct, "r_direct") + _check_finite(
         delta_r_direct, "delta_r_direct"
@@ -980,6 +992,7 @@ def equivalent_impact_level(mass_per_area: float) -> float:
         (must be positive; the Annex B relation covers 100-600 kg/m²).
     :return: ``Ln,w,eq``, in dB.
     :raises ValueError: If ``mass_per_area`` is not positive.
+    :raises TypeError: if ``mass_per_area`` is not a single number.
     :warns BuildingPredictionWarning: If ``mass_per_area`` lies outside the
         100-600 kg/m² the relation is stated for.
     """
@@ -1011,6 +1024,8 @@ def impact_flanking_correction(separating_mass: float, flanking_mass: float) -> 
         elements not covered by additional layers, in kg/m².
     :return: The correction ``K``, in dB (a non-negative integer).
     :raises ValueError: If a mass is not positive.
+    :raises TypeError: if ``flanking_mass`` or ``separating_mass`` is not a single
+        number.
     """
     sm = _check_finite(separating_mass, "separating_mass")
     fm = _check_finite(flanking_mass, "flanking_mass")
@@ -1044,6 +1059,8 @@ def predicted_impact_insulation(
     :param k_correction: Flanking correction ``K`` (Table 1), in dB.
     :return: The :class:`ImpactPredictionResult`.
     :raises ValueError: If any input is non-finite.
+    :raises TypeError: if ``delta_l_w``, ``k_correction`` or ``ln_w_eq`` is not a single
+        number.
     """
     ln_eq = _check_finite(ln_w_eq, "ln_w_eq")
     dl = _check_finite(delta_l_w, "delta_l_w")
@@ -1073,6 +1090,7 @@ def standardized_impact_level(l_prime_n_w: float, volume: float) -> float:
     :param volume: Receiving-room volume ``V``, in m³ (must be positive).
     :return: ``L'nT,w``, in dB.
     :raises ValueError: If ``volume`` is not positive.
+    :raises TypeError: if ``l_prime_n_w`` or ``volume`` is not a single number.
     """
     lnw = _check_finite(l_prime_n_w, "l_prime_n_w")
     v = _check_finite(volume, "volume")
@@ -1106,6 +1124,8 @@ def standardized_level_difference(
         positive).
     :return: ``DnT,w``, in dB.
     :raises ValueError: If ``volume`` or ``separating_area`` is not positive.
+    :raises TypeError: if ``r_prime_w``, ``separating_area`` or ``volume`` is not a
+        single number.
     """
     rw = _check_finite(r_prime_w, "r_prime_w")
     v = _check_finite(volume, "volume")

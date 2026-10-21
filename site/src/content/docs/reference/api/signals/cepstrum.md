@@ -116,6 +116,7 @@ Cepstrum of a record: power, real or complex.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `nfft` is a flag, a text or an array where a count goes. |
 
 ## CepstrumResult
 
@@ -318,7 +319,7 @@ modes are exactly complementary in dB.
 
 | Name | Description |
 | :--- | :--- |
-| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, though a cepstrum is a log-spectrum transform: the factor lands on the zeroth quefrency alone. `spectrum_db` shifts by 20 lg of it either way; the zeroth quefrency shifts with it; and `liftered_db` shifts too under `mode='lowpass'`, which keeps that quefrency, but not under `'highpass'`, which is what lifters it away. |
+| `x` | Signal, 1-D. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples, though a cepstrum is a log-spectrum transform: the factor lands on the zeroth quefrency alone. `spectrum_db` shifts by 20 lg of it either way; the zeroth quefrency shifts with it; and `liftered_spectrum_db` shifts too under `mode='lowpass'`, which keeps that quefrency, but not under `'highpass'`, which is what lifters it away. |
 | `fs` | Sample rate, in Hz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `cutoff` | Cutoff quefrency, in seconds; must resolve to at least one sample and at most `nfft/2` samples. |
 | `mode` | `"lowpass"` (default) or `"highpass"`. |
@@ -331,6 +332,7 @@ modes are exactly complementary in dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `nfft` is a flag, a text or an array where a count goes. |
 
 ## LifterResult
 
@@ -338,7 +340,7 @@ modes are exactly complementary in dB.
 LifterResult(
     frequencies: NDArray[np.float64],
     spectrum_db: NDArray[np.float64],
-    liftered_db: NDArray[np.float64],
+    liftered_spectrum_db: NDArray[np.float64],
     quefrencies: NDArray[np.float64],
     cepstrum: NDArray[np.float64],
     cutoff: float,
@@ -356,7 +358,7 @@ A log spectrum split by liftering (Milner Sec. 4.3).
 | :--- | :--- |
 | `frequencies` | Frequency axis, in Hz. |
 | `spectrum_db` | Log-magnitude spectrum of the record, in dB. |
-| `liftered_db` | Log-magnitude spectrum rebuilt from the kept quefrencies alone, in dB. Lowpass and highpass parts add up to `spectrum_db` exactly (the split is linear in the log). |
+| `liftered_spectrum_db` | Log-magnitude spectrum rebuilt from the kept quefrencies alone, in dB. Lowpass and highpass parts add up to `spectrum_db` exactly (the split is linear in the log). |
 | `quefrencies` | Quefrency axis of the underlying real cepstrum, s. |
 | `cepstrum` | The real cepstrum the lifter window was applied to. |
 | `cutoff` | Lifter cutoff quefrency, in seconds. |

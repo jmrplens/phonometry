@@ -469,7 +469,7 @@ def test_round_robin_warns_beyond_sigma_tot_over_root_2() -> None:
 
 
 def test_round_robin_refuses_an_operating_deviation_above_the_total() -> None:
-    with pytest.raises(ValueError, match="operating_db"):
+    with pytest.raises(ValueError, match="sigma_omc_db"):
         emission.reproducibility_from_round_robin(1.0, 1.5)
 
 

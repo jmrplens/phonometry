@@ -136,6 +136,8 @@ def spherical_spreading_adjustment(
         uses a non-standard polar distance (e.g. 70 m hover rings).
     :return: The spreading adjustment ``ΔLs``, in dB (added to the level).
     :raises ValueError: If a distance is not strictly positive.
+    :raises TypeError: if ``distance_m`` or ``reference_distance_m`` is not a single
+        number.
     """
     r = require_positive(distance_m, "distance_m")
     rh = require_positive(reference_distance_m, "reference_distance_m")
@@ -193,6 +195,8 @@ def atmospheric_adjustment(
     :return: The adjustment ``ΔLa`` per band, in dB (added to the level,
         :math:`\le 0` for :math:`r \ge r_\mathrm{h}`).
     :raises ValueError: If a distance is not strictly positive.
+    :raises TypeError: if ``distance_m`` or ``reference_distance_m`` is not a single
+        number, or ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     r = require_positive(distance_m, "distance_m")
@@ -284,6 +288,9 @@ def ground_effect_adjustment(
         passed as numeric values.
     :return: The adjustment ``ΔLg`` per band, in dB (added to the level).
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``flow_resistivity``, ``horizontal_distance_m``,
+        ``receiver_height_m`` or ``source_height_m`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     hs = require_non_negative(source_height_m, "source_height_m")
@@ -522,6 +529,8 @@ def mean_flow_resistivity(
         (``> 0``), shape ``(n,)``.
     :return: The mean flow resistivity ``σ̄``, in Pa·s/m².
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``lengths`` or ``resistivities`` holds a text or a value that
+        is not a real number.
     """
     d = require_positive_array(lengths, "lengths")
     sig = require_positive_array(resistivities, "resistivities")
@@ -578,6 +587,8 @@ def diffraction_attenuation(
         are evaluated unbounded.
     :return: The attenuation ``ΔLd`` per band, in dB (``≥ 0``).
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``edge_height_m`` or ``edge_span`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     if not np.isfinite(path_difference):
@@ -786,6 +797,9 @@ def terrain_screening_adjustment(
         ``(M−1,)``) averaged per sub-path by Eq. 41.
     :return: A :class:`TerrainScreeningResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``flow_resistivity`` is not a single number, or
+        ``flow_resistivity`` or ``frequencies`` holds a text or a value that is not a
+        real number.
     """
     f = require_positive_array(frequencies, "frequencies")
     d, z = _validated_section(distances_m, heights_m)

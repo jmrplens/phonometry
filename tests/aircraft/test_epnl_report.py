@@ -168,3 +168,27 @@ def test_unknown_language_rejected(tmp_path: Path) -> None:
     result = _flyover()
     with pytest.raises(ValueError, match=r"Unknown language"):
         result.report(str(tmp_path / "bad.pdf"), language="xx")
+
+
+@pytest.mark.parametrize(
+    ("language", "row"),
+    [
+        ("en", ("Bandsharing adjustment [TPNdB]", "1.6")),
+        ("es", ("Ajuste por reparto de bandas [TPNdB]", "1,6")),
+    ],
+)
+def test_the_bandsharing_row_of_the_fiche_is_in_tpndb(
+    language: str, row: tuple[str, str]
+) -> None:
+    """Annex 16 Vol. I prints the bandsharing adjustment in TPNdB (I-7).
+
+    The tone corrections dip at the PNLTM record, C = [2, 2, 0, 2, 2] around
+    the peak, so the adjustment is 1.6 and the fiche draws its row.
+    """
+    from phonometry._report.annex16_epnl import _metric_rows
+    from phonometry.aircraft.certification import epnl_from_pnlt
+
+    pnlt = np.array([80.0, 90.0, 95.0, 100.0, 95.0, 90.0, 80.0])
+    tone_corrections = np.array([0.0, 2.0, 2.0, 0.0, 2.0, 2.0, 0.0])
+    result = epnl_from_pnlt(pnlt, 0.5, tone_corrections=tone_corrections)
+    assert row in _metric_rows(result, language)

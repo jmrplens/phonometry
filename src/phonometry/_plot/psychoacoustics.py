@@ -28,7 +28,10 @@ from .common import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-    from ..psychoacoustics.loudness.contours import EqualLoudnessContours
+    from ..psychoacoustics.loudness.contours import (
+        EqualLoudnessContours,
+        LoudnessContour,
+    )
     from ..psychoacoustics.loudness.ecma import EcmaLoudness
     from ..psychoacoustics.loudness.moore_glasberg import MooreGlasbergLoudness
     from ..psychoacoustics.loudness.moore_glasberg_time import (
@@ -55,6 +58,8 @@ _AXIS_BARK_HMS = r"Critical-band rate $z$ [$\mathrm{Bark}_{\mathrm{HMS}}$]"
 _AXIS_TIME = "Time [s]"
 #: Frequency axis label shared by the spectral psychoacoustic renderers.
 _AXIS_FREQUENCY = "Frequency [Hz]"
+#: Sound-pressure-level ordinate of the equal-loudness contour views.
+_AXIS_SPL = "Sound pressure level [dB re 20 µPa]"
 #: Fewest time samples the HMS specific-value heatmap needs: with fewer than
 #: two time coordinates ``pcolormesh`` cannot span a mesh cell, so the
 #: heatmap panel of the two-panel figure is left empty.
@@ -123,9 +128,11 @@ _STRINGS: dict[str, str] = {
     "margin {m} dB": "margen {m} dB",
     "ECMA-418-1 {name} = {v} dB at {f} Hz: {verdict}": "ECMA-418-1 {name} = {v} dB a {f} Hz: {verdict}",
     _AXIS_FREQUENCY: "Frecuencia [Hz]",
-    "Sound pressure level [dB re 20 µPa]": "Nivel de presión acústica [dB re 20 µPa]",
+    _AXIS_SPL: "Nivel de presión acústica [dB re 20 µPa]",
     r"Hearing threshold $T_f$": r"Umbral de audición $T_f$",
     "ISO 226:2023 equal-loudness contours": "Curvas isofónicas ISO 226:2023",
+    "ISO 226:2023 equal-loudness contour, {p} phon": "Curva isofónica ISO 226:2023, {p} fonios",
+    r"ISO 226:2023 threshold of hearing $T_f$": r"Umbral de audición $T_f$ ISO 226:2023",
     "{p} phon": "{p} fonios",
     "ISO 226:2023 defines 20 to 90 phon; above 80 phon the contour is defined only up to 4 kHz.": "ISO 226:2023 define de 20 a 90 fonios; por encima de 80 fonios la curva solo se define hasta 4 kHz.",
 }
@@ -773,7 +780,7 @@ def plot_tone_assessment(
     ax = ax if ax is not None else _new_axes()
     ft = float(result.frequency)
     ratio = float(result.ratio_db)
-    criterion = float(result.criterion_db)
+    criterion = float(result.prominence_limit_db)
 
     def _tnr(f: np.ndarray) -> np.ndarray:
         return np.where(
@@ -1067,7 +1074,7 @@ def plot_equal_loudness_contours(
     ax.set_xlim(fmin, fmax)
     format_frequency_axis(ax, fmin, fmax, language=language)
     ax.set_xlabel(_t(_AXIS_FREQUENCY, language))
-    ax.set_ylabel(_t("Sound pressure level [dB re 20 µPa]", language))
+    ax.set_ylabel(_t(_AXIS_SPL, language))
     ax.set_title(_t("ISO 226:2023 equal-loudness contours", language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="upper right", fontsize="small")
@@ -1087,5 +1094,56 @@ def plot_equal_loudness_contours(
         ha="left",
         va="bottom",
     )
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_loudness_contour(
+    result: LoudnessContour,
+    *,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One ISO 226:2023 curve: an equal-loudness contour or the threshold.
+
+    Draws the sound pressure level of the tone against a logarithmic
+    frequency axis, titled with the loudness level of the contour, or as the
+    threshold of hearing :math:`T_f` when ``result.phon`` is ``None``.
+
+    :param result: A
+        :class:`~phonometry.psychoacoustics.loudness.contours.LoudnessContour`.
+    :param ax: Existing axes to draw on, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the curve ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    levels = np.asarray(result.levels, dtype=np.float64)
+    threshold = result.phon is None
+    style_default(kwargs, "color", _C_SECONDARY if threshold else _C_PRIMARY)
+    style_default(kwargs, "linestyle", "--" if threshold else "-")
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "markersize", 3.5)
+    ax.plot(freqs, levels, **kwargs)
+    fmin, fmax = float(freqs.min()), float(freqs.max())
+    ax.set_xlim(fmin, fmax)
+    format_frequency_axis(ax, fmin, fmax, language=language)
+    ax.set_xlabel(_t(_AXIS_FREQUENCY, language))
+    ax.set_ylabel(_t(_AXIS_SPL, language))
+    if result.phon is None:
+        ax.set_title(_t(r"ISO 226:2023 threshold of hearing $T_f$", language))
+    else:
+        ax.set_title(
+            _t("ISO 226:2023 equal-loudness contour, {p} phon", language).format(
+                p=format_number(result.phon, language, decimals=1, trim=True)
+            )
+        )
+    if "label" in kwargs:
+        ax.legend(loc="best", fontsize="small")
+    ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
     return ax

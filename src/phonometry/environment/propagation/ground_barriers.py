@@ -307,6 +307,9 @@ def spherical_reflection_coefficient(
     :return: Complex ``Q`` per frequency.
     :raises ValueError: If a height is negative, the distance is not positive,
         the impedance is zero, or its shape does not match the frequencies.
+    :raises TypeError: if ``distance``, ``receiver_height_m``, ``source_height_m`` or
+        ``speed_of_sound`` is not a single number, or ``frequencies`` holds a text or a
+        value that is not a real number.
     """
     require_scalar(distance, "distance")
     require_scalar(receiver_height_m, "receiver_height_m")
@@ -406,6 +409,9 @@ def ground_effect(
     :return: A :class:`SphericalGroundResult`.
     :raises ValueError: If neither or both of ``impedance``/``flow_resistivity_pa_s_m2``
         are given, a height is negative, or the distance is not positive.
+    :raises TypeError: if ``distance``, ``flow_resistivity_pa_s_m2``,
+        ``receiver_height_m`` or ``source_height_m`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     require_scalar(distance, "distance")
     require_scalar(receiver_height_m, "receiver_height_m")
@@ -468,6 +474,8 @@ def fresnel_number(
     :param speed_of_sound: Speed of sound ``c``, in m/s.
     :return: Fresnel number ``N`` per frequency.
     :raises ValueError: If a distance is not positive.
+    :raises TypeError: if ``speed_of_sound`` is not a single number, or ``frequencies``
+        holds a text or a value that is not a real number.
     """
     for name, value in (
         ("source_to_edge", source_to_edge),
@@ -700,7 +708,8 @@ class BarrierInsertionLoss(OwnsArrays):
         :raises ValueError: if the method is not a model the library
             implements, the loss covers no frequency, or the per-frequency
             fields disagree in length or carry a non-finite value.
-        :raises TypeError: if a required field is ``None``.
+        :raises TypeError: if a required field is ``None``, or ``method`` is
+            not a text.
         """
         require_present(
             self,
@@ -926,6 +935,9 @@ def barrier_insertion_loss(
     :return: A :class:`BarrierInsertionLoss`.
     :raises ValueError: On a non-positive/ordered geometry, or if a ground is
         requested with ``method="kurze_anderson"``.
+    :raises TypeError: if ``barrier_distance``, ``barrier_height_m``,
+        ``receiver_distance`` or ``thickness_m`` is not a single number, or
+        ``frequencies`` holds a text or a value that is not a real number.
     """
     thickness_m = _validate_barrier_geometry(
         source_height_m,

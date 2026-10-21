@@ -116,6 +116,7 @@ __all__ = [
     "low_frequency_element_normalized_difference",
     "low_frequency_intensity_reduction",
     "subarea_intensity_level",
+    "SubareaIntensityLevel",
     "surface_pressure_intensity_indicator",
 ]
 
@@ -533,6 +534,7 @@ def adaptation_term_kc(
     :raises ValueError: If ``frequencies`` is not positive/finite, if only one of
         ``boundary_area`` / ``volume`` is supplied, or if either is not
         positive.
+    :raises TypeError: if ``boundary_area`` or ``volume`` is not a single number.
     """
     f = np.asarray(frequencies, dtype=np.float64)
     if f.ndim != 1:
@@ -593,10 +595,28 @@ def surface_pressure_intensity_indicator(
     return p - i
 
 
+@dataclass(frozen=True)
+class SubareaIntensityLevel(OwnsArrays):
+    r"""The intensity level of a surface scanned in subareas (ISO 15186-1 F. (11)-(12)).
+
+    What :func:`subarea_intensity_level` returns: the combined level and the
+    area it is combined over, named, where a ``(LIn, Sm)`` tuple used to be
+    unpacked by position.
+
+    :ivar levels: :math:`L_{I\mathrm{n}}`, the normal sound intensity level
+        over the whole measurement surface, per band, in dB (Formula (11)).
+    :ivar measurement_area: :math:`S_\mathrm{m} = \sum_i \lvert S_{\mathrm{m}i}
+        \rvert`, the total measured area, in m² (Formula (12)).
+    """
+
+    levels: np.ndarray
+    measurement_area: float
+
+
 def subarea_intensity_level(
     l_in: Sequence[Sequence[float]] | np.ndarray,
     measurement_area: Sequence[float] | np.ndarray,
-) -> tuple[np.ndarray, float]:
+) -> SubareaIntensityLevel:
     r"""Combine per-subarea intensity levels (ISO 15186-1, Formulas (11)-(12)).
 
     When the measurement surface is divided into subareas ``Smi`` each scanned
@@ -623,9 +643,11 @@ def subarea_intensity_level(
     :param measurement_area: Subarea areas ``Smi``, in m² (one per row).
         Negative values mark reverse-flow subareas per Clause 6.4.6; zero is
         invalid.
-    :return: A tuple ``(LIn, Sm)`` with the combined level per band, in dB,
-        and the total measured area
-        :math:`S_\mathrm{m} = \sum \lvert S_{\mathrm{m}i} \rvert`, in m².
+    :return: The combination, as a :class:`SubareaIntensityLevel`: the
+        combined level per band, in dB, in its ``levels``, and the total
+        measured area
+        :math:`S_\mathrm{m} = \sum \lvert S_{\mathrm{m}i} \rvert`, in m²,
+        in its ``measurement_area``.
     :raises ValueError: If the shapes are inconsistent or values non-finite,
         if any subarea area is zero, or if the signed energy sum of
         Formula (11) is not positive in some band (the reverse flows cancel
@@ -664,7 +686,7 @@ def subarea_intensity_level(
         )
         raise ValueError(msg)
     l_in_total = 10.0 * np.log10(energy / sm)
-    return l_in_total, sm
+    return SubareaIntensityLevel(levels=l_in_total, measurement_area=float(sm))
 
 
 def intensity_sound_reduction(
@@ -710,6 +732,7 @@ def intensity_sound_reduction(
     :return: :class:`IntensityReductionResult`.
     :raises ValueError: If the band counts differ, if ``measurement_area`` /
         ``area`` are not positive, or if inputs are non-finite.
+    :raises TypeError: if ``area`` or ``measurement_area`` is not a single number.
     """
     lp1_bands = _as_band_levels(lp1, "lp1")
     l_in_bands = _as_band_levels(l_in, "l_in")
@@ -797,6 +820,8 @@ def intensity_element_normalized_difference(
     :raises ValueError: If the band counts differ, if ``measurement_area`` is
         not positive, if ``n`` is not a positive integer, or if inputs are
         non-finite.
+    :raises TypeError: if ``measurement_area`` is not a single number, or ``n`` is a
+        flag, a text or an array where a count goes.
     :warns LaboratoryInsulationWarning: If ``n > 1``, where the result departs
         from the printed sign of Formula (8).
     """
@@ -939,6 +964,8 @@ def limp_panel_reduction_index(
     :raises ValueError: for a non-finite or non-positive frequency, surface
         mass, area below 1 m², or a climate the formulas cannot be evaluated
         in.
+    :raises TypeError: if ``area``, ``static_pressure_pa``, ``surface_mass`` or
+        ``temperature_c`` is not a single number.
     """
     freqs = np.asarray(frequencies, dtype=np.float64)
     if freqs.ndim != 1:
@@ -1147,6 +1174,7 @@ class LowFrequencyIntensityResult(OwnsArrays):
         :raises ValueError: if the per-band arrays disagree in length, if
             ``frequencies`` is given and does not match them, or if either
             area is not positive and finite.
+        :raises TypeError: if ``area`` or ``measurement_area`` is not a single number.
         """
         require_ranks(self, r_i=1)
         if self.surface_pressure_intensity_indicator is not None:
@@ -1281,6 +1309,7 @@ def low_frequency_intensity_reduction(
     :raises ValueError: if the band counts differ, if either area is not
         positive, if any level is non-finite, or if ``frequencies`` carries a
         band outside the range this part is defined for.
+    :raises TypeError: if ``area`` or ``measurement_area`` is not a single number.
     """
     lp_bands = _as_band_levels(lp_surface, "lp_surface")
     l_in_bands = _as_band_levels(l_in, "l_in")
@@ -1353,6 +1382,7 @@ class LowFrequencyElementResult(OwnsArrays):
         :raises ValueError: if the per-band arrays disagree in length, if
             ``frequencies`` is given and does not match them, or if the
             measurement area is not positive and finite.
+        :raises TypeError: if ``measurement_area`` is not a single number.
         """
         require_ranks(self, d_i_n_e=1)
         if self.surface_pressure_intensity_indicator is not None:
@@ -1457,6 +1487,8 @@ def low_frequency_element_normalized_difference(
         not positive, if ``n_elements`` is not a positive integer, if any level
         is non-finite, or if ``frequencies`` carries a band outside the range
         this part is defined for.
+    :raises TypeError: if ``measurement_area`` is not a single number, or ``n_elements``
+        is a flag, a text or an array where a count goes.
     """
     lp_bands = _as_band_levels(lp_surface, "lp_surface")
     l_in_bands = _as_band_levels(l_in, "l_in")

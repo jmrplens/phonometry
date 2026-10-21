@@ -418,6 +418,8 @@ def reflection_grid_paths_m(
         column 1 is :math:`d_{\mathrm{r},k}`, rows in microphone order 1 to 9.
     :raises ValueError: If a distance is not positive or the grid does not
         stand between the loudspeaker and the plane.
+    :raises TypeError: if ``grid_spacing_m``, ``microphone_distance_m`` or
+        ``source_distance_m`` is not a single number.
     """
     lateral, vertical, source_grid = _grid_geometry(
         source_distance_m, microphone_distance_m, grid_spacing_m
@@ -474,6 +476,8 @@ def reflection_sampled_area_radius_m(
         test (5.7.3), in metres per second.
     :return: The radius, in metres.
     :raises ValueError: If the window length or the speed is not positive.
+    :raises TypeError: if ``speed_of_sound`` or ``window_length_s`` is not a single
+        number.
     """
     return max_sampled_area_radius(
         require_positive(window_length_s, "window_length_s"),
@@ -536,6 +540,7 @@ def adrienne_reflection_window(
         the flat part begins, is sample ``round(0.5e-3 * fs)``.
     :raises ValueError: If ``fs`` is not positive, the length does not exceed
         the 0,5 ms leading edge, or the flat part is shorter than a sample.
+    :raises TypeError: if ``fs`` or ``window_length_s`` is not a single number.
     """
     rate = require_positive(fs, "fs")
     leading, flat, trailing = _window_parts(window_length_s)
@@ -599,6 +604,7 @@ def adrienne_low_frequency_limit(window_length_s: float) -> float:
     :return: The frequency of the first minimum of the magnitude spectrum, in
         hertz: 162,5 Hz for 7,9 ms and 216,5 Hz for 6,0 ms.
     :raises ValueError: If the length does not exceed the 0,5 ms leading edge.
+    :raises TypeError: if ``window_length_s`` is not a single number.
     """
     _window_parts(window_length_s)
     step = 0.02 / window_length_s
@@ -1174,7 +1180,7 @@ class ReflectionIndexUncertainty(OwnsArrays):
         ``frequencies``, in units of the index itself: :math:`RI` is a ratio,
         and Table B.2 prints its :math:`U_j` beside it as one (0,62 at
         100 Hz against an :math:`RI` of 0,58).
-    :ivar rating_db: :math:`U` of the single-number rating :math:`DL_{RI}`,
+    :ivar rating_expanded_uncertainty_db: :math:`U` of the single-number rating :math:`DL_{RI}`,
         in decibels, the one row of Table A.1 that is a level.
     :ivar estimate: The column of Table A.1 read: ``"median"``, ``"low"`` or
         ``"high"``.
@@ -1183,7 +1189,7 @@ class ReflectionIndexUncertainty(OwnsArrays):
 
     frequencies: NDArray[np.float64]
     expanded_uncertainty: NDArray[np.float64]
-    rating_db: float
+    rating_expanded_uncertainty_db: float
     estimate: Literal["median", "low", "high"]
     coverage_factor: float
 
@@ -1226,6 +1232,8 @@ def reflection_index_expanded_uncertainty(
         :math:`U_j` aligned with the bands, in units of the index, and the
         :math:`U` of :math:`DL_{RI}`, in decibels.
     :raises ValueError: On an unknown column or a non-positive factor.
+    :raises TypeError: if ``estimate`` is not a text, or ``coverage_factor`` is not a
+        single number.
     """
     column = ("median", "low", "high").index(
         require_choice(estimate, "estimate", ("median", "low", "high"))
@@ -1241,7 +1249,7 @@ def reflection_index_expanded_uncertainty(
     return ReflectionIndexUncertainty(
         frequencies=np.asarray(_BANDS_HZ, dtype=np.float64),
         expanded_uncertainty=factor * per_band,
-        rating_db=float(factor * rating),
+        rating_expanded_uncertainty_db=float(factor * rating),
         estimate=estimate,
         coverage_factor=factor,
     )
@@ -1362,6 +1370,7 @@ def reflection_index(
     :raises ValueError: If the records are not shaped as above, the rate is
         missing or disagrees, a window does not fit its record, or a
         parameter is out of range.
+    :raises TypeError: if ``speed_of_sound`` is not a single number.
     :warns BarrierReflectionWarning: For an :math:`R_\mathrm{sub}` below 10 dB, a
         gain factor more than 20 % from 1, or a sample rate below 44 kHz.
     """
@@ -1575,6 +1584,8 @@ def reflection_low_frequency_limit(
         between the ground and the top edge, the sample is narrower than the
         grid, or at some microphone the ground reflection or an edge arrives no
         later than the reflection itself (a device below about 1,7 m).
+    :raises TypeError: if ``device_height_m``, ``device_length_m``, ``source_height_m``
+        or ``speed_of_sound`` is not a single number.
     """
     height = require_positive(device_height_m, "device_height_m")
     speed = require_positive(speed_of_sound, "speed_of_sound")
@@ -1673,6 +1684,7 @@ class ReflectionGridCheck(OwnsArrays):
 
         :raises ValueError: If the check is not ``"relative"`` or ``"grid"``,
             or there are not nine finite path differences.
+        :raises TypeError: if ``check`` is not a text.
         """
         require_choice(self.check, "check", ("relative", "grid"))
         measured = np.asarray(self.path_differences_m, dtype=np.float64)
@@ -1788,6 +1800,8 @@ def check_reflection_grid_position(
     :return: The :class:`ReflectionGridCheck` verdict.
     :raises ValueError: If there are not nine finite delays, the speed is not
         positive or the check is unknown.
+    :raises TypeError: if ``check`` is not a text, or ``speed_of_sound`` is not a single
+        number.
     """
     kind = require_choice(check, "check", ("relative", "grid"))
     speed = require_positive(speed_of_sound, "speed_of_sound")

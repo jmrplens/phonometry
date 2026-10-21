@@ -416,7 +416,9 @@ def generate_rotorcraft_flyover_event(output_dir: str) -> None:
         + direct[None, :, None]
         - 0.02 * np.abs(az)[:, None, None]
     )
-    hemisphere = aircraft.RotorcraftHemisphere(freqs, az, po, levels)
+    hemisphere = aircraft.RotorcraftHemisphere(
+        frequencies=freqs, azimuth_deg=az, polar_deg=po, levels=levels
+    )
 
     speed = 30.87  # 60 kt, in m/s
     t = np.arange(0.0, 130.01, 0.5)
@@ -1239,7 +1241,9 @@ def _synthetic_hemisphere(*, masked: bool = False) -> "RotorcraftHemisphere":
             (np.abs(az)[:, None] > 60.0) | (po[None, :] < 40.0) | (po[None, :] > 140.0)
         )
         levels = np.where(unseen[:, :, None], np.nan, levels)
-    return aircraft.RotorcraftHemisphere(freqs, az, po, levels)
+    return aircraft.RotorcraftHemisphere(
+        frequencies=freqs, azimuth_deg=az, polar_deg=po, levels=levels
+    )
 
 
 def _level_flyover_track() -> "tuple[Any, Any, float]":

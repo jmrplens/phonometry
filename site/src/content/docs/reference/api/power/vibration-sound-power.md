@@ -74,6 +74,12 @@ integer decibel to index the standard's table.
 
 **Returns:** The correction `K1A` to subtract, in dB.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `level_difference` is not a single number. |
+
 ## mean_velocity_level
 
 ```python
@@ -147,6 +153,7 @@ With the default `radiation_factor = 1` this is the Part 1 *upper limit*
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive area, reference area or impedance. |
+| TypeError | if `area`, `normalized_impedance`, `reference_area` or `reference_impedance` is not a single number. |
 
 ## radiation_factor
 
@@ -182,6 +189,7 @@ surface area and the mean-square vibratory velocity.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive area or impedance. |
+| TypeError | if `area` or `impedance` is not a single number. |
 
 ## REFERENCE_VELOCITY_M_S
 
@@ -244,6 +252,7 @@ $L_v = 20 \log_{10}(v/v_0)$ with `v0` the reference velocity.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive reference. |
+| TypeError | if `reference` is not a single number. |
 
 ## velocity_level_from_acceleration
 
@@ -276,6 +285,7 @@ r.m.s. velocity level.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive frequency or reference. |
+| TypeError | if `reference` is not a single number. |
 
 ## VibrationSoundPowerResult
 

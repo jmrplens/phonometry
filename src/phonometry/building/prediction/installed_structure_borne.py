@@ -594,6 +594,7 @@ def typical_element_mobility(
     :raises ValueError: for an unknown row, a missing or surplus describing
         quantity, a ``frequency`` that the row does not take (or lacks), or a
         non-positive value.
+    :raises TypeError: if ``structure`` is not a text.
     """
     row = require_choice(structure, "structure", tuple(TABLE_D1_QUANTITIES))
     args = _table_d1_arguments(
@@ -750,6 +751,7 @@ def tapping_machine_force_level_estimate(
         "re 1 pN"; see ``docs/ERRATA.md``).
     :raises ValueError: for a non-positive frequency or a band set other than
         1 or 3.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
     """
     coefficient = _TAPPING_MACHINE_COEFFICIENT[
         require_band_fraction(fraction, "fraction")
@@ -816,6 +818,7 @@ def tapping_machine_coupling_term(
         D.1.3 and ISO 10140-5).
     :return: The coupling term ``D_C,i``, in dB.
     :raises ValueError: for a non-positive frequency, mobility or mass.
+    :raises TypeError: if ``hammer_mass`` is not a single number.
     """
     f = _positive_values(frequency, "frequency")
     y_i = _positive_values(receiver_mobility, "receiver_mobility")
@@ -858,6 +861,7 @@ def multi_junction_adjustment(n_junctions: int) -> float:
     :param n_junctions: Number of junctions the transmission path crosses (>= 1).
     :return: The adjustment ``dK``, in dB (0,0 for a single junction).
     :raises ValueError: for fewer than one junction.
+    :raises TypeError: if ``n_junctions`` is not a single number.
     """
     require_scalar(n_junctions, "n_junctions")
     if n_junctions < 1:
@@ -901,6 +905,8 @@ def structure_to_airborne_adjustment(
     :return: The adjustment term ``D_sa,i``, in dB.
     :raises ValueError: for a non-positive frequency, critical frequency, mass
         or radiation factor.
+    :raises TypeError: if ``critical_frequency`` or ``mass_per_area`` is not a single
+        number.
     """
     f = _positive_values(frequency, "frequency")
     f_c = require_positive(critical_frequency, "critical_frequency")
@@ -946,6 +952,7 @@ def installed_power_from_reception_plate(
         level).
     :return: The mobility-corrected power level, in dB re 1 pW.
     :raises ValueError: for a non-positive receiver or plate mobility.
+    :raises TypeError: if ``plate_mobility`` is not a single number.
     """
     plate_mobility = require_positive(plate_mobility, "plate_mobility")
     lw = np.asarray(reception_plate_level, dtype=np.float64)
@@ -1001,6 +1008,7 @@ def structure_borne_pressure_level_path(
     :param reference_area: Reference area :math:`S_0 = A_0` (Default: 10 m^2).
     :return: The normalised path sound pressure level ``L_n,s,ij``, in dB.
     :raises ValueError: for a non-positive area.
+    :raises TypeError: if ``element_area`` or ``reference_area`` is not a single number.
     """
     element_area = require_positive(element_area, "element_area")
     reference_area = require_positive(reference_area, "reference_area")

@@ -371,7 +371,7 @@ response = electroacoustics.coupler_frequency_response(
 crosstalk = electroacoustics.crosstalk_attenuation(
     np.full(frequencies.size, 100.0), 52.0 - 12.0 * np.log10(frequencies / 1000.0) ** 2, frequencies=frequencies
 )
-print(response.covers_rated_range, round(crosstalk.min_db, 1))  # True 48.0
+print(response.covers_rated_range, round(crosstalk.min_attenuation, 1))  # True 48.0
 ```
 
 None of these responses has a tolerance: "It is not at present possible to set
@@ -440,8 +440,8 @@ field = 70.0 + rng.normal(0.0, 0.4, (8, 2, frequencies.size))
 earphone = field + shape_db + rng.normal(0.0, 0.6, (8, 2, frequencies.size))
 ear_canal = electroacoustics.ear_canal_frequency_response(earphone, field, frequencies=frequencies)
 band = list(frequencies).index(2500.0)
-print(comparison.meets_panel_size, round(comparison.mean_db[band], 1))  # True 2.8
-print(round(ear_canal.mean_db[band], 1), ear_canal.fittings_consistent.all())  # 3.2 True
+print(comparison.meets_panel_size, round(comparison.mean_response_db[band], 1))  # True 2.8
+print(round(ear_canal.mean_response_db[band], 1), ear_canal.fittings_consistent.all())  # 3.2 True
 print(comparison.reference_frequency_hz, ear_canal.reference_frequency_hz)  # 1000.0 500.0
 ```
 

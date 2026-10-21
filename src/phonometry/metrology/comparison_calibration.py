@@ -540,31 +540,31 @@ class ComparisonUncertaintyRow(RichDisplay):
     :ivar component: The component as the table prints it.
     :ivar subclauses: The subclauses the table refers the component to
         (Table 2); empty for Table D.1, which prints none.
-    :ivar stated_db: The value the row's text states, in dB: a semi-range or
+    :ivar stated_uncertainty_db: The value the row's text states, in dB: a semi-range or
         an expanded uncertainty with :math:`k = 2`, as :attr:`divisor` says;
         ``None`` for the repeatability of Table D.1, whose text states none,
         and for Table 2.
-    :ivar divisor: What turns :attr:`stated_db` into a standard uncertainty:
+    :ivar divisor: What turns :attr:`stated_uncertainty_db` into a standard uncertainty:
         :math:`\sqrt{3}` for the semi-range of a rectangular distribution, 2
         for an expanded uncertainty with :math:`k = 2`; ``None`` where
-        :attr:`stated_db` is.
+        :attr:`stated_uncertainty_db` is.
     :ivar standard_uncertainty_db: The standard uncertainty the table prints,
         in dB; ``None`` for Table 2.
     """
 
     component: str
     subclauses: tuple[str, ...] = ()
-    stated_db: float | None = None
+    stated_uncertainty_db: float | None = None
     divisor: float | None = None
     standard_uncertainty_db: float | None = None
 
 
 def _d1_row(
-    component: str, stated_db: float, divisor: float, printed_db: float
+    component: str, stated_uncertainty_db: float, divisor: float, printed_db: float
 ) -> ComparisonUncertaintyRow:
     return ComparisonUncertaintyRow(
         component=component,
-        stated_db=stated_db,
+        stated_uncertainty_db=stated_uncertainty_db,
         divisor=divisor,
         standard_uncertainty_db=printed_db,
     )
@@ -767,7 +767,7 @@ def _relative_humidity(value: float, name: str) -> float:
     return float(value)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class EnvironmentalSensitivityCorrection(OwnsArrays):
     r"""The change of a microphone's sensitivity level between two sets of
     environmental conditions, to first order in each.
@@ -1453,6 +1453,7 @@ def diameter_sound_field_correction(
         outer radius smaller than the diaphragm's or not smaller than
         :math:`a`, conditions Annex F refuses, a gas at another pressure, or a
         frequency at which a mode of the gap is exactly at its cut-off.
+    :raises TypeError: if ``static_pressure_kpa`` is not a single number.
     """
     frequencies = _frequency_axis(frequencies)
     lengths = {
@@ -1578,6 +1579,7 @@ class ComparisonCalibration(OwnsArrays):
             determination, a negative uncertainty, an unknown field or
             excitation, or the phase of the reference without the phase
             readings, or the other way round.
+        :raises TypeError: if ``excitation`` or ``field`` is not a text.
         """
         require_choice(self.field, "field", CALIBRATION_FIELDS)
         require_choice(self.excitation, "excitation", _EXCITATIONS)
@@ -1745,6 +1747,7 @@ class ComparisonCalibration(OwnsArrays):
             (``pip install phonometry[plot]``).
         :raises ValueError: for an unknown quantity, or the phase of a
             calibration of the level alone.
+        :raises TypeError: if ``quantity`` is not a text.
         """
         from .._i18n import check_language
         from .._plot.metrology import (
@@ -2213,6 +2216,7 @@ def simultaneous_comparison(
         numbers of determinations disagree, any column that is not one
         finite value per frequency, or phase readings that do not follow the
         level readings.
+    :raises TypeError: if ``field`` is not a text.
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
@@ -2359,6 +2363,7 @@ def sequential_comparison(
         frequencies, readings whose numbers of determinations disagree, any
         column that is not one finite value per frequency, or monitor phases
         without the output phases.
+    :raises TypeError: if ``field`` is not a text.
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
@@ -2447,6 +2452,8 @@ class ComparisonUncertaintyBudget(OwnsArrays):
             positive, an unknown field, columns that do not hold one entry per
             component, a negative uncertainty, or an :attr:`uncertainty` that
             is not the root-sum-square of the components.
+        :raises TypeError: if ``field`` is not a text, or ``coverage_factor`` or
+            ``frequency_hz`` is not a single number.
         """
         require_positive(self.frequency_hz, "frequency_hz")
         require_positive(self.coverage_factor, "coverage_factor")
@@ -2596,6 +2603,8 @@ def comparison_uncertainty_budget(
         table, an additional component without a name or with the name of
         another component, no component at all, or a value that is negative
         or not finite.
+    :raises TypeError: if ``field`` is not a text, or ``coverage_factor`` or
+        ``frequency_hz`` is not a single number.
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     table = _BUDGET_TABLES[field]
@@ -2755,6 +2764,7 @@ class JigCouplerVerification(OwnsArrays):
             with an expanded uncertainty of 0 dB at some frequency (two
             uncertainties of 0 dB, or two that are all shared), or an unknown
             validation.
+        :raises TypeError: if ``validation`` is not a text.
         """
         require_choice(self.validation, "validation", _VALIDATIONS)
         frequencies = _frequency_axis(self.frequencies)
@@ -3030,7 +3040,8 @@ def verify_jig_or_coupler(
         shared standard uncertainty that is negative, not one value per
         frequency of ``calibration``, larger than the standard uncertainty
         of either calibration, or all of both.
-    :raises TypeError: for a validation that is neither calibration.
+    :raises TypeError: for a validation that is neither calibration, or a
+        ``microphone`` that is not one number.
     """
     if not isinstance(calibration, ComparisonCalibration):
         msg = "'calibration' must be a ComparisonCalibration."
@@ -3188,6 +3199,8 @@ def free_field_region(
     :return: The :class:`FreeFieldRegion`.
     :raises ValueError: for a separation or window that is not positive, or
         conditions Annex F refuses.
+    :raises TypeError: if ``relative_humidity_percent``, ``static_pressure_kpa`` or
+        ``temperature_c`` is not a single number.
     """
     require_scalar(relative_humidity_percent, "relative_humidity_percent")
     require_scalar(temperature_c, "temperature_c")
@@ -3287,6 +3300,8 @@ def reflection_free_window_s(
     :raises ValueError: for a separation that is not positive, a reflected
         path that is not longer than the direct one, or conditions Annex F
         refuses.
+    :raises TypeError: if ``reflected_path_m``, ``source_distance_m`` or
+        ``static_pressure_kpa`` is not a single number.
     """
     distance = require_positive(source_distance_m, "source_distance_m")
     path = require_positive(reflected_path_m, "reflected_path_m")
@@ -3374,6 +3389,7 @@ class ImpedancePressureRatio(OwnsArrays):
         :raises ValueError: for frequencies that are not positive and
             increasing, an unknown coupling, or a column that is not one
             finite value per frequency.
+        :raises TypeError: if ``coupling`` is not a text.
         """
         require_choice(self.coupling, "coupling", ("coupler", "series"))
         frequencies = _frequency_axis(self.frequencies)
@@ -3435,6 +3451,7 @@ class ImpedancePressureRatio(OwnsArrays):
         :return: The axes. Requires matplotlib
             (``pip install phonometry[plot]``).
         :raises ValueError: for an unknown quantity.
+        :raises TypeError: if ``quantity`` is not a text.
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_impedance_pressure_ratio
@@ -3523,6 +3540,9 @@ def impedance_pressure_ratio(
         not exactly one of the two couplings, a series impedance of zero, a
         column that is not one finite value per frequency, or a coupling and
         a test microphone whose equivalent volumes cancel.
+    :raises TypeError: if ``coupling_equivalent_volume_m3``,
+        ``coupling_impedance_pa_s_m3``, ``reference_equivalent_volume_m3`` or
+        ``test_equivalent_volume_m3`` holds a text.
     """
     frequencies = _frequency_axis(frequencies)
     count = frequencies.size
@@ -3651,6 +3671,8 @@ def air_gap_series_impedance_pa_s_m3(
     :raises ValueError: for frequencies that are not positive and increasing,
         a length or radius that is not positive, conditions Annex F refuses,
         or a gas at another pressure.
+    :raises TypeError: if ``gap_length_m``, ``gap_radius_m`` or ``static_pressure_kpa``
+        is not a single number.
     """
     frequencies = _frequency_axis(frequencies)
     length = require_positive(gap_length_m, "gap_length_m")
@@ -3724,6 +3746,8 @@ class RectangularPulse(RichDisplay):
         :param frequencies: Any frequencies, in Hz.
         :return: :math:`X(f)` at each.
         :raises ValueError: for a frequency that is not finite.
+        :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+            number.
         """
         frequencies = require_finite_array(frequencies, "frequencies")
         # numpy's sinc is sin(pi x)/(pi x): with x = 2 f b it is (B.10) over 2ab.
@@ -3760,6 +3784,7 @@ class RectangularPulse(RichDisplay):
         :param kwargs: Forwarded to the spectrum.
         :return: The axes. Requires matplotlib
             (``pip install phonometry[plot]``).
+        :raises TypeError: if ``upper_frequency_hz`` is not a single number.
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_rectangular_pulse
@@ -3825,6 +3850,8 @@ def rectangular_pulse_duration_s(
     :return: :math:`T`, in s.
     :raises ValueError: for a frequency that is not positive or a ratio that
         is not above 1.
+    :raises TypeError: if ``upper_frequency_hz`` or ``zero_ratio`` is not a single
+        number.
     """
     upper = require_positive(upper_frequency_hz, "upper_frequency_hz")
     ratio = require_positive(zero_ratio, "zero_ratio")
@@ -3927,6 +3954,10 @@ class TimeSelectiveResponse(OwnsArrays):
             shape, a taper outside 0 to 1, or a window that does not begin
             before it ends, begins before the record or ends after it, or
             holds fewer than two samples.
+        :raises TypeError: if ``window_shape`` is not a text, ``fs``,
+            ``taper_fraction``, ``window_end_s`` or ``window_start_s`` is not a single
+            number, or ``impulse_response`` holds a text or a value that is not a real
+            number.
         """
         response = require_finite_array(self.impulse_response, "impulse_response")
         if response.size < _MIN_WINDOW_SAMPLES:
@@ -4092,6 +4123,7 @@ class TimeSelectiveResponse(OwnsArrays):
         :return: The :class:`FreeFieldRegion`.
         :raises ValueError: for an arrival at or after the end of the window,
             or what :func:`free_field_region` refuses.
+        :raises TypeError: if ``arrival_time_s`` is not a single number.
         """
         arrival = require_non_negative(arrival_time_s, "arrival_time_s")
         if arrival >= self.window_end_s:
@@ -4131,6 +4163,7 @@ class TimeSelectiveResponse(OwnsArrays):
         :return: The axes. Requires matplotlib
             (``pip install phonometry[plot]``).
         :raises ValueError: for an unknown quantity.
+        :raises TypeError: if ``quantity`` is not a text.
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_time_selective_response
@@ -4229,6 +4262,8 @@ class SteppedSineImpulseResponse(OwnsArrays):
 
         :raises ValueError: for a step that is not positive or a response that
             is not one finite value per sample.
+        :raises TypeError: if ``frequency_step_hz`` is not a single number, or
+            ``impulse_response`` holds a text or a value that is not a real number.
         """
         object.__setattr__(
             self,
@@ -4318,6 +4353,8 @@ def stepped_sine_impulse_response(
     :raises ValueError: for fewer than two frequencies, an axis that does not
         start at 0 Hz or is not equally spaced, or a response that is not one
         finite value per frequency.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number, or ``response`` holds a text.
     """
     frequencies = require_finite_array(frequencies, "frequencies")
     if frequencies.size < _MIN_WINDOW_SAMPLES:

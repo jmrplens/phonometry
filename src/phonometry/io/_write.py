@@ -543,6 +543,7 @@ def write_wav_stream(
         frames and ``frames`` was not an estimate -- the header already
         promised that length, so a mismatch is a corrupt file, not a
         rounding detail.
+    :raises TypeError: if ``frames`` is not a single number.
     """
     require_scalar(frames, "frames")
     header = build_wav_header(
@@ -808,6 +809,7 @@ def write(
         no sidecar holds or whose sidecar would pass the 1 MiB a reader
         takes, or one with a pipe, a device, a socket or a directory at the
         sidecar's name, refused before the audio is written.
+    :raises TypeError: if ``fs`` is a flag, a text or an array where a count goes.
     """
     target = Path(path)
     _check_target_suffix(path, target)

@@ -198,6 +198,8 @@ def test_scalar_per_frequency_fields_are_refused() -> None:
             surface_impedance=1200.0 + 300.0j,
             normalized_impedance=2.9 + 0.7j,
             absorption=0.74,
+            spacing_m=0.05,
+            x1=0.1,
         )
 
 
@@ -219,6 +221,8 @@ def test_all_empty_result_is_refused() -> None:
             surface_impedance=empty_complex,
             normalized_impedance=empty_complex,
             absorption=empty,
+            spacing_m=0.05,
+            x1=0.1,
         )
 
 

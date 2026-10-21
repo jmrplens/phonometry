@@ -416,6 +416,7 @@ def free_field_reference_level(
         metres.
     :return: The level referred to 10 m, in dB, in the shape of ``level``.
     :raises ValueError: If ``distance`` is not a positive, finite length.
+    :raises TypeError: if ``distance`` is not a single number.
     """
     require_scalar(distance, "distance")
     values = np.asarray(level, dtype=np.float64)
@@ -880,6 +881,7 @@ def early_lateral_energy_fraction(
         is silent, if the two responses do not split into the same number of
         bands or are of different lengths, or if they are too short for the
         80 ms window.
+    :raises TypeError: if ``weighting`` is not a text.
     """
     require_choice(weighting, "weighting", LATERAL_WEIGHTINGS)
     fs = resolve_fs(ir, fs, name="ir")
@@ -1099,6 +1101,7 @@ def late_lateral_average(levels: ArrayLike) -> float:
         order of :data:`LATE_LATERAL_AVERAGE_BANDS_HZ`.
     :return: :math:`L_{J,\mathrm{avg}}` in dB.
     :raises ValueError: If four values are not given, or they are not finite.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     values = require_finite_array(levels, "levels")
     if values.size != len(LATE_LATERAL_AVERAGE_BANDS_HZ):
@@ -1971,6 +1974,7 @@ def gliding_directivity_deviation(levels: ArrayLike) -> NDArray[np.float64]:
         against the whole-turn reference.
     :raises ValueError: If the bearings do not divide the arc a whole number
         of times, or there are too few of them to make one.
+    :raises TypeError: if ``levels`` holds a text or a value that is not a real number.
     """
     values = require_finite_array(levels, "levels")
     bearings = values.size
@@ -1999,6 +2003,7 @@ def source_directivity_limit(center: float) -> float:
     :raises ValueError: If Table 1 has no row for that band. It prints six,
         125 Hz to 4 kHz, and a survey in the 63 Hz or 8 kHz octave has no
         printed limit to be held to rather than the nearest one.
+    :raises TypeError: if ``center`` is not a single number.
     """
     require_scalar(center, "center")
     if center not in MAX_SOURCE_DIRECTIVITY_DEVIATION_DB:

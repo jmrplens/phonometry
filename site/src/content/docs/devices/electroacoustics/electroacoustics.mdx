@@ -535,7 +535,8 @@ res = electroacoustics.transfer_function(x, y, fs, estimator="H1")
 print(res.magnitude_db, res.phase_rad, res.coherence)
 res.plot()   # Bode magnitude/phase + coherence (needs matplotlib)
 
-freqs, gamma2 = electroacoustics.coherence(x, y, fs)
+coh = electroacoustics.coherence(x, y, fs)
+freqs, gamma2 = coh.frequencies, coh.coherence
 ```
 
 **Acquiring `x` and `y`.** Capture the reference and the response on two

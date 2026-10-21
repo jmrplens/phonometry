@@ -288,6 +288,7 @@ the sample standard deviation and $\gamma$ the confidence level,
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a value outside 1 to 5, a confidence level not strictly between 0 and 1, or sites that do not match the responses. |
+| TypeError | if `confidence` is not a single number. |
 
 ## MethodASummary
 
@@ -452,6 +453,7 @@ exact for bivariate normal data.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for variables of different lengths, fewer than three pairs, a non-finite value or a constant variable. |
+| TypeError | if `alternative` is not a text. |
 
 ## PERCEIVED_AFFECTIVE_QUALITY_ATTRIBUTES
 
@@ -506,6 +508,7 @@ attributes they name are part 2, and that is what they are applied to
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a mapping that does not name the eight attributes, a value outside 1 to 5, or sites that do not match the respondents. |
+| TypeError | if `central_tendency` is not a text. |
 
 ## PLEASANTNESS_EVENTFULNESS_RANGE
 
@@ -935,3 +938,4 @@ reported without naming a test.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for variables of different lengths, fewer than three pairs, a non-finite value or a constant variable. |
+| TypeError | if `alternative` is not a text. |

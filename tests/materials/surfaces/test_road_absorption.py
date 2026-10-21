@@ -320,7 +320,8 @@ def test_adrienne_window_guards() -> None:
 def test_one_third_octave_band_count_part1() -> None:
     freq = np.linspace(100.0, 6000.0, 8000)
     alpha = np.full_like(freq, 0.3)
-    centres, band = one_third_octave_absorption(frequencies=freq, absorption=alpha)
+    bands = one_third_octave_absorption(frequencies=freq, absorption=alpha)
+    centres, band = bands.frequencies, bands.absorption
     assert centres.shape == (13,)  # 250..4000 Hz, Annex E
     assert centres[0] == 250.0
     assert centres[-1] == 4000.0
@@ -330,21 +331,21 @@ def test_one_third_octave_band_count_part1() -> None:
 def test_one_third_octave_band_count_spot() -> None:
     freq = np.linspace(100.0, 3000.0, 6000)
     alpha = np.full_like(freq, 0.05)
-    centres, _ = one_third_octave_absorption(
+    centres = one_third_octave_absorption(
         frequencies=freq, absorption=alpha, f_max=SPOT_FREQUENCY_RANGE_HZ[1]
-    )
+    ).frequencies
     assert centres.shape == (9,)  # 250..1600 Hz (Annex D of Part 2)
 
 
 def test_one_third_octave_clipping() -> None:
     freq = np.linspace(200.0, 4500.0, 6000)
     alpha = np.full_like(freq, -0.02)
-    _, clipped = one_third_octave_absorption(
+    clipped = one_third_octave_absorption(
         frequencies=freq, absorption=alpha, clip_negative=True
-    )
-    _, raw = one_third_octave_absorption(
+    ).absorption
+    raw = one_third_octave_absorption(
         frequencies=freq, absorption=alpha, clip_negative=False
-    )
+    ).absorption
     np.testing.assert_allclose(clipped, 0.0, atol=1e-12)
     assert np.all(raw < 0.0)
 

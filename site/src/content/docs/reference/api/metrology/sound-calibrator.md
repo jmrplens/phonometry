@@ -385,6 +385,7 @@ The `(deviation, uncertainty)` pairs measured for a requirement.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown requirement. |
+| TypeError | if `requirement` is not a text. |
 
 ## SoundCalibratorRequirement
 
@@ -608,3 +609,4 @@ static-pressure correction is added to it (5.3.2, B.4.3.2).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown class or environmental test, a nominal frequency the class has no acceptance limit at, a static-pressure correction given for a class that is not an /M pistonphone, or one missing for an /M pistonphone whose level is given. |
+| TypeError | if `nominal_frequency_hz` is not a single number. |

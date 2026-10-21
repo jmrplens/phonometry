@@ -17,7 +17,12 @@ from .distortion import (
     thd_plus_noise,
     weighted_thd,
 )
-from .frequency_response import FrequencyResponseResult, coherence, transfer_function
+from .frequency_response import (
+    CoherenceResult,
+    FrequencyResponseResult,
+    coherence,
+    transfer_function,
+)
 from .headphones import (
     ACOUSTIC_COUPLINGS,
     BACK_RADIATIONS,
@@ -79,6 +84,7 @@ from .induction_loop_components import (
     NECK_LOOP_TYPES,
     AGCCharacteristic,
     AmplifierFrequencyResponse,
+    LoopDimensions,
     LoopField,
     LoopImpedance,
     MaxOutputCurrent,
@@ -218,6 +224,7 @@ __all__ = [
     "check_limiting_test_signal",
     "check_program_signal",
     "coherence",
+    "CoherenceResult",
     "combi_signal",
     "compliance_voltage",
     "coupler_frequency_response",
@@ -245,6 +252,7 @@ __all__ = [
     "loop_center_field",
     "loop_current",
     "loop_dimensions",
+    "LoopDimensions",
     "loop_impedance",
     "loop_resistance",
     "loop_test_noise",

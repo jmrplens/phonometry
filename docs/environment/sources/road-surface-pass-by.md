@@ -69,7 +69,7 @@ result = environment.statistical_pass_by(
     speeds,
     levels,
     road_speed_category="medium",
-    reference_db=environment.SPB_NORMALIZED_REFERENCE_DB,
+    reference_levels=environment.SPB_NORMALIZED_REFERENCE_LEVELS,
 )
 print(dict(result.reported_vehicle_sound_levels))  # {'1': 78.9, '2a': 81.0, '2b': 83.7}
 print(result.reported_index)                       # 80.1 dB
@@ -106,7 +106,7 @@ surfaces under a standard mix and is not an equivalent level of any traffic
 (9.5 NOTE). In many cases it is used as a difference from a reference surface
 (clause 10): a real dense asphalt concrete (10.1), a normalized case set by
 convention (10.2, with the Annex D example of seven dense bituminous surfaces as
-`SPB_ANNEX_D_SURFACES_DB` and its average `SPB_NORMALIZED_REFERENCE_DB`), the
+`SPB_ANNEX_D_SURFACE_LEVELS` and its average `SPB_NORMALIZED_REFERENCE_LEVELS`), the
 same surface at the same age (10.3) or any surface chosen (10.4). The standard
 gives no temperature correction (9.4): corrected levels are an input,
 `corrected_vehicle_sound_levels`, and the index is computed for them too,

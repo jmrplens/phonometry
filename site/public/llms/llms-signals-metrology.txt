@@ -639,7 +639,8 @@ print(round(result.combined_uncertainty, 3))  # 0.407 dB
 print(result.contributions.round(3))          # [0.    0.115 0.173 0.35 ]
 print(round(result.effective_dof, 1))         # 16.5
 
-k, U = result.expanded(0.95)
+expanded = result.expanded(0.95)
+k, U = expanded.coverage_factor, expanded.expanded_uncertainty
 print(round(k, 2), round(U, 2))               # 2.11 0.86  ->  Y = 74.0 ± 0.9 dB
 ```
 
@@ -743,7 +744,8 @@ model = lambda a, b, c, d: a + b + c + d
 result = metrology.uncertainty_propagation(model, quantities)
 mc = metrology.monte_carlo(model, quantities, n_trials=1_000_000, coverage=0.95, seed=1,
                     keep_samples=True)
-k, U = result.expanded(0.95)
+expanded = result.expanded(0.95)
+k, U = expanded.coverage_factor, expanded.expanded_uncertainty
 
 # One line per panel — the budget bars, and the Monte Carlo histogram with
 # its coverage interval (the committed figure also overlays the GUM Gaussian):
@@ -774,8 +776,8 @@ plt.show()
 
 The `UncertaintyResult` carries the `value`, `combined_uncertainty`, the
 `sensitivities`, the per-input `contributions` and the `effective_dof`; its
-`.plot()` draws the budget and `.expanded(coverage)` returns the pair
-$(k, U)$. The `MonteCarloResult` carries the `value`, `standard_uncertainty`,
+`.plot()` draws the budget and `.expanded(coverage)` returns   an
+`ExpandedUncertainty` (`coverage_factor`, `expanded_uncertainty`). The `MonteCarloResult` carries the `value`, `standard_uncertainty`,
 the coverage `interval` and its `coverage`; with `keep_samples=True` it also
 retains the output `samples`, and its `.plot()` draws the output histogram
 with the coverage interval marked (the right panel above). The building-acoustics uncertainty
@@ -1728,7 +1730,8 @@ each, every reading weighing the same (Formula (A.5)):
 a = metrology.axisymmetric_directivity_factor(levels[0])
 print(round(a.directivity_index, 2))   # 2.45
 
-horizontal, vertical = metrology.equal_area_incidence_angles()
+angles = metrology.equal_area_incidence_angles()
+horizontal, vertical = angles.horizontal_deg, angles.vertical_deg
 print(horizontal[:6].round(1))   # [ 0.  32.6 50.8 65.1 77.8 90. ]
 e = metrology.equal_area_directivity_factor(
     94.0 + pattern_db(horizontal, 0.785), 94.0 + pattern_db(vertical, 0.98)
@@ -1889,7 +1892,8 @@ import numpy as np
 from phonometry import filters, metrology
 
 f3 = metrology.exact_frequencies(63, 16000, fraction=3)   # 25 exact one-third octaves
-nominal, lower, upper = filters.weighting_class_limits(1)  # IEC 61672-1 Table 3, class 1
+limits = filters.weighting_class_limits(1)
+nominal, lower, upper = limits.frequencies, limits.lower, limits.upper  # IEC 61672-1 Table 3, class 1
 band = (nominal >= 63) & (nominal <= 16000)
 tolerance = np.minimum(upper, -lower)[band]                # the narrower side at each band
 
@@ -2133,10 +2137,10 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
     air_temperatures_c=[22.8, 23.3],
     relative_humidities_percent=[48.0, 46.0],
     # Clauses 10 and 11: recorded, not graded.
-    calibration_check_initial_db=93.8,
-    calibration_check_adjusted_db=94.0,
-    self_noise_microphone_db=16.9,
-    self_noise_electrical_db={"A": 11.8, "C": 13.9, "Z": 19.2},
+    calibration_check_initial_level=93.8,
+    calibration_check_adjusted_level=94.0,
+    microphone_self_noise_level=16.9,
+    electrical_self_noise_levels={"A": 11.8, "C": 13.9, "Z": 19.2},
     # Clause 12: 125 Hz and 8 kHz, relative to 1 kHz, after the corrections.
     acoustic_weighting_deviations_db=[0.3, -0.9],
     acoustic_weighting_uncertainties_db=[0.28, 0.45],
@@ -2163,7 +2167,7 @@ record = metrology.SoundLevelMeterPeriodicMeasurements(
     # upper boundary, then down the same way, and the levels that first
     # indicated overload and under-range.
     linear_operating_range_db=[40.0, 120.0],
-    linearity_starting_point_db=94.0,
+    linearity_starting_level=94.0,
     linearity_levels=[
         94.0, 99.0, 104.0, 109.0, 114.0, 119.0, 120.0, 121.0, 122.0,
         89.0, 84.0, 79.0, 74.0, 69.0, 64.0, 59.0, 54.0, 49.0, 44.0,

@@ -193,6 +193,7 @@ __all__ = [
     "SoundReductionResult",
     "corrugated_plate_mass_factor",
     "corrugated_plate_stiffness",
+    "CorrugatedPlateStiffness",
     "double_wall_transmission_loss",
     "field_incidence_correction",
     "mass_law_transmission_loss",
@@ -212,6 +213,7 @@ def field_incidence_correction(fraction: BandFraction = 3) -> float:
         octaves (4.0 dB).
     :return: The correction subtracted from the normal-incidence mass law, dB.
     :raises ValueError: for a band set other than 1 or 3.
+    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float).
     """
     return _FIELD_CORRECTION[require_band_fraction(fraction, "fraction")]
 
@@ -246,6 +248,8 @@ def mass_law_transmission_loss(
     :return: The transmission loss ``TL``, in dB.
     :raises ValueError: for a non-positive input, an unknown incidence or a
         band set other than 1 or 3.
+    :raises TypeError: if ``incidence`` is not a text, or ``field_correction`` or
+        ``mass_per_area`` is not a single number.
     """
     incidence = require_choice(incidence, "incidence", ("normal", "field"))
     m2 = require_positive(mass_per_area, "mass_per_area")
@@ -469,6 +473,9 @@ def single_panel_transmission_loss(
         ``"cremer-single"``).
     :raises ValueError: for a non-positive input, an unknown coincidence model,
         or if neither *critical_frequency* nor *bending_stiffness* is given.
+    :raises TypeError: if ``coincidence_model`` is not a text, or
+        ``critical_frequency``, ``field_correction``, ``loss_factor`` or
+        ``mass_per_area`` is not a single number.
     """
     model = require_choice(coincidence_model, "coincidence_model", ("sharp", "cremer"))
     m2 = require_positive(mass_per_area, "mass_per_area")
@@ -757,7 +764,9 @@ def plateau_transmission_loss(
         row that does not print a number the construction reads, or an
         under-specified panel.
     :raises TypeError: for a *material* that is neither a name nor a
-        :class:`~phonometry.solids.PlateauMaterial`.
+        :class:`~phonometry.solids.PlateauMaterial`, or a ``thickness_mm``,
+        ``mass_per_area``, ``plateau_height_db``, ``frequency_ratio`` or
+        ``field_correction`` that is not one number.
     """
     m2, height, ratio = _resolve_plateau_panel(
         material, thickness_mm, mass_per_area, plateau_height_db, frequency_ratio
@@ -831,12 +840,34 @@ def corrugated_plate_mass_factor(
     :param corrugation_wavelength: Corrugation wavelength ``L``, in m (> 0).
     :return: The factor (>= 1) multiplying the flat-sheet surface density.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``corrugation_amplitude`` or ``corrugation_wavelength`` is not
+        a single number.
     """
     amplitude = require_positive(corrugation_amplitude, "corrugation_amplitude")
     wavelength = require_positive(corrugation_wavelength, "corrugation_wavelength")
     q = 2.0 * math.pi * amplitude / wavelength
     q2 = q * q
     return float(2.0 / math.pi * math.sqrt(1.0 + q2) * ellipe(q2 / (1.0 + q2)))
+
+
+@dataclass(frozen=True)
+class CorrugatedPlateStiffness(OwnsArrays):
+    """The equivalent orthotropic stiffnesses of a corrugated plate (Vigran Eq. 3.115).
+
+    What :func:`corrugated_plate_stiffness` returns: the three stiffnesses,
+    named, where a ``(Bx, Bz, Bxz)`` tuple used to be unpacked by position.
+
+    :ivar b_x_n_m: :math:`B_x`, the bending stiffness across the corrugations,
+        in N·m.
+    :ivar b_z_n_m: :math:`B_z`, the bending stiffness along the corrugations,
+        in N·m.
+    :ivar b_xz_n_m: :math:`B_{xz}`, the twisting stiffness Eq. (3.113) needs,
+        in N·m.
+    """
+
+    b_x_n_m: float
+    b_z_n_m: float
+    b_xz_n_m: float
 
 
 def corrugated_plate_stiffness(
@@ -846,7 +877,7 @@ def corrugated_plate_stiffness(
     *,
     youngs_modulus: float,
     poisson_ratio: float = 0.3,
-) -> tuple[float, float, float]:
+) -> CorrugatedPlateStiffness:
     r"""Equivalent orthotropic stiffnesses of a "wavy" corrugated plate.
 
     Timoshenko & Woinowsky-Krieger's (1959) equivalent bending stiffnesses of a
@@ -881,9 +912,13 @@ def corrugated_plate_stiffness(
     :param corrugation_wavelength: Corrugation wavelength ``L``, in m (> 0).
     :param youngs_modulus: Young's modulus ``E``, in Pa (> 0).
     :param poisson_ratio: Poisson's ratio ``nu`` (Default: 0.3).
-    :return: The triple ``(Bx, Bz, Bxz)`` in N.m.
+    :return: The three stiffnesses, in N.m, as a
+        :class:`CorrugatedPlateStiffness` (``b_x_n_m``, ``b_z_n_m``,
+        ``b_xz_n_m``).
     :raises ValueError: for a non-positive input or
         :math:`\lvert\nu\rvert \ge 1`.
+    :raises TypeError: if ``corrugation_amplitude``, ``corrugation_wavelength``,
+        ``poisson_ratio``, ``thickness_m`` or ``youngs_modulus`` is not a single number.
     """
     h = require_positive(thickness_m, "thickness_m")
     amplitude = require_positive(corrugation_amplitude, "corrugation_amplitude")
@@ -908,7 +943,9 @@ def corrugated_plate_stiffness(
         * (1.0 - 0.81 / (1.0 + 2.5 * (amplitude / wavelength) ** 2))
     )
     b_xz = flat / (1.0 + nu) * (1.0 + shape)
-    return float(b_x), float(b_z), float(b_xz)
+    return CorrugatedPlateStiffness(
+        b_x_n_m=float(b_x), b_z_n_m=float(b_z), b_xz_n_m=float(b_xz)
+    )
 
 
 def orthotropic_plate_resonance(
@@ -951,6 +988,10 @@ def orthotropic_plate_resonance(
     :param bending_stiffness_xz: ``Bxz``, in N.m (> 0).
     :return: The eigenfrequency, in hertz.
     :raises ValueError: for a non-positive input or a mode order below 1.
+    :raises TypeError: if ``bending_stiffness_x``, ``bending_stiffness_xz``,
+        ``bending_stiffness_z``, ``length_x``, ``length_z`` or ``mass_per_area`` is not
+        a single number, or ``mode_x`` or ``mode_z`` is a flag, a text or an array where
+        a count goes.
     """
     require_scalar(mode_x, "mode_x")
     i = require_count(mode_x, "mode_x", at_least=None)
@@ -1000,6 +1041,8 @@ def orthotropic_critical_frequencies(
     :return: The pair ``(fc1, fc2)`` in hertz, with
         :math:`f_{\mathrm{c}1} \le f_{\mathrm{c}2}`.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``bending_stiffness_1``, ``bending_stiffness_2``,
+        ``mass_per_area`` or ``speed_of_sound`` is not a single number.
     """
     m2 = require_positive(mass_per_area, "mass_per_area")
     b1 = require_positive(bending_stiffness_1, "bending_stiffness_1")
@@ -1233,6 +1276,10 @@ def orthotropic_transmission_loss(
     :raises ValueError: for a non-positive input, an unknown method, a
         coincidence range that is not increasing, or a Heckl construction whose
         points would be out of order.
+    :raises TypeError: if ``method`` is not a text, or ``area``,
+        ``critical_frequency_lower``, ``critical_frequency_upper``,
+        ``limiting_angle_deg``, ``loss_factor`` or ``mass_per_area`` is not a single
+        number.
     """
     require_scalar(limiting_angle_deg, "limiting_angle_deg")
     chosen = require_choice(method, "method", ("integral", "heckl"))
@@ -1340,6 +1387,8 @@ def mass_spring_mass_resonance(
         :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: The mass-spring-mass resonance ``f0``, in hertz.
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``gap_m``, ``mass1``, ``mass2`` or ``tie_stiffness_per_area``
+        is not a single number.
     """
     m1 = require_positive(mass1, "mass1")
     m2 = require_positive(mass2, "mass2")
@@ -1402,6 +1451,8 @@ def double_wall_transmission_loss(
         :data:`ABSORBER_AIR`, dry air at 20 degC at textbook values).
     :return: A :class:`SoundReductionResult` (model ``"double-wall"``).
     :raises ValueError: for a non-positive input.
+    :raises TypeError: if ``gap_m``, ``loss_factor``, ``mass1`` or ``mass2`` is not a
+        single number.
     """
     m1 = require_positive(mass1, "mass1")
     m2 = require_positive(mass2, "mass2")

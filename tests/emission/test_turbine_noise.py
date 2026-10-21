@@ -682,8 +682,8 @@ def test_the_arithmetic_average_of_the_note_of_8_3() -> None:
     )
     assert result.level_range_db == 4.0
     assert result.arithmetic_mean_allowed
-    assert result.arithmetic_mean_db == pytest.approx(89.0)
-    assert 0.0 < result.surface_pressure_level - result.arithmetic_mean_db <= 0.7
+    assert result.arithmetic_mean_level == pytest.approx(89.0)
+    assert 0.0 < result.surface_pressure_level - result.arithmetic_mean_level <= 0.7
 
 
 def test_the_arithmetic_average_at_a_range_of_exactly_five_decibels() -> None:
@@ -744,7 +744,7 @@ def test_overhead_positions_and_their_effect() -> None:
         overhead_mask=mask,
     )
     effect = _energy_mean(levels) - 90.0
-    assert result.overhead_effect_db == pytest.approx(effect)
+    assert result.overhead_level_difference == pytest.approx(effect)
     assert result.overhead_may_be_deleted is (effect <= 1.0)
 
 
@@ -777,10 +777,10 @@ def test_overhead_positions_moving_the_level_by_exactly_1_0_db_may_go() -> None:
     """
     limit = oracle.IEC61063_OVERHEAD_EFFECT_DB
     at_limit = _overhead_effect(_overhead_level(limit))
-    assert at_limit.overhead_effect_db == pytest.approx(limit, abs=1e-12)
+    assert at_limit.overhead_level_difference == pytest.approx(limit, abs=1e-12)
     assert at_limit.overhead_may_be_deleted is True
     past = _overhead_effect(_overhead_level(limit + 1e-6))
-    assert past.overhead_effect_db == pytest.approx(limit + 1e-6, abs=1e-12)
+    assert past.overhead_level_difference == pytest.approx(limit + 1e-6, abs=1e-12)
     assert past.overhead_may_be_deleted is False
 
 

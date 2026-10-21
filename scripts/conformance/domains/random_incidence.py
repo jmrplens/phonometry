@@ -132,7 +132,7 @@ def _chk_equal_area_angles() -> Outcome:
     77,9° and 282,1°, which break the list's symmetry about 90°; the
     construction gives 77,85° and 282,15° (``docs/ERRATA.md``).
     """
-    horizontal, _ = metrology.equal_area_incidence_angles()
+    horizontal = metrology.equal_area_incidence_angles().horizontal_deg
     printed = ref.IEC61183_EQUAL_AREA_HORIZONTAL_DEG
     errata = ref.IEC61183_EQUAL_AREA_ERRATA_DEG
     checked = [

@@ -4,10 +4,10 @@
 from __future__ import annotations
 
 from ._statistical_pass_by import (
-    SPB_ANNEX_D_SURFACES_DB,
+    SPB_ANNEX_D_SURFACE_LEVELS,
     SPB_CONFIDENCE_INTERVALS_DB,
     SPB_MIN_VEHICLE_COUNTS,
-    SPB_NORMALIZED_REFERENCE_DB,
+    SPB_NORMALIZED_REFERENCE_LEVELS,
     SPB_REFERENCE_AIR_TEMPERATURE_C,
     SPB_REFERENCE_SPEEDS_KMH,
     SPB_ROAD_SPEED_CATEGORIES,
@@ -25,6 +25,7 @@ from ._statistical_pass_by import (
 )
 from .acoustic_roughness import (
     AcousticRoughnessSpectrum,
+    RoughnessMeasurementLines,
     acoustic_roughness_spectrum,
     average_roughness_spectra,
     curvature_processed_roughness,
@@ -50,6 +51,7 @@ from .cnossos_rail import (
     RailJoints,
     RailPad,
     RailRoughnessClass,
+    RailSourceSpectra,
     RailwayEmissionResult,
     RailwayTrack,
     RailwayVehicle,
@@ -64,6 +66,7 @@ from .cnossos_rail import (
     TractionVehicle,
     VehicleDescriptor,
     VehicleType,
+    WavelengthSpectrum,
     WheelDiameter,
     WheelMeasure,
     aerodynamic_sound_power,
@@ -165,6 +168,7 @@ __all__ = [
     "remove_roughness_spikes",
     "roughness_filter_bank",
     "roughness_measurement_lines",
+    "RoughnessMeasurementLines",
     "PREFERRED_PASS_BY_SPEEDS_KMH",
     "REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M",
     "REFERENCE_TRACK_ROUGHNESS_LIMIT_DB",
@@ -201,10 +205,10 @@ __all__ = [
     "TrackDecayRate",
     "track_decay_excitation_positions",
     "track_decay_rate",
-    "SPB_ANNEX_D_SURFACES_DB",
+    "SPB_ANNEX_D_SURFACE_LEVELS",
     "SPB_CONFIDENCE_INTERVALS_DB",
     "SPB_MIN_VEHICLE_COUNTS",
-    "SPB_NORMALIZED_REFERENCE_DB",
+    "SPB_NORMALIZED_REFERENCE_LEVELS",
     "SPB_REFERENCE_AIR_TEMPERATURE_C",
     "SPB_REFERENCE_SPEEDS_KMH",
     "SPB_ROAD_SPEED_CATEGORIES",
@@ -289,8 +293,10 @@ __all__ = [
     "total_effective_roughness",
     "track_transfer",
     "traction_sound_power",
+    "RailSourceSpectra",
     "vertical_directivity",
     "wheel_roughness",
+    "WavelengthSpectrum",
     "wheel_transfer",
     "wind_turbine_tonality",
 ]

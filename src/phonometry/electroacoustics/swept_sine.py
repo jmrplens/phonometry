@@ -180,6 +180,8 @@ def synchronized_sweep_signal(
         small if the playback chain needs one, and pass the same value to
         :func:`swept_sine_distortion`.
     :return: The sweep samples, length :math:`\lceil T f_\mathrm{s} \rceil`.
+    :raises TypeError: if ``amplitude``, ``duration_s``, ``f1``, ``f2``, ``fade`` or
+        ``fs`` is not a single number.
     """
     require_scalar(fade, "fade")
     fs_v = _positive(fs, "fs")
@@ -692,6 +694,9 @@ def swept_sine_distortion(
         the anticausal span of its linear deconvolution; or if no
         excitation frequency has a measurable order-2 product (``f1``
         above ``fs/4``, where every order-2 product would exceed Nyquist).
+    :raises TypeError: if ``amplitude``, ``duration_s``, ``f1``, ``f2`` or ``fs`` is not
+        a single number, or ``ir_length`` or ``n_harmonics`` is a flag, a text or an
+        array where a count goes.
     """
     fs = resolve_fs(recorded, fs, name="recorded")
     rec = apply_calibration(recorded, _validated_recording(recorded))

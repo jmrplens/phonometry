@@ -90,8 +90,8 @@ def _chk_table_ii() -> Outcome:
         1
         for f, level, tol in ref.IEC60268_1_TABLE_II
         if published[f].relative_level == level
-        and published[f].tolerance_plus_db == tol
-        and published[f].tolerance_minus_db == tol
+        and published[f].upper_tolerance_db == tol
+        and published[f].lower_tolerance_db == tol
     )
     return count(matching, frequencies.size, subject="bands of Table II")
 
@@ -466,7 +466,7 @@ def _chk_standard_reference_frequency() -> Outcome:
     band = list(_BANDS).index(ref.IEC60268_1_STANDARD_REFERENCE_FREQUENCY_HZ)
     computed = {
         "reference": result.reference_frequency_hz,
-        "response there": float(result.mean_db[band]),
+        "response there": float(result.mean_response_db[band]),
     }
     return record(
         {
@@ -518,7 +518,10 @@ def _chk_formula_1() -> Outcome:
         frequencies=_BANDS, earphone_levels=earphone, sound_field_levels=field
     )
     return numeric(
-        3.0, float(result.mean_db[list(_BANDS).index(2000.0)]), 1e-12, unit="dB"
+        3.0,
+        float(result.mean_response_db[list(_BANDS).index(2000.0)]),
+        1e-12,
+        unit="dB",
     )
 
 

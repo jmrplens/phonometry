@@ -522,15 +522,15 @@ def test_swr_phase_rigid_wall_first_minimum() -> None:
     # A (near) rigid wall has its first pressure minimum at lambda/4, giving
     # phase phi = pi(4*(lambda/4)/lambda - 1) = 0, i.e. r ~ +|r|.
     wavelength = 0.343
-    r = standing_wave_reflection(50.0, wavelength / 4.0, wavelength)
+    r = standing_wave_reflection(50.0, wavelength / 4.0, wavelength=wavelength)
     assert complex(r).imag == pytest.approx(0.0, abs=1e-12)
     assert complex(r).real > 0.0
 
 
 def test_swr_normalized_impedance_matches_reflection() -> None:
     swr, x_min, lam = 4.0, 0.05, 0.343
-    r = standing_wave_reflection(swr, x_min, lam)
-    z = standing_wave_normalized_impedance(swr, x_min, lam)
+    r = standing_wave_reflection(swr, x_min, wavelength=lam)
+    z = standing_wave_normalized_impedance(swr, x_min, wavelength=lam)
     assert complex(z) == pytest.approx((1.0 + r) / (1.0 - r))
 
 
@@ -642,7 +642,8 @@ def test_wave_decomposition_recovers_amplitudes_up_to_sign() -> None:
     a_true = (p0 + RC * u0) / 2.0
     b_true = (p0 - RC * u0) / 2.0
     h1, h2, h3, h4 = _synth_four_mics(tm, np.asarray(k), down_c, down_d)
-    a, b, c, d = wave_decomposition(h1, h2, h3, h4, wavenumber=k, **GEOM)
+    waves = wave_decomposition(h1, h2, h3, h4, wavenumber=k, **GEOM)
+    a, b, c, d = waves.a, waves.b, waves.c, waves.d
     assert np.allclose(a, -a_true, atol=1e-9)
     assert np.allclose(b, -b_true, atol=1e-9)
     assert np.allclose(c, -down_c, atol=1e-9)
@@ -655,7 +656,7 @@ def test_face_quantities_progressive_wave_impedance() -> None:
     # the frequency or thickness (the propagation phase cancels in the ratio).
     f = np.array([500.0, 1500.0])
     k = np.asarray(tube_wavenumber(f, C0)).real.astype(np.complex128)
-    p0, pd, u0, ud = face_quantities(
+    faces = face_quantities(
         1.0,
         0.0,
         1.0,
@@ -664,6 +665,7 @@ def test_face_quantities_progressive_wave_impedance() -> None:
         thickness_m=THICKNESS,
         characteristic_impedance=RC,
     )
+    p0, pd, u0, ud = faces.p0, faces.pd, faces.u0, faces.ud
     assert np.allclose(p0 / u0, RC, atol=1e-9)
     assert np.allclose(pd / ud, RC, atol=1e-9)
 
@@ -672,7 +674,7 @@ def test_face_quantities_backward_wave_impedance() -> None:
     # A single backward-travelling wave reverses the sign: p/u = -rho*c.
     f = np.array([500.0, 1500.0])
     k = np.asarray(tube_wavenumber(f, C0)).real.astype(np.complex128)
-    p0, pd, u0, ud = face_quantities(
+    faces = face_quantities(
         0.0,
         1.0,
         0.0,
@@ -681,6 +683,7 @@ def test_face_quantities_backward_wave_impedance() -> None:
         thickness_m=THICKNESS,
         characteristic_impedance=RC,
     )
+    p0, pd, u0, ud = faces.p0, faces.pd, faces.u0, faces.ud
     assert np.allclose(p0 / u0, -RC, atol=1e-9)
     assert np.allclose(pd / ud, -RC, atol=1e-9)
 

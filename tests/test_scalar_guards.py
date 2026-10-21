@@ -37,6 +37,7 @@ import ast
 import importlib
 import inspect
 import pkgutil
+import re
 import types
 import warnings
 from pathlib import Path
@@ -375,13 +376,13 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
         "electroacoustics.headphones",
         "_impedances",
         lambda v: (v, 0.0),
-        "rated_impedance",
+        "rated_impedance_ohm",
     ),
     (
         "electroacoustics.headphones",
         "_impedances",
         lambda v: (32.0, v),
-        "rated_source_impedance",
+        "rated_source_impedance_ohm",
     ),
     (
         "electroacoustics.swept_sine",
@@ -399,7 +400,13 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
         "emission.free_field_qualification",
         "_checked_plane",
         lambda v: (v, None),
-        "reflecting_plane",
+        "reflecting_plane_absorption_coefficient",
+    ),
+    (
+        "emission.free_field_qualification",
+        "_checked_plane",
+        lambda v: (None, v),
+        "reflecting_plane_margin_m",
     ),
     ("emission.intensity_compliance", "_spacing_offset", lambda v: (v,), "spacing_m"),
     (
@@ -513,7 +520,7 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
 #: guard that asks it from one that does not.
 _OWN_PROBES: dict[str, float] = {
     "ir_length": 4096,
-    "reflecting_plane": 0.5,
+    "reflecting_plane_absorption_coefficient": 0.5,
     "frequencies": 1000.0,
     "poisson_ratio": 0.3,
     "temperature_c": 20.0,
@@ -540,7 +547,10 @@ def test_every_guard_with_its_own_signature_refuses_an_array(
     # The number itself passes, so the array can only be refused for its rank.
     guard(*arguments(probe))
     args = arguments(wrap(probe))
-    with pytest.raises(TypeError, match=refused):
+    # The name stands alone in the message: a retired spelling that is a
+    # prefix of the real one (``rated_impedance`` of ``rated_impedance_ohm``)
+    # must not pass for it.
+    with pytest.raises(TypeError, match=rf"(?<!\w){re.escape(refused)}(?!\w)"):
         guard(*args)
 
 

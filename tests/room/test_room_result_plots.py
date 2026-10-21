@@ -150,7 +150,11 @@ def test_open_plan_plot_line_and_markers() -> None:
 
 def test_open_plan_plot_without_regression_raises() -> None:
     bare = ph.room.OpenPlanResult(
-        d2s=float("nan"), lp_as_4m=float("nan"), rd=float("nan"), rp=float("nan")
+        d2s=float("nan"),
+        lp_as_4m=float("nan"),
+        rd=float("nan"),
+        rp=float("nan"),
+        positions_m=np.array([2.0, 4.0]),
     )
     with pytest.raises(
         ValueError, match=r"plot\(\) needs the spatial-decay regression"

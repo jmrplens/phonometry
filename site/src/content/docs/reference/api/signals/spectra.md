@@ -113,6 +113,7 @@ the implementation.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `overlap` is not a single number, or `nperseg` is a flag, a text or an array where a count goes. |
 
 ## CoherentOutputSpectrumResult
 
@@ -233,6 +234,7 @@ with the measured coherence in place of the unknown true value.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `overlap` is not a single number, or `nperseg` is a flag, a text or an array where a count goes. |
 
 ## CrossSpectralDensityResult
 
@@ -343,6 +345,7 @@ are copied unchanged.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `fraction` is not a single number. |
 
 ## power_spectral_density
 
@@ -391,6 +394,7 @@ resolution-bias error at a resonance peak see
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs or parameters are invalid. |
+| TypeError | if `confidence` or `overlap` is not a single number, or `nperseg` is a flag, a text or an array where a count goes. |
 
 ## resolution_bias_error
 
@@ -424,6 +428,7 @@ approximation assumes $B_\mathrm{e} < B_\mathrm{r}$.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If either bandwidth is not positive. |
+| TypeError | if `half_power_bandwidth` or `resolution_bandwidth` is not a single number. |
 
 ## SpectralDensityResult
 

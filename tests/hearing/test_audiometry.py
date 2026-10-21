@@ -186,7 +186,7 @@ def test_the_noise_floor_margin_is_six_decibels() -> None:
     levels = np.asarray(ISO8253_1_TABLE_2[125.0], dtype=float)
     floor = levels - 6.0
     floor[0] = levels[0] - 5.9
-    check = hearing.check_audiometric_ambient_noise(levels, noise_floor_db=floor)
+    check = hearing.check_audiometric_ambient_noise(levels, noise_floor_levels=floor)
     assert check.floor_limited[0]
     assert not np.any(check.floor_limited[1:])
 
@@ -198,7 +198,7 @@ def test_a_reading_six_decibels_over_the_floor_through_arithmetic_is_clear() -> 
     last bit short of the margin the clause lets through.
     """
     check = hearing.check_audiometric_ambient_noise(
-        [20.4, 20.4], frequencies=[125.0, 160.0], noise_floor_db=[14.4, 14.5]
+        [20.4, 20.4], frequencies=[125.0, 160.0], noise_floor_levels=[14.4, 14.5]
     )
     np.testing.assert_array_equal(check.floor_limited, [False, True])
 
@@ -207,7 +207,7 @@ def test_the_noise_floor_flags_the_bands_it_limits() -> None:
     levels = np.asarray(ISO8253_1_TABLE_4[125.0], dtype=float) - 1.0
     floor = np.full(25, 0.0)
     check = hearing.check_audiometric_ambient_noise(
-        levels, presentation="bone", noise_floor_db=floor
+        levels, presentation="bone", noise_floor_levels=floor
     )
     # Bone conduction's 2 dB limit at 4 kHz cannot be read with a 0 dB floor.
     assert check.floor_limited[ISO8253_1_BANDS_HZ.index(4000.0)]
@@ -234,7 +234,7 @@ def test_the_room_check_has_no_truth_value() -> None:
         (np.zeros(5), {}, "levels"),
         (np.zeros(2), {"frequencies": [125.0, 333.0]}, "333"),
         (np.zeros(2), {"frequencies": [250.0, 125.0]}, "increasing"),
-        (np.zeros(25), {"noise_floor_db": np.zeros(3)}, "noise_floor_db"),
+        (np.zeros(25), {"noise_floor_levels": np.zeros(3)}, "noise_floor_levels"),
     ],
 )
 def test_the_room_check_refuses_mismatched_bands(
@@ -259,7 +259,7 @@ def test_three_responses_at_one_level_set_the_threshold() -> None:
         presentation_levels=levels, responses=heard, familiarization_level=30.0
     )
     assert result.determined
-    assert result.threshold_db == 30.0
+    assert result.threshold_level == 30.0
     assert result.n_responses_at_threshold == 3
     np.testing.assert_array_equal(result.ascent_levels, [30.0, 30.0, 30.0])
     assert math.isnan(result.next_level)
@@ -306,7 +306,7 @@ def test_five_ascents_without_three_at_one_level_start_a_new_series() -> None:
 def test_the_shortened_version_needs_two_out_of_three() -> None:
     result = hearing.ascending_method_threshold([35.0, 30.0, 30.0], shortened=True)
     assert result.determined
-    assert result.threshold_db == 30.0
+    assert result.threshold_level == 30.0
     full = hearing.ascending_method_threshold([35.0, 30.0, 30.0])
     assert not full.determined
 
@@ -314,7 +314,7 @@ def test_the_shortened_version_needs_two_out_of_three() -> None:
 def test_the_threshold_is_the_level_answered_in_more_than_half_the_ascents() -> None:
     """6.2.4.2 on five ascents: 30 dB three times out of five."""
     result = hearing.ascending_method_threshold([30.0, 35.0, 30.0, 25.0, 30.0])
-    assert result.threshold_db == 30.0
+    assert result.threshold_level == 30.0
     assert result.span_db == 10.0
     assert not result.doubtful
 
@@ -373,10 +373,10 @@ def test_the_ascents_alone_refuse_ascents_after_the_end() -> None:
 
 def test_the_bracketing_threshold_rounds_the_mean_to_five_decibels() -> None:
     result = hearing.bracketing_method_threshold([30, 30, 35], [35, 35, 35])
-    assert result.ascent_mean_db == pytest.approx(95.0 / 3.0)
-    assert result.descent_mean_db == pytest.approx(35.0)
-    assert result.mean_db == pytest.approx(100.0 / 3.0)
-    assert result.threshold_db == 35.0
+    assert result.ascent_mean_level == pytest.approx(95.0 / 3.0)
+    assert result.descent_mean_level == pytest.approx(35.0)
+    assert result.mean_level == pytest.approx(100.0 / 3.0)
+    assert result.threshold_level == 35.0
     assert result.complete
     assert not result.repeat_advised
 
@@ -386,13 +386,13 @@ def test_the_library_sends_a_bracketing_tie_to_the_higher_step() -> None:
     library's convention for the tie, not a value the standard gives.
     """
     result = hearing.bracketing_method_threshold([30, 30, 35], [30, 35, 35])
-    assert result.mean_db == pytest.approx(32.5)
-    assert result.threshold_db == 35.0
+    assert result.mean_level == pytest.approx(32.5)
+    assert result.threshold_level == 35.0
 
 
 def test_the_bracketing_rounding_takes_the_nearest_step() -> None:
     assert (
-        hearing.bracketing_method_threshold([30, 30, 30], [30, 30, 35]).threshold_db
+        hearing.bracketing_method_threshold([30, 30, 30], [30, 30, 35]).threshold_level
         == 30.0
     )
 
@@ -424,10 +424,10 @@ def test_the_automatic_threshold_averages_peaks_and_valleys_and_rounds_up() -> N
         [30, 20, 31, 21, 32, 20, 30, 19, 31]
     )
     assert not result.retained[0]
-    np.testing.assert_array_equal(result.peaks_db, [31.0, 32.0, 30.0, 31.0])
-    np.testing.assert_array_equal(result.valleys_db, [20.0, 21.0, 20.0, 19.0])
-    assert result.mean_db == pytest.approx(25.5)
-    assert result.threshold_db == 26.0
+    np.testing.assert_array_equal(result.peak_levels, [31.0, 32.0, 30.0, 31.0])
+    np.testing.assert_array_equal(result.valley_levels, [20.0, 21.0, 20.0, 19.0])
+    assert result.mean_level == pytest.approx(25.5)
+    assert result.threshold_level == 26.0
     assert not result.doubtful
 
 
@@ -436,15 +436,15 @@ def test_a_fraction_below_a_half_is_rounded_up_too() -> None:
     result = hearing.automatic_audiometry_threshold(
         [30, 20, 30.5, 20, 30.5, 20, 30.5, 20]
     )
-    assert result.mean_db == pytest.approx(25.25)
-    assert result.threshold_db == 26.0
+    assert result.mean_level == pytest.approx(25.25)
+    assert result.threshold_level == 26.0
 
 
 def test_a_whole_mean_is_not_rounded_up_a_decibel() -> None:
     """25 dB stays 25 dB: 'rounded up to the nearest whole number'."""
     result = hearing.automatic_audiometry_threshold([28, 20, 30, 20, 30, 20, 30, 20])
-    assert result.mean_db == pytest.approx(25.0)
-    assert result.threshold_db == 25.0
+    assert result.mean_level == pytest.approx(25.0)
+    assert result.threshold_level == 25.0
 
 
 def test_small_excursions_are_ignored_at_both_ends() -> None:
@@ -524,8 +524,8 @@ def test_the_sweep_threshold_averages_the_three_nearest_peaks_and_valleys() -> N
         [250.0, 500.0, 750.0, 1000.0, 1500.0, 2000.0]
         + [3000.0, 4000.0, 6000.0, 8000.0],
     )
-    np.testing.assert_allclose(result.mean_db, 25.0)
-    np.testing.assert_array_equal(result.threshold_db, 25.0)
+    np.testing.assert_allclose(result.mean_level, 25.0)
+    np.testing.assert_array_equal(result.threshold_level, 25.0)
     assert not np.any(result.less_reliable)
 
 
@@ -534,8 +534,8 @@ def test_the_running_threshold_sits_at_the_geometric_mean_frequency() -> None:
     result = hearing.sweep_audiometry_threshold(
         levels, reversal_frequencies=freqs, frequencies=[1000.0]
     )
-    assert result.running_threshold_db.size == 24 - 5
-    np.testing.assert_allclose(result.running_threshold_db, 25.0)
+    assert result.running_threshold_levels.size == 24 - 5
+    np.testing.assert_allclose(result.running_threshold_levels, 25.0)
     assert result.running_frequencies[0] == pytest.approx(
         math.exp(np.mean(np.log(freqs[:6])))
     )
@@ -547,8 +547,8 @@ def test_the_sweep_threshold_rounds_to_the_nearest_decibel() -> None:
     result = hearing.sweep_audiometry_threshold(
         shifted, reversal_frequencies=freqs, frequencies=[2000.0]
     )
-    assert result.mean_db[0] == pytest.approx(25.3)
-    assert result.threshold_db[0] == 25.0
+    assert result.mean_level[0] == pytest.approx(25.3)
+    assert result.threshold_level[0] == 25.0
 
 
 def test_the_nearest_reversals_are_found_on_the_logarithmic_axis() -> None:
@@ -560,8 +560,8 @@ def test_the_nearest_reversals_are_found_on_the_logarithmic_axis() -> None:
     result = hearing.sweep_audiometry_threshold(
         levels, reversal_frequencies=freqs, frequencies=[1000.0]
     )
-    assert result.mean_db[0] == pytest.approx(25.0)
-    assert result.threshold_db[0] == 25.0
+    assert result.mean_level[0] == pytest.approx(25.0)
+    assert result.threshold_level[0] == 25.0
 
 
 def test_a_sweep_whose_peaks_spread_is_less_reliable() -> None:
@@ -579,7 +579,7 @@ def test_a_downward_sweep_reads_the_same() -> None:
     down = hearing.sweep_audiometry_threshold(
         levels[::-1], reversal_frequencies=freqs[::-1]
     )
-    np.testing.assert_array_equal(up.threshold_db, down.threshold_db)
+    np.testing.assert_array_equal(up.threshold_level, down.threshold_level)
 
 
 @pytest.mark.parametrize(
@@ -614,40 +614,55 @@ def test_the_budget_reproduces_table_a2() -> None:
     """Air conduction below 4 kHz, no masking: u = 4,9 dB and U = 10 dB."""
     budget = hearing.audiometric_uncertainty(1000.0)
     printed = ISO8253_1_TABLE_A2_COMPONENTS_DB
-    np.testing.assert_allclose(np.round(budget.components_db[:4], 1), printed)
-    assert budget.components_db[4:] == (0.0, 0.0, 0.0, 0.0)
-    assert round(budget.combined_db, 1) == ISO8253_1_TABLE_A2_U_DB
-    assert round(budget.expanded_db) == ISO8253_1_TABLE_A2_EXPANDED_DB
+    np.testing.assert_allclose(
+        np.round(budget.standard_uncertainties_db[:4], 1), printed
+    )
+    assert budget.standard_uncertainties_db[4:] == (0.0, 0.0, 0.0, 0.0)
+    assert round(budget.combined_uncertainty_db, 1) == ISO8253_1_TABLE_A2_U_DB
+    assert round(budget.expanded_uncertainty_db) == ISO8253_1_TABLE_A2_EXPANDED_DB
     # A.5: k = 2, which the whole-decibel rounding of A.6 alone would not pin.
-    assert budget.expanded_db == pytest.approx(2.0 * budget.combined_db)
+    assert budget.expanded_uncertainty_db == pytest.approx(
+        2.0 * budget.combined_uncertainty_db
+    )
 
 
 def test_the_components_are_those_of_a3() -> None:
     low = hearing.audiometric_uncertainty(4000.0)
     high = hearing.audiometric_uncertainty(6000.0)
-    assert round(low.equipment_db, 1) == ISO8253_1_A33_EQUIPMENT_DB
-    transducers = (round(low.transducer_db, 1), round(high.transducer_db, 1))
+    assert round(low.equipment_uncertainty_db, 1) == ISO8253_1_A33_EQUIPMENT_DB
+    transducers = (
+        round(low.transducer_uncertainty_db, 1),
+        round(high.transducer_uncertainty_db, 1),
+    )
     assert transducers == ISO8253_1_A34_TRANSDUCER_DB
     assert high.repeatability_db == 4.0
-    assert high.equipment_db == pytest.approx(math.hypot(5.0, 2.5) / math.sqrt(3.0))
+    assert high.equipment_uncertainty_db == pytest.approx(
+        math.hypot(5.0, 2.5) / math.sqrt(3.0)
+    )
     bone = hearing.audiometric_uncertainty(500.0, conduction="bone", masked=True)
     assert bone.repeatability_db == 3.0
-    assert bone.equipment_db == pytest.approx(math.hypot(4.0, 2.5) / math.sqrt(3.0))
-    assert bone.masking_db == 2.0
+    assert bone.equipment_uncertainty_db == pytest.approx(
+        math.hypot(4.0, 2.5) / math.sqrt(3.0)
+    )
+    assert bone.masking_uncertainty_db == 2.0
     # A.3.2 b) and A.3.3 b) above 4 kHz: 5 dB and a deviation of 5 dB.
     high_bone = hearing.audiometric_uncertainty(6000.0, conduction="bone")
     assert high_bone.repeatability_db == 5.0
-    assert high_bone.equipment_db == pytest.approx(
+    assert high_bone.equipment_uncertainty_db == pytest.approx(
         math.hypot(5.0, 2.5) / math.sqrt(3.0)
     )
 
 
 def test_the_budget_takes_the_exceptional_components() -> None:
     fine = hearing.audiometric_uncertainty(
-        1000.0, level_step_db=0.0, environment_db=0.0, tester_db=1.0, special_db=3.0
+        1000.0,
+        level_step_db=0.0,
+        environment_uncertainty_db=0.0,
+        tester_uncertainty_db=1.0,
+        special_uncertainty_db=3.0,
     )
-    assert fine.equipment_db == pytest.approx(math.sqrt(3.0))
-    assert fine.combined_db == pytest.approx(
+    assert fine.equipment_uncertainty_db == pytest.approx(math.sqrt(3.0))
+    assert fine.combined_uncertainty_db == pytest.approx(
         math.sqrt(2.5**2 + 3.0 + 1.5**2 + 2.5**2 + 1.0 + 9.0)
     )
 
@@ -658,7 +673,7 @@ def test_the_budget_takes_the_exceptional_components() -> None:
         ((1000.0,), {"conduction": "sound field"}, "conduction"),
         ((0.0,), {}, "frequency"),
         ((1000.0,), {"level_step_db": -1.0}, "level_step_db"),
-        ((1000.0,), {"environment_db": -1.0}, "delta_n"),
+        ((1000.0,), {"environment_uncertainty_db": -1.0}, "delta_n"),
     ],
 )
 def test_the_budget_refuses_what_annex_a_does_not_cover(
@@ -706,7 +721,7 @@ def test_the_retest_check_has_no_truth_value() -> None:
 @pytest.mark.parametrize(
     ("args", "kwargs", "match"),
     [
-        ((math.nan, 25.0), {}, "first_db"),
+        ((math.nan, 25.0), {}, "first_threshold_level"),
         ((25.0, 25.0), {"frequency_hz": 0.0}, "frequency_hz"),
     ],
 )
@@ -730,7 +745,7 @@ def test_the_vibrotactile_levels_cannot_be_changed() -> None:
 def test_forty_decibels_by_air_conduction_calls_for_caution() -> None:
     """6.2.3.2: a hearing level of 40 dB or more, and 39,9 dB is less."""
     cautions = hearing.audiogram_cautions(
-        [500.0, 1000.0, 2000.0], air_conduction_db=[39.9, 40.0, 55.0]
+        [500.0, 1000.0, 2000.0], air_conduction_threshold_levels=[39.9, 40.0, 55.0]
     )
     np.testing.assert_array_equal(cautions.cross_hearing, [False, True, True])
     assert not np.any(cautions.vibrotactile)
@@ -740,7 +755,7 @@ def test_forty_decibels_by_air_conduction_calls_for_caution() -> None:
 def test_a_bone_level_at_the_vibrotactile_threshold_may_be_felt() -> None:
     cautions = hearing.audiogram_cautions(
         [125.0, 250.0, 500.0, 1000.0, 2000.0],
-        bone_conduction_db=[60.0, 40.0, 59.5, 70.0, 70.0],
+        bone_conduction_threshold_levels=[60.0, 40.0, 59.5, 70.0, 70.0],
     )
     np.testing.assert_array_equal(
         cautions.vibrotactile_levels, [math.nan, 40.0, 60.0, 70.0, math.nan]
@@ -754,7 +769,7 @@ def test_a_bone_level_at_the_vibrotactile_threshold_may_be_felt() -> None:
 def test_forehead_placement_lowers_the_vibrotactile_levels_ten_decibels() -> None:
     cautions = hearing.audiogram_cautions(
         [250.0, 500.0, 1000.0],
-        bone_conduction_db=[30.0, 49.0, 60.0],
+        bone_conduction_threshold_levels=[30.0, 49.0, 60.0],
         vibrator_placement="forehead",
     )
     np.testing.assert_array_equal(cautions.vibrotactile_levels, [30.0, 50.0, 60.0])
@@ -764,8 +779,8 @@ def test_forehead_placement_lowers_the_vibrotactile_levels_ten_decibels() -> Non
 def test_an_audiogram_without_a_caution_says_so() -> None:
     cautions = hearing.audiogram_cautions(
         [250.0, 1000.0],
-        air_conduction_db=[10.0, 15.0],
-        bone_conduction_db=[5.0, 10.0],
+        air_conduction_threshold_levels=[10.0, 15.0],
+        bone_conduction_threshold_levels=[5.0, 10.0],
     )
     assert not cautions.any_caution
 
@@ -773,10 +788,13 @@ def test_an_audiogram_without_a_caution_says_so() -> None:
 @pytest.mark.parametrize(
     ("kwargs", "match"),
     [
-        ({}, "air_conduction_db"),
-        ({"air_conduction_db": [10.0]}, "one level per frequency"),
+        ({}, "air_conduction_threshold_levels"),
+        ({"air_conduction_threshold_levels": [10.0]}, "one level per frequency"),
         (
-            {"air_conduction_db": [10.0, 10.0], "vibrator_placement": "chin"},
+            {
+                "air_conduction_threshold_levels": [10.0, 10.0],
+                "vibrator_placement": "chin",
+            },
             "placement",
         ),
     ],

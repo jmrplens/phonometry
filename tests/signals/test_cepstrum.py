@@ -248,7 +248,7 @@ def test_lowpass_lifter_removes_the_echo_ripple() -> None:
     res = ph.signals.lifter(
         _impulse_echo(), FS, cutoff=(DELAY - 50) / FS, mode="lowpass"
     )
-    assert float(np.max(np.abs(res.liftered_db))) < 1e-4
+    assert float(np.max(np.abs(res.liftered_spectrum_db))) < 1e-4
 
 
 def test_highpass_lifter_keeps_the_ripple_extrema() -> None:
@@ -256,10 +256,10 @@ def test_highpass_lifter_keeps_the_ripple_extrema() -> None:
     res = ph.signals.lifter(
         _impulse_echo(), FS, cutoff=(DELAY - 50) / FS, mode="highpass"
     )
-    assert float(np.max(res.liftered_db)) == pytest.approx(
+    assert float(np.max(res.liftered_spectrum_db)) == pytest.approx(
         20.0 * np.log10(1.0 + ALPHA), abs=1e-4
     )
-    assert float(np.min(res.liftered_db)) == pytest.approx(
+    assert float(np.min(res.liftered_spectrum_db)) == pytest.approx(
         20.0 * np.log10(1.0 - ALPHA), abs=1e-4
     )
 
@@ -269,7 +269,7 @@ def test_lifter_modes_are_exactly_complementary() -> None:
     low = ph.signals.lifter(x, FS, cutoff=0.002, mode="lowpass")
     high = ph.signals.lifter(x, FS, cutoff=0.002, mode="highpass")
     np.testing.assert_allclose(
-        low.liftered_db + high.liftered_db, low.spectrum_db, atol=1e-9
+        low.liftered_spectrum_db + high.liftered_spectrum_db, low.spectrum_db, atol=1e-9
     )
 
 
@@ -350,9 +350,11 @@ def test_a_lifter_result_names_the_spectrum_column_that_slipped() -> None:
     where the column still has its name.
     """
     res = ph.signals.lifter(_impulse_echo(), FS, cutoff=(DELAY - 50) / FS)
-    short = res.liftered_db[:-1]
-    with pytest.raises(ValueError, match=r"'liftered_db'.*one value per frequency"):
-        dataclasses.replace(res, liftered_db=short)
+    short = res.liftered_spectrum_db[:-1]
+    with pytest.raises(
+        ValueError, match=r"'liftered_spectrum_db'.*one value per frequency"
+    ):
+        dataclasses.replace(res, liftered_spectrum_db=short)
 
 
 def test_an_echo_detection_result_refuses_a_cepstrum_short_of_its_axis() -> None:

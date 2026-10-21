@@ -175,6 +175,8 @@ def linear_sound_speed_profile(
     :return: A two-point :class:`EffectiveSoundSpeedProfile`.
     :raises ValueError: If ``max_height_m`` or ``ground_speed_of_sound`` is not positive, or
         the profile turns non-positive within ``[0, max_height_m]``.
+    :raises TypeError: if ``gradient_per_s``, ``ground_speed_of_sound`` or
+        ``max_height_m`` is not a single number.
     """
     require_scalar(gradient_per_s, "gradient_per_s")
     c0 = require_positive(ground_speed_of_sound, "ground_speed_of_sound")
@@ -222,6 +224,9 @@ def log_linear_sound_speed_profile(
     :return: An :class:`EffectiveSoundSpeedProfile`.
     :raises ValueError: On non-positive ``c0``, ``z0`` or ``max_height_m``, fewer
         than two points, or a profile that turns non-positive.
+    :raises TypeError: if ``b``, ``ground_speed_of_sound``, ``max_height_m`` or
+        ``roughness_length`` is not a single number, or ``n_points`` is a flag, a text
+        or an array where a count goes.
     """
     require_scalar(b, "b")
     c0 = require_positive(ground_speed_of_sound, "ground_speed_of_sound")
@@ -314,6 +319,8 @@ def ray_curvature_radius(
     :return: The radius of curvature ``Rc``, in metres (always positive).
     :raises ValueError: If the gradient is zero (a straight ray) or the launch
         angle is not within ``(-90, 90)`` degrees.
+    :raises TypeError: if ``gradient_per_s``, ``ground_speed_of_sound`` or
+        ``launch_angle_deg`` is not a single number.
     """
     require_scalar(gradient_per_s, "gradient_per_s")
     require_scalar(launch_angle_deg, "launch_angle_deg")
@@ -356,6 +363,8 @@ def shadow_zone_distance(
     :param ground_speed_of_sound: Sound speed ``c0`` at the ground, in m/s.
     :return: The horizontal shadow-boundary distance, in metres.
     :raises ValueError: If the gradient is not negative, or a height is negative.
+    :raises TypeError: if ``gradient_per_s``, ``ground_speed_of_sound``,
+        ``receiver_height_m`` or ``source_height_m`` is not a single number.
     """
     require_scalar(gradient_per_s, "gradient_per_s")
     require_scalar(receiver_height_m, "receiver_height_m")
@@ -495,6 +504,8 @@ def atmospheric_ray_paths(
     :param n_steps: Number of range steps per ray (>= 2).
     :return: An :class:`AtmosphericRayResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``max_range`` or ``source_height_m`` is not a single number,
+        or ``n_steps`` is a flag, a text or an array where a count goes.
     """
     z_prof, c_prof = _clean_profile(profile)
     top = float(z_prof[-1])
@@ -739,6 +750,8 @@ def atmospheric_parabolic_equation(
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: An :class:`AtmosphericPEResult`.
     :raises ValueError: If the inputs are invalid or the impedance is unspecified.
+    :raises TypeError: if ``frequency_hz``, ``height_step_m``, ``max_height_m``,
+        ``max_range``, ``range_step`` or ``source_height_m`` is not a single number.
     """
     f = require_positive(frequency_hz, "frequency_hz")
     z_prof, c_prof = _clean_profile(profile)

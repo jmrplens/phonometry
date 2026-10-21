@@ -427,7 +427,7 @@ def _chk_spb_annex_e_corrected_index() -> Outcome:
 def _chk_spb_annex_e_difference() -> Outcome:
     result = _spb_annex_e(
         corrected_vehicle_sound_levels=spb.ANNEX_E_CORRECTED_VEHICLE_SOUND_LEVELS_DB,
-        reference_db=spb.ANNEX_E_REFERENCE_INDEX_DB,
+        reference_levels=spb.ANNEX_E_REFERENCE_INDEX_DB,
     )
     return numeric(
         spb.ANNEX_E_DIFFERENCE_DB,

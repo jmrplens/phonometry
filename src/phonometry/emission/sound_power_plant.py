@@ -435,6 +435,8 @@ def plant_characteristic_height_m(
     :return: :math:`H`, in metres.
     :raises ValueError: for a negative or non-finite height, a count from 1 to
         9, or no sources at all.
+    :raises TypeError: if ``n_low_sources`` is a flag, a text or an array where a count
+        goes.
     """
     heights = np.atleast_1d(np.asarray(source_heights_m, dtype=np.float64))
     if heights.ndim != 1 or not np.all(np.isfinite(heights)) or np.any(heights < 0.0):
@@ -470,6 +472,8 @@ def plant_microphone_height_m(
         encloses, in square metres.
     :return: :math:`h`, in metres.
     :raises ValueError: for a negative height or a non-positive area.
+    :raises TypeError: if ``characteristic_height_m`` or ``measurement_area_m2`` is not
+        a single number.
     """
     height = require_finite(characteristic_height_m, "characteristic_height_m")
     if height < 0.0:
@@ -495,6 +499,7 @@ def plant_mean_distance_limits_m(plant_area_m2: float) -> tuple[float, float]:
     :return: ``(lower, upper)`` in metres: :math:`\bar{d}` must be above the
         first and at most the second.
     :raises ValueError: for a non-positive area.
+    :raises TypeError: if ``plant_area_m2`` is not a single number.
     """
     root = math.sqrt(require_positive(plant_area_m2, "plant_area_m2"))
     return (
@@ -581,6 +586,8 @@ def plant_air_absorption_db_per_m(
     :return: :math:`\alpha` per band, in dB/m.
     :raises ValueError: for a band outside the method, only one of the two
         weather values, or a humidity outside 0 % to 100 %.
+    :raises TypeError: if ``relative_humidity_percent`` or ``temperature_c`` is not a
+        single number.
     """
     bands = _octave_bands(frequencies)
     theta, humidity = _weather(temperature_c, relative_humidity_percent)
@@ -616,6 +623,7 @@ def plant_method_uncertainty(distance_ratio: float) -> tuple[float, float]:
     :param distance_ratio: :math:`\bar{d}/\sqrt{S_\mathrm{p}}`.
     :return: ``(lower, upper)``, for example ``(-3.5, 3.0)`` at 0,05.
     :raises ValueError: for a ratio outside 0,05 to 0,5.
+    :raises TypeError: if ``distance_ratio`` is not a single number.
     """
     ratio = require_positive(distance_ratio, "distance_ratio")
     rows = sorted(PLANT_METHOD_UNCERTAINTY_DB)
@@ -649,6 +657,7 @@ def plant_steady_reading(max_level: float, min_level: float) -> float:
     :raises ValueError: for a minimum above the maximum, or a swing of 5 dB or
         more, the swing settled to nine decimals first, so 64,1 - 59,1 dB,
         4,999 999 999 999 993 in binary, is the 5 dB it is.
+    :raises TypeError: if ``max_level`` or ``min_level`` is not a single number.
     """
     top = require_finite(max_level, "max_level")
     bottom = require_finite(min_level, "min_level")
@@ -1008,6 +1017,8 @@ class PlantMeasurementContour(OwnsArrays):
         :raises ValueError: for either polygon malformed, a contour that does
             not enclose the plant area or touches it, a negative height, or a
             layout that leaves nothing to measure.
+        :raises TypeError: if ``characteristic_height_m`` is not a single number, or
+            ``n_positions`` is a flag, a text or an array where a count goes.
         """
         # The record's own copies of the caller's arrays, made before this
         # hook runs, sealed: every derived quantity is read from these, and
@@ -1272,6 +1283,8 @@ class PlantMeasurementContour(OwnsArrays):
         :return: A :class:`PlantSoundPowerResult`.
         :raises ValueError: for a number of rows that is not the number of
             measured positions, or any error of :func:`plant_sound_power`.
+        :raises TypeError: if ``levels`` holds a text or a value that is not a real
+            number.
         """
         levels = require_finite_matrix(levels, "levels")
         if levels.shape[0] != self.positions_m.shape[0]:
@@ -1458,6 +1471,9 @@ class PlantSoundPowerResult(OwnsArrays):
         whole or not at all.
 
         :raises ValueError: for any of the above.
+        :raises TypeError: if ``relative_humidity_percent`` or ``temperature_c`` is not
+            a single number, or ``background_levels`` or ``measured_levels`` holds a
+            text or a value that is not a real number.
         """
         bands = read_only(_octave_bands(self.frequencies))
         object.__setattr__(self, "frequencies", bands)
@@ -1763,6 +1779,8 @@ def plant_sound_power(
     :raises ValueError: for levels that do not match the bands, a background
         less than 6 dB below a level, a non-positive geometry, a microphone
         angle outside (0°, 90°], or half a weather.
+    :raises TypeError: if ``background_levels`` or ``levels`` holds a text or a value
+        that is not a real number.
     """
     result = PlantSoundPowerResult(
         frequencies=np.asarray(frequencies, dtype=np.float64),
@@ -1851,6 +1869,7 @@ class PlantRequirement(RichDisplay):
 
         :raises ValueError: for a comparison outside ``">"``, ``">="``,
             ``"<="`` and ``"="``, or a negative tolerance.
+        :raises TypeError: if ``tolerance`` is not a single number.
         """
         if self.comparison not in _COMPARISONS:
             msg = (
@@ -2219,6 +2238,8 @@ class PartialPlantContributions(OwnsArrays):
 
         :raises ValueError: for a name count, a band count or a level matrix
             that disagree, or bands outside the method.
+        :raises TypeError: if ``part_levels`` holds a text or a value that is not a real
+            number.
         """
         bands = read_only(_octave_bands(self.frequencies))
         object.__setattr__(self, "frequencies", bands)
@@ -2242,7 +2263,7 @@ class PartialPlantContributions(OwnsArrays):
         return energy_sum(self.part_levels, axis=0)
 
     @property
-    def contribution_db(self) -> NDArray[np.float64]:
+    def relative_part_levels(self) -> NDArray[np.float64]:
         """Each part's :math:`L_W` less the total, per band, in decibels (at most 0)."""
         return np.asarray(self.part_levels - self.total_level, dtype=np.float64)
 
@@ -2254,15 +2275,15 @@ class PartialPlantContributions(OwnsArrays):
         return energy_sum(self.part_levels[:, keep] + ck, axis=1)
 
     @property
-    def a_weighted_total_db(self) -> float:
+    def a_weighted_total_level(self) -> float:
         r""":math:`L_{W\mathrm{A}}` of the parts together, in dB re 1 pW."""
         return energy_sum(self.a_weighted_part_levels)
 
     @property
-    def a_weighted_contribution_db(self) -> NDArray[np.float64]:
+    def a_weighted_relative_part_levels(self) -> NDArray[np.float64]:
         r"""Each part's :math:`L_{W\mathrm{A}}` less the total, in decibels."""
         return np.asarray(
-            self.a_weighted_part_levels - self.a_weighted_total_db, dtype=np.float64
+            self.a_weighted_part_levels - self.a_weighted_total_level, dtype=np.float64
         )
 
     def plot(

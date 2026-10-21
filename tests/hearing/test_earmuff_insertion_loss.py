@@ -26,21 +26,21 @@ def test_the_published_tables_are_the_printed_ones() -> None:
     assert hearing.RANDOM_INCIDENCE_VARIATION_LIMITS == ISO4869_3_TABLE_1
     assert dict(hearing.ATF_FRONT_TO_RANDOM_INDEX) == ISO4869_3_TABLE_A1
     budget = hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY
-    assert budget.components_db == ISO4869_3_TABLE_B1_COMPONENTS_DB
+    assert budget.standard_uncertainties_db == ISO4869_3_TABLE_B1_COMPONENTS_DB
 
 
 def test_table_b1_gives_its_combined_and_expanded_uncertainty() -> None:
     """u = 1,3 dB and U = 2u = 2,6 dB (B.3, B.4)."""
     budget = hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY
-    assert round(budget.combined_db, 1) == ISO4869_3_TABLE_B1_U_DB
-    assert round(budget.expanded_db, 1) == ISO4869_3_B4_EXPANDED_DB
-    assert budget.combined_db == pytest.approx(math.sqrt(1.63))
+    assert round(budget.combined_uncertainty_db, 1) == ISO4869_3_TABLE_B1_U_DB
+    assert round(budget.expanded_uncertainty_db, 1) == ISO4869_3_B4_EXPANDED_DB
+    assert budget.combined_uncertainty_db == pytest.approx(math.sqrt(1.63))
 
 
 def test_the_published_budget_cannot_be_changed() -> None:
     budget = hearing.EARMUFF_INSERTION_LOSS_UNCERTAINTY
-    with pytest.raises(AttributeError, match="open_level_db"):
-        budget.open_level_db = 0.0  # type: ignore[misc]
+    with pytest.raises(AttributeError, match="open_level_uncertainty_db"):
+        budget.open_level_uncertainty_db = 0.0  # type: ignore[misc]
 
 
 def test_a_budget_refuses_a_negative_component() -> None:
@@ -87,7 +87,7 @@ def test_the_level_uncertainties_come_from_the_repetitions() -> None:
     np.testing.assert_allclose(result.standard_uncertainty_db, expected)
     np.testing.assert_allclose(result.expanded_uncertainty_db, 2.0 * expected)
     budget = result.budget(1000.0)
-    assert budget.combined_db == pytest.approx(expected)
+    assert budget.combined_uncertainty_db == pytest.approx(expected)
 
 
 def test_a_single_fitting_takes_the_typical_values_of_table_b1() -> None:
@@ -100,7 +100,9 @@ def test_a_single_fitting_takes_the_typical_values_of_table_b1() -> None:
 def test_the_report_rounds_to_a_tenth_of_a_decibel() -> None:
     open_level = np.full(_BANDS, 85.0)
     occluded = open_level - np.linspace(10.04, 10.25, _BANDS)
-    reported = hearing.earmuff_insertion_loss(open_level, occluded).reported_db
+    reported = hearing.earmuff_insertion_loss(
+        open_level, occluded
+    ).reported_insertion_loss
     assert reported[0] == pytest.approx(10.0)
     assert reported[-1] == pytest.approx(10.3)
 
@@ -231,7 +233,7 @@ def test_the_plane_wave_needs_matched_end_faces_and_a_directional_margin() -> No
     )
     assert check.passes
     np.testing.assert_allclose(check.end_face_difference, 1.5)
-    assert math.isnan(check.front_to_back_db[0])
+    assert math.isnan(check.front_to_back_ratio_db[0])
 
 
 def test_a_plane_wave_read_with_a_poor_microphone_is_not_judged() -> None:
@@ -290,9 +292,9 @@ def test_the_fixture_isolation_follows_the_three_ranges_of_5_1_4() -> None:
     )
     for first, last, least in ISO4869_3_ISOLATION:
         band = (freqs >= first) & (freqs <= last)
-        np.testing.assert_array_equal(check.required_db[band], least)
+        np.testing.assert_array_equal(check.min_isolation[band], least)
     assert not check.passes
-    np.testing.assert_array_equal(check.sufficient, check.required_db <= 60.0)
+    np.testing.assert_array_equal(check.sufficient, check.min_isolation <= 60.0)
 
 
 def test_the_fixture_isolation_is_the_open_level_less_the_cup_level() -> None:
@@ -315,7 +317,7 @@ def test_the_fixture_isolation_asks_nothing_below_63_hz() -> None:
     check = hearing.verify_fixture_isolation(
         [120.0] * 3, [80.0, 60.0, 60.0], frequencies=freqs
     )
-    assert math.isnan(check.required_db[0])
+    assert math.isnan(check.min_isolation[0])
     assert check.passes
 
 

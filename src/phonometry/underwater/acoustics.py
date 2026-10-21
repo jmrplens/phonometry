@@ -122,6 +122,7 @@ def sound_pressure_level(
     :param reference: Reference pressure :math:`p_0`, in Pa (default 1 µPa).
     :return: Sound pressure level, in dB re the reference.
     :raises ValueError: If the signal is invalid or has no energy.
+    :raises TypeError: if ``reference`` is not a single number.
     """
     sig = _validate_pressure(pressure)
     p0 = _positive(reference, "reference")
@@ -155,6 +156,7 @@ def sound_exposure_level(
         1 µPa²·s).
     :return: Sound exposure level, in dB re the reference.
     :raises ValueError: If the inputs are invalid or the signal has no energy.
+    :raises TypeError: if ``fs`` or ``reference`` is not a single number.
     """
     fs = resolve_fs(pressure, fs, name="pressure")
     sig = _validate_pressure(pressure)
@@ -184,6 +186,7 @@ def peak_sound_pressure_level(
     :param reference: Reference pressure :math:`p_0`, in Pa (default 1 µPa).
     :return: Peak sound pressure level, in dB re the reference.
     :raises ValueError: If the signal is invalid or is all zero.
+    :raises TypeError: if ``reference`` is not a single number.
     """
     sig = _validate_pressure(pressure)
     p0 = _positive(reference, "reference")

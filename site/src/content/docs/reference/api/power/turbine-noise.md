@@ -148,7 +148,7 @@ above 1 m/s (4.3).
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a `correction` that is not a [`TurbineEnvironmentalCorrection`](/phonometry/reference/api/power/turbine-noise/#turbineenvironmentalcorrection). |
+| TypeError | for a `correction` that is not a [`TurbineEnvironmentalCorrection`](/phonometry/reference/api/power/turbine-noise/#turbineenvironmentalcorrection), or an `environmental_correction` or `wind_speed_m_s` that is not one number. |
 | ValueError | unless exactly one of `correction` and `environmental_correction` is given, for a non-finite correction or for a negative wind speed. |
 
 ## turbine_background_correction
@@ -200,6 +200,7 @@ than to the surface-averaged level.
 | Exception | When |
 | :--- | :--- |
 | ValueError | if a difference is not finite. |
+| TypeError | if `level_difference` holds a text or a value that is not a real number. |
 
 ## turbine_environmental_correction
 
@@ -244,6 +245,7 @@ the judgement, and [`turbine_sound_power`](/phonometry/reference/api/power/turbi
 | Exception | When |
 | :--- | :--- |
 | ValueError | unless exactly one of the two routes to $A$ is given whole, or for a non-positive input. |
+| TypeError | if `absorption_area`, `reverberation_time`, `surface_area` or `volume` is not a single number. |
 
 ## turbine_measurement_surface
 
@@ -333,7 +335,7 @@ to lie on the sides of every parallelepiped.
 | `microphone_height_m` | Height of the row round the sides, in metres, above the reflecting plane and no higher than the lowest parallelepiped. |
 | `spacing_m` | The largest distance between neighbouring positions along the path, in metres. |
 | `n_turbine_boxes` | How many reference boxes, from the front, enclose the turbine (1 for Figure 2 a, 2 for Figure 2 b, where the HP and IP casings share one box and the LP turbine has its own). Ignored for a set in a single box. |
-| `include_overhead` | `False` leaves the overhead line out, key position 3 with it, as the NOTE of 7.2.2 allows once a preliminary investigation has shown the overhead positions move the sound power level by no more than 1,0 dB (see [`TurbineSoundPowerResult.overhead_effect_db`](/phonometry/reference/api/power/turbine-noise/#turbinesoundpowerresultoverhead_effect_db)). |
+| `include_overhead` | `False` leaves the overhead line out, key position 3 with it, as the NOTE of 7.2.2 allows once a preliminary investigation has shown the overhead positions move the sound power level by no more than 1,0 dB (see [`TurbineSoundPowerResult.overhead_level_difference`](/phonometry/reference/api/power/turbine-noise/#turbinesoundpowerresultoverhead_level_difference)). |
 
 **Returns:** The positions, their labels and the overhead mask.
 
@@ -341,7 +343,7 @@ to lie on the sides of every parallelepiped.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a `surface` that is not a [`TurbineMeasurementSurface`](/phonometry/reference/api/power/turbine-noise/#turbinemeasurementsurface). |
+| TypeError | for a `surface` that is not a [`TurbineMeasurementSurface`](/phonometry/reference/api/power/turbine-noise/#turbinemeasurementsurface), a `spacing_m` or `microphone_height_m` that is not one number, or a `n_turbine_boxes` that is a bool, a text or an array. |
 | ValueError | for a height outside the sides, a non-positive spacing, or a `n_turbine_boxes` that leaves no driven machinery. |
 
 ## turbine_noise_declaration
@@ -433,6 +435,7 @@ of the determinations.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for the wrong number of determinations or a non-finite level. |
+| TypeError | if `calibrated_level` or `machine_length_m` is not a single number, or `sound_power_levels` holds a text or a value that is not a real number. |
 
 ## turbine_sound_power
 
@@ -482,6 +485,7 @@ and leave [`TurbineSoundPowerResult.conforms`](/phonometry/reference/api/power/t
 | Exception | When |
 | :--- | :--- |
 | ValueError | for fewer than four positions, arrays of different lengths or non-finite values. |
+| TypeError | if `environmental_correction` or `surface_area` is not a single number, or `background_levels` or `pressure_levels` holds a text or a value that is not a real number. |
 
 ## TurbineEnvironmentalCorrection
 
@@ -894,7 +898,7 @@ Built by [`turbine_sound_power`](/phonometry/reference/api/power/turbine-noise/#
 
 Whether the range of the position levels is within 5 dB (NOTE of 8.3).
 
-### TurbineSoundPowerResult.arithmetic_mean_db
+### TurbineSoundPowerResult.arithmetic_mean_level
 
 *property*
 
@@ -936,7 +940,7 @@ Per position, whether its background was less than 3 dB below (4.2).
 
 **Returns:** One boolean per position, `True` where the position makes the determination an upper limit, or `None` without a background.
 
-### TurbineSoundPowerResult.overhead_effect_db
+### TurbineSoundPowerResult.overhead_level_difference
 
 *property*
 

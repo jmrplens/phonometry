@@ -38,7 +38,8 @@ def test_the_class_figure_hands_its_language_to_the_formatter(
         real(*args, **kwargs)
 
     monkeypatch.setattr(emission_plot, "format_frequency_axis", recording)
-    frequencies, class1, _class2 = emission.residual_index_limits("instrument")
+    limits = emission.residual_index_limits("instrument")
+    frequencies, class1, _class2 = limits.frequencies, limits.class_1, limits.class_2
     verdict = emission.verify_intensity_class(
         np.asarray(class1, dtype=np.float64) + 1.0, frequencies=frequencies
     )

@@ -62,6 +62,7 @@ from ._sound_power_intensity_points import (
     sound_power_intensity_points,
 )
 from ._sound_power_reverberation import (
+    OctaveBandLevels,
     ReverberationSoundEnergyResult,
     ReverberationSoundPowerResult,
     octave_band_levels,
@@ -114,6 +115,7 @@ from .intensity import (
 )
 from .intensity_compliance import (
     IntensityInstrumentComplianceResult,
+    ResidualIndexLimits,
     instrument_class_from_components,
     phase_mismatch_from_residual_index,
     residual_index_from_phase_mismatch,
@@ -351,6 +353,7 @@ __all__ = [
     "min_analyzer_bandwidth",
     "normal_intensity_from_levels",
     "octave_band_levels",
+    "OctaveBandLevels",
     "operating_standard_deviation",
     "partial_power_concentration",
     "phase_mismatch_from_residual_index",
@@ -373,6 +376,7 @@ __all__ = [
     "reproducibility_from_round_robin",
     "residual_index_from_phase_mismatch",
     "residual_index_limits",
+    "ResidualIndexLimits",
     "reverberation_parameter",
     "room_absorption_coefficient",
     "room_constant_from_air_absorption",

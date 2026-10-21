@@ -99,6 +99,7 @@ methodology". Only the per-metre line power is defined by the method.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `length` is not positive. |
+| TypeError | if `length` is not a single number. |
 
 ## ROAD_COEFFICIENTS
 
@@ -155,6 +156,7 @@ propulsion noise, a noisy one does not increase it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
+| TypeError | if `junction_distance`, `road_slope_percent` or `speed_kmh` is not a single number. |
 
 ## ROAD_REFERENCE_SPEED_KMH
 
@@ -218,6 +220,7 @@ and their total power is the propulsion term alone (2.2.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
+| TypeError | if `junction_distance`, `speed_kmh`, `studded_fraction`, `studded_months` or `temperature_c` is not a single number. |
 
 ## ROAD_SOURCE_HEIGHT_M
 

@@ -333,13 +333,15 @@ def test_a_foundation_that_did_not_move_is_a_measurement() -> None:
 
 
 def test_the_curve_helper_returns_the_four_corners() -> None:
-    freq, values = bd.foundation_guideline_curve("sensitive")
+    curve = bd.foundation_guideline_curve("sensitive")
+    freq, values = curve.frequencies, curve.velocities_mm_s
     assert freq == pytest.approx([1.0, 10.0, 50.0, 100.0])
     assert values == pytest.approx([3.0, 3.0, 8.0, 10.0])
 
 
 def test_the_curve_helper_samples_where_it_is_asked_to() -> None:
-    freq, values = bd.foundation_guideline_curve("residential", [30.0])
+    curve = bd.foundation_guideline_curve("residential", [30.0])
+    freq, values = curve.frequencies, curve.velocities_mm_s
     assert freq == pytest.approx([30.0])
     assert values == pytest.approx([10.0])
 

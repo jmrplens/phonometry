@@ -24,6 +24,7 @@ from .erb_scale import (
 from .loudness import (
     EcmaLoudness,
     EqualLoudnessContours,
+    LoudnessContour,
     MooreGlasbergLoudness,
     MooreGlasbergTimeVaryingLoudness,
     ZwickerLoudness,
@@ -110,6 +111,7 @@ __all__ = [
     "critical_bandwidth_engineering",
     "energy_sum_level",
     "equal_loudness_contour",
+    "LoudnessContour",
     "equal_loudness_contours",
     "erb_bandwidth",
     "fluctuation_strength",

@@ -136,6 +136,7 @@ contour read at 500 Hz (clause 5.5).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a wrong number of bands or mismatched frequencies. |
+| TypeError | if `attenuation` or `frequencies` holds a text or a value that is not a real number. |
 
 ## CEILING_ATTENUATION_CONTOUR
 
@@ -236,6 +237,7 @@ ASTM value about 0.79 dB higher for the same rooms.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched shapes or a non-positive area. |
+| TypeError | if `reference_area` is not a single number, or `absorption_area`, `level_receiving` or `level_source` holds a text or a value that is not a real number. |
 
 ## partition_referenced_reduction_index
 
@@ -270,6 +272,7 @@ path as transmission factors.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive dimension. |
+| TypeError | if `room_height_m` or `room_length` is not a single number, or `reduction_index` holds a text or a value that is not a real number. |
 
 ## plenum_flanking_reduction_index
 
@@ -345,6 +348,7 @@ about 0.24 dB.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for mismatched shapes, an unknown sidewall case, or a non-positive dimension. |
+| TypeError | if `sidewalls` is not a text, `ceiling_length`, `plenum_height_m`, `source_length`, `split_receiving` or `split_source` is not a single number, or `attenuation_receiving_per_m`, `attenuation_source_per_m`, `frequencies`, `reduction_index_receiving` or `reduction_index_source` holds a text or a value that is not a real number. |
 
 ## PlenumFlankingResult
 

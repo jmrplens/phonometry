@@ -83,7 +83,7 @@ def test_tnr_of_synthetic_tone_matches_analytic() -> None:
 def test_tnr_prominence_criteria() -> None:
     """Formulae (12)-(13): 8 dB at 1 kHz+, frequency-dependent below."""
     loud = psychoacoustics.tone_to_noise_ratio(_tone_in_noise(2000.0, 0.2, 0.02), FS)
-    assert loud.criterion_db == pytest.approx(8.0)
+    assert loud.prominence_limit_db == pytest.approx(8.0)
     assert loud.prominent
 
     quiet = psychoacoustics.tone_to_noise_ratio(
@@ -92,7 +92,9 @@ def test_tnr_prominence_criteria() -> None:
     assert not quiet.prominent
 
     low = psychoacoustics.tone_to_noise_ratio(_tone_in_noise(200.0, 0.2, 0.02), FS)
-    assert low.criterion_db == pytest.approx(8.0 + 8.33 * np.log10(5.0), abs=1e-6)
+    assert low.prominence_limit_db == pytest.approx(
+        8.0 + 8.33 * np.log10(5.0), abs=1e-6
+    )
 
 
 def test_pr_of_synthetic_tone_matches_analytic() -> None:
@@ -123,7 +125,7 @@ def test_pr_of_synthetic_tone_matches_analytic() -> None:
 def test_pr_criteria_and_noise_only() -> None:
     """9 dB at 1 kHz+ (Formula 26); pure noise is never prominent."""
     loud = psychoacoustics.prominence_ratio(_tone_in_noise(3000.0, 0.3, 0.02), FS)
-    assert loud.criterion_db == pytest.approx(9.0)
+    assert loud.prominence_limit_db == pytest.approx(9.0)
     assert loud.prominent
 
     rng = np.random.default_rng(7)
@@ -141,7 +143,7 @@ def test_pr_low_frequency_truncated_band() -> None:
     result = psychoacoustics.prominence_ratio(x, FS, tone_frequency=120.0)
     assert result.frequency == pytest.approx(120.0, abs=1.0)
     assert result.prominent
-    assert result.criterion_db == pytest.approx(
+    assert result.prominence_limit_db == pytest.approx(
         9.0 + 10 * np.log10(1000 / 120), abs=1e-6
     )
 
@@ -282,7 +284,7 @@ def test_plot_draws_criterion_curve_and_the_assessed_tone() -> None:
     at_tone = np.interp(
         res.frequency, criterion_curve.get_xdata(), criterion_curve.get_ydata()
     )
-    assert at_tone == pytest.approx(res.criterion_db, abs=0.1)
+    assert at_tone == pytest.approx(res.prominence_limit_db, abs=0.1)
     assert "TNR" in ax.get_title()
     assert "prominent" in ax.get_title()
     plt.close("all")

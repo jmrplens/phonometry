@@ -94,6 +94,26 @@ Coverage factor `k` from the t-distribution (GUM clause 6, Annex G).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a coverage outside (0, 1). |
+| TypeError | if `coverage` or `dof` is not a single number. |
+
+## ExpandedUncertainty
+
+```python
+ExpandedUncertainty(coverage_factor: float, expanded_uncertainty: float)
+```
+
+An expanded uncertainty and the coverage factor it was formed with.
+
+What [`UncertaintyResult.expanded`](/phonometry/reference/api/metrology/uncertainty/#uncertaintyresultexpanded) returns: `k` and
+$U = k u_\mathrm{c}$, named, where a `(k, U)` tuple used to be
+unpacked by position (GUM clause 6, Annex G).
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `coverage_factor` | The coverage factor `k`. |
+| `expanded_uncertainty` | $U = k u_\mathrm{c}$, in the unit of the measurand. |
 
 ## monte_carlo
 
@@ -140,6 +160,7 @@ probabilistically symmetric one (not the 5.3.4 shortest interval).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for no inputs, fewer than 2 trials or bad coverage, or when the model returns a non-finite output for any trial. |
+| TypeError | if `coverage` or `n_trials` is not a single number. |
 
 ## MonteCarloResult
 
@@ -224,6 +245,12 @@ Type B quantity with a rectangular PDF of half-width `a` (GUM 4.3.7).
 
 The standard uncertainty is $a / \sqrt{3}$.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `half_width` or `value` is not a single number. |
+
 ## triangular
 
 ```python
@@ -234,6 +261,12 @@ Type B quantity with a triangular PDF of half-width `a` (GUM 4.3.9).
 
 The standard uncertainty is $a / \sqrt{6}$.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `half_width` or `value` is not a single number. |
+
 ## u_shaped
 
 ```python
@@ -243,6 +276,12 @@ u_shaped(value: float, half_width: float, name: str = '') -> Quantity
 Type B quantity with a U-shaped (arcsine) PDF of half-width `a`.
 
 The standard uncertainty is $a / \sqrt{2}$.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `half_width` or `value` is not a single number. |
 
 ## uncertainty_propagation
 
@@ -305,7 +344,7 @@ UncertaintyResult.expanded(
     coverage: float = 0.95,
     *,
     coverage_factor_override: float | None = None,
-) -> tuple[float, float]
+) -> ExpandedUncertainty
 ```
 
 Coverage factor `k` and expanded uncertainty $U = k u_\mathrm{c}$.
@@ -317,7 +356,7 @@ Coverage factor `k` and expanded uncertainty $U = k u_\mathrm{c}$.
 | `coverage` | Coverage probability in (0, 1); `0.95` by default. |
 | `coverage_factor_override` | Explicit `k`. Required for a correlated budget with finite input degrees of freedom, where the GUM defines no effective-dof formula (`effective_dof` is NaN). |
 
-**Returns:** The pair `(k, U)` (GUM clause 6, Annex G).
+**Returns:** The coverage factor `k` and `U`, as an [`ExpandedUncertainty`](/phonometry/reference/api/metrology/uncertainty/#expandeduncertainty) (GUM clause 6, Annex G).
 
 **Raises**
 

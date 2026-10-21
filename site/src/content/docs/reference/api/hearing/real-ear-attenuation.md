@@ -97,6 +97,7 @@ How much a rotated directional microphone may see vary (Table 1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a rejection below 10 dB, for which Table 1 says the microphone is not suitable, or one that is not finite. |
+| TypeError | if `free_field_rejection` is not a single number. |
 
 ## assess_attenuation_difference
 
@@ -150,8 +151,8 @@ B.2).
 
 ```python
 AttenuationDifferenceResult(
-    first_mean_db: np.ndarray,
-    second_mean_db: np.ndarray,
+    first_mean_attenuation: np.ndarray,
+    second_mean_attenuation: np.ndarray,
     first_expanded_uncertainty_db: np.ndarray,
     second_expanded_uncertainty_db: np.ndarray,
     frequencies: np.ndarray,
@@ -168,8 +169,8 @@ built to call significant a difference its uncertainties cover.
 
 | Name | Description |
 | :--- | :--- |
-| `first_mean_db` | $m_1$ per band, in dB. |
-| `second_mean_db` | $m_2$ per band, in dB. |
+| `first_mean_attenuation` | $m_1$ per band, in dB. |
+| `second_mean_attenuation` | $m_2$ per band, in dB. |
 | `first_expanded_uncertainty_db` | $U_{95,1}$ per band, in dB. |
 | `second_expanded_uncertainty_db` | $U_{95,2}$ per band, in dB. |
 | `frequencies` | The centre frequencies of the test signals, in hertz. |
@@ -181,14 +182,6 @@ built to call significant a difference its uncertainties cover.
 Whether the two measurements differ significantly in any band.
 
 **Returns:** `True` when at least one band's difference exceeds its criterion.
-
-### AttenuationDifferenceResult.criterion_db
-
-*property*
-
-$\sqrt{U_{95,1}^2 + U_{95,2}^2}$ per band, in dB.
-
-A difference larger than this is significant at the 5 % level.
 
 ### AttenuationDifferenceResult.difference
 
@@ -218,6 +211,14 @@ Draw each band's difference against the criterion it has to beat.
 | `kwargs` | Forwarded to the difference bars. |
 
 **Returns:** The axes.
+
+### AttenuationDifferenceResult.significance_limit_db
+
+*property*
+
+$\sqrt{U_{95,1}^2 + U_{95,2}^2}$ per band, in dB.
+
+A difference larger than this is significant at the 5 % level.
 
 ### AttenuationDifferenceResult.significant
 
@@ -321,9 +322,9 @@ value the comparison should rest on.
 
 ```python
 ProtectorUncertaintyBudget(
-    method_db: float,
-    equipment_db: float,
-    environment_db: float,
+    method_uncertainty_db: float,
+    equipment_uncertainty_db: float,
+    environment_uncertainty_db: float,
 )
 ```
 
@@ -339,11 +340,11 @@ active insertion loss of an active noise reduction earmuff.
 
 | Name | Description |
 | :--- | :--- |
-| `method_db` | $u_\mathrm{meth}$, the uncertainty of the mean of the individual attenuations of 16 test subjects: subject group, fitting, threshold determination, tester and specimen, in dB. |
-| `equipment_db` | $u_\mathrm{eq}$, the uncertainty of the test signal generation equipment, in dB. |
-| `environment_db` | $u_\mathrm{env}$, the uncertainty of the deviations from the ideal test environment, in dB. |
+| `method_uncertainty_db` | $u_\mathrm{meth}$, the uncertainty of the mean of the individual attenuations of 16 test subjects: subject group, fitting, threshold determination, tester and specimen, in dB. |
+| `equipment_uncertainty_db` | $u_\mathrm{eq}$, the uncertainty of the test signal generation equipment, in dB. |
+| `environment_uncertainty_db` | $u_\mathrm{env}$, the uncertainty of the deviations from the ideal test environment, in dB. |
 
-### ProtectorUncertaintyBudget.combined_db
+### ProtectorUncertaintyBudget.combined_uncertainty_db
 
 *property*
 
@@ -351,7 +352,7 @@ $u = \sqrt{u_\mathrm{meth}^2 + u_\mathrm{eq}^2 + u_\mathrm{env}^2}$, in dB.
 
 **Returns:** The combined standard uncertainty, unrounded.
 
-### ProtectorUncertaintyBudget.expanded_db
+### ProtectorUncertaintyBudget.expanded_uncertainty_db
 
 *property*
 
@@ -365,8 +366,8 @@ $U_{95} = 2u$, in dB.
 real_ear_attenuation(
     attenuation: ArrayLike | None = None,
     *,
-    open_threshold_db: ArrayLike | None = None,
-    occluded_threshold_db: ArrayLike | None = None,
+    open_threshold_levels: ArrayLike | None = None,
+    occluded_threshold_levels: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
 ) -> RealEarAttenuationResult
 ```
@@ -398,8 +399,8 @@ hearing level give the same difference.
 | Name | Description |
 | :--- | :--- |
 | `attenuation` | A `(subjects, bands)` grid of individual attenuations, in dB. |
-| `open_threshold_db` | The thresholds of hearing with open ears, a `(subjects, bands)` grid in dB, given together with `occluded_threshold_db` instead of `attenuation`. |
-| `occluded_threshold_db` | The thresholds with the protector in place, in dB, on the same grid. |
+| `open_threshold_levels` | The thresholds of hearing with open ears, a `(subjects, bands)` grid in dB, given together with `occluded_threshold_levels` instead of `attenuation`. |
+| `occluded_threshold_levels` | The thresholds with the protector in place, in dB, on the same grid. |
 | `frequencies` | The centre frequencies of the test signals, in hertz, or `None` for the seven of 4.1 (125 Hz to 8 kHz) when the grid has seven columns, or those eight with the optional 63 Hz when it has eight. |
 
 **Returns:** [`RealEarAttenuationResult`](/phonometry/reference/api/hearing/real-ear-attenuation/#realearattenuationresult).
@@ -415,7 +416,7 @@ hearing level give the same difference.
 ```python
 RealEarAttenuationResult(
     attenuation: np.ndarray,
-    mean_db: np.ndarray,
+    mean_attenuation: np.ndarray,
     standard_deviation_db: np.ndarray,
     standard_uncertainty_db: np.ndarray,
     expanded_uncertainty_db: np.ndarray,
@@ -431,7 +432,7 @@ The attenuation of a hearing protector on a panel of subjects (4.6).
 | Name | Description |
 | :--- | :--- |
 | `attenuation` | The individual attenuations $A_{j,f}$, one row per subject and one column per test signal, in dB. This is the grid [`phonometry.hearing.assumed_protection_value`](/phonometry/reference/api/hearing/hearing-protectors/#assumed_protection_value), [`phonometry.hearing.hml_rating`](/phonometry/reference/api/hearing/hearing-protectors/#hml_rating) and [`phonometry.hearing.snr_rating`](/phonometry/reference/api/hearing/hearing-protectors/#snr_rating) take, unchanged. |
-| `mean_db` | The mean attenuation $m$ per test signal, in dB. |
+| `mean_attenuation` | The mean attenuation $m$ per test signal, in dB. |
 | `standard_deviation_db` | The standard deviation $s$ per test signal over the subjects, the sample one over $N - 1$, in dB. |
 | `standard_uncertainty_db` | $u = s/\sqrt{N}$, the standard deviation of the mean (A.2), in dB. |
 | `expanded_uncertainty_db` | $U_{95} = 2u$ (A.1), in dB. |
@@ -471,7 +472,7 @@ mean, and the expanded uncertainty as bars on it.
 *Constant* (`mapping`).
 
 ```python
-REAT_BETWEEN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUncertaintyBudget(method_db=4.0, equipment_db=0.3, environment_db=0.8), '250 Hz up to 4 kHz': ProtectorUncertaintyBudget(method_db=3.2, equipment_db=0.3, environment_db=0.8), 'above 4 kHz': ProtectorUncertaintyBudget(method_db=3.2, equipment_db=0.3, environment_db=0.8)}, 'earmuff': {'below 250 Hz': ProtectorUncertaintyBudget(method_db=1.8, equipment_db=0.3, environment_db=0.8), '250 Hz up to 4 kHz': ProtectorUncertaintyBudget(method_db=2.3, equipment_db=0.3, environment_db=0.8), 'above 4 kHz': ProtectorUncertaintyBudget(method_db=3.2, equipment_db=0.3, environment_db=0.8)}}
+REAT_BETWEEN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUncertaintyBudget(method_uncertainty_db=4.0, equipment_uncertainty_db=0.3, environment_uncertainty_db=0.8), '250 Hz up to 4 kHz': ProtectorUncertaintyBudget(method_uncertainty_db=3.2, equipment_uncertainty_db=0.3, environment_uncertainty_db=0.8), 'above 4 kHz': ProtectorUncertaintyBudget(method_uncertainty_db=3.2, equipment_uncertainty_db=0.3, environment_uncertainty_db=0.8)}, 'earmuff': {'below 250 Hz': ProtectorUncertaintyBudget(method_uncertainty_db=1.8, equipment_uncertainty_db=0.3, environment_uncertainty_db=0.8), '250 Hz up to 4 kHz': ProtectorUncertaintyBudget(method_uncertainty_db=2.3, equipment_uncertainty_db=0.3, environment_uncertainty_db=0.8), 'above 4 kHz': ProtectorUncertaintyBudget(method_uncertainty_db=3.2, equipment_uncertainty_db=0.3, environment_uncertainty_db=0.8)}}
 ```
 
 ## reat_expanded_uncertainty
@@ -532,7 +533,7 @@ REAT_FREQUENCY_RANGES = ('below 250 Hz', '250 Hz up to 4 kHz', 'above 4 kHz')
 *Constant* (`mapping`).
 
 ```python
-REAT_WITHIN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUncertaintyBudget(method_db=1.5, equipment_db=0.2, environment_db=0.5), '250 Hz up to 4 kHz': ProtectorUncertaintyBudget(method_db=1.0, equipment_db=0.2, environment_db=0.5), 'above 4 kHz': ProtectorUncertaintyBudget(method_db=1.5, equipment_db=0.2, environment_db=0.5)}, 'earmuff': {'below 250 Hz': ProtectorUncertaintyBudget(method_db=1.0, equipment_db=0.2, environment_db=0.5), '250 Hz up to 4 kHz': ProtectorUncertaintyBudget(method_db=0.6, equipment_db=0.2, environment_db=0.5), 'above 4 kHz': ProtectorUncertaintyBudget(method_db=1.0, equipment_db=0.2, environment_db=0.5)}}
+REAT_WITHIN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUncertaintyBudget(method_uncertainty_db=1.5, equipment_uncertainty_db=0.2, environment_uncertainty_db=0.5), '250 Hz up to 4 kHz': ProtectorUncertaintyBudget(method_uncertainty_db=1.0, equipment_uncertainty_db=0.2, environment_uncertainty_db=0.5), 'above 4 kHz': ProtectorUncertaintyBudget(method_uncertainty_db=1.5, equipment_uncertainty_db=0.2, environment_uncertainty_db=0.5)}, 'earmuff': {'below 250 Hz': ProtectorUncertaintyBudget(method_uncertainty_db=1.0, equipment_uncertainty_db=0.2, environment_uncertainty_db=0.5), '250 Hz up to 4 kHz': ProtectorUncertaintyBudget(method_uncertainty_db=0.6, equipment_uncertainty_db=0.2, environment_uncertainty_db=0.5), 'above 4 kHz': ProtectorUncertaintyBudget(method_uncertainty_db=1.0, equipment_uncertainty_db=0.2, environment_uncertainty_db=0.5)}}
 ```
 
 ## REATSoundFieldCheck

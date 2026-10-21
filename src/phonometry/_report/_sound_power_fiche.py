@@ -232,6 +232,7 @@ def headline_level(result: SoundPowerLike, level_a: float | None = None) -> floa
 
     :raises ValueError: If a screened ``level_a`` is supplied and is not
         finite, which is a determination with no qualifying band left.
+    :raises TypeError: if ``level_a`` is not a single number.
     """
     if level_a is not None:
         require_scalar(level_a, "level_a")

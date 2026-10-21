@@ -144,8 +144,10 @@ __all__ = [
     "total_effective_roughness",
     "track_transfer",
     "traction_sound_power",
+    "RailSourceSpectra",
     "vertical_directivity",
     "wheel_roughness",
+    "WavelengthSpectrum",
     "wheel_transfer",
 ]
 
@@ -1765,13 +1767,65 @@ def _energy_sum(*spectra: NDArray[np.float64]) -> NDArray[np.float64]:
 # ---------------------------------------------------------------------------
 
 
+@dataclass(frozen=True, kw_only=True)
+class WavelengthSpectrum(OwnsArrays):
+    """A roughness or contact-filter spectrum over wavelength (Appendix G).
+
+    What :func:`wheel_roughness`, :func:`rail_roughness`,
+    :func:`contact_filter` and :func:`impact_roughness_single` return: the
+    wavelengths and the levels, named, where a ``(wavelengths, levels)`` tuple
+    used to be unpacked by position.
+
+    :ivar wavelengths_mm: The wavelengths of the table, in mm, longest first
+        as Appendix G prints them.
+    :ivar levels: The level at each wavelength, in dB.
+    """
+
+    wavelengths_mm: NDArray[np.float64]
+    levels: NDArray[np.float64]
+
+    def plot(
+        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    ) -> Axes:
+        """Plot the levels against wavelength, on a logarithmic wavelength axis.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the spectrum curve.
+        :return: The axes.
+        """
+        from ..._i18n import check_language
+        from ..._plot.environment import plot_wavelength_spectrum
+
+        check_language(language)
+        return plot_wavelength_spectrum(self, ax=ax, language=language, **kwargs)
+
+
+@dataclass(frozen=True)
+class RailSourceSpectra(OwnsArrays):
+    """The sound power spectra of the two source heights of a railway source.
+
+    What :func:`traction_sound_power` and :func:`aerodynamic_sound_power`
+    return: the spectrum at source height A and at source height B (2.3.1,
+    Figure [2.3.a], :data:`RAILWAY_SOURCE_HEIGHTS_M`), named, where a
+    ``(source A, source B)`` tuple used to be unpacked by position.
+
+    :ivar source_a: The 24 band sound power levels at source height A, in dB.
+    :ivar source_b: The 24 band sound power levels at source height B, in dB.
+    """
+
+    source_a: NDArray[np.float64]
+    source_b: NDArray[np.float64]
+
+
 def wheel_roughness(
     brake: BrakeType | str,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+) -> WavelengthSpectrum:
     """Wheel roughness ``L_r,VEH`` of Table G-1a.
 
     :param brake: The :class:`BrakeType` of digit 3 of the vehicle descriptor.
-    :return: ``(wavelengths in mm, levels in dB)``.
+    :return: The wavelengths in mm and the levels in dB, as a
+        :class:`WavelengthSpectrum`.
     :raises ValueError: If the brake type is not tabulated.
     """
     key = brake.value if isinstance(brake, BrakeType) else str(brake)
@@ -1780,15 +1834,15 @@ def wheel_roughness(
             f"Unknown brake type {key!r}; Table G-1a tabulates: "
             + ", ".join(_TABLE_G1A)
         )
-    return (
-        np.asarray(_WAVELENGTHS_WHEEL, dtype=np.float64),
-        np.asarray(_TABLE_G1A[key], dtype=np.float64),
+    return WavelengthSpectrum(
+        wavelengths_mm=np.asarray(_WAVELENGTHS_WHEEL, dtype=np.float64),
+        levels=np.asarray(_TABLE_G1A[key], dtype=np.float64),
     )
 
 
 def rail_roughness(
     roughness: RailRoughnessClass | str,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+) -> WavelengthSpectrum:
     """Rail roughness ``L_r,TR`` of Table G-1b.
 
     Only the two maintained classes ``E`` and ``M`` are tabulated; the ``N``
@@ -1797,7 +1851,8 @@ def rail_roughness(
 
     :param roughness: The :class:`RailRoughnessClass` of digit 2 of the track
         descriptor.
-    :return: ``(wavelengths in mm, levels in dB)``.
+    :return: The wavelengths in mm and the levels in dB, as a
+        :class:`WavelengthSpectrum`.
     :raises ValueError: If the class carries no spectrum in Table G-1b.
     """
     key = (
@@ -1810,9 +1865,9 @@ def rail_roughness(
             + " and ".join(_TABLE_G1B)
             + "; supply a national spectrum instead."
         )
-    return (
-        np.asarray(_WAVELENGTHS_STANDARD, dtype=np.float64),
-        np.asarray(_TABLE_G1B[key], dtype=np.float64),
+    return WavelengthSpectrum(
+        wavelengths_mm=np.asarray(_WAVELENGTHS_STANDARD, dtype=np.float64),
+        levels=np.asarray(_TABLE_G1B[key], dtype=np.float64),
     )
 
 
@@ -1828,12 +1883,13 @@ class ContactFilter(Enum):
 
 def contact_filter(
     filter_: ContactFilter | tuple[float, float],
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+) -> WavelengthSpectrum:
     """Contact filter ``A_3`` of Table G-2.
 
     :param filter_: A :class:`ContactFilter` member or the ``(wheel load in kN,
         wheel diameter in mm)`` pair that labels the column.
-    :return: ``(wavelengths in mm, levels in dB)``.
+    :return: The wavelengths in mm and the levels in dB, as a
+        :class:`WavelengthSpectrum`.
     :raises ValueError: If the combination is not tabulated.
     """
     key = (
@@ -1846,9 +1902,9 @@ def contact_filter(
             f"Unknown contact filter {key!r}; Table G-2 tabulates the wheel "
             "load and wheel diameter pairs " + ", ".join(str(k) for k in _TABLE_G2)
         )
-    return (
-        np.asarray(_WAVELENGTHS_STANDARD, dtype=np.float64),
-        np.asarray(_TABLE_G2[key], dtype=np.float64),
+    return WavelengthSpectrum(
+        wavelengths_mm=np.asarray(_WAVELENGTHS_STANDARD, dtype=np.float64),
+        levels=np.asarray(_TABLE_G2[key], dtype=np.float64),
     )
 
 
@@ -1923,24 +1979,25 @@ def superstructure_transfer() -> NDArray[np.float64]:
     return np.asarray(_TABLE_G3C, dtype=np.float64)
 
 
-def impact_roughness_single() -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+def impact_roughness_single() -> WavelengthSpectrum:
     r"""Impact roughness ``L_R,IMPACT-SINGLE`` of Table G-4.
 
     The table is given for a joint density :math:`n_l = 0.01` m^-1, that is one
     switch, joint or crossing per 100 m, which is also the default the
     Directive prescribes for jointed track.
 
-    :return: ``(wavelengths in mm, levels in dB)``.
+    :return: The wavelengths in mm and the levels in dB, as a
+        :class:`WavelengthSpectrum`.
     """
-    return (
-        np.asarray(_WAVELENGTHS_STANDARD, dtype=np.float64),
-        np.asarray(_TABLE_G4, dtype=np.float64),
+    return WavelengthSpectrum(
+        wavelengths_mm=np.asarray(_WAVELENGTHS_STANDARD, dtype=np.float64),
+        levels=np.asarray(_TABLE_G4, dtype=np.float64),
     )
 
 
 def traction_sound_power(
     vehicle: TractionVehicle | str,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+) -> RailSourceSpectra:
     r"""Traction sound power per vehicle of Table G-5, in dB.
 
     Because the Directive models only constant speed and idling and takes the
@@ -1949,7 +2006,8 @@ def traction_sound_power(
     one table serves both running conditions.
 
     :param vehicle: A :class:`TractionVehicle` member or its description.
-    :return: ``(source A spectrum, source B spectrum)``, 24 values each.
+    :return: The 24 band levels at source height A and at source height B,
+        as a :class:`RailSourceSpectra`.
     :raises ValueError: If the vehicle is not tabulated.
     """
     key = vehicle.value if isinstance(vehicle, TractionVehicle) else str(vehicle)
@@ -1959,15 +2017,18 @@ def traction_sound_power(
             + ", ".join(_TABLE_G5)
         )
     low, high = _TABLE_G5[key]
-    return np.asarray(low, dtype=np.float64), np.asarray(high, dtype=np.float64)
+    return RailSourceSpectra(
+        source_a=np.asarray(low, dtype=np.float64),
+        source_b=np.asarray(high, dtype=np.float64),
+    )
 
 
 def aerodynamic_sound_power(
     speed_kmh: float = AERODYNAMIC_REFERENCE_SPEED_KMH,
     *,
-    reference: tuple[NDArray[np.float64], NDArray[np.float64]] | None = None,
+    reference: RailSourceSpectra | None = None,
     alpha: float = _AERODYNAMIC_ALPHA,
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+) -> RailSourceSpectra:
     r"""Aerodynamic sound power of (2.3.13) and (2.3.14), in dB.
 
     :math:`L_{W,0,i} = L_{W,0,h,i}(v_0) + \alpha_{h,i} \log_{10}(v/v_0)` with
@@ -1975,12 +2036,22 @@ def aerodynamic_sound_power(
     At the reference speed the result is Table G-6 verbatim.
 
     :param speed_kmh: Train speed ``v``, in km/h.
-    :param reference: ``(source A, source B)`` reference spectra at ``v_0``, or
-        ``None`` (the default) for Table G-6.
+    :param reference: The reference spectra at ``v_0`` of the two source
+        heights, as a :class:`RailSourceSpectra`, or ``None`` (the default)
+        for Table G-6.
     :param alpha: Speed exponent ``alpha_h,i``; Table G-6 gives 50 in every band.
-    :return: ``(source A spectrum, source B spectrum)``, 24 values each.
+    :return: The 24 band levels at source height A and at source height B,
+        as a :class:`RailSourceSpectra`.
+    :raises TypeError: If ``reference`` is not a :class:`RailSourceSpectra`,
+        or ``speed_kmh`` or ``alpha`` is not one number.
     :raises ValueError: If the speed is not positive.
     """
+    if reference is not None and not isinstance(reference, RailSourceSpectra):
+        msg = (
+            "'reference' must be the spectra of the two source heights as a "
+            f"RailSourceSpectra, or None; got {type(reference).__name__}."
+        )
+        raise TypeError(msg)
     v = _speed(speed_kmh)
     low, high = (
         (
@@ -1989,12 +2060,12 @@ def aerodynamic_sound_power(
         )
         if reference is None
         else (
-            _spectrum(reference[0], "reference[0]"),
-            _spectrum(reference[1], "reference[1]"),
+            _spectrum(reference.source_a, "reference.source_a"),
+            _spectrum(reference.source_b, "reference.source_b"),
         )
     )
     shift = _finite(alpha, "alpha") * np.log10(v / AERODYNAMIC_REFERENCE_SPEED_KMH)
-    return low + shift, high + shift
+    return RailSourceSpectra(source_a=low + shift, source_b=high + shift)
 
 
 def bridge_transfer(bridge: BridgeType | str) -> NDArray[np.float64]:
@@ -2019,9 +2090,9 @@ def bridge_transfer(bridge: BridgeType | str) -> NDArray[np.float64]:
 
 def roughness_to_frequency(
     levels: ArrayLike,
+    *,
     wavelengths_mm: ArrayLike,
     speed_kmh: float,
-    *,
     frequencies: ArrayLike = RAILWAY_THIRD_OCTAVE_BANDS_HZ,
     interpolation: RoughnessInterpolation = RoughnessInterpolation.PROPORTIONAL,
 ) -> NDArray[np.float64]:
@@ -2042,6 +2113,7 @@ def roughness_to_frequency(
     :param interpolation: The :class:`RoughnessInterpolation` rule.
     :return: The spectrum on the target frequency grid, in dB.
     :raises ValueError: If an input is invalid.
+    :raises TypeError: if ``speed_kmh`` is not a single number.
     """
     y = np.asarray(levels, dtype=np.float64)
     lam = np.asarray(wavelengths_mm, dtype=np.float64) / 1000.0
@@ -2101,6 +2173,7 @@ def impact_roughness(single: ArrayLike, joint_density: float) -> NDArray[np.floa
     :param joint_density: Joint density ``n_l``, in m^-1.
     :return: ``L_R,IMPACT,i``, in dB.
     :raises ValueError: If the joint density is negative or not finite.
+    :raises TypeError: if ``joint_density`` is not a single number.
     """
     density = _finite(joint_density, "joint_density")
     if density < 0.0:
@@ -2132,6 +2205,7 @@ def rolling_sound_power(
     :param n_axles: Number of axles per vehicle ``N_a``.
     :return: The component sound power, in dB.
     :raises ValueError: If ``n_axles`` is not a positive number.
+    :raises TypeError: if ``n_axles`` is not a single number.
     """
     n_a = _finite(n_axles, "n_axles")
     if n_a <= 0.0:
@@ -2170,6 +2244,7 @@ def curve_squeal_excess(
     :param track_length: Length of track along the curve ``l_track``, in m.
     :return: The excess, in dB (0.0 where no squeal is modelled).
     :raises ValueError: If the radius or the track length is not positive.
+    :raises TypeError: if ``radius`` or ``track_length`` is not a single number.
     """
     r = _finite(radius, "radius")
     if r <= 0.0:
@@ -2211,6 +2286,7 @@ def horizontal_directivity(
     :param frequencies: Midband frequencies, used only for the array shape.
     :return: The correction, in dB, one value per band.
     :raises ValueError: If the angle is not finite.
+    :raises TypeError: if ``phi`` is not a single number.
     """
     angle = np.radians(_finite(phi, "phi"))
     value = 10.0 * np.log10(0.01 + 0.99 * np.sin(angle) ** 2)
@@ -2243,6 +2319,7 @@ def vertical_directivity(
     :param edition: Which text of (2.3.16) to evaluate.
     :return: The correction, in dB, one value per band.
     :raises ValueError: If the angle is not finite or the height is not 1 or 2.
+    :raises TypeError: if ``height`` or ``psi`` is not a single number.
     """
     require_scalar(height, "height")
     angle = np.radians(_finite(psi, "psi"))
@@ -2290,6 +2367,28 @@ def octave_bands_from_third_octaves(levels: ArrayLike) -> NDArray[np.float64]:
 # ---------------------------------------------------------------------------
 
 
+def _require_record(
+    owner: object, name: str, kind: type, *, optional: bool = False
+) -> None:
+    """Raise :class:`TypeError` unless ``owner.<name>`` is a ``kind`` record.
+
+    A wavelength table or a pair of source spectra used to be passed as a
+    bare tuple, read by position; the record names its arrays, and a tuple
+    left over from that form is refused here, by name, rather than failing
+    deep inside the resampling with an attribute it does not have.
+    """
+    value = getattr(owner, name)
+    if value is None and optional:
+        return
+    if not isinstance(value, kind):
+        accepted = f"a {kind.__name__}" + (" or None" if optional else "")
+        msg = (
+            f"{type(owner).__name__}.{name} must be {accepted}; got "
+            f"{type(value).__name__}."
+        )
+        raise TypeError(msg)
+
+
 @dataclass(frozen=True)
 class RollingStock(OwnsArrays):
     """The Appendix G data of one vehicle type, on its own wavelength grids.
@@ -2299,30 +2398,42 @@ class RollingStock(OwnsArrays):
     than from the :mod:`~phonometry.environment.sources.cnossos_rail` look-ups.
 
     :ivar n_axles: Number of axles per vehicle ``N_a``.
-    :ivar wheel_roughness: ``(wavelengths in mm, levels in dB)`` of Table G-1a.
-    :ivar contact_filter: ``(wavelengths in mm, levels in dB)`` of Table G-2.
+    :ivar wheel_roughness: The :class:`WavelengthSpectrum` of Table G-1a.
+    :ivar contact_filter: The :class:`WavelengthSpectrum` of Table G-2.
     :ivar wheel_transfer: ``L_H,VEH,i`` of Table G-3b, 24 values in dB.
     :ivar superstructure_transfer: ``L_H,VEH,SUP,i`` of Table G-3c for a freight
         wagon, or ``None`` for any other vehicle type.
-    :ivar traction: ``(source A, source B)`` spectra of Table G-5, or ``None``
+    :ivar traction: The :class:`RailSourceSpectra` of Table G-5, or ``None``
         for an unpowered vehicle.
-    :ivar aerodynamic: ``(source A, source B)`` reference spectra of Table G-6
-        at ``v_0``, or ``None`` to leave aerodynamic noise out.
+    :ivar aerodynamic: The :class:`RailSourceSpectra` of Table G-6 at
+        ``v_0``, or ``None`` to leave aerodynamic noise out.
     :ivar aerodynamic_alpha: Speed exponent of (2.3.13) and (2.3.14).
     :ivar tram: ``True`` for a tram or light metro, which uses the lower
         minimum speed and the tram squeal rule.
     """
 
     n_axles: int
-    wheel_roughness: tuple[Any, Any]
-    contact_filter: tuple[Any, Any]
+    wheel_roughness: WavelengthSpectrum
+    contact_filter: WavelengthSpectrum
     wheel_transfer: Any
     superstructure_transfer: Any | None = None
-    traction: tuple[Any, Any] | None = None
-    aerodynamic: tuple[Any, Any] | None = None
+    traction: RailSourceSpectra | None = None
+    aerodynamic: RailSourceSpectra | None = None
     aerodynamic_alpha: float = _AERODYNAMIC_ALPHA
     _: KW_ONLY
     tram: bool = False
+
+    def __post_init__(self) -> None:
+        """Refuse a spectrum given as a bare pair rather than its record.
+
+        :raises TypeError: if ``wheel_roughness`` or ``contact_filter`` is not
+            a :class:`WavelengthSpectrum`, or ``traction`` or ``aerodynamic``
+            is neither a :class:`RailSourceSpectra` nor ``None``.
+        """
+        _require_record(self, "wheel_roughness", WavelengthSpectrum)
+        _require_record(self, "contact_filter", WavelengthSpectrum)
+        _require_record(self, "traction", RailSourceSpectra, optional=True)
+        _require_record(self, "aerodynamic", RailSourceSpectra, optional=True)
 
 
 @dataclass(frozen=True)
@@ -2349,10 +2460,10 @@ class RailwayVehicle(RichDisplay):
 class RailwayTrack(OwnsArrays):
     """The Appendix G data of one track section.
 
-    :ivar rail_roughness: ``(wavelengths in mm, levels in dB)`` of Table G-1b.
+    :ivar rail_roughness: The :class:`WavelengthSpectrum` of Table G-1b.
     :ivar track_transfer: ``L_H,TR,i`` of Table G-3a, 24 values in dB.
-    :ivar impact_roughness: ``(wavelengths in mm, levels in dB)`` of Table G-4,
-        or ``None`` where there is no joint, switch or crossing.
+    :ivar impact_roughness: The :class:`WavelengthSpectrum` of Table G-4, or
+        ``None`` where there is no joint, switch or crossing.
     :ivar joint_density: Joint density ``n_l``, in m^-1.
     :ivar bridge_transfer: ``L_H,bridge,i`` of Table G-7 where the section is on
         a bridge, or ``None``.
@@ -2362,13 +2473,23 @@ class RailwayTrack(OwnsArrays):
         idling flow term (2.3.4).
     """
 
-    rail_roughness: tuple[Any, Any]
+    rail_roughness: WavelengthSpectrum
     track_transfer: Any
-    impact_roughness: tuple[Any, Any] | None = None
+    impact_roughness: WavelengthSpectrum | None = None
     joint_density: float = REFERENCE_JOINT_DENSITY_PER_M
     bridge_transfer: Any | None = None
     squeal_excess: float = 0.0
     length: float = 100.0
+
+    def __post_init__(self) -> None:
+        """Refuse a roughness given as a bare pair rather than its record.
+
+        :raises TypeError: if ``rail_roughness`` is not a
+            :class:`WavelengthSpectrum`, or ``impact_roughness`` is neither one
+            nor ``None``.
+        """
+        _require_record(self, "rail_roughness", WavelengthSpectrum)
+        _require_record(self, "impact_roughness", WavelengthSpectrum, optional=True)
 
 
 @dataclass(frozen=True)
@@ -2415,6 +2536,8 @@ class RailwayEmissionResult(OwnsArrays):
 
         :raises ValueError: if the band, 1/3-octave or source-height axes
             disagree.
+        :raises TypeError: if ``heights_m`` or ``third_octave_frequencies`` is a single
+            number where an array goes.
         """
         require_ranks(
             self,
@@ -2488,13 +2611,15 @@ class RailwayEmissionResult(OwnsArrays):
 
 
 def _resample(
-    table: tuple[Any, Any],
+    table: WavelengthSpectrum,
     speed: float,
     interpolation: RoughnessInterpolation,
 ) -> NDArray[np.float64]:
-    wavelengths, levels = table
     return roughness_to_frequency(
-        levels, wavelengths, speed, interpolation=interpolation
+        table.levels,
+        wavelengths_mm=table.wavelengths_mm,
+        speed_kmh=speed,
+        interpolation=interpolation,
     )
 
 
@@ -2607,15 +2732,18 @@ def _vehicle_spectra(
             omni.append(bridge)
             components.append(("bridge", 0, bridge))
         if stock.aerodynamic is not None and speed > AERODYNAMIC_THRESHOLD_SPEED_KMH:
-            low, high = aerodynamic_sound_power(
+            power = aerodynamic_sound_power(
                 speed, reference=stock.aerodynamic, alpha=stock.aerodynamic_alpha
             )
+            low, high = power.source_a, power.source_b
             directional[0].append(low)
             directional[1].append(high + ver_aero_b)
             components.append(("aerodynamic", 0, low))
             components.append(("aerodynamic", 1, high))
     if stock.traction is not None:
-        for height, spectrum in enumerate(stock.traction):
+        for height, spectrum in enumerate(
+            (stock.traction.source_a, stock.traction.source_b)
+        ):
             directional[height].append(np.asarray(spectrum, dtype=np.float64))
             components.append(
                 ("traction", height, np.asarray(spectrum, dtype=np.float64))
@@ -2695,6 +2823,8 @@ def railway_source_power(
     :param directivity_edition: Which text of (2.3.16) to evaluate.
     :return: A :class:`RailwayEmissionResult`.
     :raises ValueError: If the traffic is empty or an input is invalid.
+    :raises TypeError: if ``min_speed_kmh`` or ``reference_time`` is not a single
+        number.
     """
     vehicles = [traffic] if isinstance(traffic, RailwayVehicle) else list(traffic)
     if not vehicles:

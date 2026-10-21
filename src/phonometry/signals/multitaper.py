@@ -455,6 +455,7 @@ def multitaper_psd(
     :param confidence: Confidence level for the chi-square interval.
     :return: A :class:`MultitaperSpectralDensityResult`.
     :raises ValueError: If the inputs or parameters are invalid.
+    :raises TypeError: if ``n_tapers`` is a flag, a text or an array where a count goes.
     """
     xa = _validate_signal(x, "x")
     fs_v = _positive(resolve_fs(x, fs), "fs")

@@ -235,6 +235,7 @@ class ReciprocityCalibration(OwnsArrays):
             whose shape does not match the method and the frequencies, a
             correction that is not one finite value per frequency, or a
             negative uncertainty.
+        :raises TypeError: if ``field`` or ``method`` is not a text.
         """
         require_choice(self.field, "field", CALIBRATION_FIELDS)
         require_choice(self.method, "method", _METHODS)
@@ -627,6 +628,8 @@ class ReciprocityUncertaintyBudget(OwnsArrays):
             lengths, no component, a matrix that is not one row per component
             and one column per frequency, an uncertainty that is negative or
             not finite, or a coverage factor that is not positive.
+        :raises TypeError: if ``field`` is not a text, or ``coverage_factor`` is not a
+            single number.
         """
         require_choice(self.field, "field", CALIBRATION_FIELDS)
         require_positive(self.coverage_factor, "coverage_factor")
@@ -709,7 +712,7 @@ def reciprocity_uncertainty_budget(
     *,
     frequencies: ArrayLike,
     field: CalibrationField = "pressure",
-    additional_components_db: Mapping[str, ArrayLike] | None = None,
+    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
     coverage_factor: float = _COVERAGE_FACTOR,
 ) -> ReciprocityUncertaintyBudget:
     r"""The uncertainty budget of a reciprocity calibration (IEC 61094-2:2009
@@ -720,7 +723,7 @@ def reciprocity_uncertainty_budget(
     field's Table 1 (:data:`IEC61094_2_TABLE_1`, :data:`IEC61094_3_TABLE_1`).
     Neither table is exhaustive ("Not all of the components may be relevant in
     a given calibration setup"), so a component may be left out and
-    ``additional_components_db`` adds others. The components that come from
+    ``additional_uncertainties_db`` adds others. The components that come from
     the acoustic transfer impedance are what
     :func:`~phonometry.metrology.coupler_parameter_uncertainty` and
     :func:`~phonometry.metrology.free_field_parameter_uncertainty` return,
@@ -737,13 +740,15 @@ def reciprocity_uncertainty_budget(
     :param standard_uncertainties_db: The components, keyed by name, each a
         standard uncertainty in dB, one value or one per frequency.
     :param field: ``"pressure"`` (default) or ``"free"``.
-    :param additional_components_db: Further components, by name, in the same
+    :param additional_uncertainties_db: Further components, by name, in the same
         form (Default: none).
     :param coverage_factor: :math:`k` (Default: 2).
     :return: The :class:`ReciprocityUncertaintyBudget`.
     :raises ValueError: for a key that is not in the field's Table 1, an
         additional component with the name of another, no component at all,
         or a value that is negative or not finite.
+    :raises TypeError: if ``field`` is not a text, or ``coverage_factor`` is not a
+        single number.
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     frequencies = _frequency_axis(frequencies)
@@ -753,7 +758,7 @@ def reciprocity_uncertainty_budget(
         msg = (
             f"{unknown} are not components of Table 1 of {_STANDARDS[field]}; the "
             f"keys are {tuple(table)}. Pass other components through "
-            "'additional_components_db'."
+            "'additional_uncertainties_db'."
         )
         raise ValueError(msg)
     names: list[str] = []
@@ -766,7 +771,7 @@ def reciprocity_uncertainty_budget(
             rows.append(
                 _band_column(standard_uncertainties_db[key], key, frequencies.size)
             )
-    for key, value in (additional_components_db or {}).items():
+    for key, value in (additional_uncertainties_db or {}).items():
         if key in names or key in table:
             msg = (
                 f"The additional component {key!r} has the name of a component "

@@ -91,6 +91,7 @@ it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the baseline is negative or the limit is not positive. |
+| TypeError | if `baseline` or `zone_b_upper` is not a single number. |
 
 ## allowable_velocity
 
@@ -137,6 +138,7 @@ fastest, and flat in between. A machine-specific part that states its own
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a frequency is not positive, a velocity or corner is not positive and finite, or the corners are not in order. |
+| TypeError | if `constant_velocity_mm_s`, `corner_high_hz`, `corner_low_hz` or `zone_factor` is not a single number. |
 
 ## assess_operational_change
 
@@ -169,6 +171,7 @@ magnitude.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the change is not finite or the limit is not positive. |
+| TypeError | if `change` or `zone_b_upper` is not a single number. |
 
 ## evaluation_zone
 
@@ -256,6 +259,7 @@ curve rather than two implementations of it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a frequency or the rating is not positive. |
+| TypeError | if `rating` is not a single number. |
 
 ## gear_shaft_displacement_limit
 
@@ -295,6 +299,7 @@ by 10 dB per decade, which on an amplitude is an exponent of one half.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a frequency or the rating is not positive. |
+| TypeError | if `rating` is not a single number. |
 
 ## GEAR_UNIT_CLASSES
 
@@ -333,6 +338,7 @@ finds its row; nothing a reader would call a different rating does.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the quantity is unknown or the table prints no row for that rating. |
+| TypeError | if `quantity` is not a text, or `rating` is not a single number. |
 
 ## GEAR_UNIT_ZONES
 
@@ -412,6 +418,7 @@ reason the tables state each class twice.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the group or support class is unknown, or neither measured quantity is given. |
+| TypeError | if `group` or `support` is not a text. |
 
 ## INDUSTRIAL_MACHINE_ZONES
 
@@ -522,6 +529,7 @@ instead, 1,25 times the upper limit of zone C.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the limit is not positive. |
+| TypeError | if `zone_c_upper` is not a single number. |
 
 ## TYPICAL_BOUNDARY_LADDER_MM_S
 
@@ -634,6 +642,7 @@ vibration moves by 5,2.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a magnitude is negative or a value is not finite. |
+| TypeError | if `final_magnitude`, `final_phase_deg`, `initial_magnitude` or `initial_phase_deg` is not a single number. |
 
 ## ZONE_LIMIT_FACTORS
 

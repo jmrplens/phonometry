@@ -217,6 +217,8 @@ def lining_resonance_frequency(
     :return: The resonance frequency ``fo``, in Hz.
     :raises ValueError: If an input is not positive and finite, or if the two
         branches are both given or both omitted.
+    :raises TypeError: if ``base_mass_per_area``, ``dynamic_stiffness`` or
+        ``lining_mass_per_area`` is not a single number.
     """
     m1 = require_positive(base_mass_per_area, "base_mass_per_area")
     m2 = require_positive(lining_mass_per_area, "lining_mass_per_area")
@@ -285,6 +287,8 @@ def weighted_lining_improvement(
     :return: The weighted improvement ``ΔRw``, in dB.
     :raises ValueError: If ``fo`` is outside the tabulated range or an input is
         not finite.
+    :raises TypeError: if ``base_rating`` or ``resonance_frequency`` is not a single
+        number.
     :warns BuildingPredictionWarning: If ``base_rating`` lies outside the
         range Clause D.2.2 states Table D.1 for.
     """
@@ -347,11 +351,6 @@ class LiningImprovementResult(RichDisplay):
     _: KW_ONLY
     anchors: bool = False
     glued_area: float | None = None
-
-    @property
-    def ratings(self) -> tuple[float, float, float]:
-        """``(ΔRw, ΔRA, ΔRA,tr)`` as a tuple, in dB."""
-        return self.delta_rw, self.delta_ra, self.delta_ratr
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -423,6 +422,8 @@ def lining_improvement(
     :raises ValueError: If an input is not positive and finite, ``system`` is
         unknown, or ``glued_area`` is out of range or combined with
         ``system="studs"``.
+    :raises TypeError: if ``system`` is not a text, or ``glued_area`` or
+        ``resonance_frequency`` is not a single number.
     :warns BuildingPredictionWarning: If ``resonance_frequency`` lies outside
         the range Annex D puts lining resonances on.
     """
@@ -497,6 +498,8 @@ def lining_improvement_in_situ(
         the basic element in the field situation, in dB.
     :return: The field rating ``ΔRsitu``, in dB.
     :raises ValueError: If an input is not finite, or ``fo`` is not positive.
+    :raises TypeError: if ``base_rating_in_situ``, ``laboratory_improvement`` or
+        ``resonance_frequency`` is not a single number.
     """
     require_scalar(laboratory_improvement, "laboratory_improvement")
     delta_lab = float(laboratory_improvement)

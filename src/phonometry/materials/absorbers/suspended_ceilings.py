@@ -374,6 +374,9 @@ def air_absorption_correction(
     :return: :math:`\Delta\alpha` per band.
     :raises ValueError: For a non-positive volume or area, or coefficients
         that do not match band for band.
+    :raises TypeError: if ``specimen_area_m2`` or ``volume`` is not a single number, or
+        ``attenuation_empty_per_m`` or ``attenuation_with_per_m`` holds a text or a
+        value that is not a real number.
     """
     volume = require_positive(volume, "volume")
     area = require_positive(specimen_area_m2, "specimen_area_m2")
@@ -415,6 +418,8 @@ def reproducibility_uncertainty(
         the six the table prints, in order.
     :return: The uncertainty of the absorption coefficient in each band.
     :raises ValueError: For a frequency Table 1 does not print.
+    :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
+        number.
     """
     if frequencies is None:
         return np.asarray(list(CEILING_UNCERTAINTY.values()), dtype=np.float64)
@@ -591,6 +596,11 @@ def check_ceiling_specimen(
         relative humidity that is empty, not one-dimensional, not finite or
         outside 0 % to 100 %, an unknown mounting letter, or a type E
         arrangement with no depth given.
+    :raises TypeError: if ``area``, ``deflection_mm``, ``depth_mm``,
+        ``fixture_density_kg_m2``, ``substructure_height_mm``,
+        ``substructure_width_mm``, ``support_center_distance_m``, ``support_height_mm``
+        or ``support_width_mm`` is not a single number, or ``relative_humidity_percent``
+        holds a text or a value that is not a real number.
     """
     area = require_positive(area, "area")
     letter = require_choice(str(mounting).upper(), "mounting", tuple(MOUNTING_TYPES))

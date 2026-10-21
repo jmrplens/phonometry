@@ -64,6 +64,7 @@ quantile of `fractile` and the spread is the upper one for `z >= 0`
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an age below 18, an unknown sex, a fractile outside (0, 1), or an unknown frequency. |
+| TypeError | if `age` or `fractile` is not a single number. |
 
 ## AgeThresholdResult
 
@@ -236,6 +237,7 @@ frequencies.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown field or frequency. |
+| TypeError | if `field` is not a text. |
 
 ## RETSPL_FREQUENCIES_HZ
 

@@ -90,6 +90,7 @@ from .random_incidence import (
     IEC61183_TABLE_B1,
     DiffuseFieldSensitivity,
     DirectivityFactor,
+    IncidenceAngles,
     RandomIncidenceSensitivity,
     ReferenceMicrophoneRow,
     SphereDivisionWarning,
@@ -198,6 +199,7 @@ from .sound_level_meter import (
     verify_sound_level_meter_periodic,
 )
 from .uncertainty import (
+    ExpandedUncertainty,
     MonteCarloResult,
     Quantity,
     UncertaintyResult,
@@ -318,6 +320,7 @@ __all__ = [
     "TrendTestResult",
     "UncertaintyComponentRow",
     "UncertaintyResult",
+    "ExpandedUncertainty",
     "UncertaintyWarning",
     "WaveMotionCorrection",
     "acoustic_center",
@@ -343,6 +346,7 @@ __all__ = [
     "environmental_sensitivity_correction",
     "equal_area_directivity_factor",
     "equal_area_incidence_angles",
+    "IncidenceAngles",
     "exact_frequencies",
     "free_field_parameter_uncertainty",
     "free_field_reciprocity",

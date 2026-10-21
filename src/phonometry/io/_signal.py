@@ -101,6 +101,8 @@ class Signal(RichDisplay):
     an EXTENSIBLE channel mask); ``provenance`` carries the ``bext``
     broadcast metadata when the file had it; ``source`` records the file,
     container, codec, bit depth and lossy flag of the origin.
+
+    :raises TypeError: if ``calibration_factor`` or ``fs`` is not a single number.
     """
 
     data: NDArray[np.float64]

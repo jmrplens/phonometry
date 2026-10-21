@@ -1241,9 +1241,9 @@ def plot_window_metrics(
         enbw = decimal_comma(f"{result.enbw_bins:.3f}", language)
         kwargs.setdefault("label", _t(_ENBW_LABEL, language, enbw=enbw))
         axs.plot(bins[shown], level[shown], **kwargs)
-        sll = decimal_comma(fmt_minus(result.highest_sidelobe_db, ".1f"), language)
+        sll = decimal_comma(fmt_minus(result.highest_sidelobe_level, ".1f"), language)
         axs.axhline(
-            result.highest_sidelobe_db,
+            result.highest_sidelobe_level,
             color=_C_REFERENCE,
             lw=1.0,
             linestyle="--",
@@ -1316,7 +1316,7 @@ def plot_lifter(
             "label",
             _t("Liftered ({mode})", language, mode=_t(result.mode, language)),
         )
-        axe.plot(result.frequencies, result.liftered_db, lw=1.6, **kwargs)
+        axe.plot(result.frequencies, result.liftered_spectrum_db, lw=1.6, **kwargs)
         axe.set_xlabel(_t(_FREQ_LABEL, language))
         axe.set_ylabel(_t(_MAGNITUDE_LABEL, language))
         axe.grid(visible=True, alpha=0.3)

@@ -80,15 +80,15 @@ import numpy as np
 from phonometry import environment
 
 c0 = 340.0
-perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed=c0, max_height=60.0)
+perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed=c0, max_height_m=60.0)
 zs = 2.0
 fig, axes = plt.subplots(2, 1, figsize=(11, 8.2), sharex=True)
 
-rayos = environment.atmospheric_ray_paths(perfil, source_height=zs,
+rayos = environment.atmospheric_ray_paths(perfil, source_height_m=zs,
                                           launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                           max_range=600.0, n_steps=3000)
-for i in range(rayos.heights.shape[0]):
-    axes[0].plot(rayos.ranges[i], rayos.heights[i], color="#1f77b4", lw=0.8, alpha=0.7)
+for i in range(rayos.heights_m.shape[0]):
+    axes[0].plot(rayos.ranges[i], rayos.heights_m[i], color="#1f77b4", lw=0.8, alpha=0.7)
 axes[0].plot([0.0], [zs], "o", color="#d62728", label="Fuente")
 grad = (perfil.speed_at(10.0) - c0) / 10.0
 x_sh = environment.shadow_zone_distance(float(grad), zs, zs, ground_speed=c0)
@@ -102,12 +102,12 @@ with warnings.catch_warnings():
     # publicado, como todo suelo exterior (ver «Elección de la impedancia del
     # suelo» en la guía de efecto suelo).
     warnings.simplefilter("ignore")
-    pe = environment.atmospheric_parabolic_equation(400.0, perfil, source_height=zs,
+    pe = environment.atmospheric_parabolic_equation(400.0, perfil, source_height_m=zs,
                                                     flow_resistivity=200e3,
-                                                    max_range=600.0, max_height=40.0)
+                                                    max_range=600.0, max_height_m=40.0)
 img = axes[1].imshow(pe.relative_level, cmap="RdBu_r", vmin=-30, vmax=6,
                      aspect="auto", origin="lower", interpolation="bilinear",
-                     extent=(pe.ranges[0], pe.ranges[-1], pe.heights[0], pe.heights[-1]))
+                     extent=(pe.ranges[0], pe.ranges[-1], pe.heights_m[0], pe.heights_m[-1]))
 axes[1].axvline(x_sh, color="k", ls="--")
 axes[1].set(ylabel="Altura [m]", xlabel="Distancia [m]", ylim=(0, 40),
             title="Nivel sonoro relativo GFPE")
@@ -208,8 +208,8 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 # Las dos capas superficiales canónicas de la Ec. 4.5 de Salomons sobre pradera.
-bajada = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0, max_height=60.0)
-subida = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0, max_height=60.0)
+bajada = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0, max_height_m=60.0)
+subida = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0, max_height_m=60.0)
 ax = bajada.plot(color="#1f77b4", language="es")
 subida.plot(ax=ax, color="#d62728", language="es")
 plt.show()
@@ -230,7 +230,7 @@ import numpy as np
 from phonometry import environment
 
 perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)
-rayos = environment.atmospheric_ray_paths(perfil, source_height=2.0,
+rayos = environment.atmospheric_ray_paths(perfil, source_height_m=2.0,
                                           launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                           max_range=600.0)
 rayos.turning_points      # puntos de retorno por rayo
@@ -260,7 +260,7 @@ from phonometry import environment
 
 # Refracción hacia abajo: el espejo favorable del caso con sombra.
 perfil = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0)
-rayos = environment.atmospheric_ray_paths(perfil, source_height=2.0,
+rayos = environment.atmospheric_ray_paths(perfil, source_height_m=2.0,
                                           launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                           max_range=600.0, n_steps=600)
 rayos.plot(language="es")   # los rayos rasantes vuelven al suelo y rebotan a lo largo
@@ -359,9 +359,9 @@ libre) en todo el plano distancia-altura.
 from phonometry import environment
 
 perfil = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)  # hacia arriba
-pe = environment.atmospheric_parabolic_equation(400.0, perfil, source_height=2.0,
+pe = environment.atmospheric_parabolic_equation(400.0, perfil, source_height_m=2.0,
                                                 flow_resistivity=200e3,  # pradera
-                                                max_range=600.0, max_height=40.0)
+                                                max_range=600.0, max_height_m=40.0)
 pe.level_at_height(2.0)   # nivel relativo frente a distancia a 2 m
 pe.plot()                 # el campo de nivel relativo distancia-altura (necesita matplotlib)
 ```
@@ -400,9 +400,9 @@ with warnings.catch_warnings():
     # suelo» en la guía de efecto suelo).
     warnings.simplefilter("ignore")
     for perfil, etiqueta in casos:
-        pe = environment.atmospheric_parabolic_equation(400.0, perfil, source_height=2.0,
+        pe = environment.atmospheric_parabolic_equation(400.0, perfil, source_height_m=2.0,
                                                         flow_resistivity=200e3,
-                                                        max_range=600.0, max_height=40.0)
+                                                        max_range=600.0, max_height_m=40.0)
         ax.plot(pe.ranges, pe.level_at_height(2.0), label=etiqueta)
 # El límite en forma cerrada del gradiente lineal equivalente hacia arriba
 # (su media a 10 m), la línea punteada de la figura.
@@ -489,12 +489,12 @@ import numpy as np
 # los fragmentos de arriba. Un suelo rígido no necesita modelo poroso, así que
 # este caso no levanta ningún aviso.
 c0, freq, zs = 343.0, 500.0, 2.0
-plano = environment.linear_sound_speed_profile(1e-12, ground_speed=c0, max_height=200.0)
+plano = environment.linear_sound_speed_profile(1e-12, ground_speed=c0, max_height_m=200.0)
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    pe = environment.atmospheric_parabolic_equation(freq, plano, source_height=zs,
+    pe = environment.atmospheric_parabolic_equation(freq, plano, source_height_m=zs,
                                                     impedance=1e6 + 0j, max_range=520.0,
-                                                    max_height=150.0)
+                                                    max_height_m=150.0)
 distancias = np.asarray(pe.ranges)
 metodo = np.asarray(pe.level_at_height(zs))
 k = 2.0 * np.pi * freq / c0

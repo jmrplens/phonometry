@@ -166,7 +166,7 @@ compared against:
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -219,10 +219,10 @@ __all__ = [
 
 
 def junction_wave_parameters(
-    thickness1: float,
+    thickness1_m: float,
     wave_speed1: float,
     surface_density1: float,
-    thickness2: float,
+    thickness2_m: float,
     wave_speed2: float,
     surface_density2: float,
 ) -> tuple[float, float]:
@@ -232,12 +232,12 @@ def junction_wave_parameters(
     :math:`\psi = (h_2 c_{\mathrm{L}2} \rho_{\mathrm{s}2}) / (h_1 c_{\mathrm{L}1} \rho_{\mathrm{s}1})`
     (Eq. 5.11), with plate 1 the plate carrying the incident wave.
 
-    :param thickness1: Thickness ``h1`` of plate 1, in m (> 0).
+    :param thickness1_m: Thickness ``h1`` of plate 1, in m (> 0).
     :param wave_speed1: Quasi-longitudinal wave speed ``cL1`` of plate 1, in m/s
         (> 0).
     :param surface_density1: Surface density ``rho_s1`` of plate 1, in kg/m^2
         (> 0).
-    :param thickness2: Thickness ``h2`` of plate 2, in m (> 0).
+    :param thickness2_m: Thickness ``h2`` of plate 2, in m (> 0).
     :param wave_speed2: Quasi-longitudinal wave speed ``cL2`` of plate 2, in m/s
         (> 0).
     :param surface_density2: Surface density ``rho_s2`` of plate 2, in kg/m^2
@@ -245,10 +245,10 @@ def junction_wave_parameters(
     :return: The pair ``(chi, psi)``.
     :raises ValueError: for a non-positive input.
     """
-    h1 = require_positive(thickness1, "thickness1")
+    h1 = require_positive(thickness1_m, "thickness1_m")
     c1 = require_positive(wave_speed1, "wave_speed1")
     r1 = require_positive(surface_density1, "surface_density1")
-    h2 = require_positive(thickness2, "thickness2")
+    h2 = require_positive(thickness2_m, "thickness2_m")
     c2 = require_positive(wave_speed2, "wave_speed2")
     r2 = require_positive(surface_density2, "surface_density2")
     hc1 = h1 * c1
@@ -493,8 +493,8 @@ def coupling_loss_factor(
 
 
 def right_angle_transmission_coefficient(
-    thickness1: float,
-    thickness2: float,
+    thickness1_m: float,
+    thickness2_m: float,
     *,
     density1: float,
     density2: float,
@@ -527,8 +527,8 @@ def right_angle_transmission_coefficient(
     ``rho`` here is the **volume** density in kg/m^3, not the surface density
     of :func:`junction_wave_parameters`.
 
-    :param thickness1: Thickness ``h1`` of the source plate, in m (> 0).
-    :param thickness2: Thickness ``h2`` of the receiving plate, in m (> 0).
+    :param thickness1_m: Thickness ``h1`` of the source plate, in m (> 0).
+    :param thickness2_m: Thickness ``h2`` of the receiving plate, in m (> 0).
     :param density1: Density ``rho1`` of the source plate, in kg/m^3 (> 0).
     :param density2: Density ``rho2`` of the receiving plate, in kg/m^3 (> 0).
     :param wave_speed1: Quasi-longitudinal wave speed ``cL1``, in m/s (> 0).
@@ -538,8 +538,8 @@ def right_angle_transmission_coefficient(
     :return: The transmission coefficient ``tau12``.
     :raises ValueError: for a non-positive input or an unknown incidence.
     """
-    h_1 = require_positive(thickness1, "thickness1")
-    h_2 = require_positive(thickness2, "thickness2")
+    h_1 = require_positive(thickness1_m, "thickness1_m")
+    h_2 = require_positive(thickness2_m, "thickness2_m")
     rho_1 = require_positive(density1, "density1")
     rho_2 = require_positive(density2, "density2")
     c_1 = require_positive(wave_speed1, "wave_speed1")
@@ -559,8 +559,8 @@ def point_connection_coupling_loss_factor(
     frequency: ArrayLike,
     n_connections: int,
     *,
-    thickness1: float,
-    thickness2: float,
+    thickness1_m: float,
+    thickness2_m: float,
     surface_density1: float,
     surface_density2: float,
     wave_speed1: float,
@@ -597,8 +597,8 @@ def point_connection_coupling_loss_factor(
 
     :param frequency: Band centre frequency ``f``, in hertz (scalar/array, >0).
     :param n_connections: Number of point connections ``N`` (integer >= 1).
-    :param thickness1: Thickness ``h1`` of the source plate, in m (> 0).
-    :param thickness2: Thickness ``h2`` of the receiving plate, in m (> 0).
+    :param thickness1_m: Thickness ``h1`` of the source plate, in m (> 0).
+    :param thickness2_m: Thickness ``h2`` of the receiving plate, in m (> 0).
     :param surface_density1: ``rho_s1``, in kg/m^2 (> 0).
     :param surface_density2: ``rho_s2``, in kg/m^2 (> 0).
     :param wave_speed1: Quasi-longitudinal wave speed ``cL1``, in m/s (> 0).
@@ -616,8 +616,8 @@ def point_connection_coupling_loss_factor(
     if n < 1:
         msg = "'n_connections' must be a positive integer."
         raise ValueError(msg)
-    h_1 = require_positive(thickness1, "thickness1")
-    h_2 = require_positive(thickness2, "thickness2")
+    h_1 = require_positive(thickness1_m, "thickness1_m")
+    h_2 = require_positive(thickness2_m, "thickness2_m")
     rs_1 = require_positive(surface_density1, "surface_density1")
     rs_2 = require_positive(surface_density2, "surface_density2")
     c_1 = require_positive(wave_speed1, "wave_speed1")
@@ -686,11 +686,11 @@ class JunctionTransmissionResult(OwnsArrays):
         or ``None`` when the junction has no straight section.
     :ivar corner_average: Diffuse-field angular average ``tau_bar_12`` (Eq. 5.6).
     :ivar straight_average: Angular average ``tau_bar_13``, or ``None``.
-    :ivar thickness1: Plate 1 thickness, in metres, retained (with
-        ``thickness2``) so :meth:`plot_geometry` can draw the junction;
+    :ivar thickness1_m: Plate 1 thickness, in metres, retained (with
+        ``thickness2_m``) so :meth:`plot_geometry` can draw the junction;
         appended after the original fields and ``None`` for hand-built
         results.
-    :ivar thickness2: Plate 2 thickness, in metres, or ``None``.
+    :ivar thickness2_m: Plate 2 thickness, in metres, or ``None``.
     """
 
     junction: str
@@ -703,8 +703,9 @@ class JunctionTransmissionResult(OwnsArrays):
     straight: np.ndarray | None
     corner_average: float
     straight_average: float | None
-    thickness1: float | None = None
-    thickness2: float | None = None
+    _: KW_ONLY
+    thickness1_m: float | None = None
+    thickness2_m: float | None = None
 
     def __post_init__(self) -> None:
         r"""Reject coefficients that do not lie on the junction's angle grid.
@@ -783,10 +784,10 @@ class JunctionTransmissionResult(OwnsArrays):
 
 def junction_transmission(
     junction: str,
-    thickness1: float,
+    thickness1_m: float,
     wave_speed1: float,
     surface_density1: float,
-    thickness2: float,
+    thickness2_m: float,
     wave_speed2: float,
     surface_density2: float,
     *,
@@ -803,12 +804,12 @@ def junction_transmission(
     (normal incidence only) use :func:`inline_transmission_coefficient`.
 
     :param junction: ``"X"``, ``"T1"``, ``"T2"`` or ``"L"``.
-    :param thickness1: Thickness ``h1`` of the source plate, in m (> 0).
+    :param thickness1_m: Thickness ``h1`` of the source plate, in m (> 0).
     :param wave_speed1: Quasi-longitudinal wave speed ``cL1`` of the source
         plate, in m/s (> 0).
     :param surface_density1: Surface density ``rho_s1`` of the source plate, in
         kg/m^2 (> 0).
-    :param thickness2: Thickness ``h2`` of the receiving plate, in m (> 0).
+    :param thickness2_m: Thickness ``h2`` of the receiving plate, in m (> 0).
     :param wave_speed2: Quasi-longitudinal wave speed ``cL2`` of the receiving
         plate, in m/s (> 0).
     :param surface_density2: Surface density ``rho_s2`` of the receiving plate,
@@ -820,10 +821,10 @@ def junction_transmission(
     """
     name = require_choice(str(junction).upper(), "junction", tuple(_JUNCTIONS))
     chi, psi = junction_wave_parameters(
-        thickness1,
+        thickness1_m,
         wave_speed1,
         surface_density1,
-        thickness2,
+        thickness2_m,
         wave_speed2,
         surface_density2,
     )
@@ -856,13 +857,13 @@ def junction_transmission(
         junction=name,
         chi=chi,
         psi=psi,
-        critical_frequency1=_critical_frequency(thickness1, wave_speed1),
-        critical_frequency2=_critical_frequency(thickness2, wave_speed2),
+        critical_frequency1=_critical_frequency(thickness1_m, wave_speed1),
+        critical_frequency2=_critical_frequency(thickness2_m, wave_speed2),
         angles_deg=grid,
         corner=corner,
         straight=straight,
         corner_average=corner_avg,
         straight_average=straight_avg,
-        thickness1=float(thickness1),
-        thickness2=float(thickness2),
+        thickness1_m=float(thickness1_m),
+        thickness2_m=float(thickness2_m),
     )

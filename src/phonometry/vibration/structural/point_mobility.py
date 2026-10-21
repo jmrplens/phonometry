@@ -94,7 +94,7 @@ _BEAM_CONSTANT: dict[str, float] = {"centre": 2.0, "end": 0.5}
 
 
 def plate_bending_stiffness(
-    youngs_modulus: float, thickness: float, poisson_ratio: float = 0.0
+    youngs_modulus: float, thickness_m: float, poisson_ratio: float = 0.0
 ) -> float:
     r"""Bending stiffness of a thin plate per unit width (Cremer Eq. 4.22).
 
@@ -103,14 +103,14 @@ def plate_bending_stiffness(
     :func:`phonometry.vibration.structural.radiation_efficiency.coincidence_frequency`.
 
     :param youngs_modulus: Young's modulus ``E`` of the plate material, in Pa.
-    :param thickness: Plate thickness ``h``, in m.
+    :param thickness_m: Plate thickness ``h``, in m.
     :param poisson_ratio: Poisson's ratio ``nu`` (Default: 0.0).
     :return: The bending stiffness per unit width ``B'``, in N.m.
     :raises ValueError: for a non-positive modulus/thickness or
         :math:`\lvert\nu\rvert \ge 1`.
     """
     e = require_positive(youngs_modulus, "youngs_modulus")
-    h = require_positive(thickness, "thickness")
+    h = require_positive(thickness_m, "thickness_m")
     if not -1.0 < poisson_ratio < 1.0:
         msg = "'poisson_ratio' must lie in (-1, 1)."
         raise ValueError(msg)

@@ -982,7 +982,7 @@ def perforation_end_correction(open_area: float) -> float:
 def perforated_plate_impedance(
     frequency: ArrayLike,
     *,
-    thickness: float,
+    thickness_m: float,
     hole_radius: float,
     open_area: float,
     end_correction: float | None = None,
@@ -1011,7 +1011,7 @@ def perforated_plate_impedance(
     holes.
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
-    :param thickness: Plate thickness ``t``, in metres.
+    :param thickness_m: Plate thickness ``t``, in metres.
     :param hole_radius: Hole radius ``a``, in metres.
     :param open_area: Fractional open area ``eps`` (0..1).
     :param end_correction: End-correction factor ``delta`` per end; default
@@ -1023,7 +1023,7 @@ def perforated_plate_impedance(
     :return: Complex transfer impedance ``z``, in Pa s/m.
     """
     f = require_positive_array(frequency, "frequency")
-    t = require_positive(thickness, "thickness")
+    t = require_positive(thickness_m, "thickness_m")
     a = require_positive(hole_radius, "hole_radius")
     eps = require_positive(open_area, "open_area")
     if eps > 1.0:
@@ -1046,7 +1046,7 @@ def perforated_plate_impedance(
 def microperforated_plate_impedance(
     frequency: ArrayLike,
     *,
-    thickness: float,
+    thickness_m: float,
     hole_radius: float,
     open_area: float,
     end_correction: float = 0.85,
@@ -1073,7 +1073,7 @@ def microperforated_plate_impedance(
     transfer impedance (Cox & D'Antonio Eq. (7.35)).
 
     :param frequency: Frequency ``f``, in hertz (scalar or array).
-    :param thickness: Plate thickness ``t``, in metres.
+    :param thickness_m: Plate thickness ``t``, in metres.
     :param hole_radius: Hole radius ``a``, in metres (submillimetre for a
         genuine microperforated design).
     :param open_area: Fractional open area ``eps`` (0..1).
@@ -1086,7 +1086,7 @@ def microperforated_plate_impedance(
     :return: Complex transfer impedance ``z``, in Pa s/m.
     """
     f = require_positive_array(frequency, "frequency")
-    t = require_positive(thickness, "thickness")
+    t = require_positive(thickness_m, "thickness_m")
     a = require_positive(hole_radius, "hole_radius")
     eps = require_positive(open_area, "open_area")
     if eps > 1.0:
@@ -1132,7 +1132,7 @@ def membrane_impedance(
 def helmholtz_resonance_frequency(
     *,
     cavity_depth: float,
-    plate_thickness: float,
+    plate_thickness_m: float,
     hole_radius: float,
     open_area: float,
     end_correction: float | None = None,
@@ -1145,7 +1145,7 @@ def helmholtz_resonance_frequency(
     3e, Eqs. (7.4)/(7.6), valid for :math:`k d \ll 1`).
 
     :param cavity_depth: Cavity depth ``d``, in metres.
-    :param plate_thickness: Plate thickness ``t``, in metres.
+    :param plate_thickness_m: Plate thickness ``t``, in metres.
     :param hole_radius: Hole radius ``a``, in metres.
     :param open_area: Fractional open area ``eps`` (0..1).
     :param end_correction: End-correction factor ``delta`` per end; default
@@ -1154,7 +1154,7 @@ def helmholtz_resonance_frequency(
     :return: Resonance frequency ``f0``, in hertz.
     """
     d = require_positive(cavity_depth, "cavity_depth")
-    t = require_positive(plate_thickness, "plate_thickness")
+    t = require_positive(plate_thickness_m, "plate_thickness_m")
     a = require_positive(hole_radius, "hole_radius")
     eps = require_positive(open_area, "open_area")
     if eps > 1.0:

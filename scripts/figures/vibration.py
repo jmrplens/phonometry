@@ -1718,8 +1718,8 @@ def generate_experimental_sea_clf(output_dir: str) -> None:
     bolted = vibration.point_connection_coupling_loss_factor(
         bands,
         12,
-        thickness1=h1,
-        thickness2=h2,
+        thickness1_m=h1,
+        thickness2_m=h2,
         surface_density1=rho * h1,
         surface_density2=rho * h2,
         wave_speed1=c_l,

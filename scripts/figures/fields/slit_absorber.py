@@ -112,7 +112,7 @@ def _slit_absorber_fields(
 
     design = _slit_absorber_design()
     res = design.resonator
-    h0 = design.slit_height
+    h0 = design.slit_height_m
     # Mesh rule: dx = min(smallest scene dimension / 4, lambda/8 at the
     # carrier) = min(h/4 = 0.244 mm, 1.143 m / 8 = 143 mm) -> the slit
     # height governs and the grid is h/4 = 0.244 mm (lambda/4677).
@@ -161,7 +161,7 @@ def _slit_absorber_fields(
             materials.slit_helmholtz_absorber(
                 freq,
                 res,
-                slit_height=_SLIT_ABS_DETUNE * h0,
+                slit_height_m=_SLIT_ABS_DETUNE * h0,
                 lattice_step=_SLIT_ABS_LATTICE,
                 period_m=_SLIT_ABS_PERIOD,
             ).absorption[0]
@@ -181,7 +181,7 @@ def _slit_absorber_fields(
     times = np.zeros(0)
     for h in (h0, _SLIT_ABS_DETUNE * h0):
         slit_f = _lossy_fluid_params(
-            *(p.item() for p in slit_effective_properties(freq, slit_height=h))
+            *(p.item() for p in slit_effective_properties(freq, slit_height_m=h))
         )
         rows = _slit_absorber_cell_rows(dx, round(h / dx), ny)
         mask = np.zeros((ny, nx), dtype=bool)
@@ -250,7 +250,7 @@ def animate_fdtd_slit_absorber(output_dir: str) -> None:
     (t_c, z_c, e_c), (t_w, z_w, e_w), times, alphas = _slit_absorber_fields()
     design = _slit_absorber_design()
     res = design.resonator
-    h0 = design.slit_height
+    h0 = design.slit_height_m
     dx = h0 / 4.0
     ny = round(_SLIT_ABS_PERIOD / dx)
     nx = round(_SLIT_ABS_TUBE / dx) + round(_SLIT_ABS_LATTICE / dx)

@@ -690,15 +690,15 @@ def test_atmospheric_ray_paths_are_untouched_by_the_dynamic_states() -> None:
         log_linear_sound_speed_profile,
     )
 
-    profile = log_linear_sound_speed_profile(1.0, max_height=200.0, n_points=64)
+    profile = log_linear_sound_speed_profile(1.0, max_height_m=200.0, n_points=64)
     res = atmospheric_ray_paths(
         profile,
-        source_height=20.0,
+        source_height_m=20.0,
         launch_angles_deg=[-8.0, -2.0, 4.0, 12.0],
         max_range=3000.0,
         n_steps=201,
     )
-    assert np.allclose(res.heights[:, ::50], _ATMOSPHERIC_HEIGHTS, rtol=1e-12)
+    assert np.allclose(res.heights_m[:, ::50], _ATMOSPHERIC_HEIGHTS, rtol=1e-12)
     assert np.allclose(res.travel_times[:, ::50], _ATMOSPHERIC_TIMES, rtol=1e-12)
     assert np.array_equal(res.ground_reflections, [1, 1, 1, 0])
     assert np.array_equal(res.turning_points, [0, 0, 1, 0])

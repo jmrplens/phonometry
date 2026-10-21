@@ -439,7 +439,7 @@ class TestValidation:
             ),
             (
                 lambda: flat_plate_modal_density(1.0, 0.0, 5150.0),
-                "'thickness' must be positive",
+                "'thickness_m' must be positive",
             ),
             (lambda: ring_frequency(0.0, 5150.0), "'mean_radius' must be positive"),
         ],

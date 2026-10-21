@@ -130,9 +130,9 @@ class _DrawableLayer(RichDisplay):
 
 @dataclass(frozen=True)
 class AirLayer(_DrawableLayer):
-    """A plain air gap of ``thickness`` metres inside the stack."""
+    """A plain air gap of ``thickness_m`` metres inside the stack."""
 
-    thickness: float
+    thickness_m: float
 
     def __post_init__(self) -> None:
         """Reject a gap whose thickness is not a finite, non-negative number.
@@ -141,14 +141,14 @@ class AirLayer(_DrawableLayer):
         gap as no gap; NaN fails every comparison downstream, so an unpinned
         layer would draw a blank stack rather than refuse.
 
-        :raises ValueError: if ``thickness`` is negative or not finite.
+        :raises ValueError: if ``thickness_m`` is negative or not finite.
         """
-        require_non_negative(self.thickness, "thickness")
+        require_non_negative(self.thickness_m, "thickness_m")
 
 
 @dataclass(frozen=True)
 class PorousLayer(_DrawableLayer):
-    """A porous layer of ``thickness`` metres described by *medium*.
+    """A porous layer of ``thickness_m`` metres described by *medium*.
 
     ``medium`` is a :class:`PorousMediumResult` (from :func:`delany_bazley`,
     :func:`miki`, :func:`johnson_champoux_allard`, or built directly from
@@ -156,7 +156,7 @@ class PorousLayer(_DrawableLayer):
     is passed to :func:`layered_absorber`.
     """
 
-    thickness: float
+    thickness_m: float
     medium: PorousMediumResult
 
 
@@ -164,7 +164,7 @@ class PorousLayer(_DrawableLayer):
 class PerforatedPlateLayer(_DrawableLayer):
     """A rigid perforated plate (see :func:`perforated_plate_impedance`)."""
 
-    thickness: float
+    thickness_m: float
     hole_radius: float
     open_area: float
     end_correction: float | None = None
@@ -174,7 +174,7 @@ class PerforatedPlateLayer(_DrawableLayer):
 class MicroperforatedPlateLayer(_DrawableLayer):
     """A microperforated plate (see :func:`microperforated_plate_impedance`)."""
 
-    thickness: float
+    thickness_m: float
     hole_radius: float
     open_area: float
     end_correction: float = 0.85
@@ -212,7 +212,7 @@ class PoroelasticLayer(_DrawableLayer):
     decoupled screen (air on both sides, their Sect. 11.3.6).
     """
 
-    thickness: float
+    thickness_m: float
     medium: PorousMediumResult
     porosity: float
     tortuosity: float
@@ -331,7 +331,7 @@ def _sheet_impedance(
     if isinstance(layer, PerforatedPlateLayer):
         return perforated_plate_impedance(
             f,
-            thickness=layer.thickness,
+            thickness_m=layer.thickness_m,
             hole_radius=layer.hole_radius,
             open_area=layer.open_area,
             end_correction=layer.end_correction,
@@ -340,7 +340,7 @@ def _sheet_impedance(
     if isinstance(layer, MicroperforatedPlateLayer):
         return microperforated_plate_impedance(
             f,
-            thickness=layer.thickness,
+            thickness_m=layer.thickness_m,
             hole_radius=layer.hole_radius,
             open_area=layer.open_area,
             end_correction=layer.end_correction,
@@ -380,7 +380,7 @@ def _porous_layer_term(
     layer: PorousLayer, f: Real, k0_sin2: Real
 ) -> tuple[Complex, Complex] | None:
     """``(Zx, kx d)`` of a porous layer, or ``None`` when zero-thickness."""
-    d = require_non_negative(layer.thickness, "PorousLayer.thickness")
+    d = require_non_negative(layer.thickness_m, "PorousLayer.thickness_m")
     if d <= 0.0:
         return None
     medium = layer.medium
@@ -411,7 +411,7 @@ def _layer_terms(
     terms: list[tuple[str, Complex, Complex]] = []
     for layer in layers:
         if isinstance(layer, AirLayer):
-            d = require_non_negative(layer.thickness, "AirLayer.thickness")
+            d = require_non_negative(layer.thickness_m, "AirLayer.thickness_m")
             if d > 0.0:
                 zc = np.full(f.shape, rc, dtype=np.complex128)
                 k = np.asarray(k0, dtype=np.complex128)
@@ -658,7 +658,7 @@ def _stack_blocks(
     for layer in layers:
         if isinstance(layer, PoroelasticLayer):
             thickness = require_non_negative(
-                layer.thickness, "PoroelasticLayer.thickness"
+                layer.thickness_m, "PoroelasticLayer.thickness_m"
             )
             if thickness <= 0.0:
                 continue

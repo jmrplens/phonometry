@@ -50,8 +50,8 @@ levels = [[98.5, 92.0, 88.2, 83.6, 76.8, 69.4, 63.9, 56.8],
 fig, ax = plt.subplots()
 for p in (20000.0, 12000.0):
     curve = aircraft.npd_curve(powers, distances, levels, power=p)
-    line, = ax.semilogx(curve.distances, curve.levels, label=f"P = {p:.0f} N")
-    ax.semilogx(curve.table_distances, curve.table_levels, "o", markersize=4,
+    line, = ax.semilogx(curve.distances_m, curve.levels, label=f"P = {p:.0f} N")
+    ax.semilogx(curve.table_distances_m, curve.table_levels, "o", markersize=4,
                 color=line.get_color())
 ax.set(xlabel="Slant distance [m]", ylabel="Event level [dB]",
        title="Noise-power-distance curves (ECAC Doc 29)")
@@ -69,7 +69,7 @@ powers = [12000.0, 20000.0]                      # e.g. net thrust, N
 distances = [200.0, 400.0, 1000.0, 2000.0, 6300.0, 10000.0]
 levels = [[98.5, 92.0, 83.6, 76.8, 63.9, 56.8],
           [107.2, 100.9, 92.7, 86.0, 72.9, 65.6]]
-aircraft.npd_level(powers, distances, levels, power=16000.0, distance=1500.0)
+aircraft.npd_level(powers, distances, levels, power=16000.0, distance_m=1500.0)
 
 curve = aircraft.npd_curve(powers, distances, levels, power=20000.0)
 curve.plot()   # NPD curve with the tabulated nodes (needs matplotlib)

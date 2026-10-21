@@ -193,7 +193,7 @@ def frame_elastic_coefficient(shear_modulus: complex, poisson_ratio: float) -> c
 
 
 def frame_quarter_wave_resonance(
-    thickness: float,
+    thickness_m: float,
     *,
     shear_modulus: complex,
     poisson_ratio: float,
@@ -219,7 +219,7 @@ def frame_quarter_wave_resonance(
     (``delta_b`` is not exactly the in-vacuum wavenumber), so the peak lands a
     few per cent above ``fr``.
 
-    :param thickness: Layer thickness ``l``, in metres (> 0).
+    :param thickness_m: Layer thickness ``l``, in metres (> 0).
     :param shear_modulus: Complex shear modulus ``N`` of the frame, in Pa.
     :param poisson_ratio: Poisson coefficient ``nu`` of the frame.
     :param frame_density: Bulk density of the frame ``rho1``, in kg/m3 (> 0):
@@ -228,7 +228,7 @@ def frame_quarter_wave_resonance(
     :raises ValueError: for a non-positive thickness or frame density, or an
         invalid ``N`` / ``nu``.
     """
-    length = require_positive(thickness, "thickness")
+    length = require_positive(thickness_m, "thickness_m")
     rho1 = require_positive(frame_density, "frame_density")
     k_c = frame_elastic_coefficient(shear_modulus, poisson_ratio)
     return float(np.sqrt(k_c.real / rho1) / (4.0 * length))
@@ -513,7 +513,7 @@ def biot_waves(
     )
 
 
-def biot_surface_impedance(waves: BiotWavesResult, thickness: float) -> Complex:
+def biot_surface_impedance(waves: BiotWavesResult, thickness_m: float) -> Complex:
     r"""Surface impedance of a hard-backed Biot layer at normal incidence.
 
     The closed form of Allard & Atalla 2e, Eqs. (6.107)-(6.108) (printed
@@ -544,11 +544,11 @@ def biot_surface_impedance(waves: BiotWavesResult, thickness: float) -> Complex:
     single layer and to a glued rigid backing.
 
     :param waves: The :class:`BiotWavesResult` of the material.
-    :param thickness: Layer thickness ``l``, in metres (> 0).
+    :param thickness_m: Layer thickness ``l``, in metres (> 0).
     :return: The complex surface impedance ``Z``, in Pa s/m.
     :raises ValueError: for a non-positive thickness.
     """
-    length = require_positive(thickness, "thickness")
+    length = require_positive(thickness_m, "thickness_m")
     phi = waves.porosity
     omega = 2.0 * np.pi * np.asarray(waves.frequencies, dtype=np.float64)
     d1 = waves.compressional_wavenumber_1
@@ -664,7 +664,7 @@ def _gamma(
 
 def poroelastic_transfer_matrix(
     waves: BiotWavesResult,
-    thickness: float,
+    thickness_m: float,
     *,
     transverse_wavenumber: ArrayLike = 0.0,
 ) -> Complex:
@@ -687,7 +687,7 @@ def poroelastic_transfer_matrix(
     is written around and the one an external multilayer chain expects.
 
     :param waves: The :class:`BiotWavesResult` of the material.
-    :param thickness: Layer thickness ``h``, in metres (> 0).
+    :param thickness_m: Layer thickness ``h``, in metres (> 0).
     :param transverse_wavenumber: In-plane wavenumber
         :math:`k_\mathrm{t} = k \sin(\theta)`,
         in rad/m (Default: 0, normal incidence). Scalar or one value per
@@ -695,7 +695,7 @@ def poroelastic_transfer_matrix(
     :return: The transfer matrix with shape ``(len(frequency), 6, 6)``.
     :raises ValueError: for a non-positive thickness.
     """
-    h = require_positive(thickness, "thickness")
+    h = require_positive(thickness_m, "thickness_m")
     k_t = np.asarray(transverse_wavenumber, dtype=np.complex128)
     front = _gamma(waves, -h, k_t)
     back = _gamma(waves, 0.0, k_t)
@@ -769,7 +769,7 @@ def _poroelastic_block(
     waves: BiotWavesResult, thickness: float, transverse_wavenumber: ArrayLike
 ) -> _Block:
     """A six-variable block, parameterised by its wave amplitudes."""
-    h = require_positive(thickness, "thickness")
+    h = require_positive(thickness, "thickness_m")
     k_t = np.asarray(transverse_wavenumber, dtype=np.complex128)
     return _Block(
         "poroelastic",
@@ -839,7 +839,7 @@ def _poroelastic_blocks(
     :raises ValueError: when the layer would need more than
         :data:`_MAX_BLOCKS` of them.
     """
-    h = require_positive(thickness, "thickness")
+    h = require_positive(thickness, "thickness_m")
     k_t = np.asarray(transverse_wavenumber, dtype=np.complex128)
     pieces = _block_count(_layer_attenuation(waves, h, k_t), "PoroelasticLayer")
     return [_poroelastic_block(waves, h / pieces, k_t) for _ in range(pieces)]

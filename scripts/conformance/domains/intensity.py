@@ -66,7 +66,7 @@ def _chk_plane_wave_intensity() -> Outcome:
     rho, c, spacing = 1.204, 343.0, 0.012
     p1, p2 = _plane_wave_pair(spacing / c)
     res = ph.emission.sound_intensity(
-        p1, p2, _FS, spacing=spacing, density=rho, speed_of_sound=c
+        p1, p2, _FS, spacing_m=spacing, density=rho, speed_of_sound=c
     )
     expected = float(np.mean(((p1 + p2) / 2.0) ** 2)) / (rho * c)
     return numeric(
@@ -144,7 +144,7 @@ def _chk_iec61043_spacing_rule() -> Outcome:
     offsets: list[float] = []
     for device in ("probe", "processor", "instrument"):
         base = ph.emission.residual_index_limits(device)
-        wide = ph.emission.residual_index_limits(device, spacing=0.050)
+        wide = ph.emission.residual_index_limits(device, spacing_m=0.050)
         for cls in (1, 2):
             offsets.extend((np.asarray(wide[cls]) - np.asarray(base[cls])).tolist())
     # Report the single offset furthest from the rule, so one column that

@@ -496,7 +496,7 @@ sign included.
 *Constant* (`mapping`).
 
 ```python
-TABLE_D1_QUANTITIES = {'mass': ('mass',), 'bar_end': ('density', 'longitudinal_velocity', 'area'), 'beam': ('density', 'longitudinal_velocity', 'thickness', 'width'), 'plate': ('density', 'longitudinal_velocity', 'thickness'), 'pipe': ('density', 'longitudinal_velocity', 'thickness', 'radius'), 'mass_spring': ('mass', 'stiffness', 'loss_factor')}
+TABLE_D1_QUANTITIES = {'mass': ('mass',), 'bar_end': ('density', 'longitudinal_velocity', 'area'), 'beam': ('density', 'longitudinal_velocity', 'thickness_m', 'width'), 'plate': ('density', 'longitudinal_velocity', 'thickness_m'), 'pipe': ('density', 'longitudinal_velocity', 'thickness_m', 'radius'), 'mass_spring': ('mass', 'stiffness', 'loss_factor')}
 ```
 
 ## TABLE_F1_FORCE_LEVEL
@@ -681,7 +681,7 @@ typical_element_mobility(
     mass: float | None = None,
     density: float | None = None,
     longitudinal_velocity: float | None = None,
-    thickness: float | None = None,
+    thickness_m: float | None = None,
     width: float | None = None,
     area: float | None = None,
     radius: float | None = None,
@@ -700,7 +700,7 @@ prints, in m/(N.s), for the row named by *structure*:
 - `"bar_end"`, described by `density` $\rho$ [kg/m3],
   `longitudinal_velocity` $c_\mathrm{L}$ [m/s] and `area` $S$
   [m2]: $\lvert Y \rvert = \left[ \rho c_\mathrm{L} S \right]^{-1}$.
-- `"beam"`, described by $\rho$, $c_\mathrm{L}$, `thickness`
+- `"beam"`, described by $\rho$, $c_\mathrm{L}$, `thickness_m`
   $t$ [m] and `width` $w$ [m]:
   $\lvert Y \rvert = \left[ 7{,}6\, \rho t w \sqrt{c_\mathrm{L} t f} \right]^{-1}$.
 - `"plate"`, described by $\rho$, $c_\mathrm{L}$ and $t$:
@@ -746,7 +746,7 @@ which [`coupling_term`](/phonometry/reference/api/building/installed-structure-b
 | `mass` | Mass `M`, in kilograms (rows `"mass"`, `"mass_spring"`). |
 | `density` | Density `rho`, in kg/m^3. |
 | `longitudinal_velocity` | Quasi-longitudinal wave speed `cL`, in m/s. |
-| `thickness` | Thickness `t`, in metres. |
+| `thickness_m` | Thickness `t`, in metres. |
 | `width` | Beam width `w`, in metres (row `"beam"`). |
 | `area` | Cross-sectional area `S`, in m^2 (row `"bar_end"`). |
 | `radius` | Pipe radius `r`, in metres (row `"pipe"`). |

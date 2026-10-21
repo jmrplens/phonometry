@@ -222,7 +222,7 @@ def _statement(
             "Microphone separation d = {spacing} mm ({offset} dB on Table 2)",
             language,
         ).format(
-            spacing=decimal_comma(f"{result.spacing * 1000.0:g}", language),
+            spacing=decimal_comma(f"{result.spacing_m * 1000.0:g}", language),
             offset=decimal_comma(f"{result.spacing_offset_db:+.1f}", language),
         ),
         t(

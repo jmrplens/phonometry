@@ -110,7 +110,7 @@ $H_{12} = H_{12,\text{uncorrected}} / H_\mathrm{c}$.
 ## hydraulic_diameter
 
 ```python
-hydraulic_diameter(width: float, height: float) -> float
+hydraulic_diameter(width: float, height_m: float) -> float
 ```
 
 Hydraulic diameter of a rectangular tube, $4A/P$ (ISO 10534-2, A.2.1.5).
@@ -126,7 +126,7 @@ rectangular tubes (see [`tube_attenuation_constant`](/phonometry/reference/api/m
 | Name | Description |
 | :--- | :--- |
 | `width` | Inner side length `w`, in metres. |
-| `height` | Inner side length `h`, in metres. |
+| `height_m` | Inner side length `h`, in metres. |
 
 **Returns:** Hydraulic diameter $d_\mathrm{h} = 4A/P$, in metres.
 
@@ -140,7 +140,7 @@ ImpedanceTubeResult(
     normalized_impedance: NDArray[np.complex128],
     absorption: NDArray[np.float64],
     *,
-    spacing: float | None = None,
+    spacing_m: float | None = None,
     x1: float | None = None,
     diameter_m: float | None = None,
     shape: str | None = None,
@@ -157,7 +157,7 @@ reflection factor `r` at the sample surface (Eq. (17)),
 $\alpha = 1 - \lvert r\rvert^2$ (Eq. (18)).
 
 The trailing fields retain the tube geometry the reduction was run with
-(microphone `spacing` `s`, distance `x1` from the sample to the
+(microphone `spacing_m` `s`, distance `x1` from the sample to the
 farther microphone, tube `diameter_m` and cross-section `shape`, stored
 canonically as `"circular"`/`"rectangular"` - a `"square"` input is
 kept as `"rectangular"`); they default to `None` when not supplied to
@@ -199,7 +199,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the result does not retain its tube geometry (`spacing`/`x1`). |
+| ValueError | If the result does not retain its tube geometry (`spacing_m`/`x1`). |
 
 ### ImpedanceTubeResult.report()
 
@@ -234,7 +234,7 @@ to the normal-incidence coefficient reported here).
 | Name | Description |
 | :--- | :--- |
 | `path` | Destination path of the PDF file. |
-| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive/geometric fields are `client`, `manufacturer`, `specimen`, `tube_diameter_m`, `tube_shape`, `mic_spacing`, `mounting`, `test_room`, `test_date`, `temperature_c`, `pressure`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 10534-2 has no verdict). |
+| `metadata` | Optional [`ReportMetadata`](/phonometry/reference/api/building/insulation/#reportmetadata); `None` produces a body-and-disclaimer fiche whose header shows only the measured frequency range. The applicable descriptive/geometric fields are `client`, `manufacturer`, `specimen`, `tube_diameter_m`, `tube_shape`, `microphone_spacing_m`, `mounting`, `test_room`, `test_date`, `temperature_c`, `static_pressure_kpa`, `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`. The `requirement` field is ignored (ISO 10534-2 has no verdict). |
 | `engine` | Rendering back end; only `"reportlab"` is supported. |
 | `verbose` | When `True`, the value table inserts the reflection-factor magnitude `\|r\|` column. |
 | `language` | Fiche language: `"en"` (default, English, decimal point) or `"es"` (Spanish, decimal comma). |
@@ -321,7 +321,7 @@ $Z / (\rho c_0) = (1 + r) / (1 - r)$.
 
 ```python
 plane_wave_frequency_range(
-    spacing: float,
+    spacing_m: float,
     speed_of_sound: float,
     *,
     diameter_m: float | None = None,
@@ -342,7 +342,7 @@ The lower limit uses the Clause 4.2 guideline that the spacing exceed
 
 | Name | Description |
 | :--- | :--- |
-| `spacing` | Microphone spacing `s`, in metres. |
+| `spacing_m` | Microphone spacing `s`, in metres. |
 | `speed_of_sound` | Speed of sound `c0`, in metres per second. |
 | `diameter_m` | Tube diameter (circular) or maximum lateral dimension (rectangular/square) `d`, in metres; `None` applies only the spacing bound. |
 | `shape` | `"circular"`, `"rectangular"` or `"square"` (a square tube is the rectangular bound with `d` the side length). |
@@ -355,11 +355,11 @@ The lower limit uses the Clause 4.2 guideline that the spacing exceed
 plot_impedance_tube_geometry(
     ax: Axes | None = None,
     *,
-    spacing: float,
+    spacing_m: float,
     x1: float,
     diameter_m: float | None = None,
     shape: str | None = 'circular',
-    sample_thickness: float | None = None,
+    sample_thickness_m: float | None = None,
     speed_of_sound: float = 343.2,
     language: str = 'en',
     **kwargs: Any,
@@ -379,11 +379,11 @@ working range of [`plane_wave_frequency_range`](/phonometry/reference/api/materi
 | Name | Description |
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `spacing` | Microphone spacing `s`, in metres. |
+| `spacing_m` | Microphone spacing `s`, in metres. |
 | `x1` | Distance from the sample face to the farther microphone, in metres. |
 | `diameter_m` | Inner diameter (circular) or lateral dimension (rectangular/square), in metres; `None` draws a nominal bore and omits the bore dimension and the cut-on bound. |
 | `shape` | `"circular"`, `"rectangular"`, `"square"` or `None`. |
-| `sample_thickness` | Drawn sample thickness, in metres; `None` draws a 50 mm nominal sample. |
+| `sample_thickness_m` | Drawn sample thickness, in metres; `None` draws a 50 mm nominal sample. |
 | `speed_of_sound` | Speed of sound for the working range, in m/s. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the tube-bore rectangle. |
@@ -406,7 +406,7 @@ plot_transmission_tube_geometry(
     s1: float,
     l2: float,
     s2: float,
-    thickness: float,
+    thickness_m: float,
     diameter_m: float | None = None,
     shape: str | None = 'circular',
     speed_of_sound: float = 343.2,
@@ -434,7 +434,7 @@ range of
 | `s1` | Upstream microphone spacing, in metres. |
 | `l2` | Front face to the nearer downstream microphone, in metres. |
 | `s2` | Downstream microphone spacing, in metres. |
-| `thickness` | Specimen thickness, in metres; must be smaller than `l2` (the downstream microphones sit past the back face). |
+| `thickness_m` | Specimen thickness, in metres; must be smaller than `l2` (the downstream microphones sit past the back face). |
 | `diameter_m` | Inner diameter (circular) or largest section dimension (rectangular/square), in metres; `None` draws a nominal bore and omits the bore dimension and the cut-on bound. |
 | `shape` | `"circular"`, `"rectangular"`, `"square"` or `None`. |
 | `speed_of_sound` | Speed of sound for the working range, in m/s. |
@@ -455,7 +455,7 @@ range of
 reflection_factor(
     h12: ArrayLike,
     *,
-    spacing: float,
+    spacing_m: float,
     x1: float,
     wavenumber: ArrayLike,
 ) -> NDArray[np.complex128]
@@ -477,7 +477,7 @@ the sample to the **farther** microphone (Clause 7.7).
 | Name | Description |
 | :--- | :--- |
 | `h12` | Measured transfer function `H12` between microphone positions 1 and 2 (Clause 7.6, Eq. (14)); complex, scalar or per band. It must already be corrected for microphone mismatch (see [`apply_mic_calibration`](/phonometry/reference/api/materials/impedance-tube/#apply_mic_calibration)). |
-| `spacing` | Microphone spacing $s = x_1 - x_2$, in metres. |
+| `spacing_m` | Microphone spacing $s = x_1 - x_2$, in metres. |
 | `x1` | Distance from the sample surface to the farther microphone (position 1), in metres. |
 | `wavenumber` | Complex wavenumber `k0` (from [`tube_wavenumber`](/phonometry/reference/api/materials/impedance-tube/#tube_wavenumber)), scalar or per band. |
 
@@ -589,7 +589,7 @@ two_microphone_impedance(
     h12: ArrayLike,
     *,
     frequency: ArrayLike,
-    spacing: float,
+    spacing_m: float,
     x1: float,
     speed_of_sound: float,
     characteristic_impedance: float,
@@ -613,7 +613,7 @@ supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
 | :--- | :--- |
 | `h12` | Measured (mismatch-corrected) transfer function `H12`. |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `spacing` | Microphone spacing `s`, in metres. |
+| `spacing_m` | Microphone spacing `s`, in metres. |
 | `x1` | Distance from the sample to the farther microphone, in metres. |
 | `speed_of_sound` | Speed of sound `c0`, in m/s (see [`speed_of_sound_iso10534`](/phonometry/reference/api/materials/impedance-tube/#speed_of_sound_iso10534)). |
 | `characteristic_impedance` | Characteristic impedance `rho c0`, in rayls. |

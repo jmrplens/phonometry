@@ -50,10 +50,10 @@ layers evaluate come from
 ## AirLayer
 
 ```python
-AirLayer(thickness: float)
+AirLayer(thickness_m: float)
 ```
 
-A plain air gap of `thickness` metres inside the stack.
+A plain air gap of `thickness_m` metres inside the stack.
 
 ## diffuse_field_absorption
 
@@ -262,7 +262,7 @@ A limp impervious membrane (see [`membrane_impedance`](/phonometry/reference/api
 
 ```python
 MicroperforatedPlateLayer(
-    thickness: float,
+    thickness_m: float,
     hole_radius: float,
     open_area: float,
     end_correction: float = 0.85,
@@ -275,7 +275,7 @@ A microperforated plate (see [`microperforated_plate_impedance`](/phonometry/ref
 
 ```python
 PerforatedPlateLayer(
-    thickness: float,
+    thickness_m: float,
     hole_radius: float,
     open_area: float,
     end_correction: float | None = None,
@@ -288,7 +288,7 @@ A rigid perforated plate (see [`perforated_plate_impedance`](/phonometry/referen
 
 ```python
 PoroelasticLayer(
-    thickness: float,
+    thickness_m: float,
     medium: PorousMediumResult,
     porosity: float,
     tortuosity: float,
@@ -322,10 +322,10 @@ decoupled screen (air on both sides, their Sect. 11.3.6).
 ## PorousLayer
 
 ```python
-PorousLayer(thickness: float, medium: PorousMediumResult)
+PorousLayer(thickness_m: float, medium: PorousMediumResult)
 ```
 
-A porous layer of `thickness` metres described by *medium*.
+A porous layer of `thickness_m` metres described by *medium*.
 
 `medium` is a [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult) (from [`delany_bazley`](/phonometry/reference/api/materials/porous/#delany_bazley),
 [`miki`](/phonometry/reference/api/materials/porous/#miki), [`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard), or built directly from

@@ -158,7 +158,7 @@ res = noise_control.valve_hydrodynamic_noise(
     ),
     noise_control.LiquidPipe(
         internal_diameter_m=0.1071,      # m
-        wall_thickness=0.0036,         # m
+        wall_thickness_m=0.0036,         # m
         density=7800.0,                # kg/m3, steel
     ),
 )

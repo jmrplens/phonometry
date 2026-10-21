@@ -717,7 +717,7 @@ def plot_zoom_fft(
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     color = style_pop(kwargs, "color", _C_PRIMARY)
     be = format_number(result.resolution_bandwidth, language, decimals=2)
-    df = format_number(result.bin_spacing, language, decimals=3)
+    df = format_number(result.bin_spacing_hz, language, decimals=3)
     kwargs.setdefault("label", f"$B_\\mathrm{{e}}$ = {be} Hz, $\\Delta f$ = {df} Hz")
     ax.plot(
         freqs, _db10(np.asarray(result.power, dtype=np.float64)), color=color, **kwargs

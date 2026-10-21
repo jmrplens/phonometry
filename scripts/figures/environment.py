@@ -632,7 +632,7 @@ def generate_atmospheric_refraction(output_dir: str) -> None:
     # up and leave an acoustic shadow near the ground (Salomons Sec. 4.4/4.6).
     c0, b = 340.0, -1.0
     prof = environment.log_linear_sound_speed_profile(
-        b, ground_speed=c0, max_height=60.0
+        b, ground_speed=c0, max_height_m=60.0
     )
     zs = 2.0
     fig, axes = plt.subplots(2, 1, figsize=(11, 8.2), sharex=True)
@@ -640,15 +640,15 @@ def generate_atmospheric_refraction(output_dir: str) -> None:
     # (a) Ray fan from a near-ground source.
     rays = environment.atmospheric_ray_paths(
         prof,
-        source_height=zs,
+        source_height_m=zs,
         launch_angles_deg=np.linspace(-8.0, 8.0, 17),
         max_range=600.0,
         n_steps=3000,
     )
-    for i in range(rays.heights.shape[0]):
+    for i in range(rays.heights_m.shape[0]):
         axes[0].plot(
             rays.ranges[i],
-            rays.heights[i],
+            rays.heights_m[i],
             color=COLOR_PRIMARY,
             lw=0.8,
             alpha=0.7,
@@ -681,10 +681,10 @@ def generate_atmospheric_refraction(output_dir: str) -> None:
         pe = environment.atmospheric_parabolic_equation(
             400.0,
             prof,
-            source_height=zs,
+            source_height_m=zs,
             flow_resistivity=200e3,
             max_range=600.0,
-            max_height=40.0,
+            max_height_m=40.0,
         )
     dl = np.where(np.isfinite(pe.relative_level), pe.relative_level, np.nan)
     img = axes[1].imshow(
@@ -698,8 +698,8 @@ def generate_atmospheric_refraction(output_dir: str) -> None:
         extent=(
             float(pe.ranges[0]),
             float(pe.ranges[-1]),
-            float(pe.heights[0]),
-            float(pe.heights[-1]),
+            float(pe.heights_m[0]),
+            float(pe.heights_m[-1]),
         ),
         zorder=1,
     )
@@ -733,11 +733,11 @@ def generate_barrier_geometry(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 5.4))
     environment.plot_barrier_geometry(
         ax=ax,
-        source_height=1.0,
+        source_height_m=1.0,
         barrier_distance=50.0,
-        barrier_height=4.0,
+        barrier_height_m=4.0,
         receiver_distance=100.0,
-        receiver_height=1.5,
+        receiver_height_m=1.5,
         language=_LANG,
     )
     plt.tight_layout()
@@ -1097,15 +1097,15 @@ def generate_atmospheric_sound_speed_profiles(output_dir: str) -> None:
     from phonometry import environment
 
     down = environment.log_linear_sound_speed_profile(
-        +1.0, ground_speed=340.0, max_height=60.0
+        +1.0, ground_speed=340.0, max_height_m=60.0
     )
     up = environment.log_linear_sound_speed_profile(
-        -1.0, ground_speed=340.0, max_height=60.0
+        -1.0, ground_speed=340.0, max_height_m=60.0
     )
     _fig, ax = plt.subplots(figsize=(7.0, 7.5))
     ax.plot(
         down.speeds_of_sound,
-        down.heights,
+        down.heights_m,
         color=COLOR_PRIMARY,
         linewidth=2.0,
         label="Downward refraction ($b$ = +1 m/s)",
@@ -1113,7 +1113,7 @@ def generate_atmospheric_sound_speed_profiles(output_dir: str) -> None:
     )
     ax.plot(
         up.speeds_of_sound,
-        up.heights,
+        up.heights_m,
         color=COLOR_SECONDARY,
         linewidth=2.0,
         label="Upward refraction ($b$ = −1 m/s)",
@@ -1138,21 +1138,21 @@ def generate_atmospheric_ray_fan(output_dir: str) -> None:
     from phonometry import environment
 
     profile = environment.log_linear_sound_speed_profile(
-        +1.0, ground_speed=340.0, max_height=60.0
+        +1.0, ground_speed=340.0, max_height_m=60.0
     )
     zs = 2.0
     rays = environment.atmospheric_ray_paths(
         profile,
-        source_height=zs,
+        source_height_m=zs,
         launch_angles_deg=np.linspace(-8.0, 8.0, 17),
         max_range=600.0,
         n_steps=600,
     )
     _fig, ax = plt.subplots(figsize=(11.0, 5.6))
-    for i in range(rays.heights.shape[0]):
+    for i in range(rays.heights_m.shape[0]):
         ax.plot(
             rays.ranges[i],
-            rays.heights[i],
+            rays.heights_m[i],
             color=COLOR_PRIMARY,
             lw=0.8,
             alpha=0.7,
@@ -1200,7 +1200,7 @@ def generate_atmospheric_pe_range(output_dir: str) -> None:
     cases = [
         (
             environment.log_linear_sound_speed_profile(
-                +1.0, ground_speed=c0, max_height=60.0
+                +1.0, ground_speed=c0, max_height_m=60.0
             ),
             COLOR_PRIMARY,
             "-",
@@ -1208,7 +1208,7 @@ def generate_atmospheric_pe_range(output_dir: str) -> None:
         ),
         (
             environment.linear_sound_speed_profile(
-                0.0, ground_speed=c0, max_height=60.0
+                0.0, ground_speed=c0, max_height_m=60.0
             ),
             COLOR_FG,
             "--",
@@ -1216,7 +1216,7 @@ def generate_atmospheric_pe_range(output_dir: str) -> None:
         ),
         (
             environment.log_linear_sound_speed_profile(
-                -1.0, ground_speed=c0, max_height=60.0
+                -1.0, ground_speed=c0, max_height_m=60.0
             ),
             COLOR_SECONDARY,
             "-",
@@ -1230,10 +1230,10 @@ def generate_atmospheric_pe_range(output_dir: str) -> None:
             pe = environment.atmospheric_parabolic_equation(
                 400.0,
                 profile,
-                source_height=zs,
+                source_height_m=zs,
                 flow_resistivity=200e3,
                 max_range=600.0,
-                max_height=40.0,
+                max_height_m=40.0,
             )
             ax.plot(
                 pe.ranges,
@@ -1869,7 +1869,7 @@ def generate_barrier_thickness_gain(output_dir: str) -> None:
                             100.0,
                             1.5,
                             method="exact",
-                            thickness=float(e),
+                            thickness_m=float(e),
                         ).insertion_loss[0]
                     )
                     - thin
@@ -2029,17 +2029,17 @@ def generate_refraction_homogeneous_check(output_dir: str) -> None:
 
     c0, freq, zs = 343.0, 500.0, 2.0
     flat = environment.linear_sound_speed_profile(
-        1e-12, ground_speed=c0, max_height=200.0
+        1e-12, ground_speed=c0, max_height_m=200.0
     )
     with _warnings.catch_warnings():
         _warnings.simplefilter("ignore")
         pe = environment.atmospheric_parabolic_equation(
             freq,
             flat,
-            source_height=zs,
+            source_height_m=zs,
             impedance=1e6 + 0j,
             max_range=520.0,
-            max_height=150.0,
+            max_height_m=150.0,
         )
     ranges = np.asarray(pe.ranges)
     solver = np.asarray(pe.level_at_height(zs))
@@ -2502,7 +2502,7 @@ def generate_wind_turbine_apparent_power(output_dir: str) -> None:
     print("Generating wind_turbine_apparent_power.svg...")
     from phonometry import environment
 
-    r1 = environment.slant_distance(hub_height=80.0, rotor_diameter_m=100.0)
+    r1 = environment.slant_distance(hub_height_m=80.0, rotor_diameter_m=100.0)
     bins = np.arange(4.0, 12.5, 0.5)
     shape = np.array([-4.0, -1.5, 0.0, -1.0, -3.0])  # 250 Hz to 1 kHz
     lwa = np.array(

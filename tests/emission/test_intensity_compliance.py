@@ -144,7 +144,7 @@ def test_note1_separation_rule(spacing_mm: float, offset_db: float) -> None:
     for device in _COLUMNS:
         _, base1, base2 = emission.residual_index_limits(device)
         _, shifted1, shifted2 = emission.residual_index_limits(
-            device, spacing=spacing_mm / 1000.0
+            device, spacing_m=spacing_mm / 1000.0
         )
         assert shifted1 == pytest.approx(base1 + offset_db)
         assert shifted2 == pytest.approx(base2 + offset_db)
@@ -152,16 +152,16 @@ def test_note1_separation_rule(spacing_mm: float, offset_db: float) -> None:
 
 def test_note1_rule_matches_the_table_values_at_50_mm() -> None:
     """A 50 mm spacer earns 3,0103 dB over every printed 25 mm figure."""
-    _, class1, _ = emission.residual_index_limits("instrument", spacing=0.050)
+    _, class1, _ = emission.residual_index_limits("instrument", spacing_m=0.050)
     expected = [row[5] + 10.0 * math.log10(2.0) for row in ref.IEC61043_TABLE2]
     assert list(class1) == pytest.approx(expected)
 
 
 def test_non_positive_spacing_is_rejected() -> None:
     with pytest.raises(
-        ValueError, match=r"'spacing' must be a positive, finite distance"
+        ValueError, match=r"'spacing_m' must be a positive, finite distance"
     ):
-        emission.residual_index_limits("probe", spacing=0.0)
+        emission.residual_index_limits("probe", spacing_m=0.0)
 
 
 # ---------------------------------------------------------------------------
@@ -242,7 +242,7 @@ def test_spacing_shifts_the_verdict() -> None:
     measured = [row[5] - 2.0 for row in ref.IEC61043_TABLE2]  # 2 dB short
     assert emission.verify_intensity_class(measured, _BANDS).overall_class == 2
     # A 12,5 mm spacer relaxes every requirement by 10 lg(0,5) = -3,01 dB.
-    relaxed = emission.verify_intensity_class(measured, _BANDS, spacing=0.0125)
+    relaxed = emission.verify_intensity_class(measured, _BANDS, spacing_m=0.0125)
     assert relaxed.overall_class == 1
     assert relaxed.spacing_offset_db == pytest.approx(-10.0 * math.log10(2.0))
 
@@ -350,7 +350,7 @@ def test_result_carries_the_masks_and_the_binding_margin() -> None:
     assert list(result.limit_class2) == pytest.approx(_table_column("instrument", 2))
     assert result.reference_class() == 1
     assert result.device == "instrument"
-    assert result.spacing == pytest.approx(0.025)
+    assert result.spacing_m == pytest.approx(0.025)
 
 
 def test_result_reference_class_and_failing_bands_when_non_compliant() -> None:
@@ -427,7 +427,7 @@ def test_phase_conversion_rejects_invalid_inputs() -> None:
     ):
         emission.residual_index_from_phase_mismatch(0.0, 1000.0, 0.025)
     with pytest.raises(
-        ValueError, match=r"'spacing' must be a positive, finite distance"
+        ValueError, match=r"'spacing_m' must be a positive, finite distance"
     ):
         emission.phase_mismatch_from_residual_index(20.0, 1000.0, -0.01)
     with pytest.raises(
@@ -443,7 +443,7 @@ def test_phase_conversion_rejects_invalid_inputs() -> None:
 def test_result_phase_mismatch_matches_the_standalone_conversion() -> None:
     """The result's convenience conversion is the public function, band by band."""
     measured = _table_column("instrument", 1)
-    result = emission.verify_intensity_class(measured, _BANDS, spacing=0.012)
+    result = emission.verify_intensity_class(measured, _BANDS, spacing_m=0.012)
     expected = emission.phase_mismatch_from_residual_index(
         np.asarray(measured), np.asarray(_BANDS), 0.012
     )
@@ -462,7 +462,7 @@ def test_an_instrument_verdict_refuses_spectra_that_disagree() -> None:
         np.full(frequencies.size, 20.0),
         frequencies,
         device="instrument",
-        spacing=0.025,
+        spacing_m=0.025,
     )
     with pytest.raises(ValueError, match="residual_index"):
         dataclasses.replace(result, residual_index=result.residual_index[:-1])
@@ -483,7 +483,7 @@ def test_a_verdict_whose_device_is_not_a_table_2_column_is_refused() -> None:
         np.full(frequencies.size, 20.0),
         frequencies,
         device="instrument",
-        spacing=0.025,
+        spacing_m=0.025,
     )
     with pytest.raises(ValueError, match="'device' must be"):
         dataclasses.replace(result, device="microphone")
@@ -504,7 +504,7 @@ def test_a_non_finite_band_of_the_verdict_is_refused(field_name: str) -> None:
         np.full(frequencies.size, 20.0),
         frequencies,
         device="instrument",
-        spacing=0.025,
+        spacing_m=0.025,
     )
     values = np.asarray(getattr(result, field_name), dtype=float).copy()
     values[1] = float("nan")
@@ -526,10 +526,13 @@ def test_the_rows_the_class_and_the_range_are_not_fields(name: str) -> None:
 
     frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
     result = emission.verify_intensity_class(
-        np.full(frequencies.size, 20.0), frequencies, device="instrument", spacing=0.025
+        np.full(frequencies.size, 20.0),
+        frequencies,
+        device="instrument",
+        spacing_m=0.025,
     )
     fields = {field.name for field in dataclasses.fields(result)}
-    assert fields == {"frequencies", "residual_index", "device", "spacing"}
+    assert fields == {"frequencies", "residual_index", "device", "spacing_m"}
     stated = {name: getattr(result, name)}
     with pytest.raises(TypeError, match=name):
         dataclasses.replace(result, **stated)
@@ -546,7 +549,10 @@ def test_a_verdict_over_no_bands_is_refused() -> None:
 
     frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
     result = emission.verify_intensity_class(
-        np.full(frequencies.size, 20.0), frequencies, device="instrument", spacing=0.025
+        np.full(frequencies.size, 20.0),
+        frequencies,
+        device="instrument",
+        spacing_m=0.025,
     )
     empty = np.array([])
     with pytest.raises(ValueError, match="At least one measurement band"):
@@ -559,7 +565,7 @@ def test_the_table_2_masks_are_read_from_the_device_and_separation() -> None:
 
     frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
     result = emission.verify_intensity_class(
-        np.full(frequencies.size, 20.0), frequencies, device="processor", spacing=0.05
+        np.full(frequencies.size, 20.0), frequencies, device="processor", spacing_m=0.05
     )
     names = {field.name for field in dataclasses.fields(result)}
     assert not names & {"limit_class1", "limit_class2", "spacing_offset_db"}
@@ -576,7 +582,7 @@ def _quiet_processor() -> emission.IntensityInstrumentComplianceResult:
     """A processor whose 3 dB index meets neither class at 25 mm."""
     frequencies = np.array([250.0, 500.0, 1000.0, 2000.0])
     return emission.verify_intensity_class(
-        np.full(frequencies.size, 3.0), frequencies, device="processor", spacing=0.025
+        np.full(frequencies.size, 3.0), frequencies, device="processor", spacing_m=0.025
     )
 
 

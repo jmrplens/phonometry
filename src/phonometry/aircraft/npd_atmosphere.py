@@ -447,10 +447,10 @@ class RevisedNpdCurves(RichDisplay):
         :raises ValueError: if the increment does not run over the distances
             of the curves it revised.
         """
-        if self.increment.distances_m.shape != self.original.distances.shape or not (
+        if self.increment.distances_m.shape != self.original.distances_m.shape or not (
             np.allclose(
                 self.increment.distances_m,
-                self.original.distances,
+                self.original.distances_m,
                 rtol=_DISTANCE_MATCH_RTOL,
                 atol=0.0,
             )
@@ -507,7 +507,7 @@ def revise_npd_curves(
         relative_humidity_percent=relative_humidity_percent,
         atmospheric_pressure_kpa=atmospheric_pressure_kpa,
         absorption=absorption,
-        distances_m=curves.distances,
+        distances_m=curves.distances_m,
     )
     levels = read_only(
         np.asarray(curves.levels, dtype=np.float64) + increment.increment_db[None, :]

@@ -202,7 +202,7 @@ def _band_factor(band: BandWidth) -> float:
 # 1. The ISO tapping machine as a mass-spring-dashpot (Hopkins 3.6.3)
 # --------------------------------------------------------------------------- #
 def hammer_impact_velocity(
-    drop_height: float = TAPPING_DROP_HEIGHT_M, *, gravity: float = _GRAVITY
+    drop_height_m: float = TAPPING_DROP_HEIGHT_M, *, gravity: float = _GRAVITY
 ) -> float:
     r"""Hammer velocity at impact :math:`v_0 = \sqrt{2 g h}` (Hopkins
     Eq. 3.85).
@@ -210,12 +210,12 @@ def hammer_impact_velocity(
     The ISO tapping machine's nominal 40 mm drop gives
     :math:`v_0 = 0.886` m/s.
 
-    :param drop_height: Drop height ``h``, in m (Default: 0,04).
+    :param drop_height_m: Drop height ``h``, in m (Default: 0,04).
     :param gravity: Acceleration of free fall ``g``, in m/s² (Default: 9,81).
     :return: The impact velocity ``vo``, in m/s.
     :raises ValueError: If an input is not positive and finite.
     """
-    h = require_positive(drop_height, "drop_height")
+    h = require_positive(drop_height_m, "drop_height_m")
     g = require_positive(gravity, "gravity")
     return float(np.sqrt(2.0 * g * h))
 
@@ -252,7 +252,7 @@ def plate_contact_stiffness(
 
 def covering_contact_stiffness(
     youngs_modulus: float,
-    thickness: float,
+    thickness_m: float,
     *,
     radius: float = TAPPING_HAMMER_RADIUS_M,
 ) -> float:
@@ -265,13 +265,13 @@ def covering_contact_stiffness(
     quoted there as 7 cm² against the 7.07 cm² of a 15 mm radius.
 
     :param youngs_modulus: Young's modulus ``E`` of the covering, in Pa.
-    :param thickness: Covering thickness ``d``, in m.
+    :param thickness_m: Covering thickness ``d``, in m.
     :param radius: Contact radius ``r``, in m (Default: 0,015).
     :return: The contact stiffness ``K``, in N/m.
     :raises ValueError: If an input is not positive and finite.
     """
     e = require_positive(youngs_modulus, "youngs_modulus")
-    d = require_positive(thickness, "thickness")
+    d = require_positive(thickness_m, "thickness_m")
     r = require_positive(radius, "radius")
     return float(e * np.pi * r**2 / d)
 

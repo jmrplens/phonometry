@@ -214,7 +214,7 @@ the auxiliary Fresnel functions. It gives 6 dB at the shadow boundary (the
 field is exactly halved, the flat-wedge limit) and tracks Kurze-Anderson through
 the shadow zone.
 
-**Thick barriers.** A `thickness` (top width $e$) lengthens the diffracted
+**Thick barriers.** A `thickness_m` (top width $e$) lengthens the diffracted
 path to $A + e + B$, the double-edge Fresnel number
 $N = (2/\lambda)(A + B + e - d)$ of
 Bies Eq. 5.157, so a thick barrier or a soil mound attenuates monotonically more

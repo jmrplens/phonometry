@@ -59,7 +59,7 @@ print(round(f_l, 1), round(f_u, 1))     # 858.0 6864.0
 Those limits are easier to see on the hardware itself.
 `plot_impedance_tube_geometry` draws a tube to scale with its plane-wave
 band worked out, and a measured `two_microphone_impedance` result that was
-given its geometry (`spacing`, `x1`, `diameter_m`) redraws its own setup with
+given its geometry (`spacing_m`, `x1`, `diameter_m`) redraws its own setup with
 `result.plot_geometry()`.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_geometry.svg" alt="To-scale side view of a 100 mm ISO 10534-2 impedance tube: the loudspeaker at the left end, microphones 1 and 2 flush in the wall at s = 50 mm spacing with microphone 1 at x1 = 150 mm from the specimen face, the specimen against the rigid backing at the right, the circular cross-section beside the tube and the plane-wave working range of 343 to 1991 Hz that this geometry sets" width="92%"></picture>
@@ -76,12 +76,12 @@ one $x_1$ = 150 mm from the specimen face.*
 import matplotlib.pyplot as plt
 from phonometry import materials
 
-materials.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter_m=0.10)
+materials.plot_impedance_tube_geometry(spacing_m=0.05, x1=0.15, diameter_m=0.10)
 plt.show()
 
 # A measured result that retains its geometry draws its own tube:
 #   res = materials.two_microphone_impedance(
-#       h12, frequency=f, spacing=0.05, x1=0.15, diameter_m=0.10, ...)
+#       h12, frequency=f, spacing_m=0.05, x1=0.15, diameter_m=0.10, ...)
 #   res.plot_geometry()
 ```
 
@@ -253,7 +253,7 @@ x2 = x1 - spacing
 h12 = (np.exp(1j*k0*x2) + target*np.exp(-1j*k0*x2)) / \
       (np.exp(1j*k0*x1) + target*np.exp(-1j*k0*x1))
 
-r = materials.reflection_factor(h12, spacing=spacing, x1=x1, wavenumber=k0)
+r = materials.reflection_factor(h12, spacing_m=spacing, x1=x1, wavenumber=k0)
 print(np.round(materials.absorption_from_reflection(r), 3))     # [0.75 0.75 0.75]
 print(np.round(materials.normalized_surface_impedance(r), 2))   # Z / rho c0
 # [1.15-1.23j 1.15-1.23j 1.15-1.23j]
@@ -293,7 +293,7 @@ r_true = layer.reflection
 h12 = (np.exp(1j*k0*x2) + r_true*np.exp(-1j*k0*x2)) / \
       (np.exp(1j*k0*x1) + r_true*np.exp(-1j*k0*x1))
 result = materials.two_microphone_impedance(
-    h12, frequency=f, spacing=spacing, x1=x1, speed_of_sound=c0,
+    h12, frequency=f, spacing_m=spacing, x1=x1, speed_of_sound=c0,
     characteristic_impedance=407.0, diameter_m=0.10,
 )
 
@@ -330,10 +330,10 @@ random-incidence $\alpha_\mathrm{s}$/$\alpha_\mathrm{w}$ of ISO 354 / ISO 11654.
 It uses the same `ReportMetadata` container and rendering engine as the other
 fiches. The measured frequency range is taken from the result; the applicable
 descriptive and geometric `ReportMetadata` fields are `client`, `manufacturer`,
-`specimen`, `tube_diameter_m`, `tube_shape`, `mic_spacing`, `mounting`,
+`specimen`, `tube_diameter_m`, `tube_shape`, `microphone_spacing_m`, `mounting`,
 `test_room`, `test_date`, `temperature_c`, `static_pressure_kpa`,
 `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`
-(`tube_diameter_m` and `mic_spacing` are given in metres and printed in
+(`tube_diameter_m` and `microphone_spacing_m` are given in metres and printed in
 millimetres). The `requirement` field is ignored (ISO 10534-2 has no verdict).
 Rendering needs reportlab and, for the figure the fiche embeds, matplotlib
 (`pip install "phonometry[report,plot]"`); only `engine="reportlab"` is
@@ -369,7 +369,7 @@ h12_fiche = (np.exp(1j*k0*x2) + r_known*np.exp(-1j*k0*x2)) / \
             (np.exp(1j*k0*x1) + r_known*np.exp(-1j*k0*x1))
 
 fiche = materials.two_microphone_impedance(
-    h12_fiche, frequency=freqs, spacing=spacing, x1=x1,
+    h12_fiche, frequency=freqs, spacing_m=spacing, x1=x1,
     speed_of_sound=c0, characteristic_impedance=rho_c, diameter_m=diameter_m,
 )
 print(np.round(fiche.absorption, 2))    # [0.68 0.8  0.9  0.97 1.   0.96 0.68]
@@ -379,7 +379,7 @@ fiche.report(
     metadata=ReportMetadata(
         specimen="Resistive facing over an 86 mm rigidly-backed air cavity",
         tube_diameter_m=diameter_m,        # m (printed as 100 mm)
-        mic_spacing=spacing,           # m (printed as 50 mm)
+        microphone_spacing_m=spacing,           # m (printed as 50 mm)
         measurement_standard="ISO 10534-2",
         laboratory="Phonometry Reference Laboratory",
     ),
@@ -427,7 +427,7 @@ import matplotlib.pyplot as plt
 from phonometry import materials
 
 materials.plot_transmission_tube_geometry(
-    l1=0.10, s1=0.05, l2=0.20, s2=0.05, thickness=0.05, diameter_m=0.10,
+    l1=0.10, s1=0.05, l2=0.20, s2=0.05, thickness_m=0.05, diameter_m=0.10,
 )
 plt.show()
 
@@ -445,7 +445,7 @@ from phonometry import materials
 f = np.array([500.0, 1000.0, 2000.0])
 k0 = 2*np.pi*f / 343.2
 rho_c = 1.186 * 343.2
-tm = materials.air_layer_transfer_matrix(thickness=0.05, wavenumber=k0,
+tm = materials.air_layer_transfer_matrix(thickness_m=0.05, wavenumber=k0,
                                characteristic_impedance=rho_c)
 print(np.round(tm.transmission_loss(rho_c), 6))   # [0. 0. 0.]
 ```
@@ -586,7 +586,7 @@ freqs = np.fft.rfftfreq(records.shape[1], sim.dt)
 band = (freqs > 300.0) & (freqs < 1200.0)
 result = two_microphone_impedance(
     spec[1, band] / spec[0, band], frequency=freqs[band],
-    spacing=0.05, x1=(nx - d_cells) * dx - (mics[0] + 0.5) * dx,
+    spacing_m=0.05, x1=(nx - d_cells) * dx - (mics[0] + 0.5) * dx,
     speed_of_sound=c0, characteristic_impedance=rho0 * c0)
 result.plot()   # the absorption the virtual tube "measured"
 ```

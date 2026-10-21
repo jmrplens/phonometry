@@ -869,7 +869,7 @@ from phonometry import materials
 area = np.pi * 0.05**2                      # 100 mm diameter cell [m^2]
 u = np.array([0.5, 1, 2, 4, 8, 12]) * 1e-3  # linear velocity [m/s]
 dp = 1.6e4 * u + 4.0e5 * u**2               # measured pressure drop [Pa]
-r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
 
 u_fit = np.linspace(0.0, 13e-3, 200)
 dp_fit = r.linear_coefficient * u_fit + r.quadratic_coefficient * u_fit**2
@@ -895,7 +895,7 @@ area = np.pi * 0.05**2            # 100 mm diameter cell [m^2]
 u = np.array([0.5, 1, 2, 4, 8, 12]) * 1e-3      # linear velocity [m/s]
 dp = 1.6e4 * u + 4.0e5 * u**2                    # measured pressure drop [Pa]
 
-r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
 print(round(r.specific_resistance))   # 16200   R_s [Pa*s/m]
 print(round(r.resistivity))           # 324000  sigma [Pa*s/m^2]
 print(round(r.linear_coefficient))    # 16000   a = R_s at u -> 0
@@ -918,7 +918,7 @@ material characterisation, so the fiche carries no pass/fail verdict.
 
 It uses the same `ReportMetadata` container and rendering engine as the other
 fiches. The descriptive fields that apply here are `client`, `manufacturer`,
-`specimen`, `thickness` (the specimen thickness $d$, in metres, shown in
+`specimen`, `thickness_m` (the specimen thickness $d$, in metres, shown in
 millimetres), `test_room`, `test_date`, `temperature_c`,
 `relative_humidity_percent`, `measurement_standard`, `laboratory`, `operator`,
 `report_id` and `notes`. The `requirement` field is ignored (ISO 9053-1 has no
@@ -931,12 +931,12 @@ decimal separator).
 ```python
 from phonometry import materials, ReportMetadata
 
-r = materials.static_airflow_resistance(u, dp, area=area, thickness=0.05)
+r = materials.static_airflow_resistance(u, dp, area=area, thickness_m=0.05)
 r.report(
     "airflow_fiche.pdf",
     metadata=ReportMetadata(
         specimen="50 mm porous absorber (open-cell)",
-        thickness=0.050,
+        thickness_m=0.050,
         measurement_standard="ISO 9053-1",
         test_room="Static airflow rig, 100 mm cell",
         laboratory="Phonometry Reference Laboratory",
@@ -1160,7 +1160,7 @@ print(round(f_l, 1), round(f_u, 1))     # 858.0 6864.0
 Those limits are easier to see on the hardware itself.
 `plot_impedance_tube_geometry` draws a tube to scale with its plane-wave
 band worked out, and a measured `two_microphone_impedance` result that was
-given its geometry (`spacing`, `x1`, `diameter_m`) redraws its own setup with
+given its geometry (`spacing_m`, `x1`, `diameter_m`) redraws its own setup with
 `result.plot_geometry()`.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_geometry.svg" alt="To-scale side view of a 100 mm ISO 10534-2 impedance tube: the loudspeaker at the left end, microphones 1 and 2 flush in the wall at s = 50 mm spacing with microphone 1 at x1 = 150 mm from the specimen face, the specimen against the rigid backing at the right, the circular cross-section beside the tube and the plane-wave working range of 343 to 1991 Hz that this geometry sets" width="92%"></picture>
@@ -1177,12 +1177,12 @@ one $x_1$ = 150 mm from the specimen face.*
 import matplotlib.pyplot as plt
 from phonometry import materials
 
-materials.plot_impedance_tube_geometry(spacing=0.05, x1=0.15, diameter_m=0.10)
+materials.plot_impedance_tube_geometry(spacing_m=0.05, x1=0.15, diameter_m=0.10)
 plt.show()
 
 # A measured result that retains its geometry draws its own tube:
 #   res = materials.two_microphone_impedance(
-#       h12, frequency=f, spacing=0.05, x1=0.15, diameter_m=0.10, ...)
+#       h12, frequency=f, spacing_m=0.05, x1=0.15, diameter_m=0.10, ...)
 #   res.plot_geometry()
 ```
 
@@ -1354,7 +1354,7 @@ x2 = x1 - spacing
 h12 = (np.exp(1j*k0*x2) + target*np.exp(-1j*k0*x2)) / \
       (np.exp(1j*k0*x1) + target*np.exp(-1j*k0*x1))
 
-r = materials.reflection_factor(h12, spacing=spacing, x1=x1, wavenumber=k0)
+r = materials.reflection_factor(h12, spacing_m=spacing, x1=x1, wavenumber=k0)
 print(np.round(materials.absorption_from_reflection(r), 3))     # [0.75 0.75 0.75]
 print(np.round(materials.normalized_surface_impedance(r), 2))   # Z / rho c0
 # [1.15-1.23j 1.15-1.23j 1.15-1.23j]
@@ -1394,7 +1394,7 @@ r_true = layer.reflection
 h12 = (np.exp(1j*k0*x2) + r_true*np.exp(-1j*k0*x2)) / \
       (np.exp(1j*k0*x1) + r_true*np.exp(-1j*k0*x1))
 result = materials.two_microphone_impedance(
-    h12, frequency=f, spacing=spacing, x1=x1, speed_of_sound=c0,
+    h12, frequency=f, spacing_m=spacing, x1=x1, speed_of_sound=c0,
     characteristic_impedance=407.0, diameter_m=0.10,
 )
 
@@ -1431,10 +1431,10 @@ random-incidence $\alpha_\mathrm{s}$/$\alpha_\mathrm{w}$ of ISO 354 / ISO 11654.
 It uses the same `ReportMetadata` container and rendering engine as the other
 fiches. The measured frequency range is taken from the result; the applicable
 descriptive and geometric `ReportMetadata` fields are `client`, `manufacturer`,
-`specimen`, `tube_diameter_m`, `tube_shape`, `mic_spacing`, `mounting`,
+`specimen`, `tube_diameter_m`, `tube_shape`, `microphone_spacing_m`, `mounting`,
 `test_room`, `test_date`, `temperature_c`, `static_pressure_kpa`,
 `measurement_standard`, `laboratory`, `operator`, `report_id` and `notes`
-(`tube_diameter_m` and `mic_spacing` are given in metres and printed in
+(`tube_diameter_m` and `microphone_spacing_m` are given in metres and printed in
 millimetres). The `requirement` field is ignored (ISO 10534-2 has no verdict).
 Rendering needs reportlab and, for the figure the fiche embeds, matplotlib
 (`pip install "phonometry[report,plot]"`); only `engine="reportlab"` is
@@ -1470,7 +1470,7 @@ h12_fiche = (np.exp(1j*k0*x2) + r_known*np.exp(-1j*k0*x2)) / \
             (np.exp(1j*k0*x1) + r_known*np.exp(-1j*k0*x1))
 
 fiche = materials.two_microphone_impedance(
-    h12_fiche, frequency=freqs, spacing=spacing, x1=x1,
+    h12_fiche, frequency=freqs, spacing_m=spacing, x1=x1,
     speed_of_sound=c0, characteristic_impedance=rho_c, diameter_m=diameter_m,
 )
 print(np.round(fiche.absorption, 2))    # [0.68 0.8  0.9  0.97 1.   0.96 0.68]
@@ -1480,7 +1480,7 @@ fiche.report(
     metadata=ReportMetadata(
         specimen="Resistive facing over an 86 mm rigidly-backed air cavity",
         tube_diameter_m=diameter_m,        # m (printed as 100 mm)
-        mic_spacing=spacing,           # m (printed as 50 mm)
+        microphone_spacing_m=spacing,           # m (printed as 50 mm)
         measurement_standard="ISO 10534-2",
         laboratory="Phonometry Reference Laboratory",
     ),
@@ -1528,7 +1528,7 @@ import matplotlib.pyplot as plt
 from phonometry import materials
 
 materials.plot_transmission_tube_geometry(
-    l1=0.10, s1=0.05, l2=0.20, s2=0.05, thickness=0.05, diameter_m=0.10,
+    l1=0.10, s1=0.05, l2=0.20, s2=0.05, thickness_m=0.05, diameter_m=0.10,
 )
 plt.show()
 
@@ -1546,7 +1546,7 @@ from phonometry import materials
 f = np.array([500.0, 1000.0, 2000.0])
 k0 = 2*np.pi*f / 343.2
 rho_c = 1.186 * 343.2
-tm = materials.air_layer_transfer_matrix(thickness=0.05, wavenumber=k0,
+tm = materials.air_layer_transfer_matrix(thickness_m=0.05, wavenumber=k0,
                                characteristic_impedance=rho_c)
 print(np.round(tm.transmission_loss(rho_c), 6))   # [0. 0. 0.]
 ```
@@ -1687,7 +1687,7 @@ freqs = np.fft.rfftfreq(records.shape[1], sim.dt)
 band = (freqs > 300.0) & (freqs < 1200.0)
 result = two_microphone_impedance(
     spec[1, band] / spec[0, band], frequency=freqs[band],
-    spacing=0.05, x1=(nx - d_cells) * dx - (mics[0] + 0.5) * dx,
+    spacing_m=0.05, x1=(nx - d_cells) * dx - (mics[0] + 0.5) * dx,
     speed_of_sound=c0, characteristic_impedance=rho0 * c0)
 result.plot()   # the absorption the virtual tube "measured"
 ```
@@ -2772,7 +2772,7 @@ design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, pe
 
 f = np.array([300.0])
 res = materials.slit_helmholtz_absorber(
-    f, design.resonator, slit_height=design.slit_height,
+    f, design.resonator, slit_height_m=design.slit_height_m,
     lattice_step=3.0e-2, period_m=5.0e-2,
 )
 z = res.normalized_impedance[0]
@@ -2821,7 +2821,7 @@ print(round(design.absorption, 4))          # ~1.0 (perfect absorption)
 
 f = np.linspace(150.0, 500.0, 700)
 res = materials.slit_helmholtz_absorber(
-    f, design.resonator, slit_height=design.slit_height,
+    f, design.resonator, slit_height_m=design.slit_height_m,
     lattice_step=3.0e-2, period_m=5.0e-2,
 )
 res.plot()   # alpha(f) with |R| overlaid; peak = 1 at 300 Hz
@@ -2880,7 +2880,7 @@ design = materials.critical_coupling_design(
 # The free function draws any resonator list; a slit_helmholtz_absorber
 # result retains its geometry, so res.plot_geometry() draws the same period_m.
 materials.plot_slit_absorber_geometry(
-    [design.resonator], slit_height=design.slit_height,
+    [design.resonator], slit_height_m=design.slit_height_m,
     lattice_step=3.0e-2, period_m=5.0e-2,
 )
 plt.show()
@@ -2905,14 +2905,14 @@ from phonometry import materials
 a, d, f0 = 3.0e-2, 5.0e-2, 300.0
 base = materials.HelmholtzResonator(1.0e-3, 3.0e-3, 30.0e-3, 27.0e-3)
 design = materials.critical_coupling_design(f0, base, lattice_step=a, period_m=d)
-h0 = design.slit_height
+h0 = design.slit_height_m
 
 f = np.linspace(150.0, 500.0, 700)
 fig, ax = plt.subplots()
 for factor, label in [(1.0, "critically coupled"),
                       (0.6, "narrow slit"), (1.7, "wide slit")]:
     res = materials.slit_helmholtz_absorber(
-        f, design.resonator, slit_height=factor * h0,
+        f, design.resonator, slit_height_m=factor * h0,
         lattice_step=a, period_m=d,
     )
     ax.plot(f, res.absorption, label=label)
@@ -2950,7 +2950,7 @@ base = materials.HelmholtzResonator(
 )
 design = materials.critical_coupling_design(300.0, base, lattice_step=3.0e-2, period_m=5.0e-2)
 res = materials.slit_helmholtz_absorber(
-    np.array([300.0]), design.resonator, slit_height=design.slit_height,
+    np.array([300.0]), design.resonator, slit_height_m=design.slit_height_m,
     lattice_step=3.0e-2, period_m=5.0e-2,
 )
 

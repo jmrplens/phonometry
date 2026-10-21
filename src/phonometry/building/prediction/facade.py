@@ -582,7 +582,7 @@ def radiated_sound_power(
     )
 
 
-def outdoor_attenuation(width: float, height: float, distance: float) -> float:
+def outdoor_attenuation(width: float, height_m: float, distance: float) -> float:
     r"""Simplified attenuation ``Atot`` of a finite side (EN 12354-4 Annex E).
 
     Reception point in front of the centre of a rectangular side
@@ -596,13 +596,13 @@ def outdoor_attenuation(width: float, height: float, distance: float) -> float:
     into the quarter-space over hard ground is built into the formula.
 
     :param width: Side width ``L``, in m.
-    :param height: Side height ``H``, in m.
+    :param height_m: Side height ``H``, in m.
     :param distance: Perpendicular distance ``d`` to the reception point, in m.
     :return: ``Atot`` in dB (subtract from ``LW`` to get the exterior ``Lp``).
     """
-    w, h, d = float(width), float(height), float(distance)
+    w, h, d = float(width), float(height_m), float(distance)
     if min(w, h, d) <= 0:
-        msg = "width, height and distance must be positive."
+        msg = "'width', 'height_m' and 'distance' must be positive."
         raise ValueError(msg)
     area = w * h
     if d > max(w, h):

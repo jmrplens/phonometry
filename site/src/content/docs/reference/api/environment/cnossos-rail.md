@@ -496,7 +496,7 @@ RAILWAY_THIRD_OCTAVE_BANDS_HZ = (50.0, 63.0, 80.0, 100.0, 125.0, 160.0, 200.0, 2
 RailwayEmissionResult(
     third_octave_frequencies: NDArray[np.float64],
     frequencies: NDArray[np.float64],
-    heights: tuple[float, float],
+    heights_m: tuple[float, float],
     third_octave_line_power: NDArray[np.float64],
     line_power: NDArray[np.float64],
     total_line_power: NDArray[np.float64],
@@ -512,7 +512,7 @@ Directional sound power per metre of a CNOSSOS-EU railway source.
 | :--- | :--- |
 | `third_octave_frequencies` | The 24 1/3-octave midband frequencies, Hz. |
 | `frequencies` | The eight octave midband frequencies, Hz. |
-| `heights` | Heights of the two equivalent source lines, in m. |
+| `heights_m` | Heights of the two equivalent source lines, in m. |
 | `third_octave_line_power` | `L'_W,eq,line,i(psi,phi)` per source height and 1/3-octave band, in dB re 1 pW per metre. |
 | `line_power` | The same, energy-summed into octave bands. |
 | `total_line_power` | The two heights summed, per octave band. |

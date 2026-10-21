@@ -293,7 +293,7 @@ announced rather than silent.
 helmholtz_resonance_frequency(
     *,
     cavity_depth: float,
-    plate_thickness: float,
+    plate_thickness_m: float,
     hole_radius: float,
     open_area: float,
     end_correction: float | None = None,
@@ -312,7 +312,7 @@ end-corrected plug length $t' = t + 2 \delta a$ (Cox & D'Antonio
 | Name | Description |
 | :--- | :--- |
 | `cavity_depth` | Cavity depth `d`, in metres. |
-| `plate_thickness` | Plate thickness `t`, in metres. |
+| `plate_thickness_m` | Plate thickness `t`, in metres. |
 | `hole_radius` | Hole radius `a`, in metres. |
 | `open_area` | Fractional open area `eps` (0..1). |
 | `end_correction` | End-correction factor `delta` per end; default [`perforation_end_correction`](/phonometry/reference/api/materials/porous/#perforation_end_correction) of `eps`. |
@@ -563,7 +563,7 @@ the porous-filled cavity case below about 500 Hz.
 microperforated_plate_impedance(
     frequency: ArrayLike,
     *,
-    thickness: float,
+    thickness_m: float,
     hole_radius: float,
     open_area: float,
     end_correction: float = 0.85,
@@ -595,7 +595,7 @@ transfer impedance (Cox & D'Antonio Eq. (7.35)).
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `thickness` | Plate thickness `t`, in metres. |
+| `thickness_m` | Plate thickness `t`, in metres. |
 | `hole_radius` | Hole radius `a`, in metres (submillimetre for a genuine microperforated design). |
 | `open_area` | Fractional open area `eps` (0..1). |
 | `end_correction` | End-correction factor `delta` per end (default 0.85, the isolated-orifice value used by Maa). |
@@ -651,7 +651,7 @@ MIKI_VALIDITY = (0.01, 1.0)
 perforated_plate_impedance(
     frequency: ArrayLike,
     *,
-    thickness: float,
+    thickness_m: float,
     hole_radius: float,
     open_area: float,
     end_correction: float | None = None,
@@ -684,7 +684,7 @@ holes.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
-| `thickness` | Plate thickness `t`, in metres. |
+| `thickness_m` | Plate thickness `t`, in metres. |
 | `hole_radius` | Hole radius `a`, in metres. |
 | `open_area` | Fractional open area `eps` (0..1). |
 | `end_correction` | End-correction factor `delta` per end; default [`perforation_end_correction`](/phonometry/reference/api/materials/porous/#perforation_end_correction) of `eps`. |

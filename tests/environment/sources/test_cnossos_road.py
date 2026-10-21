@@ -609,7 +609,7 @@ def test_result_arrays_are_consistent() -> None:
     flows = [RoadTraffic(RoadVehicleCategory.MEDIUM_HEAVY, 400.0, 70.0)]
     result = road_source_power(flows)
     assert result.frequencies.tolist() == list(ROAD_OCTAVE_BANDS_HZ)
-    assert result.source_height == 0.05
+    assert result.source_height_m == 0.05
     assert result.vehicle_power[0] == pytest.approx(
         10.0
         * np.log10(
@@ -655,7 +655,7 @@ def test_segment_power_feeds_the_propagation_stage() -> None:
     segment = line_source_segment_power(result.total_line_power, 20.0)
     levels = predicted_receiver_level(
         segment,
-        PropagationGeometry(100.0, result.source_height, 4.0),
+        PropagationGeometry(100.0, result.source_height_m, 4.0),
         frequencies=result.frequencies,
     )
     assert levels.shape == (8,)

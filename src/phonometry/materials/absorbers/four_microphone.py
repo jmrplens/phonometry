@@ -140,7 +140,7 @@ def air_density_astm(
 # Plane-wave working range (ASTM E2611-19, 6.2.3-6.2.5, 6.5.4).
 # ---------------------------------------------------------------------------
 def plane_wave_frequency_range_astm(
-    spacing: float,
+    spacing_m: float,
     speed_of_sound: float,
     *,
     diameter_m: float | None = None,
@@ -161,7 +161,7 @@ def plane_wave_frequency_range_astm(
     the upper bound and the smaller one for the lower bound (each bound is
     binding for every microphone pair).
 
-    :param spacing: Microphone spacing ``s``, in metres.
+    :param spacing_m: Microphone spacing ``s``, in metres.
     :param speed_of_sound: Speed of sound ``c``, in metres per second.
     :param diameter_m: Tube diameter (circular) or largest section dimension
         (rectangular/square) ``d``, in metres; ``None`` applies only the
@@ -170,7 +170,7 @@ def plane_wave_frequency_range_astm(
     :return: Tuple ``(f_l, f_u)`` of the lower and upper frequency limits, in Hz.
     """
     return _frequency_range(
-        spacing,
+        spacing_m,
         speed_of_sound,
         diameter_m=diameter_m,
         shape=shape,
@@ -321,7 +321,7 @@ def face_quantities(
     d: ArrayLike,
     *,
     wavenumber: ArrayLike,
-    thickness: float,
+    thickness_m: float,
     characteristic_impedance: float,
 ) -> tuple[Complex, Complex, Complex, Complex]:
     r"""Face pressures and particle velocities (ASTM E2611-19, Eq. (21)).
@@ -339,19 +339,19 @@ def face_quantities(
     :param c: Downstream forward amplitude ``C``.
     :param d: Downstream backward amplitude ``D``.
     :param wavenumber: Air wavenumber ``k``.
-    :param thickness: Specimen thickness ``d``, in metres.
+    :param thickness_m: Specimen thickness ``d``, in metres.
     :param characteristic_impedance: Characteristic impedance ``rho c``, in rayls.
     :return: Tuple ``(p0, pd, u0, ud)`` of face pressures and velocities.
     """
     require_positive(characteristic_impedance, "characteristic_impedance")
-    thickness = require_positive(thickness, "thickness")
+    thickness_m = require_positive(thickness_m, "thickness_m")
     av = np.asarray(a, dtype=np.complex128)
     bv = np.asarray(b, dtype=np.complex128)
     cv = np.asarray(c, dtype=np.complex128)
     dv = np.asarray(d, dtype=np.complex128)
     k = np.asarray(wavenumber, dtype=np.complex128)
-    ep = np.exp(-1j * k * thickness)
-    em = np.exp(1j * k * thickness)
+    ep = np.exp(-1j * k * thickness_m)
+    em = np.exp(1j * k * thickness_m)
     p0 = av + bv
     pd = cv * ep + dv * em
     u0 = (av - bv) / characteristic_impedance
@@ -374,7 +374,7 @@ class TransferMatrix(OwnsArrays):
 
     The trailing fields retain the measurement context when the matrix comes
     out of :func:`transfer_matrix_two_load` / :func:`transfer_matrix_one_load`
-    (tube geometry ``l1``/``s1``/``l2``/``s2``, specimen ``thickness``, tube
+    (tube geometry ``l1``/``s1``/``l2``/``s2``, specimen ``thickness_m``, tube
     ``diameter_m`` and canonical cross-section ``shape``, the ``frequencies``
     vector when supplied to the solver, and the air
     ``air_characteristic_impedance`` ``rho c``); all default to ``None`` so a
@@ -391,7 +391,7 @@ class TransferMatrix(OwnsArrays):
     s1: float | None = None
     l2: float | None = None
     s2: float | None = None
-    thickness: float | None = None
+    thickness_m: float | None = None
     diameter_m: float | None = None
     shape: str | None = None
     frequencies: Real | None = None
@@ -456,19 +456,19 @@ class TransferMatrix(OwnsArrays):
         r = self.reflection_hard_backed(characteristic_impedance)
         return np.asarray(1.0 - np.abs(r) ** 2, dtype=np.float64)
 
-    def material_wavenumber(self, thickness: float) -> Complex:
+    def material_wavenumber(self, thickness_m: float) -> Complex:
         r"""Propagation wavenumber inside the material (ASTM E2611-19, Eq. (29)).
 
         :math:`k' = \arccos(T_{11}) / d` (complex ``arccos``).
 
-        :param thickness: Specimen thickness ``d``, in metres.
+        :param thickness_m: Specimen thickness ``d``, in metres.
         :return: Complex material wavenumber ``k'``, in reciprocal metres.
         """
-        if thickness <= 0.0:
-            msg = "'thickness' must be positive."
+        if thickness_m <= 0.0:
+            msg = "'thickness_m' must be positive."
             raise ValueError(msg)
         t11 = np.asarray(self.t11, dtype=np.complex128)
-        return np.asarray(np.arccos(t11) / thickness, dtype=np.complex128)
+        return np.asarray(np.arccos(t11) / thickness_m, dtype=np.complex128)
 
     def characteristic_impedance_material(self) -> Complex:
         r"""Characteristic impedance of the material (ASTM E2611-19, Eq. (30)).
@@ -551,7 +551,7 @@ class TransferMatrix(OwnsArrays):
         :class:`~matplotlib.axes.Axes`.
 
         :raises ValueError: If the matrix does not retain its tube geometry
-            (``l1``/``s1``/``l2``/``s2``/``thickness``).
+            (``l1``/``s1``/``l2``/``s2``/``thickness_m``).
         """
         from ..._i18n import check_language
         from ..._plot.geometry import plot_transfer_matrix_geometry
@@ -561,7 +561,7 @@ class TransferMatrix(OwnsArrays):
 
 
 def air_layer_transfer_matrix(
-    wavenumber: ArrayLike, thickness: float, characteristic_impedance: float
+    wavenumber: ArrayLike, thickness_m: float, characteristic_impedance: float
 ) -> TransferMatrix:
     r"""Analytic transfer matrix of a pure air layer of thickness ``d``.
 
@@ -575,17 +575,17 @@ def air_layer_transfer_matrix(
     :math:`T_{11} = T_{22}`).
 
     :param wavenumber: Air wavenumber ``k``.
-    :param thickness: Layer thickness ``d``, in metres.
+    :param thickness_m: Layer thickness ``d``, in metres.
     :param characteristic_impedance: Characteristic impedance ``rho c``, in rayls.
     :return: The air-layer :class:`TransferMatrix`.
     """
     require_positive(characteristic_impedance, "characteristic_impedance")
-    if thickness <= 0.0:
-        msg = "'thickness' must be positive."
+    if thickness_m <= 0.0:
+        msg = "'thickness_m' must be positive."
         raise ValueError(msg)
     rc = characteristic_impedance
     k = np.asarray(wavenumber, dtype=np.complex128)
-    kd = k * thickness
+    kd = k * thickness_m
     cos = np.asarray(np.cos(kd), dtype=np.complex128)
     sin = np.asarray(np.sin(kd), dtype=np.complex128)
     return TransferMatrix(
@@ -638,7 +638,7 @@ def _face_from_loads(
         c,
         d,
         wavenumber=wavenumber,
-        thickness=thickness,
+        thickness_m=thickness,
         characteristic_impedance=characteristic_impedance,
     )
 
@@ -675,7 +675,7 @@ def _measurement_context(
     s1: float,
     l2: float,
     s2: float,
-    thickness: float,
+    thickness_m: float,
     diameter_m: float | None,
     shape: str,
     frequencies: ArrayLike | None,
@@ -687,7 +687,7 @@ def _measurement_context(
         "s1": s1,
         "l2": l2,
         "s2": s2,
-        "thickness": thickness,
+        "thickness_m": thickness_m,
         "diameter_m": diameter_m,
         "shape": shape if diameter_m is not None else None,
         "frequencies": (
@@ -705,7 +705,7 @@ def transfer_matrix_two_load(
     s1: float,
     l2: float,
     s2: float,
-    thickness: float,
+    thickness_m: float,
     wavenumber: ArrayLike,
     characteristic_impedance: float,
     frequencies: ArrayLike | None = None,
@@ -734,7 +734,7 @@ def transfer_matrix_two_load(
     :param s1: Upstream microphone spacing ``s1``, in metres.
     :param l2: Downstream reference distance ``l2``, in metres.
     :param s2: Downstream microphone spacing ``s2``, in metres.
-    :param thickness: Specimen thickness ``d``, in metres.
+    :param thickness_m: Specimen thickness ``d``, in metres.
     :param wavenumber: Air wavenumber ``k``.
     :param characteristic_impedance: Characteristic impedance ``rho c``.
     :param frequencies: Optional frequency vector ``f``, in hertz, retained on
@@ -764,7 +764,7 @@ def transfer_matrix_two_load(
         s1=s1,
         l2=l2,
         s2=s2,
-        thickness=thickness,
+        thickness=thickness_m,
         wavenumber=wavenumber,
         characteristic_impedance=characteristic_impedance,
     )
@@ -775,7 +775,7 @@ def transfer_matrix_two_load(
         s1=s1,
         l2=l2,
         s2=s2,
-        thickness=thickness,
+        thickness=thickness_m,
         wavenumber=wavenumber,
         characteristic_impedance=characteristic_impedance,
     )
@@ -796,7 +796,7 @@ def transfer_matrix_two_load(
             s1=s1,
             l2=l2,
             s2=s2,
-            thickness=thickness,
+            thickness_m=thickness_m,
             diameter_m=diameter_m,
             shape=canonical,
             frequencies=frequencies,
@@ -812,7 +812,7 @@ def transfer_matrix_one_load(
     s1: float,
     l2: float,
     s2: float,
-    thickness: float,
+    thickness_m: float,
     wavenumber: ArrayLike,
     characteristic_impedance: float,
     frequencies: ArrayLike | None = None,
@@ -839,7 +839,7 @@ def transfer_matrix_one_load(
     :param s1: Upstream microphone spacing ``s1``, in metres.
     :param l2: Downstream reference distance ``l2``, in metres.
     :param s2: Downstream microphone spacing ``s2``, in metres.
-    :param thickness: Specimen thickness ``d``, in metres.
+    :param thickness_m: Specimen thickness ``d``, in metres.
     :param wavenumber: Air wavenumber ``k``.
     :param characteristic_impedance: Characteristic impedance ``rho c``.
     :param frequencies: Optional frequency vector ``f``, in hertz, retained on
@@ -869,7 +869,7 @@ def transfer_matrix_one_load(
         s1=s1,
         l2=l2,
         s2=s2,
-        thickness=thickness,
+        thickness=thickness_m,
         wavenumber=wavenumber,
         characteristic_impedance=characteristic_impedance,
     )
@@ -891,7 +891,7 @@ def transfer_matrix_one_load(
             s1=s1,
             l2=l2,
             s2=s2,
-            thickness=thickness,
+            thickness_m=thickness_m,
             diameter_m=diameter_m,
             shape=canonical,
             frequencies=frequencies,

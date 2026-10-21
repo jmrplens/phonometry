@@ -238,7 +238,7 @@ result = environment.road_source_power([
 segment = environment.line_source_segment_power(result.total_line_power, 20.0)  # a 20 m segment
 levels = environment.predicted_receiver_level(
     segment,
-    environment.PropagationGeometry(100.0, result.source_height, 4.0),
+    environment.PropagationGeometry(100.0, result.source_height_m, 4.0),
     frequencies=result.frequencies,
 )
 ```

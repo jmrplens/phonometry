@@ -251,7 +251,7 @@ x = (0.8 * np.cos(2.0 * np.pi * 997.0 * t)
      + 0.5 * np.cos(2.0 * np.pi * 1000.0 * t))
 
 res = signals.zoom_fft(x, fs, f_min=980.0, f_max=1016.0)     # malla a la resolución del registro
-print(res.bin_spacing)                   # 1.0 (fs/N por defecto)
+print(res.bin_spacing_hz)                   # 1.0 (fs/N por defecto)
 print(res.resolution_bandwidth)          # 1.5 (Be del registro con ventana)
 peak = res.amplitude.argmax()
 print(res.frequencies[peak], res.amplitude[peak])   # 997.0 0.8, el tono más fuerte

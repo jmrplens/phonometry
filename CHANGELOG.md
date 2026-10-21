@@ -3093,7 +3093,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   required, so building one by hand meant passing a private name. It is
   `database` now, left out of `repr()` and of comparisons as before; the
   notebook table, which shows every public field, names it in one row.
-  `AnpDatabase(aircraft, npd, distances, profiles, spectral_classes=None)` no
+  `AnpDatabase(aircraft, npd, distances_m, profiles, spectral_classes=None)` no
   longer takes `performance`, a record of the parser's own whose type nothing
   published: `load_anp_database` fills the performance tables an export
   carries, and a database built by hand flies fixed-point profiles, as one
@@ -3242,6 +3242,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `environment.RoadEmissionCoefficients.temperature_k`, the CNOSSOS-EU $K_m$
   in dB per °C whose `_k` read as kelvin, is
   `temperature_coefficient_db_per_c`.
+
+- **A length says whether it is in metres, millimetres or feet: thickness,
+  spacing and height carry their unit.** A thickness was metres on a layer and
+  millimetres on the catalogue row beside it, a spacing was metres between two
+  microphones and hertz between two spectral lines, a height was metres above
+  the ground and decibels on a coincidence plateau, and the ANP database the
+  aircraft package reads prints its noise-power-distance tables in feet; in
+  each case the bare name left the unit to the docstring. Every public
+  parameter and field that names one of them now ends in its unit:
+  `thickness_m` on the absorber layers, `TransferMatrix`,
+  `BarrierInsertionLoss` and every function that took `thickness`, with
+  `thickness1_m` and `thickness2_m` on the plate-junction functions,
+  `JunctionTransmissionResult` and `plot_junction_geometry`,
+  `wall_thickness_m`, `lining_thickness_m`, `plate_thickness_m`,
+  `splitter_thickness_m`, and `specimen_thickness_m` and `sample_thickness_m`
+  on `plot_dynamic_stiffness_rig` and `plot_impedance_tube_geometry`;
+  `spacing_m` on the intensity and impedance-tube functions and results;
+  `line_spacing_hz` on the ISO/PAS 20065 tone functions and
+  `ZoomFFTResult.bin_spacing_hz`; `source_height_m`, `receiver_height_m`,
+  `heights_m` and every other height in metres,
+  `height_fundamental_frequency(height_m=)` among them; `plateau_height_db` on
+  `plateau_transmission_loss` and `SoundReductionResult`; `distance_m`,
+  `distances_m` and their compounds throughout `aircraft`,
+  `NpdLevelResult.distances_m` and `RotorcraftEventResult.distances_m`
+  included; and `ReportMetadata.microphone_spacing_m` and
+  `ReportMetadata.thickness_m`. The old names are gone.
+  `npd_curve(query_distances_m=)`, `static_airflow_resistance(thickness_m=)`,
+  the `distance_m`, `spacing_m` and `source_height_m` fields of
+  `RotorcraftHemisphere`, `IntensityResult` and `RoadEmissionResult`, the
+  `thickness1_m` and `thickness2_m` that `JunctionTransmissionResult` keeps,
+  and the ISO 13472-1 `source_height_m` and `microphone_height_m` of
+  `geometric_spreading_factor`, `geometric_spreading_factor_angle` and
+  `InsituAbsorptionResult` are written by name, the `section` mapping of
+  `duct_path` takes `height_m`, and `TABLE_D1_QUANTITIES` lists
+  `thickness_m`.
+  `vertical_directivity(height=)` keeps its name, because it picks source A
+  or B and holds no length, and the catalogue rows keep `thickness_mm`.
+  `scripts/check_parameter_units.py` now holds thickness, spacing and height
+  to the rule everywhere, a numbered `thickness1` as much as a bare
+  `thickness`, and distance inside `aircraft`, where feet coexist with
+  metres, so a new bare one fails CI; the migration guide maps each old name
+  to the new one.
 
 - **phonometry installs on Python 3.12, and on the oldest NumPy, SciPy and
   extras it really works with.** `requires-python` drops from 3.13 to 3.12,

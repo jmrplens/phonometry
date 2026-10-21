@@ -352,7 +352,7 @@ def test_plateau_problem_311_mass_law_and_plateau_exactly() -> None:
     res = _brick_wall()
     np.testing.assert_allclose(res.transmission_loss[:3], P311_TL[:3], atol=0.05)
     assert res.model == "plateau"
-    assert res.plateau_height == 37.0
+    assert res.plateau_height_db == 37.0
 
 
 def test_plateau_problem_311_recovery_slope_is_exactly_10_db_per_octave() -> None:
@@ -415,7 +415,7 @@ def test_plateau_explicit_panel_matches_the_table() -> None:
     by_hand = building.plateau_transmission_loss(
         P311_BANDS,
         mass_per_area=2.10 * 110.0,
-        plateau_height=37.0,
+        plateau_height_db=37.0,
         frequency_ratio=4.5,
         fluid=NORTON_AIR,
     )
@@ -441,7 +441,7 @@ def test_plateau_construction_uses_every_column_of_the_named_row(
         thickness_mm=thickness_mm,
         fluid=NORTON_AIR,
     )
-    assert res.plateau_height == height
+    assert res.plateau_height_db == height
     assert res.plateau_end == pytest.approx(ratio * res.plateau_start, rel=1e-12)
     # Point A is where the field-incidence mass law of this row's surface
     # density reaches the plateau height, so the two must agree there.
@@ -549,20 +549,20 @@ def test_plateau_plot_shades_the_coincidence_plateau() -> None:
         ),
         ({"material": "brick"}, "give 'thickness_mm' with 'material'"),
         (
-            {"mass_per_area": 231.0, "plateau_height": 37.0},
+            {"mass_per_area": 231.0, "plateau_height_db": 37.0},
             "the plateau construction needs",
         ),
         (
-            {"mass_per_area": 231.0, "plateau_height": 37.0, "frequency_ratio": 1.0},
+            {"mass_per_area": 231.0, "plateau_height_db": 37.0, "frequency_ratio": 1.0},
             "'frequency_ratio' must be greater than",
         ),
         (
-            {"mass_per_area": -1.0, "plateau_height": 37.0, "frequency_ratio": 4.5},
+            {"mass_per_area": -1.0, "plateau_height_db": 37.0, "frequency_ratio": 4.5},
             "'mass_per_area' must be positive",
         ),
         (
-            {"mass_per_area": 231.0, "plateau_height": 0.0, "frequency_ratio": 4.5},
-            "'plateau_height' must be positive",
+            {"mass_per_area": 231.0, "plateau_height_db": 0.0, "frequency_ratio": 4.5},
+            "'plateau_height_db' must be positive",
         ),
     ],
 )
@@ -583,7 +583,7 @@ def test_plateau_rejects_a_height_that_underflows_point_a() -> None:
         building.plateau_transmission_loss(
             P311_BANDS,
             mass_per_area=231.0,
-            plateau_height=1e-300,
+            plateau_height_db=1e-300,
             frequency_ratio=4.5,
             field_correction=0.0,
         )
@@ -685,12 +685,12 @@ def test_plateau_takes_a_row_of_your_own_catalogue() -> None:
     by_hand = building.plateau_transmission_loss(
         P311_BANDS,
         mass_per_area=1.1 * 12.5,
-        plateau_height=29.0,
+        plateau_height_db=29.0,
         frequency_ratio=6.0,
         fluid=NORTON_AIR,
     )
     np.testing.assert_array_equal(by_row.transmission_loss, by_hand.transmission_loss)
-    assert by_row.plateau_height == 29.0
+    assert by_row.plateau_height_db == 29.0
     assert by_row.plateau_end == pytest.approx(6.0 * by_row.plateau_start, rel=1e-12)
 
 
@@ -722,26 +722,34 @@ def test_plateau_refuses_a_row_that_prints_a_bound_where_it_reads_a_number(
 _EXPLICIT_WITH_A_ROW = [
     pytest.param(
         "Declared board",
-        {"thickness_mm": 12.5, "plateau_height": 28.0},
-        {"mass_per_area": 0.8 * 12.5, "plateau_height": 28.0, "frequency_ratio": 7.0},
+        {"thickness_mm": 12.5, "plateau_height_db": 28.0},
+        {
+            "mass_per_area": 0.8 * 12.5,
+            "plateau_height_db": 28.0,
+            "frequency_ratio": 7.0,
+        },
         id="height",
     ),
     pytest.param(
         "Ratio-bound board",
         {"thickness_mm": 12.5, "frequency_ratio": 5.0},
-        {"mass_per_area": 1.0 * 12.5, "plateau_height": 31.0, "frequency_ratio": 5.0},
+        {
+            "mass_per_area": 1.0 * 12.5,
+            "plateau_height_db": 31.0,
+            "frequency_ratio": 5.0,
+        },
         id="frequency-ratio",
     ),
     pytest.param(
         "Density-bound board",
         {"thickness_mm": 12.5, "mass_per_area": 20.0},
-        {"mass_per_area": 20.0, "plateau_height": 27.0, "frequency_ratio": 5.0},
+        {"mass_per_area": 20.0, "plateau_height_db": 27.0, "frequency_ratio": 5.0},
         id="mass-per-area",
     ),
     pytest.param(
         "Density-bound board",
         {"mass_per_area": 20.0},
-        {"mass_per_area": 20.0, "plateau_height": 27.0, "frequency_ratio": 5.0},
+        {"mass_per_area": 20.0, "plateau_height_db": 27.0, "frequency_ratio": 5.0},
         id="mass-per-area-without-thickness",
     ),
 ]
@@ -766,7 +774,7 @@ def test_an_explicit_number_replaces_the_row_s_and_the_row_s_is_not_read(
         **by_hand,  # type: ignore[arg-type]
     )
     np.testing.assert_array_equal(res.transmission_loss, expected.transmission_loss)
-    assert res.plateau_height == by_hand["plateau_height"]
+    assert res.plateau_height_db == by_hand["plateau_height_db"]
     assert res.plateau_end == pytest.approx(
         by_hand["frequency_ratio"] * res.plateau_start, rel=1e-12
     )

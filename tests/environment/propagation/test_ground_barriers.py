@@ -308,7 +308,7 @@ def test_thick_barrier_attenuates_more_than_thin_screen() -> None:
         _BANDS, 1.0, 50.0, 4.0, 100.0, 1.5, method="exact"
     )
     thick = environment.barrier_insertion_loss(
-        _BANDS, 1.0, 50.0, 4.0, 100.0, 1.5, method="exact", thickness=4.0
+        _BANDS, 1.0, 50.0, 4.0, 100.0, 1.5, method="exact", thickness_m=4.0
     )
     # A thick barrier adds a second diffraction; IL is >= the thin screen.
     assert np.all(thick.insertion_loss >= thin.insertion_loss - 1e-6)
@@ -327,7 +327,7 @@ def test_thick_barrier_double_edge_fresnel_number_grows_with_width() -> None:
         100.0,
         1.5,
         method="kurze_anderson",
-        thickness=6.0,
+        thickness_m=6.0,
     )
     assert np.all(thick.fresnel_number > thin.fresnel_number)
 
@@ -499,7 +499,7 @@ def test_a_barrier_loss_covering_no_frequency_is_refused() -> None:
 def test_barrier_rejects_bad_geometry() -> None:
     with pytest.raises(
         ValueError,
-        match=r"'barrier_height' must exceed the source and receiver heights",
+        match=r"'barrier_height_m' must exceed the source and receiver heights",
     ):
         # barrier not taller than source/receiver -> no shadow.
         environment.barrier_insertion_loss(_BANDS, 2.0, 50.0, 1.5, 100.0, 1.0)
@@ -522,11 +522,11 @@ def test_barrier_rejects_bad_geometry() -> None:
         )  # type: ignore[arg-type]
     with pytest.raises(
         ValueError,
-        match=r"'receiver_distance' must exceed 'barrier_distance \+ thickness'",
+        match=r"'receiver_distance' must exceed 'barrier_distance \+ thickness_m'",
     ):
         # A thick barrier whose far edge lies at/beyond the receiver.
         environment.barrier_insertion_loss(
-            _BANDS, 1.0, 50.0, 4.0, 100.0, 1.5, method="exact", thickness=60.0
+            _BANDS, 1.0, 50.0, 4.0, 100.0, 1.5, method="exact", thickness_m=60.0
         )
     # The speed of sound is a property of the fluid now, and the fluid refuses a
     # non-positive one on construction, so the refusal happens before the call.
@@ -541,7 +541,7 @@ def test_barrier_rejects_bad_geometry() -> None:
         )
     for bad in (float("nan"), float("inf"), -1.0):
         # thickness NaN/inf/<=0 are all rejected (NaN slips past a bare <= 0).
-        with pytest.raises(ValueError, match=r"'thickness' must be positive"):
+        with pytest.raises(ValueError, match=r"'thickness_m' must be positive"):
             environment.barrier_insertion_loss(
                 _BANDS,
                 1.0,
@@ -550,7 +550,7 @@ def test_barrier_rejects_bad_geometry() -> None:
                 100.0,
                 1.5,
                 method="exact",
-                thickness=bad,
+                thickness_m=bad,
             )
 
 
@@ -563,9 +563,9 @@ def test_barrier_rejects_non_finite_geometry() -> None:
         environment.barrier_insertion_loss(_BANDS, 2.0, float("nan"), 4.0, 50.0, 1.5)
     with pytest.raises(ValueError, match="'receiver_distance' must be positive"):
         environment.barrier_insertion_loss(_BANDS, 2.0, 1.0, 4.0, float("nan"), 1.5)
-    with pytest.raises(ValueError, match="'barrier_height' must be finite"):
+    with pytest.raises(ValueError, match="'barrier_height_m' must be finite"):
         environment.barrier_insertion_loss(_BANDS, 2.0, 1.0, float("nan"), 50.0, 1.5)
-    with pytest.raises(ValueError, match="'source_height' must be finite"):
+    with pytest.raises(ValueError, match="'source_height_m' must be finite"):
         environment.barrier_insertion_loss(_BANDS, float("nan"), 1.0, 4.0, 50.0, 1.5)
-    with pytest.raises(ValueError, match="'receiver_height' must be finite"):
+    with pytest.raises(ValueError, match="'receiver_height_m' must be finite"):
         environment.barrier_insertion_loss(_BANDS, 2.0, 1.0, 4.0, 50.0, float("nan"))

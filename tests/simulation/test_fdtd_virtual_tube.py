@@ -129,7 +129,7 @@ def test_virtual_iso10534_recovers_analytic_absorption() -> None:
     result = two_microphone_impedance(
         h12,
         frequency=BAND,
-        spacing=spacing,
+        spacing_m=spacing,
         x1=x1,
         speed_of_sound=C0,
         characteristic_impedance=RHO0 * C0,
@@ -162,7 +162,7 @@ def test_virtual_iso10534_empty_tube_is_rigid() -> None:
     result = two_microphone_impedance(
         h12,
         frequency=BAND,
-        spacing=spacing,
+        spacing_m=spacing,
         x1=x1,
         speed_of_sound=C0,
         characteristic_impedance=RHO0 * C0,
@@ -202,7 +202,7 @@ def test_virtual_astm_one_load_recovers_layer_tl() -> None:
         s1=s1,
         l2=l2,
         s2=s2,
-        thickness=THICKNESS,
+        thickness_m=THICKNESS,
         wavenumber=k_air,
         characteristic_impedance=RHO0 * C0,
     )
@@ -240,7 +240,7 @@ def test_virtual_astm_empty_tube_tl_is_zero() -> None:
         s1=s1,
         l2=l2,
         s2=s2,
-        thickness=THICKNESS,
+        thickness_m=THICKNESS,
         wavenumber=k_air,
         characteristic_impedance=RHO0 * C0,
     )

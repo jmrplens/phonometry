@@ -54,7 +54,7 @@ _VALVE: dict[str, Any] = {
     "efficiency_correction": -3.8,
     "strouhal_number": 0.2,
 }
-_PIPE: dict[str, Any] = {"wall_thickness": 0.008, "density": 8000.0}
+_PIPE: dict[str, Any] = {"wall_thickness_m": 0.008, "density": 8000.0}
 
 #: The cage of A.2: six passages, each 0,00137 m² with a 0,181 m perimeter.
 _PASSAGE_AREA = 0.00137
@@ -104,7 +104,7 @@ _PRINTED_VENA_CONTRACTA = {
 #: at 11,1 kg/m3 and 408 m/s.
 _EXAMPLE_7_PIPE: dict[str, Any] = {
     "internal_diameter_m": 0.200,
-    "wall_thickness": 0.008,
+    "wall_thickness_m": 0.008,
     "valve_outlet_diameter_m": 0.200,
     "downstream_density": 11.1,
     "downstream_sound_speed": 408.0,
@@ -477,7 +477,7 @@ def _example_seven() -> ph.noise_control.AerodynamicValveNoise:
         ),
         ph.noise_control.DownstreamPipe(
             internal_diameter_m=case["diameter"],
-            wall_thickness=case["wall_thickness"],
+            wall_thickness_m=case["wall_thickness"],
             density=case["pipe_density"],
         ),
     )

@@ -259,7 +259,7 @@ class TestZoomFFTExactness:
     def test_default_grid_matches_the_record_resolution(self) -> None:
         fs = 1000.0
         res = signals.zoom_fft(np.ones(2000), fs, f_min=100.0, f_max=200.0)
-        assert res.bin_spacing == pytest.approx(fs / 2000.0)
+        assert res.bin_spacing_hz == pytest.approx(fs / 2000.0)
 
     def test_power_is_the_tone_mean_square(self) -> None:
         fs = 8192.0

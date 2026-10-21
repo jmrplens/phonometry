@@ -225,14 +225,14 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 MetadiffuserWell(
-    slit_height: float,
+    slit_height_m: float,
     resonators: tuple[HelmholtzResonator, ...],
 )
 ```
 
 One slit of a metadiffuser panel.
 
-`slit_height` is the slit opening `h_n` along the panel face and
+`slit_height_m` is the slit opening `h_n` along the panel face and
 `resonators` the Helmholtz resonators loading the slit, ordered from
 the panel face towards the rigid backing; the resonator lattice step is
 $a = L / M$ for a panel of depth `L` and `M` resonators. All

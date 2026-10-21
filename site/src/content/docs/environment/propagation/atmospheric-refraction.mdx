@@ -75,15 +75,15 @@ import numpy as np
 from phonometry import environment
 
 c0 = 340.0
-profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=c0, max_height=60.0)
+profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=c0, max_height_m=60.0)
 zs = 2.0
 fig, axes = plt.subplots(2, 1, figsize=(11, 8.2), sharex=True)
 
-rays = environment.atmospheric_ray_paths(profile, source_height=zs,
+rays = environment.atmospheric_ray_paths(profile, source_height_m=zs,
                                          launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                          max_range=600.0, n_steps=3000)
-for i in range(rays.heights.shape[0]):
-    axes[0].plot(rays.ranges[i], rays.heights[i], color="#1f77b4", lw=0.8, alpha=0.7)
+for i in range(rays.heights_m.shape[0]):
+    axes[0].plot(rays.ranges[i], rays.heights_m[i], color="#1f77b4", lw=0.8, alpha=0.7)
 axes[0].plot([0.0], [zs], "o", color="#d62728", label="Source")
 grad = (profile.speed_at(10.0) - c0) / 10.0
 x_sh = environment.shadow_zone_distance(float(grad), zs, zs, ground_speed=c0)
@@ -96,12 +96,12 @@ with warnings.catch_warnings():
     # impedance model below its published fit range, as every outdoor ground
     # does (see "Choosing the ground impedance" in the ground-effect guide).
     warnings.simplefilter("ignore")
-    pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height=zs,
+    pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height_m=zs,
                                                     flow_resistivity=200e3,
-                                                    max_range=600.0, max_height=40.0)
+                                                    max_range=600.0, max_height_m=40.0)
 img = axes[1].imshow(pe.relative_level, cmap="RdBu_r", vmin=-30, vmax=6,
                      aspect="auto", origin="lower", interpolation="bilinear",
-                     extent=(pe.ranges[0], pe.ranges[-1], pe.heights[0], pe.heights[-1]))
+                     extent=(pe.ranges[0], pe.ranges[-1], pe.heights_m[0], pe.heights_m[-1]))
 axes[1].axvline(x_sh, color="k", ls="--")
 axes[1].set(ylabel="Height [m]", xlabel="Range [m]", ylim=(0, 40),
             title="GFPE relative sound level")
@@ -197,8 +197,8 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 # The two canonical surface layers of Salomons Eq. 4.5 over grassland.
-down = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0, max_height=60.0)
-up = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0, max_height=60.0)
+down = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0, max_height_m=60.0)
+up = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0, max_height_m=60.0)
 ax = down.plot(color="#1f77b4")
 up.plot(ax=ax, color="#d62728")
 plt.show()
@@ -219,7 +219,7 @@ import numpy as np
 from phonometry import environment
 
 profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)
-rays = environment.atmospheric_ray_paths(profile, source_height=2.0,
+rays = environment.atmospheric_ray_paths(profile, source_height_m=2.0,
                                          launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                          max_range=600.0)
 rays.turning_points      # turning points per ray
@@ -248,7 +248,7 @@ from phonometry import environment
 
 # Downward refraction: the favourable-propagation mirror of the shadow case.
 profile = environment.log_linear_sound_speed_profile(+1.0, ground_speed=340.0)
-rays = environment.atmospheric_ray_paths(profile, source_height=2.0,
+rays = environment.atmospheric_ray_paths(profile, source_height_m=2.0,
                                          launch_angles_deg=np.linspace(-8.0, 8.0, 17),
                                          max_range=600.0, n_steps=600)
 rays.plot()   # shallow rays return to the ground and bounce on down-range
@@ -342,9 +342,9 @@ free field) over the whole range-height plane.
 from phonometry import environment
 
 profile = environment.log_linear_sound_speed_profile(-1.0, ground_speed=340.0)  # upward
-pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height=2.0,
+pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height_m=2.0,
                                                 flow_resistivity=200e3,  # grassland
-                                                max_range=600.0, max_height=40.0)
+                                                max_range=600.0, max_height_m=40.0)
 pe.level_at_height(2.0)   # relative level vs range at 2 m
 pe.plot()                 # the range-height relative-level field (needs matplotlib)
 ```
@@ -382,9 +382,9 @@ with warnings.catch_warnings():
     # does (see "Choosing the ground impedance" in the ground-effect guide).
     warnings.simplefilter("ignore")
     for profile, label in cases:
-        pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height=2.0,
+        pe = environment.atmospheric_parabolic_equation(400.0, profile, source_height_m=2.0,
                                                         flow_resistivity=200e3,
-                                                        max_range=600.0, max_height=40.0)
+                                                        max_range=600.0, max_height_m=40.0)
         ax.plot(pe.ranges, pe.level_at_height(2.0), label=label)
 # The closed-form boundary of the equivalent linear upward gradient_per_s (its
 # 10 m mean), the dotted line of the figure.
@@ -466,12 +466,12 @@ import numpy as np
 # imported by the snippets above. A rigid ground needs no porous model, so
 # this case raises no warning at all.
 c0, freq, zs = 343.0, 500.0, 2.0
-flat = environment.linear_sound_speed_profile(1e-12, ground_speed=c0, max_height=200.0)
+flat = environment.linear_sound_speed_profile(1e-12, ground_speed=c0, max_height_m=200.0)
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
-    pe = environment.atmospheric_parabolic_equation(freq, flat, source_height=zs,
+    pe = environment.atmospheric_parabolic_equation(freq, flat, source_height_m=zs,
                                                     impedance=1e6 + 0j, max_range=520.0,
-                                                    max_height=150.0)
+                                                    max_height_m=150.0)
 ranges = np.asarray(pe.ranges)
 solver = np.asarray(pe.level_at_height(zs))
 k = 2.0 * np.pi * freq / c0

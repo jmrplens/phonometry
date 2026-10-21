@@ -49,7 +49,7 @@ mixes two methods and is a convenience, not a normative chain.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, fields
+from dataclasses import KW_ONLY, dataclass, fields
 from enum import Enum
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
@@ -921,7 +921,7 @@ class RoadEmissionResult(OwnsArrays):
         re 1 pW per metre.
     :ivar total_line_power: The energy sum of ``line_power`` over the
         categories, in dB re 1 pW per metre: the source strength of the line.
-    :ivar source_height: Height of the equivalent point source above the road
+    :ivar source_height_m: Height of the equivalent point source above the road
         surface, in m (0,05 m, fixed by 2.2.1).
     """
 
@@ -932,7 +932,8 @@ class RoadEmissionResult(OwnsArrays):
     vehicle_power: NDArray[np.float64]
     line_power: NDArray[np.float64]
     total_line_power: NDArray[np.float64]
-    source_height: float = ROAD_SOURCE_HEIGHT_M
+    _: KW_ONLY
+    source_height_m: float = ROAD_SOURCE_HEIGHT_M
 
     def __post_init__(self) -> None:
         """Reject an emission whose categories and bands do not line up.

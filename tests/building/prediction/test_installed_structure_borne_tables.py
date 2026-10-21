@@ -30,9 +30,9 @@ from phonometry.vibration.structural.point_mobility import infinite_plate_mobili
 _TABLE_D1_COLUMN_TWO = {
     "mass": ("mass",),
     "bar_end": ("density", "longitudinal_velocity", "area"),
-    "beam": ("density", "longitudinal_velocity", "thickness", "width"),
-    "plate": ("density", "longitudinal_velocity", "thickness"),
-    "pipe": ("density", "longitudinal_velocity", "thickness", "radius"),
+    "beam": ("density", "longitudinal_velocity", "thickness_m", "width"),
+    "plate": ("density", "longitudinal_velocity", "thickness_m"),
+    "pipe": ("density", "longitudinal_velocity", "thickness_m", "radius"),
     "mass_spring": ("mass", "stiffness", "loss_factor"),
 }
 
@@ -71,7 +71,7 @@ def test_table_d1_beam_row() -> None:
         frequency=250.0,
         density=600.0,
         longitudinal_velocity=4400.0,
-        thickness=0.08,
+        thickness_m=0.08,
         width=0.12,
     ) == pytest.approx(7.700564949552747e-05)
 
@@ -79,7 +79,7 @@ def test_table_d1_beam_row() -> None:
 def test_table_d1_plate_row() -> None:
     """Row "Plate": |Y| = [2,3 cL rho t^2]^-1, for a 140 mm concrete slab."""
     assert building.typical_element_mobility(
-        "plate", density=2300.0, longitudinal_velocity=3800.0, thickness=0.14
+        "plate", density=2300.0, longitudinal_velocity=3800.0, thickness_m=0.14
     ) == pytest.approx(2.5380762194441e-06)
 
 
@@ -90,7 +90,7 @@ def test_table_d1_pipe_row() -> None:
         frequency=500.0,
         density=7800.0,
         longitudinal_velocity=5100.0,
-        thickness=0.003,
+        thickness_m=0.003,
         radius=0.05,
     ) == pytest.approx(3.799430427426427e-05)
 
@@ -166,7 +166,7 @@ def test_plate_row_is_formula_f4_in_other_symbols() -> None:
     formula_f4 = infinite_plate_mobility(bending, rho * t)
     table_d1 = float(
         building.typical_element_mobility(
-            "plate", density=rho, longitudinal_velocity=c_l, thickness=t
+            "plate", density=rho, longitudinal_velocity=c_l, thickness_m=t
         )
     )
     assert table_d1 == pytest.approx(float(np.real(formula_f4)), rel=5e-3)
@@ -197,7 +197,7 @@ def test_table_d1_names_the_missing_describing_quantity() -> None:
     with pytest.raises(
         ValueError, match=r"Table D\.1 row 'plate' .* missing longitudinal_velocity"
     ):
-        building.typical_element_mobility("plate", density=2300.0, thickness=0.14)
+        building.typical_element_mobility("plate", density=2300.0, thickness_m=0.14)
 
 
 def test_frequency_independent_rows_reject_a_frequency() -> None:
@@ -211,7 +211,7 @@ def test_frequency_independent_rows_reject_a_frequency() -> None:
             frequency=125.0,
             density=2300.0,
             longitudinal_velocity=3800.0,
-            thickness=0.14,
+            thickness_m=0.14,
         )
 
 

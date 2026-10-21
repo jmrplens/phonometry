@@ -348,7 +348,7 @@ def test_section_declares_the_plane_wave_limit() -> None:
             OCTAVE_BANDS,
             FAN_LW,
             elements,
-            section={"width": 0.9144, "height": 0.6096},
+            section={"width": 0.9144, "height_m": 0.6096},
             flow_velocity=8.0,
             label="Supply",
         )

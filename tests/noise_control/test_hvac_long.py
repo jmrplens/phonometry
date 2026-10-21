@@ -467,7 +467,7 @@ def test_splitter_silencer_combines_by_eq_8_241() -> None:
     [
         ((None, 0.6, 1.5, [], 0.2), r"'airway_widths' must be a non-empty"),
         ((None, 0.6, 1.5, [0.1, 0.0], 0.2), r"'airway_widths' must be positive"),
-        ((None, 0.6, 1.5, 0.1, 0.0), r"'splitter_thickness' must be positive"),
+        ((None, 0.6, 1.5, 0.1, 0.0), r"'splitter_thickness_m' must be positive"),
     ],
 )
 def test_splitter_silencer_validation(args: tuple[object, ...], match: str) -> None:

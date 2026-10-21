@@ -355,7 +355,7 @@ seg = building.radiated_sound_power(
 print(round(seg.l_w[0], 1), round(seg.l_w[1], 1))     # 59.8 61.2  (LW at 63/125 Hz)
 
 # Exterior level 5 m in front of the centre of the 60×10 m side (LWA = 62.9 dB(A)).
-a_tot = building.outdoor_attenuation(width=60.0, height=10.0, distance=5.0)
+a_tot = building.outdoor_attenuation(width=60.0, height_m=10.0, distance=5.0)
 print(round(a_tot, 1), round(building.outdoor_level(62.9, a_tot), 1))   # 26.3 36.6
 
 seg.plot()   # radiated LW per octave with the A-weighted LWA line (needs matplotlib)

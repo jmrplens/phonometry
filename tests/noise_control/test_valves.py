@@ -45,7 +45,7 @@ VALVE: dict[str, Any] = {
     "efficiency_correction": EFFICIENCY_CORRECTION,
     "strouhal_number": STROUHAL,
 }
-PIPE: dict[str, Any] = {"wall_thickness": 0.008, "density": 8000.0}
+PIPE: dict[str, Any] = {"wall_thickness_m": 0.008, "density": 8000.0}
 
 #: The per-example given data of Table A.1, and the regime each one lands in.
 EXAMPLES = [
@@ -358,7 +358,7 @@ class TestPipeTransmission:
 
     PIPE = {
         "internal_diameter_m": 0.200,
-        "wall_thickness": 0.008,
+        "wall_thickness_m": 0.008,
         "valve_outlet_diameter_m": 0.200,
         "downstream_density": 11.1,
         "downstream_sound_speed": 408.0,
@@ -440,9 +440,9 @@ class TestPipeTransmission:
     def test_it_refuses_a_wall_thickness_that_is_not_a_thickness(
         self, bad: float
     ) -> None:
-        with pytest.raises(ValueError, match="wall_thickness"):
+        with pytest.raises(ValueError, match="wall_thickness_m"):
             valves.pipe_transmission_loss(
-                np.array([1000.0]), **{**self.PIPE, "wall_thickness": bad}
+                np.array([1000.0]), **{**self.PIPE, "wall_thickness_m": bad}
             )
 
 
@@ -497,7 +497,7 @@ class TestWholeChain:
                 outlet_diameter_m=0.1,
             ),
             valves.DownstreamPipe(
-                **{**PIPE, "wall_thickness": 0.004}, internal_diameter_m=0.2031
+                **{**PIPE, "wall_thickness_m": 0.004}, internal_diameter_m=0.2031
             ),
         )
         assert thin.external_level > _run(1).external_level
@@ -741,7 +741,7 @@ EXAMPLE_7 = {
     "hydraulic_diameter": 0.0025,
     "last_stage_recovery": 0.98,
     "diameter": 0.200,
-    "wall_thickness": 0.008,
+    "wall_thickness_m": 0.008,
     "pipe_density": 8000.0,
     # Table 4's "Globe, multihole drilled plug or cage, to open"; the annex
     # takes the Strouhal number at the bottom of the 0,1 to 0,3 range 5.4.2
@@ -787,7 +787,7 @@ def _example_seven() -> valves.AerodynamicValveNoise:
         ),
         valves.DownstreamPipe(
             internal_diameter_m=case["diameter"],
-            wall_thickness=case["wall_thickness"],
+            wall_thickness_m=case["wall_thickness_m"],
             density=case["pipe_density"],
         ),
     )

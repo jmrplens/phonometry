@@ -210,8 +210,8 @@ DEFAULT_FREQUENCIES_HZ = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 800
 
 ```python
 directivity_omega(
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     projected_distance: float,
 ) -> float
 ```
@@ -229,8 +229,8 @@ $$
 
 | Name | Description |
 | :--- | :--- |
-| `source_height` | Source height `hs`, in metres. |
-| `receiver_height` | Receiver height `hr`, in metres. |
+| `source_height_m` | Source height `hs`, in metres. |
+| `receiver_height_m` | Receiver height `hr`, in metres. |
 | `projected_distance` | Ground-plane projected distance `dp`, in metres. |
 
 **Returns:** `DOmega`, in decibels (0 to ~3 dB).
@@ -292,8 +292,8 @@ reference distance $d_0 = 1$ m from an omnidirectional point source
 ```python
 ground_attenuation(
     distance: float,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
     ground_source: float = 0.0,
     ground_middle: float = 0.0,
@@ -327,8 +327,8 @@ with $A_\mathrm{m} = -3q$ at 63 Hz and $A_\mathrm{m} = -3q(1 - G_\mathrm{m})$ ab
 | Name | Description |
 | :--- | :--- |
 | `distance` | Straight-line source-to-receiver distance `d`, in metres. |
-| `source_height` | Source height `hs` above ground, in metres. |
-| `receiver_height` | Receiver height `hr` above ground, in metres. |
+| `source_height_m` | Source height `hs` above ground, in metres. |
+| `receiver_height_m` | Receiver height `hr` above ground, in metres. |
 | `frequencies` | Octave-band midband frequencies, in hertz. Table 3 is defined for the eight nominal octave bands 63 Hz-8 kHz only; any other requested frequency is snapped to the nearest nominal octave band for the Table 3 lookup. |
 | `ground_source` | Ground factor `Gs` of the source region ([0, 1]). |
 | `ground_middle` | Ground factor `Gm` of the middle region ([0, 1]). |
@@ -346,7 +346,10 @@ with $A_\mathrm{m} = -3q$ at 63 Hz and $A_\mathrm{m} = -3q(1 - G_\mathrm{m})$ ab
 ## ground_attenuation_alternative
 
 ```python
-ground_attenuation_alternative(distance: float, mean_height: float) -> float
+ground_attenuation_alternative(
+    distance: float,
+    mean_height_m: float,
+) -> float
 ```
 
 Ground attenuation by the alternative A-weighted method (7.3.2, Eq. (10)).
@@ -367,7 +370,7 @@ solid-angle index [`directivity_omega`](/phonometry/reference/api/environment/ou
 | Name | Description |
 | :--- | :--- |
 | `distance` | Source-to-receiver distance `d`, in metres. |
-| `mean_height` | Mean height `hm` of the propagation path above the ground ($h_\mathrm{m} = F/d$, figure 3), in metres. |
+| `mean_height_m` | Mean height `hm` of the propagation path above the ground ($h_\mathrm{m} = F/d$, figure 3), in metres. |
 
 **Returns:** `Agr`, in decibels (>= 0).
 
@@ -407,9 +410,9 @@ trees, farmland). The default is hard ground throughout.
 ```python
 mean_path_height(
     profile_distances: ArrayLike,
-    profile_heights: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    profile_heights_m: ArrayLike,
+    source_height_m: float,
+    receiver_height_m: float,
     distance: float | None = None,
 ) -> float
 ```
@@ -433,9 +436,9 @@ difference the slant distance is built from.
 | Name | Description |
 | :--- | :--- |
 | `profile_distances` | Ground-projected distance of each profile point from the source, in metres, strictly increasing. |
-| `profile_heights` | Ground height at each profile point, in metres, on any one datum (only differences are used). |
-| `source_height` | Source height `hs` above the ground at the first profile point, in metres. |
-| `receiver_height` | Receiver height `hr` above the ground at the last profile point, in metres. |
+| `profile_heights_m` | Ground height at each profile point, in metres, on any one datum (only differences are used). |
+| `source_height_m` | Source height `hs` above the ground at the first profile point, in metres. |
+| `receiver_height_m` | Receiver height `hr` above the ground at the last profile point, in metres. |
 | `distance` | Source-to-receiver distance `d` to divide the area by, in metres; `None` takes the slant distance the profile implies. |
 
 **Returns:** `hm`, in metres.
@@ -444,7 +447,7 @@ difference the slant distance is built from.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If the two sequences disagree in length, describe fewer than two points, the distances are not strictly increasing, `source_height` or `receiver_height` is negative or not finite, or `distance` is not positive and finite. The profile heights themselves are unrestricted: they are read on any datum, so a ground below it is a negative number rather than a mistake. |
+| ValueError | If the two sequences disagree in length, describe fewer than two points, the distances are not strictly increasing, `source_height_m` or `receiver_height_m` is negative or not finite, or `distance` is not positive and finite. The profile heights themselves are unrestricted: they are read on any datum, so a ground below it is a negative number rather than a mistake. |
 
 :::note
 Ground rising above the ray subtracts from `F`, exactly as the area of
@@ -458,8 +461,8 @@ $A_\mathrm{bar}$ of 7.4.
 ```python
 meteorological_correction(
     projected_distance: float,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     c0: float,
 ) -> float
 ```
@@ -483,8 +486,8 @@ long-term average level (Eq. (6)).
 | Name | Description |
 | :--- | :--- |
 | `projected_distance` | Ground-plane projected distance `dp`, in metres. |
-| `source_height` | Source height `hs`, in metres. |
-| `receiver_height` | Receiver height `hr`, in metres. |
+| `source_height_m` | Source height `hs`, in metres. |
+| `receiver_height_m` | Receiver height `hr`, in metres. |
 | `c0` | Meteorological factor `C0`, in decibels. |
 
 **Returns:** `Cmet`, in decibels (>= 0 for $C_0 \ge 0$).
@@ -494,8 +497,8 @@ long-term average level (Eq. (6)).
 ```python
 outdoor_propagation_attenuation(
     distance: float,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     *,
     frequencies: ArrayLike = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0),
     ground_source: float = 0.0,
@@ -525,8 +528,8 @@ barrier $A_\mathrm{bar} = D_z$
 | Name | Description |
 | :--- | :--- |
 | `distance` | Straight-line source-to-receiver distance `d`, in metres. |
-| `source_height` | Source height `hs` above ground, in metres. |
-| `receiver_height` | Receiver height `hr` above ground, in metres. |
+| `source_height_m` | Source height `hs` above ground, in metres. |
+| `receiver_height_m` | Receiver height `hr` above ground, in metres. |
 | `frequencies` | Octave-band midband frequencies, in hertz. The ground term snaps each frequency to the nearest nominal octave band (Table 3 is octave-band only) and the atmospheric term evaluates the exact base-10 midband behind it (see [`atmospheric_absorption`](/phonometry/reference/api/environment/outdoor-propagation/#atmospheric_absorption)). |
 | `ground_source` | Ground factor `Gs` of the source region ([0, 1], 0 = hard, 1 = porous). |
 | `ground_middle` | Ground factor `Gm` of the middle region ([0, 1]). |
@@ -697,8 +700,8 @@ convenience.
 ```python
 PropagationGeometry(
     distance: float,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
     projected_distance: float | None = None,
 )
 ```
@@ -715,8 +718,8 @@ meteorological correction of clause 8 are written in.
 | Name | Description |
 | :--- | :--- |
 | `distance` | Straight-line source-to-receiver distance `d`, in metres. |
-| `source_height` | Source height `hs` above ground, in metres. |
-| `receiver_height` | Receiver height `hr` above ground, in metres. |
+| `source_height_m` | Source height `hs` above ground, in metres. |
+| `receiver_height_m` | Receiver height `hr` above ground, in metres. |
 | `projected_distance` | Ground-plane projected distance `dp`, in metres; `None` defaults to $\sqrt{d^2 - (h_\mathrm{s} - h_\mathrm{r})^2}$. |
 
 ## region_ground_factors
@@ -725,8 +728,8 @@ meteorological correction of clause 8 are written in.
 region_ground_factors(
     segment_lengths: ArrayLike,
     segment_ground_factors: ArrayLike,
-    source_height: float,
-    receiver_height: float,
+    source_height_m: float,
+    receiver_height_m: float,
 ) -> GroundFactors
 ```
 
@@ -751,8 +754,8 @@ the source.
 | :--- | :--- |
 | `segment_lengths` | Length of each segment of the ground projection, in metres, ordered from the source; each must be positive. |
 | `segment_ground_factors` | Ground factor `G` of each segment ([0, 1]), aligned with `segment_lengths`. |
-| `source_height` | Source height `hs` above ground, in metres. |
-| `receiver_height` | Receiver height `hr` above ground, in metres. |
+| `source_height_m` | Source height `hs` above ground, in metres. |
+| `receiver_height_m` | Receiver height `hr` above ground, in metres. |
 
 **Returns:** The [`GroundFactors`](/phonometry/reference/api/environment/outdoor-propagation/#groundfactors) of the source, middle and receiver regions.
 

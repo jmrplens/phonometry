@@ -22,10 +22,12 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
-from ._core import _solid_in_field
+from ._core import _host, _solid_in_field
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from phonometry.simulation import Compute
 
 
 @lru_cache(maxsize=1)
@@ -44,6 +46,7 @@ def _meshed_metadiffuser_ntff_levels() -> tuple[Any, Any]:
     """
     from phonometry.simulation import (
         FDTD2D,
+        Compute,
         CWSource,
         PlaneWaveSource,
         far_field_from_contour,
@@ -80,7 +83,13 @@ def _meshed_metadiffuser_ntff_levels() -> tuple[Any, Any]:
     # cfl 0.9 trims the step count; at 340 cells per wavelength the
     # numerical dispersion is negligible at any stable Courant number.
     sim = FDTD2D(
-        343.0, dx, shape=(ny, nx), sponge_width=sponge, cfl=0.9, obstacle_mask=mask
+        343.0,
+        dx,
+        shape=(ny, nx),
+        sponge_width=sponge,
+        cfl=0.9,
+        obstacle_mask=mask,
+        compute=Compute(),
     )
     sim.add_source(
         PlaneWaveSource(
@@ -221,49 +230,81 @@ def _meta_taper() -> NDArray[np.float64]:
 _META_FRAMES = 600  # 6.13 ms / 10.2 us per frame (49 frames per period)
 
 
-def _meta_pair_worker(kind: str, n_frames: int) -> tuple[Any, Any, Any]:
-    """One panel run in lockstep with its own free-field reference.
+def _meta_pair(
+    kind: str, n_frames: int, compute: Compute
+) -> tuple[NDArray[np.float32], NDArray[np.float32], NDArray[np.float64]]:
+    """One panel stepped in lockstep with its own free-field reference.
 
-    Each worker process pays for its private incident-field run, but the
-    three workers advance in parallel, so the wall time of the cached
-    field computation is about two simulations instead of four.
+    The trail is ``|p_kind - p_ref|`` at the same step, above the panel face,
+    kept as a running maximum that halves every 1.5 ms. It is computed on
+    whichever device the pair steps on, every step, and only the captured
+    frames come back to the host.
     """
-    import fdtd2d
+    from phonometry.simulation import FDTD2D
 
     c0, dx = 343.0, _META_DX
-    y1 = _META_FACE
     lam0 = c0 / _META_F0
     # Duration rule: full flight source -> deepest well bottom -> top of
     # the visible frame, (0.714 + 1.034) m / c * 1.2 = 6.12 ms, sampled at
     # four times the 12 frames-per-period visual floor (49/period at 2 kHz).
     every = 33
+    taper = _meta_taper()
     sims = []
     for rho in (_meta_rho(kind), _meta_rho("ref")):
-        sim = fdtd2d.FDTD2D(
-            c0, dx, rho=rho, shape=(_META_NY, _META_NX), sponge_width=200
+        sim = FDTD2D(
+            c0,
+            dx,
+            rho=rho,
+            shape=(_META_NY, _META_NX),
+            sponge_width=200,
+            compute=compute,
         )
         sim.add_plane_wave("up", center=0.80, width=0.05, wavelength=lam0)
-        taper = _meta_taper()
-        sim.p *= taper[np.newaxis, :]
-        sim.vy *= taper[np.newaxis, :]
+        lateral = sim._backend.asarray(taper[np.newaxis, :])
+        sim.p *= lateral
+        sim.vy *= lateral
         sims.append(sim)
+    backend = sims[0]._backend
+    xp = backend.xp
     decay = float(2.0 ** (-sims[0].dt / 0.0015))
-    face_row = round(y1 / dx)
-    trail = np.zeros_like(sims[0].p)
-    tot_frames: list[Any] = []
-    trail_frames: list[Any] = []
+    face_row = round(_META_FACE / dx)
+    trail = backend.zeros(tuple(sims[0].p.shape))
+    tot_frames: list[NDArray[np.float32]] = []
+    trail_frames: list[NDArray[np.float32]] = []
     ts: list[float] = []
     for _ in range(every * n_frames):
         for sim in sims:
             sim.step()
         scat = sims[0].p - sims[1].p
         scat[:face_row, :] = 0.0
-        np.maximum(trail * decay, np.abs(scat), out=trail)
+        trail = xp.maximum(trail * decay, xp.abs(scat))
         if sims[0].n % every == 0 and len(ts) < n_frames:
-            tot_frames.append(sims[0].p[::20, ::20].astype(np.float32))
-            trail_frames.append(trail[::20, ::20].astype(np.float32))
+            tot_frames.append(_host(sims[0], sims[0].p[::20, ::20]))
+            trail_frames.append(_host(sims[0], trail[::20, ::20]))
             ts.append(sims[0].time)
     return np.stack(tot_frames), np.stack(trail_frames), np.asarray(ts)
+
+
+#: The RAM one float64 lockstep pair holds while it steps: 24 grids of
+#: _META_NY x _META_NX doubles (ten per engine, the trail and three per-step
+#: temporaries), the count the GPU node's memory measurement found, 5.9 GB.
+_META_PAIR_BYTES = 24 * _META_NY * _META_NX * 8
+
+#: Room above that for the interpreter, the captured frames and the spread
+#: of a process's peak around its arrays.
+_META_PAIR_MARGIN = 1.25
+
+
+def _meta_workers(available: int | None) -> int:
+    """How many pairs step side by side in *available* bytes of RAM: one to three.
+
+    Three side by side want about 18 GB; where less is free they step two or
+    one at a time, which gives the same fields more slowly. Unknown memory
+    (off Linux) keeps the three.
+    """
+    if available is None:
+        return 3
+    return max(1, min(3, int(available // (_META_PAIR_BYTES * _META_PAIR_MARGIN))))
 
 
 @lru_cache(maxsize=1)
@@ -275,88 +316,44 @@ def _metadiffuser_fields(
     A 1.6 m x 1.2 m free-field box at dx = 0.25 mm, fine enough to mesh the
     real millimetre slits, necks and cavities of the Table-1 metadiffuser
     (density contrast 1e6:1 builds the panels). Each panel (flat control
-    with the metadiffuser's silhouette, deep QRD, metadiffuser) advances
-    in lockstep with a free-field reference inside its own worker process,
-    so ``total - incident`` is exact; a downgoing carrier packet at the
-    2 kHz evaluation frequency plays the goniometer source. Returns the total
-    frame stacks, the fading scattered-envelope trails [dB] and the frame
-    times. The quantitative far-field comparison lives in the companion
-    polar figure; this clip shows the near fields of the meshed panels.
+    with the metadiffuser's silhouette, deep QRD, metadiffuser) advances in
+    lockstep with a free-field reference, so ``total - incident`` is exact at
+    every step: on NumPy the pairs run side by side in worker processes as
+    far as the RAM holds them (about 5.9 GB each), else one after another,
+    and on a GPU one after another; the fields are the same either way. A
+    downgoing carrier packet at the 2 kHz evaluation frequency plays the
+    goniometer source. Returns the total frame stacks, the fading
+    scattered-envelope trails [dB] and the frame times. The quantitative
+    far-field comparison lives in the companion polar figure; this clip shows
+    the near fields of the meshed panels.
     """
-    import multiprocessing as mp
+    import clip_placement
 
-    tot, trail, times = None, None, None
-    try:
-        # The GPU host of .env turns the half-hour CPU computation into a
-        # couple of minutes (the runner falls back by itself, but the CPU
-        # pool below is faster than its single-process local mode).
-        import fdtd_gpu_remote
+    compute = clip_placement.compute_for("anim_fdtd_metadiffuser")
+    kinds = ("flat", "qrd", "meta")
+    workers = (
+        _meta_workers(clip_placement.host_bytes()) if compute.device == "cpu" else 1
+    )
+    if workers > 1:
+        import multiprocessing as mp
 
-        fdtd_gpu_remote.load_env()
-        config = fdtd_gpu_remote.RemoteConfig.from_env()
-        use_gpu = bool(config.host) and fdtd_gpu_remote.remote_available(config)
-    except (ImportError, OSError, ValueError):
-        use_gpu = False
-    if use_gpu:
-        import fdtd2d
-
-        # Same duration rule as the CPU worker: 6.12 ms at 49 frames/period.
-        every = 33
-        stride = 20
-        dt = fdtd2d.FDTD2D(343.0, _META_DX, shape=(4, 8)).dt
-        sample_steps = [every * k for k in range(1, n_frames + 1)]
-        lam0 = 343.0 / _META_F0
-        frames: dict[str, Any] = {}
-        for kind in ("flat", "qrd", "meta", "ref"):
-            job = fdtd_gpu_remote.build_job(
-                343.0,
-                _META_DX,
-                steps=every * n_frames,
-                sample_steps=sample_steps,
-                shape=(_META_NY, _META_NX),
-                rho=_meta_rho(kind),
-                sponge_width=200,
-                plane_waves=[
-                    {
-                        "direction": "up",
-                        "center": 0.80,
-                        "width": 0.05,
-                        "wavelength": lam0,
-                    }
-                ],
-                init_scale_x=_meta_taper(),
-                sample_stride=stride,
-                sample_dtype="float32",
-            )
-            # The four 19 800-step field jobs run ~10-12 min each on the
-            # GPU host; give each submit an hour before falling back.
-            frames[kind] = fdtd_gpu_remote.submit(job, config, timeout=3600.0)["frames"]
-        face_row = round(_META_FACE / _META_DX) // stride
-        decay = float(2.0 ** (-(every * dt) / 0.0015))
-        tot_list, trail_list = [], []
-        for kind in ("flat", "qrd", "meta"):
-            scat = frames[kind] - frames["ref"]
-            scat[:, :face_row, :] = 0.0
-            running = np.zeros_like(scat[0])
-            history = np.empty_like(scat)
-            for k in range(scat.shape[0]):
-                np.maximum(running * decay, np.abs(scat[k]), out=running)
-                history[k] = running
-            tot_list.append(frames[kind].astype(np.float32))
-            trail_list.append(history)
-        tot = np.stack(tot_list)
-        trail = np.stack(trail_list)
-        times = np.asarray(sample_steps, dtype=np.float64) * dt
-    else:
+        # Pairs side by side, one per process, as many as the RAM holds, so
+        # the wall time of the cached field is about two simulations, not six.
         ctx = mp.get_context("spawn")
-        with ctx.Pool(processes=3) as pool:
+        with ctx.Pool(processes=workers) as pool:
             parts = pool.starmap(
-                _meta_pair_worker,
-                [(kind, n_frames) for kind in ("flat", "qrd", "meta")],
+                _meta_pair, [(kind, n_frames, compute) for kind in kinds]
             )
-        tot = np.stack([part[0] for part in parts])
-        trail = np.stack([part[1] for part in parts])
-        times = parts[0][2]
+    else:
+        # One pair at a time: on a GPU a pair is what the free memory holds,
+        # and on NumPy where the RAM holds only one.
+        parts = []
+        for kind in kinds:
+            parts.append(_meta_pair(kind, n_frames, compute))
+            clip_placement.release_device()
+    tot = np.stack([part[0] for part in parts])
+    trail = np.stack([part[1] for part in parts])
+    times = parts[0][2]
     ref = float(trail[:, trail.shape[1] // 3 :].max()) or 1.0
     with np.errstate(divide="ignore"):
         trail_db = 20.0 * np.log10(trail / ref)

@@ -43,13 +43,6 @@ _DEVICE_NAMESPACES = frozenset({"xp", "_xp"})
 #: host. ``abs`` is not one: on a device array it gives a device array.
 _HOST_PULLS = frozenset({"float", "int", "max", "min", "round"})
 
-#: Scenes not yet moved onto the public engines. Each is taken out as it is.
-_NOT_YET: frozenset[str] = frozenset(
-    {
-        "metadiffuser.py",
-    }
-)
-
 
 def _callee(call: ast.Call) -> tuple[str | None, str]:
     """The receiver name (None for a bare function) and the name called.
@@ -249,11 +242,6 @@ def test_a_scene_keeps_its_fields_on_the_device_between_captures(
     path: pathlib.Path,
 ) -> None:
     found = problems(path.read_text(encoding="utf-8"), path.name)
-    if path.name in _NOT_YET:
-        assert found, (
-            f"{path.name} keeps its fields on the device now; take it out of _NOT_YET"
-        )
-        return
     assert not found, "\n".join(found)
 
 
@@ -373,8 +361,6 @@ def unplaced_engines(source: str, label: str) -> list[str]:
     "path", _FIGURE_MODULES, ids=lambda p: str(p.relative_to(_FIELDS_DIR.parent))
 )
 def test_every_engine_a_figure_builds_is_told_where_to_step(path: pathlib.Path) -> None:
-    if path.parent == _FIELDS_DIR and path.name in _NOT_YET:
-        return
     found = unplaced_engines(path.read_text(encoding="utf-8"), path.name)
     assert not found, "\n".join(found)
 

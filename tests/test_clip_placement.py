@@ -312,3 +312,16 @@ def test_a_blanked_frame_is_nan_where_asked_and_the_field_elsewhere() -> None:
     assert frame.dtype == np.float32
     assert np.isnan(frame[:, :3]).all()
     assert np.array_equal(frame[:, 3:], sim.p[:, 3:].astype(np.float32))
+
+
+@pytest.mark.parametrize(
+    ("available", "workers"),
+    [(None, 3), (40 << 30, 3), (16 << 30, 2), (13 << 30, 1), (4 << 30, 1)],
+)
+def test_the_metadiffuser_steps_as_many_pairs_at_once_as_the_ram_holds(
+    available: int | None, workers: int
+) -> None:
+    """Three pairs want about 18 GB; the node has about 13 GB free."""
+    from figures.fields import metadiffuser
+
+    assert metadiffuser._meta_workers(available) == workers

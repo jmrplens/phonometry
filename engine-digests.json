@@ -1,6 +1,6 @@
 {
  "environment": {
-  "libc": "glibc 2.41",
+  "libc": "glibc 2.39",
   "machine": "x86_64",
   "numpy": "2.5.3",
   "numpy_avx512": "off",
@@ -15,7 +15,7 @@
   "4": "0x1.1ebe72fdb1f3ap-17"
  },
  "measured_on": {
-  "cpu": "AMD Ryzen 5 5500U with Radeon Graphics"
+  "cpu": "AMD EPYC 9V74 80-Core Processor"
  },
  "scenarios": {
   "contour": {

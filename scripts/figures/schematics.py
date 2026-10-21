@@ -11,6 +11,7 @@ which borrow the same vocabulary to annotate a simulated field.
 
 from __future__ import annotations
 
+import weakref
 from functools import lru_cache
 from typing import TYPE_CHECKING, Any
 
@@ -265,7 +266,9 @@ _HAIRLINE_PT = 0.6
 
 #: The hue each wavefront arc was made in, which :func:`_set_wavefronts`
 #: quiets as the front spreads: the arc's own edge colour is the quieted one.
-_WAVEFRONT_HUE: dict[Arc, ColorType] = {}
+#: Held weakly: an arc keeps its axes and its figure alive, and a worker that
+#: renders several clips would otherwise keep every closed clip's figures.
+_WAVEFRONT_HUE: weakref.WeakKeyDictionary[Arc, ColorType] = weakref.WeakKeyDictionary()
 
 
 def _make_wavefronts(

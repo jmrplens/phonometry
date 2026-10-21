@@ -427,7 +427,7 @@ _OWN_SIGNATURES: list[tuple[str, str, Callable[[object], tuple[object, ...]], st
         "building.measurement.intensity_insulation",
         "_validated_element_count",
         lambda v: (v,),
-        "elements",
+        "n_elements",
     ),
     (
         "building.measurement.low_frequency",
@@ -521,8 +521,8 @@ _PUBLIC_CALLS: list[tuple[str, Callable[[object], object], float, str]] = [
         "temperature_c",
     ),
     (
-        "room.minimum_reliable_reverberation_time",
-        lambda v: room.minimum_reliable_reverberation_time(100.0, detector_time=v),
+        "room.min_reliable_reverberation_time",
+        lambda v: room.min_reliable_reverberation_time(100.0, detector_time=v),
         0.1,
         "detector_time",
     ),

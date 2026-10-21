@@ -29,7 +29,7 @@ paso que más importa.
 [Actualizar de la 3.3 a la 4.0](/phonometry/es/start/upgrading/) es el mapa: la
 única regla que mueve casi todos los imports, un resolvedor para pegar cuando
 no quieras buscar un nombre a mano, los cuatro sitios donde el arreglo
-evidente es el equivocado y los sesenta y siete nombres que ya no existen.
+evidente es el equivocado y los sesenta y nueve nombres que ya no existen.
 
 **Tengo un trabajo, no un tema. ¿Cuál es mi página?**
 [¿Qué necesitas medir?](/phonometry/es/start/tasks/) indexa la biblioteca por

@@ -133,7 +133,7 @@ from phonometry import signals
 fs = 48000.0                                      # su frecuencia de muestreo en Hz
 res = signals.power_spectral_density(record, fs)          # Hann, solape 50 %, IC 95 %
 print(res.n_averages, res.random_error)           # nd y 1/sqrt(nd)
-print(res.ci_lower[10], res.psd[10], res.ci_upper[10])
+print(res.confidence_lower[10], res.psd[10], res.confidence_upper[10])
 res.plot()                                        # PSD en dB con la banda de IC
 ```
 
@@ -256,8 +256,8 @@ freqs = res.frequencies[band]
 smooth = signals.fractional_octave_smoothing(res.frequencies, res.psd, 3.0)[band]
 
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.fill_between(freqs, 10 * np.log10(res.ci_lower[band]),
-                10 * np.log10(res.ci_upper[band]), alpha=0.3,
+ax.fill_between(freqs, 10 * np.log10(res.confidence_lower[band]),
+                10 * np.log10(res.confidence_upper[band]), alpha=0.3,
                 label="Intervalo de confianza chi-cuadrado del 95 %")
 ax.semilogx(freqs, 10 * np.log10(res.psd[band]), lw=1.0,
             label="Estimación de la PSD de Welch")
@@ -817,8 +817,8 @@ freqs = res.frequencies[band]
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.semilogx(freqs, 10 * np.log10(single.psd[band]), color="gray",
             alpha=0.45, lw=0.7, label="Una sola ventana de Slepian (K = 1)")
-ax.fill_between(freqs, 10 * np.log10(res.ci_lower[band]),
-                10 * np.log10(res.ci_upper[band]), alpha=0.3,
+ax.fill_between(freqs, 10 * np.log10(res.confidence_lower[band]),
+                10 * np.log10(res.confidence_upper[band]), alpha=0.3,
                 label="Intervalo de confianza chi-cuadrado del 95 %")
 ax.semilogx(freqs, 10 * np.log10(res.psd[band]), lw=1.2,
             label="Estimación multitaper (K = 7, adaptativa)")

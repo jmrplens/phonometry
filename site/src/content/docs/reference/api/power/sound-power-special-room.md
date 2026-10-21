@@ -465,7 +465,7 @@ special_room_source_locations(
     levels: ArrayLike,
     frequencies: ArrayLike,
     *,
-    microphone_positions: int = 6,
+    n_microphone_positions: int = 6,
     a_weighted_levels: ArrayLike | None = None,
 ) -> SourceLocationPlan
 ```
@@ -496,7 +496,7 @@ shall be reported.
 | :--- | :--- |
 | `levels` | Survey levels, `(n, bands)`, six rows in 9.4, in decibels. |
 | `frequencies` | Octave centres from 125 Hz to 8 kHz, ascending. |
-| `microphone_positions` | The column of Table 3 to read, 3, 6 (default) or 12. |
+| `n_microphone_positions` | The column of Table 3 to read, 3, 6 (default) or 12. |
 | `a_weighted_levels` | The six A-weighted levels, `(n,)`, for the A-weighted row; `None` leaves it unevaluated. |
 
 **Returns:** The [`SourceLocationPlan`](/phonometry/reference/api/power/sound-power-hard-walled/#sourcelocationplan).
@@ -674,8 +674,8 @@ SpecialRoomSoundPowerResult(
     mean_a_weighted_level: float,
     background_margin_a_db: float,
     method: str,
-    microphone_positions: int,
-    source_positions: int,
+    n_microphone_positions: int,
+    n_source_positions: int,
 )
 ```
 

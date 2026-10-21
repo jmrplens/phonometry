@@ -334,7 +334,7 @@ about 1.34 m.
 
 ```python
 from phonometry import materials
-print(round(materials.maximum_sampled_area_radius(5.0e-3), 3))   # 1.343  (metres)
+print(round(materials.max_sampled_area_radius(5.0e-3), 3))   # 1.343  (metres)
 ```
 
 The whole arrangement fits in one to-scale drawing. `plot_in_situ_geometry`
@@ -435,7 +435,7 @@ print(round(float(materials.geometric_spreading_factor_angle(
 # is what stretches the ellipse.
 dp = 1.5 * np.tan(np.radians(30.0))
 print(round(dp, 3))                                                      # 0.866
-print(round(float(materials.maximum_sampled_area_radius(5.0e-3)), 3))        # 1.343
+print(round(float(materials.max_sampled_area_radius(5.0e-3)), 3))        # 1.343
 print(round(float(materials.msa_major_axis(5.0e-3, dp)), 3))             # 3.432
 ```
 
@@ -638,7 +638,7 @@ ISO 13472-1:2002's subtraction technique: the Clause 4.1 geometrical spreading
 (`materials.in_situ_absorption_coefficient`,
 `materials.one_third_octave_absorption`,
 `materials.in_situ_absorption_spectrum`) and the Annex A sampled-area radius
-(`materials.maximum_sampled_area_radius`), with the Annex B reference-surface
+(`materials.max_sampled_area_radius`), with the Annex B reference-surface
 correction (`materials.absorption_reference_corrected`) and the Annex F
 oblique-incidence case (`materials.geometric_spreading_factor_angle`,
 `materials.msa_major_axis`, and the `incidence_angle_rad` argument of

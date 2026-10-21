@@ -180,16 +180,16 @@ by_position = [
 ]
 check = noise_control.check_source_positions(by_position)
 print(check.max_octave_spread_db)   # 4.5
-print(check.required_positions)     # 5
+print(check.n_required_positions)     # 5
 print(check.satisfied)              # False
 ```
 
 Two more positions, and the clause adds that the three used first should not be
 used again. Past six decibels the excess is stated in the report instead, which
-`exceeds_maximum` marks. The other numeric rules are here too:
+`exceeds_max` marks. The other numeric rules are here too:
 `check_band_flatness` is the requirement that the three one-third-octave levels
 inside an octave differ by at most 6 dB at 125 Hz, 5 dB at 250 Hz and 4 dB
-above; `minimum_cabin_clearance_m` is the clearance of 6.2, written exactly as
+above; `min_cabin_clearance_m` is the clearance of 6.2, written exactly as
 printed including the low-frequency sentence that relaxes it rather than
 tightening it; and `internal_noise_level` is the noise the cabin's own fans
 make, corrected for the background only while the margin stays between 6 dB and

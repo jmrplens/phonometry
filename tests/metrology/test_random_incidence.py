@@ -94,7 +94,7 @@ def test_the_factors_of_every_plane_together_sum_to_one(
     """With the poles counted in every plane's sum, the division is the sphere."""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", metrology.SphereDivisionWarning)
-        factors = metrology.adjustment_factors(step_deg, planes=planes)
+        factors = metrology.adjustment_factors(step_deg, n_planes=planes)
     assert planes * float(np.sum(factors)) == pytest.approx(1.0, abs=1e-14)
 
 
@@ -145,14 +145,14 @@ def test_the_counted_once_bias_grows_with_the_directivity() -> None:
 def test_four_planes_halve_table_a1() -> None:
     """NOTE 2 of A.6: four planes at 45° take half the values of Table A.1."""
     two = metrology.adjustment_factors(10.0)
-    four = metrology.adjustment_factors(10.0, planes=4)
+    four = metrology.adjustment_factors(10.0, n_planes=4)
     np.testing.assert_allclose(four, two / 2.0, rtol=1e-14)
 
 
 def test_one_plane_doubles_table_a1() -> None:
     """The 2 of Formula (A.4) is the factor of one plane, Delta alpha = pi."""
     np.testing.assert_allclose(
-        metrology.adjustment_factors(10.0, planes=1),
+        metrology.adjustment_factors(10.0, n_planes=1),
         2.0 * metrology.adjustment_factors(10.0),
         rtol=1e-14,
     )
@@ -176,8 +176,8 @@ def test_a_step_that_does_not_divide_the_half_circle_is_refused(
 def test_a_number_of_planes_that_is_not_a_whole_number_is_refused(
     planes: object,
 ) -> None:
-    with pytest.raises(ValueError, match="'planes' must be a whole number"):
-        metrology.adjustment_factors(10.0, planes=planes)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'n_planes' must be a whole number"):
+        metrology.adjustment_factors(10.0, n_planes=planes)  # type: ignore[arg-type]
 
 
 def test_a_step_computed_as_a_fraction_of_the_half_circle_is_accepted() -> None:
@@ -243,13 +243,13 @@ def test_four_planes_halve_the_ring_elements_but_not_the_caps() -> None:
     """At 90° steps the cap is the largest element, and more planes do not
     shrink it.
     """
-    assert metrology.largest_element_fraction(15.0, planes=4) < 0.03
+    assert metrology.largest_element_fraction(15.0, n_planes=4) < 0.03
     cap = math.sin(math.radians(90.0) / 4.0) ** 2
-    assert metrology.largest_element_fraction(90.0, planes=4) == pytest.approx(cap)
+    assert metrology.largest_element_fraction(90.0, n_planes=4) == pytest.approx(cap)
 
 
 def test_one_plane_is_judged_on_the_two_plane_division() -> None:
-    assert metrology.largest_element_fraction(10.0, planes=1) == pytest.approx(
+    assert metrology.largest_element_fraction(10.0, n_planes=1) == pytest.approx(
         metrology.largest_element_fraction(10.0)
     )
 

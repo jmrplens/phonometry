@@ -123,7 +123,7 @@ __all__ = [
     "measure_vibration_immission",
     "response_tolerance_percent",
     "takt_maxima",
-    "takt_maximum_rms",
+    "takt_max_rms",
     "verify_vibration_meter",
 ]
 
@@ -732,7 +732,7 @@ def takt_maxima(
     return np.asarray(blocks.max(axis=1), dtype=np.float64)
 
 
-def takt_maximum_rms(maxima: ArrayLike) -> float:
+def takt_max_rms(maxima: ArrayLike) -> float:
     r"""The clock maximum r.m.s. :math:`KB_\mathrm{FTm}`, Formula (2).
 
     Both rules of the formula are here: a clock maximum at or below
@@ -856,7 +856,7 @@ def measure_vibration_immission(
         kbf=kbf,
         kbf_max=float(np.max(kbf)),
         takt_maxima=maxima,
-        kbf_takt_rms=takt_maximum_rms(maxima),
+        kbf_takt_rms=takt_max_rms(maxima),
         fs=fs,
         measuring_time_s=float(x.size / fs),
         averaging_time_s=float(maxima.size * takt_duration_s),

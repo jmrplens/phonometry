@@ -124,7 +124,7 @@ from ...io._resolve import (
     resolve_pair_fs,
 )
 from ...io._signal import Signal
-from ...materials.surfaces.road_absorption import maximum_sampled_area_radius
+from ...materials.surfaces.road_absorption import max_sampled_area_radius
 from . import noise_reducing_devices as _devices
 from .noise_reducing_devices import RoadDeviceRating, sound_reflection_rating
 
@@ -466,7 +466,7 @@ def reflection_sampled_area_radius_m(
     within which a reflecting object would still fall inside the reflected
     window. It is the ISO 13472-1 construction with the loudspeaker 1,50 m and
     the microphone 0,25 m from the plane, and it reuses
-    :func:`~phonometry.materials.surfaces.road_absorption.maximum_sampled_area_radius`.
+    :func:`~phonometry.materials.surfaces.road_absorption.max_sampled_area_radius`.
     NOTE 1 of 5.6.1 gives 1,96 m for the 7,9 ms window at 340 m/s.
 
     :param window_length_s: :math:`T_\mathrm{W,ADR}` of the reflected component, s.
@@ -475,7 +475,7 @@ def reflection_sampled_area_radius_m(
     :return: The radius, in metres.
     :raises ValueError: If the window length or the speed is not positive.
     """
-    return maximum_sampled_area_radius(
+    return max_sampled_area_radius(
         require_positive(window_length_s, "window_length_s"),
         source_height_m=REFLECTION_SOURCE_DISTANCE_M,
         microphone_height_m=REFLECTION_MICROPHONE_DISTANCE_M,

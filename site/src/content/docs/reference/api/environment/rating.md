@@ -44,7 +44,8 @@ lden(
     lday: float,
     levening: float,
     lnight: float,
-    hours: tuple[float, float, float] = (12.0, 4.0, 8.0),
+    *,
+    period_hours: tuple[float, float, float] = (12.0, 4.0, 8.0),
 ) -> float
 ```
 
@@ -61,7 +62,7 @@ $$
 | `lday` | LAeq over the day period, in dB. |
 | `levening` | LAeq over the evening period, in dB (+5 dB weighting). |
 | `lnight` | LAeq over the night period, in dB (+10 dB weighting). |
-| `hours` | `(t_day, t_evening, t_night)` in hours, summing to 24. Default (12, 4, 8); countries may define the periods differently (3.6.4 Note 1). |
+| `period_hours` | `(t_day, t_evening, t_night)`, the duration of each period in hours, summing to 24. Default (12, 4, 8); countries may define the periods differently (3.6.4 Note 1). |
 
 **Returns:** Lden in dB.
 
@@ -71,7 +72,8 @@ $$
 ldn(
     lday: float,
     lnight: float,
-    hours: tuple[float, float] = (15.0, 9.0),
+    *,
+    period_hours: tuple[float, float] = (15.0, 9.0),
 ) -> float
 ```
 
@@ -87,6 +89,6 @@ $$
 | :--- | :--- |
 | `lday` | LAeq over the day period, in dB. |
 | `lnight` | LAeq over the night period, in dB (+10 dB weighting). |
-| `hours` | `(t_day, t_night)` in hours, summing to 24. Default (15, 9). |
+| `period_hours` | `(t_day, t_night)`, the duration of each period in hours, summing to 24. Default (15, 9). |
 
 **Returns:** Ldn in dB.

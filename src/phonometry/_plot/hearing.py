@@ -283,7 +283,7 @@ def plot_nipts(
             r"ISO 1999 NIPTS: $L_\mathrm{{EX,8h}}$ = {lex} dB, {years} yr", language
         ).format(
             lex=decimal_comma(fmt_minus(result.l_ex, "g"), language),
-            years=decimal_comma(f"{result.years:g}", language),
+            years=decimal_comma(f"{result.exposure_duration_years:g}", language),
         )
     )
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
@@ -337,7 +337,7 @@ def plot_htlan(
             sex=_t(result.sex, language),
             age=decimal_comma(f"{result.age:g}", language),
             lex=decimal_comma(fmt_minus(result.l_ex, "g"), language),
-            years=decimal_comma(f"{result.years:g}", language),
+            years=decimal_comma(f"{result.exposure_duration_years:g}", language),
         )
     )
     ax.legend(loc="lower left", fontsize="small")
@@ -751,7 +751,7 @@ def plot_real_ear_attenuation(
         left, right = ax.get_xlim()
         decades = float(np.log10(right / left))
         ax.set_box_aspect(((high - low) / _DB_PER_DECADE) / decades)
-    ax.set_title(_t(_REAT_TITLE, language).format(n=result.subjects))
+    ax.set_title(_t(_REAT_TITLE, language).format(n=result.n_subjects))
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
@@ -991,7 +991,7 @@ def plot_active_insertion_loss(
     ax.axhline(0.0, color=_C_EDGE, lw=0.8, zorder=0)
     _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t(_AIL_LABEL, language))
-    ax.set_title(_t(_AIL_TITLE, language).format(n=result.subjects))
+    ax.set_title(_t(_AIL_TITLE, language).format(n=result.n_subjects))
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)

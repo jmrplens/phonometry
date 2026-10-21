@@ -323,7 +323,7 @@ def ranking_positions(sample_size: int) -> tuple[int, int]:
         allow and Table C.1 does not cover, or a count that is not a whole
         number.
     """
-    n = require_count(sample_size, "sample_size", minimum=MIN_SAMPLE_SIZE)
+    n = require_count(sample_size, "sample_size", at_least=MIN_SAMPLE_SIZE)
     printed = RANKING_POSITIONS.get(n)
     if printed is not None:
         return printed
@@ -525,7 +525,7 @@ def uniform_sample_indices(
         non-negative value per point.
     """
     count = require_count(n_points, "n_points")
-    size = require_count(sample_size, "sample_size", minimum=MIN_SAMPLE_SIZE)
+    size = require_count(sample_size, "sample_size", at_least=MIN_SAMPLE_SIZE)
     if horizontal_clearances_m is None:
         eligible = np.arange(count, dtype=np.intp)
     else:
@@ -597,7 +597,7 @@ def contour_sample_chainages_m(
         short that two points would fall on the same whole metre, which
         happens only below ``M`` metres.
     """
-    size = require_count(sample_size, "sample_size", minimum=MIN_SAMPLE_SIZE)
+    size = require_count(sample_size, "sample_size", at_least=MIN_SAMPLE_SIZE)
     # A string or a bool would convert through float() ("100" to 100.0, True
     # to 1.0) and be sampled as though it were a length.
     if isinstance(total_length_m, bool) or not isinstance(total_length_m, numbers.Real):
@@ -645,12 +645,12 @@ def _level_matrix(levels: ArrayLike) -> NDArray[np.float64]:
             "of levels, one row per receiver and one column per participant."
         )
         raise ValueError(msg)
-    receivers, participants = matrix.shape
-    if receivers < MIN_SAMPLE_SIZE or participants < _MIN_PARTICIPANTS:
+    n_receivers, n_participants = matrix.shape
+    if n_receivers < MIN_SAMPLE_SIZE or n_participants < _MIN_PARTICIPANTS:
         msg = (
             f"RoundRobinPrecision: C.4 ranks at least {MIN_SAMPLE_SIZE} "
             f"receivers and a mean needs at least {_MIN_PARTICIPANTS} "
-            f"participants; got {receivers} receivers and {participants} "
+            f"participants; got {n_receivers} receivers and {n_participants} "
             "participants."
         )
         raise ValueError(msg)
@@ -689,12 +689,12 @@ class RoundRobinPrecision(OwnsArrays):
         object.__setattr__(self, "levels", read_only(_level_matrix(self.levels)))
 
     @property
-    def receivers(self) -> int:
+    def n_receivers(self) -> int:
         """``N``, the number of receiver positions."""
         return int(self.levels.shape[0])
 
     @property
-    def participants(self) -> int:
+    def n_participants(self) -> int:
         """``M``, the number of participants."""
         return int(self.levels.shape[1])
 
@@ -716,7 +716,7 @@ class RoundRobinPrecision(OwnsArrays):
     @property
     def rank_q09(self) -> int:
         r""":math:`R(q_{0,9})` for ``N`` receivers (:func:`ranking_positions`)."""
-        return ranking_positions(self.receivers)[1]
+        return ranking_positions(self.n_receivers)[1]
 
     @property
     def q09_db(self) -> float:

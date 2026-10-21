@@ -250,7 +250,7 @@ same readings give 69.4, 69.8 and 67.5 dB.
 The result, a `HighFrequencySoundPowerResult`, carries the band levels
 (`sound_power_level`), the mean room level (`mean_pressure_level`), the room
 constant, the two corrections (`c1`, `c2`) and the method, and
-`within_10_db_of_maximum` marks the bands within 10 dB of the highest.
+`within_10_db_of_max` marks the bands within 10 dB of the highest.
 
 ## 4. Tones against a reference source
 
@@ -289,7 +289,7 @@ turning once every 32 s.
 
 ```python
 speed = 2.0 * np.pi * 1.0 / 32.0                     # m/s along the path
-print(emission.minimum_analyzer_bandwidth(
+print(emission.min_analyzer_bandwidth(
     15625.0, microphone_speed_m_s=speed, speed_of_sound=345.5).round(1))   # [17.8] Hz
 # The FFT is narrower than that, so the tone is the sum of its sidebands.
 tone = emission.tone_level_from_sidebands([42.9, 41.3, 38.0])
@@ -301,11 +301,11 @@ tones = emission.high_frequency_sound_power_comparison(
     reference_sound_power_levels=[44.3, 43.9, 43.0],   # dB re 1 pW per hertz
     noise_bandwidth_hz=12.5)
 print(tones.sound_power_level.round(1))              # [59.4 52.2 44.9] dB re 1 pW
-print(tones.within_10_db_of_maximum)                 # [ True  True False]
+print(tones.within_10_db_of_max)                 # [ True  True False]
 ```
 
 Clause 13 c) asks for the level and the frequency of every tone within 10 dB of
-the highest, and `within_10_db_of_maximum` marks them: here the first two.
+the highest, and `within_10_db_of_max` marks them: here the first two.
 A bandwidth wider than 112 Hz emits a `SoundPowerWarning`, and without
 `noise_bandwidth_hz` the same function applies Formula (8) to broadband bands.
 The comparison applies $C_2$ alone, as ISO 3741 does for its own comparison

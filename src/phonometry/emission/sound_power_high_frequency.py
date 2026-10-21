@@ -156,7 +156,7 @@ __all__ = [
     "high_frequency_levels_to_determine",
     "high_frequency_sound_power",
     "high_frequency_sound_power_comparison",
-    "minimum_analyzer_bandwidth",
+    "min_analyzer_bandwidth",
     "room_absorption_coefficient",
     "room_constant_from_air_absorption",
     "room_constant_from_reverberation_time",
@@ -376,7 +376,7 @@ def room_constant_from_air_absorption(
 # --- Formulae (2) and (3): tones under a moving microphone -------------------
 
 
-def minimum_analyzer_bandwidth(
+def min_analyzer_bandwidth(
     tone_frequency_hz: ArrayLike,
     *,
     microphone_speed_m_s: float,
@@ -409,7 +409,7 @@ def tone_level_from_sidebands(sideband_levels_db: ArrayLike) -> float:
     :math:`L_\mathrm{tot} = 10 \lg \sum_{i=1}^{N_\mathrm{sb}} 10^{0{,}1 L_i}`,
     the energy sum of the bands adjacent to the tone frequency that carry
     its energy when the analyser is narrower than
-    :func:`minimum_analyzer_bandwidth`.
+    :func:`min_analyzer_bandwidth`.
 
     :param sideband_levels_db: The :math:`N_\mathrm{sb}` sideband levels
         :math:`L_i`, in decibels re 20 µPa.
@@ -542,7 +542,7 @@ class HighFrequencySoundPowerResult(OwnsArrays):
         )
 
     @property
-    def within_10_db_of_maximum(self) -> NDArray[np.bool_]:
+    def within_10_db_of_max(self) -> NDArray[np.bool_]:
         """Bands whose level is within 10 dB of the highest one.
 
         Clause 13 c) and Table 3 ask for the level and the frequency of every
@@ -862,7 +862,7 @@ def high_frequency_levels_to_determine(
       discrete tone in the 16 kHz octave;
     - ``"tone_levels_within_10_db"``: the levels and frequencies of every tone
       in the 16 kHz octave within 10 dB of the highest tonal level, the tones
-      :attr:`HighFrequencySoundPowerResult.within_10_db_of_maximum` marks.
+      :attr:`HighFrequencySoundPowerResult.within_10_db_of_max` marks.
 
     With no significant noise from 125 Hz to 8 kHz, footnote b notes that
     the noise lies outside the scope of ISO 3741 and ISO 3744, so only this

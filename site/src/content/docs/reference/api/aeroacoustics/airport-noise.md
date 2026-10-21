@@ -129,7 +129,7 @@ event_level(
     powers: NDArray[np.float64] | list[float],
     distances_m: NDArray[np.float64] | list[float],
     exposure_levels: NDArray[np.float64] | list[list[float]],
-    maximum_levels: NDArray[np.float64] | list[list[float]],
+    max_levels: NDArray[np.float64] | list[list[float]],
     *,
     reference_speed_m_s: float = 82.31104,
     mounting: str = 'wing',
@@ -156,7 +156,7 @@ ground-roll segments, and combines them into the exposure level `SEL`
 | `powers` | NPD tabulated power settings. |
 | `distances_m` | NPD tabulated slant distances, in metres. |
 | `exposure_levels` | NPD exposure (SEL) levels, shape `(P, D)`. |
-| `maximum_levels` | NPD maximum levels, shape `(P, D)`. |
+| `max_levels` | NPD maximum levels, shape `(P, D)`. |
 | `reference_speed_m_s` | NPD reference speed, in m/s (default 160 kt). |
 | `mounting` | Engine mounting (`"wing"`/`"fuselage"`/`"propeller"`). |
 | `metric` | `"exposure"` (SEL) or `"maximum"` (LAmax). |
@@ -296,7 +296,7 @@ noise_contour(
     powers: NDArray[np.float64] | list[float],
     distances_m: NDArray[np.float64] | list[float],
     exposure_levels: NDArray[np.float64] | list[list[float]],
-    maximum_levels: NDArray[np.float64] | list[list[float]],
+    max_levels: NDArray[np.float64] | list[list[float]],
     *,
     x: NDArray[np.float64] | list[float],
     y: NDArray[np.float64] | list[float],
@@ -320,7 +320,7 @@ Evaluates [`event_level`](/phonometry/reference/api/aeroacoustics/airport-noise/
 | `powers` | NPD tabulated power settings. |
 | `distances_m` | NPD tabulated slant distances, in metres. |
 | `exposure_levels` | NPD exposure (SEL) levels, shape `(P, D)`. |
-| `maximum_levels` | NPD maximum levels, shape `(P, D)`. |
+| `max_levels` | NPD maximum levels, shape `(P, D)`. |
 | `x` | Grid x coordinates, in metres. |
 | `y` | Grid y coordinates, in metres. |
 | `reference_speed_m_s` | NPD reference speed, in m/s. |

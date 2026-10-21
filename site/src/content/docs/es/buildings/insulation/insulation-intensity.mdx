@@ -717,10 +717,10 @@ página y la física coinciden.
 # Cuatro aireadores idénticos dentro de una superficie de medición de 2,0 m2.
 elemento = building.low_frequency_element_normalized_difference(
     np.full(6, 90.0), np.array([62.0, 61.0, 60.0, 58.0, 57.0, 55.0]),
-    measurement_area=2.0, elements=4, frequencies=freqs,
+    measurement_area=2.0, n_elements=4, frequencies=freqs,
 )
 print(np.round(elemento.d_i_n_e, 1))     # [32. 33. 34. 36. 37. 39.]
-print(elemento.elements)                 # 4
+print(elemento.n_elements)                 # 4
 ```
 
 ### Cualificar la instalación (anexo A)
@@ -773,7 +773,7 @@ oráculo.
 | `l_p` | array 1D o 2D | dB | uno/banda / `None` | Presión del lado receptor sobre la superficie de medición, para la Fórmula (5) |
 | `frequencies` | array 1D | Hz | 50 a 160 / `None` | Frecuencias centrales; el apartado 6.6 no admite otras |
 | `absorbing_specimen_surface` | bool | — | defecto `False` | `True` estrecha el límite del 6.4.2 a 6 dB |
-| `elements` | int | unidades | ≥ 1, defecto `1` | Número $N$ de unidades (solo `low_frequency_element_normalized_difference`) |
+| `n_elements` | int | unidades | ≥ 1, defecto `1` | Número $N$ de unidades (solo `low_frequency_element_normalized_difference`) |
 | `surface_mass` | float | kg/m² | > 0 | Masa superficial $m$ del panel flexible (`limp_panel_reduction_index`) |
 | `temperature_c` / `static_pressure_pa` | float | °C / Pa | defecto 23 °C, 101 300 Pa | El clima de las Fórmulas (A.4) y (A.5) |
 

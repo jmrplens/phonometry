@@ -257,7 +257,7 @@ from phonometry import signals
 fs = 48000.0                                      # its sample rate in Hz
 res = signals.power_spectral_density(record, fs)          # Hann, 50 % overlap, 95 % CI
 print(res.n_averages, res.random_error)           # nd and 1/sqrt(nd)
-print(res.ci_lower[10], res.psd[10], res.ci_upper[10])
+print(res.confidence_lower[10], res.psd[10], res.confidence_upper[10])
 res.plot()                                        # PSD in dB with the CI band
 ```
 
@@ -301,8 +301,8 @@ freqs = res.frequencies[band]
 smooth = signals.fractional_octave_smoothing(res.frequencies, res.psd, 3.0)[band]
 
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.fill_between(freqs, 10 * np.log10(res.ci_lower[band]),
-                10 * np.log10(res.ci_upper[band]), alpha=0.3,
+ax.fill_between(freqs, 10 * np.log10(res.confidence_lower[band]),
+                10 * np.log10(res.confidence_upper[band]), alpha=0.3,
                 label="95 % chi-square confidence interval")
 ax.semilogx(freqs, 10 * np.log10(res.psd[band]), lw=1.0,
             label="Welch PSD estimate")
@@ -693,8 +693,8 @@ freqs = res.frequencies[band]
 fig, ax = plt.subplots(figsize=(10, 6))
 ax.semilogx(freqs, 10 * np.log10(single.psd[band]), color="gray",
             alpha=0.45, lw=0.7, label="Single Slepian taper (K = 1)")
-ax.fill_between(freqs, 10 * np.log10(res.ci_lower[band]),
-                10 * np.log10(res.ci_upper[band]), alpha=0.3,
+ax.fill_between(freqs, 10 * np.log10(res.confidence_lower[band]),
+                10 * np.log10(res.confidence_upper[band]), alpha=0.3,
                 label="95 % chi-square confidence interval")
 ax.semilogx(freqs, 10 * np.log10(res.psd[band]), lw=1.2,
             label="Multitaper estimate (K = 7, adaptive)")
@@ -1383,7 +1383,7 @@ the even power and real cepstra repeat and the complex cepstrum keeps its
 anticausal (non-minimum-phase) content. Zero-padding via `nfft` reduces
 cepstral time-aliasing when the log spectrum has sharp features, exactly like
 the `oversample` padding of
-[`minimum_phase`](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/).
+[`min_phase`](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/).
 
 ## 2. Echo detection: the rahmonic spike train
 
@@ -1580,7 +1580,7 @@ homomorphic deconvolution (Havelock Ch. 87, Sec. 3.3): zero the rahmonics to
 remove an echo, keep only the low quefrencies to extract a source wavelet.
 A minimum-phase signal has a causal complex cepstrum, which is why folding
 the real cepstrum onto positive quefrencies reconstructs the minimum phase
-from $|H|$ alone: [`minimum_phase`](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/)
+from $|H|$ alone: [`min_phase`](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/)
 and `phase_decomposition` run on that same folding core (Bendat & Piersol
 Sec. 13.1.4; Tohyama in Havelock Ch. 75 edits reverberation by manipulating
 exactly these causal/anticausal parts).
@@ -1670,7 +1670,7 @@ matters.
 The cepstrum starts from the same one-record FFT conventions as the
 [calibrated spectral estimators](https://docs.jmrp.io/phonometry/signals/spectra/spectral-analysis/), and its
 folding core is literally the one inside
-[`minimum_phase`](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/) - the refactor is
+[`min_phase`](https://docs.jmrp.io/phonometry/devices/electroacoustics/swept-sine-distortion/) - the refactor is
 pinned bit-exact in the tests. The envelope spectrum is the frequency-domain
 view of the same analytic signal the
 [Hilbert envelope](https://docs.jmrp.io/phonometry/signals/spectra/correlation-delay/) returns in time, and a
@@ -2525,7 +2525,7 @@ single = signals.tone_burst(48000, 5000, 25)
 print(single.burst_samples)         # 240 samples = 5 ms at 48 kHz
 
 # Clause A2.2: 5 ms bursts at 10 bursts per second.
-train = signals.tone_burst(48000, 5000, 25, repetitions=4, repetition_rate=10)
+train = signals.tone_burst(48000, 5000, 25, n_repetitions=4, repetition_rate=10)
 print(train.period_samples, train.duty_cycle)   # 4800, 0.05
 train.plot()                        # waveform with the gating envelope
 ```
@@ -2549,7 +2549,7 @@ from phonometry import signals
 
 fs = 48000.0
 single = signals.tone_burst(fs, 5000, 25, pre_silence=0.001, post_silence=0.001)
-train = signals.tone_burst(fs, 5000, 25, repetitions=4, repetition_rate=10)
+train = signals.tone_burst(fs, 5000, 25, n_repetitions=4, repetition_rate=10)
 
 fig, axes = plt.subplots(2, 1, figsize=(10, 6.4))
 t_ms = 1e3 * np.arange(single.signal.size) / single.fs

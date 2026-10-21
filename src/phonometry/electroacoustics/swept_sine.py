@@ -113,7 +113,7 @@ def _validate_sweep_band(fs: float, f1: float, f2: float) -> None:
         raise ValueError(msg)
 
 
-def _sweep_rate(f1: float, f2: float, seconds: float) -> float:
+def _sweep_rate(f1: float, f2: float, duration_s: float) -> float:
     r"""Synchronized sweep rate ``L`` (Novak et al. 2015, Eq. 49).
 
     :math:`L = \operatorname{round}(f_1 \tilde{T} / \ln(f_2/f_1)) / f_1`:
@@ -122,11 +122,11 @@ def _sweep_rate(f1: float, f2: float, seconds: float) -> float:
     exactly zero phase, which is the synchronization condition for
     meaningful harmonic phases (their Eqs. 30-32).
     """
-    k = round(f1 * seconds / float(np.log(f2 / f1)))
+    k = round(f1 * duration_s / float(np.log(f2 / f1)))
     if k < 1:
         msg = (
-            "'seconds' is too short to synchronize the sweep: "
-            "f1*seconds/ln(f2/f1) rounds to zero periods. Lengthen the "
+            "'duration_s' is too short to synchronize the sweep: "
+            "f1*duration_s/ln(f2/f1) rounds to zero periods. Lengthen the "
             "sweep or raise 'f1'."
         )
         raise ValueError(msg)
@@ -137,7 +137,7 @@ def synchronized_sweep_signal(
     fs: int,
     f1: float,
     f2: float,
-    seconds: float,
+    duration_s: float,
     *,
     amplitude: float = 1.0,
     fade: float = 0.0,
@@ -146,7 +146,7 @@ def synchronized_sweep_signal(
 
     :math:`x(t) = A \sin[2\pi f_1 L \exp(t/L)]` with the rate
     :math:`L = \operatorname{round}(f_1 \tilde{T} / \ln(f_2/f_1)) / f_1`
-    (Eq. 49, with ``seconds`` as the requested duration
+    (Eq. 49, with ``duration_s`` as the requested duration
     :math:`\tilde{T}`). Because
     :math:`f_1 L` is an integer, delaying the signal by :math:`L \ln(n)`
     is exactly equivalent to generating its n-th harmonic (Eq. 18), which
@@ -154,7 +154,7 @@ def synchronized_sweep_signal(
     :func:`swept_sine_distortion` properties of the system under test
     rather than of the excitation. The rounding adjusts the duration
     slightly: the generated signal lasts :math:`T = L \ln(f_2/f_1)`
-    seconds rather than exactly ``seconds`` (the difference is at most
+    seconds rather than exactly ``duration_s`` (the difference is at most
     :math:`\ln(f_2/f_1)/2` periods of ``f1``).
 
     :param fs: Sampling frequency in Hz.
@@ -163,7 +163,7 @@ def synchronized_sweep_signal(
         :math:`f_1 < f_2 \le f_\mathrm{s}/2`. When :math:`f_2/f_1` is an integer
         the sweep also *ends* with zero phase
         (Novak et al. 2015, Sec. 2.5).
-    :param seconds: Approximate sweep duration in seconds; the exact
+    :param duration_s: Approximate sweep duration in seconds; the exact
         duration is quantized by the synchronization rounding.
     :param amplitude: Peak amplitude of the sweep. Default 1.0.
     :param fade: Optional half-Hann fade-in/out as a fraction of the sweep
@@ -176,12 +176,12 @@ def synchronized_sweep_signal(
     fs_v = _positive(fs, "fs")
     f1_v = _positive(f1, "f1")
     _validate_sweep_band(fs_v, f1_v, float(f2))
-    seconds_v = _positive(seconds, "seconds")
+    duration_s_v = _positive(duration_s, "duration_s")
     amplitude_v = _positive(amplitude, "amplitude")
     if not 0.0 <= fade < _MAX_FADE_FRACTION:
         msg = "fade must be in [0, 0.5)"
         raise ValueError(msg)
-    rate = _sweep_rate(f1_v, float(f2), seconds_v)
+    rate = _sweep_rate(f1_v, float(f2), duration_s_v)
     duration = rate * np.log(float(f2) / f1_v)
     n = int(np.ceil(duration * fs_v))
     t = np.arange(n) / fs_v
@@ -230,7 +230,7 @@ class SweptSineDistortionResult(OwnsArrays):
     :ivar fs: Sample rate, in Hz.
     :ivar f1: Sweep start frequency, in Hz.
     :ivar f2: Sweep stop frequency, in Hz.
-    :ivar duration: Actual sweep duration ``T`` used by the analysis, s.
+    :ivar duration_s: Actual sweep duration ``T`` used by the analysis, s.
     :ivar rate: Sweep rate :math:`L = T / \ln(f_2/f_1)`, in seconds.
     :ivar method: ``"synchronized"`` or ``"farina"``.
     """
@@ -245,7 +245,7 @@ class SweptSineDistortionResult(OwnsArrays):
     fs: float
     f1: float
     f2: float
-    duration: float
+    duration_s: float
     rate: float
     method: str
 
@@ -383,7 +383,7 @@ def _deconvolve_farina(
     fs: float,
     f1: float,
     f2: float,
-    seconds: float,
+    duration_s: float,
     fade: float,
 ) -> NDArray[np.float64]:
     """Deconvolve with the Farina inverse filter (ISO 18233 Figure B.2).
@@ -397,7 +397,7 @@ def _deconvolve_farina(
 
     from ..room._impulse_response import inverse_filter
 
-    inv = inverse_filter(int(fs), f1, f2, seconds, fade=fade)
+    inv = inverse_filter(int(fs), f1, f2, duration_s, fade=fade)
     conv = sp_signal.fftconvolve(rec, inv)
     return np.asarray(np.roll(conv, -(inv.size - 1)), dtype=np.float64)
 
@@ -508,7 +508,7 @@ def _validated_recording(
 
 
 def _sweep_timing(
-    method: str, fs: float, f1: float, f2: float, seconds: float
+    method: str, fs: float, f1: float, f2: float, duration_s: float
 ) -> tuple[float, float, int]:
     r"""Return ``(rate L, duration T, sweep_samples)`` for either generator.
 
@@ -516,13 +516,13 @@ def _sweep_timing(
     :func:`synchronized_sweep_signal` rounds the rate (Novak Eq. 49) and
     lasts :math:`\lceil T f_\mathrm{s} \rceil` samples;
     :func:`phonometry.room.sweep_signal` rounds
-    the duration to ``round(seconds*fs)`` samples.
+    the duration to ``round(duration_s*fs)`` samples.
     """
     if method == "synchronized":
-        rate = _sweep_rate(f1, f2, seconds)
+        rate = _sweep_rate(f1, f2, duration_s)
         duration = float(rate * np.log(f2 / f1))
         return rate, duration, int(np.ceil(duration * fs))
-    sweep_samples = round(seconds * fs)
+    sweep_samples = round(duration_s * fs)
     duration = sweep_samples / fs
     return duration / float(np.log(f2 / f1)), duration, sweep_samples
 
@@ -612,7 +612,7 @@ def swept_sine_distortion(
     *,
     f1: float,
     f2: float,
-    seconds: float,
+    duration_s: float,
     method: Literal["synchronized", "farina"] = "synchronized",
     n_harmonics: int = 5,
     ir_length: int | None = None,
@@ -651,7 +651,7 @@ def swept_sine_distortion(
     :param f2: Sweep stop frequency, in Hz. Distortion products above
         Nyquist fold back in any real recording, so keep
         ``n_harmonics*f2`` in mind when choosing the sweep band.
-    :param seconds: Sweep duration handed to the generator, in seconds
+    :param duration_s: Sweep duration handed to the generator, in seconds
         (for the synchronized method the actual duration is the same
         quantized value the generator used).
     :param method: ``"synchronized"`` (Novak et al. 2015, default) or
@@ -689,7 +689,7 @@ def swept_sine_distortion(
     f1_v = _positive(f1, "f1")
     f2_v = _positive(f2, "f2")
     _validate_sweep_band(fs_v, f1_v, f2_v)
-    seconds_v = _positive(seconds, "seconds")
+    duration_s_v = _positive(duration_s, "duration_s")
     amplitude_v = _positive(amplitude, "amplitude")
     if method not in ("synchronized", "farina"):
         msg = "'method' must be 'synchronized' or 'farina'."
@@ -700,7 +700,9 @@ def swept_sine_distortion(
         msg = "'n_harmonics' must be at least 2."
         raise ValueError(msg)
 
-    rate, duration, sweep_samples = _sweep_timing(method, fs_v, f1_v, f2_v, seconds_v)
+    rate, duration, sweep_samples = _sweep_timing(
+        method, fs_v, f1_v, f2_v, duration_s_v
+    )
     if rec.size < sweep_samples:
         msg = (
             f"'recorded' has {rec.size} samples but the sweep lasts "
@@ -724,7 +726,7 @@ def swept_sine_distortion(
         buffer = _deconvolve_synchronized(signal, fs_v, f1_v, rate, pad)
     else:
         fade_v = 0.01 if fade is None else float(fade)
-        buffer = _deconvolve_farina(signal, fs_v, f1_v, f2_v, seconds_v, fade_v)
+        buffer = _deconvolve_farina(signal, fs_v, f1_v, f2_v, duration_s_v, fade_v)
 
     irs, responses = _window_harmonics(buffer, delays_samples, window)
     frequencies = np.asarray(np.fft.rfftfreq(window, 1.0 / fs_v), dtype=np.float64)
@@ -742,7 +744,7 @@ def swept_sine_distortion(
         fs=fs_v,
         f1=f1_v,
         f2=f2_v,
-        duration=float(duration),
+        duration_s=float(duration),
         rate=float(rate),
         method=method,
     )

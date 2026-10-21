@@ -48,7 +48,7 @@ squares of their expanded uncertainties (B.1.2),
 
 which for two equal uncertainties is :math:`\sqrt{2}\,U_{95}`, the minimum
 difference of B.1.1 and B.2. :func:`assess_attenuation_difference` applies it
-band by band and :func:`minimum_significant_difference` gives the second form.
+band by band and :func:`min_significant_difference` gives the second form.
 B.1.1 and B.2 evaluate it on the **rounded** :math:`U_{95}` their tables print,
 and say so: "the expanded measurement uncertainty ... is 2,3 dB. The minimum
 difference is thus :math:`\sqrt{2}` × 2,3 dB = 3,3 dB". From the unrounded
@@ -100,7 +100,7 @@ __all__ = [
     "allowable_field_variation",
     "assess_attenuation_difference",
     "check_reat_sound_field",
-    "minimum_significant_difference",
+    "min_significant_difference",
     "real_ear_attenuation",
     "reat_expanded_uncertainty",
 ]
@@ -300,7 +300,7 @@ class RealEarAttenuationResult(OwnsArrays):
         deviation of the mean (A.2), in dB.
     :ivar expanded_uncertainty_db: :math:`U_{95} = 2u` (A.1), in dB.
     :ivar frequencies: The centre frequencies of the test signals, in hertz.
-    :ivar subjects: The number of test subjects :math:`N`.
+    :ivar n_subjects: The number of test subjects :math:`N`.
     """
 
     attenuation_db: np.ndarray
@@ -309,7 +309,7 @@ class RealEarAttenuationResult(OwnsArrays):
     standard_uncertainty_db: np.ndarray
     expanded_uncertainty_db: np.ndarray
     frequencies: np.ndarray
-    subjects: int
+    n_subjects: int
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -402,10 +402,10 @@ def real_ear_attenuation(
         )
         raise ValueError(msg)
     freqs = _band_axis(frequencies, grid.shape[1], "real_ear_attenuation")
-    subjects = int(grid.shape[0])
+    n_subjects = int(grid.shape[0])
     mean = np.asarray(grid.mean(axis=0), dtype=np.float64)
     spread = np.asarray(grid.std(axis=0, ddof=1), dtype=np.float64)
-    standard = spread / math.sqrt(subjects)
+    standard = spread / math.sqrt(n_subjects)
     return RealEarAttenuationResult(
         attenuation_db=np.asarray(grid, dtype=np.float64),
         mean_db=mean,
@@ -413,7 +413,7 @@ def real_ear_attenuation(
         standard_uncertainty_db=standard,
         expanded_uncertainty_db=_COVERAGE_FACTOR * standard,
         frequencies=freqs,
-        subjects=subjects,
+        n_subjects=n_subjects,
     )
 
 
@@ -444,7 +444,7 @@ def reat_expanded_uncertainty(
     precision. These are the typical values B.1.1 and B.2 draw on when no data
     of a specific measurement are at hand; the text of both uses them rounded
     to one decimal, as the tables print them (see
-    :func:`minimum_significant_difference`).
+    :func:`min_significant_difference`).
 
     :param frequencies: The centre frequencies of the test signals, in hertz.
     :param protector: ``"earplug"`` or ``"earmuff"``.
@@ -474,7 +474,7 @@ def reat_expanded_uncertainty(
     )
 
 
-def minimum_significant_difference(
+def min_significant_difference(
     expanded_uncertainty_db: ArrayLike,
 ) -> float | np.ndarray:
     r"""The smallest difference between two means that is significant (B.1.1).

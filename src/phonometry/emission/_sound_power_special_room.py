@@ -1162,7 +1162,7 @@ def special_room_source_locations(
     levels: ArrayLike,
     frequencies: ArrayLike,
     *,
-    microphone_positions: int = _SURVEY_MICROPHONES,
+    n_microphone_positions: int = _SURVEY_MICROPHONES,
     a_weighted_levels: ArrayLike | None = None,
 ) -> SourceLocationPlan:
     r"""The number of source locations for a number of microphone positions,
@@ -1190,7 +1190,7 @@ def special_room_source_locations(
     :param levels: Survey levels, ``(n, bands)``, six rows in 9.4, in
         decibels.
     :param frequencies: Octave centres from 125 Hz to 8 kHz, ascending.
-    :param microphone_positions: The column of Table 3 to read, 3, 6
+    :param n_microphone_positions: The column of Table 3 to read, 3, 6
         (default) or 12.
     :param a_weighted_levels: The six A-weighted levels, ``(n,)``, for the
         A-weighted row; ``None`` leaves it unevaluated.
@@ -1211,13 +1211,13 @@ def special_room_source_locations(
             SoundPowerWarning,
             stacklevel=2,
         )
-    if microphone_positions not in _TABLE3_MICROPHONES:
+    if n_microphone_positions not in _TABLE3_MICROPHONES:
         msg = (
-            "'microphone_positions' must be one of the columns of Table 3, "
-            f"{_TABLE3_MICROPHONES}; got {microphone_positions!r}."
+            "'n_microphone_positions' must be one of the columns of Table 3, "
+            f"{_TABLE3_MICROPHONES}; got {n_microphone_positions!r}."
         )
         raise ValueError(msg)
-    column = _TABLE3_MICROPHONES.index(microphone_positions)
+    column = _TABLE3_MICROPHONES.index(n_microphone_positions)
     freqs = _table_bands(frequencies, n_bands, f"{_STANDARD}, Table 3")
     s_m = _survey_deviation(arr)
     classes = tuple(_sm_class(float(s)) for s in s_m)
@@ -1245,9 +1245,9 @@ def special_room_source_locations(
         standard_deviation_db=np.asarray(s_m, dtype=np.float64),
         source_locations=locations,
         additional_room_locations=np.zeros(n_bands, dtype=np.int64),
-        microphone_positions=int(microphone_positions),
+        n_microphone_positions=int(n_microphone_positions),
         a_weighted_standard_deviation_db=s_a,
-        a_weighted_source_locations=n_a,
+        n_a_weighted_source_locations=n_a,
     )
 
 
@@ -1310,8 +1310,8 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     mean_a_weighted_level: float
     background_margin_a_db: float
     method: str
-    microphone_positions: int
-    source_positions: int
+    n_microphone_positions: int
+    n_source_positions: int
 
     def __post_init__(self) -> None:
         """Reject a result whose per-band quantities disagree or whose tags
@@ -1323,10 +1323,10 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         """
         require_choice(self.method, "method", ("direct", "comparison"))
         require_positive(self.coverage_factor, "coverage_factor")
-        if self.microphone_positions < 1 or self.source_positions < 1:
+        if self.n_microphone_positions < 1 or self.n_source_positions < 1:
             msg = (
-                "SpecialRoomSoundPowerResult: 'microphone_positions' and "
-                "'source_positions' must be at least 1."
+                "SpecialRoomSoundPowerResult: 'n_microphone_positions' and "
+                "'n_source_positions' must be at least 1."
             )
             raise ValueError(msg)
         bands = (
@@ -1756,8 +1756,8 @@ def sound_power_special_room(
         mean_a_weighted_level=mean_a,
         background_margin_a_db=margin_a,
         method="direct",
-        microphone_positions=n_positions,
-        source_positions=n_sources,
+        n_microphone_positions=n_positions,
+        n_source_positions=n_sources,
     )
 
 
@@ -1905,6 +1905,6 @@ def sound_power_special_room_comparison(
         mean_a_weighted_level=math.nan,
         background_margin_a_db=math.nan,
         method="comparison",
-        microphone_positions=n_positions,
-        source_positions=n_sources,
+        n_microphone_positions=n_positions,
+        n_source_positions=n_sources,
     )

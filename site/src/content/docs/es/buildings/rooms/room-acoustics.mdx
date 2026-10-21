@@ -591,8 +591,8 @@ ellas, que recurren a la primera banda cuyo $T_{30}$ haya podido evaluarse. Usa
 el mismo contenedor `ReportMetadata` y el mismo motor de renderizado que la
 [ficha de absorción ISO
 11654](/phonometry/es/materials/absorbers/absorption-measurement/#informe-de-iso-11654-report);
-los campos específicos de sala `room_volume`, `source_positions` y
-`receiver_positions` rellenan la cabecera (la ISO 3382 exige indicar el volumen
+los campos específicos de sala `room_volume`, `n_source_positions` y
+`n_receiver_positions` rellenan la cabecera (la ISO 3382 exige indicar el volumen
 de la sala y el número de posiciones de fuente y de micrófono), junto con
 `test_room` (el nombre de la sala), `specimen` (la descripción de la sala y su
 estado de ocupación), `area`, `instrumentation`, `temperature_c`,
@@ -617,7 +617,7 @@ result.report(
         specimen="Auditorio pequeño, totalmente amueblado, desocupado (1 operador presente)",
         test_room="Auditorio A",
         room_volume=2830.0, area=340.0,
-        source_positions=2, receiver_positions=8,
+        n_source_positions=2, n_receiver_positions=8,
         # El apartado 9.2 i) exige declarar el grado de exactitud.
         measurement_standard="ISO 3382-2 (grado de ingeniería)",
         temperature_c=21.0, relative_humidity_percent=45.0,

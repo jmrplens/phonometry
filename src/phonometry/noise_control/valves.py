@@ -424,7 +424,7 @@ def flow_regime(pressure_ratio: float, boundaries: RegimeBoundaries) -> int:
 
 
 def valve_style_modifier(
-    passage_area: float, wetted_perimeter: float, passages: int
+    passage_area: float, wetted_perimeter: float, n_passages: int
 ) -> float:
     r"""The valve style modifier of Equations (8a) to (8c).
 
@@ -441,19 +441,19 @@ def valve_style_modifier(
 
     :param passage_area: :math:`A`, the area of a single flow passage, in m².
     :param wetted_perimeter: :math:`l_w` of that passage, in m.
-    :param passages: :math:`N_o`, the number of independent flow passages.
+    :param n_passages: :math:`N_o`, the number of independent flow passages.
     :return: :math:`F_d`, dimensionless.
     :raises ValueError: If an argument is not positive and finite, or if the
         passage count is not a whole number.
     """
     area = require_positive(passage_area, "passage_area")
     perimeter = require_positive(wetted_perimeter, "wetted_perimeter")
-    require_scalar(passages, "passages")
-    count = int(passages)
-    if count != passages or count < 1:
+    require_scalar(n_passages, "n_passages")
+    count = int(n_passages)
+    if count != n_passages or count < 1:
         msg = (
-            "'passages' counts the independent flow passages, so it must be "
-            f"a whole number of one or more; got {passages!r}."
+            "'n_passages' counts the independent flow passages, so it must be "
+            f"a whole number of one or more; got {n_passages!r}."
         )
         raise ValueError(msg)
     if not math.isfinite(area) or not math.isfinite(perimeter):
@@ -1009,7 +1009,7 @@ def multiple_passage_jet_diameter(
 
 def stage_level_correction(
     last_stage_level: float,
-    stages: int,
+    n_stages: int,
     inlet_pressure_pa: float,
     stagnation_pressure_pa: float,
 ) -> float:
@@ -1027,19 +1027,19 @@ def stage_level_correction(
 
     :param last_stage_level: :math:`L_{pi,n}` of Equation (18) computed on
         the last stage, in dB.
-    :param stages: :math:`n`, the number of throttling stages, at least two.
+    :param n_stages: :math:`n`, the number of throttling stages, at least two.
     :param inlet_pressure_pa: :math:`p_1` at the valve inlet, in Pa.
     :param stagnation_pressure_pa: :math:`p_n` at the last stage, in Pa.
     :return: :math:`L_{pi}` for the whole trim, in dB.
     :raises ValueError: If the stage count is below two, or a pressure is not
         positive and finite, or the stagnation pressure exceeds the inlet.
     """
-    require_scalar(stages, "stages")
-    count = int(stages)
-    if count != stages or count < _MINIMUM_SOURCES:
+    require_scalar(n_stages, "n_stages")
+    count = int(n_stages)
+    if count != n_stages or count < _MINIMUM_SOURCES:
         msg = (
             "Equation (31) puts back the stages before the last one, so "
-            f"'stages' must be a whole number of two or more; got {stages!r}."
+            f"'n_stages' must be a whole number of two or more; got {n_stages!r}."
         )
         raise ValueError(msg)
     p1 = require_positive(inlet_pressure_pa, "inlet_pressure_pa")

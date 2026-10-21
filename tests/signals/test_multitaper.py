@@ -229,7 +229,7 @@ def test_multitaper_chi2_interval_covers_true_density() -> None:
     for seed in range(150):
         res = ph.signals.multitaper_psd(_white(800 + seed, n=2048), FS)
         for b in (100, 400, 800):
-            hits += int(res.ci_lower[b] <= true_psd <= res.ci_upper[b])
+            hits += int(res.confidence_lower[b] <= true_psd <= res.confidence_upper[b])
             total += 1
     assert hits / total == pytest.approx(0.95, abs=0.03)
 
@@ -301,7 +301,7 @@ def test_multitaper_columns_must_share_the_frequency_axis() -> None:
     """A column off the rfft grid is refused when built, not when drawn.
 
     The plot masks ``frequencies`` for the positive bins and applies that
-    mask to ``psd``, ``ci_lower`` and ``ci_upper``, so those three surface
+    mask to ``psd``, ``confidence_lower`` and ``confidence_upper``, so those three surface
     only as numpy's complaint about a boolean index and two axis sizes,
     naming neither the field nor the one that is wrong. The rest is silent:
     ``degrees_of_freedom`` reaches the legend as the mean of its interior
@@ -316,8 +316,8 @@ def test_multitaper_columns_must_share_the_frequency_axis() -> None:
         ("frequencies", good.frequencies[:-1], per_bin),
         ("psd", good.psd[:-1], per_bin),
         ("psd", np.append(good.psd, good.psd[-1]), per_bin),
-        ("ci_lower", good.ci_lower[:-1], per_bin),
-        ("ci_upper", good.ci_upper[:-1], per_bin),
+        ("confidence_lower", good.confidence_lower[:-1], per_bin),
+        ("confidence_upper", good.confidence_upper[:-1], per_bin),
         ("degrees_of_freedom", good.degrees_of_freedom[:-1], per_bin),
         (
             "degrees_of_freedom",

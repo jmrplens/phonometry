@@ -148,7 +148,7 @@ def test_chi_square_interval_covers_true_psd_at_stated_confidence() -> None:
     for seed in range(200):
         res = ph.signals.power_spectral_density(_white(300 + seed), FS, nperseg=1024)
         for b in (60, 120, 240):
-            hits += int(res.ci_lower[b] <= true_psd <= res.ci_upper[b])
+            hits += int(res.confidence_lower[b] <= true_psd <= res.confidence_upper[b])
             total += 1
     assert hits / total == pytest.approx(0.95, abs=0.025)
 
@@ -156,14 +156,14 @@ def test_chi_square_interval_covers_true_psd_at_stated_confidence() -> None:
 def test_dc_and_nyquist_bins_get_wider_single_component_intervals() -> None:
     """DC/Nyquist carry one real Fourier component: n = nd, not 2·nd."""
     res = ph.signals.power_spectral_density(_white(8), FS, nperseg=1024)
-    ratio = res.ci_upper / res.ci_lower
+    ratio = res.confidence_upper / res.confidence_lower
     interior = float(ratio[1])
     assert np.allclose(ratio[1:-1], interior, rtol=1e-9)
     assert float(ratio[0]) > 1.05 * interior
     assert float(ratio[-1]) > 1.05 * interior  # even nperseg -> Nyquist bin
     # Odd segment length: the last bin is not Nyquist and stays interior.
     odd = ph.signals.power_spectral_density(_white(8), FS, nperseg=1023)
-    odd_ratio = odd.ci_upper / odd.ci_lower
+    odd_ratio = odd.confidence_upper / odd.confidence_lower
     assert float(odd_ratio[-1]) == pytest.approx(float(odd_ratio[1]), rel=1e-9)
     assert float(odd_ratio[0]) > 1.05 * float(odd_ratio[1])
 
@@ -172,10 +172,10 @@ def test_confidence_interval_widens_at_higher_confidence() -> None:
     x = _white(7)
     r90 = ph.signals.power_spectral_density(x, FS, nperseg=1024, confidence=0.90)
     r99 = ph.signals.power_spectral_density(x, FS, nperseg=1024, confidence=0.99)
-    assert np.all(r99.ci_lower <= r90.ci_lower)
-    assert np.all(r90.ci_upper <= r99.ci_upper)
-    assert np.all(r90.ci_lower < r90.psd)
-    assert np.all(r90.psd < r90.ci_upper)
+    assert np.all(r99.confidence_lower <= r90.confidence_lower)
+    assert np.all(r90.confidence_upper <= r99.confidence_upper)
+    assert np.all(r90.confidence_lower < r90.psd)
+    assert np.all(r90.psd < r90.confidence_upper)
 
 
 def test_resolution_bias_error_closed_form() -> None:
@@ -513,7 +513,7 @@ def test_density_band_must_sit_on_its_own_frequency_axis() -> None:
     """The chi-square band is refused when it does not match the density.
 
     The plot cuts the positive-frequency mask from ``frequencies`` and
-    applies it to ``psd``, ``ci_lower`` and ``ci_upper``, so all four reach
+    applies it to ``psd``, ``confidence_lower`` and ``confidence_upper``, so all four reach
     the reader only as numpy's complaint about a boolean index and two axis
     sizes, naming neither the field nor the result, and leaving an open
     figure behind. An extra axis passes every count, so the ranks are pinned
@@ -525,8 +525,12 @@ def test_density_band_must_sit_on_its_own_frequency_axis() -> None:
         ("frequencies", good.frequencies[:-1], per_frequency),
         ("psd", good.psd[:-1], per_frequency),
         ("psd", np.append(good.psd, good.psd[-1]), per_frequency),
-        ("ci_lower", good.ci_lower[:-1], per_frequency),
-        ("ci_upper", np.append(good.ci_upper, good.ci_upper[-1]), per_frequency),
+        ("confidence_lower", good.confidence_lower[:-1], per_frequency),
+        (
+            "confidence_upper",
+            np.append(good.confidence_upper, good.confidence_upper[-1]),
+            per_frequency,
+        ),
         ("psd", np.column_stack([good.psd] * 2), "must have one axis"),
     )
     for field, value, fragment in cases:

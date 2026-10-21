@@ -902,7 +902,7 @@ def _padded_factors(
     spare = degree - pinned - 2 * len(quadratic) - len(linear)
     if spare < 0:
         msg = (
-            "'sections' is too small for this prototype: "
+            "'n_sections' is too small for this prototype: "
             f"degree {degree} cannot hold {pinned + 2 * len(quadratic) + len(linear)}."
         )
         raise ValueError(msg)
@@ -1136,7 +1136,7 @@ def fit_prototype(
     poles: np.ndarray,
     fs: float,
     band: tuple[float, float],
-    sections: int,
+    n_sections: int,
     f_ref: float,
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""Analog prototype whose bilinear image tracks *zeros*/*poles* at *fs*.
@@ -1167,14 +1167,14 @@ def fit_prototype(
     :param band: Frequencies in Hz between which the response is fitted. The
         response outside it is not claimed: see
         :func:`phonometry.filters.weighting._fit_band`.
-    :param sections: Biquad sections, i.e. half the degree of the realised
+    :param n_sections: Biquad n_sections, i.e. half the degree of the realised
         filter.
     :param f_ref: The standard's reference frequency. The residual is measured
         relative to the response at :func:`_anchor_hz`, which is *f_ref* itself
         at every rate that can carry it.
     :return: ``(zeros, poles)`` of the fitted prototype in rad/s, ready for
         :func:`scipy.signal.bilinear_zpk`.
-    :raises ValueError: if *band* is empty or *sections* cannot hold the
+    :raises ValueError: if *band* is empty or *n_sections* cannot hold the
         prototype's own degree.
     """
     low, high = band
@@ -1196,13 +1196,13 @@ def fit_prototype(
     target_db = _analog_db(np.asarray(zeros), np.asarray(poles), frequencies, anchor)
     grid = (omega, omega_ref, target_db)
     placements = _spare_placements(fs, span)
-    best = _fit_from(zeros, poles, 2 * sections, grid, span, placements[0])
+    best = _fit_from(zeros, poles, 2 * n_sections, grid, span, placements[0])
     if best[0] > _FIT_FAILED_DB:
         # The closed-form design's own start did not produce a filter, so the
         # question is no longer which start is quickest but which one works:
         # every remaining placement is tried and the best is kept.
         for placement in placements[1:]:
-            attempt = _fit_from(zeros, poles, 2 * sections, grid, span, placement)
+            attempt = _fit_from(zeros, poles, 2 * n_sections, grid, span, placement)
             if attempt[0] < best[0]:
                 best = attempt
     return _fitted_zpk(best[1], best[2])
@@ -1213,7 +1213,7 @@ def design_sos(
     poles: np.ndarray,
     fs: float,
     band: tuple[float, float],
-    sections: int,
+    n_sections: int,
     f_ref: float,
 ) -> np.ndarray:
     """Second-order sections realising the prototype at *fs*, 0 dB at *f_ref*.
@@ -1234,7 +1234,9 @@ def design_sos(
 
     :return: The cascade.
     """
-    fitted_zeros, fitted_poles = fit_prototype(zeros, poles, fs, band, sections, f_ref)
+    fitted_zeros, fitted_poles = fit_prototype(
+        zeros, poles, fs, band, n_sections, f_ref
+    )
     anchor = _anchor_hz(fs, band, f_ref)
     digital = signal.bilinear_zpk(fitted_zeros, fitted_poles, 1.0, fs)
     sos = signal.zpk2sos(*digital)
@@ -1250,7 +1252,7 @@ def fitted_prototype_hz(
     poles: np.ndarray,
     fs: float,
     band: tuple[float, float],
-    sections: int,
+    n_sections: int,
     f_ref: float,
 ) -> tuple[np.ndarray, np.ndarray]:
     """The fitted prototype's zeros and poles in Hz, for reading beside a table.
@@ -1259,5 +1261,7 @@ def fitted_prototype_hz(
     the answer stays comparable with the standard: the poles come back near the
     printed corner frequencies, moved by the warp the fit is undoing.
     """
-    fitted_zeros, fitted_poles = fit_prototype(zeros, poles, fs, band, sections, f_ref)
+    fitted_zeros, fitted_poles = fit_prototype(
+        zeros, poles, fs, band, n_sections, f_ref
+    )
     return fitted_zeros / (2.0 * np.pi), fitted_poles / (2.0 * np.pi)

@@ -75,7 +75,7 @@ the compact form used here,
 ``g`` is the peak of the Fast-weighted response to an exponentially decaying
 burst; for :math:`T = T_0` the bracket collapses to 1 and the correction
 reduces to the pure volume term :math:`10 \log_{10}(V/V_0)`, as it must. See
-:func:`standardized_maximum_impact_level` and
+:func:`standardized_max_impact_level` and
 :func:`fast_reverberation_correction`.
 
 **A-weighted rating (ISO 717-2:2020 Annex D, normative).** The single number is
@@ -90,7 +90,7 @@ over the one-third-octave bands 50 Hz to 630 Hz **or** the octave bands 63 Hz to
 500 Hz, with the Table D.3 A-weighting corrections, rounded half-up to an
 integer. One-third-octave measurements are rated in one-third octaves, never by
 first summing them into octaves. See
-:func:`a_weighted_maximum_impact_level`; :func:`heavy_impact_octave_levels`
+:func:`a_weighted_max_impact_level`; :func:`heavy_impact_octave_levels`
 implements the separate octave-band conversion of ISO 16283-2 Formula (20),
 used when the *measurement* is reported in octaves.
 """
@@ -125,18 +125,18 @@ __all__ = [
     "HEAVY_IMPACT_A_WEIGHTING",
     "HEAVY_IMPACT_OCTAVE_BANDS_HZ",
     "HEAVY_IMPACT_SOURCES",
-    "AWeightedMaximumImpactResult",
+    "AWeightedMaxImpactResult",
     "HeavyImpactSourceCheck",
     "HeavyImpactSourceSpec",
-    "StandardizedMaximumImpactResult",
-    "a_weighted_maximum_impact_level",
+    "StandardizedMaxImpactResult",
+    "a_weighted_max_impact_level",
     "check_heavy_impact_source",
     "fast_reverberation_correction",
     "heavy_impact_octave_levels",
     "heavy_impact_source_limits",
     "heavy_impact_source_specification",
     "impact_force_exposure_level",
-    "standardized_maximum_impact_level",
+    "standardized_max_impact_level",
 ]
 
 #: Octave-band centre frequencies of the heavy-impact source specification
@@ -584,7 +584,7 @@ def fast_reverberation_correction(
 
 
 @dataclass(frozen=True)
-class StandardizedMaximumImpactResult(OwnsArrays):
+class StandardizedMaxImpactResult(OwnsArrays):
     r"""Standardized maximum impact sound pressure level (ISO 16283-2 3.16).
 
     :ivar frequencies: Band centre frequencies, in Hz, or ``None``.
@@ -658,7 +658,7 @@ class StandardizedMaximumImpactResult(OwnsArrays):
         )
 
 
-def standardized_maximum_impact_level(
+def standardized_max_impact_level(
     levels: ArrayLike,
     volume: float,
     reverberation_time: ArrayLike,
@@ -666,7 +666,7 @@ def standardized_maximum_impact_level(
     frequencies: ArrayLike | None = None,
     reference_time: float = _T0,
     reference_volume: float = _V0,
-) -> StandardizedMaximumImpactResult:
+) -> StandardizedMaxImpactResult:
     r"""Standardized maximum impact level ``L'i,Fmax,V,T`` (Formulae (4)-(6)).
 
     :math:`L'_{\mathrm{i,Fmax},V,T} = L_\mathrm{i,Fmax} + 10 \log_{10}(V/V_0) - 10 \log_{10}[g(C)/g(C_0)]`
@@ -684,7 +684,7 @@ def standardized_maximum_impact_level(
         (Default: 0,5 s).
     :param reference_volume: Reference volume ``V0``, in m3 (Default: 50 m3
         for dwellings).
-    :return: A :class:`StandardizedMaximumImpactResult`.
+    :return: A :class:`StandardizedMaxImpactResult`.
     :raises ValueError: for mismatched shapes or non-positive inputs.
     """
     li = require_finite_array(levels, "levels")
@@ -700,13 +700,13 @@ def standardized_maximum_impact_level(
     if frequencies is not None:
         freqs = require_finite_array(frequencies, "frequencies")
         require_equal_shapes(
-            "standardized_maximum_impact_level",
+            "standardized_max_impact_level",
             {"levels": li.shape, "frequencies": freqs.shape},
             "band",
         )
     correction = fast_reverberation_correction(t, reference_time=reference_time)
     volume_term = float(10.0 * np.log10(v / v0))
-    return StandardizedMaximumImpactResult(
+    return StandardizedMaxImpactResult(
         frequencies=freqs,
         measured=li,
         standardized=np.asarray(li + volume_term - correction, dtype=np.float64),
@@ -730,7 +730,7 @@ def heavy_impact_octave_levels(levels: ArrayLike) -> np.ndarray:
 
     Note that ISO 717-2:2020 Annex D forbids using this conversion as a route
     to the single number: a one-third-octave measurement is rated in one-third
-    octaves with :func:`a_weighted_maximum_impact_level`.
+    octaves with :func:`a_weighted_max_impact_level`.
 
     :param levels: One-third-octave levels in ascending order, in dB.
     :return: The octave-band levels, in dB.
@@ -747,7 +747,7 @@ def heavy_impact_octave_levels(levels: ArrayLike) -> np.ndarray:
 
 
 @dataclass(frozen=True)
-class AWeightedMaximumImpactResult(OwnsArrays):
+class AWeightedMaxImpactResult(OwnsArrays):
     """A-weighted maximum impact sound pressure level (ISO 717-2 Annex D).
 
     :ivar frequencies: Band centre frequencies, in Hz.
@@ -785,7 +785,7 @@ class AWeightedMaximumImpactResult(OwnsArrays):
 
         ``band`` is pinned to the two Annex D band widths because the figure
         titles itself by looking the tag up in a label table after the bars
-        are drawn: :func:`a_weighted_maximum_impact_level` validates it at
+        are drawn: :func:`a_weighted_max_impact_level` validates it at
         the call, but a result rewritten by hand reaches the lookup unchecked
         and dies mid-render with a bare ``KeyError`` naming the tag alone.
 
@@ -823,12 +823,12 @@ def _round_half_up(value: float) -> int:
     return int(np.floor(value + 0.5))
 
 
-def a_weighted_maximum_impact_level(
+def a_weighted_max_impact_level(
     levels: ArrayLike,
     frequencies: ArrayLike | Sequence[float] | None = None,
     *,
     band: str | None = None,
-) -> AWeightedMaximumImpactResult:
+) -> AWeightedMaxImpactResult:
     r"""A-weighted maximum impact level ``XiA,Fmax`` (ISO 717-2:2020, (D.1)).
 
     :math:`X_\mathrm{iA,Fmax} = 10 \log_{10}( \sum_j 10^{(X_{\mathrm{i,Fmax},j} + A_j)/10} )`,
@@ -844,7 +844,7 @@ def a_weighted_maximum_impact_level(
         must be exactly the rating bands of the chosen band width.
     :param band: ``"third"`` or ``"octave"``; inferred from the number of
         values (12 -> third, 4 -> octave) when omitted.
-    :return: An :class:`AWeightedMaximumImpactResult`.
+    :return: An :class:`AWeightedMaxImpactResult`.
     :raises ValueError: for a wrong number of values or mismatched bands.
     """
     x = require_finite_array(levels, "levels")
@@ -876,7 +876,7 @@ def a_weighted_maximum_impact_level(
     a_weighting = np.asarray([table[float(b)] for b in bands], dtype=np.float64)
     corrected = x + a_weighting
     unrounded = float(10.0 * np.log10(np.sum(10.0 ** (corrected / 10.0))))
-    return AWeightedMaximumImpactResult(
+    return AWeightedMaxImpactResult(
         frequencies=bands,
         band=chosen,
         levels=x,

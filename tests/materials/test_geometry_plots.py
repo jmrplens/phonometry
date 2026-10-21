@@ -66,7 +66,7 @@ def _geometry_axes() -> Iterator[Axes]:
         lattice_step_m=0.015,
         period_m=0.02,
     )
-    yield m.plot_qrd_geometry(m.qrd_well_depths(7, 500.0), 0.12, repetitions=2)
+    yield m.plot_qrd_geometry(m.qrd_well_depths(7, 500.0), 0.12, n_repetitions=2)
     yield m.plot_impedance_tube_geometry(
         spacing_m=0.05, x1=0.15, diameter_m=0.1, shape="circular"
     )
@@ -147,9 +147,11 @@ def test_slit_result_retains_geometry_and_draws() -> None:
 
 def test_diffuser_response_retains_wells_and_draws() -> None:
     depths = m.qrd_well_depths(7, 500.0)
-    res = m.predict_diffuser_polar_response(0.12, 1000.0, depths=depths, repetitions=2)
+    res = m.predict_diffuser_polar_response(
+        0.12, 1000.0, depths=depths, n_repetitions=2
+    )
     assert res.well_width == pytest.approx(0.12)
-    assert res.repetitions == 2
+    assert res.n_repetitions == 2
     assert res.depths is not None
     assert np.allclose(res.depths, depths)
     assert res.plot_geometry() is not None
@@ -220,8 +222,8 @@ def test_qrd_geometry_validation() -> None:
         m.plot_qrd_geometry([-0.01], 0.12)
     with pytest.raises(ValueError, match=r"'well_width' must be positive"):
         m.plot_qrd_geometry([0.05], 0.0)
-    with pytest.raises(ValueError, match=r"'repetitions' must be >="):
-        m.plot_qrd_geometry([0.05], 0.12, repetitions=0)
+    with pytest.raises(ValueError, match=r"'n_repetitions' must be >="):
+        m.plot_qrd_geometry([0.05], 0.12, n_repetitions=0)
 
 
 def test_qrd_geometry_refuses_a_nan_well_depth() -> None:

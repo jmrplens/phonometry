@@ -238,7 +238,7 @@ def _nipts_statement(
             lex=decimal_comma(f"{result.l_ex:g}", language)
         ),
         t("Exposure duration = {years} years", language).format(
-            years=decimal_comma(f"{result.years:g}", language)
+            years=decimal_comma(f"{result.exposure_duration_years:g}", language)
         ),
         _fractile_phrase(result.fractile, language),
     ]
@@ -349,7 +349,7 @@ def render_nipts_report(
         _prediction_notes(
             language,
             l_ex=float(result.l_ex),
-            years=float(result.years),
+            years=float(result.exposure_duration_years),
             fractile=float(result.fractile),
             handicap_mean=is_handicap,
         )
@@ -430,7 +430,7 @@ def _htlan_statement(
             "Noise exposure L<sub>EX,8h</sub> = {lex} dB over {years} years", language
         ).format(
             lex=decimal_comma(f"{result.l_ex:g}", language),
-            years=decimal_comma(f"{result.years:g}", language),
+            years=decimal_comma(f"{result.exposure_duration_years:g}", language),
         ),
         _fractile_phrase(result.fractile, language),
     ]
@@ -535,7 +535,7 @@ def render_htlan_report(
         _prediction_notes(
             language,
             l_ex=float(result.l_ex),
-            years=float(result.years),
+            years=float(result.exposure_duration_years),
             fractile=float(result.fractile),
             handicap_mean=is_handicap,
             with_age_component=True,

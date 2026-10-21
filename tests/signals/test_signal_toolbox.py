@@ -99,7 +99,7 @@ def test_envelope_is_rectangular_gate() -> None:
 def test_repetitive_burst_train_clause_a22() -> None:
     # Clause A2.2: 5 ms bursts of 5 kHz tone; 10 bursts per second gives a
     # 4800-sample period at 48 kHz and a 5 % duty cycle.
-    res = ph.signals.tone_burst(FS, 5000.0, 25, repetitions=3, repetition_rate=10.0)
+    res = ph.signals.tone_burst(FS, 5000.0, 25, n_repetitions=3, repetition_rate=10.0)
     assert res.burst_samples == 240
     assert res.period_samples == 4800
     assert res.duty_cycle == pytest.approx(0.05)
@@ -113,7 +113,7 @@ def test_repetitive_burst_train_clause_a22() -> None:
 
 @pytest.mark.parametrize("rate", [2.0, 10.0, 100.0])
 def test_table_aiii_repetition_rates_fit(rate: float) -> None:
-    res = ph.signals.tone_burst(FS, 5000.0, 25, repetitions=2, repetition_rate=rate)
+    res = ph.signals.tone_burst(FS, 5000.0, 25, n_repetitions=2, repetition_rate=rate)
     assert res.period_samples == round(FS / rate)
 
 
@@ -148,9 +148,9 @@ def test_tone_burst_invalid_config_raises_before_warning() -> None:
     with _warnings.catch_warnings():
         _warnings.simplefilter("error", ph.PhonometryWarning)
         with pytest.raises(
-            ValueError, match=r"'repetition_rate' is required when 'repetitions' > 1"
+            ValueError, match=r"'repetition_rate' is required when 'n_repetitions' > 1"
         ):
-            ph.signals.tone_burst(FS, 997.0, 10, repetitions=2)
+            ph.signals.tone_burst(FS, 997.0, 10, n_repetitions=2)
 
 
 def test_tone_burst_commensurate_frequency_does_not_warn() -> None:
@@ -165,18 +165,18 @@ def test_tone_burst_commensurate_frequency_does_not_warn() -> None:
 def test_tone_burst_result_is_frozen() -> None:
     res = ph.signals.tone_burst(FS, 5000.0, 25)
     with pytest.raises(dataclasses.FrozenInstanceError):
-        res.cycles = 3  # type: ignore[misc]
+        res.n_cycles = 3  # type: ignore[misc]
 
 
 def test_tone_burst_invalid_inputs() -> None:
-    with pytest.raises(ValueError, match=r"'cycles' must be a positive integer"):
+    with pytest.raises(ValueError, match=r"'n_cycles' must be a positive integer"):
         ph.signals.tone_burst(FS, 5000.0, 0)
     with pytest.raises(ValueError, match=r"'frequency' must be below the Nyquist rate"):
         ph.signals.tone_burst(FS, 24000.0, 10)
     with pytest.raises(
-        ValueError, match=r"'repetition_rate' is required when 'repetitions' > 1"
+        ValueError, match=r"'repetition_rate' is required when 'n_repetitions' > 1"
     ):
-        ph.signals.tone_burst(FS, 5000.0, 25, repetitions=2)
+        ph.signals.tone_burst(FS, 5000.0, 25, n_repetitions=2)
     with pytest.raises(
         ValueError, match=r"The burst does not fit in one repetition period"
     ):
@@ -220,7 +220,7 @@ def test_tone_burst_gate_must_lie_on_the_record_it_gates() -> None:
 
 
 def test_tone_burst_plot_waveform_and_envelope() -> None:
-    res = ph.signals.tone_burst(FS, 5000.0, 25, repetitions=2, repetition_rate=10.0)
+    res = ph.signals.tone_burst(FS, 5000.0, 25, n_repetitions=2, repetition_rate=10.0)
     ax = res.plot(linewidth=2)
     assert any(line.get_linewidth() == 2.0 for line in ax.lines)
     assert "IEC 60268-1" in ax.get_title()

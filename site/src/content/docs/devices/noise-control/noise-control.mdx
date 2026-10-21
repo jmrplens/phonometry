@@ -412,7 +412,7 @@ plt.show()
 
 </details>
 
-`enclosure_insertion_loss` returns an `EnclosureResult` with the panel
+`enclosure_insertion_loss` returns an `EnclosureInsertionLossResult` with the panel
 `panel_transmission_loss`, the interior `correction`, the net `insertion_loss`,
 the interior `room_constant`, and `.plot()`. It also files itself: `.report()`
 renders a one-page enclosure fiche with the per-band $R$, $C$ and
@@ -449,7 +449,7 @@ repository; click the preview to open the PDF.
 	name="enclosure_insertion_loss_example"
 	title="Machine enclosure insertion loss example report (PDF)"
 	description="One-page machine-enclosure fiche: a metadata header naming the sheet-steel close-fitting enclosure and the machine hall, an octave-band table of the supplied panel transmission loss R, the interior correction C and the net insertion loss IL (18.0, 3.4 and 14.6 dB at 63 Hz up to 45.0, 3.4 and 41.6 dB at 4 kHz), the R, C and IL curves plotted beside it, the boxed mean insertion loss IL = 28.9 dB with the mean panel R = 32.3 dB and the external and internal surface areas SE = 24.00 m2 and Si = 30.00 m2, and a PASS verdict against a declared minimum of 20.0 dB."
-	caption="Machine-enclosure fiche (EnclosureResult.report), the net insertion loss IL = R - C the sheet-steel design case delivers."
+	caption="Machine-enclosure fiche (EnclosureInsertionLossResult.report), the net insertion loss IL = R - C the sheet-steel design case delivers."
 />
 
 ### 2.1 What the enclosure actually delivers: leaks, doors and openings

@@ -660,9 +660,9 @@ def _chk_period_29() -> Outcome:
     period = _period(2)
     return record(
         {"valid blocks": float(oracle.IOA_PERIOD_CASES[2][2]), "rating": 0.0},
-        {"valid blocks": float(period.valid_blocks), "rating": period.rating_db},
+        {"valid blocks": float(period.n_valid_blocks), "rating": period.rating_db},
         label="29 valid blocks, rated 0 dB (the AMWG report discards it)",
-        computed_label=f"{period.valid_blocks} valid blocks, rated {period.rating_db:g} dB",
+        computed_label=f"{period.n_valid_blocks} valid blocks, rated {period.rating_db:g} dB",
     )
 
 

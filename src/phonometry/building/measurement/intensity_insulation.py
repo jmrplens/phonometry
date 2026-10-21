@@ -994,25 +994,25 @@ def limp_panel_reduction_index(
 _BAND_TOLERANCE = 0.03
 
 
-def _validated_element_count(elements: object) -> int:
+def _validated_element_count(n_elements: object) -> int:
     """The number ``N`` of element units, as a positive integer.
 
-    :param elements: The caller's ``elements`` argument, of any type.
+    :param n_elements: The caller's ``n_elements`` argument, of any type.
     :return: ``N`` as a built-in ``int``.
     :raises ValueError: for a bool (``True`` counts no units), a value that is
         not a whole number, one below 1, or anything an integer cannot be
         taken from.
     """
-    msg = "'elements' must be a positive integer."
+    msg = "'n_elements' must be a positive integer."
     # An array is refused by its rank: numpy before 2.4 converts a
     # one-element array through int() instead of refusing it.
-    if isinstance(elements, (bool, np.bool_)) or not is_scalar(elements):
+    if isinstance(n_elements, (bool, np.bool_)) or not is_scalar(n_elements):
         raise ValueError(msg)
     try:
-        count = int(elements)  # type: ignore[call-overload]
+        count = int(n_elements)  # type: ignore[call-overload]
     except (TypeError, ValueError) as exc:
         raise ValueError(msg) from exc
-    if count != elements or count < 1:
+    if count != n_elements or count < 1:
         raise ValueError(msg)
     return int(count)
 
@@ -1344,7 +1344,7 @@ class LowFrequencyElementResult(OwnsArrays):
         intensity.
     :ivar frequencies: Mid-band frequencies, in hertz, or ``None``.
     :ivar measurement_area: Measurement-surface area ``Sm``, in m².
-    :ivar elements: Number ``N`` of element units installed within the
+    :ivar n_elements: Number ``N`` of element units installed within the
         measurement surface.
     :ivar absorbing_specimen_surface: Which of the two Clause 6.4.2 limits
         was applied.
@@ -1354,7 +1354,7 @@ class LowFrequencyElementResult(OwnsArrays):
     surface_pressure_intensity_indicator: np.ndarray | None
     frequencies: np.ndarray | None
     measurement_area: float
-    elements: int
+    n_elements: int
     _: KW_ONLY
     absorbing_specimen_surface: bool
 
@@ -1423,7 +1423,7 @@ def low_frequency_element_normalized_difference(
     l_in: Sequence[float] | np.ndarray,
     *,
     measurement_area: float,
-    elements: int = 1,
+    n_elements: int = 1,
     l_p: Sequence[float] | np.ndarray | None = None,
     frequencies: Sequence[float] | np.ndarray | None = None,
     absorbing_specimen_surface: bool = False,
@@ -1453,7 +1453,7 @@ def low_frequency_element_normalized_difference(
     :param l_in: Normal sound intensity levels over the measurement surface
         in the receiving room, in dB.
     :param measurement_area: Measurement-surface area ``Sm``, in m².
-    :param elements: Number ``N`` of identical element units installed within
+    :param n_elements: Number ``N`` of identical element units installed within
         the measurement surface, at least 1.
     :param l_p: Sound pressure levels on the measurement surface in the
         receiving room, measured alongside ``l_in`` (Clause 6.4.2), in dB, or
@@ -1465,7 +1465,7 @@ def low_frequency_element_normalized_difference(
         tightens the Clause 6.4.2 limit from 10 dB to 6 dB.
     :return: :class:`LowFrequencyElementResult`.
     :raises ValueError: if the band counts differ, if the measurement area is
-        not positive, if ``elements`` is not a positive integer, if any level
+        not positive, if ``n_elements`` is not a positive integer, if any level
         is non-finite, or if ``frequencies`` carries a band outside the range
         this part is defined for.
     """
@@ -1477,7 +1477,7 @@ def low_frequency_element_normalized_difference(
         "band",
     )
     sm = _positive_area(measurement_area, "measurement_area")
-    n = _validated_element_count(elements)
+    n = _validated_element_count(n_elements)
     freqs = _check_low_frequency_bands(
         frequencies,
         l_in_bands.size,
@@ -1501,7 +1501,7 @@ def low_frequency_element_normalized_difference(
         surface_pressure_intensity_indicator=f_pi,
         frequencies=freqs,
         measurement_area=sm,
-        elements=n,
+        n_elements=n,
         absorbing_specimen_surface=_validated_absorbing_flag(
             absorbing_specimen_surface
         ),

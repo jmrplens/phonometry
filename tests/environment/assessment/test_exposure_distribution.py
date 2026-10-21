@@ -54,13 +54,13 @@ def _annex_a(probabilities: np.ndarray = _PERIOD) -> sd.SELDistribution:
         _LEVELS,
         probabilities,
         sigma_db=ISO13474_ANNEX_A_SIGMA_DB,
-        subclasses=ISO13474_ANNEX_A_SUBCLASSES,
+        n_subclasses=ISO13474_ANNEX_A_SUBCLASSES,
     )
 
 
 def _annex_a_one_subclass() -> sd.SELDistribution:
     return sd.sel_distribution(
-        _LEVELS, _PERIOD, sigma_db=ISO13474_ANNEX_A_SIGMA_DB, subclasses=1
+        _LEVELS, _PERIOD, sigma_db=ISO13474_ANNEX_A_SIGMA_DB, n_subclasses=1
     )
 
 
@@ -300,7 +300,7 @@ def test_turbulence_level_shift_is_the_integral_of_equation_22(sigma: float) -> 
 
 def test_each_subclass_keeps_its_energy_after_the_shift() -> None:
     """The reason for Equation (22): the spread subclass averages to its centre."""
-    dist = sd.sel_distribution([40.0, 50.0], [0.5, 0.5], sigma_db=4.0, subclasses=1)
+    dist = sd.sel_distribution([40.0, 50.0], [0.5, 0.5], sigma_db=4.0, n_subclasses=1)
     mean = float(dist.subclass_centers_db[0, 0])
     shift = dist.level_shift_db
 
@@ -366,7 +366,7 @@ def test_class_density_is_a_step_function_of_the_classes() -> None:
 
 
 def test_subclass_centres_follow_equation_18() -> None:
-    dist = sd.sel_distribution([40.0, 44.0], [0.25, 0.75], subclasses=4)
+    dist = sd.sel_distribution([40.0, 44.0], [0.25, 0.75], n_subclasses=4)
     # Classes [38, 42] and [42, 46]: b = 1 dB, centres at g_L + (j - 1/2) b.
     np.testing.assert_allclose(
         dist.subclass_centers_db,
@@ -378,7 +378,7 @@ def test_subclass_centres_follow_equation_18() -> None:
 def test_sigma_and_subclasses_default_to_the_annex() -> None:
     dist = sd.sel_distribution([40.0, 44.0], [0.5, 0.5])
     assert dist.sigma_db == 5.0
-    assert dist.subclasses == 10
+    assert dist.n_subclasses == 10
     assert dist.subclass_centers_db.shape == (2, 10)
 
 
@@ -580,8 +580,8 @@ def test_refuses_a_non_positive_sigma(sigma: float) -> None:
 
 
 def test_refuses_zero_subclasses() -> None:
-    with pytest.raises(ValueError, match="'subclasses' must be a whole number"):
-        sd.sel_distribution([40.0, 44.0], [0.5, 0.5], subclasses=0)
+    with pytest.raises(ValueError, match="'n_subclasses' must be a whole number"):
+        sd.sel_distribution([40.0, 44.0], [0.5, 0.5], n_subclasses=0)
 
 
 def test_refuses_a_non_finite_rating_adjustment() -> None:
@@ -618,7 +618,7 @@ def test_refuses_all_zero_probabilities_in_the_energy_mean() -> None:
 
 
 def _fields(**overrides: object) -> dict[str, object]:
-    dist = sd.sel_distribution([40.0, 44.0], [0.5, 0.5], subclasses=2)
+    dist = sd.sel_distribution([40.0, 44.0], [0.5, 0.5], n_subclasses=2)
     fields = {name: getattr(dist, name) for name in dist.__dataclass_fields__}
     fields.update(overrides)
     return fields

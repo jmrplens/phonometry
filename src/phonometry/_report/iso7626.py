@@ -187,7 +187,7 @@ def render_mobility_report(
 def _impact_basis(result: ImpactMobilityResult, language: str = "en") -> str:
     """The standard-basis line of an impact measurement, naming ISO 7626-5."""
     kind = _kind(result.mobility_result, language)
-    if result.impacts == 1:
+    if result.n_impacts == 1:
         return t(
             "Measurement of the {kind} mechanical mobility Y = v/F by impact "
             "excitation, from a single impact (ISO 7626-5:2019; "
@@ -199,7 +199,7 @@ def _impact_basis(result: ImpactMobilityResult, language: str = "en") -> str:
         "excitation, averaged over {n} impacts (ISO 7626-5:2019, 8.6; "
         "frequency-response function of ISO 7626-1:2011).",
         language,
-    ).format(kind=kind, n=result.impacts)
+    ).format(kind=kind, n=result.n_impacts)
 
 
 def _window_reading(result: ImpactMobilityResult, language: str = "en") -> str:
@@ -218,7 +218,7 @@ def _impact_rows(
     coherence = float(np.asarray(result.coherence, dtype=np.float64)[index])
     return [
         *_metric_rows(mobility, language),
-        (t("Impacts averaged", language), str(result.impacts)),
+        (t("Impacts averaged", language), str(result.n_impacts)),
         (t("Exponential window a [1/s]", language), _window_reading(result, language)),
         (
             t("Coherence at peak", language),

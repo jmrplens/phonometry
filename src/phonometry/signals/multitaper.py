@@ -77,11 +77,11 @@ class MultitaperSpectralDensityResult(OwnsArrays):
     :ivar psd: Multitaper spectral density
         :math:`\hat{S}^{(mt)}(f)` (units²/Hz for
         ``'density'`` scaling, units² for ``'spectrum'``).
-    :ivar ci_lower: Lower chi-square confidence bound,
+    :ivar confidence_lower: Lower chi-square confidence bound,
         :math:`\nu \hat{S}/\chi^2_{\nu;\alpha/2}` with the per-frequency
         :math:`\nu` (the same interval
         form as B&P Eq. 8.163, with :math:`\nu` from P&W Eq. 370b).
-    :ivar ci_upper: Upper chi-square confidence bound.
+    :ivar confidence_upper: Upper chi-square confidence bound.
     :ivar confidence: Confidence level of the interval (e.g. ``0.95``).
     :ivar degrees_of_freedom: Per-frequency equivalent chi-square degrees
         of freedom
@@ -122,8 +122,8 @@ class MultitaperSpectralDensityResult(OwnsArrays):
 
     frequencies: NDArray[np.float64]
     psd: NDArray[np.float64]
-    ci_lower: NDArray[np.float64]
-    ci_upper: NDArray[np.float64]
+    confidence_lower: NDArray[np.float64]
+    confidence_upper: NDArray[np.float64]
     confidence: float
     degrees_of_freedom: NDArray[np.float64]
     random_error: NDArray[np.float64]
@@ -143,7 +143,7 @@ class MultitaperSpectralDensityResult(OwnsArrays):
         times, and the four the figure draws are the only ones a mismatch
         stops. :meth:`plot` builds a single positive-frequency mask from
         :attr:`frequencies` and applies it to :attr:`psd`,
-        :attr:`ci_lower` and :attr:`ci_upper`, so a length that disagrees
+        :attr:`confidence_lower` and :attr:`confidence_upper`, so a length that disagrees
         raises numpy's ``boolean index did not match indexed array along
         axis 0; size of axis is 513 but size of corresponding boolean
         axis is 512`` -- which names sizes and never a field, and quotes
@@ -155,7 +155,7 @@ class MultitaperSpectralDensityResult(OwnsArrays):
         reaches the figure only as the mean of its interior bins, printed
         in the legend beside the confidence level: hand this density the
         dof of another estimate and the band drawn from the correct
-        :attr:`ci_lower` and :attr:`ci_upper` is labelled
+        :attr:`confidence_lower` and :attr:`confidence_upper` is labelled
         :math:`\bar\nu` = 5.2 where the interval it shows carries 10.6, on
         a figure that is otherwise complete. One entry too many is quieter
         still -- the mean barely moves -- but the halved bin documented
@@ -184,8 +184,8 @@ class MultitaperSpectralDensityResult(OwnsArrays):
             self,
             frequencies=1,
             psd=1,
-            ci_lower=1,
-            ci_upper=1,
+            confidence_lower=1,
+            confidence_upper=1,
             degrees_of_freedom=1,
             random_error=1,
             weights=2,
@@ -195,8 +195,8 @@ class MultitaperSpectralDensityResult(OwnsArrays):
             self,
             "frequencies",
             "psd",
-            "ci_lower",
-            "ci_upper",
+            "confidence_lower",
+            "confidence_upper",
             "degrees_of_freedom",
             "random_error",
             ("weights", 1),
@@ -486,8 +486,8 @@ def multitaper_psd(
     return MultitaperSpectralDensityResult(
         frequencies=np.fft.rfftfreq(xa.size, 1.0 / fs_v),
         psd=psd,
-        ci_lower=lower,
-        ci_upper=upper,
+        confidence_lower=lower,
+        confidence_upper=upper,
         confidence=conf,
         degrees_of_freedom=dof,
         random_error=np.sqrt(2.0 / dof),

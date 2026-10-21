@@ -72,7 +72,7 @@ def _chk_table_a1() -> Outcome:
 )
 def _chk_four_planes() -> Outcome:
     """Twice each four-plane factor rounds to the value Table A.1 prints."""
-    factors = metrology.adjustment_factors(_STEP, planes=4)
+    factors = metrology.adjustment_factors(_STEP, n_planes=4)
     printed = _printed_factor_by_angle()
     matching = sum(
         1

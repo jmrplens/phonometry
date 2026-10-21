@@ -320,7 +320,7 @@ def _chk_sound_energy_identity_iso3744() -> Outcome:
     "One measurement encompassing Ne = 5 events is 10 lg 5 above one event",
 )
 def _chk_sound_energy_events_eq20() -> Outcome:
-    level = ph.emission.mean_single_event_level(np.array([90.0]), events=5)
+    level = ph.emission.mean_single_event_level(np.array([90.0]), n_events=5)
     return numeric(
         10.0 * math.log10(5.0), 90.0 - float(level[0]), 1e-12, unit="dB", places=6
     )
@@ -624,11 +624,11 @@ def _chk_iso9614_1_additional_positions() -> Outcome:
     expected = math.ceil(4.0 * (f4_subset / delta_alpha) ** 2)
     return numeric(
         float(expected),
-        float(outcome.additional_positions),
+        float(outcome.n_additional_positions),
         0.0,
         places=0,
         expected_label=f"N* = {expected} positions",
-        computed_label=f"N* = {outcome.additional_positions} positions",
+        computed_label=f"N* = {outcome.n_additional_positions} positions",
     )
 
 
@@ -798,7 +798,7 @@ def _chk_iso3747_event_forms() -> Outcome:
     )  # fmt: skip
     encompassing = ph.emission.sound_energy_in_situ(
         _ISO3747_ST + 10.0 * math.log10(n_events),
-        _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS, events=n_events,
+        _ISO3747_RSS, _ISO3747_LW_RSS, _ISO3747_FREQS, n_events=n_events,
     )  # fmt: skip
     worst = float(
         np.max(
@@ -1149,7 +1149,7 @@ def _chk_iso9295_comparison() -> Outcome:
     "three equal sidebands summing to 10 lg 3 above one",
 )
 def _chk_iso9295_tone_under_moving_microphone() -> Outcome:
-    bandwidth = ph.emission.minimum_analyzer_bandwidth(
+    bandwidth = ph.emission.min_analyzer_bandwidth(
         16000.0, microphone_speed_m_s=0.4, speed_of_sound=345.0
     )
     total = ph.emission.tone_level_from_sidebands([50.0, 50.0, 50.0])

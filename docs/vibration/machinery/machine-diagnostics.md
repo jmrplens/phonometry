@@ -113,7 +113,7 @@ sideband groups and lifts the higher mesh harmonics.
 from phonometry import vibration
 
 # A 28-tooth pinion on a 1500 r/min shaft, with two sideband orders.
-res = vibration.gear_mesh_frequencies(1500.0, 28, n_harmonics=3, sidebands=2)
+res = vibration.gear_mesh_frequencies(1500.0, 28, n_harmonics=3, n_sidebands=2)
 print(round(res["GMF"], 1))            # 700.0
 print(round(res["GMF+1x"], 1))         # 725.0  (GMF + one shaft order)
 print(res.harmonics("GMF", 3))         # [ 700. 1400. 2100.]
@@ -220,7 +220,7 @@ shaft_rpm = 2000.0               # from the tacho, not from the nameplate
 # shaft harmonics. Put them all on one axes.
 bearing = vibration.bearing_fault_frequencies(shaft_rpm, 15, 6.0, 34.0,
                                               contact_angle_deg=12.96)
-gear = vibration.gear_mesh_frequencies(shaft_rpm, 28, n_harmonics=2, sidebands=1)
+gear = vibration.gear_mesh_frequencies(shaft_rpm, 28, n_harmonics=2, n_sidebands=1)
 lines = vibration.combine_fault_lines(bearing, gear)
 
 spectrum = signals.envelope_spectrum(record, fs, band=(2000.0, 4000.0))

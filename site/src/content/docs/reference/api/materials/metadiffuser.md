@@ -42,7 +42,7 @@ metadiffuser_diffusion_spectrum(
     period_m: float,
     angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
     source_angle_deg: float = 0.0,
-    repetitions: int = 1,
+    n_repetitions: int = 1,
     resonator_geometry: str = 'slit',
     fluid: Fluid = ...,
 ) -> DiffusionSpectrum
@@ -67,7 +67,7 @@ exactly as the paper reports `delta_n`.
 | `period_m` | Well pitch `d` along the panel face, in metres. |
 | `angles_deg` | Receiver reflection angles `theta`, in degrees. |
 | `source_angle_deg` | Angle of incidence `psi`, in degrees. |
-| `repetitions` | Number of repetitions `N_p` of the single period. |
+| `n_repetitions` | Number of repetitions `N_p` of the single period. |
 | `resonator_geometry` | `"slit"` (default) for the paper's two-dimensional resonators, `"square"` for square-duct necks and cavities. |
 | `fluid` | State of the air the panel radiates into and the slits and resonators are filled with ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); its speed of sound `c0` also carries the far field. |
 
@@ -84,7 +84,7 @@ metadiffuser_polar_response(
     period_m: float,
     angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
     source_angle_deg: float = 0.0,
-    repetitions: int = 1,
+    n_repetitions: int = 1,
     resonator_geometry: str = 'slit',
     fluid: Fluid = ...,
 ) -> DiffuserPolarResponse
@@ -109,7 +109,7 @@ with
 | `period_m` | Well pitch `d` along the panel face, in metres; it is the `well_width` of the far-field model. |
 | `angles_deg` | Receiver reflection angles `theta`, in degrees. |
 | `source_angle_deg` | Angle of incidence `psi` of the source, in degrees; also applied to the local slit reflection. |
-| `repetitions` | Number of repetitions `N_p` of the single period; the grating lobes of a Schroeder-like design require `periods >= 2`. |
+| `n_repetitions` | Number of repetitions `N_p` of the single period; the grating lobes of a Schroeder-like design require `periods >= 2`. |
 | `resonator_geometry` | `"slit"` (default) for the paper's two-dimensional resonators, `"square"` for square-duct necks and cavities. |
 | `fluid` | State of the air the panel radiates into and the slits and resonators are filled with ([`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid)); its speed of sound `c0` also carries the far field. |
 

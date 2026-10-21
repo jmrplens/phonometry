@@ -914,7 +914,7 @@ def generate_heavy_impact_sources(output_dir: str) -> None:
 
     # ISO 717-2:2020 Table D.4: a field measurement in octave bands.
     levels = [65.3, 64.5, 58.0, 55.8]
-    res = building.a_weighted_maximum_impact_level(levels)
+    res = building.a_weighted_max_impact_level(levels)
     xr = np.arange(4)
     ax_rate.bar(
         xr - 0.19,

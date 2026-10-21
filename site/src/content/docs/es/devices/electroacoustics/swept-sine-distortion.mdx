@@ -101,7 +101,7 @@ fs, f1, f2, seconds = 48000, 20.0, 6000.0, 4.0
 x = electroacoustics.synchronized_sweep_signal(fs, f1, f2, seconds)   # reproducir esto...
 # ... grabar la respuesta del dispositivo en `y` (con su cola de caída) ...
 y = x + 0.12 * x**2 + 0.08 * x**3     # un cúbico sin memoria hace de grabación
-res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3)
+res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, duration_s=seconds, n_harmonics=3)
 
 res.harmonic_responses    # H1..H3 complejas sobre res.frequencies
 res.thd_ratio, res.thd_frequencies
@@ -135,7 +135,7 @@ import numpy as np
 x = electroacoustics.synchronized_sweep_signal(fs, f1, f2, seconds, amplitude=0.5, fade=0.02)
 # ... reproduce x, graba y, y sigue grabando hasta que la caída se apague ...
 y = x + 0.12 * x**2 + 0.08 * x**3     # el mismo cúbico, ahora al nivel reproducido
-res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3,
+res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, duration_s=seconds, n_harmonics=3,
                                              amplitude=0.5, fade=0.02)
 ```
 
@@ -198,7 +198,7 @@ a2, a3 = 0.12, 0.08
 x = electroacoustics.synchronized_sweep_signal(fs, f1, f2, seconds)
 b, a = sp_signal.butter(2, 3000.0, fs=fs)             # postfiltro de 3 kHz
 y = sp_signal.lfilter(b, a, x + a2 * x**2 + a3 * x**3)
-res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3)
+res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, duration_s=seconds, n_harmonics=3)
 
 h1 = 1.0 + 3.0 * a3 / 4.0                              # ganancia de Chebyshev
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -253,7 +253,7 @@ a2, a3 = 0.12, 0.08
 x = electroacoustics.synchronized_sweep_signal(fs, f1, f2, seconds)
 b, a = sp_signal.butter(2, 3000.0, fs=fs)
 y = sp_signal.lfilter(b, a, x + a2 * x**2 + a3 * x**3)
-res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3)
+res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, duration_s=seconds, n_harmonics=3)
 
 for k in range(3):
     mag = np.abs(np.asarray(res.harmonic_responses[k]))
@@ -336,7 +336,7 @@ from phonometry import electroacoustics, room
 
 x = room.sweep_signal(fs, f1, f2, seconds)          # el ESS de ISO 18233
 y = x + 0.12 * x**2 + 0.08 * x**3                   # el mismo cúbico, grabado del ESS
-res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, seconds=seconds, method="farina")
+res = electroacoustics.swept_sine_distortion(y, fs, f1=f1, f2=f2, duration_s=seconds, method="farina")
 res.plot()   # los mismos paneles |Hn| + THD(f) que el método sincronizado (necesita matplotlib)
 ```
 
@@ -367,7 +367,7 @@ x = electroacoustics.synchronized_sweep_signal(48000, 20.0, 6000.0, 4.0)
 y = x + 0.12 * x**2 + 0.08 * x**3            # el oráculo sin memoria
 actual = len(x) / 48000                       # el generador cuantiza T
 for method in ("synchronized", "farina"):
-    res = electroacoustics.swept_sine_distortion(y, 48000, f1=20.0, f2=6000.0, seconds=actual,
+    res = electroacoustics.swept_sine_distortion(y, 48000, f1=20.0, f2=6000.0, duration_s=actual,
                                                  n_harmonics=3, method=method)
     plt.semilogx(res.frequencies,
                  np.unwrap(np.angle(np.asarray(res.harmonic_responses[1]))))
@@ -425,7 +425,7 @@ imp[int(0.0025 * fs)] = 1.0
 ir = sp_signal.lfilter(b / a[0], a / a[0], imp)
 
 H = np.fft.rfft(ir)                    # respuesta unilateral, DC..Nyquist
-h_min = signals.minimum_phase(np.abs(H))       # la fase solo desde la magnitud
+h_min = signals.min_phase(np.abs(H))       # la fase solo desde la magnitud
 tau_g = signals.group_delay(H, fs)             # -(1/2pi) dphi/df, en segundos
 phi_x = signals.excess_phase(H)                # unwrap(arg H) - phi_min
 
@@ -531,7 +531,7 @@ gruesas.
 - Las utilidades de fase operan sobre cualquier respuesta unilateral
   *compleja*: una `rfft` de una RI medida, o la `response` de una estimación con
   [`transfer_function`](/phonometry/es/devices/electroacoustics/electroacoustics/) sobre una
-  malla uniforme. Solo `minimum_phase` acepta además un array de magnitud
+  malla uniforme. Solo `min_phase` acepta además un array de magnitud
   a secas, p. ej. una magnitud objetivo de diseño para ecualización.
 
 ## Qué cubre esta guía
@@ -547,7 +547,7 @@ el resultado: el nivel de excitación y su referencia `amplitude`, el `fade`
 que tiene que llegar a las dos llamadas, los requisitos de recorte y de cola,
 los modos de fallo por variación en el tiempo y por ruido impulsivo, y las
 reglas de dimensionado que relacionan $T$, $N$ y $f_2$. Las utilidades de fase
-`minimum_phase`, `group_delay`, `excess_phase` y `phase_decomposition`
+`min_phase`, `group_delay`, `excess_phase` y `phase_decomposition`
 implementan la relación de transformada de Hilbert de la sección 13.1.4 de
 Bendat y Piersol mediante el cepstrum real.
 </ScopeClaim>

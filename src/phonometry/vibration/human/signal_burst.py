@@ -206,7 +206,7 @@ _LOW_FREQUENCY_WHOLE_BODY = "low-frequency-whole-body"
 _CYCLE_COUNTS = (1, 2, 4, 8, 16)
 
 #: ISO 8041-1:2017 Table 6 (folio 17), one entry per application. The
-#: continuous row of Tables 7 to 9 is requested with ``cycles=None`` and is
+#: continuous row of Tables 7 to 9 is requested with ``n_cycles=None`` and is
 #: not a sixth entry here, because Table 6 does not give it a burst length.
 SAWTOOTH_BURST_TESTS: Mapping[str, SawtoothBurstTest] = MappingProxyType(
     {
@@ -391,8 +391,8 @@ def _build_response_table() -> dict[tuple[str, str, int | None], Mapping[str, fl
     table: dict[tuple[str, str, int | None], Mapping[str, float]] = {}
     for application, quantities, rows in _PRINTED_TABLES:
         for row, cells in rows.items():
-            for cycles, values in cells.items():
-                table[application, row, cycles] = MappingProxyType(
+            for n_cycles, values in cells.items():
+                table[application, row, n_cycles] = MappingProxyType(
                     dict(zip(quantities, values, strict=True))
                 )
     return table
@@ -402,7 +402,7 @@ def _build_response_table() -> dict[tuple[str, str, int | None], Mapping[str, fl
 #: ``(application, weighting or BAND_LIMITING, cycles)`` to the indications a
 #: conforming meter shows, in the units of the quantity (m/s2 for the r.m.s.
 #: value and the two MTVV columns, m/s^1,75 for the VDV, m/s^1,5 for the
-#: MSDV). ``cycles`` is ``None`` for the continuous row. The values are the
+#: MSDV). ``n_cycles`` is ``None`` for the continuous row. The values are the
 #: response to a 1 m/s2 amplitude signal and scale with the amplitude of the
 #: actual test signal, which is what 5.9 says on folio 16.
 SIGNAL_BURST_RESPONSE: Mapping[tuple[str, str, int | None], Mapping[str, float]] = (
@@ -426,28 +426,28 @@ def _require_row(test: SawtoothBurstTest, name: str) -> str:
     return require_choice(str(name), "name", (BAND_LIMITING, *test.weightings))
 
 
-def _require_cycles(test: SawtoothBurstTest, cycles: int | None) -> int | None:
+def _require_cycles(test: SawtoothBurstTest, n_cycles: int | None) -> int | None:
     """Return the burst length or raise ``ValueError``.
 
     ``None`` is the continuous row. Any other length is refused: the tables
     print five, and a length they do not print has no expected indication to
     be judged against.
     """
-    if cycles is None:
+    if n_cycles is None:
         return None
-    if isinstance(cycles, bool) or not isinstance(cycles, int):
+    if isinstance(n_cycles, bool) or not isinstance(n_cycles, int):
         msg = (
-            "'cycles' must be an integer number of saw-tooth cycles, or None "
+            "'n_cycles' must be an integer number of saw-tooth cycles, or None "
             "for the continuous row."
         )
         raise TypeError(msg)
-    if cycles not in test.cycle_counts:
+    if n_cycles not in test.cycle_counts:
         msg = (
-            f"'cycles' must be one of {test.cycle_counts} or None for the "
-            f"continuous row; got {cycles!r}."
+            f"'n_cycles' must be one of {test.cycle_counts} or None for the "
+            f"continuous row; got {n_cycles!r}."
         )
         raise ValueError(msg)
-    return cycles
+    return n_cycles
 
 
 def _require_sampling_rate(test: SawtoothBurstTest, fs: float | None) -> float:
@@ -478,7 +478,7 @@ def _require_sampling_rate(test: SawtoothBurstTest, fs: float | None) -> float:
 
 def sawtooth_burst(
     application: str,
-    cycles: int | None,
+    n_cycles: int | None,
     *,
     fs: float | None = None,
     amplitude_m_s2: float = 1.0,
@@ -488,12 +488,12 @@ def sawtooth_burst(
     The full measurement record: zero everywhere except during the bursts,
     which start at ``start_time_s`` and repeat every ``repeat_time_s`` until
     the printed duration runs out (six bursts, in all three applications).
-    Each burst is ``cycles`` whole saw-tooth periods, rising linearly from an
+    Each burst is ``n_cycles`` whole saw-tooth periods, rising linearly from an
     upward zero crossing to ``+amplitude_m_s2``, falling vertically to
     ``-amplitude_m_s2`` and ending back at zero, which is the waveform of
     Figure 3.
 
-    ``cycles=None`` returns the continuous row of Tables 7 to 9 instead: an
+    ``n_cycles=None`` returns the continuous row of Tables 7 to 9 instead: an
     unbroken saw-tooth from ``t = 0`` to the end of the printed duration. The
     start time does not apply to it, and the reason is measured rather than
     printed: read from zero, the band-limiting continuous cell of Table 7
@@ -506,7 +506,7 @@ def sawtooth_burst(
     the laboratory rig, not this record.
 
     :param application: One of the keys of :data:`SAWTOOTH_BURST_TESTS`.
-    :param cycles: Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or ``None``
+    :param n_cycles: Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or ``None``
         for the continuous row.
     :param fs: Sampling frequency, in hertz. Finite, positive, and above twice
         the upper band-limiting corner of the weighting under test, below
@@ -519,10 +519,10 @@ def sawtooth_burst(
     :raises ValueError: If the application, the burst length or the sampling
         rate is not one this clause defines, or the amplitude is not finite
         and positive.
-    :raises TypeError: If ``cycles`` is neither an integer nor ``None``.
+    :raises TypeError: If ``n_cycles`` is neither an integer nor ``None``.
     """
     test = _require_application(application)
-    burst_cycles = _require_cycles(test, cycles)
+    burst_cycles = _require_cycles(test, n_cycles)
     rate = _require_sampling_rate(test, fs)
     require_scalar(amplitude_m_s2, "amplitude_m_s2")
     amplitude = float(amplitude_m_s2)
@@ -618,7 +618,7 @@ def _zero_state_filter(
 def signal_burst_indications(
     application: str,
     name: str,
-    cycles: int | None,
+    n_cycles: int | None,
     *,
     fs: float | None = None,
 ) -> dict[str, float]:
@@ -635,7 +635,7 @@ def signal_burst_indications(
     :param application: One of the keys of :data:`SAWTOOTH_BURST_TESTS`.
     :param name: A weighting of that application, or :data:`BAND_LIMITING` for
         the band-limiting row.
-    :param cycles: Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or ``None``
+    :param n_cycles: Saw-tooth cycles per burst (1, 2, 4, 8 or 16), or ``None``
         for the continuous row.
     :param fs: Sampling frequency, in hertz. Finite, positive, and above twice
         the upper band-limiting corner of the weighting under test, below
@@ -648,11 +648,11 @@ def signal_burst_indications(
         the units of each quantity.
     :raises ValueError: As for :func:`sawtooth_burst`, and if the weighting
         belongs to another application.
-    :raises TypeError: If ``cycles`` is neither an integer nor ``None``.
+    :raises TypeError: If ``n_cycles`` is neither an integer nor ``None``.
     """
     test = _require_application(application)
     row = _require_row(test, name)
-    burst_cycles = _require_cycles(test, cycles)
+    burst_cycles = _require_cycles(test, n_cycles)
     rate = _require_sampling_rate(test, fs)
 
     record = sawtooth_burst(test.application, burst_cycles, fs=rate)
@@ -722,14 +722,14 @@ class SignalBurstVerification(OwnsArrays):
             quantity.
         """
         require_positive(self.amplitude_m_s2, "amplitude_m_s2")
-        for cycles in self.cycle_counts:
+        for n_cycles in self.cycle_counts:
             cells = SIGNAL_BURST_RESPONSE.get(
-                (self.application, self.weighting, cycles)
+                (self.application, self.weighting, n_cycles)
             )
             if cells is None or any(q not in cells for q in self.quantities):
                 msg = (
                     "SignalBurstVerification: Tables 7 to 9 print no cell for "
-                    f"{self.application!r}, {self.weighting!r}, {cycles} cycles "
+                    f"{self.application!r}, {self.weighting!r}, {n_cycles} cycles "
                     f"and {self.quantities}."
                 )
                 raise ValueError(msg)
@@ -747,10 +747,10 @@ class SignalBurstVerification(OwnsArrays):
         return self.amplitude_m_s2 * np.array(
             [
                 [
-                    SIGNAL_BURST_RESPONSE[self.application, self.weighting, cycles][q]
+                    SIGNAL_BURST_RESPONSE[self.application, self.weighting, n_cycles][q]
                     for q in self.quantities
                 ]
-                for cycles in self.cycle_counts
+                for n_cycles in self.cycle_counts
             ],
             dtype=np.float64,
         )
@@ -863,29 +863,29 @@ def verify_signal_burst_response(
         msg = "'measured' must report at least one burst length."
         raise ValueError(msg)
 
-    for cycles in measured:
-        _require_cycles(test, cycles)
+    for n_cycles in measured:
+        _require_cycles(test, n_cycles)
     cycle_counts = tuple(
-        cycles for cycles in (*test.cycle_counts, None) if cycles in measured
+        n_cycles for n_cycles in (*test.cycle_counts, None) if n_cycles in measured
     )
     printed_columns = tuple(SIGNAL_BURST_RESPONSE[test.application, row, None])
     first = cycle_counts[0]
     quantities = tuple(
         quantity for quantity in printed_columns if quantity in measured[first]
     )
-    for cycles in cycle_counts:
-        reported = tuple(measured[cycles])
+    for n_cycles in cycle_counts:
+        reported = tuple(measured[n_cycles])
         unknown = [column for column in reported if column not in printed_columns]
         if unknown:
             msg = (
-                f"'measured' carries {unknown} for {cycles} cycles, which the "
+                f"'measured' carries {unknown} for {n_cycles} cycles, which the "
                 f"{test.application} table does not print; it prints "
                 f"{printed_columns}."
             )
             raise ValueError(msg)
         if set(reported) != set(quantities):
             msg = (
-                f"'measured' reports {sorted(reported)} for {cycles} cycles "
+                f"'measured' reports {sorted(reported)} for {n_cycles} cycles "
                 f"and {sorted(quantities)} for {first}; every burst length has "
                 "to report the same columns."
             )
@@ -898,7 +898,10 @@ def verify_signal_burst_response(
         raise ValueError(msg)
 
     values = np.array(
-        [[float(measured[cycles][q]) for q in quantities] for cycles in cycle_counts],
+        [
+            [float(measured[n_cycles][q]) for q in quantities]
+            for n_cycles in cycle_counts
+        ],
         dtype=np.float64,
     )
     if not np.all(np.isfinite(values) & (values >= 0.0)):

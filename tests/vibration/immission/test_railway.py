@@ -192,10 +192,10 @@ def test_the_amplitude_distribution_is_a_density() -> None:
 
 
 def test_a_silent_stretch_still_has_a_distribution() -> None:
-    dist = im.amplitude_distribution(np.zeros(100), bins=3)
+    dist = im.amplitude_distribution(np.zeros(100), n_bins=3)
     assert dist.cumulative[-1] == pytest.approx(1.0)
     with pytest.raises(ValueError, match="at least 2"):
-        im.amplitude_distribution(np.zeros(100), bins=1)
+        im.amplitude_distribution(np.zeros(100), n_bins=1)
 
 
 # -- Clause 7.3: narrow band --------------------------------------------------
@@ -389,7 +389,7 @@ def test_a_steady_passage_reduces_to_its_closed_forms() -> None:
         (1.0 / math.sqrt(2.0)) / im.VELOCITY_LEVEL_REFERENCE_MM_S
     )
     assert passage.band_interval_levels_db[1, band] == pytest.approx(expected, abs=0.2)
-    assert passage.band_maximum_levels_db[band] == pytest.approx(expected, abs=0.5)
+    assert passage.band_max_levels_db[band] == pytest.approx(expected, abs=0.5)
     others = np.delete(passage.band_interval_levels_db[1], band)
     assert np.all(others < expected - 15.0)
 

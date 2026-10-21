@@ -413,13 +413,13 @@ class VehicleDescriptor(RichDisplay):
     """The four-digit vehicle descriptor of Table [2.3.a].
 
     :ivar vehicle_type: Digit 1, the :class:`VehicleType`.
-    :ivar axles: Digit 2, the number of axles per vehicle.
+    :ivar n_axles: Digit 2, the number of axles per vehicle.
     :ivar brake: Digit 3, the :class:`BrakeType`.
     :ivar measure: Digit 4, the :class:`WheelMeasure`.
     """
 
     vehicle_type: VehicleType
-    axles: int
+    n_axles: int
     brake: BrakeType
     measure: WheelMeasure = WheelMeasure.NONE
 
@@ -444,7 +444,7 @@ class VehicleDescriptor(RichDisplay):
         try:
             return cls(
                 vehicle_type=VehicleType(text[0]),
-                axles=int(text[1:-2]),
+                n_axles=int(text[1:-2]),
                 brake=BrakeType(text[-2]),
                 measure=WheelMeasure(text[-1]),
             )
@@ -456,7 +456,7 @@ class VehicleDescriptor(RichDisplay):
     def code(self) -> str:
         """The descriptor written back out as a string."""
         return (
-            f"{self.vehicle_type.value}{self.axles}"
+            f"{self.vehicle_type.value}{self.n_axles}"
             f"{self.brake.value}{self.measure.value}"
         )
 
@@ -2118,7 +2118,7 @@ def impact_roughness(single: ArrayLike, joint_density: float) -> NDArray[np.floa
 
 
 def rolling_sound_power(
-    roughness: ArrayLike, transfer: ArrayLike, axles: float
+    roughness: ArrayLike, transfer: ArrayLike, n_axles: float
 ) -> NDArray[np.float64]:
     r"""One rolling-noise component of (2.3.8) to (2.3.10), in dB.
 
@@ -2129,13 +2129,13 @@ def rolling_sound_power(
 
     :param roughness: Total effective roughness ``L_R,TOT,i``, in dB.
     :param transfer: Transfer function ``L_H,i``, in dB per axle.
-    :param axles: Number of axles per vehicle ``N_a``.
+    :param n_axles: Number of axles per vehicle ``N_a``.
     :return: The component sound power, in dB.
-    :raises ValueError: If ``axles`` is not a positive number.
+    :raises ValueError: If ``n_axles`` is not a positive number.
     """
-    n_a = _finite(axles, "axles")
+    n_a = _finite(n_axles, "n_axles")
     if n_a <= 0.0:
-        msg = "'axles' must be a positive number of axles per vehicle."
+        msg = "'n_axles' must be a positive number of axles per vehicle."
         raise ValueError(msg)
     return np.asarray(
         _spectrum(roughness, "roughness")
@@ -2297,7 +2297,7 @@ class RollingStock(OwnsArrays):
     its own database simply by building this object from its own tables rather
     than from the :mod:`~phonometry.environment.sources.cnossos_rail` look-ups.
 
-    :ivar axles: Number of axles per vehicle ``N_a``.
+    :ivar n_axles: Number of axles per vehicle ``N_a``.
     :ivar wheel_roughness: ``(wavelengths in mm, levels in dB)`` of Table G-1a.
     :ivar contact_filter: ``(wavelengths in mm, levels in dB)`` of Table G-2.
     :ivar wheel_transfer: ``L_H,VEH,i`` of Table G-3b, 24 values in dB.
@@ -2312,7 +2312,7 @@ class RollingStock(OwnsArrays):
         minimum speed and the tram squeal rule.
     """
 
-    axles: int
+    n_axles: int
     wheel_roughness: tuple[Any, Any]
     contact_filter: tuple[Any, Any]
     wheel_transfer: Any
@@ -2521,16 +2521,16 @@ def _rolling_and_bridge(
             ),
         )  # (2.3.11)
     components = [
-        rolling_sound_power(total, track.track_transfer, stock.axles),
-        rolling_sound_power(total, stock.wheel_transfer, stock.axles),
+        rolling_sound_power(total, track.track_transfer, stock.n_axles),
+        rolling_sound_power(total, stock.wheel_transfer, stock.n_axles),
     ]
     if stock.superstructure_transfer is not None:
         components.append(
-            rolling_sound_power(total, stock.superstructure_transfer, stock.axles)
+            rolling_sound_power(total, stock.superstructure_transfer, stock.n_axles)
         )
     rolling = _energy_sum(*components) + _finite(track.squeal_excess, "squeal_excess")
     bridge = (
-        rolling_sound_power(total, track.bridge_transfer, stock.axles)
+        rolling_sound_power(total, track.bridge_transfer, stock.n_axles)
         if track.bridge_transfer is not None
         else None
     )  # (2.3.18)

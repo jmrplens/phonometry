@@ -93,7 +93,7 @@ def test_steady_source_identity_lj_equals_lw_plus_10lg_t() -> None:
     assert lj.uncertainty == pytest.approx(lw.uncertainty)
     assert lj.surface_area == pytest.approx(lw.surface_area)
     assert lj.grade == "engineering"
-    assert lj.events is None
+    assert lj.n_events is None
     assert lj.integration_time == pytest.approx(10.0)
 
 
@@ -131,9 +131,9 @@ def test_surface_and_free_field_defaults_match_the_power_path() -> None:
 def test_one_measurement_of_n_events_subtracts_10lg_ne_eq20() -> None:
     """Eq. (20): one level encompassing Ne = 5 events, less 10 lg 5 = 6.9897 dB."""
     levels = np.full((10, 1), 90.0)
-    res = emission.sound_energy_pressure(levels, "hemisphere", radius=2.0, events=5)
+    res = emission.sound_energy_pressure(levels, "hemisphere", radius=2.0, n_events=5)
     assert res.mean_event_level[0] == pytest.approx(90.0 - 6.989700, abs=1e-5)
-    assert res.events == 5
+    assert res.n_events == 5
 
 
 def test_per_event_axis_is_energy_averaged_eq19() -> None:
@@ -143,7 +143,7 @@ def test_per_event_axis_is_energy_averaged_eq19() -> None:
     res = emission.sound_energy_pressure(events, "hemisphere", radius=2.0)
     expected = _energy_mean(_energy_mean(events, axis=0), axis=0)
     np.testing.assert_allclose(res.mean_event_level, expected)
-    assert res.events == 5
+    assert res.n_events == 5
 
 
 def test_two_acquisition_modes_agree_for_identical_events() -> None:
@@ -155,7 +155,9 @@ def test_two_acquisition_modes_agree_for_identical_events() -> None:
     one_at_a_time = np.repeat(single[np.newaxis], 5, axis=0)
     encompassing = single + 10.0 * np.log10(5.0)
     a = emission.sound_energy_pressure(one_at_a_time, "hemisphere", radius=1.5)
-    b = emission.sound_energy_pressure(encompassing, "hemisphere", radius=1.5, events=5)
+    b = emission.sound_energy_pressure(
+        encompassing, "hemisphere", radius=1.5, n_events=5
+    )
     np.testing.assert_allclose(a.sound_energy_level, b.sound_energy_level)
     np.testing.assert_allclose(a.mean_event_level, 84.0)
 
@@ -165,7 +167,7 @@ def test_mean_single_event_level_standalone() -> None:
     per_event = np.array([80.0, 86.0, 83.0, 80.0, 86.0])
     got = emission.mean_single_event_level(per_event)
     assert float(got) == pytest.approx(float(_energy_mean(per_event)))
-    got2 = emission.mean_single_event_level(np.array([90.0, 92.0]), events=5)
+    got2 = emission.mean_single_event_level(np.array([90.0, 92.0]), n_events=5)
     np.testing.assert_allclose(got2, [90.0 - 6.989700, 92.0 - 6.989700], atol=1e-5)
 
 
@@ -175,24 +177,24 @@ def test_fewer_than_five_events_warns() -> None:
         emission.mean_single_event_level(np.full((3, 2), 80.0))
     with pytest.warns(emission.SoundPowerWarning, match="at least 5"):
         emission.sound_energy_pressure(
-            np.full((10, 1), 80.0), "hemisphere", radius=1.0, events=2
+            np.full((10, 1), 80.0), "hemisphere", radius=1.0, n_events=2
         )
 
 
 def test_per_event_array_with_events_raises() -> None:
     with pytest.raises(ValueError, match="'levels_positions' already carries"):
         emission.sound_energy_pressure(
-            np.full((5, 10, 1), 80.0), "hemisphere", radius=1.0, events=5
+            np.full((5, 10, 1), 80.0), "hemisphere", radius=1.0, n_events=5
         )
 
 
 def test_bad_rank_and_bad_events_raise() -> None:
     with pytest.raises(ValueError, match="'levels_positions' must be a 2D"):
         emission.sound_energy_pressure(np.zeros((2, 2, 2, 2)), "hemisphere", radius=1.0)
-    with pytest.raises(ValueError, match="'events' must be a positive integer"):
-        emission.mean_single_event_level(np.zeros(3), events=0)
-    with pytest.raises(ValueError, match="'events' must be an integer"):
-        emission.mean_single_event_level(np.zeros(3), events=2.5)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'n_events' must be a positive integer"):
+        emission.mean_single_event_level(np.zeros(3), n_events=0)
+    with pytest.raises(ValueError, match="'n_events' must be an integer"):
+        emission.mean_single_event_level(np.zeros(3), n_events=2.5)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError, match="'levels' must carry one entry per single event"
     ):
@@ -299,9 +301,9 @@ def test_surface_geometry_and_position_count_as_for_lw() -> None:
         emission.sound_energy_pressure(np.full((9, 1), 80.0), "hemisphere", radius=1.0)
     with pytest.raises(ValueError, match="A positive 'radius' is required"):
         emission.sound_energy_pressure(np.full((10, 1), 80.0), "hemisphere")
-    with pytest.raises(ValueError, match="'reflecting_planes' must be 1, 2 or 3"):
+    with pytest.raises(ValueError, match="'n_reflecting_planes' must be 1, 2 or 3"):
         emission.sound_energy_pressure(
-            np.full((10, 1), 80.0), "hemisphere", radius=1.0, reflecting_planes=4
+            np.full((10, 1), 80.0), "hemisphere", radius=1.0, n_reflecting_planes=4
         )
     with pytest.raises(ValueError, match="'levels_positions' must contain only finite"):
         emission.sound_energy_pressure(
@@ -345,14 +347,14 @@ def test_result_rejects_inconsistent_fields() -> None:
         dataclasses.replace(base, background_correction=np.zeros(3))
     with pytest.raises(ValueError, match="'grade' must be one of"):
         dataclasses.replace(base, grade="precision")
-    with pytest.raises(ValueError, match="'events' must be at least 1"):
-        dataclasses.replace(base, events=0)
-    with pytest.raises(ValueError, match="'events' must be a whole number"):
-        dataclasses.replace(base, events=2.5)
-    with pytest.raises(ValueError, match="'events' must be a whole number"):
-        dataclasses.replace(base, events=True)
-    with pytest.raises(ValueError, match="'events' must be a whole number"):
-        dataclasses.replace(base, events="5")
+    with pytest.raises(ValueError, match="'n_events' must be at least 1"):
+        dataclasses.replace(base, n_events=0)
+    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
+        dataclasses.replace(base, n_events=2.5)
+    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
+        dataclasses.replace(base, n_events=True)
+    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
+        dataclasses.replace(base, n_events="5")
     with pytest.raises(ValueError, match="'integration_time' must be positive"):
         dataclasses.replace(base, integration_time=0.0)
     with pytest.raises(ValueError, match="'sound_energy_level' must be finite"):
@@ -549,18 +551,18 @@ def test_room_per_event_axis_and_encompassing_measurement_agree() -> None:
     per_event = np.repeat(single[np.newaxis], 5, axis=0)
     a = emission.sound_energy_reverberation(per_event, 1.5, 200.0, 210.0, _ROOM_FREQS)
     b = emission.sound_energy_reverberation(
-        single + 10.0 * np.log10(5.0), 1.5, 200.0, 210.0, _ROOM_FREQS, events=5
+        single + 10.0 * np.log10(5.0), 1.5, 200.0, 210.0, _ROOM_FREQS, n_events=5
     )
     np.testing.assert_allclose(a.sound_energy_level, b.sound_energy_level)
     np.testing.assert_allclose(a.mean_event_level, 85.0)
-    assert a.events == 5
-    assert b.events == 5
+    assert a.n_events == 5
+    assert b.n_events == 5
 
 
 def test_room_refusals() -> None:
     with pytest.raises(ValueError, match="'levels' already carries"):
         emission.sound_energy_reverberation(
-            np.full((5, 6, 5), 80.0), 1.5, 200.0, 210.0, _ROOM_FREQS, events=5
+            np.full((5, 6, 5), 80.0), 1.5, 200.0, 210.0, _ROOM_FREQS, n_events=5
         )
     with pytest.raises(ValueError, match="'levels' must be a 1D spectrum"):
         emission.sound_energy_reverberation(
@@ -665,12 +667,12 @@ def test_room_result_rejects_inconsistent_fields() -> None:
     )
     with pytest.raises(ValueError, match="'method' must be one of"):
         dataclasses.replace(base, method="survey")
-    with pytest.raises(ValueError, match="'events' must be at least 1"):
-        dataclasses.replace(base, events=0)
-    with pytest.raises(ValueError, match="'events' must be a whole number"):
-        dataclasses.replace(base, events=2.5)
-    with pytest.raises(ValueError, match="'events' must be a whole number"):
-        dataclasses.replace(base, events=True)
+    with pytest.raises(ValueError, match="'n_events' must be at least 1"):
+        dataclasses.replace(base, n_events=0)
+    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
+        dataclasses.replace(base, n_events=2.5)
+    with pytest.raises(ValueError, match="'n_events' must be a whole number"):
+        dataclasses.replace(base, n_events=True)
     with pytest.raises(ValueError, match="'integration_time' must be positive"):
         dataclasses.replace(base, integration_time=-1.0)
     with pytest.raises(ValueError, match="one value per band"):

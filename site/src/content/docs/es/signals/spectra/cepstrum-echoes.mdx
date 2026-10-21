@@ -147,7 +147,7 @@ son pares) se repiten y el cepstrum complejo guarda su contenido anticausal
 (de fase no mínima). El relleno de ceros vía `nfft` reduce el aliasing
 temporal cepstral cuando el espectro logarítmico tiene rasgos abruptos,
 exactamente igual que el relleno `oversample` de
-[`minimum_phase`](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
+[`min_phase`](/phonometry/es/devices/electroacoustics/swept-sine-distortion/).
 
 ## 2. Detección de ecos: el tren de picos rahmónicos
 
@@ -411,7 +411,7 @@ anular los rahmónicos elimina un eco, conservar solo las quefrencias bajas
 extrae la ondícula de la fuente. Una señal de fase mínima tiene un cepstrum
 complejo causal, y por eso plegar el cepstrum real sobre las quefrencias
 positivas reconstruye la fase mínima a partir de $|H|$ únicamente:
-[`minimum_phase`](/phonometry/es/devices/electroacoustics/swept-sine-distortion/) y
+[`min_phase`](/phonometry/es/devices/electroacoustics/swept-sine-distortion/) y
 `phase_decomposition` corren sobre ese mismo núcleo de plegado (Bendat y
 Piersol sec. 13.1.4; Tohyama, en Havelock cap. 75, edita la reverberación
 manipulando exactamente estas partes causal y anticausal).
@@ -432,7 +432,7 @@ aditivo aleatoriza la fase justo donde la magnitud es pequeña; y **comprueba la
 ida y vuelta con `invert()` antes de fiarte de ningún cepstrum editado**: un
 desenrollado fallido se manifiesta al instante como un error de reconstrucción
 muy por encima de 1e-10. Cuando el registro no da para tanto, usa el cepstrum de
-potencia para la detección y el plegado del cepstrum real de `minimum_phase`
+potencia para la detección y el plegado del cepstrum real de `min_phase`
 cuando solo hace falta una fase coherente con la magnitud.
 
 ## 5. El espectro de la envolvente: modulaciones como líneas
@@ -593,7 +593,7 @@ rodamiento.
 El cepstrum parte de las mismas convenciones FFT de registro único que los
 [estimadores espectrales calibrados](/phonometry/es/signals/spectra/spectral-analysis/),
 y su núcleo de plegado es literalmente el que hay dentro de
-[`minimum_phase`](/phonometry/es/devices/electroacoustics/swept-sine-distortion/) - la
+[`min_phase`](/phonometry/es/devices/electroacoustics/swept-sine-distortion/) - la
 refactorización queda fijada bit a bit en los tests. El espectro de la
 envolvente es la vista en frecuencia de la misma señal analítica que la
 [envolvente de Hilbert](/phonometry/es/signals/spectra/correlation-delay/) devuelve en

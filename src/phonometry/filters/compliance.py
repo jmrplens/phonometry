@@ -1106,7 +1106,7 @@ def verify_filter_class(
         msg = "'n_points' must be at least 16."
         raise ValueError(msg)
     points_per_bandwidth = require_count(
-        points_per_bandwidth, "points_per_bandwidth", minimum=_MIN_POINTS_PER_BANDWIDTH
+        points_per_bandwidth, "points_per_bandwidth", at_least=_MIN_POINTS_PER_BANDWIDTH
     )
     spec = _FILTER_EDITIONS.get(edition)
     if spec is None:

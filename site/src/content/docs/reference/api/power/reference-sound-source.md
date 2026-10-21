@@ -187,7 +187,7 @@ reference_source_calibration(
     frequencies: ArrayLike,
     arrangement: Literal['paths', 'fixed'],
     background_levels: ArrayLike | None = None,
-    maximum_levels_db: ArrayLike | None = None,
+    max_levels_db: ArrayLike | None = None,
     conditions: CalibrationConditions | None = None,
     radiation: Literal['monopole', 'dipole', 'unknown'] = 'unknown',
     knee_frequency_hz: float | None = None,
@@ -207,7 +207,7 @@ Formula (2) carries them to the sound power level under the reference
 meteorological conditions with the $C_1$, $C_2$ and
 $C_3$ of 8.4. The directivity index of each position (3.9) is its
 level less the surface level; for traversing microphones 8.3.2 takes the
-highest level seen on the traverse instead, which `maximum_levels_db`
+highest level seen on the traverse instead, which `max_levels_db`
 carries. Annex B, the alternative at low frequencies, replaces the 50 Hz
 to 80 Hz bands by the intensity levels when both agree within Table B.1
 from 50 Hz to 315 Hz. B.2 asks for the directivity index of those three
@@ -223,7 +223,7 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 | `frequencies` | Nominal one-third octave mid-band frequencies, in hertz, ascending, from 50 Hz to 20 kHz. |
 | `arrangement` | `"paths"` (meridional or spiral paths) or `"fixed"` (the 20 fixed positions or coaxial circular paths), which selects the column of Table 2. |
 | `background_levels` | Background levels, per position or one spectrum, for the ISO 3745 correction; `None` applies none. |
-| `maximum_levels_db` | For traverses, the highest level recorded on each (8.3.2), same shape as `levels`. |
+| `max_levels_db` | For traverses, the highest level recorded on each (8.3.2), same shape as `levels`. |
 | `conditions` | The [`CalibrationConditions`](/phonometry/reference/api/power/reference-sound-source/#calibrationconditions) of the air during the calibration, whose temperature and static pressure enter $C_1$ and the Annex A $C_2$ and whose $a(f)$ enters $C_3$; `None` (default) takes the reference meteorological conditions of clause 4 with no air absorption. |
 | `radiation` | Radiation character for the Annex A $C_2$. |
 | `knee_frequency_hz` | Knee frequency for a monopole or a dipole. |

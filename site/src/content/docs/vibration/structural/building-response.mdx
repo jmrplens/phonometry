@@ -74,14 +74,14 @@ from phonometry import vibration
 
 # The same sixty-metre building, fifteen wide, by each of the four predictors.
 for model, kwargs in (
-    ("stories", {"stories": 18}),        # 18 storeys, about 3.3 m each
+    ("stories", {"n_stories": 18}),      # 18 storeys, about 3.3 m each
     ("height", {"height_m": 60.0}),
     ("height_width", {"height_m": 60.0, "width_m": 15.0}),
     ("slenderness", {"height_m": 60.0, "width_m": 15.0}),
 ):
     f = vibration.fundamental_frequency(model, **kwargs)
     print(model, round(f, 2), "Hz")
-# storeys 0.56 Hz / height 0.76 Hz / height_width 0.66 Hz / slenderness 1.03 Hz
+# stories 0.56 Hz / height 0.76 Hz / height_width 0.66 Hz / slenderness 1.03 Hz
 ```
 
 ## 2. The fit to measurement, and the error it admits

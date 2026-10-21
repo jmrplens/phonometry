@@ -123,7 +123,7 @@ __all__ = [
     "interaural_cross_correlation",
     "late_lateral_average",
     "late_lateral_sound_level",
-    "minimum_receiver_positions",
+    "min_receiver_positions",
     "octave_pair_averages",
     "perceptibly_different",
     "reverberation_room_reference_level",
@@ -1829,7 +1829,7 @@ def _table_a1_row(symbol: str) -> AuditoriumQuantity:
     return TABLE_A1[key]
 
 
-def minimum_receiver_positions(seats: ArrayLike) -> NDArray[np.float64] | float:
+def min_receiver_positions(seats: ArrayLike) -> NDArray[np.float64] | float:
     r"""Fewest microphone positions a hall of a given size wants (Table A.2).
 
     ISO 3382-1:2009, Table A.2 prints three pairs, 500 seats to 6 positions,

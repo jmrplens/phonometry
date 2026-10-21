@@ -67,7 +67,7 @@ def _swept_sine() -> ph.electroacoustics.SweptSineDistortionResult:
     f1, f2, seconds = 20.0, 8000.0, 1.0
     sweep = ph.electroacoustics.synchronized_sweep_signal(FS, f1, f2, seconds)
     return ph.electroacoustics.swept_sine_distortion(
-        sweep + 0.01 * sweep**2, FS, f1=f1, f2=f2, seconds=seconds, n_harmonics=3
+        sweep + 0.01 * sweep**2, FS, f1=f1, f2=f2, duration_s=seconds, n_harmonics=3
     )
 
 

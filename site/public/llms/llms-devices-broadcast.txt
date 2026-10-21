@@ -641,7 +641,7 @@ fs = 48000
 # Clause 2.2's own stimulus: 5 ms (25-period) bursts of 5 kHz at 10 per
 # second, at the amplitude that makes the steady tone read 0 dBqps.
 burst = signals.tone_burst(fs, 5000.0, 25, amplitude=0.285,
-                           repetitions=16, repetition_rate=10.0,
+                           n_repetitions=16, repetition_rate=10.0,
                            post_silence=0.5)
 result = broadcast.quasi_peak_meter(burst.signal, fs)
 print(round(result.reading, 4))                            # 0.5872   volts

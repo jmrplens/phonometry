@@ -91,7 +91,7 @@ _T0 = 1.0
 _MIN_EVENTS = 5
 
 
-def _validate_event_count(events: object, owner: str) -> None:
+def _validate_event_count(n_events: object, owner: str) -> None:
     """Refuse a count of events that is not a whole number of them.
 
     The entry points already refuse it, but a result can also be built
@@ -102,13 +102,13 @@ def _validate_event_count(events: object, owner: str) -> None:
     comparison below raise keeps the promise the docstring makes, which is a
     ``ValueError`` and not a ``TypeError``.
     """
-    if events is None:
+    if n_events is None:
         return
-    if isinstance(events, bool) or not isinstance(events, (int, np.integer)):
-        msg = f"{owner}: 'events' must be a whole number of events; got {events!r}."
+    if isinstance(n_events, bool) or not isinstance(n_events, (int, np.integer)):
+        msg = f"{owner}: 'n_events' must be a whole number of events; got {n_events!r}."
         raise ValueError(msg)
-    if int(events) < 1:
-        msg = f"{owner}: 'events' must be at least 1; got {events!r}."
+    if int(n_events) < 1:
+        msg = f"{owner}: 'n_events' must be at least 1; got {n_events!r}."
         raise ValueError(msg)
 
 
@@ -241,7 +241,7 @@ def _check_grade(grade: str) -> Grade:
 
 def _single_event_mean(
     levels: np.ndarray,
-    events: int | None,
+    n_events: int | None,
     *,
     name: str,
     stacklevel: int,
@@ -250,7 +250,7 @@ def _single_event_mean(
     r"""Mean single event time-integrated level of one event, per position.
 
     ISO 3744:2010 Eq. (19)/(20), printed again as ISO 3746:2010 Eq. (16)/(17)
-    and ISO 3741:2010 Eq. (22)/(23). With ``events`` ``None`` the first axis
+    and ISO 3741:2010 Eq. (22)/(23). With ``n_events`` ``None`` the first axis
     of ``levels`` holds the :math:`N_\mathrm{e}` events measured one at a
     time and the mean is the energy average over that axis:
 
@@ -260,7 +260,7 @@ def _single_event_mean(
        \sum_{q=1}^{N_\mathrm{e}} 10^{0.1 L'_{Ei,q(\mathrm{ST})}} \right]
        \tag{Eq. 19}
 
-    With ``events`` :math:`= N_\mathrm{e}` the whole of ``levels`` is one
+    With ``n_events`` :math:`= N_\mathrm{e}` the whole of ``levels`` is one
     measurement that encompasses :math:`N_\mathrm{e}` successive events, and
     the level of one event is that measurement less :math:`10 \log_{10}
     N_\mathrm{e}`:
@@ -275,8 +275,8 @@ def _single_event_mean(
     below the count the method is written for.
 
     :param levels: Per-event levels with the events on the first axis
-        (``events`` ``None``), or the one measurement of ``events`` events.
-    :param events: ``None`` for one event per entry of the first axis, else
+        (``n_events`` ``None``), or the one measurement of ``n_events`` events.
+    :param n_events: ``None`` for one event per entry of the first axis, else
         the number of events one measurement encompasses.
     :param name: The caller's parameter name, for the error messages.
     :param stacklevel: Where the warning is reported.
@@ -284,28 +284,28 @@ def _single_event_mean(
         which each caller names for its own standard (ISO 3743-1:2010 prints
         it in 7.6).
     :return: The mean level of one event, one axis fewer than ``levels`` when
-        ``events`` is ``None``, the same shape otherwise.
+        ``n_events`` is ``None``, the same shape otherwise.
     :raises ValueError: for non-finite levels, an empty event axis or a
-        non-positive ``events``.
+        non-positive ``n_events``.
     """
     arr = np.asarray(levels, dtype=np.float64)
     if not np.all(np.isfinite(arr)):
         msg = f"'{name}' must contain only finite values."
         raise ValueError(msg)
-    if events is None:
+    if n_events is None:
         if arr.ndim == 0 or arr.shape[0] == 0:
             msg = f"'{name}' must carry one entry per single event on its first axis."
             raise ValueError(msg)
         count = int(arr.shape[0])
         mean = energy_mean(arr, axis=0)
     else:
-        if isinstance(events, bool) or not isinstance(events, (int, np.integer)):
-            msg = "'events' must be an integer: the number of events one measurement encompasses."
+        if isinstance(n_events, bool) or not isinstance(n_events, (int, np.integer)):
+            msg = "'n_events' must be an integer: the number of events one measurement encompasses."
             raise ValueError(msg)
-        if events < 1:
-            msg = "'events' must be a positive integer."
+        if n_events < 1:
+            msg = "'n_events' must be a positive integer."
             raise ValueError(msg)
-        count = int(events)
+        count = int(n_events)
         mean = arr - 10.0 * np.log10(count)
     if count < _MIN_EVENTS:
         warnings.warn(

@@ -182,7 +182,7 @@ ReverberationSoundEnergyResult(
     speed_of_sound: float,
     sound_energy_level_a: float,
     method: str,
-    events: int | None,
+    n_events: int | None,
     integration_time: float | None,
 )
 ```
@@ -201,7 +201,7 @@ the per-band shift of the mean level after each position was corrected by
 its own `K1i` (Eq. 25/26). `sound_energy_level_a` is the A-weighted
 total `LJA` (Annex F Eq. F.5), computed only when `frequencies` are
 supplied (`NaN` for several bands without them; equal to `LJ` for a
-single band). `method` is `'direct'` or `'comparison'`. `events`
+single band). `method` is `'direct'` or `'comparison'`. `n_events`
 is the number of single sound emission events $N_\mathrm{e}$ the
 levels were reduced from, or `None` when the caller supplied the mean
 single event level of one event; `integration_time` is the interval
@@ -336,7 +336,7 @@ sound_energy_comparison(
     lw_ref: np.ndarray | ReferenceSourceCalibration,
     *,
     frequencies: np.ndarray | None = None,
-    events: int | None = None,
+    n_events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
     background_levels_ref: np.ndarray | None = None,
@@ -376,7 +376,7 @@ time-averaged correction of 9.1.2.
 | `levels_ref` | Mean room SPL per band (1D) or `(NM, NB)` per-position time-averaged levels of the reference sound source, in decibels. |
 | `lw_ref` | Known sound power level `LW(RSS)` per band, in decibels, under the meteorological conditions of the test (Eq. 31), or the [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration) of ISO 6926, read in the one-third octave bands at `frequencies` and carried from the reference conditions to those of the test by its own `C2`. |
 | `frequencies` | Band mid-frequencies (Hz) for the `K1` criterion and the A-weighted total. |
-| `events` | The number of events `Ne` one measurement encompasses (Eq. 23); `None` when `levels` is per event or already the mean of one event. |
+| `n_events` | The number of events `Ne` one measurement encompasses (Eq. 23); `None` when `levels` is per event or already the mean of one event. |
 | `background_levels` | Time-averaged background levels for the `K1` correction of `levels` (per position, or a single spectrum). |
 | `integration_time` | The interval `T` of the single event levels, in seconds; required with `background_levels`. |
 | `background_levels_ref` | Background levels matching `levels_ref`. |
@@ -401,7 +401,7 @@ sound_energy_reverberation(
     surface_area: float,
     frequencies: np.ndarray,
     *,
-    events: int | None = None,
+    n_events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
     temperature_c: float = 23.0,
@@ -419,7 +419,7 @@ is not permitted for non-repetitive impulsive noise): a 1D per-band
 spectrum already averaged over the room, a 2D `(NM, NB)` array of one
 event's level at each position, a 3D `(Ne, NM, NB)` array of the
 $N_\mathrm{e}$ events measured one at a time (reduced by Eq. 22), or
-a 1D/2D level of one measurement encompassing `events` successive events
+a 1D/2D level of one measurement encompassing `n_events` successive events
 (reduced by Eq. 23). Each position is corrected for its background by
 $K_{1i}$ (Eq. 25/26, the frequency-dependent criterion of 9.1.2),
 the positions are energy-averaged (Eq. 27) and the sound energy level in
@@ -447,7 +447,7 @@ NOTE 1), so that the energies Eq. (25) subtracts share one reference;
 | `volume` | Reverberation-room volume `V`, in cubic metres. |
 | `surface_area` | Total room surface area `S`, in square metres. |
 | `frequencies` | One-third-octave band mid-frequencies, Hz (required: the Waterhouse term and the `K1` criterion need them). |
-| `events` | The number of events `Ne` one measurement encompasses (Eq. 23); `None` when `levels` is per event or already the mean of one event. |
+| `n_events` | The number of events `Ne` one measurement encompasses (Eq. 23); `None` when `levels` is per event or already the mean of one event. |
 | `background_levels` | Time-averaged background levels for `K1`: per-position `(NM, NB)` (or a single `(NB,)` spectrum used at every position) with per-position `levels`, applied per position before the energy average; with 1D `levels` a single `K1` from the averaged spectra approximates the per-position procedure. |
 | `integration_time` | The interval `T` of the single event levels, in seconds; required with `background_levels`. |
 | `temperature_c` | Air temperature `theta` in the room, in degrees Celsius. |

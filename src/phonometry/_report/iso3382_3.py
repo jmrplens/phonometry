@@ -86,7 +86,7 @@ def _metadata_pairs(
     Only fields that are set are returned, so empty rows never appear. An
     open-plan office is a single furnished space measured along a line of
     workstations, so the floor ``area``, the number of source positions and the
-    number of measurement positions (``receiver_positions``) are used rather
+    number of measurement positions (``n_receiver_positions``) are used rather
     than a source/receiving room pair.
     """
 
@@ -101,8 +101,8 @@ def _metadata_pairs(
         (t("Office / zone", language), metadata.test_room),
         (t("Description", language), metadata.specimen),
         (t("Floor area S [m<super>2</super>]", language), num(metadata.area)),
-        (t("Source positions", language), count(metadata.source_positions)),
-        (t("Measurement positions", language), count(metadata.receiver_positions)),
+        (t("Source positions", language), count(metadata.n_source_positions)),
+        (t("Measurement positions", language), count(metadata.n_receiver_positions)),
         (t("Instrumentation", language), metadata.instrumentation),
         (t("Temperature [&#176;C]", language), num(metadata.temperature_c)),
         (t("Relative humidity [%]", language), num(metadata.relative_humidity_percent)),

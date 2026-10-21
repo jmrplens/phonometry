@@ -209,7 +209,7 @@ def test_shock_exposure_and_measurement_times_travel_together() -> None:
             a,
             1000.0,
             start_age=20.0,
-            years=10,
+            exposure_duration_years=10,
             days_per_year=200.0,
             exposure_time=1.0,
         )

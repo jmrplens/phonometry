@@ -138,7 +138,7 @@ def test_period_machinery_agrees_on_lden_and_ldn(site: str) -> None:
     night_9h = (start_hour >= 22) | (start_hour < 7)
     lday_15h = float(10 * np.log10(np.mean(10 ** (laeq[~night_9h] / 10))))
     lnight_9h = float(10 * np.log10(np.mean(10 ** (laeq[night_9h] / 10))))
-    day_night = ldn(lday_15h, lnight_9h, hours=(15.0, 9.0))
+    day_night = ldn(lday_15h, lnight_9h, period_hours=(15.0, 9.0))
     assert day_night == pytest.approx(
         composite_rating_level([(lday_15h, 15.0, 0.0), (lnight_9h, 9.0, 10.0)]),
         abs=1e-12,

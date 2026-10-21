@@ -189,7 +189,7 @@ dimensions that still complies with 4.4.
 HardWalledRoomCheck(
     frequencies: np.ndarray,
     level_range_db: np.ndarray,
-    orientations: int,
+    n_orientations: int,
     volume: float,
     reference_box_volume_m3: float,
     largest_box_dimension_m: float,
@@ -334,8 +334,8 @@ HardWalledSoundPowerResult(
     sound_power_level_a: float,
     sound_energy_level_a: float,
     quantity: str,
-    microphone_positions: int,
-    source_positions: int,
+    n_microphone_positions: int,
+    n_source_positions: int,
 )
 ```
 
@@ -376,8 +376,8 @@ background was measured.
 table does not reach) and `sigma_r0_a` its A-weighted row; with
 `sigma_omc_db` the properties give `sigma_tot` (Eq. 22) and the expanded
 uncertainty (Eq. 23) for `coverage_factor`, all `NaN` without it.
-`microphone_positions` is $N_\mathrm{M}$ (1 for a traverse),
-`source_positions` is $N_\mathrm{S}$, and
+`n_microphone_positions` is $N_\mathrm{M}$ (1 for a traverse),
+`n_source_positions` is $N_\mathrm{S}$, and
 `sound_power_level_a` / `sound_energy_level_a` are the Annex B totals
 of the level that was determined (`NaN` for the other).
 
@@ -589,7 +589,7 @@ sound_energy_hard_walled(
     lw_ref: ArrayLike | ReferenceSourceCalibration,
     frequencies: ArrayLike,
     *,
-    events: int | None = None,
+    n_events: int | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
     background_levels_ref: ArrayLike | None = None,
@@ -624,11 +624,11 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 
 | Name | Description |
 | :--- | :--- |
-| `event_levels` | Measured (uncorrected) octave-band single event levels, in decibels. With `events` `None`: `(Ne, bands)` for a traverse, `(Ne, NM, bands)` or `(Ne, NS, NM, bands)`, one entry per event on the first axis (Eq. 15). With `events`: `(bands,)`, `(NM, bands)` or `(NS, NM, bands)`, one measurement encompassing `events` events (Eq. 16). |
+| `event_levels` | Measured (uncorrected) octave-band single event levels, in decibels. With `n_events` `None`: `(Ne, bands)` for a traverse, `(Ne, NM, bands)` or `(Ne, NS, NM, bands)`, one entry per event on the first axis (Eq. 15). With `n_events`: `(bands,)`, `(NM, bands)` or `(NS, NM, bands)`, one measurement encompassing `n_events` events (Eq. 16). |
 | `levels_ref` | Time-averaged levels of the reference sound source, `(NM, bands)` or `(bands,)`, as in [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
 | `lw_ref` | Calibrated sound power level of the reference source, `(bands,)`, in decibels, under the meteorological conditions of the test, or its [`ReferenceSourceCalibration`](/phonometry/reference/api/power/reference-sound-source/#referencesourcecalibration), as for [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
 | `frequencies` | Nominal octave mid-band frequencies, one per band. |
-| `events` | The number $N_\mathrm{e}$ of events one measurement encompasses (Eq. 16); `None` when the events are on the first axis. Fewer than five warns (7.6). |
+| `n_events` | The number $N_\mathrm{e}$ of events one measurement encompasses (Eq. 16); `None` when the events are on the first axis. Fewer than five warns (7.6). |
 | `background_levels` | Time-averaged background levels `Lpi(B)`, `(NM, bands)` or `(bands,)`, in decibels; requires `integration_time`. `None` applies no correction, warns and leaves `background_requirement_met` `False` throughout. |
 | `integration_time` | The integration time `T` of the single event levels, in seconds. The background is compared as its exposure over the same `T`, $L_{p(\mathrm{B})} + 10 \log_{10}(T/T_0)$, so that Eq. (19) subtracts one energy from another. |
 | `background_levels_ref` | Background for the reference-source measurement; `None` reuses `background_levels`, compared with the time-averaged reference level as it stands. |
@@ -643,7 +643,7 @@ $L_J = L_W + 10 \log_{10}(T/T_0)$, $T_0$ = 1 s (3.4 NOTE 1).
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for an `event_levels` rank neither form admits, a non-integer or non-positive `events`, a background without its `integration_time`, a non-positive `integration_time`, or any refusal of [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
+| ValueError | for an `event_levels` rank neither form admits, a non-integer or non-positive `n_events`, a background without its `integration_time`, a non-positive `integration_time`, or any refusal of [`sound_power_hard_walled`](/phonometry/reference/api/power/sound-power-hard-walled/#sound_power_hard_walled). |
 
 ## sound_power_hard_walled
 
@@ -714,9 +714,9 @@ SourceLocationPlan(
     standard_deviation_db: np.ndarray,
     source_locations: np.ndarray,
     additional_room_locations: np.ndarray,
-    microphone_positions: int,
+    n_microphone_positions: int,
     a_weighted_standard_deviation_db: float = nan,
-    a_weighted_source_locations: int = 0,
+    n_a_weighted_source_locations: int = 0,
 )
 ```
 
@@ -730,7 +730,7 @@ $s_\mathrm{M}$ of the preliminary levels per band, and
 locations its table asks for, in the same room. Part 1 sends a band above
 4 dB to a second room as well: `additional_room_locations` counts the
 locations there, two in such a band and zero elsewhere, and always zero
-for Part 2. `microphone_positions` is the $N_\mathrm{M}$ the
+for Part 2. `n_microphone_positions` is the $N_\mathrm{M}$ the
 numbers are read for: the preliminary positions of Part 1, the column of
 Part 2's Table 3.
 
@@ -747,6 +747,14 @@ so they are read-only properties and not fields.
 *property*
 
 The 9.5 reading of the A-weighted deviation, or `None` without one.
+
+### SourceLocationPlan.n_required_source_locations
+
+*property*
+
+The largest $N_\mathrm{S}$ any band (or the A-weighted row)
+asks for in the test room, which is the number a single determination
+covering them all has to use.
 
 ### SourceLocationPlan.other_room_required
 
@@ -779,14 +787,6 @@ Requires matplotlib (`pip install phonometry[plot]`).
 | `kwargs` | Forwarded to the standard-deviation bars. |
 
 **Returns:** The axes.
-
-### SourceLocationPlan.required_source_locations
-
-*property*
-
-The largest $N_\mathrm{S}$ any band (or the A-weighted row)
-asks for in the test room, which is the number a single determination
-covering them all has to use.
 
 ### SourceLocationPlan.spectral_character
 

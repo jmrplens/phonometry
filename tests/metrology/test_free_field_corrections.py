@@ -320,29 +320,29 @@ def test_maxima_of_clauses_9_to_14(
 ) -> None:
     """At the nominal frequency and at its exact base-ten counterpart."""
     frequencies = sorted({nominal_hz, _EXACT[nominal_hz]})
-    maxima = metrology.maximum_expanded_uncertainty(frequencies, clause=clause)
+    maxima = metrology.max_expanded_uncertainty(frequencies, clause=clause)
     assert np.allclose(maxima, max_db, atol=1e-12)
 
 
 def test_a_frequency_within_two_percent_of_a_boundary_is_read_as_it() -> None:
     """4,05 kHz is "4 kHz" to 2 %: up to and including 4 kHz, not above."""
-    near = metrology.maximum_expanded_uncertainty([4050.0, 4100.0], clause=12)
+    near = metrology.max_expanded_uncertainty([4050.0, 4100.0], clause=12)
     assert np.allclose(near, [0.25, 0.35], rtol=0.0, atol=1e-12)
 
 
 def test_clause_10_states_no_maximum_below_63_hz() -> None:
     with pytest.raises(ValueError, match="63 Hz"):
-        metrology.maximum_expanded_uncertainty([50.0], clause=10)
+        metrology.max_expanded_uncertainty([50.0], clause=10)
 
 
 @pytest.mark.parametrize("clause", [8, 15, "12", True, 12.5])
 def test_only_clauses_9_to_14_state_a_maximum(clause: object) -> None:
     with pytest.raises(ValueError, match="clause"):
-        metrology.maximum_expanded_uncertainty([1000.0], clause=clause)  # type: ignore[arg-type]
+        metrology.max_expanded_uncertainty([1000.0], clause=clause)  # type: ignore[arg-type]
 
 
 def test_a_numpy_integer_clause_is_accepted() -> None:
-    maxima = metrology.maximum_expanded_uncertainty([1000.0], clause=np.int64(12))  # type: ignore[arg-type]
+    maxima = metrology.max_expanded_uncertainty([1000.0], clause=np.int64(12))  # type: ignore[arg-type]
     assert maxima[0] == pytest.approx(0.25)
 
 
@@ -620,7 +620,7 @@ def test_formula_d7_returns_the_correction_the_responses_define() -> None:
         calibrator_level_difference_db=_ON_SLM - _ON_RM,
     )
     assert np.allclose(result.correction_db, _TRUE_CORRECTION, atol=1e-12)
-    assert (result.formula, result.clause, result.determinations) == ("D.7", 12, 1)
+    assert (result.formula, result.clause, result.n_determinations) == ("D.7", 12, 1)
     assert np.allclose(result.range_db, 0.0)
 
 
@@ -699,7 +699,7 @@ def test_determinations_are_averaged_and_their_range_kept() -> None:
         94.0 + _RM_PRESSURE,
         reference_free_field_correction_db=_REFERENCE_CORRECTION,
     )
-    assert result.determinations == 3
+    assert result.n_determinations == 3
     assert np.allclose(result.correction_db, _TRUE_CORRECTION + 0.01 / 3.0)
     assert np.allclose(result.range_db, 0.05)
     with pytest.raises(ValueError, match="read-only"):
@@ -729,7 +729,7 @@ def test_the_range_is_taken_over_the_microphones() -> None:
     grouped = _three_microphones_on_three_calibrators(
         microphones=[1, 1, 1, 2, 2, 2, 3, 3, 3]
     )
-    assert (grouped.determinations, grouped.n_microphones) == (9, 3)
+    assert (grouped.n_determinations, grouped.n_microphones) == (9, 3)
     assert grouped.microphone_corrections_db.shape == (3, _F.size)
     assert np.allclose(grouped.range_db, 0.0, atol=1e-12)
     assert np.allclose(grouped.correction_db, _TRUE_CORRECTION - 0.15)

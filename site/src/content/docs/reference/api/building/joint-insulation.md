@@ -620,7 +620,7 @@ laboratory_joint_insulation(
     frequencies: ArrayLike,
     *,
     joint_length_m: float | None = None,
-    limit_at_maximum: bool = True,
+    limit_at_max: bool = True,
 ) -> LaboratoryJointInsulationResult
 ```
 
@@ -638,7 +638,7 @@ $d = R_\mathrm{s,max} - R_\mathrm{s}'$:
 * $d < 6$ dB: $R_\mathrm{s} = R_\mathrm{s}' + 1{,}3$ dB, the
   correction Formula (J.2) gives at 6 dB, a minimum value
   (ISO 10140-2:2021 A.3);
-* $d < 3$ dB, with `limit_at_maximum` (the default): the lower
+* $d < 3$ dB, with `limit_at_max` (the default): the lower
   limit set to $R_\mathrm{s} = R_\mathrm{s,max}$, which J.1 allows
   ("may") and presents in brackets as a minimum value.
 
@@ -664,7 +664,7 @@ the bracketed lower limit, whichever rule corrected them.
 | `r_s_max_db` | $R_\mathrm{s,max}$ per band, in dB. |
 | `frequencies` | Band centre frequencies, in Hz. |
 | `joint_length_m` | Length of the joint under test, in m, kept for the form of Figure J.7; `None` leaves that row empty. |
-| `limit_at_maximum` | Set the bands within 3 dB of the maximum to $R_\mathrm{s,max}$ (default), or give them the 1,3 dB correction like the other bands below 6 dB. |
+| `limit_at_max` | Set the bands within 3 dB of the maximum to $R_\mathrm{s,max}$ (default), or give them the 1,3 dB correction like the other bands below 6 dB. |
 
 **Returns:** A [`LaboratoryJointInsulationResult`](/phonometry/reference/api/building/joint-insulation/#laboratoryjointinsulationresult).
 
@@ -689,7 +689,7 @@ LaboratoryJointInsulationResult(
     max_rating: WeightedRatingResult | None,
     open_band_rating: JointOpenBandRating | None,
     *,
-    limit_at_maximum: bool = True,
+    limit_at_max: bool = True,
 )
 ```
 
@@ -709,10 +709,10 @@ Sound reduction index of a joint per metre (ISO 10140-1:2021 Annex J).
 | `ctr_100_5000_db` | $C_\mathrm{tr,100\text{-}5000}$, in dB, or `None`. |
 | `max_rating` | The ISO 717-1 rating of $R_\mathrm{s,max}$, the maximum sound insulation of the arrangement J.5.2 a) asks the report to state, or `None`. |
 | `open_band_rating` | The single numbers with the indicative bands taken as infinitely high, or `None` when no band is indicative or there is no rating. |
-| `limit_at_maximum` | Whether the bands within 3 dB of the maximum were set to $R_\mathrm{s,max}$, as J.1 allows, rather than given the 1,3 dB correction (Default: `True`). |
+| `limit_at_max` | Whether the bands within 3 dB of the maximum were set to $R_\mathrm{s,max}$, as J.1 allows, rather than given the 1,3 dB correction (Default: `True`). |
 
 How each band was corrected (`regime`) is read from the measured
-and the maximum indices and `limit_at_maximum`, so it is not a field.
+and the maximum indices and `limit_at_max`, so it is not a field.
 
 ### LaboratoryJointInsulationResult.bracketed
 
@@ -796,7 +796,7 @@ With $d = R_\mathrm{s,max} - R_\mathrm{s}'$: `"uncorrected"`
 when $R_\mathrm{s,max}$ is at least 10 dB above, `"corrected"`
 by Formula (J.2) from 6 dB to 10 dB, `"limit"` (the fixed 1,3 dB)
 below 6 dB, and `"maximum"` (set to $R_\mathrm{s,max}$) above
-$R_\mathrm{s,max} - 3$ dB when `limit_at_maximum`.
+$R_\mathrm{s,max} - 3$ dB when `limit_at_max`.
 
 ### LaboratoryJointInsulationResult.report()
 

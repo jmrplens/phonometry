@@ -514,7 +514,7 @@ erratas](https://github.com/jmrplens/phonometry/blob/main/docs/ERRATA.es.md).
 `sound_energy_reverberation` y `sound_energy_comparison` admiten `levels` en
 las formas que admiten las funciones de potencia acústica, más una: un array
 3D `(Ne, NM, NB)` de los sucesos medidos uno a uno, o una lectura 1D/2D con
-`events=Ne` para una sola medición de varios. La cámara de la sección 1 y la
+`n_events=Ne` para una sola medición de varios. La cámara de la sección 1 y la
 fuente de referencia de la sección 2 sirven para ambas:
 
 ```python
@@ -535,7 +535,7 @@ slam_lj = emission.sound_energy_reverberation(
     background_levels=np.full(thirds.size, 45.0),   # promediado en los mismos 4 s
     integration_time=4.0, temperature_c=20.0, static_pressure_kpa=101.0,
 )
-print(slam_lj.events, slam_lj.method)                    # 5 direct
+print(slam_lj.n_events, slam_lj.method)                    # 5 direct
 print(np.round(slam_lj.sound_energy_level[:3], 1))       # [96.  94.9 94.2] dB re 1 pJ
 print(round(slam_lj.sound_energy_level_a, 1))            # LJA = 99.0 dB(A)
 
@@ -590,10 +590,10 @@ print(np.round(lj_octave, 1))         # de 99.8 dB a 87.7 dB, tres tercios sumad
 
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
-| `levels` | array 1D, 2D o 3D | dB | por banda, `(NM, NB)` o `(Ne, NM, NB)` | Niveles de suceso aislado: por suceso en el primer eje (Ec. 22), una lectura de `events` sucesos (Ec. 23), o la media de un suceso |
+| `levels` | array 1D, 2D o 3D | dB | por banda, `(NM, NB)` o `(Ne, NM, NB)` | Niveles de suceso aislado: por suceso en el primer eje (Ec. 22), una lectura de `n_events` sucesos (Ec. 23), o la media de un suceso |
 | `t60`, `volume`, `surface_area`, `frequencies` | como en la sección 1 | | | Solo método directo. Ahí `frequencies` es obligatorio; el método de comparación lo pide solo cuando se da `background_levels`, porque la corrección es por banda |
 | `levels_ref`, `lw_ref`, `background_levels_ref` | como en la sección 2 | | | Solo método de comparación; la fuente de referencia es estacionaria y conserva la corrección de 9.1.2 |
-| `events` | int o None | | `>= 1`, por defecto `None` | $N_\mathrm{e}$ abarcados por una lectura (Ec. 23); al menos 5 sin aviso |
+| `n_events` | int o None | | `>= 1`, por defecto `None` | $N_\mathrm{e}$ abarcados por una lectura (Ec. 23); al menos 5 sin aviso |
 | `background_levels` | array 1D o 2D | dB | coincide con `levels` | Fondo promediado en el tiempo sobre la misma ventana; $K_{1i}$ por posición (Ec. 25/26) |
 | `integration_time` | float | s | > 0, obligatorio con `background_levels` | La ventana $T$; el fondo se compara como $L_{pi(\mathrm{B})} + 10\log_{10}(T/T_0)$ |
 | `temperature_c`, `static_pressure_kpa` | float | °C, kPa | por defecto `23.0`, `101.325` | Fijan $c$, $C_1$, $C_2$ como en la sección 1 |
@@ -601,7 +601,7 @@ print(np.round(lj_octave, 1))         # de 99.8 dB a 87.7 dB, tres tercios sumad
 Ambas devuelven un `ReverberationSoundEnergyResult` (`sound_energy_level`,
 `mean_event_level`, `absorption_area`, `waterhouse_correction`,
 `background_correction`, `c1`, `c2`, `speed_of_sound`, `sound_energy_level_a`,
-`method`, `events`, `integration_time`), con los mismos campos `NaN` para el
+`method`, `n_events`, `integration_time`), con los mismos campos `NaN` para el
 método de comparación que su gemelo de potencia acústica, y los mismos avisos
 de cualificación.
 

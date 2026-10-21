@@ -101,7 +101,7 @@ the even power and real cepstra repeat and the complex cepstrum keeps its
 anticausal (non-minimum-phase) content. Zero-padding via `nfft` reduces
 cepstral time-aliasing when the log spectrum has sharp features, exactly like
 the `oversample` padding of
-[`minimum_phase`](../../devices/electroacoustics/swept-sine-distortion.md).
+[`min_phase`](../../devices/electroacoustics/swept-sine-distortion.md).
 
 ## 2. Echo detection: the rahmonic spike train
 
@@ -298,7 +298,7 @@ homomorphic deconvolution (Havelock Ch. 87, Sec. 3.3): zero the rahmonics to
 remove an echo, keep only the low quefrencies to extract a source wavelet.
 A minimum-phase signal has a causal complex cepstrum, which is why folding
 the real cepstrum onto positive quefrencies reconstructs the minimum phase
-from $|H|$ alone: [`minimum_phase`](../../devices/electroacoustics/swept-sine-distortion.md)
+from $|H|$ alone: [`min_phase`](../../devices/electroacoustics/swept-sine-distortion.md)
 and `phase_decomposition` run on that same folding core (Bendat & Piersol
 Sec. 13.1.4; Tohyama in Havelock Ch. 75 edits reverberation by manipulating
 exactly these causal/anticausal parts).
@@ -388,7 +388,7 @@ matters.
 The cepstrum starts from the same one-record FFT conventions as the
 [calibrated spectral estimators](spectral-analysis.md), and its
 folding core is literally the one inside
-[`minimum_phase`](../../devices/electroacoustics/swept-sine-distortion.md) - the refactor is
+[`min_phase`](../../devices/electroacoustics/swept-sine-distortion.md) - the refactor is
 pinned bit-exact in the tests. The envelope spectrum is the frequency-domain
 view of the same analytic signal the
 [Hilbert envelope](correlation-delay.md) returns in time, and a

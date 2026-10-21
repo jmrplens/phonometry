@@ -383,13 +383,15 @@ def test_a_weighting_of_another_application_is_refused() -> None:
 
 def test_a_burst_length_the_tables_do_not_print_is_refused() -> None:
     """Four cycles is a printed row; three is not, and has no expected cell."""
-    with pytest.raises(ValueError, match=r"'cycles' must be one of \(1, 2, 4, 8, 16\)"):
+    with pytest.raises(
+        ValueError, match=r"'n_cycles' must be one of \(1, 2, 4, 8, 16\)"
+    ):
         sb.sawtooth_burst("whole-body", 3, fs=2_000.0)
     assert sb.sawtooth_burst("whole-body", 4, fs=2_000.0).size > 0
 
 
 def test_a_non_integer_burst_length_is_refused() -> None:
-    with pytest.raises(TypeError, match="'cycles' must be an integer"):
+    with pytest.raises(TypeError, match="'n_cycles' must be an integer"):
         sb.sawtooth_burst("whole-body", 4.0, fs=2_000.0)  # type: ignore[arg-type]
 
 
@@ -491,7 +493,7 @@ def test_a_subset_of_rows_and_columns_is_a_valid_verdict() -> None:
 def test_the_verdict_refuses_what_it_cannot_judge() -> None:
     with pytest.raises(ValueError, match="'measured' must report at least one"):
         sb.verify_signal_burst_response("whole-body", "Wk", {})
-    with pytest.raises(ValueError, match=r"'cycles' must be one of"):
+    with pytest.raises(ValueError, match=r"'n_cycles' must be one of"):
         sb.verify_signal_burst_response("whole-body", "Wk", {3: {"rms": 0.03}})
     with pytest.raises(ValueError, match="does not print"):
         sb.verify_signal_burst_response("whole-body", "Wk", {1: {"msdv": 0.03}})

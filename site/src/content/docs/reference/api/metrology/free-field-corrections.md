@@ -49,7 +49,7 @@ divided by the divisor its distribution sets, and the effective degrees of
 freedom by Welch-Satterthwaite, which choose the coverage factor for a level of
 confidence of 95 %. [`verify_correction_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#verify_correction_uncertainty) judges the expanded
 uncertainty at each frequency against the maximum permitted by the clause the
-correction belongs to, [`maximum_expanded_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#maximum_expanded_uncertainty), and for clauses
+correction belongs to, [`max_expanded_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#max_expanded_uncertainty), and for clauses
 12 to 14 the range of the corrections over the microphones against the same
 maximum.
 
@@ -567,7 +567,7 @@ negative where it fails.
 *property*
 
 The maximum permitted at each frequency by the clause, in dB,
-[`maximum_expanded_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#maximum_expanded_uncertainty).
+[`max_expanded_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#max_expanded_uncertainty).
 
 ### CorrectionUncertaintyVerification.passes
 
@@ -824,12 +824,6 @@ against: 12, 13 or 14.
 The mean correction over the determinations at each frequency, in
 dB: the value the manual states.
 
-### FreeFieldCorrection.determinations
-
-*property*
-
-The number of determinations averaged.
-
 ### FreeFieldCorrection.formula
 
 *property*
@@ -842,6 +836,12 @@ The formula applied: `"D.7"`, `"E.6"` or `"F.13"`.
 
 The correction of each microphone, the mean over its
 determinations, in dB, shape `(microphones, frequencies)`.
+
+### FreeFieldCorrection.n_determinations
+
+*property*
+
+The number of determinations averaged.
 
 ### FreeFieldCorrection.n_microphones
 
@@ -886,10 +886,10 @@ judge. Zero for a single microphone.
 
 *Constant* (`mapping`).
 
-## maximum_expanded_uncertainty
+## max_expanded_uncertainty
 
 ```python
-maximum_expanded_uncertainty(
+max_expanded_uncertainty(
     frequencies: ArrayLike,
     *,
     clause: int,
@@ -1033,7 +1033,7 @@ maxima of their clause (IEC 62585:2012, clauses 5 and 9 to 14).
 
 The actual expanded uncertainty at each frequency, at a level of
 confidence of 95 % with the coverage factor stated (clause 5), has not to
-exceed [`maximum_expanded_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#maximum_expanded_uncertainty) of the clause; for a
+exceed [`max_expanded_uncertainty`](/phonometry/reference/api/metrology/free-field-corrections/#max_expanded_uncertainty) of the clause; for a
 calibrator, a coupler or an actuator (clauses 12 to 14) the range of the
 corrections over three microphones has not to exceed it either. A
 [`FreeFieldCorrection`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrection) knows its clause, [`clause`](/phonometry/reference/api/metrology/free-field-corrections/#freefieldcorrectionclause),

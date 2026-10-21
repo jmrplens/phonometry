@@ -193,10 +193,10 @@ probability; a minimum of $k = 1$ is enforced (Clause 8).
 | :--- | :--- |
 | ValueError | Negative `u` or an untabulated coverage probability. |
 
-## maximum_repeatability_standard_deviation
+## max_repeatability_standard_deviation
 
 ```python
-maximum_repeatability_standard_deviation() -> BandUncertainty
+max_repeatability_standard_deviation() -> BandUncertainty
 ```
 
 Return Table 1, the maximum repeatability standard deviation per band (Clause 5.8).

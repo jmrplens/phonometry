@@ -117,10 +117,10 @@ permite responder por una sala que caiga entre dos filas.
 ```python
 from phonometry import room
 
-print([round(float(room.minimum_receiver_positions(n)), 2)
+print([round(float(room.min_receiver_positions(n)), 2)
        for n in (500, 1000, 1400, 2000)])
 # [6.0, 8.0, 8.97, 10.0]
-print(round(float(room.minimum_receiver_positions(5000)), 2))   # 10.0
+print(round(float(room.min_receiver_positions(5000)), 2))   # 10.0
 ```
 
 La recta se acaba donde se acaba la tabla. A.4 pide «a minimum of between 6

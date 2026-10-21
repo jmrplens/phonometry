@@ -213,14 +213,14 @@ def test_kij_min_formula_29() -> None:
     # Kij,min = 10 lg[ lf * l0 * (1/Si + 1/Sj) ], l0 = 1 m. Hand check.
     lf, si, sj = 4.5, 11.5, 19.6
     expected = 10.0 * math.log10(4.5 * (1.0 / 11.5 + 1.0 / 19.6))
-    assert building.junction_minimum_vibration_reduction(lf, si, sj) == pytest.approx(
+    assert building.junction_min_vibration_reduction(lf, si, sj) == pytest.approx(
         expected
     )
     with pytest.raises(
         ValueError,
         match="'coupling_length', 's_i' and 's_j' must be positive",
     ):
-        building.junction_minimum_vibration_reduction(0.0, 11.5, 19.6)
+        building.junction_min_vibration_reduction(0.0, 11.5, 19.6)
 
 
 # --------------------------------------------------------------------------
@@ -290,8 +290,8 @@ def test_flanking_element_applies_kij_min_from_geometry() -> None:
         coupling_length=lf,
         flanking_area=sf,
     )
-    min_ff = building.junction_minimum_vibration_reduction(lf, sf, sf)
-    min_cross = building.junction_minimum_vibration_reduction(lf, sf, ss)
+    min_ff = building.junction_min_vibration_reduction(lf, sf, sf)
+    min_cross = building.junction_min_vibration_reduction(lf, sf, ss)
     assert min_ff == pytest.approx(7.27, abs=0.01)
     base_ff = 30.0 + 10.0 * math.log10(ss / lf)
     base_cross = (30.0 + 57.0) / 2.0 + 10.0 * math.log10(ss / lf)

@@ -846,7 +846,7 @@ def _tow_launcher_distribution() -> "SELDistribution":
              0.0003, 0.0069, 0.0798, 0.2310, 0.0215, 0.0260, 0.0263,
              0.0194, 0.0153, 0.0030]  # fmt: skip
     period = 0.8 * np.asarray(day) + 0.2 * np.asarray(night)
-    return environment.sel_distribution(levels, period, sigma_db=5.0, subclasses=10)
+    return environment.sel_distribution(levels, period, sigma_db=5.0, n_subclasses=10)
 
 
 def generate_sel_distribution_density(output_dir: str) -> None:
@@ -1400,7 +1400,7 @@ def _cnossos_rail_scene() -> tuple[Any, Any]:
     from phonometry import environment
 
     stock = environment.RollingStock(
-        axles=4,
+        n_axles=4,
         wheel_roughness=environment.wheel_roughness(environment.BrakeType.NON_TREAD),
         contact_filter=environment.contact_filter(
             environment.ContactFilter.LOAD_50_DIAMETER_920

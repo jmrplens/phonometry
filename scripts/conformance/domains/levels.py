@@ -156,7 +156,7 @@ def _chk_rd1367_period_level() -> Outcome:
         ph.environment.NoisePhase(hours, laeq, kt=kt, kf=kf)
         for hours, laeq, kt, kf in _RD1367_DAY_PHASES
     ]
-    level = ph.environment.evaluation_period_level(phases, hours=12.0)
+    level = ph.environment.evaluation_period_level(phases, duration_hours=12.0)
     return numeric(
         57.0,
         float(ph.environment.round_reported_level(level)),

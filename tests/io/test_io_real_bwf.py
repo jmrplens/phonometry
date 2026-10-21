@@ -59,8 +59,8 @@ def test_info_transcribes_the_702t_bext_field_by_field() -> None:
     assert meta.format_name == "PCM"
     assert meta.bit_depth == 24
     assert meta.fs == 48000
-    assert meta.channels == 2
-    assert meta.frames == 48044
+    assert meta.n_channels == 2
+    assert meta.n_samples == 48044
     assert not meta.lossy
 
     bext = meta.bext

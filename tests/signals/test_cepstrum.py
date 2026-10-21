@@ -31,7 +31,7 @@ add up to the original log spectrum exactly (the split is linear).
 forward transform (including the removed linear phase) to machine
 precision on a mixed-phase, delayed record.
 
-**Minimum-phase refactor.** ``phonometry.minimum_phase`` now folds the
+**Minimum-phase refactor.** ``phonometry.min_phase`` now folds the
 real cepstrum through the shared ``_fold_causal`` core; a frozen verbatim
 copy of the pre-refactor implementation must agree *bit for bit* on fixed
 responses.
@@ -375,7 +375,7 @@ def test_an_echo_detection_result_refuses_a_cepstrum_short_of_its_axis() -> None
 
 
 def _old_minimum_phase(response: np.ndarray, *, oversample: int = 8) -> np.ndarray:
-    """Verbatim frozen copy of the pre-refactor ``minimum_phase`` body.
+    """Verbatim frozen copy of the pre-refactor ``min_phase`` body.
 
     Only the private helpers it called (validation and the trigonometric
     oversampler, both untouched by the refactor) are used from the live
@@ -432,11 +432,11 @@ def test_minimum_phase_refactor_is_bit_exact(oversample: int) -> None:
     """The shared-core refactor changes no output bit on any fixed input."""
     for response in _fixed_responses():
         old = _old_minimum_phase(response, oversample=oversample)
-        new = ph.signals.minimum_phase(response, oversample=oversample)
+        new = ph.signals.min_phase(response, oversample=oversample)
         assert old.dtype == new.dtype
         assert old.shape == new.shape
         assert np.array_equal(old.view(np.float64), new.view(np.float64)), (
-            "minimum_phase output changed bitwise after the cepstrum refactor"
+            "min_phase output changed bitwise after the cepstrum refactor"
         )
 
 
@@ -444,9 +444,7 @@ def test_phase_decomposition_uses_the_shared_core_bit_exactly() -> None:
     response = _fixed_responses()[0]
     old = _old_minimum_phase(response)
     res = ph.signals.phase_decomposition(response, FS)
-    assert np.array_equal(
-        old.view(np.float64), res.minimum_phase_response.view(np.float64)
-    )
+    assert np.array_equal(old.view(np.float64), res.min_phase_response.view(np.float64))
 
 
 # ---------------------------------------------------------------------------

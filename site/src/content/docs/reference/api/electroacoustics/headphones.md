@@ -564,7 +564,7 @@ Formula (1) averaged arithmetically over the persons, in dB (8.6.5.2 h).
 
 Whether at least eight persons were measured (8.6.5.2 h).
 
-### EarCanalFrequencyResponse.persons
+### EarCanalFrequencyResponse.n_persons
 
 *property*
 
@@ -783,7 +783,7 @@ The response averaged over the persons in each band, in dB.
 
 Whether at least eight persons were heard (8.6.3.2 d, 8.6.4.2 d).
 
-### FieldComparisonResponse.persons
+### FieldComparisonResponse.n_persons
 
 *property*
 
@@ -843,7 +843,7 @@ The sample standard deviation; zero with a single person.
 ```python
 headphone_difference_frequency_signal(
     fs: int,
-    seconds: float,
+    duration_s: float,
     *,
     upper_frequency_hz: float,
     rated_source_emf_v: float,
@@ -863,7 +863,7 @@ the rated voltage. Read the products with
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate, in hertz. |
-| `seconds` | Duration, in seconds. |
+| `duration_s` | Duration, in seconds. |
 | `upper_frequency_hz` | The upper tone $f_2$, in Hz, above 80 Hz and below the Nyquist frequency. |
 | `rated_source_emf_v` | The rated input voltage, in volts (RMS). |
 
@@ -920,7 +920,7 @@ $$
 ```python
 headphone_modulation_signal(
     fs: int,
-    seconds: float,
+    duration_s: float,
     *,
     rated_source_emf_v: float,
 ) -> NDArray[np.float64]
@@ -944,7 +944,7 @@ third at 460 Hz and 740 Hz.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate, in hertz. |
-| `seconds` | Duration, in seconds. |
+| `duration_s` | Duration, in seconds. |
 | `rated_source_emf_v` | The rated input voltage, the rated source e.m.f. of 8.3.1, in volts (RMS). |
 
 **Returns:** The signal, in volts.
@@ -997,7 +997,7 @@ HeadphoneClassification(
     coupling: str,
     radiation: str,
     impedance_ohm: float,
-    channels: int,
+    n_channels: int,
 )
 ```
 
@@ -1012,7 +1012,7 @@ The classification of a headphone by IEC 60268-7:2010 Clause 4.
 | `coupling` | The acoustic coupling to the ear canal, a key of [`ACOUSTIC_COUPLINGS`](/phonometry/reference/api/electroacoustics/headphones/#acoustic_couplings). |
 | `radiation` | The radiation to the external environment, a key of [`BACK_RADIATIONS`](/phonometry/reference/api/electroacoustics/headphones/#back_radiations). |
 | `impedance_ohm` | The impedance, in ohms, as coded by [`impedance_code`](/phonometry/reference/api/electroacoustics/headphones/#impedance_code). |
-| `channels` | The number of channels, 1 to 9. |
+| `n_channels` | The number of channels, 1 to 9. |
 
 ### HeadphoneClassification.code
 

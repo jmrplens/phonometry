@@ -219,7 +219,7 @@ def test_rf64_reads_through_the_ds64_sizes(tmp_path: Path) -> None:
     assert sig.source.container == "RF64"
     described = info(path)
     assert described.container == "RF64"
-    assert described.frames == codes.size
+    assert described.n_samples == codes.size
     assert described.duration == pytest.approx(codes.size / FS)
 
 
@@ -240,7 +240,7 @@ def test_bw64_reads_like_the_rf64_it_differs_from_in_fourcc_alone(
     assert sig.source.container == "BW64"
     described = info(path)
     assert described.container == "BW64"
-    assert described.frames == codes.size
+    assert described.n_samples == codes.size
 
 
 def test_truncated_data_is_refused_at_every_depth(tmp_path: Path) -> None:
@@ -265,7 +265,7 @@ def test_truncated_data_is_refused_at_every_depth(tmp_path: Path) -> None:
             ),
         )
         path = _write(tmp_path, image, f"trunc{bits}.wav")
-        assert info(path).frames == 100
+        assert info(path).n_samples == 100
         with pytest.raises(
             ValueError, match=r"refusing to read a truncated recording as if it were"
         ):
@@ -303,8 +303,8 @@ def test_info_describes_headers_without_the_samples(tmp_path: Path) -> None:
     assert described.container == "WAV"
     assert described.format_name == "PCM"
     assert described.fs == FS
-    assert described.channels == 1
-    assert described.frames == 10
+    assert described.n_channels == 1
+    assert described.n_samples == 10
     assert described.duration == pytest.approx(10 / FS)
     assert described.bit_depth == 16
     assert not described.lossy
@@ -371,8 +371,8 @@ def test_info_answers_a_giant_rf64_from_its_headers_alone(
     assert described.container == "RF64"
     assert described.format_name == "PCM"
     assert described.fs == FS
-    assert described.channels == 2
-    assert described.frames == frames
+    assert described.n_channels == 2
+    assert described.n_samples == frames
     assert described.duration == pytest.approx(frames / FS)
     assert described.bit_depth == 16
     assert not described.lossy
@@ -458,7 +458,7 @@ def test_missing_audio_extra_is_named_in_the_error(
     described = info(_write(tmp_path, alaw, "compressed2.wav"))
     assert described.lossy
     assert described.format_name == "A-law"
-    assert described.frames == 4
+    assert described.n_samples == 4
 
 
 # ---------------------------------------------------------------------------

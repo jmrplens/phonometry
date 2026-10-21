@@ -188,7 +188,7 @@ def _sidecar_labels(
     if sidecar is None or sidecar.channel_labels is None:
         return None
     if channels is None:
-        channels = info(path).channels
+        channels = info(path).n_channels
     check_sidecar_labels(path, sidecar.channel_labels, channels)
     return sidecar.channel_labels
 

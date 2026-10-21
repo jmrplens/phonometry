@@ -208,7 +208,7 @@ def test_the_mean_attenuation_points_downwards_on_the_iec_60263_grid() -> None:
     assert ax.get_box_aspect() == pytest.approx(expected)
     # One faint line per subject behind the mean, one legend entry for them.
     faint = [line for line in ax.lines if line.get_marker() in ("None", "", None)]
-    assert len(faint) == result.subjects
+    assert len(faint) == result.n_subjects
     assert "16" in ax.get_title()
     plt.close("all")
 

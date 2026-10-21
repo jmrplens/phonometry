@@ -325,7 +325,7 @@ expressed in dB by definition.
 evaluation_period_level(
     phases: Sequence[NoisePhase],
     *,
-    hours: float | None = None,
+    duration_hours: float | None = None,
 ) -> float
 ```
 
@@ -341,7 +341,7 @@ the regulation asks to report.
 | Name | Description |
 | :--- | :--- |
 | `phases` | The noise phases of the period. |
-| `hours` | Total period duration `T`, in hours. `None` (default) uses the sum of the phase durations, as the regulation requires $\sum T_i = T$. |
+| `duration_hours` | Total period duration `T`, in hours. `None` (default) uses the sum of the phase durations, as the regulation requires $\sum T_i = T$. |
 
 **Returns:** `LKeq,T` in dB.
 
@@ -349,7 +349,7 @@ the regulation asks to report.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `phases` is empty, `hours` is not positive, or the phase durations do not sum to `hours`. |
+| ValueError | If `phases` is empty, `duration_hours` is not positive, or the phase durations do not sum to `duration_hours`. |
 
 ## impulsive_correction
 
@@ -517,10 +517,10 @@ $L_\mathrm{f} > 15$) leave no other consistent reading. See
 | :--- | :--- |
 | ValueError | If either level is not finite. |
 
-## maximum_infrastructure_limit
+## max_infrastructure_limit
 
 ```python
-maximum_infrastructure_limit(area_type: str) -> float
+max_infrastructure_limit(area_type: str) -> float
 ```
 
 Maximum `LAmax` for rail and airport infrastructure (Annex III Table A2).
@@ -546,7 +546,7 @@ or below it (Article 25.1 a iii).
 
 ```python
 NoisePhase(
-    hours: float,
+    duration_hours: float,
     laeq: float,
     kt: float = 0.0,
     kf: float = 0.0,
@@ -567,7 +567,7 @@ character.
 
 | Name | Description |
 | :--- | :--- |
-| `hours` | Duration `Ti` of the phase, in hours (positive). |
+| `duration_hours` | Duration `Ti` of the phase, in hours (positive). |
 | `laeq` | Background-corrected `LAeq,Ti`, in dB. A phase in which the activity is shut down carries the level actually measured; the worked examples of the Spanish literature enter it as 0 dB. |
 | `kt` | Tonal correction of the phase, in dB. |
 | `kf` | Low-frequency correction of the phase, in dB. |
@@ -578,7 +578,7 @@ character.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | If `hours` is not positive and finite, `laeq` is not finite, or a correction is negative. |
+| ValueError | If `duration_hours` is not positive and finite, `laeq` is not finite, or a correction is negative. |
 
 ### NoisePhase.correction
 

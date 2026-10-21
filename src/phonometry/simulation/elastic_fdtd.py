@@ -1099,11 +1099,11 @@ class ElasticFDTD2D:
 
     def run(
         self,
-        steps: int,
+        n_steps: int,
         record_every: int | None = None,
         decimate: int = 1,
     ) -> NDArray[np.float64]:
-        """Advance ``steps`` steps, optionally recording pressure frames.
+        """Advance ``n_steps`` steps, optionally recording pressure frames.
 
         With ``record_every = k`` a snapshot of the synthetic pressure ``p``
         is stored after every ``k``-th step (and one of the initial state),
@@ -1112,7 +1112,7 @@ class ElasticFDTD2D:
         ``FuncAnimation`` ``imshow`` update. Without ``record_every`` an
         empty array is returned and only the final state is kept.
         """
-        return _run_recording(self, steps, record_every, decimate)
+        return _run_recording(self, n_steps, record_every, decimate)
 
 
 @dataclass(frozen=True)

@@ -658,8 +658,8 @@ ReportMetadata(
     source_volume: float | None = None,
     receiving_volume: float | None = None,
     room_volume: float | None = None,
-    source_positions: int | None = None,
-    receiver_positions: int | None = None,
+    n_source_positions: int | None = None,
+    n_receiver_positions: int | None = None,
     temperature_c: float | None = None,
     relative_humidity_percent: float | None = None,
     source_temperature_c: float | None = None,
@@ -715,8 +715,8 @@ raises `ValueError`.
 | `source_volume` | Source-room volume, in m^3. |
 | `receiving_volume` | Receiving-room volume, in m^3. |
 | `room_volume` | Volume of the single room under test, in m^3. Room acoustics (ISO 3382-1/-2) characterises one enclosure rather than a source/receiving pair, and ISO 3382-2:2008 Clause 9 requires the room volume to be reported; the room-acoustics fiche prints it in the header. Distinct from the `source_volume`/`receiving_volume` pair, which describe a sound-transmission measurement. |
-| `source_positions` | Number of source (loudspeaker/omnidirectional) positions used in the measurement, an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8 require reporting the number of source positions). Printed by the room-acoustics fiche. |
-| `receiver_positions` | Number of microphone (receiver) positions used, an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8 require reporting the number of microphone positions). Printed by the room-acoustics fiche. |
+| `n_source_positions` | Number of source (loudspeaker/omnidirectional) positions used in the measurement, an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8 require reporting the number of source positions). Printed by the room-acoustics fiche. |
+| `n_receiver_positions` | Number of microphone (receiver) positions used, an integer (ISO 3382-1:2009 Table 1 and ISO 3382-2:2008 Clause 8 require reporting the number of microphone positions). Printed by the room-acoustics fiche. |
 | `temperature_c` | Air temperature during the test, in degrees Celsius (a single representative value; use the per-room fields below when the source and receiving rooms are reported separately). |
 | `relative_humidity_percent` | Relative humidity during the test, in %. |
 | `source_temperature_c` | Source-room air temperature, in degrees Celsius. |

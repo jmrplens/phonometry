@@ -502,7 +502,7 @@ def assess_building_vibration(
     )
 
 
-def story_fundamental_frequency(stories: int) -> float:
+def story_fundamental_frequency(n_stories: int) -> float:
     """The rough lowest horizontal natural frequency of a building.
 
     ``f ~ 10 / n``, offered for buildings from about five storeys up. Three
@@ -514,7 +514,7 @@ def story_fundamental_frequency(stories: int) -> float:
     its use is to tell whether the excitation is anywhere near the frequency
     at which the topmost floor plane will answer.
 
-    :param stories: The number of storeys ``n``.
+    :param n_stories: The number of storeys ``n``.
     :return: The estimated lowest horizontal natural frequency, in hertz.
     :raises ValueError: If the storey count is not a positive integer.
     :warns BuildingDamageWarning: Below
@@ -523,12 +523,12 @@ def story_fundamental_frequency(stories: int) -> float:
     """
     # ValueError rather than TypeError, so every argument this module refuses
     # raises the same class.
-    if isinstance(stories, bool) or not isinstance(stories, (int, np.integer)):
-        msg = "'stories' must be an integer."
+    if isinstance(n_stories, bool) or not isinstance(n_stories, (int, np.integer)):
+        msg = "'n_stories' must be an integer."
         raise ValueError(msg)  # noqa: TRY004
-    n = int(stories)
+    n = int(n_stories)
     if n < 1:
-        msg = f"'stories' must be at least 1; got {n}."
+        msg = f"'n_stories' must be at least 1; got {n}."
         raise ValueError(msg)
     if n < STORY_FREQUENCY_MIN_STORIES:
         # A warning and not a refusal: 6.4 says "about five storeys", and a

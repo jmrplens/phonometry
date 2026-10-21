@@ -63,7 +63,7 @@ diffuse_field_absorption(
     layers: list[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer] | tuple[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer, ...],
     *,
     angle_limit_rad: float = 1.5707963267948966,
-    quadrature_points: int = 64,
+    n_quadrature_points: int = 64,
     termination: str | complex | ArrayLike = 'rigid',
     fluid: Fluid = ...,
 ) -> DiffuseFieldAbsorptionResult
@@ -89,7 +89,7 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `layers` | Layer stack, as in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). |
 | `angle_limit_rad` | Upper integration angle `theta_lim`, in radians (0 \< theta_lim \<= pi/2; default pi/2). |
-| `quadrature_points` | Gauss-Legendre order (default 64). |
+| `n_quadrature_points` | Gauss-Legendre order (default 64). |
 | `termination` | As in [`layered_absorber`](/phonometry/reference/api/materials/layered/#layered_absorber). |
 | `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values). Pass a computed one, such as `fluids.air(temperature_c=30.0, relative_humidity_percent=70.0)`, to work in the air of the room. |
 

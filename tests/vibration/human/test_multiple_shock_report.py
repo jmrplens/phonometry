@@ -69,7 +69,11 @@ def _result_from_peaks(
     dz = dose_from_peaks(peaks)
     sd = compression_dose(dz, mz=mz)
     r = injury_risk(
-        sd, start_age=start_age, years=years, days_per_year=days_per_year, sex=sex
+        sd,
+        start_age=start_age,
+        exposure_duration_years=years,
+        days_per_year=days_per_year,
+        sex=sex,
     )
     return MultipleShockResult(
         sex=sex,
@@ -79,7 +83,7 @@ def _result_from_peaks(
         risk=r,
         probability=float(injury_probability(r, sex=sex)),
         start_age=start_age,
-        years=years,
+        exposure_duration_years=years,
         days_per_year=days_per_year,
         peaks=peaks,
         risk_thresholds=thresholds,

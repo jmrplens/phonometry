@@ -165,7 +165,7 @@ blade_pass_frequencies(
     *,
     n_harmonics: int = 3,
     n_vanes: int | None = None,
-    lobe_orders: int = 1,
+    n_lobe_orders: int = 1,
 ) -> FaultFrequencyResult
 ```
 
@@ -196,7 +196,7 @@ pattern turning at a different speed.
 | `n_blades` | Number of blades (integer >= 1). |
 | `n_harmonics` | Number of blade-pass harmonics (integer >= 1, Default: 3). |
 | `n_vanes` | Number of stator vanes `V` (integer >= 1) to include the lobed interaction patterns (Default: `None`, blade tones only). |
-| `lobe_orders` | Highest `\|k\|` in $m_\mathrm{L} = n\, N_{\text{blades}} \pm k\, N_{\text{vanes}}$ (integer >= 1, Default: 1). |
+| `n_lobe_orders` | Highest `\|k\|` in $m_\mathrm{L} = n\, N_{\text{blades}} \pm k\, N_{\text{vanes}}$ (integer >= 1, Default: 1). |
 
 **Returns:** A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) (source `"bladed rotor"`).
 
@@ -394,7 +394,7 @@ gear_mesh_frequencies(
     n_teeth: int,
     *,
     n_harmonics: int = 3,
-    sidebands: int = 0,
+    n_sidebands: int = 0,
     sideband_rate: float | None = None,
 ) -> FaultFrequencyResult
 ```
@@ -404,7 +404,7 @@ Gear-meshing frequency and its sideband family (Norton Eq. 8.3).
 $\mathrm{GMF} = n_{\text{teeth}} \times N/60$, with integer
 harmonics `k GMF` (`k = 1 .. n_harmonics`) named `"GMF"`,
 `"2xGMF"`, ... Each harmonic can carry a
-modulation family at `k GMF +/- m f_mod` (`m = 1 .. sidebands`), named
+modulation family at `k GMF +/- m f_mod` (`m = 1 .. n_sidebands`), named
 `"GMF-1x"`, `"2xGMF+2x"`, and so on. The default modulation rate is
 the shaft rate of the wheel: a chipped tooth or an eccentric wheel
 modulates the mesh once per revolution, which is what produces those
@@ -420,7 +420,7 @@ Only positive sideband frequencies are returned.
 | `speed_rpm` | Shaft speed `N` of the wheel, in r/min (> 0). |
 | `n_teeth` | Number of teeth on that wheel (integer >= 1). |
 | `n_harmonics` | Number of mesh harmonics (integer >= 1, Default: 3). |
-| `sidebands` | Sideband order per harmonic (integer >= 0, Default: 0, no sidebands). |
+| `n_sidebands` | Sideband order per harmonic (integer >= 0, Default: 0, no sidebands). |
 | `sideband_rate` | Modulation rate `f_mod`, in hertz (> 0, Default: the wheel's own shaft rate). |
 
 **Returns:** A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) (source `"gear pair"`).
@@ -436,13 +436,13 @@ Only positive sideband frequencies are returned.
 ```python
 induction_motor_frequencies(
     speed_rpm: float,
-    poles: int,
-    rotor_bars: int,
+    n_poles: int,
+    n_rotor_bars: int,
     *,
     slip: float = 0.0,
     supply_frequency: float | None = None,
-    slot_harmonics: int = 1,
-    sidebands: int = 0,
+    n_slot_harmonics: int = 1,
+    n_sidebands: int = 0,
 ) -> FaultFrequencyResult
 ```
 
@@ -459,7 +459,7 @@ $f_\mathrm{sh} = f_\mathrm{e}\left[\left(\dfrac{2R}{p}\right)(1-s) \pm 2(n-1)\ri
 for `R` rotor bars, `p` magnetic poles (not pole pairs), unit slip
 `s` and `n = 1, 2, ...`. Dynamic eccentricity modulates the dominant
 slot harmonic at +/- the shaft rate and +/- the slip frequency, which is
-what *sidebands* adds around `fsh`.
+what *n_sidebands* adds around `fsh`.
 
 Give the slip directly, or give the mains *supply_frequency* and let it be
 derived from `fe` and the measured shaft speed. The supply frequency is
@@ -479,12 +479,12 @@ it by the pole count.
 | Name | Description |
 | :--- | :--- |
 | `speed_rpm` | Shaft speed `N`, in r/min (> 0). |
-| `poles` | Number of magnetic poles `p` (even integer >= 2). |
-| `rotor_bars` | Number of rotor bars/slots `R` (integer >= 1). |
+| `n_poles` | Number of magnetic poles `p` (even integer >= 2). |
+| `n_rotor_bars` | Number of rotor bars/slots `R` (integer >= 1). |
 | `slip` | Unit slip `s` (`0 <= s < 1`, Default: 0); typically 0,02 to 0,05 under load. Ignored when *supply_frequency* is given. |
 | `supply_frequency` | Mains frequency `fe`, in hertz (> 0), from which the slip is derived (Default: `None`, use *slip*). |
-| `slot_harmonics` | Number of slot-harmonic orders `n` (integer >= 1, Default: 1, the fundamental `R fs` alone). |
-| `sidebands` | Sideband order around the fundamental slot harmonic at +/- the shaft rate and +/- the slip frequency (integer >= 0, Default: 0). |
+| `n_slot_harmonics` | Number of slot-harmonic orders `n` (integer >= 1, Default: 1, the fundamental `R fs` alone). |
+| `n_sidebands` | Sideband order around the fundamental slot harmonic at +/- the shaft rate and +/- the slip frequency (integer >= 0, Default: 0). |
 
 **Returns:** A [`FaultFrequencyResult`](/phonometry/reference/api/vibration/diagnostics/#faultfrequencyresult) (source `"induction motor"`).
 

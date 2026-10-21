@@ -557,7 +557,7 @@ class DoubleHitCheck(OwnsArrays):
         return np.asarray(force[np.asarray(self.impact_indices)], dtype=np.float64)
 
     @property
-    def impacts(self) -> int:
+    def n_impacts(self) -> int:
         """How many impacts the record holds."""
         return int(np.asarray(self.impact_indices).size)
 
@@ -615,7 +615,7 @@ class DoubleHitCheck(OwnsArrays):
     @property
     def passes(self) -> bool:
         """Whether the record holds a single impact."""
-        return self.impacts == 1
+        return self.n_impacts == 1
 
     def __bool__(self) -> bool:
         """Refuse to stand in for the verdict it carries.
@@ -732,7 +732,7 @@ class ImpactMobilityResult(OwnsArrays):
         identically 1 for a single impact.
     :ivar force_energy_spectral_density: Averaged one-sided energy spectral
         density of the windowed force, :math:`G_{FF}` in N²·s/Hz (3.4).
-    :ivar impacts: Number of impacts averaged.
+    :ivar n_impacts: Number of impacts averaged.
     :ivar exponential_decay_rate_per_s: Decay rate ``a`` of the exponential
         window applied, in 1/s (0 for none).
     :ivar response_quantity: What the response channel measured:
@@ -745,7 +745,7 @@ class ImpactMobilityResult(OwnsArrays):
     coherence: np.ndarray
     force_energy_spectral_density: np.ndarray
     _: KW_ONLY
-    impacts: int
+    n_impacts: int
     exponential_decay_rate_per_s: float = 0.0
     response_quantity: ResponseQuantity = "acceleration"
     driving_point: bool = True
@@ -785,9 +785,9 @@ class ImpactMobilityResult(OwnsArrays):
         if np.any(~(coherence >= 0.0)) or np.any(coherence > 1.0):
             msg = f"{owner}: 'coherence' must lie in [0, 1]."
             raise ValueError(msg)
-        require_scalar(self.impacts, "impacts")
-        if isinstance(self.impacts, bool) or int(self.impacts) < 1:
-            msg = f"{owner}: 'impacts' must be at least 1."
+        require_scalar(self.n_impacts, "n_impacts")
+        if isinstance(self.n_impacts, bool) or int(self.n_impacts) < 1:
+            msg = f"{owner}: 'n_impacts' must be at least 1."
             raise ValueError(msg)
         require_non_negative(
             self.exponential_decay_rate_per_s, "exponential_decay_rate_per_s"
@@ -1074,7 +1074,7 @@ def impact_mobility(
         out=np.zeros_like(denominator),
         where=denominator > 0.0,
     )
-    impacts = f_records.shape[0]
+    n_impacts = f_records.shape[0]
     factor = _one_sided_factor(n, freqs.size)[band]
     return ImpactMobilityResult(
         frequencies=np.asarray(freqs[band], dtype=np.float64),
@@ -1083,9 +1083,9 @@ def impact_mobility(
         ),
         coherence=np.asarray(np.clip(coherence, 0.0, 1.0), dtype=np.float64),
         force_energy_spectral_density=np.asarray(
-            factor * g_ff[band] / impacts, dtype=np.float64
+            factor * g_ff[band] / n_impacts, dtype=np.float64
         ),
-        impacts=impacts,
+        n_impacts=n_impacts,
         exponential_decay_rate_per_s=float(exponential_decay_rate_per_s),
         response_quantity=response_quantity,
         driving_point=bool(driving_point),
@@ -1781,7 +1781,7 @@ class OverloadCheck(OwnsArrays):
         return float(np.max(np.abs(np.asarray(self.record, dtype=np.float64))))
 
     @property
-    def clipped_samples(self) -> int:
+    def n_clipped_samples(self) -> int:
         """How many samples reach the full scale."""
         return int(np.count_nonzero(np.abs(np.asarray(self.record)) >= self.full_scale))
 
@@ -2155,18 +2155,18 @@ class CoherenceCheck(OwnsArrays):
     :ivar coherence: Ordinary coherence :math:`\gamma^2` at each.
     :ivar judged: Per frequency, whether it enters the verdict (``False`` where
         excluded as an anti-resonance).
-    :ivar impacts: Number of impacts averaged.
+    :ivar n_impacts: Number of impacts averaged.
     :ivar min_coherence: The coherence each judged frequency must exceed.
-    :ivar min_records: The fewest impacts the check accepts.
+    :ivar min_n_records: The fewest impacts the check accepts.
     """
 
     frequencies: np.ndarray
     coherence: np.ndarray
     judged: np.ndarray
     _: KW_ONLY
-    impacts: int
+    n_impacts: int
     min_coherence: float = HIGH_COHERENCE
-    min_records: int = COHERENCE_RECORDS
+    min_n_records: int = COHERENCE_RECORDS
 
     def __post_init__(self) -> None:
         """Reject a check whose arrays disagree or whose limits are meaningless.
@@ -2189,8 +2189,8 @@ class CoherenceCheck(OwnsArrays):
             msg = f"{owner}: 'min_coherence' must lie in (0, 1)."
             raise ValueError(msg)
         # int() would read 5.9 as 5 and True as 1: a count is a whole number.
-        require_count(self.impacts, "impacts")
-        require_count(self.min_records, "min_records")
+        require_count(self.n_impacts, "n_impacts")
+        require_count(self.min_n_records, "min_n_records")
         # With nothing judged, every judged frequency is high by default and
         # the verdict passes without having looked at the coherence.
         if not np.any(np.asarray(self.judged, dtype=bool)):
@@ -2208,7 +2208,7 @@ class CoherenceCheck(OwnsArrays):
     @property
     def enough_records(self) -> bool:
         """Whether enough impacts were averaged for the coherence to be trusted."""
-        return int(self.impacts) >= int(self.min_records)
+        return int(self.n_impacts) >= int(self.min_n_records)
 
     @property
     def random_error_percent(self) -> np.ndarray:
@@ -2220,7 +2220,7 @@ class CoherenceCheck(OwnsArrays):
         error = np.full(gamma2.shape, np.nan)
         valid = gamma2 > 0.0
         if np.any(valid):
-            error[valid] = random_error_percent(gamma2[valid], int(self.impacts))
+            error[valid] = random_error_percent(gamma2[valid], int(self.n_impacts))
         return error
 
     @property
@@ -2263,35 +2263,35 @@ def check_coherence(
     frequency_range_hz: tuple[float, float],
     exclude_hz: Sequence[tuple[float, float]] = (),
     min_coherence: float = HIGH_COHERENCE,
-    min_records: int = COHERENCE_RECORDS,
+    min_n_records: int = COHERENCE_RECORDS,
 ) -> CoherenceCheck:
     """Is the averaged estimate's coherence high over the range of interest? (9.1)
 
     The check passes when the coherence exceeds ``min_coherence`` (0,9,
     what 9.1 calls high) at every frequency of the range that is not excluded,
-    and at least ``min_records`` impacts were averaged (five, the lower end
+    and at least ``min_n_records`` impacts were averaged (five, the lower end
     of the five to ten 9.1 says a high coherence needs). A single impact has a
     coherence of 1 by construction and fails the second condition.
 
     8.6 finds three to five impacts usually enough to verify data quality in a
     low-noise environment; the coherence estimate itself, 9.1 adds, needs five
     to ten records to be trusted. Averaging five impacts satisfies both, and a
-    lower ``min_records`` states that fewer were judged enough.
+    lower ``min_n_records`` states that fewer were judged enough.
 
     :param result: The averaged estimate, from :func:`impact_mobility`.
     :param frequency_range_hz: ``(f_low, f_high)``, in hertz.
     :param exclude_hz: Bands ``(f_low, f_high)`` to leave out of the verdict,
         such as anti-resonances (9.1, NOTE 1) (Default: none).
     :param min_coherence: The coherence to exceed (Default: 0.9).
-    :param min_records: The fewest impacts to accept, a whole number of at
+    :param min_n_records: The fewest impacts to accept, a whole number of at
         least 1 (Default: 5).
     :return: A :class:`CoherenceCheck`.
     :raises ValueError: for an invalid range, exclusion or limit, a
-        ``min_records`` that is not a whole number of at least 1, or
+        ``min_n_records`` that is not a whole number of at least 1, or
         exclusions that leave no frequency of the range to judge.
     """
     low, high = _frequency_range(frequency_range_hz)
-    records = require_count(min_records, "min_records")
+    records = require_count(min_n_records, "min_n_records")
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     inside = (freqs >= low) & (freqs <= high)
     if not np.any(inside):
@@ -2310,9 +2310,9 @@ def check_coherence(
         frequencies=freqs[inside],
         coherence=np.asarray(result.coherence, dtype=np.float64)[inside],
         judged=judged,
-        impacts=int(result.impacts),
+        n_impacts=int(result.n_impacts),
         min_coherence=float(require_finite(min_coherence, "min_coherence")),
-        min_records=records,
+        min_n_records=records,
     )
 
 

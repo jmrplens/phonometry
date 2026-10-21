@@ -380,7 +380,7 @@ $$
 
 $\sum_j C_j$, in dB (0 without corrections).
 
-### ComparisonCalibration.determinations
+### ComparisonCalibration.n_determinations
 
 *property*
 

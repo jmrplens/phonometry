@@ -120,8 +120,8 @@ def _chk_example_7() -> Outcome:
 def _chk_example_8(quantity: str) -> Outcome:
     vibration = ph.vibration
     kb_ftm = (
-        vibration.railway_takt_maximum_rms(_CLASS_1),
-        vibration.railway_takt_maximum_rms(_CLASS_2),
+        vibration.railway_takt_max_rms(_CLASS_1),
+        vibration.railway_takt_max_rms(_CLASS_2),
     )
     spread = (
         vibration.railway_takt_spread(_CLASS_1),
@@ -144,8 +144,8 @@ def _chk_example_8(quantity: str) -> Outcome:
         # The example carries its rounded intermediates into this one, and
         # the print sits a unit in the third place from the unrounded chain.
         "lower": (result.kb_ftr - lower, 0.0015),
-        "whole_record": (vibration.takt_maximum_rms(whole), _THREE_DECIMALS),
-        "peaks_only": (vibration.takt_maximum_rms(peaks), _THREE_DECIMALS),
+        "whole_record": (vibration.takt_max_rms(whole), _THREE_DECIMALS),
+        "peaks_only": (vibration.takt_max_rms(peaks), _THREE_DECIMALS),
     }
     value, tolerance = computed[quantity]
     return numeric(_EXAMPLE_8[quantity], value, tolerance, places=4)

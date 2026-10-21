@@ -384,7 +384,7 @@ def test_a_count_is_a_whole_number_and_nothing_else() -> None:
     assert require_count(3, "storeys") == 3
     assert require_count(3.0, "storeys") == 3
     assert require_count(np.int64(4), "storeys") == 4
-    assert require_count(0, "storeys", minimum=0) == 0
+    assert require_count(0, "storeys", at_least=0) == 0
     for bad in (True, "3", float("inf"), float("nan"), 2.9, 0, -1, None, [3]):
         with pytest.raises(
             ValueError, match="'storeys' must be a whole number, at least 1"

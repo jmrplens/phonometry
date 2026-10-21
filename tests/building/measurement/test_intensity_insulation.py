@@ -608,7 +608,7 @@ def test_low_frequency_element_adds_the_unit_count() -> None:
         [90.0], [60.0], measurement_area=10.0
     )
     four = building.low_frequency_element_normalized_difference(
-        [90.0], [60.0], measurement_area=10.0, elements=4
+        [90.0], [60.0], measurement_area=10.0, n_elements=4
     )
     assert four.d_i_n_e[0] - single.d_i_n_e[0] == pytest.approx(10.0 * np.log10(4.0))
 
@@ -647,9 +647,9 @@ def test_low_frequency_element_carries_the_clause_6_4_2_verdict() -> None:
 @pytest.mark.parametrize("bad", [0, -1, 2.5, True])
 def test_low_frequency_element_rejects_a_bad_unit_count(bad: object) -> None:
     """N counts installed units, so it is a positive integer and not a bool."""
-    with pytest.raises(ValueError, match="'elements' must be a positive integer"):
+    with pytest.raises(ValueError, match="'n_elements' must be a positive integer"):
         building.low_frequency_element_normalized_difference(
-            [90.0], [60.0], measurement_area=10.0, elements=bad
+            [90.0], [60.0], measurement_area=10.0, n_elements=bad
         )
 
 
@@ -755,13 +755,13 @@ def test_low_frequency_accepts_numpy_booleans_and_integers() -> None:
     )
     assert absorbing.indicator_limit == 6.0
     counted = building.low_frequency_element_normalized_difference(
-        [90.0], [60.0], measurement_area=10.0, elements=np.int64(4)
+        [90.0], [60.0], measurement_area=10.0, n_elements=np.int64(4)
     )
-    assert counted.elements == 4
+    assert counted.n_elements == 4
     # np.bool_ is not a bool subclass, so the unit-count guard has to name it.
-    with pytest.raises(ValueError, match="'elements' must be a positive integer"):
+    with pytest.raises(ValueError, match="'n_elements' must be a positive integer"):
         building.low_frequency_element_normalized_difference(
-            [90.0], [60.0], measurement_area=10.0, elements=np.True_
+            [90.0], [60.0], measurement_area=10.0, n_elements=np.True_
         )
 
 

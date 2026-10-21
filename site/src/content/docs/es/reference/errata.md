@@ -8189,7 +8189,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Consecuencia para las tablas de la propia norma:** ninguna; el ejemplo que
   usa la fórmula usa la correcta.
 - **Comportamiento de la biblioteca:**
-  [`railway_takt_maximum_rms`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/people.py)
+  [`railway_takt_max_rms`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/people.py)
   toma la raíz, y los tests lo fijan a los 0,82 y 0,22 del ejemplo 8.
 - **Estado:** sin comunicar.
 
@@ -8900,7 +8900,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Consecuencia para las tablas de la propia norma:** ninguna; la norma no
   imprime ninguna disposición resuelta.
 - **Comportamiento de la biblioteca:**
-  [`minimum_cabin_clearance_m`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/_cabin_insulation.py)
+  [`min_cabin_clearance_m`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/_cabin_insulation.py)
   devuelve los 2 m planos de 50 Hz a 80 Hz y media longitud de onda por
   encima, exactamente como está impreso, y un test comprueba que la rama baja
   es la menor de las dos para que la no monotonía no pueda «arreglarse» en
@@ -8927,7 +8927,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   tal como se publica en la BS EN ISO 11957:2009.
 - **Consecuencia para las tablas de la propia norma:** ninguna.
 - **Comportamiento de la biblioteca:**
-  [`minimum_cabin_clearance_m`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/_cabin_insulation.py)
+  [`min_cabin_clearance_m`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/_cabin_insulation.py)
   devuelve una sola distancia para las paredes, el techo y los elementos
   difusores, que es la lectura que llevan las palabras, y lo dice.
 - **Estado:** sin comunicar.

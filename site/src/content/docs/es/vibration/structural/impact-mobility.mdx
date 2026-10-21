@@ -231,7 +231,7 @@ forces = force * gains
 accels = accel * gains + 0.02 * rng.standard_normal((5, n))
 estimate = vibration.impact_mobility(forces, accels, fs, force_window_s=0.015,
                                      frequency_range_hz=(5.0, 800.0))
-print(estimate.impacts, estimate.measured_frf)     # 5 accelerance
+print(estimate.n_impacts, estimate.measured_frf)     # 5 accelerance
 
 coh = vibration.check_coherence(estimate, frequency_range_hz=(10.0, 400.0))
 print(coh.passes, round(float(coh.coherence.min()), 3))   # True 0.992
@@ -259,7 +259,7 @@ números son del 9.1: una coherencia por encima de 0,9 es lo que llama alta, y
 de cinco a diez registros es lo que necesita una coherencia alta para confiar
 en su propia estimación. Cinco es también el extremo alto de los tres a cinco
 que el 8.6 considera suficientes por lo general, así que promediar cinco cumple
-con los dos; `min_records` baja la cuenta cuando se juzgan suficientes
+con los dos; `min_n_records` baja la cuenta cuando se juzgan suficientes
 menos. Un impacto aislado tiene coherencia 1 por construcción, y por eso falla
 la segunda condición. Una coherencia baja en una
 antirresonancia no suele ser motivo de preocupación (9.1 NOTA 1), y
@@ -546,7 +546,7 @@ movilidad allí es ruido.
 ```python
 double = force + 0.6 * np.roll(force, round(0.06 * fs))   # otro 60 %, 60 ms después
 hit = vibration.check_double_hit(double, fs)
-print(hit.passes, hit.impacts, round(hit.delay_s, 3))     # False 2 0.06
+print(hit.passes, hit.n_impacts, round(hit.delay_s, 3))     # False 2 0.06
 print(round(hit.notch_spacing_hz, 1), round(hit.ripple_db, 1))  # 16.7 12.0
 print(vibration.check_double_hit(force, fs).passes)       # True
 ```

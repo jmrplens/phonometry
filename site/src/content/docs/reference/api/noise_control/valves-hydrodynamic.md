@@ -921,7 +921,7 @@ $10^{-6}$ of this and calls it sound.
 
 ```python
 multihole_incipient_cavitation_ratio(
-    passages: int,
+    n_passages: int,
     hole_diameter_m: float,
     pressure_recovery: float,
 ) -> float
@@ -943,7 +943,7 @@ counts get the same threshold here.
 
 | Name | Description |
 | :--- | :--- |
-| `passages` | $N_o$, the number of independent, identical flow passages. |
+| `n_passages` | $N_o$, the number of independent, identical flow passages. |
 | `hole_diameter_m` | $d_H$, the hole diameter, in m. |
 | `pressure_recovery` | $F_L$, dimensionless. |
 
@@ -1283,7 +1283,7 @@ diameter of Equation (4) stands for that size.
 ## uniform_passage_style_modifier
 
 ```python
-uniform_passage_style_modifier(passages: int) -> float
+uniform_passage_style_modifier(n_passages: int) -> float
 ```
 
 Equation (29): the style modifier of a last stage full of openings.
@@ -1303,7 +1303,7 @@ jet area, and a peak frequency four times higher.
 
 | Name | Description |
 | :--- | :--- |
-| `passages` | $N_o$, the number of uniform openings within the last stage. |
+| `n_passages` | $N_o$, the number of uniform openings within the last stage. |
 
 **Returns:** $F_d$, dimensionless.
 

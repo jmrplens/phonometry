@@ -313,7 +313,7 @@ def test_averaging_is_the_ratio_of_averaged_spectra() -> None:
     np.testing.assert_allclose(
         res.coherence, np.abs(cross) ** 2 / (auto_f * auto_x), rtol=1e-10
     )
-    assert res.impacts == 4
+    assert res.n_impacts == 4
     assert np.min(res.coherence) < 1.0
 
 
@@ -504,7 +504,7 @@ def test_result_rejects_an_unknown_response_quantity() -> None:
             mobility=mobility,
             coherence=ones,
             force_energy_spectral_density=ones,
-            impacts=1,
+            n_impacts=1,
             response_quantity="jerk",  # type: ignore[arg-type]
         )
 
@@ -748,7 +748,7 @@ def test_two_equal_impacts_cut_notches_every_one_over_their_delay() -> None:
     np.testing.assert_allclose(esd[peaks], 4.0 * single[peaks], rtol=1e-12)
     check = vibration.check_double_hit(double, FS)
     assert not check.passes
-    assert check.impacts == 2
+    assert check.n_impacts == 2
     assert check.delay_s == pytest.approx(shift / FS)
     assert check.notch_spacing_hz == pytest.approx(FS / shift)
     assert math.isinf(check.ripple_db)
@@ -765,7 +765,7 @@ def test_a_single_impact_passes() -> None:
     force, _ = _sdof_impact(0.1)
     check = vibration.check_double_hit(force, FS)
     assert check.passes
-    assert check.impacts == 1
+    assert check.n_impacts == 1
     assert check.delay_s is None
     assert check.notch_spacing_hz is None
     assert check.ripple_db == 0.0
@@ -781,7 +781,7 @@ def test_the_threshold_decides_what_counts_as_an_impact() -> None:
 def test_a_force_transducer_wired_backwards_reads_the_same() -> None:
     force, _ = _sdof_impact(0.1)
     check = vibration.check_double_hit(-(force + 0.6 * np.roll(force, 245)), FS)
-    assert check.impacts == 2
+    assert check.n_impacts == 2
 
 
 def test_a_record_without_force_is_refused() -> None:
@@ -882,7 +882,7 @@ def test_overload_fails_at_the_full_scale_itself() -> None:
     at = vibration.check_overload(record, FS, full_scale=peak)
     assert below.passes
     assert not at.passes
-    assert at.clipped_samples >= 1
+    assert at.n_clipped_samples >= 1
     assert below.headroom_db == pytest.approx(20.0 * math.log10(1.0000001), abs=1e-9)
 
 
@@ -1026,7 +1026,7 @@ def test_coherence_must_exceed_the_minimum_strictly() -> None:
         mobility=np.ones(3, dtype=complex),
         coherence=np.array([HIGH_COHERENCE, 0.95, 0.99]),
         force_energy_spectral_density=np.ones(3),
-        impacts=5,
+        n_impacts=5,
     )
     check = vibration.check_coherence(result, frequency_range_hz=(5.0, 40.0))
     assert not check.passes
@@ -1060,7 +1060,7 @@ def test_exclusions_that_leave_nothing_to_judge_are_refused() -> None:
             frequencies=check.frequencies,
             coherence=check.coherence,
             judged=none_judged,
-            impacts=COHERENCE_RECORDS,
+            n_impacts=COHERENCE_RECORDS,
         )
 
 
@@ -1074,9 +1074,9 @@ def test_minimum_records_is_a_whole_number(min_records: object) -> None:
         FS,
     )
     minimum = cast("Any", min_records)
-    with pytest.raises(ValueError, match="min_records"):
+    with pytest.raises(ValueError, match="min_n_records"):
         vibration.check_coherence(
-            records, frequency_range_hz=(10.0, 400.0), min_records=minimum
+            records, frequency_range_hz=(10.0, 400.0), min_n_records=minimum
         )
 
 
@@ -1088,17 +1088,17 @@ def test_a_whole_float_minimum_is_a_count() -> None:
         FS,
     )
     check = vibration.check_coherence(
-        records, frequency_range_hz=(10.0, 400.0), min_records=cast("Any", 5.0)
+        records, frequency_range_hz=(10.0, 400.0), min_n_records=cast("Any", 5.0)
     )
-    assert check.min_records == COHERENCE_RECORDS
-    assert isinstance(check.min_records, int)
+    assert check.min_n_records == COHERENCE_RECORDS
+    assert isinstance(check.min_n_records, int)
     not_a_count: Any = True
     with pytest.raises(ValueError, match="impacts"):
         vibration.CoherenceCheck(
             frequencies=check.frequencies,
             coherence=check.coherence,
             judged=check.judged,
-            impacts=not_a_count,
+            n_impacts=not_a_count,
         )
 
 
@@ -1226,7 +1226,7 @@ def test_a_signal_of_several_channels_is_one_impact_per_channel() -> None:
     channels = vibration.impact_mobility(
         Signal(forces, int(FS)), Signal(responses, int(FS))
     )
-    assert channels.impacts == 2
+    assert channels.n_impacts == 2
     np.testing.assert_array_equal(channels.mobility, rows.mobility)
 
 

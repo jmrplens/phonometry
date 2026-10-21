@@ -368,7 +368,7 @@ def test_table3_cells(
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", emission.SoundPowerWarning)
         plan = emission.special_room_source_locations(
-            survey, [band], microphone_positions=(3, 6, 12)[column]
+            survey, [band], n_microphone_positions=(3, 6, 12)[column]
         )
     assert plan.spectral_character == (cls,)
     assert int(plan.source_locations[0]) == row[column]
@@ -392,11 +392,11 @@ def test_table3_a_weighted_row(cls: str, row: tuple[int, int, int]) -> None:
         plan = emission.special_room_source_locations(
             _survey(1.0),
             [1000.0],
-            microphone_positions=mics,
+            n_microphone_positions=mics,
             a_weighted_levels=a_levels,
         )
         assert plan.a_weighted_spectral_character == cls
-        assert plan.a_weighted_source_locations == row[column]
+        assert plan.n_a_weighted_source_locations == row[column]
 
 
 @pytest.mark.parametrize(("s_m", "cls"), [(2.29, "broadband"), (2.3, "narrow-band")])
@@ -465,8 +465,8 @@ def test_a_5_db_range_read_in_decimal_keeps_the_arithmetic_mean() -> None:
 
 def test_table3_has_no_column_for_four_microphones() -> None:
     survey = _survey(1.0, FREQS.size)
-    with pytest.raises(ValueError, match="microphone_positions"):
-        emission.special_room_source_locations(survey, FREQS, microphone_positions=4)
+    with pytest.raises(ValueError, match="n_microphone_positions"):
+        emission.special_room_source_locations(survey, FREQS, n_microphone_positions=4)
 
 
 # --------------------------------------------------------------------------
@@ -532,7 +532,7 @@ def test_source_locations_all_enter_formula8() -> None:
     np.testing.assert_allclose(
         res.mean_pressure_level, _energy_mean(locations.reshape(-1, FREQS.size), 0)
     )
-    assert res.source_positions == 2
+    assert res.n_source_positions == 2
 
 
 def test_a_weighted_levels_take_table4_before_formula9() -> None:

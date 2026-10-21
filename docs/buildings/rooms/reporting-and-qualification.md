@@ -74,10 +74,10 @@ a hall between the rows be answered at all.
 ```python
 from phonometry import room
 
-print([round(float(room.minimum_receiver_positions(n)), 2)
+print([round(float(room.min_receiver_positions(n)), 2)
        for n in (500, 1000, 1400, 2000)])
 # [6.0, 8.0, 8.97, 10.0]
-print(round(float(room.minimum_receiver_positions(5000)), 2))   # 10.0
+print(round(float(room.min_receiver_positions(5000)), 2))   # 10.0
 ```
 
 The line stops where the table does. A.4 asks for "a minimum of between 6

@@ -359,7 +359,7 @@ def test_low_frequency_element_plot_draws_its_own_quantity() -> None:
         np.full(6, 90.0),
         np.array([62.0, 61.0, 60.0, 58.0, 57.0, 55.0]),
         measurement_area=2.0,
-        elements=4,
+        n_elements=4,
         l_p=np.array([70.0, 72.0, 74.0, 70.0, 68.0, 66.0]),
         frequencies=[50.0, 63.0, 80.0, 100.0, 125.0, 160.0],
     )

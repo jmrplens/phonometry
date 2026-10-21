@@ -429,7 +429,7 @@ class FieldStrengthReading(OwnsArrays):
     :ivar times: The time of each reading, in seconds.
     :ivar levels: The time-weighted level, 125 ms exponential averaging, in
         dB re 400 mA/m.
-    :ivar maximum_level_db: The maximum indication over the record, the "maximum
+    :ivar max_level_db: The maximum indication over the record, the "maximum
         value of the magnetic field" that 8.2.7 sets to 400 mA/m, in dB re
         400 mA/m.
     :ivar equivalent_db: The level of the mean square over the whole record,
@@ -440,7 +440,7 @@ class FieldStrengthReading(OwnsArrays):
     weighting: str
     times: np.ndarray
     levels: np.ndarray
-    maximum_level_db: float
+    max_level_db: float
     equivalent_db: float
 
     def plot(
@@ -502,7 +502,7 @@ def field_strength_meter(
         weighting=curve,
         times=read_only(np.arange(record.size, dtype=np.float64) / rate),
         levels=read_only(levels),
-        maximum_level_db=float(np.max(levels)),
+        max_level_db=float(np.max(levels)),
         equivalent_db=10.0 * math.log10(equivalent / reference_square),
     )
 
@@ -556,7 +556,7 @@ def _band_limited_noise(fs: int, n: int, rms: float, seed: int | None) -> np.nda
 
 
 def loop_test_noise(
-    fs: int, seconds: float, *, rms: float = 1.0, seed: int | None = None
+    fs: int, duration_s: float, *, rms: float = 1.0, seed: int | None = None
 ) -> np.ndarray:
     r"""The pink noise test signal of IEC 60118-4:2014 6.4.
 
@@ -579,21 +579,21 @@ def loop_test_noise(
     allows plus or minus 1 dB for exactly that.
 
     :param fs: Sample rate, in hertz.
-    :param seconds: Duration, in seconds.
+    :param duration_s: Duration, in seconds.
     :param rms: RMS value of the signal, in whatever unit it is scaled to.
     :param seed: Seed for the noise generator; the same seed reproduces the
         same record.
     :return: The signal.
     """
     rate = require_count(fs, "fs")
-    duration = require_positive(seconds, "seconds")
+    duration = require_positive(duration_s, "duration_s")
     level = require_positive(rms, "rms")
     if rate <= 2 * _BAND_LIMIT_HZ[1]:
         msg = f"'fs' must exceed {2 * _BAND_LIMIT_HZ[1]:g} Hz for the 6.5 kHz low-pass."
         raise ValueError(msg)
     n = round(duration * rate)
     if n < 1:
-        msg = f"'seconds' of {duration:g} s is shorter than one sample at {rate} Hz."
+        msg = f"'duration_s' of {duration:g} s is shorter than one sample at {rate} Hz."
         raise ValueError(msg)
     return _band_limited_noise(rate, n, level, seed)
 
@@ -613,7 +613,7 @@ def combi_signal(
     *,
     sine_s: float = _COMBI_MIN_SINE_S,
     noise_s: float = _COMBI_MIN_NOISE_S,
-    cycles: int = 1,
+    n_cycles: int = 1,
     seed: int | None = None,
 ) -> np.ndarray:
     r"""The combi signal of IEC 60118-4:2014 6.6 and Table 2.
@@ -637,7 +637,7 @@ def combi_signal(
         sine burst when rounding the burst to whole periods has lengthened
         it, so the ratio of 4:1 is never reduced, and by the few samples it
         takes to end on a zero crossing.
-    :param cycles: Number of burst-and-noise cycles.
+    :param n_cycles: Number of burst-and-noise cycles.
     :param seed: Seed for the noise generator.
     :return: The signal, starting with a sine burst.
     """
@@ -647,7 +647,7 @@ def combi_signal(
         raise ValueError(msg)
     sine_s = require_finite(sine_s, "sine_s")
     noise_s = require_finite(noise_s, "noise_s")
-    n_cycles = require_count(cycles, "cycles")
+    n_cycles = require_count(n_cycles, "n_cycles")
     if sine_s < _COMBI_MIN_SINE_S or noise_s < _COMBI_MIN_NOISE_S:
         msg = (
             "Table 2 sets at least 1 s of sine and at least 4 s of noise; got "

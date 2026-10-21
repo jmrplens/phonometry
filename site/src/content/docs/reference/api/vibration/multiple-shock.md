@@ -198,7 +198,7 @@ injury_risk(
     daily_compression: float,
     *,
     start_age: float,
-    years: int,
+    exposure_duration_years: int,
     days_per_year: float,
     sex: Literal['male', 'female'] = 'male',
     mz: float | None = None,
@@ -216,7 +216,7 @@ weighted by the reducing ultimate strength of the ageing spine.
 | :--- | :--- |
 | `daily_compression` | The daily compressive stress $S_\mathrm{d}$, MPa. |
 | `start_age` | Age $b$ at which the exposure started, in years. |
-| `years` | Number of exposure years `n`. |
+| `exposure_duration_years` | Number of exposure years `n`. |
 | `days_per_year` | Number of exposure days per year `N`. |
 | `sex` | `"male"` or `"female"`. |
 | `mz` | Stress conversion for the static stress $S_\text{stat} = m_\mathrm{z} \cdot 9.81$; defaults to the sex-specific value. |
@@ -227,7 +227,7 @@ weighted by the reducing ultimate strength of the ageing spine.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if `years` is not positive or the spine strength is exhausted ($S_\mathrm{u} - S_\text{stat} \le 0$) within the exposure period. |
+| ValueError | if `exposure_duration_years` is not positive or the spine strength is exhausted ($S_\mathrm{u} - S_\text{stat} \le 0$) within the exposure period. |
 
 ## multiple_shock_assessment
 
@@ -237,7 +237,7 @@ multiple_shock_assessment(
     fs: float | None = None,
     *,
     start_age: float,
-    years: int,
+    exposure_duration_years: int,
     days_per_year: float,
     exposure_time: float,
     measurement_time: float,
@@ -250,7 +250,7 @@ multiple_shock_assessment(
     fs: float | None = None,
     *,
     start_age: float,
-    years: int,
+    exposure_duration_years: int,
     days_per_year: float,
     sex: Literal['male', 'female'] = ...,
     mz: float | None = ...,
@@ -278,7 +278,7 @@ horizontal whole-body exposure use the ISO 2631-1 metrics in this domain
 | `acceleration` | Measured, conditioned (zero-mean) vertical seat acceleration $a_\mathrm{z}(t)$, m/s2. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this quantity is an acceleration in m/s2 and not a pressure. |
 | `fs` | Sampling frequency, in hertz. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `start_age` | Age `b` at which the exposure started, in years. |
-| `years` | Number of exposure years `n`. |
+| `exposure_duration_years` | Number of exposure years `n`. |
 | `days_per_year` | Number of exposure days per year `N`. |
 | `exposure_time` | Daily exposure period $t_\mathrm{d}$; when given with `measurement_time` the dose is scaled to a daily dose (Formula 4), otherwise the measured dose is taken as the daily dose. |
 | `measurement_time` | Period $t_\mathrm{m}$ over which the record was measured. |
@@ -298,7 +298,7 @@ MultipleShockResult(
     risk: float,
     probability: float,
     start_age: float,
-    years: int,
+    exposure_duration_years: int,
     days_per_year: float,
     peaks: np.ndarray,
     risk_thresholds: tuple[float, float, float],
@@ -319,7 +319,7 @@ Annex C).
 | `risk` | The cumulative stress variable $R$. |
 | `probability` | The probability of lumbar injury $P(R)$ in 0-1. |
 | `start_age` | Age at which the exposure started, in years. |
-| `years` | Number of exposure years. |
+| `exposure_duration_years` | Number of exposure years. |
 | `days_per_year` | Number of exposure days per year. |
 | `peaks` | The positive response peaks $A_{\mathrm{z},i}$ used for the dose, m/s2. |
 | `risk_thresholds` | The $R$ values for 10 %, 50 % and 90 % risk of injury for this sex (Table C.2). |

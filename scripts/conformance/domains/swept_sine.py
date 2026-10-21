@@ -38,7 +38,7 @@ def _swept_sine_polynomial() -> SweptSineDistortionResult:
     x = ph.electroacoustics.synchronized_sweep_signal(fs, f1, f2, seconds)
     y = x + _SS_A2 * x**2 + _SS_A3 * x**3
     return ph.electroacoustics.swept_sine_distortion(
-        y, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3
+        y, fs, f1=f1, f2=f2, duration_s=seconds, n_harmonics=3
     )
 
 
@@ -96,7 +96,7 @@ def _chk_swept_sine_linear_floor() -> Outcome:
     fs, f1, f2, seconds = 48000, 20.0, 6000.0, 4.0
     x = ph.electroacoustics.synchronized_sweep_signal(fs, f1, f2, seconds)
     res = ph.electroacoustics.swept_sine_distortion(
-        0.5 * x, fs, f1=f1, f2=f2, seconds=seconds, n_harmonics=3
+        0.5 * x, fs, f1=f1, f2=f2, duration_s=seconds, n_harmonics=3
     )
     band = (res.thd_frequencies > 100.0) & (res.thd_frequencies < 2000.0)
     return numeric(0.0, float(np.max(res.thd_ratio[band])), 1e-3, places=5)
@@ -113,7 +113,7 @@ def _chk_minimum_phase_biquad() -> Outcome:
     b = np.array([1.0 + alpha * gain, -2.0 * math.cos(w0), 1.0 - alpha * gain])
     a = np.array([1.0 + alpha / gain, -2.0 * math.cos(w0), 1.0 - alpha / gain])
     _, resp = sg.freqz(b, a, worN=np.linspace(0.0, math.pi, 4097))
-    rec = ph.signals.minimum_phase(resp)
+    rec = ph.signals.min_phase(resp)
     err = float(np.max(np.abs(np.angle(rec) - np.angle(resp))))
     return numeric(0.0, err, 1e-9, unit="rad", places=6)
 

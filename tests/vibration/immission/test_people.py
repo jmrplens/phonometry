@@ -242,12 +242,12 @@ def test_example_8_the_two_classes_of_train() -> None:
     """C.8: KB_FTm of each class by (A.1), its square, and the spread of (A.2)."""
     class_1 = [0.92, 0.6, 0.9]
     class_2 = [0.2, 0.24]
-    assert round(im.railway_takt_maximum_rms(class_1), 2) == 0.82
-    assert round(im.railway_takt_maximum_rms(class_1) ** 2, 3) == 0.672
-    assert round(im.railway_takt_maximum_rms(class_2), 2) == 0.22
+    assert round(im.railway_takt_max_rms(class_1), 2) == 0.82
+    assert round(im.railway_takt_max_rms(class_1) ** 2, 3) == 0.672
+    assert round(im.railway_takt_max_rms(class_2), 2) == 0.22
     # The standard prints 0,048 4, which is 0,22 squared; the mean square of
     # the two maxima is 0,048 8, and the difference does not reach KB_FTr.
-    assert round(im.railway_takt_maximum_rms(class_2) ** 2, 4) == 0.0488
+    assert round(im.railway_takt_max_rms(class_2) ** 2, 4) == 0.0488
     assert round(im.railway_takt_spread(class_1), 2) == 0.27
     assert round(im.railway_takt_spread(class_2), 3) == 0.012
 
@@ -273,10 +273,10 @@ def test_example_8_formula_3_over_the_whole_record_agrees() -> None:
     """
     maxima = np.zeros(20)
     maxima[:5] = [0.92, 0.6, 0.2, 0.9, 0.24]
-    assert round(im.takt_maximum_rms(maxima), 3) == 0.325
+    assert round(im.takt_max_rms(maxima), 3) == 0.325
     only_peaks = np.zeros(20)
     only_peaks[:3] = [0.92, 0.6, 0.9]
-    assert round(im.takt_maximum_rms(only_peaks), 3) == 0.318
+    assert round(im.takt_max_rms(only_peaks), 3) == 0.318
     single = im.railway_assessment_severity(0.325, 1920)
     assert single.kb_ftr == pytest.approx(0.325)
 
@@ -308,7 +308,7 @@ def test_the_spread_is_about_the_mean_square_the_rms_returns() -> None:
     mean square (A.1) gives, and not about 0,05.
     """
     maxima = [0.1, 0.3]
-    mean_square = im.railway_takt_maximum_rms(maxima) ** 2
+    mean_square = im.railway_takt_max_rms(maxima) ** 2
     assert mean_square == pytest.approx(0.045)
     assert im.railway_takt_spread(maxima) == pytest.approx(
         math.sqrt(((0.0 - 0.045) ** 2 + (0.09 - 0.045) ** 2) / 1)

@@ -79,7 +79,7 @@ __all__ = [
     "TaskContribution",
     "full_day_exposure",
     "job_based_exposure",
-    "minimum_cumulative_duration_hours",
+    "min_cumulative_duration_hours",
     "table_c4_contribution",
     "task_based_exposure",
 ]
@@ -242,7 +242,7 @@ def table_c4_contribution(n_samples: int, u1: float) -> float:
     return float(np.interp(n_clamped, n_axis, per_row))
 
 
-def minimum_cumulative_duration_hours(n_workers: int) -> float:
+def min_cumulative_duration_hours(n_workers: int) -> float:
     """Minimum cumulative measurement duration (h) for a homogeneous exposure group (Table 1).
 
     :param n_workers: Number of workers ``n_G`` in the homogeneous exposure group.
@@ -477,7 +477,7 @@ class ExposureResult(RichDisplay):
             and self.sample_duration_hours is not None
             and self.n_samples is not None
         ):
-            required = minimum_cumulative_duration_hours(self.n_workers)
+            required = min_cumulative_duration_hours(self.n_workers)
             short = self.n_samples * self.sample_duration_hours < required - 1e-9
         return over or spread or short
 
@@ -906,7 +906,7 @@ def job_based_exposure(
         warn=warn,
     )
     if n_workers is not None and sample_duration_hours is not None:
-        required = minimum_cumulative_duration_hours(n_workers)
+        required = min_cumulative_duration_hours(n_workers)
         cumulative = len(samples) * sample_duration_hours
         if cumulative < required - 1e-9 and warn:
             warnings.warn(

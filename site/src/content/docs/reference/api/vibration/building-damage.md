@@ -452,7 +452,7 @@ STORY_FREQUENCY_NUMERATOR_HZ = 10.0
 ## story_fundamental_frequency
 
 ```python
-story_fundamental_frequency(stories: int) -> float
+story_fundamental_frequency(n_stories: int) -> float
 ```
 
 The rough lowest horizontal natural frequency of a building.
@@ -470,7 +470,7 @@ at which the topmost floor plane will answer.
 
 | Name | Description |
 | :--- | :--- |
-| `stories` | The number of storeys `n`. |
+| `n_stories` | The number of storeys `n`. |
 
 **Returns:** The estimated lowest horizontal natural frequency, in hertz.
 

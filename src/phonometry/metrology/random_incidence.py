@@ -374,13 +374,13 @@ def _warn_if_coarse(largest: float, stacklevel: int) -> None:
         )
 
 
-def adjustment_factors(step_deg: float, *, planes: int = 2) -> NDArray[np.float64]:
+def adjustment_factors(step_deg: float, *, n_planes: int = 2) -> NDArray[np.float64]:
     r"""Adjustment factors :math:`K(\phi)` for one plane of measurements
     (IEC 61183:1994, Formulas (6), (7), (A.1) and (A.2)).
 
     The share of the sphere each reading stands for, at the angles
     :math:`\phi = 0, \Delta\phi, \ldots, 360° - \Delta\phi` from the
-    reference direction, for measurements in ``planes`` planes through the
+    reference direction, for measurements in ``n_planes`` n_planes through the
     reference direction at equal angles :math:`\Delta\alpha = 180°/n` apart:
 
     .. math::
@@ -407,7 +407,7 @@ def adjustment_factors(step_deg: float, *, planes: int = 2) -> NDArray[np.float6
     :param step_deg: The angular step :math:`\Delta\phi` in degrees. It has to
         divide 180° into a whole number of steps, at least two, so that both
         poles are measured.
-    :param planes: The number of planes :math:`n` the measurements are made
+    :param n_planes: The number of n_planes :math:`n` the measurements are made
         in (Default: 2, the X-Y and X-Z planes of Annex A).
     :return: The ``360 / step_deg`` factors, read-only, the first at 0°.
     :raises ValueError: for a step that does not divide 180°, or a number of
@@ -417,12 +417,12 @@ def adjustment_factors(step_deg: float, *, planes: int = 2) -> NDArray[np.float6
         divides 180°, gives in two planes.
     """
     half_steps = _half_circle_steps(step_deg)
-    count = require_count(planes, "planes")
+    count = require_count(n_planes, "n_planes")
     _warn_if_coarse(_largest_element(half_steps, count), stacklevel=3)
     return read_only(_weights(half_steps, count))
 
 
-def largest_element_fraction(step_deg: float, *, planes: int = 2) -> float:
+def largest_element_fraction(step_deg: float, *, n_planes: int = 2) -> float:
     r"""The largest element a set of incidence angles divides the sphere into,
     as a fraction of its surface (IEC 61183:1994, A.1.6 and A.1.7).
 
@@ -436,12 +436,12 @@ def largest_element_fraction(step_deg: float, *, planes: int = 2) -> float:
 
     :param step_deg: The angular step :math:`\Delta\phi` in degrees, dividing
         180° into a whole number of steps, at least two.
-    :param planes: The number of planes (Default: 2).
+    :param n_planes: The number of n_planes (Default: 2).
     :return: The fraction, between 0 and 1.
     :raises ValueError: as :func:`adjustment_factors`.
     """
     return _largest_element(
-        _half_circle_steps(step_deg), require_count(planes, "planes")
+        _half_circle_steps(step_deg), require_count(n_planes, "n_planes")
     )
 
 

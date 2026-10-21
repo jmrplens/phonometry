@@ -18,7 +18,7 @@ import numpy as np
 import pytest
 
 from phonometry import noise_control, room
-from phonometry.noise_control.enclosures import EnclosureResult
+from phonometry.noise_control.enclosures import EnclosureInsertionLossResult
 
 
 def test_closed_form() -> None:
@@ -123,7 +123,7 @@ def test_result_type_and_plot() -> None:
         0.3,
         frequencies=[125.0, 250.0, 500.0],
     )
-    assert isinstance(res, EnclosureResult)
+    assert isinstance(res, EnclosureInsertionLossResult)
     import matplotlib as mpl
 
     mpl.use("Agg")
@@ -174,7 +174,7 @@ def test_required_transmission_loss_callable_and_result_shape() -> None:
     res = noise_control.enclosure_required_transmission_loss(
         lambda f: 5.0 + 10.0 * np.log10(f / 125.0), 6.0, 5.0, 0.3, frequencies=freqs
     )
-    assert isinstance(res, EnclosureResult)
+    assert isinstance(res, EnclosureInsertionLossResult)
     assert res.frequencies is not None
     assert res.panel_transmission_loss.shape == (3,)
     import matplotlib as mpl

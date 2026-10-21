@@ -45,9 +45,9 @@ def test_info_reads_the_geometry_from_ds64() -> None:
     assert meta.format_name == "PCM"
     assert meta.bit_depth == 24
     assert meta.fs == 44100
-    assert meta.channels == 2
+    assert meta.n_channels == 2
     # 132300 data bytes / (2 channels x 3 bytes) = 22050 frames = 0.5 s.
-    assert meta.frames == 22050
+    assert meta.n_samples == 22050
     assert meta.duration == 0.5
     assert not meta.lossy
 

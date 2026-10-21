@@ -635,6 +635,33 @@ RESPONSE_TOLERANCE_UPPER_PERCENT = ((1.25, 0.8, 10.0), (0.0, inf, 20.0))
 TAKT_DURATION_S = 30.0
 ```
 
+## takt_max_rms
+
+```python
+takt_max_rms(maxima: ArrayLike) -> float
+```
+
+The clock maximum r.m.s. $KB_\mathrm{FTm}$, Formula (2).
+
+Both rules of the formula are here: a clock maximum at or below
+[`TAKT_SUPPRESSION_THRESHOLD`](/phonometry/reference/api/vibration/vibration-meter/#takt_suppression_threshold) enters the sum as zero, and the
+interval it came from still counts in `N`, so a run of quiet intervals
+pulls the result down instead of leaving it unchanged.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `maxima` | The clock maxima of [`takt_maxima`](/phonometry/reference/api/vibration/vibration-meter/#takt_maxima). |
+
+**Returns:** $KB_\mathrm{FTm}$, dimensionless. Zero for an empty input, which is the answer for a record with no whole clock interval in it.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | If a maximum is negative or not finite. |
+
 ## takt_maxima
 
 ```python
@@ -667,33 +694,6 @@ part-interval is dropped rather than scaled up.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a bad signal or a non-positive rate or interval. |
-
-## takt_maximum_rms
-
-```python
-takt_maximum_rms(maxima: ArrayLike) -> float
-```
-
-The clock maximum r.m.s. $KB_\mathrm{FTm}$, Formula (2).
-
-Both rules of the formula are here: a clock maximum at or below
-[`TAKT_SUPPRESSION_THRESHOLD`](/phonometry/reference/api/vibration/vibration-meter/#takt_suppression_threshold) enters the sum as zero, and the
-interval it came from still counts in `N`, so a run of quiet intervals
-pulls the result down instead of leaving it unchanged.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `maxima` | The clock maxima of [`takt_maxima`](/phonometry/reference/api/vibration/vibration-meter/#takt_maxima). |
-
-**Returns:** $KB_\mathrm{FTm}$, dimensionless. Zero for an empty input, which is the answer for a record with no whole clock interval in it.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | If a maximum is negative or not finite. |
 
 ## TAKT_SUPPRESSION_THRESHOLD
 

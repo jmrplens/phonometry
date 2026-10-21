@@ -342,7 +342,7 @@ class HeadphoneClassification(RichDisplay):
         :data:`BACK_RADIATIONS`.
     :ivar impedance_ohm: The impedance, in ohms, as coded by
         :func:`impedance_code`.
-    :ivar channels: The number of channels, 1 to 9.
+    :ivar n_channels: The number of channels, 1 to 9.
     """
 
     principle: str
@@ -350,7 +350,7 @@ class HeadphoneClassification(RichDisplay):
     coupling: str
     radiation: str
     impedance_ohm: float
-    channels: int
+    n_channels: int
 
     def __post_init__(self) -> None:
         """Refuse a letter the clause does not define or a value it cannot code.
@@ -363,9 +363,9 @@ class HeadphoneClassification(RichDisplay):
         _require_letter(self.coupling, "coupling", ACOUSTIC_COUPLINGS)
         _require_letter(self.radiation, "radiation", BACK_RADIATIONS)
         impedance_code(self.impedance_ohm)
-        channels = require_count(self.channels, "channels")
-        if channels > _MAX_CHANNELS:
-            msg = f"'channels' must be 1 to {_MAX_CHANNELS}, one digit of the code."
+        n_channels = require_count(self.n_channels, "n_channels")
+        if n_channels > _MAX_CHANNELS:
+            msg = f"'n_channels' must be 1 to {_MAX_CHANNELS}, one digit of the code."
             raise ValueError(msg)
 
     @property
@@ -374,7 +374,7 @@ class HeadphoneClassification(RichDisplay):
         letters = self.principle + self.earphone_type + self.coupling + self.radiation
         return (
             f"{_CODE_PREFIX}-{letters}-{impedance_code(self.impedance_ohm)}-"
-            f"{self.channels}"
+            f"{self.n_channels}"
         )
 
     @property
@@ -406,7 +406,7 @@ def parse_classification_code(code: str) -> HeadphoneClassification:
     if match is None:
         msg = f"{code!r} is not a code of the form 60268-7-IEC-XXXX-NNRN-N."
         raise ValueError(msg)
-    principle, earphone, coupling, radiation, mantissa, exponent, channels = (
+    principle, earphone, coupling, radiation, mantissa, exponent, n_channels = (
         match.groups()
     )
     return HeadphoneClassification(
@@ -415,7 +415,7 @@ def parse_classification_code(code: str) -> HeadphoneClassification:
         coupling=coupling,
         radiation=radiation,
         impedance_ohm=float(int(mantissa) * 10 ** int(exponent)),
-        channels=int(channels),
+        n_channels=int(n_channels),
     )
 
 
@@ -1511,7 +1511,7 @@ class FieldComparisonResponse(OwnsArrays):
     reference_frequency_hz: float
 
     @property
-    def persons(self) -> int:
+    def n_persons(self) -> int:
         """The number of test persons."""
         return int(self.response_db.shape[0])
 
@@ -1526,14 +1526,14 @@ class FieldComparisonResponse(OwnsArrays):
 
         The sample standard deviation; zero with a single person.
         """
-        if self.persons < _FEWEST_POINTS:
+        if self.n_persons < _FEWEST_POINTS:
             return np.zeros(self.frequencies.size)
         return np.asarray(np.std(self.response_db, axis=0, ddof=1), dtype=np.float64)
 
     @property
     def meets_panel_size(self) -> bool:
         """Whether at least eight persons were heard (8.6.3.2 d, 8.6.4.2 d)."""
-        return self.persons >= _MIN_PERSONS
+        return self.n_persons >= _MIN_PERSONS
 
     @property
     def qualifies_as_reference(self) -> bool:
@@ -1542,7 +1542,7 @@ class FieldComparisonResponse(OwnsArrays):
         8.6.3.3 and 8.6.4.3: a headphone measured "using a panel of at least
         16 persons, may be used as a loudness comparison reference".
         """
-        return self.persons >= _MIN_REFERENCE_PERSONS
+        return self.n_persons >= _MIN_REFERENCE_PERSONS
 
     def plot(
         self,
@@ -1671,7 +1671,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
         return _band_index(self.frequencies, self.reference_frequency_hz)
 
     @property
-    def persons(self) -> int:
+    def n_persons(self) -> int:
         """The number of test persons."""
         return int(self.earphone_levels_db.shape[0])
 
@@ -1694,7 +1694,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
     @property
     def standard_deviation_db(self) -> NDArray[np.float64]:
         """The standard deviation of the persons' responses, in dB (NOTE 5)."""
-        if self.persons < _FEWEST_POINTS:
+        if self.n_persons < _FEWEST_POINTS:
             return np.zeros(self.frequencies.size)
         return np.asarray(np.std(self.response_db, axis=0, ddof=1), dtype=np.float64)
 
@@ -1742,7 +1742,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
     @property
     def meets_panel_size(self) -> bool:
         """Whether at least eight persons were measured (8.6.5.2 h)."""
-        return self.persons >= _MIN_PERSONS
+        return self.n_persons >= _MIN_PERSONS
 
     @property
     def qualifies_as_reference(self) -> bool:
@@ -1753,7 +1753,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
         least 16 test persons"; the method meant is the direct ear-canal
         measurement of 8.6.5.2 (see ``docs/ERRATA.md``).
         """
-        return self.persons >= _MIN_REFERENCE_PERSONS
+        return self.n_persons >= _MIN_REFERENCE_PERSONS
 
     def plot(
         self,
@@ -2005,19 +2005,19 @@ def verify_ear_canal_microphone(
 # ---------------------------------------------------------------------------
 
 
-def _time_axis(fs: int, seconds: float) -> NDArray[np.float64]:
-    """Sample instants of a record of ``seconds`` at ``fs``."""
+def _time_axis(fs: int, duration_s: float) -> NDArray[np.float64]:
+    """Sample instants of a record of ``duration_s`` at ``fs``."""
     rate = require_count(fs, "fs")
-    duration = require_positive(seconds, "seconds")
+    duration = require_positive(duration_s, "duration_s")
     n = round(rate * duration)
     if n < 1:
-        msg = f"'seconds' of {duration:g} s is shorter than one sample at {rate} Hz."
+        msg = f"'duration_s' of {duration:g} s is shorter than one sample at {rate} Hz."
         raise ValueError(msg)
     return np.arange(n, dtype=np.float64) / rate
 
 
 def headphone_modulation_signal(
-    fs: int, seconds: float, *, rated_source_emf_v: float
+    fs: int, duration_s: float, *, rated_source_emf_v: float
 ) -> NDArray[np.float64]:
     r"""The modulation distortion test signal of IEC 60268-7 8.7.3.
 
@@ -2033,13 +2033,13 @@ def headphone_modulation_signal(
     third at 460 Hz and 740 Hz.
 
     :param fs: Sample rate, in hertz.
-    :param seconds: Duration, in seconds.
+    :param duration_s: Duration, in seconds.
     :param rated_source_emf_v: The rated input voltage, the rated source
         e.m.f. of 8.3.1, in volts (RMS).
     :return: The signal, in volts.
     :raises ValueError: If an input is out of range.
     """
-    t = _time_axis(fs, seconds)
+    t = _time_axis(fs, duration_s)
     peak = math.sqrt(2.0) * require_positive(rated_source_emf_v, "rated_source_emf_v")
     low, high = _MODULATION_FREQUENCIES_HZ
     share = _MODULATION_RATIO / (_MODULATION_RATIO + 1.0)
@@ -2051,7 +2051,7 @@ def headphone_modulation_signal(
 
 
 def headphone_difference_frequency_signal(
-    fs: int, seconds: float, *, upper_frequency_hz: float, rated_source_emf_v: float
+    fs: int, duration_s: float, *, upper_frequency_hz: float, rated_source_emf_v: float
 ) -> NDArray[np.float64]:
     """The difference-frequency distortion test signal of IEC 60268-7 8.7.4.
 
@@ -2062,14 +2062,14 @@ def headphone_difference_frequency_signal(
     :func:`~phonometry.electroacoustics.difference_frequency_distortion`.
 
     :param fs: Sample rate, in hertz.
-    :param seconds: Duration, in seconds.
+    :param duration_s: Duration, in seconds.
     :param upper_frequency_hz: The upper tone :math:`f_2`, in Hz, above 80 Hz
         and below the Nyquist frequency.
     :param rated_source_emf_v: The rated input voltage, in volts (RMS).
     :return: The signal, in volts.
     :raises ValueError: If an input is out of range.
     """
-    t = _time_axis(fs, seconds)
+    t = _time_axis(fs, duration_s)
     upper = require_positive(upper_frequency_hz, "upper_frequency_hz")
     require_scalar(fs, "fs")
     if not _DIFFERENCE_FREQUENCY_HZ < upper < 0.5 * float(fs):

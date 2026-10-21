@@ -46,7 +46,7 @@ from phonometry.environment.sources.rolling_stock_noise import (
     check_reference_track,
     check_small_roughness_deviations,
     impulsiveness_rise_speed,
-    minimum_curve_radius,
+    min_curve_radius,
     pass_by_measurement,
     pass_by_time,
     pass_by_uncertainty,
@@ -241,7 +241,7 @@ def test_the_type_test_speeds() -> None:
 )
 def test_the_minimum_curve_radius(speed: float, radius: float) -> None:
     """6.2.2: 1 000 m to 70 km/h, 3 000 m to 120 km/h, 5 000 m above."""
-    assert minimum_curve_radius(speed) == radius
+    assert min_curve_radius(speed) == radius
 
 
 def test_the_pass_by_time_is_length_over_speed() -> None:
@@ -276,7 +276,7 @@ def test_a_steady_1_khz_tone_reads_its_own_level() -> None:
     record = pass_by_measurement(_tone(amplitude), _FS, start_s=2.0, end_s=8.0)
     expected = 10.0 * math.log10(amplitude**2 / 2.0 / _P0**2)
     assert record.equivalent_level_db == pytest.approx(expected, abs=0.02)
-    assert record.maximum_level_db == pytest.approx(expected, abs=0.05)
+    assert record.max_level_db == pytest.approx(expected, abs=0.05)
     assert record.measurement_time_s == pytest.approx(6.0)
     assert record.exposure_level_db == pytest.approx(
         record.equivalent_level_db + 10.0 * math.log10(6.0)
@@ -360,7 +360,7 @@ def test_the_maximum_is_taken_within_the_interval() -> None:
     p[burst] *= 10.0
     record = pass_by_measurement(p, _FS, start_s=2.0, end_s=8.0)
     steady = 10.0 * math.log10(0.1**2 / 2.0 / _P0**2)
-    assert record.maximum_level_db == pytest.approx(steady, abs=0.05)
+    assert record.max_level_db == pytest.approx(steady, abs=0.05)
     assert float(np.max(record.levels)) > steady + 15.0
 
 

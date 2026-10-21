@@ -143,7 +143,9 @@ def test_annex_c_male_worked_example() -> None:
     dz = v.dose_from_peaks([40.0] * 5)
     sd = v.compression_dose(dz, mz=v._MZ_MALE)
     assert sd == pytest.approx(v._MZ_MALE * ISO2631_5_DZD_MALE, abs=1e-3)
-    r = v.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="male")
+    r = v.injury_risk(
+        sd, start_age=20, exposure_duration_years=20, days_per_year=120, sex="male"
+    )
     assert r == pytest.approx(ISO2631_5_R_MALE, abs=0.01)
     pi = v.injury_probability(r, sex="male")
     assert pi == pytest.approx(ISO2631_5_PI_MALE, abs=0.01)
@@ -154,7 +156,9 @@ def test_annex_c_female_worked_example() -> None:
     dz = v.dose_from_peaks([40.0] * 5)
     sd = v.compression_dose(dz, mz=v._MZ_FEMALE)
     assert sd == pytest.approx(ISO2631_5_SD_FEMALE, abs=0.01)
-    r = v.injury_risk(sd, start_age=20, years=20, days_per_year=120, sex="female")
+    r = v.injury_risk(
+        sd, start_age=20, exposure_duration_years=20, days_per_year=120, sex="female"
+    )
     assert r == pytest.approx(ISO2631_5_R_FEMALE, abs=0.02)
 
 
@@ -201,7 +205,12 @@ def test_multiple_shock_assessment_end_to_end() -> None:
     az = np.zeros(2560)
     az[::400] = 60.0
     result = v.multiple_shock_assessment(
-        az, 256.0, start_age=20, years=20, days_per_year=120, sex="male"
+        az,
+        256.0,
+        start_age=20,
+        exposure_duration_years=20,
+        days_per_year=120,
+        sex="male",
     )
     assert result.sex == "male"
     assert result.acceleration_dose > 0.0
@@ -222,8 +231,10 @@ def test_invalid_inputs_raise() -> None:
         match=r"daily_dose_multi: 'doses'.*must all have the same shape",
     ):
         v.daily_dose_multi([1.0, 2.0], [1.0], [1.0, 2.0])
-    with pytest.raises(ValueError, match="years must be a positive integer"):
-        v.injury_risk(1.0, start_age=20, years=0, days_per_year=120)
+    with pytest.raises(
+        ValueError, match="'exposure_duration_years' must be a positive integer"
+    ):
+        v.injury_risk(1.0, start_age=20, exposure_duration_years=0, days_per_year=120)
     with pytest.raises(ValueError, match="'sex' must be"):
         v.injury_probability(1.0, sex="other")
     with pytest.raises(ValueError, match="both exposure_time and measurement_time"):
@@ -231,7 +242,7 @@ def test_invalid_inputs_raise() -> None:
             [1.0, 2.0],
             256.0,
             start_age=20,
-            years=20,
+            exposure_duration_years=20,
             days_per_year=120,
             exposure_time=8.0,
         )
@@ -242,7 +253,13 @@ def test_injury_risk_rejects_exhausted_strength() -> None:
     with pytest.raises(
         ValueError, match=r"ultimate strength minus static stress is non-positive"
     ):
-        v.injury_risk(1.0, start_age=20, years=120, days_per_year=120, sex="male")
+        v.injury_risk(
+            1.0,
+            start_age=20,
+            exposure_duration_years=120,
+            days_per_year=120,
+            sex="male",
+        )
 
 
 def test_response_peaks_rejects_2d() -> None:
@@ -271,7 +288,12 @@ def test_a_corrupt_seat_record_is_refused_where_it_enters(bad: float) -> None:
         ValueError, match="'acceleration' must contain only finite samples"
     ):
         v.multiple_shock_assessment(
-            az, 256.0, start_age=20, years=20, days_per_year=120, sex="male"
+            az,
+            256.0,
+            start_age=20,
+            exposure_duration_years=20,
+            days_per_year=120,
+            sex="male",
         )
 
 
@@ -288,7 +310,12 @@ def test_a_non_finite_health_risk_is_refused(field: str) -> None:
     az = np.zeros(2560)
     az[::400] = 60.0
     result = v.multiple_shock_assessment(
-        az, 256.0, start_age=20, years=20, days_per_year=120, sex="male"
+        az,
+        256.0,
+        start_age=20,
+        exposure_duration_years=20,
+        days_per_year=120,
+        sex="male",
     )
     with pytest.raises(ValueError, match=f"'{field}' must be finite"):
         dataclasses.replace(result, **{field: float("nan")})
@@ -302,4 +329,6 @@ def test_the_time_guards_reject_nan_and_infinity() -> None:
         with pytest.raises(ValueError, match="'measurement_time' must be positive"):
             v.daily_dose(1.0, exposure_time=1.0, measurement_time=bad)
         with pytest.raises(ValueError, match="'days_per_year' must be positive"):
-            v.injury_risk(0.5, start_age=20.0, years=20, days_per_year=bad)
+            v.injury_risk(
+                0.5, start_age=20.0, exposure_duration_years=20, days_per_year=bad
+            )

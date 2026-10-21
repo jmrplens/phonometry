@@ -284,7 +284,7 @@ def _chk_maxima() -> Outcome:
     matching = 0
     for clause, nominal, printed in ref.IEC62585_MAXIMA:
         frequencies = [nominal, _EXACT_OF_NOMINAL[nominal]]
-        maxima = metrology.maximum_expanded_uncertainty(frequencies, clause=clause)
+        maxima = metrology.max_expanded_uncertainty(frequencies, clause=clause)
         matching += bool(np.allclose(maxima, printed, rtol=0.0, atol=1e-12))
     return count(
         matching, len(ref.IEC62585_MAXIMA), subject="printed maxima of clauses 9 to 14"

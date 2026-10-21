@@ -27,6 +27,13 @@ The three helpers of :mod:`phonometry._plot.common` are the fix:
 :func:`style_default`, :func:`style_get` and :func:`style_pop`, and
 :func:`styled` for the literal. Each honours both spellings.
 
+In those three shapes only the aliased properties are refused.
+``kwargs.setdefault("label", ...)`` and ``kwargs.setdefault("marker", ...)``
+are fine, because matplotlib gives those no second name, and this says nothing
+about them. The read-back and literal shapes are refused only on a mapping that
+is the function's own ``**kwargs``: a local dictionary the caller never sees may
+hold whatever it likes.
+
 A fourth shape is refused for every property, aliased or not:
 ``ax.bar(x, h, zorder=3, **kwargs)``, a keyword the renderer writes beside the
 caller's. A caller who passes ``zorder`` too gets ``TypeError: got multiple
@@ -37,12 +44,6 @@ parameter of the function itself cannot be in ``**kwargs``, and a call to one
 of the package's own helpers passes that helper its parameters beside the
 caller's properties, so neither is refused.
 
-Only the aliased properties are refused. ``kwargs.setdefault("label", ...)`` and
-``kwargs.setdefault("marker", ...)`` are fine, because matplotlib gives those no
-second name, and this says nothing about them. The read-back and literal shapes
-are refused only on a mapping that is the function's own ``**kwargs``: a local
-dictionary the caller never sees may hold whatever it likes.
-
 Exit status 0 when no aliased property is defaulted or read back by hand and
 no keyword is written beside the caller's, 1 otherwise.
 """
@@ -52,6 +53,10 @@ from __future__ import annotations
 import ast
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 #: The repository, for paths a reader can click.
 _REPO = Path(__file__).resolve().parent.parent
@@ -189,37 +194,50 @@ def _unoverridable(tree: ast.AST) -> set[tuple[int, str]]:
     own = _own_names(tree)
     found: set[tuple[int, str]] = set()
     for function in ast.walk(tree):
-        if not isinstance(function, (ast.FunctionDef, ast.AsyncFunctionDef)):
+        if isinstance(function, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            found.update(_written_beside(function, own))
+    return found
+
+
+def _written_beside(
+    function: ast.FunctionDef | ast.AsyncFunctionDef, own: set[str]
+) -> Iterator[tuple[int, str]]:
+    """The keywords one function writes beside its own ``**kwargs``.
+
+    A keyword that names a parameter of the function cannot be in its
+    ``**kwargs``, so it cannot collide and is left alone.
+    """
+    if function.args.kwarg is None:
+        return
+    spread = function.args.kwarg.arg
+    arguments = function.args
+    bound = {
+        arg.arg
+        for arg in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
+    }
+    for call in ast.walk(function):
+        if not isinstance(call, ast.Call) or _call_root(call.func) in own:
             continue
-        if function.args.kwarg is None:
+        if not _spreads(call, spread):
             continue
-        spread = function.args.kwarg.arg
-        arguments = function.args
-        bound = {
-            arg.arg
-            for arg in (*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs)
-        }
-        for call in ast.walk(function):
-            if not isinstance(call, ast.Call) or _call_root(call.func) in own:
-                continue
-            if not any(
-                keyword.arg is None
-                and isinstance(keyword.value, ast.Name)
-                and keyword.value.id == spread
-                for keyword in call.keywords
-            ):
-                continue
-            callee = ast.unparse(call.func)
-            found.update(
-                (
+        callee = ast.unparse(call.func)
+        for keyword in call.keywords:
+            if keyword.arg is not None and keyword.arg not in bound:
+                yield (
                     call.lineno,
                     f"{keyword.arg!r} written beside **{spread} in {callee}(), "
                     "so a caller cannot pass it",
                 )
-                for keyword in call.keywords
-                if keyword.arg is not None and keyword.arg not in bound
-            )
-    return found
+
+
+def _spreads(call: ast.Call, name: str) -> bool:
+    """Whether ``call`` unpacks the mapping ``name`` with ``**``."""
+    return any(
+        keyword.arg is None
+        and isinstance(keyword.value, ast.Name)
+        and keyword.value.id == name
+        for keyword in call.keywords
+    )
 
 
 def _helper_aliases() -> set[str] | None:

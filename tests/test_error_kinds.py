@@ -113,6 +113,8 @@ EXEMPT: dict[str, str] = {
     # The placement of a remote run, as the node reads it: a field of the
     # wrong type is a broken job, refused as one at the job's stage.
     "simulation/_remote/node.py:_placement": "reads the placement a client sent",
+    # The result of a remote run, as the client reads it.
+    "simulation/_remote/client.py:_provenance": "checks what a node sent: a field of the wrong type is a failure of the node, refused as ComputeRemoteError",
 }
 
 

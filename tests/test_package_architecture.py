@@ -1412,6 +1412,14 @@ def _warning_calls(
     return calls
 
 
+#: Functions that raise again, here, a warning another process raised, with
+#: the class it was raised with: its topic is the other process's, so it is
+#: a variable here, not a published class written at the call.
+WARNING_RELAYS: dict[str, str] = {
+    "simulation/_remote/client.py:_relay": "raises again, at the caller's line, a warning the node raised, with its own class",
+}
+
+
 def warnings_without_a_topic(path: Path) -> list[str]:
     """Each ``warnings.warn`` in *path* whose category is not a published topic.
 
@@ -1420,7 +1428,8 @@ def warnings_without_a_topic(path: Path) -> list[str]:
     never the root itself, which leaves a caller who wants to silence one
     advisory only the rule that silences every other. A helper that warns on
     behalf of several topics takes the category as a parameter typed
-    ``type[PhonometryWarning]``.
+    ``type[PhonometryWarning]``. A relay of :data:`WARNING_RELAYS` is left
+    out: the class it warns with is the other process's.
     """
     import importlib
 
@@ -1435,6 +1444,12 @@ def warnings_without_a_topic(path: Path) -> list[str]:
     found: list[str] = []
     tree = ast.parse(path.read_text(encoding="utf-8"))
     for function, call in _warning_calls(tree):
+        relayed = (
+            function is not None
+            and f"{path.relative_to(SRC).as_posix()}:{function.name}" in WARNING_RELAYS
+        )
+        if relayed:
+            continue
         expression = next(
             (keyword.value for keyword in call.keywords if keyword.arg == "category"),
             call.args[1] if len(call.args) > 1 else None,
@@ -1476,6 +1491,20 @@ def test_every_warning_names_a_published_topic() -> None:
     assert not found, "warnings emitted without a published topic:\n  " + (
         "\n  ".join(found)
     )
+
+
+def test_every_warning_relay_still_relays() -> None:
+    for key in WARNING_RELAYS:
+        file, _, name = key.partition(":")
+        tree = ast.parse((SRC / file).read_text(encoding="utf-8"))
+        relays = [
+            function.name
+            for function, _ in _warning_calls(tree)
+            if function is not None
+        ]
+        assert name in relays, (
+            f"{key} no longer raises a warning; drop it from WARNING_RELAYS"
+        )
 
 
 def broad_warning_filters(path: Path) -> list[str]:

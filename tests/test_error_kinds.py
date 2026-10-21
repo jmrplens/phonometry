@@ -96,6 +96,12 @@ EXEMPT: dict[str, str] = {
     "io/_sidecar.py:_real": "CalibrationSidecar's own checks",
     "io/_sidecar.py:_labels": "CalibrationSidecar's own checks",
     "io/_sidecar.py:_check_text": "CalibrationSidecar's own checks",
+    # The hosts file parser: a field of the wrong type in the file the library
+    # reads is a malformed file, and the refusal names the file.
+    "simulation/_remote/hosts.py:load_host": "parses the hosts file",
+    "simulation/_remote/hosts.py:_entry": "parses the hosts file",
+    "simulation/_remote/hosts.py:_optional_text": "parses the hosts file",
+    "simulation/_remote/hosts.py:_timeout": "parses the hosts file",
 }
 
 

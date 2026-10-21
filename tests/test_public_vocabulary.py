@@ -1895,6 +1895,8 @@ def _prose_lines(text: str, *, docstring: bool) -> Iterator[str]:
         if math_indent is not None and (not stripped or indent > math_indent):
             continue
         math_indent = None
+        if stripped.startswith("$$") and stripped.count("$$") > 1:
+            continue  # A display formula opened and closed on its own line.
         if stripped.startswith(("```", "$$")):
             fenced = not fenced
             continue
@@ -1916,11 +1918,17 @@ def _docstrings() -> Iterator[tuple[str, str]]:
                 yield str(path.relative_to(_ROOT)), doc
 
 
+#: The API pages generated from the docstrings, which the docstring half of the
+#: test reads at their source. ``docs/reference/api/index.md`` is written by
+#: hand and read with the guides.
+_GENERATED_API = _ROOT / "site" / "src" / "content" / "docs" / "reference" / "api"
+
+
 def _pages() -> Iterator[tuple[str, str]]:
     roots = (_ROOT / "docs", _ROOT / "site" / "src" / "content" / "docs")
     for root in roots:
         for path in sorted([*root.rglob("*.md"), *root.rglob("*.mdx")]):
-            if "reference/api" not in path.as_posix():  # Generated from docstrings.
+            if _GENERATED_API not in path.parents:
                 yield str(path.relative_to(_ROOT)), path.read_text(encoding="utf-8")
 
 
@@ -1940,12 +1948,14 @@ def test_the_rule_tells_a_count_named_in_prose_from_one_used_as_a_noun() -> None
         "Biquad n_sections, i.e. half the degree.\n"
         "Pass ``n_planes`` planes; the shape is (7, n_bands).\n"
         "```python\nr = f(x, n_axles=4)  # four n_axles\n```\n"
+        "$$N = n_\\mathrm{a}$$\nThe number of n_axles per vehicle.\n"
         ".. math::\n\n    f(n_x, n_y) = n_points\n\nThe number of planes.\n"
     )
     assert count_names_written_as_nouns(text, docstring=True) == [
         "n_planes",
         "n_planes",
         "n_sections",
+        "n_axles",
     ]
 
 

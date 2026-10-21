@@ -264,8 +264,8 @@ def enforcer_problem(item: str, root: pathlib.Path) -> str | None:
 def _ruff_problem(code: str, root: pathlib.Path) -> str | None:
     """Why ruff does not run ``code`` on this tree, or None when it does.
 
-    A family in ``select`` runs every code under it except those ``ignore``
-    takes out. Ruff settles a clash by specificity: the longer selector wins,
+    A family in ``select`` (or ``extend-select``) runs every code under it
+    except those ``ignore`` or ``extend-ignore`` takes out. Ruff settles a clash by specificity: the longer selector wins,
     and an ignore as specific as the select wins too, so ``D2`` selected and
     ``D205`` ignored leaves ``D205`` off.
     """
@@ -280,7 +280,10 @@ def _ruff_problem(code: str, root: pathlib.Path) -> str | None:
     selected = specificity([*lint.get("select", ()), *lint.get("extend-select", ())])
     if not selected:
         return f"ruff {code} is not selected"
-    if specificity(list(lint.get("ignore", ()))) >= selected:
+    if (
+        specificity([*lint.get("ignore", ()), *lint.get("extend-ignore", ())])
+        >= selected
+    ):
         return f"ruff {code} is ignored"
     return None
 
@@ -456,14 +459,17 @@ def test_a_ruff_code_the_configuration_ignores_is_reported(
     _write(
         tmp_path / "pyproject.toml",
         "[tool.ruff.lint]\n"
-        'select = ["D2", "D205", "E4"]\n'
-        'ignore = ["D213", "D205", "E"]\n',
+        'select = ["D2", "D205", "E4", "W"]\n'
+        'ignore = ["D213", "D205", "E"]\n'
+        'extend-ignore = ["W291"]\n',
     )
     assert enforcer_problem("`ruff D213`", tmp_path) == "ruff D213 is ignored"
     assert enforcer_problem("`ruff D205`", tmp_path) == "ruff D205 is ignored"
     assert enforcer_problem("`ruff D212`", tmp_path) is None
     assert enforcer_problem("`ruff E402`", tmp_path) is None
     assert enforcer_problem("`ruff D105`", tmp_path) == "ruff D105 is not selected"
+    assert enforcer_problem("`ruff W291`", tmp_path) == "ruff W291 is ignored"
+    assert enforcer_problem("`ruff W292`", tmp_path) is None
     assert enforcer_problem("`ruff D205`", _ROOT) == "ruff D205 is ignored"
     assert enforcer_problem("`ruff D212`", _ROOT) is None
 

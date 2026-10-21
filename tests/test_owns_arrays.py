@@ -765,6 +765,7 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
                     cuda_runtime=None,
                     cuda_driver_api=None,
                     gpu=None,
+                    package_digest=None,
                 ),
             ),
             "pressures",

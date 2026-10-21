@@ -8,6 +8,7 @@ from .compute import (
     ComputeDeviceError,
     ComputeFallbackWarning,
     ComputeImportError,
+    ComputeRemoteError,
     RunProvenance,
     use,
 )
@@ -53,6 +54,7 @@ __all__ = [
     "ComputeDeviceError",
     "ComputeFallbackWarning",
     "ComputeImportError",
+    "ComputeRemoteError",
     "ContourPhasors",
     "ContourProbe",
     "ElasticBoundaries",

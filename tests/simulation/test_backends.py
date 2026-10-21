@@ -947,3 +947,11 @@ def test_a_bad_argument_raises_its_own_error_before_the_device_is_asked_for(
             build(request)
     assert caught == []
     assert asked == []
+
+
+def test_the_backend_of_an_engine_is_never_on_a_node() -> None:
+    request = Compute(device="cupy", host="nas")
+    with pytest.raises(
+        ValueError, match="host 'nas' reached the backend of an engine built here"
+    ):
+        bk.backend_for(request)

@@ -122,6 +122,7 @@ def _provenance(compute: Compute, **found: str | None) -> RunProvenance:
         cuda_runtime=found.get("cuda_runtime"),
         cuda_driver_api=found.get("cuda_driver_api"),
         gpu=found.get("gpu"),
+        package_digest=None,
     )
 
 
@@ -454,8 +455,16 @@ def backend_for(compute: Compute | None) -> Backend:
         available but fails a first small computation, or is not ``"cpu"``
         in Pyodide. With ``fallback=True`` neither is raised: the run warns
         with :class:`ComputeFallbackWarning` and goes to NumPy.
+    :raises ValueError: when the request names a host: a backend is always
+        this machine's.
     """
     request = _requested(compute)
+    if request.host is not None:
+        msg = (
+            f"host {request.host!r} reached the backend of an engine built here; "
+            "only fdtd_simulation and elastic_fdtd_simulation run on a node"
+        )
+        raise ValueError(msg)
     try:
         return _load(request)
     except (ComputeImportError, ComputeDeviceError) as exc:

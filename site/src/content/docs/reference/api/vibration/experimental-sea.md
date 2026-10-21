@@ -150,7 +150,7 @@ cylindrical_shell_modal_density(
     mean_radius: float,
     longitudinal_wave_speed: float,
     *,
-    band: str = 'octave',
+    fraction: Literal[1, 3] = 1,
 ) -> NDArray[np.float64]
 ```
 
@@ -187,7 +187,7 @@ frequency, which for long thin shells can be substantial.
 | `thickness_m` | Wall thickness `t`, in m (> 0). |
 | `mean_radius` | Mean shell radius `a_m`, in m (> 0). |
 | `longitudinal_wave_speed` | Plate wave speed `cL`, in m/s (> 0). |
-| `band` | Analysis bandwidth, `"octave"` (Default, $F = 1.414$) or `"third"` ($F = 1.122$). |
+| `fraction` | The analysis band set, 1 for octaves (Default, $F = 1.414$) or 3 for one-third octaves ($F = 1.122$). |
 
 **Returns:** The modal density `n(f)`, in modes per hertz.
 
@@ -195,7 +195,7 @@ frequency, which for long thin shells can be substantial.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive input or an unknown band. |
+| ValueError | for a non-positive input or a band set other than 1 or 3. |
 
 ## flat_plate_modal_density
 

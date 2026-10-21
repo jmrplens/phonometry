@@ -298,7 +298,7 @@ def test_third_octave_closed_form_is_the_octave_one_less_10_lg_3() -> None:
     """0,8 f against 2,5 f: the three one-third octaves of an octave band."""
     difference = float(
         building.tapping_machine_force_level_estimate(1000.0)
-        - building.tapping_machine_force_level_estimate(1000.0, bandwidth="third")
+        - building.tapping_machine_force_level_estimate(1000.0, fraction=3)
     )
     assert difference == pytest.approx(10.0 * math.log10(2.5 / 0.8))
     assert difference == pytest.approx(10.0 * math.log10(3.0), abs=0.2)
@@ -346,7 +346,7 @@ def test_formula_d9a_is_flat_at_about_115_db_per_third_octave() -> None:
     thirds = np.array([100.0, 200.0, 400.0, 800.0, 1600.0, 3150.0])
     lw = building.tapping_machine_characteristic_power_level(
         thirds,
-        building.tapping_machine_force_level_estimate(thirds, bandwidth="third"),
+        building.tapping_machine_force_level_estimate(thirds, fraction=3),
     )
     assert np.ptp(lw) == pytest.approx(0.0, abs=1e-9)
     assert float(lw[0]) == pytest.approx(115.0, abs=1.0)

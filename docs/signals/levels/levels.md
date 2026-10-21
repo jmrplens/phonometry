@@ -233,7 +233,7 @@ of [Environmental levels](../../environment/assessment/environmental-levels.md) 
 | `fs` | int | Hz | > 0; taken from `x` when `x` is a `Signal` | Needed by the envelope detector |
 | `n` | tuple of ints | % | default `(10, 50, 90)` | Any exceedance percentages, e.g. `(1, 5, 95)` |
 | `mode` | str | — | `'fast'` (default), `'slow'`, `'impulse'` | IEC 61672-1 ballistics of the envelope |
-| `weighting` | str or None | — | any `weighting_filter` curve: `'A'`, `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'468'`, `'Z'`, `None` (default) | Frequency weighting before the envelope (`None` and `'Z'` both leave it unweighted) |
+| `weighting` | str | — | any `weighting_filter` curve: `'A'`, `'B'`, `'C'`, `'D'`, `'G'`, `'AU'`, `'468'`, `'Z'` (default) | Frequency weighting before the envelope (`'Z'` leaves it unweighted) |
 | `calibration_factor` / `dbfs` | float / bool | — | as `leq` | Same semantics as in `leq()` |
 
 ## Peak, event and occupational metrics
@@ -345,7 +345,7 @@ is +3 dB.
 | Function | Key parameters | Returns | Standard anchor |
 | :--- | :--- | :--- | :--- |
 | `lc_peak(x, fs=None, calibration_factor=None, dbfs=False, oversample=8)` | `dbfs=True` references full-scale *peak* (1.0), not RMS; `oversample=1` reads the peak on the sample grid | $L_\mathrm{Cpeak}$ [dB] | IEC 61672-1 §5.13, Table 5 tone bursts |
-| `sel(x, fs=None, weighting=None, ...)` | `weighting='A'` gives $L_{\mathrm{A}E}$ | SEL [dB] | IEC 61672-1 Table 4 ($L_{\mathrm{A}E}$ column) |
+| `sel(x, fs=None, weighting='Z', ...)` | `weighting='A'` gives $L_{\mathrm{A}E}$ | SEL [dB] | IEC 61672-1 Table 4 ($L_{\mathrm{A}E}$ column) |
 | `sound_exposure(x, fs=None, duration_hours=None, ...)` | `duration_hours` treats `x` as a sample of that period | $E$ [Pa²h] | IEC 61252 |
 | `lex_8h(x, fs=None, duration_hours=None, ...)` | same sampling semantics | $L_\mathrm{EX,8h}$ [dB] | IEC 61252 ($\equiv L_\mathrm{EP,d}$) |
 

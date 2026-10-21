@@ -104,6 +104,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
     require_axis_count,
+    require_band_fraction,
     require_choice,
     require_equal_counts,
     require_equal_shapes,
@@ -122,6 +123,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._internal.types import BandFraction
     from ..._report.metadata import ReportMetadata
     from ..measurement.ratings import ImpactRatingResult, WeightedRatingResult
 
@@ -174,15 +176,16 @@ _PLATEAU_CONSTANT: float = 0.02
 
 #: Half-band ratios used to decide which band contains the critical frequency
 #: (the ``f ≈ fc`` branch of Formula B.2).
-_HALF_BAND: dict[str, float] = {"third": 2.0 ** (1.0 / 6.0), "octave": 2.0**0.5}
+_HALF_BAND: dict[int, float] = {3: 2.0 ** (1.0 / 6.0), 1: 2.0**0.5}
 
 #: Constants of the reciprocity relation ``R + Ln = C + 30 lg f`` between the
 #: airborne index and the impact level of a homogeneous floor (Part 2, B.3/B.4).
-_RECIPROCITY_CONSTANT: dict[str, float] = {"third": 38.0, "octave": 43.0}
+_RECIPROCITY_CONSTANT: dict[int, float] = {3: 38.0, 1: 43.0}
 
-#: Band sets ISO 717-1/-2 rate over, in hertz.
-_RATING_BANDS: dict[str, tuple[float, ...]] = {
-    "third": (
+#: Band sets ISO 717-1/-2 rate over, in hertz, keyed by band set (3 one-third
+#: octaves, 1 octaves).
+_RATING_BANDS: dict[int, tuple[float, ...]] = {
+    3: (
         100.0,
         125.0,
         160.0,
@@ -200,12 +203,9 @@ _RATING_BANDS: dict[str, tuple[float, ...]] = {
         2500.0,
         3150.0,
     ),
-    "octave": (125.0, 250.0, 500.0, 1000.0, 2000.0),
+    1: (125.0, 250.0, 500.0, 1000.0, 2000.0),
 }
 
-_BAND_CHOICES = ("third", "octave")
-
-BandType = Literal["third", "octave"]
 FlankingKind = Literal["Ff", "Df", "Fd"]
 
 
@@ -252,10 +252,10 @@ def _time_ratio(situ: ArrayLike, laboratory: ArrayLike) -> np.ndarray:
 
 
 def _rating_slice(
-    frequencies: np.ndarray, values: np.ndarray, bands: BandType
+    frequencies: np.ndarray, values: np.ndarray, fraction: BandFraction
 ) -> np.ndarray | None:
     """Return the ISO 717 rating range of *values*, or ``None`` if incomplete."""
-    wanted = _RATING_BANDS[require_choice(bands, "bands", _BAND_CHOICES)]
+    wanted = _RATING_BANDS[require_band_fraction(fraction, "fraction")]
     indices = []
     for target in wanted:
         match = np.flatnonzero(np.isclose(frequencies, target, rtol=0.03))
@@ -430,7 +430,7 @@ def calculated_sound_reduction_index(
     total_loss_factor: ArrayLike,
     radiation_factor: ArrayLike,
     forced_radiation_factor: ArrayLike,
-    bands: BandType = "third",
+    fraction: BandFraction = 3,
     resonant_only: bool = False,
     density: float | None = None,
     longitudinal_velocity: float | None = None,
@@ -481,8 +481,9 @@ def calculated_sound_reduction_index(
     :param forced_radiation_factor: Radiation factor for forced waves ``σf``
         per band (see :func:`forced_radiation_factor`); ignored when
         ``resonant_only`` is set.
-    :param bands: ``"third"`` (default) or ``"octave"``, setting the band
-        limits used to locate the :math:`f \approx f_\mathrm{c}` branch.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves, setting the band limits used to locate the
+        :math:`f \approx f_\mathrm{c}` branch.
     :param resonant_only: Drop the forced-transmission term below ``fc``.
     :param density: Density ``ρ`` of the material, in kg/m³; with
         ``longitudinal_velocity`` it enables the Formula (B.10) plateau.
@@ -502,7 +503,7 @@ def calculated_sound_reduction_index(
     eta = _band_array(total_loss_factor, f.size, "total_loss_factor", positive=True)
     sigma = _band_array(radiation_factor, f.size, "radiation_factor", positive=True)
     sigma_f = _band_array(forced_radiation_factor, f.size, "forced_radiation_factor")
-    half = _HALF_BAND[require_choice(bands, "bands", _BAND_CHOICES)]
+    half = _HALF_BAND[require_band_fraction(fraction, "fraction")]
 
     mass_term = (2.0 * rho0 * c0 / (2.0 * np.pi * f * m)) ** 2
     at_fc = (f / half <= fc) & (fc <= f * half)
@@ -1061,7 +1062,7 @@ def reciprocity_impact_level(
     sound_reduction_index: ArrayLike,
     frequencies: ArrayLike,
     *,
-    bands: BandType = "third",
+    fraction: BandFraction = 3,
 ) -> np.ndarray:
     r"""Impact level of a homogeneous floor by reciprocity (Part 2, B.3/B.4).
 
@@ -1075,14 +1076,15 @@ def reciprocity_impact_level(
 
     :param sound_reduction_index: ``R`` of the floor per band, in dB.
     :param frequencies: Band centre frequencies, in Hz.
-    :param bands: ``"third"`` (default, constant 38) or ``"octave"`` (43).
+    :param fraction: The band set, 3 for one-third octaves (default, constant
+        38) or 1 for octaves (43).
     :return: The normalized impact sound pressure level ``Ln`` per band, dB.
     :raises ValueError: If an input is not positive/finite or the band counts
         disagree.
     """
     f = require_positive_array(frequencies, "frequencies")
     r = _band_array(sound_reduction_index, f.size, "sound_reduction_index")
-    constant = _RECIPROCITY_CONSTANT[require_choice(bands, "bands", _BAND_CHOICES)]
+    constant = _RECIPROCITY_CONSTANT[require_band_fraction(fraction, "fraction")]
     return np.asarray(constant + 30.0 * np.log10(f) - r, dtype=np.float64)
 
 
@@ -1496,7 +1498,7 @@ def in_situ_element(
     element: HomogeneousElement,
     frequencies: ArrayLike,
     *,
-    bands: BandType = "third",
+    fraction: BandFraction = 3,
     resonant_only: bool = False,
     fluid: Fluid = EN_12354_AIR,
 ) -> InSituElementResult:
@@ -1515,7 +1517,8 @@ def in_situ_element(
 
     :param element: The :class:`HomogeneousElement` description.
     :param frequencies: Band centre frequencies, in Hz.
-    :param bands: ``"third"`` (default) or ``"octave"``.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves.
     :param resonant_only: Drop the forced-transmission term of Formula (B.2)
         below ``fc`` (Annex B.1, flanking paths).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
@@ -1555,7 +1558,7 @@ def in_situ_element(
         total_loss_factor=eta,
         radiation_factor=sigma,
         forced_radiation_factor=sigma_f,
-        bands=bands,
+        fraction=fraction,
         resonant_only=resonant_only,
         density=element.density,
         longitudinal_velocity=element.longitudinal_velocity,
@@ -1621,18 +1624,18 @@ def _require_paths_and_bands(
     transmission path, a share column beside those rows, and a box holding the
     single number of the whole.
 
-    ``fractions`` is indexed by path to name the dominant one, so an array
-    short of a path row yields a sheet listing fewer paths than the shares it
-    prints sum over, and the column stops reaching 100 % under a box that
-    still rates the whole.
+    ``energy_fractions`` is indexed by path to name the dominant one, so an
+    array short of a path row yields a sheet listing fewer paths than the
+    shares it prints sum over, and the column stops reaching 100 % under a box
+    that still rates the whole.
 
     :param result: The result being built.
     :param total: Name of its per-band total, ``r_prime`` or ``l_prime_n``.
     :raises ValueError: if the band or path axes disagree.
     """
     owner = type(result).__name__
-    require_ranks(result, frequencies=1, fractions=2, **{total: 1})
-    require_same_length(result, "frequencies", total, ("fractions", 1))
+    require_ranks(result, frequencies=1, energy_fractions=2, **{total: 1})
+    require_same_length(result, "frequencies", total, ("energy_fractions", 1))
     bands = require_axis_count(result.frequencies, owner, "frequencies", rank=None)
     for i, path in enumerate(result.paths):
         label = f"paths[{i}] ({path.label})"
@@ -1647,8 +1650,12 @@ def _require_paths_and_bands(
         owner,
         {
             "paths": len(result.paths),
-            "fractions": require_axis_count(
-                result.fractions, owner, "fractions", "transmission path", rank=None
+            "energy_fractions": require_axis_count(
+                result.energy_fractions,
+                owner,
+                "energy_fractions",
+                "transmission path",
+                rank=None,
             ),
         },
         "transmission path",
@@ -1756,8 +1763,8 @@ class DetailedAirborneResult(OwnsArrays):
     :ivar paths: Every transmission path (the direct path first), each with
         its ``Rij`` per band.
     :ivar r_prime: Apparent sound reduction index ``R'`` per band, in dB.
-    :ivar fractions: Share of the transmitted energy carried by each path per
-        band (paths x bands), summing to 1 in every band.
+    :ivar energy_fractions: Share of the transmitted energy carried by each
+        path per band (paths x bands), summing to 1 in every band.
     :ivar rating: ``R'w (C; Ctr)`` per ISO 717-1, or ``None`` when the bands
         supplied do not cover the rating range.
     """
@@ -1765,7 +1772,7 @@ class DetailedAirborneResult(OwnsArrays):
     frequencies: np.ndarray
     paths: tuple[BandPath, ...]
     r_prime: np.ndarray
-    fractions: np.ndarray
+    energy_fractions: np.ndarray
     rating: WeightedRatingResult | None
 
     def __post_init__(self) -> None:
@@ -1778,7 +1785,9 @@ class DetailedAirborneResult(OwnsArrays):
     @property
     def dominant(self) -> tuple[str, ...]:
         """Label of the path carrying most energy in each band."""
-        return tuple(self.paths[k].label for k in np.argmax(self.fractions, axis=0))
+        return tuple(
+            self.paths[k].label for k in np.argmax(self.energy_fractions, axis=0)
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1841,8 +1850,8 @@ class DetailedImpactResult(OwnsArrays):
     :ivar paths: Every transmission path (the direct path first), each with
         its ``Ln,ij`` per band.
     :ivar l_prime_n: Apparent normalized impact level ``L'n`` per band, in dB.
-    :ivar fractions: Share of the radiated energy carried by each path per
-        band (paths x bands), summing to 1 in every band.
+    :ivar energy_fractions: Share of the radiated energy carried by each
+        path per band (paths x bands), summing to 1 in every band.
     :ivar rating: ``L'n,w (CI)`` per ISO 717-2, or ``None`` when the bands
         supplied do not cover the rating range.
     """
@@ -1850,7 +1859,7 @@ class DetailedImpactResult(OwnsArrays):
     frequencies: np.ndarray
     paths: tuple[BandPath, ...]
     l_prime_n: np.ndarray
-    fractions: np.ndarray
+    energy_fractions: np.ndarray
     rating: ImpactRatingResult | None
 
     def __post_init__(self) -> None:
@@ -1863,7 +1872,9 @@ class DetailedImpactResult(OwnsArrays):
     @property
     def dominant(self) -> tuple[str, ...]:
         """Label of the path carrying most energy in each band."""
-        return tuple(self.paths[k].label for k in np.argmax(self.fractions, axis=0))
+        return tuple(
+            self.paths[k].label for k in np.argmax(self.energy_fractions, axis=0)
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1920,7 +1931,7 @@ def detailed_airborne_prediction(
     direct_index: ArrayLike,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = "Dd",
-    bands: BandType = "third",
+    fraction: BandFraction = 3,
 ) -> DetailedAirborneResult:
     r"""Combine direct and flanking paths into ``R'`` per band (F. 1 to 4).
 
@@ -1938,8 +1949,8 @@ def detailed_airborne_prediction(
     :param flanking_paths: The flanking paths (see
         :func:`airborne_flanking_path`); may be empty.
     :param direct_label: Label of the direct path (Default: ``"Dd"``).
-    :param bands: ``"third"`` (default) or ``"octave"``, selecting the
-        ISO 717-1 rating range.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves, selecting the ISO 717-1 rating range.
     :return: The :class:`DetailedAirborneResult`.
     :raises ValueError: If a path does not match the band count.
     """
@@ -1955,12 +1966,12 @@ def detailed_airborne_prediction(
     tau = 10.0 ** (-_path_matrix(paths, f.size) / 10.0)
     total = np.sum(tau, axis=0)
     r_prime = np.asarray(-10.0 * np.log10(total), dtype=np.float64)
-    rating_values = _rating_slice(f, r_prime, bands)
+    rating_values = _rating_slice(f, r_prime, fraction)
     return DetailedAirborneResult(
         frequencies=f,
         paths=paths,
         r_prime=r_prime,
-        fractions=np.asarray(tau / total, dtype=np.float64),
+        energy_fractions=np.asarray(tau / total, dtype=np.float64),
         rating=None if rating_values is None else weighted_rating(rating_values),
     )
 
@@ -1971,7 +1982,7 @@ def detailed_impact_prediction(
     direct_level: ArrayLike | None = None,
     flanking_paths: Sequence[BandPath] = (),
     direct_label: str = "Dd",
-    bands: BandType = "third",
+    fraction: BandFraction = 3,
 ) -> DetailedImpactResult:
     r"""Combine direct and flanking paths into ``L'n`` per band (Part 2, (1)).
 
@@ -1991,7 +2002,8 @@ def detailed_impact_prediction(
         :func:`impact_flanking_path`); may be empty when ``direct_level`` is
         given.
     :param direct_label: Label of the direct path (Default: ``"Dd"``).
-    :param bands: ``"third"`` (default) or ``"octave"``.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves, selecting the ISO 717-2 rating range.
     :return: The :class:`DetailedImpactResult`.
     :raises ValueError: If a path does not match the band count, or if neither
         a direct level nor any flanking path is given.
@@ -2016,12 +2028,12 @@ def detailed_impact_prediction(
     energy = 10.0 ** (_path_matrix(paths, f.size) / 10.0)
     total = np.sum(energy, axis=0)
     l_prime_n = np.asarray(10.0 * np.log10(total), dtype=np.float64)
-    rating_values = _rating_slice(f, l_prime_n, bands)
+    rating_values = _rating_slice(f, l_prime_n, fraction)
     return DetailedImpactResult(
         frequencies=f,
         paths=paths,
         l_prime_n=l_prime_n,
-        fractions=np.asarray(energy / total, dtype=np.float64),
+        energy_fractions=np.asarray(energy / total, dtype=np.float64),
         rating=(
             None if rating_values is None else weighted_impact_rating(rating_values)
         ),

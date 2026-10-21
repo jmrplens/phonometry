@@ -275,7 +275,7 @@ class EcmaLoudness(OwnsArrays):
     frequencies: np.ndarray
     times: np.ndarray
     loudness_vs_time: np.ndarray
-    field: str
+    field: Literal["free", "diffuse"]
 
     def __post_init__(self) -> None:
         """Reject a result whose band and time traces do not line up.

@@ -304,7 +304,7 @@ def test_a_weighting_reproduces_iec_61672_table_3(
     frequency: float, a_weighting: float
 ) -> None:
     pair = np.array([frequency, frequency * 10.0**0.1])
-    level = ea.program_signal_level(pair, [80.0, -300.0], a_weighted=True)
+    level = ea.program_signal_level(pair, [80.0, -300.0], weighting="A")
     assert round(level - 80.0, 1) == a_weighting
 
 
@@ -336,7 +336,7 @@ def test_one_fitting_does_not_conform_to_8_3_5() -> None:
 def test_band_levels_at_the_characteristic_voltage_sum_to_94_db() -> None:
     levels = np.tile(np.linspace(70.0, 85.0, BANDS.size), (3, 1))
     result = ea.program_characteristic_voltage(
-        [0.05, 0.05, 0.05], BANDS, levels, a_weighted=True
+        [0.05, 0.05, 0.05], BANDS, levels, weighting="A"
     )
     at_voltage = result.band_levels_at_characteristic
     total = 10.0 * math.log10(float(np.sum(10.0 ** (at_voltage / 10.0))))
@@ -346,8 +346,30 @@ def test_band_levels_at_the_characteristic_voltage_sum_to_94_db() -> None:
 def test_programme_characteristic_voltage_results_are_read_only() -> None:
     result = ea.program_characteristic_voltage(0.05, BANDS, np.full(BANDS.size, 80.0))
     assert not result.band_levels.flags.writeable
-    with pytest.raises(dataclasses.FrozenInstanceError, match="a_weighted"):
-        result.a_weighted = True  # type: ignore[misc]
+    with pytest.raises(dataclasses.FrozenInstanceError, match="weighting"):
+        result.weighting = "Z"  # type: ignore[misc]
+
+
+_A_OR_Z = r"'weighting' must be one of \('A', 'Z'\); got 'C'"
+
+
+def test_the_programme_level_refuses_a_weighting_8_3_5_does_not_apply() -> None:
+    """Only the A-weighting of 8.3.5, or none; a C-weighting is not read as none."""
+    levels = np.full(BANDS.size, 70.0)
+    with pytest.raises(ValueError, match=_A_OR_Z):
+        ea.program_signal_level(BANDS, levels, weighting="C")  # type: ignore[arg-type]
+
+
+def test_the_characteristic_voltage_refuses_a_weighting_8_3_5_does_not_apply() -> None:
+    levels = np.full(BANDS.size, 80.0)
+    with pytest.raises(ValueError, match=_A_OR_Z):
+        ea.program_characteristic_voltage(0.05, BANDS, levels, weighting="C")  # type: ignore[arg-type]
+
+
+def test_a_characteristic_voltage_built_by_hand_refuses_another_weighting() -> None:
+    result = ea.program_characteristic_voltage(0.05, BANDS, np.full(BANDS.size, 80.0))
+    with pytest.raises(ValueError, match=_A_OR_Z):
+        dataclasses.replace(result, weighting="C")
 
 
 # ---------------------------------------------------------------------------
@@ -856,15 +878,15 @@ def test_microphone_plot_marks_item_e_as_a_minimum(
 
 
 @pytest.mark.parametrize(
-    ("a_weighted", "free_field", "clause"),
+    ("weighting", "free_field", "clause"),
     [
-        (False, False, "(8.3.4)"),
-        (True, True, "(8.3.5)"),
-        (True, False, "A-weighted only"),
+        ("Z", False, "(8.3.4)"),
+        ("A", True, "(8.3.5)"),
+        ("A", False, "A-weighted only"),
     ],
 )
 def test_characteristic_voltage_plot_names_what_was_corrected(
-    clause: str, *, a_weighted: bool, free_field: bool
+    clause: str, *, weighting: str, free_field: bool
 ) -> None:
     plt = pytest.importorskip("matplotlib.pyplot")
     levels = np.tile(np.linspace(70.0, 85.0, BANDS.size), (3, 1))
@@ -872,7 +894,7 @@ def test_characteristic_voltage_plot_names_what_was_corrected(
         0.05,
         BANDS,
         levels,
-        a_weighted=a_weighted,
+        weighting=weighting,  # type: ignore[arg-type]
         free_field_response_db=np.zeros(BANDS.size) if free_field else None,
     )
     ax = result.plot()

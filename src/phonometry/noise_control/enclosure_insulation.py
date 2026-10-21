@@ -85,6 +85,7 @@ from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_sum
 from .._internal.validation import (
+    require_band_fraction,
     require_choice,
     require_finite,
     require_finite_array,
@@ -96,7 +97,6 @@ from ..emission._shared import ROOM_ABSORPTION_ESTIMATES, _a_weighting_correctio
 from ._insulation_shared import (
     MANDATORY_BAND_RANGE_HZ,
     PREFERRED_BAND_RANGE_HZ,
-    _band_fraction,
     _check_band_range,
     _rating_bands,
     _require_rating_bands,
@@ -109,6 +109,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .._internal.types import BandFraction
 
 __all__ = [
     "ARTIFICIAL_SOURCE_DROP_MM",
@@ -287,7 +289,7 @@ class EnclosureInsulationResult(OwnsArrays):
     :ivar condition: ``"laboratory"`` (part 1) or ``"in-situ"`` (part 2).
     :ivar source_kind: ``"actual"``, ``"reciprocity"`` or ``"artificial"``.
     :ivar base_standard: The standard the levels were determined by.
-    :ivar band_fraction: 3 for one-third octaves, 1 for octaves.
+    :ivar fraction: The band set, 3 for one-third octaves or 1 for octaves.
     """
 
     frequencies: NDArray[np.float64] | None
@@ -299,7 +301,14 @@ class EnclosureInsulationResult(OwnsArrays):
     condition: str
     source_kind: str
     base_standard: str
-    band_fraction: int
+    fraction: int
+
+    def __post_init__(self) -> None:
+        """Refuse a band set ISO 11546 does not rate in.
+
+        :raises ValueError: if ``fraction`` is not 1 or 3.
+        """
+        require_band_fraction(self.fraction, "fraction")
 
     def rounded(self) -> NDArray[np.int_]:
         """The band values as clause 9.4 reports them, to the nearest decibel."""
@@ -462,11 +471,11 @@ def _insulation(
     base_standard: str,
     condition: str,
     source_kind: str,
-    band_fraction: int,
+    fraction: int,
 ) -> EnclosureInsulationResult:
     """The body every one of Equations (1) to (5) shares."""
     without, with_, freqs = _pair(level_without, level_with, frequencies)
-    fraction = _band_fraction(band_fraction)
+    fraction = require_band_fraction(fraction, "fraction")
     where, kind = _method_pair(condition, source_kind)
     _check_band_range(
         freqs,
@@ -509,7 +518,7 @@ def _insulation(
         condition=where,
         source_kind=kind,
         base_standard=str(base_standard),
-        band_fraction=fraction,
+        fraction=fraction,
     )
 
 
@@ -523,7 +532,7 @@ def enclosure_sound_power_insulation(
     base_standard: str = "ISO 3744",
     condition: EnclosureCondition = "laboratory",
     source_kind: SourceKind = "actual",
-    band_fraction: int = 3,
+    fraction: BandFraction = 3,
 ) -> EnclosureInsulationResult:
     r"""Insertion loss from two sound power determinations, Equations (1) and (2).
 
@@ -543,7 +552,8 @@ def enclosure_sound_power_insulation(
         lists them.
     :param condition: ``"laboratory"`` for part 1, ``"in-situ"`` for part 2.
     :param source_kind: ``"actual"``, ``"reciprocity"`` or ``"artificial"``.
-    :param band_fraction: 3 for one-third octaves (default), 1 for octaves.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves.
     :return: The insertion loss, as an :class:`EnclosureInsulationResult`.
     :raises ValueError: For spectra that do not match, non-finite values, half
         an A-weighted pair, an unknown condition, source kind or band
@@ -560,7 +570,7 @@ def enclosure_sound_power_insulation(
         base_standard=base_standard,
         condition=condition,
         source_kind=source_kind,
-        band_fraction=band_fraction,
+        fraction=fraction,
     )
 
 
@@ -574,7 +584,7 @@ def enclosure_sound_pressure_insulation(
     base_standard: str = "ISO 11201",
     condition: EnclosureCondition = "laboratory",
     source_kind: SourceKind = "actual",
-    band_fraction: int = 3,
+    fraction: BandFraction = 3,
 ) -> EnclosureInsulationResult:
     r"""Insertion loss from two sound pressure levels, Equations (3) and (4).
 
@@ -595,7 +605,8 @@ def enclosure_sound_pressure_insulation(
     :param base_standard: The standard the pressure levels came from.
     :param condition: ``"laboratory"`` for part 1, ``"in-situ"`` for part 2.
     :param source_kind: ``"actual"``, ``"reciprocity"`` or ``"artificial"``.
-    :param band_fraction: 3 for one-third octaves (default), 1 for octaves.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves.
     :return: The insertion loss, as an :class:`EnclosureInsulationResult`.
     :raises ValueError: For spectra that do not match, non-finite values, half
         an A-weighted pair, an unknown condition, source kind or band
@@ -612,7 +623,7 @@ def enclosure_sound_pressure_insulation(
         base_standard=base_standard,
         condition=condition,
         source_kind=source_kind,
-        band_fraction=band_fraction,
+        fraction=fraction,
     )
 
 
@@ -621,7 +632,7 @@ def enclosure_reciprocity_insulation(
     internal_levels: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    band_fraction: int = 3,
+    fraction: BandFraction = 3,
 ) -> EnclosureInsulationResult:
     r"""Insertion loss measured from the outside in, Equation (5) of part 1.
 
@@ -637,7 +648,8 @@ def enclosure_reciprocity_insulation(
     :param internal_levels: The averaged level inside the enclosure standing in
         that field, per band, in decibels.
     :param frequencies: Nominal band centres, in hertz.
-    :param band_fraction: 3 for one-third octaves (default), 1 for octaves.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves.
     :return: The insertion loss, as an :class:`EnclosureInsulationResult` whose
         quantity is ``"reciprocity"``.
     :raises ValueError: For spectra that do not match, non-finite values or an
@@ -653,7 +665,7 @@ def enclosure_reciprocity_insulation(
         base_standard="ISO 3741",
         condition="laboratory",
         source_kind="reciprocity",
-        band_fraction=band_fraction,
+        fraction=fraction,
     )
 
 
@@ -664,7 +676,7 @@ def enclosure_artificial_source_insulation(
     frequencies: ArrayLike | None = None,
     quantity: str = "sound_power",
     condition: EnclosureCondition = "laboratory",
-    band_fraction: int = 3,
+    fraction: BandFraction = 3,
 ) -> EnclosureInsulationResult:
     r"""Insertion loss with the tapping source of Annex A, 7.3 of part 1 and 7.2 of part 2.
 
@@ -687,7 +699,8 @@ def enclosure_artificial_source_insulation(
     :param quantity: ``"sound_power"`` (default) for Equation (1), or
         ``"sound_pressure"`` for Equation (3).
     :param condition: ``"laboratory"`` for part 1, ``"in-situ"`` for part 2.
-    :param band_fraction: 3 for one-third octaves (default), 1 for octaves.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves.
     :return: The averaged insertion loss, as an
         :class:`EnclosureInsulationResult`.
     :raises ValueError: For arrays that are not two-dimensional and matched,
@@ -723,7 +736,7 @@ def enclosure_artificial_source_insulation(
         base_standard="ISO 11546 Annex A",
         condition=condition,
         source_kind="artificial",
-        band_fraction=band_fraction,
+        fraction=fraction,
     )
 
 
@@ -731,7 +744,7 @@ def weighted_enclosure_insulation(
     insulation: ArrayLike,
     *,
     quantity: str = "sound_power",
-    band_fraction: int = 3,
+    fraction: BandFraction = 3,
 ) -> WeightedEnclosureInsulation:
     r"""The single-number rating of an insertion loss, 7.4 of part 1 and 7.3 of part 2.
 
@@ -746,18 +759,19 @@ def weighted_enclosure_insulation(
         octave ones of 125 Hz to 2 kHz; a wider spectrum is refused rather
         than trimmed, because which bands it holds is the caller's to say.
     :param quantity: ``"sound_power"`` (default) or ``"reciprocity"``.
-    :param band_fraction: 3 for one-third octaves (default), 1 for octaves.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves.
     :return: The rating, as a :class:`WeightedEnclosureInsulation`.
     :raises ValueError: For a spectrum that does not carry the rating bands.
     """
     from ..building import weighted_rating
 
     values = require_finite_array(insulation, "insulation")
-    fraction = _band_fraction(band_fraction)
+    fraction = require_band_fraction(fraction, "fraction")
     kind = require_choice(str(quantity), "quantity", _RATEABLE_QUANTITIES)
-    bands, band_set = _rating_bands(fraction)
+    bands = _rating_bands(fraction)
     _require_rating_bands(values, bands)
-    result = weighted_rating(values, band_set)
+    result = weighted_rating(values, fraction)
     return WeightedEnclosureInsulation(
         rating=int(result.rating),
         c=int(result.c),

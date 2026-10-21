@@ -149,7 +149,7 @@ móvil que sigue la pantalla de un sonómetro, $L_\mathrm{AF}(t)$:
 
 ```python
 pressure = cal * recording                          # unidades digitales -> Pa
-weighted = filters.weighting_filter(pressure, fs, curve="A")
+weighted = filters.weighting_filter(pressure, fs, weighting="A")
 envelope = filters.time_weighting(weighted, fs, mode="fast")  # valor cuadrático medio en Pa^2
 laf_t = 10 * np.log10(np.maximum(envelope, 1e-12) / (2e-5) ** 2)
 # laf_t alcanza unos 80 dB durante el evento y se asienta cerca de 55 dB entre medias.
@@ -342,7 +342,7 @@ Tabla 3 de IEC 61672-1, y `verify_filter_class` barre un `OctaveFilterBank`
 contra los límites de la Tabla 1 de IEC 61260-1.
 
 ```python
-wf = filters.WeightingFilter(fs, curve="A")
+wf = filters.WeightingFilter(fs, weighting="A")
 print(filters.verify_weighting_class(wf).overall_class)   # 1
 
 bank = filters.OctaveFilterBank(fs, fraction=3)

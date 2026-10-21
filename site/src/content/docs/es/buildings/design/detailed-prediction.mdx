@@ -648,7 +648,7 @@ constructiva nueva.
 | :--- | :--- | :--- | :--- | :--- |
 | `element` | `HomogeneousElement` | — | — | Área, longitudes de lado, $m'$, $f_\mathrm{c}$, $\eta_\mathrm{int}$, $\sum l_k \alpha_k$ y opcionalmente $\rho$/$c_\mathrm{L}$ |
 | `frequencies` | array | Hz | > 0 | Frecuencias centrales de banda |
-| `bands` | str | — | `'third'` (por defecto) / `'octave'` | Fija la banda que lleva la rama $f \approx f_\mathrm{c}$ |
+| `fraction` | int | — | `3` (tercios de octava, por defecto) / `1` (octavas) | Fija la banda que lleva la rama $f \approx f_\mathrm{c}$ |
 | `resonant_only` | bool | — | por defecto `False` | Elimina el término de transmisión forzada por debajo de $f_\mathrm{c}$ (Anexo B.1, trayectorias por flancos) |
 | `fluid` | `Fluid` | — | por defecto `EN_12354_AIR` | Los 340 m/s del Anexo A con los 1,29 kg/m³ del Anexo B; pásale un `fluids.air()` calculado para predecir en el aire del edificio |
 

@@ -106,6 +106,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_band_fraction,
     require_choice,
     require_equal_shapes,
     require_finite_array,
@@ -120,6 +121,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from ..._internal.types import BandFraction
 
 __all__ = [
     "HEAVY_IMPACT_A_WEIGHTING",
@@ -173,11 +176,12 @@ HEAVY_IMPACT_SOURCES: Mapping[str, tuple[tuple[float, float], ...]] = MappingPro
 
 #: A-weighting correction ``Aj`` for the one-third-octave bands 50 Hz to 630 Hz
 #: and the octave bands 63 Hz to 500 Hz, transcribed from **ISO 717-2:2020
-#: Table D.3** (printed p. 21). Keyed by band width, each value maps the band
-#: centre frequency in Hz to ``Aj`` in dB.
-HEAVY_IMPACT_A_WEIGHTING: Mapping[str, Mapping[float, float]] = MappingProxyType(
+#: Table D.3** (printed p. 21). Keyed by band set, the ``fraction`` of
+#: :func:`a_weighted_max_impact_level` (3 for one-third octaves, 1 for
+#: octaves), each value maps the band centre frequency in Hz to ``Aj`` in dB.
+HEAVY_IMPACT_A_WEIGHTING: Mapping[int, Mapping[float, float]] = MappingProxyType(
     {
-        "third": MappingProxyType(
+        3: MappingProxyType(
             {
                 50.0: -30.3,
                 63.0: -26.2,
@@ -193,11 +197,12 @@ HEAVY_IMPACT_A_WEIGHTING: Mapping[str, Mapping[float, float]] = MappingProxyType
                 630.0: -1.9,
             }
         ),
-        "octave": MappingProxyType(
-            {63.0: -26.2, 125.0: -16.2, 250.0: -8.7, 500.0: -3.2}
-        ),
+        1: MappingProxyType({63.0: -26.2, 125.0: -16.2, 250.0: -8.7, 500.0: -3.2}),
     }
 )
+
+#: The band set of an Annex D spectrum, read from how many levels it holds.
+_FRACTION_BY_COUNT: Mapping[int, BandFraction] = MappingProxyType({12: 3, 4: 1})
 
 #: Reference force ``F0`` of ISO 16283-2:2020 Formula (A.1), in newtons: 1 N,
 #: not the 1 µN of ISO 1683.
@@ -751,7 +756,8 @@ class AWeightedMaxImpactResult(OwnsArrays):
     """A-weighted maximum impact sound pressure level (ISO 717-2 Annex D).
 
     :ivar frequencies: Band centre frequencies, in Hz.
-    :ivar band: ``"third"`` (50-630 Hz) or ``"octave"`` (63-500 Hz).
+    :ivar fraction: The band set, 3 for one-third octaves (50-630 Hz) or 1
+        for octaves (63-500 Hz).
     :ivar levels: Input maximum levels ``Xi,Fmax,j`` per band, in dB.
     :ivar a_weighting: Table D.3 correction ``Aj`` per band, in dB.
     :ivar corrected: ``Xi,Fmax,j + Aj`` per band, in dB.
@@ -761,7 +767,7 @@ class AWeightedMaxImpactResult(OwnsArrays):
     """
 
     frequencies: np.ndarray
-    band: str
+    fraction: int
     levels: np.ndarray
     a_weighting: np.ndarray
     corrected: np.ndarray
@@ -783,16 +789,17 @@ class AWeightedMaxImpactResult(OwnsArrays):
         weighting that no longer accounts for them, off by as much as the
         nearly 30 dB the table falls across the rating range.
 
-        ``band`` is pinned to the two Annex D band widths because the figure
-        titles itself by looking the tag up in a label table after the bars
-        are drawn: :func:`a_weighted_max_impact_level` validates it at
-        the call, but a result rewritten by hand reaches the lookup unchecked
-        and dies mid-render with a bare ``KeyError`` naming the tag alone.
+        ``fraction`` is pinned to the two Annex D band sets because the figure
+        titles itself by looking the band set up in a label table after the
+        bars are drawn: :func:`a_weighted_max_impact_level` validates it
+        at the call, but a result rewritten by hand reaches the lookup
+        unchecked and dies mid-render with a bare ``KeyError`` naming the
+        value alone.
 
         :raises ValueError: if any per-band column disagrees with the rest,
-            or ``band`` is not ``"third"`` or ``"octave"``.
+            or ``fraction`` is not 1 or 3.
         """
-        require_choice(self.band, "band", ("third", "octave"))
+        require_band_fraction(self.fraction, "fraction")
         require_ranks(self, frequencies=1, levels=1, a_weighting=1, corrected=1)
         require_same_length(self, "frequencies", "levels", "a_weighting", "corrected")
 
@@ -827,7 +834,7 @@ def a_weighted_max_impact_level(
     levels: ArrayLike,
     frequencies: ArrayLike | Sequence[float] | None = None,
     *,
-    band: str | None = None,
+    fraction: BandFraction | None = None,
 ) -> AWeightedMaxImpactResult:
     r"""A-weighted maximum impact level ``XiA,Fmax`` (ISO 717-2:2020, (D.1)).
 
@@ -841,27 +848,29 @@ def a_weighted_max_impact_level(
     :param levels: Maximum impact sound pressure levels ``Xi,Fmax,j``, in dB,
         in ascending band order.
     :param frequencies: Optional band centre frequencies, in Hz. When given they
-        must be exactly the rating bands of the chosen band width.
-    :param band: ``"third"`` or ``"octave"``; inferred from the number of
-        values (12 -> third, 4 -> octave) when omitted.
+        must be exactly the rating bands of the chosen band set.
+    :param fraction: The band set, 3 for one-third octaves or 1 for octaves;
+        inferred from the number of values (12 one-third octaves, 4 octaves)
+        when omitted.
     :return: An :class:`AWeightedMaxImpactResult`.
     :raises ValueError: for a wrong number of values or mismatched bands.
     """
     x = require_finite_array(levels, "levels")
-    if band is None:
-        band = {12: "third", 4: "octave"}.get(x.size, "")
-        if not band:
+    if fraction is None:
+        inferred = _FRACTION_BY_COUNT.get(x.size)
+        if inferred is None:
             msg = (
                 "'levels' must hold 12 one-third-octave values (50-630 Hz) or "
-                "4 octave values (63-500 Hz); pass 'band' to disambiguate."
+                "4 octave values (63-500 Hz); pass 'fraction' to disambiguate."
             )
             raise ValueError(msg)
-    chosen = require_choice(band, "band", ("third", "octave"))
+        fraction = inferred
+    chosen = require_band_fraction(fraction, "fraction")
     table = HEAVY_IMPACT_A_WEIGHTING[chosen]
     bands = np.asarray(sorted(table), dtype=np.float64)
     if x.shape != bands.shape:
         msg = (
-            f"'levels' must hold {bands.size} values for band={chosen!r} "
+            f"'levels' must hold {bands.size} values for fraction={chosen} "
             f"({bands[0]:g} Hz to {bands[-1]:g} Hz)."
         )
         raise ValueError(msg)
@@ -870,7 +879,7 @@ def a_weighted_max_impact_level(
         if given.shape != bands.shape or not np.allclose(given, bands):
             msg = (
                 f"'frequencies' must be the ISO 717-2 Annex D rating bands for "
-                f"band={chosen!r}: {[float(b) for b in bands]}."
+                f"fraction={chosen}: {[float(b) for b in bands]}."
             )
             raise ValueError(msg)
     a_weighting = np.asarray([table[float(b)] for b in bands], dtype=np.float64)
@@ -878,7 +887,7 @@ def a_weighted_max_impact_level(
     unrounded = float(10.0 * np.log10(np.sum(10.0 ** (corrected / 10.0))))
     return AWeightedMaxImpactResult(
         frequencies=bands,
-        band=chosen,
+        fraction=chosen,
         levels=x,
         a_weighting=a_weighting,
         corrected=corrected,

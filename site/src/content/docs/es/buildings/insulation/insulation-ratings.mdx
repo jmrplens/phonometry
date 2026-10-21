@@ -288,7 +288,7 @@ plt.show()
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `values_by_band` | array 1D | dB | 16 (tercios) o 5 (octavas) | $R$, $R'$, $D_{\mathrm{n}T}$ … medidos por banda |
-| `bands` | str o `None` | — | `'third-octave'` / `'octave'` / `None` | `None` lo infiere del número de bandas |
+| `fraction` | int o `None` | — | `3` (tercios de octava) / `1` (octavas) / `None` | `None` lo infiere del número de bandas |
 
 `weighted_rating()` devuelve un `WeightedRatingResult` (`rating`, `c`, `ctr`,
 `unfavorable_sum`, todos enteros salvo la suma), más los tres campos con los
@@ -410,7 +410,7 @@ celda las dieciséis bandas y da $-10$; la entrada del registro está en
 | Parámetro | Tipo | Unidades | Rango / valor por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
 | `values_by_band` | array 1D | dB | 16 (tercios) o 5 (octavas) | $L_\mathrm{n}$, $L'_\mathrm{n}$ o $L'_{\mathrm{n}T}$ medidos por banda |
-| `bands` | str o `None` | — | `'third-octave'` / `'octave'` / `None` | `None` lo infiere del número de bandas |
+| `fraction` | int o `None` | — | `3` (tercios de octava) / `1` (octavas) / `None` | `None` lo infiere del número de bandas |
 
 `weighted_impact_rating()` devuelve un `ImpactRatingResult` (`rating`,
 `ci` enteros, `unfavorable_sum` en dB), con los mismos tres campos de dibujo

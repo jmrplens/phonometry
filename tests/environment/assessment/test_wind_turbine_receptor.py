@@ -10,6 +10,7 @@ numbers worked by hand here.
 
 from __future__ import annotations
 
+import dataclasses
 import math
 import warnings
 from typing import TYPE_CHECKING
@@ -596,6 +597,45 @@ def test_equation_c1_band_by_band() -> None:
     )
 
 
+def test_z_weighting_leaves_the_table_c4_row_out() -> None:
+    """``weighting="Z"`` is the unweighted level the Table C.4 footnote allows.
+
+    The A-weighting row of Table C.4 (IEC TS 61400-11-2:2024, PDF page 68,
+    printed page 66) prints -26,2 dB at 63 Hz and -13,4 dB at 160 Hz. Leaving
+    the row out raises each band by exactly that and changes nothing else.
+    """
+    conditions = {
+        "distance": 500.0,
+        "hub_height_m": 100.0,
+        "frequencies": [63.0, 160.0],
+        "facade_insulation": [16.6, 20.2],
+    }
+    power = np.array([95.0, 96.0])
+    a_weighted = env.wind_turbine_low_frequency_level(power, **conditions)
+    unweighted = env.wind_turbine_low_frequency_level(
+        power, weighting="Z", **conditions
+    )
+    assert unweighted.weighting == "Z"
+    np.testing.assert_array_equal(unweighted.a_weighting_db, 0.0)
+    np.testing.assert_allclose(
+        unweighted.outdoor_levels - a_weighted.outdoor_levels, [26.2, 13.4]
+    )
+    np.testing.assert_allclose(
+        unweighted.indoor_levels - a_weighted.indoor_levels, [26.2, 13.4]
+    )
+
+
+def test_a_level_built_by_hand_refuses_another_weighting() -> None:
+    """The record holds only the two weightings the annex applies."""
+    result = env.wind_turbine_low_frequency_level(
+        [95.0], distance=500.0, hub_height_m=100.0, frequencies=[63.0]
+    )
+    with pytest.raises(
+        ValueError, match=r"'weighting' must be one of \('A', 'Z'\); got 'C'"
+    ):
+        dataclasses.replace(result, weighting="C")
+
+
 def test_turbines_sum_energetically_per_band() -> None:
     one = env.wind_turbine_low_frequency_level(
         np.full(14, 100.0), distance=600.0, hub_height_m=120.0
@@ -963,11 +1003,11 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
             r"'hub_height_m' must be finite and positive",
         ),
         (
-            "a string as the weighting flag",
+            "a weighting the annex does not apply",
             lambda: env.wind_turbine_low_frequency_level(
-                [95.0], distance=500.0, a_weighted="False", **one_band
+                [95.0], distance=500.0, weighting="C", **one_band
             ),
-            r"'a_weighted' must be True or False; got 'False'",
+            r"'weighting' must be one of \('A', 'Z'\); got 'C'",
         ),
         (
             "negative air attenuation",

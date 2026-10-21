@@ -81,7 +81,7 @@ import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
-    require_choice,
+    require_band_fraction,
     require_positive,
     require_positive_array,
     require_ranks,
@@ -91,6 +91,8 @@ from ..._internal.validation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from ..._internal.types import BandFraction
 
 __all__ = [
     "PowerInjectionResult",
@@ -105,7 +107,8 @@ __all__ = [
 
 #: Bandwidth factor ``F = sqrt(f_upper/f_lower)`` of the usual band widths,
 #: used by the above-ring-frequency cylinder modal density (Norton Eq. 6.29).
-_BANDWIDTH_FACTOR: dict[str, float] = {"third": 1.122, "octave": 1.414}
+#: Keyed by band set (3 one-third octaves, 1 octaves).
+_BANDWIDTH_FACTOR: dict[int, float] = {3: 1.122, 1: 1.414}
 
 #: Largest ``x = f/f_r`` at which the sqrt-regime cylinder modal density
 #: (Norton Eq. 6.27) still applies; Eq. 6.28 takes over above it.
@@ -210,7 +213,7 @@ def cylindrical_shell_modal_density(
     mean_radius: float,
     longitudinal_wave_speed: float,
     *,
-    band: str = "octave",
+    fraction: BandFraction = 1,
 ) -> NDArray[np.float64]:
     r"""Average modal density of a thin-walled cylinder (Norton 6.27-6.29).
 
@@ -243,17 +246,18 @@ def cylindrical_shell_modal_density(
     :param thickness_m: Wall thickness ``t``, in m (> 0).
     :param mean_radius: Mean shell radius ``a_m``, in m (> 0).
     :param longitudinal_wave_speed: Plate wave speed ``cL``, in m/s (> 0).
-    :param band: Analysis bandwidth, ``"octave"`` (Default,
-        :math:`F = 1.414`) or ``"third"`` (:math:`F = 1.122`).
+    :param fraction: The analysis band set, 1 for octaves (Default,
+        :math:`F = 1.414`) or 3 for one-third octaves (:math:`F = 1.122`).
     :return: The modal density ``n(f)``, in modes per hertz.
-    :raises ValueError: for a non-positive input or an unknown band.
+    :raises ValueError: for a non-positive input or a band set other than 1
+        or 3.
     """
     f = require_positive_array(frequency, "frequency")
     s = require_positive(area, "area")
     t = require_positive(thickness_m, "thickness_m")
     c_l = require_positive(longitudinal_wave_speed, "longitudinal_wave_speed")
     f_r = ring_frequency(mean_radius, longitudinal_wave_speed)
-    factor = _BANDWIDTH_FACTOR[require_choice(band, "band", ("octave", "third"))]
+    factor = _BANDWIDTH_FACTOR[require_band_fraction(fraction, "fraction")]
 
     x = f / f_r
     base = s / (math.pi * c_l * t)

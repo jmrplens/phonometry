@@ -956,7 +956,7 @@ print(round(float(w) * 1e3, 3), "mW")                 # W = |F|^2 / (16 sqrt(B' 
 | `mass_per_area` | float | kg/m² | > 0 | Surface density $m''$ |
 | `critical_frequency` / `bending_stiffness` | float | Hz / N·m | give one | Coincidence $f_\mathrm{c}$, or $B'$ to compute it |
 | `loss_factor` | float | — | > 0; default `0.01` single panel, `0.1` double wall | Total loss factor $\eta$ |
-| `band` | str | — | `'third'` (−5.5 dB) / `'octave'` (−4.0 dB) | Field-incidence correction width |
+| `fraction` | int | — | `3` (one-third octaves, −5.5 dB) / `1` (octaves, −4.0 dB) | Band set of the field-incidence correction |
 | `mass1` / `mass2` | float | kg/m² | > 0 | Double-wall leaf surface densities |
 | `gap_m` | float | m | > 0 | Cavity depth $d$ |
 | `cavity_medium` | `PorousMediumResult` | — | default `None` | Porous fill; lowers $f_0$ |

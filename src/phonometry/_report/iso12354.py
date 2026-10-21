@@ -295,7 +295,9 @@ def render_iso12354_airborne_report(
     for contribution in result.paths:
         value = fmt_num(contribution.r_w, language)
         if verbose:
-            share = format_number(100.0 * contribution.fraction, language, decimals=1)
+            share = format_number(
+                100.0 * contribution.energy_fraction, language, decimals=1
+            )
             value = f"{value} &#183; {share}%"
         metric_rows.append((html.escape(contribution.label), value))
 
@@ -411,7 +413,7 @@ def _detailed_path_rows(
     """
     import numpy as np
 
-    fractions = np.atleast_2d(np.asarray(result.fractions, dtype=np.float64))
+    fractions = np.atleast_2d(np.asarray(result.energy_fractions, dtype=np.float64))
     totals = fractions.mean(axis=1)
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     rows: list[tuple[str, str]] = []

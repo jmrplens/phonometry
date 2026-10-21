@@ -135,7 +135,7 @@ cabin_insulation(
     *,
     frequencies: ArrayLike | None = None,
     method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'] = 'laboratory',
-    band_fraction: int = 3,
+    fraction: Literal[1, 3] = 3,
     room_background_levels: ArrayLike | None = None,
     cabin_background_levels: ArrayLike | None = None,
     a_weighted_room_level: float | None = None,
@@ -171,7 +171,7 @@ ISO 3741 correction 6.4 asks for, and a margin under
 | `cabin_levels` | $(L_p)_{\text{cabin}}$ per band, in decibels. |
 | `frequencies` | Nominal band centres, in hertz. |
 | `method` | `"laboratory"` (default), `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`. |
-| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 | `room_background_levels` | Background in the room per band, in decibels, for the correction of 7.2.2. |
 | `cabin_background_levels` | Background inside the cabin per band, in decibels, for the correction of 6.4. |
 | `a_weighted_room_level` | $(L_{pA})_{\text{room}}$, in decibels. |
@@ -197,7 +197,7 @@ CabinInsulationResult(
     a_weighted_insulation: float | None,
     internal_noise_level: float | None,
     method: str,
-    band_fraction: int,
+    fraction: int,
 )
 ```
 
@@ -214,7 +214,7 @@ The sound pressure insulation of a cabin, band by band.
 | `a_weighted_insulation` | $D'_{p\mathrm{A}}$ of Equation (3), in decibels, or `None`. Defined only for the actual-noise method. |
 | `internal_noise_level` | $L_{pA}$ of 6.7, in decibels, or `None` when the cabin has no integral source. |
 | `method` | `"laboratory"`, `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`. |
-| `band_fraction` | 3 for one-third octaves, 1 for octaves. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves. |
 
 Whether the answer carries the prime (`apparent`) is read from the
 method, so it is not a field.
@@ -811,8 +811,8 @@ WALL_CLEARANCE_FACTOR = 0.5
 weighted_cabin_insulation(
     insulation: ArrayLike,
     *,
-    apparent: bool = False,
-    band_fraction: int = 3,
+    method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'] = 'laboratory',
+    fraction: Literal[1, 3] = 3,
 ) -> WeightedCabinInsulation
 ```
 
@@ -833,8 +833,8 @@ answer to that objection.
 | Name | Description |
 | :--- | :--- |
 | `insulation` | $D_p$ or $D'_p$ over the 16 one-third-octave rating bands or the 5 octave ones, in decibels. |
-| `apparent` | Whether the spectrum is the in-situ one, which decides whether the rating is $D_{p,\mathrm{w}}$ or $D'_{p,\mathrm{w}}$. |
-| `band_fraction` | 3 for one-third octaves (default), 1 for octaves. |
+| `method` | The method the spectrum was measured by, `"laboratory"` (default), `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`, as [`cabin_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/#cabin_insulation) takes it. It decides whether the rating is $D_{p,\mathrm{w}}$ or $D'_{p,\mathrm{w}}$. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 
 **Returns:** The rating, as a [`WeightedCabinInsulation`](/phonometry/reference/api/noise_control/cabin-insulation/#weightedcabininsulation).
 
@@ -842,7 +842,7 @@ answer to that objection.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a spectrum that is not the rating bands. |
+| ValueError | For a spectrum that is not the rating bands, an unknown method or a band set other than 1 or 3. |
 
 ## WeightedCabinInsulation
 
@@ -853,7 +853,7 @@ WeightedCabinInsulation(
     ctr: int,
     unfavorable_sum: float,
     frequencies: NDArray[np.float64],
-    apparent: bool,
+    method: str,
 )
 ```
 
@@ -868,4 +868,18 @@ The single-number rating of a cabin, clause 8 by way of ISO 717-1.
 | `ctr` | The spectrum adaptation term $C_{tr}$, in decibels. |
 | `unfavorable_sum` | The sum of unfavourable deviations at the shift the rating was read at, in decibels. |
 | `frequencies` | The bands the rating was read over, in hertz. |
-| `apparent` | Whether the rating carries the prime of 3.9. |
+| `method` | The method the spectrum was measured by: `"laboratory"`, `"in-situ-loudspeaker"` or `"in-situ-actual-noise"`. |
+
+Whether the rating carries the prime of 3.9 (`apparent`) is read
+from the method, as on [`CabinInsulationResult`](/phonometry/reference/api/noise_control/cabin-insulation/#cabininsulationresult), so it is not a
+field.
+
+### WeightedCabinInsulation.apparent
+
+*property*
+
+Whether the rating carries the prime of 3.9.
+
+Read from the method as [`CabinInsulationResult.apparent`](/phonometry/reference/api/noise_control/cabin-insulation/#cabininsulationresultapparent) reads
+it: both in-situ methods give $D'_{p,\mathrm{w}}$, the laboratory
+method $D_{p,\mathrm{w}}$.

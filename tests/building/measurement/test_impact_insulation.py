@@ -156,9 +156,9 @@ def test_unfavourable_sum_tips_over_forces_one_more_db() -> None:
 
 
 def test_explicit_band_set_override() -> None:
-    res = building.weighted_impact_rating(_ANNEX_C1_LN, bands="third-octave")
+    res = building.weighted_impact_rating(_ANNEX_C1_LN, fraction=3)
     assert res.rating == 79
-    res_oct = building.weighted_impact_rating(_ANNEX_C3_LN, bands="octave")
+    res_oct = building.weighted_impact_rating(_ANNEX_C3_LN, fraction=1)
     assert res_oct.rating == 54
 
 

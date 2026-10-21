@@ -170,7 +170,7 @@ EARPHONES = ('DT 48', 'TDH 39', 'other supra-aural')
 *Constant* (`tuple`).
 
 ```python
-FIELDS = ('free-field', 'diffuse-field')
+FIELDS = ('free', 'diffuse')
 ```
 
 ## hearing_level_to_coupler_spl
@@ -210,7 +210,7 @@ is a decibel more in the coupler.
 
 ```python
 reference_threshold(
-    field: str = 'free-field',
+    field: Literal['free', 'diffuse'] = 'free',
     frequencies: ArrayLike | None = None,
 ) -> np.ndarray
 ```
@@ -225,7 +225,7 @@ frequencies.
 
 | Name | Description |
 | :--- | :--- |
-| `field` | `"free-field"` (frontal incidence) or `"diffuse-field"`. |
+| `field` | `"free"` (a free field, frontal incidence) or `"diffuse"` (a diffuse field). |
 | `frequencies` | Optional subset of the audiometric frequencies, in hertz; `None` uses all eleven (125 Hz - 8000 Hz). |
 
 **Returns:** The reference threshold, in dB, aligned with the frequencies.

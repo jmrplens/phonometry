@@ -578,7 +578,7 @@ def _calculation_verification() -> ph.environment.CalculationVerification:
 
 def _service_equipment() -> ph.building.ServiceEquipmentResult:
     """A ventilation outlet heard in a bedroom, 25 Hz to 10 kHz (ISO/DIS 16032)."""
-    freqs = np.array(list(ph.building.SERVICE_EQUIPMENT_WEIGHTING["third"]["A"]))
+    freqs = np.array(list(ph.building.SERVICE_EQUIPMENT_WEIGHTING[3]["A"]))
     shape = 48.0 - 0.6 * np.arange(freqs.size)
     readings = shape + np.array([[0.4], [-0.3], [0.8]])
     background = shape - 12.0
@@ -2179,7 +2179,7 @@ def _programme_characteristic_voltage() -> (
         [np.linspace(70.0, 84.0, _HEADPHONE_BANDS.size) + d for d in (0.0, 0.4, -0.3)]
     )
     return ph.electroacoustics.program_characteristic_voltage(
-        0.05, _HEADPHONE_BANDS, levels, a_weighted=True
+        0.05, _HEADPHONE_BANDS, levels, weighting="A"
     )
 
 

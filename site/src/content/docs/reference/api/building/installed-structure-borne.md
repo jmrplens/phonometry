@@ -618,7 +618,7 @@ Feed them to [`tapping_machine_characteristic_power_level`](/phonometry/referenc
 tapping_machine_force_level_estimate(
     frequency: ArrayLike,
     *,
-    bandwidth: str = 'octave',
+    fraction: Literal[1, 3] = 1,
 ) -> np.ndarray
 ```
 
@@ -641,7 +641,7 @@ bands the standard does not tabulate.
 | Name | Description |
 | :--- | :--- |
 | `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
-| `bandwidth` | `"octave"` (coefficient 2,5) or `"third"` (coefficient 0,8). |
+| `fraction` | The band set, 1 for octaves (default, coefficient 2,5) or 3 for one-third octaves (coefficient 0,8). |
 
 **Returns:** The force level `L_F`, in dB re 1e-6 N (the standard prints "re 1 pN"; see `docs/ERRATA.md`).
 
@@ -649,7 +649,7 @@ bands the standard does not tabulate.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive frequency or an unknown bandwidth. |
+| ValueError | for a non-positive frequency or a band set other than 1 or 3. |
 
 ## total_structure_borne_pressure_level
 

@@ -217,9 +217,9 @@ between its rows.
 ```python
 from phonometry import hearing
 
-print(hearing.reference_threshold("free-field"))
+print(hearing.reference_threshold("free"))
 # [22.1 11.4  4.4  2.4  2.4  2.4 -1.3 -5.8 -5.4  4.3 12.6]
-print(hearing.reference_threshold("diffuse-field")[4])   # 0.8 dB at 1000 Hz
+print(hearing.reference_threshold("diffuse")[4])   # 0.8 dB at 1000 Hz
 ```
 
 ### What the reference zero is referenced to
@@ -250,7 +250,7 @@ equivalent threshold sound pressure level of ISO 389-1 (supra-aural), ISO 389-2
 (insert) or ISO 389-8 (circumaural) for the earphone actually fitted, referred
 to an acoustic coupler or an ear simulator, and obtained monaurally. ISO 389-7
 clause 1 states outright that its data differ from those and that a direct
-comparison is not appropriate. `reference_threshold("free-field")` is the zero
+comparison is not appropriate. `reference_threshold("free")` is the zero
 of a loudspeaker-based test; it is never a conversion factor for a headphone
 audiogram.
 
@@ -271,8 +271,8 @@ and the same listening condition, $L_p = \mathrm{HL} + T_f$:
 
 ```python
 hl = hearing.age_threshold(65, "male", 0.5).median      # dB HL, the §1 median
-free = hl + hearing.reference_threshold("free-field")
-diffuse = hl + hearing.reference_threshold("diffuse-field")
+free = hl + hearing.reference_threshold("free")
+diffuse = hl + hearing.reference_threshold("diffuse")
 print(hl[8].round(1), free[8].round(1), diffuse[8].round(1))  # 26.2 20.8 22.4
 ```
 
@@ -318,8 +318,8 @@ for age in (20, 40, 60, 80):
     ax1.plot(f, r.median, "o-", label=f"{age} yr")
 ax1.set_xscale("log"); ax1.invert_yaxis(); ax1.legend()
 
-ax2.plot(f, hearing.reference_threshold("free-field"), "o-", label="Free-field")
-ax2.plot(f, hearing.reference_threshold("diffuse-field"), "s--", label="Diffuse-field")
+ax2.plot(f, hearing.reference_threshold("free"), "o-", label="Free-field")
+ax2.plot(f, hearing.reference_threshold("diffuse"), "s--", label="Diffuse-field")
 ax2.set_xscale("log"); ax2.legend()
 plt.show()
 ```

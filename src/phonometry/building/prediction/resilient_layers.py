@@ -81,6 +81,7 @@ from ..._internal.boundary import settled
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
+    require_band_fraction,
     require_choice,
     require_equal_counts,
     require_positive,
@@ -93,6 +94,8 @@ from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from ..._internal.types import BandFraction
 
 __all__ = [
     "TAPPING_DROP_HEIGHT_M",
@@ -143,11 +146,12 @@ _GRAVITY: float = 9.81
 #: Band-width factors ``B`` of Hopkins (2007) Eq. (3.91), PDF page 305
 #: (printed p. 278): ``B = 0,23 f`` for one-third-octave bands and
 #: ``B = 0,707 f`` for octave bands.
-_BANDWIDTH_FACTOR: dict[str, float] = {"third": 0.23, "octave": 0.707}
+_BANDWIDTH_FACTOR: dict[int, float] = {3: 0.23, 1: 0.707}
 
 #: Half-band ratios ``fupper/fcentre`` of the base-ten band system, used to
-#: collect the tapping machine's Fourier lines into each band.
-_HALF_BAND_RATIO: dict[str, float] = {"third": 10.0**0.05, "octave": 10.0**0.15}
+#: collect the tapping machine's Fourier lines into each band, keyed by band
+#: set (3 one-third octaves, 1 octaves).
+_HALF_BAND_RATIO: dict[int, float] = {3: 10.0**0.05, 1: 10.0**0.15}
 
 #: Coefficient of the short-duration mean-square force ``F²rms = 3,9 B``
 #: (Hopkins Eq. 3.92); the exact value from Eqs. (3.90)/(3.91) is 3,925.
@@ -184,18 +188,15 @@ _FIELD_REL_TOL: float = 1e-9
 #: band holding several of its lines.
 _FOURIER_LINE_AXIS = "Fourier line"
 
-#: Band width of the mean-square force (Hopkins Eq. 3.91).
-BandWidth = Literal["third", "octave"]
 #: Floating-floor construction of ISO 12354-2:2017 Annex C.
 FloorType = Literal["screed", "asphalt"]
 #: Improvement law of a floating floor above its resonance.
 FloatingFloorModel = Literal["en12354", "cremer", "cremer_hammer"]
 
 
-def _band_factor(band: BandWidth) -> float:
+def _band_factor(fraction: object) -> float:
     r"""Band-width factor :math:`B/f` of Hopkins Eq. (3.91)."""
-    require_choice(band, "band", ("third", "octave"))
-    return _BANDWIDTH_FACTOR[band]
+    return _BANDWIDTH_FACTOR[require_band_fraction(fraction, "fraction")]
 
 
 # --------------------------------------------------------------------------- #
@@ -442,7 +443,7 @@ def force_pulse(
 
 
 def short_pulse_mean_square_force(
-    frequencies: ArrayLike, *, band: BandWidth = "third"
+    frequencies: ArrayLike, *, fraction: BandFraction = 3
 ) -> np.ndarray:
     r"""Band mean-square force of a short impact
     :math:`F_\mathrm{rms}^{2} = 3.9 B` (Eq. 3.92).
@@ -454,14 +455,14 @@ def short_pulse_mean_square_force(
     concrete slabs of at least 100 mm.
 
     :param frequencies: Band centre frequencies ``f``, in Hz.
-    :param band: ``"third"`` (:math:`B = 0.23 f`) or ``"octave"``
-        (:math:`B = 0.707 f`).
+    :param fraction: The band set, 3 for one-third octaves
+        (:math:`B = 0.23 f`) or 1 for octaves (:math:`B = 0.707 f`).
     :return: The band mean-square force ``F²rms``, in N².
-    :raises ValueError: If an input is not positive and finite, or ``band`` is
-        unknown.
+    :raises ValueError: If an input is not positive and finite, or
+        ``fraction`` is not 1 or 3.
     """
     f = require_positive_array(frequencies, "frequencies")
-    return np.asarray(_SHORT_PULSE_COEFFICIENT * _band_factor(band) * f)
+    return np.asarray(_SHORT_PULSE_COEFFICIENT * _band_factor(fraction) * f)
 
 
 @dataclass(frozen=True)
@@ -485,7 +486,8 @@ class TappingForceResult(OwnsArrays):
     :ivar upper_limit: Low-frequency asymptote
         :math:`\lvert F_n \rvert_{\text{upper}} = 2 m v_0/T_\mathrm{i}`, in N
         (Eq. 3.100); 6 dB above ``lower_limit`` in mean square.
-    :ivar band: Band width used for ``mean_square_force``.
+    :ivar fraction: Band set used for ``mean_square_force``, 3 for one-third
+        octaves or 1 for octaves.
     :ivar mass: Hammer mass ``m`` used, in kg (Default: 0,5).
 
     Whether the oscillation is over-critical is read from ``K``, ``Zdp`` and
@@ -503,7 +505,7 @@ class TappingForceResult(OwnsArrays):
     impedance: float
     lower_limit: float
     upper_limit: float
-    band: str = "third"
+    fraction: int = 3
     mass: float = TAPPING_HAMMER_MASS_KG
 
     def __post_init__(self) -> None:
@@ -550,7 +552,7 @@ class TappingForceResult(OwnsArrays):
         z = require_positive(self.impedance, "impedance")
         m = require_positive(self.mass, "mass")
         lower = require_positive(self.lower_limit, "lower_limit")
-        factor = _band_factor(self.band)  # type: ignore[arg-type]
+        factor = _band_factor(self.fraction)
         expected = (
             (
                 "cut_off_frequency",
@@ -634,7 +636,7 @@ def tapping_force_spectrum(
     mass: float = TAPPING_HAMMER_MASS_KG,
     impact_rate: float = TAPPING_IMPACT_RATE_HZ,
     impact_velocity: float | None = None,
-    band: BandWidth = "third",
+    fraction: BandFraction = 3,
 ) -> TappingForceResult:
     r"""Force spectrum of the ISO tapping machine on a floor (Hopkins 3.6.3.1).
 
@@ -663,17 +665,18 @@ def tapping_force_spectrum(
     :param impact_rate: Impact repetition rate ``fi``, in Hz (Default: 10).
     :param impact_velocity: Impact velocity ``vo``, in m/s
         (Default: :func:`hammer_impact_velocity`).
-    :param band: ``"third"`` or ``"octave"``, the band width of Eq. (3.91).
+    :param fraction: The band set of Eq. (3.91), 3 for one-third octaves or 1
+        for octaves.
     :return: A :class:`TappingForceResult`.
-    :raises ValueError: If an input is not positive and finite, or ``band`` is
-        unknown.
+    :raises ValueError: If an input is not positive and finite, or
+        ``fraction`` is not 1 or 3.
     """
     f = require_positive_array(frequencies, "frequencies")
     k = require_positive(contact_stiffness, "contact_stiffness")
     z = require_positive(impedance, "impedance")
     m = require_positive(mass, "mass")
     fi = require_positive(impact_rate, "impact_rate")
-    factor = _band_factor(band)
+    factor = _band_factor(fraction)
     v0 = (
         hammer_impact_velocity()
         if impact_velocity is None
@@ -693,7 +696,7 @@ def tapping_force_spectrum(
         impedance=z,
         lower_limit=float(m * v0 * fi),
         upper_limit=float(2.0 * m * v0 * fi),
-        band=band,
+        fraction=fraction,
         mass=m,
     )
 
@@ -839,7 +842,7 @@ def covering_improvement(
     *,
     mass: float = TAPPING_HAMMER_MASS_KG,
     impact_rate: float = TAPPING_IMPACT_RATE_HZ,
-    band: BandWidth = "third",
+    fraction: BandFraction = 3,
 ) -> CoveringImprovementResult:
     r"""Improvement of impact sound insulation by a soft covering (Eq. 4.114).
 
@@ -881,22 +884,27 @@ def covering_improvement(
     :param mass: Hammer mass ``m``, in kg (Default: 0,5).
     :param impact_rate: Impact repetition rate ``fi``, in Hz (Default: 10);
         it sets the spacing of the Fourier lines the bands average over.
-    :param band: ``"third"`` or ``"octave"``.
+    :param fraction: The band set, 3 for one-third octaves or 1 for octaves.
     :return: A :class:`CoveringImprovementResult`.
-    :raises ValueError: If an input is not positive and finite, or ``band`` is
-        unknown.
+    :raises ValueError: If an input is not positive and finite, or
+        ``fraction`` is not 1 or 3.
     """
     f = require_positive_array(frequencies, "frequencies")
     fi = require_positive(impact_rate, "impact_rate")
-    require_choice(band, "band", ("third", "octave"))
-    ratio = _HALF_BAND_RATIO[band]
+    fraction = require_band_fraction(fraction, "fraction")
+    ratio = _HALF_BAND_RATIO[fraction]
     count = int(np.ceil(float(f.max()) * ratio / fi))
     lines = np.arange(1, count + 1, dtype=np.float64) * fi
     bare = tapping_force_spectrum(
-        lines, plate_stiffness, impedance, mass=mass, impact_rate=fi, band=band
+        lines, plate_stiffness, impedance, mass=mass, impact_rate=fi, fraction=fraction
     )
     covered = tapping_force_spectrum(
-        lines, covering_stiffness, impedance, mass=mass, impact_rate=fi, band=band
+        lines,
+        covering_stiffness,
+        impedance,
+        mass=mass,
+        impact_rate=fi,
+        fraction=fraction,
     )
     line_improvement = 20.0 * np.log10(bare.peak_force / covered.peak_force)
     inside = (lines[None, :] >= f[:, None] / ratio) & (
@@ -914,7 +922,7 @@ def covering_improvement(
             impedance,
             mass=mass,
             impact_rate=fi,
-            band=band,
+            fraction=fraction,
         )
         edge_covered = tapping_force_spectrum(
             f[empty],
@@ -922,7 +930,7 @@ def covering_improvement(
             impedance,
             mass=mass,
             impact_rate=fi,
-            band=band,
+            fraction=fraction,
         )
         bare_ms[empty] = edge.peak_force**2
         covered_ms[empty] = edge_covered.peak_force**2

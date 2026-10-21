@@ -226,7 +226,7 @@ def test_weighting_filter_emphasises_the_6_khz_band_of_a_record() -> None:
     fs = 48000
     t = np.arange(fs) / fs
     x = np.sin(2 * np.pi * 1000.0 * t) + np.sin(2 * np.pi * 6300.0 * t)
-    y = np.asarray(filters.weighting_filter(x, fs, curve="468"))
+    y = np.asarray(filters.weighting_filter(x, fs, weighting="468"))
     spectrum = np.abs(np.fft.rfft(y * np.hanning(y.size)))
     freqs = np.fft.rfftfreq(y.size, 1.0 / fs)
     at_1k = spectrum[int(np.argmin(np.abs(freqs - 1000.0)))]
@@ -271,5 +271,5 @@ def test_verify_weighting_class_still_refuses_468() -> None:
     given a class it does not have.
     """
     wf = filters.WeightingFilter(48000, "468")
-    with pytest.raises(ValueError, match=r"Weighting curve must be .*'AU' or 'Z'"):
+    with pytest.raises(ValueError, match=r"'weighting' must be .*'AU' or 'Z'"):
         filters.verify_weighting_class(wf)

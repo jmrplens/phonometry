@@ -319,7 +319,7 @@ $L_\mathrm{AF}(t)$:
 
 ```python
 pressure = cal * recording                                # digital units -> Pa
-weighted = filters.weighting_filter(pressure, fs, curve="A")
+weighted = filters.weighting_filter(pressure, fs, weighting="A")
 envelope = filters.time_weighting(weighted, fs, mode="fast")  # mean-square Pa^2
 laf_t = 10 * np.log10(np.maximum(envelope, 1e-12) / (2e-5) ** 2)
 # laf_t peaks near 80 dB during the event and settles near 55 dB between.
@@ -406,7 +406,7 @@ sweeps a `WeightingFilter` against the IEC 61672-1 Table 3 limits, and
 Table 1 limits.
 
 ```python
-wf = filters.WeightingFilter(fs, curve="A")
+wf = filters.WeightingFilter(fs, weighting="A")
 print(filters.verify_weighting_class(wf).overall_class)   # 1
 
 bank = filters.OctaveFilterBank(fs, fraction=3)

@@ -128,12 +128,16 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._internal.types import BandFraction
+
 from .._internal.boundary import settled, settled_net_share, settled_ratio
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
+from .._internal.types import BAND_SET_NAMES
 from .._internal.validation import (
     is_at_most,
     is_positive,
+    require_band_fraction,
     require_equal_counts,
     require_finite_fields,
     require_ranks,
@@ -176,10 +180,6 @@ _I0 = ISO1683_REFERENCE_VALUES["gas"]["sound_intensity"].value
 #: here because this is the only determination in the library that recognises
 #: all three.
 DeterminationGrade = Literal["precision", "engineering", "survey"]
-
-#: Octave or one-third-octave band centres, selecting the column of Tables B.2
-#: and 2 a frequency is looked up in.
-BandType = Literal["octave", "third"]
 
 _GRADES: tuple[str, ...] = ("precision", "engineering", "survey")
 
@@ -381,12 +381,9 @@ def _check_grade(grade: str) -> DeterminationGrade:
     return cast(DeterminationGrade, grade)
 
 
-def _check_band_type(band_type: str) -> BandType:
+def _check_fraction(fraction: object) -> BandFraction:
     """Validate the column group of Tables B.2 and 2 a frequency is read in."""
-    if band_type not in ("octave", "third"):
-        msg = f"'band_type' must be 'octave' or 'third'; got {band_type!r}."
-        raise ValueError(msg)
-    return cast(BandType, band_type)
+    return require_band_fraction(fraction, "fraction")
 
 
 def _dynamic_capability(
@@ -404,36 +401,36 @@ def _dynamic_capability(
     )
 
 
-def _nominal_band(frequency: float, band_type: BandType) -> float:
+def _nominal_band(frequency: float, fraction: int) -> float:
     """The tabulated nominal centre a supplied frequency designates, in Hz.
 
     :raises ValueError: If ``frequency`` is not finite and positive, or no
-        tabulated centre of ``band_type`` lies within
+        tabulated centre of the band set ``fraction`` lies within
         :data:`_BAND_MATCH_TOLERANCE` of it.
     """
     require_scalar(frequency, "frequencies")
     if not math.isfinite(frequency) or frequency <= 0.0:
         msg = "Band centre frequencies must be finite and positive."
         raise ValueError(msg)
-    bands = _OCTAVE_BANDS if band_type == "octave" else _THIRD_BANDS
+    bands = _OCTAVE_BANDS if fraction == 1 else _THIRD_BANDS
     nearest = min(bands, key=lambda f: abs(math.log(f / frequency)))
     if abs(nearest / frequency - 1.0) > _BAND_MATCH_TOLERANCE:
         low, high = bands[0], bands[-1]
         msg = (
             f"{frequency:g} Hz is not a band of ISO 9614-1 Tables B.2 and 2; "
-            f"the {band_type} column covers {low:g} Hz to {high:g} Hz."
+            f"the {BAND_SET_NAMES[fraction]} column covers {low:g} Hz to {high:g} Hz."
         )
         raise ValueError(msg)
     return nearest
 
 
 def _row_for(
-    table: tuple[_BandRow, ...], frequency: float, band_type: BandType
+    table: tuple[_BandRow, ...], frequency: float, fraction: int
 ) -> tuple[float, float]:
     """The (grade 1, grade 2) pair of the table row covering one band centre.
 
     A band that reaches here always has a row. :func:`_nominal_band` refuses
-    anything that is not a tabulated centre of its own band type first, and
+    anything that is not a tabulated centre of its own band set first, and
     every centre it does admit is spanned by a row of both tables, which
     ``test_every_tabulated_band_has_a_row_in_both_tables`` holds them to. The
     ``None`` span is the 6 300 Hz row, printed for one-third-octave bands only,
@@ -445,15 +442,15 @@ def _row_for(
         drifted apart in the source rather than that the caller asked for
         anything wrong.
     """
-    nominal = _nominal_band(frequency, band_type)
+    nominal = _nominal_band(frequency, fraction)
     for octave_range, third_range, grade1, grade2 in table:
-        span = octave_range if band_type == "octave" else third_range
+        span = octave_range if fraction == 1 else third_range
         if span is not None and span[0] <= nominal <= span[1]:
             return grade1, grade2
     msg = (
         f"No row of this ISO 9614-1 table spans {nominal:g} Hz "
-        f"({band_type} bands), although it is a tabulated centre. The band "
-        "lists and the tables in this module disagree."
+        f"({BAND_SET_NAMES[fraction]} bands), although it is a tabulated centre. "
+        "The band lists and the tables in this module disagree."
     )
     raise LookupError(msg)
 
@@ -483,7 +480,7 @@ def position_count_factor(
     grade: DeterminationGrade,
     frequency: float | None = None,
     *,
-    band_type: BandType = "third",
+    fraction: BandFraction = 3,
 ) -> float:
     r"""Criterion-2 factor ``C`` of ISO 9614-1:1993 Table B.2.
 
@@ -503,13 +500,14 @@ def position_count_factor(
         the exact base-ten centre behind it. ``None`` asks for the A-weighted
         row instead, whose footnote fixes the summed range at 63 Hz to 4 kHz
         (octave) or 50 Hz to 6,3 kHz (one-third octave).
-    :param band_type: ``'octave'`` or ``'third'``, selecting the frequency
-        column; ignored when ``frequency`` is ``None``.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves, selecting the frequency column; ignored when ``frequency`` is
+        ``None``.
     :return: ``C``, dimensionless.
-    :raises ValueError: If ``grade`` or ``band_type`` is unknown; if a per-band
-        value is asked for at the survey grade, or an A-weighted one at the
-        precision or engineering grade; or if ``frequency`` is not a tabulated
-        band.
+    :raises ValueError: If ``grade`` is unknown or ``fraction`` is not 1 or 3;
+        if a per-band value is asked for at the survey grade, or an A-weighted
+        one at the precision or engineering grade; or if ``frequency`` is not a
+        tabulated band.
     """
     grade = _check_grade(grade)
     if frequency is None:
@@ -522,9 +520,9 @@ def position_count_factor(
             )
             raise ValueError(msg)
         return value
-    _check_band_type(band_type)
+    _check_fraction(fraction)
     _per_band_or_raise(grade, "Table B.2", _C_A_WEIGHTED["survey"])
-    grade1, grade2 = _row_for(_TABLE_B2, float(frequency), band_type)
+    grade1, grade2 = _row_for(_TABLE_B2, float(frequency), fraction)
     return grade1 if grade == "precision" else grade2
 
 
@@ -532,7 +530,7 @@ def determination_standard_deviation(
     grade: DeterminationGrade,
     frequency: float | None = None,
     *,
-    band_type: BandType = "third",
+    fraction: BandFraction = 3,
 ) -> float:
     r"""Standard deviation ``s`` of the determination, ISO 9614-1:1993 Table 2.
 
@@ -551,8 +549,8 @@ def determination_standard_deviation(
         ``'survey'`` (grade 3).
     :param frequency: Nominal mid-band centre in Hz, or ``None`` for the
         A-weighted row.
-    :param band_type: ``'octave'`` or ``'third'``; ignored when ``frequency``
-        is ``None``.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves; ignored when ``frequency`` is ``None``.
     :return: ``s`` in decibels.
     :raises ValueError: On the same mismatches
         :func:`position_count_factor` refuses.
@@ -568,9 +566,9 @@ def determination_standard_deviation(
             )
             raise ValueError(msg)
         return value
-    _check_band_type(band_type)
+    _check_fraction(fraction)
     _per_band_or_raise(grade, "Table 2", _S_A_WEIGHTED["survey"])
-    grade1, grade2 = _row_for(_TABLE_2_S, float(frequency), band_type)
+    grade1, grade2 = _row_for(_TABLE_2_S, float(frequency), fraction)
     return grade1 if grade == "precision" else grade2
 
 
@@ -961,7 +959,7 @@ class DiscretePointIntensityResult(OwnsArrays):
     f3: np.ndarray | None
     f4: np.ndarray | None
     pressure_residual_index: np.ndarray | None
-    band_type: str
+    fraction: int
     grade: str
 
     def __post_init__(self) -> None:
@@ -987,10 +985,10 @@ class DiscretePointIntensityResult(OwnsArrays):
 
         :raises ValueError: if any per-band quantity disagrees with the rest,
             the positions and the areas disagree, an area is not positive and
-            finite, or the grade or the band type is unknown.
+            finite, the grade is unknown or ``fraction`` is not 1 or 3.
         """
         _check_grade(self.grade)
-        _check_band_type(self.band_type)
+        _check_fraction(self.fraction)
         require_ranks(
             self,
             frequencies=1,
@@ -1033,7 +1031,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             self._applicable,
             self.a_weighting_omitted_bands,
             self.frequencies,
-            cast("BandType", self.band_type),
+            _check_fraction(self.fraction),
             self.n_positions,
             self.pressure_residual_index,
             self.f1,
@@ -1134,7 +1132,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             f4,
             self.n_positions,
             self.frequencies,
-            cast("BandType", self.band_type),
+            _check_fraction(self.fraction),
             cast("DeterminationGrade", self.grade),
         )
 
@@ -1156,7 +1154,7 @@ class DiscretePointIntensityResult(OwnsArrays):
             self.pressure_residual_index,
             self.n_positions,
             self.frequencies,
-            cast("BandType", self.band_type),
+            _check_fraction(self.fraction),
         )
 
     @property
@@ -1172,7 +1170,7 @@ class DiscretePointIntensityResult(OwnsArrays):
     def expanded_uncertainty(self) -> np.ndarray | None:
         """Table 2 footnote 1's 2s per band, at the grade each band achieved."""
         return _expanded_uncertainty(
-            self.achieved_grade, self.frequencies, cast("BandType", self.band_type)
+            self.achieved_grade, self.frequencies, _check_fraction(self.fraction)
         )
 
     @property
@@ -1408,7 +1406,7 @@ def _checked_position_band_grid(
 
 
 def _checked_frequencies(
-    frequencies: ArrayLike | None, n_bands: int, band_type: BandType
+    frequencies: ArrayLike | None, n_bands: int, fraction: int
 ) -> np.ndarray | None:
     """The supplied band centres, one per band and each one a tabulated band.
 
@@ -1426,7 +1424,7 @@ def _checked_frequencies(
         )
         raise ValueError(msg)
     for value in freqs:
-        _nominal_band(float(value), band_type)
+        _nominal_band(float(value), fraction)
     return freqs
 
 
@@ -1604,7 +1602,7 @@ def _criterion_2(
     f4: np.ndarray,
     n_positions: int,
     frequencies: np.ndarray | None,
-    band_type: BandType,
+    fraction: BandFraction,
     grade: DeterminationGrade,
 ) -> tuple[np.ndarray | None, np.ndarray | None]:
     r"""Criterion 2 per band, and the :math:`C F_4^2` it compares ``N`` against.
@@ -1617,7 +1615,7 @@ def _criterion_2(
         return None, None
     factors = np.asarray(
         [
-            position_count_factor(grade, float(f), band_type=band_type)
+            position_count_factor(grade, float(f), fraction=fraction)
             for f in frequencies
         ],
         dtype=np.float64,
@@ -1639,7 +1637,7 @@ def _per_band_grade(
     residual_index: np.ndarray | None,
     n_positions: int,
     frequencies: np.ndarray | None,
-    band_type: BandType,
+    fraction: BandFraction,
 ) -> np.ndarray | None:
     """The grade each band reaches, over the gates of Figure B.1.
 
@@ -1664,7 +1662,7 @@ def _per_band_grade(
             continue
         for grade in ("precision", "engineering"):
             factor = position_count_factor(
-                grade, float(frequencies[band]), band_type=band_type
+                grade, float(frequencies[band]), fraction=fraction
             )
             if n_positions > float(settled(factor * f4[band] ** 2)):
                 verdict[band] = grade
@@ -1689,7 +1687,7 @@ def _confidence_interval(f4: np.ndarray, n_positions: int) -> np.ndarray:
 
 
 def _expanded_uncertainty(
-    achieved: np.ndarray | None, frequencies: np.ndarray | None, band_type: BandType
+    achieved: np.ndarray | None, frequencies: np.ndarray | None, fraction: BandFraction
 ) -> np.ndarray | None:
     r"""Table 2 footnote 1's :math:`\pm 2s` per band, at the grade *achieved*.
 
@@ -1717,7 +1715,7 @@ def _expanded_uncertainty(
         values[band] = 2.0 * determination_standard_deviation(
             cast(DeterminationGrade, reached),
             float(frequencies[band]),
-            band_type=band_type,
+            fraction=fraction,
         )
     return values
 
@@ -1751,7 +1749,7 @@ def _a_weighting_omission(
 def _a_weighted_factor(
     contributions: np.ndarray,
     frequencies: np.ndarray,
-    band_type: BandType,
+    fraction: BandFraction,
     grade: DeterminationGrade,
 ) -> float:
     """The ``C`` criterion 2 uses on an A-weighted sum (B.1.2 and Note 11).
@@ -1770,17 +1768,17 @@ def _a_weighted_factor(
     if grade == "survey":
         return position_count_factor(grade)
     mid_row, high_row = _TABLE_B2[1], _TABLE_B2[2]
-    high_span = high_row[0] if band_type == "octave" else high_row[1]
+    high_span = high_row[0] if fraction == 1 else high_row[1]
     total = float(np.sum(contributions))
     nominal = np.asarray(
-        [_nominal_band(float(f), band_type) for f in frequencies], dtype=np.float64
+        [_nominal_band(float(f), fraction) for f in frequencies], dtype=np.float64
     )
     if high_span is not None and total > 0.0:
         in_high = (nominal >= high_span[0]) & (nominal <= high_span[1])
         if float(np.sum(contributions[in_high])) < 0.5 * total:
             return mid_row[2] if grade == "precision" else mid_row[3]
     return max(
-        position_count_factor(grade, float(f), band_type=band_type) for f in nominal
+        position_count_factor(grade, float(f), fraction=fraction) for f in nominal
     )
 
 
@@ -1790,7 +1788,7 @@ def _a_weighted_determination(
     applicable: np.ndarray,
     omitted: np.ndarray | None,
     frequencies: np.ndarray | None,
-    band_type: BandType,
+    fraction: BandFraction,
     n_positions: int,
     residual_index: np.ndarray | None,
     f1: np.ndarray | None,
@@ -1850,7 +1848,7 @@ def _a_weighted_determination(
         f4_a=f4_a,
         contributions=contributions[summed],
         frequencies=frequencies[summed],
-        band_type=band_type,
+        fraction=fraction,
         n_positions=n_positions,
         residual_index=residual_index,
         f1=f1,
@@ -1866,7 +1864,7 @@ def _a_weighted_grade(
     f4_a: float,
     contributions: np.ndarray,
     frequencies: np.ndarray,
-    band_type: BandType,
+    fraction: BandFraction,
     n_positions: int,
     residual_index: np.ndarray | None,
     f1: np.ndarray | None,
@@ -1894,7 +1892,7 @@ def _a_weighted_grade(
         ld = _dynamic_capability(residual_index, typed)
         if not (stationary and inward_ok and bool(np.all(ld[summed] > f2[summed]))):
             continue
-        factor = _a_weighted_factor(contributions, frequencies, band_type, typed)
+        factor = _a_weighted_factor(contributions, frequencies, fraction, typed)
         if n_positions > float(settled(factor * f4_a**2)):
             return grade
     return "none"
@@ -1908,7 +1906,7 @@ def sound_power_intensity_points(
     pressure_residual_index: float | ArrayLike | None = None,
     temporal_intensity: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    band_type: BandType = "third",
+    fraction: BandFraction = 3,
     grade: DeterminationGrade = "engineering",
 ) -> DiscretePointIntensityResult:
     r"""Sound power by sound intensity at discrete points (ISO 9614-1:1993).
@@ -1965,13 +1963,13 @@ def sound_power_intensity_points(
         samples of the normal intensity at one typical position (clause 8.2),
         W/m^2, for ``F1``.
     :param frequencies: Optional ``(bands,)`` nominal mid-band centres, Hz.
-    :param band_type: ``'octave'`` or ``'third'``, the column of Tables B.2 and
-        2 the frequencies are read in.
+    :param fraction: The band set, 3 for one-third octaves (default) or 1 for
+        octaves, the column of Tables B.2 and 2 the frequencies are read in.
     :param grade: ``'precision'`` (grade 1), ``'engineering'`` (grade 2,
         default) or ``'survey'`` (grade 3).
     :return: A :class:`DiscretePointIntensityResult`.
     :raises ValueError: If ``grade`` is none of the three grades of Table 1, or
-        ``band_type`` is neither ``'octave'`` nor ``'third'``; if
+        ``fraction`` is neither 1 nor 3; if
         ``normal_intensity`` is neither 1D nor 2D, or ``areas`` is not 1D; if
         the position set is empty, the positions and areas disagree in length,
         or an area is not positive and finite; if an input is not finite; if
@@ -1982,11 +1980,11 @@ def sound_power_intensity_points(
         ``F1`` nothing to normalize by.
     """
     grade = _check_grade(grade)
-    band_type = _check_band_type(band_type)
+    fraction = _check_fraction(fraction)
 
     intensity, seg = _position_grid(normal_intensity, areas)
     n_positions, n_bands = intensity.shape
-    freqs = _checked_frequencies(frequencies, n_bands, band_type)
+    freqs = _checked_frequencies(frequencies, n_bands, fraction)
     levels = _checked_position_band_grid(
         pressure_levels, "pressure_levels", n_positions, n_bands
     )
@@ -2031,7 +2029,7 @@ def sound_power_intensity_points(
         f3=f3,
         f4=f4,
         pressure_residual_index=residual,
-        band_type=band_type,
+        fraction=fraction,
         grade=grade,
     )
     if result.a_weighting_omitted_bands is None and freqs is not None and n_bands > 1:

@@ -144,7 +144,7 @@ class ZwickerLoudness(OwnsArrays):
     n10: float | None = None
     times: np.ndarray | None = None
     loudness_vs_time: np.ndarray | None = None
-    field: str | None = None
+    field: Literal["free", "diffuse"] | None = None
 
     def __post_init__(self) -> None:
         """Reject a misshapen specific-loudness pattern or loudness-vs-time trace.

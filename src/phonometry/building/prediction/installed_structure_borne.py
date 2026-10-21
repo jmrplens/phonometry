@@ -84,12 +84,14 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._internal.types import BandFraction
     from ..._report.metadata import ReportMetadata
 
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    require_band_fraction,
     require_choice,
     require_non_negative,
     require_positive,
@@ -699,7 +701,8 @@ TABLE_F1_FORCE_LEVEL: tuple[float, ...] = (
 #: Bandwidth coefficient of the closed form printed under Table F.1:
 #: ``L_F = 10 lg(k f / 10^-12)`` with ``k = 2,5`` in octave bands and
 #: ``k = 0,8`` in one-third-octave bands.
-_TAPPING_MACHINE_COEFFICIENT: dict[str, float] = {"octave": 2.5, "third": 0.8}
+#: Keyed by band set (1 octaves, 3 one-third octaves).
+_TAPPING_MACHINE_COEFFICIENT: dict[int, float] = {1: 2.5, 3: 0.8}
 
 
 def tapping_machine_force_level() -> np.ndarray:
@@ -721,7 +724,7 @@ def tapping_machine_force_level() -> np.ndarray:
 
 
 def tapping_machine_force_level_estimate(
-    frequency: ArrayLike, *, bandwidth: str = "octave"
+    frequency: ArrayLike, *, fraction: BandFraction = 1
 ) -> np.ndarray:
     r"""Closed form printed under Table F.1 for the tapping machine force level.
 
@@ -740,15 +743,17 @@ def tapping_machine_force_level_estimate(
     bands the standard does not tabulate.
 
     :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
-    :param bandwidth: ``"octave"`` (coefficient 2,5) or ``"third"``
-        (coefficient 0,8).
+    :param fraction: The band set, 1 for octaves (default, coefficient 2,5) or
+        3 for one-third octaves (coefficient 0,8).
     :return: The force level ``L_F``, in dB re 1e-6 N (the standard prints
         "re 1 pN"; see ``docs/ERRATA.md``).
-    :raises ValueError: for a non-positive frequency or an unknown bandwidth.
+    :raises ValueError: for a non-positive frequency or a band set other than
+        1 or 3.
     """
-    band = require_choice(bandwidth, "bandwidth", tuple(_TAPPING_MACHINE_COEFFICIENT))
+    coefficient = _TAPPING_MACHINE_COEFFICIENT[
+        require_band_fraction(fraction, "fraction")
+    ]
     f = _positive_values(frequency, "frequency")
-    coefficient = _TAPPING_MACHINE_COEFFICIENT[band]
     return np.asarray(
         10.0 * np.log10(coefficient * f / _FORCE_REFERENCE_SQUARED), dtype=np.float64
     )

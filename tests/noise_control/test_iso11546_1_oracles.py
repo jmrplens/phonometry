@@ -110,7 +110,7 @@ def _barron_pressure() -> noise_control.EnclosureInsulationResult:
         BARRON_LP_WITH_DB,
         frequencies=OCTAVES_HZ,
         base_standard="ISO 11201",
-        band_fraction=1,
+        fraction=1,
     )
 
 
@@ -174,7 +174,7 @@ def test_barron_example_7_8_sound_power_insulation() -> None:
         BARRON_LW_OUT_DB[keep],
         frequencies=OCTAVES_HZ[keep],
         base_standard="ISO 3744",
-        band_fraction=1,
+        fraction=1,
     )
     assert result.insulation == pytest.approx(BARRON_IL_DB[keep], abs=1e-9)
     assert result.quantity == "sound_power"
@@ -258,7 +258,7 @@ def test_iso717_calculation_example_through_clause_7_4() -> None:
     the rating rows of the building domain.
     """
     rated = noise_control.weighted_enclosure_insulation(
-        ISO717_TABLE_C1_DB, quantity="sound_power", band_fraction=3
+        ISO717_TABLE_C1_DB, quantity="sound_power", fraction=3
     )
     assert (rated.rating, rated.c, rated.ctr) == (30, -2, -3)
     assert rated.unfavorable_sum == pytest.approx(31.8, abs=0.05)
@@ -325,7 +325,7 @@ def test_suva_a_weighted_sound_power_total() -> None:
         reference,
         frequencies=SUVA_OCTAVES_HZ,
         base_standard="ISO 3744",
-        band_fraction=1,
+        fraction=1,
     )
     assert result.a_weighted_insulation is not None
     assert round(result.a_weighted_insulation) == SUVA_LWA_DB

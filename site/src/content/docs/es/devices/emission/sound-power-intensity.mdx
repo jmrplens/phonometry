@@ -182,7 +182,7 @@ pressure = np.full((6, 6), 80.0)
 res = emission.sound_power_intensity(
     scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
     pressure_residual_index=12.0, frequencies=freqs,
-    band_type="octave", grade="engineering",
+    fraction=1, grade="engineering",
 )
 print(np.round(res.sound_power_level, 1))               # LW por banda
 print(round(res.sound_power_level_a, 1))                # LWA sobre las bandas determinables
@@ -220,7 +220,7 @@ pressure = np.full((6, 6), 80.0)
 res = emission.sound_power_intensity(
     scan1, areas, normal_intensity_2=scan2, pressure_levels=pressure,
     pressure_residual_index=12.0, frequencies=freqs,
-    band_type="octave", grade="engineering",
+    fraction=1, grade="engineering",
 )
 
 # res es el SoundPowerIntensityResult calculado arriba. Una línea:
@@ -336,7 +336,7 @@ informe de los criterios por separado en lugar de con un único booleano.
 | `pressure_levels` | array 2D | dB | misma forma | SPL por segmento $L_{pi}$ → $F_{pI}$ |
 | `pressure_residual_index` | float o array 1D | dB | — | $\delta_{pI0}$ → $L_\mathrm{d}$ / criterio 1 |
 | `frequencies` | array 1D | Hz | octava 63 Hz-4 kHz, tercio 50 Hz-6,3 kHz | $L_{W\mathrm{A}}$ y límites de la Tabla 2; fuera de ese rango la Tabla 2 no tiene $s$ y la llamada lanza un error |
-| `band_type` | str | — | `'third'` (por defecto) / `'octave'` | Consulta de la Tabla 2 |
+| `fraction` | int | — | `3` (tercios de octava, por defecto) / `1` (octavas) | Consulta de la Tabla 2 |
 | `grade` | str | — | `'engineering'` (por defecto) / `'survey'` | Selecciona $K$ |
 | `repeatability_limit` | float o array 1D | dB | por defecto Tabla 2 (inspección: los 4 dB ponderados A reutilizados por banda) | Sobrescribe $s$ del criterio 3 |
 
@@ -604,7 +604,7 @@ scan = np.tile(intensity, (6, 1))
 res = emission.sound_power_intensity(
     scan, np.full(6, 0.5), normal_intensity_2=scan.copy(),
     pressure_levels=np.full((6, 6), 80.0), pressure_residual_index=15.0,
-    frequencies=freqs, band_type="octave", grade="engineering",
+    frequencies=freqs, fraction=1, grade="engineering",
 )
 
 res.report(

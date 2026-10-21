@@ -248,7 +248,7 @@ reference_source_reproducibility(
     *,
     environment: Literal['hemi-anechoic', 'reverberation-room'],
     arrangement: Literal['paths', 'fixed'] | None = None,
-    bandwidth: Literal['one-third-octave', 'octave'] = 'one-third-octave',
+    fraction: Literal[1, 3] = 3,
 ) -> np.ndarray
 ```
 
@@ -265,7 +265,7 @@ as printed: the 3 150 Hz one-third octave band sits in the 200 Hz to
 | `frequencies` | Nominal mid-band frequencies, in hertz. |
 | `environment` | `"hemi-anechoic"` or `"reverberation-room"`. |
 | `arrangement` | In a hemi-anechoic room, `"paths"` (meridional or spiral) or `"fixed"` (20 discrete positions or coaxial circular paths); ignored in a reverberation room. |
-| `bandwidth` | `"one-third-octave"` (default) or `"octave"`. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 
 **Returns:** $\sigma_R$ per band, in dB.
 
@@ -579,7 +579,7 @@ A-weighted sound power level over `a_weighted_range_hz` (5.3).
 ReferenceSourceCalibration.sound_power_level_at(
     frequencies: ArrayLike,
     *,
-    bandwidth: Literal['one-third-octave', 'octave'] = 'one-third-octave',
+    fraction: Literal[1, 3] = 3,
     temperature_c: float | None = None,
     static_pressure_kpa: float | None = None,
 ) -> np.ndarray
@@ -602,7 +602,7 @@ calibrated.
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | Nominal mid-band frequencies, in hertz. |
-| `bandwidth` | `"one-third-octave"` (default) or `"octave"`. |
+| `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 | `temperature_c` | Air temperature at the test, in degrees Celsius; `None` (default), with `static_pressure_kpa`, reads the reference conditions. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals, given together with `temperature_c`. |
 

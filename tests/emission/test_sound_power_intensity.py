@@ -166,7 +166,7 @@ def test_class_engineering_when_all_criteria_pass() -> None:
         pressure_levels=lp,
         pressure_residual_index=20.0,
         frequencies=np.array([1000.0]),
-        band_type="octave",
+        fraction=1,
     )
     assert res.achieved_grade[0] == "engineering"
 
@@ -181,7 +181,7 @@ def test_class_survey_when_c1_fails_for_engineering() -> None:
         pressure_levels=lp,
         pressure_residual_index=17.0,
         frequencies=np.array([1000.0]),
-        band_type="octave",
+        fraction=1,
     )
     assert res.achieved_grade[0] == "survey"
 
@@ -196,7 +196,7 @@ def test_class_none_when_c1_fails_for_both() -> None:
         pressure_levels=lp,
         pressure_residual_index=14.0,
         frequencies=np.array([1000.0]),
-        band_type="octave",
+        fraction=1,
     )
     assert res.achieved_grade[0] == "none"
 
@@ -217,7 +217,7 @@ def test_class_survey_when_c2_fails_only() -> None:
             pressure_levels=lp,
             pressure_residual_index=30.0,  # Ld large, c1 passes both
             frequencies=np.array([1000.0]),
-            band_type="octave",
+            fraction=1,
         )
     assert res.negative_partial_power_index[0] > 3.0
     assert res.achieved_grade[0] == "survey"
@@ -239,10 +239,59 @@ def test_class_downgrade_by_repeatability() -> None:
         pressure_levels=lp,
         pressure_residual_index=40.0,
         frequencies=np.array([1000.0]),
-        band_type="octave",
+        fraction=1,
     )
     np.testing.assert_allclose(res.repeatability[:, 0], 3.0, atol=1e-9)
     assert res.achieved_grade[0] == "survey"
+
+
+def _two_scans(difference_db: float, centre_hz: float, fraction: int) -> dict:
+    """One band scanned twice, the second ``difference_db`` below the first."""
+    lwi1 = 10.0 * np.log10(2.5e-4 / _P0)
+    pi2 = _P0 * 10.0 ** (0.1 * (lwi1 - difference_db))
+    return {
+        "normal_intensity": np.full((4, 1), 5.0e-4),
+        "areas": np.array([0.5, 0.5, 0.5, 0.5]),
+        "normal_intensity_2": np.full((4, 1), pi2 / 0.5),
+        "pressure_levels": np.full((4, 1), 90.0),
+        "pressure_residual_index": 40.0,
+        "frequencies": np.array([centre_hz]),
+        "fraction": fraction,
+    }
+
+
+@pytest.mark.parametrize(
+    ("centre_hz", "fraction", "difference_db", "grade"),
+    [
+        (6300.0, 3, 2.4, "engineering"),
+        (6300.0, 3, 2.6, "survey"),
+        (160.0, 3, 2.9, "engineering"),
+        (250.0, 1, 2.1, "survey"),
+        (125.0, 1, 2.9, "engineering"),
+    ],
+)
+def test_criterion_3_reads_the_column_of_the_band_set(
+    centre_hz: float, fraction: int, difference_db: float, grade: str
+) -> None:
+    """Table 2 has one column per band set (UNE-EN ISO 9614-2:1997, PDF page 12,
+    printed page 12): s is 3 dB from 50 Hz to 160 Hz in one-third octaves and
+    from 63 Hz to 125 Hz in octaves, 2 dB at 200 Hz to 315 Hz and at the 250 Hz
+    octave, and 2,5 dB at 6 300 Hz, a one-third-octave centre only.
+    """
+    res = emission.sound_power_intensity(
+        **_two_scans(difference_db, centre_hz, fraction)
+    )
+    assert res.achieved_grade[0] == grade
+
+
+def test_criterion_3_refuses_a_centre_outside_the_octave_column() -> None:
+    """160 Hz is a one-third-octave centre; the octave column has no row for it."""
+    scans = _two_scans(1.0, 160.0, 1)
+    with pytest.raises(
+        ValueError,
+        match=r"No ISO 9614-2 Table 2 standard deviation for 160 Hz \(octave bands\)",
+    ):
+        emission.sound_power_intensity(**scans)
 
 
 def test_sweep_reversal_fails_criterion_3() -> None:
@@ -263,7 +312,7 @@ def test_sweep_reversal_fails_criterion_3() -> None:
         pressure_levels=lp,
         pressure_residual_index=40.0,  # Ld high -> criterion 1 passes
         frequencies=np.array([1000.0]),
-        band_type="octave",
+        fraction=1,
     )
     assert not res.negative_band[0]  # band remains determinable
     assert np.isinf(res.repeatability[0, 0])
@@ -278,7 +327,7 @@ def test_sweep_reversal_fails_criterion_3() -> None:
         pressure_levels=lp,
         pressure_residual_index=40.0,
         frequencies=np.array([1000.0]),
-        band_type="octave",
+        fraction=1,
     )
     assert ok.achieved_grade[0] == "engineering"
 
@@ -382,7 +431,7 @@ def test_a_weighted_total_excludes_non_determinable_band() -> None:
             intensity,
             areas,
             frequencies=np.array([1000.0, 2000.0]),
-            band_type="octave",
+            fraction=1,
         )
     # Only the 1000 Hz band contributes; Ck(1000)=0 -> LWA = 90.
     assert res.sound_power_level_a == pytest.approx(90.0)

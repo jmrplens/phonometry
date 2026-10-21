@@ -41,7 +41,7 @@ señal/ruido «que no son directamente comparables» con las que describe la
 Recomendación.
 
 La curva es
-[`weighting_filter(curve="468")`](/phonometry/es/signals/levels/weighting/). El
+[`weighting_filter(weighting="468")`](/phonometry/es/signals/levels/weighting/). El
 detector es `broadcast.quasi_peak_meter`.
 
 ## 1. Qué especifica el apartado 2 y qué no
@@ -141,7 +141,7 @@ plt.show()
 
 El resultado lleva la `trace` que dibuja la figura, muestra a muestra con el
 registro, así que la balística se ve en lugar de esconderse detrás de un
-escalar. Con `weighted=False` se saca la red del camino, que es lo que hace el
+escalar. Con `weighting="Z"` se saca la red del camino, que es lo que hace el
 apartado 2.4 y el único ensayo del apartado 2 que lo hace.
 
 ## 3. La escala, y cuándo una lectura es dBqps
@@ -371,7 +371,7 @@ lectura y la aguja, `BS468_BALLISTICS` guarda las tres escalas de tiempo
 ajustadas y `verify_quasi_peak_dynamics` comprueba las once ventanas a
 cualquier frecuencia de muestreo. Los apartados 2.1, 2.3, 2.4 y 2.5 se
 ejercitan en la batería de pruebas como propiedades de la cadena. La red de
-ponderación del apartado 1 es `weighting_filter(curve="468")`.
+ponderación del apartado 1 es `weighting_filter(weighting="468")`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">

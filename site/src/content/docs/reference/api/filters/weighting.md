@@ -305,7 +305,7 @@ Forget the carried state (the next block starts from rest).
 weighting_filter(
     x: Signal,
     fs: int | None = ...,
-    curve: str = ...,
+    weighting: str = ...,
     *,
     high_accuracy: bool = ...,
 ) -> Signal
@@ -313,7 +313,7 @@ weighting_filter(
 weighting_filter(
     x: list[float] | np.ndarray,
     fs: int,
-    curve: str = ...,
+    weighting: str = ...,
     *,
     high_accuracy: bool = ...,
 ) -> np.ndarray
@@ -327,7 +327,7 @@ Apply a frequency weighting to a signal.
 | :--- | :--- |
 | `x` | Input signal, or a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) read from a measurement file. A calibrated Signal is weighted in pascals, so the weighted samples come back in pascals too; a bare array keeps whatever unit it arrived in. |
 | `fs` | Sample rate. Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
-| `curve` | 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012), '468' (ITU-R BS.468-4 psophometric noise weighting) or 'Z' (bypass). |
+| `weighting` | 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012), '468' (ITU-R BS.468-4 psophometric noise weighting) or 'Z' (bypass). |
 | `high_accuracy` | Design the filter by fitting the analog prototype at *fs* (default True), rather than by the plain bilinear transform, which warps frequency and loses class 1 below 44.1 kHz. See [`WeightingFilter.__init__`](/phonometry/reference/api/filters/weighting/#weightingfilter) for what each design costs. The '468' curve requires the fitted design and refuses False. |
 
 **Returns:** The weighted record. A bare array in gives a bare array back; a [`Signal`](/phonometry/reference/api/io/io/#signal) gives a Signal, whose samples are already in pascals and whose factor therefore reads 1.0.
@@ -337,7 +337,7 @@ Apply a frequency weighting to a signal.
 ```python
 WeightingFilter(
     fs: int,
-    curve: str = 'A',
+    weighting: str = 'A',
     *,
     stateful: bool = False,
     steady_ic: bool = False,
@@ -355,7 +355,7 @@ Initialize the weighting filter.
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sample rate in Hz. |
-| `curve` | 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical: removed from the IEC sound-level-meter standards), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012, audible sound in the presence of ultrasound), '468' (ITU-R BS.468-4 psophometric noise weighting, see `_itu_r_468_prototype`) or 'Z'. |
+| `weighting` | 'A', 'C' (IEC 61672-1), 'B' (ANSI S1.4-1983, historical: removed from the IEC sound-level-meter standards), 'D' (withdrawn IEC 537 aircraft-noise weighting), 'G' (ISO 7196 infrasound), 'AU' (IEC 61012, audible sound in the presence of ultrasound), '468' (ITU-R BS.468-4 psophometric noise weighting, see `_itu_r_468_prototype`) or 'Z'. |
 | `stateful` | If True, carry the section state between calls, so concatenated blocks equal one continuous call. Available for every curve and independent of `high_accuracy`: both designs are a plain cascade of second-order sections at the input rate, and `sosfilt` with a carried `zi` reproduces a single call bit for bit. |
 | `steady_ic` | If True, calculate steady state initial conditions for filter. |
 | `high_accuracy` | Which of the two designs to build, both of them second-order sections at the input rate. `True` (the default) fits the analog prototype at *fs*, undoing the bilinear frequency warping instead of tolerating it (`phonometry.filters._weighting_design`). Measured against the prototype over the standard's own band, the worst deviation is 0.008 dB for A at 32 kHz and 0.0003 dB at 48 kHz, and at most 0.06 dB for any curve at any rate in this corpus -- the 0.06 belonging to the 468 curve at 44.1 and 48 kHz, where a -30 dB/octave skirt has to flatten inside the last half percent below the Nyquist frequency. A and C verify to class 1 at every sample rate from 8 kHz up, and at every Table 3 row their deviation stays inside the 0.05 dB the table itself is rounded to. The design is fitted over the interval `_fit_band` returns and is not claimed outside it. `False` is the plain bilinear transform of the printed prototype: the closed-form design a reader can check against the standard term by term, at the cost of the warping. That cost grows quadratically toward the Nyquist frequency -- for A at 48 kHz it reads 15.7 dB below the design goal at the 19 952.6 Hz row, which the class 1 mask does not see because its lower limit there is -inf, and 61.4 dB below it at 15 848.9 Hz when fs = 32 kHz, which it does. So it verifies to class 1 for fs >= 44 100 Hz, degrades to class 2 at 32 000 and 22 050 Hz, and meets no class at 16 000 Hz. It is refused for the '468' curve, whose skirt puts it 23 dB out at 16 kHz with no lower grade in the Recommendation to fall back to. Defaults to True (`None` selects the default too, which is what it used to mean in every mode but the stateful one). |

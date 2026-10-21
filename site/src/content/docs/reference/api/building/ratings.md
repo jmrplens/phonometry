@@ -542,7 +542,7 @@ the heavyweight floor, as A.2.2 prints.
 ```python
 weighted_impact_rating(
     values_by_band: Mapping[float, float] | Sequence[float] | np.ndarray,
-    bands: str | None = None,
+    fraction: Literal[1, 3] | None = None,
 ) -> ImpactRatingResult
 ```
 
@@ -572,7 +572,7 @@ airborne problem, so no separate search is duplicated.
 | Name | Description |
 | :--- | :--- |
 | `values_by_band` | Measured impact levels (`Ln`, `L'n`, `L'nT`) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to level is read band by band, as [`weighted_rating`](/phonometry/reference/api/building/ratings/#weighted_rating) reads one, and a rating band it lacks is refused rather than filled. |
-| `bands` | `"third-octave"`, `"octave"` or `None` to infer the band set from the number of values or the keys of the mapping. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves, or `None` to infer it from the number of values or the keys of the mapping. |
 
 **Returns:** [`ImpactRatingResult`](/phonometry/reference/api/building/ratings/#impactratingresult) with `rating`, `ci` and `unfavorable_sum`.
 
@@ -628,7 +628,7 @@ as printed in A.2.2).
 ```python
 weighted_rating(
     values_by_band: Mapping[float, float] | Sequence[float] | np.ndarray,
-    bands: str | None = None,
+    fraction: Literal[1, 3] | None = None,
 ) -> WeightedRatingResult
 ```
 
@@ -649,7 +649,7 @@ No. 2. Input values are first reduced to one decimal place
 | Name | Description |
 | :--- | :--- |
 | `values_by_band` | Measured band quantities (`R`, `R'`, `Dn`, `DnT` ...) in dB. 16 values are read as one-third-octave bands, 5 values as octave bands. A mapping of band centre frequency in hertz to value, such as a catalogue row's [`spectrum`](/phonometry/reference/api/io/io/#bandedrowspectrum), is read band by band: one that holds any one-third-octave band that is not an octave centre as the 16 one-third octaves, any other as the 5 octaves, and a rating band it lacks is refused rather than filled. |
-| `bands` | `"third-octave"`, `"octave"` or `None` to infer the band set from the number of values or the keys of the mapping. |
+| `fraction` | The band set, 3 for one-third octaves or 1 for octaves, or `None` to infer it from the number of values or the keys of the mapping. |
 
 **Returns:** [`WeightedRatingResult`](/phonometry/reference/api/building/ratings/#weightedratingresult) with `rating`, `c`, `ctr` and `unfavorable_sum`.
 

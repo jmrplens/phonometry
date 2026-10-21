@@ -57,7 +57,7 @@ building's own frequency", not as a frequency to design against.
 BuildingFrequencyEstimate(
     frequency_hz: float,
     period_s: float,
-    model: str,
+    model: Literal['stories', 'height', 'height_width', 'slenderness'],
     coefficient: float | None,
     height_m: float | None,
 )
@@ -156,7 +156,7 @@ EMPIRICAL_FREQUENCY_TOLERANCE = 0.5
 
 ```python
 estimate_fundamental_frequency(
-    model: Literal['stories', 'height', 'height_width', 'slenderness'] | str,
+    model: Literal['stories', 'height', 'height_width', 'slenderness'],
     *,
     n_stories: int | None = None,
     height_m: float | None = None,
@@ -189,7 +189,7 @@ One prediction, bundled with the coefficient and the error band.
 
 ```python
 fundamental_frequency(
-    model: Literal['stories', 'height', 'height_width', 'slenderness'] | str,
+    model: Literal['stories', 'height', 'height_width', 'slenderness'],
     *,
     n_stories: int | None = None,
     height_m: float | None = None,
@@ -220,7 +220,7 @@ reader should not have to remember which.
 
 ```python
 fundamental_period(
-    model: Literal['stories', 'height', 'height_width', 'slenderness'] | str,
+    model: Literal['stories', 'height', 'height_width', 'slenderness'],
     *,
     n_stories: int | None = None,
     height_m: float | None = None,

@@ -984,7 +984,7 @@ print(round(float(w) * 1e3, 3), "mW")                 # W = |F|^2 / (16 sqrt(B' 
 | `mass_per_area` | float | kg/m² | > 0 | Densidad superficial $m''$ |
 | `critical_frequency` / `bending_stiffness` | float | Hz / N·m | dar uno | Coincidencia $f_\mathrm{c}$, o $B'$ para calcularla |
 | `loss_factor` | float | — | > 0; defecto `0.01` en hoja simple, `0.1` en doble hoja | Factor de pérdidas total $\eta$ |
-| `band` | str | — | `'third'` (−5,5 dB) / `'octave'` (−4,0 dB) | Ancho de la corrección de campo |
+| `fraction` | int | — | `3` (tercios de octava, −5,5 dB) / `1` (octavas, −4,0 dB) | Conjunto de bandas de la corrección de campo |
 | `mass1` / `mass2` | float | kg/m² | > 0 | Densidades superficiales de las hojas |
 | `gap_m` | float | m | > 0 | Profundidad de cámara $d$ |
 | `cavity_medium` | `PorousMediumResult` | — | defecto `None` | Relleno poroso; baja $f_0$ |

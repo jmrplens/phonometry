@@ -11,7 +11,7 @@ needed: reading the weighted signal with any other meter, "e.g. an r.m.s.
 meter", gives signal-to-noise figures "that are not directly comparable" with
 the ones the Recommendation describes.
 
-The curve is `weighting_filter(curve="468")`
+The curve is `weighting_filter(weighting="468")`
 ([Frequency weightings](../../signals/levels/weighting.md)). The detector is
 `broadcast.quasi_peak_meter`.
 
@@ -87,7 +87,7 @@ train reads 75.8 % of the steady tone against a printed 77 %, inside the 72 to
 
 The result carries the `trace` the figure draws, sample for sample with the
 record, so the ballistics are visible rather than hidden behind a scalar. Set
-`weighted=False` to take the network out of the path, which is what clause 2.4
+`weighting="Z"` to take the network out of the path, which is what clause 2.4
 does and the only test in clause 2 that does.
 
 ## 3. The scale, and when a reading is dBqps

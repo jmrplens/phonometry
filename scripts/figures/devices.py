@@ -1743,7 +1743,7 @@ def generate_sound_power_intensity_result(output_dir: str) -> None:
         pressure_levels=pressure,
         pressure_residual_index=12.0,
         frequencies=freqs,
-        band_type="octave",
+        fraction=1,
         grade="engineering",
     )
 
@@ -1827,17 +1827,14 @@ def generate_discrete_point_qualification(output_dir: str) -> None:
         pressure_levels=np.full((areas.size, freqs.size), surface_pressure),
         pressure_residual_index=20.0,  # Ld = 20 - 10 = 10 dB (Table 1, octaves)
         frequencies=freqs,
-        band_type="octave",
+        fraction=1,
     )
     f4 = np.asarray(result.f4)
     criterion_1 = np.asarray(result.criterion_1)
     interval = np.asarray(result.confidence_interval)
     required = {
         grade: np.array(
-            [
-                emission.position_count_factor(grade, float(f), band_type="octave")
-                for f in freqs
-            ]
+            [emission.position_count_factor(grade, float(f), fraction=1) for f in freqs]
         )
         * f4**2
         for grade in ("precision", "engineering")
@@ -7435,7 +7432,7 @@ def generate_enclosure_cabin_insulation(output_dir: str) -> None:
     without = np.array([96.0, 98.0, 99.0, 97.0, 94.0, 89.0])
     with_enclosure = np.array([88.0, 86.0, 81.0, 74.0, 68.0, 63.0])
     res = noise_control.enclosure_sound_power_insulation(
-        without, with_enclosure, frequencies=bands, band_fraction=1
+        without, with_enclosure, frequencies=bands, fraction=1
     )
     ax.fill_between(
         bands,
@@ -9019,7 +9016,7 @@ def generate_headphones_characteristic_voltage(output_dir: str) -> None:
     bands = _ear_simulator_bands()
     fittings = np.vstack([bands, bands + 0.6, bands - 0.4])
     result = electroacoustics.program_characteristic_voltage(
-        0.1, _HEADPHONE_BANDS, fittings, a_weighted=True
+        0.1, _HEADPHONE_BANDS, fittings, weighting="A"
     )
     fig, ax = plt.subplots(figsize=(10, 5.4))
     result.plot(ax, language=_LANG)

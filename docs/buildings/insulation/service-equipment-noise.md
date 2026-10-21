@@ -255,7 +255,7 @@ and refilled (Annex B.2.6) and heard in the bedroom next door, three readings
 from 25 Hz to 10 kHz:
 
 ```python
-freqs = np.array(list(building.SERVICE_EQUIPMENT_WEIGHTING["third"]["A"]))
+freqs = np.array(list(building.SERVICE_EQUIPMENT_WEIGHTING[3]["A"]))
 spectrum = np.array([29.5, 31.0, 33.2, 35.4, 37.1, 38.6, 40.2, 41.5, 42.3,
                      42.8, 42.6, 41.9, 40.8, 39.4, 37.9, 36.2, 34.6, 33.1,
                      31.4, 29.8, 28.1, 26.5, 24.6, 22.9, 21.0, 19.4, 17.6])
@@ -297,7 +297,7 @@ they are.*
 | `levels` | array | dB | required | Band levels of every reading, `(readings, bands)`; one row for a single reading |
 | `frequencies` | array | Hz | required | Nominal centres, increasing: one-third octaves 25 Hz to 10 kHz or octaves 31.5 Hz to 8 kHz |
 | `quantity` | str | | required | `"Smax"`, `"Fmax"` or `"eq"`, the Table 1 quantity; it names the single numbers |
-| `band` | str | | `"third"` | `"third"` or `"octave"`; Clause 6 asks for one-third octaves, octaves are optional |
+| `fraction` | int | | `3` | `3` (one-third octaves) or `1` (octaves); Clause 6 asks for one-third octaves, octaves are optional |
 | `background_db` | array | dB | `None` | One level per band, or one row per position, energy-averaged |
 | `reverberation_time` | array | s | `None` | Per band; only 50 Hz to 5 kHz (octaves 63 Hz to 4 kHz) is read, the rest may be `nan` |
 | `volume` | float | m³ | `None` | Room volume for the normalized levels; needs the reverberation time |

@@ -406,7 +406,7 @@ this module does, a useful sanity target for a new floor build-up.
 | :--- | :--- | :--- | :--- | :--- |
 | `element` | `HomogeneousElement` | — | — | Area, side lengths, $m'$, $f_\mathrm{c}$, $\eta_\mathrm{int}$, $\sum l_k \alpha_k$, and optionally $\rho$/$c_\mathrm{L}$ |
 | `frequencies` | array | Hz | > 0 | Band centres |
-| `bands` | str | — | `'third'` (default) / `'octave'` | Sets the band that carries the $f \approx f_\mathrm{c}$ branch |
+| `fraction` | int | — | `3` (one-third octaves, default) / `1` (octaves) | Sets the band that carries the $f \approx f_\mathrm{c}$ branch |
 | `resonant_only` | bool | — | default `False` | Drops the forced-transmission term below $f_\mathrm{c}$ (Annex B.1, flanking paths) |
 | `fluid` | `Fluid` | — | default `EN_12354_AIR` | The 340 m/s of Annex A with the 1,29 kg/m³ of Annex B; pass a computed `fluids.air()` to predict in the air of the building |
 

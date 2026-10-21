@@ -68,7 +68,9 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, read_only
 from ..._internal.levels_math import energy_mean, energy_sum
+from ..._internal.types import A_OR_Z_WEIGHTINGS, AOrZWeighting
 from ..._internal.validation import (
+    require_choice,
     require_finite,
     require_finite_array,
     require_finite_matrix,
@@ -82,6 +84,7 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
 
 __all__ = [
     "LOW_FREQUENCY_AIR_ATTENUATION_DB_PER_KM",
@@ -1528,7 +1531,7 @@ class LowFrequencyLevel(OwnsArrays):
     :ivar frequencies: The one-third-octave centres, in Hz.
     :ivar sound_power_levels: The turbines' band sound power levels.
     :ivar a_weighting_db: The A-weighting added to each band (zero when the
-        result is unweighted).
+        weighting is ``"Z"``).
     :ivar distance_terms_db: :math:`10 \lg(l^2 + h^2)` of each turbine, in dB.
     :ivar ground_correction: :math:`\Delta L_\mathrm{g,LF}` per band.
     :ivar air_attenuation: :math:`\Delta L_\mathrm{a}` per turbine and band.
@@ -1538,7 +1541,8 @@ class LowFrequencyLevel(OwnsArrays):
     :ivar indoor_levels: Indoor band levels, or ``None``.
     :ivar outdoor_level: Energy sum of the outdoor bands, in dB.
     :ivar indoor_level: Energy sum of the indoor bands, or ``None``.
-    :ivar a_weighted: Whether the levels are A-weighted.
+    :ivar weighting: ``"A"`` when the levels are A-weighted, ``"Z"`` when
+        they are not.
     """
 
     frequencies: NDArray[np.float64]
@@ -1553,7 +1557,14 @@ class LowFrequencyLevel(OwnsArrays):
     outdoor_level: float
     indoor_level: float | None
     _: KW_ONLY
-    a_weighted: bool
+    weighting: AOrZWeighting
+
+    def __post_init__(self) -> None:
+        """Refuse a weighting Annex C does not apply.
+
+        :raises ValueError: if ``weighting`` is neither ``"A"`` nor ``"Z"``.
+        """
+        require_choice(self.weighting, "weighting", A_OR_Z_WEIGHTINGS)
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1582,7 +1593,7 @@ def wind_turbine_low_frequency_level(
     ground_correction: ArrayLike | None = None,
     air_attenuation_db_per_km: ArrayLike | None = None,
     facade_insulation: ArrayLike | None = None,
-    a_weighted: bool = True,
+    weighting: AOrZWeighting = "A",
 ) -> LowFrequencyLevel:
     r"""Low frequency sound level at a receptor (Annex C, Equation (C.1)).
 
@@ -1616,19 +1627,15 @@ def wind_turbine_low_frequency_level(
         indoor level (for instance a row of
         :data:`LOW_FREQUENCY_FACADE_INSULATION`); ``None`` for the outdoor
         level alone.
-    :param a_weighted: Add the A-weighting of Table C.4 (IEC 61672-1) to each
-        band (the default), or give unweighted levels.
+    :param weighting: ``"A"`` (default) to add the A-weighting of Table C.4
+        (IEC 61672-1) to each band, or ``"Z"`` for unweighted levels.
     :return: A :class:`LowFrequencyLevel`.
     :raises ValueError: If the shapes disagree, a distance or height is not
         positive, an air attenuation coefficient is negative, a default table
-        has no value at a supplied band, or ``a_weighted`` is not a boolean.
+        has no value at a supplied band, or ``weighting`` is neither ``"A"``
+        nor ``"Z"``.
     """
-    if not isinstance(a_weighted, (bool, np.bool_)):
-        msg = (
-            f"'a_weighted' must be True or False; got {a_weighted!r}. A string "
-            "such as 'False' is truthy and would add the A-weighting."
-        )
-        raise ValueError(msg)
+    weighting = require_choice(weighting, "weighting", A_OR_Z_WEIGHTINGS)
     freqs = require_finite_array(frequencies, "frequencies")
     power = require_finite_matrix(sound_power_levels, "sound_power_levels")
     if power.shape[1] != freqs.size:
@@ -1669,9 +1676,9 @@ def wind_turbine_low_frequency_level(
         if facade_insulation is None
         else _per_band(facade_insulation, freqs.size, "facade_insulation")
     )
-    weighting = (
+    a_weighting = (
         _nominal_lookup(freqs, _A_WEIGHTING_DB, "The A-weighting of IEC 61672-1")
-        if a_weighted
+        if weighting == "A"
         else np.zeros(freqs.size)
     )
     slant_m = np.hypot(distances, heights)
@@ -1679,7 +1686,7 @@ def wind_turbine_low_frequency_level(
     air = alpha[np.newaxis, :] * slant_m[:, np.newaxis] / 1000.0
     outdoor_per_turbine = (
         power
-        + weighting
+        + a_weighting
         - distance_terms[:, np.newaxis]
         - _DISTANCE_TERM_DB
         + ground
@@ -1690,7 +1697,7 @@ def wind_turbine_low_frequency_level(
     return LowFrequencyLevel(
         frequencies=freqs,
         sound_power_levels=power,
-        a_weighting_db=read_only(weighting),
+        a_weighting_db=read_only(a_weighting),
         distance_terms_db=read_only(distance_terms),
         ground_correction=ground,
         air_attenuation=read_only(air),
@@ -1699,7 +1706,7 @@ def wind_turbine_low_frequency_level(
         indoor_levels=None if indoor is None else read_only(indoor),
         outdoor_level=energy_sum(outdoor),
         indoor_level=None if indoor is None else energy_sum(indoor),
-        a_weighted=bool(a_weighted),
+        weighting=weighting,
     )
 
 

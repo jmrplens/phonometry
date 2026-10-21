@@ -426,7 +426,7 @@ _HEAVY_IMPACT_SOURCE_LABELS = {
 }
 
 #: Localised names of the two ISO 717-2 Annex D rating band widths.
-_HEAVY_IMPACT_BAND_LABELS = {"third": "one-third octave", "octave": "octave"}
+_HEAVY_IMPACT_BAND_LABELS = {3: "one-third octave", 1: "octave"}
 
 
 def _t(text: str, language: str = "en") -> str:
@@ -1168,8 +1168,8 @@ def plot_airborne_prediction(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    contribs = sorted(result.paths, key=lambda c: c.fraction, reverse=True)
-    shares = [100.0 * c.fraction for c in contribs]
+    contribs = sorted(result.paths, key=lambda c: c.energy_fraction, reverse=True)
+    shares = [100.0 * c.energy_fraction for c in contribs]
     positions = np.arange(len(shares), dtype=np.float64)
     style_default(
         kwargs, "color", [_C_PRIMARY if c.kind == "Dd" else _C_MUTED for c in contribs]
@@ -1270,7 +1270,7 @@ def _plot_path_shares(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    fractions = np.atleast_2d(np.asarray(result.fractions, dtype=np.float64))
+    fractions = np.atleast_2d(np.asarray(result.energy_fractions, dtype=np.float64))
     labels = [p.label for p in result.paths]
     order = list(np.argsort(-fractions.max(axis=1)))
     named = order[:_MAX_NAMED_PATHS]
@@ -2085,7 +2085,7 @@ def plot_a_weighted_maximum_impact(
     ax.set_ylabel(_t(_MAX_IMPACT_LABEL, language))
     ax.set_title(
         f"{_t('ISO 717-2 Annex D heavy-impact rating', language)} "
-        f"({_t(_HEAVY_IMPACT_BAND_LABELS[result.band], language)}, "
+        f"({_t(_HEAVY_IMPACT_BAND_LABELS[result.fraction], language)}, "
         f"{format_number(result.unrounded, language, decimals=2)} dB)"
     )
     ax.grid(visible=True, axis="y", alpha=0.3)

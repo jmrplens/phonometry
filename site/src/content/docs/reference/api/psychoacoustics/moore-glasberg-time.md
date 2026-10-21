@@ -110,7 +110,7 @@ MooreGlasbergTimeVaryingLoudness(
     n_max: float,
     loudness_level_max: float,
     percentiles: dict[float, float],
-    field: str,
+    field: Literal['free', 'diffuse', 'eardrum'],
     presentation: str,
 )
 ```

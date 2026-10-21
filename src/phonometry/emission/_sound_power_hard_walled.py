@@ -707,7 +707,7 @@ def _determine(
         _reference_power_levels(
             reference.lw_ref,
             freqs,
-            bandwidth="octave",
+            fraction=1,
             temperature_c=reference.temperature_c,
             static_pressure_kpa=reference.static_pressure_kpa,
         ),

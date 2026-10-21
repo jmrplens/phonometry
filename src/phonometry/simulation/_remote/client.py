@@ -46,7 +46,7 @@ import numpy as np
 
 from .._backends import _PACKAGE_PREFIX
 from ..compute import ComputeFallbackWarning, ComputeRemoteError, RunProvenance
-from . import bootstrap, command, hosts, node, wire
+from . import bootstrap, command, hosts, wire
 from .package import FLOORS, PYTHON_FLOOR, installed_package
 
 if TYPE_CHECKING:
@@ -78,11 +78,16 @@ _LINE_CHARS = 4096
 #: as an error frame carries them.
 _MESSAGE_CHARS = bootstrap._MAX_MESSAGE
 _TRACE_CHARS = bootstrap._MAX_TRACE
+#: The most characters of what a node sent that a message quotes: a value's
+#: ``repr``, which escapes it, or a text already escaped (a class path, the
+#: refusal of a record built from the node's fields).
+_QUOTE_CHARS = 80
+_TEXT_CHARS = 200
 #: How long the client waits for ssh to end once the conversation is over [s].
 _EXIT_WAIT_S = 10.0
 #: The most a stream's chunk holds on its way to the sink [bytes]: the chunk a
 #: node copies it in.
-_STREAM_CHUNK = node._STREAM_CHUNK
+_STREAM_CHUNK = bootstrap._CHUNK
 #: C0 and C1 control characters, the newline and the tab apart: what a
 #: terminal could take as an escape sequence.
 _CONTROL = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
@@ -142,6 +147,21 @@ def _printable(text: str) -> str:
     there (an OSC 52 write to the clipboard, a line erased or overwritten).
     """
     return _CONTROL.sub(lambda match: f"\\x{ord(match.group()):02x}", text)
+
+
+def _quoted(value: object) -> str:
+    """A value the node sent, as a message quotes it: its ``repr``, cut short.
+
+    The ``repr`` escapes the control characters of every text in it, and
+    the cut comes after: a list of a million names from a node is not a
+    message of a million names.
+    """
+    return f"{value!r:.{_QUOTE_CHARS}}"
+
+
+def _cut(text: str) -> str:
+    """A text built from what the node sent, escaped and then cut short."""
+    return _printable(text)[:_TEXT_CHARS]
 
 
 @dataclass(frozen=True)
@@ -289,7 +309,7 @@ class Session:
 
     def node_error(self, header: Mapping[str, object]) -> ComputeRemoteError:
         """The error of a node that refused or failed, as its ``error`` frame says, escaped."""
-        stage = _printable(self.field(header, "stage", str)[:_MESSAGE_CHARS])
+        stage = _printable(self.field(header, "stage", str)[:_QUOTE_CHARS])
         message = _printable(self.field(header, "message", str)[:_MESSAGE_CHARS])
         trace = _printable(self.field(header, "traceback", str)[-_TRACE_CHARS:])
         remedy = _remedy(stage, self.entry)
@@ -447,7 +467,15 @@ def open_session(entry: HostEntry, request: Compute) -> Iterator[Session]:
     except OSError as exc:
         msg = f"node {entry.name!r}: ssh did not start: {exc}"
         raise ComputeRemoteError(msg, host=entry.name) from exc
-    session = Session(process, entry, timeout_s)
+    try:
+        session = Session(process, entry, timeout_s)
+    except BaseException:
+        # An interrupt between the start of ssh and the session's, which
+        # would stop it: stop it here.
+        process.kill()
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            process.wait(timeout=_EXIT_WAIT_S)
+        raise
     try:
         if entry.runner == "python":
             session.send_raw(_inline_bootstrap())
@@ -463,7 +491,7 @@ def open_session(entry: HostEntry, request: Compute) -> Iterator[Session]:
 def _expect(session: Session, header: Mapping[str, object], kind: str) -> None:
     found = session.field(header, "type", str)
     if found != kind:
-        msg = f"the node sent a {found!r} frame where a {kind!r} one belongs"
+        msg = f"the node sent a {_quoted(found)} frame where a {kind!r} one belongs"
         raise session.failure(msg)
 
 
@@ -514,13 +542,14 @@ def _checked_stream(
         or not bootstrap._is_count(shape[0])
     ):
         msg = (
-            f"the node sent {name!r} as {dtype} {shape!r}; the request implies {spec.name!r}, "
+            f"the node sent {_quoted(name)} as {_quoted(dtype)} {_quoted(shape)}; "
+            f"the request implies {spec.name!r}, "
             "a stream of bytes (uint8, one axis)"
         )
         raise session.failure(msg)
     length = cast("int", shape[0])
     if length > spec.max_bytes:
-        msg = f"the node sent {length} bytes of {name!r}, more than the {spec.max_bytes} the request allows"
+        msg = f"the node sent {_quoted(length)} bytes of {_quoted(name)}, more than the {spec.max_bytes} the request allows"
         raise session.failure(msg)
     return length
 
@@ -532,12 +561,12 @@ def _checked_item(session: Session, item: object, spec: ArraySpec | StreamSpec) 
     dtype = session.field(described, "dtype", str)
     shape = session.field(described, "shape", list)
     if dtype not in _ITEM_BYTES:
-        msg = f"the node sent {name!r} as {dtype!r}, which the client does not take"
+        msg = f"the node sent {_quoted(name)} as {_quoted(dtype)}, which the client does not take"
         raise session.failure(msg)
     if isinstance(spec, StreamSpec):
         return _checked_stream(session, (name, dtype, shape), spec)
     if (name, dtype, shape) != (spec.name, spec.dtype, list(spec.shape)):
-        msg = f"the node sent {name!r} as {dtype} {shape!r}; the request implies {spec.dtype} {list(spec.shape)}"
+        msg = f"the node sent {_quoted(name)} as {_quoted(dtype)} {_quoted(shape)}; the request implies {spec.dtype} {list(spec.shape)}"
         raise session.failure(msg)
     return spec.nbytes
 
@@ -559,7 +588,7 @@ def _check_arrays(
         named = [
             item.get("name") if isinstance(item, dict) else item for item in described
         ]
-        msg = f"the node described {named!r} where the request implies {[spec.name for spec in wanted]!r}"
+        msg = f"the node described {_quoted(named)} where the request implies {[spec.name for spec in wanted]!r}"
         raise session.failure(msg)
     sizes = [
         _checked_item(session, item, spec)
@@ -567,7 +596,7 @@ def _check_arrays(
     ]
     announced = session.field(header, "buffers", list)
     if announced != sizes:
-        msg = f"the node announced buffers of {announced} bytes; the arrays it described take {sizes}"
+        msg = f"the node announced buffers of {_quoted(announced)} bytes; the arrays it described take {sizes}"
         raise session.failure(msg)
     return sizes
 
@@ -579,7 +608,7 @@ def _provenance(
     fields = session.field(header, "provenance", dict)
     names = {f.name for f in dataclasses.fields(RunProvenance)}
     if set(fields) != names:
-        msg = f"the node's provenance holds {sorted(fields)}, not {sorted(names)}"
+        msg = f"the node's provenance holds {_quoted(sorted(fields))}, not {sorted(names)}"
         raise session.failure(msg)
     if any(
         isinstance(value, str) and _CONTROL.search(value) for value in fields.values()
@@ -590,7 +619,7 @@ def _provenance(
     try:
         ran = RunProvenance(**cast("dict[str, Any]", fields))
     except (TypeError, ValueError) as exc:
-        msg = f"the node's provenance is not one a run could write: {exc}"
+        msg = f"the node's provenance is not one a run could write: {_cut(str(exc))}"
         raise session.failure(msg) from None
     if ran.host is not None or ran.package_digest is not None:
         msg = "the node's provenance names a host or a package, which only the client sets"
@@ -626,29 +655,48 @@ def _warning_class(path: str) -> type[Warning] | None:
     return found if isinstance(found, type) and issubclass(found, Warning) else None
 
 
-def _warnings_of(
-    session: Session, header: Mapping[str, object]
-) -> list[tuple[type[Warning], str]]:
-    """The node's warnings, each with the class to raise it here."""
-    caught: list[tuple[type[Warning], str]] = []
-    for item in session.field(header, "warnings", list)[: node._MAX_WARNINGS]:
+def _built(category: type[Warning], message: str) -> Warning | None:
+    """*category* built on *message*, or ``None`` when it is not built that way.
+
+    A class of a library the caller imported may want more than a message
+    (a keyword its ``__init__`` requires) or show another text than the one
+    it was given (its own ``__str__``), and may raise for either. It is
+    tried here, before a byte of the result is read, so that the run never
+    stops on it with another error than a ComputeRemoteError.
+    """
+    try:
+        warning = category(message)
+        text = str(warning)
+    # Whatever such a class raises, the node's words still reach the caller,
+    # as a RuntimeWarning.
+    except Exception:
+        return None
+    return warning if text == message else None
+
+
+def _warnings_of(session: Session, header: Mapping[str, object]) -> list[Warning]:
+    """The node's warnings, each built as it is raised here.
+
+    In its own class when this process has it and the class takes the
+    message as its text; otherwise a RuntimeWarning led by the class path.
+    """
+    caught: list[Warning] = []
+    for item in session.field(header, "warnings", list)[: bootstrap._MAX_WARNINGS]:
         entry = cast("Mapping[str, object]", item)
         path = session.field(entry, "category", str)
         message = _printable(session.field(entry, "message", str)[:_MESSAGE_CHARS])
         category = _warning_class(path)
-        if category is None:
-            caught.append(
-                (RuntimeWarning, f"{_printable(path[:_MESSAGE_CHARS])}: {message}")
-            )
-        else:
-            caught.append((category, message))
+        warning = None if category is None else _built(category, message)
+        if warning is None:
+            warning = RuntimeWarning(f"{_cut(path)}: {message}")
+        caught.append(warning)
     return caught
 
 
-def _relay(caught: Sequence[tuple[type[Warning], str]]) -> None:
+def _relay(caught: Sequence[Warning]) -> None:
     """Raise again here, at the caller's line, each warning the node raised."""
-    for category, message in caught:
-        warnings.warn(message, category, skip_file_prefixes=(_PACKAGE_PREFIX,))
+    for warning in caught:
+        warnings.warn(warning, skip_file_prefixes=(_PACKAGE_PREFIX,))
 
 
 def _fill(session: Session, spec: ArraySpec, target: NDArray[Any]) -> None:

@@ -80,14 +80,14 @@ FUNCTIONS: Mapping[
 #: The fields of a job's placement: no host (a run here stays here) and no
 #: fallback (the client decides what a failure means).
 _PLACEMENT = frozenset({"device", "device_index", "dtype"})
-#: The chunk a stream is copied in [bytes].
-_STREAM_CHUNK = 1 << 22
+#: The chunk a stream is copied in [bytes], as the client reads it.
+_STREAM_CHUNK = bootstrap._CHUNK
 #: How long a run may go on once its client is gone [s].
 _GRACE_S = 30.0
 #: The least time between two progress lines [s].
 _PROGRESS_EVERY_S = 1.0
-#: The most warnings a job sends back.
-_MAX_WARNINGS = 100
+#: The most warnings a job sends back, as many as the client takes.
+_MAX_WARNINGS = bootstrap._MAX_WARNINGS
 
 
 class _Watcher:

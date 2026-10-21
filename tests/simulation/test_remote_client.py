@@ -8,6 +8,7 @@ stand-in for ssh itself.
 
 from __future__ import annotations
 
+import contextlib
 import io
 import logging
 import re
@@ -21,10 +22,12 @@ import numpy as np
 import pytest
 
 from phonometry.simulation import Compute, ComputeFallbackWarning, ComputeRemoteError
-from phonometry.simulation._remote import bootstrap, client
+from phonometry.simulation._remote import bootstrap, client, command
 from phonometry.simulation._remote.hosts import HostEntry
+from phonometry.simulation._remote.package import Package
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
     from pathlib import Path
 
     from phonometry.simulation import RunProvenance
@@ -215,6 +218,23 @@ def test_a_session_past_its_timeout_says_so() -> None:
         session.receive()
     assert process.killed
     session.close()
+
+
+def test_an_interrupt_while_the_session_is_built_stops_ssh(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    process = _FakeSsh(returncode=None)
+    monkeypatch.setattr(command, "_SSH_PROGRAM", ("ssh",))
+    monkeypatch.setattr(client, "_popen", lambda argv: process)
+
+    def interrupted(*arguments: object) -> client.Session:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(client, "Session", interrupted)
+    opening = client.open_session(_DOCKER, Compute(host="nas"))
+    with pytest.raises(KeyboardInterrupt), opening:
+        pass
+    assert process.killed, "ssh outlived an interrupt that came before its session"
 
 
 def test_progress_lines_go_to_the_log_and_the_rest_to_the_tail(
@@ -459,6 +479,75 @@ def test_a_stream_the_request_did_not_ask_for_is_refused() -> None:
         _receive(stdout)
 
 
+#: A text from a node far longer than any message should quote.
+_LONG = "x" * 100_000
+#: Frames that quote it where the client refuses them.
+_LONG_QUOTES = [
+    pytest.param(_frame({"type": _LONG}), _EXPECTED, id="frame type"),
+    pytest.param(
+        _result(arrays=[{"name": _LONG, "dtype": "float64", "shape": [2, 5]}]),
+        _EXPECTED,
+        id="array name",
+    ),
+    pytest.param(
+        _result(arrays=[{"name": "pressures", "dtype": _LONG, "shape": [2, 5]}]),
+        _EXPECTED,
+        id="array dtype",
+    ),
+    pytest.param(
+        _result(
+            arrays=[
+                {"name": "pressures", "dtype": "float64", "shape": list(range(30_000))}
+            ]
+        ),
+        _EXPECTED,
+        id="array shape",
+    ),
+    pytest.param(
+        _result(
+            arrays=[
+                _PRESSURES,
+                {"name": _LONG, "dtype": "uint8", "shape": list(range(30_000))},
+            ]
+        ),
+        _STREAMED,
+        id="stream name and shape",
+    ),
+    pytest.param(
+        _result(
+            arrays=[
+                _PRESSURES,
+                {"name": "video", "dtype": "uint8", "shape": [10**4000]},
+            ]
+        ),
+        _STREAMED,
+        id="stream length",
+    ),
+    pytest.param(
+        _result(arrays=[_PRESSURES] * 10_000, buffers=[]), _EXPECTED, id="array list"
+    ),
+    pytest.param(_result(buffers=[b""] * 30_000), _EXPECTED, id="buffer list"),
+    pytest.param(
+        _result(provenance={**_RUN, **{f"field{k}": 0 for k in range(20_000)}}),
+        _EXPECTED,
+        id="provenance fields",
+    ),
+    pytest.param(
+        _result(provenance={**_RUN, "gpu": [_LONG]}), _EXPECTED, id="provenance value"
+    ),
+]
+
+
+@pytest.mark.parametrize(("stdout", "expected"), _LONG_QUOTES)
+def test_what_a_node_sent_is_quoted_short_in_its_refusal(
+    stdout: bytes, expected: client.Expected
+) -> None:
+    sink = None if expected.stream is None else io.BytesIO()
+    with pytest.raises(ComputeRemoteError, match="the node") as caught:
+        _receive(stdout, expected=expected, sink=sink)
+    assert len(str(caught.value)) < 600
+
+
 # What is refused before the hosts file is read.
 
 
@@ -494,9 +583,8 @@ def _lab(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
         encoding="utf-8",
     )
     monkeypatch.setenv("PHONOMETRY_HOSTS_FILE", str(hosts))
-    monkeypatch.setattr(
-        client, "open_session", None
-    )  # reaching it would be an error of its own
+    # Reaching it would be an error of its own.
+    monkeypatch.setattr(client, "open_session", None)
 
 
 def test_a_package_no_node_would_take_is_a_remote_failure_before_ssh_starts(
@@ -584,6 +672,70 @@ def test_a_node_s_warning_class_is_looked_up_without_running_a_module_hook(
     assert asked == []
     assert [(w.category, str(w.message)) for w in record] == [
         (RuntimeWarning, f"{lazy.__name__}:submodule.Odd: strange")
+    ]
+
+
+class _SinceWarning(UserWarning):
+    """A warning of a library the caller imported, built with more than a message."""
+
+    def __init__(self, message: str, *, since: str) -> None:
+        super().__init__(message)
+        self.since = since
+
+
+class _MuteWarning(UserWarning):
+    """A warning of a library the caller imported, which cannot say its text."""
+
+    def __str__(self) -> str:
+        msg = "no text"
+        raise RuntimeError(msg)
+
+
+class _RewordingWarning(UserWarning):
+    """A warning of a library the caller imported, which says another text than its own."""
+
+    def __str__(self) -> str:
+        return "something else"
+
+
+@contextlib.contextmanager
+def _answers(stdout: bytes) -> Iterator[client.Session]:
+    """Stands in for ``open_session``: a node whose answers are *stdout*."""
+    yield _session(stdout=stdout, entry=_PYTHON)
+
+
+@pytest.mark.parametrize("strict", [_SinceWarning, _MuteWarning, _RewordingWarning])
+def test_a_node_s_warning_of_a_class_that_cannot_be_built_here_comes_back_as_a_runtime_warning(
+    strict: type[Warning], monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    library = types.ModuleType("a_library_of_the_caller")
+    library.Strict = strict  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, library.__name__, library)
+    _lab(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        client, "installed_package", lambda: Package(files=(), digest="0" * 64)
+    )
+    ready = _frame(
+        {"type": "hello", "protocol": bootstrap.PROTOCOL, "have": True}
+    ) + _frame({"type": "ready"})
+    result = _result(
+        caught=[{"category": f"{library.__name__}:Strict", "message": "deprecated"}]
+    )
+    monkeypatch.setattr(
+        client, "open_session", lambda entry, request: _answers(ready + result)
+    )
+    request = Compute(host="lab", fallback=True)
+    target = np.empty((2, 5))
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        provenance = client.run_remote(
+            "fdtd_simulation", request, {}, _EXPECTED, target, None
+        )
+    assert provenance is not None, "the run fell back here instead of coming back"
+    assert provenance.host == "lab"
+    assert np.array_equal(target, np.arange(10.0).reshape(2, 5))
+    assert [(w.category, str(w.message)) for w in record] == [
+        (RuntimeWarning, f"{library.__name__}:Strict: deprecated")
     ]
 
 

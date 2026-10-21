@@ -77,11 +77,14 @@ CACHE_VAR = "PHONOMETRY_NODE_CACHE"
 PROGRESS = "phonometry-progress"
 #: What comes before a frame's header: the magic and the header's length [bytes].
 _START = len(MAGIC) + 4
-#: The most a single read asks for [bytes].
+#: The most a single read asks for, and the chunk a stream after a result's
+#: arrays is copied in [bytes].
 _CHUNK = 1 << 22
 #: The longest error message and traceback an error frame carries [characters].
 _MAX_MESSAGE = 1 << 12
 _MAX_TRACE = 1 << 16
+#: The most warnings a result frame carries.
+_MAX_WARNINGS = 100
 #: How old a cut-off upload is before the cache clears it [s].
 _STALE_UPLOAD_S = 86400.0
 #: How recently a package was used for no prune to remove it [s], whatever

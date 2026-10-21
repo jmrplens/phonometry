@@ -1,17 +1,17 @@
 ---
 title: "Actualizar de la 3.3 a la 4.0"
-description: "Lo que la 4.0 movió, renombró y retiró, y cómo encontrar la grafía nueva de cualquier cosa: el recorte de la raíz, los módulos que se partieron, los tres sitios donde el arreglo evidente es el equivocado, las unidades que ahora van en el nombre del parámetro y los veredictos que pasaron a ser objetos de resultado."
+description: "Lo que la 4.0 movió, renombró y retiró, y cómo encontrar la grafía nueva de cualquier cosa: el recorte de la raíz, los módulos que se partieron, los cuatro sitios donde el arreglo evidente es el equivocado, las unidades que ahora van en el nombre del parámetro y los veredictos que pasaron a ser objetos de resultado."
 ---
 
 La 4.0 rompe duro y no lleva capa de compatibilidad. Casi nada se ha borrado:
-de los 885 nombres que la raíz exportaba en la 3.3.0, once no existen ya en
-ningún sitio y el resto simplemente vive en una dirección con nombre en vez de
-en una plana. Así que el trabajo es sobre todo un barrido de imports, y esta
+de los 885 nombres que la raíz exportaba en la 3.3.0, treinta y cinco no existen ya
+en ningún sitio y el resto simplemente vive en una dirección con nombre en vez
+de en una plana. Así que el trabajo es sobre todo un barrido de imports, y esta
 página es sobre todo un mapa.
 
 Con las dos primeras secciones arreglas los imports. La tercera léela aunque
-tengas prisa, porque en tres sitios el arreglo evidente es el equivocado, y uno
-de esos tres cambia un número sin levantar nada.
+tengas prisa, porque en cuatro sitios el arreglo evidente es el equivocado, y
+dos de esos cuatro cambian un número sin levantar nada.
 
 ## La regla única: los imports bajan un nivel
 
@@ -30,7 +30,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # esta es la grafía nueva
 ```
 
-Medido sobre la superficie entera, 871 de aquellos 885 nombres de la raíz los
+Medido sobre la superficie entera, 847 de aquellos 885 nombres de la raíz los
 publica hoy exactamente un subpaquete, ninguno dos, y ninguno necesita una ruta
 más profunda que `phonometry.<subpaquete>`. Otros tres siguen en la raíz, donde
 siempre estuvieron. Así que el cambio no tiene ambigüedad: busca el subpaquete e
@@ -103,7 +103,7 @@ mismo:
 | Módulo en 3.3.0 | Dónde está hoy su contenido |
 | --- | --- |
 | `phonometry.impedance_tube` | `materials.absorbers.impedance_tube` (función de transferencia de dos micrófonos), `materials.absorbers.four_microphone` (`TransferMatrix`, `transfer_matrix_one_load`, `wave_decomposition`, `face_quantities`, `air_layer_transfer_matrix`), `materials.absorbers.standing_wave` y `fluids` |
-| `phonometry.scattering_diffusion` | `materials.diffusers.reverberation_room_scattering` para la parte de cámara reverberante (`ScatteringResult`, `ScatteringUncertainty`, `BASE_PLATE_BANDS` y el resto), `materials.diffusers.scattering_diffusion` para los nueve nombres de campo libre |
+| `phonometry.scattering_diffusion` | `materials.diffusers.reverberation_room_scattering` para la parte de cámara reverberante (`ScatteringResult`, `ScatteringUncertainty`, `BASE_PLATE_BANDS_HZ` y el resto), `materials.diffusers.scattering_diffusion` para los nueve nombres de campo libre |
 | `phonometry.materials.porous_absorber` | `materials.absorbers.porous` para los modelos de material en masa, `materials.absorbers.layered` para toda la API multicapa (`layered_absorber`, `AirLayer`, `MembraneLayer`, `PerforatedPlateLayer`, `MicroperforatedPlateLayer`, `LayeredAbsorberResult`) |
 | `phonometry.metrology.spectra` | `signals.spectra`, más `signals.multitaper` (`multitaper_psd`) y `signals.windows` (`window_metrics`) |
 | `phonometry.compliance` | `filters.compliance` (`FilterComplianceResult`, `class_limits`, `verify_filter_class`), `filters.weighting_compliance` (`verify_weighting_class`, `weighting_class_limits`), `aircraft.measurement_system` (`verify_aircraft_noise_system`) |
@@ -114,10 +114,10 @@ encuentra sin leer esta tabla. Cada uno de los tres primeros era alcanzable por
 dos rutas en la 3.3.0, la plana y la de dentro de su paquete, y las dos han
 desaparecido.
 
-## Tres sitios donde el arreglo evidente es el equivocado
+## Cuatro sitios donde el arreglo evidente es el equivocado
 
 Todo lo demás de esta página se anuncia en cuanto lo ejecutas, y el arreglo es
-el que parece. Estos tres no son así.
+el que parece. Estos cuatro no son así.
 
 ### Los auxiliares del tubo de impedancia tomaban kelvin
 
@@ -146,6 +146,23 @@ palabra clave.
 
 Con la conversión aplicada, los dos devuelven exactamente lo que devolvían en
 la 3.3.0, bit a bit.
+
+### `GasStream` tomaba kelvin
+
+`noise_control.GasStream` guardaba la temperatura de entrada de IEC 60534-8-3
+como `inlet_temperature_k` en la 4.0.0rc1, en **kelvin**, que es como la lee
+el apartado 5. En la 4.0 el campo es `inlet_temperature_c`, en grados Celsius
+como cualquier otra temperatura que toma la biblioteca, y la conversión a la
+temperatura absoluta que necesita el apartado 5 se hace dentro. La palabra
+clave falla, así que lo notarás, pero 450,0 es un número tan legítimo en una
+unidad como en la otra: renombra la palabra clave, conserva el número y el gas
+está 273,15 K más caliente. El ejemplo 1 del Anexo A a 450 K da 91,7 dB(A) a
+1 m de la tubería; el mismo 450 leído en grados Celsius da 93,0 dB(A), y no
+salta nada.
+
+| 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `GasStream(inlet_temperature_k=T_kelvin, ...)` | `GasStream(inlet_temperature_c=T_kelvin - 273.15, ...)` |
 
 ### `scattering_diffusion.speed_of_sound` tomaba Celsius, y su sustituto responde distinto
 
@@ -249,6 +266,55 @@ la 3.3.0 devolvía $s'_\mathrm{t}$ con `installed_dynamic_stiffness(20e6, 50.0)`
 la Fórmula 6 sin su segundo término, y la 4.0 lanza un error y pide
 $s'_\mathrm{a}$.
 
+Las funciones de la ISO 13472-1 de `materials` escriben el micrófono entero y
+dan las dos alturas en metros, y dos temperaturas dicen en qué escala están:
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `mic_height=` y `source_height=` en todas las funciones de la ISO 13472-1 de `materials` que los toman, y en `plot_insitu_geometry` | `microphone_height_m=`, `source_height_m=` |
+| `InsituAbsorptionResult.mic_height` y `.source_height` | `.microphone_height_m` y `.source_height_m` |
+| `GasStream.inlet_temperature_k`, en kelvin | `inlet_temperature_c`, en grados Celsius: convierte el número, como enseña la sección de arriba |
+| `RoadEmissionCoefficients.temperature_k`, la $K_m$ de CNOSSOS-EU en dB por grado Celsius, cuyo `_k` se leía como kelvin | `temperature_coefficient_db_per_c` |
+
+Una constante publicada sigue la misma regla, y la necesita más, porque un
+número suelto no tiene más que su nombre para decir en qué está: `10.0` son
+hercios, decibelios o una cuenta. La constante que guarda un solo número
+termina en su unidad, o en `_DB` cuando está en decibelios, salvo que sea una
+cuenta, un factor o una razón; la tabla cuyo nombre dice lo que guarda
+(bandas, velocidades, alturas) termina en la unidad de eso. Las constantes que
+exportaba la raíz de la 3.3.0 están en la tabla de nombres que ya no están, al
+final de esta página; estas son las demás.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `noise_control.ISO7235_GAS_CONSTANT`, 287 J/(kg K) | `ISO7235_AIR_GAS_CONSTANT_J_KG_K` |
+| `noise_control.UNIVERSAL_GAS_CONSTANT`, 8314 J/(kmol K) | `IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K` |
+| `noise_control.AIR_SOUND_SPEED_M_S`, `PIPE_SOUND_SPEED_M_S` | `AIR_SPEED_OF_SOUND_M_S`, `PIPE_SPEED_OF_SOUND_M_S` |
+| `environment.ROAD_REFERENCE_SPEED`, `RAILWAY_MINIMUM_SPEED`, `TRAM_MINIMUM_SPEED`, `AERODYNAMIC_THRESHOLD_SPEED`, `AERODYNAMIC_REFERENCE_SPEED`, todas en km/h | los mismos nombres terminados en `_KMH` |
+| `environment.ROAD_REFERENCE_TEMPERATURE` | `ROAD_REFERENCE_TEMPERATURE_C` |
+| `environment.ROAD_SOURCE_HEIGHT`, `RAILWAY_SOURCE_HEIGHTS` | `ROAD_SOURCE_HEIGHT_M`, `RAILWAY_SOURCE_HEIGHTS_M` |
+| `environment.ROAD_OCTAVE_BANDS`, `RAILWAY_OCTAVE_BANDS`, `RAILWAY_THIRD_OCTAVE_BANDS` | los mismos nombres terminados en `_HZ` |
+| `building.LOW_FREQUENCY_BANDS` | `LOW_FREQUENCY_PROCEDURE_BANDS_HZ`, junto a la `environment.LOW_FREQUENCY_BANDS_HZ` de otra norma |
+| `building.HEAVY_IMPACT_OCTAVE_BANDS`, `TABLE_F1_OCTAVE_BANDS`, `DB_HR_FREQUENCIES` | los mismos nombres terminados en `_HZ` |
+| `building.TAPPING_DROP_HEIGHT`, `TAPPING_HAMMER_RADIUS`, `TAPPING_HAMMER_MASS`, `TAPPING_IMPACT_RATE` | `TAPPING_DROP_HEIGHT_M`, `TAPPING_HAMMER_RADIUS_M`, `TAPPING_HAMMER_MASS_KG`, `TAPPING_IMPACT_RATE_HZ` |
+| `building.LOW_FREQUENCY_VOLUME_LIMIT` | `LOW_FREQUENCY_VOLUME_LIMIT_M3` |
+| `hearing.AUDIOMETRIC_FREQUENCIES`, `PROTECTOR_OCTAVE_BANDS` | `AUDIOMETRIC_FREQUENCIES_HZ`, `PROTECTOR_OCTAVE_BANDS_HZ` |
+| `building.MINIMUM_MULTI_JUNCTION_KIJ`, −5 dB | `MINIMUM_MULTI_JUNCTION_KIJ_DB` |
+| `broadcast.DBQPS_REFERENCE`, 0,775 V | `DBQPS_REFERENCE_V` |
+| `electroacoustics.CARDIOID_RELATIVE_DIRECTIVITY`, `DEFAULT_STABILITY_MARGIN`, las dos en dB | los mismos nombres terminados en `_DB` |
+| `environment.REFERENCE_JOINT_DENSITY`, juntas por metro | `REFERENCE_JOINT_DENSITY_PER_M` |
+| `noise_control.ISO7235_ABSOLUTE_ZERO_OFFSET`, 273 K | `ISO7235_ABSOLUTE_ZERO_OFFSET_K` |
+| `psychoacoustics.ERB_C1`, en Hz, y `ERB_C2`, por hercio | `ERB_C1_HZ`, `ERB_C2_PER_HZ` |
+| `room.COMMUNICATION_SNR`, `PRIVACY_SNR`, las dos en dB | los mismos nombres terminados en `_DB` |
+| `vibration.UNCONSTRAINED_BELOW`, el −100 % de la ISO 8041-1 | `UNCONSTRAINED_BELOW_PERCENT`, junto a `CENTRAL_TOLERANCE_PERCENT` y las demás |
+
+Las constantes de los gases enseñan por qué una constante necesita su unidad
+tanto como un parámetro. Dos constantes de un mismo paquete compartían las
+palabras «constante de los gases» para 287 J/(kg K) y 8314 J/(kmol K), y
+`fluids` publica 8,314 J/(mol K) como tercera: tres cifras separadas por
+factores de 29 y de 1000 bajo un mismo nombre. Ahora cada una lleva su unidad
+entera.
+
 ## Las condiciones y las banderas se escriben por su nombre
 
 Dos reglas dejaron 37 firmas keyword-only. Una condición o una opción que lleva
@@ -320,6 +386,20 @@ muestreo es `fs` en todas las funciones.
 `times, levels = decay_curve(ir, fs)` sigue desempaquetando la curva de
 caída, en el mismo orden. Los solvers FDTD conservan `c` y `rho`, que nombran
 los mapas en los que están escritas sus ecuaciones.
+
+Una unidad también tiene una sola grafía. Una duración termina en `_s` o en
+`_hours`, un ángulo en `_deg`, una velocidad en kilómetros por hora en `_kmh` y
+una en nudos en `_kt`, una tasa de decaimiento en `_db_per_s`; `_seconds`,
+`_degrees`, `_km_h`, `_knots`, `_db_s` y un `_h` que significa horas ya no
+aparecen en ningún sitio de la API pública.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `vibration.phase_tolerance_degrees` | `vibration.phase_tolerance_deg` |
+| `ToneBurstResult.burst_seconds` | `.burst_s` |
+| `wind_speed_knots=` en `ocean_ambient_noise` y `wind_noise_spectrum`, y `AmbientNoiseResult.wind_speed_knots` | `wind_speed_kt`, la grafía que usan las velocidades de aeronaves |
+| `speed_knots=` en `ship_source_spectrum`, y `ShipTrafficSpectrum.speed_knots` | `speed_kt` |
+| `GasStream.molecular_mass`, en kg/kmol | `GasStream.molar_mass_kg_kmol`, el nombre que el catálogo de fluidos da a su `molar_mass_kg_mol` por mol |
 
 ## Cada nombre público tiene una sola dirección
 
@@ -1063,9 +1143,9 @@ except ValueError as error:
 # True
 ```
 
-## Los once nombres que ya no están
+## Los treinta y cinco nombres que ya no están
 
-Todo lo demás se movió. Estos once no existen en ningún módulo público:
+Todo lo demás se movió. Estos treinta y cinco no existen en ningún módulo público:
 
 | Ya no está | Qué escribir en su lugar |
 | --- | --- |
@@ -1077,6 +1157,23 @@ Todo lo demás se movió. Estos once no existen en ningún módulo público:
 | `depth_to_pressure` | `fluids.depth_to_gauge_pressure_mpa(depth_m=...)`, que devuelve el mismo número, o `fluids.depth_to_absolute_pressure_pa` para la absoluta. Las dos son keyword-only y las dos toman un `latitude_deg` opcional |
 | `TransmissionLossResult` | `PropagationLossResult`, con `.tl` renombrado a `.pl` |
 | `partial_exposure` | `vibration.daily_exposure`, llamada con el valor y la duración de una sola operación. `partial_exposure` era un segundo nombre de la misma función, y el número no se mueve |
+| `DEFAULT_SPEED_OF_SOUND` | `materials.ISO13472_SPEED_OF_SOUND_M_S`, los 340 m/s del Anexo A de la ISO 13472-1. Los 343 m/s que toman por omisión los módulos de salas son privados ahora; pasa `speed_of_sound=` para decir cuál quieres |
+| `OCTAVE_BANDS`, `THIRD_OCTAVE_BANDS` | `materials.RATING_OCTAVE_BANDS_HZ`, `materials.RATING_THIRD_OCTAVE_BANDS_HZ`, las bandas de la clasificación de la ISO 11654 |
+| `BASE_PLATE_BANDS` | `materials.BASE_PLATE_BANDS_HZ` |
+| `DEFAULT_POLAR_ANGLES` | `materials.DEFAULT_POLAR_ANGLES_DEG` |
+| `DEFAULT_MIC_HEIGHT`, `DEFAULT_SOURCE_HEIGHT` | `materials.DEFAULT_MICROPHONE_HEIGHT_M`, `materials.DEFAULT_SOURCE_HEIGHT_M` |
+| `PART1_FREQUENCY_RANGE`, `SPOT_FREQUENCY_RANGE`, `SPOT_NARROW_BAND_RANGE` | `materials.PART1_FREQUENCY_RANGE_HZ`, `materials.SPOT_FREQUENCY_RANGE_HZ`, `materials.SPOT_NARROW_BAND_RANGE_HZ` |
+| `REFERENCE_ACCELERATION` | `vibration.ACCELERATION_LEVEL_REFERENCE_M_S2`, el 1 µm/s² de la ISO 1683. `vibration.REFERENCE_ACCELERATION_M_S2` es otra cosa, las condiciones de referencia de la Tabla 1 de la ISO 8041-1 |
+| `REFERENCE_AREA` | `building.REFERENCE_AREA_M2` |
+| `REFERENCE_VELOCITY` | `emission.REFERENCE_VELOCITY_M_S` |
+| `DEFAULT_FREQUENCIES` | `environment.DEFAULT_FREQUENCIES_HZ` |
+| `NOY_BANDS` | `aircraft.NOY_BANDS_HZ` |
+| `UNDERWATER_REFERENCE_PRESSURE` | `underwater.UNDERWATER_REFERENCE_PRESSURE_PA` |
+| `UNDERWATER_REFERENCE_EXPOSURE` | `underwater.UNDERWATER_REFERENCE_EXPOSURE_PA2_S`, el 1 µPa² s de la ISO 1683 en Pa² s |
+| `NORMALIZED_IMPEDANCE` | `emission.NORMALIZED_IMPEDANCE_PA_S_M`, los 411 Pa s/m de la ISO/TS 7849 |
+| `NO_TONE_AUDIBILITY` | `psychoacoustics.NO_TONE_AUDIBILITY_DB` |
+| `REFERENCE_STIFFNESS` | `vibration.REFERENCE_STIFFNESS_N_M` |
+| `HAV_EAV_A8`, `HAV_ELV_A8`, `WBV_EAV_A8`, `WBV_ELV_A8` | `vibration.HAV_EAV_A8_M_S2`, `vibration.HAV_ELV_A8_M_S2`, `vibration.WBV_EAV_A8_M_S2`, `vibration.WBV_ELV_A8_M_S2`, los valores de A(8) de la Directiva 2002/44/CE. `WBV_EAV_VDV` y `WBV_ELV_VDV` conservan su nombre, porque un valor de dosis de vibración tiene una sola unidad, m/s^1,75 |
 
 ## Lo que no ha cambiado
 

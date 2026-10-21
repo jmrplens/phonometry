@@ -170,7 +170,7 @@ Where the receiving room is more than one junction away, clause F.1 subtracts an
 adjustment $\Delta K$ from the summed junction $K_{ij}$ to cover the transmission
 by wave types other than bending waves: `multi_junction_adjustment` returns the
 4 dB it gives for two junctions and the 6 dB for three or more, with the
-resulting $K_{ij}$ floored at `MINIMUM_MULTI_JUNCTION_KIJ` ($-5$ dB).
+resulting $K_{ij}$ floored at `MINIMUM_MULTI_JUNCTION_KIJ_DB` ($-5$ dB).
 
 When the equipment itself cannot be characterised, clause D.1.2.3 substitutes a
 source of known force level and Table F.1 gives that level for the ISO tapping
@@ -187,7 +187,7 @@ Formulae (D.9a) and (D.9b). The table's levels are re $10^{-6}$ N despite the
 import numpy as np
 from phonometry import building
 
-bands = np.array(building.TABLE_F1_OCTAVE_BANDS)
+bands = np.array(building.TABLE_F1_OCTAVE_BANDS_HZ)
 lw_c = building.tapping_machine_characteristic_power_level(
     bands, building.tapping_machine_force_level()
 )

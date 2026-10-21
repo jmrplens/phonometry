@@ -229,7 +229,7 @@ DIFFERENT_REFERENCES: dict[tuple[str, str], tuple[float, str]] = {
         "phonometry.building.measurement.structure_borne_power",
         "FREE_VELOCITY_REFERENCE",
     ): (5e-8, "ISO 9611:1996 clause 7, the 50 nm/s of note b of Table 3"),
-    ("phonometry.emission.vibration_sound_power", "REFERENCE_VELOCITY"): (
+    ("phonometry.emission.vibration_sound_power", "REFERENCE_VELOCITY_M_S"): (
         5e-8,
         "ISO/TS 7849-1:2009 Equation 3, the 50 nm/s of note b of Table 3",
     ),

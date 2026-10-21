@@ -610,7 +610,7 @@ def generate_ocean_ambient_noise(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6))
     # Label the wind/thermal components only once to avoid repeated legend rows.
     for i, (u, color) in enumerate(((5.0, COLOR_SECONDARY), (20.0, COLOR_PRIMARY))):
-        res = ocean_ambient_noise(freqs, wind_speed_knots=u)
+        res = ocean_ambient_noise(freqs, wind_speed_kt=u)
         _plot_ambient_curve(res, u, color, label_components=(i == 0))
     ax.set_xscale("log")
     ax.set_xlabel("Frequency [Hz]")
@@ -638,7 +638,7 @@ def _plot_ambient_curve(
         res.spectrum_level,
         color=color,
         linewidth=2.0,
-        label=f"Total ({wind_speed:.0f} kn)",
+        label=f"Total ({wind_speed:.0f} kt)",
     )
     # The wind component is a part of the total drawn above it: same colour,
     # one shade back. Opacity would take the red component off the dark page.
@@ -679,7 +679,7 @@ def generate_ship_traffic_noise(output_dir: str) -> None:
             s.source_psd,
             color=color,
             linewidth=2.0,
-            label=f"{vessel_class} ({speed:.0f} kn, {length:.0f} m)",
+            label=f"{vessel_class} ({speed:.0f} kt, {length:.0f} m)",
         )
     ax.set_xscale("log")
     ax.set_xlabel("Frequency [Hz]")

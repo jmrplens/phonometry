@@ -1212,12 +1212,12 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The axes.
 
-## REFERENCE_STIFFNESS
+## REFERENCE_STIFFNESS_N_M
 
 *Constant* (`float`).
 
 ```python
-REFERENCE_STIFFNESS = 1.0
+REFERENCE_STIFFNESS_N_M = 1.0
 ```
 
 ## transfer_stiffness_direct

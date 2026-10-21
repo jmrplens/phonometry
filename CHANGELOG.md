@@ -184,7 +184,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   values marked, and every single number in brackets when J.1 puts them there,
   with a note that gives each of them rated with the indicative bands open.
   `ReportMetadata` gains the fields the two forms print that no other sheet
-  did: `product`, `curing_time_h`, `separating_element` and `test_signal`, and
+  did: `product`, `curing_time_hours`, `separating_element` and `test_signal`, and
   `LabFloorCoveringImprovementResult.plot(rating_range=True)` draws the ΔL
   diagram with the frequency range of the rating marked, as the H.4 sheet
   does.
@@ -3163,6 +3163,86 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `sound_energy_in_situ` and `InSituSoundPowerResult`, and
   `omc_uncertainty` on `sound_power_pressure` and `sound_energy_pressure`.
 
+- **A unit is spelled one way across the public API.**
+  `vibration.phase_tolerance_degrees` is `phase_tolerance_deg`,
+  `ToneBurstResult.burst_seconds` is `burst_s`, the knots of the underwater
+  ambient-noise and ship-traffic models are `wind_speed_kt` and `speed_kt`,
+  the spelling the aircraft speeds already used, and
+  `noise_control.GasStream.molecular_mass` is `molar_mass_kg_kmol`, the
+  kilomole beside the `molar_mass_kg_mol` of the fluids catalogue.
+  `make parameter-units` now refuses `_degrees`, `_seconds`, `_km_h`, `_db_s`,
+  `_knots` and an `_h` that means hours at the end of any public name, be it
+  a function, a method, a property, a field, a parameter or a constant; the
+  henry of `inductance_h` and the $H_j$ of the HML rating's `subject_h` are
+  named exceptions, and the walk now reaches the parameters of a classmethod
+  or a staticmethod as it does those of `__init__`. Knots are written kt
+  wherever the library prints them: a record's notebook table, the legend of
+  `AmbientNoiseResult.plot()`, the API reference and the guides, where the
+  underwater pages wrote kn.
+
+- **A published constant says its unit in its name.** Sixty-five published
+  constants are renamed so that the unit a reader would otherwise have to look
+  up is in the name, as it is for a parameter. A constant that holds a single
+  number ends in its unit, or in `_DB` when it is in decibels, whatever its
+  name says, because `10.0` on its own could be hertz, decibels or a count:
+  `TAPPING_IMPACT_RATE_HZ`, `DBQPS_REFERENCE_V`,
+  `ISO7235_ABSOLUTE_ZERO_OFFSET_K`, `ERB_C1_HZ` and `ERB_C2_PER_HZ`,
+  `REFERENCE_STIFFNESS_N_M`, `NORMALIZED_IMPEDANCE_PA_S_M`,
+  `UNDERWATER_REFERENCE_EXPOSURE_PA2_S`, `REFERENCE_JOINT_DENSITY_PER_M`, the
+  four A(8) values of Directive 2002/44/EC as `HAV_EAV_A8_M_S2` and its
+  siblings, `UNCONSTRAINED_BELOW_PERCENT`, and `NO_TONE_AUDIBILITY_DB`,
+  `COMMUNICATION_SNR_DB`, `PRIVACY_SNR_DB`, `DEFAULT_STABILITY_MARGIN_DB`,
+  `CARDIOID_RELATIVE_DIRECTIVITY_DB` and `MINIMUM_MULTI_JUNCTION_KIJ_DB` for
+  the decibels. A count, a label, a factor, a fraction or a ratio carries no
+  unit and keeps its name, and so do the two vibration dose values, whose one
+  unit is m/s^1.75. A table, which holds several figures and often several
+  units, ends in its unit when its name says what it holds: a speed, a
+  frequency or a set of bands, a height, a length, a radius or a diameter, a
+  mass, an area, a volume, a velocity, an acceleration, an angle, a period, a
+  pressure, a temperature, a humidity or a gas constant. That covers
+  `NOY_BANDS_HZ`, `ROAD_REFERENCE_SPEED_KMH` and the other four CNOSSOS-EU
+  speeds, `ROAD_REFERENCE_TEMPERATURE_C`, `TAPPING_HAMMER_MASS_KG`,
+  `REFERENCE_AREA_M2`,
+  `LOW_FREQUENCY_VOLUME_LIMIT_M3`, `UNDERWATER_REFERENCE_PRESSURE_PA`,
+  `DEFAULT_POLAR_ANGLES_DEG` and the rest. A few change more than a suffix.
+  `materials.DEFAULT_SPEED_OF_SOUND`, the 340 m/s of ISO 13472-1 Annex A, is
+  `ISO13472_SPEED_OF_SOUND_M_S`, and the three 343 m/s copies of the room
+  modules, which no package exported, are private. The ISO 11654 rating bands
+  of `materials` are `RATING_OCTAVE_BANDS_HZ` and
+  `RATING_THIRD_OCTAVE_BANDS_HZ`. `building.LOW_FREQUENCY_BANDS` is
+  `LOW_FREQUENCY_PROCEDURE_BANDS_HZ`, apart from the
+  `environment.LOW_FREQUENCY_BANDS_HZ` of another standard.
+  `vibration.REFERENCE_ACCELERATION`, the 1 µm/s² of ISO 1683, is
+  `ACCELERATION_LEVEL_REFERENCE_M_S2`, so it no longer reads like the
+  `REFERENCE_ACCELERATION_M_S2` table of ISO 8041-1 beside it. `noise_control`
+  writes `AIR_SPEED_OF_SOUND_M_S` and `PIPE_SPEED_OF_SOUND_M_S` as the rest of
+  the library writes the speed of sound. And the gas constants, three
+  quantities 29 and 1000 apart that shared one name, carry their whole unit:
+  `ISO7235_AIR_GAS_CONSTANT_J_KG_K`, `ISO11820_AIR_GAS_CONSTANT_J_KG_K`,
+  `ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K`,
+  `IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K` and
+  `fluids.MOLAR_GAS_CONSTANT_J_MOL_K`. The ISO 13472-1 heights,
+  `DEFAULT_MICROPHONE_HEIGHT_M` and `DEFAULT_SOURCE_HEIGHT_M`, rename the
+  parameters they default too: `microphone_height_m=` and `source_height_m=`
+  on every function that takes them and on `plot_insitu_geometry`, and the
+  two fields of `InsituAbsorptionResult`. No value moved.
+  `make parameter-units` holds both halves of the rule, the single numbers by
+  their value and the tables by their name, with every count, label and pure
+  number it lets through listed with its reason, and the upgrading guide lists
+  each old name with the new one.
+
+- **`GasStream` takes its inlet temperature in degrees Celsius.**
+  `noise_control.GasStream.inlet_temperature_k` is `inlet_temperature_c`: the
+  IEC 60534-8-3 inlet temperature is given in °C like every other temperature
+  in the library, converted inside to the absolute temperature Clause 5 reads,
+  and refused at or below absolute zero. Convert the number when you rename
+  the keyword: Annex A's example 1 at 450 K is `inlet_temperature_c=176.85`,
+  and the same 450 read as °C moves its level at 1 m from 91.7 dB(A) to
+  93.0 dB(A) without an error.
+  `environment.RoadEmissionCoefficients.temperature_k`, the CNOSSOS-EU $K_m$
+  in dB per °C whose `_k` read as kelvin, is
+  `temperature_coefficient_db_per_c`.
+
 - **phonometry installs on Python 3.12, and on the oldest NumPy, SciPy and
   extras it really works with.** `requires-python` drops from 3.13 to 3.12,
   and every floor in the package metadata is now the oldest release the
@@ -5549,7 +5629,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   implemented as the absence of a limit rather than a wide one. The band is
   read off the factor, not off the decibel, because that is how the page
   writes it. `vibration.weighting_tolerance_percent` returns it, and
-  `vibration.phase_tolerance_degrees` returns the phase band separately,
+  `vibration.phase_tolerance_deg` returns the phase band separately,
   because footnote a applies it only to an instrument that reports a
   parameter not based on r.m.s. values.
 
@@ -6737,7 +6817,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   environmental one was published as `environmental_expanded_uncertainty`, a
   name that existed for no reason but the collision. It is
   `environment.expanded_uncertainty` now. Three more paid the same toll by
-  being left out: `hearing` publishes `AUDIOMETRIC_FREQUENCIES`, `FIELDS` and
+  being left out: `hearing` publishes `AUDIOMETRIC_FREQUENCIES_HZ`, `FIELDS` and
   `SEXES`, which the top level declined because `FIELDS` and `SEXES` cannot be
   sustained in one flat namespace. All four are ordinary names again.
 
@@ -9276,7 +9356,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `erb_bandwidth`, `cam_from_frequency` and `frequency_from_cam` expose the
   Glasberg and Moore (1990) auditory-filter bandwidth and its Cam frequency
   scale (Moore, *An Introduction to the Psychology of Hearing* 6e, pp. 76-77),
-  with the constants `ERB_C1`, `ERB_C2` and `CAM_C`. The ISO 532-2 loudness
+  with the constants `ERB_C1_HZ`, `ERB_C2_PER_HZ` and `CAM_C`. The ISO 532-2 loudness
   model now imports these functions instead of keeping its own private copies,
   so the two cannot drift apart. Two new conformance checks, a new figure
   `erb_bandwidth`, and a section in the advanced-loudness guide in English and
@@ -10775,10 +10855,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and `expanded_uncertainty`, are gone; use `insulation_coverage_factor` and
   `insulation_expanded_uncertainty`, and read the GUM pair from
   `phonometry.metrology.uncertainty`. The renamed constants
-  `OCTAVE_BANDS_HZ`, `THIRD_OCTAVE_BANDS_HZ`, `BASE_PLATE_BANDS_HZ`,
-  `BAND_CENTRES` and `ExposureWarning` are gone; use `OCTAVE_BANDS`,
-  `THIRD_OCTAVE_BANDS`, `BASE_PLATE_BANDS`, `BAND_CENTERS` and
-  `OccupationalExposureWarning`. The deprecated keywords are gone too:
+  `OCTAVE_BANDS_HZ`, `THIRD_OCTAVE_BANDS_HZ`, `BAND_CENTRES` and
+  `ExposureWarning` are gone; use `RATING_OCTAVE_BANDS_HZ`,
+  `RATING_THIRD_OCTAVE_BANDS_HZ`, `BAND_CENTERS` and
+  `OccupationalExposureWarning`. `BASE_PLATE_BANDS_HZ`, the third constant
+  alias, is the constant's own name in 4.0. The deprecated keywords are gone too:
   `sample_rate` is `fs` in the ISO 13472 functions, `humidity` is
   `relative_humidity` in the ISO 9613 ones, and `room_volume` is `volume` in
   the ISO 3744 pair.

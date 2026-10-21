@@ -3802,7 +3802,7 @@ def _epnl_flyover_data() -> dict[str, Any]:
 
         idx = np.arange(_EPNL_RECORDS)
         shape = 15.0 * np.exp(
-            -((np.log10(aircraft.NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5
+            -((np.log10(aircraft.NOY_BANDS_HZ) - np.log10(400.0)) ** 2) / 0.5
         )
         gain = 30.0 * np.exp(-((idx - 20.0) ** 2) / (2 * 5.0**2)) - 5.0
         spectra = (55.0 + shape)[None, :] + gain[:, None]
@@ -3817,14 +3817,14 @@ def _epnl_flyover_data() -> dict[str, Any]:
         for j in range(_EPNL_RECORDS):
             bg, exc = _tone_background(spectra[j])
             factors = [
-                _tone_factor(float(exc[i]), float(aircraft.NOY_BANDS[i]))
+                _tone_factor(float(exc[i]), float(aircraft.NOY_BANDS_HZ[i]))
                 for i in range(24)
             ]
             backgrounds[j] = bg
             winners[j] = int(np.argmax(factors))
             excess[j] = float(exc[winners[j]])
         return {
-            "bands": np.asarray(aircraft.NOY_BANDS, dtype=float),
+            "bands": np.asarray(aircraft.NOY_BANDS_HZ, dtype=float),
             "spectra": spectra,
             "background": backgrounds,
             "winner": winners,

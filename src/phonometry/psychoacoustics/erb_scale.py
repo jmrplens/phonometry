@@ -63,10 +63,10 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 #: Slope-and-offset constant of ``ERB_N = C1 (C2 f + 1)``, Hz.
-ERB_C1 = 24.673
+ERB_C1_HZ = 24.673
 
 #: Frequency coefficient of ``ERB_N = C1 (C2 f + 1)``, 1/Hz.
-ERB_C2 = 0.004368
+ERB_C2_PER_HZ = 0.004368
 
 #: Constant of the Cam scale ``i = C_CAM log10(C2 f + 1)``, Cam.
 CAM_C = 21.366
@@ -87,7 +87,7 @@ def erb_bandwidth(frequency: ArrayLike) -> np.ndarray | float:
     if not np.all(np.isfinite(f)) or np.any(f < 0.0):
         msg = "'frequency' must be non-negative and finite."
         raise ValueError(msg)
-    return as_float_or_array(ERB_C1 * (ERB_C2 * f + 1.0))
+    return as_float_or_array(ERB_C1_HZ * (ERB_C2_PER_HZ * f + 1.0))
 
 
 def cam_from_frequency(frequency: ArrayLike) -> np.ndarray | float:
@@ -105,7 +105,7 @@ def cam_from_frequency(frequency: ArrayLike) -> np.ndarray | float:
     if not np.all(np.isfinite(f)) or np.any(f < 0.0):
         msg = "'frequency' must be non-negative and finite."
         raise ValueError(msg)
-    return as_float_or_array(CAM_C * np.log10(ERB_C2 * f + 1.0))
+    return as_float_or_array(CAM_C * np.log10(ERB_C2_PER_HZ * f + 1.0))
 
 
 def frequency_from_cam(cam: ArrayLike) -> np.ndarray | float:
@@ -120,4 +120,4 @@ def frequency_from_cam(cam: ArrayLike) -> np.ndarray | float:
     if not np.all(np.isfinite(i)) or np.any(i < 0.0):
         msg = "'cam' must be non-negative and finite."
         raise ValueError(msg)
-    return as_float_or_array((np.power(10.0, i / CAM_C) - 1.0) / ERB_C2)
+    return as_float_or_array((np.power(10.0, i / CAM_C) - 1.0) / ERB_C2_PER_HZ)

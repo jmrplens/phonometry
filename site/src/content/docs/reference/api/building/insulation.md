@@ -682,7 +682,7 @@ ReportMetadata(
     required_class: int | None = None,
     notes: str | None = None,
     tube_shape: str | None = None,
-    curing_time_h: float | None = None,
+    curing_time_hours: float | None = None,
     separating_element: str | None = None,
     test_signal: str | None = None,
 )
@@ -731,7 +731,7 @@ raises `ValueError`.
 | `tube_shape` | Cross-section of the impedance tube: `"circular"`, `"rectangular"` or `"square"`. Printed by the impedance-tube fiche (ISO 10534-2) next to the tube diameter, which it qualifies (inner diameter for a circular tube, maximum lateral dimension otherwise). |
 | `thickness` | Specimen thickness under the applied static load, in metres. Printed by the dynamic-stiffness fiche (EN 29052-1 / ISO 9052-1), where EN 29052-1:1992 Clause 9 b) requires reporting the thickness of the resilient layer under load; it is shown in millimetres. |
 | `mounting` | Mounting condition of the specimen (e.g. the ISO 10140-1 mounting code or a short description). |
-| `curing_time_h` | Curing time of the specimen before the test, in hours (zero or more); the floor-covering form of ISO 10140-1:2021 Figure H.4 prints it, and H.5 d) asks for the curing time of a floating slab. |
+| `curing_time_hours` | Curing time of the specimen before the test, in hours (zero or more); the floor-covering form of ISO 10140-1:2021 Figure H.4 prints it, and H.5 d) asks for the curing time of a floating slab. |
 | `separating_element` | The element the specimen is mounted in, as free text: the separation wall of the joint form of ISO 10140-1:2021 Figure J.7. |
 | `test_signal` | The sound the source room is excited with, as free text (e.g. `"pink noise"`): the test noise of the joint form of ISO 10140-1:2021 Figure J.7. |
 | `measurement_standard` | Measurement standard the spectrum was obtained under (e.g. `"ISO 10140-2"` or `"ISO 16283-1"`); it forms the report's standard-basis line together with the ISO 717 rating part. |

@@ -155,7 +155,7 @@ $$
 | :--- | :--- |
 | `orders` | Mode orders `(nx, ny, nz)`, non-negative integers; either a single triple or an `(N, 3)` array of triples. |
 | `dimensions` | Room dimensions `(lx, ly, lz)`, m. |
-| `speed_of_sound` | Speed of sound `c0`, m/s (default [`DEFAULT_SPEED_OF_SOUND`](/phonometry/reference/api/materials/road-absorption/#default_speed_of_sound)). |
+| `speed_of_sound` | Speed of sound `c0`, m/s (default 343 m/s, dry air at 20 °C). |
 
 **Returns:** The modal frequency in Hz; a float for a single triple, otherwise one frequency per row.
 
@@ -186,7 +186,7 @@ solution) is excluded.
 | :--- | :--- |
 | `dimensions` | Room dimensions `(lx, ly, lz)`, m. |
 | `max_frequency` | Highest modal frequency to enumerate, Hz. |
-| `speed_of_sound` | Speed of sound `c0`, m/s (default [`DEFAULT_SPEED_OF_SOUND`](/phonometry/reference/api/materials/road-absorption/#default_speed_of_sound)). |
+| `speed_of_sound` | Speed of sound `c0`, m/s (default 343 m/s, dry air at 20 °C). |
 | `reverberation_time` | Optional reverberation time `T`, s. When given, the Schroeder frequency $2000 \sqrt{T/V}$ is computed and carried in the result (and marked by [`RoomModesResult.plot`](/phonometry/reference/api/rooms/modes/#roommodesresultplot)). |
 
 **Returns:** A [`RoomModesResult`](/phonometry/reference/api/rooms/modes/#roommodesresult).

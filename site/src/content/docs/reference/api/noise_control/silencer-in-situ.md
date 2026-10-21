@@ -416,12 +416,12 @@ One of the twenty installations of Figure 1, with its area rules.
 | `source_area_rule` | How 9.1.3 or 9.1.4 says to read $S_2$, the source side of a transmission case, or $S_\mathrm{II}$, the run without the silencer of an insertion one, in the clause's own words. |
 | `receiver_area_rule` | The same for $S_1$ or $S_\mathrm{I}$. |
 
-## ISO11820_AIR_GAS_CONSTANT
+## ISO11820_AIR_GAS_CONSTANT_J_KG_K
 
 *Constant* (`float`).
 
 ```python
-ISO11820_AIR_GAS_CONSTANT = 287.0
+ISO11820_AIR_GAS_CONSTANT_J_KG_K = 287.0
 ```
 
 ## ISO11820_AMBIENT_PRESSURE_PA
@@ -440,20 +440,20 @@ ISO11820_AMBIENT_PRESSURE_PA = 100000.0
 ISO11820_BACKGROUND_CORRECTIONS_DB = {3: 3.0, 4: 2.0, 5: 2.0, 6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}
 ```
 
-## ISO11820_GAS_CONSTANT
-
-*Constant* (`float`).
-
-```python
-ISO11820_GAS_CONSTANT = 8314.4
-```
-
 ## ISO11820_MINIMUM_BACKGROUND_MARGIN_DB
 
 *Constant* (`float`).
 
 ```python
 ISO11820_MINIMUM_BACKGROUND_MARGIN_DB = 3.0
+```
+
+## ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K
+
+*Constant* (`float`).
+
+```python
+ISO11820_MOLAR_GAS_CONSTANT_J_KMOL_K = 8314.4
 ```
 
 ## ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB
@@ -480,12 +480,12 @@ ISO11820_OCTAVE_BAND_EXTENDED_RANGE_HZ = (31.5, 8000.0)
 ISO11820_OCTAVE_BAND_RANGE_HZ = (63.0, 4000.0)
 ```
 
-## ISO11820_SOUND_SPEED_M_S
+## ISO11820_SPEED_OF_SOUND_M_S
 
 *Constant* (`float`).
 
 ```python
-ISO11820_SOUND_SPEED_M_S = 340.0
+ISO11820_SPEED_OF_SOUND_M_S = 340.0
 ```
 
 ## ISO11820_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ

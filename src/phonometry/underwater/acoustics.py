@@ -39,15 +39,15 @@ if TYPE_CHECKING:
 _LIQUID = ISO1683_REFERENCE_VALUES["liquid"]
 #: Underwater reference sound pressure ``p₀`` (Pa), i.e. 1 µPa (ISO 18405;
 #: ISO 1683:2015 Table 2).
-UNDERWATER_REFERENCE_PRESSURE = _LIQUID["sound_pressure"].value
+UNDERWATER_REFERENCE_PRESSURE_PA = _LIQUID["sound_pressure"].value
 #: Underwater reference sound exposure ``E₀`` (Pa²·s), i.e. 1 µPa²·s (ISO 18405;
 #: ISO 1683:2015 Table 2).
-UNDERWATER_REFERENCE_EXPOSURE = _LIQUID["sound_exposure"].value
+UNDERWATER_REFERENCE_EXPOSURE_PA2_S = _LIQUID["sound_exposure"].value
 #: In-air reference sound pressure (Pa), i.e. 20 µPa (ISO 1683:2015 Table 1).
 _IN_AIR_REFERENCE_PRESSURE = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
 #: Level offset between the 20 µPa and 1 µPa references, ``20·lg(20)`` dB.
 _REFERENCE_OFFSET_DB = 20.0 * np.log10(
-    _IN_AIR_REFERENCE_PRESSURE / UNDERWATER_REFERENCE_PRESSURE
+    _IN_AIR_REFERENCE_PRESSURE / UNDERWATER_REFERENCE_PRESSURE_PA
 )
 #: Rejection message for an all-zero record: no level is defined.
 _NO_ENERGY_MSG = "'pressure' has no energy."
@@ -93,7 +93,7 @@ def _validate_pressure(
 def sound_pressure_level(
     pressure: SignalInput,
     *,
-    reference: float = UNDERWATER_REFERENCE_PRESSURE,
+    reference: float = UNDERWATER_REFERENCE_PRESSURE_PA,
 ) -> float:
     r"""Mean-square sound pressure level (ISO 18405 / ISO 18406 Formula 7).
 
@@ -121,7 +121,7 @@ def sound_exposure_level(
     pressure: SignalInput,
     fs: float | None = None,
     *,
-    reference: float = UNDERWATER_REFERENCE_EXPOSURE,
+    reference: float = UNDERWATER_REFERENCE_EXPOSURE_PA2_S,
 ) -> float:
     r"""Sound exposure level (ISO 18405 / ISO 18406 Formulae 3-4).
 
@@ -155,7 +155,7 @@ def sound_exposure_level(
 def peak_sound_pressure_level(
     pressure: SignalInput,
     *,
-    reference: float = UNDERWATER_REFERENCE_PRESSURE,
+    reference: float = UNDERWATER_REFERENCE_PRESSURE_PA,
 ) -> float:
     r"""Zero-to-peak sound pressure level (ISO 18406 6.4.2.1.3).
 

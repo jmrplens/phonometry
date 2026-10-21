@@ -101,7 +101,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
 __all__ = [
-    "DB_HR_FREQUENCIES",
+    "DB_HR_FREQUENCIES_HZ",
     "DB_HR_NORMALISED_SPECTRA",
     "DbHrAssessment",
     "DbHrCheck",
@@ -132,7 +132,7 @@ __all__ = [
 _COMPLIANCE_SLACK = -1e-9
 
 #: The eighteen one-third-octave band centre frequencies of DB-HR Annex A.
-DB_HR_FREQUENCIES: tuple[float, ...] = (
+DB_HR_FREQUENCIES_HZ: tuple[float, ...] = (
     100.0,
     125.0,
     160.0,
@@ -456,7 +456,7 @@ class DbHrGlobalIndexResult(OwnsArrays):
 def _match_bands(frequencies: np.ndarray) -> np.ndarray:
     """Indices of the eighteen DB-HR bands within ``frequencies``."""
     indices: list[int] = []
-    for target in DB_HR_FREQUENCIES:
+    for target in DB_HR_FREQUENCIES_HZ:
         hits = np.nonzero(np.abs(frequencies - target) <= _BAND_TOLERANCE * target)[0]
         if hits.size != 1:
             msg = (
@@ -512,14 +512,14 @@ def db_hr_global_index(
         raise ValueError(msg)
 
     if frequencies is None:
-        if values.size != len(DB_HR_FREQUENCIES):
+        if values.size != len(DB_HR_FREQUENCIES_HZ):
             msg = (
                 "Without 'frequencies' the input must be the eighteen DB-HR "
                 "one-third-octave bands 100 Hz to 5 kHz; got "
                 f"{values.size} values."
             )
             raise ValueError(msg)
-        freqs = np.asarray(DB_HR_FREQUENCIES, dtype=np.float64)
+        freqs = np.asarray(DB_HR_FREQUENCIES_HZ, dtype=np.float64)
         selected = values
     else:
         given = np.asarray(frequencies, dtype=np.float64)

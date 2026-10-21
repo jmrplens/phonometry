@@ -36,9 +36,9 @@ STROUHAL = 0.2
 STREAM: dict[str, Any] = {
     "inlet_pressure_pa": 1.0e6,
     "inlet_density": 5.3,
-    "inlet_temperature_k": 450.0,
+    "inlet_temperature_c": 176.85,
     "specific_heat_ratio": 1.22,
-    "molecular_mass": 19.8,
+    "molar_mass_kg_kmol": 19.8,
 }
 VALVE: dict[str, Any] = {
     "pressure_recovery": PRESSURE_RECOVERY,
@@ -520,6 +520,41 @@ class TestWholeChain:
         with pytest.raises(ValueError, match="drops pressure"):
             valves.valve_aerodynamic_noise(stream, trim, pipe)
 
+    @pytest.mark.parametrize("inlet_temperature_c", [-273.15, -300.0, math.nan])
+    def test_it_refuses_an_inlet_at_or_below_absolute_zero(
+        self, inlet_temperature_c: float
+    ) -> None:
+        # Unchecked, Clause 5 divides by a zero temperature at -273.15 degC
+        # and takes the root of a negative one below it, and neither error
+        # names the field that caused it.
+        stream = valves.GasStream(
+            **{**STREAM, "inlet_temperature_c": inlet_temperature_c},
+            mass_flow=2.22,
+            outlet_pressure_pa=7.2e5,
+        )
+        trim = _trim(EXAMPLES[0])
+        pipe = valves.DownstreamPipe(**PIPE, internal_diameter_m=0.2031)
+        with pytest.raises(ValueError, match="'inlet_temperature_c' must be finite"):
+            valves.valve_aerodynamic_noise(stream, trim, pipe)
+
+    def test_a_gas_below_zero_celsius_is_read_on_the_absolute_scale(self) -> None:
+        # Equation (17) puts c_2 = sqrt(gamma R T / M) under the pipe Mach
+        # number, so at one density M_2 goes as 1 / sqrt(T). Example 1 at
+        # -10 degC, 263.15 K, against A.2's 450 K: the number is read as
+        # Celsius and converted, not refused and not taken as kelvin.
+        cold = valves.valve_aerodynamic_noise(
+            valves.GasStream(
+                **{**STREAM, "inlet_temperature_c": -10.0},
+                mass_flow=2.22,
+                outlet_pressure_pa=7.2e5,
+            ),
+            _trim(EXAMPLES[0]),
+            valves.DownstreamPipe(**PIPE, internal_diameter_m=0.2031),
+        )
+        assert cold.pipe_mach / _run(1).pipe_mach == pytest.approx(
+            math.sqrt(450.0 / 263.15), rel=1e-12
+        )
+
 
 class TestExpander:
     """Clause 7, against the sixth column of Table A.1.
@@ -697,9 +732,9 @@ EXAMPLE_7 = {
     "inlet_pressure_pa": 7.0e6,
     "outlet_pressure_pa": 1.4e6,
     "inlet_density": 55.3,
-    "inlet_temperature_k": 290.0,
+    "inlet_temperature_c": 16.85,
     "specific_heat_ratio": 1.31,
-    "molecular_mass": 19.0,
+    "molar_mass_kg_kmol": 19.0,
     "flow_coefficient": 81.5,
     "last_stage_area": 6.44e-3,
     "passages": 432,
@@ -738,9 +773,9 @@ def _example_seven() -> valves.AerodynamicValveNoise:
             inlet_pressure_pa=conditions.stagnation_pressure_pa,
             outlet_pressure_pa=case["outlet_pressure_pa"],
             inlet_density=conditions.stagnation_density,
-            inlet_temperature_k=case["inlet_temperature_k"],
+            inlet_temperature_c=case["inlet_temperature_c"],
             specific_heat_ratio=case["specific_heat_ratio"],
-            molecular_mass=case["molecular_mass"],
+            molar_mass_kg_kmol=case["molar_mass_kg_kmol"],
         ),
         valves.ValveTrim(
             flow_coefficient=conditions.flow_coefficient,

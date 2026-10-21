@@ -34,7 +34,7 @@ def _epnl_example() -> tuple[object, ReportMetadata, str]:
     k, dt = 24, 0.5
     idx = np.arange(k)
     shape = 15.0 * np.exp(
-        -((np.log10(ph.aircraft.NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5
+        -((np.log10(ph.aircraft.NOY_BANDS_HZ) - np.log10(400.0)) ** 2) / 0.5
     )
     gain = 24.0 * np.exp(-((idx - 12.0) ** 2) / (2 * 3.5**2)) - 3.0
     spectra = (46.0 + shape)[None, :] + gain[:, None]

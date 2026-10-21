@@ -148,20 +148,20 @@ in pascals and the underwater reference $p_0 = 1$ µPa by default.
 | :--- | :--- |
 | ValueError | If the signal is invalid or has no energy. |
 
-## UNDERWATER_REFERENCE_EXPOSURE
+## UNDERWATER_REFERENCE_EXPOSURE_PA2_S
 
 *Constant* (`float`).
 
 ```python
-UNDERWATER_REFERENCE_EXPOSURE = 1e-12
+UNDERWATER_REFERENCE_EXPOSURE_PA2_S = 1e-12
 ```
 
-## UNDERWATER_REFERENCE_PRESSURE
+## UNDERWATER_REFERENCE_PRESSURE_PA
 
 *Constant* (`float`).
 
 ```python
-UNDERWATER_REFERENCE_PRESSURE = 1e-06
+UNDERWATER_REFERENCE_PRESSURE_PA = 1e-06
 ```
 
 ## underwater_to_in_air_spl

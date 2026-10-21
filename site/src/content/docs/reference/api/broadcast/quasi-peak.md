@@ -109,12 +109,12 @@ conformity evidence is the eleven windows, and its home is
 
 *Constant* (`phonometry.broadcast.quasi_peak.QuasiPeakBallistics`).
 
-## DBQPS_REFERENCE
+## DBQPS_REFERENCE_V
 
 *Constant* (`float`).
 
 ```python
-DBQPS_REFERENCE = 0.775
+DBQPS_REFERENCE_V = 0.775
 ```
 
 ## quasi_peak_meter

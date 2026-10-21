@@ -512,7 +512,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # The 24 noy bands are the certification module's; the SAE ARP 866A, ANP
     # spectral-class and Doc 29 Appendix D modules import them to name the
     # same 50 Hz to 10 kHz bands.
-    "NOY_BANDS": "phonometry.aircraft.certification",
+    "NOY_BANDS_HZ": "phonometry.aircraft.certification",
     # The fluid state type and its diagnostics are defined in the private
     # phonometry/fluids/_state.py and published by the package, which is where
     # they are documented.
@@ -580,8 +580,8 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # The ISO 11654 band sets the data-sheet rows rate over are imported into
     # phonometry/materials/absorbers/datasheets.py; they are defined, and
     # documented, beside the rating.
-    "OCTAVE_BANDS": "phonometry.materials.absorbers.rating",
-    "THIRD_OCTAVE_BANDS": "phonometry.materials.absorbers.rating",
+    "RATING_OCTAVE_BANDS_HZ": "phonometry.materials.absorbers.rating",
+    "RATING_THIRD_OCTAVE_BANDS_HZ": "phonometry.materials.absorbers.rating",
     "PUBLISHED_FLUIDS": "phonometry.fluids.catalogue",
     "PUBLISHED_GASES": "phonometry.fluids.catalogue",
     "PUBLISHED_NONLINEARITY": "phonometry.fluids.nonlinearity",
@@ -590,7 +590,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # The ideal-gas closure and its two published constants are owned by the
     # module that computes with them and re-exported by the package.
     "IDEAL_GAS_VALIDITY": "phonometry.fluids.gas",
-    "MOLAR_GAS_CONSTANT": "phonometry.fluids.gas",
+    "MOLAR_GAS_CONSTANT_J_MOL_K": "phonometry.fluids.gas",
     "ideal_gas": "phonometry.fluids.gas",
     # The band ranges, the leak ratio and the seal ratio are printed in the
     # same words by ISO 11546 and ISO 11957, so they are defined once, in the
@@ -604,8 +604,8 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # The two sound speeds and the jet diameter are owned by the aerodynamic
     # valve module and imported by the hydrodynamic one, which IEC 60534-8-4
     # sends to IEC 60534-8-3 for all three, so a plain scan sees them twice.
-    "AIR_SOUND_SPEED_M_S": "phonometry.noise_control.valves",
-    "PIPE_SOUND_SPEED_M_S": "phonometry.noise_control.valves",
+    "AIR_SPEED_OF_SOUND_M_S": "phonometry.noise_control.valves",
+    "PIPE_SPEED_OF_SOUND_M_S": "phonometry.noise_control.valves",
     "jet_diameter_m": "phonometry.noise_control.valves",
     # The running r.m.s. time constant is owned by the DIN 45669-1 meter and
     # imported by the DIN 45672-2 evaluation, whose Formula (1) is the same
@@ -627,14 +627,14 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "band_sum_level": "phonometry.vibration.immission.railway",
     # The ERB_N / Cam constants are owned by erb_scale and imported by the
     # ISO 532-2 loudness model, so a plain scan sees them in both modules.
-    "ERB_C1": "phonometry.psychoacoustics.erb_scale",
-    "ERB_C2": "phonometry.psychoacoustics.erb_scale",
+    "ERB_C1_HZ": "phonometry.psychoacoustics.erb_scale",
+    "ERB_C2_PER_HZ": "phonometry.psychoacoustics.erb_scale",
     "CAM_C": "phonometry.psychoacoustics.erb_scale",
     # The tapping-machine hammer mass is owned by resilient_layers and imported
     # by installed_structure_borne, where EN 12354-5 clause D.1.3 uses the same
     # 0,5 kg as the source mass of Formula (D.9b), so a plain scan sees it in
     # both modules.
-    "TAPPING_HAMMER_MASS": "phonometry.building.prediction.resilient_layers",
+    "TAPPING_HAMMER_MASS_KG": "phonometry.building.prediction.resilient_layers",
     # The ISO 20816-1 tables and factors are plain containers, so a scan
     # by module finds no owner for them; they belong to the evaluation
     # module that publishes them.
@@ -786,7 +786,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "plot_slit_absorber_geometry": "phonometry.materials.absorbers.slow_sound",
     "plot_qrd_geometry": "phonometry.materials.diffusers.design",
     "plot_metadiffuser_panel_geometry": "phonometry.materials.diffusers.metadiffuser",
-    "DEFAULT_POLAR_ANGLES": "phonometry.materials.diffusers.design",
+    "DEFAULT_POLAR_ANGLES_DEG": "phonometry.materials.diffusers.design",
     "plot_impedance_tube_geometry": "phonometry.materials.absorbers.impedance_tube",
     "plot_transmission_tube_geometry": "phonometry.materials.absorbers.impedance_tube",
     "plot_silencer_geometry": "phonometry.noise_control.silencers",
@@ -807,10 +807,10 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "plot_pp_probe_geometry": "phonometry.emission.intensity",
     # Defined in underwater.acoustics, also re-exported by
     # underwater.ship_radiated_noise (identity scan is ambiguous).
-    "UNDERWATER_REFERENCE_PRESSURE": "phonometry.underwater.acoustics",
+    "UNDERWATER_REFERENCE_PRESSURE_PA": "phonometry.underwater.acoustics",
     # Likewise the exposure reference, which the pile-driving SEL spectrum
     # imports for its band levels.
-    "UNDERWATER_REFERENCE_EXPOSURE": "phonometry.underwater.acoustics",
+    "UNDERWATER_REFERENCE_EXPOSURE_PA2_S": "phonometry.underwater.acoustics",
     # Defined in the private phonometry._report package; documented with the
     # building insulation ratings whose report() method it drives.
     "ReportMetadata": "phonometry.building.measurement.insulation",

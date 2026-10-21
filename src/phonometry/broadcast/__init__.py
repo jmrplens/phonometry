@@ -18,7 +18,7 @@ from .program_loudness import (
 )
 from .quasi_peak import (
     BS468_BALLISTICS,
-    DBQPS_REFERENCE,
+    DBQPS_REFERENCE_V,
     QuasiPeakBallistics,
     QuasiPeakDynamicsResult,
     QuasiPeakResult,
@@ -28,7 +28,7 @@ from .quasi_peak import (
 
 __all__ = [
     "BS468_BALLISTICS",
-    "DBQPS_REFERENCE",
+    "DBQPS_REFERENCE_V",
     "DEFAULT_CHANNEL_WEIGHTS",
     "KWeightingResponse",
     "ProgramLoudnessResult",

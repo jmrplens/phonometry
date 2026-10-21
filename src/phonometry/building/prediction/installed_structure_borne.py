@@ -97,10 +97,10 @@ from ..._internal.validation import (
     require_same_length,
 )
 from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
-from .resilient_layers import TAPPING_HAMMER_MASS
+from .resilient_layers import TAPPING_HAMMER_MASS_KG
 
 #: Reference area ``S0 = A0`` of EN 12354-5 (Formula 18a), m^2.
-REFERENCE_AREA: float = 10.0
+REFERENCE_AREA_M2: float = 10.0
 
 #: Characteristic mobility ``Y_inf,rec`` of the EN 15657 reference reception
 #: plate (10 cm concrete; EN 12354-5 Annex I / EN 15657:2018 7.2.4), m/(N.s).
@@ -647,7 +647,7 @@ _FORCE_REFERENCE_SQUARED = ISO1683_REFERENCE_VALUES["solid"]["force"].value ** 2
 
 #: EN 12354-5, Table F.1: the nominal octave-band centre frequencies of the
 #: header row, in hertz. The standard prints the first as "31".
-TABLE_F1_OCTAVE_BANDS: tuple[float, ...] = (
+TABLE_F1_OCTAVE_BANDS_HZ: tuple[float, ...] = (
     31.5,
     63.0,
     125.0,
@@ -659,7 +659,7 @@ TABLE_F1_OCTAVE_BANDS: tuple[float, ...] = (
 )
 
 #: EN 12354-5, Table F.1: the force level ``L_F`` of the ISO tapping machine
-#: per octave band of :data:`TABLE_F1_OCTAVE_BANDS`, in dB re 1e-6 N
+#: per octave band of :data:`TABLE_F1_OCTAVE_BANDS_HZ`, in dB re 1e-6 N
 #: (the caption prints "re 1 pN"; see ``docs/ERRATA.md``).
 TABLE_F1_FORCE_LEVEL: tuple[float, ...] = (
     139.0,
@@ -682,7 +682,7 @@ def tapping_machine_force_level() -> np.ndarray:
     r"""Tabulated ISO tapping machine force level (EN 12354-5, Table F.1).
 
     The eight octave-band values of Table F.1, in the order of
-    :data:`TABLE_F1_OCTAVE_BANDS` (31,5 Hz to 4 kHz). Clause F.4.2
+    :data:`TABLE_F1_OCTAVE_BANDS_HZ` (31,5 Hz to 4 kHz). Clause F.4.2
     offers them for the tapping machine used in place of an electrodynamic
     shaker when measuring ``D_Fp,n`` (Formula F.9), and clause D.1.2.3
     restricts the source to low-mobility receiving structures.
@@ -764,7 +764,7 @@ def tapping_machine_coupling_term(
     frequency: ArrayLike,
     receiver_mobility: ArrayLike,
     *,
-    hammer_mass: float = TAPPING_HAMMER_MASS,
+    hammer_mass: float = TAPPING_HAMMER_MASS_KG,
 ) -> np.ndarray:
     r"""Coupling term of the tapping machine (EN 12354-5, Formula D.9b).
 
@@ -782,7 +782,7 @@ def tapping_machine_coupling_term(
     :param receiver_mobility: Real mobility ``Y_i`` of the supporting element,
         in m/(N.s) (> 0).
     :param hammer_mass: Source mass ``M``, in kilograms (Default:
-        :data:`~phonometry.building.TAPPING_HAMMER_MASS`, the 0,5 kg of clause
+        :data:`~phonometry.building.TAPPING_HAMMER_MASS_KG`, the 0,5 kg of clause
         D.1.3 and ISO 10140-5).
     :return: The coupling term ``D_C,i``, in dB.
     :raises ValueError: for a non-positive frequency, mobility or mass.
@@ -812,7 +812,7 @@ _MULTI_JUNCTION_ADJUSTMENT: dict[int, float] = {1: 0.0, 2: 4.0, 3: 6.0}
 #: value for Kij should normally not become less than - 5 dB", the point at
 #: which the standard reads the junctions as transmitting the whole
 #: structure-borne power.
-MINIMUM_MULTI_JUNCTION_KIJ: float = -5.0
+MINIMUM_MULTI_JUNCTION_KIJ_DB: float = -5.0
 
 
 def multi_junction_adjustment(junctions: int) -> float:
@@ -823,7 +823,7 @@ def multi_junction_adjustment(junctions: int) -> float:
     adjustment ``dK`` that covers the transmission by wave types other than
     bending waves. Clause F.1 estimates it from published data as 4 dB for two
     junctions and 6 dB for three or more, with the resulting ``Kij`` floored at
-    :data:`MINIMUM_MULTI_JUNCTION_KIJ`.
+    :data:`MINIMUM_MULTI_JUNCTION_KIJ_DB`.
 
     :param junctions: Number of junctions the transmission path crosses (>= 1).
     :return: The adjustment ``dK``, in dB (0,0 for a single junction).
@@ -952,7 +952,7 @@ def structure_borne_pressure_level_path(
     flanking_reduction_index: ArrayLike,
     element_area: float,
     *,
-    reference_area: float = REFERENCE_AREA,
+    reference_area: float = REFERENCE_AREA_M2,
 ) -> np.ndarray:
     r"""Normalised structure-borne SPL for one path i->j (Formula 18a).
 

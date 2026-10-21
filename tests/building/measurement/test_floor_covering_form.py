@@ -42,7 +42,7 @@ _FULL = ReportMetadata(
     test_date="2026-10-01",
     specimen="Vinyl sheet with foam backing, laid loose; four tapping-machine positions",
     mass_per_area=2.9,
-    curing_time_h=0.0,
+    curing_time_hours=0.0,
     source_temperature_c=21.2,
     source_relative_humidity_percent=48.0,
     receiving_volume=58.0,
@@ -146,7 +146,7 @@ def test_header_prints_each_value_beside_its_label(tmp_path: Path) -> None:
     """Values no other field can carry, so each one is found only in its row."""
     out = tmp_path / "header.pdf"
     _annex_c2().report(
-        str(out), metadata=ReportMetadata(curing_time_h=36.0, mass_per_area=2.9)
+        str(out), metadata=ReportMetadata(curing_time_hours=36.0, mass_per_area=2.9)
     )
     text = _text(out)
     assert "Curing time [h]: 36" in text
@@ -180,9 +180,9 @@ def test_form_refuses_an_unknown_engine(tmp_path: Path) -> None:
 
 
 def test_curing_time_may_be_zero_but_not_negative() -> None:
-    assert ReportMetadata(curing_time_h=0.0).curing_time_h == pytest.approx(0.0)
-    with pytest.raises(ValueError, match="curing_time_h"):
-        ReportMetadata(curing_time_h=-1.0)
+    assert ReportMetadata(curing_time_hours=0.0).curing_time_hours == pytest.approx(0.0)
+    with pytest.raises(ValueError, match="curing_time_hours"):
+        ReportMetadata(curing_time_hours=-1.0)
 
 
 def test_diagram_marks_the_frequency_range_of_the_rating() -> None:

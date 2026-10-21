@@ -41,8 +41,8 @@ import reference_data as ref
 from phonometry.environment.sources.cnossos_road import (
     CNOSSOS_A_WEIGHTING,
     ROAD_COEFFICIENTS,
-    ROAD_OCTAVE_BANDS,
-    ROAD_REFERENCE_SPEED,
+    ROAD_OCTAVE_BANDS_HZ,
+    ROAD_REFERENCE_SPEED_KMH,
     JunctionType,
     RoadEmissionCoefficients,
     RoadEmissionResult,
@@ -186,7 +186,7 @@ def test_a_weighting_matches_official_journal() -> None:
 
 def test_octave_bands_are_the_corrected_range() -> None:
     """The corrigendum of OJ L 5, 10.1.2018 sets 2.2.1 to 63 Hz - 8 kHz."""
-    assert ROAD_OCTAVE_BANDS == (
+    assert ROAD_OCTAVE_BANDS_HZ == (
         63.0,
         125.0,
         250.0,
@@ -212,7 +212,10 @@ def test_temperature_coefficients_match_the_directive() -> None:
     and the correction is identically zero; the stored zeros are asserted here
     because no computed level can reach them.
     """
-    assert ROAD_COEFFICIENTS.temperature_k == ref.CNOSSOS_ROAD_TEMPERATURE_K
+    assert (
+        ROAD_COEFFICIENTS.temperature_coefficient_db_per_c
+        == ref.CNOSSOS_ROAD_TEMPERATURE_COEFFICIENTS_DB_PER_C
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -224,8 +227,8 @@ def test_temperature_coefficients_match_the_directive() -> None:
 @pytest.mark.parametrize("category", CATEGORIES)
 def test_reference_conditions_reduce_to_table_f1(category: str) -> None:
     """(2.2.4)/(2.2.11) at v_ref, reference surface, 20 degC, no junction."""
-    rolling = road_rolling_noise(category, ROAD_REFERENCE_SPEED)
-    propulsion = road_propulsion_noise(category, ROAD_REFERENCE_SPEED)
+    rolling = road_rolling_noise(category, ROAD_REFERENCE_SPEED_KMH)
+    propulsion = road_propulsion_noise(category, ROAD_REFERENCE_SPEED_KMH)
     assert np.array_equal(rolling, np.asarray(ROAD_COEFFICIENTS.rolling_a[category]))
     assert np.array_equal(
         propulsion, np.asarray(ROAD_COEFFICIENTS.propulsion_a[category])
@@ -245,7 +248,7 @@ def test_rolling_speed_law_is_exactly_logarithmic(category: str) -> None:
 def test_propulsion_speed_law_is_exactly_linear(category: str) -> None:
     """(2.2.11) is affine in ``v``: equal speed steps give equal level steps."""
     step = np.asarray(ROAD_COEFFICIENTS.propulsion_b[category]) * (
-        10.0 / ROAD_REFERENCE_SPEED
+        10.0 / ROAD_REFERENCE_SPEED_KMH
     )
     for v in (30.0, 60.0, 90.0, 120.0):
         delta = road_propulsion_noise(category, v + 10.0) - road_propulsion_noise(
@@ -337,7 +340,7 @@ def test_studded_tyres_at_full_penetration_give_exactly_d_stud() -> None:
     v = 70.0
     d_stud = np.asarray(ROAD_COEFFICIENTS.studded_a) + np.asarray(
         ROAD_COEFFICIENTS.studded_b
-    ) * math.log10(v / ROAD_REFERENCE_SPEED)
+    ) * math.log10(v / ROAD_REFERENCE_SPEED_KMH)
     delta = road_rolling_noise(
         "1", v, studded_fraction=1.0, studded_months=12.0
     ) - road_rolling_noise("1", v)
@@ -552,7 +555,7 @@ def test_surface_effect_on_rolling_and_propulsion_differ() -> None:
     v = 40.0
     rolling = road_rolling_noise("1", v, surface=surface) - road_rolling_noise("1", v)
     expected = np.asarray(row.alpha["1"]) + row.beta["1"] * math.log10(
-        v / ROAD_REFERENCE_SPEED
+        v / ROAD_REFERENCE_SPEED_KMH
     )
     assert rolling == pytest.approx(expected, abs=1e-12)
     propulsion = road_propulsion_noise("1", v, surface=surface) - road_propulsion_noise(
@@ -605,7 +608,7 @@ def test_categories_are_summed_energetically() -> None:
 def test_result_arrays_are_consistent() -> None:
     flows = [RoadTraffic(RoadVehicleCategory.MEDIUM_HEAVY, 400.0, 70.0)]
     result = road_source_power(flows)
-    assert result.frequencies.tolist() == list(ROAD_OCTAVE_BANDS)
+    assert result.frequencies.tolist() == list(ROAD_OCTAVE_BANDS_HZ)
     assert result.source_height == 0.05
     assert result.vehicle_power[0] == pytest.approx(
         10.0
@@ -765,7 +768,9 @@ def test_incomplete_database_is_rejected_as_an_invalid_input() -> None:
         studded_a=ROAD_COEFFICIENTS.studded_a,
         studded_b=ROAD_COEFFICIENTS.studded_b,
         junction_c={"1": ROAD_COEFFICIENTS.junction_c["1"]},
-        temperature_k={"1": ROAD_COEFFICIENTS.temperature_k["1"]},
+        temperature_coefficient_db_per_c={
+            "1": ROAD_COEFFICIENTS.temperature_coefficient_db_per_c["1"]
+        },
     )
     assert road_rolling_noise("1", 70.0, coefficients=partial).shape == (8,)
     unknown = r"coefficient database has no category '3'"
@@ -845,12 +850,14 @@ def test_the_coefficient_tables_refuse_writes_on_any_instance() -> None:
     The default database is shared by every caller, and a database a caller
     builds from plain dictionaries is held the same way.
     """
-    built = dataclasses.replace(ROAD_COEFFICIENTS, temperature_k={"1": 0.08})
+    built = dataclasses.replace(
+        ROAD_COEFFICIENTS, temperature_coefficient_db_per_c={"1": 0.08}
+    )
     for database in (ROAD_COEFFICIENTS, built):
         with pytest.raises(TypeError, match="does not support item assignment"):
             database.rolling_a["1"] = (0.0,) * 8  # type: ignore[index]
         with pytest.raises(TypeError, match="does not support item assignment"):
-            database.temperature_k["1"] = 0.0  # type: ignore[index]
+            database.temperature_coefficient_db_per_c["1"] = 0.0  # type: ignore[index]
 
 
 def test_the_coefficients_survive_pickling_and_deep_copies() -> None:

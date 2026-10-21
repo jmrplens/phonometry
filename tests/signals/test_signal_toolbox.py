@@ -59,7 +59,7 @@ def test_table_aii_burst_sample_counts(ms: int, cycles: int) -> None:
     # 5 kHz tone: 5 periods per ms, 48 samples per ms at 48 kHz.
     res = ph.signals.tone_burst(FS, 5000.0, cycles)
     assert res.burst_samples == 48 * ms
-    assert res.burst_seconds == pytest.approx(ms / 1000.0)
+    assert res.burst_s == pytest.approx(ms / 1000.0)
     assert res.signal.size == res.burst_samples
 
 

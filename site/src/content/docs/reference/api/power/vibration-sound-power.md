@@ -98,12 +98,12 @@ area-weighted average (Equation 11).
 
 **Returns:** The mean velocity level, in dB.
 
-## NORMALIZED_IMPEDANCE
+## NORMALIZED_IMPEDANCE_PA_S_M
 
 *Constant* (`float`).
 
 ```python
-NORMALIZED_IMPEDANCE = 411.0
+NORMALIZED_IMPEDANCE_PA_S_M = 411.0
 ```
 
 ## radiated_sound_power_level
@@ -183,12 +183,12 @@ surface area and the mean-square vibratory velocity.
 | :--- | :--- |
 | ValueError | for a non-positive area or impedance. |
 
-## REFERENCE_VELOCITY
+## REFERENCE_VELOCITY_M_S
 
 *Constant* (`float`).
 
 ```python
-REFERENCE_VELOCITY = 5e-08
+REFERENCE_VELOCITY_M_S = 5e-08
 ```
 
 ## sound_power_from_vibration

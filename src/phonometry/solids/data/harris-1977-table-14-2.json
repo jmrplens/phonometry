@@ -8,7 +8,7 @@
       "adhered_area_percent": 100,
       "temperature_c": 21,
       "ranges": {
-        "decay_rate_db_s": [
+        "decay_rate_db_per_s": [
           1,
           12
         ],
@@ -24,7 +24,7 @@
       "adhered_area_percent": 100,
       "temperature_c": 21,
       "ranges": {
-        "decay_rate_db_s": [
+        "decay_rate_db_per_s": [
           1,
           6
         ],
@@ -40,7 +40,7 @@
       "adhered_area_percent": 100,
       "temperature_c": 21,
       "ranges": {
-        "decay_rate_db_s": [
+        "decay_rate_db_per_s": [
           1,
           11
         ],
@@ -54,7 +54,7 @@
       "key": "1_pliegue_muescado_sin_adhesivo",
       "name": "1 pliegue muescado",
       "variant": "sin adhesivo",
-      "decay_rate_db_s": 21,
+      "decay_rate_db_per_s": 21,
       "unquantified": {
         "adhered_area_percent": "No"
       },
@@ -66,7 +66,7 @@
       "key": "lo_mismo_cubierto_con_alfombra_sin_adhesivo",
       "name": "Lo mismo, cubierto con alfombra",
       "variant": "sin adhesivo",
-      "decay_rate_db_s": 85,
+      "decay_rate_db_per_s": 85,
       "unquantified": {
         "adhered_area_percent": "No"
       },
@@ -80,7 +80,7 @@
       "adhered_area_percent": 100,
       "temperature_c": 21,
       "ranges": {
-        "decay_rate_db_s": [
+        "decay_rate_db_per_s": [
           6,
           20
         ],
@@ -96,7 +96,7 @@
       "adhered_area_percent": 100,
       "temperature_c": 21,
       "ranges": {
-        "decay_rate_db_s": [
+        "decay_rate_db_per_s": [
           20,
           40
         ],
@@ -109,7 +109,7 @@
     {
       "key": "1_pl_muescado_cubierto_con_hoja_de_metal",
       "name": "1 pl. muescado, cubierto con hoja de metal",
-      "decay_rate_db_s": 400,
+      "decay_rate_db_per_s": 400,
       "adhered_area_percent": 100,
       "surface_density_kg_m2": 5,
       "temperature_c": 21

@@ -161,7 +161,7 @@ check_spot_frequency_range(frequency: ArrayLike) -> None
 Advise when a spot-method frequency is out of range (ISO 13472-2, Scope).
 
 The spot method is valid over the one-third-octave bands 250-1600 Hz
-(narrow-band 220-1800 Hz). Frequencies outside [`SPOT_FREQUENCY_RANGE`](/phonometry/reference/api/materials/road-absorption/#spot_frequency_range)
+(narrow-band 220-1800 Hz). Frequencies outside [`SPOT_FREQUENCY_RANGE_HZ`](/phonometry/reference/api/materials/road-absorption/#spot_frequency_range_hz)
 raise a [`RoadAbsorptionWarning`](/phonometry/reference/api/materials/road-absorption/#roadabsorptionwarning); results there are advisory.
 
 **Parameters**
@@ -176,36 +176,28 @@ raise a [`RoadAbsorptionWarning`](/phonometry/reference/api/materials/road-absor
 | :--- | :--- |
 | ValueError | If any frequency is negative. |
 
-## DEFAULT_MIC_HEIGHT
+## DEFAULT_MICROPHONE_HEIGHT_M
 
 *Constant* (`float`).
 
 ```python
-DEFAULT_MIC_HEIGHT = 0.25
+DEFAULT_MICROPHONE_HEIGHT_M = 0.25
 ```
 
-## DEFAULT_SOURCE_HEIGHT
+## DEFAULT_SOURCE_HEIGHT_M
 
 *Constant* (`float`).
 
 ```python
-DEFAULT_SOURCE_HEIGHT = 1.25
-```
-
-## DEFAULT_SPEED_OF_SOUND
-
-*Constant* (`float`).
-
-```python
-DEFAULT_SPEED_OF_SOUND = 340.0
+DEFAULT_SOURCE_HEIGHT_M = 1.25
 ```
 
 ## geometric_spreading_factor
 
 ```python
 geometric_spreading_factor(
-    source_height: float = 1.25,
-    mic_height: float = 0.25,
+    source_height_m: float = 1.25,
+    microphone_height_m: float = 0.25,
 ) -> float
 ```
 
@@ -221,8 +213,8 @@ $d_\mathrm{m} = 0.25$ m gives $K_\mathrm{r} = 2/3$ (Clause 4.2).
 
 | Name | Description |
 | :--- | :--- |
-| `source_height` | Source-to-reference-plane distance `ds`, in metres. |
-| `mic_height` | Microphone-to-reference-plane distance `dm`, in metres. |
+| `source_height_m` | Source-to-reference-plane distance `ds`, in metres. |
+| `microphone_height_m` | Microphone-to-reference-plane distance `dm`, in metres. |
 
 **Returns:** Geometrical-spreading factor `Kr` (dimensionless, $0 < K_\mathrm{r} < 1$).
 
@@ -237,8 +229,8 @@ $d_\mathrm{m} = 0.25$ m gives $K_\mathrm{r} = 2/3$ (Clause 4.2).
 ```python
 geometric_spreading_factor_angle(
     incidence_angle_rad: float,
-    source_height: float = 1.25,
-    mic_height: float = 0.25,
+    source_height_m: float = 1.25,
+    microphone_height_m: float = 0.25,
 ) -> float
 ```
 
@@ -254,8 +246,8 @@ cosine is unity and `Kr,theta` collapses to `Kr` (Clause 4.1).
 | Name | Description |
 | :--- | :--- |
 | `incidence_angle_rad` | Incidence angle `theta`, in **radians**. |
-| `source_height` | Source-to-reference-plane distance `ds`, in metres. |
-| `mic_height` | Microphone-to-reference-plane distance `dm`, in metres. |
+| `source_height_m` | Source-to-reference-plane distance `ds`, in metres. |
+| `microphone_height_m` | Microphone-to-reference-plane distance `dm`, in metres. |
 
 **Returns:** Oblique factor `Kr,theta` (positive root, dimensionless).
 
@@ -266,8 +258,8 @@ insitu_absorption_coefficient(
     incident_ir: Signal | Sequence[float] | np.ndarray,
     reflected_ir: Signal | Sequence[float] | np.ndarray,
     *,
-    source_height: float = 1.25,
-    mic_height: float = 0.25,
+    source_height_m: float = 1.25,
+    microphone_height_m: float = 0.25,
     incidence_angle_rad: float = 0.0,
     n: int | None = None,
 ) -> NDArray[np.float64]
@@ -287,8 +279,8 @@ is treated as absorbed, so `alpha` may be slightly overestimated
 | :--- | :--- |
 | `incident_ir` | Windowed incident impulse response `hi(t)`, real. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
 | `reflected_ir` | Windowed reflected impulse response `hr(t)`, real. Same treatment as `incident_ir`; two Signals recorded at different rates are refused rather than arbitrated. |
-| `source_height` | Source-to-plane distance `ds`, in metres. |
-| `mic_height` | Microphone-to-plane distance `dm`, in metres. |
+| `source_height_m` | Source-to-plane distance `ds`, in metres. |
+| `microphone_height_m` | Microphone-to-plane distance `dm`, in metres. |
 | `incidence_angle_rad` | Incidence angle `theta`, in radians (0 = normal). |
 | `n` | FFT length; defaults to the longer input. |
 
@@ -326,8 +318,8 @@ insitu_absorption_spectrum(
     reflected_ir: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
-    source_height: float = 1.25,
-    mic_height: float = 0.25,
+    source_height_m: float = 1.25,
+    microphone_height_m: float = 0.25,
     incidence_angle_rad: float = 0.0,
     n: int | None = None,
     f_min: float = 250.0,
@@ -351,8 +343,8 @@ in a plottable [`InsituAbsorptionResult`](/phonometry/reference/api/materials/ro
 | `incident_ir` | Windowed incident (direct-path) impulse response `hi`. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
 | `reflected_ir` | Windowed reflected-path impulse response `hr`. Same treatment as `incident_ir`: its calibration is applied too, which is what makes the shared factor cancel rather than skew the ratio. |
 | `fs` | Sampling frequency, in hertz. Required when both records are bare arrays; either may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it, and two Signals recorded at different rates are refused rather than arbitrated. |
-| `source_height` | Source-to-plane distance `ds`, in metres. |
-| `mic_height` | Microphone-to-plane distance `dm`, in metres. |
+| `source_height_m` | Source-to-plane distance `ds`, in metres. |
+| `microphone_height_m` | Microphone-to-plane distance `dm`, in metres. |
 | `incidence_angle_rad` | Incidence angle `theta`, in radians (0 = normal). |
 | `n` | FFT length; defaults to the longer of the two impulse responses. |
 | `f_min` | Lowest band centre to report, in hertz (default 250 Hz). |
@@ -374,8 +366,8 @@ insitu_reflection_factor(
     incident_ir: Signal | Sequence[float] | np.ndarray,
     reflected_ir: Signal | Sequence[float] | np.ndarray,
     *,
-    source_height: float = 1.25,
-    mic_height: float = 0.25,
+    source_height_m: float = 1.25,
+    microphone_height_m: float = 0.25,
     incidence_angle_rad: float = 0.0,
     fs: float | None = None,
     delay: float | None = None,
@@ -402,8 +394,8 @@ Annex C; the frequency-dependent form of Annex G).
 | :--- | :--- |
 | `incident_ir` | Windowed incident (direct-path) impulse response `hi(t)`, real, one sample per `1 / fs`. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
 | `reflected_ir` | Windowed reflected-path impulse response `hr(t)`, real, same sampling as `incident_ir`. Same treatment as `incident_ir`: its calibration is applied too, which is what makes the shared factor cancel rather than skew the ratio. |
-| `source_height` | Source-to-plane distance `ds`, in metres. |
-| `mic_height` | Microphone-to-plane distance `dm`, in metres. |
+| `source_height_m` | Source-to-plane distance `ds`, in metres. |
+| `microphone_height_m` | Microphone-to-plane distance `dm`, in metres. |
 | `incidence_angle_rad` | Incidence angle `theta`, in radians (0 = normal). |
 | `fs` | Sampling frequency, in hertz; required with `delay` for phase restoration, and otherwise unused. Either record may be a [`Signal`](/phonometry/reference/api/io/io/#signal) and supply it; an explicit value that disagrees with one raises, and two Signals recorded at different rates are refused rather than arbitrated. |
 | `delay` | Reflected-path delay `dtau` to undo, in seconds; `None` returns the raw spectral ratio. |
@@ -423,8 +415,8 @@ Annex C; the frequency-dependent form of Annex G).
 InsituAbsorptionResult(
     frequencies: NDArray[np.float64],
     absorption: NDArray[np.float64],
-    source_height: float | None = None,
-    mic_height: float | None = None,
+    source_height_m: float | None = None,
+    microphone_height_m: float | None = None,
 )
 ```
 
@@ -436,8 +428,8 @@ An in-situ one-third-octave absorption spectrum (ISO 13472-1).
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in hertz. |
 | `absorption` | Sound-absorption coefficient `alpha` per band (a band with no contributing narrow-band samples is `nan`). |
-| `source_height` | Source height the spectrum was reduced with, in metres, retained (with `mic_height`) so `plot_geometry` can draw the set-up; `None` for hand-built results. |
-| `mic_height` | Microphone height, in metres, or `None`. |
+| `source_height_m` | Source height the spectrum was reduced with, in metres, retained (with `microphone_height_m`) so `plot_geometry` can draw the set-up; `None` for hand-built results. |
+| `microphone_height_m` | Microphone height, in metres, or `None`. |
 
 ### InsituAbsorptionResult.plot()
 
@@ -477,14 +469,22 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | :--- | :--- |
 | ValueError | If the result does not retain its geometry. |
 
+## ISO13472_SPEED_OF_SOUND_M_S
+
+*Constant* (`float`).
+
+```python
+ISO13472_SPEED_OF_SOUND_M_S = 340.0
+```
+
 ## max_sampled_area_radius
 
 ```python
 max_sampled_area_radius(
     window_width: float,
     *,
-    source_height: float = 1.25,
-    mic_height: float = 0.25,
+    source_height_m: float = 1.25,
+    microphone_height_m: float = 0.25,
     speed_of_sound: float = 340.0,
 ) -> float
 ```
@@ -507,8 +507,8 @@ $r \approx 1.34$ m.
 | Name | Description |
 | :--- | :--- |
 | `window_width` | Temporal-window width `Tw` (reflected wave), seconds. |
-| `source_height` | Source-to-plane distance `ds`, in metres. |
-| `mic_height` | Microphone-to-plane distance `dm`, in metres. |
+| `source_height_m` | Source-to-plane distance `ds`, in metres. |
+| `microphone_height_m` | Microphone-to-plane distance `dm`, in metres. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |
 
 **Returns:** Maximum-sampled-area radius `r`, in metres.
@@ -526,8 +526,8 @@ msa_major_axis(
     window_width: float,
     projected_distance: float,
     *,
-    source_height: float = 1.25,
-    mic_height: float = 0.25,
+    source_height_m: float = 1.25,
+    microphone_height_m: float = 0.25,
     speed_of_sound: float = 340.0,
 ) -> float
 ```
@@ -545,8 +545,8 @@ source-to-microphone distance projected on the reference plane.
 | :--- | :--- |
 | `window_width` | Temporal-window width `Tw`, in seconds. |
 | `projected_distance` | Projected source-to-mic distance `dp`, in metres. |
-| `source_height` | Source-to-plane distance `ds`, in metres. |
-| `mic_height` | Microphone-to-plane distance `dm`, in metres. |
+| `source_height_m` | Source-to-plane distance `ds`, in metres. |
+| `microphone_height_m` | Microphone-to-plane distance `dm`, in metres. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |
 
 **Returns:** Major axis `a`, in metres.
@@ -598,12 +598,12 @@ Clause 6.6 step 5); Part 1 does not mandate clipping, so pass
 | :--- | :--- |
 | ValueError | If `frequencies` and `absorption` differ in shape or are empty. |
 
-## PART1_FREQUENCY_RANGE
+## PART1_FREQUENCY_RANGE_HZ
 
 *Constant* (`tuple`).
 
 ```python
-PART1_FREQUENCY_RANGE = (250.0, 4000.0)
+PART1_FREQUENCY_RANGE_HZ = (250.0, 4000.0)
 ```
 
 ## plot_insitu_geometry
@@ -612,8 +612,8 @@ PART1_FREQUENCY_RANGE = (250.0, 4000.0)
 plot_insitu_geometry(
     ax: Axes | None = None,
     *,
-    source_height: float = 1.25,
-    mic_height: float = 0.25,
+    source_height_m: float = 1.25,
+    microphone_height_m: float = 0.25,
     sampled_radius: float | None = 1.34,
     language: str = 'en',
     **kwargs: Any,
@@ -632,8 +632,8 @@ with the sampled radius of the standard 5 ms window.
 | Name | Description |
 | :--- | :--- |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `source_height` | Source height above the surface, in metres. |
-| `mic_height` | Microphone height, in metres (\< `source_height`). |
+| `source_height_m` | Source height above the surface, in metres. |
+| `microphone_height_m` | Microphone height, in metres (\< `source_height_m`). |
 | `sampled_radius` | Sampled-area radius drawn on the ground, in metres; `None` omits it. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the surface rectangle. |
@@ -653,8 +653,8 @@ power_reflection_coefficient(
     incident_ir: Signal | Sequence[float] | np.ndarray,
     reflected_ir: Signal | Sequence[float] | np.ndarray,
     *,
-    source_height: float = 1.25,
-    mic_height: float = 0.25,
+    source_height_m: float = 1.25,
+    microphone_height_m: float = 0.25,
     incidence_angle_rad: float = 0.0,
     n: int | None = None,
 ) -> NDArray[np.float64]
@@ -675,8 +675,8 @@ independent of any reflected-path time offset.
 | :--- | :--- |
 | `incident_ir` | Windowed incident impulse response `hi(t)`, real. Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal), whose calibration is applied to the samples and then cancels: what is read off the pair is the ratio of their transfer functions, so a factor the two share divides out. |
 | `reflected_ir` | Windowed reflected impulse response `hr(t)`, real. Same treatment as `incident_ir`; two Signals recorded at different rates are refused rather than arbitrated. |
-| `source_height` | Source-to-plane distance `ds`, in metres. |
-| `mic_height` | Microphone-to-plane distance `dm`, in metres. |
+| `source_height_m` | Source-to-plane distance `ds`, in metres. |
+| `microphone_height_m` | Microphone-to-plane distance `dm`, in metres. |
 | `incidence_angle_rad` | Incidence angle `theta`, in radians. |
 | `n` | FFT length; defaults to the longer input. |
 
@@ -686,7 +686,7 @@ independent of any reflected-path time offset.
 
 ```python
 reflected_path_delay(
-    mic_height: float = 0.25,
+    microphone_height_m: float = 0.25,
     speed_of_sound: float = 340.0,
 ) -> float
 ```
@@ -702,7 +702,7 @@ is the delay undone by the phase-restoration term of
 
 | Name | Description |
 | :--- | :--- |
-| `mic_height` | Microphone-to-reference-plane distance `dm`, in metres. |
+| `microphone_height_m` | Microphone-to-reference-plane distance `dm`, in metres. |
 | `speed_of_sound` | Speed of sound `c`, in metres per second. |
 
 **Returns:** Delay `dtau`, in seconds.
@@ -717,12 +717,12 @@ is the delay undone by the phase-restoration term of
 
 Advisory for out-of-range in-situ road-absorption frequencies.
 
-## SPOT_FREQUENCY_RANGE
+## SPOT_FREQUENCY_RANGE_HZ
 
 *Constant* (`tuple`).
 
 ```python
-SPOT_FREQUENCY_RANGE = (250.0, 1600.0)
+SPOT_FREQUENCY_RANGE_HZ = (250.0, 1600.0)
 ```
 
 ## spot_internal_loss_correction
@@ -807,12 +807,12 @@ $s = (81 \pm 4)$ mm.
 | :--- | :--- |
 | ValueError | On non-positive speed or frequency, or `f_min >= f_max`. |
 
-## SPOT_NARROW_BAND_RANGE
+## SPOT_NARROW_BAND_RANGE_HZ
 
 *Constant* (`tuple`).
 
 ```python
-SPOT_NARROW_BAND_RANGE = (220.0, 1800.0)
+SPOT_NARROW_BAND_RANGE_HZ = (220.0, 1800.0)
 ```
 
 ## spot_tube_upper_frequency

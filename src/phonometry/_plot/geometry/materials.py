@@ -1322,8 +1322,8 @@ def plot_transfer_matrix_geometry(
 def plot_insitu_geometry(
     ax: Axes | None = None,
     *,
-    source_height: float = 1.25,
-    mic_height: float = 0.25,
+    source_height_m: float = 1.25,
+    microphone_height_m: float = 0.25,
     sampled_radius: float | None = 1.34,
     language: str = "en",
     **kwargs: Any,
@@ -1336,8 +1336,8 @@ def plot_insitu_geometry(
     with the sampled radius of the standard 5 ms window.
 
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param source_height: Source height above the surface, in metres.
-    :param mic_height: Microphone height, in metres (< ``source_height``).
+    :param source_height_m: Source height above the surface, in metres.
+    :param microphone_height_m: Microphone height, in metres (< ``source_height_m``).
     :param sampled_radius: Sampled-area radius drawn on the ground, in
         metres; ``None`` omits it.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1347,28 +1347,28 @@ def plot_insitu_geometry(
         and positive, or a source no higher than the microphone.
     """
     _check_language(language)
-    require_positive(mic_height, "mic_height")
-    require_positive(source_height, "source_height")
-    if source_height <= mic_height:
-        msg = "'source_height' must exceed 'mic_height'."
+    require_positive(microphone_height_m, "microphone_height_m")
+    require_positive(source_height_m, "source_height_m")
+    if source_height_m <= microphone_height_m:
+        msg = "'source_height_m' must exceed 'microphone_height_m'."
         raise ValueError(msg)
     if sampled_radius is not None:
         require_positive(sampled_radius, "sampled_radius")
     if ax is None:
         ax = _new_axes()
-    half = max(source_height, sampled_radius or 0.0) * 1.2
+    half = max(source_height_m, sampled_radius or 0.0) * 1.2
     _material_rect(
         ax,
         -half,
-        -0.06 * source_height,
+        -0.06 * source_height_m,
         2.0 * half,
-        0.06 * source_height,
+        0.06 * source_height_m,
         "rigid",
         **kwargs,
     )
     ax.text(
         half * 1.02,
-        -0.03 * source_height,
+        -0.03 * source_height_m,
         _t("Road surface", language),
         fontsize=8,
         ha="left",
@@ -1376,54 +1376,63 @@ def plot_insitu_geometry(
     )
     # Mast, source and microphone on the same vertical.
     ax.plot(
-        [0.0, 0.0], [0.0, source_height], color=_C_MUTED, linewidth=1.0, linestyle=":"
+        [0.0, 0.0], [0.0, source_height_m], color=_C_MUTED, linewidth=1.0, linestyle=":"
     )
     # The direct path runs down from the cone's mouth, so the label ends
     # short of it instead of straddling it.
     _loudspeaker(
-        ax, 0.0, source_height, 0.28 * source_height, language, label_ha="right"
+        ax, 0.0, source_height_m, 0.28 * source_height_m, language, label_ha="right"
     )
-    _microphone(ax, 0.0, mic_height, 0.22 * source_height, "")
+    _microphone(ax, 0.0, microphone_height_m, 0.22 * source_height_m, "")
     # Direct and reflected paths to the microphone.
-    ax.plot([0.0, 0.0], [source_height, mic_height], color=_C_PRIMARY, linewidth=1.6)
     ax.plot(
-        [0.0, 0.0], [mic_height, 0.0], color=_C_SECONDARY, linewidth=1.4, linestyle="--"
+        [0.0, 0.0],
+        [source_height_m, microphone_height_m],
+        color=_C_PRIMARY,
+        linewidth=1.6,
+    )
+    ax.plot(
+        [0.0, 0.0],
+        [microphone_height_m, 0.0],
+        color=_C_SECONDARY,
+        linewidth=1.4,
+        linestyle="--",
     )
     if sampled_radius is not None:
         ax.plot(
             [-sampled_radius, sampled_radius],
-            [0.012 * source_height] * 2,
+            [0.012 * source_height_m] * 2,
             color=_C_PRIMARY,
             linewidth=3.0,
             solid_capstyle="butt",
         )
         _dim(
             ax,
-            (0.0, -0.12 * source_height),
-            (sampled_radius, -0.12 * source_height),
+            (0.0, -0.12 * source_height_m),
+            (sampled_radius, -0.12 * source_height_m),
             _metres(sampled_radius, language),
         )
         ax.text(
             -0.5 * sampled_radius,
-            -0.14 * source_height,
+            -0.14 * source_height_m,
             _t("Sampled area", language),
             fontsize=8,
             ha="center",
             va="top",
         )
-    off = 0.12 * source_height
+    off = 0.12 * source_height_m
     _dim(
         ax,
         (-2.0 * off, 0.0),
-        (-2.0 * off, mic_height),
-        _metres(mic_height, language),
+        (-2.0 * off, microphone_height_m),
+        _metres(microphone_height_m, language),
         tight=True,
     )
     _dim(
         ax,
         (-4.0 * off, 0.0),
-        (-4.0 * off, source_height),
-        _metres(source_height, language),
+        (-4.0 * off, source_height_m),
+        _metres(source_height_m, language),
     )
     _finish_geometry_axes(ax, _t("In-situ absorption set-up", language))
     return ax
@@ -1437,16 +1446,16 @@ def plot_insitu_result_geometry(
     **kwargs: Any,
 ) -> Axes:
     """Set-up drawing for a result that retained its geometry."""
-    if result.source_height is None or result.mic_height is None:
+    if result.source_height_m is None or result.microphone_height_m is None:
         msg = (
             "This result does not retain its set-up heights; call "
-            "plot_insitu_geometry(source_height=..., mic_height=...)."
+            "plot_insitu_geometry(source_height_m=..., microphone_height_m=...)."
         )
         raise ValueError(msg)
     return plot_insitu_geometry(
         ax=ax,
-        source_height=result.source_height,
-        mic_height=result.mic_height,
+        source_height_m=result.source_height_m,
+        microphone_height_m=result.microphone_height_m,
         language=language,
         **kwargs,
     )

@@ -95,7 +95,7 @@ from .._internal.validation import (
 _SABINE_NUMERATOR = 24.0 * log(10.0)
 
 #: Default speed of sound ``c0`` (20 degC dry air), in m/s, giving ``k = 0.161``.
-DEFAULT_SPEED_OF_SOUND = 343.0
+_SPEED_OF_SOUND_M_S = 343.0
 
 #: Absorption-coefficient ceiling for the Eyring-family logarithm ``ln(1 -
 #: Sanity ceiling for any individual absorption coefficient. Measured ISO 354
@@ -298,7 +298,7 @@ def sabine_reverberation_time(
     surfaces: Sequence[Surface],
     *,
     air_attenuation: ArrayLike = 0.0,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Sabine reverberation time :math:`T = k V / (A + 4 m V)`.
 
@@ -318,7 +318,7 @@ def sabine_reverberation_time(
         :func:`~phonometry.environment.propagation.air_absorption.air_attenuation_m`. Default ``0``
         (air absorption neglected).
     :param speed_of_sound: Speed of sound ``c0``, m/s (default
-        :data:`DEFAULT_SPEED_OF_SOUND`, giving the factor ``0.161``).
+        343 m/s, dry air at 20 °C, giving the factor ``0.161``).
     :return: The reverberation time ``T``, s; a float for scalar inputs,
         otherwise a per-band array.
     """
@@ -334,7 +334,7 @@ def eyring_reverberation_time(
     surfaces: Sequence[Surface],
     *,
     air_attenuation: ArrayLike = 0.0,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Eyring (Norris-Eyring) reverberation time.
 
@@ -370,7 +370,7 @@ def millington_sette_reverberation_time(
     surfaces: Sequence[Surface],
     *,
     air_attenuation: ArrayLike = 0.0,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Millington-Sette reverberation time.
 
@@ -483,7 +483,7 @@ def fitzroy_reverberation_time(
     absorptions: Sequence[ArrayLike],
     *,
     air_attenuation: ArrayLike = 0.0,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Fitzroy reverberation time -- area-weighted arithmetic mean of axial times.
 
@@ -518,7 +518,7 @@ def arau_puchades_reverberation_time(
     absorptions: Sequence[ArrayLike],
     *,
     air_attenuation: ArrayLike = 0.0,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> np.ndarray | float:
     r"""Arau-Puchades reverberation time -- area-weighted geometric mean of axial times.
 
@@ -717,7 +717,7 @@ def reverberation_time_models(
     *,
     air_attenuation: ArrayLike = 0.0,
     frequencies: ArrayLike | None = None,
-    speed_of_sound: float = DEFAULT_SPEED_OF_SOUND,
+    speed_of_sound: float = _SPEED_OF_SOUND_M_S,
 ) -> ReverberationModelResult:
     """Predict the reverberation time of a rectangular room by all five models.
 

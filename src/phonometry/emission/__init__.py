@@ -198,8 +198,8 @@ from .turbine_noise import (
     turbine_sound_power,
 )
 from .vibration_sound_power import (
-    NORMALIZED_IMPEDANCE,
-    REFERENCE_VELOCITY,
+    NORMALIZED_IMPEDANCE_PA_S_M,
+    REFERENCE_VELOCITY_M_S,
     VibrationSoundPowerResult,
     extraneous_velocity_correction,
     mean_velocity_level,
@@ -252,7 +252,7 @@ __all__ = [
     "MINIMUM_BACKGROUND_MARGIN_DB",
     "MeteorologicalCorrection",
     "NEGLIGIBLE_BACKGROUND_MARGIN_DB",
-    "NORMALIZED_IMPEDANCE",
+    "NORMALIZED_IMPEDANCE_PA_S_M",
     "NoiseEmissionDeclaration",
     "OperatingModeDeclaration",
     "partial_plant_contributions",
@@ -278,7 +278,7 @@ __all__ = [
     "PrecisionFieldIndicators",
     "PrecisionIntensityResult",
     "PrecisionSoundPowerResult",
-    "REFERENCE_VELOCITY",
+    "REFERENCE_VELOCITY_M_S",
     "ReferenceAtmosphereCorrection",
     "ReferenceSoundSourceVerdict",
     "ReferenceSourceCalibration",

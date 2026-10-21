@@ -49,8 +49,8 @@ mpl.use("Agg")
 import phonometry as ph
 from phonometry import building
 from phonometry.building.measurement.low_frequency import (
-    LOW_FREQUENCY_BANDS,
-    LOW_FREQUENCY_VOLUME_LIMIT,
+    LOW_FREQUENCY_PROCEDURE_BANDS_HZ,
+    LOW_FREQUENCY_VOLUME_LIMIT_M3,
     LowFrequencyProcedure,
     LowFrequencyWarning,
     _named_low_frequency_bands,
@@ -111,12 +111,12 @@ def _printed_formula_13(default: float, corner: float) -> float:
 
 def test_trigger_limit_is_the_printed_25_cubic_metres() -> None:
     """The constant is the number every clause prints, not a rounded stand-in."""
-    assert LOW_FREQUENCY_VOLUME_LIMIT == 25.0
+    assert LOW_FREQUENCY_VOLUME_LIMIT_M3 == 25.0
 
 
 def test_bands_are_the_printed_three() -> None:
     """50 Hz, 63 Hz and 80 Hz, in that order, and nothing else."""
-    assert LOW_FREQUENCY_BANDS == (50.0, 63.0, 80.0)
+    assert LOW_FREQUENCY_PROCEDURE_BANDS_HZ == (50.0, 63.0, 80.0)
 
 
 @pytest.mark.parametrize(
@@ -1067,7 +1067,7 @@ def test_a_room_at_or_above_the_trigger_raises_nothing() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", LowFrequencyWarning)
         building.impact_insulation(
-            _L2, _T2, volume=LOW_FREQUENCY_VOLUME_LIMIT, frequencies=_FREQS
+            _L2, _T2, volume=LOW_FREQUENCY_VOLUME_LIMIT_M3, frequencies=_FREQS
         )
 
 

@@ -50,7 +50,7 @@ def generate_epnl(output_dir: str) -> None:
     # Gaussian overall-level envelope; a fan tone in the 2500 Hz band adds a
     # tone correction near the closest-point-of-approach.
     shape = 15.0 * np.exp(
-        -((np.log10(aircraft.NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5
+        -((np.log10(aircraft.NOY_BANDS_HZ) - np.log10(400.0)) ** 2) / 0.5
     )
     gain = 30.0 * np.exp(-((idx - 20.0) ** 2) / (2 * 5.0**2)) - 5.0
     spectra = (55.0 + shape)[None, :] + gain[:, None]
@@ -1002,7 +1002,7 @@ def generate_airport_segment_corrections(output_dir: str) -> None:
     ax_v.text(
         _VREF_MS + 1.5,
         1.05,
-        r"$V_{\mathrm{ref}}$ = 82.3 m/s (160 kn)",
+        r"$V_{\mathrm{ref}}$ = 82.3 m/s (160 kt)",
         fontsize=8,
         color=COLOR_FG,
     )

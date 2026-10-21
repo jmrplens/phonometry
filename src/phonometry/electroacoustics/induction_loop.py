@@ -611,8 +611,8 @@ def _nearer_zero(x: np.ndarray, k: int) -> int:
 def combi_signal(
     fs: int,
     *,
-    sine_seconds: float = _COMBI_MIN_SINE_S,
-    noise_seconds: float = _COMBI_MIN_NOISE_S,
+    sine_s: float = _COMBI_MIN_SINE_S,
+    noise_s: float = _COMBI_MIN_NOISE_S,
     cycles: int = 1,
     seed: int | None = None,
 ) -> np.ndarray:
@@ -630,10 +630,10 @@ def combi_signal(
     own zero crossings.
 
     :param fs: Sample rate, in hertz.
-    :param sine_seconds: Duration of each sine burst, at least 1 s; rounded to
+    :param sine_s: Duration of each sine burst, at least 1 s; rounded to
         a whole number of periods.
-    :param noise_seconds: Duration of each stretch of noise, at least 4 s and
-        at least four times ``sine_seconds``. It grows to four times the
+    :param noise_s: Duration of each stretch of noise, at least 4 s and
+        at least four times ``sine_s``. It grows to four times the
         sine burst when rounding the burst to whole periods has lengthened
         it, so the ratio of 4:1 is never reduced, and by the few samples it
         takes to end on a zero crossing.
@@ -645,8 +645,8 @@ def combi_signal(
     if rate <= 2 * _BAND_LIMIT_HZ[1]:
         msg = f"'fs' must exceed {2 * _BAND_LIMIT_HZ[1]:g} Hz for the 6.5 kHz low-pass."
         raise ValueError(msg)
-    sine_s = require_finite(sine_seconds, "sine_seconds")
-    noise_s = require_finite(noise_seconds, "noise_seconds")
+    sine_s = require_finite(sine_s, "sine_s")
+    noise_s = require_finite(noise_s, "noise_s")
     n_cycles = require_count(cycles, "cycles")
     if sine_s < _COMBI_MIN_SINE_S or noise_s < _COMBI_MIN_NOISE_S:
         msg = (

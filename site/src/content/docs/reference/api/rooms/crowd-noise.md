@@ -107,12 +107,12 @@ bound (Equation (17.54)).
 
 **Returns:** The equivalent absorption area per table `A_tab`, m2.
 
-## COMMUNICATION_SNR
+## COMMUNICATION_SNR_DB
 
 *Constant* (`float`).
 
 ```python
-COMMUNICATION_SNR = -6.0
+COMMUNICATION_SNR_DB = -6.0
 ```
 
 ## crowd_noise
@@ -202,7 +202,7 @@ Self-generated noise of an occupied room versus occupancy and absorption.
 | `distance` | Talker-to-listener distance `r`, m. |
 | `sound_power_level` | Sound power level of one talker, dB re 1 pW. |
 | `directivity` | Talker directivity factor `Q`. |
-| `communication_level` | Noise level at which the speech-to-noise ratio falls to [`COMMUNICATION_SNR`](/phonometry/reference/api/rooms/crowd-noise/#communication_snr), dB: above it, cross-table conversation stops working. |
+| `communication_level` | Noise level at which the speech-to-noise ratio falls to [`COMMUNICATION_SNR_DB`](/phonometry/reference/api/rooms/crowd-noise/#communication_snr_db), dB: above it, cross-table conversation stops working. |
 
 ### CrowdNoiseResult.plot()
 
@@ -239,12 +239,12 @@ Speech-to-noise ratio for every point of `levels`, dB.
 NORMAL_VOICE_POWER_LEVEL = 70.0
 ```
 
-## PRIVACY_SNR
+## PRIVACY_SNR_DB
 
 *Constant* (`float`).
 
 ```python
-PRIVACY_SNR = -9.0
+PRIVACY_SNR_DB = -9.0
 ```
 
 ## speech_direct_level

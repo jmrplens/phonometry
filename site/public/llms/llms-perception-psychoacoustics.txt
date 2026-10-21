@@ -534,7 +534,7 @@ Cams, so equal steps along it are equal numbers of auditory filters.*
 | `cam` | float or array | Cam | ≥ 0 | `frequency_from_cam` |
 
 Each returns a float for a scalar input and an array otherwise. The three
-constants are exported as `ERB_C1`, `ERB_C2` and `CAM_C`.
+constants are exported as `ERB_C1_HZ`, `ERB_C2_PER_HZ` and `CAM_C`.
 
 ## Moore-Glasberg loudness (ISO 532-2)
 

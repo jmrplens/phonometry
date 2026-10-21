@@ -104,11 +104,11 @@ TALKER_DIRECTIVITY = 2.0
 
 #: Speech-to-noise ratio required for adequate cross-table communication, dB
 #: (Long Equation (17.53)).
-COMMUNICATION_SNR = -6.0
+COMMUNICATION_SNR_DB = -6.0
 
 #: Speech-to-noise ratio below which a neighbouring table is not understood, dB
 #: (Long Equation (17.54)).
-PRIVACY_SNR = -9.0
+PRIVACY_SNR_DB = -9.0
 
 
 def _require_distance(value: ArrayLike, name: str) -> NDArray[np.float64]:
@@ -251,7 +251,7 @@ class CrowdNoiseResult(OwnsArrays):
     :ivar sound_power_level: Sound power level of one talker, dB re 1 pW.
     :ivar directivity: Talker directivity factor ``Q``.
     :ivar communication_level: Noise level at which the speech-to-noise ratio
-        falls to :data:`COMMUNICATION_SNR`, dB: above it, cross-table
+        falls to :data:`COMMUNICATION_SNR_DB`, dB: above it, cross-table
         conversation stops working.
     """
 
@@ -291,7 +291,7 @@ class CrowdNoiseResult(OwnsArrays):
         :attr:`distance` for a talker of :attr:`sound_power_level` and
         :attr:`directivity`, all three of which the result stores beside it,
         and :attr:`communication_level` is that signal against the fixed
-        :data:`COMMUNICATION_SNR` of Equation (17.53). Both reach the reader
+        :data:`COMMUNICATION_SNR_DB` of Equation (17.53). Both reach the reader
         as a horizontal line whose caption is drawn from a *different* field
         than its height: the speech line is placed at ``signal_level`` and
         labelled with ``distance``, the limit line is placed at
@@ -326,7 +326,7 @@ class CrowdNoiseResult(OwnsArrays):
             scalar field is not finite, if ``signal_level`` does not restate
             the direct field of Equation (17.50) for the stored geometry, or
             if ``communication_level`` does not restate ``signal_level``
-            against :data:`COMMUNICATION_SNR`.
+            against :data:`COMMUNICATION_SNR_DB`.
         """
         require_ranks(self, talkers=1, absorption_areas=1, levels=2)
         require_same_length(self, "absorption_areas", "levels", axis="absorption area")
@@ -357,12 +357,12 @@ class CrowdNoiseResult(OwnsArrays):
                 f"{self.signal_level!r} where those fields state {direct!r}."
             )
             raise ValueError(msg)
-        limit = self.signal_level - COMMUNICATION_SNR
+        limit = self.signal_level - COMMUNICATION_SNR_DB
         if not math.isclose(self.communication_level, limit, rel_tol=0.0, abs_tol=1e-9):
             msg = (
                 "CrowdNoiseResult: 'communication_level' must be the noise "
                 "level at which the speech-to-noise ratio falls to the "
-                f"{COMMUNICATION_SNR:g} dB limit of Equation (17.53), that is "
+                f"{COMMUNICATION_SNR_DB:g} dB limit of Equation (17.53), that is "
                 f"'signal_level' minus it; got {self.communication_level!r} "
                 f"where 'signal_level' {self.signal_level!r} states {limit!r}."
             )
@@ -454,5 +454,5 @@ def crowd_noise(
         distance=float(r),
         sound_power_level=lw,
         directivity=float(q),
-        communication_level=signal - COMMUNICATION_SNR,
+        communication_level=signal - COMMUNICATION_SNR_DB,
     )

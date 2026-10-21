@@ -84,7 +84,7 @@ Complex = NDArray[np.complex128]
 
 
 __all__ = [
-    "DEFAULT_POLAR_ANGLES",
+    "DEFAULT_POLAR_ANGLES_DEG",
     "DiffuserPolarResponse",
     "predict_diffuser_polar_response",
     "predicted_diffusion_spectrum",
@@ -98,7 +98,7 @@ _C_DEFAULT = 343.0
 
 #: Default single-plane receiver angles of ISO 17497-2: a semicircle from
 #: -90 deg to +90 deg in 5 deg steps (Clause 6.3, Figure 4), in degrees.
-DEFAULT_POLAR_ANGLES: tuple[int, ...] = tuple(range(-90, 91, 5))
+DEFAULT_POLAR_ANGLES_DEG: tuple[int, ...] = tuple(range(-90, 91, 5))
 
 #: Fewest wells a per-period sequence must describe: a single well cannot
 #: form the phase-grating variation the Fraunhofer model sums over.
@@ -423,7 +423,7 @@ def predict_diffuser_polar_response(
     *,
     depths: ArrayLike | None = None,
     reflection: ArrayLike | None = None,
-    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES,
+    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
     repetitions: int = 1,
     speed_of_sound: float = _C_DEFAULT,
@@ -447,7 +447,7 @@ def predict_diffuser_polar_response(
         of one period (1-D, at least two wells); mutually exclusive with
         ``depths``.
     :param angles_deg: Receiver reflection angles ``theta``, in degrees; defaults to
-        the ISO 17497-2 semicircle :data:`DEFAULT_POLAR_ANGLES`.
+        the ISO 17497-2 semicircle :data:`DEFAULT_POLAR_ANGLES_DEG`.
     :param source_angle_deg: Angle of incidence ``psi`` of the source, in degrees
         (0 = normal incidence).
     :param repetitions: Number of repetitions ``N_p`` of the single period; the
@@ -500,7 +500,7 @@ def predicted_diffusion_spectrum(
     *,
     depths: ArrayLike,
     reflection_of: None = None,
-    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES,
+    angles_deg: ArrayLike = DEFAULT_POLAR_ANGLES_DEG,
     source_angle_deg: float = 0.0,
     repetitions: int = 1,
     speed_of_sound: float = _C_DEFAULT,
@@ -531,7 +531,7 @@ def predicted_diffusion_spectrum(
     :param reflection_of: Reserved for future frequency-dependent reflection
         models; must be ``None``.
     :param angles_deg: Receiver reflection angles ``theta``, in degrees; defaults to
-        :data:`DEFAULT_POLAR_ANGLES`.
+        :data:`DEFAULT_POLAR_ANGLES_DEG`.
     :param source_angle_deg: Angle of incidence ``psi``, in degrees.
     :param repetitions: Number of repetitions ``N_p`` of the single period.
     :param speed_of_sound: Speed of sound ``c``, in metres per second.

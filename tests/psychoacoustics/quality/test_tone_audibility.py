@@ -559,7 +559,7 @@ def test_mean_audibility_matches_annex_e() -> None:
 
 
 def test_mean_audibility_is_energy_mean() -> None:
-    deltas = [4.0, 6.0, psychoacoustics.NO_TONE_AUDIBILITY]
+    deltas = [4.0, 6.0, psychoacoustics.NO_TONE_AUDIBILITY_DB]
     expected = 10.0 * math.log10(np.mean([10.0 ** (d / 10.0) for d in deltas]))
     assert psychoacoustics.mean_audibility(deltas) == pytest.approx(expected)
 

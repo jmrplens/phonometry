@@ -17,7 +17,7 @@ import numpy as np
 import pytest
 
 from phonometry.aircraft.certification import (
-    NOY_BANDS,
+    NOY_BANDS_HZ,
     EPNLResult,
     _tone_background,
     effective_perceived_noise_level,
@@ -95,7 +95,7 @@ _DTR_44 = [
     0.4311,
 ]
 
-_B = list(NOY_BANDS)
+_B = list(NOY_BANDS_HZ)
 
 # ICAO Doc 9501 ETM Vol. I (2018) Table 3-7 turbofan spectrum (bands 1-2 blank).
 _SPL_37 = [
@@ -194,7 +194,7 @@ def test_tone_background_is_iso3891_annex_c(unused_bands: float) -> None:
     # the correction. Its 22 bands start at 80 Hz, so whatever stands in the
     # 50 Hz and 63 Hz bands must not reach the result. It is the spectrum of
     # ICAO ETM Table 3-7 from 80 Hz up.
-    assert tuple(NOY_BANDS[2:]) == iso3891_annex_c.FREQUENCIES_HZ
+    assert tuple(NOY_BANDS_HZ[2:]) == iso3891_annex_c.FREQUENCIES_HZ
     assert tuple(_SPL_37[2:]) == iso3891_annex_c.LEVELS_DB
     spl = [unused_bands, unused_bands, *iso3891_annex_c.LEVELS_DB]
     background, excess = _tone_background(spl)

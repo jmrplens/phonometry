@@ -111,7 +111,7 @@ __all__ = [
 
 #: The reference acceleration of Formula (3), in metres per second squared:
 #: the :math:`10^{-6}` m/s² of DIN EN 21683, the same number
-#: ``vibration.REFERENCE_ACCELERATION`` publishes for human exposure and
+#: ``vibration.ACCELERATION_LEVEL_REFERENCE_M_S2`` publishes for human exposure and
 #: ISO 1683:2015 keeps in Table 3.
 _ACCELERATION_REFERENCE_M_S2 = ISO1683_REFERENCE_VALUES["solid"]["acceleration"].value
 

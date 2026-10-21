@@ -58,7 +58,7 @@ __all__ = [
 class DampingTreatment(CatalogueRow):
     """One damping treatment, rated on the chapter's standard panel.
 
-    :ivar decay_rate_db_s: The decay rate of the vibration of the treated
+    :ivar decay_rate_db_per_s: The decay rate of the vibration of the treated
         standard panel, in decibels per second. Printed as a range on most
         rows, which :attr:`~phonometry.io.CatalogueRow.ranges`
         holds.
@@ -72,7 +72,7 @@ class DampingTreatment(CatalogueRow):
     :ivar surface_density_kg_m2: The weight of the treatment, in kg/m2.
     """
 
-    decay_rate_db_s: float | None = None
+    decay_rate_db_per_s: float | None = None
     temperature_c: float | None = None
     adhered_area_percent: float | None = None
     surface_density_kg_m2: float | None = None

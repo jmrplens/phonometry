@@ -145,12 +145,12 @@ Which of the five regimes of Clause 5.2 the valve is in, 1 to 5.
 Read from `pressure_ratio` and `boundaries` by
 [`flow_regime`](/phonometry/reference/api/noise_control/valves/#flow_regime), the intervals of Clause 5.2 closed at the top.
 
-## AIR_SOUND_SPEED_M_S
+## AIR_SPEED_OF_SOUND_M_S
 
 *Constant* (`float`).
 
 ```python
-AIR_SOUND_SPEED_M_S = 343.0
+AIR_SPEED_OF_SOUND_M_S = 343.0
 ```
 
 ## coincidence_frequencies
@@ -422,9 +422,9 @@ GasStream(
     inlet_pressure_pa: float,
     outlet_pressure_pa: float,
     inlet_density: float,
-    inlet_temperature_k: float,
+    inlet_temperature_c: float,
     specific_heat_ratio: float,
-    molecular_mass: float,
+    molar_mass_kg_kmol: float,
 )
 ```
 
@@ -438,9 +438,9 @@ The gas and the operating point, which Clause 5.1 reads first.
 | `inlet_pressure_pa` | $p_1$, absolute, in Pa. |
 | `outlet_pressure_pa` | $p_2$, absolute, in Pa. |
 | `inlet_density` | $\rho_1$, in kg/m³. |
-| `inlet_temperature_k` | $T_1$, absolute, in K. |
+| `inlet_temperature_c` | $T_1$, in °C; Clause 5 reads it absolute, converted inside. |
 | `specific_heat_ratio` | $\gamma$. |
-| `molecular_mass` | $M$, in kg/kmol. |
+| `molar_mass_kg_kmol` | $M$, in kg/kmol. |
 
 ## GLOBE_CONTRACTION_COEFFICIENT
 
@@ -448,6 +448,14 @@ The gas and the operating point, which Clause 5.1 reads first.
 
 ```python
 GLOBE_CONTRACTION_COEFFICIENT = 0.93
+```
+
+## IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K
+
+*Constant* (`float`).
+
+```python
+IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K = 8314.0
 ```
 
 ## internal_spectrum
@@ -705,12 +713,12 @@ What a multistage trim hands Clause 5 in place of the valve inlet.
 | `stagnation_density` | $\rho_n$ there, in kg/m³, Equation (29). |
 | `equation` | Which of `"28a"`, `"28b"` and `"28c"` was used, because the branch is a reading of NOTE 3 rather than an arithmetic fact and a report should say which one it took. |
 
-## PIPE_SOUND_SPEED_M_S
+## PIPE_SPEED_OF_SOUND_M_S
 
 *Constant* (`float`).
 
 ```python
-PIPE_SOUND_SPEED_M_S = 5000.0
+PIPE_SPEED_OF_SOUND_M_S = 5000.0
 ```
 
 ## pipe_transmission_loss
@@ -952,14 +960,6 @@ STANDARD_ATMOSPHERE_PA = 101325.0
 
 ```python
 STRUCTURAL_LOSS_REFERENCE_HZ = 1.0
-```
-
-## UNIVERSAL_GAS_CONSTANT
-
-*Constant* (`float`).
-
-```python
-UNIVERSAL_GAS_CONSTANT = 8314.0
 ```
 
 ## VALVE_ACOUSTIC_STYLES

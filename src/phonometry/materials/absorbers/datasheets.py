@@ -52,8 +52,8 @@ from typing import TYPE_CHECKING, Any, ClassVar
 
 from ..._internal.catalogue import BandedRow, _bases_named
 from .rating import (
-    OCTAVE_BANDS,
-    THIRD_OCTAVE_BANDS,
+    RATING_OCTAVE_BANDS_HZ,
+    RATING_THIRD_OCTAVE_BANDS_HZ,
     AbsorptionRatingResult,
     _practical_round,
     weighted_absorption,
@@ -317,10 +317,12 @@ class PracticalAbsorptionSpectrum(_RatedAbsorption):
             the row, the band and what the sheet had there; nothing is filled
             in for it.
         """
-        return weighted_absorption(self.values_at(OCTAVE_BANDS))
+        return weighted_absorption(self.values_at(RATING_OCTAVE_BANDS_HZ))
 
     def _rating_if_printed(self) -> AbsorptionRatingResult | None:
-        values = [getattr(self, self._band_field(band)) for band in OCTAVE_BANDS]
+        values = [
+            getattr(self, self._band_field(band)) for band in RATING_OCTAVE_BANDS_HZ
+        ]
         if any(value is None or value < 0 for value in values):
             return None
         return weighted_absorption(values)
@@ -454,8 +456,8 @@ class ThirdOctaveAbsorptionSpectrum(_RatedAbsorption):
             or for a negative coefficient among them, naming the row, the
             band and the value.
         """
-        values = self.values_at(THIRD_OCTAVE_BANDS)
-        for band in THIRD_OCTAVE_BANDS:
+        values = self.values_at(RATING_THIRD_OCTAVE_BANDS_HZ)
+        for band in RATING_THIRD_OCTAVE_BANDS_HZ:
             if why := self._negative(band):
                 msg = f"{self.name!r} cannot be rated: {why}"
                 raise ValueError(msg)
@@ -475,7 +477,10 @@ class ThirdOctaveAbsorptionSpectrum(_RatedAbsorption):
         )
 
     def _rating_if_printed(self) -> AbsorptionRatingResult | None:
-        values = [getattr(self, self._band_field(band)) for band in THIRD_OCTAVE_BANDS]
+        values = [
+            getattr(self, self._band_field(band))
+            for band in RATING_THIRD_OCTAVE_BANDS_HZ
+        ]
         if any(value is None or value < 0 for value in values):
             return None
         return weighted_absorption_from_third_octave(values)

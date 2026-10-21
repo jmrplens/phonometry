@@ -34,9 +34,9 @@ def _flyover() -> aircraft.EPNLResult:
     """A deterministic synthetic flyover EPNLResult (Gaussian temporal peak)."""
     k, dt = 24, 0.5
     idx = np.arange(k)
-    from phonometry.aircraft import NOY_BANDS
+    from phonometry.aircraft import NOY_BANDS_HZ
 
-    shape = 15.0 * np.exp(-((np.log10(NOY_BANDS) - np.log10(400.0)) ** 2) / 0.5)
+    shape = 15.0 * np.exp(-((np.log10(NOY_BANDS_HZ) - np.log10(400.0)) ** 2) / 0.5)
     gain = 24.0 * np.exp(-((idx - 12.0) ** 2) / (2 * 3.5**2)) - 3.0
     spectra = (46.0 + shape)[None, :] + gain[:, None]
     spectra[:, 17] += 10.0 * np.exp(-((idx - 12.0) ** 2) / (2 * 4.0**2))

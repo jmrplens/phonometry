@@ -2514,9 +2514,9 @@ def generate_hearing_threshold(output_dir: str) -> None:
     """ISO 7029 age-related threshold and ISO 389-7 reference threshold."""
     print("Generating hearing_threshold.png...")
     from phonometry import hearing
-    from phonometry.hearing.threshold import AUDIOMETRIC_FREQUENCIES
+    from phonometry.hearing.threshold import AUDIOMETRIC_FREQUENCIES_HZ
 
-    freqs = AUDIOMETRIC_FREQUENCIES
+    freqs = AUDIOMETRIC_FREQUENCIES_HZ
     _fig, (ax_age, ax_ref) = plt.subplots(1, 2, figsize=(12.5, 5.6))
 
     # --- Left: ISO 7029 median threshold by age (male) + 10-90 % band @70. ---
@@ -2596,9 +2596,9 @@ def generate_age_threshold_sex_and_spread(output_dir: str) -> None:
     """
     print("Generating age_threshold_sex_and_spread.png...")
     from phonometry import hearing
-    from phonometry.hearing.threshold import AUDIOMETRIC_FREQUENCIES
+    from phonometry.hearing.threshold import AUDIOMETRIC_FREQUENCIES_HZ
 
-    idx = int(np.argmin(np.abs(np.asarray(AUDIOMETRIC_FREQUENCIES) - 4000.0)))
+    idx = int(np.argmin(np.abs(np.asarray(AUDIOMETRIC_FREQUENCIES_HZ) - 4000.0)))
     ages = np.arange(18.0, 81.0, 1.0)
     res = {
         s: [hearing.age_threshold(float(a), s, 0.5) for a in ages]
@@ -4457,7 +4457,7 @@ def generate_audiometric_zero_earphones(output_dir: str) -> None:
 
     # The sound-field zero of ISO 389-7 at the eleven frequencies it shares
     # with the earphone table: the same audiogram, two different zeros.
-    shared = [f for f in hearing.AUDIOMETRIC_FREQUENCIES if f in set(freqs)]
+    shared = [f for f in hearing.AUDIOMETRIC_FREQUENCIES_HZ if f in set(freqs)]
     coupler = hearing.earphone_reference_level("TDH 39", shared)
     field = hearing.reference_threshold("free-field", shared)
     ax_gap.plot(shared, coupler, "s-", color=COLOR_SECONDARY, label="TDH 39, coupler")

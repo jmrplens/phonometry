@@ -75,7 +75,7 @@ import numpy as np
 
 from .._internal.frozen import OwnsArrays, read_only
 from .._internal.validation import require_choice, require_scalar
-from .threshold import AUDIOMETRIC_FREQUENCIES as _AUDIOMETRIC_FREQUENCIES
+from .threshold import AUDIOMETRIC_FREQUENCIES_HZ as _AUDIOMETRIC_FREQUENCIES
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

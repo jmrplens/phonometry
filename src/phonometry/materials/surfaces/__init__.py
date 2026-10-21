@@ -11,12 +11,12 @@ ISO 13472 and the road are what it holds today.
 from __future__ import annotations
 
 from .road_absorption import (
-    DEFAULT_MIC_HEIGHT,
-    DEFAULT_SOURCE_HEIGHT,
-    DEFAULT_SPEED_OF_SOUND,
-    PART1_FREQUENCY_RANGE,
-    SPOT_FREQUENCY_RANGE,
-    SPOT_NARROW_BAND_RANGE,
+    DEFAULT_MICROPHONE_HEIGHT_M,
+    DEFAULT_SOURCE_HEIGHT_M,
+    ISO13472_SPEED_OF_SOUND_M_S,
+    PART1_FREQUENCY_RANGE_HZ,
+    SPOT_FREQUENCY_RANGE_HZ,
+    SPOT_NARROW_BAND_RANGE_HZ,
     InsituAbsorptionResult,
     RoadAbsorptionWarning,
     absorption_reference_corrected,
@@ -39,12 +39,12 @@ from .road_absorption import (
 )
 
 __all__ = [
-    "DEFAULT_MIC_HEIGHT",
-    "DEFAULT_SOURCE_HEIGHT",
-    "DEFAULT_SPEED_OF_SOUND",
-    "PART1_FREQUENCY_RANGE",
-    "SPOT_FREQUENCY_RANGE",
-    "SPOT_NARROW_BAND_RANGE",
+    "DEFAULT_MICROPHONE_HEIGHT_M",
+    "DEFAULT_SOURCE_HEIGHT_M",
+    "ISO13472_SPEED_OF_SOUND_M_S",
+    "PART1_FREQUENCY_RANGE_HZ",
+    "SPOT_FREQUENCY_RANGE_HZ",
+    "SPOT_NARROW_BAND_RANGE_HZ",
     "InsituAbsorptionResult",
     "RoadAbsorptionWarning",
     "absorption_reference_corrected",

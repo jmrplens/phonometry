@@ -169,7 +169,7 @@ def test_the_rating_keeps_the_fifteen_bands_it_was_formed_from() -> None:
     rating = _annex_c().rating()
     assert rating.third_octave_alpha_s is not None
     assert list(rating.third_octave_alpha_s) == [
-        _ANNEX_C[band] for band in materials.THIRD_OCTAVE_BANDS
+        _ANNEX_C[band] for band in materials.RATING_THIRD_OCTAVE_BANDS_HZ
     ]
 
 

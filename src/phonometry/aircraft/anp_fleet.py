@@ -63,7 +63,7 @@ from .airport_noise import (
     event_level,
     noise_contour,
 )
-from .certification import NOY_BANDS
+from .certification import NOY_BANDS_HZ
 from .flight_performance import (
     AerodynamicCoefficients,
     ApproachStep,
@@ -1744,8 +1744,8 @@ def _spectral_frequencies(header: Iterable[str]) -> NDArray[np.float64]:
         if c.strip().startswith("L_") and c.strip().endswith("Hz")
     ]
     frequencies = np.asarray(found, dtype=np.float64)
-    if frequencies.shape != NOY_BANDS.shape or not np.allclose(
-        frequencies, NOY_BANDS, rtol=0.0, atol=_BAND_MATCH_HZ
+    if frequencies.shape != NOY_BANDS_HZ.shape or not np.allclose(
+        frequencies, NOY_BANDS_HZ, rtol=0.0, atol=_BAND_MATCH_HZ
     ):
         msg = (
             "spectral-class table must carry the 24 'L_<f>Hz' columns from "

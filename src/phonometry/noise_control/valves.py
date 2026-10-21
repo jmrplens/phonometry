@@ -67,6 +67,8 @@ import numpy as np
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays
 from .._internal.validation import (
+    ABSOLUTE_ZERO_C,
+    require_above_absolute_zero,
     require_choice,
     require_positive,
     require_scalar,
@@ -82,7 +84,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 __all__ = [
     "AERODYNAMIC_A_WEIGHTING_DB",
     "AerodynamicValveNoise",
-    "AIR_SOUND_SPEED_M_S",
+    "AIR_SPEED_OF_SOUND_M_S",
     "coincidence_frequencies",
     "combine_internal_levels",
     "DEFAULT_EXPANDER",
@@ -103,7 +105,7 @@ __all__ = [
     "multiple_passage_jet_diameter",
     "multistage_trim_conditions",
     "MultistageConditions",
-    "PIPE_SOUND_SPEED_M_S",
+    "PIPE_SPEED_OF_SOUND_M_S",
     "pipe_transmission_loss",
     "PIPE_WALL_MACH_LIMIT",
     "PipeFrequencies",
@@ -118,7 +120,7 @@ __all__ = [
     "stage_level_correction",
     "STANDARD_ATMOSPHERE_PA",
     "STRUCTURAL_LOSS_REFERENCE_HZ",
-    "UNIVERSAL_GAS_CONSTANT",
+    "IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K",
     "VALVE_ACOUSTIC_STYLES",
     "valve_aerodynamic_noise",
     "valve_style_modifier",
@@ -142,7 +144,7 @@ FLOW_COEFFICIENT_CONSTANTS = MappingProxyType({"Cv": 4.6e-3, "Kv": 4.9e-3})
 #: The universal gas constant as the standard prints it in Clause 4, in
 #: J/(kmol K). It is paired with a molecular mass in kg/kmol, which is the
 #: form Equations (10) and (14) are written for.
-UNIVERSAL_GAS_CONSTANT = 8314.0
+IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K = 8314.0
 
 #: Table 4: the valve correction factor for acoustical efficiency
 #: :math:`A_\eta` and the Strouhal number at the peak frequency
@@ -171,12 +173,12 @@ VALVE_ACOUSTIC_STYLES: Mapping[str, tuple[float, float]] = MappingProxyType(
 #: Speed of sound in air of NOTE 3 to Equations (22) and (23), in m/s. It is
 #: the value the coincidence frequencies are printed for, not a property of
 #: the air around the pipe on the day.
-AIR_SOUND_SPEED_M_S = 343.0
+AIR_SPEED_OF_SOUND_M_S = 343.0
 
 #: Speed of sound in the pipe wall of NOTE 4 to Equations (21) and (23), in
 #: m/s, for steel. Clause 1 restricts the whole method to steel and steel
 #: alloy pipes for exactly this reason.
-PIPE_SOUND_SPEED_M_S = 5000.0
+PIPE_SPEED_OF_SOUND_M_S = 5000.0
 
 #: The reference frequency :math:`f_s` of Equation (20c), in Hz. The symbol
 #: list gives it as 1 Hz and the equation never says so again, which makes
@@ -666,8 +668,8 @@ def coincidence_frequencies(
     wall_thickness: float,
     downstream_sound_speed: float,
     *,
-    pipe_sound_speed: float = PIPE_SOUND_SPEED_M_S,
-    air_sound_speed: float = AIR_SOUND_SPEED_M_S,
+    pipe_sound_speed: float = PIPE_SPEED_OF_SOUND_M_S,
+    air_sound_speed: float = AIR_SPEED_OF_SOUND_M_S,
 ) -> PipeFrequencies:
     r"""Equations (21), (22) and (23).
 
@@ -756,8 +758,8 @@ def pipe_transmission_loss(
     downstream_density: float,
     downstream_sound_speed: float,
     pipe_density: float,
-    pipe_sound_speed: float = PIPE_SOUND_SPEED_M_S,
-    air_sound_speed: float = AIR_SOUND_SPEED_M_S,
+    pipe_sound_speed: float = PIPE_SPEED_OF_SOUND_M_S,
+    air_sound_speed: float = AIR_SPEED_OF_SOUND_M_S,
     atmospheric_pressure_pa: float = 1.01325e5,
     standard_pressure_pa: float = 1.01325e5,
 ) -> NDArray[np.float64]:
@@ -1405,18 +1407,19 @@ class GasStream(RichDisplay):
     :ivar inlet_pressure_pa: :math:`p_1`, absolute, in Pa.
     :ivar outlet_pressure_pa: :math:`p_2`, absolute, in Pa.
     :ivar inlet_density: :math:`\rho_1`, in kg/m³.
-    :ivar inlet_temperature_k: :math:`T_1`, absolute, in K.
+    :ivar inlet_temperature_c: :math:`T_1`, in °C; Clause 5 reads it absolute,
+        converted inside.
     :ivar specific_heat_ratio: :math:`\gamma`.
-    :ivar molecular_mass: :math:`M`, in kg/kmol.
+    :ivar molar_mass_kg_kmol: :math:`M`, in kg/kmol.
     """
 
     mass_flow: float
     inlet_pressure_pa: float
     outlet_pressure_pa: float
     inlet_density: float
-    inlet_temperature_k: float
+    inlet_temperature_c: float
     specific_heat_ratio: float
-    molecular_mass: float
+    molar_mass_kg_kmol: float
 
 
 @dataclass(frozen=True)
@@ -1468,8 +1471,8 @@ class DownstreamPipe(RichDisplay):
     wall_thickness: float
     density: float
     _: KW_ONLY
-    speed_of_sound: float = PIPE_SOUND_SPEED_M_S
-    air_sound_speed: float = AIR_SOUND_SPEED_M_S
+    speed_of_sound: float = PIPE_SPEED_OF_SOUND_M_S
+    air_sound_speed: float = AIR_SPEED_OF_SOUND_M_S
     atmospheric_pressure_pa: float = STANDARD_ATMOSPHERE_PA
     standard_pressure_pa: float = STANDARD_ATMOSPHERE_PA
 
@@ -1509,9 +1512,9 @@ def valve_aerodynamic_noise(
     inlet_pressure_pa = stream.inlet_pressure_pa
     outlet_pressure_pa = stream.outlet_pressure_pa
     inlet_density = stream.inlet_density
-    inlet_temperature_k = stream.inlet_temperature_k
+    inlet_temperature_c = stream.inlet_temperature_c
     specific_heat_ratio = stream.specific_heat_ratio
-    molecular_mass = stream.molecular_mass
+    molar_mass_kg_kmol = stream.molar_mass_kg_kmol
     flow_coefficient = valve.flow_coefficient
     style_modifier = valve.style_modifier
     pressure_recovery = valve.pressure_recovery
@@ -1537,8 +1540,11 @@ def valve_aerodynamic_noise(
         raise ValueError(msg)
     flow = require_positive(mass_flow, "mass_flow")
     rho1 = require_positive(inlet_density, "inlet_density")
-    t1 = require_positive(inlet_temperature_k, "inlet_temperature_k")
-    mass = require_positive(molecular_mass, "molecular_mass")
+    t1 = (
+        require_above_absolute_zero(inlet_temperature_c, "inlet_temperature_c")
+        - ABSOLUTE_ZERO_C
+    )
+    mass = require_positive(molar_mass_kg_kmol, "molar_mass_kg_kmol")
     outlet = require_positive(valve_outlet_diameter_m, "valve_outlet_diameter_m")
     bore = require_positive(internal_diameter_m, "internal_diameter_m")
 
@@ -1581,7 +1587,7 @@ def valve_aerodynamic_noise(
     )
 
     rho2 = rho1 * (p2 / p1)
-    c2 = math.sqrt(gamma * UNIVERSAL_GAS_CONSTANT * t1 / mass)
+    c2 = math.sqrt(gamma * IEC60534_MOLAR_GAS_CONSTANT_J_KMOL_K * t1 / mass)
     outlet_mach = 4.0 * flow / (math.pi * outlet**2 * rho2 * c2)
     pipe_mach = 4.0 * flow / (math.pi * bore**2 * rho2 * c2)
     limited = min(pipe_mach, PIPE_WALL_MACH_LIMIT)

@@ -112,7 +112,7 @@ A tabulated NPD level is not a free-standing measurement. It is the event level
 of that aeroplane in steady straight flight along an **infinite** path, at a
 fixed reference condition (§2.5): sea-level pressure, the average atmospheric
 attenuation rates of Appendix D Table D-1, no precipitation, wind below 8 m/s,
-a 160 kn groundspeed for the exposure levels, and flat acoustically soft ground
+a 160 kt groundspeed for the exposure levels, and flat acoustically soft ground
 with the microphone 1.2 m above it. Those attenuation rates are arithmetic
 averages over European and American certification campaigns, so the reference
 day is a notional atmosphere (Doc 29 calls it the *AIR-1845 atmosphere*)
@@ -159,7 +159,7 @@ $N$ points make $N-1$ segments, so every per-segment mask carries $N-1$ entries.
 This is why the ground-roll masks below read `xs[:-1] < 1500.0` and not
 `xs < 1500.0`. Two defaults decide more than they look like they do. The speed
 column enters the duration correction relative to `reference_speed`, whose
-default is 82.31 m/s, the Doc 29 160 kn reference, so a path flown at exactly
+default is 82.31 m/s, the Doc 29 160 kt reference, so a path flown at exactly
 that speed carries no duration correction at all, which is the case in every
 example on this page, and varying the column is how you see the term work. And
 `mounting=` defaults to `"wing"`: that is a property of the aeroplane rather

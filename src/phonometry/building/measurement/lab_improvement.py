@@ -575,7 +575,7 @@ class LabFloorCoveringImprovementResult(OwnsArrays):
 
         :param path: Destination path of the PDF file.
         :param metadata: Optional :class:`~phonometry.ReportMetadata`; its
-            ``product`` and ``curing_time_h`` fill the product identification
+            ``product`` and ``curing_time_hours`` fill the product identification
             and curing time rows, ``source_temperature_c`` and
             ``source_relative_humidity_percent`` (or the single
             ``temperature_c`` and ``relative_humidity_percent``) the climate

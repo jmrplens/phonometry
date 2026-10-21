@@ -139,7 +139,7 @@ except ImportError:  # pragma: no cover - depends on install extras
 
 #: Reference voltage of the dBqps scale (clause 2.6), in volts: the r.m.s.
 #: value of the 1 kHz sine that shall read 0 dB.
-DBQPS_REFERENCE = 0.775
+DBQPS_REFERENCE_V = 0.775
 
 #: Reference sound pressure, in pascals. BS.468-4 has none: it is here only
 #: so that :attr:`QuasiPeakResult.level_unit` can name the scale a caller
@@ -516,7 +516,7 @@ class QuasiPeakResult(OwnsArrays):
         nothing here can tell those two apart, and no other reference is
         close enough to either to collide.
         """
-        if math.isclose(self.reference, DBQPS_REFERENCE):
+        if math.isclose(self.reference, DBQPS_REFERENCE_V):
             return "dBqps"
         if math.isclose(self.reference, _P_REF):
             return "dB re 20 uPa"
@@ -573,7 +573,7 @@ def _resolve_reference(x: SignalInput, reference: float | None) -> float:
             "reference=2e-5 for a quasi-peak sound pressure level re 20 uPa."
         )
         raise ValueError(msg)
-    return DBQPS_REFERENCE
+    return DBQPS_REFERENCE_V
 
 
 def quasi_peak_meter(

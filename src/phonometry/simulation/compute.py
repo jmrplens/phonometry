@@ -72,22 +72,29 @@ class ComputeFallbackWarning(PhonometryWarning):
     """A requested device was not available and the run went to NumPy."""
 
 
-def _refuse_impossible_placement(device: Device, dtype: Dtype, index: int) -> None:
-    """Refuse a device, dtype and index no run can step on together.
+def _placement_index(device: Device, dtype: Dtype, device_index: int) -> int:
+    """The device index as an int, once the placement is one a run can step on.
 
     Shared by :class:`Compute`, the request, and :class:`RunProvenance`, the
     record of a run, so a record rebuilt by hand cannot hold a placement no
-    request could have asked for.
+    request could have asked for. The index is held as an int, so a whole
+    float or a NumPy integer reaches the array library as the plain index it
+    takes.
 
-    :raises ValueError: for ``"torch:mps"`` in float64, or an index other
-        than 0 on a device that has one instance.
+    :raises TypeError: for a ``device_index`` that is not a number (a bool
+        is not one).
+    :raises ValueError: for an index that is not a whole number of 0 or
+        more, ``"torch:mps"`` in float64, or an index other than 0 on a
+        device that has one instance.
     """
+    index = require_count(device_index, "device_index", at_least=0)
     if device == _TORCH_MPS and dtype == "float64":
         msg = "device 'torch:mps' needs dtype='float32': MPS has no float64"
         raise ValueError(msg)
     if device in _SINGLE and index != 0:
         msg = f"device {device!r} has no device index; leave device_index at 0"
         raise ValueError(msg)
+    return index
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -118,9 +125,7 @@ class Compute(RichDisplay):
         """Refuse a request that cannot mean anything, before any device is probed."""
         require_choice(self.device, "device", _DEVICES)
         require_choice(self.dtype, "dtype", _DTYPES)
-        # Held as an int, so a whole float or a NumPy integer reaches the
-        # array library as the plain index it takes.
-        index = require_count(self.device_index, "device_index", at_least=0)
+        index = _placement_index(self.device, self.dtype, self.device_index)
         object.__setattr__(self, "device_index", index)
         if not isinstance(self.fallback, bool | np.bool_):
             # "no" is truthy: read as a flag it would turn on the fallback
@@ -128,7 +133,6 @@ class Compute(RichDisplay):
             msg = f"'fallback' must be True or False, got {self.fallback!r}."
             raise TypeError(msg)
         object.__setattr__(self, "fallback", bool(self.fallback))
-        _refuse_impossible_placement(self.device, self.dtype, self.device_index)
         if self.device == "cpu" and self.fallback:
             msg = "device 'cpu' is already the fallback; fallback=True means nothing there"
             raise ValueError(msg)
@@ -175,10 +179,8 @@ class RunProvenance(RichDisplay):
         """Refuse a record no run could have written, as :class:`Compute` does."""
         require_choice(self.device, "device", _DEVICES)
         require_choice(self.dtype, "dtype", _DTYPES)
-        # Held as an int, as Compute holds it.
-        index = require_count(self.device_index, "device_index", at_least=0)
+        index = _placement_index(self.device, self.dtype, self.device_index)
         object.__setattr__(self, "device_index", index)
-        _refuse_impossible_placement(self.device, self.dtype, index)
         if not isinstance(self.numpy_version, str):
             msg = f"'numpy_version' must be a text, got {self.numpy_version!r}."
             raise TypeError(msg)

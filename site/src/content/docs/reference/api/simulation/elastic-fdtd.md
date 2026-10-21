@@ -162,7 +162,7 @@ $1/\sqrt{r}$ amplitude spreading.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an input is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is not an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording), or a `compute` that is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
+| TypeError | If an input is of the wrong type, among them a `cfl` or `dx` that is not one number, a `recording` that is neither an [`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording) nor `None`, or a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ValueError | If the inputs are invalid. |
 | ComputeImportError | When the device's library is not installed or does not import. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
@@ -255,7 +255,7 @@ interfaces converge to the physical traction continuity.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl` is not a single number, `sponge_width` is a flag, a text or an array where a count goes, or `compute` is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
+| TypeError | if `cfl` is not a single number, `sponge_width` is a flag, a text or an array where a count goes, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 
@@ -350,7 +350,7 @@ or `numpy.s_[120:, :]` for the same thing spelled as a slice.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If a mask does not match `shape` or a material spec is invalid, a catalogue row's refusal among them. |
-| TypeError | For a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, or a `compute` keyword that is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
+| TypeError | For a mask array that is not boolean, a catalogue row of a class that lacks any of the bulk longitudinal speed, the transverse speed and the density, or a `compute` keyword that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ComputeImportError | When the library of the device a `compute` keyword asks for is not installed or does not import. |
 | ComputeDeviceError | When that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), pointing at the line that called this method, and steps on NumPy instead. |
 
@@ -550,7 +550,7 @@ nothing (the default) runs the physics and keeps only the time axis.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a probe that is not a pair or has an index that is not a number, or a `snapshot_every` or `snapshot_decimation` that is a flag, a text, an array or anything else that is not a number. |
+| TypeError | for a probe that is not a pair or has an index that is not a number, a `snapshot_every` that is a flag, a text, an array or anything else that is neither a number nor `None`, or a `snapshot_decimation` that is a flag, a text, an array or anything else that is not a number. |
 | ValueError | for `probe_fields` that are empty, repeat a field or name one that is not `"p"`, `"vx"` or `"vy"`, a `snapshot_field` that is none of them, a probe of more or fewer than two indices or with an index that is not a whole number, or a `snapshot_every` or `snapshot_decimation` that is not a whole number of 1 or more. |
 
 ## ExplosionSource

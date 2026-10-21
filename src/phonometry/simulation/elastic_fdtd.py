@@ -669,8 +669,8 @@ class ElasticFDTD2D:
     :param compute: Where the engine steps (:class:`Compute`); ``None``
         follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :raises TypeError: if ``cfl`` is not a single number, ``sponge_width`` is a flag,
-        a text or an array where a count goes, or ``compute`` is not a
-        :class:`Compute`.
+        a text or an array where a count goes, or ``compute`` is neither a
+        :class:`Compute` nor ``None``.
     :raises ComputeImportError: when the library of the device ``compute``
         asks for is not installed or does not import.
     :raises ComputeDeviceError: when that device is not present, or fails a
@@ -852,7 +852,7 @@ class ElasticFDTD2D:
         :raises TypeError: For a mask array that is not boolean, a
             catalogue row of a class that lacks any of the bulk longitudinal
             speed, the transverse speed and the density, or a ``compute``
-            keyword that is not a :class:`Compute`.
+            keyword that is neither a :class:`Compute` nor ``None``.
         :raises ComputeImportError: When the library of the device a
             ``compute`` keyword asks for is not installed or does not import.
         :raises ComputeDeviceError: When that device is not present, or fails
@@ -1464,8 +1464,10 @@ class ElasticRecording(RichDisplay):
     :param snapshot_decimation: Keep every this many cells along each axis
         in a snapshot (default 1, every cell); the result records it.
     :raises TypeError: for a probe that is not a pair or has an index that is
-        not a number, or a ``snapshot_every`` or ``snapshot_decimation`` that
-        is a flag, a text, an array or anything else that is not a number.
+        not a number, a ``snapshot_every`` that is a flag, a text, an array or
+        anything else that is neither a number nor ``None``, or a
+        ``snapshot_decimation`` that is a flag, a text, an array or anything
+        else that is not a number.
     :raises ValueError: for ``probe_fields`` that are empty, repeat a field or
         name one that is not ``"p"``, ``"vx"`` or ``"vy"``, a
         ``snapshot_field`` that is none of them, a probe of more or fewer than
@@ -1771,9 +1773,9 @@ def elastic_fdtd_simulation(
         :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :return: An :class:`ElasticFDTDResult`.
     :raises TypeError: If an input is of the wrong type, among them a ``cfl``
-        or ``dx`` that is not one number, a ``recording`` that is not an
-        :class:`ElasticRecording`, or a ``compute`` that is not a
-        :class:`Compute`.
+        or ``dx`` that is not one number, a ``recording`` that is neither an
+        :class:`ElasticRecording` nor ``None``, or a ``compute`` that is
+        neither a :class:`Compute` nor ``None``.
     :raises ValueError: If the inputs are invalid.
     :raises ComputeImportError: When the device's library is not installed
         or does not import.

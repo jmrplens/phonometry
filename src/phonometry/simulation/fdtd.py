@@ -452,7 +452,7 @@ def _snapshot_options(
     :param snapshot_decimation: Cells a snapshot steps over along each axis.
     :return: Both as ``int``, the cadence ``None`` when no snapshot is asked.
     :raises TypeError: for a flag, a text, an array or anything else that is
-        not a number.
+        not a number, ``None`` excepted for ``snapshot_every``.
     :raises ValueError: for a number that is not a whole number of 1 or more.
     """
     require_scalar(snapshot_every, "snapshot_every")
@@ -1108,7 +1108,7 @@ class FDTD2D:
         follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :raises TypeError: if ``cfl``, ``dx`` or ``sponge_reflection`` is not a single
         number, ``sponge_width`` is a flag, a text or an array where a count goes,
-        or ``compute`` is not a :class:`Compute`.
+        or ``compute`` is neither a :class:`Compute` nor ``None``.
     :raises ComputeImportError: when the library of the device ``compute``
         asks for is not installed or does not import.
     :raises ComputeDeviceError: when that device is not present, or fails a
@@ -1763,8 +1763,10 @@ class FDTDRecording(RichDisplay):
     :param snapshot_decimation: Keep every this many cells along each axis
         in a snapshot (default 1, every cell); the result records it.
     :raises TypeError: for a probe that is not a pair or has an index that is
-        not a number, or a ``snapshot_every`` or ``snapshot_decimation`` that
-        is a flag, a text, an array or anything else that is not a number.
+        not a number, a ``snapshot_every`` that is a flag, a text, an array or
+        anything else that is neither a number nor ``None``, or a
+        ``snapshot_decimation`` that is a flag, a text, an array or anything
+        else that is not a number.
     :raises ValueError: for a probe of more or fewer than two indices or with
         an index that is not a whole number, or a ``snapshot_every`` or
         ``snapshot_decimation`` that is not a whole number of 1 or more.
@@ -2011,11 +2013,12 @@ def fdtd_simulation(
         :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :return: A :class:`FDTDResult`.
     :raises TypeError: If an input is of the wrong type: a ``duration``,
-        ``cfl`` or ``dx`` that is not one number, a ``recording`` that is not
-        an :class:`FDTDRecording`, an ``absorbing_layer_cells`` that is not a
-        number, a ``shape`` that is not a pair, a complex medium, an
-        ``obstacle_mask`` that is not boolean, or a ``compute`` that is not a
-        :class:`Compute`.
+        ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
+        neither an :class:`FDTDRecording` nor ``None``, an
+        ``absorbing_layer_cells`` that is not a number, a ``shape`` that is
+        not a pair, a complex medium, an ``obstacle_mask`` that is not
+        boolean, or a ``compute`` that is neither a :class:`Compute` nor
+        ``None``.
     :raises ValueError: If the inputs are invalid.
     :raises ComputeImportError: When the device's library is not installed
         or does not import.

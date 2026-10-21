@@ -230,7 +230,7 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `cfl`, `dx` or `sponge_reflection` is not a single number, `sponge_width` is a flag, a text or an array where a count goes, or `compute` is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
+| TypeError | if `cfl`, `dx` or `sponge_reflection` is not a single number, `sponge_width` is a flag, a text or an array where a count goes, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 
@@ -518,7 +518,7 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an input is of the wrong type: a `duration`, `cfl` or `dx` that is not one number, a `recording` that is not an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording), an `absorbing_layer_cells` that is not a number, a `shape` that is not a pair, a complex medium, an `obstacle_mask` that is not boolean, or a `compute` that is not a [`Compute`](/phonometry/reference/api/simulation/compute/#compute). |
+| TypeError | If an input is of the wrong type: a `duration`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, an `absorbing_layer_cells` that is not a number, a `shape` that is not a pair, a complex medium, an `obstacle_mask` that is not boolean, or a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
 | ValueError | If the inputs are invalid. |
 | ComputeImportError | When the device's library is not installed or does not import. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
@@ -553,7 +553,7 @@ physics and keeps only the time axis.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a probe that is not a pair or has an index that is not a number, or a `snapshot_every` or `snapshot_decimation` that is a flag, a text, an array or anything else that is not a number. |
+| TypeError | for a probe that is not a pair or has an index that is not a number, a `snapshot_every` that is a flag, a text, an array or anything else that is neither a number nor `None`, or a `snapshot_decimation` that is a flag, a text, an array or anything else that is not a number. |
 | ValueError | for a probe of more or fewer than two indices or with an index that is not a whole number, or a `snapshot_every` or `snapshot_decimation` that is not a whole number of 1 or more. |
 
 ## FDTDResult

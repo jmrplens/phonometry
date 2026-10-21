@@ -65,6 +65,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
+
 __all__ = [
     "DAMPING_RATIO_RANGE",
     "EMPIRICAL_FREQUENCY_TOLERANCE",
@@ -314,7 +316,7 @@ class BuildingFrequencyEstimate(RichDisplay):
         return empirical_frequency_bounds(self.frequency_hz)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw Figure D.1 with this estimate on it.
 

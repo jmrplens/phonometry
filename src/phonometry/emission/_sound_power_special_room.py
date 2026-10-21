@@ -73,7 +73,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -83,6 +83,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
@@ -112,8 +114,10 @@ from ._sound_power_hard_walled import (
     _octave_frequencies,
 )
 
+Method = Literal["direct", "comparison"]
+
 #: The standard implemented here, as the warnings cite it.
-_STANDARD = "ISO 3743-2:2018"
+_STANDARD: Final = "ISO 3743-2:2018"
 #: The two table references the frequency validator cites.
 _TABLE_F1 = f"{_STANDARD}, Table F.1"
 #: Reference quantities of Formula (9).
@@ -210,8 +214,6 @@ _TABLE3: Mapping[str, Mapping[str, tuple[int, int, int]]] = MappingProxyType(
         ),
     }
 )
-
-Method = Literal["direct", "comparison"]
 
 
 def _table4_correction(delta: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -374,7 +376,7 @@ def _centred_scale(ratio: np.ndarray, half_width: np.ndarray) -> float:
     return float(candidates[int(np.argmin(deviation))])
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SpecialRoomReverberationCheck(OwnsArrays):
     r"""Qualification of a special reverberation test room by its
     reverberation time, volume and climate (ISO 3743-2:2018, 6.2, 6.3, 6.6).
@@ -404,7 +406,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
     nominal_reverberation_time_s: float
     centered: bool
     volume: float
-    method: str
+    method: Method
     climate_product_change: float = math.nan
     source_volume_m3: float = math.nan
 
@@ -544,7 +546,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot :math:`T/T_\mathrm{nom}` within the limiting curves, laid out
         as Figure B.3 of the standard, with the limits widening above the
@@ -599,6 +601,7 @@ def _climate_change(
         )
         raise ValueError(msg)
     for rh in (humidity, humidity_ref):
+        # A relative humidity is at most 100 per cent.
         if not math.isfinite(rh) or rh <= 0.0 or rh > 100.0:  # noqa: PLR2004
             msg = "Relative humidities must be in (0, 100] per cent."
             raise ValueError(msg)
@@ -703,6 +706,7 @@ def check_special_room_reverberation(
     if freqs.shape != t.shape:
         msg = "'frequencies' must carry one value per reverberation time."
         raise ValueError(msg)
+    chosen: Method
     chosen = require_choice(method, "method", ("direct", "comparison"))
     r = reverberation_parameter(
         freqs,
@@ -844,7 +848,7 @@ class SpecialRoomSurfaceCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each surface's coefficient within the 0,5 to 1,5 band of the
         mean, and the floor against its 0,06, with every coefficient outside
@@ -914,6 +918,7 @@ def check_special_room_surfaces(
         surface_absorption_coefficients, "surface_absorption_coefficients", 2
     )
     n_surfaces, n_bands = surfaces.shape
+    # The fewest values the step below can work with, not a quantity.
     if n_surfaces < 2:  # noqa: PLR2004
         msg = "'surface_absorption_coefficients' must hold at least two surfaces."
         raise ValueError(msg)
@@ -1025,7 +1030,7 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the difference per band within the ± Table 1 limits.
 
@@ -1085,7 +1090,7 @@ def check_special_room_suitability(
     :param measured_power_levels: The reference source's octave-band power
         levels determined in the room, in decibels: the ``sound_power_level``
         of :func:`sound_power_special_room`, the level at the test, and not
-        its ``sound_power_level_ref``, which the Annex E :math:`C_2` has
+        its ``sound_power_level_at_reference_conditions``, which the Annex E :math:`C_2` has
         already carried to the reference conditions: against a calibration
         read at the conditions of the test, it would count :math:`C_2` twice.
     :param calibrated_power_levels: Its calibrated octave-band levels, in
@@ -1211,6 +1216,7 @@ def special_room_source_locations(
     """
     arr = _finite(levels, "levels", (2,))
     n_positions, n_bands = arr.shape
+    # The fewest values the step below can work with, not a quantity.
     if n_positions < 2:  # noqa: PLR2004
         msg = "'levels' must hold at least two microphone positions for Formula (4)."
         raise ValueError(msg)
@@ -1279,7 +1285,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     :math:`L_{p\mathrm{e}}`, and ``background_correction`` the per-band shift
     the Table 4 corrections made to it. ``background_margin_db`` is the
     smallest margin of the source over the background per band, and
-    ``background_margin_ref_db`` that of the reference source (the
+    ``reference_background_margin_db`` that of the reference source (the
     comparison method only), ``NaN`` where nothing was measured.
     ``background_requirement_met`` is read from them and the 4 dB of 6.5 and
     9.8, so it is not a field: ``True`` only where a background was measured
@@ -1307,7 +1313,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     mean_pressure_level: np.ndarray
     background_correction: np.ndarray
     background_margin_db: np.ndarray
-    background_margin_ref_db: np.ndarray
+    reference_background_margin_db: np.ndarray
     mean_reference_level: np.ndarray
     reference_power_level: np.ndarray
     volume: float
@@ -1321,7 +1327,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
     sound_power_level_a_direct: float
     mean_a_weighted_level: float
     background_margin_a_db: float
-    method: str
+    method: Method
     n_microphone_positions: int
     n_source_positions: int
 
@@ -1351,7 +1357,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
             "mean_pressure_level",
             "background_correction",
             "background_margin_db",
-            "background_margin_ref_db",
+            "reference_background_margin_db",
             "mean_reference_level",
             "reference_power_level",
             "sigma_r0",
@@ -1369,7 +1375,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         """
         met = _margin_met(self.background_margin_db)
         if self.method == "comparison":
-            met = met & _margin_met(self.background_margin_ref_db)
+            met = met & _margin_met(self.reference_background_margin_db)
         return met
 
     @property
@@ -1403,17 +1409,17 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         return float(self.coverage_factor * self.sigma_tot_a)
 
     @property
-    def sound_power_level_ref(self) -> np.ndarray:
+    def sound_power_level_at_reference_conditions(self) -> np.ndarray:
         """``LW + C2`` under the reference meteorological conditions (E.1)."""
         return np.asarray(self.sound_power_level + self.c2, dtype=np.float64)
 
     @property
-    def sound_power_level_a_ref(self) -> float:
-        """The Annex F total of :attr:`sound_power_level_ref`, ``LWA + C2``."""
+    def sound_power_level_a_at_reference_conditions(self) -> float:
+        """The Annex F total of :attr:`sound_power_level_at_reference_conditions`, ``LWA + C2``."""
         return float(self.sound_power_level_a + self.c2)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the octave-band spectrum with the A-weighted total annotated.
 
@@ -1439,9 +1445,9 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render the ISO 3743-2 determination as a one-page test sheet.
 
@@ -1490,6 +1496,7 @@ def _measurement_grid(value: ArrayLike, name: str) -> tuple[np.ndarray, bool]:
     arr = _finite(value, name, (1, 2, 3))
     if arr.ndim == 1:
         return arr[None, None, :], True
+    # The number is a count of array axes, not a quantity.
     if arr.ndim == 2:  # noqa: PLR2004
         return arr[None, :, :], False
     return arr, False
@@ -1759,7 +1766,7 @@ def sound_power_special_room(
         mean_pressure_level=mean,
         background_correction=np.asarray(shift, dtype=np.float64),
         background_margin_db=margin,
-        background_margin_ref_db=nan_band,
+        reference_background_margin_db=nan_band,
         mean_reference_level=nan_band,
         reference_power_level=nan_band,
         volume=volume,
@@ -1781,12 +1788,12 @@ def sound_power_special_room(
 
 def sound_power_special_room_comparison(
     levels: ArrayLike,
-    levels_ref: ArrayLike,
-    lw_ref: ArrayLike | ReferenceSourceCalibration,
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
     background_levels: ArrayLike | None = None,
-    background_levels_ref: ArrayLike | None = None,
+    reference_background_levels: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -1812,9 +1819,9 @@ def sound_power_special_room_comparison(
 
     :param levels: Levels of the source under test, ``(bands,)``, ``(NM,
         bands)`` or ``(NS, NM, bands)``, in decibels.
-    :param levels_ref: Levels of the reference source, ``(NMr, bands)``, at
+    :param reference_levels: Levels of the reference source, ``(NMr, bands)``, at
         least six positions (10.3), or one traverse level ``(bands,)``.
-    :param lw_ref: The reference source's calibrated octave-band power level
+    :param reference_sound_power_levels: The reference source's calibrated octave-band power level
         :math:`L_{W\mathrm{r}}`, ``(bands,)``, in decibels, under the
         meteorological conditions of the test, since Formula (10) gives
         :math:`L_{W\mathrm{e}}` there (Annex E); or the
@@ -1825,7 +1832,7 @@ def sound_power_special_room_comparison(
     :param frequencies: Nominal octave centres from 63 Hz to 8 kHz.
     :param background_levels: Background for the source under test, as in
         :func:`sound_power_special_room`.
-    :param background_levels_ref: Background at the reference source's
+    :param reference_background_levels: Background at the reference source's
         positions; ``None`` reuses ``background_levels`` when it fits them.
     :param temperature_c: Air temperature at the test, in degrees Celsius.
     :param static_pressure_kpa: Static pressure at the test, in kilopascals.
@@ -1846,10 +1853,10 @@ def sound_power_special_room_comparison(
     omc = _check_uncertainty_inputs(sigma_omc_db, coverage_factor)
     _validate_meteorology(temperature_c, static_pressure_kpa)
     _microphone_advisory(n_positions, traverse=traverse, stacklevel=3)
-    ref_grid, ref_traverse = _measurement_grid(levels_ref, "levels_ref")
+    ref_grid, ref_traverse = _measurement_grid(reference_levels, "reference_levels")
     if ref_grid.shape[0] != 1 or ref_grid.shape[2] != n_bands:
         msg = (
-            f"'levels_ref' must be (positions, {n_bands} bands) or one traverse "
+            f"'reference_levels' must be (positions, {n_bands} bands) or one traverse "
             f"({n_bands} bands,) spectrum of the reference source."
         )
         raise ValueError(msg)
@@ -1865,17 +1872,19 @@ def sound_power_special_room_comparison(
     # so a calibration is read there, less its own C2.
     power = _finite(
         _reference_power_levels(
-            lw_ref,
+            reference_sound_power_levels,
             freqs,
             fraction=1,
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
         ),
-        "lw_ref",
+        "reference_sound_power_levels",
         (1,),
     )
     if power.shape != (n_bands,):
-        msg = f"'lw_ref' must carry one value per band ({n_bands})."
+        msg = (
+            f"'reference_sound_power_levels' must carry one value per band ({n_bands})."
+        )
         raise ValueError(msg)
     background = (
         None
@@ -1885,13 +1894,18 @@ def sound_power_special_room_comparison(
         )
     )
     ref_background_input = (
-        background_levels if background_levels_ref is None else background_levels_ref
+        background_levels
+        if reference_background_levels is None
+        else reference_background_levels
     )
     ref_background = (
         None
         if ref_background_input is None
         else _background_grid(
-            ref_background_input, "background_levels_ref", n_ref_positions, n_bands
+            ref_background_input,
+            "reference_background_levels",
+            n_ref_positions,
+            n_bands,
         )
     )
     mean, shift, margin = _corrected_mean(grid, background)
@@ -1908,7 +1922,7 @@ def sound_power_special_room_comparison(
         mean_pressure_level=mean,
         background_correction=np.asarray(shift, dtype=np.float64),
         background_margin_db=margin,
-        background_margin_ref_db=margin_ref,
+        reference_background_margin_db=margin_ref,
         mean_reference_level=np.asarray(mean_ref, dtype=np.float64),
         reference_power_level=power,
         volume=math.nan,

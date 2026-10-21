@@ -562,7 +562,7 @@ def test_itu_r_468_weighting_reproduces_every_table_1_row() -> None:
     """
     freqs = [row[0] for row in ref.ITU_R_468_TABLE1]
     printed = np.array([row[1] for row in ref.ITU_R_468_TABLE1])
-    curve = electroacoustics.itu_r_468_weighting(freqs)
+    curve = electroacoustics.weighting_bs468(freqs)
     error = curve - printed
     assert np.max(np.abs(error)) <= ref.ITU_R_468_NETWORK_VS_TABLE1_DB
     # Not a slack bound met by luck: the rms sits at half the maximum, which
@@ -580,19 +580,19 @@ def test_itu_r_468_peak_is_the_networks_own_and_not_the_table_row() -> None:
     Recommendation.
     """
     grid = np.geomspace(5000.0, 8000.0, 200001)
-    curve = electroacoustics.itu_r_468_weighting(grid)
+    curve = electroacoustics.weighting_bs468(grid)
     peak = float(np.max(curve))
     assert peak == pytest.approx(12.2176, abs=5e-4)
     assert float(grid[int(np.argmax(curve))]) == pytest.approx(6247.0, rel=1e-3)
     # The printed row is that peak rounded, and 6 300 Hz is 0.001 dB below it.
-    at_6300 = float(electroacoustics.itu_r_468_weighting([6300.0])[0])
+    at_6300 = float(electroacoustics.weighting_bs468([6300.0])[0])
     assert at_6300 == pytest.approx(12.2167, abs=5e-4)
     assert peak - at_6300 < 0.002
 
 
 def test_itu_r_468_weighting_blocks_dc() -> None:
     """The series capacitor of Fig. 1a is a zero at the origin, not a slope."""
-    assert electroacoustics.itu_r_468_weighting([0.0])[0] == -np.inf
+    assert electroacoustics.weighting_bs468([0.0])[0] == -np.inf
 
 
 def test_itu_r_468_weighting_keeps_the_callers_shape() -> None:
@@ -603,11 +603,11 @@ def test_itu_r_468_weighting_keeps_the_callers_shape() -> None:
     product taken over the wrong axis.
     """
     grid = np.array([[100.0, 1000.0, 6300.0], [200.0, 2000.0, 12500.0]])
-    weighted = electroacoustics.itu_r_468_weighting(grid)
+    weighted = electroacoustics.weighting_bs468(grid)
     assert weighted.shape == grid.shape
     assert weighted[0, 1] == pytest.approx(0.0, abs=1e-12)
     assert weighted[1, 0] == pytest.approx(
-        float(electroacoustics.itu_r_468_weighting([200.0])[0]), abs=1e-12
+        float(electroacoustics.weighting_bs468([200.0])[0]), abs=1e-12
     )
 
 
@@ -615,7 +615,7 @@ def test_itu_r_468_weighting_rejects_a_negative_frequency() -> None:
     with pytest.raises(
         ValueError, match="'frequencies' must be finite and non-negative"
     ):
-        electroacoustics.itu_r_468_weighting([-100.0])
+        electroacoustics.weighting_bs468([-100.0])
 
 
 def test_itu_r_468_matches_aes17_ccir_rms_table() -> None:
@@ -629,13 +629,13 @@ def test_itu_r_468_matches_aes17_ccir_rms_table() -> None:
     """
     for frequency, printed in ref.ITU_R_468_AES17_ROWS:
         shifted = (
-            float(electroacoustics.itu_r_468_weighting([frequency])[0])
+            float(electroacoustics.weighting_bs468([frequency])[0])
             + ref.ITU_R_468_AES17_OFFSET_DB
         )
         assert shifted == pytest.approx(printed, abs=ref.ITU_R_468_AES17_TOL_DB)
     # The offset itself was taken from the curve, not from the table: it is
     # the network's 2 kHz response rounded to 0,01 dB.
-    at_2k = float(electroacoustics.itu_r_468_weighting([2000.0])[0])
+    at_2k = float(electroacoustics.weighting_bs468([2000.0])[0])
     assert at_2k == pytest.approx(-ref.ITU_R_468_AES17_OFFSET_DB, abs=0.005)
 
 

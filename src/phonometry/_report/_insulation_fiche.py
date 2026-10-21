@@ -50,6 +50,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from .metadata import ReportMetadata
 
@@ -85,7 +86,7 @@ class ColumnsBuilder(Protocol):
         curve: np.ndarray,
         *,
         verbose: bool,
-        language: str,
+        language: Language,
     ) -> tuple[Sequence[Column], str, list[float] | None]:
         """Build the columns that follow the frequency column."""
         ...
@@ -118,7 +119,7 @@ def requirement_verdict(
     rating: WeightedRatingResult | ImpactRatingResult,
     rating_symbol: str,
     requirement: float,
-    language: str,
+    language: Language,
 ) -> tuple[str, bool]:
     """Return the verdict text and PASS flag for a supplied requirement.
 
@@ -142,7 +143,7 @@ def requirement_verdict(
 def band_value_table(
     centers: np.ndarray,
     columns: Sequence[Column],
-    language: str,
+    language: Language,
     col_widths: list[float] | None = None,
     *,
     compact: bool = False,
@@ -220,7 +221,7 @@ def iso717_columns_builder(
     """
 
     def build(
-        value_header: str, curve: np.ndarray, *, verbose: bool, language: str
+        value_header: str, curve: np.ndarray, *, verbose: bool, language: Language
     ) -> tuple[Sequence[Column], str, Any]:
         from reportlab.lib.units import mm
 
@@ -257,7 +258,7 @@ def render_insulation_fiche(
     build_columns: ColumnsBuilder,
     metadata: ReportMetadata | None,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> str:
     """Render a sound-insulation test-report fiche to a PDF at ``path``.
 
@@ -293,6 +294,7 @@ def render_insulation_fiche(
     # The columns callback imports reportlab before the page is composed, so
     # the actionable hint is raised here, ahead of it.
     try:
+        # Imported only to fail early, with the hint, when the optional dependency is absent.
         import reportlab  # noqa: F401
     except ImportError as exc:
         raise ImportError(_REPORTLAB_HINT) from exc
@@ -333,7 +335,7 @@ def render_insulation_fiche(
         value_header, curve, verbose=verbose, language=language
     )
 
-    def _plot(ax: Axes | None = None, language: str = language) -> Axes:
+    def _plot(ax: Axes | None = None, language: Language = language) -> Axes:
         axes = rating.plot(ax=ax, language=language)
         axes.set_ylabel(t(spec["ylabel"], language))
         return axes
@@ -433,7 +435,7 @@ def compose_insulation_fiche(
     plot: FichePlot,
     result: ResultBlock,
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
     left_width_mm: float = 56.0,
     plot_width_mm: float = 118.0,
 ) -> str:

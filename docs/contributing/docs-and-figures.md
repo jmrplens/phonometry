@@ -1009,7 +1009,7 @@ svg.fonttype = "none" and the font family normalized to a generic sans
 <a id="f43"></a>
 ### F43. Move a figure only on purpose, then look at it in light, dark and Spanish
 
-**Why.** The gates check contrast, clearance, determinism and translation, not whether a figure reads well: `itu_r_468_weighting` (#645) shipped with its annotations across the curves, hard to read, while every gate was green. A change that should move nothing (a rename, a refactor) leaves every figure byte-identical, so a figure it moves is a defect to find, not a figure to look at.
+**Why.** The gates check contrast, clearance, determinism and translation, not whether a figure reads well: `weighting_bs468` (#645) shipped with its annotations across the curves, hard to read, while every gate was green. A change that should move nothing (a rename, a refactor) leaves every figure byte-identical, so a figure it moves is a defect to find, not a figure to look at.
 
 **Do**
 

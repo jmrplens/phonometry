@@ -74,9 +74,9 @@ convenience, not a normative chain.
 
 from __future__ import annotations
 
-from dataclasses import KW_ONLY, dataclass, field
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -95,6 +95,8 @@ from ..._internal.validation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from ..._i18n import Language
 
 __all__ = [
     "AERODYNAMIC_REFERENCE_SPEED_KMH",
@@ -331,6 +333,14 @@ class VehicleType(Enum):
     OTHER = "o"  #: Other, such as maintenance vehicles.
 
 
+#: A :class:`BrakeType`, by its letter.
+BrakeCode = Literal[
+    "c",
+    "k",
+    "n",
+]
+
+
 class BrakeType(Enum):
     """Digit 3 of the vehicle descriptor, Table [2.3.a]."""
 
@@ -357,6 +367,15 @@ class TrackBase(Enum):
     NON_BALLASTED_BRIDGE = "N"  #: Non-ballasted bridge.
     EMBEDDED = "T"  #: Embedded track.
     OTHER = "O"  #: Other.
+
+
+#: A :class:`RailRoughnessClass`, by its letter.
+RailRoughnessCode = Literal[
+    "E",
+    "M",
+    "N",
+    "B",
+]
 
 
 class RailRoughnessClass(Enum):
@@ -1287,6 +1306,16 @@ _TABLE_G4: tuple[float, ...] = (
 )
 
 
+#: A :class:`TractionVehicle`, by the description its table prints.
+TractionVehicleName = Literal[
+    "diesel locomotive, c. 800 kW",
+    "diesel locomotive, c. 2 200 kW",
+    "diesel multiple unit",
+    "electric locomotive",
+    "electric multiple unit",
+]
+
+
 class TractionVehicle(Enum):
     """Columns of Table G-5, the traction sound power per vehicle."""
 
@@ -1638,6 +1667,13 @@ _TABLE_G6_B: tuple[float, ...] = (
 _AERODYNAMIC_ALPHA = 50.0
 
 
+#: A :class:`BridgeType`, by the correction its table prints.
+BridgeTypeName = Literal[
+    "+10 dB(A)",
+    "+15 dB(A)",
+]
+
+
 class BridgeType(Enum):
     """Columns of Table G-7, labelled by the A-weighted bridge excess."""
 
@@ -1785,7 +1821,7 @@ class WavelengthSpectrum(OwnsArrays):
     levels: NDArray[np.float64]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the levels against wavelength, on a logarithmic wavelength axis.
 
@@ -1801,7 +1837,7 @@ class WavelengthSpectrum(OwnsArrays):
         return plot_wavelength_spectrum(self, ax=ax, language=language, **kwargs)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RailSourceSpectra(OwnsArrays):
     """The sound power spectra of the two source heights of a railway source.
 
@@ -1819,7 +1855,7 @@ class RailSourceSpectra(OwnsArrays):
 
 
 def wheel_roughness(
-    brake: BrakeType | str,
+    brake: BrakeType | BrakeCode,
 ) -> WavelengthSpectrum:
     """Wheel roughness ``L_r,VEH`` of Table G-1a.
 
@@ -1841,7 +1877,7 @@ def wheel_roughness(
 
 
 def rail_roughness(
-    roughness: RailRoughnessClass | str,
+    roughness: RailRoughnessClass | RailRoughnessCode,
 ) -> WavelengthSpectrum:
     """Rail roughness ``L_r,TR`` of Table G-1b.
 
@@ -1908,6 +1944,19 @@ def contact_filter(
     )
 
 
+#: A :class:`TrackTransferClass`, by its code.
+TrackTransferCode = Literal[
+    "M/S",
+    "M/M",
+    "M/H",
+    "B/S",
+    "B/M",
+    "B/H",
+    "W",
+    "D",
+]
+
+
 class TrackTransferClass(Enum):
     """Columns of Table G-3a, ``track base / rail pad`` of the track descriptor."""
 
@@ -1921,7 +1970,9 @@ class TrackTransferClass(Enum):
     DIRECT_FASTENING = "D"  #: Direct fastening on bridges.
 
 
-def track_transfer(track: TrackTransferClass | str) -> NDArray[np.float64]:
+def track_transfer(
+    track: TrackTransferClass | TrackTransferCode,
+) -> NDArray[np.float64]:
     """Track transfer function ``L_H,TR,i`` of Table G-3a, in dB per axle.
 
     :param track: A :class:`TrackTransferClass` member or its column code.
@@ -1996,7 +2047,7 @@ def impact_roughness_single() -> WavelengthSpectrum:
 
 
 def traction_sound_power(
-    vehicle: TractionVehicle | str,
+    vehicle: TractionVehicle | TractionVehicleName,
 ) -> RailSourceSpectra:
     r"""Traction sound power per vehicle of Table G-5, in dB.
 
@@ -2068,7 +2119,7 @@ def aerodynamic_sound_power(
     return RailSourceSpectra(source_a=low + shift, source_b=high + shift)
 
 
-def bridge_transfer(bridge: BridgeType | str) -> NDArray[np.float64]:
+def bridge_transfer(bridge: BridgeType | BridgeTypeName) -> NDArray[np.float64]:
     """Bridge transfer function ``L_H,bridge,i`` of Table G-7, in dB per axle.
 
     :param bridge: A :class:`BridgeType` member or its column label.
@@ -2389,7 +2440,7 @@ def _require_record(
         raise TypeError(msg)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RollingStock(OwnsArrays):
     """The Appendix G data of one vehicle type, on its own wavelength grids.
 
@@ -2420,7 +2471,6 @@ class RollingStock(OwnsArrays):
     traction: RailSourceSpectra | None = None
     aerodynamic: RailSourceSpectra | None = None
     aerodynamic_alpha: float = _AERODYNAMIC_ALPHA
-    _: KW_ONLY
     tram: bool = False
 
     def __post_init__(self) -> None:
@@ -2436,7 +2486,7 @@ class RollingStock(OwnsArrays):
         _require_record(self, "aerodynamic", RailSourceSpectra, optional=True)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RailwayVehicle(RichDisplay):
     """One vehicle of the traffic on a track section.
 
@@ -2450,13 +2500,12 @@ class RailwayVehicle(RichDisplay):
 
     stock: RollingStock
     flow_rate: float = 0.0
-    _: KW_ONLY
     speed_kmh: float = 0.0
     condition: RunningCondition = RunningCondition.CONSTANT
     idling_time: float = 0.0
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RailwayTrack(OwnsArrays):
     """The Appendix G data of one track section.
 
@@ -2599,7 +2648,7 @@ class RailwayEmissionResult(OwnsArrays):
                 )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-metre line power of the two equivalent source heights."""
         from ..._i18n import check_language

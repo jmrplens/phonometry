@@ -106,7 +106,7 @@ def _effective_blocking_mass() -> EffectiveBlockingMass:
     m_eff = 20.0 * (1.0 + (f / 3000.0) ** 2)
     return vibration.effective_blocking_mass(
         frequencies=f,
-        force=m_eff * ones,
+        force_n=m_eff * ones,
         first_acceleration_m_s2=ones,
         second_acceleration_m_s2=ones,
         blocking_mass=20.0,

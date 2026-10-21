@@ -89,7 +89,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from functools import lru_cache
-from typing import TYPE_CHECKING, Any, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 from scipy import signal
@@ -113,6 +113,17 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import DTypeLike
 
+    from .._i18n import Language
+
+Mode = Literal["fast", "slow", "impulse"]
+#: How a time weighting starts: from rest, or settled on the first sample.
+InitialState = Literal["zero", "first"]
+
+#: The three time weightings: F and S of IEC 61672-1:2013, and I of the
+#: withdrawn IEC 60651.
+_TIME_WEIGHTINGS: tuple[Mode, ...] = ("fast", "slow", "impulse")
+Weighting = Literal["A", "C", "B", "D", "G", "AU", "468", "Z"]
+
 __all__ = [
     "TimeWeightedEnvelope",
     "TimeWeighting",
@@ -124,6 +135,8 @@ __all__ = [
 
 #: Rejection message shared by the four entry points that take ``fs``.
 _FS_POSITIVE = "Sample rate 'fs' must be positive."
+#: Rejection message of a time weighting that is none of the three.
+_MODE_INVALID = "Invalid time weighting mode. Use ['fast', 'slow', 'impulse']"
 
 try:
     from numba import jit as _numba_jit
@@ -557,7 +570,7 @@ class WeightingFilter:
     def __init__(
         self,
         fs: int,
-        weighting: str = "A",
+        weighting: Weighting = "A",
         *,
         stateful: bool = False,
         steady_ic: bool = False,
@@ -616,7 +629,7 @@ class WeightingFilter:
         require_scalar(fs, "fs")
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
-        weighting = _require_str(weighting, "weighting")
+        _require_str(weighting, "weighting")
         if not isinstance(high_accuracy, bool | np.bool_):
             # ``None`` used to select the default; read as a truth value now
             # it would quietly pick the plain design instead.
@@ -742,7 +755,7 @@ def _runtime_frequency_response(
 
 @lru_cache(maxsize=32)
 def _cached_weighting_filter(
-    fs: int, curve: str, *, high_accuracy: bool
+    fs: int, curve: Weighting, *, high_accuracy: bool
 ) -> WeightingFilter:
     """Reuse the (immutable, non-stateful) weighting-filter object.
 
@@ -759,7 +772,7 @@ def _as_envelope(
     x: Signal | list[float] | np.ndarray,
     mean_square: np.ndarray,
     fs: int,
-    mode: str,
+    mode: Mode,
 ) -> TimeWeightedEnvelope | np.ndarray:
     """Wrap the envelope for a Signal input, leave a bare array alone.
 
@@ -805,7 +818,7 @@ class TimeWeightedEnvelope(OwnsArrays):
 
     mean_square: np.ndarray
     fs: int
-    mode: str
+    mode: Mode
     _: KW_ONLY
     calibrated: bool
 
@@ -850,7 +863,7 @@ class TimeWeightedEnvelope(OwnsArrays):
         return np.arange(self.mean_square.shape[-1]) / float(self.fs)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the level trace this envelope stands for.
 
@@ -872,7 +885,7 @@ class TimeWeightedEnvelope(OwnsArrays):
 def weighting_filter(
     x: Signal,
     fs: int | None = ...,
-    weighting: str = ...,
+    weighting: Weighting = ...,
     *,
     high_accuracy: bool = ...,
 ) -> Signal: ...
@@ -882,7 +895,7 @@ def weighting_filter(
 def weighting_filter(
     x: list[float] | np.ndarray,
     fs: int,
-    weighting: str = ...,
+    weighting: Weighting = ...,
     *,
     high_accuracy: bool = ...,
 ) -> np.ndarray: ...
@@ -891,7 +904,7 @@ def weighting_filter(
 def weighting_filter(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
-    weighting: str = "A",
+    weighting: Weighting = "A",
     *,
     high_accuracy: bool = True,
 ) -> Signal | np.ndarray:
@@ -926,7 +939,7 @@ def weighting_filter(
 
 def _prepare_time_weighting_initial_state(
     x_sq: np.ndarray,
-    initial_state: str | float | np.ndarray | None,
+    initial_state: InitialState | float | np.ndarray | None,
 ) -> np.ndarray:
     """Return the previous output state ``y[-1]`` for time weighting."""
     invalid_initial_state_message = (
@@ -996,8 +1009,8 @@ else:  # pragma: no cover - exercised only without numba installed
 def time_weighting(
     x: Signal,
     fs: int | None = ...,
-    mode: str = ...,
-    initial_state: str | float | np.ndarray | None = ...,
+    mode: Mode = ...,
+    initial_state: InitialState | float | np.ndarray | None = ...,
 ) -> TimeWeightedEnvelope: ...
 
 
@@ -1005,16 +1018,16 @@ def time_weighting(
 def time_weighting(
     x: list[float] | np.ndarray,
     fs: int,
-    mode: str = ...,
-    initial_state: str | float | np.ndarray | None = ...,
+    mode: Mode = ...,
+    initial_state: InitialState | float | np.ndarray | None = ...,
 ) -> np.ndarray: ...
 
 
 def time_weighting(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
-    mode: str = "fast",
-    initial_state: str | float | np.ndarray | None = None,
+    mode: Mode = "fast",
+    initial_state: InitialState | float | np.ndarray | None = None,
 ) -> TimeWeightedEnvelope | np.ndarray:
     """Apply time weighting to a signal (Exponential averaging).
 
@@ -1041,11 +1054,13 @@ def time_weighting(
     x_proc = resolve_samples(x)
     if fs <= 0:
         raise ValueError(_FS_POSITIVE)
-    mode = _require_str(mode, "mode")
+    _require_str(mode, "mode")
     x_sq = x_proc**2
     initial = _prepare_time_weighting_initial_state(x_sq, initial_state)
 
     mode_lower = mode.lower()
+    if mode_lower not in _TIME_WEIGHTINGS:
+        raise ValueError(_MODE_INVALID)
 
     if mode_lower in ["fast", "slow"]:
         tau = 0.125 if mode_lower == "fast" else 1.0
@@ -1058,7 +1073,7 @@ def time_weighting(
         return _as_envelope(x, cast(np.ndarray, y), fs, mode_lower)
 
     if mode_lower == "impulse":
-        # IEC 61672-1: 35ms for rising, 1500ms for falling
+        # Time weighting I of the withdrawn IEC 60651: 35 ms rising, 1500 ms falling
         tau_rise = 0.035
         tau_fall = 1.5
 
@@ -1076,8 +1091,7 @@ def time_weighting(
         # Move time axis back
         return _as_envelope(x, np.moveaxis(y_t, 0, -1), fs, mode_lower)
 
-    msg = "Invalid time weighting mode. Use ['fast', 'slow', 'impulse']"
-    raise ValueError(msg)
+    raise ValueError(_MODE_INVALID)
 
 
 class TimeWeighting:
@@ -1087,7 +1101,7 @@ class TimeWeighting:
     across blocks, so concatenated block outputs equal a single continuous call.
     """
 
-    def __init__(self, fs: int, mode: str = "fast") -> None:
+    def __init__(self, fs: int, mode: Mode = "fast") -> None:
         """:param fs: Sample rate in Hz.
         :param mode: 'fast' (125 ms), 'slow' (1000 ms) or 'impulse' (35 ms / 1.5 s).
         :raises TypeError: if ``fs`` is not a single number.
@@ -1095,12 +1109,12 @@ class TimeWeighting:
         require_scalar(fs, "fs")
         if fs <= 0:
             raise ValueError(_FS_POSITIVE)
-        mode = _require_str(mode, "mode")
-        if mode.lower() not in ("fast", "slow", "impulse"):
-            msg = "Invalid time weighting mode. Use ['fast', 'slow', 'impulse']"
-            raise ValueError(msg)
+        _require_str(mode, "mode")
+        folded = mode.lower()
+        if folded not in _TIME_WEIGHTINGS:
+            raise ValueError(_MODE_INVALID)
         self.fs = fs
-        self.mode = mode.lower()
+        self.mode: Mode = folded
         self._state: np.ndarray | None = None
 
     def process(

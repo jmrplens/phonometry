@@ -166,7 +166,7 @@ it are themselves a useful non-Gaussianity screen (B&P Sec. 5.5.1.1).
 LevelCrossingResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -312,7 +312,7 @@ bandwidth limit.
 PeakStatisticsResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -333,8 +333,8 @@ stationarity_test(
     fs: float | None = None,
     *,
     n_segments: int = 20,
-    statistic: str = 'mean_square',
-    method: str = 'reverse_arrangements',
+    statistic: Literal['mean_square', 'rms', 'mean', 'variance'] = 'mean_square',
+    method: Literal['reverse_arrangements', 'runs'] = 'reverse_arrangements',
     alpha: float = 0.05,
 ) -> StationarityTestResult
 ```
@@ -383,8 +383,8 @@ segment must remain long against the record's lowest frequencies.
 StationarityTestResult(
     segment_values: NDArray[np.float64],
     segment_times: NDArray[np.float64],
-    statistic: str,
-    method: str,
+    statistic: Literal['mean_square', 'rms', 'mean', 'variance'],
+    method: Literal['reverse_arrangements', 'runs'],
     trend_statistic: int,
     mean: float,
     standard_deviation: float,
@@ -438,7 +438,7 @@ percentage points about the segment values' own median for runs.
 StationarityTestResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -463,7 +463,7 @@ Whether the count falls inside the acceptance region, `lower < trend_statistic <
 trend_test(
     values: NDArray[np.float64] | list[float],
     *,
-    method: str = 'reverse_arrangements',
+    method: Literal['reverse_arrangements', 'runs'] = 'reverse_arrangements',
     alpha: float = 0.05,
 ) -> TrendTestResult
 ```
@@ -512,7 +512,7 @@ non-monotonic clustering.
 ```python
 TrendTestResult(
     values: NDArray[np.float64],
-    method: str,
+    method: Literal['reverse_arrangements', 'runs'],
     statistic: int,
     n: int,
     mean: float,
@@ -568,7 +568,7 @@ below `median`.
 TrendTestResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

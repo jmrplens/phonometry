@@ -31,7 +31,7 @@ reproduces RANDI 3.1 [Breeding et al.] and Wales & Heitmeyer (2002).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, get_args
 
 import numpy as np
 
@@ -46,6 +46,8 @@ from ..._internal.validation import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from ..._i18n import Language
 
 __all__ = [
     "VESSEL_CLASSES",
@@ -98,8 +100,25 @@ _VESSEL_CLASSES: dict[str, tuple[float, bool, float, float]] = {
     "vehicle carrier": (15.8, True, 1.0, 3.0),
 }
 
+#: A JOMOPANS-ECHO vessel class, as Table 1 of the source names it.
+VesselClass = Literal[
+    "bulker",
+    "containership",
+    "cruise",
+    "dredger",
+    "fishing",
+    "government/research",
+    "naval",
+    "other",
+    "passenger",
+    "recreational",
+    "tanker",
+    "tug",
+    "vehicle carrier",
+]
+
 #: Available JOMOPANS-ECHO vessel classes (for discovery and validation).
-VESSEL_CLASSES: tuple[str, ...] = tuple(sorted(_VESSEL_CLASSES))
+VESSEL_CLASSES: tuple[VesselClass, ...] = get_args(VesselClass)
 
 
 def _default_bands() -> NDArray[np.float64]:
@@ -226,7 +245,7 @@ class ShipTrafficSpectrum(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the predicted source spectral-density level versus frequency."""
         from ..._i18n import check_language
@@ -239,10 +258,10 @@ class ShipTrafficSpectrum(OwnsArrays):
 
 def ship_source_spectrum(
     speed_kt: float = 12.0,
-    length_m: float = 100.0,
     *,
-    vessel_class: str = "containership",
-    model: str = "jomopans-echo",
+    length_m: float = 100.0,
+    vessel_class: VesselClass = "containership",
+    model: Literal["jomopans-echo", "randi", "wales-heitmeyer"] = "jomopans-echo",
     frequencies: NDArray[np.float64] | list[float] | None = None,
 ) -> ShipTrafficSpectrum:
     """Predicted underwater source-level spectrum of a ship.

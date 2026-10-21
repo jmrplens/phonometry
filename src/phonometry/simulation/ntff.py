@@ -82,7 +82,7 @@ __all__ = [
 ]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ContourPhasors(OwnsArrays):
     r"""Steady-state ``p`` and ``v_n`` phasors sampled on a closed contour.
 

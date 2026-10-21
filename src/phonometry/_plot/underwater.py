@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from ..underwater.bioacoustics.audiograms import AudiogramResult
     from ..underwater.bioacoustics.weighting import (
         AuditoryWeightingResult,
@@ -154,7 +155,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -163,7 +164,7 @@ def plot_ship_source_level(
     result: ShipSourceLevelResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Radiated noise level, source level and the ΔL surface correction.
@@ -232,7 +233,7 @@ def plot_pile_strike(
     result: PileStrikeResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Pile-strike pressure waveform and its cumulative energy.
@@ -254,7 +255,7 @@ def plot_pile_strike(
     # In pascals whatever the stored type: the same reading the result's own
     # metrics were checked against, so the marker and its label agree.
     pressure = apply_calibration(
-        result.pressure, np.asarray(result.pressure, dtype=np.float64)
+        result.pressure_pa, np.asarray(result.pressure_pa, dtype=np.float64)
     )
     fs = float(result.fs)
     t = np.arange(pressure.size) / fs
@@ -313,7 +314,7 @@ def plot_sound_speed_profile(
     result: SoundSpeedProfile,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Sound-speed profile: speed vs depth, with depth increasing downward.
@@ -346,7 +347,7 @@ def plot_propagation_loss(
     result: PropagationLossResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Propagation loss versus range, with spreading and absorption split out.
@@ -400,7 +401,7 @@ def plot_sonar_equation(
     result: SonarEquationResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Signal excess versus propagation loss, with the detection limit (SE = 0).
@@ -450,7 +451,7 @@ def plot_bottom_loss(
     result: BottomLossResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Bottom reflection loss versus grazing angle, marking the critical angle.
@@ -492,7 +493,7 @@ def plot_seabed_reflection(
     result: SeabedReflection,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Seabed reflection-coefficient magnitude versus grazing angle.
@@ -534,7 +535,7 @@ def plot_ambient_noise(
     result: AmbientNoiseResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Composite ambient-noise spectrum and its components versus frequency.
@@ -597,7 +598,7 @@ def plot_ship_traffic_spectrum(
     result: ShipTrafficSpectrum,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Predicted ship source spectral-density level versus frequency.
@@ -633,7 +634,7 @@ def plot_normal_modes(
     result: NormalModeResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Normal-mode propagation loss versus range (loss increasing downward).
@@ -666,7 +667,7 @@ def plot_ray_trace(
     result: RayTraceResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Ray paths through the water column (depth increasing downward).
@@ -711,7 +712,7 @@ def _draw_bathymetry(
     ax: Axes,
     result: RayTraceResult | GaussianBeamResult,
     r_max: float,
-    language: str,
+    language: Language,
     *,
     labelled: bool,
 ) -> None:
@@ -738,7 +739,7 @@ def plot_eigenrays(
     result: EigenrayResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Arrival structure of the eigenrays: per-path loss stems against delay.
@@ -821,7 +822,7 @@ def _plot_loss_field(
     pl: np.ndarray,
     *,
     title: str,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> Axes:
     """A propagation-loss field on a range-depth grid, shared by two solvers.
@@ -882,7 +883,7 @@ def plot_parabolic_equation(
     result: ParabolicEquationResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Parabolic-equation propagation-loss field (range x depth).
@@ -909,7 +910,7 @@ def plot_gaussian_beams(
     result: GaussianBeamResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Gaussian beam propagation-loss field (range x depth).
@@ -962,7 +963,7 @@ def _spectrum_axes(
     *,
     ylabel: str,
     title: str,
-    language: str,
+    language: Language,
 ) -> Axes:
     """Shared frame for the frequency-domain underwater renderers."""
     ax = ax if ax is not None else _new_axes()
@@ -982,7 +983,7 @@ def plot_weston_regimes(
     result: WestonPropagationResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Composite Weston propagation loss with each regime's law and boundaries.
@@ -1051,7 +1052,7 @@ def plot_marine_mammal_audiogram(
     result: AudiogramResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Hearing threshold versus frequency with the point of best sensitivity.
@@ -1094,7 +1095,7 @@ def plot_auditory_weighting(
     result: AuditoryWeightingResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Auditory weighting function of a marine-mammal hearing group.
@@ -1132,7 +1133,7 @@ def plot_weighted_exposure(
     result: WeightedExposureResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Unweighted and weighted band spectra against the exposure criteria.
@@ -1207,7 +1208,7 @@ def plot_strike_sel_spectrum(
     result: StrikeSELSpectrum,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band single-strike sound exposure level of a pile strike.
@@ -1260,7 +1261,7 @@ def plot_detection_range(
     result: DetectionRangeResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Propagation loss against the figure of merit, with the detection range.

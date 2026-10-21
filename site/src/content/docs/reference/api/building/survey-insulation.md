@@ -77,21 +77,21 @@ supplied. No background correction is applied (Clause 6.2).
 ```python
 estimate_reverberation_index(
     volume: float,
-    room: str,
+    room: Literal['furnished', 'kitchen', 'bathroom', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'a+e', 'b+f', 'c+g', 'd+h'],
     *,
     weighted: Literal[False] = False,
 ) -> np.ndarray
 
 estimate_reverberation_index(
     volume: float,
-    room: str,
+    room: Literal['furnished', 'kitchen', 'bathroom', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'a+e', 'b+f', 'c+g', 'd+h'],
     *,
     weighted: Literal[True],
 ) -> float
 
 estimate_reverberation_index(
     volume: float,
-    room: str,
+    room: Literal['furnished', 'kitchen', 'bathroom', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'a+e', 'b+f', 'c+g', 'd+h'],
     *,
     weighted: bool = ...,
 ) -> np.ndarray | float
@@ -368,7 +368,7 @@ Per-band airborne sound insulation, survey method (ISO 10052).
 SurveyAirborneResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -386,11 +386,11 @@ Delegates to the weighted-rating plot. Requires the automatic rating
 SurveyAirborneResult.report(
     path: str,
     *,
-    quantity: str = 'dnt',
+    quantity: Literal['dnt', 'r_prime'] = 'dnt',
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -452,7 +452,7 @@ Per-band façade sound insulation, survey method (ISO 10052).
 SurveyFacadeResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -466,9 +466,9 @@ SurveyFacadeResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -529,7 +529,7 @@ Per-band impact sound insulation, survey method (ISO 10052).
 SurveyImpactResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -543,9 +543,9 @@ SurveyImpactResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

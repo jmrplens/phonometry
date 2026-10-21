@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from matplotlib.ticker import FuncFormatter
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..metrology.comparison_calibration import (
         ComparisonCalibration,
         ComparisonUncertaintyBudget,
@@ -292,7 +293,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
@@ -302,7 +303,7 @@ def plot_uncertainty_budget(
     result: UncertaintyResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Bar chart of each input's contribution to the combined uncertainty.
@@ -349,7 +350,7 @@ def plot_monte_carlo(
     result: MonteCarloResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Histogram of the Monte Carlo output with the coverage interval marked.
@@ -417,7 +418,7 @@ def _trend_verdict_label(
     count: int,
     bounds: tuple[int, int],
     verdict: str,
-    language: str,
+    language: Language,
 ) -> str:
     """Legend label naming the count, acceptance region and verdict.
 
@@ -441,7 +442,7 @@ def _trend_verdict_label(
     )
 
 
-def _draw_sequence_median(ax: Axes, median: float, language: str) -> None:
+def _draw_sequence_median(ax: Axes, median: float, language: Language) -> None:
     """Draw the runs-classification median as a dashed reference line."""
     ax.axhline(
         median,
@@ -456,7 +457,7 @@ def plot_trend_test(
     result: TrendTestResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Tested sequence against its sample index with the trend-test verdict.
@@ -509,7 +510,7 @@ def plot_stationarity_test(
     result: StationarityTestResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Segment-statistic sequence with the trend-test verdict.
@@ -551,7 +552,7 @@ def plot_level_crossing_rate(
     result: LevelCrossingResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Measured level-crossing rates against the Rice curve.
@@ -598,7 +599,7 @@ def plot_peak_statistics(
     result: PeakStatisticsResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Empirical peak exceedance against the Rice closed forms.
@@ -706,7 +707,7 @@ _BAND_HALF_WIDTH = 0.14
 _FULL_SHARE = 100.0
 
 
-def _verdict_word(*, passes: bool, language: str) -> str:
+def _verdict_word(*, passes: bool, language: Language) -> str:
     """``conforms`` or ``does not conform``, localised."""
     return _t(_CONFORMS if passes else _DOES_NOT_CONFORM, language)
 
@@ -715,7 +716,7 @@ def _draw_limits(
     ax: Axes,
     verifications: tuple[ConformanceVerification, ...],
     positions: np.ndarray,
-    language: str,
+    language: Language,
     *,
     one_sided: bool,
 ) -> None:
@@ -780,7 +781,7 @@ def _draw_open_limits(
     ax: Axes,
     verifications: tuple[ConformanceVerification, ...],
     positions: np.ndarray,
-    language: str,
+    language: Language,
 ) -> None:
     """Short bars at the finite limits of intervals open on one side.
 
@@ -810,7 +811,7 @@ def _draw_uncertainties(
     ax: Axes,
     verifications: tuple[ConformanceVerification, ...],
     positions: np.ndarray,
-    language: str,
+    language: Language,
 ) -> None:
     """The shaded maximum-permitted band and the actual-uncertainty error bar."""
     band = theme_fill(_C_MUTED, ax)
@@ -845,7 +846,7 @@ def _draw_verdicts(
     ax: Axes,
     verifications: tuple[ConformanceVerification, ...],
     positions: np.ndarray,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
     *,
     unusable_label: str | None = None,
@@ -904,7 +905,7 @@ def _finite_or(limit: float, fallback: float) -> float:
 def _draw_conformance(
     ax: Axes,
     verifications: tuple[ConformanceVerification, ...],
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
     *,
     magnitude_axis_label: str | None = None,
@@ -965,7 +966,7 @@ def plot_conformance_verification(
     result: ConformanceVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One measured deviation read by the conformance rule of IEC TC 29.
@@ -999,7 +1000,7 @@ def plot_conformance_verification(
     return ax
 
 
-def _requirement_label(name: str, clause: str, language: str) -> str:
+def _requirement_label(name: str, clause: str, language: Language) -> str:
     """``Generated level (§5.3.2)``, localised; the section sign keeps the
     clause number a reference, not a decimal, in the Spanish figures.
     """
@@ -1010,7 +1011,7 @@ def plot_sound_calibrator_requirement(
     result: SoundCalibratorRequirement,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Every measurement of one IEC 60942 requirement against its limits.
@@ -1046,7 +1047,7 @@ def plot_sound_calibrator_requirement(
 
 
 def _allowance_shares(
-    result: SoundCalibratorVerification, language: str
+    result: SoundCalibratorVerification, language: Language
 ) -> tuple[list[str], list[float], list[float], list[ConformanceVerification]]:
     """One label, the two shares in per cent and the verdict, per measurement."""
     labels: list[str] = []
@@ -1100,7 +1101,7 @@ def plot_sound_calibrator_verification(
     result: SoundCalibratorVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """How much of each allowance every measurement of a calibrator uses.
@@ -1246,7 +1247,7 @@ _SLM_PEAK_SIGNALS = ("one cycle", "positive half cycle", "negative half cycle")
 _SLM_UPRIGHT_TICKS = 9
 
 
-def _slm_label(label: str, language: str) -> str:
+def _slm_label(label: str, language: Language) -> str:
     """One result of a periodic test as its tick label reads.
 
     The differences of Clause 14 in mathtext, the signal of a C-weighted peak
@@ -1276,7 +1277,7 @@ def _slm_label(label: str, language: str) -> str:
     return decimal_comma(label, language)
 
 
-def _slm_verdict(result: SoundLevelMeterPeriodicRequirement, language: str) -> str:
+def _slm_verdict(result: SoundLevelMeterPeriodicRequirement, language: Language) -> str:
     """``conforms``, ``does not conform`` or ``not usable``, localised."""
     if result.failed:
         return _t(_DOES_NOT_CONFORM, language)
@@ -1295,7 +1296,7 @@ def plot_slm_periodic_requirement(
     result: SoundLevelMeterPeriodicRequirement,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One requirement of IEC 61672-3:2013 against its acceptance limits.
@@ -1450,7 +1451,7 @@ def _draw_slm_slot(
     ax: Axes,
     x: float,
     result: SoundLevelMeterPeriodicRequirement,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
     shown: set[str],
 ) -> None:
@@ -1492,7 +1493,7 @@ def _draw_slm_slot(
 def _slm_tick_labels(
     ax: Axes,
     slots: list[tuple[str, SoundLevelMeterPeriodicRequirement | None, str | None]],
-    language: str,
+    language: Language,
 ) -> None:
     """Each slot's clause under it, a failed check in red, a status on end.
 
@@ -1523,7 +1524,7 @@ def plot_slm_periodic_verification(
     result: SoundLevelMeterPeriodicVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Every graded clause of the periodic tests at its margin, one slot each.
@@ -1626,7 +1627,9 @@ _WEIGHTS_HEADROOM = 1.35
 _POLAR_FRAME_MARGIN = 0.8
 
 
-def _plane_label(result: DirectivityFactor, plane_angle: float, language: str) -> str:
+def _plane_label(
+    result: DirectivityFactor, plane_angle: float, language: Language
+) -> str:
     """The legend entry of one plane of a directivity measurement."""
     from .._i18n import format_number
 
@@ -1682,7 +1685,7 @@ def _plane_curve(
     return theta[order], level[order]
 
 
-def _radial_formatter(top: float, language: str) -> FuncFormatter:
+def _radial_formatter(top: float, language: Language) -> FuncFormatter:
     """Radial tick labels in dB: the numbers, with the unit on the outermost."""
     from matplotlib.ticker import FuncFormatter
 
@@ -1696,7 +1699,7 @@ def _radial_formatter(top: float, language: str) -> FuncFormatter:
 
 
 def _plot_directivity_response(
-    result: DirectivityFactor, ax: Axes | None, language: str, **kwargs: Any
+    result: DirectivityFactor, ax: Axes | None, language: Language, **kwargs: Any
 ) -> Axes:
     r"""Polar :math:`L(\phi) - L_\mathrm{rd}`, one closed curve per plane."""
     from matplotlib.ticker import MaxNLocator
@@ -1761,7 +1764,7 @@ def _plot_directivity_response(
 
 
 def _plot_directivity_weights(
-    result: DirectivityFactor, ax: Axes | None, language: str, **kwargs: Any
+    result: DirectivityFactor, ax: Axes | None, language: Language, **kwargs: Any
 ) -> Axes:
     """The weight of each reading of the first plane, in per cent of the sphere."""
     from .._i18n import format_number, localize_axes
@@ -1806,7 +1809,7 @@ def plot_directivity_factor(
     ax: Axes | None = None,
     *,
     view: str = "response",
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The directional response or the weights of an IEC 61183 measurement.
@@ -1833,7 +1836,7 @@ def plot_random_incidence_sensitivity(
     ax: Axes | None = None,
     *,
     view: str = "levels",
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The IEC 61183 random-incidence sensitivity level against frequency.
@@ -1895,7 +1898,7 @@ def plot_diffuse_field_sensitivity(
     result: DiffuseFieldSensitivity,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The IEC 61183 diffuse-field sensitivity level against frequency.
@@ -2016,7 +2019,7 @@ def plot_adjustment_value(
     result: AdjustmentValue,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The free-field deviation of a meter before and after its adjustment.
@@ -2118,7 +2121,7 @@ def plot_free_field_correction(
     result: FreeFieldCorrection,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The IEC 62585 free-field correction of a meter against frequency.
@@ -2190,7 +2193,7 @@ def plot_free_field_correction(
     return ax
 
 
-def _component_label(descriptor: str, language: str) -> str:
+def _component_label(descriptor: str, language: Language) -> str:
     """The tick label of one component: ``a7: C_FF,RM``, or its own name."""
     label = _COMPONENT_LABELS.get(descriptor)
     if label is None:
@@ -2203,7 +2206,7 @@ def plot_correction_budget(
     result: CorrectionUncertaintyBudget,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The standard uncertainty of each component of an IEC 62585 budget.
@@ -2280,7 +2283,7 @@ def plot_correction_uncertainty_verification(
     result: CorrectionUncertaintyVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The expanded uncertainties of a set of corrections against the
@@ -2522,7 +2525,7 @@ def plot_comparison_calibration(
     result: ComparisonCalibration,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The sensitivity level of a microphone calibrated by comparison.
@@ -2598,7 +2601,7 @@ def plot_environmental_sensitivity_correction(
     result: EnvironmentalSensitivityCorrection,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The environmental correction of a sensitivity level and its three
@@ -2671,7 +2674,7 @@ def plot_jig_diameter_correction(
     result: JigDiameterCorrection,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The corrections of IEC 61094-5 Table A.1 with their expanded
@@ -2773,7 +2776,7 @@ def plot_diameter_sound_field_correction(
     result: DiameterSoundFieldCorrection,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The correction of a test microphone smaller than its reference, by
@@ -2841,7 +2844,7 @@ def plot_jig_coupler_verification(
     result: JigCouplerVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The difference of a calibration made in a jig or coupler and the one
@@ -2938,7 +2941,7 @@ def plot_jig_coupler_verification(
     return ax
 
 
-def _comparison_component_label(name: str, language: str) -> str:
+def _comparison_component_label(name: str, language: Language) -> str:
     """The tick label of one component: its short name, or its own name."""
     label = _COMPARISON_COMPONENT_LABELS.get(name)
     return name if label is None else _t(label, language)
@@ -2948,7 +2951,7 @@ def plot_comparison_budget(
     result: ComparisonUncertaintyBudget,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The standard uncertainty of each component of a comparison budget.
@@ -3005,7 +3008,7 @@ def plot_free_field_region(
     result: FreeFieldRegion,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The effective free-field region of IEC 61094-8 B.1 in a plane through
@@ -3227,7 +3230,7 @@ def plot_comparison_phase(
     result: ComparisonCalibration,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The phase of the sensitivity of a microphone calibrated by
@@ -3280,7 +3283,7 @@ def plot_impedance_pressure_ratio(
     ax: Axes | None = None,
     *,
     quantity: str = "level",
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The pressure ratio that different acoustic impedances cause: its
@@ -3341,7 +3344,7 @@ def plot_rectangular_pulse(
     ax: Axes | None = None,
     *,
     upper_frequency_hz: float | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The spectrum of the pulse of IEC 61094-8 B.6 relative to its value at
@@ -3420,7 +3423,7 @@ def plot_time_selective_response(
     *,
     quantity: str = "impulse",
     frequencies: NDArray[np.float64] | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The impulse response with the time window over it, or the frequency
@@ -3454,7 +3457,7 @@ def plot_time_selective_response(
 
 
 def _draw_time_window(
-    result: TimeSelectiveResponse, ax: Axes, language: str, kwargs: dict[str, Any]
+    result: TimeSelectiveResponse, ax: Axes, language: Language, kwargs: dict[str, Any]
 ) -> None:
     """The impulse response, normalised, with the window and what it keeps."""
     from .._i18n import format_number
@@ -3493,7 +3496,7 @@ def _draw_windowed_response(
     result: TimeSelectiveResponse,
     ax: Axes,
     frequencies: NDArray[np.float64] | None,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> None:
     """The level of the response through the window and of the whole record,
@@ -3533,7 +3536,7 @@ def plot_stepped_sine_impulse_response(
     result: SteppedSineImpulseResponse,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The impulse response of a stepped-sine measurement against time.

@@ -70,6 +70,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..hearing.occupational_exposure import ExposureResult
     from .metadata import ReportMetadata
 
@@ -93,17 +94,17 @@ _INSTRUMENT_LABELS: dict[str, str] = {
 }
 
 
-def _fmt_db(value: float, language: str = "en") -> str:
+def _fmt_db(value: float, language: Language = "en") -> str:
     """A level or uncertainty rounded to one decimal place (Clause 15 e)."""
     return format_number(display_round(float(value)), language, decimals=1)
 
 
-def _fmt_hours(value: float, language: str = "en") -> str:
+def _fmt_hours(value: float, language: Language = "en") -> str:
     """A duration in hours with up to one decimal (trailing ``.0`` kept)."""
     return format_number(float(value), language, decimals=1)
 
 
-def _basis(result: ExposureResult, language: str = "en") -> str:
+def _basis(result: ExposureResult, language: Language = "en") -> str:
     """The standard-basis line: ISO 9612:2009 plus the applied strategy."""
     strategy = t(_STRATEGY_LABELS[result.strategy], language)
     return t(
@@ -116,7 +117,7 @@ def _basis(result: ExposureResult, language: str = "en") -> str:
 def _instrumentation_text(
     result: ExposureResult,
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> str | None:
     """The Clause 15 c instrumentation line: user text, or the class fallback."""
     if metadata is not None and metadata.instrumentation:
@@ -129,7 +130,7 @@ def _instrumentation_text(
 def _metadata_pairs(
     result: ExposureResult,
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
@@ -164,7 +165,7 @@ def _esc(value: str | None) -> str | None:
 
 
 def _task_table(
-    result: ExposureResult, *, verbose: bool = False, language: str = "en"
+    result: ExposureResult, *, verbose: bool = False, language: Language = "en"
 ) -> Table:
     """The Clause 15 b/d work-analysis table of a task-based result.
 
@@ -248,7 +249,7 @@ def _task_table(
     return table
 
 
-def _sampling_table(result: ExposureResult, language: str = "en") -> Table:
+def _sampling_table(result: ExposureResult, language: Language = "en") -> Table:
     """The sampling summary of a job-based/full-day result (Formula (C.9) budget)."""
     from reportlab.lib.units import mm
 
@@ -300,7 +301,7 @@ def _sampling_table(result: ExposureResult, language: str = "en") -> Table:
 
 
 def _assessment_rows(
-    result: ExposureResult, language: str = "en"
+    result: ExposureResult, language: Language = "en"
 ) -> list[tuple[str, str, str, bool | None]]:
     """The Directive 2003/10/EC assessment rows.
 
@@ -341,7 +342,7 @@ def _assessment_rows(
     return rows
 
 
-def _assessment_table(result: ExposureResult, language: str = "en") -> Table:
+def _assessment_table(result: ExposureResult, language: Language = "en") -> Table:
     """The Directive 2003/10/EC assessment table (exceeded / not exceeded)."""
     from reportlab.lib.units import mm
 
@@ -371,7 +372,9 @@ def _assessment_table(result: ExposureResult, language: str = "en") -> Table:
     return stacked_table(data, [74 * mm, 24 * mm, 42 * mm, 34 * mm])
 
 
-def _statement(result: ExposureResult, language: str = "en") -> tuple[str, list[str]]:
+def _statement(
+    result: ExposureResult, language: Language = "en"
+) -> tuple[str, list[str]]:
     """The boxed result statement and its extended terms (Clause 15 e)."""
     statement = t(
         "Daily noise exposure level L<sub>EX,8h</sub> = <b>{lex} dB</b> "
@@ -395,7 +398,7 @@ def _statement(result: ExposureResult, language: str = "en") -> tuple[str, list[
     return statement, extended
 
 
-def _verdict(result: ExposureResult, language: str = "en") -> tuple[str, bool]:
+def _verdict(result: ExposureResult, language: Language = "en") -> tuple[str, bool]:
     """Verdict text and PASS flag against the Directive 2003/10/EC limit value.
 
     The exposure limit value of 87 dB(A) (Article 3.1) is the only Directive
@@ -421,7 +424,7 @@ def render_iso9612_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 9612:2009 occupational noise-exposure fiche to a PDF at ``path``.
 

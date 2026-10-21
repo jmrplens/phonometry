@@ -60,6 +60,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..hearing.noise_induced_hearing_loss import HTLANResult, NIPTSResult
     from .metadata import ReportMetadata
 
@@ -89,12 +90,12 @@ _POPULATION_DISCLAIMER = (
 )
 
 
-def _fmt_db(value: float, language: str = "en") -> str:
+def _fmt_db(value: float, language: Language = "en") -> str:
     """A threshold shift or level rounded to one decimal place."""
     return format_number(display_round(float(value)), language, decimals=1)
 
 
-def _fmt_freq(value: float, language: str = "en") -> str:
+def _fmt_freq(value: float, language: Language = "en") -> str:
     """An audiometric frequency in hertz, as an integer (500 ... 6000)."""
     return format_number(round(float(value)), language, decimals=0)
 
@@ -143,7 +144,7 @@ def _iso_q_percent(fractile: float) -> float:
     return round(100.0 * (1.0 - float(fractile)), 6)
 
 
-def _fractile_phrase(fractile: float, language: str = "en") -> str:
+def _fractile_phrase(fractile: float, language: Language = "en") -> str:
     """A short gloss of the population fractile, in ISO 1999's own ``Q``.
 
     ``Q`` is printed with the meaning ISO 1999:2013 gives it in 6.3.2
@@ -163,7 +164,7 @@ def _fractile_phrase(fractile: float, language: str = "en") -> str:
 # NIPTS fiche.
 # --------------------------------------------------------------------------- #
 def _nipts_metadata_pairs(
-    metadata: ReportMetadata | None, language: str = "en"
+    metadata: ReportMetadata | None, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """The (label, value) header-grid pairs of a NIPTS/HTLAN fiche."""
     if metadata is None:
@@ -178,7 +179,7 @@ def _nipts_metadata_pairs(
 
 
 def _nipts_table(
-    result: NIPTSResult, *, verbose: bool = False, language: str = "en"
+    result: NIPTSResult, *, verbose: bool = False, language: Language = "en"
 ) -> Table:
     """The per-audiometric-frequency NIPTS table (median and fractile value)."""
     from reportlab.lib.units import mm
@@ -219,7 +220,7 @@ def _nipts_table(
 
 
 def _nipts_statement(
-    result: NIPTSResult, language: str = "en"
+    result: NIPTSResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed representative NIPTS statement and the exposure-condition terms."""
     is_handicap, value, freq = _representative(result.frequencies, result.value)
@@ -246,7 +247,7 @@ def _nipts_statement(
 
 
 def _nipts_verdict(
-    result: NIPTSResult, requirement: float, language: str = "en"
+    result: NIPTSResult, requirement: float, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag: the representative NIPTS at or below a maximum.
 
@@ -269,7 +270,7 @@ def render_nipts_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a NIPTS prediction fiche to a PDF at ``path`` (ISO 1999:2013, 6.3).
 
@@ -363,7 +364,7 @@ def render_nipts_report(
 # HTLAN fiche.
 # --------------------------------------------------------------------------- #
 def _htlan_table(
-    result: HTLANResult, *, verbose: bool = False, language: str = "en"
+    result: HTLANResult, *, verbose: bool = False, language: Language = "en"
 ) -> Table:
     """The per-audiometric-frequency HTLAN table (age, noise and combined)."""
     from reportlab.lib.units import mm
@@ -405,7 +406,7 @@ def _htlan_table(
 
 
 def _htlan_statement(
-    result: HTLANResult, language: str = "en"
+    result: HTLANResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed representative HTLAN statement and the listener/exposure terms."""
     is_handicap, value, freq = _representative(result.frequencies, result.threshold)
@@ -438,7 +439,7 @@ def _htlan_statement(
 
 
 def _htlan_verdict(
-    result: HTLANResult, requirement: float, language: str = "en"
+    result: HTLANResult, requirement: float, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag: the representative HTLAN at or below a maximum."""
     _, value, _ = _representative(result.frequencies, result.threshold)
@@ -456,7 +457,7 @@ def render_htlan_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an HTLAN prediction fiche to a PDF at ``path`` (ISO 1999:2013, 6.1).
 
@@ -568,7 +569,7 @@ def _outside_validated_domain(l_ex: float, years: float, fractile: float) -> boo
 
 
 def _prediction_notes(
-    language: str = "en",
+    language: Language = "en",
     *,
     l_ex: float,
     years: float,

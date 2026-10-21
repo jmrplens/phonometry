@@ -64,7 +64,7 @@ top of the zone below it, which is how the tables print their limits.
 from phonometry import vibration
 
 # Three boundaries from whichever part of ISO 20816 applies, in mm/s r.m.s.
-zones = vibration.ZoneBoundaries(2.8, 7.1, 11.2)
+zones = vibration.ZoneBoundaries(a_b=2.8, b_c=7.1, c_d=11.2)
 print(vibration.evaluation_zone([0.9, 3.4, 8.0, 20.0], zones))   # ['A' 'B' 'C' 'D']
 print(vibration.evaluation_zone(2.8, zones))                     # A, the limit of A
 ```

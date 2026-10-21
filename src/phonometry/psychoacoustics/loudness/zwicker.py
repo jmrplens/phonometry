@@ -30,6 +30,8 @@ from ...io._resolve import resolve_calibration, resolve_fs
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
     from ...io._signal import Signal
 from scipy import signal
@@ -225,7 +227,7 @@ class ZwickerLoudness(OwnsArrays):
         require_choice(self.field, "field", ("free", "diffuse"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the specific loudness N'(z) over Bark (see :mod:`phonometry._plot.psychoacoustics`).
 
@@ -245,9 +247,9 @@ class ZwickerLoudness(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 532-1 Zwicker loudness fiche to a PDF.
 
@@ -788,6 +790,7 @@ def _percentile(values: np.ndarray, percentile: int) -> float:
     n = ordered.size
     if percentile == 0:
         return float(ordered[-1])
+    # The top of the percentile scale.
     if percentile == 100:  # noqa: PLR2004
         return float(ordered[0])
     k = int((1.0 - percentile / 100.0) * n)

@@ -75,7 +75,7 @@ enclosure_insertion_loss(
     internal_absorption: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    model: str = 'bies',
+    model: Literal['bies', 'norton'] = 'bies',
 ) -> EnclosureInsertionLossResult
 ```
 
@@ -123,7 +123,7 @@ enclosure_required_transmission_loss(
     internal_absorption: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    model: str = 'bies',
+    model: Literal['bies', 'norton'] = 'bies',
 ) -> EnclosureInsertionLossResult
 ```
 
@@ -190,7 +190,7 @@ The predicted insertion loss of a machine enclosure (Bies §7.4.2).
 EnclosureInsertionLossResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -207,9 +207,9 @@ EnclosureInsertionLossResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

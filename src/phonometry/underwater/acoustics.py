@@ -33,7 +33,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from ..io._resolve import SignalInput, apply_calibration, resolve_fs
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -49,7 +49,7 @@ __all__ = [
 ]
 
 #: ISO 1683:2015 Table 2, the reference values for sound in liquids.
-_LIQUID = ISO1683_REFERENCE_VALUES["liquid"]
+_LIQUID = REFERENCE_VALUES["liquid"]
 #: Underwater reference sound pressure ``p₀`` (Pa), i.e. 1 µPa (ISO 18405;
 #: ISO 1683:2015 Table 2).
 UNDERWATER_REFERENCE_PRESSURE_PA = _LIQUID["sound_pressure"].value
@@ -57,13 +57,13 @@ UNDERWATER_REFERENCE_PRESSURE_PA = _LIQUID["sound_pressure"].value
 #: ISO 1683:2015 Table 2).
 UNDERWATER_REFERENCE_EXPOSURE_PA2_S = _LIQUID["sound_exposure"].value
 #: In-air reference sound pressure (Pa), i.e. 20 µPa (ISO 1683:2015 Table 1).
-_IN_AIR_REFERENCE_PRESSURE = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_IN_AIR_REFERENCE_PRESSURE = REFERENCE_VALUES["gas"]["sound_pressure"].value
 #: Level offset between the 20 µPa and 1 µPa references, ``20·lg(20)`` dB.
 _REFERENCE_OFFSET_DB = 20.0 * np.log10(
     _IN_AIR_REFERENCE_PRESSURE / UNDERWATER_REFERENCE_PRESSURE_PA
 )
 #: Rejection message for an all-zero record: no level is defined.
-_NO_ENERGY_MSG = "'pressure' has no energy."
+_NO_ENERGY_MSG = "'pressure_pa' has no energy."
 
 
 def _positive(value: float, name: str) -> float:
@@ -92,20 +92,20 @@ def _validate_pressure(
     require_scalar(min_samples, "min_samples")
     sig = np.asarray(pressure, dtype=np.float64)
     if sig.ndim != 1:
-        msg = "'pressure' must be one-dimensional."
+        msg = "'pressure_pa' must be one-dimensional."
         raise ValueError(msg)
     if sig.size < min_samples:
         plural = "sample" if min_samples == 1 else "samples"
-        msg = f"'pressure' must contain at least {min_samples} {plural}."
+        msg = f"'pressure_pa' must contain at least {min_samples} {plural}."
         raise ValueError(msg)
     if not np.all(np.isfinite(sig)):
-        msg = "'pressure' must be finite."
+        msg = "'pressure_pa' must be finite."
         raise ValueError(msg)
     return apply_calibration(pressure, sig)
 
 
 def sound_pressure_level(
-    pressure: SignalInput,
+    pressure_pa: SignalInput,
     *,
     reference: float = UNDERWATER_REFERENCE_PRESSURE_PA,
 ) -> float:
@@ -114,7 +114,7 @@ def sound_pressure_level(
     :math:`\mathrm{SPL} = 10 \log_{10}(\langle p^2 \rangle / p_0^2)` dB, with ``p``
     in pascals and the underwater reference :math:`p_0 = 1` µPa by default.
 
-    :param pressure: Sound-pressure time series (1-D), in Pa. Accepts a
+    :param pressure_pa: Sound-pressure time series (1-D), in Pa. Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples: this quantity is a pressure, and the underwater reference
         of 1 uPa changes what the decibel is counted from, not what the
@@ -124,7 +124,7 @@ def sound_pressure_level(
     :raises ValueError: If the signal is invalid or has no energy.
     :raises TypeError: if ``reference`` is not a single number.
     """
-    sig = _validate_pressure(pressure)
+    sig = _validate_pressure(pressure_pa)
     p0 = _positive(reference, "reference")
     mean_square = float(np.mean(sig**2))
     if mean_square <= 0.0:
@@ -133,7 +133,7 @@ def sound_pressure_level(
 
 
 def sound_exposure_level(
-    pressure: SignalInput,
+    pressure_pa: SignalInput,
     fs: float | None = None,
     *,
     reference: float = UNDERWATER_REFERENCE_EXPOSURE_PA2_S,
@@ -144,7 +144,7 @@ def sound_exposure_level(
     exposure :math:`E = \int p^2 \, dt \approx (1/f_\mathrm{s}) \sum p^2` over the
     record.
 
-    :param pressure: Sound-pressure time series (1-D), in Pa. Accepts a
+    :param pressure_pa: Sound-pressure time series (1-D), in Pa. Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples: this quantity is a pressure, and the underwater reference
         of 1 uPa changes what the decibel is counted from, not what the
@@ -158,8 +158,8 @@ def sound_exposure_level(
     :raises ValueError: If the inputs are invalid or the signal has no energy.
     :raises TypeError: if ``fs`` or ``reference`` is not a single number.
     """
-    fs = resolve_fs(pressure, fs, name="pressure")
-    sig = _validate_pressure(pressure)
+    fs = resolve_fs(pressure_pa, fs, name="pressure_pa")
+    sig = _validate_pressure(pressure_pa)
     fs_v = _positive(fs, "fs")
     e0 = _positive(reference, "reference")
     exposure = float(np.sum(sig**2) / fs_v)
@@ -169,7 +169,7 @@ def sound_exposure_level(
 
 
 def peak_sound_pressure_level(
-    pressure: SignalInput,
+    pressure_pa: SignalInput,
     *,
     reference: float = UNDERWATER_REFERENCE_PRESSURE_PA,
 ) -> float:
@@ -178,7 +178,7 @@ def peak_sound_pressure_level(
     :math:`L_{p,\mathrm{pk}} = 20 \log_{10}(\max \lvert p \rvert / p_0)` dB re
     1 µPa.
 
-    :param pressure: Sound-pressure time series (1-D), in Pa. Accepts a
+    :param pressure_pa: Sound-pressure time series (1-D), in Pa. Accepts a
         :class:`phonometry.io.Signal`, whose calibration is applied to the
         samples: this quantity is a pressure, and the underwater reference
         of 1 uPa changes what the decibel is counted from, not what the
@@ -188,7 +188,7 @@ def peak_sound_pressure_level(
     :raises ValueError: If the signal is invalid or is all zero.
     :raises TypeError: if ``reference`` is not a single number.
     """
-    sig = _validate_pressure(pressure)
+    sig = _validate_pressure(pressure_pa)
     p0 = _positive(reference, "reference")
     peak = float(np.max(np.abs(sig)))
     if peak <= 0.0:

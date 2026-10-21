@@ -106,7 +106,7 @@ import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -124,6 +124,11 @@ from ..._internal.warnings import PhonometryWarning
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from ..._i18n import Language
+
+VehicleCategory = Literal["1", "2a", "2b"]
+RoadSpeedCategory = Literal["low", "medium", "high"]
 
 __all__ = [
     "SPB_ANNEX_D_SURFACE_LEVELS",
@@ -154,10 +159,10 @@ class StatisticalPassByWarning(PhonometryWarning):
 #: 3.4 and clause 4: the three vehicle categories the method uses, cars (1),
 #: dual-axle heavy vehicles (2a) and multi-axle heavy vehicles (2b). The other
 #: categories of Annex A (other light vehicles, motorcycles) are not used.
-SPB_VEHICLE_CATEGORIES: tuple[str, ...] = ("1", "2a", "2b")
+SPB_VEHICLE_CATEGORIES: tuple[VehicleCategory, ...] = ("1", "2a", "2b")
 
 #: 3.3: the three road speed categories, in the order Table 1 prints them.
-SPB_ROAD_SPEED_CATEGORIES: tuple[str, ...] = ("low", "medium", "high")
+SPB_ROAD_SPEED_CATEGORIES: tuple[RoadSpeedCategory, ...] = ("low", "medium", "high")
 
 #: Table 1: the reference speed of each vehicle category in each road speed
 #: category, in kilometres per hour.
@@ -268,13 +273,13 @@ def _reported_levels(levels: Mapping[str, float]) -> dict[str, float]:
     return {key: _round_tenth(value) for key, value in levels.items()}
 
 
-def _road_category(road_speed_category: str) -> str:
+def _road_category(road_speed_category: str) -> RoadSpeedCategory:
     return require_choice(
         road_speed_category, "road_speed_category", SPB_ROAD_SPEED_CATEGORIES
     )
 
 
-def _vehicle_category(vehicle_category: object) -> str:
+def _vehicle_category(vehicle_category: object) -> VehicleCategory:
     key = str(vehicle_category).strip().lower()
     if key not in SPB_VEHICLE_CATEGORIES:
         msg = (
@@ -332,7 +337,7 @@ def _index_terms(
 def statistical_pass_by_index(
     vehicle_sound_levels: Mapping[str, float],
     *,
-    road_speed_category: str,
+    road_speed_category: RoadSpeedCategory,
     weighting_factors: Mapping[str, float] | None = None,
 ) -> float:
     r"""The Statistical Pass-By Index of three vehicle sound levels, 9.5.
@@ -414,8 +419,8 @@ class PassByRegression(OwnsArrays):
         :math:`\lg(v / 1\ \mathrm{km/h})`, in decades.
     """
 
-    vehicle_category: str
-    road_speed_category: str
+    vehicle_category: VehicleCategory
+    road_speed_category: RoadSpeedCategory
     speeds_kmh: NDArray[np.float64]
     max_levels: NDArray[np.float64]
     reference_speed_kmh: float
@@ -514,7 +519,7 @@ class PassByRegression(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Draw the pass-bys, the fitted line, the 9.3 window and :math:`L_\mathrm{veh}`.
 
@@ -533,8 +538,8 @@ class PassByRegression(OwnsArrays):
 def _fit(
     speeds_kmh: ArrayLike,
     max_levels: ArrayLike,
-    vehicle_category: str,
-    road_speed_category: str,
+    vehicle_category: VehicleCategory,
+    road_speed_category: RoadSpeedCategory,
 ) -> PassByRegression:
     """The least-squares line of 9.1 and the statistics clause 13 reports."""
     speeds = require_positive_array(speeds_kmh, "speeds_kmh")
@@ -617,8 +622,8 @@ def pass_by_regression(
     speeds_kmh: ArrayLike,
     max_levels: ArrayLike,
     *,
-    vehicle_category: str,
-    road_speed_category: str,
+    vehicle_category: VehicleCategory,
+    road_speed_category: RoadSpeedCategory,
 ) -> PassByRegression:
     r"""Fit the level of one vehicle category against the logarithm of speed, 9.1 and 9.2.
 
@@ -678,7 +683,7 @@ class StatisticalPassByResult(RichDisplay):
         decimal; ``None`` when no reference was given.
     """
 
-    road_speed_category: str
+    road_speed_category: RoadSpeedCategory
     regressions: Mapping[str, PassByRegression]
     weighting_factors: Mapping[str, float]
     vehicle_sound_levels: Mapping[str, float]
@@ -805,7 +810,7 @@ class StatisticalPassByResult(RichDisplay):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Draw the three clouds of pass-bys, their lines and :math:`L_\mathrm{veh}`.
 
@@ -826,7 +831,7 @@ def statistical_pass_by(
     speeds_kmh: ArrayLike,
     max_levels: ArrayLike,
     *,
-    road_speed_category: str,
+    road_speed_category: RoadSpeedCategory,
     corrected_vehicle_sound_levels: Mapping[str, float] | None = None,
     reference_levels: float | Mapping[str, float] | None = None,
     weighting_factors: Mapping[str, float] | None = None,
@@ -903,7 +908,7 @@ def statistical_pass_by(
             StatisticalPassByWarning,
             stacklevel=2,
         )
-    vehicle_levels = {
+    vehicle_levels: dict[str, float] = {
         key: regressions[key].vehicle_sound_level for key in SPB_VEHICLE_CATEGORIES
     }
     index = statistical_pass_by_index(

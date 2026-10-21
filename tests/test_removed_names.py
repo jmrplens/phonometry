@@ -219,6 +219,7 @@ def test_a_removed_path_is_not_served_by_its_parent_package() -> None:
     ):
         importlib.import_module("phonometry.hearing.sti")
     with pytest.raises(ImportError, match=r"cannot import name 'sti'"):
+        # The import is the assertion: it raises, so the name is never bound.
         from phonometry.hearing import sti  # noqa: F401
     with pytest.raises(AttributeError, match=r"has no attribute 'sti'"):
         _ = ph.hearing.sti
@@ -769,6 +770,22 @@ def test_a_module_hidden_behind_its_function_is_private(path: str) -> None:
     ):
         importlib.import_module(path)
     assert callable(getattr(importlib.import_module(package), leaf))
+
+
+def test_the_test_signal_module_is_private() -> None:
+    """``signals.test_signals`` is gone; its functions are where a caller reads them.
+
+    The ``test_`` prefix is left to test files, so the module that generates
+    the test signals is private and its package publishes every name it held.
+    """
+    with pytest.raises(
+        ModuleNotFoundError,
+        match=r"No module named 'phonometry\.signals\.test_signals'",
+    ):
+        importlib.import_module("phonometry.signals.test_signals")
+    assert callable(ph.signals.noise_signal)
+    assert callable(ph.signals.tone_burst)
+    assert ph.signals.noise_signal.__module__ == "phonometry.signals._test_signals"
 
 
 def test_the_names_a_hidden_module_held_keep_their_package_address() -> None:

@@ -974,7 +974,7 @@ def test_the_force_record_leaves_the_mass_line_out_of_the_highest_peak() -> None
     assert whole.peak_time_s < 0.01  # the impact, 5 ms into the record
     assert whole.passes
     free = vibration.check_response_decay(
-        response, FS, exponential_window=True, force=force
+        response, FS, exponential_window=True, force_n=force
     )
     assert free.start_s > ref.ISO7626_5_PULSE_TIME_S
     assert free.peak < whole.peak
@@ -985,7 +985,7 @@ def test_the_force_record_leaves_the_mass_line_out_of_the_highest_peak() -> None
     )
     assert not by_hand.passes
     later = vibration.check_response_decay(
-        response, FS, exponential_window=True, force=force, start_s=0.02
+        response, FS, exponential_window=True, force_n=force, start_s=0.02
     )
     assert later.start_s == pytest.approx(0.02)
 
@@ -994,14 +994,14 @@ def test_a_force_record_of_another_length_is_refused() -> None:
     force, response = _sdof_impact(0.005)
     short = force[: N // 2]
     with pytest.raises(ValueError, match="one length"):
-        vibration.check_response_decay(response, FS, force=short)
+        vibration.check_response_decay(response, FS, force_n=short)
 
 
 def test_a_force_that_never_falls_back_is_refused() -> None:
     _, response = _sdof_impact(0.005)
     ramp = np.linspace(0.0, 1.0, N)
     with pytest.raises(ValueError, match="does not fall back"):
-        vibration.check_response_decay(response, FS, force=ramp)
+        vibration.check_response_decay(response, FS, force_n=ramp)
 
 
 def test_response_decay_rejects_a_start_past_the_midpoint() -> None:
@@ -1280,7 +1280,7 @@ def test_an_explicit_rate_that_disagrees_with_the_signal_is_refused() -> None:
 
 def test_bare_records_without_a_rate_are_refused() -> None:
     force, response = _sdof_impact(0.1)
-    with pytest.raises(ValueError, match="fs is required when 'force'"):
+    with pytest.raises(ValueError, match="fs is required when 'force_n'"):
         vibration.impact_mobility(force, response)
 
 
@@ -1294,9 +1294,9 @@ def test_a_check_keeps_the_samples_it_judged_as_a_bare_array() -> None:
         Signal(response, int(FS), calibration_factor=_CAL)
     )
     for kept, record in (
-        (double.force, force),
-        (overload.record, force),
-        (decay.record, response),
+        (double.force_n, force),
+        (overload.x, force),
+        (decay.response, response),
     ):
         assert type(kept) is np.ndarray
         np.testing.assert_array_equal(kept, record)

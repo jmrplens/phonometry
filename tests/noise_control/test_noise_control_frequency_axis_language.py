@@ -58,7 +58,7 @@ def _duct_path() -> DuctPathResult:
     return noise_control.duct_path(
         frequencies=_BANDS,
         source_level=[92.0, 90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0],
-        elements=[noise_control.DuctElement("Duct", 3.0)],
+        elements=[noise_control.DuctElement(label="Duct", attenuation=3.0)],
     )
 
 

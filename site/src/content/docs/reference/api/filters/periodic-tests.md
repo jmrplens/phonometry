@@ -173,7 +173,9 @@ The IEC 61260-3:2016 verdict on the periodic tests of a band filter.
 ### FilterPeriodicVerification.clause()
 
 ```python
-FilterPeriodicVerification.clause(clause: str) -> PeriodicTestClause
+FilterPeriodicVerification.clause(
+    clause: Literal['10.2', '10.3', '11.7', '11.9', '13'],
+) -> PeriodicTestClause
 ```
 
 The verdict on one clause.
@@ -249,7 +251,7 @@ deviation outside its limits and no uncertainty above its maximum.
 FilterPeriodicVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -334,7 +336,7 @@ lowest mid-band frequency of the set or above 1.5 times the highest.
 
 ```python
 PeriodicTestClause(
-    clause: str,
+    clause: Literal['10.2', '10.3', '11.7', '11.9', '13'],
     title: str,
     labels: tuple[str, ...],
     verifications: tuple[ConformanceVerification, ...],
@@ -375,7 +377,7 @@ Whether every result of the clause demonstrates conformance (5.1).
 PeriodicTestClause.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

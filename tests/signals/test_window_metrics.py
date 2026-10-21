@@ -112,7 +112,7 @@ def test_enbw_hz_matches_welch_resolution_bandwidth() -> None:
     # The PSD estimator reports Bₑ = fs·Σw²/(Σw)² per segment; it must be
     # the same number window_metrics reports as ENBW·fs/n.
     fs, nperseg = 48000.0, 2048
-    x = ph.signals.noise_signal(fs, 1.0, seed=6)
+    x = ph.signals.noise_signal(fs, duration_s=1.0, seed=6)
     psd = ph.signals.power_spectral_density(x, fs, nperseg=nperseg)
     metrics = ph.signals.window_metrics("hann", nperseg)
     assert psd.resolution_bandwidth == pytest.approx(metrics.enbw_hz(fs), rel=1e-12)

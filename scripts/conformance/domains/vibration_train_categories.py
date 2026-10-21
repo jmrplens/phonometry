@@ -27,6 +27,7 @@ Example 9 on printed page 44.
 from __future__ import annotations
 
 import functools
+from typing import Literal
 
 import phonometry as ph
 
@@ -69,7 +70,7 @@ _PLANFALL = (
     (0.44, 2, 6, 1.3),
     (0.40, 2, 6, 1.3),
 )
-_EXAMPLE_9 = {
+_EXAMPLE_9: dict[tuple[str, Literal["day", "night"]], float] = {
     ("nullfall", "day"): 0.039,
     ("nullfall", "night"): 0.065,
     ("planfall", "day"): 0.046,
@@ -79,7 +80,11 @@ _CASES = {"nullfall": _NULLFALL, "planfall": _PLANFALL}
 
 #: Table 3 (printed page 24): a few of the cells the draft prints for the
 #: days two to six, as (stage, days, A_u, A_r).
-_TABLE_3 = (("I", 3, 0.67, 0.37), ("II", 5, 0.93, 0.67), ("III", 6, 1.27, 1.03))
+_TABLE_3: tuple[tuple[Literal["I", "II", "III"], int, float, float], ...] = (
+    ("I", 3, 0.67, 0.37),
+    ("II", 5, 0.93, 0.67),
+    ("III", 6, 1.27, 1.03),
+)
 
 
 def _chk_table_b1(name: str, quantity: str) -> Outcome:
@@ -107,7 +112,7 @@ def _chk_example_8_kb_ftr() -> Outcome:
     return numeric(0.0997, computed, _FOUR_DECIMALS, places=4)
 
 
-def _chk_example_9(case: str, time_of_day: str) -> Outcome:
+def _chk_example_9(case: str, time_of_day: Literal["day", "night"]) -> Outcome:
     rows = _CASES[case]
     counts = [row[1] if time_of_day == "day" else row[2] for row in rows]
     computed = ph.vibration.train_assessment_severity(
@@ -131,7 +136,9 @@ def _chk_table_1() -> Outcome:
     return numeric(0.1, computed, _FOUR_DECIMALS, places=2)
 
 
-def _chk_table_3(stage: str, days: int, a_u: float, a_r: float, which: str) -> Outcome:
+def _chk_table_3(
+    stage: Literal["I", "II", "III"], days: int, a_u: float, a_r: float, which: str
+) -> Outcome:
     guide = ph.vibration.construction_guide_values(days, stage=stage)
     if which == "A_u":
         return numeric(a_u, guide.a_u, _TWO_DECIMALS, places=3)

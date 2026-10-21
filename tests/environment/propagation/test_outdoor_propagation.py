@@ -520,15 +520,19 @@ class TestPredictedReceiverLevel:
         )
         level = environment.predicted_receiver_level(
             lw,
-            environment.PropagationGeometry(200.0, 2.0, 2.0),
+            environment.PropagationGeometry(
+                distance=200.0, source_height_m=2.0, receiver_height_m=2.0
+            ),
             frequencies=BANDS,
-            ground=environment.GroundFactors(1.0, 1.0, 1.0),
+            ground=environment.GroundFactors(source=1.0, middle=1.0, receiver=1.0),
         )
         assert np.allclose(level, lw - r.a_total)
 
     def test_directivity_and_omega_add(self) -> None:
         lw = np.full(len(BANDS), 90.0)
-        geometry = environment.PropagationGeometry(200.0, 2.0, 2.0)
+        geometry = environment.PropagationGeometry(
+            distance=200.0, source_height_m=2.0, receiver_height_m=2.0
+        )
         base = environment.predicted_receiver_level(lw, geometry, frequencies=BANDS)
         boosted = environment.predicted_receiver_level(
             lw,
@@ -540,8 +544,10 @@ class TestPredictedReceiverLevel:
 
     def test_cmet_subtracted(self) -> None:
         lw = np.full(len(BANDS), 90.0)
-        geometry = environment.PropagationGeometry(400.0, 2.0, 2.0)
-        porous = environment.GroundFactors(1.0, 1.0, 1.0)
+        geometry = environment.PropagationGeometry(
+            distance=400.0, source_height_m=2.0, receiver_height_m=2.0
+        )
+        porous = environment.GroundFactors(source=1.0, middle=1.0, receiver=1.0)
         dw = environment.predicted_receiver_level(
             lw, geometry, frequencies=BANDS, ground=porous
         )
@@ -556,12 +562,16 @@ class TestPredictedReceiverLevel:
         lw = np.full(len(BANDS), 100.0)
         near = environment.predicted_receiver_level(
             lw,
-            environment.PropagationGeometry(100.0, 2.0, 2.0),
+            environment.PropagationGeometry(
+                distance=100.0, source_height_m=2.0, receiver_height_m=2.0
+            ),
             frequencies=BANDS,
         )
         far = environment.predicted_receiver_level(
             lw,
-            environment.PropagationGeometry(1000.0, 2.0, 2.0),
+            environment.PropagationGeometry(
+                distance=1000.0, source_height_m=2.0, receiver_height_m=2.0
+            ),
             frequencies=BANDS,
         )
         assert np.all(far < near)

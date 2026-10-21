@@ -48,6 +48,8 @@ from .._internal.validation import check_engine, require_scalar
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
 
 __all__ = [
@@ -298,9 +300,9 @@ class NoiseEmissionDeclaration(RichDisplay):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         r"""Render an ISO 4871 noise-emission declaration fiche to a PDF.
 

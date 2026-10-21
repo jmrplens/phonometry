@@ -94,6 +94,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+
 __all__ = [
     "ANR_WITHIN_LABORATORY_UNCERTAINTY",
     "ActiveInsertionLossResult",
@@ -229,7 +231,7 @@ class ActiveInsertionLossResult(OwnsArrays):
     n_subjects: int
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the mean active insertion loss with its expanded uncertainty.
 
@@ -438,7 +440,7 @@ class ANRTotalAttenuationResult(OwnsArrays):
     snr: SNRRatingResult
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the passive, active and total attenuation and the APV.
 
@@ -706,7 +708,7 @@ class ANRLinearityResult(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw every step at the ear against the 5 dB ± 1 dB it should be.
 

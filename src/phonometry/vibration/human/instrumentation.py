@@ -74,7 +74,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -91,6 +91,7 @@ from ..._internal.validation import (
 from .exposure import (
     WEIGHTING_NAMES,
     HumanVibrationWarning,
+    WeightingName,
     band_limiting_factors,
     frequency_weighting,
     weighting_factors,
@@ -101,6 +102,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from ..._i18n import Language
+
+Method = Literal["linear", "exponential"]
 
 __all__ = [
     "CENTRAL_TOLERANCE_PERCENT",
@@ -388,7 +393,7 @@ PVEM_INDICATION_TOLERANCES_PERCENT: Mapping[str, float] = MappingProxyType(
 )
 
 
-def indication_tolerance_percent(name: str) -> float:
+def indication_tolerance_percent(name: WeightingName) -> float:
     """The Table 2 indication tolerance at the reference frequency.
 
     :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
@@ -402,7 +407,7 @@ def indication_tolerance_percent(name: str) -> float:
 
 
 def weighting_tolerance_percent(
-    name: str, frequencies: ArrayLike
+    name: WeightingName, frequencies: ArrayLike
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """The Table 5 band around a weighting, region by region.
 
@@ -432,7 +437,9 @@ def weighting_tolerance_percent(
     return lower, upper
 
 
-def phase_tolerance_deg(name: str, frequencies: ArrayLike) -> NDArray[np.float64]:
+def phase_tolerance_deg(
+    name: WeightingName, frequencies: ArrayLike
+) -> NDArray[np.float64]:
     """The Table 5 characteristic phase-deviation band, region by region.
 
     Footnote a of the table limits this to instruments that provide a
@@ -479,7 +486,7 @@ def _checked_uncertainty(value: float | None, name: str) -> float:
     return uncertainty
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class WeightingVerification(OwnsArrays):
     """One measured weighting response against its ISO 8041-1 tolerances.
 
@@ -499,7 +506,7 @@ class WeightingVerification(OwnsArrays):
     frequencies, so a verification cannot be built against another band.
     """
 
-    weighting: str
+    weighting: WeightingName
     frequencies: NDArray[np.float64]
     measured: NDArray[np.float64]
     design: NDArray[np.float64]
@@ -570,7 +577,7 @@ class WeightingVerification(OwnsArrays):
         return float(self.deviation_percent[worst])
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the measured response inside the tolerance band.
 
@@ -590,7 +597,7 @@ class WeightingVerification(OwnsArrays):
 
 
 def verify_weighting(
-    name: str,
+    name: WeightingName,
     measured_factors: ArrayLike,
     *,
     frequencies: ArrayLike,
@@ -890,7 +897,7 @@ def peak_deviation_percent(characteristic_phase_deviation_deg: ArrayLike) -> flo
 
 
 def _design_phase_deg(
-    name: str, frequencies: NDArray[np.float64]
+    name: WeightingName, frequencies: NDArray[np.float64]
 ) -> NDArray[np.float64]:
     """The design-goal phase along ascending frequencies, in degrees.
 
@@ -971,7 +978,7 @@ class PhaseVerification(OwnsArrays):
     built against another band.
     """
 
-    weighting: str
+    weighting: WeightingName
     frequencies: NDArray[np.float64]
     measured_phase_deg: NDArray[np.float64]
     design_phase_deg: NDArray[np.float64]
@@ -1041,7 +1048,7 @@ class PhaseVerification(OwnsArrays):
         return peak_deviation_percent(self.characteristic_deviation_deg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the characteristic phase deviation inside the Table 5 band.
 
@@ -1061,7 +1068,7 @@ class PhaseVerification(OwnsArrays):
 
 
 def verify_phase_response(
-    name: str, measured_phase_deg: ArrayLike, *, frequencies: ArrayLike
+    name: WeightingName, measured_phase_deg: ArrayLike, *, frequencies: ArrayLike
 ) -> PhaseVerification:
     """Verify a measured phase response against the ISO 8041-1 Table 5 band.
 
@@ -1146,7 +1153,7 @@ def verify_phase_response(
     )
 
 
-def reference_indication(name: str) -> float:
+def reference_indication(name: WeightingName) -> float:
     """The weighted indication a conforming meter shows at the reference.
 
     Table 1 pairs each application with a reference frequency and a reference
@@ -1164,7 +1171,7 @@ def reference_indication(name: str) -> float:
     return REFERENCE_ACCELERATION_M_S2[weighting] * factor
 
 
-def band_limited_weighting_factor(name: str) -> float:
+def band_limited_weighting_factor(name: WeightingName) -> float:
     r"""The factor that makes the second row of Table 2 satisfiable.
 
     Table 2 (folio 12) allows 3 % between "the indicated value of any
@@ -1259,7 +1266,7 @@ RUNNING_RMS_DECAY_RATE_DB_PER_S: tuple[tuple[float, float, float], ...] = (
 )
 
 
-def running_rms_decay_time(integration_time: float, *, method: str) -> float:
+def running_rms_decay_time(integration_time: float, *, method: Method) -> float:
     r"""When the running r.m.s. falls to 10 % after the signal is shut off.
 
     5.13 (folio 20) applies a steady sinusoid at the reference frequency for
@@ -1315,7 +1322,7 @@ class RunningRMSDecayVerification(RichDisplay):
         indicated value, as supplied, in seconds.
     """
 
-    method: str
+    method: Method
     integration_time: float
     measured_time_s: float
 
@@ -1399,7 +1406,7 @@ class RunningRMSDecayVerification(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the measured decay time against the printed interval.
 
@@ -1421,7 +1428,7 @@ class RunningRMSDecayVerification(RichDisplay):
 
 
 def verify_running_rms_decay(
-    measured_time_s: float, *, integration_time: float, method: str
+    measured_time_s: float, *, integration_time: float, method: Method
 ) -> RunningRMSDecayVerification:
     """Verify a measured decay time against Table 10 or Table 11.
 
@@ -1449,6 +1456,7 @@ def verify_running_rms_decay(
         the three printed time constants.
     :raises TypeError: if ``measured_time_s`` is not a single number.
     """
+    averaging: Method
     averaging = require_choice(str(method), "method", ("linear", "exponential"))
     require_scalar(measured_time_s, "measured_time_s")
     measured = float(measured_time_s)

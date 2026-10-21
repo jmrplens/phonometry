@@ -173,7 +173,7 @@ A-weighted maximum impact sound pressure level (ISO 717-2 Annex D).
 AWeightedMaxImpactResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -188,7 +188,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ```python
 check_heavy_impact_source(
     force_exposure_level: ArrayLike,
-    source: str = 'rubber_ball',
+    source: Literal['rubber_ball', 'bang_machine'] = 'rubber_ball',
 ) -> HeavyImpactSourceCheck
 ```
 
@@ -307,7 +307,7 @@ octaves with [`a_weighted_max_impact_level`](/phonometry/reference/api/building/
 
 ```python
 heavy_impact_source_limits(
-    source: str = 'rubber_ball',
+    source: Literal['rubber_ball', 'bang_machine'] = 'rubber_ball',
 ) -> HeavyImpactSourceLimits
 ```
 
@@ -331,7 +331,7 @@ Octave-band `LFE` tolerance band of a heavy impact source.
 
 ```python
 heavy_impact_source_specification(
-    source: str = 'rubber_ball',
+    source: Literal['rubber_ball', 'bang_machine'] = 'rubber_ball',
 ) -> HeavyImpactSourceSpec
 ```
 
@@ -363,7 +363,10 @@ HEAVY_IMPACT_SOURCES = {'rubber_ball': ((39.0, 1.0), (31.0, 1.5), (23.0, 1.5), (
 ## HeavyImpactSourceCheck
 
 ```python
-HeavyImpactSourceCheck(source: str, measured: np.ndarray)
+HeavyImpactSourceCheck(
+    source: Literal['rubber_ball', 'bang_machine'],
+    measured: np.ndarray,
+)
 ```
 
 Conformance of a measured heavy impact source to its printed spectrum.
@@ -410,7 +413,7 @@ Printed nominal `LFE` per band, in dB re 1 N.
 HeavyImpactSourceCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -460,7 +463,7 @@ used to be unpacked by position.
 
 ```python
 HeavyImpactSourceSpec(
-    name: str,
+    name: Literal['rubber_ball', 'bang_machine'],
     frequencies: tuple[float, ...],
     force_exposure_level: tuple[float, ...],
     tolerance_db: tuple[float, ...],
@@ -510,7 +513,7 @@ spectrum by other means still conforms.
 
 ```python
 impact_force_exposure_level(
-    force: Signal | Sequence[float] | np.ndarray,
+    force_n: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     reference_force: float = 1.0,
@@ -543,8 +546,8 @@ supplied record with the trapezoidal rule, so pass one isolated impact.
 
 | Name | Description |
 | :--- | :--- |
-| `force` | Sampled instantaneous force `F(t)`, in newtons (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
-| `fs` | Sampling rate of *force*, in hertz (> 0). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
+| `force_n` | Sampled instantaneous force `F(t)`, in newtons (1-D). Accepts a [`phonometry.io.Signal`](/phonometry/reference/api/io/io/#signal) for its rate; a calibration factor it carries is deliberately not applied, because this record is a force in newtons and not a pressure. |
+| `fs` | Sampling rate of *force_n*, in hertz (> 0). Required for a bare array; a [`Signal`](/phonometry/reference/api/io/io/#signal) brings its own, and an explicit value that disagrees with it raises instead of silently winning. |
 | `reference_force` | Reference force `F0`, in newtons (Default: 1 N). |
 | `reference_time` | Reference time interval `Tref`, in seconds (Default: 1 s). |
 
@@ -632,7 +635,7 @@ Standardized maximum impact sound pressure level (ISO 16283-2 3.16).
 StandardizedMaxImpactResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

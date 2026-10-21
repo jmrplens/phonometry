@@ -873,7 +873,10 @@ def test_iso_3743_1_reads_the_octave_bands_at_the_test_conditions() -> None:
     np.testing.assert_allclose(got.reference_power_level, octave, rtol=0, atol=1e-12)
     np.testing.assert_allclose(got.sound_power_level, octave + 4.0, rtol=0, atol=1e-12)
     np.testing.assert_allclose(
-        got.sound_power_level_ref, octave + 4.0 + c2_3743, rtol=0, atol=1e-12
+        got.sound_power_level_at_reference_conditions,
+        octave + 4.0 + c2_3743,
+        rtol=0,
+        atol=1e-12,
     )
     at_test = cal.sound_power_level_at(
         freqs, fraction=1, temperature_c=20.0, static_pressure_kpa=90.0
@@ -931,7 +934,7 @@ def test_iso_3743_2_comparison_reads_the_calibration() -> None:
     np.testing.assert_allclose(got.reference_power_level, octave, rtol=0, atol=1e-12)
     np.testing.assert_allclose(got.sound_power_level, octave + 4.0, rtol=0, atol=1e-12)
     np.testing.assert_allclose(
-        got.sound_power_level_ref,
+        got.sound_power_level_at_reference_conditions,
         octave + 4.0 + _c2_at_20_degc_and_90_kpa(15.0),
         rtol=0,
         atol=1e-12,

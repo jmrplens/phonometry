@@ -531,8 +531,8 @@ def _detailed_airborne() -> Axes:
         bands,
         direct_index=np.linspace(35.0, 65.0, bands.size),
         flanking_paths=[
-            BandPath("Ff", "Ff", np.linspace(45.0, 60.0, bands.size)),
-            BandPath("Df", "Df", np.linspace(50.0, 75.0, bands.size)),
+            BandPath(label="Ff", kind="Ff", values=np.linspace(45.0, 60.0, bands.size)),
+            BandPath(label="Df", kind="Df", values=np.linspace(50.0, 75.0, bands.size)),
         ],
     ).plot()
 
@@ -543,7 +543,9 @@ def _detailed_impact() -> Axes:
     return ph.building.detailed_impact_prediction(
         bands,
         direct_level=np.linspace(50.0, 75.0, bands.size),
-        flanking_paths=[BandPath("Df", "Df", np.linspace(45.0, 72.0, bands.size))],
+        flanking_paths=[
+            BandPath(label="Df", kind="Df", values=np.linspace(45.0, 72.0, bands.size))
+        ],
     ).plot()
 
 

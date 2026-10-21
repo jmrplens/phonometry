@@ -144,7 +144,7 @@ def _rooflight_under_heavy_rain() -> tuple[
     # The laboratory's 6 mm reference pane: mounted a little more lossily
     # than Table I.1 assumes (its structural reverberation time is 0.8 times
     # the one the reference loss factor would give).
-    l_i_ref = np.array(
+    l_i_reference = np.array(
         [46.2, 45.8, 46.9, 46.5, 47.8, 47.2, 47.9, 48.1, 47.6]
         + [46.8, 44.9, 43.1, 43.8, 46.9, 51.6, 50.9, 46.8, 44.6]
     )
@@ -152,7 +152,7 @@ def _rooflight_under_heavy_rain() -> tuple[
         [0.176, 0.177, 0.138, 0.139, 0.140, 0.111, 0.111, 0.088, 0.088]
         + [0.070, 0.070, 0.071, 0.055, 0.056, 0.044, 0.044, 0.035, 0.035]
     )
-    correction = building.rainfall_reference_correction(l_i_ref, t_s)
+    correction = building.rainfall_reference_correction(l_i_reference, t_s)
     # A 1.25 m x 1.5 m polycarbonate rooflight under heavy rain in a 62 m3
     # test room.
     l_pr = np.array(

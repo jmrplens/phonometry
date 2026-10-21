@@ -108,7 +108,7 @@ bearing_fault_frequencies(
     pitch_diameter: float,
     *,
     contact_angle_deg: float = 0.0,
-    rotating_race: str = 'inner',
+    rotating_race: Literal['inner', 'outer'] = 'inner',
 ) -> FaultFrequencyResult
 ```
 
@@ -243,6 +243,7 @@ they came from.
 
 ```python
 FaultFrequencyResult(
+    *,
     lines: tuple[FaultLine, ...],
     shaft_rate: float,
     source: str,
@@ -316,7 +317,7 @@ Predicted frequencies in shaft orders, in order.
 FaultFrequencyResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -370,10 +371,11 @@ much narrower than the highest predicted harmonic.
 
 ```python
 FaultLine(
+    *,
     name: str,
     frequency: float,
     order: float,
-    family: str,
+    family: Literal['shaft', 'bearing', 'gear', 'motor', 'blade'],
     description: str,
 )
 ```

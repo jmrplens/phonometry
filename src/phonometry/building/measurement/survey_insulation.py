@@ -93,6 +93,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -109,7 +111,7 @@ __all__ = [
 ]
 
 
-def _validate_report_request(engine: str, language: str) -> None:
+def _validate_report_request(engine: ReportEngine, language: Language) -> None:
     """Reject an unknown engine or language before a survey fiche is rendered.
 
     Shared by the survey result ``report`` methods: only the ``"reportlab"``
@@ -280,26 +282,48 @@ def reverberation_index(
     return 10.0 * np.log10(tt / _positive(t0, "t0"))
 
 
+#: A room of ISO 10052:2021 Table 4, by the key :func:`estimate_reverberation_index`
+#: reads it under: the furnished rooms, or the construction letters of
+#: Table 3 and their area-averaged mixed classes for an unfurnished one.
+SurveyRoom = Literal[
+    "furnished",
+    "kitchen",
+    "bathroom",
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "a+e",
+    "b+f",
+    "c+g",
+    "d+h",
+]
+
+
 @overload
 def estimate_reverberation_index(
-    volume: float, room: str, *, weighted: Literal[False] = False
+    volume: float, room: SurveyRoom, *, weighted: Literal[False] = False
 ) -> np.ndarray: ...
 
 
 @overload
 def estimate_reverberation_index(
-    volume: float, room: str, *, weighted: Literal[True]
+    volume: float, room: SurveyRoom, *, weighted: Literal[True]
 ) -> float: ...
 
 
 @overload
 def estimate_reverberation_index(
-    volume: float, room: str, *, weighted: bool = ...
+    volume: float, room: SurveyRoom, *, weighted: bool = ...
 ) -> np.ndarray | float: ...
 
 
 def estimate_reverberation_index(
-    volume: float, room: str, *, weighted: bool = False
+    volume: float, room: SurveyRoom, *, weighted: bool = False
 ) -> np.ndarray | float:
     r"""Estimate the reverberation index from room type and volume (Clause 6.5).
 
@@ -404,7 +428,7 @@ class SurveyAirborneResult(OwnsArrays):
         require_same_length(self, "d", "d_nt", "d_n", "r_prime")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``DnT`` against the shifted ISO 717-1 reference curve.
 
@@ -421,11 +445,11 @@ class SurveyAirborneResult(OwnsArrays):
         self,
         path: str,
         *,
-        quantity: str = "dnt",
+        quantity: Literal["dnt", "r_prime"] = "dnt",
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a survey-method airborne field report to a PDF (ISO 10052).
 
@@ -523,7 +547,7 @@ class SurveyImpactResult(OwnsArrays):
         require_same_length(self, "l_i", "l_nt", "l_n")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``L'nT`` against the shifted ISO 717-2 reference curve."""
         if self.rating is None:
@@ -535,9 +559,9 @@ class SurveyImpactResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a survey-method impact field report to a PDF (ISO 10052).
 
@@ -623,7 +647,7 @@ class SurveyFacadeResult(OwnsArrays):
         require_same_length(self, "d_2m", "d_2m_nt", "d_2m_n")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``D2m,nT`` against the shifted ISO 717-1 reference curve."""
         if self.rating is None:
@@ -635,9 +659,9 @@ class SurveyFacadeResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a survey-method facade field report to a PDF (ISO 10052).
 

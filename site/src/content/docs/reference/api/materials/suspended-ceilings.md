@@ -241,7 +241,7 @@ The centre distance is judged only when it was given (4.1.1.2.3.6).
 check_ceiling_specimen(
     *,
     area: float,
-    mounting: str = 'E',
+    mounting: Literal['A', 'B', 'E', 'J'] = 'E',
     depth_mm: float | None = None,
     deflection_mm: float = 0.0,
     substructure_width_mm: float = 0.0,
@@ -367,7 +367,7 @@ MIN_SUPPORT_SPACING_M = 1.2
 ## mounting_type
 
 ```python
-mounting_type(letter: str) -> str
+mounting_type(letter: Literal['A', 'B', 'E', 'J']) -> str
 ```
 
 What one mounting letter of EN ISO 354 Annex B means here.

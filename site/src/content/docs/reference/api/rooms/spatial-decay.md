@@ -690,7 +690,7 @@ spatial_decay_curve(
     *,
     near_limit_m: float = 5.0,
     far_limit_m: float = 16.0,
-    region: str = 'middle',
+    region: Literal['near', 'middle', 'far', 'whole'] = 'middle',
     band: float | None = None,
 ) -> SpatialDecayResult
 ```
@@ -766,7 +766,7 @@ SpatialDecayResult(
     level_excess: NDArray[np.float64],
     decay_rate_db: float,
     mean_level_excess: float,
-    region: str,
+    region: Literal['near', 'middle', 'far', 'whole'],
     band: float | None = None,
 )
 ```
@@ -792,7 +792,7 @@ A spatial sound distribution curve and what clause 6 reads off it.
 SpatialDecayResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

@@ -98,6 +98,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -254,7 +256,7 @@ class JointOpenBandRating(RichDisplay):
     ctr_100_5000: int | None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the open-band single numbers beside the bands taken as open.
 
@@ -500,7 +502,7 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot :math:`R_\mathrm{s}` per band with the maximum of the arrangement.
 
@@ -521,9 +523,9 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         r"""Render the form of Figure J.7 to a one-page PDF.
 
@@ -778,7 +780,7 @@ class JointTestElementCheck(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the length and width of the joint against their bounds.
 
@@ -886,7 +888,7 @@ class GapWidthCheck(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the readings with their average and the 0,3 mm band.
 
@@ -929,7 +931,7 @@ def check_gap_width(readings_mm: ArrayLike) -> GapWidthCheck:
 # --- J.4 and J.5: a variable slit at several gap widths ------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class JointGapSeries(OwnsArrays):
     r"""Single numbers of a variable slit against its gap width (J.4, J.5.2 h), i)).
 
@@ -1028,7 +1030,7 @@ class JointGapSeries(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        language: str = "en",
+        language: Language = "en",
         quantity: Literal["r_s_w", "r_s_w_c", "r_s_w_ctr"] = "r_s_w_ctr",
         **kwargs: Any,
     ) -> Axes:
@@ -1052,7 +1054,7 @@ class JointGapSeries(OwnsArrays):
         )
 
     def plot_octave_bands(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot :math:`R_\mathrm{s}` in octave bands at every gap width, as Figure J.9.
 
@@ -1210,7 +1212,7 @@ class JointGapSeriesCheck(RichDisplay):
         return _GAP_MATCH_MM
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the measured gap widths against the three widths J.4 asks for.
 

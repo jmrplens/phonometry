@@ -64,11 +64,12 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..materials.absorbers.sound_absorption import SoundAbsorptionMeasurement
     from .metadata import ReportMetadata
 
 
-def _cell(value: float, decimals: int, language: str) -> str:
+def _cell(value: float, decimals: int, language: Language) -> str:
     """Format one table value, or an em dash when it is not finite.
 
     A band whose decay could not be evaluated arrives here as a NaN: that is
@@ -86,12 +87,12 @@ def _cell(value: float, decimals: int, language: str) -> str:
     return format_number(v, language, decimals=decimals)
 
 
-def _a2(value: float, language: str = "en") -> str:
+def _a2(value: float, language: Language = "en") -> str:
     """Two decimals (``alpha_s`` and the times), or the em dash (see :func:`_cell`)."""
     return _cell(value, 2, language)
 
 
-def _a1(value: float, language: str = "en") -> str:
+def _a1(value: float, language: Language = "en") -> str:
     """One decimal (areas ``A``, ISO 354 Cl. 8.3), or the em dash (:func:`_cell`)."""
     return _cell(value, 1, language)
 
@@ -99,7 +100,7 @@ def _a1(value: float, language: str = "en") -> str:
 def _metadata_pairs(
     result: SoundAbsorptionMeasurement,
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the absorption header grid.
 
@@ -161,7 +162,9 @@ def _metadata_pairs(
     ]
 
 
-def _alpha_table(freqs: np.ndarray, alpha_s: np.ndarray, language: str = "en") -> Table:
+def _alpha_table(
+    freqs: np.ndarray, alpha_s: np.ndarray, language: Language = "en"
+) -> Table:
     """Build the compact two-column ``f | alpha_s`` table (accredited default)."""
     from reportlab.lib.units import mm
 
@@ -178,7 +181,9 @@ def _alpha_table(freqs: np.ndarray, alpha_s: np.ndarray, language: str = "en") -
     return band_table(rows, [28 * mm, 28 * mm], len(freqs), band_centres=freqs)
 
 
-def _detail_table(result: SoundAbsorptionMeasurement, language: str = "en") -> Table:
+def _detail_table(
+    result: SoundAbsorptionMeasurement, language: Language = "en"
+) -> Table:
     """Build the verbose table ``f | T1 | T2 | A1 | A2 | alpha_s`` (~102 mm wide)."""
     from reportlab.lib.units import mm
 
@@ -215,7 +220,7 @@ def _detail_table(result: SoundAbsorptionMeasurement, language: str = "en") -> T
     return band_table(rows, col_widths, len(freqs), band_centres=freqs)
 
 
-def _statement(result: SoundAbsorptionMeasurement, language: str = "en") -> str:
+def _statement(result: SoundAbsorptionMeasurement, language: Language = "en") -> str:
     """The boxed characterisation headline (ISO 354 has no single number)."""
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     lo = round(float(freqs.min())) if freqs.size else 0
@@ -232,7 +237,7 @@ def render_iso354_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 354 sound-absorption test-report fiche to a PDF at ``path``.
 

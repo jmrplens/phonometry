@@ -37,8 +37,8 @@ from doc29_appendix_d_data import (
 from reference_data import IEC61672_TABLE3
 
 from phonometry.aircraft import (
+    AIR1845_ATTENUATION_DB_PER_100M,
     NOY_BANDS_HZ,
-    SAE_AIR1845_ATTENUATION_DB_PER_100M,
     AerodromeAtmosphere,
     ANPDatabase,
     ANPNPDCurves,
@@ -46,7 +46,7 @@ from phonometry.aircraft import (
     NPDAtmosphereIncrement,
     RevisedNPDCurves,
     SpectralClass,
-    arp866a_attenuation,
+    attenuation_arp866a,
     event_level,
     load_anp_database,
     npd_atmosphere_increment,
@@ -85,10 +85,10 @@ def _curves(operation: str, table: tuple) -> ANPNPDCurves:
 
 
 def test_table_d1_is_published_frozen_over_the_24_bands() -> None:
-    assert isinstance(SAE_AIR1845_ATTENUATION_DB_PER_100M, MappingProxyType)
-    assert tuple(SAE_AIR1845_ATTENUATION_DB_PER_100M) == FREQUENCIES_HZ
-    assert SAE_AIR1845_ATTENUATION_DB_PER_100M[1000.0] == pytest.approx(0.590)
-    assert SAE_AIR1845_ATTENUATION_DB_PER_100M[10000.0] == pytest.approx(9.836)
+    assert isinstance(AIR1845_ATTENUATION_DB_PER_100M, MappingProxyType)
+    assert tuple(AIR1845_ATTENUATION_DB_PER_100M) == FREQUENCIES_HZ
+    assert AIR1845_ATTENUATION_DB_PER_100M[1000.0] == pytest.approx(0.590)
+    assert AIR1845_ATTENUATION_DB_PER_100M[10000.0] == pytest.approx(9.836)
 
 
 def test_spectral_classes_103_and_205_are_table_d2() -> None:
@@ -128,10 +128,10 @@ def test_arp866a_attenuation_is_table_d3b_within_seven_ppm() -> None:
 def test_table_d3b_reads_eta_linearly_in_table_1() -> None:
     # ISO 3891 Table 1 asks for "a form of quadratic interpolation"; Table
     # D-3b is reproduced by a linear one, which is what the Appendix D route
-    # asks arp866a_attenuation for. The 10 kHz band at 10 degC and 80 %
+    # asks attenuation_arp866a for. The 10 kHz band at 10 degC and 80 %
     # evaluates at f0 = 9 000 Hz with delta = 2.496, between the knots 2.30
     # (0.495) and 2.50 (0.450).
-    res = arp866a_attenuation([10000.0], eta_interpolation="linear", **_AIR)
+    res = attenuation_arp866a([10000.0], eta_interpolation="linear", **_AIR)
     delta = float(res.delta[0])
     assert 2.30 < delta < 2.50
     linear = 0.495 + (delta - 2.30) / 0.20 * (0.450 - 0.495)
@@ -141,7 +141,7 @@ def test_table_d3b_reads_eta_linearly_in_table_1() -> None:
     )
     # The quadratic of ISO 3891's own tables misses Table D-3b by more than a
     # decibel in the 4 kHz band at 25000 ft (204.355 dB printed).
-    quadratic = arp866a_attenuation([4000.0], **_AIR)
+    quadratic = attenuation_arp866a([4000.0], **_AIR)
     assert quadratic.eta_interpolation == "quadratic"
     far = float(quadratic.path_attenuation(25000.0 * _FT_M)[0])
     assert abs(far - TABLE_D3B[19][-1]) > 1.0

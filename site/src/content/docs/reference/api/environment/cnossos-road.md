@@ -117,10 +117,10 @@ ROAD_OCTAVE_BANDS_HZ = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.
 
 ```python
 road_propulsion_noise(
-    category: RoadVehicleCategory | str,
+    category: RoadVehicleCategory | Literal['1', '2', '3', '4a', '4b'],
     speed_kmh: float,
     *,
-    surface: RoadSurface | str | RoadSurfaceCoefficients = ...,
+    surface: RoadSurface | Literal['reference road surface', '1-layer ZOAB', '2-layer ZOAB', '2-layer ZOAB (fine)', 'SMA-NL5', 'SMA-NL8', 'brushed down concrete', 'optimised brushed down concrete', 'fine broomed concrete', 'worked surface', 'hard elements in herringbone', 'hard elements not in herringbone', 'quiet hard elements', 'thin layer A', 'thin layer B'] | RoadSurfaceCoefficients = ...,
     road_slope_percent: float = 0.0,
     junction_distance: float | None = None,
     junction_type: JunctionType = ...,
@@ -178,10 +178,10 @@ ROAD_REFERENCE_TEMPERATURE_C = 20.0
 
 ```python
 road_rolling_noise(
-    category: RoadVehicleCategory | str,
+    category: RoadVehicleCategory | Literal['1', '2', '3', '4a', '4b'],
     speed_kmh: float,
     *,
-    surface: RoadSurface | str | RoadSurfaceCoefficients = ...,
+    surface: RoadSurface | Literal['reference road surface', '1-layer ZOAB', '2-layer ZOAB', '2-layer ZOAB (fine)', 'SMA-NL5', 'SMA-NL8', 'brushed down concrete', 'optimised brushed down concrete', 'fine broomed concrete', 'worked surface', 'hard elements in herringbone', 'hard elements not in herringbone', 'quiet hard elements', 'thin layer A', 'thin layer B'] | RoadSurfaceCoefficients = ...,
     temperature_c: float = 20.0,
     studded_fraction: float = 0.0,
     studded_months: float = 0.0,
@@ -236,7 +236,7 @@ ROAD_SOURCE_HEIGHT_M = 0.05
 road_source_power(
     traffic: RoadTraffic | list[RoadTraffic] | tuple[RoadTraffic, ...],
     *,
-    surface: RoadSurface | str | RoadSurfaceCoefficients = ...,
+    surface: RoadSurface | Literal['reference road surface', '1-layer ZOAB', '2-layer ZOAB', '2-layer ZOAB (fine)', 'SMA-NL5', 'SMA-NL8', 'brushed down concrete', 'optimised brushed down concrete', 'fine broomed concrete', 'worked surface', 'hard elements in herringbone', 'hard elements not in herringbone', 'quiet hard elements', 'thin layer A', 'thin layer B'] | RoadSurfaceCoefficients = ...,
     temperature_c: float = 20.0,
     road_slope_percent: float = 0.0,
     studded_months: float = 0.0,
@@ -283,7 +283,7 @@ temperature, the gradient, the studded-tyre season and the junction.
 
 ```python
 road_surface_coefficients(
-    surface: RoadSurface | str,
+    surface: RoadSurface | Literal['reference road surface', '1-layer ZOAB', '2-layer ZOAB', '2-layer ZOAB (fine)', 'SMA-NL5', 'SMA-NL8', 'brushed down concrete', 'optimised brushed down concrete', 'fine broomed concrete', 'worked surface', 'hard elements in herringbone', 'hard elements not in herringbone', 'quiet hard elements', 'thin layer A', 'thin layer B'],
 ) -> RoadSurfaceCoefficients
 ```
 
@@ -307,10 +307,10 @@ Look up a Table F-4 row.
 
 ```python
 road_vehicle_sound_power(
-    category: RoadVehicleCategory | str,
+    category: RoadVehicleCategory | Literal['1', '2', '3', '4a', '4b'],
     speed_kmh: float,
     *,
-    surface: RoadSurface | str | RoadSurfaceCoefficients = ...,
+    surface: RoadSurface | Literal['reference road surface', '1-layer ZOAB', '2-layer ZOAB', '2-layer ZOAB (fine)', 'SMA-NL5', 'SMA-NL8', 'brushed down concrete', 'optimised brushed down concrete', 'fine broomed concrete', 'worked surface', 'hard elements in herringbone', 'hard elements not in herringbone', 'quiet hard elements', 'thin layer A', 'thin layer B'] | RoadSurfaceCoefficients = ...,
     temperature_c: float = 20.0,
     road_slope_percent: float = 0.0,
     studded_fraction: float = 0.0,
@@ -354,6 +354,7 @@ propulsion term is the whole of it (2.2.3).
 
 ```python
 RoadEmissionCoefficients(
+    *,
     rolling_a: Mapping[str, tuple[float, ...]],
     rolling_b: Mapping[str, tuple[float, ...]],
     propulsion_a: Mapping[str, tuple[float, ...]],
@@ -361,7 +362,7 @@ RoadEmissionCoefficients(
     studded_a: tuple[float, ...],
     studded_b: tuple[float, ...],
     junction_c: Mapping[str, tuple[tuple[float, float], tuple[float, float]]],
-    temperature_coefficient_db_per_c: Mapping[str, float],
+    temperature_coefficient_db_per_k: Mapping[str, float],
 )
 ```
 
@@ -385,7 +386,7 @@ reproduced for comparison with pre-2021 studies.
 | `studded_a` | `a_i` of Table F-2 (category 1 only), in dB. |
 | `studded_b` | `b_i` of Table F-2 (category 1 only), in dB. |
 | `junction_c` | `(C_R, C_P)` of Table F-3 per category and junction type, in dB. |
-| `temperature_coefficient_db_per_c` | `K_m` of (2.2.10), in dB per degree Celsius. |
+| `temperature_coefficient_db_per_k` | `K_m` of (2.2.10), in dB per kelvin, the same number per degree Celsius, since it multiplies a difference of temperatures. |
 
 ## RoadEmissionResult
 
@@ -433,7 +434,7 @@ by (EU) 2021/1226, i.e. [`CNOSSOS_A_WEIGHTING`](/phonometry/reference/api/enviro
 RoadEmissionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -452,6 +453,7 @@ Road surfaces tabulated in Table F-4 (as replaced by 2021/1226).
 
 ```python
 RoadSurfaceCoefficients(
+    *,
     name: str,
     alpha: dict[str, tuple[float, ...]],
     beta: dict[str, float],
@@ -474,6 +476,7 @@ One row of Table F-4: the acoustic signature of a road surface.
 
 ```python
 RoadTraffic(
+    *,
     category: RoadVehicleCategory,
     flow_rate: float,
     speed_kmh: float,

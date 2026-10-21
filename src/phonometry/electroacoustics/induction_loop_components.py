@@ -147,7 +147,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy import optimize
@@ -170,6 +170,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from .._i18n import Language
+
+Component = Literal["x", "y", "z", "magnitude"]
 
 __all__ = [
     "NECK_LOOP_TYPES",
@@ -417,7 +421,7 @@ class LoopField(OwnsArrays):
             np.sqrt(self.h_x_a_per_m**2 + self.h_y_a_per_m**2 + self.h_z_a_per_m**2)
         )
 
-    def level(self, component: str = "z") -> np.ndarray:
+    def level(self, component: Component = "z") -> np.ndarray:
         r"""The field strength level of one component, dB re 400 mA/m.
 
         :param component: ``"x"``, ``"y"``, ``"z"`` or ``"magnitude"``.
@@ -438,8 +442,8 @@ class LoopField(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        component: str = "z",
-        language: str = "en",
+        component: Component = "z",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the field strength level along the points, as Figures E.2 and E.3.
@@ -889,7 +893,7 @@ class LoopImpedance(OwnsArrays):
         return current * self.at(frequency_hz)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Draw the magnitude of the impedance against frequency.
 
@@ -977,7 +981,7 @@ class MaxOutputCurrent(OwnsArrays):
     max_current_a: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the distortion against the load current, with the rated THD.
 
@@ -1223,7 +1227,7 @@ class AmplifierFrequencyResponse(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the response against frequency, 0 dB at 1 kHz (5.4.12.3).
 
@@ -1396,7 +1400,7 @@ class AGCCharacteristic(OwnsArrays):
         return _AGC_RECOMMENDED_RANGE_DB
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw output level against input level, as Figure A.1.
 
@@ -1511,7 +1515,7 @@ class QuadraturePhaseError(OwnsArrays):
             return float(20.0 * np.log10(2.0 * math.sin(half) ** 2))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the deviation from 90 degrees against frequency.
 
@@ -1622,7 +1626,7 @@ class NeckLoopCharacteristics(OwnsArrays):
     frequencies_3db_hz: tuple[float, ...]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the frequency response on the jig, 0 dB at 1 kHz.
 
@@ -1827,7 +1831,7 @@ class NeckLoopVerification(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each measured value as a share of its limit.
 

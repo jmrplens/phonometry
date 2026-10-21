@@ -76,14 +76,14 @@ from ..._internal.validation import (
 )
 from ..._internal.warnings import PhonometryWarning
 from ...io._resolve import SignalInput, resolve_fs, resolve_samples
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
-
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -226,7 +226,7 @@ class ImpulseProminenceResult(OwnsArrays):
         return float(impulse_adjustment(self.prominence))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the adjustment curve ``KI(P)`` with the impulses marked.
 
@@ -245,9 +245,9 @@ class ImpulseProminenceResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an impulsive-sound prominence assessment fiche to a PDF.
 
@@ -465,7 +465,7 @@ class ImpulsiveSoundWarning(PhonometryWarning):
 # ---------------------------------------------------------------------------
 
 #: Reference sound pressure, in pascal (20 uPa, ISO 1683:2015 Table 1).
-_REFERENCE_PRESSURE: float = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_REFERENCE_PRESSURE: float = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 #: Gradient, in dB/s, that the positive slope of ``LpAF`` must exceed for a
 #: point to belong to an onset (Clauses 3.3 and 4, procedures a-d).
@@ -627,7 +627,7 @@ class ImpulsiveSoundResult(OwnsArrays):
         return float(self.laeq + self.adjustment)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``LpAF`` versus time with the detected onsets marked.
 
@@ -654,12 +654,9 @@ class LevelHistory(OwnsArrays):
     A-weighted, F time-weighted sound pressure level sampled every ``dt``
     seconds. It came back as a bare ``(times, levels)`` pair, which meant
     the one thing every other result in this library offers, a plot that
-    knows what it is drawing, had to be written by hand each time.
-
-    For backward compatibility with that pair, the dataclass is iterable
-    and unpacks as ``times, levels = sound_pressure_level_history(...)``,
-    the same way :class:`~phonometry.room.DecayCurve` replaced its own
-    tuple return.
+    knows what it is drawing, had to be written by hand each time. It is
+    read by name, ``history.times`` and ``history.levels``, like every other
+    record, and does not unpack as that pair.
 
     :ivar times: Time of each sample, in seconds from the start.
     :ivar levels: The level at each of those times, in dB.
@@ -673,8 +670,8 @@ class LevelHistory(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a trace whose levels and time axis are of different lengths.
 
-        The history is handed on as a pair, and it unpacks as one, so whoever
-        receives it puts the two arrays together again: a window taken as
+        Whoever reads the two arrays off the history puts them together
+        again: a window taken as
         ``levels[times > t]`` needs them to index alike, and the plot draws
         one against the other. A pair whose halves disagree is not a level
         history at all, so it is refused where it is made rather than at each
@@ -685,13 +682,8 @@ class LevelHistory(OwnsArrays):
         require_ranks(self, times=1, levels=1)
         require_same_length(self, "times", "levels", axis="sample")
 
-    def __iter__(self) -> Iterator[np.ndarray]:
-        """Yield ``times`` then ``levels`` so the result unpacks like a tuple."""
-        yield self.times
-        yield self.levels
-
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the level trace against time.
 
@@ -728,10 +720,10 @@ def sound_pressure_level_history(
     :param reference_pressure_pa: Reference pressure, in pascal (default 20 uPa).
     :param calibration_offset: Level offset added to ``LpAF``, in dB, for
         signals recorded on a scale other than pascal.
-    :return: A :class:`LevelHistory`, which unpacks as ``(times, levels)``
-        for the callers that always did: the sample times in seconds and ``LpAF`` in
-        dB. The realised interval is ``times[1] - times[0]`` and may differ
-        slightly from ``dt`` because it is an integer number of samples.
+    :return: A :class:`LevelHistory`, read by name: ``times``, the sample
+        times in seconds, and ``levels``, ``LpAF`` in dB. The realised
+        interval is ``times[1] - times[0]`` and may differ slightly from
+        ``dt`` because it is an integer number of samples.
     :raises ValueError: for a non-positive ``fs``, ``dt`` outside 10-25 ms, or
         an ``x`` that is not one channel (a 1-D series).
     :raises TypeError: if ``dt`` or ``fs`` is not a single number.
@@ -988,13 +980,14 @@ def impulsive_sound_adjustment(
     """
     fs = resolve_fs(x, fs, name="x")
     x = require_1d_signal(resolve_samples(x, name="x"), "x")
-    times, levels = sound_pressure_level_history(
+    history = sound_pressure_level_history(
         x,
         fs,
         dt=dt,
         reference_pressure_pa=reference_pressure_pa,
         calibration_offset=calibration_offset,
     )
+    times, levels = history.times, history.levels
     realised_dt = float(times[1] - times[0]) if times.size > 1 else dt
     onsets = detect_onsets(levels, realised_dt, onset_rate_method=onset_rate_method)
 
@@ -1060,7 +1053,7 @@ def _plot_level_history(
     result: LevelHistory,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The bare ``LpAF`` trace, without the onset marks of the full assessment.
@@ -1093,7 +1086,7 @@ def _plot_impulsive_sound(
     result: ImpulsiveSoundResult,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     from ..._i18n import check_language, format_number

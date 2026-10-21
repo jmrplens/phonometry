@@ -30,9 +30,9 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
-import phonometry  # noqa: E402
-from phonometry import io  # noqa: E402
-from phonometry.io._catalogue import CATALOGUE_SCHEMA_VERSION  # noqa: E402
+import phonometry
+from phonometry import io
+from phonometry.io._catalogue import CATALOGUE_SCHEMA_VERSION
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 #: Where the site serves the schema from, beside its other static files.

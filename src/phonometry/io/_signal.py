@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -42,10 +42,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import DTypeLike, NDArray
 
+    from .._i18n import Language
     from ._chunks import BroadcastMetadata
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SignalOrigin(RichDisplay):
     """Where a :class:`Signal` came from, as read from the file itself.
 
@@ -69,7 +70,6 @@ class SignalOrigin(RichDisplay):
     container: str
     format_name: str
     bit_depth: int | None
-    _: KW_ONLY
     lossy: bool
 
 
@@ -117,6 +117,7 @@ class Signal(RichDisplay):
         require_scalar(self.calibration_factor, "calibration_factor")
         require_scalar(self.fs, "fs")
         data = np.atleast_2d(np.asarray(self.data, dtype=np.float64))
+        # The number is a count of array axes, not a quantity.
         if data.ndim != 2:  # noqa: PLR2004
             msg = f"data must be 1-D or (channels, samples); got {data.ndim}-D"
             raise ValueError(msg)
@@ -292,8 +293,8 @@ class Signal(RichDisplay):
         self,
         ax: Axes | None = None,
         *,
-        language: str = "en",
-        scale: str = "linear",
+        language: Language = "en",
+        scale: Literal["linear", "db"] = "linear",
         **kwargs: Any,
     ) -> Axes:
         """Plot the waveform, calibrated to pascals when a calibration is set.

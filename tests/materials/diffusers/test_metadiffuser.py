@@ -46,7 +46,7 @@ def _well(
         cavity_length_m=lc * MM,
         cavity_side_m=wc * MM,
     )
-    return MetadiffuserWell(h * MM, (resonator,) * m)
+    return MetadiffuserWell(slit_height_m=h * MM, resonators=(resonator,) * m)
 
 
 # Table 1: QR-metadiffuser, N = 5 slits, M = 2, L = 2 cm, d = 7 cm.
@@ -239,7 +239,7 @@ def test_panel_validation() -> None:
             below_zero, [ABSORBER, None], depth_m=0.03, period_m=0.10
         )
     with pytest.raises(ValueError, match="at least one resonator"):
-        MetadiffuserWell(0.01, ())
+        MetadiffuserWell(slit_height_m=0.01, resonators=())
 
 
 def test_square_resonator_geometry_and_validation() -> None:

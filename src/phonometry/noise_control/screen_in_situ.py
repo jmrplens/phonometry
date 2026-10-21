@@ -84,6 +84,8 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "ISO11821_BAND_RANGE_HZ",
     "BACKGROUND_CORRECTION_WINDOW_DB",
@@ -169,7 +171,7 @@ IMPULSE_INVALID_DEVIATION_DB: float = 5.0
 ENGINEERING_STANDARD_DEVIATION_DB: float = 2.0
 
 SourceKind = Literal["actual", "artificial"]
-_SOURCE_KINDS: tuple[str, ...] = ("actual", "artificial")
+_SOURCE_KINDS: tuple[SourceKind, ...] = ("actual", "artificial")
 
 
 class ScreenInSituWarning(PhonometryWarning):
@@ -357,7 +359,7 @@ class ScreenInSituResult(OwnsArrays):
     screened_levels: NDArray[np.float64]
     attenuation: NDArray[np.float64]
     a_weighted_attenuation: float | None
-    source_kind: str
+    source_kind: Literal["actual", "artificial"]
     distance: float | None
 
     @property
@@ -382,7 +384,7 @@ class ScreenInSituResult(OwnsArrays):
         return int(round_half_even(self.a_weighted_attenuation))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the two levels and the attenuation between them.
 

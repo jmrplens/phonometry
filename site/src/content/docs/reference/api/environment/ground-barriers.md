@@ -183,7 +183,7 @@ BarrierInsertionLoss(
     frequencies: NDArray[np.float64],
     insertion_loss: NDArray[np.float64],
     fresnel_number: NDArray[np.float64],
-    method: str,
+    method: Literal['kurze_anderson', 'exact'],
     *,
     ground: bool,
     source_height_m: float,
@@ -219,7 +219,7 @@ Per-frequency barrier insertion loss (IL vs frequency).
 BarrierInsertionLoss.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -235,7 +235,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 BarrierInsertionLoss.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -252,9 +252,9 @@ BarrierInsertionLoss.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -444,7 +444,7 @@ plot_barrier_geometry(
     receiver_distance: float,
     receiver_height_m: float,
     thickness_m: float | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -562,7 +562,7 @@ Every array is aligned with `frequencies`.
 SphericalGroundResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

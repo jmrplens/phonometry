@@ -115,7 +115,7 @@ Result of a STOI or ESTOI intelligibility computation.
 STOIResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

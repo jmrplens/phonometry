@@ -10,7 +10,7 @@ it; this module builds a column out of them.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 import numpy as np
 
@@ -20,11 +20,13 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ...fluids.water import sea_water_sound_speed
+from ...fluids.water import SoundSpeedModel, sea_water_sound_speed
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from ..._i18n import Language
 
 __all__ = [
     "SoundSpeedProfile",
@@ -48,7 +50,7 @@ class SoundSpeedProfile(OwnsArrays):
     depths: NDArray[np.float64]
     speeds_of_sound: NDArray[np.float64]
     gradient_per_s: NDArray[np.float64]
-    model: str
+    model: SoundSpeedModel
 
     def __post_init__(self) -> None:
         """Reject a profile whose three columns are not one water column.
@@ -90,7 +92,7 @@ class SoundSpeedProfile(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the sound-speed profile (speed vs depth, depth increasing down)."""
         from ..._i18n import check_language
@@ -106,7 +108,7 @@ def sound_speed_profile(
     temperatures_c: NDArray[np.float64] | list[float] | float,
     salinities: NDArray[np.float64] | list[float] | float,
     *,
-    model: str = "unesco",
+    model: SoundSpeedModel = "unesco",
     latitude: float = 45.0,
 ) -> SoundSpeedProfile:
     """Evaluate a sound-speed profile over a depth column.
@@ -151,5 +153,6 @@ def sound_speed_profile(
         depths=z,
         speeds_of_sound=c,
         gradient_per_s=gradient_per_s,
-        model=model.strip().lower(),
+        # sea_water_sound_speed has refused any other name by now.
+        model=cast("SoundSpeedModel", model.strip().lower()),
     )

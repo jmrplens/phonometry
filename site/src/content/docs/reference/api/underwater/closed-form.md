@@ -45,12 +45,12 @@ propagation_loss(
     range_m: NDArray[np.float64] | list[float] | float,
     frequency_hz: float,
     *,
-    law: str = 'spherical',
+    law: Literal['spherical', 'cylindrical', 'practical'] = 'spherical',
     temperature_c: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
-    model: str = 'francois-garrison',
+    model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] = 'francois-garrison',
     transition_range: float | None = None,
 ) -> PropagationLossResult
 ```
@@ -117,7 +117,7 @@ Propagation loss versus range (closed-form).
 PropagationLossResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -134,7 +134,7 @@ seawater_absorption(
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
-    model: str = 'francois-garrison',
+    model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] = 'francois-garrison',
 ) -> NDArray[np.float64]
 ```
 
@@ -166,7 +166,7 @@ Volume absorption coefficient $\alpha$, in dB/km.
 spreading_loss(
     range_m: NDArray[np.float64] | list[float] | float,
     *,
-    law: str = 'spherical',
+    law: Literal['spherical', 'cylindrical', 'practical'] = 'spherical',
     transition_range: float | None = None,
 ) -> NDArray[np.float64]
 ```

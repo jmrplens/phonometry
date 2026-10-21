@@ -51,7 +51,7 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parents[2] / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-from check_frozen_constants import mutable_parts  # noqa: E402
+from check_frozen_constants import mutable_parts
 
 _DATASHEET: dict[str, Any] = {
     "kind": "datasheet",

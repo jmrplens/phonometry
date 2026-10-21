@@ -27,6 +27,15 @@ from ._envelope import (
     envelope,
     envelope_spectrum,
 )
+from ._test_signals import (
+    ResampledSignalResult,
+    ToneBurstResult,
+    ToneBurstWarning,
+    fractional_delay,
+    noise_signal,
+    resample_signal,
+    tone_burst,
+)
 from .inversion import InverseFilterResult, regularized_inverse_filter
 from .levels import laeq, lc_peak, leq, lex_8h, ln_levels, sel, sound_exposure
 from .miso import MISOCoherenceResult, miso_coherence
@@ -52,15 +61,6 @@ from .synchronous_average import (
     SynchronousAverageResult,
     comb_filter_response,
     time_synchronous_average,
-)
-from .test_signals import (
-    ResampledSignalResult,
-    ToneBurstResult,
-    ToneBurstWarning,
-    fractional_delay,
-    noise_signal,
-    resample_signal,
-    tone_burst,
 )
 from .time_frequency import (
     SpectrogramResult,

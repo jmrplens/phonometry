@@ -94,7 +94,7 @@ track = environment.RailwayTrack(
     impact_roughness=environment.impact_roughness_single(),
 )
 result = environment.railway_source_power(
-    environment.RailwayVehicle(stock, flow_rate=96.0, speed_kmh=160.0), track, phi=90.0, psi=10.0,
+    environment.RailwayVehicle(stock=stock, flow_rate=96.0, speed_kmh=160.0), track, phi=90.0, psi=10.0,
 )
 result.plot()
 plt.show()

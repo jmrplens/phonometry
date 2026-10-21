@@ -73,7 +73,7 @@ from __future__ import annotations
 import math
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 from scipy import special
@@ -97,7 +97,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
+
+Statistic = Literal["mean_square", "rms", "mean", "variance"]
+Method = Literal["reverse_arrangements", "runs"]
 
 __all__ = [
     "LevelCrossingResult",
@@ -482,7 +486,7 @@ class TrendTestResult(OwnsArrays):
     """
 
     values: NDArray[np.float64]
-    method: str
+    method: Method
     statistic: int
     n: int
     mean: float
@@ -569,7 +573,7 @@ class TrendTestResult(OwnsArrays):
         _acceptance_region(owner, self.values, self.method, self.alpha, self.median)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the tested sequence against its sample index with the verdict.
 
@@ -674,7 +678,7 @@ def _validate_trend_inputs(
 def trend_test(
     values: NDArray[np.float64] | list[float],
     *,
-    method: str = "reverse_arrangements",
+    method: Method = "reverse_arrangements",
     alpha: float = 0.05,
 ) -> TrendTestResult:
     r"""Nonparametric trend test on a sequence of observations or estimates.
@@ -743,8 +747,8 @@ class StationarityTestResult(OwnsArrays):
 
     segment_values: NDArray[np.float64]
     segment_times: NDArray[np.float64]
-    statistic: str
-    method: str
+    statistic: Statistic
+    method: Method
     trend_statistic: int
     mean: float
     standard_deviation: float
@@ -829,7 +833,7 @@ class StationarityTestResult(OwnsArrays):
         _acceptance_region(owner, self.segment_values, self.method, self.alpha, centre)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the segment-statistic sequence with the test verdict.
 
@@ -860,8 +864,8 @@ def stationarity_test(
     fs: float | None = None,
     *,
     n_segments: int = 20,
-    statistic: str = "mean_square",
-    method: str = "reverse_arrangements",
+    statistic: Statistic = "mean_square",
+    method: Method = "reverse_arrangements",
     alpha: float = 0.05,
 ) -> StationarityTestResult:
     r"""Test a record for stationarity via trends in segment statistics.
@@ -1038,7 +1042,7 @@ class LevelCrossingResult(OwnsArrays):
         require_same_length(self, "levels", "rates", "rice_rates", axis="level")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot measured crossing rates against the Rice curve.
 
@@ -1404,7 +1408,7 @@ class PeakStatisticsResult(OwnsArrays):
         return _rice_peak_density(za, self.irregularity_factor)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the empirical peak exceedance against the Rice curves.
 

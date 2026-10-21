@@ -37,13 +37,19 @@ def _measurements() -> dict[str, list[rd.NoisePhase]]:
     """The day and evening phases of Manual Ejemplo 3.1."""
     return {
         "day": [
-            rd.NoisePhase(2.0, 0.0, label="Actividad cerrada"),
-            rd.NoisePhase(6.0, 50.0, kt=6.0, kf=3.0, label="Maquina ruidosa"),
-            rd.NoisePhase(4.0, 48.0, kt=3.0, kf=3.0, label="Resto de fuentes"),
+            rd.NoisePhase(duration_hours=2.0, laeq=0.0, label="Actividad cerrada"),
+            rd.NoisePhase(
+                duration_hours=6.0, laeq=50.0, kt=6.0, kf=3.0, label="Maquina ruidosa"
+            ),
+            rd.NoisePhase(
+                duration_hours=4.0, laeq=48.0, kt=3.0, kf=3.0, label="Resto de fuentes"
+            ),
         ],
         "evening": [
-            rd.NoisePhase(2.0, 48.0, kt=3.0, kf=3.0, label="Resto de fuentes"),
-            rd.NoisePhase(2.0, 0.0, label="Actividad cerrada"),
+            rd.NoisePhase(
+                duration_hours=2.0, laeq=48.0, kt=3.0, kf=3.0, label="Resto de fuentes"
+            ),
+            rd.NoisePhase(duration_hours=2.0, laeq=0.0, label="Actividad cerrada"),
         ],
     }
 
@@ -204,7 +210,7 @@ def test_report_escapes_xml_specials_in_metadata_and_phase_labels(
     """
     measurements = _measurements()
     measurements["day"][1] = rd.NoisePhase(
-        6.0, 50.0, kt=6.0, kf=3.0, label="Compresor <A> & <B>"
+        duration_hours=6.0, laeq=50.0, kt=6.0, kf=3.0, label="Compresor <A> & <B>"
     )
     result = rd.assess_activity(
         measurements, rd.activity_limits("a"), operating_days=303
@@ -233,8 +239,8 @@ def test_three_period_fiche_stays_one_page(tmp_path: Path) -> None:
     """
     measurements = _measurements()
     measurements["night"] = [
-        rd.NoisePhase(4.0, 40.0, kt=3.0, label="Ventilacion"),
-        rd.NoisePhase(4.0, 38.0, label="Parada"),
+        rd.NoisePhase(duration_hours=4.0, laeq=40.0, kt=3.0, label="Ventilacion"),
+        rd.NoisePhase(duration_hours=4.0, laeq=38.0, label="Parada"),
     ]
     result = rd.assess_activity(
         measurements, rd.activity_limits("a"), operating_days=303

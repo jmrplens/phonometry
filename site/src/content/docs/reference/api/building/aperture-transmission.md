@@ -57,9 +57,10 @@ energetic combination used by the EN 12354-3/-4 facade model of
 
 ```python
 ApertureTransmissionResult(
+    *,
     frequencies: np.ndarray,
     transmission_coefficient: np.ndarray,
-    kind: str,
+    kind: Literal['slit', 'circular'],
     depth: float,
     width_m: float | None = None,
     radius: float | None = None,
@@ -85,7 +86,7 @@ Transmission through a slit or circular aperture (Hopkins 4.3.10).
 ApertureTransmissionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -101,7 +102,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ApertureTransmissionResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -194,7 +195,7 @@ plot_aperture_geometry(
     *,
     ax: Axes | None = ...,
     width_m: float,
-    language: str = ...,
+    language: Literal['en', 'es'] = ...,
     **kwargs: Any,
 ) -> Axes
 
@@ -203,7 +204,7 @@ plot_aperture_geometry(
     *,
     ax: Axes | None = ...,
     radius: float,
-    language: str = ...,
+    language: Literal['en', 'es'] = ...,
     **kwargs: Any,
 ) -> Axes
 ```
@@ -283,7 +284,7 @@ slit_transmission_coefficient(
     depth: float,
     *,
     field: Literal['diffuse', 'normal'] = 'diffuse',
-    position: str = 'mid',
+    position: Literal['mid', 'edge'] = 'mid',
     speed_of_sound: float = 343.0,
 ) -> ApertureTransmissionResult
 ```

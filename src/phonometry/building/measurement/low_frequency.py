@@ -94,7 +94,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -108,6 +108,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from ..._i18n import Language
 
 __all__ = [
     "LOW_FREQUENCY_PROCEDURE_BANDS_HZ",
@@ -468,7 +470,7 @@ def low_frequency_level(level: ArrayLike, corner: ArrayLike) -> np.ndarray:
     return np.asarray(10.0 * np.log10(combined), dtype=np.float64)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class LowFrequencyProcedure(OwnsArrays):
     """The extra measurements ISO 16283 asks for in a room under 25 m³.
 
@@ -583,7 +585,7 @@ class LowFrequencyResult(OwnsArrays):
     reverberation_63_octave: float | None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the three low-frequency bands, default against corner and LF.
 
@@ -708,7 +710,7 @@ def apply_low_frequency_procedure(
     *,
     frequencies: ArrayLike,
     reverberation_time: ArrayLike | None = None,
-    room: str = "receiving",
+    room: Literal["receiving", "source"] = "receiving",
 ) -> LowFrequencyResult:
     r"""Run the low-frequency procedure over one room's band values.
 

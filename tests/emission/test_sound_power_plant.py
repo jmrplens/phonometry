@@ -352,7 +352,7 @@ def test_mean_distance_window_is_empty_at_its_two_ends(
 
 
 def test_steady_reading_is_the_arithmetic_mean() -> None:
-    assert emission.plant_steady_reading(72.0, 68.4) == pytest.approx(70.2)
+    assert emission.plant_steady_reading(68.4, 72.0) == pytest.approx(70.2)
 
 
 @pytest.mark.parametrize(("maximum", "minimum"), [(75.0, 70.0), (64.1, 59.1)])
@@ -361,7 +361,7 @@ def test_a_swing_of_5_db_is_not_steady(maximum: float, minimum: float) -> None:
     5 dB, though 4,999 999 999 999 993 in binary.
     """
     with pytest.raises(ValueError, match="integrating instrument"):
-        emission.plant_steady_reading(maximum, minimum)
+        emission.plant_steady_reading(minimum, maximum)
 
 
 # --------------------------------------------------------------------------- #

@@ -116,12 +116,16 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
+
+Kind = Literal["accelerance", "mobility", "receptance"]
 
 #: Kind of motion the response channel measures, and the FRF it gives.
 ResponseQuantity = Literal["acceleration", "velocity", "displacement"]
 
-_FRF_OF_RESPONSE: dict[str, str] = {
+_FRF_OF_RESPONSE: dict[str, Kind] = {
     "acceleration": "accelerance",
     "velocity": "mobility",
     "displacement": "receptance",
@@ -301,7 +305,7 @@ class EnergySpectralDensity(OwnsArrays):
     density: np.ndarray
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the density in dB re its highest bin against frequency.
 
@@ -318,7 +322,7 @@ class EnergySpectralDensity(OwnsArrays):
 
 
 def energy_spectral_density(
-    record: SignalInput, fs: float | None = None
+    x: SignalInput, fs: float | None = None
 ) -> EnergySpectralDensity:
     r"""One-sided energy spectral density of a transient record (3.3, 3.4).
 
@@ -329,7 +333,7 @@ def energy_spectral_density(
     force in newtons the unit is N²·s/Hz, the unit of Figures 3, 4, 5, 7 and 8.
     The DC bin and, for an even record, the Nyquist bin are not doubled.
 
-    :param record: One record, 1-D. Accepts a :class:`phonometry.io.Signal`
+    :param x: One record, 1-D. Accepts a :class:`phonometry.io.Signal`
         for its rate; a calibration factor it carries is not applied.
     :param fs: Sample rate, in Hz. Required for a bare array; a
         :class:`~phonometry.io.Signal` brings its own, and an explicit value
@@ -340,8 +344,8 @@ def energy_spectral_density(
     :raises ValueError: for a record that is not 1-D and finite, or a
         non-positive sample rate.
     """
-    rate = require_positive(resolve_fs(record, fs, name="record"), "fs")
-    x = _record(record, "record")
+    rate = require_positive(resolve_fs(x, fs, name="x"), "fs")
+    x = _record(x, "x")
     freqs, spectrum = _spectrum(x[np.newaxis, :], rate)
     factor = _one_sided_factor(x.size, freqs.size)
     esd = factor * np.abs(spectrum[0]) ** 2
@@ -545,7 +549,7 @@ class DoubleHitCheck(OwnsArrays):
     second impact shows as a slight ripple, and why moderate dips "may normally
     be tolerated".
 
-    :ivar force: The force record judged, in N, as a bare array (a
+    :ivar force_n: The force record judged, in N, as a bare array (a
         :class:`~phonometry.io.Signal` passed in is read without its
         calibration factor, and its samples are what is kept).
     :ivar fs: Its sample rate, in Hz.
@@ -560,7 +564,7 @@ class DoubleHitCheck(OwnsArrays):
         {"impact_indices": ""}
     )
 
-    force: np.ndarray
+    force_n: np.ndarray
     fs: float
     impact_indices: np.ndarray
     _: KW_ONLY
@@ -573,20 +577,20 @@ class DoubleHitCheck(OwnsArrays):
             positive, no impact is listed, or an index falls outside the record.
         :raises TypeError: if ``fs`` is not a single number.
         """
-        require_ranks(self, force=1, impact_indices=1)
+        require_ranks(self, force_n=1, impact_indices=1)
         require_positive(self.fs, "fs")
         indices = np.asarray(self.impact_indices)
         if indices.size == 0:
             msg = "DoubleHitCheck: 'impact_indices' must list at least one impact."
             raise ValueError(msg)
-        if np.any(indices < 0) or np.any(indices >= np.asarray(self.force).size):
+        if np.any(indices < 0) or np.any(indices >= np.asarray(self.force_n).size):
             msg = "DoubleHitCheck: every impact index must lie inside the record."
             raise ValueError(msg)
 
     @property
     def times(self) -> np.ndarray:
         """Time of every sample of the record, in seconds."""
-        return np.arange(np.asarray(self.force).size) / self.fs
+        return np.arange(np.asarray(self.force_n).size) / self.fs
 
     @property
     def impact_times_s(self) -> np.ndarray:
@@ -596,8 +600,8 @@ class DoubleHitCheck(OwnsArrays):
     @property
     def impact_peaks(self) -> np.ndarray:
         """Force at the peak of every impact, in N."""
-        force = np.asarray(self.force, dtype=np.float64)
-        return np.asarray(force[np.asarray(self.impact_indices)], dtype=np.float64)
+        force_n = np.asarray(self.force_n, dtype=np.float64)
+        return np.asarray(force_n[np.asarray(self.impact_indices)], dtype=np.float64)
 
     @property
     def n_impacts(self) -> int:
@@ -669,7 +673,7 @@ class DoubleHitCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the force record with its impacts, and its energy spectral density.
 
@@ -694,7 +698,7 @@ class DoubleHitCheck(OwnsArrays):
 
 
 def check_double_hit(
-    force: SignalInput, fs: float | None = None, *, threshold_ratio: float = 0.1
+    force_n: SignalInput, fs: float | None = None, *, threshold_ratio: float = 0.1
 ) -> DoubleHitCheck:
     r"""Does the force record hold one impact, or a double hit? (6.4)
 
@@ -723,7 +727,7 @@ def check_double_hit(
     with a steep elliptic or Chebyshev filter, and a single impact then reads
     as several. The unfiltered force avoids both effects.
 
-    :param force: One force record, 1-D, in N. Accepts a
+    :param force_n: One force record, 1-D, in N. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, because this record is a force
         in newtons and not a pressure.
@@ -738,18 +742,18 @@ def check_double_hit(
         no force in it.
     :raises TypeError: if ``threshold_ratio`` is not a single number.
     """
-    rate = require_positive(resolve_fs(force, fs, name="force"), "fs")
-    record = _record(force, "force")
+    rate = require_positive(resolve_fs(force_n, fs, name="force_n"), "fs")
+    record = _record(force_n, "force_n")
     threshold = require_positive(threshold_ratio, "threshold_ratio")
     if threshold >= 1.0:
         msg = "'threshold_ratio' must lie in (0, 1)."
         raise ValueError(msg)
     peaks = _impact_peaks(record, threshold)
     if peaks.size == 0:
-        msg = "'force' holds no force: every sample is zero."
+        msg = "'force_n' holds no force: every sample is zero."
         raise ValueError(msg)
     return DoubleHitCheck(
-        force=record,
+        force_n=record,
         fs=rate,
         impact_indices=peaks,
         threshold_ratio=threshold,
@@ -855,11 +859,21 @@ class ImpactMobilityResult(OwnsArrays):
         return np.asarray(np.angle(self.mobility), dtype=np.float64)
 
     @property
-    def measured_frf(self) -> str:
+    def measured_frf(self) -> Kind:
         """The FRF kind the response channel gives: accelerance, mobility or receptance."""
         return _FRF_OF_RESPONSE[self.response_quantity]
 
-    def to(self, target: str) -> np.ndarray:
+    def to(
+        self,
+        target: Literal[
+            "receptance",
+            "mobility",
+            "accelerance",
+            "dynamic_stiffness",
+            "impedance",
+            "apparent_mass",
+        ],
+    ) -> np.ndarray:
         """Convert the mobility to another FRF kind (see :func:`.convert_frf`)."""
         return convert_frf(
             self.mobility, frequency=self.frequencies, source="mobility", target=target
@@ -894,7 +908,7 @@ class ImpactMobilityResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the averaged mobility and its coherence.
 
@@ -920,9 +934,9 @@ class ImpactMobilityResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render the ISO 7626 mobility fiche for an impact measurement to a PDF.
 
@@ -973,7 +987,7 @@ def _warn_masked_impacts(
 
 
 def impact_mobility(
-    force: SignalInput,
+    force_n: SignalInput,
     response: SignalInput,
     fs: float | None = None,
     *,
@@ -988,7 +1002,7 @@ def impact_mobility(
 ) -> ImpactMobilityResult:
     r"""Mobility from impact records, averaged as 8.6 prescribes.
 
-    Each row of ``force`` and ``response`` is one impact at the same point,
+    Each row of ``force_n`` and ``response`` is one impact at the same point,
     triggered as 8.2 describes. The force is multiplied by the force window
     (8.5.1) and both records by the exponential window (8.5.2), both are
     transformed, and the estimate is the averaged cross-spectrum of response
@@ -1017,7 +1031,7 @@ def impact_mobility(
     :class:`ImpactExcitationWarning`: 6.4 forbids removing a second impact
     that way.
 
-    :param force: Force records, in N: one record (1-D) or one per row (2-D).
+    :param force_n: Force records, in N: one record (1-D) or one per row (2-D).
         Accepts a :class:`phonometry.io.Signal`, one channel per impact, for
         its rate; a calibration factor it carries is deliberately not
         applied, because this record is a force and not a pressure.
@@ -1052,13 +1066,13 @@ def impact_mobility(
     :warns ImpactExcitationWarning: when the force window removes an impact.
     """
     rate = require_positive(
-        resolve_pair_fs(force, response, fs, names=("force", "response")), "fs"
+        resolve_pair_fs(force_n, response, fs, names=("force_n", "response")), "fs"
     )
-    f_records = _records(force, "force")
+    f_records = _records(force_n, "force_n")
     x_records = _records(response, "response")
     if f_records.shape != x_records.shape:
         msg = (
-            f"'force' and 'response' must have the same shape; got "
+            f"'force_n' and 'response' must have the same shape; got "
             f"{f_records.shape} and {x_records.shape}."
         )
         raise ValueError(msg)
@@ -1254,7 +1268,7 @@ class ExponentialWindowCorrection(OwnsArrays):
         return np.asarray(sigma / np.hypot(sigma, omega), dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each mode's apparent damping split into the true and the window's part.
 
@@ -1335,7 +1349,7 @@ class SingleModeFitResult(OwnsArrays):
     residue: complex
     direct_term: complex
     _: KW_ONLY
-    kind: str = "mobility"
+    kind: Kind = "mobility"
     exponential_decay_rate_per_s: float = 0.0
 
     def __post_init__(self) -> None:
@@ -1433,7 +1447,7 @@ class SingleModeFitResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the data fitted, the fitted mode and the mode with the window taken out.
 
@@ -1494,7 +1508,7 @@ def single_mode_fit(
     *,
     frequencies: ArrayLike,
     band_hz: tuple[float, float],
-    kind: str = "mobility",
+    kind: Kind = "mobility",
     exponential_decay_rate_per_s: float = 0.0,
 ) -> SingleModeFitResult:
     r"""Fit one mode to an FRF over a band around its resonance.
@@ -1741,7 +1755,7 @@ class ForceSpectrumCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the force energy spectral density against the range and the limit.
 
@@ -1761,7 +1775,7 @@ class ForceSpectrumCheck(OwnsArrays):
 
 
 def check_force_spectrum(
-    force: SignalInput,
+    force_n: SignalInput,
     fs: float | None = None,
     *,
     frequency_range_hz: tuple[float, float],
@@ -1776,7 +1790,7 @@ def check_force_spectrum(
     the share of force energy above the range, which 6.3 asks to keep small, is
     reported beside it as :attr:`ForceSpectrumCheck.energy_fraction_above`.
 
-    :param force: One force record, 1-D, in N (windowed or not, as it will be
+    :param force_n: One force record, 1-D, in N (windowed or not, as it will be
         processed). Accepts a :class:`phonometry.io.Signal` for its rate; a
         calibration factor it carries is deliberately not applied, because
         this record is a force in newtons and not a pressure.
@@ -1789,8 +1803,8 @@ def check_force_spectrum(
     :return: A :class:`ForceSpectrumCheck`.
     :raises ValueError: for an invalid record, sample rate, range or limit.
     """
-    rate = require_positive(resolve_fs(force, fs, name="force"), "fs")
-    spectrum = energy_spectral_density(force, rate)
+    rate = require_positive(resolve_fs(force_n, fs, name="force_n"), "fs")
+    spectrum = energy_spectral_density(force_n, rate)
     freqs, esd = spectrum.frequencies, spectrum.density
     low, high = _frequency_range(frequency_range_hz, nyquist=rate / 2.0)
     return ForceSpectrumCheck(
@@ -1813,7 +1827,7 @@ class OverloadCheck(OwnsArrays):
     waveform: pass the widest-band record available. A pass here is necessary,
     not sufficient.
 
-    :ivar record: The record judged, in its own unit, as a bare array (a
+    :ivar x: The record judged, in its own unit, as a bare array (a
         :class:`~phonometry.io.Signal` passed in is read without its
         calibration factor, and its samples are what is kept).
     :ivar fs: Its sample rate, in Hz.
@@ -1821,7 +1835,7 @@ class OverloadCheck(OwnsArrays):
         unit of the record.
     """
 
-    record: np.ndarray
+    x: np.ndarray
     fs: float
     _: KW_ONLY
     full_scale: float
@@ -1833,19 +1847,19 @@ class OverloadCheck(OwnsArrays):
             sample rate is not positive.
         :raises TypeError: if ``fs`` or ``full_scale`` is not a single number.
         """
-        require_ranks(self, record=1)
+        require_ranks(self, x=1)
         require_positive(self.fs, "fs")
         require_positive(self.full_scale, "full_scale")
 
     @property
     def peak(self) -> float:
         """Largest magnitude in the record, in its unit."""
-        return float(np.max(np.abs(np.asarray(self.record, dtype=np.float64))))
+        return float(np.max(np.abs(np.asarray(self.x, dtype=np.float64))))
 
     @property
     def n_clipped_samples(self) -> int:
         """How many samples reach the full scale."""
-        return int(np.count_nonzero(np.abs(np.asarray(self.record)) >= self.full_scale))
+        return int(np.count_nonzero(np.abs(np.asarray(self.x)) >= self.full_scale))
 
     @property
     def headroom_db(self) -> float:
@@ -1869,7 +1883,7 @@ class OverloadCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the record against its full scale, clipped samples marked.
 
@@ -1889,11 +1903,11 @@ class OverloadCheck(OwnsArrays):
 
 
 def check_overload(
-    record: SignalInput, fs: float | None = None, *, full_scale: float
+    x: SignalInput, fs: float | None = None, *, full_scale: float
 ) -> OverloadCheck:
     """Did one channel of the record stay below its full scale? (8.4)
 
-    :param record: One record, 1-D, in any unit. Accepts a
+    :param x: One record, 1-D, in any unit. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately not applied, so the samples stay in the unit
         the channel recorded them in, the unit of its full scale.
@@ -1907,10 +1921,10 @@ def check_overload(
     :raises ValueError: for an invalid record, sample rate or full scale.
     :raises TypeError: if ``full_scale`` is not a single number.
     """
-    rate = require_positive(resolve_fs(record, fs, name="record"), "fs")
-    x = _record(record, "record")
+    rate = require_positive(resolve_fs(x, fs, name="x"), "fs")
+    x = _record(x, "x")
     return OverloadCheck(
-        record=x,
+        x=x,
         fs=rate,
         full_scale=require_positive(full_scale, "full_scale"),
     )
@@ -1951,7 +1965,7 @@ class ResponseDecayCheck(OwnsArrays):
     rather than the decay. ``start_s`` just after the force pulse, or the force
     record passed to :func:`check_response_decay`, judges the free decay alone.
 
-    :ivar record: The response record judged, unwindowed, in its own unit, as
+    :ivar response: The response record judged, unwindowed, in its own unit, as
         a bare array (a :class:`~phonometry.io.Signal` passed in is read
         without its calibration factor, and its samples are what is kept).
     :ivar fs: Its sample rate, in Hz.
@@ -1962,7 +1976,7 @@ class ResponseDecayCheck(OwnsArrays):
     :ivar start_s: Time from which the highest peak is sought, in seconds.
     """
 
-    record: np.ndarray
+    response: np.ndarray
     fs: float
     _: KW_ONLY
     segment_s: float
@@ -1979,13 +1993,13 @@ class ResponseDecayCheck(OwnsArrays):
         :raises TypeError: if ``fs``, ``segment_s`` or ``start_s`` is not a single
             number.
         """
-        require_ranks(self, record=1)
+        require_ranks(self, response=1)
         require_positive(self.fs, "fs")
         require_positive(self.segment_s, "segment_s")
         require_non_negative(self.start_s, "start_s")
-        record = np.asarray(self.record, dtype=np.float64)
+        record = np.asarray(self.response, dtype=np.float64)
         if not np.all(np.isfinite(record)):
-            msg = "ResponseDecayCheck: 'record' must be finite."
+            msg = "ResponseDecayCheck: 'response' must be finite."
             raise ValueError(msg)
         size = record.size
         if self._segment_samples() > size // 2:
@@ -2010,7 +2024,7 @@ class ResponseDecayCheck(OwnsArrays):
         return round(self.start_s * self.fs)
 
     def _magnitude(self) -> NDArray[np.float64]:
-        return np.abs(np.asarray(self.record, dtype=np.float64))
+        return np.abs(np.asarray(self.response, dtype=np.float64))
 
     @property
     def peak(self) -> float:
@@ -2049,7 +2063,7 @@ class ResponseDecayCheck(OwnsArrays):
         at the rate the segment peaks decay from the midpoint to the last
         segment (never raised).
         """
-        size = np.asarray(self.record).size
+        size = np.asarray(self.response).size
         segment = self._segment_samples()
         last = self.last_segment_ratio
         middle = self.midpoint_ratio
@@ -2082,7 +2096,7 @@ class ResponseDecayCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the response with the levels it reaches at the midpoint and the end.
 
@@ -2111,11 +2125,11 @@ def _pulse_end(force: NDArray[np.float64]) -> int:
     signed, loudest = _signed_force(force)
     peak = signed[loudest]
     if peak <= 0.0:
-        msg = "'force' holds no force: every sample is zero."
+        msg = "'force_n' holds no force: every sample is zero."
         raise ValueError(msg)
     after = np.flatnonzero(signed[loudest:] <= _PULSE_END_RATIO * peak)
     if after.size == 0:
-        msg = "'force' does not fall back after its peak: the pulse must end inside the record."
+        msg = "'force_n' does not fall back after its peak: the pulse must end inside the record."
         raise ValueError(msg)
     return loudest + int(after[0])
 
@@ -2127,7 +2141,7 @@ def check_response_decay(
     exponential_window: bool = False,
     segment_s: float | None = None,
     start_s: float = 0.0,
-    force: SignalInput | None = None,
+    force_n: SignalInput | None = None,
 ) -> ResponseDecayCheck:
     """Has the response decayed enough by the end of the record? (8.3, 8.5.2)
 
@@ -2155,7 +2169,7 @@ def check_response_decay(
         ``None``, one tenth of the record).
     :param start_s: Time from which the highest peak is sought, in seconds
         (Default: 0, the whole record, as the clause reads).
-    :param force: The force record of the same impact, same length (Default:
+    :param force_n: The force record of the same impact, same length (Default:
         ``None``). When given, the highest peak is sought only after the force
         pulse, where the force has fallen back to 1 % of its peak, so a
         driving-point acceleration is judged on its free decay and not on the
@@ -2169,11 +2183,11 @@ def check_response_decay(
         pulse does not end inside the record.
     :raises TypeError: if ``segment_s`` or ``start_s`` is not a single number.
     """
-    if force is None:
+    if force_n is None:
         rate = require_positive(resolve_fs(response, fs, name="response"), "fs")
     else:
         rate = require_positive(
-            resolve_pair_fs(response, force, fs, names=("response", "force")), "fs"
+            resolve_pair_fs(response, force_n, fs, names=("response", "force_n")), "fs"
         )
     x = _record(response, "response")
     if not np.any(x):
@@ -2182,11 +2196,11 @@ def check_response_decay(
         msg = "'response' holds no motion: every sample is zero."
         raise ValueError(msg)
     start = require_non_negative(start_s, "start_s")
-    if force is not None:
-        pulse = _record(force, "force")
+    if force_n is not None:
+        pulse = _record(force_n, "force_n")
         if pulse.size != x.size:
             msg = (
-                f"'force' and 'response' must be records of one length; got "
+                f"'force_n' and 'response' must be records of one length; got "
                 f"{pulse.size} and {x.size} samples."
             )
             raise ValueError(msg)
@@ -2197,7 +2211,7 @@ def check_response_decay(
         else require_positive(segment_s, "segment_s")
     )
     return ResponseDecayCheck(
-        record=x,
+        response=x,
         fs=rate,
         segment_s=float(segment),
         exponential_window=bool(exponential_window),
@@ -2308,7 +2322,7 @@ class CoherenceCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the coherence against its minimum, excluded frequencies shaded.
 
@@ -2487,7 +2501,7 @@ class ChannelMatchVerification(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | np.ndarray:
         """Plot the magnitude and phase deviations against their tolerances.
 

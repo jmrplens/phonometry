@@ -44,6 +44,8 @@ with.
 
 from __future__ import annotations
 
+from typing import Literal, cast
+
 import numpy as np
 from reference_data import enclosure_cabin_insulation as enclosure
 from reference_data import spatial_decay as spatial
@@ -831,7 +833,7 @@ def _chk_m8_off_the_chart() -> Outcome:
     "Table E.1 lists and refuses the rest",
 )
 def _chk_table_e1() -> Outcome:
-    cases = {
+    cases: dict[str, tuple[Literal["1", "2a", "2b", "2c"], int, int, int, bool]] = {
         "1 with a level-1 room": ("1", 1, 1, 1, True),
         "1 with a level-4 room": ("1", 4, 1, 1, False),
         "2a as Annex D uses it": ("2a", 2, 1, 1, True),
@@ -1155,7 +1157,8 @@ def _chk_clause_43_ranges() -> Outcome:
     reader = {"DL2": ph.room.typical_decay_range, "DLf": ph.room.typical_excess_range}
     matching = 0
     for name, bounds in printed.items():
-        descriptor, region = name.split()
+        descriptor, word = name.split()
+        region = cast("Literal['near', 'middle', 'far']", word)
         matching += sum(
             got == want
             for got, want in zip(reader[descriptor](region), bounds, strict=True)

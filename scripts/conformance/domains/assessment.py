@@ -195,7 +195,7 @@ _GUM = "Measurement uncertainty (GUM / Supplement 1)"
     _GUM, "ISO/IEC Guide 98-3-1 clause 9.2", "Combined uncertainty, additive model"
 )
 def _chk_gum_additive() -> Outcome:
-    quantities = [ph.metrology.Quantity(0.0, 1.0) for _ in range(4)]
+    quantities = [ph.metrology.Quantity(value=0.0, uncertainty=1.0) for _ in range(4)]
     result = ph.metrology.uncertainty_propagation(
         lambda a, b, c, d: a + b + c + d, quantities
     )
@@ -211,7 +211,9 @@ def _chk_gum_coverage() -> Outcome:
 
 @register(_GUM, "ISO/IEC Guide 98-3 Annex G.4", "Welch-Satterthwaite effective dof")
 def _chk_gum_welch() -> Outcome:
-    quantities = [ph.metrology.Quantity(0.0, 1.0, dof=10) for _ in range(4)]
+    quantities = [
+        ph.metrology.Quantity(value=0.0, uncertainty=1.0, dof=10) for _ in range(4)
+    ]
     result = ph.metrology.uncertainty_propagation(
         lambda a, b, c, d: a + b + c + d, quantities
     )
@@ -220,7 +222,8 @@ def _chk_gum_welch() -> Outcome:
 
 def _gum_h1_result() -> UncertaintyResult:
     quantities = [
-        ph.metrology.Quantity(v, unc, dof=dof) for v, unc, dof in ref.GUM_H1_INPUTS
+        ph.metrology.Quantity(value=v, uncertainty=unc, dof=dof)
+        for v, unc, dof in ref.GUM_H1_INPUTS
     ]
     with warnings.catch_warnings():
         # alphaS and theta are genuinely flat directions at the H.1 estimates.
@@ -260,7 +263,8 @@ def _chk_gum_h2_correlated() -> Outcome:
     u_means = obs.std(axis=0, ddof=1) / math.sqrt(obs.shape[0])
     r = np.corrcoef(obs.T)
     quantities = [
-        ph.metrology.Quantity(m, s) for m, s in zip(means, u_means, strict=True)
+        ph.metrology.Quantity(value=m, uncertainty=s)
+        for m, s in zip(means, u_means, strict=True)
     ]
     result = ph.metrology.uncertainty_propagation(
         lambda v, i, p: v / i * math.cos(p), quantities, correlation=r
@@ -280,7 +284,10 @@ def _chk_gum_h2_correlated() -> Outcome:
     "Seeded Monte Carlo, rectangular sum: 95 % interval endpoint",
 )
 def _chk_gum_s1_table3_monte_carlo() -> Outcome:
-    quantities = [ph.metrology.Quantity(0.0, 1.0, "rectangular") for _ in range(4)]
+    quantities = [
+        ph.metrology.Quantity(value=0.0, uncertainty=1.0, distribution="rectangular")
+        for _ in range(4)
+    ]
     mc = ph.metrology.monte_carlo(
         lambda a, b, c, d: a + b + c + d,
         quantities,

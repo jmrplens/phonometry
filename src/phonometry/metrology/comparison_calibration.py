@@ -209,7 +209,7 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from dataclasses import field as dataclass_field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 from scipy import special
@@ -241,8 +241,12 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from ..fluids import Fluid
     from .reciprocity_calibration import ReciprocityCalibration
+
+ResponseQuantity = Literal["level", "phase"]
+WindowShape = Literal["tukey", "hann", "hamming", "rectangular"]
 
 __all__ = [
     "IEC61094_5_TABLE_A1",
@@ -678,7 +682,7 @@ class ReferenceCalibrationRow(RichDisplay):
     :ivar expanded_uncertainty_10khz_db: The same at 10 kHz, in dB.
     """
 
-    microphone_types: str
+    microphone_types: Literal["LS", "LS and WS"]
     method: str
     references: tuple[str, ...]
     expanded_uncertainty_1khz_db: float
@@ -868,7 +872,7 @@ class EnvironmentalSensitivityCorrection(OwnsArrays):
         return pressure + self.temperature_term_db + self.humidity_term_db
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot :math:`C_\mathrm{env}` and its three terms against frequency.
 
@@ -1027,7 +1031,7 @@ class JigDiameterCorrection(OwnsArrays):
         return self.expanded_uncertainty_db / _COVERAGE_FACTOR
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the corrections with their expanded uncertainty.
 
@@ -1191,7 +1195,7 @@ class DiameterSoundFieldCorrection(OwnsArrays):
         return np.degrees(np.angle(self.ratio))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the correction and the correction at twice the separation
         against frequency.
@@ -1562,7 +1566,7 @@ class ComparisonCalibration(OwnsArrays):
     pressure_level_difference: NDArray[np.float64]
     corrections: Mapping[str, NDArray[np.float64]]
     field: CalibrationField
-    excitation: str
+    excitation: Literal["simultaneous", "sequential"]
     expanded_uncertainty_db: NDArray[np.float64] | None = None
     _: KW_ONLY
     reference_sensitivity_phase_deg: NDArray[np.float64] | None = None
@@ -1724,8 +1728,8 @@ class ComparisonCalibration(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        quantity: str = "level",
-        language: str = "en",
+        quantity: ResponseQuantity = "level",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot :math:`L_\mathrm{test}` and the reference's level against
@@ -1804,7 +1808,7 @@ def _calibration(
     output_level_differences: NDArray[np.float64],
     *,
     field: CalibrationField,
-    excitation: str,
+    excitation: Literal["simultaneous", "sequential"],
     pressure_level_difference: ArrayLike,
     corrections: Mapping[str, ArrayLike] | None,
     reference_environment: EnvironmentalSensitivityCorrection | None,
@@ -2522,7 +2526,7 @@ class ComparisonUncertaintyBudget(OwnsArrays):
         return 20.0 * math.log10(1.0 + math.sqrt(float(np.sum(relative**2))))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot the standard uncertainty of each component, with
         :math:`u_\mathrm{c}`, :math:`k` and :math:`U`.
@@ -2547,7 +2551,12 @@ def _component(value: float | Quantity, name: str) -> Quantity:
     :raises ValueError: for a value that is negative or not finite.
     """
     if isinstance(value, Quantity):
-        return Quantity(0.0, value.uncertainty, value.distribution, name=name)
+        return Quantity(
+            value=0.0,
+            uncertainty=value.uncertainty,
+            distribution=value.distribution,
+            name=name,
+        )
     require_scalar(value, name)
     number = float(value)
     if not (math.isfinite(number) and number >= 0.0):
@@ -2556,7 +2565,7 @@ def _component(value: float | Quantity, name: str) -> Quantity:
             f"non-negative; got {value!r}."
         )
         raise ValueError(msg)
-    return Quantity(0.0, number, name=name)
+    return Quantity(value=0.0, uncertainty=number, name=name)
 
 
 def comparison_uncertainty_budget(
@@ -2747,7 +2756,7 @@ class JigCouplerVerification(OwnsArrays):
     calibration_uncertainty_db: NDArray[np.float64]
     validation_level: NDArray[np.float64]
     validation_uncertainty_db: NDArray[np.float64]
-    validation: str
+    validation: Literal["comparison", "reciprocity"]
     unvalidated_frequencies_hz: NDArray[np.float64]
     _: KW_ONLY
     shared_standard_uncertainty_db: NDArray[np.float64] = dataclass_field(
@@ -2894,7 +2903,7 @@ class JigCouplerVerification(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the difference of the two calibrations against the expanded
         uncertainty of the difference, marking where they disagree, with the
@@ -2917,7 +2926,9 @@ class JigCouplerVerification(OwnsArrays):
 def _validation_columns(
     validation: ComparisonCalibration | ReciprocityCalibration,
     microphone: int | None,
-) -> tuple[str, NDArray[np.float64], NDArray[np.float64]]:
+) -> tuple[
+    Literal["comparison", "reciprocity"], NDArray[np.float64], NDArray[np.float64]
+]:
     """The kind, the level and the expanded uncertainty of a validation.
 
     :raises ValueError: for a free-field calibration, a reciprocity
@@ -2929,6 +2940,7 @@ def _validation_columns(
     require_scalar(microphone, "microphone")
     from .reciprocity_calibration import ReciprocityCalibration
 
+    kind: Literal["comparison", "reciprocity"]
     if isinstance(validation, ReciprocityCalibration):
         kind = "reciprocity"
         if microphone is None:
@@ -3152,7 +3164,7 @@ class FreeFieldRegion(RichDisplay):
         return (self.major_axis_m - self.source_distance_m) / 2.0
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the region in a plane through the axis, as Figure B.1 draws it.
 
@@ -3380,7 +3392,7 @@ class ImpedancePressureRatio(OwnsArrays):
 
     frequencies: NDArray[np.float64]
     ratio: NDArray[np.complex128]
-    coupling: str
+    coupling: Literal["coupler", "series"]
     coupling_equivalent_volume_m3: NDArray[np.complex128]
 
     def __post_init__(self) -> None:
@@ -3437,8 +3449,8 @@ class ImpedancePressureRatio(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        quantity: str = "level",
-        language: str = "en",
+        quantity: ResponseQuantity = "level",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot :math:`20\lg\lvert R_P\rvert` and its standard uncertainty,
@@ -3559,6 +3571,7 @@ def impedance_pressure_ratio(
     test = _complex_column(
         test_equivalent_volume_m3, "test_equivalent_volume_m3", count
     )
+    coupling: Literal["coupler", "series"]
     if coupling_impedance_pa_s_m3 is None:
         coupling = "coupler"
         volume = _complex_column(
@@ -3693,7 +3706,7 @@ def air_gap_series_impedance_pa_s_m3(
 # ---------------------------------------------------------------------------
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RectangularPulse(RichDisplay):
     r"""The rectangular pulse of the direct impulse method (IEC 61094-8:2012
     B.6.1, Formula (B.10)).
@@ -3769,7 +3782,7 @@ class RectangularPulse(RichDisplay):
         ax: Axes | None = None,
         *,
         upper_frequency_hz: float | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot :math:`\lvert X(f)/X(0)\rvert` in dB up to past its second
@@ -3941,7 +3954,7 @@ class TimeSelectiveResponse(OwnsArrays):
     fs: float
     window_start_s: float
     window_end_s: float
-    window_shape: str = "tukey"
+    window_shape: WindowShape = "tukey"
     taper_fraction: float = _DEFAULT_TAPER_FRACTION
     excitation: RectangularPulse | None = None
 
@@ -4144,9 +4157,9 @@ class TimeSelectiveResponse(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        quantity: str = "impulse",
+        quantity: Literal["impulse", "response"] = "impulse",
         frequencies: ArrayLike | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot the impulse response with the window over it, or the level of
@@ -4186,7 +4199,7 @@ def time_selective_response(
     *,
     window_start_s: float,
     window_end_s: float,
-    window_shape: str = "tukey",
+    window_shape: WindowShape = "tukey",
     taper_fraction: float = _DEFAULT_TAPER_FRACTION,
     excitation: RectangularPulse | None = None,
 ) -> TimeSelectiveResponse:
@@ -4295,7 +4308,7 @@ class SteppedSineImpulseResponse(OwnsArrays):
         return np.arange(self.impulse_response.size) / self.fs
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the impulse response against time.
 

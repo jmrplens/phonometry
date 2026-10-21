@@ -42,7 +42,9 @@ N = 1 << 19
 
 
 def _white(seed: int, rms: float = 1.0, n: int = N) -> np.ndarray:
-    return ph.signals.noise_signal(FS, n / FS, color="white", rms=rms, seed=seed)
+    return ph.signals.noise_signal(
+        FS, duration_s=n / FS, color="white", rms=rms, seed=seed
+    )
 
 
 def _fir(x: np.ndarray, taps: list[float]) -> np.ndarray:

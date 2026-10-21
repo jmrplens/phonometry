@@ -296,7 +296,7 @@ mass_law_transmission_loss(
     frequency: ArrayLike,
     mass_per_area: float,
     *,
-    incidence: str = 'field',
+    incidence: Literal['normal', 'field'] = 'field',
     fraction: Literal[1, 3] = 3,
     field_correction: float | None = None,
     fluid: Fluid = ...,
@@ -487,7 +487,7 @@ orthotropic_transmission_loss(
     critical_frequency_lower: float,
     critical_frequency_upper: float,
     loss_factor: float = 0.01,
-    method: str = 'integral',
+    method: Literal['integral', 'heckl'] = 'integral',
     area: float | None = None,
     limiting_angle_deg: float = 78.0,
     fraction: Literal[1, 3] = 3,
@@ -585,7 +585,7 @@ PLATEAU_MATERIALS = {'aluminium': (2.66, 29.0, 11.0), 'brick': (2.1, 37.0, 4.5),
 plateau_transmission_loss(
     frequency: ArrayLike,
     *,
-    material: str | PlateauMaterial,
+    material: Literal['aluminium', 'brick', 'concrete', 'glass', 'lead', 'plaster', 'plywood', 'steel'] | PlateauMaterial,
     thickness_mm: float,
     plateau_height_db: float | None = ...,
     frequency_ratio: float | None = ...,
@@ -596,7 +596,7 @@ plateau_transmission_loss(
 plateau_transmission_loss(
     frequency: ArrayLike,
     *,
-    material: str | PlateauMaterial,
+    material: Literal['aluminium', 'brick', 'concrete', 'glass', 'lead', 'plaster', 'plywood', 'steel'] | PlateauMaterial,
     mass_per_area: float,
     thickness_mm: float | None = ...,
     plateau_height_db: float | None = ...,
@@ -681,7 +681,7 @@ plot_double_wall_geometry(
     *,
     ax: Axes | None = None,
     resonance_frequency: float | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -724,7 +724,7 @@ single_panel_transmission_loss(
     bending_stiffness: float | None = None,
     loss_factor: float = 0.01,
     fraction: Literal[1, 3] = 3,
-    coincidence_model: str = 'sharp',
+    coincidence_model: Literal['sharp', 'cremer'] = 'sharp',
     field_correction: float | None = None,
     fluid: Fluid = ...,
 ) -> SoundReductionResult
@@ -788,9 +788,10 @@ let it be computed from *bending_stiffness* and *mass_per_area* through
 
 ```python
 SoundReductionResult(
+    *,
     frequencies: np.ndarray,
     transmission_loss: np.ndarray,
-    model: str,
+    model: Literal['sharp-single', 'cremer-single', 'plateau', 'orthotropic-integral', 'orthotropic-heckl', 'double-wall'],
     critical_frequency: float | None = None,
     resonance_frequency: float | None = None,
     mass1: float | None = None,
@@ -828,7 +829,7 @@ Predicted airborne sound reduction index `R(f)` of a construction.
 SoundReductionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -844,7 +845,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 SoundReductionResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -889,7 +890,7 @@ SoundReductionResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> str
 ```

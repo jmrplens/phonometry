@@ -175,7 +175,12 @@ scale came out.
 ## QuasiPeakBallistics
 
 ```python
-QuasiPeakBallistics(charge: float, discharge: float, reading_device: float)
+QuasiPeakBallistics(
+    *,
+    charge: float,
+    discharge: float,
+    reading_device: float,
+)
 ```
 
 Time constants of the quasi-peak chain, in seconds.
@@ -295,7 +300,7 @@ close enough to either to collide.
 QuasiPeakResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

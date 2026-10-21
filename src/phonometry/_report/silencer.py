@@ -50,11 +50,12 @@ from ._noise_control_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..noise_control.silencers import ReactiveSilencerResult
     from .metadata import ReportMetadata
 
 
-def _basis(language: str = "en") -> str:
+def _basis(language: Language = "en") -> str:
     """The prediction-basis line naming the four-pole transmission-loss method."""
     return t(
         "Predicted transmission loss of a reactive silencer, computed by the "
@@ -66,7 +67,7 @@ def _basis(language: str = "en") -> str:
     )
 
 
-def _prediction_statement(language: str = "en") -> str:
+def _prediction_statement(language: Language = "en") -> str:
     """The prediction statement printed under the boxed transmission loss."""
     return t(
         "Predicted (estimated) result computed from the declared silencer "
@@ -78,7 +79,7 @@ def _prediction_statement(language: str = "en") -> str:
     )
 
 
-def _caption(result: ReactiveSilencerResult, language: str = "en") -> str:
+def _caption(result: ReactiveSilencerResult, language: Language = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
     if freqs is None:
@@ -89,7 +90,7 @@ def _caption(result: ReactiveSilencerResult, language: str = "en") -> str:
     return t("One-third-octave-band transmission loss", language)
 
 
-def _value_table(result: ReactiveSilencerResult, language: str = "en") -> Table:
+def _value_table(result: ReactiveSilencerResult, language: Language = "en") -> Table:
     """Build the per-band table (nominal frequency, TL, and IL when computed).
 
     Called only after the renderer has imported reportlab.
@@ -113,7 +114,9 @@ def _value_table(result: ReactiveSilencerResult, language: str = "en") -> Table:
     return power_value_table(header, rows_data, widths, fraction)
 
 
-def _resonance_term(result: ReactiveSilencerResult, language: str = "en") -> str | None:
+def _resonance_term(
+    result: ReactiveSilencerResult, language: Language = "en"
+) -> str | None:
     """The extended term naming the resonance frequencies, or ``None``."""
     resonances = getattr(result, "resonances", None)
     if resonances is None:
@@ -127,7 +130,7 @@ def _resonance_term(result: ReactiveSilencerResult, language: str = "en") -> str
 
 
 def _statement(
-    result: ReactiveSilencerResult, language: str = "en"
+    result: ReactiveSilencerResult, language: Language = "en"
 ) -> tuple[float, str, list[str]]:
     """The boxed mean transmission loss and its extended silencer terms."""
     tl = np.asarray(result.transmission_loss, dtype=np.float64)
@@ -156,7 +159,7 @@ def _statement(
     return mean_tl, statement, extended
 
 
-def _basis_strip(language: str = "en") -> str:
+def _basis_strip(language: Language = "en") -> str:
     """The four-pole transmission-loss relation line for the method-basis strip."""
     return t(
         "TL = 10 lg[(Z<sub>n</sub>/Z<sub>1</sub>) (1/4) |T<sub>11</sub> + "
@@ -177,7 +180,7 @@ def render_reactive_silencer_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a reactive-silencer transmission-loss fiche to a PDF at ``path``.
 

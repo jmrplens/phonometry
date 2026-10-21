@@ -76,6 +76,8 @@ from .._internal.validation import require_finite, require_scalar
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
+
 __all__ = [
     "ConformanceVerification",
     "verify_conformance",
@@ -306,7 +308,7 @@ class ConformanceVerification(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the deviation, its uncertainty and the limits, as Figure E.1 does.
 

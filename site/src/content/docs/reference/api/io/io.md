@@ -470,6 +470,7 @@ s/m2) and no value"`, never a figure the page does not print.
 
 ```python
 BroadcastMetadata(
+    *,
     description: str,
     originator: str,
     originator_reference: str,
@@ -1652,8 +1653,8 @@ under test and stay a measurement.
 Signal.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
-    scale: str = 'linear',
+    language: Literal['en', 'es'] = 'en',
+    scale: Literal['linear', 'db'] = 'linear',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1686,11 +1687,11 @@ Total number of samples across all channels.
 
 ```python
 SignalOrigin(
+    *,
     path: str,
     container: str,
     format_name: str,
     bit_depth: int | None,
-    *,
     lossy: bool,
 )
 ```
@@ -1720,8 +1721,8 @@ write(
     x: Signal | NDArray[np.generic] | list[float],
     fs: int | None = ...,
     *,
-    subtype: str | None = ...,
-    bext: BroadcastMetadata | str | None = ...,
+    subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = ...,
+    bext: BroadcastMetadata | Literal['loudness'] | None = ...,
     dither: Literal['tpdf'],
     rng: np.random.Generator | int | None = ...,
     sidecar: bool = ...,
@@ -1732,8 +1733,8 @@ write(
     x: Signal | NDArray[np.generic] | list[float],
     fs: int | None = ...,
     *,
-    subtype: str | None = ...,
-    bext: BroadcastMetadata | str | None = ...,
+    subtype: Literal['PCM_16', 'PCM_24', 'PCM_32', 'FLOAT', 'DOUBLE'] | None = ...,
+    bext: BroadcastMetadata | Literal['loudness'] | None = ...,
     sidecar: bool = ...,
 ) -> None
 ```
@@ -1789,8 +1790,8 @@ write_catalogue(
     catalogue: str | None = None,
     about: str | None = None,
     provenance: Provenance | None = None,
-    delimiter: str = ',',
-    decimal: str = '.',
+    delimiter: Literal[',', ';', '\t'] = ',',
+    decimal: Literal['.', ','] = '.',
     overwrite: bool = False,
 ) -> tuple[Path, ...]
 ```

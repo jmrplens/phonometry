@@ -14,7 +14,7 @@ take only the two literals still run, and fail here.
 
 from __future__ import annotations
 
-from typing import assert_type
+from typing import Final, assert_type
 
 import numpy as np
 import pytest
@@ -23,7 +23,8 @@ from phonometry import building
 
 #: A furnished living room of 40 m³, in the 35 m³ to 60 m³ row of Table 4.
 _VOLUME_M3 = 40.0
-_ROOM = "furnished"
+#: Held as ``Final`` so mypy reads it as the literal room the parameter takes.
+_ROOM: Final = "furnished"
 
 
 def test_a_literal_form_gives_the_narrow_type() -> None:

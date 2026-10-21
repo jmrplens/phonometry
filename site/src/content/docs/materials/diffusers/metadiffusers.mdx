@@ -160,9 +160,9 @@ rows = [  # slit h, neck l_n, cavity l_c, neck w_n, cavity w_c  [mm]
 ]
 wells = []
 for h, ln, lc, wn, wc in rows:
-    resonator = materials.HelmholtzResonator(ln * mm, wn * mm, lc * mm, wc * mm)
+    resonator = materials.HelmholtzResonator(neck_length_m=ln * mm, neck_side_m=wn * mm, cavity_length_m=lc * mm, cavity_side_m=wc * mm)
     # two identical resonators per slit
-    wells.append(materials.MetadiffuserWell(h * mm, (resonator, resonator)))
+    wells.append(materials.MetadiffuserWell(slit_height_m=h * mm, resonators=(resonator, resonator)))
 
 f = np.arange(1800.0, 2601.0, 5.0)
 panel = materials.metadiffuser_reflection(f, wells, depth_m=0.02, period_m=0.07)
@@ -264,8 +264,8 @@ rows = [
 ]
 wells = [
     materials.MetadiffuserWell(
-        h * mm,
-        2 * (materials.HelmholtzResonator(ln * mm, wn * mm, lc * mm, wc * mm),),
+        slit_height_m=h * mm,
+        resonators=2 * (materials.HelmholtzResonator(neck_length_m=ln * mm, neck_side_m=wn * mm, cavity_length_m=lc * mm, cavity_side_m=wc * mm),),
     )
     for h, ln, lc, wn, wc in rows
 ]
@@ -400,8 +400,8 @@ def panel_with(cavity_mm):
     trial = [(14.7, 13.0, cavity_mm, 6.2, 9.0)] + rows[1:]
     built = []
     for h, ln, lc, wn, wc in trial:
-        resonator = materials.HelmholtzResonator(ln * mm, wn * mm, lc * mm, wc * mm)
-        built.append(materials.MetadiffuserWell(h * mm, (resonator, resonator)))
+        resonator = materials.HelmholtzResonator(neck_length_m=ln * mm, neck_side_m=wn * mm, cavity_length_m=lc * mm, cavity_side_m=wc * mm)
+        built.append(materials.MetadiffuserWell(slit_height_m=h * mm, resonators=(resonator, resonator)))
     return materials.metadiffuser_reflection(np.array([2000.0]), built,
                                              depth_m=0.02, period_m=0.07)
 

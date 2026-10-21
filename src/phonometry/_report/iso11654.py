@@ -63,6 +63,7 @@ if TYPE_CHECKING:
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..materials.absorbers.rating import AbsorptionRatingResult
     from .metadata import ReportMetadata
 
@@ -70,7 +71,7 @@ if TYPE_CHECKING:
 _DEVIATION_EPS = 0.005
 
 
-def _d2(value: float, language: str = "en") -> str:
+def _d2(value: float, language: Language = "en") -> str:
     """Two decimals, locale-aware separator (period for English, comma for ES)."""
     return format_number(value, language, decimals=2)
 
@@ -113,7 +114,7 @@ def _base_table_style(accent: Color, light: Color, n_data: int) -> list[Any]:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the absorption header grid.
 
@@ -155,7 +156,7 @@ def _value_table(
     deviations: np.ndarray,
     *,
     verbose: bool,
-    language: str = "en",
+    language: Language = "en",
 ) -> Table:
     """Build the left-hand octave-band absorption table (accredited or evaluation).
 
@@ -220,7 +221,7 @@ def _third_octave_table(
     bands: np.ndarray,
     alpha_s: np.ndarray,
     measured: np.ndarray,
-    language: str = "en",
+    language: Language = "en",
 ) -> Table:
     """Build the combined one-third-octave ``f | alpha_s | alpha_p`` table.
 
@@ -259,7 +260,7 @@ def _third_octave_table(
     return table
 
 
-def _statement(result: AbsorptionRatingResult, language: str = "en") -> str:
+def _statement(result: AbsorptionRatingResult, language: Language = "en") -> str:
     """The boxed single-number statement ``alpha_w = X(shape)``.
 
     The shape indicator follows the value without a space, exactly as the
@@ -273,7 +274,9 @@ def _statement(result: AbsorptionRatingResult, language: str = "en") -> str:
     return f"&#945;<sub>w</sub> = <b>{value}</b>"
 
 
-def _extended_terms(result: AbsorptionRatingResult, language: str = "en") -> list[str]:
+def _extended_terms(
+    result: AbsorptionRatingResult, language: Language = "en"
+) -> list[str]:
     """The absorption class, shape indicator and applied shift shown by the box."""
     terms = [
         t("Absorption class: {value}", language).format(
@@ -293,7 +296,7 @@ def _extended_terms(result: AbsorptionRatingResult, language: str = "en") -> lis
 
 
 def _verdict(
-    result: AbsorptionRatingResult, requirement: float, language: str = "en"
+    result: AbsorptionRatingResult, requirement: float, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag: absorption passes at or above the requirement."""
     passed = float(result.alpha_w) >= requirement
@@ -312,7 +315,7 @@ def _left_table(
     deviations: np.ndarray,
     *,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> tuple[Any, str]:
     """Pick the left-hand table of the fiche, and the caption that names it.
 
@@ -368,7 +371,7 @@ def render_iso11654_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 11654 absorption-rating fiche to a PDF at ``path``.
 

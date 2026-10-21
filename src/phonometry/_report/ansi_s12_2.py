@@ -71,6 +71,7 @@ if TYPE_CHECKING:
     from reportlab.lib.styles import ParagraphStyle
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..room.noise_criteria import NCResult, RCResult
     from .metadata import ReportMetadata
 
@@ -94,7 +95,7 @@ def _thead_style() -> ParagraphStyle:
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the room-noise header grid.
 
@@ -122,7 +123,7 @@ def _metadata_pairs(
     return escaped_pairs(specs)
 
 
-def _band_labels(language: str = "en") -> list[str]:
+def _band_labels(language: Language = "en") -> list[str]:
     """Nominal octave-band labels (16 ... 8000 Hz), aligned with the levels.
 
     The centre of the 31,5 Hz band is a number like any other on the sheet, so
@@ -137,7 +138,7 @@ def _band_labels(language: str = "en") -> list[str]:
     ]
 
 
-def _level_cell(level: float, language: str, decimals: int = 1) -> str:
+def _level_cell(level: float, language: Language, decimals: int = 1) -> str:
     """One octave-band level cell, or an em dash when the band is absent."""
     if not math.isfinite(level):
         return "—"
@@ -188,7 +189,7 @@ def _value_table(
     return table
 
 
-def _nc_contour_column(levels: np.ndarray, language: str) -> list[str]:
+def _nc_contour_column(levels: np.ndarray, language: Language) -> list[str]:
     """Per-band NC contour value read by the tangency method (verbose NC).
 
     For each band the NC index whose Table 1 curve passes through the measured
@@ -214,7 +215,9 @@ def _nc_contour_column(levels: np.ndarray, language: str) -> list[str]:
     return cells
 
 
-def _base_columns(levels: np.ndarray, language: str) -> list[tuple[str, list[str]]]:
+def _base_columns(
+    levels: np.ndarray, language: Language
+) -> list[tuple[str, list[str]]]:
     """The two columns every room-noise table opens with (frequency, level)."""
     return [
         (t("Frequency f [Hz]", language), _band_labels(language)),
@@ -227,7 +230,7 @@ def _assemble_left(
     col_widths: list[float],
     widths: tuple[float, float],
     caption_style: ParagraphStyle,
-    language: str,
+    language: Language,
 ) -> tuple[list[Any], list[float]]:
     """Wrap the caption and value table into a two-panel left cell."""
     from ._layout import fiche_paragraph
@@ -241,7 +244,11 @@ def _assemble_left(
 
 
 def _nc_left_cell(
-    result: NCResult, *, verbose: bool, caption_style: ParagraphStyle, language: str
+    result: NCResult,
+    *,
+    verbose: bool,
+    caption_style: ParagraphStyle,
+    language: Language,
 ) -> tuple[list[Any], list[float]]:
     """The NC fiche left cell (caption + table) and its two-panel column widths."""
     from reportlab.lib.units import mm
@@ -263,7 +270,11 @@ def _nc_left_cell(
 
 
 def _rc_left_cell(
-    result: RCResult, *, verbose: bool, caption_style: ParagraphStyle, language: str
+    result: RCResult,
+    *,
+    verbose: bool,
+    caption_style: ParagraphStyle,
+    language: Language,
 ) -> tuple[list[Any], list[float]]:
     """The RC fiche left cell (caption + table) and its two-panel column widths."""
     from reportlab.lib.units import mm
@@ -308,7 +319,7 @@ def _rating_label(value: float) -> str:
     return f"{int(rounded)}" if float(rounded).is_integer() else f"{rounded:g}"
 
 
-def _nc_statement_terms(result: NCResult, language: str) -> tuple[str, list[str]]:
+def _nc_statement_terms(result: NCResult, language: Language) -> tuple[str, list[str]]:
     """The boxed NC designation and its extended terms (clause 5.2.2).
 
     A SIL-designated spectrum boxes ``NC-nn`` with the SIL value; a tangency
@@ -384,7 +395,7 @@ _RC_QUALITY = {
 }
 
 
-def _rc_statement_terms(result: RCResult, language: str) -> tuple[str, list[str]]:
+def _rc_statement_terms(result: RCResult, language: Language) -> tuple[str, list[str]]:
     """The boxed ``RC-nn(tag)`` statement and its RC extended terms.
 
     A rating outside the tabulated RC-25 to RC-50 family (Table D.1) adds a
@@ -422,7 +433,7 @@ def _verdict(
     symbol: str,
     rating: float,
     requirement: float,
-    language: str,
+    language: Language,
     out_of_range: str | None = None,
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag: a room-noise rating passes at or below target.
@@ -465,7 +476,7 @@ class LeftCellBuilder[R: NCResult | RCResult](Protocol):
         *,
         verbose: bool,
         caption_style: ParagraphStyle,
-        language: str,
+        language: Language,
     ) -> tuple[list[Any], list[float]]:
         """Build the left cell and the two panel widths."""
         ...
@@ -477,11 +488,11 @@ def _render_room_noise[R: NCResult | RCResult](
     *,
     basis_template: str,
     left_builder: LeftCellBuilder[R],
-    statement_builder: Callable[[R, str], tuple[str, list[str]]],
+    statement_builder: Callable[[R, Language], tuple[str, list[str]]],
     symbol: str,
     metadata: ReportMetadata | None,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> str:
     """Render a room-noise rating fiche, shared by the NC and RC renderers."""
     try:
@@ -564,7 +575,7 @@ def render_nc_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a Noise Criteria (NC) assessment fiche to a PDF at ``path``.
 
@@ -603,7 +614,7 @@ def render_rc_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a Room Criteria Mark II (RC) assessment fiche to a PDF at ``path``.
 

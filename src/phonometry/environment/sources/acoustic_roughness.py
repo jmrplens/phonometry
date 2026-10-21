@@ -81,7 +81,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -100,6 +100,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
     from ...filters import OctaveFilterBank
 
 __all__ = [
@@ -486,7 +487,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
     levels: NDArray[np.float64]
     record_length_m: float | None = None
     n_segments: int | None = None
-    method: str | None = None
+    method: Literal["A", "B"] | None = None
 
     def __post_init__(self) -> None:
         """Hold the bands as read-only arrays, one level per band, longest first.
@@ -541,7 +542,7 @@ class AcousticRoughnessSpectrum(OwnsArrays):
         ax: Axes | None = None,
         *,
         limit_db: Mapping[float, float] | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the spectrum as EN 15610 clause 9 presents it.

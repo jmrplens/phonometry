@@ -70,6 +70,7 @@ if TYPE_CHECKING:
     from reportlab.lib.styles import ParagraphStyle, StyleSheet1
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..building.measurement.floor_covering_improvement import (
         FloorCoveringImprovementResult,
     )
@@ -78,7 +79,7 @@ if TYPE_CHECKING:
 def _metadata_pairs(
     result: FloorCoveringImprovementResult,
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the header grid.
 
@@ -167,7 +168,7 @@ def _reference_floor_with_covering(
 def _value_table(
     result: FloorCoveringImprovementResult,
     ln_r: np.ndarray | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> Table:
     """Build the per-band ``f | delta-L`` table.
 
@@ -208,7 +209,7 @@ def _value_table(
     return band_table(rows, widths, len(freqs), band_centres=freqs)
 
 
-def _basis_line(metadata: ReportMetadata | None, language: str = "en") -> str:
+def _basis_line(metadata: ReportMetadata | None, language: Language = "en") -> str:
     """The standard-basis line, naming the measurement standard when supplied."""
     standard = metadata.measurement_standard if metadata is not None else None
     if standard:
@@ -232,7 +233,9 @@ def _is_background_limited(result: FloorCoveringImprovementResult) -> bool:
     return bool(np.any(np.asarray(result.limited, dtype=bool)))
 
 
-def _box_statement(result: FloorCoveringImprovementResult, language: str = "en") -> str:
+def _box_statement(
+    result: FloorCoveringImprovementResult, language: Language = "en"
+) -> str:
     """The boxed single-number statement, or a characterisation headline.
 
     With the 16 rating bands present the box carries the ISO 16251-1 Clause 8 e)
@@ -265,7 +268,7 @@ def _body(
     *,
     verbose: bool,
     caption_style: ParagraphStyle,
-    language: str = "en",
+    language: Language = "en",
 ) -> Table:
     """The two-panel body: the per-band table beside the ``delta-L(f)`` curve.
 
@@ -289,7 +292,7 @@ def _body(
         _value_table(result, ln_r, language),
     ]
 
-    def _plot(ax: Axes | None = None, language: str = language) -> Axes:
+    def _plot(ax: Axes | None = None, language: Language = language) -> Axes:
         return result.plot(ax=ax, language=language)
 
     left_width, plot_width = (66.0, 108.0) if ln_r is not None else (56.0, 118.0)
@@ -305,7 +308,7 @@ def _verdict_row(
     result: FloorCoveringImprovementResult,
     requirement: float,
     styles: StyleSheet1,
-    language: str,
+    language: Language,
 ) -> list[Any]:
     """The requirement verdict: a higher weighted improvement passes."""
     value = float(result.delta_lw) if result.delta_lw is not None else 0.0
@@ -322,7 +325,7 @@ def render_iso16251_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 16251-1 floor-covering impact-improvement fiche to a PDF.
 

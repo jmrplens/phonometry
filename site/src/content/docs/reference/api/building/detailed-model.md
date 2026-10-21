@@ -142,7 +142,12 @@ equivalent absorption lengths with Formula (10), then Formula (15) gives
 ## BandPath
 
 ```python
-BandPath(label: str, kind: str, values: np.ndarray)
+BandPath(
+    *,
+    label: str,
+    kind: Literal['Dd', 'Ff', 'Df', 'Fd'],
+    values: np.ndarray,
+)
 ```
 
 One transmission path of the detailed model, per band.
@@ -324,7 +329,7 @@ upwards on its lightweight blockwork.
 | `resonant_only` | Drop the forced-transmission term below `fc`. |
 | `density` | Density `ρ` of the material, in kg/m³; with `longitudinal_velocity` it enables the Formula (B.10) plateau. |
 | `longitudinal_velocity` | Quasi-longitudinal phase velocity `cL` of the material, in m/s. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN_12354_AIR`](/phonometry/reference/api/building/detailed-model/#en_12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
 
 **Returns:** The sound reduction index `R` per band, in dB.
 
@@ -455,7 +460,7 @@ Label of the path carrying most energy in each band.
 DetailedAirborneResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -472,9 +477,9 @@ DetailedAirborneResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -542,7 +547,7 @@ Label of the path carrying most energy in each band.
 DetailedImpactResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -559,9 +564,9 @@ DetailedImpactResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -648,7 +653,7 @@ laboratory value, Formula 8).
 
 **Returns:** `RDd` per band, in dB.
 
-## EN_12354_AIR
+## EN12354_AIR
 
 *Constant* (`phonometry.fluids.Fluid`).
 
@@ -1015,6 +1020,7 @@ implementation reproduces.
 
 ```python
 HomogeneousElement(
+    *,
     label: str,
     area: float,
     length1: float,
@@ -1101,7 +1107,7 @@ measured one.
 | `length2` | The other side length, in m. |
 | `perimeter_absorption` | $\sum l_k \alpha_k$ over the element's perimeter, in m (Default: 0). |
 | `label` | The element's name (Default: the row's [`name`](/phonometry/reference/api/io/io/#cataloguerow)). |
-| `fluid` | The air whose speed of sound `co` enters `fc` (Default: [`EN_12354_AIR`](/phonometry/reference/api/building/detailed-model/#en_12354_air), the 340 m/s of Annex A). |
+| `fluid` | The air whose speed of sound `co` enters `fc` (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the 340 m/s of Annex A). |
 
 **Returns:** The [`HomogeneousElement`](/phonometry/reference/api/building/detailed-model/#homogeneouselement).
 
@@ -1183,7 +1189,7 @@ data come from a laboratory measurement.
 | `frequencies` | Band centre frequencies, in Hz. |
 | `fraction` | The band set, 3 for one-third octaves (default) or 1 for octaves. |
 | `resonant_only` | Drop the forced-transmission term of Formula (B.2) below `fc` (Annex B.1, flanking paths). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN_12354_AIR`](/phonometry/reference/api/building/detailed-model/#en_12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
 
 **Returns:** The [`InSituElementResult`](/phonometry/reference/api/building/detailed-model/#insituelementresult).
 
@@ -1343,7 +1349,7 @@ Formula (C.4) absorption coefficients (see
 | `critical_frequency` | Critical frequency `fc`, in Hz. |
 | `radiation_factor` | Radiation factor `σ` per band. |
 | `perimeter_absorption` | $\sum l_k \alpha_k$ over the element's perimeter, in m (may be zero for a free-edged element). |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN_12354_AIR`](/phonometry/reference/api/building/detailed-model/#en_12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`EN12354_AIR`](/phonometry/reference/api/building/detailed-model/#en12354_air), the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3). |
 
 **Returns:** The total loss factor `ηtot,situ` per band (dimensionless).
 
@@ -1432,7 +1438,7 @@ Per-band in-situ description of one element (Clause 4.2.2).
 InSituElementResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

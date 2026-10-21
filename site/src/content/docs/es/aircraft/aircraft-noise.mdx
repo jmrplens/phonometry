@@ -407,11 +407,11 @@ aproximación por encima de 4 EPNdB, o un resultado a menos de 1 EPNdB del lími
 del Capítulo 3.
 
 La biblioteca aporta los ingredientes y no la contabilidad. `air_attenuation` y
-`sae_band_attenuation`, más abajo, dan los $\alpha(i)$ y $\alpha_\mathrm{R}(i)$
+`band_attenuation_arp5534`, más abajo, dan los $\alpha(i)$ y $\alpha_\mathrm{R}(i)$
 de los dos primeros términos, aunque no en su unidad: el §8.3.2.1 toma los
 coeficientes en dB/100 m con $\mathrm{QK}$ en metros, y eso es lo que convierte el 0,01,
 mientras que `air_attenuation` devuelve dB/m (el $0{,}01\,\alpha(i)$ de esos
-términos) y `sae_band_attenuation` una atenuación en banda a lo largo de un
+términos) y `band_attenuation_arp5534` una atenuación en banda a lo largo de un
 camino dado, en dB (el $0{,}01\,\alpha(i)\,\mathrm{QK}$ entero para el camino $\mathrm{QK}$). La
 maquinaria del EPNL vuelve a pasar un espectro ajustado con la misma facilidad
 que uno medido; la geometría de la trayectoria $\mathrm{QK}/\mathrm{Q}_r\mathrm{K}_r$ y
@@ -471,7 +471,7 @@ la atenuación en bandas de tercio de octava sobre el trayecto. El coeficiente d
 tono puro es el de ISO 9613-1, cuyos términos repite ARP 5534 §3.1 en sus
 ecuaciones 1-3, con la presión de vapor de saturación que ARP 5534 imprime en
 las ecuaciones 5-6 (la forma larga de ANSI S1.26, no la fórmula del anexo B de
-`air_attenuation`); sobre él, `sae_band_attenuation` añade el **método SAE** (ARP 5534
+`air_attenuation`); sobre él, `band_attenuation_arp5534` añade el **método SAE** (ARP 5534
 §3.2.2) que mapea la atenuación de trayecto de tono puro medio de banda
 $\delta_\mathrm{t} = \alpha\,s$ a la atenuación de banda $\delta_\mathrm{B}$, coherente con el
 método exacto mucho más allá del límite de 50 dB del método aproximado.
@@ -511,7 +511,7 @@ freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # tercios 50 Hz-10 kHz
 fig, ax = plt.subplots()
 # continua: atenuación de banda SAE, discontinua: tono puro medio de banda
 for s in (1000.0, 7620.0):
-    att = aircraft.sae_band_attenuation(
+    att = aircraft.band_attenuation_arp5534(
         freqs, s, temperature_c=25.0, relative_humidity_percent=70.0
     )
     line, = ax.semilogx(att.frequencies, att.band_attenuation, marker="o",
@@ -532,7 +532,7 @@ import numpy as np
 from phonometry import aircraft
 
 freqs = 1000.0 * 10.0 ** (np.arange(-13, 11) / 10.0)   # tercios 50 Hz–10 kHz
-att = aircraft.sae_band_attenuation(freqs, path_length_m=7620.0,
+att = aircraft.band_attenuation_arp5534(freqs, path_length_m=7620.0,
                               temperature_c=25.0, relative_humidity_percent=70.0)
 att.plot()   # banda frente a tono puro medio de banda (requiere matplotlib)
 ```
@@ -563,7 +563,7 @@ el ejemplo del turbofán de la Tabla 3-7 del ETM Vol. I) y la cadena EPNL
 completa (`effective_perceived_noise_level`, que reproduce el ejemplo de la
 Tabla 4-4 del ETM Vol. I). Las tolerancias del sistema de medida de la IEC
 61265:1995 mediante `verify_aircraft_noise_system`. La absorción atmosférica
-en banda de la SAE ARP 5534 mediante `sae_band_attenuation`.
+en banda de la SAE ARP 5534 mediante `band_attenuation_arp5534`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">

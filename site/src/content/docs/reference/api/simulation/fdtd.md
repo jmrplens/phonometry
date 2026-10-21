@@ -127,6 +127,7 @@ Clear the accumulators (call once the field is steady).
 
 ```python
 CWSource(
+    *,
     ix: int,
     iy: int,
     frequency: float,
@@ -168,11 +169,11 @@ FDTD2D(
     rho: float | NDArray[np.float64] = 1.2,
     cfl: float = 0.6,
     sponge_width: int = 0,
-    sponge_sides: str | Iterable[str] | None = None,
+    sponge_sides: Literal['left', 'right', 'top', 'bottom'] | Iterable[Literal['left', 'right', 'top', 'bottom']] | None = None,
     sponge_reflection: float = 0.0001,
     damping: float | NDArray[np.float64] = 0.0,
     shape: tuple[int, int] | None = None,
-    edge_impedance: Mapping[str, float | NDArray[np.float64]] | None = None,
+    edge_impedance: Mapping[Literal['left', 'right', 'top', 'bottom'], float | NDArray[np.float64]] | None = None,
     obstacle_mask: NDArray[np.bool_] | None = None,
 )
 ```
@@ -265,7 +266,7 @@ radiated field itself is the quantity of interest).
 
 ```python
 FDTD2D.add_plane_wave(
-    direction: str,
+    direction: Literal['down', 'up', 'left', 'right'],
     *,
     center: float,
     width: float,
@@ -335,7 +336,7 @@ FDTD2D.plot_geometry(
     ax: Axes | None = None,
     *,
     probes: ArrayLike | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -409,7 +410,7 @@ fdtd_simulation(
     rho: float | NDArray[np.float64] = 1.2,
     cfl: float = 0.6,
     probes: Sequence[tuple[int, int]] = (),
-    boundaries: str | Mapping[str, str | float | NDArray[np.float64]] = 'rigid',
+    boundaries: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | NDArray[np.float64]] = 'rigid',
     absorbing_layer_cells: int = 20,
     obstacle_mask: NDArray[np.bool_] | None = None,
     damping: float = 0.0,
@@ -510,9 +511,9 @@ Frozen result of a [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd
 FDTDResult.plot(
     ax: Axes | None = None,
     *,
-    kind: str = 'probes',
+    kind: Literal['probes', 'snapshot'] = 'probes',
     frame: int = -1,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -541,6 +542,7 @@ Domain size `(lx, ly)` [m].
 
 ```python
 GaussianPulse(
+    *,
     ix: int,
     iy: int,
     half_width_s: float,
@@ -577,6 +579,7 @@ Source waveform at time `t` (seconds).
 
 ```python
 PlaneWaveSource(
+    *,
     direction: str,
     waveform: Callable[[float], float],
     offset: int = 0,
@@ -612,6 +615,7 @@ inside the sponge layer when one is configured on that side).
 
 ```python
 SignalSource(
+    *,
     ix: int,
     iy: int,
     samples: NDArray[np.float64],

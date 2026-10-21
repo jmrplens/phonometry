@@ -217,10 +217,10 @@ import matplotlib.pyplot as plt
 from phonometry import environment
 
 traffic = [
-    environment.RoadTraffic(environment.RoadVehicleCategory.LIGHT, 1200.0, 50.0),
-    environment.RoadTraffic(environment.RoadVehicleCategory.MEDIUM_HEAVY, 90.0, 50.0),
-    environment.RoadTraffic(environment.RoadVehicleCategory.HEAVY, 45.0, 50.0),
-    environment.RoadTraffic(environment.RoadVehicleCategory.MOTORCYCLES, 60.0, 50.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.LIGHT, flow_rate=1200.0, speed_kmh=50.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.MEDIUM_HEAVY, flow_rate=90.0, speed_kmh=50.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.HEAVY, flow_rate=45.0, speed_kmh=50.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.MOTORCYCLES, flow_rate=60.0, speed_kmh=50.0),
 ]
 result = environment.road_source_power(
     traffic, surface=environment.RoadSurface.THIN_LAYER_A, temperature_c=12.0, road_slope_percent=3.0,
@@ -378,13 +378,13 @@ arithmetic and is offered as such.
 from phonometry import environment
 
 result = environment.road_source_power([
-    environment.RoadTraffic(environment.RoadVehicleCategory.LIGHT, 1000.0, 90.0),
-    environment.RoadTraffic(environment.RoadVehicleCategory.HEAVY, 120.0, 80.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.LIGHT, flow_rate=1000.0, speed_kmh=90.0),
+    environment.RoadTraffic(category=environment.RoadVehicleCategory.HEAVY, flow_rate=120.0, speed_kmh=80.0),
 ])
 segment = environment.line_source_segment_power(result.total_line_power, 20.0)  # a 20 m segment
 levels = environment.predicted_receiver_level(
     segment,
-    environment.PropagationGeometry(100.0, result.source_height_m, 4.0),
+    environment.PropagationGeometry(distance=100.0, source_height_m=result.source_height_m, receiver_height_m=4.0),
     frequencies=result.frequencies,
 )
 ```
@@ -601,7 +601,7 @@ track = environment.RailwayTrack(
     impact_roughness=environment.impact_roughness_single(),
 )
 result = environment.railway_source_power(
-    environment.RailwayVehicle(stock, flow_rate=96.0, speed_kmh=160.0), track, phi=90.0, psi=10.0,
+    environment.RailwayVehicle(stock=stock, flow_rate=96.0, speed_kmh=160.0), track, phi=90.0, psi=10.0,
 )
 result.plot()
 plt.show()

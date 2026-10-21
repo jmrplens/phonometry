@@ -101,6 +101,8 @@ import pathlib
 import pkgutil
 import re
 import sys
+import types
+import typing
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, NamedTuple, cast
 
@@ -746,38 +748,14 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         "PorousMaterial",
         "fiber_diameter_distribution_parameter",
     ): _OF_A_DISTRIBUTION,
-    ("phonometry.underwater.acoustics", "sound_pressure_level", "pressure"): _ACOUSTIC,
-    ("phonometry.underwater.acoustics", "sound_exposure_level", "pressure"): _ACOUSTIC,
-    (
-        "phonometry.underwater.acoustics",
-        "peak_sound_pressure_level",
-        "pressure",
-    ): _ACOUSTIC,
-    (
-        "phonometry.underwater.sources.pile_driving_noise",
-        "single_strike_sel",
-        "pressure",
-    ): _ACOUSTIC,
-    (
-        "phonometry.underwater.sources.pile_driving_noise",
-        "strike_sel_spectrum",
-        "pressure",
-    ): _ACOUSTIC,
-    (
-        "phonometry.underwater.sources.pile_driving_noise",
-        "pile_strike_metrics",
-        "pressure",
-    ): _ACOUSTIC,
-    (
-        "phonometry.underwater.sources.pile_driving_noise",
-        "PileStrikeResult",
-        "pressure",
-    ): _ACOUSTIC,
     (
         "phonometry.underwater.propagation.numerical",
         "GaussianBeamResult",
         "pressure",
-    ): _ACOUSTIC,
+    ): (
+        "the complex field of the beam sum normalized to unit pressure at 1 m, "
+        "a pure number: propagation_loss is -20 lg of its magnitude"
+    ),
     ("phonometry.simulation.ntff", "ContourPhasors", "pressure"): _ACOUSTIC,
     ("phonometry.simulation.fdtd", "FDTDResult", "pressures"): _ACOUSTIC,
     # An evaluation period is not a length of time here: it is which of the
@@ -809,7 +787,7 @@ EXEMPT: dict[tuple[str, str, str], str] = {
         "samples_per_period",
     ): "a count of samples, which is what the name already says",
     (
-        "phonometry.signals.test_signals",
+        "phonometry.signals._test_signals",
         "ToneBurstResult",
         "period_samples",
     ): "a count of samples, which is what the name already says",
@@ -1496,6 +1474,18 @@ def offenders(
                 loose.append(parameter)
             continue
         if not names_a_quantity(parameter.name, parameter.module):
+            # A name that carries a unit is held to the second half whatever
+            # quantity it names: ``duration_s``, ``length_m`` and ``high_hz``
+            # are numbers a caller writes, and a default that stays
+            # positional lets the bare number stand without its name.
+            if parameter.positional_with_default and parameter.name.lower().endswith(
+                UNITS
+            ):
+                key = (parameter.module, parameter.qualname, parameter.name)
+                if key in POSITIONAL:
+                    used.add(key)
+                else:
+                    loose.append(parameter)
             continue
         if holds_a_truth_value(parameter.annotation):
             continue
@@ -1794,6 +1784,105 @@ def misspelled(
     return found, [k for k in SPELLING_EXEMPT if k not in used]
 
 
+#: A temperature is on the Celsius scale and an interval of temperature is in
+#: kelvin. ``GasStream(inlet_temperature_k=450.0)`` renamed to ``_c`` with the
+#: number kept made the gas 273.15 K hotter without an error, so an absolute
+#: temperature is written in degrees Celsius (``temperature_c``), and a
+#: difference, a tolerance, an uncertainty of a temperature or a coefficient
+#: per degree, which are the same number on either scale, are written in
+#: kelvin, the SI unit of an interval (``u_temperature_k``,
+#: ``temperature_coefficient_db_per_k``), whichever of the two a standard
+#: prints: Directive (EU) 2015/996 prints the CNOSSOS-EU coefficient in dB/°C
+#: and ISO 10847 its tolerance in °C, the same numbers. A temperature name that
+#: ends in ``_k`` is an interval only where this table says so, keyed by
+#: ``(module, qualified name, name)`` with its reason; an entry that matches
+#: nothing fails.
+_UNCERTAINTY_OF_A_TEMPERATURE = (
+    "a standard uncertainty of a temperature, an interval: the same number in "
+    "kelvin and in degrees Celsius, written in kelvin"
+)
+TEMPERATURE_INTERVALS: dict[tuple[str, str, str], str] = {
+    (
+        "phonometry.environment.propagation.barrier_in_situ",
+        "",
+        "TEMPERATURE_TOLERANCE_K",
+    ): (
+        "ISO 10847 6.3.2, the largest difference between the mean temperatures "
+        "of the two campaigns: an interval"
+    ),
+    (
+        "phonometry.metrology.reciprocity_coupler",
+        "CouplerInputUncertainties",
+        "u_temperature_k",
+    ): _UNCERTAINTY_OF_A_TEMPERATURE,
+    (
+        "phonometry.metrology.reciprocity_free_field",
+        "FreeFieldInputUncertainties",
+        "u_temperature_k",
+    ): _UNCERTAINTY_OF_A_TEMPERATURE,
+}
+
+#: Words that make a temperature name an interval of temperature.
+_INTERVAL_WORDS = frozenset(
+    {
+        "difference",
+        "differences",
+        "rise",
+        "drop",
+        "delta",
+        "change",
+        "step",
+        "uncertainty",
+        "tolerance",
+        "tolerances",
+    }
+)
+
+
+def temperature_scale(name: str) -> str | None:
+    """Why a temperature name is on the wrong scale, or ``None``.
+
+    :param name: A public parameter, field or property name.
+    """
+    lowered = name.lower()
+    if "temperature" not in lowered:
+        return None
+    words = lowered.split("_")
+    if lowered.endswith("_per_c"):
+        return (
+            "a coefficient per degree is per kelvin: end it in _per_k, the same number"
+        )
+    if lowered.endswith("_c") and (_INTERVAL_WORDS & set(words) or words[0] == "u"):
+        return (
+            "an interval of temperature is in kelvin, the same number as in "
+            "degrees Celsius: end it in _k"
+        )
+    if lowered.endswith("_k") and not lowered.endswith("_per_k"):
+        return (
+            "a temperature is in degrees Celsius: end it in _c and convert the "
+            "number, or list an interval in TEMPERATURE_INTERVALS"
+        )
+    return None
+
+
+def temperature_scales(
+    parameters: Iterable[Parameter] | None = None,
+) -> tuple[list[tuple[PublicName, str]], list[tuple[str, str, str]]]:
+    """Temperatures not in degrees Celsius and intervals not in kelvin, and stale exemptions."""
+    found: list[tuple[PublicName, str]] = []
+    used: set[tuple[str, str, str]] = set()
+    for entry in public_names(parameters):
+        problem = temperature_scale(entry.name)
+        if problem is None:
+            continue
+        key = (entry.module, entry.qualname, entry.name)
+        if key in TEMPERATURE_INTERVALS:
+            used.add(key)
+            continue
+        found.append((entry, problem))
+    return found, [k for k in TEMPERATURE_INTERVALS if k not in used]
+
+
 #: Where the bare name and the same name with a unit are allowed to stand
 #: side by side in one subpackage, keyed by ``(subpackage, bare, suffixed)``,
 #: with the reason. Every other pair is one quantity spelled two ways, and
@@ -1831,6 +1920,13 @@ _PATH_AND_RATE = (
 )
 
 PAIR_EXEMPT: dict[tuple[str, str, str], str] = {
+    **_pair(
+        "the complex field of a Gaussian beam sum normalized to unit pressure "
+        "at 1 m, a pure number, beside the pressure waveform of a pile strike "
+        "in pascals",
+        "underwater",
+        ("pressure", "pressure_pa"),
+    ),
     **_pair(
         "the engine power setting P that indexes the NPD curves, in whatever "
         "unit the ANP database tabulates it (pounds of thrust, per cent), "
@@ -2528,6 +2624,13 @@ RECORD_AXIS_EXEMPT: dict[tuple[str, str], str] = {
 }
 
 
+#: How deep an alias of an alias is followed.
+_ALIAS_DEPTH = 3
+
+#: What a union alias is at run time: ``X | Y`` or ``Union[X, Y]``.
+_UNIONS = (typing.Union, types.UnionType)
+
+
 def _public_records() -> dict[str, type]:
     """Every public dataclass of the package, by name."""
     records: dict[str, type] = {}
@@ -2539,12 +2642,40 @@ def _public_records() -> dict[str, type]:
     return records
 
 
+def _union_members(name: str, module: object, depth: int = 0) -> list[str]:
+    """The names a module-level union alias stands for, aliases expanded.
+
+    ``Layer = PorousLayer | AirLayer | ...`` is how a function says it takes
+    any of six records, and under ``from __future__ import annotations`` its
+    signature names only ``Layer``: the records are found through the alias.
+    """
+    value = getattr(module, name, None)
+    if depth > _ALIAS_DEPTH or typing.get_origin(value) not in _UNIONS:
+        return []
+    members: list[str] = []
+    for argument in typing.get_args(value):
+        member = getattr(argument, "__name__", None)
+        if member:
+            members.append(member)
+            members.extend(_union_members(member, module, depth + 1))
+    return members
+
+
 def _annotations_of(target: Callable[..., object]) -> list[str]:
+    """The parameter annotations of *target*, with its union aliases spelled out."""
     try:
         signature = inspect.signature(target)
     except (TypeError, ValueError):
         return []
-    return [str(p.annotation) for p in signature.parameters.values()]
+    texts = [str(p.annotation) for p in signature.parameters.values()]
+    module = sys.modules.get(getattr(target, "__module__", "") or "")
+    words = {word for text in texts for word in re.findall(r"[A-Za-z_]\w*", text)}
+    expanded = [
+        member for word in sorted(words) for member in _union_members(word, module)
+    ]
+    if expanded:
+        texts.append(" ".join(expanded))
+    return texts
 
 
 def _taken_as_arguments() -> str:
@@ -2629,6 +2760,80 @@ def positional_record_axes() -> tuple[
             entry = PublicName(key[0], key[1], obj.__name__, _where(obj))
             found.extend((entry, axis, values) for axis in axes)
     return found, [k for k in RECORD_AXIS_EXEMPT if k not in used]
+
+
+#: Input records that keep a field positional, keyed by ``(module, qualified
+#: name)``, with the reason. Every other record a public function takes as an
+#: argument is written by name, field by field, as a function call is.
+RECORD_POSITIONAL_EXEMPT: dict[tuple[str, str], str] = {
+    ("phonometry.io._signal", "Signal"): (
+        "Signal(x, fs) is the pair every function of the library takes "
+        "positionally, the samples and their rate, and nothing else is taken "
+        "by position"
+    ),
+}
+
+
+def positional_records() -> tuple[
+    list[tuple[PublicName, tuple[str, ...]]], list[tuple[str, str]]
+]:
+    """The input records whose constructor takes any field by position.
+
+    An input record is what :func:`positional_record_axes` reads as one: a
+    public dataclass another public function takes, or one such a record
+    holds. A caller builds it field by field, so every field is written by
+    name (``@dataclass(kw_only=True)``); a result one function hands whole to
+    another is passed over (:data:`RECORD_AXIS_EXEMPT`), and a record that
+    keeps a positional field says why in :data:`RECORD_POSITIONAL_EXEMPT`.
+    """
+    taken = _taken_as_arguments()
+    found: list[tuple[PublicName, tuple[str, ...]]] = []
+    used: set[tuple[str, str]] = set()
+    seen: set[tuple[str, str]] = set()
+    for _, module in public_modules():
+        for exported in getattr(module, "__all__", ()):
+            obj = getattr(module, exported, None)
+            if not (inspect.isclass(obj) and dataclasses.is_dataclass(obj)):
+                continue
+            key = (obj.__module__, obj.__qualname__)
+            if key in seen or key in RECORD_AXIS_EXEMPT:
+                continue
+            seen.add(key)
+            if not re.search(rf"\b{re.escape(obj.__name__)}\b", taken):
+                continue
+            try:
+                signature = inspect.signature(obj)
+            except (TypeError, ValueError):
+                continue
+            positional = tuple(
+                p.name for p in signature.parameters.values() if p.kind in _BY_POSITION
+            )
+            if not positional:
+                continue
+            if key in RECORD_POSITIONAL_EXEMPT:
+                used.add(key)
+                continue
+            found.append(
+                (PublicName(key[0], key[1], obj.__name__, _where(obj)), positional)
+            )
+    return found, [k for k in RECORD_POSITIONAL_EXEMPT if k not in used]
+
+
+def _report_positional_records(
+    records: list[tuple[PublicName, tuple[str, ...]]],
+) -> None:
+    """Print the input-record rule's findings."""
+    if not records:
+        return
+    print("::error::an input record takes its fields by position")
+    print(f"{len(records)} record(s) a caller builds take fields positionally:")
+    for entry, fields in sorted(records):
+        print(f"  {entry.qualname}({', '.join(fields)})  <- {entry.where}")
+    print(
+        "  -> make the record @dataclass(kw_only=True), so every field is "
+        "written by name; one that keeps a positional field goes in "
+        "RECORD_POSITIONAL_EXEMPT with the reason."
+    )
 
 
 def _report_record_axes(
@@ -2745,7 +2950,7 @@ TUPLE_RETURN_EXEMPT: dict[tuple[str, str], str] = {
     ),
     (
         "phonometry.materials.absorbers.four_microphone",
-        "plane_wave_frequency_range_astm",
+        "plane_wave_frequency_range_astm_e2611",
     ): _BOUNDS,
     (
         "phonometry.materials.absorbers.impedance_tube",
@@ -2847,7 +3052,7 @@ def fixed_tuple_items(annotation: object) -> tuple[str, ...] | None:
         if any(isinstance(i, ast.Constant) and i.value is Ellipsis for i in items):
             continue
         # One item is not a bundle
-        if len(items) >= 2:  # noqa: PLR2004
+        if len(items) >= 2:
             return tuple(ast.unparse(i) for i in items)
     return None
 
@@ -3397,6 +3602,7 @@ def main() -> int:
     parameters = list(public_parameters())
     unnamed, loose, stale = offenders(parameters)
     misspellings, stale_spellings = misspelled(parameters)
+    scales, stale_scales = temperature_scales(parameters)
     constants, stale_constants = unitless_constants()
     rates, stale_rates = misnamed_rates(parameters)
     pressures, stale_pressures = ambient_pressure_names(parameters)
@@ -3407,9 +3613,11 @@ def main() -> int:
     axes, stale_axes = positional_function_axes()
     tuples, stale_tuples = tuple_returns()
     records, stale_records = positional_record_axes()
+    by_position, stale_by_position = positional_records()
     stale_keys = [
         *stale,
         *stale_spellings,
+        *stale_scales,
         *stale_constants,
         *stale_rates,
         *stale_pressures,
@@ -3420,11 +3628,13 @@ def main() -> int:
         *stale_axes,
         *stale_tuples,
         *stale_records,
+        *stale_by_position,
     ]
     if not (
         unnamed
         or loose
         or misspellings
+        or scales
         or constants
         or rates
         or pressures
@@ -3435,13 +3645,15 @@ def main() -> int:
         or axes
         or tuples
         or records
+        or by_position
         or stale_keys
     ):
         print(
             "Every public parameter and constant under the rule names its unit, "
             "in the one spelling the tree uses, and asks for it by name; every "
             "condition and every frequency or wavelength axis beside its values "
-            "is written by name, in a function and in a record a caller builds; "
+            "is written by name, in a function and in a record a caller builds, "
+            "and every field of such a record is written by name too; "
             "every name in decibels says the quantity it holds; every "
             "public function is named for what it returns, and answers several "
             "quantities as a record."
@@ -3472,6 +3684,13 @@ def main() -> int:
             "POSITIONAL with the reason."
         )
     _report_names(misspellings, constants)
+    if scales:
+        print(
+            "::error::a temperature is not in degrees Celsius, or an interval not in kelvin"
+        )
+        for entry, problem in sorted(scales):
+            dotted = ".".join(part for part in (entry.qualname, entry.name) if part)
+            print(f"  {dotted}: {problem}  <- {entry.where}")
     _report_closing(rates, pressures, pairs)
     _report_functions(functions)
     _report_levels(levels)
@@ -3479,6 +3698,7 @@ def main() -> int:
     _report_function_axes(axes)
     _report_tuple_returns(tuples)
     _report_record_axes(records)
+    _report_positional_records(by_position)
     for key in stale_keys:
         print(
             f"::error::an exemption at the top of scripts/check_parameter_units.py "

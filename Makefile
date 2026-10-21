@@ -297,7 +297,7 @@ raises-blocks:
 	$(PYTHON) scripts/check_raises_blocks.py
 
 # Every level is a ratio to an ISO 1683 reference value, and the package
-# publishes them once, in phonometry.metrology.ISO1683_REFERENCE_VALUES. This
+# publishes them once, in phonometry.metrology.REFERENCE_VALUES. This
 # fails on a reference value in src that is typed out again instead of read
 # from the table, and on one that differs from it without naming the document
 # it comes from. On the tree it was written against it found forty-three.
@@ -367,6 +367,17 @@ parameter-units:
 # parameter-units does.
 identifier-spelling:
 	$(PYTHON) scripts/check_identifier_spelling.py
+
+# A choice typed `str` takes any string a caller types, and a misspelling
+# surfaces only when the call runs, if at all. This holds every public
+# parameter and record field that the code treats as one of a fixed set of
+# strings (a validator, an `in` against strings, a lookup by key, two quoted
+# options in its docstring, or the same parameter handed on to one that does)
+# to a `Literal` of its options; a string open by its nature is listed with its
+# reason. Needs the package importable, for the same reason parameter-units
+# does.
+choice-literals:
+	$(PYTHON) scripts/check_choice_literals.py
 
 # A published table is shared by the whole process, and a dict behind a
 # `Mapping` annotation or a writeable array lets one caller change a printed
@@ -737,5 +748,5 @@ check: lint security test
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \
 	boundary-comparisons array-aliasing record-display \
-	conformance-rows conformance-vocabulary parameter-units identifier-spelling frozen-constants published-sources \
+	conformance-rows conformance-vocabulary parameter-units identifier-spelling choice-literals frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data catalogue-schema published-catalogues

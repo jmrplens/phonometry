@@ -43,7 +43,7 @@ exposes the rounded view through :attr:`AbsorptionUncertaintyResult.reported_exp
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -59,6 +59,10 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from matplotlib.axes import Axes
+
+    from ..._i18n import Language
+
+Condition = Literal["reproducibility", "repeatability"]
 
 __all__ = [
     "AbsorptionUncertaintyResult",
@@ -81,7 +85,7 @@ _REPEATABILITY_FACTOR = 0.6
 _REPRODUCIBILITY = "reproducibility"
 
 #: Measurement conditions selecting σR (reproducibility) or σr (repeatability).
-_CONDITIONS = ("reproducibility", "repeatability")
+_CONDITIONS: tuple[Condition, ...] = ("reproducibility", "repeatability")
 
 #: Table 1 (Clause 5): ``(m, n)`` for Formulae (1)/(2), keyed by one-third-octave
 #: midband frequency in Hz (63-5000). Transcribed digit-for-digit from
@@ -149,7 +153,7 @@ _COEFFICIENT_QUANTITIES = frozenset(
 )
 
 
-def _condition(condition: str) -> str:
+def _condition(condition: str) -> Condition:
     if condition not in _CONDITIONS:
         msg = f"'condition' must be one of {_CONDITIONS}; got {condition!r}."
         raise ValueError(msg)
@@ -210,8 +214,14 @@ class AbsorptionUncertaintyResult(OwnsArrays):
         per band.
     """
 
-    quantity: str
-    condition: str
+    quantity: Literal[
+        "absorption_coefficient",
+        "equivalent_area",
+        "practical_coefficient",
+        "weighted_coefficient",
+        "single_number_rating",
+    ]
+    condition: Condition
     frequencies: np.ndarray
     values: np.ndarray
     standard_uncertainty: np.ndarray
@@ -272,7 +282,7 @@ class AbsorptionUncertaintyResult(OwnsArrays):
         return np.asarray(self.values + self.expanded_uncertainty, dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the quantity with its ``±U`` uncertainty ribbon (band quantities).
 
@@ -309,8 +319,14 @@ def _band_uncertainty(
     *,
     owner: str,
     values_name: str,
-    quantity: str,
-    condition: str,
+    quantity: Literal[
+        "absorption_coefficient",
+        "equivalent_area",
+        "practical_coefficient",
+        "weighted_coefficient",
+        "single_number_rating",
+    ],
+    condition: Condition,
     coverage: float,
     band_kind: str,
 ) -> AbsorptionUncertaintyResult:
@@ -348,7 +364,7 @@ def sound_absorption_coefficient_uncertainty(
     alpha: float | Sequence[float] | np.ndarray,
     *,
     frequencies: float | Sequence[float] | np.ndarray,
-    condition: str = "reproducibility",
+    condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
     r"""Uncertainty of the ISO 354 sound absorption coefficient ``αs``
@@ -382,7 +398,7 @@ def equivalent_area_uncertainty(
     area: float | Sequence[float] | np.ndarray,
     *,
     frequencies: float | Sequence[float] | np.ndarray,
-    condition: str = "reproducibility",
+    condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
     r"""Uncertainty of the ISO 354 equivalent sound absorption area ``AT``
@@ -426,7 +442,7 @@ def practical_coefficient_uncertainty(
     alpha_p: float | Sequence[float] | np.ndarray,
     *,
     frequencies: float | Sequence[float] | np.ndarray,
-    condition: str = "reproducibility",
+    condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
     r"""Uncertainty of the ISO 11654 practical absorption coefficient ``αp``
@@ -460,8 +476,14 @@ def _single_number(
     value: float,
     u: float,
     *,
-    quantity: str,
-    condition: str,
+    quantity: Literal[
+        "absorption_coefficient",
+        "equivalent_area",
+        "practical_coefficient",
+        "weighted_coefficient",
+        "single_number_rating",
+    ],
+    condition: Condition,
     coverage: float,
 ) -> AbsorptionUncertaintyResult:
     k = absorption_coverage_factor(coverage)
@@ -480,7 +502,7 @@ def _single_number(
 def weighted_coefficient_uncertainty(
     alpha_w: float = 0.0,
     *,
-    condition: str = "reproducibility",
+    condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
     r"""Uncertainty of the ISO 11654 weighted absorption coefficient ``αw``
@@ -511,7 +533,7 @@ def weighted_coefficient_uncertainty(
 def single_number_rating_uncertainty(
     dl_alpha: float,
     *,
-    condition: str = "reproducibility",
+    condition: Condition = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
     r"""Uncertainty of the EN 1793-1 single-number rating ``DLα,NRD``

@@ -77,6 +77,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
 
 __all__ = [
@@ -172,7 +174,7 @@ class LaboratoryAirborneInsulationResult(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``R`` against the shifted ISO 717-1 reference curve.
 
@@ -195,9 +197,9 @@ class LaboratoryAirborneInsulationResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 10140-2 laboratory airborne-insulation report to a PDF.
 
@@ -298,7 +300,7 @@ class LaboratoryImpactInsulationResult(OwnsArrays):
                 raise ValueError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``Ln`` against the shifted ISO 717-2 reference curve.
 
@@ -320,9 +322,9 @@ class LaboratoryImpactInsulationResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 10140-3 laboratory impact-insulation report to a PDF.
 
@@ -373,9 +375,9 @@ def _render_iso10140(
     *,
     quantity: str,
     metadata: ReportMetadata | None,
-    engine: str,
+    engine: ReportEngine,
     verbose: bool,
-    language: str,
+    language: Language,
 ) -> str:
     """Validate the laboratory-report request and delegate to the renderer.
 

@@ -197,7 +197,7 @@ CabinInsulationResult(
     insulation: NDArray[np.float64],
     a_weighted_insulation: float | None,
     internal_noise_level: float | None,
-    method: str,
+    method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'],
     fraction: int,
 )
 ```
@@ -236,7 +236,7 @@ give $D'_p$, the laboratory method $D_p$.
 CabinInsulationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -274,7 +274,10 @@ The measurement is outside a condition ISO 11957 states.
 ## CabinUncertainty
 
 ```python
-CabinUncertainty(method: str, volume_ratio: float)
+CabinUncertainty(
+    method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'],
+    volume_ratio: float,
+)
 ```
 
 What clause 10 will and will not say about a measurement.
@@ -859,7 +862,7 @@ WeightedCabinInsulation(
     ctr: int,
     unfavorable_sum: float,
     frequencies: NDArray[np.float64],
-    method: str,
+    method: Literal['laboratory', 'in-situ-loudspeaker', 'in-situ-actual-noise'],
 )
 ```
 

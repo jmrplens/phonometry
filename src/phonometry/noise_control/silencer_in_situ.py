@@ -74,7 +74,7 @@ import math
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -97,6 +97,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from .._i18n import Language
+
+Quantity = Literal["transmission", "insertion"]
 
 __all__ = [
     "ISO11820_AIR_GAS_CONSTANT_J_KG_K",
@@ -218,9 +222,10 @@ DOWNSTREAM_DISTANCE_COEFFICIENTS: tuple[float, float] = (12.0, 10.0)
 VELOCITY_UNIFORMITY_TOLERANCE_PERCENT: float = 10.0
 
 InSituQuantity = Literal["transmission", "insertion"]
-SideSpace = Literal["duct", "diffuse_room", "non_diffuse_room", "open_space", "any"]
+#: What stands on one side of a silencer in situ (9.1.3, 9.1.4).
+Side = Literal["duct", "diffuse_room", "non_diffuse_room", "open_space"]
 
-_SIDES: tuple[str, ...] = (
+_SIDES: tuple[Side, ...] = (
     "duct",
     "diffuse_room",
     "non_diffuse_room",
@@ -239,7 +244,8 @@ _DUCT_WITH = "measurement cross-section in the duct with the silencer installed"
 _ABSORPTION_WITHOUT = "one-quarter of the absorption of the room without the silencer"
 _ABSORPTION_WITH = "one-quarter of the absorption of the room with the silencer"
 _ENVELOPING_OPEN_END = "measurement surface enveloping the open end of the silencer"
-_ANY_SIDE = "any duct, room or space"
+#: The source side of an insertion case, which is not part of the case.
+_ANY_SIDE: Final = "any"
 
 #: The three one-third-octave bands inside one octave, 9.1.5.
 _THIRDS_PER_OCTAVE = 3
@@ -273,9 +279,9 @@ class InstallationCase(RichDisplay):
     """
 
     number: int
-    source_side: str
-    receiver_side: str
-    quantity: str
+    source_side: Side | Literal["any"]
+    receiver_side: Side
+    quantity: Quantity
     source_area_rule: str
     receiver_area_rule: str
 
@@ -789,7 +795,7 @@ class SilencerInSituResult(OwnsArrays):
     area_term_db: NDArray[np.float64]
     field_correction_difference: NDArray[np.float64]
     loss: NDArray[np.float64]
-    quantity: str
+    quantity: Quantity
     case: InstallationCase | None
 
     @property
@@ -798,7 +804,7 @@ class SilencerInSituResult(OwnsArrays):
         return "D_ts" if self.quantity == "transmission" else "D_is"
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the level difference and the loss it becomes.
 
@@ -835,7 +841,7 @@ def _loss(
     receiver_area_m2: ArrayLike,
     field_correction_difference: ArrayLike,
     names: tuple[str, str],
-    quantity: str,
+    quantity: InSituQuantity,
     case: InstallationCase | None,
 ) -> SilencerInSituResult:
     """The body Equations (19) and (21) share.

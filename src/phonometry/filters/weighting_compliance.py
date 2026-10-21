@@ -41,7 +41,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Literal, cast
 
 import numpy as np
 
@@ -56,6 +56,11 @@ from .weighting import WeightingFilter, _runtime_frequency_response
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
+
+Edition = Literal["2013", "1979"]
+#: The weightings graded across the editions: A, C and Z (IEC 61672-1:2013
+#: Table 3), B (IEC 651 / ANSI S1.4) and AU (IEC 61012).
+GradedWeighting = Literal["A", "B", "C", "AU", "Z"]
 
 __all__ = [
     "WeightingComplianceResult",
@@ -507,7 +512,7 @@ class WeightingClassLimits(OwnsArrays):
 
 
 def weighting_class_limits(
-    weighting_class: int, *, edition: str = "2013"
+    weighting_class: int, *, edition: Edition = "2013"
 ) -> WeightingClassLimits:
     """Acceptance limits of one performance class of a weighting standard.
 
@@ -744,8 +749,8 @@ class WeightingComplianceResult(OwnsArrays):
 
     band_margins: tuple[Mapping[str, Any], ...]
     between_nominals: Mapping[str, float] | None
-    weighting: str
-    edition: str
+    weighting: GradedWeighting
+    edition: Edition
     fs: float
     n_sweep_points: int
 
@@ -902,7 +907,7 @@ def _margin_classes(band: Mapping[str, Any]) -> list[int]:
 
 
 def verify_weighting_class(
-    wf: WeightingFilter, *, n_sweep_points: int = 4096, edition: str = "2013"
+    wf: WeightingFilter, *, n_sweep_points: int = 4096, edition: Edition = "2013"
 ) -> WeightingComplianceResult:
     r"""Verify a frequency-weighting filter against its standard's tolerances.
 
@@ -1036,7 +1041,7 @@ def verify_weighting_class(
     return WeightingComplianceResult(
         band_margins=tuple(bands),
         between_nominals=between,
-        weighting=str(wf.weighting),
+        weighting=cast("GradedWeighting", wf.weighting),
         edition=edition,
         fs=float(wf.fs),
         n_sweep_points=require_count(n_sweep_points, "n_sweep_points", at_least=None),

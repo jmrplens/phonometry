@@ -218,7 +218,7 @@ def test_tone_burst_es_and_bad_language() -> None:
 
 def test_resampled_signal_es_and_bad_language() -> None:
     res = ph.signals.resample_signal(
-        ph.signals.noise_signal(FS, 0.2, seed=5), FS, fs_new=32000.0
+        ph.signals.noise_signal(FS, duration_s=0.2, seed=5), FS, fs_new=32000.0
     )
     ax = res.plot(language="es")
     assert "Remuestreo polifásico" in ax.get_title()

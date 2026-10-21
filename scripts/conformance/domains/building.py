@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import reference_data as ref
@@ -1627,10 +1627,10 @@ def _chk_iso10140_5_table_i1() -> Outcome:
     loss = ph.building.RAINFALL_REFERENCE_LOSS_FACTOR_DB
     level = ph.building.RAINFALL_REFERENCE_INTENSITY_LEVELS
     matching = total = 0
-    for band, eta_ref_db, l_ic_ref in ref.ISO10140_5_TABLE_I1:
+    for band, eta_ref_db, l_ic_reference in ref.ISO10140_5_TABLE_I1:
         total += 2
         matching += band in loss and abs(loss[band] - eta_ref_db) <= 1e-9
-        matching += band in level and abs(level[band] - l_ic_ref) <= 1e-9
+        matching += band in level and abs(level[band] - l_ic_reference) <= 1e-9
     return count(matching, total, subject="printed cells")
 
 
@@ -2362,7 +2362,12 @@ def _chk_hopkins_wall_tie_resonance() -> Outcome:
     "Dynamic stiffness of four wall ties (butterfly, double-triangle, twist)",
 )
 def _chk_hopkins_wall_tie_table() -> Outcome:
-    printed = {
+    printed: dict[
+        Literal[
+            "butterfly", "double_triangle", "vertical_twist", "vertical_twist_100mm"
+        ],
+        tuple[float, float],
+    ] = {
         "butterfly": (0.050, 1.7e6),
         "double_triangle": (0.050, 16.1e6),
         "vertical_twist": (0.050, 94.0e6),
@@ -3117,7 +3122,7 @@ def _chk_iso10846_4_rigid_block() -> Outcome:
     a = force / 25.0
     em = ph.vibration.effective_blocking_mass(
         frequencies=f,
-        force=force,
+        force_n=force,
         first_acceleration_m_s2=a,
         second_acceleration_m_s2=a,
         blocking_mass=25.0,
@@ -3138,7 +3143,7 @@ def _chk_iso10846_4_f3() -> Outcome:
     m_eff = m2 * (1.0 + (f / fc) ** 2)
     em = ph.vibration.effective_blocking_mass(
         frequencies=f,
-        force=m_eff * ones,
+        force_n=m_eff * ones,
         first_acceleration_m_s2=ones,
         second_acceleration_m_s2=ones,
         blocking_mass=m2,

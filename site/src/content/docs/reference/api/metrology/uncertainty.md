@@ -194,7 +194,7 @@ Result of the Monte Carlo method (Guide 98-3-1, Supplement 1).
 MonteCarloResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -215,9 +215,10 @@ phonometry[plot]`); returns the `Axes`.
 
 ```python
 Quantity(
+    *,
     value: float,
     uncertainty: float,
-    distribution: str = 'gaussian',
+    distribution: Literal['gaussian', 'rectangular', 'triangular', 'u-shaped'] = 'gaussian',
     dof: float = inf,
     name: str = '',
 )
@@ -370,7 +371,7 @@ Coverage factor `k` and expanded uncertainty $U = k u_\mathrm{c}$.
 UncertaintyResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

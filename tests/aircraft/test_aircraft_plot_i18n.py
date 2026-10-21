@@ -10,12 +10,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pytest
 
-from phonometry.aircraft.atmospheric_absorption import sae_band_attenuation
+from phonometry.aircraft.atmospheric_absorption import band_attenuation_arp5534
 
 
 def _result() -> object:
     f = np.array([100.0, 1000.0, 4000.0, 8000.0])
-    return sae_band_attenuation(
+    return band_attenuation_arp5534(
         f, 2000.0, temperature_c=25.0, relative_humidity_percent=70.0
     )
 

@@ -51,11 +51,11 @@ from typing import TYPE_CHECKING, NamedTuple
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 
-from check_solid_agreement import normalised  # noqa: E402
+from check_solid_agreement import normalised
 
-from phonometry.environment.propagation import PUBLISHED_GROUND_SURFACES  # noqa: E402
-from phonometry.materials.absorbers import PUBLISHED_POROUS_MATERIALS  # noqa: E402
-from phonometry.solids import PUBLISHED_SOLIDS  # noqa: E402
+from phonometry.environment.propagation import PUBLISHED_GROUND_SURFACES
+from phonometry.materials.absorbers import PUBLISHED_POROUS_MATERIALS
+from phonometry.solids import PUBLISHED_SOLIDS
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping

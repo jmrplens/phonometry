@@ -658,7 +658,7 @@ def test_fdtd_domain_preview() -> None:
         edge_impedance={"top": 413.0},
         obstacle_mask=mask,
     )
-    sim.add_source(GaussianPulse(8, 20, half_width_s=1e-3))
+    sim.add_source(GaussianPulse(ix=8, iy=20, half_width_s=1e-3))
     assert sim.sponge_width == 6
     assert sim.sponge_sides == ("left", "right")
     assert set(sim.edge_impedance) == {"top"}

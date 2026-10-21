@@ -86,7 +86,7 @@ from __future__ import annotations
 import warnings
 from dataclasses import dataclass
 from itertools import pairwise
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
@@ -94,6 +94,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from .reference_sound_source import ReferenceSourceCalibration
 
 from .._internal.boundary import settled
@@ -165,7 +166,7 @@ class InSituSoundPowerResult(OwnsArrays):
     ``'energy'`` the sound energy level ``LJ`` (Eq. 19 or 20) in
     ``sound_energy_level`` with ``sound_power_level`` all ``NaN``. Both are
     at the meteorological conditions of the test; the properties
-    :attr:`sound_power_level_ref` and :attr:`sound_energy_level_ref` add the
+    :attr:`sound_power_level_at_reference_conditions` and :attr:`sound_energy_level_at_reference_conditions` add the
     Annex C correction ``c2`` (Eq. C.1, C.3).
 
     ``mean_source_level`` is the mean corrected level of the source under
@@ -180,9 +181,9 @@ class InSituSoundPowerResult(OwnsArrays):
     ``background_correction`` is ``K1i`` at each microphone position and band
     for the source under test (Eq. 7; for ``N`` events measured one at a
     time it is the per-position shift the per-event corrections of Eq. 13
-    produce in the mean of Eq. 15), ``background_correction_ref`` the same for
+    produce in the mean of Eq. 15), ``reference_background_correction`` the same for
     the reference source at each location (Eq. 9, 10).
-    ``background_margin_db`` and ``background_margin_ref_db`` are the smallest
+    ``background_margin_db`` and ``reference_background_margin_db`` are the smallest
     margin over the background per band, of the source under test over its
     positions (and events) and of the reference source over its locations and
     positions, ``NaN`` where no background was measured; the two flags below
@@ -225,9 +226,9 @@ class InSituSoundPowerResult(OwnsArrays):
     reference_levels: np.ndarray
     reference_power_level: np.ndarray
     background_correction: np.ndarray
-    background_correction_ref: np.ndarray
+    reference_background_correction: np.ndarray
     background_margin_db: np.ndarray
-    background_margin_ref_db: np.ndarray
+    reference_background_margin_db: np.ndarray
     c2: float
     excess_levels: np.ndarray | None
     directivity_range_db: float | None
@@ -235,7 +236,7 @@ class InSituSoundPowerResult(OwnsArrays):
     coverage_factor: float
     sound_power_level_a: float
     sound_energy_level_a: float
-    quantity: str
+    quantity: Literal["power", "energy"]
 
     def __post_init__(self) -> None:
         """Reject a result whose per-band, per-position or per-location
@@ -271,9 +272,9 @@ class InSituSoundPowerResult(OwnsArrays):
             reference_levels=2,
             reference_power_level=1,
             background_correction=2,
-            background_correction_ref=3,
+            reference_background_correction=3,
             background_margin_db=1,
-            background_margin_ref_db=1,
+            reference_background_margin_db=1,
         )
         require_same_length(
             self,
@@ -285,17 +286,17 @@ class InSituSoundPowerResult(OwnsArrays):
             ("reference_levels", 1),
             "reference_power_level",
             ("background_correction", 1),
-            ("background_correction_ref", 2),
+            ("reference_background_correction", 2),
             "background_margin_db",
-            "background_margin_ref_db",
+            "reference_background_margin_db",
         )
         owner = type(self).__name__
         require_equal_counts(
             owner,
             {
                 "reference_levels": int(np.shape(self.reference_levels)[0]),
-                "background_correction_ref": int(
-                    np.shape(self.background_correction_ref)[0]
+                "reference_background_correction": int(
+                    np.shape(self.reference_background_correction)[0]
                 ),
             },
             axis="reference source location",
@@ -304,8 +305,8 @@ class InSituSoundPowerResult(OwnsArrays):
             owner,
             {
                 "background_correction": int(np.shape(self.background_correction)[0]),
-                "background_correction_ref": int(
-                    np.shape(self.background_correction_ref)[1]
+                "reference_background_correction": int(
+                    np.shape(self.reference_background_correction)[1]
                 ),
             },
             axis="microphone position",
@@ -320,7 +321,7 @@ class InSituSoundPowerResult(OwnsArrays):
         """
         return np.asarray(
             _margin_met(self.background_margin_db)
-            & _margin_met(self.background_margin_ref_db),
+            & _margin_met(self.reference_background_margin_db),
             dtype=bool,
         )
 
@@ -335,7 +336,7 @@ class InSituSoundPowerResult(OwnsArrays):
         return np.asarray(
             measured
             & ~_margin_met(self.background_margin_db)
-            & _margin_met(self.background_margin_ref_db),
+            & _margin_met(self.reference_background_margin_db),
             dtype=bool,
         )
 
@@ -367,21 +368,21 @@ class InSituSoundPowerResult(OwnsArrays):
         return float(self.coverage_factor * self.sigma_tot)
 
     @property
-    def sound_power_level_ref(self) -> np.ndarray:
+    def sound_power_level_at_reference_conditions(self) -> np.ndarray:
         """``LW`` under the reference meteorological conditions, ``LW + C2``
         (ISO 3747:2010 Annex C, Eq. C.1); ``NaN`` for an energy determination.
         """
         return np.asarray(self.sound_power_level + self.c2, dtype=np.float64)
 
     @property
-    def sound_energy_level_ref(self) -> np.ndarray:
+    def sound_energy_level_at_reference_conditions(self) -> np.ndarray:
         """``LJ`` under the reference meteorological conditions, ``LJ + C2``
         (ISO 3747:2010 Annex C, Eq. C.3); ``NaN`` for a power determination.
         """
         return np.asarray(self.sound_energy_level + self.c2, dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the determined spectrum with the A-weighted total annotated.
 
@@ -440,7 +441,7 @@ def static_pressure_from_altitude(altitude: float) -> float:
 
 
 def excess_sound_pressure_level(
-    level: ArrayLike, lw_ref: ArrayLike, distance: ArrayLike
+    level: ArrayLike, reference_sound_power_levels: ArrayLike, distance: ArrayLike
 ) -> np.ndarray | float:
     r"""Excess of sound pressure level over the free field at a distance from
     the reference sound source (ISO 3747:2010 Annex A, Eq. A.1).
@@ -461,7 +462,7 @@ def excess_sound_pressure_level(
 
     :param level: Sound pressure level(s) ``Lp(RSS),r`` measured at distance
         ``r`` from the reference sound source, in decibels.
-    :param lw_ref: Calibrated sound power level ``LW(RSS)`` of the reference
+    :param reference_sound_power_levels: Calibrated sound power level ``LW(RSS)`` of the reference
         source, in decibels (per band, or A-weighted).
     :param distance: Distance(s) ``r`` from the microphone to the reference
         source, in metres.
@@ -472,9 +473,13 @@ def excess_sound_pressure_level(
         other.
     """
     lp = _as_float64(level, "level")
-    lw = _as_float64(lw_ref, "lw_ref")
+    lw = _as_float64(reference_sound_power_levels, "reference_sound_power_levels")
     r = _as_float64(distance, "distance")
-    for arr, name in ((lp, "level"), (lw, "lw_ref"), (r, "distance")):
+    for arr, name in (
+        (lp, "level"),
+        (lw, "reference_sound_power_levels"),
+        (r, "distance"),
+    ):
         if arr.size == 0:
             msg = f"'{name}' must not be empty."
             raise ValueError(msg)
@@ -482,7 +487,7 @@ def excess_sound_pressure_level(
         msg = "'level' must be finite."
         raise ValueError(msg)
     if not np.all(np.isfinite(lw)):
-        msg = "'lw_ref' must be finite."
+        msg = "'reference_sound_power_levels' must be finite."
         raise ValueError(msg)
     if not np.all(np.isfinite(r)) or np.any(r <= 0.0):
         msg = "'distance' must be finite and positive."
@@ -491,7 +496,7 @@ def excess_sound_pressure_level(
         np.broadcast_shapes(lp.shape, lw.shape, r.shape)
     except ValueError as exc:
         msg = (
-            "'level', 'lw_ref' and 'distance' must broadcast against each "
+            "'level', 'reference_sound_power_levels' and 'distance' must broadcast against each "
             f"other; got shapes {lp.shape}, {lw.shape} and {r.shape}."
         )
         raise ValueError(msg) from exc
@@ -579,31 +584,37 @@ def _checked_frequencies(frequencies: ArrayLike, n_bands: int) -> np.ndarray:
 
 
 def _reference_grids(
-    levels_ref: ArrayLike, lw_ref: ArrayLike, n_positions: int, n_bands: int
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike,
+    n_positions: int,
+    n_bands: int,
 ) -> tuple[np.ndarray, np.ndarray]:
     """The reference-source levels as ``(m, n, bands)`` and its calibrated
     power as ``(m, bands)``, for one location (2D levels, 1D power) or ``m``.
     """
-    ref = _finite_grid(levels_ref, "levels_ref", (2, 3))
+    ref = _finite_grid(reference_levels, "reference_levels", (2, 3))
+    # The number is a count of array axes, not a quantity.
     if ref.ndim == 2:  # noqa: PLR2004
         ref = ref[None, :, :]
     if ref.shape[1:] != (n_positions, n_bands):
         msg = (
-            "'levels_ref' must be measured at the same microphone positions "
+            "'reference_levels' must be measured at the same microphone positions "
             f"and bands as 'levels' ({n_positions} positions, {n_bands} bands), "
             "as (positions, bands) or (locations, positions, bands)."
         )
         raise ValueError(msg)
     m = ref.shape[0]
-    power = _finite_grid(lw_ref, "lw_ref", (1, 2))
+    power = _finite_grid(
+        reference_sound_power_levels, "reference_sound_power_levels", (1, 2)
+    )
     if power.ndim == 1:
         if power.shape != (n_bands,):
-            msg = f"'lw_ref' must carry one value per band ({n_bands})."
+            msg = f"'reference_sound_power_levels' must carry one value per band ({n_bands})."
             raise ValueError(msg)
         power = np.broadcast_to(power, (m, n_bands)).copy()
     elif power.shape != (m, n_bands):
         msg = (
-            "'lw_ref' must be one spectrum, or one per reference source "
+            "'reference_sound_power_levels' must be one spectrum, or one per reference source "
             f"location ({m} locations, {n_bands} bands)."
         )
         raise ValueError(msg)
@@ -633,7 +644,7 @@ def _background_grid(
     return bg
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class GradeConditions(OwnsArrays):
     r"""The two conditions Table 2 puts on engineering grade 2.
 
@@ -768,10 +779,10 @@ class _Comparison:
     clauses 8.5 and 9 read the same for power and for energy.
     """
 
-    levels_ref: ArrayLike
-    lw_ref: ArrayLike | ReferenceSourceCalibration
+    reference_levels: ArrayLike
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration
     frequencies: ArrayLike
-    background_levels_ref: ArrayLike | None
+    reference_background_levels: ArrayLike | None
     temperature_c: float
     static_pressure_kpa: float
     conditions: GradeConditions | None
@@ -790,6 +801,7 @@ def _event_shape(arr: np.ndarray, n_events: int | None) -> tuple[bool, int, int,
 
     :return: ``(one_at_a_time, n_positions, n_events, n_bands)``.
     """
+    # The number is a count of array axes, not a quantity.
     one_at_a_time = arr.ndim == 3  # noqa: PLR2004
     if one_at_a_time:
         if n_events is not None:
@@ -857,7 +869,7 @@ def _event_background(
 
 def _determine(
     *,
-    quantity: str,
+    quantity: Literal["power", "energy"],
     mean_source: np.ndarray,
     background_correction: np.ndarray,
     margin_source: np.ndarray,
@@ -871,8 +883,10 @@ def _determine(
     n_positions, n_bands = background_correction.shape
     freqs = _checked_frequencies(comparison.frequencies, n_bands)
     ref, power = _reference_grids(
-        comparison.levels_ref,
-        _reference_power_levels(comparison.lw_ref, freqs, fraction=1),
+        comparison.reference_levels,
+        _reference_power_levels(
+            comparison.reference_sound_power_levels, freqs, fraction=1
+        ),
         n_positions,
         n_bands,
     )
@@ -880,8 +894,8 @@ def _determine(
     # One background reading serves both sources (7.5): the reference-source
     # measurement takes the source's background unless it brought its own.
     bg_ref = _background_grid(
-        comparison.background_levels_ref,
-        "background_levels_ref",
+        comparison.reference_background_levels,
+        "reference_background_levels",
         n_positions,
         n_bands,
     )
@@ -917,9 +931,9 @@ def _determine(
         reference_levels=np.asarray(per_location, dtype=np.float64),
         reference_power_level=np.asarray(ref_power, dtype=np.float64),
         background_correction=np.asarray(background_correction, dtype=np.float64),
-        background_correction_ref=np.asarray(k1_ref, dtype=np.float64),
+        reference_background_correction=np.asarray(k1_ref, dtype=np.float64),
         background_margin_db=np.asarray(margin_source, dtype=np.float64),
-        background_margin_ref_db=np.asarray(margin_ref, dtype=np.float64),
+        reference_background_margin_db=np.asarray(margin_ref, dtype=np.float64),
         c2=_c2_correction(comparison.temperature_c, comparison.static_pressure_kpa),
         excess_levels=excess,
         directivity_range_db=directivity,
@@ -933,12 +947,12 @@ def _determine(
 
 def sound_power_in_situ(
     levels: ArrayLike,
-    levels_ref: ArrayLike,
-    lw_ref: ArrayLike | ReferenceSourceCalibration,
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
     background_levels: ArrayLike | None = None,
-    background_levels_ref: ArrayLike | None = None,
+    reference_background_levels: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
@@ -962,17 +976,17 @@ def sound_power_in_situ(
        + \overline{L_{p(\mathrm{ST})}} \tag{Eq. 11}
 
     at the meteorological conditions of the test; the returned ``c2`` and
-    the ``sound_power_level_ref`` property carry it to the reference
+    the ``sound_power_level_at_reference_conditions`` property carry it to the reference
     conditions of Annex C, and ``sound_power_level_a`` is the Annex D total.
 
     :param levels: Measured (uncorrected) octave-band time-averaged levels
         ``L'pi(ST)`` of the source under test, ``(n, bands)``, one row per
         microphone position, in decibels.
-    :param levels_ref: The same for the reference sound source, ``L'pi(RSS)``
+    :param reference_levels: The same for the reference sound source, ``L'pi(RSS)``
         already corrected for speed, temperature and static pressure per its
         manufacturer but not for background: ``(n, bands)`` for one
         location, or ``(m, n, bands)`` for ``m`` locations (Eq. 10).
-    :param lw_ref: Calibrated octave-band sound power level ``LW(RSS)`` of the
+    :param reference_sound_power_levels: Calibrated octave-band sound power level ``LW(RSS)`` of the
         reference source, ``(bands,)``, or ``(m, bands)`` when each location
         was calibrated in its own similar position (Eq. 12), in decibels; or
         the :class:`~phonometry.emission.ReferenceSourceCalibration` of ISO
@@ -988,7 +1002,7 @@ def sound_power_in_situ(
         leaves ``background_requirement_met`` ``False`` in every band, since
         7.5 has the background measured at each position and 8.1 needs the
         margin to declare the measurement valid.
-    :param background_levels_ref: Background for the reference-source
+    :param reference_background_levels: Background for the reference-source
         measurement, same shapes; ``None`` reuses ``background_levels``,
         since the procedure takes one background reading (7.5).
     :param temperature_c: Air temperature at the test, in degrees Celsius.
@@ -1014,7 +1028,7 @@ def sound_power_in_situ(
         interval (default), 1,6 for a one-sided comparison with a limit.
     :return: :class:`InSituSoundPowerResult` with ``quantity='power'``.
     :raises ValueError: if ``levels`` is not a finite ``(n, bands)`` array,
-        ``levels_ref``, ``lw_ref`` or either background does not match it,
+        ``reference_levels``, ``reference_sound_power_levels`` or either background does not match it,
         ``frequencies`` are not the octave centres of Table D.1,
         ``temperature_c`` or ``static_pressure_kpa`` is out of range,
         ``conditions.excess_levels`` is supplied and is not one finite value
@@ -1041,10 +1055,10 @@ def sound_power_in_situ(
         margin_source=margin,
         background_levels=bg,
         comparison=_Comparison(
-            levels_ref=levels_ref,
-            lw_ref=lw_ref,
+            reference_levels=reference_levels,
+            reference_sound_power_levels=reference_sound_power_levels,
             frequencies=frequencies,
-            background_levels_ref=background_levels_ref,
+            reference_background_levels=reference_background_levels,
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
             conditions=conditions,
@@ -1056,13 +1070,13 @@ def sound_power_in_situ(
 
 def sound_energy_in_situ(
     event_levels: ArrayLike,
-    levels_ref: ArrayLike,
-    lw_ref: ArrayLike | ReferenceSourceCalibration,
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
     n_events: int | None = None,
     background_levels: ArrayLike | None = None,
-    background_levels_ref: ArrayLike | None = None,
+    reference_background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -1095,9 +1109,9 @@ def sound_energy_in_situ(
         levels ``L'Ei,q(ST)`` as ``(n, N, bands)``, or ``L'Ei,N(ST)`` of one
         measurement encompassing ``n_events`` events as ``(n, bands)``, in
         decibels.
-    :param levels_ref: Time-averaged levels of the reference sound source,
+    :param reference_levels: Time-averaged levels of the reference sound source,
         ``(n, bands)`` or ``(m, n, bands)``, as in :func:`sound_power_in_situ`.
-    :param lw_ref: Calibrated sound power level of the reference source,
+    :param reference_sound_power_levels: Calibrated sound power level of the reference source,
         ``(bands,)`` or ``(m, bands)``, in decibels, or its
         :class:`~phonometry.emission.ReferenceSourceCalibration`, as for
         :func:`sound_power_in_situ`.
@@ -1108,7 +1122,7 @@ def sound_energy_in_situ(
         ``Lpi(B)``, ``(n, bands)`` or ``(bands,)``, in decibels; ``None``
         applies no correction, warns, and leaves
         ``background_requirement_met`` ``False`` in every band (7.5, 8.1).
-    :param background_levels_ref: Background for the reference-source
+    :param reference_background_levels: Background for the reference-source
         measurement; ``None`` reuses ``background_levels`` (7.5).
     :param integration_time: The integration time ``T`` of the event
         measurement, in seconds. ``None`` applies Eq. (14) as printed,
@@ -1163,10 +1177,10 @@ def sound_energy_in_situ(
         margin_source=margin,
         background_levels=bg,
         comparison=_Comparison(
-            levels_ref=levels_ref,
-            lw_ref=lw_ref,
+            reference_levels=reference_levels,
+            reference_sound_power_levels=reference_sound_power_levels,
             frequencies=frequencies,
-            background_levels_ref=background_levels_ref,
+            reference_background_levels=reference_background_levels,
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
             conditions=conditions,

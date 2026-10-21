@@ -33,7 +33,7 @@ them rather than inventing a number.
 from __future__ import annotations
 
 import math
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, Literal, overload
 
 import numpy as np
 
@@ -47,6 +47,9 @@ from ._state import Fluid
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
+
+#: The four sound-speed equations of sea water.
+SoundSpeedModel = Literal["unesco", "del_grosso", "mackenzie", "medwin"]
 
 __all__ = [
     "depth_to_absolute_pressure_pa",
@@ -255,7 +258,7 @@ def sea_water_sound_speed(
     salinity_psu: float,
     depth_m: float,
     *,
-    model: str = ...,
+    model: SoundSpeedModel = ...,
     latitude_deg: float = ...,
 ) -> float: ...
 
@@ -266,7 +269,7 @@ def sea_water_sound_speed(
     salinity_psu: ArrayLike,
     depth_m: ArrayLike,
     *,
-    model: str = ...,
+    model: SoundSpeedModel = ...,
     latitude_deg: float = ...,
 ) -> float | NDArray[np.float64]: ...
 
@@ -276,7 +279,7 @@ def sea_water_sound_speed(
     salinity_psu: ArrayLike,
     depth_m: ArrayLike,
     *,
-    model: str = "unesco",
+    model: SoundSpeedModel = "unesco",
     latitude_deg: float = 45.0,
 ) -> float | NDArray[np.float64]:
     """Speed of sound in sea water, in metres per second.
@@ -458,7 +461,7 @@ def sea_water(
     salinity_psu: float = 35.0,
     depth_m: float = 0.0,
     latitude_deg: float = 45.0,
-    sound_speed_model: str = "unesco",
+    sound_speed_model: SoundSpeedModel = "unesco",
 ) -> Fluid:
     """Sea water at one point of the ocean.
 

@@ -145,7 +145,7 @@ inverse-distance law (IEC 61094-3:2016 6.5).
 AcousticCenter.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -506,7 +506,7 @@ the attenuation.
 FreeFieldArrangementCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -600,7 +600,7 @@ Built by [`free_field_parameter_uncertainty`](/phonometry/reference/api/metrolog
 FreeFieldParameterUncertainty.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -735,7 +735,7 @@ depend on $c$ because Step 4 divides by it.
 ReciprocityAirAttenuation.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

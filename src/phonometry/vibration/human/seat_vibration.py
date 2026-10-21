@@ -66,6 +66,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
+
 __all__ = [
     "ACTIVE_DAMPING_TEST_MASS_KG",
     "DAMPING_TEST_MASS_KG",
@@ -288,7 +290,7 @@ class SeatTransmissionResult(RichDisplay):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the runs, their means and the SEAT factor between them.
 

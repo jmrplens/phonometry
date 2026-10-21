@@ -60,7 +60,7 @@ import math
 import warnings
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 import numpy as np
 
@@ -75,12 +75,14 @@ from .._internal.validation import (
     require_scalar,
 )
 from .._internal.warnings import PhonometryWarning
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping, Sequence
 
     from numpy.typing import ArrayLike, NDArray
+
+Coefficient = Literal["Cv", "Kv"]
 
 __all__ = [
     "AERODYNAMIC_A_WEIGHTING_DB",
@@ -257,7 +259,7 @@ AERODYNAMIC_A_WEIGHTING_DB = (
 
 #: The reference sound power of NOTE 5 to Clause 4, in W: the 1 pW of
 #: ISO 1683:2015 Table 1.
-_REFERENCE_SOUND_POWER_W = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
+_REFERENCE_SOUND_POWER_W = REFERENCE_VALUES["gas"]["sound_power"].value
 
 #: Equation (18)'s leading coefficient, which carries the reference pressure
 #: and the pipe geometry together.
@@ -308,7 +310,7 @@ class ValveNoiseWarning(PhonometryWarning):
     """A valve read outside the conditions IEC 60534-8-3 prints for it."""
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RegimeBoundaries(RichDisplay):
     r"""The four pressure ratios that cut Clause 5.2 into five regimes.
 
@@ -475,7 +477,7 @@ def jet_diameter_m(
     style_modifier: float,
     pressure_recovery: float,
     *,
-    coefficient: str = "Cv",
+    coefficient: Coefficient = "Cv",
 ) -> float:
     r"""The jet diameter of Equation (9).
 
@@ -843,7 +845,9 @@ def pipe_transmission_loss(
     return np.asarray(loss - _damping_factor(outlet), dtype=np.float64)
 
 
-def last_stage_flow_coefficient(total_area: float, *, coefficient: str = "Cv") -> float:
+def last_stage_flow_coefficient(
+    total_area: float, *, coefficient: Coefficient = "Cv"
+) -> float:
     r"""Equation (27): the flow coefficient of the last stage, from its area.
 
     .. math::
@@ -888,7 +892,7 @@ class MultistageConditions(RichDisplay):
     flow_coefficient: float
     stagnation_pressure_pa: float
     stagnation_density: float
-    equation: str
+    equation: Literal["28a", "28b", "28c"]
 
 
 def multistage_trim_conditions(
@@ -956,6 +960,7 @@ def multistage_trim_conditions(
         raise ValueError(msg)
 
     ratio = capacity / last
+    equation: Literal["28a", "28b", "28c"]
     if p1 / p2 >= _STAGNATION_BRANCH_RATIO:
         pressure = math.sqrt(
             (p1 * capacity / (_STAGNATION_COEFFICIENT * last)) ** 2 + p2**2
@@ -981,7 +986,7 @@ def multiple_passage_jet_diameter(
     passage_length: float,
     passage_diameter_m: float,
     *,
-    coefficient: str = "Cv",
+    coefficient: Coefficient = "Cv",
 ) -> float:
     r"""Equation (26): the jet diameter of a single-stage, many-passage trim.
 
@@ -1092,7 +1097,7 @@ _EFFICIENCY_CORRECTION_UNITS: Mapping[str, str] = MappingProxyType(
 )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class Expander(RichDisplay):
     r"""The transition piece downstream of the valve (Clause 7).
 
@@ -1150,7 +1155,7 @@ class ExpanderNoise(OwnsArrays):
     band_internal_level: NDArray[np.float64]
 
 
-def expander_noise(  # noqa: PLR0913
+def expander_noise(
     frequencies: NDArray[np.float64],
     *,
     mass_flow: float,
@@ -1452,7 +1457,7 @@ def _third_octave_bands() -> NDArray[np.float64]:
     return np.asarray(normalized_frequencies(3), dtype=np.float64)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class GasStream(RichDisplay):
     r"""The gas and the operating point, which Clause 5.1 reads first.
 
@@ -1475,7 +1480,7 @@ class GasStream(RichDisplay):
     molar_mass_kg_kmol: float
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ValveTrim(RichDisplay):
     r"""The valve, at the travel being examined.
 
@@ -1502,10 +1507,10 @@ class ValveTrim(RichDisplay):
     outlet_diameter_m: float
     efficiency_correction: float
     strouhal_number: float
-    coefficient: str = "Cv"
+    coefficient: Coefficient = "Cv"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class DownstreamPipe(RichDisplay):
     r"""The pipe the noise actually comes out of, and what surrounds it.
 
@@ -1525,7 +1530,6 @@ class DownstreamPipe(RichDisplay):
     internal_diameter_m: float
     wall_thickness_m: float
     density: float
-    _: KW_ONLY
     speed_of_sound: float = PIPE_SPEED_OF_SOUND_M_S
     air_sound_speed: float = AIR_SPEED_OF_SOUND_M_S
     atmospheric_pressure_pa: float = STANDARD_ATMOSPHERE_PA

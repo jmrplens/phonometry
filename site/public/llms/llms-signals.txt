@@ -283,7 +283,7 @@ calibrator = np.sqrt(2) * np.sin(2 * np.pi * 1000 * np.arange(3 * fs) / fs)
 
 # "Street" measurement: 10 s of pink background noise plus a 1 s horn-like
 #   1 kHz event, so the statistical levels have something to separate.
-recording = signals.noise_signal(fs, 10.0, color="pink", rms=0.02, seed=7)
+recording = signals.noise_signal(fs, duration_s=10.0, color="pink", rms=0.02, seed=7)
 recording[4 * fs : 5 * fs] += 0.2 * np.sqrt(2) * np.sin(
     2 * np.pi * 1000 * np.arange(fs) / fs
 )

@@ -128,6 +128,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from .._internal.types import BandFraction
 
 from .._internal.boundary import settled, settled_net_share, settled_ratio
@@ -144,7 +145,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 from ._shared import SoundPowerWarning, _a_weighting_corrections
 from .intensity import (
     _F4_NON_POSITIVE,
@@ -169,9 +170,9 @@ __all__ = [
 ]
 
 #: Reference sound power, in watts (clause 3.6.3; ISO 1683:2015 Table 1).
-_W0 = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
+_W0 = REFERENCE_VALUES["gas"]["sound_power"].value
 #: Reference sound intensity, in W/m^2 (clause 3.5; ISO 1683:2015 Table 1).
-_I0 = ISO1683_REFERENCE_VALUES["gas"]["sound_intensity"].value
+_I0 = REFERENCE_VALUES["gas"]["sound_intensity"].value
 
 #: The three accuracy grades of ISO 9614-1, in the library's shared spelling.
 #: ``"precision"`` is grade 1, ``"engineering"`` grade 2 and ``"survey"``
@@ -1259,7 +1260,7 @@ class DiscretePointIntensityResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the LW spectrum; bands outside the method are hatched.
 

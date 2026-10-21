@@ -54,6 +54,7 @@ from ._layout import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..emission.declaration import NoiseEmissionDeclaration
     from .metadata import ReportMetadata
 
@@ -72,7 +73,7 @@ _MAX_MODE_COLUMNS = 6
 def _basis(
     declaration: NoiseEmissionDeclaration,
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """The standard-basis line: ISO 4871:1996 plus the basic emission standard."""
     standards = list(declaration.basic_standards)
@@ -90,7 +91,7 @@ def _basis(
     )
 
 
-def _footnote(declaration: NoiseEmissionDeclaration, language: str = "en") -> str:
+def _footnote(declaration: NoiseEmissionDeclaration, language: Language = "en") -> str:
     """The clause-5 b determination footnote (noise test code + basic standards)."""
     standards = ", ".join(html.escape(s) for s in declaration.basic_standards)
     code = (
@@ -117,7 +118,7 @@ def _footnote(declaration: NoiseEmissionDeclaration, language: str = "en") -> st
     return t("Values determined in accordance with ISO 4871:1996.", language)
 
 
-def _fmt_level(value: float, language: str = "en") -> str:
+def _fmt_level(value: float, language: Language = "en") -> str:
     """A declared level, rounded to the nearest decibel (ISO 4871 3.15/3.16)."""
     # Reuse the model's halves-up rounding so the printed value matches the
     # declared quantity exactly (Python's round() is round-half-to-even).
@@ -127,7 +128,7 @@ def _fmt_level(value: float, language: str = "en") -> str:
 
 
 def _dual_rows(
-    declaration: NoiseEmissionDeclaration, language: str = "en"
+    declaration: NoiseEmissionDeclaration, language: Language = "en"
 ) -> list[tuple[str, list[str]]]:
     """Dual-number value rows: (label, per-mode cells) in ISO 4871 Annex B order."""
     modes = list(declaration.modes)
@@ -173,7 +174,7 @@ def _dual_rows(
 
 
 def _single_rows(
-    declaration: NoiseEmissionDeclaration, language: str = "en"
+    declaration: NoiseEmissionDeclaration, language: Language = "en"
 ) -> list[tuple[str, list[str]]]:
     """Single-number value rows: the declared L_WAd (and L_pAd) per mode (3.15)."""
     modes = list(declaration.modes)
@@ -210,14 +211,14 @@ def _single_rows(
     return rows
 
 
-def _emission_cell(value: float | None, language: str = "en") -> str:
+def _emission_cell(value: float | None, language: Language = "en") -> str:
     """A per-mode emission-pressure cell, or an en dash when not declared."""
     if value is None:
         return _NOT_DECLARED
     return _fmt_level(value, language)
 
 
-def _emission_declared_cell(value: int | None, language: str = "en") -> str:
+def _emission_declared_cell(value: int | None, language: Language = "en") -> str:
     """A per-mode declared emission-pressure cell, or an en dash when absent."""
     if value is None:
         return _NOT_DECLARED
@@ -225,7 +226,7 @@ def _emission_declared_cell(value: int | None, language: str = "en") -> str:
 
 
 def _declaration_table(
-    declaration: NoiseEmissionDeclaration, language: str = "en"
+    declaration: NoiseEmissionDeclaration, language: Language = "en"
 ) -> Table:
     """Reproduce the ISO 4871 Annex B declaration table (identification + values)."""
     from reportlab.lib import colors
@@ -397,7 +398,7 @@ def _declaration_table(
     return table
 
 
-def _note(declaration: NoiseEmissionDeclaration, language: str = "en") -> str:
+def _note(declaration: NoiseEmissionDeclaration, language: Language = "en") -> str:
     """The ISO 4871 Annex B upper-boundary note (dual- or single-number wording)."""
     if declaration.form == "dual-number":
         return t(
@@ -416,7 +417,7 @@ def _note(declaration: NoiseEmissionDeclaration, language: str = "en") -> str:
 
 
 def _verification_rows(
-    declaration: NoiseEmissionDeclaration, language: str = "en"
+    declaration: NoiseEmissionDeclaration, language: Language = "en"
 ) -> list[tuple[str, str, str, str]]:
     """Verification rows (clause 6.2): L_1 against the declared form, per mode.
 
@@ -462,7 +463,7 @@ def render_iso4871_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ISO 4871:1996 noise-emission-declaration fiche to a PDF at ``path``.
 

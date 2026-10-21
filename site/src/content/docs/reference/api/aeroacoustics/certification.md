@@ -35,7 +35,7 @@ effective_perceived_noise_level(
     dt: float | NDArray[np.float64] | list[float] = 0.5,
     *,
     reference_time: float = 10.0,
-    procedure: str = 'airplane',
+    procedure: Literal['airplane', 'helicopter'] = 'airplane',
 ) -> EPNLResult
 ```
 
@@ -187,7 +187,7 @@ Effective Perceived Noise Level of an aircraft flyover (ICAO Annex 16).
 EPNLResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -201,9 +201,9 @@ EPNLResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

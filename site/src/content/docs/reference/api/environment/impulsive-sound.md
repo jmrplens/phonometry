@@ -251,7 +251,7 @@ Predicted prominence `P` of each impulse (Formula 1).
 ImpulseProminenceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -286,9 +286,9 @@ ImpulseProminenceResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 
@@ -429,7 +429,7 @@ The qualifying onset with the highest prominence, or `None`.
 ImpulsiveSoundResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -467,12 +467,9 @@ What [`sound_pressure_level_history`](/phonometry/reference/api/environment/impu
 A-weighted, F time-weighted sound pressure level sampled every `dt`
 seconds. It came back as a bare `(times, levels)` pair, which meant
 the one thing every other result in this library offers, a plot that
-knows what it is drawing, had to be written by hand each time.
-
-For backward compatibility with that pair, the dataclass is iterable
-and unpacks as `times, levels = sound_pressure_level_history(...)`,
-the same way [`DecayCurve`](/phonometry/reference/api/rooms/acoustics/#decaycurve) replaced its own
-tuple return.
+knows what it is drawing, had to be written by hand each time. It is
+read by name, `history.times` and `history.levels`, like every other
+record, and does not unpack as that pair.
 
 **Attributes**
 
@@ -488,7 +485,7 @@ tuple return.
 LevelHistory.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -600,7 +597,7 @@ standard.
 | `reference_pressure_pa` | Reference pressure, in pascal (default 20 uPa). |
 | `calibration_offset` | Level offset added to `LpAF`, in dB, for signals recorded on a scale other than pascal. |
 
-**Returns:** A [`LevelHistory`](/phonometry/reference/api/environment/impulsive-sound/#levelhistory), which unpacks as `(times, levels)` for the callers that always did: the sample times in seconds and `LpAF` in dB. The realised interval is `times[1] - times[0]` and may differ slightly from `dt` because it is an integer number of samples.
+**Returns:** A [`LevelHistory`](/phonometry/reference/api/environment/impulsive-sound/#levelhistory), read by name: `times`, the sample times in seconds, and `levels`, `LpAF` in dB. The realised interval is `times[1] - times[0]` and may differ slightly from `dt` because it is an integer number of samples.
 
 **Raises**
 

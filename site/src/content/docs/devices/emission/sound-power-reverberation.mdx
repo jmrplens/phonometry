@@ -344,7 +344,7 @@ The procedure is two measurements and two backgrounds. The test source is
 measured first, at the six positions or over the traverse of section 1. The RSS
 is then run **in the same room, at the same microphone positions or the same
 traverse**, with the source under test left standing where it was, and with its
-own background reading (that is what `background_levels_ref` is for). The RSS
+own background reading (that is what `reference_background_levels` is for). The RSS
 stands on the floor more than 1,5 m from the walls; the preferred position is
 the one the source under test occupies, and where the source cannot be moved the
 RSS goes as close to it as practicable but never closer than 1,5 m
@@ -371,19 +371,19 @@ positions rather than the two sources.
 
 ### `sound_power_comparison()` parameters
 
-`sound_power_comparison(levels, levels_ref, lw_ref, *, frequencies=None,
-background_levels=…, background_levels_ref=…, temperature_c=23.0,
+`sound_power_comparison(levels, reference_levels, reference_sound_power_levels, *, frequencies=None,
+background_levels=…, reference_background_levels=…, temperature_c=23.0,
 static_pressure_kpa=101.325)` takes the same room levels plus the reference
 source's levels and known power.
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `levels_ref` | 1D or 2D array | dB | matches `levels` | Mean room SPL with the reference source (RSS) running |
-| `lw_ref` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source, from its ISO 6926 calibration; a [`ReferenceSourceCalibration`](/phonometry/devices/emission/free-field-qualification/) is read in the one-third octave bands at `frequencies` |
+| `reference_levels` | 1D or 2D array | dB | matches `levels` | Mean room SPL with the reference source (RSS) running |
+| `reference_sound_power_levels` | 1D array or `ReferenceSourceCalibration` | dB | per band | Known sound power $L_W(\text{RSS})$ of the reference source, from its ISO 6926 calibration; a [`ReferenceSourceCalibration`](/phonometry/devices/emission/free-field-qualification/) is read in the one-third octave bands at `frequencies` |
 | `background_levels` | 1D or 2D array | dB | matches `levels` | Background for the test source; per-band $K_1$ on $L_p(\text{ST})$ |
-| `background_levels_ref` | 1D or 2D array | dB | matches `levels_ref` | Background for the **reference** source; per-band $K_1$ on $L_p(\text{RSS})$ |
+| `reference_background_levels` | 1D or 2D array | dB | matches `reference_levels` | Background for the **reference** source; per-band $K_1$ on $L_p(\text{RSS})$ |
 
-`background_levels_ref` background-corrects the reference-source room level
+`reference_background_levels` background-corrects the reference-source room level
 $L_p(\text{RSS})$ exactly as `background_levels` does for the test source;
 both need `frequencies` (the ISO 3741 criterion is frequency-dependent).
 
@@ -565,7 +565,7 @@ print(np.round(lj_octave, 1))         # 99.8 dB down to 87.7 dB, three thirds su
 | :--- | :--- | :--- | :--- | :--- |
 | `levels` | 1D, 2D or 3D array | dB | per band, `(NM, NB)` or `(Ne, NM, NB)` | Single event levels: per event on the first axis (Eq. 22), one reading of `n_events` events (Eq. 23), or the mean of one event |
 | `t60`, `volume`, `surface_area`, `frequencies` | as in section 1 | | | Direct method only. `frequencies` is required there; the comparison method takes it only when `background_levels` is given, since the correction is per band |
-| `levels_ref`, `lw_ref`, `background_levels_ref` | as in section 2 | | | Comparison method only; the reference source is steady and keeps the 9.1.2 correction |
+| `reference_levels`, `reference_sound_power_levels`, `reference_background_levels` | as in section 2 | | | Comparison method only; the reference source is steady and keeps the 9.1.2 correction |
 | `n_events` | int or None | | `>= 1`, default `None` | $N_\mathrm{e}$ encompassed by one reading (Eq. 23); at least 5 without a warning |
 | `background_levels` | 1D or 2D array | dB | matches `levels` | Time-averaged background over the same window; per-position $K_{1i}$ (Eq. 25/26) |
 | `integration_time` | float | s | > 0, required with `background_levels` | The window $T$; the background is compared as $L_{pi(\mathrm{B})} + 10\log_{10}(T/T_0)$ |

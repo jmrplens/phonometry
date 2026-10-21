@@ -39,7 +39,9 @@ N = 32768
 
 
 def _white(seed: int, rms: float = 1.0, n: int = N) -> np.ndarray:
-    return ph.signals.noise_signal(FS, n / FS, color="white", rms=rms, seed=seed)
+    return ph.signals.noise_signal(
+        FS, duration_s=n / FS, color="white", rms=rms, seed=seed
+    )
 
 
 def _known_snr_pair(seed: int, n: int = N) -> tuple[np.ndarray, np.ndarray, float]:
@@ -51,7 +53,7 @@ def _known_snr_pair(seed: int, n: int = N) -> tuple[np.ndarray, np.ndarray, floa
     """
     x = _white(1000 + seed, n=n)
     noise = ph.signals.noise_signal(
-        FS, n / FS, color="white", rms=0.5, seed=5000 + seed
+        FS, duration_s=n / FS, color="white", rms=0.5, seed=5000 + seed
     )
     return x, 0.8 * x + noise, 0.64 / 0.25
 
@@ -296,7 +298,9 @@ def test_sine_in_noise_coherent_output_at_tone() -> None:
     """γ² at a tone bin follows SNR/(1+SNR) with the in-bin noise power."""
     t = np.arange(N) / FS
     x = np.sqrt(2.0) * np.sin(2.0 * np.pi * 400.0 * t)
-    noise = ph.signals.noise_signal(FS, N / FS, color="white", rms=0.5, seed=9)
+    noise = ph.signals.noise_signal(
+        FS, duration_s=N / FS, color="white", rms=0.5, seed=9
+    )
     y = x + noise
     res = ph.signals.coherent_output_spectrum(x, y, FS, nperseg=1024)
     i = int(np.argmin(np.abs(res.frequencies - 400.0)))

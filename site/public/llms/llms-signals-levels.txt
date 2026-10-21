@@ -1686,7 +1686,7 @@ A level in decibels is a ratio to a reference value, so it means nothing
 until the reference is named. ISO 1683:2015 fixes one per quantity, and the
 library counts every level from it unless the standard a function implements
 names another. The table is published as
-`metrology.ISO1683_REFERENCE_VALUES`, keyed by medium and then by quantity:
+`metrology.REFERENCE_VALUES`, keyed by medium and then by quantity:
 
 | Quantity | Gases (Table 1) | Liquids (Table 2) | Vibration (Table 3) |
 |:---|:---|:---|:---|
@@ -1713,7 +1713,7 @@ and ISO 9611 count the surface velocity from the same value, which is the
 ```python
 from phonometry import metrology
 
-p0 = metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"]
+p0 = metrology.REFERENCE_VALUES["gas"]["sound_pressure"]
 print(p0.value, p0.unit, p0.printed)  # 2e-05 Pa 20 µPa
 ```
 
@@ -1757,7 +1757,7 @@ meters*: the sound exposure E in Pa²h and the normalized 8 h level LEX,8h
 (≡ LEP,d), anchored at 3.2 Pa²h ⇔ exactly 90 dB.
 ISO 1683:2015, *Acoustics. Preferred reference values for acoustical and
 vibratory levels*: Tables 1 to 3, the reference value every level here is
-counted from, published as `metrology.ISO1683_REFERENCE_VALUES`, and note b of
+counted from, published as `metrology.REFERENCE_VALUES`, and note b of
 Table 2, the 26.0 dB between the air and water pressure references. The ISO 1996-1/-2
 environmental indicators and determination procedures are covered in
 [Environmental levels](https://docs.jmrp.io/phonometry/environment/assessment/environmental-levels/).

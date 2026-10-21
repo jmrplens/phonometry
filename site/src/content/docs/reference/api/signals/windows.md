@@ -123,7 +123,7 @@ Equivalent noise bandwidth in Hz for a sample rate `fs`.
 WindowMetricsResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```

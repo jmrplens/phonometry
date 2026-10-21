@@ -342,7 +342,8 @@ def test_each_requirement_reads_its_own_tables(
 def test_a_negative_deviation_meets_the_lower_limit(
     requirement: str,
     deviation: float,
-    conforms: bool,  # noqa: FBT001
+    *,
+    conforms: bool,
 ) -> None:
     """The level, supply-voltage, frequency and field limits bound |deviation|.
 
@@ -412,7 +413,8 @@ def test_table_e1_through_the_class_1_level_at_1_khz(
     limit: float,
     uncertainty: float,
     maximum: float,
-    conforms: bool,  # noqa: FBT001
+    *,
+    conforms: bool,
     outcome: int,
 ) -> None:
     """Examples 1 to 7 use 0,25 dB and 0,15 dB, Table 2 and A.1 for class 1."""

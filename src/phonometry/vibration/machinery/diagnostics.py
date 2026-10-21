@@ -92,7 +92,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -107,6 +107,8 @@ from ..._internal.validation import (
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+
+    from ..._i18n import Language
 
 #: Description of the shaft-rate line, shared by every family.
 _SHAFT_DESCRIPTION = "shaft rotational frequency"
@@ -142,7 +144,7 @@ def shaft_rate(speed_rpm: float) -> float:
     return require_positive(speed_rpm, "speed_rpm") / 60.0
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FaultLine(RichDisplay):
     """One predicted discrete line of a machine's kinematic signature.
 
@@ -159,12 +161,16 @@ class FaultLine(RichDisplay):
     name: str
     frequency: float
     order: float
-    family: str
+    family: Literal["shaft", "bearing", "gear", "motor", "blade"]
     description: str
 
 
 def _line(
-    name: str, frequency: float, fs: float, family: str, description: str
+    name: str,
+    frequency: float,
+    fs: float,
+    family: Literal["shaft", "bearing", "gear", "motor", "blade"],
+    description: str,
 ) -> FaultLine:
     """Build a :class:`FaultLine`, deriving its shaft order from ``fs``."""
     return FaultLine(
@@ -176,7 +182,7 @@ def _line(
     )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FaultFrequencyResult(RichDisplay):
     """A family of predicted fault lines for one machine element.
 
@@ -266,7 +272,7 @@ class FaultFrequencyResult(RichDisplay):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Overlay the predicted lines on a measured envelope spectrum.
 
@@ -339,7 +345,7 @@ def bearing_fault_frequencies(
     pitch_diameter: float,
     *,
     contact_angle_deg: float = 0.0,
-    rotating_race: str = "inner",
+    rotating_race: Literal["inner", "outer"] = "inner",
 ) -> FaultFrequencyResult:
     r"""Kinematic frequencies of a rolling-contact bearing (Norton 8.4-8.14).
 

@@ -79,7 +79,7 @@ cepstrum(
     x: Signal | NDArray[np.float64] | list[float],
     fs: float | None = None,
     *,
-    kind: str = 'power',
+    kind: Literal['power', 'real', 'complex'] = 'power',
     nfft: int | None = None,
 ) -> CepstrumResult
 ```
@@ -124,7 +124,7 @@ Cepstrum of a record: power, real or complex.
 CepstrumResult(
     quefrencies: NDArray[np.float64],
     cepstrum: NDArray[np.float64],
-    kind: str,
+    kind: Literal['power', 'real', 'complex'],
     fs: float,
     nfft: int,
     linear_phase_samples: int,
@@ -179,7 +179,7 @@ keeps the phase, so only it is invertible.
 CepstrumResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -279,7 +279,7 @@ An echo delay and reflection coefficient read off the power cepstrum.
 EchoDetectionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -300,7 +300,7 @@ lifter(
     fs: float | None = None,
     *,
     cutoff: float,
-    mode: str = 'lowpass',
+    mode: Literal['lowpass', 'highpass'] = 'lowpass',
     nfft: int | None = None,
 ) -> LifterResult
 ```
@@ -344,7 +344,7 @@ LifterResult(
     quefrencies: NDArray[np.float64],
     cepstrum: NDArray[np.float64],
     cutoff: float,
-    mode: str,
+    mode: Literal['lowpass', 'highpass'],
     fs: float,
     nfft: int,
 )
@@ -372,7 +372,7 @@ A log spectrum split by liftering (Milner Sec. 4.3).
 LifterResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes | NDArray[Any]
 ```

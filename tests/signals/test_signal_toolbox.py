@@ -255,7 +255,7 @@ def test_designed_filter_meets_its_own_spec(
     # passband flat within δ and stopband below -A dB with δ = 10^(-A/20).
     from scipy import signal as sp_signal
 
-    x = ph.signals.noise_signal(fs, 0.2, seed=5)
+    x = ph.signals.noise_signal(fs, duration_s=0.2, seed=5)
     res = ph.signals.resample_signal(
         x, fs, fs_new=fs_new, stopband_attenuation=atten, transition_width=tw
     )
@@ -288,7 +288,7 @@ def test_resampled_tone_matches_analytic_tone() -> None:
 
 
 def test_rational_ratio_and_output_length() -> None:
-    x = ph.signals.noise_signal(44100.0, 0.1, seed=2)
+    x = ph.signals.noise_signal(44100.0, duration_s=0.1, seed=2)
     res = ph.signals.resample_signal(x, 44100.0, fs_new=48000.0)
     assert (res.up, res.down) == (160, 147)
     assert res.signal.size == int(np.ceil(x.size * 160 / 147))
@@ -297,7 +297,7 @@ def test_rational_ratio_and_output_length() -> None:
 
 
 def test_identity_ratio_returns_copy_without_filtering() -> None:
-    x = ph.signals.noise_signal(FS, 0.05, seed=3)
+    x = ph.signals.noise_signal(FS, duration_s=0.05, seed=3)
     res = ph.signals.resample_signal(x, FS, fs_new=FS)
     np.testing.assert_array_equal(res.signal, x)
     assert (res.up, res.down) == (1, 1)
@@ -305,14 +305,14 @@ def test_identity_ratio_returns_copy_without_filtering() -> None:
 
 
 def test_irrational_ratio_raises() -> None:
-    x = ph.signals.noise_signal(FS, 0.05, seed=4)
+    x = ph.signals.noise_signal(FS, duration_s=0.05, seed=4)
     fs_irrational = FS * np.sqrt(2.0)
     with pytest.raises(ValueError, match=r"'fs_new'/'fs' = .* is not a rational ratio"):
         ph.signals.resample_signal(x, FS, fs_new=fs_irrational)
 
 
 def test_resample_invalid_parameters() -> None:
-    x = ph.signals.noise_signal(FS, 0.05, seed=4)
+    x = ph.signals.noise_signal(FS, duration_s=0.05, seed=4)
     two_dimensional = np.zeros((4, 4))
     with pytest.raises(ValueError, match=r"'stopband_attenuation' must be at least"):
         ph.signals.resample_signal(x, FS, fs_new=32000.0, stopband_attenuation=10.0)
@@ -333,7 +333,7 @@ def test_resampled_record_and_taps_must_each_be_flat() -> None:
     from end to end: no reader in the library opens it, and the figure drawn
     from the taps alone is byte for byte the one a flat record gives.
     """
-    x = ph.signals.noise_signal(FS, 0.05, seed=5)
+    x = ph.signals.noise_signal(FS, duration_s=0.05, seed=5)
     res = ph.signals.resample_signal(x, FS, fs_new=24000.0)
     one_axis = "must have one axis"
     cases = (
@@ -348,7 +348,7 @@ def test_resampled_record_and_taps_must_each_be_flat() -> None:
 
 
 def test_resample_plot_filter_and_edges() -> None:
-    x = ph.signals.noise_signal(FS, 0.2, seed=5)
+    x = ph.signals.noise_signal(FS, duration_s=0.2, seed=5)
     res = ph.signals.resample_signal(x, FS, fs_new=32000.0, stopband_attenuation=100.0)
     ax = res.plot(linewidth=2)
     # The magnitude trace echoes the requested kwargs.
@@ -403,14 +403,14 @@ def test_phase_slope_is_exactly_minus_2pi_f_d_over_fs() -> None:
 
 
 def test_linear_integer_delay_is_exact_sample_shift() -> None:
-    x = ph.signals.noise_signal(FS, 0.1, seed=7)
+    x = ph.signals.noise_signal(FS, duration_s=0.1, seed=7)
     y = ph.signals.fractional_delay(x, 5.0)
     expected = np.concatenate([np.zeros(5), x[:-5]])
     np.testing.assert_allclose(y, expected, atol=1e-13)
 
 
 def test_negative_delay_advances() -> None:
-    x = ph.signals.noise_signal(FS, 0.1, seed=8)
+    x = ph.signals.noise_signal(FS, duration_s=0.1, seed=8)
     y = ph.signals.fractional_delay(x, -3.0)
     expected = np.concatenate([x[3:], np.zeros(3)])
     np.testing.assert_allclose(y, expected, atol=1e-13)
@@ -421,7 +421,7 @@ def test_linear_mode_is_bit_identical_to_alignment_kernel() -> None:
     # public function must reproduce it bit for bit (advance = -delay).
     from phonometry.signals._correlation import _fractional_advance
 
-    x = ph.signals.noise_signal(FS, 0.1, seed=9)
+    x = ph.signals.noise_signal(FS, duration_s=0.1, seed=9)
     shift = 4.6180339887
     np.testing.assert_array_equal(
         ph.signals.fractional_delay(x, -shift), _fractional_advance(x, shift)
@@ -431,7 +431,7 @@ def test_linear_mode_is_bit_identical_to_alignment_kernel() -> None:
 def test_circular_roundtrip_recovers_record() -> None:
     # Odd length: the rfft has no Nyquist bin, so the circular ramp is
     # exactly invertible for any record.
-    x = ph.signals.noise_signal(FS, 0.05, seed=10)[:2399]
+    x = ph.signals.noise_signal(FS, duration_s=0.05, seed=10)[:2399]
     y = ph.signals.fractional_delay(
         ph.signals.fractional_delay(x, 2.5, mode="circular"),
         -2.5,
@@ -441,7 +441,7 @@ def test_circular_roundtrip_recovers_record() -> None:
 
 
 def test_fractional_delay_invalid_inputs() -> None:
-    x = ph.signals.noise_signal(FS, 0.05, seed=11)
+    x = ph.signals.noise_signal(FS, duration_s=0.05, seed=11)
     full_length = float(x.size)
     two_dimensional = np.zeros((2, 8))
     with pytest.raises(ValueError, match=r"'mode' must be 'linear'"):

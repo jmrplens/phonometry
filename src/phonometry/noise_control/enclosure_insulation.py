@@ -76,7 +76,7 @@ from __future__ import annotations
 import warnings
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -110,7 +110,10 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from .._internal.types import BandFraction
+
+Quantity = Literal["sound_power", "reciprocity"]
 
 __all__ = [
     "ARTIFICIAL_SOURCE_DROP_MM",
@@ -181,18 +184,31 @@ SOURCE_WALL_CLEARANCE_FACTOR: float = 0.2
 #: The base standards Table 1 of the two parts names, spelled once each. The
 #: table of methods, the room requirements of Annex C and the warnings all key
 #: on these strings, so one spelling each keeps them from drifting apart.
-_ISO_3741 = "ISO 3741"
-_ISO_3742 = "ISO 3742"
-_ISO_3743_1 = "ISO 3743-1"
-_ISO_3743_2 = "ISO 3743-2"
-_ISO_3744 = "ISO 3744"
-_ISO_3746 = "ISO 3746"
-_ISO_3747 = "ISO 3747"
-_ISO_9614_1 = "ISO 9614-1"
-_ISO_9614_2 = "ISO 9614-2"
-_ISO_11201 = "ISO 11201"
-_ISO_11202 = "ISO 11202"
-_ISO_11204 = "ISO 11204"
+_ISO_3741: Final = "ISO 3741"
+_ISO_3742: Final = "ISO 3742"
+_ISO_3743_1: Final = "ISO 3743-1"
+_ISO_3743_2: Final = "ISO 3743-2"
+_ISO_3744: Final = "ISO 3744"
+_ISO_3746: Final = "ISO 3746"
+_ISO_3747: Final = "ISO 3747"
+_ISO_9614_1: Final = "ISO 9614-1"
+_ISO_9614_2: Final = "ISO 9614-2"
+_ISO_11201: Final = "ISO 11201"
+_ISO_11202: Final = "ISO 11202"
+_ISO_11204: Final = "ISO 11204"
+
+#: A base standard of Table C.1 of part 2, by its designation.
+TestEnvironmentStandard = Literal[
+    "ISO 3743-1",
+    "ISO 3744",
+    "ISO 3746",
+    "ISO 3747",
+    "ISO 9614-1",
+    "ISO 9614-2",
+    "ISO 11201",
+    "ISO 11202",
+    "ISO 11204",
+]
 
 #: Table C.1 of part 2: what each base standard asks of the room, as the
 #: largest environmental correction ``K2`` it tolerates and the smallest
@@ -202,20 +218,20 @@ _ISO_11204 = "ISO 11204"
 #: ``None``. The last column of the printed table is headed ISO 10204, which
 #: is no standard; its own footnote names ISO 11204, and that is the key here
 #: (see the errata).
-TEST_ENVIRONMENT_REQUIREMENTS: Mapping[str, tuple[float | None, float | None]] = (
-    MappingProxyType(
-        {
-            _ISO_3743_1: (None, 6.0),
-            _ISO_3744: (2.0, 6.0),
-            _ISO_3746: (7.0, 3.0),
-            _ISO_3747: (None, 3.0),
-            _ISO_9614_1: (None, None),
-            _ISO_9614_2: (None, None),
-            _ISO_11201: (2.0, 6.0),
-            _ISO_11202: (7.0, 3.0),
-            _ISO_11204: (7.0, 6.0),
-        }
-    )
+TEST_ENVIRONMENT_REQUIREMENTS: Mapping[
+    TestEnvironmentStandard, tuple[float | None, float | None]
+] = MappingProxyType(
+    {
+        _ISO_3743_1: (None, 6.0),
+        _ISO_3744: (2.0, 6.0),
+        _ISO_3746: (7.0, 3.0),
+        _ISO_3747: (None, 3.0),
+        _ISO_9614_1: (None, None),
+        _ISO_9614_2: (None, None),
+        _ISO_11201: (2.0, 6.0),
+        _ISO_11202: (7.0, 3.0),
+        _ISO_11204: (7.0, 6.0),
+    }
 )
 
 #: The base standards that hand back an A-weighted number and nothing per
@@ -224,13 +240,16 @@ _A_WEIGHTED_ONLY = (_ISO_3746, _ISO_11202)
 
 EnclosureCondition = Literal["laboratory", "in-situ"]
 SourceKind = Literal["actual", "reciprocity", "artificial"]
-_CONDITIONS: tuple[str, ...] = ("laboratory", "in-situ")
-_SOURCE_KINDS: tuple[str, ...] = ("actual", "reciprocity", "artificial")
+_CONDITIONS: tuple[EnclosureCondition, ...] = ("laboratory", "in-situ")
+_SOURCE_KINDS: tuple[SourceKind, ...] = ("actual", "reciprocity", "artificial")
 #: The quantities the ISO 717-1 rating of clause 7 may be asked for.
-_RATEABLE_QUANTITIES: tuple[str, ...] = ("sound_power", "reciprocity")
+_RATEABLE_QUANTITIES: tuple[Quantity, ...] = ("sound_power", "reciprocity")
 #: The quantities the artificial source of Annex A may be read as, which the
 #: clause decides by sending the levels to Equation (1) or to Equation (3).
-_ARTIFICIAL_QUANTITIES: tuple[str, ...] = ("sound_power", "sound_pressure")
+_ARTIFICIAL_QUANTITIES: tuple[Literal["sound_power", "sound_pressure"], ...] = (
+    "sound_power",
+    "sound_pressure",
+)
 #: The fewest source positions 7.3 of part 1 and 7.2 of part 2 accept.
 _MIN_ARTIFICIAL_POSITIONS = 2
 
@@ -296,10 +315,10 @@ class EnclosureInsulationResult(OwnsArrays):
     level_without: NDArray[np.float64]
     level_with: NDArray[np.float64]
     insulation: NDArray[np.float64]
-    quantity: str
+    quantity: Literal["sound_power", "sound_pressure", "reciprocity"]
     a_weighted_insulation: float | None
-    condition: str
-    source_kind: str
+    condition: Literal["laboratory", "in-situ"]
+    source_kind: Literal["actual", "reciprocity", "artificial"]
     base_standard: str
     fraction: int
 
@@ -318,7 +337,7 @@ class EnclosureInsulationResult(OwnsArrays):
         return np.asarray(round_half_even(self.insulation), dtype=np.int_)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the two runs and the difference between them.
 
@@ -355,7 +374,7 @@ class WeightedEnclosureInsulation(OwnsArrays):
     ctr: int
     unfavorable_sum: float
     frequencies: NDArray[np.float64]
-    quantity: str
+    quantity: Quantity
 
 
 @dataclass(frozen=True)
@@ -374,7 +393,7 @@ class EnclosureTestEnvironmentCheck(RichDisplay):
         at.
     """
 
-    base_standard: str
+    base_standard: TestEnvironmentStandard
     actual_area_ratio: float
     mean_absorption_coefficient: float
 
@@ -480,7 +499,7 @@ def _insulation(
     frequencies: ArrayLike | None,
     a_weighted_without: float | None,
     a_weighted_with: float | None,
-    quantity: str,
+    quantity: Literal["sound_power", "sound_pressure", "reciprocity"],
     base_standard: str,
     condition: str,
     source_kind: str,
@@ -542,7 +561,7 @@ def enclosure_sound_power_insulation(
     frequencies: ArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
-    base_standard: str = "ISO 3744",
+    base_standard: str = _ISO_3744,
     condition: EnclosureCondition = "laboratory",
     source_kind: SourceKind = "actual",
     fraction: BandFraction = 3,
@@ -598,7 +617,7 @@ def enclosure_sound_pressure_insulation(
     frequencies: ArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
-    base_standard: str = "ISO 11201",
+    base_standard: str = _ISO_11201,
     condition: EnclosureCondition = "laboratory",
     source_kind: SourceKind = "actual",
     fraction: BandFraction = 3,
@@ -698,7 +717,7 @@ def enclosure_artificial_source_insulation(
     level_with_by_position: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    quantity: str = "sound_power",
+    quantity: Literal["sound_power", "sound_pressure"] = "sound_power",
     condition: EnclosureCondition = "laboratory",
     fraction: BandFraction = 3,
 ) -> EnclosureInsulationResult:
@@ -770,7 +789,7 @@ def enclosure_artificial_source_insulation(
 def weighted_enclosure_insulation(
     insulation: ArrayLike,
     *,
-    quantity: str = "sound_power",
+    quantity: Quantity = "sound_power",
     fraction: BandFraction = 3,
 ) -> WeightedEnclosureInsulation:
     r"""The single-number rating of an insertion loss, 7.4 of part 1 and 7.3 of part 2.
@@ -901,7 +920,7 @@ def fill_ratio(source_volume_m3: float, interior_volume_m3: float) -> float:
 
 def check_enclosure_test_environment(
     *,
-    base_standard: str,
+    base_standard: TestEnvironmentStandard,
     mean_absorption_coefficient: float,
     room_surface_area_m2: float,
     measurement_surface_area_m2: float,
@@ -1065,7 +1084,9 @@ _METHODS: dict[tuple[str, str], tuple[MethodEntry, ...]] = {
 }
 
 
-def _method_pair(condition: str, source_kind: str) -> tuple[str, str]:
+def _method_pair(
+    condition: str, source_kind: str
+) -> tuple[EnclosureCondition, SourceKind]:
     """The condition and the source kind of a combination Table 1 prints.
 
     Reading the table before anything else is what stops a result claiming a

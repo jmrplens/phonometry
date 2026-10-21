@@ -239,7 +239,7 @@ import numpy as np
 from phonometry import signals
 
 fs = 48000.0
-x = signals.noise_signal(fs, 20.0, color="pink", seed=11)
+x = signals.noise_signal(fs, duration_s=20.0, color="pink", seed=11)
 res = signals.power_spectral_density(x, fs, nperseg=4096)
 band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)
 freqs = res.frequencies[band]
@@ -287,7 +287,7 @@ import numpy as np
 from phonometry import signals
 
 delay = int(0.002 * fs)                                     # a 2 ms delay path
-noise = signals.noise_signal(fs, 20.0, rms=0.3, seed=9)     # uncorrelated noise
+noise = signals.noise_signal(fs, duration_s=20.0, rms=0.3, seed=9)     # uncorrelated noise
 y = 0.9 * np.concatenate([np.zeros(delay), x[:-delay]]) + noise
 res = signals.cross_spectral_density(x, y, fs)
 print(res.magnitude_random_error[100], res.phase_standard_deviation_rad[100])  # bin 100 errors
@@ -313,8 +313,8 @@ from phonometry import signals
 fs = 8000.0
 tau = 0.002                                   # 2 ms = 16 samples
 delay = int(tau * fs)
-x = signals.noise_signal(fs, 8.0, seed=8)
-noise = signals.noise_signal(fs, 8.0, rms=0.3, seed=9)
+x = signals.noise_signal(fs, duration_s=8.0, seed=8)
+noise = signals.noise_signal(fs, duration_s=8.0, rms=0.3, seed=9)
 y = 0.9 * np.concatenate([np.zeros(delay), x[:-delay]]) + noise
 
 res = signals.cross_spectral_density(x, y, fs)
@@ -376,8 +376,8 @@ import numpy as np
 from phonometry import signals
 
 fs = 48000.0
-x = signals.noise_signal(fs, 8.0, color="white", seed=1)
-noise = signals.noise_signal(fs, 8.0, color="white", rms=0.5, seed=2)
+x = signals.noise_signal(fs, duration_s=8.0, color="white", seed=1)
+noise = signals.noise_signal(fs, duration_s=8.0, color="white", rms=0.5, seed=2)
 y = 0.8 * x + noise                      # SNR = 0.64/0.25 at every frequency
 
 res = signals.coherent_output_spectrum(x, y, fs)
@@ -401,8 +401,8 @@ import numpy as np
 from phonometry import signals
 
 fs = 48000.0
-x = signals.noise_signal(fs, 8.0, color="white", seed=1)
-noise = signals.noise_signal(fs, 8.0, color="white", rms=0.5, seed=2)
+x = signals.noise_signal(fs, duration_s=8.0, color="white", seed=1)
+noise = signals.noise_signal(fs, duration_s=8.0, color="white", rms=0.5, seed=2)
 y = 0.8 * x + noise                      # SNR = 0.64/0.25 per band
 
 res = signals.coherent_output_spectrum(x, y, fs, nperseg=2048)
@@ -561,8 +561,8 @@ seed reproduces the same record bit for bit.
 ```python
 from phonometry import signals
 
-pink = signals.noise_signal(48000, 10.0, color="pink", seed=7)     # deterministic
-white = signals.noise_signal(48000, 10.0, color="white", rms=0.5, seed=7)
+pink = signals.noise_signal(48000, duration_s=10.0, color="pink", seed=7)     # deterministic
+white = signals.noise_signal(48000, duration_s=10.0, color="white", rms=0.5, seed=7)
 ```
 
 Measured over three decades (20 Hz – 20 kHz) with the estimator of section 1,
@@ -768,7 +768,7 @@ import numpy as np
 from phonometry import signals
 
 fs = 48000.0
-x = signals.noise_signal(fs, 8192 / fs, color="pink", seed=11)   # 171 ms record
+x = signals.noise_signal(fs, duration_s=8192 / fs, color="pink", seed=11)   # 171 ms record
 single = signals.multitaper_psd(x, fs, n_tapers=1, adaptive=False)
 res = signals.multitaper_psd(x, fs)                              # NW = 4, K = 7
 band = (res.frequencies >= 20.0) & (res.frequencies <= 20000.0)

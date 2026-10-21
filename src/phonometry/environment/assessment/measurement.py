@@ -64,6 +64,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
+
 __all__ = [
     "EnvironmentalMeasurementWarning",
     "RepeatedMeasurementResult",
@@ -253,7 +255,7 @@ class TonalAssessmentResult(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the ``Kt(ΔLta)`` adjustment curve with this tone marked."""
         from ..._i18n import check_language
@@ -426,7 +428,7 @@ class TonalSurveyAssessment(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the spectrum with the prominent bands marked and each band's bar.
 

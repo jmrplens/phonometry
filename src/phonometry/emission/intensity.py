@@ -71,6 +71,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
+
 from .._internal.boundary import settled, settled_net_share
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
@@ -87,7 +89,7 @@ from .._internal.validation import (
     require_scalar,
 )
 from ..filters.frequencies import _genfreqs
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 from ..signals.spectra import (
     _MIN_SAMPLES,
     _default_nperseg,
@@ -112,9 +114,9 @@ TEMPORAL_VARIABILITY_LIMIT = 0.6
 
 #: Reference sound intensity, in watts per square metre (ISO 9614-1, A.2.3),
 #: the 1 pW/m² of ISO 1683:2015 Table 1.
-_I0 = ISO1683_REFERENCE_VALUES["gas"]["sound_intensity"].value
+_I0 = REFERENCE_VALUES["gas"]["sound_intensity"].value
 #: Reference sound pressure, in pascals (ISO 1683:2015 Table 1).
-_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 #: Upper ``k*dr`` bound (rad) for the finite-difference bias correction. The
 #: exact reciprocal ``(k*dr)/sin(k*dr)`` diverges as ``k*dr -> pi`` (the first
 #: spatial-aliasing null, ``f = c/(2*dr)``), so a handful of near-null bins
@@ -338,7 +340,7 @@ class IntensityResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot Lp vs LI per band with the pressure-intensity index.
 
@@ -353,7 +355,7 @@ class IntensityResult(OwnsArrays):
         return plot_intensity(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the p-p probe with its spacer to scale.
 
@@ -538,7 +540,7 @@ class FieldIndicators(OwnsArrays):
         ax: Axes | None = None,
         *,
         dynamic_capability: float | np.ndarray | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         r"""Plot the per-band indicators F2/F3, the Ld line and F4.
@@ -661,6 +663,7 @@ def _validate_band_options(fraction: int | None, limits: list[float] | None) -> 
     # NaN fails every comparison, so finiteness is tested explicitly: a NaN
     # limit would otherwise pass and silently select no band at all.
     if limits is not None and (
+        # The length of a fixed-size argument, not a quantity.
         len(limits) != 2  # noqa: PLR2004
         or not all(math.isfinite(v) for v in limits)
         or limits[0] <= 0
@@ -1097,6 +1100,7 @@ def field_indicators(
         msg = "'pressure_levels' must have at least one band."
         raise ValueError(msg)
 
+    # The number is a count of array axes, not a quantity.
     n_bands = lp.shape[1] if lp.ndim == 2 else 1  # noqa: PLR2004
     freqs: np.ndarray | None = None
     if frequencies is not None:

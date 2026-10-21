@@ -10,11 +10,12 @@ import numpy as np
 
 from .._internal.warnings import PhonometryWarning
 from ..io._resolve import SignalInput, resolve_optional_fs, resolve_samples
-from .reference_values import ISO1683_REFERENCE_VALUES
+from .reference_values import REFERENCE_VALUES
 from .sound_calibrator import _designation, _fluctuation_limit_db
 
 if TYPE_CHECKING:
     from ..io._signal import Signal
+    from .sound_calibrator import CalibratorClass
 
 __all__ = [
     "CalibrationWarning",
@@ -25,7 +26,7 @@ __all__ = [
 # estimate; a shorter take falls back to broadband RMS.
 _MIN_COHERENT_SAMPLES = 4
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
-_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 
 class CalibrationWarning(PhonometryWarning):
@@ -34,7 +35,7 @@ class CalibrationWarning(PhonometryWarning):
 
 @overload
 def sensitivity(
-    ref_signal: Signal,
+    reference_signal: Signal,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     fs: int | None = ...,
@@ -42,14 +43,14 @@ def sensitivity(
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
-    calibrator_class: str = ...,
+    calibrator_class: CalibratorClass = ...,
     narrowband: bool = ...,
 ) -> float: ...
 
 
 @overload
 def sensitivity(
-    ref_signal: SignalInput,
+    reference_signal: SignalInput,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     *,
@@ -57,14 +58,14 @@ def sensitivity(
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
-    calibrator_class: str = ...,
+    calibrator_class: CalibratorClass = ...,
     narrowband: bool = ...,
 ) -> float: ...
 
 
 @overload
 def sensitivity(
-    ref_signal: SignalInput,
+    reference_signal: SignalInput,
     target_spl: float,
     reference_pressure_pa: float,
     fs: int,
@@ -72,14 +73,14 @@ def sensitivity(
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
-    calibrator_class: str = ...,
+    calibrator_class: CalibratorClass = ...,
     narrowband: bool = ...,
 ) -> float: ...
 
 
 @overload
 def sensitivity(
-    ref_signal: SignalInput,
+    reference_signal: SignalInput,
     target_spl: float = ...,
     reference_pressure_pa: float = ...,
     fs: int | None = ...,
@@ -87,13 +88,13 @@ def sensitivity(
     validate: bool = ...,
     max_fluctuation_db: float | None = ...,
     frequency: float = ...,
-    calibrator_class: str = ...,
+    calibrator_class: CalibratorClass = ...,
     narrowband: Literal[False] = ...,
 ) -> float: ...
 
 
 def sensitivity(
-    ref_signal: SignalInput,
+    reference_signal: SignalInput,
     target_spl: float = 94.0,
     reference_pressure_pa: float = _P0,
     fs: int | None = None,
@@ -101,7 +102,7 @@ def sensitivity(
     validate: bool = True,
     max_fluctuation_db: float | None = None,
     frequency: float = 1000.0,
-    calibrator_class: str = "1",
+    calibrator_class: CalibratorClass = "1",
     narrowband: bool = False,
 ) -> float:
     r"""The calibration factor (multiplier) that converts digital units
@@ -129,7 +130,7 @@ def sensitivity(
        settled portion of the recording is available (>= 1 s after the 1 s
        integrator attack).
 
-    :param ref_signal: Recording of the calibration tone. Accepts a
+    :param reference_signal: Recording of the calibration tone. Accepts a
         :class:`phonometry.io.Signal` for its rate; a calibration factor it
         carries is deliberately **not** applied, because this function is
         what produces such a factor and folding an existing one in would
@@ -162,12 +163,12 @@ def sensitivity(
         enable it for noisy coupler recordings.
     :return: Calibration factor (sensitivity multiplier).
     """
-    fs = resolve_optional_fs(ref_signal, fs)
+    fs = resolve_optional_fs(reference_signal, fs)
     # calibrate=False: this function *derives* the digital-to-pascal factor
     # from a calibrator take, so scaling the samples by a factor the object
     # already carries would fold the old calibration into the new one.
     signal_arr = np.asarray(
-        resolve_samples(ref_signal, calibrate=False, name="ref_signal"),
+        resolve_samples(reference_signal, calibrate=False, name="reference_signal"),
         dtype=np.float64,
     )
     if signal_arr.size == 0:

@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import math
 import warnings
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 import reference_data as ref
@@ -106,7 +106,11 @@ def _chk_intensity_scan_lw() -> Outcome:
 )
 def _chk_iec61043_table2() -> Outcome:
     """All 22 bands x 3 device kinds x 2 classes against the printed table."""
-    columns = {"probe": (1, 2), "processor": (3, 4), "instrument": (5, 6)}
+    columns: dict[Literal["probe", "processor", "instrument"], tuple[int, int]] = {
+        "probe": (1, 2),
+        "processor": (3, 4),
+        "instrument": (5, 6),
+    }
     worst = 0.0
     for device, (col1, col2) in columns.items():
         limits = ph.emission.residual_index_limits(device)
@@ -769,7 +773,13 @@ def _chk_iso3747_eq11_vs_iso3741() -> Outcome:
         _ISO3747_ST, _ISO3747_RSS, _ISO3747_LW_RSS, frequencies=_ISO3747_FREQS,
         temperature_c=20.0, static_pressure_kpa=100.0,
     )  # fmt: skip
-    worst = float(np.max(np.abs(res.sound_power_level_ref - room.sound_power_level)))
+    worst = float(
+        np.max(
+            np.abs(
+                res.sound_power_level_at_reference_conditions - room.sound_power_level
+            )
+        )
+    )
     return numeric(
         0.0, worst, 1e-9, unit="dB", places=9, expected_label="0 dB difference"
     )
@@ -1223,7 +1233,16 @@ def _chk_iso9295_free_field_correction() -> Outcome:
 #: ISO 9295:2015 Table 3 as printed: (noise from 125 Hz to 8 kHz, noise in the
 #: 16 kHz octave) -> the levels to determine, in the words of the
 #: identifiers ``high_frequency_levels_to_determine`` returns.
-_ISO9295_TABLE_3 = (
+_ISO9295_TABLE_3: tuple[
+    tuple[
+        tuple[
+            Literal["broadband", "narrowband", "none"],
+            Literal["none", "broadband", "discrete_tone", "multiple_tones"],
+        ],
+        tuple[str, ...],
+    ],
+    ...,
+] = (
     (("broadband", "none"), ("a_weighted_sound_power_level",)),
     (
         ("broadband", "broadband"),

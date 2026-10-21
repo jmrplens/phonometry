@@ -111,8 +111,8 @@ DampingMaterial(
     peak_temperature_at_10_hz_c: float | None = None,
     peak_temperature_at_100_hz_c: float | None = None,
     peak_temperature_at_1000_hz_c: float | None = None,
-    youngs_modulus_max_pa: float | None = None,
     youngs_modulus_min_pa: float | None = None,
+    youngs_modulus_max_pa: float | None = None,
     youngs_modulus_transition_pa: float | None = None,
     loss_modulus_max_pa: float | None = None,
 )
@@ -133,8 +133,8 @@ peaks, once per printed frequency.
 | `peak_temperature_at_10_hz_c` | Temperature at which `max_loss_factor` occurs when the material is worked at 10 Hz. |
 | `peak_temperature_at_100_hz_c` | The same at 100 Hz. |
 | `peak_temperature_at_1000_hz_c` | The same at 1000 Hz. |
-| `youngs_modulus_max_pa` | Storage Young's modulus at the stiff end, for low temperatures or high frequencies. |
 | `youngs_modulus_min_pa` | Storage Young's modulus at the soft end, for high temperatures or low frequencies. |
+| `youngs_modulus_max_pa` | Storage Young's modulus at the stiff end, for low temperatures or high frequencies. |
 | `youngs_modulus_transition_pa` | Storage Young's modulus in the band where the loss factor peaks, which is the one that belongs beside `max_loss_factor`. |
 | `loss_modulus_max_pa` | The greatest value of the loss (imaginary) modulus. The chapter gives it as the product of the two above it, so a row where it is not about `max_loss_factor * youngs_modulus_transition_pa` is worth a second look at the page. |
 | `name` | The material as the table names it, attribution stripped. |

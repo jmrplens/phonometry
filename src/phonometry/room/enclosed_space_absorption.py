@@ -30,7 +30,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -42,10 +42,11 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from .._report.metadata import ReportMetadata
 
 
-from .._internal.types import as_float_or_array
+from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
     require_finite_fields,
@@ -54,6 +55,12 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
+
+#: The six air conditions Table 1 prints an attenuation for, by temperature
+#: and relative humidity band.
+AirCondition = Literal[
+    "10C_30-50", "10C_50-70", "10C_70-90", "20C_30-50", "20C_50-70", "20C_70-90"
+]
 
 __all__ = [
     "ReverberationResult",
@@ -86,7 +93,7 @@ _OBJECT_EXPONENT = 2.0 / 3.0
 #: Power attenuation coefficient ``m`` in air, in Neper per metre, by
 #: temperature/humidity condition over :data:`_OCTAVE_BANDS` (Table 1). The
 #: table lists ``10**-3 Neper/m``; the values here are already in Neper/m.
-_AIR_ATTENUATION: Mapping[str, np.ndarray] = MappingProxyType(
+_AIR_ATTENUATION: Mapping[AirCondition, np.ndarray] = MappingProxyType(
     {
         "10C_30-50": read_only(np.array([0.1, 0.2, 0.5, 1.1, 2.7, 9.4, 29.0]) * 1e-3),
         "10C_50-70": read_only(np.array([0.1, 0.2, 0.5, 0.8, 1.8, 5.9, 21.1]) * 1e-3),
@@ -312,7 +319,7 @@ class ReverberationResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the reverberation time over the octave bands.
 
@@ -330,9 +337,9 @@ class ReverberationResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an enclosed-space absorption/reverberation fiche to a PDF.
 
@@ -382,7 +389,7 @@ def enclosed_space_reverberation(
     *,
     objects: ArrayLike = (),
     object_fraction: float = 0.0,
-    air_condition: str | None = None,
+    air_condition: AirCondition | None = None,
     frequencies: ArrayLike = _OCTAVE_BANDS,
     speed_of_sound: float = _SPEED_OF_SOUND,
 ) -> ReverberationResult:

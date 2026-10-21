@@ -40,7 +40,7 @@ from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal, get_args
 
 import numpy as np
 
@@ -53,6 +53,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
+
+    from ..._i18n import Language
 
 __all__ = [
     "AUDIOGRAM_GROUPS",
@@ -135,8 +137,11 @@ _AUDIOGRAM_NORMALIZED: dict[str, AudiogramParameters] = {
     "OCA": AudiogramParameters("OCA", -1.55, 1.6, 8.66, 54.9, 2.91, 0.968, in_air=True),
 }
 
+#: A hearing group with a published group audiogram (Southall et al. 2019).
+AudiogramGroup = Literal["HF", "VHF", "SI", "PCW", "OCW", "PCA", "OCA"]
+
 #: Hearing groups with a published group audiogram (Southall et al. 2019).
-AUDIOGRAM_GROUPS: tuple[str, ...] = tuple(_AUDIOGRAM_ORIGINAL)
+AUDIOGRAM_GROUPS: tuple[AudiogramGroup, ...] = get_args(AudiogramGroup)
 
 #: Southall et al. (2019) Table 4, PDF page 24 (printed p. 148): frequency of
 #: best hearing
@@ -160,7 +165,7 @@ _ORCA_BREAKS = (11.3, 46.2)
 
 
 def audiogram_parameters(
-    group: str, *, normalized: bool = False
+    group: AudiogramGroup, *, normalized: bool = False
 ) -> AudiogramParameters:
     """Fit parameters of a published group audiogram.
 
@@ -227,7 +232,7 @@ class AudiogramResult(OwnsArrays):
         require_same_length(self, "frequencies", "threshold", axis="frequency")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the hearing threshold versus frequency."""
         from ..._i18n import check_language
@@ -273,7 +278,7 @@ def _bundle(
 
 def group_audiogram(
     frequency_hz: NDArray[np.float64] | list[float] | float,
-    group: str,
+    group: AudiogramGroup,
     *,
     normalized: bool = False,
 ) -> AudiogramResult:

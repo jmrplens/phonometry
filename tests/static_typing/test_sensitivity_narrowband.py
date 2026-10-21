@@ -30,7 +30,7 @@ _FS = 48000
 #: cycles, so its RMS is the amplitude over the square root of two.
 _AMPLITUDE = 0.5
 _TONE = _AMPLITUDE * np.sin(2.0 * np.pi * 1000.0 * np.arange(2 * _FS) / _FS)
-_P0_PA = metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0_PA = metrology.REFERENCE_VALUES["gas"]["sound_pressure"].value
 #: The factor that maps the tone to 94 dB: the pressure over the tone's RMS.
 _FACTOR = _P0_PA * 10.0 ** (94.0 / 20.0) / (_AMPLITUDE / np.sqrt(2.0))
 

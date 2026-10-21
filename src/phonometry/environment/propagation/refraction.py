@@ -70,6 +70,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from ..._i18n import Language
     from ...fluids import Fluid
     from ...materials.absorbers.porous import PorousMediumResult
 
@@ -103,7 +104,7 @@ _MIN_RAY_STEPS = 2
 # ===========================================================================
 # Effective sound-speed profiles
 # ===========================================================================
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class EffectiveSoundSpeedProfile(OwnsArrays):
     r"""Vertical profile of the effective sound speed ``c_eff(z)``.
 
@@ -145,7 +146,7 @@ class EffectiveSoundSpeedProfile(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the effective sound-speed profile (height on the vertical axis)."""
         from ..._i18n import check_language
@@ -459,7 +460,7 @@ class AtmosphericRayResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the curved ray paths (height on the vertical axis)."""
         from ..._i18n import check_language
@@ -657,7 +658,7 @@ class AtmosphericPEResult(OwnsArrays):
         return np.asarray(self.relative_level[i], dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the relative-level field over the range-height plane."""
         from ..._i18n import check_language

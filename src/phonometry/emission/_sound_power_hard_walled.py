@@ -103,7 +103,7 @@ import warnings
 from dataclasses import dataclass
 from itertools import pairwise
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Final, Literal
 
 import numpy as np
 
@@ -113,6 +113,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
+    from .._internal.types import ReportEngine
     from .._report.metadata import ReportMetadata
     from .reference_sound_source import ReferenceSourceCalibration
 
@@ -141,7 +143,7 @@ from ._shared import (
 )
 
 #: The standard the determinations here implement, as the warnings cite it.
-_STANDARD = "ISO 3743-1:2010"
+_STANDARD: Final = "ISO 3743-1:2010"
 #: Background margin at or above which the determination meets 4.5, and below
 #: which K1 is fixed at 1,3 dB; a band where the source under test falls below
 #: it is an upper bound (8.1.3).
@@ -322,9 +324,9 @@ class HardWalledSoundPowerResult(OwnsArrays):
     is :math:`\overline{L_{p(\mathrm{B})}}` (Eq. 12), ``NaN`` where no
     background was measured, and ``reference_power_level`` the calibrated
     :math:`L_{W(\mathrm{RSS})}`. ``background_correction`` and
-    ``background_correction_ref`` are :math:`K_1` and
+    ``reference_background_correction`` are :math:`K_1` and
     :math:`K_{1(\mathrm{RSS})}` per band, and ``background_margin_db`` and
-    ``background_margin_ref_db`` the two margins over the background they
+    ``reference_background_margin_db`` the two margins over the background they
     were read from (``NaN`` where no background was measured).
     ``background_requirement_met`` and ``upper_bound`` are read from those
     margins and the 6 dB of 4.5, so they are not fields: the first is
@@ -355,9 +357,9 @@ class HardWalledSoundPowerResult(OwnsArrays):
     mean_background_level: np.ndarray
     reference_power_level: np.ndarray
     background_correction: np.ndarray
-    background_correction_ref: np.ndarray
+    reference_background_correction: np.ndarray
     background_margin_db: np.ndarray
-    background_margin_ref_db: np.ndarray
+    reference_background_margin_db: np.ndarray
     c2: float
     sigma_r0: np.ndarray
     sigma_r0_a: float
@@ -365,7 +367,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
     coverage_factor: float
     sound_power_level_a: float
     sound_energy_level_a: float
-    quantity: str
+    quantity: Literal["power", "energy"]
     n_microphone_positions: int
     n_source_positions: int
 
@@ -403,9 +405,9 @@ class HardWalledSoundPowerResult(OwnsArrays):
             "mean_background_level",
             "reference_power_level",
             "background_correction",
-            "background_correction_ref",
+            "reference_background_correction",
             "background_margin_db",
-            "background_margin_ref_db",
+            "reference_background_margin_db",
             "sigma_r0",
         )
         require_ranks(self, **dict.fromkeys(bands, 1))
@@ -420,7 +422,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
         """
         return np.asarray(
             _margin_met(self.background_margin_db)
-            & _margin_met(self.background_margin_ref_db),
+            & _margin_met(self.reference_background_margin_db),
             dtype=bool,
         )
 
@@ -435,7 +437,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
         return np.asarray(
             measured
             & ~_margin_met(self.background_margin_db)
-            & _margin_met(self.background_margin_ref_db),
+            & _margin_met(self.reference_background_margin_db),
             dtype=bool,
         )
 
@@ -467,22 +469,22 @@ class HardWalledSoundPowerResult(OwnsArrays):
         return float(self.coverage_factor * self.sigma_tot_a)
 
     @property
-    def sound_power_level_ref(self) -> np.ndarray:
+    def sound_power_level_at_reference_conditions(self) -> np.ndarray:
         """``LW + C2`` under the reference meteorological conditions (Eq. A.1);
         ``NaN`` for an energy determination.
         """
         return np.asarray(self.sound_power_level + self.c2, dtype=np.float64)
 
     @property
-    def sound_energy_level_ref(self) -> np.ndarray:
+    def sound_energy_level_at_reference_conditions(self) -> np.ndarray:
         """``LJ + C2`` under the reference meteorological conditions (Eq. A.3);
         ``NaN`` for a power determination.
         """
         return np.asarray(self.sound_energy_level + self.c2, dtype=np.float64)
 
     @property
-    def sound_power_level_a_ref(self) -> float:
-        """The A-weighted total of :attr:`sound_power_level_ref`.
+    def sound_power_level_a_at_reference_conditions(self) -> float:
+        """The A-weighted total of :attr:`sound_power_level_at_reference_conditions`.
 
         ``C2`` is the same in every band, so it passes through Eq. (B.1)
         unchanged: the total moves by ``C2`` too.
@@ -490,12 +492,12 @@ class HardWalledSoundPowerResult(OwnsArrays):
         return float(self.sound_power_level_a + self.c2)
 
     @property
-    def sound_energy_level_a_ref(self) -> float:
-        """The A-weighted total of :attr:`sound_energy_level_ref` (Eq. B.2)."""
+    def sound_energy_level_a_at_reference_conditions(self) -> float:
+        """The A-weighted total of :attr:`sound_energy_level_at_reference_conditions` (Eq. B.2)."""
         return float(self.sound_energy_level_a + self.c2)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the determined spectrum with the A-weighted total annotated.
 
@@ -522,9 +524,9 @@ class HardWalledSoundPowerResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render the ISO 3743-1 determination as a one-page test sheet.
 
@@ -578,6 +580,7 @@ def _source_grid(arr: np.ndarray) -> tuple[np.ndarray, bool]:
     """
     if arr.ndim == 1:
         return arr[None, None, :], True
+    # The number is a count of array axes, not a quantity.
     if arr.ndim == 2:  # noqa: PLR2004
         return arr[None, :, :], False
     return arr, False
@@ -666,11 +669,11 @@ class _Reference:
     read too.
     """
 
-    levels_ref: ArrayLike
-    lw_ref: ArrayLike | ReferenceSourceCalibration
+    reference_levels: ArrayLike
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration
     frequencies: ArrayLike
     background_levels: ArrayLike | None
-    background_levels_ref: ArrayLike | None
+    reference_background_levels: ArrayLike | None
     temperature_c: float
     static_pressure_kpa: float
     sigma_omc_db: float | None
@@ -679,7 +682,7 @@ class _Reference:
 
 def _determine(
     *,
-    quantity: str,
+    quantity: Literal["power", "energy"],
     mean_source: np.ndarray,
     background_for_source: np.ndarray | None,
     n_positions: int,
@@ -698,29 +701,33 @@ def _determine(
     freqs = _octave_frequencies(reference.frequencies, n_bands)
     omc = _check_uncertainty_inputs(reference.sigma_omc_db, reference.coverage_factor)
     _validate_meteorology(reference.temperature_c, reference.static_pressure_kpa)
-    ref_arr = _finite(reference.levels_ref, "levels_ref", (1, 2))
+    ref_arr = _finite(reference.reference_levels, "reference_levels", (1, 2))
     if traverse and ref_arr.ndim != 1:
         msg = (
-            "'levels_ref' must be the traverse level of the reference source, a "
+            "'reference_levels' must be the traverse level of the reference source, a "
             "(bands,) spectrum, when the source under test was measured on one."
         )
         raise ValueError(msg)
-    mean_ref = _position_mean(ref_arr, "levels_ref", n_positions, n_bands)  # Eq. (11)
+    mean_ref = _position_mean(
+        ref_arr, "reference_levels", n_positions, n_bands
+    )  # Eq. (11)
     # Eq. (14) and (20) give the level under the conditions of the test
     # (Annex A), so a calibration is read there, less its own C2.
     power = _finite(
         _reference_power_levels(
-            reference.lw_ref,
+            reference.reference_sound_power_levels,
             freqs,
             fraction=1,
             temperature_c=reference.temperature_c,
             static_pressure_kpa=reference.static_pressure_kpa,
         ),
-        "lw_ref",
+        "reference_sound_power_levels",
         (1,),
     )
     if power.shape != (n_bands,):
-        msg = f"'lw_ref' must carry one value per band ({n_bands})."
+        msg = (
+            f"'reference_sound_power_levels' must carry one value per band ({n_bands})."
+        )
         raise ValueError(msg)
 
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
@@ -741,15 +748,15 @@ def _determine(
     # measurement brought its own (7.5).
     ref_background = (
         source_background
-        if reference.background_levels_ref is None
-        else reference.background_levels_ref
+        if reference.reference_background_levels is None
+        else reference.reference_background_levels
     )
     k1_ref = np.zeros(n_bands, dtype=np.float64)
     met_ref = np.zeros(n_bands, dtype=bool)
     margin_ref = nan_band.copy()
     if ref_background is not None:
         mean_bg_ref = _position_mean(
-            ref_background, "background_levels_ref", n_positions, n_bands
+            ref_background, "reference_background_levels", n_positions, n_bands
         )
         margin_ref = np.asarray(mean_ref - mean_bg_ref, dtype=np.float64)
         k1_ref, met_ref = _k1_eq13(margin_ref)
@@ -767,9 +774,9 @@ def _determine(
         mean_background_level=np.asarray(mean_bg, dtype=np.float64),
         reference_power_level=np.asarray(power, dtype=np.float64),
         background_correction=k1,
-        background_correction_ref=k1_ref,
+        reference_background_correction=k1_ref,
         background_margin_db=margin,
-        background_margin_ref_db=margin_ref,
+        reference_background_margin_db=margin_ref,
         c2=_c2_correction(reference.temperature_c, reference.static_pressure_kpa),
         sigma_r0=_table3_sigma(freqs),
         sigma_r0_a=_SIGMA_R0_A_DB,
@@ -785,12 +792,12 @@ def _determine(
 
 def sound_power_hard_walled(
     levels: ArrayLike,
-    levels_ref: ArrayLike,
-    lw_ref: ArrayLike | ReferenceSourceCalibration,
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
     background_levels: ArrayLike | None = None,
-    background_levels_ref: ArrayLike | None = None,
+    reference_background_levels: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -813,7 +820,7 @@ def sound_power_hard_walled(
        + \overline{L'_{p(\mathrm{ST})}} + K_{1(\mathrm{RSS})} - K_1
        \tag{Eq. 14}
 
-    at the meteorological conditions of the test; ``sound_power_level_ref``
+    at the meteorological conditions of the test; ``sound_power_level_at_reference_conditions``
     adds the Annex A correction and ``sound_power_level_a`` is the Annex B
     total.
 
@@ -821,10 +828,10 @@ def sound_power_hard_walled(
         the source under test, in decibels: ``(bands,)`` for one microphone
         traverse (NOTE to 8.1.2), ``(NM, bands)`` for fixed positions, or
         ``(NS, NM, bands)`` for several source locations (Eq. 9).
-    :param levels_ref: The same for the reference sound source at the same
+    :param reference_levels: The same for the reference sound source at the same
         microphone positions, ``(NM, bands)``, or its traverse level
         ``(bands,)``.
-    :param lw_ref: Calibrated octave-band sound power level of the reference
+    :param reference_sound_power_levels: Calibrated octave-band sound power level of the reference
         source ``LW(RSS)``, ``(bands,)``, in decibels, under the
         meteorological conditions of the test, since Eq. (14) gives ``LW``
         there (Annex A); or the
@@ -839,7 +846,7 @@ def sound_power_hard_walled(
         ``(NM, bands)`` or one averaged ``(bands,)`` spectrum, in decibels.
         ``None`` applies no correction, warns and leaves
         ``background_requirement_met`` ``False`` throughout (4.5, 7.5).
-    :param background_levels_ref: Background for the reference-source
+    :param reference_background_levels: Background for the reference-source
         measurement, same shapes; ``None`` reuses ``background_levels``.
     :param temperature_c: Air temperature at the test, in degrees Celsius.
     :param static_pressure_kpa: Static pressure at the test, in kilopascals
@@ -873,11 +880,11 @@ def sound_power_hard_walled(
         n_sources=n_sources,
         traverse=traverse,
         reference=_Reference(
-            levels_ref=levels_ref,
-            lw_ref=lw_ref,
+            reference_levels=reference_levels,
+            reference_sound_power_levels=reference_sound_power_levels,
             frequencies=frequencies,
             background_levels=background_levels,
-            background_levels_ref=background_levels_ref,
+            reference_background_levels=reference_background_levels,
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
             sigma_omc_db=sigma_omc_db,
@@ -926,14 +933,14 @@ def _event_grid(arr: np.ndarray, n_events: int | None) -> tuple[np.ndarray, bool
 
 def sound_energy_hard_walled(
     event_levels: ArrayLike,
-    levels_ref: ArrayLike,
-    lw_ref: ArrayLike | ReferenceSourceCalibration,
+    reference_levels: ArrayLike,
+    reference_sound_power_levels: ArrayLike | ReferenceSourceCalibration,
     *,
     frequencies: ArrayLike,
     n_events: int | None = None,
     background_levels: ArrayLike | None = None,
     integration_time: float | None = None,
-    background_levels_ref: ArrayLike | None = None,
+    reference_background_levels: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     sigma_omc_db: float | None = None,
@@ -967,9 +974,9 @@ def sound_energy_hard_walled(
         per event on the first axis (Eq. 15). With ``n_events``: ``(bands,)``,
         ``(NM, bands)`` or ``(NS, NM, bands)``, one measurement encompassing
         ``n_events`` events (Eq. 16).
-    :param levels_ref: Time-averaged levels of the reference sound source,
+    :param reference_levels: Time-averaged levels of the reference sound source,
         ``(NM, bands)`` or ``(bands,)``, as in :func:`sound_power_hard_walled`.
-    :param lw_ref: Calibrated sound power level of the reference source,
+    :param reference_sound_power_levels: Calibrated sound power level of the reference source,
         ``(bands,)``, in decibels, under the meteorological conditions of the
         test, or its :class:`~phonometry.emission.ReferenceSourceCalibration`,
         as for :func:`sound_power_hard_walled`.
@@ -985,7 +992,7 @@ def sound_energy_hard_walled(
         levels, in seconds. The background is compared as its exposure over
         the same ``T``, :math:`L_{p(\mathrm{B})} + 10 \log_{10}(T/T_0)`, so
         that Eq. (19) subtracts one energy from another.
-    :param background_levels_ref: Background for the reference-source
+    :param reference_background_levels: Background for the reference-source
         measurement; ``None`` reuses ``background_levels``, compared with the
         time-averaged reference level as it stands.
     :param temperature_c: Air temperature at the test, in degrees Celsius.
@@ -1033,11 +1040,11 @@ def sound_energy_hard_walled(
         n_sources=n_sources,
         traverse=traverse,
         reference=_Reference(
-            levels_ref=levels_ref,
-            lw_ref=lw_ref,
+            reference_levels=reference_levels,
+            reference_sound_power_levels=reference_sound_power_levels,
             frequencies=frequencies,
             background_levels=background_levels,
-            background_levels_ref=background_levels_ref,
+            reference_background_levels=reference_background_levels,
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
             sigma_omc_db=sigma_omc_db,
@@ -1148,6 +1155,7 @@ class HardWalledRoomCheck(OwnsArrays):
                 f"the bands of Table 3 ({_STANDARD})."
             )
             raise ValueError(msg)
+        # The fewest values the step below can work with, not a quantity.
         if self.n_orientations < 2:  # noqa: PLR2004
             msg = "HardWalledRoomCheck: 'n_orientations' must be at least 2."
             raise ValueError(msg)
@@ -1251,7 +1259,7 @@ class HardWalledRoomCheck(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the orientation spread per band against the Table 3 limit.
 
@@ -1314,6 +1322,7 @@ def check_hard_walled_room(
     """
     levels = _finite(orientation_levels, "orientation_levels", (2,))
     n_orientations, n_bands = levels.shape
+    # The fewest values the step below can work with, not a quantity.
     if n_orientations < 2:  # noqa: PLR2004
         msg = (
             "'orientation_levels' must hold at least two orientations (4.4 uses eight)."
@@ -1391,7 +1400,7 @@ class SourceLocationPlan(OwnsArrays):
     so they are read-only properties and not fields.
     """
 
-    standard: str
+    standard: Literal["ISO 3743-1:2010", "ISO 3743-2:2018"]
     frequencies: np.ndarray
     standard_deviation_db: np.ndarray
     source_locations: np.ndarray
@@ -1460,7 +1469,7 @@ class SourceLocationPlan(OwnsArrays):
         return bool(np.any(self.additional_room_locations > 0))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         r"""Plot :math:`s_\mathrm{M}` per band against the table's class limits,
         with the number of source locations over each bar.
@@ -1511,6 +1520,7 @@ def hard_walled_source_locations(
     """
     arr = _finite(levels, "levels", (2,))
     n_positions, n_bands = arr.shape
+    # The fewest values the step below can work with, not a quantity.
     if n_positions < 2:  # noqa: PLR2004
         msg = "'levels' must hold at least two microphone positions for Eq. (7)."
         raise ValueError(msg)

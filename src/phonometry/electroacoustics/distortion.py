@@ -14,7 +14,7 @@ captured signal:
   20 kHz by default).
 * **Weighted THD** (14.12.11), the harmonic residual weighted by the
   IEC 60268-1 / ITU-R BS.468-4 network (A/C optional), whose nominal
-  response :func:`itu_r_468_weighting` exposes on its own.
+  response :func:`weighting_bs468` exposes on its own.
 
 All metrics have an exact analytic oracle: a signal synthesised with known
 harmonic amplitudes reproduces the closed-form ratio. The functions assume
@@ -49,13 +49,14 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 __all__ = [
     "HarmonicDistortionResult",
     "harmonic_analysis",
     "harmonic_distortion",
-    "itu_r_468_weighting",
+    "weighting_bs468",
     "sinad",
     "thd",
     "thd_plus_noise",
@@ -545,7 +546,7 @@ def sinad(
     return float(-thdn_db)
 
 
-def itu_r_468_weighting(frequencies: ArrayLike) -> NDArray[np.float64]:
+def weighting_bs468(frequencies: ArrayLike) -> NDArray[np.float64]:
     r"""ITU-R BS.468-4 weighting response, in dB re 1 kHz.
 
     Clause 1 of the Recommendation defines the nominal curve as the response
@@ -603,7 +604,7 @@ def _weighted_rms_468(x: NDArray[np.float64], fs: float) -> float:
     freqs = np.fft.rfftfreq(n, d=1.0 / fs)
     gains = np.zeros(freqs.size)
     nonzero = freqs > 0.0
-    gains[nonzero] = 10.0 ** (itu_r_468_weighting(freqs[nonzero]) / 20.0)
+    gains[nonzero] = 10.0 ** (weighting_bs468(freqs[nonzero]) / 20.0)
     weights = np.full(freqs.size, 2.0)
     weights[0] = 1.0
     if n % 2 == 0:
@@ -731,7 +732,7 @@ class HarmonicDistortionResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the magnitude spectrum with the harmonics marked.
 

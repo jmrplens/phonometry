@@ -4,7 +4,7 @@ description: "What 4.0 moved, renamed and removed, and how to find the new spell
 ---
 
 4.0 is a hard break with no compatibility layer. Almost nothing was deleted:
-of the 885 names the root exported in 3.3.0, seventy-four exist nowhere any more
+of the 885 names the root exported in 3.3.0, seventy-eight exist nowhere any more
 and the rest simply live at a named address instead of a flat one. So most of the
 work is an import sweep, and this page is mostly a map.
 
@@ -28,7 +28,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # this is the new spelling
 ```
 
-Measured across the whole surface, 808 of those 885 root names are published
+Measured across the whole surface, 804 of those 885 root names are published
 today by exactly one subpackage, none by two, and none needs a path deeper
 than `phonometry.<subpackage>`. Three more are still at the root, where they
 always were. So the swap is unambiguous: find the subpackage, import from it.
@@ -218,9 +218,9 @@ in this library.
 | 3.3.0 | 4.0 |
 | --- | --- |
 | `temperature=` | `temperature_c=` |
-| `pressure=` on `air_attenuation`, `air_attenuation_m` (now `air_power_attenuation_per_m`), `atmospheric_attenuation`, `atmospheric_absorption`, `outdoor_propagation_attenuation`, `sae_band_attenuation`, `impedance_adjustment` and `atmospheric_adjustment`, and on the `event_level` and `noise_contour` methods of `AnpAircraft` and `AnpDatabase`; `static_pressure=` on `meteorological_corrections`, `sound_power_anechoic`, `sound_power_reverberation` and `sound_power_comparison`; the fields `AtmosphericAttenuation.pressure`, `AircraftBandAttenuation.pressure` and `ReportMetadata.pressure`, all in kPa | `static_pressure_kpa=` and `.static_pressure_kpa` |
+| `pressure=` on `air_attenuation`, `air_attenuation_m` (now `air_power_attenuation_per_m`), `atmospheric_attenuation`, `atmospheric_absorption`, `outdoor_propagation_attenuation`, `sae_band_attenuation` (now `band_attenuation_arp5534`), `impedance_adjustment` and `atmospheric_adjustment`, and on the `event_level` and `noise_contour` methods of `AnpAircraft` and `AnpDatabase`; `static_pressure=` on `meteorological_corrections`, `sound_power_anechoic`, `sound_power_reverberation` and `sound_power_comparison`; the fields `AtmosphericAttenuation.pressure`, `AircraftBandAttenuation.pressure` and `ReportMetadata.pressure`, all in kPa | `static_pressure_kpa=` and `.static_pressure_kpa` |
 | `static_pressure=` on `alternating_airflow_resistance`, `barometric_pressure=` on `sound_power_intensity_precision`, `atmospheric_pressure=` on `enclosed_gas_stiffness` and `floating_floor_resonance` | `static_pressure_pa=` |
-| `atmospheric_pressure=` on `air_density_iso` and `air_density_astm` | `static_pressure_kpa=` on `air_density_iso10534` and `air_density_astm` |
+| `atmospheric_pressure=` on `air_density_iso` (now `air_density_iso10534`) and `air_density_astm` (now `air_density_astm_e2611`) | `static_pressure_kpa=` on `air_density_iso10534` and `air_density_astm_e2611` |
 | `atmospheric_pressure=` on `johnson_champoux_allard` and the slow-sound functions | the `fluid=` they take now, which carries its own static pressure |
 | `humidity=`, `relative_humidity=` | `relative_humidity_percent=` |
 | `diameter=` and its thirteen compounds | `diameter_m=` |
@@ -277,7 +277,7 @@ both heights in metres, and two temperatures say which scale they are on:
 | `mic_height=` and `source_height=` on every ISO 13472-1 function of `materials` that takes them, and on `plot_insitu_geometry` | `microphone_height_m=`, `source_height_m=` |
 | `InsituAbsorptionResult.mic_height` and `.source_height` | `.microphone_height_m` and `.source_height_m` |
 | `GasStream.inlet_temperature_k`, in kelvin | `inlet_temperature_c`, in degrees Celsius: convert the number, as the section above shows |
-| `RoadEmissionCoefficients.temperature_k`, the CNOSSOS-EU $K_m$ in dB per degree Celsius, whose `_k` read as kelvin | `temperature_coefficient_db_per_c` |
+| `RoadEmissionCoefficients.temperature_k`, the CNOSSOS-EU $K_m$ in dB per degree, which read as a temperature in kelvin | `temperature_coefficient_db_per_k`: a coefficient per degree is per kelvin, the same number as per degree Celsius |
 
 Lengths take their unit where a second unit competes for the word. A
 thickness is in metres on a layer and in millimetres on the catalogue row it
@@ -342,7 +342,7 @@ ever had the one, as in the table of "One spelling per concept":
 | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- |
 | `RotorcraftHemisphere.azimuth` and `.polar`, `RotorcraftEventResult.azimuth` and `.polar`, in degrees | `.azimuth_deg` and `.polar_deg`, as `hemisphere_source_level` takes them |
-| `sae_band_attenuation(path_length=)` and `AircraftBandAttenuation.path_length` | `path_length_m` |
+| `sae_band_attenuation(path_length=)` (now `band_attenuation_arp5534`) and `AircraftBandAttenuation.path_length` | `path_length_m` |
 | `gap=` on `double_wall_transmission_loss`, `mass_spring_mass_resonance` and `plot_double_wall_geometry`, and `SoundReductionResult.gap`, in metres | `gap_m`, beside the `gap_mm` of a joint series |
 | `HeavyImpactSourceSpec.tolerance` and `HeavyImpactSourceCheck.tolerance`, in dB | `.tolerance_db` |
 | `LoudspeakerCharacteristics.input_voltage` and `loudspeaker_characteristics(input_voltage=)`, `MicrophoneNoise.voltage` | `input_voltage_v` and `voltage_v`, as the induction-loop records spell them |
@@ -401,6 +401,17 @@ does. Two constants of one package shared the words "gas constant" for
 third: three figures 29 and 1000 apart under one name. Each now carries its
 whole unit.
 
+A time signal that is one physical quantity is named for it, with its unit,
+as `velocity_mm_s` already was on the DIN 4150 and DIN 45669 functions; a
+signal in any unit is `x`. This only changes a call that wrote the signal by
+name:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `pressure=` on `underwater.sound_pressure_level`, `peak_sound_pressure_level`, `sound_exposure_level`, `pile_strike_metrics`, `single_strike_sel` and `strike_sel_spectrum`, and `PileStrikeResult.pressure` | `pressure_pa` |
+| `acceleration=` on `vibration.acceleration_dose`, `spinal_response` and `multiple_shock_assessment` | `acceleration_m_s2=` |
+| `force=` on `building.impact_force_exposure_level` and `vibration.injected_power` | `force_n=` |
+
 ## Conditions and flags are written by name
 
 An ambient or medium condition or a calibration factor that carries a default,
@@ -446,9 +457,20 @@ These took a condition or a calibration factor by position until now:
 | `psychoacoustics.sharpness_din(x, fs, "free", "din", cal)` | `sharpness_din(x, fs, "free", "din", calibration_factor=cal)` |
 | `environment.ground_attenuation(d, hs, hr, bands, gs, gm, gr)` | `ground_attenuation(d, hs, hr, frequencies=bands, ground_source=gs, ground_middle=gm, ground_receiver=gr)`, and `projected_distance=` by name |
 | the speed of sound by position on `IntensityInstrumentComplianceResult.phase_mismatch_deg`, `emission.phase_mismatch_from_residual_index`, `residual_index_from_phase_mismatch`, `environment.fresnel_number`, `spherical_reflection_coefficient`, `room.reflection_density`, `materials.reflected_path_delay`, `spot_tube_upper_frequency` and `spot_microphone_spacing_bounds` | `speed_of_sound=` |
-| `noise_control.LiquidPipe(d, t, rho, c, rho_air, c_air)` | `LiquidPipe(d, t, rho, speed_of_sound=c, air_density=rho_air, air_sound_speed=c_air)` |
-| `underwater.FluidSeabed(rho, c, rho_water)` | `FluidSeabed(rho, c, water_density=rho_water)` |
+| `noise_control.LiquidPipe(d, t, rho, c, rho_air, c_air)` | `LiquidPipe(internal_diameter_m=d, wall_thickness_m=t, density=rho, speed_of_sound=c, air_density=rho_air, air_sound_speed=c_air)` |
+| `underwater.FluidSeabed(rho, c, rho_water)` | `FluidSeabed(density=rho, speed_of_sound=c, water_density=rho_water)` |
 | `io.Signal(data, fs, cal)` | `io.Signal(data, fs, calibration_factor=cal)`, and `channel_labels`, `provenance` and `source` by name |
+
+A parameter whose name carries its unit and that has a default is written by
+name too. `noise_signal(fs, 2.0)` reads as two seconds only to someone who
+remembers the order, and the `_s` that says so is on the parameter, not on the
+call:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `signals.noise_signal(fs, 2.0)`, `speech.stipa_signal(fs, 18.0)` | `noise_signal(fs, duration_s=2.0)`, `stipa_signal(fs, duration_s=18.0)` |
+| `underwater.ship_source_spectrum(12.0, 100.0)` | `ship_source_spectrum(12.0, length_m=100.0)` |
+| the per-sample duration by position on `hearing.job_based_exposure` | `sample_duration_hours=` |
 
 A frequency axis is written by name as well, wherever it sits beside the values
 it labels. Two arrays of one length bind either way round without a complaint,
@@ -518,6 +540,32 @@ levels=levels)`, and a positional call raises `TypeError`. A result the
 library builds and another function takes whole keeps its fields where they
 are, since no caller writes it field by field.
 
+Every record you build and hand to a function takes its fields by name, not
+only those with an axis. These took them by position in 3.3.0 or 4.0.0rc1:
+
+- `aircraft`: `Aerodrome`, `AerodynamicCoefficients`, `ApproachStep`, `DepartureStep`, `FlightConditionInterpolation`, `JetEngineCoefficients`, `PerformanceAircraft`, `PropellerEngineCoefficients`, `RotorcraftGround`.
+- `broadcast`: `QuasiPeakBallistics`.
+- `building`: `ApertureTransmissionResult`, `BandPath`, `FacadeElement`, `FlankingPath`, `HomogeneousElement`, `LowFrequencyProcedure`, `SoundReductionResult`.
+- `electroacoustics`: `LoudspeakerDirectivity`, `LoudspeakerRatings`, `MicrophoneDirectivity`, `MicrophoneElectrical`, `MicrophoneNoise`, `MicrophoneOverload`.
+- `emission`: `GradeConditions`, `PrecisionFieldIndicators`, `RoomEnvironment`.
+- `environment`: `Barrier`, `DirectivityCorrection`, `EffectiveSoundSpeedProfile`, `GroundFactors`, `NoisePhase`, `PropagationGeometry`, `RailwayTrack`, `RailwayVehicle`, `RegulationLimits`, `RoadDeviceRating`, `RoadEmissionCoefficients`, `RoadSurfaceCoefficients`, `RoadTraffic`, `RollingStock`, `SourceEmission`.
+- `filters`: `EQSection`, `FilterDesign`, `LevelCalibration`.
+- `fluids`: `Fluid`.
+- `hearing`: `ExposureResult`, `HMLRatingResult`, `SNRRatingResult`, `Task`.
+- `io`: `BroadcastMetadata`, `SignalOrigin`.
+- `materials`: `AbsorptionRatingResult`, `AirLayer`, `BiotWavesResult`, `HelmholtzResonator`, `MembraneLayer`, `MetadiffuserWell`, `MicroperforatedPlateLayer`, `PerforatedPlateLayer`, `PoroelasticLayer`, `PorousLayer`, `PorousMediumResult`.
+- `metrology`: `Quantity`.
+- `noise_control`: `DesignCriterion`, `DownstreamPipe`, `DuctElement`, `Expander`, `GasStream`, `LiquidPipe`, `LiquidStream`, `LiquidTrim`, `RegimeBoundaries`, `RoomToRoomResult`, `SourceRoom`, `ValveTrim`.
+- `simulation`: `ContourPhasors`, `CWSource`, `ElasticBoundaries`, `ElasticRecording`, `ExplosionSource`, `ForceSource`, `GaussianPulse`, `Material`, `PlaneWaveSource`, `SignalSource`.
+- `underwater`: `BeamFan`, `FluidSeabed`, `RayTraceResult`, `VolumeAbsorption`, `WestonSeabed`.
+- `vibration`: `FaultFrequencyResult`, `FaultLine`, `WeightingVerification`, `ZoneBoundaries`.
+
+`noise_control.DuctElement("Elbow", [0, 1, 2], [41, 39, 36])` is
+`DuctElement(label="Elbow", attenuation=[0, 1, 2], self_noise=[41, 39, 36])`.
+`io.Signal(x, fs)` is the one record that keeps its two first fields by
+position: the samples and their rate are the pair every function of the
+library takes that way.
+
 ## One spelling per concept
 
 The public names had drifted into several spellings of the same quantity, and
@@ -552,14 +600,14 @@ hertz, `levels` in decibels and the sample rate is `fs` on every function.
 | `level=`, `measured_level=`, `operational_level=` on `sti_from_impulse_response`, `stipa`, `sti_adjusted_for_levels` and `STIResult.adjusted_for_levels` | `levels=`, `measured_levels=`, `operational_levels=` |
 | `.passed` on `AircraftSystemComplianceResult`, `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck`, `RigidMassCalibrationResult` | `.passes`, as on every other verifier |
 | `MicrophoneNoise(weighting="CCIR")` | `MicrophoneNoise(weighting="468")`, the spelling `weighting_filter` and `weighted_thd` use for the ITU-R BS.468-4 curve |
-| `atmospheric_pressure_kpa=` on the ISO 9613-1 functions, `atmospheric_absorption`, `outdoor_propagation_attenuation`, `AtmosphericAttenuation`, `AtmosphericConditions`, `sae_band_attenuation`, `AircraftBandAttenuation`, `AerodromeAtmosphere`, `RotorcraftAtmosphere`, `impedance_adjustment`, `atmospheric_adjustment`, the `AnpAircraft` and `AnpDatabase` methods, `air_density_iso10534` and `air_density_astm`; `atmospheric_pressure_pa=` on `enclosed_gas_stiffness` and `floating_floor_resonance`; `barometric_pressure_pa=` on `sound_power_intensity_precision`; `absolute_pressure_pa=` on `sea_water_density` | `static_pressure_kpa=` or `static_pressure_pa=`, the same unit |
+| `atmospheric_pressure_kpa=` on the ISO 9613-1 functions, `atmospheric_absorption`, `outdoor_propagation_attenuation`, `AtmosphericAttenuation`, `AtmosphericConditions`, `sae_band_attenuation` (now `band_attenuation_arp5534`), `AircraftBandAttenuation`, `AerodromeAtmosphere`, `RotorcraftAtmosphere`, `impedance_adjustment`, `atmospheric_adjustment`, the `AnpAircraft` and `AnpDatabase` methods, `air_density_iso10534` and `air_density_astm` (now `air_density_astm_e2611`); `atmospheric_pressure_pa=` on `enclosed_gas_stiffness` and `floating_floor_resonance`; `barometric_pressure_pa=` on `sound_power_intensity_precision`; `absolute_pressure_pa=` on `sea_water_density` | `static_pressure_kpa=` or `static_pressure_pa=`, the same unit |
 | `ambient_pressure_pa=` on `normal_air_density` | `atmospheric_pressure_pa=`, the outside atmosphere beside the gauge static pressure of the duct |
 | `environmental_ratio_from_absorption(absorption_area_m2=)`, `running_rms_decay_time(integration_time_s=)` and `verify_running_rms_decay(integration_time_s=)` | `absorption_area=` and `integration_time=`, the spelling of the rest of their packages |
 | `bending_stress(density_kg_m3=)` | `density=`, the spelling of the rest of `vibration` |
 | `confidence=` on `building.insulation_coverage_factor`, `materials.absorption_coverage_factor`, `sound_absorption_coefficient_uncertainty`, `equivalent_area_uncertainty`, `practical_coefficient_uncertainty`, `weighted_coefficient_uncertainty`, `single_number_rating_uncertainty` and `environment.environmental_expanded_uncertainty`, and `UncertainValue.confidence` | `coverage=` and `.coverage`, the coverage probability of the GUM; `confidence` is left to the statistical confidence of an interval, as on `signals.power_spectral_density` |
 
-`times, levels = decay_curve(ir, fs)` still unpacks the decay curve, in the
-same order. The FDTD solvers keep `c` and `rho`, which name the maps their
+A `DecayCurve` is read by name, `curve.times` and `curve.levels`, and no
+longer unpacks as the pair it replaced. The FDTD solvers keep `c` and `rho`, which name the maps their
 equations are written in.
 
 A unit has one spelling too. A duration ends in `_s` or `_hours`, an angle in
@@ -574,6 +622,29 @@ and an `_h` that means hours appear nowhere in the public API any more.
 | `wind_speed_knots=` on `ocean_ambient_noise` and `wind_noise_spectrum`, and `AmbientNoiseResult.wind_speed_knots` | `wind_speed_kt`, the spelling the aircraft speeds use |
 | `speed_knots=` on `ship_source_spectrum`, and `ShipTrafficSpectrum.speed_knots` | `speed_kt` |
 | `GasStream.molecular_mass`, in kg/kmol | `GasStream.molar_mass_kg_kmol`, the name the fluids catalogue gives its `molar_mass_kg_mol` per mole |
+
+A word is written whole: `ref` is `reference` in every public name that
+abbreviated it. SPL, SEL, SNR and RMS stay as they are, terms of art like
+`L_max`.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `levels_ref=`, `background_levels_ref=` and `lw_ref=` on `sound_power_comparison` and `sound_energy_comparison` (3.3.0), and on `sound_power_in_situ` and `sound_energy_in_situ` (4.0.0rc1) | `reference_levels=`, `reference_background_levels=` and `reference_sound_power_levels=`, the last as `high_frequency_sound_power_comparison` spells it |
+| `InSituSoundPowerResult.background_correction_ref`, `.sound_power_level_ref` and `.sound_energy_level_ref` | `.reference_background_correction`, and `.sound_power_level_at_reference_conditions` and `.sound_energy_level_at_reference_conditions`: the levels with the Annex C correction (C2, to the reference meteorological conditions), not those of the reference source |
+| `metrology.sensitivity(ref_signal=)` | `reference_signal=` |
+
+A standard's designation is in a name only where it tells two things apart,
+and then it is written one way: the body joined to its number, first in a
+constant or a class and last in a function. Where the module already names
+the standard, the designation is gone.
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `sae_band_attenuation` | `aircraft.band_attenuation_arp5534`, the document it follows |
+| `itu_r_468_weighting` | `electroacoustics.weighting_bs468` |
+| `air_density_astm` and `speed_of_sound_astm`, and `plane_wave_frequency_range_astm` (4.0.0rc1) | `materials.air_density_astm_e2611`, `speed_of_sound_astm_e2611` and `plane_wave_frequency_range_astm_e2611`, beside `air_density_iso10534` |
+| `noise_control.VDI2081_SPECTRAL_CORRECTION` | `noise_control.SPECTRAL_CORRECTION`: the package has no other spectral correction to tell it from, and its own text cites VDI 2081 Part 2 |
+| `building.EN_12354_AIR` | `building.EN12354_AIR` |
 
 An identifier is spelled in American English, and in situ is spelled
 `in_situ`. A caller types every name, so `center_frequency` on one function
@@ -713,7 +784,7 @@ single address now, the one the resolver above returns, and none is private:
 | the ISO 12354-1 Annex D linings listed by `building.prediction.resilient_layers`: `lining_improvement`, `lining_improvement_in_situ`, `lining_resonance_frequency`, `weighted_lining_improvement`, `LiningImprovementResult` | `building.lining_improvement` and the rest, defined in `building.prediction.linings` |
 | `emission.DeclarationForm`; `Grade` and `Surface` listed by `emission.sound_power`; `EQFilterType` listed by `filters.equalizer` (`metrology.equalizer` in 3.3.0) | nothing to import: no type alias is public. Pass the string the parameter takes, `form="single-number"` for instance, and the API reference shows each parameter's `Literal[...]` where the alias used to be |
 | `BASIC_METHOD_MAX_CREST_FACTOR` listed by `vibration.human.exposure` | not published. `vibration.crest_factor` warns above 9, the crest factor up to which ISO 2631-1 6.2.2 holds the basic method sufficient |
-| `REFERENCE_IMPEDANCE`, `REFERENCE_AREA` and `REFERENCE_SOUND_POWER` of `emission.vibration_sound_power`, a module with no `__all__` whose package never published them | not published. The 400 N·s/m³ and the 1 m² are the defaults of `reference_impedance=` and `reference_area=` in `emission.radiated_sound_power_level`, and the 1 pW is `metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value` |
+| `REFERENCE_IMPEDANCE`, `REFERENCE_AREA` and `REFERENCE_SOUND_POWER` of `emission.vibration_sound_power`, a module with no `__all__` whose package never published them | not published. The 400 N·s/m³ and the 1 m² are the defaults of `reference_impedance=` and `reference_area=` in `emission.radiated_sound_power_level`, and the 1 pW is `metrology.REFERENCE_VALUES["gas"]["sound_power"].value` |
 | `AnpAircraft(..., _database=db)` and `aircraft._database` | `ANPAircraft(..., database=db)` and `aircraft.database`, still left out of the repr and of comparisons |
 | `AnpDatabase(..., performance=...)` (4.0.0rc1) | no `performance=`, whose type nothing published: `aircraft.load_anp_database` reads the performance tables of an export, and a database built by hand flies fixed-point profiles |
 
@@ -862,6 +933,12 @@ In 3.3.0 several of them lived elsewhere (`metrology/correlation.py`,
 `psychoacoustics/tone_audibility.py`); the package import is the answer there
 too.
 
+`signals.test_signals` (4.0.0rc1) is private as well, for another reason:
+pytest collects a module whose name starts with `test_`, and the prefix belongs
+to test files. Every function it held keeps its `signals.` address, so `from
+phonometry.signals.test_signals import noise_signal` is `from
+phonometry.signals import noise_signal`.
+
 The type aliases those modules defined went with them, and no public path
 reaches them now: `PrecisionSurface`, `PrecisionArray` and `PrecisionRoom` of
 `emission.sound_power_anechoic`, `MicrophoneShield` of
@@ -898,9 +975,9 @@ way in 3.3.0 or 4.0.0rc1 and are not any more:
 | `VALIDATED_YEARS`, `VALIDATED_FRACTILES` and `VALIDATED_L_EX_MAX` of the same module | not published. `nipts` and `htlan` warn outside the 1 to 40 years, the 0.05 to 0.95 fractiles and the 100 dB ISO 1999 validates |
 | `OCTAVE_BANDS` of `noise_control.hvac` and of `room.enclosed_space_absorption` | not published: each is the default band axis of its functions, and every result carries its `frequencies` |
 | `SPEED_OF_SOUND`, `AIR_ATTENUATION` and `PUBLISHED_AIR_CONDITION` (`DEFAULT_AIR_CONDITION` in 3.3.0) of `room.enclosed_space_absorption` | not published: the 345.6 m/s default of `speed_of_sound=`, and the six conditions `air_condition=` takes, which its docstring lists, `"20C_50-70"` the one clause 4.3 recommends |
-| `REFERENCE_VELOCITY`, `REFERENCE_FORCE`, `REFERENCE_SOUND_POWER` and `FREE_VELOCITY_REFERENCE` of `building.measurement.structure_borne_power` (`building.structure_borne_power` in 3.3.0), and `REFERENCE_PRESSURE` of `environment.assessment.impulsive_sound` (`environmental.impulsive_sound` in 3.3.0) | the `.value` of the `metrology.ISO1683_REFERENCE_VALUES` entry each was read from, since the entry is a record and not a number: `["solid"]["velocity"].value` (1 nm/s), `["solid"]["force"].value` (1 µN), `["gas"]["sound_power"].value` (1 pW), `["solid"]["velocity_alternative"].value` (the 50 nm/s of note b of Table 3, the ISO 9611 free-velocity reference) and `["gas"]["sound_pressure"].value` (20 µPa) |
+| `REFERENCE_VELOCITY`, `REFERENCE_FORCE`, `REFERENCE_SOUND_POWER` and `FREE_VELOCITY_REFERENCE` of `building.measurement.structure_borne_power` (`building.structure_borne_power` in 3.3.0), and `REFERENCE_PRESSURE` of `environment.assessment.impulsive_sound` (`environmental.impulsive_sound` in 3.3.0) | the `.value` of the `metrology.REFERENCE_VALUES` entry each was read from, since the entry is a record and not a number: `["solid"]["velocity"].value` (1 nm/s), `["solid"]["force"].value` (1 µN), `["gas"]["sound_power"].value` (1 pW), `["solid"]["velocity_alternative"].value` (the 50 nm/s of note b of Table 3, the ISO 9611 free-velocity reference) and `["gas"]["sound_pressure"].value` (20 µPa) |
 | `REFERENCE_MOBILITY` and `CHARACTERISTIC_PLATE_MOBILITY` of `building.measurement.structure_borne_power` (`building.structure_borne_power` in 3.3.0), and `REFERENCE_PLATE_MOBILITY` of `building.prediction.installed_structure_borne` (`building.installed_structure_borne` in 3.3.0) | not published. `REFERENCE_MOBILITY` is the 1 m/(N s) reference mobility of EN 15657 clause 5, which the functions apply in its Formulae (15), (17) and (18); the plate mobility is the default of `characteristic_mobility=` and `plate_mobility=` |
-| `SPEED_OF_SOUND`, `AIR_DENSITY`, `REFERENCE_FREQUENCY`, `REFERENCE_LENGTH` and `MAX_RADIATION_FACTOR` of `building.prediction.detailed_model` | not published. The air is `building.EN_12354_AIR`, which carries the 340 m/s and the 1.29 kg/m³ |
+| `SPEED_OF_SOUND`, `AIR_DENSITY`, `REFERENCE_FREQUENCY`, `REFERENCE_LENGTH` and `MAX_RADIATION_FACTOR` of `building.prediction.detailed_model` | not published. The air is `building.EN12354_AIR`, which carries the 340 m/s and the 1.29 kg/m³ |
 | the coefficients, limits and defaults of `environment.assessment.impulsive_sound` (`environmental.impulse_prominence` and `environmental.impulsive_sound` in 3.3.0): `PROMINENCE_COEFFS`, `ADJUSTMENT_SLOPE`, `ADJUSTMENT_THRESHOLD`, `ONSET_RATE_LIMIT`, `DEFAULT_ASSESSMENT_PERIOD_MIN`, `ONSET_GRADIENT_LIMIT`, `TIME_WEIGHTING_F_TAU`, `MERGE_GAP`, `SAMPLE_INTERVAL_RANGE`, `DEFAULT_SAMPLE_INTERVAL`, `HIGHLY_IMPULSIVE_LIMIT` | not published: each is applied by `impulse_prominence` or `impulsive_sound_adjustment`, and the two defaults are those of `dt=` (20 ms) and `assessment_period_minutes=` (30 min) |
 | the Annex C constants of `vibration.human.multiple_shock` (`vibration.multiple_shock_vibration` in 3.3.0): `MZ_MALE`, `MZ_FEMALE`, `DOSE_AMPLITUDE_FACTOR`, `DOSE_EXPONENT`, `GRAVITY`, `ULTIMATE_STRENGTH_INTERCEPT`, `STRENGTH_AGE_SLOPE_MALE`, `STRENGTH_AGE_SLOPE_FEMALE`, `WEIBULL_MALE`, `WEIBULL_FEMALE`, `RISK_THRESHOLDS_MALE`, `RISK_THRESHOLDS_FEMALE` | not published: the functions take `sex=` and apply the pair it names. `compression_dose(..., mz=)` defaults to 0.029, the male value of Formula C.2; pass 0.025 for the female one |
 | `DEFAULT_HEADWIND_KT` and `APPROACH_WEIGHT_FRACTION` of `aircraft.flight_performance` | not published: the 8 kt default of `Aerodrome(headwind_kt=)`, and the 0.9 of the maximum landing weight the approach is flown at |
@@ -1123,6 +1200,8 @@ first.
 | `f, spl = psychoacoustics.equal_loudness_contour(40.0)`, `f, tf = psychoacoustics.hearing_threshold()` | `c = psychoacoustics.equal_loudness_contour(40.0)`, then `c.frequencies`, `c.levels` and `c.phon`, which is `None` for the threshold (a `LoudnessContour`, with `.plot()`) |
 | `f, v = vibration.foundation_guideline_curve(building_class)` | `g = vibration.foundation_guideline_curve(building_class)`, then `g.frequencies` and `g.velocities_mm_s` (a `GuidelineCurve`) |
 | `chi, psi = vibration.junction_wave_parameters(...)` | `w = vibration.junction_wave_parameters(...)`, then `w.chi` and `w.psi` (a `JunctionWaveParameters`) |
+| `time, level = room.decay_curve(ir, fs)`, which still unpacked | `curve = room.decay_curve(ir, fs)`, then `curve.times` and `curve.levels` (a `DecayCurve`, which no longer unpacks) |
+| `times, levels = environment.sound_pressure_level_history(x, fs)` | `h = environment.sound_pressure_level_history(x, fs)`, then `h.times` and `h.levels` (a `LevelHistory`, which no longer unpacks) |
 
 ```python
 import numpy as np
@@ -1503,7 +1582,7 @@ says where each verdict first shipped.
 | `hearing.REATSoundFieldCheck` | `allowable_variation_db` | gains `free_field_rejection` | after 4.0.0rc1 |
 | `hearing.DiffuseSoundFieldCheck` | `allowable_variation_db` | gains `front_to_random_index` | after 4.0.0rc1 |
 | `hearing.FreeSoundFieldCheck` | `axis_offset_m`, `inverse_distance_difference` | `field` and `loudspeaker_distance_m` select them | after 4.0.0rc1 |
-| `electroacoustics.ProgramSignalCheck` | `offset_db`, `relative_levels`, `upper_tolerance_db`, `lower_tolerance_db` | `frequencies`, `band_levels` | after 4.0.0rc1 |
+| `electroacoustics.ProgramSignalCheck` | `offset_db`, `relative_levels`, `lower_tolerance_db`, `upper_tolerance_db` | `frequencies`, `band_levels` | after 4.0.0rc1 |
 | `electroacoustics.NeckLoopVerification` | `limits` | `neck_loop_type` selects it | after 4.0.0rc1 |
 | `psychoacoustics.ToneAssessment` | `prominence_limit_db`, `prominent` | gains `method`, `"tone_to_noise_ratio"` or `"prominence_ratio"` | 3.3.0 |
 | `underwater.WeightedExposureResult` | `criteria` | gains `impulsive` | 4.0.0rc1 |
@@ -1589,9 +1668,9 @@ that is keyword-only.
 | `emission.FreeFieldCheck` | `room`, `frequencies`, `band_radius_m`, `max_qualified_radius_m`, every `*_met`, `full_frequency_range`, `conforming_range_hz`, `conforming_radius_m`, `not_judged` | the arguments of `check_free_field`: gains `source_directionality`, `reflecting_plane_absorption_coefficient`, `reflecting_plane_margin_m`, `paths_in_working_area`, `speed_of_sound` | after 4.0.0rc1 |
 | `emission.IntensityInstrumentComplianceResult` | `bands`, `overall_class`, `range_limited` | `frequencies`, `residual_index`, `device`, `spacing_m` | 4.0.0rc1 |
 | `emission.ReferenceSourceCalibration` | `sound_power_level`, `intensity_bands`, `intensity_agreement`, `room_qualified` | gains `intensity_sound_power_level` and `room_qualification` | after 4.0.0rc1 |
-| `emission.HardWalledSoundPowerResult` | `background_requirement_met`, `upper_bound` | gains `background_margin_db`, `background_margin_ref_db` | after 4.0.0rc1 |
-| `emission.InSituSoundPowerResult` | `background_requirement_met`, `upper_bound`, `grade`, `sigma_r0`, `sigma_tot`, `expanded_uncertainty` | gains `background_margin_db`, `background_margin_ref_db`, the smallest over the positions, and `excess_levels`, `directivity_range_db`, the two indicators Table 2 grades by | 4.0.0rc1 |
-| `emission.SpecialRoomSoundPowerResult` | `background_requirement_met`, `background_requirement_met_a` | gains `background_margin_db`, `background_margin_ref_db`, `background_margin_a_db` | after 4.0.0rc1 |
+| `emission.HardWalledSoundPowerResult` | `background_requirement_met`, `upper_bound` | gains `background_margin_db`, `reference_background_margin_db` | after 4.0.0rc1 |
+| `emission.InSituSoundPowerResult` | `background_requirement_met`, `upper_bound`, `grade`, `sigma_r0`, `sigma_tot`, `expanded_uncertainty` | gains `background_margin_db`, `reference_background_margin_db`, the smallest over the positions, and `excess_levels`, `directivity_range_db`, the two indicators Table 2 grades by | 4.0.0rc1 |
+| `emission.SpecialRoomSoundPowerResult` | `background_requirement_met`, `background_requirement_met_a` | gains `background_margin_db`, `reference_background_margin_db`, `background_margin_a_db` | after 4.0.0rc1 |
 | `emission.EmissionPressureResult` | `upper_bound` | gains `background_margin_db`, by name only | 4.0.0rc1 |
 | `emission.PrecisionCriteria` | `criterion_1` to `criterion_5`, `qualified` | gains the readings: `indicators`, `scan_intensity_level_1`, `scan_intensity_level_2`, `frequencies`, `repeatability_limit_db`, `pressure_residual_index`, `field_nonuniformity_1`, `field_nonuniformity_2` | 3.3.0 |
 | `emission.DiscretePointIntensityResult` | everything but the indicators and the grade: `partial_power`, `sound_power`, `sound_power_level`, `achieved_grade`, both criteria, the A-weighted figures and the rest | gains `normal_intensity`, `segment_areas_m2`, `pressure_residual_index`, `fraction` | 4.0.0rc1 |
@@ -1882,9 +1961,9 @@ print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
 # True
 ```
 
-## The seventy-four names that are gone
+## The seventy-eight names that are gone
 
-Everything else moved. These seventy-four exist in no public module:
+Everything else moved. These seventy-eight exist in no public module:
 
 | Gone | What to write instead |
 | --- | --- |
@@ -1931,6 +2010,9 @@ Everything else moved. These seventy-four exist in no public module:
 | `satisfies_lower_requirement`, `satisfies_upper_requirement` | `building.assess_requirement_conformity(rating, expanded_uncertainty_db, required_rating, bound="minimum")` or `bound="maximum"`. The bool is its `.passes`, beside the `.margin_db` it was read from, and both formulae stay strict |
 | `strong_coupling_satisfied` | `building.check_strong_coupling`, with the same arguments. The boolean array is its `.holds`, and `.passes` is every band |
 | `tonal_seeking_survey` | `environment.assess_tonal_survey(levels, frequencies=frequencies)`. The boolean array is its `.prominent`, beside the `.min_level_differences` and `.level_differences` it was read from |
+| `air_density_astm`, `speed_of_sound_astm` | `materials.air_density_astm_e2611`, `materials.speed_of_sound_astm_e2611`, beside `air_density_iso10534`: a standard's designation in a name is written one way |
+| `sae_band_attenuation` | `aircraft.band_attenuation_arp5534`, the document it follows |
+| `itu_r_468_weighting` | `electroacoustics.weighting_bs468` |
 
 ## What did not change
 

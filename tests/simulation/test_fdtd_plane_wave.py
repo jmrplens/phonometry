@@ -102,9 +102,9 @@ def test_plane_wave_source_rejects_bad_waveform_and_amplitude() -> None:
     # the interpreter's "'float' object is not callable", and a NaN
     # amplitude silently NaNed the field step by step.
     with pytest.raises(TypeError, match="waveform must be callable"):
-        PlaneWaveSource("down", 1.0)  # type: ignore[arg-type]
+        PlaneWaveSource(direction="down", waveform=1.0)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="amplitude must be finite"):
-        PlaneWaveSource("down", lambda t: 0.0, amplitude=np.nan)
+        PlaneWaveSource(direction="down", waveform=lambda t: 0.0, amplitude=np.nan)
 
 
 def test_rigid_wall_doubles_incident_pressure() -> None:
@@ -127,8 +127,10 @@ def test_plane_source_steady_state_is_plane_and_one_way() -> None:
         sponge_width=20,
         sponge_sides=("top", "bottom"),
     )
-    waveform = CWSource(0, 0, frequency=1000.0)
-    sim.add_source(PlaneWaveSource("down", waveform.value, offset=22))
+    waveform = CWSource(ix=0, iy=0, frequency=1000.0)
+    sim.add_source(
+        PlaneWaveSource(direction="down", waveform=waveform.value, offset=22)
+    )
     for _ in range(700):
         sim.step()
     body = sim.p[60:140, :]
@@ -142,19 +144,19 @@ def test_plane_source_steady_state_is_plane_and_one_way() -> None:
 
 def test_plane_source_validation_and_geometry_preview() -> None:
     sim = FDTD2D(C0, DX, shape=(40, 40))
-    bad_direction = PlaneWaveSource("sideways", lambda t: 0.0)
+    bad_direction = PlaneWaveSource(direction="sideways", waveform=lambda t: 0.0)
     with pytest.raises(ValueError, match=r"'direction' must be"):
         sim.add_source(bad_direction)
-    bad_offset = PlaneWaveSource("down", lambda t: 0.0, offset=40)
+    bad_offset = PlaneWaveSource(direction="down", waveform=lambda t: 0.0, offset=40)
     with pytest.raises(ValueError, match=r"plane-wave offset lies outside the grid"):
         sim.add_source(bad_offset)
-    sim.add_source(PlaneWaveSource("left", lambda t: 0.0, offset=2))
+    sim.add_source(PlaneWaveSource(direction="left", waveform=lambda t: 0.0, offset=2))
     assert len(sim._plane_sources) == 1
     # An injection line may not cross an obstacle.
     mask = np.zeros((40, 40), dtype=bool)
     mask[5, 10:20] = True
     blocked = FDTD2D(C0, DX, shape=(40, 40), obstacle_mask=mask)
-    on_obstacle = PlaneWaveSource("down", lambda t: 0.0, offset=5)
+    on_obstacle = PlaneWaveSource(direction="down", waveform=lambda t: 0.0, offset=5)
     with pytest.raises(
         ValueError, match=r"plane-wave injection line crosses an obstacle"
     ):

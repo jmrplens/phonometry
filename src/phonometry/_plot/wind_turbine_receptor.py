@@ -30,6 +30,7 @@ if TYPE_CHECKING:
     from matplotlib.lines import Line2D
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from ..environment.assessment.wind_turbine_modulation import (
         BinnedModulation,
         ModulationBlock,
@@ -121,12 +122,14 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim."""
     return _STRINGS.get(text, text) if language == "es" else text
 
 
-def _num(value: float, language: str, decimals: int = 1, *, trim: bool = False) -> str:
+def _num(
+    value: float, language: Language, decimals: int = 1, *, trim: bool = False
+) -> str:
     from .._i18n import format_number
 
     return format_number(value, language, decimals=decimals, trim=trim)
@@ -159,7 +162,7 @@ _SECTOR_COLOURS: tuple[str, ...] = (
 
 
 def _direction_groups(
-    directions: ArrayLike | None, count: int, language: str
+    directions: ArrayLike | None, count: int, language: Language
 ) -> list[tuple[str, np.ndarray, str | None]]:
     """Name, member mask and colour of each direction sector, in increasing order.
 
@@ -189,7 +192,7 @@ def plot_modulation_block(
     ax: Axes | None = None,
     *,
     kind: str = "spectrum",
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The block's power spectrum (Figure 1 of the TS) or its two series.
@@ -218,7 +221,7 @@ def plot_modulation_block(
 
 
 def _draw_block_spectrum(
-    result: ModulationBlock, ax: Axes, language: str, kwargs: dict[str, Any]
+    result: ModulationBlock, ax: Axes, language: Language, kwargs: dict[str, Any]
 ) -> None:
     freqs = np.asarray(result.frequencies)
     spectrum = np.asarray(result.power_spectrum)
@@ -295,7 +298,7 @@ def _draw_block_spectrum(
 
 
 def _draw_block_series(
-    result: ModulationBlock, ax: Axes, language: str, kwargs: dict[str, Any]
+    result: ModulationBlock, ax: Axes, language: Language, kwargs: dict[str, Any]
 ) -> None:
     time_s = np.arange(np.asarray(result.detrended_levels).size) * 0.1
     reconstructed = np.asarray(result.reconstructed_levels)
@@ -343,7 +346,7 @@ def plot_modulation_period(
     result: ModulationPeriod,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The 10 s depths through the period and the 10 min rating."""
@@ -407,7 +410,7 @@ def plot_binned_modulation(
     result: BinnedModulation,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The worst band's mean rating per bin against wind speed.
@@ -471,7 +474,7 @@ def plot_wind_shear_profile(
     result: WindShearProfile,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The power-law profile through the two measured points."""
@@ -536,7 +539,7 @@ def plot_binned_sound_levels(
     result: BinnedSoundLevels,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The interval levels against wind speed with the bin averages over them."""
@@ -581,7 +584,7 @@ def plot_turbine_sound_levels(
     result: TurbineSoundLevels,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Total, background and turbine level per bin."""
@@ -637,7 +640,7 @@ def _draw_turbine_levels(
     ax: Axes,
     result: TurbineSoundLevels,
     x: np.ndarray,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> None:
     """Total, background and turbine level as three lines over every bin."""
@@ -670,7 +673,7 @@ def _draw_turbine_levels_by_sector(
     ax: Axes,
     result: TurbineSoundLevels,
     x: np.ndarray,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
 ) -> list[Line2D]:
     """The three levels of each direction sector apart, in the sector's colour.
@@ -724,7 +727,7 @@ def plot_predicted_receptor_level(
     result: PredictedReceptorLevel,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each turbine's predicted level and the total with its uncertainty."""
@@ -762,7 +765,7 @@ def plot_sound_relevant_turbines(
     result: SoundRelevantTurbines,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The turbines' levels, loudest first, the sound relevant ones marked.
@@ -832,7 +835,7 @@ def plot_low_frequency_level(
     result: LowFrequencyLevel,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The outdoor and indoor band levels of Equation (C.1)."""
@@ -873,7 +876,7 @@ def plot_sound_emergence(
     result: SoundEmergence,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The emergence of each wind speed class."""
@@ -906,7 +909,7 @@ def plot_wind_turbine_rating_level(
     result: WindTurbineRatingLevel,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The three candidate adjustments, the governing one outlined."""
@@ -944,7 +947,7 @@ def plot_tone_search_limit(
     result: ToneSearchLimit,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The ISO 9613-1 band attenuation over the distance, the 20 dB line."""

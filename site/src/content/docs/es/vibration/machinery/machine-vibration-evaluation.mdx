@@ -93,7 +93,7 @@ tablas.
 from phonometry import vibration
 
 # Tres fronteras de la parte de la ISO 20816 que aplique, en mm/s eficaces.
-zones = vibration.ZoneBoundaries(2.8, 7.1, 11.2)
+zones = vibration.ZoneBoundaries(a_b=2.8, b_c=7.1, c_d=11.2)
 print(vibration.evaluation_zone([0.9, 3.4, 8.0, 20.0], zones))   # ['A' 'B' 'C' 'D']
 print(vibration.evaluation_zone(2.8, zones))                     # A, el límite de A
 ```

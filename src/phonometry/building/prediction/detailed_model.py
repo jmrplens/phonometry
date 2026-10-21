@@ -123,7 +123,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
-    from ..._internal.types import BandFraction
+    from ..._i18n import Language
+    from ..._internal.types import BandFraction, ReportEngine
     from ..._report.metadata import ReportMetadata
     from ..measurement.ratings import ImpactRatingResult, WeightedRatingResult
 
@@ -138,7 +139,7 @@ _AIR_DENSITY: float = 1.29
 #: transmission model, transcribed rather than recomputed. It is not the air the
 #: visco-thermal absorber models default to, which is 343,0 m/s and
 #: 1,205 kg/m3: a standard's own constants stay with the clause that prints them.
-EN_12354_AIR = Fluid(
+EN12354_AIR = Fluid(
     temperature_c=20.0,
     static_pressure_pa=101_325.0,
     composition={},
@@ -266,7 +267,7 @@ def _rating_slice(
     return np.asarray(values[indices], dtype=np.float64)
 
 
-def _check_report_request(engine: str, language: str) -> None:
+def _check_report_request(engine: ReportEngine, language: Language) -> None:
     """Reject an unknown engine or language before a fiche is rendered."""
     from ..._i18n import check_language
 
@@ -440,7 +441,7 @@ def calculated_sound_reduction_index(
     resonant_only: bool = False,
     density: float | None = None,
     longitudinal_velocity: float | None = None,
-    fluid: Fluid = EN_12354_AIR,
+    fluid: Fluid = EN12354_AIR,
 ) -> np.ndarray:
     r"""Sound reduction index of a homogeneous element (Formulae B.2, B.10).
 
@@ -496,7 +497,7 @@ def calculated_sound_reduction_index(
     :param longitudinal_velocity: Quasi-longitudinal phase velocity ``cL`` of
         the material, in m/s.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`EN_12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
+        :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
     :return: The sound reduction index ``R`` per band, in dB.
     :raises ValueError: If an input is not positive/finite or the per-band
         arrays do not share the band count.
@@ -645,7 +646,7 @@ def in_situ_total_loss_factor(
     critical_frequency: float,
     radiation_factor: ArrayLike,
     perimeter_absorption: float,
-    fluid: Fluid = EN_12354_AIR,
+    fluid: Fluid = EN12354_AIR,
 ) -> np.ndarray:
     r"""Total loss factor in situ ``ηtot,situ`` (Formula C.1).
 
@@ -667,7 +668,7 @@ def in_situ_total_loss_factor(
     :param perimeter_absorption: :math:`\sum l_k \alpha_k` over the element's
         perimeter, in m (may be zero for a free-edged element).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`EN_12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
+        :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
     :return: The total loss factor ``ηtot,situ`` per band (dimensionless).
     :raises ValueError: If an input is not positive/finite, the perimeter sum
         is negative, or the band counts disagree.
@@ -1336,7 +1337,7 @@ def floating_floor_improvement(
 # --------------------------------------------------------------------------- #
 # Element description and its in-situ evaluation
 # --------------------------------------------------------------------------- #
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class HomogeneousElement(RichDisplay):
     r"""A Type A homogeneous element of the detailed model.
 
@@ -1385,7 +1386,7 @@ class HomogeneousElement(RichDisplay):
         length2: float,
         perimeter_absorption: float = 0.0,
         label: str = "",
-        fluid: Fluid = EN_12354_AIR,
+        fluid: Fluid = EN12354_AIR,
     ) -> HomogeneousElement:
         r"""The element a layer of a solid's catalogue row makes.
 
@@ -1423,7 +1424,7 @@ class HomogeneousElement(RichDisplay):
         :param label: The element's name (Default: the row's
             :attr:`~phonometry.io.CatalogueRow.name`).
         :param fluid: The air whose speed of sound ``co`` enters
-            ``fc`` (Default: :data:`EN_12354_AIR`, the 340 m/s of Annex A).
+            ``fc`` (Default: :data:`EN12354_AIR`, the 340 m/s of Annex A).
         :return: The :class:`HomogeneousElement`.
         :raises TypeError: for a row that is not a
             :class:`~phonometry.solids.SolidMaterial`, or a ``thickness_m`` or
@@ -1529,7 +1530,7 @@ class InSituElementResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the in-situ ``Rsitu`` and ``Ln,situ`` spectra of the element.
 
@@ -1549,7 +1550,7 @@ def in_situ_element(
     *,
     fraction: BandFraction = 3,
     resonant_only: bool = False,
-    fluid: Fluid = EN_12354_AIR,
+    fluid: Fluid = EN12354_AIR,
 ) -> InSituElementResult:
     r"""Evaluate one homogeneous element in situ, per band (Clause 4.2.2).
 
@@ -1571,7 +1572,7 @@ def in_situ_element(
     :param resonant_only: Drop the forced-transmission term of Formula (B.2)
         below ``fc`` (Annex B.1, flanking paths).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid` (Default:
-        :data:`EN_12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
+        :data:`EN12354_AIR`, the air EN/ISO 12354 works in, 340 m/s and 1,29 kg/m3).
     :return: The :class:`InSituElementResult`.
     :raises ValueError: If any element property is not positive and finite.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
@@ -1644,7 +1645,7 @@ def in_situ_element(
 # --------------------------------------------------------------------------- #
 # Path assembly and totals (Clause 4.1)
 # --------------------------------------------------------------------------- #
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class BandPath(OwnsArrays):
     """One transmission path of the detailed model, per band.
 
@@ -1654,7 +1655,7 @@ class BandPath(OwnsArrays):
     """
 
     label: str
-    kind: str
+    kind: Literal["Dd", "Ff", "Df", "Fd"]
     values: np.ndarray
 
 
@@ -1842,7 +1843,7 @@ class DetailedAirborneResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band path contributions and the resulting ``R'``.
 
@@ -1862,9 +1863,9 @@ class DetailedAirborneResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a detailed airborne prediction fiche (EN/ISO 12354-1).
 
@@ -1929,7 +1930,7 @@ class DetailedImpactResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-band path contributions and the resulting ``L'n``.
 
@@ -1947,9 +1948,9 @@ class DetailedImpactResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render a detailed impact prediction fiche (EN/ISO 12354-2).
 
@@ -2097,7 +2098,7 @@ def detailed_impact_prediction(
 
 
 __all__ = [
-    "EN_12354_AIR",
+    "EN12354_AIR",
     "BandPath",
     "DetailedAirborneResult",
     "DetailedImpactResult",

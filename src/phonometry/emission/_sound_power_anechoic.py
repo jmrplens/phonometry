@@ -48,7 +48,7 @@ import numpy as np
 from .._internal.boundary import settled
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, energy_sum, weighted_energy_mean
-from .._internal.types import as_float_or_array
+from .._internal.types import ReportEngine, as_float_or_array
 from .._internal.validation import (
     check_engine,
     require_ranks,
@@ -60,6 +60,7 @@ from ._shared import _S0, SoundPowerWarning, _a_weighting_corrections
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from .._i18n import Language
     from .._report.metadata import ReportMetadata
     from .free_field_qualification import FreeFieldCheck
 
@@ -363,7 +364,7 @@ class PrecisionSoundPowerResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the precision ``LW`` spectrum with the A-weighted total.
 
@@ -381,9 +382,9 @@ class PrecisionSoundPowerResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 3745:2012 precision sound-power fiche to a PDF.
 
@@ -618,14 +619,19 @@ def meteorological_corrections(
 def _sigma_r0_3745(nominal: int, room: PrecisionRoom) -> float:
     """Per-band sigma_R0 (ISO 3745:2012 Table 2 hemi / Table 3 anechoic), dB."""
     require_scalar(nominal, "nominal")
+    # Band edges in hertz, as Tables 2 and 3 print them.
     if 50 <= nominal <= 80:  # noqa: PLR2004
         return 2.0
+    # Band edges in hertz, as Tables 2 and 3 print them.
     if 100 <= nominal <= 630:  # noqa: PLR2004
         return 1.5 if room == "hemi-anechoic" else 1.0
+    # Band edges in hertz, as Tables 2 and 3 print them.
     if 800 <= nominal <= 5000:  # noqa: PLR2004
         return 1.0 if room == "hemi-anechoic" else 0.5
+    # Band edges in hertz, as Tables 2 and 3 print them.
     if 6300 <= nominal <= 10000:  # noqa: PLR2004
         return 1.5 if room == "hemi-anechoic" else 1.0
+    # Band edges in hertz, as Tables 2 and 3 print them.
     if 12500 <= nominal <= 20000:  # noqa: PLR2004
         return 2.0
     msg = (
@@ -909,6 +915,7 @@ def sound_power_anechoic(
     if room_qualification is not None:
         _room_qualification_warnings(room_qualification, surface, radius, frequencies)
     levels = np.atleast_2d(np.asarray(levels_positions, dtype=np.float64))
+    # The number is a count of array axes, not a quantity.
     if levels.ndim != 2:  # noqa: PLR2004
         msg = "'levels_positions' must be a 2D (positions, bands) array."
         raise ValueError(msg)

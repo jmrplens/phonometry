@@ -134,7 +134,9 @@ def test_example_9_the_change_of_the_night_severity_exceeds_25_percent() -> None
     against the case without the project, so mitigation is to be looked into.
     """
     guide = im.railway_guide_values("mixed", time_of_day="night")
-    assert guide == im.GuideValues(0.1, 0.6, 0.07, time_of_day="night", edition="2023")
+    assert guide == im.GuideValues(
+        a_u=0.1, a_o=0.6, a_r=0.07, time_of_day="night", edition="2023"
+    )
     change = im.assess_railway_change(
         kb_fmax_before=0.66,
         kb_fmax_after=0.66,

@@ -159,7 +159,7 @@ def _probe(
     program = _PROBE.format(scripts=str(_SCRIPTS), then=then)
     flags = ["-S", "-E"] if bare else ["-E"]
     # The interpreter running this suite
-    return subprocess.run(  # noqa: S603
+    return subprocess.run(
         [sys.executable, *flags, "-c", program, str(_ROOT / script)],
         capture_output=True,
         text=True,

@@ -43,7 +43,7 @@ metadiffuser_diffusion_spectrum(
     angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
     source_angle_deg: float = 0.0,
     n_repetitions: int = 1,
-    resonator_geometry: str = 'slit',
+    resonator_geometry: Literal['square', 'slit'] = 'slit',
     fluid: Fluid = ...,
 ) -> DiffusionSpectrum
 ```
@@ -91,7 +91,7 @@ metadiffuser_polar_response(
     angles_deg: ArrayLike = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -35, -30, -25, -20, -15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90),
     source_angle_deg: float = 0.0,
     n_repetitions: int = 1,
-    resonator_geometry: str = 'slit',
+    resonator_geometry: Literal['square', 'slit'] = 'slit',
     fluid: Fluid = ...,
 ) -> DiffuserPolarResponse
 ```
@@ -137,7 +137,7 @@ metadiffuser_reflection(
     depth_m: float,
     period_m: float,
     angle_rad: float = 0.0,
-    resonator_geometry: str = 'slit',
+    resonator_geometry: Literal['square', 'slit'] = 'slit',
     fluid: Fluid = ...,
 ) -> MetadiffuserResult
 ```
@@ -206,7 +206,7 @@ prediction was run with (`wells`, `depth_m`, `period_m`) so
 MetadiffuserResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -222,7 +222,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 MetadiffuserResult.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -236,6 +236,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 MetadiffuserWell(
+    *,
     slit_height_m: float,
     resonators: tuple[HelmholtzResonator, ...],
 )
@@ -260,7 +261,7 @@ plot_metadiffuser_panel_geometry(
     ax: Axes | None = None,
     depth_m: float,
     period_m: float,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

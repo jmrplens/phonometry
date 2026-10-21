@@ -155,13 +155,13 @@ detection_range(
     figure_of_merit: float,
     frequency_hz: float,
     *,
-    law: str = 'spherical',
+    law: Literal['spherical', 'cylindrical', 'practical'] = 'spherical',
     transition_range: float | None = None,
     temperature_c: float = 10.0,
     salinity: float = 35.0,
     depth: float = 0.0,
     ph: float = 8.0,
-    model: str = 'francois-garrison',
+    model: Literal['francois-garrison', 'ainslie-mccolm', 'thorp'] = 'francois-garrison',
     max_range: float = 500000.0,
     n_points: int = 400,
 ) -> DetectionRangeResult
@@ -209,7 +209,7 @@ detection_range_from_curve(
     range_m: NDArray[np.float64] | list[float],
     propagation_loss: NDArray[np.float64] | list[float],
     *,
-    crossing: str = 'first',
+    crossing: Literal['first', 'last'] = 'first',
 ) -> float
 ```
 
@@ -312,7 +312,7 @@ Detection range obtained by inverting a propagation-loss law.
 DetectionRangeResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -357,7 +357,7 @@ Passive sonar equation $\mathrm{SE} = \mathrm{SL} - \mathrm{PL} - (\mathrm{NL} -
 
 ```python
 SonarEquationResult(
-    mode: str,
+    mode: Literal['passive', 'active'],
     signal_excess: NDArray[np.float64],
     snr: NDArray[np.float64],
     figure_of_merit: float,
@@ -396,7 +396,7 @@ Sonar-equation solution.
 SonarEquationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

@@ -87,6 +87,7 @@ from ..._internal.validation import require_positive, require_scalar
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
     from ..._internal.types import Real
     from .porous import PorousMediumResult
 
@@ -237,7 +238,7 @@ def frame_quarter_wave_resonance(
     return float(np.sqrt(k_c.real / rho1) / (4.0 * length))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class BiotWavesResult(OwnsArrays):
     r"""The three Biot waves of an isotropic air-saturated porous material.
 
@@ -363,7 +364,7 @@ class BiotWavesResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the three Biot wavenumbers against frequency.
 

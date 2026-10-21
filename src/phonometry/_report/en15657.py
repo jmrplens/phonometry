@@ -58,11 +58,12 @@ from ._sound_power_fiche import (
 if TYPE_CHECKING:
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..building.measurement.structure_borne_power import StructureBornePowerResult
     from .metadata import ReportMetadata
 
 
-def _basis(language: str = "en") -> str:
+def _basis(language: Language = "en") -> str:
     """The standard-basis line naming the EN 15657 reception-plate method."""
     return t(
         "Determination of the structure-borne sound power injected into the "
@@ -72,7 +73,7 @@ def _basis(language: str = "en") -> str:
     )
 
 
-def _caption(result: StructureBornePowerResult, language: str = "en") -> str:
+def _caption(result: StructureBornePowerResult, language: Language = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
     if freqs is None:
@@ -83,7 +84,7 @@ def _caption(result: StructureBornePowerResult, language: str = "en") -> str:
     return t("One-third-octave-band structure-borne sound power levels", language)
 
 
-def _eta_cell(value: float, language: str = "en") -> str:
+def _eta_cell(value: float, language: Language = "en") -> str:
     """The loss-factor cell (four decimals), or an em dash when not finite."""
     if not np.isfinite(value):
         return "—"
@@ -91,7 +92,7 @@ def _eta_cell(value: float, language: str = "en") -> str:
 
 
 def _value_table(
-    result: StructureBornePowerResult, *, verbose: bool, language: str = "en"
+    result: StructureBornePowerResult, *, verbose: bool, language: Language = "en"
 ) -> Table:
     """Build the full-width per-band table (nominal frequency, Lv, L_Ws).
 
@@ -135,7 +136,7 @@ def _value_table(
 
 
 def _statement(
-    result: StructureBornePowerResult, language: str = "en"
+    result: StructureBornePowerResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed total ``L_Ws`` and its extended plate terms."""
     total = float(result.total_level)
@@ -159,7 +160,7 @@ def _statement(
     return statement, extended
 
 
-def _relation_strip(language: str = "en") -> str:
+def _relation_strip(language: Language = "en") -> str:
     """The Formula 14 relation line for the basis strip."""
     return t(
         "L<sub>Ws</sub> = 10 lg(2&#960; f &#951; m S / (f<sub>0</sub> "
@@ -174,7 +175,7 @@ def _relation_strip(language: str = "en") -> str:
     )
 
 
-def _conversion_strip(language: str = "en") -> str:
+def _conversion_strip(language: Language = "en") -> str:
     """The plate-specific note directing the EN 12354-5 conversion chain."""
     return t(
         "Formula 14 gives the power injected into this particular reception "
@@ -193,7 +194,7 @@ def render_structure_borne_power_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an EN 15657 structure-borne sound power fiche to a PDF at ``path``.
 

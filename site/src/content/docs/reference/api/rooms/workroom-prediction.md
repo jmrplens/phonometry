@@ -56,7 +56,7 @@ British cover.
 
 ```python
 check_prediction_detail(
-    category: str,
+    category: Literal['1', '2a', '2b', '2c'],
     *,
     room_detail: int,
     fitting_detail: int,
@@ -132,7 +132,9 @@ FITTING_DETAIL_LEVELS = {1: 'fittings are not taken into account', 2: 'one mean 
 ## prediction_method
 
 ```python
-prediction_method(category: str) -> PredictionMethod
+prediction_method(
+    category: Literal['1', '2a', '2b', '2c'],
+) -> PredictionMethod
 ```
 
 One category of Table 4, with the detail levels of Table E.1.
@@ -163,7 +165,7 @@ PREDICTION_METHODS = {'1': PredictionMethod(category='1', family='diffuse field'
 
 ```python
 PredictionDetailCheck(
-    category: str,
+    category: Literal['1', '2a', '2b', '2c'],
     room_detail: int,
     fitting_detail: int,
     source_detail: int,
@@ -212,8 +214,8 @@ Whether the source description falls inside Table E.1.
 
 ```python
 PredictionMethod(
-    category: str,
-    family: str,
+    category: Literal['1', '2a', '2b', '2c'],
+    family: Literal['diffuse field', 'geometrical'],
     rooms: str,
     room_detail: tuple[int, ...],
     fitting_detail: tuple[int, ...],
@@ -295,7 +297,9 @@ and the workstation, except at a machine's own workstation, where
 ## typical_decay_range
 
 ```python
-typical_decay_range(region: str) -> tuple[float | None, float | None]
+typical_decay_range(
+    region: Literal['near', 'middle', 'far'],
+) -> tuple[float | None, float | None]
 ```
 
 What 4.3 says `DL2` usually is in one region, in decibels.
@@ -325,7 +329,9 @@ TYPICAL_DECAY_RANGE_DB = {'near': (5.0, 6.0), 'middle': (2.0, 5.0), 'far': (6.0,
 ## typical_excess_range
 
 ```python
-typical_excess_range(region: str) -> tuple[float | None, float | None]
+typical_excess_range(
+    region: Literal['near', 'middle', 'far'],
+) -> tuple[float | None, float | None]
 ```
 
 What 4.3 says `DLf` usually is in one region, in decibels.

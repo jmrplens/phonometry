@@ -800,8 +800,8 @@ _KWARG_PLOT_CASES = [
         "line",
     ),
     (
-        "arp866a_attenuation",
-        lambda: ph.aircraft.arp866a_attenuation(
+        "attenuation_arp866a",
+        lambda: ph.aircraft.attenuation_arp866a(
             [500.0, 1000.0, 2000.0], temperature_c=10.0, relative_humidity_percent=80.0
         ),
         "line",

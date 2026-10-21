@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Literal, cast
 
 import numpy as np
 
@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from ..room._crowd_noise import CrowdNoiseResult
     from ..room._impulse_response import ImpulseResponseResult, ShapedSweepResult
     from ..room.acoustics import DecayCurve, RoomAcousticsResult
@@ -261,12 +262,12 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
 
-def _localize_band_axes(ax: Axes, language: str) -> None:
+def _localize_band_axes(ax: Axes, language: Language) -> None:
     """Comma-localise the numeric y-axis of a categorical band plot.
 
     :func:`~phonometry._i18n.localize_axes` reformats only the automatic numeric
@@ -280,7 +281,7 @@ def _localize_band_axes(ax: Axes, language: str) -> None:
 
 
 def _band_labels(
-    frequency: ArrayLike | None, count: int, language: str
+    frequency: ArrayLike | None, count: int, language: Language
 ) -> tuple[list[str], bool]:
     """Tick labels for a categorical band axis, and whether they are bands.
 
@@ -312,7 +313,7 @@ def _band_labels(
 def plot_room_acoustics(
     result: RoomAcousticsResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Per-band decay times (EDT/T20/T30) and clarity (C50/C80).
@@ -415,7 +416,7 @@ def _band_indices(
 def plot_sound_strength(
     result: SoundStrengthResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Per-band sound strength G against the Table A.1 typical range.
@@ -513,7 +514,7 @@ def plot_sound_strength(
 def plot_lateral_energy(
     result: LateralEnergyResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band early lateral energy fraction over the Table A.1 range.
@@ -578,7 +579,7 @@ def plot_lateral_energy(
 def plot_late_lateral(
     result: LateLateralResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-band late lateral sound level over the Table A.1 range.
@@ -640,7 +641,7 @@ def plot_late_lateral(
 def plot_stage_support(
     result: StageSupportResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Both stage supports per band over their Table C.1 ranges.
@@ -702,7 +703,7 @@ def plot_stage_support(
 def plot_interaural_correlation(
     result: InterauralCorrelationResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The interaural correlation function over the (B.2) search window.
@@ -758,7 +759,7 @@ def plot_decay_curve(
     ax: Axes | None = None,
     *,
     fits: bool = True,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Schroeder decay curve with optional straight T-fit overlays.
@@ -809,7 +810,7 @@ def plot_decay_curve(
 def plot_impulse_response(
     result: ImpulseResponseResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Impulse-response waveform and its log-magnitude / Schroeder decay.
@@ -887,7 +888,7 @@ def plot_impulse_response(
 
 
 def plot_noise_criterion(
-    result: NCResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: NCResult, ax: Axes | None = None, language: Language = "en", **kwargs: Any
 ) -> Axes:
     """Measured spectrum against the NC curve family (ANSI/ASA S12.2-2019).
 
@@ -949,7 +950,7 @@ def plot_noise_criterion(
 
 
 def plot_room_criterion(
-    result: RCResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: RCResult, ax: Axes | None = None, language: Language = "en", **kwargs: Any
 ) -> Axes:
     """Measured spectrum against the reference RC Mark II curve (Annex D).
 
@@ -1009,7 +1010,7 @@ def plot_room_criterion(
 def plot_enclosed_space_absorption(
     result: ReverberationResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Reverberation time over the octave bands (EN 12354-6).
@@ -1039,7 +1040,7 @@ def plot_enclosed_space_absorption(
 def plot_reverberation_models(
     result: ReverberationModelResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Reverberation time by five statistical models over the bands.
@@ -1093,7 +1094,10 @@ def plot_reverberation_models(
 
 
 def plot_open_plan(
-    result: OpenPlanResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: OpenPlanResult,
+    ax: Axes | None = None,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Spatial decay of speech with the distraction/privacy distances marked.
 
@@ -1179,9 +1183,9 @@ def plot_excitation(
     x: ArrayLike,
     fs: int,
     *,
-    kind: str = "sweep",
+    kind: Literal["sweep", "mls"] = "sweep",
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Plot an ISO 18233 excitation signal (sweep or MLS).
@@ -1286,7 +1290,7 @@ def plot_excitation(
 def plot_image_source_reflectogram(
     result: ImageSourceResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Reflectogram of a synthetic image-source room impulse response.
@@ -1306,6 +1310,7 @@ def plot_image_source_reflectogram(
     ax = ax if ax is not None else _new_axes()
     times = np.asarray(result.times, dtype=np.float64)
     amp = np.asarray(result.amplitudes, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if amp.ndim == 2:  # noqa: PLR2004
         amp = amp[0]
     orders = np.asarray(result.orders, dtype=np.int_)
@@ -1390,7 +1395,7 @@ def plot_image_source_reflectogram(
 def plot_steady_field(
     result: SteadyFieldResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Steady-state SPL against distance: direct, reverberant and total fields.
@@ -1469,7 +1474,7 @@ def plot_steady_field(
 def plot_shaped_sweep(
     result: ShapedSweepResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Shaped-sweep waveform and its Welch spectrum against the target.
@@ -1572,7 +1577,10 @@ def plot_shaped_sweep(
 
 
 def plot_room_modes(
-    result: RoomModesResult, ax: Axes | None = None, language: str = "en", **kwargs: Any
+    result: RoomModesResult,
+    ax: Axes | None = None,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Mode ladder by kind and modal density of a rectangular room.
 
@@ -1670,7 +1678,7 @@ def plot_room_modes(
 def plot_crowd_noise(
     result: CrowdNoiseResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Self-generated crowd noise against occupancy, one curve per absorption.
@@ -1744,7 +1752,7 @@ def plot_crowd_noise(
 def plot_spatial_decay(
     result: SpatialDecayResult,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The measured curve, the free field it is judged against, and the fit.

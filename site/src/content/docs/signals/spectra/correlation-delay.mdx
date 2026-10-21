@@ -61,8 +61,8 @@ from phonometry import signals
 
 fs = 8192.0
 delay = 102                                  # 12.45 ms
-x = signals.noise_signal(fs, 2.0, seed=4)
-interference = signals.noise_signal(fs, 2.0, rms=0.5, seed=5)
+x = signals.noise_signal(fs, duration_s=2.0, seed=4)
+interference = signals.noise_signal(fs, duration_s=2.0, rms=0.5, seed=5)
 y = 0.8 * np.concatenate([np.zeros(delay), x[:-delay]]) + interference
 
 res = signals.correlation(x, y, fs, normalization="coefficient", max_lag=0.05)
@@ -89,8 +89,8 @@ from phonometry import signals
 
 fs = 8192.0
 delay = 102                                  # 12.45 ms
-x = signals.noise_signal(fs, 2.0, seed=4)
-interference = signals.noise_signal(fs, 2.0, rms=0.5, seed=5)
+x = signals.noise_signal(fs, duration_s=2.0, seed=4)
+interference = signals.noise_signal(fs, duration_s=2.0, rms=0.5, seed=5)
 y = 0.8 * np.concatenate([np.zeros(delay), x[:-delay]]) + interference
 
 res = signals.correlation(x, y, fs, normalization="coefficient", max_lag=0.05)
@@ -257,9 +257,9 @@ from phonometry import signals
 fs = 8192.0
 delay = 20  # samples
 b, a = sp_signal.butter(2, 800.0 / (fs / 2.0))   # colored common signal
-s = sp_signal.lfilter(b, a, signals.noise_signal(fs, 4.0, color="white", seed=10))
-x = s + signals.noise_signal(fs, 4.0, color="white", rms=0.02, seed=11)
-y = np.roll(s, delay) + signals.noise_signal(fs, 4.0, color="white", rms=0.02, seed=12)
+s = sp_signal.lfilter(b, a, signals.noise_signal(fs, duration_s=4.0, color="white", seed=10))
+x = s + signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.02, seed=11)
+y = np.roll(s, delay) + signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.02, seed=12)
 
 direct = signals.time_delay(x, y, fs, method="direct", max_delay=0.01)
 phat = signals.time_delay(x, y, fs, method="gcc", weighting="phat",
@@ -305,9 +305,9 @@ from phonometry import signals
 fs = 8192.0
 delay = 20  # samples
 b, a = sp_signal.butter(2, 800.0 / (fs / 2.0))   # colored common signal
-s = sp_signal.lfilter(b, a, signals.noise_signal(fs, 4.0, color="white", seed=10))
-x = s + signals.noise_signal(fs, 4.0, color="white", rms=0.02, seed=11)
-y = np.roll(s, delay) + signals.noise_signal(fs, 4.0, color="white", rms=0.02, seed=12)
+s = sp_signal.lfilter(b, a, signals.noise_signal(fs, duration_s=4.0, color="white", seed=10))
+x = s + signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.02, seed=11)
+y = np.roll(s, delay) + signals.noise_signal(fs, duration_s=4.0, color="white", rms=0.02, seed=12)
 
 res = signals.time_delay(x, y, fs, method="gcc", weighting="ml",
                          nperseg=2048, upsample=16, signal_bandwidth=1000.0)

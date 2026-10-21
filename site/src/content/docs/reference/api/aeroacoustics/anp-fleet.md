@@ -53,7 +53,7 @@ ANPAircraft(
     engine_type: str,
     n_engines: int,
     weight_class: str,
-    mounting: str,
+    mounting: Literal['wing', 'fuselage', 'propeller'],
     npd_id: str,
     power_parameter: str,
     approach_spectral_class_id: str,
@@ -85,7 +85,7 @@ One ANP aircraft type: metadata plus NPD/profile access and Doc 29 wiring.
 ```python
 ANPAircraft.event_level(
     observer: NDArray[np.float64] | list[float],
-    operation: str,
+    operation: Literal['departure', 'D', 'arrival', 'A'],
     *,
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
@@ -93,7 +93,7 @@ ANPAircraft.event_level(
     temperature_c: float | None = None,
     static_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
-    absorption: str = 'arp5534',
+    absorption: Literal['arp5534', 'arp866a'] = 'arp5534',
 ) -> FlyoverResult
 ```
 
@@ -103,7 +103,7 @@ Single-event level at a receiver (see [`ANPDatabase.event_level`](/phonometry/re
 
 ```python
 ANPAircraft.noise_contour(
-    operation: str,
+    operation: Literal['departure', 'D', 'arrival', 'A'],
     *,
     x: NDArray[np.float64] | list[float],
     y: NDArray[np.float64] | list[float],
@@ -113,7 +113,7 @@ ANPAircraft.noise_contour(
     temperature_c: float | None = None,
     static_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
-    absorption: str = 'arp5534',
+    absorption: Literal['arp5534', 'arp866a'] = 'arp5534',
 ) -> NoiseContourResult
 ```
 
@@ -122,7 +122,10 @@ Single-event ground contour (see [`ANPDatabase.noise_contour`](/phonometry/refer
 ### ANPAircraft.npd_curves()
 
 ```python
-ANPAircraft.npd_curves(operation: str, metric: str = 'SEL') -> ANPNPDCurves
+ANPAircraft.npd_curves(
+    operation: Literal['departure', 'D', 'arrival', 'A'],
+    metric: Literal['SEL', 'LAmax'] = 'SEL',
+) -> ANPNPDCurves
 ```
 
 NPD curves for this aircraft (see [`ANPDatabase.npd_curves`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabasenpd_curves)).
@@ -131,7 +134,7 @@ NPD curves for this aircraft (see [`ANPDatabase.npd_curves`](/phonometry/referen
 
 ```python
 ANPAircraft.profile(
-    operation: str,
+    operation: Literal['departure', 'D', 'arrival', 'A'],
     stage_length: int = 1,
     *,
     profile_id: str | None = None,
@@ -144,13 +147,13 @@ Fixed-point profile (see [`ANPDatabase.profile`](/phonometry/reference/api/aeroa
 
 ```python
 ANPAircraft.revised_npd_curves(
-    operation: str,
-    metric: str = 'SEL',
+    operation: Literal['departure', 'D', 'arrival', 'A'],
+    metric: Literal['SEL', 'LAmax'] = 'SEL',
     *,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-    absorption: str = 'arp5534',
+    absorption: Literal['arp5534', 'arp866a'] = 'arp5534',
 ) -> RevisedNPDCurves
 ```
 
@@ -159,7 +162,9 @@ NPD curves for another atmosphere (see [`ANPDatabase.revised_npd_curves`](/phono
 ### ANPAircraft.spectral_class()
 
 ```python
-ANPAircraft.spectral_class(operation: str) -> SpectralClass
+ANPAircraft.spectral_class(
+    operation: Literal['departure', 'D', 'arrival', 'A'],
+) -> SpectralClass
 ```
 
 Spectral class of this aircraft's NPD for an operation.
@@ -223,7 +228,7 @@ Sorted list of aircraft identifiers in the database.
 ANPDatabase.event_level(
     aircraft_id: str,
     observer: NDArray[np.float64] | list[float],
-    operation: str,
+    operation: Literal['departure', 'D', 'arrival', 'A'],
     *,
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
@@ -231,7 +236,7 @@ ANPDatabase.event_level(
     temperature_c: float | None = None,
     static_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
-    absorption: str = 'arp5534',
+    absorption: Literal['arp5534', 'arp866a'] = 'arp5534',
 ) -> FlyoverResult
 ```
 
@@ -268,7 +273,7 @@ Feeds the aircraft's profile and NPD curves into
 ```python
 ANPDatabase.flight_profile(
     aircraft_id: str,
-    operation: str,
+    operation: Literal['departure', 'D', 'arrival', 'A'],
     *,
     aerodrome: Aerodrome,
     stage_length: int | str = 1,
@@ -307,7 +312,7 @@ which is why one has to be given and why the answer is not a table entry.
 ```python
 ANPDatabase.noise_contour(
     aircraft_id: str,
-    operation: str,
+    operation: Literal['departure', 'D', 'arrival', 'A'],
     *,
     x: NDArray[np.float64] | list[float],
     y: NDArray[np.float64] | list[float],
@@ -317,7 +322,7 @@ ANPDatabase.noise_contour(
     temperature_c: float | None = None,
     static_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
-    absorption: str = 'arp5534',
+    absorption: Literal['arp5534', 'arp866a'] = 'arp5534',
 ) -> NoiseContourResult
 ```
 
@@ -355,8 +360,8 @@ Feeds the aircraft's profile and NPD curves into
 ```python
 ANPDatabase.npd_curves(
     aircraft_id: str,
-    operation: str,
-    metric: str = 'SEL',
+    operation: Literal['departure', 'D', 'arrival', 'A'],
+    metric: Literal['SEL', 'LAmax'] = 'SEL',
 ) -> ANPNPDCurves
 ```
 
@@ -413,7 +418,7 @@ approach weight follows from the last of those as Doc 29 defines it.
 ```python
 ANPDatabase.procedural_profile(
     aircraft_id: str,
-    operation: str,
+    operation: Literal['departure', 'D', 'arrival', 'A'],
     *,
     aerodrome: Aerodrome,
     stage_length: int | str = 1,
@@ -441,7 +446,7 @@ Takes the same arguments as `flight_profile`.
 ```python
 ANPDatabase.procedural_steps(
     aircraft_id: str,
-    operation: str,
+    operation: Literal['departure', 'D', 'arrival', 'A'],
     stage_length: int | str = 1,
     *,
     profile_id: str | None = None,
@@ -479,7 +484,7 @@ read only for a departure.
 ```python
 ANPDatabase.profile(
     aircraft_id: str,
-    operation: str,
+    operation: Literal['departure', 'D', 'arrival', 'A'],
     stage_length: int | str = 1,
     *,
     profile_id: str | None = None,
@@ -517,13 +522,13 @@ none named `"DEFAULT"`) raises listing the identifiers.
 ```python
 ANPDatabase.revised_npd_curves(
     aircraft_id: str,
-    operation: str,
-    metric: str = 'SEL',
+    operation: Literal['departure', 'D', 'arrival', 'A'],
+    metric: Literal['SEL', 'LAmax'] = 'SEL',
     *,
     temperature_c: float,
     relative_humidity_percent: float,
     static_pressure_kpa: float = 101.325,
-    absorption: str = 'arp5534',
+    absorption: Literal['arp5534', 'arp866a'] = 'arp5534',
 ) -> RevisedNPDCurves
 ```
 
@@ -587,10 +592,11 @@ Sorted list of the spectral class identifiers in the database.
 
 ```python
 ANPNPDCurves(
+    *,
     aircraft_id: str,
     npd_id: str,
-    metric: str,
-    operation: str,
+    metric: Literal['SEL', 'LAmax'],
+    operation: Literal['A', 'D'],
     power_parameter: str,
     powers: NDArray[np.float64],
     distances_m: NDArray[np.float64],
@@ -642,7 +648,7 @@ Interpolated NPD level `L(P, d)` (Doc 29 Eq. 4-3/4-4).
 ANPNPDCurves.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -654,7 +660,7 @@ Plot the NPD curve at each tabulated power versus slant distance.
 ```python
 ANPProfile(
     aircraft_id: str,
-    operation: str,
+    operation: Literal['A', 'D'],
     profile_id: str,
     stage_length: int | str,
     path: NDArray[np.float64],
@@ -686,7 +692,7 @@ mutating.
 ANPProfile.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -721,7 +727,7 @@ Load an EASA ANP database (aircraft, NPD curves and default profiles).
 SpectralClass(
     *,
     class_id: str,
-    operation: str,
+    operation: Literal['A', 'D'],
     description: str,
     frequencies: NDArray[np.float64],
     levels: NDArray[np.float64],
@@ -753,7 +759,7 @@ from it ([`revise_npd_curves`](/phonometry/reference/api/aeroacoustics/npd-atmos
 SpectralClass.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

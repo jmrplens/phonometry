@@ -98,13 +98,14 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from .._i18n import Language
     from .._internal.types import BandFraction
     from .._report.metadata import ReportMetadata
 
 from .._internal.boundary import settled, settled_net_share
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean, weighted_energy_mean
-from .._internal.types import BAND_SET_NAMES
+from .._internal.types import BAND_SET_NAMES, ReportEngine
 from .._internal.validation import (
     check_engine,
     require_above_absolute_zero,
@@ -117,12 +118,12 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ..metrology.reference_values import REFERENCE_VALUES
 from ._shared import SoundPowerWarning, _a_weighting_corrections, _check_grade
 from .intensity import dynamic_capability_index
 
 #: Reference sound power, in watts (ISO 9614-2, 3.6.3; ISO 1683:2015 Table 1).
-_W0 = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
+_W0 = REFERENCE_VALUES["gas"]["sound_power"].value
 _S0 = 1.0  #: Reference surface area, in square metres (ISO 9614-2, A.2.1).
 
 #: Rejection message for a 'frequencies' vector that does not span the bands.
@@ -408,7 +409,7 @@ class SoundPowerIntensityResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the LW spectrum; non-positive bands are hatched as unusable.
 
@@ -426,9 +427,9 @@ class SoundPowerIntensityResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         """Render an ISO 9614-2 sound-power-by-intensity determination fiche.
 
@@ -845,7 +846,7 @@ def _a_weighted_total(
 # ===========================================================================
 
 #: Reference sound intensity, in W/m^2 (3.5; ISO 1683:2015 Table 1).
-_I0 = ISO1683_REFERENCE_VALUES["gas"]["sound_intensity"].value
+_I0 = REFERENCE_VALUES["gas"]["sound_intensity"].value
 _K_9614_3 = 10.0  #: Bias-error factor K, in dB (def. 3.11).
 _FS_LIMIT = 2.0  #: Criterion 4 field-non-uniformity limit (Eq. C.4).
 _F_PI_DIFF_LIMIT = 3.0  #: Criterion 3 signed-minus-unsigned limit, dB (Eq. C.3).
@@ -856,7 +857,7 @@ _FS_RATIO_HIGH = 1.2  #: Criterion 5 upper bound on FS(1)/FS(2) (Eq. C.5).
 _MIN_STDDEV_SAMPLES = 2
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class PrecisionFieldIndicators(OwnsArrays):
     r"""ISO 9614-3:2002 Annex B field indicators (per band).
 
@@ -1280,7 +1281,7 @@ class PrecisionIntensityResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the ``LW`` spectrum; non-applicable bands are hatched/greyed.
 
@@ -1298,9 +1299,9 @@ class PrecisionIntensityResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
         indicators: PrecisionFieldIndicators | None = None,
         criteria: PrecisionCriteria | None = None,
         residual_index: float | Sequence[float] | np.ndarray | None = None,
@@ -1520,12 +1521,16 @@ def _spread_over_bands(value: ArrayLike, n_bands: int) -> np.ndarray:
 def _sigma_r0_9614_3(nominal: int) -> float:
     """Per-band sigma_R0 (ISO 9614-3:2002 Table 1), in dB; also criterion-1 s."""
     require_scalar(nominal, "nominal")
+    # Band edges in hertz, as Table 1 prints them.
     if 50 <= nominal <= 160:  # noqa: PLR2004
         return 2.0
+    # Band edges in hertz, as Table 1 prints them.
     if 200 <= nominal <= 315:  # noqa: PLR2004
         return 1.5
+    # Band edges in hertz, as Table 1 prints them.
     if 400 <= nominal <= 5000:  # noqa: PLR2004
         return 1.0
+    # Band edges in hertz, as Table 1 prints them.
     if nominal == 6300:  # noqa: PLR2004
         return 2.0
     msg = (

@@ -21,6 +21,11 @@ never translated: only the fixed *labels* live here.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .._i18n import Language
+
 #: Spanish translations of the fixed strings rendered by the accredited
 #: ``.report()`` fiches, keyed by their verbatim English text. ``t`` returns
 #: the English key unchanged for any language other than ``"es"``, so the
@@ -1190,7 +1195,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def t(text: str, language: str = "en") -> str:
+def t(text: str, language: Language = "en") -> str:
     """Localise a fixed report string; English is returned verbatim (byte-identical).
 
     :param text: The exact English display string, doubling as the lookup key.
@@ -1202,7 +1207,7 @@ def t(text: str, language: str = "en") -> str:
 
 def format_number(
     value: float,
-    language: str = "en",
+    language: Language = "en",
     *,
     decimals: int = 1,
     trim: bool = False,
@@ -1228,7 +1233,7 @@ def format_number(
     return _format_number(value, language, decimals=decimals, trim=trim)
 
 
-def decimal_comma(value: str, language: str = "en") -> str:
+def decimal_comma(value: str, language: Language = "en") -> str:
     """Locale-aware separator swap for the renderers (level-1 re-export).
 
     Thin wrapper around :func:`phonometry._i18n.decimal_comma`; see

@@ -650,7 +650,8 @@ def test_verify_neck_loop(
     resistance: float,
     voltage: float,
     kind: int,
-    passes: bool,  # noqa: FBT001
+    *,
+    passes: bool,
 ) -> None:
     assert (
         ea.verify_neck_loop(resistance, voltage, neck_loop_type=kind).passes is passes

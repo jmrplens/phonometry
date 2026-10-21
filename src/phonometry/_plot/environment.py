@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.figure import Figure
 
+    from .._i18n import Language
     from ..environment.assessment.exposure_distribution import SELDistribution
     from ..environment.assessment.impulsive_sound import ImpulseProminenceResult
     from ..environment.assessment.measurement import (
@@ -338,7 +339,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en") -> str:
+def _t(text: str, language: Language = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
 
@@ -347,7 +348,7 @@ def plot_atmospheric_attenuation(
     result: AtmosphericAttenuation,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Pure-tone atmospheric attenuation coefficient vs frequency (ISO 9613-1).
@@ -397,7 +398,7 @@ def plot_wind_turbine_tonality(
     result: WindTurbineTonalityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Narrowband spectrum with the critical band, masking level and the tone.
@@ -455,7 +456,7 @@ def plot_impulse_prominence(
     result: ImpulseProminenceResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Adjustment curve ``KI(P)`` with the candidate impulses marked.
@@ -518,7 +519,7 @@ def plot_tonal_survey(
     result: TonalSurveyAssessment,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One-third-octave band levels with the Annex K prominent tones marked.
@@ -579,7 +580,7 @@ def plot_tonal_adjustment(
     result: TonalAssessmentResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Tonal adjustment curve ``Kt(ΔLta)`` with the assessed tone marked.
@@ -633,7 +634,7 @@ def plot_outdoor_attenuation(
     result: OutdoorAttenuation,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Stacked per-band attenuation terms with the total overlaid (ISO 9613-2).
@@ -692,7 +693,7 @@ def plot_cnossos_rail_emission(
     result: RailwayEmissionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-metre railway source-line power of the two equivalent source heights.
@@ -753,7 +754,7 @@ def plot_spherical_ground(
     result: SphericalGroundResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Excess attenuation (level re free field) of the spherical-wave ground effect.
@@ -817,7 +818,7 @@ def plot_barrier_insertion_loss(
     result: BarrierInsertionLoss,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Barrier insertion loss versus frequency.
@@ -861,7 +862,7 @@ def plot_sound_speed_profile(
     profile: EffectiveSoundSpeedProfile,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Effective sound-speed profile ``c_eff(z)`` (height on the vertical axis).
@@ -893,7 +894,7 @@ def plot_atmospheric_rays(
     result: AtmosphericRayResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Curved sound-ray paths over the ground (height on the vertical axis).
@@ -934,7 +935,7 @@ def plot_atmospheric_pe(
     result: AtmosphericPEResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Parabolic-equation relative-level field over the range-height plane.
@@ -1000,7 +1001,7 @@ def plot_tonal_correction_rd1367(
     result: TonalCorrectionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One-third-octave spectrum with the RD 1367/2007 emergence ``Lt`` per band.
@@ -1070,7 +1071,7 @@ def plot_activity_assessment(
     result: ActivityAssessment,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-period RD 1367/2007 indices against their limit values.
@@ -1213,7 +1214,7 @@ def plot_cnossos_road_emission(
     result: RoadEmissionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Per-metre road source-line power with its vehicle-category breakdown.
@@ -1271,7 +1272,7 @@ def plot_road_device_rating(
     result: RoadDeviceRating,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The per-band performance of a road device against the spectrum weighting it.
@@ -1358,7 +1359,7 @@ def plot_reflection_index(
     result: ReflectionIndexResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The sound reflection index of EN 1793-5, band by band.
@@ -1435,7 +1436,7 @@ def plot_reflection_index_uncertainty(
     result: ReflectionIndexUncertainty,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The expanded uncertainty of an EN 1793-5 sound reflection index (A.2).
@@ -1489,7 +1490,7 @@ def plot_direct_sound_subtraction(
     result: DirectSoundSubtraction,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The signal subtraction of EN 1793-5, 5.5.4, around the direct sound.
@@ -1584,7 +1585,7 @@ def plot_reflection_frequency_limit(
     result: ReflectionFrequencyLimit,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The low frequency limit at each microphone of the EN 1793-5 grid.
@@ -1647,7 +1648,7 @@ def plot_reflection_grid_check(
     result: ReflectionGridCheck,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The position check of EN 1793-5 against the 25 mm tolerance of Table 3.
@@ -1716,7 +1717,7 @@ _GRID_TOLERANCE_MM = 25.0
 def plot_barrier_in_situ(
     result: MeasuredBarrierInsertionLoss,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The two receiver spectra of ISO 10847 and the insertion loss between them.
@@ -1786,7 +1787,7 @@ _SPB_SPEED_TICKS_KMH: tuple[float, ...] = (
 _SPB_AXIS_MARGIN = 1.08
 
 
-def _spb_speed_axis(ax: Axes, speeds_kmh: list[float], language: str) -> None:
+def _spb_speed_axis(ax: Axes, speeds_kmh: list[float], language: Language) -> None:
     """A logarithmic speed axis, the one the regression of 9.1 is a line on."""
     import matplotlib.ticker as mticker
 
@@ -1823,7 +1824,7 @@ def plot_pass_by_regression(
     result: PassByRegression,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One category of pass-bys against speed, the line through them and ``L_veh``.
@@ -1904,7 +1905,7 @@ def plot_statistical_pass_by(
     result: StatisticalPassByResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The three clouds of pass-bys of a surface, their lines and the index.
@@ -1989,7 +1990,7 @@ def plot_sel_distribution(
     ax: Axes | None = None,
     *,
     view: str = "density",
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The ISO 13474 distribution as its class density, density or exceedance.
@@ -2294,13 +2295,13 @@ _METHOD_B_SHORT: dict[str, str] = {
 }
 
 
-def _item_label(item: str, language: str) -> str:
+def _item_label(item: str, language: Language) -> str:
     """An item as drawn: without the examples in brackets, translated."""
     short = _METHOD_B_SHORT.get(item, item.split(" (e.g.", 1)[0].strip())
     return _t(short, language)
 
 
-def _site_label(site: str, language: str) -> str:
+def _site_label(site: str, language: Language) -> str:
     """A site as drawn: the one unnamed site of a study is translated."""
     return _t(site, language) if site == "all" else site
 
@@ -2316,7 +2317,7 @@ def plot_method_a_summary(
     result: MethodASummary,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Median and range of each Method A item per site (ISO/TS 12913-3 A.2).
@@ -2405,7 +2406,7 @@ def _toward(value: float, positive: str, negative: str) -> str:
     return "center"
 
 
-def _draw_attribute_axes(ax: Axes, reach: float, language: str) -> None:
+def _draw_attribute_axes(ax: Axes, reach: float, language: Language) -> None:
     """The eight attribute arrows of Figure A.1, named past their tips."""
     ink = theme_line(ax.xaxis.label.get_color(), ax, quiet=0.7)
     for label, angle, solid in _PAQ_AXES:
@@ -2457,7 +2458,7 @@ def plot_pleasantness_eventfulness(
     *,
     normalized: bool = True,
     respondents: bool = False,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The sites on the two-dimensional model of ISO/TS 12913-3 Figure A.1.
@@ -2569,7 +2570,7 @@ def plot_soundscape_correlation(
     result: SoundscapeCorrelation,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """The pairs of a correlation, as ranks for Spearman, with the coefficient.
@@ -2611,7 +2612,7 @@ def plot_method_b_summary(
     result: MethodBSummary,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Mean and confidence interval of each Method B scale per site.
@@ -2675,7 +2676,7 @@ def plot_source_ranking(
     result: SourceRanking,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Median rank of each recognised sound source per site, with its range.
@@ -2730,7 +2731,7 @@ def plot_binaural_indicators(
     ax: Axes | None = None,
     *,
     parameter: str,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """One row of ISO/TS 12913-3 Table D.1 at both ears.
@@ -2833,7 +2834,7 @@ def plot_level_difference_quantiles(
     result: LevelDifferenceQuantiles,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The sorted sample of ISO 17534-1 C.4 by rank, with its two quantiles.
@@ -2920,7 +2921,7 @@ def plot_round_robin_precision(
     result: RoundRobinPrecision,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The distribution of :math:`|dL_n|_{\max}` of a round robin, as Figure A.3.
@@ -2987,7 +2988,7 @@ def plot_calculation_verification(
     result: CalculationVerification,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Each result of the ISO 17534-1 TRC form against its certified interval.
@@ -3079,7 +3080,7 @@ def plot_wavelength_spectrum(
     result: WavelengthSpectrum,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """A roughness or contact-filter spectrum against wavelength (Appendix G).

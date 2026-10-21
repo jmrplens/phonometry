@@ -63,7 +63,8 @@ def test_decay_curve_is_linear_for_exponential() -> None:
     # L(t) = -60*t/T exactly for an exponential decay (5.3.3, Eq. 1).
     t60 = 1.0
     ir = exponential_ir(t60, 3.0)
-    t, level = room.decay_curve(ir, FS)
+    decay = room.decay_curve(ir, FS)
+    t, level = decay.times, decay.levels
     assert level[0] == pytest.approx(0.0, abs=1e-9)
     # Compare over the first 40 dB of decay.
     mask = level >= -40.0
@@ -73,13 +74,14 @@ def test_decay_curve_is_linear_for_exponential() -> None:
 def test_decay_curve_monotone_nonincreasing() -> None:
     rng = np.random.default_rng(7)
     ir = exponential_ir(0.7, 2.0) * rng.standard_normal(int(2.0 * FS))
-    _, level = room.decay_curve(ir, FS)
+    level = room.decay_curve(ir, FS).levels
     assert np.all(np.diff(level) <= 1e-12)
 
 
 def test_decay_curve_single_band() -> None:
     ir = multitone_ir(0.8, 2.5, [500.0])
-    t, level = room.decay_curve(ir, FS, band=500.0)
+    decay = room.decay_curve(ir, FS, band=500.0)
+    t, level = decay.times, decay.levels
     assert t.shape == level.shape
     assert level[0] == pytest.approx(0.0, abs=1e-9)
     assert np.all(np.isfinite(level))

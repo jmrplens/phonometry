@@ -41,7 +41,7 @@ _SCRIPTS = str(pathlib.Path(__file__).resolve().parents[2] / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-import generate_catalogue_schema as generator  # noqa: E402
+import generate_catalogue_schema as generator
 
 ROW_CLASSES = generator.published_row_classes()
 SCHEMA = io.catalogue_schema(*ROW_CLASSES)
@@ -1016,7 +1016,9 @@ _NODE = shutil.which("node")
 
 @pytest.mark.skipif(_NODE is None, reason="no ECMA-262 engine to compare with")
 @pytest.mark.parametrize("flags", ["u", ""], ids=["unicode", "plain"])
-def test_an_editors_validator_reads_every_pattern_as_python_does(flags: str) -> None:
+def test_an_editors_validator_reads_every_pattern_as_python_does(
+    flags: str, tmp_path: pathlib.Path
+) -> None:
     """ECMA-262, the dialect JSON Schema names, reads the patterns alike.
 
     An editor validates a catalogue file with the engine of its language,
@@ -1025,9 +1027,11 @@ def test_an_editors_validator_reads_every_pattern_as_python_does(flags: str) -> 
     """
     texts = _pattern_texts()
     patterns = _every_pattern()
+    # The input goes through a file, not stdin: Node's readFileSync(0) on a
+    # pipe can fail with EAGAIN on macOS when the pipe is not ready yet.
     script = (
         "const {patterns, texts, flags} = JSON.parse(require('fs')"
-        ".readFileSync(0, 'utf8'));"
+        ".readFileSync(process.argv[1], 'utf8'));"
         "const out = {};"
         "for (const [name, p] of Object.entries(patterns)) {"
         "  const re = new RegExp(p, flags);"
@@ -1035,15 +1039,19 @@ def test_an_editors_validator_reads_every_pattern_as_python_does(flags: str) -> 
         "}"
         "process.stdout.write(JSON.stringify(out));"
     )
-    given = json.dumps({"patterns": patterns, "texts": texts, "flags": flags})
+    given = tmp_path / "patterns.json"
+    given.write_text(
+        json.dumps({"patterns": patterns, "texts": texts, "flags": flags}),
+        encoding="utf-8",
+    )
     ran = subprocess.run(
-        [str(_NODE), "-e", script],
-        input=given,
+        [str(_NODE), "-e", script, str(given)],
         capture_output=True,
         text=True,
         timeout=120,
-        check=True,
+        check=False,
     )
+    assert ran.returncode == 0, ran.stderr
     ecma = json.loads(ran.stdout)
     for name, pattern in patterns.items():
         compiled = re.compile(pattern)

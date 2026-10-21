@@ -28,6 +28,7 @@ from ._layout import escaped_pairs, fmt_meta
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from .._i18n import Language
     from .metadata import ReportMetadata
 
 
@@ -58,7 +59,7 @@ def standard_basis_line(
     with_standard: str,
     without_standard: str,
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """The standard-basis line, naming the measurement standard when supplied.
 
@@ -78,7 +79,7 @@ def standard_basis_line(
 
 def material_metadata_pairs(
     metadata: ReportMetadata,
-    language: str,
+    language: Language,
     middle: list[tuple[str, str | None]],
 ) -> list[tuple[str, str]]:
     """Build the common material identity grid with fiche-specific middle rows.
@@ -118,7 +119,7 @@ def render_material_fiche(
     content: MaterialFicheContent,
     metadata: ReportMetadata | None,
     *,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a material-test fiche from its ``content`` to a PDF at ``path``.
 

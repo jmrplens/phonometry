@@ -462,7 +462,7 @@ RESULT_FIELDS = [
     ("time_synchronous_average.period_waveform", _average, ("period_waveform",), FS),
     ("resample_signal.signal", _resample, ("signal",), FS // 2),
     ("align_impulse_responses", _align, ("aligned", "reference"), FS),
-    ("pile_strike_metrics.pressure", _strike, ("pressure",), FS),
+    ("pile_strike_metrics.pressure_pa", _strike, ("pressure_pa",), FS),
     (
         "subtract_direct_sound",
         _subtraction,
@@ -542,6 +542,14 @@ _WAVEFORM_NAMES = frozenset(
         "samples",
         "record",
         "force",
+        # The generic record, and a motion named for its role, as the
+        # parameters they came in by are.
+        "x",
+        "response",
+        # A waveform named for the quantity it holds carries its unit.
+        "pressure_pa",
+        "force_n",
+        "acceleration_m_s2",
     }
 )
 
@@ -561,7 +569,7 @@ _BARE_ON_PURPOSE = {
     "phonometry.room._impulse_response.ShapedSweepResult.signal": (
         "a generated excitation: no input to take a type from"
     ),
-    "phonometry.signals.test_signals.ToneBurstResult.signal": (
+    "phonometry.signals._test_signals.ToneBurstResult.signal": (
         "a generated test signal: no input to take a type from"
     ),
     "phonometry.room.image_source.ImageSourceResult.ir": (
@@ -573,15 +581,15 @@ _BARE_ON_PURPOSE = {
     "phonometry.simulation.fdtd.SignalSource.samples": (
         "an excitation the caller supplies, not a result"
     ),
-    "phonometry.vibration.structural._impact_mobility.DoubleHitCheck.force": (
+    "phonometry.vibration.structural._impact_mobility.DoubleHitCheck.force_n": (
         "a force in newtons, read without the Signal's digital-to-pascal "
         "factor: a Signal would claim a conversion that never happened"
     ),
-    "phonometry.vibration.structural._impact_mobility.OverloadCheck.record": (
+    "phonometry.vibration.structural._impact_mobility.OverloadCheck.x": (
         "the raw samples judged against the channel's full scale, in the "
         "channel's own unit: a calibrated Signal would present other numbers"
     ),
-    "phonometry.vibration.structural._impact_mobility.ResponseDecayCheck.record": (
+    "phonometry.vibration.structural._impact_mobility.ResponseDecayCheck.response": (
         "a motion, not a pressure, read without the Signal's factor: a "
         "Signal would claim a conversion that never happened"
     ),
@@ -671,7 +679,7 @@ def test_the_strike_is_drawn_in_the_pascals_its_metrics_were_checked_in() -> Non
     pressure = 1e3 * _RECORD
     result = pile_strike_metrics(pressure, FS)
     halved = dataclasses.replace(
-        result, pressure=Signal(pressure / 2.0, FS, calibration_factor=2.0)
+        result, pressure_pa=Signal(pressure / 2.0, FS, calibration_factor=2.0)
     )
     ax = halved.plot()[0]
     drawn = np.asarray(ax.get_lines()[0].get_ydata())

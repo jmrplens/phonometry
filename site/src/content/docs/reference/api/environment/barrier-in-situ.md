@@ -427,7 +427,7 @@ MeasuredBarrierInsertionLoss(
     receiver_levels_before: NDArray[np.float64],
     receiver_levels_after: NDArray[np.float64],
     insertion_loss: NDArray[np.float64],
-    method: str,
+    method: Literal['direct', 'indirect'],
     receiver_correction_before: float,
     receiver_correction_after: float,
 )
@@ -455,7 +455,7 @@ The insertion loss of a barrier as measured, ISO 10847 clause 8.2.
 MeasuredBarrierInsertionLoss.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -674,12 +674,12 @@ decimal are not taken past it by the last bits.
 
 $(H_s + H_R) / (d_1 + d_2)$, the ratio of the "before" campaign.
 
-## TEMPERATURE_TOLERANCE_C
+## TEMPERATURE_TOLERANCE_K
 
 *Constant* (`float`).
 
 ```python
-TEMPERATURE_TOLERANCE_C = 10.0
+TEMPERATURE_TOLERANCE_K = 10.0
 ```
 
 ## wind_class

@@ -7,7 +7,7 @@ shipping noise, and the marine-mammal weighting the impact criteria apply.
 Everything here is embedded by a page under ``underwater/``.
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Literal
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,6 +33,8 @@ from .theme import (
 
 if TYPE_CHECKING:
     from phonometry.underwater import AmbientNoiseResult
+    from phonometry.underwater.bioacoustics.weighting import HearingGroup
+    from phonometry.underwater.sources.ship_traffic_noise import VesselClass
 
 
 def generate_ship_source_level(output_dir: str) -> None:
@@ -387,7 +389,7 @@ def generate_marine_mammal_weighting(output_dir: str) -> None:
     from phonometry import underwater
 
     freqs = np.logspace(1.0, 5.4, 700)
-    groups = (
+    groups: tuple[tuple[HearingGroup, str, str, Any], ...] = (
         ("LF", "Low-frequency cetaceans", COLOR_PRIMARY, "-"),
         ("HF", "High-frequency cetaceans", COLOR_SECONDARY, "--"),
         ("VHF", "Very high-frequency cetaceans", COLOR_TERTIARY, "-."),
@@ -667,13 +669,15 @@ def generate_ship_traffic_noise(output_dir: str) -> None:
     from phonometry import underwater
 
     _fig, ax = plt.subplots(figsize=(10, 6))
-    cases = (
+    cases: tuple[tuple[VesselClass, float, float, str], ...] = (
         ("containership", 18.0, 300.0, COLOR_PRIMARY),
         ("cruise", 17.1, 250.0, COLOR_SECONDARY),
         ("tug", 3.7, 30.0, "#8c8c8c"),
     )
     for vessel_class, speed, length, color in cases:
-        s = underwater.ship_source_spectrum(speed, length, vessel_class=vessel_class)
+        s = underwater.ship_source_spectrum(
+            speed, length_m=length, vessel_class=vessel_class
+        )
         ax.plot(
             s.frequencies,
             s.source_psd,
@@ -898,7 +902,12 @@ def generate_sound_speed_models(output_dir: str) -> None:
 
     depths = np.linspace(0.0, 5000.0, 251)
     temps = 4.0 + 14.0 / (1.0 + (np.maximum(depths - 80.0, 0.0) / 250.0) ** 2)
-    models = ("unesco", "del_grosso", "mackenzie", "medwin")
+    models: tuple[Literal["unesco", "del_grosso", "mackenzie", "medwin"], ...] = (
+        "unesco",
+        "del_grosso",
+        "mackenzie",
+        "medwin",
+    )
     colors = (COLOR_PRIMARY, COLOR_SECONDARY, COLOR_TERTIARY, "#8c8c8c")
     profiles = {
         m: np.asarray(
@@ -1178,7 +1187,17 @@ def generate_sonar_budget(output_dir: str) -> None:
     from phonometry import underwater
 
     ranges = np.linspace(50.0, 30_000.0, 800)
-    cases = (
+    cases: tuple[
+        tuple[
+            str,
+            float,
+            Literal["spherical", "cylindrical", "practical"],
+            float | None,
+            str,
+            str,
+        ],
+        ...,
+    ] = (
         ("10 kHz, spherical only", 10e3, "spherical", None, COLOR_PRIMARY, "-"),
         (
             "10 kHz, practical $R_0$ = 1 km",
@@ -2023,7 +2042,8 @@ def generate_marine_mammal_assessment(output_dir: str) -> None:
     spectrum.plot(ax=axes[0], language=_LANG)
     axes[0].set_title("Step 1: Single-Strike SEL by Band", pad=12)
 
-    for ax, group in zip(axes[1:], ("LF", "VHF"), strict=True):
+    weighted_groups: tuple[HearingGroup, ...] = ("LF", "VHF")
+    for ax, group in zip(axes[1:], weighted_groups, strict=True):
         res = underwater.weighted_exposure(
             frequencies_hz=spectrum.frequencies,
             band_sel=spectrum.band_sel,
@@ -2051,7 +2071,7 @@ def generate_marine_mammal_exposure_functions(output_dir: str) -> None:
     print("Generating marine_mammal_exposure_functions...")
     from phonometry import underwater
 
-    groups = ("LF", "HF", "VHF", "PW", "OW")
+    groups: tuple[HearingGroup, ...] = ("LF", "HF", "VHF", "PW", "OW")
     palette = (COLOR_PRIMARY, COLOR_SECONDARY, COLOR_TERTIARY, "#8c8c8c", "#7b5ea7")
     freqs = np.logspace(1.0, np.log10(400e3), 800)
 
@@ -2104,10 +2124,11 @@ def generate_marine_mammal_exposure_functions(output_dir: str) -> None:
     format_frequency_axis(ax, 10.0, 400e3, language=_LANG)
 
     ax = axes[1]
-    for guidance, color, ls in (
+    guidances: tuple[tuple[Literal["nmfs-2024", "nmfs-2018"], str, str], ...] = (
         ("nmfs-2024", COLOR_PRIMARY, "-"),
         ("nmfs-2018", COLOR_SECONDARY, "--"),
-    ):
+    )
+    for guidance, color, ls in guidances:
         res = underwater.auditory_weighting(freqs, "LF", guidance=guidance)
         ax.semilogx(
             res.frequencies,
@@ -2169,7 +2190,7 @@ def generate_piling_campaign_accumulation(output_dir: str) -> None:
     fs = 48_000
     spectrum = underwater.strike_sel_spectrum(_piling_strike(fs), fs, fraction=3)
     counts = np.unique(np.round(np.logspace(0.0, 4.0, 90)).astype(int))
-    groups = ("LF", "HF", "VHF", "PW", "OW")
+    groups: tuple[HearingGroup, ...] = ("LF", "HF", "VHF", "PW", "OW")
     palette = (COLOR_PRIMARY, COLOR_SECONDARY, COLOR_TERTIARY, "#8c8c8c", "#7b5ea7")
 
     _fig, ax = plt.subplots(figsize=(11.5, 6.4))

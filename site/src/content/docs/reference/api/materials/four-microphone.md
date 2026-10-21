@@ -32,10 +32,10 @@ that module.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## air_density_astm
+## air_density_astm_e2611
 
 ```python
-air_density_astm(
+air_density_astm_e2611(
     *,
     temperature_c: ArrayLike,
     static_pressure_kpa: ArrayLike = 101.325,
@@ -169,15 +169,15 @@ unpacked by position.
 | `u0` | The particle velocity on the upstream face. |
 | `ud` | The particle velocity on the downstream face. |
 
-## plane_wave_frequency_range_astm
+## plane_wave_frequency_range_astm_e2611
 
 ```python
-plane_wave_frequency_range_astm(
+plane_wave_frequency_range_astm_e2611(
     spacing_m: float,
     speed_of_sound: float,
     *,
     diameter_m: float | None = None,
-    shape: str = 'circular',
+    shape: Literal['circular', 'rectangular', 'square'] = 'circular',
 ) -> tuple[float, float]
 ```
 
@@ -213,10 +213,13 @@ binding for every microphone pair).
 | :--- | :--- |
 | TypeError | if `spacing_m` is not a single number. |
 
-## speed_of_sound_astm
+## speed_of_sound_astm_e2611
 
 ```python
-speed_of_sound_astm(*, temperature_c: ArrayLike) -> NDArray[np.float64]
+speed_of_sound_astm_e2611(
+    *,
+    temperature_c: ArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Speed of sound in air (ASTM E2611-19, Eq. (4)).
@@ -253,7 +256,7 @@ transfer_matrix_one_load(
     characteristic_impedance: float,
     frequencies: ArrayLike | None = None,
     diameter_m: float | None = None,
-    shape: str = 'circular',
+    shape: Literal['circular', 'rectangular', 'square'] = 'circular',
 ) -> TransferMatrix
 ```
 
@@ -307,7 +310,7 @@ transfer_matrix_two_load(
     characteristic_impedance: float,
     frequencies: ArrayLike | None = None,
     diameter_m: float | None = None,
-    shape: str = 'circular',
+    shape: Literal['circular', 'rectangular', 'square'] = 'circular',
 ) -> TransferMatrix
 ```
 
@@ -361,7 +364,7 @@ TransferMatrix(
     s2: float | None = None,
     thickness_m: float | None = None,
     diameter_m: float | None = None,
-    shape: str | None = None,
+    shape: Literal['circular', 'rectangular', 'square'] | None = None,
     frequencies: NDArray[np.float64] | None = None,
     air_characteristic_impedance: float | None = None,
 )
@@ -456,7 +459,7 @@ TransferMatrix.plot(
     *,
     frequencies: ArrayLike | None = None,
     characteristic_impedance: float | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -502,7 +505,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 TransferMatrix.plot_geometry(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -596,7 +599,7 @@ wave_decomposition(
     s2: float,
     wavenumber: ArrayLike,
     diameter_m: float | None = None,
-    shape: str = 'circular',
+    shape: Literal['circular', 'rectangular', 'square'] = 'circular',
 ) -> WaveAmplitudes
 ```
 

@@ -100,7 +100,7 @@ IMAGES = _SCRIPTS.parent / ".github" / "images"
 #: because that says "looked at, and it is the same", which is a different
 #: statement from "do not translate this".
 ENGLISH_BY_DESIGN: dict[str, str] = {
-    'PlaneWaveSource("down", offset = 60)': "the API call the figure documents, quoted as the reader would type it",
+    'PlaneWaveSource(direction = "down", offset = 60)': "the API call the figure documents, quoted as the reader would type it",
     "narrowband=True (Goertzel)": "a keyword argument of the API the figure documents, and the name of "
     "the algorithm behind it",
     "shape (4, N)": "a numpy attribute and its value, as the reader sees it printed",

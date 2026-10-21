@@ -154,8 +154,8 @@ def test_every_reference_to_a_badge_resolves_to_a_generated_file() -> None:
     guard that turns a rename into a failing test instead of a 404 in a
     rendered page.
     """
-    tracked = subprocess.run(  # noqa: S603
-        ["git", "-C", str(_ROOT), "ls-files", "-z"],  # noqa: S607
+    tracked = subprocess.run(
+        ["git", "-C", str(_ROOT), "ls-files", "-z"],
         capture_output=True,
         check=True,
     ).stdout.decode()
@@ -226,7 +226,7 @@ def test_the_banner_reads_its_counts_and_never_carries_its_own() -> None:
     )
     svg = cb.render_banner(FIXTURE["counts"], cb.LIGHT)
     # Our own output
-    root = ET.fromstring(svg)  # noqa: S314
+    root = ET.fromstring(svg)
     assert root.get("aria-label") == alt
     # Read off the title rather than searched for as a substring: the drawn
     # figures are outlines, so "566" turns up in path coordinates by chance.
@@ -398,7 +398,7 @@ def test_every_asset_says_in_words_what_it_shows() -> None:
     """An image of a tick is not a verdict to anyone who cannot see it."""
     for name, source in cb.assets().items():
         # Our own output
-        root = ET.fromstring(source)  # noqa: S314
+        root = ET.fromstring(source)
         assert root.get("role") == "img", name
         label = root.get("aria-label")
         assert label, name
@@ -428,7 +428,7 @@ def test_nothing_generated_contains_an_emoji() -> None:
 def test_each_asset_is_well_formed_and_declares_its_own_size(name: str) -> None:
     source = _committed(name)
     # Our own output
-    root = ET.fromstring(source)  # noqa: S314
+    root = ET.fromstring(source)
     assert root.tag == "{http://www.w3.org/2000/svg}svg"
     # Intrinsic width and height as well as a viewBox: without them GitHub
     # cannot reserve the box before the bytes arrive, and a mark in a table

@@ -39,7 +39,7 @@ TOLERANCE_MM_S = 0.05
 # --------------------------------------------------------------------------- #
 def test_a_magnitude_is_graded_into_one_of_the_four_zones() -> None:
     """Zone A up to the first boundary, D above the last."""
-    boundaries = vibration.ZoneBoundaries(2.8, 7.1, 11.2)
+    boundaries = vibration.ZoneBoundaries(a_b=2.8, b_c=7.1, c_d=11.2)
     graded = vibration.evaluation_zone([0.5, 3.0, 8.0, 20.0], boundaries)
     assert list(graded) == ["A", "B", "C", "D"]
 
@@ -51,7 +51,7 @@ def test_a_boundary_belongs_to_the_zone_below_it() -> None:
     machine measured at exactly 2,8 meets zone A rather than falling out of
     it.
     """
-    boundaries = vibration.ZoneBoundaries(2.8, 7.1, 11.2)
+    boundaries = vibration.ZoneBoundaries(a_b=2.8, b_c=7.1, c_d=11.2)
     assert vibration.evaluation_zone(2.8, boundaries) == "A"
     assert vibration.evaluation_zone(7.1, boundaries) == "B"
     assert vibration.evaluation_zone(11.2, boundaries) == "C"
@@ -60,7 +60,7 @@ def test_a_boundary_belongs_to_the_zone_below_it() -> None:
 
 def test_a_scalar_is_graded_to_a_string_and_an_array_to_an_array() -> None:
     """The shape of the answer follows the shape of the question."""
-    boundaries = vibration.ZoneBoundaries(1.0, 2.0, 3.0)
+    boundaries = vibration.ZoneBoundaries(a_b=1.0, b_c=2.0, c_d=3.0)
     assert isinstance(vibration.evaluation_zone(0.5, boundaries), str)
     graded = vibration.evaluation_zone([0.5, 2.5], boundaries)
     assert isinstance(graded, np.ndarray)
@@ -76,7 +76,7 @@ def test_boundaries_that_do_not_rise_are_refused(
 ) -> None:
     """Out of order they would grade a good machine as a bad one, silently."""
     with pytest.raises(ValueError, match="must increase through the zones"):
-        vibration.ZoneBoundaries(a_b, b_c, c_d)
+        vibration.ZoneBoundaries(a_b=a_b, b_c=b_c, c_d=c_d)
 
 
 @pytest.mark.parametrize("bad", [0.0, -1.0, math.nan, math.inf])
@@ -88,12 +88,12 @@ def test_a_boundary_that_is_not_a_magnitude_is_refused(bad: float) -> None:
     since NaN compares false against everything it is asked about.
     """
     with pytest.raises(ValueError, match="a_b|must be positive|must be finite"):
-        vibration.ZoneBoundaries(bad, 7.1, 11.2)
+        vibration.ZoneBoundaries(a_b=bad, b_c=7.1, c_d=11.2)
 
 
 def test_a_magnitude_that_is_not_a_magnitude_is_refused() -> None:
     """Negative and non-finite alike: neither is a vibration severity."""
-    boundaries = vibration.ZoneBoundaries(2.8, 7.1, 11.2)
+    boundaries = vibration.ZoneBoundaries(a_b=2.8, b_c=7.1, c_d=11.2)
     for bad in (-1.0, math.nan, math.inf):
         with pytest.raises(ValueError, match="non-negative and finite"):
             vibration.evaluation_zone(bad, boundaries)
@@ -131,8 +131,8 @@ def test_the_three_typical_ranges_overlap_the_way_the_table_draws_them() -> None
 
 def test_the_low_end_of_each_range_grades_a_small_machine() -> None:
     """Note 2: a 15 kW motor sits at the low end, a large one at the high end."""
-    small = vibration.ZoneBoundaries(0.71, 1.8, 4.5)
-    large = vibration.ZoneBoundaries(4.5, 9.3, 14.7)
+    small = vibration.ZoneBoundaries(a_b=0.71, b_c=1.8, c_d=4.5)
+    large = vibration.ZoneBoundaries(a_b=4.5, b_c=9.3, c_d=14.7)
     assert vibration.evaluation_zone(3.0, small) == "C"
     assert vibration.evaluation_zone(3.0, large) == "A"
 

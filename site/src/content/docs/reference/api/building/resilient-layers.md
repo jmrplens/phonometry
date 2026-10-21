@@ -245,7 +245,7 @@ Predicted improvement `ΔL` of a soft floor covering
 CoveringImprovementResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -431,7 +431,7 @@ FloatingFloorImprovementResult(
     frequencies: np.ndarray,
     improvement: np.ndarray,
     resonance_frequency: float,
-    model: str,
+    model: Literal['en12354', 'cremer', 'cremer_hammer'],
     slope: float,
     limiting_frequency: float | None = None,
     delta_lw: float | None = None,
@@ -458,7 +458,7 @@ Predicted improvement `ΔL(f)` of a floating floor.
 FloatingFloorImprovementResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -912,7 +912,7 @@ from `contact_stiffness`, `impedance` and `mass`.
 TappingForceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

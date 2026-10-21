@@ -61,7 +61,7 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from enum import StrEnum
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -85,6 +85,10 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from ..._i18n import Language
+
+Averaging = Literal["energy", "arithmetic"]
 
 
 __all__ = [
@@ -625,7 +629,7 @@ class WindShearProfile(RichDisplay):
         return float(out) if out.ndim == 0 else np.asarray(out, dtype=np.float64)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the power-law profile through the two measured points.
 
@@ -785,6 +789,7 @@ def _type_a_arithmetic(
     spread the equation cannot give.
     """
     n = values.size
+    # The fewest values the step below can work with, not a quantity.
     if n < 2:  # noqa: PLR2004
         return math.nan
     centre = float(np.mean(values)) if mean is None else mean
@@ -798,7 +803,7 @@ class _Averaging(StrEnum):
     ARITHMETIC = "arithmetic"
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class BinnedSoundLevels(OwnsArrays):
     """Interval levels averaged per wind speed bin and sector (10.1, 10.3).
 
@@ -830,8 +835,7 @@ class BinnedSoundLevels(OwnsArrays):
     type_a_uncertainty_db: NDArray[np.float64]
     type_b_uncertainty_db: NDArray[np.float64]
     combined_uncertainty_db: NDArray[np.float64]
-    _: KW_ONLY
-    averaging: str
+    averaging: Averaging
     interval_levels: NDArray[np.float64]
     interval_wind_speeds_m_s: NDArray[np.float64]
     bin_width_m_s: float
@@ -908,7 +912,7 @@ class BinnedSoundLevels(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the intervals against wind speed and the bin averages over them.
 
@@ -932,9 +936,9 @@ class BinnedSoundLevels(OwnsArrays):
 def bin_sound_levels(
     levels: ArrayLike,
     wind_speeds_m_s: ArrayLike,
-    wind_directions_deg: ArrayLike | None = None,
     *,
-    averaging: str = "energy",
+    wind_directions_deg: ArrayLike | None = None,
+    averaging: Averaging = "energy",
     type_b_uncertainty_db: ArrayLike = 0.0,
     bin_width_m_s: float = 1.0,
     sector_width_deg: float = 30.0,
@@ -1159,7 +1163,7 @@ class TurbineSoundLevels(OwnsArrays):
         return tuple(_correction_regime(float(delta)) for delta in difference)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot total, background and turbine levels per bin.
 
@@ -1349,7 +1353,7 @@ class PredictedReceptorLevel(OwnsArrays):
     modeling_uncertainty_db: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each turbine's contribution and the total with its uncertainty.
 
@@ -1502,7 +1506,7 @@ class SoundRelevantTurbines(OwnsArrays):
         return float(np.mean(speeds[self.relevant]))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the turbines' levels, loudest first, the relevant ones marked.
 
@@ -1592,7 +1596,7 @@ class LowFrequencyLevel(OwnsArrays):
         require_choice(self.weighting, "weighting", A_OR_Z_WEIGHTINGS)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the outdoor and indoor band levels.
 
@@ -1780,7 +1784,7 @@ class SoundEmergence(OwnsArrays):
     wind_speeds_m_s: NDArray[np.float64] | None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the emergence of each wind speed class.
 
@@ -1888,7 +1892,7 @@ class WindTurbineRatingLevel(RichDisplay):
     rating_level: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the three candidate adjustments with the governing one marked.
 
@@ -1984,7 +1988,7 @@ class ToneSearchLimit(OwnsArrays):
     static_pressure_kpa: float
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the band attenuation over the distance and the 20 dB line.
 

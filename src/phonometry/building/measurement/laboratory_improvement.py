@@ -44,7 +44,7 @@ ISO 10140-5 are where those curves are printed.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -77,6 +77,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
+    from ..._internal.types import ReportEngine
     from ..._report.metadata import ReportMetadata
     from .ratings import BasicElement, ImpactRatingResult, ReferenceFloor
 
@@ -188,7 +190,7 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
     r_without: np.ndarray
     r_with: np.ndarray
     delta_r: np.ndarray
-    basic_element: str | None
+    basic_element: Literal["heavy_wall", "heavy_floor", "lightweight_wall"] | None
     rating: ReductionImprovementRating | None
     delta_rw_direct: int | None
     delta_rw_c_direct: int | None
@@ -223,7 +225,7 @@ class LaboratoryLiningImprovementResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the improvement ``ΔR`` per band with its single numbers.
 
@@ -394,7 +396,7 @@ class LiningCuringCheck(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the admissible curing time and time lag with this measurement.
 
@@ -487,7 +489,9 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
     l_n0: np.ndarray
     l_n: np.ndarray
     improvement: np.ndarray
-    reference_floor: str
+    reference_floor: Literal[
+        "heavyweight", "lightweight_1", "lightweight_2", "lightweight_3"
+    ]
     delta_lw: int | None
     ci_delta: int | None
     reference_rating: ImpactRatingResult | None
@@ -527,7 +531,7 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        language: str = "en",
+        language: Language = "en",
         rating_range: bool = False,
         **kwargs: Any,
     ) -> Axes:
@@ -556,9 +560,9 @@ class LaboratoryFloorCoveringImprovementResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        engine: str = "reportlab",
+        engine: ReportEngine = "reportlab",
         verbose: bool = False,
-        language: str = "en",
+        language: Language = "en",
     ) -> str:
         r"""Render the form of ISO 10140-1:2021 Figure H.4 to a one-page PDF.
 
@@ -728,7 +732,7 @@ class HeavyImpactImprovementResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the improvement ``ΔLr`` per band.
 

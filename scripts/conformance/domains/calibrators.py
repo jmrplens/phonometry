@@ -81,11 +81,12 @@ def _register_table_e1() -> None:
     ) in ref.IEC60942_TABLE_E1:
 
         def check(
+            *,
             deviation: float = deviation,
             limit: float = limit,
             uncertainty: float = uncertainty,
             maximum: float = maximum,
-            conforms: bool = conforms,  # noqa: FBT001
+            conforms: bool = conforms,
             outcome: int = outcome,
         ) -> Outcome:
             result = ph.metrology.verify_conformance(
@@ -112,12 +113,13 @@ def _register_table_c1() -> None:
     ), uncertainty, maximum, conforms, outcome in ref.IEC61672_1_TABLE_C1:
 
         def check(
+            *,
             deviation: float = deviation,
             lower: float = lower,
             upper: float = upper,
             uncertainty: float = uncertainty,
             maximum: float = maximum,
-            conforms: bool = conforms,  # noqa: FBT001
+            conforms: bool = conforms,
             outcome: int = outcome,
         ) -> Outcome:
             result = ph.metrology.verify_conformance(

@@ -133,6 +133,7 @@ def split_bands(
     """
     if limits is None:
         return None, [x]
+    # The length of a fixed-size argument, not a quantity.
     if len(limits) != 2:  # noqa: PLR2004
         msg = f"'{name}' must be a (f_min, f_max) pair or None."
         raise ValueError(msg)

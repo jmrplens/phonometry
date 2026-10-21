@@ -328,9 +328,9 @@ def test_collected_test_modules_have_unique_import_names() -> None:
     work does, is exactly how the collision gets introduced.
 
     ``src`` is scanned too, because pytest collects from the repository root
-    and ``phonometry.signals.test_signals`` matches the default patterns. It
-    sits inside a package, so it imports under its dotted name and cannot
-    collide, and this check knows that rather than assuming it.
+    and a module named ``test_*.py`` there would match the default patterns.
+    It would sit inside a package, so it would import under its dotted name
+    and could not collide, and this check knows that rather than assuming it.
     """
     import collections
 
@@ -628,7 +628,7 @@ def test_every_warning_a_package_can_raise_is_published() -> None:
             try:
                 module = importlib.import_module(modname)
             # An optional dependency is absent
-            except Exception:  # noqa: BLE001
+            except Exception:
                 continue
             for name, obj in vars(module).items():
                 if (
@@ -1092,7 +1092,7 @@ def test_a_judgement_summary_does_not_open_with_another_family_verb() -> None:
         try:
             imported = importlib.import_module(module.name)
         # A module that will not import is another test's finding, not this one's
-        except Exception:  # noqa: BLE001
+        except Exception:
             continue
         for name in getattr(imported, "__all__", []):
             obj = getattr(imported, name, None)

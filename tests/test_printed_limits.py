@@ -266,8 +266,8 @@ _DERIVED_LIMITS = {
     ),
     "phonometry.electroacoustics.program_signal.ProgramSignalCheck": (
         "relative_levels",
-        "upper_tolerance_db",
         "lower_tolerance_db",
+        "upper_tolerance_db",
     ),
     "phonometry.emission.free_field_qualification.InverseSquareLawResult": (
         "tolerance_db",

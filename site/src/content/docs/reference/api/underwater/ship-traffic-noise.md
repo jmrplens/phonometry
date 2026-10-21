@@ -40,10 +40,10 @@ reproduces RANDI 3.1 [Breeding et al.] and Wales & Heitmeyer (2002).
 ```python
 ship_source_spectrum(
     speed_kt: float = 12.0,
-    length_m: float = 100.0,
     *,
-    vessel_class: str = 'containership',
-    model: str = 'jomopans-echo',
+    length_m: float = 100.0,
+    vessel_class: Literal['bulker', 'containership', 'cruise', 'dredger', 'fishing', 'government/research', 'naval', 'other', 'passenger', 'recreational', 'tanker', 'tug', 'vehicle carrier'] = 'containership',
+    model: Literal['jomopans-echo', 'randi', 'wales-heitmeyer'] = 'jomopans-echo',
     frequencies: NDArray[np.float64] | list[float] | None = None,
 ) -> ShipTrafficSpectrum
 ```
@@ -103,7 +103,7 @@ Predicted ship source-level spectrum.
 ShipTrafficSpectrum.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

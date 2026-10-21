@@ -70,11 +70,12 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from ..psychoacoustics.quality._tone_audibility import ToneAudibilityResult
     from .metadata import ReportMetadata
 
 
-def _fmt(value: float, language: str, decimals: int = 1) -> str:
+def _fmt(value: float, language: Language, decimals: int = 1) -> str:
     """A quantity rounded to ``decimals`` decimals, localised separator."""
     return format_number(float(value), language, decimals=decimals)
 
@@ -95,7 +96,7 @@ def _tonal_adjustment(audibility: float) -> int:
 def _metadata_pairs(
     result: ToneAudibilityResult,
     metadata: ReportMetadata | None,
-    language: str = "en",
+    language: Language = "en",
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the tonal-assessment header grid.
 
@@ -128,7 +129,7 @@ def _esc(value: str | None) -> str | None:
     return html.escape(value) if value else None
 
 
-def _present_markup(*, present: bool, language: str = "en") -> str:
+def _present_markup(*, present: bool, language: Language = "en") -> str:
     """Inline markup for the per-tone present/absent column.
 
     A tone is *present* when its audibility exceeds the masking threshold
@@ -142,7 +143,7 @@ def _present_markup(*, present: bool, language: str = "en") -> str:
     return f"<font color='{_MUTED_HEX}'>&#8211;</font>"
 
 
-def _type_label(group_size: int | None, language: str = "en") -> str:
+def _type_label(group_size: int | None, language: Language = "en") -> str:
     """The entry-type label: a single tone or a combined ``FG`` group."""
     if group_size is None or group_size <= 1:
         return t("Single", language)
@@ -152,7 +153,7 @@ def _type_label(group_size: int | None, language: str = "en") -> str:
 
 
 def _key_quantity_table(
-    result: ToneAudibilityResult, *, verbose: bool = False, language: str = "en"
+    result: ToneAudibilityResult, *, verbose: bool = False, language: Language = "en"
 ) -> Table:
     """The full-width per-tone key-quantity table (ISO/PAS 20065 Table E.2 style).
 
@@ -244,7 +245,7 @@ def _key_quantity_table(
 
 
 def _statement(
-    result: ToneAudibilityResult, language: str = "en"
+    result: ToneAudibilityResult, language: Language = "en"
 ) -> tuple[str, list[str]]:
     """The boxed decisive audibility ``ΔL_ta`` and tonal adjustment ``K``.
 
@@ -279,7 +280,7 @@ def _statement(
 
 
 def _verdict(
-    result: ToneAudibilityResult, requirement: float, language: str = "en"
+    result: ToneAudibilityResult, requirement: float, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag against a supplied maximum audibility.
 
@@ -302,7 +303,7 @@ def render_tone_audibility_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render a tonal audibility assessment fiche to a PDF at ``path``.
 
@@ -370,7 +371,7 @@ def render_tone_audibility_report(
     # Full-width, landscape level-versus-frequency analysis plot: the tone
     # levels above their critical-band masking noise (a self-scaling dB axis).
     def _levels_plot(
-        ax: Axes | None = None, language: str = "en", **kwargs: Any
+        ax: Axes | None = None, language: Language = "en", **kwargs: Any
     ) -> Axes:
         from .._plot.psychoacoustics import plot_tone_audibility_levels
 

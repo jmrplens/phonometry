@@ -228,7 +228,8 @@ Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 
 ```python
 FreeFieldCheck(
-    bandwidth: str,
+    *,
+    bandwidth: Literal['discrete-frequency', 'broadband'],
     results: tuple[InverseSquareLawResult, ...],
     source_directionality: tuple[SourceDirectionalityResult | None, ...],
     measurement_radius_m: float | None,
@@ -405,7 +406,7 @@ Every source has traverses towards each of the five targets of A.3.3 a) to e).
 FreeFieldCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -542,7 +543,7 @@ so a tone at 794 Hz is held to the 800 Hz row.
 ```python
 InverseSquareLawResult(
     frequencies: np.ndarray,
-    room: str,
+    room: Literal['anechoic', 'hemi-anechoic'],
     origin_m: np.ndarray,
     origin_fitted: bool,
     source_box_m: np.ndarray | None,
@@ -608,7 +609,7 @@ InverseSquareLawResult.plot(
     ax: Axes | None = None,
     *,
     frequency_hz: float | None = None,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -638,6 +639,7 @@ The Table A.1 limit of each frequency, in dB, read from the room.
 
 ```python
 MicrophoneTraverse(
+    *,
     positions_m: np.ndarray,
     levels: np.ndarray,
     monitor_levels: np.ndarray | None = None,
@@ -706,6 +708,7 @@ A traverse laid out along a straight line from `start_m`.
 ```python
 qualification_frequencies(
     low_hz: float = 100.0,
+    *,
     high_hz: float = 10000.0,
 ) -> np.ndarray
 ```
@@ -771,7 +774,7 @@ Whether the directionality is within Table B.1 in every band.
 SourceDirectionalityResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

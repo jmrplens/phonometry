@@ -153,7 +153,7 @@ _DBHR_R_PRIME = [
 )
 def _chk_rd1367_period_level() -> Outcome:
     phases = [
-        ph.environment.NoisePhase(hours, laeq, kt=kt, kf=kf)
+        ph.environment.NoisePhase(duration_hours=hours, laeq=laeq, kt=kt, kf=kf)
         for hours, laeq, kt, kf in _RD1367_DAY_PHASES
     ]
     level = ph.environment.evaluation_period_level(phases, duration_hours=12.0)
@@ -187,12 +187,12 @@ def _chk_rd1367_long_term_level() -> Outcome:
 )
 def _chk_rd1367_activity_verdict() -> Outcome:
     day = [
-        ph.environment.NoisePhase(hours, laeq, kt=kt, kf=kf)
+        ph.environment.NoisePhase(duration_hours=hours, laeq=laeq, kt=kt, kf=kf)
         for hours, laeq, kt, kf in _RD1367_DAY_PHASES
     ]
     evening = [
-        ph.environment.NoisePhase(2.0, 48.0, kt=3.0, kf=3.0),
-        ph.environment.NoisePhase(2.0, 0.0),
+        ph.environment.NoisePhase(duration_hours=2.0, laeq=48.0, kt=3.0, kf=3.0),
+        ph.environment.NoisePhase(duration_hours=2.0, laeq=0.0),
     ]
     verdict = ph.environment.assess_activity(
         {"day": day, "evening": evening},
@@ -526,7 +526,7 @@ def _iso1683_value(
     medium: str, key: str, expected: float, printed: str, unit: str
 ) -> Outcome:
     """One printed ISO 1683 value against the published table row."""
-    row = ph.metrology.ISO1683_REFERENCE_VALUES[medium][key]
+    row = ph.metrology.REFERENCE_VALUES[medium][key]
     in_si = f"{expected:g} {unit}"
     held = f"{row.value:g} {row.unit}"
     return record(

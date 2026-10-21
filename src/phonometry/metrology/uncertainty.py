@@ -34,13 +34,15 @@ from __future__ import annotations
 import math
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from .._i18n import Language
 
 
 from .._internal.display import RichDisplay
@@ -90,10 +92,18 @@ class UncertaintyWarning(PhonometryWarning):
 
 
 #: Recognised probability density functions for the Monte Carlo method.
-_DISTRIBUTIONS: tuple[str, ...] = ("gaussian", "rectangular", "triangular", "u-shaped")
+#: The probability density functions a :class:`Quantity` can be drawn from.
+Distribution = Literal["gaussian", "rectangular", "triangular", "u-shaped"]
+
+_DISTRIBUTIONS: tuple[Distribution, ...] = (
+    "gaussian",
+    "rectangular",
+    "triangular",
+    "u-shaped",
+)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class Quantity(RichDisplay):
     r"""An input quantity of a measurement model (GUM clause 4).
 
@@ -107,7 +117,7 @@ class Quantity(RichDisplay):
 
     value: float
     uncertainty: float
-    distribution: str = "gaussian"
+    distribution: Distribution = "gaussian"
     dof: float = math.inf
     name: str = ""
 
@@ -144,7 +154,12 @@ def rectangular(value: float, half_width: float, name: str = "") -> Quantity:
     """
     require_scalar(half_width, "half_width")
     require_scalar(value, "value")
-    return Quantity(value, half_width / math.sqrt(3.0), "rectangular", name=name)
+    return Quantity(
+        value=value,
+        uncertainty=half_width / math.sqrt(3.0),
+        distribution="rectangular",
+        name=name,
+    )
 
 
 def triangular(value: float, half_width: float, name: str = "") -> Quantity:
@@ -156,7 +171,12 @@ def triangular(value: float, half_width: float, name: str = "") -> Quantity:
     """
     require_scalar(half_width, "half_width")
     require_scalar(value, "value")
-    return Quantity(value, half_width / math.sqrt(6.0), "triangular", name=name)
+    return Quantity(
+        value=value,
+        uncertainty=half_width / math.sqrt(6.0),
+        distribution="triangular",
+        name=name,
+    )
 
 
 def u_shaped(value: float, half_width: float, name: str = "") -> Quantity:
@@ -168,7 +188,12 @@ def u_shaped(value: float, half_width: float, name: str = "") -> Quantity:
     """
     require_scalar(half_width, "half_width")
     require_scalar(value, "value")
-    return Quantity(value, half_width / math.sqrt(2.0), "u-shaped", name=name)
+    return Quantity(
+        value=value,
+        uncertainty=half_width / math.sqrt(2.0),
+        distribution="u-shaped",
+        name=name,
+    )
 
 
 @dataclass(frozen=True)
@@ -327,7 +352,7 @@ class UncertaintyResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the uncertainty budget (per-input contributions).
 
@@ -367,7 +392,7 @@ class MonteCarloResult(OwnsArrays):
     samples: np.ndarray | None = field(default=None, repr=False)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the output histogram with the coverage interval marked.
 

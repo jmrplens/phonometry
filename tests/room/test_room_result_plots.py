@@ -87,16 +87,17 @@ def test_room_acoustics_single_axes_composition() -> None:
 
 
 # --------------------------------------------------------------------------
-# Schroeder decay curve (backward compat + plot)
+# Schroeder decay curve (read by name + plot)
 # --------------------------------------------------------------------------
-def test_decay_curve_is_dataclass_and_unpacks_like_tuple() -> None:
+def test_decay_curve_is_a_record_read_by_name() -> None:
+    """The curve is read by name; it does not unpack as the old pair."""
     ir = _exp_ir()
     dc = ph.room.decay_curve(ir, FS)
     assert isinstance(dc, ph.room.DecayCurve)
-    time, level = ph.room.decay_curve(ir, FS)  # backward-compatible unpacking
-    np.testing.assert_array_equal(time, dc.times)
-    np.testing.assert_array_equal(level, dc.levels)
+    assert dc.times.shape == dc.levels.shape
     assert dc.band is None
+    with pytest.raises(TypeError, match="DecayCurve"):
+        iter(dc)
 
 
 def test_decay_curve_records_band() -> None:

@@ -120,7 +120,7 @@ def generate_fdtd_domain_geometry(output_dir: str) -> None:
         edge_impedance={"top": 413.0},
         obstacle_mask=mask,
     )
-    sim.add_source(GaussianPulse(10, 30, half_width_s=1e-3))
+    sim.add_source(GaussianPulse(ix=10, iy=30, half_width_s=1e-3))
     _fig, ax = plt.subplots(figsize=(10, 6.6))
     sim.plot_geometry(ax=ax, probes=[(3.0, 1.5), (4.0, 2.0)], language=_LANG)
     plt.tight_layout()
@@ -195,10 +195,10 @@ def generate_elastic_halfspace_waves(output_dir: str) -> None:
                 iy=0,
                 direction="y",
                 amplitude=1e6,
-                waveform=simulation.GaussianPulse(0, 0, half_width_s=width).value,
+                waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=width).value,
             )
         ],
-        boundaries=simulation.ElasticBoundaries({"top": "free"}),
+        boundaries=simulation.ElasticBoundaries(sides={"top": "free"}),
         recording=simulation.ElasticRecording(
             snapshot_every=steps, snapshot_field="vy"
         ),
@@ -287,7 +287,9 @@ def _scholte_interface_result() -> ElasticFDTDResult:
         sources=[
             simulation.ExplosionSource(ix=60, iy=89, waveform=ricker, amplitude=1e3)
         ],
-        boundaries=simulation.ElasticBoundaries("absorbing", absorbing_layer_cells=20),
+        boundaries=simulation.ElasticBoundaries(
+            sides="absorbing", absorbing_layer_cells=20
+        ),
         recording=simulation.ElasticRecording(
             snapshot_every=steps, snapshot_field="vy"
         ),
@@ -421,7 +423,11 @@ def generate_fdtd_plane_wave_launch(output_dir: str) -> None:
         343.0, dx, shape=(160, 80), sponge_width=sponge, sponge_sides=("top", "bottom")
     )
     sim.add_source(
-        PlaneWaveSource("down", CWSource(0, 0, frequency=1000.0).value, offset=offset)
+        PlaneWaveSource(
+            direction="down",
+            waveform=CWSource(ix=0, iy=0, frequency=1000.0).value,
+            offset=offset,
+        )
     )
     sim.run(700)  # ramp, fill, then a few whole periods
     field = np.asarray(sim.p).copy()  # the instantaneous field of panel (a)

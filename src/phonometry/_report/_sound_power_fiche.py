@@ -51,6 +51,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
     from reportlab.platypus import Table
 
+    from .._i18n import Language
     from .metadata import ReportMetadata
 
     class SoundPowerLike(Protocol):
@@ -85,13 +86,13 @@ _MIN_BANDS_TO_INFER_FRACTION = 2
 _THIRD_OCTAVE_FRACTION = 3
 
 
-def _num(value: float | None, language: str = "en") -> str | None:
+def _num(value: float | None, language: Language = "en") -> str | None:
     """Round-trip a client-supplied metadata number, or ``None`` when unset."""
     return fmt_meta(value, language) if value is not None else None
 
 
 def metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the sound-power header grid.
 
@@ -121,7 +122,7 @@ def metadata_pairs(
     return escaped_pairs(specs)
 
 
-def d1(value: float, language: str = "en") -> str:
+def d1(value: float, language: Language = "en") -> str:
     """One decimal place, locale-aware separator; em dash when not finite."""
     if not math.isfinite(float(value)):
         return "—"
@@ -156,7 +157,7 @@ def nominal_bands(
 
 
 def band_labels(
-    frequencies: np.ndarray | None, n: int, language: str = "en"
+    frequencies: np.ndarray | None, n: int, language: Language = "en"
 ) -> tuple[list[str], int]:
     """Return the nominal band labels and the band fraction (1, 3 or 0).
 
@@ -174,7 +175,7 @@ def band_labels(
     return [decimal_comma(f"{centre:g}", language) for centre in centres], fraction
 
 
-def range_str(values: np.ndarray, language: str = "en", decimals: int = 1) -> str:
+def range_str(values: np.ndarray, language: Language = "en", decimals: int = 1) -> str:
     """Format a per-band quantity as a single value or an ``a to b`` range.
 
     ``decimals`` is the precision the quantity is read at: one decimal for a
@@ -250,7 +251,7 @@ def headline_level(result: SoundPowerLike, level_a: float | None = None) -> floa
 
 
 def power_statement(
-    result: SoundPowerLike, language: str = "en", *, level_a: float | None = None
+    result: SoundPowerLike, language: Language = "en", *, level_a: float | None = None
 ) -> tuple[str, list[str]]:
     """The boxed sound-power result and its base extended terms.
 
@@ -291,7 +292,7 @@ def power_statement(
 def power_verdict(
     result: SoundPowerLike,
     requirement: float,
-    language: str = "en",
+    language: Language = "en",
     *,
     level_a: float | None = None,
 ) -> tuple[str, bool]:
@@ -330,7 +331,7 @@ def power_verdict(
 
 
 def level_limit_verdict(
-    value: float, requirement: float, symbol: str, language: str = "en"
+    value: float, requirement: float, symbol: str, language: Language = "en"
 ) -> tuple[str, bool]:
     """Verdict text and PASS flag for a level against a declared upper limit.
 
@@ -351,7 +352,7 @@ def level_limit_verdict(
     return text, passed
 
 
-def fraction_caption(result: SoundPowerLike, language: str = "en") -> str:
+def fraction_caption(result: SoundPowerLike, language: Language = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
     if freqs is None:
@@ -457,7 +458,7 @@ def render_sound_power_fiche(
     copy: FicheCopy,
     value_table: Table,
     metadata: ReportMetadata | None,
-    language: str,
+    language: Language,
     verdict: tuple[str, bool] | None = None,
     disclaimer: str | None = None,
     figsize: tuple[float, float] = (9.2, 3.4),

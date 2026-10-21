@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 from ..loudness.zwicker import ZwickerLoudness, loudness_zwicker
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ __all__ = [
 ]
 
 #: Reference sound pressure in air, 20 µPa (ISO 1683:2015 Table 1).
-_P0 = ISO1683_REFERENCE_VALUES["gas"]["sound_pressure"].value
+_P0 = REFERENCE_VALUES["gas"]["sound_pressure"].value
 
 _DZ = 0.1  # Bark step of the ISO 532-1 specific-loudness pattern
 _Z = np.arange(1, 241) * _DZ  # Bark bin centers (0.1 .. 24.0), reference convention

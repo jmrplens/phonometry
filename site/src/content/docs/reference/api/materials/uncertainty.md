@@ -72,8 +72,8 @@ The coverage factor `k` for a coverage probability (Table 3).
 
 ```python
 AbsorptionUncertaintyResult(
-    quantity: str,
-    condition: str,
+    quantity: Literal['absorption_coefficient', 'equivalent_area', 'practical_coefficient', 'weighted_coefficient', 'single_number_rating'],
+    condition: Literal['reproducibility', 'repeatability'],
     frequencies: np.ndarray,
     values: np.ndarray,
     standard_uncertainty: np.ndarray,
@@ -114,7 +114,7 @@ Lower interval bound `value − U` (exact `U`).
 AbsorptionUncertaintyResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -144,7 +144,7 @@ equivalent_area_uncertainty(
     area: float | Sequence[float] | np.ndarray,
     *,
     frequencies: float | Sequence[float] | np.ndarray,
-    condition: str = 'reproducibility',
+    condition: Literal['reproducibility', 'repeatability'] = 'reproducibility',
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
 ```
@@ -177,7 +177,7 @@ practical_coefficient_uncertainty(
     alpha_p: float | Sequence[float] | np.ndarray,
     *,
     frequencies: float | Sequence[float] | np.ndarray,
-    condition: str = 'reproducibility',
+    condition: Literal['reproducibility', 'repeatability'] = 'reproducibility',
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
 ```
@@ -209,7 +209,7 @@ $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula (5)).
 single_number_rating_uncertainty(
     dl_alpha: float,
     *,
-    condition: str = 'reproducibility',
+    condition: Literal['reproducibility', 'repeatability'] = 'reproducibility',
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
 ```
@@ -242,7 +242,7 @@ sound_absorption_coefficient_uncertainty(
     alpha: float | Sequence[float] | np.ndarray,
     *,
     frequencies: float | Sequence[float] | np.ndarray,
-    condition: str = 'reproducibility',
+    condition: Literal['reproducibility', 'repeatability'] = 'reproducibility',
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
 ```
@@ -274,7 +274,7 @@ $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula (3)).
 weighted_coefficient_uncertainty(
     alpha_w: float = 0.0,
     *,
-    condition: str = 'reproducibility',
+    condition: Literal['reproducibility', 'repeatability'] = 'reproducibility',
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult
 ```

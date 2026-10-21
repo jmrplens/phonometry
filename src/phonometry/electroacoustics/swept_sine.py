@@ -73,6 +73,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 __all__ = [
@@ -258,7 +259,7 @@ class SweptSineDistortionResult(OwnsArrays):
     f2: float
     duration_s: float
     rate: float
-    method: str
+    method: Literal["synchronized", "farina"]
 
     def __post_init__(self) -> None:
         """Reject a separation whose three axes disagree.
@@ -321,7 +322,7 @@ class SweptSineDistortionResult(OwnsArrays):
         return int(self.harmonic_responses.shape[0])
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         """Plot the harmonic responses and the THD(f).
 

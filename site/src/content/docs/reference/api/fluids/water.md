@@ -121,7 +121,7 @@ sea_water(
     salinity_psu: float = 35.0,
     depth_m: float = 0.0,
     latitude_deg: float = 45.0,
-    sound_speed_model: str = 'unesco',
+    sound_speed_model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = 'unesco',
 ) -> Fluid
 ```
 
@@ -193,7 +193,7 @@ sea_water_sound_speed(
     salinity_psu: float,
     depth_m: float,
     *,
-    model: str = ...,
+    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = ...,
     latitude_deg: float = ...,
 ) -> float
 
@@ -202,7 +202,7 @@ sea_water_sound_speed(
     salinity_psu: ArrayLike,
     depth_m: ArrayLike,
     *,
-    model: str = ...,
+    model: Literal['unesco', 'del_grosso', 'mackenzie', 'medwin'] = ...,
     latitude_deg: float = ...,
 ) -> float | NDArray[np.float64]
 ```

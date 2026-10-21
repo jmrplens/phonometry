@@ -98,6 +98,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "AcousticCenter",
     "FreeFieldArrangementCheck",
@@ -255,7 +257,7 @@ class ReciprocityAirAttenuation(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the attenuation in dB/m and its three parts against frequency.
 
@@ -769,7 +771,7 @@ class AcousticCenter(OwnsArrays):
         return -self.intercept / self.slope
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the inverse pressures, the fitted line and where it crosses the
         axis.
@@ -942,7 +944,7 @@ class FreeFieldArrangementCheck(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each distance against ten diameters and the range of Annex A.
 
@@ -1075,7 +1077,7 @@ class FreeFieldParameterUncertainty(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot each component against frequency.
 

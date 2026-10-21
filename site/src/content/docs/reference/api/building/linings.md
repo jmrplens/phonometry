@@ -226,7 +226,7 @@ Single-number ratings of an additional layer (ISO 12354-1 Annex D).
 LiningImprovementResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

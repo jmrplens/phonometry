@@ -601,8 +601,8 @@ def test_composite_r_long_window_in_wall() -> None:
     # compositing gives 35.74 dB.
     res = building.facade_sound_reduction(
         [
-            building.FacadeElement("wall", area=148.0, r=45.0),
-            building.FacadeElement("window", area=12.0, r=25.0),
+            building.FacadeElement(name="wall", area=148.0, r=45.0),
+            building.FacadeElement(name="window", area=12.0, r=25.0),
         ],
         area=160.0,
         volume=50.0,
@@ -616,8 +616,8 @@ def test_composite_r_long_slot_under_door() -> None:
     # R = 10 lg[20.125 / (20*0.001 + 0.125*1)] = 21.4 dB (printed to 0.1 dB).
     res = building.facade_sound_reduction(
         [
-            building.FacadeElement("door", area=20.0, r=30.0),
-            building.FacadeElement("slot", area=0.125, r=0.0),
+            building.FacadeElement(name="door", area=20.0, r=30.0),
+            building.FacadeElement(name="slot", area=0.125, r=0.0),
         ],
         area=20.125,
         volume=50.0,
@@ -632,8 +632,8 @@ def test_composite_r_manual_es_facade() -> None:
     # Rg = 10 lg[8 / (6*10^-4.0 + 2*10^-2.6)] = 31.5 dBA (printed to 0.1 dB).
     res = building.facade_sound_reduction(
         [
-            building.FacadeElement("blind part", area=6.0, r=40.0),
-            building.FacadeElement("window", area=2.0, r=26.0),
+            building.FacadeElement(name="blind part", area=6.0, r=40.0),
+            building.FacadeElement(name="window", area=2.0, r=26.0),
         ],
         area=8.0,
         volume=50.0,

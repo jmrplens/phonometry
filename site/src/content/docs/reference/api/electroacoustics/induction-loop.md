@@ -171,7 +171,7 @@ Whether the voltage at the Table 4 frequency is within compliance (10.3.3).
 AmplifierOverloadVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -268,7 +268,7 @@ without an undesirable tonal quality or mostly at low frequencies) or
 BackgroundNoiseAssessment.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -430,7 +430,7 @@ field_strength_meter(
     x: ArrayLike,
     fs: int,
     *,
-    weighting: str = 'Z',
+    weighting: Literal['Z', 'A'] = 'Z',
 ) -> FieldStrengthReading
 ```
 
@@ -464,7 +464,7 @@ peak programme meter of 6.1.4, is definitive (6.1.1).
 ```python
 FieldStrengthReading(
     fs: int,
-    weighting: str,
+    weighting: Literal['Z', 'A'],
     times: np.ndarray,
     levels: np.ndarray,
     max_level: float,
@@ -491,7 +491,7 @@ What the true-RMS field strength meter of IEC 60118-4:2014 6.1.3 reads.
 FieldStrengthReading.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -513,8 +513,8 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 InductionLoopVerification(
-    clause: str,
-    layout: str,
+    clause: Literal['8', '9'],
+    layout: Literal['useful_volume', 'refuge_small', 'refuge_large', 'counter', 'refuge_useful_volume', 'counter_useful_volume'],
     requirements: tuple[LoopRequirement, ...],
     background_noise: BackgroundNoiseAssessment | None = None,
 )
@@ -549,7 +549,7 @@ Whether every requirement measured is met; `False` when none was.
 InductionLoopVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -644,7 +644,7 @@ allows plus or minus 1 dB for exactly that.
 
 ```python
 LoopRequirement(
-    name: str,
+    name: Literal['field_strength', 'field_strength_reached', 'frequency_response', 'system_noise', 'field_strength_range', 'standing_area'],
     clause: str,
     levels: tuple[float, ...],
     lower_limits_db: tuple[float, ...],
@@ -694,7 +694,7 @@ decimal readings passes.
 LoopRequirement.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -778,7 +778,9 @@ REFERENCE_FIELD_STRENGTH_A_PER_M = 0.4
 ## small_volume_measurement_points
 
 ```python
-small_volume_measurement_points(layout: str) -> np.ndarray
+small_volume_measurement_points(
+    layout: Literal['refuge_small', 'refuge_large', 'counter'],
+) -> np.ndarray
 ```
 
 The measurement points of a disabled refuge or a counter (clause 9 as amended).
@@ -848,7 +850,7 @@ verify_amplifier_overload(
     impedance: LoopImpedance,
     compliance_voltage_v: float,
     *,
-    program: str = 'speech',
+    program: Literal['transient_speech', 'speech', 'music'] = 'speech',
     current_response: AmplifierFrequencyResponse | None = None,
 ) -> AmplifierOverloadVerification
 ```
@@ -978,7 +980,7 @@ off is also assessed against the recommendations of 7.2
 verify_small_volume_system(
     field_strength_levels: ArrayLike,
     *,
-    layout: str,
+    layout: Literal['refuge_small', 'refuge_large', 'counter', 'refuge_useful_volume', 'counter_useful_volume'],
     heights_m: ArrayLike | None = None,
     standing_area_levels: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,

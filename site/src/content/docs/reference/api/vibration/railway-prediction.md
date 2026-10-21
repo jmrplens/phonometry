@@ -95,9 +95,9 @@ FLOOR_NATURAL_FREQUENCIES_HZ = (8.0, 10.0, 12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 5
 foundation_to_floor_level_difference(
     frequencies: ArrayLike,
     *,
-    floor: str,
+    floor: Literal['concrete', 'timber'],
     floor_natural_frequency_hz: float,
-    statistic: str = 'mean',
+    statistic: Literal['mean', 'lower', 'upper'] = 'mean',
 ) -> NDArray[np.float64]
 ```
 
@@ -191,7 +191,7 @@ how it is computed here.
 
 ```python
 ground_to_floor_level_difference(
-    floor: str,
+    floor: Literal['concrete', 'timber'],
     *,
     floor_natural_frequency_hz: float,
 ) -> NDArray[np.float64]
@@ -231,9 +231,9 @@ considerably.
 
 ```python
 ground_to_foundation_level_difference(
-    level: str,
+    level: Literal['basement', 'ground_floor'],
     *,
-    statistic: str = 'mean',
+    statistic: Literal['mean', 'lower', 'upper'] = 'mean',
 ) -> NDArray[np.float64]
 ```
 
@@ -670,7 +670,7 @@ prints 0,4 for a sum level of 78,1 dB.
 train_decay_exponent(
     point_exponent: float,
     *,
-    fitted_with: str = 'power_and_damping',
+    fitted_with: Literal['power_and_damping', 'power_law'] = 'power_and_damping',
 ) -> float
 ```
 
@@ -777,7 +777,7 @@ The prediction for one category of train, Clauses 5 and 7.
 TrainCategoryPrediction.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

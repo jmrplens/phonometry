@@ -52,8 +52,8 @@ frequencies in Hz. The water column has a pressure-release surface at z = 0.
 from __future__ import annotations
 
 import warnings
-from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, NamedTuple
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple, get_args
 
 import numpy as np
 
@@ -70,12 +70,18 @@ from ..._internal.validation import (
 )
 from ..._internal.warnings import PhonometryWarning
 from ._seabed_reflection import reflection_coefficient
-from .closed_form import _ABSORPTION_MODELS, _M_PER_KM, seawater_absorption
+from .closed_form import (
+    _ABSORPTION_MODELS,
+    _M_PER_KM,
+    AbsorptionModel,
+    seawater_absorption,
+)
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from ..._i18n import Language
     from ..._internal.rays import RayDerivative, RayMarch
 
 __all__ = [
@@ -108,7 +114,9 @@ class NumericalPropagationWarning(PhonometryWarning):
     """
 
 
-_BOTTOM_TYPES = ("pressure-release", "rigid")
+#: A bottom boundary the ray tracer applies by name.
+BottomType = Literal["pressure-release", "rigid"]
+_BOTTOM_TYPES: tuple[BottomType, ...] = get_args(BottomType)
 #: What every solver here says when the source is handed to it outside the
 #: water column. One string rather than four copies: the three field solvers
 #: and the ray tracer all reject the same thing for the same reason, and a
@@ -233,6 +241,7 @@ def _clean_bathymetry(
     if bathymetry is None:
         return None
     pair = tuple(bathymetry)
+    # The length of a fixed-size argument, not a quantity.
     if len(pair) != 2 or pair[0] is None or pair[1] is None:  # noqa: PLR2004
         msg = "'bathymetry' must be a (ranges_m, depths_m) pair of arrays."
         raise ValueError(msg)
@@ -271,7 +280,7 @@ def _clean_bathymetry(
     return br, bd
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FluidSeabed(RichDisplay):
     r"""A lossy fluid seabed, passed as the ``bottom`` of a solver.
 
@@ -297,7 +306,6 @@ class FluidSeabed(RichDisplay):
 
     density: float
     speed_of_sound: float
-    _: KW_ONLY
     water_density: float = 1000.0
 
 
@@ -478,7 +486,7 @@ class NormalModeResult(OwnsArrays):
         require_same_length(self, "ranges", "propagation_loss", axis="range")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the propagation loss versus range (loss increasing downward)."""
         from ..._i18n import check_language
@@ -526,7 +534,7 @@ def normal_modes(
     receiver_depth: float,
     ranges_m: NDArray[np.float64] | list[float] | None = None,
     density: float = 1000.0,
-    bottom: str = "pressure-release",
+    bottom: Literal["pressure-release", "rigid"] = "pressure-release",
     n_depth_points: int | None = None,
 ) -> NormalModeResult:
     r"""Normal-mode propagation loss for a range-independent waveguide.
@@ -696,7 +704,7 @@ def normal_modes(
 # ===========================================================================
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RayTraceResult(OwnsArrays):
     r"""Ray-tracing solution through a sound-speed profile.
 
@@ -844,7 +852,7 @@ class RayTraceResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the ray paths (depth increasing downward)."""
         from ..._i18n import check_language
@@ -1164,7 +1172,7 @@ class EigenrayResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the arrival structure (per-path loss stems against delay)."""
         from ..._i18n import check_language
@@ -1401,7 +1409,7 @@ def eigenrays(
     *,
     receiver_range: float,
     receiver_depth: float,
-    bottom: str | FluidSeabed = "pressure-release",
+    bottom: BottomType | FluidSeabed = "pressure-release",
     max_n_arrivals: int = 64,
     n_steps: int | None = None,
 ) -> EigenrayResult:
@@ -1550,6 +1558,7 @@ def eigenrays(
     if require_count(max_n_arrivals, "max_n_arrivals", at_least=None) < 1:
         msg = "'max_n_arrivals' must be at least 1."
         raise ValueError(msg)
+    # The fewest values the step below can work with, not a quantity.
     if trace.launch_angles_deg.size < 2:  # noqa: PLR2004
         msg = "'trace' must carry at least two rays to bracket between."
         raise ValueError(msg)
@@ -1895,7 +1904,7 @@ class GaussianBeamResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the propagation-loss field (depth increasing downward)."""
         from ..._i18n import check_language
@@ -2919,7 +2928,7 @@ class _Fan(NamedTuple):
     width: NDArray[np.float64]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class BeamFan(RichDisplay):
     r"""The launch fan :func:`gaussian_beams` hangs its beams on.
 
@@ -2952,7 +2961,7 @@ class BeamFan(RichDisplay):
     beam_width: float | None = None
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class VolumeAbsorption(RichDisplay):
     r"""Seawater volume absorption: a model and the water it is evaluated in.
 
@@ -2969,22 +2978,25 @@ class VolumeAbsorption(RichDisplay):
     :ivar ph: Acidity (Thorp ignores it always).
     """
 
-    model: str
-    _: KW_ONLY
+    model: AbsorptionModel
     temperature_c: float = 10.0
     salinity: float = 35.0
     ph: float = 8.0
 
 
 def _resolve_absorption(
-    absorption: str | VolumeAbsorption | None,
+    absorption: AbsorptionModel | VolumeAbsorption | None,
     frequency_hz: float,
     zs: float,
 ) -> tuple[str | None, float]:
     """The validated model key and its dB/km coefficient at the source."""
     if absorption is None:
         return None, 0.0
-    spec = VolumeAbsorption(absorption) if isinstance(absorption, str) else absorption
+    spec = (
+        VolumeAbsorption(model=absorption)
+        if isinstance(absorption, str)
+        else absorption
+    )
     key = spec.model.strip().lower()
     if key not in _ABSORPTION_MODELS:
         msg = (
@@ -3092,8 +3104,8 @@ def gaussian_beams(
     n_depth_points: int = 200,
     fan: BeamFan | None = None,
     range_step: float = 25.0,
-    bottom: str | FluidSeabed = "pressure-release",
-    absorption: str | VolumeAbsorption | None = None,
+    bottom: BottomType | FluidSeabed = "pressure-release",
+    absorption: AbsorptionModel | VolumeAbsorption | None = None,
     bathymetry: tuple[
         NDArray[np.float64] | list[float], NDArray[np.float64] | list[float]
     ]
@@ -3676,7 +3688,7 @@ class ParabolicEquationResult(OwnsArrays):
         require_same_length(self, "ranges", ("propagation_loss", 1), axis="range")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the propagation-loss field (depth increasing downward)."""
         from ..._i18n import check_language

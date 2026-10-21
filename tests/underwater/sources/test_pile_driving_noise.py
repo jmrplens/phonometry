@@ -91,7 +91,7 @@ def test_pile_strike_metrics_bundle_and_plot() -> None:
 
 def test_pile_strike_metrics_rejects_short_signal() -> None:
     too_short = np.array([1.0])
-    with pytest.raises(ValueError, match="'pressure' must contain at least"):
+    with pytest.raises(ValueError, match="'pressure_pa' must contain at least"):
         underwater.pile_strike_metrics(too_short, FS)
 
 
@@ -110,9 +110,9 @@ def test_pile_strike_result_rejects_a_peak_level_its_trace_never_reached() -> No
 def test_pile_strike_result_rejects_a_trace_the_peak_no_longer_summarises() -> None:
     """Substituting the waveform without restating the peak is the same lie."""
     res = underwater.pile_strike_metrics(_pulse(100.0, 0.25), FS)
-    halved = np.asarray(res.pressure) / 2.0
+    halved = np.asarray(res.pressure_pa) / 2.0
     with pytest.raises(ValueError, match="'peak_spl' must be the zero-to-peak"):
-        dataclasses.replace(res, pressure=halved)
+        dataclasses.replace(res, pressure_pa=halved)
 
 
 def test_pile_strike_result_accepts_a_variant_that_restates_every_metric() -> None:
@@ -124,10 +124,10 @@ def test_pile_strike_result_accepts_a_variant_that_restates_every_metric() -> No
     must not be refused over it.
     """
     res = underwater.pile_strike_metrics(_pulse(100.0, 0.25), FS)
-    halved = np.asarray(res.pressure) / 2.0
+    halved = np.asarray(res.pressure_pa) / 2.0
     variant = dataclasses.replace(
         res,
-        pressure=halved,
+        pressure_pa=halved,
         peak_spl=20.0 * np.log10(float(np.max(np.abs(halved))) / 1e-6),
         single_strike_sel=underwater.sound_exposure_level(halved, FS),
         spl=underwater.sound_pressure_level(halved),
@@ -140,8 +140,10 @@ def test_pile_strike_result_accepts_a_variant_that_restates_every_metric() -> No
 
 def test_pile_strike_result_rejects_an_empty_trace() -> None:
     res = underwater.pile_strike_metrics(_pulse(100.0, 0.25), FS)
-    with pytest.raises(ValueError, match="'pressure' must carry at least one sample"):
-        dataclasses.replace(res, pressure=np.array([]))
+    with pytest.raises(
+        ValueError, match="'pressure_pa' must carry at least one sample"
+    ):
+        dataclasses.replace(res, pressure_pa=np.array([]))
 
 
 def test_pile_strike_result_accepts_a_silent_trace_peaking_at_minus_infinity() -> None:
@@ -156,7 +158,7 @@ def test_pile_strike_result_accepts_a_silent_trace_peaking_at_minus_infinity() -
         peak_spl=-np.inf,
         spl=-np.inf,
         pulse_duration=0.0,
-        pressure=np.zeros(16),
+        pressure_pa=np.zeros(16),
         fs=float(FS),
     )
     assert silent.peak_spl == -np.inf
@@ -276,7 +278,7 @@ def test_strike_sel_spectrum_validates_its_arguments() -> None:
     ):
         underwater.strike_sel_spectrum(x, FS, limits=(2000.0, 100.0))
     with pytest.raises(
-        ValueError, match=r"'pressure' has no energy inside the requested bands"
+        ValueError, match=r"'pressure_pa' has no energy inside the requested bands"
     ):
         underwater.strike_sel_spectrum(silence, FS)
 
@@ -382,11 +384,11 @@ def test_a_strike_whose_trace_is_a_bare_number_is_refused() -> None:
     peak of its own that the comparison beside it was happy to confirm.
     """
     res = underwater.pile_strike_metrics(_pulse(100.0, 0.25), FS)
-    lone = np.float64(np.max(np.abs(res.pressure)))
+    lone = np.float64(np.max(np.abs(res.pressure_pa)))
     with pytest.raises(
-        ValueError, match=r"'pressure' must be a one-dimensional waveform"
+        ValueError, match=r"'pressure_pa' must be a one-dimensional waveform"
     ):
-        dataclasses.replace(res, pressure=lone)
+        dataclasses.replace(res, pressure_pa=lone)
 
 
 def test_restating_the_peak_alone_does_not_save_the_other_three() -> None:
@@ -399,10 +401,10 @@ def test_restating_the_peak_alone_does_not_save_the_other_three() -> None:
     decided on the peak and the exposure together.
     """
     res = underwater.pile_strike_metrics(_pulse(100.0, 0.25), FS)
-    halved = np.asarray(res.pressure) / 2.0
+    halved = np.asarray(res.pressure_pa) / 2.0
     restated_peak = underwater.peak_sound_pressure_level(halved)
     with pytest.raises(ValueError, match=r"'single_strike_sel' must be the exposure"):
-        dataclasses.replace(res, pressure=halved, peak_spl=restated_peak)
+        dataclasses.replace(res, pressure_pa=halved, peak_spl=restated_peak)
 
 
 def test_a_pulse_duration_left_behind_by_a_new_shape_is_refused() -> None:
@@ -420,4 +422,4 @@ def test_a_pulse_duration_left_behind_by_a_new_shape_is_refused() -> None:
         "spl": underwater.sound_pressure_level(reshaped),
     }
     with pytest.raises(ValueError, match=r"'pulse_duration' must be the 5 % to 95 %"):
-        dataclasses.replace(res, pressure=reshaped, **restated)
+        dataclasses.replace(res, pressure_pa=reshaped, **restated)

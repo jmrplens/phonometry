@@ -15,7 +15,7 @@ Private module: nothing here is part of the public API.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol
 
 import numpy as np
 
@@ -29,10 +29,15 @@ if TYPE_CHECKING:
 #: The room-criterion families a composed workflow can be rated against:
 #: the NC curves of ANSI/ASA S12.2-2019 Table 1 and the RC Mark II curves of
 #: its Annex D.
-CRITERION_FAMILIES: tuple[str, ...] = ("NC", "RC")
+#: The two room-criterion families: NC and RC.
+CriterionFamily = Literal["NC", "RC"]
+
+CRITERION_FAMILIES: tuple[CriterionFamily, ...] = ("NC", "RC")
 
 
-def validate_target(criterion: str, target: float | None) -> tuple[str, float | None]:
+def validate_target(
+    criterion: str, target: float | None
+) -> tuple[CriterionFamily, float | None]:
     """Validate a criterion family and its target value.
 
     :param criterion: ``"NC"`` or ``"RC"``.

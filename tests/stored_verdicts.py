@@ -265,7 +265,7 @@ class _Tracer:
             func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", None)
         )
         # np.where(c, a, b)
-        if name == "where" and len(expr.args) == 3:  # noqa: PLR2004
+        if name == "where" and len(expr.args) == 3:
             return (
                 self.label(expr.args[1])
                 and self.label(expr.args[2])

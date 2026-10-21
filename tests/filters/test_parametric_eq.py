@@ -95,7 +95,7 @@ def test_peaking_hand_computed_coefficients() -> None:
         a2/a0 = 0.87731660628506083
     """
     eq = ph.filters.ParametricEQ(
-        FS, ph.filters.EQSection("peaking", 1000.0, gain_db=6.0, q=0.707)
+        FS, ph.filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=6.0, q=0.707)
     )
     expected = np.array(
         [
@@ -126,7 +126,7 @@ def test_peaking_gain_exact_at_f0_and_unity_at_ends(f0: float, gain_db: float) -
     and z=-1 the b and a sums are both 2*(1 -/+ cos w0), so |H| = 1.
     """
     eq = ph.filters.ParametricEQ(
-        FS, ph.filters.EQSection("peaking", f0, gain_db=gain_db, q=2.0)
+        FS, ph.filters.EQSection(filter_type="peaking", f0=f0, gain_db=gain_db, q=2.0)
     )
     at_f0, at_dc, at_nyq = _gain_db_at(eq.sos, [f0, 0.0, FS / 2])
     assert at_f0 == pytest.approx(gain_db, abs=1e-10)
@@ -143,10 +143,10 @@ def test_shelves_exact_gain_at_ends(gain_db: float) -> None:
     the high shelf mirrors them.
     """
     low = ph.filters.ParametricEQ(
-        FS, ph.filters.EQSection("lowshelf", 500.0, gain_db=gain_db)
+        FS, ph.filters.EQSection(filter_type="lowshelf", f0=500.0, gain_db=gain_db)
     )
     high = ph.filters.ParametricEQ(
-        FS, ph.filters.EQSection("highshelf", 500.0, gain_db=gain_db)
+        FS, ph.filters.EQSection(filter_type="highshelf", f0=500.0, gain_db=gain_db)
     )
     low_dc, low_nyq = _gain_db_at(low.sos, [0.0, FS / 2])
     high_dc, high_nyq = _gain_db_at(high.sos, [0.0, FS / 2])
@@ -165,7 +165,9 @@ def test_shelf_midpoint_gain_at_f0() -> None:
     for filter_type in ("lowshelf", "highshelf"):
         eq = ph.filters.ParametricEQ(
             FS,
-            ph.filters.EQSection(filter_type, 1000.0, gain_db=8.0, slope=1.0),
+            ph.filters.EQSection(
+                filter_type=filter_type, f0=1000.0, gain_db=8.0, slope=1.0
+            ),
         )
         (at_f0,) = _gain_db_at(eq.sos, [1000.0])
         assert at_f0 == pytest.approx(4.0, abs=1e-10)
@@ -179,8 +181,12 @@ def test_lowpass_highpass_gain_q_at_f0(q: float) -> None:
     corner; the cookbook's bilinear design prewarps so the digital response
     keeps that value exactly at f0.
     """
-    lp = ph.filters.ParametricEQ(FS, ph.filters.EQSection("lowpass", 1000.0, q=q))
-    hp = ph.filters.ParametricEQ(FS, ph.filters.EQSection("highpass", 1000.0, q=q))
+    lp = ph.filters.ParametricEQ(
+        FS, ph.filters.EQSection(filter_type="lowpass", f0=1000.0, q=q)
+    )
+    hp = ph.filters.ParametricEQ(
+        FS, ph.filters.EQSection(filter_type="highpass", f0=1000.0, q=q)
+    )
     q_db = 20 * np.log10(q)
     (lp_f0,) = _gain_db_at(lp.sos, [1000.0])
     (hp_f0,) = _gain_db_at(hp.sos, [1000.0])
@@ -198,7 +204,7 @@ def test_bandpass_notch_allpass_anchors() -> None:
     """Band-pass peaks at 0 dB (skirt variant at Q), notch nulls, all-pass is flat."""
     (bp_f0,) = _gain_db_at(
         ph.filters.ParametricEQ(
-            FS, ph.filters.EQSection("bandpass", 1000.0, q=3.0)
+            FS, ph.filters.EQSection(filter_type="bandpass", f0=1000.0, q=3.0)
         ).sos,
         [1000.0],
     )
@@ -206,20 +212,24 @@ def test_bandpass_notch_allpass_anchors() -> None:
 
     (skirt_f0,) = _gain_db_at(
         ph.filters.ParametricEQ(
-            FS, ph.filters.EQSection("bandpass_skirt", 1000.0, q=3.0)
+            FS, ph.filters.EQSection(filter_type="bandpass_skirt", f0=1000.0, q=3.0)
         ).sos,
         [1000.0],
     )
     assert skirt_f0 == pytest.approx(20 * np.log10(3.0), abs=1e-10)
 
-    notch = ph.filters.ParametricEQ(FS, ph.filters.EQSection("notch", 1000.0, q=5.0))
+    notch = ph.filters.ParametricEQ(
+        FS, ph.filters.EQSection(filter_type="notch", f0=1000.0, q=5.0)
+    )
     (notch_f0,) = _gain_db_at(notch.sos, [1000.0])
     assert notch_f0 < -250.0
     notch_dc, notch_nyq = _gain_db_at(notch.sos, [0.0, FS / 2])
     assert notch_dc == pytest.approx(0.0, abs=1e-10)
     assert notch_nyq == pytest.approx(0.0, abs=1e-10)
 
-    ap = ph.filters.ParametricEQ(FS, ph.filters.EQSection("allpass", 1000.0, q=0.9))
+    ap = ph.filters.ParametricEQ(
+        FS, ph.filters.EQSection(filter_type="allpass", f0=1000.0, q=0.9)
+    )
     freqs = np.linspace(1.0, FS / 2, 512)
     _, h = signal.sosfreqz(ap.sos, worN=freqs, fs=FS)
     np.testing.assert_allclose(np.abs(h), 1.0, rtol=0.0, atol=1e-12)
@@ -243,7 +253,7 @@ def test_peaking_half_gain_edges_match_q_definition() -> None:
     """
     f0, q, gain_db = 1000.0, 1.5, 6.0
     eq = ph.filters.ParametricEQ(
-        FS, ph.filters.EQSection("peaking", f0, gain_db=gain_db, q=q)
+        FS, ph.filters.EQSection(filter_type="peaking", f0=f0, gain_db=gain_db, q=q)
     )
     w0 = 2 * np.pi * f0 / FS
     alpha = np.sin(w0) / (2 * q)
@@ -265,7 +275,7 @@ def test_peaking_half_gain_bandwidth_matches_q_in_analog_limit() -> None:
     """Far below Nyquist the G/2 dB bandwidth approaches f0/Q."""
     f0, q = 200.0, 2.0  # f0/fs ~ 0.4 %: negligible warping
     eq = ph.filters.ParametricEQ(
-        FS, ph.filters.EQSection("peaking", f0, gain_db=6.0, q=q)
+        FS, ph.filters.EQSection(filter_type="peaking", f0=f0, gain_db=6.0, q=q)
     )
 
     def offset(f: float) -> float:
@@ -290,10 +300,11 @@ def test_bw_parameterization_reduces_to_q_relation() -> None:
     for filter_type in ("peaking", "bandpass", "notch"):
         gain = 6.0 if filter_type == "peaking" else 0.0
         from_bw = ph.filters.ParametricEQ(
-            FS, ph.filters.EQSection(filter_type, f0, gain_db=gain, bw=bw)
+            FS,
+            ph.filters.EQSection(filter_type=filter_type, f0=f0, gain_db=gain, bw=bw),
         )
         from_q = ph.filters.ParametricEQ(
-            FS, ph.filters.EQSection(filter_type, f0, gain_db=gain, q=q)
+            FS, ph.filters.EQSection(filter_type=filter_type, f0=f0, gain_db=gain, q=q)
         )
         np.testing.assert_allclose(from_bw.sos, from_q.sos, rtol=0.0, atol=1e-15)
 
@@ -306,19 +317,24 @@ def test_slope_parameterization_reduces_to_q_relation() -> None:
     for filter_type in ("lowshelf", "highshelf"):
         from_s = ph.filters.ParametricEQ(
             FS,
-            ph.filters.EQSection(filter_type, f0, gain_db=gain_db, slope=slope),
+            ph.filters.EQSection(
+                filter_type=filter_type, f0=f0, gain_db=gain_db, slope=slope
+            ),
         )
         from_q = ph.filters.ParametricEQ(
-            FS, ph.filters.EQSection(filter_type, f0, gain_db=gain_db, q=q)
+            FS,
+            ph.filters.EQSection(filter_type=filter_type, f0=f0, gain_db=gain_db, q=q),
         )
         np.testing.assert_allclose(from_s.sos, from_q.sos, rtol=0.0, atol=1e-15)
 
 
 def test_default_q_is_butterworth() -> None:
     """With no q/bw/slope the section designs at Q = 1/sqrt(2) (-3.01 dB)."""
-    eq = ph.filters.ParametricEQ(FS, ph.filters.EQSection("lowpass", 1000.0))
+    eq = ph.filters.ParametricEQ(
+        FS, ph.filters.EQSection(filter_type="lowpass", f0=1000.0)
+    )
     explicit = ph.filters.ParametricEQ(
-        FS, ph.filters.EQSection("lowpass", 1000.0, q=1.0 / np.sqrt(2.0))
+        FS, ph.filters.EQSection(filter_type="lowpass", f0=1000.0, q=1.0 / np.sqrt(2.0))
     )
     np.testing.assert_allclose(eq.sos, explicit.sos, rtol=0.0, atol=1e-16)
     (at_f0,) = _gain_db_at(eq.sos, [1000.0])
@@ -339,7 +355,9 @@ def test_bandpass_matches_scipy_iirpeak() -> None:
     0.03 dB across the band here), not coefficient-exact.
     """
     f0, q = 1000.0, 5.0
-    eq = ph.filters.ParametricEQ(FS, ph.filters.EQSection("bandpass", f0, q=q))
+    eq = ph.filters.ParametricEQ(
+        FS, ph.filters.EQSection(filter_type="bandpass", f0=f0, q=q)
+    )
     b, a = signal.iirpeak(f0, q, fs=FS)
     freqs = np.logspace(1, np.log10(FS / 2 * 0.99), 512)
     _, h_eq = signal.sosfreqz(eq.sos, worN=freqs, fs=FS)
@@ -350,7 +368,9 @@ def test_bandpass_matches_scipy_iirpeak() -> None:
 def test_notch_matches_scipy_iirnotch() -> None:
     """Notch magnitude matches scipy.signal.iirnotch (same caveat as iirpeak)."""
     f0, q = 1000.0, 5.0
-    eq = ph.filters.ParametricEQ(FS, ph.filters.EQSection("notch", f0, q=q))
+    eq = ph.filters.ParametricEQ(
+        FS, ph.filters.EQSection(filter_type="notch", f0=f0, q=q)
+    )
     b, a = signal.iirnotch(f0, q, fs=FS)
     freqs = np.logspace(1, np.log10(FS / 2 * 0.99), 512)
     _, h_eq = signal.sosfreqz(eq.sos, worN=freqs, fs=FS)
@@ -364,7 +384,8 @@ def test_butterworth_alignment_matches_scipy_butter() -> None:
     freqs = np.logspace(1, np.log10(FS / 2 * 0.99), 512)
     for filter_type, btype in (("lowpass", "low"), ("highpass", "high")):
         eq = ph.filters.ParametricEQ(
-            FS, ph.filters.EQSection(filter_type, f0, q=1.0 / np.sqrt(2.0))
+            FS,
+            ph.filters.EQSection(filter_type=filter_type, f0=f0, q=1.0 / np.sqrt(2.0)),
         )
         sos_ref = signal.butter(2, f0, btype=btype, output="sos", fs=FS)
         _, h_eq = signal.sosfreqz(eq.sos, worN=freqs, fs=FS)
@@ -379,9 +400,9 @@ def test_butterworth_alignment_matches_scipy_butter() -> None:
 
 def _three_sections() -> list[ph.filters.EQSection]:
     return [
-        ph.filters.EQSection("lowshelf", 100.0, gain_db=4.0, slope=1.0),
-        ph.filters.EQSection("peaking", 1000.0, gain_db=-6.0, bw=1.0),
-        ph.filters.EQSection("highshelf", 8000.0, gain_db=3.0),
+        ph.filters.EQSection(filter_type="lowshelf", f0=100.0, gain_db=4.0, slope=1.0),
+        ph.filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=-6.0, bw=1.0),
+        ph.filters.EQSection(filter_type="highshelf", f0=8000.0, gain_db=3.0),
     ]
 
 
@@ -444,7 +465,7 @@ def test_every_type_designs_and_is_stable(filter_type: str) -> None:
     """Every cookbook type yields a stable, normalized SOS section."""
     gain = 6.0 if filter_type in ("peaking", "lowshelf", "highshelf") else 0.0
     eq = ph.filters.ParametricEQ(
-        FS, ph.filters.EQSection(filter_type, 1000.0, gain_db=gain)
+        FS, ph.filters.EQSection(filter_type=filter_type, f0=1000.0, gain_db=gain)
     )
     assert eq.sos.shape == (1, 6)
     assert eq.sos[0, 3] == pytest.approx(1.0, abs=0.0)  # normalized a0
@@ -459,30 +480,32 @@ def test_every_type_designs_and_is_stable(filter_type: str) -> None:
 
 def test_rejects_unknown_type_and_bad_frequencies() -> None:
     with pytest.raises(ValueError, match=r"Unknown filter_type 'bell'"):
-        ph.filters.EQSection("bell", 1000.0)  # type: ignore[arg-type]
+        ph.filters.EQSection(filter_type="bell", f0=1000.0)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match=r"'f0' must be positive"):
-        ph.filters.EQSection("peaking", 0.0)
-    at_nyquist = ph.filters.EQSection("peaking", FS / 2, gain_db=3.0)
+        ph.filters.EQSection(filter_type="peaking", f0=0.0)
+    at_nyquist = ph.filters.EQSection(filter_type="peaking", f0=FS / 2, gain_db=3.0)
     with pytest.raises(
         ValueError, match=r"f0 = .* must sit below the Nyquist frequency"
     ):
         ph.filters.ParametricEQ(FS, at_nyquist)
-    section = ph.filters.EQSection("peaking", 1000.0, gain_db=3.0)
+    section = ph.filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=3.0)
     with pytest.raises(ValueError, match=r"'fs' must be positive"):
         ph.filters.ParametricEQ(0, section)
 
 
 def test_rejects_conflicting_or_misplaced_parameters() -> None:
     with pytest.raises(ValueError, match=r"Give only one of 'q', 'bw' and 'slope'"):
-        ph.filters.EQSection("peaking", 1000.0, gain_db=3.0, q=1.0, bw=1.0)
+        ph.filters.EQSection(
+            filter_type="peaking", f0=1000.0, gain_db=3.0, q=1.0, bw=1.0
+        )
     with pytest.raises(ValueError, match=r"'slope' applies to the shelving types"):
-        ph.filters.EQSection("peaking", 1000.0, gain_db=3.0, slope=1.0)
+        ph.filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=3.0, slope=1.0)
     with pytest.raises(ValueError, match=r"'bw' applies to"):
-        ph.filters.EQSection("lowshelf", 1000.0, gain_db=3.0, bw=1.0)
+        ph.filters.EQSection(filter_type="lowshelf", f0=1000.0, gain_db=3.0, bw=1.0)
     with pytest.raises(ValueError, match=r"'gain_db' applies to"):
-        ph.filters.EQSection("notch", 1000.0, gain_db=3.0)
+        ph.filters.EQSection(filter_type="notch", f0=1000.0, gain_db=3.0)
     with pytest.raises(ValueError, match=r"'q' must be positive"):
-        ph.filters.EQSection("peaking", 1000.0, gain_db=3.0, q=-1.0)
+        ph.filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=3.0, q=-1.0)
     with pytest.raises(ValueError, match="at least one EQSection"):
         ph.filters.ParametricEQ(FS, [])
 
@@ -500,7 +523,7 @@ def test_rejects_conflicting_or_misplaced_parameters() -> None:
 )
 def test_rejects_non_finite_parameters(kwargs: dict, offender: str) -> None:
     with pytest.raises(ValueError, match=rf"'{offender}' must be finite"):
-        ph.filters.EQSection("peaking", **kwargs)
+        ph.filters.EQSection(filter_type="peaking", **kwargs)
 
 
 @pytest.mark.parametrize("gain_db", [1e308, -1e308])
@@ -517,7 +540,9 @@ def test_extreme_finite_gain_raises_value_error(
     with pytest.raises(
         ValueError, match=r"'gain_db' = .* is outside the representable range"
     ):
-        ph.filters.EQSection(filter_type, 1000.0, gain_db=gain_db, **kwargs)
+        ph.filters.EQSection(
+            filter_type=filter_type, f0=1000.0, gain_db=gain_db, **kwargs
+        )
 
 
 def test_shelf_slope_beyond_gain_bound_raises_informatively() -> None:
@@ -525,19 +550,21 @@ def test_shelf_slope_beyond_gain_bound_raises_informatively() -> None:
     # (A + 1/A)/(A + 1/A - 2) = 8.2869...; beyond it the raw math would
     # fail with a bare "math domain error".
     with pytest.raises(ValueError, match=r"Shelf slope 'slope' = .* is too steep"):
-        ph.filters.EQSection("lowshelf", 1000.0, gain_db=9.0, slope=12.0)
+        ph.filters.EQSection(filter_type="lowshelf", f0=1000.0, gain_db=9.0, slope=12.0)
     # Just below the bound the design succeeds and is strictly stable.
-    section = ph.filters.EQSection("lowshelf", 1000.0, gain_db=9.0, slope=8.0)
+    section = ph.filters.EQSection(
+        filter_type="lowshelf", f0=1000.0, gain_db=9.0, slope=8.0
+    )
     sos = ph.filters.ParametricEQ(FS, section).sos
     assert np.max(np.abs(np.roots(sos[0, 3:]))) < 1.0
     # Gain 0 dB (A = 1): every positive slope is admissible.
-    ph.filters.EQSection("lowshelf", 1000.0, gain_db=0.0, slope=50.0)
+    ph.filters.EQSection(filter_type="lowshelf", f0=1000.0, gain_db=0.0, slope=50.0)
 
 
 def test_bw_overflow_near_nyquist_raises_value_error() -> None:
     # The w0/sin(w0) warping factor diverges towards Nyquist: this bw/f0
     # pair used to escape as a raw OverflowError from math.sinh.
-    section = ph.filters.EQSection("notch", 23999.0, bw=1.0)
+    section = ph.filters.EQSection(filter_type="notch", f0=23999.0, bw=1.0)
     with pytest.raises(ValueError, match=r"Bandwidth 'bw' = .* is too wide"):
         ph.filters.ParametricEQ(FS, section)
 
@@ -546,7 +573,7 @@ def test_bw_marginally_unstable_section_raises_value_error() -> None:
     # Large but finite alpha: the rounded a2 lands exactly at -1.0 (poles
     # on the unit circle) with no arithmetic error to flag it.
     for f0, bw in ((23800.0, 1.0), (23900.0, 6.0)):
-        section = ph.filters.EQSection("notch", f0, bw=bw)
+        section = ph.filters.EQSection(filter_type="notch", f0=f0, bw=bw)
         with pytest.raises(ValueError, match="not strictly stable"):
             ph.filters.ParametricEQ(FS, section)
 
@@ -559,7 +586,7 @@ def test_extreme_but_valid_sections_still_design_stably() -> None:
         ("allpass", 12000.0, {"q": 1e-6}),
     ):
         sos = ph.filters.ParametricEQ(
-            FS, ph.filters.EQSection(filter_type, f0, **kwargs)
+            FS, ph.filters.EQSection(filter_type=filter_type, f0=f0, **kwargs)
         ).sos
         assert np.all(np.isfinite(sos))
         assert np.max(np.abs(np.roots(sos[0, 3:]))) < 1.0
@@ -567,7 +594,7 @@ def test_extreme_but_valid_sections_still_design_stably() -> None:
 
 def test_response_grid_validation() -> None:
     eq = ph.filters.ParametricEQ(
-        FS, ph.filters.EQSection("peaking", 1000.0, gain_db=3.0)
+        FS, ph.filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=3.0)
     )
     with pytest.raises(ValueError, match=r"'n_points' must be at least"):
         eq.response(n_points=1)
@@ -641,7 +668,7 @@ def test_plot_two_panel_and_single_axes() -> None:
 
 def test_plot_rejects_unknown_language() -> None:
     res = ph.filters.ParametricEQ(
-        FS, ph.filters.EQSection("peaking", 1000.0, gain_db=3.0)
+        FS, ph.filters.EQSection(filter_type="peaking", f0=1000.0, gain_db=3.0)
     ).response(n_points=64)
     with pytest.raises(ValueError, match=r"Unknown language 'xx'"):
         res.plot(language="xx")

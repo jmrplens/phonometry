@@ -112,7 +112,7 @@ def check(paths: list[pathlib.Path]) -> tuple[int, list[tuple[str, int, str, str
                 checked += 1
                 try:
                     parser.parse(run, dpi=100, prop=None)
-                except Exception as exc:  # noqa: BLE001
+                except Exception as exc:
                     lines = [line for line in str(exc).splitlines() if line.strip()]
                     reason = lines[0] if lines else type(exc).__name__
                     failures.append((str(path), node.lineno, run, reason))

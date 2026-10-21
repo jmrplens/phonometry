@@ -41,7 +41,8 @@ def test_iec60942_table_e1(
     limit: float,
     uncertainty: float,
     maximum: float,
-    conforms: bool,  # noqa: FBT001
+    *,
+    conforms: bool,
     outcome: int,
 ) -> None:
     """Every example of Table E.1: verdict, outcome and printed reason."""
@@ -67,7 +68,8 @@ def test_iec61672_1_table_c1(
     limits: tuple[float, float],
     uncertainty: float,
     maximum: float,
-    conforms: bool,  # noqa: FBT001
+    *,
+    conforms: bool,
     outcome: int,
 ) -> None:
     """Every example of Table C.1, whose limits are asymmetric (+1,0; -1,2 dB)."""
@@ -281,7 +283,8 @@ def test_iec61260_1_table_c1(
     limits: tuple[float, float],
     uncertainty: float,
     maximum: float,
-    conforms: bool,  # noqa: FBT001
+    *,
+    conforms: bool,
     outcome: int,
 ) -> None:
     """IEC 61260-1:2014 Table C.1 (folio 31) prints the ten examples again."""

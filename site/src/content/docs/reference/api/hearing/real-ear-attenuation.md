@@ -195,7 +195,7 @@ $|m_1 - m_2|$ per band, in dB.
 AttenuationDifferenceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -445,7 +445,7 @@ The attenuation of a hearing protector on a panel of subjects (4.6).
 RealEarAttenuationResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -481,7 +481,7 @@ REAT_BETWEEN_LABORATORY_UNCERTAINTY = {'earplug': {'below 250 Hz': ProtectorUnce
 reat_expanded_uncertainty(
     frequencies: ArrayLike,
     *,
-    protector: str,
+    protector: Literal['earplug', 'earmuff'],
     between_laboratories: bool = False,
 ) -> np.ndarray
 ```
@@ -618,7 +618,7 @@ Whether the sound field qualifies for 4.2.2, a) and b) both judged.
 REATSoundFieldCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

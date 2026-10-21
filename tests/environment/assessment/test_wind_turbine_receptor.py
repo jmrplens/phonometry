@@ -136,7 +136,9 @@ def test_equations_8_and_9_for_statistical_levels() -> None:
 
 def test_north_sector_spans_345_to_15_degrees() -> None:
     binned = env.bin_sound_levels(
-        [40.0, 41.0, 42.0, 43.0], [5.0, 5.0, 5.0, 5.0], [345.0, 14.9, 15.0, 359.0]
+        [40.0, 41.0, 42.0, 43.0],
+        [5.0, 5.0, 5.0, 5.0],
+        wind_directions_deg=[345.0, 14.9, 15.0, 359.0],
     )
     np.testing.assert_array_equal(binned.wind_directions_deg, [0.0, 30.0])
     np.testing.assert_array_equal(binned.counts, [3, 1])
@@ -145,7 +147,9 @@ def test_north_sector_spans_345_to_15_degrees() -> None:
 def test_a_sector_width_that_does_not_divide_a_turn_is_refused() -> None:
     directions = np.zeros(6)
     with pytest.raises(ValueError, match=r"must divide 360"):
-        env.bin_sound_levels(_LEVELS, _SPEEDS, directions, sector_width_deg=25.0)
+        env.bin_sound_levels(
+            _LEVELS, _SPEEDS, wind_directions_deg=directions, sector_width_deg=25.0
+        )
 
 
 def test_an_unknown_averaging_is_refused() -> None:
@@ -239,14 +243,14 @@ def test_bins_pair_by_class_and_sector() -> None:
     total = env.bin_sound_levels(
         [45.0, 46.0, 50.0],
         [2.6, 2.4, 7.0],
-        [355.0, 5.0, 181.0],
+        wind_directions_deg=[355.0, 5.0, 181.0],
         bin_width_m_s=0.5,
         sector_width_deg=20.0,
     )
     background = env.bin_sound_levels(
         [38.0, 39.0],
         [2.55, 7.1],
-        [1.0, 179.0],
+        wind_directions_deg=[1.0, 179.0],
         bin_width_m_s=0.5,
         sector_width_deg=20.0,
     )
@@ -263,8 +267,12 @@ def test_one_wind_speed_class_pairs_sector_by_sector() -> None:
     The background is binned in the other order, so pairing on the class
     alone would take one sector's background for the other, or lose a sector.
     """
-    total = env.bin_sound_levels([45.0, 50.0], [5.0, 5.0], [0.0, 90.0])
-    background = env.bin_sound_levels([44.0, 38.0], [5.0, 5.0], [90.0, 0.0])
+    total = env.bin_sound_levels(
+        [45.0, 50.0], [5.0, 5.0], wind_directions_deg=[0.0, 90.0]
+    )
+    background = env.bin_sound_levels(
+        [44.0, 38.0], [5.0, 5.0], wind_directions_deg=[90.0, 0.0]
+    )
     corrected = total.background_corrected(background)
     np.testing.assert_allclose(corrected.wind_speeds_m_s, [5.0, 5.0])
     np.testing.assert_allclose(corrected.total_levels, [45.0, 50.0])
@@ -284,10 +292,10 @@ def _two_sectors() -> tuple[env.BinnedSoundLevels, env.BinnedSoundLevels]:
     speeds = [3.0, 4.0, 5.0, 3.0, 4.0, 5.0]
     directions = [0.0, 0.0, 0.0, 90.0, 90.0, 90.0]
     total = env.bin_sound_levels(
-        [45.0, 47.0, 49.0, 40.0, 42.0, 44.0], speeds, directions
+        [45.0, 47.0, 49.0, 40.0, 42.0, 44.0], speeds, wind_directions_deg=directions
     )
     background = env.bin_sound_levels(
-        [35.0, 34.0, 33.0, 32.0, 31.0, 30.0], speeds, directions
+        [35.0, 34.0, 33.0, 32.0, 31.0, 30.0], speeds, wind_directions_deg=directions
     )
     return total, background
 
@@ -400,8 +408,10 @@ def test_twelve_sectors_take_twelve_colours() -> None:
     totals = 45.0 + 0.1 * np.arange(24)
     backgrounds = np.full(24, 35.0)
     backgrounds[-1] = totals[-1] - 2.0
-    total = env.bin_sound_levels(totals, speeds, directions)
-    background = env.bin_sound_levels(backgrounds, speeds, directions)
+    total = env.bin_sound_levels(totals, speeds, wind_directions_deg=directions)
+    background = env.bin_sound_levels(
+        backgrounds, speeds, wind_directions_deg=directions
+    )
     ax = total.background_corrected(background).plot()
     legend = ax.get_legend()
     colours = {
@@ -435,10 +445,13 @@ def test_a_sector_centre_is_written_in_the_plot_language(
     directions = [22.5, 22.5, 45.0, 45.0]
     speeds = [5.0, 6.0, 5.0, 6.0]
     total = env.bin_sound_levels(
-        [45.0, 46.0, 47.0, 48.0], speeds, directions, sector_width_deg=22.5
+        [45.0, 46.0, 47.0, 48.0],
+        speeds,
+        wind_directions_deg=directions,
+        sector_width_deg=22.5,
     )
     background = env.bin_sound_levels(
-        [35.0] * 4, speeds, directions, sector_width_deg=22.5
+        [35.0] * 4, speeds, wind_directions_deg=directions, sector_width_deg=22.5
     )
     ax = total.background_corrected(background).plot(language=language)
     texts = [t.get_text() for t in ax.get_legend().get_texts()]
@@ -830,7 +843,9 @@ def test_the_plots_say_what_their_marks_are() -> None:
 
 def _refusal_cases() -> list[tuple[str, object, str]]:
     by_speed = env.bin_sound_levels([45.0, 46.0], [5.0, 6.0])
-    by_direction = env.bin_sound_levels([45.0, 46.0], [5.0, 6.0], [0.0, 90.0])
+    by_direction = env.bin_sound_levels(
+        [45.0, 46.0], [5.0, 6.0], wind_directions_deg=[0.0, 90.0]
+    )
     elsewhere = env.bin_sound_levels([38.0], [9.0])
     half_metre = env.bin_sound_levels([38.0], [5.0], bin_width_m_s=0.5)
     profile = env.wind_shear_profile(4.5, 8.6, upper_height_m=120.0)
@@ -896,7 +911,9 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
         ),
         (
             "one direction for two levels",
-            lambda: env.bin_sound_levels([40.0, 41.0], [5.0, 6.0], [0.0]),
+            lambda: env.bin_sound_levels(
+                [40.0, 41.0], [5.0, 6.0], wind_directions_deg=[0.0]
+            ),
             r"'wind_directions_deg' must hold one value per data point",
         ),
         (

@@ -100,7 +100,7 @@ DuctModeResult(
     cut_on_no_flow: np.ndarray,
     axial_wavenumber: np.ndarray,
     mach: float,
-    section: str,
+    section: Literal['circular', 'rectangular'],
     label: str,
 )
 ```
@@ -131,7 +131,7 @@ The lowest cut-on frequency, Hz: plane waves only below it.
 DuctModeResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

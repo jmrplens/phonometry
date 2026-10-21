@@ -32,6 +32,7 @@ if TYPE_CHECKING:
         ModulationPeriod,
         SELDistribution,
     )
+    from phonometry.environment.sources.cnossos_road import RoadVehicleCode
 
 from .i18n import _LANG, _fmt_minus
 from .theme import (
@@ -360,13 +361,25 @@ def generate_cnossos_road_emission(output_dir: str) -> None:
     # motorcycles, 60 m before a signalised crossing, on a 3 % upgrade, at the
     # 12 degC yearly mean of a temperate city.
     traffic = [
-        environment.RoadTraffic(environment.RoadVehicleCategory.LIGHT, 1200.0, 50.0),
         environment.RoadTraffic(
-            environment.RoadVehicleCategory.MEDIUM_HEAVY, 90.0, 50.0
+            category=environment.RoadVehicleCategory.LIGHT,
+            flow_rate=1200.0,
+            speed_kmh=50.0,
         ),
-        environment.RoadTraffic(environment.RoadVehicleCategory.HEAVY, 45.0, 50.0),
         environment.RoadTraffic(
-            environment.RoadVehicleCategory.MOTORCYCLES, 60.0, 50.0
+            category=environment.RoadVehicleCategory.MEDIUM_HEAVY,
+            flow_rate=90.0,
+            speed_kmh=50.0,
+        ),
+        environment.RoadTraffic(
+            category=environment.RoadVehicleCategory.HEAVY,
+            flow_rate=45.0,
+            speed_kmh=50.0,
+        ),
+        environment.RoadTraffic(
+            category=environment.RoadVehicleCategory.MOTORCYCLES,
+            flow_rate=60.0,
+            speed_kmh=50.0,
         ),
     ]
     result = environment.road_source_power(
@@ -441,10 +454,11 @@ def generate_cnossos_road_speed_law(output_dir: str) -> None:
 
     speeds = np.linspace(20.0, 130.0, 221)
     _fig, ax = plt.subplots(figsize=(11, 6.4))
-    for category, color, name in [
+    road_categories: tuple[tuple[RoadVehicleCode, str, str], ...] = (
         ("1", COLOR_PRIMARY, "Light vehicles (1)"),
         ("3", COLOR_SECONDARY, "Heavy vehicles (3)"),
-    ]:
+    )
+    for category, color, name in road_categories:
         rolling = np.array(
             [a_weighted(environment.road_rolling_noise(category, v)) for v in speeds]
         )
@@ -1368,13 +1382,13 @@ def generate_rd1367_activity_assessment(output_dir: str) -> None:
     from phonometry import environment
 
     day = [
-        environment.NoisePhase(2.0, 0.0, label="closed"),
-        environment.NoisePhase(6.0, 50.0, kt=6.0, kf=3.0),
-        environment.NoisePhase(4.0, 48.0, kt=3.0, kf=3.0),
+        environment.NoisePhase(duration_hours=2.0, laeq=0.0, label="closed"),
+        environment.NoisePhase(duration_hours=6.0, laeq=50.0, kt=6.0, kf=3.0),
+        environment.NoisePhase(duration_hours=4.0, laeq=48.0, kt=3.0, kf=3.0),
     ]
     evening = [
-        environment.NoisePhase(2.0, 48.0, kt=3.0, kf=3.0),
-        environment.NoisePhase(2.0, 0.0),
+        environment.NoisePhase(duration_hours=2.0, laeq=48.0, kt=3.0, kf=3.0),
+        environment.NoisePhase(duration_hours=2.0, laeq=0.0),
     ]
     verdict = environment.assess_activity(
         {"day": day, "evening": evening},
@@ -1435,7 +1449,7 @@ def generate_cnossos_rail_emission(output_dir: str) -> None:
     # 96 coaches per hour at 160 km/h: eight eight-car trains an hour on a
     # conventional main line, seen broadside and slightly from above.
     result = environment.railway_source_power(
-        environment.RailwayVehicle(stock, flow_rate=96.0, speed_kmh=160.0),
+        environment.RailwayVehicle(stock=stock, flow_rate=96.0, speed_kmh=160.0),
         track,
         phi=90.0,
         psi=10.0,
@@ -2143,10 +2157,18 @@ def generate_cnossos_road_corrections(output_dir: str) -> None:
         return float(environment.road_source_power(**kwargs).a_weighted_line_power)
 
     light = [
-        environment.RoadTraffic(environment.RoadVehicleCategory.LIGHT, 1000.0, 50.0)
+        environment.RoadTraffic(
+            category=environment.RoadVehicleCategory.LIGHT,
+            flow_rate=1000.0,
+            speed_kmh=50.0,
+        )
     ]
     heavy = [
-        environment.RoadTraffic(environment.RoadVehicleCategory.HEAVY, 1000.0, 50.0)
+        environment.RoadTraffic(
+            category=environment.RoadVehicleCategory.HEAVY,
+            flow_rate=1000.0,
+            speed_kmh=50.0,
+        )
     ]
 
     _fig, (t_ax, s_ax, j_ax) = plt.subplots(1, 3, figsize=(14.5, 4.8))
@@ -2179,9 +2201,9 @@ def generate_cnossos_road_corrections(output_dir: str) -> None:
                 a_line(
                     traffic=[
                         environment.RoadTraffic(
-                            environment.RoadVehicleCategory.LIGHT,
-                            1000.0,
-                            float(v),
+                            category=environment.RoadVehicleCategory.LIGHT,
+                            flow_rate=1000.0,
+                            speed_kmh=float(v),
                             studded_fraction=share,
                         )
                     ],
@@ -2190,9 +2212,9 @@ def generate_cnossos_road_corrections(output_dir: str) -> None:
                 - a_line(
                     traffic=[
                         environment.RoadTraffic(
-                            environment.RoadVehicleCategory.LIGHT,
-                            1000.0,
-                            float(v),
+                            category=environment.RoadVehicleCategory.LIGHT,
+                            flow_rate=1000.0,
+                            speed_kmh=float(v),
                         )
                     ]
                 )
@@ -2264,7 +2286,11 @@ def generate_cnossos_road_gradient(output_dir: str) -> None:
 
     slopes = np.linspace(-14.0, 14.0, 141)
     _fig, ax = plt.subplots(figsize=(11, 6.4))
-    colors = {"1": COLOR_PRIMARY, "2": COLOR_TERTIARY, "3": COLOR_SECONDARY}
+    colors: dict[RoadVehicleCode, str] = {
+        "1": COLOR_PRIMARY,
+        "2": COLOR_TERTIARY,
+        "3": COLOR_SECONDARY,
+    }
     for category, color in colors.items():
         for speed, style in ((50.0, "--"), (80.0, "-")):
             flat = a_weighted(environment.road_propulsion_noise(category, speed))
@@ -2364,7 +2390,7 @@ def generate_cnossos_rail_components(output_dir: str) -> None:
 
     _fig, (left, right) = plt.subplots(1, 2, figsize=(13, 5.4))
     result = environment.railway_source_power(
-        environment.RailwayVehicle(stock, flow_rate=96.0, speed_kmh=160.0),
+        environment.RailwayVehicle(stock=stock, flow_rate=96.0, speed_kmh=160.0),
         track,
         phi=90.0,
         psi=10.0,
@@ -2410,7 +2436,7 @@ def generate_cnossos_rail_components(output_dir: str) -> None:
                 total(
                     environment.railway_source_power(
                         environment.RailwayVehicle(
-                            stock, flow_rate=96.0, speed_kmh=float(v)
+                            stock=stock, flow_rate=96.0, speed_kmh=float(v)
                         ),
                         track,
                         phi=90.0,
@@ -3240,9 +3266,9 @@ def _qa_levels() -> dict[str, NDArray[np.float64]]:
             env.predicted_receiver_level(
                 np.full(len(_QA_BANDS), _QA_LW),
                 env.PropagationGeometry(
-                    distance,
-                    _QA_SOURCE[2],
-                    _QA_RECEIVER[2],
+                    distance=distance,
+                    source_height_m=_QA_SOURCE[2],
+                    receiver_height_m=_QA_RECEIVER[2],
                     projected_distance=d_p,
                 ),
                 frequencies=_QA_BANDS,
@@ -3274,9 +3300,9 @@ def _qa_levels() -> dict[str, NDArray[np.float64]]:
     )
     profile_z = (0.0, 0.0, 10.0, 10.0)
     return {
-        "T01": general(env.GroundFactors(0.0, 0.0, 0.0), d_flat),
-        "T02": general(env.GroundFactors(0.5, 0.5, 0.5), d_flat),
-        "T03": general(env.GroundFactors(1.0, 1.0, 1.0), d_flat),
+        "T01": general(env.GroundFactors(source=0.0, middle=0.0, receiver=0.0), d_flat),
+        "T02": general(env.GroundFactors(source=0.5, middle=0.5, receiver=0.5), d_flat),
+        "T03": general(env.GroundFactors(source=1.0, middle=1.0, receiver=1.0), d_flat),
         "T04": general(
             env.region_ground_factors(
                 segments, (0.2, 0.5, 0.9), _QA_SOURCE[2], _QA_RECEIVER[2]
@@ -4062,7 +4088,9 @@ def generate_rolling_stock_uncertainty(output_dir: str) -> None:
     budget = environment.pass_by_uncertainty(
         55.0,
         [
-            metrology.Quantity(value, u, name=spanish if _LANG == "es" else english)
+            metrology.Quantity(
+                value=value, uncertainty=u, name=spanish if _LANG == "es" else english
+            )
             for english, spanish, value, u in _TABLE_G2_ROWS
         ],
     )

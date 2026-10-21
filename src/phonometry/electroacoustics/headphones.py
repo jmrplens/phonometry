@@ -191,6 +191,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
     from ..io._signal import Signal
 
 __all__ = [
@@ -644,7 +645,7 @@ class RatedImpedanceVerification(OwnsArrays):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the modulus against frequency with the rated value and its 80 %.
 
@@ -1030,7 +1031,7 @@ class ProgramCharacteristicVoltage(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the band levels at the characteristic voltage and their 94 dB sum.
 
@@ -1150,7 +1151,7 @@ class LimitingTestSignalCheck(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the spectrum against Table II, with the ratio in the title.
 
@@ -1267,7 +1268,7 @@ class ProtectionVoltage(OwnsArrays):
         return (self.protection_voltage_v / step, self.protection_voltage_v * step)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the sensitivity change against the e.m.f., with the 1 dB line.
 
@@ -1383,7 +1384,7 @@ class CouplerFrequencyResponse(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        language: str = "en",
+        language: Language = "en",
         iec_scale: bool = True,
         **kwargs: Any,
     ) -> Axes:
@@ -1473,7 +1474,7 @@ class CrosstalkAttenuation(OwnsArrays):
         return float(np.min(self.attenuation))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the attenuation against frequency.
 
@@ -1581,7 +1582,7 @@ class FieldComparisonResponse(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        language: str = "en",
+        language: Language = "en",
         iec_scale: bool = True,
         **kwargs: Any,
     ) -> Axes:
@@ -1792,7 +1793,7 @@ class EarCanalFrequencyResponse(OwnsArrays):
         self,
         ax: Axes | None = None,
         *,
-        language: str = "en",
+        language: Language = "en",
         iec_scale: bool = True,
         **kwargs: Any,
     ) -> Axes:
@@ -1947,7 +1948,7 @@ class EarCanalMicrophoneVerification(RichDisplay):
         raise TypeError(msg)
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw each requirement's value as a share of its limit.
 

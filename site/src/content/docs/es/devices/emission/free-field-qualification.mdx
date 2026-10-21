@@ -309,7 +309,7 @@ plt.show()
 
 | Función | Apartado | Devuelve | Notas |
 | :--- | :--- | :--- | :--- |
-| `MicrophoneTraverse(positions_m, levels, monitor_levels=None, background_levels=None, name="", targets=())` | 5.1.3.2, A.3.3 | un recorrido | `nan` marca un punto no medido a una frecuencia, que es como se escribe un paso que cambia con la frecuencia; `targets` nombra hacia qué se elige la trayectoria entre `"dihedral corner"`, `"trihedral corner"`, `"boundary center"`, `"closest boundary"` y `"unique features"` |
+| `MicrophoneTraverse(positions_m=..., levels=..., monitor_levels=None, background_levels=None, name="", targets=())` | 5.1.3.2, A.3.3 | un recorrido | `nan` marca un punto no medido a una frecuencia, que es como se escribe un paso que cambia con la frecuencia; `targets` nombra hacia qué se elige la trayectoria entre `"dihedral corner"`, `"trihedral corner"`, `"boundary center"`, `"closest boundary"` y `"unique features"` |
 | `MicrophoneTraverse.along(direction, distances, levels, *, start_m=(0, 0, 0), ...)` | 5.1.3.2 | un recorrido | Trazado a lo largo de una recta |
 | `inverse_square_law_deviations(traverses, *, frequencies, room, origin_m=None, source_box_m=None)` | Fórmulas (1) a (4) | `InverseSquareLawResult` | Una llamada por fuente de ensayo; `origin_m` o `source_box_m`, no las dos |
 | `inverse_square_law_tolerance(frequencies, *, room)` | Tabla A.1 | límite por banda [dB] | Un tono se lee en la banda de tercio de octava que lo contiene |

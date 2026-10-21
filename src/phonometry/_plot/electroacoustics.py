@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.projections.polar import PolarAxes
 
+    from .._i18n import Language
     from ..electroacoustics.distortion import HarmonicDistortionResult
     from ..electroacoustics.frequency_response import (
         CoherenceResult,
@@ -153,7 +154,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
@@ -163,7 +164,7 @@ def plot_harmonic_distortion(
     result: HarmonicDistortionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Harmonic amplitude spectrum with the harmonics marked and THD annotated.
@@ -225,7 +226,7 @@ def plot_modulation_distortion(
     result: ModulationDistortionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Carrier and modulation sidebands with the per-order distortion annotated.
@@ -339,7 +340,7 @@ def plot_frequency_response(
     result: FrequencyResponseResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Bode magnitude / phase and coherence of an estimated frequency response.
@@ -405,7 +406,7 @@ def plot_swept_sine_distortion(
     result: SweptSineDistortionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Harmonic frequency responses and THD(f) of a swept-sine measurement.
@@ -492,7 +493,7 @@ def plot_piston_impedance(
     result: RadiatingPistonResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Normalized radiation resistance and reactance of a baffled piston.
@@ -559,7 +560,7 @@ def plot_piston_directivity(
     result: PistonDirectivity,
     ax: PolarAxes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Far-field directivity (beam) pattern of a baffled circular piston.
@@ -645,14 +646,14 @@ def plot_piston_directivity(
 # ---------------------------------------------------------------------------
 
 
-def _fmt_num(value: float, language: str) -> str:
+def _fmt_num(value: float, language: Language) -> str:
     """A number with up to one decimal (locale separator), trailing ``.0`` dropped."""
     from .._i18n import format_number
 
     return format_number(value, language, decimals=1, trim=True)
 
 
-def _freq_label(value: float, language: str) -> str:
+def _freq_label(value: float, language: Language) -> str:
     """A frequency rounded to the nearest hertz, locale-formatted."""
     from .._i18n import format_number
 
@@ -665,7 +666,7 @@ def _grid(ax: Axes) -> None:
 
 
 def _draw_loudspeaker_response(
-    result: LoudspeakerCharacteristics, ax: Axes, *, language: str = "en"
+    result: LoudspeakerCharacteristics, ax: Axes, *, language: Language = "en"
 ) -> None:
     """On-axis SPL with the tolerance band, reference lines and range markers."""
     f = np.asarray(result.frequencies, dtype=np.float64)
@@ -707,7 +708,7 @@ def _draw_loudspeaker_response(
 
 
 def _draw_impedance(
-    result: LoudspeakerCharacteristics, ax: Axes, *, language: str = "en"
+    result: LoudspeakerCharacteristics, ax: Axes, *, language: Language = "en"
 ) -> None:
     """Impedance modulus with the rated and 80 %-of-rated reference lines (16)."""
     ax.semilogx(
@@ -740,7 +741,7 @@ def _draw_impedance(
 
 
 def _draw_loudspeaker_thd(
-    result: LoudspeakerCharacteristics, ax: Axes, *, language: str = "en"
+    result: LoudspeakerCharacteristics, ax: Axes, *, language: Language = "en"
 ) -> None:
     """Total harmonic distortion against frequency, in percent (24.1)."""
     ax.semilogx(result.thd_frequencies, result.thd_percent, color=_C_PRIMARY, lw=1.3)
@@ -756,7 +757,7 @@ def _draw_datasheet_polar(
     result: LoudspeakerCharacteristics | MicrophoneCharacteristics,
     ax: PolarAxes,
     *,
-    language: str = "en",
+    language: Language = "en",
 ) -> None:
     """Polar directivity to the IEC 60263 clause 3 25 dB reference-circle scale."""
     angles = np.asarray(result.polar_angles_deg, dtype=np.float64)
@@ -789,7 +790,7 @@ def _draw_datasheet_polar(
 
 
 def _draw_microphone_response(
-    result: MicrophoneCharacteristics, ax: Axes, *, language: str = "en"
+    result: MicrophoneCharacteristics, ax: Axes, *, language: Language = "en"
 ) -> None:
     """Free-field response with the tolerance band and reference markers (12)."""
     f = np.asarray(result.frequencies, dtype=np.float64)
@@ -832,7 +833,7 @@ def _draw_microphone_response(
 
 
 def _draw_noise_spectrum(
-    result: MicrophoneCharacteristics, ax: Axes, *, language: str = "en"
+    result: MicrophoneCharacteristics, ax: Axes, *, language: Language = "en"
 ) -> None:
     """Inherent-noise equivalent band-level spectrum (17.2 b)."""
     ax.semilogx(
@@ -846,7 +847,7 @@ def _draw_noise_spectrum(
 
 
 def _draw_microphone_distortion(
-    result: MicrophoneCharacteristics, ax: Axes, *, language: str = "en"
+    result: MicrophoneCharacteristics, ax: Axes, *, language: Language = "en"
 ) -> None:
     """Total harmonic distortion against sound pressure level (14.2/15.2)."""
     ax.plot(
@@ -913,7 +914,7 @@ def _plot_one_quantity(
     quantity: str,
     table: dict[str, tuple[Any, bool, str | None]],
     ax: Axes | None,
-    language: str,
+    language: Language,
     missing: dict[str, str],
 ) -> Axes:
     """Draw exactly one rated-characteristic panel on a single axes.
@@ -951,7 +952,7 @@ def plot_loudspeaker_characteristics(
     quantity: str = "response",
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Plot one IEC 60268-5 loudspeaker rated characteristic on a single axes.
@@ -990,7 +991,7 @@ def plot_microphone_characteristics(
     quantity: str = "response",
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Plot one IEC 60268-4 microphone rated characteristic on a single axes.
@@ -1028,7 +1029,7 @@ def plot_feedback_stability(
     result: FeedbackStabilityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Gain structure of a reinforcement loop against its stability limits.
@@ -1127,7 +1128,7 @@ def plot_coherence(
     result: CoherenceResult,
     *,
     ax: Axes | None = None,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     r"""The ordinary coherence :math:`\gamma^2(f)` of two records, on 0 to 1.

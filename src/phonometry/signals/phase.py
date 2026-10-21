@@ -61,6 +61,8 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "PhaseDecompositionResult",
     "excess_phase",
@@ -345,7 +347,7 @@ class PhaseDecompositionResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes | NDArray[Any]:
         r"""Plot the magnitude, the phase decomposition and the group delay.
 

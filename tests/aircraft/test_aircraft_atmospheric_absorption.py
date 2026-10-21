@@ -30,8 +30,8 @@ from iso3891_tables_data import (
 from phonometry.aircraft.atmospheric_absorption import (
     AircraftBandAttenuation,
     ARP866AAttenuation,
-    arp866a_attenuation,
-    sae_band_attenuation,
+    attenuation_arp866a,
+    band_attenuation_arp5534,
 )
 from phonometry.aircraft.certification import NOY_BANDS_HZ
 from phonometry.environment.propagation.air_absorption import air_attenuation
@@ -69,7 +69,7 @@ def test_coefficient_is_iso9613_at_the_arp5534_molar_concentration() -> None:
     # pressure in another form. ISO 9613-1 at the relative humidity that gives
     # the same molar concentration is therefore the ARP 5534 coefficient.
     f = np.array([50.0, 500.0, 1000.0, 8000.0])
-    res = sae_band_attenuation(
+    res = band_attenuation_arp5534(
         f, 500.0, temperature_c=15.0, relative_humidity_percent=60.0
     )
     assert isinstance(res, AircraftBandAttenuation)
@@ -96,7 +96,7 @@ def test_saturation_pressure_is_eq6_not_iso9613_annex_b() -> None:
     ratio = _arp5534_eq6(t_k) / _iso9613_annex_b(t_k)
     assert ratio == pytest.approx(1.0 - 4.5e-5, abs=0.2e-5)
     iso = air_attenuation([10000.0], temperature_c=10.0, relative_humidity_percent=80.0)
-    arp = sae_band_attenuation(
+    arp = band_attenuation_arp5534(
         [10000.0], 1.0, temperature_c=10.0, relative_humidity_percent=80.0
     ).coefficient_db_per_m
     assert float(arp[0]) != pytest.approx(float(iso[0]), rel=1e-5)
@@ -104,7 +104,7 @@ def test_saturation_pressure_is_eq6_not_iso9613_annex_b() -> None:
 
 def test_band_attenuation_matches_regression_oracle() -> None:
     f = np.array([100.0, 1000.0, 4000.0, 8000.0])
-    res = sae_band_attenuation(
+    res = band_attenuation_arp5534(
         f, 2000.0, temperature_c=25.0, relative_humidity_percent=70.0
     )
     for i in range(f.size):
@@ -123,7 +123,7 @@ def test_piecewise_continuity_at_150_db() -> None:
 
 def test_small_absorption_band_close_to_pure_tone() -> None:
     # For small δ_t the band attenuation is within a few percent of pure-tone.
-    res = sae_band_attenuation(
+    res = band_attenuation_arp5534(
         [200.0], 100.0, temperature_c=25.0, relative_humidity_percent=70.0
     )
     ratio = float(res.band_attenuation[0] / res.midband_attenuation[0])
@@ -131,20 +131,20 @@ def test_small_absorption_band_close_to_pure_tone() -> None:
 
 
 def test_zero_path_length_gives_zero() -> None:
-    res = sae_band_attenuation([1000.0, 4000.0], 0.0)
+    res = band_attenuation_arp5534([1000.0, 4000.0], 0.0)
     assert np.allclose(res.band_attenuation, 0.0)
     assert np.allclose(res.midband_attenuation, 0.0)
 
 
 def test_attenuation_increases_with_frequency_and_distance() -> None:
-    near = sae_band_attenuation(
+    near = band_attenuation_arp5534(
         [2000.0], 500.0, temperature_c=25.0, relative_humidity_percent=70.0
     )
-    far = sae_band_attenuation(
+    far = band_attenuation_arp5534(
         [2000.0], 5000.0, temperature_c=25.0, relative_humidity_percent=70.0
     )
     assert far.band_attenuation[0] > near.band_attenuation[0]
-    spec = sae_band_attenuation([500.0, 8000.0], 2000.0)
+    spec = band_attenuation_arp5534([500.0, 8000.0], 2000.0)
     assert spec.band_attenuation[1] > spec.band_attenuation[0]
 
 
@@ -155,7 +155,7 @@ def test_large_attenuation_no_nan_or_warning() -> None:
 
     with warnings.catch_warnings():
         warnings.simplefilter("error", RuntimeWarning)
-        res = sae_band_attenuation(
+        res = band_attenuation_arp5534(
             [8000.0, 10000.0],
             50_000.0,
             temperature_c=25.0,
@@ -170,9 +170,9 @@ def test_large_attenuation_no_nan_or_warning() -> None:
 
 def test_invalid_inputs_rejected() -> None:
     with pytest.raises(ValueError, match=r"'frequencies' must be strictly positive"):
-        sae_band_attenuation([-1.0], 100.0)
+        band_attenuation_arp5534([-1.0], 100.0)
     with pytest.raises(ValueError, match=r"'path_length_m' must be non-negative"):
-        sae_band_attenuation([1000.0], -5.0)
+        band_attenuation_arp5534([1000.0], -5.0)
 
 
 def test_per_band_arrays_must_agree() -> None:
@@ -180,7 +180,7 @@ def test_per_band_arrays_must_agree() -> None:
     # reads it, so it leaves as dB/m for the caller to multiply by a path
     # length, and collapsed to a single value numpy broadcasts it over every
     # band of that spectrum. The other three stop the figure instead.
-    res = sae_band_attenuation([500.0, 1000.0, 2000.0, 4000.0], 1000.0)
+    res = band_attenuation_arp5534([500.0, 1000.0, 2000.0, 4000.0], 1000.0)
     collapsed = res.coefficient_db_per_m[:1]
     with pytest.raises(ValueError, match=r"'coefficient_db_per_m' \(1\)"):
         replace(res, coefficient_db_per_m=collapsed)
@@ -197,14 +197,14 @@ def test_per_band_array_must_carry_one_axis() -> None:
     # axis, so every length agrees and the length check alone lets it through;
     # the caller who multiplies it by a path length and subtracts it from a
     # spectrum gets a band-by-band matrix instead of a spectrum.
-    res = sae_band_attenuation([500.0, 1000.0, 2000.0, 4000.0], 1000.0)
+    res = band_attenuation_arp5534([500.0, 1000.0, 2000.0, 4000.0], 1000.0)
     column = res.coefficient_db_per_m.reshape(-1, 1)
     with pytest.raises(ValueError, match="'coefficient_db_per_m' must have one axis"):
         replace(res, coefficient_db_per_m=column)
 
 
 def test_plot_smoke() -> None:
-    res = sae_band_attenuation(
+    res = band_attenuation_arp5534(
         np.array([50.0, 100.0, 500.0, 1000.0, 5000.0, 10000.0]), 3000.0
     )
     assert res.plot() is not None
@@ -236,7 +236,7 @@ def _iso3891_delta(f0: float, theta: float, rh: float) -> float:
 def test_arp866a_formula_at_1_khz() -> None:
     # At 10 degC and 80 % the 1 kHz band has delta = 7.49, past the last
     # change of Table 1 at 6.50, so eta = 0.200 and the formula is closed.
-    res = arp866a_attenuation(
+    res = attenuation_arp866a(
         [1000.0], temperature_c=10.0, relative_humidity_percent=80.0
     )
     assert isinstance(res, ARP866AAttenuation)
@@ -251,7 +251,7 @@ def test_arp866a_formula_at_1_khz() -> None:
 
 
 def test_arp866a_evaluates_table_2_frequencies() -> None:
-    res = arp866a_attenuation(
+    res = attenuation_arp866a(
         NOY_BANDS_HZ, temperature_c=15.0, relative_humidity_percent=70.0
     )
     assert np.array_equal(res.frequencies, NOY_BANDS_HZ)
@@ -264,7 +264,7 @@ def test_arp866a_evaluates_table_2_frequencies() -> None:
     )
     assert np.array_equal(res.evaluation_frequencies_hz[:20], NOY_BANDS_HZ[:20])
     exact = 1000.0 * 10.0 ** (np.array([-12.0, 7.0]) / 10.0)  # 63.0957, 5011.87
-    by_exact = arp866a_attenuation(
+    by_exact = attenuation_arp866a(
         exact, temperature_c=15.0, relative_humidity_percent=70.0
     )
     assert tuple(by_exact.frequencies) == (63.0, 5000.0)
@@ -272,7 +272,7 @@ def test_arp866a_evaluates_table_2_frequencies() -> None:
 
 
 def test_arp866a_dry_air_leaves_the_first_term() -> None:
-    res = arp866a_attenuation(
+    res = attenuation_arp866a(
         [2000.0], temperature_c=20.0, relative_humidity_percent=0.0
     )
     assert float(res.delta[0]) == pytest.approx(0.0)
@@ -283,7 +283,7 @@ def test_arp866a_dry_air_leaves_the_first_term() -> None:
 
 
 def test_arp866a_path_attenuation_shapes() -> None:
-    res = arp866a_attenuation(
+    res = attenuation_arp866a(
         [500.0, 4000.0], temperature_c=10.0, relative_humidity_percent=80.0
     )
     one = res.path_attenuation(1000.0)
@@ -300,23 +300,23 @@ def test_arp866a_path_attenuation_shapes() -> None:
 
 def test_arp866a_refuses_what_the_formula_cannot_take() -> None:
     with pytest.raises(ValueError, match="'frequencies' must name"):
-        arp866a_attenuation([40.0], temperature_c=10.0, relative_humidity_percent=80.0)
+        attenuation_arp866a([40.0], temperature_c=10.0, relative_humidity_percent=80.0)
     with pytest.raises(ValueError, match="'frequencies' must name"):
-        arp866a_attenuation(
+        attenuation_arp866a(
             [12500.0], temperature_c=10.0, relative_humidity_percent=80.0
         )
     with pytest.raises(ValueError, match="'relative_humidity_percent' must be within"):
-        arp866a_attenuation(
+        attenuation_arp866a(
             [1000.0], temperature_c=10.0, relative_humidity_percent=120.0
         )
     with pytest.raises(ValueError, match="temperature_c"):
-        arp866a_attenuation(
+        attenuation_arp866a(
             [1000.0], temperature_c=-300.0, relative_humidity_percent=50.0
         )
 
 
 def test_arp866a_arrays_must_agree() -> None:
-    res = arp866a_attenuation(
+    res = attenuation_arp866a(
         [500.0, 1000.0], temperature_c=10.0, relative_humidity_percent=80.0
     )
     short = res.eta[:1]
@@ -325,7 +325,7 @@ def test_arp866a_arrays_must_agree() -> None:
 
 
 def test_arp866a_plot_smoke() -> None:
-    res = arp866a_attenuation(
+    res = attenuation_arp866a(
         NOY_BANDS_HZ, temperature_c=10.0, relative_humidity_percent=80.0
     )
     ax = res.plot(language="es")
@@ -339,7 +339,7 @@ def _coefficients(humidity: float, interpolation: str) -> np.ndarray:
     """ISO 3891 Tables 9 and 10 laid out: bands down, temperatures across."""
     return np.column_stack(
         [
-            arp866a_attenuation(
+            attenuation_arp866a(
                 NOY_BANDS_HZ,
                 temperature_c=t,
                 relative_humidity_percent=humidity,
@@ -364,7 +364,7 @@ def test_quadratic_eta_reproduces_iso3891_table_10() -> None:
 def test_quadratic_eta_is_the_parabola_through_three_entries() -> None:
     # delta between the entries 2.30 and 2.50 reads the parabola through
     # 2.00, 2.30 and 2.50 (0.570, 0.495, 0.450).
-    res = arp866a_attenuation(
+    res = attenuation_arp866a(
         [10000.0], temperature_c=10.0, relative_humidity_percent=80.0
     )
     d = float(res.delta[0])
@@ -382,12 +382,12 @@ def test_quadratic_eta_holds_0_200_from_6_50() -> None:
     # 6.05, 6.50 and 7.00 would dip to 0.1993 between the last two; eta stays
     # at 0.200 instead, as the linear reading does. 1250 Hz at 10 degC and
     # 80 % falls in that interval.
-    res = arp866a_attenuation(
+    res = attenuation_arp866a(
         [1250.0], temperature_c=10.0, relative_humidity_percent=80.0
     )
     assert 6.50 < float(res.delta[0]) < 7.00
     assert float(res.eta[0]) == pytest.approx(0.200, abs=1e-12)
-    linear = arp866a_attenuation(
+    linear = attenuation_arp866a(
         [1250.0],
         temperature_c=10.0,
         relative_humidity_percent=80.0,
@@ -436,10 +436,10 @@ def test_iso3891_table_9_contradicts_table_10_where_humidity_drops_out() -> None
     bands, temps = list(FREQUENCIES_HZ), list(TEMPERATURES_C)
     for band, temperature in TABLE_9_MISPRINTED:
         k, j = bands.index(band), temps.index(temperature)
-        at70 = arp866a_attenuation(
+        at70 = attenuation_arp866a(
             [band], temperature_c=temperature, relative_humidity_percent=70.0
         )
-        at80 = arp866a_attenuation(
+        at80 = attenuation_arp866a(
             [band], temperature_c=temperature, relative_humidity_percent=80.0
         )
         assert min(float(at70.delta[0]), float(at80.delta[0])) >= 6.5
@@ -451,7 +451,7 @@ def test_iso3891_table_9_contradicts_table_10_where_humidity_drops_out() -> None
 
 def test_unknown_eta_interpolation_is_refused() -> None:
     with pytest.raises(ValueError, match="'eta_interpolation' must be one of"):
-        arp866a_attenuation(
+        attenuation_arp866a(
             [1000.0],
             temperature_c=10.0,
             relative_humidity_percent=80.0,
@@ -466,8 +466,8 @@ def test_sae_band_attenuation_passes_its_pressure_on() -> None:
     """
     f = [1000.0, 4000.0]
     conditions = {"temperature_c": 20.0, "relative_humidity_percent": 50.0}
-    high = sae_band_attenuation(f, 1000.0, static_pressure_kpa=80.0, **conditions)
-    sea = sae_band_attenuation(f, 1000.0, **conditions)
+    high = band_attenuation_arp5534(f, 1000.0, static_pressure_kpa=80.0, **conditions)
+    sea = band_attenuation_arp5534(f, 1000.0, **conditions)
     iso_ratio = air_attenuation(
         f, static_pressure_kpa=80.0, **conditions
     ) / air_attenuation(f, **conditions)

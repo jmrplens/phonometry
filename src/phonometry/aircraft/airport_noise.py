@@ -52,6 +52,10 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from .._i18n import Language
+
+Mounting = Literal["wing", "fuselage", "propeller"]
+
 __all__ = [
     "AerodromeAtmosphere",
     "FlightSegmentState",
@@ -115,7 +119,7 @@ def lateral_attenuation(elevation_deg: float, lateral_m: float) -> float:
 
 
 def engine_installation_correction(
-    depression_deg: float, mounting: str = "wing"
+    depression_deg: float, mounting: Mounting = "wing"
 ) -> float:
     """Engine-installation lateral-directivity correction ``ΔI(φ)`` (Eq. 4-15/4-16).
 
@@ -281,7 +285,7 @@ _DSOR0_M = 762.0
 
 
 def start_of_roll_directivity(
-    azimuth_deg: float, distance_m: float, engine: str = "jet"
+    azimuth_deg: float, distance_m: float, engine: Literal["jet", "turboprop"] = "jet"
 ) -> float:
     r"""Start-of-roll (ground-roll) directivity correction ``ΔSOR`` (Eq. 4-22/4-25).
 
@@ -353,6 +357,7 @@ def _clean_table(
     p = np.asarray(powers, dtype=np.float64).ravel()
     d = np.asarray(distances_m, dtype=np.float64).ravel()
     lv = np.asarray(levels, dtype=np.float64)
+    # The fewest values the step below can work with, not a quantity.
     if p.size < 2 or d.size < 2:  # noqa: PLR2004
         msg = "'powers' and 'distances_m' must each have at least two values."
         raise ValueError(msg)
@@ -428,7 +433,7 @@ class NPDLevelResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the interpolated level versus slant distance (log axis)."""
         from .._i18n import check_language
@@ -761,7 +766,7 @@ class FlyoverResult(OwnsArrays):
         require_choice(self.metric, "metric", ("exposure", "maximum"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the per-segment contributions to the event level."""
         from .._i18n import check_language
@@ -775,6 +780,7 @@ def _validate_path(
 ) -> NDArray[np.float64]:
     """Coerce and validate a flight path to a finite ``(N, 5)`` array."""
     pts = np.asarray(path, dtype=np.float64)
+    # The number is a count of array axes, not a quantity.
     if pts.ndim != 2 or pts.shape[1] != 5 or pts.shape[0] < 2:  # noqa: PLR2004
         msg = "'path' must have shape (N, 5) with N >= 2 (x,y,z,power,speed)."
         raise ValueError(msg)
@@ -874,7 +880,7 @@ def _segment_noise_fraction(
 def _start_of_roll_correction(
     q: float,
     ds: float,
-    engine: str,
+    engine: Literal["jet", "turboprop"],
     *,
     roll_behind: bool,
 ) -> float:
@@ -923,7 +929,7 @@ def _event_level_core(
     lm: NDArray[np.float64],
     vref: float,
     imp: float,
-    mounting: str,
+    mounting: Mounting,
     key: str,
     ground_roll: NDArray[np.bool_] | None = None,
     landing_roll: NDArray[np.bool_] | None = None,
@@ -941,7 +947,9 @@ def _event_level_core(
     average segment speed. NPD lookups clamp to the recommended 30 m floor
     (Doc 29 §4.2).
     """
-    engine = "turboprop" if mounting.strip().lower() in ("propeller", "prop") else "jet"
+    engine: Literal["jet", "turboprop"] = (
+        "turboprop" if mounting.strip().lower() in ("propeller", "prop") else "jet"
+    )
     n_segments = max(pts.shape[0] - 1, 0)
     # Unbanked flight is the default; resolving it once keeps the per-segment
     # loop (one pass per contour grid point) free of the None test.
@@ -1330,7 +1338,7 @@ def _grid_event_levels(
     lm: NDArray[np.float64],
     vref: float,
     imp: float,
-    mounting: str,
+    mounting: Mounting,
     key: str,
     ground_roll: NDArray[np.bool_] | None = None,
     landing_roll: NDArray[np.bool_] | None = None,
@@ -1400,7 +1408,7 @@ def event_level(
     max_levels: NDArray[np.float64] | list[list[float]],
     *,
     reference_speed_m_s: float = _VREF_MS,
-    mounting: str = "wing",
+    mounting: Mounting = "wing",
     metric: EventMetric = "exposure",
     atmosphere: AerodromeAtmosphere = _STANDARD_ATMOSPHERE,
     segments: FlightSegmentState = _AIRBORNE,
@@ -1509,7 +1517,7 @@ class NoiseContourResult(OwnsArrays):
         require_choice(self.metric, "metric", ("exposure", "maximum"))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot filled noise contours over the ground plane."""
         from .._i18n import check_language
@@ -1530,7 +1538,7 @@ def noise_contour(
     x: NDArray[np.float64] | list[float],
     y: NDArray[np.float64] | list[float],
     reference_speed_m_s: float = _VREF_MS,
-    mounting: str = "wing",
+    mounting: Mounting = "wing",
     metric: EventMetric = "exposure",
     atmosphere: AerodromeAtmosphere = _STANDARD_ATMOSPHERE,
     segments: FlightSegmentState = _AIRBORNE,
@@ -1558,6 +1566,7 @@ def noise_contour(
     """
     gx = np.asarray(x, dtype=np.float64).ravel()
     gy = np.asarray(y, dtype=np.float64).ravel()
+    # The fewest values the step below can work with, not a quantity.
     if gx.size < 2 or gy.size < 2:  # noqa: PLR2004
         msg = "'x' and 'y' must each have at least two grid points."
         raise ValueError(msg)

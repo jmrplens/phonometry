@@ -144,6 +144,7 @@ millihertz.
 ```python
 adrienne_reflection_window(
     fs: float,
+    *,
     window_length_s: float = 0.0079,
 ) -> NDArray[np.float64]
 ```
@@ -286,7 +287,7 @@ otherwise.
 DirectSoundSubtraction.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -694,7 +695,7 @@ How far down a device of a given size can be measured, 5.5.7.
 ReflectionFrequencyLimit.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -716,7 +717,10 @@ Requires matplotlib (`pip install phonometry[plot]`).
 ## ReflectionGridCheck
 
 ```python
-ReflectionGridCheck(check: str, path_differences_m: NDArray[np.float64])
+ReflectionGridCheck(
+    check: Literal['relative', 'grid'],
+    path_differences_m: NDArray[np.float64],
+)
 ```
 
 The position check of 5.6.2.5 or 5.6.2.6, against Table 3.
@@ -763,7 +767,7 @@ Whether every microphone is within tolerance, so the set-up is correct.
 ReflectionGridCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -826,7 +830,7 @@ The sound reflection index of a device, per one-third octave band.
 ReflectionIndexResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -878,7 +882,7 @@ deviation of Table A.1 taken as the combined standard uncertainty.
 ReflectionIndexUncertainty.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

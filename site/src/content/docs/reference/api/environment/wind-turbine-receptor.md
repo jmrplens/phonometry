@@ -113,9 +113,9 @@ level cannot be determined (11.6.4).
 bin_sound_levels(
     levels: ArrayLike,
     wind_speeds_m_s: ArrayLike,
-    wind_directions_deg: ArrayLike | None = None,
     *,
-    averaging: str = 'energy',
+    wind_directions_deg: ArrayLike | None = None,
+    averaging: Literal['energy', 'arithmetic'] = 'energy',
     type_b_uncertainty_db: ArrayLike = 0.0,
     bin_width_m_s: float = 1.0,
     sector_width_deg: float = 30.0,
@@ -164,6 +164,7 @@ whose first member is centred on north. Per bin:
 
 ```python
 BinnedSoundLevels(
+    *,
     wind_speeds_m_s: NDArray[np.float64],
     wind_directions_deg: NDArray[np.float64] | None,
     counts: NDArray[np.int64],
@@ -171,8 +172,7 @@ BinnedSoundLevels(
     type_a_uncertainty_db: NDArray[np.float64],
     type_b_uncertainty_db: NDArray[np.float64],
     combined_uncertainty_db: NDArray[np.float64],
-    *,
-    averaging: str,
+    averaging: Literal['energy', 'arithmetic'],
     interval_levels: NDArray[np.float64],
     interval_wind_speeds_m_s: NDArray[np.float64],
     bin_width_m_s: float,
@@ -235,7 +235,7 @@ in the other is left out.
 BinnedSoundLevels.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -400,7 +400,7 @@ band; the band arrays are summed over the turbines.
 LowFrequencyLevel.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -539,7 +539,7 @@ A predicted receptor level and its uncertainty (10.3.4).
 PredictedReceptorLevel.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -680,7 +680,7 @@ The emergence criterion per wind speed class (Annex J, Equation (J.1)).
 SoundEmergence.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -751,7 +751,7 @@ Positions of the sound relevant turbines, loudest first.
 SoundRelevantTurbines.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -838,7 +838,7 @@ The upper frequency of the tonal search range (12.5.2.4).
 ToneSearchLimit.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -940,7 +940,7 @@ total and the background levels, so it is not a field.
 TurbineSoundLevels.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1216,7 +1216,7 @@ A wind profile through two measured heights (Annex K).
 WindShearProfile.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -1283,7 +1283,7 @@ The rating level of wind turbine sound (Annex A, A.1).
 WindTurbineRatingLevel.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

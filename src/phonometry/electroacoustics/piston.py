@@ -95,6 +95,8 @@ if TYPE_CHECKING:
     from matplotlib.projections.polar import PolarAxes
     from numpy.typing import ArrayLike, NDArray
 
+    from .._i18n import Language
+
 __all__ = [
     "PistonDirectivity",
     "RadiatingPistonResult",
@@ -257,7 +259,7 @@ class PistonDirectivity(OwnsArrays):
         )
 
     def plot(
-        self, ax: PolarAxes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: PolarAxes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the far-field directivity (beam) pattern on a polar axes.
 
@@ -452,7 +454,7 @@ class RadiatingPistonResult(OwnsArrays):
         require_finite_fields(self, "angles_rad", "directivity")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the normalized piston resistance and reactance against ``ka``.
 
@@ -473,7 +475,7 @@ class RadiatingPistonResult(OwnsArrays):
         ax: Axes | None = None,
         *,
         frequency_index: int = -1,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the baffled piston to scale, with its directivity lobe.

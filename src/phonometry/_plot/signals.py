@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from matplotlib.typing import ColorType
 
+    from .._i18n import Language
     from ..signals._cepstrum import (
         CepstrumResult,
         EchoDetectionResult,
@@ -22,6 +23,7 @@ if TYPE_CHECKING:
         TimeDelayResult,
     )
     from ..signals._envelope import EnvelopeResult, EnvelopeSpectrumResult
+    from ..signals._test_signals import ResampledSignalResult, ToneBurstResult
     from ..signals.inversion import InverseFilterResult
     from ..signals.miso import MISOCoherenceResult
     from ..signals.multitaper import MultitaperSpectralDensityResult
@@ -32,7 +34,6 @@ if TYPE_CHECKING:
         SpectralDensityResult,
     )
     from ..signals.synchronous_average import SynchronousAverageResult
-    from ..signals.test_signals import ResampledSignalResult, ToneBurstResult
     from ..signals.time_frequency import SpectrogramResult, ZoomFFTResult
     from ..signals.windows import WindowMetricsResult
 
@@ -184,7 +185,7 @@ _STRINGS: dict[str, str] = {
 }
 
 
-def _t(text: str, language: str = "en", **fmt: Any) -> str:
+def _t(text: str, language: Language = "en", **fmt: Any) -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     s = _STRINGS.get(text, text) if language == "es" else text
     return s.format(**fmt) if fmt else s
@@ -209,7 +210,7 @@ def _finite_db_floor(curves: list[np.ndarray], *, margin: float = 5.0) -> float:
     return float(finite.min()) - margin if finite.size else -100.0
 
 
-def _psd_ylabel(scaling: str, language: str = "en") -> str:
+def _psd_ylabel(scaling: str, language: Language = "en") -> str:
     return (
         _t("Spectral density [dB re 1/Hz]", language)
         if scaling == "density"
@@ -220,7 +221,7 @@ def _psd_ylabel(scaling: str, language: str = "en") -> str:
 def _plot_density_with_band(
     result: SpectralDensityResult | MultitaperSpectralDensityResult,
     ax: Axes | None,
-    language: str,
+    language: Language,
     kwargs: dict[str, Any],
     *,
     band_color: ColorType | None,
@@ -263,7 +264,7 @@ def plot_spectral_density(
     result: SpectralDensityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Spectral density in dB with its chi-square confidence band.
@@ -305,7 +306,7 @@ def plot_multitaper_spectral_density(
     result: MultitaperSpectralDensityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Multitaper spectral density in dB with its chi-square band.
@@ -355,7 +356,7 @@ def plot_cross_spectral_density(
     result: CrossSpectralDensityResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Cross-spectrum magnitude, phase (with ±σ band) and coherence.
@@ -427,7 +428,7 @@ def plot_coherent_output_spectrum(
     result: CoherentOutputSpectrumResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Output, coherent and noise spectra plus the spectral SNR.
@@ -501,7 +502,7 @@ def _miso_spectra_panel(
     result: MISOCoherenceResult,
     freqs: np.ndarray,
     pos: np.ndarray,
-    language: str,
+    language: Language,
 ) -> None:
     """Draw the per-input coherent output spectra with pale opaque fills."""
     output_db = _db10(result.output_psd[pos])
@@ -553,7 +554,7 @@ def _miso_coherence_panel(
     result: MISOCoherenceResult,
     freqs: np.ndarray,
     pos: np.ndarray,
-    language: str,
+    language: Language,
 ) -> None:
     """Draw the multiple coherence over the per-input partial coherences."""
     for i in range(result.n_inputs):
@@ -583,7 +584,7 @@ def plot_miso_coherence(
     result: MISOCoherenceResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Per-input coherent output spectra and the multiple/partial coherences.
@@ -631,7 +632,7 @@ def plot_spectrogram(
     result: SpectrogramResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Spectrogram in dB over the time-frequency plane.
@@ -699,7 +700,7 @@ def plot_zoom_fft(
     result: ZoomFFTResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Zoom power spectrum in dB over the zoom band (linear axis).
@@ -736,7 +737,7 @@ def plot_correlation(
     result: CorrelationResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Correlation estimate against the lag in seconds.
@@ -779,7 +780,7 @@ def plot_time_delay(
     result: TimeDelayResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Correlation function with the estimated delay marked.
@@ -834,7 +835,7 @@ def plot_aligned_impulse_response(
     result: AlignedImpulseResponseResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Reference and aligned impulse responses overlaid.
@@ -870,7 +871,7 @@ def plot_envelope(
     result: EnvelopeResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Signal with its Hilbert envelope, plus the instantaneous frequency.
@@ -930,7 +931,7 @@ def plot_phase_decomposition(
     result: PhaseDecompositionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Magnitude, phase decomposition and group delay of a response.
@@ -1018,12 +1019,12 @@ def plot_tone_burst(
     result: ToneBurstResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Burst waveform with its rectangular gating envelope.
 
-    :param result: A :class:`~phonometry.signals.test_signals.ToneBurstResult`.
+    :param result: A :class:`~phonometry.signals.ToneBurstResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the waveform ``plot`` call.
@@ -1074,7 +1075,7 @@ def plot_resampled_signal(
     result: ResampledSignalResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Anti-alias filter magnitude with the design edges and attenuation.
@@ -1087,7 +1088,7 @@ def plot_resampled_signal(
     anti-alias spec, read off the delivered filter.
 
     :param result: A
-        :class:`~phonometry.signals.test_signals.ResampledSignalResult`.
+        :class:`~phonometry.signals.ResampledSignalResult`.
     :param ax: Existing axes, or ``None`` to create a figure.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the magnitude ``plot`` call.
@@ -1182,7 +1183,7 @@ def plot_cepstrum(
     result: CepstrumResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Cepstrum against quefrency, over the unambiguous first half-axis.
@@ -1213,7 +1214,7 @@ def plot_window_metrics(
     result: WindowMetricsResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Window shape and spectrum with the Harris figures of merit marked.
@@ -1286,7 +1287,11 @@ def plot_window_metrics(
 
 
 def plot_lifter(
-    result: LifterResult, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+    result: LifterResult,
+    ax: Axes | None = None,
+    *,
+    language: Language = "en",
+    **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Real cepstrum with the lifter cutoff, plus the split log spectrum.
 
@@ -1364,7 +1369,7 @@ def plot_echo_detection(
     result: EchoDetectionResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Power cepstrum with the searched band and the detected echo marked.
@@ -1419,7 +1424,7 @@ def plot_envelope_spectrum(
     result: EnvelopeSpectrumResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Detected envelope over time and its amplitude spectrum.
@@ -1480,7 +1485,7 @@ def plot_inverse_filter(
     result: InverseFilterResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
     """Measured, inverse and equalized magnitudes of a regularized inversion.
@@ -1553,7 +1558,7 @@ def plot_synchronous_average(
     result: SynchronousAverageResult,
     ax: Axes | None = None,
     *,
-    language: str = "en",
+    language: Language = "en",
     **kwargs: Any,
 ) -> Axes | np.ndarray:
     """Averaged periodic waveform and the synchronous-averaging comb filter.

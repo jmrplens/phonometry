@@ -90,12 +90,13 @@ from ..._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from ...metrology.reference_values import ISO1683_REFERENCE_VALUES
+from ...metrology.reference_values import REFERENCE_VALUES
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ..._internal.types import BandFraction
 
 __all__ = [
@@ -162,7 +163,7 @@ _SHORT_PULSE_COEFFICIENT: float = 3.9
 #: Hopkins (2007) Table 2.1 gives for structure-borne sound power. ISO 1683
 #: lists no structure-borne power; the number is the airborne 1 pW of its
 #: Table 1, and it is read from there.
-_POWER_REFERENCE: float = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
+_POWER_REFERENCE: float = REFERENCE_VALUES["gas"]["sound_power"].value
 
 #: Constant of ISO 12354-2:2017 Formula (C.2), ``fo = 160 √(s'/m')`` with ``s'``
 #: in MN/m³. The exact mass-spring value is ``1000/(2 π) = 159,15``; the
@@ -631,7 +632,7 @@ class TappingForceResult(OwnsArrays):
         return np.asarray(10.0 * np.log10(self.power_input / _POWER_REFERENCE))
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the force spectrum ``|Fn|`` with its asymptotes and ``fco``.
 
@@ -842,7 +843,7 @@ class CoveringImprovementResult(OwnsArrays):
             )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``ΔL(f)`` from the force ratio beside the two-line estimate.
 
@@ -1134,7 +1135,7 @@ class FloatingFloorImprovementResult(OwnsArrays):
     frequencies: np.ndarray
     improvement: np.ndarray
     resonance_frequency: float
-    model: str
+    model: Literal["en12354", "cremer", "cremer_hammer"]
     slope: float
     limiting_frequency: float | None = None
     delta_lw: float | None = None
@@ -1155,7 +1156,7 @@ class FloatingFloorImprovementResult(OwnsArrays):
         require_same_length(self, "frequencies", "improvement")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot ``ΔL(f)`` with the resonance and the asymptotic slope marked.
 

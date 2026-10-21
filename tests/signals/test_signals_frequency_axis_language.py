@@ -34,6 +34,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
+    from phonometry.signals import ResampledSignalResult
     from phonometry.signals.inversion import InverseFilterResult
     from phonometry.signals.miso import MISOCoherenceResult
     from phonometry.signals.multitaper import MultitaperSpectralDensityResult
@@ -43,7 +44,6 @@ if TYPE_CHECKING:
         CrossSpectralDensityResult,
         SpectralDensityResult,
     )
-    from phonometry.signals.test_signals import ResampledSignalResult
 
     Drawn = Axes | NDArray[Any]
 
@@ -100,7 +100,7 @@ def _resampled_signal() -> ResampledSignalResult:
     # 4 kHz down to 200 Hz puts the stopband edge at 100 Hz, and the view runs
     # from an eighth of it (12,5 Hz) to four times it.
     return ph.signals.resample_signal(
-        ph.signals.noise_signal(4000.0, 1.0, seed=5), 4000.0, fs_new=200.0
+        ph.signals.noise_signal(4000.0, duration_s=1.0, seed=5), 4000.0, fs_new=200.0
     )
 
 

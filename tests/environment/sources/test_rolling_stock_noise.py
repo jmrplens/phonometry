@@ -164,7 +164,10 @@ def test_table_g2_is_reproduced() -> None:
     """55,68 dB, u_c = 0,83 dB and U = 1,66 dB, from the printed rows."""
     budget = pass_by_uncertainty(
         ref.TABLE_G2_READING_DB,
-        [metrology.Quantity(v, u, name=n) for n, v, u in ref.TABLE_G2_ROWS],
+        [
+            metrology.Quantity(value=v, uncertainty=u, name=n)
+            for n, v, u in ref.TABLE_G2_ROWS
+        ],
     )
     assert budget.level == pytest.approx(ref.TABLE_G2_LEVEL_DB, abs=1e-12)
     assert (
@@ -179,7 +182,10 @@ def test_figure_g1_draws_the_shares_largest_first() -> None:
     """Sorted by share, ties kept in Table G.2 order, the budget is Figure G.1."""
     budget = pass_by_uncertainty(
         ref.TABLE_G2_READING_DB,
-        [metrology.Quantity(v, u, name=n) for n, v, u in ref.TABLE_G2_ROWS],
+        [
+            metrology.Quantity(value=v, uncertainty=u, name=n)
+            for n, v, u in ref.TABLE_G2_ROWS
+        ],
     )
     ranked = sorted(
         budget.variance_ratios, key=lambda name: -budget.variance_ratios[name]
@@ -1527,8 +1533,8 @@ def test_a_test_plot_is_titled_with_its_method_in_words(
 def test_two_inputs_of_the_same_name_are_refused() -> None:
     """Each input has its own share of the variance, so each needs a name of its own."""
     inputs = [
-        metrology.Quantity(0.0, 0.1, name="distance"),
-        metrology.Quantity(0.0, 0.2, name="distance"),
+        metrology.Quantity(value=0.0, uncertainty=0.1, name="distance"),
+        metrology.Quantity(value=0.0, uncertainty=0.2, name="distance"),
     ]
     with pytest.raises(ValueError, match="needs a name of its own.*repeated: distance"):
         pass_by_uncertainty(55.0, inputs)
@@ -1549,7 +1555,10 @@ def test_an_unnamed_input_never_takes_a_name_given_to_another(
     """An input without a name is called by its place, primed when that name was given to another."""
     budget = pass_by_uncertainty(
         55.0,
-        [metrology.Quantity(0.0, 0.1 * (i + 1), name=n) for i, n in enumerate(names)],
+        [
+            metrology.Quantity(value=0.0, uncertainty=0.1 * (i + 1), name=n)
+            for i, n in enumerate(names)
+        ],
     )
     assert budget.names == expected
     assert tuple(budget.variance_ratios) == expected
@@ -1559,7 +1568,10 @@ def test_the_uncertainty_plot_is_figure_g1() -> None:
     """The bars are drawn in the order Figure G.1 prints its labels."""
     budget = pass_by_uncertainty(
         ref.TABLE_G2_READING_DB,
-        [metrology.Quantity(v, u, name=n) for n, v, u in ref.TABLE_G2_ROWS],
+        [
+            metrology.Quantity(value=v, uncertainty=u, name=n)
+            for n, v, u in ref.TABLE_G2_ROWS
+        ],
     )
     ax = budget.plot()
     labels = tuple(t.get_text() for t in ax.get_xticklabels())

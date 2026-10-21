@@ -853,7 +853,7 @@ class Module:
         self._cut = self._cut or outer_cut
         return result
 
-    def value(self, node: ast.AST, context: Context) -> Value:  # noqa: C901, PLR0911, PLR0912
+    def value(self, node: ast.AST, context: Context) -> Value:
         """What an expression evaluated in ``context`` can be."""
         number = literal_number(node) if isinstance(node, ast.expr) else None
         if number is not None:
@@ -1252,7 +1252,7 @@ class Module:
 
         return self._guarded(("returns", context), compute)
 
-    def call(self, node: ast.Call, context: Context) -> Value:  # noqa: PLR0911
+    def call(self, node: ast.Call, context: Context) -> Value:
         """A call: settling, selecting, computing, fitting, counting, or this file's."""
         name = call_name(node)
         if name in SETTLING:

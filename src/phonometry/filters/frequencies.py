@@ -297,6 +297,7 @@ def _infer_band_fraction(frequency: np.ndarray) -> int:
     report fiche so they classify a band set identically.
     """
     freq = np.asarray(frequency, dtype=np.float64)
+    # The fewest values the step below can work with, not a quantity.
     if freq.size < 2:  # noqa: PLR2004
         return 1
     return 1 if float(freq[1] / freq[0]) > _OCTAVE_SPACING_MIN_RATIO else 3

@@ -45,7 +45,9 @@ def _at(spectrum: ShipTrafficSpectrum, freq: float) -> tuple[float, float]:
 
 
 def test_jomopans_echo_matches_reference_calculator() -> None:
-    s = ship_source_spectrum(13.5, 211.0, vessel_class="bulker", model="jomopans-echo")
+    s = ship_source_spectrum(
+        13.5, length_m=211.0, vessel_class="bulker", model="jomopans-echo"
+    )
     assert isinstance(s, ShipTrafficSpectrum)
     for freq, psd_o, band_o in _ECHO_ORACLE:
         psd, band = _at(s, freq)
@@ -54,8 +56,8 @@ def test_jomopans_echo_matches_reference_calculator() -> None:
 
 
 def test_jomopans_echo_faster_ship_is_louder() -> None:
-    slow = ship_source_spectrum(10.0, 200.0, vessel_class="containership")
-    fast = ship_source_spectrum(20.0, 200.0, vessel_class="containership")
+    slow = ship_source_spectrum(10.0, length_m=200.0, vessel_class="containership")
+    fast = ship_source_spectrum(20.0, length_m=200.0, vessel_class="containership")
     # 60*log10(V/Vc): +60*log10(2) ~ 18 dB louder at double the speed.
     assert np.all(fast.source_psd > slow.source_psd)
     assert float(np.mean(fast.source_psd - slow.source_psd)) == pytest.approx(
@@ -65,14 +67,14 @@ def test_jomopans_echo_faster_ship_is_louder() -> None:
 
 def test_cargo_low_frequency_hump_present() -> None:
     # Cargo vessels have an extra LF peak below 100 Hz; a tug (non-cargo) does not.
-    bulker = ship_source_spectrum(13.9, 200.0, vessel_class="bulker")
+    bulker = ship_source_spectrum(13.9, length_m=200.0, vessel_class="bulker")
     # Peak of the spectrum sits below 100 Hz for the cargo hump.
     peak_f = float(bulker.frequencies[int(np.argmax(bulker.source_psd))])
     assert peak_f < 100.0
 
 
 def test_randi_and_wales_heitmeyer_run() -> None:
-    r = ship_source_spectrum(15.0, 250.0, model="randi")
+    r = ship_source_spectrum(15.0, length_m=250.0, model="randi")
     w = ship_source_spectrum(model="wales-heitmeyer")
     assert r.vessel_class is None
     assert w.speed_kt is None
@@ -127,8 +129,8 @@ def test_wales_heitmeyer_printed_asymptotes() -> None:
 
 
 def test_wales_heitmeyer_ignores_speed_and_length() -> None:
-    a = ship_source_spectrum(5.0, 100.0, model="wales-heitmeyer")
-    b = ship_source_spectrum(25.0, 400.0, model="wales-heitmeyer")
+    a = ship_source_spectrum(5.0, length_m=100.0, model="wales-heitmeyer")
+    b = ship_source_spectrum(25.0, length_m=400.0, model="wales-heitmeyer")
     assert np.allclose(a.source_psd, b.source_psd)
 
 
@@ -140,18 +142,18 @@ def test_vessel_classes_exposed() -> None:
 
 def test_unknown_class_and_model_rejected() -> None:
     with pytest.raises(ValueError, match=r"'vessel_class' must be one of"):
-        ship_source_spectrum(12.0, 100.0, vessel_class="submarine")
+        ship_source_spectrum(12.0, length_m=100.0, vessel_class="submarine")
     with pytest.raises(ValueError, match=r"'model' must be one of"):
-        ship_source_spectrum(12.0, 100.0, model="urick")
+        ship_source_spectrum(12.0, length_m=100.0, model="urick")
 
 
 def test_a_frequency_that_is_not_positive_is_named_by_its_parameter() -> None:
     with pytest.raises(ValueError, match=r"'frequencies' must be"):
-        ship_source_spectrum(12.0, 100.0, frequencies=[100.0, -1.0])
+        ship_source_spectrum(12.0, length_m=100.0, frequencies=[100.0, -1.0])
 
 
 def test_ship_traffic_plot_smoke() -> None:
-    s = ship_source_spectrum(18.0, 300.0, vessel_class="containership")
+    s = ship_source_spectrum(18.0, length_m=300.0, vessel_class="containership")
     assert s.plot() is not None
 
 
@@ -224,7 +226,7 @@ def test_jomopans_echo_tracks_overseas_harriette_at_speed(
     # oracle.
     res = ship_source_spectrum(
         speed_kn,
-        173.0,
+        length_m=173.0,
         vessel_class="bulker",
         frequencies=_HARRIETTE_FREQS,
     )
@@ -241,7 +243,7 @@ def test_jomopans_echo_overseas_harriette_low_speed_mean() -> None:
     # standard deviation).
     res = ship_source_spectrum(
         8.0,
-        173.0,
+        length_m=173.0,
         vessel_class="bulker",
         frequencies=_HARRIETTE_FREQS,
     )

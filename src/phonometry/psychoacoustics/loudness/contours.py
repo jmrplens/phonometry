@@ -25,6 +25,8 @@ if TYPE_CHECKING:
 
     from matplotlib.axes import Axes
 
+    from ..._i18n import Language
+
 __all__ = [
     "EqualLoudnessContours",
     "equal_loudness_contour",
@@ -134,7 +136,7 @@ class LoudnessContour(OwnsArrays):
     phon: float | None
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the levels against frequency on a logarithmic axis.
 
@@ -275,7 +277,7 @@ class EqualLoudnessContours(OwnsArrays):
         require_same_length(self, "phons", ("contours", 0), axis="loudness level")
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the equal-loudness contour family with the hearing threshold.
 

@@ -128,7 +128,7 @@ SpectrogramResult(
     window: str,
     nperseg: int,
     overlap: float,
-    scaling: str,
+    scaling: Literal['density', 'spectrum'],
 )
 ```
 
@@ -157,7 +157,7 @@ Calibrated STFT power spectrogram (B&P Section 12.6.4.2).
 SpectrogramResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -262,7 +262,7 @@ Narrow-band zoom spectrum on a fine frequency grid (B&P 11.5.4).
 ZoomFFTResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```

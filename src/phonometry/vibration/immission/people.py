@@ -78,7 +78,7 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
@@ -104,6 +104,23 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
+
+    from ..._i18n import Language
+
+TimeOfDay = Literal["day", "night"]
+Edition = Literal["1999", "2023"]
+Source = Literal[
+    "general",
+    "road",
+    "railway",
+    "urban_railway",
+    "quarry_blasting",
+    "road_existing",
+    "induced_seismic",
+]
+
+#: The areas of Table 1, by use.
+Area = Literal["industrial", "commercial", "mixed", "residential", "sensitive"]
 
 __all__ = [
     "ASSESSMENT_PERIOD_S",
@@ -219,7 +236,7 @@ ROAD_EXISTING_TOLERANCE_FACTOR: float = 1.5
 INDUCED_SEISMIC_PEAK_FACTOR: float = 0.44
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class GuideValues(RichDisplay):
     r"""One row of Table 1 or Table 2 for one period: the three guide values.
 
@@ -239,8 +256,8 @@ class GuideValues(RichDisplay):
     a_u: float
     a_o: float
     a_r: float
-    time_of_day: str = "day"
-    edition: str = "1999"
+    time_of_day: TimeOfDay = "day"
+    edition: Edition = "1999"
 
 
 #: Table 1 (printed page 6): the guide values by kind of area, keyed by the
@@ -250,36 +267,36 @@ class GuideValues(RichDisplay):
 #: (neither mainly commercial nor mainly dwellings: core, mixed and village
 #: areas), ``"residential"`` row 4 (mainly or only dwellings, small
 #: settlements) and ``"sensitive"`` row 5 (hospitals, spas and the like).
-GUIDE_VALUES: Mapping[str, Mapping[str, GuideValues]] = MappingProxyType(
+GUIDE_VALUES: Mapping[Area, Mapping[TimeOfDay, GuideValues]] = MappingProxyType(
     {
         "industrial": MappingProxyType(
             {
-                "day": GuideValues(0.4, 6.0, 0.2),
-                "night": GuideValues(0.3, 0.6, 0.15, time_of_day="night"),
+                "day": GuideValues(a_u=0.4, a_o=6.0, a_r=0.2),
+                "night": GuideValues(a_u=0.3, a_o=0.6, a_r=0.15, time_of_day="night"),
             }
         ),
         "commercial": MappingProxyType(
             {
-                "day": GuideValues(0.3, 6.0, 0.15),
-                "night": GuideValues(0.2, 0.4, 0.1, time_of_day="night"),
+                "day": GuideValues(a_u=0.3, a_o=6.0, a_r=0.15),
+                "night": GuideValues(a_u=0.2, a_o=0.4, a_r=0.1, time_of_day="night"),
             }
         ),
         "mixed": MappingProxyType(
             {
-                "day": GuideValues(0.2, 5.0, 0.1),
-                "night": GuideValues(0.15, 0.3, 0.07, time_of_day="night"),
+                "day": GuideValues(a_u=0.2, a_o=5.0, a_r=0.1),
+                "night": GuideValues(a_u=0.15, a_o=0.3, a_r=0.07, time_of_day="night"),
             }
         ),
         "residential": MappingProxyType(
             {
-                "day": GuideValues(0.15, 3.0, 0.07),
-                "night": GuideValues(0.1, 0.2, 0.05, time_of_day="night"),
+                "day": GuideValues(a_u=0.15, a_o=3.0, a_r=0.07),
+                "night": GuideValues(a_u=0.1, a_o=0.2, a_r=0.05, time_of_day="night"),
             }
         ),
         "sensitive": MappingProxyType(
             {
-                "day": GuideValues(0.1, 3.0, 0.05),
-                "night": GuideValues(0.1, 0.15, 0.05, time_of_day="night"),
+                "day": GuideValues(a_u=0.1, a_o=3.0, a_r=0.05),
+                "night": GuideValues(a_u=0.1, a_o=0.15, a_r=0.05, time_of_day="night"),
             }
         ),
     }
@@ -288,19 +305,23 @@ GUIDE_VALUES: Mapping[str, Mapping[str, GuideValues]] = MappingProxyType(
 #: Table 1 of E DIN 4150-2:2023-08 (printed page 14): the same thirty cells
 #: as :data:`GUIDE_VALUES` but one, the night :math:`A_\mathrm{u}` of row 3, the mixed
 #: area, down from 0,15 to 0,1; the row now names urban areas too.
-GUIDE_VALUES_2023: Mapping[str, Mapping[str, GuideValues]] = MappingProxyType(
+GUIDE_VALUES_2023: Mapping[Area, Mapping[TimeOfDay, GuideValues]] = MappingProxyType(
     {
         area: MappingProxyType(
             {
                 "day": GuideValues(
-                    row["day"].a_u, row["day"].a_o, row["day"].a_r, "day", "2023"
+                    a_u=row["day"].a_u,
+                    a_o=row["day"].a_o,
+                    a_r=row["day"].a_r,
+                    time_of_day="day",
+                    edition="2023",
                 ),
                 "night": GuideValues(
-                    0.1 if area == "mixed" else row["night"].a_u,
-                    row["night"].a_o,
-                    row["night"].a_r,
-                    "night",
-                    "2023",
+                    a_u=0.1 if area == "mixed" else row["night"].a_u,
+                    a_o=row["night"].a_o,
+                    a_r=row["night"].a_r,
+                    time_of_day="night",
+                    edition="2023",
                 ),
             }
         )
@@ -324,23 +345,23 @@ CONSTRUCTION_GUIDE_VALUES: Mapping[str, Mapping[int, GuideValues]] = MappingProx
     {
         "I": MappingProxyType(
             {
-                1: GuideValues(0.8, 5.0, 0.4),
-                26: GuideValues(0.4, 5.0, 0.3),
-                78: GuideValues(0.3, 5.0, 0.2),
+                1: GuideValues(a_u=0.8, a_o=5.0, a_r=0.4),
+                26: GuideValues(a_u=0.4, a_o=5.0, a_r=0.3),
+                78: GuideValues(a_u=0.3, a_o=5.0, a_r=0.2),
             }
         ),
         "II": MappingProxyType(
             {
-                1: GuideValues(1.2, 5.0, 0.8),
-                26: GuideValues(0.8, 5.0, 0.6),
-                78: GuideValues(0.6, 5.0, 0.4),
+                1: GuideValues(a_u=1.2, a_o=5.0, a_r=0.8),
+                26: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6),
+                78: GuideValues(a_u=0.6, a_o=5.0, a_r=0.4),
             }
         ),
         "III": MappingProxyType(
             {
-                1: GuideValues(1.6, 5.0, 1.2),
-                26: GuideValues(1.2, 5.0, 1.0),
-                78: GuideValues(0.8, 5.0, 0.6),
+                1: GuideValues(a_u=1.6, a_o=5.0, a_r=1.2),
+                26: GuideValues(a_u=1.2, a_o=5.0, a_r=1.0),
+                78: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6),
             }
         ),
     }
@@ -360,8 +381,8 @@ PEAK_TO_KB_FACTORS: Mapping[str, float] = MappingProxyType(
     }
 )
 
-_PERIODS = tuple(ASSESSMENT_PERIOD_S)
-_AREAS = tuple(GUIDE_VALUES)
+_PERIODS: tuple[TimeOfDay, ...] = ("day", "night")
+_AREAS: tuple[Area, ...] = tuple(GUIDE_VALUES)
 _SOURCES = ("general", "road", "railway", "urban_railway", "quarry_blasting")
 _RAILWAYS = ("railway", "urban_railway")
 _ROADS = ("road", "road_existing")
@@ -386,7 +407,7 @@ _EDITIONS = ("1999", "2023")
 #: The areas of Table 1 rows 3 and 4, where quarry blasting under the
 #: conditions of 6.5.1 is held to the :math:`A_\mathrm{o}` of row 1.
 _QUARRY_BLASTING_AREAS = ("mixed", "residential")
-_ROW_1 = "industrial"
+_ROW_1: Area = "industrial"
 #: The decimals a raised guide value keeps: 1,5 times a two-decimal value.
 _RAISED_DECIMALS = 3
 _CONSTRUCTION_AREAS = ("commercial", "industrial")
@@ -436,11 +457,11 @@ def _keeps_to(value: float, guide: float) -> bool:
 
 
 def guide_values(
-    area: str,
+    area: Area,
     *,
-    time_of_day: str = "day",
-    source: str = "general",
-    edition: str = "1999",
+    time_of_day: TimeOfDay = "day",
+    source: Source = "general",
+    edition: Edition = "1999",
 ) -> GuideValues:
     r"""The guide values of Table 1 for one area, time of day and kind of source.
 
@@ -479,18 +500,24 @@ def guide_values(
         # and not a float with a tail the verdict would then round anyway.
         factor = _RAISED_SOURCES[kind]
         return GuideValues(
-            round(values.a_u * factor, _RAISED_DECIMALS),
-            values.a_o,
-            round(values.a_r * factor, _RAISED_DECIMALS),
-            values.time_of_day,
-            values.edition,
+            a_u=round(values.a_u * factor, _RAISED_DECIMALS),
+            a_o=values.a_o,
+            a_r=round(values.a_r * factor, _RAISED_DECIMALS),
+            time_of_day=values.time_of_day,
+            edition=values.edition,
         )
     a_o = values.a_o
     if kind == "induced_seismic" and which == "night":
         a_o = row["day"].a_o
     if kind == "quarry_blasting" and which == "day" and area in _QUARRY_BLASTING_AREAS:
         a_o = table[_ROW_1][which].a_o
-    return GuideValues(values.a_u, a_o, values.a_r, values.time_of_day, values.edition)
+    return GuideValues(
+        a_u=values.a_u,
+        a_o=a_o,
+        a_r=values.a_r,
+        time_of_day=values.time_of_day,
+        edition=values.edition,
+    )
 
 
 def induced_seismic_kb_fmax(peak_velocity_mm_s: float) -> float:
@@ -524,7 +551,10 @@ def _interpolated(low: float, high: float, days: int) -> float:
 
 
 def construction_guide_values(
-    duration_days: int, *, stage: str = "I", area: str = "residential"
+    duration_days: int,
+    *,
+    stage: Literal["I", "II", "III"] = "I",
+    area: Area = "residential",
 ) -> GuideValues:
     r"""The daytime guide values of Table 2 for a construction site (6.5.4.2).
 
@@ -572,13 +602,13 @@ def construction_guide_values(
         column = one_day
     elif days < next_column:
         return GuideValues(
-            _interpolated(one_day.a_u, to_26.a_u, days),
-            a_o,
-            _interpolated(one_day.a_r, to_26.a_r, days),
+            a_u=_interpolated(one_day.a_u, to_26.a_u, days),
+            a_o=a_o,
+            a_r=_interpolated(one_day.a_r, to_26.a_r, days),
         )
     else:
         column = to_26 if days <= _CONSTRUCTION_MIDDLE_DAYS else to_78
-    return GuideValues(column.a_u, a_o, column.a_r)
+    return GuideValues(a_u=column.a_u, a_o=a_o, a_r=column.a_r)
 
 
 def _exposures(
@@ -600,7 +630,7 @@ def assessment_vibration_severity(
     kb_ftm: ArrayLike,
     exposure_s: ArrayLike,
     *,
-    time_of_day: str = "day",
+    time_of_day: TimeOfDay = "day",
     in_rest_time: ArrayLike | None = None,
 ) -> float:
     r"""The assessment vibration severity :math:`KB_\mathrm{FTr}`, Formulae (4) and (5).
@@ -650,7 +680,7 @@ def assessment_vibration_severity(
 
 
 def admissible_exposure_s(
-    kb_ftm: float, a_r: float, *, time_of_day: str = "day"
+    kb_ftm: float, a_r: float, *, time_of_day: TimeOfDay = "day"
 ) -> float:
     r"""How long a source may act before :math:`KB_\mathrm{FTr}` reaches :math:`A_\mathrm{r}`.
 
@@ -761,14 +791,14 @@ class RailwayAssessment(OwnsArrays):
     occupied_takte: NDArray[np.int64]
     lower: float | None
     upper: float | None
-    time_of_day: str
+    time_of_day: TimeOfDay
 
 
 def railway_assessment_severity(
     kb_ftm: ArrayLike,
     occupied_takte: ArrayLike,
     *,
-    time_of_day: str = "day",
+    time_of_day: TimeOfDay = "day",
     spread: ArrayLike | None = None,
 ) -> RailwayAssessment:
     r"""The assessment vibration severity of a railway, Formulae (A.3) and (A.4).
@@ -856,7 +886,17 @@ def kb_from_peak_velocity(peak_velocity_mm_s: float, frequency_hz: float) -> flo
 
 
 def kb_fmax_from_peak_velocity(
-    peak_velocity_mm_s: float, frequency_hz: float, *, kind: str
+    peak_velocity_mm_s: float,
+    frequency_hz: float,
+    *,
+    kind: Literal[
+        "harmonic",
+        "harmonic_distorted",
+        "stochastic_resonant",
+        "stochastic",
+        "single_event_resonant",
+        "single_event",
+    ],
 ) -> float:
     r"""An estimate of :math:`KB_\mathrm{Fmax}` from an unweighted record, Formula (7).
 
@@ -951,7 +991,7 @@ class PeopleAssessment(RichDisplay):
         return _people_verdict(self)[2]
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the two assessment quantities against the three guide values.
 
@@ -1051,9 +1091,9 @@ def assess_people_in_buildings(
     guide: GuideValues,
     *,
     kb_ftr: float | None = None,
-    source: str = "general",
+    source: Source = "general",
     rare_short_events: bool = False,
-    edition: str | None = None,
+    edition: Edition | None = None,
 ) -> PeopleAssessment:
     r"""Read the guide values in the order of Clause 6.2 (Figure 2).
 

@@ -84,7 +84,7 @@ def characteristic_impedance(density: float, speed_of_sound: float) -> float:
     )
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True, kw_only=True)
 class Fluid(RichDisplay):
     """One fluid at one state, and the properties its model fixed there.
 

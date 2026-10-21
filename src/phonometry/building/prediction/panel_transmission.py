@@ -88,7 +88,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy.integrate import quad
@@ -116,6 +116,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
+    from ..._i18n import Language
     from ..._internal.types import BandFraction
     from ..._report.metadata import ReportMetadata
     from ...fluids import Fluid
@@ -153,6 +154,11 @@ def _plateau_constants() -> dict[str, tuple[float, float, float]]:
         constants[row.name.casefold()] = (density, height, ratio)
     return constants
 
+
+#: A material of Norton & Karczub (2003) Table 3.1, by its lower-case name.
+PlateauMaterialName = Literal[
+    "aluminium", "brick", "concrete", "glass", "lead", "plaster", "plywood", "steel"
+]
 
 #: Norton & Karczub (2003) Table 3.1, PDF page 261 (printed p. 241):
 #: plateau-method data for common materials, as ``(surface density in kg/m2
@@ -223,7 +229,7 @@ def mass_law_transmission_loss(
     frequency: ArrayLike,
     mass_per_area: float,
     *,
-    incidence: str = "field",
+    incidence: Literal["normal", "field"] = "field",
     fraction: BandFraction = 3,
     field_correction: float | None = None,
     fluid: Fluid = ABSORBER_AIR,
@@ -278,7 +284,7 @@ def _resolve_field_correction(fraction: BandFraction, override: float | None) ->
     return value
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class SoundReductionResult(OwnsArrays):
     """Predicted airborne sound reduction index ``R(f)`` of a construction.
 
@@ -308,7 +314,14 @@ class SoundReductionResult(OwnsArrays):
 
     frequencies: np.ndarray
     transmission_loss: np.ndarray
-    model: str
+    model: Literal[
+        "sharp-single",
+        "cremer-single",
+        "plateau",
+        "orthotropic-integral",
+        "orthotropic-heckl",
+        "double-wall",
+    ]
     critical_frequency: float | None = None
     resonance_frequency: float | None = None
     mass1: float | None = None
@@ -365,7 +378,7 @@ class SoundReductionResult(OwnsArrays):
         path: str,
         *,
         metadata: ReportMetadata | None = None,
-        language: str = "en",
+        language: Language = "en",
         **kwargs: Any,
     ) -> str:
         """Render the ISO 717-1 Annex C rating fiche of ``R(f)`` to a PDF.
@@ -390,7 +403,7 @@ class SoundReductionResult(OwnsArrays):
         )
 
     def plot(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Plot the predicted sound reduction index ``R(f)``.
 
@@ -404,7 +417,7 @@ class SoundReductionResult(OwnsArrays):
         return plot_sound_reduction(self, ax=ax, language=language, **kwargs)
 
     def plot_geometry(
-        self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
+        self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
         """Draw the mass-spring-mass cross-section to scale.
 
@@ -430,7 +443,7 @@ def single_panel_transmission_loss(
     bending_stiffness: float | None = None,
     loss_factor: float = 0.01,
     fraction: BandFraction = 3,
-    coincidence_model: str = "sharp",
+    coincidence_model: Literal["sharp", "cremer"] = "sharp",
     field_correction: float | None = None,
     fluid: Fluid = ABSORBER_AIR,
 ) -> SoundReductionResult:
@@ -677,7 +690,7 @@ def _resolve_plateau_panel(
 def plateau_transmission_loss(
     frequency: ArrayLike,
     *,
-    material: str | PlateauMaterial,
+    material: PlateauMaterialName | PlateauMaterial,
     thickness_mm: float,
     plateau_height_db: float | None = ...,
     frequency_ratio: float | None = ...,
@@ -690,7 +703,7 @@ def plateau_transmission_loss(
 def plateau_transmission_loss(
     frequency: ArrayLike,
     *,
-    material: str | PlateauMaterial,
+    material: PlateauMaterialName | PlateauMaterial,
     mass_per_area: float,
     thickness_mm: float | None = ...,
     plateau_height_db: float | None = ...,
@@ -715,7 +728,7 @@ def plateau_transmission_loss(
 def plateau_transmission_loss(
     frequency: ArrayLike,
     *,
-    material: str | PlateauMaterial | None = None,
+    material: PlateauMaterialName | PlateauMaterial | None = None,
     thickness_mm: float | None = None,
     mass_per_area: float | None = None,
     plateau_height_db: float | None = None,
@@ -1200,7 +1213,7 @@ def orthotropic_transmission_loss(
     critical_frequency_lower: float,
     critical_frequency_upper: float,
     loss_factor: float = 0.01,
-    method: str = "integral",
+    method: Literal["integral", "heckl"] = "integral",
     area: float | None = None,
     limiting_angle_deg: float = 78.0,
     fraction: BandFraction = 3,

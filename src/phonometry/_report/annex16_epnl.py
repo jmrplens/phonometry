@@ -56,6 +56,7 @@ from ._layout import (
 )
 
 if TYPE_CHECKING:
+    from .._i18n import Language
     from ..aircraft.certification import EPNLResult
     from .metadata import ReportMetadata
 
@@ -67,7 +68,7 @@ _DB_EPS = 1e-9
 
 
 def _metadata_pairs(
-    metadata: ReportMetadata, language: str = "en"
+    metadata: ReportMetadata, language: Language = "en"
 ) -> list[tuple[str, str]]:
     """Build the ordered (label, value) pairs of the certification header grid.
 
@@ -88,7 +89,9 @@ def _metadata_pairs(
     ]
 
 
-def _metric_rows(result: EPNLResult, language: str = "en") -> list[tuple[str, str]]:
+def _metric_rows(
+    result: EPNLResult, language: Language = "en"
+) -> list[tuple[str, str]]:
     """The intermediate EPNL quantities shown in the left-hand metrics table.
 
     These are informational: PNLTM, the duration correction ``D``, the 10
@@ -117,7 +120,7 @@ def _metric_rows(result: EPNLResult, language: str = "en") -> list[tuple[str, st
     return rows
 
 
-def _statement(result: EPNLResult, language: str = "en") -> str:
+def _statement(result: EPNLResult, language: Language = "en") -> str:
     """The boxed single-number statement ``EPNL = X EPNdB``.
 
     Annex 16 determines the EPNL to one decimal place, so the displayed value
@@ -129,7 +132,7 @@ def _statement(result: EPNLResult, language: str = "en") -> str:
 
 
 def _verdict_rows(
-    result: EPNLResult, limit: float, language: str = "en"
+    result: EPNLResult, limit: float, language: Language = "en"
 ) -> list[tuple[str, str, str, str]]:
     """The Level | Limit | Margin compliance row for a supplied EPNL limit.
 
@@ -162,7 +165,7 @@ def render_annex16_epnl_report(
     *,
     metadata: ReportMetadata | None = None,
     verbose: bool = False,
-    language: str = "en",
+    language: Language = "en",
 ) -> str:
     """Render an ICAO Annex 16 EPNL certification fiche to a PDF at ``path``.
 

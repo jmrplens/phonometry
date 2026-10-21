@@ -72,7 +72,7 @@ import struct
 import warnings
 from dataclasses import replace
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy.io import wavfile
@@ -105,6 +105,9 @@ class ClippingWarning(PhonometryWarning):
 #: 0x0001 PCM, 0x0003 IEEE float. The subtype names follow libsndfile's
 #: identifiers so the same vocabulary serves the base writer and the
 #: ``[audio]`` extra.
+#: The WAV sample formats the writer offers.
+Subtype = Literal["PCM_16", "PCM_24", "PCM_32", "FLOAT", "DOUBLE"]
+
 _SUBTYPE_SPEC: dict[str, tuple[int, int]] = {
     "PCM_16": (0x0001, 2),
     "PCM_24": (0x0001, 3),
@@ -112,6 +115,9 @@ _SUBTYPE_SPEC: dict[str, tuple[int, int]] = {
     "FLOAT": (0x0003, 4),
     "DOUBLE": (0x0003, 8),
 }
+
+#: The subtypes, as the choice a caller makes.
+_SUBTYPES: tuple[Subtype, ...] = ("PCM_16", "PCM_24", "PCM_32", "FLOAT", "DOUBLE")
 
 #: Bytes per sample of PCM_16, read from ``_SUBTYPE_SPEC`` so the value keeps
 #: living in one place: the per-sample width that separates the two
@@ -126,7 +132,10 @@ _WAV_SUFFIXES = frozenset({".wav", ".wave", ".bwf"})
 
 #: numpy integer dtypes accepted for bit-exact pass-through, and the
 #: subtype their codes are.
-_PASSTHROUGH_SUBTYPES = {np.dtype(np.int16): "PCM_16", np.dtype(np.int32): "PCM_32"}
+_PASSTHROUGH_SUBTYPES: dict[np.dtype[Any], Subtype] = {
+    np.dtype(np.int16): "PCM_16",
+    np.dtype(np.int32): "PCM_32",
+}
 
 #: Fourcc of the classic 32-bit WAV container: this file's declared size is
 #: the uint32 at offset 4, unlike RF64/BW64 whose real size is the uint64
@@ -165,13 +174,14 @@ def _resolve_input(
     if data.dtype not in _PASSTHROUGH_SUBTYPES:
         data = np.asarray(data, dtype=np.float64)
     data = np.atleast_2d(data)
+    # The number is a count of array axes, not a quantity.
     if data.ndim != 2:  # noqa: PLR2004
         msg = f"x must be 1-D or (channels, samples); got {data.ndim}-D"
         raise ValueError(msg)
     return data, require_count(fs, "fs", at_least=None)
 
 
-def _resolve_subtype(data: np.ndarray, subtype: str | None) -> str:
+def _resolve_subtype(data: np.ndarray, subtype: str | None) -> Subtype:
     """Pick or validate the subtype for the resolved input data.
 
     Float data defaults to ``FLOAT``: float32 represents every sample that
@@ -200,7 +210,7 @@ def _resolve_subtype(data: np.ndarray, subtype: str | None) -> str:
         raise TypeError(msg)
     if subtype is None:
         return "FLOAT"
-    if subtype not in _SUBTYPE_SPEC:
+    if subtype not in _SUBTYPES:
         msg = (
             f"unknown subtype {subtype!r}; the WAV writer offers "
             f"{sorted(_SUBTYPE_SPEC)}"
@@ -708,8 +718,8 @@ def write(
     x: Signal | NDArray[np.generic] | list[float],
     fs: int | None = ...,
     *,
-    subtype: str | None = ...,
-    bext: BroadcastMetadata | str | None = ...,
+    subtype: Subtype | None = ...,
+    bext: BroadcastMetadata | Literal["loudness"] | None = ...,
     dither: Literal["tpdf"],
     rng: np.random.Generator | int | None = ...,
     sidecar: bool = ...,
@@ -722,8 +732,8 @@ def write(
     x: Signal | NDArray[np.generic] | list[float],
     fs: int | None = ...,
     *,
-    subtype: str | None = ...,
-    bext: BroadcastMetadata | str | None = ...,
+    subtype: Subtype | None = ...,
+    bext: BroadcastMetadata | Literal["loudness"] | None = ...,
     sidecar: bool = ...,
 ) -> None: ...
 
@@ -733,9 +743,9 @@ def write(
     x: Signal | NDArray[np.generic] | list[float],
     fs: int | None = None,
     *,
-    subtype: str | None = None,
-    bext: BroadcastMetadata | str | None = None,
-    dither: str | None = None,
+    subtype: Subtype | None = None,
+    bext: BroadcastMetadata | Literal["loudness"] | None = None,
+    dither: Literal["tpdf"] | None = None,
     rng: np.random.Generator | int | None = None,
     sidecar: bool = False,
 ) -> None:

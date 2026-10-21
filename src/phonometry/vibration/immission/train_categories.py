@@ -56,7 +56,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
@@ -71,6 +71,7 @@ from .people import (
     _PERIODS,
     ASSESSMENT_TAKT_COUNT,
     GUIDE_VALUES_2023,
+    Area,
     GuideValues,
     _keeps_to,
 )
@@ -80,6 +81,9 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Mapping
 
     from numpy.typing import ArrayLike, NDArray
+
+TimeOfDay = Literal["day", "night"]
+Alignment = Literal["surface", "underground"]
 
 __all__ = [
     "RAILWAY_CHANGE_TOLERANCE_PERCENT",
@@ -102,10 +106,13 @@ __all__ = [
 #: Formula (10) is the same number.
 TRAIN_KB_FMAX_FACTOR: float = 1.5
 
+#: A kind of train of Table 2, by name.
+TrainKind = Literal["tram_metro", "s_bahn", "passenger", "freight", "freight_long"]
+
 #: The kinds of train Table 2 distinguishes, by the rules they run under:
 #: trams, light rail and metros (BOStrab); S-Bahn; other passenger trains;
 #: freight trains up to 600 m; and freight trains over 600 m (EBO).
-TRAIN_KINDS: tuple[str, ...] = (
+TRAIN_KINDS: tuple[TrainKind, ...] = (
     "tram_metro",
     "s_bahn",
     "passenger",
@@ -151,7 +158,9 @@ _UNDERGROUND_TABLE_AREAS = ("industrial", "commercial")
 _DRAFT = "2023"
 
 
-def train_weighting_factor(kind: str, *, alignment: str = "surface") -> float:
+def train_weighting_factor(
+    kind: TrainKind, *, alignment: Alignment = "surface"
+) -> float:
     r"""The weighting factor :math:`\alpha_\mathrm{Zug}` of Table 2 for one category.
 
     :param kind: The kind of train, as :data:`TRAIN_KINDS` lists them.
@@ -232,7 +241,7 @@ def train_assessment_severity(
     trains: ArrayLike,
     *,
     alpha: ArrayLike,
-    time_of_day: str = "day",
+    time_of_day: TimeOfDay = "day",
 ) -> float:
     r"""The assessment vibration severity of a railway, Formula (6).
 
@@ -290,7 +299,7 @@ def train_assessment_severity(
 
 
 def railway_guide_values(
-    area: str, *, time_of_day: str = "day", alignment: str = "surface"
+    area: Area, *, time_of_day: TimeOfDay = "day", alignment: Alignment = "surface"
 ) -> GuideValues:
     r"""The guide values a line to be built new is held to (6.5.3.5).
 
@@ -316,11 +325,11 @@ def railway_guide_values(
     if which == "day" or (where == "underground" and kind in _UNDERGROUND_TABLE_AREAS):
         return values
     return GuideValues(
-        values.a_u,
-        RAILWAY_NEW_LINE_NIGHT_A_O[where],
-        values.a_r,
-        values.time_of_day,
-        values.edition,
+        a_u=values.a_u,
+        a_o=RAILWAY_NEW_LINE_NIGHT_A_O[where],
+        a_r=values.a_r,
+        time_of_day=values.time_of_day,
+        edition=values.edition,
     )
 
 
@@ -345,7 +354,7 @@ class RailwayChange(RichDisplay):
     kb_ftr_before: float
     kb_ftr_after: float
     guide: GuideValues
-    time_of_day: str
+    time_of_day: TimeOfDay
 
     @property
     def kb_fmax_increase_percent(self) -> float:
@@ -423,7 +432,7 @@ def assess_railway_change(
     kb_ftr_before: float,
     kb_ftr_after: float,
     guide: GuideValues,
-    time_of_day: str = "day",
+    time_of_day: TimeOfDay = "day",
 ) -> RailwayChange:
     r"""Judge an altered or extended line by the change it brings (6.5.3.6).
 

@@ -294,7 +294,7 @@ Normalized flanking impact level `Ln,f` (Formula (5)).
 FlankingImpactLevelResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -308,9 +308,9 @@ FlankingImpactLevelResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     part: int = 2,
 ) -> str
 ```
@@ -368,7 +368,7 @@ Normalized flanking level difference `Dn,f` (airborne, Formula (4)).
 FlankingLevelDifferenceResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -382,9 +382,9 @@ FlankingLevelDifferenceResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     part: int = 2,
 ) -> str
 ```
@@ -632,7 +632,7 @@ In none of them, then, does strong coupling put `Kij` in doubt.
 StrongCouplingCheck.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -878,7 +878,7 @@ An octave band is bracketed when any of its one-third-octave bands is.
 VibrationReductionResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -895,9 +895,9 @@ VibrationReductionResult.report(
     path: str,
     *,
     metadata: ReportMetadata | None = None,
-    engine: str = 'reportlab',
+    engine: Literal['reportlab'] = 'reportlab',
     verbose: bool = False,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
 ) -> str
 ```
 

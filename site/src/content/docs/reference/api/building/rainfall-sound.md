@@ -160,7 +160,7 @@ one hour (the definition under Table H.1).
 
 ```python
 rainfall_reference_correction(
-    l_i_ref: ArrayLike,
+    l_i_reference: ArrayLike,
     structural_reverberation_time: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
@@ -187,7 +187,7 @@ $f$ in Formula (I.1) is taken as the band centre frequency given.
 
 | Name | Description |
 | :--- | :--- |
-| `l_i_ref` | $L_{I,\mathrm{ref}}$ of the reference specimen per band, in dB re 1 pW/m² (e.g. `rainfall_sound(...).l_i`). |
+| `l_i_reference` | $L_{I,\mathrm{ref}}$ of the reference specimen per band, in dB re 1 pW/m² (e.g. `rainfall_sound(...).l_i`). |
 | `structural_reverberation_time` | Its structural reverberation time per band, measured to ISO 10140-4, in s. |
 | `frequencies` | Band centre frequencies, in Hz, each one of the 18 bands of Table I.1 (100 Hz to 5 000 Hz); `None` takes all 18. |
 
@@ -198,7 +198,7 @@ $f$ in Formula (I.1) is taken as the band centre frequency given.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs disagree in length, a level is not finite, a time or frequency is not positive, or a band is not in Table I.1. |
-| TypeError | if `frequencies`, `l_i_ref` or `structural_reverberation_time` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies`, `l_i_reference` or `structural_reverberation_time` holds a text or a value that is not a real number. |
 
 ## RAINFALL_REFERENCE_INTENSITY_LEVELS
 
@@ -321,12 +321,12 @@ then follow as in K.4.2.
 ```python
 RainfallReferenceCorrection(
     frequencies: np.ndarray,
-    l_i_ref: np.ndarray,
+    l_i_reference: np.ndarray,
     structural_reverberation_time: np.ndarray,
     loss_factor: np.ndarray,
     reference_loss_factor: np.ndarray,
-    l_i_m_ref: np.ndarray,
-    l_ic_ref: np.ndarray,
+    l_i_m_reference: np.ndarray,
+    l_ic_reference: np.ndarray,
     correction: np.ndarray,
 )
 ```
@@ -338,12 +338,12 @@ The normalization correction from the reference glass pane (Annex I).
 | Name | Description |
 | :--- | :--- |
 | `frequencies` | One-third-octave band centre frequencies, in Hz. |
-| `l_i_ref` | Measured sound intensity level of the reference specimen, $L_{I,\mathrm{ref}}$, in dB re 1 pW/m². |
+| `l_i_reference` | Measured sound intensity level of the reference specimen, $L_{I,\mathrm{ref}}$, in dB re 1 pW/m². |
 | `structural_reverberation_time` | Its structural reverberation time $T_\mathrm{s}$, in s. |
 | `loss_factor` | Its total loss factor $\eta = 2.2/(f T_\mathrm{s})$ (Formula (I.1)), a linear ratio. |
 | `reference_loss_factor` | The reference loss factor $\eta_\mathrm{ref}$ of Table I.1 as a linear ratio, like `loss_factor`: $10^{x/10}$ of the decibel value $x$ the table prints ([`RAINFALL_REFERENCE_LOSS_FACTOR_DB`](/phonometry/reference/api/building/rainfall-sound/#rainfall_reference_loss_factor_db)). |
-| `l_i_m_ref` | The level corrected to the reference loss factor, $L_{I,\mathrm{m,ref}}$, in dB (Formula (I.2)). |
-| `l_ic_ref` | The reference level $L_{I\mathrm{c,ref}}$ of Table I.1, in dB. |
+| `l_i_m_reference` | The level corrected to the reference loss factor, $L_{I,\mathrm{m,ref}}$, in dB (Formula (I.2)). |
+| `l_ic_reference` | The reference level $L_{I\mathrm{c,ref}}$ of Table I.1, in dB. |
 | `correction` | $\Delta L_{I\mathrm{c}} = L_{I,\mathrm{m,ref}} - L_{I\mathrm{c,ref}}$, in dB (Formula (I.3)). |
 
 ### RainfallReferenceCorrection.plot()
@@ -352,7 +352,7 @@ The normalization correction from the reference glass pane (Annex I).
 RainfallReferenceCorrection.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -371,7 +371,7 @@ RainfallSoundResult(
     frequencies: np.ndarray,
     l_i: np.ndarray,
     l_ia: float | None,
-    method: str,
+    method: Literal['pressure', 'intensity'],
     correction: np.ndarray | None = None,
     l_i_norm: np.ndarray | None = None,
     l_ia_norm: float | None = None,
@@ -424,7 +424,7 @@ over the three one-third-octave bands of each octave present.
 RainfallSoundResult.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -490,7 +490,7 @@ table prints the three lighter classes as "up to" a rate and cloudburst as
 
 ```python
 RainGeneratorVerification(
-    rain_type: str,
+    rain_type: Literal['intense', 'heavy'],
     rainfall_rate_mm_h: float,
     drop_diameters_mm: np.ndarray | None,
     fall_velocities_m_s: np.ndarray | None,
@@ -542,7 +542,7 @@ Whether every judged requirement holds.
 RainGeneratorVerification.plot(
     ax: Axes | None = None,
     *,
-    language: str = 'en',
+    language: Literal['en', 'es'] = 'en',
     **kwargs: Any,
 ) -> Axes
 ```
@@ -584,7 +584,7 @@ Share of the measured drops within the velocity window, or `None`.
 verify_rain_generator(
     rainfall_rate_mm_h: float,
     *,
-    rain_type: str = 'heavy',
+    rain_type: Literal['intense', 'heavy'] = 'heavy',
     drop_diameters_mm: ArrayLike | None = None,
     fall_velocities_m_s: ArrayLike | None = None,
 ) -> RainGeneratorVerification

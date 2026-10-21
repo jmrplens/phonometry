@@ -340,10 +340,11 @@ obstáculo), sobre mallas de 32 por 40 a 64 por 48 celdas avanzadas entre 60 y
 
 **NumPy, float64: idéntico bit a bit.** Las mismas entradas dan salidas
 idénticas bit a bit en la misma plataforma: sin números aleatorios y con
-todas las operaciones en un orden fijo. El camino de NumPy se compara además,
-bit a bit, con una copia congelada de las dos simulaciones tal como eran antes
-de poder calcular en otro sitio, de modo que los demás dispositivos no le han
-costado nada a los números de NumPy.
+todas las operaciones en un orden fijo. El camino de NumPy se compara además
+con resúmenes SHA-256 de cada número que dan esos escenarios, tomados de las
+dos simulaciones tal como eran antes de poder calcular en otro sitio
+(`engine-digests.json`, comprobado en CI), de modo que los demás dispositivos
+no le han costado nada a los números de NumPy.
 
 **CuPy, float64: campos idénticos bit a bit, según lo medido.** En una NVIDIA
 GeForce RTX 4060 con el controlador de NVIDIA 610.57.04, CuPy 14.2.0

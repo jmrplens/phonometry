@@ -120,9 +120,9 @@ def test_each_probe_reads_its_cell_of_the_collocated_field(
 
     The probes gather through flat indices and edge masks, and the collocated
     field is built by slicing; both average the same faces in the same order.
-    The frozen copies have no recorder, so the recorder is held to them by
-    composition: the frozen parity pins the fields, and this pins the probes
-    to the fields.
+    The golden digests cover the stored fields and not the recorder, so the
+    recorder is held to them by composition: the digests pin the fields, and
+    this pins the probes to the fields.
     """
     if backend == "strict":
         go_strict()

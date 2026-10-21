@@ -71080,8 +71080,9 @@ decimated snapshots in two of them.
 
 **NumPy, float64: bit-identical.** Identical inputs give bit-identical
 outputs on the same platform: no random numbers, and every operation in a
-fixed order. The NumPy path is also held bit for bit to a frozen copy of the
-two engines as they stood before they could step anywhere else, so the other
+fixed order. The NumPy path is also held to SHA-256 digests of every number
+those scenarios give, recorded from the two engines as they stood before they
+could step anywhere else (`engine-digests.json`, checked in CI), so the other
 devices cost the NumPy numbers nothing.
 
 **CuPy, float64: bit-identical fields, as measured.** On an NVIDIA GeForce RTX

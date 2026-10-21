@@ -3,16 +3,15 @@
 
 Each scenario builds an engine from a module that provides ``FDTD2D`` or
 ``ElasticFDTD2D`` and their sources, steps it, and returns every stored field
-as a host array. The same scenarios run against the frozen engines (the
-NumPy proof), against CuPy (``scripts/gpu_parity.py``) and against torch
-(the tolerance tests), so a feature cannot be proven on one backend and
-skipped on another. Grids are small: the point is every code path, not
-speed.
+as a host array. The same scenarios hold the NumPy path to its golden
+digests (``scripts/engine_digests.py``), measure CuPy
+(``scripts/gpu_parity.py``) and bound torch (the tolerance tests), so a
+feature cannot be proven on one backend and skipped on another. Grids are
+small: the point is every code path, not speed.
 """
 
 from __future__ import annotations
 
-import inspect
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -25,10 +24,9 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
 Kind = Literal["acoustic", "elastic"]
-#: An engine built from whichever module a scenario is handed: the live
-#: ``fdtd`` or ``elastic_fdtd``, or a frozen copy of one. Each module has
-#: classes of its own, so no one class or protocol names them all, and the
-#: attributes a scenario reads are looked up when it runs.
+#: An engine built from ``fdtd`` or ``elastic_fdtd``. Each module has classes
+#: of its own, so no one class or protocol names them both, and the attributes
+#: a scenario reads are looked up when it runs.
 Engine = Any
 
 _ACOUSTIC_FIELDS = ("p", "vx", "vy")
@@ -226,16 +224,8 @@ def run(
 
 
 def _run_frames(engine: Engine, steps: int, every: int, decimation: int) -> object:
-    """``run`` under the option names its signature has.
-
-    Today's engines take ``snapshot_every`` and ``snapshot_decimation``; the
-    frozen copies take the older names. The names are read from the
-    signature, not tried in turn, so a ``TypeError`` raised inside ``run``
-    reaches the caller.
-    """
-    if "snapshot_every" in inspect.signature(engine.run).parameters:
-        return engine.run(steps, snapshot_every=every, snapshot_decimation=decimation)
-    return engine.run(steps, record_every=every, decimate=decimation)
+    """``run`` with the snapshot options, by name."""
+    return engine.run(steps, snapshot_every=every, snapshot_decimation=decimation)
 
 
 def _collocated(engine: Engine, field: str) -> object:

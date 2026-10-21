@@ -722,9 +722,8 @@ def test_non_integral_counts_and_coordinates_are_rejected() -> None:
     with pytest.raises(ValueError, match="'sponge_width' must be a whole number"):
         FDTD2D(C0, 0.05, shape=(20, 20), sponge_width=2.5)  # type: ignore[arg-type]
     sim = FDTD2D(C0, 0.05, shape=(20, 20))
-    float_source = GaussianPulse(ix=2.5, iy=3, half_width_s=1e-4)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'source ix' must be a whole number"):
-        sim.add_source(float_source)
+    with pytest.raises(ValueError, match="'ix' must be a whole number"):
+        GaussianPulse(ix=2.5, iy=3, half_width_s=1e-4)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="'n_steps' must be a whole number"):
         sim.run(1.5)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="'snapshot_every' must be a whole number"):
@@ -734,6 +733,55 @@ def test_non_integral_counts_and_coordinates_are_rejected() -> None:
     ):
         sim.run(10, snapshot_decimation=1.5)  # type: ignore[arg-type]
     assert sim.n == 0  # nothing ran on the rejected calls
+
+
+def _whole_float_sources() -> list[object]:
+    return [
+        GaussianPulse(ix=2.0, iy=3.0, half_width_s=1e-4, t0=0.0),  # type: ignore[arg-type]
+        CWSource(ix=2.0, iy=3.0, frequency=500.0, ramp_cycles=0.0),  # type: ignore[arg-type]
+        SignalSource(ix=2.0, iy=3.0, samples=np.ones(64), fs=1e5),  # type: ignore[arg-type]
+    ]
+
+
+@pytest.mark.parametrize("index", range(3), ids=["gaussian", "cw", "signal"])
+def test_a_whole_float_cell_index_is_held_as_an_int_and_steps(index: int) -> None:
+    """``ix=2.0`` names cell 2: the record holds it as an int, so the run uses it.
+
+    The engine indexes the pressure array with the record's own ``ix`` and
+    ``iy``; a whole float passed the check at ``add_source`` and then failed
+    the first step with numpy's ``IndexError``.
+    """
+    source = _whole_float_sources()[index]
+    assert type(source.ix) is int  # type: ignore[attr-defined]
+    assert type(source.iy) is int  # type: ignore[attr-defined]
+    sim = FDTD2D(C0, 0.05, shape=(20, 20))
+    sim.add_source(source)  # type: ignore[arg-type]
+    sim.run(2)
+    assert np.any(np.asarray(sim.p) != 0.0)
+
+
+def test_a_whole_float_plane_wave_offset_is_held_as_an_int_and_steps() -> None:
+    from phonometry.simulation.fdtd import PlaneWaveSource
+
+    plane = PlaneWaveSource(
+        direction="down",
+        waveform=lambda t: 1.0,
+        offset=1.0,  # type: ignore[arg-type]
+    )
+    assert type(plane.offset) is int
+    sim = FDTD2D(C0, 0.05, shape=(20, 20))
+    sim.add_source(plane)
+    sim.run(2)
+    assert np.any(np.asarray(sim.p) != 0.0)
+
+
+@pytest.mark.parametrize("field", ["ix", "iy"])
+def test_a_fractional_cell_index_is_refused_when_the_source_is_built(
+    field: str,
+) -> None:
+    indices: dict[str, object] = {"ix": 2, "iy": 3, field: 2.5}
+    with pytest.raises(ValueError, match=f"'{field}' must be a whole number"):
+        CWSource(**indices, frequency=500.0)  # type: ignore[arg-type]
 
 
 # --- Plotting ---------------------------------------------------------------

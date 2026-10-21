@@ -634,11 +634,6 @@ def test_source_validation() -> None:
     force_off_grid = ForceSource(ix=19, iy=1, direction="x", waveform=lambda t: 0.0)
     explosion_in_obstacle = ExplosionSource(ix=9, iy=9, waveform=lambda t: 0.0)
     force_in_obstacle = ForceSource(ix=9, iy=9, direction="y", waveform=lambda t: 0.0)
-    explosion_bad_ix = ExplosionSource(
-        ix=1.5,
-        iy=1,  # type: ignore[arg-type]
-        waveform=lambda t: 0.0,
-    )
     with pytest.raises(ValueError, match="source position lies outside the grid"):
         sim.add_source(explosion_off_grid)
     with pytest.raises(ValueError, match="source position lies outside the grid"):
@@ -647,8 +642,29 @@ def test_source_validation() -> None:
         sim.add_source(explosion_in_obstacle)
     with pytest.raises(ValueError, match="source position lies inside an obstacle"):
         sim.add_source(force_in_obstacle)
-    with pytest.raises(ValueError, match="'source ix' must be a whole number"):
-        sim.add_source(explosion_bad_ix)
+    with pytest.raises(ValueError, match="'ix' must be a whole number"):
+        ExplosionSource(ix=1.5, iy=1, waveform=lambda t: 0.0)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("kind", ["explosion", "force"])
+def test_a_whole_float_cell_index_is_held_as_an_int_and_steps(kind: str) -> None:
+    """``ix=5.0`` names cell 5: the record holds it as an int, so the run uses it.
+
+    The engine indexes its stress and velocity arrays with the record's own
+    ``ix`` and ``iy``; a whole float passed the check at ``add_source`` and
+    then failed the first step with numpy's ``IndexError``.
+    """
+    source: ExplosionSource | ForceSource = (
+        ExplosionSource(ix=5.0, iy=5.0, waveform=lambda t: 1.0)  # type: ignore[arg-type]
+        if kind == "explosion"
+        else ForceSource(ix=5.0, iy=5.0, direction="x", waveform=lambda t: 1.0)  # type: ignore[arg-type]
+    )
+    assert type(source.ix) is int
+    assert type(source.iy) is int
+    sim = ElasticFDTD2D(6000.0, 3000.0, 0.01, rho=2700.0, shape=(20, 20))
+    sim.add_source(source)
+    sim.run(2)
+    assert np.any(np.asarray(sim.txx) != 0.0) or np.any(np.asarray(sim.vx) != 0.0)
 
 
 @pytest.mark.parametrize(

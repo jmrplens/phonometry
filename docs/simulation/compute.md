@@ -60,12 +60,12 @@ take it as `compute=`:
 ```py
 gpu = simulation.Compute(device="cupy")
 sim = simulation.FDTD2D(343.0, 0.01, shape=(200, 300), compute=gpu)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
-    compute=gpu,
 )
+res = simulation.fdtd_simulation(run, compute=gpu)
 ```
 
 A float32 run needs no GPU: on NumPy it halves the memory every field and
@@ -73,12 +73,12 @@ every snapshot takes. Section 6 says how far its numbers can stray from a
 float64 run's.
 
 ```python
-light = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)], snapshot_every=50),
-    compute=simulation.Compute(dtype="float32"),
 )
+light = simulation.fdtd_simulation(run, compute=simulation.Compute(dtype="float32"))
 print(light.snapshots.dtype, light.pressures.dtype)   # float32 float64
 ```
 
@@ -91,7 +91,7 @@ was: each sample is cast once on its way off the device.
 | Device | What to install | Notes |
 |---|---|---|
 | `"cpu"` | nothing: NumPy is a dependency of phonometry | the reference every other device is compared with |
-| `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` | `pip install phonometry[torch]` | torch 2.3.0 or later with array-api-compat 1.5.1 or later; `[full]` leaves it out |
+| `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` | `pip install "phonometry[torch]"` | torch 2.3.0 or later with array-api-compat 1.5.1 or later; `[full]` leaves it out |
 | `"cupy"` | the CuPy wheel for your CUDA version, such as `pip install cupy-cuda12x` or `pip install cupy-cuda13x` | not an extra of phonometry, because the wheel has to match the CUDA your driver supports |
 
 `[full]` leaves torch out on purpose: the torch wheels PyPI serves for Linux
@@ -101,7 +101,7 @@ the torch it finds, and those libraries stay out:
 
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install phonometry[torch]
+pip install "phonometry[torch]"
 ```
 
 Adding that index with `--extra-index-url` is not enough: pip takes the
@@ -132,18 +132,14 @@ simulation functions, and the engine keeps the one it got: leaving a `use()`
 block does not move an engine built inside it.
 
 ```python
+run = simulation.FDTDRun(
+    343.0, 0.01, 1.0e-3, shape=(100, 150),
+    sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
+    recording=simulation.FDTDRecording(probes=[(100, 50)]),
+)
 with simulation.use(simulation.Compute(dtype="float32")):
-    inside = simulation.fdtd_simulation(
-        343.0, 0.01, 1.0e-3, shape=(100, 150),
-        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
-        recording=simulation.FDTDRecording(probes=[(100, 50)]),
-    )
-    pinned = simulation.fdtd_simulation(
-        343.0, 0.01, 1.0e-3, shape=(100, 150),
-        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
-        recording=simulation.FDTDRecording(probes=[(100, 50)]),
-        compute=simulation.Compute(),
-    )
+    inside = simulation.fdtd_simulation(run)
+    pinned = simulation.fdtd_simulation(run, compute=simulation.Compute())
 print(inside.provenance.dtype, pinned.provenance.dtype)   # float32 float64
 ```
 
@@ -173,17 +169,17 @@ single = simulation.Compute(dtype="float32")
 
 
 def pulse_run(half_width_s):
-    return simulation.fdtd_simulation(
+    run = simulation.FDTDRun(
         343.0, 0.01, 1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=half_width_s)],
         recording=simulation.FDTDRecording(probes=[(100, 50)]),
-        compute=single,
     )
+    return simulation.fdtd_simulation(run, compute=single)
 
 
 with ThreadPoolExecutor(max_workers=2) as pool:
-    runs = list(pool.map(pulse_run, (2.0e-4, 3.0e-4)))
-print([run.provenance.dtype for run in runs])   # ['float32', 'float32']
+    results = list(pool.map(pulse_run, (2.0e-4, 3.0e-4)))
+print([res.provenance.dtype for res in results])   # ['float32', 'float32']
 ```
 
 ## 4. When the device is not there: `fallback`
@@ -214,12 +210,12 @@ later.
 
 ```py
 request = simulation.Compute(device="cupy", fallback=True)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
-    compute=request,
 )
+res = simulation.fdtd_simulation(run, compute=request)
 # On a machine without CuPy:
 # ComputeFallbackWarning: device 'cupy' needs CuPy, which is not installed
 # (No module named 'cupy'); install the wheel for your CUDA version, e.g.
@@ -259,12 +255,12 @@ print(light.provenance.device, light.provenance.dtype, light.provenance.array_li
 A run on CuPy records the card and the versions it stepped on:
 
 ```py
-gpu_run = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    compute=simulation.Compute(device="cupy"),
 )
-print(gpu_run.provenance)
+on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy"))
+print(on_gpu.provenance)
 # On the machine of the proof in section 6:
 # RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
 #     numpy_version='2.5.3', array_library='cupy 14.2.0', cuda_runtime='13.2',
@@ -393,12 +389,13 @@ array raises `TypeError`, and a number below 1 or not whole raises
 it was taken from, with the axes on the whole domain.
 
 ```python
-decimated = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
         snapshot_every=10, snapshot_decimation=4),
 )
+decimated = simulation.fdtd_simulation(run)
 print(decimated.snapshots.shape, decimated.snapshot_decimation)   # (17, 50, 75) 4
 decimated.plot(kind="snapshot")
 ```

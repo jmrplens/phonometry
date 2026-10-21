@@ -227,12 +227,12 @@ take it as `compute=`:
 ```py
 gpu = simulation.Compute(device="cupy")
 sim = simulation.FDTD2D(343.0, 0.01, shape=(200, 300), compute=gpu)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
-    compute=gpu,
 )
+res = simulation.fdtd_simulation(run, compute=gpu)
 ```
 
 A float32 run needs no GPU: on NumPy it halves the memory every field and
@@ -240,12 +240,12 @@ every snapshot takes. Section 6 says how far its numbers can stray from a
 float64 run's.
 
 ```python
-light = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)], snapshot_every=50),
-    compute=simulation.Compute(dtype="float32"),
 )
+light = simulation.fdtd_simulation(run, compute=simulation.Compute(dtype="float32"))
 print(light.snapshots.dtype, light.pressures.dtype)   # float32 float64
 ```
 
@@ -258,7 +258,7 @@ was: each sample is cast once on its way off the device.
 | Device | What to install | Notes |
 |---|---|---|
 | `"cpu"` | nothing: NumPy is a dependency of phonometry | the reference every other device is compared with |
-| `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` | `pip install phonometry[torch]` | torch 2.3.0 or later with array-api-compat 1.5.1 or later; `[full]` leaves it out |
+| `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` | `pip install "phonometry[torch]"` | torch 2.3.0 or later with array-api-compat 1.5.1 or later; `[full]` leaves it out |
 | `"cupy"` | the CuPy wheel for your CUDA version, such as `pip install cupy-cuda12x` or `pip install cupy-cuda13x` | not an extra of phonometry, because the wheel has to match the CUDA your driver supports |
 
 `[full]` leaves torch out on purpose: the torch wheels PyPI serves for Linux
@@ -268,7 +268,7 @@ the torch it finds, and those libraries stay out:
 
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install phonometry[torch]
+pip install "phonometry[torch]"
 ```
 
 Adding that index with `--extra-index-url` is not enough: pip takes the
@@ -299,18 +299,14 @@ simulation functions, and the engine keeps the one it got: leaving a `use()`
 block does not move an engine built inside it.
 
 ```python
+run = simulation.FDTDRun(
+    343.0, 0.01, 1.0e-3, shape=(100, 150),
+    sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
+    recording=simulation.FDTDRecording(probes=[(100, 50)]),
+)
 with simulation.use(simulation.Compute(dtype="float32")):
-    inside = simulation.fdtd_simulation(
-        343.0, 0.01, 1.0e-3, shape=(100, 150),
-        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
-        recording=simulation.FDTDRecording(probes=[(100, 50)]),
-    )
-    pinned = simulation.fdtd_simulation(
-        343.0, 0.01, 1.0e-3, shape=(100, 150),
-        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
-        recording=simulation.FDTDRecording(probes=[(100, 50)]),
-        compute=simulation.Compute(),
-    )
+    inside = simulation.fdtd_simulation(run)
+    pinned = simulation.fdtd_simulation(run, compute=simulation.Compute())
 print(inside.provenance.dtype, pinned.provenance.dtype)   # float32 float64
 ```
 
@@ -340,17 +336,17 @@ single = simulation.Compute(dtype="float32")
 
 
 def pulse_run(half_width_s):
-    return simulation.fdtd_simulation(
+    run = simulation.FDTDRun(
         343.0, 0.01, 1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=half_width_s)],
         recording=simulation.FDTDRecording(probes=[(100, 50)]),
-        compute=single,
     )
+    return simulation.fdtd_simulation(run, compute=single)
 
 
 with ThreadPoolExecutor(max_workers=2) as pool:
-    runs = list(pool.map(pulse_run, (2.0e-4, 3.0e-4)))
-print([run.provenance.dtype for run in runs])   # ['float32', 'float32']
+    results = list(pool.map(pulse_run, (2.0e-4, 3.0e-4)))
+print([res.provenance.dtype for res in results])   # ['float32', 'float32']
 ```
 
 ## 4. When the device is not there: `fallback`
@@ -381,12 +377,12 @@ later.
 
 ```py
 request = simulation.Compute(device="cupy", fallback=True)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
-    compute=request,
 )
+res = simulation.fdtd_simulation(run, compute=request)
 # On a machine without CuPy:
 # ComputeFallbackWarning: device 'cupy' needs CuPy, which is not installed
 # (No module named 'cupy'); install the wheel for your CUDA version, e.g.
@@ -426,12 +422,12 @@ print(light.provenance.device, light.provenance.dtype, light.provenance.array_li
 A run on CuPy records the card and the versions it stepped on:
 
 ```py
-gpu_run = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    compute=simulation.Compute(device="cupy"),
 )
-print(gpu_run.provenance)
+on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy"))
+print(on_gpu.provenance)
 # On the machine of the proof in section 6:
 # RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
 #     numpy_version='2.5.3', array_library='cupy 14.2.0', cuda_runtime='13.2',
@@ -560,12 +556,13 @@ array raises `TypeError`, and a number below 1 or not whole raises
 it was taken from, with the axes on the whole domain.
 
 ```python
-decimated = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
         snapshot_every=10, snapshot_decimation=4),
 )
+decimated = simulation.fdtd_simulation(run)
 print(decimated.snapshots.shape, decimated.snapshot_decimation)   # (17, 50, 75) 4
 decimated.plot(kind="snapshot")
 ```
@@ -711,6 +708,12 @@ $\Delta x \le c_\text{min} / (10 f)$ (in a wholly solid map the S wavelength is 
 the shortest; in mixed domains the fluid P wavelength can be shorter, as
 in water at 1480 m/s over a 2000 m/s-shear sediment).
 
+A simulation is one record:
+`ElasticRun(c_p, c_s, dx, duration, sources=..., rho=..., ...)` holds the
+domain, its sources and what it records, and checks every argument when it
+is built, so a mistake raises where the run is written;
+`elastic_fdtd_simulation(run)` steps it, and `compute=` says where.
+
 ```python
 import numpy as np
 from phonometry import simulation
@@ -719,7 +722,7 @@ from phonometry.simulation import ALUMINUM
 # An aluminium block hit by a tiny explosion: the P front reaches two
 # probes 100 and 220 cells away; c_P falls out of the differential delay.
 w = 8e-6
-res = simulation.elastic_fdtd_simulation(
+run = simulation.ElasticRun(
     ALUMINUM.c_p, ALUMINUM.c_s, 0.002, 1.1e-4, rho=ALUMINUM.rho,
     shape=(501, 501),
     sources=[simulation.ExplosionSource(
@@ -728,6 +731,7 @@ res = simulation.elastic_fdtd_simulation(
     recording=simulation.ElasticRecording(
         probes=[(350, 250), (470, 250)], probe_fields=("p",)),
 )
+res = simulation.elastic_fdtd_simulation(run)
 t = res.times[1:]
 t1, t2 = (t[np.abs(res.signals[k, 0, 1:]).argmax()] for k in range(2))
 print(round(0.24 / (t2 - t1)))    # 6424  c_P = sqrt((lambda+2mu)/rho) = 6450.5
@@ -745,14 +749,7 @@ installed and what is promised about the numbers on each.
 
 ```py
 on_gpu = simulation.elastic_fdtd_simulation(
-    ALUMINUM.c_p, ALUMINUM.c_s, 0.002, 1.1e-4, rho=ALUMINUM.rho,
-    shape=(501, 501),
-    sources=[simulation.ExplosionSource(
-        ix=250, iy=250,
-        waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=w).value)],
-    recording=simulation.ElasticRecording(
-        probes=[(350, 250), (470, 250)], probe_fields=("p",)),
-    compute=simulation.Compute(device="cupy"),
+    run, compute=simulation.Compute(device="cupy")
 )
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
 ```
@@ -808,7 +805,7 @@ from phonometry import simulation
 dx, w = 0.001, 8e-6
 dt = 0.6 * dx / (ALUMINUM.c_p * np.sqrt(2.0))
 steps = round(7.3e-5 / dt)
-res = simulation.elastic_fdtd_simulation(
+run = simulation.ElasticRun(
     ALUMINUM.c_p, ALUMINUM.c_s, dx, 7.3e-5, rho=ALUMINUM.rho,
     shape=(300, 600),
     sources=[simulation.ForceSource(
@@ -818,6 +815,7 @@ res = simulation.elastic_fdtd_simulation(
     recording=simulation.ElasticRecording(snapshot_every=steps,
                                           snapshot_field="vy"),
 )
+res = simulation.elastic_fdtd_simulation(run)
 res.plot(kind="snapshot")
 plt.show()
 ```
@@ -1046,7 +1044,7 @@ def ricker(t):
     a = (np.pi * f0 * (t - t0)) ** 2
     return (1.0 - 2.0 * a) * np.exp(-a)
 
-res = simulation.elastic_fdtd_simulation(
+run = simulation.ElasticRun(
     c_p, c_s, dx, 0.232, rho=rho,
     sources=[simulation.ExplosionSource(ix=60, iy=89, waveform=ricker,
                                         amplitude=1e3)],
@@ -1055,6 +1053,7 @@ res = simulation.elastic_fdtd_simulation(
     recording=simulation.ElasticRecording(snapshot_every=steps,
                                           snapshot_field="vy"),
 )
+res = simulation.elastic_fdtd_simulation(run)
 res.plot(kind="snapshot")
 plt.show()
 ```
@@ -1304,15 +1303,21 @@ Courant number, default 0.6) and the largest sound speed in the map; values
 outside $(0, 1)$ are rejected because the scheme is unconditionally
 meaningless beyond the bound (Eq. 4.14).
 
+A simulation is one record: `FDTDRun(c, dx, duration, sources=..., ...)`
+holds the domain, its sources and what it records, and checks every argument
+when it is built, so a mistake raises where the run is written;
+`fdtd_simulation(run)` steps it, and `compute=` says where.
+
 ```python
 from phonometry import simulation
 
 # A 3.0 x 2.0 m air domain: 300 x 200 cells of 1 cm.
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
+res = simulation.fdtd_simulation(run)
 print(res.size)                  # (3.0, 2.0)  metres
 print(round(res.dt * 1e6, 2))    # 12.37  microseconds (CN = 0.6)
 print(res.provenance.device, res.provenance.dtype)   # cpu float64
@@ -1326,12 +1331,7 @@ needs installed, how a whole script picks one and what is promised about the
 numbers on each.
 
 ```py
-on_gpu = simulation.fdtd_simulation(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    recording=simulation.FDTDRecording(probes=[(200, 100)]),
-    compute=simulation.Compute(device="cupy"),
-)
+on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy"))
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
 ```
 
@@ -1642,7 +1642,7 @@ from phonometry import simulation
 # in the shadow and only receives the wave diffracted around the edge.
 mask = np.zeros((200, 300), dtype=bool)
 mask[60:, 150:154] = True
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
@@ -1650,6 +1650,7 @@ res = simulation.fdtd_simulation(
     obstacle_mask=mask,
     boundaries="absorbing", absorbing_layer_cells=30,
 )
+res = simulation.fdtd_simulation(run)
 
 fig, (ax_f, ax_p) = plt.subplots(
     1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
@@ -1673,11 +1674,12 @@ from phonometry import simulation
 
 lx, ly, dx = 1.0, 0.7, 0.02
 nx, ny = round(lx / dx), round(ly / dx)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
+res = simulation.fdtd_simulation(run)
 p = res.pressures[0]
 spec = np.abs(np.fft.rfft(p * np.hanning(p.size), n=8 * p.size))
 freqs = np.fft.rfftfreq(8 * p.size, res.dt)
@@ -1705,11 +1707,12 @@ from phonometry import simulation
 
 lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
 nx, ny = round(lx / dx), round(ly / dx)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     c, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
+res = simulation.fdtd_simulation(run)
 
 # One line: the raw probe pressure history the spectrum is computed from.
 res.plot()

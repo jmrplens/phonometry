@@ -64,6 +64,12 @@ $\Delta x \le c_\text{min} / (10 f)$ (in a wholly solid map the S wavelength is 
 the shortest; in mixed domains the fluid P wavelength can be shorter, as
 in water at 1480 m/s over a 2000 m/s-shear sediment).
 
+A simulation is one record:
+`ElasticRun(c_p, c_s, dx, duration, sources=..., rho=..., ...)` holds the
+domain, its sources and what it records, and checks every argument when it
+is built, so a mistake raises where the run is written;
+`elastic_fdtd_simulation(run)` steps it, and `compute=` says where.
+
 ```python
 import numpy as np
 from phonometry import simulation
@@ -72,7 +78,7 @@ from phonometry.simulation import ALUMINUM
 # An aluminium block hit by a tiny explosion: the P front reaches two
 # probes 100 and 220 cells away; c_P falls out of the differential delay.
 w = 8e-6
-res = simulation.elastic_fdtd_simulation(
+run = simulation.ElasticRun(
     ALUMINUM.c_p, ALUMINUM.c_s, 0.002, 1.1e-4, rho=ALUMINUM.rho,
     shape=(501, 501),
     sources=[simulation.ExplosionSource(
@@ -81,6 +87,7 @@ res = simulation.elastic_fdtd_simulation(
     recording=simulation.ElasticRecording(
         probes=[(350, 250), (470, 250)], probe_fields=("p",)),
 )
+res = simulation.elastic_fdtd_simulation(run)
 t = res.times[1:]
 t1, t2 = (t[np.abs(res.signals[k, 0, 1:]).argmax()] for k in range(2))
 print(round(0.24 / (t2 - t1)))    # 6424  c_P = sqrt((lambda+2mu)/rho) = 6450.5
@@ -98,14 +105,7 @@ installed and what is promised about the numbers on each.
 
 ```py
 on_gpu = simulation.elastic_fdtd_simulation(
-    ALUMINUM.c_p, ALUMINUM.c_s, 0.002, 1.1e-4, rho=ALUMINUM.rho,
-    shape=(501, 501),
-    sources=[simulation.ExplosionSource(
-        ix=250, iy=250,
-        waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=w).value)],
-    recording=simulation.ElasticRecording(
-        probes=[(350, 250), (470, 250)], probe_fields=("p",)),
-    compute=simulation.Compute(device="cupy"),
+    run, compute=simulation.Compute(device="cupy")
 )
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
 ```
@@ -161,7 +161,7 @@ from phonometry import simulation
 dx, w = 0.001, 8e-6
 dt = 0.6 * dx / (ALUMINUM.c_p * np.sqrt(2.0))
 steps = round(7.3e-5 / dt)
-res = simulation.elastic_fdtd_simulation(
+run = simulation.ElasticRun(
     ALUMINUM.c_p, ALUMINUM.c_s, dx, 7.3e-5, rho=ALUMINUM.rho,
     shape=(300, 600),
     sources=[simulation.ForceSource(
@@ -171,6 +171,7 @@ res = simulation.elastic_fdtd_simulation(
     recording=simulation.ElasticRecording(snapshot_every=steps,
                                           snapshot_field="vy"),
 )
+res = simulation.elastic_fdtd_simulation(run)
 res.plot(kind="snapshot")
 plt.show()
 ```
@@ -399,7 +400,7 @@ def ricker(t):
     a = (np.pi * f0 * (t - t0)) ** 2
     return (1.0 - 2.0 * a) * np.exp(-a)
 
-res = simulation.elastic_fdtd_simulation(
+run = simulation.ElasticRun(
     c_p, c_s, dx, 0.232, rho=rho,
     sources=[simulation.ExplosionSource(ix=60, iy=89, waveform=ricker,
                                         amplitude=1e3)],
@@ -408,6 +409,7 @@ res = simulation.elastic_fdtd_simulation(
     recording=simulation.ElasticRecording(snapshot_every=steps,
                                           snapshot_field="vy"),
 )
+res = simulation.elastic_fdtd_simulation(run)
 res.plot(kind="snapshot")
 plt.show()
 ```

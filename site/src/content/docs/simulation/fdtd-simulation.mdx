@@ -126,17 +126,22 @@ scheme is only **conditionally stable**: at $\mathrm{CN} \le 1$ the update
 neither creates nor destroys energy, and above the bound every mode with a
 wavelength near the grid scale grows exponentially, so the run reaches
 `inf` within a few hundred steps rather than degrading gracefully
-(Eq. 4.14). `fdtd_simulation` therefore rejects any `cfl` outside $(0, 1)$
+(Eq. 4.14). `FDTDRun` therefore rejects any `cfl` outside $(0, 1)$
 instead of letting the run start. Section 6 also uses a *per-axis* Courant
 number $S = c\,\Delta t/\Delta x = \mathrm{CN}/\sqrt{2}$ in the
 dispersion relation; the two are not the same number, and the default
 `cfl = 0.6` means $S = 0.424$.
 
+A simulation is one record: `FDTDRun(c, dx, duration, sources=..., ...)`
+holds the domain, its sources and what it records, and checks every argument
+when it is built, so a mistake raises where the run is written;
+`fdtd_simulation(run)` steps it, and `compute=` says where.
+
 ```python
 from phonometry import simulation
 
 # A 3.0 x 2.0 m air domain: 300 x 200 cells of 1 cm.
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0,             # c: sound speed [m/s], a scalar or a map over the grid
     0.01,              # dx: square cell size [m]
     2.0e-3,            # duration: simulated time [s] (dt is derived, not given)
@@ -144,6 +149,7 @@ res = simulation.fdtd_simulation(
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
+res = simulation.fdtd_simulation(run)
 print(res.size)                  # (3.0, 2.0)  metres
 print(round(res.dt * 1e6, 2))    # 12.37  microseconds (CN = 0.6)
 print(res.provenance.device, res.provenance.dtype)   # cpu float64
@@ -157,12 +163,7 @@ the devices, what each needs installed, how a whole script picks one and what
 is promised about the numbers on each.
 
 ```py
-on_gpu = simulation.fdtd_simulation(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    recording=simulation.FDTDRecording(probes=[(200, 100)]),
-    compute=simulation.Compute(device="cupy"),
-)
+on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy"))
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
 ```
 
@@ -774,7 +775,7 @@ from phonometry import simulation
 # in the shadow and only receives the wave diffracted around the edge.
 mask = np.zeros((200, 300), dtype=bool)
 mask[60:, 150:154] = True
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
@@ -782,6 +783,7 @@ res = simulation.fdtd_simulation(
     obstacle_mask=mask,
     boundaries="absorbing", absorbing_layer_cells=30,
 )
+res = simulation.fdtd_simulation(run)
 
 fig, (ax_f, ax_p) = plt.subplots(
     1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
@@ -915,11 +917,12 @@ from phonometry import simulation
 
 lx, ly, dx = 1.0, 0.7, 0.02
 nx, ny = round(lx / dx), round(ly / dx)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
+res = simulation.fdtd_simulation(run)
 p = res.pressures[0]
 # Window the record (it ends with the undamped modes still ringing, and an
 # abrupt truncation smears every peak) and zero-pad it eightfold, which
@@ -952,11 +955,12 @@ from phonometry import simulation
 
 lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
 nx, ny = round(lx / dx), round(ly / dx)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     c, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
+res = simulation.fdtd_simulation(run)
 
 # One line: the raw probe pressure history the spectrum is computed from.
 res.plot()

@@ -3285,8 +3285,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `FDTD2D.run` and `ElasticFDTD2D.run` name their snapshot options as the
   recordings do.** The `probes=`, `snapshot_every=` and
   `snapshot_decimation=` of `fdtd_simulation` are the fields of
-  `simulation.FDTDRecording`, passed as `recording=`, as
-  `elastic_fdtd_simulation` takes an `ElasticRecording`. Both records refuse
+  `simulation.FDTDRecording`, the `recording` of the run (the entry below),
+  as `elastic_fdtd_simulation` takes an `ElasticRecording`. Both records refuse
   a malformed probe, an unknown or repeated field and a bad count when they
   are built, where an `ElasticRecording` used to be refused only when a run
   read it; a probe off the grid is still the run's to refuse, and with two
@@ -3299,6 +3299,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is a `TypeError`, and a number that is not a whole number of 1 or more a
   `ValueError`. A call that passed the cadence by position is unchanged; one
   that named it renames it, as the migration guide shows.
+
+- **A simulation is one record, checked when it is built.**
+  `simulation.FDTDRun(c, dx, duration, *, sources, shape=None, rho=1.2,
+  cfl=0.6, recording=None, boundaries="rigid", absorbing_layer_cells=20,
+  obstacle_mask=None, damping=0.0)` and `simulation.ElasticRun(c_p, c_s, dx,
+  duration, *, sources, rho, shape=None, cfl=0.6, recording=None,
+  boundaries=None, obstacle_mask=None, damping=0.0)` hold the arguments
+  `fdtd_simulation` and `elastic_fdtd_simulation` took, and the two functions
+  take the run: `fdtd_simulation(run, *, compute=None)` and
+  `elastic_fdtd_simulation(run, *, compute=None)`. A run checks every
+  argument when it is built, the grid's included (the time step, the
+  density, the sponge, the impedance edges, the obstacle, and the sources
+  and the probes on the grid), with the class and the words the functions
+  raised, so a run that builds is one the function can step. Both records
+  are frozen and take their grid and their duration by position and the
+  rest by name; the sources are held as a tuple, a mapping of boundaries as
+  a read-only mapping and every array as the run's own read-only copy, so
+  nothing the caller changes afterwards reaches a checked run.
+  `ElasticRun` refuses `boundaries` that are not an `ElasticBoundaries` with
+  a `TypeError`, where the function failed inside the run. `ElasticBoundaries`
+  now holds a mapping of sides as a read-only mapping of its own, so a run
+  cannot follow the caller's later edits to the dictionary.
 
 - **`FDTD2D.kappa`, `ElasticFDTD2D.mu` and `ElasticFDTD2D.lam` are
   read-only.** They are host copies the engine computed from its medium, as

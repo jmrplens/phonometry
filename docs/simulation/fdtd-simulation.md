@@ -80,15 +80,21 @@ Courant number, default 0.6) and the largest sound speed in the map; values
 outside $(0, 1)$ are rejected because the scheme is unconditionally
 meaningless beyond the bound (Eq. 4.14).
 
+A simulation is one record: `FDTDRun(c, dx, duration, sources=..., ...)`
+holds the domain, its sources and what it records, and checks every argument
+when it is built, so a mistake raises where the run is written;
+`fdtd_simulation(run)` steps it, and `compute=` says where.
+
 ```python
 from phonometry import simulation
 
 # A 3.0 x 2.0 m air domain: 300 x 200 cells of 1 cm.
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
+res = simulation.fdtd_simulation(run)
 print(res.size)                  # (3.0, 2.0)  metres
 print(round(res.dt * 1e6, 2))    # 12.37  microseconds (CN = 0.6)
 print(res.provenance.device, res.provenance.dtype)   # cpu float64
@@ -102,12 +108,7 @@ needs installed, how a whole script picks one and what is promised about the
 numbers on each.
 
 ```py
-on_gpu = simulation.fdtd_simulation(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    recording=simulation.FDTDRecording(probes=[(200, 100)]),
-    compute=simulation.Compute(device="cupy"),
-)
+on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy"))
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
 ```
 
@@ -418,7 +419,7 @@ from phonometry import simulation
 # in the shadow and only receives the wave diffracted around the edge.
 mask = np.zeros((200, 300), dtype=bool)
 mask[60:, 150:154] = True
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
@@ -426,6 +427,7 @@ res = simulation.fdtd_simulation(
     obstacle_mask=mask,
     boundaries="absorbing", absorbing_layer_cells=30,
 )
+res = simulation.fdtd_simulation(run)
 
 fig, (ax_f, ax_p) = plt.subplots(
     1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
@@ -449,11 +451,12 @@ from phonometry import simulation
 
 lx, ly, dx = 1.0, 0.7, 0.02
 nx, ny = round(lx / dx), round(ly / dx)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
+res = simulation.fdtd_simulation(run)
 p = res.pressures[0]
 spec = np.abs(np.fft.rfft(p * np.hanning(p.size), n=8 * p.size))
 freqs = np.fft.rfftfreq(8 * p.size, res.dt)
@@ -481,11 +484,12 @@ from phonometry import simulation
 
 lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
 nx, ny = round(lx / dx), round(ly / dx)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     c, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
+res = simulation.fdtd_simulation(run)
 
 # One line: the raw probe pressure history the spectrum is computed from.
 res.plot()

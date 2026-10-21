@@ -92,7 +92,10 @@ def load_host(name: str) -> HostEntry:
     try:
         # utf-8-sig: Windows Notepad saves UTF-8 with a byte-order mark.
         document = tomllib.loads(raw.decode("utf-8-sig"))
-    except (UnicodeDecodeError, tomllib.TOMLDecodeError) as exc:
+    # ValueError holds UnicodeDecodeError, TOMLDecodeError and Python's refusal
+    # of an integer longer than 4300 digits; RecursionError a value nested
+    # deeper than the interpreter's limit.
+    except (ValueError, RecursionError) as exc:
         msg = f"{path}: not a TOML file: {exc}"
         raise ValueError(msg) from None
     table = document.get("hosts", {})

@@ -154,6 +154,10 @@ def test_a_missing_file_is_a_missing_key_that_names_the_file(hosts_at: Path) -> 
             _DOCKER.replace("7200", "9" * 400),
             "'timeout_s' must be a positive number of seconds",
         ),
+        # Python refuses to read an integer longer than 4300 digits.
+        (_DOCKER.replace("7200", "9" * 5000), "not a TOML file"),
+        # A value nested deeper than Python's recursion limit.
+        (_DOCKER + "x = " + "[" * 100_000 + "]" * 100_000 + "\n", "not a TOML file"),
         (
             _DOCKER.replace('label = "RTX 4060 on the NAS"', "label = 4"),
             "'label' must be a non-empty text",

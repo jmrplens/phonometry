@@ -110,6 +110,9 @@ EXEMPT: dict[str, str] = {
     "simulation/_remote/bootstrap.py:_floors": "reads a frame the other end sent",
     # The arguments of a remote run, as the node reads them.
     "simulation/_remote/wire.py:_decode": "reads the data a client sent: a form the node cannot read is a broken job, refused as one",
+    # The placement of a remote run, as the node reads it: a field of the
+    # wrong type is a broken job, refused as one at the job's stage.
+    "simulation/_remote/node.py:_placement": "reads the placement a client sent",
 }
 
 

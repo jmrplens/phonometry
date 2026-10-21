@@ -107,7 +107,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from . import _backends
+from . import _backends, _observer
 from .compute import _local_request, _requested
 from .fdtd import (
     _DEFAULT_SPONGE_REFLECTION,
@@ -2008,6 +2008,9 @@ def _record_elastic_run(
     the march. Each snapshot is cut to every ``snapshot_decimation``-th cell
     on the device and comes to the host as it is taken, so only the cells
     it keeps cross.
+
+    After each step it tells a watcher, if one is set (:mod:`._observer`), how
+    many steps are done; a node uses that to stop a run whose client went away.
     """
     b = sim._backend
     d = snapshot_decimation
@@ -2021,6 +2024,7 @@ def _record_elastic_run(
     with b.context():
         for i in range(steps):
             sim.step()
+            _observer.step_done(i + 1, steps)
             if n_probes:
                 _store_samples(sim, probe_fields, gathers, i + 1, signals, buffer)
             if (

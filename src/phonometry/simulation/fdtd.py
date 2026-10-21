@@ -79,7 +79,7 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from . import _backends
+from . import _backends, _observer
 from .compute import RunProvenance, _local_request, _requested
 from .ntff import ContourPhasors
 
@@ -2274,6 +2274,9 @@ def _record_run(
     the host once, after the march. Each snapshot is cut to every
     ``snapshot_decimation``-th cell on the device and comes to the host as
     it is taken, so only the cells it keeps cross.
+
+    After each step it tells a watcher, if one is set (:mod:`._observer`), how
+    many steps are done; a node uses that to stop a run whose client went away.
     """
     b, xp = sim._backend, sim._xp
     d = snapshot_decimation
@@ -2286,6 +2289,7 @@ def _record_run(
     with b.context():
         for i in range(steps):
             sim.step()
+            _observer.step_done(i + 1, steps)
             if n_probes:
                 sample = xp.take(xp.reshape(sim.p, (-1,)), centre)
                 if buffer is None:

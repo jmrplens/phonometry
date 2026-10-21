@@ -548,7 +548,12 @@ def _floors(hello: Mapping[str, object]) -> dict[str, str]:
 
 
 def _hand_over(stream: IO[bytes], frames: IO[bytes], package: Path) -> int:
-    """Import the package from the cache and give it the stream."""
+    """Import the package from the cache and give it the stream.
+
+    The node raises the refusals of the package's own copy of this module,
+    another module than this file run as a script; they are raised again
+    here as this file's, so that :func:`main` names their stage.
+    """
     sys.path.insert(0, str(package))
     # Absolute on purpose: this file runs as a script, from the node image or
     # sent inline, outside the package it imports here from the cache.
@@ -558,12 +563,16 @@ def _hand_over(stream: IO[bytes], frames: IO[bytes], package: Path) -> int:
     if package.resolve() not in location.parents:
         msg = f"phonometry imported from {location}, not from the package sent ({package})"
         raise Refused(msg, stage="import")
-    # The module that serves the stream is not in the tree yet: mypy reports
-    # these two ignores as unused once it is, and they go then.
-    from phonometry.simulation._remote import node  # type: ignore[attr-defined]
+    from phonometry.simulation._remote import bootstrap as shipped
+    from phonometry.simulation._remote import node
 
     write_frame(frames, {"type": "ready"})
-    return node.serve(stream, frames)  # type: ignore[no-any-return]
+    try:
+        return node.serve(stream, frames)
+    except shipped.Refused as exc:
+        raise Refused(str(exc), stage=exc.stage) from None
+    except shipped.FrameError as exc:
+        raise FrameError(str(exc)) from None
 
 
 def _converse(stream: IO[bytes], frames: IO[bytes]) -> int:

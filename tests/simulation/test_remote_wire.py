@@ -317,3 +317,9 @@ def test_a_float32_array_stays_float32() -> None:
 def test_a_form_the_encoder_does_not_write_is_refused(node: object) -> None:
     with pytest.raises(ValueError, match="not a wire form"):
         wire.decode_arguments({"c": node}, [bytearray(8)])
+
+
+def test_the_guard_names_every_function_a_node_runs() -> None:
+    from phonometry.simulation._remote import node
+
+    assert set(_EVERY_PARAMETER) == set(node.FUNCTIONS)

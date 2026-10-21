@@ -40,6 +40,7 @@ from phonometry.noise_control import silencers as sl
 from phonometry.simulation.fdtd import (
     CWSource,
     FDTDRecording,
+    FDTDRun,
     GaussianPulse,
     fdtd_simulation,
 )
@@ -66,20 +67,24 @@ def _pulse_spectrum(
     """Probe spectrum of one broadband pulse run: ``(frequencies, P(f))``."""
     dt = 0.6 * dx / (_C * math.sqrt(2.0))
     res = fdtd_simulation(
-        _C,
-        dx,
-        steps * dt,
-        sources=[GaussianPulse(ix=source[0], iy=source[1], half_width_s=pulse_width)],
-        shape=obstacle.shape,
-        recording=FDTDRecording(probes=[probe]),
-        boundaries={
-            "left": "absorbing",
-            "right": "absorbing",
-            "top": "rigid",
-            "bottom": "rigid",
-        },
-        absorbing_layer_cells=sponge,
-        obstacle_mask=obstacle,
+        FDTDRun(
+            _C,
+            dx,
+            steps * dt,
+            sources=[
+                GaussianPulse(ix=source[0], iy=source[1], half_width_s=pulse_width)
+            ],
+            shape=obstacle.shape,
+            recording=FDTDRecording(probes=[probe]),
+            boundaries={
+                "left": "absorbing",
+                "right": "absorbing",
+                "top": "rigid",
+                "bottom": "rigid",
+            },
+            absorbing_layer_cells=sponge,
+            obstacle_mask=obstacle,
+        )
     )
     p = res.pressures[0]
     n = p.size * _PAD
@@ -116,15 +121,17 @@ def _transmitted_rms(frequency: float) -> float:
     steps = 3000
     dt = 0.6 * _DX / (_C * math.sqrt(2.0))
     res = fdtd_simulation(
-        _C,
-        _DX,
-        steps * dt,
-        sources=[src],
-        shape=(_NY, _NX),
-        recording=FDTDRecording(probes=[(170, 7)]),
-        boundaries=boundaries,
-        absorbing_layer_cells=10,
-        obstacle_mask=mask,
+        FDTDRun(
+            _C,
+            _DX,
+            steps * dt,
+            sources=[src],
+            shape=(_NY, _NX),
+            recording=FDTDRecording(probes=[(170, 7)]),
+            boundaries=boundaries,
+            absorbing_layer_cells=10,
+            obstacle_mask=mask,
+        )
     )
     p = res.pressures[0]
     tail = p[int(p.size * 0.6) :]  # steady-state window

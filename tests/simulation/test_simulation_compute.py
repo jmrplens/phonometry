@@ -18,8 +18,10 @@ from phonometry.simulation import (
     ComputeFallbackWarning,
     ElasticFDTD2D,
     ElasticRecording,
+    ElasticRun,
     ExplosionSource,
     FDTDRecording,
+    FDTDRun,
     GaussianPulse,
     Material,
     PlaneWaveSource,
@@ -38,12 +40,14 @@ if TYPE_CHECKING:
 def _acoustic(recording: FDTDRecording | None = None, **kwargs: Any) -> FDTDResult:
     """A small acoustic run with one pulse, recorded as the test asks."""
     return fdtd_simulation(
-        343.0,
-        0.01,
-        1e-3,
-        shape=(30, 41),
-        sources=[GaussianPulse(ix=15, iy=15, half_width_s=4e-5)],
-        recording=recording,
+        FDTDRun(
+            343.0,
+            0.01,
+            1e-3,
+            shape=(30, 41),
+            sources=[GaussianPulse(ix=15, iy=15, half_width_s=4e-5)],
+            recording=recording,
+        ),
         **kwargs,
     )
 
@@ -55,25 +59,29 @@ def _pulse(t: float) -> float:
 def _elastic(recording: ElasticRecording, **kwargs: Any) -> ElasticFDTDResult:
     """A small solid struck by an explosion, recorded as the test asks."""
     return elastic_fdtd_simulation(
-        4000.0,
-        2300.0,
-        0.01,
-        1e-4,
-        rho=2500.0,
-        shape=(20, 21),
-        sources=[ExplosionSource(ix=10, iy=9, waveform=_pulse)],
-        recording=recording,
+        ElasticRun(
+            4000.0,
+            2300.0,
+            0.01,
+            1e-4,
+            rho=2500.0,
+            shape=(20, 21),
+            sources=[ExplosionSource(ix=10, iy=9, waveform=_pulse)],
+            recording=recording,
+        ),
         **kwargs,
     )
 
 
 def test_a_run_records_where_it_ran() -> None:
     res = fdtd_simulation(
-        343.0,
-        0.01,
-        1e-3,
-        shape=(30, 30),
-        sources=[GaussianPulse(ix=15, iy=15, half_width_s=4e-5)],
+        FDTDRun(
+            343.0,
+            0.01,
+            1e-3,
+            shape=(30, 30),
+            sources=[GaussianPulse(ix=15, iy=15, half_width_s=4e-5)],
+        )
     )
     assert res.provenance.device == "cpu"
     assert res.provenance.dtype == "float64"
@@ -157,12 +165,14 @@ def _function_route(every: object, decimation: object) -> object:
         snapshot_decimation=decimation,  # type: ignore[arg-type]
     )
     return fdtd_simulation(
-        343.0,
-        0.01,
-        1e-4,
-        shape=(8, 8),
-        sources=[GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
-        recording=recording,
+        FDTDRun(
+            343.0,
+            0.01,
+            1e-4,
+            shape=(8, 8),
+            sources=[GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
+            recording=recording,
+        )
     )
 
 
@@ -172,14 +182,16 @@ def _elastic_function_route(every: object, decimation: object) -> object:
         snapshot_decimation=decimation,  # type: ignore[arg-type]
     )
     return elastic_fdtd_simulation(
-        4000.0,
-        2300.0,
-        0.01,
-        1e-5,
-        rho=2500.0,
-        shape=(8, 8),
-        sources=[ExplosionSource(ix=4, iy=4, waveform=_pulse)],
-        recording=recording,
+        ElasticRun(
+            4000.0,
+            2300.0,
+            0.01,
+            1e-5,
+            rho=2500.0,
+            shape=(8, 8),
+            sources=[ExplosionSource(ix=4, iy=4, waveform=_pulse)],
+            recording=recording,
+        )
     )
 
 
@@ -226,12 +238,14 @@ def test_a_bad_snapshot_count_is_refused_alike_on_every_route(
 
 def test_a_float32_run_keeps_float32_snapshots() -> None:
     res = fdtd_simulation(
-        343.0,
-        0.01,
-        5e-4,
-        shape=(20, 20),
-        sources=[GaussianPulse(ix=10, iy=10, half_width_s=4e-5)],
-        recording=FDTDRecording(probes=[(4, 4)], snapshot_every=5),
+        FDTDRun(
+            343.0,
+            0.01,
+            5e-4,
+            shape=(20, 20),
+            sources=[GaussianPulse(ix=10, iy=10, half_width_s=4e-5)],
+            recording=FDTDRecording(probes=[(4, 4)], snapshot_every=5),
+        ),
         compute=Compute(dtype="float32"),
     )
     assert res.snapshots is not None
@@ -243,14 +257,18 @@ def test_a_float32_run_keeps_float32_snapshots() -> None:
 def test_a_plane_wave_runs_through_the_function() -> None:
     pulse = GaussianPulse(ix=0, iy=0, half_width_s=5e-5)
     res = fdtd_simulation(
-        343.0,
-        0.01,
-        1e-3,
-        shape=(40, 30),
-        boundaries="absorbing",
-        absorbing_layer_cells=8,
-        sources=[PlaneWaveSource(direction="down", waveform=pulse.value, offset=10)],
-        recording=FDTDRecording(probes=[(15, 30)]),
+        FDTDRun(
+            343.0,
+            0.01,
+            1e-3,
+            shape=(40, 30),
+            boundaries="absorbing",
+            absorbing_layer_cells=8,
+            sources=[
+                PlaneWaveSource(direction="down", waveform=pulse.value, offset=10)
+            ],
+            recording=FDTDRecording(probes=[(15, 30)]),
+        )
     )
     assert np.abs(res.pressures).max() > 0.0
     assert isinstance(res.sources[0], PlaneWaveSource)
@@ -261,12 +279,14 @@ def test_a_plane_wave_run_draws_its_snapshot_with_the_point_sources_only() -> No
 
     pulse = GaussianPulse(ix=5, iy=30, half_width_s=5e-5)
     res = fdtd_simulation(
-        343.0,
-        0.01,
-        5e-4,
-        shape=(40, 30),
-        sources=[PlaneWaveSource(direction="down", waveform=pulse.value), pulse],
-        recording=FDTDRecording(snapshot_every=10),
+        FDTDRun(
+            343.0,
+            0.01,
+            5e-4,
+            shape=(40, 30),
+            sources=[PlaneWaveSource(direction="down", waveform=pulse.value), pulse],
+            recording=FDTDRecording(snapshot_every=10),
+        )
     )
     ax = res.plot(kind="snapshot")
     stars = [line for line in ax.lines if line.get_marker() == "*"]
@@ -285,11 +305,13 @@ def test_fallback_is_recorded(monkeypatch: pytest.MonkeyPatch) -> None:
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         res = fdtd_simulation(
-            343.0,
-            0.01,
-            5e-4,
-            shape=(16, 16),
-            sources=[GaussianPulse(ix=8, iy=8, half_width_s=4e-5)],
+            FDTDRun(
+                343.0,
+                0.01,
+                5e-4,
+                shape=(16, 16),
+                sources=[GaussianPulse(ix=8, iy=8, half_width_s=4e-5)],
+            ),
             compute=Compute(device="cupy", fallback=True),
         )
     assert [w.category for w in caught] == [ComputeFallbackWarning]

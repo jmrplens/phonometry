@@ -2808,6 +2808,16 @@ RECORD_POSITIONAL_EXEMPT: dict[tuple[str, str], str] = {
         "positionally, the samples and their rate, and nothing else is taken "
         "by position"
     ),
+    ("phonometry.simulation.fdtd", "FDTDRun"): (
+        "FDTDRun(c, dx, duration) names the medium, the grid spacing and the "
+        "time a simulation runs for first, as fdtd_simulation always took "
+        "them, and takes everything else by name"
+    ),
+    ("phonometry.simulation.elastic_fdtd", "ElasticRun"): (
+        "ElasticRun(c_p, c_s, dx, duration) names the two wave speeds, the "
+        "grid spacing and the time first, as FDTDRun does, and takes "
+        "everything else by name"
+    ),
 }
 
 

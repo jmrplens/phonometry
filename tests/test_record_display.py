@@ -300,12 +300,14 @@ def _fdtd() -> object:
 
     sim = simulation.FDTD2D(343.0, 0.02, shape=(100, 100))
     return simulation.fdtd_simulation(
-        343.0,
-        0.02,
-        100 * sim.dt,
-        sources=[simulation.GaussianPulse(ix=50, iy=50, half_width_s=2e-4)],
-        shape=(100, 100),
-        recording=simulation.FDTDRecording(probes=[(10, 10)], snapshot_every=1),
+        simulation.FDTDRun(
+            343.0,
+            0.02,
+            100 * sim.dt,
+            sources=[simulation.GaussianPulse(ix=50, iy=50, half_width_s=2e-4)],
+            shape=(100, 100),
+            recording=simulation.FDTDRecording(probes=[(10, 10)], snapshot_every=1),
+        )
     )
 
 

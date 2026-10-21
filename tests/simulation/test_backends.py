@@ -23,8 +23,10 @@ from phonometry.simulation import (
     ComputeImportError,
     ElasticFDTD2D,
     ElasticRecording,
+    ElasticRun,
     ExplosionSource,
     FDTDRecording,
+    FDTDRun,
     ForceSource,
     GaussianPulse,
     PlaneWaveSource,
@@ -222,21 +224,25 @@ _ROUTES: dict[str, Callable[[], object]] = {
         (8, 8), 0.01, background=WATER, compute=_ABSENT_GPU
     ),
     "fdtd_simulation": lambda: fdtd_simulation(
-        343.0,
-        0.01,
-        1e-4,
-        shape=(8, 8),
-        sources=[GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
+        FDTDRun(
+            343.0,
+            0.01,
+            1e-4,
+            shape=(8, 8),
+            sources=[GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
+        ),
         compute=_ABSENT_GPU,
     ),
     "elastic_fdtd_simulation": lambda: elastic_fdtd_simulation(
-        4000.0,
-        2300.0,
-        0.01,
-        1e-5,
-        rho=2500.0,
-        shape=(8, 8),
-        sources=[ExplosionSource(ix=4, iy=4, waveform=lambda t: t)],
+        ElasticRun(
+            4000.0,
+            2300.0,
+            0.01,
+            1e-5,
+            rho=2500.0,
+            shape=(8, 8),
+            sources=[ExplosionSource(ix=4, iy=4, waveform=lambda t: t)],
+        ),
         compute=_ABSENT_GPU,
     ),
 }
@@ -755,14 +761,14 @@ def test_torch_cuda_without_cuda_is_a_device_error() -> None:
 _NUMPY_RUN = """
 import sys
 from phonometry import simulation as s
-s.fdtd_simulation(
+s.fdtd_simulation(s.FDTDRun(
     343.0, 0.01, 1e-4, shape=(8, 8), recording=s.FDTDRecording(probes=[(4, 4)]),
     sources=[s.GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
-)
-s.elastic_fdtd_simulation(
+))
+s.elastic_fdtd_simulation(s.ElasticRun(
     4000.0, 2300.0, 0.01, 1e-5, rho=2500.0, shape=(8, 8),
     sources=[s.ExplosionSource(ix=4, iy=4, waveform=lambda t: t)],
-)
+))
 libraries = {"cupy", "torch", "array_api_compat", "array_api_strict"}
 print(sorted(libraries & {name.partition(".")[0] for name in sys.modules}))
 """
@@ -800,7 +806,7 @@ def _acoustic_run(compute: Compute, **changes: Any) -> object:
         **changes,
     }
     duration = arguments.pop("duration")
-    return fdtd_simulation(343.0, 0.01, duration, compute=compute, **arguments)
+    return fdtd_simulation(FDTDRun(343.0, 0.01, duration, **arguments), compute=compute)
 
 
 def _elastic_run(compute: Compute, **changes: Any) -> object:
@@ -814,7 +820,8 @@ def _elastic_run(compute: Compute, **changes: Any) -> object:
     }
     duration = arguments.pop("duration")
     return elastic_fdtd_simulation(
-        4000.0, 2300.0, 0.01, duration, rho=2500.0, compute=compute, **arguments
+        ElasticRun(4000.0, 2300.0, 0.01, duration, rho=2500.0, **arguments),
+        compute=compute,
     )
 
 

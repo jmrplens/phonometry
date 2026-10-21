@@ -1,0 +1,219 @@
+#  Copyright (c) 2026. Jose Manuel Requena Plens
+"""A simulation is one record, checked when it is built.
+
+:class:`FDTDRun` and :class:`ElasticRun` hold every argument of a run and
+refuse a bad one where the run is written, the grid's included (the time
+step, the density, the sponge, the impedance edges, the obstacle, the
+sources and the probes on the grid), so that a run which builds is one the
+simulation function can step, here or on a node. Nothing the caller changes
+afterwards reaches a checked run.
+"""
+
+from __future__ import annotations
+
+import copy
+import dataclasses
+import pickle
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any
+
+import numpy as np
+import pytest
+
+from phonometry.simulation import (
+    ElasticBoundaries,
+    ElasticRecording,
+    ElasticRun,
+    ExplosionSource,
+    FDTDRecording,
+    FDTDRun,
+    GaussianPulse,
+    elastic_fdtd_simulation,
+    fdtd_simulation,
+)
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+_PULSE = GaussianPulse(ix=4, iy=4, half_width_s=4e-5)
+
+
+def _acoustic(**changes: Any) -> FDTDRun:
+    fields: dict[str, Any] = {"shape": (8, 8), "sources": [_PULSE], **changes}
+    return FDTDRun(343.0, 0.01, 1e-4, **fields)
+
+
+def _elastic(**changes: Any) -> ElasticRun:
+    source = ExplosionSource(ix=4, iy=4, waveform=_PULSE.value)
+    fields: dict[str, Any] = {
+        "shape": (8, 8),
+        "rho": 2500.0,
+        "sources": [source],
+        **changes,
+    }
+    return ElasticRun(4000.0, 2300.0, 0.01, 1e-4, **fields)
+
+
+@pytest.mark.parametrize(
+    ("build", "bad", "error", "match"),
+    [
+        (_acoustic, {"rho": -1.0}, ValueError, "rho must be strictly positive"),
+        (
+            _acoustic,
+            {"boundaries": {"left": np.ones(3)}},
+            ValueError,
+            "impedance for side 'left'",
+        ),
+        (
+            _acoustic,
+            {"boundaries": "absorbing", "absorbing_layer_cells": 0},
+            ValueError,
+            "absorbing_layer_cells must be >= 1",
+        ),
+        (_acoustic, {"sources": []}, ValueError, "at least one source is required"),
+        (
+            _acoustic,
+            {"sources": [GaussianPulse(ix=40, iy=4, half_width_s=4e-5)]},
+            ValueError,
+            "source position lies outside the grid",
+        ),
+        (
+            _acoustic,
+            {"recording": FDTDRecording(probes=[(40, 40)])},
+            ValueError,
+            r"probe \(40, 40\) lies outside the grid",
+        ),
+        (
+            _acoustic,
+            {"recording": ElasticRecording()},
+            TypeError,
+            "'recording' must be an FDTDRecording or None",
+        ),
+        (_elastic, {"rho": -1.0}, ValueError, "rho must be strictly positive"),
+        (
+            _elastic,
+            {"recording": ElasticRecording(probes=[(40, 40)])},
+            ValueError,
+            r"probe \(40, 40\) lies outside the grid",
+        ),
+        (
+            _elastic,
+            {
+                "boundaries": ElasticBoundaries(
+                    sides="absorbing", absorbing_layer_cells=0
+                )
+            },
+            ValueError,
+            "absorbing_layer_cells must be >= 1",
+        ),
+        (
+            _elastic,
+            {"boundaries": "free"},
+            TypeError,
+            "'boundaries' must be an ElasticBoundaries or None",
+        ),
+    ],
+)
+def test_a_run_refuses_a_bad_argument_when_it_is_built(
+    build: Callable[..., FDTDRun | ElasticRun],
+    bad: dict[str, object],
+    error: type[Exception],
+    match: str,
+) -> None:
+    with pytest.raises(error, match=match):
+        build(**bad)
+
+
+def test_a_changed_copy_of_a_run_is_checked_again() -> None:
+    corner = GaussianPulse(ix=1, iy=1, half_width_s=4e-5)
+    run = _acoustic(sources=[corner], recording=FDTDRecording(probes=[(6, 6)]))
+    with pytest.raises(ValueError, match=r"probe \(6, 6\) lies outside the grid"):
+        dataclasses.replace(run, shape=(4, 4))
+
+
+def test_a_run_takes_its_grid_and_duration_by_position_and_the_rest_by_name() -> None:
+    with pytest.raises(TypeError):
+        FDTDRun(343.0, 0.01, 1e-4, [_PULSE])  # type: ignore[misc]
+    run = _acoustic()
+    assert (run.c, run.dx, run.duration, run.shape) == (343.0, 0.01, 1e-4, (8, 8))
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        run.dx = 0.02  # type: ignore[misc]
+
+
+def test_a_run_does_not_follow_what_its_caller_changes() -> None:
+    c = np.full((8, 8), 343.0)
+    sources = [_PULSE]
+    edge = np.full(8, 413.0)
+    boundaries: dict[str, Any] = {"left": "absorbing", "top": edge}
+    run = FDTDRun(
+        c,
+        0.01,
+        1e-4,
+        sources=sources,
+        boundaries=boundaries,
+        absorbing_layer_cells=2,
+        recording=FDTDRecording(probes=[(5, 5)]),
+    )
+    before = fdtd_simulation(run)
+    c[:] = 686.0
+    edge[:] = -1.0
+    sources.append(GaussianPulse(ix=40, iy=40, half_width_s=4e-5))
+    boundaries["right"] = "absorbing"
+    after = fdtd_simulation(run)
+    assert np.array_equal(after.pressures, before.pressures)
+    assert run.sources == (_PULSE,)
+    assert isinstance(run.boundaries, MappingProxyType)
+    assert set(run.boundaries) == {"left", "top"}
+    assert not run.c.flags.writeable
+
+    sides: dict[str, Any] = {"top": "free", "bottom": "absorbing"}
+    elastic = _elastic(
+        boundaries=ElasticBoundaries(sides=sides, absorbing_layer_cells=2),
+        recording=ElasticRecording(probes=[(5, 5)], probe_fields=("p", "vy")),
+    )
+    first = elastic_fdtd_simulation(elastic)
+    sides["top"] = "absorbing"
+    sides["left"] = "free"
+    again = elastic_fdtd_simulation(elastic)
+    rebuilt = elastic_fdtd_simulation(pickle.loads(pickle.dumps(elastic)))
+    assert isinstance(elastic.boundaries, ElasticBoundaries)
+    assert dict(elastic.boundaries.sides) == {"top": "free", "bottom": "absorbing"}
+    for later in (again, rebuilt):
+        assert np.array_equal(later.signals, first.signals)
+        assert later.free_sides == first.free_sides == ("top",)
+
+
+def test_elastic_boundaries_hold_a_mapping_of_sides_read_only() -> None:
+    sides: dict[str, Any] = {"top": "free", "left": "absorbing"}
+    boundaries = ElasticBoundaries(sides=sides, absorbing_layer_cells=3)
+    sides["top"] = "absorbing"
+    assert isinstance(boundaries.sides, MappingProxyType)
+    assert dict(boundaries.sides) == {"top": "free", "left": "absorbing"}
+    for back in (pickle.loads(pickle.dumps(boundaries)), copy.deepcopy(boundaries)):
+        assert isinstance(back.sides, MappingProxyType)
+        assert back == boundaries
+    assert ElasticBoundaries(sides="free").sides == "free"
+
+
+@pytest.mark.parametrize("build", [_acoustic, _elastic])
+def test_a_run_crosses_a_process_boundary(
+    build: Callable[..., FDTDRun | ElasticRun],
+) -> None:
+    run = (
+        build(boundaries={"left": "absorbing"}, absorbing_layer_cells=2)
+        if build is _acoustic
+        else build()
+    )
+    back = pickle.loads(pickle.dumps(run))
+    simulate = fdtd_simulation if build is _acoustic else elastic_fdtd_simulation
+    here, there = simulate(run), simulate(back)
+    assert np.array_equal(here.times, there.times)
+    assert back._checked.steps == run._checked.steps
+
+
+def test_a_simulation_function_takes_its_own_run_only() -> None:
+    elastic, acoustic = _elastic(), _acoustic()
+    with pytest.raises(TypeError, match="'run' must be an FDTDRun, got ElasticRun"):
+        fdtd_simulation(elastic)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'run' must be an ElasticRun, got FDTDRun"):
+        elastic_fdtd_simulation(acoustic)  # type: ignore[arg-type]

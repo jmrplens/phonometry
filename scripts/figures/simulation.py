@@ -140,17 +140,19 @@ def generate_fdtd_simulation(output_dir: str) -> None:
     mask = np.zeros((200, 300), dtype=bool)
     mask[60:, 150:154] = True
     res = simulation.fdtd_simulation(
-        343.0,
-        dx,
-        9.0e-3,
-        shape=(200, 300),
-        sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-        recording=simulation.FDTDRecording(
-            probes=[(100, 100), (240, 100)], snapshot_every=75
-        ),
-        obstacle_mask=mask,
-        boundaries="absorbing",
-        absorbing_layer_cells=30,
+        simulation.FDTDRun(
+            343.0,
+            dx,
+            9.0e-3,
+            shape=(200, 300),
+            sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+            recording=simulation.FDTDRecording(
+                probes=[(100, 100), (240, 100)], snapshot_every=75
+            ),
+            obstacle_mask=mask,
+            boundaries="absorbing",
+            absorbing_layer_cells=30,
+        )
     )
 
     _fig, (ax_f, ax_p) = plt.subplots(
@@ -183,26 +185,30 @@ def generate_elastic_halfspace_waves(output_dir: str) -> None:
     dt = cfl * dx / (c_p * np.sqrt(2.0))
     steps = round(duration / dt)
     res = simulation.elastic_fdtd_simulation(
-        c_p,
-        c_s,
-        dx,
-        duration,
-        rho=rho,
-        shape=(300, 600),
-        cfl=cfl,
-        sources=[
-            simulation.ForceSource(
-                ix=300,
-                iy=0,
-                direction="y",
-                amplitude=1e6,
-                waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=width).value,
-            )
-        ],
-        boundaries=simulation.ElasticBoundaries(sides={"top": "free"}),
-        recording=simulation.ElasticRecording(
-            snapshot_every=steps, snapshot_field="vy"
-        ),
+        simulation.ElasticRun(
+            c_p,
+            c_s,
+            dx,
+            duration,
+            rho=rho,
+            shape=(300, 600),
+            cfl=cfl,
+            sources=[
+                simulation.ForceSource(
+                    ix=300,
+                    iy=0,
+                    direction="y",
+                    amplitude=1e6,
+                    waveform=simulation.GaussianPulse(
+                        ix=0, iy=0, half_width_s=width
+                    ).value,
+                )
+            ],
+            boundaries=simulation.ElasticBoundaries(sides={"top": "free"}),
+            recording=simulation.ElasticRecording(
+                snapshot_every=steps, snapshot_field="vy"
+            ),
+        )
     )
 
     _fig, ax = plt.subplots(figsize=(9.5, 5.4))
@@ -280,20 +286,22 @@ def _scholte_interface_result() -> ElasticFDTDResult:
         return float((1.0 - 2.0 * a) * np.exp(-a))
 
     return simulation.elastic_fdtd_simulation(
-        c_p,
-        c_s,
-        dx,
-        duration,
-        rho=rho,
-        sources=[
-            simulation.ExplosionSource(ix=60, iy=89, waveform=ricker, amplitude=1e3)
-        ],
-        boundaries=simulation.ElasticBoundaries(
-            sides="absorbing", absorbing_layer_cells=20
-        ),
-        recording=simulation.ElasticRecording(
-            snapshot_every=steps, snapshot_field="vy"
-        ),
+        simulation.ElasticRun(
+            c_p,
+            c_s,
+            dx,
+            duration,
+            rho=rho,
+            sources=[
+                simulation.ExplosionSource(ix=60, iy=89, waveform=ricker, amplitude=1e3)
+            ],
+            boundaries=simulation.ElasticBoundaries(
+                sides="absorbing", absorbing_layer_cells=20
+            ),
+            recording=simulation.ElasticRecording(
+                snapshot_every=steps, snapshot_field="vy"
+            ),
+        )
     )
 
 
@@ -345,12 +353,14 @@ def generate_fdtd_room_modes(output_dir: str) -> None:
     lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
     nx, ny = round(lx / dx), round(ly / dx)
     res = simulation.fdtd_simulation(
-        c,
-        dx,
-        0.35,
-        shape=(ny, nx),
-        sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
-        recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
+        simulation.FDTDRun(
+            c,
+            dx,
+            0.35,
+            shape=(ny, nx),
+            sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
+            recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
+        )
     )
     p = res.pressures[0]
     spec = np.abs(np.fft.rfft(p * np.hanning(p.size), n=8 * p.size))

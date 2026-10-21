@@ -32,9 +32,11 @@ Eq. 9.9): zero normal stress on the surface plane and an antisymmetric
 image of the shear stress above it.
 
 Two API levels are exposed, mirroring the acoustic module.
-:func:`elastic_fdtd_simulation` builds the grid, runs a deterministic
-simulation and returns a frozen :class:`ElasticFDTDResult` with per-probe
-signal histories, optional field snapshots and a ``.plot()`` method.
+:func:`elastic_fdtd_simulation` takes an :class:`ElasticRun`, the record of
+a simulation that checks every argument when it is built, steps it
+deterministically and returns a frozen :class:`ElasticFDTDResult` with
+per-probe signal histories, optional field snapshots and a ``.plot()``
+method.
 :class:`ElasticFDTD2D` is the underlying stepping engine for callers that
 need frame-by-frame access to the five field arrays.
 
@@ -81,7 +83,9 @@ from __future__ import annotations
 
 import dataclasses
 from collections.abc import Callable, Iterable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import KW_ONLY, dataclass
+from functools import cached_property
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -89,7 +93,13 @@ from scipy.optimize import brentq
 
 from .._internal.catalogue import CatalogueRow
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays, handed_over, read_only_copy
+from .._internal.frozen import (
+    OwnsArrays,
+    handed_over,
+    read_only,
+    read_only_copy,
+    reduce_with_plain_rows,
+)
 from .._internal.validation import (
     require_choice,
     require_count,
@@ -98,8 +108,9 @@ from .._internal.validation import (
     require_scalar,
 )
 from . import _backends
-from .compute import _local_request
+from .compute import _local_request, _requested
 from .fdtd import (
+    _DEFAULT_SPONGE_REFLECTION,
     _SIDES,
     Field2D,
     Side,
@@ -118,6 +129,8 @@ from .fdtd import (
     _run_recording,
     _sigma_map,
     _snapshot_options,
+    _snapshot_shape,
+    _snapshot_times,
     _step_count,
     _time_step,
     _validate_sponge_damping,
@@ -143,6 +156,7 @@ __all__ = [
     "ElasticFDTD2D",
     "ElasticFDTDResult",
     "ElasticRecording",
+    "ElasticRun",
     "ExplosionSource",
     "ForceSource",
     "Material",
@@ -679,9 +693,8 @@ def _check_elastic_source(
 ) -> None:
     """Refuse a source off the grid ``(ny, nx)`` or inside the obstacle.
 
-    Shared by :meth:`ElasticFDTD2D.add_source` and
-    :func:`elastic_fdtd_simulation`, which checks its sources before it
-    builds the engine.
+    Shared by :meth:`ElasticFDTD2D.add_source` and :class:`ElasticRun`,
+    which checks its sources against the grid when the run is built.
     """
     ix = _integer("source ix", source.ix)
     iy = _integer("source iy", source.iy)
@@ -815,7 +828,7 @@ class ElasticFDTD2D:
         cfl: float = 0.6,
         sponge_width: int = 0,
         sponge_sides: Side | Iterable[Side] | None = None,
-        sponge_reflection: float = 1e-4,
+        sponge_reflection: float = _DEFAULT_SPONGE_REFLECTION,
         damping: float | NDArray[np.float64] = 0.0,
         shape: tuple[int, int] | None = None,
         free_sides: str | Iterable[str] | None = None,
@@ -1602,7 +1615,8 @@ class ElasticRecording(RichDisplay):
         """Refuse a malformed probe, field or count when the record is built.
 
         Whether a probe lies on the grid, and outside the obstacle, is checked
-        by :func:`elastic_fdtd_simulation`, the first place a grid exists.
+        by the :class:`ElasticRun` that holds the record, the first place a
+        grid exists.
         """
         fields = _resolve_probe_fields(self.probe_fields)
         if self.snapshot_field not in _FIELD_NAMES:
@@ -1629,13 +1643,220 @@ class ElasticBoundaries(RichDisplay):
 
     :param sides: ``"rigid"`` (default), ``"absorbing"``, ``"free"``, or a
         mapping from side name (``left``/``right``/``top``/``bottom``) to one
-        of those.
+        of those. A mapping is held as a read-only copy, so a change to the
+        caller's dictionary afterwards does not reach the record.
     :param absorbing_layer_cells: Sponge-layer thickness for absorbing sides,
         in cells.
     """
 
     sides: ElasticBoundary | Mapping[Side, ElasticBoundary] = "rigid"
     absorbing_layer_cells: int = 20
+
+    def __post_init__(self) -> None:
+        """Hold a mapping of sides as a read-only copy of its own.
+
+        The sides are checked where a run reads them, not here.
+        """
+        if isinstance(self.sides, Mapping):
+            object.__setattr__(self, "sides", MappingProxyType(dict(self.sides)))
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Rebuild from the fields: a read-only mapping of sides does not pickle."""
+        return reduce_with_plain_rows(self)
+
+
+@dataclass(frozen=True)
+class _ElasticChecks:
+    """What the checks of an :class:`ElasticRun` found, kept with the run.
+
+    As :class:`~phonometry.simulation.fdtd._AcousticChecks`, for the elastic
+    engine: the grid, the free and the absorbing sides, the counts and the
+    recorded fields.
+    """
+
+    grid: tuple[int, int]
+    dx: float
+    dt: float
+    obstacle: NDArray[np.bool_] | None
+    free_sides: tuple[str, ...]
+    absorbing_sides: tuple[Side, ...]
+    sponge_width: int
+    probe_ix: NDArray[np.int_]
+    fields: tuple[str, ...]
+    steps: int
+    snapshot_every: int | None
+    snapshot_field: Field
+    snapshot_decimation: int
+
+    def snapshot_shape(self) -> tuple[int, int, int] | None:
+        """The shape of the snapshots the run records, or ``None`` when it records none."""
+        return _snapshot_shape(
+            self.grid, self.steps, self.snapshot_every, self.snapshot_decimation
+        )
+
+
+@dataclass(frozen=True)
+class ElasticRun(OwnsArrays):
+    r"""One elastic (P-SV) FDTD simulation: the domain, its sources and what it records.
+
+    As :class:`~phonometry.simulation.FDTDRun`, for
+    :func:`elastic_fdtd_simulation`: every argument is checked when the run
+    is built, the grid's included (the time step, the shear speed against
+    the P-wave speed, the density, the sponge and the damping, the free and
+    absorbing sides, the obstacle, and the sources and the probes on the
+    grid), and nothing the caller changes afterwards reaches a checked run.
+
+    :param c_p: P-wave speed map [m/s], shape ``(ny, nx)``, or a scalar with
+        an explicit ``shape``.
+    :param c_s: S-wave speed map [m/s]; ``c_s = 0`` marks fluid cells.
+    :param dx: Grid spacing [m] (square cells).
+    :param duration: Physical time to simulate [s].
+    :param sources: One or more of :class:`ExplosionSource` or
+        :class:`ForceSource`.
+    :param rho: Density map [kg/m3]; scalar or ``(ny, nx)`` array.
+    :param shape: Grid shape ``(ny, nx)``, required when ``c_p`` is scalar.
+    :param cfl: Courant number in ``(0, 1)`` (Virieux Eqs. 6-7); the time
+        step is :math:`\Delta t = C_\mathrm{N}\, \Delta x / (c_{\mathrm{p},\max} \sqrt{2})`.
+        Default 0.6.
+    :param recording: What the run records (:class:`ElasticRecording`): the
+        probe cells and their fields, and the snapshot cadence and field.
+        ``None`` records nothing but the time axis.
+    :param boundaries: How the domain edges are terminated
+        (:class:`ElasticBoundaries`); ``None`` is rigid on all four sides.
+    :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells
+        (rasterised interior geometry).
+    :param damping: Uniform bulk amplitude decay rate [1/s].
+    :raises TypeError: If an argument is of the wrong type, among them a
+        ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
+        neither an :class:`ElasticRecording` nor ``None``, or ``boundaries``
+        that are neither an :class:`ElasticBoundaries` nor ``None``.
+    :raises ValueError: If an argument is out of its range, or a source, a
+        probe or the obstacle does not fit the grid.
+    """
+
+    c_p: float | Field2D
+    c_s: float | Field2D
+    dx: float
+    duration: float
+    _: KW_ONLY
+    sources: Sequence[ElasticSource]
+    rho: float | Field2D
+    shape: tuple[int, int] | None = None
+    cfl: float = 0.6
+    recording: ElasticRecording | None = None
+    boundaries: ElasticBoundaries | None = None
+    obstacle_mask: NDArray[np.bool_] | None = None
+    damping: float = 0.0
+
+    def __post_init__(self) -> None:
+        """Hold the sources so they cannot change, then check every argument."""
+        object.__setattr__(self, "sources", tuple(self.sources))
+        checks = self._checked
+        if self.shape is not None and np.isscalar(self.c_p):
+            # Read only for a scalar c_p: held as the grid it was built on.
+            object.__setattr__(self, "shape", checks.grid)
+
+    @cached_property
+    def _checked(self) -> _ElasticChecks:
+        """Every argument checked, once, when the run is built."""
+        return _elastic_checks(self)
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Rebuild from the fields, so the run checks itself again where it arrives."""
+        return reduce_with_plain_rows(self)
+
+
+def _boundaries_or_rigid(boundaries: object) -> ElasticBoundaries:
+    """A run's ``boundaries``, or rigid on all four sides for ``None``.
+
+    :raises TypeError: for anything but ``None`` or an :class:`ElasticBoundaries`.
+    """
+    if boundaries is None:
+        return ElasticBoundaries()
+    if not isinstance(boundaries, ElasticBoundaries):
+        msg = f"'boundaries' must be an ElasticBoundaries or None, got {type(boundaries).__name__}."
+        raise TypeError(msg)
+    return boundaries
+
+
+def _elastic_checks(run: ElasticRun) -> _ElasticChecks:
+    """Check every argument of *run*, as :func:`elastic_fdtd_simulation` always did.
+
+    The recording's type, the boundaries' type, the sources, the duration,
+    the sides and the sponge thickness, then the medium
+    (:func:`_elastic_medium`: the grid and the time step, the shear speed,
+    the density, the sponge and the damping, the free sides, the obstacle),
+    then the sources and the probes on the grid and the step count.
+
+    :raises TypeError: as :class:`ElasticRun` documents.
+    :raises ValueError: as :class:`ElasticRun` documents.
+    """
+    recording = _recording_or_empty(run.recording, ElasticRecording)
+    boundaries = _boundaries_or_rigid(run.boundaries)
+    if len(run.sources) == 0:
+        msg = "at least one source is required"
+        raise ValueError(msg)
+    duration = _positive_finite("duration", run.duration)
+    absorbing_sides, free_sides = _parse_elastic_boundaries(boundaries.sides)
+    width = _validated_absorbing_layer(boundaries, absorbing_sides)
+    medium = _elastic_medium(
+        run.c_p,
+        run.c_s,
+        run.dx,
+        rho=run.rho,
+        cfl=run.cfl,
+        sponge_width=width,
+        sponge_sides=absorbing_sides or None,
+        sponge_reflection=_DEFAULT_SPONGE_REFLECTION,
+        damping=run.damping,
+        shape=run.shape,
+        free_sides=free_sides,
+        obstacle_mask=run.obstacle_mask,
+    )
+    ny, nx = medium.cp_map.shape
+    for source in run.sources:
+        _check_elastic_source(source, (ny, nx), medium.obstacle)
+    return _ElasticChecks(
+        grid=(ny, nx),
+        dx=medium.dx,
+        dt=medium.dt,
+        obstacle=None if medium.obstacle is None else read_only(medium.obstacle),
+        free_sides=medium.free_sides,
+        absorbing_sides=absorbing_sides,
+        sponge_width=width,
+        probe_ix=read_only(_probe_indices(recording.probes, (ny, nx), medium.obstacle)),
+        fields=tuple(recording.probe_fields),
+        steps=_step_count(duration, medium.dt),
+        snapshot_every=recording.snapshot_every,
+        snapshot_field=recording.snapshot_field,
+        snapshot_decimation=recording.snapshot_decimation,
+    )
+
+
+def _elastic_engine(run: ElasticRun, compute: Compute | None) -> ElasticFDTD2D:
+    """The engine that steps *run* on this machine, its sources added.
+
+    It takes the sponge and the free sides the run's checks found, and
+    checks its medium again in its constructor, as every engine does.
+    """
+    checks = run._checked
+    sim = ElasticFDTD2D(
+        run.c_p,
+        run.c_s,
+        run.dx,
+        rho=run.rho,
+        cfl=run.cfl,
+        sponge_width=checks.sponge_width,
+        sponge_sides=checks.absorbing_sides or None,
+        damping=run.damping,
+        shape=run.shape,
+        free_sides=checks.free_sides,
+        obstacle_mask=run.obstacle_mask,
+        compute=compute,
+    )
+    for source in run.sources:
+        sim.add_source(source)
+    return sim
 
 
 def _parse_elastic_boundaries(
@@ -1829,20 +2050,7 @@ def _validated_absorbing_layer(
 
 
 def elastic_fdtd_simulation(
-    c_p: float | Field2D,
-    c_s: float | Field2D,
-    dx: float,
-    duration: float,
-    *,
-    sources: Sequence[ElasticSource],
-    rho: float | Field2D,
-    shape: tuple[int, int] | None = None,
-    cfl: float = 0.6,
-    recording: ElasticRecording | None = None,
-    boundaries: ElasticBoundaries | None = None,
-    obstacle_mask: NDArray[np.bool_] | None = None,
-    damping: float = 0.0,
-    compute: Compute | None = None,
+    run: ElasticRun, *, compute: Compute | None = None
 ) -> ElasticFDTDResult:
     r"""Run a deterministic 2D elastic (P-SV) FDTD simulation.
 
@@ -1865,126 +2073,65 @@ def elastic_fdtd_simulation(
     a point source is physically a line source with cylindrical
     :math:`1/\sqrt{r}` amplitude spreading.
 
-    :param c_p: P-wave speed map [m/s], shape ``(ny, nx)``, or a scalar with
-        an explicit ``shape``.
-    :param c_s: S-wave speed map [m/s]; ``c_s = 0`` marks fluid cells.
-    :param dx: Grid spacing [m] (square cells).
-    :param duration: Physical time to simulate [s].
-    :param sources: One or more of :class:`ExplosionSource` or
-        :class:`ForceSource`.
-    :param rho: Density map [kg/m3]; scalar or ``(ny, nx)`` array.
-    :param shape: Grid shape ``(ny, nx)``, required when ``c_p`` is scalar.
-    :param cfl: Courant number in ``(0, 1)`` (Virieux Eqs. 6-7); the time
-        step is :math:`\Delta t = C_\mathrm{N}\, \Delta x / (c_{\mathrm{p},\max} \sqrt{2})`.
-        Default 0.6.
-    :param recording: What the run records (:class:`ElasticRecording`): the
-        probe cells and their fields, and the snapshot cadence and field.
-        ``None`` records nothing but the time axis.
-    :param boundaries: How the domain edges are terminated
-        (:class:`ElasticBoundaries`); ``None`` is rigid on all four sides.
-    :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells
-        (rasterised interior geometry).
-    :param damping: Uniform bulk amplitude decay rate [1/s].
+    :param run: The simulation (:class:`ElasticRun`): the domain, its
+        sources and what it records, every argument checked when the run was
+        built.
     :param compute: Where the run steps (:class:`Compute`); ``None`` follows
         :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :return: An :class:`ElasticFDTDResult`.
-    :raises TypeError: If an input is of the wrong type, among them a ``cfl``
-        or ``dx`` that is not one number, a ``recording`` that is neither an
-        :class:`ElasticRecording` nor ``None``, or a ``compute`` that is
-        neither a :class:`Compute` nor ``None``.
-    :raises ValueError: If the inputs are invalid.
+    :raises TypeError: For a ``run`` that is not an :class:`ElasticRun`, or a
+        ``compute`` that is neither a :class:`Compute` nor ``None``.
+    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse.
     :raises ComputeImportError: When the device's library is not installed
         or does not import.
     :raises ComputeDeviceError: When the device is not present, or fails a
         first small computation; with ``fallback=True`` the run warns with
         :class:`ComputeFallbackWarning` and steps on NumPy instead.
     """
-    recording = _recording_or_empty(recording, ElasticRecording)
-    boundaries = ElasticBoundaries() if boundaries is None else boundaries
-    if len(sources) == 0:
-        msg = "at least one source is required"
-        raise ValueError(msg)
-    duration = _positive_finite("duration", duration)
-    fields = tuple(recording.probe_fields)
-    snapshot_every = recording.snapshot_every
-    snapshot_field = recording.snapshot_field
-    d = recording.snapshot_decimation
-    absorbing_sides, free_sides = _parse_elastic_boundaries(boundaries.sides)
-    absorbing_layer_cells = _validated_absorbing_layer(boundaries, absorbing_sides)
-
-    # The grid, the obstacle, the sources, the probes and the step count are
-    # checked on the host first, through the helpers the engine uses, so a
-    # bad one raises its own error before the engine asks for its device.
-    cp_map, _, dt = _elastic_grid(c_p, shape, cfl, dx)
-    ny, nx = cp_map.shape
-    obstacle = _validated_obstacle(obstacle_mask, ny, nx)
-    for source in sources:
-        _check_elastic_source(source, (ny, nx), obstacle)
-    probe_ix = _probe_indices(recording.probes, (ny, nx), obstacle)
-    steps = _step_count(duration, dt)
-
-    sim = ElasticFDTD2D(
-        c_p,
-        c_s,
-        dx,
-        rho=rho,
-        cfl=cfl,
-        sponge_width=absorbing_layer_cells,
-        sponge_sides=absorbing_sides or None,
-        damping=damping,
-        shape=shape,
-        free_sides=free_sides,
-        obstacle_mask=obstacle_mask,
-        compute=compute,
-    )
-    for source in sources:
-        sim.add_source(source)
-    times = np.arange(steps + 1, dtype=np.float64) * sim.dt
+    if not isinstance(run, ElasticRun):
+        msg = f"'run' must be an ElasticRun, got {type(run).__name__}."
+        raise TypeError(msg)
+    checks = run._checked
+    request = _requested(compute)
     # The record keeps these two as they are (handed_over): the snapshots are
     # most of the result, and a copy would hold them twice while it is built.
     # The probe histories are float64 whatever the run's dtype; the snapshots
     # keep it, a float32 run's being half the size.
-    signals = np.zeros((probe_ix.shape[0], len(fields), steps + 1), dtype=np.float64)
-    snapshots = (
-        None
-        if snapshot_every is None
-        else np.zeros(
-            (steps // snapshot_every + 1, -(-ny // d), -(-nx // d)),
-            dtype=sim._backend.host_dtype,
-        )
+    signals = np.zeros(
+        (checks.probe_ix.shape[0], len(checks.fields), checks.steps + 1),
+        dtype=np.float64,
     )
+    frames = checks.snapshot_shape()
+    snapshots = (
+        None if frames is None else np.zeros(frames, dtype=np.dtype(request.dtype))
+    )
+    sim = _elastic_engine(run, compute)
     _record_elastic_run(
         sim,
-        steps,
-        probe_ix,
-        fields,
-        snapshot_every,
-        snapshot_field,
-        d,
+        checks.steps,
+        checks.probe_ix,
+        checks.fields,
+        checks.snapshot_every,
+        checks.snapshot_field,
+        checks.snapshot_decimation,
         signals,
         snapshots,
     )
-
-    positions = (probe_ix.astype(np.float64) + 0.5) * sim.dx
     return ElasticFDTDResult(
-        times=times,
+        times=np.arange(checks.steps + 1, dtype=np.float64) * checks.dt,
         signals=handed_over(signals),
-        probe_fields=fields,
-        probes=probe_ix,
-        probe_positions=positions,
-        dx=sim.dx,
-        dt=sim.dt,
-        shape=(ny, nx),
-        sources=tuple(sources),
+        probe_fields=checks.fields,
+        probes=checks.probe_ix,
+        probe_positions=(checks.probe_ix.astype(np.float64) + 0.5) * checks.dx,
+        dx=checks.dx,
+        dt=checks.dt,
+        shape=checks.grid,
+        sources=tuple(run.sources),
         snapshots=handed_over(snapshots),
-        snapshot_times=(
-            None
-            if snapshot_every is None
-            else np.arange(0, steps + 1, snapshot_every, dtype=np.float64) * sim.dt
-        ),
-        snapshot_field=snapshot_field,
-        obstacle_mask=(sim._obstacle if sim._obstacle is not None else None),
-        free_sides=sim.free_sides,
-        snapshot_decimation=d,
+        snapshot_times=_snapshot_times(checks.steps, checks.snapshot_every, checks.dt),
+        snapshot_field=checks.snapshot_field,
+        obstacle_mask=checks.obstacle,
+        free_sides=checks.free_sides,
+        snapshot_decimation=checks.snapshot_decimation,
         provenance=sim.provenance,
     )

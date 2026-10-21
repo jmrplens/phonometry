@@ -448,12 +448,14 @@ def _fdtd() -> object:
 
     sim = simulation.FDTD2D(343.0, 0.02, shape=(100, 100))
     return simulation.fdtd_simulation(
-        343.0,
-        0.02,
-        100 * sim.dt,
-        sources=[simulation.GaussianPulse(ix=50, iy=50, half_width_s=2e-4)],
-        shape=(100, 100),
-        recording=simulation.FDTDRecording(probes=[(10, 10)], snapshot_every=1),
+        simulation.FDTDRun(
+            343.0,
+            0.02,
+            100 * sim.dt,
+            sources=[simulation.GaussianPulse(ix=50, iy=50, half_width_s=2e-4)],
+            shape=(100, 100),
+            recording=simulation.FDTDRecording(probes=[(10, 10)], snapshot_every=1),
+        )
     )
 
 
@@ -465,14 +467,16 @@ def _elastic_fdtd() -> object:
     dt = 0.6 * dx / (c_p * np.sqrt(2.0))
     pulse = simulation.GaussianPulse(ix=0, iy=0, half_width_s=2e-4)
     return simulation.elastic_fdtd_simulation(
-        c_p,
-        3200.0,
-        dx,
-        160 * dt,
-        sources=[simulation.ExplosionSource(ix=50, iy=30, waveform=pulse.value)],
-        rho=7850.0,
-        shape=(60, 100),
-        recording=simulation.ElasticRecording(probes=[(5, 5)], snapshot_every=1),
+        simulation.ElasticRun(
+            c_p,
+            3200.0,
+            dx,
+            160 * dt,
+            sources=[simulation.ExplosionSource(ix=50, iy=30, waveform=pulse.value)],
+            rho=7850.0,
+            shape=(60, 100),
+            recording=simulation.ElasticRecording(probes=[(5, 5)], snapshot_every=1),
+        )
     )
 
 

@@ -105,7 +105,7 @@ def _integrated_response_check(fraction: int) -> Outcome:
     result = ph.filters.verify_filter_class(_bank_1995(fraction), edition="1995")
     worst = max(abs(b["bandwidth_deviation_db"]) for b in result.bands)
     achieved = result.requirement_class("effective_bandwidth")
-    margin = result.binding_margin_db("effective_bandwidth", 0)
+    margin = result.binding_margin("effective_bandwidth", 0)
     return Outcome(
         expected="class 0 (|Delta B| <= 0.15 dB)",
         computed=f"class {achieved} (|Delta B| <= {worst:.3f} dB)",
@@ -141,7 +141,7 @@ def _summation_check(fraction: int) -> Outcome:
     low = round(min(b["summation_min_db"] for b in result.bands), 3) + 0.0
     high = round(max(b["summation_max_db"] for b in result.bands), 3) + 0.0
     achieved = result.requirement_class("summation")
-    margin = result.binding_margin_db("summation", 0)
+    margin = result.binding_margin("summation", 0)
     return Outcome(
         expected="class 0 (-1.0 dB <= Delta P <= +1.0 dB)",
         computed=f"class {achieved} ({low:+.3f} dB to {high:+.3f} dB)",

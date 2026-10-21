@@ -114,7 +114,7 @@ from ..._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ...materials.absorbers.porous import PUBLISHED_AIR, delany_bazley, miki
+from ...materials.absorbers.porous import ABSORBER_AIR, delany_bazley, miki
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -269,7 +269,7 @@ def spherical_reflection_coefficient(
     source_height_m: float,
     receiver_height_m: float,
     distance: float,
-    speed_of_sound: float = PUBLISHED_AIR.speed_of_sound,
+    speed_of_sound: float = ABSORBER_AIR.speed_of_sound,
 ) -> Complex:
     r"""Spherical-wave reflection coefficient ``Q`` (Weyl-Van der Pol).
 
@@ -347,7 +347,7 @@ def ground_effect(
     impedance: ArrayLike | PorousMediumResult | None = None,
     flow_resistivity_pa_s_m2: float | None = None,
     model: Literal["delany_bazley", "miki"] = "delany_bazley",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> SphericalGroundResult:
     r"""Spherical-wave ground effect above a finite-impedance ground.
 
@@ -383,8 +383,8 @@ def ground_effect(
     :param model: Porous model for ``flow_resistivity_pa_s_m2`` (``"delany_bazley"`` or
         ``"miki"``).
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`SphericalGroundResult`.
     :raises ValueError: If neither or both of ``impedance``/``flow_resistivity_pa_s_m2``
@@ -431,7 +431,7 @@ def fresnel_number(
     edge_to_receiver: float,
     direct_distance: float,
     frequencies: ArrayLike,
-    speed_of_sound: float = PUBLISHED_AIR.speed_of_sound,
+    speed_of_sound: float = ABSORBER_AIR.speed_of_sound,
 ) -> Real:
     r"""Fresnel number :math:`N = (2/\lambda)(A + B - d)` (Bies Eq. (5.134)).
 
@@ -847,7 +847,7 @@ def barrier_insertion_loss(
     ground_impedance: ArrayLike | PorousMediumResult | None = None,
     ground_flow_resistivity_pa_s_m2: float | None = None,
     ground_model: Literal["delany_bazley", "miki"] = "delany_bazley",
-    fluid: Fluid = PUBLISHED_AIR,
+    fluid: Fluid = ABSORBER_AIR,
 ) -> BarrierInsertionLoss:
     r"""Insertion loss of a thin, thick or ground-coupled barrier.
 
@@ -894,8 +894,8 @@ def barrier_insertion_loss(
         (Pa s/m2) for the ground model, as an alternative to ``ground_impedance``.
     :param ground_model: Porous model for ``ground_flow_resistivity_pa_s_m2``.
     :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
-        (Default: :data:`PUBLISHED_AIR`, the air this model was published
-        with). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
+        (Default: :data:`ABSORBER_AIR`, dry air at 20 degC at textbook
+        values). Pass a computed one, such as ``fluids.air(temperature_c=30.0,
         relative_humidity_percent=70.0)``, to work in the air of the room.
     :return: A :class:`BarrierInsertionLoss`.
     :raises ValueError: On a non-positive/ordered geometry, or if a ground is

@@ -217,10 +217,10 @@ the standard cites it.
 | :--- | :--- |
 | ValueError | if `name` is unknown or `frequencies` is empty. |
 
-## combine_partial_exposures
+## combined_daily_exposure
 
 ```python
-combine_partial_exposures(partials: ArrayLike) -> float
+combined_daily_exposure(partials: ArrayLike) -> float
 ```
 
 Combine partial exposures into `A(8)` (ISO 5349-1/-2 Eq. (3)).
@@ -279,7 +279,7 @@ whose magnitude is the Annex Part B dominant-axis value (see
 [`wbv_exposure_basis`](/phonometry/reference/api/vibration/exposure/#wbv_exposure_basis)) rather than a vector total.  Called with the
 value and duration of one operation of a working day, it returns that
 operation's partial vibration exposure $A_i(8)$ (ISO 5349-2
-Eq. (2)), the term [`combine_partial_exposures`](/phonometry/reference/api/vibration/exposure/#combine_partial_exposures) sums.
+Eq. (2)), the term [`combined_daily_exposure`](/phonometry/reference/api/vibration/exposure/#combined_daily_exposure) sums.
 
 **Parameters**
 

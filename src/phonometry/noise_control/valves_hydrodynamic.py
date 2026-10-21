@@ -103,7 +103,7 @@ __all__ = [
     "CAVITATION_FLOOR_WIDTH",
     "cavitation_peak_frequency",
     "cavitation_transmission_loss",
-    "combine_stage_levels",
+    "combined_stage_level",
     "corrected_incipient_ratio",
     "differential_pressure_ratio",
     "HydrodynamicValveNoise",
@@ -1763,7 +1763,7 @@ def stage_conditions(
     )
 
 
-def combine_stage_levels(*levels: float) -> float:
+def combined_stage_level(levels: ArrayLike) -> float:
     r"""Equation (27): the stages of a multistage trim, added.
 
     .. math::
@@ -1776,18 +1776,19 @@ def combine_stage_levels(*levels: float) -> float:
     increasing flow areas does not use it, because everything but the last
     stage is absorbed inside the trim.
 
-    :param levels: :math:`L_{pAe,1m,i}`, one per stage, in dB.
+    :param levels: :math:`L_{pAe,1m,i}`, one per stage, in dB: a sequence of
+        two or more.
     :return: Their energy sum, in dB.
-    :raises ValueError: If fewer than two levels are given, or one is not
-        finite.
+    :raises ValueError: If ``levels`` is not one sequence of at least two
+        levels, or one is not finite.
     """
-    if len(levels) < _MINIMUM_STAGES:
+    values = require_finite_array(levels, "levels")
+    if values.size < _MINIMUM_STAGES:
         msg = (
             "Equation (27) sums the stages of a multistage trim, so it needs "
-            f"at least {_MINIMUM_STAGES} levels; got {len(levels)}."
+            f"at least {_MINIMUM_STAGES} levels; got {values.size}."
         )
         raise ValueError(msg)
-    values = require_finite_array(list(levels), "levels")
     return float(10.0 * np.log10(np.sum(10.0 ** (values / 10.0))))
 
 

@@ -253,7 +253,7 @@ def test_the_estimate_is_the_difference_of_two_a_weighted_totals() -> None:
     estimate = noise_control.estimated_cabin_noise_insulation(
         spectrum, insulation, frequencies=THIRD_OCTAVES
     )
-    reference = noise_control.estimated_a_weighted_insulation(
+    reference = noise_control.estimated_a_weighted_enclosure_insulation(
         spectrum, insulation, frequencies=THIRD_OCTAVES
     )
     assert estimate == pytest.approx(reference)

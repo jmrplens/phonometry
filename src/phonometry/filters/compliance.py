@@ -1445,7 +1445,7 @@ class FilterComplianceResult(OwnsArrays):
                 return cls
         return None
 
-    def binding_margin_db(self, requirement: str, filter_class: int) -> float:
+    def binding_margin(self, requirement: str, filter_class: int) -> float:
         """The smallest margin, in dB, of any band to one class on one requirement.
 
         :param requirement: One of :attr:`requirements`.

@@ -53,7 +53,7 @@ What this module computes, and what it refuses to
 Every equation of clauses 6 and 7 is here, with the weighted rating of
 ISO 717-1 delegated to :func:`phonometry.building.weighted_rating` rather than
 re-derived, and the A-weighted estimate of the annexes written so that it
-cannot disagree with its own inputs: :func:`estimated_a_weighted_insulation`
+cannot disagree with its own inputs: :func:`estimated_a_weighted_enclosure_insulation`
 reduces algebraically to the difference of the two A-weighted totals computed
 from the same assumed spectrum, which is the only exact oracle either part
 offers.
@@ -129,17 +129,17 @@ __all__ = [
     "TestEnvironmentApplicability",
     "WeightedEnclosureInsulation",
     "applicable_methods",
-    "artificial_source_insulation",
-    "estimated_a_weighted_insulation",
+    "enclosure_artificial_source_insulation",
+    "estimated_a_weighted_enclosure_insulation",
     "fill_ratio",
     "leak_ratio",
-    "reciprocity_insulation",
+    "enclosure_reciprocity_insulation",
     "seal_ratio",
-    "sound_power_insulation",
-    "sound_pressure_insulation",
+    "enclosure_sound_power_insulation",
+    "enclosure_sound_pressure_insulation",
     "source_position_clearance_m",
     "test_environment_applicability",
-    "weighted_insulation",
+    "weighted_enclosure_insulation",
 ]
 
 #: Clause 1: below this volume, in cubic metres, the part applies to a
@@ -513,7 +513,7 @@ def _insulation(
     )
 
 
-def sound_power_insulation(
+def enclosure_sound_power_insulation(
     level_without: ArrayLike,
     level_with: ArrayLike,
     *,
@@ -564,7 +564,7 @@ def sound_power_insulation(
     )
 
 
-def sound_pressure_insulation(
+def enclosure_sound_pressure_insulation(
     level_without: ArrayLike,
     level_with: ArrayLike,
     *,
@@ -616,7 +616,7 @@ def sound_pressure_insulation(
     )
 
 
-def reciprocity_insulation(
+def enclosure_reciprocity_insulation(
     external_levels: ArrayLike,
     internal_levels: ArrayLike,
     *,
@@ -657,7 +657,7 @@ def reciprocity_insulation(
     )
 
 
-def artificial_source_insulation(
+def enclosure_artificial_source_insulation(
     level_without_by_position: ArrayLike,
     level_with_by_position: ArrayLike,
     *,
@@ -727,7 +727,7 @@ def artificial_source_insulation(
     )
 
 
-def weighted_insulation(
+def weighted_enclosure_insulation(
     insulation: ArrayLike,
     *,
     quantity: str = "sound_power",
@@ -768,7 +768,7 @@ def weighted_insulation(
     )
 
 
-def estimated_a_weighted_insulation(
+def estimated_a_weighted_enclosure_insulation(
     spectrum_levels: ArrayLike,
     insulation: ArrayLike,
     *,

@@ -587,7 +587,7 @@ print(building.satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))
 Impact quantities offer situations B/C only (Table 4, no 500 Hz band in the 2020
 edition), and $\Delta L$ only situation A. Descriptors are case-insensitive with
 aliases (`rprime_w`/`dnt_w`→`r_w`, `lprime_n_w`→`ln_w`); combine independent
-components in quadrature with `combine_uncertainties`, and reduce by $m$
+components in quadrature with `metrology.combined_standard_uncertainty`, and reduce by $m$
 independent measurements with `reduce_by_independent_measurements` ($u/\sqrt{m}$).
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_uncertainty_demo.svg" alt="A weighted rating reported with its two-sided 95 % expanded uncertainty in situations A, B and C, the reproducibility uncertainty widest and the repeatability uncertainty narrowest" width="80%"></picture>
@@ -626,15 +626,15 @@ plt.show()
 | `quantity` | str | — | `'r_w'`, `'ln_w'`, `'delta_lw'` (+ aliases, `+c`/`+ctr` variants) | Single-number descriptor |
 | `situation` | str | — | `'A'` / `'B'` / `'C'` | Measurement situation (Clause 5.2) |
 | `value` | float | dB | — | Best estimate $y$ to attach $U$ to |
-| `coverage` | float | — | default `0.95` | Confidence level (Table 8) |
+| `coverage` | float | — | default `0.95` | Coverage probability (Table 8) |
 | `one_sided` | bool | — | default `False` | One-sided factor for conformity checks |
 | `upper_limit` | bool | — | default `False` | Select the $\sigma_\mathrm{R95}$ upper limit (airborne, situation A) |
 
 `band_uncertainty()` returns a `BandUncertainty` (`frequencies`,
 `uncertainties`, `.to_arrays()`); `single_number_uncertainty()` a float;
 `uncertain_value()` an `UncertainValue` (`value`, `standard_uncertainty`,
-`coverage_factor`, `expanded_uncertainty`, `.lower`, `.upper`). The read-only
-`COVERAGE_FACTORS` mapping exposes Table 8 keyed by `(confidence, one_sided)`.
+`coverage_factor`, `expanded_uncertainty`, `coverage`, `.lower`, `.upper`). The read-only
+`COVERAGE_FACTORS` mapping exposes Table 8 keyed by `(coverage, one_sided)`.
 
 ## Beyond the two-room measurement
 

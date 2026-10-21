@@ -96,7 +96,7 @@ two ranges Cox compiles for it.
 | Name | Description |
 | :--- | :--- |
 | `name` | The specimen name as a table prints it, matched without regard to case: `"Foam"`, `"foam"`. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_POROUS`](/phonometry/reference/api/materials/catalogue/#published_porous): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_POROUS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_POROUS`](/phonometry/reference/api/materials/catalogue/#published_porous)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_POROUS_MATERIALS`](/phonometry/reference/api/materials/catalogue/#published_porous_materials): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_POROUS_MATERIALS \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_POROUS_MATERIALS`](/phonometry/reference/api/materials/catalogue/#published_porous_materials)). |
 
 **Returns:** The rows whose [`PorousMaterial.name`](/phonometry/reference/api/materials/catalogue/#porousmaterial) matches, in catalogue order, which is empty when no row names it.
 
@@ -382,7 +382,7 @@ print and converted, here and once, to the metres
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `model` | `"johnson_champoux_allard"` (Default), `"delany_bazley"` or `"miki"`. The last two read the flow resistivity alone, so they describe a coarser specimen than the one the other four parameters pin. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air)). |
+| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air)). |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
 
@@ -490,6 +490,6 @@ s/m2) and no value"`, never a figure the page does not print.
 | :--- | :--- |
 | AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
 
-## PUBLISHED_POROUS
+## PUBLISHED_POROUS_MATERIALS
 
 *Constant* (`mapping`).

@@ -309,22 +309,22 @@ def test_a_catalogue_equals_a_mapping_of_the_same_rows() -> None:
 # ---------------------------------------------------------------------------
 def test_a_published_catalogue_joins_yours_without_sharing_a_key() -> None:
     mine = _read(_panel())
-    joined = materials.PUBLISHED_POROUS | mine
-    assert len(joined) == len(materials.PUBLISHED_POROUS) + 2
+    joined = materials.PUBLISHED_POROUS_MATERIALS | mine
+    assert len(joined) == len(materials.PUBLISHED_POROUS_MATERIALS) + 2
     assert joined["panel-40/core-lab"] is mine["panel-40/core-lab"]
-    both = mine | materials.PUBLISHED_POROUS
+    both = mine | materials.PUBLISHED_POROUS_MATERIALS
     assert list(both)[:2] == list(mine)
 
 
 def test_a_key_in_both_catalogues_is_refused_at_every_join() -> None:
     mine = _read(_panel())
-    joined = materials.PUBLISHED_POROUS | mine
+    joined = materials.PUBLISHED_POROUS_MATERIALS | mine
     with pytest.raises(io.CatalogueError, match="panel-40/core-lab"):
         _ = joined | mine
 
 
 def test_a_join_is_read_only() -> None:
-    joined = materials.PUBLISHED_POROUS | _read(_panel())
+    joined = materials.PUBLISHED_POROUS_MATERIALS | _read(_panel())
     with pytest.raises(TypeError, match="item assignment"):
         joined["panel-40/other"] = None  # type: ignore[index]
 
@@ -1476,7 +1476,7 @@ def test_reading_leaves_every_published_catalogue_as_it_was(
     listing = sorted(tmp_path.iterdir())
     io.read_catalogue(path, row_type=PorousMaterial)
     _read(_panel())
-    _ = materials.PUBLISHED_POROUS | _read(_panel())
+    _ = materials.PUBLISHED_POROUS_MATERIALS | _read(_panel())
     assert sorted(tmp_path.iterdir()) == listing
     for (package, name), (value, copy_before) in published.items():
         assert getattr(importlib.import_module(f"phonometry.{package}"), name) is value

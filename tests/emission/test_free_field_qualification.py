@@ -135,19 +135,19 @@ def _qualified(
 def test_table_a1_cells(frequency: float, anechoic: float, hemi: float) -> None:
     """Table A.1 of ISO 26101 and of the amended ISO 3745 print the same cells."""
     assert (
-        emission.inverse_square_law_tolerance_db([frequency], room="anechoic")[0]
+        emission.inverse_square_law_tolerance([frequency], room="anechoic")[0]
         == anechoic
     )
     assert (
-        emission.inverse_square_law_tolerance_db([frequency], room="hemi-anechoic")[0]
+        emission.inverse_square_law_tolerance([frequency], room="hemi-anechoic")[0]
         == hemi
     )
 
 
 def test_a_tone_is_read_in_the_band_that_contains_it() -> None:
     """A tone at the exact one-third octave centre 794 Hz is held to the 800 Hz row."""
-    assert emission.inverse_square_law_tolerance_db([794.3], room="anechoic")[0] == 1.0
-    assert emission.inverse_square_law_tolerance_db([630.96], room="anechoic")[0] == 1.5
+    assert emission.inverse_square_law_tolerance([794.3], room="anechoic")[0] == 1.0
+    assert emission.inverse_square_law_tolerance([630.96], room="anechoic")[0] == 1.5
 
 
 @pytest.mark.parametrize(
@@ -164,24 +164,22 @@ def test_a_tone_is_read_in_the_band_that_contains_it() -> None:
 def test_table_b1_cells(frequency: float, anechoic: float, hemi: float) -> None:
     """ISO 26101 Table B.1: the allowable deviations in directionality."""
     assert (
-        emission.directionality_tolerance_db([frequency], room="anechoic")[0]
-        == anechoic
+        emission.directionality_tolerance([frequency], room="anechoic")[0] == anechoic
     )
     assert (
-        emission.directionality_tolerance_db([frequency], room="hemi-anechoic")[0]
-        == hemi
+        emission.directionality_tolerance([frequency], room="hemi-anechoic")[0] == hemi
     )
 
 
 def test_unknown_room_is_refused() -> None:
     with pytest.raises(ValueError, match="'room'"):
-        emission.inverse_square_law_tolerance_db([1000.0], room="reverberant")  # type: ignore[arg-type]
+        emission.inverse_square_law_tolerance([1000.0], room="reverberant")  # type: ignore[arg-type]
 
 
 def test_qualification_frequencies_of_a23() -> None:
     """One-third octaves below 125 Hz and above 4 kHz, octaves between."""
-    np.testing.assert_array_equal(emission.qualification_frequencies_hz(), _GRID)
-    extended = emission.qualification_frequencies_hz(50.0, 20000.0)
+    np.testing.assert_array_equal(emission.qualification_frequencies(), _GRID)
+    extended = emission.qualification_frequencies(50.0, 20000.0)
     np.testing.assert_array_equal(
         extended,
         [50.0, 63.0, 80.0, *_GRID, 12500.0, 16000.0, 20000.0],
@@ -190,7 +188,7 @@ def test_qualification_frequencies_of_a23() -> None:
 
 def test_qualification_frequencies_refuse_an_empty_range() -> None:
     with pytest.raises(ValueError, match="'high_hz'"):
-        emission.qualification_frequencies_hz(1000.0, 500.0)
+        emission.qualification_frequencies(1000.0, 500.0)
 
 
 # --- Formulae (1) to (4): the closed forms --------------------------------------
@@ -325,7 +323,7 @@ def test_a_coherent_reflection_ripples_by_the_known_amount() -> None:
         [traverse], frequencies=[frequency], room="hemi-anechoic"
     )
     t = float(
-        emission.inverse_square_law_tolerance_db([frequency], room="hemi-anechoic")[0]
+        emission.inverse_square_law_tolerance([frequency], room="hemi-anechoic")[0]
     )
     assert t == 2.5
     last = 0
@@ -902,7 +900,7 @@ def test_a_background_is_needed_wherever_a_level_is() -> None:
 
 @pytest.mark.parametrize(
     "lookup",
-    [emission.inverse_square_law_tolerance_db, emission.directionality_tolerance_db],
+    [emission.inverse_square_law_tolerance, emission.directionality_tolerance],
 )
 def test_the_tolerance_lookups_take_one_frequency_axis(lookup: object) -> None:
     with pytest.raises(ValueError, match="1-D array of frequencies"):

@@ -189,9 +189,9 @@ between adjacent one-third octaves, and its output must be stable to 0,5 dB
 over the measurement.
 
 ```python
-print(room.omnidirectionality_tolerance_db(630.0))   # 2.0
-print(room.omnidirectionality_tolerance_db(800.0))   # 5.0
-print(room.omnidirectionality_tolerance_db(1000.0))  # 8.0
+print(room.omnidirectionality_tolerance(630.0))   # 2.0
+print(room.omnidirectionality_tolerance(800.0))   # 5.0
+print(room.omnidirectionality_tolerance(1000.0))  # 8.0
 ```
 
 The 800 Hz value is a reading rather than a quotation: the clause says the

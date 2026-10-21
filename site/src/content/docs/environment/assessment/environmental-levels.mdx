@@ -311,8 +311,8 @@ percentile levels (Annex I) and rejects inverted percentile orderings.
 
 ### Measurement uncertainty (Clause 4, Annex F)
 
-`combined_standard_uncertainty()`
-forms $u = \sqrt{\sum (c_j u_j)^2}$ (Formula (2)) and
+`metrology.combined_standard_uncertainty()`, the one root-sum-square the
+library has, forms $u = \sqrt{\sum (c_j u_j)^2}$ (Formula (2)) and
 `environmental_expanded_uncertainty()` applies $k = 2$ (95 %) or $k = 1.3$ (80 %);
 `residual_correction_uncertainty()` carries the residual-correction sensitivity
 (Formulae (F.7)/(F.8)) and `uncertainty_from_repeated_measurements()` the
@@ -322,7 +322,7 @@ reported alongside as `approximate_uncertainty` and a warning when the levels
 spread beyond 3 dB, where the substitute grossly inflates.
 
 ```python
-from phonometry import environment
+from phonometry import environment, metrology
 
 tonal = environment.assess_tonal_audibility(54.1, 45.2, 430.0)  # TonalAssessmentResult
 kt = tonal.adjustment                                             # 6 dB
@@ -333,7 +333,7 @@ corr = environment.residual_sound_correction(measured_level=58.0, residual_level
 # contributions are the measured level (0.5 dB scaled by the F.7 sensitivity),
 # the source operating conditions (1000 vehicles counted, 10/sqrt(1000)),
 # the meteorology, the microphone-location correction and the residual.
-u = environment.combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38])
+u = metrology.combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38])
 print(round(u, 2))                                             # 2.18 dB (G.2)
 print(round(environment.environmental_expanded_uncertainty(u), 2))           # 4.36 dB (k = 2)
 ```
@@ -349,7 +349,7 @@ ISO 1996-2:2017 and every entry has a name, a source and a size:
 | Microphone location | the +5,7 dB flush-mounted correction of Annex B | 0,40 dB |
 | Residual sound | $L_\mathrm{res} = 50$ dB with $u = 2$ dB, through the sensitivity $c_\mathrm{res}$ of Formula (F.8) | 0,38 dB |
 
-`combined_standard_uncertainty` also accepts $(u_j, c_j)$ **pairs**, so the
+`metrology.combined_standard_uncertainty` also accepts $(u_j, c_j)$ **pairs**, so the
 sensitivity coefficients need not be pre-multiplied by hand, and
 `residual_correction_uncertainty` supplies exactly the two coefficients of
 Formulae (F.7)/(F.8), both of which grow without bound as the residual

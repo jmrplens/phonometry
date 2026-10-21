@@ -121,32 +121,30 @@ def test_table_2_is_the_kb_weighting_rounded_to_a_tenth() -> None:
     # Without the band limitation of the meter, which would take 1,5 dB off at 80 Hz.
     limited = 20.0 * np.log10(np.abs(im.kb_weighting_response(freqs)))
     assert limited[-1] < response[-1] - 1.0
-    weighted = im.kb_weighted_levels_db(np.zeros(14), freqs)
+    weighted = im.kb_weighted_levels(np.zeros(14), freqs)
     assert list(weighted) == list(im.KB_WEIGHTING_TABLE_DB.values())
     with pytest.raises(ValueError, match="nominal third-octave centre"):
-        im.kb_weighted_levels_db([0.0], [100.0])
+        im.kb_weighted_levels([0.0], [100.0])
     with pytest.raises(ValueError, match="14 bands"):
         im.predict_train_category(np.zeros(10), frequencies=FREQS[:10])
 
 
 def test_annex_a_tables_as_printed() -> None:
     """Spot cells of the six tables, and their shapes."""
-    concrete = im.ground_to_floor_transfer_db(
-        "concrete", floor_natural_frequency_hz=8.0
-    )
+    concrete = im.ground_to_floor_transfer("concrete", floor_natural_frequency_hz=8.0)
     assert list(concrete[:6]) == [-0.51, 1.42, 6.88, 15.0, 5.87, 0.17]
     assert (
-        im.ground_to_floor_transfer_db("concrete", floor_natural_frequency_hz=20.0)[7]
+        im.ground_to_floor_transfer("concrete", floor_natural_frequency_hz=20.0)[7]
         == 13.12
     )
     assert (
-        im.ground_to_floor_transfer_db("concrete", floor_natural_frequency_hz=63.0)[12]
+        im.ground_to_floor_transfer("concrete", floor_natural_frequency_hz=63.0)[12]
         == 9.5
     )
-    timber = im.ground_to_floor_transfer_db("timber", floor_natural_frequency_hz=8.0)
+    timber = im.ground_to_floor_transfer("timber", floor_natural_frequency_hz=8.0)
     assert list(timber[:4]) == [5.14, 7.55, 12.59, 20.0]
     assert (
-        im.ground_to_floor_transfer_db("timber", floor_natural_frequency_hz=80.0)[-1]
+        im.ground_to_floor_transfer("timber", floor_natural_frequency_hz=80.0)[-1]
         == -1.35
     )
     for floor in im.GROUND_TO_FLOOR_DB.values():
@@ -155,15 +153,13 @@ def test_annex_a_tables_as_printed() -> None:
     columns = im.GROUND_TO_FLOOR_DB["concrete"]
     assert columns[10.0][1:] == columns[8.0][:-1]
     assert columns[16.0][3:] == columns[8.0][:-3]
-    basement = im.ground_to_foundation_transfer_db("basement")
+    basement = im.ground_to_foundation_transfer("basement")
     assert basement[9] == -9.3
-    assert (
-        im.ground_to_foundation_transfer_db("basement", statistic="lower")[9] == -15.6
-    )
-    assert im.ground_to_foundation_transfer_db("basement", statistic="upper")[9] == -2.7
-    assert im.ground_to_foundation_transfer_db("ground_floor")[5] == -1.9
+    assert im.ground_to_foundation_transfer("basement", statistic="lower")[9] == -15.6
+    assert im.ground_to_foundation_transfer("basement", statistic="upper")[9] == -2.7
+    assert im.ground_to_foundation_transfer("ground_floor")[5] == -1.9
     with pytest.raises(ValueError, match="nominal third-octave centre"):
-        im.ground_to_floor_transfer_db("concrete", floor_natural_frequency_hz=15.0)
+        im.ground_to_floor_transfer("concrete", floor_natural_frequency_hz=15.0)
 
 
 def test_foundation_to_floor_at_the_tabulated_ratios_and_between() -> None:
@@ -171,14 +167,14 @@ def test_foundation_to_floor_at_the_tabulated_ratios_and_between() -> None:
     for timber at the natural frequency, the mean of 1,60 at a ratio of 0,2,
     and nan where the table prints none.
     """
-    at_20 = im.foundation_to_floor_transfer_db(
+    at_20 = im.foundation_to_floor_transfer(
         [4.0, 20.0, 100.0, 160.0], floor="concrete", floor_natural_frequency_hz=20.0
     )
     assert at_20[0] == pytest.approx(1.60)
     assert at_20[1] == pytest.approx(17.26)
     assert at_20[2] == pytest.approx(2.83)
     assert math.isnan(at_20[3])
-    timber = im.foundation_to_floor_transfer_db(
+    timber = im.foundation_to_floor_transfer(
         [20.0, 126.0, 160.0, 1.6, 2.0],
         floor="timber",
         floor_natural_frequency_hz=20.0,
@@ -188,13 +184,13 @@ def test_foundation_to_floor_at_the_tabulated_ratios_and_between() -> None:
     assert timber[2] == pytest.approx(1.85)
     assert math.isnan(timber[3])  # ratio 0,08: the timber mean starts at 0,125
     assert math.isnan(timber[4])
-    upper = im.foundation_to_floor_transfer_db(
+    upper = im.foundation_to_floor_transfer(
         [4.0, 5.0], floor="timber", floor_natural_frequency_hz=20.0, statistic="upper"
     )
     assert math.isnan(upper[0])  # ratio 0,2, printed as a dash
     assert upper[1] == pytest.approx(8.1)
     # Between two tabulated ratios: linear in decibels over the logarithm.
-    between = im.foundation_to_floor_transfer_db(
+    between = im.foundation_to_floor_transfer(
         [math.sqrt(0.8 * 1.0) * 20.0], floor="concrete", floor_natural_frequency_hz=20.0
     )
     assert between[0] == pytest.approx((9.94 + 17.26) / 2)
@@ -212,11 +208,11 @@ def test_formula_3_rescales_a_spectrum_and_stops_at_30_percent() -> None:
 
 def test_formulae_4_to_6_the_transmission_through_the_ground() -> None:
     freqs = np.array([8.0, 16.0, 63.0])
-    none = im.ground_transmission_db(
+    none = im.ground_transmission(
         freqs, distance_m=10.0, reference_distance_m=10.0, exponent=0.3
     )
     assert np.allclose(none, 0.0)
-    doubled = im.ground_transmission_db(
+    doubled = im.ground_transmission(
         freqs, distance_m=20.0, reference_distance_m=10.0, exponent=0.3
     )
     assert np.allclose(doubled, -20.0 * 0.3 * math.log10(2.0))
@@ -225,7 +221,7 @@ def test_formulae_4_to_6_the_transmission_through_the_ground() -> None:
         freqs, damping_ratio=0.03, shear_wave_speed_m_s=200.0
     )
     assert alpha[0] == pytest.approx(2 * math.pi * 8.0 * 0.03 / 200.0)
-    damped = im.ground_transmission_db(
+    damped = im.ground_transmission(
         freqs,
         distance_m=20.0,
         reference_distance_m=10.0,
@@ -237,12 +233,12 @@ def test_formulae_4_to_6_the_transmission_through_the_ground() -> None:
     assert damped[0] - doubled[0] == pytest.approx(
         -20.0 * math.log10(math.e) * alpha[0] * 10.0
     )
-    per_band = im.ground_transmission_db(
+    per_band = im.ground_transmission(
         freqs, distance_m=20.0, reference_distance_m=10.0, exponent=[0.2, 0.3, 0.4]
     )
     assert per_band[2] == pytest.approx(-20.0 * 0.4 * math.log10(2.0))
     with pytest.raises(ValueError, match="shear wave speed"):
-        im.ground_transmission_db(
+        im.ground_transmission(
             freqs,
             distance_m=20.0,
             reference_distance_m=10.0,
@@ -255,7 +251,7 @@ def test_formula_13_and_the_line_source_of_annex_b() -> None:
     assert im.velocity_spectrum_um_s([0.0])[0] == pytest.approx(0.05)
     assert im.velocity_spectrum_um_s([78.1])[0] == pytest.approx(401.8, abs=0.1)
     assert im.point_to_line_transition_distance_m(30.0, wavelength_m=10.0) == 90.0
-    assert im.line_source_correction_db(
+    assert im.line_source_correction(
         100.0, reference_distance_m=10.0, exponent_correction=0.3
     ) == pytest.approx(6.0)
     assert im.train_decay_exponent(1.0) == 0.7
@@ -273,7 +269,7 @@ def test_formula_13_and_the_line_source_of_annex_b() -> None:
     assert ratio[1] == pytest.approx(9.0**-0.7)
     assert ratio[2] == pytest.approx(9.0**-0.7 * 10.0**-1.0)
     with pytest.raises(ValueError, match="0.3 to 0.5"):
-        im.line_source_correction_db(
+        im.line_source_correction(
             100.0, reference_distance_m=10.0, exponent_correction=0.6
         )
 

@@ -151,10 +151,10 @@ flanking construction and the model assumptions is recorded in
 | ValueError | If `engine` is unknown or `language` is not supported. |
 | ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
 
-## combine_linings
+## combined_lining_improvement
 
 ```python
-combine_linings(delta_a: float, delta_b: float) -> float
+combined_lining_improvement(delta_a: float, delta_b: float) -> float
 ```
 
 Combine two lining improvements (EN 12354-1 Formulas 30/31).

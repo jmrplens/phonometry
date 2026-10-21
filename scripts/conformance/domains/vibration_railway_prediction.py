@@ -69,39 +69,39 @@ _TABLE_2 = {4.0: -4.7, 8.0: -1.7, 20.0: -0.3, 63.0: 0.0}
 _ANNEX_A: dict[str, tuple[float, Callable[[], float]]] = {
     "Table A.1, concrete floor at 8 Hz, the band at 8 Hz": (
         15.0,
-        lambda: ph.vibration.ground_to_floor_transfer_db(
+        lambda: ph.vibration.ground_to_floor_transfer(
             "concrete", floor_natural_frequency_hz=8.0
         )[3],
     ),
     "Table A.1, concrete floor at 20 Hz, the band at 20 Hz": (
         13.12,
-        lambda: ph.vibration.ground_to_floor_transfer_db(
+        lambda: ph.vibration.ground_to_floor_transfer(
             "concrete", floor_natural_frequency_hz=20.0
         )[7],
     ),
     "Table A.2, timber floor at 8 Hz, the band at 4 Hz": (
         5.14,
-        lambda: ph.vibration.ground_to_floor_transfer_db(
+        lambda: ph.vibration.ground_to_floor_transfer(
             "timber", floor_natural_frequency_hz=8.0
         )[0],
     ),
     "Table A.3, ground to a basement, the mean at 31,5 Hz": (
         -9.3,
-        lambda: ph.vibration.ground_to_foundation_transfer_db("basement")[9],
+        lambda: ph.vibration.ground_to_foundation_transfer("basement")[9],
     ),
     "Table A.4, ground to a ground floor, the mean at 12,5 Hz": (
         -1.9,
-        lambda: ph.vibration.ground_to_foundation_transfer_db("ground_floor")[5],
+        lambda: ph.vibration.ground_to_foundation_transfer("ground_floor")[5],
     ),
     "Table A.5, foundation to a concrete floor, the mean at its natural frequency": (
         17.26,
-        lambda: ph.vibration.foundation_to_floor_transfer_db(
+        lambda: ph.vibration.foundation_to_floor_transfer(
             [20.0], floor="concrete", floor_natural_frequency_hz=20.0
         )[0],
     ),
     "Table A.6, foundation to a timber floor, the mean at its natural frequency": (
         21.93,
-        lambda: ph.vibration.foundation_to_floor_transfer_db(
+        lambda: ph.vibration.foundation_to_floor_transfer(
             [20.0], floor="timber", floor_natural_frequency_hz=20.0
         )[0],
     ),
@@ -188,7 +188,7 @@ def _chk_kb_ftr_night() -> Outcome:
 
 
 def _chk_table_2(band_hz: float) -> Outcome:
-    computed = float(ph.vibration.kb_weighted_levels_db([0.0], [band_hz])[0])
+    computed = float(ph.vibration.kb_weighted_levels([0.0], [band_hz])[0])
     return numeric(_TABLE_2[band_hz], computed, 1e-9, unit="dB", places=1)
 
 

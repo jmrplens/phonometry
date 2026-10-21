@@ -123,8 +123,8 @@ def _library_correction(
     alpha_1 = tuple(table[empty][band] for band in frequencies)
     alpha_2 = tuple(table[with_specimen][band] for band in frequencies)
     # dB/km to dB/m, then the library's own EN ISO 354 8.1.2.1 conversion.
-    m_1 = ph.materials.attenuation_from_alpha(np.asarray(alpha_1) / 1000.0)
-    m_2 = ph.materials.attenuation_from_alpha(np.asarray(alpha_2) / 1000.0)
+    m_1 = ph.materials.power_attenuation_from_alpha(np.asarray(alpha_1) / 1000.0)
+    m_2 = ph.materials.power_attenuation_from_alpha(np.asarray(alpha_2) / 1000.0)
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         correction = ph.materials.air_absorption_correction(
@@ -249,7 +249,7 @@ def _chk_ten_lg_e() -> Outcome:
     a number this library can be held to.
     """
     printed = oracle.VIGRAN_EQ_4_41_TEN_LG_E
-    unity = float(ph.materials.attenuation_from_alpha(1.0))
+    unity = float(ph.materials.power_attenuation_from_alpha(1.0))
     return numeric(
         printed,
         1.0 / unity,
@@ -318,7 +318,7 @@ def _chk_cox_table_4_2() -> Outcome:
     worst = 0.0
     for humidity, row in oracle.COX_TABLE_4_2_M_MILLI.items():
         computed = (
-            ph.environment.air_attenuation_m(
+            ph.environment.air_power_attenuation_per_m(
                 oracle.COX_TABLE_4_2_BANDS_HZ,
                 temperature_c=20.0,
                 relative_humidity_percent=humidity,
@@ -450,13 +450,13 @@ def _chk_srl_absorption_coefficient() -> Outcome:
     """
     empty_temperature_c, empty_humidity, empty_pressure_mbar = oracle.SRL_13441_EMPTY
     temperature_c, humidity, pressure_mbar = oracle.SRL_13441_WITH_SPECIMEN
-    m_1 = ph.environment.air_attenuation_m(
+    m_1 = ph.environment.air_power_attenuation_per_m(
         oracle.SRL_13441_BANDS_HZ,
         temperature_c=empty_temperature_c,
         relative_humidity_percent=empty_humidity,
         static_pressure_kpa=empty_pressure_mbar / 10.0,
     )
-    m_2 = ph.environment.air_attenuation_m(
+    m_2 = ph.environment.air_power_attenuation_per_m(
         oracle.SRL_13441_BANDS_HZ,
         temperature_c=temperature_c,
         relative_humidity_percent=humidity,

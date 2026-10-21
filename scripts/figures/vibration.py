@@ -6670,7 +6670,7 @@ def generate_building_transfer_spectra(output_dir: str) -> None:
         for natural, (colour, style) in styles.items():
             ax.plot(
                 positions,
-                vibration.ground_to_floor_transfer_db(
+                vibration.ground_to_floor_transfer(
                     floor, floor_natural_frequency_hz=natural
                 ),
                 color=colour,

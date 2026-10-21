@@ -332,7 +332,7 @@ def radiation_impedance_correction(
     return np.asarray(pressure_term + n * ratio, dtype=np.float64)
 
 
-def reference_source_reproducibility_db(
+def reference_source_reproducibility(
     frequencies: ArrayLike,
     *,
     environment: CalibrationEnvironment,
@@ -965,7 +965,7 @@ def reference_source_calibration(
     )
     directivity = _calibration_directivity(precision, maximum_levels_db)
     _calibration_room_qualified(room_qualification, freqs[~intensity_bands])
-    uncertainty = k * reference_source_reproducibility_db(
+    uncertainty = k * reference_source_reproducibility(
         freqs, environment="hemi-anechoic", arrangement=arrangement
     )
     return ReferenceSourceCalibration(
@@ -1516,7 +1516,7 @@ __all__ = [
     "knee_frequency",
     "radiation_impedance_correction",
     "reference_source_calibration",
-    "reference_source_reproducibility_db",
+    "reference_source_reproducibility",
     "repeatability_standard_deviation",
     "verify_reference_sound_source",
     "verify_reference_source_drift",

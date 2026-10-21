@@ -4,7 +4,7 @@ description: "Lo que la 4.0 movió, renombró y retiró, y cómo encontrar la gr
 ---
 
 La 4.0 rompe duro y no lleva capa de compatibilidad. Casi nada se ha borrado:
-de los 885 nombres que la raíz exportaba en la 3.3.0, treinta y cinco no existen ya
+de los 885 nombres que la raíz exportaba en la 3.3.0, cuarenta y cinco no existen ya
 en ningún sitio y el resto simplemente vive en una dirección con nombre en vez
 de en una plana. Así que el trabajo es sobre todo un barrido de imports, y esta
 página es sobre todo un mapa.
@@ -30,7 +30,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # esta es la grafía nueva
 ```
 
-Medido sobre la superficie entera, 847 de aquellos 885 nombres de la raíz los
+Medido sobre la superficie entera, 837 de aquellos 885 nombres de la raíz los
 publica hoy exactamente un subpaquete, ninguno dos, y ninguno necesita una ruta
 más profunda que `phonometry.<subpaquete>`. Otros tres siguen en la raíz, donde
 siempre estuvieron. Así que el cambio no tiene ambigüedad: busca el subpaquete e
@@ -227,7 +227,7 @@ las dos presiones legítimas en esta biblioteca.
 | 3.3.0 | 4.0 |
 | --- | --- |
 | `temperature=` | `temperature_c=` |
-| `pressure=` en `air_attenuation`, `air_attenuation_m`, `atmospheric_attenuation`, `atmospheric_absorption`, `outdoor_propagation_attenuation`, `sae_band_attenuation`, `impedance_adjustment` y `atmospheric_adjustment`, y en los métodos `event_level` y `noise_contour` de `AnpAircraft` y `AnpDatabase`; `static_pressure=` en `meteorological_corrections`, `sound_power_anechoic`, `sound_power_reverberation` y `sound_power_comparison`; los campos `AtmosphericAttenuation.pressure`, `AircraftBandAttenuation.pressure` y `ReportMetadata.pressure`, todos en kPa | `static_pressure_kpa=` y `.static_pressure_kpa` |
+| `pressure=` en `air_attenuation`, `air_attenuation_m` (ahora `air_power_attenuation_per_m`), `atmospheric_attenuation`, `atmospheric_absorption`, `outdoor_propagation_attenuation`, `sae_band_attenuation`, `impedance_adjustment` y `atmospheric_adjustment`, y en los métodos `event_level` y `noise_contour` de `AnpAircraft` y `AnpDatabase`; `static_pressure=` en `meteorological_corrections`, `sound_power_anechoic`, `sound_power_reverberation` y `sound_power_comparison`; los campos `AtmosphericAttenuation.pressure`, `AircraftBandAttenuation.pressure` y `ReportMetadata.pressure`, todos en kPa | `static_pressure_kpa=` y `.static_pressure_kpa` |
 | `static_pressure=` en `alternating_airflow_resistance`, `barometric_pressure=` en `sound_power_intensity_precision`, `atmospheric_pressure=` en `enclosed_gas_stiffness` y `floating_floor_resonance` | `static_pressure_pa=` |
 | `atmospheric_pressure=` en `air_density_iso` y `air_density_astm` | `static_pressure_kpa=` en `air_density_iso10534` y `air_density_astm` |
 | `atmospheric_pressure=` en `johnson_champoux_allard` y en las funciones de sonido lento | el `fluid=` que reciben ahora, que lleva su propia presión estática |
@@ -486,6 +486,7 @@ muestreo es `fs` en todas las funciones.
 | `ambient_pressure_pa=` en `normal_air_density` | `atmospheric_pressure_pa=`, la atmósfera exterior junto a la presión estática manométrica del conducto |
 | `environmental_ratio_from_absorption(absorption_area_m2=)`, `running_rms_decay_time(integration_time_s=)` y `verify_running_rms_decay(integration_time_s=)` | `absorption_area=` e `integration_time=`, la grafía del resto de sus paquetes |
 | `bending_stress(density_kg_m3=)` | `density=`, la grafía del resto de `vibration` |
+| `confidence=` en `building.insulation_coverage_factor`, `materials.absorption_coverage_factor`, `sound_absorption_coefficient_uncertainty`, `equivalent_area_uncertainty`, `practical_coefficient_uncertainty`, `weighted_coefficient_uncertainty`, `single_number_rating_uncertainty` y `environment.environmental_expanded_uncertainty`, y `UncertainValue.confidence` | `coverage=` y `.coverage`, la probabilidad de cobertura de la GUM; `confidence` queda para la confianza estadística de un intervalo, como en `signals.power_spectral_density` |
 
 `times, levels = decay_curve(ir, fs)` sigue desempaquetando la curva de
 caída, en el mismo orden. Los solvers FDTD conservan `c` y `rho`, que nombran
@@ -535,6 +536,45 @@ print(hasattr(vibration, "partial_exposure"))
 # 2.3
 # True True
 # False
+```
+
+## Una función se nombra por lo que devuelve, una sola vez
+
+Un cálculo se nombra por la magnitud que devuelve, y un cálculo tiene un solo
+nombre. Una unidad se queda en el nombre de una función solo donde esa
+magnitud se escribe en más de una unidad (`peak_velocity_from_kb_mm_s`,
+`air_power_attenuation_per_m`); un nivel, una corrección, un índice o una
+frecuencia no la lleva, porque solo se da en decibelios o en hercios. La raíz
+de la suma de cuadrados de incertidumbres independientes es una sola función,
+`metrology.combined_standard_uncertainty`, la imprima la norma que la imprima,
+y la probabilidad de cobertura de una incertidumbre expandida se escribe
+`coverage` allí donde se pide.
+
+| 3.3.0 o 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `environment.combined_standard_uncertainty(contributions)` | `metrology.combined_standard_uncertainty(contributions)`, con la misma firma y el mismo número; ahora rechaza un par `(u, c)` con `u` negativa |
+| `noise_control.combine_stage_levels(80.0, 74.0)`, `noise_control.combine_internal_levels(trim, expander)` | `noise_control.combined_stage_level([80.0, 74.0])`, `noise_control.combined_internal_levels([trim, expander])`: los niveles llegan como una sola secuencia, como los toma cualquier otra suma energética |
+| `building.energy_average_level(levels, 0)`, `room.directivity_energy_average(levels, 0)` | `axis=0`, por su nombre |
+| `materials.PUBLISHED_AIR` | `materials.ABSORBER_AIR`, el aire seco a 20 °C que los modelos de absorbentes usan por defecto, con los mismos valores. El prefijo `PUBLISHED_` es de los catálogos, y el nombre ya no atribuye ese aire al modelo de Johnson-Champoux-Allard, cuyo libro imprime otro |
+| `metrology.combine_uncertainty(model, quantities)` | `metrology.uncertainty_propagation(model, quantities)`, con los mismos argumentos |
+| `metrology.expanded_uncertainty(result, 0.95)` | `result.expanded(0.95)`, el método del resultado que recibía |
+| `coverage_factor(0.95, one_sided)` en el primer nivel de la 3.3.0 | `building.insulation_coverage_factor(0.95, one_sided=...)`, el factor de la ISO 12999-1 al que remitía. `metrology.coverage_factor(coverage, dof)` es otra función, el factor GUM de la t de Student, que da 1,96 a dos decimales para el 95 % e infinitos grados de libertad y no tiene forma unilateral |
+
+Los nombres de la raíz de la 3.3.0 que esto renombra o retira (`combine_uncertainties`,
+`combine_uncertainty`, `expanded_uncertainty`, `combine_linings`,
+`combine_subareas`, `combine_partial_exposures`, `combine_age_and_noise`,
+`air_attenuation_m`, `attenuation_from_alpha` y
+`air_attenuation_coefficient`) están en la tabla de los nombres que ya no
+están, al final de esta página.
+
+```python
+from phonometry import metrology, noise_control
+
+# ISO 1996-2:2017 Tabla G.2, los cinco productos c_j u_j de una hora junto a una carretera
+print(round(metrology.combined_standard_uncertainty([0.59, 0.3, 2.0, 0.40, 0.38]), 2))
+print(round(noise_control.combined_stage_level([80.0, 80.0]), 2))
+# 2.18
+# 83.01
 ```
 
 ## Todo `.plot()` toma primero los ejes
@@ -879,7 +919,7 @@ las deja a más de 125 dB por debajo.
 | --- | --- |
 | cada banda de un banco diezmado se diezmaba hasta que su frecuencia de Nyquist de proceso era 1,25 veces su borde superior de banda | se diezma sólo hasta dejarla en dieciséis veces ese borde, así que la transformación bilineal ya no deforma la banda: el nivel de una banda se mueve hasta 0,07 dB con ruido blanco, sobre todo en las bandas más bajas, y el banco de octavas, que sumaría sus salidas hasta +0,94 dB y leería clase 2 en el 5.16, es clase 1 en todos los requisitos |
 | la `class` de una banda leída de `margin_class{c}_db` | `class` sobre todos los requisitos; `margin_class{c}_db` sigue siendo el margen de la Tabla 1, junto a `bandwidth_margin_class{c}_db` y `summation_margin_class{c}_db`, que vale `None` en las dos bandas de los extremos |
-| un solo requisito por el que preguntar | `requirements`, `requirement_class(name)` y `binding_margin_db(name, cls)` leen cada uno por separado, y `plot(requirement="summation")` lo dibuja |
+| un solo requisito por el que preguntar | `requirements`, `requirement_class(name)` y `binding_margin(name, cls)` leen cada uno por separado, y `plot(requirement="summation")` lo dibuja |
 | un veredicto con `edition="1995"` solo sobre la Tabla 1 | la Tabla 1, `"effective_bandwidth"` (la respuesta integrada del filtro del 4.5.3) y `"summation"` (4.9, recorrida de la frecuencia central más baja a la más alta, así que las bandas de los extremos también la llevan), las dos con la S que el 5.3.3 sube en pasos de 12 hasta que la respuesta integrada se estabiliza, que el `points_per_bandwidth` del resultado indica (36 para el banco de octavas por defecto) |
 | una banda diezmada calificada hasta la frecuencia de Nyquist de su frecuencia diezmada, con `checked_to_omega` parado ahí | calificada a la frecuencia de entrada hasta su mitad, imágenes incluidas; `checked_to_omega` es la mitad de la frecuencia de entrada entre la frecuencia central, y `range_limited` marca una máscara de la Tabla 1 que sigue más allá |
 | el filtro antialiasing que `scipy.signal.resample_poly` diseña por defecto, que dejaba las imágenes del banco de octavas a 8, 16 y 32 kHz 68,9 dB por debajo, sin llegar a los 70 dB de la clase 1 | un filtro de la misma longitud dimensionado para una banda atenuada de 120 dB, con sus imágenes al menos 125,4 dB por debajo; el nivel de una banda se mueve menos de 0,01 dB |
@@ -1247,9 +1287,9 @@ except ValueError as error:
 # True
 ```
 
-## Los treinta y cinco nombres que ya no están
+## Los cuarenta y cinco nombres que ya no están
 
-Todo lo demás se movió. Estos treinta y cinco no existen en ningún módulo público:
+Todo lo demás se movió. Estos cuarenta y cinco no existen en ningún módulo público:
 
 | Ya no está | Qué escribir en su lugar |
 | --- | --- |
@@ -1278,6 +1318,12 @@ Todo lo demás se movió. Estos treinta y cinco no existen en ningún módulo p�
 | `NO_TONE_AUDIBILITY` | `psychoacoustics.NO_TONE_AUDIBILITY_DB` |
 | `REFERENCE_STIFFNESS` | `vibration.REFERENCE_STIFFNESS_N_M` |
 | `HAV_EAV_A8`, `HAV_ELV_A8`, `WBV_EAV_A8`, `WBV_ELV_A8` | `vibration.HAV_EAV_A8_M_S2`, `vibration.HAV_ELV_A8_M_S2`, `vibration.WBV_EAV_A8_M_S2`, `vibration.WBV_ELV_A8_M_S2`, los valores de A(8) de la Directiva 2002/44/CE. `WBV_EAV_VDV` y `WBV_ELV_VDV` conservan su nombre, porque un valor de dosis de vibración tiene una sola unidad, m/s^1,75 |
+| `combine_uncertainties` | `metrology.combined_standard_uncertainty`, la única raíz de la suma de cuadrados, que toma las contribuciones como una sola secuencia: `combine_uncertainties(3.0, 4.0)` es `combined_standard_uncertainty([3.0, 4.0])` |
+| `combine_uncertainty` | `metrology.uncertainty_propagation`, la propagación GUM a través de un modelo, con los mismos `model`, `quantities` y `correlation` |
+| `expanded_uncertainty` | `building.insulation_expanded_uncertainty(u, coverage, one_sided=...)`, la función de la ISO 12999-1 a la que remitía el nombre de primer nivel de la 3.3.0, con el mismo número: `expanded_uncertainty(1.2)` e `insulation_expanded_uncertainty(1.2)` dan los dos 2,352 dB. La incertidumbre expandida GUM de un resultado propagado es `result.expanded(coverage)` |
+| `combine_linings`, `combine_subareas`, `combine_partial_exposures`, `combine_age_and_noise` | `building.combined_lining_improvement`, `building.subarea_intensity_level`, `vibration.combined_daily_exposure`, `hearing.age_and_noise_threshold`: un cálculo se nombra por lo que devuelve |
+| `air_attenuation_m` | `environment.air_power_attenuation_per_m`. La m que devuelve es el coeficiente de atenuación de potencia de la ISO 354, en 1/m, no una longitud |
+| `attenuation_from_alpha`, `air_attenuation_coefficient` | `materials.power_attenuation_from_alpha`, la única conversión que hacen la ISO 354 y la ISO 17497-1. Su argumento es `attenuation_db_per_m`, donde las dos funciones antiguas lo llamaban `alpha` y `pressure_attenuation_db_per_m`. Rechaza un alfa NaN o infinito, que `attenuation_from_alpha` dejaba pasar |
 
 ## Lo que no ha cambiado
 

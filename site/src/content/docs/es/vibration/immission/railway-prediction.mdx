@@ -122,7 +122,7 @@ En superficie el exponente suele estar entre 0,2 y 0,4.
 ```python
 from phonometry import vibration
 
-delta = vibration.ground_transmission_db(
+delta = vibration.ground_transmission(
     [8.0, 31.5, 125.0],
     distance_m=25.0,
     reference_distance_m=8.0,
@@ -147,11 +147,11 @@ de todas ellas, que según la norma sobreestima considerablemente.
 ```python
 from phonometry import vibration
 
-print(vibration.ground_to_foundation_transfer_db("basement")[:5])  # [-4.  -3.5 -3.6 -4.2 -4.2]
-print(vibration.foundation_to_floor_transfer_db(
+print(vibration.ground_to_foundation_transfer("basement")[:5])  # [-4.  -3.5 -3.6 -4.2 -4.2]
+print(vibration.foundation_to_floor_transfer(
     [8.0, 16.0, 20.0, 40.0], floor="concrete", floor_natural_frequency_hz=20.0
 ))  # [ 3.26  9.94 17.26  3.27]
-print(vibration.ground_to_floor_transfer_db("timber", floor_natural_frequency_hz=16.0)[4:8])
+print(vibration.ground_to_floor_transfer("timber", floor_natural_frequency_hz=16.0)[4:8])
 # [ 6.03 10.07 16.    8.51]
 ```
 
@@ -173,7 +173,7 @@ for ax, floor in zip(axes, ("concrete", "timber"), strict=True):
     for natural in (8.0, 16.0, 63.0):
         ax.plot(
             positions,
-            vibration.ground_to_floor_transfer_db(floor, floor_natural_frequency_hz=natural),
+            vibration.ground_to_floor_transfer(floor, floor_natural_frequency_hz=natural),
             marker="o",
             label=rf"$f_\mathrm{{e}}$ = {natural:g} Hz",
         )
@@ -288,7 +288,7 @@ from phonometry import vibration
 
 print(vibration.point_to_line_transition_distance_m(75.0, wavelength_m=12.5))  # 450.0
 print(vibration.train_decay_exponent(1.0))  # 0.7
-print(f"{vibration.line_source_correction_db(50.0, reference_distance_m=8.0, exponent_correction=0.3):.2f} dB")  # 4.78 dB
+print(f"{vibration.line_source_correction(50.0, reference_distance_m=8.0, exponent_correction=0.3):.2f} dB")  # 4.78 dB
 print(vibration.RECOMMENDED_DISTANCES_M["urban"])  # {'tunnel': 20.0, 'surface': 25.0}
 ```
 

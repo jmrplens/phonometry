@@ -111,7 +111,7 @@ __all__ = [
     "apply_weighting",
     "band_limiting_factors",
     "band_limiting_response",
-    "combine_partial_exposures",
+    "combined_daily_exposure",
     "crest_factor",
     "daily_exposure",
     "daily_vibration_exposure",
@@ -1065,7 +1065,7 @@ def daily_exposure(total_value: float, duration_s: float) -> float:
     :func:`wbv_exposure_basis`) rather than a vector total.  Called with the
     value and duration of one operation of a working day, it returns that
     operation's partial vibration exposure :math:`A_i(8)` (ISO 5349-2
-    Eq. (2)), the term :func:`combine_partial_exposures` sums.
+    Eq. (2)), the term :func:`combined_daily_exposure` sums.
 
     :param total_value: Vibration total value ``a_hv`` (or ``a_v``), in m/s2.
     :param duration_s: Daily exposure duration ``T``, in seconds.
@@ -1085,7 +1085,7 @@ def daily_exposure(total_value: float, duration_s: float) -> float:
     return a * math.sqrt(t / REFERENCE_DURATION_S)
 
 
-def combine_partial_exposures(partials: ArrayLike) -> float:
+def combined_daily_exposure(partials: ArrayLike) -> float:
     r"""Combine partial exposures into ``A(8)`` (ISO 5349-1/-2 Eq. (3)).
 
     :math:`A(8) = \sqrt{\sum_i A_i(8)^2}`.
@@ -1487,7 +1487,7 @@ def daily_vibration_exposure(
         [daily_exposure(float(a), float(dt)) for a, dt in zip(ahv, t, strict=True)],
         dtype=np.float64,
     )
-    a8 = combine_partial_exposures(partials)
+    a8 = combined_daily_exposure(partials)
     return DailyVibrationExposure(
         a8=a8,
         labels=labels,

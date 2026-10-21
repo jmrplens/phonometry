@@ -274,7 +274,7 @@ rectangular entre $\sqrt{3}$ para la mayoría, la incertidumbre expandida de
 $C_\mathrm{FF,RM}$ según la IEC/TS 61094-7 entre 2, y la repetibilidad de las
 medidas repetidas entre 1, con sus grados de libertad. Las Tablas I.2 e I.3 la
 rellenan a 1 kHz y a 8 kHz. `metrology.correction_uncertainty_budget`
-construye el balance sobre `metrology.combine_uncertainty`, con cada
+construye el balance sobre `metrology.uncertainty_propagation`, con cada
 componente como una corrección que entra en la Fórmula (E.6) con coeficiente
 de sensibilidad $\pm 1$, y toma el factor de cobertura de los grados de
 libertad efectivos de Welch-Satterthwaite para un nivel de confianza del 95 %

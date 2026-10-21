@@ -1329,7 +1329,7 @@ def test_a_published_table_is_a_template_in_the_default_dialect(
 ) -> None:
     allard = {
         key: row
-        for key, row in materials.PUBLISHED_POROUS.items()
+        for key, row in materials.PUBLISHED_POROUS_MATERIALS.items()
         if row.table == "allard-2009-table-13-1"
     }
     path = tmp_path / "template.csv"
@@ -1512,7 +1512,12 @@ def test_rows_that_credit_their_table_apart_are_refused_at_each_credit(
             "attributed_to.row",
             None,
         ),
-        (environment.PUBLISHED_GROUND, "bies-2017-table-5-2", None, "Plovsing, 2006"),
+        (
+            environment.PUBLISHED_GROUND_SURFACES,
+            "bies-2017-table-5-2",
+            None,
+            "Plovsing, 2006",
+        ),
     ],
 )
 def test_a_published_table_that_credits_a_row_or_itself_goes_into_a_sheet(

@@ -244,7 +244,7 @@ $c$ y una $m$ distintas para cada situación porque la norma lo hace: el términ
 de corrección $-4(V/S)(m_2 - m_1)$ resta la absorción propia del aire, y en las
 bandas altas es comparable con la de la probeta. Calcula $c$ con la ec. (2)
 mediante `speed_of_sound`, y $m$ a partir de la atenuación en tono puro de
-ISO 9613-1 con `air_attenuation_coefficient` (ec. (3),
+ISO 9613-1 con `power_attenuation_from_alpha` (ec. (3),
 $m \approx \alpha/4{,}343$ para $\alpha$ en dB/m), una vez por situación, a
 partir de la media de las lecturas tomadas antes y después de ella:
 
@@ -259,7 +259,7 @@ temps = [20.0, 20.5, 21.0, 21.5]        # degC, media por situación (apartado 7
 alpha = [0.04062, 0.04189, 0.04334, 0.04502]
 c = [float(materials.speed_of_sound_iso17497(temperature_c=t))
      for t in temps]                                             # ec. (2)
-m = [float(materials.air_attenuation_coefficient(a)) for a in alpha]  # ec. (3)
+m = [float(materials.power_attenuation_from_alpha(a)) for a in alpha]  # ec. (3)
 print(np.round(c, 2))    # [343.2  343.49 343.78 344.08]
 print(np.round(m, 5))    # [0.00935 0.00965 0.00998 0.01037]   1/m a 5 kHz
 

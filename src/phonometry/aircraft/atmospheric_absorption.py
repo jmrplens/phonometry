@@ -444,7 +444,7 @@ class Arp866aAttenuation(OwnsArrays):
     def __post_init__(self) -> None:
         """Reject a coefficient set whose arrays do not all run over the same bands.
 
-        Each array is one value per band, and :meth:`path_attenuation_db`
+        Each array is one value per band, and :meth:`path_attenuation`
         multiplies the coefficient by a path length for the caller to subtract
         band by band from a spectrum: a coefficient array one short, or one
         with an extra axis, would be broadcast over that spectrum without a
@@ -470,9 +470,7 @@ class Arp866aAttenuation(OwnsArrays):
             "coefficient_db_per_100m",
         )
 
-    def path_attenuation_db(
-        self, path_length_m: float | ArrayLike
-    ) -> NDArray[np.float64]:
+    def path_attenuation(self, path_length_m: float | ArrayLike) -> NDArray[np.float64]:
         r"""Attenuation over a path, :math:`\alpha \cdot s / 100`, in dB.
 
         ARP 866A gives a rate, so the attenuation is proportional to the path

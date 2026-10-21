@@ -168,6 +168,11 @@ def _reflection_index() -> ph.environment.ReflectionIndexResult:
     )
 
 
+def _reflection_index_uncertainty() -> ph.environment.ReflectionIndexUncertainty:
+    """EN 1793-5 A.2: the high column of Table A.1 at k_p = 1,96, as Annex B.5."""
+    return ph.environment.reflection_index_expanded_uncertainty()
+
+
 def _reflection_records() -> tuple[np.ndarray, np.ndarray]:
     """In-front and free-field records of microphone 5 before a half reflector."""
     samples = 2048
@@ -1641,7 +1646,7 @@ _FREE_FIELD_TARGETS: tuple[tuple[str, ...], ...] = (
 
 def _inverse_square_law() -> ph.emission.InverseSquareLawResult:
     """ISO 26101 deviations: six traverses, one wall reflection at 1 kHz."""
-    freqs = ph.emission.qualification_frequencies_hz()
+    freqs = ph.emission.qualification_frequencies()
     d = np.arange(0.30, 3.0001, 0.02)
     traverses = []
     for index, direction in enumerate(_FREE_FIELD_DIRECTIONS):
@@ -1665,7 +1670,7 @@ def _inverse_square_law() -> ph.emission.InverseSquareLawResult:
 
 def _source_directionality() -> ph.emission.SourceDirectionalityResult:
     """ISO 26101 Annex B: 32 positions, a gentle lobe growing with frequency."""
-    freqs = ph.emission.qualification_frequencies_hz()
+    freqs = ph.emission.qualification_frequencies()
     positions = ph.emission.directionality_positions("hemi-anechoic")
     lobe = positions[:, 0] / 1.5
     levels = 80.0 + np.outer(lobe, np.linspace(0.3, 2.0, freqs.size))

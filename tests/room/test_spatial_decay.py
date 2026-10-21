@@ -325,16 +325,16 @@ def test_a_distance_inside_the_first_metre_is_refused() -> None:
 
 
 def test_the_omnidirectionality_ramp_lands_on_its_printed_ends() -> None:
-    assert room.omnidirectionality_tolerance_db(500.0) == pytest.approx(2.0)
-    assert room.omnidirectionality_tolerance_db(630.0) == pytest.approx(2.0)
-    assert room.omnidirectionality_tolerance_db(800.0) == pytest.approx(5.0)
-    assert room.omnidirectionality_tolerance_db(1000.0) == pytest.approx(8.0)
-    assert room.omnidirectionality_tolerance_db(5000.0) == pytest.approx(8.0)
+    assert room.omnidirectionality_tolerance(500.0) == pytest.approx(2.0)
+    assert room.omnidirectionality_tolerance(630.0) == pytest.approx(2.0)
+    assert room.omnidirectionality_tolerance(800.0) == pytest.approx(5.0)
+    assert room.omnidirectionality_tolerance(1000.0) == pytest.approx(8.0)
+    assert room.omnidirectionality_tolerance(5000.0) == pytest.approx(8.0)
 
 
 def test_a_frequency_that_names_no_third_octave_is_refused() -> None:
     with pytest.raises(ValueError, match="nominal one-third-octave"):
-        room.omnidirectionality_tolerance_db(700.0)
+        room.omnidirectionality_tolerance(700.0)
 
 
 def test_a_curve_carries_its_region_and_its_two_descriptors() -> None:

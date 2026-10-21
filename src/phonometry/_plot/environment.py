@@ -62,6 +62,7 @@ if TYPE_CHECKING:
         ReflectionFrequencyLimit,
         ReflectionGridCheck,
         ReflectionIndexResult,
+        ReflectionIndexUncertainty,
     )
     from ..environment.propagation.ground_barriers import (
         BarrierInsertionLoss,
@@ -129,6 +130,12 @@ _RI_BARS = "$RI$, sound reflection index"
 _BELOW_LOWEST_BAND = "Below the lowest reliable band"
 _RI_AVERAGE = "Average of all positions"
 _RI_POSITIONS = "Each grid position"
+_RI_U_LABEL = "Expanded uncertainty $U_j$ of $RI$"
+_RI_U_BANDS = "$U_j$ of each band"
+_RI_U_RATING = "$U$ of $DL_{{RI}}$ = {value} dB"
+_RI_U_TITLE = "EN 1793-5 A.2: {column} column of Table A.1, $k_p$ = {factor}"
+#: The three columns of Table A.1, as the title names them.
+_RI_U_COLUMNS = {"median": "median", "low": "low", "high": "high"}
 
 _STRINGS: dict[str, str] = {
     "Narrowband spectrum": "Espectro de banda estrecha",
@@ -256,6 +263,13 @@ _STRINGS: dict[str, str] = {
     _BELOW_LOWEST_BAND: "Por debajo de la banda fiable más baja",
     _RI_AVERAGE: "Media de todas las posiciones",
     _RI_POSITIONS: "Cada posición de la rejilla",
+    _RI_U_LABEL: "Incertidumbre expandida $U_j$ de $RI$",
+    _RI_U_BANDS: "$U_j$ de cada banda",
+    _RI_U_RATING: "$U$ de $DL_{{RI}}$ = {value} dB",
+    _RI_U_TITLE: "EN 1793-5 A.2: columna {column} de la tabla A.1, $k_p$ = {factor}",
+    "median": "mediana",
+    "low": "baja",
+    "high": "alta",
     "to 5 kHz": "a 5 kHz",
     "Time after the direct sound [ms]": "Tiempo tras el sonido directo [ms]",
     "Impulse response [a.u.]": "Respuesta al impulso [u. a.]",
@@ -1331,6 +1345,60 @@ def plot_reflection_index(
     )
     ax.grid(visible=True, axis="y", alpha=0.3)
     legend = ax.legend(fontsize="small")
+    place_legend_clear(legend)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_reflection_index_uncertainty(
+    result: ReflectionIndexUncertainty,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The expanded uncertainty of an EN 1793-5 sound reflection index (A.2).
+
+    One bar per one-third octave band for :math:`U_j`, in units of the index,
+    which is a ratio; the :math:`U` of the single-number rating
+    :math:`DL_{RI}` is a level in decibels, so it is stated in the legend
+    rather than drawn on the same axis. The column of Table A.1 and the
+    coverage factor are in the title.
+
+    :param result: A
+        :class:`~phonometry.environment.propagation.barrier_reflection.ReflectionIndexUncertainty`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the ``Axes.bar`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    freqs = np.asarray(result.frequencies, dtype=np.float64)
+    values = np.asarray(result.expanded_uncertainty, dtype=np.float64)
+    positions = _band_axis(ax, freqs, language=language)
+    style_default(kwargs, "color", _C_PRIMARY)
+    kwargs.setdefault("label", _t(_RI_U_BANDS, language))
+    ax.set_axisbelow(True)
+    bars = ax.bar(positions, values, **kwargs)
+    from matplotlib.lines import Line2D
+
+    rating = format_number(result.rating_db, language, decimals=2)
+    stated = Line2D(
+        [],
+        [],
+        linestyle="none",
+        label=_t(_RI_U_RATING, language).format(value=rating),
+    )
+    ax.set_xlim(-0.5, positions[-1] + 0.5)
+    ax.set_ylim(0.0, float(np.max(values)) * 1.3)
+    ax.set_ylabel(_t(_RI_U_LABEL, language))
+    factor = format_number(result.coverage_factor, language, decimals=2)
+    column = _t(_RI_U_COLUMNS[result.estimate], language)
+    ax.set_title(_t(_RI_U_TITLE, language).format(column=column, factor=factor))
+    ax.grid(visible=True, axis="y", alpha=0.3)
+    legend = ax.legend(handles=[bars, stated], fontsize="small")
     place_legend_clear(legend)
     localize_axes(ax, language)
     return ax
@@ -2505,7 +2573,7 @@ def plot_method_b_summary(
     ax.set_ylim(0.5, 5.5)
     ax.set_yticks([1, 2, 3, 4, 5])
     ax.set_ylabel(_t("Scale value (Table B.1)", language))
-    level = format_number(100.0 * result.confidence_level, language, decimals=0)
+    level = format_number(100.0 * result.confidence, language, decimals=0)
     # The level goes where each language puts it: "95 % confidence interval",
     # "intervalo de confianza del 95 %".
     interval = _t("{level} % confidence interval", language).format(level=level)

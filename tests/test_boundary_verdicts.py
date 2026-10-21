@@ -151,7 +151,7 @@ def test_screen_background_at_6_db_is_acceptable(
     signal: float, background: float
 ) -> None:
     # ISO 11821 5.7: under 6 dB is unacceptable; 6 dB itself is corrected.
-    corrected = noise_control.background_corrected_level_db([signal], [background])
+    corrected = noise_control.screen_background_corrected_level([signal], [background])
     expected = 10.0 * math.log10(10.0 ** (signal / 10.0) - 10.0 ** (background / 10.0))
     assert corrected[0] == pytest.approx(expected, abs=1e-9)
 
@@ -160,7 +160,7 @@ def test_screen_background_at_6_db_is_acceptable(
 def test_screen_background_at_10_db_is_still_corrected(
     signal: float, background: float
 ) -> None:
-    corrected = noise_control.background_corrected_level_db([signal], [background])
+    corrected = noise_control.screen_background_corrected_level([signal], [background])
     expected = 10.0 * math.log10(10.0 ** (signal / 10.0) - 10.0 ** (background / 10.0))
     assert corrected[0] == pytest.approx(expected, abs=1e-9)
 
@@ -170,7 +170,7 @@ def test_silencer_background_10_db_is_the_last_row(
     signal: float, background: float
 ) -> None:
     # ISO 11820 Table 1 prints 0,5 dB against 10 dB, and nothing above it.
-    correction = noise_control.silencer_background_correction_db([signal - background])
+    correction = noise_control.silencer_background_correction([signal - background])
     assert correction[0] == 0.5
 
 
@@ -178,7 +178,7 @@ def test_silencer_background_10_db_is_the_last_row(
 def test_silencer_background_9_db_reads_its_own_row(
     signal: float, background: float
 ) -> None:
-    correction = noise_control.silencer_background_correction_db([signal - background])
+    correction = noise_control.silencer_background_correction([signal - background])
     assert correction[0] == 0.5
 
 
@@ -187,7 +187,7 @@ def test_barrier_background_10_db_takes_nothing_off(
     signal: float, background: float
 ) -> None:
     # ISO 10847 6.4 prints rows to 9 dB; 10 dB is past the table.
-    correction = environment.barrier_background_correction_db([signal - background])
+    correction = environment.barrier_background_correction([signal - background])
     assert correction[0] == 0.0
 
 
@@ -309,7 +309,7 @@ def test_impulse_spread_of_3_db_is_not_repeated(high: float, low: float) -> None
     # ISO 11821 5.6.2.1: past 3 dB the measurement is repeated, at 3 dB it is not.
     with warnings.catch_warnings():
         warnings.simplefilter("error")
-        level = noise_control.impulse_mean_level_db([high, low, low])
+        level = noise_control.impulse_mean_level([high, low, low])
     assert low < level < high
 
 
@@ -1251,7 +1251,7 @@ def test_an_enclosure_insulation_on_a_half_is_reported_even(
 ) -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", noise_control.EnclosureInsulationWarning)
-        result = noise_control.sound_pressure_insulation([pair[0]], [pair[1]])
+        result = noise_control.enclosure_sound_pressure_insulation([pair[0]], [pair[1]])
     assert int(result.rounded()[0]) == reported
 
 

@@ -191,10 +191,10 @@ hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 
 **Returns:** `(32, 3)` or `(64, 3)` coordinates, in metres.
 
-## directionality_tolerance_db
+## directionality_tolerance
 
 ```python
-directionality_tolerance_db(
+directionality_tolerance(
     frequencies: ArrayLike,
     *,
     room: Literal['anechoic', 'hemi-anechoic'],
@@ -500,10 +500,10 @@ span the frequency range, each with its own mathematical origin, and
 | :--- | :--- |
 | ValueError | if both `origin_m` and `source_box_m` are given, a traverse's level columns do not match the frequencies, a traverse has no level at a frequency, or a point coincides with the origin. |
 
-## inverse_square_law_tolerance_db
+## inverse_square_law_tolerance
 
 ```python
-inverse_square_law_tolerance_db(
+inverse_square_law_tolerance(
     frequencies: ArrayLike,
     *,
     room: Literal['anechoic', 'hemi-anechoic'],
@@ -626,7 +626,7 @@ Draw the deviations along every traverse at one frequency.
 
 The Table A.1 limit of each frequency, in dB, read from the room.
 
-**Returns:** [`inverse_square_law_tolerance_db`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_tolerance_db) of `frequencies` in `room`.
+**Returns:** [`inverse_square_law_tolerance`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_tolerance) of `frequencies` in `room`.
 
 ## MicrophoneTraverse
 
@@ -695,10 +695,10 @@ A traverse laid out along a straight line from `start_m`.
 | :--- | :--- |
 | ValueError | for a direction that is zero or not finite. |
 
-## qualification_frequencies_hz
+## qualification_frequencies
 
 ```python
-qualification_frequencies_hz(
+qualification_frequencies(
     low_hz: float = 100.0,
     high_hz: float = 10000.0,
 ) -> np.ndarray
@@ -787,7 +787,7 @@ Draw the extreme deviations per band against Table B.1.
 
 The Table B.1 limit per band, in dB, read from the room.
 
-**Returns:** [`directionality_tolerance_db`](/phonometry/reference/api/power/free-field-qualification/#directionality_tolerance_db) of `frequencies` in `room`.
+**Returns:** [`directionality_tolerance`](/phonometry/reference/api/power/free-field-qualification/#directionality_tolerance) of `frequencies` in `room`.
 
 ### SourceDirectionalityResult.within_tolerance
 

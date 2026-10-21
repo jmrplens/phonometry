@@ -113,7 +113,7 @@ class Fluid(RichDisplay):
 
         A frozen dataclass stops the attribute from being rebound and says
         nothing about what it points at, so a plain ``dict`` here stays
-        writable. That matters most for the shared states: ``PUBLISHED_AIR`` is
+        writable. That matters most for the shared states: ``ABSORBER_AIR`` is
         a module-level constant every visco-thermal model defaults to, and one
         ``air.properties["density"] = 999`` anywhere in a process would have
         moved every one of those defaults, silently and for good.

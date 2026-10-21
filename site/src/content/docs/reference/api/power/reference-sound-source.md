@@ -240,10 +240,10 @@ marks the bands whose level was replaced, as B.2 asks the report to.
 | :--- | :--- |
 | ValueError | for bands that are not ascending one-third octaves from 50 Hz to 20 kHz, no position, levels, background levels, maxima or a manufacturer's $C_2$ that are not finite, or inconsistent shapes. |
 
-## reference_source_reproducibility_db
+## reference_source_reproducibility
 
 ```python
-reference_source_reproducibility_db(
+reference_source_reproducibility(
     frequencies: ArrayLike,
     *,
     environment: Literal['hemi-anechoic', 'reverberation-room'],

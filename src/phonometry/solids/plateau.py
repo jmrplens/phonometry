@@ -70,7 +70,7 @@ if TYPE_CHECKING:  # pragma: no cover - typing only
 __all__ = [
     "PUBLISHED_PLATEAU_DATA",
     "PlateauMaterial",
-    "plateau_material_named",
+    "plateau_data_named",
 ]
 
 
@@ -118,7 +118,7 @@ def _load() -> dict[str, PlateauMaterial]:
 PUBLISHED_PLATEAU_DATA: Mapping[str, PlateauMaterial] = MappingProxyType(_load())
 
 
-def plateau_material_named(
+def plateau_data_named(
     name: str, *, catalogue: Mapping[str, PlateauMaterial] | None = None
 ) -> tuple[PlateauMaterial, ...]:
     """Every row whose printed name contains *name*, case insensitively.
@@ -139,7 +139,7 @@ def plateau_material_named(
     return tuple(
         row
         for row in rows_to_search(
-            catalogue, PUBLISHED_PLATEAU_DATA, PlateauMaterial, "plateau_material_named"
+            catalogue, PUBLISHED_PLATEAU_DATA, PlateauMaterial, "plateau_data_named"
         )
         if wanted in search_text(row.name)
     )

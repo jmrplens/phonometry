@@ -1067,7 +1067,7 @@ One substitution the standard allows is not implemented: clauses 6.2.3 and
 6.2.4 let a **database B**, an age threshold measured on a national control
 population, replace database A. Only database A exists here, so `htlan`
 always draws its age component from ISO 7029:2017. For a database-B
-assessment, `combine_age_and_noise(htla, nipts_value)` runs Formula (1) on an
+assessment, `age_and_noise_threshold(htla, nipts_value)` runs Formula (1) on an
 externally supplied HTLA array; computing database B itself is out of scope.
 
 **Test-report fiche.** `HtlanResult.report(path)` renders the companion fiche

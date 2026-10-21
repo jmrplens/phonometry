@@ -81,7 +81,7 @@ cell = environment.air_attenuation(1000.0, temperature_c=10.0, relative_humidity
 print(round(float(cell), 2))                # 3.66  (dB/km, Table 1)
 
 # Feed real conditions into the ISO 354 power attenuation coefficient m [1/m]
-m = environment.air_attenuation_m([1000.0, 4000.0], temperature_c=20.0,
+m = environment.air_power_attenuation_per_m([1000.0, 4000.0], temperature_c=20.0,
                                   relative_humidity_percent=50.0)
 print(np.round(m, 5))                        # [0.00107 0.00683]
 ```
@@ -96,12 +96,12 @@ stated $\pm 10$ % accuracy (Clause 7.1). Inputs outside the tabulated ranges
 (−20…+50 °C, 10…100 % RH, 50…10 000 Hz, or above the 200 kPa validity envelope)
 still compute but raise an `AtmosphericAbsorptionWarning`; non-physical inputs
 (non-positive frequency, humidity outside 0…100 %, sub-absolute-zero
-temperature) raise `ValueError`. `air_attenuation_m` composes $\alpha$ with the
+temperature) raise `ValueError`. `air_power_attenuation_per_m` composes $\alpha$ with the
 ISO 354 conversion $m = \alpha/(10 \log_{10} e)$ so an ISO 354 caller can feed real
 atmospheric conditions straight into `absorption_area` /
 `absorption_coefficient` instead of hand-entering $m$.
 
-### `air_attenuation()` / `air_attenuation_m()` parameters
+### `air_attenuation()` / `air_power_attenuation_per_m()` parameters
 
 | Parameter | Type / shape | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
@@ -111,7 +111,7 @@ atmospheric conditions straight into `absorption_area` /
 | `static_pressure_kpa` | float | kPa | default `101.325` | ≤ 200 valid (Clause 7); above warns |
 | `exact_midband` | bool | — | default `False` | Snap to $f_\mathrm{m} = 1000\cdot10^{k/10}$ (reproduces Table 1) |
 
-`air_attenuation` returns $\alpha$ in dB/m; `air_attenuation_m` returns
+`air_attenuation` returns $\alpha$ in dB/m; `air_power_attenuation_per_m` returns
 $m = \alpha/(10 \log_{10} e)$ in 1/m for ISO 354.
 
 ### A plottable result: `atmospheric_attenuation()`
@@ -778,5 +778,5 @@ length-weighted region ground factors of 6.2.5 behind `region_ground_factors`,
 and test cases T01 to T07, the ones it marks as answerable by ISO 9613-2 alone.
 ISO 354:2003, *Acoustics — Measurement of sound
 absorption in a reverberation room*: only the clause 8.1.2.1 conversion
-$m = \alpha/(10 \log_{10} e)$ behind `air_attenuation_m`; the reverberation-room
+$m = \alpha/(10 \log_{10} e)$ behind `air_power_attenuation_per_m`; the reverberation-room
 method itself is covered in the [Room Acoustics guide](../../buildings/rooms/room-acoustics.md).

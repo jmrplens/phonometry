@@ -83,7 +83,7 @@ Every row for a surface name, across the tables.
 | Name | Description |
 | :--- | :--- |
 | `name` | The surface as a table prints it, matched without regard to case. |
-| `catalogue` | The rows to search in place of [`PUBLISHED_GROUND`](/phonometry/reference/api/environment/ground-surfaces/#published_ground): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_GROUND \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_GROUND`](/phonometry/reference/api/environment/ground-surfaces/#published_ground)). |
+| `catalogue` | The rows to search in place of [`PUBLISHED_GROUND_SURFACES`](/phonometry/reference/api/environment/ground-surfaces/#published_ground_surfaces): a catalogue of your own that [`phonometry.io.read_catalogue`](/phonometry/reference/api/io/io/#read_catalogue) returns, `PUBLISHED_GROUND_SURFACES \| mine` to search both at once, or any mapping of key to row (Default: `None`, which searches [`PUBLISHED_GROUND_SURFACES`](/phonometry/reference/api/environment/ground-surfaces/#published_ground_surfaces)). |
 
 **Returns:** The rows whose [`GroundSurface.name`](/phonometry/reference/api/environment/ground-surfaces/#groundsurface) matches, in catalogue order, which is empty when no row names it.
 
@@ -330,7 +330,7 @@ into both.
 | :--- | :--- |
 | `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `model` | `"delany_bazley"` (Default) or `"miki"`, the two ground models the outdoor functions take. |
-| `fluid` | The air above the ground, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air the two models were published with, as the outdoor functions default to). |
+| `fluid` | The air above the ground, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`ABSORBER_AIR`](/phonometry/reference/api/materials/porous/#absorber_air), dry air at 20 degC at textbook values, as the outdoor functions default to). |
 
 **Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult), in the materials domain's time convention, which the outdoor functions convert themselves.
 
@@ -438,6 +438,6 @@ s/m2) and no value"`, never a figure the page does not print.
 | :--- | :--- |
 | AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
 
-## PUBLISHED_GROUND
+## PUBLISHED_GROUND_SURFACES
 
 *Constant* (`mapping`).

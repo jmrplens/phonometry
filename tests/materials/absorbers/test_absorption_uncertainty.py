@@ -17,8 +17,8 @@ from phonometry import materials
 # ---------------------------------------------------------------------------
 def test_coverage_factor_table3() -> None:
     expected = {0.68: 1.0, 0.80: 1.3, 0.90: 1.6, 0.95: 2.0, 0.99: 2.6, 0.999: 3.3}
-    for confidence, k in expected.items():
-        assert materials.absorption_coverage_factor(confidence) == k
+    for coverage, k in expected.items():
+        assert materials.absorption_coverage_factor(coverage) == k
 
 
 def test_coverage_factor_rejects_untabulated() -> None:
@@ -40,7 +40,7 @@ def test_absorption_coefficient_reproduces_table4() -> None:
         ref.ISO12999_2_TABLE4_ALPHA_S,
         ref.ISO12999_2_TABLE4_FREQ,
         condition="reproducibility",
-        confidence=0.95,
+        coverage=0.95,
     )
     assert res.coverage_factor == 2.0
     np.testing.assert_allclose(

@@ -24,7 +24,7 @@ import pytest
 import reference_data as ref
 
 from phonometry.materials.absorbers.porous import (
-    PUBLISHED_AIR,
+    ABSORBER_AIR,
     ROCK_WOOL_LATERAL_FIT,
     ROCK_WOOL_LONGITUDINAL_FIT,
     FibreResistivityFit,
@@ -262,8 +262,8 @@ def test_every_printed_specimen_reproduces_through_its_own_shape_factor(
 
 
 def test_the_default_fluid_is_the_air_the_book_states() -> None:
-    """Allard's viscosity and the library's published air are the same number."""
-    assert PUBLISHED_AIR.viscosity == pytest.approx(ref.ALLARD_AIR_VISCOSITY_PA_S)
+    """Allard's viscosity and the library's absorber air are the same number."""
+    assert ABSORBER_AIR.viscosity == pytest.approx(ref.ALLARD_AIR_VISCOSITY_PA_S)
 
 
 def test_a_more_resistive_material_has_a_narrower_pore() -> None:

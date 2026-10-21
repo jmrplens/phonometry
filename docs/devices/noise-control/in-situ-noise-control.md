@@ -169,9 +169,9 @@ ISO 11820 prints a stepped table, positive, to be subtracted, and refuses under
 between 6 dB and 10 dB of margin.
 
 ```python
-print(noise_control.silencer_background_correction_db([9.0]))   # [0.5] dB off
-print(environment.barrier_background_correction_db([9.0]))      # [-1.] dB added
-print(round(80.0 - noise_control.background_corrected_level_db(
+print(noise_control.silencer_background_correction([9.0]))   # [0.5] dB off
+print(environment.barrier_background_correction([9.0]))      # [-1.] dB added
+print(round(80.0 - noise_control.screen_background_corrected_level(
     [80.0], [71.0])[0], 2))                                     # 0.58 dB off
 ```
 

@@ -88,7 +88,7 @@ bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
 without = [96.0, 98.0, 99.0, 97.0, 94.0, 89.0]   # dB, máquina sola
 with_box = [88.0, 86.0, 81.0, 74.0, 68.0, 63.0]  # dB, con el encapsulado
 
-res = noise_control.sound_power_insulation(
+res = noise_control.enclosure_sound_power_insulation(
     without, with_box, frequencies=bands, band_fraction=1,
 )
 print(res.rounded())                    # [ 8 12 18 23 26 26] dB
@@ -100,7 +100,7 @@ lleva una declaración. El apartado 9.4 informa cada valor de banda redondeado
 al decibelio más próximo, que es lo que hace `.rounded()`.
 
 Las dos partes miden además un aislamiento a la **presión acústica** en una
-posición declarada, ecuaciones (3) y (4), con `sound_pressure_insulation`. Es
+posición declarada, ecuaciones (3) y (4), con `enclosure_sound_pressure_insulation`. Es
 otra magnitud con la misma aritmética: pertenece a una posición de micrófono, y
 por eso la norma obliga a informar de cuál.
 
@@ -141,7 +141,7 @@ de la propia norma base. Las dos sustitutas son:
   sobre una chapa de acero sin amortiguar, usada en varias posiciones. Las
   posiciones se promedian **aritméticamente**, que es la palabra de la propia
   norma y no la media energética que se usa casi en todas partes en esta
-  biblioteca, así que `artificial_source_insulation` la escribe en vez de
+  biblioteca, así que `enclosure_artificial_source_insulation` la escribe en vez de
   tomarla prestada.
 
 ## 3. ¿Sirve la sala?
@@ -352,13 +352,13 @@ la cite de todas formas está citando un apartado que lo excluyó.
 <Scope>
 <ScopeClaim status="covered" label="Cubierto">
 La aritmética de los tres documentos. De la ISO 11546-1 y -2: las ecuaciones
-(1) a (5) con `sound_power_insulation`, `sound_pressure_insulation`,
-`reciprocity_insulation` y `artificial_source_insulation`, la última
+(1) a (5) con `enclosure_sound_power_insulation`, `enclosure_sound_pressure_insulation`,
+`enclosure_reciprocity_insulation` y `enclosure_artificial_source_insulation`, la última
 promediando sus posiciones de fuente aritméticamente como dice el apartado; la
 tabla 1 como datos con `applicable_methods`, con las magnitudes que puede
 declarar cada fila y las filas que no dan espectro; el número único de la
-ISO 717-1 del apartado 7 con `weighted_insulation`; la estimación del anexo C
-y del anexo D con `estimated_a_weighted_insulation`; los cocientes de fuga, de
+ISO 717-1 del apartado 7 con `weighted_enclosure_insulation`; la estimación del anexo C
+y del anexo D con `estimated_a_weighted_enclosure_insulation`; los cocientes de fuga, de
 estanquidad y de llenado de las definiciones; la distancia de la fuente de
 7.2; y el anexo C entero de la parte 2, con la tabla C.1, la tabla C.2 y la
 figura C.1 en forma cerrada con `test_environment_applicability`, contrastada

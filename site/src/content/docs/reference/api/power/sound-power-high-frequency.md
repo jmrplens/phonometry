@@ -422,10 +422,10 @@ tone that lies within 10 dB of the highest tonal level in the band, so
 for a tonal determination this marks the tones the report has to
 carry.
 
-## minimum_analyzer_bandwidth_hz
+## minimum_analyzer_bandwidth
 
 ```python
-minimum_analyzer_bandwidth_hz(
+minimum_analyzer_bandwidth(
     tone_frequency_hz: ArrayLike,
     *,
     microphone_speed_m_s: float,
@@ -581,7 +581,7 @@ Total level of a tone from its sideband levels (ISO 9295 Formula (3)).
 $L_\mathrm{tot} = 10 \lg \sum_{i=1}^{N_\mathrm{sb}} 10^{0{,}1 L_i}$,
 the energy sum of the bands adjacent to the tone frequency that carry
 its energy when the analyser is narrower than
-[`minimum_analyzer_bandwidth_hz`](/phonometry/reference/api/power/sound-power-high-frequency/#minimum_analyzer_bandwidth_hz).
+[`minimum_analyzer_bandwidth`](/phonometry/reference/api/power/sound-power-high-frequency/#minimum_analyzer_bandwidth).
 
 **Parameters**
 

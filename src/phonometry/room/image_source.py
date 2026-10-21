@@ -610,7 +610,7 @@ def image_source_rir(
         per-band; the pressure amplitude of each
         path is scaled by :math:`\mathrm{e}^{-m r / 2}` (Kuttruff 4.1). Default 0 (air
         absorption neglected). Obtain a physical ``m`` from
-        :func:`~phonometry.environment.propagation.air_absorption.air_attenuation_m`.
+        :func:`~phonometry.environment.propagation.air_absorption.air_power_attenuation_per_m`.
     :param duration: RIR length, s; default the latest image arrival rounded up
         to the next sample.
     :param frequencies: Optional band centre frequencies, Hz, labelling a

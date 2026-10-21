@@ -202,13 +202,13 @@ from .uncertainty import (
     Quantity,
     UncertaintyResult,
     UncertaintyWarning,
-    combine_uncertainty,
+    combined_standard_uncertainty,
     coverage_factor,
-    expanded_uncertainty,
     monte_carlo,
     rectangular,
     triangular,
     u_shaped,
+    uncertainty_propagation,
 )
 
 __all__ = [
@@ -328,7 +328,8 @@ __all__ = [
     "capillary_tube_impedance",
     "check_coupler",
     "check_free_field_arrangement",
-    "combine_uncertainty",
+    "combined_standard_uncertainty",
+    "uncertainty_propagation",
     "comparison_coupler_correction",
     "comparison_uncertainty_budget",
     "correction_uncertainty_budget",
@@ -343,7 +344,6 @@ __all__ = [
     "equal_area_directivity_factor",
     "equal_area_incidence_angles",
     "exact_frequencies",
-    "expanded_uncertainty",
     "free_field_parameter_uncertainty",
     "free_field_reciprocity",
     "free_field_reciprocity_pair",

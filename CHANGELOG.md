@@ -459,7 +459,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the twenty of `solids`, `fluids`, `materials`, `building`, `noise_control`
   and `environment`, takes `catalogue=`: the rows to search in place of its
   own `PUBLISHED_*`, such as a catalogue `io.read_catalogue` read, or
-  `materials.PUBLISHED_POROUS | mine` to search both at once. Each keeps its
+  `materials.PUBLISHED_POROUS_MATERIALS | mine` to search both at once. Each keeps its
   own way of matching a name (whole or in part, in the name, in the heading
   above it or in a carpet's fibre), answers every match in the order the
   mapping holds them and never picks one for you. A name matches without
@@ -643,7 +643,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `reflection_sampled_area_radius_m` Formula (8), and
   `reflection_low_frequency_limit` the limit each microphone reaches for a
   device of a given size, by the construction of Garai and Guidorzi, since
-  Figure 14 prints no formula. Every result has `.plot()`, and a new guide in
+  Figure 14 prints no formula. `reflection_index_expanded_uncertainty` is
+  A.2: a read-only `ReflectionIndexUncertainty` with the $U_j$ of each band,
+  in units of the index, and the $U$ of $DL_{RI}$ in decibels, from the
+  reproducibility of Table A.1 (the high column and $k_p$ = 1,96 by default,
+  as Annex B.5). Every result has `.plot()`, and a new guide in
   both languages walks through a measurement and the example of Annex B. Of
   that example the library reproduces the twelve-position average of sixteen
   bands to the hundredth (the other two fall on an exact half that the printed
@@ -811,7 +815,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   require; no source prints the fit, and the rule is stated in the docstring
   and the guide. `check_free_field` returns the verdict of the Annex A that
   ISO 3745:2012/Amd.1:2017 wrote: the Table A.1 limits for both room types,
-  the frequencies of A.2.3 (`qualification_frequencies_hz`, one-third
+  the frequencies of A.2.3 (`qualification_frequencies`, one-third
   octaves below 125 Hz and above 4 kHz and octaves between), the maximum
   qualified radius of A.2.4, the traverse count, the five path targets
   (`MicrophoneTraverse.targets`), the working area (`paths_in_working_area`)
@@ -1205,7 +1209,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   with a reference sound source, for broadband noise (Formula (8)) and for
   tones read against a source calibrated per hertz (Formula (9)), and the
   result marks the tones within 10 dB of the highest that the report has to
-  carry. `minimum_analyzer_bandwidth_hz` and `tone_level_from_sidebands` are
+  carry. `minimum_analyzer_bandwidth` and `tone_level_from_sidebands` are
   the bandwidth a moving microphone needs and the sideband sum when the FFT is
   narrower (Formulae (2) and (3)), `free_field_absorption_correction` the
   $K_\alpha = r\alpha$ of the free-field method beyond 2 m (Formula (10)), and
@@ -1241,7 +1245,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   limit of Part 4 Inequality (3), warning where they fail;
   `vibration.effective_blocking_mass` is Part 4 Formula (6) with the f3 of its
   Inequality (5); `vibration.driving_point_uncertainty` builds the Annex B
-  budget of Part 5 on `metrology.combine_uncertainty`, with U = 2u, from the
+  budget of Part 5 on `metrology.uncertainty_propagation`, with U = 2u, from the
   expressions B.3.4 to B.3.6 print (Table B.1 rounds them up to one decimal,
   and any term can be passed in to reproduce it). Each result has `.plot()`.
   Neither part prints a worked example, so the conformance rows are closed
@@ -1332,7 +1336,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   are judged on the three microphones and not on the spread between the
   calibrators. The free-field correction of the reference microphone, from
   IEC/TS 61094-7, is an input. `metrology.correction_uncertainty_budget`
-  builds the budget of Table I.1 on `metrology.combine_uncertainty`, its
+  builds the budget of Table I.1 on `metrology.uncertainty_propagation`, its
   fifteen components keyed as the table prints them with the divisors of
   their distributions, adds the static-pressure component of clause 6 below
   97 kPa and any component a laboratory's method needs, and takes the
@@ -1390,7 +1394,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   pressure-calibrated reference takes the reference's IEC/TS 61094-7
   difference. `metrology.comparison_uncertainty_budget` combines the
   components of Table D.1 or of IEC 61094-8 Table 2 on
-  `metrology.combine_uncertainty` with $k = 2$, and
+  `metrology.uncertainty_propagation` with $k = 2$, and
   `metrology.free_field_region` gives the effective free-field region of a
   time window, $A = d + \tau c$ (B.1), with the speed of sound of the
   IEC 61094-2 Annex F air, and the clearance it asks of the room and of the
@@ -1446,7 +1450,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   test frequencies of its Formula (1) with `points_per_bandwidth` (S, at least
   24), the trapezoidal effective bandwidth of Formula (2) and the energy sum of
   each band and its two neighbours of Formula (3); `requirements`,
-  `requirement_class`, `binding_margin_db` and `plot(requirement=...)` read
+  `requirement_class`, `binding_margin` and `plot(requirement=...)` read
   each one, and the fiche tabulates them. `filters.verify_time_invariance` runs
   the exponential sweep of IEC 61260-2 7.4 through the bank itself, decimation
   included, at 2 s and 5 s per decade against Formula (17), which is
@@ -2550,10 +2554,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `emission.precision_background_correction`,
   `emission.reverberation_background_correction`,
   `emission.background_noise_correction_at_workstation`,
-  `noise_control.background_corrected_level_db`,
+  `noise_control.screen_background_corrected_level`,
   `noise_control.internal_noise_level`,
-  `noise_control.silencer_background_correction_db`,
-  `environment.barrier_background_correction_db` and
+  `noise_control.silencer_background_correction`,
+  `environment.barrier_background_correction` and
   `room.check_background_margin`; the positions `noise_control.check_source_positions`
   and `noise_control.microphone_positions_required` ask for; the checks of
   `environment.residual_sound_correction`, `environment.tonal_seeking_survey`,
@@ -2564,7 +2568,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `building.satisfies_upper_requirement` and
   `building.strong_coupling_satisfied`; `emission.precision_qualification`,
   `environment.is_short_distance`, `noise_control.substitution_area_ratio`,
-  `noise_control.fit_operating_line`, `noise_control.impulse_mean_level_db`,
+  `noise_control.fit_operating_line`, `noise_control.impulse_mean_level`,
   `noise_control.uncertainty_conditions`, `materials.limp_frame_applicable`,
   `materials.air_absorption_correction`, `materials.installed_dynamic_stiffness`,
   `materials.alternating_airflow_resistance`, `room.perceptibly_different`,
@@ -3001,7 +3005,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   printed with the chapter's own note about it, because the parentheses mark
   greater uncertainty and no hedge of this library means that.
 - **Twenty-nine resistive facings, from open-weave cloth to perforated
-  plate.** `materials.absorbers.PUBLISHED_FLOW_RESISTANCE` holds Ver & Beranek
+  plate.** `materials.absorbers.PUBLISHED_RESISTIVE_SHEETS` holds Ver & Beranek
   2e TABLES 8.5, 8.6 and 8.7: the flow resistance of the screens, cloths and
   sheets that go in front of a porous absorber, which is the number that
   decides how much of it the sound ever reaches.
@@ -3086,6 +3090,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `Homepage` pointed at a redirect on jmrp.io. The path is unchanged, and
   GitHub Pages redirects every old address to the same path on the new host,
   so existing links keep working.
+
+- **A function is named for what it returns, and a unit stays in the name only
+  where the quantity has two.** A level, a correction, a difference, an index
+  or a tolerance is in decibels and a frequency in hertz wherever the library
+  computes one, so no public function or method ends in `_db` or `_hz` any
+  more; a quantity written in more than one unit keeps it
+  (`peak_velocity_from_kb_mm_s`, `admissible_exposure_s`). From 3.3.0,
+  `environment.air_attenuation_m` is `air_power_attenuation_per_m`, because
+  the m it returns is the ISO 354 power attenuation coefficient in 1/m and
+  read as a length, and `materials.attenuation_from_alpha` and
+  `materials.air_attenuation_coefficient`, one conversion under two names,
+  are one `materials.power_attenuation_from_alpha`, which keeps the stricter
+  of the two checks and refuses a NaN or an infinite alpha that ISO 354's
+  version passed through to the absorption area. CONTRIBUTING states the rule
+  and `scripts/check_parameter_units.py` fails on a public function or method
+  that ends in `_db` or `_hz`; the six methods that read the columns of a
+  printed row, `LoopField.level_db` and `WindowMetricsResult.enbw_hz` keep
+  the suffix, each with its reason.
+
+- **One computation, one name: the root-sum-square of the library is
+  `metrology.combined_standard_uncertainty`.** GUM 5.1.2, ISO 1996-2
+  Formula (2) and ISO 12999-1 Formulae (C.2) and (A.2) print the same sum, and
+  `environment.combined_standard_uncertainty` and
+  `building.combine_uncertainties` computed it twice. It takes the products
+  c·u or `(u, c)` pairs as one sequence, as the environment version did, and
+  refuses an empty list, a value that is not finite and a pair with a
+  negative uncertainty. The GUM propagation through a model,
+  `metrology.combine_uncertainty`, is `uncertainty_propagation`, and a
+  computation that returns a number is named for it: `combine_linings` is
+  `building.combined_lining_improvement`, `combine_subareas`
+  `building.subarea_intensity_level`, `combine_partial_exposures`
+  `vibration.combined_daily_exposure` and `combine_age_and_noise`
+  `hearing.age_and_noise_threshold`. `noise_control.combine_stage_levels` and
+  `combine_internal_levels` are `combined_stage_level` and
+  `combined_internal_levels`, and take their levels as one sequence, as every
+  other energy sum of the library does; one spectrum passed on its own, where
+  the sequence of spectra belongs, is refused rather than summed over its
+  bands. The warning a correlated budget gives
+  names `coverage_factor_override`, the keyword `expanded()` asks for.
+
+- **The coverage probability of an expanded uncertainty is `coverage`.** The
+  keyword was `coverage` on `building.insulation_expanded_uncertainty`,
+  `uncertain_value` and `metrology.coverage_factor`, and `confidence` on
+  `building.insulation_coverage_factor`, the six ISO 12999-2 functions of
+  `materials` (`absorption_coverage_factor`,
+  `sound_absorption_coefficient_uncertainty`, `equivalent_area_uncertainty`,
+  `practical_coefficient_uncertainty`, `weighted_coefficient_uncertainty` and
+  `single_number_rating_uncertainty`) and
+  `environment.environmental_expanded_uncertainty`. It is `coverage=`
+  everywhere now, `UncertainValue.confidence` is `.coverage`, and the
+  messages say coverage probability. `confidence` stays the statistical
+  confidence of an interval, as on `signals.power_spectral_density` and on
+  `environment.method_b_summary`.
+
+- **An axis is written by name.** `building.energy_average_level` and
+  `room.directivity_energy_average` take `axis=` keyword-only, as
+  `vibration.passage_average_level` does, so a bare integer after the levels
+  is refused instead of read as the axis. The default is unchanged.
+
+- **The air the absorber models default to is `materials.ABSORBER_AIR`.** It
+  was `PUBLISHED_AIR`, a `Fluid` sharing its prefix with every catalogue of
+  rows. It sits now beside `ANNEX_A_AIR` and `EN_12354_AIR`, named for the
+  standards that print them, and `SIMULATION_AIR`, the solver's own, and it no
+  longer says it is the air the Johnson-Champoux-Allard model was published
+  with: Allard and Atalla state theirs at 18 degC, 1,213 kg/m3 and 342 m/s, and
+  this one is a dry air at 20 degC whose values each cite the page they were
+  read on (Bies, Hansen and Howard 5e for the speed, density and ratio of
+  specific heats, Allard and Atalla 2e for the viscosity, Prandtl number and
+  static pressure). Its numbers are unchanged.
+
+- **Every catalogue lookup is named after the catalogue it searches.**
+  `<x>_named` searches `PUBLISHED_<X>`, and a test holds every lookup the
+  packages publish to that rule.
 
 - **`AnpAircraft.database` is a public field, and `AnpDatabase` is built from
   what a caller can hold.** An aircraft read from an ANP database kept that
@@ -3323,7 +3400,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `absolute_pressure_pa` on `sea_water_density` and `static_pressure_kpa` on
   the sound-power family beside them. It is `static_pressure_kpa` or
   `static_pressure_pa` everywhere now, keeping the unit its clause writes:
-  `air_attenuation`, `air_attenuation_m`, `atmospheric_attenuation`,
+  `air_attenuation`, `air_attenuation_m` (now `air_power_attenuation_per_m`),
+  `atmospheric_attenuation`,
   `AtmosphericAttenuation`, `AtmosphericConditions`, `atmospheric_absorption`,
   `outdoor_propagation_attenuation`, `upper_tone_search_frequency` and
   `ToneSearchLimit`; `sae_band_attenuation`, `AircraftBandAttenuation`,
@@ -3392,7 +3470,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   functions, `HomogeneousElement.from_solid`, the rainfall and service
   equipment functions, `air_absorption_correction` and `CeilingSpecimenCheck`,
   `effective_blocking_mass`, the running-r.m.s. decay checks,
-  `soil_building_natural_frequency_hz`, `bending_stress`, the DIN 45672-1
+  `soil_building_natural_frequency`, `bending_stress`, the DIN 45672-1
   ground constants, `flow_velocity_m_s` and `static_pressure_difference_pa`
   (`volume`, `area`, `surface_area`, `absorption_area`, `room_constant`,
   `radius`, `distance`, `roughness_length`, `reverberation_time`,
@@ -3912,12 +3990,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Removed
 
+- **`building.combine_uncertainties`, `environment.combined_standard_uncertainty`
+  and `metrology.expanded_uncertainty` are gone.** The first two are
+  `metrology.combined_standard_uncertainty`, which takes the contributions as
+  one sequence (`combine_uncertainties(3.0, 4.0)` is
+  `combined_standard_uncertainty([3.0, 4.0])`). The third, the GUM
+  `metrology.expanded_uncertainty(result, coverage)`, returned
+  `result.expanded(coverage)`, which is what to write. The top-level
+  `expanded_uncertainty` of 3.3.0 was another function, the ISO 12999-1
+  `expanded_uncertainty(u, coverage, one_sided)` that forwarded to
+  `building.insulation_expanded_uncertainty`, and that is its replacement.
+  `combine_uncertainties` and `expanded_uncertainty` were 3.3.0 top-level
+  names, and so were eight of the names renamed above, so the migration guide
+  lists forty-five gone, ten more than before, and 837 of the 885 published
+  by exactly one package.
+
 - **`vibration.partial_exposure` is gone: `vibration.daily_exposure` is the one
   name for an A(8).** It was an assignment, `partial_exposure =
   daily_exposure`, so the two names computed the same thing. Called with the
   value and the duration of one operation, `daily_exposure` returns that
   operation's partial exposure Ai(8) (ISO 5349-2 Eq. (2)), the term
-  `combine_partial_exposures` sums, and its documentation now says so.
+  `combined_daily_exposure` sums, and its documentation now says so.
   `partial_exposure` was one of the names the 3.3.0 top level exported, so
   the migration guide lists eleven gone, not ten.
 
@@ -4241,7 +4334,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a book printing 250 to 500 kPa s/m2 and a book printing 370 are saying the
   same thing at two resolutions. It found four pairs nobody had listed.
 
-- **The ground has a catalogue.** `environment.PUBLISHED_GROUND` holds the
+- **The ground has a catalogue.** `environment.PUBLISHED_GROUND_SURFACES` holds the
   hundred and five ground surfaces three published tables print: the
   thirty-four Bies measures, the eight classes A to H the propagation models
   define, with the ground factor ISO 9613-2 and NMPB-2008 each take, and the
@@ -4266,7 +4359,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   including the two rows where the uncertainty is as large as the value.
 
 - **A hundred and sixty-two compiled rows, from two more books.**
-  `materials.PUBLISHED_POROUS` now holds the five tables Cox & D'Antonio
+  `materials.PUBLISHED_POROUS_MATERIALS` now holds the five tables Cox & D'Antonio
   compile from the literature (flow resistivity, fibre diameter, porosity, the
   two characteristic lengths and tortuosity) and the two Mechel prints (a
   porosity by material and the fibre data of three product groups), beside the
@@ -4290,7 +4383,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the material.
 
 - **Thirty-two published porous specimens from nineteen parameter tables.**
-  `materials.PUBLISHED_POROUS` is the porous rows of the nineteen tables
+  `materials.PUBLISHED_POROUS_MATERIALS` is the porous rows of the nineteen tables
   Allard & Atalla print across eight chapters, each one the input to a worked
   example of the book, keyed by the table it came off and the row it is:
   `'allard-2009-table-6-1/domisol_coffrage'`, `'allard-2009-table-13-1/foam'`.
@@ -4605,10 +4698,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   once it is built, in `phonometry.noise_control.enclosure_insulation`. The
   quantity is a difference of two runs: determine the machine's sound power
   without the enclosure, determine it again with the enclosure in place and
-  subtract band by band. `sound_power_insulation`, `sound_pressure_insulation`,
-  `reciprocity_insulation` and `artificial_source_insulation` are Equations (1)
-  to (5) of the two parts, `weighted_insulation` is the ISO 717-1 rating of
-  clause 7, and `estimated_a_weighted_insulation` is the annex that says what
+  subtract band by band. `enclosure_sound_power_insulation`, `enclosure_sound_pressure_insulation`,
+  `enclosure_reciprocity_insulation` and `enclosure_artificial_source_insulation` are Equations (1)
+  to (5) of the two parts, `weighted_enclosure_insulation` is the ISO 717-1 rating of
+  clause 7, and `estimated_a_weighted_enclosure_insulation` is the annex that says what
   the enclosure would be worth against a stated spectrum.
 
   `applicable_methods` reads Table 1 as data, so a declaration cannot claim
@@ -4702,8 +4795,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   in `phonometry.noise_control.screen_in_situ`. `screen_attenuation` is the
   difference between the run without the screen and the run with it, and the
   A-weighted pair of 5.9 is refused with an artificial source, because then
-  the spectrum weighted would be the loudspeaker's. `background_corrected_level_db`
-  is the boxed formula of 5.7 inside its own window, `directivity_index_db` is
+  the spectrum weighted would be the loudspeaker's. `screen_background_corrected_level`
+  is the boxed formula of 5.7 inside its own window, `screen_source_directivity_index` is
   the twelve-position test an artificial source has to pass, and
   `microphone_distances_m` is the quarter, half, once and twice the screen
   height of 5.5.2, floored at 1 m, so that for a low screen two positions
@@ -4716,7 +4809,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   top edge so that a source that ran differently on the two days does not read
   as barrier performance. `wind_class` is Table 1, `is_short_distance` is the
   geometry test of 6.3.1 that decides whether the upwind class exists at all,
-  and `barrier_background_correction_db` is Table 3, whose values are printed
+  and `barrier_background_correction` is Table 3, whose values are printed
   negative and are added, where the ISO 11820 table prints the same physical
   thing positive and subtracts it.
 
@@ -4839,8 +4932,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   whatever you are measuring happens in one; a label in a list of areas has to
   answer a different question, which is what is inside.
 
-- **`PUBLISHED_POROUS_MATERIALS` is now `PUBLISHED_POROUS`, and its keys name
-  the table.** The two specimens it held are
+- **The keys of `PUBLISHED_POROUS_MATERIALS` name the table.** The two
+  specimens it held are
   `'allard-2009-table-6-1/domisol_coffrage'` and
   `'allard-2009-table-11-2/soft_fibrous'`, and thirty more rows joined them.
   `PorousMaterial` keeps its name and moves to
@@ -5149,7 +5242,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and the conformance row had both pinned that short geometry as correct; both
   now use the height the angle governs, and a new entry holds the clearance.
 
-  `extraneous_corrected_mean_level_db` flagged a 3 dB margin as capped. ISO
+  `extraneous_corrected_mean_level` flagged a 3 dB margin as capped. ISO
   11820 caps the energy subtraction at 3 dB, and Table 1 prints what that 3 dB
   is: the correction at a 3 dB margin, which the subtraction writes unrounded as
   3,0206 dB. The cap is judged on the margin of the two energy means now, so the
@@ -5729,12 +5822,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   called `mitigation_db` and not an insertion loss for that reason, goes in
   negative.
   `rescale_emission_for_speed` carries an emission to another speed by 20 lg
-  of the ratio, for a change of up to 30 %; `ground_transmission_db` is
+  of the ratio, for a change of up to 30 %; `ground_transmission` is
   spreading with an exponent and damping with `alpha_R` = 2π f D / c_s,
   Formulae (4) to (6). The six tables of Annex A are read off their pages
-  cell by cell: `ground_to_floor_transfer_db` by natural frequency of a
-  concrete or timber floor, `ground_to_foundation_transfer_db` for a basement
-  or a ground floor with both deviations, `foundation_to_floor_transfer_db`
+  cell by cell: `ground_to_floor_transfer` by natural frequency of a
+  concrete or timber floor, `ground_to_foundation_transfer` for a basement
+  or a ground floor with both deviations, `foundation_to_floor_transfer`
   against the ratio to the natural frequency, interpolated in decibels over
   the logarithm of the ratio. Clause 7 is `predict_train_category`: Table 2,
   the KB weighting rounded to a tenth of a decibel, added to the bands from
@@ -5766,10 +5859,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   harmonic or impulsive, and the wave a surface or a body wave, and the
   damping of the ground as `attenuation_coefficient_per_m`;
   `material_damping_factor` is the damping alone, as Figure 2 draws it. The
-  building on its ground is `soil_building_natural_frequency_hz` with its
+  building on its ground is `soil_building_natural_frequency` with its
   guide values by storeys, two storeys taking the union of the two ranges the
   clause prints it in, `foundation_transfer_max` and `floor_transfer_max`
-  as 1 over twice the damping, and `storey_frequency_hz`. A blast and a
+  as 1 over twice the damping, and the storey estimate of Formula (4) is
+  `storey_fundamental_frequency`, the one function for the estimate
+  DIN 4150-3 6.4 and ISO 4866 D.2 print as well. A blast and a
   falling mass are Formulae (5) and (6) with the user's constants; a hall of
   machines is Formula (7) with the nomogram of Figure 3 read off the page at a
   five-hundredth as `machine_count_correction`; a track excites at its speed
@@ -6154,7 +6249,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   being a detail of the trim and becomes a source of its own, and IEC
   60534-8-3 sends the calculation to Clause 7 for it. `Expander` describes the
   transition piece, `expander_noise` runs Equations (34) to (42) on it, and
-  `combine_internal_levels` adds the two spectra inside the pipe by
+  `combined_internal_levels` adds the two spectra inside the pipe by
   Equation (43) before the wall takes the sum through once, because there is
   only one wall.
 
@@ -7783,9 +7878,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - The visco-thermal absorber models take a `phonometry.fluids.Fluid` where they
   used to take an `AirProperties` of their own. `AirProperties` and
-  `DEFAULT_AIR` are withdrawn; the air the Johnson-Champoux-Allard model was
-  published with is `PUBLISHED_AIR`, and the keyword is `fluid=` rather than
-  `air=`. Nothing about the numbers changed: `PUBLISHED_AIR` carries the same
+  `DEFAULT_AIR` are withdrawn; the air those models default to is
+  `ABSORBER_AIR`, and the keyword is `fluid=` rather than `air=`. Nothing
+  about the numbers changed: `ABSORBER_AIR` carries the same
   343,0 m/s, 1,205 kg/m3, 1,84 x 10^-5 Pa s, Pr = 0,71, gamma = 1,4 and
   101 325 Pa those models always defaulted to.
 
@@ -7797,10 +7892,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   relative_humidity_percent=70.0)` usable here: the absorber is then predicted
   in the air of the room rather than in the air of the paper.
 
-  `PUBLISHED_AIR` keeps its own Prandtl number rather than closing it from
-  eta / (rho alpha_t). A published fit carries the value it was fitted with, and
-  deriving it from a better air would silently change the model instead of
-  correcting it.
+  `ABSORBER_AIR` keeps its own Prandtl number, the 0,71 of Allard and Atalla,
+  rather than closing it from eta / (rho alpha_t), so that every default stays
+  where it was instead of moving by 1,5 parts in a thousand.
 
 - The fan's pressure rise says what it is: `fan_sound_power`'s second argument
   is `fan_static_pressure_pa`, keyword-only. It is a **gauge** pressure rise in
@@ -11028,8 +11122,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `normalized_frequencies` and `sensitivity`. The ISO 12999-1 pair that
   shadowed the GUM functions at the package root, the bare `coverage_factor`
   and `expanded_uncertainty`, are gone; use `insulation_coverage_factor` and
-  `insulation_expanded_uncertainty`, and read the GUM pair from
-  `phonometry.metrology.uncertainty`. The renamed constants
+  `insulation_expanded_uncertainty`. The GUM coverage factor is
+  `metrology.coverage_factor`, and the GUM expanded uncertainty of a result
+  is `UncertaintyResult.expanded(coverage)`. The renamed constants
   `OCTAVE_BANDS_HZ`, `THIRD_OCTAVE_BANDS_HZ`, `BAND_CENTRES` and
   `ExposureWarning` are gone; use `RATING_OCTAVE_BANDS_HZ`,
   `RATING_THIRD_OCTAVE_BANDS_HZ`, `BAND_CENTERS` and

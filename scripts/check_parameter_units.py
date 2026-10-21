@@ -52,6 +52,14 @@ figures and often several units, is held to it when its name says a quantity
 unit of what the name says. :data:`SPELLING_EXEMPT` and
 :data:`CONSTANT_EXEMPT` are the escape hatches of the two rules, keyed by
 location, each with its reason.
+
+The last rule is about functions: one is named for the quantity it returns,
+and a quantity whose unit never changes does not put it in the name. A public
+function or method whose name ends in one of :data:`FUNCTION_REJECTED_UNITS`
+(a level, a correction, a difference, an index or a tolerance in decibels, a
+frequency in hertz) is reported with the name it reads as without it.
+:data:`FUNCTION_UNIT_EXEMPT` lists the methods that keep the suffix, each with
+its reason.
 """
 
 from __future__ import annotations
@@ -348,6 +356,62 @@ SPELLING_EXEMPT: dict[tuple[str, str, str], str] = {
     ),
 }
 
+#: A function is named for the quantity it returns, and these are the units a
+#: function name never ends in: a level, a correction, a difference, an index
+#: or a tolerance is in decibels and a frequency in hertz wherever the library
+#: computes one, so ``_db`` or ``_hz`` on a function only restates the
+#: convention beside siblings that do not. A function keeps a unit where its
+#: quantity has more than one customary unit, which is where a hazard is fixed
+#: by naming: ``_mm_s`` and ``_um_s`` against metres per second, ``_s``
+#: against hours, ``_m`` and ``_m2``, ``_per_m`` against decibels and nepers
+#: per metre, ``_pa`` and ``_percent``.
+FUNCTION_REJECTED_UNITS = ("_db", "_hz")
+
+#: Public methods that end in one of :data:`FUNCTION_REJECTED_UNITS` and keep
+#: it, keyed by the module that defines the class and the qualified name, with
+#: the reason.
+_A_ROW_ACCESSOR = (
+    "reads the columns of one printed row, which are named for their unit as "
+    "the page prints them, and is named as they are"
+)
+FUNCTION_UNIT_EXEMPT: dict[tuple[str, str], str] = {
+    (
+        "phonometry.noise_control.duct_walls",
+        "DuctWallSpectrum.transmission_loss_db",
+    ): _A_ROW_ACCESSOR,
+    (
+        "phonometry.building.catalogue",
+        "TransmissionLossSpectrum.transmission_loss_db",
+    ): _A_ROW_ACCESSOR,
+    (
+        "phonometry.building.datasheets",
+        "SoundReductionSpectrum.sound_reduction_index_db",
+    ): _A_ROW_ACCESSOR,
+    (
+        "phonometry.building.datasheets",
+        "ImpactImprovementSpectrum.impact_improvement_db",
+    ): _A_ROW_ACCESSOR,
+    (
+        "phonometry.metrology.sound_level_meter",
+        "PeakReference.limits_db",
+    ): _A_ROW_ACCESSOR,
+    (
+        "phonometry.metrology.sound_level_meter",
+        "ToneburstReference.limits_db",
+    ): _A_ROW_ACCESSOR,
+    (
+        "phonometry.electroacoustics.induction_loop_components",
+        "LoopField.level_db",
+    ): (
+        "the field strength in decibels re 400 mA/m, beside the same field in "
+        "A/m that the record holds, so the unit says which of the two it returns"
+    ),
+    ("phonometry.signals.windows", "WindowMetricsResult.enbw_hz"): (
+        "the equivalent noise bandwidth in hertz, beside the same bandwidth in "
+        "bins that the record holds as enbw_bins"
+    ),
+}
+
 #: Published constants under the rule that stay without a unit, keyed by the
 #: module that owns them, with the reason. Every one is a count, a label, a
 #: pure number or a set of figures that carry their own units; a constant in
@@ -593,7 +657,6 @@ CONSTANT_EXEMPT: dict[tuple[str, str], str] = {
         "vibration.immission.prediction",
         "LOOSE_GROUND_SYSTEM_DAMPING",
     ),
-    **_exempt(_A_COUNT, "vibration.immission.prediction", "STOREY_FORMULA_MIN_STOREYS"),
     **_exempt(
         _A_FRACTION,
         "vibration.immission.railway_prediction",
@@ -1912,6 +1975,102 @@ def unitless_constants() -> tuple[list[PublicName], list[tuple[str, str]]]:
     return found, [k for k in CONSTANT_EXEMPT if k not in used]
 
 
+def _class_methods(cls: type) -> Iterator[tuple[str, object]]:
+    """Each public method a class answers to, named by the class that defines it.
+
+    The class's own namespace is not enough: a method a published class
+    inherits from a base no module exports (``_DrawableLayer.plot``,
+    ``ScatteringBands.scattering_coefficient``) is called on the published
+    class all the same. The method resolution order is walked, an attribute
+    is taken from the first class that defines it, as Python resolves it, and
+    only the classes of this package are read. Keying by the defining class
+    reports a method shared by many published classes once.
+    """
+    resolved: set[str] = set()
+    for klass in inspect.getmro(cls):
+        ours = (getattr(klass, "__module__", "") or "").startswith("phonometry")
+        for attribute, member in vars(klass).items():
+            if attribute in resolved:
+                continue
+            resolved.add(attribute)
+            if (
+                ours
+                and _is_public(attribute)
+                and (
+                    inspect.isfunction(member)
+                    or isinstance(member, (classmethod, staticmethod))
+                )
+            ):
+                yield f"{klass.__qualname__}.{attribute}", member
+
+
+def _public_functions() -> Iterator[PublicName]:
+    """Every public function and method a caller calls by name, once each.
+
+    A property is left out: it reads like a field, and a field keeps the unit
+    of what it holds. A classmethod or a staticmethod is a function by the
+    name it is called with. A method is found on every published class that
+    answers to it, inherited ones included (:func:`_class_methods`).
+    """
+    seen: set[tuple[str, str]] = set()
+    for _, module in public_modules():
+        for exported in getattr(module, "__all__", ()):
+            obj = getattr(module, exported, None)
+            if inspect.isfunction(obj):
+                callables: list[tuple[str, object]] = [(exported, obj)]
+            elif inspect.isclass(obj):
+                callables = list(_class_methods(obj))
+            else:
+                continue
+            for qualname, member in callables:
+                target = getattr(member, "__func__", member)
+                home = getattr(target, "__module__", "") or ""
+                if (home, qualname) in seen:
+                    continue
+                seen.add((home, qualname))
+                yield PublicName(
+                    home, qualname, qualname.rpartition(".")[2], _where(target)
+                )
+
+
+def unit_named_functions() -> tuple[list[PublicName], list[tuple[str, str]]]:
+    """The public functions named with a unit their quantity never changes, and stale keys."""
+    found: list[PublicName] = []
+    used: set[tuple[str, str]] = set()
+    for entry in _public_functions():
+        if not entry.name.lower().endswith(FUNCTION_REJECTED_UNITS):
+            continue
+        key = (entry.module, entry.qualname)
+        if key in FUNCTION_UNIT_EXEMPT:
+            used.add(key)
+            continue
+        found.append(entry)
+    return found, [k for k in FUNCTION_UNIT_EXEMPT if k not in used]
+
+
+def _report_functions(functions: list[PublicName]) -> None:
+    """Print the function-name rule's findings."""
+    if not functions:
+        return
+    print("::error::a public function is named with a unit its quantity never changes")
+    print(
+        f"{len(functions)} function(s) end in {' or '.join(FUNCTION_REJECTED_UNITS)}:"
+    )
+    for entry in sorted(functions):
+        wanted = re.sub(r"_(?:db|hz)$", "", entry.qualname, flags=re.IGNORECASE)
+        print(f"  {entry.qualname} -> {wanted}  <- {entry.where}")
+    print(
+        "  -> a function is named for the quantity it returns; a level, a "
+        "correction, a difference, an index or a tolerance is in decibels and "
+        "a frequency in hertz, so the name carries neither. Where the bare name "
+        "collides or claims more than the function computes, take the family's "
+        "prefix (silencer_sound_power_level). A method that reads a row's "
+        "columns or returns a quantity the record also holds in another unit "
+        "goes in FUNCTION_UNIT_EXEMPT at the top of "
+        "scripts/check_parameter_units.py with its reason."
+    )
+
+
 def _report_names(
     misspellings: list[tuple[PublicName, str]], constants: list[PublicName]
 ) -> None:
@@ -2001,6 +2160,7 @@ def main() -> int:
     rates, stale_rates = misnamed_rates(parameters)
     pressures, stale_pressures = ambient_pressure_names(parameters)
     pairs, stale_pairs = bare_and_suffixed(parameters)
+    functions, stale_functions = unit_named_functions()
     stale_keys = [
         *stale,
         *stale_spellings,
@@ -2008,6 +2168,7 @@ def main() -> int:
         *stale_rates,
         *stale_pressures,
         *stale_pairs,
+        *stale_functions,
     ]
     if not (
         unnamed
@@ -2017,11 +2178,13 @@ def main() -> int:
         or rates
         or pressures
         or pairs
+        or functions
         or stale_keys
     ):
         print(
             "Every public parameter and constant under the rule names its unit, "
-            "in the one spelling the tree uses, and asks for it by name."
+            "in the one spelling the tree uses, and asks for it by name; every "
+            "public function is named for what it returns."
         )
         return 0
     if unnamed:
@@ -2050,6 +2213,7 @@ def main() -> int:
         )
     _report_names(misspellings, constants)
     _report_closing(rates, pressures, pairs)
+    _report_functions(functions)
     for key in stale_keys:
         print(
             f"::error::an exemption at the top of scripts/check_parameter_units.py "

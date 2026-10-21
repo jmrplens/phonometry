@@ -68,7 +68,7 @@ def _chk_atm_pe_ground_effect() -> Outcome:
             zr,
             float(pe.ranges[i]),
             impedance=z,
-            fluid=ph.materials.PUBLISHED_AIR,
+            fluid=ph.materials.ABSORBER_AIR,
         ).excess_attenuation[0]
     )
     return numeric(oracle, got, 0.5, unit="dB", places=3)

@@ -445,7 +445,7 @@ def test_coupler_response_is_referred_to_500_hz() -> None:
     response = ea.coupler_frequency_response(
         BANDS, levels, rated_frequency_range_hz=(100.0, 10000.0)
     )
-    relative = response.relative_response_db()
+    relative = response.relative_response()
     assert relative[list(BANDS).index(500.0)] == 0.0
     assert response.covers_rated_range
 

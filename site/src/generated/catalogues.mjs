@@ -156931,12 +156931,12 @@ export const catalogues = {
         }
       },
       {
-        "key": "allard-2009-jca/air",
-        "table": "allard-2009-jca",
+        "key": "phonometry-absorbers/air",
+        "table": "phonometry-absorbers",
         "name": "Air",
         "temperature": "20",
         "pressure": "101 325",
-        "model": "Johnson-Champoux-Allard published constants (dry air at 20 degC)",
+        "model": "textbook dry air at 20 degC, the absorber models' default medium",
         "validity": "",
         "cells": [
           {
@@ -156962,7 +156962,7 @@ export const catalogues = {
         ],
         "es": {
           "name": "Aire",
-          "model": "Constantes publicadas de Johnson-Champoux-Allard (aire seco a 20 degC)"
+          "model": "aire seco de manual a 20 degC, el medio por defecto de los modelos de absorbentes"
         }
       },
       {

@@ -398,9 +398,9 @@ estrecho, porque el fondo del que habla incluye el ruido que genera el viento y
 el remedio para eso es un día más tranquilo.
 
 ```python
-print(noise_control.silencer_background_correction_db([9.0]))   # [0.5] dB menos
-print(environment.barrier_background_correction_db([9.0]))      # [-1.] dB suma
-print(round(80.0 - noise_control.background_corrected_level_db(
+print(noise_control.silencer_background_correction([9.0]))   # [0.5] dB menos
+print(environment.barrier_background_correction([9.0]))      # [-1.] dB suma
+print(round(80.0 - noise_control.screen_background_corrected_level(
     [80.0], [71.0])[0], 2))                                     # 0.58 dB menos
 ```
 
@@ -414,7 +414,7 @@ La ISO 11820 ofrece una segunda vía para rodear el sonido ajeno, para el caso e
 que las fuentes sobre las que trabaja el silenciador se puedan apagar y medir
 aparte: la resta energética de las ecuaciones (17) y (18), con un tope de 3 dB.
 Pasado el tope la magnitud no queda determinada, y lo que se puede enunciar en su
-lugar es la desigualdad del apartado 4. `extraneous_corrected_mean_level_db`
+lugar es la desigualdad del apartado 4. `extraneous_corrected_mean_level`
 devuelve el nivel corregido y si se llegó al tope, para que un número topado no
 se pueda escribir como una determinación. El tope se juzga sobre el margen, que
 es donde lo pone la tabla 1. Con un margen de exactamente 3 dB la resta quita

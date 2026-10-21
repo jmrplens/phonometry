@@ -300,7 +300,7 @@ class _Joined[R: CatalogueRow](Mapping[str, R]):
 
     What ``|`` gives between a :class:`Catalogue` and any other mapping of
     rows. It is read-only and joins again with ``|`` under the same rule, so
-    ``(PUBLISHED_POROUS | mine) | theirs`` refuses a shared key at every
+    ``(PUBLISHED_POROUS_MATERIALS | mine) | theirs`` refuses a shared key at every
     step, where a plain ``dict`` would keep the last row under it and say
     nothing. Joining two mappings of one row class gives a mapping of that
     class, so the join goes to a ``*_named`` lookup as either side would.
@@ -352,7 +352,7 @@ class Catalogue[R: CatalogueRow](Mapping[str, R], RichDisplay):
     What :func:`read_catalogue` and :func:`parse_catalogue` return. It is a
     read-only mapping from ``"<name>/<key>"`` to a row, so it goes wherever a
     ``PUBLISHED_*`` catalogue goes, and a row's :attr:`CatalogueRow.table` is
-    the catalogue's name. ``PUBLISHED_POROUS | mine`` reads both as one and
+    the catalogue's name. ``PUBLISHED_POROUS_MATERIALS | mine`` reads both as one and
     refuses a key both hold rather than letting one row replace the other;
     a caller's catalogue can never take a name of the packaged form, so the
     keys of the two never meet.
@@ -434,7 +434,7 @@ class Catalogue[R: CatalogueRow](Mapping[str, R], RichDisplay):
     def __ror__[S: CatalogueRow](self, other: Mapping[str, S]) -> Mapping[str, R | S]:
         """*other* and this as one read-only mapping, refusing a shared key.
 
-        What ``PUBLISHED_POROUS | mine`` reaches, since a published mapping
+        What ``PUBLISHED_POROUS_MATERIALS | mine`` reaches, since a published mapping
         does not know how to join a catalogue.
         """
         return _join(other, self)

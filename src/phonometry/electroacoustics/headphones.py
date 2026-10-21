@@ -1327,7 +1327,7 @@ class CouplerFrequencyResponse(OwnsArrays):
             and self.frequencies[-1] >= upper * (1.0 - _LIMIT_SLACK)
         )
 
-    def relative_response_db(
+    def relative_response(
         self, *, reference_frequency_hz: float = _MEASURING_FREQUENCY_HZ
     ) -> NDArray[np.float64]:
         """The level relative to its value at a reference frequency, in dB.

@@ -46,11 +46,7 @@ _HOST_PULLS = frozenset({"float", "int", "max", "min", "round"})
 #: Scenes not yet moved onto the public engines. Each is taken out as it is.
 _NOT_YET: frozenset[str] = frozenset(
     {
-        "elastic.py",
-        "halfspace.py",
         "metadiffuser.py",
-        "mode_conversion.py",
-        "radiation_efficiency.py",
     }
 )
 

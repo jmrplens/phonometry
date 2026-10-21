@@ -28,7 +28,7 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
-from ._core import _fit_text_x, _gain_note, _solid_in_field, _weak_field_gain
+from ._core import _fit_text_x, _gain_note, _host, _solid_in_field, _weak_field_gain
 
 # --- Elastic FDTD clips: plate junction and coincidence --------------------
 # Both clips run the library's 2D P-SV solver (phonometry.simulation
@@ -93,8 +93,11 @@ def _plate_junction_fields() -> tuple[Any, Any, Any, Any, int]:
     speed c_g = 2 c_B(4 kHz) = 1251 m/s: t = 0.5 ms + 1.2 x 1.52 ms =
     2.32 ms -> 462 active frames.
     """
+    import clip_placement
+
     from phonometry import simulation
 
+    compute = clip_placement.compute_for("anim_elastic_plate_junction")
     dx = _EL_DX
     bp, m2 = _elastic_plate_bp_m2()
     c_b = float((bp / m2) ** 0.25 * np.sqrt(2.0 * np.pi * _EJ_F0))
@@ -131,7 +134,9 @@ def _plate_junction_fields() -> tuple[Any, Any, Any, Any, int]:
             c_p[r0:r_end, j0 : j0 + 4] = _EL_CP
             c_s[r0:r_end, j0 : j0 + 4] = _EL_CS
             rho[r0:r_end, j0 : j0 + 4] = _EL_RHO
-        sim = simulation.ElasticFDTD2D(c_p, c_s, dx, rho=rho, sponge_width=_EJ_SPONGE)
+        sim = simulation.ElasticFDTD2D(
+            c_p, c_s, dx, rho=rho, sponge_width=_EJ_SPONGE, compute=compute
+        )
         # Vertical force on the top surface (the vy face between the air
         # row r0 - 1 and the first plate row): Lamb-style A0 launcher.
         sim.add_source(
@@ -143,6 +148,7 @@ def _plate_junction_fields() -> tuple[Any, Any, Any, Any, int]:
                 waveform=burst,
             )
         )
+        xp = sim._backend.xp
         frames: list[Any] = []
         hl: list[Any] = []
         vl: list[Any] = []
@@ -150,12 +156,14 @@ def _plate_junction_fields() -> tuple[Any, Any, Any, Any, int]:
         for _ in range(n_active):
             for _s in range(every):
                 sim.step()
-            v = np.hypot(sim.collocated("vx"), sim.collocated("vy"))
-            frames.append(v[rows, cols].astype(np.float32))
+            v = xp.hypot(
+                sim.collocated("vx")[rows, cols], sim.collocated("vy")[rows, cols]
+            )
+            frames.append(_host(sim, v))
             # Mid-plane plate velocities: the vy face row and (junction
             # run) the vx face column through the middle of each plate.
-            hl.append(sim.vy[r0 + 1, :].astype(np.float32))
-            vl.append(sim.vx[:, j0 + 1].astype(np.float32))
+            hl.append(_host(sim, sim.vy[r0 + 1, :]))
+            vl.append(_host(sim, sim.vx[:, j0 + 1]))
             ts.append(sim.time)
         runs.append((np.stack(frames), np.stack(hl), np.stack(vl)))
     lines = (runs[0][1], runs[1][1], runs[1][2])
@@ -486,8 +494,11 @@ def _coincidence_fields() -> tuple[Any, Any, Any, list[float], int]:
     = 1), the frame times, the measured transmitted levels [dB re
     incident] and the active frame count.
     """
+    import clip_placement
+
     from phonometry import simulation, vibration
 
+    compute = clip_placement.compute_for("anim_elastic_coincidence")
     dx = _EL_DX
     bp, m2 = _elastic_plate_bp_m2()
     fc = vibration.coincidence_frequency(m2, bp)
@@ -506,8 +517,8 @@ def _coincidence_fields() -> tuple[Any, Any, Any, list[float], int]:
     n_active = int(np.ceil((ramp_t + 1.2 * flight) / (every * dt)))
     steps = n_active * every
 
-    src_cols = np.arange(_EC_SPONGE, _EC_NX - _EC_SPONGE)
-    x_src = (src_cols + 0.5) * dx
+    src_cols = slice(_EC_SPONGE, _EC_NX - _EC_SPONGE)
+    x_src = (np.arange(_EC_SPONGE, _EC_NX - _EC_SPONGE) + 0.5) * dx
     x0, x1, y0, y1 = _EC_VIEW
     rows = slice(round(y0 / dx), round(y1 / dx), 2)
     cols = slice(round(x0 / dx), round(x1 / dx), 2)
@@ -528,25 +539,29 @@ def _coincidence_fields() -> tuple[Any, Any, Any, list[float], int]:
         c_p[r0 : r0 + 4] = _EL_CP * _EC_CB_TUNE
         c_s[r0 : r0 + 4] = _EL_CS * _EC_CB_TUNE
         rho[r0 : r0 + 4] = _EL_RHO
-        sim = simulation.ElasticFDTD2D(c_p, c_s, dx, rho=rho, sponge_width=_EC_SPONGE)
-        omega = 2.0 * np.pi * f0
-        phase_x = omega * np.sin(theta) * x_src / _EL_C0
+        sim = simulation.ElasticFDTD2D(
+            c_p, c_s, dx, rho=rho, sponge_width=_EC_SPONGE, compute=compute
+        )
+        backend = sim._backend
+        xp = backend.xp
+        omega = float(2.0 * np.pi * f0)
+        phase_x = backend.asarray(omega * np.sin(theta) * x_src / _EL_C0)
         frames: list[Any] = []
         ts: list[float] = []
-        inc = 0.0
+        incident = backend.zeros(())
         for i in range(steps):
             sim.step()
             t = sim.time
             r = min(t / ramp_t, 1.0)
-            drive = (r * r * (3.0 - 2.0 * r)) * np.sin(omega * t - phase_x)
+            drive = (r * r * (3.0 - 2.0 * r)) * xp.sin(omega * t - phase_x)
             sim.txx[src_row, src_cols] -= drive
             sim.tyy[src_row, src_cols] -= drive
             if w0 <= t <= w1:
-                inc = max(inc, abs(float(sim.p[p_row, p_col])))
+                incident = xp.maximum(incident, xp.abs(sim.p[p_row, p_col]))
             if (i + 1) % every == 0:
-                frames.append(sim.p[rows, cols].astype(np.float32))
+                frames.append(_host(sim, sim.p[rows, cols]))
                 ts.append(t)
-        stack = np.stack(frames) / inc
+        stack = np.stack(frames) / backend.scalar(incident)
         tail = stack[3 * n_active // 4 :]
         # The stored rows start at y0; index the under-plate box within.
         rb0 = (b_rows.start - rows.start) // 2

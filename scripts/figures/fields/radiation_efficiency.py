@@ -15,7 +15,7 @@ import numpy as np
 
 from ..media import _ANIM_PILL_BOX, _anim_figure, _render_clip, _translate_str
 from ..theme import CMAP_FIELD, COLOR_FG, FIELD_INK, FIELD_STROKE
-from ._core import _solid_in_field
+from ._core import _host, _solid_in_field
 from .elastic import (
     _EC_CB_TUNE,
     _EL_C0,
@@ -161,8 +161,11 @@ def _radiation_efficiency_fields() -> tuple[Any, Any, Any, Any, Any]:
     frame times, the measured ``k_x / k_0`` of the air above each panel and
     the fitted e-folding height of the pressure envelope in each.
     """
+    import clip_placement
+
     from phonometry import simulation, vibration
 
+    compute = clip_placement.compute_for("anim_elastic_radiation_efficiency")
     dx = _EL_DX
     bp, m2 = _elastic_plate_bp_m2()
     fc = vibration.coincidence_frequency(m2, bp)
@@ -172,6 +175,7 @@ def _radiation_efficiency_fields() -> tuple[Any, Any, Any, Any, Any]:
     lam_b_lo = 2.0 * np.pi / _re_bending_wavenumber(freqs[0])
     ramp_lo = _RE_RAMP_CYCLES / freqs[0]
     span = slice(round(_RE_SPAN_X0 / dx), round((_RE_SPAN_X0 + lam_b_lo) / dx))
+    span_cells = span.stop - span.start
     x0, x1, _h0, h1 = _re_geometry()
     diagonal = float(np.hypot(x1 - x0, h1))
     span_t = ramp_lo + 1.2 * diagonal / _EL_C0 + _RE_AVG_CYCLES / freqs[0]
@@ -199,15 +203,21 @@ def _radiation_efficiency_fields() -> tuple[Any, Any, Any, Any, Any]:
         c_p[r0 : r0 + _RE_PLATE_ROWS] = cp_plate
         c_s[r0 : r0 + _RE_PLATE_ROWS] = _EL_CS * _EC_CB_TUNE
         rho[r0 : r0 + _RE_PLATE_ROWS] = _EL_RHO
-        sim = simulation.ElasticFDTD2D(c_p, c_s, dx, rho=rho, sponge_width=_RE_SPONGE)
-        omega = 2.0 * np.pi * f0
-        k_b = _re_bending_wavenumber(f0)
+        sim = simulation.ElasticFDTD2D(
+            c_p, c_s, dx, rho=rho, sponge_width=_RE_SPONGE, compute=compute
+        )
+        backend = sim._backend
+        xp = backend.xp
+        omega = float(2.0 * np.pi * f0)
+        k_b = float(_re_bending_wavenumber(f0))
+        taper_d = backend.asarray(taper)
+        x_d = backend.asarray(x_src)
         ramp_t = _RE_RAMP_CYCLES / f0
         # Whole number of drive periods at the end of the window: the upper
         # panel gets four times as many cycles inside the same 3.32 ms.
         cycles = _RE_AVG_CYCLES * round(f0 / freqs[0])
         avg_from = steps - round(cycles / (f0 * dt))
-        v2_sum = 0.0
+        v2_sum = backend.zeros(())
         n_avg = 0
         frames: list[Any] = []
         plate: list[Any] = []
@@ -217,22 +227,22 @@ def _radiation_efficiency_fields() -> tuple[Any, Any, Any, Any, Any]:
             t = sim.time
             r = min(t / ramp_t, 1.0)
             sim.vy[drive_row] += (
-                (r * r * (3.0 - 2.0 * r)) * taper * np.sin(omega * t - k_b * x_src)
+                (r * r * (3.0 - 2.0 * r)) * taper_d * xp.sin(omega * t - k_b * x_d)
             )
             if i >= avg_from:
-                v2_sum += float(np.mean(sim.vy[drive_row, span] ** 2))
+                v2_sum = v2_sum + xp.sum(sim.vy[drive_row, span] ** 2) / span_cells
                 n_avg += 1
             if (i + 1) % _RE_EVERY == 0:
-                p = sim.p.copy()
+                p = _host(sim, sim.p, dtype=np.float64)
                 # Blank exactly the plate rows: inside the steel `p` is the
                 # mean normal stress, orders above any air pressure, and the
                 # plate is drawn as a patch instead. One row either side
                 # would blank the air the near field lives in.
                 p[r0 : r0 + _RE_PLATE_ROWS] = 0.0
                 frames.append(p[rows, cols].astype(np.float32))
-                plate.append(sim.vy[drive_row, cols].astype(np.float32))
+                plate.append(_host(sim, sim.vy[drive_row, cols]))
                 ts.append(t)
-        v2 = v2_sum / n_avg
+        v2 = backend.scalar(v2_sum) / n_avg
         # The colour scale is the pressure a piston of the same surface
         # velocity would make, so a panel that reaches +-1 is radiating like
         # one and a panel that stays dark is not.

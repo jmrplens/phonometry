@@ -17,6 +17,7 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
+from ._core import _host
 
 # Aluminium half-space, the material of the still figure this clip promotes
 # (simulation/elastic-waves.mdx section 3) and of the solver's own Rayleigh
@@ -102,8 +103,11 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
     histories, the frame times and the Rayleigh speed measured off the free
     run's probes.
     """
+    import clip_placement
+
     from phonometry import simulation
 
+    compute = clip_placement.compute_for("anim_elastic_halfspace_waves")
     dx = _HS_DX
     dt = 0.6 * dx / (_HS_CP * float(np.sqrt(2.0)))
     corner = float(np.hypot(_HS_HALF * dx, _HS_HALF * dx))
@@ -131,12 +135,15 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
             sponge_width=_HS_SPONGE,
             sponge_sides=("left", "right", "bottom"),
             free_sides=("top",) if free else None,
+            compute=compute,
         )
         sim.add_source(
             simulation.ForceSource(
                 ix=src_ix, iy=0, direction="y", amplitude=1e6, waveform=pulse
             )
         )
+        xp = sim._backend.xp
+        probe_cells = sim._backend.index(np.asarray(probe_cols))
         frames: list[Any] = []
         probe: list[Any] = []
         ts: list[float] = []
@@ -144,11 +151,11 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
             sim.step()
             if sim.n % every == 0:
                 vy = sim.collocated("vy")
-                frames.append(vy[rows, cols].astype(np.float32))
-                probe.append([float(vy[0, probe_cols[0]]), float(vy[0, probe_cols[1]])])
+                frames.append(_host(sim, vy[rows, cols]))
+                probe.append(xp.take(vy[0], probe_cells))
                 ts.append(sim.time)
         stacks.append(np.stack(frames))
-        traces.append(np.asarray(probe, dtype=np.float32))
+        traces.append(_host(sim, xp.stack(probe)))
         times = np.asarray(ts)
     # The surface train is the largest thing either probe ever sees on the
     # free run, so the speed is the peak-to-peak time of flight over the

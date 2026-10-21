@@ -1101,7 +1101,7 @@ def _agree_rate(
 class ReflectionIndexResult(OwnsArrays):
     r"""The sound reflection index of a device, per one-third octave band.
 
-    :ivar bands_hz: The eighteen band centres, 100 Hz to 5 kHz.
+    :ivar frequencies: The eighteen band centres, 100 Hz to 5 kHz.
     :ivar reflection_index: :math:`RI_j`, the average over every microphone of
         every grid position (5.6.2.3); ``nan`` in a band nothing measured.
     :ivar position_values: ``(positions, 18)``: the average of each grid
@@ -1119,7 +1119,7 @@ class ReflectionIndexResult(OwnsArrays):
         each subtraction, in decibels, or ``None``.
     """
 
-    bands_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     reflection_index: NDArray[np.float64]
     position_values: NDArray[np.float64]
     lowest_band_hz: float
@@ -1196,7 +1196,7 @@ def _result(
     np.divide(sums, counts, out=average, where=counts > 0)
     rating = sound_reflection_rating(average, lowest_band_hz=lowest_band_hz)
     return ReflectionIndexResult(
-        bands_hz=read_only(np.asarray(_BANDS_HZ, dtype=np.float64)),
+        frequencies=read_only(np.asarray(_BANDS_HZ, dtype=np.float64)),
         reflection_index=read_only(average),
         position_values=position_values,
         lowest_band_hz=rating.lowest_band_hz,

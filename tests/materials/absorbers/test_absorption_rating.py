@@ -275,14 +275,12 @@ def test_result_is_frozen() -> None:
 
 def test_result_exposes_curves_for_plotting() -> None:
     res = weighted_absorption(_ANNEX_A1_ALPHA_P)
-    np.testing.assert_allclose(res.band_centers, OCTAVE_BANDS)
+    np.testing.assert_allclose(res.frequencies, OCTAVE_BANDS)
     np.testing.assert_allclose(res.measured, _ANNEX_A1_ALPHA_P)
-    assert res.measured.shape == res.shifted_reference.shape == res.band_centers.shape
+    assert res.measured.shape == res.shifted_reference.shape == res.frequencies.shape
 
 
-@pytest.mark.parametrize(
-    "field_name", ["band_centers", "measured", "shifted_reference"]
-)
+@pytest.mark.parametrize("field_name", ["frequencies", "measured", "shifted_reference"])
 def test_an_octave_curve_off_the_rating_axis_is_refused(field_name: str) -> None:
     """The three octave columns of the fiche table must share one length.
 

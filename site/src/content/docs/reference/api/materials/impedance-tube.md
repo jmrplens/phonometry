@@ -612,7 +612,7 @@ supplied, frequencies outside the plane-wave range (Eqs. (1)-(4)) raise an
 | Name | Description |
 | :--- | :--- |
 | `h12` | Measured (mismatch-corrected) transfer function `H12`. |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `spacing` | Microphone spacing `s`, in metres. |
 | `x1` | Distance from the sample to the farther microphone, in metres. |
 | `speed_of_sound` | Speed of sound `c0`, in m/s (see [`speed_of_sound_iso10534`](/phonometry/reference/api/materials/impedance-tube/#speed_of_sound_iso10534)). |

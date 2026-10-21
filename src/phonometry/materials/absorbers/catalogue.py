@@ -297,7 +297,7 @@ class PorousMaterial(CatalogueRow):
         print and converted, here and once, to the metres
         :func:`~phonometry.materials.absorbers.johnson_champoux_allard` takes.
 
-        :param frequency: Frequency vector ``f``, in hertz.
+        :param frequency: Frequency ``f``, in hertz (scalar or array).
         :param model: ``"johnson_champoux_allard"`` (Default),
             ``"delany_bazley"`` or ``"miki"``. The last two read the flow
             resistivity alone, so they describe a coarser specimen than the

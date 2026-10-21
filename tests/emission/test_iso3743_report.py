@@ -126,7 +126,7 @@ def _special_direct() -> SpecialRoomSoundPowerResult:
     return sound_power_special_room(
         _ST - 20.0,
         _FREQS,
-        volume_m3=_VOLUME,
+        volume=_VOLUME,
         nominal_reverberation_time_s=_TNOM,
         background_levels=np.full(7, 30.0),
         a_weighted_levels=np.array([75.2, 75.6, 75.9, 75.4]),
@@ -275,7 +275,7 @@ def test_hard_walled_energy_fiche(tmp_path: Path) -> None:
         _LW_RSS,
         _FREQS,
         background_levels=np.full((4, 7), 30.0),
-        integration_time_s=2.0,
+        integration_time=2.0,
         sigma_omc_db=2.0,
     )
     text = _render(

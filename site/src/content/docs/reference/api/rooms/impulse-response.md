@@ -462,7 +462,7 @@ measurement's noise floor (that is its purpose: SNR shaping).
 | `f1` | Start frequency of the sweep band in Hz. Must be > 0. The magnitude rolls off over 1/6 octave *below* `f1` (clipped at the first FFT bin), so the full target level holds across `[f1, f2]`. |
 | `f2` | Stop frequency in Hz. Must satisfy $f_1 < f_2 \le f_\mathrm{s}/2$; keep some margin below Nyquist so the upper roll-off has room. |
 | `seconds` | Sweep duration $\tau_\mathrm{G}(f_2) - \tau_\mathrm{G}(f_1)$ in seconds. The returned signal is slightly longer (lead-in plus tail margin, see `start_delay`). |
-| `target` | The magnitude shape: `"pink"` (default; 3 dB per octave falling, the classical room-measurement emphasis), `"white"` (flat), or a `(frequencies_hz, magnitude_db)` pair of arrays interpolated in dB over log-frequency (only the shape matters; any overall offset is normalised away). |
+| `target` | The magnitude shape: `"pink"` (default; 3 dB per octave falling, the classical room-measurement emphasis), `"white"` (flat), or a `(frequencies, magnitude_db)` pair of arrays interpolated in dB over log-frequency (only the shape matters; any overall offset is normalised away). |
 | `amplitude` | Peak amplitude of the returned sweep. Default 1.0. |
 | `start_delay` | Group delay assigned to `f1`, in seconds; the same margin is left after `tau_G(f2)`, so the signal lasts `seconds + 2*start_delay`. The sweep spreads slightly beyond its nominal start (Sec. 4.2: the group delay of the lowest bin "should not be set to zero"), so the default `0.05*seconds` gives the first half-wave room to evolve. |
 | `fade` | Half-Hann fade-in/out length as a fraction of the returned signal, applied to pin the ends to zero (Sec. 4.2). Default 0.01; 0.0 disables. |

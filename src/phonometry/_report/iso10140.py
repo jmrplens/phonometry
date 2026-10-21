@@ -136,7 +136,7 @@ def render_iso10140_report(
         # bands; the caption declares the set.
         caption_key = (
             "Octave-band {vh} [dB]"
-            if np.asarray(rating.band_centers).size == _N_OCTAVE_BANDS
+            if np.asarray(rating.frequencies).size == _N_OCTAVE_BANDS
             else "One-third-octave {vh} [dB]"
         )
         caption = t(caption_key, language).format(vh=spec["symbol"])

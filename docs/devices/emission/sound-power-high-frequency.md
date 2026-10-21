@@ -118,16 +118,16 @@ alpha = emission.air_absorption_np_per_m(
     thirds, temperature_c=23.0, relative_humidity_percent=50.0)
 print(alpha.round(4))            # [0.0245 0.0383 0.0564] Np/m
 room_air = emission.room_constant_from_air_absorption(
-    thirds, volume_m3=200.0, surface_area_m2=210.0,
+    thirds, volume=200.0, surface_area_m2=210.0,
     temperature_c=23.0, relative_humidity_percent=50.0)
 print(room_air.round(1))         # [ 48.3  86.6 158.4] m2
 
 # The same room, from the reverberation times measured on the boom path.
 times = [0.70, 0.42, 0.26]       # s, at 12.5, 16 and 20 kHz
 print(emission.room_absorption_coefficient(
-    times, volume_m3=200.0, surface_area_m2=210.0).round(3))   # [0.196 0.304 0.443]
+    times, volume=200.0, surface_area_m2=210.0).round(3))   # [0.196 0.304 0.443]
 room_t = emission.room_constant_from_reverberation_time(
-    times, volume_m3=200.0, surface_area_m2=210.0)
+    times, volume=200.0, surface_area_m2=210.0)
 print(room_t.round(1))           # [ 51.1  91.8 167.4] m2
 ```
 
@@ -192,10 +192,10 @@ Celsius scale puts 273.15 K. The library converts with 273.15 K, which moves
 
 | Function | Formula | Returns | Notes |
 | :--- | :--- | :--- | :--- |
-| `air_absorption_np_per_m(frequencies_hz, *, temperature_c, relative_humidity_percent, static_pressure_kpa=101.325)` | Annex A | $\alpha$ [Np/m] | ISO 9613-1 without the 8.686; advisory outside 50 Hz to 22.4 kHz and outside −20 °C to +50 °C |
-| `room_absorption_coefficient(reverberation_time_s, *, volume_m3, surface_area_m2)` | (5) | $\alpha_\mathrm{room}$ | The 0.16 the formula prints |
-| `room_constant_from_reverberation_time(reverberation_time_s, *, volume_m3, surface_area_m2)` | (4), (5) | $R$ [m²] | Clause 6 |
-| `room_constant_from_air_absorption(frequencies_hz, *, volume_m3, surface_area_m2, temperature_c, relative_humidity_percent, static_pressure_kpa=101.325)` | (7) | $R$ [m²] | Clause 7; warns below 10 kHz, refuses $8\alpha V/S \ge 1$ |
+| `air_absorption_np_per_m(frequencies, *, temperature_c, relative_humidity_percent, static_pressure_kpa=101.325)` | Annex A | $\alpha$ [Np/m] | ISO 9613-1 without the 8.686; advisory outside 50 Hz to 22.4 kHz and outside −20 °C to +50 °C |
+| `room_absorption_coefficient(reverberation_time_s, *, volume, surface_area_m2)` | (5) | $\alpha_\mathrm{room}$ | The 0.16 the formula prints |
+| `room_constant_from_reverberation_time(reverberation_time_s, *, volume, surface_area_m2)` | (4), (5) | $R$ [m²] | Clause 6 |
+| `room_constant_from_air_absorption(frequencies, *, volume, surface_area_m2, temperature_c, relative_humidity_percent, static_pressure_kpa=101.325)` | (7) | $R$ [m²] | Clause 7; warns below 10 kHz, refuses $8\alpha V/S \ge 1$ |
 
 ## 3. A printer in a reverberation room
 
@@ -221,7 +221,7 @@ orientations = np.array([        # dB re 20 uPa, one row per orientation
     [58.8, 56.5, 51.6],
 ])
 printer = emission.high_frequency_sound_power(
-    orientations, frequencies_hz=thirds, room_constant_m2=room_air,
+    orientations, frequencies=thirds, room_constant_m2=room_air,
     temperature_c=23.0, static_pressure_kpa=101.325)
 print(printer.mean_pressure_level.round(2))   # [58.46 56.29 51.44] dB, Formula (1)
 print(printer.sound_power_level.round(1))     # [69.1 69.5 67.3] dB re 1 pW
@@ -240,8 +240,8 @@ same readings give 69.4, 69.8 and 67.5 dB.
 
 | Parameter | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `pressure_levels_db` | 1D or 2D array | dB | `(bands,)` or `(N, bands)` | $\overline{L_{p(\mathrm{ST})}}$, or the orientations or revolutions averaged by Formula (1) |
-| `frequencies_hz` | 1D array | Hz | one per band | A frequency outside 11.2 kHz to 22.4 kHz emits a `SoundPowerWarning` |
+| `pressure_levels` | 1D or 2D array | dB | `(bands,)` or `(N, bands)` | $\overline{L_{p(\mathrm{ST})}}$, or the orientations or revolutions averaged by Formula (1) |
+| `frequencies` | 1D array | Hz | one per band | A frequency outside 11.2 kHz to 22.4 kHz emits a `SoundPowerWarning` |
 | `room_constant_m2` | float or 1D array | m² | positive | From either room-constant function |
 | `temperature_c` | float | °C | default `23.0` | For $C_1$ and $C_2$ (clause 10.1) |
 | `static_pressure_kpa` | float | kPa | default `101.325` | For $C_1$ and $C_2$ |
@@ -296,9 +296,9 @@ tone = emission.tone_level_from_sidebands([42.9, 41.3, 38.0])
 print(round(tone, 1))                                # 45.9 dB
 
 tones = emission.high_frequency_sound_power_comparison(
-    [tone, 38.5, 31.0], frequencies_hz=[15625.0, 17000.0, 20500.0],
-    reference_pressure_levels_db=[41.8, 41.2, 40.1],
-    reference_sound_power_levels_db=[44.3, 43.9, 43.0],   # dB re 1 pW per hertz
+    [tone, 38.5, 31.0], frequencies=[15625.0, 17000.0, 20500.0],
+    reference_pressure_levels=[41.8, 41.2, 40.1],
+    reference_sound_power_levels=[44.3, 43.9, 43.0],   # dB re 1 pW per hertz
     noise_bandwidth_hz=12.5)
 print(tones.sound_power_level.round(1))              # [59.4 52.2 44.9] dB re 1 pW
 print(tones.within_10_db_of_maximum)                 # [ True  True False]

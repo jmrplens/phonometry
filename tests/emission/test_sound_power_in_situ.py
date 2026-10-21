@@ -345,11 +345,11 @@ def test_clause_9_5_example_expanded_uncertainty_is_5_db() -> None:
         conditions=emission.GradeConditions(
             excess_levels=[8.0, 9.5, 7.2, 8.8], directivity_range=3.0
         ),
-        sigma_omc=2.0,
+        sigma_omc_db=2.0,
     )
     assert res.grade == "engineering"
     assert res.sigma_r0 == 1.5
-    assert res.sigma_omc == 2.0
+    assert res.sigma_omc_db == 2.0
     assert res.sigma_tot == pytest.approx(2.5)
     assert res.expanded_uncertainty == pytest.approx(5.0)
     assert res.coverage_factor == 2.0
@@ -367,7 +367,7 @@ def test_table_e1_grade_2_row(sigma_omc: float, expected: float) -> None:
         conditions=emission.GradeConditions(
             excess_levels=[8.0, 9.5, 7.2, 8.8], directivity_range=3.0
         ),
-        sigma_omc=sigma_omc,
+        sigma_omc_db=sigma_omc,
     )
     assert round(res.sigma_tot, 1) == expected
 
@@ -378,7 +378,7 @@ def test_one_sided_coverage_factor_scales_eq23() -> None:
         conditions=emission.GradeConditions(
             excess_levels=[8.0, 9.5, 7.2, 8.8], directivity_range=3.0
         ),
-        sigma_omc=2.0,
+        sigma_omc_db=2.0,
         coverage_factor=1.6,
     )
     assert res.expanded_uncertainty == pytest.approx(1.6 * 2.5)
@@ -391,7 +391,7 @@ def test_uncertainty_is_nan_without_sigma_omc() -> None:
         )
     )
     assert res.sigma_r0 == 1.5
-    assert np.isnan(res.sigma_omc)
+    assert np.isnan(res.sigma_omc_db)
     assert np.isnan(res.sigma_tot)
     assert np.isnan(res.expanded_uncertainty)
 
@@ -671,10 +671,12 @@ def test_each_grade_indicator_is_validated_on_its_own() -> None:
 
 
 def test_uncertainty_inputs_are_validated() -> None:
-    with pytest.raises(ValueError, match="'sigma_omc' must be finite and non-negative"):
-        _power(sigma_omc=-0.5)
+    with pytest.raises(
+        ValueError, match="'sigma_omc_db' must be finite and non-negative"
+    ):
+        _power(sigma_omc_db=-0.5)
     with pytest.raises(ValueError, match="'coverage_factor' must be positive"):
-        _power(sigma_omc=2.0, coverage_factor=0.0)
+        _power(sigma_omc_db=2.0, coverage_factor=0.0)
 
 
 def test_events_argument_is_checked_against_the_form() -> None:

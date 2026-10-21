@@ -195,7 +195,7 @@ hemi-anechoic room, 64 in an anechoic one (Figure B.1).
 
 ```python
 directionality_tolerance_db(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     room: Literal['anechoic', 'hemi-anechoic'],
 ) -> np.ndarray
@@ -207,7 +207,7 @@ Allowable deviation of the test source directionality (ISO 26101 Table B.1).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | One-third octave mid-band frequencies, in hertz. |
+| `frequencies` | One-third octave mid-band frequencies, in hertz. |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
 
 **Returns:** The half-width of the tolerance band, in dB, per frequency.
@@ -237,7 +237,7 @@ Whether a room qualifies as anechoic or hemi-anechoic for ISO 3745.
 
 The verdict of the amended ISO 3745:2012 Annex A over the frequencies
 evaluated, with the ISO 26101:2017 clauses it defers to. Every per-band
-array is aligned with `frequencies_hz` (ascending) and judged within
+array is aligned with `frequencies` (ascending) and judged within
 `maximum_qualified_radius_m`.
 
 Every verdict, the radius and the reduced range are read from the
@@ -323,7 +323,7 @@ The points of every traverse within the radius equally spaced at the frequency, 
 A.4.3 and ISO 26101 5.1.4.3; points added between two of them near a
 peak deviation are allowed (see the module notes for the tolerance).
 
-### FreeFieldCheck.frequencies_hz
+### FreeFieldCheck.frequencies
 
 *property*
 
@@ -463,7 +463,7 @@ The traverse paths lie in the working area of the room (A.3.3), as declared.
 inverse_square_law_deviations(
     traverses: Sequence[MicrophoneTraverse],
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     room: Literal['anechoic', 'hemi-anechoic'],
     origin_m: ArrayLike | None = None,
     source_box_m: ArrayLike | None = None,
@@ -486,8 +486,8 @@ span the frequency range, each with its own mathematical origin, and
 
 | Name | Description |
 | :--- | :--- |
-| `traverses` | The straight traverses, all measured at `frequencies_hz`. |
-| `frequencies_hz` | The test frequencies (tones or one-third octave mid-bands), in hertz, one per level column. |
+| `traverses` | The straight traverses, all measured at `frequencies`. |
+| `frequencies` | The test frequencies (tones or one-third octave mid-bands), in hertz, one per level column. |
 | `room` | `"anechoic"` or `"hemi-anechoic"`, which selects the Table A.1 limits. |
 | `origin_m` | The mathematical origin of every traverse, `(x, y, z)` in metres; `None` with no `source_box_m` takes the room frame's origin. |
 | `source_box_m` | The box the test source physically occupies, as `((x_min, y_min, z_min), (x_max, y_max, z_max))` in metres; the origin is then searched inside it (ISO 26101 5.1.3.2, ISO 3745 A.3.3). A zero extent on an axis holds the origin on that coordinate. |
@@ -504,7 +504,7 @@ span the frequency range, each with its own mathematical origin, and
 
 ```python
 inverse_square_law_tolerance_db(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     room: Literal['anechoic', 'hemi-anechoic'],
 ) -> np.ndarray
@@ -520,7 +520,7 @@ so a tone at 794 Hz is held to the 800 Hz row.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Test frequencies or band mid-frequencies, in hertz. |
+| `frequencies` | Test frequencies or band mid-frequencies, in hertz. |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
 
 **Returns:** The half-width of the tolerance band, in dB, per frequency.
@@ -535,7 +535,7 @@ so a tone at 794 Hz is held to the 800 Hz row.
 
 ```python
 InverseSquareLawResult(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     room: str,
     origin_m: np.ndarray,
     origin_fitted: bool,
@@ -543,8 +543,8 @@ InverseSquareLawResult(
     traverse_names: tuple[str, ...],
     traverse_targets: tuple[tuple[str, ...], ...],
     positions_m: tuple[np.ndarray, ...],
-    distances_m: tuple[np.ndarray, ...],
-    levels_db: tuple[np.ndarray, ...],
+    distances: tuple[np.ndarray, ...],
+    levels: tuple[np.ndarray, ...],
     background_margin_db: tuple[np.ndarray | None, ...],
     source_stability_db: tuple[np.ndarray, ...],
     source_strength_db: np.ndarray,
@@ -561,7 +561,7 @@ Deviations from the inverse square law of one test source (ISO 26101 5.1.5).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The test frequencies, in hertz, as given. |
+| `frequencies` | The test frequencies, in hertz, as given. |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
 | `origin_m` | The mathematical origin of the traverses, `(x, y, z)` in metres. |
 | `origin_fitted` | `True` when the origin was searched inside `source_box_m`. |
@@ -569,8 +569,8 @@ Deviations from the inverse square law of one test source (ISO 26101 5.1.5).
 | `traverse_names` | The label of each traverse as given, `""` when none was. |
 | `traverse_targets` | What each traverse was selected towards (A.3.3 a) to e)), as given. |
 | `positions_m` | The measurement points of each traverse, `(N, 3)`. |
-| `distances_m` | The distance $r_i$ of each point from the origin, in metres. |
-| `levels_db` | $L_{pi}$ of each traverse after the stability correction of Formula (1), `(N, NF)`, `nan` where not measured. |
+| `distances` | The distance $r_i$ of each point from the origin, in metres. |
+| `levels` | $L_{pi}$ of each traverse after the stability correction of Formula (1), `(N, NF)`, `nan` where not measured. |
 | `background_margin_db` | $L'_{pi}$ less the background at each point, `(N, NF)`, or `None` for a traverse without background. |
 | `source_stability_db` | The largest excursion of the monitor microphone from its reading at point 0, per frequency, or `nan` without a monitor. |
 | `source_strength_db` | $b$ of Formula (2) per traverse and frequency, `(NT, NF)`: the midpoint of the admissible interval over the points within `band_radius_m` (over the traverse's own qualified run when its first point lies beyond that radius). |
@@ -626,14 +626,14 @@ Draw the deviations along every traverse at one frequency.
 
 The Table A.1 limit of each frequency, in dB, read from the room.
 
-**Returns:** [`inverse_square_law_tolerance_db`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_tolerance_db) of `frequencies_hz` in `room`.
+**Returns:** [`inverse_square_law_tolerance_db`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_tolerance_db) of `frequencies` in `room`.
 
 ## MicrophoneTraverse
 
 ```python
 MicrophoneTraverse(
     positions_m: np.ndarray,
-    levels_db: np.ndarray,
+    levels: np.ndarray,
     monitor_levels_db: np.ndarray | None = None,
     background_levels_db: np.ndarray | None = None,
     name: str = '',
@@ -648,7 +648,7 @@ One straight microphone traverse of ISO 26101:2017 5.1.3.2.
 | Name | Description |
 | :--- | :--- |
 | `positions_m` | The measurement points, one row per point, as `(x, y, z)` coordinates in metres in the room frame: `z` points up and, in a hemi-anechoic room, the reflecting plane is `z = 0`. The mathematical origin of the traverse is given to [`inverse_square_law_deviations`](/phonometry/reference/api/power/free-field-qualification/#inverse_square_law_deviations) in the same frame. |
-| `levels_db` | The measured sound pressure level $L'_{pi}$ at each point, one row per point and one column per test frequency, in dB. A `nan` marks a point not measured at that frequency, which is how a spacing that changes with frequency is written (ISO 3745 A.4.3 asks for equally spaced points *at each frequency*). Every other level is finite. |
+| `levels` | The measured sound pressure level $L'_{pi}$ at each point, one row per point and one column per test frequency, in dB. A `nan` marks a point not measured at that frequency, which is how a spacing that changes with frequency is written (ISO 3745 A.4.3 asks for equally spaced points *at each frequency*). Every other level is finite. |
 | `monitor_levels_db` | The monitor microphone level $L_{p,\mathrm{ref},i}$ recorded with each point, same shape; the first row is the level for the initial point 0, which every point is corrected to. It is finite wherever a level was measured and in the first row of every frequency measured. `None` applies no stability correction. |
 | `background_levels_db` | The background level at each point, same shape, or one row for the whole traverse, finite wherever a level was measured; `None` leaves the 6 dB requirement of ISO 26101 5.1.2.2 c) unjudged. |
 | `name` | A label for the traverse (the path it follows: a dihedral corner, the nearest wall, a door). |
@@ -661,8 +661,8 @@ One straight microphone traverse of ISO 26101:2017 5.1.3.2.
 ```python
 MicrophoneTraverse.along(
     direction: ArrayLike,
-    distances_m: ArrayLike,
-    levels_db: ArrayLike,
+    distances: ArrayLike,
+    levels: ArrayLike,
     *,
     start_m: ArrayLike = (0.0, 0.0, 0.0),
     monitor_levels_db: ArrayLike | None = None,
@@ -679,8 +679,8 @@ A traverse laid out along a straight line from `start_m`.
 | Name | Description |
 | :--- | :--- |
 | `direction` | The direction of the path, any non-zero 3-vector. |
-| `distances_m` | The distance of each point from `start_m` along the path, in metres. |
-| `levels_db` | One row per point, one column per frequency, in dB. |
+| `distances` | The distance of each point from `start_m` along the path, in metres. |
+| `levels` | One row per point, one column per frequency, in dB. |
 | `start_m` | The point the distances are counted from, in metres; the room frame's origin by default. |
 | `monitor_levels_db` | As for the class. |
 | `background_levels_db` | As for the class. |
@@ -730,7 +730,7 @@ frequencies.
 
 ```python
 SourceDirectionalityResult(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     room: str,
     mean_level_db: np.ndarray,
     maximum_positive_deviation_db: np.ndarray,
@@ -744,7 +744,7 @@ Whether a test source is uniform enough to qualify a room (ISO 26101 B.4).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The one-third octave mid-band frequencies, in hertz. |
+| `frequencies` | The one-third octave mid-band frequencies, in hertz. |
 | `room` | The room type the source is to qualify. |
 | `mean_level_db` | The arithmetic mean of the decibel levels per band. |
 | `maximum_positive_deviation_db` | The largest level above the mean. |
@@ -787,7 +787,7 @@ Draw the extreme deviations per band against Table B.1.
 
 The Table B.1 limit per band, in dB, read from the room.
 
-**Returns:** [`directionality_tolerance_db`](/phonometry/reference/api/power/free-field-qualification/#directionality_tolerance_db) of `frequencies_hz` in `room`.
+**Returns:** [`directionality_tolerance_db`](/phonometry/reference/api/power/free-field-qualification/#directionality_tolerance_db) of `frequencies` in `room`.
 
 ### SourceDirectionalityResult.within_tolerance
 
@@ -801,9 +801,9 @@ Per band, whether both extreme deviations are within Table B.1.
 
 ```python
 verify_source_directionality(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     room: Literal['anechoic', 'hemi-anechoic'],
 ) -> SourceDirectionalityResult
 ```
@@ -822,8 +822,8 @@ the room being qualified.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | One row per position (32 hemi-anechoic, 64 anechoic), one column per band, in dB; a 1-D array is one band. |
-| `frequencies_hz` | The one-third octave mid-band frequencies, in hertz. |
+| `levels` | One row per position (32 hemi-anechoic, 64 anechoic), one column per band, in dB; a 1-D array is one band. |
+| `frequencies` | The one-third octave mid-band frequencies, in hertz. |
 | `room` | `"anechoic"` or `"hemi-anechoic"`. |
 
 **Returns:** [`SourceDirectionalityResult`](/phonometry/reference/api/power/free-field-qualification/#sourcedirectionalityresult).

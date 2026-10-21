@@ -97,7 +97,7 @@ def _free_field_traverses(
 def _directionality(room: str = "hemi-anechoic") -> emission.SourceDirectionalityResult:
     count = 32 if room == "hemi-anechoic" else 64
     return emission.verify_source_directionality(
-        np.full((count, len(_GRID)), 80.0), frequencies_hz=_GRID, room=room
+        np.full((count, len(_GRID)), 80.0), frequencies=_GRID, room=room
     )
 
 
@@ -105,7 +105,7 @@ def _qualified(
     traverses: list[emission.MicrophoneTraverse], **kwargs: object
 ) -> emission.FreeFieldCheck:
     fit = emission.inverse_square_law_deviations(
-        traverses, frequencies_hz=_GRID, room="hemi-anechoic"
+        traverses, frequencies=_GRID, room="hemi-anechoic"
     )
     options: dict[str, object] = {
         "bandwidth": "discrete-frequency",
@@ -199,7 +199,7 @@ def test_qualification_frequencies_refuse_an_empty_range() -> None:
 def test_an_exact_inverse_square_field_qualifies_at_every_distance() -> None:
     d = np.arange(0.30, 3.0001, 0.05)
     fit = emission.inverse_square_law_deviations(
-        _free_field_traverses(d), frequencies_hz=_GRID, room="anechoic"
+        _free_field_traverses(d), frequencies=_GRID, room="anechoic"
     )
     np.testing.assert_allclose(fit.traverse_radius_m, d[-1], rtol=0, atol=1e-12)
     assert fit.maximum_qualified_radius_m == pytest.approx(d[-1], abs=1e-12)
@@ -216,7 +216,7 @@ def test_formula_3_is_the_mean_of_level_plus_20_lg_r() -> None:
     levels = np.array([85.0, 80.5, 76.0, 73.5])
     traverse = emission.MicrophoneTraverse.along((1, 0, 0), d, levels)
     fit = emission.inverse_square_law_deviations(
-        [traverse], frequencies_hz=[1000.0], room="anechoic"
+        [traverse], frequencies=[1000.0], room="anechoic"
     )
     expected = (np.sum(20.0 * np.log10(d)) + np.sum(levels)) / d.size
     assert fit.initial_source_strength_db[0, 0] == pytest.approx(expected, abs=1e-12)
@@ -242,7 +242,7 @@ def test_a_known_reflection_deviates_by_the_known_amount() -> None:
     levels, excess = _incoherent_reflection(rho2, wall, d)
     traverse = emission.MicrophoneTraverse.along((1, 0, 0), d, levels)
     fit = emission.inverse_square_law_deviations(
-        [traverse], frequencies_hz=[1000.0], room="anechoic"
+        [traverse], frequencies=[1000.0], room="anechoic"
     )
     q1 = d[0] / (2.0 * wall - d[0])
     q = math.sqrt(((1.0 + rho2 * q1**2) * 10.0 ** (2.0 * tol / 10.0) - 1.0) / rho2)
@@ -278,7 +278,7 @@ def test_the_fit_reads_its_tolerance_from_table_a1(
     d = np.linspace(0.5, 2.0, 7)
     fit = emission.inverse_square_law_deviations(
         _free_field_traverses(d, freqs, background=None),
-        frequencies_hz=freqs,
+        frequencies=freqs,
         room=room,  # type: ignore[arg-type]
     )
     np.testing.assert_array_equal(fit.tolerance_db, printed)
@@ -292,7 +292,7 @@ def test_a_radius_the_levels_do_not_qualify_is_refused() -> None:
     levels, _ = _incoherent_reflection(1.0, 2.5, d)
     traverse = emission.MicrophoneTraverse.along((1, 0, 0), d, levels)
     fit = emission.inverse_square_law_deviations(
-        [traverse], frequencies_hz=[1000.0], room="anechoic"
+        [traverse], frequencies=[1000.0], room="anechoic"
     )
     assert fit.maximum_qualified_radius_m < d[-1]
     forged = {
@@ -322,7 +322,7 @@ def test_a_coherent_reflection_ripples_by_the_known_amount() -> None:
         (0, 0, 1), d, _L1M - 20.0 * np.log10(d) + excess
     )
     fit = emission.inverse_square_law_deviations(
-        [traverse], frequencies_hz=[frequency], room="hemi-anechoic"
+        [traverse], frequencies=[frequency], room="hemi-anechoic"
     )
     t = float(
         emission.inverse_square_law_tolerance_db([frequency], room="hemi-anechoic")[0]
@@ -354,7 +354,7 @@ def test_formula_1_removes_the_source_drift() -> None:
         monitor_levels_db=monitor,
     )
     fit = emission.inverse_square_law_deviations(
-        [traverse], frequencies_hz=[1000.0], room="anechoic"
+        [traverse], frequencies=[1000.0], room="anechoic"
     )
     np.testing.assert_allclose(fit.deviations_db[0], 0.0, rtol=0, atol=1e-12)
     assert fit.source_stability_db[0][0] == pytest.approx(0.8)
@@ -366,7 +366,7 @@ def test_a_point_not_measured_at_one_frequency_is_left_out_there() -> None:
     levels[-1, 1] = np.nan
     fit = emission.inverse_square_law_deviations(
         [emission.MicrophoneTraverse.along((1, 0, 0), d, levels)],
-        frequencies_hz=[1000.0, 2000.0],
+        frequencies=[1000.0, 2000.0],
         room="anechoic",
     )
     assert fit.traverse_radius_m[0, 0] == pytest.approx(d[-1])
@@ -387,7 +387,7 @@ def _offset_field(origin: np.ndarray) -> list[emission.MicrophoneTraverse]:
         out.append(
             emission.MicrophoneTraverse(
                 positions_m=points,
-                levels_db=(_L1M - 20.0 * np.log10(r))[:, None],
+                levels=(_L1M - 20.0 * np.log10(r))[:, None],
             )
         )
     return out
@@ -403,11 +403,11 @@ def test_the_origin_is_found_inside_the_source_volume() -> None:
     true_origin = np.array([0.08, -0.06, 0.12])
     traverses = _offset_field(true_origin)
     fixed = emission.inverse_square_law_deviations(
-        traverses, frequencies_hz=[1000.0], room="anechoic"
+        traverses, frequencies=[1000.0], room="anechoic"
     )
     fitted = emission.inverse_square_law_deviations(
         traverses,
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
         source_box_m=((-0.1, -0.1, 0.0), (0.1, 0.1, 0.2)),
     )
@@ -431,7 +431,7 @@ def test_an_exact_field_is_found_at_its_centre_wherever_it_sits(seed: int) -> No
     true_origin = rng.uniform([-0.1, -0.1, 0.0], [0.1, 0.1, 0.2])
     fitted = emission.inverse_square_law_deviations(
         _offset_field(true_origin),
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
         source_box_m=((-0.1, -0.1, 0.0), (0.1, 0.1, 0.2)),
     )
@@ -459,7 +459,7 @@ def test_a_field_that_qualifies_everywhere_returns_its_centre() -> None:
         )
     fitted = emission.inverse_square_law_deviations(
         traverses,
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
         source_box_m=((-0.05, -0.05, 0.0), (0.05, 0.05, 0.08)),
     )
@@ -481,11 +481,11 @@ def test_ties_go_to_the_origin_that_fills_the_least_of_the_band() -> None:
     points = d[:, None] * np.array([1.0, 0.0, 0.0])[None, :]
     r = np.linalg.norm(points - true_origin[None, :], axis=1)
     traverse = emission.MicrophoneTraverse(
-        positions_m=points, levels_db=(_L1M - 20.0 * np.log10(r))[:, None]
+        positions_m=points, levels=(_L1M - 20.0 * np.log10(r))[:, None]
     )
     fitted = emission.inverse_square_law_deviations(
         [traverse],
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
         source_box_m=((0.0, -0.05, 0.0), (0.0, 0.05, 0.0)),
     )
@@ -520,7 +520,7 @@ def test_a_short_traverse_does_not_pull_the_origin_off_the_centre() -> None:
         traverses.append(emission.MicrophoneTraverse.along(u, d, levels[:, None]))
     fitted = emission.inverse_square_law_deviations(
         traverses,
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
         source_box_m=((-0.1, -0.1, -0.1), (0.1, 0.1, 0.1)),
     )
@@ -535,7 +535,7 @@ def test_the_origin_never_leaves_the_box() -> None:
     traverses = _offset_field(np.array([0.3, 0.0, 0.1]))
     fitted = emission.inverse_square_law_deviations(
         traverses,
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
         source_box_m=((-0.05, -0.05, 0.0), (0.05, 0.05, 0.2)),
     )
@@ -560,7 +560,7 @@ def test_a_traverse_starting_beyond_the_radius_is_centred_on_its_own_run() -> No
         (0, 1, 0), far, _L1M + 1.0 - 20.0 * np.log10(far)
     )
     fit = emission.inverse_square_law_deviations(
-        [broken, late], frequencies_hz=[1000.0], room="anechoic"
+        [broken, late], frequencies=[1000.0], room="anechoic"
     )
     assert fit.maximum_qualified_radius_m == pytest.approx(0.70)
     assert fit.source_strength_db[1, 0] == pytest.approx(_L1M + 1.0, abs=1e-9)
@@ -571,7 +571,7 @@ def test_a_flat_box_holds_that_coordinate() -> None:
     traverses = _offset_field(np.array([0.0, 0.0, 0.05]))
     fitted = emission.inverse_square_law_deviations(
         traverses,
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
         source_box_m=((-0.1, -0.1, 0.0), (0.1, 0.1, 0.0)),
     )
@@ -583,7 +583,7 @@ def test_origin_and_box_together_are_refused() -> None:
     with pytest.raises(ValueError, match="'source_box_m'"):
         emission.inverse_square_law_deviations(
             traverses,
-            frequencies_hz=[1000.0],
+            frequencies=[1000.0],
             room="anechoic",
             origin_m=(0, 0, 0),
             source_box_m=((0, 0, 0), (1, 1, 1)),
@@ -594,21 +594,21 @@ def test_a_point_on_the_origin_is_refused() -> None:
     traverse = emission.MicrophoneTraverse.along((1, 0, 0), [0.0, 0.5], [90.0, 84.0])
     with pytest.raises(ValueError, match="mathematical origin"):
         emission.inverse_square_law_deviations(
-            [traverse], frequencies_hz=[1000.0], room="anechoic"
+            [traverse], frequencies=[1000.0], room="anechoic"
         )
 
 
 def test_a_traverse_needs_two_points_in_three_coordinates() -> None:
     flat, levels = np.zeros((3, 2)), np.zeros(3)
     with pytest.raises(ValueError, match="'positions_m'"):
-        emission.MicrophoneTraverse(positions_m=flat, levels_db=levels)
+        emission.MicrophoneTraverse(positions_m=flat, levels=levels)
 
 
 def test_level_columns_must_match_the_frequencies() -> None:
     traverse = emission.MicrophoneTraverse.along((1, 0, 0), [0.5, 1.0], [90.0, 84.0])
     with pytest.raises(ValueError, match="level columns"):
         emission.inverse_square_law_deviations(
-            [traverse], frequencies_hz=[500.0, 1000.0], room="anechoic"
+            [traverse], frequencies=[500.0, 1000.0], room="anechoic"
         )
 
 
@@ -618,7 +618,7 @@ def test_two_frequencies_in_one_band_are_refused() -> None:
     )
     with pytest.raises(ValueError, match="same one-third octave"):
         emission.inverse_square_law_deviations(
-            [traverse], frequencies_hz=[1000.0, 1010.0], room="anechoic"
+            [traverse], frequencies=[1000.0, 1010.0], room="anechoic"
         )
 
 
@@ -647,7 +647,7 @@ def test_a_lobe_beyond_table_b1_is_not_suitable() -> None:
     levels = np.full((32, 1), 80.0)
     levels[5, 0] = 82.7  # 2,62 dB above the mean at 1 kHz; the limit is 2,5 dB
     result = emission.verify_source_directionality(
-        levels, frequencies_hz=[1000.0], room="hemi-anechoic"
+        levels, frequencies=[1000.0], room="hemi-anechoic"
     )
     mean = levels.mean()
     assert result.maximum_positive_deviation_db[0] == pytest.approx(82.7 - mean)
@@ -657,9 +657,9 @@ def test_a_lobe_beyond_table_b1_is_not_suitable() -> None:
 
 def test_directionality_needs_the_positions_of_b32() -> None:
     hemisphere = np.full((32, 1), 80.0)
-    with pytest.raises(ValueError, match="'levels_db'"):
+    with pytest.raises(ValueError, match="'levels'"):
         emission.verify_source_directionality(
-            hemisphere, frequencies_hz=[1000.0], room="anechoic"
+            hemisphere, frequencies=[1000.0], room="anechoic"
         )
 
 
@@ -729,7 +729,7 @@ def test_the_plane_extends_at_least_0_75_m(*, margin: float, met: bool) -> None:
     freqs = _GRID[1:]
     fit = emission.inverse_square_law_deviations(
         _free_field_traverses(_SPACING, freqs),
-        frequencies_hz=freqs,
+        frequencies=freqs,
         room="hemi-anechoic",
     )
     check = emission.check_free_field(
@@ -765,7 +765,7 @@ def test_the_path_targets_of_a33_are_read_from_the_traverses() -> None:
     unnamed = [
         emission.MicrophoneTraverse(
             positions_m=t.positions_m,
-            levels_db=t.levels_db,
+            levels=t.levels,
             background_levels_db=t.background_levels_db,
         )
         for t in _free_field_traverses(_SPACING)
@@ -777,7 +777,7 @@ def test_the_path_targets_of_a33_are_read_from_the_traverses() -> None:
     no_door = [
         emission.MicrophoneTraverse(
             positions_m=t.positions_m,
-            levels_db=t.levels_db,
+            levels=t.levels,
             background_levels_db=t.background_levels_db,
             targets=tuple(x for x in t.targets if x != "unique features"),
         )
@@ -794,7 +794,7 @@ def test_an_unknown_path_target_is_refused() -> None:
     with pytest.raises(ValueError, match="'targets'"):
         emission.MicrophoneTraverse(
             positions_m=points,
-            levels_db=levels,
+            levels=levels,
             targets=("window",),  # type: ignore[arg-type]
         )
 
@@ -846,7 +846,7 @@ def test_an_infinite_level_is_refused(level: float) -> None:
     d = np.arange(0.3, 2.2001, 0.1)
     levels = _L1M - 20.0 * np.log10(d)
     levels[5] = level
-    with pytest.raises(ValueError, match="'levels_db' must be finite"):
+    with pytest.raises(ValueError, match="'levels' must be finite"):
         emission.MicrophoneTraverse.along((1, 0, 0), d, levels)
 
 
@@ -924,7 +924,7 @@ def test_100_mm_spacing_meets_iso_3745_but_not_iso_26101_above_343_hz() -> None:
     """
     d = np.arange(0.30, 3.0001, 0.10)
     check = _qualified(_free_field_traverses(d))
-    freqs = check.frequencies_hz
+    freqs = check.frequencies
     assert np.all(check.spacing_met[freqs > 250.0])
     assert np.all(check.iso26101_spacing_met[freqs < 343.0])
     assert not np.any(check.iso26101_spacing_met[freqs > 343.0])
@@ -972,9 +972,9 @@ def test_the_edge_band_is_held_to_the_stricter_spacing() -> None:
     """At 250 Hz a tenth of a wavelength is 137 mm, and 100 mm applies."""
     d = np.arange(0.30, 3.0001, 0.12)
     check = _qualified(_free_field_traverses(d))
-    at_250 = check.frequencies_hz == 250.0
+    at_250 = check.frequencies == 250.0
     assert not check.spacing_met[at_250][0]
-    assert check.spacing_met[check.frequencies_hz == 125.0][0]
+    assert check.spacing_met[check.frequencies == 125.0][0]
 
 
 def _counted(points: tuple[int, ...]) -> emission.FreeFieldCheck:
@@ -993,7 +993,7 @@ def _counted(points: tuple[int, ...]) -> emission.FreeFieldCheck:
             )
         )
     fit = emission.inverse_square_law_deviations(
-        traverses, frequencies_hz=[1000.0], room="anechoic"
+        traverses, frequencies=[1000.0], room="anechoic"
     )
     return emission.check_free_field(fit, bandwidth="broadband")
 
@@ -1071,7 +1071,7 @@ def test_a_path_is_judged_by_its_direction_not_by_its_first_point() -> None:
     directions = (*_DIRECTIONS[:5], (1.5, 1.0, 4.0))
     fit = emission.inverse_square_law_deviations(
         _free_field_traverses(_SPACING, directions=directions),
-        frequencies_hz=_GRID,
+        frequencies=_GRID,
         room="hemi-anechoic",
         origin_m=(0.05, 0.034, 0.0),
     )
@@ -1090,7 +1090,7 @@ def test_a_path_is_judged_by_its_direction_not_by_its_first_point() -> None:
 
 def test_an_anechoic_room_sets_no_path_angle() -> None:
     fit = emission.inverse_square_law_deviations(
-        _free_field_traverses(_SPACING), frequencies_hz=_GRID, room="anechoic"
+        _free_field_traverses(_SPACING), frequencies=_GRID, room="anechoic"
     )
     check = emission.check_free_field(
         fit,
@@ -1115,13 +1115,13 @@ def test_a_range_short_of_100_hz_to_10_khz_is_not_in_full_conformity() -> None:
     """A.2.3: everything met over 100 Hz to 250 Hz is "in conformity", no more."""
     freqs = _GRID[:3]
     fit = emission.inverse_square_law_deviations(
-        _free_field_traverses(_SPACING, freqs), frequencies_hz=freqs, room="anechoic"
+        _free_field_traverses(_SPACING, freqs), frequencies=freqs, room="anechoic"
     )
     check = emission.check_free_field(
         fit,
         bandwidth="broadband",
         source_directionality=emission.verify_source_directionality(
-            np.full((64, 3), 80.0), frequencies_hz=freqs, room="anechoic"
+            np.full((64, 3), 80.0), frequencies=freqs, room="anechoic"
         ),
         paths_in_working_area=True,
     )
@@ -1137,12 +1137,12 @@ def test_a_failing_low_band_leaves_a_reduced_range() -> None:
     traverses = _free_field_traverses(_SPACING)
     spoiled = []
     for traverse in traverses:
-        levels = traverse.levels_db.copy()
+        levels = traverse.levels.copy()
         levels[:, 0] += 4.0 * np.sin(2 * np.pi * _SPACING / 1.0)
         spoiled.append(
             emission.MicrophoneTraverse(
                 positions_m=traverse.positions_m,
-                levels_db=levels,
+                levels=levels,
                 background_levels_db=traverse.background_levels_db,
                 targets=traverse.targets,
             )
@@ -1159,14 +1159,14 @@ def test_two_sources_share_the_range() -> None:
     fits = [
         emission.inverse_square_law_deviations(
             _free_field_traverses(_SPACING, band),
-            frequencies_hz=band,
+            frequencies=band,
             room="hemi-anechoic",
         )
         for band in (low, high)
     ]
     directionality = [
         emission.verify_source_directionality(
-            np.full((32, len(band)), 80.0), frequencies_hz=band, room="hemi-anechoic"
+            np.full((32, len(band)), 80.0), frequencies=band, room="hemi-anechoic"
         )
         for band in (low, high)
     ]
@@ -1179,13 +1179,13 @@ def test_two_sources_share_the_range() -> None:
         paths_in_working_area=True,
     )
     assert check.passes
-    np.testing.assert_array_equal(check.frequencies_hz, _GRID)
+    np.testing.assert_array_equal(check.frequencies, _GRID)
 
 
 def test_one_band_measured_by_two_sources_is_refused() -> None:
     fit = emission.inverse_square_law_deviations(
         _free_field_traverses(_SPACING, (1000.0,)),
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
     )
     with pytest.raises(ValueError, match="two test sources"):
@@ -1195,7 +1195,7 @@ def test_one_band_measured_by_two_sources_is_refused() -> None:
 def test_directionality_must_align_with_the_sources() -> None:
     fit = emission.inverse_square_law_deviations(
         _free_field_traverses(_SPACING, (1000.0,)),
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
     )
     with pytest.raises(ValueError, match="'source_directionality'"):
@@ -1207,7 +1207,7 @@ def test_directionality_must_align_with_the_sources() -> None:
 def test_an_unknown_bandwidth_is_refused() -> None:
     fit = emission.inverse_square_law_deviations(
         _free_field_traverses(_SPACING, (1000.0,)),
-        frequencies_hz=[1000.0],
+        frequencies=[1000.0],
         room="anechoic",
     )
     with pytest.raises(ValueError, match="'bandwidth'"):
@@ -1282,7 +1282,7 @@ def test_a_measurement_inside_the_qualification_raises_no_warning() -> None:
 
 def test_the_deviation_plot_draws_one_curve_per_traverse() -> None:
     fit = emission.inverse_square_law_deviations(
-        _free_field_traverses(_SPACING), frequencies_hz=_GRID, room="hemi-anechoic"
+        _free_field_traverses(_SPACING), frequencies=_GRID, room="hemi-anechoic"
     )
     ax = fit.plot(frequency_hz=1000.0)
     labels = ax.get_legend_handles_labels()[1]
@@ -1301,13 +1301,13 @@ def test_the_deviation_plot_draws_the_deviations_below_a_band_for_the_legend() -
     highest curve and the upper limit, where the legend goes.
     """
     fit = emission.inverse_square_law_deviations(
-        _free_field_traverses(_SPACING), frequencies_hz=_GRID, room="hemi-anechoic"
+        _free_field_traverses(_SPACING), frequencies=_GRID, room="hemi-anechoic"
     )
-    column = int(np.flatnonzero(np.isclose(fit.frequencies_hz, 1000.0))[0])
+    column = int(np.flatnonzero(np.isclose(fit.frequencies, 1000.0))[0])
     ax = fit.plot(frequency_hz=1000.0)
     first = ax.get_lines()[0]
-    order = np.argsort(fit.distances_m[0])
-    np.testing.assert_allclose(first.get_xdata(), fit.distances_m[0][order])
+    order = np.argsort(fit.distances[0])
+    np.testing.assert_allclose(first.get_xdata(), fit.distances[0][order])
     np.testing.assert_allclose(first.get_ydata(), fit.deviations_db[0][order, column])
     limit = float(fit.tolerance_db[column])
     highest = max(limit, max(float(np.nanmax(d[:, column])) for d in fit.deviations_db))
@@ -1383,12 +1383,12 @@ def test_the_check_plot_marks_the_reduced_range() -> None:
     traverses = _free_field_traverses(_SPACING)
     spoiled = []
     for traverse in traverses:
-        levels = traverse.levels_db.copy()
+        levels = traverse.levels.copy()
         levels[:, 0] += 4.0 * np.sin(2 * np.pi * _SPACING / 1.0)
         spoiled.append(
             emission.MicrophoneTraverse(
                 positions_m=traverse.positions_m,
-                levels_db=levels,
+                levels=levels,
                 background_levels_db=traverse.background_levels_db,
                 targets=traverse.targets,
             )
@@ -1418,7 +1418,7 @@ def test_unnamed_traverses_are_labelled_in_the_plot_language() -> None:
         for u in _DIRECTIONS[:5]
     ]
     fit = emission.inverse_square_law_deviations(
-        traverses, frequencies_hz=[1000.0], room="anechoic"
+        traverses, frequencies=[1000.0], room="anechoic"
     )
     assert fit.traverse_names == ("",) * 5
     labels = fit.plot().get_legend_handles_labels()[1]

@@ -279,10 +279,10 @@ plt.show()
 # A mano, desde el índice que porta el resultado:
 w = dnf.rating
 fig, ax = plt.subplots()
-ax.semilogx(w.band_centers, dnf.d_n_f, "o-", label="Dn,f (flancos)")
-ax.semilogx(w.band_centers, w.shifted_reference, "s--",
+ax.semilogx(w.frequencies, dnf.d_n_f, "o-", label="Dn,f (flancos)")
+ax.semilogx(w.frequencies, w.shifted_reference, "s--",
             label="referencia desplazada")
-ax.fill_between(w.band_centers, w.measured, w.shifted_reference,
+ax.fill_between(w.frequencies, w.measured, w.shifted_reference,
                 where=w.measured < w.shifted_reference, interpolate=True,
                 alpha=0.3, label="desviaciones desfavorables")
 ax.set_xlabel("Frecuencia [Hz]")
@@ -414,7 +414,7 @@ x = np.arange(freqs.size)
 for depth, style in ((0.43, "-o"), (0.86, "--o")):
     res = building.plenum_flanking_reduction_index(
         ceiling, ceiling, ceiling_length=4.75, plenum_height=depth,
-        frequency=freqs,
+        frequencies=freqs,
     )
     ax_path.plot(x, res.reduction_index, style, label=f"Rcl, plenum h = {depth:g} m")
 ax_path.plot(x, 2.0 * ceiling, ":s", label="RS + RR (los dos techos)")
@@ -484,7 +484,7 @@ ceiling = [17.0, 21.0, 25.0, 29.0, 32.0, 30.0, 38.0]   # placa de yeso de 9,5 mm
 # La geometría del ejemplo de Vigran: LS = LR = 4,75 m, plenum 0,43 m,
 # paredes laterales reflectantes.
 res = building.plenum_flanking_reduction_index(
-    ceiling, ceiling, ceiling_length=4.75, plenum_height=0.43, frequency=freqs
+    ceiling, ceiling, ceiling_length=4.75, plenum_height=0.43, frequencies=freqs
 )
 print(round(res.geometry_term, 1))    # 10.4 dB cobrados a RS + RR
 res.plot()                            # Rcl frente a los dos techos

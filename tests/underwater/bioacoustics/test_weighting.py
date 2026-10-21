@@ -429,6 +429,11 @@ def test_peak_spl_can_trip_tts_alone_and_the_margin_says_so() -> None:
     assert res.exceeds_injury is False
 
 
+def test_weighted_exposure_names_its_own_frequency_axis() -> None:
+    with pytest.raises(ValueError, match="'frequencies_hz' must be strictly positive"):
+        weighted_exposure([-1000.0], [100.0], "VHF")
+
+
 def test_non_impulsive_criteria_have_no_peak_metric() -> None:
     res = weighted_exposure([1000.0], [150.0], "LF", impulsive=False, peak_spl=250.0)
     assert res.criteria.injury_peak_spl is None

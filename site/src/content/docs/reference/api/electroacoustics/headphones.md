@@ -259,7 +259,7 @@ peak over its RMS against the two limits.
 
 ```python
 coupler_frequency_response(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     sound_pressure_level_db: ArrayLike,
     *,
     rated_frequency_range_hz: tuple[float, float] | None = None,
@@ -276,7 +276,7 @@ the rated source impedance, over "at least the rated frequency range".
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Frequencies, in Hz, strictly ascending. |
+| `frequencies` | Frequencies, in Hz, strictly ascending. |
 | `sound_pressure_level_db` | The level at each, in dB re 20 µPa. |
 | `rated_frequency_range_hz` | The rated frequency range (8.6.6), as (lower, upper), in Hz, to judge the coverage; `None` if not stated. |
 
@@ -292,7 +292,7 @@ the rated source impedance, over "at least the rated frequency range".
 
 ```python
 CouplerFrequencyResponse(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     sound_pressure_level_db: NDArray[np.float64],
     rated_frequency_range_hz: tuple[float, float] | None,
 )
@@ -304,7 +304,7 @@ The coupler or ear simulator frequency response (IEC 60268-7 8.6.2).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, ascending. |
+| `frequencies` | The frequencies, in Hz, ascending. |
 | `sound_pressure_level_db` | The level in the coupler or ear simulator at each frequency, in dB re 20 µPa. |
 | `rated_frequency_range_hz` | The rated frequency range, (lower, upper), in Hz, or `None` when not stated. |
 
@@ -372,7 +372,7 @@ The level relative to its value at a reference frequency, in dB.
 
 ```python
 crosstalk_attenuation(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     driven_level_db: ArrayLike,
     other_level_db: ArrayLike,
 ) -> CrosstalkAttenuation
@@ -389,7 +389,7 @@ channel", expressed as the difference of the two levels against frequency.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Frequencies, in Hz, strictly ascending. |
+| `frequencies` | Frequencies, in Hz, strictly ascending. |
 | `driven_level_db` | The level with the channel under test driven, in dB re 20 µPa. |
 | `other_level_db` | The level with the other channel driven, in dB re 20 µPa. |
 
@@ -405,7 +405,7 @@ channel", expressed as the difference of the two levels against frequency.
 
 ```python
 CrosstalkAttenuation(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     driven_level_db: NDArray[np.float64],
     other_level_db: NDArray[np.float64],
 )
@@ -417,7 +417,7 @@ The crosstalk attenuation of a multi-channel headphone (IEC 60268-7 8.12).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, ascending. |
+| `frequencies` | The frequencies, in Hz, ascending. |
 | `driven_level_db` | The level in the coupler of the channel under test with the rated e.m.f. on that channel, in dB re 20 µPa. |
 | `other_level_db` | The level in the same coupler with the rated e.m.f. on the other, stated channel, in dB re 20 µPa. |
 
@@ -462,7 +462,7 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 ```python
 ear_canal_frequency_response(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     earphone_levels_db: ArrayLike,
     sound_field_levels_db: ArrayLike,
     *,
@@ -485,7 +485,7 @@ result also carries the two checks of the procedure: the fittings within
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The band centres, in Hz, ascending, including the reference band. |
+| `frequencies` | The band centres, in Hz, ascending, including the reference band. |
 | `earphone_levels_db` | The levels with the headphone, in dB, shape (persons, 2, bands), or (2, bands) for one person. |
 | `sound_field_levels_db` | The levels in the sound field, in dB, the same shape. |
 | `reference_frequency_hz` | The reference band of Formula (1), in Hz (500 Hz, as the formula prints it). |
@@ -502,7 +502,7 @@ result also carries the two checks of the procedure: the fittings within
 
 ```python
 EarCanalFrequencyResponse(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     earphone_levels_db: NDArray[np.float64],
     sound_field_levels_db: NDArray[np.float64],
     reference_frequency_hz: float,
@@ -515,7 +515,7 @@ The ear canal sound pressure level frequency response (IEC 60268-7 8.6.5).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The one-third-octave band centres, in Hz. |
+| `frequencies` | The one-third-octave band centres, in Hz. |
 | `earphone_levels_db` | The probe microphone's band levels with the headphone, items c) and d), shape (persons, 2, bands), in dB. |
 | `sound_field_levels_db` | The probe microphone's band levels in the sound field, items b) and e), shape (persons, 2, bands), in dB. |
 | `reference_frequency_hz` | The band of Formula (1), in Hz. |
@@ -704,7 +704,7 @@ EARPHONE_TYPES = {'C': 'circumaural', 'E': 'intra-concha', 'H': 'earshell', 'I':
 
 ```python
 field_comparison_response(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     field_level_db: ArrayLike,
     source_emf_v: ArrayLike,
     *,
@@ -735,7 +735,7 @@ method (8.6.3.3).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The one-third-octave band centres, in Hz, ascending, including the reference band. |
+| `frequencies` | The one-third-octave band centres, in Hz, ascending, including the reference band. |
 | `field_level_db` | The level of the reference field at the reference point, without the person, in dB re 20 µPa: one value per band, or one row per person. |
 | `source_emf_v` | The e.m.f. that made the headphone equally loud, in volts (RMS), one row per person, one value per band. |
 | `field` | `"free"` (8.6.3) or `"diffuse"` (8.6.4). |
@@ -754,7 +754,7 @@ method (8.6.3.3).
 ```python
 FieldComparisonResponse(
     field: Literal['free', 'diffuse'],
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     response_db: NDArray[np.float64],
     reference_frequency_hz: float,
 )
@@ -767,7 +767,7 @@ A free-field or diffuse-field comparison frequency response (IEC 60268-7 8.6.3, 
 | Name | Description |
 | :--- | :--- |
 | `field` | `"free"` (8.6.3) or `"diffuse"` (8.6.4). |
-| `frequencies_hz` | The one-third-octave band centres, in Hz. |
+| `frequencies` | The one-third-octave band centres, in Hz. |
 | `response_db` | Each test person's response, one row per person, in dB relative to the reference band. |
 | `reference_frequency_hz` | The band the response is referred to, in Hz. |
 
@@ -1135,7 +1135,7 @@ Spaces around the hyphens are ignored, so the clause's own layout,
 ```python
 programme_characteristic_voltage(
     source_emf_v: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     band_levels_db: ArrayLike,
     *,
     a_weighted: bool = False,
@@ -1159,7 +1159,7 @@ measurements".
 | Name | Description |
 | :--- | :--- |
 | `source_emf_v` | The source e.m.f. of each fitting's reading, in volts (RMS): one value for all, or one per fitting. |
-| `frequencies_hz` | The band centre frequencies, in Hz, ascending. |
+| `frequencies` | The band centre frequencies, in Hz, ascending. |
 | `band_levels_db` | The band levels, in dB re 20 µPa, shape `(bands,)` for one fitting or `(fittings, bands)`. |
 | `a_weighted` | Apply the A-weighting (8.3.5). |
 | `free_field_response_db` | The free-field response of the head and torso simulator in each band, in dB, compensated by its inverse (8.3.5); `None` for none. |
@@ -1176,7 +1176,7 @@ measurements".
 
 ```python
 programme_signal_level(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     band_levels_db: ArrayLike,
     *,
     a_weighted: bool = False,
@@ -1203,7 +1203,7 @@ $$
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The band centre frequencies, in Hz, ascending. |
+| `frequencies` | The band centre frequencies, in Hz, ascending. |
 | `band_levels_db` | The band levels read in the coupler or ear simulator, in dB re 20 µPa. |
 | `a_weighted` | Apply the A-weighting (8.3.5, 8.5.2 d). |
 | `free_field_response_db` | The free-field response of the head and torso simulator at 0° azimuth in each band, in dB, whose inverse compensates the output; `None` for no compensation. |
@@ -1220,7 +1220,7 @@ $$
 
 ```python
 ProgrammeCharacteristicVoltage(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     band_levels_db: NDArray[np.float64],
     source_emf_v: NDArray[np.float64],
     corrections_db: NDArray[np.float64],
@@ -1235,7 +1235,7 @@ The simulated programme signal characteristic voltage (IEC 60268-7 8.3.4, 8.3.5)
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The band centre frequencies, in Hz. |
+| `frequencies` | The band centre frequencies, in Hz. |
 | `band_levels_db` | The band levels read in the coupler or ear simulator, one row per fitting, in dB re 20 µPa. |
 | `source_emf_v` | The source e.m.f. of each fitting's reading, in volts (RMS). |
 | `corrections_db` | The correction added to each band, in dB: the A-weighting minus the free-field response, zero when neither applies. |
@@ -1264,7 +1264,7 @@ The arithmetic mean of `voltages_v`, in volts: 8.3.5 g).
 
 Whether 3 to 5 fittings were averaged, as 8.3.5 g) asks.
 
-### ProgrammeCharacteristicVoltage.levels_db
+### ProgrammeCharacteristicVoltage.levels
 
 *property*
 
@@ -1400,7 +1400,7 @@ The sensitivity at each step relative to the first, in dB.
 
 ```python
 RatedImpedanceVerification(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     impedance_ohm: NDArray[np.float64],
     rated_impedance_ohm: float,
     rated_frequency_range_hz: tuple[float, float],
@@ -1413,7 +1413,7 @@ A rated impedance judged against the measured modulus (IEC 60268-7 8.2).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The measurement frequencies, in Hz, ascending. |
+| `frequencies` | The measurement frequencies, in Hz, ascending. |
 | `impedance_ohm` | The modulus of the impedance at each frequency, in ohms. |
 | `rated_impedance_ohm` | The rated impedance, in ohms. |
 | `rated_frequency_range_hz` | The rated frequency range, (lower, upper), in Hz. |
@@ -1548,7 +1548,7 @@ certificate, are not numbers.
 
 ```python
 verify_rated_impedance(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     impedance_ohm: ArrayLike,
     *,
     rated_impedance_ohm: float,
@@ -1568,7 +1568,7 @@ measurement covered 20 Hz to 20 kHz as 8.2.2.2 c) requires.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Measurement frequencies, in Hz, strictly ascending. |
+| `frequencies` | Measurement frequencies, in Hz, strictly ascending. |
 | `impedance_ohm` | The impedance at each frequency, in ohms: the modulus, or the complex impedance whose modulus is taken. |
 | `rated_impedance_ohm` | The rated impedance, in ohms. |
 | `rated_frequency_range_hz` | The rated frequency range (8.6.6), as (lower, upper), in Hz. |

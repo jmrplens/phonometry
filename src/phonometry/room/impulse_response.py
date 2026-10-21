@@ -952,7 +952,7 @@ def _shaped_target_db(
     Named targets: ``"white"`` is flat; ``"pink"`` falls 3 dB per octave in
     magnitude (:math:`-10 \log_{10}(f/f_1)`), the spectrum of the classical
     logarithmic sweep (Mueller & Massarani 2001, Sec. 4). An arbitrary
-    target is a ``(frequencies_hz, magnitude_db)`` pair, interpolated
+    target is a ``(frequencies, magnitude_db)`` pair, interpolated
     linearly in dB over log-frequency and held constant beyond its ends.
     """
     safe = np.maximum(freqs, freqs[1] if freqs.size > 1 else 1.0)
@@ -963,20 +963,20 @@ def _shaped_target_db(
             return np.asarray(-10.0 * np.log10(safe / f_range[0]))
         msg = (
             f"unknown named target {target!r}; use 'white', 'pink' or a "
-            "(frequencies_hz, magnitude_db) pair"
+            "(frequencies, magnitude_db) pair"
         )
         raise ValueError(msg)
     t_freq = np.asarray(target[0], dtype=np.float64)
     t_db = np.asarray(target[1], dtype=np.float64)
     if t_freq.ndim != 1 or t_freq.size < 2:  # noqa: PLR2004
         msg = (
-            "an array target must be a (frequencies_hz, magnitude_db) pair "
+            "an array target must be a (frequencies, magnitude_db) pair "
             "of 1-D arrays with at least 2 points"
         )
         raise ValueError(msg)
     require_equal_shapes(
         "shaped_sweep_signal",
-        {"frequencies_hz": t_freq.shape, "magnitude_db": t_db.shape},
+        {"frequencies": t_freq.shape, "magnitude_db": t_db.shape},
         "frequency",
     )
     if np.any(t_freq <= 0.0) or np.any(np.diff(t_freq) <= 0.0):
@@ -1074,7 +1074,7 @@ def shaped_sweep_signal(
         see ``start_delay``).
     :param target: The magnitude shape: ``"pink"`` (default; 3 dB per
         octave falling, the classical room-measurement emphasis),
-        ``"white"`` (flat), or a ``(frequencies_hz, magnitude_db)`` pair of
+        ``"white"`` (flat), or a ``(frequencies, magnitude_db)`` pair of
         arrays interpolated in dB over log-frequency (only the shape
         matters; any overall offset is normalised away).
     :param amplitude: Peak amplitude of the returned sweep. Default 1.0.

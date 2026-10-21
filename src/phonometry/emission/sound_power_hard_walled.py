@@ -61,7 +61,7 @@ event level, exactly as ISO 3744:2010 Eq. (21) does, and asks only that both
 be measured over one integration time :math:`T`. The library reads the
 background as its exposure over that :math:`T`, :math:`L_{p(\mathrm{B})} +
 10 \log_{10}(T/T_0)`, which is the reading under which the insistence on one
-:math:`T` does any work (see ``docs/ERRATA.md``), so ``integration_time_s`` is
+:math:`T` does any work (see ``docs/ERRATA.md``), so ``integration_time`` is
 required with a background.
 
 Annex A carries either level to the reference meteorological conditions of
@@ -286,7 +286,7 @@ def _table3_sigma(frequencies: np.ndarray) -> np.ndarray:
 def _check_uncertainty_inputs(
     sigma_omc_db: float | None, coverage_factor: float
 ) -> float:
-    """``sigma_omc`` as given (``NaN`` for none), after the two refusals.
+    """``sigma_omc_db`` as given (``NaN`` for none), after the two refusals.
 
     :raises ValueError: for a negative or non-finite ``sigma_omc_db`` or a
         coverage factor that is not positive.
@@ -338,7 +338,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
 
     ``sigma_r0`` is the Table 3 value per band (``NaN`` at 63 Hz, which the
     table does not reach) and ``sigma_r0_a`` its A-weighted row; with
-    ``sigma_omc`` the properties give ``sigma_tot`` (Eq. 22) and the expanded
+    ``sigma_omc_db`` the properties give ``sigma_tot`` (Eq. 22) and the expanded
     uncertainty (Eq. 23) for ``coverage_factor``, all ``NaN`` without it.
     ``microphone_positions`` is :math:`N_\mathrm{M}` (1 for a traverse),
     ``source_positions`` is :math:`N_\mathrm{S}`, and
@@ -360,7 +360,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
     c2: float
     sigma_r0: np.ndarray
     sigma_r0_a: float
-    sigma_omc: float
+    sigma_omc_db: float
     coverage_factor: float
     sound_power_level_a: float
     sound_energy_level_a: float
@@ -438,14 +438,14 @@ class HardWalledSoundPowerResult(OwnsArrays):
     def sigma_tot(self) -> np.ndarray:
         r""":math:`\sigma_\mathrm{tot} = \sqrt{\sigma_{R0}^2 +
         \sigma_\mathrm{omc}^2}` per band (Eq. 22), in decibels; ``NaN`` without
-        ``sigma_omc`` and at 63 Hz.
+        ``sigma_omc_db`` and at 63 Hz.
         """
-        return np.asarray(np.hypot(self.sigma_r0, self.sigma_omc), dtype=np.float64)
+        return np.asarray(np.hypot(self.sigma_r0, self.sigma_omc_db), dtype=np.float64)
 
     @property
     def sigma_tot_a(self) -> float:
         """Eq. (22) with the A-weighted row of Table 3, in decibels."""
-        return float(math.hypot(self.sigma_r0_a, self.sigma_omc))
+        return float(math.hypot(self.sigma_r0_a, self.sigma_omc_db))
 
     @property
     def expanded_uncertainty(self) -> np.ndarray:
@@ -456,7 +456,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
     def expanded_uncertainty_a(self) -> float:
         """``U = k sigma_tot`` of the A-weighted level (Eq. 23), in decibels.
 
-        With ``sigma_omc`` = 2,0 dB and ``k`` = 2 this is the 5 dB of the 9.5
+        With ``sigma_omc_db`` = 2,0 dB and ``k`` = 2 this is the 5 dB of the 9.5
         EXAMPLE.
         """
         return float(self.coverage_factor * self.sigma_tot_a)
@@ -497,7 +497,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
         One bar per octave band of ``LW`` (or ``LJ``), a band that 8.1.3 makes
         an upper bound hatched and named as one, a band that fails the
         background requirement of 4.5 otherwise cross-hatched and named as
-        that, and the expanded uncertainty as an error bar where ``sigma_omc``
+        that, and the expanded uncertainty as an error bar where ``sigma_omc_db``
         was given. Requires matplotlib (``pip install phonometry[plot]``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -768,7 +768,7 @@ def _determine(
         c2=_c2_correction(reference.temperature_c, reference.static_pressure_kpa),
         sigma_r0=_table3_sigma(freqs),
         sigma_r0_a=_SIGMA_R0_A_DB,
-        sigma_omc=omc,
+        sigma_omc_db=omc,
         coverage_factor=float(reference.coverage_factor),
         sound_power_level_a=total if is_power else math.nan,
         sound_energy_level_a=math.nan if is_power else total,
@@ -927,7 +927,7 @@ def sound_energy_hard_walled(
     *,
     events: int | None = None,
     background_levels: ArrayLike | None = None,
-    integration_time_s: float | None = None,
+    integration_time: float | None = None,
     background_levels_ref: ArrayLike | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -974,9 +974,9 @@ def sound_energy_hard_walled(
         Fewer than five warns (7.6).
     :param background_levels: Time-averaged background levels ``Lpi(B)``,
         ``(NM, bands)`` or ``(bands,)``, in decibels; requires
-        ``integration_time_s``. ``None`` applies no correction, warns and
+        ``integration_time``. ``None`` applies no correction, warns and
         leaves ``background_requirement_met`` ``False`` throughout.
-    :param integration_time_s: The integration time ``T`` of the single event
+    :param integration_time: The integration time ``T`` of the single event
         levels, in seconds. The background is compared as its exposure over
         the same ``T``, :math:`L_{p(\mathrm{B})} + 10 \log_{10}(T/T_0)`, so
         that Eq. (19) subtracts one energy from another.
@@ -991,7 +991,7 @@ def sound_energy_hard_walled(
     :return: :class:`HardWalledSoundPowerResult` with ``quantity='energy'``.
     :raises ValueError: for an ``event_levels`` rank neither form admits, a
         non-integer or non-positive ``events``, a background without its
-        ``integration_time_s``, a non-positive ``integration_time_s``, or any
+        ``integration_time``, a non-positive ``integration_time``, or any
         refusal of :func:`sound_power_hard_walled`.
     """
     arr = np.asarray(event_levels, dtype=np.float64)
@@ -1003,20 +1003,20 @@ def sound_energy_hard_walled(
     _position_advisory(n_positions, traverse=traverse, stacklevel=3)
     per_position = energy_mean(grid, axis=0)  # Eq. (17)
     mean_source = np.asarray(energy_mean(per_position, axis=0), dtype=np.float64)
-    if integration_time_s is not None:
-        require_positive(integration_time_s, "integration_time_s")
+    if integration_time is not None:
+        require_positive(integration_time, "integration_time")
     exposure: np.ndarray | None = None
     if background_levels is not None:
-        if integration_time_s is None:
+        if integration_time is None:
             msg = (
-                "'integration_time_s' (the interval T of the single event levels, "
+                "'integration_time' (the interval T of the single event levels, "
                 "in seconds) is required with 'background_levels': Eq. (19) "
                 "compares the background as its exposure over the same T "
                 f"({_STANDARD}, 8.2.3)."
             )
             raise ValueError(msg)
         bg = _finite(background_levels, "background_levels", (1, 2))
-        carried = _background_exposure(bg, integration_time_s)
+        carried = _background_exposure(bg, integration_time)
         exposure = _position_mean(carried, "background_levels", n_positions, n_bands)
     return _determine(
         quantity="energy",
@@ -1086,7 +1086,7 @@ def reproducibility_from_round_robin(total_db: float, operating_db: float) -> fl
         raise ValueError(msg)
     if operating > total / math.sqrt(2.0):
         warnings.warn(
-            "sigma_omc exceeds sigma_tot/sqrt(2); the reproducibility extracted "
+            "sigma_omc_db exceeds sigma_tot/sqrt(2); the reproducibility extracted "
             f"from this round robin is of low accuracy ({_STANDARD}, 9.3.2).",
             SoundPowerWarning,
             stacklevel=2,
@@ -1101,7 +1101,7 @@ class HardWalledRoomCheck(OwnsArrays):
     ``level_range_db`` is, per octave band, the largest difference between
     the mean levels of any two of the directional source's orientations
     (4.4), and :attr:`limit_db` the Table 3 value it may not exceed.
-    ``volume_m3`` is the room, ``reference_box_volume_m3`` and
+    ``volume`` is the room, ``reference_box_volume_m3`` and
     ``largest_box_dimension_m`` the reference box of 4.1, and
     :attr:`minimum_volume_m3` / :attr:`box_dimension_limit_m` what 4.2 asks
     of them. ``max_absorption_coefficient`` is the largest sound absorption
@@ -1116,7 +1116,7 @@ class HardWalledRoomCheck(OwnsArrays):
     frequencies: np.ndarray
     level_range_db: np.ndarray
     orientations: int
-    volume_m3: float
+    volume: float
     reference_box_volume_m3: float
     largest_box_dimension_m: float
     max_absorption_coefficient: float
@@ -1140,7 +1140,7 @@ class HardWalledRoomCheck(OwnsArrays):
         if self.orientations < 2:  # noqa: PLR2004
             msg = "HardWalledRoomCheck: 'orientations' must be at least 2."
             raise ValueError(msg)
-        require_positive(self.volume_m3, "volume_m3")
+        require_positive(self.volume, "volume")
         require_positive(self.reference_box_volume_m3, "reference_box_volume_m3")
         require_positive(self.largest_box_dimension_m, "largest_box_dimension_m")
 
@@ -1170,7 +1170,7 @@ class HardWalledRoomCheck(OwnsArrays):
         :return: 1,0 m in a room of up to 100 m³, 2,0 m in a larger one, in
             metres.
         """
-        if self.volume_m3 <= _SMALL_ROOM_LIMIT_M3:
+        if self.volume <= _SMALL_ROOM_LIMIT_M3:
             return _BOX_LIMIT_SMALL_ROOM_M
         return _BOX_LIMIT_LARGE_ROOM_M
 
@@ -1181,7 +1181,7 @@ class HardWalledRoomCheck(OwnsArrays):
         :return: The least distance from the source that keeps a microphone
             in the reverberant field.
         """
-        return float(_REVERBERANT_DISTANCE_FACTOR * self.volume_m3 ** (1 / 3))
+        return float(_REVERBERANT_DISTANCE_FACTOR * self.volume ** (1 / 3))
 
     @property
     def band_adequate(self) -> np.ndarray:
@@ -1202,7 +1202,7 @@ class HardWalledRoomCheck(OwnsArrays):
         last bit above a room volume that equals it, and 4.2 asks for "at
         least".
         """
-        volume = float(settled(self.volume_m3))
+        volume = float(settled(self.volume))
         return volume >= float(settled(self.minimum_volume_m3))
 
     @property
@@ -1263,7 +1263,7 @@ def check_hard_walled_room(
     orientation_levels: ArrayLike,
     frequencies: ArrayLike,
     *,
-    volume_m3: float,
+    volume: float,
     reference_box_m: ArrayLike,
     absorption_coefficients: ArrayLike | None = None,
 ) -> HardWalledRoomCheck:
@@ -1289,7 +1289,7 @@ def check_hard_walled_room(
         bands)``, in decibels.
     :param frequencies: Nominal octave mid-band frequencies from 125 Hz to
         8 kHz, one per band, ascending.
-    :param volume_m3: Volume of the test room, in cubic metres.
+    :param volume: Volume of the test room, in cubic metres.
     :param reference_box_m: The three dimensions of the reference box, in
         metres (4.1).
     :param absorption_coefficients: Sound absorption coefficients of the
@@ -1321,7 +1321,7 @@ def check_hard_walled_room(
             SoundPowerWarning,
             stacklevel=2,
         )
-    volume = require_positive(volume_m3, "volume_m3")
+    volume = require_positive(volume, "volume")
     box = np.asarray(reference_box_m, dtype=np.float64)
     if box.shape != (3,) or not np.all(np.isfinite(box)) or np.any(box <= 0.0):
         msg = "'reference_box_m' must be three positive, finite dimensions in metres."
@@ -1343,7 +1343,7 @@ def check_hard_walled_room(
         frequencies=freqs,
         level_range_db=np.asarray(np.ptp(levels, axis=0), dtype=np.float64),
         orientations=n_orientations,
-        volume_m3=volume,
+        volume=volume,
         reference_box_volume_m3=box_volume,
         largest_box_dimension_m=float(np.max(box)),
         max_absorption_coefficient=alpha_max,

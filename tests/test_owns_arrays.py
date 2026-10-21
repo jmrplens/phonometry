@@ -3,7 +3,7 @@
 
 ``phonometry._internal.frozen.OwnsArrays`` makes the copy when the record is
 built, so it holds whoever builds the record: a function of the library, or a
-caller who writes ``SomeResult(levels_db=levels, ...)`` by hand. The first
+caller who writes ``SomeResult(levels=levels, ...)`` by hand. The first
 half of this file fixes what the mechanism does, on records written for the
 purpose, the arrays a factory hands over without a copy included, and that
 the largest simulation results are not held twice while they are built; the
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 
 @dataclasses.dataclass(frozen=True)
 class _Plain(OwnsArrays):
-    levels_db: np.ndarray
+    levels: np.ndarray
     label: str = ""
     gain: float = 1.0
 
@@ -66,25 +66,25 @@ class _Containers(OwnsArrays):
 
 @dataclasses.dataclass(frozen=True)
 class _Validated(OwnsArrays):
-    levels_db: np.ndarray
+    levels: np.ndarray
     doubled_db: np.ndarray = dataclasses.field(init=False)
 
     def __post_init__(self) -> None:
         # The class's own hook runs on the record's copy, never the caller's.
-        if self.levels_db.flags.writeable:
+        if self.levels.flags.writeable:
             msg = "the hook saw an array the caller can still write into"
             raise AssertionError(msg)
-        object.__setattr__(self, "doubled_db", read_only(2.0 * self.levels_db))
+        object.__setattr__(self, "doubled_db", read_only(2.0 * self.levels))
 
 
 @dataclasses.dataclass(frozen=True)
 class _Unsealed(OwnsArrays):
-    levels_db: np.ndarray
+    levels: np.ndarray
     centred_db: np.ndarray = dataclasses.field(init=False)
 
     def __post_init__(self) -> None:
         # Stored writeable on purpose: the record copies it after the hook.
-        object.__setattr__(self, "centred_db", self.levels_db - 1.0)
+        object.__setattr__(self, "centred_db", self.levels - 1.0)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -97,7 +97,7 @@ class _CallsSuper(_Validated):
     seen: list[object] = dataclasses.field(default_factory=list)
 
     def __post_init__(self) -> None:
-        self.seen.append(self.levels_db)
+        self.seen.append(self.levels)
         super().__post_init__()
 
 
@@ -108,7 +108,7 @@ class _Hooked:
 
 @dataclasses.dataclass(frozen=True)
 class _WithInitVar(OwnsArrays):
-    levels_db: np.ndarray
+    levels: np.ndarray
     offset_db: dataclasses.InitVar[np.ndarray]
     shifted_db: np.ndarray = dataclasses.field(init=False)
 
@@ -148,32 +148,32 @@ def _writeable(values: list[float]) -> np.ndarray:
 
 def test_the_record_keeps_a_read_only_copy_and_the_caller_keeps_writing() -> None:
     levels = _writeable([60.0, 61.0, 62.0])
-    record = _Plain(levels_db=levels, label="hand", gain=2.0)
+    record = _Plain(levels=levels, label="hand", gain=2.0)
     levels[0] = 0.0
-    np.testing.assert_array_equal(record.levels_db, [60.0, 61.0, 62.0])
-    assert not np.shares_memory(record.levels_db, levels)
-    assert not record.levels_db.flags.writeable
+    np.testing.assert_array_equal(record.levels, [60.0, 61.0, 62.0])
+    assert not np.shares_memory(record.levels, levels)
+    assert not record.levels.flags.writeable
     assert levels.flags.writeable
     assert (record.label, record.gain) == ("hand", 2.0)
 
 
 def test_a_view_of_the_caller_s_array_is_copied_too() -> None:
     grid = _writeable([1.0, 2.0, 3.0, 4.0]).reshape(2, 2)
-    record = _Plain(levels_db=grid[:, 0])
+    record = _Plain(levels=grid[:, 0])
     grid[:, 0] = -1.0
-    np.testing.assert_array_equal(record.levels_db, [1.0, 3.0])
-    assert record.levels_db.flags.c_contiguous
+    np.testing.assert_array_equal(record.levels, [1.0, 3.0])
+    assert record.levels.flags.c_contiguous
 
 
 def test_a_read_only_array_of_the_caller_is_copied_as_well() -> None:
     """A read-only flag is the caller's to set back, so it is no promise."""
     levels = _writeable([1.0, 2.0])
     levels.flags.writeable = False
-    record = _Plain(levels_db=levels)
-    assert not np.shares_memory(record.levels_db, levels)
+    record = _Plain(levels=levels)
+    assert not np.shares_memory(record.levels, levels)
     levels.flags.writeable = True
     levels[0] = 9.0
-    assert record.levels_db[0] == 1.0
+    assert record.levels[0] == 1.0
 
 
 def test_arrays_inside_containers_are_copied_and_the_rest_is_kept() -> None:
@@ -250,13 +250,13 @@ def test_every_copy_is_c_ordered_whatever_it_was_made_from() -> None:
     """A broadcast row and a transposed grid come out C-ordered, values kept."""
     row = _writeable([1.0, 2.0, 3.0])
     broadcast = np.broadcast_to(row, (4, 3))
-    record = _Plain(levels_db=broadcast)
-    assert record.levels_db.flags.c_contiguous
-    np.testing.assert_array_equal(record.levels_db, broadcast)
+    record = _Plain(levels=broadcast)
+    assert record.levels.flags.c_contiguous
+    np.testing.assert_array_equal(record.levels, broadcast)
     grid = _writeable([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).reshape(2, 3)
-    transposed = _Plain(levels_db=grid.T)
-    assert transposed.levels_db.flags.c_contiguous
-    np.testing.assert_array_equal(transposed.levels_db, grid.T)
+    transposed = _Plain(levels=grid.T)
+    assert transposed.levels.flags.c_contiguous
+    np.testing.assert_array_equal(transposed.levels, grid.T)
 
 
 def test_a_record_held_in_a_field_is_left_as_it_is() -> None:
@@ -267,7 +267,7 @@ def test_a_record_held_in_a_field_is_left_as_it_is() -> None:
         inner: _Plain
         steps: tuple[_Plain, ...]
 
-    inner = _Plain(levels_db=_writeable([1.0]))
+    inner = _Plain(levels=_writeable([1.0]))
     outer = Outer(inner=inner, steps=(inner,))
     assert outer.inner is inner
     assert outer.steps[0] is inner
@@ -276,7 +276,7 @@ def test_a_record_held_in_a_field_is_left_as_it_is() -> None:
 def test_the_argument_of_an_init_var_is_copied_before_the_hook() -> None:
     """The hook seals the argument it keeps; the caller's array keeps its flag."""
     offset = _writeable([0.5, 0.25])
-    record = _WithInitVar(levels_db=_writeable([1.0, 2.0]), offset_db=offset)
+    record = _WithInitVar(levels=_writeable([1.0, 2.0]), offset_db=offset)
     assert offset.flags.writeable
     assert not np.shares_memory(record.shifted_db, offset)
     offset[0] = 9.0
@@ -285,14 +285,14 @@ def test_the_argument_of_an_init_var_is_copied_before_the_hook() -> None:
 
 def test_the_class_s_own_post_init_runs_on_the_copy() -> None:
     levels = _writeable([1.0, 2.0])
-    record = _Validated(levels_db=levels)
+    record = _Validated(levels=levels)
     levels[:] = 0.0
     np.testing.assert_array_equal(record.doubled_db, [2.0, 4.0])
     assert not record.doubled_db.flags.writeable
 
 
 def test_an_array_the_hook_left_writeable_is_copied_after_it() -> None:
-    record = _Unsealed(levels_db=_writeable([3.0, 4.0]))
+    record = _Unsealed(levels=_writeable([3.0, 4.0]))
     assert not record.centred_db.flags.writeable
     np.testing.assert_array_equal(record.centred_db, [2.0, 3.0])
 
@@ -333,9 +333,9 @@ def test_a_strided_view_of_an_array_someone_can_write_is_copied() -> None:
 
 def test_a_subclass_copies_its_own_fields_and_its_base_s() -> None:
     levels, extra = _writeable([1.0]), _writeable([7.0, 8.0])
-    record = _Inherits(levels_db=levels, extra_db=extra)
+    record = _Inherits(levels=levels, extra_db=extra)
     levels[0] = extra[0] = 0.0
-    assert record.levels_db[0] == 1.0
+    assert record.levels[0] == 1.0
     assert record.extra_db[0] == 7.0
     assert record.doubled_db[0] == 2.0
 
@@ -345,9 +345,9 @@ def test_a_hook_that_calls_super_copies_once() -> None:
     the array the subclass's hook saw is the one the record keeps.
     """
     seen: list[object] = []
-    record = _CallsSuper(levels_db=_writeable([1.0]), seen=seen)
+    record = _CallsSuper(levels=_writeable([1.0]), seen=seen)
     assert len(seen) == 1
-    assert seen[0] is record.levels_db
+    assert seen[0] is record.levels
     assert record.doubled_db[0] == 2.0
 
 
@@ -358,22 +358,22 @@ def test_listing_the_mixin_before_a_base_with_a_hook_is_refused() -> None:
 
 
 def test_a_replaced_record_owns_what_it_was_given() -> None:
-    record = _Plain(levels_db=_writeable([1.0]))
+    record = _Plain(levels=_writeable([1.0]))
     levels = _writeable([5.0])
-    replaced = dataclasses.replace(record, levels_db=levels)
+    replaced = dataclasses.replace(record, levels=levels)
     levels[0] = 0.0
-    assert replaced.levels_db[0] == 5.0
-    assert not np.shares_memory(replaced.levels_db, record.levels_db)
+    assert replaced.levels[0] == 5.0
+    assert not np.shares_memory(replaced.levels, record.levels)
 
 
 def test_none_and_numbers_go_through_untouched() -> None:
     @dataclasses.dataclass(frozen=True)
     class Optional(OwnsArrays):
-        levels_db: np.ndarray | None = None
+        levels: np.ndarray | None = None
         level_db: float | np.ndarray = 0.0
 
     record = Optional()
-    assert record.levels_db is None
+    assert record.levels is None
     assert record.level_db == 0.0
 
 
@@ -385,8 +385,8 @@ def test_none_and_numbers_go_through_untouched() -> None:
 def test_an_array_handed_over_is_kept_as_it_is_and_sealed() -> None:
     frames = np.zeros((4, 3))
     frames[1] = 2.0
-    record = _Plain(levels_db=frozen.handed_over(frames))
-    assert record.levels_db is frames
+    record = _Plain(levels=frozen.handed_over(frames))
+    assert record.levels is frames
     assert not frames.flags.writeable
     with pytest.raises(ValueError, match="read-only"):
         frames[0, 0] = 1.0
@@ -394,11 +394,11 @@ def test_an_array_handed_over_is_kept_as_it_is_and_sealed() -> None:
 
 def test_only_the_first_record_keeps_an_array_handed_over() -> None:
     frames = frozen.handed_over(np.ones(5))
-    first = _Plain(levels_db=frames)
-    second = _Plain(levels_db=frames)
-    assert first.levels_db is frames
-    assert second.levels_db is not frames
-    assert not np.shares_memory(first.levels_db, second.levels_db)
+    first = _Plain(levels=frames)
+    second = _Plain(levels=frames)
+    assert first.levels is frames
+    assert second.levels is not frames
+    assert not np.shares_memory(first.levels, second.levels)
 
 
 @pytest.mark.parametrize(
@@ -420,9 +420,9 @@ def test_an_array_handed_over_that_is_a_view_or_not_c_ordered_is_copied(
     C-ordered or not, so the caller's view keeps its ``writeable`` flag.
     """
     array = make()
-    record = _Plain(levels_db=frozen.handed_over(array))
-    assert not np.shares_memory(record.levels_db, array)
-    assert record.levels_db.flags.c_contiguous
+    record = _Plain(levels=frozen.handed_over(array))
+    assert not np.shares_memory(record.levels, array)
+    assert record.levels.flags.c_contiguous
     assert array.flags.writeable
 
 
@@ -438,8 +438,8 @@ def test_an_array_never_kept_leaves_no_mark() -> None:
 
 def test_an_array_not_handed_over_is_still_copied() -> None:
     frames = np.zeros(5)
-    record = _Plain(levels_db=frames)
-    assert record.levels_db is not frames
+    record = _Plain(levels=frames)
+    assert record.levels is not frames
     assert frames.flags.writeable
 
 
@@ -775,7 +775,7 @@ def _calibration_with(corrections: Mapping[str, np.ndarray]) -> dict[str, object
     frequencies = np.array([250.0, 500.0, 1000.0])
     return {
         "ReciprocityCalibration": metrology.ReciprocityCalibration(
-            frequencies_hz=frequencies,
+            frequencies=frequencies,
             sensitivity_v_per_pa=np.ones((3, 3)),
             products_v2_per_pa2=np.ones((3, 3)),
             field="pressure",
@@ -783,7 +783,7 @@ def _calibration_with(corrections: Mapping[str, np.ndarray]) -> dict[str, object
             corrections_db=corrections,
         ),
         "ComparisonCalibration": metrology.ComparisonCalibration(
-            frequencies_hz=frequencies,
+            frequencies=frequencies,
             reference_sensitivity_level_db=np.full(3, -38.0),
             output_level_differences_db=np.zeros(3),
             pressure_level_difference_db=np.zeros(3),
@@ -872,8 +872,8 @@ def test_a_signal_handed_to_an_array_field_keeps_its_samples_writeable() -> None
 
     signal = io.Signal(np.ones((2, 4)), fs=48000)
     record = PassByMeasurement(
-        times_s=signal,  # type: ignore[arg-type]
-        levels_db=np.zeros(3),
+        times=signal,  # type: ignore[arg-type]
+        levels=np.zeros(3),
         start_s=0.0,
         end_s=1.0,
         equivalent_level_db=0.0,
@@ -884,6 +884,6 @@ def test_a_signal_handed_to_an_array_field_keeps_its_samples_writeable() -> None
         record_end_level_db=0.0,
     )
     assert signal.data.flags.writeable
-    assert not np.shares_memory(record.times_s, signal.data)
+    assert not np.shares_memory(record.times, signal.data)
     signal.data[0, 0] = 5.0
-    assert record.times_s[0, 0] == 1.0
+    assert record.times[0, 0] == 1.0

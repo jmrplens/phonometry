@@ -279,7 +279,7 @@ _MIN_REGRESSION_POINTS = 2
 #: Every curve of clause 6 is read position by position, so a value without a
 #: distance is a curve with a hole in it rather than a shorter curve.
 _MISMATCH_MSG = (
-    "'distribution_values_db' and 'distances_m' must match position for position."
+    "'distribution_values_db' and 'distances' must match position for position."
 )
 
 #: A.4: the repeatability tolerance on the source's sound power, in decibels,
@@ -341,7 +341,7 @@ class BackgroundMarginCheck(OwnsArrays):
 
 
 def check_background_margin(
-    levels_db: ArrayLike, background_levels_db: ArrayLike
+    levels: ArrayLike, background_levels_db: ArrayLike
 ) -> BackgroundMarginCheck:
     """Does the source stand clear of the background? 5.1.4.
 
@@ -361,7 +361,7 @@ def check_background_margin(
     positions: the clause asks the same 10 dB of every band, and a curve is
     read band by band.
 
-    :param levels_db: :math:`L_p` with the test source running, in decibels,
+    :param levels: :math:`L_p` with the test source running, in decibels,
         one value per measured position of one octave band.
     :param background_levels_db: The background at the same positions, in
         decibels, as a scalar or one value per position.
@@ -369,11 +369,11 @@ def check_background_margin(
     :raises ValueError: For inputs that are not finite or do not match position
         for position.
     """
-    levels = require_finite_array(levels_db, "levels_db")
+    levels = require_finite_array(levels, "levels")
     background = require_finite_array(background_levels_db, "background_levels_db")
     if background.size not in (1, levels.size):
         msg = (
-            "'background_levels_db' must be a scalar or match 'levels_db' "
+            "'background_levels_db' must be a scalar or match 'levels' "
             "position for position."
         )
         raise ValueError(msg)
@@ -411,7 +411,7 @@ def check_background_margin(
 class SpatialDecayResult(OwnsArrays):
     r"""A spatial sound distribution curve and what clause 6 reads off it.
 
-    :param distances_m: The distance of each microphone position from the
+    :param distances: The distance of each microphone position from the
         acoustical centre of the source, in metres.
     :param distribution_values_db: :math:`D` at each position, in decibels.
     :param reference_values_db: :math:`D_\mathrm{ref}` at each position, in
@@ -427,7 +427,7 @@ class SpatialDecayResult(OwnsArrays):
         or ``None`` for a curve that stands for a spectrum.
     """
 
-    distances_m: NDArray[np.float64]
+    distances: NDArray[np.float64]
     distribution_values_db: NDArray[np.float64]
     reference_values_db: NDArray[np.float64]
     level_excess_db: NDArray[np.float64]
@@ -451,7 +451,7 @@ class SpatialDecayResult(OwnsArrays):
 
 
 def sound_distribution_value(
-    levels_db: ArrayLike, sound_power_levels_db: ArrayLike
+    levels: ArrayLike, sound_power_levels_db: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The sound distribution value of a measured point, Equation (1).
 
@@ -463,24 +463,24 @@ def sound_distribution_value(
     of the room: run the test again with a louder source and every value comes
     back the same.
 
-    :param levels_db: :math:`L_{pj}(r)` at each position, in decibels.
+    :param levels: :math:`L_{pj}(r)` at each position, in decibels.
     :param sound_power_levels_db: :math:`L_{Wj}` of the source, in decibels,
         as a scalar or one value per position.
     :return: :math:`D_j(r)`, in decibels.
     :raises ValueError: For inputs that are not finite or do not broadcast.
     """
-    levels = require_finite_array(levels_db, "levels_db")
+    levels = require_finite_array(levels, "levels")
     power = require_finite_array(sound_power_levels_db, "sound_power_levels_db")
     if power.size not in (1, levels.size):
         msg = (
-            "'sound_power_levels_db' must be a scalar or match 'levels_db' "
+            "'sound_power_levels_db' must be a scalar or match 'levels' "
             "position for position."
         )
         raise ValueError(msg)
     return np.asarray(levels - power, dtype=np.float64)
 
 
-def reference_distribution_value(distances_m: ArrayLike) -> NDArray[np.float64]:
+def reference_distribution_value(distances: ArrayLike) -> NDArray[np.float64]:
     r"""The free-field reference curve, Equation (2).
 
     .. math::
@@ -492,11 +492,11 @@ def reference_distribution_value(distances_m: ArrayLike) -> NDArray[np.float64]:
     rounding of the 11: :math:`10 \lg 4\pi` is 10,99. The printed 11 is what is
     used here, because it is the curve the standard draws in its own figures.
 
-    :param distances_m: :math:`r` at each position, in metres.
+    :param distances: :math:`r` at each position, in metres.
     :return: :math:`D_\mathrm{ref}(r)`, in decibels.
     :raises ValueError: For a distance that is not strictly positive.
     """
-    radii = require_positive_array(distances_m, "distances_m")
+    radii = require_positive_array(distances, "distances")
     return np.asarray(
         20.0 * np.log10(ISO14257_REFERENCE_DISTANCE_M / radii) - FREE_FIELD_OFFSET_DB,
         dtype=np.float64,
@@ -504,7 +504,7 @@ def reference_distribution_value(distances_m: ArrayLike) -> NDArray[np.float64]:
 
 
 def floor_reference_value(
-    distances_m: ArrayLike,
+    distances: ArrayLike,
     *,
     source_height_m: float = 0.0,
     path_height_m: float | None = None,
@@ -521,7 +521,7 @@ def floor_reference_value(
     whole bracket becomes 2 and the correction is the 3 dB of Equation (B.4),
     the free field folded into a half space.
 
-    :param distances_m: :math:`r` at each position, in metres.
+    :param distances: :math:`r` at each position, in metres.
     :param source_height_m: :math:`h_\mathrm{S}`, in metres; zero for a source on the
         floor.
     :param path_height_m: :math:`h_\mathrm{P}`, in metres; omit it for a path at the
@@ -530,7 +530,7 @@ def floor_reference_value(
     :raises ValueError: For a distance that is not strictly positive or a
         negative height.
     """
-    radii = require_positive_array(distances_m, "distances_m")
+    radii = require_positive_array(distances, "distances")
     source = require_finite(source_height_m, "source_height_m")
     if source < 0.0:
         msg = "'source_height_m' must be zero or positive."
@@ -551,7 +551,7 @@ def floor_reference_value(
 def corrected_distribution_value(
     distribution_values_db: ArrayLike,
     measured_reference_db: ArrayLike,
-    distances_m: ArrayLike,
+    distances: ArrayLike,
     *,
     source_height_m: float = 0.0,
     path_height_m: float | None = None,
@@ -574,7 +574,7 @@ def corrected_distribution_value(
     :param distribution_values_db: :math:`D_j(r)` in the room, in decibels.
     :param measured_reference_db: :math:`D_{\mathrm{meas,ref}\,j}(r)` measured
         for this source over a reflecting plane, in decibels.
-    :param distances_m: :math:`r` at each position, in metres.
+    :param distances: :math:`r` at each position, in metres.
     :param source_height_m: :math:`h_\mathrm{S}`, in metres.
     :param path_height_m: :math:`h_\mathrm{P}`, in metres.
     :return: :math:`D_{\mathrm{corr}\,j}(r)`, in decibels.
@@ -583,11 +583,11 @@ def corrected_distribution_value(
     """
     values = require_finite_array(distribution_values_db, "distribution_values_db")
     measured = require_finite_array(measured_reference_db, "measured_reference_db")
-    radii = require_positive_array(distances_m, "distances_m")
+    radii = require_positive_array(distances, "distances")
     if values.shape != measured.shape or values.shape != radii.shape:
         msg = (
             "'distribution_values_db', 'measured_reference_db' and "
-            "'distances_m' must match position for position."
+            "'distances' must match position for position."
         )
         raise ValueError(msg)
     floor = floor_reference_value(
@@ -737,7 +737,7 @@ def _regression(
 
 
 def spatial_decay_rate(
-    distribution_values_db: ArrayLike, distances_m: ArrayLike
+    distribution_values_db: ArrayLike, distances: ArrayLike
 ) -> float:
     r"""The rate of spatial decay per distance doubling, Equation (5).
 
@@ -757,13 +757,13 @@ def spatial_decay_rate(
 
     :param distribution_values_db: :math:`D_i` at the positions of the range,
         in decibels.
-    :param distances_m: :math:`r_i` at the same positions, in metres.
+    :param distances: :math:`r_i` at the same positions, in metres.
     :return: :math:`\mathrm{DL}_2`, in decibels per distance doubling.
     :raises ValueError: For inputs that do not match position for position,
         fewer than two positions, or positions that are all at one distance.
     """
     values = require_finite_array(distribution_values_db, "distribution_values_db")
-    radii = require_positive_array(distances_m, "distances_m")
+    radii = require_positive_array(distances, "distances")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
     if values.size < _MIN_REGRESSION_POINTS:
@@ -796,7 +796,7 @@ def spatial_decay_rate(
 
 
 def level_excess(
-    distribution_values_db: ArrayLike, distances_m: ArrayLike
+    distribution_values_db: ArrayLike, distances: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The excess over a free field at each position, Equation (6).
 
@@ -805,20 +805,18 @@ def level_excess(
        \mathrm{DL}_\mathrm{f} = D - D_\mathrm{ref}
 
     :param distribution_values_db: :math:`D` at each position, in decibels.
-    :param distances_m: :math:`r` at each position, in metres.
+    :param distances: :math:`r` at each position, in metres.
     :return: :math:`\mathrm{DL}_\mathrm{f}` at each position, in decibels.
     :raises ValueError: For inputs that do not match position for position.
     """
     values = require_finite_array(distribution_values_db, "distribution_values_db")
-    radii = require_positive_array(distances_m, "distances_m")
+    radii = require_positive_array(distances, "distances")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
     return np.asarray(values - reference_distribution_value(radii), dtype=np.float64)
 
 
-def mean_level_excess(
-    distribution_values_db: ArrayLike, distances_m: ArrayLike
-) -> float:
+def mean_level_excess(distribution_values_db: ArrayLike, distances: ArrayLike) -> float:
     r"""The excess averaged over a distance range, Equation (7).
 
     .. math::
@@ -835,14 +833,14 @@ def mean_level_excess(
 
     :param distribution_values_db: :math:`D` at the positions of the range, in
         decibels.
-    :param distances_m: :math:`r` at the same positions, in metres, in
+    :param distances: :math:`r` at the same positions, in metres, in
         increasing order.
     :return: :math:`\mathrm{DL}_\mathrm{f}(r_n, r_m)`, in decibels.
     :raises ValueError: For inputs that do not match, fewer than two
         positions, or distances that do not increase.
     """
     values = require_finite_array(distribution_values_db, "distribution_values_db")
-    radii = require_positive_array(distances_m, "distances_m")
+    radii = require_positive_array(distances, "distances")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
     if values.size < _MIN_REGRESSION_POINTS:
@@ -852,7 +850,7 @@ def mean_level_excess(
         )
         raise ValueError(msg)
     if np.any(np.diff(radii) <= 0.0):
-        msg = "'distances_m' must increase from one position to the next."
+        msg = "'distances' must increase from one position to the next."
         raise ValueError(msg)
     excess = level_excess(values, radii)
     steps = np.log10(radii[1:] / radii[:-1])
@@ -862,7 +860,7 @@ def mean_level_excess(
 
 def level_excess_at(
     distribution_values_db: ArrayLike,
-    distances_m: ArrayLike,
+    distances: ArrayLike,
     distance_m: float,
 ) -> float:
     r"""The excess read off the regression line at one distance, Equation (8).
@@ -887,14 +885,14 @@ def level_excess_at(
 
     :param distribution_values_db: :math:`D_i` at the positions of the range,
         in decibels.
-    :param distances_m: :math:`r_i` at the same positions, in metres.
+    :param distances: :math:`r_i` at the same positions, in metres.
     :param distance_m: :math:`r`, the distance to read at, in metres.
     :return: :math:`\mathrm{DL}'_{\mathrm{f}r}`, in decibels.
     :raises ValueError: For inputs that do not match, fewer than two
         positions, or a non-positive distance.
     """
     values = require_finite_array(distribution_values_db, "distribution_values_db")
-    radii = require_positive_array(distances_m, "distances_m")
+    radii = require_positive_array(distances, "distances")
     target = require_positive(distance_m, "distance_m")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
@@ -1019,7 +1017,7 @@ def _third_octave_index(frequency_hz: float) -> int:
 
 def spatial_decay_curve(
     distribution_values_db: ArrayLike,
-    distances_m: ArrayLike,
+    distances: ArrayLike,
     *,
     near_limit_m: float = TYPICAL_NEAR_LIMIT_M,
     far_limit_m: float = TYPICAL_FAR_LIMIT_M,
@@ -1030,7 +1028,7 @@ def spatial_decay_curve(
 
     :param distribution_values_db: :math:`D` at every measured position, in
         decibels, over the whole path.
-    :param distances_m: :math:`r` at the same positions, in metres, in
+    :param distances: :math:`r` at the same positions, in metres, in
         increasing order.
     :param near_limit_m: :math:`d_1` of 6.2, in metres.
     :param far_limit_m: :math:`d_2` of 6.2, in metres.
@@ -1041,7 +1039,7 @@ def spatial_decay_curve(
         region holding fewer than two measured positions.
     """
     values = require_finite_array(distribution_values_db, "distribution_values_db")
-    radii = require_positive_array(distances_m, "distances_m")
+    radii = require_positive_array(distances, "distances")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
     if region not in _REGIONS:
@@ -1075,7 +1073,7 @@ def spatial_decay_curve(
         raise ValueError(msg)
     chosen, chosen_radii = values[keep], radii[keep]
     return SpatialDecayResult(
-        distances_m=chosen_radii,
+        distances=chosen_radii,
         distribution_values_db=chosen,
         reference_values_db=reference_distribution_value(chosen_radii),
         level_excess_db=level_excess(chosen, chosen_radii),

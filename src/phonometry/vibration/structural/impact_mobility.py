@@ -1643,7 +1643,7 @@ class ForceSpectrumCheck(OwnsArrays):
         return (freqs >= low) & (freqs <= high)
 
     @property
-    def level_db(self) -> np.ndarray:
+    def levels(self) -> np.ndarray:
         """The density in dB re its highest value inside the range."""
         esd = np.asarray(self.energy_spectral_density, dtype=np.float64)
         top = float(np.max(esd[self.in_range]))
@@ -1653,7 +1653,7 @@ class ForceSpectrumCheck(OwnsArrays):
     @property
     def drop_db(self) -> float:
         """How far the density falls across the range, highest to lowest, in dB."""
-        return float(-np.min(self.level_db[self.in_range]))
+        return float(-np.min(self.levels[self.in_range]))
 
     @property
     def energy_fraction_above(self) -> float:

@@ -184,7 +184,7 @@ def slit_effective_properties(
     (Appl. Sci. 2017 Eq. (6); Appl. Phys. Lett. 2016 Eqs. (A1)-(A2)).
     :math:`\kappa_0 = \gamma P_0`.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param slit_height: Slit height ``h``, in metres.
     :param fluid: State of the air in the slit
         (:class:`~phonometry.fluids.Fluid`); the
@@ -242,7 +242,7 @@ def rectangular_duct_properties(
     as the boundary layers vanish and by the Poiseuille resistivity
     :math:`28.454\,\eta/\text{side}^2` as :math:`\omega \to 0`.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param side: Square-duct side length, in metres.
     :param fluid: State of the air in the duct
         (:class:`~phonometry.fluids.Fluid`); the
@@ -438,7 +438,7 @@ def helmholtz_resonator_impedance(
     corrections are the 2-D fits of Sci. Rep. 7:5389 Eqs. (11)-(12); both
     ``slit_height`` and ``lattice_step`` are then required.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param resonator: The :class:`HelmholtzResonator` geometry.
     :param slit_height: Slit height ``h`` for the neck-to-slit correction; if
         ``None`` that correction is omitted (``"square"`` only).
@@ -677,7 +677,7 @@ def slit_helmholtz_absorber(
     locally reacting, so the internal chain does not depend on ``theta``;
     only the front air impedance carries ``cos(theta)``.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param resonators: One :class:`HelmholtzResonator` or a sequence of them,
         ordered from the panel face towards the rigid backing.
     :param slit_height: Slit height ``h``, in metres.

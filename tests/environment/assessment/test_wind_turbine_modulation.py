@@ -55,7 +55,7 @@ def test_the_spectrum_is_half_the_ioa_code_s_over_its_49_lines() -> None:
     block = env.amplitude_modulation_block(
         _sample(2), modulation_frequency_range_hz=(0.4, 0.9)
     )
-    np.testing.assert_allclose(block.frequencies_hz, np.arange(1, 50) / 10.0)
+    np.testing.assert_allclose(block.frequencies, np.arange(1, 50) / 10.0)
     np.testing.assert_allclose(
         2.0 * block.power_spectrum, ref.IOA_SAMPLE_2_POWER_SPECTRUM, rtol=1e-12
     )
@@ -661,7 +661,7 @@ def _refusal_cases() -> list[tuple[str, object, str]]:
                 band=1,
                 weighting="A",
             ),
-            r"'frequencies_hz' has 6 centres",
+            r"'frequencies' has 6 centres",
         ),
         (
             "range of one value",

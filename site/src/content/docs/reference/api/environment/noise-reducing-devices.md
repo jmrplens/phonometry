@@ -150,7 +150,7 @@ RoadDeviceRating(
     category: str | None,
     quantity: str,
     spectrum: str,
-    bands_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     values: NDArray[np.float64],
     weights: NDArray[np.float64],
     lowest_band_hz: float = 100.0,
@@ -168,7 +168,7 @@ One single-number rating of a road traffic noise reducing device.
 | `category` | The Annex A category of the reported value, `"A1"` to `"A5"` for absorption or `"B1"` to `"B4"` for insulation, or `None` for a railway rating and for reflection, whose standards print no ladder. |
 | `quantity` | `"absorption"`, `"insulation"` or `"reflection"`. |
 | `spectrum` | `"road"` (EN 1793-3) or `"railway"` (EN 16272-3-1). |
-| `bands_hz` | The eighteen band centre frequencies, in Hz. |
+| `frequencies` | The eighteen band centre frequencies, in Hz. |
 | `values` | The per-band input the rating was weighted from: the sound absorption coefficients, the sound reduction indices in dB, or the sound reflection indices (`nan` allowed below `lowest_band_hz`). |
 | `weights` | The normalised traffic noise spectrum, in dB. |
 | `lowest_band_hz` | The lowest band the rating sums from: 100 Hz for `DLα` and `DL_R`, which sum all eighteen, and the lowest reliable band $m$ for `DL_RI`. |

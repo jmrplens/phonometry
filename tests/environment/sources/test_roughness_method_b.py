@@ -317,9 +317,7 @@ def test_method_b_reads_an_even_spread_within_the_class_0_integrated_response() 
     record, wavenumbers = _even_lines(17.0, 21.0, amplitude)
     spectrum = _plain(record)
     judged = 0
-    for wavelength, level in zip(
-        spectrum.wavelengths_m, spectrum.levels_db, strict=True
-    ):
+    for wavelength, level in zip(spectrum.wavelengths_m, spectrum.levels, strict=True):
         band = round(-10.0 * math.log10(wavelength))
         inside = np.count_nonzero(
             (wavenumbers >= 10.0 ** (band / 10.0 - 0.05))
@@ -434,7 +432,7 @@ def test_the_record_is_processed_as_7_1_asks() -> None:
     )
     direct = filtered_roughness_spectrum(record, sample_spacing_m=_DX)
     by_hand = _plain(processed)
-    np.testing.assert_allclose(direct.levels_db, by_hand.levels_db, atol=1e-9)
+    np.testing.assert_allclose(direct.levels, by_hand.levels, atol=1e-9)
 
 
 def test_the_record_needs_a_whole_number_of_samples_per_metre() -> None:
@@ -547,7 +545,7 @@ def test_a_method_a_line_is_not_held_to_the_15_m() -> None:
     """For Method A the 15 m is a NOTE of 7.4.2, not a requirement."""
     spectrum = _spectrum_under_limit(1.0)
     fourier = AcousticRoughnessSpectrum(
-        spectrum.wavelengths_m, spectrum.levels_db, record_length_m=1.0, method="A"
+        spectrum.wavelengths_m, spectrum.levels, record_length_m=1.0, method="A"
     )
     check = environment.check_reference_track([fourier], [], speed_kmh=160.0)
     assert all(c.clause != "EN 15610 7.4.3" for c in check.conditions)

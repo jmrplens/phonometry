@@ -343,7 +343,7 @@ def _chk_band_flatness_limits() -> Outcome:
     computed = {
         f"{centre:g} Hz": float(limit)
         for centre, limit in zip(
-            check.octave_centres_hz.tolist(), check.limit_db.tolist(), strict=True
+            check.octave_frequencies.tolist(), check.limit_db.tolist(), strict=True
         )
     }
     return record(printed, computed, unit="dB")

@@ -355,7 +355,7 @@ relación de prominencia de ECMA-418-1 de
 | `f_high` | float, opcional | Hz | por defecto `None` | Borde superior de la banda de usuario |
 
 Devuelve un `EcmaTonality`: `tonality` ($T$, tu_HMS), `specific_tonality`
-($T'(z)$, 53 bandas), `bark`, `centre_frequencies`, `tonal_frequencies`
+($T'(z)$, 53 bandas), `bark`, `frequencies`, `tonal_frequencies`
 ($f_{\text{ton},z}$), `times`, `tonality_vs_time` ($T(l)$),
 `tonal_frequency_vs_time`,
 `field`.
@@ -493,7 +493,7 @@ plt.show()
 
 Devuelve un `EcmaRoughness`: `roughness` ($R$, asper, el percentil 90 de
 $R(l_{50})$), `specific_roughness` ($R'(z)$, 53 bandas), `bark`,
-`centre_frequencies`, `times`, `roughness_vs_time` ($R(l_{50})$),
+`frequencies`, `times`, `roughness_vs_time` ($R(l_{50})$),
 `specific_roughness_vs_time` (array de (n_times, 53)), `field`.
 
 ## Intensidad de fluctuación en vacil_HMS (ECMA-418-2)
@@ -599,7 +599,7 @@ plt.show()
 
 Devuelve un `EcmaFluctuationStrength`: `fluctuation_strength` ($F$, vacil_HMS,
 el percentil 90 de $F(l_{50})$), `specific_fluctuation_strength`
-($F'(z)$, 53 bandas), `bark`, `centre_frequencies`, `times`,
+($F'(z)$, 53 bandas), `bark`, `frequencies`, `times`,
 `fluctuation_strength_vs_time` ($F(l_{50})$),
 `specific_fluctuation_strength_vs_time` (array de (n_times, 53)), `field`.
 

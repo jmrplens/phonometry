@@ -262,7 +262,7 @@ def test_correction_vanishes_at_low_frequency() -> None:
 
 def test_result_arrays_are_read_only() -> None:
     result = metrology.diameter_sound_field_correction(_F_A1, **_WS3)
-    for name in ("frequencies_hz", "ratio", "doubled_separation_ratio"):
+    for name in ("frequencies", "ratio", "doubled_separation_ratio"):
         assert not getattr(result, name).flags.writeable
 
 
@@ -488,7 +488,7 @@ def _reciprocity(
         ]
     )
     return ReciprocityCalibration(
-        frequencies_hz=frequencies,
+        frequencies=frequencies,
         sensitivity_v_per_pa=sensitivities.astype(np.complex128),
         products_v2_per_pa2=products.astype(np.complex128),
         field=field,
@@ -522,7 +522,7 @@ def test_settling_decides_a_difference_on_the_limit() -> None:
     and 0,06 dB: only the settling to a nanodecibel keeps it on the limit.
     """
     on_the_limit = cc.JigCouplerVerification(
-        frequencies_hz=np.array([1000.0, 2000.0]),
+        frequencies=np.array([1000.0, 2000.0]),
         calibration_level_db=np.array([-26.9, -26.9]),
         calibration_uncertainty_db=np.array([0.08, 0.08]),
         validation_level_db=np.array([-27.0, -27.0 - 1e-6]),
@@ -549,7 +549,7 @@ def test_validation_pairs_each_frequency_with_its_own() -> None:
     other_uncertainty = np.array([0.5, 0.04, 0.05, 0.06])
     other = _comparison(other_level, other_uncertainty, frequencies=grid)
     result = metrology.verify_jig_or_coupler(jig, other)
-    assert result.frequencies_hz.tolist() == [1000.0, 2000.0, 4000.0]
+    assert result.frequencies.tolist() == [1000.0, 2000.0, 4000.0]
     np.testing.assert_allclose(result.validation_level_db, other_level[1:], atol=1e-9)
     np.testing.assert_allclose(
         result.validation_uncertainty_db, other_uncertainty[1:], rtol=1e-12
@@ -568,7 +568,7 @@ def test_validation_frequency_within_the_tolerance_is_the_same() -> None:
     grid = np.array([1000.0 * (1.0 + 5e-10), 2000.0, 4000.0 * (1.0 + 1e-8)])
     reciprocity = _reciprocity(grid, np.array([-26.31, -26.32, -26.33]), 0.04)
     result = metrology.verify_jig_or_coupler(jig, reciprocity, microphone=1)
-    assert result.frequencies_hz.tolist() == [1000.0, 2000.0]
+    assert result.frequencies.tolist() == [1000.0, 2000.0]
     np.testing.assert_allclose(result.validation_level_db, [-26.31, -26.32], atol=1e-9)
     assert result.unvalidated_frequencies_hz.tolist() == [4000.0, 8000.0]
 
@@ -582,7 +582,7 @@ def test_validation_against_a_reciprocity_calibration() -> None:
     reciprocity = _reciprocity(np.array([1000.0, 2000.0, 4000.0]), -26.32, 0.04)
     result = metrology.verify_jig_or_coupler(jig, reciprocity, microphone=1)
     assert result.validation == "reciprocity"
-    assert result.frequencies_hz.tolist() == [1000.0, 2000.0, 4000.0]
+    assert result.frequencies.tolist() == [1000.0, 2000.0, 4000.0]
     assert result.unvalidated_frequencies_hz.tolist() == [8000.0]
     np.testing.assert_allclose(result.difference_db, 0.02, atol=1e-9)
     assert result.passes
@@ -672,7 +672,7 @@ def test_verification_refuses_a_negative_uncertainty() -> None:
         ValueError, match="'calibration_uncertainty_db' must be non-negative"
     ):
         cc.JigCouplerVerification(
-            frequencies_hz=np.array([1000.0]),
+            frequencies=np.array([1000.0]),
             calibration_level_db=np.array([-26.3]),
             calibration_uncertainty_db=np.array([-0.1]),
             validation_level_db=np.array([-26.3]),
@@ -685,7 +685,7 @@ def test_verification_refuses_a_negative_uncertainty() -> None:
 def test_verification_refuses_two_zero_uncertainties() -> None:
     with pytest.raises(ValueError, match="above 0 dB"):
         cc.JigCouplerVerification(
-            frequencies_hz=np.array([1000.0]),
+            frequencies=np.array([1000.0]),
             calibration_level_db=np.array([-26.3]),
             calibration_uncertainty_db=np.array([0.0]),
             validation_level_db=np.array([-26.3]),
@@ -795,7 +795,7 @@ def test_correlation_is_zero_where_a_calibration_carries_no_uncertainty() -> Non
     zero; elsewhere it is (k u_sh)^2/(U_cal U_val) = 0,04^2/(0,08 x 0,06).
     """
     result = cc.JigCouplerVerification(
-        frequencies_hz=np.array([1000.0, 2000.0]),
+        frequencies=np.array([1000.0, 2000.0]),
         calibration_level_db=np.array([-26.3, -26.3]),
         calibration_uncertainty_db=np.array([0.0, 0.08]),
         validation_level_db=np.array([-26.3, -26.3]),
@@ -890,7 +890,7 @@ def test_gum_example_2_correlation_of_two_items_against_one_standard() -> None:
     for comparison, (printed, decimals) in ref.GUM_F123_EXAMPLE_2_CORRELATION.items():
         expanded = 2.0 * scale * math.hypot(comparison, standard)
         result = cc.JigCouplerVerification(
-            frequencies_hz=np.array([1000.0]),
+            frequencies=np.array([1000.0]),
             calibration_level_db=np.array([-26.3]),
             calibration_uncertainty_db=np.array([expanded]),
             validation_level_db=np.array([-26.3]),
@@ -909,7 +909,7 @@ def test_gum_example_2_correlation_of_two_items_against_one_standard() -> None:
 
 def test_verification_publishes_the_shared_part_read_only() -> None:
     result = cc.JigCouplerVerification(
-        frequencies_hz=np.array([1000.0, 2000.0]),
+        frequencies=np.array([1000.0, 2000.0]),
         calibration_level_db=np.array([-26.3, -26.3]),
         calibration_uncertainty_db=np.array([0.08, 0.08]),
         validation_level_db=np.array([-26.3, -26.3]),
@@ -955,7 +955,7 @@ def test_verification_refuses_two_uncertainties_all_shared() -> None:
     """
     with pytest.raises(ValueError, match="above 0 dB"):
         cc.JigCouplerVerification(
-            frequencies_hz=np.array([1000.0]),
+            frequencies=np.array([1000.0]),
             calibration_level_db=np.array([-26.3]),
             calibration_uncertainty_db=np.array([0.08]),
             validation_level_db=np.array([-26.3]),
@@ -971,7 +971,7 @@ def test_verification_refuses_a_negative_shared_part() -> None:
         ValueError, match="'shared_standard_uncertainty_db' must be non-negative"
     ):
         cc.JigCouplerVerification(
-            frequencies_hz=np.array([1000.0]),
+            frequencies=np.array([1000.0]),
             calibration_level_db=np.array([-26.3]),
             calibration_uncertainty_db=np.array([0.08]),
             validation_level_db=np.array([-26.3]),
@@ -1039,7 +1039,7 @@ def test_verification_plot_marks_the_disagreements() -> None:
     (band,) = ax.collections
     vertices = band.get_paths()[0].vertices
     for frequency, uncertainty in zip(
-        result.frequencies_hz, result.expanded_uncertainty_db, strict=True
+        result.frequencies, result.expanded_uncertainty_db, strict=True
     ):
         edges = np.unique(vertices[np.isclose(vertices[:, 0], frequency), 1].round(12))
         np.testing.assert_allclose(edges, [-uncertainty, uncertainty])

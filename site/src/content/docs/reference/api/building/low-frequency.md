@@ -98,7 +98,7 @@ checks that stand in for one.
 
 ```python
 apply_low_frequency_procedure(
-    level: ArrayLike,
+    levels: ArrayLike,
     frequencies: ArrayLike,
     procedure: LowFrequencyProcedure,
     *,
@@ -129,7 +129,7 @@ brings a 63 Hz octave value.
 
 | Name | Description |
 | :--- | :--- |
-| `level` | Energy-average levels of the whole measurement, in dB, one value per band. |
+| `levels` | Energy-average levels of the whole measurement, in dB, one value per band. |
 | `frequencies` | Band centre frequencies, in Hz, same length. |
 | `procedure` | The room's corner measurements and volume. |
 | `reverberation_time` | Reverberation times of the whole measurement, in seconds. Required for `room="receiving"`; refused for `room="source"`. |
@@ -220,7 +220,7 @@ level and can never fall further than $10 \lg(2/3) = -1,76$ dB below
 
 | Name | Description |
 | :--- | :--- |
-| `level` | Energy-average level `L` from the default procedure, in dB, one value per band. |
+| `level` | Energy-average level `L` from the default procedure, in dB, a scalar or one value per band. |
 | `corner` | Corner level $L_\mathrm{Corner}$ from [`corner_level`](/phonometry/reference/api/building/low-frequency/#corner_level), in dB, same bands. |
 
 **Returns:** $L_\mathrm{LF}$, in dB, one value per band.

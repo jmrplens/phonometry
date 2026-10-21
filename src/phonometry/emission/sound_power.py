@@ -963,7 +963,7 @@ def sound_power_pressure(
     frequencies: np.ndarray | None = None,
     room: RoomEnvironment | None = None,
     grade: Grade = "engineering",
-    omc_uncertainty: float = 0.0,
+    sigma_omc_db: float = 0.0,
 ) -> SoundPowerResult:
     r"""Sound power level from surface pressure levels (ISO 3744/3746:2010).
 
@@ -997,11 +997,11 @@ def sound_power_pressure(
         ``None`` is a room with no data at all, i.e. a free field
         (:math:`K_2 = 0`).
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
-    :param omc_uncertainty: ``sigma_omc`` (dB), operating/mounting instability.
+    :param sigma_omc_db: ``sigma_omc`` (dB), operating/mounting instability.
     :return: :class:`SoundPowerResult`.
     """
     grade = _check_grade(grade)
-    omc_uncertainty = require_non_negative(omc_uncertainty, "omc_uncertainty")
+    sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
     levels = np.atleast_2d(np.asarray(levels_positions, dtype=np.float64))
     if levels.ndim != 2:  # noqa: PLR2004
         msg = "'levels_positions' must be a 2D (positions, bands) array."
@@ -1057,9 +1057,7 @@ def sound_power_pressure(
     # per-band level minus the raw per-band surface mean (no residual +K1 bias).
     directivity = np.asarray(levels - mean_level[np.newaxis, :], dtype=np.float64)
 
-    uncertainty = _COVERAGE_FACTOR_95 * float(
-        np.hypot(_SIGMA_R0[grade], omc_uncertainty)
-    )
+    uncertainty = _COVERAGE_FACTOR_95 * float(np.hypot(_SIGMA_R0[grade], sigma_omc_db))
 
     return SoundPowerResult(
         frequencies=freqs,
@@ -1410,7 +1408,7 @@ def sound_energy_pressure(
     frequencies: np.ndarray | None = None,
     room: RoomEnvironment | None = None,
     grade: Grade = "engineering",
-    omc_uncertainty: float = 0.0,
+    sigma_omc_db: float = 0.0,
 ) -> SoundEnergyResult:
     r"""Sound energy level of a noise burst from surface single event levels
     (ISO 3744:2010 clause 8.3, ISO 3746:2010 clause 8.4).
@@ -1474,7 +1472,7 @@ def sound_energy_pressure(
         ``None`` is a room with no data at all, i.e. a free field
         (:math:`K_2 = 0`).
     :param grade: ``'engineering'`` (ISO 3744) or ``'survey'`` (ISO 3746).
-    :param omc_uncertainty: ``sigma_omc`` (dB), operating/mounting instability.
+    :param sigma_omc_db: ``sigma_omc`` (dB), operating/mounting instability.
     :return: :class:`SoundEnergyResult`.
     :raises ValueError: for a malformed or non-finite level array, a
         geometry that does not describe the surface, too few positions, a
@@ -1482,7 +1480,7 @@ def sound_energy_pressure(
         ``frequencies`` length.
     """
     grade = _check_grade(grade)
-    omc_uncertainty = require_non_negative(omc_uncertainty, "omc_uncertainty")
+    sigma_omc_db = require_non_negative(sigma_omc_db, "sigma_omc_db")
     levels, event_count = _event_position_levels(levels_positions, events)
     if levels.shape[1] == 0:
         msg = "'levels_positions' must contain at least one frequency band."
@@ -1530,9 +1528,7 @@ def sound_energy_pressure(
     # as it does for the time-averaged levels (clause 3.24, 8.4).
     directivity = np.asarray(levels - mean_level[np.newaxis, :], dtype=np.float64)
 
-    uncertainty = _COVERAGE_FACTOR_95 * float(
-        np.hypot(_SIGMA_R0[grade], omc_uncertainty)
-    )
+    uncertainty = _COVERAGE_FACTOR_95 * float(np.hypot(_SIGMA_R0[grade], sigma_omc_db))
 
     return SoundEnergyResult(
         frequencies=freqs,

@@ -395,7 +395,7 @@ Ec. G.1 la suma a $L_W$ exactamente como la Ec. G.3 la suma a $L_J$.
 | `room.reverberation_time`, `room.volume` | float/array, float | s, m³ | > 0 | $A = 0{,}16\,V/T$ para $K_2$; $T$ por banda → $K_2$ por banda |
 | `room.mean_absorption_coefficient`, `room.room_surface` | float/array, float | -, m² | `(0,1]`, > 0 | $A = \alpha\,S_v$ (Ec. A.7); $\alpha$ por banda → $K_2$ por banda |
 | `grade` | str | — | `'engineering'` (por defecto) / `'survey'` | ISO 3744 vs ISO 3746 |
-| `omc_uncertainty` | float | dB | por defecto `0.0` | $\sigma_\text{omc}$, inestabilidad de operación/montaje, incorporada a $U$ |
+| `sigma_omc_db` | float | dB | por defecto `0.0` | $\sigma_\text{omc}$, inestabilidad de operación/montaje, incorporada a $U$ |
 
 Devuelve un `SoundPowerResult`: `sound_power_level` ($L_W$ por banda),
 `surface_pressure_level` ($L_p$ tras $K_1$/$K_2$), `mean_pressure_level`,
@@ -673,7 +673,7 @@ de grado 2 de la sección 1: el coste del grado es sobre todo tiempo.
 | `temperature_c` | float | °C | por defecto `23.0` | Fija $C_1$, $C_2$ |
 | `static_pressure_kpa` | float | kPa | por defecto `101.325` | Fija $C_1$, $C_2$ |
 | `air_absorption_coefficient` | float o array 1D | dB/m | por defecto `None` | El término $C_3$ de absorción del aire; se aporta, no se calcula |
-| `sigma_omc` | float | dB | por defecto `0.0` | Desviación típica de funcionamiento y montaje, apartado 10.5 |
+| `sigma_omc_db` | float | dB | por defecto `0.0` | Desviación típica de funcionamiento y montaje, apartado 10.5 |
 | `coverage_factor` | float | — | por defecto `2.0` | La $k$ de $U = k\sqrt{\sigma_{R0}^2 + \sigma_\text{omc}^2}$ |
 
 Los dos últimos son toda la historia de la incertidumbre, y el valor por defecto
@@ -703,7 +703,7 @@ levels = base[None, :] + rng.normal(0.0, 1.0, (40, freqs.size))
 # son los 4.1 dB que imprime la ficha de abajo. Con su valor por defecto 0
 # informa 1.0 dB.
 result = emission.sound_power_anechoic(levels, "hemisphere", radius=1.0,
-                                       frequencies=freqs, sigma_omc=2.0)
+                                       frequencies=freqs, sigma_omc_db=2.0)
 print(round(result.sound_power_level_a, 1))   # 89.3
 print(round(float(result.uncertainty), 1))    # 4.1  dB
 result.plot()   # espectro LW, LWA en el título (requiere matplotlib)
@@ -1100,7 +1100,7 @@ lj_ref = burst.sound_energy_level + corr.total    # Ec. G.3; la Ec. G.1 suma lo 
 | `frequencies` | array 1D | Hz | centros de banda nominales | Activa $L_{J\mathrm{A}}$ (Ec. E.2) |
 | `room` | `RoomEnvironment` o None | | por defecto `None` (campo libre) | Los datos de sala tras $K_2$, como en la sección 1 |
 | `grade` | str | | `'engineering'` (por defecto) / `'survey'` | Apartado 8.3 de ISO 3744 frente a apartado 8.4 de ISO 3746 |
-| `omc_uncertainty` | float | dB | por defecto `0.0` | $\sigma_\text{omc}$, incorporada a $U$ como para $L_W$ |
+| `sigma_omc_db` | float | dB | por defecto `0.0` | $\sigma_\text{omc}$, incorporada a $U$ como para $L_W$ |
 
 Devuelve un `SoundEnergyResult`: `sound_energy_level` ($L_J$ por banda),
 `surface_event_level` ($\overline{L_E}$ tras $K_1$/$K_2$, Ec. 22),

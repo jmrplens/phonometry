@@ -106,7 +106,7 @@ res = emission.sound_power_in_situ(
         excess_levels=[8.2, 7.6, 8.9, 8.0],   # dLfA at each position (Annex A)
         directivity_range=4.0,                # +/-4 dB round the machine (7.2)
     ),
-    sigma_omc=0.5,                        # a steady source (9.2 NOTE)
+    sigma_omc_db=0.5,                        # a steady source (9.2 NOTE)
 )
 print(np.round(res.sound_power_level, 1))   # [88.8 91.5 92.6 91.8 88.9 84.7 78.6]
 print(round(res.sound_power_level_a, 1))    # 96.1 dB(A)
@@ -229,7 +229,7 @@ with the grade and the expanded uncertainty.
 | `temperature_c` | float | °C | default `23.0` | Air temperature at the test, for $C_2$ |
 | `static_pressure_kpa` | float | kPa | default `101.325` | Static pressure at the test, for $C_2$; see `static_pressure_from_altitude` |
 | `conditions` | `GradeConditions` | | | The two conditions Table 2 reads together: `excess_levels`, the $\Delta L_{f\mathrm{A}}$ at each position `(n,)` in decibels (Annex A), and `directivity_range`, the half-width of the A-weighted directivity survey in decibels (7.2). Either one left out leaves the determination at survey grade |
-| `sigma_omc` | float | dB | $\ge 0$ | Standard deviation of the operating and mounting conditions (9.2); `None` leaves the uncertainty `NaN` |
+| `sigma_omc_db` | float | dB | $\ge 0$ | Standard deviation of the operating and mounting conditions (9.2); `None` leaves the uncertainty `NaN` |
 | `coverage_factor` | float | | default `2.0` | $k$ of Eq. 23; 1,6 for a one-sided comparison with a limit |
 
 The function returns an `InSituSoundPowerResult`: `sound_power_level` (Eq. 11
@@ -238,7 +238,7 @@ or 12, at the conditions of the test), `mean_source_level` and
 `reference_power_level`, `background_correction` per position and band,
 `background_correction_ref` per location, position and band,
 `background_requirement_met` and `upper_bound` per band, `c2`, `grade`, `sigma_r0`,
-`sigma_omc`, `sigma_tot`, `expanded_uncertainty`, `coverage_factor`,
+`sigma_omc_db`, `sigma_tot`, `expanded_uncertainty`, `coverage_factor`,
 `sound_power_level_a` and `quantity`. `sound_power_level_ref` adds `c2` to
 the level (section 3).
 
@@ -289,7 +289,7 @@ events = np.stack([strokes + d for d in (-0.3, 0.2, 0.0, 0.4, -0.2, 0.1)], axis=
 energy = emission.sound_energy_in_situ(
     events, rss, lw_rss, freqs,                 # (4 positions, 6 events, 7 bands)
     background_levels=background, integration_time=4.0,
-    conditions=emission.GradeConditions(excess_levels=[8.2, 7.6, 8.9, 8.0], directivity_range=4.0), sigma_omc=2.0,
+    conditions=emission.GradeConditions(excess_levels=[8.2, 7.6, 8.9, 8.0], directivity_range=4.0), sigma_omc_db=2.0,
 )
 print(energy.quantity)                            # energy
 print(np.round(energy.sound_energy_level, 1))     # [103.7 105.3 106.1 105.3 102.4  98.6  93. ]
@@ -307,7 +307,7 @@ the inputs are the same: grade 2, $\sigma_\mathrm{omc}$ = 2,0 dB, $k$ = 2.
 | `event_levels` | 3D or 2D array | dB | `(n, N, bands)` or `(n, bands)` | $L'_{Ei,q(\mathrm{ST})}$ per event, or $L'_{Ei,N(\mathrm{ST})}$ of one measurement over $N$ events |
 | `events` | int | | $\ge 1$ | $N$ for the 2D form (Eq. 17); must be `None` with the 3D form. Clause 7.6 asks for at least five events, so fewer than five warns and the determination is nonconforming, on either form |
 | `integration_time` | float | s | $> 0$ | $T$ of the event measurement; `None` applies Eq. 14 as printed |
-| `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc`, `coverage_factor` | | | | As in `sound_power_in_situ()` |
+| `levels_ref`, `lw_ref`, `frequencies`, `background_levels`, `background_levels_ref`, `temperature_c`, `static_pressure_kpa`, `excess_levels`, `directivity_range`, `sigma_omc_db`, `coverage_factor` | | | | As in `sound_power_in_situ()` |
 
 ## 3. Grade, uncertainty and reference conditions
 
@@ -332,7 +332,7 @@ comparison with a limit value; $\sigma_\mathrm{omc}$ is the user's number
 (9.2, E.3), near 0,5 dB for a steady source, 2 dB with material flow, 4 dB
 for a press under load. The standard's example (9.5), grade 2 with
 $\sigma_\mathrm{omc}$ = 2,0 dB and $k$ = 2, gives
-$U = 2\sqrt{1{,}5^2 + 2^2}$ dB = 5 dB. Without a `sigma_omc` the result
+$U = 2\sqrt{1{,}5^2 + 2^2}$ dB = 5 dB. Without a `sigma_omc_db` the result
 leaves `sigma_tot` and `expanded_uncertainty` `NaN`.
 
 **Reference conditions (Annex C).** The radiation-impedance correction

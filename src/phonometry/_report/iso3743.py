@@ -160,7 +160,7 @@ def _closing_strip(
     reference sound source's columns and the background statement the
     standard asks for, still fits its one page.
     """
-    sigma_omc = float(result.sigma_omc)
+    sigma_omc = float(result.sigma_omc_db)
     if not math.isfinite(sigma_omc):
         uncertainty = t(
             "No expanded uncertainty is stated: &#963;<sub>omc</sub> was not supplied.",
@@ -567,7 +567,7 @@ def _special_statement(
                 "m<super>3</super>, T<sub>nom</sub> = {tnom} s",
                 language,
             ).format(
-                volume=format_number(float(result.volume_m3), language, decimals=1),
+                volume=format_number(float(result.volume), language, decimals=1),
                 tnom=format_number(
                     float(result.nominal_reverberation_time_s), language, decimals=2
                 ),

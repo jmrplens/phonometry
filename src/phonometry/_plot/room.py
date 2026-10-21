@@ -1764,7 +1764,7 @@ def plot_spatial_decay(
     """
     require_choice(language, "language", ("en", "es"))
     axes = _new_axes() if ax is None else ax
-    radii = np.asarray(result.distances_m, dtype=np.float64)
+    radii = np.asarray(result.distances, dtype=np.float64)
     values = np.asarray(result.distribution_values_db, dtype=np.float64)
     reference = np.asarray(result.reference_values_db, dtype=np.float64)
 

@@ -173,8 +173,8 @@ def _critical_band_edges(fc: float) -> tuple[float, float]:
     return f - cbw / 2.0, f + cbw / 2.0
 
 
-def _energy_mean(levels_db: NDArray[np.float64]) -> float:
-    return float(10.0 * np.log10(np.mean(10.0 ** (levels_db / 10.0))))
+def _energy_mean(levels: NDArray[np.float64]) -> float:
+    return float(10.0 * np.log10(np.mean(10.0 ** (levels / 10.0))))
 
 
 #: Tone-classification margins (dB): masking-line criterion and tone criterion.

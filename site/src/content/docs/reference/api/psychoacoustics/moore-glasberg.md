@@ -145,7 +145,7 @@ MooreGlasbergLoudness(
     loudness_level: float,
     specific: np.ndarray,
     erb_number: np.ndarray,
-    centre_frequencies: np.ndarray,
+    frequencies: np.ndarray,
     field: str,
     presentation: str,
 )
@@ -158,7 +158,7 @@ loudness level L_N in phon (obtained by inverting the loudness/loudness-
 level relationship of Table 5).  `specific` holds the specific loudness
 N'(i) in sone/Cam sampled at the ERB-number grid `erb_number` (Cam),
 i.e. i from 1.8 Cam to 38.9 Cam in 0.1 Cam steps (372 values), and
-`centre_frequencies` the corresponding auditory-filter centre
+`frequencies` the corresponding auditory-filter centre
 frequencies in Hz.  For a binaural (diotic) result the specific-loudness
 pattern is that of a single ear before binaural inhibition; the total
 `loudness` already includes the binaural summation.  `field` and

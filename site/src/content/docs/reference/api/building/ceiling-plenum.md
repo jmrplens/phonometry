@@ -109,7 +109,7 @@ The measurement chain
 ```python
 ceiling_attenuation_class(
     attenuation: ArrayLike,
-    frequency: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> CeilingAttenuationResult
 ```
 
@@ -126,7 +126,7 @@ contour read at 500 Hz (clause 5.5).
 | Name | Description |
 | :--- | :--- |
 | `attenuation` | Normalized ceiling attenuation `Dn,c` in the 16 one-third-octave bands 125 Hz to 4000 Hz, in dB. |
-| `frequency` | Optional band centre frequencies, in Hz; when given they must be exactly the 16 contour bands. |
+| `frequencies` | Optional band centre frequencies, in Hz; when given they must be exactly the 16 contour bands. |
 
 **Returns:** A [`CeilingAttenuationResult`](/phonometry/reference/api/building/ceiling-plenum/#ceilingattenuationresult).
 
@@ -271,7 +271,7 @@ plenum_flanking_reduction_index(
     ceiling_length: float,
     plenum_height: float,
     sidewalls: str = ...,
-    frequency: ArrayLike | None = ...,
+    frequencies: ArrayLike | None = ...,
     attenuation_source: ArrayLike,
     attenuation_receiving: ArrayLike,
     source_length: float | None = ...,
@@ -286,7 +286,7 @@ plenum_flanking_reduction_index(
     ceiling_length: float,
     plenum_height: float,
     sidewalls: str = ...,
-    frequency: ArrayLike | None = ...,
+    frequencies: ArrayLike | None = ...,
     source_length: float | None = ...,
     split_source: float = ...,
     split_receiving: float = ...,
@@ -321,7 +321,7 @@ about 0.24 dB.
 | `ceiling_length` | Receiving-side ceiling length `LR`, in m (> 0). |
 | `plenum_height` | Plenum height `h`, in m (> 0). |
 | `sidewalls` | `"reflecting"` ($\epsilon = 2$, Default) or `"absorbing"` ($\epsilon = 1$); $\epsilon$ scales both the geometry penalty of Eq. (9.20) and the exponents of Eq. (9.18). |
-| `frequency` | Optional band centre frequencies, in Hz. |
+| `frequencies` | Optional band centre frequencies, in Hz. |
 | `attenuation_source` | Optional plenum power attenuation coefficient `mS` per band, in 1/m (> 0); switches to Eq. (9.18). |
 | `attenuation_receiving` | Optional `mR` per band, in 1/m (> 0); required together with *attenuation_source*. |
 | `source_length` | Source-side ceiling length `LS`, in m (Default: equal to *ceiling_length*). |

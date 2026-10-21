@@ -90,7 +90,7 @@ exact = 90.0 - 20.0 * np.log10(d)             # 90 dB a 1 m, sin reflexiones
 paths = [(1, 1, 1), (1, 1, 0.3), (0, 1, 0.5), (1, 0, 0.2), (-1, 0.5, 0.6)]
 traverses = [emission.MicrophoneTraverse.along(u, d, exact) for u in paths]
 fit = emission.inverse_square_law_deviations(
-    traverses, frequencies_hz=[1000.0], room="anechoic")
+    traverses, frequencies=[1000.0], room="anechoic")
 print(round(fit.maximum_qualified_radius_m, 2))   # 3.0 m
 print(fit.source_strength_db[:, 0].round(2))      # [90. 90. 90. 90. 90.]
 print(fit.largest_deviation_db.round(3))          # [0.]
@@ -111,7 +111,7 @@ excess = 10.0 * np.log10(1.0 + (d / (2.0 * wall - d)) ** 2)
 reflected = emission.MicrophoneTraverse.along(
     (1, 0, 0), d, 90.0 - 20.0 * np.log10(d) + excess)
 one = emission.inverse_square_law_deviations(
-    [reflected], frequencies_hz=[1000.0], room="anechoic")
+    [reflected], frequencies=[1000.0], room="anechoic")
 print(round(float(one.traverse_radius_m[0, 0]), 2))    # 2.15 m
 inside = d <= one.traverse_radius_m[0, 0]
 print(round(float(np.ptp(one.deviations_db[0][inside, 0])), 3))   # 1.903 dB
@@ -246,7 +246,7 @@ for name, towards, aims in paths:
         background_levels_db=np.full(grid.size, 25.0)))
 
 room = emission.inverse_square_law_deviations(
-    traverses, frequencies_hz=grid, room="hemi-anechoic",
+    traverses, frequencies=grid, room="hemi-anechoic",
     source_box_m=((-0.05, -0.05, 0.0), (0.05, 0.05, 0.08)))
 print(room.origin_m.round(3))                 # [0.005 0.05  0.   ] m
 print(room.band_radius_m.round(2))            # [2.76 2.95 2.95 ... 2.95] m
@@ -254,10 +254,10 @@ print(room.largest_deviation_db.round(1))     # [2.5 2.3 1.2 1.2 1.3 1.3 1.2 ...
 print(round(room.maximum_qualified_radius_m, 2))   # 2.76 m
 
 foot = emission.inverse_square_law_deviations(
-    traverses, frequencies_hz=grid, room="hemi-anechoic", origin_m=(0.0, 0.0, 0.0))
+    traverses, frequencies=grid, room="hemi-anechoic", origin_m=(0.0, 0.0, 0.0))
 print(round(foot.maximum_qualified_radius_m, 2))   # 2.73 m
 at_centre = emission.inverse_square_law_deviations(
-    traverses, frequencies_hz=grid, room="hemi-anechoic", origin_m=centre)
+    traverses, frequencies=grid, room="hemi-anechoic", origin_m=centre)
 print(round(at_centre.maximum_qualified_radius_m, 2))   # 2.72 m
 print(at_centre.largest_deviation_db.round(1))     # [2.4 1.7 1.2 0.8 0.7 0.6 0.6 ...] dB
 ```
@@ -309,10 +309,10 @@ plt.show()
 
 | Función | Apartado | Devuelve | Notas |
 | :--- | :--- | :--- | :--- |
-| `MicrophoneTraverse(positions_m, levels_db, monitor_levels_db=None, background_levels_db=None, name="", targets=())` | 5.1.3.2, A.3.3 | un recorrido | `nan` marca un punto no medido a una frecuencia, que es como se escribe un paso que cambia con la frecuencia; `targets` nombra hacia qué se elige la trayectoria entre `"dihedral corner"`, `"trihedral corner"`, `"boundary centre"`, `"closest boundary"` y `"unique features"` |
-| `MicrophoneTraverse.along(direction, distances_m, levels_db, *, start_m=(0, 0, 0), ...)` | 5.1.3.2 | un recorrido | Trazado a lo largo de una recta |
-| `inverse_square_law_deviations(traverses, *, frequencies_hz, room, origin_m=None, source_box_m=None)` | Fórmulas (1) a (4) | `InverseSquareLawResult` | Una llamada por fuente de ensayo; `origin_m` o `source_box_m`, no las dos |
-| `inverse_square_law_tolerance_db(frequencies_hz, *, room)` | Tabla A.1 | límite por banda [dB] | Un tono se lee en la banda de tercio de octava que lo contiene |
+| `MicrophoneTraverse(positions_m, levels, monitor_levels_db=None, background_levels_db=None, name="", targets=())` | 5.1.3.2, A.3.3 | un recorrido | `nan` marca un punto no medido a una frecuencia, que es como se escribe un paso que cambia con la frecuencia; `targets` nombra hacia qué se elige la trayectoria entre `"dihedral corner"`, `"trihedral corner"`, `"boundary centre"`, `"closest boundary"` y `"unique features"` |
+| `MicrophoneTraverse.along(direction, distances, levels, *, start_m=(0, 0, 0), ...)` | 5.1.3.2 | un recorrido | Trazado a lo largo de una recta |
+| `inverse_square_law_deviations(traverses, *, frequencies, room, origin_m=None, source_box_m=None)` | Fórmulas (1) a (4) | `InverseSquareLawResult` | Una llamada por fuente de ensayo; `origin_m` o `source_box_m`, no las dos |
+| `inverse_square_law_tolerance_db(frequencies, *, room)` | Tabla A.1 | límite por banda [dB] | Un tono se lee en la banda de tercio de octava que lo contiene |
 | `qualification_frequencies_hz(low_hz=100.0, high_hz=10000.0)` | A.2.3 | frecuencias [Hz] | Once en el intervalo mínimo |
 
 El resultado lleva las distancias, los niveles corregidos, $b$ por recorrido y
@@ -376,7 +376,7 @@ rows = np.arange(32)[:, None]
 bands = np.arange(grid.size)[None, :]
 source = emission.verify_source_directionality(
     80.0 + 0.4 * np.sin(0.7 * rows + bands) * (1.0 + bands / 10.0),
-    frequencies_hz=grid, room="hemi-anechoic")
+    frequencies=grid, room="hemi-anechoic")
 print(source.passes)                                         # True
 
 check = emission.check_free_field(
@@ -435,12 +435,12 @@ los 100 mm, y cualifica sobre un intervalo reducido:
 
 ```python
 coarse = [emission.MicrophoneTraverse(
-              positions_m=t.positions_m[::4], levels_db=t.levels_db[::4],
+              positions_m=t.positions_m[::4], levels=t.levels[::4],
               background_levels_db=t.background_levels_db[::4], name=t.name,
               targets=t.targets)
           for t in traverses]
 room100 = emission.inverse_square_law_deviations(
-    coarse, frequencies_hz=grid, room="hemi-anechoic",
+    coarse, frequencies=grid, room="hemi-anechoic",
     source_box_m=((-0.05, -0.05, 0.0), (0.05, 0.05, 0.08)))
 check100 = emission.check_free_field(
     room100, bandwidth="discrete-frequency", source_directionality=source,
@@ -482,9 +482,9 @@ print(caught[0].message)
 | Función | Apartado | Devuelve | Notas |
 | :--- | :--- | :--- | :--- |
 | `check_free_field(results, *, bandwidth, source_directionality=None, measurement_radius_m=None, reflecting_plane_absorption_coefficient=None, reflecting_plane_margin_m=None, paths_in_working_area=None, speed_of_sound=343.0)` | Anexo A modificado | `FreeFieldCheck` | Un resultado por fuente de ensayo, con frecuencias disjuntas; lo que no se dio queda en `not_judged` |
-| `verify_source_directionality(levels_db, *, frequencies_hz, room)` | Anexo B de ISO 26101 | `SourceDirectionalityResult` | 32 o 64 posiciones, una columna por banda |
+| `verify_source_directionality(levels, *, frequencies, room)` | Anexo B de ISO 26101 | `SourceDirectionalityResult` | 32 o 64 posiciones, una columna por banda |
 | `directionality_positions(room, *, radius_m=1.5)` | B.3.2 de ISO 26101 | posiciones [m] | Elevación desde la vertical, acimut de 45° en 45° |
-| `directionality_tolerance_db(frequencies_hz, *, room)` | Tabla B.1 | límite por banda [dB] | 5 dB por encima de 10 kHz |
+| `directionality_tolerance_db(frequencies, *, room)` | Tabla B.1 | límite por banda [dB] | 5 dB por encima de 10 kHz |
 
 ## 5. Una fuente sonora de referencia (ISO 6926)
 
@@ -544,7 +544,7 @@ levels = (source_lw[None, :] - 10.0 * np.log10(2.0 * np.pi * 2.0**2)
 air = emission.CalibrationConditions(
     temperature_c=20.0, static_pressure_kpa=98.6, air_absorption_db_per_m=alpha)
 calibration = emission.reference_source_calibration(
-    levels, frequencies_hz=thirds, arrangement="fixed", conditions=air)
+    levels, frequencies=thirds, arrangement="fixed", conditions=air)
 print(calibration.sound_power_level_db[[0, 10, 20]].round(2))  # [86.06 87.77 78.41] dB
 print(round(calibration.c1_db, 3), calibration.c2_db[0].round(3))   # -0.031 0.087
 print(calibration.c3_db[[0, 10, 20]].round(3))                 # [0.001 0.009 0.351] dB
@@ -593,7 +593,7 @@ print(verdict.supply_variation_db.max().round(2), verdict.supply_met)   # 0.18 T
 drift = emission.verify_reference_source_drift(
     calibration.sound_power_level_db,
     calibration.sound_power_level_db + np.where(thirds < 160.0, 1.2, 0.3),
-    frequencies_hz=thirds)
+    frequencies=thirds)
 print(drift.passes, drift.recalibration_required)            # False True
 ```
 
@@ -682,15 +682,15 @@ ensayo.
 
 | Función | Apartado | Devuelve | Notas |
 | :--- | :--- | :--- | :--- |
-| `reference_source_calibration(levels_db, *, frequencies_hz, arrangement, background_levels_db=None, maximum_levels_db=None, conditions=None, radiation="unknown", knee_frequency_hz=None, c2_db=None, intensity_sound_power_level_db=None, room_qualification=None, coverage_factor=1.96)` | 8, fórmula (2) | `ReferenceSourceCalibration` | `arrangement` es `"paths"` o `"fixed"`, la columna de la tabla 2; `room_qualification` avisa cuando la sala no cubre las bandas a 2 m (8.1) |
+| `reference_source_calibration(levels, *, frequencies, arrangement, background_levels_db=None, maximum_levels_db=None, conditions=None, radiation="unknown", knee_frequency_hz=None, c2_db=None, intensity_sound_power_level_db=None, room_qualification=None, coverage_factor=1.96)` | 8, fórmula (2) | `ReferenceSourceCalibration` | `arrangement` es `"paths"` o `"fixed"`, la columna de la tabla 2; `room_qualification` avisa cuando la sala no cubre las bandas a 2 m (8.1) |
 | `CalibrationConditions(*, temperature_c=23.0, static_pressure_kpa=101.325, air_absorption_db_per_m=None)` | 4, 8.4 | el aire de la fórmula (2) | Temperatura y presión estática para $C_1$ y $C_2$, $a(f)$ por banda para $C_3$ |
-| `ReferenceSourceCalibration.sound_power_level_at(frequencies_hz, *, bandwidth="one-third-octave", temperature_c=None, static_pressure_kpa=None)` | 8.4 | $L_W$ por banda [dB] | Con las condiciones de un ensayo, $L_W - C_2$ allí |
-| `verify_reference_sound_source(calibration, *, frequencies_hz=None, repeated_levels_db=None, supply_variation_db=None, directivity_index_db=None, reverberation_rooms_only=False)` | 5.2, 5.4, 5.5 | `ReferenceSoundSourceVerdict` | Tres repeticiones de potencia o cinco de presión; el mayor cambio en el intervalo de alimentación declarado |
-| `verify_reference_source_drift(reference_levels_db, latest_levels_db, *, frequencies_hz)` | 5.6 | `ReferenceSourceDriftResult` | 2,83 veces la tabla 1 |
-| `repeatability_standard_deviation(levels_db)` | Fórmula (1) | $\sigma_r$ por banda [dB] | Respecto a la media energética |
-| `radiation_impedance_correction(*, temperature_c=23.0, static_pressure_kpa=101.325, radiation="unknown", frequencies_hz=None, knee_frequency_hz=None)` | Anexo A | $C_2$ [dB] | Monopolo, dipolo aerodinámico o desconocida |
+| `ReferenceSourceCalibration.sound_power_level_at(frequencies, *, bandwidth="one-third-octave", temperature_c=None, static_pressure_kpa=None)` | 8.4 | $L_W$ por banda [dB] | Con las condiciones de un ensayo, $L_W - C_2$ allí |
+| `verify_reference_sound_source(calibration, *, frequencies=None, repeated_levels_db=None, supply_variation_db=None, directivity_index_db=None, reverberation_rooms_only=False)` | 5.2, 5.4, 5.5 | `ReferenceSoundSourceVerdict` | Tres repeticiones de potencia o cinco de presión; el mayor cambio en el intervalo de alimentación declarado |
+| `verify_reference_source_drift(reference_levels_db, latest_levels_db, *, frequencies)` | 5.6 | `ReferenceSourceDriftResult` | 2,83 veces la tabla 1 |
+| `repeatability_standard_deviation(levels)` | Fórmula (1) | $\sigma_r$ por banda [dB] | Respecto a la media energética |
+| `radiation_impedance_correction(*, temperature_c=23.0, static_pressure_kpa=101.325, radiation="unknown", frequencies=None, knee_frequency_hz=None)` | Anexo A | $C_2$ [dB] | Monopolo, dipolo aerodinámico o desconocida |
 | `knee_frequency(d0_m, *, speed_of_sound=343.0)` | Fórmula (A.1) | $f_\mathrm{k}$ [Hz] | $c/(2\pi d_0)$ |
-| `reference_source_reproducibility_db(frequencies_hz, *, environment, arrangement=None, bandwidth="one-third-octave")` | Tabla 2 | $\sigma_R$ por banda [dB] | Las columnas de tercio de octava y de octava se leen por separado |
+| `reference_source_reproducibility_db(frequencies, *, environment, arrangement=None, bandwidth="one-third-octave")` | Tabla 2 | $\sigma_R$ por banda [dB] | Las columnas de tercio de octava y de octava se leen por separado |
 
 La fórmula (A.1) tiene un defecto propio: el anexo A define su $d_0$ como la
 mitad de la dimensión característica de la fuente de ISO 3745, que el

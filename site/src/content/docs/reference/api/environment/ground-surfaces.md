@@ -328,7 +328,7 @@ into both.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
+| `frequency` | Frequency `f`, in hertz (scalar or array). |
 | `model` | `"delany_bazley"` (Default) or `"miki"`, the two ground models the outdoor functions take. |
 | `fluid` | The air above the ground, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air), the air the two models were published with, as the outdoor functions default to). |
 

@@ -121,7 +121,7 @@ def test_tonal_frequency_tracks_tone(
     peak_band = int(np.argmax(ref_1k_40.specific_tonality))
     # The peaking band centres on the tone and its estimated tonal frequency
     # matches (Formulae 39/55).
-    assert ref_1k_40.centre_frequencies[peak_band] == pytest.approx(1000.0, rel=0.15)
+    assert ref_1k_40.frequencies[peak_band] == pytest.approx(1000.0, rel=0.15)
     assert ref_1k_40.tonal_frequencies[peak_band] == pytest.approx(1000.0, rel=0.05)
 
 
@@ -161,7 +161,7 @@ def test_specific_tonality_peaks_near_tone(
     ref_1k_40: psychoacoustics.EcmaTonality,
 ) -> None:
     peak_band = int(np.argmax(ref_1k_40.specific_tonality))
-    assert ref_1k_40.centre_frequencies[peak_band] == pytest.approx(1000.0, rel=0.15)
+    assert ref_1k_40.frequencies[peak_band] == pytest.approx(1000.0, rel=0.15)
 
 
 def test_user_band_excluding_tone_lowers_tonality() -> None:
@@ -284,7 +284,7 @@ def test_result_structure(ref_1k_40: psychoacoustics.EcmaTonality) -> None:
     assert ref_1k_40.bark.shape == (53,)
     assert ref_1k_40.bark[0] == pytest.approx(0.5)
     assert ref_1k_40.bark[-1] == pytest.approx(26.5)
-    assert ref_1k_40.centre_frequencies.shape == (53,)
+    assert ref_1k_40.frequencies.shape == (53,)
     assert ref_1k_40.times.shape == ref_1k_40.tonality_vs_time.shape
     assert ref_1k_40.times.shape == ref_1k_40.tonal_frequency_vs_time.shape
     assert ref_1k_40.field == "free"
@@ -304,7 +304,7 @@ def test_tonal_frequencies_off_the_band_axis_are_refused(
     scale with the specific tonality and time with the tonality, and never
     touch f_ton,z(z), so an array one band short or one band long draws a
     perfectly ordinary figure and reaches the caller intact, out of step with
-    the ``centre_frequencies`` it is read against.
+    the ``frequencies`` it is read against.
     """
     values = ref_1k_40.tonal_frequencies
     wrong = values[:-1] if trim else np.append(values, values[-1])

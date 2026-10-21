@@ -324,7 +324,7 @@ def test_result_structure() -> None:
     assert isinstance(result, psychoacoustics.MooreGlasbergLoudness)
     assert result.specific.shape == (372,)
     assert result.erb_number.shape == (372,)
-    assert result.centre_frequencies.shape == (372,)
+    assert result.frequencies.shape == (372,)
     assert result.erb_number[0] == pytest.approx(1.8)
     assert result.erb_number[-1] == pytest.approx(38.9)
     assert result.field == "free"
@@ -417,22 +417,20 @@ def test_invalid_inputs() -> None:
 
 
 def test_a_result_refuses_a_centre_frequency_per_filter_missing() -> None:
-    """``centre_frequencies`` is the column nothing in the library reads.
+    """``frequencies`` is the column nothing in the library reads.
 
     The chart draws the specific loudness against ``erb_number`` and takes the
     ends of that scale for its x limits, so a mismatch between those two stops
     matplotlib with a complaint about a first dimension. Nothing opens
-    ``centre_frequencies`` at all, here or in any renderer: one value short it
+    ``frequencies`` at all, here or in any renderer: one value short it
     plots and titles exactly as before, and every value of the pattern is then
     filed under the next auditory filter along. For the tone below the peak of
     the pattern moves from 1000.9 Hz to 1014.2 Hz without changing by a sone.
     """
     result = psychoacoustics.loudness_moore_glasberg_from_spectrum([(1000.0, 60.0)])
-    one_filter_short = result.centre_frequencies[1:]
-    with pytest.raises(
-        ValueError, match=rf"'centre_frequencies' \({one_filter_short.size}\)"
-    ):
-        dataclasses.replace(result, centre_frequencies=one_filter_short)
+    one_filter_short = result.frequencies[1:]
+    with pytest.raises(ValueError, match=rf"'frequencies' \({one_filter_short.size}\)"):
+        dataclasses.replace(result, frequencies=one_filter_short)
 
 
 def test_a_result_refuses_a_centre_frequency_column_of_pairs() -> None:
@@ -444,9 +442,9 @@ def test_a_result_refuses_a_centre_frequency_column_of_pairs() -> None:
     where the standard has one. The rank pin is what refuses it.
     """
     result = psychoacoustics.loudness_moore_glasberg_from_spectrum([(1000.0, 60.0)])
-    pairs = np.column_stack([result.centre_frequencies, result.centre_frequencies])
-    with pytest.raises(ValueError, match="'centre_frequencies' must have one axis"):
-        dataclasses.replace(result, centre_frequencies=pairs)
+    pairs = np.column_stack([result.frequencies, result.frequencies])
+    with pytest.raises(ValueError, match="'frequencies' must have one axis"):
+        dataclasses.replace(result, frequencies=pairs)
 
 
 # --------------------------------------------------------------------------

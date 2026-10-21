@@ -3012,8 +3012,8 @@ class BandedRow(CatalogueRow):
             self._band_field(band_hz), wanted_by=f"the {band_hz} Hz band"
         )
 
-    def values_at(self, frequencies_hz: ArrayLike) -> NDArray[np.float64]:
-        """The row's value at each of *frequencies_hz*, or a refusal.
+    def values_at(self, frequencies: ArrayLike) -> NDArray[np.float64]:
+        """The row's value at each of *frequencies*, or a refusal.
 
         The adapter for a function that takes one value per band by position
         (the absorption of a surface in a reverberation formula, the
@@ -3030,7 +3030,7 @@ class BandedRow(CatalogueRow):
         refuses it, with what the page had there; it is never read as zero
         and never filled from its neighbours.
 
-        :param frequencies_hz: Band centre frequencies, in hertz, of any
+        :param frequencies: Band centre frequencies, in hertz, of any
             shape.
         :return: A new array of the same shape, one value per frequency.
         :raises ValueError: for a frequency that is not finite and positive,
@@ -3038,11 +3038,11 @@ class BandedRow(CatalogueRow):
             for a band this row does not print, naming the row, the band and
             what the page had in that cell.
         """
-        wanted = np.asarray(frequencies_hz, dtype=np.float64)
+        wanted = np.asarray(frequencies, dtype=np.float64)
         flat = wanted.reshape(-1)
         if not (np.all(np.isfinite(flat)) and np.all(flat > 0.0)):
             msg = (
-                f"frequencies_hz holds {_quote(flat.tolist())}, and a band "
+                f"frequencies holds {_quote(flat.tolist())}, and a band "
                 "centre is a finite frequency above zero"
             )
             raise ValueError(msg)

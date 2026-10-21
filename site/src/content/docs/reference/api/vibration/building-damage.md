@@ -292,7 +292,7 @@ draws; pass *frequency* to sample the same polyline elsewhere.
 | Name | Description |
 | :--- | :--- |
 | `building_class` | One of [`BUILDING_CLASSES`](/phonometry/reference/api/vibration/building-damage/#building_classes). |
-| `frequency` | Frequencies to sample at, in hertz, or `None` for the four corners of Table 1. |
+| `frequency` | Frequency or frequencies to sample at, in hertz, or `None` for the four corners of Table 1. |
 
 **Returns:** `(frequency_hz, guideline_mm_s)`.
 

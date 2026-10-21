@@ -402,12 +402,12 @@ def _validated_curves(
     :raises ValueError: If a curve is missing from the result or the three do
         not share a shape.
     """
-    centers = result.band_centers
+    centers = result.frequencies
     measured = result.measured
     shifted = result.shifted_reference
     if centers is None or measured is None or shifted is None:
         msg = (
-            "render_iso717_report() needs 'band_centers', 'measured' and "
+            "render_iso717_report() needs 'frequencies', 'measured' and "
             "'shifted_reference' on the result."
         )
         raise ValueError(msg)
@@ -417,7 +417,7 @@ def _validated_curves(
     require_equal_shapes(
         f"{type(result).__name__}.report",
         {
-            "band_centers": centers.shape,
+            "frequencies": centers.shape,
             "measured": measured.shape,
             "shifted_reference": shifted.shape,
         },
@@ -465,7 +465,7 @@ def render_iso717_report(
         :class:`~phonometry.building.measurement.ratings.WeightedRatingResult`
         (airborne, ISO 717-1) or
         :class:`~phonometry.building.measurement.ratings.ImpactRatingResult` (impact,
-        ISO 717-2) carrying the per-band ``band_centers``, ``measured`` and
+        ISO 717-2) carrying the per-band ``frequencies``, ``measured`` and
         ``shifted_reference`` curves.
     :param path: Destination path of the PDF file.
     :param metadata: Optional :class:`ReportMetadata`; ``None`` produces a

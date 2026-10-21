@@ -141,7 +141,7 @@ def plate_loss_factor(
     Estimated from the plate's structural reverberation time; identical to the
     ISO 10848 total loss factor.
 
-    :param frequency: Band centre frequency ``f``, in hertz (per band).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or per band).
     :param reverberation_time: Structural reverberation time ``Ts``, in s.
     :return: The loss factor ``eta`` (dimensionless) per band.
     """
@@ -183,7 +183,7 @@ def structure_borne_power_level(
 
     :param velocity_level: Spatial mean plate velocity level ``L_v`` (scalar or
         per band), in dB re ``v0``.
-    :param frequency: Band centre frequency ``f``, in hertz.
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array).
     :param mass_per_area: Plate mass per unit area ``m``, in kg/m^2 (> 0).
     :param area: Plate area ``S``, in m^2 (> 0).
     :param loss_factor: Plate loss factor ``eta`` (scalar or per band, > 0).
@@ -382,7 +382,7 @@ def reception_plate_power(
 
     :param velocity_level: Spatial mean plate velocity level ``L_v`` (per band),
         in dB re 1e-9 m/s (see :func:`spatial_mean_velocity_level`).
-    :param frequency: Band centre frequencies ``f``, in hertz.
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or per band).
     :param mass_per_area: Plate mass per unit area ``m``, in kg/m^2 (> 0).
     :param area: Plate area ``S``, in m^2 (> 0).
     :param loss_factor: Plate loss factor ``eta`` (per band), or ``None`` to

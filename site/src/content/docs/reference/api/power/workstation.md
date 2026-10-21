@@ -451,7 +451,7 @@ NEGLIGIBLE_BACKGROUND_MARGIN_DB = 15.0
 ## operating_standard_deviation
 
 ```python
-operating_standard_deviation(levels_db: ArrayLike) -> float
+operating_standard_deviation(levels: ArrayLike) -> float
 ```
 
 Standard deviation of the operating and mounting conditions.
@@ -474,7 +474,7 @@ ISO 11200:2014 Annex B disagree with each other about that, and
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | Repeated readings under the same conditions, in decibels; at least two. |
+| `levels` | Repeated readings under the same conditions, in decibels; at least two. |
 
 **Returns:** $\sigma_\mathrm{omc}$ in decibels.
 
@@ -487,7 +487,7 @@ ISO 11200:2014 Annex B disagree with each other about that, and
 ## subinterval_level
 
 ```python
-subinterval_level(levels_db: ArrayLike, durations_s: ArrayLike) -> float
+subinterval_level(levels: ArrayLike, durations_s: ArrayLike) -> float
 ```
 
 One level for a cycle made of operating periods of different lengths.
@@ -505,7 +505,7 @@ weighted by how long each lasts, not by how many there are.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The level of each sub-interval, in decibels. |
+| `levels` | The level of each sub-interval, in decibels. |
 | `durations_s` | How long each lasted, in seconds, strictly positive and of the same length. |
 
 **Returns:** The level of the whole interval, in decibels.

@@ -195,7 +195,7 @@ def metadiffuser_reflection(
     its neighbours and the incidence ``angle_rad`` enters only through the front
     air impedance.
 
-    :param frequency: Frequency vector ``f``, in hertz.
+    :param frequency: Frequency ``f``, in hertz (scalar or array).
     :param wells: Sequence of :class:`MetadiffuserWell` (or ``None`` for a
         flat rigid strip) describing one period of the panel face.
     :param depth: Panel depth ``L`` common to all slits, in metres.
@@ -353,6 +353,7 @@ def metadiffuser_diffusion_spectrum(
     if freqs.ndim != 1 or freqs.size == 0:
         msg = "'frequencies' must be a non-empty 1-D sequence."
         raise ValueError(msg)
+    freqs = require_positive_array(freqs, "frequencies")
     cells = _check_panel(wells, depth, period_m)
     flat = np.ones(len(cells), dtype=np.complex128)
     result = metadiffuser_reflection(

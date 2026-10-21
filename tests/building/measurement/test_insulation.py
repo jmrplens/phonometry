@@ -693,7 +693,7 @@ def test_weighted_rating_manual_es_facade_traffic_index() -> None:
     assert res.rating + res.ctr == pytest.approx(32.8, abs=1.0)
 
 
-@pytest.mark.parametrize("field", ["band_centers", "measured", "shifted_reference"])
+@pytest.mark.parametrize("field", ["frequencies", "measured", "shifted_reference"])
 def test_rating_band_curves_must_be_finite(field: str) -> None:
     """The ISO 717 fiche reads the stored curves raw, so they are pinned.
 

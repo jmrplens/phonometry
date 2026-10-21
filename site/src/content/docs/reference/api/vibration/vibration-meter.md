@@ -73,7 +73,7 @@ hardware. Passing here is necessary for conformity and is not conformity.
 ```python
 assess_short_term_vibration(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     building_class: str,
     numtaps: int | None = None,
@@ -87,7 +87,7 @@ Judge short-term vibration on a building by Annex E.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity at the foundation, in millimetres per second (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). |
 | `numtaps` | See [`assessment_weighting_taps`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_taps). |
 
@@ -112,7 +112,7 @@ ASSESSMENT_GUIDE_VALUES_MM_S = {'commercial': 20.0, 'residential': 5.0, 'sensiti
 ```python
 assessment_velocity(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     building_class: str,
     numtaps: int | None = None,
@@ -130,7 +130,7 @@ in time with the record it came from.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). Annex E filters the unweighted signal, which has already been band-limited by 5.2.3. |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). |
 | `numtaps` | See [`assessment_weighting_taps`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_taps). |
 
@@ -146,7 +146,7 @@ in time with the record it came from.
 
 ```python
 assessment_weighting_response(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     building_class: str,
 ) -> NDArray[np.float64]
@@ -165,7 +165,7 @@ up to the Nyquist frequency rather than stopping at 100 Hz.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Frequencies, in hertz. |
+| `frequencies` | Frequencies, in hertz. |
 | `building_class` | The row of DIN 4150-3:1999-02 Table 1, as [`ASSESSMENT_GUIDE_VALUES_MM_S`](/phonometry/reference/api/vibration/vibration-meter/#assessment_guide_values_mm_s) keys it. |
 
 **Returns:** The target magnitude, dimensionless, 1 below 10 Hz.
@@ -180,7 +180,7 @@ up to the Nyquist frequency rather than stopping at 100 Hz.
 
 ```python
 assessment_weighting_taps(
-    fs_hz: float,
+    fs: float,
     *,
     building_class: str,
     numtaps: int | None = None,
@@ -199,7 +199,7 @@ removes.
 
 | Name | Description |
 | :--- | :--- |
-| `fs_hz` | Sampling frequency, in hertz. Table E.1 requires the Nyquist frequency to be above 315 Hz where the meter reaches that far, and this refuses a rate below 630 Hz for the same reason. |
+| `fs` | Sampling frequency, in hertz. Table E.1 requires the Nyquist frequency to be above 315 Hz where the meter reaches that far, and this refuses a rate below 630 Hz for the same reason. |
 | `building_class` | See [`assessment_weighting_response`](/phonometry/reference/api/vibration/vibration-meter/#assessment_weighting_response). |
 | `numtaps` | Length of the filter, odd. The default resolves the 10 Hz corner of the target with room to spare, at half a second of taps. |
 
@@ -226,7 +226,7 @@ AssessmentVelocity(
     assessment_velocity_mm_s: float,
     building_class: str,
     velocity_mm_s: NDArray[np.float64],
-    fs_hz: float,
+    fs: float,
 )
 ```
 
@@ -239,7 +239,7 @@ One record judged by Annex E, without a dominant frequency.
 | `assessment_velocity_mm_s` | $\vert v_{Bn}\vert _\mathrm{max}$, the peak of the weighted velocity, in millimetres per second. |
 | `building_class` | The row of DIN 4150-3 Table 1 that was used. |
 | `velocity_mm_s` | The weighted velocity itself, one value per sample. |
-| `fs_hz` | The sampling frequency the record was read at. |
+| `fs` | The sampling frequency the record was read at. |
 
 The Table E.2 value (`guide_value_mm_s`) is read from the building
 class, so a record cannot be judged against another value.
@@ -302,7 +302,7 @@ BAND_LIMIT_CORNER_FACTOR = 0.8
 
 ```python
 band_limitation_response(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     working_range: str = 'building',
 ) -> NDArray[np.complex128]
@@ -314,7 +314,7 @@ The band limitation of the unweighted signal, Formula (3).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Frequencies, in hertz. |
+| `frequencies` | Frequencies, in hertz. |
 | `working_range` | `"building"` (1 Hz to 80 Hz, the default) or `"railway"` (4 Hz to 315 Hz); see [`WORKING_RANGES_HZ`](/phonometry/reference/api/vibration/vibration-meter/#working_ranges_hz). |
 
 **Returns:** The complex response $H_{u\mathrm{Soll}}$, whose magnitude is Formula (5).
@@ -330,7 +330,7 @@ The band limitation of the unweighted signal, Formula (3).
 ```python
 dominant_frequency(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     method: Literal['zero_crossing', 'fourier'] | str = 'zero_crossing',
 ) -> DominantFrequency
@@ -350,7 +350,7 @@ has to be reported.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `method` | `"zero_crossing"` (D a), the default: the two zero crossings around the largest amplitude are half a period apart) or `"fourier"` (D b): the largest value of the spectrum of the whole event, with the runner-up reported beside it. |
 
 **Returns:** The frequency and how it was found, as a [`DominantFrequency`](/phonometry/reference/api/vibration/vibration-meter/#dominantfrequency).
@@ -434,7 +434,7 @@ KB_REFERENCE_INDICATIONS = {'peak_velocity_mm_s': 1.0, 'kbf': 0.667, 'kbf_max': 
 ```python
 kb_signal(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     working_range: str = 'building',
 ) -> NDArray[np.float64]
@@ -452,7 +452,7 @@ per second for the result to mean what the standard says.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
 
 **Returns:** $KB(t)$, one value per sample.
@@ -483,7 +483,7 @@ KB_TIME_CONSTANT_S = 0.125
 
 ```python
 kb_weighting_response(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     working_range: str = 'building',
 ) -> NDArray[np.complex128]
@@ -495,7 +495,7 @@ The KB frequency weighting, Formula (4).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Frequencies, in hertz. |
+| `frequencies` | Frequencies, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
 
 **Returns:** The complex response $H_{B\mathrm{Soll}}$, whose magnitude is Formula (6).
@@ -511,7 +511,7 @@ The KB frequency weighting, Formula (4).
 ```python
 kbf_signal(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     working_range: str = 'building',
     time_constant_s: float = 0.125,
@@ -532,7 +532,7 @@ why a measurement is started before the event it is about.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
 | `time_constant_s` | The averaging time constant, in seconds. The standard fixes it at 0,125 s and the parameter exists so a comparison with another time weighting can be written down, not so a meter can use one. |
 
@@ -549,7 +549,7 @@ why a measurement is started before the event it is about.
 ```python
 measure_vibration_immission(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     working_range: str = 'building',
     takt_duration_s: float = 30.0,
@@ -572,7 +572,7 @@ of quiet removes it, which is also how a real measurement is made.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The measured velocity, in millimetres per second (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
 | `takt_duration_s` | The clock interval, in seconds (default 30 s). |
 
@@ -596,7 +596,7 @@ RESPONSE_TOLERANCE_LOWER_PERCENT = ((1.25, 0.8, 10.0), (0.5, 2.0, 20.0))
 
 ```python
 response_tolerance_percent(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     working_range: str = 'building',
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]
@@ -608,7 +608,7 @@ The limits of Tables 2 and 3 at each frequency, in per cent.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Frequencies, in hertz. |
+| `frequencies` | Frequencies, in hertz. |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
 
 **Returns:** `(lower, upper)`: the largest deviation allowed below and above the design response, both as positive percentages. A lower limit of 100 % is the standard declining to constrain the response from below outside the working range.
@@ -640,7 +640,7 @@ TAKT_DURATION_S = 30.0
 ```python
 takt_maxima(
     kbf: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     takt_duration_s: float = 30.0,
 ) -> NDArray[np.float64]
@@ -657,7 +657,7 @@ part-interval is dropped rather than scaled up.
 | Name | Description |
 | :--- | :--- |
 | `kbf` | The $KB_\mathrm{F}(t)$ signal (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `takt_duration_s` | The clock interval, in seconds (default 30 s). |
 
 **Returns:** One maximum per whole clock interval, in order. Empty when the record is shorter than one interval.
@@ -715,7 +715,7 @@ VELOCITY_DETECTION_LIMIT_MM_S = 0.05
 
 ```python
 verify_vibration_meter(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     measured_response: ArrayLike,
     *,
     weighting: Literal['kb', 'unweighted'] | str = 'kb',
@@ -737,7 +737,7 @@ dropped from the verdict rather than passed for free.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies the response was measured at, in hertz. The reference frequency has to be among them. |
+| `frequencies` | The frequencies the response was measured at, in hertz. The reference frequency has to be among them. |
 | `measured_response` | The measured amplitude response at those frequencies, in any consistent unit: only its shape is graded. |
 | `weighting` | `"kb"` for the weighted response of Formula (4), the default, or `"unweighted"` for the band limitation of Formula (3). |
 | `working_range` | See [`band_limitation_response`](/phonometry/reference/api/vibration/vibration-meter/#band_limitation_response). |
@@ -760,7 +760,7 @@ VibrationMeterReading(
     kbf_max: float,
     takt_maxima: NDArray[np.float64],
     kbf_takt_rms: float,
-    fs_hz: float,
+    fs: float,
     measuring_time_s: float,
     averaging_time_s: float,
     working_range: str,
@@ -778,7 +778,7 @@ What a meter displays for one record (5.1.6.1).
 | `kbf_max` | $KB_\mathrm{Fmax}$, its maximum. |
 | `takt_maxima` | The clock maxima, one per whole clock interval. |
 | `kbf_takt_rms` | $KB_\mathrm{FTm}$ of Formula (2). |
-| `fs_hz` | The sampling frequency the record was read at. |
+| `fs` | The sampling frequency the record was read at. |
 | `measuring_time_s` | $T_M$, the length of the record. |
 | `averaging_time_s` | $T_m$, the whole clock intervals in it. |
 | `working_range` | The working range the chain was built for. |
@@ -820,7 +820,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ```python
 VibrationMeterVerification(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     deviation_percent: NDArray[np.float64],
     measured_response: NDArray[np.float64],
     weighting: str,
@@ -835,7 +835,7 @@ One measured amplitude response against Tables 2 and 3.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies the response was measured at. |
+| `frequencies` | The frequencies the response was measured at. |
 | `deviation_percent` | `F(f)` of Formula (7) at each of them: the measured response over the design response, both normalised at the reference frequency, as a percentage departure from unity. |
 | `measured_response` | The measured amplitude response at each of them, as supplied, which footnote a of Table 3 reads. |
 | `weighting` | `"kb"` or `"unweighted"`, which design response the deviation is against. |

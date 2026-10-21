@@ -380,6 +380,10 @@ class TestValidation:
         with pytest.raises(ValueError, match="'energy1' must be strictly positive"):
             power_injection_clf(500.0, bad, 0.1, 4.4e-3, 2.4e-3, 1.0, 1.0)
 
+    def test_a_band_axis_that_is_not_positive_is_named_frequencies(self) -> None:
+        with pytest.raises(ValueError, match="'frequencies' must be strictly positive"):
+            power_injection_clf([-125.0, 250.0], 1.0, 0.1, 4.4e-3, 2.4e-3, 1.0, 1.0)
+
     def test_band_length_mismatch(self) -> None:
         with pytest.raises(
             ValueError,

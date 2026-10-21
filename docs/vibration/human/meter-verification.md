@@ -259,19 +259,19 @@ plt.show()
 # By hand, from the result's fields, mirroring what
 # WeightingVerification.plot() draws:
 upper, lower = vibration.weighting_tolerance_percent(
-    check.weighting, check.frequencies_hz
+    check.weighting, check.frequencies
 )
 inside = check.within_tolerance
 fig, ax = plt.subplots()
-ax.fill_between(check.frequencies_hz,
+ax.fill_between(check.frequencies,
                 check.design * (1.0 + lower / 100.0),
                 check.design * (1.0 + upper / 100.0),
                 color="#1f77b4", alpha=0.15, label="ISO 8041-1 tolerance")
-ax.plot(check.frequencies_hz, check.design, color="#1f77b4", lw=2.0,
+ax.plot(check.frequencies, check.design, color="#1f77b4", lw=2.0,
         label="design goal")
-ax.plot(check.frequencies_hz[inside], check.measured[inside], "o",
+ax.plot(check.frequencies[inside], check.measured[inside], "o",
         color="#2ca02c", label="within tolerance")
-ax.plot(check.frequencies_hz[~inside], check.measured[~inside], "X",
+ax.plot(check.frequencies[~inside], check.measured[~inside], "X",
         color="#d62728", markersize=9, label="outside tolerance")
 ax.set(xscale="log", yscale="log", xlabel="Frequency [Hz]",
        ylabel="Weighting factor")
@@ -898,7 +898,7 @@ try:
     vibration.verify_phase_response("Wk", octaves, np.zeros_like(octaves))
 except ValueError as error:
     print(error)
-# verify_phase_response: 'frequencies_hz' steps by a ratio of up to 2, and
+# verify_phase_response: 'frequencies' steps by a ratio of up to 2, and
 # ISO 8041-1:2017 12.11.1 asks for steps of not more than one third of an
 # octave (1.259). The design-goal phase is rebuilt on the grid it is given,
 # and on a coarser one it can land a whole turn away without the verdict

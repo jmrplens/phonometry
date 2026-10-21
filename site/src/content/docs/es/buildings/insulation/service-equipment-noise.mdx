@@ -329,8 +329,8 @@ están las seis bandas grises.*
 
 | Parámetro | Tipo | Unidades | Por defecto | Notas |
 | :--- | :--- | :--- | :--- | :--- |
-| `levels_db` | array | dB | obligatorio | Niveles por banda de cada lectura, `(lecturas, bandas)`; una fila para una sola lectura |
-| `frequencies_hz` | array | Hz | obligatorio | Frecuencias centrales nominales, crecientes: tercios de octava de 25 Hz a 10 kHz u octavas de 31,5 Hz a 8 kHz |
+| `levels` | array | dB | obligatorio | Niveles por banda de cada lectura, `(lecturas, bandas)`; una fila para una sola lectura |
+| `frequencies` | array | Hz | obligatorio | Frecuencias centrales nominales, crecientes: tercios de octava de 25 Hz a 10 kHz u octavas de 31,5 Hz a 8 kHz |
 | `quantity` | str | | obligatorio | `"Smax"`, `"Fmax"` o `"eq"`, la magnitud de la tabla 1; da nombre a los valores únicos |
 | `band` | str | | `"third"` | `"third"` u `"octave"`; el capítulo 6 pide tercios de octava, las octavas son opcionales |
 | `background_db` | array | dB | `None` | Un nivel por banda, o una fila por posición, promediada energéticamente |
@@ -440,7 +440,7 @@ varying = building.check_varying_background(
     [36.5, 35.0, 31.0, 27.5, 24.0, 21.0, 17.5],   # máximo del ruido de fondo en 12 min [dB]
     [44.0, 46.5, 43.0, 39.5, 36.0, 32.5, 28.0],   # el equipamiento, mismas bandas [dB]
     observation_time_s=720.0,
-    frequencies_hz=octaves,
+    frequencies=octaves,
 )
 print(varying.margin_ok, varying.passes)
 # [False  True  True  True  True  True  True] False

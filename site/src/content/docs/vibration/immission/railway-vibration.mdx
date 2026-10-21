@@ -70,8 +70,8 @@ import numpy as np
 
 from phonometry import vibration
 
-fs_hz = 2048
-t = np.arange(30 * fs_hz) / fs_hz
+fs = 2048
+t = np.arange(30 * fs) / fs
 rng = np.random.default_rng(7)
 envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
 bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
@@ -81,7 +81,7 @@ record = envelope * bogies * (
     + 0.03 * rng.standard_normal(t.size)
 )
 
-passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+passage = vibration.evaluate_train_passage(record, fs, t2_s=(6.75, 23.25))
 passage.plot()
 ```
 
@@ -97,8 +97,8 @@ import numpy as np
 
 from phonometry import vibration
 
-fs_hz = 2048
-t = np.arange(30 * fs_hz) / fs_hz
+fs = 2048
+t = np.arange(30 * fs) / fs
 rng = np.random.default_rng(7)
 envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
 bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
@@ -108,7 +108,7 @@ record = envelope * bogies * (
     + 0.03 * rng.standard_normal(t.size)
 )
 
-passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+passage = vibration.evaluate_train_passage(record, fs, t2_s=(6.75, 23.25))
 for name, (start, end), rms in zip(
     ("T1", "T2", "T3"), passage.intervals_s, passage.interval_rms_mm_s
 ):
@@ -141,11 +141,11 @@ import numpy as np
 
 from phonometry import vibration
 
-fs_hz = 2048
-t = np.arange(3 * fs_hz) / fs_hz
+fs = 2048
+t = np.arange(3 * fs) / fs
 one_mm_s_rms = np.sqrt(2) * np.sin(2 * np.pi * 40 * t)
-level = vibration.running_velocity_level(one_mm_s_rms, fs_hz)
-print(f"{level[-fs_hz:].mean():.2f} dB")  # 86.02 dB
+level = vibration.running_velocity_level(one_mm_s_rms, fs)
+print(f"{level[-fs:].mean():.2f} dB")  # 86.02 dB
 ```
 
 The average starts from rest, so the first stretch of any record reads low,
@@ -205,8 +205,8 @@ import numpy as np
 
 from phonometry import vibration
 
-fs_hz = 2048
-t = np.arange(30 * fs_hz) / fs_hz
+fs = 2048
+t = np.arange(30 * fs) / fs
 rng = np.random.default_rng(7)
 envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
 bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
@@ -216,16 +216,16 @@ record = envelope * bogies * (
     + 0.03 * rng.standard_normal(t.size)
 )
 
-passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+passage = vibration.evaluate_train_passage(record, fs, t2_s=(6.75, 23.25))
 ax = passage.plot_spectrum()
 
-t2 = slice(round(6.75 * fs_hz), round(23.25 * fs_hz))
-spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs_hz)
+t2 = slice(round(6.75 * fs), round(23.25 * fs))
+spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs)
 centres, rms = vibration.third_octaves_from_narrowband(
     spectrum.frequencies, spectrum.psd
 )
 narrow = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
-positions = [list(centres).index(band) for band in passage.band_centres_hz]
+positions = [list(centres).index(band) for band in passage.frequencies]
 ax.plot(range(len(positions)), narrow[positions], "x", label="T2 from the narrow band")
 ax.legend()
 ```
@@ -237,8 +237,8 @@ import numpy as np
 
 from phonometry import vibration
 
-fs_hz = 2048
-t = np.arange(30 * fs_hz) / fs_hz
+fs = 2048
+t = np.arange(30 * fs) / fs
 rng = np.random.default_rng(7)
 envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
 bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
@@ -248,8 +248,8 @@ record = envelope * bogies * (
     + 0.03 * rng.standard_normal(t.size)
 )
 
-passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
-bands = list(passage.band_centres_hz)
+passage = vibration.evaluate_train_passage(record, fs, t2_s=(6.75, 23.25))
+bands = list(passage.frequencies)
 for band in (40.0, 63.0):
     i = bands.index(band)
     print(
@@ -293,8 +293,8 @@ import numpy as np
 
 from phonometry import vibration
 
-fs_hz = 2048
-t = np.arange(30 * fs_hz) / fs_hz
+fs = 2048
+t = np.arange(30 * fs) / fs
 rng = np.random.default_rng(7)
 envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
 bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
@@ -303,11 +303,11 @@ record = envelope * bogies * (
     + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
     + 0.03 * rng.standard_normal(t.size)
 )
-passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+passage = vibration.evaluate_train_passage(record, fs, t2_s=(6.75, 23.25))
 
-t2 = slice(round(6.75 * fs_hz), round(23.25 * fs_hz))
-spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs_hz)
-print(f"block {spectrum.nperseg / fs_hz:.2f} s")  # 0.80 s
+t2 = slice(round(6.75 * fs), round(23.25 * fs))
+spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs)
+print(f"block {spectrum.nperseg / fs:.2f} s")  # 0.80 s
 centres, rms = vibration.third_octaves_from_narrowband(
     spectrum.frequencies, spectrum.psd
 )

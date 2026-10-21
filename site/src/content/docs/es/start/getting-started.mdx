@@ -471,9 +471,11 @@ poco sobre las bandas de 12,5 o 16 Hz por muchos dígitos que devuelva.
 
 Jupyter, JupyterLab, VS Code y Colab muestran el valor de la última línea de
 una celda, y un resultado se muestra como una tabla de sus campos: cada uno con
-su unidad cuando su nombre la lleva (`_db`, `_hz`, `_m`...), cada array en una
-línea con su forma y el intervalo de sus valores, nunca los valores, así que
-los fotogramas de una simulación ocupan una sola fila. Un veredicto muestra su
+su unidad cuando su nombre la lleva (`_db`, `_hz`, `_m`...) o es un eje que la
+API nombra por el concepto a secas (`frequencies` en hercios, `levels` en
+decibelios, `times` en segundos), cada array en una línea con su forma y el
+intervalo de sus valores, nunca los valores, así que los fotogramas de una
+simulación ocupan una sola fila. Un veredicto muestra su
 resultado, PASS o FAIL, en el título. Mostrar la tabla lee los campos y, en un
 veredicto, `passes`, que puede leer otras propiedades del veredicto; no dibuja
 nada ni ejecuta nada más. `print()` y `repr()` no cambian: el repr de la
@@ -499,7 +501,7 @@ bank        # la última línea de la celda: el cuaderno muestra su tabla
 
 Jupyter lo muestra bajo la celda como esta tabla:
 
-<div class="phonometry-record"><table style="border-collapse:collapse;margin:0"><caption style="caption-side:top;text-align:left;padding:2px 0"><strong>OctaveFilterResult</strong></caption><thead><tr><th style="text-align:left;vertical-align:top">field</th><th style="text-align:left;vertical-align:top">value</th><th style="text-align:left;vertical-align:top">unit</th></tr></thead><tbody><tr><td style="text-align:left;vertical-align:top"><code>levels</code></td><td style="text-align:left;vertical-align:top">array 31 float64, 17.125 to 82.986</td><td style="text-align:left;vertical-align:top"></td></tr><tr><td style="text-align:left;vertical-align:top"><code>frequencies</code></td><td style="text-align:left;vertical-align:top">list of 31 numbers, 19.953 to 19953</td><td style="text-align:left;vertical-align:top"></td></tr><tr><td style="text-align:left;vertical-align:top"><code>bands</code></td><td style="text-align:left;vertical-align:top">None</td><td style="text-align:left;vertical-align:top"></td></tr></tbody></table><div style="font-size:smaller;opacity:0.8;padding-top:2px">plot()</div></div>
+<div class="phonometry-record"><table style="border-collapse:collapse;margin:0"><caption style="caption-side:top;text-align:left;padding:2px 0"><strong>OctaveFilterResult</strong></caption><thead><tr><th style="text-align:left;vertical-align:top">field</th><th style="text-align:left;vertical-align:top">value</th><th style="text-align:left;vertical-align:top">unit</th></tr></thead><tbody><tr><td style="text-align:left;vertical-align:top"><code>levels</code></td><td style="text-align:left;vertical-align:top">array 31 float64, 17.125 to 82.986</td><td style="text-align:left;vertical-align:top">dB</td></tr><tr><td style="text-align:left;vertical-align:top"><code>frequencies</code></td><td style="text-align:left;vertical-align:top">list of 31 numbers, 19.953 to 19953</td><td style="text-align:left;vertical-align:top">Hz</td></tr><tr><td style="text-align:left;vertical-align:top"><code>bands</code></td><td style="text-align:left;vertical-align:top">None</td><td style="text-align:left;vertical-align:top"></td></tr></tbody></table><div style="font-size:smaller;opacity:0.8;padding-top:2px">plot()</div></div>
 
 Un veredicto, en una celda propia, muestra su resultado en el título. Este
 aplica el Anexo G.4 de ISO 10140-1 a un [ensayo de trasdosado](/phonometry/es/buildings/insulation/lab-application-rules/) sobre
@@ -518,8 +520,8 @@ El terminal de IPython imprime las mismas tablas como texto:
 
 ```text
 OctaveFilterResult
-  levels       array 31 float64, 17.125 to 82.986
-  frequencies  list of 31 numbers, 19.953 to 19953
+  levels       array 31 float64, 17.125 to 82.986   dB
+  frequencies  list of 31 numbers, 19.953 to 19953  Hz
   bands        None
 plot()
 

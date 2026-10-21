@@ -611,7 +611,7 @@ def test_profile_mismatch_names_the_solver_that_was_called() -> None:
     )
     for name, call in calls:
         with pytest.raises(
-            ValueError, match=rf"{name}: 'depths'.*'sound_speeds'.*same shape"
+            ValueError, match=rf"{name}: 'depths'.*'speeds_of_sound'.*same shape"
         ):
             call()
 

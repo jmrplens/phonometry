@@ -126,7 +126,7 @@ def test_standardization_plot_draws_both_spectra(language: str) -> None:
         _TABLE_D4,
         41.4,
         [1.43, 3.7, 3.1, 2.38],
-        frequency=[63.0, 125.0, 250.0, 500.0],
+        frequencies=[63.0, 125.0, 250.0, 500.0],
     )
     ax = res.plot(language=language)
     assert len(ax.lines) == 2
@@ -229,7 +229,7 @@ def _plenum(**kwargs: list[float]) -> ph.building.PlenumFlankingResult:
 
 @pytest.mark.parametrize("language", ["en", "es"])
 def test_plenum_plot_draws_the_path_against_the_two_ceilings(language: str) -> None:
-    res = _plenum(frequency=[63.0, 125.0, 250.0, 500.0, 1000.0])
+    res = _plenum(frequencies=[63.0, 125.0, 250.0, 500.0, 1000.0])
     ax = res.plot(language=language)
     total = res.reduction_index_source + res.reduction_index_receiving
     values = [ln.get_ydata() for ln in ax.lines]

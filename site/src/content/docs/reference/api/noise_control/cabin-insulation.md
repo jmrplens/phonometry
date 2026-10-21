@@ -83,7 +83,7 @@ BAND_FLATNESS_LIMIT_DB = {125.0: 6.0, 250.0: 5.0}
 
 ```python
 BandFlatnessCheck(
-    octave_centres_hz: NDArray[np.float64],
+    octave_frequencies: NDArray[np.float64],
     spread_db: NDArray[np.float64],
 )
 ```
@@ -97,7 +97,7 @@ fields: a check cannot be built against another limit.
 
 | Name | Description |
 | :--- | :--- |
-| `octave_centres_hz` | The nominal octave centre frequencies read, in hertz. |
+| `octave_frequencies` | The nominal octave centre frequencies read, in hertz. |
 | `spread_db` | The difference between the loudest and the quietest of the three one-third-octave bands in each, in decibels. |
 
 ### BandFlatnessCheck.all_satisfied
@@ -850,7 +850,7 @@ WeightedCabinInsulation(
     c: int,
     ctr: int,
     unfavourable_sum: float,
-    band_centres_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     apparent: bool,
 )
 ```
@@ -865,5 +865,5 @@ The single-number rating of a cabin, clause 8 by way of ISO 717-1.
 | `c` | The spectrum adaptation term $C$, in decibels. |
 | `ctr` | The spectrum adaptation term $C_{tr}$, in decibels. |
 | `unfavourable_sum` | The sum of unfavourable deviations at the shift the rating was read at, in decibels. |
-| `band_centres_hz` | The bands the rating was read over, in hertz. |
+| `frequencies` | The bands the rating was read over, in hertz. |
 | `apparent` | Whether the rating carries the prime of 3.9. |

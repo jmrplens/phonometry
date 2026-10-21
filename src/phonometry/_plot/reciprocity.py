@@ -351,7 +351,7 @@ def plot_reciprocity_calibration(
     :return: The axes.
     """
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     levels = np.asarray(result.sensitivity_level_db, dtype=np.float64)
     band_label = None
     if result.expanded_uncertainty_db is not None:
@@ -421,7 +421,7 @@ def plot_reciprocity_budget(
     from .._i18n import format_number
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = np.asarray(result.frequencies_hz, dtype=np.float64)
+    frequencies = np.asarray(result.frequencies, dtype=np.float64)
     for index, (name, values) in enumerate(
         zip(result.names, result.standard_uncertainties_db, strict=True)
     ):
@@ -487,7 +487,7 @@ def plot_heat_conduction_correction(
         "label",
         _t(r"$20\lg|\Delta_\mathrm{H}|$, apparent increase of the volume", language),
     )
-    ax.plot(result.frequencies_hz, result.correction_db, **kwargs)
+    ax.plot(result.frequencies, result.correction_db, **kwargs)
     ax.set_ylim(bottom=0.0)
     _frequency_axes(
         ax,
@@ -528,9 +528,9 @@ def plot_capillary_tube_impedance(
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
     kwargs.setdefault("label", _t(_RE_CAPILLARY_LABEL, language))
-    ax.plot(result.frequencies_hz, impedance.real, **kwargs)
+    ax.plot(result.frequencies, impedance.real, **kwargs)
     ax.plot(
-        result.frequencies_hz,
+        result.frequencies,
         impedance.imag,
         color=_C_SECONDARY,
         lw=1.2,
@@ -568,7 +568,7 @@ def plot_coupler_transfer_impedance(
     :return: The axes.
     """
     ax = ax if ax is not None else _new_axes()
-    frequencies = result.frequencies_hz
+    frequencies = result.frequencies
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
@@ -628,7 +628,7 @@ def plot_wave_motion_correction(
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
     kwargs.setdefault("label", _t("Wave-motion correction", language))
-    ax.plot(result.frequencies_hz, result.correction_db, **kwargs)
+    ax.plot(result.frequencies, result.correction_db, **kwargs)
     printed = np.array(sorted(IEC61094_2_TABLE_C3), dtype=np.float64)
     ax.plot(
         printed * result.speed_of_sound_ratio,
@@ -755,7 +755,7 @@ def plot_parameter_uncertainty(
     :return: The axes.
     """
     ax = ax if ax is not None else _new_axes()
-    frequencies = result.frequencies_hz
+    frequencies = result.frequencies
     names = list(result.components_db)
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.6)
@@ -804,7 +804,7 @@ def plot_air_attenuation(
     from .._i18n import format_number
 
     ax = ax if ax is not None else _new_axes()
-    frequencies = result.frequencies_hz
+    frequencies = result.frequencies
     to_db = result.attenuation_db_per_m / result.attenuation_np_per_m
     for values, colour, style, label in (
         (
@@ -869,7 +869,7 @@ def plot_acoustic_centre(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    distances = result.distances_m
+    distances = result.distances
     position = result.position_m
     span = np.linspace(min(position, 0.0), float(distances.max()) * 1.05, 50)
     ax.plot(

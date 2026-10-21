@@ -254,7 +254,7 @@ def test_arp866a_evaluates_table_2_frequencies() -> None:
     res = arp866a_attenuation(
         NOY_BANDS, temperature_c=15.0, relative_humidity_percent=70.0
     )
-    assert np.array_equal(res.frequencies_hz, NOY_BANDS)
+    assert np.array_equal(res.frequencies, NOY_BANDS)
     assert tuple(res.evaluation_frequencies_hz[-5:]) == (
         4000.0,
         4500.0,
@@ -267,7 +267,7 @@ def test_arp866a_evaluates_table_2_frequencies() -> None:
     by_exact = arp866a_attenuation(
         exact, temperature_c=15.0, relative_humidity_percent=70.0
     )
-    assert tuple(by_exact.frequencies_hz) == (63.0, 5000.0)
+    assert tuple(by_exact.frequencies) == (63.0, 5000.0)
     assert tuple(by_exact.evaluation_frequencies_hz) == (63.0, 4500.0)
 
 
@@ -299,9 +299,9 @@ def test_arp866a_path_attenuation_shapes() -> None:
 
 
 def test_arp866a_refuses_what_the_formula_cannot_take() -> None:
-    with pytest.raises(ValueError, match="'frequencies_hz' must name"):
+    with pytest.raises(ValueError, match="'frequencies' must name"):
         arp866a_attenuation([40.0], temperature_c=10.0, relative_humidity_percent=80.0)
-    with pytest.raises(ValueError, match="'frequencies_hz' must name"):
+    with pytest.raises(ValueError, match="'frequencies' must name"):
         arp866a_attenuation(
             [12500.0], temperature_c=10.0, relative_humidity_percent=80.0
         )
@@ -331,7 +331,7 @@ def test_arp866a_plot_smoke() -> None:
     ax = res.plot(language="es")
     assert ax.get_ylabel().startswith("Coeficiente")
     assert "866A" in ax.get_legend().get_texts()[0].get_text()
-    assert np.array_equal(ax.lines[0].get_xdata(), res.frequencies_hz)
+    assert np.array_equal(ax.lines[0].get_xdata(), res.frequencies)
     assert np.array_equal(ax.lines[0].get_ydata(), res.coefficient_db_per_100m)
 
 

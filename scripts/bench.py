@@ -109,7 +109,7 @@ def pe_inputs() -> dict[str, Any]:
     return {
         "frequency_hz": 100.0,
         "depths": [0.0, 1000.0],
-        "sound_speeds": [1500.0, 1500.0],
+        "speeds_of_sound": [1500.0, 1500.0],
         "source_depth": 50.0,
         "max_range": 3000.0,
         "range_step": 20.0,
@@ -204,7 +204,7 @@ def run_parabolic_equation() -> np.ndarray:
     res = ph.underwater.parabolic_equation(
         p["frequency_hz"],
         p["depths"],
-        p["sound_speeds"],
+        p["speeds_of_sound"],
         source_depth=p["source_depth"],
         max_range=p["max_range"],
         range_step=p["range_step"],

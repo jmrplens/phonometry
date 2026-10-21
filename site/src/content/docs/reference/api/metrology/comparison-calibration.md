@@ -213,7 +213,7 @@ its sensitivity level through this module.
 
 ```python
 air_gap_series_impedance_pa_s_m3(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     gap_length_m: float,
     gap_radius_m: float,
@@ -261,7 +261,7 @@ given `coupling_impedance_pa_s_m3` = $Z_x$, exactly.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `gap_length_m` | $L$, the length of the space between the two diaphragms, in m (Appendix B's example: 2 mm). |
 | `gap_radius_m` | $r$, its radius, in m (Appendix B's example: half of 12,7 mm). |
 | `temperature_c` | The air temperature, in °C (Default: 23,0, the reference conditions of clause 4). |
@@ -335,7 +335,7 @@ components (an erratum; see `docs/ERRATA.md`).
 
 ```python
 ComparisonCalibration(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     reference_sensitivity_level_db: NDArray[np.float64],
     output_level_differences_db: NDArray[np.float64],
     pressure_level_difference_db: NDArray[np.float64],
@@ -362,7 +362,7 @@ $$
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `reference_sensitivity_level_db` | $L_\mathrm{ref}$, the reference microphone's sensitivity level as calibrated, in dB re 1 V/Pa. |
 | `output_level_differences_db` | $20\lg R_V$ of each determination, one row per determination, in dB: the output of the test microphone re that of the reference. |
 | `pressure_level_difference_db` | $20\lg R_P$, the effective sound pressure on the test microphone re that on the reference, in dB. |
@@ -586,7 +586,7 @@ each and prints no value.
 
 ```python
 diameter_sound_field_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     reference_radius_m: float,
     test_diaphragm_radius_m: float,
@@ -656,7 +656,7 @@ $R_P = -1$ at $c/2L$.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing, each below both resonance frequencies. |
+| `frequencies` | The frequencies, in Hz, increasing, each below both resonance frequencies. |
 | `reference_radius_m` | $a$, the radius of the reference microphone's front cavity, which the model also takes for its diaphragm, in m (an LS2: 4,650 mm, Table 1 of the paper). |
 | `test_diaphragm_radius_m` | $b$, the radius of the test microphone's diaphragm, in m (a WS3: 2,065 mm). |
 | `test_outer_radius_m` | The overall radius of the test microphone, in m, at least $b$ and less than $a$ (a WS3: 2,975 mm). |
@@ -680,7 +680,7 @@ $R_P = -1$ at $c/2L$.
 
 ```python
 DiameterSoundFieldCorrection(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     ratio: NDArray[np.complex128],
     doubled_separation_ratio: NDArray[np.complex128],
     reference_radius_m: float,
@@ -708,7 +708,7 @@ uncertainty of Table A.1 approximately is, comes with it.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `ratio` | $R_P$ at each frequency, complex: the test microphone's effective pressure re the reference's. |
 | `doubled_separation_ratio` | $R_P$ with the diaphragms twice as far apart, complex. |
 | `reference_radius_m` | $a$, the radius of the reference microphone's front cavity and diaphragm, in m. |
@@ -781,7 +781,7 @@ estimate to make.
 
 ```python
 environmental_sensitivity_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     static_pressure_kpa: float,
     temperature_c: float,
@@ -832,7 +832,7 @@ or subtract it from the result (`test_environment=`).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `static_pressure_kpa` | $p_s$, the static pressure the level is wanted at, in kPa. |
 | `temperature_c` | $t$, in °C. |
 | `relative_humidity_percent` | $H$, in %. |
@@ -855,7 +855,7 @@ or subtract it from the result (`test_environment=`).
 
 ```python
 EnvironmentalSensitivityCorrection(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     static_pressure_kpa: float,
     temperature_c: float,
     relative_humidity_percent: float,
@@ -885,7 +885,7 @@ $(p_{s,0}, t_0, H_0)$, it gives the level at $(p_s, t, H)$.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `static_pressure_kpa` | $p_s$, where the level is wanted, in kPa. |
 | `temperature_c` | $t$, in °C. |
 | `relative_humidity_percent` | $H$, in %. |
@@ -1089,7 +1089,7 @@ IEC61094_8_TABLE_1 = {'primary_free_field': ReferenceCalibrationRow(microphone_t
 
 ```python
 impedance_pressure_ratio(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     reference_equivalent_volume_m3: ArrayLike,
     test_equivalent_volume_m3: ArrayLike,
@@ -1147,7 +1147,7 @@ and $p_{s,\mathrm{r}}$ = 101,325 kPa):
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `reference_equivalent_volume_m3` | $V_\mathrm{e,ref}$, complex, in m³, one value or one per frequency, such as [`ReciprocityMicrophone.complex_equivalent_volume_m3`](/phonometry/reference/api/metrology/reciprocity-coupler/#reciprocitymicrophonecomplex_equivalent_volume_m3) gives it from the lumped parameters of IEC 61094-2 E.4. Its ratio to $V_\mathrm{eq}$ holds no $\kappa_\mathrm{r}$, so the volume keeps the definition $V_\mathrm{eq}$ was given in, the $\kappa_\mathrm{r} = 1{,}40$ of IEC 61094-1 for the values of its Table 3; a series impedance is turned into $V_x$ with that same 1,40. |
 | `test_equivalent_volume_m3` | $V_\mathrm{e,test}$, in m³. |
 | `coupling_equivalent_volume_m3` | $V_x$ of a closed coupler, in m³ at the reference conditions (Default: None). |
@@ -1165,7 +1165,7 @@ and $p_{s,\mathrm{r}}$ = 101,325 kPa):
 
 ```python
 ImpedancePressureRatio(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     ratio: NDArray[np.complex128],
     coupling: str,
     coupling_equivalent_volume_m3: NDArray[np.complex128],
@@ -1189,7 +1189,7 @@ comparison, and its phase the `pressure_phase_difference_deg`.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `ratio` | $R_P$ at each frequency, complex. |
 | `coupling` | `"coupler"`, a closed coupler small against the wavelength (IEC 61094-2 Formula (3)), or `"series"`, the air between the microphones in series with each (IEC 61094-5 Table D.1, by the circuit of Jarvis 1996). |
 | `coupling_equivalent_volume_m3` | $V_x$ at each frequency, complex, in m³. |
@@ -1265,7 +1265,7 @@ experiment.
 
 ```python
 jig_diameter_correction(
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> JigDiameterCorrection
 ```
 
@@ -1285,7 +1285,7 @@ budget as an additional component.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Frequencies of the table, in Hz, increasing (Default: None, the 14 rows). |
+| `frequencies` | Frequencies of the table, in Hz, increasing (Default: None, the 14 rows). |
 
 **Returns:** The [`JigDiameterCorrection`](/phonometry/reference/api/metrology/comparison-calibration/#jigdiametercorrection).
 
@@ -1299,7 +1299,7 @@ budget as an additional component.
 
 ```python
 JigCouplerVerification(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     calibration_level_db: NDArray[np.float64],
     calibration_uncertainty_db: NDArray[np.float64],
     validation_level_db: NDArray[np.float64],
@@ -1347,7 +1347,7 @@ which this verification does not represent.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies the two calibrations share, in Hz. |
+| `frequencies` | The frequencies the two calibrations share, in Hz. |
 | `calibration_level_db` | $L_\mathrm{cal}$, the sensitivity level from the jig or coupler being validated, in dB re 1 V/Pa. |
 | `calibration_uncertainty_db` | $U_\mathrm{cal}$, its expanded uncertainty ($k = 2$), in dB. |
 | `validation_level_db` | $L_\mathrm{val}$, the sensitivity level it is validated against, in dB re 1 V/Pa. |
@@ -1442,7 +1442,7 @@ frequencies the validation does not cover as dashed vertical lines.
 
 ```python
 JigDiameterCorrection(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     correction_db: NDArray[np.float64],
 )
 ```
@@ -1462,7 +1462,7 @@ expanded uncertainty with.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies of the table asked for, in Hz. |
+| `frequencies` | The frequencies of the table asked for, in Hz. |
 | `correction_db` | The correction at each, in dB. |
 
 ### JigDiameterCorrection.expanded_uncertainty_db
@@ -1665,9 +1665,7 @@ $b$ of Formula (B.10), half the duration, in s.
 ### RectangularPulse.level_db_at()
 
 ```python
-RectangularPulse.level_db_at(
-    frequencies_hz: ArrayLike,
-) -> NDArray[np.float64]
+RectangularPulse.level_db_at(frequencies: ArrayLike) -> NDArray[np.float64]
 ```
 
 $20\lg\lvert X(f)/X(0)\rvert$, how far the spectrum has
@@ -1677,7 +1675,7 @@ fallen from its value at 0 Hz, in dB (minus infinity at a zero).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Any frequencies, in Hz. |
+| `frequencies` | Any frequencies, in Hz. |
 
 **Returns:** The level at each, in dB.
 
@@ -1711,9 +1709,7 @@ frequencies of interest.
 ### RectangularPulse.spectrum_at()
 
 ```python
-RectangularPulse.spectrum_at(
-    frequencies_hz: ArrayLike,
-) -> NDArray[np.float64]
+RectangularPulse.spectrum_at(frequencies: ArrayLike) -> NDArray[np.float64]
 ```
 
 $X(f)$ of Formula (B.10), in V·s, the transform of the pulse
@@ -1723,7 +1719,7 @@ centred on the time origin, where it is real.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Any frequencies, in Hz. |
+| `frequencies` | Any frequencies, in Hz. |
 
 **Returns:** $X(f)$ at each.
 
@@ -1813,7 +1809,7 @@ fall within this time too.
 
 ```python
 sequential_comparison(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     reference_sensitivity_level_db: ArrayLike,
     reference_output_level_db: ArrayLike,
     test_output_level_db: ArrayLike,
@@ -1877,7 +1873,7 @@ same measurement point (7.3), $\arg R_P$ is 0.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `reference_sensitivity_level_db` | $L_\mathrm{ref}$, the reference microphone's sensitivity level, in dB re 1 V/Pa. |
 | `reference_output_level_db` | $20\lg V_\mathrm{ref}$, the reference microphone's output level, in dB re any voltage the test microphone is read against too. |
 | `test_output_level_db` | $20\lg V_\mathrm{test}$, the test microphone's output level, in dB re the same voltage. |
@@ -1935,7 +1931,7 @@ to [`sequential_comparison`](/phonometry/reference/api/metrology/comparison-cali
 
 ```python
 simultaneous_comparison(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     reference_sensitivity_level_db: ArrayLike,
     channel_difference_db: ArrayLike,
     interchanged_channel_difference_db: ArrayLike | None = None,
@@ -2005,7 +2001,7 @@ the complex ratio the sensitivity "both modulus and phase" is.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `reference_sensitivity_level_db` | $L_\mathrm{ref}$, the reference microphone's sensitivity level, in dB re 1 V/Pa, one value or one per frequency. For a free-field calibration it is the reference's free-field level, or its pressure level with `reference_free_field_difference_db`. |
 | `channel_difference_db` | $L_\mathrm{C12}$, the reading of channel 1 less that of channel 2 with the reference on channel 1, in dB. |
 | `interchanged_channel_difference_db` | $L_\mathrm{C21}$, the same difference after the interchange, the test microphone on channel 1, in dB (Default: None; required for `field="pressure"`). |
@@ -2061,7 +2057,7 @@ on the two microphones differ in phase. Pass one to
 
 ```python
 stepped_sine_impulse_response(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     response: ArrayLike,
 ) -> SteppedSineImpulseResponse
 ```
@@ -2097,10 +2093,10 @@ one.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | $k\,\Delta f$, from 0 Hz, in Hz, equally spaced. |
+| `frequencies` | $k\,\Delta f$, from 0 Hz, in Hz, equally spaced. |
 | `response` | $H(k\,\Delta f)$, complex, one value per frequency. |
 
-**Returns:** The [`SteppedSineImpulseResponse`](/phonometry/reference/api/metrology/comparison-calibration/#steppedsineimpulseresponse); pass its `impulse_response` and `sample_rate_hz` to [`time_selective_response`](/phonometry/reference/api/metrology/comparison-calibration/#time_selective_response).
+**Returns:** The [`SteppedSineImpulseResponse`](/phonometry/reference/api/metrology/comparison-calibration/#steppedsineimpulseresponse); pass its `impulse_response` and `fs` to [`time_selective_response`](/phonometry/reference/api/metrology/comparison-calibration/#time_selective_response).
 
 **Raises**
 
@@ -2135,6 +2131,12 @@ $1/\Delta f$, how long the impulse response lasts, in s:
 "the length of the impulse response will be the inverse of the size
 of the frequency step" (B.2.2).
 
+### SteppedSineImpulseResponse.fs
+
+*property*
+
+$f_\mathrm{s} = N\,\Delta f$, in Hz.
+
 ### SteppedSineImpulseResponse.plot()
 
 ```python
@@ -2158,13 +2160,7 @@ Plot the impulse response against time.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
-### SteppedSineImpulseResponse.sample_rate_hz
-
-*property*
-
-$f_\mathrm{s} = N\,\Delta f$, in Hz.
-
-### SteppedSineImpulseResponse.time_s
+### SteppedSineImpulseResponse.times
 
 *property*
 
@@ -2175,7 +2171,7 @@ The time of each sample, in s.
 ```python
 time_selective_response(
     impulse_response: ArrayLike,
-    sample_rate_hz: float,
+    fs: float,
     *,
     window_start_s: float,
     window_end_s: float,
@@ -2216,7 +2212,7 @@ their responses at the calibration frequencies go to
 | Name | Description |
 | :--- | :--- |
 | `impulse_response` | The impulse response, one value per sample, from the start of the record. |
-| `sample_rate_hz` | Its sample rate, in Hz. |
+| `fs` | Its sample rate, in Hz. |
 | `window_start_s` | Where the window begins, in s from the start of the record: before the direct sound arrives. |
 | `window_end_s` | Where it ends, in s: before the first reflection. |
 | `window_shape` | `"tukey"` (default), `"hann"`, `"hamming"` or `"rectangular"`. |
@@ -2236,7 +2232,7 @@ their responses at the calibration frequencies go to
 ```python
 TimeSelectiveResponse(
     impulse_response: NDArray[np.float64],
-    sample_rate_hz: float,
+    fs: float,
     window_start_s: float,
     window_end_s: float,
     window_shape: str = 'tukey',
@@ -2261,7 +2257,7 @@ the pulse's, as a pulse that begins at the start of the record.
 | Name | Description |
 | :--- | :--- |
 | `impulse_response` | The impulse response, sampled. |
-| `sample_rate_hz` | Its sample rate, in Hz. |
+| `fs` | Its sample rate, in Hz. |
 | `window_start_s` | Where the window begins, in s. |
 | `window_end_s` | Where it ends, in s. |
 | `window_shape` | `"tukey"`, `"hann"`, `"hamming"` or `"rectangular"`. |
@@ -2315,7 +2311,7 @@ an impulse response to its frequency step.
 
 ```python
 TimeSelectiveResponse.level_db_at(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -2326,7 +2322,7 @@ times a second.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 
 **Returns:** The level at each, in dB.
 
@@ -2334,7 +2330,7 @@ times a second.
 
 ```python
 TimeSelectiveResponse.phase_deg_at(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
@@ -2345,7 +2341,7 @@ the record.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 
 **Returns:** The phase at each, in degrees.
 
@@ -2356,7 +2352,7 @@ TimeSelectiveResponse.plot(
     ax: Axes | None = None,
     *,
     quantity: str = 'impulse',
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes
@@ -2371,7 +2367,7 @@ $H(f)$ with and without the window.
 | :--- | :--- |
 | `ax` | Existing axes to draw on, or `None` to create a figure. |
 | `quantity` | `"impulse"` (default) or `"response"`. |
-| `frequencies_hz` | The frequencies of the response, in Hz (Default: None, 200 from the frequency resolution to a quarter of the sample rate, or, with an `excitation`, to a tenth of the first zero of its spectrum if that is lower, B.6.1). |
+| `frequencies` | The frequencies of the response, in Hz (Default: None, 200 from the frequency resolution to a quarter of the sample rate, or, with an `excitation`, to a tenth of the first zero of its spectrum if that is lower, B.6.1). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the windowed curve. |
 
@@ -2387,7 +2383,7 @@ $H(f)$ with and without the window.
 
 ```python
 TimeSelectiveResponse.record_response_at(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -2398,7 +2394,7 @@ included: what the window takes away, for comparison.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 
 **Returns:** $H(f)$ at each.
 
@@ -2412,7 +2408,7 @@ included: what the window takes away, for comparison.
 
 ```python
 TimeSelectiveResponse.response_at(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
 ) -> NDArray[np.complex128]
 ```
 
@@ -2424,7 +2420,7 @@ each frequency, complex, in the unit of the response times seconds
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 
 **Returns:** $H(f)$ at each.
 
@@ -2434,7 +2430,7 @@ each frequency, complex, in the unit of the response times seconds
 | :--- | :--- |
 | ValueError | for frequencies that are not positive and increasing, or, with an excitation, a frequency at or above the first zero of its spectrum. |
 
-### TimeSelectiveResponse.time_s
+### TimeSelectiveResponse.times
 
 *property*
 

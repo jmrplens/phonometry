@@ -70,7 +70,7 @@ from numpy.typing import NDArray
 @dataclass(frozen=True)
 class BandResult:
     frequencies: NDArray[np.float64]
-    levels_db: NDArray[np.float64] | None
+    levels: NDArray[np.float64] | None
     label: str = ""
 """
 
@@ -136,7 +136,7 @@ def test_the_iso_3743_helper_before_its_fix_is_refused(tmp_path: pathlib.Path) -
 
         def sound_power(levels, frequencies):
             freqs = _octave_frequencies(frequencies, len(levels))
-            return BandResult(frequencies=freqs, levels_db=np.asarray(levels) + 3.0)
+            return BandResult(frequencies=freqs, levels=np.asarray(levels) + 3.0)
         """,
     )
     assert found == {("sound_power", "BandResult.frequencies", "frequencies")}
@@ -152,7 +152,7 @@ def test_a_validation_helper_carries_the_caller_s_array(tmp_path: pathlib.Path) 
 
         def rating(frequencies, levels):
             f = require_finite_array(frequencies, "frequencies")
-            return BandResult(frequencies=f, levels_db=f * 0.0)
+            return BandResult(frequencies=f, levels=f * 0.0)
         """,
     )
     assert found == {("rating", "BandResult.frequencies", "frequencies")}
@@ -201,7 +201,7 @@ def test_a_record_copied_with_replace_keeps_the_caller_s_axes(
         from .results import BandResult
 
         def revise(curves: BandResult, levels):
-            return dataclasses.replace(curves, levels_db=levels * 1.0)
+            return dataclasses.replace(curves, levels=levels * 1.0)
         """,
     )
     assert found == {
@@ -231,13 +231,13 @@ def test_the_fixes_pass(tmp_path: pathlib.Path) -> None:
 
         def rating(frequencies, levels):
             f = require_finite_array(frequencies, "frequencies")
-            return BandResult(frequencies=read_only_copy(f), levels_db=f * 0.0)
+            return BandResult(frequencies=read_only_copy(f), levels=f * 0.0)
 
         def revise(curves: BandResult, levels):
             return dataclasses.replace(
                 curves,
                 frequencies=read_only_copy(curves.frequencies),
-                levels_db=levels * 1.0,
+                levels=levels * 1.0,
             )
 
         @dataclass(frozen=True)
@@ -284,10 +284,10 @@ def test_the_caller_s_array_or_a_view_of_it_is_refused(
         from .results import BandResult
 
         def views(levels):
-            return BandResult(frequencies=np.arange(3.0), levels_db={kept})
+            return BandResult(frequencies=np.arange(3.0), levels={kept})
         """,
     )
-    assert found == {("views", "BandResult.levels_db", "levels")}
+    assert found == {("views", "BandResult.levels", "levels")}
 
 
 @pytest.mark.parametrize(
@@ -312,7 +312,7 @@ def test_a_new_array_passes(tmp_path: pathlib.Path, kept: str) -> None:
         from .results import BandResult
 
         def fresh(levels):
-            return BandResult(frequencies=np.arange(3.0), levels_db={kept})
+            return BandResult(frequencies=np.arange(3.0), levels={kept})
         """,
     )
     assert found == set()
@@ -355,7 +355,7 @@ def test_a_private_record_carries_what_it_was_given(tmp_path: pathlib.Path) -> N
 
         def predict(frequencies):
             setup = _setup(frequencies)
-            return BandResult(frequencies=setup.frequencies, levels_db=None)
+            return BandResult(frequencies=setup.frequencies, levels=None)
         """,
     )
     assert found == {("predict", "BandResult.frequencies", "frequencies")}
@@ -380,8 +380,8 @@ def test_a_record_parameter_s_text_fields_are_not_arrays(
             parts: tuple[tuple[str, NDArray[np.float64]], ...]
 
         def combine(paths: list[BandResult]):
-            labels = Contributions(parts=tuple((p.label, p.levels_db * 1.0) for p in paths))
-            kept = Contributions(parts=tuple((p.label, p.levels_db) for p in paths))
+            labels = Contributions(parts=tuple((p.label, p.levels * 1.0) for p in paths))
+            kept = Contributions(parts=tuple((p.label, p.levels) for p in paths))
             return labels, kept
         """,
     )
@@ -443,7 +443,7 @@ def test_a_record_s_writeable_copy_is_still_the_caller_s_to_edit(
                 object.__setattr__(self, "levels", read_only_copy(self.levels))
 
         def deviations(traverse: Traverse):
-            return BandResult(frequencies=traverse.positions, levels_db=traverse.levels)
+            return BandResult(frequencies=traverse.positions, levels=traverse.levels)
         """,
     )
     assert found == {("deviations", "BandResult.frequencies", "traverse")}
@@ -479,12 +479,12 @@ def test_a_nested_function_sees_the_arrays_of_its_closure(
             aligned = np.asarray(levels)
 
             def build(label):
-                return BandResult(frequencies=np.arange(3.0), levels_db=aligned, label=label)
+                return BandResult(frequencies=np.arange(3.0), levels=aligned, label=label)
 
             return build("x")
         """,
     )
-    assert found == {("outer.build", "BandResult.levels_db", "levels")}
+    assert found == {("outer.build", "BandResult.levels", "levels")}
 
 
 def test_a_plain_class_keeps_an_annotated_attribute(tmp_path: pathlib.Path) -> None:
@@ -588,7 +588,7 @@ def test_a_database_that_hands_out_its_constructor_s_arrays_is_refused(
                 self._distances = distances
 
             def curve(self, key):
-                return BandResult(frequencies=self._distances, levels_db=self._curves[key])
+                return BandResult(frequencies=self._distances, levels=self._curves[key])
         """,
     )
     assert found == {
@@ -653,7 +653,7 @@ def _indexed_by_helper(
             {helper}
 
         def head(frequencies):
-            return BandResult(frequencies=frequencies[_head(3)], levels_db=None)
+            return BandResult(frequencies=frequencies[_head(3)], levels=None)
         """,
     )
 
@@ -699,7 +699,7 @@ def test_a_shallow_copy_or_a_numpy_view_is_refused(
 
         def shallow(bands):
             {body}
-            return BandResult(frequencies=kept, levels_db=None)
+            return BandResult(frequencies=kept, levels=None)
         """,
     )
     assert found == {("shallow", "BandResult.frequencies", "bands")}
@@ -718,7 +718,7 @@ def test_a_mapping_parameter_s_copy_keeps_its_arrays(tmp_path: pathlib.Path) -> 
         def mapping(bands: Mapping[str, np.ndarray], levels: np.ndarray):
             own = levels.copy()
             mine = bands.copy()
-            return BandResult(frequencies=mine["a"], levels_db=own)
+            return BandResult(frequencies=mine["a"], levels=own)
         """,
     )
     assert found == {("mapping", "BandResult.frequencies", "bands")}
@@ -734,13 +734,13 @@ def test_a_field_patched_in_a_factory_is_refused(tmp_path: pathlib.Path) -> None
         from .results import BandResult
 
         def patched(levels):
-            result = BandResult(frequencies=np.arange(3.0), levels_db=None)
-            object.__setattr__(result, "levels_db", levels)
+            result = BandResult(frequencies=np.arange(3.0), levels=None)
+            object.__setattr__(result, "levels", levels)
             object.__setattr__(result, "label", "patched")
             return result
         """,
     )
-    assert found == {("patched", "BandResult.levels_db", "levels")}
+    assert found == {("patched", "BandResult.levels", "levels")}
 
 
 # ---------------------------------------------------------------------------
@@ -759,7 +759,7 @@ from ._internal.frozen import OwnsArrays
 @dataclass(frozen=True)
 class Spectrum(OwnsArrays):
     frequencies: NDArray[np.float64]
-    levels_db: NDArray[np.float64] | None
+    levels: NDArray[np.float64] | None
     columns: dict[str, np.ndarray]
     label: str = ""
 """
@@ -880,10 +880,10 @@ def test_a_record_that_copies_takes_the_caller_s_array_as_it_is(
 
         def spectrum(frequencies, levels):
             f = require_finite_array(frequencies, "frequencies")
-            return Spectrum(frequencies=f, levels_db=levels[:, 0], columns={"a": f})
+            return Spectrum(frequencies=f, levels=levels[:, 0], columns={"a": f})
 
         def revise(spectrum: Spectrum, levels):
-            return dataclasses.replace(spectrum, levels_db=levels)
+            return dataclasses.replace(spectrum, levels=levels)
 
         def coupler(impedance):
             return Coupler(impedance=impedance)
@@ -920,7 +920,7 @@ def test_a_copy_handed_to_a_record_that_copies_is_refused(
         from .owning import Spectrum
 
         def spectrum(f):
-            return Spectrum(frequencies={argument}, levels_db=None, columns={{}})
+            return Spectrum(frequencies={argument}, levels=None, columns={{}})
         """,
     )
     assert found == {("spectrum", "Spectrum.frequencies (copied twice)", "")}
@@ -942,7 +942,7 @@ def test_a_conversion_or_a_container_s_copy_is_not_a_second_copy(
     """``np.array`` of a list builds the array; a mapping's ``copy`` copies
     the mapping, which the record does not.
     """
-    given = {"frequencies": "np.zeros(2)", "levels_db": "None", "columns": "{}"}
+    given = {"frequencies": "np.zeros(2)", "levels": "None", "columns": "{}"}
     given[field] = argument
     call = ", ".join(f"{name}={value}" for name, value in given.items())
     found = _findings(
@@ -981,18 +981,18 @@ def shift_in_place(values):
 @pytest.mark.parametrize(
     ("bound", "used"),
     [
-        ("read_only_copy(x)", "Spectrum(frequencies=f, levels_db=None, columns={})"),
+        ("read_only_copy(x)", "Spectrum(frequencies=f, levels=None, columns={})"),
         (
             "x.copy()",
-            "Spectrum(frequencies=read_only(f), levels_db=f * 2.0, columns={})",
+            "Spectrum(frequencies=read_only(f), levels=f * 2.0, columns={})",
         ),
         (
             "np.copy(x)",
-            "Spectrum(frequencies=f, levels_db=np.log10(f[1:]), columns={})",
+            "Spectrum(frequencies=f, levels=np.log10(f[1:]), columns={})",
         ),
         (
             "x.astype(np.float64)",
-            "Spectrum(frequencies=read_only(f), levels_db=None, columns={})",
+            "Spectrum(frequencies=read_only(f), levels=None, columns={})",
         ),
     ],
 )
@@ -1003,7 +1003,7 @@ def test_a_copy_bound_to_a_name_and_handed_over_is_refused(
 
     The shape the tree held after the copies at the call were dropped:
     ``f = require_positive_array(...).copy()`` early in the function and
-    ``frequencies_hz=read_only(f)`` at the end, with only reads between.
+    ``frequencies=read_only(f)`` at the end, with only reads between.
     """
     found = _findings(
         tmp_path,
@@ -1064,7 +1064,7 @@ def test_a_copy_the_function_needs_is_not_a_second_copy(
         def spectrum(x):
             f = x.copy()
             {middle}
-            return Spectrum(frequencies=f, levels_db=None, columns={{}})
+            return Spectrum(frequencies=f, levels=None, columns={{}})
         """,
     )
     assert found == set()
@@ -1082,7 +1082,7 @@ def test_a_parameter_copied_into_itself_is_not_read_as_a_second_copy(
 
         def spectrum(x):
             x = x.copy()
-            return Spectrum(frequencies=x, levels_db=None, columns={})
+            return Spectrum(frequencies=x, levels=None, columns={})
         """,
     )
     assert found == set()

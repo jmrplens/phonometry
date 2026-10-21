@@ -625,10 +625,10 @@ def contour_sample_chainages_m(
 # --------------------------------------------------------------------------- #
 # 4.5.2 and A.3: the precision of a method across programs
 # --------------------------------------------------------------------------- #
-def _level_matrix(levels_db: ArrayLike) -> NDArray[np.float64]:
+def _level_matrix(levels: ArrayLike) -> NDArray[np.float64]:
     """A round robin's levels as a float64 matrix C.4 can rank, or a refusal.
 
-    The shared matrix guard names ``levels_db`` when numpy cannot read it
+    The shared matrix guard names ``levels`` when numpy cannot read it
     (ragged rows, strings) and refuses a complex matrix, which a plain
     ``float64`` cast would take with its imaginary part dropped. It reads a
     single row as a matrix of one row; a round robin is a table, so a
@@ -638,14 +638,14 @@ def _level_matrix(levels_db: ArrayLike) -> NDArray[np.float64]:
         numeric, holds a complex or a non-finite value, has fewer than 20
         receivers or fewer than two participants.
     """
-    levels = require_finite_matrix(levels_db, "levels_db")
-    if np.ndim(levels_db) != _MATRIX_RANK:
+    matrix = require_finite_matrix(levels, "levels")
+    if np.ndim(levels) != _MATRIX_RANK:
         msg = (
-            "RoundRobinPrecision: 'levels_db' must be a two-dimensional array "
+            "RoundRobinPrecision: 'levels' must be a two-dimensional array "
             "of levels, one row per receiver and one column per participant."
         )
         raise ValueError(msg)
-    receivers, participants = levels.shape
+    receivers, participants = matrix.shape
     if receivers < MINIMUM_SAMPLE_SIZE or participants < _MIN_PARTICIPANTS:
         msg = (
             f"RoundRobinPrecision: C.4 ranks at least {MINIMUM_SAMPLE_SIZE} "
@@ -654,7 +654,7 @@ def _level_matrix(levels_db: ArrayLike) -> NDArray[np.float64]:
             "participants."
         )
         raise ValueError(msg)
-    return np.array(levels, dtype=np.float64)
+    return np.array(matrix, dtype=np.float64)
 
 
 @dataclass(frozen=True)
@@ -673,11 +673,11 @@ class RoundRobinPrecision(OwnsArrays):
     Built by :func:`round_robin_precision`. Only the levels are stored;
     everything else is read from them.
 
-    :ivar levels_db: :math:`L_{n,m}`, shape ``(N, M)``: one row per receiver,
+    :ivar levels: :math:`L_{n,m}`, shape ``(N, M)``: one row per receiver,
         one column per participant, in dB.
     """
 
-    levels_db: NDArray[np.float64]
+    levels: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Keep a read-only copy of a level matrix C.4 can rank.
@@ -686,27 +686,27 @@ class RoundRobinPrecision(OwnsArrays):
             numeric, holds a complex or a non-finite value, has fewer than 20
             receivers or fewer than two participants.
         """
-        object.__setattr__(self, "levels_db", read_only(_level_matrix(self.levels_db)))
+        object.__setattr__(self, "levels", read_only(_level_matrix(self.levels)))
 
     @property
     def receivers(self) -> int:
         """``N``, the number of receiver positions."""
-        return int(self.levels_db.shape[0])
+        return int(self.levels.shape[0])
 
     @property
     def participants(self) -> int:
         """``M``, the number of participants."""
-        return int(self.levels_db.shape[1])
+        return int(self.levels.shape[1])
 
     @property
     def mean_levels_db(self) -> NDArray[np.float64]:
         r""":math:`\bar L_n`, the arithmetic mean at each receiver, in dB."""
-        return np.mean(self.levels_db, axis=1)
+        return np.mean(self.levels, axis=1)
 
     @property
     def deviations_db(self) -> NDArray[np.float64]:
         r""":math:`dL_{n,m} = L_{n,m} - \bar L_n`, shape ``(N, M)``, in dB."""
-        return self.levels_db - self.mean_levels_db[:, None]
+        return self.levels - self.mean_levels_db[:, None]
 
     @property
     def max_abs_deviations_db(self) -> NDArray[np.float64]:
@@ -752,11 +752,11 @@ class RoundRobinPrecision(OwnsArrays):
         )
 
 
-def round_robin_precision(levels_db: ArrayLike) -> RoundRobinPrecision:
+def round_robin_precision(levels: ArrayLike) -> RoundRobinPrecision:
     r"""The precision of a method from a round robin of programs
     (ISO 17534-1:2015, 4.5.2 and A.3).
 
-    :param levels_db: :math:`L_{n,m}`, the level each of ``M`` participants
+    :param levels: :math:`L_{n,m}`, the level each of ``M`` participants
         calculated at each of ``N`` receivers, in dB: shape ``(N, M)``, at
         least 20 receivers and two participants.
     :return: A :class:`RoundRobinPrecision`; its ``q09_db`` is the result of
@@ -764,7 +764,7 @@ def round_robin_precision(levels_db: ArrayLike) -> RoundRobinPrecision:
     :raises ValueError: for a matrix of the wrong shape, one that is not
         numeric, or one with a complex or a non-finite level.
     """
-    return RoundRobinPrecision(levels_db=_level_matrix(levels_db))
+    return RoundRobinPrecision(levels=_level_matrix(levels))
 
 
 # --------------------------------------------------------------------------- #

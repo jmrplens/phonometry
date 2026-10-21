@@ -50,8 +50,8 @@ from phonometry._plot import common as _plotting
 # --------------------------------------------------------------------------
 def test_airborne_rating_carries_curve_fields() -> None:
     res = _airborne_rating()
-    assert res.band_centers is not None
-    assert res.band_centers.size == 16
+    assert res.frequencies is not None
+    assert res.frequencies.size == 16
     assert res.measured is not None
     assert res.shifted_reference is not None
     # shifted reference read at 500 Hz (index 7) equals the rating.
@@ -169,7 +169,7 @@ def test_octave_impact_plot_keeps_curve_honest_and_annotates_offset() -> None:
     # with the -5 dB note rather than the curve being distorted down.
     res = ph.building.weighted_impact_rating(_ANNEX_C3_LN_OCTAVE)
     assert res.rating == 54
-    idx500 = int(np.argmin(np.abs(res.band_centers - 500.0)))
+    idx500 = int(np.argmin(np.abs(res.frequencies - 500.0)))
     read_value = float(res.shifted_reference[idx500])
     assert read_value == pytest.approx(res.rating + 5)  # honest curve
     ax = res.plot()
@@ -193,7 +193,7 @@ def test_third_octave_impact_plot_reads_rating_at_500() -> None:
     # For one-third-octave impact there is no -5 dB offset: the curve read
     # value at 500 Hz equals the rating, so no offset note is drawn.
     res = _impact_rating()
-    idx500 = int(np.argmin(np.abs(res.band_centers - 500.0)))
+    idx500 = int(np.argmin(np.abs(res.frequencies - 500.0)))
     assert round(float(res.shifted_reference[idx500])) == res.rating
     ax = res.plot()
     texts = " ".join(t.get_text() for t in ax.texts).replace("−", "-")

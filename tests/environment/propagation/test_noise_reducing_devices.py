@@ -237,7 +237,7 @@ class TestReporting:
         np.testing.assert_allclose(
             got.weights, prop.NORMALISED_TRAFFIC_NOISE_SPECTRUM_DB
         )
-        np.testing.assert_allclose(got.bands_hz, prop.TRAFFIC_NOISE_BANDS_HZ)
+        np.testing.assert_allclose(got.frequencies, prop.TRAFFIC_NOISE_BANDS_HZ)
 
 
 class TestRailwaySpectrum:

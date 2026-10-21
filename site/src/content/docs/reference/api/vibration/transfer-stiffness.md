@@ -948,7 +948,7 @@ Per frequency, whether it lies below the first line outside 1 dB.
 
 ```python
 indirect_transfer_stiffness_result(
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
     transmissibility: ArrayLike,
     blocking_mass: float,
     *,
@@ -968,7 +968,7 @@ not [`valid`](/phonometry/reference/api/vibration/transfer-stiffness/#transferst
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Frequencies `f`, in hertz (array). |
+| `frequencies` | Frequencies `f`, in hertz (array). |
 | `transmissibility` | Vibration transmissibility $T = u_2/u_1$ (complex). |
 | `blocking_mass` | Blocking mass `m2`, in kg (> 0). |
 | `flange_mass` | Output-flange mass `mf`, in kg (Default: 0.0). |

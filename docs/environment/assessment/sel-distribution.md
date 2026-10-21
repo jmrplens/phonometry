@@ -37,7 +37,7 @@ print(round(environment.frequency_weighted_sel(source_db, a_weighting_db), 1))  
 # Table A.3: the A-weighted level of each excess-attenuation class at the
 # receiver, and its probability by day and by night; 07:00 to 19:00 is 80 %
 # day and 20 % night.
-levels_db = [30.5, 31.2, 31.3, 36.1, 38.3, 38.8, 39.2,
+levels = [30.5, 31.2, 31.3, 36.1, 38.3, 38.8, 39.2,
              30.8, 31.8, 31.8, 33.7, 40.2, 41.0, 41.6, 42.2, 42.4, 42.7, 43.1,
              28.4, 30.8, 32.2, 42.3, 43.6, 44.5, 45.2, 45.5, 46.1]
 day = [0.0360, 0.0053, 0.0003, 0.0731, 0.0951, 0.0634, 0.0,
@@ -56,8 +56,8 @@ with the ISO 1996-1 adjustment `K` for highly impulsive sound inside the sum:
 the rating level the standard hands on to an ISO 1996-1 assessment.
 
 ```python
-print(round(environment.long_term_sel(levels_db, probabilities), 1))  # 37.0
-print(round(environment.long_term_sel(levels_db, probabilities, rating_adjustment_db=12.0), 1))  # 49.0
+print(round(environment.long_term_sel(levels, probabilities), 1))  # 37.0
+print(round(environment.long_term_sel(levels, probabilities, rating_adjustment_db=12.0), 1))  # 49.0
 ```
 
 ## Classes, subclasses and the spread for turbulence
@@ -71,7 +71,7 @@ each subclass replaced by a Gaussian of standard deviation `sigma` (typically
 energetic mean stays where it was (Equations (17) to (23)).
 
 ```python
-dist = environment.sel_distribution(levels_db, probabilities, sigma_db=5.0, subclasses=10)
+dist = environment.sel_distribution(levels, probabilities, sigma_db=5.0, subclasses=10)
 print(dist.lower_bounds_db[:4].round(2))                              # [27.35 29.45 30.65 30.8 ]
 print([round(float(r), 4) for r in dist.class_densities_per_db[:4]])  # [0.0007, 0.024, 1.2399, 0.2222]
 print(round(dist.level_shift_db, 3))                                  # 2.878

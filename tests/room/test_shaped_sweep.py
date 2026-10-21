@@ -188,9 +188,7 @@ def test_rejects_bad_inputs() -> None:
     with pytest.raises(ValueError, match="unknown named target"):
         room.shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target="blue")
     mismatched = (np.array([100.0, 200.0]), np.array([0.0]))
-    with pytest.raises(
-        ValueError, match=r"'frequencies_hz'.*'magnitude_db'.*same shape"
-    ):
+    with pytest.raises(ValueError, match=r"'frequencies'.*'magnitude_db'.*same shape"):
         room.shaped_sweep_signal(FS, 50.0, 5000.0, 1.0, target=mismatched)
     too_short = (np.array([100.0]), np.array([0.0]))
     with pytest.raises(ValueError, match=r"array target.*at least 2 points"):

@@ -200,7 +200,7 @@ class EcmaRoughness(OwnsArrays):
     90th percentile of R(l50), Clause 7.1.10). ``specific_roughness`` is the
     average specific roughness R'(z) in asper/Bark_HMS over the 53 auditory
     bands (Clause 7.1.8), with ``bark`` the critical-band-rate scale z
-    (0.5..26.5 Bark_HMS) and ``centre_frequencies`` the band centre
+    (0.5..26.5 Bark_HMS) and ``frequencies`` the band centre
     frequencies F(z). ``times`` and ``roughness_vs_time`` hold the
     time-dependent roughness R(l50) at 50 Hz (Formula 111);
     ``specific_roughness_vs_time`` is the time-dependent specific roughness
@@ -211,7 +211,7 @@ class EcmaRoughness(OwnsArrays):
     roughness: float
     specific_roughness: np.ndarray
     bark: np.ndarray
-    centre_frequencies: np.ndarray
+    frequencies: np.ndarray
     times: np.ndarray
     roughness_vs_time: np.ndarray
     specific_roughness_vs_time: np.ndarray
@@ -251,7 +251,7 @@ class EcmaRoughness(OwnsArrays):
             self,
             specific_roughness=1,
             bark=1,
-            centre_frequencies=1,
+            frequencies=1,
             times=1,
             roughness_vs_time=1,
             specific_roughness_vs_time=2,
@@ -259,7 +259,7 @@ class EcmaRoughness(OwnsArrays):
         require_same_length(
             self,
             "bark",
-            "centre_frequencies",
+            "frequencies",
             "specific_roughness",
             ("specific_roughness_vs_time", 1),
             axis="auditory band",
@@ -650,7 +650,7 @@ def roughness_ecma(
         roughness=r_single,
         specific_roughness=r_spec,
         bark=_Z,
-        centre_frequencies=_F_CENTRE,
+        frequencies=_F_CENTRE,
         times=grid,
         roughness_vs_time=r_vs_time,
         specific_roughness_vs_time=r_time,

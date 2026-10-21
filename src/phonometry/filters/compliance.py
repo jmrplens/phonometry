@@ -393,17 +393,15 @@ _EPS = float(np.finfo(float).eps)
 _IMAGE_BATCH = 16
 
 
-def _anti_alias_gain(
-    factor: int, fs_hz: float, frequencies_hz: np.ndarray
-) -> np.ndarray:
+def _anti_alias_gain(factor: int, fs_hz: float, frequencies: np.ndarray) -> np.ndarray:
     r"""The magnitude of a band's anti-aliasing filter at the bank's input rate.
 
     :param factor: The band's decimation factor; 1 has no such filter.
     :param fs_hz: The bank's input sampling rate.
-    :param frequencies_hz: Where to evaluate it.
+    :param frequencies: Where to evaluate it.
     :return: :math:`|H_\mathrm{aa}(f)|`, one per frequency.
     """
-    freqs = np.asarray(frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(frequencies, dtype=np.float64)
     if factor == 1:
         return np.ones(freqs.shape)
     _, h = signal.freqz(_multirate_lowpass(factor), worN=freqs, fs=fs_hz)
@@ -411,7 +409,7 @@ def _anti_alias_gain(
 
 
 def _band_gain(
-    sos: np.ndarray, factor: int, fs_hz: float, frequencies_hz: np.ndarray
+    sos: np.ndarray, factor: int, fs_hz: float, frequencies: np.ndarray
 ) -> np.ndarray:
     r"""The magnitude response of one band, decimation included, at the input rate.
 
@@ -425,10 +423,10 @@ def _band_gain(
     :param sos: The band's second-order sections, designed at ``fs / factor``.
     :param factor: The band's decimation factor :math:`M`.
     :param fs_hz: The bank's input sampling rate.
-    :param frequencies_hz: Input frequencies.
+    :param frequencies: Input frequencies.
     :return: :math:`|H_\mathrm{aa}(f)\,H_\mathrm{b}(f)|`.
     """
-    freqs = np.asarray(frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(frequencies, dtype=np.float64)
     _, h = signal.sosfreqz(sos, worN=freqs, fs=fs_hz / factor)
     return np.asarray(_anti_alias_gain(factor, fs_hz, freqs) * np.abs(h))
 
@@ -450,7 +448,7 @@ def _band_relative_attenuation(
     factor: int,
     fs_hz: float,
     mid_hz: float,
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
 ) -> np.ndarray:
     """Relative attenuation of one designed band at arbitrary frequencies, dB.
 
@@ -465,10 +463,10 @@ def _band_relative_attenuation(
     :param factor: The band's decimation factor.
     :param fs_hz: The bank's input sampling rate.
     :param mid_hz: Its exact mid-band frequency.
-    :param frequencies_hz: Where to evaluate it.
+    :param frequencies: Where to evaluate it.
     :return: The relative attenuation, ``+inf`` where no input reaches.
     """
-    freqs = np.asarray(frequencies_hz, dtype=np.float64)
+    freqs = np.asarray(frequencies, dtype=np.float64)
     out = np.full(freqs.shape, np.inf)
     reachable = (freqs > 0.0) & (freqs < fs_hz / 2.0)
     if np.any(reachable):
@@ -533,7 +531,7 @@ class _BandGrid:
     def baseband(self) -> tuple[np.ndarray, np.ndarray]:
         """The band below its decimated Nyquist frequency, anti-aliasing included.
 
-        :return: ``(frequencies_hz, relative_attenuation_db)`` on the grid
+        :return: ``(frequencies, relative_attenuation_db)`` on the grid
             points of ``(0, fs / (2 M))``.
         """
         g = np.arange(1, self.num_points) * self.spacing_hz
@@ -562,7 +560,7 @@ class _BandGrid:
 
         :param first: The first folded point (>= 0).
         :param last: The last folded point (<= ``num_points``).
-        :return: One ``(frequencies_hz, relative_attenuation_db)`` per image
+        :return: One ``(frequencies, relative_attenuation_db)`` per image
             and side.
         """
         if self.factor == 1 or last < first:
@@ -1138,7 +1136,7 @@ def verify_filter_class(
         fraction=int(bank.fraction),
         edition=edition,
         sos=tuple(np.asarray(s, dtype=np.float64) for s in bank.sos),
-        band_frequencies=np.asarray(bank.freq, dtype=np.float64),
+        frequencies=np.asarray(bank.freq, dtype=np.float64),
         factors=tuple(int(f) for f in bank.factor),
         fs=float(bank.fs),
         num_points=int(num_points),
@@ -1237,7 +1235,7 @@ class FilterComplianceResult(OwnsArrays):
     :ivar sos: Per-band second-order sections of the analysed bank (one array
         per band), kept so the relative attenuation can be recomputed
         exactly as the verifier does.
-    :ivar band_frequencies: The exact mid-band frequencies ``f_m`` in Hz.
+    :ivar frequencies: The exact mid-band frequencies ``f_m`` in Hz.
     :ivar factors: Per-band decimation factor; the band's processing sample
         rate is ``fs / factor`` (the multirate rate the SOS were designed at)
         and the factor fixes its anti-aliasing filter. Stored because the
@@ -1274,7 +1272,7 @@ class FilterComplianceResult(OwnsArrays):
     fraction: int
     edition: str
     sos: tuple[np.ndarray, ...]
-    band_frequencies: np.ndarray
+    frequencies: np.ndarray
     factors: tuple[int, ...]
     fs: float
     num_points: int
@@ -1312,8 +1310,8 @@ class FilterComplianceResult(OwnsArrays):
             a class, or a per-band value is not finite.
         """
         object.__setattr__(self, "band_margins", frozen_rows(self.band_margins))
-        require_ranks(self, band_frequencies=1)
-        require_same_length(self, "band_margins", "sos", "band_frequencies", "factors")
+        require_ranks(self, frequencies=1)
+        require_same_length(self, "band_margins", "sos", "frequencies", "factors")
         require_choice(self.edition, "edition", tuple(_FILTER_EDITIONS))
         expected = list(_FILTER_EDITIONS[self.edition]["classes"])
         _require_margin_classes(self.band_margins, self.edition, expected)

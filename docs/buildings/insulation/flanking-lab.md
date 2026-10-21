@@ -148,10 +148,10 @@ plt.show()
 # By hand, from the rating the result carries:
 w = dnf.rating
 fig, ax = plt.subplots()
-ax.semilogx(w.band_centers, dnf.d_n_f, "o-", label="Dn,f (flanking)")
-ax.semilogx(w.band_centers, w.shifted_reference, "s--",
+ax.semilogx(w.frequencies, dnf.d_n_f, "o-", label="Dn,f (flanking)")
+ax.semilogx(w.frequencies, w.shifted_reference, "s--",
             label="shifted reference")
-ax.fill_between(w.band_centers, w.measured, w.shifted_reference,
+ax.fill_between(w.frequencies, w.measured, w.shifted_reference,
                 where=w.measured < w.shifted_reference, interpolate=True,
                 alpha=0.3, label="unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")
@@ -212,7 +212,7 @@ ceiling = [17.0, 21.0, 25.0, 29.0, 32.0, 30.0, 38.0]   # 9.5 mm plasterboard
 
 # Vigran's example geometry: LS = LR = 4.75 m, plenum 0.43 m, reflecting walls.
 res = building.plenum_flanking_reduction_index(
-    ceiling, ceiling, ceiling_length=4.75, plenum_height=0.43, frequency=freqs
+    ceiling, ceiling, ceiling_length=4.75, plenum_height=0.43, frequencies=freqs
 )
 print(round(res.geometry_term, 1))    # 10.4 dB charged against RS + RR
 res.plot()                            # Rcl against the two ceilings

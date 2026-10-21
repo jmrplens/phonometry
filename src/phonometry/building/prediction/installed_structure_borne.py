@@ -552,8 +552,8 @@ def typical_element_mobility(
     which :func:`coupling_term` then rejects.
 
     :param structure: Table D.1 row name.
-    :param frequency: Frequency ``f``, in hertz, for the frequency-dependent
-        rows only.
+    :param frequency: Frequency ``f``, in hertz (scalar or array), for the
+        frequency-dependent rows only.
     :param mass: Mass ``M``, in kilograms (rows ``"mass"``, ``"mass_spring"``).
     :param density: Density ``rho``, in kg/m^3.
     :param longitudinal_velocity: Quasi-longitudinal wave speed ``cL``, in m/s.
@@ -715,7 +715,7 @@ def tapping_machine_force_level_estimate(
     table covers and this only where it does not, chiefly the one-third-octave
     bands the standard does not tabulate.
 
-    :param frequency: Band centre frequency ``f``, in hertz (> 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param bandwidth: ``"octave"`` (coefficient 2,5) or ``"third"``
         (coefficient 0,8).
     :return: The force level ``L_F``, in dB re 1e-6 N (the standard prints
@@ -749,7 +749,7 @@ def tapping_machine_characteristic_power_level(
     it carries no term for :math:`F_0^2 / W_0`; that is what pins the reading
     of Table F.1 against its own printed "re 1 pN" caption.
 
-    :param frequency: Band centre frequency ``f``, in hertz (> 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param force_level: Force level ``L_F``, in dB re 1e-6 N (Table F.1 or
         :func:`tapping_machine_force_level_estimate`).
     :return: The characteristic power level ``L_Ws,c``, in dB re 1 pW.
@@ -778,7 +778,7 @@ def tapping_machine_coupling_term(
     Formula (19b), for a machine standing on a plate-like element of real
     mobility ``Y_i``; Annex F Formulae (F.4) to (F.6b) estimate that ``Y_i``.
 
-    :param frequency: Band centre frequency ``f``, in hertz (> 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param receiver_mobility: Real mobility ``Y_i`` of the supporting element,
         in m/(N.s) (> 0).
     :param hammer_mass: Source mass ``M``, in kilograms (Default:
@@ -859,7 +859,7 @@ def structure_to_airborne_adjustment(
     :func:`structure_borne_pressure_level_path` takes as ``adjustment_term``,
     sign included.
 
-    :param frequency: Band centre frequency ``f``, in hertz (> 0).
+    :param frequency: Band centre frequency ``f``, in hertz (scalar or array, > 0).
     :param critical_frequency: Critical frequency ``fc,i`` of the element, in
         hertz (> 0).
     :param mass_per_area: Mass per unit area ``mi`` of the element, in kg/m^2

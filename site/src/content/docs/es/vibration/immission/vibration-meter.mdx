@@ -151,8 +151,8 @@ import numpy as np
 
 from phonometry import vibration
 
-fs_hz = 2048.0
-t = np.arange(int(90.0 * fs_hz)) / fs_hz
+fs = 2048.0
+t = np.arange(int(90.0 * fs)) / fs
 record = 0.02 * np.sin(2 * np.pi * 11.0 * t)
 for start, amplitude, frequency in ((22.0, 1.8, 17.0), (68.0, 0.9, 26.0)):
     window = (t >= start) & (t < start + 3.0)
@@ -162,7 +162,7 @@ for start, amplitude, frequency in ((22.0, 1.8, 17.0), (68.0, 0.9, 26.0)):
         * np.sin(2 * np.pi * frequency * t[window])
     )
 
-reading = vibration.measure_vibration_immission(record, fs_hz)
+reading = vibration.measure_vibration_immission(record, fs)
 reading.plot(language="es")
 ```
 
@@ -177,8 +177,8 @@ import numpy as np
 
 from phonometry import vibration
 
-fs_hz = 2048.0
-t = np.arange(int(90.0 * fs_hz)) / fs_hz
+fs = 2048.0
+t = np.arange(int(90.0 * fs)) / fs
 record = 0.02 * np.sin(2 * np.pi * 11.0 * t)
 for start, amplitude, frequency in ((22.0, 1.8, 17.0), (68.0, 0.9, 26.0)):
     window = (t >= start) & (t < start + 3.0)
@@ -188,7 +188,7 @@ for start, amplitude, frequency in ((22.0, 1.8, 17.0), (68.0, 0.9, 26.0)):
         * np.sin(2 * np.pi * frequency * t[window])
     )
 
-reading = vibration.measure_vibration_immission(record, fs_hz)
+reading = vibration.measure_vibration_immission(record, fs)
 print(f"|v|max            = {reading.peak_velocity_mm_s:.3f} mm/s")  # 1.816 mm/s
 print(f"KB_Fmax           = {reading.kbf_max:.3f}")                  # 1.210
 print(f"máximos por Takt  = {reading.takt_maxima.round(3)}")         # [1.21 0.013 0.62]
@@ -247,11 +247,11 @@ import numpy as np
 
 from phonometry import vibration
 
-frequencies_hz = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
-measured = np.abs(vibration.kb_weighting_response(frequencies_hz))
+frequencies = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
+measured = np.abs(vibration.kb_weighting_response(frequencies))
 measured[5] *= 1.15  # un vibrómetro un 15 % alto en 31,5 Hz
 
-result = vibration.verify_vibration_meter(frequencies_hz, measured)
+result = vibration.verify_vibration_meter(frequencies, measured)
 print(f"cumple: {result.passes}")                          # False
 print(f"peor frecuencia: {result.worst_frequency_hz} Hz")  # 31.5 Hz
 ```
@@ -275,12 +275,12 @@ import numpy as np
 
 from phonometry import vibration
 
-fs_hz = 2048.0
-t = np.arange(int(3.0 * fs_hz)) / fs_hz
+fs = 2048.0
+t = np.arange(int(3.0 * fs)) / fs
 event = np.sin(2 * np.pi * 17.0 * t) * np.hanning(t.size)
 
-print(vibration.dominant_frequency(event, fs_hz).frequency_hz)  # 17.07 Hz
-print(vibration.dominant_frequency(event, fs_hz, method="fourier").frequency_hz)
+print(vibration.dominant_frequency(event, fs).frequency_hz)  # 17.07 Hz
+print(vibration.dominant_frequency(event, fs, method="fourier").frequency_hz)
 ```
 
 La discrepancia importa porque la frecuencia elige el valor de referencia, así
@@ -332,8 +332,8 @@ import numpy as np
 
 from phonometry import vibration
 
-fs_hz = 2048.0
-t = np.arange(int(3.0 * fs_hz)) / fs_hz
+fs = 2048.0
+t = np.arange(int(3.0 * fs)) / fs
 event = 1.8 * np.sin(2 * np.pi * 17.0 * t) * np.hanning(t.size)
 
 # El camino de la DIN 4150-3: encontrar la frecuencia y leer allí el valor.
@@ -344,7 +344,7 @@ print(f"  razón {peak_mm_s / guideline:.3f}")  # 0.269
 
 # El camino del anexo E: ninguna frecuencia por ningún lado.
 assessment = vibration.assess_short_term_vibration(
-    event, fs_hz, building_class="residential"
+    event, fs, building_class="residential"
 )
 print(f"|v_B2|max {assessment.assessment_velocity_mm_s:.3f} mm/s frente a 5 mm/s")
 print(f"  razón {assessment.ratio:.3f}")  # 0.271

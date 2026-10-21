@@ -329,6 +329,14 @@ MeanGroundPlaneResult.height(
 
 The plane height $a\,d + b$ at `distance`, in metres.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `distance` | Distance $d$ along the section, in metres (scalar or array). |
+
+**Returns:** The height of the plane at each distance, in metres.
+
 ### MeanGroundPlaneResult.plot()
 
 ```python

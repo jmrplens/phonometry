@@ -196,7 +196,7 @@ ws3 = {
     "reference_resonance_frequency_hz": 22000,
     "test_resonance_frequency_hz": 100000,
 }   # the inputs of Table 1 of [1]
-model = metrology.diameter_sound_field_correction(j.frequencies_hz, **ws3)
+model = metrology.diameter_sound_field_correction(j.frequencies, **ws3)
 print(round(model.speed_of_sound, 1), model.correction_db[[0, 9, 13]].round(3))   # 345.9 [-0.004 -0.233 -1.434]
 print(np.abs(model.correction_db - j.correction_db).max().round(4))               # 0.0093
 print((model.separation_change_db / np.abs(model.correction_db))[[0, 13]].round(3))   # [0.063 0.054]
@@ -355,7 +355,7 @@ ir_ref = metrology.stepped_sine_impulse_response(f_step, heard(mic(f_step, -38.0
 ir_ws2f = metrology.stepped_sine_impulse_response(
     f_step, heard(mic(f_step, -26.4, 18000, 0.9), 1 / (1 + 1j * f_step / 6000))
 )   # the WS2F hears the reflection off axis
-print(ir_ref.duration_s, round(ir_ref.sample_rate_hz))   # 0.02 200050
+print(ir_ref.duration_s, round(ir_ref.fs))   # 0.02 200050
 ```
 
 The impulse response lasts the inverse of the frequency step, 20 ms (B.2.2:
@@ -374,8 +374,8 @@ path is `L` stays outside while `tau <= (L - d) / c`:
 ```python
 tau = metrology.reflection_free_window_s(1.0, 1.48)
 window = {"window_start_s": direct - 0.0005, "window_end_s": direct + tau}
-ref = metrology.time_selective_response(ir_ref.impulse_response, ir_ref.sample_rate_hz, **window)
-ws2f = metrology.time_selective_response(ir_ws2f.impulse_response, ir_ws2f.sample_rate_hz, **window)
+ref = metrology.time_selective_response(ir_ref.impulse_response, ir_ref.fs, **window)
+ws2f = metrology.time_selective_response(ir_ws2f.impulse_response, ir_ws2f.fs, **window)
 print(round(1000 * tau, 2), round(ref.frequency_resolution_hz))   # 1.39 530
 ```
 

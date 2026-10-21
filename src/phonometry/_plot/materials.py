@@ -171,7 +171,7 @@ def plot_weighted_absorption(
     from .._i18n import decimal_comma, format_number, localize_axes
 
     ax = _plot_rating(
-        np.asarray(result.band_centers, dtype=np.float64),
+        np.asarray(result.frequencies, dtype=np.float64),
         np.asarray(result.measured, dtype=np.float64),
         np.asarray(result.shifted_reference, dtype=np.float64),
         impact=False,

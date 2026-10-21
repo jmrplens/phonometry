@@ -22,8 +22,12 @@ The table reads the record's fields and, on a verdict, ``passes``, which is a
 property and may read others of the record; the display itself calls no other
 property, draws no plot and runs no other computation of the record's own. A
 scalar is printed; the unit of a field is read from the end of its name
-(``levels_db`` is in decibels, ``wind_speed_m_s`` in metres per second), and
-a name that ends in no unit gets none; an array is one line, its shape, its
+(``band_levels_db`` is in decibels, ``wind_speed_m_s`` in metres per second),
+an axis the API names by the bare concept has the one unit it is always in
+(``frequencies`` in hertz, ``levels`` in decibels, ``times`` in seconds),
+and any other name that ends in no unit gets none; a record whose field of
+one of those names holds another quantity says so in a ``_display_units``
+mapping of its own; an array is one line, its shape, its
 type and the range of its values, never the values; a record held in a field
 is a table of its own, folded, one level down; a tuple, a list or a mapping
 is summarised. A record with a ``passes`` verdict shows it as PASS or FAIL in
@@ -79,8 +83,26 @@ MAX_INLINE = 6
 #: displayed; a record further down is named, not expanded.
 MAX_DEPTH = 1
 
-#: The field names that are a unit on their own: a sampling rate, in hertz.
-_NAMED_UNITS: Mapping[str, str] = MappingProxyType({"fs": "Hz"})
+#: The field names that are a unit on their own: a sampling rate, in hertz,
+#: and the axes the public vocabulary names by the bare concept because their
+#: unit never changes (a band axis is ``frequencies``, an array of levels
+#: ``levels``), with the compounds of them that carry no unit of their own.
+_NAMED_UNITS: Mapping[str, str] = MappingProxyType(
+    {
+        "fs": "Hz",
+        "frequencies": "Hz",
+        "octave_frequencies": "Hz",
+        "third_octave_frequencies": "Hz",
+        "levels": "dB",
+        "background_levels": "dB",
+        "measured_levels": "dB",
+        "times": "s",
+        "distances": "m",
+        "depths": "m",
+        "volume": "m\N{SUPERSCRIPT THREE}",
+        "speeds_of_sound": "m/s",
+    }
+)
 
 #: The units a name can end in, keyed by the words that spell them. A suffix
 #: of several words is read first, so ``wind_speed_m_s`` is in m/s and not in
@@ -310,6 +332,18 @@ def unit_of(name: str) -> str:
     if last in _LETTER_UNITS and _is_symbol(stem):
         return ""
     return _UNITS.get(last, "")
+
+
+def _unit_in(record: object, name: str) -> str:
+    """The unit of field *name* of *record*: its own word for it, or its name's.
+
+    A record whose field carries one of the bare names of
+    :data:`_NAMED_UNITS` but holds another quantity (crossing levels in the
+    units of the signal, not in decibels) maps the name to its unit, or to
+    ``""``, in a ``_display_units`` class attribute.
+    """
+    own: Mapping[str, str] = getattr(type(record), "_display_units", {})
+    return own[name] if name in own else unit_of(name)
 
 
 def _is_symbol(stem: list[str]) -> bool:
@@ -556,7 +590,7 @@ def _rows(record: object, *, depth: int) -> tuple[list[_Row], int]:
         if _is_record(value) and depth < MAX_DEPTH and expanded < MAX_NESTED:
             nested = value
             expanded += 1
-        unit = "" if value is None else unit_of(name)
+        unit = "" if value is None else _unit_in(record, name)
         rows.append(_Row(name, _cut(_value(value), MAX_VALUE), unit, nested))
     return rows, max(0, len(fields) - MAX_ROWS)
 

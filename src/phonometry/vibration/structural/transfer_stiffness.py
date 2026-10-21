@@ -196,11 +196,14 @@ class TransferStiffnessWarning(PhonometryWarning):
     """Advisory when an ISO 10846 adequacy condition or a band count fails."""
 
 
-def _omega(frequency: ArrayLike) -> NDArray[np.float64]:
-    r"""Angular frequency :math:`\omega = 2\pi f` (rad/s); rejects f <= 0."""
+def _omega(frequency: ArrayLike, name: str = "frequency") -> NDArray[np.float64]:
+    r"""Angular frequency :math:`\omega = 2\pi f` (rad/s); rejects f <= 0.
+
+    *name* is the caller's own name for the frequency, for the message.
+    """
     f = np.asarray(frequency, dtype=np.float64)
     if np.any(f <= 0.0):
-        msg = "'frequency' must be positive."
+        msg = f"'{name}' must be positive."
         raise ValueError(msg)
     return 2.0 * np.pi * f
 
@@ -335,9 +338,22 @@ def transfer_stiffness_indirect(
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
+    return _indirect_stiffness(
+        frequency, transmissibility, blocking_mass, flange_mass, "frequency"
+    )
+
+
+def _indirect_stiffness(
+    frequency: ArrayLike,
+    transmissibility: ArrayLike,
+    blocking_mass: float,
+    flange_mass: float,
+    name: str,
+) -> np.ndarray:
+    """ISO 10846-3 Formula (1); *name* is the caller's own name for the frequency."""
     blocking_mass = require_positive(blocking_mass, "blocking_mass")
     flange_mass = require_non_negative(flange_mass, "flange_mass")
-    omega = _omega(frequency)
+    omega = _omega(frequency, name)
     t = np.asarray(transmissibility, dtype=np.complex128)
     magnitude = np.abs(t)
     if np.any(magnitude > TRANSMISSIBILITY_LIMIT):
@@ -349,7 +365,7 @@ def transfer_stiffness_indirect(
             "within 1 dB (12 %); those bands lie outside the valid frequency "
             "range of the indirect method.",
             TransferStiffnessWarning,
-            stacklevel=2,
+            stacklevel=3,
         )
     return np.asarray(
         -(omega**2) * (blocking_mass + flange_mass) * t, dtype=np.complex128
@@ -643,7 +659,7 @@ class TransferStiffnessResult(OwnsArrays):
 
 
 def indirect_transfer_stiffness_result(
-    frequency: ArrayLike,
+    frequencies: ArrayLike,
     transmissibility: ArrayLike,
     blocking_mass: float,
     *,
@@ -657,7 +673,7 @@ def indirect_transfer_stiffness_result(
     not :attr:`~TransferStiffnessResult.valid`, so that
     :meth:`~TransferStiffnessResult.band_average` leaves them out.
 
-    :param frequency: Frequencies ``f``, in hertz (array).
+    :param frequencies: Frequencies ``f``, in hertz (array).
     :param transmissibility: Vibration transmissibility
         :math:`T = u_2/u_1` (complex).
     :param blocking_mass: Blocking mass ``m2``, in kg (> 0).
@@ -666,9 +682,9 @@ def indirect_transfer_stiffness_result(
     :warns TransferStiffnessWarning: where any :math:`\lvert T\rvert > 0.1`
         (Inequality (2) violated).
     """
-    freq = np.asarray(frequency, dtype=np.float64)
-    k = transfer_stiffness_indirect(
-        freq, transmissibility, blocking_mass, flange_mass=flange_mass
+    freq = np.asarray(frequencies, dtype=np.float64)
+    k = _indirect_stiffness(
+        freq, transmissibility, blocking_mass, flange_mass, "frequencies"
     )
     measured = np.asarray(transmissibility, dtype=np.complex128)
     return TransferStiffnessResult(

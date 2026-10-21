@@ -404,7 +404,7 @@ def _table2_rows(frequencies: NDArray[np.float64]) -> NDArray[np.intp]:
     outside = (rows < 0) | (rows >= _F0_HZ.size)
     if np.any(outside):
         msg = (
-            "'frequencies_hz' must name one-third-octave bands from 50 Hz to "
+            "'frequencies' must name one-third-octave bands from 50 Hz to "
             "10 kHz, the bands ISO 3891:1978 Annex A Table 2 gives f0 for; got "
             f"{frequencies[outside].tolist()}."
         )
@@ -416,7 +416,7 @@ def _table2_rows(frequencies: NDArray[np.float64]) -> NDArray[np.intp]:
 class Arp866aAttenuation(OwnsArrays):
     r"""Atmospheric attenuation coefficient per band by SAE ARP 866A (ISO 3891 Annex A).
 
-    :ivar frequencies_hz: Nominal one-third-octave-band centre frequencies, in
+    :ivar frequencies: Nominal one-third-octave-band centre frequencies, in
         Hz, one per band.
     :ivar evaluation_frequencies_hz: The frequency ``f0`` of ISO 3891 Table 2 at
         which each band is evaluated, in Hz: the centre up to 4 kHz, the rounded
@@ -432,7 +432,7 @@ class Arp866aAttenuation(OwnsArrays):
         ``"quadratic"`` or ``"linear"`` (see :func:`arp866a_attenuation`).
     """
 
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     evaluation_frequencies_hz: NDArray[np.float64]
     delta: NDArray[np.float64]
     eta: NDArray[np.float64]
@@ -455,7 +455,7 @@ class Arp866aAttenuation(OwnsArrays):
         """
         require_ranks(
             self,
-            frequencies_hz=1,
+            frequencies=1,
             evaluation_frequencies_hz=1,
             delta=1,
             eta=1,
@@ -463,7 +463,7 @@ class Arp866aAttenuation(OwnsArrays):
         )
         require_same_length(
             self,
-            "frequencies_hz",
+            "frequencies",
             "evaluation_frequencies_hz",
             "delta",
             "eta",
@@ -536,7 +536,7 @@ _ETA_INTERPOLATION = ("quadratic", "linear")
 
 
 def arp866a_attenuation(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     temperature_c: float,
     relative_humidity_percent: float,
@@ -584,7 +584,7 @@ def arp866a_attenuation(
     from 30 % to 90 %. Its Tables 3 to 12 print the formula from -10 °C to
     40 °C and from 10 % to 100 %.
 
-    :param frequencies_hz: One-third-octave bands, by nominal or exact centre
+    :param frequencies: One-third-octave bands, by nominal or exact centre
         frequency in Hz, from 50 Hz to 10 kHz.
     :param temperature_c: Air temperature ``θ``, in degrees Celsius.
     :param relative_humidity_percent: Relative humidity ``RH``, in percent
@@ -596,7 +596,7 @@ def arp866a_attenuation(
         absolute zero, a humidity outside 0 % to 100 %, or an unknown
         interpolation.
     """
-    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    f = require_positive_array(frequencies, "frequencies")
     interpolation = require_choice(
         eta_interpolation, "eta_interpolation", _ETA_INTERPOLATION
     )
@@ -632,7 +632,7 @@ def arp866a_attenuation(
     ) + eta * 10.0 ** (np.log10(f0) + 8.42994e-3 * theta - 2.755624)
     nominal = np.asarray(NOY_BANDS[rows], dtype=np.float64)
     return Arp866aAttenuation(
-        frequencies_hz=nominal,
+        frequencies=nominal,
         evaluation_frequencies_hz=f0,
         delta=np.asarray(delta, dtype=np.float64),
         eta=np.asarray(eta, dtype=np.float64),

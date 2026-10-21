@@ -405,11 +405,11 @@ was.
 
 ```python
 AbsorptionAreaSpectrum.values_at(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
 ) -> NDArray[np.float64]
 ```
 
-The row's value at each of *frequencies_hz*, or a refusal.
+The row's value at each of *frequencies*, or a refusal.
 
 The adapter for a function that takes one value per band by position
 (the absorption of a surface in a reverberation formula, the
@@ -430,7 +430,7 @@ and never filled from its neighbours.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Band centre frequencies, in hertz, of any shape. |
+| `frequencies` | Band centre frequencies, in hertz, of any shape. |
 
 **Returns:** A new array of the same shape, one value per frequency.
 
@@ -780,12 +780,10 @@ was.
 ### AbsorptionSpectrum.values_at()
 
 ```python
-AbsorptionSpectrum.values_at(
-    frequencies_hz: ArrayLike,
-) -> NDArray[np.float64]
+AbsorptionSpectrum.values_at(frequencies: ArrayLike) -> NDArray[np.float64]
 ```
 
-The row's value at each of *frequencies_hz*, or a refusal.
+The row's value at each of *frequencies*, or a refusal.
 
 The adapter for a function that takes one value per band by position
 (the absorption of a surface in a reverberation formula, the
@@ -806,7 +804,7 @@ and never filled from its neighbours.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | Band centre frequencies, in hertz, of any shape. |
+| `frequencies` | Band centre frequencies, in hertz, of any shape. |
 
 **Returns:** A new array of the same shape, one value per frequency.
 

@@ -932,7 +932,7 @@ def plot_arp866a_attenuation(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    f = np.asarray(result.frequencies_hz, dtype=np.float64)
+    f = np.asarray(result.frequencies, dtype=np.float64)
     air = _air_label(result.temperature_c, result.relative_humidity_percent, language)
     ax.plot(
         f,
@@ -975,11 +975,11 @@ def plot_spectral_class(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    f = np.asarray(result.frequencies_hz, dtype=np.float64)
+    f = np.asarray(result.frequencies, dtype=np.float64)
     operation = "departure" if result.operation == "D" else "arrival"
     ax.plot(
         f,
-        np.asarray(result.levels_db),
+        np.asarray(result.levels),
         **styled(
             kwargs,
             color=_C_PRIMARY,
@@ -1067,7 +1067,7 @@ def plot_npd_atmosphere_attenuation(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    f = np.asarray(result.frequencies_hz, dtype=np.float64)
+    f = np.asarray(result.frequencies, dtype=np.float64)
     if reference:
         ax.plot(
             f,

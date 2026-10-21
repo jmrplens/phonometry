@@ -177,15 +177,15 @@ def plot_harmonic_distortion(
     amps = np.asarray(result.harmonic_amplitudes, dtype=np.float64)
     tiny = np.finfo(np.float64).tiny
     ref = amps[0] if amps.size and amps[0] > 0.0 else 1.0
-    levels_db = 20.0 * np.log10(np.maximum(amps, tiny) / ref)
+    levels = 20.0 * np.log10(np.maximum(amps, tiny) / ref)
     orders = np.arange(1, amps.size + 1)
     floor_db = -160.0  # display floor of the panel, in dB re the fundamental
 
-    ax.vlines(orders, floor_db, levels_db, color=_C_PRIMARY, lw=1.5)
+    ax.vlines(orders, floor_db, levels, color=_C_PRIMARY, lw=1.5)
     style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Harmonics", language))
-    ax.plot(orders, levels_db, "o", **kwargs)
-    for order, level in zip(orders, levels_db, strict=True):
+    ax.plot(orders, levels, "o", **kwargs)
+    for order, level in zip(orders, levels, strict=True):
         if level > floor_db:
             ax.annotate(
                 f"{order}",

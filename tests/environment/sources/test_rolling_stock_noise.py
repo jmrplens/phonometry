@@ -361,7 +361,7 @@ def test_the_maximum_is_taken_within_the_interval() -> None:
     record = pass_by_measurement(p, _FS, start_s=2.0, end_s=8.0)
     steady = 10.0 * math.log10(0.1**2 / 2.0 / _P0**2)
     assert record.max_level_db == pytest.approx(steady, abs=0.05)
-    assert float(np.max(record.levels_db)) > steady + 15.0
+    assert float(np.max(record.levels)) > steady + 15.0
 
 
 def test_the_equivalent_level_is_the_mean_square_of_the_pressure() -> None:
@@ -617,7 +617,7 @@ def test_a_slope_counts_from_a_rise_of_10_db(rise_db: float, *, counts: bool) ->
 def test_the_rise_speed_result_holds_tuples() -> None:
     """Built directly from lists, the slopes and speeds are held as tuples."""
     result = environment.RiseSpeedResult(
-        times_s=[0.0, 0.01], levels_db=[60.0, 61.0], slopes=[[0, 1]],
+        times=[0.0, 0.01], levels=[60.0, 61.0], slopes=[[0, 1]],
         rise_speeds_db_per_s=[100.0],
     )  # fmt: skip
     assert result.slopes == ((0, 1),)
@@ -633,7 +633,7 @@ def test_no_slope_rising_10_db_gives_no_rise_speed() -> None:
 
 def test_the_times_have_to_increase() -> None:
     """A derivative needs increasing times."""
-    with pytest.raises(ValueError, match="'times_s' must increase"):
+    with pytest.raises(ValueError, match="'times' must increase"):
         impulsiveness_rise_speed([0.0, 0.0, 0.1], [60.0, 61.0, 62.0])
 
 
@@ -724,7 +724,7 @@ def test_roughness_below_the_limit_changes_nothing() -> None:
     verdict = check_small_roughness_deviations(
         _limit_spectrum(-1.0),
         np.full(len(_NOISE_BANDS_HZ), 70.0),
-        frequencies_hz=_NOISE_BANDS_HZ,
+        frequencies=_NOISE_BANDS_HZ,
         speed_kmh=80.0,
     )
     assert verdict.exceeded is False
@@ -742,11 +742,11 @@ def test_two_rails_on_the_limit_do_not_exceed_it() -> None:
     """
     rail = _limit_spectrum()
     averaged = average_roughness_spectra([rail, rail])
-    np.testing.assert_allclose(averaged.levels_db, rail.levels_db, rtol=0, atol=1e-12)
+    np.testing.assert_allclose(averaged.levels, rail.levels, rtol=0, atol=1e-12)
     verdict = check_small_roughness_deviations(
         averaged,
         np.full(len(_NOISE_BANDS_HZ), 70.0),
-        frequencies_hz=_NOISE_BANDS_HZ,
+        frequencies=_NOISE_BANDS_HZ,
         speed_kmh=80.0,
     )
     assert verdict.exceeded is False
@@ -761,13 +761,13 @@ def test_two_rails_on_the_limit_do_not_exceed_it() -> None:
 def test_one_band_over_the_limit_at_36_kmh_corrects_one_noise_band() -> None:
     """At 10 m/s the 4 cm band carries onto 250 Hz whole: 3 dB there, 0 elsewhere."""
     roughness = _limit_spectrum(-1.0)
-    levels = np.array(roughness.levels_db)
+    levels = np.array(roughness.levels)
     index = roughness.bands.index(14)  # 4 cm
     levels[index] = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[0.04] + 3.0
     roughness = AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)
     noise = np.full(len(_NOISE_BANDS_HZ), 70.0)
     verdict = check_small_roughness_deviations(
-        roughness, noise, frequencies_hz=_NOISE_BANDS_HZ, speed_kmh=_ALIGNED_SPEED_KMH
+        roughness, noise, frequencies=_NOISE_BANDS_HZ, speed_kmh=_ALIGNED_SPEED_KMH
     )
     correction = np.zeros(len(_NOISE_BANDS_HZ))
     correction[_NOISE_BANDS_HZ.index(250.0)] = 3.0
@@ -781,13 +781,13 @@ def test_one_band_over_the_limit_at_36_kmh_corrects_one_noise_band() -> None:
 def test_a_large_exceedance_is_not_accepted() -> None:
     """The same band 20 dB over, in a spectrum that band dominates, moves it over 1 dB."""
     roughness = _limit_spectrum(-1.0)
-    levels = np.array(roughness.levels_db)
+    levels = np.array(roughness.levels)
     levels[roughness.bands.index(14)] = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[0.04] + 20.0
     roughness = AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)
     noise = np.full(len(_NOISE_BANDS_HZ), 60.0)
     noise[_NOISE_BANDS_HZ.index(250.0)] = 80.0
     verdict = check_small_roughness_deviations(
-        roughness, noise, frequencies_hz=_NOISE_BANDS_HZ, speed_kmh=_ALIGNED_SPEED_KMH
+        roughness, noise, frequencies=_NOISE_BANDS_HZ, speed_kmh=_ALIGNED_SPEED_KMH
     )
     assert verdict.impact_db > 1.0
     assert verdict.passes is False
@@ -813,7 +813,7 @@ def test_annex_c_accepts_an_effect_of_1_db_and_no_more(
     10 lg(24 + 10^2) - 10 lg(24 + 10^(2 - x/10)).
     """
     roughness = _limit_spectrum(-1.0)
-    levels = np.array(roughness.levels_db)
+    levels = np.array(roughness.levels)
     levels[roughness.bands.index(14)] = (
         REFERENCE_TRACK_ROUGHNESS_LIMIT_DB[0.04] + exceedance_db
     )
@@ -821,7 +821,7 @@ def test_annex_c_accepts_an_effect_of_1_db_and_no_more(
     noise = np.full(len(_NOISE_BANDS_HZ), 60.0)
     noise[_NOISE_BANDS_HZ.index(250.0)] = 80.0
     verdict = check_small_roughness_deviations(
-        roughness, noise, frequencies_hz=_NOISE_BANDS_HZ, speed_kmh=_ALIGNED_SPEED_KMH
+        roughness, noise, frequencies=_NOISE_BANDS_HZ, speed_kmh=_ALIGNED_SPEED_KMH
     )
     expected = 10.0 * math.log10(24.0 + 100.0) - 10.0 * math.log10(
         24.0 + 100.0 * 10.0 ** (-exceedance_db / 10.0)
@@ -836,7 +836,7 @@ def test_the_annex_c_plot_names_both_spectra() -> None:
     verdict = check_small_roughness_deviations(
         _limit_spectrum(-1.0),
         np.full(len(_NOISE_BANDS_HZ), 70.0),
-        frequencies_hz=_NOISE_BANDS_HZ,
+        frequencies=_NOISE_BANDS_HZ,
         speed_kmh=80.0,
     )
     ax = verdict.plot(language="es")
@@ -847,7 +847,7 @@ def test_the_annex_c_plot_names_both_spectra() -> None:
 def test_annex_e_bounds_a_one_band_difference() -> None:
     """Situation 2 is 5 dB rougher in one band: the bound is what 5 dB does to it."""
     one = _limit_spectrum(-2.0)
-    levels = np.array(one.levels_db)
+    levels = np.array(one.levels)
     levels[one.bands.index(14)] += 5.0
     two = AcousticRoughnessSpectrum(one.wavelengths_m, levels)
     noise_1 = np.full(len(_NOISE_BANDS_HZ), 70.0)
@@ -857,7 +857,7 @@ def test_annex_e_bounds_a_one_band_difference() -> None:
         two,
         noise_1,
         noise_2,
-        frequencies_hz=_NOISE_BANDS_HZ,
+        frequencies=_NOISE_BANDS_HZ,
         speed_kmh=_ALIGNED_SPEED_KMH,
     )
     count = len(_NOISE_BANDS_HZ)
@@ -869,8 +869,8 @@ def test_annex_e_bounds_a_one_band_difference() -> None:
     assert min_2 == pytest.approx(down, abs=1e-9)
     assert max_2 == pytest.approx(0.0, abs=1e-9)
     assert result.bound_db == pytest.approx(abs(up), abs=1e-9)
-    np.testing.assert_allclose(result.envelope_min.levels_db, one.levels_db)
-    np.testing.assert_allclose(result.envelope_max.levels_db, two.levels_db)
+    np.testing.assert_allclose(result.envelope_min.levels, one.levels)
+    np.testing.assert_allclose(result.envelope_max.levels, two.levels)
 
 
 def test_annex_e_needs_a_band_in_common() -> None:
@@ -882,7 +882,7 @@ def test_annex_e_needs_a_band_in_common() -> None:
         ValueError, match="two roughness spectra have no band in common"
     ):
         roughness_comparability(
-            one, two, noise, noise, frequencies_hz=[500.0, 630.0, 800.0], speed_kmh=80.0
+            one, two, noise, noise, frequencies=[500.0, 630.0, 800.0], speed_kmh=80.0
         )
 
 
@@ -946,7 +946,7 @@ def test_a_tighter_curve_fails_the_same_track() -> None:
 def test_the_roughness_limit_is_judged_in_every_band() -> None:
     """One band 0,5 dB over the limit fails 6.2.5 without Annex C."""
     roughness = _limit_spectrum(-1.0)
-    levels = np.array(roughness.levels_db)
+    levels = np.array(roughness.levels)
     levels[5] += 1.5
     check = check_reference_track(
         [AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)],
@@ -962,13 +962,13 @@ def test_the_roughness_limit_is_judged_in_every_band() -> None:
 def test_annex_c_accepts_a_small_exceedance() -> None:
     """The same exceedance passes when Annex C finds its effect at most 1 dB."""
     roughness = _limit_spectrum(-1.0)
-    levels = np.array(roughness.levels_db)
+    levels = np.array(roughness.levels)
     levels[roughness.bands.index(14)] += 1.5
     roughness = AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)
     annex_c = check_small_roughness_deviations(
         roughness,
         np.full(len(_NOISE_BANDS_HZ), 70.0),
-        frequencies_hz=_NOISE_BANDS_HZ,
+        frequencies=_NOISE_BANDS_HZ,
         speed_kmh=_ALIGNED_SPEED_KMH,
     )
     check = check_reference_track(
@@ -1081,7 +1081,7 @@ def _measured_lateral(
         flat[-1] = 0.1
         responses = np.hstack([flat, responses])
         frequencies = [flat_band_hz, *frequencies]
-    return track_decay_rate(responses, frequencies_hz=frequencies, direction="lateral")
+    return track_decay_rate(responses, frequencies=frequencies, direction="lateral")
 
 
 def _en_15461_conditions(check: ReferenceTrackCheck) -> dict[str, bool | None]:
@@ -1140,7 +1140,7 @@ def test_a_rate_under_twice_the_floor_fails_en_15461_7() -> None:
 def _exceeding_roughness() -> AcousticRoughnessSpectrum:
     """1 dB under the limit but 0,5 dB over it in the 4 cm band."""
     roughness = _limit_spectrum(-1.0)
-    levels = np.array(roughness.levels_db)
+    levels = np.array(roughness.levels)
     levels[roughness.bands.index(14)] += 1.5
     return AcousticRoughnessSpectrum(roughness.wavelengths_m, levels)
 
@@ -1151,7 +1151,7 @@ def _annex_c(
     return check_small_roughness_deviations(
         roughness,
         np.full(len(_NOISE_BANDS_HZ), 70.0),
-        frequencies_hz=_NOISE_BANDS_HZ,
+        frequencies=_NOISE_BANDS_HZ,
         speed_kmh=speed_kmh,
     )
 
@@ -1213,7 +1213,7 @@ def test_an_annex_c_verdict_against_another_limit_is_refused() -> None:
     strict = check_small_roughness_deviations(
         roughness,
         np.full(len(_NOISE_BANDS_HZ), 70.0),
-        frequencies_hz=_NOISE_BANDS_HZ,
+        frequencies=_NOISE_BANDS_HZ,
         speed_kmh=_ALIGNED_SPEED_KMH,
         limit_db=stricter,
     )
@@ -1265,7 +1265,7 @@ def test_an_annex_c_verdict_records_the_limit_it_was_judged_against() -> None:
     annex_c = check_small_roughness_deviations(
         _exceeding_roughness(),
         np.full(len(_NOISE_BANDS_HZ), 70.0),
-        frequencies_hz=_NOISE_BANDS_HZ,
+        frequencies=_NOISE_BANDS_HZ,
         speed_kmh=_ALIGNED_SPEED_KMH,
         limit_db=limit,
     )
@@ -1414,7 +1414,7 @@ def test_a_roughness_limit_gives_one_level_per_band() -> None:
         check_small_roughness_deviations(
             exceeding,
             noise,
-            frequencies_hz=_NOISE_BANDS_HZ,
+            frequencies=_NOISE_BANDS_HZ,
             speed_kmh=_ALIGNED_SPEED_KMH,
             limit_db=limit,
         )

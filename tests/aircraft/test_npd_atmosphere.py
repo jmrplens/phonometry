@@ -93,8 +93,8 @@ def test_table_d1_is_published_frozen_over_the_24_bands() -> None:
 
 def test_spectral_classes_103_and_205_are_table_d2() -> None:
     printed = np.array(TABLE_D2)
-    assert np.array_equal(_DB.spectral_class(103).levels_db, printed[:, 0])
-    assert np.array_equal(_DB.spectral_class("205").levels_db, printed[:, 1])
+    assert np.array_equal(_DB.spectral_class(103).levels, printed[:, 0])
+    assert np.array_equal(_DB.spectral_class("205").levels, printed[:, 1])
     assert _DB.spectral_class(103).operation == "D"
     assert _DB.spectral_class(205).operation == "A"
 
@@ -215,7 +215,7 @@ def test_a_weighting_is_the_nominal_iec_61672_1_table_3() -> None:
 
 def test_increment_does_not_depend_on_the_spectrum_level() -> None:
     sc = _DB.spectral_class(103)
-    louder = npd_atmosphere_increment(sc.levels_db + 12.5, **_AIR)
+    louder = npd_atmosphere_increment(sc.levels + 12.5, **_AIR)
     assert np.allclose(louder.increment_db, _increment(103, "arp5534").increment_db)
 
 
@@ -372,10 +372,10 @@ def test_unknown_spectral_class_names_what_there_is() -> None:
 def test_spectral_class_rejects_levels_off_its_bands() -> None:
     sc = _DB.spectral_class(103)
     assert isinstance(sc, SpectralClass)
-    assert not sc.levels_db.flags.writeable
-    short = sc.levels_db[:-1]
-    with pytest.raises(ValueError, match="'levels_db' \\(23\\)"):
-        dataclasses.replace(sc, levels_db=short)
+    assert not sc.levels.flags.writeable
+    short = sc.levels[:-1]
+    with pytest.raises(ValueError, match="'levels' \\(23\\)"):
+        dataclasses.replace(sc, levels=short)
 
 
 def test_plots_en_es() -> None:
@@ -415,7 +415,7 @@ def test_attenuation_plot_draws_the_column_of_its_distance() -> None:
     ax = inc.plot_attenuation(distance_m=_DISTANCES_M[6])
     assert np.array_equal(_ydata(ax, 0), inc.reference_attenuation_db[:, column])
     assert np.array_equal(_ydata(ax, 1), inc.specified_attenuation_db[:, column])
-    assert np.array_equal(ax.lines[1].get_xdata(), inc.frequencies_hz)
+    assert np.array_equal(ax.lines[1].get_xdata(), inc.frequencies)
     plt.close("all")
 
 
@@ -434,15 +434,15 @@ def test_revised_plot_draws_revised_solid_over_original_dashed() -> None:
 def test_spectral_class_plot_draws_its_levels() -> None:
     sc = _DB.spectral_class(205)
     ax = sc.plot()
-    assert np.array_equal(ax.lines[0].get_xdata(), sc.frequencies_hz)
-    assert np.array_equal(_ydata(ax, 0), sc.levels_db)
+    assert np.array_equal(ax.lines[0].get_xdata(), sc.frequencies)
+    assert np.array_equal(_ydata(ax, 0), sc.levels)
     plt.close("all")
 
 
 def test_frequencies_are_a_copy_not_the_published_bands() -> None:
     inc = _increment(103, "arp5534")
-    assert np.array_equal(inc.frequencies_hz, NOY_BANDS)
-    assert inc.frequencies_hz is not NOY_BANDS
+    assert np.array_equal(inc.frequencies, NOY_BANDS)
+    assert inc.frequencies is not NOY_BANDS
 
 
 def test_noise_contour_with_humidity_reads_the_revised_tables() -> None:

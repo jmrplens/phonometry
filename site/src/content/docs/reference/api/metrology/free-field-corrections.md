@@ -96,7 +96,7 @@ is in `docs/ERRATA.md`.
 
 ```python
 adjustment_value(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     free_field_indicated_level_db: ArrayLike,
     calibrator_reading_db: float,
     *,
@@ -134,7 +134,7 @@ text asks for.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies of the free-field response, in Hz, increasing, the calibration check frequency among them. |
+| `frequencies` | The frequencies of the free-field response, in Hz, increasing, the calibration check frequency among them. |
 | `free_field_indicated_level_db` | What the meter indicates in the free field at each frequency, in dB, before the adjustment. |
 | `calibrator_reading_db` | $L_4'$, what the meter indicates on the recommended calibrator at the same sensitivity, in dB. |
 | `calibrator_level_db` | $L_1$, the level stated for the calibrator at the calibration check frequency, in dB. |
@@ -155,7 +155,7 @@ text asks for.
 
 ```python
 AdjustmentValue(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     free_field_deviation_db: NDArray[np.float64],
     calibrator_level_db: float,
     calibrator_reading_db: float,
@@ -184,11 +184,11 @@ number, without an uncertainty (clause 8).
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | the frequencies of the free-field response, in Hz. |
+| `frequencies` | the frequencies of the free-field response, in Hz. |
 | `free_field_deviation_db` | $d$, the indication in the free field less the incident level at each frequency, before the adjustment, in dB. |
 | `calibrator_level_db` | $L_1$, the level stated for the sound calibrator, in dB. |
 | `calibrator_reading_db` | $L_4'$, what the meter indicates on the calibrator before the adjustment, at the sensitivity the free-field readings were taken at, in dB. |
-| `check_frequency_hz` | $f_\mathrm{R}$, the calibration check frequency, in Hz: one of `frequencies_hz`. |
+| `check_frequency_hz` | $f_\mathrm{R}$, the calibration check frequency, in Hz: one of `frequencies`. |
 | `tolerance_db` | $t$ at each frequency, in dB, infinite where a frequency does not pull the fit; `None` for equal weights. |
 | `pressure_deviation_db` | the indication in a pressure field of level $L_1$ less $L_1$ at each frequency, before the adjustment, in dB; `None` when the pressure response was not given. |
 
@@ -288,7 +288,7 @@ normalised to sum to one; equal without tolerances.
 
 ```python
 comparison_coupler_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     slm_free_field_level_db: ArrayLike,
     reference_free_field_level_db: ArrayLike,
     slm_coupler_level_db: ArrayLike,
@@ -326,7 +326,7 @@ correction is their mean.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `slm_free_field_level_db` | $L_\mathrm{ind1}$, the meter in the free field, in dB. |
 | `reference_free_field_level_db` | $L_\mathrm{ind2}$, the reference microphone in the same field, in dB. |
 | `slm_coupler_level_db` | the meter in the coupler, in dB ($L_\mathrm{ind3b}$ of Figure E.1). |
@@ -512,7 +512,7 @@ $u_i$, each value over its divisor, in dB.
 ```python
 CorrectionUncertaintyVerification(
     clause: int,
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     expanded_uncertainty_db: NDArray[np.float64],
     correction_db: NDArray[np.float64] | None = None,
     coverage_factor: NDArray[np.float64] | None = None,
@@ -543,7 +543,7 @@ maximum its clause does not give.
 | Name | Description |
 | :--- | :--- |
 | `clause` | the clause, 9 to 14. |
-| `frequencies_hz` | the frequencies, in Hz. |
+| `frequencies` | the frequencies, in Hz. |
 | `expanded_uncertainty_db` | the actual expanded uncertainty at each frequency, in dB. |
 | `correction_db` | the corrections, in dB, which the documentation of clause 15 states with their uncertainty; `None` if not given. |
 | `coverage_factor` | the coverage factor of each expanded uncertainty, which clause 15 asks to be stated; `None` if not given. |
@@ -669,7 +669,7 @@ by frequency.
 
 ```python
 electrostatic_actuator_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     slm_free_field_level_db: ArrayLike,
     reference_free_field_level_db: ArrayLike,
     slm_actuator_level_db: ArrayLike,
@@ -708,7 +708,7 @@ actuator clause 7 asks for.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing, $f_0$ among them. |
+| `frequencies` | The frequencies, in Hz, increasing, $f_0$ among them. |
 | `slm_free_field_level_db` | $L_\mathrm{ind1}(f)$, the meter in the free field, in dB. |
 | `reference_free_field_level_db` | $L_\mathrm{ind2}(f)$, the reference channel in the same field, in dB. |
 | `slm_actuator_level_db` | $L_\mathrm{ind3}(f)$, the meter on the actuator, in dB. |
@@ -776,7 +776,7 @@ the one-third-octave ones.
 
 ```python
 FreeFieldCorrection(
-    frequencies_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     corrections_db: NDArray[np.float64],
     reference_correction_db: NDArray[np.float64],
     source: str,
@@ -803,7 +803,7 @@ determinations share a microphone.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | the frequencies, in Hz. |
+| `frequencies` | the frequencies, in Hz. |
 | `corrections_db` | $C_\mathrm{FF,SLM}$, or $C_\mathrm{N,FF,SLM}$ for an actuator, of each determination, in dB, shape `(determinations, frequencies)`. |
 | `reference_correction_db` | what the reference microphone contributes at each frequency, in dB: $C_\mathrm{FF,RM}$ for a calibrator or a coupler, $S_\mathrm{N,RM} + G_\mathrm{N,RC}$ for an actuator. |
 | `source` | `"sound_calibrator"` (Annex D), `"comparison_coupler"` (Annex E) or `"electrostatic_actuator"` (Annex F). |
@@ -890,7 +890,7 @@ judge. Zero for a single microphone.
 
 ```python
 maximum_expanded_uncertainty(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     clause: int,
 ) -> NDArray[np.float64]
@@ -920,7 +920,7 @@ ones do.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz. |
+| `frequencies` | The frequencies, in Hz. |
 | `clause` | The clause, 9 to 14. |
 
 **Returns:** The maximum at each frequency, in dB, read-only.
@@ -935,7 +935,7 @@ ones do.
 
 ```python
 sound_calibrator_correction(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     slm_free_field_level_db: ArrayLike,
     reference_free_field_level_db: ArrayLike,
     slm_calibrator_level_db: ArrayLike,
@@ -973,7 +973,7 @@ taken over the three microphones and not over the calibrators as well.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `slm_free_field_level_db` | $L_\mathrm{ind1}$, the meter in the free field, in dB. |
 | `reference_free_field_level_db` | $L_\mathrm{ind2}$, the reference microphone in the same field, in dB. |
 | `slm_calibrator_level_db` | $L_\mathrm{ind3}$, the meter on the calibrator, in dB. |
@@ -1018,7 +1018,7 @@ uncertainty of a correction measured with a comparison coupler (Annex E).
 
 ```python
 verify_correction_uncertainty(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     expanded_uncertainty_db: ArrayLike,
     *,
     clause: int,
@@ -1047,7 +1047,7 @@ through floating-point arithmetic is on it, not above it.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The frequencies, in Hz, increasing. |
+| `frequencies` | The frequencies, in Hz, increasing. |
 | `expanded_uncertainty_db` | The actual expanded uncertainty at each frequency, in dB, one value or one per frequency. |
 | `clause` | The clause the corrections belong to: 9 (case and diffraction), 10 (microphone response), 11 (windscreens and accessories), 12 (sound calibrator), 13 (comparison coupler) or 14 (electrostatic actuator). |
 | `correction_db` | The corrections, in dB, for the documentation of clause 15 (Default: None). |

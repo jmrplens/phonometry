@@ -325,8 +325,8 @@ def test_drive_voltage_is_e3_u_h() -> None:
 
 def test_impedance_default_frequencies_are_third_octaves() -> None:
     z = ea.loop_impedance(0.5, 50e-6)
-    assert z.frequencies_hz[0] == pytest.approx(50.0)
-    assert z.frequencies_hz[-1] == pytest.approx(10000.0)
+    assert z.frequencies[0] == pytest.approx(50.0)
+    assert z.frequencies[-1] == pytest.approx(10000.0)
     with pytest.raises(ValueError, match="read-only"):
         z.impedance_ohm[0] = 0.0
 

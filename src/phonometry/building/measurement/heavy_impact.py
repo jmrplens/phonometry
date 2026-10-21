@@ -659,11 +659,11 @@ class StandardizedMaximumImpactResult(OwnsArrays):
 
 
 def standardized_maximum_impact_level(
-    level: ArrayLike,
+    levels: ArrayLike,
     volume: float,
     reverberation_time: ArrayLike,
     *,
-    frequency: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
     reference_time: float = _T0,
     reference_volume: float = _V0,
 ) -> StandardizedMaximumImpactResult:
@@ -674,12 +674,12 @@ def standardized_maximum_impact_level(
     floor excited by the rubber ball. The reverberation term is
     :func:`fast_reverberation_correction`.
 
-    :param level: Energy-averaged maximum impact sound pressure level
+    :param levels: Energy-averaged maximum impact sound pressure level
         ``Li,Fmax`` per band, in dB.
     :param volume: Receiving-room volume ``V``, in m3 (> 0).
     :param reverberation_time: Receiving-room reverberation time ``T`` per
         band, in seconds (> 0); a scalar is broadcast over the bands.
-    :param frequency: Optional band centre frequencies, in Hz.
+    :param frequencies: Optional band centre frequencies, in Hz.
     :param reference_time: Reference reverberation time ``T0``, in seconds
         (Default: 0,5 s).
     :param reference_volume: Reference volume ``V0``, in m3 (Default: 50 m3
@@ -687,21 +687,21 @@ def standardized_maximum_impact_level(
     :return: A :class:`StandardizedMaximumImpactResult`.
     :raises ValueError: for mismatched shapes or non-positive inputs.
     """
-    li = require_finite_array(level, "level")
+    li = require_finite_array(levels, "levels")
     v = require_positive(volume, "volume")
     v0 = require_positive(reference_volume, "reference_volume")
     t = require_finite_array(reverberation_time, "reverberation_time")
     if t.size == 1:
         t = np.full(li.shape, float(t[0]))
     if t.shape != li.shape:
-        msg = "'reverberation_time' must be a scalar or match 'level'."
+        msg = "'reverberation_time' must be a scalar or match 'levels'."
         raise ValueError(msg)
     freqs: np.ndarray | None = None
-    if frequency is not None:
-        freqs = require_finite_array(frequency, "frequency")
+    if frequencies is not None:
+        freqs = require_finite_array(frequencies, "frequencies")
         require_equal_shapes(
             "standardized_maximum_impact_level",
-            {"level": li.shape, "frequency": freqs.shape},
+            {"levels": li.shape, "frequencies": freqs.shape},
             "band",
         )
     correction = fast_reverberation_correction(t, reference_time=reference_time)
@@ -717,7 +717,7 @@ def standardized_maximum_impact_level(
     )
 
 
-def heavy_impact_octave_levels(level: ArrayLike) -> np.ndarray:
+def heavy_impact_octave_levels(levels: ArrayLike) -> np.ndarray:
     r"""Combine one-third-octave maximum levels into octaves (Formula (20)).
 
     .. math::
@@ -732,13 +732,13 @@ def heavy_impact_octave_levels(level: ArrayLike) -> np.ndarray:
     to the single number: a one-third-octave measurement is rated in one-third
     octaves with :func:`a_weighted_maximum_impact_level`.
 
-    :param level: One-third-octave levels in ascending order, in dB.
+    :param levels: One-third-octave levels in ascending order, in dB.
     :return: The octave-band levels, in dB.
     :raises ValueError: when the length is not a positive multiple of three.
     """
-    x = require_finite_array(level, "level")
+    x = require_finite_array(levels, "levels")
     if x.size % 3 != 0:
-        msg = "'level' must be a 1-D array whose length is a multiple of 3."
+        msg = "'levels' must be a 1-D array whose length is a multiple of 3."
         raise ValueError(msg)
     return np.asarray(
         10.0 * np.log10(np.sum(10.0 ** (x.reshape(-1, 3) / 10.0), axis=1)),
@@ -824,8 +824,8 @@ def _round_half_up(value: float) -> int:
 
 
 def a_weighted_maximum_impact_level(
-    level: ArrayLike,
-    frequency: ArrayLike | Sequence[float] | None = None,
+    levels: ArrayLike,
+    frequencies: ArrayLike | Sequence[float] | None = None,
     *,
     band: str | None = None,
 ) -> AWeightedMaximumImpactResult:
@@ -838,21 +838,21 @@ def a_weighted_maximum_impact_level(
     corrections of Table D.3. The same formula rates ``LiA,Fmax``,
     ``LiA,Fmax,V,T``, ``L'iA,Fmax`` and ``L'iA,Fmax,V,T``.
 
-    :param level: Maximum impact sound pressure levels ``Xi,Fmax,j``, in dB,
+    :param levels: Maximum impact sound pressure levels ``Xi,Fmax,j``, in dB,
         in ascending band order.
-    :param frequency: Optional band centre frequencies, in Hz. When given they
+    :param frequencies: Optional band centre frequencies, in Hz. When given they
         must be exactly the rating bands of the chosen band width.
     :param band: ``"third"`` or ``"octave"``; inferred from the number of
         values (12 -> third, 4 -> octave) when omitted.
     :return: An :class:`AWeightedMaximumImpactResult`.
     :raises ValueError: for a wrong number of values or mismatched bands.
     """
-    x = require_finite_array(level, "level")
+    x = require_finite_array(levels, "levels")
     if band is None:
         band = {12: "third", 4: "octave"}.get(x.size, "")
         if not band:
             msg = (
-                "'level' must hold 12 one-third-octave values (50-630 Hz) or "
+                "'levels' must hold 12 one-third-octave values (50-630 Hz) or "
                 "4 octave values (63-500 Hz); pass 'band' to disambiguate."
             )
             raise ValueError(msg)
@@ -861,15 +861,15 @@ def a_weighted_maximum_impact_level(
     bands = np.asarray(sorted(table), dtype=np.float64)
     if x.shape != bands.shape:
         msg = (
-            f"'level' must hold {bands.size} values for band={chosen!r} "
+            f"'levels' must hold {bands.size} values for band={chosen!r} "
             f"({bands[0]:g} Hz to {bands[-1]:g} Hz)."
         )
         raise ValueError(msg)
-    if frequency is not None:
-        given = require_finite_array(frequency, "frequency")
+    if frequencies is not None:
+        given = require_finite_array(frequencies, "frequencies")
         if given.shape != bands.shape or not np.allclose(given, bands):
             msg = (
-                f"'frequency' must be the ISO 717-2 Annex D rating bands for "
+                f"'frequencies' must be the ISO 717-2 Annex D rating bands for "
                 f"band={chosen!r}: {[float(b) for b in bands]}."
             )
             raise ValueError(msg)

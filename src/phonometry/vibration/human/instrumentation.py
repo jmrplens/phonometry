@@ -443,7 +443,7 @@ class WeightingVerification(OwnsArrays):
     """One measured weighting response against its ISO 8041-1 tolerances.
 
     :ivar weighting: The weighting the response was measured for.
-    :ivar frequencies_hz: The frequencies it was measured at.
+    :ivar frequencies: The frequencies it was measured at.
     :ivar measured: The measured weighting factors, as supplied.
     :ivar design: The design-goal factors of ISO 8041-1 Table 3 at the same
         frequencies.
@@ -459,7 +459,7 @@ class WeightingVerification(OwnsArrays):
     """
 
     weighting: str
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     measured: NDArray[np.float64]
     design: NDArray[np.float64]
     deviation_percent: NDArray[np.float64]
@@ -472,7 +472,7 @@ class WeightingVerification(OwnsArrays):
             frequency is not positive and finite, or the uncertainty is
             negative or not finite.
         """
-        weighting_tolerance_percent(self.weighting, self.frequencies_hz)
+        weighting_tolerance_percent(self.weighting, self.frequencies)
         _checked_uncertainty(
             self.expanded_uncertainty_percent, "expanded_uncertainty_percent"
         )
@@ -487,7 +487,7 @@ class WeightingVerification(OwnsArrays):
         laboratory's uncertainty is not subtracted: a response of exactly zero
         deviates by -100 % and still conforms.
         """
-        upper, lower = weighting_tolerance_percent(self.weighting, self.frequencies_hz)
+        upper, lower = weighting_tolerance_percent(self.weighting, self.frequencies)
         deviation = np.asarray(self.deviation_percent, dtype=np.float64)
         uncertainty = self.expanded_uncertainty_percent
         unconstrained = lower <= UNCONSTRAINED_BELOW
@@ -509,7 +509,7 @@ class WeightingVerification(OwnsArrays):
     @property
     def failing_frequencies_hz(self) -> NDArray[np.float64]:
         """The frequencies whose deviation falls outside the band."""
-        return np.asarray(self.frequencies_hz[~self.within_tolerance], dtype=np.float64)
+        return np.asarray(self.frequencies[~self.within_tolerance], dtype=np.float64)
 
     @property
     def worst_deviation_percent(self) -> float:
@@ -605,7 +605,7 @@ def verify_weighting(
     deviation = (measured / design - 1.0) * 100.0
     return WeightingVerification(
         weighting=weighting,
-        frequencies_hz=f,
+        frequencies=f,
         measured=measured,
         design=design,
         deviation_percent=deviation,
@@ -619,27 +619,27 @@ _FORMULA_6_FREQUENCIES = 2
 
 
 def _require_a_pair_of_ascending_frequencies(
-    frequencies_hz: NDArray[np.float64], owner: str
+    frequencies: NDArray[np.float64], owner: str
 ) -> None:
     """Require what Formula (6) needs: two frequencies, and an order.
 
-    :param frequencies_hz: The already validated frequencies, in hertz.
+    :param frequencies: The already validated frequencies, in hertz.
     :param owner: Name of the entry point, for the error message.
     :raises ValueError: If there is only one frequency, or if two of them are
         equal or out of order. The formula divides by ``f(n+1) - f(n)``, so an
         unordered grid is not a grid it can be evaluated on, and sorting one
         silently would pair up phase errors the caller never measured together.
     """
-    if frequencies_hz.size < _FORMULA_6_FREQUENCIES:
+    if frequencies.size < _FORMULA_6_FREQUENCIES:
         msg = (
-            f"{owner}: 'frequencies_hz' must hold at least two frequencies; "
+            f"{owner}: 'frequencies' must hold at least two frequencies; "
             f"Formula (6) is about a pair of adjacent bands, and got "
-            f"{frequencies_hz.size}."
+            f"{frequencies.size}."
         )
         raise ValueError(msg)
-    if not np.all(np.diff(frequencies_hz) > 0.0):
+    if not np.all(np.diff(frequencies) > 0.0):
         msg = (
-            f"{owner}: 'frequencies_hz' must increase strictly, because "
+            f"{owner}: 'frequencies' must increase strictly, because "
             f"Formula (6) divides by the difference between adjacent ones."
         )
         raise ValueError(msg)
@@ -656,9 +656,7 @@ _WIDEST_STEP_RATIO = 10.0 ** (1.0 / 10.0)
 _STEP_RATIO_SLACK = 1e-6
 
 
-def _require_a_third_octave_grid(
-    frequencies_hz: NDArray[np.float64], owner: str
-) -> None:
+def _require_a_third_octave_grid(frequencies: NDArray[np.float64], owner: str) -> None:
     """Require the grid 12.11.1 prints, because the design is rebuilt on it.
 
     The design-goal phase runs off one continuous branch, and it is recovered
@@ -670,17 +668,17 @@ def _require_a_third_octave_grid(
     tolerance. The failure is silent and it can go either way, so it is
     refused rather than warned about.
 
-    :param frequencies_hz: The already validated ascending frequencies, in
+    :param frequencies: The already validated ascending frequencies, in
         hertz.
     :param owner: Name of the entry point, for the error message.
     :raises ValueError: If two adjacent frequencies are more than one third of
         an octave apart.
     """
-    ratios = frequencies_hz[1:] / frequencies_hz[:-1]
+    ratios = frequencies[1:] / frequencies[:-1]
     worst = float(np.max(ratios))
     if worst > _WIDEST_STEP_RATIO * (1.0 + _STEP_RATIO_SLACK):
         msg = (
-            f"{owner}: 'frequencies_hz' steps by a ratio of up to {worst:.4g}, "
+            f"{owner}: 'frequencies' steps by a ratio of up to {worst:.4g}, "
             f"and ISO 8041-1:2017 12.11.1 asks for steps of not more than one "
             f"third of an octave ({_WIDEST_STEP_RATIO:.4g}). The design-goal "
             f"phase is rebuilt on the grid it is given, and on a coarser one "
@@ -690,7 +688,7 @@ def _require_a_third_octave_grid(
 
 
 def characteristic_phase_deviation(
-    frequencies_hz: ArrayLike, phase_deviation_deg: ArrayLike
+    frequencies: ArrayLike, phase_deviation_deg: ArrayLike
 ) -> NDArray[np.float64]:
     r"""The characteristic phase deviation of ISO 8041-1 Formula (6).
 
@@ -723,7 +721,7 @@ def characteristic_phase_deviation(
     but would influence neither the vibration parameters to be measured nor
     the characteristic phase deviation values".
 
-    :param frequencies_hz: The frequencies the phase errors belong to, in
+    :param frequencies: The frequencies the phase errors belong to, in
         hertz, strictly ascending. H.2.1 asks for them "preferably in steps of
         one-third octaves", which is the grid Annex B tabulates.
     :param phase_deviation_deg: The phase error at each frequency, in degrees,
@@ -735,11 +733,11 @@ def characteristic_phase_deviation(
         finite, or if there are fewer than two frequencies or they do not
         strictly ascend.
     """
-    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    f = require_positive_array(frequencies, "frequencies")
     deviation = require_finite_array(phase_deviation_deg, "phase_deviation_deg")
     require_equal_shapes(
         "characteristic_phase_deviation",
-        {"frequencies_hz": f.shape, "phase_deviation_deg": deviation.shape},
+        {"frequencies": f.shape, "phase_deviation_deg": deviation.shape},
         quantity="frequency",
     )
     _require_a_pair_of_ascending_frequencies(f, "characteristic_phase_deviation")
@@ -837,7 +835,7 @@ def peak_deviation_percent(characteristic_phase_deviation_deg: ArrayLike) -> flo
 
 
 def _design_phase_deg(
-    name: str, frequencies_hz: NDArray[np.float64]
+    name: str, frequencies: NDArray[np.float64]
 ) -> NDArray[np.float64]:
     """The design-goal phase along ascending frequencies, in degrees.
 
@@ -850,10 +848,10 @@ def _design_phase_deg(
     of Tables B.1 to B.9 are reproduced within their print rounding.
 
     :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
-    :param frequencies_hz: Strictly ascending frequencies, in hertz.
+    :param frequencies: Strictly ascending frequencies, in hertz.
     :return: The design-goal phase, in degrees, on the printed branch.
     """
-    response = frequency_weighting(name, frequencies_hz).response
+    response = frequency_weighting(name, frequencies).response
     return np.degrees(np.unwrap(np.angle(response))).astype(np.float64)
 
 
@@ -903,7 +901,7 @@ class PhaseVerification(OwnsArrays):
     """One measured phase response against the ISO 8041-1 Table 5 phase band.
 
     :ivar weighting: The weighting the response was measured for.
-    :ivar frequencies_hz: The frequencies it was measured at.
+    :ivar frequencies: The frequencies it was measured at.
     :ivar measured_phase_deg: The measured phase, as supplied.
     :ivar design_phase_deg: The design-goal phase of Formula (H.1) at the same
         frequencies, on the branch Tables B.1 to B.9 print.
@@ -920,7 +918,7 @@ class PhaseVerification(OwnsArrays):
     """
 
     weighting: str
-    frequencies_hz: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
     measured_phase_deg: NDArray[np.float64]
     design_phase_deg: NDArray[np.float64]
     deviation_deg: NDArray[np.float64]
@@ -1003,7 +1001,7 @@ class PhaseVerification(OwnsArrays):
 
 
 def verify_phase_response(
-    name: str, frequencies_hz: ArrayLike, measured_phase_deg: ArrayLike
+    name: str, frequencies: ArrayLike, measured_phase_deg: ArrayLike
 ) -> PhaseVerification:
     """Verify a measured phase response against the ISO 8041-1 Table 5 band.
 
@@ -1045,7 +1043,7 @@ def verify_phase_response(
     this function does not perform.
 
     :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
-    :param frequencies_hz: The frequencies the phase was measured at, in
+    :param frequencies: The frequencies the phase was measured at, in
         hertz, strictly ascending and at least two of them.
     :param measured_phase_deg: The measured phase at each frequency, in
         degrees, on the continuous branch Tables B.1 to B.9 print.
@@ -1059,11 +1057,11 @@ def verify_phase_response(
         rather than a phase response the criterion can grade.
     """
     weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
-    f = require_positive_array(frequencies_hz, "frequencies_hz")
+    f = require_positive_array(frequencies, "frequencies")
     measured = require_finite_array(measured_phase_deg, "measured_phase_deg")
     require_equal_shapes(
         "verify_phase_response",
-        {"frequencies_hz": f.shape, "measured_phase_deg": measured.shape},
+        {"frequencies": f.shape, "measured_phase_deg": measured.shape},
         quantity="frequency",
     )
     _require_a_pair_of_ascending_frequencies(f, "verify_phase_response")
@@ -1075,7 +1073,7 @@ def verify_phase_response(
     characteristic = characteristic_phase_deviation(f, deviation)
     return PhaseVerification(
         weighting=weighting,
-        frequencies_hz=f,
+        frequencies=f,
         measured_phase_deg=measured,
         design_phase_deg=design,
         deviation_deg=deviation,

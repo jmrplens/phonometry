@@ -101,7 +101,7 @@ How often each velocity occurred in a stretch, Formula (11).
 ## band_sum_level
 
 ```python
-band_sum_level(levels_db: ArrayLike) -> float
+band_sum_level(levels: ArrayLike) -> float
 ```
 
 The sum level $\Sigma L$ of a spectrum, Annex B, Formula (B.3).
@@ -112,7 +112,7 @@ $10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}$, the energy sum of the bands.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The band levels, in decibels. |
+| `levels` | The band levels, in decibels. |
 
 **Returns:** $\Sigma L$, in decibels.
 
@@ -127,7 +127,7 @@ $10 \lg \sum 10^{0,1 L(f_{\mathrm{T}n})}$, the energy sum of the bands.
 ```python
 centred_interval(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     duration_s: float = 4.0,
 ) -> tuple[float, float]
@@ -145,7 +145,7 @@ rather than cut, so it keeps its length.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The velocity, in millimetres per second (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `duration_s` | The length of the stretch, in seconds (default 4 s). |
 
 **Returns:** `(start, end)`, in seconds from the start of the record. A record shorter than *duration_s* is returned whole.
@@ -218,7 +218,7 @@ two spectra.
 ```python
 evaluate_train_passage(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     t2_s: tuple[float, float],
     t1_s: tuple[float, float] | None = None,
@@ -240,7 +240,7 @@ severity DIN 4150-2 reads, and the third-octave levels of Figure 6.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The velocity of the passage as the transducer gives it, in millimetres per second (1-D). |
-| `fs_hz` | Sampling frequency, in hertz: an integer, for the third-octave bank, and high enough to carry the 315 Hz range. |
+| `fs` | Sampling frequency, in hertz: an integer, for the third-octave bank, and high enough to carry the 315 Hz range. |
 | `t2_s` | $T_2$, the passage itself, `(start, end)` in seconds. Clause 5 b) reads it off the record, from about a quarter of the most frequent maxima back down to the same amplitude, which is a judgement about the record, so it is asked for rather than guessed. |
 | `t1_s` | $T_1$; `None` (default) centres four seconds on the largest amplitude inside $T_2$, or all of $T_2$ when that is shorter. An explicit one may not be longer than $T_2$. |
 | `t3_s` | $T_3$; `None` (default) takes the whole record. |
@@ -321,7 +321,7 @@ is [`event_velocity`](/phonometry/reference/api/vibration/railway/#event_velocit
 ```python
 interval_rms(
     values: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     interval_s: tuple[float, float],
 ) -> float
@@ -339,7 +339,7 @@ Formula (4) and which is what a meter reading its display produces.
 | Name | Description |
 | :--- | :--- |
 | `values` | The velocity or its running r.m.s., in any unit (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `interval_s` | The stretch `(start, end)`, in seconds from the start of the record. |
 
 **Returns:** $\tilde v_j$, in the unit of *values*.
@@ -355,7 +355,7 @@ Formula (4) and which is what a meter reading its display produces.
 ```python
 narrowband_psd(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     resolution_hz: float = 1.25,
 ) -> SpectralDensityResult
@@ -374,7 +374,7 @@ back to the mean square of the stretch, which is Formula (14).
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The velocity of the stretch, in millimetres per second (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `resolution_hz` | The line spacing $\Delta f$, in hertz (default 1,25 Hz). The block holds `round(fs / resolution)` samples, so the spacing actually used is `fs` over that count. |
 
 **Returns:** The spectrum, as a [`SpectralDensityResult`](/phonometry/reference/api/signals/spectra/#spectraldensityresult).
@@ -397,7 +397,7 @@ NARROWBAND_RESOLUTION_HZ = 1.25
 
 ```python
 passage_average_level(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     *,
     axis: int | None = None,
 ) -> float | NDArray[np.float64]
@@ -412,7 +412,7 @@ $10 \lg \langle 10^{L/10} \rangle$, the level of
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The levels of the passages, in decibels. A 2-D array of third-octave spectra, one row per passage, averages band by band with `axis=0`. |
+| `levels` | The levels of the passages, in decibels. A 2-D array of third-octave spectra, one row per passage, averages band by band with `axis=0`. |
 | `axis` | The axis the passages run along; `None` (default) averages every value. |
 
 **Returns:** The average level: a float, or one level per band.
@@ -494,7 +494,7 @@ all of its mean square. This returns the formula as printed.
 ```python
 running_acceleration_level(
     acceleration_m_s2: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     time_constant_s: float = 0.125,
 ) -> NDArray[np.float64]
@@ -507,7 +507,7 @@ The running acceleration level $L_{aF}(t)$ of Formula (3), in dB.
 | Name | Description |
 | :--- | :--- |
 | `acceleration_m_s2` | The acceleration, in metres per second squared (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `time_constant_s` | See [`running_velocity_rms`](/phonometry/reference/api/vibration/railway/#running_velocity_rms). |
 
 **Returns:** $20 \lg(\tilde a_F / a_0)$ with $a_0 = 10^{-6}$ m/s², the reference DIN EN 21683 gives and the one the rest of this package's acceleration levels use.
@@ -523,7 +523,7 @@ The running acceleration level $L_{aF}(t)$ of Formula (3), in dB.
 ```python
 running_velocity_level(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     time_constant_s: float = 0.125,
 ) -> NDArray[np.float64]
@@ -536,7 +536,7 @@ The running velocity level $L_{v\mathrm{F}}(t)$ of Formula (2), in dB.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The velocity, in millimetres per second (1-D). |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `time_constant_s` | See [`running_velocity_rms`](/phonometry/reference/api/vibration/railway/#running_velocity_rms). |
 
 **Returns:** $20 \lg(\tilde v_\mathrm{F} / v_0)$ with $v_0$ = [`VELOCITY_LEVEL_REFERENCE_MM_S`](/phonometry/reference/api/vibration/railway/#velocity_level_reference_mm_s), one value per sample. A sample whose running r.m.s. is still exactly zero, before the first nonzero sample, is `-inf`.
@@ -552,7 +552,7 @@ The running velocity level $L_{v\mathrm{F}}(t)$ of Formula (2), in dB.
 ```python
 running_velocity_rms(
     velocity_mm_s: ArrayLike,
-    fs_hz: float,
+    fs: float,
     *,
     time_constant_s: float = 0.125,
 ) -> NDArray[np.float64]
@@ -572,7 +572,7 @@ which is what Figure 3 draws, is 7 % and 0,9 % short.
 | Name | Description |
 | :--- | :--- |
 | `velocity_mm_s` | The velocity, in millimetres per second (1-D), as measured or in one third-octave band of it. |
-| `fs_hz` | Sampling frequency, in hertz. |
+| `fs` | Sampling frequency, in hertz. |
 | `time_constant_s` | The time constant, in seconds (default 0,125 s, "Fast"). |
 
 **Returns:** $\tilde v_\mathrm{F}(t)$, one value per sample, in mm/s.
@@ -628,7 +628,7 @@ THIRD_OCTAVE_LINES = {4.0: 1, 5.0: 1, 6.3: 1, 8.0: 2, 10.0: 2, 12.5: 2, 16.0: 3,
 
 ```python
 third_octaves_from_narrowband(
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     psd: ArrayLike,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
@@ -658,7 +658,7 @@ bands out rather than filling them with the lines of a neighbour.
 
 | Name | Description |
 | :--- | :--- |
-| `frequencies_hz` | The line frequencies of the spectrum, in hertz, evenly spaced at 1,25 Hz. |
+| `frequencies` | The line frequencies of the spectrum, in hertz, evenly spaced at 1,25 Hz. |
 | `psd` | The one-sided power spectral density at those lines, in (mm/s)²/Hz. |
 
 **Returns:** `(centres, rms)`: the nominal centres of the bands the spectrum holds whole, from [`THIRD_OCTAVE_LINES`](/phonometry/reference/api/vibration/railway/#third_octave_lines), in hertz, and the band r.m.s. in each, in mm/s.
@@ -682,10 +682,10 @@ TrainPassage(
     intervals_s: tuple[tuple[float, float], ...],
     event_velocity_mm_s: float,
     event_level_db: float,
-    band_centres_hz: NDArray[np.float64],
+    frequencies: NDArray[np.float64],
     band_interval_levels_db: NDArray[np.float64],
     band_max_levels_db: NDArray[np.float64],
-    fs_hz: float,
+    fs: float,
 )
 ```
 
@@ -704,10 +704,10 @@ One passage reduced the way Clauses 5 to 7 reduce it.
 | `intervals_s` | The three stretches `(start, end)`, in seconds. |
 | `event_velocity_mm_s` | $v_\mathrm{E}$ of Formula (8), from $T_3$. |
 | `event_level_db` | $L_{v\mathrm{E}}$ of Formula (9). |
-| `band_centres_hz` | The nominal third-octave centres analysed. |
+| `frequencies` | The nominal third-octave centres analysed. |
 | `band_interval_levels_db` | $L_{v\mathrm{F}j}(f_{\mathrm{T}n})$ of Formula (6), one row per stretch, $T_1$ to $T_3$. |
 | `band_max_levels_db` | $L_{v\mathrm{Fmax}}(f_{\mathrm{T}n})$ of Formula (7), over $T_3$. |
-| `fs_hz` | The sampling frequency of the record. |
+| `fs` | The sampling frequency of the record. |
 
 ### TrainPassage.plot()
 

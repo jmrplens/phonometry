@@ -126,7 +126,7 @@ def test_table_2_is_the_kb_weighting_rounded_to_a_tenth() -> None:
     with pytest.raises(ValueError, match="nominal third-octave centre"):
         im.kb_weighted_levels_db([0.0], [100.0])
     with pytest.raises(ValueError, match="14 bands"):
-        im.predict_train_category(np.zeros(10), frequencies_hz=FREQS[:10])
+        im.predict_train_category(np.zeros(10), frequencies=FREQS[:10])
 
 
 def test_annex_a_tables_as_printed() -> None:

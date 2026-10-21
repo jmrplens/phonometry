@@ -264,9 +264,9 @@ def test_iso717_calculation_example_through_clause_7_4() -> None:
     assert rated.unfavourable_sum == pytest.approx(31.8, abs=0.05)
     assert rated.unfavourable_sum < 32.0
     assert rated.quantity == "sound_power"
-    assert rated.band_centres_hz[0] == 100.0
-    assert rated.band_centres_hz[-1] == 3150.0
-    assert rated.band_centres_hz.size == len(ISO717_TABLE_C1_DB)
+    assert rated.frequencies[0] == 100.0
+    assert rated.frequencies[-1] == 3150.0
+    assert rated.frequencies.size == len(ISO717_TABLE_C1_DB)
 
 
 def test_clause_9_4_rounding_is_rule_a_of_iso_80000_1() -> None:

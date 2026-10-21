@@ -1637,7 +1637,7 @@ def _band_positions(
 
 
 def single_number_average(
-    symbol: str, values: ArrayLike, frequency: ArrayLike
+    symbol: str, values: ArrayLike, frequencies: ArrayLike
 ) -> float:
     r"""The Table A.1 single number of one auditorium quantity.
 
@@ -1660,8 +1660,8 @@ def single_number_average(
         one row, "J_LF or J_LFC", so both weightings of
         :func:`early_lateral_energy_fraction` share its four bands, its
         just-noticeable difference and its typical range.
-    :param values: Its per-band values, one per entry of ``frequency``.
-    :param frequency: The band centre frequencies in Hz, as a result carries
+    :param values: Its per-band values, one per entry of ``frequencies``.
+    :param frequencies: The band centre frequencies in Hz, as a result carries
         them.
     :return: The single number, in the quantity's own unit.
     :raises ValueError: If the symbol is not one Table A.1 prints, if the two
@@ -1670,20 +1670,20 @@ def single_number_average(
     """
     quantity = _table_a1_row(symbol)
     readings = np.asarray(values, dtype=np.float64)
-    centres = np.asarray(frequency, dtype=np.float64)
+    centres = np.asarray(frequencies, dtype=np.float64)
     if readings.shape != centres.shape:
         msg = (
-            f"'values' has {readings.size} entries and 'frequency' has "
+            f"'values' has {readings.size} entries and 'frequencies' has "
             f"{centres.size}; they are the two axes of one result."
         )
         raise ValueError(msg)
-    picked = _band_positions(centres, quantity.averaging_bands_hz, "frequency")
+    picked = _band_positions(centres, quantity.averaging_bands_hz, "frequencies")
     if quantity.energy_averaged:
         return late_lateral_average(readings[picked])
     return float(np.mean(readings[picked]))
 
 
-def octave_pair_averages(values: ArrayLike, frequency: ArrayLike) -> dict[str, float]:
+def octave_pair_averages(values: ArrayLike, frequencies: ArrayLike) -> dict[str, float]:
     """The low, mid and high pair averages of ISO 3382-1:2009, A.5.
 
     A more concise presentation than a full band table: the 125 Hz and
@@ -1699,22 +1699,22 @@ def octave_pair_averages(values: ArrayLike, frequency: ArrayLike) -> dict[str, f
     octave are not usually thought to be subjectively important, so the high
     pair means little for them.
 
-    :param values: Per-band values, one per entry of ``frequency``.
-    :param frequency: The band centre frequencies in Hz.
+    :param values: Per-band values, one per entry of ``frequencies``.
+    :param frequencies: The band centre frequencies in Hz.
     :return: ``{"low": ..., "mid": ..., "high": ...}`` in the values' unit.
     :raises ValueError: If the two arrays disagree in length, or if the band
         axis does not carry all six octaves from 125 Hz to 4 kHz.
     """
     readings = np.asarray(values, dtype=np.float64)
-    centres = np.asarray(frequency, dtype=np.float64)
+    centres = np.asarray(frequencies, dtype=np.float64)
     if readings.shape != centres.shape:
         msg = (
-            f"'values' has {readings.size} entries and 'frequency' has "
+            f"'values' has {readings.size} entries and 'frequencies' has "
             f"{centres.size}; they are the two axes of one result."
         )
         raise ValueError(msg)
     return {
-        label: float(np.mean(readings[_band_positions(centres, pair, "frequency")]))
+        label: float(np.mean(readings[_band_positions(centres, pair, "frequencies")]))
         for label, pair in OCTAVE_PAIRS_HZ.items()
     }
 

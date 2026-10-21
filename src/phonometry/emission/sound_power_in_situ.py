@@ -207,10 +207,10 @@ class InSituSoundPowerResult(OwnsArrays):
     :math:`\Delta L_{f\mathrm{A}}` at each microphone position and the
     directivity range of the source, ``None`` where they were not determined.
     ``grade`` is the accuracy grade Table 2 grants from them (``'engineering'``
-    or ``'survey'``) and ``sigma_r0`` its typical reproducibility; ``sigma_omc``,
+    or ``'survey'``) and ``sigma_r0`` its typical reproducibility; ``sigma_omc_db``,
     ``sigma_tot`` and ``expanded_uncertainty`` are the operating-and-mounting
     deviation, Eq. (22) and Eq. (23) for ``coverage_factor``, ``NaN`` when no
-    ``sigma_omc`` was supplied. The grade and the three figures read from it
+    ``sigma_omc_db`` was supplied. The grade and the three figures read from it
     are read-only properties, so they are not fields. ``sound_power_level_a`` and
     ``sound_energy_level_a`` are the Annex D A-weighted totals of the level
     that was determined (``NaN`` for the other).
@@ -230,7 +230,7 @@ class InSituSoundPowerResult(OwnsArrays):
     c2: float
     excess_levels_db: np.ndarray | None
     directivity_range_db: float | None
-    sigma_omc: float
+    sigma_omc_db: float
     coverage_factor: float
     sound_power_level_a: float
     sound_energy_level_a: float
@@ -353,10 +353,10 @@ class InSituSoundPowerResult(OwnsArrays):
 
     @property
     def sigma_tot(self) -> float:
-        r"""Eq. (22), :math:`\sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}`, ``NaN`` without ``sigma_omc``."""
-        if np.isnan(self.sigma_omc):
+        r"""Eq. (22), :math:`\sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}`, ``NaN`` without ``sigma_omc_db``."""
+        if np.isnan(self.sigma_omc_db):
             return float("nan")
-        return float(np.sqrt(self.sigma_r0**2 + self.sigma_omc**2))
+        return float(np.sqrt(self.sigma_r0**2 + self.sigma_omc_db**2))
 
     @property
     def expanded_uncertainty(self) -> float:
@@ -704,18 +704,18 @@ def _grade_from(excess: np.ndarray | None, directivity: float | None) -> Grade:
     return "survey"
 
 
-def _checked_sigma_omc(sigma_omc: float | None, coverage_factor: float) -> float:
-    """``sigma_omc`` as given, ``NaN`` when absent; ``sigma_R0``, Eq. (22) and
+def _checked_sigma_omc(sigma_omc_db: float | None, coverage_factor: float) -> float:
+    """``sigma_omc_db`` as given, ``NaN`` when absent; ``sigma_R0``, Eq. (22) and
     Eq. (23) are read from it by the result.
     """
     require_positive(coverage_factor, "coverage_factor")
-    if sigma_omc is None:
+    if sigma_omc_db is None:
         return float("nan")
-    require_scalar(sigma_omc, "sigma_omc")
-    if not np.isfinite(sigma_omc) or sigma_omc < 0.0:
-        msg = "'sigma_omc' must be finite and non-negative."
+    require_scalar(sigma_omc_db, "sigma_omc_db")
+    if not np.isfinite(sigma_omc_db) or sigma_omc_db < 0.0:
+        msg = "'sigma_omc_db' must be finite and non-negative."
         raise ValueError(msg)
-    return float(sigma_omc)
+    return float(sigma_omc_db)
 
 
 def _position_advisory(n_positions: int) -> None:
@@ -770,7 +770,7 @@ class _Comparison:
     temperature_c: float
     static_pressure_kpa: float
     conditions: GradeConditions | None
-    sigma_omc: float | None
+    sigma_omc_db: float | None
     coverage_factor: float
 
 
@@ -905,7 +905,7 @@ def _determine(
     nan_band = np.full(n_bands, np.nan, dtype=np.float64)
     total = energy_sum(level + _a_weighting_corrections(freqs))  # Eq. (D.1) / (D.2)
     excess, directivity = _grade_indicators(comparison.conditions, n_positions)
-    omc = _checked_sigma_omc(comparison.sigma_omc, comparison.coverage_factor)
+    omc = _checked_sigma_omc(comparison.sigma_omc_db, comparison.coverage_factor)
     is_power = quantity == "power"
     return InSituSoundPowerResult(
         frequencies=freqs,
@@ -922,7 +922,7 @@ def _determine(
         c2=_c2_correction(comparison.temperature_c, comparison.static_pressure_kpa),
         excess_levels_db=excess,
         directivity_range_db=directivity,
-        sigma_omc=omc,
+        sigma_omc_db=omc,
         coverage_factor=comparison.coverage_factor,
         sound_power_level_a=total if is_power else float("nan"),
         sound_energy_level_a=float("nan") if is_power else total,
@@ -941,7 +941,7 @@ def sound_power_in_situ(
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
-    sigma_omc: float | None = None,
+    sigma_omc_db: float | None = None,
     coverage_factor: float = _COVERAGE_TWO_SIDED,
 ) -> InSituSoundPowerResult:
     r"""Sound power level of a steady or non-steady source in situ, by
@@ -1006,7 +1006,7 @@ def sound_power_in_situ(
         microphone position (Annex A) and the range of the directivity survey
         of the source (7.2). ``None``, or either condition left out, leaves
         the determination at survey grade.
-    :param sigma_omc: Standard deviation of the operating and mounting
+    :param sigma_omc_db: Standard deviation of the operating and mounting
         conditions of the source (9.2, E.3), in decibels; ``None`` leaves
         ``sigma_tot`` and the expanded uncertainty ``NaN``.
     :param coverage_factor: ``k`` of Eq. (23): 2 for the two-sided 95 %
@@ -1017,7 +1017,7 @@ def sound_power_in_situ(
         ``frequencies`` are not the octave centres of Table D.1,
         ``temperature_c`` or ``static_pressure_kpa`` is out of range,
         ``conditions.excess_levels`` is supplied and is not one finite value
-        per position, ``conditions.directivity_range`` or ``sigma_omc`` is
+        per position, ``conditions.directivity_range`` or ``sigma_omc_db`` is
         supplied and is
         negative, or ``coverage_factor`` is not positive.
     """
@@ -1047,7 +1047,7 @@ def sound_power_in_situ(
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
             conditions=conditions,
-            sigma_omc=sigma_omc,
+            sigma_omc_db=sigma_omc_db,
             coverage_factor=coverage_factor,
         ),
     )
@@ -1066,7 +1066,7 @@ def sound_energy_in_situ(
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
-    sigma_omc: float | None = None,
+    sigma_omc_db: float | None = None,
     coverage_factor: float = _COVERAGE_TWO_SIDED,
 ) -> InSituSoundPowerResult:
     r"""Sound energy level of an impulsive source in situ, by comparison with
@@ -1121,7 +1121,7 @@ def sound_energy_in_situ(
         for :func:`sound_power_in_situ`; Annex C itself prints pascals.
     :param conditions: The :class:`GradeConditions` of the determination, as
         for :func:`sound_power_in_situ`.
-    :param sigma_omc: Operating-and-mounting standard deviation, in decibels.
+    :param sigma_omc_db: Operating-and-mounting standard deviation, in decibels.
     :param coverage_factor: ``k`` of Eq. (23), 2 by default.
     :return: :class:`InSituSoundPowerResult` with ``quantity='energy'``.
     :raises ValueError: if ``event_levels`` is not a finite 2D or 3D array,
@@ -1167,7 +1167,7 @@ def sound_energy_in_situ(
             temperature_c=temperature_c,
             static_pressure_kpa=static_pressure_kpa,
             conditions=conditions,
-            sigma_omc=sigma_omc,
+            sigma_omc_db=sigma_omc_db,
             coverage_factor=coverage_factor,
         ),
     )

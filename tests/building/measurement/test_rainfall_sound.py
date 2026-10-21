@@ -444,7 +444,7 @@ def test_result_refuses_an_unknown_method() -> None:
     level = np.array([40.0])
     with pytest.raises(ValueError, match=r"method"):
         RainfallSoundResult(
-            frequencies_hz=band, l_i_db=level, l_ia_db=None, method="guess"
+            frequencies=band, l_i_db=level, l_ia_db=None, method="guess"
         )
 
 

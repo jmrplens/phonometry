@@ -547,9 +547,9 @@ def test_k2_zero_surface_area_raises() -> None:
 def test_negative_omc_uncertainty_raises() -> None:
     """np.hypot squares sigma_omc, so a negative value would silently pass."""
     levels = np.full((10, 1), 90.0)
-    with pytest.raises(ValueError, match="'omc_uncertainty' must be non-negative"):
+    with pytest.raises(ValueError, match="'sigma_omc_db' must be non-negative"):
         emission.sound_power_pressure(
-            levels, "hemisphere", radius=2.0, omc_uncertainty=-5.0
+            levels, "hemisphere", radius=2.0, sigma_omc_db=-5.0
         )
 
 

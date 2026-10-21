@@ -289,12 +289,12 @@ _BAND_MATCH = 0.06
 
 
 def _band_indices(
-    frequencies_hz: np.ndarray, targets: tuple[float, ...]
+    frequencies: np.ndarray, targets: tuple[float, ...]
 ) -> np.ndarray | None:
-    """Indices of ``targets`` in ``frequencies_hz``, or ``None`` if one is absent."""
+    """Indices of ``targets`` in ``frequencies``, or ``None`` if one is absent."""
     indices: list[int] = []
     for target in targets:
-        hits = np.nonzero(np.abs(frequencies_hz - target) <= _BAND_MATCH * target)[0]
+        hits = np.nonzero(np.abs(frequencies - target) <= _BAND_MATCH * target)[0]
         if hits.size != 1:
             return None
         indices.append(int(hits[0]))
@@ -303,7 +303,7 @@ def _band_indices(
 
 def _table_values(
     table: Mapping[float, float],
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     missing: Callable[[float, int], str],
 ) -> np.ndarray:
     """The values of a band table at every given band, or a ``ValueError``.
@@ -313,8 +313,8 @@ def _table_values(
     """
     keys = np.asarray(tuple(table), dtype=np.float64)
     values = np.asarray(tuple(table.values()), dtype=np.float64)
-    out = np.empty(frequencies_hz.shape, dtype=np.float64)
-    for i, f in enumerate(frequencies_hz):
+    out = np.empty(frequencies.shape, dtype=np.float64)
+    for i, f in enumerate(frequencies):
         hits = np.nonzero(np.abs(keys - f) <= _BAND_MATCH * f)[0]
         if hits.size != 1:
             raise ValueError(missing(float(f), int(hits.size)))
@@ -357,13 +357,13 @@ def _not_in_correction(frequency_hz: float, matches: int) -> str:
     )
 
 
-def _a_weighted(levels_db: np.ndarray, frequencies_hz: np.ndarray) -> float | None:
+def _a_weighted(levels: np.ndarray, frequencies: np.ndarray) -> float | None:
     r"""Formula (K.2) over the 18 bands, or ``None`` when one is missing."""
-    idx = _band_indices(frequencies_hz, _RAIN_BANDS_HZ)
+    idx = _band_indices(frequencies, _RAIN_BANDS_HZ)
     if idx is None:
         return None
     weights = np.asarray(tuple(RAINFALL_A_WEIGHTING.values()), dtype=np.float64)
-    return float(energy_sum(levels_db[idx] + weights))
+    return float(energy_sum(levels[idx] + weights))
 
 
 # --- The rain ---------------------------------------------------------------
@@ -572,7 +572,7 @@ def verify_rain_generator(
 class RainfallReferenceCorrection(OwnsArrays):
     r"""The normalization correction from the reference glass pane (Annex I).
 
-    :ivar frequencies_hz: One-third-octave band centre frequencies, in Hz.
+    :ivar frequencies: One-third-octave band centre frequencies, in Hz.
     :ivar l_i_ref_db: Measured sound intensity level of the reference
         specimen, :math:`L_{I,\mathrm{ref}}`, in dB re 1 pW/m².
     :ivar structural_reverberation_time_s: Its structural reverberation time
@@ -591,7 +591,7 @@ class RainfallReferenceCorrection(OwnsArrays):
         L_{I\mathrm{c,ref}}`, in dB (Formula (I.3)).
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     l_i_ref_db: np.ndarray
     structural_reverberation_time_s: np.ndarray
     loss_factor: np.ndarray
@@ -606,7 +606,7 @@ class RainfallReferenceCorrection(OwnsArrays):
         :raises ValueError: if the per-band columns disagree.
         """
         fields = (
-            "frequencies_hz",
+            "frequencies",
             "l_i_ref_db",
             "structural_reverberation_time_s",
             "loss_factor",
@@ -640,7 +640,7 @@ class RainfallReferenceCorrection(OwnsArrays):
 def rainfall_reference_correction(
     l_i_ref_db: ArrayLike,
     structural_reverberation_time_s: ArrayLike,
-    frequencies_hz: ArrayLike | None = None,
+    frequencies: ArrayLike | None = None,
 ) -> RainfallReferenceCorrection:
     r"""Correction :math:`\Delta L_{I\mathrm{c}}` of a laboratory (ISO 10140-5 I.2).
 
@@ -664,7 +664,7 @@ def rainfall_reference_correction(
         band, in dB re 1 pW/m² (e.g. ``rainfall_sound(...).l_i_db``).
     :param structural_reverberation_time_s: Its structural reverberation time
         per band, measured to ISO 10140-4, in s.
-    :param frequencies_hz: Band centre frequencies, in Hz, each one of the 18
+    :param frequencies: Band centre frequencies, in Hz, each one of the 18
         bands of Table I.1 (100 Hz to 5 000 Hz); ``None`` takes all 18.
     :return: A :class:`RainfallReferenceCorrection`.
     :raises ValueError: If the inputs disagree in length, a level is not
@@ -673,8 +673,8 @@ def rainfall_reference_correction(
     """
     freqs = (
         np.asarray(_RAIN_BANDS_HZ, dtype=np.float64)
-        if frequencies_hz is None
-        else require_positive_array(frequencies_hz, "frequencies_hz")
+        if frequencies is None
+        else require_positive_array(frequencies, "frequencies")
     )
     level = require_finite_array(l_i_ref_db, "l_i_ref_db")
     t_s = require_positive_array(
@@ -683,7 +683,7 @@ def rainfall_reference_correction(
     require_equal_shapes(
         "rainfall_reference_correction",
         {
-            "frequencies_hz": freqs.shape,
+            "frequencies": freqs.shape,
             "l_i_ref_db": level.shape,
             "structural_reverberation_time_s": t_s.shape,
         },
@@ -697,7 +697,7 @@ def rainfall_reference_correction(
     eta_ref = 10.0 ** (eta_ref_db / 10.0)
     l_i_m_ref = level + 10.0 * np.log10(eta / eta_ref)  # Formula (I.2)
     return RainfallReferenceCorrection(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         l_i_ref_db=level,
         structural_reverberation_time_s=t_s,
         loss_factor=eta,
@@ -715,7 +715,7 @@ def rainfall_reference_correction(
 class RainfallSoundResult(OwnsArrays):
     r"""Sound intensity level radiated by a specimen under rain (Annex K).
 
-    :ivar frequencies_hz: One-third-octave band centre frequencies, in Hz.
+    :ivar frequencies: One-third-octave band centre frequencies, in Hz.
     :ivar l_i_db: Sound intensity level :math:`L_I` per band, in dB re
         1 pW/m² (Formula (K.1) or (K.4)).
     :ivar l_ia_db: A-weighted sound intensity level :math:`L_{I\mathrm{A}}`,
@@ -731,7 +731,7 @@ class RainfallSoundResult(OwnsArrays):
         dB, or ``None``.
     """
 
-    frequencies_hz: np.ndarray
+    frequencies: np.ndarray
     l_i_db: np.ndarray
     l_ia_db: float | None
     method: str
@@ -745,9 +745,9 @@ class RainfallSoundResult(OwnsArrays):
         :raises ValueError: if the per-band columns disagree, or ``method`` is
             neither ``"pressure"`` nor ``"intensity"``.
         """
-        require_ranks(self, frequencies_hz=1, l_i_db=1, correction_db=1, l_i_norm_db=1)
+        require_ranks(self, frequencies=1, l_i_db=1, correction_db=1, l_i_norm_db=1)
         require_same_length(
-            self, "frequencies_hz", "l_i_db", "correction_db", "l_i_norm_db"
+            self, "frequencies", "l_i_db", "correction_db", "l_i_norm_db"
         )
         require_choice(self.method, "method", ("pressure", "intensity"))
 
@@ -774,7 +774,7 @@ class RainfallSoundResult(OwnsArrays):
         values: list[float] = []
         for centre in (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0):
             thirds = tuple(centre * 2.0 ** (k / 3.0) for k in (-1, 0, 1))
-            idx = _band_indices(self.frequencies_hz, thirds)
+            idx = _band_indices(self.frequencies, thirds)
             if idx is not None:
                 centres.append(centre)
                 values.append(float(energy_sum(levels[idx])))
@@ -809,7 +809,7 @@ class RainfallSoundResult(OwnsArrays):
 
 
 def _normalized(
-    frequencies_hz: np.ndarray,
+    frequencies: np.ndarray,
     l_i: np.ndarray,
     reference: RainfallReferenceCorrection | ArrayLike | None,
 ) -> tuple[np.ndarray | None, np.ndarray | None, float | None]:
@@ -820,31 +820,31 @@ def _normalized(
         keys = MappingProxyType(
             dict(
                 zip(
-                    reference.frequencies_hz.tolist(),
+                    reference.frequencies.tolist(),
                     reference.correction_db.tolist(),
                     strict=True,
                 )
             )
         )
-        correction = _table_values(keys, frequencies_hz, _not_in_correction)
+        correction = _table_values(keys, frequencies, _not_in_correction)
     else:
         correction = require_finite_array(reference, "reference_correction")
         require_equal_shapes(
             "rainfall_sound",
             {
-                "frequencies_hz": frequencies_hz.shape,
+                "frequencies": frequencies.shape,
                 "reference_correction": correction.shape,
             },
             "band",
         )
     l_i_norm = l_i - correction  # Formula (K.5)
-    return correction, l_i_norm, _a_weighted(l_i_norm, frequencies_hz)
+    return correction, l_i_norm, _a_weighted(l_i_norm, frequencies)
 
 
 def rainfall_sound(
     l_pr_db: ArrayLike,
     reverberation_time_s: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     volume_m3: float,
     excited_area_m2: float,
@@ -879,7 +879,7 @@ def rainfall_sound(
         ``(positions, bands)`` for several, which are added energetically.
     :param reverberation_time_s: Reverberation time of the test room per band,
         in s.
-    :param frequencies_hz: Band centre frequencies, in Hz.
+    :param frequencies: Band centre frequencies, in Hz.
     :param volume_m3: Volume of the test room, in m³.
     :param excited_area_m2: Area of the specimen directly excited by the rain,
         :math:`S_\mathrm{e}`, in m².
@@ -893,7 +893,7 @@ def rainfall_sound(
     :raises ValueError: If the shapes disagree, a level is not finite, a time,
         frequency, volume or area is not positive, or a band has no correction.
     """
-    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
+    freqs = require_positive_array(frequencies, "frequencies")
     try:
         levels = np.asarray(l_pr_db, dtype=np.float64)
     except (TypeError, ValueError) as exc:
@@ -911,7 +911,7 @@ def rainfall_sound(
     require_equal_shapes(
         "rainfall_sound",
         {
-            "frequencies_hz": freqs.shape,
+            "frequencies": freqs.shape,
             "l_pr_db (bands)": levels.shape[1:],
             "reverberation_time_s": t.shape,
         },
@@ -923,7 +923,7 @@ def rainfall_sound(
         background = require_finite_array(background_db, "background_db")
         require_equal_shapes(
             "rainfall_sound",
-            {"frequencies_hz": freqs.shape, "background_db": background.shape},
+            {"frequencies": freqs.shape, "background_db": background.shape},
             "band",
         )
         levels = np.vstack([background_correction(row, background) for row in levels])
@@ -937,7 +937,7 @@ def rainfall_sound(
     )  # Formula (K.1)
     correction, l_i_norm, l_ia_norm = _normalized(freqs, l_i, reference_correction)
     return RainfallSoundResult(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         l_i_db=l_i,
         l_ia_db=_a_weighted(l_i, freqs),
         method="pressure",
@@ -949,7 +949,7 @@ def rainfall_sound(
 
 def rainfall_sound_from_intensity(
     l_im_db: ArrayLike,
-    frequencies_hz: ArrayLike,
+    frequencies: ArrayLike,
     *,
     measuring_area_m2: float,
     excited_area_m2: float,
@@ -967,7 +967,7 @@ def rainfall_sound_from_intensity(
 
     :param l_im_db: Sound intensity level measured over the surface, per band,
         in dB re 1 pW/m².
-    :param frequencies_hz: Band centre frequencies, in Hz.
+    :param frequencies: Band centre frequencies, in Hz.
     :param measuring_area_m2: Area of the measuring surface
         :math:`S_\mathrm{m}`, in m².
     :param excited_area_m2: Area of the specimen directly excited by the rain,
@@ -978,11 +978,11 @@ def rainfall_sound_from_intensity(
     :raises ValueError: If the shapes disagree, a level is not finite, or a
         frequency or area is not positive.
     """
-    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
+    freqs = require_positive_array(frequencies, "frequencies")
     l_im = require_finite_array(l_im_db, "l_im_db")
     require_equal_shapes(
         "rainfall_sound_from_intensity",
-        {"frequencies_hz": freqs.shape, "l_im_db": l_im.shape},
+        {"frequencies": freqs.shape, "l_im_db": l_im.shape},
         "band",
     )
     measuring = require_positive(measuring_area_m2, "measuring_area_m2")
@@ -990,7 +990,7 @@ def rainfall_sound_from_intensity(
     l_i = l_im + 10.0 * np.log10(measuring / excited)  # Formula (K.4)
     correction, l_i_norm, l_ia_norm = _normalized(freqs, l_i, reference_correction)
     return RainfallSoundResult(
-        frequencies_hz=freqs,
+        frequencies=freqs,
         l_i_db=l_i,
         l_ia_db=_a_weighted(l_i, freqs),
         method="intensity",

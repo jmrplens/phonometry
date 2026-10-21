@@ -96,7 +96,7 @@ def test_specific_loudness_peaks_near_tone(
     ref_1k_40: psychoacoustics.EcmaLoudness,
 ) -> None:
     peak_band = int(np.argmax(ref_1k_40.specific_loudness))
-    assert ref_1k_40.centre_frequencies[peak_band] == pytest.approx(1000.0, rel=0.15)
+    assert ref_1k_40.frequencies[peak_band] == pytest.approx(1000.0, rel=0.15)
 
 
 # --------------------------------------------------------------------------
@@ -136,7 +136,7 @@ def test_result_structure(ref_1k_40: psychoacoustics.EcmaLoudness) -> None:
     assert ref_1k_40.bark.shape == (53,)
     assert ref_1k_40.bark[0] == pytest.approx(0.5)
     assert ref_1k_40.bark[-1] == pytest.approx(26.5)
-    assert ref_1k_40.centre_frequencies.shape == (53,)
+    assert ref_1k_40.frequencies.shape == (53,)
     assert ref_1k_40.times.shape == ref_1k_40.loudness_vs_time.shape
     assert ref_1k_40.field == "free"
     # Time-dependent loudness is sampled at 187.5 Hz (Clause 6.2.6).

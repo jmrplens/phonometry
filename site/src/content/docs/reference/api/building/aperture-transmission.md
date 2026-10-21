@@ -142,7 +142,7 @@ Transmission coefficient of a circular aperture (Hopkins Eq. 4.102).
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequencies `f`, in hertz (array, > 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `radius` | Aperture radius `a`, in m (> 0). |
 | `depth` | Aperture depth `d` (wall thickness), in m (> 0). |
 | `speed_of_sound` | Speed of sound in air `c0` (Default: 343 m/s). |
@@ -297,7 +297,7 @@ Transmission coefficient of a straight-edged slit (Hopkins Eq. 4.99).
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequencies `f`, in hertz (array, > 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `width` | Slit width `w`, in m (> 0). |
 | `depth` | Slit depth `d` (wall thickness across the slit), in m (> 0). |
 | `field` | `"diffuse"` ($m = 8$) or `"normal"` ($m = 4$). |

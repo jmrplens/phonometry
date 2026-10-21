@@ -61,7 +61,7 @@ def test_the_root_is_continuous_and_starts_with_a_positive_real_part() -> None:
 def test_calibration_refuses_sensitivities_of_the_wrong_shape() -> None:
     with pytest.raises(ValueError, match="'sensitivity_v_per_pa' must have shape"):
         metrology.ReciprocityCalibration(
-            frequencies_hz=_F,
+            frequencies=_F,
             sensitivity_v_per_pa=np.ones((2, 3), dtype=complex),
             products_v2_per_pa2=np.ones((3, 3), dtype=complex),
             field="pressure",
@@ -75,7 +75,7 @@ def test_calibration_levels_phases_and_read_only_columns() -> None:
         [[0.05j, -0.05, 0.05], [0.04, 0.04, 0.04], [0.06, 0.06, 0.06]]
     )
     calibration = metrology.ReciprocityCalibration(
-        frequencies_hz=_F,
+        frequencies=_F,
         sensitivity_v_per_pa=sensitivities,
         products_v2_per_pa2=np.ones((3, 3), dtype=complex),
         field="free_field",
@@ -170,7 +170,7 @@ def test_a_complex_column_spreads_a_single_value() -> None:
 
 def _calibration_fields() -> dict[str, object]:
     return {
-        "frequencies_hz": _F,
+        "frequencies": _F,
         "sensitivity_v_per_pa": np.full((3, 3), 0.05, dtype=complex),
         "products_v2_per_pa2": np.ones((3, 3), dtype=complex),
         "field": "pressure",
@@ -207,7 +207,7 @@ def test_budget_refuses_names_and_components_that_disagree() -> None:
     matrix = np.full((2, 3), 0.01)
     with pytest.raises(ValueError, match="'names' and 'components' must hold"):
         metrology.ReciprocityUncertaintyBudget(
-            frequencies_hz=_F,
+            frequencies=_F,
             field="pressure",
             names=("rounding", "repeatability"),
             components=("Rounding error",),
@@ -219,7 +219,7 @@ def test_budget_refuses_a_matrix_of_the_wrong_shape() -> None:
     matrix = np.full((1, 2), 0.01)
     with pytest.raises(ValueError, match="'standard_uncertainties_db' must have shape"):
         metrology.ReciprocityUncertaintyBudget(
-            frequencies_hz=_F,
+            frequencies=_F,
             field="pressure",
             names=("rounding",),
             components=("Rounding error",),

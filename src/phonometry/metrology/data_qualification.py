@@ -72,7 +72,8 @@ from __future__ import annotations
 
 import math
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import numpy as np
 from scipy import special
@@ -90,6 +91,8 @@ from ..io._resolve import resolve_fs
 from ..signals.spectra import _positive, _validate_signal, power_spectral_density
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
@@ -984,6 +987,9 @@ class LevelCrossingResult(OwnsArrays):
     :ivar duration: Record duration used for the rates, in seconds.
     :ivar fs: Sample rate, in Hz.
     """
+
+    #: The crossing levels are in the units of the signal, not in decibels.
+    _display_units: ClassVar[Mapping[str, str]] = MappingProxyType({"levels": ""})
 
     levels: NDArray[np.float64]
     rates: NDArray[np.float64]

@@ -373,7 +373,7 @@ def test_steady_source_energy_is_power_plus_10_lg_t() -> None:
     power = _power(background_levels=background)
     events = np.stack([ST + 10.0 * math.log10(t)] * 5)
     energy = emission.sound_energy_hard_walled(
-        events, RSS, LW_RSS, FREQS, background_levels=background, integration_time_s=t
+        events, RSS, LW_RSS, FREQS, background_levels=background, integration_time=t
     )
     np.testing.assert_allclose(
         energy.sound_energy_level, power.sound_power_level + 10.0, atol=1e-9
@@ -391,11 +391,11 @@ def test_events_one_at_a_time_and_one_encompassing_measurement_agree() -> None:
     n_events = 7
     one_at_a_time = emission.sound_energy_hard_walled(
         np.stack([ST] * n_events), RSS, LW_RSS, FREQS, background_levels=BACKGROUND,
-        integration_time_s=1.0,
+        integration_time=1.0,
     )  # fmt: skip
     encompassing = emission.sound_energy_hard_walled(
         ST + 10.0 * math.log10(n_events), RSS, LW_RSS, FREQS, events=n_events,
-        background_levels=BACKGROUND, integration_time_s=1.0,
+        background_levels=BACKGROUND, integration_time=1.0,
     )  # fmt: skip
     np.testing.assert_allclose(
         encompassing.sound_energy_level, one_at_a_time.sound_energy_level, atol=1e-9
@@ -405,7 +405,7 @@ def test_events_one_at_a_time_and_one_encompassing_measurement_agree() -> None:
 def test_energy_source_locations_follow_eq17() -> None:
     events = np.stack([np.stack([ST, ST + 3.0])] * 5)  # (Ne, NS, NM, NB)
     res = emission.sound_energy_hard_walled(
-        events, RSS, LW_RSS, FREQS, background_levels=BACKGROUND, integration_time_s=1.0
+        events, RSS, LW_RSS, FREQS, background_levels=BACKGROUND, integration_time=1.0
     )
     per_position = _energy_mean(np.stack([ST, ST + 3.0]), 0)
     expected = LW_RSS - _energy_mean(RSS, 0) + _energy_mean(per_position, 0)
@@ -417,13 +417,13 @@ def test_fewer_than_five_events_warn_citing_7_6() -> None:
     with pytest.warns(emission.SoundPowerWarning, match=r"ISO 3743-1:2010 7\.6"):
         emission.sound_energy_hard_walled(
             np.stack([ST] * 3), RSS, LW_RSS, FREQS, background_levels=BACKGROUND,
-            integration_time_s=1.0,
+            integration_time=1.0,
         )  # fmt: skip
 
 
 def test_energy_background_needs_the_integration_time() -> None:
     events = np.stack([ST] * 5)
-    with pytest.raises(ValueError, match="integration_time_s"):
+    with pytest.raises(ValueError, match="'integration_time'"):
         emission.sound_energy_hard_walled(
             events, RSS, LW_RSS, FREQS, background_levels=BACKGROUND
         )
@@ -464,7 +464,7 @@ def _orientations(spread: np.ndarray) -> np.ndarray:
 
 def test_room_qualifies_on_spreads_at_the_table3_limits() -> None:
     check = emission.check_hard_walled_room(
-        _orientations(SIGMA_R0_TABLE_3), FREQS, volume_m3=60.0,
+        _orientations(SIGMA_R0_TABLE_3), FREQS, volume=60.0,
         reference_box_m=[0.8, 0.5, 0.6], absorption_coefficients=[0.05, 0.2],
     )  # fmt: skip
     np.testing.assert_allclose(check.level_range_db, SIGMA_R0_TABLE_3, atol=1e-12)
@@ -476,7 +476,7 @@ def test_spread_over_the_limit_in_one_band_fails_4_4() -> None:
     spread = SIGMA_R0_TABLE_3.copy()
     spread[3] = 1.6
     check = emission.check_hard_walled_room(
-        _orientations(spread), FREQS, volume_m3=60.0, reference_box_m=[0.8, 0.5, 0.6]
+        _orientations(spread), FREQS, volume=60.0, reference_box_m=[0.8, 0.5, 0.6]
     )
     assert not check.acoustically_adequate
     assert not bool(check.band_adequate[3])
@@ -501,7 +501,7 @@ def test_volume_and_reference_box_of_4_2(
     volume: float, box: list[float], *, volume_ok: bool, box_ok: bool
 ) -> None:
     check = emission.check_hard_walled_room(
-        _orientations(np.full(7, 1.0)), FREQS, volume_m3=volume, reference_box_m=box
+        _orientations(np.full(7, 1.0)), FREQS, volume=volume, reference_box_m=box
     )
     assert check.volume_adequate is volume_ok
     assert check.box_fits is box_ok
@@ -510,7 +510,7 @@ def test_volume_and_reference_box_of_4_2(
 
 def test_a_surface_above_0_20_fails_4_3() -> None:
     check = emission.check_hard_walled_room(
-        _orientations(np.full(7, 1.0)), FREQS, volume_m3=60.0,
+        _orientations(np.full(7, 1.0)), FREQS, volume=60.0,
         reference_box_m=[0.5, 0.5, 0.5], absorption_coefficients=[[0.1, 0.21]],
     )  # fmt: skip
     assert check.surfaces_hard is False
@@ -521,7 +521,7 @@ def test_minimum_microphone_distance_of_7_3() -> None:
     check = emission.check_hard_walled_room(
         _orientations(np.full(7, 1.0)),
         FREQS,
-        volume_m3=64.0,
+        volume=64.0,
         reference_box_m=[0.5, 0.5, 0.5],
     )
     assert check.minimum_microphone_distance_m == pytest.approx(0.3 * 4.0)
@@ -531,7 +531,7 @@ def test_room_check_has_no_truth_value() -> None:
     check = emission.check_hard_walled_room(
         _orientations(np.full(7, 1.0)),
         FREQS,
-        volume_m3=60.0,
+        volume=60.0,
         reference_box_m=[0.5, 0.5, 0.5],
     )
     with pytest.raises(TypeError, match="passes"):
@@ -543,7 +543,7 @@ def test_room_check_refuses_63_hz() -> None:
     orientations = _orientations(np.full(7, 1.0))[:, :2]
     with pytest.raises(ValueError, match="125 Hz to 8 kHz"):
         emission.check_hard_walled_room(
-            orientations, freqs, volume_m3=60.0, reference_box_m=[0.5, 0.5, 0.5]
+            orientations, freqs, volume=60.0, reference_box_m=[0.5, 0.5, 0.5]
         )
 
 
@@ -551,7 +551,7 @@ def test_other_than_eight_orientations_warn() -> None:
     orientations = _orientations(np.full(7, 1.0))[:4]
     with pytest.warns(emission.SoundPowerWarning, match="eight|8"):
         emission.check_hard_walled_room(
-            orientations, FREQS, volume_m3=60.0, reference_box_m=[0.5, 0.5, 0.5]
+            orientations, FREQS, volume=60.0, reference_box_m=[0.5, 0.5, 0.5]
         )
 
 
@@ -665,7 +665,7 @@ def test_plot_without_a_background_claims_no_upper_bound() -> None:
 def test_plot_of_an_energy_result_in_spanish() -> None:
     res = emission.sound_energy_hard_walled(
         np.stack([ST] * 5), RSS, LW_RSS, FREQS, background_levels=BACKGROUND,
-        integration_time_s=1.0,
+        integration_time=1.0,
     )  # fmt: skip
     ax = res.plot(language="es")
     assert "energía" in ax.get_ylabel()
@@ -677,7 +677,7 @@ def test_room_check_plot_marks_the_failing_band_and_the_limits() -> None:
     spread = SIGMA_R0_TABLE_3.copy()
     spread[3] = 2.0
     check = emission.check_hard_walled_room(
-        _orientations(spread), FREQS, volume_m3=60.0, reference_box_m=[0.5, 0.5, 0.5]
+        _orientations(spread), FREQS, volume=60.0, reference_box_m=[0.5, 0.5, 0.5]
     )
     ax = check.plot()
     heights = [p.get_height() for p in ax.patches[: FREQS.size]]
@@ -710,7 +710,7 @@ def test_room_check_plot_draws_the_table3_marks_at_their_limits() -> None:
     check = emission.check_hard_walled_room(
         _orientations(SIGMA_R0_TABLE_3),
         FREQS,
-        volume_m3=60.0,
+        volume=60.0,
         reference_box_m=[0.5, 0.5, 0.5],
     )
     ax = check.plot()
@@ -730,7 +730,7 @@ def test_room_check_legend_keys_each_colour_by_a_bar_of_it() -> None:
     spread = SIGMA_R0_TABLE_3.copy()
     spread[0] = 4.9  # 125 Hz over its 3,0 dB
     check = emission.check_hard_walled_room(
-        _orientations(spread), FREQS, volume_m3=60.0, reference_box_m=[0.5, 0.5, 0.5]
+        _orientations(spread), FREQS, volume=60.0, reference_box_m=[0.5, 0.5, 0.5]
     )
     ax = check.plot()
     bars = ax.patches[: FREQS.size]

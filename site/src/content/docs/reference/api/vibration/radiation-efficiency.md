@@ -157,7 +157,7 @@ expressions.
 
 | Name | Description |
 | :--- | :--- |
-| `frequency` | Band centre frequencies `f`, in hertz (array, > 0). |
+| `frequency` | Band centre frequency `f`, in hertz (scalar or array, > 0). |
 | `length_x` | Plate dimension `Lx`, in m (> 0). |
 | `length_y` | Plate dimension `Ly`, in m (> 0). |
 | `critical_frequency` | Coincidence frequency `fc`, in hertz (> 0); see [`coincidence_frequency`](/phonometry/reference/api/vibration/radiation-efficiency/#coincidence_frequency). |

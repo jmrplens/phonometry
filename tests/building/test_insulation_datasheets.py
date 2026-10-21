@@ -133,7 +133,7 @@ def test_the_improvement_row_rates_as_table_c2_prints() -> None:
     assert rating.delta_lw == ref.ISO717_2_ANNEX_C2_DELTA_LW
     assert rating.ci_delta == ref.ISO717_2_ANNEX_C2_CI_DELTA
     assert rating.ci_r == -11 - ref.ISO717_2_ANNEX_C2_CI_DELTA
-    assert rating.band_centers.tolist() == [float(band) for band in _RATED]
+    assert rating.frequencies.tolist() == [float(band) for band in _RATED]
     assert rating.improvement.tolist() == ref.ISO717_2_ANNEX_C2_DELTA_L
 
 
@@ -166,7 +166,7 @@ def test_the_rating_result_holds_its_terms_together() -> None:
             delta_lw=rating.delta_lw,
             ci_delta=rating.ci_delta,
             ci_r=rating.ci_r + 1,
-            band_centers=rating.band_centers,
+            frequencies=rating.frequencies,
             improvement=rating.improvement,
         )
     with pytest.raises(ValueError, match="improvement"):
@@ -174,7 +174,7 @@ def test_the_rating_result_holds_its_terms_together() -> None:
             delta_lw=15,
             ci_delta=-9,
             ci_r=-2,
-            band_centers=rating.band_centers,
+            frequencies=rating.frequencies,
             improvement=rating.improvement[:5],
         )
 
@@ -244,8 +244,8 @@ def test_an_octave_mapping_is_read_as_octaves() -> None:
     octaves = {125: 36.0, 250: 45.0, 500: 52.0, 1000: 55.0, 2000: 56.0, 4000: 60.0}
     by_band = building.weighted_rating(octaves)
     assert by_band.rating == building.weighted_rating(list(octaves.values())[:5]).rating
-    assert by_band.band_centers is not None
-    assert len(by_band.band_centers) == 5
+    assert by_band.frequencies is not None
+    assert len(by_band.frequencies) == 5
 
 
 @pytest.mark.parametrize(

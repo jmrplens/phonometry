@@ -181,8 +181,8 @@ def test_a_meter_on_its_design_response_passes() -> None:
     assert result.passes
     assert result.deviation_percent == pytest.approx(np.zeros(f.size - 1), abs=1e-9)
     # The reference frequency carries no requirement and is not graded.
-    assert result.frequencies_hz.size == f.size - 1
-    assert im.KB_REFERENCE_FREQUENCY_HZ not in result.frequencies_hz
+    assert result.frequencies.size == f.size - 1
+    assert im.KB_REFERENCE_FREQUENCY_HZ not in result.frequencies
 
 
 def test_a_meter_outside_the_central_band_fails_there_and_only_there() -> None:
@@ -193,7 +193,7 @@ def test_a_meter_outside_the_central_band_fails_there_and_only_there() -> None:
     measured[0] *= 1.15
     result = im.verify_vibration_meter(f, measured)
     assert not result.passes
-    graded = dict(zip(result.frequencies_hz, result.within_tolerance, strict=True))
+    graded = dict(zip(result.frequencies, result.within_tolerance, strict=True))
     assert not graded[31.5]
     assert graded[1.0]  # 15 % is inside the 20 % of the skirt
     assert result.worst_frequency_hz == pytest.approx(31.5)
@@ -308,9 +308,9 @@ def test_annex_e_filter_stays_inside_the_five_percent_band(
     building_class: str,
 ) -> None:
     """Table E.1 allows the realised filter 5 % either side of the target."""
-    fs_hz = 2048.0
-    taps = im.assessment_weighting_taps(fs_hz, building_class=building_class)
-    freqs, response = sig.freqz(taps, worN=4096, fs=fs_hz)
+    fs = 2048.0
+    taps = im.assessment_weighting_taps(fs, building_class=building_class)
+    freqs, response = sig.freqz(taps, worN=4096, fs=fs)
     graded = (freqs >= 1.0) & (freqs <= im.WORKING_RANGES_HZ["railway"][1])
     target = im.assessment_weighting_response(
         freqs[graded], building_class=building_class
@@ -328,19 +328,19 @@ def test_annex_e_filter_has_a_linear_phase(building_class: str) -> None:
 
 def test_assessment_velocity_below_ten_hertz_is_the_velocity_itself() -> None:
     """The weighting is 1 there, so the peak is the peak that went in."""
-    fs_hz = 2048.0
-    t = np.arange(int(4.0 * fs_hz)) / fs_hz
+    fs = 2048.0
+    t = np.arange(int(4.0 * fs)) / fs
     record = 3.0 * np.sin(2.0 * math.pi * 5.0 * t)
-    weighted = im.assessment_velocity(record, fs_hz, building_class="residential")
+    weighted = im.assessment_velocity(record, fs, building_class="residential")
     assert np.max(np.abs(weighted)) == pytest.approx(3.0, rel=0.02)
 
 
 def test_annex_e_verdict_uses_the_frequency_independent_guide_value() -> None:
     """Table E.2, and the point of the annex: no frequency is asked for."""
-    fs_hz = 2048.0
-    t = np.arange(int(4.0 * fs_hz)) / fs_hz
+    fs = 2048.0
+    t = np.arange(int(4.0 * fs)) / fs
     record = 6.0 * np.sin(2.0 * math.pi * 8.0 * t)
-    result = im.assess_short_term_vibration(record, fs_hz, building_class="residential")
+    result = im.assess_short_term_vibration(record, fs, building_class="residential")
     assert result.guide_value_mm_s == pytest.approx(5.0)
     assert not result.within_guideline
     assert result.ratio == pytest.approx(6.0 / 5.0, rel=0.02)
@@ -348,17 +348,17 @@ def test_annex_e_verdict_uses_the_frequency_independent_guide_value() -> None:
     # 16,5 mm/s, is weighted down to a third and keeps to the same value.
     fast = 6.0 * np.sin(2.0 * math.pi * 60.0 * t)
     assert im.assess_short_term_vibration(
-        fast, fs_hz, building_class="residential"
+        fast, fs, building_class="residential"
     ).within_guideline
 
 
 def test_annex_d_zero_crossing_and_fourier_find_the_same_burst() -> None:
     """Two ways of naming a frequency an event does not really have."""
-    fs_hz = 2048.0
-    t = np.arange(int(2.0 * fs_hz)) / fs_hz
+    fs = 2048.0
+    t = np.arange(int(2.0 * fs)) / fs
     record = np.sin(2.0 * math.pi * 24.0 * t) * np.hanning(t.size)
-    by_crossing = im.dominant_frequency(record, fs_hz)
-    by_fourier = im.dominant_frequency(record, fs_hz, method="fourier")
+    by_crossing = im.dominant_frequency(record, fs)
+    by_fourier = im.dominant_frequency(record, fs, method="fourier")
     assert by_crossing.frequency_hz == pytest.approx(24.0, rel=0.03)
     assert by_fourier.frequency_hz == pytest.approx(24.0, rel=0.03)
     assert by_crossing.candidates == ()
@@ -374,11 +374,11 @@ def test_annex_d_refuses_a_record_with_no_half_period_around_its_peak() -> None:
 
 def test_a_rate_that_cannot_carry_the_working_range_is_refused() -> None:
     """An aliased record reads like an ordinary one, so it is refused first."""
-    with pytest.raises(ValueError, match="fs_hz"):
+    with pytest.raises(ValueError, match="'fs'"):
         im.kb_signal(np.zeros(100), 100.0)
-    with pytest.raises(ValueError, match="fs_hz"):
+    with pytest.raises(ValueError, match="'fs'"):
         im.kb_signal(np.zeros(100), 500.0, working_range="railway")
-    with pytest.raises(ValueError, match="fs_hz"):
+    with pytest.raises(ValueError, match="'fs'"):
         im.assessment_weighting_taps(600.0, building_class="residential")
 
 

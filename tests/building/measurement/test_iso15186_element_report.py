@@ -205,7 +205,7 @@ def test_non_iso_band_count_rejected(tmp_path: Path) -> None:
         c=-2,
         ctr=-3,
         unfavourable_sum=0.0,
-        band_centers=centers,
+        frequencies=centers,
         measured=curve,
         shifted_reference=curve,
     )
@@ -225,5 +225,5 @@ def test_rating_without_per_band_data_rejected(tmp_path: Path) -> None:
         rating=bare_rating,
     )
     out = str(tmp_path / "x.pdf")
-    with pytest.raises(ValueError, match=r"per-band rating data \('band_centers'"):
+    with pytest.raises(ValueError, match=r"per-band rating data \('frequencies'"):
         result.report(out)

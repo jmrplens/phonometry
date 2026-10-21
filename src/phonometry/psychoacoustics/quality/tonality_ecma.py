@@ -87,7 +87,7 @@ class EcmaTonality(OwnsArrays):
     ``tonality`` is the single representative tonality T in tu_HMS
     (Formula 63). ``specific_tonality`` is the average specific tonality
     T'(z) in tu_HMS over the 53 auditory bands (Formula 53), with ``bark``
-    the critical-band-rate scale z (0.5..26.5 Bark_HMS), ``centre_frequencies``
+    the critical-band-rate scale z (0.5..26.5 Bark_HMS), ``frequencies``
     the band centre frequencies F(z) and ``tonal_frequencies`` the per-band
     tonal frequency f_ton,z(z) (Formula 55). ``times`` and ``tonality_vs_time``
     hold the time-dependent tonality T(l) at 187.5 Hz (Formula 61) and
@@ -98,7 +98,7 @@ class EcmaTonality(OwnsArrays):
     tonality: float
     specific_tonality: np.ndarray
     bark: np.ndarray
-    centre_frequencies: np.ndarray
+    frequencies: np.ndarray
     tonal_frequencies: np.ndarray
     times: np.ndarray
     tonality_vs_time: np.ndarray
@@ -134,7 +134,7 @@ class EcmaTonality(OwnsArrays):
             self,
             specific_tonality=1,
             bark=1,
-            centre_frequencies=1,
+            frequencies=1,
             tonal_frequencies=1,
             times=1,
             tonality_vs_time=1,
@@ -143,7 +143,7 @@ class EcmaTonality(OwnsArrays):
         require_same_length(
             self,
             "bark",
-            "centre_frequencies",
+            "frequencies",
             "specific_tonality",
             "tonal_frequencies",
             axis="auditory band",
@@ -326,7 +326,7 @@ def tonality_ecma(
         tonality=t_single,
         specific_tonality=t_spec,
         bark=_Z,
-        centre_frequencies=_F_CENTRE,
+        frequencies=_F_CENTRE,
         tonal_frequencies=f_spec,
         times=time,
         tonality_vs_time=t_time,

@@ -145,7 +145,7 @@ def _rows(result: CorrectionUncertaintyVerification, language: str) -> list[list
     rows: list[list[Any]] = [header]
     uncertainty_passes = np.asarray(result.uncertainty_passes)
     range_passes = result.range_passes
-    for index, frequency in enumerate(np.asarray(result.frequencies_hz)):
+    for index, frequency in enumerate(np.asarray(result.frequencies)):
         passed = bool(uncertainty_passes[index]) and (
             range_passes is None or bool(np.asarray(range_passes)[index])
         )
@@ -190,7 +190,7 @@ def _statement(
 ) -> tuple[str, list[str]]:
     """The boxed statement and the extended terms beside it."""
     failures = int(result.failing_frequencies_hz.size)
-    count = int(np.asarray(result.frequencies_hz).size)
+    count = int(np.asarray(result.frequencies).size)
     if failures:
         statement = t(
             "<b>Exceeds</b> the maximum permitted values of clause {n} at {k} of "

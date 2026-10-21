@@ -233,10 +233,10 @@ def test_profile_gradient_and_shape() -> None:
         depths, temperatures_c=10.0, salinities=35.0, model="unesco"
     )
     assert isinstance(prof, SoundSpeedProfile)
-    assert prof.speed_of_sound.shape == depths.shape
+    assert prof.speeds_of_sound.shape == depths.shape
     assert prof.gradient_per_s.shape == depths.shape
     # Isothermal/isohaline column: speed rises with depth (pressure), gradient > 0.
-    assert np.all(np.diff(prof.speed_of_sound) > 0.0)
+    assert np.all(np.diff(prof.speeds_of_sound) > 0.0)
     assert np.all(prof.gradient_per_s > 0.0)
 
 
@@ -253,7 +253,7 @@ def test_profile_columns_must_run_over_one_depth_grid() -> None:
     dimension" and two bare shapes, naming neither column. ``gradient_per_s``
     reaches no figure at all and is silent in both directions, yet the depth
     of the sound-channel axis and the ray curvature radius are read off it
-    entry by entry beside ``depth``. An extra axis is quieter still: an
+    entry by entry beside ``depths``. An extra axis is quieter still: an
     ``(n, 2)`` column carries one value per depth by every count and draws a
     second curve under the one legend entry that names a single model.
     """
@@ -261,18 +261,18 @@ def test_profile_columns_must_run_over_one_depth_grid() -> None:
     per_depth = "one value per depth"
     one_axis = "must have one axis"
     cases = (
-        ("depth", good.depth[:-1], per_depth),
-        ("speed_of_sound", good.speed_of_sound[:-1], per_depth),
-        ("speed_of_sound", np.append(good.speed_of_sound, 1500.0), per_depth),
+        ("depths", good.depths[:-1], per_depth),
+        ("speeds_of_sound", good.speeds_of_sound[:-1], per_depth),
+        ("speeds_of_sound", np.append(good.speeds_of_sound, 1500.0), per_depth),
         # np.diff is the obvious hand-rolled gradient, and it is one short.
         (
             "gradient_per_s",
-            np.diff(good.speed_of_sound) / np.diff(good.depth),
+            np.diff(good.speeds_of_sound) / np.diff(good.depths),
             per_depth,
         ),
         ("gradient_per_s", np.append(good.gradient_per_s, 0.0), per_depth),
-        ("depth", np.column_stack([good.depth] * 2), one_axis),
-        ("speed_of_sound", np.column_stack([good.speed_of_sound] * 2), one_axis),
+        ("depths", np.column_stack([good.depths] * 2), one_axis),
+        ("speeds_of_sound", np.column_stack([good.speeds_of_sound] * 2), one_axis),
         ("gradient_per_s", np.column_stack([good.gradient_per_s] * 2), one_axis),
     )
     for field, value, fragment in cases:

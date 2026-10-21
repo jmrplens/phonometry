@@ -68,7 +68,7 @@ number the standard forbids.
 
 ```python
 background_corrected_level_db(
-    levels_db: ArrayLike,
+    levels: ArrayLike,
     background_levels_db: ArrayLike,
 ) -> NDArray[np.float64]
 ```
@@ -93,7 +93,7 @@ the remedy is to wait for a quieter day rather than to correct harder.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The level with the sources on, per band, in decibels. |
+| `levels` | The level with the sources on, per band, in decibels. |
 | `background_levels_db` | The level with them off, per band, in decibels. |
 
 **Returns:** The corrected level per band, in decibels.
@@ -123,7 +123,7 @@ DIRECTIVITY_CIRCLE_RADIUS_M = 1.5
 ## directivity_index_db
 
 ```python
-directivity_index_db(levels_db: ArrayLike) -> NDArray[np.float64]
+directivity_index_db(levels: ArrayLike) -> NDArray[np.float64]
 ```
 
 The directivity index of a source, definition 3.10.
@@ -145,7 +145,7 @@ much of a shadow the source casts on itself.
 
 | Name | Description |
 | :--- | :--- |
-| `levels_db` | The levels at the twelve positions, in decibels. |
+| `levels` | The levels at the twelve positions, in decibels. |
 
 **Returns:** $DI_i$ at each position, in decibels.
 

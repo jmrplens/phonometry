@@ -169,7 +169,7 @@ InSituSoundPowerResult(
     c2: float,
     excess_levels_db: np.ndarray | None,
     directivity_range_db: float | None,
-    sigma_omc: float,
+    sigma_omc_db: float,
     coverage_factor: float,
     sound_power_level_a: float,
     sound_energy_level_a: float,
@@ -228,10 +228,10 @@ Table 2 grades the determination by, the A-weighted excess
 $\Delta L_{f\mathrm{A}}$ at each microphone position and the
 directivity range of the source, `None` where they were not determined.
 `grade` is the accuracy grade Table 2 grants from them (`'engineering'`
-or `'survey'`) and `sigma_r0` its typical reproducibility; `sigma_omc`,
+or `'survey'`) and `sigma_r0` its typical reproducibility; `sigma_omc_db`,
 `sigma_tot` and `expanded_uncertainty` are the operating-and-mounting
 deviation, Eq. (22) and Eq. (23) for `coverage_factor`, `NaN` when no
-`sigma_omc` was supplied. The grade and the three figures read from it
+`sigma_omc_db` was supplied. The grade and the three figures read from it
 are read-only properties, so they are not fields. `sound_power_level_a` and
 `sound_energy_level_a` are the Annex D A-weighted totals of the level
 that was determined (`NaN` for the other).
@@ -291,7 +291,7 @@ The typical reproducibility of Table 2 at `grade`, in dB.
 
 *property*
 
-Eq. (22), $\sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}$, `NaN` without `sigma_omc`.
+Eq. (22), $\sqrt{\sigma_{R0}^2 + \sigma_{omc}^2}$, `NaN` without `sigma_omc_db`.
 
 ### InSituSoundPowerResult.sound_energy_level_ref
 
@@ -332,7 +332,7 @@ sound_energy_in_situ(
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
-    sigma_omc: float | None = None,
+    sigma_omc_db: float | None = None,
     coverage_factor: float = 2.0,
 ) -> InSituSoundPowerResult
 ```
@@ -372,7 +372,7 @@ time-averaged, over 30 s (7.6), exactly as for a steady source.
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals, as for [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ); Annex C itself prints pascals. |
 | `conditions` | The [`GradeConditions`](/phonometry/reference/api/power/sound-power-in-situ/#gradeconditions) of the determination, as for [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ). |
-| `sigma_omc` | Operating-and-mounting standard deviation, in decibels. |
+| `sigma_omc_db` | Operating-and-mounting standard deviation, in decibels. |
 | `coverage_factor` | `k` of Eq. (23), 2 by default. |
 
 **Returns:** [`InSituSoundPowerResult`](/phonometry/reference/api/power/sound-power-in-situ/#insitusoundpowerresult) with `quantity='energy'`.
@@ -397,7 +397,7 @@ sound_power_in_situ(
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
     conditions: GradeConditions | None = None,
-    sigma_omc: float | None = None,
+    sigma_omc_db: float | None = None,
     coverage_factor: float = 2.0,
 ) -> InSituSoundPowerResult
 ```
@@ -434,7 +434,7 @@ conditions of Annex C, and `sound_power_level_a` is the Annex D total.
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
 | `static_pressure_kpa` | Static pressure at the test, in kilopascals (see [`static_pressure_from_altitude`](/phonometry/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). Annex C prints this quantity in pascals, with $p_{\mathrm{s},0}$ = 1,013 25 x 10^5 Pa, and is alone in its family in doing so: ISO 3741:2010, ISO 3744:2010 and ISO 3745:2012 all print kilopascals. This argument follows the three, so that one unit serves the whole ISO 3740 family; `C2` carries a pressure term and a temperature term, and the pressure enters only as the ratio $p_\mathrm{s}/p_{\mathrm{s},0}$, so converting both together cannot move a result. |
 | `conditions` | The [`GradeConditions`](/phonometry/reference/api/power/sound-power-in-situ/#gradeconditions) Table 2 reads to decide the accuracy grade: the excess of sound pressure level at each microphone position (Annex A) and the range of the directivity survey of the source (7.2). `None`, or either condition left out, leaves the determination at survey grade. |
-| `sigma_omc` | Standard deviation of the operating and mounting conditions of the source (9.2, E.3), in decibels; `None` leaves `sigma_tot` and the expanded uncertainty `NaN`. |
+| `sigma_omc_db` | Standard deviation of the operating and mounting conditions of the source (9.2, E.3), in decibels; `None` leaves `sigma_tot` and the expanded uncertainty `NaN`. |
 | `coverage_factor` | `k` of Eq. (23): 2 for the two-sided 95 % interval (default), 1,6 for a one-sided comparison with a limit. |
 
 **Returns:** [`InSituSoundPowerResult`](/phonometry/reference/api/power/sound-power-in-situ/#insitusoundpowerresult) with `quantity='power'`.
@@ -443,7 +443,7 @@ conditions of Annex C, and `sound_power_level_a` is the Annex D total.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | if `levels` is not a finite `(n, bands)` array, `levels_ref`, `lw_ref` or either background does not match it, `frequencies` are not the octave centres of Table D.1, `temperature_c` or `static_pressure_kpa` is out of range, `conditions.excess_levels` is supplied and is not one finite value per position, `conditions.directivity_range` or `sigma_omc` is supplied and is negative, or `coverage_factor` is not positive. |
+| ValueError | if `levels` is not a finite `(n, bands)` array, `levels_ref`, `lw_ref` or either background does not match it, `frequencies` are not the octave centres of Table D.1, `temperature_c` or `static_pressure_kpa` is out of range, `conditions.excess_levels` is supplied and is not one finite value per position, `conditions.directivity_range` or `sigma_omc_db` is supplied and is negative, or `coverage_factor` is not positive. |
 
 ## static_pressure_from_altitude
 

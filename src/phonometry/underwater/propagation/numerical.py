@@ -134,30 +134,30 @@ _MIN_PE_DEPTH_POINTS = 16
 
 def _clean_profile(
     depths: NDArray[np.float64] | list[float],
-    sound_speeds: NDArray[np.float64] | list[float],
+    speeds_of_sound: NDArray[np.float64] | list[float],
     owner: str,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """One validated sound-speed profile out of the two node arrays.
 
     :param depths: Depth nodes of the profile, in metres.
-    :param sound_speeds: Sound speed at each of those depths, in m/s.
+    :param speeds_of_sound: Sound speed at each of those depths, in m/s.
     :param owner: The solver the caller typed, for the error messages: the
         four of them share this cleaner, and the name in the message should
         be the one on the call that raised.
-    :return: The coerced ``(depths, sound_speeds)`` pair.
+    :return: The coerced ``(depths, speeds_of_sound)`` pair.
     :raises ValueError: if the two do not describe one increasing profile
         from the surface down.
     """
     z = np.asarray(depths, dtype=np.float64)
-    c = np.asarray(sound_speeds, dtype=np.float64)
+    c = np.asarray(speeds_of_sound, dtype=np.float64)
     if z.ndim != 1 or z.size < _MIN_POLYLINE_NODES:
         msg = "'depths' must be a 1-D array of at least two points."
         raise ValueError(msg)
     require_equal_shapes(
-        owner, {"depths": z.shape, "sound_speeds": c.shape}, "profile node"
+        owner, {"depths": z.shape, "speeds_of_sound": c.shape}, "profile node"
     )
     if not (np.all(np.isfinite(z)) and np.all(np.isfinite(c))):
-        msg = "'depths' and 'sound_speeds' must be finite."
+        msg = "'depths' and 'speeds_of_sound' must be finite."
         raise ValueError(msg)
     if np.any(np.diff(z) <= 0.0):
         msg = "'depths' must be strictly increasing."
@@ -166,7 +166,7 @@ def _clean_profile(
         msg = "'depths' must start at the surface z = 0."
         raise ValueError(msg)
     if np.any(c <= 0.0):
-        msg = "'sound_speeds' must be strictly positive."
+        msg = "'speeds_of_sound' must be strictly positive."
         raise ValueError(msg)
     return z, c
 
@@ -490,7 +490,7 @@ def _propagating_band(
 def normal_modes(
     frequency_hz: float,
     depths: NDArray[np.float64] | list[float],
-    sound_speeds: NDArray[np.float64] | list[float],
+    speeds_of_sound: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
     receiver_depth: float,
@@ -517,7 +517,7 @@ def normal_modes(
     :param frequency_hz: Source frequency, in Hz.
     :param depths: Depth samples of the sound-speed profile, in metres, starting
         at the surface ``z = 0`` and strictly increasing to the bottom.
-    :param sound_speeds: Sound speed at each depth, in m/s.
+    :param speeds_of_sound: Sound speed at each depth, in m/s.
     :param source_depth: Source depth ``zs``, in metres.
     :param receiver_depth: Receiver depth for the propagation-loss slice, in m.
     :param ranges_m: Ranges at which to evaluate the loss, in metres; defaults to
@@ -537,7 +537,7 @@ def normal_modes(
     """
     f = require_positive(frequency_hz, "frequency_hz")
     rho = require_positive(density, "density")
-    z_prof, c_prof = _clean_profile(depths, sound_speeds, "normal_modes")
+    z_prof, c_prof = _clean_profile(depths, speeds_of_sound, "normal_modes")
     water_depth = float(z_prof[-1])
     require_scalar(source_depth, "source_depth")
     zs = float(source_depth)
@@ -819,7 +819,7 @@ class RayTraceResult(OwnsArrays):
 
 def ray_trace(
     depths: NDArray[np.float64] | list[float],
-    sound_speeds: NDArray[np.float64] | list[float],
+    speeds_of_sound: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
     launch_angles_deg: NDArray[np.float64] | list[float],
@@ -886,7 +886,7 @@ def ray_trace(
     per ray, are the entire per-bounce record a downstream amplitude needs.
 
     :param depths: Depth samples of the profile, in metres, from ``z = 0``.
-    :param sound_speeds: Sound speed at each depth, in m/s.
+    :param speeds_of_sound: Sound speed at each depth, in m/s.
     :param source_depth: Source depth, in metres.
     :param launch_angles_deg: Launch angles from the horizontal, in degrees
         (positive downward).
@@ -901,7 +901,7 @@ def ray_trace(
     :return: A :class:`RayTraceResult`.
     :raises ValueError: If the inputs are invalid.
     """
-    z_prof, c_prof = _clean_profile(depths, sound_speeds, "ray_trace")
+    z_prof, c_prof = _clean_profile(depths, speeds_of_sound, "ray_trace")
     bathy = _clean_bathymetry(bathymetry, z_prof, "ray_trace")
     water_depth = float(z_prof[-1])
     depth_at_source = water_depth if bathy is None else float(bathy[1][0])
@@ -3044,7 +3044,7 @@ def _retire_stopped_beams(
 def gaussian_beams(
     frequency_hz: float,
     depths: NDArray[np.float64] | list[float],
-    sound_speeds: NDArray[np.float64] | list[float],
+    speeds_of_sound: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
     max_range: float = 10_000.0,
@@ -3270,7 +3270,7 @@ def gaussian_beams(
 
     :param frequency_hz: Source frequency, in Hz.
     :param depths: Depth samples of the profile, in metres, from ``z = 0``.
-    :param sound_speeds: Sound speed at each depth, in m/s.
+    :param speeds_of_sound: Sound speed at each depth, in m/s.
     :param source_depth: Source depth, in metres, inside the water column.
     :param max_range: Maximum range to march to, in metres.
     :param ranges_m: Ranges at which to evaluate the field, in metres. Default
@@ -3319,7 +3319,7 @@ def gaussian_beams(
     """
     f = require_positive(frequency_hz, "frequency_hz")
     fan = BeamFan() if fan is None else fan
-    z_prof, c_prof = _clean_profile(depths, sound_speeds, "gaussian_beams")
+    z_prof, c_prof = _clean_profile(depths, speeds_of_sound, "gaussian_beams")
     bathy = _clean_bathymetry(bathymetry, z_prof, "gaussian_beams")
     water_depth = float(z_prof[-1])
     depth_at_source = water_depth if bathy is None else float(bathy[1][0])
@@ -3648,7 +3648,7 @@ class ParabolicEquationResult(OwnsArrays):
 def parabolic_equation(
     frequency_hz: float,
     depths: NDArray[np.float64] | list[float],
-    sound_speeds: NDArray[np.float64] | list[float],
+    speeds_of_sound: NDArray[np.float64] | list[float],
     *,
     source_depth: float,
     max_range: float = 10_000.0,
@@ -3674,7 +3674,7 @@ def parabolic_equation(
 
     :param frequency_hz: Source frequency, in Hz.
     :param depths: Depth samples of the profile, in metres, from ``z = 0``.
-    :param sound_speeds: Sound speed at each depth, in m/s.
+    :param speeds_of_sound: Sound speed at each depth, in m/s.
     :param source_depth: Source depth, in metres.
     :param max_range: Maximum range, in metres.
     :param range_step: Range marching step :math:`\Delta r`, in metres.
@@ -3685,7 +3685,7 @@ def parabolic_equation(
     from scipy.fft import dst, idst
 
     f = require_positive(frequency_hz, "frequency_hz")
-    z_prof, c_prof = _clean_profile(depths, sound_speeds, "parabolic_equation")
+    z_prof, c_prof = _clean_profile(depths, speeds_of_sound, "parabolic_equation")
     water_depth = float(z_prof[-1])
     require_scalar(source_depth, "source_depth")
     zs = float(source_depth)

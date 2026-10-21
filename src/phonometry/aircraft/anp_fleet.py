@@ -434,24 +434,24 @@ class SpectralClass(OwnsArrays):
     :ivar class_id: Spectral class identifier (``"103"``, ``"205"``...).
     :ivar operation: ``"A"`` (approach) or ``"D"`` (departure).
     :ivar description: The aircraft family the class describes.
-    :ivar frequencies_hz: Nominal one-third-octave-band centre frequencies, in
+    :ivar frequencies: Nominal one-third-octave-band centre frequencies, in
         Hz, from 50 Hz to 10 kHz.
-    :ivar levels_db: Band levels at 1 000 ft, in dB.
+    :ivar levels: Band levels at 1 000 ft, in dB.
     """
 
     class_id: str
     operation: str
     description: str
-    frequencies_hz: NDArray[np.float64]
-    levels_db: NDArray[np.float64]
+    frequencies: NDArray[np.float64]
+    levels: NDArray[np.float64]
 
     def __post_init__(self) -> None:
         """Reject a class whose levels do not run over its bands.
 
         :raises ValueError: if the two arrays disagree or carry an extra axis.
         """
-        require_ranks(self, frequencies_hz=1, levels_db=1)
-        require_same_length(self, "frequencies_hz", "levels_db")
+        require_ranks(self, frequencies=1, levels=1)
+        require_same_length(self, "frequencies", "levels")
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
@@ -1772,8 +1772,8 @@ def _parse_spectral_classes(text: str) -> dict[str, SpectralClass]:
             class_id=class_id,
             operation=_operation_code(row[_COL_OP_TYPE]),
             description=row.get("Description", ""),
-            frequencies_hz=frequencies,
-            levels_db=levels,
+            frequencies=frequencies,
+            levels=levels,
         )
     return out
 

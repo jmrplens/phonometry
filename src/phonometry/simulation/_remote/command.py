@@ -1,0 +1,131 @@
+#  Copyright (c) 2026. Jose Manuel Requena Plens
+"""How the client reaches a node: the ssh command line and the job's placement (private).
+
+One ``ssh`` process carries a remote run: never a prompt (a prompt would
+hang a notebook), no terminal and no forwarding of anything of the client's,
+a dead link noticed in about a minute, the options ended by ``--`` before
+the destination. The remote command is a shell string for the node's POSIX
+login shell, so every word of it that comes from the hosts file is quoted.
+"""
+
+from __future__ import annotations
+
+import shlex
+import shutil
+from typing import TYPE_CHECKING
+
+from . import bootstrap
+
+if TYPE_CHECKING:
+    from ..compute import Compute
+    from .hosts import HostEntry
+
+#: The options every connection takes, whatever ``~/.ssh/config`` says for
+#: the host (options on the command line win over the file). No terminal: a
+#: pty turns every LF of a frame into CRLF and reads the package's bytes as
+#: keys (0x03 interrupts, 0x04 ends the input). No agent, X11 or port
+#: forwarding: the node runs code the client sends, and gets nothing of the
+#: client's. Never a prompt, which would hang a notebook; keep-alives that
+#: notice a dead link in about a minute; a connection given up after 30 s.
+SSH_OPTIONS: tuple[str, ...] = (
+    "-T",
+    "-a",
+    "-x",
+    *(
+        word
+        for setting in (
+            "RequestTTY=no",
+            "ClearAllForwardings=yes",
+            "BatchMode=yes",
+            "ServerAliveInterval=15",
+            "ServerAliveCountMax=4",
+            "ConnectTimeout=30",
+        )
+        for word in ("-o", setting)
+    ),
+)
+#: The one line a Python node runs: it reads the bootstrap from its standard
+#: input, its length on the first line, and runs it as a script; what follows
+#: on the input is the conversation.
+LOADER = (
+    "import sys;n=int(sys.stdin.buffer.readline());"
+    'exec(compile(sys.stdin.buffer.read(n),"phonometry-bootstrap","exec"),{"__name__":"__main__"})'
+)
+#: The devices whose Docker container needs a GPU.
+_GPU_DEVICES = ("cupy", "torch:cuda")
+#: The environment a Docker node's container runs with: the cache, CuPy's
+#: compiled kernels kept beside it, and a home and a matplotlib directory
+#: any user can write.
+_DOCKER_ENVIRONMENT = (
+    f"{bootstrap.CACHE_VAR}=/cache",
+    "CUPY_CACHE_DIR=/cache/cupy-kernels",
+    "HOME=/tmp",
+    "MPLCONFIGDIR=/tmp/matplotlib",
+)
+#: What stands for ``ssh``: ``None`` looks it up on ``PATH``. The tests set
+#: it to a stand-in, which on Windows cannot be a batch file on ``PATH``:
+#: cmd.exe rewrites the quotes and metacharacters of the remote command.
+_SSH_PROGRAM: tuple[str, ...] | None = None
+
+
+def ssh_program() -> tuple[str, ...]:
+    """The program, and its leading arguments, that runs ``ssh``.
+
+    :raises FileNotFoundError: when no ``ssh`` is on ``PATH``.
+    """
+    if _SSH_PROGRAM is not None:
+        return _SSH_PROGRAM
+    found = shutil.which("ssh")
+    if found is None:
+        msg = "no ssh client on PATH"
+        raise FileNotFoundError(msg)
+    return (found,)
+
+
+def ssh_argv(entry: HostEntry, request: Compute) -> list[str]:
+    """The ssh command that runs a job on *entry* for *request*."""
+    return [
+        *ssh_program(),
+        *SSH_OPTIONS,
+        "--",
+        entry.ssh,
+        remote_command(entry, request),
+    ]
+
+
+def remote_command(entry: HostEntry, request: Compute) -> str:
+    """What the node's shell runs: the image's bootstrap, or the interpreter on the loader."""
+    if entry.runner == "python":
+        return shlex.join([entry.target, "-I", "-c", LOADER])
+    docker = [
+        "docker",
+        "run",
+        "--rm",
+        "-i",
+        "--init",
+        "--pull=never",
+        "--network",
+        "none",
+    ]
+    if request.device in _GPU_DEVICES:
+        docker += ["--gpus", f"device={request.device_index}"]
+    for setting in _DOCKER_ENVIRONMENT:
+        docker += ["-e", setting]
+    image = shlex.join([entry.target, "python", "-I", bootstrap.IMAGE_PATH])
+    # The user and the cache are the node's: the shell there expands them.
+    script = (
+        'cache="${XDG_CACHE_HOME:-$HOME/.cache}/phonometry/remote" && '
+        'mkdir -p "$cache" && '
+        f'exec {shlex.join(docker)} --user "$(id -u):$(id -g)" -v "$cache:/cache" {image}'
+    )
+    return shlex.join(["sh", "-c", script])
+
+
+def node_placement(entry: HostEntry, request: Compute) -> dict[str, object]:
+    """The placement the node runs: a Docker node sees its one GPU as index 0."""
+    index = (
+        0
+        if entry.runner == "docker" and request.device in _GPU_DEVICES
+        else request.device_index
+    )
+    return {"device": request.device, "device_index": index, "dtype": request.dtype}

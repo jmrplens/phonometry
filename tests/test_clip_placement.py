@@ -321,7 +321,7 @@ def test_a_blanked_frame_is_nan_where_asked_and_the_field_elsewhere() -> None:
 def test_the_metadiffuser_steps_as_many_pairs_at_once_as_the_ram_holds(
     available: int | None, workers: int
 ) -> None:
-    """Three pairs want about 25 GB; the node has about 13 GB free."""
+    """Three pairs want about 26 GB; the node has about 13 GB free."""
     from figures.fields import metadiffuser
 
     assert metadiffuser._meta_workers(available) == workers

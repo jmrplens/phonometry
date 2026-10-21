@@ -291,17 +291,17 @@ def _meta_pair(
 _META_PAIR_BYTES = 24 * _META_NY * _META_NX * 8
 
 #: What a pair needs over its grids, as a factor. Its process peaked at
-#: 6.98 GB resident over the first frames (the grids and about 1.1 GB of
-#: interpreter and libraries), the 600 frames it captures add about 0.37 GB,
-#: and the parent holds about 0.37 GB of returned frames for each pair: about
-#: 7.7 GB in all, and 1.4 times the grids is 8.26 GB a pair.
-_META_PAIR_MARGIN = 1.4
+#: 6982 MiB (7.32 GB) resident over the first frames: the grids and about
+#: 1.4 GB of interpreter and libraries. The 600 frames it captures add about
+#: 0.37 GB, and the parent holds about 0.37 GB of returned frames for each
+#: pair: about 8.1 GB in all, and 1.45 times the grids is 8.55 GB a pair.
+_META_PAIR_MARGIN = 1.45
 
 
 def _meta_workers(available: int | None) -> int:
     """How many pairs step side by side in *available* bytes of RAM: one to three.
 
-    Three side by side want about 25 GB; where less is free they step two or
+    Three side by side want about 26 GB; where less is free they step two or
     one at a time, which gives the same fields more slowly. Unknown memory
     (off Linux) keeps the three.
     """

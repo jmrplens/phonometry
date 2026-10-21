@@ -172,6 +172,18 @@ def test_the_lane_budget_is_set_on_the_pool_of_the_named_gpu(
     assert log == ["device 1", "limit 4000000000"]
 
 
+def test_a_gpu_clip_s_placement_holds_the_lane_budget(
+    devices: dict[str, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A scene asks for its placement and nothing else; the budget comes with it."""
+    log: list[str] = []
+    monkeypatch.setitem(sys.modules, "cupy", _fake_cupy(log))
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", "cupy")
+    monkeypatch.setenv(clip_placement.GPU_BYTES_ENV, "4000000000")
+    assert clip_placement.compute_for("anim_gpu") == Compute(device="cupy")
+    assert log == ["device 0", "limit 4000000000"]
+
+
 @pytest.mark.parametrize("text", ["four", "0", "-5"])
 def test_a_lane_budget_that_is_not_a_positive_count_is_refused(
     monkeypatch: pytest.MonkeyPatch, text: str

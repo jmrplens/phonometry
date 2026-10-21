@@ -197,7 +197,9 @@ def test_the_device_is_released_after_the_field_and_before_the_variants(
     """The fields are host arrays when the builder returns; CuPy's pool is not.
 
     Four forked children would each inherit the claim on the blocks the
-    builder stepped in, so the parent frees them first.
+    builder stepped in, so the parent frees them first. The parent's own
+    list cannot show that a child started after the release, so the release
+    leaves a file behind and each child writes down whether it saw it.
     """
     if "fork" not in mp.get_all_start_methods():
         pytest.skip("this platform cannot fork")
@@ -205,10 +207,24 @@ def test_the_device_is_released_after_the_field_and_before_the_variants(
 
     events: list[str] = []
     clip = "test_only_clip"
+    marker = tmp_path / "parent" / "released"
+    marker.parent.mkdir()
+    out = tmp_path / "variants"
+    out.mkdir()
+
+    def release() -> None:
+        events.append("released")
+        marker.touch()
+
+    def draw(output_dir: str) -> None:
+        lang, dark = _variant()
+        name = f"{lang}_{dark}_{marker.exists()}"
+        (pathlib.Path(output_dir) / name).write_text("", encoding="utf-8")
+
     monkeypatch.setitem(registry._ANIM_FIELDS, clip, lambda: events.append("field"))
-    monkeypatch.setattr(
-        clip_placement, "release_device", lambda: events.append("released")
-    )
-    monkeypatch.setitem(registry._ANIMATIONS, clip, lambda output_dir: None)
-    registry._render_anim_variants(clip, str(tmp_path))
+    monkeypatch.setattr(clip_placement, "release_device", release)
+    monkeypatch.setitem(registry._ANIMATIONS, clip, draw)
+    registry._render_anim_variants(clip, str(out))
     assert events == ["field", "released"]
+    written = {path.name for path in out.iterdir()}
+    assert written == {f"{lang}_{dark}_True" for lang, dark in EXPECTED}

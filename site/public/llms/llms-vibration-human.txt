@@ -242,7 +242,7 @@ from phonometry import vibration
 freqs = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0])
 accel = np.array([0.20, 0.45, 0.42, 0.25, 0.12, 0.05, 0.02])
 
-result = vibration.weighted_acceleration(accel, freqs, "Wk")
+result = vibration.weighted_acceleration(accel, "Wk", frequencies=freqs)
 print(round(result.overall, 3))          # 0.555  m/s^2 (a_w)
 print(result.weighted.round(3))          # W_i * a_i per band
 
@@ -263,7 +263,7 @@ freqs = np.array([1.0, 1.25, 1.6, 2.0, 2.5, 3.15, 4.0, 5.0, 6.3, 8.0, 10.0,
                   12.5, 16.0, 20.0, 25.0, 31.5, 40.0, 63.0, 80.0])
 accel = np.array([0.18, 0.24, 0.33, 0.46, 0.52, 0.55, 0.48, 0.39, 0.31, 0.26,
                   0.21, 0.17, 0.13, 0.10, 0.078, 0.060, 0.045, 0.028, 0.020])
-result = vibration.weighted_acceleration(accel, freqs, "Wk")
+result = vibration.weighted_acceleration(accel, "Wk", frequencies=freqs)
 
 # One line:
 result.plot()
@@ -1232,7 +1232,7 @@ frequencies = 10.0 ** (bands / 10.0)
 measured = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
                      0.7897, 0.3427, 0.1894, 0.1366])
 
-check = vibration.verify_weighting("Wk", frequencies, measured)
+check = vibration.verify_weighting("Wk", measured, frequencies=frequencies)
 print(check.passes)                             # False
 print(check.deviation_percent.round(1))
 # [  3.   3.   3.   3.   3.   2. -15.   2.   2.]
@@ -1251,7 +1251,7 @@ $f_\mathrm{t3}$ and $f_\mathrm{t4}$, and the instrument conforms:
 ```python
 moved = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
                   0.7897, 0.4112, 0.1894, 0.1138])
-print(vibration.verify_weighting("Wk", frequencies, moved).passes)   # True
+print(vibration.verify_weighting("Wk", moved, frequencies=frequencies).passes)   # True
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_weighting_verification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/meter_weighting_verification.svg" alt="Two panels on one logarithmic frequency axis, 0.2512 to 158.5 Hz. Above, the Wk design goal inside its Table 5 band, the sweep as read in filled red circles and the same sweep with its shortfall moved in open green rings: at seven bands one point wears both marks, and at 31.62 Hz the red circle sits alone just under the lower edge, with a note reading 4.0 per cent of the design goal below the minus 11 per cent limit. Below, the same points in per cent against plus 12 and minus 11 centrally and plus 26 and minus 21 in the skirts: the 31.62 Hz point is 15 per cent low, and an arrow carries it past the step at 63.1 Hz to 79.43 Hz, above minus 21 and conforming" width="94%"></picture>
@@ -1264,7 +1264,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import vibration
 
-check = vibration.verify_weighting("Wk", frequencies, measured)
+check = vibration.verify_weighting("Wk", measured, frequencies=frequencies)
 
 # One line:
 check.plot()
@@ -1314,11 +1314,11 @@ from phonometry import vibration
 print(vibration.weighting_factors("Wk", [0.1259]).round(5))   # [0.04932]
 
 # A channel that reads nothing at all there still conforms.
-dead = vibration.verify_weighting("Wk", [0.1259], [0.0])
+dead = vibration.verify_weighting("Wk", [0.0], frequencies=[0.1259])
 print(dead.passes, dead.deviation_percent.round(1))   # True [-100.]
 
 # The upper limit is the half of the cell that can fail: +26 %, tail or not.
-high = vibration.verify_weighting("Wk", [0.1259], [0.0626])
+high = vibration.verify_weighting("Wk", [0.0626], frequencies=[0.1259])
 print(high.passes, high.deviation_percent.round(1))   # False [26.9]
 ```
 
@@ -1376,7 +1376,7 @@ region with three points to spare:
 frequency = [10 ** 0.8]
 measured = vibration.weighting_factors("Wk", frequency) * 1.09
 
-bare = vibration.verify_weighting("Wk", frequency, measured)
+bare = vibration.verify_weighting("Wk", measured, frequencies=frequency)
 print(bare.passes, bare.deviation_percent.round(1))    # True [9.]
 ```
 
@@ -1385,7 +1385,7 @@ the instrument has changed, and the reported deviation does not change either:
 
 ```python
 declared = vibration.verify_weighting(
-    "Wk", frequency, measured, expanded_uncertainty_percent=4.5
+    "Wk", measured, frequencies=frequency, expanded_uncertainty_percent=4.5
 )
 print(declared.passes, declared.deviation_percent.round(1))   # False [9.]
 print(declared.expanded_uncertainty_percent)                  # 4.5
@@ -1431,9 +1431,9 @@ sweep_measured = (vibration.weighting_factors("Wk", sweep_hz)
                   * (1 + sweep_deviations / 100))
 
 u = vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT["12.11.2"]
-print(vibration.verify_weighting("Wk", sweep_hz, sweep_measured).passes)   # True
+print(vibration.verify_weighting("Wk", sweep_measured, frequencies=sweep_hz).passes)   # True
 graded = vibration.verify_weighting(
-    "Wk", sweep_hz, sweep_measured, expanded_uncertainty_percent=u
+    "Wk", sweep_measured, frequencies=sweep_hz, expanded_uncertainty_percent=u
 )
 print(graded.passes)                              # False
 print(graded.failing_frequencies_hz.round(2))     # [  6.31 125.89]
@@ -1490,7 +1490,7 @@ strange rule that rejected it for the care:
 
 ```python
 dead = vibration.verify_weighting(
-    "Wk", [0.1259], [0.0], expanded_uncertainty_percent=4.5
+    "Wk", [0.0], frequencies=[0.1259], expanded_uncertainty_percent=4.5
 )
 print(dead.passes, dead.deviation_percent.round(1))   # True [-100.]
 ```
@@ -1729,7 +1729,7 @@ frequencies = 10.0 ** (bands / 10.0)
 
 # A constant phase error is graded at face value.
 constant = vibration.characteristic_phase_deviation(
-    frequencies, np.full(frequencies.shape, 4.0)
+    np.full(frequencies.shape, 4.0), frequencies=frequencies
 )
 print(round(float(constant.min()), 6), round(float(constant.max()), 6))
 # 4.0 4.0
@@ -1739,7 +1739,7 @@ print(round(float(constant.min()), 6), round(float(constant.max()), 6))
 delay_deg = -360.0 * frequencies * 2e-3
 print(round(float(delay_deg.min()), 1), round(float(delay_deg.max()), 1))
 # -286.6 -0.1
-ramp = vibration.characteristic_phase_deviation(frequencies, delay_deg)
+ramp = vibration.characteristic_phase_deviation(delay_deg, frequencies=frequencies)
 print(float(np.max(ramp)) < 1e-10)   # True
 ```
 
@@ -1764,7 +1764,7 @@ B.8, computed rather than transcribed:
 ```python
 # frequencies is the one-third-octave grid of the block above.
 design = vibration.verify_phase_response(
-    "Wk", frequencies, np.zeros_like(frequencies)
+    "Wk", np.zeros_like(frequencies), frequencies=frequencies
 ).design_phase_deg
 
 for band in (-10, 0, 8, 18, 26):
@@ -1802,13 +1802,13 @@ print(round(float(frequencies[0]), 4), round(float(frequencies[-1]), 4))
 # 0.5012 79.4328
 
 design = vibration.verify_phase_response(
-    "Wk", frequencies, np.zeros_like(frequencies)
+    "Wk", np.zeros_like(frequencies), frequencies=frequencies
 ).design_phase_deg
 delay = -360.0 * frequencies * 2e-3
 spare_pole = -np.degrees(np.arctan(frequencies / 100.0))
 
 check = vibration.verify_phase_response(
-    "Wk", frequencies, design + delay + spare_pole
+    "Wk", design + delay + spare_pole, frequencies=frequencies
 )
 print(check.passes)                                                  # False
 print(check.failing_frequencies_hz.round(2))                         # [63.1]
@@ -1822,7 +1822,7 @@ Take the pole away and the delay alone is a phase error of up to 57 degrees
 that the criterion grades as zero:
 
 ```python
-delayed = vibration.verify_phase_response("Wk", frequencies, design + delay)
+delayed = vibration.verify_phase_response("Wk", design + delay, frequencies=frequencies)
 print(round(float(delayed.deviation_deg.min()), 1),
       round(float(delayed.deviation_deg.max()), 1))
 # -57.2 -0.4
@@ -1856,7 +1856,7 @@ limit = vibration.phase_tolerance_deg("Wk", attributed)
 
 fig, (ax_error, ax_graded) = plt.subplots(2, 1, sharex=True, figsize=(9, 7))
 for label, error in errors.items():
-    graded = vibration.verify_phase_response("Wk", frequencies, design + error)
+    graded = vibration.verify_phase_response("Wk", design + error, frequencies=frequencies)
     ax_error.semilogx(frequencies, graded.deviation_deg, marker="o", label=label)
     ax_graded.semilogx(attributed, graded.characteristic_deviation_deg, marker="o")
 ax_graded.plot(attributed, limit, color="#1f77b4", ls="--", drawstyle="steps-post",
@@ -1909,7 +1909,7 @@ either way, so it is refused rather than warned about:
 ```python
 octaves = 2.0 ** np.arange(0.0, 7.0)
 try:
-    vibration.verify_phase_response("Wk", octaves, np.zeros_like(octaves))
+    vibration.verify_phase_response("Wk", np.zeros_like(octaves), frequencies=octaves)
 except ValueError as error:
     print(error)
 # verify_phase_response: 'frequencies' steps by a ratio of up to 2, and
@@ -2458,7 +2458,7 @@ print(filters.verify_weighting_class(wf).overall_class)   # 1
 sweep = 10.0 ** (np.array([-3, 0, 3, 6, 9, 12, 15, 18, 19]) / 10.0)
 read = np.array([0.4314, 0.4969, 0.5466, 0.9937, 1.068,
                  0.7897, 0.3427, 0.1894, 0.1366])
-print(vibration.verify_weighting("Wk", sweep, read).passes)   # False
+print(vibration.verify_weighting("Wk", read, frequencies=sweep).passes)   # False
 ```
 
 Three differences are worth naming, because they are the ones that trip a

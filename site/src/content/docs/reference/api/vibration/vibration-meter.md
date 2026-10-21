@@ -715,9 +715,9 @@ VELOCITY_DETECTION_LIMIT_MM_S = 0.05
 
 ```python
 verify_vibration_meter(
-    frequencies: ArrayLike,
     measured_response: ArrayLike,
     *,
+    frequencies: ArrayLike,
     weighting: Literal['kb', 'Z'] = 'kb',
     working_range: Literal['building', 'railway'] = 'building',
     reference_frequency_hz: float = 16.0,

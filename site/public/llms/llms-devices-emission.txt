@@ -733,7 +733,7 @@ c2 = np.array([0.0] * 11 + [0.2, 0.3, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.9,
                             2.3, 2.8, 3.4, 4.0])         # sampling tube, dB
 
 duct = emission.sound_power_in_duct(
-    levels, freqs, duct_diameter_m=0.63, flow_velocity=12.0,
+    levels, frequencies=freqs, duct_diameter_m=0.63, flow_velocity=12.0,
     shield="sampling-tube", microphone_correction=c1, shield_correction=c2,
     temperature_c=20.0, static_pressure_kpa=101.325,
 )
@@ -796,7 +796,7 @@ lower:
 
 ```python
 inlet = emission.sound_power_in_duct(
-    levels, freqs, duct_diameter_m=0.63, flow_velocity=-12.0,
+    levels, frequencies=freqs, duct_diameter_m=0.63, flow_velocity=-12.0,
     microphone_correction=c1, shield_correction=c2,
 )
 print(round(float(inlet.flow_modal_correction[13]), 2))   # 1.39 dB at 1 kHz
@@ -818,7 +818,7 @@ shields are limited to low velocities and the sampling tube is preferred
 
 ```python
 cone = emission.sound_power_in_duct(
-    levels, freqs, duct_diameter_m=0.63, flow_velocity=12.0,
+    levels, frequencies=freqs, duct_diameter_m=0.63, flow_velocity=12.0,
     shield="nose-cone", microphone_correction=c1,
 )
 print(round(float(cone.flow_modal_correction[0]), 2))     # 0.31 dB, every band
@@ -1226,7 +1226,7 @@ print(f"H = {H:.2f} m, N = {contour.positions_m.shape[0]}, "
 
 levels = levels_at(contour, sources)
 background = levels - np.array([14, 13, 15, 17, 19, 20, 22, 24])
-result = contour.sound_power(levels, bands, background_levels=background)
+result = contour.sound_power(levels, frequencies=bands, background_levels=background)
 print(np.round(result.mean_level, 1))
 # [63.8 65.8 65.6 63.2 60.2 56.  49.1 39.9]
 print(f"dLS = {result.area_term_db:.2f} dB, dLF = {result.near_field_term_db:.2f} dB")
@@ -1389,11 +1389,11 @@ to the formula, which 15 °C and 70 % already take; the warm dry air itself
 adds 1.0 dB.
 
 ```python
-warm = contour.sound_power(levels, bands, background_levels=background,
+warm = contour.sound_power(levels, frequencies=bands, background_levels=background,
                            temperature_c=25.0, relative_humidity_percent=40.0)
 print(np.round(warm.sound_power_level - result.sound_power_level, 2))
 # [0.03 0.07 0.04 0.08 0.08 0.19 0.34 2.4 ]
-reference = contour.sound_power(levels, bands, background_levels=background,
+reference = contour.sound_power(levels, frequencies=bands, background_levels=background,
                                 temperature_c=15.0, relative_humidity_percent=70.0)
 print(np.round(warm.sound_power_level - reference.sound_power_level, 2))
 # [0.01 0.01 0.02 0.05 0.1  0.19 0.43 0.97]
@@ -1428,7 +1428,7 @@ asphalt = emission.plant_measurement_contour(
     [[285, 5], [375, 5], [375, 75], [285, 75]],
     characteristic_height_m=emission.plant_characteristic_height_m([4.0, 8.0, 12.0]),
 )
-asphalt_result = asphalt.sound_power(levels_at(asphalt, asphalt_sources), bands)
+asphalt_result = asphalt.sound_power(levels_at(asphalt, asphalt_sources), frequencies=bands)
 print(f"LWA = {asphalt_result.a_weighted_sound_power_level:.1f} dB")
 # LWA = 105.4 dB
 
@@ -1688,7 +1688,7 @@ radiation factor comes from an independently measured power:
 from phonometry import emission
 
 # The standard's worked calibration EXAMPLE: 9.81 m/s^2 at 100 Hz.
-print(round(float(emission.velocity_level_from_acceleration(9.81, 100.0)), 1))   # 106.9 dB
+print(round(float(emission.velocity_level_from_acceleration(9.81, frequency=100.0)), 1))   # 106.9 dB
 
 # Radiation factor from a measured power (ISO 9614): eps = P / (Zc <v^2> S).
 eps = emission.radiation_factor(3.0e-4, area=2.0, mean_square_velocity=(1e-3)**2)

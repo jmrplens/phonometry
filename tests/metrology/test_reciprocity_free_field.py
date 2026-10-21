@@ -203,8 +203,8 @@ def test_accuracy_domain_excludes_a_frequency_too_high_for_the_pressure() -> Non
 def test_three_microphones_give_their_sensitivities_back() -> None:
     """Formula (D.1) forward, Formula (8) with the factor -j of (7) back."""
     calibration = metrology.free_field_reciprocity(
-        _F,
-        _electrical(),
+        frequencies=_F,
+        electrical_transfer_impedances_ohm=_electrical(),
         diaphragm_distances_m=_DISTANCES,
         acoustic_centers_m=_CENTRES,
         dispersion=False,
@@ -225,8 +225,8 @@ def test_the_printed_formula_8_is_45_degrees_off() -> None:
     """
     z12, z23, z31 = _electrical()
     calibration = metrology.free_field_reciprocity(
-        _F,
-        [z12, z23, z31],
+        frequencies=_F,
+        electrical_transfer_impedances_ohm=[z12, z23, z31],
         diaphragm_distances_m=_DISTANCES,
         acoustic_centers_m=_CENTRES,
         dispersion=False,
@@ -258,9 +258,9 @@ def test_two_microphones_and_a_source_give_their_sensitivities_back() -> None:
     """Formula (9), complex since COR1."""
     electrical = _electrical()
     calibration = metrology.free_field_reciprocity_pair(
-        _F,
-        electrical[0],
-        _TRUE[0] / _TRUE[1],
+        frequencies=_F,
+        electrical_transfer_impedance_ohm=electrical[0],
+        sensitivity_ratio=_TRUE[0] / _TRUE[1],
         diaphragm_distance_m=_DISTANCES[0],
         acoustic_centers_m=_CENTRES[:2],
         dispersion=False,
@@ -292,9 +292,9 @@ def test_transfer_impedance_is_formula_6_at_the_receiver() -> None:
         * np.exp(-attenuation.attenuation_np_per_m * d_m)
     )
     computed = metrology.free_field_transfer_impedance(
-        _F,
-        _TRUE[0],
-        _TRUE[1],
+        frequencies=_F,
+        sensitivity_1_v_per_pa=_TRUE[0],
+        sensitivity_2_v_per_pa=_TRUE[1],
         diaphragm_distance_m=d_m,
         acoustic_centers_m=(0.009, 0.0085),
         dispersion=False,
@@ -308,15 +308,19 @@ def test_dispersion_turns_the_phase_and_leaves_the_modulus() -> None:
     sound, a few parts in 1e5 of k d.
     """
     plain = metrology.free_field_transfer_impedance(
-        _F,
-        _TRUE[0],
-        _TRUE[1],
+        frequencies=_F,
+        sensitivity_1_v_per_pa=_TRUE[0],
+        sensitivity_2_v_per_pa=_TRUE[1],
         diaphragm_distance_m=0.2,
         dispersion=False,
         **_CONDITIONS,
     )
     dispersive = metrology.free_field_transfer_impedance(
-        _F, _TRUE[0], _TRUE[1], diaphragm_distance_m=0.2, **_CONDITIONS
+        frequencies=_F,
+        sensitivity_1_v_per_pa=_TRUE[0],
+        sensitivity_2_v_per_pa=_TRUE[1],
+        diaphragm_distance_m=0.2,
+        **_CONDITIONS,
     )
     attenuation = metrology.reciprocity_air_attenuation(_F, **_CONDITIONS)
     k0 = 2.0 * math.pi * _F / attenuation.speed_of_sound
@@ -331,8 +335,8 @@ def test_acoustic_centres_that_meet_are_refused() -> None:
     electrical = _electrical()
     with pytest.raises(ValueError, match="acoustic centres leave no distance"):
         metrology.free_field_reciprocity(
-            _F,
-            electrical,
+            frequencies=_F,
+            electrical_transfer_impedances_ohm=electrical,
             diaphragm_distances_m=_DISTANCES,
             acoustic_centers_m=(0.15, 0.15, 0.0),
             **_CONDITIONS,
@@ -343,7 +347,10 @@ def test_free_field_reciprocity_needs_three_pairs() -> None:
     electrical = _electrical()
     with pytest.raises(ValueError, match="Three pairs"):
         metrology.free_field_reciprocity(
-            _F, electrical[:2], diaphragm_distances_m=_DISTANCES, **_CONDITIONS
+            frequencies=_F,
+            electrical_transfer_impedances_ohm=electrical[:2],
+            diaphragm_distances_m=_DISTANCES,
+            **_CONDITIONS,
         )
 
 
@@ -465,7 +472,9 @@ def test_free_field_components_are_named_by_table_1() -> None:
     }
     assert set(result.components_db) <= set(metrology.IEC61094_3_TABLE_1)
     budget = metrology.reciprocity_uncertainty_budget(
-        _F, result.components_db, field="free"
+        frequencies=_F,
+        standard_uncertainties_db=result.components_db,
+        field="free",
     )
     assert np.all(budget.expanded_uncertainty_db > 0.0)
 

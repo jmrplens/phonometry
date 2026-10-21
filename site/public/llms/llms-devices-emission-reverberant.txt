@@ -320,7 +320,7 @@ slam_cmp = emission.sound_energy_comparison(
 print(round(float(slam_cmp.sound_energy_level[0]), 1), slam_cmp.method)   # 95.0 comparison
 
 # Annex F octave bands, and the identity with the steady chain (LJ = LW + 10 lg(T/T0)).
-octaves, lj_octave = emission.octave_band_levels(slam_lj.sound_energy_level, thirds)
+octaves, lj_octave = emission.octave_band_levels(slam_lj.sound_energy_level, frequencies=thirds)
 print(octaves)                        # [ 125.  250.  500. 1000. 2000. 4000. 8000.]
 lp_thirds = np.linspace(80.0, 70.0, thirds.size)     # the mean room SPL of section 1
 steady = emission.sound_power_reverberation(
@@ -451,7 +451,7 @@ orientations = np.array([  # 4.4: a directional source, mean level per orientati
     [72.1, 73.9, 75.5, 76.8, 76.2, 73.0, 67.9],
 ])
 room = emission.check_hard_walled_room(
-    orientations, freqs, volume=60.0, reference_box_m=[0.5, 0.4, 0.9],
+    orientations, frequencies=freqs, volume=60.0, reference_box_m=[0.5, 0.4, 0.9],
     absorption_coefficients=[0.02, 0.03, 0.05, 0.08, 0.12],
 )
 print(np.round(room.level_range_db, 1))           # [2.5 1.8 1.4 1.3 1.2 1.2 1.6]
@@ -483,7 +483,7 @@ survey = np.array([  # 7.4: six positions, the blender running, dB
     [82.9, 86.3, 88.4, 90.5, 88.3, 83.5, 78.3],
     [84.4, 85.4, 87.1, 91.4, 87.2, 83.0, 77.6],
 ])
-plan = emission.hard_walled_source_locations(survey, freqs)
+plan = emission.hard_walled_source_locations(survey, frequencies=freqs)
 print(np.round(plan.standard_deviation_db, 2))    # [0.93 0.63 0.65 0.8  0.52 0.6  0.42]
 print(plan.n_required_source_locations)             # 1
 ```
@@ -537,7 +537,7 @@ background = np.array([  # a ventilation duct in the ceiling, loud at the low en
     [79.5, 71.5, 64.5, 58.5, 52.5, 45.5, 40.5],   # above the box, nearer the duct
 ])
 res = emission.sound_power_hard_walled(
-    st, rss, lw_rss, freqs, background_levels=background, sigma_omc_db=1.0,
+    st, rss, lw_rss, frequencies=freqs, background_levels=background, sigma_omc_db=1.0,
 )
 print(np.round(res.sound_power_level, 1))         # [89.1 92.2 94.3 96.3 93.7 89.6 84.2]
 print(round(res.sound_power_level_a, 1))          # 100.1 dB(A)
@@ -640,7 +640,7 @@ $\overline{L_{p(\mathrm{B})}} + 10 \log_{10}(T/T_0)$, and so needs
 strokes = st + 12.0
 events = np.stack([strokes + d for d in (-0.4, 0.1, 0.3, -0.2, 0.2)])
 energy = emission.sound_energy_hard_walled(
-    events, rss, lw_rss, freqs,                  # (5 events, 5 positions, 7 bands)
+    events, rss, lw_rss, frequencies=freqs,                  # (5 events, 5 positions, 7 bands)
     background_levels=background, integration_time=2.0, sigma_omc_db=2.0,
 )
 print(np.round(energy.sound_energy_level, 1))     # [102.2 104.4 106.3 108.3 105.7 101.6  96.2]
@@ -724,7 +724,7 @@ t = np.array([
     0.83, 0.79, 0.83, 0.79, 0.80, 0.77, 0.81, 0.74, 0.71, 0.67,
 ])
 room2 = emission.check_special_room_reverberation(
-    t, thirds, volume=72.0,
+    t, frequencies=thirds, volume=72.0,
     relative_humidity_percent=48.0, temperature_c=22.0,          # during the test
     reverberation_relative_humidity_percent=52.0, reverberation_temperature_c=21.0,
 )
@@ -777,7 +777,7 @@ walls = np.array([  # 6.4: each wall and the ceiling, octave bands
 ])
 floor = np.array([0.02, 0.02, 0.02, 0.03, 0.03, 0.04, 0.05])
 surfaces = emission.check_special_room_surfaces(
-    walls, floor, freqs, surface_areas_m2=[15.0, 14.4, 15.0, 14.4, 24.0]
+    walls, floor, frequencies=freqs, surface_areas_m2=[15.0, 14.4, 15.0, 14.4, 24.0]
 )
 print(surfaces.passes)                               # True
 print(np.round(surfaces.surface_ratio.min(), 2), np.round(surfaces.surface_ratio.max(), 2))  # 0.81 1.21
@@ -794,9 +794,9 @@ rss2 = np.array([  # the reference source on the floor, 1.5 m from the walls
     [74.1, 76.9, 79.4, 79.8, 79.8, 77.5, 73.6],
 ])
 in_room = emission.sound_power_special_room(
-    rss2, freqs, volume=72.0, nominal_reverberation_time_s=tnom, background_levels=bg2,
+    rss2, frequencies=freqs, volume=72.0, nominal_reverberation_time_s=tnom, background_levels=bg2,
 )
-suitability = emission.check_special_room_suitability(in_room.sound_power_level, lw_r, freqs)
+suitability = emission.check_special_room_suitability(in_room.sound_power_level, lw_r, frequencies=freqs)
 print(np.round(suitability.difference, 1))   # [ 0.8  0.3  0.1 -0.1  0.2 -0.2 -0.4]
 print(suitability.passes)                       # True
 ```
@@ -831,7 +831,7 @@ calibration = emission.reference_source_calibration(
 print(np.round(calibration.sound_power_level_at(freqs, fraction=1), 2))
 # [79.87 83.37 86.07 86.77 86.27 84.17 80.57] dB under the reference conditions
 suitability2 = emission.check_special_room_suitability(
-    in_room.sound_power_level, calibration, freqs, temperature_c=22.0, static_pressure_kpa=97.5,
+    in_room.sound_power_level, calibration, frequencies=freqs, temperature_c=22.0, static_pressure_kpa=97.5,
 )
 print(np.round(suitability2.calibrated_power_level, 2))  # [79.72 83.22 85.92 86.62 86.12 84.02 80.42]
 print(np.round(suitability2.difference, 1))   # [ 1.1  0.6  0.4  0.2  0.5  0.1 -0.1]
@@ -879,7 +879,7 @@ survey2 = np.array([
     [60.9, 65.9, 67.8, 64.1, 61.9, 58.0, 52.0],
 ])
 survey2_a = np.array([68.4, 70.1, 68.5, 70.0, 68.1, 69.5])
-plan2 = emission.special_room_source_locations(survey2, freqs, a_weighted_levels=survey2_a)
+plan2 = emission.special_room_source_locations(survey2, frequencies=freqs, a_weighted_levels=survey2_a)
 print(np.round(plan2.standard_deviation_db, 2))  # [1.02 0.99 3.   0.51 0.35 0.33 0.41]
 print(plan2.spectral_character[2])               # narrow-band
 print(plan2.source_locations, plan2.n_a_weighted_source_locations)  # [1 1 2 1 1 1 1] 1
@@ -917,7 +917,7 @@ second = survey2 + np.array([
 levels = np.stack([survey2, second])                           # (2, 6, 7)
 levels_a = np.array([survey2_a, [68.8, 69.0, 69.4, 69.2, 68.5, 68.9]])
 direct = emission.sound_power_special_room(
-    levels, freqs, volume=72.0, nominal_reverberation_time_s=tnom,
+    levels, frequencies=freqs, volume=72.0, nominal_reverberation_time_s=tnom,
     background_levels=bg2, a_weighted_levels=levels_a, a_weighted_background_levels=46.0,
     sigma_omc_db=0.5,
 )
@@ -926,7 +926,7 @@ print(round(direct.sound_power_level_a_direct, 1), round(direct.sound_power_leve
 print(round(direct.expanded_uncertainty_a, 1))   # 4.1 dB (Table 5, k = 2)
 
 comparison = emission.sound_power_special_room_comparison(
-    levels, rss2, lw_r, freqs, background_levels=bg2, sigma_omc_db=0.5,
+    levels, rss2, lw_r, frequencies=freqs, background_levels=bg2, sigma_omc_db=0.5,
 )
 print(np.round(comparison.sound_power_level, 1))  # [67.7 72.  72.9 71.  68.1 65.  59.4]
 print(round(comparison.sound_power_level_a, 1))   # 75.7 dB(A)
@@ -1042,7 +1042,7 @@ annexes print $C_2$ alone.
 # A laboratory 1 100 m above sea level, at 19 degC.
 ps = emission.static_pressure_from_altitude(1100.0)
 high = emission.sound_power_hard_walled(
-    st, rss, lw_rss, freqs, background_levels=background,
+    st, rss, lw_rss, frequencies=freqs, background_levels=background,
     temperature_c=19.0, static_pressure_kpa=ps,
 )
 print(round(ps, 2), round(high.c2, 3))            # 88.79 kPa, 0.488 dB (Eq. A.2, A.1)
@@ -1324,7 +1324,7 @@ background = np.array([  # Lpi(B): the factory floor, loud at the low end
 ])
 
 res = emission.sound_power_in_situ(
-    st, rss, lw_rss, freqs, background_levels=background,
+    st, rss, lw_rss, frequencies=freqs, background_levels=background,
     conditions=emission.GradeConditions(
         excess_levels=[8.2, 7.6, 8.9, 8.0],   # dLfA at each position (Annex A)
         directivity_range=4.0,                # +/-4 dB round the machine (7.2)
@@ -1403,7 +1403,7 @@ the levels arrive as one grid per location:
 # along each long side; the second sits nearer a wall and reads 1.2 dB lower,
 # and was calibrated in a similar position 0.4 dB lower.
 two = emission.sound_power_in_situ(
-    st, np.stack([rss, rss - 1.2]), np.stack([lw_rss, lw_rss - 0.4]), freqs,
+    st, np.stack([rss, rss - 1.2]), np.stack([lw_rss, lw_rss - 0.4]), frequencies=freqs,
     background_levels=background,
 )
 print(two.reference_levels.shape)               # (2, 7): mean level per location (Eq. 10)
@@ -1510,7 +1510,7 @@ strokes = np.array([
 ])
 events = np.stack([strokes + d for d in (-0.3, 0.2, 0.0, 0.4, -0.2, 0.1)], axis=1)
 energy = emission.sound_energy_in_situ(
-    events, rss, lw_rss, freqs,                 # (4 positions, 6 events, 7 bands)
+    events, rss, lw_rss, frequencies=freqs,                 # (4 positions, 6 events, 7 bands)
     background_levels=background, integration_time=4.0,
     conditions=emission.GradeConditions(excess_levels=[8.2, 7.6, 8.9, 8.0], directivity_range=4.0), sigma_omc_db=2.0,
 )
@@ -1575,7 +1575,7 @@ library keeps the family's rounding.
 ps = emission.static_pressure_from_altitude(640.0)
 print(round(ps, 2))                                 # 93.87 kPa (Eq. C.2)
 high = emission.sound_power_in_situ(
-    st, rss, lw_rss, freqs, background_levels=background,
+    st, rss, lw_rss, frequencies=freqs, background_levels=background,
     temperature_c=27.0, static_pressure_kpa=ps,
 )
 print(round(high.c2, 3))                            # 0.423 dB

@@ -323,7 +323,9 @@ def _corrected(
             f"{float(np.min(margin)):.1f} dB."
         )
         warnings.warn(msg, CabinInsulationWarning, stacklevel=3)
-    return levels - reverberation_background_correction(levels, background, frequencies)
+    return levels - reverberation_background_correction(
+        levels, background, frequencies=frequencies
+    )
 
 
 @dataclass(frozen=True)

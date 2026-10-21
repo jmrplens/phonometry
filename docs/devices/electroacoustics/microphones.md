@@ -137,7 +137,7 @@ cardioid = 20 * np.log10((1 + np.cos(np.radians(angles_rad))) / 2)
 noise_f = np.geomspace(20, 20000, 31)
 
 result = electroacoustics.microphone_characteristics(
-    freqs, response, 12.5, tolerance_db=3.0,          # 12.5 mV/Pa at 1 kHz
+    response, 12.5, frequencies=freqs, tolerance_db=3.0,          # 12.5 mV/Pa at 1 kHz
     directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, cardioid), frequency=1000.0),
     noise=electroacoustics.MicrophoneNoise(                             # A-weighted, V
         voltage_v=1.25e-6,
@@ -204,7 +204,7 @@ response = -10 * np.log10(1 + (30.0 / freqs) ** 4)      # low-frequency roll-off
 response -= 10 * np.log10(1 + (freqs / 19000.0) ** 8)   # high-frequency roll-off
 response += 2.0 * np.exp(-(np.log2(freqs / 9000.0) ** 2) / 0.3)  # presence region
 
-result = electroacoustics.microphone_characteristics(freqs, response, 12.5, tolerance_db=3.0)
+result = electroacoustics.microphone_characteristics(response, 12.5, frequencies=freqs, tolerance_db=3.0)
 result.plot()   # quantity="response" (the default)
 plt.show()
 ```
@@ -227,7 +227,7 @@ angles_rad = np.linspace(0, 179, 359)
 cardioid = 20 * np.log10((1 + np.cos(np.radians(angles_rad))) / 2)
 
 result = electroacoustics.microphone_characteristics(
-    freqs, response, 12.5, tolerance_db=3.0,
+    response, 12.5, frequencies=freqs, tolerance_db=3.0,
     directivity=electroacoustics.MicrophoneDirectivity(polar=(angles_rad, cardioid), frequency=1000.0),
 )
 result.plot(quantity="directivity")
@@ -251,7 +251,7 @@ response = -10 * np.log10(1 + (30.0 / freqs) ** 4)
 noise_f = np.geomspace(20, 20000, 31)
 
 result = electroacoustics.microphone_characteristics(
-    freqs, response, 12.5, tolerance_db=3.0,
+    response, 12.5, frequencies=freqs, tolerance_db=3.0,
     noise=electroacoustics.MicrophoneNoise(
         voltage_v=1.25e-6,
         spectrum=(noise_f, 6.0 + 12.0 * np.log10(1000.0 / noise_f)),
@@ -278,7 +278,7 @@ response = -10 * np.log10(1 + (30.0 / freqs) ** 4)
 spl_axis = np.linspace(100, 140, 81)
 
 result = electroacoustics.microphone_characteristics(
-    freqs, response, 12.5, tolerance_db=3.0,
+    response, 12.5, frequencies=freqs, tolerance_db=3.0,
     overload=electroacoustics.MicrophoneOverload(
         distortion=(spl_axis, 0.5 * 10 ** ((spl_axis - 130.0) * 0.08)),
         thd_percent=0.5,

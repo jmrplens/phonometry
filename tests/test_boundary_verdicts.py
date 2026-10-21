@@ -116,7 +116,7 @@ def test_iso3744_6_db_is_not_below_the_criterion(
 def test_iso3745_k1_is_zero_at_15_db(signal: float, background: float) -> None:
     # ISO 3745 9.4.2: K1 is zero from 15 dB.
     k1 = emission.precision_background_correction(
-        np.array([signal]), np.array([background]), np.array([1000.0])
+        np.array([signal]), np.array([background]), frequencies=np.array([1000.0])
     )
     assert k1[0] == 0.0
 
@@ -128,14 +128,16 @@ def test_iso3745_10_db_is_not_below_the_mid_band_criterion(
     with warnings.catch_warnings():
         warnings.simplefilter("error", emission.SoundPowerWarning)
         k1 = emission.precision_background_correction(
-            np.array([signal]), np.array([background]), np.array([1000.0])
+            np.array([signal]), np.array([background]), frequencies=np.array([1000.0])
         )
     assert k1[0] == pytest.approx(-10.0 * math.log10(1.0 - 10.0**-1.0), abs=1e-9)
 
 
 @pytest.mark.parametrize(("signal", "background"), _pairs(15.0))
 def test_iso3741_k1_is_zero_at_15_db(signal: float, background: float) -> None:
-    k1 = emission.reverberation_background_correction([signal], [background], [1000.0])
+    k1 = emission.reverberation_background_correction(
+        [signal], [background], frequencies=[1000.0]
+    )
     assert k1[0] == 0.0
 
 
@@ -351,7 +353,7 @@ def test_a_band_exactly_5_db_over_its_neighbours_is_flagged(
 ) -> None:
     # ISO 1996-2 Annex K: from 500 Hz a band 5 dB or more above both neighbours.
     flags = environment.assess_tonal_survey(
-        [neighbour, tone, neighbour], [800.0, 1000.0, 1250.0]
+        [neighbour, tone, neighbour], frequencies=[800.0, 1000.0, 1250.0]
     ).prominent
     assert bool(flags[1])
 
@@ -457,7 +459,9 @@ def test_a_rigid_mass_exactly_5_percent_off_is_within_tolerance(
     measured: float, mass: float
 ) -> None:
     # ISO 7626-2: the accelerance of a rigid mass is 1/m to within 5 %.
-    result = vibration.verify_rigid_mass_calibration([measured], [100.0], mass)
+    result = vibration.verify_rigid_mass_calibration(
+        [measured], frequencies=[100.0], mass=mass
+    )
     assert bool(result.within_tolerance[0])
 
 
@@ -628,7 +632,7 @@ def test_a_line_exactly_10_db_under_the_highest_is_still_a_tone_line(
     levels[peak] = highest
     levels[peak + 3] = other
     result = environment.wind_turbine_tonality(
-        levels, frequencies, tone_frequency=500.0
+        levels, frequencies=frequencies, tone_frequency=500.0
     )
     both = 10.0 * math.log10(10.0 ** (highest / 10.0) + 10.0 ** (other / 10.0))
     assert result.tone_level == pytest.approx(both, abs=1e-9)
@@ -653,7 +657,7 @@ def test_a_peak_exactly_6_db_over_the_screen_average_is_no_possible_tone(
     levels[peak] = round(background + 6.0, 1)
     levels[peak - 1] = levels[peak + 1] = round(background - 20.0, 1)
     result = environment.wind_turbine_tonality(
-        levels, frequencies, tone_frequency=500.0
+        levels, frequencies=frequencies, tone_frequency=500.0
     )
     assert not result.has_identified_tone
 
@@ -665,7 +669,7 @@ def test_a_line_exactly_6_db_over_l70_is_not_masking_noise(background: float) ->
     levels[peak] = round(background + 15.0, 1)
     levels[peak - 30] = round(background + 6.0, 1)
     result = environment.wind_turbine_tonality(
-        levels, frequencies, tone_frequency=500.0
+        levels, frequencies=frequencies, tone_frequency=500.0
     )
     expected = background + 10.0 * math.log10(result.critical_bandwidth / 1.5)
     assert result.masking_level == pytest.approx(expected, abs=1e-9)
@@ -680,7 +684,7 @@ def test_a_line_exactly_6_db_over_the_masking_average_is_no_tone_line(
     levels[peak] = round(background + 15.0, 1)
     levels[peak - 30] = round(background + 6.0, 1)
     result = environment.wind_turbine_tonality(
-        levels, frequencies, tone_frequency=500.0
+        levels, frequencies=frequencies, tone_frequency=500.0
     )
     assert result.tone_level == pytest.approx(levels[peak], abs=1e-9)
 
@@ -927,7 +931,7 @@ def test_a_band_exactly_5_db_over_its_neighbours_takes_3_db(
 ) -> None:
     # RD 1367/2007 Annex IV: from 3 dB to 5 dB, Kt = 3 dB, past 5 dB 6 dB.
     result = environment.assessment.spain.tonal_correction(
-        [neighbour, tone, neighbour], [800.0, 1000.0, 1250.0]
+        [neighbour, tone, neighbour], frequencies=[800.0, 1000.0, 1250.0]
     )
     assert result.correction == 3.0
 
@@ -1306,7 +1310,9 @@ def test_an_rc_mid_frequency_average_on_a_half_rates_even(
     # these averages are 39,5 and 36,5 in decimal, under and over in binary.
     levels = np.full(10, 30.0)
     levels[5:8] = mid
-    result = room.room_criterion(levels, room.noise_criteria.NC_OCTAVE_BANDS_HZ)
+    result = room.room_criterion(
+        levels, frequencies=room.noise_criteria.NC_OCTAVE_BANDS_HZ
+    )
     assert result.rating == rating
 
 
@@ -1321,7 +1327,9 @@ def test_an_nc_speech_interference_level_on_a_half_rates_even(
     # SIL are 29,5 and 24,5 in decimal, under and over in binary.
     levels = np.zeros(10)
     levels[5:9] = sil_levels
-    result = room.noise_criterion(levels, room.noise_criteria.NC_OCTAVE_BANDS_HZ)
+    result = room.noise_criterion(
+        levels, frequencies=room.noise_criteria.NC_OCTAVE_BANDS_HZ
+    )
     assert result.method == "SIL"
     assert result.rating == rating
 
@@ -1390,7 +1398,11 @@ def test_a_blocked_output_exactly_20_db_down_holds(
     source: float, output: float
 ) -> None:
     # ISO 10846-2: the output level at least 20 dB below the input level.
-    check = vibration.check_blocked_output([100.0], [source], [output])
+    check = vibration.check_blocked_output(
+        frequencies=[100.0],
+        input_acceleration_level=[source],
+        output_acceleration_level=[output],
+    )
     assert bool(check.holds[0])
 
 

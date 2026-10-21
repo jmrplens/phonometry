@@ -585,7 +585,7 @@ print(over.passes, round(over.peak, 1), round(over.headroom_db, 1))   # True 47.
 **Channel match (8.1).** One broad-band signal into both channels, the
 frequency response between them estimated, for instance with
 `phonometry.electroacoustics.frequency_response.transfer_function`, and
-`verify_channel_match(frequencies, response, frequency_range_hz=...)` asks
+`verify_channel_match(response, frequencies=frequencies, frequency_range_hz=...)` asks
 for unity within ±5 % and zero phase within ±5° across the range. It is the
 one check here that judges the instrument rather than the record, hence
 `verify_` rather than `check_`.

@@ -362,49 +362,41 @@ $$
 ```python
 plot_silencer_geometry(
     kind: str,
-    ax: Axes | None = None,
+    geometry: Mapping[str, float],
     *,
-    length: float | None = None,
-    chamber_area: float | None = None,
-    pipe_area: float | None = None,
-    inlet_extension: float = 0.0,
-    outlet_extension: float = 0.0,
-    duct_area: float | None = None,
-    neck_area: float | None = None,
-    neck_length: float | None = None,
-    cavity_volume: float | None = None,
-    branch_area: float | None = None,
+    ax: Axes | None = None,
     language: str = 'en',
+    **kwargs: Any,
 ) -> Axes
 ```
 
 Draw a reactive silencer cross-section to scale.
 
 Side cut through the duct axis with equivalent circular diameters
-(`d = 2 sqrt(S / pi)`) for every cross-section area, matching the
-parameters of the four `noise_control` silencer
-constructors. A Helmholtz cavity is drawn as the cube of equal volume
-with its volume annotated.
+(`d = 2 sqrt(S / pi)`) for every cross-section area, drawn from the
+`kind` and the `geometry` that
+[`ReactiveSilencerResult`](/phonometry/reference/api/noise_control/silencers/#reactivesilencerresult)
+keeps, so a drawing reads like the result. A Helmholtz cavity is drawn as
+the cube of equal volume with its volume annotated.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `kind` | One of `"expansion chamber"`, `"extended-tube chamber"`, `"Helmholtz resonator"`, `"quarter-wave resonator"` (the `ReactiveSilencerResult.kind` strings). |
+| `geometry` | The dimensions, keyed as `ReactiveSilencerResult.geometry` keys them. A chamber takes `length` (metres), `chamber_area` and `pipe_area` (the chamber and the inlet/outlet pipe cross-sections, m2), and an extended-tube chamber also `inlet_extension` and `outlet_extension` (how far each tube reaches into the chamber, metres, `0.0` when left out). A Helmholtz resonator takes `duct_area` (the main duct cross-section, m2), `neck_area` (m2), `neck_length` (metres) and `cavity_volume` (m3); a quarter-wave resonator takes `duct_area` (m2), `length` (the tube length, metres) and `branch_area` (the branch tube cross-section, m2). |
 | `ax` | Existing axes, or `None` to create a figure. |
-| `length` | Chamber length or quarter-wave tube length, in metres. |
-| `chamber_area` | Chamber cross-section, in m2 (chambers). |
-| `pipe_area` | Inlet/outlet pipe cross-section, in m2 (chambers). |
-| `inlet_extension` | Inlet tube extension into the chamber, in metres. |
-| `outlet_extension` | Outlet tube extension, in metres. |
-| `duct_area` | Main duct cross-section, in m2 (side branches). |
-| `neck_area` | Neck cross-section, in m2 (Helmholtz). |
-| `neck_length` | Neck length, in metres (Helmholtz). |
-| `cavity_volume` | Cavity volume, in m3 (Helmholtz). |
-| `branch_area` | Branch tube cross-section, in m2 (quarter-wave). |
 | `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the outline of the main bore: the chamber shell of a chamber, the duct of a side branch. |
 
 **Returns:** The axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if *geometry* is not a mapping. |
+| ValueError | for an unknown *kind*, a key the kind does not take, a key it needs that is missing, or dimensions that cannot be built. |
 
 ## quarter_wave_impedance
 

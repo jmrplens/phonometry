@@ -219,7 +219,7 @@ spectrum = underwater.strike_sel_spectrum(strike, fs, fraction=3)
 peak = underwater.peak_sound_pressure_level(strike)
 
 res = underwater.weighted_exposure(
-    spectrum.frequencies, spectrum.band_sel, "LF",
+    spectrum.band_sel, "LF", frequencies_hz=spectrum.frequencies,
     guidance="nmfs-2024", impulsive=True, n_events=3000, peak_spl=peak,
 )
 print(res.unweighted_sel, res.weighted_sel, res.cumulative_sel)

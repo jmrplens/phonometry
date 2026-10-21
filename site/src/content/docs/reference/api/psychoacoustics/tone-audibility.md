@@ -105,9 +105,9 @@ reading, matching its executable Annex J reference program; the ISO/PAS
 ```python
 analyze_spectrum(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     line_spacing_hz: float,
     *,
+    frequencies: ArrayLike,
     effective_bandwidth_factor: float = 1.5,
 ) -> ToneAudibilityResult
 ```
@@ -156,11 +156,11 @@ the wrong mean narrow-band level for tones near its edges.
 
 ```python
 assess_tones(
-    tone_frequencies: ArrayLike,
     tone_levels: ArrayLike,
     mean_narrowband_levels: ArrayLike,
     line_spacing_hz: float,
     *,
+    tone_frequencies: ArrayLike,
     extended_uncertainties: ArrayLike | None = None,
 ) -> ToneAudibilityResult
 ```
@@ -175,10 +175,10 @@ to every tone and bundles them into a plottable [`ToneAudibilityResult`](/phonom
 
 | Name | Description |
 | :--- | :--- |
-| `tone_frequencies` | Tone frequencies `fT`, in Hz. |
 | `tone_levels` | Tone levels `LT`, in dB (Formula (8)). |
 | `mean_narrowband_levels` | Mean narrow-band levels `LS` of the masking noise, in dB (Formula (6)). |
 | `line_spacing_hz` | Line spacing (frequency resolution) `Δf`, in Hz. |
+| `tone_frequencies` | Tone frequencies `fT`, in Hz. |
 | `extended_uncertainties` | Optional per-tone extended uncertainties `U`, in dB (see [`audibility_uncertainty`](/phonometry/reference/api/psychoacoustics/tone-audibility/#audibility_uncertainty); computed automatically by [`analyze_spectrum`](/phonometry/reference/api/psychoacoustics/tone-audibility/#analyze_spectrum), which has the per-line levels this level-based entry point lacks). |
 
 **Returns:** A [`ToneAudibilityResult`](/phonometry/reference/api/psychoacoustics/tone-audibility/#toneaudibilityresult).
@@ -286,10 +286,10 @@ consideration; see [`mean_audibility_uncertainty`](/phonometry/reference/api/psy
 ```python
 combined_tone_level(
     levels: ArrayLike,
-    frequencies: ArrayLike,
-    tone_frequencies: ArrayLike,
     mean_narrowband_levels: ArrayLike,
     *,
+    frequencies: ArrayLike,
+    tone_frequencies: ArrayLike,
     effective_bandwidth_factor: float = 1.5,
 ) -> float
 ```
@@ -307,9 +307,9 @@ then rated at the frequency of its most audible tone.
 | Name | Description |
 | :--- | :--- |
 | `levels` | Narrow-band levels `Li` of the spectrum, in dB. |
+| `mean_narrowband_levels` | Each tone's mean narrow-band level `LS`, dB (same length as `tone_frequencies`). |
 | `frequencies` | The line frequencies, in Hz (strictly increasing). |
 | `tone_frequencies` | The tone frequencies sharing the critical band, Hz. |
-| `mean_narrowband_levels` | Each tone's mean narrow-band level `LS`, dB (same length as `tone_frequencies`). |
 | `effective_bandwidth_factor` | $\Delta f_\mathrm{e}/\Delta f$; 1.5 for a Hanning window. |
 
 **Returns:** Combined tone level `LT`, in dB.
@@ -553,9 +553,9 @@ with 12 averages the standard reports ~+/-1.5 dB as typically achieved.
 ```python
 mean_narrowband_level(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     tone_frequency: float,
     *,
+    frequencies: ArrayLike,
     effective_bandwidth_factor: float = 1.5,
 ) -> float
 ```
@@ -682,10 +682,10 @@ $\Delta L = L_\mathrm{T} - L_\mathrm{G} - a_\mathrm{v}$
 ```python
 tone_level(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     tone_frequency: float,
     mean_narrowband_level: float,
     *,
+    frequencies: ArrayLike,
     effective_bandwidth_factor: float = 1.5,
 ) -> float
 ```

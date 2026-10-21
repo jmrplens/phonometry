@@ -983,9 +983,10 @@ class RandomIncidenceSensitivity(OwnsArrays):
 
 
 def random_incidence_sensitivity(
-    frequencies: ArrayLike,
     free_field_level: ArrayLike,
     directivity_index: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> RandomIncidenceSensitivity:
     r"""Random-incidence sensitivity level from the free-field sensitivity
     level and the directivity factor (IEC 61183:1994, Formulas (1) and (A.6)).
@@ -1170,10 +1171,10 @@ class DiffuseFieldSensitivity(OwnsArrays):
 
 
 def diffuse_field_sensitivity(
-    frequencies: ArrayLike,
     indicated_level: ArrayLike,
     reference_indicated_level: ArrayLike,
     *,
+    frequencies: ArrayLike,
     reference_random_incidence_level: ArrayLike | None = None,
     reference_free_field_level: ArrayLike | None = None,
     reference_directivity_index: ArrayLike | None = None,

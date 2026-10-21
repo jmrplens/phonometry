@@ -491,9 +491,9 @@ _T2 = np.array(
 
 def _measurement() -> materials.SoundAbsorptionMeasurement:
     return materials.measure_sound_absorption(
-        _FREQS,
-        _T1,
-        _T2,
+        frequencies=_FREQS,
+        t_empty=_T1,
+        t_specimen=_T2,
         volume=200.0,
         area=10.8,
         temperature_c=20.0,
@@ -553,7 +553,12 @@ def test_measurement_negative_humidity_raises() -> None:
         ValueError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
     ):
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=200.0, area=10.8, relative_humidity_percent=-40.0
+            frequencies=_FREQS,
+            t_empty=_T1,
+            t_specimen=_T2,
+            volume=200.0,
+            area=10.8,
+            relative_humidity_percent=-40.0,
         )
 
 
@@ -562,7 +567,12 @@ def test_measurement_humidity_above_saturation_raises() -> None:
         ValueError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
     ):
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=200.0, area=10.8, relative_humidity_percent=150.0
+            frequencies=_FREQS,
+            t_empty=_T1,
+            t_specimen=_T2,
+            volume=200.0,
+            area=10.8,
+            relative_humidity_percent=150.0,
         )
 
 
@@ -573,7 +583,12 @@ def test_measurement_non_numeric_humidity_raises_by_name() -> None:
         TypeError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
     ):
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=200.0, area=10.8, relative_humidity_percent="wet"
+            frequencies=_FREQS,
+            t_empty=_T1,
+            t_specimen=_T2,
+            volume=200.0,
+            area=10.8,
+            relative_humidity_percent="wet",
         )
 
 
@@ -584,9 +599,9 @@ def test_measurement_one_element_array_humidity_raises_by_name() -> None:
         TypeError, match=r"'relative_humidity_percent' must be within \[0, 100\]"
     ):
         materials.measure_sound_absorption(
-            _FREQS,
-            _T1,
-            _T2,
+            frequencies=_FREQS,
+            t_empty=_T1,
+            t_specimen=_T2,
             volume=200.0,
             area=10.8,
             relative_humidity_percent=np.array([54.0]),
@@ -597,7 +612,13 @@ def test_measurement_air_attenuation_reduces_area() -> None:
     # A non-zero m subtracts the 4 V m term (Eq. (5)/(7)).
     m = 1e-3
     res = materials.measure_sound_absorption(
-        _FREQS, _T1, _T2, volume=200.0, area=10.8, temperature_c=20.0, m=m
+        frequencies=_FREQS,
+        t_empty=_T1,
+        t_specimen=_T2,
+        volume=200.0,
+        area=10.8,
+        temperature_c=20.0,
+        m=m,
     )
     expected_a1 = 55.3 * 200.0 / (343.0 * _T1) - 4.0 * 200.0 * m
     np.testing.assert_allclose(res.absorption_area_empty, expected_a1)
@@ -609,7 +630,11 @@ def test_measurement_shape_mismatch_raises() -> None:
         match=r"measure_sound_absorption: .*'t_empty' .* must all have the same shape",
     ):
         materials.measure_sound_absorption(
-            _FREQS, _T1[:-1], _T2, volume=200.0, area=10.8
+            frequencies=_FREQS,
+            t_empty=_T1[:-1],
+            t_specimen=_T2,
+            volume=200.0,
+            area=10.8,
         )
 
 
@@ -626,7 +651,12 @@ def test_measurement_small_room_warns_once() -> None:
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=100.0, area=10.8, temperature_c=20.0
+            frequencies=_FREQS,
+            t_empty=_T1,
+            t_specimen=_T2,
+            volume=100.0,
+            area=10.8,
+            temperature_c=20.0,
         )
     volume_warnings = [
         w
@@ -641,7 +671,12 @@ def test_measurement_temperature_out_of_range_warns_once() -> None:
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
         materials.measure_sound_absorption(
-            _FREQS, _T1, _T2, volume=200.0, area=10.8, temperature_c=5.0
+            frequencies=_FREQS,
+            t_empty=_T1,
+            t_specimen=_T2,
+            volume=200.0,
+            area=10.8,
+            temperature_c=5.0,
         )
     temp_warnings = [
         w

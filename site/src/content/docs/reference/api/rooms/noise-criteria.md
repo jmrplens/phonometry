@@ -175,6 +175,7 @@ fixed disclaimer.
 ```python
 noise_criterion(
     levels: ArrayLike,
+    *,
     frequencies: ArrayLike | None = None,
 ) -> NCResult
 ```
@@ -353,6 +354,7 @@ fixed disclaimer.
 ```python
 room_criterion(
     levels: ArrayLike,
+    *,
     frequencies: ArrayLike | None = None,
 ) -> RCResult
 ```

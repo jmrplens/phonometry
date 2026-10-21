@@ -617,8 +617,8 @@ Whether the width is no greater than 50 mm.
 laboratory_joint_insulation(
     r_s_prime: ArrayLike,
     r_s_max: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     joint_length_m: float | None = None,
     limit_at_max: bool = True,
 ) -> LaboratoryJointInsulationResult

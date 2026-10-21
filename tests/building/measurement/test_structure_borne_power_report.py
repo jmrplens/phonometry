@@ -45,7 +45,7 @@ def _extract_text(path: str) -> str:
 
 def _result() -> building.StructureBornePowerResult:
     return building.reception_plate_power(
-        _LV, _FREQS, mass_per_area=_MASS, area=_AREA, reverberation_time=_TS
+        _LV, frequency=_FREQS, mass_per_area=_MASS, area=_AREA, reverberation_time=_TS
     )
 
 
@@ -133,7 +133,7 @@ def test_third_octave_labels_and_caption(tmp_path: Path) -> None:
     freqs = np.array([100, 125, 160, 200, 250, 315, 400, 500, 630, 800], dtype=float)
     lv = np.linspace(80.0, 92.0, freqs.size)
     res = building.reception_plate_power(
-        lv, freqs, mass_per_area=_MASS, area=_AREA, loss_factor=0.01
+        lv, frequency=freqs, mass_per_area=_MASS, area=_AREA, loss_factor=0.01
     )
     out = tmp_path / "third.pdf"
     res.report(str(out))

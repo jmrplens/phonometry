@@ -312,6 +312,7 @@ def sel(
 def sound_exposure(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
+    *,
     duration_hours: float | None = None,
     calibration_factor: float | None = None,
 ) -> float | np.ndarray:
@@ -355,6 +356,7 @@ def sound_exposure(
 def lex_8h(
     x: Signal | list[float] | np.ndarray,
     fs: int | None = None,
+    *,
     duration_hours: float | None = None,
     calibration_factor: float | None = None,
 ) -> float | np.ndarray:

@@ -85,7 +85,7 @@ partitions = {
 }
 for name, tl in partitions.items():
     res = noise_control.room_to_room_transmission(
-        bands, tl, 8.0 * 3.0, receiving,
+        tl, 8.0 * 3.0, receiving, frequencies=bands,
         source=noise_control.SourceRoom(level=90.0), label=name,
     )
     print(f"{name:32s} {np.round(res.noise_reduction, 1)}")
@@ -145,10 +145,10 @@ operator = [(25.0, [0.08, 0.24, 0.57, 0.69, 0.71, 0.73]),
             (25.0, ceiling), (60.0, walls)]
 
 chain = noise_control.room_to_room_transmission(
-    bands,
-    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],       # TL of the separating wall
-    5.0 * 3.0,                                  # the wall is 5 m x 3 m
-    room.equivalent_absorption_area(operator),
+    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
+    5.0 * 3.0,       # TL of the separating wall
+    room.equivalent_absorption_area(operator),                                  # the wall is 5 m x 3 m
+    frequencies=bands,
     source=noise_control.SourceRoom(
         power_level=[105.0, 103.0, 98.0, 108.0, 107.0, 109.0],
         room_constant=room.room_constant(268.0, room.mean_absorption(plant)),
@@ -354,8 +354,8 @@ transmission loss rather than get lost:
 ```python
 # The chain of section 3 again, with 3 dB allowed for flanking and leaks.
 honest = noise_control.room_to_room_transmission(
-    bands, [39.0, 42.0, 50.0, 58.0, 63.0, 67.0], 15.0,
-    room.equivalent_absorption_area(operator),
+    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0], 15.0, room.equivalent_absorption_area(operator),
+    frequencies=bands,
     source=noise_control.SourceRoom(level=chain.source_level),
     criterion=noise_control.DesignCriterion(target=45.0, flanking_penalty=3.0),
 )
@@ -394,7 +394,7 @@ source = noise_control.SourceRoom(
     power_level=105.0, room_constant=room.room_constant(900.0, 0.05), directivity=2.0,
 )
 near = noise_control.room_to_room_transmission(
-    [1000.0], 30.0, 16.0, room.room_constant(100.0, 0.35),
+    30.0, 16.0, room.room_constant(100.0, 0.35), frequencies=[1000.0],
     source=source, receiver_distance_m=1.5,
 )
 print(np.round(near.received_level, 1))   # [61.6]

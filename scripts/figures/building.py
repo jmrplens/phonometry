@@ -1446,7 +1446,7 @@ def generate_extended_insulation_rating(output_dir: str) -> None:
     ]
     freqs = [50, 63, 80, *(_THIRD_OCTAVE_16), 4000, 5000]
     ext = building.weighted_rating_extended(
-        [18.7, 19.2, 20.0, *r_core, 26.8, 29.2], freqs
+        [18.7, 19.2, 20.0, *r_core, 26.8, 29.2], frequencies=freqs
     )
     assert ext.measured is not None
     assert ext.core.shifted_reference is not None
@@ -3133,8 +3133,8 @@ def generate_low_frequency_procedure(output_dir: str) -> None:
     )
     chain = required.receiver_low_frequency
     assert chain is not None
-    w_default = building.weighted_rating_extended(default.dnt, freqs)
-    w_required = building.weighted_rating_extended(required.dnt, freqs)
+    w_default = building.weighted_rating_extended(default.dnt, frequencies=freqs)
+    w_required = building.weighted_rating_extended(required.dnt, frequencies=freqs)
     # Present because `freqs` carries the whole 50 Hz to 3150 Hz range the
     # Annex B term sums over; the terms are optional on the result because a
     # core-range-only input has no enlarged range to form them from.
@@ -3371,7 +3371,7 @@ def _service_equipment_measurement() -> "ServiceEquipmentResult":
     )  # fmt: skip
     return building.service_equipment_level(
         readings,
-        freqs,
+        frequencies=freqs,
         quantity="eq",
         background_db=background,
         reverberation_time=reverberation,

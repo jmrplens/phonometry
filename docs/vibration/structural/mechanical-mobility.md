@@ -67,8 +67,8 @@ from phonometry import vibration
 
 # A mobility of 2e-3 m/(N.s) at 80 Hz, expressed as the other FRFs:
 Y = 2e-3
-print(round(abs(vibration.convert_frf(Y, 80.0, "mobility", "impedance")), 1))     # 500.0  N.s/m
-print(f"{abs(vibration.convert_frf(Y, 80.0, 'mobility', 'accelerance')):.3f}")    # 1.005  1/kg
+print(round(abs(vibration.convert_frf(Y, "mobility", "impedance", frequency=80.0)), 1))     # 500.0  N.s/m
+print(f"{abs(vibration.convert_frf(Y, 'mobility', 'accelerance', frequency=80.0)):.3f}")    # 1.005  1/kg
 ```
 
 The choice between the three motion FRFs is one of convenience, not physics:
@@ -156,7 +156,7 @@ from phonometry import vibration
 
 # A 10 kg calibration block: |A| must be 1/m = 0.100 1/kg at every frequency.
 f = np.array([20.0, 100.0, 500.0])
-res = vibration.verify_rigid_mass_calibration([0.100, 0.102, 0.097], f, mass=10.0)
+res = vibration.verify_rigid_mass_calibration([0.100, 0.102, 0.097], frequencies=f, mass=10.0)
 print(res.passes, res.within_tolerance.tolist())   # True [True, True, True]
 
 # The Annex A example: coherence 0.8 needs about 75 averages for < 5 %.
@@ -179,7 +179,7 @@ m = 10.0                                                  # calibration block ma
 f = np.logspace(np.log10(20.0), np.log10(5000.0), 400)
 drift = 0.05 * (f / 2500.0) ** 2                          # high-frequency drift
 measured = (1.0 / m) * (1.0 + 0.015 * np.sin(2 * np.pi * np.log10(f)) + drift)
-res = vibration.verify_rigid_mass_calibration(measured, f, mass=m)
+res = vibration.verify_rigid_mass_calibration(measured, frequencies=f, mass=m)
 print(res.passes)                                         # False (drift exceeds 5 %)
 res.plot()
 ```
@@ -198,7 +198,7 @@ m = 10.0
 f = np.logspace(np.log10(20.0), np.log10(5000.0), 400)
 drift = 0.05 * (f / 2500.0) ** 2
 measured = (1.0 / m) * (1.0 + 0.015 * np.sin(2 * np.pi * np.log10(f)) + drift)
-res = vibration.verify_rigid_mass_calibration(measured, f, mass=m)
+res = vibration.verify_rigid_mass_calibration(measured, frequencies=f, mass=m)
 bad = ~res.within_tolerance
 
 fig, (top, bot) = plt.subplots(2, 1, sharex=True, figsize=(10, 7),

@@ -1438,8 +1438,8 @@ def _validated_extended_input(
 
 def weighted_rating_extended(
     values_by_band: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray | None = None,
     *,
+    frequencies: Sequence[float] | np.ndarray | None = None,
     one_decimal: bool = False,
 ) -> ExtendedWeightedRatingResult:
     r"""Weighted rating with enlarged-range adaptation terms (ISO 717-1 An. B).
@@ -1515,8 +1515,8 @@ def weighted_rating_extended(
 
 def weighted_impact_rating_extended(
     values_by_band: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray | None = None,
     *,
+    frequencies: Sequence[float] | np.ndarray | None = None,
     one_decimal: bool = False,
 ) -> ExtendedImpactRatingResult:
     r"""Weighted impact rating with ``CI,50-2500`` (ISO 717-2:2020 A.2.1).
@@ -1943,8 +1943,8 @@ class ReductionImprovementRating(RichDisplay):
 
 def weighted_reduction_improvement(
     delta_r: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray | None = None,
     *,
+    frequencies: Sequence[float] | np.ndarray | None = None,
     basic_element: BasicElement = "heavy_wall",
     one_decimal: bool = False,
 ) -> ReductionImprovementRating:
@@ -2011,9 +2011,11 @@ def weighted_reduction_improvement(
         )
         raise ValueError(msg)
     without = np.asarray(tuple(table.values()), dtype=np.float64)[indices]
-    rated_without = weighted_rating_extended(without, freqs, one_decimal=one_decimal)
+    rated_without = weighted_rating_extended(
+        without, frequencies=freqs, one_decimal=one_decimal
+    )
     rated_with = weighted_rating_extended(
-        without + delta, freqs, one_decimal=one_decimal
+        without + delta, frequencies=freqs, one_decimal=one_decimal
     )
 
     def _delta(before: float, after: float) -> float:

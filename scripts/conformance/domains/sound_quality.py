@@ -134,7 +134,9 @@ def _chk_iso20065_mean_audibility() -> Outcome:
 )
 def _chk_iso20065_mean_narrowband_level() -> Outcome:
     value = ph.psychoacoustics.mean_narrowband_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
     )
     # Iterative Formula (6) with Hanning correction; 0.02 dB absorbs rounding.
     return numeric(ref.ISO20065_E1_LS, value, 0.02, unit="dB", places=2)
@@ -147,7 +149,9 @@ def _chk_iso20065_mean_narrowband_level() -> Outcome:
 )
 def _chk_iso20065_uncertainty() -> Outcome:
     res = ph.psychoacoustics.analyze_spectrum(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        line_spacing_hz=ref.ISO20065_LINE_SPACING,
     )
     assert res.extended_uncertainties is not None
     by_freq = dict(zip(res.tone_frequencies, res.extended_uncertainties, strict=True))
@@ -177,10 +181,15 @@ def _chk_iso20065_mean_uncertainty() -> Outcome:
 )
 def _chk_iso20065_tone_level() -> Outcome:
     ls = ph.psychoacoustics.mean_narrowband_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
     )
     value = ph.psychoacoustics.tone_level(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, 137.3, ls
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequency=137.3,
+        mean_narrowband_level=ls,
     )
     return numeric(ref.ISO20065_E1_LT, value, 0.02, unit="dB", places=2)
 
@@ -192,7 +201,9 @@ def _chk_iso20065_tone_level() -> Outcome:
 )
 def _chk_iso20065_peak_detection() -> Outcome:
     result = ph.psychoacoustics.analyze_spectrum(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        line_spacing_hz=ref.ISO20065_LINE_SPACING,
     )
     assert result.group_sizes is not None
     singles = result.group_sizes == 1
@@ -214,7 +225,9 @@ def _chk_iso20065_peak_detection() -> Outcome:
 )
 def _chk_iso20065_step3_fg() -> Outcome:
     result = ph.psychoacoustics.analyze_spectrum(
-        ref.ISO20065_E1_LEVELS, ref.ISO20065_E1_FREQUENCIES, ref.ISO20065_LINE_SPACING
+        ref.ISO20065_E1_LEVELS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        line_spacing_hz=ref.ISO20065_LINE_SPACING,
     )
     assert result.group_sizes is not None
     fg = result.group_sizes > 1
@@ -228,9 +241,9 @@ def _chk_iso20065_step3_fg() -> Outcome:
 def _chk_iso20065_fg_combination() -> Outcome:
     value = ph.psychoacoustics.combined_tone_level(
         ref.ISO20065_E1_LEVELS,
-        ref.ISO20065_E1_FREQUENCIES,
-        ref.ISO20065_E1_TONE_FREQUENCIES,
-        ref.ISO20065_E1_TONE_LS,
+        frequencies=ref.ISO20065_E1_FREQUENCIES,
+        tone_frequencies=ref.ISO20065_E1_TONE_FREQUENCIES,
+        mean_narrowband_levels=ref.ISO20065_E1_TONE_LS,
     )
     return numeric(ref.ISO20065_E1_LT_FG, value, 0.02, unit="dB", places=2)
 

@@ -179,6 +179,7 @@ FIELDS = ('free', 'diffuse')
 hearing_level_to_coupler_spl(
     hearing_level: ArrayLike,
     earphone: str = 'TDH 39',
+    *,
     frequencies: ArrayLike | None = None,
 ) -> np.ndarray
 ```

@@ -176,7 +176,7 @@ def _chk_table_2() -> Outcome:
 )
 def _chk_average() -> Outcome:
     readings = np.repeat(np.array([[40.0], [43.0], [46.0]]), _THIRD.size, axis=1)
-    res = building.service_equipment_level(readings, _THIRD, quantity="eq")
+    res = building.service_equipment_level(readings, frequencies=_THIRD, quantity="eq")
     exact = 10.0 * math.log10((10.0**4.0 + 10.0**4.3 + 10.0**4.6) / 3.0)
     return numeric(
         math.floor(exact * 10.0 + 0.5) / 10.0,
@@ -203,7 +203,7 @@ def _chk_standardization() -> Outcome:
     for fraction, freqs in widths:
         res = building.service_equipment_level(
             np.full((3, freqs.size), 40.0),
-            freqs,
+            frequencies=freqs,
             quantity="eq",
             fraction=fraction,
             reverberation_time=np.full(freqs.size, 1.0),
@@ -227,7 +227,7 @@ def _chk_normalization() -> Outcome:
     # 40 dB band: 42,04 dB, worked by hand.
     res = building.service_equipment_level(
         _flat(40.0),
-        _THIRD,
+        frequencies=_THIRD,
         quantity="eq",
         reverberation_time=np.full(_THIRD.size, 0.5),
         volume=50.0,
@@ -243,7 +243,9 @@ def _chk_normalization() -> Outcome:
     "LA,eq of a flat 40 dB spectrum over 50 Hz to 5 000 Hz",
 )
 def _chk_a_weighted() -> Outcome:
-    res = building.service_equipment_level(_flat(40.0), _THIRD, quantity="eq")
+    res = building.service_equipment_level(
+        _flat(40.0), frequencies=_THIRD, quantity="eq"
+    )
     a = building.SERVICE_EQUIPMENT_WEIGHTING[3]["A"]
     bands = [f for f in _THIRD if 50.0 <= f <= 5000.0]
     expected = 10.0 * math.log10(sum(10.0 ** (0.1 * (40.0 + a[f])) for f in bands))
@@ -256,7 +258,9 @@ def _chk_a_weighted() -> Outcome:
     "LC,eq of a flat 40 dB spectrum over 25 Hz to 10 000 Hz",
 )
 def _chk_c_weighted() -> Outcome:
-    res = building.service_equipment_level(_flat(40.0), _THIRD, quantity="eq")
+    res = building.service_equipment_level(
+        _flat(40.0), frequencies=_THIRD, quantity="eq"
+    )
     c = building.SERVICE_EQUIPMENT_WEIGHTING[3]["C"]
     expected = 10.0 * math.log10(sum(10.0 ** (0.1 * (40.0 + c[f])) for f in _THIRD))
     return numeric(expected, res.unrounded_ratings["LC,eq"], 1e-9, unit="dB", places=4)
@@ -268,11 +272,13 @@ def _chk_rounding() -> Outcome:
     # LA,eq = 51,000 4 dB and LC,eq = 53,550 7 dB, which read 51 and 54 dB;
     # a lone 1 000 Hz band at 44,5 dB sums to exactly 44,5 dB, and the half
     # goes up, to 45 dB.
-    flat = building.service_equipment_level(_flat(40.0), _THIRD, quantity="eq")
+    flat = building.service_equipment_level(
+        _flat(40.0), frequencies=_THIRD, quantity="eq"
+    )
     lone_levels = np.full(_THIRD.size, -200.0)
     lone_levels[_THIRD == 1000.0] = 44.5
     lone = building.service_equipment_level(
-        np.tile(lone_levels, (3, 1)), _THIRD, quantity="eq"
+        np.tile(lone_levels, (3, 1)), frequencies=_THIRD, quantity="eq"
     )
     got = (flat.ratings["LA,eq"], flat.ratings["LC,eq"], lone.ratings["LA,eq"])
     matching = sum(g == w for g, w in zip(got, (51, 54, 45), strict=True))
@@ -557,7 +563,9 @@ def _chk_instrument_agreement() -> Outcome:
     # (LC 56,0 dB) agrees, and one 2,1 dB under it (LA 48,9 dB) or over it
     # (LC 56,1 dB) does not.
     limit = ref.ISO16032_INSTRUMENT_AGREEMENT_DB
-    res = building.service_equipment_level(_flat(40.0), _THIRD, quantity="eq")
+    res = building.service_equipment_level(
+        _flat(40.0), frequencies=_THIRD, quantity="eq"
+    )
     la, lc = res.ratings["LA,eq"], res.ratings["LC,eq"]
     lc_off = building.check_instrument_agreement(
         res, {"LA,eq": la - limit, "LC,eq": lc + limit + 0.1}

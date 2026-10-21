@@ -705,7 +705,7 @@ in_bands = i_mean[None, :] * (1.0 + rng.normal(0.0, 0.18, (10, freqs.size)))
 in_bands[:2, 0] = -0.35 * i_mean[0]
 in_bands[2:, 0] *= (10.0 * i_mean[0] - in_bands[:2, 0].sum()) / in_bands[2:, 0].sum()
 
-fi = emission.field_indicators(lp_bands, in_bands, freqs)   # (positions, bands)
+fi = emission.field_indicators(lp_bands, in_bands, frequencies=freqs)   # (positions, bands)
 fi.plot(dynamic_capability=ld)   # F2/F3 per band vs Ld, F4 on a twin axis (needs matplotlib)
 ```
 
@@ -740,7 +740,7 @@ in_bands = i_mean[None, :] * (1.0 + rng.normal(0.0, 0.18, (10, freqs.size)))
 in_bands[:2, 0] = -0.35 * i_mean[0]
 in_bands[2:, 0] *= (10.0 * i_mean[0] - in_bands[:2, 0].sum()) / in_bands[2:, 0].sum()
 
-fi = emission.field_indicators(lp_bands, in_bands, freqs)
+fi = emission.field_indicators(lp_bands, in_bands, frequencies=freqs)
 ld = emission.dynamic_capability_index(18.0)   # δpI0 = 18 dB, K = 10 dB
 
 # One line — F2/F3 per band against Ld, with F4 on a twin axis:
@@ -829,7 +829,7 @@ measured_delta_pi0 = [11.0, 11.9, 11.2, 10.0, 13.2, 15.9, 17.0, 18.0,
                       19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 24.0, 24.0,
                       24.0, 24.0, 24.0, 24.0, 24.0, 24.0]   # dB, 22 bands
 
-res = emission.verify_intensity_class(measured_delta_pi0, freqs,
+res = emission.verify_intensity_class(measured_delta_pi0, frequencies=freqs,
                                       device="instrument", spacing_m=0.012)
 print(res.overall_class)          # 2: one band misses the class 1 minimum
 print(res.binding_margin())       # smallest per-band margin to that class [dB]
@@ -864,11 +864,11 @@ from phonometry import emission
 spacing = 0.012
 freqs, _, _ = emission.residual_index_limits("instrument", spacing_m=spacing)
 phase_mismatch = 0.05 * np.maximum(1.0, freqs / 1000.0)          # degrees
-measured = emission.residual_index_from_phase_mismatch(phase_mismatch, freqs,
-                                                        spacing)
+measured = emission.residual_index_from_phase_mismatch(phase_mismatch, spacing,
+                                                        frequency=freqs)
 measured = measured - 4.0 * np.exp(-((np.log(freqs / 100.0) / 0.25) ** 2))
 
-res = emission.verify_intensity_class(measured, freqs, spacing_m=spacing)
+res = emission.verify_intensity_class(measured, frequencies=freqs, spacing_m=spacing)
 res.plot()
 plt.show()
 ```
@@ -908,12 +908,12 @@ and the two conversions run both ways:
 from phonometry import emission
 
 # 20 dB of residual index at 1 kHz over a 25 mm spacer:
-phi = emission.phase_mismatch_from_residual_index(20.0, 1000.0, 0.025)
+phi = emission.phase_mismatch_from_residual_index(20.0, 0.025, frequency=1000.0)
 print(round(float(phi), 2))     # 0.26 degrees, a hundredth of kd
 
 # And back, for a chain whose channels are matched to 0.05°:
 print(round(float(emission.residual_index_from_phase_mismatch(
-    0.05, 1000.0, 0.012)), 1))  # 24.0 dB
+    0.05, 0.012, frequency=1000.0)), 1))  # 24.0 dB
 ```
 
 That is why the low-frequency end of Table 2 rises 1 dB per third-octave band

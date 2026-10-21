@@ -702,9 +702,9 @@ def _substituted_reverberation(
 
 def apply_low_frequency_procedure(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     procedure: LowFrequencyProcedure,
     *,
+    frequencies: ArrayLike,
     reverberation_time: ArrayLike | None = None,
     room: str = "receiving",
 ) -> LowFrequencyResult:

@@ -629,7 +629,7 @@ def test_rating_rejects_mismatched_frequencies() -> None:
         ValueError, match=r"'frequencies' must be the ISO 717-2 Annex D rating bands"
     ):
         building.a_weighted_max_impact_level(
-            ISO717_2_TABLE_D4_LEVELS, [125.0, 250.0, 500.0, 1000.0]
+            ISO717_2_TABLE_D4_LEVELS, frequencies=[125.0, 250.0, 500.0, 1000.0]
         )
 
 

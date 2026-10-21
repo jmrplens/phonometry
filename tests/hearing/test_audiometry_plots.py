@@ -80,7 +80,7 @@ def test_the_automatic_figure_greys_the_ignored_reversals() -> None:
 
 def test_the_sweep_figure_draws_hearing_level_downwards() -> None:
     result = hearing.sweep_audiometry_threshold(
-        np.geomspace(500.0, 4000.0, 12), [30.0, 20.0] * 6
+        [30.0, 20.0] * 6, reversal_frequencies=np.geomspace(500.0, 4000.0, 12)
     )
     ax = result.plot(language="es")
     assert ax.yaxis_inverted()

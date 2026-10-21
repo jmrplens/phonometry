@@ -292,13 +292,21 @@ def _section(peak_m: float) -> aircraft.TerrainScreeningResult:
     distances = np.linspace(0.0, 1000.0, 41)
     heights = peak_m * np.exp(-(((distances - 500.0) / 120.0) ** 2))
     return aircraft.terrain_screening_adjustment(
-        _BANDS, (0.0, 10.0), (1000.0, 1.5), distances, heights
+        frequencies=_BANDS,
+        source=(0.0, 10.0),
+        receiver=(1000.0, 1.5),
+        distances_m=distances,
+        heights_m=heights,
     )
 
 
 def _ridge() -> aircraft.TerrainScreeningResult:
     return aircraft.terrain_screening_adjustment(
-        _BANDS, (0.0, 10.0), (1000.0, 1.5), [0.0, 500.0, 1000.0], [0.0, 30.0, 0.0]
+        frequencies=_BANDS,
+        source=(0.0, 10.0),
+        receiver=(1000.0, 1.5),
+        distances_m=[0.0, 500.0, 1000.0],
+        heights_m=[0.0, 30.0, 0.0],
     )
 
 
@@ -310,7 +318,11 @@ def test_the_section_regime_follows_its_terrain() -> None:
 def test_terrain_on_the_line_of_sight_does_not_screen() -> None:
     # Only points strictly above the line of sight are obstacles.
     result = aircraft.terrain_screening_adjustment(
-        _BANDS, (0.0, 0.0), (100.0, 10.0), [0.0, 50.0, 100.0], [0.0, 5.0, 0.0]
+        frequencies=_BANDS,
+        source=(0.0, 0.0),
+        receiver=(100.0, 10.0),
+        distances_m=[0.0, 50.0, 100.0],
+        heights_m=[0.0, 5.0, 0.0],
     )
     assert result.screened is False
 
@@ -442,14 +454,18 @@ def test_a_tracing_that_does_not_alternate_is_refused() -> None:
 def test_the_sweep_peaks_are_read_from_the_levels() -> None:
     frequencies = np.geomspace(500.0, 4000.0, 8)
     levels = np.array([30.0, 40.0, 31.0, 41.0, 32.0, 42.0, 31.0, 40.0])
-    result = hearing.sweep_audiometry_threshold(frequencies, levels)
+    result = hearing.sweep_audiometry_threshold(
+        levels, reversal_frequencies=frequencies
+    )
     assert result.is_peak.tolist() == [False, True] * 4
 
 
 def test_a_sweep_threshold_is_held_to_its_reversals() -> None:
     frequencies = np.geomspace(500.0, 4000.0, 8)
     levels = np.array([30.0, 40.0, 31.0, 41.0, 32.0, 42.0, 31.0, 40.0])
-    result = hearing.sweep_audiometry_threshold(frequencies, levels)
+    result = hearing.sweep_audiometry_threshold(
+        levels, reversal_frequencies=frequencies
+    )
     with pytest.raises(ValueError, match="mean_db"):
         dataclasses.replace(result, reversal_levels=levels + 1.0)
 
@@ -525,14 +541,16 @@ def _tonal(amplitude_db: float) -> environment.WindTurbineTonalityResult:
     frequencies = np.arange(400.0, 601.0, 1.0)
     levels = np.full(frequencies.size, 30.0)
     levels[100] += amplitude_db
-    return environment.wind_turbine_tonality(levels, frequencies)
+    return environment.wind_turbine_tonality(levels, frequencies=frequencies)
 
 
 def test_the_identified_tone_is_read_from_the_levels() -> None:
     tonal = _tonal(15.0)
     assert tonal.has_identified_tone is True
     flat = environment.wind_turbine_tonality(
-        np.full(tonal.frequencies.size, 30.0), tonal.frequencies, tone_frequency=500.0
+        np.full(tonal.frequencies.size, 30.0),
+        frequencies=tonal.frequencies,
+        tone_frequency=500.0,
     )
     assert flat.has_identified_tone is False
     assert flat.is_audible is False
@@ -556,7 +574,7 @@ def test_a_tonality_candidate_below_20_hz_is_refused() -> None:
     frequencies = np.arange(10.0, 301.0, 1.0)
     levels = np.full(frequencies.size, 30.0)
     levels[90] += 15.0
-    low = environment.wind_turbine_tonality(levels, frequencies)
+    low = environment.wind_turbine_tonality(levels, frequencies=frequencies)
     with pytest.raises(ValueError, match="candidate_frequency_hz"):
         dataclasses.replace(low, candidate_frequency_hz=15.0)
 

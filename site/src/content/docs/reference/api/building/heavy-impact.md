@@ -107,8 +107,8 @@ used when the *measurement* is reported in octaves.
 ```python
 a_weighted_max_impact_level(
     levels: ArrayLike,
-    frequencies: ArrayLike | Sequence[float] | None = None,
     *,
+    frequencies: ArrayLike | Sequence[float] | None = None,
     fraction: Literal[1, 3] | None = None,
 ) -> AWeightedMaxImpactResult
 ```

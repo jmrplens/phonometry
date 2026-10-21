@@ -348,9 +348,7 @@ def _k1_eq14(delta: np.ndarray, frequencies: np.ndarray) -> tuple[np.ndarray, bo
 
 
 def reverberation_background_correction(
-    levels: ArrayLike,
-    background_levels: ArrayLike,
-    frequencies: ArrayLike,
+    levels: ArrayLike, background_levels: ArrayLike, *, frequencies: ArrayLike
 ) -> NDArray[np.float64]:
     r"""Background-noise correction :math:`K_1`, ISO 3741:2010 Equation (14).
 
@@ -731,8 +729,8 @@ def sound_power_reverberation(
     t60: float | np.ndarray,
     volume: float,
     surface_area: float,
-    frequencies: np.ndarray,
     *,
+    frequencies: np.ndarray,
     background_levels: np.ndarray | None = None,
     temperature_c: float = 23.0,
     static_pressure_kpa: float = 101.325,
@@ -1067,8 +1065,8 @@ def sound_energy_reverberation(
     t60: float | np.ndarray,
     volume: float,
     surface_area: float,
-    frequencies: np.ndarray,
     *,
+    frequencies: np.ndarray,
     n_events: int | None = None,
     background_levels: np.ndarray | None = None,
     integration_time: float | None = None,
@@ -1278,7 +1276,7 @@ def sound_energy_comparison(
 
 
 def octave_band_levels(
-    levels: np.ndarray, frequencies: np.ndarray
+    levels: np.ndarray, *, frequencies: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray]:
     r"""Octave-band levels from one-third-octave band levels (ISO 3741 Annex F).
 

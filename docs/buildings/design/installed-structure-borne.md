@@ -189,9 +189,9 @@ from phonometry import building
 
 bands = np.array(building.TABLE_F1_OCTAVE_BANDS_HZ)
 lw_c = building.tapping_machine_characteristic_power_level(
-    bands, building.tapping_machine_force_level()
+    building.tapping_machine_force_level(), frequency=bands
 )
-dc = building.tapping_machine_coupling_term(bands, 1.07e-6)   # 220 mm concrete
+dc = building.tapping_machine_coupling_term(1.07e-6, frequency=bands)   # 220 mm concrete
 print(np.round(lw_c - dc, 1))   # [79.3 82.3 85.3 88.3 91.3 94.3 96.3 96.3]
 ```
 

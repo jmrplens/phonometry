@@ -91,13 +91,13 @@ and passes when one exists; it reports the margin and the bands that bind.
 fs = 48000
 x = electroacoustics.simulated_program_signal(fs, 60.0, spectrum="figure_2", seed=2)
 bands = octave_filter(x, fs, fraction=3, limits=[19.95, 19952.6])
-check = electroacoustics.check_program_signal(bands.frequencies, bands.levels)
+check = electroacoustics.check_program_signal(bands.levels, frequencies=bands.frequencies)
 print(check.passes, round(check.margin_db, 2), check.binding_bands_hz)
 # True 0.12 (315.0, 5000.0)
 
 y = electroacoustics.simulated_program_signal(fs, 60.0, seed=2)
 bands_y = octave_filter(y, fs, fraction=3, limits=[19.95, 19952.6])
-check_y = electroacoustics.check_program_signal(bands_y.frequencies, bands_y.levels)
+check_y = electroacoustics.check_program_signal(bands_y.levels, frequencies=bands_y.frequencies)
 print(check_y.passes, round(check_y.margin_db, 2))  # True 0.34
 ```
 
@@ -191,7 +191,7 @@ first, lists the second and checks the third.
 f = np.geomspace(10.0, 30000.0, 241)
 z = 31.0 + 22.0 / (1.0 + ((f / 90.0 - 90.0 / f) / 0.9) ** 2) + 4.0 * (f / 20000.0)
 impedance = electroacoustics.verify_rated_impedance(
-    f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(15.0, 25000.0)
+    z, frequencies=f, rated_impedance_ohm=32.0, rated_frequency_range_hz=(15.0, 25000.0)
 )
 print(impedance.passes, round(impedance.min_ohm, 1), round(impedance.min_ratio, 3))
 # True 31.3 0.979
@@ -263,9 +263,9 @@ frequencies = centres[in_range]
 resonance = 9.0 / (1.0 + ((frequencies / 3000.0 - 3000.0 / frequencies) / 0.8) ** 2)
 reading = 72.0 + levels[in_range] + resonance  # dB re 20 µPa at 0.1 V
 fittings = np.vstack([reading, reading + 0.6, reading - 0.4])
-plain = electroacoustics.program_characteristic_voltage(0.1, frequencies, fittings)
+plain = electroacoustics.program_characteristic_voltage(0.1, fittings, frequencies=frequencies)
 weighted = electroacoustics.program_characteristic_voltage(
-    0.1, frequencies, fittings, weighting="A"
+    0.1, fittings, frequencies=frequencies, weighting="A"
 )
 print(round(plain.characteristic_voltage_v, 3), round(weighted.characteristic_voltage_v, 3))
 # 0.241 0.253
@@ -366,10 +366,10 @@ level = (
     - 10.0 * np.log10(1.0 + (fr / 12000.0) ** 6)
 )
 response = electroacoustics.coupler_frequency_response(
-    fr, level, rated_frequency_range_hz=(20.0, 20000.0)
+    level, frequencies=fr, rated_frequency_range_hz=(20.0, 20000.0)
 )
 crosstalk = electroacoustics.crosstalk_attenuation(
-    frequencies, np.full(frequencies.size, 100.0), 52.0 - 12.0 * np.log10(frequencies / 1000.0) ** 2
+    np.full(frequencies.size, 100.0), 52.0 - 12.0 * np.log10(frequencies / 1000.0) ** 2, frequencies=frequencies
 )
 print(response.covers_rated_range, round(crosstalk.min_db, 1))  # True 48.0
 ```
@@ -434,11 +434,11 @@ equal_loudness_emf = 0.05 * 10.0 ** (
     -(shape_db + rng.normal(0.0, 1.2, (8, frequencies.size))) / 20.0
 )
 comparison = electroacoustics.field_comparison_response(
-    frequencies, 70.0, equal_loudness_emf, field="free"
+    70.0, equal_loudness_emf, frequencies=frequencies, field="free"
 )
 field = 70.0 + rng.normal(0.0, 0.4, (8, 2, frequencies.size))
 earphone = field + shape_db + rng.normal(0.0, 0.6, (8, 2, frequencies.size))
-ear_canal = electroacoustics.ear_canal_frequency_response(frequencies, earphone, field)
+ear_canal = electroacoustics.ear_canal_frequency_response(earphone, field, frequencies=frequencies)
 band = list(frequencies).index(2500.0)
 print(comparison.meets_panel_size, round(comparison.mean_db[band], 1))  # True 2.8
 print(round(ear_canal.mean_db[band], 1), ear_canal.fittings_consistent.all())  # 3.2 True

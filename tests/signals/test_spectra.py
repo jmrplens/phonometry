@@ -360,7 +360,9 @@ def test_snr_error_is_sqrt2_over_gamma_sqrt_nd() -> None:
 def test_smoothing_leaves_flat_spectrum_exactly_unchanged() -> None:
     f = np.linspace(0.0, 4000.0, 512)
     flat = np.full(512, 3.7)
-    out = ph.signals.fractional_octave_smoothing(f, flat, 3.0)
+    out = ph.signals.fractional_octave_smoothing(
+        frequencies=f, values=flat, fraction=3.0
+    )
     np.testing.assert_allclose(out, flat, rtol=0.0, atol=1e-12)
 
 
@@ -368,9 +370,9 @@ def test_smoothing_flat_invariance_in_db_and_amplitude_domains() -> None:
     f = np.linspace(1.0, 4000.0, 512)
     for domain, level in (("db", -12.0), ("amplitude", 0.5)):
         out = ph.signals.fractional_octave_smoothing(
-            f,
-            np.full(512, level),
-            6.0,
+            frequencies=f,
+            values=np.full(512, level),
+            fraction=6.0,
             domain=domain,  # type: ignore[arg-type]
         )
         np.testing.assert_allclose(out, np.full(512, level), atol=1e-12)
@@ -384,7 +386,9 @@ def test_smoothed_line_has_third_octave_width_and_conserved_level() -> None:
     f0 = 1000.0
     i0 = int(np.argmin(np.abs(f - f0)))
     power[i0] = 5.0
-    out = ph.signals.fractional_octave_smoothing(f, power, 3.0)
+    out = ph.signals.fractional_octave_smoothing(
+        frequencies=f, values=power, fraction=3.0
+    )
     width = f0 * (2.0 ** (1.0 / 6.0) - 2.0 ** (-1.0 / 6.0))
     # Level at the line: the bin's power spread over the kernel width.
     assert float(out[i0]) == pytest.approx(5.0 * df / width, rel=1e-9)
@@ -397,7 +401,9 @@ def test_smoothed_line_has_third_octave_width_and_conserved_level() -> None:
 def test_smoothing_narrows_variance_of_noisy_spectrum() -> None:
     res = ph.signals.power_spectral_density(_white(11), FS, nperseg=4096)
     band = (res.frequencies > 200.0) & (res.frequencies < 3800.0)
-    smooth = ph.signals.fractional_octave_smoothing(res.frequencies, res.psd, 3.0)
+    smooth = ph.signals.fractional_octave_smoothing(
+        frequencies=res.frequencies, values=res.psd, fraction=3.0
+    )
     assert float(np.std(smooth[band])) < 0.35 * float(np.std(res.psd[band]))
     # Same mean level: smoothing is power-preserving on average.
     assert float(np.mean(smooth[band])) == pytest.approx(
@@ -408,7 +414,7 @@ def test_smoothing_narrows_variance_of_noisy_spectrum() -> None:
 def test_smoothing_zero_frequency_point_is_copied() -> None:
     f = np.concatenate(([0.0], np.linspace(10.0, 1000.0, 100)))
     v = np.concatenate(([9.0], np.ones(100)))
-    out = ph.signals.fractional_octave_smoothing(f, v, 3.0)
+    out = ph.signals.fractional_octave_smoothing(frequencies=f, values=v, fraction=3.0)
     assert out[0] == 9.0
 
 

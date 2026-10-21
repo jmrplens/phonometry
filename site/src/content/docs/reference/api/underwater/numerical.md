@@ -271,6 +271,7 @@ it to keep everything the fan bracketed.
 FluidSeabed(
     density: float,
     speed_of_sound: float,
+    *,
     water_density: float = 1000.0,
 )
 ```

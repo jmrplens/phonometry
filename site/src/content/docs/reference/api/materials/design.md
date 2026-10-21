@@ -143,8 +143,8 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 plot_qrd_geometry(
     depths: ArrayLike,
     well_width: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     n_repetitions: int = 1,
     fin_width: float | None = None,
     language: str = 'en',

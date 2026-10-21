@@ -250,8 +250,8 @@ $L_v = 20 \log_{10}(v/v_0)$ with `v0` the reference velocity.
 ```python
 velocity_level_from_acceleration(
     peak_acceleration: ArrayLike,
-    frequency: ArrayLike,
     *,
+    frequency: ArrayLike,
     reference: float = 5e-08,
 ) -> np.ndarray
 ```

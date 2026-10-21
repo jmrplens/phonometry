@@ -98,7 +98,7 @@ def test_survey_thresholds() -> None:
     # 125 Hz band +20 over neighbours (>15 low-freq threshold) -> flagged
     # 630 Hz band +6 over neighbours (>5 high-freq threshold) -> flagged
     levels = [40.0, 40.0, 60.0, 40.0, 40.0, 50.0, 56.0, 50.0]
-    flags = environment.assess_tonal_survey(levels, freqs).prominent
+    flags = environment.assess_tonal_survey(levels, frequencies=freqs).prominent
     assert flags[2]  # 125 Hz
     assert flags[6]  # 630 Hz
     assert not flags[0]  # end bands never flagged
@@ -108,7 +108,7 @@ def test_survey_thresholds() -> None:
 def test_survey_below_threshold_not_flagged() -> None:
     freqs = [160.0, 200.0, 250.0]
     levels = [40.0, 45.0, 40.0]  # +5 < 8 dB mid-freq threshold
-    assert not environment.assess_tonal_survey(levels, freqs).prominent[1]
+    assert not environment.assess_tonal_survey(levels, frequencies=freqs).prominent[1]
 
 
 def test_survey_names_both_band_counts() -> None:
@@ -117,13 +117,15 @@ def test_survey_names_both_band_counts() -> None:
         ValueError,
         match=r"assess_tonal_survey: 'levels' .* must each carry one value per band",
     ):
-        environment.assess_tonal_survey([40.0, 60.0, 40.0, 41.0], [100.0, 125.0, 160.0])
+        environment.assess_tonal_survey(
+            [40.0, 60.0, 40.0, 41.0], frequencies=[100.0, 125.0, 160.0]
+        )
 
 
 def test_the_survey_record_reads_its_thresholds_and_differences() -> None:
     """Annex K: 15 dB to 125 Hz, 8 dB to 400 Hz, 5 dB above; NaN at the two ends."""
     survey = environment.assess_tonal_survey(
-        [40.0, 60.0, 40.0, 50.0, 41.0], [100.0, 125.0, 160.0, 500.0, 630.0]
+        [40.0, 60.0, 40.0, 50.0, 41.0], frequencies=[100.0, 125.0, 160.0, 500.0, 630.0]
     )
     assert survey.thresholds_db.tolist() == [15.0, 15.0, 8.0, 5.0, 5.0]
     assert np.isnan(survey.level_differences[0])
@@ -153,7 +155,7 @@ def test_the_survey_plot_draws_the_bands_the_tones_and_what_each_needs(
     import matplotlib.pyplot as plt
 
     survey = environment.assess_tonal_survey(
-        [40.0, 60.0, 40.0, 50.0, 41.0], [100.0, 125.0, 160.0, 500.0, 630.0]
+        [40.0, 60.0, 40.0, 50.0, 41.0], frequencies=[100.0, 125.0, 160.0, 500.0, 630.0]
     )
     ax = survey.plot(language=language)
     try:

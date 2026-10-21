@@ -66,8 +66,8 @@ def _t(text: str, language: str = "en") -> str:
 @overload
 def plot_aperture_geometry(
     depth: float,
-    ax: Axes | None = ...,
     *,
+    ax: Axes | None = ...,
     width_m: float,
     language: str = ...,
     **kwargs: Any,
@@ -77,8 +77,8 @@ def plot_aperture_geometry(
 @overload
 def plot_aperture_geometry(
     depth: float,
-    ax: Axes | None = ...,
     *,
+    ax: Axes | None = ...,
     radius: float,
     language: str = ...,
     **kwargs: Any,
@@ -87,8 +87,8 @@ def plot_aperture_geometry(
 
 def plot_aperture_geometry(
     depth: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     width_m: float | None = None,
     radius: float | None = None,
     language: str = "en",
@@ -208,8 +208,8 @@ def plot_aperture_result_geometry(
 # ---------------------------------------------------------------------------
 def plot_facade_elements(
     elements: Sequence[FacadeElement],
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -321,8 +321,8 @@ def plot_double_wall_geometry(
     mass1: float,
     mass2: float,
     gap_m: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     resonance_frequency: float | None = None,
     language: str = "en",
     **kwargs: Any,

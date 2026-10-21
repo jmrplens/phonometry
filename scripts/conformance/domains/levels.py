@@ -345,7 +345,9 @@ def _chk_long_room_modes() -> Outcome:
 def _chk_long_modal_density() -> Outcome:
     density = float(
         np.asarray(
-            ph.room.room_modal_density(1000.0, (7.0, 5.0, 3.0), speed_of_sound=344.0)
+            ph.room.room_modal_density(
+                frequency=1000.0, dimensions=(7.0, 5.0, 3.0), speed_of_sound=344.0
+            )
         )[()]
     )
     return numeric(34.0, density, 0.5, unit="modes/Hz", places=2)

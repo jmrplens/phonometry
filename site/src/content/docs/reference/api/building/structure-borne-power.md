@@ -209,8 +209,9 @@ only the reference differs.
 
 ```python
 plate_loss_factor(
-    frequency: ArrayLike,
     reverberation_time: ArrayLike,
+    *,
+    frequency: ArrayLike,
 ) -> np.ndarray
 ```
 
@@ -233,10 +234,10 @@ ISO 10848 total loss factor.
 ```python
 reception_plate_power(
     velocity_level: ArrayLike,
-    frequency: ArrayLike,
     mass_per_area: float,
     area: float,
     *,
+    frequency: ArrayLike,
     loss_factor: ArrayLike | None = None,
     reverberation_time: ArrayLike | None = None,
 ) -> StructureBornePowerResult
@@ -332,11 +333,11 @@ per-position velocity levels.
 ```python
 structure_borne_power_level(
     velocity_level: ArrayLike,
-    frequency: ArrayLike,
     mass_per_area: float,
     area: float,
     loss_factor: ArrayLike,
     *,
+    frequency: ArrayLike,
     reference_velocity: float = 1e-09,
 ) -> np.ndarray
 ```

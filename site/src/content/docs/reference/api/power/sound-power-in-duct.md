@@ -277,10 +277,10 @@ $L_{W\mathrm{A}}$ of Annex C in the title. Requires matplotlib
 ```python
 sound_power_in_duct(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     duct_diameter_m: float,
     flow_velocity: float,
     *,
+    frequencies: ArrayLike,
     shield: Literal['sampling-tube', 'nose-cone', 'foam-ball'] = 'sampling-tube',
     microphone_correction: ArrayLike = 0.0,
     shield_correction: ArrayLike = 0.0,

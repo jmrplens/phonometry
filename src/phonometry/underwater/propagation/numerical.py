@@ -297,6 +297,7 @@ class FluidSeabed(RichDisplay):
 
     density: float
     speed_of_sound: float
+    _: KW_ONLY
     water_density: float = 1000.0
 
 

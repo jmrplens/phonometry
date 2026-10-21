@@ -75,9 +75,9 @@ changed one at a time by their associated uncertainty":
 
 ```python
 reciprocity_uncertainty_budget(
-    frequencies: ArrayLike,
     standard_uncertainties_db: Mapping[str, ArrayLike],
     *,
+    frequencies: ArrayLike,
     field: Literal['pressure', 'free'] = 'pressure',
     additional_components_db: Mapping[str, ArrayLike] | None = None,
     coverage_factor: float = 2.0,

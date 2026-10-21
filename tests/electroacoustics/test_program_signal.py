@@ -108,7 +108,9 @@ def test_figure_2_keeps_its_shape_for_any_array() -> None:
 
 def test_figure_2_with_pink_noise_lands_inside_table_ii() -> None:
     frequencies, _, _ = _table()
-    check = ea.check_program_signal(frequencies, _figure_2_band_levels())
+    check = ea.check_program_signal(
+        frequencies=frequencies, band_levels=_figure_2_band_levels()
+    )
     assert check.passes
     assert check.margin_db == pytest.approx(0.178, abs=0.002)
     assert 5000.0 in check.binding_bands_hz
@@ -164,7 +166,9 @@ def test_generator_spectrum_conforms_over_a_long_record(
 ) -> None:
     x = ea.simulated_program_signal(FS, 120.0, spectrum=spectrum, seed=2)
     bands = ph.filters.octave_filter(x, FS, fraction=3, limits=[19.95, 19952.6])
-    check = ea.check_program_signal(bands.frequencies, np.asarray(bands.levels))
+    check = ea.check_program_signal(
+        frequencies=bands.frequencies, band_levels=np.asarray(bands.levels)
+    )
     assert check.passes
     assert check.frequencies.size == 31
 
@@ -172,7 +176,9 @@ def test_generator_spectrum_conforms_over_a_long_record(
 def test_table_spectrum_sits_on_the_table() -> None:
     x = ea.simulated_program_signal(FS, 120.0, seed=4)
     bands = ph.filters.octave_filter(x, FS, fraction=3, limits=[19.95, 19952.6])
-    check = ea.check_program_signal(bands.frequencies, np.asarray(bands.levels))
+    check = ea.check_program_signal(
+        frequencies=bands.frequencies, band_levels=np.asarray(bands.levels)
+    )
     # The middle bands are wide enough for 120 s to settle well inside 0,5 dB.
     middle = (check.frequencies >= 250.0) & (check.frequencies <= 8000.0)
     assert np.max(np.abs(check.deviations_db[middle])) < 0.1
@@ -219,7 +225,7 @@ def test_a_record_too_short_is_refused() -> None:
 
 def test_the_table_itself_passes_with_its_whole_tolerance() -> None:
     frequencies, levels, tolerances = _table()
-    check = ea.check_program_signal(frequencies, levels + 73.0)
+    check = ea.check_program_signal(frequencies=frequencies, band_levels=levels + 73.0)
     assert check.passes
     assert check.offset_db == pytest.approx(-73.0, abs=1e-12)
     assert check.margin_db == pytest.approx(float(np.min(tolerances)), abs=1e-12)
@@ -231,7 +237,7 @@ def test_a_band_on_its_limit_passes() -> None:
     # 20 Hz raised 3,5 dB: the only level that fits is -0,5 dB, which puts it
     # on its +3 dB limit and the 0,5 dB bands of the middle on their -0,5 dB.
     shifted[0] += 3.5
-    check = ea.check_program_signal(frequencies, shifted)
+    check = ea.check_program_signal(frequencies=frequencies, band_levels=shifted)
     assert check.offset_db == pytest.approx(-0.5, abs=1e-12)
     assert check.margin_db == pytest.approx(0.0, abs=1e-12)
     assert check.passes
@@ -241,7 +247,7 @@ def test_a_band_beyond_its_limit_fails_and_is_named() -> None:
     frequencies, levels, _ = _table()
     shifted = levels.copy()
     shifted[14] += 1.5  # 500 Hz, tolerance 0,5 dB
-    check = ea.check_program_signal(frequencies, shifted)
+    check = ea.check_program_signal(frequencies=frequencies, band_levels=shifted)
     assert not check.passes
     assert 500.0 in check.binding_bands_hz
     assert check.margin_db < 0.0
@@ -250,54 +256,56 @@ def test_a_band_beyond_its_limit_fails_and_is_named() -> None:
 def test_exact_band_centres_are_read_as_nominal() -> None:
     frequencies, levels, _ = _table()
     exact = 1000.0 * 10.0 ** (np.round(10.0 * np.log10(frequencies / 1000.0)) / 10.0)
-    check = ea.check_program_signal(exact, levels)
+    check = ea.check_program_signal(frequencies=exact, band_levels=levels)
     np.testing.assert_array_equal(check.frequencies, frequencies)
 
 
 def test_a_partial_spectrum_is_judged_on_its_bands() -> None:
     frequencies, levels, _ = _table()
-    check = ea.check_program_signal(frequencies[:30], levels[:30])
+    check = ea.check_program_signal(
+        frequencies=frequencies[:30], band_levels=levels[:30]
+    )
     assert check.frequencies.size == 30
     assert check.passes
 
 
 def test_check_results_are_read_only() -> None:
     frequencies, levels, _ = _table()
-    check = ea.check_program_signal(frequencies, levels)
+    check = ea.check_program_signal(frequencies=frequencies, band_levels=levels)
     assert not check.band_levels.flags.writeable
     assert not check.frequencies.flags.writeable
 
 
 def test_check_has_no_truth_value() -> None:
     frequencies, levels, _ = _table()
-    check = ea.check_program_signal(frequencies, levels)
+    check = ea.check_program_signal(frequencies=frequencies, band_levels=levels)
     with pytest.raises(TypeError, match="passes"):
         bool(check)
 
 
 def test_a_frequency_outside_table_ii_is_refused() -> None:
     with pytest.raises(ValueError, match="Table II"):
-        ea.check_program_signal([20.0, 22000.0], [0.0, 0.0])
+        ea.check_program_signal(frequencies=[20.0, 22000.0], band_levels=[0.0, 0.0])
 
 
 def test_a_repeated_band_is_refused() -> None:
     with pytest.raises(ValueError, match="more than once"):
-        ea.check_program_signal([1000.0, 1000.0], [0.0, 0.0])
+        ea.check_program_signal(frequencies=[1000.0, 1000.0], band_levels=[0.0, 0.0])
 
 
 def test_one_band_is_refused() -> None:
     with pytest.raises(ValueError, match="At least 2 bands"):
-        ea.check_program_signal([1000.0], [0.0])
+        ea.check_program_signal(frequencies=[1000.0], band_levels=[0.0])
 
 
 def test_lengths_must_agree() -> None:
     with pytest.raises(ValueError, match="equal length"):
-        ea.check_program_signal([1000.0, 1250.0], [0.0])
+        ea.check_program_signal(frequencies=[1000.0, 1250.0], band_levels=[0.0])
 
 
 def test_a_level_must_be_finite() -> None:
     with pytest.raises(ValueError, match="band_levels"):
-        ea.check_program_signal([1000.0, 1250.0], [0.0, np.nan])
+        ea.check_program_signal(frequencies=[1000.0, 1250.0], band_levels=[0.0, np.nan])
 
 
 # ---------------------------------------------------------------------------
@@ -311,7 +319,7 @@ def test_check_plot_draws_the_bands_referred_by_the_offset(language: str) -> Non
     frequencies, levels, tolerances = _table()
     shifted = levels + 73.0
     shifted[0] += 2.9  # 20 Hz near its +3 dB limit moves the centred level
-    check = ea.check_program_signal(frequencies, shifted)
+    check = ea.check_program_signal(frequencies=frequencies, band_levels=shifted)
     assert check.offset_db == pytest.approx(-73.2, abs=1e-12)
     ax = check.plot(language=language)
     table, referred = ax.lines

@@ -205,9 +205,9 @@ def _chk_duct_path_table_14_9() -> Outcome:
     from phonometry.noise_control.hvac import _OCTAVE_BANDS
 
     res = duct_path(
-        _OCTAVE_BANDS,
-        [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
-        [
+        frequencies=_OCTAVE_BANDS,
+        source_level=[90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0],
+        elements=[
             DuctElement(
                 "Elbow", [0, 1, 2, 3, 3, 3, 3, 3], [41, 39, 36, 29, 20, 6, 0, 0]
             ),
@@ -333,10 +333,10 @@ _N421_SURFACES = (
 )
 def _chk_room_to_room_noise_reduction() -> Outcome:
     res = ph.noise_control.room_to_room_transmission(
-        _N421_BANDS,
-        [37.0, 41.0, 48.0, 60.0, 61.0, 61.0],
-        8.0 * 3.0,
-        ph.room.equivalent_absorption_area(_N421_SURFACES),
+        frequencies=_N421_BANDS,
+        transmission_loss=[37.0, 41.0, 48.0, 60.0, 61.0, 61.0],
+        partition_area=8.0 * 3.0,
+        receiving_absorption=ph.room.equivalent_absorption_area(_N421_SURFACES),
         source=ph.noise_control.SourceRoom(level=90.0),
     )
     printed = np.array([37.5, 40.8, 49.0, 62.8, 65.3, 65.9])
@@ -369,10 +369,10 @@ def _chk_room_to_room_chain() -> Outcome:
         (60.0, walls),
     )
     res = ph.noise_control.room_to_room_transmission(
-        _N421_BANDS,
-        [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
-        15.0,
-        ph.room.equivalent_absorption_area(operator),
+        frequencies=_N421_BANDS,
+        transmission_loss=[39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
+        partition_area=15.0,
+        receiving_absorption=ph.room.equivalent_absorption_area(operator),
         source=ph.noise_control.SourceRoom(
             power_level=[105.0, 103.0, 98.0, 108.0, 107.0, 109.0],
             room_constant=ph.room.room_constant(268.0, ph.room.mean_absorption(plant)),
@@ -409,10 +409,10 @@ def _chk_room_to_room_near_the_wall() -> Outcome:
         barron.BARRON_EXAMPLE_7_6_SOURCE_ABSORPTION,
     )
     res = ph.noise_control.room_to_room_transmission(
-        [1000.0],
-        barron.BARRON_EXAMPLE_7_6_TRANSMISSION_LOSS_DB,
-        barron.BARRON_EXAMPLE_7_6_WALL_M2,
-        ph.room.room_constant(
+        frequencies=[1000.0],
+        transmission_loss=barron.BARRON_EXAMPLE_7_6_TRANSMISSION_LOSS_DB,
+        partition_area=barron.BARRON_EXAMPLE_7_6_WALL_M2,
+        receiving_absorption=ph.room.room_constant(
             barron.BARRON_EXAMPLE_7_6_RECEIVING_SURFACE_M2,
             barron.BARRON_EXAMPLE_7_6_RECEIVING_ABSORPTION,
         ),

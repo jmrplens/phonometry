@@ -431,22 +431,44 @@ def test_silencer_self_noise_fractional_passages_raises() -> None:
 
 def test_splitter_silencer_identical_airways_equal_one_passage() -> None:
     """Bies §8.10.5: identical airways give the loss of a single passage."""
-    one = hvac.splitter_silencer_insertion_loss(None, 0.6, 1.5, 0.1, 0.2)
+    one = hvac.splitter_silencer_insertion_loss(
+        frequencies=None,
+        height_m=0.6,
+        length=1.5,
+        airway_widths=0.1,
+        splitter_thickness_m=0.2,
+    )
     four = hvac.splitter_silencer_insertion_loss(
-        None, 0.6, 1.5, [0.1, 0.1, 0.1, 0.1], 0.2
+        frequencies=None,
+        height_m=0.6,
+        length=1.5,
+        airway_widths=[0.1, 0.1, 0.1, 0.1],
+        splitter_thickness_m=0.2,
     )
     assert np.allclose(one.values, four.values)
 
 
 def test_splitter_silencer_airway_is_a_lined_duct_of_half_the_splitter() -> None:
-    one = hvac.splitter_silencer_insertion_loss(None, 0.6, 1.5, 0.1, 0.2)
+    one = hvac.splitter_silencer_insertion_loss(
+        frequencies=None,
+        height_m=0.6,
+        length=1.5,
+        airway_widths=0.1,
+        splitter_thickness_m=0.2,
+    )
     duct = hvac.lined_rectangular_duct_attenuation(None, 0.1, 0.6, 1.5, 0.1)
     assert np.allclose(one.values, duct.values)
 
 
 def test_splitter_silencer_combines_by_eq_8_241() -> None:
     widths = [0.1, 0.3]
-    res = hvac.splitter_silencer_insertion_loss(None, 0.6, 1.5, widths, 0.2)
+    res = hvac.splitter_silencer_insertion_loss(
+        frequencies=None,
+        height_m=0.6,
+        length=1.5,
+        airway_widths=widths,
+        splitter_thickness_m=0.2,
+    )
     per_airway = np.array(
         [
             hvac.lined_rectangular_duct_attenuation(None, w, 0.6, 1.5, 0.1).values
@@ -465,14 +487,14 @@ def test_splitter_silencer_combines_by_eq_8_241() -> None:
 @pytest.mark.parametrize(
     ("args", "match"),
     [
-        ((None, 0.6, 1.5, [], 0.2), r"'airway_widths' must be a non-empty"),
-        ((None, 0.6, 1.5, [0.1, 0.0], 0.2), r"'airway_widths' must be positive"),
-        ((None, 0.6, 1.5, 0.1, 0.0), r"'splitter_thickness_m' must be positive"),
+        ((0.6, 1.5, [], 0.2), r"'airway_widths' must be a non-empty"),
+        ((0.6, 1.5, [0.1, 0.0], 0.2), r"'airway_widths' must be positive"),
+        ((0.6, 1.5, 0.1, 0.0), r"'splitter_thickness_m' must be positive"),
     ],
 )
 def test_splitter_silencer_validation(args: tuple[object, ...], match: str) -> None:
     with pytest.raises(ValueError, match=match):
-        hvac.splitter_silencer_insertion_loss(*args)  # type: ignore[arg-type]
+        hvac.splitter_silencer_insertion_loss(*args, frequencies=None)  # type: ignore[arg-type]
 
 
 def test_diffuser_sound_power_reproduces_the_table_14_9_row() -> None:

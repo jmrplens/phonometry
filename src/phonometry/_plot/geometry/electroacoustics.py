@@ -77,8 +77,8 @@ def _t(text: str, language: str = "en") -> str:
 @overload
 def plot_piston_geometry(
     radius: float,
-    ax: Axes | None = ...,
     *,
+    ax: Axes | None = ...,
     angles_rad: ArrayLike,
     directivity: ArrayLike,
     lobe_label: str | None = ...,
@@ -90,8 +90,8 @@ def plot_piston_geometry(
 @overload
 def plot_piston_geometry(
     radius: float,
-    ax: Axes | None = ...,
     *,
+    ax: Axes | None = ...,
     lobe_label: str | None = ...,
     language: str = ...,
     **kwargs: Any,
@@ -100,8 +100,8 @@ def plot_piston_geometry(
 
 def plot_piston_geometry(
     radius: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     angles_rad: ArrayLike | None = None,
     directivity: ArrayLike | None = None,
     lobe_label: str | None = None,
@@ -237,8 +237,8 @@ def plot_sound_reinforcement_geometry(
     talker_distance: float,
     microphone_distance: float,
     listener_distance: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:

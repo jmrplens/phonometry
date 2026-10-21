@@ -140,7 +140,7 @@ hr = kr * 0.4 * np.roll(hi, 96)
 # Narrow-band absorption, then reduced to one-third octaves over 250-4000 Hz.
 alpha = materials.in_situ_absorption_coefficient(hi, hr)   # 1 - (1/Kr^2)|Hr/Hi|^2
 freq = np.fft.rfftfreq(n, 1.0 / fs)
-centres, band = materials.one_third_octave_absorption(freq, alpha)
+centres, band = materials.one_third_octave_absorption(alpha, frequencies=freq)
 print(round(kr, 4))                # 0.6667
 print(round(float(band[2]), 3))    # 0.84  (alpha = 1 - 0.4^2 = 0.84)
 ```
@@ -322,9 +322,9 @@ one-third-octave bands 250–1600 Hz.
 from phonometry import materials
 
 # Upper usable frequency of a 100 mm tube and the valid spacing window.
-print(round(materials.spot_tube_upper_frequency(0.100, 343.0), 1))      # 1989.4 Hz
+print(round(materials.spot_tube_upper_frequency(0.100, speed_of_sound=343.0), 1))      # 1989.4 Hz
 s_min, s_max = materials.spot_microphone_spacing_bounds(
-    343.0, f_min=220.0, f_max=1800.0)
+    speed_of_sound=343.0, f_min=220.0, f_max=1800.0)
 print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
 ```
 

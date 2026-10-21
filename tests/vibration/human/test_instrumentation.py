@@ -124,7 +124,9 @@ def test_the_phase_band_is_a_separate_question() -> None:
 def test_a_response_equal_to_the_design_goal_passes_everywhere() -> None:
     frequencies = np.array([0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
     design = np.asarray(vibration.weighting_factors("Wk", frequencies))
-    got = vibration.verify_weighting("Wk", frequencies, design)
+    got = vibration.verify_weighting(
+        "Wk", frequencies=frequencies, measured_factors=design
+    )
     assert got.passes
     assert got.worst_deviation_percent == pytest.approx(0.0, abs=1e-9)
     assert got.failing_frequencies_hz.size == 0
@@ -139,8 +141,12 @@ def test_the_acceptance_test_is_the_one_annex_b_prints() -> None:
     """
     frequency = 16.0
     design = float(np.asarray(vibration.weighting_factors("Wk", [frequency]))[0])
-    inside = vibration.verify_weighting("Wk", [frequency], [design * 1.119])
-    outside = vibration.verify_weighting("Wk", [frequency], [design * 1.121])
+    inside = vibration.verify_weighting(
+        "Wk", frequencies=[frequency], measured_factors=[design * 1.119]
+    )
+    outside = vibration.verify_weighting(
+        "Wk", frequencies=[frequency], measured_factors=[design * 1.121]
+    )
     assert inside.passes
     assert not outside.passes
     assert outside.worst_deviation_percent == pytest.approx(12.1, abs=0.05)
@@ -155,12 +161,16 @@ def test_the_tails_constrain_the_response_from_above_only() -> None:
     """
     ft1 = ins.TRANSITION_FREQUENCIES_HZ["Wk"][0]
     frequency = ft1 * 0.5
-    got = vibration.verify_weighting("Wk", [frequency], [0.0])
+    got = vibration.verify_weighting(
+        "Wk", frequencies=[frequency], measured_factors=[0.0]
+    )
     assert got.passes
     assert got.deviation_percent == pytest.approx([-100.0])
 
     design = float(np.asarray(vibration.weighting_factors("Wk", [frequency]))[0])
-    over = vibration.verify_weighting("Wk", [frequency], [design * 1.27])
+    over = vibration.verify_weighting(
+        "Wk", frequencies=[frequency], measured_factors=[design * 1.27]
+    )
     assert not over.passes
 
 
@@ -172,7 +182,9 @@ def test_the_verdict_is_about_the_weighting_and_says_so() -> None:
 
 def test_a_response_of_the_wrong_length_is_refused() -> None:
     with pytest.raises(ValueError, match=r"same shape"):
-        vibration.verify_weighting("Wk", [1.0, 2.0, 4.0], [0.5, 0.6])
+        vibration.verify_weighting(
+            "Wk", frequencies=[1.0, 2.0, 4.0], measured_factors=[0.5, 0.6]
+        )
 
 
 @pytest.mark.parametrize(
@@ -188,13 +200,19 @@ def test_the_measurement_is_checked_before_it_is_judged(
     frequencies: list[float], factors: list[float], match: str
 ) -> None:
     with pytest.raises(ValueError, match=match):
-        vibration.verify_weighting("Wk", frequencies, factors)
+        vibration.verify_weighting(
+            "Wk", frequencies=frequencies, measured_factors=factors
+        )
 
 
 def test_an_unknown_weighting_is_refused_by_every_entry_point() -> None:
     for call in (
-        lambda: vibration.verify_weighting("Wz", [1.0], [1.0]),
-        lambda: vibration.verify_phase_response("Wz", [1.0, 2.0], [0.0, 0.0]),
+        lambda: vibration.verify_weighting(
+            "Wz", frequencies=[1.0], measured_factors=[1.0]
+        ),
+        lambda: vibration.verify_phase_response(
+            "Wz", frequencies=[1.0, 2.0], measured_phase_deg=[0.0, 0.0]
+        ),
         lambda: ins.weighting_tolerance_percent("Wz", [1.0]),
         lambda: ins.phase_tolerance_deg("Wz", [1.0]),
         lambda: ins.indication_tolerance_percent("Wz"),
@@ -226,27 +244,43 @@ def test_the_laboratory_uncertainty_extends_the_deviation_upwards() -> None:
     edge is the whole difference the keyword makes.
     """
     measured = _measured_at("Wk", 16.0, 11.5)
-    assert vibration.verify_weighting("Wk", [16.0], measured).passes
+    assert vibration.verify_weighting(
+        "Wk", frequencies=[16.0], measured_factors=measured
+    ).passes
     extended = vibration.verify_weighting(
-        "Wk", [16.0], measured, expanded_uncertainty_percent=1.0
+        "Wk",
+        frequencies=[16.0],
+        measured_factors=measured,
+        expanded_uncertainty_percent=1.0,
     )
     assert not extended.passes
     assert extended.failing_frequencies_hz == pytest.approx([16.0])
     # And an uncertainty small enough not to reach the limit leaves it standing.
     assert vibration.verify_weighting(
-        "Wk", [16.0], measured, expanded_uncertainty_percent=0.4
+        "Wk",
+        frequencies=[16.0],
+        measured_factors=measured,
+        expanded_uncertainty_percent=0.4,
     ).passes
 
 
 def test_the_laboratory_uncertainty_extends_the_deviation_downwards() -> None:
     """The same sentence read against the -11 % of the same region."""
     measured = _measured_at("Wk", 16.0, -10.5)
-    assert vibration.verify_weighting("Wk", [16.0], measured).passes
+    assert vibration.verify_weighting(
+        "Wk", frequencies=[16.0], measured_factors=measured
+    ).passes
     assert not vibration.verify_weighting(
-        "Wk", [16.0], measured, expanded_uncertainty_percent=1.0
+        "Wk",
+        frequencies=[16.0],
+        measured_factors=measured,
+        expanded_uncertainty_percent=1.0,
     ).passes
     assert vibration.verify_weighting(
-        "Wk", [16.0], measured, expanded_uncertainty_percent=0.4
+        "Wk",
+        frequencies=[16.0],
+        measured_factors=measured,
+        expanded_uncertainty_percent=0.4,
     ).passes
 
 
@@ -260,7 +294,10 @@ def test_the_band_is_not_widened_by_the_uncertainty() -> None:
     lower, upper = ins.weighting_tolerance_percent("Wk", [16.0])
     assert (float(lower[0]), float(upper[0])) == pytest.approx((-11.0, 12.0))
     verdict = vibration.verify_weighting(
-        "Wk", [16.0], _measured_at("Wk", 16.0, 11.5), expanded_uncertainty_percent=1.0
+        "Wk",
+        frequencies=[16.0],
+        measured_factors=_measured_at("Wk", 16.0, 11.5),
+        expanded_uncertainty_percent=1.0,
     )
     assert verdict.deviation_percent == pytest.approx([11.5], abs=1e-9)
     assert verdict.expanded_uncertainty_percent == pytest.approx(1.0)
@@ -270,7 +307,9 @@ def test_no_uncertainty_is_the_default_and_is_recorded() -> None:
     """The bare comparison stays the default, and says that it was one."""
     frequencies = [1.0, 8.0, 63.0]
     design = np.asarray(vibration.weighting_factors("Wd", frequencies))
-    verdict = vibration.verify_weighting("Wd", frequencies, design)
+    verdict = vibration.verify_weighting(
+        "Wd", frequencies=frequencies, measured_factors=design
+    )
     assert verdict.expanded_uncertainty_percent == pytest.approx(0.0)
     assert verdict.passes
 
@@ -285,14 +324,22 @@ def test_the_uncertainty_never_reaches_the_unconstrained_tails() -> None:
     ft1 = ins.TRANSITION_FREQUENCIES_HZ["Wk"][0]
     frequency = ft1 * 0.5
     verdict = vibration.verify_weighting(
-        "Wk", [frequency], [0.0], expanded_uncertainty_percent=5.0
+        "Wk",
+        frequencies=[frequency],
+        measured_factors=[0.0],
+        expanded_uncertainty_percent=5.0,
     )
     assert verdict.passes
     # The upper limit of the same tail is a real limit and is still extended.
     measured = _measured_at("Wk", frequency, 25.5)
-    assert vibration.verify_weighting("Wk", [frequency], measured).passes
+    assert vibration.verify_weighting(
+        "Wk", frequencies=[frequency], measured_factors=measured
+    ).passes
     assert not vibration.verify_weighting(
-        "Wk", [frequency], measured, expanded_uncertainty_percent=1.0
+        "Wk",
+        frequencies=[frequency],
+        measured_factors=measured,
+        expanded_uncertainty_percent=1.0,
     ).passes
 
 
@@ -301,7 +348,10 @@ def test_an_uncertainty_that_is_not_one_is_refused(bad: float) -> None:
     """A negative or non-finite uncertainty is refused, never dropped."""
     with pytest.raises(ValueError, match=r"'expanded_uncertainty_percent'"):
         vibration.verify_weighting(
-            "Wk", [16.0], [1.0], expanded_uncertainty_percent=bad
+            "Wk",
+            frequencies=[16.0],
+            measured_factors=[1.0],
+            expanded_uncertainty_percent=bad,
         )
 
 
@@ -424,7 +474,9 @@ def test_the_wh_phase_at_158_hz_is_the_printed_cell() -> None:
 def test_a_constant_phase_error_is_graded_at_face_value() -> None:
     """Formula (6) on a constant: ``c`` degrees everywhere gives ``c``."""
     frequencies = np.array([1.0, 1.259, 1.585, 2.0])
-    got = vibration.characteristic_phase_deviation(frequencies, np.full(4, 4.5))
+    got = vibration.characteristic_phase_deviation(
+        frequencies=frequencies, phase_deviation_deg=np.full(4, 4.5)
+    )
     assert got == pytest.approx([4.5, 4.5, 4.5])
     assert got.size == frequencies.size - 1
 
@@ -440,7 +492,9 @@ def test_a_constant_group_delay_is_graded_as_zero() -> None:
     frequencies = np.array([10.0 ** (n / 10.0) for n in range(-1, 37)])
     deviation = -0.001 * 360.0 * frequencies  # one millisecond of delay
     assert np.max(np.abs(deviation)) > 1000.0
-    got = vibration.characteristic_phase_deviation(frequencies, deviation)
+    got = vibration.characteristic_phase_deviation(
+        frequencies=frequencies, phase_deviation_deg=deviation
+    )
     assert np.max(np.abs(got)) == pytest.approx(0.0, abs=1e-9)
 
 
@@ -456,7 +510,9 @@ def test_the_characteristic_deviation_belongs_to_the_lower_frequency() -> None:
     ft2 = ins.TRANSITION_FREQUENCIES_HZ["Wh"][1]
     assert frequencies[1] == pytest.approx(ft2)
     design = _design_phase("Wh", frequencies)
-    verdict = vibration.verify_phase_response("Wh", frequencies, design + 9.0)
+    verdict = vibration.verify_phase_response(
+        "Wh", frequencies=frequencies, measured_phase_deg=design + 9.0
+    )
     assert verdict.characteristic_frequencies_hz == pytest.approx(frequencies[:-1])
     assert verdict.tolerance_deg == pytest.approx([12.0, 6.0])
     # 9 degrees of offset is inside the skirt limit and outside the central one.
@@ -468,15 +524,21 @@ def test_the_phase_verdict_turns_at_the_table_5_limit() -> None:
     """The central region allows 6 degrees, and 5,9 is not 6,1."""
     frequencies, _ = _annex_b_grid("Wk")
     design = _design_phase("Wk", frequencies)
-    assert vibration.verify_phase_response("Wk", frequencies, design + 5.9).passes
-    assert not vibration.verify_phase_response("Wk", frequencies, design + 6.1).passes
+    assert vibration.verify_phase_response(
+        "Wk", frequencies=frequencies, measured_phase_deg=design + 5.9
+    ).passes
+    assert not vibration.verify_phase_response(
+        "Wk", frequencies=frequencies, measured_phase_deg=design + 6.1
+    ).passes
 
 
 def test_the_printed_phase_columns_conform_to_table_5() -> None:
     """A meter that is the printed design goal passes the printed criterion."""
     for weighting in ISO8041_1_ANNEX_B_PHASES_DEG:
         frequencies, printed = _annex_b_grid(weighting)
-        verdict = vibration.verify_phase_response(weighting, frequencies, printed)
+        verdict = vibration.verify_phase_response(
+            weighting, frequencies=frequencies, measured_phase_deg=printed
+        )
         assert verdict.passes, weighting
         assert verdict.weighting == weighting
         assert np.max(verdict.characteristic_deviation_deg) < 0.5
@@ -535,7 +597,9 @@ def test_an_inverted_measurement_is_named_rather_than_only_failed() -> None:
     frequencies, _ = _annex_b_grid("Wk")
     design = _design_phase("Wk", frequencies)
     with pytest.warns(HumanVibrationWarning, match=r"H\.2\.3\.4 k\)"):
-        verdict = vibration.verify_phase_response("Wk", frequencies, design + 180.0)
+        verdict = vibration.verify_phase_response(
+            "Wk", frequencies=frequencies, measured_phase_deg=design + 180.0
+        )
     assert not verdict.passes
     assert verdict.characteristic_deviation_deg == pytest.approx(
         np.full(frequencies.size - 1, 180.0)
@@ -544,7 +608,7 @@ def test_an_inverted_measurement_is_named_rather_than_only_failed() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error")
         assert not vibration.verify_phase_response(
-            "Wk", frequencies, design + 20.0
+            "Wk", frequencies=frequencies, measured_phase_deg=design + 20.0
         ).passes
 
 
@@ -552,7 +616,9 @@ def test_the_phase_verdict_carries_what_it_was_reached_from() -> None:
     """Every field of the verdict, on a response 3 degrees off everywhere."""
     frequencies, _ = _annex_b_grid("Wd")
     design = _design_phase("Wd", frequencies)
-    verdict = vibration.verify_phase_response("Wd", frequencies, design + 3.0)
+    verdict = vibration.verify_phase_response(
+        "Wd", frequencies=frequencies, measured_phase_deg=design + 3.0
+    )
     assert verdict.frequencies == pytest.approx(frequencies)
     assert verdict.measured_phase_deg == pytest.approx(design + 3.0)
     assert verdict.design_phase_deg == pytest.approx(design)
@@ -571,7 +637,9 @@ def test_the_phase_verdict_carries_what_it_was_reached_from() -> None:
 def test_a_perfect_phase_response_deviates_by_nothing() -> None:
     frequencies, _ = _annex_b_grid("Wh")
     design = _design_phase("Wh", frequencies)
-    verdict = vibration.verify_phase_response("Wh", frequencies, design)
+    verdict = vibration.verify_phase_response(
+        "Wh", frequencies=frequencies, measured_phase_deg=design
+    )
     assert verdict.passes
     assert np.max(verdict.characteristic_deviation_deg) == pytest.approx(0.0, abs=1e-9)
     assert verdict.peak_deviation_percent == pytest.approx(0.0, abs=1e-9)
@@ -580,8 +648,12 @@ def test_a_perfect_phase_response_deviates_by_nothing() -> None:
 @pytest.mark.parametrize(
     "call",
     [
-        lambda f, p: vibration.characteristic_phase_deviation(f, p),
-        lambda f, p: vibration.verify_phase_response("Wk", f, p),
+        lambda f, p: vibration.characteristic_phase_deviation(
+            frequencies=f, phase_deviation_deg=p
+        ),
+        lambda f, p: vibration.verify_phase_response(
+            "Wk", frequencies=f, measured_phase_deg=p
+        ),
     ],
 )
 def test_formula_6_needs_a_pair_of_ascending_frequencies(call) -> None:  # noqa: ANN001
@@ -604,8 +676,12 @@ def test_formula_6_needs_a_pair_of_ascending_frequencies(call) -> None:  # noqa:
 @pytest.mark.parametrize(
     "call",
     [
-        lambda f, p: vibration.characteristic_phase_deviation(f, p),
-        lambda f, p: vibration.verify_phase_response("Wk", f, p),
+        lambda f, p: vibration.characteristic_phase_deviation(
+            frequencies=f, phase_deviation_deg=p
+        ),
+        lambda f, p: vibration.verify_phase_response(
+            "Wk", frequencies=f, measured_phase_deg=p
+        ),
     ],
 )
 def test_the_phase_measurement_is_checked_before_it_is_judged(call) -> None:  # noqa: ANN001
@@ -874,7 +950,9 @@ def _refused_sweep() -> vibration.WeightingVerification:
     frequencies = 10.0 ** (bands / 10.0)
     measured = vibration.weighting_factors("Wk", frequencies).copy()
     measured[6] *= 0.85
-    return vibration.verify_weighting("Wk", frequencies, measured)
+    return vibration.verify_weighting(
+        "Wk", frequencies=frequencies, measured_factors=measured
+    )
 
 
 def test_the_weighting_plot_paints_a_refusal_red_and_a_pass_green() -> None:
@@ -963,10 +1041,12 @@ def test_the_phase_plot_uses_the_same_pair_as_the_weighting_plot() -> None:
     bands = np.arange(-3, 20)
     frequencies = 10.0 ** (bands / 10.0)
     design = vibration.verify_phase_response(
-        "Wk", frequencies, np.zeros_like(frequencies)
+        "Wk", frequencies=frequencies, measured_phase_deg=np.zeros_like(frequencies)
     ).design_phase_deg
     spare_pole = -np.degrees(np.arctan(frequencies / 100.0))
-    ax = vibration.verify_phase_response("Wk", frequencies, design + spare_pole).plot()
+    ax = vibration.verify_phase_response(
+        "Wk", frequencies=frequencies, measured_phase_deg=design + spare_pole
+    ).plot()
     series = {
         line.get_label(): line
         for line in ax.get_lines()

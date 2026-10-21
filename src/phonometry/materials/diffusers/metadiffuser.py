@@ -392,4 +392,4 @@ def metadiffuser_diffusion_spectrum(
         norm[i] = float(
             normalized_diffusion_coefficient(surface.coefficient, reference.coefficient)
         )
-    return diffusion_spectrum(freqs, raw, normalized=norm)
+    return diffusion_spectrum(frequencies=freqs, diffusion=raw, normalized=norm)

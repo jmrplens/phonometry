@@ -41,10 +41,14 @@ import check_parameter_units as cpu
 
 import phonometry.aircraft
 import phonometry.building
+import phonometry.environment
+import phonometry.io
+import phonometry.noise_control
+import phonometry.room
 import phonometry.signals
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
 
 @pytest.mark.parametrize(
@@ -1038,3 +1042,211 @@ def test_the_notebook_table_reads_a_level_the_way_the_rule_does() -> None:
         != cpu.decibel_head(entry.name, entry.module)
     }
     assert all(cpu.names_a_quantity(name, module) for module, name in disagreements)
+
+
+def _attenuation(
+    frequencies: np.ndarray, height: float, speed_of_sound: float = 343.0
+) -> float:
+    return height + speed_of_sound
+
+
+def _calibrated(x: np.ndarray, calibration_factor: float | None = None) -> float:
+    return 0.0 if calibration_factor is None else calibration_factor
+
+
+def _medium(speed_of_sound: float = 343.0) -> float:
+    return speed_of_sound
+
+
+def _ground(distance: float, *, ground_source: float = 0.0) -> float:
+    return distance + ground_source
+
+
+def _seabed(density: float, water_density: float = 1000.0) -> float:
+    return density / water_density
+
+
+def test_a_condition_is_written_by_name_whatever_its_suffix(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The speed of sound and a calibration factor carry no unit to catch, so
+    the unit half of the rule never saw them: both are reported when a caller
+    can still pass them by position. The first parameter is the subject of
+    the call and stays where it is, and a keyword-only ground factor passes.
+    """
+    for function in (_attenuation, _calibrated, _medium, _ground, _seabed):
+        monkeypatch.setattr(function, "__module__", "phonometry.environment.stub")
+    stub = types.ModuleType("phonometry.stub")
+    stub.__all__ = ["attenuation", "calibrated", "medium", "ground", "seabed"]  # type: ignore[attr-defined]
+    stub.attenuation = _attenuation  # type: ignore[attr-defined]
+    stub.calibrated = _calibrated  # type: ignore[attr-defined]
+    stub.medium = _medium  # type: ignore[attr-defined]
+    stub.ground = _ground  # type: ignore[attr-defined]
+    stub.seabed = _seabed  # type: ignore[attr-defined]
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    _, loose, _ = cpu.offenders()
+    assert sorted((p.qualname, p.name) for p in loose) == [
+        ("attenuation", "speed_of_sound"),
+        ("calibrated", "calibration_factor"),
+        ("seabed", "water_density"),
+    ]
+
+
+def _criterion(levels: np.ndarray, frequencies: np.ndarray | None = None) -> float:
+    return 0.0
+
+
+def _criterion_by_name(
+    levels: np.ndarray, *, frequencies: np.ndarray | None = None
+) -> float:
+    return 0.0
+
+
+def _wavenumber(frequencies: np.ndarray, speed_of_sound: float) -> float:
+    return speed_of_sound
+
+
+def _single_frequency(levels: np.ndarray, frequency: float) -> float:
+    return frequency
+
+
+def _tones(tone_frequencies: np.ndarray, tone_levels: np.ndarray) -> float:
+    return 0.0
+
+
+def _modes(damping_ratio: np.ndarray, damped_natural_frequency_hz: np.ndarray) -> float:
+    return 0.0
+
+
+class _Contour:
+    """A stub record whose method takes its axis beside the levels."""
+
+    def sound_power(self, levels: np.ndarray, frequencies: np.ndarray) -> float:
+        return 0.0
+
+
+def test_a_frequency_axis_beside_its_values_is_written_by_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Two arrays of one length bind either way round without a complaint, so
+    an axis beside the values it labels has to be named, and so has an array
+    whose name ends in a frequency word (``tone_frequencies`` beside the tone
+    levels, a natural frequency per mode beside the damping of each mode). An
+    axis that is the only array, an axis already behind the ``*`` and a single
+    frequency typed as a number pass; a method is held to the rule as a
+    function is.
+    """
+    for function in (
+        _criterion,
+        _criterion_by_name,
+        _wavenumber,
+        _single_frequency,
+        _tones,
+        _modes,
+    ):
+        monkeypatch.setattr(function, "__module__", "phonometry.room.stub")
+    monkeypatch.setattr(_Contour, "__module__", "phonometry.room.stub")
+    stub = types.ModuleType("phonometry.stub")
+    stub.__all__ = [  # type: ignore[attr-defined]
+        "criterion",
+        "criterion_by_name",
+        "wavenumber",
+        "single_frequency",
+        "tones",
+        "modes",
+        "Contour",
+    ]
+    stub.criterion = _criterion  # type: ignore[attr-defined]
+    stub.criterion_by_name = _criterion_by_name  # type: ignore[attr-defined]
+    stub.wavenumber = _wavenumber  # type: ignore[attr-defined]
+    stub.single_frequency = _single_frequency  # type: ignore[attr-defined]
+    stub.tones = _tones  # type: ignore[attr-defined]
+    stub.modes = _modes  # type: ignore[attr-defined]
+    stub.Contour = _Contour  # type: ignore[attr-defined]
+
+    def modules() -> Iterator[tuple[str, types.ModuleType]]:
+        yield "phonometry.stub", stub
+
+    monkeypatch.setattr(cpu, "public_modules", modules)
+    found, stale = cpu.positional_frequency_axes()
+    assert sorted((entry.qualname, axis, values) for entry, axis, values in found) == [
+        ("_Contour.sound_power", "frequencies", ("levels",)),
+        ("criterion", "frequencies", ("levels",)),
+        ("modes", "damped_natural_frequency_hz", ("damping_ratio",)),
+        ("tones", "tone_frequencies", ("tone_levels",)),
+    ]
+    assert stale == []
+
+
+def test_a_frequency_axis_exemption_nothing_needs_is_stale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    key = ("phonometry.room.stub", "criterion_gone")
+    monkeypatch.setitem(cpu.FREQUENCY_AXIS_EXEMPT, key, "a reason")
+    _, stale = cpu.positional_frequency_axes()
+    assert key in stale
+
+
+def test_the_tree_writes_every_frequency_axis_by_name() -> None:
+    assert cpu.positional_frequency_axes() == ([], [])
+
+
+@pytest.mark.parametrize(
+    "annotation",
+    [
+        "ArrayLike",
+        "NDArray[np.float64] | list[float]",
+        "Sequence[float] | np.ndarray",
+        "tuple[float, ...]",
+    ],
+)
+def test_an_array_of_numbers_is_read_off_the_annotation(annotation: str) -> None:
+    assert cpu.holds_an_array(annotation)
+
+
+@pytest.mark.parametrize(
+    "annotation",
+    [
+        "float",
+        "tuple[float, float]",
+        "Sequence[Layer] | Layer",
+        inspect.Parameter.empty,
+    ],
+)
+def test_a_number_a_pair_or_a_sequence_of_records_is_not(annotation: object) -> None:
+    assert not cpu.holds_an_array(annotation)
+
+
+def test_every_condition_on_the_tree_is_written_by_name() -> None:
+    _, loose, _ = cpu.offenders()
+    assert loose == []
+
+
+_OCTAVES = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
+
+
+@pytest.mark.parametrize(
+    ("function", "args"),
+    [
+        (phonometry.io.Signal, (np.zeros(4), 8000, 1.0)),
+        (phonometry.noise_control.LiquidPipe, (0.1, 0.005, 7800.0, 5000.0)),
+        (phonometry.environment.ground_attenuation, (200.0, 2.0, 2.0, _OCTAVES)),
+        (phonometry.signals.sound_exposure, (np.zeros(8), 8, 8.0)),
+        (phonometry.room.noise_criterion, (np.full(8, 40.0), _OCTAVES)),
+        (phonometry.underwater.FluidSeabed, (1800.0, 1700.0, 1025.0)),
+        (phonometry.psychoacoustics.assess_tones, ([200.0], [40.0], [50.0], 2.7)),
+    ],
+)
+def test_a_condition_or_an_axis_passed_by_position_is_refused(
+    function: Callable[..., object], args: tuple[object, ...]
+) -> None:
+    """The keyword rule holds at the call, not only in the guard's walk: a
+    condition or a frequency axis written by position raises instead of
+    binding to the next parameter.
+    """
+    with pytest.raises(TypeError, match=rf"{function.__name__}.*takes .*positional"):
+        function(*args)

@@ -519,8 +519,9 @@ TABLE_F1_OCTAVE_BANDS_HZ = (31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 400
 
 ```python
 tapping_machine_characteristic_power_level(
-    frequency: ArrayLike,
     force_level: ArrayLike,
+    *,
+    frequency: ArrayLike,
 ) -> np.ndarray
 ```
 
@@ -559,9 +560,9 @@ of Table F.1 against its own printed "re 1 pN" caption.
 
 ```python
 tapping_machine_coupling_term(
-    frequency: ArrayLike,
     receiver_mobility: ArrayLike,
     *,
+    frequency: ArrayLike,
     hammer_mass: float = 0.5,
 ) -> np.ndarray
 ```

@@ -262,8 +262,8 @@ Cartesian `(x, y, z)` in metres, in the order of the position numbers.
 ```python
 plot_microphone_positions(
     positions: ArrayLike,
-    ax: Axes3D | None = None,
     *,
+    ax: Axes3D | None = None,
     radius: float | None = None,
     language: str = 'en',
     **kwargs: Any,

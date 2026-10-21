@@ -484,7 +484,7 @@ def test_direct_method_exact_inversion_eq30() -> None:
         t60,
         volume,
         surface,
-        _ROOM_FREQS,
+        frequencies=_ROOM_FREQS,
         temperature_c=theta,
         static_pressure_kpa=ps,
     )
@@ -506,11 +506,11 @@ def test_direct_method_identity_lj_equals_lw_plus_10lg_t() -> None:
     t60 = np.array([2.0, 1.8, 1.5, 1.0, 0.6])
     shift = 10.0 * np.log10(5.0)
     lw = emission.sound_power_reverberation(
-        lp, t60, 200.0, 210.0, _ROOM_FREQS, background_levels=bg,
+        lp, t60, 200.0, 210.0, frequencies=_ROOM_FREQS, background_levels=bg,
         temperature_c=20.0, static_pressure_kpa=100.0,
     )  # fmt: skip
     lj = emission.sound_energy_reverberation(
-        lp + shift, t60, 200.0, 210.0, _ROOM_FREQS, background_levels=bg,
+        lp + shift, t60, 200.0, 210.0, frequencies=_ROOM_FREQS, background_levels=bg,
         integration_time=5.0, temperature_c=20.0, static_pressure_kpa=100.0,
     )  # fmt: skip
     np.testing.assert_allclose(lj.sound_energy_level, lw.sound_power_level + shift)
@@ -539,7 +539,7 @@ def test_room_k1i_uses_the_frequency_dependent_criterion_on_the_exposure() -> No
             1.5,
             200.0,
             210.0,
-            freqs,
+            frequencies=freqs,
             background_levels=bg,
             integration_time=10.0,
         )
@@ -553,9 +553,16 @@ def test_room_per_event_axis_and_encompassing_measurement_agree() -> None:
     """Eq. (22) over five equal events and Eq. (23) on their energy sum coincide."""
     single = np.full((6, 5), 85.0)
     per_event = np.repeat(single[np.newaxis], 5, axis=0)
-    a = emission.sound_energy_reverberation(per_event, 1.5, 200.0, 210.0, _ROOM_FREQS)
+    a = emission.sound_energy_reverberation(
+        per_event, 1.5, 200.0, 210.0, frequencies=_ROOM_FREQS
+    )
     b = emission.sound_energy_reverberation(
-        single + 10.0 * np.log10(5.0), 1.5, 200.0, 210.0, _ROOM_FREQS, n_events=5
+        single + 10.0 * np.log10(5.0),
+        1.5,
+        200.0,
+        210.0,
+        frequencies=_ROOM_FREQS,
+        n_events=5,
     )
     np.testing.assert_allclose(a.sound_energy_level, b.sound_energy_level)
     np.testing.assert_allclose(a.mean_event_level, 85.0)
@@ -566,30 +573,35 @@ def test_room_per_event_axis_and_encompassing_measurement_agree() -> None:
 def test_room_refusals() -> None:
     with pytest.raises(ValueError, match="'levels' already carries"):
         emission.sound_energy_reverberation(
-            np.full((5, 6, 5), 80.0), 1.5, 200.0, 210.0, _ROOM_FREQS, n_events=5
+            np.full((5, 6, 5), 80.0),
+            1.5,
+            200.0,
+            210.0,
+            frequencies=_ROOM_FREQS,
+            n_events=5,
         )
     with pytest.raises(ValueError, match="'levels' must be a 1D spectrum"):
         emission.sound_energy_reverberation(
-            np.zeros((2, 2, 2, 2)), 1.5, 200.0, 210.0, _ROOM_FREQS
+            np.zeros((2, 2, 2, 2)), 1.5, 200.0, 210.0, frequencies=_ROOM_FREQS
         )
     with pytest.raises(ValueError, match="'levels' must contain only finite"):
         emission.sound_energy_reverberation(
-            np.array([np.nan] * 5), 1.5, 200.0, 210.0, _ROOM_FREQS
+            np.array([np.nan] * 5), 1.5, 200.0, 210.0, frequencies=_ROOM_FREQS
         )
     with pytest.raises(ValueError, match="'integration_time' .* is required"):
         emission.sound_energy_reverberation(
-            np.full(5, 80.0), 1.5, 200.0, 210.0, _ROOM_FREQS,
+            np.full(5, 80.0), 1.5, 200.0, 210.0, frequencies=_ROOM_FREQS,
             background_levels=np.full(5, 60.0),
         )  # fmt: skip
     with pytest.raises(
         ValueError, match="'volume' and 'surface_area' must be positive"
     ):
         emission.sound_energy_reverberation(
-            np.full(5, 80.0), 1.5, 0.0, 210.0, _ROOM_FREQS
+            np.full(5, 80.0), 1.5, 0.0, 210.0, frequencies=_ROOM_FREQS
         )
     with pytest.raises(ValueError, match="'frequencies' length must match"):
         emission.sound_energy_reverberation(
-            np.full(5, 80.0), 1.5, 200.0, 210.0, [1000.0]
+            np.full(5, 80.0), 1.5, 200.0, 210.0, frequencies=[1000.0]
         )
 
 
@@ -667,7 +679,7 @@ def test_room_result_rejects_inconsistent_fields() -> None:
     import dataclasses
 
     base = emission.sound_energy_reverberation(
-        np.full(5, 80.0), 1.5, 200.0, 210.0, _ROOM_FREQS
+        np.full(5, 80.0), 1.5, 200.0, 210.0, frequencies=_ROOM_FREQS
     )
     with pytest.raises(ValueError, match="'method' must be one of"):
         dataclasses.replace(base, method="survey")
@@ -691,7 +703,7 @@ def test_room_result_rejects_inconsistent_fields() -> None:
 def test_octave_band_levels_three_equal_thirds_add_10lg3() -> None:
     """Eq. (F.4): three equal thirds sum to L + 10 lg 3 = L + 4.7712 dB."""
     thirds = np.array([800.0, 1000.0, 1250.0])
-    freqs, levels = emission.octave_band_levels(np.full(3, 90.0), thirds)
+    freqs, levels = emission.octave_band_levels(np.full(3, 90.0), frequencies=thirds)
     np.testing.assert_allclose(freqs, [1000.0])
     assert levels[0] == pytest.approx(90.0 + 4.771213, abs=1e-5)
 
@@ -705,7 +717,7 @@ def test_octave_band_levels_group_by_table_f1() -> None:
          1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000], dtype=float,
     )  # fmt: skip
     levels = np.arange(24, dtype=float)
-    freqs, out = emission.octave_band_levels(levels, thirds)
+    freqs, out = emission.octave_band_levels(levels, frequencies=thirds)
     np.testing.assert_allclose(freqs, [63, 125, 250, 500, 1000, 2000, 4000, 8000])
     expected = [
         10.0 * np.log10(np.sum(10.0 ** (0.1 * levels[3 * i : 3 * i + 3])))
@@ -715,14 +727,14 @@ def test_octave_band_levels_group_by_table_f1() -> None:
     # Order of the input does not matter, only membership.
     rng = np.random.default_rng(1)
     perm = rng.permutation(24)
-    _, shuffled = emission.octave_band_levels(levels[perm], thirds[perm])
+    _, shuffled = emission.octave_band_levels(levels[perm], frequencies=thirds[perm])
     np.testing.assert_allclose(shuffled, expected)
 
 
 def test_octave_band_levels_several_spectra_on_the_last_axis() -> None:
     thirds = np.array([400.0, 500.0, 630.0, 800.0, 1000.0, 1250.0])
     levels = np.array([[80.0] * 6, [70.0] * 6])
-    freqs, out = emission.octave_band_levels(levels, thirds)
+    freqs, out = emission.octave_band_levels(levels, frequencies=thirds)
     assert out.shape == (2, 2)
     np.testing.assert_allclose(freqs, [500.0, 1000.0])
     np.testing.assert_allclose(out[1], 70.0 + 10.0 * np.log10(3.0))
@@ -732,17 +744,19 @@ def test_octave_band_levels_refusals() -> None:
     with pytest.raises(
         ValueError, match="three one-third-octave bands of every octave"
     ):
-        emission.octave_band_levels(np.zeros(2), [800.0, 1000.0])
+        emission.octave_band_levels(np.zeros(2), frequencies=[800.0, 1000.0])
     with pytest.raises(ValueError, match="'frequencies' must be nominal"):
-        emission.octave_band_levels(np.zeros(3), [900.0, 1000.0, 1250.0])
+        emission.octave_band_levels(np.zeros(3), frequencies=[900.0, 1000.0, 1250.0])
     with pytest.raises(ValueError, match="'frequencies' must not repeat"):
-        emission.octave_band_levels(np.zeros(3), [1000.0, 1000.0, 1250.0])
+        emission.octave_band_levels(np.zeros(3), frequencies=[1000.0, 1000.0, 1250.0])
     with pytest.raises(ValueError, match="'levels' must carry one value per band"):
-        emission.octave_band_levels(np.zeros(2), [800.0, 1000.0, 1250.0])
+        emission.octave_band_levels(np.zeros(2), frequencies=[800.0, 1000.0, 1250.0])
     with pytest.raises(ValueError, match="'levels' must contain only finite"):
-        emission.octave_band_levels([np.nan, 0.0, 0.0], [800.0, 1000.0, 1250.0])
+        emission.octave_band_levels(
+            [np.nan, 0.0, 0.0], frequencies=[800.0, 1000.0, 1250.0]
+        )
     with pytest.raises(ValueError, match="'frequencies' must be a non-empty 1-D"):
-        emission.octave_band_levels(np.zeros((1, 0)), [])
+        emission.octave_band_levels(np.zeros((1, 0)), frequencies=[])
 
 
 # --------------------------------------------------------------------------
@@ -761,7 +775,7 @@ def test_plot_bars_match_lj_and_title_carries_lja() -> None:
     plt.close("all")
 
     room = emission.sound_energy_reverberation(
-        np.full((6, 5), 80.0), 1.5, 200.0, 210.0, _ROOM_FREQS
+        np.full((6, 5), 80.0), 1.5, 200.0, 210.0, frequencies=_ROOM_FREQS
     )
     ax = room.plot()
     assert "ISO 3741" in ax.get_title()

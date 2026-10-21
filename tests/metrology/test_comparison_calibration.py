@@ -246,7 +246,12 @@ def test_budget_refuses_a_combination_its_columns_do_not_give() -> None:
 # --------------------------------------------------------------------------
 def test_interchange_cancels_channel_gains_source_drift_and_asymmetry() -> None:
     first, second = _interchange_readings()
-    result = metrology.simultaneous_comparison(_F, _L_REF, first, second)
+    result = metrology.simultaneous_comparison(
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
+    )
     np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
     assert result.excitation == "simultaneous"
     assert result.standard == "IEC 61094-5:2016"
@@ -260,10 +265,10 @@ def test_d2_in_linear_form_is_the_level_form() -> None:
     first = np.zeros(_F.size)
     second = 2.0 * 20.0 * np.log10(r_v)
     result = metrology.simultaneous_comparison(
-        _F,
-        _L_REF,
-        first,
-        second,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
         pressure_level_difference=20.0 * np.log10(r_p),
     )
     np.testing.assert_allclose(
@@ -275,7 +280,10 @@ def test_repeats_are_averaged_and_counted() -> None:
     first, second = _interchange_readings()
     noise = np.array([[0.004], [-0.002], [-0.002]])
     result = metrology.simultaneous_comparison(
-        _F, _L_REF, first + noise, second - noise
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first + noise,
+        interchanged_channel_difference=second - noise,
     )
     assert result.n_determinations == 3
     np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
@@ -284,12 +292,21 @@ def test_repeats_are_averaged_and_counted() -> None:
 def test_pressure_calibration_refuses_to_skip_the_interchange() -> None:
     first, _ = _interchange_readings()
     with pytest.raises(ValueError, match=r"IEC 61094-5 5\.1\.2"):
-        metrology.simultaneous_comparison(_F, _L_REF, first)
+        metrology.simultaneous_comparison(
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=first,
+        )
 
 
 def test_free_field_simultaneous_without_interchange_reads_the_difference() -> None:
     difference = _L_REF - _L_TEST
-    result = metrology.simultaneous_comparison(_F, _L_REF, difference, field="free")
+    result = metrology.simultaneous_comparison(
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=difference,
+        field="free",
+    )
     np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
     assert result.standard == "IEC 61094-8:2012"
 
@@ -299,7 +316,12 @@ def test_repeats_that_disagree_in_number_are_refused() -> None:
     rows_first = np.vstack([first, first])
     rows_second = np.vstack([second, second, second])
     with pytest.raises(ValueError, match=r"same number of determinations"):
-        metrology.simultaneous_comparison(_F, _L_REF, rows_first, rows_second)
+        metrology.simultaneous_comparison(
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=rows_first,
+            interchanged_channel_difference=rows_second,
+        )
 
 
 # --------------------------------------------------------------------------
@@ -311,10 +333,10 @@ def test_monitor_ratio_cancels_a_drifting_source() -> None:
     field_test = field_ref + np.array([0.3, -0.2, 0.15, 0.4, -0.35])
     monitor_gain = -12.5
     result = metrology.sequential_comparison(
-        _F,
-        _L_REF,
-        _L_REF + field_ref,
-        _L_TEST + field_test,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + field_ref,
+        test_output_level=_L_TEST + field_test,
         monitor=metrology.MonitorReadings(
             reference_level=monitor_gain + field_ref,
             test_level=monitor_gain + field_test,
@@ -326,7 +348,12 @@ def test_monitor_ratio_cancels_a_drifting_source() -> None:
 
 
 def test_without_a_monitor_the_readings_are_differenced() -> None:
-    result = metrology.sequential_comparison(_F, _L_REF, _L_REF + 90.0, _L_TEST + 90.0)
+    result = metrology.sequential_comparison(
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + 90.0,
+        test_output_level=_L_TEST + 90.0,
+    )
     np.testing.assert_allclose(result.sensitivity_level, _L_TEST, atol=1e-12)
 
 
@@ -337,10 +364,10 @@ def test_monitor_levels_disagreeing_in_determinations_are_refused() -> None:
     )
     with pytest.raises(ValueError, match=r"same number of determinations"):
         metrology.sequential_comparison(
-            _F,
-            _L_REF,
-            _L_REF + 94.0,
-            _L_TEST + 94.0,
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            reference_output_level=_L_REF + 94.0,
+            test_output_level=_L_TEST + 94.0,
             monitor=monitor,
         )
 
@@ -388,10 +415,10 @@ def test_environmental_corrections_go_on_the_reference_and_off_the_result() -> N
         temperature_coefficient_db_per_k=-0.004,
     )
     result = metrology.simultaneous_comparison(
-        _F,
-        _L_REF,
-        first,
-        second,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
         reference_environment=reference_env,
         test_environment=test_env,
     )
@@ -415,7 +442,11 @@ def test_environmental_correction_at_other_frequencies_is_refused() -> None:
     )
     with pytest.raises(ValueError, match=r"'reference_environment' was made at 2"):
         metrology.simultaneous_comparison(
-            _F, _L_REF, first, second, reference_environment=env
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=first,
+            interchanged_channel_difference=second,
+            reference_environment=env,
         )
 
 
@@ -424,17 +455,17 @@ def _compare(excitation: str, **kwargs: object) -> metrology.ComparisonCalibrati
     if excitation == "simultaneous":
         first, second = _interchange_readings()
         return metrology.simultaneous_comparison(
-            _F,
-            _L_REF,
-            first,
-            second,
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=first,
+            interchanged_channel_difference=second,
             **kwargs,  # type: ignore[arg-type]
         )
     return metrology.sequential_comparison(
-        _F,
-        _L_REF,
-        _L_REF + 94.0,
-        _L_TEST + 94.0,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + 94.0,
+        test_output_level=_L_TEST + 94.0,
         **kwargs,  # type: ignore[arg-type]
     )
 
@@ -532,7 +563,11 @@ def _compare_on_thirds(
     """A calibration at the exact one-third-octave frequencies."""
     level = np.full(_EXACT_THIRDS.size, -38.0)
     return metrology.sequential_comparison(
-        _EXACT_THIRDS, level, level + 94.0, level + 106.0, reference_environment=env
+        frequencies=_EXACT_THIRDS,
+        reference_sensitivity_level=level,
+        reference_output_level=level + 94.0,
+        test_output_level=level + 106.0,
+        reference_environment=env,
     )
 
 
@@ -647,10 +682,10 @@ def test_an_unknown_field_is_named_before_the_free_field_difference(
 def test_free_field_difference_is_added_to_a_pressure_calibrated_reference() -> None:
     difference = np.array([0.0, 0.08, 0.2, 0.85, 2.45])
     result = metrology.sequential_comparison(
-        _F,
-        _L_REF,
-        _L_REF + difference + 94.0,
-        _L_TEST + 94.0,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + difference + 94.0,
+        test_output_level=_L_TEST + 94.0,
         field="free",
         reference_free_field_difference=difference,
     )
@@ -661,7 +696,11 @@ def test_free_field_difference_on_a_pressure_calibration_is_refused() -> None:
     first, second = _interchange_readings()
     with pytest.raises(ValueError, match=r"IEC 61094-8 Table 1"):
         metrology.simultaneous_comparison(
-            _F, _L_REF, first, second, reference_free_field_difference=0.1
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=first,
+            interchanged_channel_difference=second,
+            reference_free_field_difference=0.1,
         )
 
 
@@ -678,10 +717,10 @@ def test_a_correction_named_twice_is_refused() -> None:
     named = {"reference environment": 0.01}
     with pytest.raises(ValueError, match=r"repeats the correction"):
         metrology.simultaneous_comparison(
-            _F,
-            _L_REF,
-            first,
-            second,
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=first,
+            interchanged_channel_difference=second,
             reference_environment=env,
             corrections=named,
         )
@@ -719,10 +758,10 @@ def test_jig_correction_enters_as_a_named_correction() -> None:
     keep = slice(1, None)
     jig = metrology.jig_diameter_correction(frequencies)
     result = metrology.simultaneous_comparison(
-        frequencies,
-        _L_REF[keep],
-        first[keep],
-        second[keep],
+        frequencies=frequencies,
+        reference_sensitivity_level=_L_REF[keep],
+        channel_difference=first[keep],
+        interchanged_channel_difference=second[keep],
         corrections={"WS3 in the jig (Table A.1)": jig.correction},
     )
     np.testing.assert_allclose(
@@ -766,7 +805,11 @@ def test_region_refuses_a_window_that_is_not_positive() -> None:
 def test_results_publish_read_only_columns() -> None:
     first, second = _interchange_readings()
     result = metrology.simultaneous_comparison(
-        _F, _L_REF, first, second, expanded_uncertainty_db=0.09
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
+        expanded_uncertainty_db=0.09,
     )
     for column in (
         result.frequencies,
@@ -787,14 +830,24 @@ def test_calibration_refuses_a_negative_uncertainty() -> None:
         ValueError, match=r"'expanded_uncertainty_db' must be non-negative"
     ):
         metrology.simultaneous_comparison(
-            _F, _L_REF, first, second, expanded_uncertainty_db=-0.1
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=first,
+            interchanged_channel_difference=second,
+            expanded_uncertainty_db=-0.1,
         )
 
 
 def test_calibration_refuses_an_unknown_field() -> None:
     first, second = _interchange_readings()
     with pytest.raises(ValueError, match=r"'field' must be one of"):
-        metrology.simultaneous_comparison(_F, _L_REF, first, second, field="diffuse")
+        metrology.simultaneous_comparison(
+            frequencies=_F,
+            reference_sensitivity_level=_L_REF,
+            channel_difference=first,
+            interchanged_channel_difference=second,
+            field="diffuse",
+        )
 
 
 def test_environmental_correction_needs_the_coefficients_of_the_microphone() -> None:
@@ -817,13 +870,16 @@ def test_iec61183_diffuse_field_comparison_uses_the_shared_model() -> None:
         random_incidence._output_level_difference_db is cc._output_level_difference_db
     )
     result = metrology.diffuse_field_sensitivity(
-        [1000.0, 2000.0],
-        [94.3, 94.6],
-        [94.0, 94.1],
+        frequencies=[1000.0, 2000.0],
+        indicated_level=[94.3, 94.6],
+        reference_indicated_level=[94.0, 94.1],
         reference_random_incidence_level=[-26.0, -26.2],
     )
     expected = metrology.sequential_comparison(
-        [1000.0, 2000.0], [-26.0, -26.2], [94.0, 94.1], [94.3, 94.6]
+        frequencies=[1000.0, 2000.0],
+        reference_sensitivity_level=[-26.0, -26.2],
+        reference_output_level=[94.0, 94.1],
+        test_output_level=[94.3, 94.6],
     )
     np.testing.assert_allclose(
         result.diffuse_field_level, expected.sensitivity_level, atol=1e-12
@@ -836,7 +892,11 @@ def test_iec61183_diffuse_field_comparison_uses_the_shared_model() -> None:
 def test_calibration_plot_draws_the_band_and_both_levels() -> None:
     first, second = _interchange_readings()
     result = metrology.simultaneous_comparison(
-        _F, _L_REF, first, second, expanded_uncertainty_db=0.09
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=first,
+        interchanged_channel_difference=second,
+        expanded_uncertainty_db=0.09,
     )
     fig, ax = plt.subplots()
     result.plot(ax)
@@ -850,9 +910,12 @@ def test_calibration_plot_draws_the_band_and_both_levels() -> None:
     np.testing.assert_allclose(ax.get_lines()[0].get_ydata(), _L_TEST, atol=1e-12)
     plt.close(fig)
     fig, ax = plt.subplots()
-    metrology.simultaneous_comparison(_F, _L_REF, _L_REF - _L_TEST, field="free").plot(
-        ax, language="es"
-    )
+    metrology.simultaneous_comparison(
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        channel_difference=_L_REF - _L_TEST,
+        field="free",
+    ).plot(ax, language="es")
     assert ax.get_title() == "Sensibilidad en campo libre por comparación (IEC 61094-8)"
     assert len(ax.collections) == 0
     plt.close(fig)
@@ -865,10 +928,10 @@ def test_free_field_plot_draws_the_reference_free_field_level() -> None:
     """
     difference = np.array([0.0, 0.05, 0.12, 0.3, 0.7])
     result = metrology.sequential_comparison(
-        _F,
-        _L_REF,
-        _L_REF + difference + 74.0,
-        _L_TEST + 74.0,
+        frequencies=_F,
+        reference_sensitivity_level=_L_REF,
+        reference_output_level=_L_REF + difference + 74.0,
+        test_output_level=_L_TEST + 74.0,
         field="free",
         reference_free_field_difference=difference,
     )

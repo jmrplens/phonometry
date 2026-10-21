@@ -1809,11 +1809,11 @@ fall within this time too.
 
 ```python
 sequential_comparison(
-    frequencies: ArrayLike,
     reference_sensitivity_level: ArrayLike,
     reference_output_level: ArrayLike,
     test_output_level: ArrayLike,
     *,
+    frequencies: ArrayLike,
     monitor: MonitorReadings | None = None,
     field: Literal['pressure', 'free'] = 'pressure',
     pressure_level_difference: ArrayLike = 0.0,
@@ -1931,11 +1931,11 @@ to [`sequential_comparison`](/phonometry/reference/api/metrology/comparison-cali
 
 ```python
 simultaneous_comparison(
-    frequencies: ArrayLike,
     reference_sensitivity_level: ArrayLike,
     channel_difference: ArrayLike,
     interchanged_channel_difference: ArrayLike | None = None,
     *,
+    frequencies: ArrayLike,
     field: Literal['pressure', 'free'] = 'pressure',
     pressure_level_difference: ArrayLike = 0.0,
     corrections: Mapping[str, ArrayLike] | None = None,
@@ -2057,8 +2057,9 @@ on the two microphones differ in phase. Pass one to
 
 ```python
 stepped_sine_impulse_response(
-    frequencies: ArrayLike,
     response: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> SteppedSineImpulseResponse
 ```
 

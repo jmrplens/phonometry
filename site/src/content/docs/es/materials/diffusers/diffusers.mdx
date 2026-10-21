@@ -293,7 +293,7 @@ freqs = np.array([250, 315, 400, 500, 630, 800, 1000,
 alpha_s = np.full_like(freqs, 0.10)
 alpha_spec = 0.11 + 0.75 * (np.log10(freqs / 250) / np.log10(4000 / 250))
 
-result = materials.scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
+result = materials.scattering_coefficient_spectrum(alpha_spec, alpha_s, frequencies=freqs)
 print(np.round(result.scattering[[0, 6, 12]], 3))   # [0.011 0.428 0.844]
 result.plot()   # s(f) en eje de frecuencia logarítmico, de 0 a 1 (requiere matplotlib)
 ```
@@ -325,7 +325,7 @@ freqs = np.array([250, 315, 400, 500, 630, 800, 1000,
                   1250, 1600, 2000, 2500, 3150, 4000], float)
 alpha_s = np.full_like(freqs, 0.10)
 alpha_spec = 0.11 + 0.75 * (np.log10(freqs / 250) / np.log10(4000 / 250))
-result = materials.scattering_coefficient_spectrum(freqs, alpha_spec, alpha_s)
+result = materials.scattering_coefficient_spectrum(alpha_spec, alpha_s, frequencies=freqs)
 
 # result es el ScatteringResult calculado arriba. En una línea:
 result.plot(language="es")
@@ -906,7 +906,7 @@ from phonometry import materials
 # random_incidence_diffusion (apartado 8.4).
 freqs = np.array([250, 500, 1000, 2000, 4000], float)
 d = np.array([0.30, 0.45, 0.60, 0.75, 0.88])
-spectrum = materials.diffusion_spectrum(freqs, d)
+spectrum = materials.diffusion_spectrum(d, frequencies=freqs)
 spectrum.plot()    # d(f) en el eje de bandas (requiere matplotlib)
 spectrum.report("difusion.pdf")   # ficha de una página (requiere phonometry[report])
 ```

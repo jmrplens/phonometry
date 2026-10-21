@@ -587,8 +587,8 @@ airborne problem, so no separate search is duplicated.
 ```python
 weighted_impact_rating_extended(
     values_by_band: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray | None = None,
     *,
+    frequencies: Sequence[float] | np.ndarray | None = None,
     one_decimal: bool = False,
 ) -> ExtendedImpactRatingResult
 ```
@@ -664,8 +664,8 @@ No. 2. Input values are first reduced to one decimal place
 ```python
 weighted_rating_extended(
     values_by_band: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray | None = None,
     *,
+    frequencies: Sequence[float] | np.ndarray | None = None,
     one_decimal: bool = False,
 ) -> ExtendedWeightedRatingResult
 ```
@@ -706,8 +706,8 @@ Annex B requires for the uncertainty of single-number values.
 ```python
 weighted_reduction_improvement(
     delta_r: Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray | None = None,
     *,
+    frequencies: Sequence[float] | np.ndarray | None = None,
     basic_element: Literal['heavy_wall', 'heavy_floor', 'lightweight_wall'] = 'heavy_wall',
     one_decimal: bool = False,
 ) -> ReductionImprovementRating

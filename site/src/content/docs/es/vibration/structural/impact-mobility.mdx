@@ -644,7 +644,7 @@ print(over.passes, round(over.peak, 1), round(over.headroom_db, 1))   # True 47.
 **Concordancia entre canales (8.1).** Una misma señal de banda ancha en los dos
 canales, la respuesta en frecuencia entre ellos estimada, por ejemplo con
 `phonometry.electroacoustics.frequency_response.transfer_function`, y
-`verify_channel_match(frequencies, response, frequency_range_hz=...)` pide la
+`verify_channel_match(response, frequencies=frequencies, frequency_range_hz=...)` pide la
 unidad con ±5 % y fase nula con ±5° en todo el rango. Es la única comprobación
 de esta página que juzga el instrumento y no el registro, de ahí `verify_` en
 lugar de `check_`.

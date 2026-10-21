@@ -174,10 +174,7 @@ def _from_receptance(
 
 
 def convert_frf(
-    value: ArrayLike,
-    frequency: ArrayLike,
-    source: str,
-    target: str,
+    value: ArrayLike, source: str, target: str, *, frequency: ArrayLike
 ) -> np.ndarray:
     r"""Convert a frequency-response function between any two kinds (Table 1).
 
@@ -267,7 +264,7 @@ def sdof_mobility(
     :return: The complex mobility ``Y``, in m/(N.s).
     """
     h = sdof_receptance(frequency, mass, stiffness, damping)
-    return convert_frf(h, frequency, "receptance", "mobility")
+    return convert_frf(h, frequency=frequency, source="receptance", target="mobility")
 
 
 def sdof_accelerance(
@@ -282,7 +279,9 @@ def sdof_accelerance(
     :return: The complex accelerance ``A``, in 1/kg.
     """
     h = sdof_receptance(frequency, mass, stiffness, damping)
-    return convert_frf(h, frequency, "receptance", "accelerance")
+    return convert_frf(
+        h, frequency=frequency, source="receptance", target="accelerance"
+    )
 
 
 def resonance_frequency(mass: float, stiffness: float) -> float:
@@ -420,9 +419,9 @@ class RigidMassCalibrationResult(OwnsArrays):
 
 def verify_rigid_mass_calibration(
     frf: ArrayLike,
-    frequencies: ArrayLike,
     mass: float,
     *,
+    frequencies: ArrayLike,
     quantity: str = "accelerance",
 ) -> RigidMassCalibrationResult:
     r"""Verify an operational calibration on a rigid mass (ISO 7626-2, 7.5.2).
@@ -591,7 +590,9 @@ class MobilityResult(OwnsArrays):
         impedance :math:`1/Y_{ij}`, not the blocked matrix impedance of Table 1
         (which does not invert element-wise).
         """
-        return convert_frf(self.mobility, self.frequencies, "mobility", target)
+        return convert_frf(
+            self.mobility, frequency=self.frequencies, source="mobility", target=target
+        )
 
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any

@@ -337,7 +337,9 @@ def test_subset_spectrum_renders_missing_bands(tmp_path: Path) -> None:
     freqs = [500.0, 1000.0, 2000.0, 4000.0, 8000.0]
     levels = [40.0, 35.0, 30.0, 27.0, 22.0]
     out = tmp_path / "subset.pdf"
-    rn.noise_criterion(levels, freqs).report(str(out), metadata=_full_metadata())
+    rn.noise_criterion(levels, frequencies=freqs).report(
+        str(out), metadata=_full_metadata()
+    )
     assert_one_page(str(out))
     text = _extract_text(str(out))
     assert "—" in text  # the unmeasured low bands are shown as an em dash

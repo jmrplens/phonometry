@@ -164,7 +164,7 @@ partitions = {
 }
 for name, tl in partitions.items():
     res = noise_control.room_to_room_transmission(
-        bands, tl, 8.0 * 3.0, receiving,
+        tl, 8.0 * 3.0, receiving, frequencies=bands,
         source=noise_control.SourceRoom(level=90.0), label=name,
     )
     print(f"{name:44s} {np.round(res.noise_reduction, 1)}")
@@ -204,7 +204,7 @@ import matplotlib.pyplot as plt
 # Una línea por muro: el RoomToRoomResult dibuja los dos espectros, la curva
 # de criterio y la reducción de ruido frente a la pérdida por transmisión.
 noise_control.room_to_room_transmission(
-    bands, partitions["Ladrillo enfoscado de 125 mm"], 8.0 * 3.0, receiving,
+    partitions["Ladrillo enfoscado de 125 mm"], 8.0 * 3.0, receiving, frequencies=bands,
     source=noise_control.SourceRoom(level=90.0),
 ).plot(language="es")
 plt.show()
@@ -212,7 +212,7 @@ plt.show()
 # A mano: la separación que muestra cada muro, y el recinto que hay detrás.
 fig, (top, bottom) = plt.subplots(2, 1, sharex=True)
 for name, tl in partitions.items():
-    res = noise_control.room_to_room_transmission(bands, tl, 8.0 * 3.0, receiving,
+    res = noise_control.room_to_room_transmission(tl, 8.0 * 3.0, receiving, frequencies=bands,
                                                   source=noise_control.SourceRoom(level=90.0))
     top.semilogx(bands, res.noise_reduction - np.asarray(tl, float),
                  "o-", label=name)
@@ -267,10 +267,10 @@ operator = [(25.0, [0.08, 0.24, 0.57, 0.69, 0.71, 0.73]),
             (25.0, ceiling), (60.0, walls)]
 
 chain = noise_control.room_to_room_transmission(
-    bands,
-    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],       # TL del muro separador
-    5.0 * 3.0,                                  # el muro mide 5 m x 3 m
-    room.equivalent_absorption_area(operator),
+    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
+    5.0 * 3.0,       # TL del muro separador
+    room.equivalent_absorption_area(operator),                                  # el muro mide 5 m x 3 m
+    frequencies=bands,
     source=noise_control.SourceRoom(
         power_level=[105.0, 103.0, 98.0, 108.0, 107.0, 109.0],
         room_constant=room.room_constant(268.0, room.mean_absorption(plant)),
@@ -558,8 +558,8 @@ necesaria en lugar de perderse:
 ```python
 # Otra vez la cadena del apartado 3, con 3 dB de provisión por flancos y fugas.
 honest = noise_control.room_to_room_transmission(
-    bands, [39.0, 42.0, 50.0, 58.0, 63.0, 67.0], 15.0,
-    room.equivalent_absorption_area(operator),
+    [39.0, 42.0, 50.0, 58.0, 63.0, 67.0], 15.0, room.equivalent_absorption_area(operator),
+    frequencies=bands,
     source=noise_control.SourceRoom(level=chain.source_level),
     criterion=noise_control.DesignCriterion(target=45.0, flanking_penalty=3.0),
 )
@@ -642,10 +642,10 @@ source = noise_control.SourceRoom(
 receiving = room.room_constant(100.0, 0.35)          # 53.85 m2, la R2 de Barron
 
 far = noise_control.room_to_room_transmission(
-    [1000.0], 30.0, 16.0, receiving, source=source,
+    30.0, 16.0, receiving, frequencies=[1000.0], source=source,
 )
 near = noise_control.room_to_room_transmission(
-    [1000.0], 30.0, 16.0, receiving, source=source, receiver_distance_m=1.5,
+    30.0, 16.0, receiving, frequencies=[1000.0], source=source, receiver_distance_m=1.5,
 )
 print(np.round(far.received_level, 1))    # [59.]
 print(np.round(near.received_level, 1))   # [61.6]

@@ -75,9 +75,9 @@ lv_low = np.array([72.0, 74.0, 71.0, 68.0, 64.0, 60.0, 55.0])
 # de la pesada, así que para una fuente de |Y_S| ~ 1e-3 m/(N.s) su nivel de
 # velocidad medio espacial va 35.1 dB por encima: 12.0 dB de eso es potencia
 # inyectada de más y el resto es el eta*m*S mucho menor de la placa disipándola.
-low = building.reception_plate_power(lv_low, bands, mass_per_area=230.0,
+low = building.reception_plate_power(lv_low, frequency=bands, mass_per_area=230.0,
                                      area=7.0, reverberation_time=0.25)
-high = building.reception_plate_power(lv_low + 35.1, bands, mass_per_area=7.9,
+high = building.reception_plate_power(lv_low + 35.1, frequency=bands, mass_per_area=7.9,
                                       area=2.0, reverberation_time=0.5)
 
 # Una línea: las barras L_Ws(f) de una determinación con su total sumado en bandas:
@@ -487,7 +487,7 @@ from phonometry import ReportMetadata, building
 freqs = np.array([125, 250, 500, 1000, 2000, 4000], float)
 lv = np.array([70.0, 72, 68, 64, 60, 55])   # nivel de velocidad medio de la placa [dB]
 res = building.reception_plate_power(               # la placa de baja movilidad del ap. 7.2.2
-    lv, freqs, mass_per_area=230.0, area=7.0, reverberation_time=0.25,
+    lv, frequency=freqs, mass_per_area=230.0, area=7.0, reverberation_time=0.25,
 )
 
 res.report(

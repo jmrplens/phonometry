@@ -101,7 +101,7 @@ def test_the_log_distance_axis_is_unchanged_in_english() -> None:
 def _ship_source_level(language: str) -> Axes:
     result = underwater.monopole_source_level(
         [150.0, 149.0, 148.0, 147.0, 146.0],
-        [1000.0, 1250.0, 1600.0, 2000.0, 2500.0],
+        frequency=[1000.0, 1250.0, 1600.0, 2000.0, 2500.0],
         draft_m=10.0,
     )
     return np.atleast_1d(result.plot(language=language))[0]
@@ -131,7 +131,7 @@ def test_every_twin_axis_of_the_field_indicators_reaches_spanish() -> None:
     freqs = np.array([125.0, 250.0, 500.0, 1000.0])
     levels = np.tile(np.array([64.0, 66.0, 68.0, 70.0]), (10, 1))
     intensity = 1e-12 * 10.0 ** ((levels - np.array([10.5, 8.5, 6.0, 4.5])) / 10.0)
-    result = emission.field_indicators(levels, intensity, freqs)
+    result = emission.field_indicators(levels, intensity, frequencies=freqs)
     twin = _panels(result.plot(language="es"))[1]
     labels = _decimals(_labels(twin))
     assert labels
@@ -251,7 +251,7 @@ def test_a_pinned_frequency_axis_is_left_to_its_own_helper() -> None:
     """
     freqs = np.array([31.5, 63.0, 125.0, 250.0, 500.0, 1000.0])
     result = underwater.monopole_source_level(
-        [150.0, 149.0, 148.0, 147.0, 146.0, 145.0], freqs, draft_m=10.0
+        [150.0, 149.0, 148.0, 147.0, 146.0, 145.0], frequency=freqs, draft_m=10.0
     )
     axes = np.atleast_1d(result.plot(language="es"))[0]
     assert "31,5" in _labels(axes, "x"), _labels(axes, "x")

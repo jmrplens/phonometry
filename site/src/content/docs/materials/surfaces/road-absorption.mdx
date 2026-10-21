@@ -127,7 +127,7 @@ hr = kr * 0.4 * np.roll(hi, 96)
 # Narrow-band absorption, then reduced to one-third octaves over 250-4000 Hz.
 alpha = materials.in_situ_absorption_coefficient(hi, hr)   # 1 - (1/Kr^2)|Hr/Hi|^2
 freq = np.fft.rfftfreq(n, 1.0 / fs)
-centres, band = materials.one_third_octave_absorption(freq, alpha)
+centres, band = materials.one_third_octave_absorption(alpha, frequencies=freq)
 print(round(kr, 4))                # 0.6667
 print(round(float(band[2]), 3))    # 0.84  (alpha = 1 - 0.4^2 = 0.84)
 ```
@@ -487,10 +487,10 @@ frequency range is by band *edges*: those centre frequencies mean 220 Hz to
 from phonometry import materials
 
 # Upper usable frequency of a 100 mm tube and the valid spacing window.
-print(round(materials.spot_tube_upper_frequency(0.100, 343.0), 1))      # 1989.4 Hz
+print(round(materials.spot_tube_upper_frequency(0.100, speed_of_sound=343.0), 1))      # 1989.4 Hz
 # 220 Hz and 1800 Hz are the outer edges of the 250 Hz and 1600 Hz bands.
 s_min, s_max = materials.spot_microphone_spacing_bounds(
-    343.0, f_min=220.0, f_max=1800.0)
+    speed_of_sound=343.0, f_min=220.0, f_max=1800.0)
 print(round(s_min, 3), round(s_max, 3))    # 0.078 0.086  (metres)
 ```
 
@@ -612,7 +612,7 @@ import numpy as np
 
 # `materials` is imported above. The plane-wave ceiling against the bore.
 bores = np.linspace(0.055, 0.155, 300)
-ceiling = [materials.spot_tube_upper_frequency(d, 343.0) for d in bores]
+ceiling = [materials.spot_tube_upper_frequency(d, speed_of_sound=343.0) for d in bores]
 fig, ax = plt.subplots()
 ax.plot(bores * 1e3, ceiling)
 ax.axhline(1800.0, linestyle="--")     # top edge of the 1600 Hz band

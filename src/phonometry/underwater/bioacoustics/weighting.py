@@ -1050,10 +1050,10 @@ def _require_margins_restate(result: WeightedExposureResult) -> None:
 
 
 def weighted_exposure(
-    frequencies_hz: NDArray[np.float64] | list[float],
     band_sel: NDArray[np.float64] | list[float],
     group: str,
     *,
+    frequencies_hz: NDArray[np.float64] | list[float],
     guidance: str = "nmfs-2024",
     impulsive: bool = True,
     n_events: int = 1,

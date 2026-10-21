@@ -1319,8 +1319,8 @@ class ServiceEquipmentResult(OwnsArrays):
 
 def service_equipment_level(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     quantity: _Quantity,
     fraction: BandFraction = 3,
     background_db: ArrayLike | None = None,

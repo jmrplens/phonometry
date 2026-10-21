@@ -730,9 +730,9 @@ damping away again.
 
 ```python
 exponential_window_correction(
-    damped_natural_frequency_hz: ArrayLike,
     apparent_damping_ratio: ArrayLike,
     *,
+    damped_natural_frequency_hz: ArrayLike,
     exponential_decay_rate_per_s: float,
 ) -> ExponentialWindowCorrection
 ```
@@ -748,8 +748,8 @@ leaves the method open; [`single_mode_fit`](/phonometry/reference/api/vibration/
 
 | Name | Description |
 | :--- | :--- |
-| `damped_natural_frequency_hz` | Damped natural frequency of each mode, in hertz (scalar or 1-D). |
 | `apparent_damping_ratio` | Damping ratio estimated from the windowed data, per mode, in (0, 1). |
+| `damped_natural_frequency_hz` | Damped natural frequency of each mode, in hertz (scalar or 1-D, the shape of `apparent_damping_ratio`). |
 | `exponential_decay_rate_per_s` | Decay rate `a` of the window, in 1/s. |
 
 **Returns:** An [`ExponentialWindowCorrection`](/phonometry/reference/api/vibration/impact-mobility/#exponentialwindowcorrection).
@@ -1445,9 +1445,9 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 ```python
 single_mode_fit(
-    frequencies: ArrayLike,
     frf: ArrayLike,
     *,
+    frequencies: ArrayLike,
     band_hz: tuple[float, float],
     kind: str = 'mobility',
     exponential_decay_rate_per_s: float = 0.0,
@@ -1637,9 +1637,9 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 ```python
 verify_channel_match(
-    frequencies: ArrayLike,
     response: ArrayLike,
     *,
+    frequencies: ArrayLike,
     frequency_range_hz: tuple[float, float],
 ) -> ChannelMatchVerification
 ```

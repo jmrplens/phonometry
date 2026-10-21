@@ -476,9 +476,9 @@ def quarter_wave_impedance(
     return np.asarray(zb, dtype=np.complex128)
 
 
-#: The keys :attr:`ReactiveSilencerResult.geometry` may carry: the keyword
-#: parameters of the geometry renderer it is splatted into (the union over
-#: the four named constructors, each of which stores a subset).
+#: The keys :attr:`ReactiveSilencerResult.geometry` may carry: the keys of
+#: the ``geometry`` mapping the silencer drawing reads (the union over the
+#: four named constructors, each of which stores a subset).
 _GEOMETRY_KEYS = frozenset(
     {
         "length",
@@ -592,12 +592,12 @@ class ReactiveSilencerResult(OwnsArrays):
         for a branch tube -- and has nothing to do with how finely the
         response was sampled.
 
-        :attr:`geometry` is pinned to the keyword names of
-        :func:`~phonometry._plot.geometry.noise_control.plot_silencer_geometry`,
-        because :meth:`plot_geometry` splats it straight into that call: an
-        unknown key would die there in a ``TypeError`` naming the plot
-        function's kwarg rather than the field that carried it, and a
-        non-finite value would draw a part-blank device.
+        :attr:`geometry` is pinned to the keys
+        :func:`~phonometry._plot.geometry.noise_control.plot_silencer_geometry`
+        reads, because :meth:`plot_geometry` hands it straight to that call:
+        an unknown key would only be refused there, by the drawing rather than
+        by the field that carried it, and a non-finite value would draw a
+        part-blank device.
 
         :raises ValueError: if the curves disagree, the matrix is not a
             stack of four-poles over frequency, or the retained geometry

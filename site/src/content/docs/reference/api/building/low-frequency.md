@@ -99,9 +99,9 @@ checks that stand in for one.
 ```python
 apply_low_frequency_procedure(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     procedure: LowFrequencyProcedure,
     *,
+    frequencies: ArrayLike,
     reverberation_time: ArrayLike | None = None,
     room: str = 'receiving',
 ) -> LowFrequencyResult

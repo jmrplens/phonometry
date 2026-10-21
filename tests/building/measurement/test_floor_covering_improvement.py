@@ -63,7 +63,9 @@ def test_foret2011_carpet_rates_to_29() -> None:
     """The measured carpet spectrum rates to the paper's ΔLw = 29 dB."""
     bare = np.full(len(ref.FORET2011_CARPET_FREQ), 100.0)
     delta_l = np.asarray(ref.FORET2011_CARPET_ISO16251_DELTA_L)
-    res = building.impact_improvement(bare, bare - delta_l, ref.FORET2011_CARPET_FREQ)
+    res = building.impact_improvement(
+        bare, bare - delta_l, frequencies=ref.FORET2011_CARPET_FREQ
+    )
     assert res.delta_lw == ref.FORET2011_CARPET_ISO16251_DELTA_LW
 
 
@@ -176,7 +178,7 @@ def test_impact_improvement_difference_and_rating() -> None:
     cov = bare - np.array(
         [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30], dtype=float
     )
-    res = building.impact_improvement(bare, cov, freqs)
+    res = building.impact_improvement(bare, cov, frequencies=freqs)
     np.testing.assert_allclose(
         res.improvement, [0, 0, 1, 2, 4, 7, 11, 15, 18, 21, 23, 25, 27, 28, 29, 30]
     )
@@ -196,7 +198,7 @@ def test_annex_c2_improvement_oracle() -> None:
     # End-to-end through the ISO 16251-1 front-end.
     bare = np.full(16, 75.0)
     res = building.impact_improvement(
-        bare, bare - dl, ref.ISO717_2_REFERENCE_FLOOR_FREQ
+        bare, bare - dl, frequencies=ref.ISO717_2_REFERENCE_FLOOR_FREQ
     )
     assert res.delta_lw == ref.ISO717_2_ANNEX_C2_DELTA_LW
     assert res.ci_delta == ref.ISO717_2_ANNEX_C2_CI_DELTA
@@ -264,9 +266,11 @@ def test_baruch_2018_published_spectrum_crosscheck() -> None:
     assert abs(dlw_simplified - 15) <= 1
     # Both spectra reproduce the same rating through the ISO 16251-1 front-end.
     bare = np.full(16, 75.0)
-    res_full = building.impact_improvement(bare, bare - baruch_full, freqs)
+    res_full = building.impact_improvement(bare, bare - baruch_full, frequencies=freqs)
     assert res_full.delta_lw == dlw_full
-    res_simplified = building.impact_improvement(bare, bare - baruch_simplified, freqs)
+    res_simplified = building.impact_improvement(
+        bare, bare - baruch_simplified, frequencies=freqs
+    )
     assert res_simplified.delta_lw == dlw_simplified
 
 
@@ -294,7 +298,7 @@ def test_clause_63_18_band_spectrum_rates_on_sub_range() -> None:
     dl16 = np.asarray(ref.ISO717_2_ANNEX_C2_DELTA_L)
     dl18 = np.concatenate([dl16, [22.0, 21.0]])  # 4 k / 5 kHz extensions
     bare = np.full(18, 75.0)
-    res = building.impact_improvement(bare, bare - dl18, _CLAUSE_63_FREQS)
+    res = building.impact_improvement(bare, bare - dl18, frequencies=_CLAUSE_63_FREQS)
     assert res.delta_lw == ref.ISO717_2_ANNEX_C2_DELTA_LW
     assert res.ci_delta == ref.ISO717_2_ANNEX_C2_CI_DELTA
 
@@ -304,7 +308,7 @@ def test_extended_21_band_spectrum_rates_on_sub_range() -> None:
     freqs = [50.0, 63.0, 80.0, *_CLAUSE_63_FREQS]
     dl = np.concatenate([[1.0, 1.5, 2.0], ref.ISO717_2_ANNEX_C2_DELTA_L, [22.0, 21.0]])
     bare = np.full(21, 75.0)
-    res = building.impact_improvement(bare, bare - dl, freqs)
+    res = building.impact_improvement(bare, bare - dl, frequencies=freqs)
     assert res.delta_lw == ref.ISO717_2_ANNEX_C2_DELTA_LW
     assert res.ci_delta == ref.ISO717_2_ANNEX_C2_CI_DELTA
 
@@ -313,7 +317,7 @@ def test_spectrum_missing_rating_bands_stays_unrated() -> None:
     # Without the full 100-3150 Hz sub-range no rating is formed.
     freqs = _CLAUSE_63_FREQS[:15]  # stops at 2500 Hz
     bare = np.full(15, 75.0)
-    res = building.impact_improvement(bare, bare - 5.0, freqs)
+    res = building.impact_improvement(bare, bare - 5.0, frequencies=freqs)
     assert res.delta_lw is None
     assert res.ci_delta is None
 
@@ -323,14 +327,14 @@ def test_impact_improvement_with_background_flags_limited() -> None:
     bare = np.array([80.0, 80.0])
     cov = np.array([70.0, 79.0])
     bg = np.array([50.0, 79.5])  # 2nd band: signal within 6 dB of background
-    res = building.impact_improvement(bare, cov, freqs, background=bg)
+    res = building.impact_improvement(bare, cov, frequencies=freqs, background=bg)
     assert bool(res.limited[1])
     assert res.delta_lw is None  # not the 16 rating bands
 
 
 def test_impact_improvement_shape_mismatch() -> None:
     with pytest.raises(ValueError, match=r"'with_covering'.*same shape"):
-        building.impact_improvement([75.0, 75.0], [70.0], [500.0, 1000.0])
+        building.impact_improvement([75.0, 75.0], [70.0], frequencies=[500.0, 1000.0])
 
 
 def test_impact_improvement_per_position_averages_after_difference() -> None:
@@ -339,7 +343,7 @@ def test_impact_improvement_per_position_averages_after_difference() -> None:
     freqs = [500.0, 1000.0]
     l0 = np.array([[80.0, 78.0], [82.0, 76.0]])
     l1 = np.array([[70.0, 70.0], [74.0, 66.0]])
-    res = building.impact_improvement(l0, l1, freqs)
+    res = building.impact_improvement(l0, l1, frequencies=freqs)
     np.testing.assert_allclose(res.improvement, [(10 + 8) / 2, (8 + 10) / 2])
     assert res.improvement.shape == (2,)
 
@@ -351,7 +355,7 @@ def test_background_correction_precedes_averaging() -> None:
     l0 = np.array([[80.0], [80.0]])
     l1 = np.array([[62.0], [80.0]])  # pos 1 close to background, pos 2 not
     bg = np.array([60.0])  # margins: L1 pos1 = 2 dB (<6 -> limit)
-    res = building.impact_improvement(l0, l1, freqs, background=bg)
+    res = building.impact_improvement(l0, l1, frequencies=freqs, background=bg)
     assert bool(res.limited[0])  # a position hit the 1.3 dB limit
     # Averaging-then-correcting would miss that per-position limit flag.
 
@@ -364,7 +368,7 @@ def test_impact_improvement_background_shape_validation() -> None:
         building.impact_improvement(
             bare,
             covered,
-            [500.0, 1000.0],
+            frequencies=[500.0, 1000.0],
             background=mismatched_background,
         )
 
@@ -375,7 +379,7 @@ def test_impact_improvement_background_shape_validation() -> None:
 def test_octave_conversion_formula_5() -> None:
     freqs = [400.0, 500.0, 630.0]  # the 500 Hz octave triplet
     dl = np.array([10.0, 10.0, 10.0])
-    octaves = building.improvement_octave_bands(dl, freqs)
+    octaves = building.improvement_octave_bands(dl, frequencies=freqs)
     assert isinstance(octaves, building.OctaveBandSpectrum)
     assert octaves.quantity == "ΔL"
     np.testing.assert_allclose(octaves.frequencies, [500.0])
@@ -386,7 +390,7 @@ def test_octave_conversion_formula_5() -> None:
 def test_octave_conversion_energy_mean() -> None:
     freqs = [400.0, 500.0, 630.0]
     dl = np.array([6.0, 10.0, 14.0])
-    oct_dl = building.improvement_octave_bands(dl, freqs).values
+    oct_dl = building.improvement_octave_bands(dl, frequencies=freqs).values
     expected = -10.0 * np.log10(
         np.mean([10.0 ** (-6 / 10), 10.0 ** (-10 / 10), 10.0 ** (-14 / 10)])
     )
@@ -397,13 +401,13 @@ def test_the_octave_spectrum_is_a_record_with_its_quantity() -> None:
     """The octaves and their values by name, never a pair unpacked by position."""
     freqs = [400.0, 500.0, 630.0]
     dl = np.array([6.0, 10.0, 14.0])
-    octaves = building.improvement_octave_bands(dl, freqs, quantity="ΔR")
+    octaves = building.improvement_octave_bands(dl, frequencies=freqs, quantity="ΔR")
     assert octaves.quantity == "ΔR"
     assert not octaves.values.flags.writeable
     with pytest.raises(TypeError, match="cannot unpack non-iterable"):
         _centres, _values = octaves  # type: ignore[misc]
     with pytest.raises(ValueError, match="quantity"):
-        building.improvement_octave_bands(dl, freqs, quantity="LI")
+        building.improvement_octave_bands(dl, frequencies=freqs, quantity="LI")
     with pytest.raises(ValueError, match="quantity"):
         building.OctaveBandSpectrum(np.array([500.0]), np.array([10.0]), "dB")
 
@@ -421,7 +425,7 @@ def test_a_fractional_rating_is_refused_by_name(field: str) -> None:
     """
     freqs = ref.ISO717_2_REFERENCE_FLOOR_FREQ
     bare = np.full(16, 75.0)
-    res = building.impact_improvement(bare, bare - 5.0, freqs)
+    res = building.impact_improvement(bare, bare - 5.0, frequencies=freqs)
     with pytest.raises(TypeError, match=rf"'{field}' must be an integer number"):
         dataclasses.replace(res, **{field: -1.0})
 
@@ -438,7 +442,7 @@ def test_an_adaptation_term_without_its_rating_is_refused() -> None:
     fell through to the unrated characterisation headline.
     """
     unrated = building.impact_improvement(
-        [1.0, 2.0, 3.0], [0.0, 0.0, 0.0], [500.0, 1000.0, 2000.0]
+        [1.0, 2.0, 3.0], [0.0, 0.0, 0.0], frequencies=[500.0, 1000.0, 2000.0]
     )
     assert unrated.delta_lw is None
     assert unrated.ci_delta is None
@@ -457,7 +461,7 @@ def test_a_rating_quoted_without_its_adaptation_term_is_allowed() -> None:
     """
     freqs = ref.ISO717_2_REFERENCE_FLOOR_FREQ
     bare = np.full(16, 75.0)
-    res = building.impact_improvement(bare, bare - 5.0, freqs)
+    res = building.impact_improvement(bare, bare - 5.0, frequencies=freqs)
     assert dataclasses.replace(res, ci_delta=None).delta_lw == res.delta_lw
 
 
@@ -467,7 +471,7 @@ def test_a_rating_quoted_without_its_adaptation_term_is_allowed() -> None:
 def test_result_octave_bands_method() -> None:
     freqs = ref.ISO717_2_REFERENCE_FLOOR_FREQ
     bare = np.full(16, 75.0)
-    res = building.impact_improvement(bare, bare - 5.0, freqs)
+    res = building.impact_improvement(bare, bare - 5.0, frequencies=freqs)
     octaves = res.octave_bands()
     assert octaves.quantity == "ΔL"
     assert octaves.frequencies.tolist() == [125.0, 250.0, 500.0, 1000.0, 2000.0]
@@ -481,7 +485,7 @@ def test_plot_returns_axes() -> None:
     mpl.use("Agg")
     freqs = ref.ISO717_2_REFERENCE_FLOOR_FREQ
     bare = np.full(16, 75.0)
-    res = building.impact_improvement(bare, bare - 8.0, freqs)
+    res = building.impact_improvement(bare, bare - 8.0, frequencies=freqs)
     ax = res.plot()
     assert ax.get_title().startswith("ISO 16251-1")
 
@@ -515,7 +519,7 @@ def test_the_octave_spectrum_plot_draws_one_point_per_octave(
 
     freqs = ref.ISO717_2_REFERENCE_FLOOR_FREQ
     octaves = building.improvement_octave_bands(
-        np.linspace(2.0, 17.0, 16), freqs, quantity="ΔR"
+        np.linspace(2.0, 17.0, 16), frequencies=freqs, quantity="ΔR"
     )
     ax = octaves.plot(language=language)
     curve = next(line for line in ax.lines if line.get_marker() == "s")

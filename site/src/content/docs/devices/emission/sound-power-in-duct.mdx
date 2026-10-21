@@ -211,7 +211,7 @@ c2 = np.array([0.0] * 11 + [0.2, 0.3, 0.5, 0.6, 0.8, 1.0, 1.2, 1.5, 1.9,
                             2.3, 2.8, 3.4, 4.0])         # sampling tube, dB
 
 duct = emission.sound_power_in_duct(
-    levels, freqs, duct_diameter_m=0.63, flow_velocity=12.0,
+    levels, frequencies=freqs, duct_diameter_m=0.63, flow_velocity=12.0,
     shield="sampling-tube", microphone_correction=c1, shield_correction=c2,
     temperature_c=20.0, static_pressure_kpa=101.325,
 )
@@ -274,7 +274,7 @@ lower:
 
 ```python
 inlet = emission.sound_power_in_duct(
-    levels, freqs, duct_diameter_m=0.63, flow_velocity=-12.0,
+    levels, frequencies=freqs, duct_diameter_m=0.63, flow_velocity=-12.0,
     microphone_correction=c1, shield_correction=c2,
 )
 print(round(float(inlet.flow_modal_correction[13]), 2))   # 1.39 dB at 1 kHz
@@ -303,7 +303,7 @@ than that shield's own figure, and the call says so with a
 
 ```python
 cone = emission.sound_power_in_duct(
-    levels, freqs, duct_diameter_m=0.63, flow_velocity=12.0,
+    levels, frequencies=freqs, duct_diameter_m=0.63, flow_velocity=12.0,
     shield="nose-cone", microphone_correction=c1,
 )
 print(round(float(cone.flow_modal_correction[0]), 2))     # 0.31 dB, every band

@@ -61,14 +61,20 @@ def _energy_mean(levels: np.ndarray) -> np.ndarray:
 
 def _hard_walled(**kwargs: object) -> ph.emission.HardWalledSoundPowerResult:
     kwargs.setdefault("background_levels", _BACKGROUND)
-    return ph.emission.sound_power_hard_walled(_ST, _RSS, _LW_RSS, _FREQS, **kwargs)  # type: ignore[arg-type]
+    return ph.emission.sound_power_hard_walled(
+        _ST,
+        _RSS,
+        _LW_RSS,
+        frequencies=_FREQS,
+        **kwargs,  # type: ignore[arg-type]
+    )
 
 
 def _special_direct(**kwargs: object) -> ph.emission.SpecialRoomSoundPowerResult:
     kwargs.setdefault("background_levels", _BACKGROUND)
     return ph.emission.sound_power_special_room(
         _ST,
-        _FREQS,
+        frequencies=_FREQS,
         volume=70.0,
         nominal_reverberation_time_s=0.73,
         **kwargs,  # type: ignore[arg-type]
@@ -149,7 +155,7 @@ def _chk_iso3743_1_vs_iso3747() -> Outcome:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", ph.emission.SoundPowerWarning)  # six positions
         in_situ = ph.emission.sound_power_in_situ(
-            _ST, _RSS, _LW_RSS, _FREQS, background_levels=_BACKGROUND
+            _ST, _RSS, _LW_RSS, frequencies=_FREQS, background_levels=_BACKGROUND
         )
     worst = float(np.max(np.abs(part1.sound_power_level - in_situ.sound_power_level)))
     return numeric(
@@ -168,7 +174,7 @@ def _chk_iso3743_1_energy_identity() -> Outcome:
     background[2] = _energy_mean(_ST)[2] - 8.0
     power = _hard_walled(background_levels=background)
     energy = ph.emission.sound_energy_hard_walled(
-        np.stack([_ST + 10.0 * math.log10(t)] * 5), _RSS, _LW_RSS, _FREQS,
+        np.stack([_ST + 10.0 * math.log10(t)] * 5), _RSS, _LW_RSS, frequencies=_FREQS,
         background_levels=background, integration_time=t,
     )  # fmt: skip
     worst = float(
@@ -187,11 +193,11 @@ def _chk_iso3743_1_energy_identity() -> Outcome:
 def _chk_iso3743_1_event_forms() -> Outcome:
     n_events = 8
     one_at_a_time = ph.emission.sound_energy_hard_walled(
-        np.stack([_ST] * n_events), _RSS, _LW_RSS, _FREQS,
+        np.stack([_ST] * n_events), _RSS, _LW_RSS, frequencies=_FREQS,
         background_levels=_BACKGROUND, integration_time=1.0,
     )  # fmt: skip
     encompassing = ph.emission.sound_energy_hard_walled(
-        _ST + 10.0 * math.log10(n_events), _RSS, _LW_RSS, _FREQS, n_events=n_events,
+        _ST + 10.0 * math.log10(n_events), _RSS, _LW_RSS, frequencies=_FREQS, n_events=n_events,
         background_levels=_BACKGROUND, integration_time=1.0,
     )  # fmt: skip
     worst = float(
@@ -225,7 +231,7 @@ def _chk_iso3743_1_table_b1() -> Outcome:
     ck = np.array([-26.2, -16.1, -8.6, -3.2, 0.0, 1.2, 1.0, -1.1])  # Table B.1
     flat = np.full((3, freqs.size), 80.0)
     res = ph.emission.sound_power_hard_walled(
-        flat, flat, np.full(freqs.size, 90.0), freqs,
+        flat, flat, np.full(freqs.size, 90.0), frequencies=freqs,
         background_levels=np.full(freqs.size, 50.0),
     )  # fmt: skip
     expected = 90.0 + 10.0 * math.log10(float(np.sum(10.0 ** (0.1 * ck))))
@@ -250,7 +256,7 @@ def _chk_iso3743_1_room_size() -> Outcome:
     agree = 0
     for volume, box, volume_ok, box_ok in cases:
         check = ph.emission.check_hard_walled_room(
-            orientations, _FREQS, volume=volume, reference_box_m=box
+            orientations, frequencies=_FREQS, volume=volume, reference_box_m=box
         )
         agree += int(check.volume_adequate is volume_ok and check.box_fits is box_ok)
     return count(agree, len(cases), subject="room and box verdicts")
@@ -272,7 +278,7 @@ def _chk_iso3743_1_table2() -> Outcome:
     agree = 0
     for deviations, (locations, other) in edges.values():
         plan = ph.emission.hard_walled_source_locations(
-            80.0 + deviations[:, None], [1000.0]
+            80.0 + deviations[:, None], frequencies=[1000.0]
         )
         agree += int(
             int(plan.source_locations[0]) == locations
@@ -301,13 +307,13 @@ def _chk_iso3743_round_robin() -> Outcome:
 def _chk_iso3743_1_background_vs_iso11546() -> Outcome:
     mean_st = _energy_mean(_ST)
     at = ph.emission.sound_power_hard_walled(
-        _ST, _RSS, _LW_RSS, _FREQS, background_levels=mean_st - 6.0,
+        _ST, _RSS, _LW_RSS, frequencies=_FREQS, background_levels=mean_st - 6.0,
         background_levels_ref=_BACKGROUND,
     )  # fmt: skip
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", ph.emission.SoundPowerWarning)
         below = ph.emission.sound_power_hard_walled(
-            _ST, _RSS, _LW_RSS, _FREQS, background_levels=mean_st - 5.99,
+            _ST, _RSS, _LW_RSS, frequencies=_FREQS, background_levels=mean_st - 5.99,
             background_levels_ref=_BACKGROUND,
         )  # fmt: skip
     threshold = (
@@ -381,7 +387,9 @@ def _chk_iso3743_2_formula1() -> Outcome:
 def _chk_iso3743_2_centring() -> Outcome:
     r = ph.emission.reverberation_parameter(_THIRDS, 70.0)
     t = 0.8 * r / r[10]
-    check = ph.emission.check_special_room_reverberation(t, _THIRDS, volume=70.0)
+    check = ph.emission.check_special_room_reverberation(
+        t, frequencies=_THIRDS, volume=70.0
+    )
     return numeric(
         0.8 / float(r[10]),
         check.nominal_reverberation_time_s,
@@ -411,9 +419,11 @@ def _chk_iso3743_2_b5_example() -> Outcome:
     q = t / ph.emission.reverberation_parameter(_THIRDS, 70.0)
     midpoint = 0.8 / (0.5 * float(q.max() + q.min()))
     printed = ph.emission.check_special_room_reverberation(
-        t, _THIRDS, volume=70.0, nominal_reverberation_time_s=0.73
+        t, frequencies=_THIRDS, volume=70.0, nominal_reverberation_time_s=0.73
     )
-    centred = ph.emission.check_special_room_reverberation(t, _THIRDS, volume=70.0)
+    centred = ph.emission.check_special_room_reverberation(
+        t, frequencies=_THIRDS, volume=70.0
+    )
     departure = 10.0 * math.log10(centred.nominal_reverberation_time_s / 0.73)
     facts = (
         abs(midpoint - 1.09) <= 0.015,
@@ -436,7 +446,7 @@ def _chk_iso3743_2_source_size() -> Outcome:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", ph.emission.SoundPowerWarning)
             check = ph.emission.check_special_room_reverberation(
-                0.7 * r, _THIRDS, volume=70.0, source_volume_m3=volume
+                0.7 * r, frequencies=_THIRDS, volume=70.0, source_volume_m3=volume
             )
         verdicts.append((check.source_size_recommended, check.passes))
     return count(
@@ -454,7 +464,7 @@ def _chk_iso3743_2_source_size() -> Outcome:
 def _chk_iso3743_2_limits() -> Outcome:
     check = ph.emission.check_special_room_reverberation(
         np.full(_THIRDS.size, 0.7),
-        _THIRDS,
+        frequencies=_THIRDS,
         volume=70.0,
         nominal_reverberation_time_s=0.7,
     )
@@ -475,7 +485,9 @@ def _chk_iso3743_2_limits() -> Outcome:
     "Maximum permitted differences of the reference-source evaluation of 6.7",
 )
 def _chk_iso3743_2_table1() -> Outcome:
-    check = ph.emission.check_special_room_suitability(_LW_RSS, _LW_RSS, _FREQS)
+    check = ph.emission.check_special_room_suitability(
+        _LW_RSS, _LW_RSS, frequencies=_FREQS
+    )
     printed = {"125 Hz": 5.0, "250 Hz": 3.0, "500 Hz": 3.0, "1 kHz": 3.0,
                "2 kHz": 3.0, "4 kHz": 3.0, "8 kHz": 4.0}  # fmt: skip
     return record(
@@ -497,7 +509,7 @@ def _chk_iso3743_2_suitability_verdicts() -> Outcome:
             measured = _LW_RSS.copy()
             measured[band] += offset
             check = ph.emission.check_special_room_suitability(
-                measured, _LW_RSS, _FREQS
+                measured, _LW_RSS, frequencies=_FREQS
             )
             agree += int(
                 bool(check.band_within[band]) is within and check.passes is within
@@ -567,7 +579,7 @@ def _chk_iso3743_2_suitability_calibration() -> Outcome:
     check = ph.emission.check_special_room_suitability(
         np.full(_FREQS.size, 90.0),
         _unequal_calibration(),
-        _FREQS,
+        frequencies=_FREQS,
         temperature_c=_TEST_C,
         static_pressure_kpa=_TEST_KPA,
     )
@@ -602,13 +614,13 @@ def _chk_iso3743_2_suitability_calibration_verdicts() -> Outcome:
                 ph.emission.check_special_room_suitability(
                     measured,
                     calibration,
-                    _FREQS,
+                    frequencies=_FREQS,
                     temperature_c=_TEST_C,
                     static_pressure_kpa=_TEST_KPA,
                 )
                 if read_at_test
                 else ph.emission.check_special_room_suitability(
-                    measured, calibration, _FREQS
+                    measured, calibration, frequencies=_FREQS
                 )
             )
             agree += int(
@@ -633,10 +645,20 @@ def _chk_iso3743_comparison_calibration() -> Outcome:
     background = np.full(_FREQS.size, 40.0)  # above 15 dB: K1 = 0, no Table 4 step
     conditions = {"temperature_c": _TEST_C, "static_pressure_kpa": _TEST_KPA}
     part1 = ph.emission.sound_power_hard_walled(
-        st, rss, calibration, _FREQS, background_levels=background, **conditions
+        st,
+        rss,
+        calibration,
+        frequencies=_FREQS,
+        background_levels=background,
+        **conditions,
     )
     part2 = ph.emission.sound_power_special_room_comparison(
-        st, rss, calibration, _FREQS, background_levels=background, **conditions
+        st,
+        rss,
+        calibration,
+        frequencies=_FREQS,
+        background_levels=background,
+        **conditions,
     )
     at_test = _OCTAVE_AS_CALIBRATED - _C2_UNKNOWN + 4.0
     expected = {
@@ -690,7 +712,7 @@ def _chk_iso3743_2_table3() -> Outcome:
         for (band, cls), row in _TABLE_3.items():
             plan = ph.emission.special_room_source_locations(
                 70.0 + _SURVEYS[cls][:, None],
-                [float(band)],
+                frequencies=[float(band)],
                 n_microphone_positions=mics,
             )
             agree += int(
@@ -700,7 +722,7 @@ def _chk_iso3743_2_table3() -> Outcome:
             total += 1
         for cls, row in _TABLE_3_A.items():
             plan = ph.emission.special_room_source_locations(
-                70.0 + _SURVEYS["broadband"][:, None], [1000.0],
+                70.0 + _SURVEYS["broadband"][:, None], frequencies=[1000.0],
                 n_microphone_positions=mics, a_weighted_levels=80.0 + _SURVEYS[cls],
             )  # fmt: skip
             agree += int(plan.n_a_weighted_source_locations == row[column])
@@ -753,7 +775,7 @@ def _chk_iso3743_2_formula9() -> Outcome:
 )
 def _chk_iso3743_2_formula10() -> Outcome:
     part2 = ph.emission.sound_power_special_room_comparison(
-        _ST, _RSS, _LW_RSS, _FREQS, background_levels=_BACKGROUND
+        _ST, _RSS, _LW_RSS, frequencies=_FREQS, background_levels=_BACKGROUND
     )
     worst = float(
         np.max(np.abs(part2.sound_power_level - _hard_walled().sound_power_level))
@@ -773,7 +795,7 @@ def _chk_iso3743_2_reference_background() -> Outcome:
         np.full((6, 1), 75.0),
         np.full((6, 1), 80.0),
         [90.0],
-        [1000.0],
+        frequencies=[1000.0],
         background_levels=[50.0],
         background_levels_ref=[75.0],
     )
@@ -790,7 +812,7 @@ def _chk_iso3743_2_climate() -> Outcome:
     verdicts = []
     for humidity, temperature in ((55.0, 20.0), (56.0, 20.0), (80.0, 10.0)):
         check = ph.emission.check_special_room_reverberation(
-            0.7 * r, _THIRDS, volume=70.0,
+            0.7 * r, frequencies=_THIRDS, volume=70.0,
             relative_humidity_percent=humidity, temperature_c=temperature,
             reverberation_relative_humidity_percent=50.0, reverberation_temperature_c=20.0,
         )  # fmt: skip

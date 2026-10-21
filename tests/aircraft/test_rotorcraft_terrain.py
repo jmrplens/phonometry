@@ -147,7 +147,12 @@ def test_diffraction_multiple_edges_and_cap() -> None:
 def test_screening_flat_section_matches_ground_effect() -> None:
     f = np.array([63.0, 250.0, 1000.0])
     res = aircraft.terrain_screening_adjustment(
-        f, (0.0, 50.0), (500.0, 1.2), [0.0, 500.0], [0.0, 0.0], flow_resistivity="D"
+        frequencies=f,
+        source=(0.0, 50.0),
+        receiver=(500.0, 1.2),
+        distances_m=[0.0, 500.0],
+        heights_m=[0.0, 0.0],
+        flow_resistivity="D",
     )
     ref = aircraft.ground_effect_adjustment(f, 50.0, 1.2, 500.0, flow_resistivity="D")
     assert not res.screened
@@ -165,7 +170,14 @@ def test_screening_inclined_plane_uses_equivalent_geometry() -> None:
     z = slope * d
     src = (0.0, 60.0)
     rcv = (400.0, slope * 400.0 + 1.2)
-    res = aircraft.terrain_screening_adjustment(f, src, rcv, d, z, flow_resistivity="E")
+    res = aircraft.terrain_screening_adjustment(
+        frequencies=f,
+        source=src,
+        receiver=rcv,
+        distances_m=d,
+        heights_m=z,
+        flow_resistivity="E",
+    )
     scale = np.hypot(1.0, slope)
     hs = 60.0 / scale
     hr = 1.2 / scale
@@ -185,7 +197,14 @@ def test_screening_blocked_hill_hand_checked_delta() -> None:
     src, rcv = (0.0, 20.0), (400.0, 1.2)
     d = np.array([0.0, 190.0, 200.0, 210.0, 400.0])
     z = np.array([0.0, 0.0, 40.0, 0.0, 0.0])
-    res = aircraft.terrain_screening_adjustment(f, src, rcv, d, z, flow_resistivity="G")
+    res = aircraft.terrain_screening_adjustment(
+        frequencies=f,
+        source=src,
+        receiver=rcv,
+        distances_m=d,
+        heights_m=z,
+        flow_resistivity="G",
+    )
     assert res.screened
     so = np.hypot(200.0, 40.0 - 20.0)
     orr = np.hypot(200.0, 40.0 - 1.2)
@@ -195,7 +214,12 @@ def test_screening_blocked_hill_hand_checked_delta() -> None:
     assert tuple(res.diffraction_points[0]) == (200.0, 40.0)
     # Screening must lose level relative to the unblocked flat site at high f.
     flat = aircraft.terrain_screening_adjustment(
-        f, src, rcv, [0.0, 400.0], [0.0, 0.0], flow_resistivity="G"
+        frequencies=f,
+        source=src,
+        receiver=rcv,
+        distances_m=[0.0, 400.0],
+        heights_m=[0.0, 0.0],
+        flow_resistivity="G",
     )
     assert res.adjustment[-1] < flat.adjustment[-1] - 5.0
 
@@ -205,11 +229,11 @@ def test_screening_terrain_below_sight_never_diffracts() -> None:
     # topography rule): the bump changes the mean plane, not the regime.
     f = np.array([500.0])
     res = aircraft.terrain_screening_adjustment(
-        f,
-        (0.0, 50.0),
-        (400.0, 1.2),
-        [0.0, 200.0, 400.0],
-        [0.0, 10.0, 0.0],
+        frequencies=f,
+        source=(0.0, 50.0),
+        receiver=(400.0, 1.2),
+        distances_m=[0.0, 200.0, 400.0],
+        heights_m=[0.0, 10.0, 0.0],
         flow_resistivity="D",
     )
     assert not res.screened
@@ -220,19 +244,19 @@ def test_screening_per_segment_resistivity_uses_log_mean() -> None:
     # run at the Eq. 41 log-mean 1e5.
     f = np.array([125.0, 1000.0])
     mixed = aircraft.terrain_screening_adjustment(
-        f,
-        (0.0, 30.0),
-        (300.0, 1.2),
-        [0.0, 150.0, 300.0],
-        [0.0, 0.0, 0.0],
+        frequencies=f,
+        source=(0.0, 30.0),
+        receiver=(300.0, 1.2),
+        distances_m=[0.0, 150.0, 300.0],
+        heights_m=[0.0, 0.0, 0.0],
         flow_resistivity=[1.0e4, 1.0e6],
     )
     scalar = aircraft.terrain_screening_adjustment(
-        f,
-        (0.0, 30.0),
-        (300.0, 1.2),
-        [0.0, 150.0, 300.0],
-        [0.0, 0.0, 0.0],
+        frequencies=f,
+        source=(0.0, 30.0),
+        receiver=(300.0, 1.2),
+        distances_m=[0.0, 150.0, 300.0],
+        heights_m=[0.0, 0.0, 0.0],
         flow_resistivity=1.0e5,
     )
     assert np.allclose(mixed.adjustment, scalar.adjustment, atol=1e-12)
@@ -242,31 +266,43 @@ def test_screening_validation_and_plot() -> None:
     f = [500.0]
     with pytest.raises(ValueError, match=r"The terrain section must cover"):
         aircraft.terrain_screening_adjustment(
-            f, (-10.0, 5.0), (100.0, 1.2), [0.0, 100.0], [0.0, 0.0]
+            frequencies=f,
+            source=(-10.0, 5.0),
+            receiver=(100.0, 1.2),
+            distances_m=[0.0, 100.0],
+            heights_m=[0.0, 0.0],
         )
     with pytest.raises(ValueError, match="smaller section distance"):
         aircraft.terrain_screening_adjustment(
-            f, (100.0, 5.0), (0.0, 1.2), [0.0, 100.0], [0.0, 0.0]
+            frequencies=f,
+            source=(100.0, 5.0),
+            receiver=(0.0, 1.2),
+            distances_m=[0.0, 100.0],
+            heights_m=[0.0, 0.0],
         )
     with pytest.raises(ValueError, match="one value per"):
         aircraft.terrain_screening_adjustment(
-            f,
-            (0.0, 5.0),
-            (100.0, 1.2),
-            [0.0, 50.0, 100.0],
-            [0.0, 0.0, 0.0],
+            frequencies=f,
+            source=(0.0, 5.0),
+            receiver=(100.0, 1.2),
+            distances_m=[0.0, 50.0, 100.0],
+            heights_m=[0.0, 0.0, 0.0],
             flow_resistivity=[1e5],
         )
     blocked = aircraft.terrain_screening_adjustment(
-        [250.0, 1000.0],
-        (0.0, 20.0),
-        (400.0, 1.2),
-        [0.0, 190.0, 200.0, 210.0, 400.0],
-        [0.0, 0.0, 40.0, 0.0, 0.0],
+        frequencies=[250.0, 1000.0],
+        source=(0.0, 20.0),
+        receiver=(400.0, 1.2),
+        distances_m=[0.0, 190.0, 200.0, 210.0, 400.0],
+        heights_m=[0.0, 0.0, 40.0, 0.0, 0.0],
     )
     assert blocked.plot() is not None
     clear = aircraft.terrain_screening_adjustment(
-        [250.0], (0.0, 20.0), (400.0, 1.2), [0.0, 400.0], [0.0, 0.0]
+        frequencies=[250.0],
+        source=(0.0, 20.0),
+        receiver=(400.0, 1.2),
+        distances_m=[0.0, 400.0],
+        heights_m=[0.0, 0.0],
     )
     assert clear.plot() is not None
 

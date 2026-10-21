@@ -225,7 +225,7 @@ ax = passage.plot_spectrum(language="es")
 t2 = slice(round(6.75 * fs), round(23.25 * fs))
 spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs)
 centres, rms = vibration.third_octaves_from_narrowband(
-    spectrum.frequencies, spectrum.psd
+    spectrum.psd, frequencies=spectrum.frequencies
 )
 narrow = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
 positions = [list(centres).index(band) for band in passage.frequencies]
@@ -312,7 +312,7 @@ t2 = slice(round(6.75 * fs), round(23.25 * fs))
 spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs)
 print(f"bloque {spectrum.nperseg / fs:.2f} s")  # 0.80 s
 centres, rms = vibration.third_octaves_from_narrowband(
-    spectrum.frequencies, spectrum.psd
+    spectrum.psd, frequencies=spectrum.frequencies
 )
 levels = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
 for band in (40.0, 50.0, 63.0):

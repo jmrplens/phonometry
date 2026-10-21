@@ -245,8 +245,8 @@ ternary-sequence designs.
 ```python
 plot_metadiffuser_panel_geometry(
     wells: Sequence[Any],
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     depth_m: float,
     period_m: float,
     language: str = 'en',

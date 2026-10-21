@@ -345,10 +345,7 @@ class DiffusionSpectrum(OwnsArrays):
 
 
 def diffusion_spectrum(
-    frequencies: ArrayLike,
-    diffusion: ArrayLike,
-    *,
-    normalized: ArrayLike | None = None,
+    diffusion: ArrayLike, *, frequencies: ArrayLike, normalized: ArrayLike | None = None
 ) -> DiffusionSpectrum:
     """Diffusion-coefficient spectrum ``d(f)`` (ISO 17497-2, Clause 8.5).
 

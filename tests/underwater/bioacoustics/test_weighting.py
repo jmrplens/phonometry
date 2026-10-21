@@ -353,7 +353,9 @@ def test_weighted_exposure_reduces_the_unweighted_sel() -> None:
     """Weighting can only remove energy: W(f) ≤ 0 everywhere."""
     freqs = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
     band_sel = np.full(freqs.size, 170.0)
-    res = weighted_exposure(freqs, band_sel, "VHF", guidance="nmfs-2024")
+    res = weighted_exposure(
+        frequencies_hz=freqs, band_sel=band_sel, group="VHF", guidance="nmfs-2024"
+    )
     assert res.weighted_sel < res.unweighted_sel
     assert np.all(res.weighting <= 0.0)
 
@@ -362,8 +364,12 @@ def test_weighted_exposure_accumulates_10_lg_n() -> None:
     """ISO 18406 Formula 9 for identical events: SEL_cum = SEL + 10·lg(N)."""
     freqs = np.array([500.0, 1000.0, 2000.0])
     band_sel = np.array([170.0, 172.0, 168.0])
-    one = weighted_exposure(freqs, band_sel, "LF", n_events=1)
-    many = weighted_exposure(freqs, band_sel, "LF", n_events=1000)
+    one = weighted_exposure(
+        frequencies_hz=freqs, band_sel=band_sel, group="LF", n_events=1
+    )
+    many = weighted_exposure(
+        frequencies_hz=freqs, band_sel=band_sel, group="LF", n_events=1000
+    )
     assert many.cumulative_sel - one.cumulative_sel == pytest.approx(30.0, abs=1e-9)
 
 
@@ -377,8 +383,18 @@ def test_weighted_exposure_flags_exceedance_of_the_published_criterion() -> None
     peak_hz = 1000.0 * _peak_frequency_khz(
         params.a, params.b, params.f1_khz, params.f2_khz
     )
-    below = weighted_exposure([peak_hz], [crit.injury_sel - 1.0], "LF", impulsive=True)
-    above = weighted_exposure([peak_hz], [crit.injury_sel + 1.0], "LF", impulsive=True)
+    below = weighted_exposure(
+        frequencies_hz=[peak_hz],
+        band_sel=[crit.injury_sel - 1.0],
+        group="LF",
+        impulsive=True,
+    )
+    above = weighted_exposure(
+        frequencies_hz=[peak_hz],
+        band_sel=[crit.injury_sel + 1.0],
+        group="LF",
+        impulsive=True,
+    )
     assert below.exceeds_injury is False
     assert above.exceeds_injury is True
     assert above.sel_margin == pytest.approx(1.0, abs=0.01)
@@ -395,7 +411,13 @@ def test_peak_spl_criterion_is_compared_unweighted() -> None:
     """The dual metric compares the peak SPL flat, not weighted."""
     crit = exposure_criteria("VHF", guidance="nmfs-2024", impulsive=True)
     assert crit.injury_peak_spl == 202.0
-    res = weighted_exposure([1000.0], [100.0], "VHF", impulsive=True, peak_spl=210.0)
+    res = weighted_exposure(
+        frequencies_hz=[1000.0],
+        band_sel=[100.0],
+        group="VHF",
+        impulsive=True,
+        peak_spl=210.0,
+    )
     assert res.peak_margin == pytest.approx(8.0, abs=1e-9)
     assert res.exceeds_injury is True
     assert res.sel_margin is not None
@@ -407,7 +429,11 @@ def test_an_exposure_exactly_at_the_criterion_counts_as_exceeding_it() -> None:
     crit = exposure_criteria("VHF", guidance="nmfs-2024", impulsive=True)
     assert crit.injury_peak_spl is not None
     res = weighted_exposure(
-        [1000.0], [100.0], "VHF", impulsive=True, peak_spl=crit.injury_peak_spl
+        frequencies_hz=[1000.0],
+        band_sel=[100.0],
+        group="VHF",
+        impulsive=True,
+        peak_spl=crit.injury_peak_spl,
     )
     assert res.peak_margin == 0.0
     assert res.exceeds_injury is True
@@ -420,7 +446,13 @@ def test_peak_spl_can_trip_tts_alone_and_the_margin_says_so() -> None:
     so a 199 dB peak sits between them while the weighted SEL stays far below
     both SEL criteria.
     """
-    res = weighted_exposure([1000.0], [100.0], "VHF", impulsive=True, peak_spl=199.0)
+    res = weighted_exposure(
+        frequencies_hz=[1000.0],
+        band_sel=[100.0],
+        group="VHF",
+        impulsive=True,
+        peak_spl=199.0,
+    )
     assert res.tts_peak_margin == pytest.approx(3.0, abs=1e-9)
     assert res.peak_margin == pytest.approx(-3.0, abs=1e-9)
     assert res.tts_margin is not None
@@ -431,11 +463,17 @@ def test_peak_spl_can_trip_tts_alone_and_the_margin_says_so() -> None:
 
 def test_weighted_exposure_names_its_own_frequency_axis() -> None:
     with pytest.raises(ValueError, match="'frequencies_hz' must be strictly positive"):
-        weighted_exposure([-1000.0], [100.0], "VHF")
+        weighted_exposure(frequencies_hz=[-1000.0], band_sel=[100.0], group="VHF")
 
 
 def test_non_impulsive_criteria_have_no_peak_metric() -> None:
-    res = weighted_exposure([1000.0], [150.0], "LF", impulsive=False, peak_spl=250.0)
+    res = weighted_exposure(
+        frequencies_hz=[1000.0],
+        band_sel=[150.0],
+        group="LF",
+        impulsive=False,
+        peak_spl=250.0,
+    )
     assert res.criteria.injury_peak_spl is None
     assert res.peak_margin is None
 
@@ -498,20 +536,26 @@ def test_invalid_frequencies_raise(frequency: list[float]) -> None:
 
 def test_mismatched_band_spectrum_raises() -> None:
     with pytest.raises(ValueError, match="band_sel.*same shape"):
-        weighted_exposure([100.0, 200.0], [170.0], "LF")
+        weighted_exposure(frequencies_hz=[100.0, 200.0], band_sel=[170.0], group="LF")
 
 
 def test_non_finite_band_spectrum_raises() -> None:
     with pytest.raises(ValueError, match=r"'band_sel' must be finite"):
-        weighted_exposure([100.0, 200.0], [170.0, np.nan], "LF")
+        weighted_exposure(
+            frequencies_hz=[100.0, 200.0], band_sel=[170.0, np.nan], group="LF"
+        )
     with pytest.raises(ValueError, match=r"'band_sel' must be finite"):
-        weighted_exposure([100.0, 200.0], [170.0, np.inf], "LF")
+        weighted_exposure(
+            frequencies_hz=[100.0, 200.0], band_sel=[170.0, np.inf], group="LF"
+        )
 
 
 def test_minus_infinity_is_an_empty_band_not_an_error() -> None:
     """A band with no energy contributes nothing and must not be rejected."""
-    both = weighted_exposure([100.0, 200.0], [170.0, -np.inf], "LF")
-    one = weighted_exposure([100.0], [170.0], "LF")
+    both = weighted_exposure(
+        frequencies_hz=[100.0, 200.0], band_sel=[170.0, -np.inf], group="LF"
+    )
+    one = weighted_exposure(frequencies_hz=[100.0], band_sel=[170.0], group="LF")
     assert both.weighted_sel == pytest.approx(one.weighted_sel, abs=1e-12)
     assert both.unweighted_sel == pytest.approx(170.0, abs=1e-12)
 
@@ -520,7 +564,7 @@ def test_the_result_does_not_alias_the_caller_arrays() -> None:
     """The dataclass is frozen, so its arrays must not be the caller's own."""
     freqs = np.array([100.0, 200.0])
     levels = np.array([170.0, 171.0])
-    res = weighted_exposure(freqs, levels, "LF")
+    res = weighted_exposure(frequencies_hz=freqs, band_sel=levels, group="LF")
     assert res.frequencies is not freqs
     assert res.band_sel is not levels
     levels[0] = 0.0
@@ -534,13 +578,20 @@ def test_invalid_event_count_raises(n_events: float) -> None:
     with pytest.raises(
         ValueError, match=r"'n_events' must be a whole number of events"
     ):
-        weighted_exposure([1000.0], [170.0], "LF", n_events=n_events)  # type: ignore[arg-type]
+        weighted_exposure(
+            [170.0],
+            "LF",
+            frequencies_hz=[1000.0],
+            n_events=n_events,  # type: ignore[arg-type]
+        )
 
 
 def test_non_finite_peak_spl_raises() -> None:
     not_a_number = float("nan")
     with pytest.raises(ValueError, match=r"'peak_spl' must be finite"):
-        weighted_exposure([1000.0], [170.0], "LF", peak_spl=not_a_number)
+        weighted_exposure(
+            frequencies_hz=[1000.0], band_sel=[170.0], group="LF", peak_spl=not_a_number
+        )
 
 
 def test_a_curve_that_does_not_run_over_the_frequencies_is_refused() -> None:
@@ -594,7 +645,9 @@ def test_an_exposure_row_that_does_not_run_over_the_bands_is_refused() -> None:
     say, so a row of the wrong length changes the verdict before the figure,
     the only reader that would object, is ever drawn.
     """
-    good = weighted_exposure([125.0, 250.0, 500.0, 1000.0], [180.0] * 4, "LF")
+    good = weighted_exposure(
+        frequencies_hz=[125.0, 250.0, 500.0, 1000.0], band_sel=[180.0] * 4, group="LF"
+    )
     per_band = "must each carry one value per band"
     one_axis = "must have one axis"
     cases = (
@@ -621,7 +674,13 @@ def test_a_peak_margin_that_contradicts_its_own_peak_level_is_refused() -> None:
     exceeds_injury=False``. Dropping the level to ``None`` printed a margin of
     -68.2 dB for a peak that was not there.
     """
-    good = weighted_exposure([1000.0], [100.0], "VHF", impulsive=True, peak_spl=210.0)
+    good = weighted_exposure(
+        frequencies_hz=[1000.0],
+        band_sel=[100.0],
+        group="VHF",
+        impulsive=True,
+        peak_spl=210.0,
+    )
     assert (good.peak_spl, good.peak_margin) == (210.0, 8.0)
     cases: tuple[tuple[str, float | None], ...] = (
         ("peak_spl", 150.0),
@@ -641,7 +700,13 @@ def test_a_non_finite_peak_level_is_refused_at_construction() -> None:
     never the undetermined state -- it is a level that failed to be measured,
     and it reaches the margin as a subtraction that quietly answers ``NaN``.
     """
-    good = weighted_exposure([1000.0], [100.0], "VHF", impulsive=True, peak_spl=210.0)
+    good = weighted_exposure(
+        frequencies_hz=[1000.0],
+        band_sel=[100.0],
+        group="VHF",
+        impulsive=True,
+        peak_spl=210.0,
+    )
     with pytest.raises(
         ValueError, match=r"WeightedExposureResult: 'peak_spl' must be finite"
     ):
@@ -658,7 +723,13 @@ def test_the_tts_half_of_the_peak_metric_is_pinned_too() -> None:
     200 dB peak carrying the 190 dB one's -6 dB of TTS headroom, 4 dB over the
     196 dB TTS-onset criterion, and still reporting ``exceeds_tts=False``.
     """
-    good = weighted_exposure([1000.0], [80.0], "VHF", impulsive=True, peak_spl=190.0)
+    good = weighted_exposure(
+        frequencies_hz=[1000.0],
+        band_sel=[80.0],
+        group="VHF",
+        impulsive=True,
+        peak_spl=190.0,
+    )
     assert (good.tts_peak_margin, good.exceeds_tts) == (-6.0, False)
     named = r"'tts_peak_margin' must be 'peak_spl' minus"
     with pytest.raises(ValueError, match=named):
@@ -676,7 +747,13 @@ def test_the_peak_metric_may_be_restated_whole_or_left_out_whole() -> None:
     one whose guidance publishes no peak criteria to compare against (the
     non-impulsive tables publish none).
     """
-    good = weighted_exposure([1000.0], [100.0], "VHF", impulsive=True, peak_spl=210.0)
+    good = weighted_exposure(
+        frequencies_hz=[1000.0],
+        band_sel=[100.0],
+        group="VHF",
+        impulsive=True,
+        peak_spl=210.0,
+    )
     louder = dataclasses.replace(
         good, peak_spl=250.0, peak_margin=48.0, tts_peak_margin=54.0
     )
@@ -693,7 +770,13 @@ def test_the_peak_metric_may_be_restated_whole_or_left_out_whole() -> None:
         None,
         None,
     )
-    flat = weighted_exposure([1000.0], [150.0], "LF", impulsive=False, peak_spl=250.0)
+    flat = weighted_exposure(
+        frequencies_hz=[1000.0],
+        band_sel=[150.0],
+        group="LF",
+        impulsive=False,
+        peak_spl=250.0,
+    )
     assert (flat.peak_margin, flat.tts_peak_margin) == (None, None)
 
 
@@ -705,7 +788,9 @@ def test_a_total_that_does_not_sum_the_row_beside_it_is_refused() -> None:
     alone. A variant that edits one row, one total or the event count it is
     accumulated over therefore reports an exposure its own bands do not carry.
     """
-    good = weighted_exposure([125.0, 250.0, 500.0, 1000.0], [180.0] * 4, "LF")
+    good = weighted_exposure(
+        frequencies_hz=[125.0, 250.0, 500.0, 1000.0], band_sel=[180.0] * 4, group="LF"
+    )
     cases: tuple[tuple[str, object, str], ...] = (
         ("weighted_band_sel", good.weighted_band_sel + 3.0, "weighted_band_sel"),
         ("band_sel", good.band_sel - 3.0, "weighted_band_sel"),
@@ -727,7 +812,13 @@ def test_the_verdicts_are_read_from_the_margins() -> None:
     auditory-injury peak criterion could once be built reporting no
     exceedance at all; the verdicts are no fields now.
     """
-    over = weighted_exposure([1000.0], [100.0], "VHF", impulsive=True, peak_spl=230.0)
+    over = weighted_exposure(
+        frequencies_hz=[1000.0],
+        band_sel=[100.0],
+        group="VHF",
+        impulsive=True,
+        peak_spl=230.0,
+    )
     assert over.peak_margin == 28.0
     assert (over.exceeds_injury, over.exceeds_tts) == (True, True)
     for field in ("exceeds_injury", "exceeds_tts"):
@@ -747,7 +838,10 @@ def test_an_all_empty_spectrum_keeps_its_undetermined_totals() -> None:
     """
     with np.errstate(divide="ignore"):
         res = weighted_exposure(
-            [100.0, 200.0], [-np.inf, -np.inf], "LF", peak_spl=200.0
+            frequencies_hz=[100.0, 200.0],
+            band_sel=[-np.inf, -np.inf],
+            group="LF",
+            peak_spl=200.0,
         )
     assert (res.unweighted_sel, res.weighted_sel, res.cumulative_sel) == (
         -np.inf,
@@ -765,7 +859,12 @@ def test_plot_returns_axes() -> None:
     assert auditory_weighting(freqs, "VHF").plot() is not None
     assert auditory_weighting(freqs, "LF").plot(language="es") is not None
     bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0])
-    res = weighted_exposure(bands, np.full(bands.size, 180.0), "LF", peak_spl=210.0)
+    res = weighted_exposure(
+        frequencies_hz=bands,
+        band_sel=np.full(bands.size, 180.0),
+        group="LF",
+        peak_spl=210.0,
+    )
     assert res.plot() is not None
     assert res.plot(language="es") is not None
     plt.close("all")

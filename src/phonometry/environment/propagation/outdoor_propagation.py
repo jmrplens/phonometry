@@ -602,6 +602,7 @@ def ground_attenuation(
     distance: float,
     source_height_m: float,
     receiver_height_m: float,
+    *,
     frequencies: ArrayLike = DEFAULT_FREQUENCIES_HZ,
     ground_source: float = 0.0,
     ground_middle: float = 0.0,
@@ -1163,11 +1164,11 @@ def outdoor_propagation_attenuation(
         distance,
         source_height_m,
         receiver_height_m,
-        freqs,
-        ground_source,
-        ground_middle,
-        ground_receiver,
-        projected_distance,
+        frequencies=freqs,
+        ground_source=ground_source,
+        ground_middle=ground_middle,
+        ground_receiver=ground_receiver,
+        projected_distance=projected_distance,
     )
 
     if barrier is None:

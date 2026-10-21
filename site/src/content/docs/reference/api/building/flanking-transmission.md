@@ -231,8 +231,8 @@ $\overline{D}_{\mathrm{v},ij} = \frac{1}{2}(D_{\mathrm{v},ij} + D_{\mathrm{v},ji
 equivalent_absorption_length(
     area: float,
     structural_reverberation_time: float | Sequence[float] | np.ndarray,
-    frequencies: Sequence[float] | np.ndarray,
     *,
+    frequencies: Sequence[float] | np.ndarray,
     speed_of_sound: float = 343.0,
 ) -> np.ndarray
 ```
@@ -613,8 +613,9 @@ The least `Dv,ij`, $3 - 10 \lg (m_i f_{\mathrm{c}j} / (m_j f_{\mathrm{c}i}))$, i
 
 ```python
 total_loss_factor(
-    frequencies: Sequence[float] | np.ndarray,
     structural_reverberation_time: float | Sequence[float] | np.ndarray,
+    *,
+    frequencies: Sequence[float] | np.ndarray,
 ) -> np.ndarray
 ```
 

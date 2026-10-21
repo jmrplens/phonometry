@@ -58,8 +58,8 @@ def plot_junction_geometry(
     junction: str,
     thickness1_m: float,
     thickness2_m: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -150,8 +150,8 @@ def plot_junction_result_geometry(
 def plot_plate_geometry(
     length_x: float,
     length_y: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     boundary: str = "simply_supported",
     language: str = "en",
     **kwargs: Any,

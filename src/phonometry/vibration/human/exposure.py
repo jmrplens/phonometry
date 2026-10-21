@@ -730,9 +730,7 @@ class WeightedSpectrum(OwnsArrays):
 
 
 def weighted_acceleration(
-    band_accelerations: ArrayLike,
-    frequencies: ArrayLike,
-    weighting: str,
+    band_accelerations: ArrayLike, weighting: str, *, frequencies: ArrayLike
 ) -> WeightedSpectrum:
     r"""Weighted r.m.s. acceleration from a band spectrum (ISO 2631-1
     Eq. (9)).

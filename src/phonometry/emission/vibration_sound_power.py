@@ -132,8 +132,8 @@ def velocity_level(
 
 def velocity_level_from_acceleration(
     peak_acceleration: ArrayLike,
-    frequency: ArrayLike,
     *,
+    frequency: ArrayLike,
     reference: float = REFERENCE_VELOCITY_M_S,
 ) -> np.ndarray:
     r"""Velocity level from a sinusoidal acceleration (ISO/TS 7849-1, Eq. 8).

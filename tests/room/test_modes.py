@@ -119,7 +119,9 @@ def test_cubic_room_modes_are_degenerate() -> None:
 
 def test_long_modal_density_34_modes_per_hertz_at_1_khz() -> None:
     """Long, printed p. 326: 34 modes per hertz at 1 kHz for the 7 x 5 x 3 m room."""
-    density = room.room_modal_density(1000.0, LONG_ROOM, speed_of_sound=LONG_C0)
+    density = room.room_modal_density(
+        frequency=1000.0, dimensions=LONG_ROOM, speed_of_sound=LONG_C0
+    )
     assert round(float(density)) == 34
 
 
@@ -136,18 +138,30 @@ def test_mode_count_matches_its_closed_form() -> None:
         + math.pi / 4.0 * surface * x**2
         + edges / 8.0 * x
     )
-    assert float(room.room_mode_count(f, LONG_ROOM, speed_of_sound=LONG_C0)) == (
-        pytest.approx(expected)
-    )
+    assert float(
+        room.room_mode_count(frequency=f, dimensions=LONG_ROOM, speed_of_sound=LONG_C0)
+    ) == (pytest.approx(expected))
 
 
 def test_modal_density_is_the_derivative_of_the_count() -> None:
     """Equation (8.46) is d/df of Equation (8.45) (central difference)."""
     f, h = 500.0, 1e-3
-    up = float(room.room_mode_count(f + h, LONG_ROOM, speed_of_sound=LONG_C0))
-    down = float(room.room_mode_count(f - h, LONG_ROOM, speed_of_sound=LONG_C0))
+    up = float(
+        room.room_mode_count(
+            frequency=f + h, dimensions=LONG_ROOM, speed_of_sound=LONG_C0
+        )
+    )
+    down = float(
+        room.room_mode_count(
+            frequency=f - h, dimensions=LONG_ROOM, speed_of_sound=LONG_C0
+        )
+    )
     numeric = (up - down) / (2.0 * h)
-    analytic = float(room.room_modal_density(f, LONG_ROOM, speed_of_sound=LONG_C0))
+    analytic = float(
+        room.room_modal_density(
+            frequency=f, dimensions=LONG_ROOM, speed_of_sound=LONG_C0
+        )
+    )
     assert numeric == pytest.approx(analytic, rel=1e-7)
 
 
@@ -163,7 +177,11 @@ def test_smooth_count_tracks_the_exact_enumeration_at_high_frequency() -> None:
             LONG_ROOM, max_frequency=f_max, speed_of_sound=LONG_C0
         ).frequencies
     )
-    smooth = float(room.room_mode_count(f_max, LONG_ROOM, speed_of_sound=LONG_C0))
+    smooth = float(
+        room.room_mode_count(
+            frequency=f_max, dimensions=LONG_ROOM, speed_of_sound=LONG_C0
+        )
+    )
     assert exact > 800
     assert smooth == pytest.approx(exact, rel=0.01)
 
@@ -174,7 +192,9 @@ def test_result_geometry_properties() -> None:
     assert result.surface_area == pytest.approx(142.0)
     assert result.edge_length == pytest.approx(60.0)
     assert result.density(1000.0) == pytest.approx(
-        room.room_modal_density(1000.0, LONG_ROOM, speed_of_sound=result.speed_of_sound)
+        room.room_modal_density(
+            frequency=1000.0, dimensions=LONG_ROOM, speed_of_sound=result.speed_of_sound
+        )
     )
 
 
@@ -205,7 +225,7 @@ def test_enumeration_refuses_an_unreasonable_lattice() -> None:
     ):
         room.room_modes(LONG_ROOM, max_frequency=20000.0)
     # The smooth count answers the same question there without enumerating.
-    assert float(room.room_mode_count(20000.0, LONG_ROOM)) > 8e7
+    assert float(room.room_mode_count(frequency=20000.0, dimensions=LONG_ROOM)) > 8e7
 
 
 def test_result_is_a_frozen_dataclass() -> None:
@@ -278,9 +298,9 @@ def test_other_validation_errors() -> None:
     with pytest.raises(ValueError, match=r"'orders' must be a triple \(nx, ny, nz\)"):
         room.room_mode_frequency(two_dimensional, LONG_ROOM)
     with pytest.raises(ValueError, match="'frequency' must be non-negative and finite"):
-        room.room_mode_count(-1.0, LONG_ROOM)
+        room.room_mode_count(frequency=-1.0, dimensions=LONG_ROOM)
     with pytest.raises(ValueError, match="'frequency' must be non-negative and finite"):
-        room.room_modal_density(math.inf, LONG_ROOM)
+        room.room_modal_density(frequency=math.inf, dimensions=LONG_ROOM)
 
 
 def _long_table_result() -> room.RoomModesResult:

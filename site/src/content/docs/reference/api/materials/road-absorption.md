@@ -564,9 +564,9 @@ source-to-microphone distance projected on the reference plane.
 
 ```python
 one_third_octave_absorption(
-    frequencies: ArrayLike,
     absorption: ArrayLike,
     *,
+    frequencies: ArrayLike,
     f_min: float = 250.0,
     f_max: float = 4000.0,
     clip_negative: bool = True,
@@ -613,8 +613,8 @@ PART1_FREQUENCY_RANGE_HZ = (250.0, 4000.0)
 
 ```python
 plot_in_situ_geometry(
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     source_height_m: float = 1.25,
     microphone_height_m: float = 0.25,
     sampled_radius: float | None = 1.34,
@@ -690,6 +690,7 @@ independent of any reflected-path time offset.
 ```python
 reflected_path_delay(
     microphone_height_m: float = 0.25,
+    *,
     speed_of_sound: float = 340.0,
 ) -> float
 ```
@@ -775,8 +776,8 @@ one-third-octave results are set to zero when `clip_negative` is true
 
 ```python
 spot_microphone_spacing_bounds(
-    speed_of_sound: float = 340.0,
     *,
+    speed_of_sound: float = 340.0,
     f_min: float = 220.0,
     f_max: float = 1800.0,
 ) -> tuple[float, float]
@@ -823,6 +824,7 @@ SPOT_NARROW_BAND_RANGE_HZ = (220.0, 1800.0)
 ```python
 spot_tube_upper_frequency(
     diameter_m: float,
+    *,
     speed_of_sound: float = 340.0,
 ) -> float
 ```

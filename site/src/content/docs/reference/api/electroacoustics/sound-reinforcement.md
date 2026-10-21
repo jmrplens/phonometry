@@ -258,8 +258,8 @@ plot_sound_reinforcement_geometry(
     talker_distance: float,
     microphone_distance: float,
     listener_distance: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     language: str = 'en',
     **kwargs: Any,
 ) -> Axes

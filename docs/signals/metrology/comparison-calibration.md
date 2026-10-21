@@ -69,7 +69,7 @@ noise = rng.normal(0.0, 0.004, (2, 3, f.size))   # three repeats of each reading
 l_c12 = (l_ref + gain_1) - (l_true + gain_2) + field_a + noise[0]   # reference on channel 1
 l_c21 = (l_true + gain_1) - (l_ref + gain_2) + field_a + noise[1]   # interchanged
 
-c = metrology.simultaneous_comparison(f, l_ref, l_c12, l_c21)
+c = metrology.simultaneous_comparison(l_ref, l_c12, l_c21, frequencies=f)
 print(c.n_determinations, c.sensitivity_level[[2, 8, 19]].round(2))   # 3 [-38.63 -38.58 -38.44]
 print(np.abs(c.sensitivity_level - l_true).max().round(3))           # 0.003
 ```
@@ -137,7 +137,7 @@ budgets = [
 ]
 u = [bb.expanded_uncertainty_db for bb in budgets]
 c = metrology.simultaneous_comparison(
-    f, l_ref, l_c12, l_c21, reference_environment=env, expanded_uncertainty_db=u
+    l_ref, l_c12, l_c21, frequencies=f, reference_environment=env, expanded_uncertainty_db=u
 )
 print(np.round(u, 3)[[0, 16, 19]])                  # [0.087 0.101 0.205]
 print(c.sensitivity_mv_per_pa[[2, 8, 19]].round(2))  # [11.72 11.78 11.98]
@@ -265,10 +265,10 @@ def free_field_budget(fx):
 
 
 free = metrology.sequential_comparison(
-    ff,
     l_ref_p,
-    l_ref_p + c_ff + field_1,     # the reference's output, dB re 1 V
-    l_ws2f + field_2,             # the WS2F's output in its place
+    l_ref_p + c_ff + field_1,
+    l_ws2f + field_2,     # the reference's output, dB re 1 V
+    frequencies=ff,             # the WS2F's output in its place
     monitor=metrology.MonitorReadings(
         reference_level=monitor + field_1, test_level=monitor + field_2
     ),
@@ -344,9 +344,9 @@ def heard(m, off_axis):   # each step: the direct sound and the rig's reflection
     )
 
 
-ir_ref = metrology.stepped_sine_impulse_response(f_step, heard(mic(f_step, -38.0, 22000, 1.1), 1.0))
+ir_ref = metrology.stepped_sine_impulse_response(heard(mic(f_step, -38.0, 22000, 1.1), 1.0), frequencies=f_step)
 ir_ws2f = metrology.stepped_sine_impulse_response(
-    f_step, heard(mic(f_step, -26.4, 18000, 0.9), 1 / (1 + 1j * f_step / 6000))
+    heard(mic(f_step, -26.4, 18000, 0.9), 1 / (1 + 1j * f_step / 6000)), frequencies=f_step
 )   # the WS2F hears the reflection off axis
 print(ir_ref.duration_s, round(ir_ref.fs))   # 0.02 200050
 ```
@@ -380,10 +380,10 @@ and phases through the window are the two outputs of a substitution:
 fw = metrology.exact_frequencies(1900, 20000, fraction=3)   # 2 kHz to 20 kHz
 m_ref = mic(fw, -38.0, 22000, 1.1)   # the reference's free-field sensitivity, from its certificate
 tsel = metrology.sequential_comparison(
-    fw,
     20 * np.log10(np.abs(m_ref)),
     ref.level_at(fw),
     ws2f.level_at(fw),
+    frequencies=fw,
     field="free",
     phase=metrology.SequentialComparisonPhase(
         reference_sensitivity_phase_deg=np.degrees(np.angle(m_ref)),
@@ -452,7 +452,7 @@ jitter = np.random.default_rng(5).normal(0.0, 0.02, (2, 3, f.size))
 p12 = (phi_ref + shift_1) - (phi_true + shift_2) + late_a + jitter[0]   # reference on channel 1
 p21 = (phi_true + shift_1) - (phi_ref + shift_2) + late_a + jitter[1]   # interchanged
 cp = metrology.simultaneous_comparison(
-    f, l_ref, l_c12, l_c21,
+    l_ref, l_c12, l_c21, frequencies=f,
     phase=metrology.SimultaneousComparisonPhase(
         reference_sensitivity_phase_deg=phi_ref,
         channel_phase_difference_deg=p12,
@@ -601,10 +601,10 @@ without a monitor, and the library computes it through the same model:
 
 ```python
 d = metrology.diffuse_field_sensitivity(
-    [1000.0, 2000.0], [94.3, 94.6], [94.0, 94.1],
+    [94.3, 94.6], [94.0, 94.1], frequencies=[1000.0, 2000.0],
     reference_random_incidence_level=[-26.0, -26.2],
 )
-s = metrology.sequential_comparison([1000.0, 2000.0], [-26.0, -26.2], [94.0, 94.1], [94.3, 94.6])
+s = metrology.sequential_comparison([-26.0, -26.2], [94.0, 94.1], [94.3, 94.6], frequencies=[1000.0, 2000.0])
 print(d.diffuse_field_level, s.sensitivity_level)   # [-25.7 -25.7] [-25.7 -25.7]
 ```
 
@@ -642,9 +642,9 @@ mode = 0.5 * np.exp(-(((fv / 1000 - 6.3) / 0.6) ** 2))   # the field moves near 
 jitter = np.random.default_rng(42).normal(0.0, 0.01, (2, 3, fv.size))
 j12 = (l_ref[6:] + gain_1) - (l_true[6:] + gain_2) + field_a[6:] + mode + jitter[0]
 j21 = (l_true[6:] + gain_1) - (l_ref[6:] + gain_2) + field_a[6:] + jitter[1]
-jig = metrology.simultaneous_comparison(fv, l_ref[6:], j12, j21, expanded_uncertainty_db=u[6:])
+jig = metrology.simultaneous_comparison(l_ref[6:], j12, j21, frequencies=fv, expanded_uncertainty_db=u[6:])
 coupler = metrology.simultaneous_comparison(
-    f[:17], l_ref[:17], l_c12[:, :17], l_c21[:, :17], expanded_uncertainty_db=u[:17]
+    l_ref[:17], l_c12[:, :17], l_c21[:, :17], frequencies=f[:17], expanded_uncertainty_db=u[:17]
 )   # the coupler of A.1, up to 10 kHz
 check = metrology.verify_jig_or_coupler(jig, coupler)
 print(check.passes, check.failing_frequencies_hz.round())    # False [6310.]

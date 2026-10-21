@@ -478,13 +478,14 @@ def _broadcast_bands(
 
 
 def power_injection_clf(
-    frequencies: ArrayLike,
     energy1: ArrayLike,
     energy2: ArrayLike,
     internal_loss_factor1: ArrayLike,
     internal_loss_factor2: ArrayLike,
     modal_density1: ArrayLike,
     modal_density2: ArrayLike,
+    *,
+    frequencies: ArrayLike,
 ) -> PowerInjectionResult:
     r"""Coupling loss factors from a single-drive energy measurement.
 
@@ -564,9 +565,7 @@ def power_injection_clf(
 
 
 def power_injection_matrix(
-    frequencies: ArrayLike,
-    energies: ArrayLike,
-    input_powers: ArrayLike,
+    energies: ArrayLike, input_powers: ArrayLike, *, frequencies: ArrayLike
 ) -> PowerInjectionResult:
     """Full two-drive power-injection inversion (no reciprocity assumed).
 

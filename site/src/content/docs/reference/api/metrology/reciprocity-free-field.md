@@ -273,9 +273,9 @@ is moved by a fraction of itself,
 
 ```python
 free_field_reciprocity(
-    frequencies: ArrayLike,
     electrical_transfer_impedances_ohm: Sequence[ArrayLike],
     *,
+    frequencies: ArrayLike,
     diaphragm_distances_m: Sequence[float],
     temperature_c: float,
     static_pressure_pa: float,
@@ -329,10 +329,10 @@ printed Formula (8) drops (module docstring).
 
 ```python
 free_field_reciprocity_pair(
-    frequencies: ArrayLike,
     electrical_transfer_impedance_ohm: ArrayLike,
     sensitivity_ratio: ArrayLike,
     *,
+    frequencies: ArrayLike,
     diaphragm_distance_m: float,
     temperature_c: float,
     static_pressure_pa: float,
@@ -384,10 +384,10 @@ Formula (7), which the printed Formula (9) drops (module docstring).
 
 ```python
 free_field_transfer_impedance(
-    frequencies: ArrayLike,
     sensitivity_1_v_per_pa: ArrayLike,
     sensitivity_2_v_per_pa: ArrayLike,
     *,
+    frequencies: ArrayLike,
     diaphragm_distance_m: float,
     temperature_c: float,
     static_pressure_pa: float,

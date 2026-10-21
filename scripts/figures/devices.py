@@ -526,8 +526,8 @@ def _loudspeaker_datasheet_example() -> "LoudspeakerCharacteristics":
     fz = np.geomspace(20, 20000, 260)
     thd_f = np.geomspace(50, 5000, 140)
     return electroacoustics.loudspeaker_characteristics(
-        freqs,
-        spl,
+        frequencies=freqs,
+        spl=spl,
         rated_impedance_ohm=8.0,
         sensitivity_band=(200.0, 4000.0),
         impedance=(fz, 6.6 + 24 * np.exp(-(np.log2(fz / 52.0) ** 2) / 0.12)),
@@ -559,9 +559,9 @@ def _microphone_datasheet_example() -> "MicrophoneCharacteristics":
     noise_f = np.geomspace(20, 20000, 31)
     spl_axis = np.linspace(100, 140, 81)
     return electroacoustics.microphone_characteristics(
-        freqs,
-        response,
-        12.5,
+        frequencies=freqs,
+        response_db=response,
+        sensitivity_mv_per_pa=12.5,
         tolerance_db=3.0,  # 12.5 mV/Pa at 1 kHz
         directivity=electroacoustics.MicrophoneDirectivity(
             polar=(angles, cardioid), frequency=1000.0
@@ -986,10 +986,8 @@ def generate_expansion_chamber_geometry(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     noise_control.plot_silencer_geometry(
         "expansion chamber",
+        {"length": 0.3, "chamber_area": 0.04, "pipe_area": 0.01},
         ax=ax,
-        length=0.3,
-        chamber_area=0.04,
-        pipe_area=0.01,
         language=_LANG,
     )
     plt.tight_layout()
@@ -1010,11 +1008,13 @@ def generate_helmholtz_branch_geometry(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     noise_control.plot_silencer_geometry(
         "Helmholtz resonator",
+        {
+            "duct_area": 0.01,
+            "neck_area": 1e-4,
+            "neck_length": 0.02,
+            "cavity_volume": 1e-3,
+        },
         ax=ax,
-        duct_area=0.01,
-        neck_area=1e-4,
-        neck_length=0.02,
-        cavity_volume=1e-3,
         language=_LANG,
     )
     plt.tight_layout()
@@ -1035,10 +1035,8 @@ def generate_quarter_wave_geometry(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6.2))
     noise_control.plot_silencer_geometry(
         "quarter-wave resonator",
+        {"duct_area": 0.01, "length": 0.3, "branch_area": 2e-3},
         ax=ax,
-        duct_area=0.01,
-        length=0.3,
-        branch_area=2e-3,
         language=_LANG,
     )
     plt.tight_layout()
@@ -1671,9 +1669,9 @@ def generate_sound_power_in_duct_result(output_dir: str) -> None:
     freqs, levels, c1, c2 = _in_duct_fan_example()
     result = sound_power_in_duct(
         levels,
-        freqs,
-        0.63,
-        12.0,
+        frequencies=freqs,
+        duct_diameter_m=0.63,
+        flow_velocity=12.0,
         microphone_correction=c1,
         shield_correction=c2,
     )
@@ -2303,7 +2301,11 @@ def generate_silencer_selection(output_dir: str) -> None:
             f"lined 36 × 24 in duct",
         )
     splitter = hvac.splitter_silencer_insertion_loss(
-        bands, 24 * inch, 5 * foot, [4 * inch] * 5, 8 * inch
+        frequencies=bands,
+        height_m=24 * inch,
+        length=5 * foot,
+        airway_widths=[4 * inch] * 5,
+        splitter_thickness_m=8 * inch,
     )
     ax.semilogx(
         bands,
@@ -3495,7 +3497,7 @@ def generate_field_indicators(output_dir: str) -> None:
     i_n[:2, 0] = -0.35 * i_mean[0]
     i_n[2:, 0] *= (10.0 * i_mean[0] - i_n[:2, 0].sum()) / i_n[2:, 0].sum()
 
-    fi = emission.field_indicators(lp, i_n, freqs)
+    fi = emission.field_indicators(lp, i_n, frequencies=freqs)
     ld = emission.dynamic_capability_index(18.0)  # delta_pI0 = 18 dB, K = 10 dB
     _fig, ax = plt.subplots(figsize=(10, 6))
     # The result's own .plot() draws F2 and F3 per band, the dynamic
@@ -3524,13 +3526,15 @@ def generate_intensity_class(output_dir: str) -> None:
     freqs, _, _ = emission.residual_index_limits("instrument", spacing_m=spacing)
     phase_mismatch = 0.05 * np.maximum(1.0, freqs / 1000.0)  # degrees
     measured = emission.residual_index_from_phase_mismatch(
-        phase_mismatch, freqs, spacing
+        phase_mismatch, frequency=freqs, spacing_m=spacing
     )
     # A vent resonance of the capsules costs 4 dB around 100 Hz, the one band
     # that drops out of class 1 and drags the whole verdict down to class 2.
     measured = measured - 4.0 * np.exp(-(((np.log(freqs / 100.0)) / 0.25) ** 2))
 
-    result = emission.verify_intensity_class(measured, freqs, spacing_m=spacing)
+    result = emission.verify_intensity_class(
+        measured, frequencies=freqs, spacing_m=spacing
+    )
     _fig, ax = plt.subplots(figsize=(10, 6))
     # The result's own .plot() shades the pass region of the achieved class and
     # rings the bands that cost the chain the next class up.
@@ -3734,7 +3738,7 @@ def generate_duct_attenuation_elements(output_dir: str) -> None:
 
     ax = axes[1][1]
     sil = hvac.splitter_silencer_insertion_loss(
-        bands,
+        frequencies=bands,
         height_m=24 * inch,
         length=5 * foot,
         airway_widths=[0.10] * 5,
@@ -4216,9 +4220,9 @@ def _long_duct_paths() -> tuple[Any, Any]:
     fan = [90.0, 86.0, 82.0, 79.0, 77.0, 75.0, 71.0, 61.0]
     source = "Fan, centrifugal FC, 5000 cfm, 2 in w.g."
     supply = noise_control.duct_path(
-        bands,
-        fan,
-        [
+        frequencies=bands,
+        source_level=fan,
+        elements=[
             noise_control.DuctElement(
                 "Elbow, 36 x 24 in, unlined",
                 [0, 1, 2, 3, 3, 3, 3, 3],
@@ -4260,9 +4264,9 @@ def _long_duct_paths() -> tuple[Any, Any]:
         label="Supply",
     )
     ret = noise_control.duct_path(
-        bands,
-        fan,
-        [
+        frequencies=bands,
+        source_level=fan,
+        elements=[
             noise_control.DuctElement(
                 "Elbow, 36 x 24 in, unlined",
                 [0, 1, 2, 3, 3, 3, 3, 3],
@@ -4464,10 +4468,10 @@ def generate_room_to_room_partitions(output_dir: str) -> None:
     ax = axes[0]
     for label, tl, color, style in partitions:
         res = noise_control.room_to_room_transmission(
-            bands,
-            tl,
-            wall_area,
-            receiving,
+            frequencies=bands,
+            transmission_loss=tl,
+            partition_area=wall_area,
+            receiving_absorption=receiving,
             source=noise_control.SourceRoom(level=90.0),
             label=label,
         )
@@ -4562,10 +4566,10 @@ def _norton_plant_room_chain() -> "RoomToRoomResult":
         (60.0, walls),
     ]
     return noise_control.room_to_room_transmission(
-        bands,
-        [39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
-        5.0 * 3.0,
-        room.equivalent_absorption_area(operator),
+        frequencies=bands,
+        transmission_loss=[39.0, 42.0, 50.0, 58.0, 63.0, 67.0],
+        partition_area=5.0 * 3.0,
+        receiving_absorption=room.equivalent_absorption_area(operator),
         source=noise_control.SourceRoom(
             power_level=[105.0, 103.0, 98.0, 108.0, 107.0, 109.0],
             room_constant=room.room_constant(268.0, room.mean_absorption(plant)),
@@ -5076,9 +5080,9 @@ def generate_microphone_patterns(output_dir: str) -> None:
             )
         )
         res = electroacoustics.microphone_characteristics(
-            freqs,
-            response,
-            12.5,
+            frequencies=freqs,
+            response_db=response,
+            sensitivity_mv_per_pa=12.5,
             tolerance_db=3.0,
             directivity=electroacoustics.MicrophoneDirectivity(
                 polar=(angles, polar_db), frequency=1000.0
@@ -5450,7 +5454,7 @@ def generate_in_situ_sound_power(output_dir: str) -> None:
         st,
         rss,
         lw_rss,
-        freqs,
+        frequencies=freqs,
         background_levels=background,
         conditions=emission.GradeConditions(
             excess_levels=[8.2, 7.6, 8.9, 8.0], directivity_range=4.0
@@ -7917,7 +7921,7 @@ def _iso3743_1_example() -> tuple[Any, np.ndarray, np.ndarray, np.ndarray]:
             st,
             rss,
             lw_rss,
-            _ISO3743_FREQS,
+            frequencies=_ISO3743_FREQS,
             background_levels=background,
             sigma_omc_db=1.0,
         )
@@ -8035,7 +8039,9 @@ def generate_special_room_reverberation(output_dir: str) -> None:
         [1.30, 1.13, 1.14, 1.01, 0.99, 0.90, 0.94, 0.86, 0.87, 0.82, 0.83,
          0.83, 0.79, 0.83, 0.79, 0.80, 0.77, 0.81, 0.74, 0.71, 0.67]
     )  # fmt: skip
-    check = emission.check_special_room_reverberation(measured, thirds, volume=72.0)
+    check = emission.check_special_room_reverberation(
+        measured, frequencies=thirds, volume=72.0
+    )
     fig, ax = plt.subplots(figsize=(10, 5.6))
     check.plot(ax=ax, language=_LANG)
     fig.tight_layout()
@@ -8075,11 +8081,11 @@ def generate_special_room_sound_power(output_dir: str) -> None:
     )
     background = np.array([48.0, 45.0, 42.0, 40.0, 38.0, 36.0, 35.0])
     plan = emission.special_room_source_locations(
-        survey, _ISO3743_FREQS, a_weighted_levels=a_levels[0]
+        survey, frequencies=_ISO3743_FREQS, a_weighted_levels=a_levels[0]
     )
     direct = emission.sound_power_special_room(
         levels,
-        _ISO3743_FREQS,
+        frequencies=_ISO3743_FREQS,
         volume=72.0,
         nominal_reverberation_time_s=0.77,
         background_levels=background,
@@ -8099,7 +8105,7 @@ def generate_special_room_sound_power(output_dir: str) -> None:
         ]
     )
     comparison = emission.sound_power_special_room_comparison(
-        levels, rss, lw_ref, _ISO3743_FREQS, background_levels=background
+        levels, rss, lw_ref, frequencies=_ISO3743_FREQS, background_levels=background
     )
     fig, (axt, axb) = plt.subplots(2, 1, figsize=(10, 8.6), height_ratios=(0.85, 1.0))
     plan.plot(ax=axt, language=_LANG)
@@ -8150,7 +8156,7 @@ def generate_special_room_suitability(output_dir: str) -> None:
     )
     in_room = emission.sound_power_special_room(
         rss,
-        _ISO3743_FREQS,
+        frequencies=_ISO3743_FREQS,
         volume=72.0,
         nominal_reverberation_time_s=0.77,
         background_levels=np.array([48.0, 45.0, 42.0, 40.0, 38.0, 36.0, 35.0]),
@@ -8160,7 +8166,7 @@ def generate_special_room_suitability(output_dir: str) -> None:
     check = emission.check_special_room_suitability(
         in_room.sound_power_level,
         calibration,
-        _ISO3743_FREQS,
+        frequencies=_ISO3743_FREQS,
         temperature_c=22.0,
         static_pressure_kpa=97.5,
     )
@@ -8491,8 +8497,8 @@ def generate_induction_loop_overload(output_dir: str) -> None:
     )
     impedance = electroacoustics.loop_impedance(resistance, inductance)
     response = electroacoustics.amplifier_frequency_response(
-        [100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],
-        [2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],
+        frequencies=[100.0, 1000.0, 2000.0, 3150.0, 4000.0, 5000.0, 8000.0],
+        output_current_a=[2.0, 2.0, 2.4, 2.9, 3.2, 3.5, 3.6],
     )
     overload = electroacoustics.verify_amplifier_overload(
         electroacoustics.loop_current(10.0, 20.0, height_m=1.2),
@@ -8522,7 +8528,9 @@ def generate_induction_loop_amplifier(output_dir: str) -> None:
         + [1250, 1600, 2000, 2500, 3150, 4000, 5000]
     )
     phase = 90.0 - 4.0 * np.log2(f / 700.0) ** 2 / 3.0
-    quadrature = electroacoustics.quadrature_phase_error(f, phase)
+    quadrature = electroacoustics.quadrature_phase_error(
+        frequencies=f, phase_difference_deg=phase
+    )
     fig, (ax_agc, ax_phase) = plt.subplots(1, 2, figsize=(13.5, 5.6))
     agc.plot(ax_agc, language=_LANG)
     quadrature.plot(ax_phase, language=_LANG)
@@ -8539,7 +8547,12 @@ def generate_induction_loop_neck_loop(output_dir: str) -> None:
     f = np.array([100.0, 200, 500, 1000, 2000, 5000, 8000, 10000])
     z = np.abs(32.2 + 2j * np.pi * f * 0.53e-3)
     level = -6.0 + 20 * np.log10(z[3] / z)
-    neck = electroacoustics.neck_loop_characteristics(f, level, z, input_voltage_v=0.5)
+    neck = electroacoustics.neck_loop_characteristics(
+        frequencies=f,
+        field_strength_level=level,
+        impedance_ohm=z,
+        input_voltage_v=0.5,
+    )
     verdict = electroacoustics.verify_neck_loop(
         32.4, neck.reference_input_voltage_v, neck_loop_type=1
     )
@@ -8626,7 +8639,9 @@ def _plant_example() -> tuple[Any, Any, NDArray[np.float64]]:
     )
     levels = _plant_levels(contour, _PLANT_SOURCES)
     background = levels - np.array([14.0, 13.0, 15.0, 17.0, 19.0, 20.0, 22.0, 24.0])
-    result = contour.sound_power(levels, _PLANT_BANDS, background_levels=background)
+    result = contour.sound_power(
+        levels, frequencies=_PLANT_BANDS, background_levels=background
+    )
     true_lw = 10.0 * np.log10(
         np.sum([10.0 ** (np.asarray(lw) / 10.0) for _p, lw in _PLANT_SOURCES], axis=0)
     )
@@ -8886,7 +8901,7 @@ def generate_plant_partial_contributions(output_dir: str) -> None:
         ),
     )
     asphalt_result = asphalt.sound_power(
-        _plant_levels(asphalt, _ASPHALT_SOURCES), _PLANT_BANDS
+        _plant_levels(asphalt, _ASPHALT_SOURCES), frequencies=_PLANT_BANDS
     )
     area = emission.partial_plant_contributions(
         [result, asphalt_result],
@@ -8971,7 +8986,7 @@ def generate_headphones_programme_signal(output_dir: str) -> None:
     )
     bands = octave_filter(x, _HEADPHONE_FS, fraction=3, limits=[19.95, 19952.6])
     figure_2 = electroacoustics.check_program_signal(
-        bands.frequencies, np.asarray(bands.levels)
+        frequencies=bands.frequencies, band_levels=np.asarray(bands.levels)
     )
     clipped = electroacoustics.simulated_program_signal(
         _HEADPHONE_FS, 60.0, peak_to_rms=2.0, seed=2
@@ -8994,7 +9009,10 @@ def generate_headphones_impedance(output_dir: str) -> None:
 
     f, z = _headphone_impedance()
     verdict = electroacoustics.verify_rated_impedance(
-        f, z, rated_impedance_ohm=32.0, rated_frequency_range_hz=(15.0, 25000.0)
+        frequencies=f,
+        impedance_ohm=z,
+        rated_impedance_ohm=32.0,
+        rated_frequency_range_hz=(15.0, 25000.0),
     )
     fig, ax = plt.subplots(figsize=(10, 5.4))
     verdict.plot(ax, language=_LANG)
@@ -9016,7 +9034,7 @@ def generate_headphones_characteristic_voltage(output_dir: str) -> None:
     bands = _ear_simulator_bands()
     fittings = np.vstack([bands, bands + 0.6, bands - 0.4])
     result = electroacoustics.program_characteristic_voltage(
-        0.1, _HEADPHONE_BANDS, fittings, weighting="A"
+        0.1, frequencies=_HEADPHONE_BANDS, band_levels=fittings, weighting="A"
     )
     fig, ax = plt.subplots(figsize=(10, 5.4))
     result.plot(ax, language=_LANG)
@@ -9038,12 +9056,14 @@ def generate_headphones_coupler_response(output_dir: str) -> None:
         - 10.0 * np.log10(1.0 + (f / 12000.0) ** 6)
     )
     response = electroacoustics.coupler_frequency_response(
-        f, level, rated_frequency_range_hz=(20.0, 20000.0)
+        frequencies=f,
+        sound_pressure_level=level,
+        rated_frequency_range_hz=(20.0, 20000.0),
     )
     crosstalk = electroacoustics.crosstalk_attenuation(
-        _HEADPHONE_BANDS,
-        np.full(_HEADPHONE_BANDS.size, 100.0),
-        52.0 - 12.0 * np.log10(_HEADPHONE_BANDS / 1000.0) ** 2,
+        frequencies=_HEADPHONE_BANDS,
+        driven_level=np.full(_HEADPHONE_BANDS.size, 100.0),
+        other_level=52.0 - 12.0 * np.log10(_HEADPHONE_BANDS / 1000.0) ** 2,
     )
     fig, (ax_response, ax_crosstalk) = plt.subplots(1, 2, figsize=(13.5, 5.2))
     response.plot(ax_response, language=_LANG)
@@ -9070,14 +9090,19 @@ def generate_headphones_test_persons(output_dir: str) -> None:
     spread = rng.normal(0.0, 1.2, (persons, _HEADPHONE_BANDS.size))
     emf = 0.05 * 10.0 ** (-(shape_db + spread) / 20.0)
     comparison = electroacoustics.field_comparison_response(
-        _HEADPHONE_BANDS, 70.0, emf, field="free"
+        frequencies=_HEADPHONE_BANDS,
+        field_level=70.0,
+        source_emf_v=emf,
+        field="free",
     )
     field = 70.0 + rng.normal(0.0, 0.4, (persons, 2, _HEADPHONE_BANDS.size))
     earphone = (
         field + shape_db + rng.normal(0.0, 0.6, (persons, 2, _HEADPHONE_BANDS.size))
     )
     ear_canal = electroacoustics.ear_canal_frequency_response(
-        _HEADPHONE_BANDS, earphone, field
+        frequencies=_HEADPHONE_BANDS,
+        earphone_levels=earphone,
+        sound_field_levels=field,
     )
     fig, (ax_comparison, ax_ear) = plt.subplots(2, 1, figsize=(10, 9.6))
     comparison.plot(ax_comparison, language=_LANG)

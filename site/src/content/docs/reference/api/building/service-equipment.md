@@ -989,8 +989,8 @@ the equipment, the result stands without correction
 ```python
 service_equipment_level(
     levels: ArrayLike,
-    frequencies: ArrayLike,
     *,
+    frequencies: ArrayLike,
     quantity: Literal['Smax', 'Fmax', 'eq'],
     fraction: Literal[1, 3] = 3,
     background_db: ArrayLike | None = None,

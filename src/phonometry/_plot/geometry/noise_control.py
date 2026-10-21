@@ -20,6 +20,7 @@ leaf never imports domain code at module level.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -114,6 +115,22 @@ _SILENCER_KINDS = (
     _KIND_HELMHOLTZ,
     _KIND_QUARTER,
 )
+
+#: The ``geometry`` keys each kind is drawn from: the dimensions its
+#: constructor retains in ``ReactiveSilencerResult.geometry``. A chamber's
+#: tube extensions may be left out and are then drawn flush (``0.0``).
+_SILENCER_KEYS: dict[str, tuple[str, ...]] = {
+    _KIND_EXPANSION: ("length", "chamber_area", "pipe_area"),
+    _KIND_EXTENDED: (
+        "length",
+        "chamber_area",
+        "pipe_area",
+        "inlet_extension",
+        "outlet_extension",
+    ),
+    _KIND_HELMHOLTZ: ("duct_area", "neck_area", "neck_length", "cavity_volume"),
+    _KIND_QUARTER: ("duct_area", "length", "branch_area"),
+}
 
 
 def _duct_diameter(area: float, name: str = "area") -> float:
@@ -448,51 +465,82 @@ def _validate_branch_geometry(
     _duct_diameter(branch_area, "branch_area")
 
 
+def _require_silencer_keys(kind: str, geometry: Mapping[str, float]) -> None:
+    """Refuse a geometry that is not a mapping, or that holds a key the kind
+    is not drawn from, naming every such key.
+
+    :raises TypeError: if *geometry* is not a mapping.
+    :raises ValueError: if *geometry* holds a key *kind* does not take.
+    """
+    if not isinstance(geometry, Mapping):
+        msg = (
+            "'geometry' must be a mapping of dimension names to values, "
+            f"not {type(geometry).__name__}."
+        )
+        raise TypeError(msg)
+    allowed = _SILENCER_KEYS[kind]
+    extra = [key for key in geometry if key not in allowed]
+    if extra:
+        names = ", ".join(repr(key) for key in extra)
+        keys = ", ".join(repr(key) for key in allowed)
+        msg = f"The {kind} drawing takes no {names}; its geometry keys are {keys}."
+        raise ValueError(msg)
+
+
 def plot_silencer_geometry(
     kind: str,
-    ax: Axes | None = None,
+    geometry: Mapping[str, float],
     *,
-    length: float | None = None,
-    chamber_area: float | None = None,
-    pipe_area: float | None = None,
-    inlet_extension: float = 0.0,
-    outlet_extension: float = 0.0,
-    duct_area: float | None = None,
-    neck_area: float | None = None,
-    neck_length: float | None = None,
-    cavity_volume: float | None = None,
-    branch_area: float | None = None,
+    ax: Axes | None = None,
     language: str = "en",
+    **kwargs: Any,
 ) -> Axes:
     """Draw a reactive silencer cross-section to scale.
 
     Side cut through the duct axis with equivalent circular diameters
-    (``d = 2 sqrt(S / pi)``) for every cross-section area, matching the
-    parameters of the four :mod:`~phonometry.noise_control` silencer
-    constructors. A Helmholtz cavity is drawn as the cube of equal volume
-    with its volume annotated.
+    (``d = 2 sqrt(S / pi)``) for every cross-section area, drawn from the
+    ``kind`` and the ``geometry`` that
+    :class:`~phonometry.noise_control.silencers.ReactiveSilencerResult`
+    keeps, so a drawing reads like the result. A Helmholtz cavity is drawn as
+    the cube of equal volume with its volume annotated.
 
     :param kind: One of ``"expansion chamber"``, ``"extended-tube chamber"``,
         ``"Helmholtz resonator"``, ``"quarter-wave resonator"`` (the
         ``ReactiveSilencerResult.kind`` strings).
+    :param geometry: The dimensions, keyed as ``ReactiveSilencerResult.geometry``
+        keys them. A chamber takes ``length`` (metres), ``chamber_area`` and
+        ``pipe_area`` (the chamber and the inlet/outlet pipe cross-sections,
+        m2), and an extended-tube chamber also ``inlet_extension`` and
+        ``outlet_extension`` (how far each tube reaches into the chamber,
+        metres, ``0.0`` when left out). A Helmholtz resonator takes
+        ``duct_area`` (the main duct cross-section, m2), ``neck_area`` (m2),
+        ``neck_length`` (metres) and ``cavity_volume`` (m3); a quarter-wave
+        resonator takes ``duct_area`` (m2), ``length`` (the tube length,
+        metres) and ``branch_area`` (the branch tube cross-section, m2).
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param length: Chamber length or quarter-wave tube length, in metres.
-    :param chamber_area: Chamber cross-section, in m2 (chambers).
-    :param pipe_area: Inlet/outlet pipe cross-section, in m2 (chambers).
-    :param inlet_extension: Inlet tube extension into the chamber, in metres.
-    :param outlet_extension: Outlet tube extension, in metres.
-    :param duct_area: Main duct cross-section, in m2 (side branches).
-    :param neck_area: Neck cross-section, in m2 (Helmholtz).
-    :param neck_length: Neck length, in metres (Helmholtz).
-    :param cavity_volume: Cavity volume, in m3 (Helmholtz).
-    :param branch_area: Branch tube cross-section, in m2 (quarter-wave).
     :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the outline of the main bore: the chamber
+        shell of a chamber, the duct of a side branch.
     :return: The axes.
+    :raises TypeError: if *geometry* is not a mapping.
+    :raises ValueError: for an unknown *kind*, a key the kind does not take,
+        a key it needs that is missing, or dimensions that cannot be built.
     """
     _check_language(language)
     if kind not in _SILENCER_KINDS:
         msg = f"Unknown silencer kind {kind!r}; expected one of {_SILENCER_KINDS}."
         raise ValueError(msg)
+    _require_silencer_keys(kind, geometry)
+    length = geometry.get("length")
+    chamber_area = geometry.get("chamber_area")
+    pipe_area = geometry.get("pipe_area")
+    inlet_extension = geometry.get("inlet_extension", 0.0)
+    outlet_extension = geometry.get("outlet_extension", 0.0)
+    duct_area = geometry.get("duct_area")
+    neck_area = geometry.get("neck_area")
+    neck_length = geometry.get("neck_length")
+    cavity_volume = geometry.get("cavity_volume")
+    branch_area = geometry.get("branch_area")
     chamber = kind in (_KIND_EXPANSION, _KIND_EXTENDED)
     if chamber:
         _validate_chamber_geometry(
@@ -523,6 +571,7 @@ def plot_silencer_geometry(
             language,
             inlet_extension=inlet_extension,
             outlet_extension=outlet_extension,
+            **kwargs,
         )
     else:
         _draw_branch_silencer(
@@ -535,6 +584,7 @@ def plot_silencer_geometry(
             cavity_volume=cavity_volume,
             length=length,
             branch_area=branch_area,
+            **kwargs,
         )
     _finish_geometry_axes(
         ax,
@@ -560,14 +610,12 @@ def plot_silencer_result_geometry(
     if result.geometry is None:
         msg = (
             "This result does not retain its geometry; call "
-            "plot_silencer_geometry(kind, ...) with the original arguments."
+            "plot_silencer_geometry(kind, geometry) with the dimensions it "
+            "was built from."
         )
         raise ValueError(msg)
     return plot_silencer_geometry(
-        result.kind,
-        ax=ax,
-        language=language,
-        **dict(result.geometry),
+        result.kind, result.geometry, ax=ax, language=language
     )
 
 
@@ -850,8 +898,8 @@ def plot_plenum_geometry(
     exit_area: float,
     line_of_sight: float,
     wall_area: float,
-    ax: Axes | None = None,
     *,
+    ax: Axes | None = None,
     angle_rad: float = 0.0,
     language: str = "en",
     **kwargs: Any,

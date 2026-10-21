@@ -345,8 +345,8 @@ def _band_uncertainty(
 
 def sound_absorption_coefficient_uncertainty(
     alpha: float | Sequence[float] | np.ndarray,
-    frequencies: float | Sequence[float] | np.ndarray,
     *,
+    frequencies: float | Sequence[float] | np.ndarray,
     condition: str = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
@@ -379,8 +379,8 @@ def sound_absorption_coefficient_uncertainty(
 
 def equivalent_area_uncertainty(
     area: float | Sequence[float] | np.ndarray,
-    frequencies: float | Sequence[float] | np.ndarray,
     *,
+    frequencies: float | Sequence[float] | np.ndarray,
     condition: str = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:
@@ -423,8 +423,8 @@ def equivalent_area_uncertainty(
 
 def practical_coefficient_uncertainty(
     alpha_p: float | Sequence[float] | np.ndarray,
-    frequencies: float | Sequence[float] | np.ndarray,
     *,
+    frequencies: float | Sequence[float] | np.ndarray,
     condition: str = "reproducibility",
     coverage: float = 0.95,
 ) -> AbsorptionUncertaintyResult:

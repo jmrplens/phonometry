@@ -613,7 +613,7 @@ _KWARG_PLOT_CASES = [
     (
         "sweep_audiometry",
         lambda: ph.hearing.sweep_audiometry_threshold(
-            np.geomspace(500.0, 4000.0, 12), [30.0, 20.0] * 6
+            [30.0, 20.0] * 6, reversal_frequencies=np.geomspace(500.0, 4000.0, 12)
         ),
         "line",
     ),
@@ -727,14 +727,19 @@ _KWARG_PLOT_CASES = [
     (
         "blocked_output_check",
         lambda: ph.vibration.check_blocked_output(
-            [50.0, 100.0, 200.0], [100.0, 100.0, 100.0], [70.0, 75.0, 60.0]
+            frequencies=[50.0, 100.0, 200.0],
+            input_acceleration_level=[100.0, 100.0, 100.0],
+            output_acceleration_level=[70.0, 75.0, 60.0],
         ),
         "line",
     ),
     (
         "output_mass_check",
         lambda: ph.vibration.check_output_mass(
-            [50.0, 100.0, 200.0], 0.1, [120.0, 120.0, 120.0], [100.0, 105.0, 110.0]
+            frequencies=[50.0, 100.0, 200.0],
+            output_mass_kg=0.1,
+            output_force_level=[120.0, 120.0, 120.0],
+            output_acceleration_level=[100.0, 105.0, 110.0],
         ),
         "line",
     ),
@@ -987,6 +992,86 @@ def test_every_plot_takes_ax_first_and_the_rest_by_name() -> None:
         if language is not None and language.kind is not inspect.Parameter.KEYWORD_ONLY:
             offenders.append(f"{owner}.plot: 'language' is not keyword-only")
     assert not offenders, "\n".join(offenders)
+
+
+def _public_plot_helpers() -> dict[str, Callable[..., object]]:
+    """Every ``plot_*`` function a public module publishes in its ``__all__``."""
+    import importlib
+    import pkgutil
+
+    found: dict[str, Callable[..., object]] = {}
+    for info in pkgutil.walk_packages(ph.__path__, "phonometry."):
+        if any(part.startswith("_") for part in info.name.split(".")[1:]):
+            continue
+        module = importlib.import_module(info.name)
+        for name in getattr(module, "__all__", ()):
+            obj = getattr(module, name, None)
+            if name.startswith("plot_") and inspect.isfunction(obj):
+                found.setdefault(name, obj)
+    return found
+
+
+def test_every_plot_helper_takes_its_axes_and_language_by_name() -> None:
+    """``plot_x(data, *, ax=None, ..., language="en", **kwargs)`` on every helper.
+
+    The helpers drew from three shapes. Seventeen took the axes by position
+    after their data (``plot_plate_geometry(0.8, 0.6, ax)``), six took it first and
+    every dimension by name (``plot_barrier_geometry(ax, source_height_m=...)``),
+    and one took it by name only, so a caller had to know which helper was
+    which before passing the axes the same way twice. A geometry helper whose
+    first number is a dimension and whose second is the axes also turns a
+    forgotten argument into an axes bound to a length. Now the data a helper
+    draws is positional, and the axes, the language and the style keywords are
+    written by name on all of them.
+    """
+    helpers = _public_plot_helpers()
+    assert len(helpers) >= 24, "the walk found too few plot helpers to mean anything"
+    offenders: list[str] = []
+    for name, helper in sorted(helpers.items()):
+        parameters = inspect.signature(helper).parameters
+        for wanted in ("ax", "language"):
+            parameter = parameters.get(wanted)
+            if parameter is None:
+                offenders.append(f"{name}: takes no {wanted!r}")
+            elif parameter.kind is not inspect.Parameter.KEYWORD_ONLY:
+                offenders.append(f"{name}: {wanted!r} can be passed by position")
+        var_keyword = next(
+            (
+                p.name
+                for p in parameters.values()
+                if p.kind is inspect.Parameter.VAR_KEYWORD
+            ),
+            None,
+        )
+        if var_keyword is None:
+            offenders.append(f"{name}: forwards no style keywords (**kwargs)")
+        elif not _reads_in_body(helper, var_keyword):
+            offenders.append(f"{name}: takes **{var_keyword} and never reads it")
+    assert not offenders, "\n".join(offenders)
+
+
+def _reads_in_body(function: Callable[..., object], name: str) -> bool:
+    """Whether the body of ``function`` reads the local ``name``.
+
+    A helper that declares ``**kwargs`` and never touches it accepts every
+    style keyword and draws nothing with it, so the signature alone does not
+    prove the keywords are forwarded.
+    """
+    import textwrap
+
+    tree = ast.parse(textwrap.dedent(inspect.getsource(function)))
+    definition = next(
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == function.__name__
+    )
+    return any(
+        isinstance(node, ast.Name)
+        and node.id == name
+        and isinstance(node.ctx, ast.Load)
+        for statement in definition.body
+        for node in ast.walk(statement)
+    )
 
 
 # --------------------------------------------------------------------------

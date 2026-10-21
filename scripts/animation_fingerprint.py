@@ -71,6 +71,14 @@ Known gaps, deliberately
   matter: a change to the colour a helper picks moves no number and still
   redraws every clip that asks for it, so ``phonometry._plot`` is walked
   like ``scripts/figures``.
+
+  A clip that steps one of the FDTD engines is the exception, because its
+  frames *are* the engine's numbers. It is tied to the engines' golden
+  digests (``engine-digests.json``, see ``scripts/engine_digests.py``),
+  which change when what the engines compute changes and never when their
+  source is only rewritten: a reworded error message in the engine would
+  otherwise mark every field clip stale. A clip counts as one that steps an
+  engine when anything it reaches imports ``phonometry.simulation``.
 * **Pattern translations reached only through an f-string.** The selection
   below matches a table pattern against the clip's literal text, and a label
   assembled at run time from several pieces may not be recognisable in the
@@ -84,6 +92,7 @@ from __future__ import annotations
 import ast
 import contextlib
 import hashlib
+import json
 import pathlib
 import sys
 from typing import TYPE_CHECKING
@@ -121,6 +130,11 @@ _REGISTRY = "figures.registry"
 #: Always part of every fingerprint: nothing calls it from inside a clip, but
 #: it sets the rcParams and the palette each frame is drawn with.
 _EXTRA_ROOTS = (("figures.theme", "set_theme"),)
+
+#: The FDTD engines' golden digests, at the root of the repository
+#: (``scripts/engine_digests.py``). A clip that steps an engine is tied to
+#: them instead of to the engine's source; see "Known gaps".
+ENGINE_DIGESTS = "engine-digests.json"
 
 #: The translation tables, excluded from the code walk and re-entered per
 #: clip by :func:`_selected_translations`.
@@ -271,6 +285,7 @@ class Sources:
         self.root = root
         self.modules: dict[str, _Module] = {}
         self.packages: set[str] = set()
+        self._engine_digest: str | None = None
         parsed: dict[str, ast.Module] = {}
         for where, prefix in _PACKAGES:
             package_root = root.joinpath(*where)
@@ -292,6 +307,15 @@ class Sources:
         for module in self.modules.values():
             for node in module.tree.body:
                 module.collect(node)
+
+    def engine_digest(self) -> str:
+        """:func:`engine_digest` of this tree, read once.
+
+        :raises FileNotFoundError: when the tree has no ``engine-digests.json``.
+        """
+        if self._engine_digest is None:
+            self._engine_digest = engine_digest(self.root)
+        return self._engine_digest
 
     # -- name resolution ---------------------------------------------------
 
@@ -722,10 +746,91 @@ def _run_is_written(run: str, literals: set[str]) -> bool:
     return False
 
 
+def engine_digest(root: pathlib.Path) -> str:
+    """One hash of what the engines compute, from ``engine-digests.json``.
+
+    Only the digests and the fluid-energy record count: where they were
+    measured (the ``environment`` block) is not what the engines compute.
+
+    :raises FileNotFoundError: when *root* has no ``engine-digests.json``.
+    """
+    path = root / ENGINE_DIGESTS
+    if not path.exists():
+        msg = (
+            f"{path} is missing; record the engines' digests with `make engine-digests`"
+        )
+        raise FileNotFoundError(msg)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    numbers = {"scenarios": data["scenarios"], "fluid_energy": data["fluid_energy"]}
+    return hashlib.sha256(json.dumps(numbers, sort_keys=True).encode()).hexdigest()
+
+
+def _names_engine(module: str, attr: str) -> bool:
+    """Whether ``from <module> import <attr>`` reaches the simulation package."""
+    if module == "phonometry":
+        return attr == "simulation"
+    return module == "phonometry.simulation" or module.startswith(
+        "phonometry.simulation."
+    )
+
+
+def _imports_engine(node: ast.Import | ast.ImportFrom) -> bool:
+    if isinstance(node, ast.Import):
+        return any(_names_engine(alias.name, "") for alias in node.names)
+    return (
+        node.level == 0
+        and node.module is not None
+        and any(_names_engine(node.module, alias.name) for alias in node.names)
+    )
+
+
+def _uses_engine(module: _Module, node: ast.AST) -> bool:
+    for child in ast.walk(node):
+        if isinstance(child, ast.Import | ast.ImportFrom) and _imports_engine(child):
+            return True
+        if isinstance(child, ast.Name) and child.id in module.imports:
+            target, attr = module.imports[child.id]
+            if _names_engine(target, attr):
+                return True
+    return False
+
+
+def steps_an_engine(sources: Sources, symbols: Iterable[Symbol]) -> bool:
+    """Whether a clip that reaches *symbols* uses the simulation package.
+
+    Either something it reaches imports the package where it uses it (the
+    field builders do, inside the function), or it names what a module it
+    reaches imported from the package at the top (a material such as
+    ``ALUMINUM``).
+    """
+    chosen = list(symbols)
+    nodes = [(module, sources.node((module, name))) for module, name in chosen]
+    for module in {module for module, _ in chosen}:
+        nodes.extend((module, statement) for statement in sources.modules[module].body)
+    return any(
+        node is not None and _uses_engine(sources.modules[module], node)
+        for module, node in nodes
+    )
+
+
+def engine_clips(root: pathlib.Path) -> set[str]:
+    """The registered clips that step an FDTD engine."""
+    sources = Sources(root)
+    return {
+        clip
+        for clip, entry in sources.clips().items()
+        if steps_an_engine(sources, sources.closure([entry, *_EXTRA_ROOTS]))
+    }
+
+
 def fingerprint_parts(
     sources: Sources, clip: str, entry: Symbol
 ) -> tuple[list[str], list[str]]:
-    """``(code lines, translation lines)`` a clip's fingerprint is taken over."""
+    """``(code lines, translation lines)`` a clip's fingerprint is taken over.
+
+    :raises FileNotFoundError: when the clip steps an FDTD engine and the tree
+        has no ``engine-digests.json``.
+    """
     roots = [entry, *_EXTRA_ROOTS]
     symbols = sources.closure(roots)
     code = sorted(
@@ -740,6 +845,10 @@ def fingerprint_parts(
         body = sources.modules[module].body
         if body:
             code.append(f"{module}.<module>\x00" + _module_level(body))
+    # A clip that steps an engine shows the engine's numbers, so it is tied to
+    # the engine's golden digests, which move only when those numbers do.
+    if steps_an_engine(sources, symbols):
+        code.append(f"<engine>\x00{sources.engine_digest()}")
     code.sort()
     exact, patterns = _table_entries(sources)
     text = _selected_translations(_literals(sources, symbols), exact, patterns)
@@ -747,7 +856,11 @@ def fingerprint_parts(
 
 
 def fingerprints(root: pathlib.Path) -> dict[str, str]:
-    """The fingerprint of every registered clip, computed from *root*'s sources."""
+    """The fingerprint of every registered clip, computed from *root*'s sources.
+
+    :raises FileNotFoundError: when a clip steps an FDTD engine and *root* has
+        no ``engine-digests.json``.
+    """
     sources = Sources(root)
     out: dict[str, str] = {}
     for clip, entry in sorted(sources.clips().items()):
@@ -774,9 +887,11 @@ _HEADER = """\
 # the clip was written. Each hash covers the clip's builder, everything it
 # reaches inside scripts/figures (the shared clip tail, the theme, the
 # translation machinery), inside phonometry._plot (the drawing helpers it
-# calls) and inside phonometry.io (the encode path), and the translation-table
-# entries its own strings select; it is taken over the syntax tree, so
-# comments and docstrings do not move it. See scripts/animation_fingerprint.py.
+# calls) and inside phonometry.io (the encode path), the translation-table
+# entries its own strings select and, for a clip that steps an FDTD engine,
+# the engines' golden digests (engine-digests.json); it is taken over the
+# syntax tree, so comments and docstrings do not move it. See
+# scripts/animation_fingerprint.py.
 #
 # Written by the renderer. To refresh one clip, re-render it:
 #     python scripts/generate_graphs.py --animations --anim <clip>
@@ -814,6 +929,9 @@ def stamp(clips: Iterable[str], root: pathlib.Path | None = None) -> None:
     otherwise each write back the manifest they read, losing one of the two
     stamps -- the one failure mode of this file that would be invisible until
     CI asked for the missing clip.
+
+    :raises FileNotFoundError: when a clip steps an FDTD engine and the tree
+        has no ``engine-digests.json``.
     """
     import fcntl
 

@@ -20,6 +20,7 @@ ask what the fingerprint did about it.
 from __future__ import annotations
 
 import ast
+import json
 import pathlib
 import sys
 from typing import TYPE_CHECKING, Self
@@ -828,3 +829,112 @@ def test_a_clip_with_no_files_at_all_says_so(
     out = capsys.readouterr().out
     assert "registered but not published at all" in out
     assert "half-rendered" not in out
+
+
+FIELD_SCENE = '''
+from .media import _render_clip
+
+
+def _field():
+    """A field builder: it steps an engine."""
+    from phonometry.simulation import FDTD2D
+
+    return FDTD2D
+
+
+def animate_field(output_dir):
+    """A clip of a simulated field."""
+    _field()
+    _render_clip(None, None, output_dir, "anim_field")
+'''
+
+MATERIAL_SCENE = '''
+from phonometry.simulation import ALUMINUM
+
+from .media import _render_clip
+
+
+def animate_material(output_dir):
+    """A clip that names a material of the simulation package at import."""
+    _render_clip(ALUMINUM, None, output_dir, "anim_material")
+'''
+
+_DIGESTS = {
+    "environment": {"system": "Linux", "machine": "x86_64", "python": "3.13"},
+    "scenarios": {"sponge": {"p": "aa", "vx": "bb"}},
+    "fluid_energy": {"0": "0x1.0000000000000p+0"},
+}
+
+
+def _engine_tree(root: pathlib.Path) -> pathlib.Path:
+    """The miniature tree plus two clips that use the simulation package."""
+    tree = _write_tree(root)
+    package = tree / "scripts" / "figures"
+    (package / "fields.py").write_text(FIELD_SCENE, encoding="utf-8")
+    (package / "materials.py").write_text(MATERIAL_SCENE, encoding="utf-8")
+    registry = REGISTRY.replace(
+        "from .schematics import animate_one, animate_two",
+        "from .fields import animate_field\n"
+        "from .materials import animate_material\n"
+        "from .schematics import animate_one, animate_two",
+    ).replace(
+        '"anim_two": animate_two,',
+        '"anim_two": animate_two,\n'
+        '    "anim_field": animate_field,\n'
+        '    "anim_material": animate_material,',
+    )
+    (package / "registry.py").write_text(registry, encoding="utf-8")
+    (tree / fp.ENGINE_DIGESTS).write_text(json.dumps(_DIGESTS), encoding="utf-8")
+    return tree
+
+
+def _rewrite_digests(tree: pathlib.Path, key: str, value: object) -> None:
+    path = tree / fp.ENGINE_DIGESTS
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data[key] = value
+    path.write_text(json.dumps(data), encoding="utf-8")
+
+
+def test_a_clip_that_steps_an_engine_follows_its_golden_digests(
+    tmp_path: pathlib.Path,
+) -> None:
+    tree = _engine_tree(tmp_path)
+    before = fp.fingerprints(tree)
+    _rewrite_digests(tree, "scenarios", {"sponge": {"p": "aa", "vx": "cc"}})
+    after = fp.fingerprints(tree)
+    assert {clip for clip in before if before[clip] != after[clip]} == {
+        "anim_field",
+        "anim_material",
+    }
+
+
+def test_where_the_digests_were_measured_moves_no_clip(tmp_path: pathlib.Path) -> None:
+    tree = _engine_tree(tmp_path)
+    before = fp.fingerprints(tree)
+    _rewrite_digests(tree, "environment", {"system": "Darwin"})
+    assert fp.fingerprints(tree) == before
+
+
+def test_a_rewrite_of_the_engine_source_moves_no_clip(tmp_path: pathlib.Path) -> None:
+    """The walk never reads the engines; their digests stand for them."""
+    tree = _engine_tree(tmp_path)
+    engine = tree / "src" / "phonometry" / "simulation" / "fdtd.py"
+    engine.parent.mkdir(parents=True)
+    engine.write_text("def step(p):\n    return p + 1\n", encoding="utf-8")
+    before = fp.fingerprints(tree)
+    engine.write_text("def step(p):\n    return 1 + p\n", encoding="utf-8")
+    assert fp.fingerprints(tree) == before
+
+
+def test_a_missing_digest_file_is_named(tmp_path: pathlib.Path) -> None:
+    tree = _engine_tree(tmp_path)
+    (tree / fp.ENGINE_DIGESTS).unlink()
+    with pytest.raises(FileNotFoundError, match=r"make engine-digests"):
+        fp.fingerprints(tree)
+
+
+def test_the_engine_clips_of_the_repository_are_the_field_clips() -> None:
+    from figures import registry
+
+    root = pathlib.Path(__file__).resolve().parents[1]
+    assert fp.engine_clips(root) == set(registry._ANIM_FIELDS)

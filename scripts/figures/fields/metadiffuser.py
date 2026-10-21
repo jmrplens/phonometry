@@ -277,7 +277,7 @@ def _meta_pair(
             sim.step()
         scat = sims[0].p - sims[1].p
         scat[:face_row, :] = 0.0
-        trail = xp.maximum(trail * decay, xp.abs(scat))
+        xp.maximum(trail * decay, xp.abs(scat), out=trail)
         if sims[0].n % every == 0 and len(ts) < n_frames:
             tot_frames.append(_host(sims[0], sims[0].p[::20, ::20]))
             trail_frames.append(_host(sims[0], trail[::20, ::20]))
@@ -290,15 +290,18 @@ def _meta_pair(
 #: temporaries), the count the GPU node's memory measurement found, 5.9 GB.
 _META_PAIR_BYTES = 24 * _META_NY * _META_NX * 8
 
-#: Room above that for the interpreter, the captured frames and the spread
-#: of a process's peak around its arrays.
-_META_PAIR_MARGIN = 1.25
+#: What a pair needs over its grids, as a factor. Its process peaked at
+#: 6.98 GB resident over the first frames (the grids and about 1.1 GB of
+#: interpreter and libraries), the 600 frames it captures add about 0.37 GB,
+#: and the parent holds about 0.37 GB of returned frames for each pair: about
+#: 7.7 GB in all, and 1.4 times the grids is 8.26 GB a pair.
+_META_PAIR_MARGIN = 1.4
 
 
 def _meta_workers(available: int | None) -> int:
     """How many pairs step side by side in *available* bytes of RAM: one to three.
 
-    Three side by side want about 18 GB; where less is free they step two or
+    Three side by side want about 25 GB; where less is free they step two or
     one at a time, which gives the same fields more slowly. Unknown memory
     (off Linux) keeps the three.
     """
@@ -319,13 +322,13 @@ def _metadiffuser_fields(
     with the metadiffuser's silhouette, deep QRD, metadiffuser) advances in
     lockstep with a free-field reference, so ``total - incident`` is exact at
     every step: on NumPy the pairs run side by side in worker processes as
-    far as the RAM holds them (about 5.9 GB each), else one after another,
-    and on a GPU one after another; the fields are the same either way. A
-    downgoing carrier packet at the 2 kHz evaluation frequency plays the
-    goniometer source. Returns the total frame stacks, the fading
-    scattered-envelope trails [dB] and the frame times. The quantitative
-    far-field comparison lives in the companion polar figure; this clip shows
-    the near fields of the meshed panels.
+    far as the RAM holds them (about 5.9 GB of grids, about 8 GB a process),
+    else one after another, and on a GPU one after another; the fields are
+    the same either way. A downgoing carrier packet at the 2 kHz evaluation
+    frequency plays the goniometer source. Returns the total frame stacks,
+    the fading scattered-envelope trails [dB] and the frame times. The
+    quantitative far-field comparison lives in the companion polar figure;
+    this clip shows the near fields of the meshed panels.
     """
     import clip_placement
 

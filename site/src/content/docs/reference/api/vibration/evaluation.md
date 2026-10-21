@@ -144,7 +144,7 @@ fastest, and flat in between. A machine-specific part that states its own
 evaluation_zone(
     magnitude: ArrayLike,
     boundaries: ZoneBoundaries,
-) -> EvaluationZone | NDArray[np.str_]
+) -> Literal['A', 'B', 'C', 'D'] | NDArray[np.str_]
 ```
 
 Grade a vibration magnitude into zone A, B, C or D (6.3.2.3).
@@ -355,7 +355,7 @@ industrial_machine_zone(
     *,
     displacement_um: ArrayLike | None = None,
     velocity_mm_s: ArrayLike | None = None,
-) -> EvaluationZone | NDArray[np.str_]
+) -> Literal['A', 'B', 'C', 'D'] | NDArray[np.str_]
 ```
 
 Grade an industrial machine against Table A.1 or A.2.

@@ -359,8 +359,8 @@ intensity axis through both; default is the classic 12 mm spacer.
 
 ```python
 sound_intensity(
-    p1: SignalInput,
-    p2: SignalInput,
+    p1: Signal | Sequence[float] | np.ndarray,
+    p2: Signal | Sequence[float] | np.ndarray,
     fs: int | None = None,
     *,
     spacing: float,

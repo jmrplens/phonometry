@@ -70,7 +70,7 @@ hard-coded as if normative.
 absorption_reference_corrected(
     road_reflection: ArrayLike,
     reference_reflection: ArrayLike,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Reference-corrected road absorption (ISO 13472-1:2002, Annex B).
@@ -111,7 +111,7 @@ adrienne_window(
     trailing_duration: float = 0.005,
     leading_edge: str = 'blackman-harris',
     trailing_edge: str = 'blackman-harris',
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Adrienne-type temporal window (ISO 13472-1:2002, Clause 6.4).
@@ -263,14 +263,14 @@ cosine is unity and `Kr,theta` collapses to `Kr` (Clause 4.1).
 
 ```python
 insitu_absorption_coefficient(
-    incident_ir: SignalInput,
-    reflected_ir: SignalInput,
+    incident_ir: Signal | Sequence[float] | np.ndarray,
+    reflected_ir: Signal | Sequence[float] | np.ndarray,
     *,
     source_height: float = 1.25,
     mic_height: float = 0.25,
     incidence_angle_rad: float = 0.0,
     n: int | None = None,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Normal-incidence absorption coefficient `alpha(f)` (ISO 13472-1, 4.1).
@@ -297,7 +297,9 @@ is treated as absorbed, so `alpha` may be slightly overestimated
 ## insitu_absorption_from_reflection
 
 ```python
-insitu_absorption_from_reflection(reflection: ArrayLike) -> Real
+insitu_absorption_from_reflection(
+    reflection: ArrayLike,
+) -> NDArray[np.float64]
 ```
 
 Absorption coefficient from the reflection factor (ISO 13472-1, 4.1).
@@ -320,8 +322,8 @@ $1 / K_\mathrm{r}$ factor
 
 ```python
 insitu_absorption_spectrum(
-    incident_ir: SignalInput,
-    reflected_ir: SignalInput,
+    incident_ir: Signal | Sequence[float] | np.ndarray,
+    reflected_ir: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     source_height: float = 1.25,
@@ -369,8 +371,8 @@ in a plottable [`InsituAbsorptionResult`](/phonometry/reference/api/materials/ro
 
 ```python
 insitu_reflection_factor(
-    incident_ir: SignalInput,
-    reflected_ir: SignalInput,
+    incident_ir: Signal | Sequence[float] | np.ndarray,
+    reflected_ir: Signal | Sequence[float] | np.ndarray,
     *,
     source_height: float = 1.25,
     mic_height: float = 0.25,
@@ -378,7 +380,7 @@ insitu_reflection_factor(
     fs: float | None = None,
     delay: float | None = None,
     n: int | None = None,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Complex pressure reflection factor `r(f)` (ISO 13472-1, Clause 4.1).
@@ -419,8 +421,8 @@ Annex C; the frequency-dependent form of Annex G).
 
 ```python
 InsituAbsorptionResult(
-    frequencies: Real,
-    absorption: Real,
+    frequencies: NDArray[np.float64],
+    absorption: NDArray[np.float64],
     source_height: float | None = None,
     mic_height: float | None = None,
 )
@@ -565,7 +567,7 @@ one_third_octave_absorption(
     f_min: float = 250.0,
     f_max: float = 4000.0,
     clip_negative: bool = True,
-) -> tuple[Real, Real]
+) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
 
 Aggregate narrow-band absorption into one-third-octave bands.
@@ -648,14 +650,14 @@ with the sampled radius of the standard 5 ms window.
 
 ```python
 power_reflection_coefficient(
-    incident_ir: SignalInput,
-    reflected_ir: SignalInput,
+    incident_ir: Signal | Sequence[float] | np.ndarray,
+    reflected_ir: Signal | Sequence[float] | np.ndarray,
     *,
     source_height: float = 1.25,
     mic_height: float = 0.25,
     incidence_angle_rad: float = 0.0,
     n: int | None = None,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Sound-power reflection factor `QW(f)` (ISO 13472-1, 4.1 / Annex C).
@@ -731,7 +733,7 @@ spot_internal_loss_correction(
     system_absorption: ArrayLike,
     *,
     clip_negative: bool = True,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Internal-loss (system) correction (ISO 13472-2:2010, Annex A).

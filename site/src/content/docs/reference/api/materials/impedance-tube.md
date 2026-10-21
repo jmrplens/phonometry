@@ -38,7 +38,7 @@ degrees Celsius and whose forward wave carries the opposite exponent sign.
 ## absorption_from_reflection
 
 ```python
-absorption_from_reflection(reflection: ArrayLike) -> Real
+absorption_from_reflection(reflection: ArrayLike) -> NDArray[np.float64]
 ```
 
 Normal-incidence absorption coefficient (ISO 10534-2, Eq. (18)).
@@ -61,7 +61,7 @@ air_density_iso10534(
     *,
     temperature_c: ArrayLike,
     atmospheric_pressure_kpa: ArrayLike = 101.325,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Air density (ISO 10534-2:2001, Eq. (7)).
@@ -91,7 +91,7 @@ kelvin.
 apply_mic_calibration(
     h12_uncorrected: ArrayLike,
     calibration_factor: ArrayLike,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Apply the microphone calibration factor (ISO 10534-2, Eq. (13)).
@@ -134,11 +134,11 @@ rectangular tubes (see [`tube_attenuation_constant`](/phonometry/reference/api/m
 
 ```python
 ImpedanceTubeResult(
-    frequencies: Real,
-    reflection: Complex,
-    surface_impedance: Complex,
-    normalized_impedance: Complex,
-    absorption: Real,
+    frequencies: NDArray[np.float64],
+    reflection: NDArray[np.complex128],
+    surface_impedance: NDArray[np.complex128],
+    normalized_impedance: NDArray[np.complex128],
+    absorption: NDArray[np.float64],
     *,
     spacing: float | None = None,
     x1: float | None = None,
@@ -258,7 +258,7 @@ Advisory for out-of-plane-wave-range impedance-tube frequencies.
 mic_calibration_factor(
     h12_config1: ArrayLike,
     h12_config2: ArrayLike,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Microphone-mismatch calibration factor `Hc` (ISO 10534-2, Eq. (10)).
@@ -280,7 +280,9 @@ microphones physically interchanged (II) - the cabling to the analyser is
 ## normalized_surface_admittance
 
 ```python
-normalized_surface_admittance(reflection: ArrayLike) -> Complex
+normalized_surface_admittance(
+    reflection: ArrayLike,
+) -> NDArray[np.complex128]
 ```
 
 Normalised surface admittance $G \rho c_0$ (ISO 10534-2, Eq. (20)).
@@ -298,7 +300,9 @@ $G \rho c_0 = (\rho c_0) / Z = (1 - r) / (1 + r)$.
 ## normalized_surface_impedance
 
 ```python
-normalized_surface_impedance(reflection: ArrayLike) -> Complex
+normalized_surface_impedance(
+    reflection: ArrayLike,
+) -> NDArray[np.complex128]
 ```
 
 Normalised surface impedance $Z/(\rho c_0)$ (ISO 10534-2, Eq. (19)).
@@ -454,7 +458,7 @@ reflection_factor(
     spacing: float,
     x1: float,
     wavenumber: ArrayLike,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Complex reflection factor at the sample surface (ISO 10534-2, Eq. (17)).
@@ -482,7 +486,7 @@ the sample to the **farther** microphone (Clause 7.7).
 ## speed_of_sound_iso10534
 
 ```python
-speed_of_sound_iso10534(*, temperature_c: ArrayLike) -> Real
+speed_of_sound_iso10534(*, temperature_c: ArrayLike) -> NDArray[np.float64]
 ```
 
 Speed of sound in air (ISO 10534-2:2001, Eq. (5)).
@@ -509,7 +513,7 @@ $c_0 = 343.2 \sqrt{T / 293}$, with $T$ in kelvin.
 surface_impedance(
     reflection: ArrayLike,
     characteristic_impedance: float,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Absolute surface impedance `Z` (ISO 10534-2, Eq. (19)).
@@ -532,7 +536,7 @@ tube_attenuation_constant(
     frequency: ArrayLike,
     speed_of_sound: float,
     diameter_m: float,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Lower-bound tube attenuation constant `k0''` (ISO 10534-2, Eq. (A.18)).
@@ -559,7 +563,7 @@ tube_wavenumber(
     speed_of_sound: float,
     *,
     attenuation: ArrayLike | None = None,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Complex wavenumber $k_0 = k_0' - jk_0''$ (ISO 10534-2, Clause 2.6).

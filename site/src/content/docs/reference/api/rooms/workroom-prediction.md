@@ -293,7 +293,7 @@ and the workstation, except at a machine's own workstation, where
 ## typical_decay_range
 
 ```python
-typical_decay_range(region: str) -> _Range
+typical_decay_range(region: str) -> tuple[float | None, float | None]
 ```
 
 What 4.3 says `DL2` usually is in one region, in decibels.
@@ -323,7 +323,7 @@ TYPICAL_DECAY_RANGE_DB = {'near': (5.0, 6.0), 'middle': (2.0, 5.0), 'far': (6.0,
 ## typical_excess_range
 
 ```python
-typical_excess_range(region: str) -> _Range
+typical_excess_range(region: str) -> tuple[float | None, float | None]
 ```
 
 What 4.3 says `DLf` usually is in one region, in decibels.

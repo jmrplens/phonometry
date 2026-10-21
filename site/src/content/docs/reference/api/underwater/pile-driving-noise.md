@@ -81,7 +81,7 @@ $\mathrm{SEL}_{\mathrm{ss}} + 10 \log_{10} N$.
 
 ```python
 pile_strike_metrics(
-    pressure: SignalInput,
+    pressure: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> PileStrikeResult
 ```
@@ -148,7 +148,10 @@ Plot the strike waveform and its cumulative energy.
 ## single_strike_sel
 
 ```python
-single_strike_sel(pressure: SignalInput, fs: float | None = None) -> float
+single_strike_sel(
+    pressure: Signal | Sequence[float] | np.ndarray,
+    fs: float | None = None,
+) -> float
 ```
 
 Single-strike sound exposure level `SEL_ss` (ISO 18406 Formulae 3-4).
@@ -175,7 +178,7 @@ pulse, in dB re 1 µPa²·s.
 
 ```python
 strike_sel_spectrum(
-    pressure: SignalInput,
+    pressure: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     fraction: int = 3,

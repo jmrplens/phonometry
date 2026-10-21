@@ -236,7 +236,7 @@ lower `minimum_records` states that fewer were judged enough.
 
 ```python
 check_double_hit(
-    force: SignalInput,
+    force: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     threshold_ratio: float = 0.1,
@@ -290,7 +290,7 @@ as several. The unfiltered force avoids both effects.
 
 ```python
 check_force_spectrum(
-    force: SignalInput,
+    force: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     frequency_range_hz: tuple[float, float],
@@ -328,7 +328,7 @@ reported beside it as [`ForceSpectrumCheck.energy_fraction_above`](/phonometry/r
 
 ```python
 check_overload(
-    record: SignalInput,
+    record: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     full_scale: float,
@@ -357,13 +357,13 @@ Did one channel of the record stay below its full scale? (8.4)
 
 ```python
 check_response_decay(
-    response: SignalInput,
+    response: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     exponential_window: bool = False,
     segment_s: float | None = None,
     start_s: float = 0.0,
-    force: SignalInput | None = None,
+    force: Signal | Sequence[float] | np.ndarray | None = None,
 ) -> ResponseDecayCheck
 ```
 
@@ -623,7 +623,7 @@ Time of every sample of the record, in seconds.
 
 ```python
 energy_spectral_density(
-    record: SignalInput,
+    record: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> tuple[np.ndarray, np.ndarray]
 ```
@@ -987,11 +987,11 @@ HIGH_COHERENCE = 0.9
 
 ```python
 impact_mobility(
-    force: SignalInput,
-    response: SignalInput,
+    force: Signal | Sequence[float] | np.ndarray,
+    response: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
-    response_quantity: ResponseQuantity = 'acceleration',
+    response_quantity: Literal['acceleration', 'velocity', 'displacement'] = 'acceleration',
     force_window_s: float | None = None,
     force_window_start_s: float = 0.0,
     force_window_taper_s: float = 0.0,
@@ -1078,7 +1078,7 @@ ImpactMobilityResult(
     *,
     impacts: int,
     exponential_decay_rate_per_s: float = 0.0,
-    response_quantity: ResponseQuantity = 'acceleration',
+    response_quantity: Literal['acceleration', 'velocity', 'displacement'] = 'acceleration',
     driving_point: bool = True,
 )
 ```

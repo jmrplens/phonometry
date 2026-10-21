@@ -87,13 +87,13 @@ van Vossen, Robertsson & Chapman, *Geophysics* 67(2), 618-624 (2002).
 
 ```python
 elastic_fdtd_simulation(
-    c_p: float | Field2D,
-    c_s: float | Field2D,
+    c_p: float | NDArray[np.float64],
+    c_s: float | NDArray[np.float64],
     dx: float,
     duration: float,
     *,
-    sources: Sequence[ElasticSource],
-    rho: float | Field2D,
+    sources: Sequence[ExplosionSource | ForceSource],
+    rho: float | NDArray[np.float64],
     shape: tuple[int, int] | None = None,
     cfl: float = 0.6,
     recording: ElasticRecording | None = None,
@@ -174,11 +174,11 @@ is why it travels with the sides rather than beside them.
 
 ```python
 ElasticFDTD2D(
-    c_p: float | Field2D,
-    c_s: float | Field2D,
+    c_p: float | NDArray[np.float64],
+    c_s: float | NDArray[np.float64],
     dx: float,
     *,
-    rho: float | Field2D,
+    rho: float | NDArray[np.float64],
     cfl: float = 0.6,
     sponge_width: int = 0,
     sponge_sides: str | Iterable[str] | None = None,
@@ -233,7 +233,7 @@ interfaces converge to the physical traction continuity.
 ### ElasticFDTD2D.add_source()
 
 ```python
-ElasticFDTD2D.add_source(source: ElasticSource) -> None
+ElasticFDTD2D.add_source(source: ExplosionSource | ForceSource) -> None
 ```
 
 Register an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource).
@@ -245,7 +245,7 @@ and the obstacle mask.
 ### ElasticFDTD2D.collocated()
 
 ```python
-ElasticFDTD2D.collocated(field: str) -> Field2D
+ElasticFDTD2D.collocated(field: str) -> NDArray[np.float64]
 ```
 
 One field interpolated to the cell centres, shape `(ny, nx)`.
@@ -376,7 +376,7 @@ ElasticFDTDResult(
     dx: float,
     dt: float,
     shape: tuple[int, int],
-    sources: tuple[ElasticSource, ...],
+    sources: tuple[ExplosionSource | ForceSource, ...],
     snapshots: NDArray[np.float64] | None,
     snapshot_times: NDArray[np.float64] | None,
     snapshot_field: str,

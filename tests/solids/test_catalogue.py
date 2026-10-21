@@ -210,7 +210,7 @@ def test_a_field_that_is_not_missing_has_no_reason_to_be() -> None:
 
 def test_why_missing_refuses_a_field_this_class_does_not_have() -> None:
     """A misspelt name must not answer as if the cell were empty."""
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match=r"has no attribute 'densty_kg_m3'"):
         HOPKINS["steel"].why_missing("densty_kg_m3")
 
 
@@ -261,7 +261,7 @@ def test_a_row_cannot_be_edited() -> None:
         thickness_critical_frequency_product_m_hz=12.3,
         density_kg_m3=7800.0,
     )
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match=r"cannot assign to field 'density_kg_m3'"):
         row.density_kg_m3 = 1.0  # type: ignore[misc]
 
 

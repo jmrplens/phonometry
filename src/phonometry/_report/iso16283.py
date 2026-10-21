@@ -61,9 +61,8 @@ if TYPE_CHECKING:
         AirborneInsulationResult,
         FacadeInsulationResult,
         ImpactInsulationResult,
-        ImpactRatingResult,
-        WeightedRatingResult,
     )
+    from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from .metadata import ReportMetadata
 
 #: Decimal places of the ``T [s]`` reverberation-time column in the verbose

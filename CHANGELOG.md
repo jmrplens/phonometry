@@ -1940,6 +1940,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The API reference's front page and the site's home page show a 4.0
+  call.** Both unpacked `spl, freq = filters.octave_filter(...)`, which 4.0
+  answers with an `OctaveFilterResult`, and the reference said every
+  documented name also imports from the top-level package, which exports
+  twenty-five. They bind the result now, and the page of the top level says
+  which of its objects it documents and where the others are. The home
+  page's examples are run with every guide's by
+  `scripts/check_doc_snippets.py`, which had never read them, and
+  `scripts/check_em_dashes.py` reads the home page's data, where an em dash
+  had gone unseen.
+
 - **A one-element array is refused where one number is asked for, on every
   NumPy the library supports.** NumPy 2.0 to 2.3 convert a one-element array
   to a float with no more than a deprecation warning, and only 2.4 refuses it,
@@ -3065,6 +3076,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   GitHub Pages redirects every old address to the same path on the new host,
   so existing links keep working.
 
+- **`AnpAircraft.database` is a public field, and `AnpDatabase` is built from
+  what a caller can hold.** An aircraft read from an ANP database kept that
+  database in a field called `_database`, which its constructor nonetheless
+  required, so building one by hand meant passing a private name. It is
+  `database` now, left out of `repr()` and of comparisons as before; the
+  notebook table, which shows every public field, names it in one row.
+  `AnpDatabase(aircraft, npd, distances, profiles, spectral_classes=None)` no
+  longer takes `performance`, a record of the parser's own whose type nothing
+  published: `load_anp_database` fills the performance tables an export
+  carries, and a database built by hand flies fixed-point profiles, as one
+  built without them always did.
+
 - **phonometry installs on Python 3.12, and on the oldest NumPy, SciPy and
   extras it really works with.** `requires-python` drops from 3.13 to 3.12,
   and every floor in the package metadata is now the oldest release the
@@ -3555,6 +3578,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   errata register use the same words for every uncertainty budget. The sonar
   budget of the underwater propagation solvers guide says "balance de sonar"
   too, the word its figure already used.
+
+### Removed
+
+- **`vibration.partial_exposure` is gone: `vibration.daily_exposure` is the one
+  name for an A(8).** It was an assignment, `partial_exposure =
+  daily_exposure`, so the two names computed the same thing. Called with the
+  value and the duration of one operation, `daily_exposure` returns that
+  operation's partial exposure Ai(8) (ISO 5349-2 Eq. (2)), the term
+  `combine_partial_exposures` sums, and its documentation now says so.
+  `partial_exposure` was one of the names the 3.3.0 top level exported, so
+  the migration guide lists eleven gone, not ten.
+
+- **A module lists what it defines, and its package publishes it.**
+  `building.measurement.insulation` listed the ISO 717 ratings after they
+  moved to `building.measurement.ratings`, five private names of that module
+  among them, and `LowFrequencyProcedure`; `building.prediction.resilient_layers`
+  listed the five ISO 12354-1 Annex D lining names after they moved to
+  `building.prediction.linings`; `noise_control.screen_in_situ` listed the
+  operator sphere `noise_control.cabin_insulation` owns, and
+  `noise_control.cabin_insulation` listed the band ranges, `leak_ratio` and
+  `seal_ratio` that ISO 11957 shares with ISO 11546 and
+  `noise_control.enclosure_insulation` publishes. Each name is
+  published once, by its package and the module that defines it, and
+  `building.weighted_rating`, `building.lining_improvement` and the rest are
+  where they were. `weighted_rating_extended`, `weighted_impact_rating_extended`,
+  the two extended rating results, `weighted_impact_improvement` and
+  `impact_improvement_adaptation_term` no longer import from `insulation`, nor
+  the lining names from `resilient_layers`, nor `leak_ratio`, `seal_ratio` and
+  `MANDATORY_BAND_RANGE_HZ` from `cabin_insulation`. `building.measurement.ratings`
+  and `emission.vibration_sound_power` had no `__all__` at all, so everything
+  they defined looked public; they list what their packages publish now.
+  `REFERENCE_IMPEDANCE` and `REFERENCE_AREA`, which `emission` never
+  published, are the private defaults of `radiated_sound_power_level`'s
+  `reference_impedance=` and `reference_area=`, and `REFERENCE_SOUND_POWER`,
+  which nothing read, is gone: the 1 pW is
+  `metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_power"]`.
+
+- **No type alias is public.** `emission.DeclarationForm`, published since
+  3.3.0, and the `Grade`, `Surface` and `EQFilterType` that
+  `emission.sound_power` and `filters.equalizer` listed are not published any
+  more, and neither is `BASIC_METHOD_MAX_CREST_FACTOR`, a constant
+  `vibration.human.exposure` listed and its package never took up. A
+  parameter typed with an alias takes the strings it always took
+  (`form="single-number"`), and the API reference prints the alias's
+  definition in the signature, `form: Literal['dual-number',
+  'single-number']`, where it used to print a name nobody could import.
+  Publishing an alias later costs nothing; withdrawing one after 4.0 would
+  need a 5.0.
+
+  `scripts/check_api_reference.py` holds the surface to this. It fails when a
+  module lists a name its package does not publish, re-exports a name
+  another public module defines, lists a type alias, or lists a name another
+  module of its package lists too, and when a package publishes a function or
+  a class under a name that is not its own. Run on the tree before these
+  changes it reported thirty-two listings. It also fails on a row of the
+  curated API table for a plain name nothing publishes, which is what
+  `DeclarationForm` left behind when its row stayed.
 
 ### Fixed
 

@@ -363,8 +363,8 @@ measured_insertion_loss_indirect(
     receiver_after_db: ArrayLike,
     *,
     frequencies: ArrayLike | None = None,
-    receiver_type_before: ReceiverType = 'hemi_free_field',
-    receiver_type_after: ReceiverType = 'hemi_free_field',
+    receiver_type_before: Literal['hemi_free_field', 'reflecting_surface'] = 'hemi_free_field',
+    receiver_type_after: Literal['hemi_free_field', 'reflecting_surface'] = 'hemi_free_field',
 ) -> MeasuredBarrierInsertionLoss
 ```
 

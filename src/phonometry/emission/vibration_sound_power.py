@@ -67,7 +67,19 @@ from .._internal.validation import (
     require_ranks,
     require_same_length,
 )
-from ..metrology.reference_values import ISO1683_REFERENCE_VALUES
+
+__all__ = [
+    "NORMALIZED_IMPEDANCE",
+    "REFERENCE_VELOCITY",
+    "VibrationSoundPowerResult",
+    "extraneous_velocity_correction",
+    "mean_velocity_level",
+    "radiated_sound_power_level",
+    "radiation_factor",
+    "sound_power_from_vibration",
+    "velocity_level",
+    "velocity_level_from_acceleration",
+]
 
 #: Reference vibratory velocity ``v0`` (ISO/TS 7849-1:2009, Equation 3), m/s:
 #: the 50 nm/s ISO 1683:2015 keeps for structure-borne sound in note b of
@@ -76,11 +88,9 @@ REFERENCE_VELOCITY: float = 5.0e-8
 #: Normalized characteristic impedance ``Z_c,n`` at 23 degC, 101.3 kPa, N.s/m3.
 NORMALIZED_IMPEDANCE: float = 411.0
 #: Reference acoustic impedance of air ``Z_c,0``, N.s/m3.
-REFERENCE_IMPEDANCE: float = 400.0
-#: Reference sound power ``P0``, W (ISO 1683:2015 Table 1).
-REFERENCE_SOUND_POWER: float = ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value
+_REFERENCE_IMPEDANCE: float = 400.0
 #: Reference area ``S0``, m2.
-REFERENCE_AREA: float = 1.0
+_REFERENCE_AREA: float = 1.0
 
 #: ISO/TS 7849-1 Table 2: correction K1A (dB) for extraneous vibratory velocity
 #: keyed by the integer level difference dLv (dB). dLv >= 10 -> 0; dLv < 3 -> 3.
@@ -208,9 +218,9 @@ def radiated_sound_power_level(
     area: float,
     *,
     radiation_factor: ArrayLike = 1.0,
-    reference_area: float = REFERENCE_AREA,
+    reference_area: float = _REFERENCE_AREA,
     normalized_impedance: float = NORMALIZED_IMPEDANCE,
-    reference_impedance: float = REFERENCE_IMPEDANCE,
+    reference_impedance: float = _REFERENCE_IMPEDANCE,
 ) -> np.ndarray:
     r"""Radiated sound power level (ISO/TS 7849-1 Eq. 12, -2 Eq. 15).
 

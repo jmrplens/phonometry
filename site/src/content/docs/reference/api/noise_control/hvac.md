@@ -764,7 +764,7 @@ outside it the sum means nothing.
 HvacSpectrumResult(
     frequencies: np.ndarray,
     values: np.ndarray,
-    quantity: HvacQuantity,
+    quantity: Literal['attenuation', 'sound_power_level'],
     label: str,
 )
 ```

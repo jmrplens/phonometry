@@ -156,10 +156,10 @@ The Table B.3 criterion row that calls for this action.
 
 ```python
 determination_standard_deviation(
-    grade: DeterminationGrade,
+    grade: Literal['precision', 'engineering', 'survey'],
     frequency: float | None = None,
     *,
-    band_type: BandType = 'third',
+    band_type: Literal['octave', 'third'] = 'third',
 ) -> float
 ```
 
@@ -438,7 +438,7 @@ The measurement surface, the sum of the segment areas, in m².
 
 ```python
 error_factor(
-    grade: DeterminationGrade,
+    grade: Literal['precision', 'engineering', 'survey'],
     *,
     a_weighted: bool = False,
 ) -> float
@@ -519,7 +519,7 @@ partial_power_concentration(
     normal_intensity: ArrayLike,
     areas: ArrayLike,
     *,
-    grade: DeterminationGrade = 'engineering',
+    grade: Literal['precision', 'engineering', 'survey'] = 'engineering',
 ) -> PartialPowerConcentration
 ```
 
@@ -607,10 +607,10 @@ equation (B.4) asks to be spread over them.
 
 ```python
 position_count_factor(
-    grade: DeterminationGrade,
+    grade: Literal['precision', 'engineering', 'survey'],
     frequency: float | None = None,
     *,
-    band_type: BandType = 'third',
+    band_type: Literal['octave', 'third'] = 'third',
 ) -> float
 ```
 
@@ -653,8 +653,8 @@ sound_power_intensity_points(
     pressure_residual_index: float | ArrayLike | None = None,
     temporal_intensity: ArrayLike | None = None,
     frequencies: ArrayLike | None = None,
-    band_type: BandType = 'third',
-    grade: DeterminationGrade = 'engineering',
+    band_type: Literal['octave', 'third'] = 'third',
+    grade: Literal['precision', 'engineering', 'survey'] = 'engineering',
 ) -> DiscretePointIntensityResult
 ```
 

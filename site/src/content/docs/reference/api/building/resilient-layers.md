@@ -149,7 +149,7 @@ covering_improvement(
     *,
     mass: float = 0.5,
     impact_rate: float = 10.0,
-    band: BandWidth = 'third',
+    band: Literal['third', 'octave'] = 'third',
 ) -> CoveringImprovementResult
 ```
 
@@ -686,7 +686,7 @@ gives; the two forms agree.
 short_pulse_mean_square_force(
     frequencies: ArrayLike,
     *,
-    band: BandWidth = 'third',
+    band: Literal['third', 'octave'] = 'third',
 ) -> np.ndarray
 ```
 
@@ -771,7 +771,7 @@ tapping_force_spectrum(
     mass: float = 0.5,
     impact_rate: float = 10.0,
     impact_velocity: float | None = None,
-    band: BandWidth = 'third',
+    band: Literal['third', 'octave'] = 'third',
 ) -> TappingForceResult
 ```
 
@@ -922,7 +922,7 @@ weighted_floating_floor_improvement(
     mass_per_area: float,
     dynamic_stiffness: float,
     *,
-    floor: FloorType = 'screed',
+    floor: Literal['screed', 'asphalt'] = 'screed',
 ) -> float
 ```
 

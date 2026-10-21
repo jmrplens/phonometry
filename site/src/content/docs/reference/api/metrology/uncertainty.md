@@ -40,7 +40,7 @@ path of 6.4.8 for non-independent quantities is not implemented -- use
 
 ```python
 combine_uncertainty(
-    model: Model,
+    model: Callable[..., float],
     quantities: Sequence[Quantity],
     correlation: ArrayLike | None = None,
 ) -> UncertaintyResult
@@ -104,7 +104,7 @@ Convenience wrapper for [`UncertaintyResult.expanded`](/phonometry/reference/api
 
 ```python
 monte_carlo(
-    model: Model,
+    model: Callable[..., float],
     quantities: Sequence[Quantity],
     trials: int = 1000000,
     coverage: float = 0.95,

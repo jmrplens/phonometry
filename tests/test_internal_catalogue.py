@@ -404,7 +404,7 @@ def test_the_hedges_of_a_shared_row_cannot_be_edited_in_place() -> None:
 def test_why_missing_refuses_a_field_the_row_does_not_have() -> None:
     """A misspelt field would otherwise answer as if the cell were empty."""
     row = CatalogueRow(name="x", source="y")
-    with pytest.raises(AttributeError):
+    with pytest.raises(AttributeError, match=r"has no attribute 'porsity'"):
         row.why_missing("porsity")
 
 

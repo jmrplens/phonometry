@@ -73,13 +73,13 @@ DEFAULT_POLAR_ANGLES = (-90, -85, -80, -75, -70, -65, -60, -55, -50, -45, -40, -
 ```python
 DiffuserPolarResponse(
     frequency: float,
-    angles_deg: Real,
-    levels: Real,
+    angles_deg: NDArray[np.float64],
+    levels: NDArray[np.float64],
     coefficient: float,
     *,
     source_angle_deg: float = 0.0,
     well_width: float | None = None,
-    depths: Real | None = None,
+    depths: NDArray[np.float64] | None = None,
     repetitions: int | None = None,
 )
 ```
@@ -308,7 +308,7 @@ qrd_well_depths(
     design_frequency: float,
     *,
     speed_of_sound: float = 343.0,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Well depths of a quadratic residue diffuser (Cox and D'Antonio, Eq. (10.3)).
@@ -337,7 +337,7 @@ $\lambda_0 / 2$.
 ## quadratic_residue_sequence
 
 ```python
-quadratic_residue_sequence(prime: int) -> Real
+quadratic_residue_sequence(prime: int) -> NDArray[np.float64]
 ```
 
 Quadratic residue sequence `s_n` (Cox and D'Antonio, Eq. (10.2)).

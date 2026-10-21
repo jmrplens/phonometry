@@ -50,10 +50,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from reportlab.platypus import Table
 
-    from ..building.measurement.insulation import (
-        ImpactRatingResult,
-        WeightedRatingResult,
-    )
+    from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from .metadata import ReportMetadata
 
 #: Cell padding, font size and leading of a compact band table, in points

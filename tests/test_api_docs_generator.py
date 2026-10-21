@@ -604,3 +604,98 @@ def test_a_read_only_table_is_labelled_and_shown_as_a_mapping() -> None:
     table = MappingProxyType({"day": MappingProxyType({"a_u": 0.1}), "k": (1, 2)})
     assert gad._type_name(table) == "mapping"
     assert gad._constant_repr(table) == "{'day': {'a_u': 0.1}, 'k': (1, 2)}"
+
+
+# ---------------------------------------------------------------------------
+# Type aliases in signatures
+# ---------------------------------------------------------------------------
+def test_an_unpublished_alias_reads_as_its_definition() -> None:
+    """No type alias is public, so a signature never names one.
+
+    ``form: DeclarationForm`` sends a reader to a name nothing exports; the
+    page shows what the parameter takes instead.
+    """
+    from phonometry.emission import NoiseEmissionDeclaration
+
+    rendered = gad.format_signature(
+        "NoiseEmissionDeclaration", NoiseEmissionDeclaration, omit_return=True
+    )
+    assert "form: Literal['dual-number', 'single-number'] = 'dual-number'" in rendered
+    assert "DeclarationForm" not in rendered
+
+
+def test_an_alias_imported_only_for_the_type_checker_is_found() -> None:
+    """``sound_power`` imports ``DeclarationForm`` under ``TYPE_CHECKING``."""
+    from phonometry.emission import SoundPowerResult
+
+    rendered = gad.format_signature(
+        "SoundPowerResult.declare", SoundPowerResult.declare, drop_first=True
+    )
+    assert "Literal['dual-number', 'single-number']" in rendered
+    assert "DeclarationForm" not in rendered
+
+
+def test_alias_expansion_leaves_quotes_attributes_and_foreign_names_alone() -> None:
+    """Only a name the library assigns as an alias is replaced."""
+    module = "phonometry.emission.sound_power"
+    assert gad.expand_unpublished_aliases("Grade", module) == (
+        "Literal['engineering', 'survey']"
+    )
+    # A quoted Literal member that happens to spell an alias stays a string.
+    assert gad.expand_unpublished_aliases("Literal['Grade']", module) == (
+        "Literal['Grade']"
+    )
+    # An attribute is not a bare name, and numpy's ArrayLike is not ours.
+    assert gad.expand_unpublished_aliases("np.ndarray", module) == "np.ndarray"
+    assert (
+        gad.expand_unpublished_aliases(
+            "ArrayLike", "phonometry.environment.propagation.ground_barriers"
+        )
+        == "ArrayLike"
+    )
+
+
+def test_an_alias_a_package_published_would_stay_a_name(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Publishing an alias later is additive, and its name would then link.
+
+    No alias is published today, so the branch is reached only by saying one
+    is: the page would print ``Grade`` and link it, as it does every published
+    name, instead of spelling it out.
+    """
+    from phonometry.emission import sound_power
+
+    published = frozenset({id(sound_power.Grade)})
+    monkeypatch.setattr(gad, "_published_ids", lambda: published)
+    module = "phonometry.emission.sound_power"
+    assert gad.expand_unpublished_aliases("Grade", module) == "Grade"
+    assert gad.expand_unpublished_aliases("Surface", module).startswith("Literal[")
+
+
+def test_the_api_index_shows_the_4_0_call_and_no_root_import() -> None:
+    """The filter bank returns a result, and the root exports twenty-five names."""
+    pages, xref, _ = gad.build_model()
+    index = gad.render_index(pages, xref, gad.RoleStats())
+    assert "r = filters.octave_filter(x, fs)" in index
+    assert "spl, freq" not in index
+    assert "from phonometry import leq" not in index
+
+
+def test_the_top_level_page_says_where_each_of_its_objects_is_documented() -> None:
+    """``Signal`` is a top-level name documented with ``io``, not on that page."""
+    pages, _, _ = gad.build_model()
+    (top,) = (page for page in pages if page.module == "phonometry")
+    here = {member.name for member in top.members}
+    objects = [
+        name
+        for name in phonometry.__all__
+        if not inspect.ismodule(getattr(phonometry, name))
+    ]
+    assert set(objects) - here, "every top-level object is on the page"
+    for name in objects:
+        assert f"`{name}`" in top.intro
+    for name in set(objects) - here:
+        module = gad.attribute_module(name, getattr(phonometry, name))
+        assert f"`{name}` with `{module}`" in top.intro
+    assert "can also be imported directly" not in top.intro

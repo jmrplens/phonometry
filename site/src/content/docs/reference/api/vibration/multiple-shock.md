@@ -71,7 +71,7 @@ text and is out of scope.
 
 ```python
 acceleration_dose(
-    acceleration: SignalInput,
+    acceleration: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> float
 ```
@@ -233,7 +233,7 @@ weighted by the reducing ultimate strength of the ageing spine.
 
 ```python
 multiple_shock_assessment(
-    acceleration: SignalInput,
+    acceleration: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     start_age: float,
@@ -246,7 +246,7 @@ multiple_shock_assessment(
 ) -> MultipleShockResult
 
 multiple_shock_assessment(
-    acceleration: SignalInput,
+    acceleration: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     start_age: float,
@@ -442,7 +442,7 @@ the vertical spinal response; the transmissibility is unity at 0 Hz.
 
 ```python
 spinal_response(
-    acceleration: SignalInput,
+    acceleration: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> np.ndarray
 ```

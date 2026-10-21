@@ -67,7 +67,7 @@ detect_onsets(
     levels: ArrayLike,
     dt: float,
     *,
-    onset_rate_method: _OnsetRateMethod = 'least_squares',
+    onset_rate_method: Literal['least_squares', 'upper_half'] = 'least_squares',
 ) -> tuple[ImpulseOnset, ...]
 ```
 
@@ -330,13 +330,13 @@ A supplied level rise does not qualify as an impulse (clause 4.5).
 
 ```python
 impulsive_sound_adjustment(
-    signal: SignalInput,
+    signal: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     dt: float = 0.02,
     reference_pressure_pa: float = 2e-05,
     calibration_offset: float = 0.0,
-    onset_rate_method: _OnsetRateMethod = 'least_squares',
+    onset_rate_method: Literal['least_squares', 'upper_half'] = 'least_squares',
     laeq: float | None = None,
 ) -> ImpulsiveSoundResult
 ```
@@ -570,7 +570,7 @@ $$
 
 ```python
 sound_pressure_level_history(
-    signal: SignalInput,
+    signal: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     dt: float = 0.02,

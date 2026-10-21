@@ -33,14 +33,11 @@ from ._insulation_fiche import Column, render_insulation_fiche
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from ..building.measurement.insulation import (
-        ImpactRatingResult,
-        WeightedRatingResult,
-    )
     from ..building.measurement.lab_insulation import (
         LabAirborneInsulationResult,
         LabImpactInsulationResult,
     )
+    from ..building.measurement.ratings import ImpactRatingResult, WeightedRatingResult
     from .metadata import ReportMetadata
 
 #: Band-centre count that identifies an ISO 717 rating computed from octave

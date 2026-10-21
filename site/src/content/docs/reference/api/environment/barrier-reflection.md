@@ -392,8 +392,8 @@ REFLECTION_GRID_SPACING_M = 0.4
 
 ```python
 reflection_index(
-    in_front_irs: SignalInput | Sequence[SignalInput],
-    free_field_irs: SignalInput | Sequence[SignalInput],
+    in_front_irs: Signal | Sequence[float] | np.ndarray | Sequence[Signal | Sequence[float] | np.ndarray],
+    free_field_irs: Signal | Sequence[float] | np.ndarray | Sequence[Signal | Sequence[float] | np.ndarray],
     fs: float | None = None,
     *,
     speed_of_sound: float,
@@ -838,8 +838,8 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 ```python
 source_directivity_corrections(
-    microphone_irs: SignalInput,
-    specular_irs: SignalInput,
+    microphone_irs: Signal | Sequence[float] | np.ndarray,
+    specular_irs: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     window_length_s: float | ArrayLike = 0.006,
@@ -879,8 +879,8 @@ placed on its own record's peak (5.5.6).
 
 ```python
 subtract_direct_sound(
-    in_front_ir: SignalInput,
-    free_field_ir: SignalInput,
+    in_front_ir: Signal | Sequence[float] | np.ndarray,
+    free_field_ir: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
 ) -> DirectSoundSubtraction
 ```

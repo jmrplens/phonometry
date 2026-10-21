@@ -102,7 +102,7 @@ $\ln(1 - \alpha_i)$, so each must be below 1.
 ```python
 eyring_reverberation_time(
     volume: float,
-    surfaces: Sequence[Surface],
+    surfaces: Sequence[tuple[float, ArrayLike]],
     *,
     air_attenuation: ArrayLike = 0.0,
     speed_of_sound: float = 343.0,
@@ -172,7 +172,9 @@ must be below 1.
 ## mean_absorption
 
 ```python
-mean_absorption(surfaces: Sequence[Surface]) -> np.ndarray | float
+mean_absorption(
+    surfaces: Sequence[tuple[float, ArrayLike]],
+) -> np.ndarray | float
 ```
 
 Area-weighted mean absorption coefficient
@@ -191,7 +193,7 @@ $\bar{\alpha} = A / S$.
 ```python
 millington_sette_reverberation_time(
     volume: float,
-    surfaces: Sequence[Surface],
+    surfaces: Sequence[tuple[float, ArrayLike]],
     *,
     air_attenuation: ArrayLike = 0.0,
     speed_of_sound: float = 343.0,
@@ -367,7 +369,7 @@ quantity.
 ```python
 sabine_reverberation_time(
     volume: float,
-    surfaces: Sequence[Surface],
+    surfaces: Sequence[tuple[float, ArrayLike]],
     *,
     air_attenuation: ArrayLike = 0.0,
     speed_of_sound: float = 343.0,

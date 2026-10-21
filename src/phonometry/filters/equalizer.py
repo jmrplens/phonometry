@@ -82,7 +82,6 @@ if TYPE_CHECKING:
     from ..io._signal import Signal
 
 __all__ = [
-    "EQFilterType",
     "EQResponseResult",
     "EQSection",
     "ParametricEQ",

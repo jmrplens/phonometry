@@ -292,6 +292,13 @@ ignore = [
 # accept is open and no TypedDict can close it truthfully.
 allow-star-arg-any = true
 
+[tool.ruff.lint.flake8-pytest-style]
+# PT011 asks for `match=` only on the broad exceptions by default. An
+# AttributeError is how a withdrawn name, a misspelt field and an assignment
+# to a frozen record all fail, so a bare one passes on whichever of them
+# happened: the match names the attribute.
+raises-extend-require-match-for = ["AttributeError"]
+
 [tool.ruff.lint.per-file-ignores]
 # `matplotlib.use("Agg")` has to run between `import matplotlib` and the first
 # `import matplotlib.pyplot`, and the scripts put the repository on `sys.path`

@@ -179,9 +179,9 @@ at `(receiver_distance, receiver_height)`. Three models are available:
 
 ```python
 BarrierInsertionLoss(
-    frequencies: Real,
-    insertion_loss: Real,
-    fresnel_number: Real,
+    frequencies: NDArray[np.float64],
+    insertion_loss: NDArray[np.float64],
+    fresnel_number: NDArray[np.float64],
     method: str,
     *,
     ground: bool,
@@ -306,7 +306,7 @@ fresnel_number(
     direct_distance: float,
     frequencies: ArrayLike,
     speed_of_sound: float = 343.0,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Fresnel number $N = (2/\lambda)(A + B - d)$ (Bies Eq. (5.134)).
@@ -400,7 +400,7 @@ of the materials domain. Exactly one of the two must be given.
 ## kurze_anderson_attenuation
 
 ```python
-kurze_anderson_attenuation(fresnel_number: ArrayLike) -> Real
+kurze_anderson_attenuation(fresnel_number: ArrayLike) -> NDArray[np.float64]
 ```
 
 Kurze-Anderson barrier attenuation (Bies Eq. (5.138); Kurze & Anderson, 1971).
@@ -490,7 +490,7 @@ spherical_reflection_coefficient(
     receiver_height: float,
     distance: float,
     speed_of_sound: float = 343.0,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Spherical-wave reflection coefficient `Q` (Weyl-Van der Pol).
@@ -526,12 +526,12 @@ $w = \sqrt{i k R_2 / 2} \, (\cos\theta + 1/Z)$ (Eq. (D.57)).
 
 ```python
 SphericalGroundResult(
-    frequencies: Real,
-    excess_attenuation: Real,
-    reflection_coefficient: Complex,
-    plane_reflection_coefficient: Complex,
-    boundary_loss: Complex,
-    normalized_impedance: Complex,
+    frequencies: NDArray[np.float64],
+    excess_attenuation: NDArray[np.float64],
+    reflection_coefficient: NDArray[np.complex128],
+    plane_reflection_coefficient: NDArray[np.complex128],
+    boundary_loss: NDArray[np.complex128],
+    normalized_impedance: NDArray[np.complex128],
     r_direct: float,
     r_reflected: float,
 )

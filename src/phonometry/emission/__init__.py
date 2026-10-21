@@ -8,7 +8,6 @@ from .._plot.geometry import (
     plot_pp_probe_geometry,
 )
 from .declaration import (
-    DeclarationForm,
     NoiseEmissionDeclaration,
     OperatingModeDeclaration,
 )
@@ -234,7 +233,6 @@ __all__ = [
     "CalibrationConditions",
     "check_plant_measurement",
     "DEFAULT_COVERAGE_FACTOR",
-    "DeclarationForm",
     "DiscretePointIntensityResult",
     "EmissionPressureResult",
     "FieldIndicators",

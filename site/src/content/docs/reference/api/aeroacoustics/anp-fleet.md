@@ -58,7 +58,7 @@ AnpAircraft(
     power_parameter: str,
     approach_spectral_class_id: str,
     departure_spectral_class_id: str,
-    _database: AnpDatabase,
+    database: AnpDatabase,
 )
 ```
 
@@ -78,6 +78,7 @@ One ANP aircraft type: metadata plus NPD/profile access and Doc 29 wiring.
 | `power_parameter` | Name/unit of the NPD power parameter. |
 | `approach_spectral_class_id` | Spectral class of the approach NPD. |
 | `departure_spectral_class_id` | Spectral class of the departure NPD. |
+| `database` | The [`AnpDatabase`](/phonometry/reference/api/aeroacoustics/anp-fleet/#anpdatabase) the aircraft was read from, which its NPD, spectral-class, profile and Doc 29 methods consult. |
 
 ### AnpAircraft.event_level()
 
@@ -88,7 +89,7 @@ AnpAircraft.event_level(
     *,
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
-    metric: EventMetric = 'exposure',
+    metric: Literal['exposure', 'maximum'] = 'exposure',
     temperature_c: float | None = None,
     atmospheric_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
@@ -108,7 +109,7 @@ AnpAircraft.noise_contour(
     y: NDArray[np.float64] | list[float],
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
-    metric: EventMetric = 'exposure',
+    metric: Literal['exposure', 'maximum'] = 'exposure',
     temperature_c: float | None = None,
     atmospheric_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
@@ -185,7 +186,6 @@ AnpDatabase(
     npd: Mapping[tuple[str, str, str], tuple[NDArray[np.float64], NDArray[np.float64]]],
     distances: NDArray[np.float64],
     profiles: Mapping[tuple[str, str, str, int], NDArray[np.float64]],
-    performance: _PerformanceTables | None = None,
     spectral_classes: Mapping[str, SpectralClass] | None = None,
 )
 ```
@@ -227,7 +227,7 @@ AnpDatabase.event_level(
     *,
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
-    metric: EventMetric = 'exposure',
+    metric: Literal['exposure', 'maximum'] = 'exposure',
     temperature_c: float | None = None,
     atmospheric_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,
@@ -307,7 +307,7 @@ AnpDatabase.noise_contour(
     y: NDArray[np.float64] | list[float],
     aerodrome: Aerodrome | None = None,
     stage_length: int | str = 1,
-    metric: EventMetric = 'exposure',
+    metric: Literal['exposure', 'maximum'] = 'exposure',
     temperature_c: float | None = None,
     atmospheric_pressure_kpa: float | None = None,
     relative_humidity_percent: float | None = None,

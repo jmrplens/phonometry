@@ -74,10 +74,10 @@ asking.
 assess_building_vibration(
     velocity_mm_s: float,
     *,
-    building_class: BuildingClass | str,
+    building_class: Literal['commercial', 'residential', 'sensitive'] | str,
     frequency_hz: float | None = None,
-    location: MeasurementLocation | str = 'foundation',
-    duration: VibrationDuration | str = 'short_term',
+    location: Literal['foundation', 'top_floor'] | str = 'foundation',
+    duration: Literal['short_term', 'long_term'] | str = 'short_term',
     massive_structure: bool = False,
 ) -> DamageAssessment
 ```
@@ -277,7 +277,7 @@ FOUNDATION_FREQUENCIES_HZ = (1.0, 10.0, 50.0, 100.0)
 
 ```python
 foundation_guideline_curve(
-    building_class: BuildingClass | str,
+    building_class: Literal['commercial', 'residential', 'sensitive'] | str,
     frequency: ArrayLike | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]
 ```
@@ -306,11 +306,11 @@ draws; pass *frequency* to sample the same polyline elsewhere.
 
 ```python
 guideline_velocity(
-    building_class: BuildingClass | str,
+    building_class: Literal['commercial', 'residential', 'sensitive'] | str,
     frequency: ArrayLike | None = None,
     *,
-    location: MeasurementLocation | str = 'foundation',
-    duration: VibrationDuration | str = 'short_term',
+    location: Literal['foundation', 'top_floor'] | str = 'foundation',
+    duration: Literal['short_term', 'long_term'] | str = 'short_term',
     massive_structure: bool = False,
 ) -> np.ndarray | float
 ```
@@ -362,9 +362,9 @@ MASSIVE_STRUCTURE_FACTOR = 2.0
 
 ```python
 pipeline_guideline_velocity(
-    material: PipelineMaterial | str,
+    material: Literal['welded_steel', 'concrete_or_flanged_metal', 'masonry_or_plastic'] | str,
     *,
-    duration: VibrationDuration | str = 'short_term',
+    duration: Literal['short_term', 'long_term'] | str = 'short_term',
 ) -> float
 ```
 

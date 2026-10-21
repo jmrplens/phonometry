@@ -4,7 +4,7 @@ description: "What 4.0 moved, renamed and removed, and how to find the new spell
 ---
 
 4.0 is a hard break with no compatibility layer. Almost nothing was deleted:
-of the 885 names the root exported in 3.3.0, ten exist nowhere any more and
+of the 885 names the root exported in 3.3.0, eleven exist nowhere any more and
 the rest simply live at a named address instead of a flat one. So most of the
 work is an import sweep, and this page is mostly a map.
 
@@ -28,7 +28,7 @@ print("laeq" in phonometry.__all__)     # False
 from phonometry.signals import laeq     # this is the new spelling
 ```
 
-Measured across the whole surface, 872 of those 885 root names are published
+Measured across the whole surface, 871 of those 885 root names are published
 today by exactly one subpackage, none by two, and none needs a path deeper
 than `phonometry.<subpackage>`. Three more are still at the root, where they
 always were. So the swap is unambiguous: find the subpackage, import from it.
@@ -302,6 +302,37 @@ that takes either a number or an array keeps its name.
 `times, levels = decay_curve(ir, fs)` still unpacks the decay curve, in the
 same order. The FDTD solvers keep `c` and `rho`, which name the maps their
 equations are written in.
+
+## Every public name has one address
+
+A handful of names could be imported from a second module in 3.3.0 or
+4.0.0rc1, or from a module that listed something its package did not publish,
+and the ANP database put a private name in two constructors. Each name has a
+single address now, the one the resolver above returns, and none is private:
+
+| 3.3.0 or 4.0.0rc1 | 4.0 |
+| --- | --- |
+| `vibration.partial_exposure` | `vibration.daily_exposure`, the function it was a second name for. Called with the value and the duration of one operation, it returns that operation's partial exposure Ai(8), and the number does not move |
+| the ISO 717 ratings listed by `building.measurement.insulation`: `weighted_rating`, `weighted_impact_rating`, their `_extended` forms, `weighted_impact_improvement`, `impact_improvement_adaptation_term` and the four rating results | `building.weighted_rating` and the rest, defined in `building.measurement.ratings` |
+| `LowFrequencyProcedure` listed by `building.measurement.insulation` | `building.LowFrequencyProcedure`, defined in `building.measurement.low_frequency` |
+| the ISO 12354-1 Annex D linings listed by `building.prediction.resilient_layers`: `lining_improvement`, `lining_improvement_in_situ`, `lining_resonance_frequency`, `weighted_lining_improvement`, `LiningImprovementResult` | `building.lining_improvement` and the rest, defined in `building.prediction.linings` |
+| `emission.DeclarationForm`; `Grade` and `Surface` listed by `emission.sound_power`; `EQFilterType` listed by `filters.equalizer` (`metrology.equalizer` in 3.3.0) | nothing to import: no type alias is public. Pass the string the parameter takes, `form="single-number"` for instance, and the API reference shows each parameter's `Literal[...]` where the alias used to be |
+| `BASIC_METHOD_MAX_CREST_FACTOR` listed by `vibration.human.exposure` | not published. `vibration.crest_factor` warns above 9, the crest factor up to which ISO 2631-1 6.2.2 holds the basic method sufficient |
+| `REFERENCE_IMPEDANCE`, `REFERENCE_AREA` and `REFERENCE_SOUND_POWER` of `emission.vibration_sound_power`, a module with no `__all__` whose package never published them | not published. The 400 N·s/m³ and the 1 m² are the defaults of `reference_impedance=` and `reference_area=` in `emission.radiated_sound_power_level`, and the 1 pW is `metrology.ISO1683_REFERENCE_VALUES["gas"]["sound_power"].value` |
+| `AnpAircraft(..., _database=db)` and `aircraft._database` | `AnpAircraft(..., database=db)` and `aircraft.database`, still left out of the repr and of comparisons |
+| `AnpDatabase(..., performance=...)` (4.0.0rc1) | no `performance=`, whose type nothing published: `aircraft.load_anp_database` reads the performance tables of an export, and a database built by hand flies fixed-point profiles |
+
+```python
+from phonometry import building, vibration
+
+# ISO 5349-2 E.3: the brush-saw's partial exposure, 4,6 m/s² for 2 h
+print(round(vibration.daily_exposure(4.6, 2 * 3600.0), 1))
+print(callable(building.weighted_rating), callable(building.lining_improvement))
+print(hasattr(vibration, "partial_exposure"))
+# 2.3
+# True True
+# False
+```
 
 ## Every `.plot()` takes the axes first
 
@@ -989,9 +1020,9 @@ except ValueError as error:
 # True
 ```
 
-## The ten names that are gone
+## The eleven names that are gone
 
-Everything else moved. These ten exist in no public module:
+Everything else moved. These eleven exist in no public module:
 
 | Gone | What to write instead |
 | --- | --- |
@@ -1002,6 +1033,7 @@ Everything else moved. These ten exist in no public module:
 | `speed_of_sound` | `fluids.air(temperature_c=...).speed_of_sound` for the medium. It uses a fuller model than the ISO 17497-1 one-liner did, so the number moves: 343.99 m/s against 343.20 m/s at 20 °C |
 | `depth_to_pressure` | `fluids.depth_to_gauge_pressure_mpa(depth_m=...)`, which returns the same number, or `fluids.depth_to_absolute_pressure_pa` for the absolute one. Both are keyword-only and both take an optional `latitude_deg` |
 | `TransmissionLossResult` | `PropagationLossResult`, with `.tl` renamed to `.pl` |
+| `partial_exposure` | `vibration.daily_exposure`, called with one operation's value and duration. `partial_exposure` was a second name for the same function, and the number does not move |
 
 ## What did not change
 

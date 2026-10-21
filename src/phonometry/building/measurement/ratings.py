@@ -99,6 +99,24 @@ if TYPE_CHECKING:
 
     from ..._report.metadata import ReportMetadata
 
+__all__ = [
+    "IMPACT_REFERENCE_FLOORS",
+    "LINING_REFERENCE_ELEMENTS",
+    "ExtendedImpactRatingResult",
+    "ExtendedWeightedRatingResult",
+    "ImpactImprovementRatingResult",
+    "ImpactRatingResult",
+    "ReductionImprovementRating",
+    "WeightedRatingResult",
+    "impact_improvement_adaptation_term",
+    "weighted_impact_improvement",
+    "weighted_impact_rating",
+    "weighted_impact_rating_extended",
+    "weighted_rating",
+    "weighted_rating_extended",
+    "weighted_reduction_improvement",
+]
+
 # --- ISO 717-1 Table 3 reference values ----------------------------------
 
 #: One-third-octave reference values, 100 Hz to 3150 Hz (Table 3).

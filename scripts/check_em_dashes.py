@@ -23,8 +23,8 @@ What is NOT prose keeps its dash, and every exemption below says why:
 - **Code.** A fenced block, an inline code span and a string a test compares
   with are data, not prose, and a dash that fills a whole table cell, or a
   whole slash-separated item of one, is the placeholder of an empty cell, not
-  a sentence. The glossary cards are prose in a data module and are read as
-  such.
+  a sentence. The glossary cards, the home page's text and the Spanish
+  catalogue notes are prose in the site's data modules and are read as such.
 - **Two bare dashes** in a table row separator or a horizontal rule are
   hyphens, not em dashes; only U+2014 is looked for.
 
@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import ast
 import io
+import json
 import pathlib
 import re
 import sys
@@ -45,15 +46,17 @@ from markdown_fences import code_lines
 
 EM_DASH = "—"
 
-#: Where the published prose lives: the pages and their mirrors, the package
-#: docstrings the API reference is generated from, and the text the figure
-#: and diagram generators draw. Tests are not published and keep their
-#: dashes, and the llms mirrors and the generated API pages are regenerated
-#: from what is listed here and need no scan of their own.
+#: Where the published prose lives: the pages and their mirrors, the data
+#: modules the site's pages are built from (the glossary cards, the home page's
+#: text and examples, the Spanish catalogue notes), the package docstrings the
+#: API reference is generated from, and the text the figure and diagram
+#: generators draw. Tests are not published and keep their dashes, and the
+#: llms mirrors and the generated API pages are regenerated from what is listed
+#: here and need no scan of their own.
 DEFAULT_ROOTS = (
     "docs",
     "site/src/content/docs",
-    "site/src/data/glossary.mjs",
+    "site/src/data",
     "src/phonometry",
     "scripts/figures",
     "scripts/diagrams",
@@ -279,7 +282,7 @@ def python_hits(text: str) -> list[int]:
 
 
 def data_hits(text: str) -> list[int]:
-    """The 1-based lines of a data module (the glossary cards) whose text carries a dash.
+    """The 1-based lines of a data module (glossary, home page) whose text has a dash.
 
     A comment is not published and keeps its dash; a standard's title is
     exempt as everywhere else.
@@ -294,16 +297,49 @@ def data_hits(text: str) -> list[int]:
     return hits
 
 
+#: A JSON string literal, escapes included.
+_JSON_STRING = re.compile(r'"(?:[^"\\\n]|\\.)*"')
+
+
+def json_hits(text: str) -> list[int]:
+    """The 1-based lines of a JSON data file whose strings carry a dash.
+
+    Every key and value of the file is a string, so each is read as a
+    string literal of a module is: a dash alone is an empty cell, and a dash
+    inside quotation marks reproduces what a source prints.
+    """
+    hits: list[int] = []
+    for number, line in enumerate(text.splitlines(), start=1):
+        if EM_DASH not in line:
+            continue
+        for literal in _JSON_STRING.findall(line):
+            try:
+                value = json.loads(literal)
+            except json.JSONDecodeError:
+                value = literal
+            if EM_DASH in value and _string_is_prose(value):
+                hits.append(number)
+                break
+    return hits
+
+
+#: The suffixes the guard reads, each with the reader that knows its kind.
+_READERS = {
+    ".py": python_hits,
+    ".md": markdown_hits,
+    ".mdx": markdown_hits,
+    ".mjs": data_hits,
+    ".ts": data_hits,
+    ".json": json_hits,
+}
+
+
 def scan(path: pathlib.Path) -> list[int]:
     """The offending lines of one file, by its kind."""
-    text = path.read_text(encoding="utf-8")
-    if path.suffix == ".py":
-        return python_hits(text)
-    if path.suffix in {".md", ".mdx"}:
-        return markdown_hits(text)
-    if path.suffix == ".mjs":
-        return data_hits(text)
-    return []
+    reader = _READERS.get(path.suffix)
+    if reader is None:
+        return []
+    return reader(path.read_text(encoding="utf-8"))
 
 
 #: Local working notes under docs/, gitignored and never published.
@@ -320,7 +356,7 @@ def iter_files(roots: tuple[str, ...]) -> list[pathlib.Path]:
             files.extend(
                 p
                 for p in sorted(base.rglob("*"))
-                if p.suffix in {".py", ".md", ".mdx", ".mjs"}
+                if p.suffix in _READERS
                 and not any(str(p).startswith(u) for u in _UNPUBLISHED)
             )
     return files

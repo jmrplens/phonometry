@@ -507,7 +507,7 @@ membrane_impedance(
     *,
     surface_density: float,
     resistance: float = 0.0,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Transfer impedance of a limp impervious membrane.
@@ -568,7 +568,7 @@ microperforated_plate_impedance(
     open_area: float,
     end_correction: float = 0.85,
     fluid: Fluid = ...,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Transfer impedance of a microperforated plate (Maa's exact model).
@@ -656,7 +656,7 @@ perforated_plate_impedance(
     open_area: float,
     end_correction: float | None = None,
     fluid: Fluid = ...,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Transfer impedance of a rigid perforated plate with circular holes.
@@ -722,7 +722,7 @@ $\delta \to 0.85$ for an isolated hole.
 
 ```python
 plot_absorber_stack(
-    layers: Sequence[Layer] | Layer,
+    layers: Sequence[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer] | AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer,
     ax: Axes | None = None,
     *,
     language: str = 'en',
@@ -790,11 +790,11 @@ Advisory for porous-model use outside the published fit range.
 
 ```python
 PorousMediumResult(
-    frequencies: Real,
-    characteristic_impedance: Complex,
-    wavenumber: Complex,
-    effective_density: Complex,
-    bulk_modulus: Complex,
+    frequencies: NDArray[np.float64],
+    characteristic_impedance: NDArray[np.complex128],
+    wavenumber: NDArray[np.complex128],
+    effective_density: NDArray[np.complex128],
+    bulk_modulus: NDArray[np.complex128],
     model: str,
     flow_resistivity: float,
     speed_of_sound: float,

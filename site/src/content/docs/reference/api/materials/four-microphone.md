@@ -39,7 +39,7 @@ air_density_astm(
     *,
     temperature_c: ArrayLike,
     atmospheric_pressure_kpa: ArrayLike = 101.325,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Air density (ASTM E2611-19, Eq. (5)).
@@ -103,7 +103,7 @@ face_quantities(
     wavenumber: ArrayLike,
     thickness: float,
     characteristic_impedance: float,
-) -> tuple[Complex, Complex, Complex, Complex]
+) -> tuple[NDArray[np.complex128], NDArray[np.complex128], NDArray[np.complex128], NDArray[np.complex128]]
 ```
 
 Face pressures and particle velocities (ASTM E2611-19, Eq. (21)).
@@ -171,7 +171,7 @@ binding for every microphone pair).
 ## speed_of_sound_astm
 
 ```python
-speed_of_sound_astm(*, temperature_c: ArrayLike) -> Real
+speed_of_sound_astm(*, temperature_c: ArrayLike) -> NDArray[np.float64]
 ```
 
 Speed of sound in air (ASTM E2611-19, Eq. (4)).
@@ -292,10 +292,10 @@ $$
 
 ```python
 TransferMatrix(
-    t11: Complex,
-    t12: Complex,
-    t21: Complex,
-    t22: Complex,
+    t11: NDArray[np.complex128],
+    t12: NDArray[np.complex128],
+    t21: NDArray[np.complex128],
+    t22: NDArray[np.complex128],
     *,
     l1: float | None = None,
     s1: float | None = None,
@@ -304,7 +304,7 @@ TransferMatrix(
     thickness: float | None = None,
     diameter_m: float | None = None,
     shape: str | None = None,
-    frequencies: Real | None = None,
+    frequencies: NDArray[np.float64] | None = None,
     air_characteristic_impedance: float | None = None,
 )
 ```
@@ -329,7 +329,7 @@ unchanged.
 ```python
 TransferMatrix.absorption_hard_backed(
     characteristic_impedance: float,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Hard-backed absorption coefficient (ASTM E2611-19, Eq. (28)).
@@ -347,7 +347,7 @@ $\alpha = 1 - \lvert R \rvert^2$.
 ### TransferMatrix.characteristic_impedance_material()
 
 ```python
-TransferMatrix.characteristic_impedance_material() -> Complex
+TransferMatrix.characteristic_impedance_material() -> NDArray[np.complex128]
 ```
 
 Characteristic impedance of the material (ASTM E2611-19, Eq. (30)).
@@ -359,7 +359,7 @@ $Z = \sqrt{T_{12} / T_{21}}$.
 ### TransferMatrix.determinant()
 
 ```python
-TransferMatrix.determinant() -> Complex
+TransferMatrix.determinant() -> NDArray[np.complex128]
 ```
 
 Determinant $T_{11} T_{22} - T_{12} T_{21}$ (unity for a reciprocal specimen).
@@ -367,7 +367,9 @@ Determinant $T_{11} T_{22} - T_{12} T_{21}$ (unity for a reciprocal specimen).
 ### TransferMatrix.material_wavenumber()
 
 ```python
-TransferMatrix.material_wavenumber(thickness: float) -> Complex
+TransferMatrix.material_wavenumber(
+    thickness: float,
+) -> NDArray[np.complex128]
 ```
 
 Propagation wavenumber inside the material (ASTM E2611-19, Eq. (29)).
@@ -457,7 +459,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ```python
 TransferMatrix.reflection_hard_backed(
     characteristic_impedance: float,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 Hard-backed reflection coefficient (ASTM E2611-19, Eq. (27)).
@@ -475,7 +477,9 @@ $R = (T_{11} - \rho c T_{21}) / (T_{11} + \rho c T_{21})$.
 ### TransferMatrix.transmission_loss()
 
 ```python
-TransferMatrix.transmission_loss(characteristic_impedance: float) -> Real
+TransferMatrix.transmission_loss(
+    characteristic_impedance: float,
+) -> NDArray[np.float64]
 ```
 
 Normal-incidence transmission loss in dB (ASTM E2611-19, Eq. (26)).
@@ -517,7 +521,7 @@ wave_decomposition(
     wavenumber: ArrayLike,
     diameter_m: float | None = None,
     shape: str = 'circular',
-) -> tuple[Complex, Complex, Complex, Complex]
+) -> tuple[NDArray[np.complex128], NDArray[np.complex128], NDArray[np.complex128], NDArray[np.complex128]]
 ```
 
 Decompose the wave field into `(A, B, C, D)` (ASTM E2611-19, Eqs. (17)-(20)).

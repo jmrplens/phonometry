@@ -22,8 +22,8 @@ wrong thing. Three checks, cheapest first:
    is written by hand for GitHub and does not carry the same set of examples,
    so it gets the shadowing check and nothing else.
 
-3. **Execution.** Every English page's blocks, plus those of the README and
-   of ``llms.txt``, are concatenated in reading
+3. **Execution.** Every English page's blocks, plus those of the README, of
+   ``llms.txt`` and of the site's home page, are concatenated in reading
    order (a guide is a narrative: later blocks use the variables the earlier
    ones bound) and run in a subprocess. A page that reads a file the reader
    brings runs on one :data:`_FIXTURES` writes first. Pages that cannot run
@@ -46,6 +46,7 @@ import argparse
 import ast
 import concurrent.futures
 import pathlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -106,9 +107,33 @@ _FIXTURES: dict[str, str] = {
 _TIMEOUT_S = 600
 
 
+#: The site's home page, which prints its examples from a data module rather
+#: than from Markdown: each is a template literal bound to a ``*_CODE``
+#: constant. It is the first code a visitor reads.
+_HOME = _ROOT / "site" / "src" / "data" / "home.ts"
+
+#: ``const NAME_CODE = `...`;``, the literal captured whole.
+_TEMPLATE_CODE = re.compile(r"^const \w+_CODE = `(.*?)`;$", re.DOTALL | re.MULTILINE)
+
+
+def _template_literal(raw: str) -> str:
+    """The text a JavaScript template literal holds, with no substitution.
+
+    A ``${`` would splice JavaScript into the example, which no snippet
+    does, so it is refused rather than guessed at.
+    """
+    if "${" in raw.replace("\\${", ""):
+        msg = "a home-page example interpolates ${...}; write it out in full"
+        raise ValueError(msg)
+    return re.sub(r"\\([`$\\])", r"\1", raw)
+
+
 def _blocks(path: pathlib.Path) -> list[str]:
     """Python blocks of a page, in reading order."""
-    return python_fences(path.read_text(encoding="utf-8"))
+    text = path.read_text(encoding="utf-8")
+    if path.suffix == ".ts":
+        return [_template_literal(m.group(1)) for m in _TEMPLATE_CODE.finditer(text)]
+    return python_fences(text)
 
 
 def _imported_names(code: str) -> list[str]:
@@ -331,13 +356,19 @@ def _rel(path: pathlib.Path) -> str:
 def _published() -> list[pathlib.Path]:
     """Surfaces outside the guides that print snippets at the reader.
 
-    The README is the PyPI front page and ``llms.txt`` is what an assistant
-    reads first, so a broken example there is the most expensive kind. They
-    are not guides, so they get the same checks by a different route: the
-    dumps under ``site/public/llms`` and ``llms-full.txt`` restate guide
-    material and only take the static ones (see :func:`main`).
+    The README is the PyPI front page, ``llms.txt`` is what an assistant
+    reads first and the home page is what a visitor of the site reads first,
+    so a broken example there is the most expensive kind. They are not
+    guides, so they get the same checks by a different route: the dumps under
+    ``site/public/llms`` and ``llms-full.txt`` restate guide material and only
+    take the static ones (see :func:`main`).
     """
-    published = [_ROOT / "README.md", _ROOT / "README_PYPI.md", _ROOT / "llms.txt"]
+    published = [
+        _ROOT / "README.md",
+        _ROOT / "README_PYPI.md",
+        _ROOT / "llms.txt",
+        _HOME,
+    ]
     return [p for p in published if p.exists()]
 
 

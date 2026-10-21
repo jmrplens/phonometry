@@ -60,7 +60,7 @@ A plain air gap of `thickness` metres inside the stack.
 ```python
 diffuse_field_absorption(
     frequency: ArrayLike,
-    layers: list[Layer] | tuple[Layer, ...],
+    layers: list[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer] | tuple[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer, ...],
     *,
     angle_limit_rad: float = 1.5707963267948966,
     quadrature_points: int = 64,
@@ -99,8 +99,8 @@ truncate the integral at 75-87 degrees instead of 90 (Sect. D.5); set
 
 ```python
 DiffuseFieldAbsorptionResult(
-    frequencies: Real,
-    absorption: Real,
+    frequencies: NDArray[np.float64],
+    absorption: NDArray[np.float64],
     angle_limit_rad: float,
 )
 ```
@@ -134,7 +134,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ```python
 layered_absorber(
     frequency: ArrayLike,
-    layers: list[Layer] | tuple[Layer, ...],
+    layers: list[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer] | tuple[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer, ...],
     *,
     angle_rad: float = 0.0,
     termination: str | complex | ArrayLike = 'rigid',
@@ -184,14 +184,14 @@ extremely attenuating layers); the raw chain matrix is still returned in
 
 ```python
 LayeredAbsorberResult(
-    frequencies: Real,
+    frequencies: NDArray[np.float64],
     angle_rad: float,
-    surface_impedance: Complex,
-    normalized_impedance: Complex,
-    reflection: Complex,
-    absorption: Real,
-    transfer_matrix: Complex,
-    layers: tuple[Layer, ...] | None = None,
+    surface_impedance: NDArray[np.complex128],
+    normalized_impedance: NDArray[np.complex128],
+    reflection: NDArray[np.complex128],
+    absorption: NDArray[np.float64],
+    transfer_matrix: NDArray[np.complex128],
+    layers: tuple[AirLayer | PorousLayer | PerforatedPlateLayer | MicroperforatedPlateLayer | MembraneLayer | PoroelasticLayer, ...] | None = None,
 )
 ```
 
@@ -339,7 +339,7 @@ statistical_absorption(
     normalized_impedance: ArrayLike,
     *,
     angle_limit_rad: float = 1.5707963267948966,
-) -> Real
+) -> NDArray[np.float64]
 ```
 
 Closed-form Paris integral for a locally reacting plane.

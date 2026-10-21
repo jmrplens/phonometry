@@ -83,7 +83,10 @@ printed 0.82, and `docs/ERRATA.md` records why. See
 ## biot_surface_impedance
 
 ```python
-biot_surface_impedance(waves: BiotWavesResult, thickness: float) -> Complex
+biot_surface_impedance(
+    waves: BiotWavesResult,
+    thickness: float,
+) -> NDArray[np.complex128]
 ```
 
 Surface impedance of a hard-backed Biot layer at normal incidence.
@@ -194,24 +197,24 @@ $\rho_a = \phi \rho_0 (\alpha_\infty - 1)$ (Eq. (6.44)):
 
 ```python
 BiotWavesResult(
-    frequencies: Real,
+    frequencies: NDArray[np.float64],
     porosity: float,
     tortuosity: float,
     frame_density: float,
     shear_modulus: complex,
     poisson_ratio: float,
-    elastic_p: Complex,
-    elastic_q: Complex,
-    elastic_r: Complex,
-    density_11: Complex,
-    density_12: Complex,
-    density_22: Complex,
-    compressional_wavenumber_1: Complex,
-    compressional_wavenumber_2: Complex,
-    shear_wavenumber: Complex,
-    velocity_ratio_1: Complex,
-    velocity_ratio_2: Complex,
-    velocity_ratio_3: Complex,
+    elastic_p: NDArray[np.complex128],
+    elastic_q: NDArray[np.complex128],
+    elastic_r: NDArray[np.complex128],
+    density_11: NDArray[np.complex128],
+    density_12: NDArray[np.complex128],
+    density_22: NDArray[np.complex128],
+    compressional_wavenumber_1: NDArray[np.complex128],
+    compressional_wavenumber_2: NDArray[np.complex128],
+    shear_wavenumber: NDArray[np.complex128],
+    velocity_ratio_1: NDArray[np.complex128],
+    velocity_ratio_2: NDArray[np.complex128],
+    velocity_ratio_3: NDArray[np.complex128],
 )
 ```
 
@@ -428,7 +431,7 @@ poroelastic_transfer_matrix(
     thickness: float,
     *,
     transverse_wavenumber: ArrayLike = 0.0,
-) -> Complex
+) -> NDArray[np.complex128]
 ```
 
 The 6x6 transfer matrix $[T^p]$ of a Biot poroelastic layer.

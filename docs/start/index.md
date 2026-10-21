@@ -28,7 +28,7 @@ one step that matters most.
 [Upgrading from 3.3 to 4.0](upgrading.md) is the map: the one rule
 that moves almost every import, a resolver to paste when you would rather not
 look a name up, the three places where the obvious fix is the wrong one, and
-the ten names that are gone.
+the eleven names that are gone.
 
 **I have a job, not a subject. Which page is it?**
 [What do you need to measure?](https://docs.jmrp.io/phonometry/start/tasks/) indexes the library by

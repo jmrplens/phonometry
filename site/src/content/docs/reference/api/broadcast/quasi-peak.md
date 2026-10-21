@@ -121,7 +121,7 @@ DBQPS_REFERENCE = 0.775
 
 ```python
 quasi_peak_meter(
-    x: SignalInput,
+    x: Signal | Sequence[float] | np.ndarray,
     fs: float | None = None,
     *,
     weighted: bool = True,

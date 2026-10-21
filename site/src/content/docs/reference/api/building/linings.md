@@ -42,7 +42,7 @@ Performance" says which pieces have an oracle and which do not.
 lining_improvement(
     resonance_frequency: float,
     *,
-    system: LiningSystem = 'mineral_wool',
+    system: Literal['mineral_wool', 'foam', 'studs'] = 'mineral_wool',
     anchors: bool = False,
     glued_area: float | None = None,
 ) -> LiningImprovementResult
@@ -187,7 +187,7 @@ Exactly one of the two branches applies:
 ```python
 LiningImprovementResult(
     resonance_frequency: float,
-    system: LiningSystem,
+    system: Literal['mineral_wool', 'foam', 'studs'],
     delta_rw: float,
     delta_ra: float,
     delta_ratr: float,

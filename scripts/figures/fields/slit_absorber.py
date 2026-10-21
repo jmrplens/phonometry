@@ -347,13 +347,15 @@ def animate_fdtd_slit_absorber(output_dir: str) -> None:
             )
         )
         ax.axhline(env_base, color=COLOR_GRID, lw=0.8, zorder=1)
+        # Under the baseline, between it and the tube: above it the envelope
+        # starts at the very place the label began and ran through its letters.
         ax.text(
             0.005,
-            env_base + 0.004,
+            env_base - 0.003,
             "$|p|$ envelope",
             fontsize=7.5,
             ha="left",
-            va="bottom",
+            va="top",
             color=COLOR_FG,
             alpha=0.8,
         )

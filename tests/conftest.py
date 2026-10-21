@@ -55,6 +55,36 @@ def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool 
 
 
 @pytest.fixture(autouse=True)
+def _matplotlib_settings_unchanged() -> Iterator[None]:
+    """Fail a test that leaves matplotlib's global settings changed.
+
+    ``plt.style.use`` or an assignment to ``rcParams`` outlives the test that
+    made it and draws the figures of whatever test the worker runs next, so a
+    figure test passed or failed with the order the workers were dealt: the
+    dark page the contrast tests left behind turned a legend frame black, and
+    the legend check of another module no longer saw it. A test changes the
+    settings inside ``matplotlib.rc_context()`` or ``plt.style.context()``.
+    The settings are read raw, so no deprecated key warns.
+    """
+    matplotlib = sys.modules.get("matplotlib")
+    before = None if matplotlib is None else dict.copy(matplotlib.rcParams)
+    yield
+    if before is None:
+        return
+    after = dict.copy(sys.modules["matplotlib"].rcParams)
+    if after == before:
+        return
+    changed = sorted(
+        key for key in after.keys() | before.keys() if after.get(key) != before.get(key)
+    )
+    pytest.fail(
+        f"the test left {len(changed)} matplotlib setting(s) changed "
+        f"({', '.join(changed[:8])}{', ...' if len(changed) > 8 else ''}); "
+        "change them inside matplotlib.rc_context() or plt.style.context()"
+    )
+
+
+@pytest.fixture(autouse=True)
 def _close_figures() -> Iterator[None]:
     """Close every pyplot figure a test leaves open.
 

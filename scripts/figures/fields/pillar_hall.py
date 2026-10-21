@@ -16,7 +16,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ..media import _ANIM_DPI, _ANIM_HOLD, _render_clip, _translate_str
-from ..theme import _FILENAME_SUFFIX, CMAP_FIELD, COLOR_FG, COLOR_GRID
+from ..theme import _FILENAME_SUFFIX, CMAP_FIELD, COLOR_FG
+from ._core import _solid_in_field
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -206,9 +207,10 @@ def animate_fdtd_pillar_hall(output_dir: str) -> None:
         vmax=vmax,
         interpolation="bilinear",
     )
+    pillar_fill = _solid_in_field(ax)
     for cx, cy, r in _pillar_layout():
         ax.add_patch(
-            Circle((cx, cy), r, facecolor=COLOR_GRID, edgecolor=COLOR_FG, lw=0.8)
+            Circle((cx, cy), r, facecolor=pillar_fill, edgecolor=COLOR_FG, lw=0.8)
         )
     ax.set_xlim(*_PILLAR_VIEW)
     ax.set_ylim(0.0, _PILLAR_LY)

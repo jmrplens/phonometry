@@ -280,6 +280,101 @@ def test_a_change_that_cannot_reach_a_clip_leaves_it_alone(
     assert fp.fingerprints(tree) == before
 
 
+#: The drawing code of the library a clip borrows its colours from, the
+#: physics beside it, and the theme registering a map at import, as the
+#: real ``figures.theme`` registers the dark field map.
+_PLOT_COMMON = """
+_DELTA = 12.0
+
+
+def theme_fill(colour, ax):
+    return (colour, ax, _DELTA)
+
+
+def _register_dark_map():
+    return "phonometry_field_dark"
+"""
+
+_PHYSICS = """
+def reverberation_time(volume, area):
+    return 0.161 * volume / area
+"""
+
+
+def _library_tree(root: pathlib.Path) -> pathlib.Path:
+    """The miniature package, its first clip filling with a library helper."""
+    _write_tree(root)
+    plot = root / "src" / "phonometry" / "_plot"
+    plot.mkdir(parents=True)
+    (root / "src" / "phonometry" / "__init__.py").write_text("", encoding="utf-8")
+    (plot / "__init__.py").write_text("", encoding="utf-8")
+    (plot / "common.py").write_text(_PLOT_COMMON, encoding="utf-8")
+    (root / "src" / "phonometry" / "room.py").write_text(_PHYSICS, encoding="utf-8")
+    edit(
+        root,
+        "schematics",
+        "from .theme import COLOR_PRIMARY",
+        "from phonometry._plot.common import theme_fill\n"
+        "from phonometry.room import reverberation_time\n"
+        "from .theme import COLOR_PRIMARY",
+    )
+    edit(
+        root,
+        "schematics",
+        '    _translate_str("only in clip one")',
+        '    _translate_str("only in clip one")\n    theme_fill(COLOR_PRIMARY, None)',
+    )
+    edit(
+        root,
+        "schematics",
+        '    _translate_str("only in clip two")',
+        '    _translate_str("only in clip two")\n    reverberation_time(100.0, 20.0)',
+    )
+    edit(
+        root,
+        "theme",
+        'COLOR_PRIMARY = "#1f77b4"',
+        "from phonometry._plot.common import _register_dark_map\n\n"
+        'COLOR_PRIMARY = "#1f77b4"\n\n_register_dark_map()',
+    )
+    return root
+
+
+@pytest.mark.parametrize(
+    ("path", "old", "new", "moves"),
+    [
+        # A library helper a clip draws with, and the constant it reads.
+        (
+            "_plot/common.py",
+            "return (colour, ax, _DELTA)",
+            "return (ax, colour)",
+            {"anim_one"},
+        ),
+        ("_plot/common.py", "_DELTA = 12.0", "_DELTA = 4.0", {"anim_one"}),
+        # What a module the clips reach runs when it is imported.
+        (
+            "_plot/common.py",
+            'return "phonometry_field_dark"',
+            'return "phonometry_field_dark_2"',
+            {"anim_one", "anim_two"},
+        ),
+        # The physics a clip calls moves the static figures, not the stamp.
+        ("room.py", "0.161 * volume / area", "0.163 * volume / area", set()),
+    ],
+)
+def test_the_drawing_code_of_the_library_is_followed_and_its_physics_is_not(
+    tmp_path: pathlib.Path, path: str, old: str, new: str, moves: set[str]
+) -> None:
+    tree = _library_tree(tmp_path)
+    before = fp.fingerprints(tree)
+    source = tree / "src" / "phonometry" / path
+    text = source.read_text(encoding="utf-8")
+    assert text.count(old) == 1, old
+    source.write_text(text.replace(old, new), encoding="utf-8")
+    after = fp.fingerprints(tree)
+    assert {clip for clip in before if before[clip] != after[clip]} == moves
+
+
 #: A class, functions with and without a keyword default and a bare lambda:
 #: every kind of empty list a node carries (``bases``, ``keywords``,
 #: ``decorator_list``, ``posonlyargs``, ``kwonlyargs``, ``kw_defaults``,

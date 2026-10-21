@@ -153,9 +153,11 @@ def animate_fdtd_aperture_slit(output_dir: str) -> None:
         ),
         T(rf"Opening $w$ = {_APERTURE_WIDTHS[1]:.2f} m (= $\lambda$)"),
     ]
+    # On two lines each: on one, the verdict reached back across the wall,
+    # whose edges showed through the translucent pill and struck its letters.
     verdicts = [
-        T("cylindrical re-radiation from the slit"),
-        T("the front passes: sharp-edged shadow"),
+        T("cylindrical re-radiation\nfrom the slit"),
+        T("the front passes:\nsharp-edged shadow"),
     ]
     ims: list[Any] = []
     v_txts: list[Any] = []
@@ -212,10 +214,13 @@ def animate_fdtd_aperture_slit(output_dir: str) -> None:
             xytext=(0.55, 3.65),
             arrowprops={"arrowstyle": "-|>", "color": FIELD_INK, "lw": 1.2},
         )
+        # On two lines, left of the wall: on one it ran from 0.85 m to 3.6 m
+        # (4.3 m in Spanish), across the wall, whose edges struck it between
+        # its words.
         ax_p.text(
-            0.85,
+            0.15,
             3.75,
-            T("incident plane wavefront"),
+            T("incident plane\nwavefront"),
             ha="left",
             va="bottom",
             color=FIELD_INK,
@@ -267,11 +272,14 @@ def animate_fdtd_aperture_slit(output_dir: str) -> None:
         if col == 0:
             ax_p.set_ylabel(T("instantaneous $p(x, y)$"), fontsize=9)
             ax_r.set_ylabel(T("RMS level [dB]"), fontsize=9)
+            # On two lines: on one it ran from the left edge into the wall,
+            # whose edge struck it in every frame.
             ax_p.text(
                 0.2,
                 0.85,
                 T(
-                    rf"$f$ = {_APERTURE_F:.0f} Hz "
+                    rf"$f$ = {_APERTURE_F:.0f} Hz"
+                    "\n"
                     rf"($\lambda$ = {lam:.2f} m)"
                 ),
                 ha="left",
@@ -348,8 +356,11 @@ def animate_fdtd_aperture_slit(output_dir: str) -> None:
         for col in range(2):
             ims[2 * col].set_data(shadow_gained(col, k))
             ims[2 * col + 1].set_data(db_all[col][k])
+        # On two lines: on one, the Spanish pill reached back across the wall,
+        # whose edges showed through it and struck its first letters, as the
+        # verdicts below did.
         tau_txt.set_text(
-            T(rf"slit $\tau$ = {tau:.2f} (Gomperts)") if k >= reveal else ""
+            T(rf"slit $\tau$ = {tau:.2f}" + "\n(Gomperts)") if k >= reveal else ""
         )
         t_txt.set_text(T(f"$t$ = {times[k] * 1e3:4.1f} ms"))
         return (*ims, tau_txt, t_txt)

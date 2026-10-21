@@ -53,6 +53,12 @@ import pathlib
 import re
 import sys
 
+_SCRIPTS = pathlib.Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+
+import check_figure_legends as legends
+
 #: Where the figures are committed.
 IMAGES = pathlib.Path(__file__).resolve().parent.parent / ".github" / "images"
 
@@ -110,6 +116,24 @@ def labels(path: pathlib.Path) -> list[str]:
     return _COMMENT.findall(path.read_text(encoding="utf-8", errors="replace"))
 
 
+def point_labels(path: pathlib.Path) -> list[str]:
+    """Every label *path* draws that is a number written with a point.
+
+    Allowed or not, in the order drawn: the per-drawing half of
+    :func:`check`, which the clip frame audit runs on each Spanish frame.
+    """
+    return [label for label in labels(path) if _NUMERIC_LABEL.match(label)]
+
+
+def comma_clauses(path: pathlib.Path) -> list[str]:
+    """Every clause number *path* writes as a decimal after a designation."""
+    return [
+        citation
+        for label in labels(path)
+        for citation in _CLAUSE_WITH_COMMA.findall(label)
+    ]
+
+
 def stem(path: pathlib.Path) -> str:
     """The figure a Spanish variant belongs to, without the language suffix."""
     name = path.stem
@@ -131,14 +155,12 @@ def check(images: pathlib.Path) -> tuple[list[tuple[str, str]], list[str]]:
     paths = sorted({p for pattern in SPANISH for p in images.glob(pattern)})
     for path in paths:
         figure = stem(path)
-        for label in labels(path):
-            if not _NUMERIC_LABEL.match(label):
-                continue
+        for label in point_labels(path):
             key = f"{figure}: {label}"
             seen.add(key)
             if key not in ALLOWED and (figure, label) not in found:
                 found.append((figure, label))
-    return found, sorted(set(ALLOWED) - seen)
+    return found, sorted(k for k in set(ALLOWED) - seen if not legends.is_clip(k))
 
 
 def clause_commas(images: pathlib.Path) -> list[tuple[str, str]]:
@@ -152,10 +174,9 @@ def clause_commas(images: pathlib.Path) -> list[tuple[str, str]]:
     paths = sorted({p for pattern in SPANISH for p in images.glob(pattern)})
     for path in paths:
         figure = stem(path)
-        for label in labels(path):
-            for citation in _CLAUSE_WITH_COMMA.findall(label):
-                if (figure, citation) not in found:
-                    found.append((figure, citation))
+        for citation in comma_clauses(path):
+            if (figure, citation) not in found:
+                found.append((figure, citation))
     return found
 
 

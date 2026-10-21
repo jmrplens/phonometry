@@ -36,18 +36,26 @@ everything near it.
   the letters of the other, glyph against glyph. The lines of one matplotlib
   artist are not measured against each other, and tick labels against each
   other are left to the tick audit.
+* A **fill** painted after a text covers it where it lies over the letters: a
+  label under the chip of a later label, under a legend plate or under a
+  patch drawn above it loses what the fill hides. It counts when more than
+  :data:`INK_PT2` square points of its letters, sampled every :data:`_STEP`
+  points inside their outlines, lie under fills painted after it. A text's
+  own chip is painted before its letters and does not count, nor does the
+  halo a path effect draws round them.
 * A **stroke** is any stroked shape outside the furniture: plotted lines,
   contours, arrows, the outline of a patch, the spines, and every line of a
   plate. It is read as its centre line with half its width either side, with
   its caps and its dashes, and only where it puts ink down: a line clipped to
   its axes draws nothing past their edge, and a line painted before an opaque
   fill, the chip of a note or the plate of a legend, is hidden where the fill
-  is. It fails a text in two ways. It **runs across** the text when a stretch
-  of it spans the whole height of the line, between its first letter and its
-  last, which strikes the line through whether or not it meets a letter on
-  the way. It **runs into** the letters when the ink it lays inside their
-  outlines, sampled every :data:`_STEP` points, comes to more than
-  :data:`INK_PT2` square points.
+  is, and where the fill's own opaque edge is (the halo a path effect draws
+  round a label is such an edge). It fails a text in two ways. It **runs
+  across** the text when a stretch of it spans the whole height of the line,
+  between its first letter and its last, which strikes the line through
+  whether or not it meets a letter on the way. It **runs into** the letters
+  when the ink it lays inside their outlines, sampled every :data:`_STEP`
+  points, comes to more than :data:`INK_PT2` square points.
 
 What is left out, and why
 -------------------------
@@ -175,14 +183,15 @@ class Finding(NamedTuple):
 
     drawing: str
     #: ``"tick"`` (a text over a tick label), ``"text"`` (over another text),
-    #: ``"cut"`` (a stroke across a text's line) or ``"ink"`` (a stroke on its
-    #: letters).
+    #: ``"cut"`` (a stroke across a text's line), ``"ink"`` (a stroke on its
+    #: letters) or ``"covered"`` (a fill painted over its letters).
     kind: str
     #: What is drawn over the text: another text, quoted, or an artist.
     over: str
     text: str
     #: Points for a text (how far the two reach into each other, negative
-    #: for a gap), how far inside the line for a cut, square points for ink.
+    #: for a gap), how far inside the line for a cut, square points of
+    #: letters for ink and for a cover.
     amount: float
     where: Point
 
@@ -198,8 +207,9 @@ class Finding(NamedTuple):
             "text": f"the text {self.over} is drawn over",
             "cut": f"{self.over} runs across",
             "ink": f"{self.over} runs into the letters of",
+            "covered": f"{self.over} is painted over the letters of",
         }[self.kind]
-        unit = "pt²" if self.kind == "ink" else "pt"
+        unit = "pt²" if self.kind in ("ink", "covered") else "pt"
         return (
             f"{self.drawing}: {what} {self.text!r} "
             f"({self.amount:.2f} {unit} at {self.where[0]:.0f}, {self.where[1]:.0f})"
@@ -228,6 +238,8 @@ class _Text(NamedTuple):
     role: str
     letters: tuple[_Letter, ...]
     box: Box
+    #: Where its first letter is painted, in document order.
+    order: int
 
 
 class _Stroke(NamedTuple):
@@ -249,9 +261,14 @@ class _Fill(NamedTuple):
     """One opaque filled shape, which hides whatever was painted before it."""
 
     polygon: list[Point]
+    #: The box of the polygon, grown by :attr:`half`.
     box: Box
     order: int
     clips: tuple[tuple[str, Matrix], ...]
+    #: Half the width of the opaque edge stroked round it, 0 for none: the
+    #: edge hides what is under it as the fill does.
+    half: float
+    artist: str
 
 
 class _Frame(NamedTuple):
@@ -662,7 +679,8 @@ class Sheet(ticks.Drawing):
         """Every string the drawing writes, with the glyphs it places."""
         letters: dict[int, list[_Letter]] = {}
         roles: dict[int, tuple[str, str]] = {}
-        for node in self.nodes:
+        first: dict[int, int] = {}
+        for order, node in enumerate(self.nodes):
             index = self._owned.get(id(node.element))
             letter = self._letter(node) if index is not None else None
             if index is None or letter is None:
@@ -676,6 +694,7 @@ class Sheet(ticks.Drawing):
             if not self.visible(centre, node.clips):
                 continue
             letters.setdefault(index, []).append(letter)
+            first.setdefault(index, order)
             if index not in roles:
                 groups = node.groups
                 role = (
@@ -696,7 +715,14 @@ class Sheet(ticks.Drawing):
             if box is not None:
                 role, owner = roles[index]
                 found.append(
-                    _Text(self._strings[index], owner, role, tuple(glyphs), box)
+                    _Text(
+                        self._strings[index],
+                        owner,
+                        role,
+                        tuple(glyphs),
+                        box,
+                        first[index],
+                    )
                 )
         return found
 
@@ -785,10 +811,33 @@ class Sheet(ticks.Drawing):
             )
             if fill == "none" or opacity < _OPAQUE:
                 continue
+            half = 0.0
+            edge = _style(element, "stroke", ticks._STROKE)
+            edge_opacity = (
+                opacity
+                / _number(_style(element, "fill-opacity", _FILL_OPACITY), 1.0)
+                * _number(_style(element, "stroke-opacity", _STROKE_OPACITY), 1.0)
+            )
+            if edge not in (None, "none") and edge_opacity >= _OPAQUE:
+                a, b, c, d, _e, _f = node.matrix
+                width = _number(
+                    _style(element, "stroke-width", ticks._STROKE_WIDTH), 1.0
+                )
+                half = width * math.sqrt(abs(a * d - b * c)) / 2.0
+            artist = ticks._artist(node) if node.groups else f"a <{name}>"
             for line in _shape(element, name):
                 polygon = [ticks._apply(node.matrix, p) for p in line]
                 if len(polygon) >= 3:
-                    found.append(_Fill(polygon, ticks._box(polygon), order, node.clips))
+                    found.append(
+                        _Fill(
+                            polygon,
+                            ticks._grown(ticks._box(polygon), half),
+                            order,
+                            node.clips,
+                            half,
+                            artist,
+                        )
+                    )
         return found
 
 
@@ -809,17 +858,84 @@ def _frame(text: _Text) -> _Frame:
     return _Frame(along, across, start, end, top, bottom)
 
 
-def _hidden(sheet: Sheet, point: Point, order: int, fills: list[_Fill]) -> bool:
-    """Whether an opaque fill painted after *order* covers *point*."""
-    for fill in fills:
-        box = fill.box
-        if fill.order <= order or not (
-            box[0] <= point[0] <= box[2] and box[1] <= point[1] <= box[3]
-        ):
-            continue
-        if ticks._inside(point, fill.polygon) and sheet.visible(point, fill.clips):
+def _on_edge(point: Point, polygon: list[Point], half: float) -> bool:
+    """Whether *point* lies within *half* of the outline of *polygon*."""
+    px, py = point
+    for (ax, ay), (bx, by) in itertools.pairwise([*polygon, polygon[0]]):
+        dx, dy = bx - ax, by - ay
+        span = dx * dx + dy * dy
+        t = 0.0 if span <= 0.0 else ((px - ax) * dx + (py - ay) * dy) / span
+        t = min(1.0, max(0.0, t))
+        if math.hypot(px - (ax + t * dx), py - (ay + t * dy)) <= half:
             return True
     return False
+
+
+def _covers(sheet: Sheet, fill: _Fill, point: Point) -> bool:
+    """Whether *fill*, or the opaque edge round it, paints over *point*."""
+    box = fill.box
+    if not (box[0] <= point[0] <= box[2] and box[1] <= point[1] <= box[3]):
+        return False
+    inside = ticks._inside(point, fill.polygon) or (
+        fill.half > 0.0 and _on_edge(point, fill.polygon, fill.half)
+    )
+    return inside and sheet.visible(point, fill.clips)
+
+
+def _hidden(sheet: Sheet, point: Point, order: int, fills: list[_Fill]) -> bool:
+    """Whether an opaque fill painted after *order* covers *point*."""
+    return any(fill.order > order and _covers(sheet, fill, point) for fill in fills)
+
+
+def _covered(
+    sheet: Sheet, text: _Text, fills: list[_Fill]
+) -> tuple[float, Point, str] | None:
+    """How much of the letters of *text* fills painted after it hide.
+
+    Sampled on a grid :data:`_STEP` apart over each letter that a later fill
+    reaches, each sample tested against the outline of the glyph, so only
+    ink the letters would have laid down counts. Returns the area, where the
+    first hidden sample is and the artist that hides the most.
+    """
+    later = [
+        fill
+        for fill in fills
+        if fill.order > text.order and _overlaps(fill.box, text.box)
+    ]
+    if not later:
+        return None
+    area = 0.0
+    where: Point | None = None
+    by_artist: dict[str, float] = {}
+    cell = _STEP * _STEP
+    for letter in text.letters:
+        near = [fill for fill in later if _overlaps(fill.box, letter.box)]
+        if not near:
+            continue
+        x0, y0, x1, y1 = letter.box
+        columns = max(1, math.ceil((x1 - x0) / _STEP))
+        rows = max(1, math.ceil((y1 - y0) / _STEP))
+        for i in range(columns):
+            x = x0 + (i + 0.5) * (x1 - x0) / columns
+            for j in range(rows):
+                point = (x, y0 + (j + 0.5) * (y1 - y0) / rows)
+                local = ticks._apply(letter.inverse, point)
+                box = letter.local
+                if not (
+                    box[0] <= local[0] <= box[2] and box[1] <= local[1] <= box[3]
+                ) or not _filled(local, letter.outline):
+                    continue
+                hider = next(
+                    (fill for fill in near if _covers(sheet, fill, point)), None
+                )
+                if hider is None:
+                    continue
+                area += cell
+                where = where or point
+                by_artist[hider.artist] = by_artist.get(hider.artist, 0.0) + cell
+    if where is None:
+        return None
+    return area, where, max(by_artist, key=lambda name: by_artist[name])
 
 
 def _dash_on(stroke: _Stroke, distance: float) -> bool:
@@ -1041,6 +1157,13 @@ def measure(path: pathlib.Path) -> list[Finding]:
         else:
             found.append(Finding(path.stem, "text", repr(other.text), one.text, *hit))
     fills = sheet.fills()
+    for text in texts:
+        if text.role != "text":
+            continue
+        cover = _covered(sheet, text, fills)
+        if cover is not None and cover[0] > INK_PT2:
+            area, where, artist = cover
+            found.append(Finding(path.stem, "covered", artist, text.text, area, where))
     for stroke in sheet.pen_strokes():
         for text in texts:
             if text.role == "tick" or _leads(sheet, stroke, text):
@@ -1079,7 +1202,11 @@ def main(argv: list[str] | None = None) -> int:
         f for f in findings if f.key not in EXEMPTIONS and f.drawing not in EXEMPTIONS
     ]
     fired = {f.key for f in findings} | {f.drawing for f in findings}
-    stale = sorted(set(EXEMPTIONS) - fired) if not args.files else []
+    stale = (
+        sorted(k for k in set(EXEMPTIONS) - fired if not legends.is_clip(k))
+        if not args.files
+        else []
+    )
     for key in stale:
         print(
             f"::error::EXEMPTIONS names {key!r}, which no longer fires: delete the entry"

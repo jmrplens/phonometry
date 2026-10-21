@@ -2,9 +2,9 @@
 """The fork path of a clip render, which nothing else was exercising.
 
 ``scripts/figures/registry.py`` renders the four language and theme variants
-of a clip two ways: one after another in this process, or, when the clip has a
-registered field builder and the platform can fork, in four children that
-share the field the parent computed. Only the second one is used for the
+of a clip two ways: one after another in this process, or, when the platform
+can fork, in four children, which share the field the parent computed when the
+clip has a registered field builder. Only the second one is used for the
 expensive clips, and only the first one was ever reached by a test.
 
 They drifted. ``_render_anim_variant`` takes its ``dark`` flag keyword-only,
@@ -22,6 +22,7 @@ second rather than after a several-minute simulation.
 from __future__ import annotations
 
 import multiprocessing as mp
+import os
 import pathlib
 import sys
 from typing import TYPE_CHECKING
@@ -46,6 +47,21 @@ pytestmark = pytest.mark.pinned_stack
 
 #: The four variants every clip is rendered in.
 EXPECTED = (("en", False), ("en", True), ("es", False), ("es", True))
+
+
+@pytest.fixture(autouse=True)
+def _no_frames_to_judge(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The stand-in clips here draw no frames, so there is nothing to judge.
+
+    A render inspects all four variants before it encodes any
+    (``registry._audited_first``) and stops a clip whose variants left no
+    record of an inspection. These stand-ins never reach ``_render_clip``,
+    which is what writes one; what this module tests is where each variant
+    is rendered, and ``tests/test_clip_frame_audit.py`` tests the verdict.
+    """
+    import clip_frame_audit
+
+    monkeypatch.setattr(clip_frame_audit, "verdict", lambda directory, clip: None)
 
 
 @pytest.fixture(autouse=True)
@@ -108,7 +124,7 @@ def test_both_branches_render_the_same_four_variants(
     else:
         seen: list[tuple[str, bool]] = []
         draw = _record(seen)
-        monkeypatch.delitem(registry._ANIM_FIELDS, clip, raising=False)
+        monkeypatch.setattr(mp, "get_all_start_methods", lambda: ["spawn"])
 
     monkeypatch.setitem(registry._ANIMATIONS, clip, draw)
     registry._render_anim_variants(clip, str(tmp_path))
@@ -118,3 +134,58 @@ def test_both_branches_render_the_same_four_variants(
         assert written == {f"{lang}_{dark}" for lang, dark in EXPECTED}
     else:
         assert set(seen) == set(EXPECTED)
+
+
+def test_a_clip_without_a_field_forks_its_variants_too(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """Every render audits its frames first, so a schematic clip forks as well.
+
+    Four variants in four processes is what keeps the frame audit from
+    multiplying the wall time of a schematic clip's render by four; nothing
+    is simulated first, because there is no field to share.
+    """
+    if "fork" not in mp.get_all_start_methods():
+        pytest.skip("this platform cannot fork")
+    clip = "test_only_schematic"
+    parent = os.getpid()
+
+    def draw(output_dir: str) -> None:
+        lang, dark = _variant()
+        forked = os.getpid() != parent
+        (pathlib.Path(output_dir) / f"{lang}_{dark}_{forked}").write_text(
+            "", encoding="utf-8"
+        )
+
+    monkeypatch.delitem(registry._ANIM_FIELDS, clip, raising=False)
+    monkeypatch.setitem(registry._ANIMATIONS, clip, draw)
+    registry._render_anim_variants(clip, str(tmp_path))
+    written = {path.name for path in tmp_path.iterdir()}
+    assert written == {f"{lang}_{dark}_True" for lang, dark in EXPECTED}
+
+
+def test_every_cached_clip_field_is_registered() -> None:
+    """A field cached inside its module but not registered is simulated once per variant.
+
+    The variants fork, and a cache filled in a child dies with it: the banner's
+    2.5 GB frame stack was being computed by each of the four children until
+    its builder was registered, so the parent computes it once and they share
+    it. Every cached ``_*_fields`` function of the field clips is registered.
+    """
+    import figures.fields
+
+    registered = set(registry._ANIM_FIELDS.values())
+    unregistered = sorted(
+        f"{module.__name__}.{name}"
+        for module in (
+            sys.modules[name]
+            for name in sorted(sys.modules)
+            if name.startswith(f"{figures.fields.__name__}.")
+        )
+        for name, value in vars(module).items()
+        if name.endswith("_fields")
+        and hasattr(value, "cache_info")
+        and value.__module__ == module.__name__
+        and value not in registered
+    )
+    assert unregistered == []

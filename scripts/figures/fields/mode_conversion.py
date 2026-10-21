@@ -343,15 +343,18 @@ def animate_elastic_mode_conversion(output_dir: str) -> None:
                 path_effects=outline,
                 zorder=6,
             )
-        # Inside the steel, which is the region the gain applies to, and in
-        # its top-right corner, clear of the incident arrowhead above and of
-        # every Snell arrow below.
+        # Inside the steel, which is the region the gain applies to, under
+        # its name in the left half, on two lines: every Snell arrow leaves
+        # the contact at mid-width towards the right, and in the top-right
+        # corner the P arrow of the 10 deg panel and the SV arrow of the
+        # 20 deg one ran through the note. The line breaks after the
+        # translation, so the translation table keeps its one-line entry.
         ax.text(
-            x1 - 1.5,
-            6.0,
-            T(_gain_note("steel", gain)),
+            x0 + 1.5,
+            7.5,
+            T(_gain_note("steel", gain)).replace(" (", "\n(", 1),
             fontsize=6.5,
-            ha="right",
+            ha="left",
             va="top",
             color=FIELD_INK,
             path_effects=outline,

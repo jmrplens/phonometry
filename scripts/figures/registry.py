@@ -1741,6 +1741,9 @@ _ANIM_FIELDS: dict[str, Callable[[], Any]] = {
     "anim_elastic_halfspace_waves": _halfspace_fields,
     "anim_elastic_mode_conversion": _mode_conversion_fields,
     "anim_elastic_radiation_efficiency": _radiation_efficiency_fields,
+    # The banner's field is a CPU run held in its own cache: registered, it is
+    # computed once before the four variants fork, instead of once in each.
+    "anim_fdtd_pillar_hall": _pillar_fields,
 }
 
 # A clip rename must not silently drop its field builder; fail fast.
@@ -1762,42 +1765,92 @@ def _render_anim_variant(
         plt.close("all")
 
 
+def _audited_first(clip: str, render: Callable[[], None]) -> None:
+    """Run *render* (all four variants of *clip*) so that it encodes all or none.
+
+    The frame audit (``scripts/clip_frame_audit.py``) inspects one variant
+    at a time, and a finding can belong to one variant alone: a stroke the
+    dark page swallows, a Spanish label wider than the English one. Audited
+    as each is encoded, the variants before a failing one would already be
+    written. So a render is two passes. The first renders the four variants
+    with :data:`clip_frame_audit.GATE_ENV` set, which inspects each up to its
+    first finding and encodes nothing, and :func:`clip_frame_audit.verdict`
+    stops the clip if any of them failed. The second encodes them, with
+    :data:`clip_frame_audit.AUDITED_ENV` naming the clip so its frames are
+    not drawn a second time. The drawing is the same both times: the same
+    code from the same state, the field of a field clip computed before
+    either. An audit-only run is the first pass alone.
+    """
+    import tempfile
+
+    import clip_frame_audit
+
+    if clip_frame_audit.audit_only():
+        render()
+        return
+    with tempfile.TemporaryDirectory(prefix="clip-gate-") as gate:
+        os.environ[clip_frame_audit.GATE_ENV] = gate
+        try:
+            render()
+        finally:
+            del os.environ[clip_frame_audit.GATE_ENV]
+        clip_frame_audit.verdict(Path(gate), clip)
+    os.environ[clip_frame_audit.AUDITED_ENV] = clip
+    try:
+        render()
+    finally:
+        del os.environ[clip_frame_audit.AUDITED_ENV]
+
+
 def _render_anim_variants(clip: str, output_dir: str) -> None:
     """Render all four language/theme variants of one clip.
 
-    Where the clip has a registered field builder and the platform can
-    fork, the field is computed once here and the four variants then render
-    concurrently in forked children that share it: the encoding of a
-    600-frame field clip is the long pole, and four of them cost about as
-    much wall time as one. Everything else (no builder, no fork) falls back
-    to rendering the variants one after another in this process, which is
-    what the pool workers of a full run do anyway.
+    Where the platform can fork, the four variants render concurrently in
+    forked children: the encoding of a 600-frame field clip is the long
+    pole, and so is the frame audit every render runs before it encodes,
+    and four of either cost about as much wall time as one. A clip with a
+    registered field builder has its field computed once here first, so the
+    children share it instead of each simulating it. Where the platform
+    cannot fork, the variants render one after another in this process,
+    which is what the pool workers of a full run do. Either way the four are
+    inspected before any is encoded (:func:`_audited_first`).
     """
     import multiprocessing as mp
 
     builder = _ANIM_FIELDS.get(clip)
-    if builder is None or "fork" not in mp.get_all_start_methods():
-        for lang, dark in _VARIANTS:
-            _render_anim_variant(clip=clip, output_dir=output_dir, lang=lang, dark=dark)
+    if "fork" not in mp.get_all_start_methods():
+
+        def in_turn() -> None:
+            for lang, dark in _VARIANTS:
+                _render_anim_variant(
+                    clip=clip, output_dir=output_dir, lang=lang, dark=dark
+                )
+
+        _audited_first(clip, in_turn)
         return
-    builder()
+    if builder is not None:
+        builder()
     ctx = mp.get_context("fork")
-    procs = [
-        ctx.Process(
-            target=_render_anim_variant,
-            args=(clip, output_dir, lang),
-            kwargs={"dark": dark},
-        )
-        for lang, dark in _VARIANTS
-    ]
-    for proc in procs:
-        proc.start()
-    for proc in procs:
-        proc.join()
-    failed = [p.exitcode for p in procs if p.exitcode]
-    if failed:
-        msg = f"{clip}: {len(failed)} variant(s) failed (exit codes {failed})"
-        raise RuntimeError(msg)
+
+    def side_by_side() -> None:
+        procs = [
+            ctx.Process(
+                target=_render_anim_variant,
+                args=(clip, output_dir, lang),
+                kwargs={"dark": dark},
+            )
+            for lang, dark in _VARIANTS
+        ]
+        for proc in procs:
+            proc.start()
+        for proc in procs:
+            proc.join()
+        failed = [p.exitcode for p in procs if p.exitcode]
+        if failed:
+            msg = f"{clip}: {len(failed)} variant(s) failed (exit codes {failed})"
+            raise RuntimeError(msg)
+
+    _audited_first(clip, side_by_side)
 
 
 def _stamp_clips(clips: list[str], output_dir: str) -> None:
@@ -1810,14 +1863,17 @@ def _stamp_clips(clips: list[str], output_dir: str) -> None:
 
     Only a run that wrote into the published clips directory stamps: the
     renderer takes any output directory, and a render into a scratch one is
-    for looking at, not a statement about what is published.
+    for looking at, not a statement about what is published. An audit-only
+    run (``--audit-only``) writes no clip at all, so it never stamps.
     """
     import pathlib
 
     import animation_fingerprint
+    import clip_frame_audit
 
     if (
         not clips
+        or clip_frame_audit.audit_only()
         or pathlib.Path(output_dir).resolve() != assets_dir.clips_dir().resolve()
     ):
         return
@@ -1854,7 +1910,9 @@ def generate_animations(
     """
     import shutil
 
-    if shutil.which("ffmpeg") is None:
+    import clip_frame_audit
+
+    if shutil.which("ffmpeg") is None and not clip_frame_audit.audit_only():
         msg = (
             "ffmpeg was not found on PATH; it is required to encode the "
             "animation WebM/GIF outputs. Install ffmpeg and retry."
@@ -2126,11 +2184,16 @@ def _run_anim_task(clip: str, img_dir: str) -> str:
     pyplot state cannot leak into the next clip that reuses the process.
     """
     func = _ANIMATIONS[clip]
-    try:
+
+    def in_turn() -> None:
         for lang, dark in _VARIANTS:
             set_lang(lang)
             set_theme(dark=dark)
             func(img_dir)
+
+    try:
+        # Inspected, all four, before any is encoded; see _audited_first.
+        _audited_first(clip, in_turn)
     finally:
         plt.close("all")
         # The banner's 2.5 mm frame stack is ~2.5 GB; do not let it stay
@@ -2203,6 +2266,43 @@ def _select_figures(names: list[str] | None) -> list[Callable[[str], None]]:
     return selected
 
 
+def _audit_animations(names: list[str] | None, jobs: int | None) -> None:
+    """Hold every frame of *names* (every clip by default) to the figure gates.
+
+    The clips are rendered as for an encode, through the same
+    ``_render_clip``, with :data:`clip_frame_audit.AUDIT_ENV` naming the
+    directory each variant writes its findings to: while it is set a clip is
+    inspected and not encoded, and :func:`_stamp_clips` stamps nothing. One
+    clip, or ``--jobs 1``, walks the clips in this process (a field clip's
+    four variants fork off one simulation); otherwise the clips go to the
+    process pool of a full render. Exits with the status of
+    :func:`clip_frame_audit.report`, after every clip has been inspected.
+    """
+    import shutil
+
+    import clip_frame_audit
+
+    clips = list(names) if names else list(_ANIMATIONS)
+    unknown = sorted(set(clips) - _ANIMATIONS.keys())
+    if unknown:
+        msg = f"unknown animation(s) {unknown}; available: {', '.join(sorted(_ANIMATIONS))}"
+        raise SystemExit(msg)
+    directory = Path(clip_frame_audit.DEFAULT_DIR).resolve()
+    shutil.rmtree(directory, ignore_errors=True)
+    directory.mkdir(parents=True)
+    os.environ[clip_frame_audit.AUDIT_ENV] = str(directory)
+    print(f"--- Inspecting the frames of {len(clips)} clip(s) x 4 variants ---")
+    workers = jobs if jobs is not None else _default_jobs()
+    try:
+        if names or workers == 1:
+            generate_animations(str(directory), clips, variants=True)
+        else:
+            _generate_animations_parallel(str(directory), clips, workers)
+    finally:
+        status = clip_frame_audit.report(directory, clips)
+    raise SystemExit(status)
+
+
 def main(argv: list[str] | None = None) -> None:
     """CLI entry point: figures by default, clips behind ``--animations``."""
     import argparse
@@ -2230,6 +2330,13 @@ def main(argv: list[str] | None = None) -> None:
         metavar="NAME",
         help="with --animations, render only this clip (repeatable; use "
         "the output stem, e.g. --anim anim_schroeder)",
+    )
+    parser.add_argument(
+        "--audit-only",
+        action="store_true",
+        help="with --animations, draw every frame of each clip and hold it to "
+        "the figure gates (scripts/clip_frame_audit.py) without encoding, "
+        "stamping or publishing anything; exit 1 on any finding",
     )
     parser.add_argument(
         "--all",
@@ -2263,6 +2370,11 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.anim and not do_anim:
         parser.error("--anim requires --animations (or --all)")
+    if args.audit_only:
+        if not args.animations or args.do_all or args.posters:
+            parser.error("--audit-only goes with --animations alone")
+        _audit_animations(args.anim, args.jobs)
+        return
     # The clips and their posters are binary and live in a repository of
     # their own; see scripts/assets_dir.py. Resolved only when a run is about
     # to write one, so a figures-only run needs no checkout of it.

@@ -4,52 +4,53 @@
 # each), so nothing else can tell that the code drawing a clip has moved since
 # the clip was written. Each hash covers the clip's builder, everything it
 # reaches inside scripts/figures (the shared clip tail, the theme, the
-# translation machinery) and the translation-table entries its own strings
-# select; it is taken over the syntax tree, so comments and docstrings do not
-# move it. See scripts/animation_fingerprint.py.
+# translation machinery) and inside phonometry._plot (the drawing helpers it
+# calls), and the translation-table entries its own strings select; it is
+# taken over the syntax tree, so comments and docstrings do not move it. See
+# scripts/animation_fingerprint.py.
 #
 # Written by the renderer. To refresh one clip, re-render it:
 #     python scripts/generate_graphs.py --animations --anim <clip>
-anim_block_vs_exponential faf2e5e229b34268
-anim_comb_filtering 5c7aad9a30768ef9
-anim_dynamic_stiffness_sweep b9725bb143ebba6a
-anim_elastic_coincidence 62ca8c1f5e0cc45a
-anim_elastic_halfspace_waves 8a3d634ed7d9f621
-anim_elastic_mode_conversion 1607cb76a008370a
-anim_elastic_plate_junction a0425948687af36f
-anim_elastic_radiation_efficiency 2bb13375e1f0669f
-anim_epnl_flyover c70e356394ac50b7
-anim_fdtd_absorption_placement b2d9f12acf71fe93
-anim_fdtd_aperture_slit 1099aa24afaa2c51
-anim_fdtd_barrier b5409c675ae36b1c
-anim_fdtd_critical_angle 178f6e5121f27ae8
-anim_fdtd_diffusion ec6d4bb0a1a61be9
-anim_fdtd_dispersion 97b68dbe39a3cf64
-anim_fdtd_duct_cut_on 116547b2337fbf87
-anim_fdtd_ducting cc024ba715ceb0d0
-anim_fdtd_expansion_chamber 354b1f86e122a1cb
-anim_fdtd_ground_effect 99a51457fd8353a4
-anim_fdtd_impedance_tube cfeb8e696553078f
-anim_fdtd_metadiffuser 7e30dd84cd4e4ce9
-anim_fdtd_open_end 330f0e1092f32be7
-anim_fdtd_pillar_hall 477ad9f5017bb6e9
-anim_fdtd_refraction fbeb12eadc463e79
-anim_fdtd_room_modes c3dd22ecb535c6e4
-anim_fdtd_side_branch f08c25d7a25452ea
-anim_fdtd_slit_absorber ef9b9bf80d5d4e2b
-anim_fdtd_transmission_tube 9cc783822effce4f
-anim_feedback_howl eec996a9f4fc8ec5
-anim_flanking_paths ea2d66e129b4431e
-anim_image_source_buildup 78f62ee955d47488
-anim_instantaneous_intensity b3d81f1d8bda0218
-anim_intensity_scan_power cc31020bbc950e42
-anim_iso717_shift b8a37df465d35c26
-anim_loudness_gating 13ce9a7f21d8f4db
-anim_modulation_transfer 80d8d560113c114e
-anim_onset_detection b78e2495df1e2b6a
-anim_power_two_rooms a5d68bd314244120
-anim_schroeder 787d450f6f3d2236
-anim_specific_loudness bb9ae0c6bca0a088
-anim_standing_wave_tube 50a7d93b15c7fd4e
-anim_sweep_deconvolution 6be864970c2b7151
-anim_time_weighting 28165f1b827312ad
+anim_block_vs_exponential 8d67da9c76e4f0ec
+anim_comb_filtering a65a2fed0bbcc997
+anim_dynamic_stiffness_sweep cd3a16bc5fb9e50d
+anim_elastic_coincidence df13bc2c9d3bac42
+anim_elastic_halfspace_waves fe8a1170f5019c38
+anim_elastic_mode_conversion 70add045f3bc9821
+anim_elastic_plate_junction 9a716dc54d40d99d
+anim_elastic_radiation_efficiency 47d85e99d07c6c0c
+anim_epnl_flyover 7e38cacda92942f0
+anim_fdtd_absorption_placement a5ecb06c0f45ce5a
+anim_fdtd_aperture_slit 68cfcfc921782660
+anim_fdtd_barrier da42b45633a5f17e
+anim_fdtd_critical_angle 8fdc6a225305a7ab
+anim_fdtd_diffusion 6684f9052af2ee18
+anim_fdtd_dispersion 31daa52d7ebe23ba
+anim_fdtd_duct_cut_on bc0f273c9de0cae3
+anim_fdtd_ducting c344353ef5dd5c9e
+anim_fdtd_expansion_chamber d99f9f3d1bd9f330
+anim_fdtd_ground_effect 5a5716ebae5628a0
+anim_fdtd_impedance_tube 78a7639d5e0eff3d
+anim_fdtd_metadiffuser 8a77e98f60d6dc7e
+anim_fdtd_open_end ac5362806161cf95
+anim_fdtd_pillar_hall fc2f7f87d2a2b81f
+anim_fdtd_refraction 2277e0359f7dac0d
+anim_fdtd_room_modes 045ba5e7d37d6c7d
+anim_fdtd_side_branch f15917cb7a856627
+anim_fdtd_slit_absorber 782b34991e022f6a
+anim_fdtd_transmission_tube 4ca134396c3467a4
+anim_feedback_howl aa88868c580abbd7
+anim_flanking_paths 9077d18eb22d7679
+anim_image_source_buildup 2a01c172b052dfaf
+anim_instantaneous_intensity dc99d41155c33ad0
+anim_intensity_scan_power a7c9c4941c0872bc
+anim_iso717_shift 6ab215b1506e3561
+anim_loudness_gating 2cdf0b83a9b8086d
+anim_modulation_transfer dd548a2180d0c9b1
+anim_onset_detection 1d2dfaf495fb3d62
+anim_power_two_rooms 4c45a9e5711add1c
+anim_schroeder d14b9a260f4053cc
+anim_specific_loudness d67790390b4332bf
+anim_standing_wave_tube 2fcc75302551e39d
+anim_sweep_deconvolution c1a59d06f102f02c
+anim_time_weighting eec462fd1e46712c

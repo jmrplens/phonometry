@@ -17,6 +17,7 @@ import os
 import sys
 from typing import TYPE_CHECKING, Any, cast
 
+import clip_frame_audit
 import matplotlib.pyplot as plt
 
 from .i18n import (
@@ -179,6 +180,18 @@ def _render_clip(
     after the fit was measured against a glyph that is not the one drawn.
     A clip that blanks a pre-translated label until its reveal frame blanks
     it inside this callback too, after the fit.
+
+    Before a frame is encoded, every frame is drawn to SVG in a copy of this
+    process and held to the gates the figures pass
+    (``scripts/clip_frame_audit.py``). A render through the registry runs
+    this twice, so the four variants of a clip are encoded all or none: the
+    first pass inspects each and encodes nothing, the second encodes them
+    once every one has passed. Called directly for one variant, a finding
+    raises ``clip_frame_audit.ClipFrameError`` naming the clip, the variant,
+    the frame and the finding, and that variant is not encoded. In an
+    audit-only run (``generate_graphs.py --animations --audit-only``) the
+    clip is inspected and not encoded at all. The ``FuncAnimation`` that
+    encodes is made after the audit, so the copy's draws cannot reach it.
     """
     from matplotlib.animation import FuncAnimation
 
@@ -188,6 +201,18 @@ def _render_clip(
         measure()
     n_frames = _ANIM_FRAMES if frames is None else frames
     rate = _ANIM_FPS if fps is None else fps
+    clip_frame_audit.audit(
+        fig,
+        update,
+        stem,
+        frames=n_frames,
+        interval_ms=1000 / rate,
+        language=_LANG,
+        dark=bool(_FILENAME_SUFFIX),
+    )
+    if clip_frame_audit.audit_only():
+        plt.close(fig)
+        return
     anim = FuncAnimation(fig, update, frames=n_frames, interval=1000 / rate, blit=False)
     _save_animation(
         anim, fig, output_dir, stem, fps=rate, gif_fps=gif_fps, poster_ss=poster_ss

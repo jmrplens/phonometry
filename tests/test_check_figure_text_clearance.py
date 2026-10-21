@@ -436,3 +436,35 @@ def test_a_stale_exemption_fails(
     monkeypatch.setattr(gate, "EXEMPTIONS", {"clear: a note": "a decision"})
     assert gate.main([]) == 1
     assert "no longer fires" in capsys.readouterr().out
+
+
+# --------------------------------------------------------------------------
+# A fill painted over the letters.
+
+
+def test_a_note_under_a_later_chip_is_covered(tmp_path: pathlib.Path) -> None:
+    """The chip of the label painted after it hides what it lies on."""
+    ax = _panel()
+    ax.text(0.15, 0.5, "the first note", transform=ax.transAxes, zorder=3)
+    ax.text(
+        0.3,
+        0.48,
+        "chip",
+        transform=ax.transAxes,
+        zorder=4,
+        bbox={"boxstyle": "round,pad=0.6", "facecolor": "white"},
+    )
+    assert ("covered", "the first note") in _kinds(_save(tmp_path, "covered"))
+
+
+def test_a_note_on_its_own_chip_is_not_covered(tmp_path: pathlib.Path) -> None:
+    """Its chip is painted before its letters, as a backing."""
+    ax = _panel()
+    ax.text(
+        0.3,
+        0.5,
+        "a note",
+        transform=ax.transAxes,
+        bbox={"boxstyle": "round,pad=0.6", "facecolor": "white"},
+    )
+    assert gate.measure(_save(tmp_path, "own_chip")) == []

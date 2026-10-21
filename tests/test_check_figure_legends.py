@@ -165,6 +165,20 @@ def test_a_legend_without_a_frame_is_not_a_plate(tmp_path: pathlib.Path) -> None
     assert cfl.measure(path) == []
 
 
+def test_a_black_legend_frame_is_a_plate(tmp_path: pathlib.Path) -> None:
+    """matplotlib writes no ``fill`` for black, the colour SVG fills with anyway.
+
+    A legend on a dark page sits on a black frame, so a frame read only off a
+    written ``fill`` let every point under it through.
+    """
+    ax = _panel()
+    line = _reading(ax, 0.5, 0.5, "a reading")
+    _box_over(ax, line, 0.5, 0.5).get_frame().set_facecolor("black")
+    found = cfl.measure(_save(tmp_path, "black_frame"))
+
+    assert {overlap.legend for overlap in found} == {"legend_1"}
+
+
 def test_a_shaded_band_under_the_box_is_not_a_marker(tmp_path: pathlib.Path) -> None:
     """A band and a marker are named alike by matplotlib; size separates them."""
     ax = _panel()
@@ -318,7 +332,7 @@ def test_a_clean_drawing_passes_and_says_so(
     monkeypatch.setattr(cfl, "EXEMPTIONS", {})
 
     assert cfl.main([str(path)]) == 0
-    assert "No legend covers a plotted point" in capsys.readouterr().out
+    assert "No legend or chip covers a plotted point" in capsys.readouterr().out
 
 
 def test_every_exemption_carries_a_reason() -> None:
@@ -327,3 +341,55 @@ def test_every_exemption_carries_a_reason() -> None:
     for name, reason in cfl.EXEMPTIONS.items():
         assert name == name.strip()
         assert len(reason.split()) >= 10, f"{name} is written down without a reason"
+
+
+def _chip(ax: Axes, x: float, y: float, **bbox: object) -> None:
+    """A label centred on (*x*, *y*) on a chip, drawn above the curves."""
+    chip = {"boxstyle": "round,pad=0.3", "facecolor": "white", "edgecolor": "none"}
+    chip.update(bbox)
+    ax.text(x, y, "label", ha="center", va="center", zorder=6, bbox=chip)
+
+
+def test_a_chip_over_a_plotted_point_is_reported(tmp_path: pathlib.Path) -> None:
+    """An opaque chip hides the datum under it, as a legend frame does."""
+    ax = _panel()
+    _reading(ax, 0.5, 0.5, "a reading")
+    _chip(ax, 0.5, 0.5)
+    (found,) = cfl.measure(_save(tmp_path, "chip_over"))
+    assert found.legend.startswith("the chip of text_")
+    assert found.legend.endswith("'label'")
+
+
+def test_a_point_the_reader_still_has_is_not_a_chip_finding(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Drawn over the chip, under a wash, or under a badge of its own colour."""
+    ax = _panel()
+    ax.plot([0.2], [0.5], "o", zorder=7)
+    _chip(ax, 0.2, 0.5)
+    ax.plot([0.5], [0.5], "o", color="#1f77b4")
+    _chip(ax, 0.5, 0.5, alpha=0.3)
+    ax.plot([0.8], [0.5], "o", color="#1f77b4")
+    _chip(ax, 0.8, 0.5, facecolor="#1f77b4")
+    assert cfl.measure(_save(tmp_path, "chip_clear")) == []
+
+
+def test_a_black_point_under_a_black_badge_is_not_a_chip_finding(
+    tmp_path: pathlib.Path,
+) -> None:
+    """Neither black is written down, and both are the black SVG fills with."""
+    ax = _panel()
+    ax.plot([0.5], [0.5], "o", color="black")
+    _chip(ax, 0.5, 0.5, facecolor="black")
+    assert cfl.measure(_save(tmp_path, "black_badge")) == []
+
+
+def test_a_chip_over_the_tick_marks_of_an_axis_is_not_a_finding(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A tick mark is placed like a marker, and it is the frame, not a datum."""
+    ax = _panel()
+    ax.set_xticks([0.4, 0.5, 0.6])
+    ax.tick_params(direction="in", length=8)
+    _chip(ax, 0.5, 0.02)
+    assert cfl.measure(_save(tmp_path, "chip_ticks")) == []

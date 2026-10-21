@@ -2186,16 +2186,16 @@ _ES_EXACT = {
     "Level re steady tone [dB]": "Nivel re tono estacionario [dB]",
     "exponential Fast envelope": "envolvente exponencial Fast",
     "block Leq, 125 ms slices": "Leq por bloques de 125 ms",
-    "IEC 61672-1 Table 4 target": "objetivo de la Tabla 4 de IEC 61672-1",
+    "IEC 61672-1 Table 4 target": "objetivo de la Tabla 4\nde IEC 61672-1",
     "Burst start within the block [ms]": "Inicio de la ráfaga dentro del bloque [ms]",
     "Reading [dB]": "Lectura [dB]",
     "the block reading leaves the corridor": "la lectura por bloques sale del corredor",
     # --- anim_feedback_howl: the loop as a geometric series ---
     "Gain before feedback is a convergence condition": "La ganancia antes del acople es una condición de convergencia",
-    "talker,\n0.3 m from the microphone": "hablante,\na 0,3 m del micrófono",
+    "talker,\n0.3 m from\nthe microphone": "hablante,\na 0,3 m del\nmicrófono",
     "listener,\n12 m away": "oyente,\na 12 m",
     "microphone, mixer, amplifier": "micrófono, mesa, amplificador",
-    "the feedback path": "el camino de realimentación",
+    "the feedback path": "el camino de\nrealimentación",
     "Round trip number": "Número de vuelta",
     "Copy level re direct [dB]": "Nivel de la copia re directo [dB]",
     "Round trips summed": "Vueltas sumadas",
@@ -3490,7 +3490,7 @@ _ES_EXACT = {
     "response [dB]": "respuesta [dB]",
     "high mic: dense comb": "micro alto: peine denso",
     "lower: notches move up": "más bajo: los nulos suben",
-    "on the floor: copies merge, no comb in band": "en el suelo: las copias se funden, sin peine en banda",
+    "on the floor: copies merge, no comb in band": "en el suelo: las copias se funden,\nsin peine en banda",
     "first notch above 8 kHz": "primer nulo por encima de 8 kHz",
     # --- FDTD animation labels (third batch) ---
     "Barrier diffraction into the shadow zone (2D FDTD)": "Difracción en una barrera hacia la zona de sombra (FDTD 2D)",
@@ -3525,6 +3525,7 @@ _ES_EXACT = {
     "Flat rigid panel": "Panel rígido plano",
     "Schroeder diffuser (QRD, $N$ = 7)": "Difusor de Schroeder (QRD, $N$ = 7)",
     "incident plane wavefront": "frente de onda plano incidente",
+    "incident plane\nwavefront": "frente de onda\nplano incidente",
     "sound field $p$": "campo sonoro $p$",
     "scattered field (total − incident)": "campo dispersado (total − incidente)",
     "specular beam": "haz especular",
@@ -4186,8 +4187,7 @@ _ES_EXACT = {
     "ancho de carga $f/Q$ es porcentual; la muesca sin pérdidas, de "
     "hercios.",
     # anim_fdtd_absorption_placement
-    "Where the absorption sits: same total, two decays (2D FDTD)": "Dónde se coloca la absorción: mismo total, dos decaimientos "
-    "(FDTD 2D)",
+    "Where the absorption sits: same total, two decays (2D FDTD)": "Dónde va la absorción: mismo total, dos decaimientos (FDTD 2D)",
     "Absorption spread over all four edges": "Absorción repartida por los cuatro bordes",
     "The same total, floor and ceiling only": "El mismo total, solo en suelo y techo",
     "what survives runs parallel to the absorber": "lo que sobrevive corre paralelo al absorbente",
@@ -4197,8 +4197,8 @@ _ES_EXACT = {
     "Total energy [dB]": "Energía total [dB]",
     # anim_fdtd_aperture_slit
     "Sound through a wall aperture (2D FDTD)": "Sonido a través de una abertura en un muro (FDTD 2D)",
-    "cylindrical re-radiation from the slit": "re-radiación cilíndrica desde la rendija",
-    "the front passes: sharp-edged shadow": "el frente pasa: sombra de bordes nítidos",
+    "cylindrical re-radiation\nfrom the slit": "rerradiación cilíndrica\ndesde la rendija",
+    "the front passes:\nsharp-edged shadow": "el frente pasa:\nsombra de bordes nítidos",
     "RMS level [dB]": "Nivel RMS [dB]",
     # anim_fdtd_refraction
     "Atmospheric refraction: downwind duct, upwind shadow (2D FDTD)": "Refracción atmosférica: canal a favor del viento, sombra en "
@@ -6390,12 +6390,12 @@ _ES_PATTERNS = [
         r"Hueco $w$ = \1,\2 m (= $\\lambda$)",
     ),
     (
-        r"^slit \$\\tau\$ = (\d+)\.(\d+) \(Gomperts\)$",
-        r"rendija $\\tau$ = \1,\2 (Gomperts)",
+        r"^slit \$\\tau\$ = (\d+)\.(\d+)\n\(Gomperts\)$",
+        r"rendija $\\tau$ = \1,\2\n(Gomperts)",
     ),
     (
-        r"^\$f\$ = (\d+) Hz \(\$\\lambda\$ = (\d+)\.(\d+) m\)$",
-        r"$f$ = \1 Hz ($\\lambda$ = \2,\3 m)",
+        r"^\$f\$ = (\d+) Hz\n\(\$\\lambda\$ = (\d+)\.(\d+) m\)$",
+        r"$f$ = \1 Hz\n($\\lambda$ = \2,\3 m)",
     ),
     (
         r"^shadow beyond ≈ (\d+) m \(ray model\)$",

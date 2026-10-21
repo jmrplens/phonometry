@@ -45,6 +45,11 @@ _HS_NY, _HS_NX = 450, 1100
 _HS_SPONGE = 120
 _HS_HALF = 300  # view half-width and depth [cells]
 _HS_FPS = 40
+# How far a front has to have travelled [m] before its letter is put on it.
+# The Rayleigh train runs at 0.93 of the shear speed, so at first the S and
+# R letters, and the P letter with them, sit on top of one another round the
+# source; at 0.08 m the three stand apart.
+_HS_LABEL_FROM = 0.08
 
 
 def _rayleigh_speed(c_p: float, c_s: float) -> float:
@@ -302,13 +307,16 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
             zorder=6,
         )
         # The Rayleigh label rides the right-hand marker instead of sitting
-        # over the source, where it collided with the panel title.
+        # over the source, where it collided with the panel title, and on
+        # the source's side of it: the shear arc meets the surface just
+        # beyond the marker, and a label centred under the marker had the
+        # dotted arc run through it.
         r_lab = ax.text(
             0.0,
             0.018,
             "R",
             fontsize=8.5,
-            ha="center",
+            ha="right",
             va="top",
             color=COLOR_PRIMARY,
             fontweight="bold",
@@ -426,15 +434,15 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
                 (s_arc, labels[row][1], r_s),
             ):
                 arc.set_visible(rad > 0.01)
-                lab.set_visible(0.02 < rad < half * 1.35)
+                lab.set_visible(_HS_LABEL_FROM < rad < half * 1.35)
                 lab.set_position((rad * 0.72, rad * 0.72))
             if row == 0:
                 inside = 0.02 < r_r < half
                 marks[row].set_data(
                     ([-r_r, r_r] if inside else []), ([0.0, 0.0] if inside else [])
                 )
-                r_labs[row].set_visible(inside)
-                r_labs[row].set_position((r_r, 0.018))
+                r_labs[row].set_visible(_HS_LABEL_FROM < r_r < half)
+                r_labs[row].set_position((r_r - 0.006, 0.018))
             trace = (tr_free, tr_rigid)[row]
             for i, line in enumerate(lines[row]):
                 line.set_data(t_us[: kf + 1], trace[: kf + 1, i])

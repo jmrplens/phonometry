@@ -189,16 +189,27 @@ def _edges() -> set[tuple[str, str, str]]:
             # were refused above.
             if not isinstance(node, ast.ImportFrom) or node.level == 0:
                 continue
-            target = node.module or ""
-            head = target.split(".")[0] if target else ""
-            if node.level == 1 and pkg == "root":
-                to_pkg = head if (SRC / head).is_dir() else "root"
-            elif node.level == 1:
-                to_pkg = pkg  # sibling inside the same subpackage
-            else:  # level == 2 from inside a subpackage
-                to_pkg = head if (SRC / head).is_dir() else "root"
-            out.add((pkg, to_pkg, f"{path.relative_to(SRC)}: {ast.dump(node)[:60]}"))
+            where = f"{path.relative_to(SRC)}: {ast.dump(node)[:60]}"
+            out.update((pkg, to_pkg, where) for to_pkg in _reached_packages(path, node))
     return out
+
+
+def _reached_packages(path: Path, node: ast.ImportFrom) -> set[str]:
+    """The top-level packages the relative import *node* in *path* reaches.
+
+    The dots climb from the package the module sits in, at whatever depth:
+    ``from .. import fdtd`` in ``simulation/_remote/wire.py`` reaches
+    ``simulation``, as ``from ..fdtd import FDTDRun`` does there, while the
+    same two dots in ``simulation/fdtd.py`` reach the root package. A name
+    imported from the root package itself (``from .. import io`` one
+    directory down) is the package it names; a module of the root package,
+    or a name that is not a package, is ``"root"``.
+    """
+    here = path.relative_to(SRC).parent.parts
+    anchor = here[: max(len(here) - node.level + 1, 0)]
+    target = [*anchor, *(node.module.split(".") if node.module else [])]
+    heads = [target[0]] if target else [alias.name for alias in node.names]
+    return {head if (SRC / head).is_dir() else "root" for head in heads}
 
 
 #: Family-to-family edges allowed inside a domain. The subgroups exist to
@@ -289,6 +300,34 @@ def test_an_absolute_self_import_is_refused_unless_the_list_names_it() -> None:
     assert _unlisted_self_imports("simulation/_remote/node.py", every_form) == names
     for rel, listed in SCRIPT_SELF_IMPORTS.items():
         assert _unlisted_self_imports(rel, every_form) == names - listed
+
+
+@pytest.mark.parametrize(
+    ("rel", "line", "reached"),
+    [
+        ("simulation/fdtd.py", "from .compute import Compute", {"simulation"}),
+        ("simulation/fdtd.py", "from .._internal import frozen", {"_internal"}),
+        ("simulation/fdtd.py", "from .. import io", {"io"}),
+        ("simulation/fdtd.py", "from .. import _version", {"root"}),
+        ("simulation/_remote/wire.py", "from . import bootstrap", {"simulation"}),
+        ("simulation/_remote/wire.py", "from .. import fdtd", {"simulation"}),
+        ("simulation/_remote/wire.py", "from ..fdtd import FDTDRun", {"simulation"}),
+        (
+            "simulation/_remote/wire.py",
+            "from ... import io, signals",
+            {"io", "signals"},
+        ),
+        ("simulation/_remote/wire.py", "from ...io import Signal", {"io"}),
+        ("simulation/__init__.py", "from .fdtd import FDTDRun", {"simulation"}),
+    ],
+)
+def test_a_relative_import_reaches_the_package_its_dots_climb_to(
+    rel: str, line: str, reached: set[str]
+) -> None:
+    """The dots of a relative import are counted from where the module sits."""
+    node = ast.parse(line).body[0]
+    assert isinstance(node, ast.ImportFrom)
+    assert _reached_packages(SRC / rel, node) == reached
 
 
 def test_internal_imports_no_domain_code() -> None:

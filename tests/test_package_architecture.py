@@ -413,6 +413,43 @@ def test_subpackage_reexports_cover_facade_imports() -> None:
     )
 
 
+def _orphan_code_directories(src: Path) -> list[str]:
+    """The directories under *src* that hold a module but no ``__init__.py``.
+
+    A module is what Python could import: a hidden file (macOS writes ``._``
+    files beside every file it copies to a foreign disk) or a directory with a
+    dot in its name cannot be, and setuptools leaves both out of the wheel.
+    """
+    holding = {
+        path.parent
+        for path in src.rglob("*.py")
+        if not path.name.startswith(".")
+        and not any("." in part for part in path.parent.relative_to(src).parts)
+    }
+    return sorted(
+        directory.relative_to(src.parent).as_posix()
+        for directory in holding
+        if not (directory / "__init__.py").is_file()
+    )
+
+
+def test_every_directory_of_code_is_a_package() -> None:
+    """A directory that holds a module holds an ``__init__.py`` too.
+
+    Without one, Python imports the directory here as a namespace package and
+    every test passes; but the wheel takes only directories with an
+    ``__init__.py`` (``namespaces = false`` in ``pyproject.toml``), so the
+    code is in no wheel, and the package a client ships to a node leaves it
+    out as well.
+    """
+    orphans = _orphan_code_directories(SRC)
+    assert not orphans, (
+        "a directory of modules without an __init__.py imports here as a "
+        "namespace package, but is in no wheel and on no node; add the "
+        "__init__.py: " + ", ".join(orphans)
+    )
+
+
 def test_collected_test_modules_have_unique_import_names() -> None:
     """Two test modules that import under one name break the whole collection.
 

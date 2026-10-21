@@ -147,6 +147,12 @@ full = ["numba>=0.60.0", "matplotlib>=3.10.7", "reportlab>=4.0.4", "svglib>=0.9.
 
 [tool.setuptools.packages.find]
 where = ["src"]
+# A package is a directory with an __init__.py, which every code directory
+# has: the default would also take a directory of modules without one as a
+# namespace package. The package a client ships to a node
+# (phonometry.simulation._remote.package) follows this rule, and
+# tests/test_package_architecture.py refuses a code directory without one.
+namespaces = false
 
 [tool.setuptools.package-data]
 phonometry = [

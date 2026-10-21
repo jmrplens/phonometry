@@ -22,6 +22,18 @@ def test_the_package_data_is_the_wheel_s() -> None:
     )
 
 
+def test_the_wheel_is_built_by_the_rules_the_client_follows() -> None:
+    # package_from repeats how setuptools fills the wheel: a package is a
+    # directory with an __init__.py, and phonometry's package data is all the
+    # data there is. A setting that changes either, or a MANIFEST.in that adds
+    # files to the package, changes the wheel without changing what ships.
+    setuptools = _PYPROJECT["tool"]["setuptools"]
+    assert setuptools["packages"]["find"] == {"where": ["src"], "namespaces": False}
+    assert set(setuptools["package-data"]) == {"phonometry"}
+    assert "exclude-package-data" not in setuptools
+    assert not (_ROOT / "MANIFEST.in").exists()
+
+
 def test_the_floors_a_node_checks_are_the_package_s() -> None:
     floors = {}
     for requirement in _PYPROJECT["project"]["dependencies"]:
@@ -104,6 +116,55 @@ def test_a_directory_that_is_not_a_package_ships_only_its_data(tmp_path: Path) -
     assert shipped.size == len(b"x = 1\n") + len(b"{}")
 
 
+def _shipped(root: Path) -> list[str]:
+    return [path for path, _ in package.package_from(root).files]
+
+
+def test_a_directory_with_a_dot_in_its_name_is_no_package(tmp_path: Path) -> None:
+    root = tmp_path / "phonometry"
+    _tree(root, {"__init__.py": b"", "sub.old/__init__.py": b"", "sub.old/mod.py": b""})
+    assert _shipped(root) == ["phonometry/__init__.py"]
+
+
+def test_a_hidden_file_stays_here_as_it_stays_out_of_a_wheel(tmp_path: Path) -> None:
+    # macOS writes a "._" file beside each file it copies to a foreign disk.
+    root = tmp_path / "phonometry"
+    _tree(
+        root,
+        {
+            "__init__.py": b"",
+            "._fdtd.py": b"\x00\x05\x16\x07",
+            "solids/data/steel.json": b"{}",
+            "solids/data/._steel.json": b"\x00\x05\x16\x07",
+        },
+    )
+    assert _shipped(root) == [
+        "phonometry/__init__.py",
+        "phonometry/solids/data/steel.json",
+    ]
+
+
+def test_the_typing_files_of_every_package_travel_as_a_wheel_takes_them(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "phonometry"
+    _tree(
+        root,
+        {
+            "__init__.py": b"",
+            "sub/__init__.py": b"",
+            "sub/mod.pyi": b"x: int\n",
+            "sub/py.typed": b"",
+        },
+    )
+    assert _shipped(root) == [
+        "phonometry/__init__.py",
+        "phonometry/sub/__init__.py",
+        "phonometry/sub/mod.pyi",
+        "phonometry/sub/py.typed",
+    ]
+
+
 def test_a_package_without_its_init_is_no_package(tmp_path: Path) -> None:
     root = tmp_path / "phonometry"
     root.mkdir()
@@ -119,4 +180,13 @@ def test_a_file_no_node_would_take_is_refused_here_by_name(tmp_path: Path) -> No
     with pytest.raises(
         ValueError, match="'phonometry/draft copy.py' cannot travel to a node"
     ):
+        package.package_from(root)
+
+
+def test_a_directory_of_another_name_is_not_the_package_a_node_runs(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "phonometry_copy"
+    _tree(root, {"__init__.py": b""})
+    with pytest.raises(ValueError, match="phonometry_copy is not named 'phonometry'"):
         package.package_from(root)

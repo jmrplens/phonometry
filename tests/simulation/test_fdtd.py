@@ -25,6 +25,7 @@ import pytest
 from phonometry.simulation.fdtd import (
     FDTD2D,
     CWSource,
+    FDTDRecording,
     FDTDResult,
     GaussianPulse,
     SignalSource,
@@ -61,7 +62,7 @@ def test_rigid_box_modes_match_analytic_eigenfrequencies() -> None:
         0.35,
         shape=(ny, nx),
         sources=[GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
-        probes=[(nx - 4, ny - 3)],
+        recording=FDTDRecording(probes=[(nx - 4, ny - 3)]),
     )
     for m, n in ((1, 0), (0, 1), (1, 1), (2, 0)):
         f_mn = 0.5 * C0 * float(np.hypot(m / lx, n / ly))
@@ -81,7 +82,7 @@ def test_tube_resonances_match_analytic_harmonics() -> None:
         0.5,
         shape=(3, nx),
         sources=[GaussianPulse(ix=30, iy=1, half_width_s=1.5e-4)],
-        probes=[(nx - 5, 1)],
+        recording=FDTDRecording(probes=[(nx - 5, 1)]),
     )
     for m in (1, 2, 3, 4):
         f_m = m * C0 / (2.0 * length)
@@ -101,7 +102,7 @@ def free_field() -> FDTDResult:
         8.6e-3,
         shape=(320, 420),
         sources=[GaussianPulse(ix=60, iy=160, half_width_s=3.0e-4)],
-        probes=[(180, 160), (300, 160)],
+        recording=FDTDRecording(probes=[(180, 160), (300, 160)]),
         boundaries="absorbing",
         absorbing_layer_cells=40,
     )
@@ -136,7 +137,7 @@ def test_rigid_wall_reflection_matches_image_source() -> None:
         7.5e-3,
         shape=(300, 300),
         sources=[GaussianPulse(ix=50, iy=150, half_width_s=1.0e-4)],
-        probes=[(100, 150)],
+        recording=FDTDRecording(probes=[(100, 150)]),
         boundaries={"right": "absorbing", "top": "absorbing", "bottom": "absorbing"},
         absorbing_layer_cells=30,
     )
@@ -338,10 +339,12 @@ def _slab_run(
         7.0e-3,
         shape=(100, 150),
         sources=[GaussianPulse(ix=30, iy=50, half_width_s=5e-5)],
-        probes=[(110, 50), (30, 90)],  # behind the slab / open path
+        recording=FDTDRecording(
+            probes=[(110, 50), (30, 90)],  # behind the slab / open path
+            snapshot_every=50,
+        ),
         obstacle_mask=obstacle,
         boundaries="absorbing",
-        snapshot_every=50,
     )
     return (
         float(np.abs(res.pressures[0]).max()),
@@ -375,6 +378,7 @@ def test_obstacle_mask_validation() -> None:
     full_mask = np.ones((10, 10), dtype=bool)
     masked_source = GaussianPulse(ix=5, iy=5, half_width_s=1e-4)
     open_source = GaussianPulse(ix=1, iy=1, half_width_s=1e-4)
+    masked_probe = FDTDRecording(probes=[(5, 5)])
     with pytest.raises(ValueError, match="match the grid shape"):
         FDTD2D(C0, 0.05, shape=(10, 12), obstacle_mask=mask)
     with pytest.raises(TypeError, match=r"obstacle_mask must be a boolean array"):
@@ -392,7 +396,7 @@ def test_obstacle_mask_validation() -> None:
             shape=(10, 10),
             obstacle_mask=mask,
             sources=[open_source],
-            probes=[(5, 5)],
+            recording=masked_probe,
         )
 
 
@@ -467,7 +471,7 @@ def _duct_echo(
         rho=RHO0,
         shape=(3, 1200),
         sources=[GaussianPulse(ix=900, iy=1, half_width_s=2e-4)],
-        probes=[(600, 1)],
+        recording=FDTDRecording(probes=[(600, 1)]),
         boundaries=boundaries,
     )
     p, t = res.pressures[0], res.times
@@ -508,7 +512,7 @@ def test_damping_through_the_public_api() -> None:
             shape=(40, 60),
             damping=damping,
             sources=[GaussianPulse(ix=10, iy=10, half_width_s=1e-4)],
-            probes=[(40, 20)],
+            recording=FDTDRecording(probes=[(40, 20)]),
         )
         return float(np.abs(res.pressures).max())
 
@@ -536,7 +540,7 @@ def test_stable_cfl_values_are_accepted() -> None:
             shape=(20, 20),
             cfl=cfl,
             sources=[GaussianPulse(ix=5, iy=5, half_width_s=1e-4)],
-            probes=[(10, 10)],
+            recording=FDTDRecording(probes=[(10, 10)]),
         )
         assert np.all(np.isfinite(res.pressures))
 
@@ -551,8 +555,7 @@ def test_result_records_probes_and_snapshots() -> None:
         5e-3,
         shape=(40, 60),
         sources=[CWSource(ix=10, iy=10, frequency=800.0)],
-        probes=[(30, 20), (50, 35)],
-        snapshot_every=25,
+        recording=FDTDRecording(probes=[(30, 20), (50, 35)], snapshot_every=25),
     )
     n_steps = round(5e-3 / res.dt)
     assert res.times.shape == (n_steps + 1,)
@@ -581,10 +584,9 @@ def test_two_runs_are_bit_identical() -> None:
             3e-3,
             shape=(80, 100),
             sources=[GaussianPulse(ix=50, iy=40, half_width_s=1e-4)],
-            probes=[(70, 40)],
+            recording=FDTDRecording(probes=[(70, 40)], snapshot_every=40),
             boundaries="absorbing",
             absorbing_layer_cells=15,
-            snapshot_every=40,
         )
 
     a, b = run(), run()
@@ -610,8 +612,7 @@ def test_each_snapshot_is_the_field_of_its_own_step() -> None:
         1.6e-2,
         shape=(40, 60),
         sources=[GaussianPulse(ix=20, iy=20, half_width_s=5e-4)],
-        probes=[(30, 20), (50, 35)],
-        snapshot_every=every,
+        recording=FDTDRecording(probes=[(30, 20), (50, 35)], snapshot_every=every),
     )
     assert (res.times.size - 1) % every != 0
     assert res.snapshots is not None
@@ -626,14 +627,10 @@ def test_each_snapshot_is_the_field_of_its_own_step() -> None:
         ({"sources": []}, "at least one source"),
         ({"duration": 0.0}, "duration must be positive"),
         ({"duration": 1e-9}, "at least one time step"),
-        ({"snapshot_every": 0}, "snapshot_every must be >= 1"),
-        ({"snapshot_every": 2.5}, "'snapshot_every' must be a whole number"),
-        ({"probes": [(99, 0)]}, r"probe .* lies outside the grid"),
-        ({"probes": [(2.5, 3)]}, "'probe ix' must be a whole number"),
-        ({"probes": [(2, 3.5)]}, "'probe iy' must be a whole number"),
-        # A malformed entry used to be reported by the interpreter's
-        # unpacking message, naming neither probes nor the entry.
-        ({"probes": [(1, 2, 3)]}, r"probes must hold \(ix, iy\) index pairs"),
+        (
+            {"recording": FDTDRecording(probes=[(99, 0)])},
+            r"probe .* lies outside the grid",
+        ),
         (
             {"boundaries": "absorbing", "absorbing_layer_cells": 0},
             "absorbing_layer_cells must be >= 1",
@@ -658,19 +655,64 @@ def test_simulation_rejects_invalid_arguments(
         fdtd_simulation(C0, 0.05, duration, shape=(30, 30), **full)
 
 
+@pytest.mark.parametrize(
+    ("kwargs", "match"),
+    [
+        ({"snapshot_every": 0}, "'snapshot_every' must be a whole number, at least 1"),
+        ({"snapshot_every": -1}, "'snapshot_every' must be a whole number, at least 1"),
+        ({"snapshot_every": 2.5}, "'snapshot_every' must be a whole number"),
+        ({"probes": [(2.5, 3)]}, "'probe ix' must be a whole number"),
+        ({"probes": [(2, 3.5)]}, "'probe iy' must be a whole number"),
+        # A malformed entry used to be reported by the interpreter's
+        # unpacking message, naming neither probes nor the entry.
+        ({"probes": [(1, 2, 3)]}, r"probes must hold \(ix, iy\) index pairs"),
+    ],
+)
+def test_a_recording_rejects_invalid_probes_and_counts(
+    kwargs: dict[str, object],
+    match: str,
+) -> None:
+    """Refused when the record is built, before any run is asked for."""
+    with pytest.raises(ValueError, match=match):
+        FDTDRecording(**kwargs)
+
+
 def test_a_probe_that_is_not_a_pair_is_the_wrong_type() -> None:
     # A bare index where a pair belongs cannot be unpacked at all: the wrong
     # type, where a triple is a pair of the wrong length.
-    sources = [GaussianPulse(ix=5, iy=5, half_width_s=1e-4)]
     with pytest.raises(TypeError, match=r"probes must hold \(ix, iy\) index pairs"):
-        fdtd_simulation(
-            C0,
-            0.05,
-            1e-3,
-            shape=(30, 30),
-            sources=sources,
-            probes=[5],  # type: ignore[list-item]
-        )
+        FDTDRecording(probes=[5])  # type: ignore[list-item]
+
+
+def test_a_recording_holds_whole_pairs_and_counts() -> None:
+    """A list, a whole float or a NumPy integer reads back as plain ints."""
+    probes = [(np.int64(3), 4.0)]
+    recording = FDTDRecording(
+        probes=probes,  # type: ignore[arg-type]
+        snapshot_every=np.int64(5),  # type: ignore[arg-type]
+        snapshot_decimation=2.0,  # type: ignore[arg-type]
+    )
+    probes.append((9, 9))
+    assert recording.probes == ((3, 4),)
+    assert [type(i) for i in recording.probes[0]] == [int, int]
+    assert type(recording.snapshot_every) is int
+    assert type(recording.snapshot_decimation) is int
+    assert recording.snapshot_decimation == 2
+
+
+def test_a_run_without_a_recording_keeps_only_the_time_axis() -> None:
+    res = fdtd_simulation(
+        C0,
+        0.05,
+        1e-3,
+        shape=(30, 30),
+        sources=[GaussianPulse(ix=5, iy=5, half_width_s=1e-4)],
+    )
+    assert res.pressures.shape == (0, res.times.size)
+    assert res.probes.shape == (0, 2)
+    assert res.snapshots is None
+    assert res.snapshot_times is None
+    assert res.snapshot_decimation == 1
 
 
 def test_non_integral_counts_and_coordinates_are_rejected() -> None:
@@ -685,10 +727,12 @@ def test_non_integral_counts_and_coordinates_are_rejected() -> None:
         sim.add_source(float_source)
     with pytest.raises(ValueError, match="'n_steps' must be a whole number"):
         sim.run(1.5)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'record_every' must be a whole number"):
-        sim.run(10, record_every=1.5)  # type: ignore[arg-type]
-    with pytest.raises(ValueError, match="'decimate' must be a whole number"):
-        sim.run(10, decimate=1.5)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'snapshot_every' must be a whole number"):
+        sim.run(10, snapshot_every=1.5)  # type: ignore[arg-type]
+    with pytest.raises(
+        ValueError, match="'snapshot_decimation' must be a whole number"
+    ):
+        sim.run(10, snapshot_decimation=1.5)  # type: ignore[arg-type]
     assert sim.n == 0  # nothing ran on the rejected calls
 
 
@@ -705,9 +749,8 @@ def small_result() -> FDTDResult:
         3e-3,
         shape=(30, 40),
         sources=[GaussianPulse(ix=8, iy=15, half_width_s=1e-4)],
-        probes=[(30, 15)],
+        recording=FDTDRecording(probes=[(30, 15)], snapshot_every=20),
         obstacle_mask=mask,
-        snapshot_every=20,
     )
 
 
@@ -783,7 +826,7 @@ def test_plot_rejects_unknown_kind_and_missing_snapshots() -> None:
         1e-3,
         shape=(20, 20),
         sources=[GaussianPulse(ix=5, iy=5, half_width_s=1e-4)],
-        probes=[(10, 10)],
+        recording=FDTDRecording(probes=[(10, 10)]),
     )
     with pytest.raises(ValueError, match=r"kind must be 'probes'"):
         res.plot(kind="field")

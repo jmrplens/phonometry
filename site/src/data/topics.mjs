@@ -528,6 +528,7 @@ export const topics = [
       { slug: 'simulation', label: 'Overview', translations: { es: 'Resumen' } },
       'simulation/fdtd-simulation',
       'simulation/elastic-waves',
+      'simulation/compute',
       apiGroup('simulation'),
     ],
   },

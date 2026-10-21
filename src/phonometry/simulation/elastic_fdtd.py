@@ -38,9 +38,22 @@ signal histories, optional field snapshots and a ``.plot()`` method.
 :class:`ElasticFDTD2D` is the underlying stepping engine for callers that
 need frame-by-frame access to the five field arrays.
 
-The solver is deliberately deterministic: float64 arithmetic throughout, no
-random numbers and single-threaded numpy execution, so identical inputs give
-bit-identical outputs on the same platform.
+The solver is deliberately deterministic: no random numbers, and every
+operation in a fixed order. On NumPy in float64 identical inputs give
+bit-identical outputs on the same platform. On CuPy in float64 the recorded
+proof (``gpu-parity.lock``) found every field, snapshot and contour phasor
+bit-identical to NumPy's over the scenarios of both engines, and the energy
+within 1.79e-16 relative over them, because the GPU sums it in another
+order; the guide on where a simulation runs names the hardware it was
+measured on. Runs on torch's CPU device, and float32 runs on NumPy, agree
+with NumPy in float64 within the tolerance that guide publishes for each
+device and dtype. Each of these bounds is the worst over that scenario
+matrix (grids of up to 64 by 48 cells, up to 120 steps), not a promise about
+any run: float32 rounding grows with the number of steps. An acoustic run
+of 8085 steps on a 200 by 300 cell grid, driven by a 1 kHz ``CWSource``,
+differed by 8.0e-06 relative at its probe (4.0e-06 with a Gaussian pulse),
+on NumPy and on torch's CPU device alike. A float32 run on CuPy, and any run
+on torch's CUDA device, is not measured yet.
 
 Validated against analytic oracles: P- and S-wave times of flight
 :math:`c_\mathrm{P} = \sqrt{(\lambda + 2\mu) / \rho}` and
@@ -78,11 +91,13 @@ from .._internal.catalogue import CatalogueRow
 from .._internal.display import RichDisplay
 from .._internal.frozen import OwnsArrays, handed_over, read_only_copy
 from .._internal.validation import (
+    require_choice,
     require_count,
     require_ranks,
     require_same_length,
     require_scalar,
 )
+from . import _backends
 from .fdtd import (
     _SIDES,
     Field2D,
@@ -92,10 +107,17 @@ from .fdtd import (
     _positive_finite,
     _positive_map,
     _probe_indices,
+    _probe_pairs,
+    _recording_or_empty,
+    _require_courant,
     _require_grid_axes,
+    _require_provenance,
     _resolve_sponge_sides,
     _run_recording,
     _sigma_map,
+    _snapshot_options,
+    _step_count,
+    _time_step,
     _validate_sponge_damping,
     _validated_obstacle,
 )
@@ -105,6 +127,8 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
+    from ._backends import DeviceArray
+    from .compute import Compute, RunProvenance
 
 Field = Literal["p", "vx", "vy"]
 
@@ -506,6 +530,84 @@ def _resolve_free_sides(
     return sides
 
 
+def _elastic_grid(
+    c_p: float | Field2D, shape: tuple[int, int] | None, cfl: float, dx: float
+) -> tuple[Field2D, float, float]:
+    """The P-wave speed map, the grid spacing and the time step, checked on the host.
+
+    :return: ``(cp_map, dx, dt)``; the step is bounded by ``c_p`` alone.
+    """
+    _require_courant(cfl)
+    cp_map = _resolve_speed_map("c_p", c_p, shape)
+    _positive_map("c_p", cp_map)
+    ny, nx = cp_map.shape
+    if ny < _MIN_GRID_CELLS or nx < _MIN_GRID_CELLS:
+        msg = "the grid must be at least 2 x 2 cells"
+        raise ValueError(msg)
+    dx = _positive_finite("dx", dx)
+    return cp_map, dx, _time_step(cfl, dx, float(cp_map.max()))
+
+
+def _check_elastic_source(
+    source: ElasticSource,
+    shape: tuple[int, ...],
+    obstacle: NDArray[np.bool_] | None,
+) -> None:
+    """Refuse a source off the grid ``(ny, nx)`` or inside the obstacle.
+
+    Shared by :meth:`ElasticFDTD2D.add_source` and
+    :func:`elastic_fdtd_simulation`, which checks its sources before it
+    builds the engine.
+    """
+    ix = _integer("source ix", source.ix)
+    iy = _integer("source iy", source.iy)
+    if isinstance(source, ExplosionSource):
+        _check_explosion_cell(ix, iy, shape, obstacle)
+    else:
+        _check_force_node(source, ix, iy, shape, obstacle)
+
+
+def _check_explosion_cell(
+    ix: int, iy: int, shape: tuple[int, ...], obstacle: NDArray[np.bool_] | None
+) -> None:
+    """Check an explosion cell against the grid and the obstacle mask."""
+    require_scalar(ix, "ix")
+    require_scalar(iy, "iy")
+    ny, nx = shape
+    if not (0 <= ix < nx and 0 <= iy < ny):
+        msg = "source position lies outside the grid"
+        raise ValueError(msg)
+    if obstacle is not None and obstacle[iy, ix]:
+        msg = "source position lies inside an obstacle"
+        raise ValueError(msg)
+
+
+def _check_force_node(
+    source: ForceSource,
+    ix: int,
+    iy: int,
+    shape: tuple[int, ...],
+    obstacle: NDArray[np.bool_] | None,
+) -> None:
+    """Check a force velocity node against the grid and the obstacle."""
+    require_scalar(ix, "ix")
+    require_scalar(iy, "iy")
+    ny, nx = shape
+    along_x = source.direction == "x"
+    limit = (ny, nx - 1) if along_x else (ny - 1, nx)
+    if not (0 <= ix < limit[1] and 0 <= iy < limit[0]):
+        msg = "source position lies outside the grid"
+        raise ValueError(msg)
+    # The face is closed when either cell it separates is an obstacle cell,
+    # the rule the open-face factors of the step are built from; it is read
+    # from the host mask, not from those device factors.
+    if obstacle is not None and (
+        obstacle[iy, ix] or (obstacle[iy, ix + 1] if along_x else obstacle[iy + 1, ix])
+    ):
+        msg = "source position lies inside an obstacle"
+        raise ValueError(msg)
+
+
 class ElasticFDTD2D:
     r"""2D elastic (P-SV) FDTD stepping engine on a staggered grid.
 
@@ -564,8 +666,16 @@ class ElasticFDTD2D:
         every face adjacent to a masked cell is closed (zero normal
         velocity) and every touching corner shear stress is zeroed, i.e. a
         shear-free rigid inclusion, rasterising arbitrary interior geometry.
-    :raises TypeError: if ``cfl`` is not a single number, or ``sponge_width`` is a flag,
-        a text or an array where a count goes.
+    :param compute: Where the engine steps (:class:`Compute`); ``None``
+        follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
+    :raises TypeError: if ``cfl`` is not a single number, ``sponge_width`` is a flag,
+        a text or an array where a count goes, or ``compute`` is neither a
+        :class:`Compute` nor ``None``.
+    :raises ComputeImportError: when the library of the device ``compute``
+        asks for is not installed or does not import.
+    :raises ComputeDeviceError: when that device is not present, or fails a
+        first small computation; with ``fallback=True`` the engine warns
+        with :class:`ComputeFallbackWarning` and steps on NumPy instead.
     """
 
     def __init__(
@@ -583,14 +693,10 @@ class ElasticFDTD2D:
         shape: tuple[int, int] | None = None,
         free_sides: str | Iterable[str] | None = None,
         obstacle_mask: NDArray[np.bool_] | None = None,
+        compute: Compute | None = None,
     ) -> None:
-        require_scalar(cfl, "cfl")
-        cp_map = _resolve_speed_map("c_p", c_p, shape)
-        _positive_map("c_p", cp_map)
+        cp_map, self.dx, self.dt = _elastic_grid(c_p, shape, cfl, dx)
         ny, nx = cp_map.shape
-        if ny < _MIN_GRID_CELLS or nx < _MIN_GRID_CELLS:
-            msg = "the grid must be at least 2 x 2 cells"
-            raise ValueError(msg)
         cs_map = _resolve_speed_map("c_s", c_s, (ny, nx))
         if cs_map.shape != (ny, nx):
             msg = "c_s map must match the shape of c_p"
@@ -607,12 +713,6 @@ class ElasticFDTD2D:
                 "fluid cell"
             )
             raise ValueError(msg)
-        if not np.isfinite(cfl) or not 0.0 < cfl < 1.0:
-            msg = (
-                "cfl must lie in (0, 1): the leapfrog scheme "
-                "is unstable beyond the Courant bound CN = 1"
-            )
-            raise ValueError(msg)
         rho_map = (
             np.full((ny, nx), float(np.real(rho)), dtype=np.float64)
             if np.isscalar(rho)
@@ -625,49 +725,6 @@ class ElasticFDTD2D:
         sponge_width, damping_map = _validate_sponge_damping(
             sponge_width, sponge_reflection, damping, ny, nx
         )
-
-        self.dx = _positive_finite("dx", dx)
-        # Read-only copies of their own, so the maps the simulation reports
-        # stay the ones mu, lam and dt were computed from.
-        self.c_p = read_only_copy(cp_map)
-        self.c_s = read_only_copy(cs_map)
-        self.rho = read_only_copy(rho_map)
-        c_max = float(cp_map.max())
-        self.dt = cfl * self.dx / (c_max * float(np.sqrt(2.0)))
-        #: Shear modulus ``mu = rho c_s**2`` at cell centres.
-        self.mu: Field2D = rho_map * cs_map**2
-        #: First Lame parameter ``lambda = rho (c_p**2 - 2 c_s**2)``.
-        self.lam: Field2D = np.maximum(rho_map * (cp_map**2 - 2.0 * cs_map**2), 0.0)
-        self._mu2 = 2.0 * self.mu
-        # Plane-strain surface modulus E' = 4 mu (lambda + mu) /
-        # (lambda + 2 mu): on a free surface the zero normal stress ties
-        # the normal strain rate to the tangential one, and the in-plane
-        # stress evolves with E' times the tangential strain rate alone.
-        self._e_surf: Field2D = np.divide(
-            4.0 * self.mu * (self.lam + self.mu),
-            self.lam + self._mu2,
-            out=np.zeros_like(self.mu),
-            where=(self.lam + self._mu2) > 0.0,
-        )
-        # Density averaged onto the faces where each velocity lives
-        # (arithmetic mean, Moczo et al. Eq. 7.39).
-        self._rho_x = 0.5 * (rho_map[:, 1:] + rho_map[:, :-1])
-        self._rho_y = 0.5 * (rho_map[1:, :] + rho_map[:-1, :])
-        self._mu_c = self._corner_mu(self.mu)
-
-        self.txx: Field2D = np.zeros((ny, nx), dtype=np.float64)
-        self.tyy: Field2D = np.zeros((ny, nx), dtype=np.float64)
-        self.txy: Field2D = np.zeros((ny - 1, nx - 1), dtype=np.float64)
-        self.vx: Field2D = np.zeros((ny, nx - 1), dtype=np.float64)
-        self.vy: Field2D = np.zeros((ny - 1, nx), dtype=np.float64)
-        self._div: Field2D = np.zeros((ny, nx), dtype=np.float64)
-        self._dvx: Field2D = np.zeros((ny, nx), dtype=np.float64)
-        self._dvy: Field2D = np.zeros((ny, nx), dtype=np.float64)
-        self._dty: Field2D = np.zeros((ny, nx - 1), dtype=np.float64)
-        self._dtx: Field2D = np.zeros((ny - 1, nx), dtype=np.float64)
-        self._sources: list[ElasticSource] = []
-        self.n = 0  # completed steps
-
         sides = _resolve_sponge_sides(sponge_sides)
         #: Sponge-layer width in cells (read-only configuration record).
         self.sponge_width = require_count(sponge_width, "sponge_width", at_least=None)
@@ -679,8 +736,72 @@ class ElasticFDTD2D:
         if overlap:
             msg = f"sides {sorted(overlap)} cannot be both free and absorbing"
             raise ValueError(msg)
+        self._obstacle: NDArray[np.bool_] | None = _validated_obstacle(
+            obstacle_mask, ny, nx
+        )
+
+        # Every argument is checked on the host before the device is asked
+        # for, so a bad one raises its own error, never a missing library's
+        # or a fallback warning first.
+        backend = _backends.backend_for(compute)
+        self._backend = backend
+        self._xp = backend.xp
+        # Read-only copies of their own, so the maps the simulation reports
+        # stay the ones mu, lam and dt were computed from.
+        self.c_p = read_only_copy(cp_map)
+        self.c_s = read_only_copy(cs_map)
+        self.rho = read_only_copy(rho_map)
+        c_max = float(cp_map.max())
+        #: Shear modulus ``mu = rho c_s**2`` at cell centres, a read-only
+        #: host copy.
+        self.mu = read_only_copy(rho_map * cs_map**2)
+        #: First Lame parameter ``lambda = rho (c_p**2 - 2 c_s**2)``, a
+        #: read-only host copy.
+        self.lam = read_only_copy(
+            np.maximum(rho_map * (cp_map**2 - 2.0 * cs_map**2), 0.0)
+        )
+        mu2 = 2.0 * self.mu
+        # Plane-strain surface modulus E' = 4 mu (lambda + mu) /
+        # (lambda + 2 mu): on a free surface the zero normal stress ties
+        # the normal strain rate to the tangential one, and the in-plane
+        # stress evolves with E' times the tangential strain rate alone.
+        e_surf = np.divide(
+            4.0 * self.mu * (self.lam + self.mu),
+            self.lam + mu2,
+            out=np.zeros_like(self.mu),
+            where=(self.lam + mu2) > 0.0,
+        )
+        # Density averaged onto the faces where each velocity lives
+        # (arithmetic mean, Moczo et al. Eq. 7.39), kept on the host for the
+        # force sources and on the device for the step.
+        rho_x = 0.5 * (rho_map[:, 1:] + rho_map[:, :-1])
+        rho_y = 0.5 * (rho_map[1:, :] + rho_map[:-1, :])
+        self._rho_x_host, self._rho_y_host = rho_x, rho_y
+        mu_c = self._corner_mu(self.mu)
+        # The maps the step reads, each handed to the device once.
+        self._lam = backend.asarray(self.lam)
+        self._mu = backend.asarray(self.mu)
+        self._mu2 = backend.asarray(mu2)
+        self._e_surf = backend.asarray(e_surf)
+        self._rho_x = backend.asarray(rho_x)
+        self._rho_y = backend.asarray(rho_y)
+        self._mu_c = backend.asarray(mu_c)
+
+        self.txx = backend.zeros((ny, nx))
+        self.tyy = backend.zeros((ny, nx))
+        self.txy = backend.zeros((ny - 1, nx - 1))
+        self.vx = backend.zeros((ny, nx - 1))
+        self.vy = backend.zeros((ny - 1, nx))
+        self._div = backend.zeros((ny, nx))
+        self._dvx = backend.zeros((ny, nx))
+        self._dvy = backend.zeros((ny, nx))
+        self._dty = backend.zeros((ny, nx - 1))
+        self._dtx = backend.zeros((ny - 1, nx))
+        self._sources: list[ElasticSource] = []
+        self.n = 0  # completed steps
+
         self._init_decay(sides, sponge_width, sponge_reflection, damping_map, c_max)
-        self._init_obstacle(obstacle_mask, ny, nx)
+        self._init_obstacle()
 
     @classmethod
     def from_regions(
@@ -724,13 +845,20 @@ class ElasticFDTD2D:
             material taken in any of the forms ``background`` takes.
         :param kwargs: Forwarded to :class:`ElasticFDTD2D` (``cfl``,
             ``sponge_width``, ``sponge_sides``, ``sponge_reflection``,
-            ``damping``, ``free_sides``, ``obstacle_mask``).
+            ``damping``, ``free_sides``, ``obstacle_mask``, ``compute``).
         :return: The configured stepping engine.
         :raises ValueError: If a mask does not match ``shape`` or a
             material spec is invalid, a catalogue row's refusal among them.
-        :raises TypeError: For a mask array that is not boolean, or a
+        :raises TypeError: For a mask array that is not boolean, a
             catalogue row of a class that lacks any of the bulk longitudinal
-            speed, the transverse speed and the density.
+            speed, the transverse speed and the density, or a ``compute``
+            keyword that is neither a :class:`Compute` nor ``None``.
+        :raises ComputeImportError: When the library of the device a
+            ``compute`` keyword asks for is not installed or does not import.
+        :raises ComputeDeviceError: When that device is not present, or fails
+            a first small computation; with ``fallback=True`` the engine warns
+            with :class:`ComputeFallbackWarning`, pointing at the line that
+            called this method, and steps on NumPy instead.
         """
         ny = _integer("shape[0]", shape[0])
         nx = _integer("shape[1]", shape[1])
@@ -790,42 +918,52 @@ class ElasticFDTD2D:
             c_max,
             self.dx,
         )
-        self._decay_c: Field2D = np.exp(-sigma * self.dt)
-        self._decay_vx: Field2D = np.exp(
-            -(0.5 * (sigma[:, 1:] + sigma[:, :-1])) * self.dt
+        backend = self._backend
+        self._decay_c = backend.asarray(np.exp(-sigma * self.dt))
+        self._decay_vx = backend.asarray(
+            np.exp(-(0.5 * (sigma[:, 1:] + sigma[:, :-1])) * self.dt)
         )
-        self._decay_vy: Field2D = np.exp(
-            -(0.5 * (sigma[1:, :] + sigma[:-1, :])) * self.dt
+        self._decay_vy = backend.asarray(
+            np.exp(-(0.5 * (sigma[1:, :] + sigma[:-1, :])) * self.dt)
         )
-        self._decay_xy: Field2D = np.exp(
-            -(
-                0.25
-                * (sigma[1:, 1:] + sigma[1:, :-1] + sigma[:-1, 1:] + sigma[:-1, :-1])
+        self._decay_xy = backend.asarray(
+            np.exp(
+                -(
+                    0.25
+                    * (
+                        sigma[1:, 1:]
+                        + sigma[1:, :-1]
+                        + sigma[:-1, 1:]
+                        + sigma[:-1, :-1]
+                    )
+                )
+                * self.dt
             )
-            * self.dt
         )
 
-    def _init_obstacle(
-        self, obstacle_mask: NDArray[np.bool_] | None, ny: int, nx: int
-    ) -> None:
-        """Validate the obstacle mask into closed-face velocity factors."""
-        self._obstacle: NDArray[np.bool_] | None = _validated_obstacle(
-            obstacle_mask, ny, nx
-        )
-        self._vx_open: Field2D | None = None
-        self._vy_open: Field2D | None = None
-        self._txy_open: Field2D | None = None
+    def _init_obstacle(self) -> None:
+        """Turn the validated obstacle mask into closed-face and corner factors on the device."""
+        self._vx_open: DeviceArray | None = None
+        self._vy_open: DeviceArray | None = None
+        self._txy_open: DeviceArray | None = None
         if self._obstacle is not None:
             mask = self._obstacle
+            backend = self._backend
             # A face between two cells is open only when both are open
             # (rigid obstacle boundary: zero normal velocity), and a corner
             # shear stress survives only when all four cells are open
             # (shear-free rigid inclusion, matching the domain edges).
-            self._vx_open = (~(mask[:, 1:] | mask[:, :-1])).astype(np.float64)
-            self._vy_open = (~(mask[1:, :] | mask[:-1, :])).astype(np.float64)
-            self._txy_open = (
-                ~(mask[1:, 1:] | mask[1:, :-1] | mask[:-1, 1:] | mask[:-1, :-1])
-            ).astype(np.float64)
+            self._vx_open = backend.asarray(
+                (~(mask[:, 1:] | mask[:, :-1])).astype(np.float64)
+            )
+            self._vy_open = backend.asarray(
+                (~(mask[1:, :] | mask[:-1, :])).astype(np.float64)
+            )
+            self._txy_open = backend.asarray(
+                (
+                    ~(mask[1:, 1:] | mask[1:, :-1] | mask[:-1, 1:] | mask[:-1, :-1])
+                ).astype(np.float64)
+            )
 
     @property
     def time(self) -> float:
@@ -833,14 +971,19 @@ class ElasticFDTD2D:
         return self.n * self.dt
 
     @property
-    def p(self) -> Field2D:
+    # The array type is the backend's, and the Array API standard does not name one.
+    def p(self) -> Any:  # noqa: ANN401
         """Synthetic pressure ``-(txx + tyy) / 2`` at cell centres [Pa].
 
         The mean compressive normal stress: in fluid (``c_s = 0``) regions
         it is exactly the acoustic pressure, and in solids it is the
-        convenient scalar for probes and snapshots.
+        convenient scalar for probes and snapshots. It is computed on the
+        engine's device, where the stresses live: a NumPy array by default,
+        the backend's own array on another device; :meth:`host_field` gives
+        host copies of the stresses it is built from.
         """
-        return -0.5 * (self.txx + self.tyy)
+        with self._backend.context():
+            return -0.5 * (self.txx + self.tyy)
 
     def add_source(self, source: ElasticSource) -> None:
         """Register an :class:`ExplosionSource` or a :class:`ForceSource`.
@@ -849,45 +992,16 @@ class ElasticFDTD2D:
         staggered velocity node. Positions are validated against the grid
         and the obstacle mask.
         """
-        ix = _integer("source ix", source.ix)
-        iy = _integer("source iy", source.iy)
-        if isinstance(source, ExplosionSource):
-            self._validate_explosion_position(ix, iy)
-        else:
-            self._validate_force_position(source, ix, iy)
+        _check_elastic_source(source, self.c_p.shape, self._obstacle)
         self._sources.append(source)
-
-    def _validate_explosion_position(self, ix: int, iy: int) -> None:
-        """Check an explosion cell against the grid and the obstacle mask."""
-        require_scalar(ix, "ix")
-        require_scalar(iy, "iy")
-        ny, nx = self.txx.shape
-        if not (0 <= ix < nx and 0 <= iy < ny):
-            msg = "source position lies outside the grid"
-            raise ValueError(msg)
-        if self._obstacle is not None and self._obstacle[iy, ix]:
-            msg = "source position lies inside an obstacle"
-            raise ValueError(msg)
-
-    def _validate_force_position(self, source: ForceSource, ix: int, iy: int) -> None:
-        """Check a force velocity node against the grid and the obstacle."""
-        require_scalar(ix, "ix")
-        require_scalar(iy, "iy")
-        ny, nx = self.txx.shape
-        open_map = self._vx_open if source.direction == "x" else self._vy_open
-        limit = (ny, nx - 1) if source.direction == "x" else (ny - 1, nx)
-        if not (0 <= ix < limit[1] and 0 <= iy < limit[0]):
-            msg = "source position lies outside the grid"
-            raise ValueError(msg)
-        # The open map holds exact 0.0/1.0 factors cast from booleans:
-        # exact zero marks a face closed by the obstacle mask (<= avoids
-        # the float-equality lint without changing the semantics).
-        if open_map is not None and open_map[iy, ix] <= 0.0:
-            msg = "source position lies inside an obstacle"
-            raise ValueError(msg)
 
     def step(self) -> None:
         """Advance the leapfrog scheme by one time step (Virieux Eq. 5)."""
+        with self._backend.context():
+            self._step()
+
+    def _step(self) -> None:
+        """One leapfrog step on the backend's arrays."""
         dt_dx = self.dt / self.dx
         txx, tyy = self.txx, self.tyy
         # Velocity half-step from the stress gradients; the one-sided txy
@@ -916,8 +1030,8 @@ class ElasticFDTD2D:
         # update.
         div, dvx, dvy = self._velocity_gradients()
         txx_surf, tyy_surf = self._stash_surface_stress(dt_dx, dvx, dvy)
-        self.txx += self.lam * dt_dx * div + self._mu2 * dt_dx * dvx
-        self.tyy += self.lam * dt_dx * div + self._mu2 * dt_dx * dvy
+        self.txx += self._lam * dt_dx * div + self._mu2 * dt_dx * dvx
+        self.tyy += self._lam * dt_dx * div + self._mu2 * dt_dx * dvy
         self.txy += (
             self._mu_c
             * dt_dx
@@ -939,7 +1053,7 @@ class ElasticFDTD2D:
         self.txy *= self._decay_xy
         self.n += 1
 
-    def _shear_dty(self) -> Field2D:
+    def _shear_dty(self) -> DeviceArray:
         r"""One-sided y-difference of txy, free surfaces imaged (Moczo 9.9).
 
         The shear stress is zero on the domain edge (shear-free rigid
@@ -957,7 +1071,7 @@ class ElasticFDTD2D:
             dty[-1, :] *= 2.0
         return dty
 
-    def _shear_dtx(self) -> Field2D:
+    def _shear_dtx(self) -> DeviceArray:
         """One-sided x-difference of txy, free surfaces imaged (Moczo 9.9)."""
         txy, dtx = self.txy, self._dtx
         dtx[:, 0] = txy[:, 0]
@@ -969,10 +1083,12 @@ class ElasticFDTD2D:
             dtx[:, -1] *= 2.0
         return dtx
 
-    def _velocity_gradients(self) -> tuple[Field2D, Field2D, Field2D]:
+    def _velocity_gradients(
+        self,
+    ) -> tuple[DeviceArray, DeviceArray, DeviceArray]:
         """Velocity divergence and one-sided vx/vy differences at centres."""
         div = self._div
-        div.fill(0.0)
+        div[...] = 0.0
         div[:, :-1] += self.vx
         div[:, 1:] -= self.vx
         div[:-1, :] += self.vy
@@ -999,9 +1115,9 @@ class ElasticFDTD2D:
     def _stash_surface_stress(
         self,
         dt_dx: float,
-        dvx: Field2D,
-        dvy: Field2D,
-    ) -> tuple[list[Field2D], list[Field2D]]:
+        dvx: DeviceArray,
+        dvy: DeviceArray,
+    ) -> tuple[list[DeviceArray], list[DeviceArray]]:
         """E'-updated in-plane stress of each free surface, pre-bulk-update.
 
         On a free-surface row/column the zero normal stress ties the
@@ -1024,7 +1140,9 @@ class ElasticFDTD2D:
         return txx_surf, tyy_surf
 
     def _apply_free_surfaces(
-        self, txx_surf: list[Field2D], tyy_surf: list[Field2D]
+        self,
+        txx_surf: list[DeviceArray],
+        tyy_surf: list[DeviceArray],
     ) -> None:
         """Pin the surface normal stress to zero and restore the E' update.
 
@@ -1051,16 +1169,19 @@ class ElasticFDTD2D:
                     self.tyy[r, c] = 0.0
 
     def _inject_force(self, src: ForceSource, t: float) -> None:
-        """Add one body-force increment to the target velocity node."""
+        """Add one body-force increment to the target velocity node.
+
+        The face density is read from the host map as a Python float, which
+        rounds as the float64 element it is read from, so the increment is
+        the same IEEE double arithmetic on every device.
+        """
         f = src.amplitude * src.waveform(t)
         if src.direction == "x":
-            self.vx[src.iy, src.ix] += (
-                self.dt * f / (self._rho_x[src.iy, src.ix] * self.dx**2)
-            )
+            rho = float(self._rho_x_host[src.iy, src.ix])
+            self.vx[src.iy, src.ix] += self.dt * f / (rho * self.dx**2)
         else:
-            self.vy[src.iy, src.ix] += (
-                self.dt * f / (self._rho_y[src.iy, src.ix] * self.dx**2)
-            )
+            rho = float(self._rho_y_host[src.iy, src.ix])
+            self.vy[src.iy, src.ix] += self.dt * f / (rho * self.dx**2)
 
     def energy(self) -> float:
         r"""Total elastic field energy [J per metre of depth].
@@ -1071,38 +1192,47 @@ class ElasticFDTD2D:
         to the acoustic :math:`p^2 / (2 \lambda)` and shear-free corners
         contribute nothing.
         """
-        e_v = 0.5 * (
-            float(np.sum(self._rho_x * self.vx**2))
-            + float(np.sum(self._rho_y * self.vy**2))
-        )
-        lam, mu = self.lam, self.mu
-        solid = mu > 0.0
-        den = np.where(solid, 8.0 * mu * (lam + mu), 1.0)
-        e_solid = (
-            (lam + 2.0 * mu) * (self.txx**2 + self.tyy**2)
-            - 2.0 * lam * self.txx * self.tyy
-        ) / den
-        # Fluid cells always have lam = rho c_p**2 > 0; guard the division
-        # anyway so a lambda = 0 solid does not raise a spurious warning.
-        e_fluid = np.divide(self.p**2, 2.0 * lam, out=np.zeros_like(lam), where=~solid)
-        e_n = float(np.sum(np.where(solid, e_solid, e_fluid)))
-        mu_c = self._mu_c
-        e_s = float(
-            np.sum(
-                np.where(
-                    mu_c > 0.0, self.txy**2 / np.where(mu_c > 0.0, 2.0 * mu_c, 1.0), 0.0
+        xp, b = self._xp, self._backend
+        with b.context():
+            e_v = 0.5 * (
+                b.scalar(xp.sum(self._rho_x * self.vx**2))
+                + b.scalar(xp.sum(self._rho_y * self.vy**2))
+            )
+            lam, mu = self._lam, self._mu
+            solid = mu > 0.0
+            den = xp.where(solid, 8.0 * mu * (lam + mu), 1.0)
+            e_solid = (
+                (lam + 2.0 * mu) * (self.txx**2 + self.tyy**2)
+                - 2.0 * lam * self.txx * self.tyy
+            ) / den
+            # Fluid cells always have lam = rho c_p**2 > 0; the solid cells
+            # divide by one instead, so a lambda = 0 solid does not raise a
+            # spurious warning, and their quotient is never read.
+            safe = xp.where(solid, 1.0, 2.0 * lam)
+            e_fluid = xp.where(solid, 0.0, self.p**2 / safe)
+            e_n = b.scalar(xp.sum(xp.where(solid, e_solid, e_fluid)))
+            mu_c = self._mu_c
+            e_s = b.scalar(
+                xp.sum(
+                    xp.where(
+                        mu_c > 0.0,
+                        self.txy**2 / xp.where(mu_c > 0.0, 2.0 * mu_c, 1.0),
+                        0.0,
+                    )
                 )
             )
-        )
         return (e_v + e_n + e_s) * self.dx**2
 
-    def collocated(self, field: Field) -> Field2D:
+    # The array type is the backend's, and the Array API standard does not name one.
+    def collocated(self, field: Field) -> Any:  # noqa: ANN401
         """One field interpolated to the cell centres, shape ``(ny, nx)``.
 
         ``"p"`` is the synthetic pressure; ``"vx"``/``"vy"`` average the two
         adjacent faces (domain-edge faces count as zero, their built-in
         value), so probes and snapshots of every field share the cell-centre
-        positions.
+        positions. The result is on the engine's device, where the fields
+        live: a NumPy array by default, the backend's own array on another
+        device; :meth:`host_field` gives host copies of the stored fields.
         """
         if field == "p":
             return self.p
@@ -1110,32 +1240,67 @@ class ElasticFDTD2D:
             msg = f"field must be one of {_FIELD_NAMES}"
             raise ValueError(msg)
         ny, nx = self.txx.shape
-        out = np.zeros((ny, nx), dtype=np.float64)
-        if field == "vx":
-            out[:, :-1] += self.vx
-            out[:, 1:] += self.vx
-        else:
-            out[:-1, :] += self.vy
-            out[1:, :] += self.vy
-        out *= 0.5
+        with self._backend.context():
+            out = self._backend.zeros((ny, nx))
+            if field == "vx":
+                out[:, :-1] += self.vx
+                out[:, 1:] += self.vx
+            else:
+                out[:-1, :] += self.vy
+                out[1:, :] += self.vy
+            out *= 0.5
         return out
 
     def run(
         self,
         n_steps: int,
-        record_every: int | None = None,
-        decimate: int = 1,
-    ) -> NDArray[np.float64]:
+        snapshot_every: int | None = None,
+        snapshot_decimation: int = 1,
+    ) -> NDArray[np.floating]:
         """Advance ``n_steps`` steps, optionally recording pressure frames.
 
-        With ``record_every = k`` a snapshot of the synthetic pressure ``p``
-        is stored after every ``k``-th step (and one of the initial state),
-        spatially subsampled by ``decimate``; the stacked
-        ``(n_frames, ny', nx')`` array plugs straight into a
-        ``FuncAnimation`` ``imshow`` update. Without ``record_every`` an
-        empty array is returned and only the final state is kept.
+        With ``snapshot_every = k`` a host copy of the synthetic pressure
+        ``p`` is stored after every ``k``-th step (and one of the initial
+        state), keeping every ``snapshot_decimation``-th cell along each
+        axis; the stacked ``(n_frames, ny', nx')`` array plugs straight into
+        a ``FuncAnimation`` ``imshow`` update. Without ``snapshot_every`` an
+        empty array is returned and only the final state is kept (read it
+        with :meth:`host_field`).
+
+        :raises TypeError: if ``snapshot_decimation``, ``n_steps`` or
+            ``snapshot_every`` is a flag, a text or an array where a count goes.
+        :raises ValueError: if ``n_steps`` is not a whole number of 0 or more,
+            or ``snapshot_every`` or ``snapshot_decimation`` is not a whole
+            number of 1 or more.
         """
-        return _run_recording(self, n_steps, record_every, decimate)
+        return _run_recording(self, n_steps, snapshot_every, snapshot_decimation)
+
+    #: The arrays the engine stores, the names :meth:`host_field` reads.
+    _STORED: tuple[Literal["txx", "tyy", "txy", "vx", "vy"], ...] = (
+        "txx",
+        "tyy",
+        "txy",
+        "vx",
+        "vy",
+    )
+
+    def host_field(
+        self, name: Literal["txx", "tyy", "txy", "vx", "vy"]
+    ) -> NDArray[np.floating]:
+        """A NumPy copy of the stored field *name*, whatever the device.
+
+        :param name: ``"txx"`` or ``"tyy"`` (cell centres), ``"txy"``
+            (interior corners), ``"vx"`` or ``"vy"`` (faces).
+        :raises TypeError: if ``name`` is not a text.
+        :raises ValueError: for a field the engine does not store.
+        """
+        require_choice(name, "name", self._STORED)
+        return np.array(self._backend.to_host(getattr(self, name)), copy=True)
+
+    @property
+    def provenance(self) -> RunProvenance:
+        """Where this engine steps: device, dtype and library versions."""
+        return self._backend.provenance
 
 
 @dataclass(frozen=True)
@@ -1158,12 +1323,16 @@ class ElasticFDTDResult(OwnsArrays):
     :ivar shape: Grid shape ``(ny, nx)``.
     :ivar sources: The source definitions of the run.
     :ivar snapshots: Recorded cell-centre fields of ``snapshot_field``,
-        shape ``(n_frames, ny, nx)``, or ``None`` when no snapshots were
-        requested.
+        shape ``(n_frames, ceil(ny / d), ceil(nx / d))`` with ``d`` the
+        ``snapshot_decimation``, in the dtype the run stepped in, or ``None``
+        when no snapshots were requested.
     :ivar snapshot_times: Time of each snapshot [s], or ``None``.
     :ivar snapshot_field: The field recorded in ``snapshots``.
     :ivar obstacle_mask: Boolean map of rigid cells, or ``None``.
     :ivar free_sides: Sides carrying a traction-free surface.
+    :ivar snapshot_decimation: Every how many cells a snapshot keeps along
+        each axis (1 keeps every cell).
+    :ivar provenance: Where the run stepped (:class:`RunProvenance`).
     """
 
     times: NDArray[np.float64]
@@ -1175,11 +1344,13 @@ class ElasticFDTDResult(OwnsArrays):
     dt: float
     shape: tuple[int, int]
     sources: tuple[ElasticSource, ...]
-    snapshots: NDArray[np.float64] | None
+    snapshots: NDArray[np.floating] | None
     snapshot_times: NDArray[np.float64] | None
     snapshot_field: Field
     obstacle_mask: NDArray[np.bool_] | None
     free_sides: tuple[str, ...]
+    snapshot_decimation: int
+    provenance: RunProvenance
 
     def __post_init__(self) -> None:
         """Reject a run whose probes, fields, time axis and grid disagree.
@@ -1194,9 +1365,13 @@ class ElasticFDTDResult(OwnsArrays):
         frame recorded on a different grid into a plausible field over a
         domain it never covered.
 
+        :raises TypeError: if ``snapshot_decimation`` is not a number, or
+            ``provenance`` is not a :class:`RunProvenance`.
         :raises ValueError: if the probe, field, time-step, snapshot or grid
-            axes disagree.
+            axes disagree, or ``snapshot_decimation`` is not a whole number
+            of 1 or more.
         """
+        _require_provenance(type(self).__name__, self.provenance)
         require_ranks(
             self,
             times=1,
@@ -1214,9 +1389,16 @@ class ElasticFDTDResult(OwnsArrays):
         require_same_length(self, "probe_fields", ("signals", 1), axis="recorded field")
         require_same_length(self, "times", ("signals", 2), axis="time step")
         require_same_length(self, "snapshots", "snapshot_times", axis="snapshot")
-        _require_grid_axes(
-            type(self).__name__, self.shape, self.snapshots, self.obstacle_mask
+        decimation = _require_grid_axes(
+            type(self).__name__,
+            self.shape,
+            self.snapshots,
+            self.obstacle_mask,
+            self.snapshot_decimation,
         )
+        # Held as an int, so a whole float or a NumPy integer reads back as
+        # the plain step a slice and the snapshot renderer take.
+        object.__setattr__(self, "snapshot_decimation", decimation)
 
     @property
     def size(self) -> tuple[float, float]:
@@ -1279,12 +1461,47 @@ class ElasticRecording(RichDisplay):
         (and at :math:`t = 0`); ``None`` records none.
     :param snapshot_field: Field recorded in the snapshots
         (``"p"``/``"vx"``/``"vy"``, interpolated to cell centres).
+    :param snapshot_decimation: Keep every this many cells along each axis
+        in a snapshot (default 1, every cell); the result records it.
+    :raises TypeError: for a probe that is not a pair or has an index that is
+        not a number, a ``snapshot_every`` that is a flag, a text, an array or
+        anything else that is neither a number nor ``None``, or a
+        ``snapshot_decimation`` that is a flag, a text, an array or anything
+        else that is not a number.
+    :raises ValueError: for ``probe_fields`` that are empty, repeat a field or
+        name one that is not ``"p"``, ``"vx"`` or ``"vy"``, a
+        ``snapshot_field`` that is none of them, a probe of more or fewer than
+        two indices or with an index that is not a whole number, or a
+        ``snapshot_every`` or ``snapshot_decimation`` that is not a whole
+        number of 1 or more.
     """
 
     probes: Sequence[tuple[int, int]] = ()
     probe_fields: Sequence[str] = ("vy",)
     snapshot_every: int | None = None
     snapshot_field: Field = "p"
+    snapshot_decimation: int = 1
+
+    def __post_init__(self) -> None:
+        """Refuse a malformed probe, field or count when the record is built.
+
+        Whether a probe lies on the grid, and outside the obstacle, is checked
+        by :func:`elastic_fdtd_simulation`, the first place a grid exists.
+        """
+        fields = _resolve_probe_fields(self.probe_fields)
+        if self.snapshot_field not in _FIELD_NAMES:
+            msg = f"snapshot_field must be one of {_FIELD_NAMES}"
+            raise ValueError(msg)
+        every, decimation = _snapshot_options(
+            self.snapshot_every, self.snapshot_decimation
+        )
+        # Held as tuples and plain ints, so a list handed in cannot change the
+        # record after it is built, and a whole float or a NumPy integer reads
+        # back as the count a slice takes.
+        object.__setattr__(self, "probes", _probe_pairs(self.probes))
+        object.__setattr__(self, "probe_fields", fields)
+        object.__setattr__(self, "snapshot_every", every)
+        object.__setattr__(self, "snapshot_decimation", decimation)
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -1351,21 +1568,83 @@ def _resolve_probe_fields(probe_fields: Sequence[str]) -> tuple[str, ...]:
     return fields
 
 
+def _device_mask(b: _backends.Backend, host: NDArray[np.bool_]) -> DeviceArray:
+    """A host boolean array as a boolean array on the device.
+
+    A backend hands over floating arrays, so the mask goes as exact zeros
+    and ones and turns boolean again on the device.
+    """
+    return b.asarray(host.astype(np.float64)) > 0.0
+
+
+def _probe_gathers(
+    sim: ElasticFDTD2D, rows: NDArray[np.int_], cols: NDArray[np.int_]
+) -> dict[str, DeviceArray]:
+    """Flat indices and edge masks of the probe cells, on the device, once.
+
+    The Array API standard indexes one axis with an integer array, not two
+    at once, so each probe cell becomes one index into its field flattened
+    row by row: ``row * width + column``, with the width of the field read.
+    A face beyond the domain edge has no stored velocity; its index is
+    clamped to a stored face and the mask zeroes what it reads.
+    """
+    b = sim._backend
+    ny, nx = sim.txx.shape
+    with b.context():
+        return {
+            "centre": b.index(rows * nx + cols),
+            "vx_left": b.index(rows * (nx - 1) + np.maximum(cols - 1, 0)),
+            "vx_right": b.index(rows * (nx - 1) + np.minimum(cols, nx - 2)),
+            "vy_above": b.index(np.maximum(rows - 1, 0) * nx + cols),
+            "vy_below": b.index(np.minimum(rows, ny - 2) * nx + cols),
+            "has_left": _device_mask(b, cols > 0),
+            "has_right": _device_mask(b, cols < nx - 1),
+            "has_above": _device_mask(b, rows > 0),
+            "has_below": _device_mask(b, rows < ny - 1),
+        }
+
+
 def _sample_probes(
-    sim: ElasticFDTD2D, field: str, rows: NDArray[np.int_], cols: NDArray[np.int_]
-) -> NDArray[np.float64]:
+    sim: ElasticFDTD2D, field: str, g: dict[str, DeviceArray]
+) -> DeviceArray:
     """Sample one field at the probe cell centres (velocities averaged)."""
+    xp = sim._xp
+
+    def flat(a: DeviceArray) -> DeviceArray:
+        return xp.reshape(a, (-1,))
+
     if field == "p":
-        return -0.5 * (sim.txx[rows, cols] + sim.tyy[rows, cols])
+        return -0.5 * (
+            xp.take(flat(sim.txx), g["centre"]) + xp.take(flat(sim.tyy), g["centre"])
+        )
     if field == "vx":
-        nx = sim.txx.shape[1]
-        left = np.where(cols > 0, sim.vx[rows, np.maximum(cols - 1, 0)], 0.0)
-        right = np.where(cols < nx - 1, sim.vx[rows, np.minimum(cols, nx - 2)], 0.0)
-        return np.asarray(0.5 * (left + right), dtype=np.float64)
-    ny = sim.txx.shape[0]
-    above = np.where(rows > 0, sim.vy[np.maximum(rows - 1, 0), cols], 0.0)
-    below = np.where(rows < ny - 1, sim.vy[np.minimum(rows, ny - 2), cols], 0.0)
-    return np.asarray(0.5 * (above + below), dtype=np.float64)
+        left = xp.where(g["has_left"], xp.take(flat(sim.vx), g["vx_left"]), 0.0)
+        right = xp.where(g["has_right"], xp.take(flat(sim.vx), g["vx_right"]), 0.0)
+        return 0.5 * (left + right)
+    above = xp.where(g["has_above"], xp.take(flat(sim.vy), g["vy_above"]), 0.0)
+    below = xp.where(g["has_below"], xp.take(flat(sim.vy), g["vy_below"]), 0.0)
+    return 0.5 * (above + below)
+
+
+def _store_samples(
+    sim: ElasticFDTD2D,
+    probe_fields: tuple[str, ...],
+    gathers: dict[str, DeviceArray],
+    column: int,
+    signals: NDArray[np.float64],
+    buffer: DeviceArray | None,
+) -> None:
+    """Write this step's probe samples into column *column* of the record.
+
+    Into ``signals`` itself when there is no device ``buffer`` (NumPy), into
+    the buffer otherwise.
+    """
+    for k, field in enumerate(probe_fields):
+        sample = _sample_probes(sim, field, gathers)
+        if buffer is None:
+            signals[:, k, column] = sample
+        else:
+            buffer[:, k, column] = sample
 
 
 def _record_elastic_run(
@@ -1375,8 +1654,9 @@ def _record_elastic_run(
     probe_fields: tuple[str, ...],
     snapshot_every: int | None,
     snapshot_field: Field,
+    snapshot_decimation: int,
     signals: NDArray[np.float64],
-    snapshots: NDArray[np.float64] | None,
+    snapshots: NDArray[np.floating] | None,
 ) -> None:
     """Step the engine, writing probe histories and field snapshots in place.
 
@@ -1385,39 +1665,37 @@ def _record_elastic_run(
     one frame every ``snapshot_every`` steps, ``steps // snapshot_every + 1``
     of them. Both are allocated by the caller before the march, so that the
     run is never held twice, as a list of frames and their stack.
+
+    On NumPy the probe samples are written straight into ``signals``; on a
+    device they go into a buffer there, which comes to the host once, after
+    the march. Each snapshot is cut to every ``snapshot_decimation``-th cell
+    on the device and comes to the host as it is taken, so only the cells
+    it keeps cross.
     """
+    b = sim._backend
+    d = snapshot_decimation
     if snapshots is not None:
-        snapshots[0] = sim.collocated(snapshot_field)
-    rows = probe_ix[:, 1]
-    cols = probe_ix[:, 0]
-    for i in range(steps):
-        sim.step()
-        if probe_ix.shape[0]:
-            for k, field in enumerate(probe_fields):
-                signals[:, k, i + 1] = _sample_probes(sim, field, rows, cols)
-        if (
-            snapshots is not None
-            and snapshot_every is not None
-            and (i + 1) % snapshot_every == 0
-        ):
-            snapshots[(i + 1) // snapshot_every] = sim.collocated(snapshot_field)
-
-
-def _validated_snapshot_options(
-    recording: ElasticRecording,
-) -> tuple[int | None, Field]:
-    """Validate and normalise the snapshot cadence and field."""
-    snapshot_every = recording.snapshot_every
-    snapshot_field = recording.snapshot_field
-    if snapshot_field not in _FIELD_NAMES:
-        msg = f"snapshot_field must be one of {_FIELD_NAMES}"
-        raise ValueError(msg)
-    if snapshot_every is not None:
-        snapshot_every = _integer("snapshot_every", snapshot_every)
-        if snapshot_every < 1:
-            msg = "snapshot_every must be >= 1"
-            raise ValueError(msg)
-    return snapshot_every, snapshot_field
+        snapshots[0] = b.to_host(sim.collocated(snapshot_field)[::d, ::d])
+    n_probes = probe_ix.shape[0]
+    gathers = _probe_gathers(sim, probe_ix[:, 1], probe_ix[:, 0]) if n_probes else {}
+    buffer = (
+        None if b.name == "numpy" else b.zeros((n_probes, len(probe_fields), steps + 1))
+    )
+    with b.context():
+        for i in range(steps):
+            sim.step()
+            if n_probes:
+                _store_samples(sim, probe_fields, gathers, i + 1, signals, buffer)
+            if (
+                snapshots is not None
+                and snapshot_every is not None
+                and (i + 1) % snapshot_every == 0
+            ):
+                snapshots[(i + 1) // snapshot_every] = b.to_host(
+                    sim.collocated(snapshot_field)[::d, ::d]
+                )
+    if buffer is not None:
+        signals[...] = b.to_host(buffer)
 
 
 def _validated_absorbing_layer(
@@ -1448,6 +1726,7 @@ def elastic_fdtd_simulation(
     boundaries: ElasticBoundaries | None = None,
     obstacle_mask: NDArray[np.bool_] | None = None,
     damping: float = 0.0,
+    compute: Compute | None = None,
 ) -> ElasticFDTDResult:
     r"""Run a deterministic 2D elastic (P-SV) FDTD simulation.
 
@@ -1490,19 +1769,43 @@ def elastic_fdtd_simulation(
     :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells
         (rasterised interior geometry).
     :param damping: Uniform bulk amplitude decay rate [1/s].
+    :param compute: Where the run steps (:class:`Compute`); ``None`` follows
+        :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
     :return: An :class:`ElasticFDTDResult`.
+    :raises TypeError: If an input is of the wrong type, among them a ``cfl``
+        or ``dx`` that is not one number, a ``recording`` that is neither an
+        :class:`ElasticRecording` nor ``None``, or a ``compute`` that is
+        neither a :class:`Compute` nor ``None``.
     :raises ValueError: If the inputs are invalid.
+    :raises ComputeImportError: When the device's library is not installed
+        or does not import.
+    :raises ComputeDeviceError: When the device is not present, or fails a
+        first small computation; with ``fallback=True`` the run warns with
+        :class:`ComputeFallbackWarning` and steps on NumPy instead.
     """
-    recording = ElasticRecording() if recording is None else recording
+    recording = _recording_or_empty(recording, ElasticRecording)
     boundaries = ElasticBoundaries() if boundaries is None else boundaries
     if len(sources) == 0:
         msg = "at least one source is required"
         raise ValueError(msg)
     duration = _positive_finite("duration", duration)
-    fields = _resolve_probe_fields(recording.probe_fields)
-    snapshot_every, snapshot_field = _validated_snapshot_options(recording)
+    fields = tuple(recording.probe_fields)
+    snapshot_every = recording.snapshot_every
+    snapshot_field = recording.snapshot_field
+    d = recording.snapshot_decimation
     absorbing_sides, free_sides = _parse_elastic_boundaries(boundaries.sides)
     absorbing_layer_cells = _validated_absorbing_layer(boundaries, absorbing_sides)
+
+    # The grid, the obstacle, the sources, the probes and the step count are
+    # checked on the host first, through the helpers the engine uses, so a
+    # bad one raises its own error before the engine asks for its device.
+    cp_map, _, dt = _elastic_grid(c_p, shape, cfl, dx)
+    ny, nx = cp_map.shape
+    obstacle = _validated_obstacle(obstacle_mask, ny, nx)
+    for source in sources:
+        _check_elastic_source(source, (ny, nx), obstacle)
+    probe_ix = _probe_indices(recording.probes, (ny, nx), obstacle)
+    steps = _step_count(duration, dt)
 
     sim = ElasticFDTD2D(
         c_p,
@@ -1516,25 +1819,23 @@ def elastic_fdtd_simulation(
         shape=shape,
         free_sides=free_sides,
         obstacle_mask=obstacle_mask,
+        compute=compute,
     )
     for source in sources:
         sim.add_source(source)
-
-    ny, nx = sim.txx.shape
-    probe_ix = _probe_indices(recording.probes, (ny, nx), sim._obstacle)
-
-    steps = round(duration / sim.dt)
-    if steps < 1:
-        msg = f"duration must cover at least one time step (dt = {sim.dt:.3e} s)"
-        raise ValueError(msg)
     times = np.arange(steps + 1, dtype=np.float64) * sim.dt
     # The record keeps these two as they are (handed_over): the snapshots are
     # most of the result, and a copy would hold them twice while it is built.
+    # The probe histories are float64 whatever the run's dtype; the snapshots
+    # keep it, a float32 run's being half the size.
     signals = np.zeros((probe_ix.shape[0], len(fields), steps + 1), dtype=np.float64)
     snapshots = (
         None
         if snapshot_every is None
-        else np.zeros((steps // snapshot_every + 1, ny, nx), dtype=np.float64)
+        else np.zeros(
+            (steps // snapshot_every + 1, -(-ny // d), -(-nx // d)),
+            dtype=sim._backend.host_dtype,
+        )
     )
     _record_elastic_run(
         sim,
@@ -1543,6 +1844,7 @@ def elastic_fdtd_simulation(
         fields,
         snapshot_every,
         snapshot_field,
+        d,
         signals,
         snapshots,
     )
@@ -1567,4 +1869,6 @@ def elastic_fdtd_simulation(
         snapshot_field=snapshot_field,
         obstacle_mask=(sim._obstacle if sim._obstacle is not None else None),
         free_sides=sim.free_sides,
+        snapshot_decimation=d,
+        provenance=sim.provenance,
     )

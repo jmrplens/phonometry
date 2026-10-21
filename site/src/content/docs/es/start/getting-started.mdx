@@ -28,8 +28,8 @@ o versiones más recientes. Cada una de esas versiones mínimas, y cada mínima 
 los extras, es la más antigua con la que pasan los tests de la biblioteca, y un
 trabajo de CI instala exactamente esas versiones en Python 3.12 para que siga
 siendo así: matplotlib 3.10.7 para `[plot]`, reportlab 4.0.4 y svglib 0.9.0
-para `[report]`, numba 0.60.0 para `[perf]` y python-soundfile 0.12.0 para
-`[audio]`.
+para `[report]`, numba 0.60.0 para `[perf]`, python-soundfile 0.12.0 para
+`[audio]` y torch 2.3.0 con array-api-compat 1.5.1 para `[torch]`.
 
 ### Extras opcionales
 
@@ -39,20 +39,25 @@ pip install phonometry[perf]    # numba, ponderación temporal 'impulse' más r�
 pip install phonometry[report]  # reportlab + svglib, para que los métodos .report() generen fichas PDF normativas (su panel de gráfica necesita también [plot])
 pip install phonometry[audio]   # python-soundfile, para que phonometry.io lea también FLAC, AIFF, Ogg/Opus, MP3 y WAV comprimido
 pip install phonometry[full]    # todos los anteriores (recomendado)
+pip install phonometry[torch]   # torch + array-api-compat, para que las simulaciones FDTD calculen con PyTorch (CPU, CUDA o MPS de Apple); [full] no lo incluye
 ```
 
 Recomiendo `pip install phonometry[full]`: instala de una vez matplotlib,
 numba, reportlab, svglib y soundfile, con lo que quedan habilitadas todas las
-funcionalidades de la biblioteca. La instalación base calcula todas las
-métricas solo con NumPy y SciPy. Esto incluye leer con `phonometry.io` todo
-WAV lineal de medición (24 bits, multicanal EXTENSIBLE, RF64); lo único que no
-queda disponible son las figuras (`.plot()` y las gráficas de respuesta de los
+funcionalidades de la biblioteca salvo el cálculo de las simulaciones FDTD con
+torch, que añade `[torch]`. La instalación base calcula todas las métricas solo
+con NumPy y SciPy. Esto incluye leer con `phonometry.io` todo WAV lineal de
+medición (24 bits, multicanal EXTENSIBLE, RF64); lo único que no queda
+disponible son las figuras (`.plot()` y las gráficas de respuesta de los
 filtros), las fichas PDF normativas (`.report()`), el núcleo compilado que
-acelera la ponderación temporal `impulse` y los formatos de audio comprimidos.
-Un apunte de licencias sobre `[audio]`: instala python-soundfile, cuyo wheel
-empaqueta **libsndfile bajo LGPL-2.1** (enlazada dinámicamente, el mismo
-patrón que librosa y torchaudio). La instalación base se mantiene libre de
-ella a propósito, y por eso los formatos metrológicos no necesitan extra.
+acelera la ponderación temporal `impulse`, los demás formatos de audio (FLAC,
+AIFF, Ogg/Opus, MP3 y WAV comprimido) y el cálculo de las simulaciones FDTD con
+torch (que se calculan con NumPy de todos modos, y en una GPU de NVIDIA en
+cuanto se instala CuPy). Un apunte de licencias sobre `[audio]`: instala
+python-soundfile, cuyo wheel empaqueta **libsndfile bajo LGPL-2.1** (enlazada
+dinámicamente, el mismo patrón que librosa y torchaudio). La instalación base
+se mantiene libre de ella a propósito, y por eso los formatos metrológicos no
+necesitan extra.
 
 Un matiz sobre `[full]`: numba es el único extra que pone un tope a NumPy, y
 solo lo sube cuando pasa a admitir una versión menor nueva de NumPy. Por eso,
@@ -61,6 +66,25 @@ en las semanas siguientes a una versión menor de NumPy, `phonometry[full]`
 lo que obtiene una instalación simple. numba solo acelera la ponderación
 temporal `impulse`, de modo que si necesitas la última versión de NumPy el
 mismo día que sale, instala `phonometry[plot,report]` y deja fuera `[perf]`.
+
+`[full]` deja fuera `[torch]` a propósito: los wheels de torch que sirve PyPI
+para Linux traen gigabytes de bibliotecas de CUDA. En una máquina Linux sin GPU
+de NVIDIA, instala primero torch desde el índice de CPU de PyTorch y después
+el extra, que conserva el torch que encuentra, y esas bibliotecas se quedan
+fuera:
+
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install phonometry[torch]
+```
+
+Añadir ese índice con `--extra-index-url` no basta: pip toma el torch más
+reciente que encuentra en cualquiera de los dos índices, también el de
+PyPI con CUDA.
+
+[Dónde se calcula una simulación](/phonometry/es/simulation/compute/) explica
+qué necesita cada dispositivo de las simulaciones FDTD, entre ellos el wheel
+de CuPy para una GPU de NVIDIA.
 
 ### Desde un clon
 

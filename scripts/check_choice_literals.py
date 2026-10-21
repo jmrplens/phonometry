@@ -211,6 +211,12 @@ OPEN: dict[tuple[str, str, str], str] = {
     ("phonometry.signals._correlation", "time_delay", "window"): (
         "any window scipy.signal.get_window accepts, an open set"
     ),
+    ("phonometry.simulation.compute", "RunProvenance", "cuda_driver_api"): (
+        "a CUDA version the GPU driver reports, open like every version number"
+    ),
+    ("phonometry.simulation.compute", "RunProvenance", "cuda_runtime"): (
+        "a CUDA version the array library reports, open like every version number"
+    ),
     ("phonometry.solids.catalogue", "solids_named", "name"): _CATALOGUE_NAME,
     (
         "phonometry.vibration.machinery.diagnostics",

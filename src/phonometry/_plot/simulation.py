@@ -133,13 +133,28 @@ def _render_snapshot(
     colorbar_label: str,
     title: str,
     language: Language,
+    decimation: int,
+    dx: float,
     **kwargs: Any,
 ) -> Axes:
-    """Render one field raster with the geometry overlaid (shared core)."""
+    """Render one field raster with the geometry overlaid (shared core).
+
+    A field recorded with ``decimation`` d keeps the first cell of every d by
+    d block of the grid of spacing ``dx``; the obstacle map is the whole grid
+    whatever the field keeps, and is drawn over the domain.
+    """
     from .._i18n import localize_axes
 
     lx, ly = size
-    extent = (0.0, lx, ly, 0.0)
+    domain = (0.0, lx, ly, 0.0)
+    if decimation == 1:
+        extent = domain
+    else:
+        # Each sample is the first cell of a decimation-by-decimation block,
+        # drawn over that block; the last block may overhang the domain, and
+        # the axis limits below cut it at the edge.
+        rows, cols = field.shape
+        extent = (0.0, cols * decimation * dx, rows * decimation * dx, 0.0)
     vmax = float(np.abs(field).max()) or 1.0
     img = ax.imshow(
         field,
@@ -161,9 +176,12 @@ def _render_snapshot(
             vmin=0.0,
             vmax=2.0,
             origin="upper",
-            extent=extent,
+            extent=domain,
             interpolation="nearest",
         )
+    if decimation > 1:
+        ax.set_xlim(0.0, lx)
+        ax.set_ylim(ly, 0.0)
     for x, y in source_positions:
         ax.plot(x, y, marker="*", markersize=10, color=_C_REFERENCE, linestyle="none")
     for k in range(probe_positions.shape[0]):
@@ -242,7 +260,11 @@ def plot_fdtd_snapshot(
     and probe cells are marked.  The default colormap follows the axes
     background so zero pressure blends into the page -- ``RdBu_r`` on a
     light background, the black-centred ``phonometry_field_dark`` on a dark
-    one -- and ``cmap`` overrides it.
+    one -- and ``cmap`` overrides it. A snapshot recorded with
+    ``snapshot_decimation`` d draws each sample over the d by d block of
+    cells it was taken from, and the axes still end at the domain's edges:
+    when d > 1 their limits are fixed there, which turns autoscaling off for
+    anything drawn on them afterwards; with d = 1 they are left to autoscale.
 
     :param result: A :class:`~phonometry.simulation.fdtd.FDTDResult` with
         recorded snapshots.
@@ -253,6 +275,8 @@ def plot_fdtd_snapshot(
     :return: The axes.
     :raises ValueError: If the result holds no snapshots.
     """
+    from ..simulation.fdtd import PlaneWaveSource
+
     if result.snapshots is None or result.snapshot_times is None:
         msg = (
             "the result holds no snapshots; rerun the "
@@ -267,13 +291,18 @@ def plot_fdtd_snapshot(
         size=result.size,
         shape=result.shape,
         obstacle_mask=result.obstacle_mask,
+        # A plane wave is injected along a whole line and has no cell to mark.
         source_positions=[
-            ((s.ix + 0.5) * result.dx, (s.iy + 0.5) * result.dx) for s in result.sources
+            ((s.ix + 0.5) * result.dx, (s.iy + 0.5) * result.dx)
+            for s in result.sources
+            if not isinstance(s, PlaneWaveSource)
         ],
         probe_positions=result.probe_positions,
         colorbar_label=_t(_PRESSURE_LABEL, language),
         title=_t("FDTD pressure field at $t$ = {t_txt} ms", language, t_txt=t_txt),
         language=language,
+        decimation=result.snapshot_decimation,
+        dx=result.dx,
         **kwargs,
     )
 
@@ -355,7 +384,10 @@ def plot_elastic_snapshot(
     velocity component, at cell centres) with the same raster styling as
     the acoustic snapshot renderer, including its background-aware default
     colormap (``RdBu_r`` on a light axes background, the black-centred
-    ``phonometry_field_dark`` on a dark one; ``cmap`` overrides it).
+    ``phonometry_field_dark`` on a dark one; ``cmap`` overrides it) and its
+    drawing of a decimated snapshot, each sample over its block of cells,
+    with the axes limits fixed to the domain (autoscaling off) when
+    ``snapshot_decimation`` is greater than 1.
 
     :param result: An
         :class:`~phonometry.simulation.elastic_fdtd.ElasticFDTDResult`
@@ -388,5 +420,7 @@ def plot_elastic_snapshot(
         colorbar_label=_t(_ELASTIC_FIELD_LABELS[result.snapshot_field], language),
         title=_t(_ELASTIC_FIELD_TITLES[result.snapshot_field], language, t_txt=t_txt),
         language=language,
+        decimation=result.snapshot_decimation,
+        dx=result.dx,
         **kwargs,
     )

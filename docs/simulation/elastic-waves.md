@@ -53,10 +53,12 @@ that record ``p``, ``vx`` or ``vy``, the same sponge and obstacle
 machinery, and a frozen `ElasticFDTDResult` with the same `.plot()`. What
 the run writes down travels as one `ElasticRecording` (the probe cells and
 their fields, the snapshot cadence and its field) and how the domain ends
-as one `ElasticBoundaries` (the sides and the sponge thickness). The
-Courant bound depends only on the fastest $c_\mathrm{P}$ in the map (Virieux
-Eqs. 6-7), while the resolution rule uses the slowest wave speed anywhere
-in the domain -- the slowest non-zero $c_\mathrm{S}$ of the solid cells or, if a
+as one `ElasticBoundaries` (the sides and the sponge thickness). Like the
+acoustic `FDTDRecording`, the recording refuses a malformed probe, field or
+count when it is built. The Courant bound depends only on the fastest
+$c_\mathrm{P}$ in the map (Virieux Eqs. 6-7), while the resolution rule
+uses the slowest wave speed anywhere in the domain -- the slowest
+non-zero $c_\mathrm{S}$ of the solid cells or, if a
 fluid region carries a still slower $c_\mathrm{P}$, that fluid speed:
 $\Delta x \le c_\text{min} / (10 f)$ (in a wholly solid map the S wavelength is always
 the shortest; in mixed domains the fluid P wavelength can be shorter, as
@@ -82,6 +84,30 @@ res = simulation.elastic_fdtd_simulation(
 t = res.times[1:]
 t1, t2 = (t[np.abs(res.signals[k, 0, 1:]).argmax()] for k in range(2))
 print(round(0.24 / (t2 - t1)))    # 6424  c_P = sqrt((lambda+2mu)/rho) = 6450.5
+print(res.provenance.device, res.provenance.dtype)   # cpu float64
+```
+
+The run stepped on NumPy in float64, as `res.provenance` records. The
+elastic solver takes the same `compute=` as the acoustic one, and so does
+`ElasticFDTD2D.from_regions`: the block above steps on an NVIDIA GPU through
+CuPy with one more argument. On such a device the engine's own fields,
+`sim.p` and `sim.collocated(field)` included, are that device's arrays, and
+`sim.host_field(name)` gives a NumPy copy; a result is on the host whatever
+device stepped. [Where a simulation runs](compute.md) covers the devices, what each needs
+installed and what is promised about the numbers on each.
+
+```py
+on_gpu = simulation.elastic_fdtd_simulation(
+    ALUMINUM.c_p, ALUMINUM.c_s, 0.002, 1.1e-4, rho=ALUMINUM.rho,
+    shape=(501, 501),
+    sources=[simulation.ExplosionSource(
+        ix=250, iy=250,
+        waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=w).value)],
+    recording=simulation.ElasticRecording(
+        probes=[(350, 250), (470, 250)], probe_fields=("p",)),
+    compute=simulation.Compute(device="cupy"),
+)
+print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
 ```
 
 ## 2. Fluids inside the elastic solver
@@ -479,6 +505,8 @@ waves probe the sediment shear stiffness.
 - [2D FDTD wave simulation](fdtd-simulation.md): the acoustic solver this
   guide extends, with the staggered grid, the Courant bound, the sources,
   probes and boundary machinery shared by both.
+- [Where a simulation runs](compute.md): both solvers on an NVIDIA GPU
+  through CuPy or on PyTorch, and what is promised about their numbers.
 - [Predicting Panel Sound Insulation](../buildings/design/panel-sound-insulation.md): the mass
   law and coincidence closed forms; the immersed-plate run of section 7 is
   their full-wave cross-check.

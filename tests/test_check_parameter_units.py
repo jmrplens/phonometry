@@ -22,6 +22,7 @@ fails bare as it did before.
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import functools
 import inspect
@@ -1846,3 +1847,20 @@ def test_a_qualifier_exemption_nothing_needs_is_stale(
     monkeypatch.setitem(cpu.QUALIFIER_ONLY_EXEMPT, key, "a reason for nothing")
     _, stale = cpu.qualifier_only_decibels()
     assert key in stale
+
+
+@contextlib.contextmanager
+def _placed() -> Iterator[None]:
+    yield
+
+
+def test_a_decorated_function_is_found_where_its_source_is() -> None:
+    """A ``@contextmanager`` function is located in its own file, not contextlib's.
+
+    The decorator hands back a wrapper whose code lives in ``contextlib.py``,
+    outside the tree, and the location of every public name is read relative
+    to it: reading the wrapper's file crashed the whole walk.
+    """
+    where = cpu._where(_placed)
+    line = inspect.getsourcelines(_placed.__wrapped__)[1]
+    assert where == f"tests/test_check_parameter_units.py:{line}"

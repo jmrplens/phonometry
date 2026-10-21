@@ -106,7 +106,8 @@ graphs:
 	rm -rf $(FIGURE_ANNOTATION_DIR)
 	# And for the tick-label measurement.
 	rm -rf $(FIGURE_TICK_DIR)
-	$(FIGURE_ENV) $(FIGURE_LANGUAGE_ENV) $(FIGURE_ANNOTATION_ENV) $(FIGURE_TICK_ENV) $(PYTHON) scripts/generate_graphs.py
+	# The committed figures are drawn on NumPy, whatever the shell asks for.
+	env -u PHONOMETRY_COMPUTE $(FIGURE_ENV) $(FIGURE_LANGUAGE_ENV) $(FIGURE_ANNOTATION_ENV) $(FIGURE_TICK_ENV) $(PYTHON) scripts/generate_graphs.py
 	$(FIGURE_ENV) $(FIGURE_LANGUAGE_ENV) $(PYTHON) scripts/generate_diagrams.py
 
 # Every shaded region has to be visible against the page it is drawn on, on
@@ -763,12 +764,22 @@ test-perf:
 test-gpu:
 	$(TEST_ENV) $(PYTHON) -m pytest -rs tests/test_fdtd_gpu_parity.py
 
+# The CuPy proof in gpu-parity.lock, run where CuPy and an NVIDIA GPU are
+# (docker/node/Dockerfile builds such an environment). Rerun it after any
+# change to the engines, fdtd.py, elastic_fdtd.py and _backends.py under
+# src/phonometry/simulation/, or to scripts/engine_scenarios.py:
+# tests/simulation/test_gpu_parity_lock.py fails until the lock carries their
+# new fingerprint. src goes first on the path, so the engine measured is this
+# checkout's and not an installed one; the script refuses any other.
+gpu-parity:
+	PYTHONPATH=src $(TEST_ENV) $(PYTHON) scripts/gpu_parity.py --write
+
 check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
 	assets animations animation-freshness animation-audit posters brand lighthouse \
-	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
+	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu gpu-parity coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \

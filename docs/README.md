@@ -346,6 +346,7 @@ field itself on a finite-difference grid.
 
 - [2D FDTD wave simulation](simulation/fdtd-simulation.md): the deterministic staggered-grid pressure-velocity FDTD solver (Attenborough & Van Renterghem 2021, chapter 4) with Gaussian, tone and arbitrary-signal sources, pressure probes, rasterised obstacles, rigid/impedance/absorbing boundaries, the near-to-far-field Kirchhoff-Helmholtz chain, and a result object with probe histories and field snapshots
 - [Elastic waves and fluid-solid coupling](simulation/elastic-waves.md): the elastic P-SV companion solver (Virieux 1986) on the same staggered grid, with stress-imaging free surfaces and Rayleigh waves, fluids as the shear-free limit, and fluid-solid coupling validated against Brekhovskikh & Godin: mode conversion, Scholte interface waves and immersed-plate transmission
+- [Where a simulation runs: NumPy, CuPy and torch](simulation/compute.md): both solvers on NumPy, on an NVIDIA GPU through CuPy or on PyTorch, chosen with a `Compute` request, a `use()` block or `PHONOMETRY_COMPUTE`, with the fallback to NumPy, the provenance every result records, the bit-identical CuPy fields and the published torch bounds, and decimated snapshots
 
 ## Reference
 

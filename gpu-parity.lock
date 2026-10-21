@@ -1,0 +1,325 @@
+{
+ "base_image": "nvidia/cuda:13.3.1-runtime-ubuntu24.04@sha256:63da350831208559df18c7b8f3e0d5d1c984eaa815cdde690aacd6606cd0cb11",
+ "cuda_driver_api": "13.3",
+ "cupy": "14.2.0",
+ "cupy_cuda_runtime": "13.2",
+ "engine_fingerprint": "14a4ef9ecbe3224022fb53be2918faea06f1c41d2d2dc8f1cda7a06d150d5119",
+ "fields_bit_identical": true,
+ "fields_max_relative": {
+  "contour": 0.0,
+  "elastic_force_obstacle": 0.0,
+  "elastic_layers": 0.0,
+  "impedance": 0.0,
+  "obstacle_damping": 0.0,
+  "plane_wave": 0.0,
+  "sponge": 0.0
+ },
+ "gpu": "NVIDIA GeForce RTX 4060",
+ "keys": {
+  "contour": {
+   "contour0_1500_p": {
+    "bit_identical": true,
+    "kind": "phasor",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "contour0_1500_v": {
+    "bit_identical": true,
+    "kind": "phasor",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "contour0_3000_p": {
+    "bit_identical": true,
+    "kind": "phasor",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "contour0_3000_v": {
+    "bit_identical": true,
+    "kind": "phasor",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "energy": {
+    "bit_identical": false,
+    "kind": "reduction",
+    "max_abs": 8.271806125530277e-25,
+    "max_relative": 1.630534100567117e-16
+   },
+   "p": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   }
+  },
+  "elastic_force_obstacle": {
+   "collocated_vx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "collocated_vy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "energy": {
+    "bit_identical": false,
+    "kind": "reduction",
+    "max_abs": 1.6155871338926322e-27,
+    "max_relative": 1.7292447730268256e-16
+   },
+   "frames": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "txx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "txy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "tyy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   }
+  },
+  "elastic_layers": {
+   "collocated_vx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "collocated_vy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "energy": {
+    "bit_identical": true,
+    "kind": "reduction",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "frames": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "txx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "txy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "tyy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   }
+  },
+  "impedance": {
+   "energy": {
+    "bit_identical": true,
+    "kind": "reduction",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "p": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   }
+  },
+  "obstacle_damping": {
+   "energy": {
+    "bit_identical": true,
+    "kind": "reduction",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "frames": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "p": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   }
+  },
+  "plane_wave": {
+   "energy": {
+    "bit_identical": false,
+    "kind": "reduction",
+    "max_abs": 2.6469779601696886e-23,
+    "max_relative": 1.7891035517065168e-16
+   },
+   "p": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   }
+  },
+  "sponge": {
+   "energy": {
+    "bit_identical": false,
+    "kind": "reduction",
+    "max_abs": 2.0679515313825692e-25,
+    "max_relative": 1.3716398884783176e-16
+   },
+   "frames": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "p": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vx": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   },
+   "vy": {
+    "bit_identical": true,
+    "kind": "field",
+    "max_abs": 0.0,
+    "max_relative": 0.0
+   }
+  }
+ },
+ "max_abs_difference": {
+  "contour": 0.0,
+  "elastic_force_obstacle": 0.0,
+  "elastic_layers": 0.0,
+  "impedance": 0.0,
+  "obstacle_damping": 0.0,
+  "plane_wave": 0.0,
+  "sponge": 0.0
+ },
+ "measured_on": "2026-10-21",
+ "numpy": "2.5.3",
+ "nvidia_driver": "610.57.04",
+ "nvrtc": "13.3",
+ "phasors_bit_identical": true,
+ "phasors_max_relative": {
+  "contour": 0.0
+ },
+ "python": "3.13.16",
+ "reductions_max_relative": {
+  "contour": 1.630534100567117e-16,
+  "elastic_force_obstacle": 1.7292447730268256e-16,
+  "elastic_layers": 0.0,
+  "impedance": 0.0,
+  "obstacle_damping": 0.0,
+  "plane_wave": 1.7891035517065168e-16,
+  "sponge": 1.3716398884783176e-16
+ }
+}

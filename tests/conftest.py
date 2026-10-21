@@ -23,6 +23,9 @@ def pytest_configure(config: pytest.Config) -> None:
     # setdefault: the CI tests-perf job sets NUMBA_DISABLE_JIT=0 explicitly
     # to exercise the jitted kernel; an externally-set value must win.
     os.environ.setdefault("NUMBA_DISABLE_JIT", "1")
+    # A placement in the developer's shell must not move the suite onto a GPU
+    # or refuse it: the tests that want a device ask for it by name.
+    os.environ.pop("PHONOMETRY_COMPUTE", None)
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:

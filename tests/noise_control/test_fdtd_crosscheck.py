@@ -37,7 +37,12 @@ import numpy as np
 import pytest
 
 from phonometry.noise_control import silencers as sl
-from phonometry.simulation.fdtd import CWSource, GaussianPulse, fdtd_simulation
+from phonometry.simulation.fdtd import (
+    CWSource,
+    FDTDRecording,
+    GaussianPulse,
+    fdtd_simulation,
+)
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -66,7 +71,7 @@ def _pulse_spectrum(
         steps * dt,
         sources=[GaussianPulse(ix=source[0], iy=source[1], half_width_s=pulse_width)],
         shape=obstacle.shape,
-        probes=[probe],
+        recording=FDTDRecording(probes=[probe]),
         boundaries={
             "left": "absorbing",
             "right": "absorbing",
@@ -116,7 +121,7 @@ def _transmitted_rms(frequency: float) -> float:
         steps * dt,
         sources=[src],
         shape=(_NY, _NX),
-        probes=[(170, 7)],
+        recording=FDTDRecording(probes=[(170, 7)]),
         boundaries=boundaries,
         absorbing_layer_cells=10,
         obstacle_mask=mask,

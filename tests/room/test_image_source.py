@@ -35,7 +35,7 @@ import pytest
 
 from phonometry import room
 from phonometry.room.image_source import _WALL_ORDER
-from phonometry.simulation import GaussianPulse, fdtd_simulation
+from phonometry.simulation import FDTDRecording, GaussianPulse, fdtd_simulation
 
 C = 343.0
 
@@ -328,7 +328,7 @@ def test_fdtd_rigid_wall_echo_matches_first_image() -> None:
         duration=0.012,
         sources=[src],
         shape=(ny, nx),
-        probes=[(int(probe_x / dx), ny // 2)],
+        recording=FDTDRecording(probes=[(int(probe_x / dx), ny // 2)]),
         boundaries={
             "left": "rigid",
             "right": "absorbing",
@@ -367,7 +367,7 @@ def test_fdtd_damping_decay_recovers_t60() -> None:
         duration=1.2,
         sources=[src],
         shape=(ny, nx),
-        probes=[(2 * nx // 3, 2 * ny // 3)],
+        recording=FDTDRecording(probes=[(2 * nx // 3, 2 * ny // 3)]),
         boundaries="rigid",
         damping=damping,
     )

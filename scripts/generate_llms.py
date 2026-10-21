@@ -646,17 +646,27 @@ def _summary(version: str) -> list[str]:
         "pip install phonometry[plot]      # + matplotlib figures and .plot()",
         "pip install phonometry[perf]      # + numba-jitted impulse kernel",
         "pip install phonometry[report]    # + reportlab and svglib, for .report() PDF fiches",
+        "pip install phonometry[audio]     # + python-soundfile, for FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV",
         "pip install phonometry[full]      # all of the above (recommended)",
+        "pip install phonometry[torch]     # + torch and array-api-compat, the FDTD engines on PyTorch; not in [full]",
         "```",
         "",
         (
             "I recommend `pip install phonometry[full]`, which enables every "
-            "feature. The base install computes every metric on NumPy and SciPy "
-            "alone; without the extras only the `.plot()` figures and the "
+            "feature except the torch backend of the FDTD engines, which "
+            "`[torch]` adds. The base install computes every metric on NumPy and "
+            "SciPy alone; without the extras only the `.plot()` figures, the "
             "`.report()` PDF fiches (whose figure panel needs matplotlib as well "
-            "as reportlab and svglib) are unavailable. The `impulse` time "
-            "weighting still works without numba, on a pure-Python kernel that "
-            "is only slower."
+            "as reportlab and svglib), the compressed audio formats and the "
+            "torch backend of the FDTD engines are unavailable. The `impulse` "
+            "time weighting still works without numba, on a pure-Python kernel "
+            "that is only slower, and the FDTD engines run on NumPy either way, "
+            "and on an NVIDIA GPU once CuPy is installed. `[full]` leaves torch "
+            "out because the torch wheels PyPI serves on Linux bring gigabytes "
+            "of CUDA libraries; on a Linux machine without an NVIDIA GPU, "
+            "running `pip install torch --index-url "
+            "https://download.pytorch.org/whl/cpu` before "
+            "`pip install phonometry[torch]` takes the CPU wheels instead."
         ),
         "",
         (

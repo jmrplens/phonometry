@@ -84,3 +84,28 @@ updates:
       - "dependencies"
       - "javascript"
     open-pull-requests-limit: 2
+
+  # The base image of docker/node/Dockerfile, the GPU node the CuPy proof in
+  # gpu-parity.lock is measured on. Its CUDA minor is the node driver's own,
+  # and the CUDA headers are pinned to the exact cudart it carries, which no
+  # CI job would catch drifting, since none builds that image. So only a new
+  # digest of the same tag is proposed: a CUDA release of any size is a
+  # change made by hand, with the headers and the driver beside it.
+  - package-ecosystem: "docker"
+    directory: "/docker/node"
+    cooldown:
+      default-days: 3
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Etc/UTC"
+    labels:
+      - "dependencies"
+      - "area: simulation"
+    ignore:
+      - dependency-name: "nvidia/cuda"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"

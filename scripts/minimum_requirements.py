@@ -98,6 +98,10 @@ def python_floor(pyproject: dict[str, object]) -> str:
 def mismatches(expected: dict[str, str]) -> list[str]:
     """The floors the running environment did not install exactly.
 
+    A local version label is not part of the release: torch from its CPU
+    index installs as ``2.x.y+cpu``, which is the floor ``2.x.y`` built
+    without CUDA.
+
     :param expected: ``{name: floor}``, as :func:`floors` returns it.
     :return: One line per distribution that is missing or at another version.
     """
@@ -108,7 +112,7 @@ def mismatches(expected: dict[str, str]) -> list[str]:
         except metadata.PackageNotFoundError:
             problems.append(f"{name}: not installed, the floor is {version}")
             continue
-        if installed != version:
+        if installed.split("+", 1)[0] != version:
             problems.append(f"{name}: {installed} installed, the floor is {version}")
     return problems
 

@@ -219,8 +219,9 @@ so GitHub's *Cite this repository* button produces BibTeX and APA entries.
 
 phonometry is one person's work, and its main cost is the primary sources:
 every metric is implemented from the governing standard's paid text. You can
-[sponsor the project on GitHub](https://github.com/sponsors/jmrplens), and the
-documentation keeps a live list of the
+sponsor the project on [GitHub Sponsors](https://github.com/sponsors/jmrplens)
+or [Ko-fi](https://ko-fi.com/jmrplens), and the documentation keeps a live
+list of the
 [sources that resisted every legitimate acquisition route](https://docs.jmrp.io/phonometry/start/support/),
 with four ways to help get them: fund the purchase, send a copy privately
 (whatever its origin, it is never republished), verify against your own

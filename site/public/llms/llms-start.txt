@@ -914,11 +914,12 @@ measured and what you expected.
 
 ## Sponsor
 
-[GitHub Sponsors](https://github.com/sponsors/jmrplens) funds the project
-directly, and the money goes where the cost is: buying the standards and
-editions the implementations are written from. A one-off sponsorship that
-names one of the documents below buys exactly that document, and the entry
-leaves the table when it lands.
+[GitHub Sponsors](https://github.com/sponsors/jmrplens) and
+[Ko-fi](https://ko-fi.com/jmrplens) both fund the project directly, and the
+money goes where the cost is: buying the standards and editions the
+implementations are written from. A one-off sponsorship or Ko-fi donation
+that names one of the documents below buys exactly that document, and the
+entry leaves the table when it lands.
 
 ## The sources I could not obtain
 
@@ -927,9 +928,9 @@ Each entry has survived the whole acquisition effort: my own library, the
 official stores, the open-access indexes and every other legitimate channel I
 could find, re-checked on the date shown. Four routes help:
 
-- **Fund the purchase.** A one-off sponsorship naming the document; where a
-  link goes to an official store, the price is on that page, and for the rest
-  name the item and I will quote it in the issue.
+- **Fund the purchase.** A one-off sponsorship or Ko-fi donation naming the
+  document; where a link goes to an official store, the price is on that
+  page, and for the rest name the item and I will quote it in the issue.
 - **Send me a copy.** Whatever its origin. It stays private, it is used only
   to implement and to verify, and it is never republished: the repository
   only ever carries the derived numeric values. Write to

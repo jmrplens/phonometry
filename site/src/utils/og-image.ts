@@ -146,18 +146,19 @@ function titleType(size: number): Style {
 }
 
 /**
- * The title sizes, largest first. 34 px is kept out of the scale and tried
- * only when nothing on it fits.
+ * The title sizes, largest first: the five sizes the card has always used,
+ * and 44 px, which a title only reaches by stepping down (see `layOutTitle`).
  */
-const TITLE_SIZES = [68, 58, 48, 44, 40] as const;
-const TITLE_SIZE_LAST_RESORT = 34;
+const TITLE_SIZES = [68, 58, 48, 44, 40, 34] as const;
 
 /**
- * The size each title had while the card sized it by character count, which
- * stays as the smallest it may now get (see `layOutTitle`).
+ * The size a title gets by its length: 68 px up to 22 characters, 58 px up to
+ * 38, 48 px up to 56, 40 px up to 78 and 34 px beyond. This is the table the
+ * card has always sized titles by, and it keeps titles of near-equal length,
+ * the pages of one section or a page and its translation, at the same size.
  * @param title - The page title.
  */
-function sizeFloor(title: string): number {
+function tableSize(title: string): number {
   const n = title.length;
   if (n <= 22) return 68;
   if (n <= 38) return 58;
@@ -168,16 +169,10 @@ function sizeFloor(title: string): number {
 
 /**
  * The widest title column any card has, x = 72 to 932, where a title sits
- * when its artwork leaves it the whole width.
+ * when its artwork leaves it the whole width, and where every title sat
+ * before the column depended on the artwork.
  */
 const FULL_COLUMN = 860;
-
-/**
- * The shortest a first line should be next to the second, as a fraction of
- * it: a first line much shorter than the second leaves the title hanging off
- * a stub, "Propagación" over "submarina del sonido".
- */
-const FIRST_LINE_MIN = 0.6;
 
 /** The longest last line still too short to stand alone: one word this long or shorter. */
 const LONE_WORD_MAX = 8;
@@ -185,11 +180,43 @@ const LONE_WORD_MAX = 8;
 /** Words a line should not end on: they belong with what follows them. */
 const WEAK_END = new Set(
   (
-    'a an the of in on at to for by and or with from as into per via vs ' +
-    'el la lo los las un una unos unas de del al en y e o u ni ' +
-    'por para con sin sobre entre que se su sus'
+    'a an the of in on at to for by and or nor but with from as into onto per via vs versus ' +
+    'under over between through within without ' +
+    'el la lo los las un una unos unas de del al en y e o u ni pero por para con sin sobre ' +
+    'entre desde hasta bajo según mediante hacia tras durante contra que se su sus'
   ).split(' '),
 );
+
+/**
+ * Conjunctions and prepositions that open a phrase of their own, so a line
+ * may start with one: "Silencers, Screens / and Barriers In Situ", "Medición
+ * del aislamiento / en laboratorio".
+ */
+const PHRASE_OPENERS = new Set(
+  (
+    'and or nor but in on at for by with from into onto per via vs versus under over ' +
+    'between through within without y e o u ni pero en por para con sin sobre entre ' +
+    'desde hasta bajo según mediante hacia tras durante contra al del'
+  ).split(' '),
+);
+
+/**
+ * "of" and "de" open a phrase only before an article, "of a Sound Level
+ * Meter", "de un sonómetro". Without one they join two nouns into one term,
+ * "tiempo de reverberación", "presión sonora de emisión", which a break would
+ * split.
+ */
+const OF = new Set(['of', 'de']);
+const ARTICLE = new Set('a an the el la lo los las un una unos unas'.split(' '));
+
+/**
+ * The shortest a first line may be, as a fraction of the second, for a break
+ * before a conjunction or a preposition to count as a phrase boundary. A
+ * shorter one leaves the title hanging off a stub: "Emisión" over "de la
+ * fuente ferroviaria CNOSSOS-EU", "Reading" over "and writing measurement
+ * audio".
+ */
+const PHRASE_FIRST_LINE_MIN = 0.4;
 
 /** An abbreviation set in capitals: "ISO", "E", "ITU-R", "ISO/TS", "BS.468-4", "DB-HR". */
 const CAPITALS = /^[A-Z][A-Z0-9]*(?:[./-][A-Z0-9]+)*$/;
@@ -237,6 +264,34 @@ function breakable(before: string, after: string): boolean {
   return true;
 }
 
+/**
+ * A word as the lists of function words above spell it, in lower case, or
+ * nothing for an abbreviation in capitals: "EN" in "EN 16487" is no Spanish
+ * "en", nor "E" in "E DIN 4150-2" a Spanish "e".
+ * @param word - One space-separated word of the title.
+ */
+function functionWord(word: string): string {
+  return CAPITALS.test(word) ? '' : word.toLowerCase();
+}
+
+/**
+ * What kind of boundary a break falls on: `mark`, before a bracket or after a
+ * colon or semicolon; `word`, before a conjunction or a preposition that opens
+ * a phrase; `none`, anywhere else, and anywhere inside brackets, where the
+ * "and" of "(ISO 8253-1 and -2)" opens nothing.
+ * @param words - The title's words.
+ * @param i - Index of the first word of the second line.
+ */
+function boundary(words: string[], i: number): 'mark' | 'word' | 'none' {
+  const before = words.slice(0, i).join(' ');
+  if (before.split('(').length > before.split(')').length) return 'none';
+  if (words[i].startsWith('(') || /[:;]$/.test(words[i - 1])) return 'mark';
+  const opener = functionWord(words[i]);
+  if (PHRASE_OPENERS.has(opener)) return 'word';
+  if (OF.has(opener) && ARTICLE.has(functionWord(words[i + 1] ?? ''))) return 'word';
+  return 'none';
+}
+
 interface TitleBreak {
   lines: [string] | [string, string];
   /** Width of each line at 1 px; multiply by the size. */
@@ -245,8 +300,10 @@ interface TitleBreak {
   lone: boolean;
   /** The first line ends on a word that belongs with the next. */
   weak: boolean;
-  /** The break falls before a bracket or after a colon or semicolon. */
-  phrase: boolean;
+  /** The boundary the break falls on, from `boundary`. */
+  phrase: 'mark' | 'word' | 'none';
+  /** The break the title had while the card filled its full column line by line. */
+  had: boolean;
 }
 
 /**
@@ -257,7 +314,7 @@ interface TitleBreak {
 function titleBreaks(title: string): TitleBreak[] {
   const words = title.split(' ');
   const out: TitleBreak[] = [
-    { lines: [title], widths: [], lone: false, weak: false, phrase: false },
+    { lines: [title], widths: [], lone: false, weak: false, phrase: 'none', had: false },
   ];
   for (let i = 1; i < words.length; i++) {
     if (!breakable(words[i - 1], words[i])) continue;
@@ -266,9 +323,29 @@ function titleBreaks(title: string): TitleBreak[] {
       lines: [words.slice(0, i).join(' '), second],
       widths: [],
       lone: !second.includes(' ') && second.length <= LONE_WORD_MAX,
-      weak: WEAK_END.has(words[i - 1].toLowerCase()),
-      phrase: words[i].startsWith('(') || /[:;]$/.test(words[i - 1]),
+      weak: WEAK_END.has(functionWord(words[i - 1])),
+      phrase: boundary(words, i),
+      had: false,
     });
+  }
+  return out;
+}
+
+/**
+ * Every first line the card's earlier line breaking could end a line with:
+ * at each space, and after a hyphen or a slash that a letter follows, as in
+ * "Low-" or "(ISO/". Each comes with the index of the word the second line
+ * would start with, or -1 when the break falls inside a word.
+ * @param title - The page title.
+ */
+function earlierBreaks(title: string): { first: string; at: number }[] {
+  const words = title.split(' ');
+  const out: { first: string; at: number }[] = [];
+  for (let i = 0; i < words.length; i++) {
+    if (i > 0) out.push({ first: words.slice(0, i).join(' '), at: i });
+    for (const m of words[i].matchAll(/[-/](?=\p{L})/gu)) {
+      out.push({ first: [...words.slice(0, i), words[i].slice(0, m.index + 1)].join(' '), at: -1 });
+    }
   }
   return out;
 }
@@ -277,21 +354,21 @@ function titleBreaks(title: string): TitleBreak[] {
 const MEASURE_SIZE = 100;
 
 /**
- * Fills in the width of every candidate line by laying them all out with
- * satori, in one pass, as the card will set them.
+ * Lays out every string once with satori, as the card sets a title line, and
+ * returns its width at 1 px.
  *
  * Text width is proportional to the size, the advances, the kerning and the
  * letter spacing in em all scale with it, so one layout at MEASURE_SIZE prices
  * every line at every size; a fine point scale keeps the layout from rounding
  * the widths to whole pixels. Checked against a layout at each size of the
  * scale, the scaled widths agree to a thousandth of a pixel.
- * @param breaks - Candidate layouts from `titleBreaks`, filled in place.
+ * @param strings - The lines to measure.
  * @param fonts - The fonts the card is set in.
  */
-async function measureBreaks(breaks: TitleBreak[], fonts: Fonts): Promise<void> {
-  const strings = [...new Set(breaks.flatMap((b) => b.lines))];
+async function measureLines(strings: string[], fonts: Fonts): Promise<Map<string, number>> {
+  const unique = [...new Set(strings)];
   const widths = new Map<string, number>();
-  const lines: Node[] = strings.map((s, i) => ({
+  const lines: Node[] = unique.map((s, i) => ({
     type: 'div',
     key: i,
     props: { style: { display: 'flex', ...titleType(MEASURE_SIZE) }, children: s },
@@ -306,16 +383,13 @@ async function measureBreaks(breaks: TitleBreak[], fonts: Fonts): Promise<void> 
     fonts,
     pointScaleFactor: 1000,
     onNodeDetected: (node) => {
-      if (typeof node.key === 'number') widths.set(strings[node.key], node.width / MEASURE_SIZE);
+      if (typeof node.key === 'number') widths.set(unique[node.key], node.width / MEASURE_SIZE);
     },
   });
-  for (const b of breaks) {
-    b.widths = b.lines.map((line) => {
-      const w = widths.get(line);
-      if (w === undefined) throw new Error(`og-image: satori did not lay out "${line}".`);
-      return w;
-    });
+  for (const s of unique) {
+    if (!widths.has(s)) throw new Error(`og-image: satori did not lay out "${s}".`);
   }
+  return widths;
 }
 
 /**
@@ -332,42 +406,6 @@ function fitting(breaks: TitleBreak[], size: number, column: number): TitleBreak
 }
 
 /**
- * How many lines the title takes at one size: 1, 2, or 3 for anything more.
- * @param breaks - Measured candidate layouts.
- * @param size - Font size in pixels.
- * @param column - Column width in pixels.
- */
-function lineCount(breaks: TitleBreak[], size: number, column: number): number {
-  const fit = fitting(breaks, size, column);
-  return fit.length === 0 ? 3 : fit[0].lines.length;
-}
-
-/**
- * The largest size the title fits at, by the card's order of preference:
- * one line; else two lines without a lone short word at the end; else two
- * lines with one, when no size avoids it.
- * @param breaks - Measured candidate layouts.
- * @param sizes - Sizes to try, largest first.
- * @param column - Column width in pixels.
- */
-function largestFit(
-  breaks: TitleBreak[],
-  sizes: readonly number[],
-  column: number,
-): number | undefined {
-  const lineOk = [
-    (fit: TitleBreak[]) => fit.length === 1 && fit[0].lines.length === 1,
-    (fit: TitleBreak[]) => fit.some((b) => !b.lone),
-    (fit: TitleBreak[]) => fit.length > 0,
-  ];
-  for (const ok of lineOk) {
-    const size = sizes.find((s) => ok(fitting(breaks, s, column)));
-    if (size !== undefined) return size;
-  }
-  return undefined;
-}
-
-/**
  * The items of `list` that pass `test`, or all of `list` when none does.
  * @param list - Candidates.
  * @param test - The preference.
@@ -380,26 +418,24 @@ function prefer<T>(list: T[], test: (item: T) => boolean): T[] {
 /**
  * Sets the title for a column: its size, and its one or two lines.
  *
- * The size comes from the fit, measured with satori itself. The largest size
- * of the scale at which the title fits on one line wins; failing that, the
- * largest at which it fits two lines without a lone short word at the end
- * (one word of LONE_WORD_MAX characters or fewer); failing that, the largest
- * at which it fits two lines at all, and 34 px only when nothing else does.
+ * The size is the one `tableSize` gives the title's length, so near-identical
+ * titles keep the same size and none gets larger than it was. The card steps
+ * down the scale, 58, 48, 44, 40, 34 px, only while the title cannot be set
+ * in two lines of its column at that size, breaking only where `breakable`
+ * allows, so a title gets smaller than its table size only where the column
+ * its artwork leaves cannot hold it. Nothing fitting at 34 px stops the
+ * build: the card neither adds a third line nor cuts the title.
  *
- * No title gets smaller than the size it had when the cards were sized by
- * character count (`sizeFloor`), unless the artwork forces it: below the
- * floor, a title that would fit two lines at a larger size would otherwise
- * drop to one line at a smaller one, and read smaller in every preview for no
- * gain. The floor gives way only when the card's own column takes more lines
- * at the floor size than the full column would, which is the artwork's bright
- * zone, not the title, deciding.
- *
- * Of the two-line breaks that fit, the card prefers, in order: one that
- * leaves no lone short word at the end; one whose first line does not end on
- * an article, preposition or conjunction; one before a bracket or after a
- * colon, if its shorter line is at least a third of the longer; one whose
- * first line is at least FIRST_LINE_MIN of the second; and then the one whose
- * lines come closest to equal length.
+ * At that size the title takes one line when it fits, and otherwise two. Of
+ * the two-line breaks that fit, the card prefers, in order:
+ * 1. a break at a phrase boundary, and of those the one the title had while
+ *    the card filled its full column line by line, then one before a bracket
+ *    or after a colon or semicolon, then one before a conjunction or a
+ *    preposition that opens a phrase (`boundary`) on a first line that is no
+ *    stub (PHRASE_FIRST_LINE_MIN);
+ * 2. a first line that does not end on an article, preposition or conjunction;
+ * 3. a second line longer than one short word (LONE_WORD_MAX characters);
+ * 4. the pair of lines closest to equal length.
  * @param title - The page title.
  * @param column - Width of the card's title column, in pixels.
  * @param fonts - The fonts the card is set in.
@@ -410,24 +446,40 @@ async function layOutTitle(
   fonts: Fonts,
 ): Promise<{ size: number; lines: string[] }> {
   const breaks = titleBreaks(title);
-  await measureBreaks(breaks, fonts);
-  const floor = sizeFloor(title);
-  const floorHolds = lineCount(breaks, floor, column) <= lineCount(breaks, floor, FULL_COLUMN);
-  const size =
-    (floorHolds ? largestFit(breaks, TITLE_SIZES.filter((s) => s >= floor), column) : undefined) ??
-    largestFit(breaks, TITLE_SIZES, column) ??
-    largestFit(breaks, [TITLE_SIZE_LAST_RESORT], column);
+  const earlier = earlierBreaks(title);
+  const widths = await measureLines(
+    [...breaks.flatMap((b) => b.lines), ...earlier.map((e) => e.first)],
+    fonts,
+  );
+  for (const b of breaks) b.widths = b.lines.map((line) => widths.get(line) ?? Infinity);
+
+  // The break the title had: the last place where the first line still fit
+  // the full column at the table size. Only a break between words that is
+  // still allowed can be kept.
+  const start = tableSize(title);
+  if ((widths.get(title) ?? Infinity) * start > FULL_COLUMN) {
+    const last = earlier.findLast((e) => (widths.get(e.first) ?? Infinity) * start <= FULL_COLUMN);
+    const words = title.split(' ');
+    const first = last && last.at > 0 ? words.slice(0, last.at).join(' ') : undefined;
+    for (const b of breaks) b.had = b.lines.length === 2 && b.lines[0] === first;
+  }
+
+  const size = TITLE_SIZES.find((s) => s <= start && fitting(breaks, s, column).length > 0);
   if (size === undefined) {
     throw new Error(
       `og-image: the title "${title}" does not fit two lines of a ${column} px column even at ` +
-        `${TITLE_SIZE_LAST_RESORT} px. Shorten it: the card neither adds a third line nor cuts it.`,
+        `${TITLE_SIZES.at(-1)} px. Shorten it: the card neither adds a third line nor cuts it.`,
     );
   }
+  const atPhrase = (b: TitleBreak) =>
+    b.phrase === 'mark' ||
+    (b.phrase === 'word' && b.widths[0] >= PHRASE_FIRST_LINE_MIN * b.widths[1]);
   let fit = fitting(breaks, size, column);
-  fit = prefer(fit, (b) => !b.lone);
+  fit = prefer(fit, (b) => b.had && atPhrase(b));
+  fit = prefer(fit, (b) => b.phrase === 'mark');
+  fit = prefer(fit, atPhrase);
   fit = prefer(fit, (b) => !b.weak);
-  fit = prefer(fit, (b) => b.phrase && Math.min(...b.widths) >= Math.max(...b.widths) / 3);
-  fit = prefer(fit, (b) => b.widths[0] >= FIRST_LINE_MIN * (b.widths[1] ?? 0));
+  fit = prefer(fit, (b) => !b.lone);
   const imbalance = (b: TitleBreak) => Math.abs(b.widths[0] - (b.widths[1] ?? b.widths[0]));
   const best = fit.reduce((a, b) => (imbalance(b) < imbalance(a) ? b : a));
   return { size, lines: [...best.lines] };

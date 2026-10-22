@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 165 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 166 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and sixty-five guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and sixty-six guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -960,3 +960,6 @@ reproduces.
   both solvers on NumPy, on an NVIDIA GPU through CuPy or on PyTorch, with
   the fallback to NumPy, the provenance every result records and what is
   promised about the numbers on each device.
+- [Sending a simulation to a remote node](/phonometry/simulation/remote-node/):
+  run either FDTD simulation on another machine over SSH, in Docker or a
+  Python environment, with or without a GPU, and get the same record back.

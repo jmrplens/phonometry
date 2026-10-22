@@ -49,11 +49,11 @@ _LATER = {"en": "or later", "es": "o posterior"}
 #: How the pages write each dependency a node needs. A dependency the
 #: package gains raises KeyError here: add it to this table and to the pages.
 _DEPENDENCIES = {"numpy": "NumPy", "scipy": "SciPy"}
-#: The pages and their language. The Spanish page joins this list when it
-#: exists.
+#: The pages and their language.
 _PAGES = [
     ("site/src/content/docs/simulation/remote-node.mdx", "en"),
     ("docs/simulation/remote-node.md", "en"),
+    ("site/src/content/docs/es/simulation/remote-node.mdx", "es"),
 ]
 
 

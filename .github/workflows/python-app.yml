@@ -1138,6 +1138,10 @@ jobs:
 
   tests:
     runs-on: ${{ matrix.os }}
+    # Its longest cell in the last 72 passing runs took 45 min, on Windows. A
+    # test that hangs ends the run ten minutes after it started
+    # (faulthandler_timeout in pyproject.toml); this stops what is left.
+    timeout-minutes: 75
     permissions:
       contents: read
       # Required for the OIDC-based Codecov upload (no token secret needed).
@@ -1178,6 +1182,10 @@ jobs:
       # pytest-cov combines the per-worker coverage into a single coverage.xml.
       # Pin the numerical thread pools to one thread each so the per-core xdist
       # workers do not oversubscribe the CPU with nested BLAS/OpenMP pools.
+      # The step took at most 43 min in those runs. Stopping the step rather
+      # than the job leaves the upload below, which runs always(), the JUnit
+      # and coverage files to send.
+      timeout-minutes: 60
       env:
         OMP_NUM_THREADS: "1"
         MKL_NUM_THREADS: "1"
@@ -1215,6 +1223,9 @@ jobs:
   tests-perf:
     name: tests (numba-jitted kernel)
     runs-on: ubuntu-latest
+    # At most 23 min in its last 72 passing runs, and a hung test ends the
+    # run ten minutes after it started (pyproject.toml).
+    timeout-minutes: 45
     permissions:
       contents: read
     # Declared once for the whole job so the guard below runs under exactly the
@@ -1279,6 +1290,9 @@ jobs:
   array-api:
     name: FDTD engines on array-api-strict and torch (CPU)
     runs-on: ubuntu-latest
+    # Under 5 min in its last 18 passing runs, and a hung test ends the run
+    # ten minutes after it started (pyproject.toml).
+    timeout-minutes: 20
     permissions:
       contents: read
     # One thread per pool, as in the main test job: torch and the BLAS pools
@@ -1330,6 +1344,9 @@ jobs:
   mps:
     name: FDTD engines on torch MPS
     runs-on: macos-15
+    # Under 2 min in its last 18 passing runs, and a hung test ends the run
+    # ten minutes after it started (pyproject.toml).
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
@@ -1502,6 +1519,9 @@ jobs:
   minimum-versions:
     name: Library tests at the dependency floors
     runs-on: ubuntu-latest
+    # Under 25 min in its last 72 passing runs, and a hung test ends the
+    # run ten minutes after it started (pyproject.toml).
+    timeout-minutes: 45
     permissions:
       contents: read
     env:

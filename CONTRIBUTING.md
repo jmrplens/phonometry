@@ -93,6 +93,12 @@ To check coverage locally:
 pytest --cov=src/phonometry --cov-report=term-missing tests/
 ```
 
+A test still running after ten minutes ends the run (`faulthandler_timeout`
+in `pyproject.toml`): pytest prints the stack of every thread and the test's
+name, and under `-n` that test fails and the run stops once the other
+workers finish what they hold. `-o faulthandler_timeout=0` lifts the limit
+for a session that needs longer.
+
 How a test is written, from where its expected values come from to how it
 waits on an error or a warning, is in the [Tests](docs/contributing/tests.md)
 page of the style guide. `make raises-blocks` runs

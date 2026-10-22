@@ -859,7 +859,10 @@ def _segment_resistivities(
     if isinstance(flow_resistivity, str):
         return np.full(n_segments, _resolve_flow_resistivity(flow_resistivity))
     if np.isscalar(flow_resistivity):
-        return np.full(n_segments, _resolve_flow_resistivity(float(flow_resistivity)))  # type: ignore[arg-type]
+        # unused-ignore: NumPy 2.5.4's stubs narrow isscalar() to float and the
+        # ignore is unnecessary; older stubs leave complex in and need it.
+        sigma = float(flow_resistivity)  # type: ignore[arg-type, unused-ignore]
+        return np.full(n_segments, _resolve_flow_resistivity(sigma))
     arr = require_positive_array(flow_resistivity, "flow_resistivity")
     if arr.shape != (n_segments,):
         msg = "Per-segment 'flow_resistivity' must have one value per profile segment."

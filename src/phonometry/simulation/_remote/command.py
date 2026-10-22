@@ -24,9 +24,11 @@ if TYPE_CHECKING:
 #: ``~/.ssh/config``, so whatever the file says for the host, a run gets no
 #: terminal (RequestTTY), no RemoteCommand, no agent, X11 or port forwarding
 #: (ForwardAgent, ForwardX11, LocalForward, RemoteForward, DynamicForward),
-#: no LocalCommand (PermitLocalCommand), never a prompt (BatchMode), and the
+#: no Kerberos credentials delegated (GSSAPIDelegateCredentials), no
+#: LocalCommand (PermitLocalCommand), never a prompt (BatchMode), and the
 #: keep-alives and the connection timeout below. Every client from OpenSSH
-#: 7.6 on knows them. SessionType, StdinNull and ForkAfterAuthentication are
+#: 7.6 on knows them; one built without GSSAPI, which delegates nothing,
+#: writes that it does not support that option and goes on. SessionType, StdinNull and ForkAfterAuthentication are
 #: left out on purpose: a client older than OpenSSH 8.7 refuses them on the
 #: command line and would run nothing. A host alias used as a node leaves
 #: them at their defaults: a SessionType of none, a StdinNull of yes or a
@@ -51,6 +53,9 @@ SSH_OPTIONS: tuple[str, ...] = (
             # machine would land among the frames.
             "ClearAllForwardings=yes",
             "PermitLocalCommand=no",
+            # No Kerberos credentials of the client's handed to the node, which
+            # a Kerberos site's config often asks for.
+            "GSSAPIDelegateCredentials=no",
             # Never a prompt, which would hang a notebook; keep-alives that
             # notice a dead link in about a minute; a connection given up
             # after 30 s.

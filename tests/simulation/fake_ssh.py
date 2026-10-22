@@ -38,6 +38,7 @@ _REQUIRED = (
     "RemoteCommand=none",
     "ClearAllForwardings=yes",
     "PermitLocalCommand=no",
+    "GSSAPIDelegateCredentials=no",
     "BatchMode=yes",
     "ServerAliveInterval=15",
     "ServerAliveCountMax=4",

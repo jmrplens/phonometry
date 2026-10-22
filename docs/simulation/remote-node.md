@@ -301,12 +301,12 @@ notices a dead connection in about a minute, and gives up connecting after
 
 SSH is the boundary. Whoever can log in to the node can run code there, and a
 remote run does exactly that with the package you send, so give the node the
-trust you give any machine you log in to. ssh is started with no terminal and
-with no agent, X11 or port forwarding, whatever `~/.ssh/config` says for the
-host. Besides the package and the job, ssh may send the environment variables
-your ssh configuration names with `SendEnv` or `SetEnv` (Debian and Ubuntu
-send `LANG` and the `LC_*` variables), and the node's ssh server takes those
-its `AcceptEnv` allows.
+trust you give any machine you log in to. ssh is started with no terminal,
+with no agent, X11 or port forwarding, and without delegating your Kerberos
+credentials, whatever `~/.ssh/config` says for the host. Besides the package
+and the job, it may send the environment variables your ssh configuration
+names with `SendEnv` or `SetEnv` (on Debian and Ubuntu, for example `LANG` and
+the `LC_*` variables), as far as the node's `AcceptEnv` allows.
 
 A job carries no code: the node runs the package you sent, on its own Python
 and libraries. The job names one of the two simulation functions and carries

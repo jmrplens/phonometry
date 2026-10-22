@@ -8,6 +8,7 @@ import io
 import json
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -99,6 +100,8 @@ def test_ssh_takes_these_options_and_no_others() -> None:
         "-o",
         "PermitLocalCommand=no",
         "-o",
+        "GSSAPIDelegateCredentials=no",
+        "-o",
         "BatchMode=yes",
         "-o",
         "ServerAliveInterval=15",
@@ -130,14 +133,66 @@ def test_ssh_never_prompts_and_ends_its_options_before_the_destination(
 def test_ssh_asks_for_no_terminal_and_forwards_nothing_of_the_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    # A "RequestTTY force" or a "ForwardAgent yes" that ~/.ssh/config gives the
-    # host must not reach a run: a pty rewrites the frames, and a node runs the
-    # code it is sent. Options on the command line win over the file.
+    # A "RequestTTY force", a "ForwardAgent yes" or a "GSSAPIDelegateCredentials
+    # yes" that ~/.ssh/config gives the host must not reach a run: a pty
+    # rewrites the frames, and a node runs the code it is sent, with neither
+    # the client's agent nor its Kerberos credentials. Options on the command
+    # line win over the file.
     monkeypatch.setattr(command, "_SSH_PROGRAM", ("ssh",))
     options = _options(command.ssh_argv(_DOCKER, Compute(host="nas")))
     assert {"-T", "-a", "-x"} <= set(options)
-    for setting in ("RequestTTY=no", "ClearAllForwardings=yes"):
+    for setting in (
+        "RequestTTY=no",
+        "ClearAllForwardings=yes",
+        "GSSAPIDelegateCredentials=no",
+    ):
         assert options[options.index(setting) - 1] == "-o"
+
+
+@pytest.mark.skipif(shutil.which("ssh") is None, reason="no ssh client on PATH")
+def test_the_ssh_client_here_lets_no_setting_of_a_config_through(
+    tmp_path: Path,
+) -> None:
+    # The client on this machine reads a config that asks for everything a run
+    # must not have, and says (-G) what it would do: the options win. A client
+    # built without GSSAPI lists no delegation, and delegates nothing.
+    config = tmp_path / "config"
+    config.write_text(
+        "Host node\n"
+        "  ForwardAgent yes\n"
+        "  ForwardX11 yes\n"
+        "  RequestTTY force\n"
+        "  GSSAPIDelegateCredentials yes\n"
+        "  RemoteCommand echo config\n"
+        "  PermitLocalCommand yes\n"
+        "  LocalForward 9999 localhost:22\n"
+        "  BatchMode no\n",
+        encoding="utf-8",
+    )
+    done = subprocess.run(
+        ["ssh", "-F", str(config), "-G", *command.SSH_OPTIONS, "--", "node"],
+        capture_output=True,
+        check=True,
+        text=True,
+        timeout=60,
+    )
+    settings: dict[str, list[str]] = {}
+    for line in done.stdout.splitlines():
+        key, _, value = line.partition(" ")
+        settings.setdefault(key, []).append(value)
+    assert settings["forwardagent"] == ["no"]
+    assert settings["forwardx11"] == ["no"]
+    assert settings["requesttty"] in (["no"], ["false"])
+    assert settings["permitlocalcommand"] == ["no"]
+    assert settings["batchmode"] == ["yes"]
+    assert settings.get("gssapidelegatecredentials", ["no"]) == ["no"]
+    for forwarding in (
+        "remotecommand",
+        "localforward",
+        "remoteforward",
+        "dynamicforward",
+    ):
+        assert forwarding not in settings
 
 
 def test_a_docker_node_runs_the_image_s_bootstrap_cut_off_from_the_network() -> None:

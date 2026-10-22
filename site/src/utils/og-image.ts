@@ -219,6 +219,8 @@ const PHRASE_FIRST_LINE_MIN = 0.4;
 
 /** An abbreviation set in capitals: "ISO", "E", "ITU-R", "ISO/TS", "BS.468-4", "DB-HR". */
 const CAPITALS = /^[A-Z][A-Z0-9]*(?:[./-][A-Z0-9]+)*$/;
+/** The same, or one a number leads: "FDTD", "CNOSSOS-EU", "2D". */
+const ABBREVIATION = /^(?:[A-Z]|\d+[A-Z])[A-Z0-9]*(?:[./-][A-Z0-9]+)*$/;
 /** Words a designation is spelled with besides abbreviations and numbers. */
 const DESIGNATION_WORDS = new Set(['Doc', 'Mark']);
 /** A unit a number keeps on its line. */
@@ -292,12 +294,40 @@ function endsWithDesignation(words: string[], i: number): boolean {
 }
 
 /**
+ * Whether the words before `i` are one designation that opens the title, as
+ * "2D FDTD" opens "2D FDTD wave simulation" and "CNOSSOS-EU" opens
+ * "CNOSSOS-EU railway source emission": abbreviations (ABBREVIATION) and the
+ * words `breakable` keeps with them, ending before the first word that is
+ * neither. A break there mirrors one before a designation that ends the
+ * title, and as there, one short word is not enough: alone on the first line
+ * it would be a stub.
+ * @param words - The title's words.
+ * @param i - Index of the first word of the second line.
+ */
+function startsWithDesignation(words: string[], i: number): boolean {
+  for (let j = 0; j < i; j++) {
+    const kept = j > 0 && !breakable(words[j - 1], words[j]);
+    if (!kept && !ABBREVIATION.test(bare(words[j]))) return false;
+  }
+  if (ABBREVIATION.test(bare(words[i]))) return false;
+  return i > 1 || words[0].length > LONE_WORD_MAX;
+}
+
+/** Conjunctions, which can join two modifiers of one noun as well as two phrases. */
+const CONJUNCTIONS = new Set('and or nor y e o u ni'.split(' '));
+/** A hyphenated compound, "Diffuse-Field", or a prefix whose noun comes later, "Low-". */
+const COMPOUND = /\p{L}-(?:\p{L}|$)/u;
+
+/**
  * What kind of boundary a break falls on: `mark`, before a bracket, after a
  * colon or semicolon, or before a designation that ends the title, which is
  * the same break as before a bracketed one, "Emisión de la fuente ferroviaria
- * / CNOSSOS-EU"; `word`, before a conjunction or a preposition that opens a
- * phrase; `none`, anywhere else, and anywhere inside brackets, where the "and"
- * of "(ISO 8253-1 and -2)" opens nothing.
+ * / CNOSSOS-EU", or after one that opens it, "2D FDTD / wave simulation";
+ * `word`, before a conjunction or a preposition that opens a phrase; `none`,
+ * anywhere else. That includes anywhere inside brackets, where the "and" of
+ * "(ISO 8253-1 and -2)" opens nothing, and before a conjunction between two
+ * hyphenated compounds, which joins two modifiers of one noun: "Random-Incidence
+ * and Diffuse-Field Response".
  * @param words - The title's words.
  * @param i - Index of the first word of the second line.
  */
@@ -305,8 +335,10 @@ function boundary(words: string[], i: number): 'mark' | 'word' | 'none' {
   const before = words.slice(0, i).join(' ');
   if (before.split('(').length > before.split(')').length) return 'none';
   if (words[i].startsWith('(') || /[:;]$/.test(words[i - 1])) return 'mark';
-  if (endsWithDesignation(words, i)) return 'mark';
+  if (endsWithDesignation(words, i) || startsWithDesignation(words, i)) return 'mark';
   const opener = functionWord(words[i]);
+  const joinsModifiers = COMPOUND.test(words[i - 1]) && COMPOUND.test(words[i + 1] ?? '');
+  if (CONJUNCTIONS.has(opener) && joinsModifiers) return 'none';
   if (PHRASE_OPENERS.has(opener)) return 'word';
   if (OF.has(opener) && ARTICLE.has(functionWord(words[i + 1] ?? ''))) return 'word';
   return 'none';

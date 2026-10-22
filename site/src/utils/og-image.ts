@@ -176,7 +176,7 @@ const FULL_COLUMN = 860;
 /** The longest last line still too short to stand alone: one word this long or shorter. */
 const LONE_WORD_MAX = 8;
 
-/** Words a line should not end on: they belong with what follows them. */
+/** Words a line never ends on: they belong with what follows them (`bound`). */
 const WEAK_END = new Set(
   (
     'a an the of in on at to for by and or nor but with from as into onto per via vs versus ' +
@@ -344,14 +344,51 @@ function boundary(words: string[], i: number): 'mark' | 'word' | 'none' {
   return 'none';
 }
 
+/**
+ * Whether a phrase starts at word `k`: a bracket, a conjunction or a
+ * preposition, or any word after a comma, colon or semicolon.
+ * @param words - The title's words.
+ * @param k - Index of the word.
+ */
+function phraseStarts(words: string[], k: number): boolean {
+  const word = functionWord(words[k]);
+  return (
+    words[k].startsWith('(') ||
+    PHRASE_OPENERS.has(word) ||
+    OF.has(word) ||
+    /[,;:]$/.test(words[k - 1])
+  );
+}
+
+/**
+ * Whether a break before word `i` would part words that belong together,
+ * which the card keeps on one line as it keeps a designation:
+ * - a word that belongs with the next (WEAK_END) never ends a line, as "the"
+ *   in "Sound Power in the / Reverberation Room" or "de" in "Potencia
+ *   acústica en salas de / ensayo";
+ * - an article keeps the two words after it when its phrase ends there, at a
+ *   bracket, a conjunction, a preposition, a punctuation mark or the end of
+ *   the title: "the German Way" in "HVAC Noise the German Way (VDI 2081)".
+ * @param words - The title's words.
+ * @param i - Index of the first word of the second line.
+ */
+function bound(words: string[], i: number): boolean {
+  if (WEAK_END.has(functionWord(words[i - 1]))) return true;
+  return (
+    i >= 2 &&
+    ARTICLE.has(functionWord(words[i - 2])) &&
+    !phraseStarts(words, i - 1) &&
+    !phraseStarts(words, i) &&
+    (i + 1 === words.length || phraseStarts(words, i + 1))
+  );
+}
+
 interface TitleBreak {
   lines: [string] | [string, string];
   /** Width of each line at 1 px; multiply by the size. */
   widths: number[];
   /** The second line is a single short word. */
   lone: boolean;
-  /** The first line ends on a word that belongs with the next. */
-  weak: boolean;
   /** The boundary the break falls on, from `boundary`. */
   phrase: 'mark' | 'word' | 'none';
   /** The break the title had while the card filled its full column line by line. */
@@ -360,22 +397,22 @@ interface TitleBreak {
 
 /**
  * Every way to set the title in one or two lines, breaking where `breakable`
- * allows: the whole title, then one entry per break point.
+ * allows and `bound` does not forbid: the whole title, then one entry per
+ * break point.
  * @param title - The page title.
  */
 function titleBreaks(title: string): TitleBreak[] {
   const words = title.split(' ');
   const out: TitleBreak[] = [
-    { lines: [title], widths: [], lone: false, weak: false, phrase: 'none', had: false },
+    { lines: [title], widths: [], lone: false, phrase: 'none', had: false },
   ];
   for (let i = 1; i < words.length; i++) {
-    if (!breakable(words[i - 1], words[i])) continue;
+    if (!breakable(words[i - 1], words[i]) || bound(words, i)) continue;
     const second = words.slice(i).join(' ');
     out.push({
       lines: [words.slice(0, i).join(' '), second],
       widths: [],
       lone: !second.includes(' ') && second.length <= LONE_WORD_MAX,
-      weak: WEAK_END.has(functionWord(words[i - 1])),
       phrase: boundary(words, i),
       had: false,
     });
@@ -474,20 +511,21 @@ function prefer<T>(list: T[], test: (item: T) => boolean): T[] {
  * titles keep the same size and none gets larger than it was. The card steps
  * down the scale, 58, 48, 44, 40, 34 px, only while the title cannot be set
  * in two lines of its column at that size, breaking only where `breakable`
- * allows, so a title gets smaller than its table size only where the column
- * its artwork leaves cannot hold it. Nothing fitting at 34 px stops the
- * build: the card neither adds a third line nor cuts the title.
+ * allows and `bound` does not forbid, so a title gets smaller than its table
+ * size only where the column its artwork leaves cannot hold it. Nothing
+ * fitting at 34 px stops the build: the card neither adds a third line nor
+ * cuts the title.
  *
  * At that size the title takes one line when it fits, and otherwise two. Of
  * the two-line breaks that fit, the card prefers, in order:
  * 1. a break at a phrase boundary, and of those the one the title had while
  *    the card filled its full column line by line, then one before a bracket
- *    or a closing designation or after a colon or semicolon, then one before
- *    a conjunction or a preposition that opens a phrase (`boundary`) on a
- *    first line that is no stub (PHRASE_FIRST_LINE_MIN);
- * 2. a first line that does not end on an article, preposition or conjunction;
- * 3. a second line longer than one short word (LONE_WORD_MAX characters);
- * 4. the pair of lines closest to equal length.
+ *    or a closing designation, after an opening one or after a colon or
+ *    semicolon, then one before a conjunction or a preposition that opens a
+ *    phrase (`boundary`) on a first line that is no stub
+ *    (PHRASE_FIRST_LINE_MIN);
+ * 2. a second line longer than one short word (LONE_WORD_MAX characters);
+ * 3. the pair of lines closest to equal length.
  * @param title - The page title.
  * @param column - Width of the card's title column, in pixels.
  * @param fonts - The fonts the card is set in.
@@ -530,7 +568,6 @@ async function layOutTitle(
   fit = prefer(fit, (b) => b.had && atPhrase(b));
   fit = prefer(fit, (b) => b.phrase === 'mark');
   fit = prefer(fit, atPhrase);
-  fit = prefer(fit, (b) => !b.weak);
   fit = prefer(fit, (b) => !b.lone);
   const imbalance = (b: TitleBreak) => Math.abs(b.widths[0] - (b.widths[1] ?? b.widths[0]));
   const best = fit.reduce((a, b) => (imbalance(b) < imbalance(a) ? b : a));

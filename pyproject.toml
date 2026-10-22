@@ -375,12 +375,18 @@ pythonpath = ["tests"]
 addopts = ["--dist=loadgroup", "--max-worker-restart=0"]
 # A test still running after ten minutes has hung. The slowest takes 147 s on
 # the slowest CI runner, a Windows one (the metadiffuser NTFF test with its
-# group's fixture), so 600 s is four times that. pytest then prints the stack
-# of every thread and ends the process: under `-n` the controller fails the
-# test that worker was running, by name, and stops the run once the other
-# workers finish what they hold, with the JUnit and coverage files written;
-# without `-n` the run ends there. Entering pdb turns it off, and
-# `-o faulthandler_timeout=0` turns it off for a session that needs longer.
+# group's fixture), so 600 s is four times that. The tests-perf and
+# minimum-versions jobs write no JUnit file, so their slowest test is not
+# measured; they run on Linux, where the slowest of the main matrix takes
+# about 90 s, and each of their runs takes half as long as a Windows one.
+# pytest then prints the stack of every thread and ends the process: under
+# `-n` the controller fails the test that worker was running, by name, and
+# stops the run once the other workers finish what they hold, with the JUnit
+# and coverage files written; without `-n` the run ends there. pytest lifts
+# the limit when a test fails, and tests/hang_guard.py sets it again, so the
+# teardown of a failed test has the whole limit from the failure. Entering
+# pdb turns it off, and `-o faulthandler_timeout=0` turns it off for a
+# session that needs longer.
 faulthandler_timeout = 600
 faulthandler_exit_on_timeout = true
 markers = [

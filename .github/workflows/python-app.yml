@@ -1138,10 +1138,10 @@ jobs:
 
   tests:
     runs-on: ${{ matrix.os }}
-    # Its longest cell in the last 72 passing runs took 45 min, on Windows. A
-    # test that hangs ends the run ten minutes after it started
-    # (faulthandler_timeout in pyproject.toml); this stops what is left.
-    timeout-minutes: 75
+    # Its longest cell in the last 72 passing runs took 45 min, on Windows.
+    # The Run tests step has a limit of its own; this one leaves the steps
+    # around it, the setup before and the uploads after, a quarter of an hour.
+    timeout-minutes: 85
     permissions:
       contents: read
       # Required for the OIDC-based Codecov upload (no token secret needed).
@@ -1182,10 +1182,13 @@ jobs:
       # pytest-cov combines the per-worker coverage into a single coverage.xml.
       # Pin the numerical thread pools to one thread each so the per-core xdist
       # workers do not oversubscribe the CPU with nested BLAS/OpenMP pools.
-      # The step took at most 43 min in those runs. Stopping the step rather
-      # than the job leaves the upload below, which runs always(), the JUnit
-      # and coverage files to send.
-      timeout-minutes: 60
+      # The step took at most 43 min in those runs. A test that hangs is
+      # ended ten minutes after it started (faulthandler_timeout in
+      # pyproject.toml), and the other workers then finish what they hold,
+      # so a hang late in the run still ends inside 70 min, with the test
+      # named and the JUnit and coverage files written. Past that the runner
+      # stops pytest, which may then write neither for the uploads below.
+      timeout-minutes: 70
       env:
         OMP_NUM_THREADS: "1"
         MKL_NUM_THREADS: "1"
@@ -1447,8 +1450,10 @@ jobs:
     # account whose password is locked, as a runner's may be: '*' is no
     # password, and not a locked one. sshd logs to a file of the job, which
     # the last step shows when the job fails or is cancelled. The hosts file
-    # bounds each run, so a node that stops answering fails its test instead
-    # of holding the job.
+    # bounds each run at five minutes, under the ten pytest gives a test
+    # (faulthandler_timeout in pyproject.toml), so a node that stops
+    # answering fails its test with the client's own error instead of
+    # holding the job or ending pytest; the step takes seconds.
     - name: Serve the node through sshd on localhost
       run: |
         user="$(id -un)"
@@ -1468,7 +1473,7 @@ jobs:
         chmod 600 ~/.ssh/config
         ssh -o BatchMode=yes phonometry-ci-node "docker image inspect --format '{{.Id}}' phonometry-node:cpu"
         printf '%s\n' "[hosts.ci]" 'ssh = "phonometry-ci-node"' 'runner = "docker"' \
-          'image = "phonometry-node:cpu"' 'label = "the localhost node of CI"' 'timeout_s = 600' \
+          'image = "phonometry-node:cpu"' 'label = "the localhost node of CI"' 'timeout_s = 300' \
           > "$RUNNER_TEMP/hosts.toml"
     # A test that skips compares nothing, and pytest exits 0 all the same:
     # the job fails on any skip, whatever its reason. pytest writes no

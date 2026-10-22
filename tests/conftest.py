@@ -7,6 +7,10 @@ from pathlib import Path
 import pinned_stack
 import pytest
 
+# pytest's limit on a test's time (faulthandler_timeout in pyproject.toml),
+# set again once a test has failed, so that its teardown has one too.
+pytest_plugins = ("hang_guard",)
+
 # Select a non-interactive matplotlib backend for the headless test suite.
 # The library no longer forces a backend (see issue #52), so the test harness
 # must opt into Agg itself; otherwise matplotlib picks a GUI backend (e.g.

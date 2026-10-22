@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import contextlib
 import dataclasses
+import errno
 import io
 import os
 import subprocess
@@ -39,6 +40,7 @@ from phonometry.simulation._remote.package import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from pathlib import Path
 
 _CPU = {"device": "cpu", "device_index": 0, "dtype": "float64"}
@@ -458,41 +460,102 @@ def test_the_node_s_watcher_stops_a_cancelled_run_and_writes_progress(
 # The thread that watches a node's input.
 
 
-class _HeldRead:
-    """``os`` as node.py sees it, with the watcher's first read held until released.
-
-    It stands for a scheduler that takes the processor from the watcher at
-    the worst moment: once the watcher has the descriptor it reads, and
-    before it reads.
-    """
+class _Scheduler:
+    """The scheduler at its worst for the watcher: it takes the processor away once and gives it back when told."""
 
     def __init__(self) -> None:
-        self.reading = threading.Event()
+        self.held = threading.Event()
         self.released = threading.Event()
+
+    def hold(self) -> None:
+        """Hold the calling thread until released, the first time the watcher calls."""
+        if threading.current_thread().name == _WATCHER and not self.held.is_set():
+            self.held.set()
+            self.released.wait(_THREAD_S)
+
+
+class _HeldThreading:
+    """``threading`` as node.py sees it: the thread it starts is held before its first line."""
+
+    def __init__(self, scheduler: _Scheduler) -> None:
+        self._scheduler = scheduler
+
+    # Whatever threading holds, of whatever type it has.
+    def __getattr__(self, name: str) -> Any:  # noqa: ANN401
+        return getattr(threading, name)
+
+    # threading's own name, which node.py calls.
+    def Thread(  # noqa: N802
+        self, *, target: Callable[[], object], **options: Any
+    ) -> threading.Thread:
+        def held() -> None:
+            self._scheduler.hold()
+            target()
+
+        return threading.Thread(target=held, **options)
+
+
+class _HeldOs:
+    """``os`` as node.py sees it: the watcher's first call into it is held.
+
+    The call is held once its arguments are worked out, as a thread loses
+    the processor between taking a number and using it.
+    """
+
+    def __init__(self, scheduler: _Scheduler) -> None:
+        self._scheduler = scheduler
 
     # Whatever os holds, of whatever type it has.
     def __getattr__(self, name: str) -> Any:  # noqa: ANN401
-        return getattr(os, name)
+        value = getattr(os, name)
+        if not callable(value):
+            return value
 
-    def read(self, descriptor: int, size: int) -> bytes:
-        if threading.current_thread().name == _WATCHER and not self.reading.is_set():
-            self.reading.set()
-            self.released.wait(_THREAD_S)
-        return os.read(descriptor, size)
+        def held(*args: object, **kwargs: object) -> object:
+            self._scheduler.hold()
+            return value(*args, **kwargs)
+
+        return held
 
 
+def _next_pipe_under(number: int) -> int:
+    """Open the next pipe with its read end under *number*, which is free; return its write end.
+
+    The lowest free number usually is *number* already. When a lower one is
+    free, the read end is moved onto *number*, the write end first taken off
+    it if it landed there.
+    """
+    next_read, next_write = os.pipe()
+    if next_read != number:
+        if next_write == number:
+            moved = os.dup(next_write)
+            os.close(next_write)
+            next_write = moved
+        os.dup2(next_read, number, inheritable=False)
+        os.close(next_read)
+    return next_write
+
+
+@pytest.mark.parametrize("moment", ["before its first line", "at its first call to os"])
 def test_the_watcher_reads_its_own_input_and_never_the_next_file_opened(
-    monkeypatch: pytest.MonkeyPatch,
+    moment: str, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """The caller may close the stream as soon as serve returns.
 
-    A watcher that took the stream's descriptor number for itself and lost
-    the processor before its first read would read whatever the process
-    opened next under that number: in a worker that serves one job after
-    another, the next job's pipe, whose job then never reaches its node.
+    A watcher that took the stream's descriptor number in its own thread
+    could lose the processor before it read, or before it copied the
+    number, and then read whatever the process opened next under that
+    number: in a worker that serves one job after another, the next job's
+    pipe, whose job then never reaches its node. Here the watcher is held
+    at the worst moment, before it runs at all or at its first call to
+    ``os``, while the stream is closed and its number given to the next
+    pipe; it must still read its own input, and only that.
     """
-    held = _HeldRead()
-    monkeypatch.setattr(node, "os", held)
+    scheduler = _Scheduler()
+    if moment == "before its first line":
+        monkeypatch.setattr(node, "threading", _HeldThreading(scheduler))
+    else:
+        monkeypatch.setattr(node, "os", _HeldOs(scheduler))
     read_end, write_end = os.pipe()
     stream = os.fdopen(read_end, "rb")
     opened = [write_end]
@@ -501,26 +564,22 @@ def test_the_watcher_reads_its_own_input_and_never_the_next_file_opened(
     before = set(threading.enumerate())
     try:
         node._watch_input(stream, cancelled, finished)
-        assert held.reading.wait(_THREAD_S), "the watcher never read its input"
+        assert scheduler.held.wait(_THREAD_S), "the watcher never ran"
         stream.close()
         # The next pipe the process opens, its read end under the number the
-        # stream had (the lowest free number usually is that one), and a job
-        # waiting in it.
-        next_read, next_write = os.pipe()
-        if next_read != read_end:
-            os.dup2(next_read, read_end, inheritable=False)
-            os.close(next_read)
+        # stream had, and a job waiting in it.
+        next_write = _next_pipe_under(read_end)
         opened.append(read_end)
         os.write(next_write, b"the next job")
         os.close(next_write)
-        held.released.set()
+        scheduler.released.set()
         still_watching = not cancelled.wait(0.5)
         os.close(write_end)
         opened.remove(write_end)
         _join_watchers(before)
         left = os.read(read_end, 64)
     finally:
-        held.released.set()
+        scheduler.released.set()
         stream.close()
         for descriptor in opened:
             with contextlib.suppress(OSError):
@@ -528,6 +587,102 @@ def test_the_watcher_reads_its_own_input_and_never_the_next_file_opened(
     assert left == b"the next job", "the watcher took the bytes of the next pipe"
     assert still_watching, "the watcher stopped before its own input ended"
     assert cancelled.is_set()
+
+
+class _FailingOs:
+    """``os`` as node.py sees it, the call it names failing with *code*; copies and closes are noted."""
+
+    def __init__(self, call: str, code: int) -> None:
+        self._call = call
+        self._code = code
+        self.copies: list[int] = []
+        self.closing: list[int] = []
+        self.closed: list[int] = []
+
+    # Whatever os holds, of whatever type it has.
+    def __getattr__(self, name: str) -> Any:  # noqa: ANN401
+        return getattr(os, name)
+
+    def _fail(self, call: str) -> None:
+        if call == self._call:
+            raise OSError(self._code, f"{call} failed on purpose")
+
+    def dup(self, descriptor: int) -> int:
+        self._fail("dup")
+        copy = os.dup(descriptor)
+        self.copies.append(copy)
+        return copy
+
+    def read(self, descriptor: int, size: int) -> bytes:
+        self._fail("read")
+        return os.read(descriptor, size)
+
+    def close(self, descriptor: int) -> None:
+        self.closing.append(descriptor)
+        self._fail("close")
+        os.close(descriptor)
+        self.closed.append(descriptor)
+
+
+def test_an_input_the_node_cannot_copy_is_an_error_and_not_a_client_gone(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """With no descriptor left, the node says so; it does not stop the run as if the client had left."""
+    monkeypatch.setattr(node, "os", _FailingOs("dup", errno.EMFILE))
+    read_end, write_end = os.pipe()
+    stream = os.fdopen(read_end, "rb")
+    cancelled, finished = threading.Event(), threading.Event()
+    # A watcher started all the same must not end this process once its
+    # grace runs out: the run it would wait for is over.
+    finished.set()
+    before = set(threading.enumerate())
+    try:
+        with pytest.raises(OSError, match="dup failed on purpose") as raised:
+            node._watch_input(stream, cancelled, finished)
+    finally:
+        stream.close()
+        os.close(write_end)
+    assert raised.value.errno == errno.EMFILE
+    assert not cancelled.is_set()
+    assert not any(t.name == _WATCHER for t in set(threading.enumerate()) - before)
+
+
+@pytest.mark.parametrize(
+    ("call", "code", "closes"),
+    [
+        pytest.param("read", errno.EIO, "its copy", id="read fails"),
+        pytest.param("read", errno.EBADF, "nothing", id="read finds no descriptor"),
+        pytest.param("close", errno.EIO, "its copy", id="close fails"),
+    ],
+)
+def test_a_watcher_whose_input_fails_still_stops_the_run(
+    call: str, code: int, closes: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A read or a close that fails ends the input too, and the run is told.
+
+    The copy is closed unless the read found it closed already: by then its
+    number may name another file, which is not the watcher's to close.
+    """
+    failing = _FailingOs(call, code)
+    monkeypatch.setattr(node, "os", failing)
+    read_end, write_end = os.pipe()
+    cancelled, finished = threading.Event(), threading.Event()
+    finished.set()  # the run is over: the watcher ends as soon as its input does
+    before = set(threading.enumerate())
+    try:
+        with os.fdopen(read_end, "rb") as stream:
+            node._watch_input(stream, cancelled, finished)
+            os.close(write_end)
+            write_end = -1
+            assert cancelled.wait(_THREAD_S), "the run was never told its input ended"
+            _join_watchers(before)
+    finally:
+        for descriptor in [write_end, *failing.copies]:
+            if descriptor >= 0 and descriptor not in failing.closed:
+                with contextlib.suppress(OSError):
+                    os.close(descriptor)
+    assert len(failing.copies) == 1
+    assert failing.closing == (failing.copies if closes == "its copy" else [])
 
 
 def test_an_input_that_is_no_file_has_ended() -> None:

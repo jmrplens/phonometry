@@ -3,19 +3,27 @@
 
 name: GitLab Mirror
 
+# Pushes to main and tags mirror at once. Work branches used to as well, with
+# `branches: "**"`, which meant every push of every pull request replicated the
+# whole repository and put a "Mirror repository" check on the pull request: on
+# a day of many small pull requests, ten mirror runs an hour for branches
+# nobody reads on GitLab. Those now arrive through the six-hourly schedule
+# below, and the push below is the only one that can be delayed by pruning:
+# the whole refspec is pushed every time, so main and the tags carry every
+# branch with them anyway.
 on:
   push:
     branches:
-      - "**"
+      - main
     tags:
       - "**"
+  workflow_run:
+    workflows:
+      - Release
+    types:
+      - completed
   schedule:
     - cron: "17 */6 * * *"
-  # The release workflow dispatches this one once the GitHub Release exists,
-  # so the GitLab release links to its files at once rather than at the next
-  # schedule. It used to wait on a workflow_run of a workflow named "Release",
-  # which never fired (the release workflow had another name) and which would
-  # have run this workflow, secrets included, on whatever that run concluded.
   workflow_dispatch:
 
 permissions:
@@ -35,11 +43,13 @@ jobs:
   repository:
     name: Mirror repository
     runs-on: ubuntu-latest
-    # Pushes made by Dependabot run with Dependabot secrets, not Actions
-    # secrets, so the SSH key below arrives empty and the guard fails the
-    # job on every dependabot/* branch. Skip those pushes: the merge commit
-    # on main and the six-hourly schedule keep the mirror current.
-    if: github.actor != 'dependabot[bot]'
+    timeout-minutes: 15
+    # Dependabot runs without Actions secrets, so the SSH key would be empty
+    # and the job could only fail. Its branches reach GitLab with the next
+    # push to main or the six-hourly scheduled run, which mirrors every ref.
+    if: >-
+      github.actor != 'dependabot[bot]' &&
+      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
     steps:
       - name: Configure GitLab SSH key
         env:
@@ -63,7 +73,12 @@ jobs:
 
       - name: Push branches and tags to GitLab
         env:
-          GIT_SSH_COMMAND: ssh -i ~/.ssh/gitlab_mirror -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes
+          # IPv4 only: gitlab.com publishes an AAAA record and GitHub-hosted
+          # runners have no IPv6 route, so an IPv6 attempt can only fail. The
+          # run of 2026-10-14 14:56Z died on "connect to host gitlab.com port
+          # 22: Network is unreachable" while the runs before and after it
+          # mirrored fine.
+          GIT_SSH_COMMAND: ssh -i ~/.ssh/gitlab_mirror -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o AddressFamily=inet -o ConnectTimeout=20
         run: |
           set -euo pipefail
           git init --bare mirror.git
@@ -81,20 +96,34 @@ jobs:
           # refspec is the equivalent form, but `--force` is explicit
           # and easier to grep for. --prune keeps the GitLab side tidy
           # by removing refs that have been deleted on GitHub.
-          git -C mirror.git push --force --prune gitlab \
-            '+refs/heads/*:refs/heads/*' \
-            '+refs/tags/*:refs/tags/*'
+          #
+          # Retried because a transient network failure between the runner
+          # and gitlab.com is the usual way this step fails. Retrying is safe:
+          # every attempt force-pushes the same refspec, so a push that did
+          # land is simply repeated as a no-op.
+          for attempt in 1 2 3; do
+            if git -C mirror.git push --force --prune gitlab \
+              '+refs/heads/*:refs/heads/*' \
+              '+refs/tags/*:refs/tags/*'; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              echo "::warning::GitLab push attempt ${attempt} failed; retrying in $((attempt * 20)) s"
+              sleep $((attempt * 20))
+            fi
+          done
+          echo "::error::GitLab push failed after 3 attempts"
+          exit 1
 
   releases:
     name: Sync linked releases
     runs-on: ubuntu-latest
-    # After the repository job, so a release's tag is on GitLab before the
-    # GitLab release that names it is created.
-    needs: repository
+    timeout-minutes: 15
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event_name == 'schedule' ||
-      startsWith(github.ref, 'refs/tags/')
+      startsWith(github.ref, 'refs/tags/') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     env:
       GH_TOKEN: ${{ github.token }}
       GITLAB_API_TOKEN: ${{ secrets.GITLAB_API_TOKEN }}
@@ -102,6 +131,10 @@ jobs:
       - name: Sync GitHub releases to GitLab links
         run: |
           set -euo pipefail
+          # Bash does not carry errexit into a command substitution unless
+          # told to, so a request failing inside $(...) would be read as an
+          # empty answer: a failed links page as the end of the list.
+          shopt -s inherit_errexit
 
           if [ -z "$GITLAB_API_TOKEN" ]; then
             echo "::error::GITLAB_API_TOKEN secret is empty or missing"
@@ -111,42 +144,81 @@ jobs:
           gitlab_api="https://gitlab.com/api/v4/projects/${GITLAB_PROJECT_ID}"
 
           # Every write and listing goes through here, so a failed request
-          # prints GitLab's response body instead of a bare curl exit 22.
+          # prints GitLab's response body instead of a bare curl exit 22,
+          # which is all the run that first hit the bug below could say.
           gitlab_request() {
             local method="$1"
             local url="$2"
             local payload="${3:-}"
-            local response
-            local args=(--fail-with-body --show-error --silent --request "$method" --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}")
+            local body
+            local args=(--fail-with-body --show-error --silent --connect-timeout 10 --max-time 60 --request "$method" --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}")
+            # Only reads are retried: a write GitLab committed before the
+            # connection dropped would be made twice.
+            if [ "$method" = GET ]; then
+              args+=(--retry 3 --retry-delay 5)
+            fi
             if [ -n "$payload" ]; then
               args+=(--header "Content-Type: application/json" --data "$payload")
             fi
-            if ! response=$(curl "${args[@]}" "$url"); then
-              echo "::error::GitLab ${method} ${url#"$gitlab_api"} failed: ${response}" >&2
+            # The body goes to a file rather than stdout: curl empties a file
+            # before it retries, while on stdout a retried request leaves the
+            # failed attempt's body in front of the answer.
+            body=$(mktemp)
+            if ! curl "${args[@]}" --output "$body" "$url"; then
+              echo "::error::GitLab ${method} ${url#"$gitlab_api"} failed: $(cat "$body")" >&2
+              rm -f "$body"
               return 1
             fi
-            printf '%s' "$response"
+            cat "$body"
+            rm -f "$body"
           }
 
           request_json() {
             gitlab_request "$1" "$2" "$3" >/dev/null
           }
 
+          # GitLab pages a release's links, twenty to a page unless asked
+          # otherwise, and v3.2.0 was the first release here with more than
+          # twenty (21 assets and the GitHub link). Reading only the first
+          # page made its last links look missing, the sync POSTed them
+          # again, and GitLab refused with 400 because the name was taken.
+          # Every page is read, at 100 to a page, the API's maximum.
+          list_links() {
+            local tag_encoded="$1"
+            local page=1
+            local batch
+            local all='[]'
+            while :; do
+              batch=$(gitlab_request GET "${gitlab_api}/releases/${tag_encoded}/assets/links?per_page=100&page=${page}") || return 1
+              [ "$(jq 'length' <<<"$batch")" -gt 0 ] || break
+              all=$(jq -c --argjson more "$batch" '. + $more' <<<"$all")
+              page=$((page + 1))
+            done
+            printf '%s\n' "$all"
+          }
+
           # Prints the GitLab release for the tag, or nothing when GitLab
           # does not have it yet.
           current_release() {
             local tag_encoded="$1"
-            local response
+            local body
             local status
-            response=$(curl --silent --show-error --write-out '\n%{http_code}' \
+            # To a file for the reason gitlab_request gives.
+            body=$(mktemp)
+            status=$(curl --silent --show-error --output "$body" --write-out '%{http_code}' \
+              --connect-timeout 10 --max-time 60 --retry 3 --retry-delay 5 \
               --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}" \
               "${gitlab_api}/releases/${tag_encoded}")
-            status=${response##*$'\n'}
             case "$status" in
-              200) printf '%s' "${response%$'\n'*}" ;;
+              200) cat "$body" ;;
               404) ;;
-              *) echo "::error::Unexpected GitLab release lookup status ${status}: ${response%$'\n'*}" >&2; exit 1 ;;
+              *)
+                echo "::error::Unexpected GitLab release lookup status ${status}: $(cat "$body")" >&2
+                rm -f "$body"
+                exit 1
+                ;;
             esac
+            rm -f "$body"
           }
 
           sync_link() {
@@ -187,7 +259,7 @@ jobs:
               desired_names["$link_name"]=1
             done < <(jq -r '.[].name' <<<"$desired_links")
 
-            current_links=$(gitlab_request GET "${gitlab_api}/releases/${tag_encoded}/assets/links?per_page=100")
+            current_links=$(list_links "$tag_encoded")
 
             while IFS= read -r link; do
               link_id=$(jq -r '.id' <<<"$link")
@@ -227,11 +299,11 @@ jobs:
               --arg released_at "$released_at" \
               '{name: $name, description: $description, released_at: $released_at}')
 
-            # Write only what differs. GitLab answers 500 to a PUT that
-            # rewrites v4.0.0rc1 with the values it already holds, and a
-            # run that rewrote every release stopped there. GitLab stores
-            # released_at with milliseconds and GitHub without, so both are
-            # compared as instants, fraction included.
+            # Write only what differs. The loop used to rewrite every
+            # release and link on every run, and GitLab can answer 500 to a
+            # PUT that rewrites a release with the values it already holds.
+            # GitLab stores released_at with milliseconds and GitHub without,
+            # so both are compared as instants, fraction included.
             current=$(current_release "$tag_encoded")
             if [ -z "$current" ]; then
               request_json POST "${gitlab_api}/releases" "$create_release_payload"
@@ -247,7 +319,7 @@ jobs:
               request_json PUT "${gitlab_api}/releases/${tag_encoded}" "$update_release_payload"
             fi
 
-            existing_links=$(gitlab_request GET "${gitlab_api}/releases/${tag_encoded}/assets/links?per_page=100")
+            existing_links=$(list_links "$tag_encoded")
             desired_links=$(jq -c '[{name: "GitHub Release", url: .url, link_type: "other"}] + [.assets[]? | {name: .name, url: .url, link_type: "package"}]' <<<"$release_json")
 
             jq -c '.[]' <<<"$desired_links" |

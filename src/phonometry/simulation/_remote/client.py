@@ -28,6 +28,7 @@ import contextlib
 import dataclasses
 import importlib
 import inspect
+import io
 import logging
 import math
 import re
@@ -645,7 +646,11 @@ def _warning_class(path: str) -> type[Warning] | None:
     if module_name == "phonometry" or module_name.startswith("phonometry."):
         try:
             module = importlib.import_module(module_name)
-        except ImportError:
+        # Whatever the import of a module the node names raises, the class is
+        # not found here, and the warning comes back as a RuntimeWarning: the
+        # result is read already, and no error of the node's choosing may
+        # stop the run with another error than a ComputeRemoteError.
+        except Exception:
             return None
     else:
         module = sys.modules.get(module_name)
@@ -786,6 +791,32 @@ def _package(host: str) -> Package:
         raise ComputeRemoteError(msg, host=host) from None
 
 
+def _check_job_size(
+    host: str, job: Mapping[str, object], buffers: Sequence[memoryview]
+) -> None:
+    """Refuse, before ssh starts, a job whose header no node would read.
+
+    Every number and text of the run outside an array travels in the job's
+    header (a point source takes about 190 bytes of it), and a node reads no
+    header longer than :data:`.bootstrap.MAX_HEADER`. The header is measured
+    as the frame writes it.
+
+    :raises ComputeRemoteError: for a longer one.
+    """
+    payload = dict(job)
+    payload["buffers"] = [view.nbytes for view in buffers]
+    encoded = io.BytesIO()
+    bootstrap.write_header(encoded, payload)
+    size = encoded.tell() - bootstrap._START
+    if size > bootstrap.MAX_HEADER:
+        msg = (
+            f"node {host!r}: the job's header takes {size} bytes, more than the "
+            f"{bootstrap.MAX_HEADER} bytes a node reads; the sources and every "
+            "value of the run outside an array travel in it"
+        )
+        raise ComputeRemoteError(msg, host=host)
+
+
 def run_remote(
     function: RemoteFunction,
     request: Compute,
@@ -801,14 +832,14 @@ def run_remote(
     In this order, before anything connects: the arguments become data (an
     argument that cannot travel is the caller's ``TypeError``, whatever the
     host), Pyodide is refused, the hosts file names the node, the package is
-    read from disk.
+    read from disk, the job is measured against the header a node reads.
 
     :return: The run's provenance, its host and package digest set; ``None``
         when the run failed, ``request.fallback`` asks to run here instead,
         and the :class:`ComputeFallbackWarning` was raised.
     :raises KeyError: for a host the hosts file does not name.
-    :raises ValueError: for a malformed hosts file, or arrays and a sink
-        that do not match *expected*.
+    :raises ValueError: for a hosts file that cannot be read or is
+        malformed, or arrays and a sink that do not match *expected*.
     :raises TypeError: for an argument that cannot travel.
     :raises ComputeRemoteError: for a failure of the transport or of the
         node, without ``fallback``.
@@ -828,6 +859,7 @@ def run_remote(
             "compute": placement,
             "arguments": tree,
         }
+        _check_job_size(host, job, buffers)
         _LOG.info(
             "%s: running %s on %s in %s",
             entry.label,

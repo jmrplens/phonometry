@@ -65,6 +65,10 @@ _WAVEFORM_OWNERS: tuple[type, ...] = (
 )
 #: Marks a value :func:`_leaf` does not take.
 _NOT_A_LEAF = object()
+#: The integers that travel, those of an int64: JSON carries them whole,
+#: where Python writes no integer of more than 4300 digits.
+_INT64_MIN = -(2**63)
+_INT64_MAX = 2**63 - 1
 
 
 def encode_arguments(
@@ -74,9 +78,10 @@ def encode_arguments(
 
     :raises TypeError: naming the argument, for a value that cannot travel:
         a callable other than the ``value`` of a GaussianPulse, CWSource or
-        SignalSource, a subclass of a library record, an array of anything
-        but booleans, integers or floats of up to 64 bits, a mapping with a
-        key that is not text, or any other object a node could not rebuild.
+        SignalSource, a subclass of a library record, an integer outside
+        the 64-bit range, an array of anything but booleans, integers or
+        floats of up to 64 bits, a mapping with a key that is not text, or
+        any other object a node could not rebuild.
     """
     buffers: list[memoryview] = []
     tree = {name: _encode(value, name, buffers) for name, value in arguments.items()}
@@ -103,6 +108,14 @@ def _leaf(value: object, where: str, buffers: list[memoryview]) -> object:
     if isinstance(value, float):
         return {"$": "float", "hex": value.hex()}
     if isinstance(value, int):
+        if not _INT64_MIN <= value <= _INT64_MAX:
+            # The value is not quoted: Python refuses to write an integer of
+            # more than 4300 digits as text.
+            msg = (
+                f"{where} cannot travel to a node: the integer is outside the "
+                f"int64 range a node takes, {_INT64_MIN} to {_INT64_MAX}"
+            )
+            raise TypeError(msg)
         return value
     if isinstance(value, np.ndarray):
         return _array(value, where, buffers)

@@ -256,6 +256,38 @@ def test_what_cannot_travel_is_refused_by_name(
         wire.encode_arguments(arguments)
 
 
+def test_an_integer_json_cannot_carry_is_refused_by_name_before_it_is_written() -> None:
+    # A run takes a snapshot interval of any size; JSON writes no integer of
+    # more than 4300 digits, and a node reads none outside an int64.
+    run = FDTDRun(
+        343.0,
+        0.01,
+        1e-3,
+        shape=(20, 20),
+        sources=[GaussianPulse(ix=10, iy=10, half_width_s=4e-5)],
+        recording=FDTDRecording(snapshot_every=10**5000),
+    )
+    with pytest.raises(
+        TypeError,
+        match=r"run\.recording\.snapshot_every cannot travel to a node: the integer "
+        r"is outside the int64 range",
+    ):
+        wire.encode_arguments({"run": run})
+
+
+@pytest.mark.parametrize("value", [2**63, -(2**63) - 1])
+def test_an_integer_outside_an_int64_is_refused(value: int) -> None:
+    with pytest.raises(TypeError, match="shape\\[0\\] cannot travel to a node"):
+        wire.encode_arguments({"shape": [value, 5]})
+
+
+@pytest.mark.parametrize("value", [2**63 - 1, -(2**63)])
+def test_the_integers_at_the_ends_of_an_int64_travel(value: int) -> None:
+    back = _round_trip({"n": value})
+    assert back["n"] == value
+    assert type(back["n"]) is int
+
+
 class _LouderPulse(GaussianPulse):
     def value(self, t: float) -> float:
         return 2.0 * super().value(t)

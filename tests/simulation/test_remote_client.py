@@ -9,6 +9,9 @@ stand-in for ssh itself.
 from __future__ import annotations
 
 import contextlib
+import importlib.abc
+import importlib.machinery
+import importlib.util
 import io
 import logging
 import re
@@ -21,7 +24,12 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from phonometry.simulation import Compute, ComputeFallbackWarning, ComputeRemoteError
+from phonometry.simulation import (
+    Compute,
+    ComputeFallbackWarning,
+    ComputeRemoteError,
+    GaussianPulse,
+)
 from phonometry.simulation._remote import bootstrap, client, command
 from phonometry.simulation._remote.hosts import HostEntry
 from phonometry.simulation._remote.package import Package
@@ -604,6 +612,94 @@ def test_a_package_no_node_would_take_is_a_remote_failure_before_ssh_starts(
         )
 
 
+#: How a job longer than the header a node reads is refused.
+_TOO_LONG = (
+    rf"the job's header takes \d+ bytes, more than the {bootstrap.MAX_HEADER} "
+    "bytes a node reads"
+)
+
+
+def _lab_without_ssh(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> list[HostEntry]:
+    """The lab node and a package to send; each ssh the client would start is recorded and fails."""
+    _lab(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        client, "installed_package", lambda: Package(files=(), digest="0" * 64)
+    )
+    opened: list[HostEntry] = []
+
+    def opening(entry: HostEntry, request: Compute) -> object:
+        opened.append(entry)
+        msg = "ssh is not started in this test"
+        raise ComputeRemoteError(msg, host=entry.name)
+
+    monkeypatch.setattr(client, "open_session", opening)
+    return opened
+
+
+#: A run of more point sources than a job's header holds: each takes about
+#: 190 bytes of it.
+_TOO_MANY_SOURCES = {"sources": [GaussianPulse(ix=10, iy=10, half_width_s=4e-5)] * 6000}
+
+
+def test_a_job_larger_than_the_header_a_node_reads_is_a_remote_failure_before_ssh_starts(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    # Refused here, where a fallback can still run it, not by the node once
+    # the connection is open.
+    opened = _lab_without_ssh(monkeypatch, tmp_path)
+    request, target = Compute(host="lab"), np.empty((2, 5))
+    with pytest.raises(ComputeRemoteError, match=_TOO_LONG):
+        client.run_remote(
+            "fdtd_simulation", request, _TOO_MANY_SOURCES, _EXPECTED, target, None
+        )
+    assert opened == []
+
+
+def test_a_job_larger_than_the_header_a_node_reads_falls_back_here_when_asked(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    opened = _lab_without_ssh(monkeypatch, tmp_path)
+    request, target = Compute(host="lab", fallback=True), np.empty((2, 5))
+    with pytest.warns(ComputeFallbackWarning, match=_TOO_LONG):
+        provenance = client.run_remote(
+            "fdtd_simulation", request, _TOO_MANY_SOURCES, _EXPECTED, target, None
+        )
+    assert provenance is None
+    assert opened == []
+
+
+@pytest.mark.parametrize(
+    ("past", "match"),
+    [(0, "ssh is not started in this test"), (1, _TOO_LONG)],
+)
+def test_the_job_s_header_is_measured_as_the_frame_writes_it(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, past: int, match: str
+) -> None:
+    # A job whose header is exactly as long as a node reads goes on to ssh;
+    # one byte more does not.
+    opened = _lab_without_ssh(monkeypatch, tmp_path)
+    arguments: dict[str, object] = {"note": ""}
+    job = {
+        "type": "job",
+        "function": "fdtd_simulation",
+        "compute": {"device": "cpu", "device_index": 0, "dtype": "float64"},
+        "arguments": arguments,
+        "buffers": [],
+    }
+    out = io.BytesIO()
+    bootstrap.write_header(out, job)
+    empty = out.tell() - len(bootstrap.MAGIC) - 4
+    arguments["note"] = "x" * (bootstrap.MAX_HEADER - empty + past)
+    request, target = Compute(host="lab"), np.empty((2, 5))
+    with pytest.raises(ComputeRemoteError, match=match):
+        client.run_remote(
+            "fdtd_simulation", request, arguments, _EXPECTED, target, None
+        )
+    assert len(opened) == (0 if past else 1)
+
+
 def test_a_package_not_on_disk_falls_back_here_when_asked(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -673,6 +769,44 @@ def test_a_node_s_warning_class_is_looked_up_without_running_a_module_hook(
     assert [(w.category, str(w.message)) for w in record] == [
         (RuntimeWarning, f"{lazy.__name__}:submodule.Odd: strange")
     ]
+
+
+class _ExplodingModule(importlib.abc.MetaPathFinder, importlib.abc.Loader):
+    """Finds one module of phonometry whose import raises something other than an ImportError."""
+
+    name = "phonometry.simulation._a_module_whose_import_raises"
+
+    def find_spec(
+        self, fullname: str, path: object, target: object = None
+    ) -> importlib.machinery.ModuleSpec | None:
+        if fullname != self.name:
+            return None
+        return importlib.util.spec_from_loader(fullname, self)
+
+    def create_module(self, spec: importlib.machinery.ModuleSpec) -> None:
+        return None
+
+    def exec_module(self, module: types.ModuleType) -> None:
+        msg = "this module does not import here"
+        raise RuntimeError(msg)
+
+
+def test_a_node_s_warning_of_a_module_whose_import_raises_comes_back_as_a_runtime_warning(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # The result is read already: whatever the import of a module the node
+    # names raises, it must not stop the run with another error than a
+    # ComputeRemoteError, which would skip the fallback.
+    monkeypatch.setattr(sys, "meta_path", [_ExplodingModule(), *sys.meta_path])
+    path = f"{_ExplodingModule.name}:Odd"
+    stdout = _result(caught=[{"category": path, "message": "strange"}])
+    with warnings.catch_warnings(record=True) as record:
+        warnings.simplefilter("always")
+        _receive(stdout)
+    assert [(w.category, str(w.message)) for w in record] == [
+        (RuntimeWarning, f"{path}: strange")
+    ]
+    assert _ExplodingModule.name not in sys.modules
 
 
 class _SinceWarning(UserWarning):

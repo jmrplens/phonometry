@@ -517,7 +517,7 @@ collocated velocities and the contour phasors.
 
 | Device | dtype | Bound | Where it is measured |
 |---|---|---|---|
-| `cpu` (NumPy) | float32 | 3×10⁻⁶ | every CPU kernel level, at NumPy 2.0.2 and 2.5.3 |
+| `cpu` (NumPy) | float32 | 3×10⁻⁶ | every CPU kernel level, at NumPy 2.0.2 and 2.5.4 |
 | `torch:cpu` | float64 | 9×10⁻¹⁶ | every CPU kernel level, at torch 2.3.0 and 2.14.1 |
 | `torch:cpu` | float32 | 2×10⁻⁶ | every CPU kernel level, at torch 2.3.0 and 2.14.1 |
 | `torch:mps` | float32 | 2×10⁻⁶ | the `mps` CI job, on a macOS 15 runner with Apple silicon, at torch 2.14.1 |

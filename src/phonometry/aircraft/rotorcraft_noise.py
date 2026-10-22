@@ -1619,7 +1619,9 @@ def _setup_ground_elevation(
         if not np.isfinite(ground_elevation):
             msg = "'ground_elevation' must be finite."
             raise ValueError(msg)
-        return float(ground_elevation)  # type: ignore[arg-type]
+        # unused-ignore: NumPy 2.5.4's stubs narrow isscalar() to float and the
+        # ignore is unnecessary; older stubs leave complex in and need it.
+        return float(ground_elevation)  # type: ignore[arg-type, unused-ignore]
     arr = np.asarray(ground_elevation, dtype=np.float64).ravel()
     if not np.all(np.isfinite(arr)):
         msg = "'ground_elevation' must be finite."

@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import os
 import re
+import threading
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass
@@ -175,8 +176,9 @@ class Compute(RichDisplay):
     :raises ValueError: for an unknown device or dtype, ``"torch:mps"`` in
         float64, an index on a device that has one instance, an index that
         is not a whole number of 0 or more, a ``host`` that is not a name the
-        hosts file can hold, a ``timeout_s`` without a host or not positive,
-        or a fallback asked of ``"cpu"`` on this machine.
+        hosts file can hold, a ``timeout_s`` without a host, not positive or
+        longer than a timer here can wait (``threading.TIMEOUT_MAX``), or a
+        fallback asked of ``"cpu"`` on this machine.
     """
 
     device: Device = "cpu"
@@ -233,8 +235,9 @@ def _checked_timeout(timeout_s: object, host: str | None) -> float | None:
 
     :raises TypeError: for a timeout that is not one number (a bool is not
         one).
-    :raises ValueError: for a timeout without a host, or one that is not
-        positive and finite.
+    :raises ValueError: for a timeout without a host, one that is not
+        positive and finite, or one longer than a timer here can wait
+        (``threading.TIMEOUT_MAX``).
     """
     if timeout_s is None:
         return None
@@ -245,7 +248,16 @@ def _checked_timeout(timeout_s: object, host: str | None) -> float | None:
         # float(True) is 1.0: read as a number it would bound the run to 1 s.
         msg = f"'timeout_s' must be one number, not a bool; got {timeout_s!r}."
         raise TypeError(msg)
-    return require_positive(cast("float", timeout_s), "timeout_s")
+    seconds = require_positive(cast("float", timeout_s), "timeout_s")
+    if seconds > threading.TIMEOUT_MAX:
+        # The timer that stops a remote run would die on a longer one, and
+        # the run would have no timeout at all.
+        msg = (
+            f"'timeout_s' must be at most {int(threading.TIMEOUT_MAX)} s, the "
+            f"longest a timer here waits; got {timeout_s!r}."
+        )
+        raise ValueError(msg)
+    return seconds
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -24,6 +24,7 @@ import math
 import os
 import re
 import sys
+import threading
 import tomllib
 from dataclasses import dataclass
 from pathlib import Path
@@ -39,6 +40,8 @@ _RUNNERS: tuple[Runner, ...] = ("docker", "python")
 _KEYS = frozenset({"ssh", "runner", "image", "python", "label", "timeout_s"})
 #: A Docker image reference: no whitespace, no quote, nothing a shell reads.
 _IMAGE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/:@-]*")
+#: C0 and C1 control characters, which no ssh destination holds.
+_CONTROL = re.compile(r"[\x00-\x1f\x7f-\x9f]")
 
 
 @dataclass(frozen=True)
@@ -80,8 +83,9 @@ def load_host(name: str) -> HostEntry:
     """The entry *name* of the hosts file, checked.
 
     :raises KeyError: when the file does not exist or names no such host.
-    :raises ValueError: naming the file, when it is not TOML, its ``hosts``
-        is not a table, or the entry is malformed.
+    :raises ValueError: naming the file, when it cannot be read (a
+        directory, a file this user may not read), is not TOML, its
+        ``hosts`` is not a table, or the entry is malformed.
     """
     path = hosts_file()
     try:
@@ -89,6 +93,9 @@ def load_host(name: str) -> HostEntry:
     except FileNotFoundError:
         msg = f"no host {name!r}: the hosts file {path} does not exist"
         raise KeyError(msg) from None
+    except OSError as exc:
+        msg = f"{path}: the hosts file cannot be read: {exc.strerror or exc}"
+        raise ValueError(msg) from None
     try:
         # utf-8-sig: Windows Notepad saves UTF-8 with a byte-order mark.
         document = tomllib.loads(raw.decode("utf-8-sig"))
@@ -119,7 +126,13 @@ def _entry(where: str, name: str, table: object) -> HostEntry:
         msg = f"{where}: unknown key(s) {unknown}; the keys are {sorted(_KEYS)}"
         raise ValueError(msg)
     ssh = _required_text(where, table, "ssh")
-    if ssh.startswith("-") or any(character.isspace() for character in ssh):
+    # A control character would reach the ssh command line, where a NUL
+    # stops the process from starting with an error that names no file.
+    if (
+        ssh.startswith("-")
+        or any(character.isspace() for character in ssh)
+        or _CONTROL.search(ssh) is not None
+    ):
         msg = (
             f"{where}: 'ssh' must be a destination such as user@address or an "
             f"alias of ~/.ssh/config, got {ssh!r}"
@@ -210,5 +223,13 @@ def _timeout(where: str, table: dict[str, object]) -> float | None:
         # float is no number of seconds a run can wait.
         raise ValueError(msg) from None
     if not math.isfinite(seconds) or seconds <= 0:
+        raise ValueError(msg)
+    if seconds > threading.TIMEOUT_MAX:
+        # The timer that stops a run would die on a longer one, and the run
+        # would have no timeout at all.
+        msg = (
+            f"{where}: 'timeout_s' must be at most {int(threading.TIMEOUT_MAX)} "
+            f"seconds, the longest a timer here waits, got {value!r}"
+        )
         raise ValueError(msg)
     return seconds

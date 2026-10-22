@@ -119,6 +119,20 @@ def test_a_missing_file_is_a_missing_key_that_names_the_file(hosts_at: Path) -> 
             _DOCKER.replace("root@192.168.0.40", "root@host extra"),
             "'ssh' must be a destination",
         ),
+        # A control character, which would reach the ssh command line: a NUL
+        # stops ssh from starting with an error that names no file.
+        (
+            _DOCKER.replace("root@192.168.0.40", "root@192.168.0.40\\u0000"),
+            "'ssh' must be a destination",
+        ),
+        (
+            _DOCKER.replace("root@192.168.0.40", "root@\\u001b[2Jhost"),
+            "'ssh' must be a destination",
+        ),
+        (
+            _DOCKER.replace("root@192.168.0.40", "root@\\u009bhost"),
+            "'ssh' must be a destination",
+        ),
         (
             _DOCKER.replace('"docker"', '"podman"'),
             "'runner' must be 'docker' or 'python'",
@@ -159,6 +173,11 @@ def test_a_missing_file_is_a_missing_key_that_names_the_file(hosts_at: Path) -> 
             _DOCKER.replace("7200", "9" * 400),
             "'timeout_s' must be a positive number of seconds",
         ),
+        # The timer that stops a run would die on a longer one.
+        (
+            _DOCKER.replace("7200", "1e300"),
+            "'timeout_s' must be at most .* seconds, the longest a timer here waits",
+        ),
         # Python refuses to read an integer longer than 4300 digits.
         (_DOCKER.replace("7200", "9" * 5000), "not a TOML file"),
         # A value nested deeper than Python's recursion limit.
@@ -179,6 +198,22 @@ def test_a_malformed_file_is_a_value_error_that_names_it(
     with pytest.raises(ValueError, match=match) as caught:
         hosts.load_host(name)
     assert str(hosts_at) in str(caught.value)
+
+
+@pytest.mark.parametrize("kind", ["a directory", "under a file"])
+def test_a_hosts_file_that_cannot_be_read_is_a_value_error_that_names_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str
+) -> None:
+    if kind == "a directory":
+        path = tmp_path / "hosts.toml"
+        path.mkdir()
+    else:
+        (tmp_path / "not-a-directory").write_text("", encoding="utf-8")
+        path = tmp_path / "not-a-directory" / "hosts.toml"
+    monkeypatch.setenv(hosts.HOSTS_FILE_VAR, str(path))
+    with pytest.raises(ValueError, match="the hosts file cannot be read") as caught:
+        hosts.load_host("nas")
+    assert str(path) in str(caught.value)
 
 
 def test_an_image_entry_on_a_python_node_names_where_it_belongs(hosts_at: Path) -> None:

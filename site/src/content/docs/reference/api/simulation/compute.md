@@ -59,7 +59,7 @@ Where an FDTD simulation steps, in which dtype, and whether it may fall back.
 | Exception | When |
 | :--- | :--- |
 | TypeError | for a `device` or `dtype` that is not text, a `device_index` that is not a number (a bool is not one), a `fallback` that is not `True` or `False`, a `host` that is neither text nor `None`, or a `timeout_s` that is not one number. |
-| ValueError | for an unknown device or dtype, `"torch:mps"` in float64, an index on a device that has one instance, an index that is not a whole number of 0 or more, a `host` that is not a name the hosts file can hold, a `timeout_s` without a host or not positive, or a fallback asked of `"cpu"` on this machine. |
+| ValueError | for an unknown device or dtype, `"torch:mps"` in float64, an index on a device that has one instance, an index that is not a whole number of 0 or more, a `host` that is not a name the hosts file can hold, a `timeout_s` without a host, not positive or longer than a timer here can wait (`threading.TIMEOUT_MAX`), or a fallback asked of `"cpu"` on this machine. |
 
 ## ComputeDeviceError
 

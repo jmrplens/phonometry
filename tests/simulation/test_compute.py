@@ -8,6 +8,7 @@ import os
 import pickle
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 import numpy as np
@@ -329,6 +330,22 @@ def test_a_host_or_a_timeout_that_cannot_mean_anything_is_refused(
 ) -> None:
     with pytest.raises(error, match=match):
         Compute(**kwargs)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("timeout_s", [threading.TIMEOUT_MAX * 2, 1e300])
+def test_a_timeout_longer_than_a_timer_waits_is_refused_with_the_limit(
+    timeout_s: float,
+) -> None:
+    # The timer that stops a remote run would die on it, and the run would
+    # have no timeout at all.
+    limit = int(threading.TIMEOUT_MAX)
+    with pytest.raises(ValueError, match=rf"'timeout_s' must be at most {limit} s"):
+        Compute(host="nas", timeout_s=timeout_s)
+
+
+def test_the_longest_timeout_a_timer_waits_is_taken() -> None:
+    longest = Compute(host="nas", timeout_s=threading.TIMEOUT_MAX)
+    assert longest.timeout_s == threading.TIMEOUT_MAX
 
 
 @pytest.mark.parametrize(

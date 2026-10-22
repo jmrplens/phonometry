@@ -647,9 +647,10 @@ def _warning_class(path: str) -> type[Warning] | None:
         try:
             module = importlib.import_module(module_name)
         # Whatever the import of a module the node names raises, the class is
-        # not found here, and the warning comes back as a RuntimeWarning: the
-        # result is read already, and no error of the node's choosing may
-        # stop the run with another error than a ComputeRemoteError.
+        # not found here, and the warning comes back as a RuntimeWarning: this
+        # runs once the result's header is read and before any of its arrays
+        # is, and no error of the node's choosing may stop the run with
+        # another error than a ComputeRemoteError.
         except Exception:
             return None
     else:
@@ -666,8 +667,9 @@ def _built(category: type[Warning], message: str) -> Warning | None:
     A class of a library the caller imported may want more than a message
     (a keyword its ``__init__`` requires) or show another text than the one
     it was given (its own ``__str__``), and may raise for either. It is
-    tried here, before a byte of the result is read, so that the run never
-    stops on it with another error than a ComputeRemoteError.
+    tried here, once the result's header is read and before any of its
+    arrays is, so that the run never stops on it with another error than a
+    ComputeRemoteError.
     """
     try:
         warning = category(message)

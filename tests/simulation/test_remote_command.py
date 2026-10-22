@@ -139,8 +139,9 @@ def test_ssh_asks_for_no_terminal_and_forwards_nothing_of_the_client(
     # yes" or a "ControlMaster auto" that ~/.ssh/config gives the host must
     # not reach a run: a pty rewrites the frames, a node runs the code it is
     # sent, with neither the client's agent nor its Kerberos credentials, and
-    # a shared master that persists holds the run's standard error open.
-    # Options on the command line win over the file.
+    # a run neither leaves a master behind here nor rides another's, whose
+    # keep-alives and timeout are not the run's. Options on the command line
+    # win over the file.
     monkeypatch.setattr(command, "_SSH_PROGRAM", ("ssh",))
     options = _options(command.ssh_argv(_DOCKER, Compute(host="nas")))
     assert {"-T", "-a", "-x"} <= set(options)

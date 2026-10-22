@@ -2425,9 +2425,10 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
         ``compute`` that is neither a :class:`Compute` nor ``None``, or,
         when ``compute`` names a host, a run that cannot travel to a node: a
         source whose waveform is a callable other than the ``value`` of a
-        :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`.
+        :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`,
+        or a whole number outside the range of an int64.
     :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
-        a malformed hosts file.
+        a hosts file that cannot be read or is malformed.
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
         or does not import.

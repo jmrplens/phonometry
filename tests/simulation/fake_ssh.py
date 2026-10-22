@@ -3,9 +3,10 @@
 
 It checks the options a client must pass (no prompt, no terminal, no
 forwarding, no command of a config file, no shared connection, a
-keep-alive, ``--`` before the destination), then runs the remote command on this machine, split as a POSIX
-shell splits it, on its own standard streams. ``FAKE_SSH_MODE`` makes it
-misbehave the ways a real connection can:
+keep-alive, ``--`` before the destination), then runs the remote command on
+this machine, split as a POSIX shell splits it, on its own standard
+streams. ``FAKE_SSH_MODE`` makes it misbehave the ways a real connection
+can:
 
 * ``refuse``: exit 255 with ssh's words for a refused key;
 * ``banner``: print a login banner on standard output first;

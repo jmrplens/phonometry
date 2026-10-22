@@ -61,9 +61,11 @@ SSH_OPTIONS: tuple[str, ...] = (
             # a Kerberos site's config often asks for.
             "GSSAPIDelegateCredentials=no",
             # No connection sharing: every run is a connection of its own,
-            # whatever ControlMaster the file sets. A master that persists
-            # holds the client's standard error open, and closing a run
-            # would wait for it.
+            # whatever ControlMaster the file sets. A run would otherwise
+            # leave a master behind on this machine (ControlPersist), or ride
+            # another's master, whose keep-alives and timeout are that
+            # connection's and not the ones below: a dead node would go
+            # unnoticed past the minute they promise.
             "ControlPath=none",
             # Never a prompt, which would hang a notebook; keep-alives that
             # notice a dead link in about a minute; a connection given up

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -200,9 +201,30 @@ def test_a_malformed_file_is_a_value_error_that_names_it(
     assert str(hosts_at) in str(caught.value)
 
 
-@pytest.mark.parametrize("kind", ["a directory", "under a file"])
-def test_a_hosts_file_that_cannot_be_read_is_a_value_error_that_names_it(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str
+#: What a hosts path under a file raises. Windows reports a path whose middle
+#: component is a file as one that does not exist (ERROR_PATH_NOT_FOUND, a
+#: FileNotFoundError), so there the hosts file is missing, the KeyError of no
+#: file at all; elsewhere it is a path that cannot be read.
+_UNDER_A_FILE = (
+    (KeyError, "does not exist")
+    if os.name == "nt"
+    else (ValueError, "the hosts file cannot be read")
+)
+
+
+@pytest.mark.parametrize(
+    ("kind", "error", "match"),
+    [
+        ("a directory", ValueError, "the hosts file cannot be read"),
+        ("under a file", *_UNDER_A_FILE),
+    ],
+)
+def test_a_hosts_file_that_cannot_be_read_is_refused_naming_it(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    kind: str,
+    error: type[Exception],
+    match: str,
 ) -> None:
     if kind == "a directory":
         path = tmp_path / "hosts.toml"
@@ -211,9 +233,11 @@ def test_a_hosts_file_that_cannot_be_read_is_a_value_error_that_names_it(
         (tmp_path / "not-a-directory").write_text("", encoding="utf-8")
         path = tmp_path / "not-a-directory" / "hosts.toml"
     monkeypatch.setenv(hosts.HOSTS_FILE_VAR, str(path))
-    with pytest.raises(ValueError, match="the hosts file cannot be read") as caught:
+    with pytest.raises(error, match=match) as caught:
         hosts.load_host("nas")
-    assert str(path) in str(caught.value)
+    # The message itself: a KeyError's text is the repr of its message,
+    # which doubles every backslash of a Windows path.
+    assert str(path) in caught.value.args[0]
 
 
 def test_an_image_entry_on_a_python_node_names_where_it_belongs(hosts_at: Path) -> None:

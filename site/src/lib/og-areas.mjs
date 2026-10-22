@@ -35,11 +35,12 @@ const AREA_SLUG = new Map([
 ]);
 
 /**
- * Where each artwork gets too bright for the title, as the card places it: the
- * first x at which the artwork, smoothed over 3 x 3 pixels and taken at its
- * brightest across the rows a title can occupy (y 230 to 470), reaches the
- * luminance that brings the title colour, #f2f8fa, under 4.5:1, the WCAG
- * contrast for large type. `null` is an artwork that never gets there.
+ * Where each artwork gets too bright for the title: the first x at which the
+ * drawing, resized to the 1200 x 630 card with a Lanczos filter, smoothed over
+ * 3 x 3 pixels and taken at its brightest across the rows a title can occupy
+ * (y 230 to 470), reaches the luminance that brings the title colour, #f2f8fa,
+ * under 4.5:1, the WCAG contrast for large type. `null` is an artwork that
+ * never gets there.
  *
  * Every artwork key needs an entry, measured on its drawing: a key missing
  * here stops the build below rather than taking a column nobody checked.
@@ -61,11 +62,17 @@ const BRIGHT_FROM = new Map([
 /**
  * How far short of the bright zone a title stops, in pixels.
  *
- * The same artwork placed by two faithful routes, scaled by sharp or drawn by
- * the card itself, puts the start of its bright zone up to 23 px apart: 743
- * and 758 on the loudspeaker, 1036 and 1059 on the generic card. The margin
- * covers that. With it, the artwork behind any pixel a title can reach stays
- * at 4.8:1 or better against the title on all ten cards.
+ * The card, which draws the artwork with satori, brightens each drawing at the
+ * x in BRIGHT_FROM or later, never earlier: at 758 instead of 743 on the
+ * loudspeaker and at 1059 instead of 1036 on the generic card, and at the same
+ * x on the other four drawings that brighten. So BRIGHT_FROM is the early side
+ * of where the cards brighten, and the margin is room left on top of it. In
+ * the columns this leaves, the drawing behind any pixel a title can reach,
+ * smoothed over 3 x 3 pixels as above, stays at 4.7:1 or better against the
+ * title: 4.73:1 at worst, on the vibration drawing resized with a Lanczos
+ * filter, 4.90:1 resized by sharp and 5.02:1 as the card draws it. Single
+ * pixels, unsmoothed, go lower; specks of the generic drawing come to 3.2:1
+ * as the card draws it.
  */
 const TITLE_MARGIN = 24;
 

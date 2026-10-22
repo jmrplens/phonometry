@@ -490,7 +490,7 @@ spreading rather than the 3D spherical $1/r$.
 | Name | Description |
 | :--- | :--- |
 | `run` | The simulation ([`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun)): the domain, its sources and what it records, every argument checked when the run was built. |
-| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
+| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. With a `host` the whole run goes to that node, named in the hosts file, and comes back as this function's record (see the guide on remote nodes). |
 
 **Returns:** A [`FDTDResult`](/phonometry/reference/api/simulation/fdtd/#fdtdresult).
 
@@ -498,10 +498,12 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), or a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse. |
+| TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource). |
+| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a malformed hosts file. |
+| KeyError | For a `host` the hosts file does not name. |
 | ComputeImportError | When the device's library is not installed or does not import. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
+| ComputeRemoteError | For a failure of the connection or of the node; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy here instead. |
 
 ## FDTDRecording
 

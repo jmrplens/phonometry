@@ -143,8 +143,8 @@ significa $S = 0{,}424$.
 Una simulación es un solo registro:
 `FDTDRun(c, dx, duration, sources=..., ...)` reúne el dominio, sus fuentes
 y lo que anota, y comprueba todos los argumentos al construirse, así que un
-error se lanza donde se escribe la ejecución; `fdtd_simulation(run)` la
-calcula, y `compute=` dice dónde.
+argumento erróneo se rechaza donde se escribe la ejecución;
+`fdtd_simulation(run)` la calcula, y `compute=` dice dónde.
 
 ```python
 from phonometry import simulation
@@ -176,6 +176,9 @@ sobre los números en cada uno.
 on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy"))
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, y el nombre de la tarjeta
 ```
+
+Con un `host`, la misma ejecución va a otra máquina: véase
+[Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/).
 
 El paso temporal no es una entrada. Sale de `cfl` y de la mayor velocidad
 del sonido del mapa, y `res.dt` informa del valor que se usó: por eso la
@@ -349,10 +352,9 @@ ajusta hasta que la muestra modelada reproduce una absorción medida. Los dos
 límites merecen decirse sin rodeos: como la pérdida es independiente de la
 frecuencia y la impedancia se mantiene real, esto **no** es un modelo de
 Delany-Bazley ni de Johnson-Champoux-Allard y no reproducirá la dependencia
-con la frecuencia de un absorbente real; y `FDTD2D` acepta un escalar *o* un
-mapa `(ny, nx)`, mientras que la función de conveniencia `fdtd_simulation`
-solo admite un escalar, así que un absorbente región a región hay que
-construirlo sobre el motor.
+con la frecuencia de un absorbente real; y `damping` es un escalar *o* un
+mapa `(ny, nx)`, en un `FDTDRun` igual que en el motor `FDTD2D`, así que un
+absorbente región a región es un solo mapa de tasas de caída.
 
 ```python
 import numpy as np
@@ -1173,9 +1175,9 @@ DFT.
 El esquema explícito solo es estable mientras un frente de onda cruce como
 mucho una celda por paso temporal. Con celdas cuadradas el número de Courant
 es $\mathrm{CN} = c\,\Delta t\,\sqrt{2}/\Delta x \le 1$ (Attenborough y Van
-Renterghem, Ec. 4.13). `fdtd_simulation` deriva el paso temporal del
-parámetro `cfl` (ese mismo $\mathrm{CN}$, por defecto 0,6) y de la mayor
-velocidad del sonido del mapa, y rechaza los valores fuera de $(0, 1)$. El
+Renterghem, Ec. 4.13). `FDTDRun` deriva el paso temporal de su parámetro
+`cfl` (ese mismo $\mathrm{CN}$, por defecto 0,6) y de la mayor velocidad del
+sonido del mapa, y al construirse rechaza un `cfl` fuera de $(0, 1)$. El
 número de Courant *por eje* de la relación de dispersión de más arriba es un
 número distinto, $S = c\,\Delta t/\Delta x = \mathrm{CN}/\sqrt{2}$, que vale
 0,424 con el valor por defecto.

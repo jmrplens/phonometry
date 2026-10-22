@@ -400,6 +400,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [2D FDTD wave simulation](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/)
 - [Elastic waves and fluid-solid coupling](https://docs.jmrp.io/phonometry/simulation/elastic-waves/)
 - [Where a simulation runs: NumPy, CuPy and torch](https://docs.jmrp.io/phonometry/simulation/compute/)
+- [Sending a simulation to a remote node](https://docs.jmrp.io/phonometry/simulation/remote-node/)
 
 ## Theory and reference
 

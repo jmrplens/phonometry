@@ -167,6 +167,9 @@ on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
 ```
 
+With a `host` the same run goes to another machine: see
+[Sending a simulation to a remote node](/phonometry/simulation/remote-node/).
+
 The time step is not an input. It follows from `cfl` and the largest sound
 speed in the map, and `res.dt` reports the value that was used. That is why
 the duration is given in seconds of simulated time and never in steps.
@@ -328,9 +331,9 @@ until the modelled sample reproduces a measured absorption. The two limits
 are worth stating plainly: because the loss is frequency-independent and the
 impedance stays real, this is **not** a Delany-Bazley or
 Johnson-Champoux-Allard model and will not reproduce a real absorber's
-frequency dependence; and `FDTD2D` accepts a scalar *or* an `(ny, nx)` map,
-while the convenience `fdtd_simulation` takes a scalar only, so a
-region-by-region absorber has to be built on the engine.
+frequency dependence; and `damping` is a scalar *or* an `(ny, nx)` map, in an
+`FDTDRun` as in the engine `FDTD2D`, so a region-by-region absorber is one
+map of decay rates.
 
 ```python
 import numpy as np
@@ -1100,12 +1103,12 @@ window with it.
 The explicit scheme is stable only while a wavefront crosses at most one
 cell per time step. With square cells the Courant number is
 $\mathrm{CN} = c\,\Delta t\,\sqrt{2}/\Delta x \le 1$ (Attenborough & Van
-Renterghem Eq. 4.13). `fdtd_simulation` derives the time step from the
-`cfl` parameter (that same $\mathrm{CN}$, default 0.6) and the largest sound
-speed in the map, rejecting values outside $(0, 1)$. The *per-axis* Courant
-number of the dispersion relation above is a different number,
-$S = c\,\Delta t/\Delta x = \mathrm{CN}/\sqrt{2}$, which is 0.424 at the
-default.
+Renterghem Eq. 4.13). `FDTDRun` derives the time step from its `cfl`
+parameter (that same $\mathrm{CN}$, default 0.6) and the largest sound speed
+in the map, and refuses a `cfl` outside $(0, 1)$ when it is built. The
+*per-axis* Courant number of the dispersion relation above is a different
+number, $S = c\,\Delta t/\Delta x = \mathrm{CN}/\sqrt{2}$, which is 0.424 at
+the default.
 
 ### Can I trust the absolute levels from a 2D FDTD run?
 

@@ -134,7 +134,7 @@ $1/\sqrt{r}$ amplitude spreading.
 | Name | Description |
 | :--- | :--- |
 | `run` | The simulation ([`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun)): the domain, its sources and what it records, every argument checked when the run was built. |
-| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
+| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. With a `host` the whole run goes to that node, named in the hosts file, and comes back as this function's record (see the guide on remote nodes). |
 
 **Returns:** An [`ElasticFDTDResult`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticfdtdresult).
 
@@ -142,10 +142,12 @@ $1/\sqrt{r}$ amplitude spreading.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | For a `run` that is not an [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun), or a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse. |
+| TypeError | For a `run` that is not an [`ElasticRun`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: an [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or a [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource) whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource). |
+| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a malformed hosts file. |
+| KeyError | For a `host` the hosts file does not name. |
 | ComputeImportError | When the device's library is not installed or does not import. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
+| ComputeRemoteError | For a failure of the connection or of the node; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy here instead. |
 
 ## ElasticBoundaries
 

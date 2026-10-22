@@ -110,6 +110,9 @@ on_gpu = simulation.elastic_fdtd_simulation(
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
 ```
 
+With a `host` the same run goes to another machine: see
+[Sending a simulation to a remote node](remote-node.md).
+
 ## 2. Fluids inside the elastic solver
 
 Setting ``c_s = 0`` marks a **fluid** cell: the shear modulus vanishes,

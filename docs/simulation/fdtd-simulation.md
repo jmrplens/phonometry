@@ -112,6 +112,9 @@ on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's name
 ```
 
+With a `host` the same run goes to another machine: see
+[Sending a simulation to a remote node](remote-node.md).
+
 The grid is index-based: cell ``(ix, iy)`` has its centre at
 ``((ix + 0.5) * dx, (iy + 0.5) * dx)`` metres, with rows plotted downward
 (the ``imshow`` convention), so a position in metres maps to
@@ -605,9 +608,9 @@ quarters the error (the scheme is second order). With $\Delta x = 1$ cm the
 The explicit scheme is stable only while a wavefront crosses at most one
 cell per time step. With square cells the Courant number is
 $\mathrm{CN} = c\,\Delta t\,\sqrt{2}/\Delta x \le 1$ (Attenborough & Van
-Renterghem Eq. 4.13). `fdtd_simulation` derives the time step from the
-`cfl` parameter (the Courant number, default 0.6) and the largest sound
-speed in the map, rejecting values outside $(0, 1)$.
+Renterghem Eq. 4.13). `FDTDRun` derives the time step from its `cfl`
+parameter (the Courant number, default 0.6) and the largest sound speed in
+the map, and refuses a `cfl` outside $(0, 1)$ when it is built.
 
 ### Can I trust the absolute levels from a 2D FDTD run?
 

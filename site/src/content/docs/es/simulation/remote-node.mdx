@@ -29,11 +29,11 @@ eso vale también en un nodo.
 ## 1. Qué pasa cuando una ejecución va a un nodo
 
 Todo lo que puede rechazar la llamada lo hace primero aquí, antes de que se
-abra ninguna conexión. La ejecución comprobó todos sus argumentos al construirse, con el
-código que usa una ejecución aquí, así que un argumento erróneo lanza el
-mismo `TypeError` o `ValueError` que lanza sin host. Después, la función
-rechaza una ejecución que no puede viajar (la sección 5 dice cuál), y el
-fichero de hosts tiene que nombrar el nodo.
+abra ninguna conexión. La ejecución comprobó todos sus argumentos al
+construirse, con el código que usa una ejecución aquí, así que un argumento
+erróneo lanza el mismo `TypeError` o `ValueError` que lanza sin host.
+Después, la función rechaza una ejecución que no puede viajar (la sección 5
+dice cuál), y el fichero de hosts tiene que nombrar el nodo.
 
 A partir de ahí, un solo proceso `ssh` lleva toda la ejecución. No hay que
 instalar ni mantener en marcha ningún servidor en el nodo: le basta con su
@@ -48,7 +48,7 @@ bajo un digest de sus ficheros, que vuelve a calcular a partir de lo que
 recibe, y una copia de desarrollo es una versión nueva con cada cambio. Un
 nodo conserva los cinco paquetes usados por última vez y borra los demás,
 pero nunca uno usado en los últimos diez minutos ni uno que una ejecución aún
-retiene, así que una ejecución larga conserva su paquete por muchos otros que
+retenga, así que una ejecución larga conserva su paquete por muchos otros que
 vayan y vengan.
 
 El nodo ejecuta la función en el dispositivo pedido, sin ninguna vuelta a
@@ -167,7 +167,7 @@ entera.
 
 Un nodo Docker es una máquina Linux cuyo shell de inicio de sesión es un
 shell POSIX (`sh`, `bash`, `zsh`: la orden que envía un cliente va
-entrecomillada para uno de ellos), con Docker instalado y tu usuario en su
+entrecomillada para un shell POSIX), con Docker instalado y tu usuario en su
 grupo `docker`. Una ejecución en un nodo donde tu usuario no está en ese
 grupo falla, y su error da la orden que te añade. Una GPU necesita además el
 controlador de NVIDIA en el nodo, lo bastante reciente para el runtime de

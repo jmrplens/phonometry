@@ -43,20 +43,22 @@ the run may fall back to NumPy:
 | `device_index` | which GPU, for `"cupy"` and `"torch:cuda"` | `0` |
 | `dtype` | `"float64"` or `"float32"` | `"float64"` |
 | `fallback` | step on NumPy with a warning when the device is not available, instead of raising | `False` |
+| `host` | the node the run goes to, by its name in the hosts file; see [Sending a simulation to a remote node](/phonometry/simulation/remote-node/) | `None` (this machine) |
+| `timeout_s` | the longest a run on a node may take, in seconds; only with a `host` | the hosts file's, else no limit |
 
 The record is a request. Building one imports and probes nothing, so a script
 that names a GPU can be written and checked on a laptop that has none; the
 engine checks the request when it is built. A request that cannot mean
 anything is refused at once with `ValueError`: `"torch:mps"` in float64 (MPS
 has no float64), an index on a device that has one instance (`"cpu"`,
-`"torch:cpu"` and `"torch:mps"`), and `fallback=True` on `"cpu"`, which is
-the fallback already.
+`"torch:cpu"` and `"torch:mps"`), `fallback=True` on `"cpu"` with no
+`host`, which is the fallback already, and a `timeout_s` without a `host`.
 
 ```python
 from phonometry import simulation
 
 print(simulation.Compute())
-# Compute(device='cpu', device_index=0, dtype='float64', fallback=False)
+# Compute(device='cpu', device_index=0, dtype='float64', fallback=False, host=None, timeout_s=None)
 request = simulation.Compute(device="cupy", device_index=1, dtype="float32")
 print(request.device, request.device_index, request.dtype)   # cupy 1 float32
 try:
@@ -155,18 +157,27 @@ print(inside.provenance.dtype, pinned.provenance.dtype)   # float32 float64
 ```
 
 `PHONOMETRY_COMPUTE` writes a placement as text,
-`device[:index][,option...]`, with the options `float32`, `float64` and
-`fallback`: `cupy`, `cupy:1`, `torch:cuda:1,fallback`, `torch:mps,float32`
-or `cpu,float32`. Spaces around the parts are ignored. The variable is read
-each time a placement is resolved and never at import, so it can be set after
-`import phonometry`. A value the grammar does not describe, an option given
-twice, two dtypes, or a request `Compute` refuses (`torch:mps` without
-`float32`) raises `ValueError` naming the variable when the first engine is
-built.
+`device[:index][@host][,option...]`, with the options `float32`, `float64`
+and `fallback`: `cupy`, `cupy:1`, `torch:cuda:1,fallback`,
+`torch:mps,float32`, `cpu,float32` or `cupy@nas`. Spaces around the parts are
+ignored. The variable is read each time a placement is resolved and never at
+import, so it can be set after `import phonometry`. A value the grammar does
+not describe, an option given twice, two dtypes, or a request `Compute`
+refuses (`torch:mps` without `float32`) raises `ValueError` naming the
+variable when the placement is resolved.
 
 ```bash
 PHONOMETRY_COMPUTE=cupy:1,fallback python study.py
 ```
+
+A host, `Compute(host="nas")` or `@nas` in the variable, sends a whole run to
+another machine, and only the two simulation functions take one:
+`fdtd_simulation(run, compute=...)` and
+`elastic_fdtd_simulation(run, compute=...)` run there and return the record a
+run here returns. An engine built directly steps in this process, and it
+raises `ValueError` for a placement that names a host, wherever the placement
+came from. [Sending a simulation to a remote node](/phonometry/simulation/remote-node/)
+says how to name a node and set one up.
 
 **Threads and processes.** `use()` holds its record in a context variable.
 Whether a new thread or process sees it depends on how it is started, so give
@@ -257,6 +268,7 @@ engine reports the same record as `sim.provenance`:
 | `cuda_driver_api` | the CUDA version the GPU driver supports (`"13.3"`), reported by CuPy only; it is not the NVIDIA driver's own version |
 | `gpu` | the GPU's name (`"Apple MPS"` on MPS), `None` off a GPU |
 | `host` | the machine the run went to, `None` for this one |
+| `package_digest` | the SHA-256 of the package that ran on the node, `None` for a run on this machine |
 
 ```python
 print(light.provenance.device, light.provenance.dtype, light.provenance.array_library)
@@ -275,7 +287,7 @@ print(on_gpu.provenance)
 # On the machine of the proof in section 6:
 # RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
 #     numpy_version='2.5.3', array_library='cupy 14.2.0', cuda_runtime='13.2',
-#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060')
+#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060', package_digest=None)
 ```
 
 An engine's fields live on its device. `sim.p`, `sim.vx` and `sim.vy` of an

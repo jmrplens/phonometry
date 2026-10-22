@@ -92,7 +92,8 @@ const TITLE_COLUMN_MAX = 860;
  * sources and devices, 723 on materials, 845 on vibration and 860 on the
  * other six. A title never passes TITLE_COLUMN_START plus the width of its
  * card's column, and scripts/check-social-cards.mjs fails the build on a card
- * whose title does.
+ * whose title does, and on an artwork that comes under 4.5:1 against the
+ * title anywhere inside its column, measured as BRIGHT_FROM is.
  * @type {Readonly<Record<string, number>>}
  */
 export const TITLE_COLUMN = Object.freeze(
@@ -109,6 +110,14 @@ export const TITLE_COLUMN = Object.freeze(
     }),
   ),
 );
+
+/**
+ * The file of an artwork's master under .github/brand/art.
+ * @param {string} art - Artwork key, from `artKeyFor`.
+ */
+export function artworkFile(art) {
+  return art === 'generic' ? 'generic.webp' : `area-${art}.webp`;
+}
 
 /**
  * The title column width for an artwork key.

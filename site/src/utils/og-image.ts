@@ -21,7 +21,7 @@ import path from 'node:path';
 import satori from 'satori';
 import sharp from 'sharp';
 
-import { TITLE_COLUMN_START, titleColumnFor } from '../lib/og-areas.mjs';
+import { artworkFile, TITLE_COLUMN_START, titleColumnFor } from '../lib/og-areas.mjs';
 
 /**
  * Where the brand assets live, relative to the working directory.
@@ -92,8 +92,7 @@ async function getMark(): Promise<string> {
 async function getArt(key: string): Promise<string> {
   const cached = artUris.get(key);
   if (cached) return cached;
-  const file = key === 'generic' ? 'generic.webp' : `area-${key}.webp`;
-  const buf = await readFile(path.join(BRAND, 'art', file));
+  const buf = await readFile(path.join(BRAND, 'art', artworkFile(key)));
   const jpeg = await sharp(buf).jpeg({ quality: 92 }).toBuffer();
   const uri = `data:image/jpeg;base64,${jpeg.toString('base64')}`;
   artUris.set(key, uri);

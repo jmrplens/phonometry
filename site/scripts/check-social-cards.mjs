@@ -1,5 +1,6 @@
 // Fail the build when a social card lost its type, when its title runs into
-// the bright part of its artwork, or when it carries the other language's
+// the bright part of its artwork, when an artwork is too bright inside the
+// column its titles take, or when a card carries the other language's
 // strapline.
 //
 // Every documentation page gets a 1200x630 card under dist/og/, laid out by
@@ -27,11 +28,14 @@
 // end of that column a card should hold its artwork and nothing else. What the
 // artwork looks like there is read from the cards themselves: all the cards of
 // one artwork share it, and their titles end at different places, so pixel by
-// pixel the darkest of them is the drawing. A pixel of a card counts as title
-// when its luminance is closer to the title's than to that drawing's, which
-// is a pixel at least half covered by the title's ink. A straight stem 1 px
-// past the limit puts a whole column of them there, and the title of every
-// card there is today, moved 1 px past its limit, fails the check.
+// pixel the darkest of them is the drawing. Every page has its Spanish twin
+// (check-i18n-parity.mjs), so every artwork is on two cards at least; one on
+// a single card stops the check rather than passing unchecked. A pixel of a
+// card counts as title when its luminance is closer to the title's than to
+// that drawing's, which is a pixel at least half covered by the title's ink. A
+// straight stem 1 px past the limit puts a whole column of them there, and the
+// title of every card there is today, moved 1 px past its limit, fails the
+// check.
 //
 // The postbuild re-encodes every card with mozjpeg at quality 82. Two points
 // of the wave-simulation drawing's grid, at (778, 242) and (807, 255), are a
@@ -39,11 +43,22 @@
 // to 245, against the title's 247, by an amount that varies from card to
 // card. That artwork, and only that one, is allowed two pixels.
 //
-// The strapline under the wordmark is in the page's language. All the cards of
-// one artwork share the drawing behind it, so a card's strapline has to look
-// like its own language's cards of that artwork and not like the other
-// language's. The Spanish home page, whose id is "es" and not "es/...", once
-// got the English strapline this way.
+// Where each column ends comes from where its artwork brightens, measured by
+// hand (BRIGHT_FROM in og-areas.mjs), so the check above alone would let a
+// redrawn artwork, or a column widened by an edit there, put titles over
+// bright drawing with nothing failing. So the drawings are read as well, from
+// their masters, resized to the card by sharp and smoothed over 3 x 3 pixels
+// as BRIGHT_FROM is measured: across the rows a title can occupy, everywhere
+// inside its column, each has to keep the WCAG contrast for large type,
+// 4.5:1, against the title's colour. They keep 4.90:1 at worst today, on the
+// vibration drawing.
+//
+// The strapline under the wordmark is in the page's language, and where it
+// starts tells which language that is. Both are set in the same type against
+// the right padding, so the Spanish one, "Herramientas de medida acústica para
+// Python", which is the longer, starts 44 px left of the English one,
+// "Acoustic measurement toolkit for Python". The Spanish home page, whose id
+// is "es" and not "es/...", once got the English strapline.
 //
 // Usage: node scripts/check-social-cards.mjs [dist-directory]
 import { readdirSync } from 'node:fs';
@@ -52,9 +67,16 @@ import { fileURLToPath } from 'node:url';
 
 import sharp from 'sharp';
 
-import { artKeyFor, TITLE_COLUMN, TITLE_COLUMN_START } from '../src/lib/og-areas.mjs';
+import {
+  artKeyFor,
+  artworkFile,
+  TITLE_COLUMN,
+  TITLE_COLUMN_START,
+} from '../src/lib/og-areas.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
+// The artwork masters, which the cards draw from (src/utils/og-image.ts).
+const ART = join(here, '..', '..', '.github', 'brand', 'art');
 // An explicit directory is for reproducing a defect against a build kept aside;
 // with none, the check reads the build that is there.
 const DIST = process.argv[2] ? resolve(process.argv[2]) : join(here, '..', 'dist');
@@ -80,11 +102,22 @@ const TITLE_LUMA = luma(0xf2, 0xf8, 0xfa);
 // re-encode can make of the two grid points of the wave-simulation drawing.
 // None of its cards uses them today.
 const PAST_LIMIT_ALLOWANCE = { simulation: 2 };
-// How far apart, on average over the strapline's box, the English and the
-// Spanish straplines of one artwork have to be for the two languages to carry
-// different ones. They measure about 13 levels apart on every artwork, and
-// each card's strapline comes within 0.7 of its own language's.
-const MIN_STRAPLINE_CONTRAST = 6;
+// The rows a title can occupy, over which og-areas.mjs measures where each
+// artwork brightens. The titles' ink spans y 281 to 418 on every card.
+const TITLE_ROWS = { y0: 230, y1: 471 };
+// The contrast every artwork keeps against the title inside its column: WCAG's
+// for large type.
+const MIN_ARTWORK_CONTRAST = 4.5;
+// Where each language's strapline starts: the first column of the strapline's
+// row with strapline ink in it, the same on every card.
+const STRAPLINE_START = { en: 780, es: 736 };
+// How far from it a card's strapline may start, for the antialiasing of its
+// first stroke.
+const STRAPLINE_TOLERANCE = 2;
+// Strapline ink is a pixel at least three quarters as bright as the
+// strapline's colour, #84bccf. Left of where the straplines start, no artwork
+// comes near that in their row: 88 at most, on the wave-simulation card.
+const STRAPLINE_INK = 0.75 * luma(0x84, 0xbc, 0xcf);
 
 /**
  * Luminance of a colour, with the Rec. 709 weights, on its 0-255 values.
@@ -94,6 +127,17 @@ const MIN_STRAPLINE_CONTRAST = 6;
  */
 function luma(r, g, b) {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+/**
+ * WCAG relative luminance of a colour, from its 0-255 sRGB values.
+ * @param {number} r - Red.
+ * @param {number} g - Green.
+ * @param {number} b - Blue.
+ */
+function relativeLuminance(r, g, b) {
+  const lin = (c) => (c / 255 <= 0.04045 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
 }
 
 /** Every .jpg under `root`. */
@@ -129,6 +173,20 @@ function lumaIn(data, info, box) {
     }
   }
   return out;
+}
+
+/**
+ * The first column of the strapline's row with strapline ink in it, or -1 when
+ * there is none.
+ */
+function straplineStart(data, info) {
+  for (let x = STRAPLINE.x0; x < STRAPLINE.x1; x++) {
+    for (let y = STRAPLINE.y0; y < STRAPLINE.y1; y++) {
+      const i = (y * info.width + x) * info.channels;
+      if (luma(data[i], data[i + 1], data[i + 2]) >= STRAPLINE_INK) return x;
+    }
+  }
+  return -1;
 }
 
 let files;
@@ -168,7 +226,7 @@ for (const file of files) {
     // the x where the title has to end, so the column [limit, limit + 1)
     // stays clear.
     past: lumaIn(data, info, { ...TITLE, x0: limit }),
-    strapline: lumaIn(data, info, STRAPLINE),
+    strapline: straplineStart(data, info),
   });
 }
 
@@ -213,54 +271,58 @@ for (const [art, group] of groupBy(cards, (c) => c.art)) {
   }
 }
 
-/**
- * The pixel-by-pixel mean of some cards' strapline boxes.
- * @param {typeof cards} group - Cards of one artwork and one language.
- */
-function meanStrapline(group) {
-  const mean = new Float32Array(group[0].strapline.length);
-  for (const card of group) {
-    for (let p = 0; p < mean.length; p++) mean[p] += card.strapline[p] / group.length;
-  }
-  return mean;
-}
-
-/**
- * Mean absolute difference between two strapline boxes.
- * @param {Float32Array} a - One box.
- * @param {Float32Array} b - The other.
- */
-function distance(a, b) {
-  let sum = 0;
-  for (let p = 0; p < a.length; p++) sum += Math.abs(a[p] - b[p]);
-  return sum / a.length;
-}
-
 const LANGUAGE = { en: 'English', es: 'Spanish' };
 const strayed = [];
-for (const [art, group] of groupBy(cards, (c) => c.art)) {
-  const byLocale = groupBy(group, (c) => c.locale);
-  if (!byLocale.has('en') || !byLocale.has('es')) continue;
-  const mean = { en: meanStrapline(byLocale.get('en')), es: meanStrapline(byLocale.get('es')) };
-  const apart = distance(mean.en, mean.es);
-  if (apart < MIN_STRAPLINE_CONTRAST) {
+for (const card of cards) {
+  const own = STRAPLINE_START[card.locale];
+  if (Math.abs(card.strapline - own) <= STRAPLINE_TOLERANCE) continue;
+  const other = card.locale === 'en' ? 'es' : 'en';
+  if (card.strapline < 0) {
+    strayed.push(`  ${card.name}: no strapline`);
+  } else if (Math.abs(card.strapline - STRAPLINE_START[other]) <= STRAPLINE_TOLERANCE) {
     strayed.push(
-      `  ${art}: its English and Spanish cards carry the same strapline ` +
-        `(${apart.toFixed(1)} levels apart, at least ${MIN_STRAPLINE_CONTRAST} expected)`,
+      `  ${card.name}: the ${LANGUAGE[other]} strapline, starting at x = ${card.strapline}; ` +
+        `the ${LANGUAGE[card.locale]} one starts at ${own}`,
     );
-    continue;
+  } else {
+    strayed.push(
+      `  ${card.name}: a strapline starting at x = ${card.strapline}, where neither ` +
+        `language's does (English ${STRAPLINE_START.en}, Spanish ${STRAPLINE_START.es})`,
+    );
   }
-  for (const card of group) {
-    const other = card.locale === 'en' ? 'es' : 'en';
-    const own = distance(card.strapline, mean[card.locale]);
-    const theirs = distance(card.strapline, mean[other]);
-    if (own >= theirs) {
-      strayed.push(
-        `  ${card.name}: its strapline matches the ${LANGUAGE[other]} cards of its artwork ` +
-          `(${theirs.toFixed(1)} levels off), not the ${LANGUAGE[card.locale]} ones ` +
-          `(${own.toFixed(1)})`,
-      );
+}
+
+// The drawings themselves, inside the columns their titles take.
+const titleLuminance = relativeLuminance(0xf2, 0xf8, 0xfa);
+const brightest = (titleLuminance + 0.05) / MIN_ARTWORK_CONTRAST - 0.05;
+const glaring = [];
+for (const [art, width] of Object.entries(TITLE_COLUMN)) {
+  const { data, info } = await sharp(join(ART, artworkFile(art)))
+    .resize(1200, 630, { fit: 'cover' })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const lum = new Float64Array(info.width * info.height);
+  for (let p = 0; p < lum.length; p++) {
+    lum[p] = relativeLuminance(data[3 * p], data[3 * p + 1], data[3 * p + 2]);
+  }
+  const limit = TITLE_COLUMN_START + width;
+  let worst = { value: 0, x: 0, y: 0 };
+  for (let y = TITLE_ROWS.y0; y < TITLE_ROWS.y1; y++) {
+    for (let x = TITLE_COLUMN_START; x < limit; x++) {
+      let sum = 0;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) sum += lum[(y + dy) * info.width + x + dx];
+      }
+      if (sum / 9 > worst.value) worst = { value: sum / 9, x, y };
     }
+  }
+  if (worst.value > brightest) {
+    const contrast = (titleLuminance + 0.05) / (worst.value + 0.05);
+    glaring.push(
+      `  ${art}: ${contrast.toFixed(2)}:1 against the title at (${worst.x}, ${worst.y}), ` +
+        `inside its column, which ends at x = ${limit}`,
+    );
   }
 }
 
@@ -278,16 +340,25 @@ function report(failures, what) {
 report(lost, 'lost their mark or their title');
 report(crossed, "have a title past the end of its artwork's title column (src/lib/og-areas.mjs)");
 report(strayed, "carry a strapline that is not in their page's language");
+if (glaring.length > 0) {
+  console.error(
+    `Artworks under ${MIN_ARTWORK_CONTRAST}:1 against the title inside their title column ` +
+      '(BRIGHT_FROM and TITLE_MARGIN in src/lib/og-areas.mjs):\n' +
+      glaring.join('\n'),
+  );
+}
 if (alone.length > 0) {
   console.error(
     'Artworks on a single card, so the check cannot tell the drawing from a title there:\n' +
       alone.join('\n'),
   );
 }
-if (lost.length > 0 || crossed.length > 0 || strayed.length > 0 || alone.length > 0) {
+const failed = [lost, crossed, strayed, alone, glaring].some((list) => list.length > 0);
+if (failed) {
   process.exit(1);
 }
 console.log(
   `${cards.length} social cards carry their mark, their title and their language's strapline, ` +
-    'and every title stops where its artwork lets it.',
+    'every title stops where its artwork lets it, and every artwork stays dark enough for the ' +
+    'title inside its column.',
 );

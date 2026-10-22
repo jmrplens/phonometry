@@ -188,8 +188,8 @@ build it.
 The hosts file may name an image of your own. The client runs the bootstrap a
 node starts with as the container's entrypoint, `python` on the image's `PATH`
 running `/usr/local/share/phonometry-node/bootstrap.py`, so such an image needs
-a Python 3 `python` on its `PATH` and that file at that path (the Dockerfile
-copies it from the package), with NumPy and SciPy at the floors of section 4,
+a `python` on its `PATH` and that file at that path (the Dockerfile copies it
+from the package), with Python, NumPy and SciPy at the floors of section 4,
 and CuPy or torch for a GPU. Its own `ENTRYPOINT` does not run: nothing it
 would print can break the conversation with the client, and an environment it
 would activate is not active.
@@ -228,10 +228,12 @@ with no activation script first, so the environment must work without one.
 | a run that cannot travel: a source whose waveform is a callable other than the `.value` of a `GaussianPulse`, `CWSource` or `SignalSource` | `TypeError`, naming the source | when the function is called, before the hosts file is read |
 | a host the file does not name, or no hosts file | `KeyError` | before ssh starts |
 | a hosts file that is not TOML, or a malformed entry | `ValueError`, naming the file | before ssh starts |
+| no ssh client on `PATH`, Pyodide, or a package that cannot be read from disk or holds a file no node would write | `ComputeRemoteError` | before ssh starts |
 | anything that fails in the connection or on the node | `ComputeRemoteError` | when it fails |
 
 The message of a `ComputeRemoteError` says what happened and, when it can
-tell, what to do: build the image on the node (`make node-image HOST=nas`),
+tell, what to do: install an OpenSSH client here, build the image on the node
+(`make node-image HOST=nas`),
 join the `docker` group there, install the NVIDIA Container Toolkit, lift the
 environment to the floors or rebuild the image, add your key to the node's
 `~/.ssh/authorized_keys`, accept its host key, make a login script print
@@ -244,9 +246,10 @@ standard error as a note too.
 
 With `fallback=True` a `ComputeRemoteError` becomes a `ComputeFallbackWarning`,
 whose message carries the error, and the run steps on NumPy here, in the dtype
-asked for; its provenance says so, with no host and the device `"cpu"`. Only
-the failures of the connection and of the node fall back: a wrong argument,
-an unknown host or a malformed hosts file raises with or without it.
+asked for; its provenance says so, with no host and the device `"cpu"`. Every
+`ComputeRemoteError` falls back, those raised here before ssh starts
+included; a wrong argument, an unknown host or a malformed hosts file raises
+with or without it.
 
 Warnings the run raises on the node are raised here, at the line of your code
 that called the function, with their own class: phonometry's as published,
@@ -268,8 +271,8 @@ ClientAliveInterval 15
 ClientAliveCountMax 4
 ```
 
-It then notices in about a minute. Without them the run goes on to its end,
-and a GPU stays busy for it.
+With them the server notices a vanished client in about a minute. Without
+them the run goes on to its end, and a GPU stays busy for it.
 
 ## 6. Progress and timeouts
 
@@ -300,12 +303,16 @@ SSH is the boundary. Whoever can log in to the node can run code there, and a
 remote run does exactly that with the package you send, so give the node the
 trust you give any machine you log in to. ssh is started with no terminal and
 with no agent, X11 or port forwarding, whatever `~/.ssh/config` says for the
-host: the node gets nothing of yours but the package and the job.
+host. Besides the package and the job, ssh may send the environment variables
+your ssh configuration names with `SendEnv` or `SetEnv` (Debian and Ubuntu
+send `LANG` and the `LC_*` variables), and the node's ssh server takes those
+its `AcceptEnv` allows.
 
-The node does not run code you did not send. A job is the name of one of the
-two simulation functions and its run as data, which the node builds again
-with the library's constructors, and a package is checked against its digest
-before it is stored. A Docker node's container has no network.
+A job carries no code: the node runs the package you sent, on its own Python
+and libraries. The job names one of the two simulation functions and carries
+its run as data, which the node builds again with the library's constructors,
+and a package is checked against its digest before it is stored. A Docker
+node's container has no network.
 
 The client does not trust the bytes the node sends. Every header and every
 array is checked against what the request implies, its name, its dtype, its

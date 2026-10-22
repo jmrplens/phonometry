@@ -275,10 +275,30 @@ function functionWord(word: string): string {
 }
 
 /**
- * What kind of boundary a break falls on: `mark`, before a bracket or after a
- * colon or semicolon; `word`, before a conjunction or a preposition that opens
- * a phrase; `none`, anywhere else, and anywhere inside brackets, where the
- * "and" of "(ISO 8253-1 and -2)" opens nothing.
+ * Whether the words from `i` to the end of the title are one designation: an
+ * abbreviation in capitals, or "Doc" or "Mark", with the words `breakable`
+ * keeps with it, as "CNOSSOS-EU", "EN 16487" and "FDTD 2D" end a title. One
+ * short word, "SEA" or "GFPE", is not enough: alone on the second line it
+ * would hang there as a lone word.
+ * @param words - The title's words.
+ * @param i - Index of the first word of the second line.
+ */
+function endsWithDesignation(words: string[], i: number): boolean {
+  const first = bare(words[i]);
+  if (!CAPITALS.test(first) && !DESIGNATION_WORDS.has(first)) return false;
+  for (let j = i + 1; j < words.length; j++) {
+    if (breakable(words[j - 1], words[j])) return false;
+  }
+  return i < words.length - 1 || words[i].length > LONE_WORD_MAX;
+}
+
+/**
+ * What kind of boundary a break falls on: `mark`, before a bracket, after a
+ * colon or semicolon, or before a designation that ends the title, which is
+ * the same break as before a bracketed one, "Emisión de la fuente ferroviaria
+ * / CNOSSOS-EU"; `word`, before a conjunction or a preposition that opens a
+ * phrase; `none`, anywhere else, and anywhere inside brackets, where the "and"
+ * of "(ISO 8253-1 and -2)" opens nothing.
  * @param words - The title's words.
  * @param i - Index of the first word of the second line.
  */
@@ -286,6 +306,7 @@ function boundary(words: string[], i: number): 'mark' | 'word' | 'none' {
   const before = words.slice(0, i).join(' ');
   if (before.split('(').length > before.split(')').length) return 'none';
   if (words[i].startsWith('(') || /[:;]$/.test(words[i - 1])) return 'mark';
+  if (endsWithDesignation(words, i)) return 'mark';
   const opener = functionWord(words[i]);
   if (PHRASE_OPENERS.has(opener)) return 'word';
   if (OF.has(opener) && ARTICLE.has(functionWord(words[i + 1] ?? ''))) return 'word';
@@ -430,9 +451,9 @@ function prefer<T>(list: T[], test: (item: T) => boolean): T[] {
  * the two-line breaks that fit, the card prefers, in order:
  * 1. a break at a phrase boundary, and of those the one the title had while
  *    the card filled its full column line by line, then one before a bracket
- *    or after a colon or semicolon, then one before a conjunction or a
- *    preposition that opens a phrase (`boundary`) on a first line that is no
- *    stub (PHRASE_FIRST_LINE_MIN);
+ *    or a closing designation or after a colon or semicolon, then one before
+ *    a conjunction or a preposition that opens a phrase (`boundary`) on a
+ *    first line that is no stub (PHRASE_FIRST_LINE_MIN);
  * 2. a first line that does not end on an article, preposition or conjunction;
  * 3. a second line longer than one short word (LONE_WORD_MAX characters);
  * 4. the pair of lines closest to equal length.

@@ -78,7 +78,9 @@ jobs:
           # run of 2026-10-14 14:56Z died on "connect to host gitlab.com port
           # 22: Network is unreachable" while the runs before and after it
           # mirrored fine.
-          GIT_SSH_COMMAND: ssh -i ~/.ssh/gitlab_mirror -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o AddressFamily=inet -o ConnectTimeout=20
+          GIT_SSH_COMMAND: >-
+            ssh -i ~/.ssh/gitlab_mirror -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes
+            -o AddressFamily=inet -o ConnectTimeout=20
         run: |
           set -euo pipefail
           git init --bare mirror.git
@@ -151,7 +153,8 @@ jobs:
             local url="$2"
             local payload="${3:-}"
             local body
-            local args=(--fail-with-body --show-error --silent --connect-timeout 10 --max-time 60 --request "$method" --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}")
+            local args=(--fail-with-body --show-error --silent --connect-timeout 10 --max-time 60
+              --request "$method" --header "PRIVATE-TOKEN: ${GITLAB_API_TOKEN}")
             # Only reads are retried: a write GitLab committed before the
             # connection dropped would be made twice.
             if [ "$method" = GET ]; then
@@ -189,7 +192,8 @@ jobs:
             local batch
             local all='[]'
             while :; do
-              batch=$(gitlab_request GET "${gitlab_api}/releases/${tag_encoded}/assets/links?per_page=100&page=${page}") || return 1
+              batch=$(gitlab_request GET \
+                "${gitlab_api}/releases/${tag_encoded}/assets/links?per_page=100&page=${page}") || return 1
               [ "$(jq 'length' <<<"$batch")" -gt 0 ] || break
               all=$(jq -c --argjson more "$batch" '. + $more' <<<"$all")
               page=$((page + 1))
@@ -241,7 +245,8 @@ jobs:
               request_json POST "${gitlab_api}/releases/${tag_encoded}/assets/links" "$payload"
             elif ! jq -e --arg url "$url" --arg link_type "$link_type" \
               '.url == $url and .link_type == $link_type' <<<"$existing" >/dev/null; then
-              request_json PUT "${gitlab_api}/releases/${tag_encoded}/assets/links/$(jq -r '.id' <<<"$existing")" "$payload"
+              request_json PUT \
+                "${gitlab_api}/releases/${tag_encoded}/assets/links/$(jq -r '.id' <<<"$existing")" "$payload"
             fi
           }
 
@@ -285,7 +290,9 @@ jobs:
 
             tag_encoded=$(jq -nr --arg value "$tag" '$value | @uri')
             name=$(jq -r '.name // .tagName' <<<"$release_json")
-            description=$(jq -r '"This GitLab release mirrors the canonical GitHub release: \(.url)\n\n---\n\n\(.body // "")"' <<<"$release_json")
+            description=$(jq -r \
+              '"This GitLab release mirrors the canonical GitHub release: \(.url)\n\n---\n\n\(.body // "")"' \
+              <<<"$release_json")
             released_at=$(jq -r '.publishedAt // empty' <<<"$release_json")
             create_release_payload=$(jq -cn \
               --arg name "$name" \
@@ -320,14 +327,16 @@ jobs:
             fi
 
             existing_links=$(list_links "$tag_encoded")
-            desired_links=$(jq -c '[{name: "GitHub Release", url: .url, link_type: "other"}] + [.assets[]? | {name: .name, url: .url, link_type: "package"}]' <<<"$release_json")
+            desired_links=$(jq -c '
+              [{name: "GitHub Release", url: .url, link_type: "other"}]
+              + [.assets[]? | {name: .name, url: .url, link_type: "package"}]' <<<"$release_json")
 
             jq -c '.[]' <<<"$desired_links" |
             while IFS= read -r link; do
               link_name=$(jq -r '.name' <<<"$link")
               link_url=$(jq -r '.url' <<<"$link")
               link_type=$(jq -r '.link_type' <<<"$link")
-              [ -n "$link_name" ] && [ -n "$link_url" ] || continue
+              if [ -z "$link_name" ] || [ -z "$link_url" ]; then continue; fi
               sync_link "$tag_encoded" "$existing_links" "$link_name" "$link_url" "$link_type"
             done
             delete_stale_links "$tag_encoded" "$desired_links"

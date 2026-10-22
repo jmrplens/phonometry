@@ -250,8 +250,17 @@ def test_a_run_does_not_follow_what_its_caller_changes() -> None:
         assert not getattr(elastic_listed, name).flags.writeable, name
 
 
-#: A number too large for a float, in every place a run reads a map.
+#: A map of numbers too large for a float, which the test below puts in ``c``,
+#: in ``damping`` and in the elastic ``c_s``; an impedance takes a row of them.
 _HUGE = [[10**400] * 8 for _ in range(8)]
+
+
+class _NoFloat:
+    """A number whose conversion to a float divides by zero."""
+
+    def __float__(self) -> float:
+        msg = "a float of this number divides by zero"
+        raise ZeroDivisionError(msg)
 
 
 @pytest.mark.parametrize(
@@ -278,17 +287,21 @@ _HUGE = [[10**400] * 8 for _ in range(8)]
             shape=(8, 8),
             sources=[ExplosionSource(ix=4, iy=4, waveform=_PULSE.value)],
         ),
+        lambda: FDTDRun(
+            [[_NoFloat()] * 8 for _ in range(8)], 0.01, -1.0, sources=[_PULSE]
+        ),
     ],
-    ids=["c", "damping", "impedance", "elastic c_s"],
+    ids=["c", "damping", "impedance", "elastic c_s", "no float in c"],
 )
-def test_a_map_too_large_for_a_float_is_checked_in_its_turn(
+def test_a_map_the_float_conversion_refuses_is_checked_in_its_turn(
     build: Callable[[], FDTDRun | ElasticRun],
 ) -> None:
-    """The map is held as the run's own array, but its checks keep their order.
+    """A map the float conversion refuses is left as given, for the checks.
 
-    Reading a map of numbers too large for a float raises OverflowError;
-    the run checks its duration before its medium, so a bad duration is the
-    error named, as it always was.
+    Reading a map of numbers too large for a float raises OverflowError, and
+    one whose number divides by zero when made a float raises
+    ZeroDivisionError. The run checks its duration before its medium, so a
+    bad duration is the error named, as it always was.
     """
     with pytest.raises(ValueError, match="duration must be positive and finite"):
         build()

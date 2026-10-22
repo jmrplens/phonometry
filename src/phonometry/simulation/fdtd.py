@@ -2081,12 +2081,17 @@ def _held_map(
     afterwards would change what the run steps here and what a node
     rebuilds. The list is read as the checks read it, so no number moves. A
     number, a text, an array or ``None`` is left as it is. So is a value the
-    conversion refuses (an int too large for a float among them), which the
-    checks then refuse in their own words and in their own order, and a map
-    that holds complex numbers, which the checks meet as they always did:
-    ``c`` and ``rho`` refuse it, and elsewhere NumPy drops the imaginary
-    part with a warning. Read here, such a map would warn once more, or
-    turn a refusal into a warning, so only a real-valued map is held.
+    conversion refuses (an int too large for a float, a number whose float
+    divides by zero), which the checks then refuse in their own words and in
+    their own order, and a map that holds complex numbers, which the checks
+    meet as they always did: :class:`FDTDRun`'s ``c`` and ``rho`` refuse it
+    with ``TypeError``; elsewhere a map of Python complex numbers raises
+    ``TypeError`` in the float conversion, and one of NumPy complex numbers
+    loses its imaginary part with a ``ComplexWarning`` and stays the
+    caller's list. Read here as float64, a map of NumPy complex numbers
+    would warn a second time; read as complex, a map of Python complex
+    numbers would turn its refusal into a warning. So only a real-valued map
+    is held.
 
     :param dtype: What the checks read the map as: float64 for a medium,
         ``None`` for the obstacle, whose checks require booleans.
@@ -2095,7 +2100,7 @@ def _held_map(
         return value
     try:
         held = None if np.iscomplexobj(value) else np.array(value, dtype=dtype)
-    except (TypeError, ValueError, OverflowError):
+    except (TypeError, ValueError, ArithmeticError):
         held = None
     return value if held is None else read_only(held)
 

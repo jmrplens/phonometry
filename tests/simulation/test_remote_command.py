@@ -162,7 +162,7 @@ def test_a_docker_node_runs_the_image_s_bootstrap_cut_off_from_the_network() -> 
     assert docker[docker.index("--gpus") + 1] == "device=1"
     assert docker[docker.index("--user") + 1] == "$(id -u):$(id -g)"
     assert docker[docker.index("-v") + 1] == "$cache:/cache"
-    assert docker[-4:] == ["phonometry-node:gpu", "python", "-I", bootstrap.IMAGE_PATH]
+    assert docker[-3:] == ["phonometry-node:gpu", "-I", bootstrap.IMAGE_PATH]
     assert 'mkdir -p "$cache"' in script
 
 
@@ -202,6 +202,20 @@ def test_a_docker_node_s_cache_is_where_its_bootstrap_would_look(
     assert not (tmp_path / "relative").exists()
 
 
+@pytest.mark.parametrize("device", ["cpu", "cupy"])
+def test_a_docker_node_runs_the_bootstrap_as_its_entrypoint(device: Device) -> None:
+    # An image's own ENTRYPOINT (the CUDA images' prints a banner on standard
+    # output) never runs: the bootstrap is the entrypoint, the image's name
+    # the last word before its arguments.
+    request = Compute(device=device, host="nas")
+    _, _, script = shlex.split(command.remote_command(_DOCKER, request))
+    words = shlex.split(script)
+    image = words.index("phonometry-node:gpu")
+    assert words[words.index("--entrypoint") + 1] == "python"
+    assert words.index("--entrypoint") < image
+    assert words[image + 1 :] == ["-I", bootstrap.IMAGE_PATH]
+
+
 def test_a_numpy_run_on_a_docker_node_asks_for_no_gpu() -> None:
     assert "--gpus" not in command.remote_command(_DOCKER, Compute(host="nas"))
 
@@ -231,7 +245,8 @@ def test_a_docker_node_s_shell_runs_no_word_of_the_hosts_file(tmp_path: Path) ->
         remote, tmp_path, f"{bin_dir}{os.pathsep}{os.environ['PATH']}"
     )
     cache = tmp_path / ".cache" / "phonometry" / "remote"
-    assert words[-4:] == [odd.target, "python", "-I", bootstrap.IMAGE_PATH]
+    assert words[-3:] == [odd.target, "-I", bootstrap.IMAGE_PATH]
+    assert words[words.index("--entrypoint") + 1] == "python"
     assert words[words.index("--user") + 1] == f"{os.getuid()}:{os.getgid()}"
     assert words[words.index("-v") + 1] == f"{cache}:/cache"
     assert cache.is_dir()

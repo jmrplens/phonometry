@@ -129,7 +129,13 @@ def remote_command(entry: HostEntry, request: Compute) -> str:
         docker += ["--gpus", f"device={request.device_index}"]
     for setting in _DOCKER_ENVIRONMENT:
         docker += ["-e", setting]
-    image = shlex.join([entry.target, "python", "-I", bootstrap.IMAGE_PATH])
+    # The bootstrap is the container's entrypoint, whatever image the hosts
+    # file names: an image's own ENTRYPOINT runs before the command and may
+    # write to standard output, which carries the frames (the CUDA images'
+    # prints a banner there). The GPU reaches the container through the
+    # runtime's hook, not through that entrypoint.
+    docker += ["--entrypoint", "python"]
+    image = shlex.join([entry.target, "-I", bootstrap.IMAGE_PATH])
     # The user and the cache are the node's: the shell there expands them. The
     # cache is where the bootstrap looks for it: XDG's, which ignores a
     # relative XDG_CACHE_HOME, else ~/.cache.

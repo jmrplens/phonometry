@@ -65,15 +65,16 @@ def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool 
 _MAX_NODE_ID = 2000
 
 
-@pytest.fixture(autouse=True)
-def _node_id_windows_can_hold(request: pytest.FixtureRequest) -> None:
+@pytest.hookimpl(tryfirst=True)
+def pytest_runtest_setup(item: pytest.Item) -> None:
     """Fail a test whose id is longer than :data:`_MAX_NODE_ID` characters.
 
-    A fixture rather than a collection hook: under pytest-xdist the workers
-    collect, and a refusal raised there reaches the run as an internal error
-    without its message.
+    It runs before pytest names the test in PYTEST_CURRENT_TEST, so Windows
+    shows this message too. A setup hook rather than a collection hook:
+    under pytest-xdist the workers collect, and a refusal raised there
+    reaches the run as an internal error without its message.
     """
-    nodeid = request.node.nodeid
+    nodeid = item.nodeid
     if len(nodeid) > _MAX_NODE_ID:
         pytest.fail(
             f"this test's id is {len(nodeid)} characters long, more than the "

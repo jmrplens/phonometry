@@ -177,9 +177,9 @@ CUDA de la imagen, y el NVIDIA Container Toolkit.
 
 Pertenecer al grupo `docker` equivale a ser root en el nodo: el demonio de
 Docker se ejecuta como root, y cualquier miembro puede arrancar un
-contenedor que lee y escribe todos los ficheros de la máquina, como advierte
-la propia documentación de Docker. El propietario del nodo solo da esa
-pertenencia a una cuenta SSH a la que ya confía la máquina entera.
+contenedor que lea y escriba todos los ficheros de la máquina, como advierte
+la propia documentación de Docker. El propietario del nodo solo añade a ese
+grupo una cuenta SSH a la que ya le confía la máquina entera.
 
 La imagen se construye en el nodo, desde una copia del repositorio en tu
 máquina:

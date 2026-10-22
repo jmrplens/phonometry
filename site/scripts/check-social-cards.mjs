@@ -14,18 +14,28 @@
 // The card is near-white type on artwork that is dark where the type sits, so
 // the question has a measurable answer. In the box of the mark and in the
 // column of the title, count the pixels whose three channels are all at least
-// 200: none of the ten brand artworks has a single one in the left three
-// quarters of the card, where both boxes are, the mark alone gives about a
-// thousand, and the shortest title that gets a card ("Files", the io landing
-// page) about two and a half thousand. A card short of either floor has lost
-// the mark or the title.
+// 200. Of the ten brand artworks only the wave-simulation one has any there,
+// two dots of its grid at (778, 242) and (807, 255); the mark alone gives
+// about a thousand, and the shortest title that gets a card ("Files", the io
+// landing page) about two and a half thousand. A card short of either floor
+// has lost the mark or the title.
+//
+// The same count, taken right of where the card's artwork lets its title end,
+// catches a title that runs into the bright part of the drawing. Each artwork
+// brightens at a different x, and src/lib/og-areas.mjs keeps, per artwork,
+// the title column that stops short of it (TITLE_COLUMN). Past that column,
+// out to the right edge of the title box, a card may hold the two grid dots of
+// the simulation artwork and nothing more; a line of the title that crosses
+// the limit puts dozens of pixels there with a single stroke.
 //
 // Usage: node scripts/check-social-cards.mjs [dist-directory]
 import { readdirSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import sharp from 'sharp';
+
+import { artKeyFor, TITLE_COLUMN, TITLE_COLUMN_START } from '../src/lib/og-areas.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 // An explicit directory is for reproducing a defect against a build kept aside;
@@ -45,6 +55,9 @@ const INK = 200;
 // what any artwork gives (0).
 const MIN_MARK = 400;
 const MIN_TITLE = 300;
+// Ink allowed past the title's limit: the simulation artwork's two grid dots,
+// with room for a stray pixel of the JPEG encode.
+const MAX_PAST_LIMIT = 8;
 
 /** Every .jpg under `root`. */
 function walk(root, out = []) {
@@ -80,20 +93,51 @@ if (cards.length === 0) {
   process.exit(1);
 }
 
-const failures = [];
+/**
+ * The x the card's title may reach: the end of its artwork's title column.
+ * The card's path under og/ is the page's slug, which names its artwork.
+ * @param {string} file - Path of the card.
+ */
+function titleLimit(file) {
+  const slug = relative(OG, file).replace(/\.jpg$/, '').split(sep).join('/');
+  return TITLE_COLUMN_START + TITLE_COLUMN[artKeyFor(slug)];
+}
+
+const lost = [];
+const crossed = [];
 for (const file of cards) {
   const { data, info } = await sharp(file).raw().toBuffer({ resolveWithObject: true });
   const mark = inkIn(data, info, MARK);
   const title = inkIn(data, info, TITLE);
   if (mark < MIN_MARK || title < MIN_TITLE) {
-    failures.push(`  ${relative(DIST, file)}: mark ${mark} px (floor ${MIN_MARK}), title ${title} px (floor ${MIN_TITLE})`);
+    lost.push(
+      `  ${relative(DIST, file)}: mark ${mark} px (floor ${MIN_MARK}), title ${title} px (floor ${MIN_TITLE})`,
+    );
+  }
+  const limit = titleLimit(file);
+  const beyond = inkIn(data, info, { ...TITLE, x0: limit + 1 });
+  if (beyond > MAX_PAST_LIMIT) {
+    crossed.push(
+      `  ${relative(DIST, file)}: ${beyond} px of ink past x = ${limit} (allowance ${MAX_PAST_LIMIT})`,
+    );
   }
 }
 
-if (failures.length > 0) {
-  console.error(`${failures.length} of ${cards.length} social cards lost their mark or their title:`);
+/**
+ * Prints one class of failure, at most forty cards of it.
+ * @param {string[]} failures - One line per card.
+ * @param {string} what - What those cards got wrong.
+ */
+function report(failures, what) {
+  if (failures.length === 0) return;
+  console.error(`${failures.length} of ${cards.length} social cards ${what}:`);
   console.error(failures.slice(0, 40).join('\n'));
   if (failures.length > 40) console.error(`  ... and ${failures.length - 40} more`);
-  process.exit(1);
 }
-console.log(`${cards.length} social cards carry their mark and their title.`);
+report(lost, 'lost their mark or their title');
+report(crossed, "have a title past the end of its artwork's title column (src/lib/og-areas.mjs)");
+if (lost.length > 0 || crossed.length > 0) process.exit(1);
+console.log(
+  `${cards.length} social cards carry their mark and their title, ` +
+    'and every title stops where its artwork lets it.',
+);

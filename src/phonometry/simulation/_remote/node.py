@@ -115,18 +115,30 @@ def _watch_input(
     stream: IO[bytes], cancelled: threading.Event, finished: threading.Event
 ) -> None:
     """Set *cancelled* when the input ends; end the process if the run then does not stop."""
+    # The thread reads a descriptor of its own, duplicated here before it
+    # starts, and closes it when the input ends. The stream stays the
+    # caller's, who may close it as soon as serve returns: a number taken
+    # from it inside the thread could by then name the next file opened, and
+    # the thread would read that file's bytes. On Windows the copy also has
+    # a lock of its own, so closing the stream never waits for this read. An
+    # input that is no file, or one already closed, is an ended one.
+    try:
+        descriptor: int | None = os.dup(stream.fileno())
+    except (OSError, ValueError):
+        descriptor = None
 
     def watch() -> None:
         # Anything the client sends after the job is ignored: only its end
-        # matters, and an input closed under this reader, or one that is no
-        # file, is an ended one. The descriptor is read, not the buffered
-        # file: a thread blocked in the file's read holds its lock, and the
-        # interpreter aborts at exit when it cannot take that lock.
-        with contextlib.suppress(OSError, ValueError):
-            descriptor = stream.fileno()
-            ended = False
-            while not ended:
-                ended = not os.read(descriptor, 1 << 16)
+        # matters. The descriptor is read, not the buffered file: a thread
+        # blocked in the file's read holds its lock, and the interpreter
+        # aborts at exit when it cannot take that lock.
+        if descriptor is not None:
+            try:
+                with contextlib.suppress(OSError):
+                    while os.read(descriptor, 1 << 16):
+                        pass
+            finally:
+                os.close(descriptor)
         cancelled.set()
         if not finished.wait(_GRACE_S):
             sys.stderr.write(

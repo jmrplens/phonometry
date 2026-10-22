@@ -118,6 +118,10 @@ jobs:
   releases:
     name: Sync linked releases
     runs-on: ubuntu-latest
+    # After the repository job, never beside it: a release created on GitHub
+    # together with its tag (the web UI does that) reaches this job on the
+    # same push, and GitLab refuses a release whose tag it does not have yet.
+    needs: repository
     timeout-minutes: 15
     if: >-
       github.event_name == 'workflow_dispatch' ||

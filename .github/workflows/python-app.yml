@@ -1429,9 +1429,9 @@ jobs:
     # makes any host key it lacks. Without PAM, sshd refuses even a key to an
     # account whose password is locked, as a runner's may be: '*' is no
     # password, and not a locked one. sshd logs to a file of the job, which
-    # the last step shows when the job fails. The hosts file bounds each run,
-    # so a node that stops answering fails its test instead of holding the
-    # job.
+    # the last step shows when the job fails or is cancelled. The hosts file
+    # bounds each run, so a node that stops answering fails its test instead
+    # of holding the job.
     - name: Serve the node through sshd on localhost
       run: |
         user="$(id -un)"
@@ -1454,25 +1454,30 @@ jobs:
           'image = "phonometry-node:cpu"' 'label = "the localhost node of CI"' 'timeout_s = 600' \
           > "$RUNNER_TEMP/hosts.toml"
     # A test that skips compares nothing, and pytest exits 0 all the same:
-    # the job fails on any skip, whatever its reason. Actions runs a step
-    # with bash -e alone, so pipefail is set for pytest's status to pass
-    # through tee.
+    # the job fails on any skip, whatever its reason. pytest writes no
+    # colour, so that a summary line starts with SKIPPED and not with an
+    # escape sequence that a forced colour (FORCE_COLOR, PY_COLORS) would
+    # put first and the check would read past. Actions runs a step with
+    # bash -e alone, so pipefail is set for pytest's status to pass through
+    # tee.
     - name: Run the simulations on the node and here, and compare them
       env:
         PHONOMETRY_TEST_NODE: ci
         PHONOMETRY_HOSTS_FILE: ${{ runner.temp }}/hosts.toml
       run: |
         set -o pipefail
-        pytest -q -rfEPs tests/simulation/test_localhost_node.py | tee "$RUNNER_TEMP/node-tests.txt"
+        pytest -q --color=no -rfEPs tests/simulation/test_localhost_node.py | tee "$RUNNER_TEMP/node-tests.txt"
         if grep -q '^SKIPPED' "$RUNNER_TEMP/node-tests.txt"; then
           echo "::error::The localhost-node tests skipped instead of running on the node."
           exit 1
         fi
     # Why a login was refused, or why sshd did not start or could not take
     # its port, is in sshd's log and in no step's output: with -E, sshd
-    # writes there what it would otherwise send to the system log.
+    # writes there what it would otherwise send to the system log. A job
+    # past its timeout is cancelled, not failed, and a run that hangs is the
+    # one whose log is wanted most.
     - name: Show sshd's log
-      if: failure()
+      if: failure() || cancelled()
       run: |
         if [ -f "$RUNNER_TEMP/sshd.log" ]; then
           sudo cat "$RUNNER_TEMP/sshd.log"

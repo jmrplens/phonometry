@@ -97,15 +97,35 @@ async function getArt(key: string): Promise<string> {
 }
 
 /**
+ * Width of the title column, which ends at x = 672.
+ *
+ * A line of the title can run to the end of its column, so the column has to
+ * end before the artwork brightens. Measured on the ten artworks as the card
+ * places them, over every row a title can take, the first column where the
+ * artwork is bright enough to bring the title under 4.5:1, the WCAG contrast
+ * for large type, is x = 695 on the wave-simulation grid and 743 on the
+ * loudspeaker of the sources card; on the other eight it is 819 or further
+ * right, or nowhere. One column for every card keeps all of them clear.
+ */
+const TITLE_WIDTH = 600;
+
+/**
  * Picks a title size that keeps the longest documentation titles to two lines.
+ *
+ * Each bound is the longest title, in characters, that still fits two lines
+ * of the column at that size: every title the documentation has, and at least
+ * 99 in 100 random titles of that length made of its words. The 68 px bound
+ * is the short-title one the card started with, and 34 px holds two lines up
+ * to 64 characters.
  * @param title - The page title.
  */
 function titleSize(title: string): number {
   const n = title.length;
   if (n <= 22) return 68;
-  if (n <= 38) return 58;
-  if (n <= 56) return 48;
-  if (n <= 78) return 40;
+  if (n <= 34) return 58;
+  if (n <= 40) return 48;
+  if (n <= 48) return 44;
+  if (n <= 55) return 40;
   return 34;
 }
 
@@ -209,7 +229,7 @@ export async function generateOgImage(card: OgCard): Promise<Buffer> {
       // Middle: the area, then the page title.
       el(
         'div',
-        { display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '860px' },
+        { display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: `${TITLE_WIDTH}px` },
         card.kicker
           ? el(
               'div',
@@ -231,6 +251,11 @@ export async function generateOgImage(card: OgCard): Promise<Buffer> {
             color: HEADING,
             lineHeight: '1.12',
             letterSpacing: '-0.015em',
+            // In the narrower column a greedy break can leave a scrap on
+            // the second line, "Sound Intensity (p-" over "p)". Pretty
+            // wrapping moves the break back when the last line is that
+            // short, and never adds a line.
+            textWrap: 'pretty',
           },
           card.title,
         ),

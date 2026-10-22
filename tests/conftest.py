@@ -57,6 +57,32 @@ def pytest_ignore_collect(collection_path: Path, config: pytest.Config) -> bool 
     return None
 
 
+#: The longest id a test may have [characters]. pytest writes the id of the
+#: running test into the PYTEST_CURRENT_TEST environment variable, and Windows
+#: holds no variable longer than 32767 characters: a parametrized case whose id
+#: is its own large input fails its setup there. The bound is far below that,
+#: so such an id fails on every system.
+_MAX_NODE_ID = 2000
+
+
+@pytest.fixture(autouse=True)
+def _node_id_windows_can_hold(request: pytest.FixtureRequest) -> None:
+    """Fail a test whose id is longer than :data:`_MAX_NODE_ID` characters.
+
+    A fixture rather than a collection hook: under pytest-xdist the workers
+    collect, and a refusal raised there reaches the run as an internal error
+    without its message.
+    """
+    nodeid = request.node.nodeid
+    if len(nodeid) > _MAX_NODE_ID:
+        pytest.fail(
+            f"this test's id is {len(nodeid)} characters long, more than the "
+            f"{_MAX_NODE_ID} allowed: Windows cannot hold it in PYTEST_CURRENT_TEST. "
+            "Give the case a short id (pytest.param(..., id=...) or ids=).",
+            pytrace=False,
+        )
+
+
 @pytest.fixture(autouse=True)
 def _matplotlib_settings_unchanged() -> Iterator[None]:
     """Fail a test that leaves matplotlib's global settings changed.

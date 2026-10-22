@@ -107,85 +107,127 @@ def test_a_missing_file_is_a_missing_key_that_names_the_file(hosts_at: Path) -> 
 @pytest.mark.parametrize(
     ("text", "match"),
     [
-        ("[hosts.nas\n", "not a TOML file"),
-        ("hosts = 3\n", "'hosts' must be a table"),
-        ("[hosts]\nnas = 3\n", r"\[hosts.nas\] must be a table"),
-        (_DOCKER.replace("image =", "imgae ="), "unknown key"),
-        (_DOCKER.replace('ssh = "root@192.168.0.40"\n', ""), "'ssh' is missing"),
-        (
+        pytest.param("[hosts.nas\n", "not a TOML file", id="not TOML"),
+        pytest.param("hosts = 3\n", "'hosts' must be a table", id="hosts not a table"),
+        pytest.param(
+            "[hosts]\nnas = 3\n",
+            r"\[hosts.nas\] must be a table",
+            id="entry not a table",
+        ),
+        pytest.param(
+            _DOCKER.replace("image =", "imgae ="), "unknown key", id="unknown key"
+        ),
+        pytest.param(
+            _DOCKER.replace('ssh = "root@192.168.0.40"\n', ""),
+            "'ssh' is missing",
+            id="no ssh",
+        ),
+        pytest.param(
             _DOCKER.replace("root@192.168.0.40", "-oProxyCommand=evil"),
             "'ssh' must be a destination",
+            id="ssh an option",
         ),
-        (
+        pytest.param(
             _DOCKER.replace("root@192.168.0.40", "root@host extra"),
             "'ssh' must be a destination",
+            id="ssh with a space",
         ),
         # A control character, which would reach the ssh command line: a NUL
         # stops ssh from starting with an error that names no file.
-        (
+        pytest.param(
             _DOCKER.replace("root@192.168.0.40", "root@192.168.0.40\\u0000"),
             "'ssh' must be a destination",
+            id="ssh with a NUL",
         ),
-        (
+        pytest.param(
             _DOCKER.replace("root@192.168.0.40", "root@\\u001b[2Jhost"),
             "'ssh' must be a destination",
+            id="ssh with an escape",
         ),
-        (
+        pytest.param(
             _DOCKER.replace("root@192.168.0.40", "root@\\u009bhost"),
             "'ssh' must be a destination",
+            id="ssh with a C1 control",
         ),
-        (
+        pytest.param(
             _DOCKER.replace('"docker"', '"podman"'),
             "'runner' must be 'docker' or 'python'",
+            id="unknown runner",
         ),
-        (_DOCKER.replace('image = "phonometry-node:gpu"\n', ""), "'image' is missing"),
-        (
+        pytest.param(
+            _DOCKER.replace('image = "phonometry-node:gpu"\n', ""),
+            "'image' is missing",
+            id="no image",
+        ),
+        pytest.param(
             _DOCKER.replace("phonometry-node:gpu", "bad image"),
             "'image' must be a Docker image reference",
+            id="image not a reference",
         ),
-        (
+        pytest.param(
             _DOCKER + 'python = "/usr/bin/python3"\n',
             "'python' belongs to runner = \"python\"",
+            id="python on a docker node",
         ),
-        (
+        pytest.param(
             _PYTHON.replace('python = "/opt/conda envs/node/bin/python"\n', ""),
             "'python' is missing",
+            id="no python",
         ),
-        (_PYTHON.replace("/opt/conda", "/opt/con\\nda"), "'python' must be one line"),
+        pytest.param(
+            _PYTHON.replace("/opt/conda", "/opt/con\\nda"),
+            "'python' must be one line",
+            id="python of two lines",
+        ),
         # The command quotes the path, so the node's shell never expands "~".
-        (
+        pytest.param(
             _PYTHON.replace("/opt/conda envs", "~/conda envs"),
             "'python' starts with '~'.*absolute or relative to the home directory",
+            id="python under a tilde",
         ),
-        (
+        pytest.param(
             _DOCKER.replace("7200", "0"),
             "'timeout_s' must be a positive number of seconds",
+            id="timeout zero",
         ),
-        (
+        pytest.param(
             _DOCKER.replace("7200", '"7200"'),
             "'timeout_s' must be a positive number of seconds",
+            id="timeout a text",
         ),
-        (
+        pytest.param(
             _DOCKER.replace("7200", "true"),
             "'timeout_s' must be a positive number of seconds",
+            id="timeout a bool",
         ),
         # tomllib reads an integer of any size, past the range of a float.
-        (
+        pytest.param(
             _DOCKER.replace("7200", "9" * 400),
             "'timeout_s' must be a positive number of seconds",
+            id="timeout of 400 digits",
         ),
         # The timer that stops a run would die on a longer one.
-        (
+        pytest.param(
             _DOCKER.replace("7200", "1e300"),
             "'timeout_s' must be at most .* seconds, the longest a timer here waits",
+            id="timeout past a timer",
         ),
         # Python refuses to read an integer longer than 4300 digits.
-        (_DOCKER.replace("7200", "9" * 5000), "not a TOML file"),
+        pytest.param(
+            _DOCKER.replace("7200", "9" * 5000),
+            "not a TOML file",
+            id="timeout of 5000 digits",
+        ),
         # A value nested deeper than Python's recursion limit.
-        (_DOCKER + "x = " + "[" * 100_000 + "]" * 100_000 + "\n", "not a TOML file"),
-        (
+        pytest.param(
+            _DOCKER + "x = " + "[" * 100_000 + "]" * 100_000 + "\n",
+            "not a TOML file",
+            id="nested 100000 deep",
+        ),
+        pytest.param(
             _DOCKER.replace('label = "RTX 4060 on the NAS"', "label = 4"),
             "'label' must be a non-empty text",
+            id="label a number",
         ),
     ],
 )

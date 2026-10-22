@@ -44,6 +44,8 @@ _PYTHON = HostEntry(
 )
 
 
+#: The longest the loader may take to run a script of one line [s].
+_LOADER_TIMEOUT_S = 60
 #: A stand-in for a node's program: it writes each word it is given, ended by a NUL.
 _WORDS_OUT = '#!/bin/sh\nfor word in "$@"; do printf \'%s\\0\' "$word"; done\n'
 
@@ -337,12 +339,19 @@ def test_a_python_node_s_shell_runs_no_word_of_the_hosts_file(tmp_path: Path) ->
 
 def test_the_loader_runs_what_it_is_sent_and_leaves_the_rest_of_the_input() -> None:
     source = b"import sys; sys.stderr.write(sys.stdin.buffer.read().decode())"
-    done = subprocess.run(
-        [sys.executable, "-I", "-c", command.LOADER],
-        input=b"%d\n" % len(source) + source + b"the frames",
-        capture_output=True,
-        check=False,
-    )
+    try:
+        done = subprocess.run(
+            [sys.executable, "-I", "-c", command.LOADER],
+            input=b"%d\n" % len(source) + source + b"the frames",
+            capture_output=True,
+            check=False,
+            timeout=_LOADER_TIMEOUT_S,
+        )
+    except subprocess.TimeoutExpired:
+        pytest.fail(
+            f"the loader did not end within {_LOADER_TIMEOUT_S} s of its input "
+            "ending: it waits for more than the length on its first line announces"
+        )
     assert (done.returncode, done.stderr) == (0, b"the frames")
 
 

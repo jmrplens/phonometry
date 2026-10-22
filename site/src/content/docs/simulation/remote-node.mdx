@@ -162,6 +162,12 @@ is not in that group fails, and its error gives the command that adds you. A
 GPU needs the NVIDIA driver on the node as well, recent enough for the CUDA
 runtime of the image, and the NVIDIA Container Toolkit.
 
+Membership of the `docker` group is the same as root on the node: the
+Docker daemon runs as root, and any member can start a container that reads
+and writes every file of the machine, as Docker's own documentation warns.
+The node's owner gives that membership only to an SSH account already
+trusted with the whole machine.
+
 The image is built on the node, from a checkout of the repository on your
 machine:
 

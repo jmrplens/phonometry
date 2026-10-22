@@ -88,25 +88,42 @@ def test_a_frame_is_magic_then_length_then_json_then_buffers() -> None:
 @pytest.mark.parametrize(
     ("data", "match"),
     [
-        (b"", "ended before a frame"),
-        (b"Welcome to the node\n", "does not start a frame: it starts b'Welcome '"),
-        (b"PNF1" + struct.pack(">I", (1 << 20) + 1), "more than the 1048576 allowed"),
-        (b"PNF1" + struct.pack(">I", 4) + b"nope", "not JSON"),
-        (b"PNF1" + struct.pack(">I", 2) + b"[]", "not an object"),
-        (b"PNF1" + struct.pack(">I", 2) + b"{}", "'type' of a frame"),
-        (
+        pytest.param(b"", "ended before a frame", id="empty"),
+        pytest.param(
+            b"Welcome to the node\n",
+            "does not start a frame: it starts b'Welcome '",
+            id="a login banner",
+        ),
+        pytest.param(
+            b"PNF1" + struct.pack(">I", (1 << 20) + 1),
+            "more than the 1048576 allowed",
+            id="a header too long",
+        ),
+        pytest.param(
+            b"PNF1" + struct.pack(">I", 4) + b"nope", "not JSON", id="not JSON"
+        ),
+        pytest.param(
+            b"PNF1" + struct.pack(">I", 2) + b"[]", "not an object", id="a list"
+        ),
+        pytest.param(
+            b"PNF1" + struct.pack(">I", 2) + b"{}", "'type' of a frame", id="no type"
+        ),
+        pytest.param(
             b"PNF1" + struct.pack(">I", 30) + b'{"type":"x","buffers":[-1]}   ',
             "not byte counts",
+            id="a negative buffer",
         ),
-        (
+        pytest.param(
             b"PNF1" + struct.pack(">I", 40) + b'{"type":"x"}',
             "ended 28 bytes short of the 40",
+            id="a header cut short",
         ),
         # Within the size limit, but deeper than json can read: a RecursionError
         # would escape every handler a broken stream has.
-        (
+        pytest.param(
             b"PNF1" + struct.pack(">I", 400_000) + b"[" * 200_000 + b"]" * 200_000,
             "nested deeper",
+            id="nested 200000 deep",
         ),
     ],
 )

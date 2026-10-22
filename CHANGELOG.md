@@ -92,7 +92,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `result.provenance.package_digest` the package that ran; progress goes to
   the `phonometry.simulation` logger, silent unless configured. `Compute`
   gains `host` and `timeout_s`. `FDTD2D` and `ElasticFDTD2D` refuse a host:
-  an engine steps in this process.
+  an engine steps in this process. The new guide, "Sending a simulation to
+  a remote node", says all of this in English and Spanish, and the
+  contributor guide adds A54: the library reports progress to a
+  `phonometry.` logger at INFO or DEBUG and never configures logging; and
+  A55: every parameter of a function that runs on a node, and every field
+  of the records it takes, has a form that travels as data.
 
 - **A snapshot can keep every d-th cell, and the result says so.**
   `snapshot_decimation=` on `FDTDRecording`, `ElasticRecording`,

@@ -127,18 +127,18 @@ $$
             = \frac{c\,\Delta t\,\sqrt{2}}{\Delta x} \le 1,
 $$
 
-y `fdtd_simulation` deriva el paso temporal del parámetro `cfl` (este
-$\mathrm{CN}$, por defecto 0,6) y de la mayor velocidad del sonido del mapa. El
-esquema solo es **condicionalmente estable**: con $\mathrm{CN} \le 1$ la
-actualización ni crea ni destruye energía, y por encima del límite todo modo
-de longitud de onda próxima a la escala de la malla crece exponencialmente,
-así que la ejecución llega a `inf` en unos pocos centenares de pasos en vez
-de degradarse con suavidad (Ec. 4.14). Por eso `FDTDRun` rechaza
-cualquier `cfl` fuera de $(0, 1)$ en lugar de dejar que la ejecución
-arranque. La sección 6 usa además un número de Courant
-*por eje*, $S = c\,\Delta t/\Delta x = \mathrm{CN}/\sqrt{2}$, en la relación de
-dispersión; los dos no son el mismo número, y el `cfl = 0.6` por defecto
-significa $S = 0{,}424$.
+y la ejecución, `FDTDRun`, deriva el paso temporal al construirse, a partir
+del parámetro `cfl` (este $\mathrm{CN}$, por defecto 0,6) y de la mayor
+velocidad del sonido del mapa. El esquema solo es **condicionalmente
+estable**: con $\mathrm{CN} \le 1$ la actualización ni crea ni destruye
+energía, y por encima del límite todo modo de longitud de onda próxima a la
+escala de la malla crece exponencialmente, así que la ejecución llega a
+`inf` en unos pocos centenares de pasos en vez de degradarse con suavidad
+(Ec. 4.14). Por eso `FDTDRun` rechaza cualquier `cfl` fuera de $(0, 1)$ en
+lugar de dejar que la ejecución arranque. La sección 6 usa además un número
+de Courant *por eje*, $S = c\,\Delta t/\Delta x = \mathrm{CN}/\sqrt{2}$, en la
+relación de dispersión; los dos no son el mismo número, y el `cfl = 0.6` por
+defecto significa $S = 0{,}424$.
 
 Una simulación es un solo registro:
 `FDTDRun(c, dx, duration, sources=..., ...)` reúne el dominio, sus fuentes

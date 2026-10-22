@@ -214,7 +214,8 @@ print([res.provenance.dtype for res in results])   # ['float32', 'float32']
 ## 4. Cuando el dispositivo no está: `fallback`
 
 Sin `fallback`, construir una simulación en un dispositivo que no se puede
-usar lanza un error, y el mensaje dice por qué:
+usar, o enviar una ejecución a un nodo que falla, lanza un error, y el
+mensaje dice por qué:
 
 - `ComputeImportError`, una subclase de `ImportError`, cuando la biblioteca
   del dispositivo no está instalada (`"cupy"` sin CuPy, o un dispositivo
@@ -228,15 +229,20 @@ usar lanza un error, y el mensaje dice por qué:
   `"cpu"` en Pyodide. Un dispositivo que se declara disponible recibe además
   un cálculo pequeño, una vez por proceso, y se rechaza igual si falla: el MPS
   de una máquina virtual de macOS no puede reservar memoria, y CuPy sin su
-  compilador de CUDA no puede construir un núcleo.
+  compilador de CUDA no puede construir un núcleo;
+- `ComputeRemoteError`, una subclase de `RuntimeError`, para una ejecución
+  enviada a un nodo con un `host`, cuando falla la conexión o el nodo,
+  incluido el dispositivo de allí;
+  [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/)
+  explica qué significa cada fallo.
 
-Con `fallback=True` no se lanza ninguno de los dos. La ejecución avisa con
+Con `fallback=True` no se lanza ninguno de ellos. La ejecución avisa con
 `ComputeFallbackWarning`, un `PhonometryWarning` cuyo mensaje lleva el motivo,
-y calcula con NumPy en el `dtype` pedido. El aviso señala la línea de tu
-código que construyó la simulación o llamó a la función de simulación, nunca
-una línea dentro de la biblioteca, y la procedencia del resultado dice
-`"cpu"`, de modo que una ejecución que volvió a NumPy no puede pasar después
-por una ejecución en GPU.
+y calcula con NumPy en esta máquina, en el `dtype` pedido. El aviso señala la
+línea de tu código que construyó la simulación o llamó a la función de
+simulación, nunca una línea dentro de la biblioteca, y la procedencia del
+resultado dice `"cpu"`, sin host, de modo que una ejecución que volvió a
+NumPy no puede pasar después por una ejecución en GPU ni en un nodo.
 
 ```py
 request = simulation.Compute(device="cupy", fallback=True)
@@ -478,6 +484,8 @@ escenarios. El resto de phonometry calcula solo con NumPy.
   una ejecución.
 - [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
   la simulación elástica, que toma el mismo `compute=`.
+- [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/):
+  la misma ejecución en otra máquina por SSH, con un `host` en la petición.
 - Referencia de la API: [`simulation.compute`](/phonometry/es/reference/api/simulation/compute/),
   [`simulation.fdtd`](/phonometry/es/reference/api/simulation/fdtd/),
   [`simulation.elastic_fdtd`](/phonometry/es/reference/api/simulation/elastic-fdtd/).
@@ -512,7 +520,9 @@ Instala CuPy para tu versión de CUDA (`pip install cupy-cuda12x`) o el extra
 
 Porque la petición decía `fallback=True` y el dispositivo no se podía usar:
 faltaba la biblioteca o no se pudo importar, o el dispositivo no estaba o
-falló su primer cálculo pequeño. La ejecución avisó con
-`ComputeFallbackWarning`, cuyo mensaje da el motivo, y
-`result.provenance.device` dice `"cpu"`. Sin `fallback=True`, la misma
-petición lanza en su lugar `ComputeImportError` o `ComputeDeviceError`.
+falló su primer cálculo pequeño, o, en una ejecución enviada a un nodo, falló
+la conexión o el nodo. La ejecución avisó con `ComputeFallbackWarning`, cuyo
+mensaje da el motivo, y `result.provenance.device` dice `"cpu"`. Sin
+`fallback=True`, la misma petición lanza en su lugar `ComputeImportError` o
+`ComputeDeviceError`, o `ComputeRemoteError` en una ejecución enviada a un
+nodo.

@@ -195,8 +195,8 @@ print([res.provenance.dtype for res in results])   # ['float32', 'float32']
 
 ## 4. When the device is not there: `fallback`
 
-Without `fallback`, building an engine on a device that cannot be used
-raises, and the message says why:
+Without `fallback`, building an engine on a device that cannot be used, or
+sending a run to a node that fails, raises, and the message says why:
 
 - `ComputeImportError`, a subclass of `ImportError`, when the device's
   library is not installed (`"cupy"` without CuPy, or a `"torch:..."` device
@@ -209,15 +209,19 @@ raises, and the message says why:
   device that reports itself available is also given one small computation,
   once per process, and refused the same way if it fails: MPS in a macOS
   virtual machine cannot allocate, and CuPy without its CUDA compiler cannot
-  build a kernel.
+  build a kernel;
+- `ComputeRemoteError`, a subclass of `RuntimeError`, for a run sent to a
+  node with a `host`, when the connection or the node fails, the device
+  there included; [Sending a simulation to a remote node](remote-node.md)
+  says what each failure means.
 
-With `fallback=True` neither is raised. The run warns with
+With `fallback=True` none of them is raised. The run warns with
 `ComputeFallbackWarning`, a `PhonometryWarning` whose message carries the
-reason, and steps on NumPy in the dtype that was asked for. The warning
-points at the line of your code that built the engine or called the
-simulation function, never at a line inside the library, and the result's
-provenance says `"cpu"`, so a run that fell back cannot pass for a GPU run
-later.
+reason, and steps on NumPy on this machine, in the dtype that was asked for.
+The warning points at the line of your code that built the engine or called
+the simulation function, never at a line inside the library, and the
+result's provenance says `"cpu"`, with no host, so a run that fell back
+cannot pass for a GPU run or a run on a node later.
 
 ```py
 request = simulation.Compute(device="cupy", fallback=True)
@@ -440,6 +444,8 @@ The rest of phonometry computes on NumPy only.
   acoustic engine, its sources, probes and boundaries, and how to size a run.
 - [Elastic waves and fluid-solid coupling](elastic-waves.md):
   the elastic engine, which takes the same `compute=`.
+- [Sending a simulation to a remote node](remote-node.md): the same run on
+  another machine over SSH, with a `host` in the request.
 - API reference: [`simulation.compute`](https://docs.jmrp.io/phonometry/reference/api/simulation/compute/),
   [`simulation.fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/fdtd/),
   [`simulation.elastic_fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/).
@@ -471,10 +477,12 @@ Install CuPy for your CUDA version (`pip install cupy-cuda12x`) or the
 
 Because the request said `fallback=True` and the device could not be used:
 the library was missing or did not import, or the device was absent or
-failed its first small computation. The run warned with
+failed its first small computation, or, for a run sent to a node, the
+connection or the node failed. The run warned with
 `ComputeFallbackWarning`, whose message gives the reason, and
 `result.provenance.device` reads `"cpu"`. Without `fallback=True` the same
-request raises `ComputeImportError` or `ComputeDeviceError` instead.
+request raises `ComputeImportError` or `ComputeDeviceError` instead, or
+`ComputeRemoteError` for a run sent to a node.
 
 ## References
 

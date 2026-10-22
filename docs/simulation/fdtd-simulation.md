@@ -75,10 +75,10 @@ $$
             = \frac{c\,\Delta t\,\sqrt{2}}{\Delta x} \le 1,
 $$
 
-and `fdtd_simulation` derives the time step from the `cfl` parameter (the
-Courant number, default 0.6) and the largest sound speed in the map; values
-outside $(0, 1)$ are rejected because the scheme is unconditionally
-meaningless beyond the bound (Eq. 4.14).
+and the run, `FDTDRun`, derives the time step when it is built, from the
+`cfl` parameter (the Courant number, default 0.6) and the largest sound speed
+in the map; values outside $(0, 1)$ are rejected because the scheme is
+unconditionally meaningless beyond the bound (Eq. 4.14).
 
 A simulation is one record: `FDTDRun(c, dx, duration, sources=..., ...)`
 holds the domain, its sources and what it records, and checks every argument

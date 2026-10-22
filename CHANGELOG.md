@@ -3355,10 +3355,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   raised, so a run that builds is one the function can step. Both records
   are frozen and take their grid and their duration by position and the
   rest by name; the sources are held as a tuple, a mapping of boundaries as
-  a read-only mapping, and every array, and every map given as nested lists,
-  as the run's own read-only array, so nothing the caller changes afterwards
-  reaches a checked run. `damping` takes a scalar for the whole field or an
-  `(ny, nx)` map, as the engines do.
+  a read-only mapping, and every array, and every real-valued map given as
+  nested lists, as the run's own read-only array, so nothing the caller
+  changes afterwards reaches a checked run. `damping` takes a scalar for the
+  whole field or an `(ny, nx)` map, as the engines do.
   `ElasticRun` refuses `boundaries` that are not an `ElasticBoundaries` with
   a `TypeError`, where the function failed inside the run. `ElasticBoundaries`
   now holds a mapping of sides as a read-only mapping of its own, so a run

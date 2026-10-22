@@ -2074,16 +2074,19 @@ class FDTDRun(OwnsArrays):
 def _held_map(
     value: ArrayLike | None, dtype: type[np.generic] | None = np.float64
 ) -> object:
-    """A map given as nested sequences, as the run's own read-only array.
+    """A real-valued map given as nested sequences, as the run's own read-only array.
 
     A run copies the arrays it is given, not the lists: one built from
     ``[[343.0, ...], ...]`` would keep the caller's list, and an edit to it
     afterwards would change what the run steps here and what a node
     rebuilds. The list is read as the checks read it, so no number moves. A
-    number, a text, an array or ``None`` is left as it is, and so is a
-    complex map or a value the conversion refuses, for the checks to refuse
-    in their own words: read as float64, NumPy's complex numbers would lose
-    their imaginary part with only a warning.
+    number, a text, an array or ``None`` is left as it is. So is a value the
+    conversion refuses (an int too large for a float among them), which the
+    checks then refuse in their own words and in their own order, and a map
+    that holds complex numbers, which the checks meet as they always did:
+    ``c`` and ``rho`` refuse it, and elsewhere NumPy drops the imaginary
+    part with a warning. Read here, such a map would warn once more, or
+    turn a refusal into a warning, so only a real-valued map is held.
 
     :param dtype: What the checks read the map as: float64 for a medium,
         ``None`` for the obstacle, whose checks require booleans.
@@ -2092,7 +2095,7 @@ def _held_map(
         return value
     try:
         held = None if np.iscomplexobj(value) else np.array(value, dtype=dtype)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         held = None
     return value if held is None else read_only(held)
 

@@ -250,6 +250,50 @@ def test_a_run_does_not_follow_what_its_caller_changes() -> None:
         assert not getattr(elastic_listed, name).flags.writeable, name
 
 
+#: A number too large for a float, in every place a run reads a map.
+_HUGE = [[10**400] * 8 for _ in range(8)]
+
+
+@pytest.mark.parametrize(
+    "build",
+    [
+        lambda: FDTDRun(_HUGE, 0.01, -1.0, sources=[_PULSE]),
+        lambda: FDTDRun(
+            343.0, 0.01, -1.0, shape=(8, 8), sources=[_PULSE], damping=_HUGE
+        ),
+        lambda: FDTDRun(
+            343.0,
+            0.01,
+            -1.0,
+            shape=(8, 8),
+            sources=[_PULSE],
+            boundaries={"top": [10**400] * 8},
+        ),
+        lambda: ElasticRun(
+            4000.0,
+            _HUGE,
+            0.01,
+            -1.0,
+            rho=2500.0,
+            shape=(8, 8),
+            sources=[ExplosionSource(ix=4, iy=4, waveform=_PULSE.value)],
+        ),
+    ],
+    ids=["c", "damping", "impedance", "elastic c_s"],
+)
+def test_a_map_too_large_for_a_float_is_checked_in_its_turn(
+    build: Callable[[], FDTDRun | ElasticRun],
+) -> None:
+    """The map is held as the run's own array, but its checks keep their order.
+
+    Reading a map of numbers too large for a float raises OverflowError;
+    the run checks its duration before its medium, so a bad duration is the
+    error named, as it always was.
+    """
+    with pytest.raises(ValueError, match="duration must be positive and finite"):
+        build()
+
+
 def test_elastic_boundaries_hold_a_mapping_of_sides_read_only() -> None:
     sides: dict[str, Any] = {"top": "free", "left": "absorbing"}
     boundaries = ElasticBoundaries(sides=sides, absorbing_layer_cells=3)

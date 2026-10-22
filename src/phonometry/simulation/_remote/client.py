@@ -41,7 +41,7 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 from types import MappingProxyType
-from typing import IO, TYPE_CHECKING, Any, Literal, cast
+from typing import IO, TYPE_CHECKING, Any, Literal, cast, overload
 
 import numpy as np
 
@@ -272,7 +272,30 @@ class Session:
         except bootstrap.FrameError as exc:
             raise self.failure(str(exc)) from None
 
-    def field[T](self, header: Mapping[str, object], key: str, kind: type[T]) -> T:
+    # Typed as bootstrap.field types each kind of field.
+    @overload
+    def field(
+        self, header: Mapping[str, object], key: str, kind: type[bool]
+    ) -> bool: ...
+    @overload
+    def field(self, header: Mapping[str, object], key: str, kind: type[int]) -> int: ...
+    @overload
+    def field(self, header: Mapping[str, object], key: str, kind: type[str]) -> str: ...
+    @overload
+    def field(
+        self, header: Mapping[str, object], key: str, kind: type[list[Any]]
+    ) -> list[Any]: ...
+    @overload
+    def field(
+        self, header: Mapping[str, object], key: str, kind: type[dict[Any, Any]]
+    ) -> dict[Any, Any]: ...
+    @overload
+    def field(
+        self, header: Mapping[str, object], key: str, kind: type[object]
+    ) -> object: ...
+    def field(
+        self, header: Mapping[str, object], key: str, kind: type[object]
+    ) -> object:
         """A field of what the node sent, of type *kind*, or the node's failure."""
         try:
             return bootstrap.field(header, key, kind)
@@ -628,8 +651,13 @@ def _provenance(
     if (ran.device, ran.dtype) != (request.device, request.dtype):
         msg = f"the node reports a run on {ran.device} in {ran.dtype}; the request was {request.device} in {request.dtype}"
         raise session.failure(msg)
-    return dataclasses.replace(
-        ran, host=request.host, device_index=request.device_index, package_digest=digest
+    return RunProvenance(
+        **{
+            **dataclasses.asdict(ran),
+            "host": request.host,
+            "device_index": request.device_index,
+            "package_digest": digest,
+        }
     )
 
 

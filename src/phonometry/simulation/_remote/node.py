@@ -124,8 +124,9 @@ def _watch_input(
         # interpreter aborts at exit when it cannot take that lock.
         with contextlib.suppress(OSError, ValueError):
             descriptor = stream.fileno()
-            while os.read(descriptor, 1 << 16):
-                pass
+            ended = False
+            while not ended:
+                ended = not os.read(descriptor, 1 << 16)
         cancelled.set()
         if not finished.wait(_GRACE_S):
             sys.stderr.write(

@@ -52,12 +52,11 @@ import tempfile
 import time
 import traceback
 from pathlib import Path
-from typing import IO, TYPE_CHECKING, TypeVar
+from typing import IO, TYPE_CHECKING, overload
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping, Sequence
-
-T = TypeVar("T")
+    from typing import Any
 
 #: The version of the conversation. A node that speaks another is refused.
 PROTOCOL = 1
@@ -219,7 +218,26 @@ def _is_count(value: object) -> bool:
     return isinstance(value, int) and not isinstance(value, bool) and value >= 0
 
 
-def field(header: Mapping[str, object], key: str, kind: type[T]) -> T:
+# The kinds a frame's fields come in, each typed as itself; any other kind
+# is checked alike and typed as an object. Overloads rather than a type
+# variable: this file parses as Python 3.8, which has no generic syntax.
+@overload
+def field(header: Mapping[str, object], key: str, kind: type[bool]) -> bool: ...
+@overload
+def field(header: Mapping[str, object], key: str, kind: type[int]) -> int: ...
+@overload
+def field(header: Mapping[str, object], key: str, kind: type[str]) -> str: ...
+@overload
+def field(
+    header: Mapping[str, object], key: str, kind: type[list[Any]]
+) -> list[Any]: ...
+@overload
+def field(
+    header: Mapping[str, object], key: str, kind: type[dict[Any, Any]]
+) -> dict[Any, Any]: ...
+@overload
+def field(header: Mapping[str, object], key: str, kind: type[object]) -> object: ...
+def field(header: Mapping[str, object], key: str, kind: type[object]) -> object:
     """The field *key* of a frame header, or of an object inside one, of type *kind*.
 
     :raises FrameError: when *header* is not an object (a node may send any

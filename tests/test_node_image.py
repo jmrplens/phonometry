@@ -110,7 +110,9 @@ def test_the_build_context_holds_exactly_what_the_dockerfile_copies() -> None:
 
 
 def test_the_build_context_is_the_same_bytes_every_time() -> None:
-    assert node_image.context_archive(_ROOT) == node_image.context_archive(_ROOT)
+    first = node_image.context_archive(_ROOT)
+    second = node_image.context_archive(_ROOT)
+    assert first == second
 
 
 def test_the_build_runs_on_the_node_and_tags_the_entry_s_image(

@@ -102,6 +102,8 @@ def test_ssh_takes_these_options_and_no_others() -> None:
         "-o",
         "GSSAPIDelegateCredentials=no",
         "-o",
+        "ControlPath=none",
+        "-o",
         "BatchMode=yes",
         "-o",
         "ServerAliveInterval=15",
@@ -133,11 +135,12 @@ def test_ssh_never_prompts_and_ends_its_options_before_the_destination(
 def test_ssh_asks_for_no_terminal_and_forwards_nothing_of_the_client(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    # A "RequestTTY force", a "ForwardAgent yes" or a "GSSAPIDelegateCredentials
-    # yes" that ~/.ssh/config gives the host must not reach a run: a pty
-    # rewrites the frames, and a node runs the code it is sent, with neither
-    # the client's agent nor its Kerberos credentials. Options on the command
-    # line win over the file.
+    # A "RequestTTY force", a "ForwardAgent yes", a "GSSAPIDelegateCredentials
+    # yes" or a "ControlMaster auto" that ~/.ssh/config gives the host must
+    # not reach a run: a pty rewrites the frames, a node runs the code it is
+    # sent, with neither the client's agent nor its Kerberos credentials, and
+    # a shared master that persists holds the run's standard error open.
+    # Options on the command line win over the file.
     monkeypatch.setattr(command, "_SSH_PROGRAM", ("ssh",))
     options = _options(command.ssh_argv(_DOCKER, Compute(host="nas")))
     assert {"-T", "-a", "-x"} <= set(options)
@@ -145,6 +148,7 @@ def test_ssh_asks_for_no_terminal_and_forwards_nothing_of_the_client(
         "RequestTTY=no",
         "ClearAllForwardings=yes",
         "GSSAPIDelegateCredentials=no",
+        "ControlPath=none",
     ):
         assert options[options.index(setting) - 1] == "-o"
 
@@ -166,6 +170,9 @@ def test_the_ssh_client_here_lets_no_setting_of_a_config_through(
         "  RemoteCommand echo config\n"
         "  PermitLocalCommand yes\n"
         "  LocalForward 9999 localhost:22\n"
+        "  ControlMaster auto\n"
+        f"  ControlPath {tmp_path / 'master-%r@%h:%p'}\n"
+        "  ControlPersist yes\n"
         "  BatchMode no\n",
         encoding="utf-8",
     )
@@ -186,6 +193,8 @@ def test_the_ssh_client_here_lets_no_setting_of_a_config_through(
     assert settings["permitlocalcommand"] == ["no"]
     assert settings["batchmode"] == ["yes"]
     assert settings.get("gssapidelegatecredentials", ["no"]) == ["no"]
+    # No control path, no shared connection, whatever ControlMaster says.
+    assert settings.get("controlpath", ["none"]) == ["none"]
     for forwarding in (
         "remotecommand",
         "localforward",
@@ -204,7 +213,9 @@ def test_a_docker_node_runs_the_image_s_bootstrap_cut_off_from_the_network() -> 
     assert (sh, flag) == ("sh", "-c")
     words = shlex.split(script)
     docker = words[words.index("exec") + 1 :]
-    assert docker[:8] == [
+    # No log: Docker would copy the result stream, the container's standard
+    # output, into a log on the node's disk.
+    assert docker[:10] == [
         "docker",
         "run",
         "--rm",
@@ -212,6 +223,8 @@ def test_a_docker_node_runs_the_image_s_bootstrap_cut_off_from_the_network() -> 
         "--init",
         "--pull=never",
         "--network",
+        "none",
+        "--log-driver",
         "none",
     ]
     assert docker[docker.index("--gpus") + 1] == "device=1"

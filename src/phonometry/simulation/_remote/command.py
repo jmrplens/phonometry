@@ -2,10 +2,11 @@
 """How the client reaches a node: the ssh command line and the job's placement (private).
 
 One ``ssh`` process carries a remote run: never a prompt (a prompt would
-hang a notebook), no terminal and no forwarding of anything of the client's,
-a dead link noticed in about a minute, the options ended by ``--`` before
-the destination. The remote command is a shell string for the node's POSIX
-login shell, so every word of it that comes from the hosts file is quoted.
+hang a notebook), no terminal, no forwarding of anything of the client's and
+no connection shared with another, a dead link noticed in about a minute,
+the options ended by ``--`` before the destination. The remote command is a
+shell string for the node's POSIX login shell, so every word of it that
+comes from the hosts file is quoted.
 """
 
 from __future__ import annotations
@@ -25,14 +26,17 @@ if TYPE_CHECKING:
 #: terminal (RequestTTY), no RemoteCommand, no agent, X11 or port forwarding
 #: (ForwardAgent, ForwardX11, LocalForward, RemoteForward, DynamicForward),
 #: no Kerberos credentials delegated (GSSAPIDelegateCredentials), no
-#: LocalCommand (PermitLocalCommand), never a prompt (BatchMode), and the
-#: keep-alives and the connection timeout below. Every client from OpenSSH
-#: 7.6 on knows them; one built without GSSAPI, which delegates nothing,
-#: writes that it does not support that option and goes on. SessionType, StdinNull and ForkAfterAuthentication are
-#: left out on purpose: a client older than OpenSSH 8.7 refuses them on the
-#: command line and would run nothing. A host alias used as a node leaves
-#: them at their defaults: a SessionType of none, a StdinNull of yes or a
-#: ForkAfterAuthentication of yes hangs a run until its timeout.
+#: LocalCommand (PermitLocalCommand), no connection shared with another
+#: (ControlPath), never a prompt (BatchMode), and the keep-alives and the
+#: connection timeout below. Every client from OpenSSH 7.6 on knows them;
+#: one built without GSSAPI, which delegates nothing, writes that it does
+#: not support that option and goes on. SessionType, StdinNull and
+#: ForkAfterAuthentication are left out on purpose: a client older than
+#: OpenSSH 8.7 refuses them on the command line and would run nothing. A
+#: host alias used as a node leaves them at their defaults: a SessionType of
+#: none hangs a run until its timeout, a StdinNull of yes makes it fail at
+#: once (the node reads an empty input), and a ForkAfterAuthentication of
+#: yes detaches the session out of the client's reach.
 SSH_OPTIONS: tuple[str, ...] = (
     # No terminal (-T and RequestTTY): a pty turns every LF of a frame into
     # CRLF and reads the package's bytes as keys (0x03 interrupts, 0x04 ends
@@ -56,6 +60,11 @@ SSH_OPTIONS: tuple[str, ...] = (
             # No Kerberos credentials of the client's handed to the node, which
             # a Kerberos site's config often asks for.
             "GSSAPIDelegateCredentials=no",
+            # No connection sharing: every run is a connection of its own,
+            # whatever ControlMaster the file sets. A master that persists
+            # holds the client's standard error open, and closing a run
+            # would wait for it.
+            "ControlPath=none",
             # Never a prompt, which would hang a notebook; keep-alives that
             # notice a dead link in about a minute; a connection given up
             # after 30 s.
@@ -128,6 +137,11 @@ def remote_command(entry: HostEntry, request: Compute) -> str:
         "--init",
         "--pull=never",
         "--network",
+        "none",
+        # No log: Docker copies a container's standard output into its log
+        # even while a client is attached, and the result stream is the
+        # standard output. The attached client still gets every byte.
+        "--log-driver",
         "none",
     ]
     if request.device in _GPU_DEVICES:

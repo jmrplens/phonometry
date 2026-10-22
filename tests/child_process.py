@@ -7,8 +7,9 @@ limit of its own. A program that hands its pipes on to a process it starts
 keeps them open past that kill, and the read never ends. Git for Windows is
 such a program: the ``git.exe`` on the path is a launcher that starts the
 ``git.exe`` doing the work and gives it the pipes. :func:`run` kills the
-child and waits for it alone; the pipes are left to the threads reading
-them, which end with the last process that holds them.
+child and waits for it alone; on Windows the pipes are left to the
+threads reading them, which end with the last process that holds them,
+and elsewhere they are closed.
 
 :func:`join` waits for a :mod:`multiprocessing` child the same way: a
 forked child that never ends, which a fork of a process with threads can
@@ -17,7 +18,9 @@ leave, is killed and fails the test instead of holding the worker.
 
 from __future__ import annotations
 
+import contextlib
 import subprocess  # nosec B404 - the tests' own programs, never a shell
+import sys
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -57,11 +60,28 @@ def run(
     except BaseException:
         process.kill()
         process.wait(_KILLED_S)
+        _close_pipes(process)
         raise
     done = subprocess.CompletedProcess(process.args, process.returncode, stdout, stderr)
     if check:
         done.check_returncode()
     return done
+
+
+def _close_pipes(process: subprocess.Popen[Any]) -> None:
+    """Close the pipes of a killed *process*, where no thread still reads them.
+
+    On POSIX ``communicate`` reads them in the calling thread, which has
+    given up on them. On Windows a thread of ``communicate`` reads each one
+    until the last process holding it ends, holding the file's lock while
+    it reads, and closes it then: closing it here would wait as long.
+    """
+    if sys.platform == "win32":
+        return
+    for pipe in (process.stdin, process.stdout, process.stderr):
+        if pipe is not None:
+            with contextlib.suppress(OSError):
+                pipe.close()
 
 
 def join(child: BaseProcess, *, timeout: float) -> None:

@@ -784,6 +784,10 @@ def _through_a_node(
         # closing it would wait as long as the reader does.
         if not reader.is_alive():
             stderr.close()
+    # A node killed once its answer was in comes back with the kill's status
+    # and no error above: the limit is what ended it, and the test says so.
+    if expired.is_set():
+        pytest.fail(f"the node did not finish within {_NODE_S:g} s")
     assert not reader.is_alive(), "standard error stayed open after the node ended"
     return kinds, header, buffers, code, b"".join(said)
 

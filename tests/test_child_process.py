@@ -19,6 +19,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 import child_process
 import pytest
@@ -36,19 +37,50 @@ _RUNS_ON_S = 60.0
 #: too late.
 _PROMPT_S = 30.0
 #: How long a launcher here runs before it is stopped [s]: time to start its
-#: child and write down the child's process id.
-_LAUNCHER_LIMIT_S = 5.0
+#: child and write down the child's process id, on a loaded runner too.
+_LAUNCHER_LIMIT_S = 10.0
 
 
-def test_a_program_that_outlives_its_limit_is_killed() -> None:
-    started = time.monotonic()
+class _Started:
+    """``subprocess`` as child_process.py sees it, keeping every process it starts."""
+
+    def __init__(self) -> None:
+        self.processes: list[subprocess.Popen[bytes]] = []
+
+    # Whatever subprocess holds, of whatever type it has.
+    def __getattr__(self, name: str) -> Any:  # noqa: ANN401
+        return getattr(subprocess, name)
+
+    # subprocess's own name, which child_process.py calls.
+    def Popen(  # noqa: N802
+        self, args: list[str], **options: Any
+    ) -> subprocess.Popen[bytes]:
+        process = subprocess.Popen(args, **options)
+        self.processes.append(process)
+        return process
+
+
+def test_a_program_that_outlives_its_limit_is_killed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    started = _Started()
+    monkeypatch.setattr(child_process, "subprocess", started)
+    begun = time.monotonic()
     with pytest.raises(subprocess.TimeoutExpired):
         child_process.run(
             [sys.executable, "-c", f"import time; time.sleep({_RUNS_ON_S})"],
             capture_output=True,
             timeout=_LIMIT_S,
         )
-    assert time.monotonic() - started < _PROMPT_S
+    assert time.monotonic() - begun < _PROMPT_S
+    (process,) = started.processes
+    assert process.returncode is not None, "the program was not waited for"
+    if sys.platform != "win32":
+        # On Windows the threads that read them close them.
+        assert process.stdout is not None
+        assert process.stderr is not None
+        assert process.stdout.closed, "the killed program's output was left open"
+        assert process.stderr.closed, "the killed program's output was left open"
 
 
 def test_a_program_whose_child_keeps_its_pipes_is_still_stopped_on_time(
@@ -79,6 +111,9 @@ def test_a_program_whose_child_keeps_its_pipes_is_still_stopped_on_time(
                 timeout=_LAUNCHER_LIMIT_S,
             )
         elapsed = time.monotonic() - started
+        # Without a child of the launcher, nothing held the pipes past the
+        # kill, and the time says nothing.
+        assert pid_file.exists(), "the launcher had not started its child when stopped"
         assert elapsed < _PROMPT_S, f"the run came back {elapsed:.0f} s after it began"
     finally:
         if pid_file.exists():
@@ -134,21 +169,57 @@ _UNBOUNDED = {
 }
 
 
-def _unbounded(call: ast.Call) -> str | None:
-    """What *call* waits on with no bound, or ``None`` for a call that is bounded or waits on nothing."""
+def _forever(limit: ast.expr | None) -> bool:
+    """Whether *limit*, the time limit a call is given, sets none: absent, ``None`` or ``-1``."""
+    if limit is None:
+        return True
+    if isinstance(limit, ast.UnaryOp) and isinstance(limit.op, ast.USub):
+        return isinstance(limit.operand, ast.Constant) and limit.operand.value == 1
+    return isinstance(limit, ast.Constant) and limit.value is None
+
+
+def _argument(call: ast.Call, name: str, position: int | None) -> ast.expr | None:
+    """The argument *call* passes as *name*, by keyword or at *position*; ``None`` when absent.
+
+    A *position* of ``None`` is a keyword-only parameter. What ``**options``
+    holds is not in the text, so it passes nothing.
+    """
+    for keyword in call.keywords:
+        if keyword.arg == name:
+            return keyword.value
+    if position is None or len(call.args) <= position:
+        return None
+    return call.args[position]
+
+
+def _unbounded(call: ast.Call, modules: frozenset[str]) -> str | None:
+    """What *call* waits on with no bound, or ``None`` for a call that is bounded or waits on nothing.
+
+    *modules* are the names ``subprocess`` goes by in the file. A ``join``,
+    ``wait`` or ``result`` called with arguments other than a limit belongs
+    to some other API (``str.join``, a builder's ``result``) and passes; one
+    given ``None`` or ``-1`` for its limit waits for good, as one given
+    nothing does.
+    """
     func = call.func
     if not isinstance(func, ast.Attribute):
         return None
-    keywords = {keyword.arg for keyword in call.keywords}
-    if "timeout" in keywords:
-        return None
+    what = f"{ast.unparse(func.value)}.{func.attr} without a timeout"
     if func.attr in _RUNNERS:
-        bare = isinstance(func.value, ast.Name) and func.value.id == "subprocess"
-        return f"subprocess.{func.attr} without a timeout" if bare else None
-    if func.attr == "communicate" and len(call.args) < 2:
-        return f"{ast.unparse(func.value)}.communicate without a timeout"
-    if func.attr in _WAITS and not call.args and not keywords:
-        return f"{ast.unparse(func.value)}.{func.attr}() without a timeout"
+        bare = isinstance(func.value, ast.Name) and func.value.id in modules
+        return what if bare and _forever(_argument(call, "timeout", None)) else None
+    if func.attr == "communicate":
+        return what if _forever(_argument(call, "timeout", 1)) else None
+    if func.attr == "acquire":
+        blocking = _argument(call, "blocking", 0)
+        blocks = blocking is None or (
+            isinstance(blocking, ast.Constant) and blocking.value is True
+        )
+        return what if blocks and _forever(_argument(call, "timeout", 1)) else None
+    if func.attr in _WAITS:
+        limit = _argument(call, "timeout", 0)
+        bare = not call.args and not call.keywords
+        return what if bare or (limit is not None and _forever(limit)) else None
     return None
 
 
@@ -156,6 +227,13 @@ def _waits(path: Path) -> list[tuple[str, str]]:
     """Each wait in *path* with no bound, as ``("path::function", what)``."""
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     where = path.relative_to(_ROOT).as_posix()
+    modules = frozenset(
+        alias.asname or alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import)
+        for alias in node.names
+        if alias.name == "subprocess"
+    )
     found: list[tuple[str, str]] = []
 
     def visit(node: ast.AST, scope: str) -> None:
@@ -169,12 +247,63 @@ def _waits(path: Path) -> list[tuple[str, str]]:
                 found.extend(
                     (key, f"subprocess.{name} imported bare") for name in names
                 )
-            if isinstance(child, ast.Call) and (what := _unbounded(child)):
+            if isinstance(child, ast.Call) and (what := _unbounded(child, modules)):
                 found.append((key, f"line {child.lineno}: {what}"))
             visit(child, inner)
 
     visit(tree, "")
     return found
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "subprocess.run(['git'])",
+        "subprocess.run(['git'], timeout=None)",
+        "sp.check_output(['git'])",
+        "process.communicate(b'')",
+        "process.communicate(timeout=None)",
+        "thread.join()",
+        "thread.join(None)",
+        "thread.join(timeout=None)",
+        "event.wait(timeout=None)",
+        "future.result()",
+        "lock.acquire()",
+        "lock.acquire(True)",
+        "lock.acquire(timeout=-1)",
+        "subprocess.run(['git'], **options)",
+    ],
+)
+def test_a_wait_with_no_bound_is_found(source: str) -> None:
+    (call,) = (
+        node for node in ast.walk(ast.parse(source)) if isinstance(node, ast.Call)
+    )
+    assert _unbounded(call, frozenset({"subprocess", "sp"}))
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "subprocess.run(['git'], timeout=120)",
+        "child_process.run(['git'], timeout=120)",
+        "process.communicate(b'', 30)",
+        "thread.join(30)",
+        "thread.join(timeout=30)",
+        "event.wait(_THREAD_S)",
+        "future.result(timeout=30)",
+        "lock.acquire(False)",
+        "lock.acquire(blocking=False)",
+        "lock.acquire(True, 30)",
+        "text.join(parts)",
+    ],
+)
+def test_a_wait_with_a_bound_or_no_wait_at_all_passes(source: str) -> None:
+    (call,) = (
+        node
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+    )
+    assert _unbounded(call, frozenset({"subprocess"})) is None
 
 
 def test_every_wait_in_the_suite_has_a_bound() -> None:

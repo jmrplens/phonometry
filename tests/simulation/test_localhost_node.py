@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
+from test_remote_simulation import _assert_same_result
 
 from phonometry.simulation import (
     Compute,
@@ -65,27 +66,14 @@ def _acoustic(duration: float) -> FDTDRun:
     )
 
 
-def _assert_same(there: object, here: object) -> None:
-    """Every field of the record equal, arrays bit for bit; the provenance apart."""
-    for f in dataclasses.fields(here):  # type: ignore[arg-type]
-        if f.name == "provenance":
-            continue
-        got, want = getattr(there, f.name), getattr(here, f.name)
-        if isinstance(want, np.ndarray):
-            assert isinstance(got, np.ndarray), f.name
-            assert got.dtype == want.dtype, f.name
-            assert np.array_equal(got, want), f.name
-        else:
-            assert got == want, f.name
-
-
 def test_a_remote_acoustic_run_equals_the_run_here() -> None:
-    # One run for both, as the stand-in's tests do: a record's sources are
-    # compared, and a bound waveform built twice is two.
+    # One run for both, as the tests over fake_ssh.py in
+    # test_remote_simulation.py do: a record's sources are compared, and a
+    # bound waveform built twice is two.
     run = _acoustic(4e-3)
     here = fdtd_simulation(run)
     there = fdtd_simulation(run, compute=Compute(host=NODE))
-    _assert_same(there, here)
+    _assert_same_result(there, here)
     assert there.provenance.host == NODE
     assert there.provenance.package_digest == package.installed_package().digest
     assert (
@@ -115,7 +103,7 @@ def test_a_remote_elastic_run_equals_the_run_here() -> None:
     )
     here = elastic_fdtd_simulation(run)
     there = elastic_fdtd_simulation(run, compute=Compute(host=NODE))
-    _assert_same(there, here)
+    _assert_same_result(there, here)
     assert there.provenance.host == NODE
 
 

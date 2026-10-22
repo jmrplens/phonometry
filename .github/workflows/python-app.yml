@@ -1385,10 +1385,18 @@ jobs:
       run: |
         docker run --rm -i hadolint/hadolint:v2.15.1 hadolint --failure-threshold warning - < docker/node/Dockerfile
         shellcheck docker/node/provision.sh
-    # No pip cache here. zizmor takes a job that runs docker/build-push-action
-    # for one that publishes, and a publishing job should not restore a cache
-    # another run could have written. This job publishes nothing: the image
-    # goes no further than this runner's Docker.
+    # The caches. A pip cache and the image's layer cache would both be safe
+    # here: Actions scopes a cache to the ref of the run that wrote it, so a
+    # pull_request run writes only under its merge ref and reads its own, its
+    # base branch's and main's, and only runs on main (its pushes and
+    # dispatches) write under main. The pip cache is left off all the same:
+    # zizmor's cache-poisoning rule takes a job that builds an image with
+    # docker/build-push-action for one that publishes, and refuses a
+    # setup-python cache in it. The layer cache, which that rule does not
+    # cover, stays: it spares the build its downloads, and what the image
+    # computes is checked against the run here regardless. The job publishes
+    # nothing: the image goes no further than this runner's Docker, and the
+    # build uploads no record of itself as an artifact.
     - name: Set up Python 3.13
       uses: actions/setup-python@v7
       with:
@@ -1403,10 +1411,10 @@ jobs:
     # The cpu stage fetches a PPA key, the pinned ffmpeg build (checked
     # against its SHA-256) and the figure stack: kept in the Actions cache by
     # build step, rebuilt only when its inputs change, the ffmpeg pin included.
-    # The cache only spares those downloads; what the image computes is
-    # checked against the run here all the same.
     - name: Build the node image for a CPU
       uses: docker/build-push-action@v7
+      env:
+        DOCKER_BUILD_RECORD_UPLOAD: "false"
       with:
         context: .
         file: docker/node/Dockerfile
@@ -1420,15 +1428,18 @@ jobs:
     # runner image carries OpenSSH's server (its ssh package); ssh-keygen -A
     # makes any host key it lacks. Without PAM, sshd refuses even a key to an
     # account whose password is locked, as a runner's may be: '*' is no
-    # password, and not a locked one. The hosts file bounds each run, so a
-    # node that stops answering fails its test instead of holding the job.
+    # password, and not a locked one. sshd logs to a file of the job, which
+    # the last step shows when the job fails. The hosts file bounds each run,
+    # so a node that stops answering fails its test instead of holding the
+    # job.
     - name: Serve the node through sshd on localhost
       run: |
         user="$(id -un)"
         sudo usermod -p '*' "$user"
         sudo ssh-keygen -A
         sudo mkdir -p /run/sshd
-        sudo /usr/sbin/sshd -p 2222 -o ListenAddress=127.0.0.1 -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no
+        sudo /usr/sbin/sshd -p 2222 -o ListenAddress=127.0.0.1 -o PasswordAuthentication=no -o KbdInteractiveAuthentication=no \
+          -E "$RUNNER_TEMP/sshd.log"
         install -d -m 700 ~/.ssh
         ssh-keygen -q -t ed25519 -N "" -f ~/.ssh/node_key
         cat ~/.ssh/node_key.pub >> ~/.ssh/authorized_keys
@@ -1442,11 +1453,30 @@ jobs:
         printf '%s\n' "[hosts.ci]" 'ssh = "phonometry-ci-node"' 'runner = "docker"' \
           'image = "phonometry-node:cpu"' 'label = "the localhost node of CI"' 'timeout_s = 600' \
           > "$RUNNER_TEMP/hosts.toml"
+    # A test that skips compares nothing, and pytest exits 0 all the same:
+    # the job fails on any skip, whatever its reason. Actions runs a step
+    # with bash -e alone, so pipefail is set for pytest's status to pass
+    # through tee.
     - name: Run the simulations on the node and here, and compare them
       env:
         PHONOMETRY_TEST_NODE: ci
         PHONOMETRY_HOSTS_FILE: ${{ runner.temp }}/hosts.toml
-      run: pytest -q -rfEP tests/simulation/test_localhost_node.py
+      run: |
+        set -o pipefail
+        pytest -q -rfEPs tests/simulation/test_localhost_node.py | tee "$RUNNER_TEMP/node-tests.txt"
+        if grep -q '^SKIPPED' "$RUNNER_TEMP/node-tests.txt"; then
+          echo "::error::The localhost-node tests skipped instead of running on the node."
+          exit 1
+        fi
+    # Why a login was refused, or why sshd did not start or could not take
+    # its port, is in sshd's log and in no step's output: with -E, sshd
+    # writes there what it would otherwise send to the system log.
+    - name: Show sshd's log
+      if: failure()
+      run: |
+        if [ -f "$RUNNER_TEMP/sshd.log" ]; then
+          sudo cat "$RUNNER_TEMP/sshd.log"
+        fi
 
   # The floors in pyproject.toml are measured: each is the oldest release the
   # library's suite passes with on the oldest Python the package supports.

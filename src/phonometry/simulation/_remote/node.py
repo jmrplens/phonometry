@@ -41,7 +41,7 @@ from typing import IO, TYPE_CHECKING, Any
 import numpy as np
 
 from .. import _observer
-from ..compute import _ENV_VAR, Compute, _strip_host
+from ..compute import _ENV_VAR, Compute
 from ..elastic_fdtd import elastic_fdtd_simulation
 from ..fdtd import fdtd_simulation
 from . import bootstrap, wire
@@ -138,10 +138,13 @@ def _watch_input(
 
 
 def _forget_host() -> None:
-    """Take a host out of this node's ``PHONOMETRY_COMPUTE``: a run here stays here."""
-    value = os.environ.get(_ENV_VAR)
-    if value is not None:
-        os.environ[_ENV_VAR] = _strip_host(value)
+    """Take ``PHONOMETRY_COMPUTE`` out of this node's environment: a run here stays here.
+
+    The job names its placement, which the run is given explicitly, so the
+    variable decides nothing on the node; a host left in it would send a
+    run on to the node it names.
+    """
+    os.environ.pop(_ENV_VAR, None)
 
 
 def _little_endian(array: NDArray[Any]) -> memoryview:
@@ -151,12 +154,16 @@ def _little_endian(array: NDArray[Any]) -> memoryview:
 
 
 def _caught(records: Sequence[warnings.WarningMessage]) -> list[dict[str, str]]:
-    """The warnings a run raised, once each, as class path and message."""
+    """The warnings a run raised, once each, as class path and message.
+
+    Each message is cut to the length an error frame carries, before two are
+    compared: as many long messages as a result takes still fit its header.
+    """
     seen: list[dict[str, str]] = []
     for record in records:
         item = {
             "category": f"{record.category.__module__}:{record.category.__qualname__}",
-            "message": str(record.message),
+            "message": str(record.message)[: bootstrap._MAX_MESSAGE],
         }
         if item not in seen:
             seen.append(item)

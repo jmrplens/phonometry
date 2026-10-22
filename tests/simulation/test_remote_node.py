@@ -333,12 +333,48 @@ def test_the_warnings_of_a_run_travel_once_each_with_their_class(
     ]
 
 
-def test_a_node_takes_the_host_out_of_its_own_environment(
+def _warns_long_and_returns(**arguments: object) -> tuple[object, None]:
+    # Two messages that differ only past the length an error frame carries.
+    long = "x" * (2 * bootstrap._MAX_MESSAGE)
+    warnings.warn(f"{long}a", UserWarning, stacklevel=1)
+    warnings.warn(f"{long}b", UserWarning, stacklevel=1)
+    here = fdtd_simulation(_ACOUSTIC)
+    return SimpleNamespace(
+        pressures=here.pressures, snapshots=None, provenance=here.provenance
+    ), None
+
+
+def test_a_long_warning_travels_cut_to_the_length_of_an_error_message(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("PHONOMETRY_COMPUTE", "cpu@nas,float32")
-    _serve(_job("fdtd_simulation", {"run": _ACOUSTIC}))
-    assert os.environ["PHONOMETRY_COMPUTE"] == "cpu,float32"
+    # As many such warnings as a result carries still fit the header a
+    # client reads.
+    monkeypatch.setattr(
+        node,
+        "FUNCTIONS",
+        MappingProxyType(
+            {"fdtd_simulation": (_warns_long_and_returns, ("pressures", "snapshots"))}
+        ),
+    )
+    code, frames = _serve(_job("fdtd_simulation", {"run": _ACOUSTIC}))
+    ((header, _),) = frames
+    assert code == 0
+    assert header["warnings"] == [
+        {"category": "builtins:UserWarning", "message": "x" * bootstrap._MAX_MESSAGE}
+    ]
+
+
+@pytest.mark.parametrize("value", ["cpu@nas,float32", "cpu@nas,fallback", "cupy:1@nas"])
+def test_a_node_takes_the_variable_that_could_name_a_host_out_of_its_environment(
+    monkeypatch: pytest.MonkeyPatch, value: str
+) -> None:
+    # The job names the placement, so the variable decides nothing here; a
+    # host left in it would send the run on, and a value without the host
+    # ("cpu,fallback") is one the variable's reader refuses.
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", value)
+    code, _ = _serve(_job("fdtd_simulation", {"run": _ACOUSTIC}))
+    assert code == 0
+    assert "PHONOMETRY_COMPUTE" not in os.environ
 
 
 # The hook the simulation functions call after each step.

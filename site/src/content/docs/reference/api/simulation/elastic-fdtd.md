@@ -552,7 +552,7 @@ ElasticRun(
     recording: ElasticRecording | None = None,
     boundaries: ElasticBoundaries | None = None,
     obstacle_mask: NDArray[np.bool_] | None = None,
-    damping: float = 0.0,
+    damping: float | NDArray[np.float64] = 0.0,
 )
 ```
 
@@ -580,7 +580,7 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 | `recording` | What the run records ([`ElasticRecording`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticrecording)): the probe cells and their fields, and the snapshot cadence and field. `None` records nothing but the time axis. |
 | `boundaries` | How the domain edges are terminated ([`ElasticBoundaries`](/phonometry/reference/api/simulation/elastic-fdtd/#elasticboundaries)); `None` is rigid on all four sides. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells (rasterised interior geometry). |
-| `damping` | Uniform bulk amplitude decay rate [1/s]. |
+| `damping` | Bulk amplitude decay rate [1/s]: a scalar for the whole field or an `(ny, nx)` map. |
 
 **Raises**
 

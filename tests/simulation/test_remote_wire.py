@@ -66,7 +66,7 @@ _EVERY_ACOUSTIC_FIELD: dict[str, Any] = {
     ),
     "absorbing_layer_cells": 2,
     "obstacle_mask": _MASK,
-    "damping": 1.5,
+    "damping": np.linspace(0.0, 3.0, 120).reshape(10, 12),
 }
 
 #: A value for every field of an ElasticRun.
@@ -103,6 +103,10 @@ _EVERY_ELASTIC_FIELD: dict[str, Any] = {
     "obstacle_mask": _MASK,
     "damping": np.float64(0.5),
 }
+
+#: The fields the tables leave at their default: ``shape`` is read only with a
+#: scalar speed, and both tables give a map.
+_AT_DEFAULT = frozenset({"shape"})
 
 #: Each function a node runs, and an example of each of its parameters but
 #: ``compute``, which travels as the job's placement.
@@ -152,8 +156,28 @@ def _assert_same(got: object, want: object, where: str = "") -> None:
 def test_every_field_of_a_run_travels(record: type, table: dict[str, Any]) -> None:
     fields = {f.name for f in dataclasses.fields(record) if f.init}
     assert set(table) == fields, "give every field of the run a value here"
+    at_default = [
+        f.name
+        for f in dataclasses.fields(record)
+        if f.default is not dataclasses.MISSING
+        and f.name not in _AT_DEFAULT
+        and not _away_from(table[f.name], f.default)
+    ]
+    assert not at_default, (
+        f"give these fields a value away from their default: {at_default}"
+    )
     run = record(**table)
     _assert_same(_round_trip({"run": run})["run"], run, "run")
+
+
+def _away_from(value: object, default: object) -> bool:
+    """Whether *value* differs from a field's *default*, a number, a name or None."""
+    if default is None:
+        return value is not None
+    if np.isscalar(value):
+        return bool(value != default)
+    # A map, a mapping or a record where the default is one number or one name.
+    return True
 
 
 @pytest.mark.parametrize("name", sorted(_EVERY_PARAMETER))

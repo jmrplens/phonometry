@@ -2019,7 +2019,8 @@ class FDTDRun(OwnsArrays):
         sides, in cells.
     :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells
         (rasterised interior geometry).
-    :param damping: Uniform bulk amplitude decay rate [1/s].
+    :param damping: Bulk amplitude decay rate [1/s]: a scalar for the whole
+        field or an ``(ny, nx)`` map.
     :raises TypeError: If an argument is of the wrong type: a ``duration``,
         ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
         neither an :class:`FDTDRecording` nor ``None``, an
@@ -2044,15 +2045,17 @@ class FDTDRun(OwnsArrays):
     ) = "rigid"
     absorbing_layer_cells: int = 20
     obstacle_mask: NDArray[np.bool_] | None = None
-    damping: float = 0.0
+    damping: float | Field2D = 0.0
 
     def __post_init__(self) -> None:
-        """Hold the containers so they cannot change, then check every argument."""
+        """Hold the containers and the maps so they cannot change, then check every argument."""
         object.__setattr__(self, "sources", tuple(self.sources))
         if isinstance(self.boundaries, Mapping):
-            object.__setattr__(
-                self, "boundaries", MappingProxyType(dict(self.boundaries))
-            )
+            held = {side: _held_map(value) for side, value in self.boundaries.items()}
+            object.__setattr__(self, "boundaries", MappingProxyType(held))
+        for name in ("c", "rho", "damping"):
+            object.__setattr__(self, name, _held_map(getattr(self, name)))
+        object.__setattr__(self, "obstacle_mask", _held_map(self.obstacle_mask, None))
         checks = self._checked
         if self.shape is not None and np.isscalar(self.c):
             # Read only for a scalar c: held as the grid it was built on.
@@ -2066,6 +2069,32 @@ class FDTDRun(OwnsArrays):
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
         """Rebuild from the fields: a read-only mapping of boundaries does not pickle."""
         return reduce_with_plain_rows(self)
+
+
+def _held_map(
+    value: ArrayLike | None, dtype: type[np.generic] | None = np.float64
+) -> object:
+    """A map given as nested sequences, as the run's own read-only array.
+
+    A run copies the arrays it is given, not the lists: one built from
+    ``[[343.0, ...], ...]`` would keep the caller's list, and an edit to it
+    afterwards would change what the run steps here and what a node
+    rebuilds. The list is read as the checks read it, so no number moves. A
+    number, a text, an array or ``None`` is left as it is, and so is a
+    complex map or a value the conversion refuses, for the checks to refuse
+    in their own words: read as float64, NumPy's complex numbers would lose
+    their imaginary part with only a warning.
+
+    :param dtype: What the checks read the map as: float64 for a medium,
+        ``None`` for the obstacle, whose checks require booleans.
+    """
+    if value is None or np.isscalar(value) or isinstance(value, np.ndarray):
+        return value
+    try:
+        held = None if np.iscomplexobj(value) else np.array(value, dtype=dtype)
+    except (TypeError, ValueError):
+        held = None
+    return value if held is None else read_only(held)
 
 
 def _acoustic_checks(run: FDTDRun) -> _AcousticChecks:

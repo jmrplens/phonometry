@@ -117,6 +117,7 @@ from .fdtd import (
     _cleared,
     _expected_arrays,
     _finite,
+    _held_map,
     _hold_cells,
     _integer,
     _placement_here,
@@ -1729,7 +1730,8 @@ class ElasticRun(OwnsArrays):
         (:class:`ElasticBoundaries`); ``None`` is rigid on all four sides.
     :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells
         (rasterised interior geometry).
-    :param damping: Uniform bulk amplitude decay rate [1/s].
+    :param damping: Bulk amplitude decay rate [1/s]: a scalar for the whole
+        field or an ``(ny, nx)`` map.
     :raises TypeError: If an argument is of the wrong type, among them a
         ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
         neither an :class:`ElasticRecording` nor ``None``, or ``boundaries``
@@ -1750,11 +1752,14 @@ class ElasticRun(OwnsArrays):
     recording: ElasticRecording | None = None
     boundaries: ElasticBoundaries | None = None
     obstacle_mask: NDArray[np.bool_] | None = None
-    damping: float = 0.0
+    damping: float | Field2D = 0.0
 
     def __post_init__(self) -> None:
-        """Hold the sources so they cannot change, then check every argument."""
+        """Hold the sources and the maps so they cannot change, then check every argument."""
         object.__setattr__(self, "sources", tuple(self.sources))
+        for name in ("c_p", "c_s", "rho", "damping"):
+            object.__setattr__(self, name, _held_map(getattr(self, name)))
+        object.__setattr__(self, "obstacle_mask", _held_map(self.obstacle_mask, None))
         checks = self._checked
         if self.shape is not None and np.isscalar(self.c_p):
             # Read only for a scalar c_p: held as the grid it was built on.

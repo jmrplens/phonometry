@@ -182,6 +182,73 @@ def test_a_run_does_not_follow_what_its_caller_changes() -> None:
         assert np.array_equal(later.signals, first.signals)
         assert later.free_sides == first.free_sides == ("top",)
 
+    # A map given as nested lists becomes the run's own array, read as the
+    # engine reads it, so the run steps what an array would have given and
+    # an edit to the lists afterwards reaches neither this run nor a node.
+    def grid(value: float) -> list[list[float]]:
+        return [[value] * 8 for _ in range(8)]
+
+    speeds, densities, rates = grid(343.0), grid(1.2), grid(5.0)
+    walls = [[False] * 8 for _ in range(8)]
+    walls[2][6] = True
+    profile = [413.0] * 8
+    listed = FDTDRun(
+        speeds,
+        0.01,
+        1e-4,
+        sources=[_PULSE],
+        rho=densities,
+        damping=rates,
+        obstacle_mask=walls,
+        boundaries={"top": profile},
+        recording=FDTDRecording(probes=[(5, 5)]),
+    )
+    as_arrays = FDTDRun(
+        np.array(speeds),
+        0.01,
+        1e-4,
+        sources=[_PULSE],
+        rho=np.array(densities),
+        damping=np.array(rates),
+        obstacle_mask=np.array(walls),
+        boundaries={"top": np.array(profile)},
+        recording=FDTDRecording(probes=[(5, 5)]),
+    )
+    held = fdtd_simulation(listed)
+    assert np.array_equal(held.pressures, fdtd_simulation(as_arrays).pressures)
+    for rows in (speeds, densities, rates):
+        rows[5][5] *= 3.0
+    walls[3][3] = True
+    profile[0] = -1.0
+    assert np.array_equal(fdtd_simulation(listed).pressures, held.pressures)
+    for name in ("c", "rho", "damping", "obstacle_mask"):
+        assert not getattr(listed, name).flags.writeable, name
+    assert not listed.boundaries["top"].flags.writeable
+
+    p_speeds, s_speeds, solid, losses = (
+        grid(4000.0),
+        grid(2300.0),
+        grid(2500.0),
+        grid(5.0),
+    )
+    elastic_listed = ElasticRun(
+        p_speeds,
+        s_speeds,
+        0.01,
+        1e-4,
+        rho=solid,
+        damping=losses,
+        obstacle_mask=[[False] * 7 + [True]] + [[False] * 8 for _ in range(7)],
+        sources=[ExplosionSource(ix=4, iy=4, waveform=_PULSE.value)],
+        recording=ElasticRecording(probes=[(5, 5)], probe_fields=("p",)),
+    )
+    signals = elastic_fdtd_simulation(elastic_listed).signals
+    for rows in (p_speeds, s_speeds, solid, losses):
+        rows[5][5] *= 1.5
+    assert np.array_equal(elastic_fdtd_simulation(elastic_listed).signals, signals)
+    for name in ("c_p", "c_s", "rho", "damping", "obstacle_mask"):
+        assert not getattr(elastic_listed, name).flags.writeable, name
+
 
 def test_elastic_boundaries_hold_a_mapping_of_sides_read_only() -> None:
     sides: dict[str, Any] = {"top": "free", "left": "absorbing"}

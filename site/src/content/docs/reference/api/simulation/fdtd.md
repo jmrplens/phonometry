@@ -627,7 +627,7 @@ FDTDRun(
     boundaries: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | NDArray[np.float64]] = 'rigid',
     absorbing_layer_cells: int = 20,
     obstacle_mask: NDArray[np.bool_] | None = None,
-    damping: float = 0.0,
+    damping: float | NDArray[np.float64] = 0.0,
 )
 ```
 
@@ -658,7 +658,7 @@ reaches a checked run.
 | `boundaries` | `"rigid"` (default), `"absorbing"`, or a mapping from side name (`left`/`right`/`top`/`bottom`) to `"rigid"`, `"absorbing"`, or a real specific impedance [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35). |
 | `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells (rasterised interior geometry). |
-| `damping` | Uniform bulk amplitude decay rate [1/s]. |
+| `damping` | Bulk amplitude decay rate [1/s]: a scalar for the whole field or an `(ny, nx)` map. |
 
 **Raises**
 

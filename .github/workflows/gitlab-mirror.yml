@@ -11,17 +11,15 @@ name: GitLab Mirror
 # below, and the push below is the only one that can be delayed by pruning:
 # the whole refspec is pushed every time, so main and the tags carry every
 # branch with them anyway.
+# No workflow_run here, unlike the other repositories: release.yml dispatches
+# this workflow when a release is out (zizmor flags workflow_run, and
+# tests/test_release_workflow.py holds the dispatch in place).
 on:
   push:
     branches:
       - main
     tags:
       - "**"
-  workflow_run:
-    workflows:
-      - Release
-    types:
-      - completed
   schedule:
     - cron: "17 */6 * * *"
   workflow_dispatch:

@@ -99,12 +99,13 @@ passphrase, and connect once by hand to accept the node's host key. A user, a
 port, a key or a jump host belongs in a `Host` alias of `~/.ssh/config`. The
 options the client gives ssh on the command line win over that file for what
 a run cannot have: a `RemoteCommand` or a `LocalCommand` of the alias does
-not run, and nothing is forwarded (section 7). Three settings stay the
-file's, because clients older than OpenSSH 8.7 refuse them on the command
-line, and an alias used as a node must leave them at their defaults:
-`SessionType none` hangs a run until its timeout, `StdinNull yes` fails it at
-once, and `ForkAfterAuthentication yes` detaches the session out of the
-client's reach.
+not run, nothing is forwarded (section 7), and no connection is shared:
+every run is a connection of its own, whatever `ControlMaster` the alias
+sets. Three settings stay the file's, because clients older than OpenSSH 8.7
+refuse them on the command line, and an alias used as a node must leave them
+at their defaults: `SessionType none` hangs a run until its timeout,
+`StdinNull yes` fails it at once, and `ForkAfterAuthentication yes` detaches
+the session out of the client's reach.
 
 **The request.** `host` names the node, and `timeout_s` may bound the run; it
 wins over the file's. Building the request reads no file and opens no
@@ -225,10 +226,10 @@ with no activation script first, so the environment must work without one.
 | What went wrong | What is raised | When |
 |---|---|---|
 | an argument of the run | `TypeError` or `ValueError` | when the run is built, as for a run here |
-| a run that cannot travel: a source whose waveform is a callable other than the `.value` of a `GaussianPulse`, `CWSource` or `SignalSource` | `TypeError`, naming the source | when the function is called, before the hosts file is read |
+| a run that cannot travel: a source whose waveform is a callable other than the `.value` of a `GaussianPulse`, `CWSource` or `SignalSource`, or a whole number outside the range of an int64 | `TypeError`, naming the source or the field | when the function is called, before the hosts file is read |
 | a host the file does not name, or no hosts file | `KeyError` | before ssh starts |
-| a hosts file that is not TOML, or a malformed entry | `ValueError`, naming the file | before ssh starts |
-| no ssh client on `PATH`, Pyodide, or a package that cannot be read from disk or holds a file no node would write | `ComputeRemoteError` | before ssh starts |
+| a hosts file that cannot be read or is not TOML, or a malformed entry | `ValueError`, naming the file | before ssh starts |
+| no ssh client on `PATH`, Pyodide, a package that cannot be read from disk or holds a file no node would write, or a job too long for the header a node reads (a run of several thousand point sources) | `ComputeRemoteError` | before ssh starts |
 | anything that fails in the connection or on the node | `ComputeRemoteError` | when it fails |
 
 The message of a `ComputeRemoteError` says what happened and, when it can

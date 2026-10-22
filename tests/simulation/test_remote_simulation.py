@@ -63,6 +63,9 @@ _SRC = Path(package.__file__).resolve().parents[3]
 _NODE_TIMEOUT_S = 120
 #: The longest the import check's own interpreter may take [s].
 _SUBPROCESS_TIMEOUT_S = 120
+#: The longest the stand-in for ssh may take to write the node's process
+#: id once the node has answered [s].
+_PIDFILE_WAIT_S = 30.0
 
 
 @pytest.fixture(scope="module")
@@ -175,6 +178,14 @@ def _alive(pid: int) -> bool:
     except ProcessLookupError:
         return False
     return True
+
+
+def _written(pidfile: Path) -> bool:
+    """Whether *pidfile* holds a whole process id: a file just opened for writing is empty."""
+    try:
+        return pidfile.read_text(encoding="utf-8").strip().isdigit()
+    except FileNotFoundError:
+        return False
 
 
 # A run there is the run here.
@@ -515,6 +526,17 @@ def test_an_interrupt_stops_ssh_and_the_node(
 
     def interrupted(session: client.Session, *rest: object) -> RunProvenance:
         sessions.append(session)
+        # The stand-in writes the node's process id once it has started it,
+        # on a machine that may be busy: the interrupt waits for a whole id,
+        # so the node it stops is one the test can name.
+        deadline = time.monotonic() + _PIDFILE_WAIT_S
+        while not _written(pidfile):
+            if time.monotonic() > deadline:
+                pytest.fail(
+                    f"the stand-in for ssh wrote no process id to {pidfile} "
+                    f"within {_PIDFILE_WAIT_S:g} s"
+                )
+            time.sleep(0.05)
         raise KeyboardInterrupt
 
     monkeypatch.setattr(client, "_receive_result", interrupted)

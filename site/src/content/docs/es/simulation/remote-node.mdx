@@ -114,11 +114,13 @@ aceptar la clave de host del nodo. Un usuario, un puerto, una clave o un host
 de salto van en un alias `Host` de `~/.ssh/config`. Las opciones que el
 cliente le da a ssh en la línea de órdenes mandan sobre ese fichero en lo que
 una ejecución no puede tener: un `RemoteCommand` o un `LocalCommand` del
-alias no se ejecutan, y no se reenvía nada (sección 7). Tres ajustes siguen
-siendo cosa del fichero, porque los clientes anteriores a OpenSSH 8.7 los
-rechazan en la línea de órdenes, y un alias que se use como nodo tiene que
-dejarlos en sus valores por defecto: `SessionType none` deja una ejecución
-colgada hasta su tiempo límite, `StdinNull yes` la hace fallar en el acto y
+alias no se ejecutan, no se reenvía nada (sección 7) y no se comparte
+ninguna conexión: cada ejecución es una conexión propia, diga lo que diga el
+`ControlMaster` del alias. Tres ajustes siguen siendo cosa del fichero,
+porque los clientes anteriores a OpenSSH 8.7 los rechazan en la línea de
+órdenes, y un alias que se use como nodo tiene que dejarlos en sus valores
+por defecto: `SessionType none` deja una ejecución colgada hasta su tiempo
+límite, `StdinNull yes` la hace fallar en el acto y
 `ForkAfterAuthentication yes` separa la sesión y la deja fuera del alcance
 del cliente.
 
@@ -248,10 +250,10 @@ antes, así que el entorno tiene que funcionar sin él.
 | Qué salió mal | Qué se lanza | Cuándo |
 |---|---|---|
 | un argumento de la ejecución | `TypeError` o `ValueError` | al construir la ejecución, igual que para una ejecución aquí |
-| una ejecución que no puede viajar: una fuente cuya forma de onda es un invocable distinto del `.value` de un `GaussianPulse`, `CWSource` o `SignalSource` | `TypeError`, nombrando la fuente | al llamar a la función, antes de leer el fichero de hosts |
+| una ejecución que no puede viajar: una fuente cuya forma de onda es un invocable distinto del `.value` de un `GaussianPulse`, `CWSource` o `SignalSource`, o un número entero fuera del rango de un int64 | `TypeError`, nombrando la fuente o el campo | al llamar a la función, antes de leer el fichero de hosts |
 | un host que el fichero no nombra, o ningún fichero de hosts | `KeyError` | antes de que arranque ssh |
-| un fichero de hosts que no es TOML, o una entrada mal formada | `ValueError`, nombrando el fichero | antes de que arranque ssh |
-| ningún cliente ssh en el `PATH`, Pyodide, o un paquete que no se puede leer del disco o que contiene un fichero que ningún nodo escribiría | `ComputeRemoteError` | antes de que arranque ssh |
+| un fichero de hosts que no se puede leer o no es TOML, o una entrada mal formada | `ValueError`, nombrando el fichero | antes de que arranque ssh |
+| ningún cliente ssh en el `PATH`, Pyodide, un paquete que no se puede leer del disco o que contiene un fichero que ningún nodo escribiría, o un trabajo demasiado largo para la cabecera que lee un nodo (una ejecución de varios miles de fuentes puntuales) | `ComputeRemoteError` | antes de que arranque ssh |
 | cualquier cosa que falle en la conexión o en el nodo | `ComputeRemoteError` | cuando falla |
 
 El mensaje de un `ComputeRemoteError` dice qué pasó y, cuando puede saberlo,

@@ -147,6 +147,12 @@ full = ["numba>=0.60.0", "matplotlib>=3.10.7", "reportlab>=4.0.4", "svglib>=0.9.
 
 [tool.setuptools.packages.find]
 where = ["src"]
+# A package is a directory with an __init__.py, which every code directory
+# has: the default would also take a directory of modules without one as a
+# namespace package. The package a client ships to a node
+# (phonometry.simulation._remote.package) follows this rule, and
+# tests/test_package_architecture.py refuses a code directory without one.
+namespaces = false
 
 [tool.setuptools.package-data]
 phonometry = [
@@ -180,6 +186,11 @@ target-version = "py312"
 # comments those snippets use to show expected output are a teaching device,
 # not an accident.
 extend-exclude = ["*.md"]
+# The node bootstrap runs on whatever Python a node has, so that an old one
+# can say it is too old instead of failing to parse the file: it is held to
+# Python 3.8 syntax, and tests/simulation/test_remote_bootstrap.py parses it
+# with that grammar.
+per-file-target-version = { "src/phonometry/simulation/_remote/bootstrap.py" = "py38" }
 
 [tool.ruff.lint]
 # The default set (E4, E7, E9, F) plus the families this tree already satisfies

@@ -24,9 +24,10 @@ formulation of Attenborough & Van Renterghem, *Predicting Outdoor Sound*
   perfectly-matched-layer treatment discussed in section 4.2.3.
 
 Two API levels are exposed. [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) is the result-object
-entry point: it builds the grid, runs a deterministic simulation and returns
-a frozen [`FDTDResult`](/phonometry/reference/api/simulation/fdtd/#fdtdresult) with per-probe pressure histories, optional
-field snapshots and a `.plot()` method. [`FDTD2D`](/phonometry/reference/api/simulation/fdtd/#fdtd2d) is the underlying
+entry point: it takes an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), the record of a simulation that
+checks every argument when it is built, steps it deterministically and
+returns a frozen [`FDTDResult`](/phonometry/reference/api/simulation/fdtd/#fdtdresult) with per-probe pressure histories,
+optional field snapshots and a `.plot()` method. [`FDTD2D`](/phonometry/reference/api/simulation/fdtd/#fdtd2d) is the underlying
 stepping engine (also used by the documentation animations) for callers that
 need frame-by-frame access to the field.
 
@@ -231,6 +232,7 @@ sides into absorbing or locally reacting boundaries. Sources are soft
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `cfl`, `dx` or `sponge_reflection` is not a single number, `sponge_width` is a flag, a text or an array where a count goes, or `compute` is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
+| ValueError | for an argument out of its range, and for a `compute` that names a host: an engine steps in this process, and only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) runs on a node. |
 | ComputeImportError | when the library of the device `compute` asks for is not installed or does not import. |
 | ComputeDeviceError | when that device is not present, or fails a first small computation; with `fallback=True` the engine warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 
@@ -453,19 +455,8 @@ Elapsed simulated time [s].
 
 ```python
 fdtd_simulation(
-    c: float | NDArray[np.float64],
-    dx: float,
-    duration: float,
+    run: FDTDRun,
     *,
-    sources: Sequence[GaussianPulse | CWSource | SignalSource | PlaneWaveSource],
-    shape: tuple[int, int] | None = None,
-    rho: float | NDArray[np.float64] = 1.2,
-    cfl: float = 0.6,
-    recording: FDTDRecording | None = None,
-    boundaries: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | NDArray[np.float64]] = 'rigid',
-    absorbing_layer_cells: int = 20,
-    obstacle_mask: NDArray[np.bool_] | None = None,
-    damping: float = 0.0,
     compute: Compute | None = None,
 ) -> FDTDResult
 ```
@@ -498,19 +489,8 @@ spreading rather than the 3D spherical $1/r$.
 
 | Name | Description |
 | :--- | :--- |
-| `c` | Sound-speed map [m/s], shape `(ny, nx)`, or a scalar with an explicit `shape`. |
-| `dx` | Grid spacing [m] (square cells). |
-| `duration` | Physical time to simulate [s]. |
-| `sources` | One or more of [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource), [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource) or [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource). |
-| `shape` | Grid shape `(ny, nx)`, required when `c` is a scalar. |
-| `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
-| `cfl` | Courant number in `(0, 1)` (Eqs. 4.13-4.14); the time step is $\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})$. Default 0.6. |
-| `recording` | What the run records ([`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording)): the probe cells, and the snapshot cadence and decimation. `None` records nothing but the time axis. |
-| `boundaries` | `"rigid"` (default), `"absorbing"`, or a mapping from side name (`left`/`right`/`top`/`bottom`) to `"rigid"`, `"absorbing"`, or a real specific impedance [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35). |
-| `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells. |
-| `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells (rasterised interior geometry). |
-| `damping` | Uniform bulk amplitude decay rate [1/s]. |
-| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. |
+| `run` | The simulation ([`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun)): the domain, its sources and what it records, every argument checked when the run was built. |
+| `compute` | Where the run steps ([`Compute`](/phonometry/reference/api/simulation/compute/#compute)); `None` follows [`use`](/phonometry/reference/api/simulation/compute/#use), then `PHONOMETRY_COMPUTE`, then NumPy. With a `host` the whole run goes to that node, named in the hosts file, and comes back as this function's record (see the guide on remote nodes). |
 
 **Returns:** A [`FDTDResult`](/phonometry/reference/api/simulation/fdtd/#fdtdresult).
 
@@ -518,10 +498,12 @@ spreading rather than the 3D spherical $1/r$.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an input is of the wrong type: a `duration`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, an `absorbing_layer_cells` that is not a number, a `shape` that is not a pair, a complex medium, an `obstacle_mask` that is not boolean, or a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`. |
-| ValueError | If the inputs are invalid. |
+| TypeError | For a `run` that is not an [`FDTDRun`](/phonometry/reference/api/simulation/fdtd/#fdtdrun), a `compute` that is neither a [`Compute`](/phonometry/reference/api/simulation/compute/#compute) nor `None`, or, when `compute` names a host, a run that cannot travel to a node: a source whose waveform is a callable other than the `value` of a [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource) or [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource), or a whole number outside the range of an int64. |
+| ValueError | For a `PHONOMETRY_COMPUTE` that does not parse, or a hosts file that cannot be read or is malformed. |
+| KeyError | For a `host` the hosts file does not name. |
 | ComputeImportError | When the device's library is not installed or does not import. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
+| ComputeRemoteError | For a failure of the connection or of the node; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy here instead. |
 
 ## FDTDRecording
 
@@ -628,6 +610,62 @@ Plot the probe histories or one recorded field snapshot.
 *property*
 
 Domain size `(lx, ly)` [m].
+
+## FDTDRun
+
+```python
+FDTDRun(
+    c: float | NDArray[np.float64],
+    dx: float,
+    duration: float,
+    *,
+    sources: Sequence[GaussianPulse | CWSource | SignalSource | PlaneWaveSource],
+    shape: tuple[int, int] | None = None,
+    rho: float | NDArray[np.float64] = 1.2,
+    cfl: float = 0.6,
+    recording: FDTDRecording | None = None,
+    boundaries: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | NDArray[np.float64]] = 'rigid',
+    absorbing_layer_cells: int = 20,
+    obstacle_mask: NDArray[np.bool_] | None = None,
+    damping: float | NDArray[np.float64] = 0.0,
+)
+```
+
+One acoustic FDTD simulation: the domain, its sources and what it records.
+
+Every argument is checked when the run is built, the grid's included:
+the time step, the density, the sponge and the damping, the impedance
+edges, the obstacle, and the sources and the probes on the grid. A run
+that builds is one [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) can step, here or on a node,
+and a bad argument raises where the run is written, with the class and
+the words the function always raised. The sources are held as a tuple,
+a mapping of boundaries as a read-only mapping, and each array as the
+run's own read-only copy, so nothing the caller changes afterwards
+reaches a checked run.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `c` | Sound-speed map [m/s], shape `(ny, nx)`, or a scalar with an explicit `shape`. |
+| `dx` | Grid spacing [m] (square cells). |
+| `duration` | Physical time to simulate [s]. |
+| `sources` | One or more of [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource), [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource) or [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource). |
+| `shape` | Grid shape `(ny, nx)`, required when `c` is a scalar. |
+| `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
+| `cfl` | Courant number in `(0, 1)` (Eqs. 4.13-4.14); the time step is $\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})$. Default 0.6. |
+| `recording` | What the run records ([`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording)): the probe cells, and the snapshot cadence and decimation. `None` records nothing but the time axis. |
+| `boundaries` | `"rigid"` (default), `"absorbing"`, or a mapping from side name (`left`/`right`/`top`/`bottom`) to `"rigid"`, `"absorbing"`, or a real specific impedance [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35). |
+| `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells. |
+| `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells (rasterised interior geometry). |
+| `damping` | Bulk amplitude decay rate [1/s]: a scalar for the whole field or an `(ny, nx)` map. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | If an argument is of the wrong type: a `duration`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, an `absorbing_layer_cells` that is not a number, a `shape` that is not a pair, a complex medium, or an `obstacle_mask` that is not boolean. |
+| ValueError | If an argument is out of its range, or a source, a probe or the obstacle does not fit the grid. |
 
 ## GaussianPulse
 

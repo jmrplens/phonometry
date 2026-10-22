@@ -3,9 +3,12 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
+import pickle
 import subprocess
 import sys
+import threading
 from pathlib import Path
 
 import numpy as np
@@ -15,6 +18,7 @@ from phonometry.simulation import (
     Compute,
     ComputeDeviceError,
     ComputeImportError,
+    ComputeRemoteError,
     RunProvenance,
     use,
 )
@@ -229,6 +233,7 @@ _RUN: dict[str, object] = {
     "cuda_runtime": "13.2",
     "cuda_driver_api": "13.3",
     "gpu": "NVIDIA GeForce RTX 4060",
+    "package_digest": None,
 }
 
 
@@ -273,4 +278,200 @@ def test_a_run_provenance_no_run_could_write_is_refused(
 ) -> None:
     fields = {**_RUN, **changes}
     with pytest.raises(error, match=match):
+        RunProvenance(**fields)  # type: ignore[arg-type]
+
+
+# A request that names a node. Building one reaches nothing, as with a GPU.
+
+
+def test_a_request_names_a_host_without_reaching_it() -> None:
+    request = Compute(device="cupy", host="nas", timeout_s=600)
+    assert (request.host, request.timeout_s) == ("nas", 600.0)
+    assert Compute().host is None
+
+
+def test_a_numpy_run_may_fall_back_from_a_node() -> None:
+    # On this machine "cpu" is the fallback already; on a node it is not.
+    assert Compute(host="nas", fallback=True).fallback is True
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "error", "match"),
+    [
+        ({"host": ""}, ValueError, "'host' must be a name from the hosts file"),
+        (
+            {"host": "root@192.168.0.40"},
+            ValueError,
+            "'host' must be a name from the hosts file",
+        ),
+        (
+            {"host": "-oProxyCommand=x"},
+            ValueError,
+            "'host' must be a name from the hosts file",
+        ),
+        ({"host": "a" * 65}, ValueError, "'host' must be a name from the hosts file"),
+        ({"host": 7}, TypeError, "'host' must be a name from the hosts file or None"),
+        ({"timeout_s": 60.0}, ValueError, "'timeout_s' bounds a remote run"),
+        ({"host": "nas", "timeout_s": 0.0}, ValueError, "'timeout_s' must be positive"),
+        (
+            {"host": "nas", "timeout_s": "60"},
+            TypeError,
+            "'timeout_s' must be one number",
+        ),
+        (
+            {"host": "nas", "timeout_s": True},
+            TypeError,
+            "'timeout_s' must be one number",
+        ),
+    ],
+)
+def test_a_host_or_a_timeout_that_cannot_mean_anything_is_refused(
+    kwargs: dict[str, object], error: type[Exception], match: str
+) -> None:
+    with pytest.raises(error, match=match):
+        Compute(**kwargs)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("timeout_s", [threading.TIMEOUT_MAX * 2, 1e300])
+def test_a_timeout_longer_than_a_timer_waits_is_refused_with_the_limit(
+    timeout_s: float,
+) -> None:
+    # The timer that stops a remote run would die on it, and the run would
+    # have no timeout at all.
+    limit = int(threading.TIMEOUT_MAX)
+    with pytest.raises(ValueError, match=rf"'timeout_s' must be at most {limit} s"):
+        Compute(host="nas", timeout_s=timeout_s)
+
+
+def test_the_longest_timeout_a_timer_waits_is_taken() -> None:
+    longest = Compute(host="nas", timeout_s=threading.TIMEOUT_MAX)
+    assert longest.timeout_s == threading.TIMEOUT_MAX
+
+
+@pytest.mark.parametrize(
+    ("text", "want"),
+    [
+        ("cupy@nas", Compute(device="cupy", host="nas")),
+        (
+            "cupy:1@nas,float32,fallback",
+            Compute(
+                device="cupy",
+                device_index=1,
+                dtype="float32",
+                fallback=True,
+                host="nas",
+            ),
+        ),
+        ("cpu@node-2.lab", Compute(host="node-2.lab")),
+        (
+            " torch:cuda@nas , float32 ",
+            Compute(device="torch:cuda", dtype="float32", host="nas"),
+        ),
+    ],
+)
+def test_the_environment_names_a_host_after_an_at(text: str, want: Compute) -> None:
+    assert cm._parse_environment(text) == want
+
+
+@pytest.mark.parametrize("text", ["cupy@", "cupy@bad host", "@nas", "cupy@nas@lab"])
+def test_a_malformed_host_in_the_environment_names_the_variable(text: str) -> None:
+    with pytest.raises(ValueError, match="PHONOMETRY_COMPUTE"):
+        cm._parse_environment(text)
+
+
+@pytest.mark.parametrize(
+    ("text", "want"),
+    [
+        ("cupy:1@nas,float32", "cupy:1,float32"),
+        ("cupy@nas", "cupy"),
+        ("cupy", "cupy"),
+        (" cpu@nas ", "cpu"),
+    ],
+)
+def test_a_node_takes_the_host_out_of_its_environment(text: str, want: str) -> None:
+    assert cm._strip_host(text) == want
+
+
+@pytest.mark.parametrize(
+    ("source", "match"),
+    [
+        ("argument", "compute= names host 'nas'"),
+        ("use", "the use\\(\\) block names host 'nas'"),
+        ("environment", "PHONOMETRY_COMPUTE names host 'nas'"),
+    ],
+)
+def test_an_engine_built_here_refuses_a_host_and_says_where_it_came_from(
+    source: str, match: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv(cm._ENV_VAR, raising=False)
+    request = Compute(device="cupy", host="nas")
+    if source == "environment":
+        monkeypatch.setenv(cm._ENV_VAR, "cupy@nas")
+    argument = request if source == "argument" else None
+    with (
+        use(request) if source == "use" else contextlib.nullcontext(),
+        pytest.raises(ValueError, match=match),
+    ):
+        cm._local_request(argument, owner="FDTD2D")
+
+
+def test_the_refusal_tells_the_caller_how_to_step_here_or_run_there(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(cm._ENV_VAR, "cupy@nas")
+    with pytest.raises(
+        ValueError,
+        match="pass compute=Compute\\(device='cupy'\\) to step here, or call fdtd_simulation",
+    ):
+        cm._local_request(None, owner="FDTD2D")
+
+
+def test_a_request_without_a_host_passes_an_engine(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(cm._ENV_VAR, "cupy:1")
+    assert cm._local_request(None, owner="FDTD2D") == Compute(
+        device="cupy", device_index=1
+    )
+
+
+def test_the_placement_says_where_it_came_from(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv(cm._ENV_VAR, raising=False)  # whatever the shell had
+    assert cm._requested_from(None) == (Compute(), "default")
+    monkeypatch.setenv(cm._ENV_VAR, "cupy")
+    assert cm._requested_from(None)[1] == "environment"
+    with use(Compute(device="torch:cpu")):
+        assert cm._requested_from(None)[1] == "use"
+    assert cm._requested_from(Compute())[1] == "argument"
+
+
+def test_a_remote_error_refines_runtime_error_and_survives_a_process_boundary() -> None:
+    error = ComputeRemoteError(
+        "node 'nas' failed", host="nas", node_traceback="Traceback ...\nValueError: x"
+    )
+    assert isinstance(error, RuntimeError)
+    back = pickle.loads(pickle.dumps(error))
+    assert (str(back), back.host, back.node_traceback) == (
+        str(error),
+        "nas",
+        error.node_traceback,
+    )
+    assert any("ValueError: x" in note for note in back.__notes__)
+
+
+def test_a_provenance_names_the_package_that_ran() -> None:
+    digest = "0123456789abcdef" * 4
+    record = RunProvenance(**{**_RUN, "host": "nas", "package_digest": digest})  # type: ignore[arg-type]
+    assert record.package_digest == digest
+
+
+@pytest.mark.parametrize(
+    ("value", "error"),
+    [("abc", ValueError), ("0123456789ABCDEF" * 4, ValueError), (7, TypeError)],
+)
+def test_a_package_digest_is_sixty_four_lowercase_hex_digits(
+    value: object, error: type[Exception]
+) -> None:
+    fields = {**_RUN, "package_digest": value}
+    with pytest.raises(error, match="'package_digest'"):
         RunProvenance(**fields)  # type: ignore[arg-type]

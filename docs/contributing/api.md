@@ -1330,3 +1330,58 @@ if not -20.0 <= temperature_c <= 50.0:
 **Enforced by:** review
 
 **Exceptions.** A range the clause prints is reflected, as an error or a warning as the clause reads. The physical limits are the only unconditional errors: T ≤ 0 K, t ≤ −273.15 °C, a non-positive pressure.
+
+<a id="a54"></a>
+### A54. Report progress to a `phonometry.` logger at INFO or DEBUG; never configure logging
+
+**Why.** A run on a node can last an hour, and a caller wants to see it move. A library that prints writes into its caller's output (A52), and a library that configures logging rewrites its caller's. The standard logger is silent until the caller asks: nothing below WARNING reaches standard error by default, so messages at INFO and DEBUG cost the caller nothing. An advisory is a warning with its topic class (A50), never a log line at WARNING, which would print.
+
+**Do**
+
+```python
+import logging
+
+_LOG = logging.getLogger("phonometry.simulation")
+
+
+def report(label: str, done: int, total: int) -> None:
+    _LOG.info("%s: step %d of %d", label, done, total)
+
+
+report("the NAS", 3, 10)
+```
+
+**Don't**
+
+```py
+logging.basicConfig(level=logging.INFO)  # the caller's logging, not the library's
+_LOG.warning("the node is slow")  # an advisory is a warning, and WARNING prints
+```
+
+**Enforced by:** `tests/test_package_architecture.py::test_the_library_logs_quietly_to_loggers_of_its_own`, `tests/test_package_architecture.py::test_the_logging_rule_reads_a_loud_logger`, `tests/test_package_architecture.py::test_the_logging_rule_reads_every_spelling_of_a_logger`, `tests/test_package_architecture.py::test_the_logging_rule_reads_every_way_of_configuring`, `tests/test_package_architecture.py::test_the_logging_rule_follows_a_logger_from_module_to_module`
+
+**Exceptions.** None. The caller turns the messages on, with `logging.basicConfig(level=logging.INFO)` or a handler on `phonometry.simulation`.
+
+<a id="a55"></a>
+### A55. Give every parameter of a function that runs on a node, and every field of the records it takes, a form that travels as data
+
+**Why.** A run sent to a node carries the function's name and its arguments, never code: numbers, texts, arrays, and the library's own records field by field, the run record first among them. A parameter or a field whose value cannot travel works here and fails the day someone first sends it to a node, and a callable would have to travel as code, which the remote route refuses by design. A waveform is the one callable that travels: the `.value` of a library source, which the node rebuilds from its record.
+
+**Do**
+
+```python
+from phonometry import simulation
+
+pulse = simulation.GaussianPulse(ix=0, iy=0, half_width_s=1e-5)
+source = simulation.ExplosionSource(ix=5, iy=5, waveform=pulse.value)  # rebuilt on the node from the record
+```
+
+**Don't**
+
+```py
+source = simulation.ExplosionSource(ix=5, iy=5, waveform=lambda t: 0.0)  # code: refused on the way to a node
+```
+
+**Enforced by:** `tests/simulation/test_remote_wire.py::test_every_parameter_of_a_remote_function_travels`, `tests/simulation/test_remote_wire.py::test_every_field_of_a_run_travels`, `tests/simulation/test_remote_wire.py::test_the_guard_names_every_function_a_node_runs`, `tests/simulation/test_remote_simulation.py::test_the_remote_route_sends_every_parameter`, `CI: Remote simulation on a localhost node`
+
+**Exceptions.** `compute`, which says where the run goes and travels as the job's placement. A new field of `FDTDRun` or `ElasticRun` gets a value in the tables of `tests/simulation/test_remote_wire.py`, away from its default where the run takes another, and a new function a node runs gets a row in `_EVERY_PARAMETER`, or the tests above fail.

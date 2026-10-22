@@ -38,6 +38,7 @@ from phonometry.simulation.elastic_fdtd import (
     ElasticFDTD2D,
     ElasticFDTDResult,
     ElasticRecording,
+    ElasticRun,
     ExplosionSource,
     ForceSource,
     Material,
@@ -161,28 +162,32 @@ def body_waves() -> ElasticFDTDResult:
     """
     w = 8e-6
     return elastic_fdtd_simulation(
-        CP_AL,
-        CS_AL,
-        0.002,
-        2.2e-4,
-        rho=RHO_AL,
-        shape=(501, 501),
-        sources=[
-            ExplosionSource(
-                ix=250, iy=250, waveform=GaussianPulse(ix=0, iy=0, half_width_s=w).value
+        ElasticRun(
+            CP_AL,
+            CS_AL,
+            0.002,
+            2.2e-4,
+            rho=RHO_AL,
+            shape=(501, 501),
+            sources=[
+                ExplosionSource(
+                    ix=250,
+                    iy=250,
+                    waveform=GaussianPulse(ix=0, iy=0, half_width_s=w).value,
+                ),
+                ForceSource(
+                    ix=250,
+                    iy=250,
+                    direction="y",
+                    amplitude=1e6,
+                    waveform=GaussianPulse(ix=0, iy=0, half_width_s=w).value,
+                ),
+            ],
+            recording=ElasticRecording(
+                probes=[(250, 350), (250, 470), (350, 250), (470, 250)],
+                probe_fields=("p", "vy"),
             ),
-            ForceSource(
-                ix=250,
-                iy=250,
-                direction="y",
-                amplitude=1e6,
-                waveform=GaussianPulse(ix=0, iy=0, half_width_s=w).value,
-            ),
-        ],
-        recording=ElasticRecording(
-            probes=[(250, 350), (250, 470), (350, 250), (470, 250)],
-            probe_fields=("p", "vy"),
-        ),
+        )
     )
 
 
@@ -224,31 +229,35 @@ def test_rayleigh_wave_speed_matches_characteristic_equation() -> None:
     assert 0.928 * CS_AL < c_r < 0.943 * CS_AL
     w = 8e-6
     res = elastic_fdtd_simulation(
-        CP_AL,
-        CS_AL,
-        0.002,
-        5.0e-4,
-        rho=RHO_AL,
-        shape=(240, 660),
-        sources=[
-            ForceSource(
-                ix=60,
-                iy=0,
-                direction="y",
-                amplitude=1e6,
-                waveform=GaussianPulse(ix=0, iy=0, half_width_s=w).value,
-            )
-        ],
-        recording=ElasticRecording(probes=[(300, 0), (600, 0)], probe_fields=("vy",)),
-        boundaries=ElasticBoundaries(
-            sides={
-                "top": "free",
-                "left": "absorbing",
-                "right": "absorbing",
-                "bottom": "absorbing",
-            },
-            absorbing_layer_cells=40,
-        ),
+        ElasticRun(
+            CP_AL,
+            CS_AL,
+            0.002,
+            5.0e-4,
+            rho=RHO_AL,
+            shape=(240, 660),
+            sources=[
+                ForceSource(
+                    ix=60,
+                    iy=0,
+                    direction="y",
+                    amplitude=1e6,
+                    waveform=GaussianPulse(ix=0, iy=0, half_width_s=w).value,
+                )
+            ],
+            recording=ElasticRecording(
+                probes=[(300, 0), (600, 0)], probe_fields=("vy",)
+            ),
+            boundaries=ElasticBoundaries(
+                sides={
+                    "top": "free",
+                    "left": "absorbing",
+                    "right": "absorbing",
+                    "bottom": "absorbing",
+                },
+                absorbing_layer_cells=40,
+            ),
+        )
     )
     t1 = _arrival(res, 0, 0)
     t2 = _arrival(res, 1, 0)
@@ -713,9 +722,7 @@ def test_simulation_rejects_invalid_arguments(
     }
     duration = full.pop("duration")
     with pytest.raises(ValueError, match=match):
-        elastic_fdtd_simulation(
-            6000.0, 3000.0, 0.05, duration, rho=2700.0, shape=(30, 30), **full
-        )
+        ElasticRun(6000.0, 3000.0, 0.05, duration, rho=2700.0, shape=(30, 30), **full)
 
 
 @pytest.mark.parametrize(
@@ -784,8 +791,8 @@ def _small_run(**kwargs: object) -> ElasticFDTDResult:
     }
     defaults.update(kwargs)
     return elastic_fdtd_simulation(
-        6000.0, 3000.0, 0.02, 2e-3, rho=2700.0, shape=(40, 60), **defaults
-    )  # type: ignore[arg-type]
+        ElasticRun(6000.0, 3000.0, 0.02, 2e-3, rho=2700.0, shape=(40, 60), **defaults)  # type: ignore[arg-type]
+    )
 
 
 def test_result_records_signals_and_snapshots() -> None:

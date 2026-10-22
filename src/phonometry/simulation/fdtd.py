@@ -18,9 +18,10 @@ formulation of Attenborough & Van Renterghem, *Predicting Outdoor Sound*
   perfectly-matched-layer treatment discussed in section 4.2.3.
 
 Two API levels are exposed. :func:`fdtd_simulation` is the result-object
-entry point: it builds the grid, runs a deterministic simulation and returns
-a frozen :class:`FDTDResult` with per-probe pressure histories, optional
-field snapshots and a ``.plot()`` method. :class:`FDTD2D` is the underlying
+entry point: it takes an :class:`FDTDRun`, the record of a simulation that
+checks every argument when it is built, steps it deterministically and
+returns a frozen :class:`FDTDResult` with per-probe pressure histories,
+optional field snapshots and a ``.plot()`` method. :class:`FDTD2D` is the underlying
 stepping engine (also used by the documentation animations) for callers that
 need frame-by-frame access to the field.
 
@@ -52,7 +53,9 @@ edge, and second-order convergence under grid refinement.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import KW_ONLY, dataclass
+from functools import cached_property
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, Protocol
 
@@ -60,7 +63,13 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from .._internal.display import RichDisplay
-from .._internal.frozen import OwnsArrays, handed_over, read_only_copy
+from .._internal.frozen import (
+    OwnsArrays,
+    handed_over,
+    read_only,
+    read_only_copy,
+    reduce_with_plain_rows,
+)
 from .._internal.validation import (
     require_choice,
     require_count,
@@ -70,17 +79,17 @@ from .._internal.validation import (
     require_same_length,
     require_scalar,
 )
-from . import _backends
-from .compute import RunProvenance
+from . import _backends, _observer
+from .compute import Compute, RunProvenance, _local_request, _requested
 from .ntff import ContourPhasors
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Mapping, Sequence
+    from collections.abc import Callable, Iterable, Sequence
 
     from matplotlib.axes import Axes
 
     from .._i18n import Language
-    from .compute import Compute
+    from ._remote.client import Expected
 
 __all__ = [
     "FDTD2D",
@@ -88,6 +97,7 @@ __all__ = [
     "ContourProbe",
     "FDTDRecording",
     "FDTDResult",
+    "FDTDRun",
     "GaussianPulse",
     "PlaneWaveSource",
     "SignalSource",
@@ -107,6 +117,10 @@ _SIDE_TRAVEL = ("down", "up", "left", "right")
 
 #: Boundary-condition names accepted by :func:`fdtd_simulation`.
 _BOUNDARY_NAMES = ("rigid", "absorbing")
+
+#: The target reflection of a sponge layer when the caller names none: the
+#: default of both engines, which a run keeps.
+_DEFAULT_SPONGE_REFLECTION = 1e-4
 
 
 def _positive_finite(name: str, value: float) -> float:
@@ -721,6 +735,70 @@ def _acoustic_grid(
     return c_map, dx, _time_step(cfl, dx, float(c_map.max()))
 
 
+@dataclass(frozen=True)
+class _AcousticMedium:
+    """An acoustic medium checked on the host, before any device is asked for.
+
+    What :class:`FDTD2D` builds its maps from, and what an
+    :class:`FDTDRun` checks when it is built: the same function checks both,
+    so a bad argument raises the same error on every route.
+    """
+
+    c_map: Field2D
+    rho_map: Field2D
+    dx: float
+    dt: float
+    sponge_width: int
+    sides: tuple[Side, ...]
+    sponge_sides: tuple[Side, ...]
+    damping_map: NDArray[np.float64]
+    impedances: list[tuple[str, Field2D]]
+    obstacle: NDArray[np.bool_] | None
+
+
+def _acoustic_medium(
+    c: float | Field2D,
+    dx: float,
+    *,
+    rho: float | Field2D,
+    cfl: float,
+    sponge_width: int,
+    sponge_sides: Side | Iterable[Side] | None,
+    sponge_reflection: float,
+    damping: float | NDArray[np.float64],
+    shape: tuple[int, int] | None,
+    edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None,
+    obstacle_mask: NDArray[np.bool_] | None,
+) -> _AcousticMedium:
+    """Check every argument of :class:`FDTD2D` that describes the medium.
+
+    In the order the constructor always checked them: the grid and the
+    time step, the density, the sponge and the damping, the sponge sides,
+    the impedance edges, the obstacle.
+    """
+    c_map, dx, dt = _acoustic_grid(c, shape, cfl, dx)
+    ny, nx = c_map.shape
+    rho_map = _resolve_rho_map(rho, ny, nx)
+    width, damping_map = _validate_sponge_damping(
+        sponge_width, sponge_reflection, damping, ny, nx
+    )
+    sides = _resolve_sponge_sides(sponge_sides)
+    width = require_count(width, "sponge_width", at_least=None)
+    used = sides if width > 0 else ()
+    return _AcousticMedium(
+        c_map=c_map,
+        rho_map=rho_map,
+        dx=dx,
+        dt=dt,
+        sponge_width=width,
+        sides=sides,
+        sponge_sides=used,
+        damping_map=damping_map,
+        impedances=_validated_impedances(edge_impedance, used, ny, nx),
+        obstacle=_validated_obstacle(obstacle_mask, ny, nx),
+    )
+
+
 def _step_count(duration: float, dt: float) -> int:
     """The number of steps of *dt* that cover *duration*, at least one."""
     steps = round(duration / dt)
@@ -730,13 +808,45 @@ def _step_count(duration: float, dt: float) -> int:
     return steps
 
 
+def _snapshot_shape(
+    grid: tuple[int, int],
+    steps: int,
+    snapshot_every: int | None,
+    snapshot_decimation: int,
+) -> tuple[int, int, int] | None:
+    """The shape of the snapshots a run of *steps* records on *grid*, or ``None``.
+
+    One frame for the initial field and one every ``snapshot_every`` steps,
+    each keeping every ``snapshot_decimation``-th cell along each axis. The
+    checks of both runs read it here.
+    """
+    if snapshot_every is None:
+        return None
+    ny, nx = grid
+    d = snapshot_decimation
+    return (steps // snapshot_every + 1, -(-ny // d), -(-nx // d))
+
+
+def _snapshot_times(
+    steps: int, snapshot_every: int | None, dt: float
+) -> NDArray[np.float64] | None:
+    """The time of each snapshot a run of *steps* records [s], or ``None``.
+
+    Read by both simulation functions, for the frames :func:`_snapshot_shape`
+    counts.
+    """
+    if snapshot_every is None:
+        return None
+    return np.arange(0, steps + 1, snapshot_every, dtype=np.float64) * dt
+
+
 def _check_source(
     source: AnySource, shape: tuple[int, ...], obstacle: NDArray[np.bool_] | None
 ) -> None:
     """Refuse a source off the grid ``(ny, nx)`` or inside the obstacle.
 
-    Shared by :meth:`FDTD2D.add_source` and :func:`fdtd_simulation`, which
-    checks its sources before it builds the engine.
+    Shared by :meth:`FDTD2D.add_source` and :class:`FDTDRun`, which checks
+    its sources against the grid when the run is built.
     """
     if isinstance(source, PlaneWaveSource):
         _check_plane_source(source, shape, obstacle)
@@ -1143,6 +1253,9 @@ class FDTD2D:
     :raises TypeError: if ``cfl``, ``dx`` or ``sponge_reflection`` is not a single
         number, ``sponge_width`` is a flag, a text or an array where a count goes,
         or ``compute`` is neither a :class:`Compute` nor ``None``.
+    :raises ValueError: for an argument out of its range, and for a ``compute``
+        that names a host: an engine steps in this process, and only
+        :func:`fdtd_simulation` runs on a node.
     :raises ComputeImportError: when the library of the device ``compute``
         asks for is not installed or does not import.
     :raises ComputeDeviceError: when that device is not present, or fails a
@@ -1159,33 +1272,40 @@ class FDTD2D:
         cfl: float = 0.6,
         sponge_width: int = 0,
         sponge_sides: Side | Iterable[Side] | None = None,
-        sponge_reflection: float = 1e-4,
+        sponge_reflection: float = _DEFAULT_SPONGE_REFLECTION,
         damping: float | NDArray[np.float64] = 0.0,
         shape: tuple[int, int] | None = None,
         edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None = None,
         obstacle_mask: NDArray[np.bool_] | None = None,
         compute: Compute | None = None,
     ) -> None:
-        c_map, self.dx, self.dt = _acoustic_grid(c, shape, cfl, dx)
+        medium = _acoustic_medium(
+            c,
+            dx,
+            rho=rho,
+            cfl=cfl,
+            sponge_width=sponge_width,
+            sponge_sides=sponge_sides,
+            sponge_reflection=sponge_reflection,
+            damping=damping,
+            shape=shape,
+            edge_impedance=edge_impedance,
+            obstacle_mask=obstacle_mask,
+        )
+        c_map, rho_map = medium.c_map, medium.rho_map
+        self.dx, self.dt = medium.dx, medium.dt
         ny, nx = c_map.shape
-        rho_map = _resolve_rho_map(rho, ny, nx)
-        sponge_width, damping_map = _validate_sponge_damping(
-            sponge_width, sponge_reflection, damping, ny, nx
-        )
-        sides = _resolve_sponge_sides(sponge_sides)
         #: Sponge-layer width in cells (read-only configuration record).
-        self.sponge_width = require_count(sponge_width, "sponge_width", at_least=None)
+        self.sponge_width = medium.sponge_width
         #: Sides carrying a sponge layer when ``sponge_width > 0``.
-        self.sponge_sides: tuple[str, ...] = sides if sponge_width > 0 else ()
-        impedances = _validated_impedances(edge_impedance, self.sponge_sides, ny, nx)
-        self._obstacle: NDArray[np.bool_] | None = _validated_obstacle(
-            obstacle_mask, ny, nx
-        )
+        self.sponge_sides: tuple[str, ...] = medium.sponge_sides
+        self._obstacle: NDArray[np.bool_] | None = medium.obstacle
 
         # Every argument is checked on the host before the device is asked
         # for, so a bad one raises its own error, never a missing library's
-        # or a fallback warning first.
-        backend = _backends.backend_for(compute)
+        # or a fallback warning first. Then a host is refused: an engine
+        # steps in this process.
+        backend = _backends.backend_for(_local_request(compute, owner="FDTD2D"))
         self._backend = backend
         self._xp = backend.xp
         # The medium the simulation was built on, as read-only copies of its
@@ -1217,7 +1337,13 @@ class FDTD2D:
         self._contour_probes: list[ContourProbe] = []
         self.n = 0  # completed steps
 
-        self._init_decay(sides, sponge_width, sponge_reflection, damping_map, c_max)
+        self._init_decay(
+            medium.sides,
+            medium.sponge_width,
+            sponge_reflection,
+            medium.damping_map,
+            c_max,
+        )
         rho_edges = {
             "left": self.rho[:, 0],
             "right": self.rho[:, -1],
@@ -1226,7 +1352,7 @@ class FDTD2D:
         }
         self._edges = [
             _ImpedanceEdge(side, z, rho_edges[side], self.dt, self.dx, backend)
-            for side, z in impedances
+            for side, z in medium.impedances
         ]
         #: Per-side impedance boundaries as supplied (immutable record), read
         #: once the edges have validated them; an array profile is kept as a
@@ -1814,7 +1940,8 @@ class FDTDRecording(RichDisplay):
         """Refuse a malformed probe or count when the record is built.
 
         Whether a probe lies on the grid, and outside the obstacle, is checked
-        by :func:`fdtd_simulation`, the first place a grid exists.
+        by the :class:`FDTDRun` that holds the record, the first place a grid
+        exists.
         """
         every, decimation = _snapshot_options(
             self.snapshot_every, self.snapshot_decimation
@@ -1825,6 +1952,284 @@ class FDTDRecording(RichDisplay):
         object.__setattr__(self, "probes", _probe_pairs(self.probes))
         object.__setattr__(self, "snapshot_every", every)
         object.__setattr__(self, "snapshot_decimation", decimation)
+
+
+@dataclass(frozen=True)
+class _AcousticChecks:
+    """What the checks of an :class:`FDTDRun` found, kept with the run.
+
+    The grid and the counts the run is stepped and recorded with, so that
+    the simulation function, here or on its way to a node, reads them
+    without checking anything twice. No map is kept: an engine builds its
+    own.
+    """
+
+    grid: tuple[int, int]
+    dx: float
+    dt: float
+    obstacle: NDArray[np.bool_] | None
+    absorbing_sides: tuple[Side, ...]
+    edge_impedance: Mapping[Side, float | NDArray[np.float64]]
+    sponge_width: int
+    probe_ix: NDArray[np.int_]
+    steps: int
+    snapshot_every: int | None
+    snapshot_decimation: int
+
+    def snapshot_shape(self) -> tuple[int, int, int] | None:
+        """The shape of the snapshots the run records, or ``None`` when it records none."""
+        return _snapshot_shape(
+            self.grid, self.steps, self.snapshot_every, self.snapshot_decimation
+        )
+
+
+@dataclass(frozen=True)
+class FDTDRun(OwnsArrays):
+    r"""One acoustic FDTD simulation: the domain, its sources and what it records.
+
+    Every argument is checked when the run is built, the grid's included:
+    the time step, the density, the sponge and the damping, the impedance
+    edges, the obstacle, and the sources and the probes on the grid. A run
+    that builds is one :func:`fdtd_simulation` can step, here or on a node,
+    and a bad argument raises where the run is written, with the class and
+    the words the function always raised. The sources are held as a tuple,
+    a mapping of boundaries as a read-only mapping, and each array as the
+    run's own read-only copy, so nothing the caller changes afterwards
+    reaches a checked run.
+
+    :param c: Sound-speed map [m/s], shape ``(ny, nx)``, or a scalar with an
+        explicit ``shape``.
+    :param dx: Grid spacing [m] (square cells).
+    :param duration: Physical time to simulate [s].
+    :param sources: One or more of :class:`GaussianPulse`,
+        :class:`CWSource`, :class:`SignalSource` or :class:`PlaneWaveSource`.
+    :param shape: Grid shape ``(ny, nx)``, required when ``c`` is a scalar.
+    :param rho: Density map [kg/m3]; scalar or ``(ny, nx)`` array.
+    :param cfl: Courant number in ``(0, 1)`` (Eqs. 4.13-4.14); the time step
+        is :math:`\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})`.
+        Default 0.6.
+    :param recording: What the run records (:class:`FDTDRecording`): the
+        probe cells, and the snapshot cadence and decimation. ``None``
+        records nothing but the time axis.
+    :param boundaries: ``"rigid"`` (default), ``"absorbing"``, or a mapping
+        from side name (``left``/``right``/``top``/``bottom``) to
+        ``"rigid"``, ``"absorbing"``, or a real specific impedance
+        [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35).
+    :param absorbing_layer_cells: Sponge-layer thickness for absorbing
+        sides, in cells.
+    :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells
+        (rasterised interior geometry).
+    :param damping: Bulk amplitude decay rate [1/s]: a scalar for the whole
+        field or an ``(ny, nx)`` map.
+    :raises TypeError: If an argument is of the wrong type: a ``duration``,
+        ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
+        neither an :class:`FDTDRecording` nor ``None``, an
+        ``absorbing_layer_cells`` that is not a number, a ``shape`` that is
+        not a pair, a complex medium, or an ``obstacle_mask`` that is not
+        boolean.
+    :raises ValueError: If an argument is out of its range, or a source, a
+        probe or the obstacle does not fit the grid.
+    """
+
+    c: float | Field2D
+    dx: float
+    duration: float
+    _: KW_ONLY
+    sources: Sequence[AnySource]
+    shape: tuple[int, int] | None = None
+    rho: float | Field2D = 1.2
+    cfl: float = 0.6
+    recording: FDTDRecording | None = None
+    boundaries: (
+        AcousticBoundary | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]]
+    ) = "rigid"
+    absorbing_layer_cells: int = 20
+    obstacle_mask: NDArray[np.bool_] | None = None
+    damping: float | Field2D = 0.0
+
+    def __post_init__(self) -> None:
+        """Hold the containers and the maps so they cannot change, then check every argument."""
+        object.__setattr__(self, "sources", tuple(self.sources))
+        if isinstance(self.boundaries, Mapping):
+            held = {side: _held_map(value) for side, value in self.boundaries.items()}
+            object.__setattr__(self, "boundaries", MappingProxyType(held))
+        for name in ("c", "rho", "damping"):
+            object.__setattr__(self, name, _held_map(getattr(self, name)))
+        object.__setattr__(self, "obstacle_mask", _held_map(self.obstacle_mask, None))
+        checks = self._checked
+        if self.shape is not None and np.isscalar(self.c):
+            # Read only for a scalar c: held as the grid it was built on.
+            object.__setattr__(self, "shape", checks.grid)
+
+    @cached_property
+    def _checked(self) -> _AcousticChecks:
+        """Every argument checked, once, when the run is built."""
+        return _acoustic_checks(self)
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Rebuild from the fields: a read-only mapping of boundaries does not pickle."""
+        return reduce_with_plain_rows(self)
+
+
+def _held_map(
+    value: ArrayLike | None, dtype: type[np.generic] | None = np.float64
+) -> object:
+    """A real-valued map given as nested sequences, as the run's own read-only array.
+
+    A run copies the arrays it is given, not the lists: one built from
+    ``[[343.0, ...], ...]`` would keep the caller's list, and an edit to it
+    afterwards would change what the run steps here and what a node
+    rebuilds. The list is read as the checks read it, so no number moves. A
+    number, a text, an array or ``None`` is left as it is. So is a value the
+    conversion refuses (an int too large for a float, a number whose float
+    divides by zero), which the checks then refuse in their own words and in
+    their own order, and a map that holds complex numbers, which the checks
+    meet as they always did: :class:`FDTDRun`'s ``c`` and ``rho`` refuse it
+    with ``TypeError``; elsewhere a map of Python complex numbers raises
+    ``TypeError`` in the float conversion, and one of NumPy complex numbers
+    loses its imaginary part with a ``ComplexWarning`` and stays the
+    caller's list. Read here as float64, a map of NumPy complex numbers
+    would warn a second time; read as complex, a map of Python complex
+    numbers would turn its refusal into a warning. So only a real-valued map
+    is held.
+
+    :param dtype: What the checks read the map as: float64 for a medium,
+        ``None`` for the obstacle, whose checks require booleans.
+    """
+    if value is None or np.isscalar(value) or isinstance(value, np.ndarray):
+        return value
+    try:
+        held = None if np.iscomplexobj(value) else np.array(value, dtype=dtype)
+    except (TypeError, ValueError, ArithmeticError):
+        held = None
+    return value if held is None else read_only(held)
+
+
+def _acoustic_checks(run: FDTDRun) -> _AcousticChecks:
+    """Check every argument of *run*, as :func:`fdtd_simulation` always did.
+
+    The recording's type, the sponge thickness, the sources, the duration
+    and the boundaries, then the medium (:func:`_acoustic_medium`: the grid
+    and the time step, the density, the sponge and the damping, the
+    impedance edges, the obstacle), then the sources and the probes on the
+    grid and the step count. The recording checked its own fields when it
+    was built; here its probes meet the grid.
+
+    :raises TypeError: as :class:`FDTDRun` documents.
+    :raises ValueError: as :class:`FDTDRun` documents.
+    """
+    recording = _recording_or_empty(run.recording, FDTDRecording)
+    require_scalar(run.absorbing_layer_cells, "absorbing_layer_cells")
+    if len(run.sources) == 0:
+        msg = "at least one source is required"
+        raise ValueError(msg)
+    duration = _positive_finite("duration", run.duration)
+    absorbing_sides, edge_impedance = _parse_boundaries(run.boundaries)
+    width = 0
+    if absorbing_sides:
+        width = _integer("absorbing_layer_cells", run.absorbing_layer_cells)
+        if width < 1:
+            msg = "absorbing_layer_cells must be >= 1"
+            raise ValueError(msg)
+    medium = _acoustic_medium(
+        run.c,
+        run.dx,
+        rho=run.rho,
+        cfl=run.cfl,
+        sponge_width=width,
+        sponge_sides=absorbing_sides or None,
+        sponge_reflection=_DEFAULT_SPONGE_REFLECTION,
+        damping=run.damping,
+        shape=run.shape,
+        edge_impedance=edge_impedance or None,
+        obstacle_mask=run.obstacle_mask,
+    )
+    ny, nx = medium.c_map.shape
+    for source in run.sources:
+        _check_source(source, (ny, nx), medium.obstacle)
+    return _AcousticChecks(
+        grid=(ny, nx),
+        dx=medium.dx,
+        dt=medium.dt,
+        obstacle=None if medium.obstacle is None else read_only(medium.obstacle),
+        absorbing_sides=absorbing_sides,
+        edge_impedance=MappingProxyType(edge_impedance),
+        sponge_width=width,
+        probe_ix=read_only(_probe_indices(recording.probes, (ny, nx), medium.obstacle)),
+        steps=_step_count(duration, medium.dt),
+        snapshot_every=recording.snapshot_every,
+        snapshot_decimation=recording.snapshot_decimation,
+    )
+
+
+def _acoustic_engine(run: FDTDRun, compute: Compute | None) -> FDTD2D:
+    """The engine that steps *run* on this machine, its sources added.
+
+    It takes the sponge and the impedance edges the run's checks found, and
+    checks its medium again in its constructor, as every engine does.
+    """
+    checks = run._checked
+    sim = FDTD2D(
+        run.c,
+        run.dx,
+        rho=run.rho,
+        cfl=run.cfl,
+        sponge_width=checks.sponge_width,
+        sponge_sides=checks.absorbing_sides or None,
+        damping=run.damping,
+        shape=run.shape,
+        edge_impedance=checks.edge_impedance or None,
+        obstacle_mask=run.obstacle_mask,
+        compute=compute,
+    )
+    for source in run.sources:
+        sim.add_source(source)
+    return sim
+
+
+def _expected_arrays(
+    histories: tuple[str, tuple[int, ...]],
+    frames: tuple[int, int, int] | None,
+    dtype: str,
+) -> Expected:
+    """What a node sends back for a run, in the order it sends it.
+
+    The probe histories, named and shaped as *histories* says and float64
+    whatever the run's dtype, then the snapshots in the run's dtype when the
+    run records them. Shared by both simulation functions, whose records
+    differ only in the name and the shape of the histories.
+    """
+    from ._remote.client import ArraySpec, Expected
+
+    name, shape = histories
+    first = ArraySpec(name, "float64", shape)
+    if frames is None:
+        return Expected(arrays=(first,))
+    return Expected(arrays=(first, ArraySpec("snapshots", dtype, frames)))
+
+
+def _acoustic_expected(run: FDTDRun, dtype: str) -> Expected:
+    """The arrays a node must send back for *run*, in the order it sends them."""
+    checks = run._checked
+    pressures = (checks.probe_ix.shape[0], checks.steps + 1)
+    return _expected_arrays(("pressures", pressures), checks.snapshot_shape(), dtype)
+
+
+def _placement_here(request: Compute) -> Compute:
+    """Where a run steps on this machine, for either simulation function.
+
+    As asked when the request names no host. When it names one, this is the
+    fallback after the node failed: NumPy, in the dtype the request asked
+    for.
+    """
+    return request if request.host is None else Compute(dtype=request.dtype)
+
+
+def _cleared(first: NDArray[np.floating], second: NDArray[np.floating] | None) -> None:
+    """Zero what a failed remote run may have half written, before the run here."""
+    first[...] = 0.0
+    if second is not None:
+        second[...] = 0.0
 
 
 def _parse_boundaries(
@@ -1907,10 +2312,10 @@ def _probe_indices(
 
 
 def _recording_or_empty[R: RichDisplay](recording: object, record: type[R]) -> R:
-    """A simulation function's ``recording``, or an empty *record* for ``None``.
+    """A run's ``recording``, or an empty *record* for ``None``.
 
-    Shared by :func:`fdtd_simulation` and :func:`elastic_fdtd_simulation`, so
-    each takes its own record and nothing else, the other engine's included:
+    Shared by :class:`FDTDRun` and :class:`ElasticRun`, so each takes its own
+    record and nothing else, the other engine's included:
     the elastic record has the acoustic one's fields, and would otherwise run
     with its probe fields and snapshot field silently ignored.
 
@@ -1951,6 +2356,9 @@ def _record_run(
     the host once, after the march. Each snapshot is cut to every
     ``snapshot_decimation``-th cell on the device and comes to the host as
     it is taken, so only the cells it keeps cross.
+
+    After each step it tells a watcher, if one is set (:mod:`._observer`), how
+    many steps are done; a node uses that to stop a run whose client went away.
     """
     b, xp = sim._backend, sim._xp
     d = snapshot_decimation
@@ -1963,6 +2371,7 @@ def _record_run(
     with b.context():
         for i in range(steps):
             sim.step()
+            _observer.step_done(i + 1, steps)
             if n_probes:
                 sample = xp.take(xp.reshape(sim.p, (-1,)), centre)
                 if buffer is None:
@@ -1979,23 +2388,7 @@ def _record_run(
         pressures[...] = b.to_host(buffer)
 
 
-def fdtd_simulation(
-    c: float | Field2D,
-    dx: float,
-    duration: float,
-    *,
-    sources: Sequence[AnySource],
-    shape: tuple[int, int] | None = None,
-    rho: float | Field2D = 1.2,
-    cfl: float = 0.6,
-    recording: FDTDRecording | None = None,
-    boundaries: AcousticBoundary
-    | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]] = "rigid",
-    absorbing_layer_cells: int = 20,
-    obstacle_mask: NDArray[np.bool_] | None = None,
-    damping: float = 0.0,
-    compute: Compute | None = None,
-) -> FDTDResult:
+def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResult:
     r"""Run a deterministic 2D acoustic FDTD simulation.
 
     Builds the staggered-grid domain (Attenborough & Van Renterghem 2021,
@@ -2020,119 +2413,84 @@ def fdtd_simulation(
     physically a line source with cylindrical :math:`1/\sqrt{r}` amplitude
     spreading rather than the 3D spherical :math:`1/r`.
 
-    :param c: Sound-speed map [m/s], shape ``(ny, nx)``, or a scalar with an
-        explicit ``shape``.
-    :param dx: Grid spacing [m] (square cells).
-    :param duration: Physical time to simulate [s].
-    :param sources: One or more of :class:`GaussianPulse`,
-        :class:`CWSource`, :class:`SignalSource` or :class:`PlaneWaveSource`.
-    :param shape: Grid shape ``(ny, nx)``, required when ``c`` is a scalar.
-    :param rho: Density map [kg/m3]; scalar or ``(ny, nx)`` array.
-    :param cfl: Courant number in ``(0, 1)`` (Eqs. 4.13-4.14); the time step
-        is :math:`\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})`.
-        Default 0.6.
-    :param recording: What the run records (:class:`FDTDRecording`): the
-        probe cells, and the snapshot cadence and decimation. ``None``
-        records nothing but the time axis.
-    :param boundaries: ``"rigid"`` (default), ``"absorbing"``, or a mapping
-        from side name (``left``/``right``/``top``/``bottom``) to
-        ``"rigid"``, ``"absorbing"``, or a real specific impedance
-        [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35).
-    :param absorbing_layer_cells: Sponge-layer thickness for absorbing
-        sides, in cells.
-    :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells
-        (rasterised interior geometry).
-    :param damping: Uniform bulk amplitude decay rate [1/s].
+    :param run: The simulation (:class:`FDTDRun`): the domain, its sources
+        and what it records, every argument checked when the run was built.
     :param compute: Where the run steps (:class:`Compute`); ``None`` follows
-        :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
+        :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy. With a
+        ``host`` the whole run goes to that node, named in the hosts file,
+        and comes back as this function's record (see the guide on remote
+        nodes).
     :return: A :class:`FDTDResult`.
-    :raises TypeError: If an input is of the wrong type: a ``duration``,
-        ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
-        neither an :class:`FDTDRecording` nor ``None``, an
-        ``absorbing_layer_cells`` that is not a number, a ``shape`` that is
-        not a pair, a complex medium, an ``obstacle_mask`` that is not
-        boolean, or a ``compute`` that is neither a :class:`Compute` nor
-        ``None``.
-    :raises ValueError: If the inputs are invalid.
+    :raises TypeError: For a ``run`` that is not an :class:`FDTDRun`, a
+        ``compute`` that is neither a :class:`Compute` nor ``None``, or,
+        when ``compute`` names a host, a run that cannot travel to a node: a
+        source whose waveform is a callable other than the ``value`` of a
+        :class:`GaussianPulse`, :class:`CWSource` or :class:`SignalSource`,
+        or a whole number outside the range of an int64.
+    :raises ValueError: For a ``PHONOMETRY_COMPUTE`` that does not parse, or
+        a hosts file that cannot be read or is malformed.
+    :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeImportError: When the device's library is not installed
         or does not import.
     :raises ComputeDeviceError: When the device is not present, or fails a
         first small computation; with ``fallback=True`` the run warns with
         :class:`ComputeFallbackWarning` and steps on NumPy instead.
+    :raises ComputeRemoteError: For a failure of the connection or of the
+        node; with ``fallback=True`` the run warns with
+        :class:`ComputeFallbackWarning` and steps on NumPy here instead.
     """
-    recording = _recording_or_empty(recording, FDTDRecording)
-    snapshot_every, d = recording.snapshot_every, recording.snapshot_decimation
-    require_scalar(absorbing_layer_cells, "absorbing_layer_cells")
-    if len(sources) == 0:
-        msg = "at least one source is required"
-        raise ValueError(msg)
-    duration = _positive_finite("duration", duration)
-    absorbing_sides, edge_impedance = _parse_boundaries(boundaries)
-    if absorbing_sides:
-        absorbing_layer_cells = _integer("absorbing_layer_cells", absorbing_layer_cells)
-        if absorbing_layer_cells < 1:
-            msg = "absorbing_layer_cells must be >= 1"
-            raise ValueError(msg)
-
-    # The grid, the obstacle, the sources, the probes and the step count are
-    # checked on the host first, through the helpers the engine uses, so a
-    # bad one raises its own error before the engine asks for its device.
-    c_map, _, dt = _acoustic_grid(c, shape, cfl, dx)
-    ny, nx = c_map.shape
-    obstacle = _validated_obstacle(obstacle_mask, ny, nx)
-    for source in sources:
-        _check_source(source, (ny, nx), obstacle)
-    probe_ix = _probe_indices(recording.probes, (ny, nx), obstacle)
-    steps = _step_count(duration, dt)
-
-    sim = FDTD2D(
-        c,
-        dx,
-        rho=rho,
-        cfl=cfl,
-        sponge_width=absorbing_layer_cells if absorbing_sides else 0,
-        sponge_sides=absorbing_sides or None,
-        damping=damping,
-        shape=shape,
-        edge_impedance=edge_impedance or None,
-        obstacle_mask=obstacle_mask,
-        compute=compute,
-    )
-    for source in sources:
-        sim.add_source(source)
-    times = np.arange(steps + 1, dtype=np.float64) * sim.dt
+    if not isinstance(run, FDTDRun):
+        msg = f"'run' must be an FDTDRun, got {type(run).__name__}."
+        raise TypeError(msg)
+    checks = run._checked
+    request = _requested(compute)
     # The record keeps these two as they are (handed_over): the snapshots are
     # most of the result, and a copy would hold them twice while it is built.
     # The probe histories are float64 whatever the run's dtype; the snapshots
-    # keep it, a float32 run's being half the size.
-    pressures = np.zeros((probe_ix.shape[0], steps + 1), dtype=np.float64)
+    # keep it, a float32 run's being half the size. Either route fills them.
+    pressures = np.zeros((checks.probe_ix.shape[0], checks.steps + 1), dtype=np.float64)
+    frames = checks.snapshot_shape()
     snapshots = (
-        None
-        if snapshot_every is None
-        else np.zeros(
-            (steps // snapshot_every + 1, -(-ny // d), -(-nx // d)),
-            dtype=sim._backend.host_dtype,
-        )
+        None if frames is None else np.zeros(frames, dtype=np.dtype(request.dtype))
     )
-    _record_run(sim, steps, probe_ix, snapshot_every, d, pressures, snapshots)
+    provenance: RunProvenance | None = None
+    if request.host is not None:
+        # Called here, not from a helper the two functions share: the record
+        # keeps these arrays without a copy, which holds only for arrays that
+        # reach the code writing into them within three calls.
+        from ._remote.client import run_remote
 
-    positions = (probe_ix.astype(np.float64) + 0.5) * sim.dx
+        expected = _acoustic_expected(run, request.dtype)
+        provenance = run_remote(
+            "fdtd_simulation", request, {"run": run}, expected, pressures, snapshots
+        )
+        if provenance is None:
+            # The node failed and the request asked to run here instead.
+            _cleared(pressures, snapshots)
+    if provenance is None:
+        sim = _acoustic_engine(run, _placement_here(request))
+        _record_run(
+            sim,
+            checks.steps,
+            checks.probe_ix,
+            checks.snapshot_every,
+            checks.snapshot_decimation,
+            pressures,
+            snapshots,
+        )
+        provenance = sim.provenance
     return FDTDResult(
-        times=times,
+        times=np.arange(checks.steps + 1, dtype=np.float64) * checks.dt,
         pressures=handed_over(pressures),
-        probes=probe_ix,
-        probe_positions=positions,
-        dx=sim.dx,
-        dt=sim.dt,
-        shape=(ny, nx),
-        sources=tuple(sources),
+        probes=checks.probe_ix,
+        probe_positions=(checks.probe_ix.astype(np.float64) + 0.5) * checks.dx,
+        dx=checks.dx,
+        dt=checks.dt,
+        shape=checks.grid,
+        sources=tuple(run.sources),
         snapshots=handed_over(snapshots),
-        snapshot_times=(
-            None
-            if snapshot_every is None
-            else np.arange(0, steps + 1, snapshot_every, dtype=np.float64) * sim.dt
-        ),
-        obstacle_mask=(sim._obstacle if sim._obstacle is not None else None),
-        snapshot_decimation=d,
-        provenance=sim.provenance,
+        snapshot_times=_snapshot_times(checks.steps, checks.snapshot_every, checks.dt),
+        obstacle_mask=checks.obstacle,
+        snapshot_decimation=checks.snapshot_decimation,
+        provenance=provenance,
     )

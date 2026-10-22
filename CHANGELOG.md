@@ -60,6 +60,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   adds X21: an engine touches its fields only with Array API standard
   operations.
 
+- **A simulation runs on another machine over SSH.**
+  `simulation.Compute(device="cupy", host="nas")`, or
+  `PHONOMETRY_COMPUTE=cupy@nas`, sends a whole run,
+  `fdtd_simulation(run, compute=...)` or
+  `elastic_fdtd_simulation(run, compute=...)`, to a node named in a hosts
+  file (`hosts.toml` under `$XDG_CONFIG_HOME/phonometry/`, by default
+  `~/.config/phonometry/`, `%APPDATA%\phonometry\` on Windows, or wherever
+  `PHONOMETRY_HOSTS_FILE` points), and returns the record a run here returns.
+  The node, a Linux or macOS machine with a POSIX login shell, runs a Python
+  environment with NumPy and SciPy or, on Linux, Docker with the image of
+  `docker/node/Dockerfile`, built on it with `make node-image HOST=nas`,
+  whose bootstrap the client runs as the container's entrypoint through the
+  `python` on the image's `PATH`; either way it runs the caller's own
+  phonometry, which the client sends once per version and the node keeps in
+  a cache. ssh runs with no terminal and no agent, X11 or port forwarding,
+  delegates no Kerberos credentials and runs no `RemoteCommand` or
+  `LocalCommand`, whatever `~/.ssh/config` says; every byte the node sends
+  back is checked against what the request implies before it is read, and
+  its words reach the caller with their control characters escaped. The run
+  travels as data, field by field, never as code, and checks itself again on
+  the node: a waveform travels as the `.value` of a `GaussianPulse`,
+  `CWSource` or `SignalSource`, and any other callable is refused with
+  `TypeError` before anything connects. A failure of the connection or of
+  the node raises `simulation.ComputeRemoteError`, which carries the node's
+  traceback, or with `fallback=True` warns with `ComputeFallbackWarning` and
+  runs on NumPy here. Warnings raised on the node are raised here with their
+  own class, or as a `RuntimeWarning` led by the class's path when that
+  class cannot be built here, and an interrupt stops the node's run.
+  `result.provenance.host` names the node and the new
+  `result.provenance.package_digest` the package that ran; progress goes to
+  the `phonometry.simulation` logger, silent unless configured. `Compute`
+  gains `host` and `timeout_s`. `FDTD2D` and `ElasticFDTD2D` refuse a host:
+  an engine steps in this process. The new guide, "Sending a simulation to
+  a remote node", says all of this in English and Spanish, and the
+  contributor guide adds A54: the library reports progress to a
+  `phonometry.` logger at INFO or DEBUG and never configures logging; and
+  A55: every parameter of a function that runs on a node, and every field
+  of the records it takes, has a form that travels as data.
+
 - **A snapshot can keep every d-th cell, and the result says so.**
   `snapshot_decimation=` on `FDTDRecording`, `ElasticRecording`,
   `FDTD2D.run` and `ElasticFDTD2D.run` keeps every d-th cell along each axis,
@@ -3285,20 +3324,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `FDTD2D.run` and `ElasticFDTD2D.run` name their snapshot options as the
   recordings do.** The `probes=`, `snapshot_every=` and
   `snapshot_decimation=` of `fdtd_simulation` are the fields of
-  `simulation.FDTDRecording`, passed as `recording=`, as
-  `elastic_fdtd_simulation` takes an `ElasticRecording`. Both records refuse
-  a malformed probe, an unknown or repeated field and a bad count when they
+  `simulation.FDTDRecording`, the `recording` of the run (the entry below),
+  as an elastic run takes an `ElasticRecording`. Both records refuse a
+  malformed probe, an unknown or repeated field and a bad count when they
   are built, where an `ElasticRecording` used to be refused only when a run
   read it; a probe off the grid is still the run's to refuse, and with two
-  bad probes the first is named. Each function raises `TypeError` for a
-  `recording` that is not its own record, the other engine's included, and
-  a run without one records only its time axis, as before. `record_every=` is
-  `snapshot_every=` and `decimate=` is `snapshot_decimation=`, the names
-  `FDTDRecording` and `ElasticRecording` take, and every route refuses a bad
-  count with the same class and the same words: a flag, a text or an array
-  is a `TypeError`, and a number that is not a whole number of 1 or more a
-  `ValueError`. A call that passed the cadence by position is unchanged; one
-  that named it renames it, as the migration guide shows.
+  bad probes the first is named. Each run raises `TypeError` when it is
+  built with a `recording` that is not its own record, the other engine's
+  included, and a run without one records only its time axis, as before.
+  `record_every=` is `snapshot_every=` and `decimate=` is
+  `snapshot_decimation=`, the names `FDTDRecording` and `ElasticRecording`
+  take, and every route refuses a bad count with the same class and the same
+  words: a flag, a text or an array is a `TypeError`, and a number that is
+  not a whole number of 1 or more a `ValueError`. A call that passed the
+  cadence by position is unchanged; one that named it renames it, as the
+  migration guide shows.
+
+- **A simulation is one record, checked when it is built.**
+  `simulation.FDTDRun(c, dx, duration, *, sources, shape=None, rho=1.2,
+  cfl=0.6, recording=None, boundaries="rigid", absorbing_layer_cells=20,
+  obstacle_mask=None, damping=0.0)` and `simulation.ElasticRun(c_p, c_s, dx,
+  duration, *, sources, rho, shape=None, cfl=0.6, recording=None,
+  boundaries=None, obstacle_mask=None, damping=0.0)` hold the arguments
+  `fdtd_simulation` and `elastic_fdtd_simulation` took, and the two functions
+  take the run: `fdtd_simulation(run, *, compute=None)` and
+  `elastic_fdtd_simulation(run, *, compute=None)`. A run checks every
+  argument when it is built, the grid's included (the time step, the
+  density, the sponge, the impedance edges, the obstacle, and the sources
+  and the probes on the grid), with the class and the words the functions
+  raised, so a run that builds is one the function can step. Both records
+  are frozen and take their grid and their duration by position and the
+  rest by name; the sources are held as a tuple, a mapping of boundaries as
+  a read-only mapping, and every array, and every real-valued map given as
+  nested lists, as the run's own read-only array, so no later change the
+  caller makes to the list of sources, the mapping of boundaries, an array
+  or a real-valued map reaches a checked run. `damping` takes a scalar for
+  the whole field or an `(ny, nx)` map, as the engines do.
+  `ElasticRun` refuses `boundaries` that are not an `ElasticBoundaries` with
+  a `TypeError`, where the function failed inside the run. `ElasticBoundaries`
+  now holds a mapping of sides as a read-only mapping of its own, so a run
+  cannot follow the caller's later edits to the dictionary.
 
 - **`FDTD2D.kappa`, `ElasticFDTD2D.mu` and `ElasticFDTD2D.lam` are
   read-only.** They are host copies the engine computed from its medium, as

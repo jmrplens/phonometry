@@ -23,9 +23,11 @@ from phonometry.simulation import (
     ElasticFDTD2D,
     ElasticFDTDResult,
     ElasticRecording,
+    ElasticRun,
     ExplosionSource,
     FDTDRecording,
     FDTDResult,
+    FDTDRun,
     elastic_fdtd,
     elastic_fdtd_simulation,
     fdtd_simulation,
@@ -77,18 +79,20 @@ def _layered_run(snapshot_field: Field, snapshot_every: int) -> ElasticFDTDResul
     c_p[9:, :], c_s[9:, :], rho[9:, :] = 4000.0, 2300.0, 2500.0
     probes = [(0, 0), (nx - 1, 0), (0, ny - 1), (nx - 1, ny - 1), (7, 4), (11, 12)]
     return elastic_fdtd_simulation(
-        c_p,
-        c_s,
-        0.01,
-        1e-4,
-        sources=[ExplosionSource(ix=10, iy=6, waveform=_pulse)],
-        rho=rho,
-        recording=ElasticRecording(
-            probes=probes,
-            probe_fields=("p", "vx", "vy"),
-            snapshot_every=snapshot_every,
-            snapshot_field=snapshot_field,
-        ),
+        ElasticRun(
+            c_p,
+            c_s,
+            0.01,
+            1e-4,
+            sources=[ExplosionSource(ix=10, iy=6, waveform=_pulse)],
+            rho=rho,
+            recording=ElasticRecording(
+                probes=probes,
+                probe_fields=("p", "vx", "vy"),
+                snapshot_every=snapshot_every,
+                snapshot_field=snapshot_field,
+            ),
+        )
     )
 
 
@@ -140,14 +144,16 @@ def test_a_recorded_acoustic_run_agrees_with_numpy(
 
     def simulate() -> FDTDResult:
         return fdtd_simulation(
-            343.0,
-            0.01,
-            1e-3,
-            shape=(16, 20),
-            sources=[CWSource(ix=6, iy=7, frequency=2000.0)],
-            recording=FDTDRecording(
-                probes=[(0, 0), (19, 15), (12, 3)], snapshot_every=1
-            ),
+            FDTDRun(
+                343.0,
+                0.01,
+                1e-3,
+                shape=(16, 20),
+                sources=[CWSource(ix=6, iy=7, frequency=2000.0)],
+                recording=FDTDRecording(
+                    probes=[(0, 0), (19, 15), (12, 3)], snapshot_every=1
+                ),
+            )
         )
 
     want = simulate()

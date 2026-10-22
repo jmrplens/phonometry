@@ -1,0 +1,412 @@
+← [Documentation index](../README.md)
+
+# Sending a simulation to a remote node
+
+A simulation can run on another machine, a node, when its `Compute` request
+names one: a workstation with a GPU, a server, the NAS under the desk. The run
+record, `FDTDRun` or `ElasticRun`, is the one a run here takes, built and
+checked here; the call is the same, `fdtd_simulation(run, compute=...)` or
+`elastic_fdtd_simulation(run, compute=...)`; and so is the record it returns.
+Only those two functions go to a node. An engine built directly, `FDTD2D` or
+`ElasticFDTD2D`, steps in this process, where its fields are yours to read and
+write between steps, and it refuses a request that names a host.
+
+This page says what happens when a run goes to a node, how to name one, how
+to set up a Docker node or a Python node, what can go wrong and what each
+error says, how to follow a run, what each side trusts of the other, and when
+a run there gives the numbers a run here gives. The device itself, NumPy,
+CuPy or torch, is chosen as [Where a simulation runs](compute.md) explains,
+and all of it holds on a node.
+
+## 1. What happens when a run goes to a node
+
+Everything that can refuse the call does so here first, before a connection
+opens. The run checked every argument when it was built, by the code a run
+here uses, so a wrong argument raises the `TypeError` or `ValueError` it
+raises without a host. The function then refuses a run that cannot travel
+(section 5 says which), and the hosts file must name the node.
+
+Then one `ssh` process carries the whole run. There is no server to install
+or keep running on the node: its ssh server is all it needs. The run travels
+as data, field by field, never as code, and the node builds it again with the
+library's constructors, so it checks itself again there.
+
+The node runs your own phonometry, as installed here, whatever is installed
+there. The client sends its files, those a wheel of it would hold, once per
+version: a node keeps each version under a digest of its files, which it
+computes again from what it receives, and a development checkout is a new
+version at each change. A node keeps the five packages used last and prunes
+the others, but never one used in the last ten minutes or one a run still
+holds, so a long run keeps its package however many others come and go.
+
+The node runs the function on the device asked for, with no fallback of its
+own, and sends back the probe histories and the snapshots, which are read here
+into arrays sized from your request. `result.provenance.host` names the node
+and `result.provenance.package_digest` the package that ran; the rest of the
+provenance is the node's: its NumPy, its array library, its GPU.
+
+## 2. Naming a node: the hosts file
+
+A request names a node by a name of your choosing, and a hosts file says
+where that node is and how it runs a job. The file is read each time a run
+names a host, never at import:
+
+| System | Where the hosts file is |
+|---|---|
+| Linux and macOS | `~/.config/phonometry/hosts.toml`, or `phonometry/hosts.toml` under the directory `XDG_CONFIG_HOME` names, when that variable holds an absolute path |
+| Windows | `%APPDATA%\phonometry\hosts.toml` |
+| any system | the path `PHONOMETRY_HOSTS_FILE` names, when that variable is set; it wins over the rows above |
+
+Each node is a table of its own. This file names a Docker node and a Python
+node:
+
+```toml
+# A GPU in the NAS, running the node image (section 3).
+[hosts.nas]
+ssh = "me@nas.local"
+runner = "docker"
+image = "phonometry-node:gpu"
+label = "the GPU in the NAS"
+timeout_s = 7200
+
+# A workstation running a Python environment of its own (section 4).
+[hosts.lab]
+ssh = "lab"                         # a Host alias of ~/.ssh/config
+runner = "python"
+python = "venvs/node/bin/python"    # relative to the home directory there
+```
+
+| Key | What it holds | Default |
+|---|---|---|
+| `ssh` | the destination `ssh` takes: `user@address`, or a `Host` alias of your `~/.ssh/config` | required |
+| `runner` | how the node runs a job: `"docker"` or `"python"` | required |
+| `image` | for a Docker node, the image on the node | required there |
+| `python` | for a Python node, its interpreter: an absolute path, or one relative to the home directory on the node | required there |
+| `label` | how messages and the log name the node | its name |
+| `timeout_s` | the longest a run there may take, in seconds | no limit |
+
+A name holds letters, digits, `.`, `_` and `-`, and starts with a letter or a
+digit. A key the table does not list, an `image` for a Python node or a
+`python` for a Docker one, or a `python` path that starts with `~` raises
+`ValueError` naming the file: the client quotes the path in the command it
+sends, so the node's shell would never expand the `~`. A file saved with a
+byte-order mark, as Windows Notepad saves UTF-8, reads like any other.
+
+**What ssh needs.** The client runs the `ssh` of your machine, OpenSSH 7.6 or
+newer, and a run never asks for anything: ssh runs in batch mode. Log in to
+the node with a key ssh can use without a prompt, from `ssh-agent` or with no
+passphrase, and connect once by hand to accept the node's host key. A user, a
+port, a key or a jump host belongs in a `Host` alias of `~/.ssh/config`. The
+options the client gives ssh on the command line win over that file for what
+a run cannot have: a `RemoteCommand` or a `LocalCommand` of the alias does
+not run, nothing is forwarded (section 7), and no connection is shared:
+every run is a connection of its own, whatever `ControlMaster` the alias
+sets. Three settings stay the file's, because clients older than OpenSSH 8.7
+refuse them on the command line, and an alias used as a node must leave them
+at their defaults: `SessionType none` hangs a run until its timeout,
+`StdinNull yes` fails it at once, and `ForkAfterAuthentication yes` detaches
+the session out of the client's reach.
+
+**The request.** `host` names the node, and `timeout_s` may bound the run; it
+wins over the file's. Building the request reads no file and opens no
+connection:
+
+```python
+from phonometry import simulation
+
+request = simulation.Compute(device="cupy", host="nas", timeout_s=3600)
+print(request.host, request.timeout_s)   # nas 3600.0
+```
+
+The run and the call are those of a run here:
+
+```py
+run = simulation.FDTDRun(
+    343.0, 0.01, 0.05, shape=(400, 600),
+    sources=[simulation.GaussianPulse(ix=150, iy=200, half_width_s=3.0e-4)],
+    recording=simulation.FDTDRecording(probes=[(450, 200)]),
+)
+res = simulation.fdtd_simulation(run, compute=request)
+print(res.provenance.host, res.provenance.gpu)   # nas, and the card's name
+```
+
+`elastic_fdtd_simulation(ElasticRun(...), compute=request)` goes to the node
+the same way. A whole script can name the node once, with a `use()` block or
+with the `PHONOMETRY_COMPUTE` environment variable, whose grammar is
+`device[:index][@host][,option...]`:
+
+```bash
+PHONOMETRY_COMPUTE=cupy@nas python study.py
+PHONOMETRY_COMPUTE=cupy:1@nas,float32,fallback python study.py
+```
+
+A host is a name from the file, never `user@address`: the destination belongs
+in the file, and `Compute(host="me@nas")` raises `ValueError`. An engine built
+directly refuses a host wherever it comes from, a `use()` block and the
+variable included, and its `ValueError` says what to pass instead: `compute=`
+naming only the device, to step here, or the run to its simulation function,
+to run the whole simulation there.
+
+## 3. A Docker node
+
+A Docker node is a Linux machine whose login shell is a POSIX shell (`sh`,
+`bash`, `zsh`: the command a client sends is quoted for one), with Docker
+installed and your user in its `docker` group. A run on a node where your user
+is not in that group fails, and its error gives the command that adds you. A
+GPU needs the NVIDIA driver on the node as well, recent enough for the CUDA
+runtime of the image, and the NVIDIA Container Toolkit.
+
+Membership of the `docker` group is the same as root on the node: the
+Docker daemon runs as root, and any member can start a container that reads
+and writes every file of the machine, as Docker's own documentation warns.
+The node's owner gives that membership only to an SSH account already
+trusted with the whole machine.
+
+The image is built on the node, from a checkout of the repository on your
+machine:
+
+```bash
+make node-image HOST=nas               # a node with an NVIDIA GPU
+make node-image HOST=nas TARGET=cpu    # a node without one
+```
+
+`HOST` names an entry of your hosts file whose runner is `docker`. The command
+sends the Dockerfile, `docker/node/Dockerfile`, and the few files it copies to
+the node over ssh, `docker build` runs there, and the image takes the entry's
+`image` as its tag. Nothing is published to a registry, and a rebuild with
+nothing changed comes from Docker's cache.
+
+Both builds hold Python 3.13 with the library's pinned dependencies and the
+libraries its figures need, the DejaVu fonts the figures are drawn with, and
+ffmpeg, a static build the Dockerfile pins by URL and SHA-256, with SVT-AV1,
+NVENC, VP9 and dav1d, so a node needs no ffmpeg of its own. The GPU build
+adds the CUDA runtime and CuPy 14.2.0, the release the GPU proof of
+[Where a simulation runs](compute.md) ran on. Each base image is pinned
+by digest.
+
+Each run gets a container of its own, removed when the run ends, with no
+network, running as your user on the node, so whatever it writes is yours. Its
+packages live in `~/.cache/phonometry/remote` on the node (under
+`XDG_CACHE_HOME` when that variable holds an absolute path), which the
+container mounts. A run takes one GPU, the one `device_index` picks. Docker
+never pulls the image: a node without it fails the run, and the error says to
+build it.
+
+The hosts file may name an image of your own. The client runs the bootstrap a
+node starts with as the container's entrypoint, `python` on the image's `PATH`
+running `/usr/local/share/phonometry-node/bootstrap.py`, so such an image needs
+a `python` on its `PATH` and that file at that path (the Dockerfile copies it
+from the package), with Python, NumPy and SciPy at the floors of section 4,
+and CuPy or torch for a GPU. Its own `ENTRYPOINT` does not run: nothing it
+would print can break the conversation with the client, and an environment it
+would activate is not active.
+
+## 4. A Python node
+
+A Python node runs a job in a Python environment of its own, with no Docker.
+It is a Linux or macOS machine whose login shell is a POSIX shell, as for
+Docker. Windows works as the client, not as a node: its OpenSSH server runs
+the command through `cmd.exe`, which reads the quoting another way.
+
+The environment needs Python 3.12 or later, with NumPy 2.0.2 or later and
+SciPy 1.14.0 or later, the library's floors, and CuPy or torch for a GPU,
+installed as [Where a simulation runs](compute.md) says.
+phonometry need not be installed there, and an installed one is not used: the
+interpreter runs isolated (`-I`), on the package the client sent, and the node
+checks that the phonometry it imported is that one. An environment below a
+floor refuses the run, and the error names the floor and says to upgrade the
+environment.
+
+```bash
+python3 -m venv ~/venvs/node
+~/venvs/node/bin/pip install "numpy>=2.0.2" "scipy>=1.14.0"
+```
+
+Quote each requirement: unquoted, the `>=` is a shell redirection. The hosts
+file then names the interpreter by its path, `venvs/node/bin/python` from the
+home directory or the absolute path. The client runs that `python` directly,
+with no activation script first, so the environment must work without one.
+
+## 5. When something goes wrong
+
+| What went wrong | What is raised | When |
+|---|---|---|
+| an argument of the run | `TypeError` or `ValueError` | when the run is built, as for a run here |
+| a run that cannot travel: a source whose waveform is a callable other than the `.value` of a `GaussianPulse`, `CWSource` or `SignalSource`, or a whole number outside the range of an int64 | `TypeError`, naming the source or the field | when the function is called, before the hosts file is read |
+| a host the file does not name, or no hosts file | `KeyError` | before ssh starts |
+| a hosts file that cannot be read or is not TOML, or a malformed entry | `ValueError`, naming the file | before ssh starts |
+| no ssh client on `PATH`, Pyodide, a package that cannot be read from disk or holds a file no node would write, or a job too long for the header a node reads (a run of several thousand point sources) | `ComputeRemoteError` | before ssh starts |
+| anything that fails in the connection or on the node | `ComputeRemoteError` | when it fails |
+
+The message of a `ComputeRemoteError` says what happened and, when it can
+tell, what to do: install an OpenSSH client here, build the image on the node
+(`make node-image HOST=nas`),
+join the `docker` group there, install the NVIDIA Container Toolkit, lift the
+environment to the floors or rebuild the image, add your key to the node's
+`~/.ssh/authorized_keys`, accept its host key, make a login script print
+nothing when the shell is not interactive, or rename a file of a development
+checkout whose name no node would write. Its `host` holds the node's name, and
+its `node_traceback` the traceback the node printed when the run raised
+there, which is also attached as a note, so a traceback printed here shows
+it. A connection that broke adds the last lines the node wrote to its
+standard error as a note too.
+
+With `fallback=True` a `ComputeRemoteError` becomes a `ComputeFallbackWarning`,
+whose message carries the error, and the run steps on NumPy here, in the dtype
+asked for; its provenance says so, with no host and the device `"cpu"`. Every
+`ComputeRemoteError` falls back, those raised here before ssh starts
+included; a wrong argument, an unknown host or a malformed hosts file raises
+with or without it.
+
+Warnings the run raises on the node are raised here, at the line of your code
+that called the function, with their own class: phonometry's as published,
+Python's and NumPy's as themselves. A warning of a library this process has
+not imported, or of a class that cannot be built from its message, comes back
+as a `RuntimeWarning` whose message starts with the class's path.
+
+An interrupt, Ctrl-C or the stop button of a notebook, stops ssh at once and
+reaches your code as `KeyboardInterrupt`, `fallback=True` or not. The node
+sees its input end, and its run ends at most 30 seconds after its client
+closes the connection, usually at its next step. A client that vanishes
+without closing it (a laptop put to sleep, a network that drops) is noticed
+only when the node's ssh server notices. Set its keep-alive in the node's
+`sshd_config`, to the values the client's own keep-alive uses, and reload the
+server:
+
+```text
+ClientAliveInterval 15
+ClientAliveCountMax 4
+```
+
+With them the server notices a vanished client in about a minute. Without
+them the run goes on to its end, and a GPU stays busy for it.
+
+## 6. Progress and timeouts
+
+A remote run reports to the `phonometry.simulation` logger, which says nothing
+until you configure logging:
+
+```python
+import logging
+
+logging.basicConfig(level=logging.INFO)
+```
+
+At `INFO` the logger says when a run starts, when the package is sent (its
+digest and its size), the step the node has reached as the run goes, and when
+the run is done, each line led by the node's label; at `DEBUG` it adds what
+the node writes to its standard error.
+
+`timeout_s`, from the request or else from the hosts file, bounds a whole run,
+from connecting to the result, measured here: past it ssh is stopped and the
+run raises `ComputeRemoteError`, or falls back with `fallback=True`. Without
+one a run may take as long as it takes. Two bounds hold whatever it says: ssh
+notices a dead connection in about a minute, and gives up connecting after
+30 seconds.
+
+## 7. Security, in both directions
+
+SSH is the boundary. Whoever can log in to the node can run code there, and a
+remote run does exactly that with the package you send, so give the node the
+trust you give any machine you log in to. ssh is started with no terminal,
+with no agent, X11 or port forwarding, and without delegating your Kerberos
+credentials, whatever `~/.ssh/config` says for the host. Besides the package
+and the job, it may send the environment variables your ssh configuration
+names with `SendEnv` or `SetEnv` (on Debian and Ubuntu, for example `LANG` and
+the `LC_*` variables), as far as the node's `AcceptEnv` allows.
+
+A job carries no code: the node runs the package you sent, on its own Python
+and libraries. The job names one of the two simulation functions and carries
+its run as data, which the node builds again with the library's constructors,
+and a package is checked against its digest before it is stored. A Docker
+node's container has no network.
+
+The client does not trust the bytes the node sends. Every header and every
+array is checked against what the request implies, its name, its dtype, its
+shape and its length, before it is read; nothing is unpickled; no module the
+node names is imported unless it is phonometry's own; and the node's words
+(its errors, tracebacks, log lines and warnings) reach your terminal with
+their control characters written as escapes, so a node cannot send an escape
+sequence to your terminal.
+
+## 8. When a run there equals a run here
+
+A run on a node steps the same code as a run here, on the node's own NumPy
+and its own CPU or GPU. On a CPU it gives the same numbers bit for bit only
+with the same pins on the same CPU: the same Python, NumPy and SciPy, on the
+same kind of processor and C library. A CI job proves it on every pull
+request, against a node on the same machine. Between two machines, NumPy's
+vectorised functions, such as the exponential of the sponge profile, may round
+differently by one unit in the last place, each CPU taking the instructions it
+has. On a GPU, [Where a simulation runs](compute.md) states what the proof
+on the GPU shows.
+
+## 9. For library developers
+
+The remote route's tests run on every pull request through a stand-in for
+ssh, on Linux, macOS and Windows, and a CI job runs a real node on localhost:
+it builds the node image for a CPU, serves it through an ssh server and holds
+a run there bit for bit to the run here. `make node-image HOST=<name>` builds
+the image on your node from your checkout, with the Dockerfile and the
+bootstrap as you changed them. After a change to an engine, `make gpu-parity`,
+run from your checkout in that image on the node's GPU, renews the GPU proof
+in `gpu-parity.lock`.
+
+## What this guide covers
+
+**Covered.** Running `fdtd_simulation` and `elastic_fdtd_simulation` on
+another machine over SSH, on a Docker node built from the repository's image
+or on a Python environment, with or without a GPU; the hosts file that names
+a node, and the `host` of `Compute` and of `PHONOMETRY_COMPUTE`; what the
+client and the node check, each of what the other sends; the errors a remote
+run raises, the fallback to NumPy here, the warnings the node raises, progress
+on the `phonometry.simulation` logger, timeouts and interrupts; and when a
+remote run gives the numbers of a run here.
+
+**Not covered.** An engine built directly, `FDTD2D` or `ElasticFDTD2D`,
+steps in this process and does not go to a node, and a node runs the two
+simulation functions only, never code of the caller's choosing. ssh is the
+only transport. A node has no scheduler or queue of its own: two runs sent at
+the same time run side by side. The node image is built on the node and
+published to no registry, and a Windows machine cannot be a node. A node
+encodes no video yet, though its image carries ffmpeg for it.
+
+## See also
+
+- [Where a simulation runs: NumPy, CuPy and torch](compute.md): the devices
+  a run steps on, here or on a node, and what is promised about the numbers
+  on each.
+- [2D FDTD wave simulation](fdtd-simulation.md): the acoustic run, its
+  sources, probes and boundaries.
+- [Elastic waves and fluid-solid coupling](elastic-waves.md): the elastic
+  run, which goes to a node the same way.
+- API reference: [`simulation.compute`](https://docs.jmrp.io/phonometry/reference/api/simulation/compute/),
+  [`simulation.fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/fdtd/),
+  [`simulation.elastic_fdtd`](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/).
+
+## Quick answers
+
+### How do I run a simulation on another machine?
+
+Name the machine in a hosts file, give it the node image
+(`make node-image HOST=nas`) or a Python environment with NumPy and SciPy, and
+pass `compute=simulation.Compute(device="cupy", host="nas")` to
+`fdtd_simulation` or `elastic_fdtd_simulation`, or set
+`PHONOMETRY_COMPUTE=cupy@nas`. The run, the call and the result are those of a
+run here, and `result.provenance.host` names the node.
+
+### Does a remote run give the same numbers?
+
+With the same pins on the same CPU, bit for bit, as a CI job proves on every
+pull request. Between two machines, NumPy may round a vectorised function,
+such as the exponential of the sponge profile, differently by one unit in the
+last place. On a GPU, the proof on the compute page states how the fields
+compare with NumPy's.
+
+### What does the node need?
+
+An ssh server you can log in to with a key, on Linux or macOS with a POSIX
+login shell, and either Docker with the node image (and, for a GPU, the
+NVIDIA driver and the NVIDIA Container Toolkit) or a Python 3.12 or later with
+NumPy and SciPy at the library's floors (and CuPy or torch for a GPU). phonometry itself need not be
+installed there: the client sends its own.

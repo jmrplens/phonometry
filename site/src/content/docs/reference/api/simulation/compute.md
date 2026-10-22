@@ -18,9 +18,12 @@ process sees it depends on how it is started; give a worker its placement
 through `compute=` or `PHONOMETRY_COMPUTE`.
 
 The environment variable is read when a computation resolves its placement,
-never at import. Its grammar is `device[:index][,option...]` with the
+never at import. Its grammar is `device[:index][@host][,option...]` with the
 options `float32`, `float64` and `fallback`: `cupy`, `cupy:1`,
-`torch:cuda:1,fallback`, `torch:mps,float32`.
+`torch:cuda:1,fallback`, `torch:mps,float32`, `cupy@nas`. A host is a
+name in the hosts file (see the guide on remote nodes); only
+[`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and
+[`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) run on one.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -33,6 +36,8 @@ Compute(
     device_index: int = 0,
     dtype: Literal['float64', 'float32'] = 'float64',
     fallback: bool = False,
+    host: str | None = None,
+    timeout_s: float | None = None,
 )
 ```
 
@@ -46,13 +51,15 @@ Where an FDTD simulation steps, in which dtype, and whether it may fall back.
 | `device_index` | Which GPU, for `"cupy"` and `"torch:cuda"`. |
 | `dtype` | `"float64"` (default) or `"float32"`. |
 | `fallback` | Run on NumPy, with a [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning), when the device is not available, instead of raising. |
+| `host` | The node the run goes to, by its name in the hosts file, or `None` (default) to run on this machine. Only [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) and [`elastic_fdtd_simulation`](/phonometry/reference/api/simulation/elastic-fdtd/#elastic_fdtd_simulation) run on a node; an engine built here refuses a host. |
+| `timeout_s` | The longest a remote run may take, from connecting to the result [s], or `None` for the hosts file's value (no limit when the file names none). Only with a `host`. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a `device` or `dtype` that is not text, a `device_index` that is not a number (a bool is not one), or a `fallback` that is not `True` or `False`. |
-| ValueError | for an unknown device or dtype, `"torch:mps"` in float64, an index on a device that has one instance, an index that is not a whole number of 0 or more, or a fallback asked of `"cpu"`. |
+| TypeError | for a `device` or `dtype` that is not text, a `device_index` that is not a number (a bool is not one), a `fallback` that is not `True` or `False`, a `host` that is neither text nor `None`, or a `timeout_s` that is not one number. |
+| ValueError | for an unknown device or dtype, `"torch:mps"` in float64, an index on a device that has one instance, an index that is not a whole number of 0 or more, a `host` that is not a name the hosts file can hold, a `timeout_s` without a host, not positive or longer than a timer here can wait (`threading.TIMEOUT_MAX`), or a fallback asked of `"cpu"` on this machine. |
 
 ## ComputeDeviceError
 
@@ -65,6 +72,24 @@ A requested device was not available and the run went to NumPy.
 ## ComputeImportError
 
 The library a requested device needs is not installed, or does not import.
+
+## ComputeRemoteError
+
+A run sent to a node failed in the connection or on the node.
+
+Raised for a transport failure (no ssh client, a node that cannot be
+reached, a stream that breaks the protocol, a run past its timeout) and
+for a failure on the node (an image or a Python environment that cannot
+run the package, an exception raised by the run itself). A wrong
+argument is never one: it raises its own `TypeError` or `ValueError`
+before anything connects.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `host` | The node's name in the hosts file. |
+| `node_traceback` | The traceback the node printed, as text, when the run raised there; it is also attached as a note, so a traceback printed here shows it. |
 
 ## RunProvenance
 
@@ -80,6 +105,7 @@ RunProvenance(
     cuda_runtime: str | None,
     cuda_driver_api: str | None,
     gpu: str | None,
+    package_digest: str | None,
 )
 ```
 
@@ -98,13 +124,14 @@ Where a run actually stepped, recorded by the result.
 | `cuda_runtime` | The CUDA runtime the array library uses, as `"major.minor"` (`"13.2"`), or `None` off a CUDA device. |
 | `cuda_driver_api` | The CUDA version the GPU driver supports, as `"major.minor"` (`"13.3"`), where the array library reports it (CuPy), else `None`. It is not the NVIDIA driver's own version. |
 | `gpu` | The GPU's name, or `None`. |
+| `package_digest` | The SHA-256 of the package the node ran, in lowercase hex, or `None` for a run on this machine. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a `device` or `dtype` that is not text, a `device_index` that is not a number (a bool is not one), a `numpy_version` that is not text, or a `host`, `array_library`, `cuda_runtime`, `cuda_driver_api` or `gpu` that is neither text nor `None`. |
-| ValueError | for an unknown device or dtype, `"torch:mps"` in float64, an index on a device that has one instance, or an index that is not a whole number of 0 or more. |
+| TypeError | for a `device` or `dtype` that is not text, a `device_index` that is not a number (a bool is not one), a `numpy_version` that is not text, or a `host`, `array_library`, `cuda_runtime`, `cuda_driver_api`, `gpu` or `package_digest` that is neither text nor `None`. |
+| ValueError | for an unknown device or dtype, `"torch:mps"` in float64, an index on a device that has one instance, an index that is not a whole number of 0 or more, or a `package_digest` that is not 64 lowercase hexadecimal digits. |
 
 ## use
 

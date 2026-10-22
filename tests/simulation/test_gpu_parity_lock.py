@@ -187,6 +187,7 @@ def test_the_base_image_is_read_from_the_node_dockerfile() -> None:
     assert base.startswith("nvidia/cuda:")
     assert "@sha256:" in base
     assert gpu_parity.base_image_of("# no image here\n") is None
+    assert gpu_parity.base_image_of("FROM ubuntu:24.04@sha256:00 AS cpu\n") is None
 
 
 def test_a_docstring_does_not_move_the_fingerprint() -> None:

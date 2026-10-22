@@ -10,10 +10,12 @@ an edge is an explicit, reviewed decision.
 from __future__ import annotations
 
 import ast
+import dataclasses
 import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import TypeGuard
 
 import pytest
 
@@ -116,35 +118,100 @@ def _iter_modules() -> list[Path]:
     return [p for p in SRC.rglob("*.py") if p.name != "__init__.py" or p.parent != SRC]
 
 
+#: The files of the package that run as scripts outside it, each with the
+#: modules of the package it may import by absolute name. The node bootstrap
+#: is the one: a node runs it before the package is there (from the node
+#: image, or sent inline), so it has no package to be relative to, and once
+#: the client has sent the package it imports it from the node's cache by
+#: name. Every other file imports the package relatively.
+SCRIPT_SELF_IMPORTS: dict[str, frozenset[str]] = {
+    "simulation/_remote/bootstrap.py": frozenset(
+        {"phonometry", "phonometry.simulation._remote"}
+    ),
+}
+
+
+def _is_main_guard(node: ast.stmt) -> bool:
+    """Whether *node* is ``if __name__ == "__main__":``."""
+    return (
+        isinstance(node, ast.If)
+        and isinstance(node.test, ast.Compare)
+        and isinstance(node.test.left, ast.Name)
+        and node.test.left.id == "__name__"
+        and len(node.test.ops) == 1
+        and isinstance(node.test.ops[0], ast.Eq)
+        and isinstance(node.test.comparators[0], ast.Constant)
+        and node.test.comparators[0].value == "__main__"
+    )
+
+
+def _absolute_self_imports(tree: ast.AST) -> set[str]:
+    """The modules of this package *tree* imports by absolute name, in any form.
+
+    ``import phonometry.x``, with or without ``as``, counts as much as
+    ``from phonometry.x import y``: either would bypass the relative-import
+    rules below.
+    """
+    found: set[str] = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names = [alias.name for alias in node.names]
+        elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+            names = [node.module]
+        else:
+            continue
+        found.update(
+            name
+            for name in names
+            if name == "phonometry" or name.startswith("phonometry.")
+        )
+    return found
+
+
+def _unlisted_self_imports(rel: str, tree: ast.AST) -> set[str]:
+    """The absolute self-imports of the file *rel* that its entry does not list."""
+    return _absolute_self_imports(tree) - SCRIPT_SELF_IMPORTS.get(rel, frozenset())
+
+
 def _edges() -> set[tuple[str, str, str]]:
     """(from_pkg, to_pkg, 'file: import') for every relative import in src."""
     out: set[tuple[str, str, str]] = set()
     for path in _iter_modules():
         pkg = _package_of(path)
         tree = ast.parse(path.read_text(encoding="utf-8"))
+        unlisted = _unlisted_self_imports(path.relative_to(SRC).as_posix(), tree)
+        if unlisted:
+            pytest.fail(
+                f"{path.relative_to(SRC)}: absolute self-import "
+                f"{', '.join(repr(name) for name in sorted(unlisted))} "
+                "(use relative imports)"
+            )
         for node in ast.walk(tree):
-            if not isinstance(node, ast.ImportFrom):
+            # An absolute import is a third-party one here: the package's own
+            # were refused above.
+            if not isinstance(node, ast.ImportFrom) or node.level == 0:
                 continue
-            if node.level == 0:
-                # Absolute self-imports would bypass the relative-import rules.
-                if node.module and (
-                    node.module == "phonometry" or node.module.startswith("phonometry.")
-                ):
-                    pytest.fail(
-                        f"{path.relative_to(SRC)}: absolute self-import "
-                        f"'{node.module}' (use relative imports)"
-                    )
-                continue
-            target = node.module or ""
-            head = target.split(".")[0] if target else ""
-            if node.level == 1 and pkg == "root":
-                to_pkg = head if (SRC / head).is_dir() else "root"
-            elif node.level == 1:
-                to_pkg = pkg  # sibling inside the same subpackage
-            else:  # level == 2 from inside a subpackage
-                to_pkg = head if (SRC / head).is_dir() else "root"
-            out.add((pkg, to_pkg, f"{path.relative_to(SRC)}: {ast.dump(node)[:60]}"))
+            where = f"{path.relative_to(SRC)}: {ast.dump(node)[:60]}"
+            out.update((pkg, to_pkg, where) for to_pkg in _reached_packages(path, node))
     return out
+
+
+def _reached_packages(path: Path, node: ast.ImportFrom) -> set[str]:
+    """The top-level packages the relative import *node* in *path* reaches.
+
+    The dots climb from the package the module sits in, at whatever depth:
+    ``from .. import fdtd`` in ``simulation/_remote/wire.py`` reaches
+    ``simulation``, as ``from ..fdtd import FDTDRun`` does there, while the
+    same two dots in ``simulation/fdtd.py`` reach the root package. A name
+    imported from the root package itself (``from .. import io`` one
+    directory down) is the package it names; a module of the root package,
+    or a name that is not a package, is ``"root"``.
+    """
+    here = path.relative_to(SRC).parent.parts
+    anchor = here[: max(len(here) - node.level + 1, 0)]
+    target = [*anchor, *(node.module.split(".") if node.module else [])]
+    heads = [target[0]] if target else [alias.name for alias in node.names]
+    return {head if (SRC / head).is_dir() else "root" for head in heads}
 
 
 #: Family-to-family edges allowed inside a domain. The subgroups exist to
@@ -191,6 +258,78 @@ def test_family_edges_are_whitelisted() -> None:
     assert not violations, "unlisted family-to-family imports:\n" + "\n".join(
         violations
     )
+
+
+def test_the_scripts_allowed_an_absolute_self_import_are_scripts_that_make_it() -> None:
+    """Each listed file runs as a script and imports by name exactly what it lists.
+
+    A listed import the file no longer makes is a stale entry, and one it
+    makes beyond its list is refused like any other.
+    """
+    for rel, listed in SCRIPT_SELF_IMPORTS.items():
+        path = SRC / rel
+        assert path.is_file(), f"{rel} is listed but does not exist"
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        assert any(_is_main_guard(node) for node in tree.body), (
+            f'{rel} is listed as a script but has no `if __name__ == "__main__":`'
+        )
+        assert _absolute_self_imports(tree) == listed, rel
+
+
+def test_an_absolute_self_import_is_refused_unless_the_list_names_it() -> None:
+    """The guard sees each way of writing the import, and the list admits nothing else."""
+    every_form = ast.parse(
+        "import phonometry\n"
+        "import phonometry.signals as signals\n"
+        "from phonometry import filters\n"
+        "from phonometry.simulation._remote import node\n"
+        "def later():\n"
+        "    import phonometry.io\n"
+    )
+    names = {
+        "phonometry",
+        "phonometry.signals",
+        "phonometry.simulation._remote",
+        "phonometry.io",
+    }
+    assert _absolute_self_imports(every_form) == names
+    # A relative import, or a package whose name only starts the same, is not one.
+    assert not _absolute_self_imports(
+        ast.parse("from . import node\nfrom .. import io\nimport phonometryx\n")
+    )
+    # A file the list does not name is allowed none, a module beside the
+    # script included; the script is allowed what it lists and nothing more.
+    assert _unlisted_self_imports("simulation/_remote/node.py", every_form) == names
+    for rel, listed in SCRIPT_SELF_IMPORTS.items():
+        assert _unlisted_self_imports(rel, every_form) == names - listed
+
+
+@pytest.mark.parametrize(
+    ("rel", "line", "reached"),
+    [
+        ("simulation/fdtd.py", "from .compute import Compute", {"simulation"}),
+        ("simulation/fdtd.py", "from .._internal import frozen", {"_internal"}),
+        ("simulation/fdtd.py", "from .. import io", {"io"}),
+        ("simulation/fdtd.py", "from .. import _version", {"root"}),
+        ("simulation/_remote/wire.py", "from . import bootstrap", {"simulation"}),
+        ("simulation/_remote/wire.py", "from .. import fdtd", {"simulation"}),
+        ("simulation/_remote/wire.py", "from ..fdtd import FDTDRun", {"simulation"}),
+        (
+            "simulation/_remote/wire.py",
+            "from ... import io, signals",
+            {"io", "signals"},
+        ),
+        ("simulation/_remote/wire.py", "from ...io import Signal", {"io"}),
+        ("simulation/__init__.py", "from .fdtd import FDTDRun", {"simulation"}),
+    ],
+)
+def test_a_relative_import_reaches_the_package_its_dots_climb_to(
+    rel: str, line: str, reached: set[str]
+) -> None:
+    """The dots of a relative import are counted from where the module sits."""
+    node = ast.parse(line).body[0]
+    assert isinstance(node, ast.ImportFrom)
+    assert _reached_packages(SRC / rel, node) == reached
 
 
 def test_internal_imports_no_domain_code() -> None:
@@ -312,6 +451,43 @@ def test_subpackage_reexports_cover_facade_imports() -> None:
         )
     assert not missing, (
         "facade imports not re-exported by their subpackage:\n" + "\n".join(missing)
+    )
+
+
+def _orphan_code_directories(src: Path) -> list[str]:
+    """The directories under *src* that hold a module but no ``__init__.py``.
+
+    A module is what Python could import: a hidden file (macOS writes ``._``
+    files beside every file it copies to a foreign disk) or a directory with a
+    dot in its name cannot be, and setuptools leaves both out of the wheel.
+    """
+    holding = {
+        path.parent
+        for path in src.rglob("*.py")
+        if not path.name.startswith(".")
+        and not any("." in part for part in path.parent.relative_to(src).parts)
+    }
+    return sorted(
+        directory.relative_to(src.parent).as_posix()
+        for directory in holding
+        if not (directory / "__init__.py").is_file()
+    )
+
+
+def test_every_directory_of_code_is_a_package() -> None:
+    """A directory that holds a module holds an ``__init__.py`` too.
+
+    Without one, Python imports the directory here as a namespace package and
+    every test passes; but the wheel takes only directories with an
+    ``__init__.py`` (``namespaces = false`` in ``pyproject.toml``), so the
+    code is in no wheel, and the package a client ships to a node leaves it
+    out as well.
+    """
+    orphans = _orphan_code_directories(SRC)
+    assert not orphans, (
+        "a directory of modules without an __init__.py imports here as a "
+        "namespace package, but is in no wheel and on no node; add the "
+        "__init__.py: " + ", ".join(orphans)
     )
 
 
@@ -1238,6 +1414,14 @@ def _warning_calls(
     return calls
 
 
+#: Functions that raise again, here, a warning another process raised, with
+#: the class it was raised with: its topic is the other process's, so it is
+#: a variable here, not a published class written at the call.
+WARNING_RELAYS: dict[str, str] = {
+    "simulation/_remote/client.py:_relay": "raises again, at the caller's line, a warning the node raised, with its own class",
+}
+
+
 def warnings_without_a_topic(path: Path) -> list[str]:
     """Each ``warnings.warn`` in *path* whose category is not a published topic.
 
@@ -1246,7 +1430,8 @@ def warnings_without_a_topic(path: Path) -> list[str]:
     never the root itself, which leaves a caller who wants to silence one
     advisory only the rule that silences every other. A helper that warns on
     behalf of several topics takes the category as a parameter typed
-    ``type[PhonometryWarning]``.
+    ``type[PhonometryWarning]``. A relay of :data:`WARNING_RELAYS` is left
+    out: the class it warns with is the other process's.
     """
     import importlib
 
@@ -1261,6 +1446,12 @@ def warnings_without_a_topic(path: Path) -> list[str]:
     found: list[str] = []
     tree = ast.parse(path.read_text(encoding="utf-8"))
     for function, call in _warning_calls(tree):
+        relayed = (
+            function is not None
+            and f"{path.relative_to(SRC).as_posix()}:{function.name}" in WARNING_RELAYS
+        )
+        if relayed:
+            continue
         expression = next(
             (keyword.value for keyword in call.keywords if keyword.arg == "category"),
             call.args[1] if len(call.args) > 1 else None,
@@ -1302,6 +1493,20 @@ def test_every_warning_names_a_published_topic() -> None:
     assert not found, "warnings emitted without a published topic:\n  " + (
         "\n  ".join(found)
     )
+
+
+def test_every_warning_relay_still_relays() -> None:
+    for key in WARNING_RELAYS:
+        file, _, name = key.partition(":")
+        tree = ast.parse((SRC / file).read_text(encoding="utf-8"))
+        relays = [
+            function.name
+            for function, _ in _warning_calls(tree)
+            if function is not None
+        ]
+        assert name in relays, (
+            f"{key} no longer raises a warning; drop it from WARNING_RELAYS"
+        )
 
 
 def broad_warning_filters(path: Path) -> list[str]:
@@ -1403,3 +1608,471 @@ def test_a_docstring_lists_a_warning_under_warns() -> None:
         if field.search(line)
     ]
     assert not found, "warnings documented as raised:\n  " + "\n  ".join(found)
+
+
+#: Logger calls louder than INFO: an advisory is a warning (A52), and a
+#: logger at WARNING or above prints to standard error by default.
+_LOUD = frozenset({"warning", "warn", "error", "critical", "exception", "fatal", "log"})
+#: Calls that configure logging, which is the caller's business.
+_CONFIGURING = frozenset(
+    {
+        "basicConfig",
+        "addHandler",
+        "removeHandler",
+        "addFilter",
+        "removeFilter",
+        "setLevel",
+        "dictConfig",
+        "fileConfig",
+    }
+)
+
+
+def _logging_imports(tree: ast.AST) -> dict[str, str]:
+    """Each name *tree* binds to ``logging`` or to a member of it.
+
+    The value is the dotted name the bound name stands for.
+    """
+    names = {"logging": "logging"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            names.update(
+                (alias.asname, alias.name) if alias.asname else ("logging", "logging")
+                for alias in node.names
+                if alias.name.split(".")[0] == "logging"
+            )
+        elif (
+            isinstance(node, ast.ImportFrom)
+            and node.level == 0
+            and (node.module or "").split(".")[0] == "logging"
+        ):
+            names.update(
+                (alias.asname or alias.name, f"{node.module}.{alias.name}")
+                for alias in node.names
+            )
+    return names
+
+
+def _package_imports(tree: ast.AST) -> dict[str, str]:
+    """Each name *tree* binds by importing from the package, with its name there.
+
+    A relative import is one from the package. ``import phonometry.x`` binds
+    ``phonometry``, and ``import phonometry.x as y`` binds ``y`` to ``x``.
+    """
+    names: dict[str, str] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and (
+            node.level > 0 or (node.module or "").split(".")[0] == "phonometry"
+        ):
+            names.update(
+                (alias.asname or alias.name, alias.name) for alias in node.names
+            )
+        elif isinstance(node, ast.Import):
+            names.update(
+                (alias.asname, alias.name.rpartition(".")[2])
+                if alias.asname
+                else ("phonometry", "phonometry")
+                for alias in node.names
+                if alias.name.split(".")[0] == "phonometry"
+            )
+    return names
+
+
+def _dotted(expression: ast.expr, names: dict[str, str]) -> str | None:
+    """The dotted name *expression* spells, its first name read through *names*.
+
+    ``None`` when *expression* is not a dotted name.
+    """
+    if isinstance(expression, ast.Name):
+        return names.get(expression.id, expression.id)
+    if isinstance(expression, ast.Attribute):
+        owner = _dotted(expression.value, names)
+        return None if owner is None else f"{owner}.{expression.attr}"
+    return None
+
+
+def _first_name(expression: ast.expr) -> str | None:
+    """The name a chain of attributes *expression* starts from, or ``None``."""
+    while isinstance(expression, ast.Attribute):
+        expression = expression.value
+    return expression.id if isinstance(expression, ast.Name) else None
+
+
+def _takes_a_logger(node: ast.AST | None, names: dict[str, str]) -> TypeGuard[ast.Call]:
+    """Whether *node* calls ``logging.getLogger``, however the module spells it."""
+    return (
+        isinstance(node, ast.Call) and _dotted(node.func, names) == "logging.getLogger"
+    )
+
+
+def _names_a_library_logger(call: ast.Call) -> bool:
+    """Whether a ``getLogger`` *call* names ``phonometry`` or a logger under it."""
+    name = next(
+        (keyword.value for keyword in call.keywords if keyword.arg == "name"),
+        call.args[0] if call.args else None,
+    )
+    return (
+        isinstance(name, ast.Constant)
+        and isinstance(name.value, str)
+        and name.value.split(".")[0] == "phonometry"
+    )
+
+
+@dataclasses.dataclass
+class _Loggers:
+    """What one module holds as a logger.
+
+    ``names`` are its imports of ``logging``, ``imported`` the names it
+    imports from the package (each with its name there), ``shared`` the names
+    the package's modules bind to a logger, and ``held`` the expressions that
+    hold a logger in this module.
+    """
+
+    names: dict[str, str]
+    imported: dict[str, str]
+    shared: frozenset[str]
+    held: set[str] = dataclasses.field(default_factory=set)
+
+    def holds(self, expression: ast.expr) -> bool:
+        """Whether *expression* is a logger.
+
+        It is when this module holds it, when it takes one from
+        ``getLogger``, when it is the ``getChild`` of one, or when it is a
+        logger another module binds, read through the module it was imported
+        with (``client._LOG``).
+        """
+        if ast.unparse(expression) in self.held or _takes_a_logger(
+            expression, self.names
+        ):
+            return True
+        if isinstance(expression, ast.Call):
+            return (
+                isinstance(expression.func, ast.Attribute)
+                and expression.func.attr == "getChild"
+                and self.holds(expression.func.value)
+            )
+        return (
+            isinstance(expression, ast.Attribute)
+            and expression.attr in self.shared
+            and _first_name(expression.value) in self.imported
+        )
+
+    def reaches_into(self, expression: ast.expr) -> bool:
+        """Whether *expression* is a part of a logger or of ``logging``.
+
+        A part is reached through an attribute or an index: ``_LOG.handlers``,
+        ``_LOG.handlers[:]``, ``logging.raiseExceptions``.
+        """
+        while isinstance(expression, (ast.Attribute, ast.Subscript)):
+            expression = expression.value
+            if self.holds(expression) or _dotted(expression, self.names) == "logging":
+                return True
+        return False
+
+
+def _read_loggers(tree: ast.AST, shared: frozenset[str]) -> _Loggers:
+    """Every logger *tree* holds, followed through its assignments.
+
+    A name imported from the package is a logger when the package binds it to
+    one. An assignment whose value is a logger binds its targets to one, until
+    no assignment adds one more (an alias of an alias, a child of a child). A
+    logger bound in a class body is held as ``self.<name>``, ``cls.<name>``
+    and ``<Class>.<name>`` too.
+    """
+    imported = _package_imports(tree)
+    loggers = _Loggers(_logging_imports(tree), imported, shared)
+    loggers.held.update(name for name, there in imported.items() if there in shared)
+    classes = {
+        id(statement): node.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.ClassDef)
+        for statement in node.body
+    }
+    assignments = [
+        (node.targets if isinstance(node, ast.Assign) else [node.target], node)
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.Assign, ast.AnnAssign))
+    ]
+    grown = True
+    while grown:
+        bound = {
+            f"{owner}{ast.unparse(target)}"
+            for targets, node in assignments
+            if node.value is not None and loggers.holds(node.value)
+            for target in targets
+            for owner in (
+                ("", "self.", "cls.", f"{classes[id(node)]}.")
+                if id(node) in classes
+                else ("",)
+            )
+        }
+        grown = not bound <= loggers.held
+        loggers.held |= bound
+    return loggers
+
+
+def _logging_set_by(statement: ast.stmt, loggers: _Loggers) -> str | None:
+    """The part of a logger or of ``logging`` *statement* sets or deletes.
+
+    ``None`` when it changes neither.
+    """
+    if isinstance(statement, ast.Delete):
+        verb, targets = "deletes", statement.targets
+    elif isinstance(statement, ast.Assign):
+        verb, targets = "sets", statement.targets
+    elif isinstance(statement, (ast.AnnAssign, ast.AugAssign)):
+        verb, targets = "sets", [statement.target]
+    else:
+        return None
+    return next(
+        (
+            f"{verb} {ast.unparse(target)}"
+            for target in targets
+            if loggers.reaches_into(target)
+        ),
+        None,
+    )
+
+
+def _logging_misuse_at(node: ast.AST, loggers: _Loggers) -> str | None:
+    """What *node* does that the logging rule refuses, or ``None``."""
+    if isinstance(node, ast.stmt):
+        return _logging_set_by(node, loggers)
+    if not isinstance(node, ast.Call):
+        return None
+    function = _dotted(node.func, loggers.names)
+    if function is not None and function.startswith("logging."):
+        return None if function == "logging.getLogger" else f"calls {function}"
+    if not isinstance(node.func, ast.Attribute):
+        return None
+    owner, attribute = node.func.value, node.func.attr
+    if loggers.holds(owner):
+        loud = attribute in _LOUD | _CONFIGURING
+        return f"calls {ast.unparse(node.func)}" if loud else None
+    if loggers.reaches_into(owner):
+        return f"calls {ast.unparse(node.func)}"
+    if attribute in _CONFIGURING:
+        return f"configures logging with {attribute}"
+    return None
+
+
+def logging_misuse(
+    source: str, where: str, *, shared_loggers: frozenset[str] = frozenset()
+) -> list[str]:
+    """Each place in *source* that logs louder than INFO, configures logging, or uses a logger not the library's.
+
+    The source is read through its imports: an alias of ``logging``, or a name
+    imported from it, is the call it stands for, and a name imported from the
+    package that the package binds to a logger (*shared_loggers*, from
+    :func:`shared_loggers`) is a logger here too. A logger is followed through
+    every assignment (see :func:`_read_loggers`); calling into one, or setting
+    or deleting a part of one or of ``logging``, configures logging. The places
+    come in the order of the source.
+    """
+    tree = ast.parse(source)
+    loggers = _read_loggers(tree, shared_loggers)
+    found = [
+        (node.lineno, "takes a logger that is not phonometry's")
+        for node in ast.walk(tree)
+        if _takes_a_logger(node, loggers.names) and not _names_a_library_logger(node)
+    ]
+    found.extend(
+        (node.lineno, offence)
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.stmt, ast.expr))
+        and (offence := _logging_misuse_at(node, loggers))
+    )
+    return [f"{where}:{line} {what}" for line, what in sorted(found)]
+
+
+def _may_hold_a_logger(source: str, shared: frozenset[str]) -> bool:
+    """Whether *source* names ``logging`` or a logger the package binds.
+
+    A module that names neither can neither take a logger nor import one.
+    """
+    return "logging" in source or any(name in source for name in shared)
+
+
+def shared_loggers(sources: list[str]) -> frozenset[str]:
+    """The names the modules in *sources* bind to a logger at their top level.
+
+    A module that imports a logger from another binds it too, under its own
+    name, so the names are read again until no module adds one.
+    """
+    shared: frozenset[str] = frozenset()
+    while True:
+        bound: set[str] = set()
+        for source in sources:
+            if not _may_hold_a_logger(source, shared):
+                continue
+            tree = ast.parse(source)
+            held = _read_loggers(tree, shared).held
+            bound.update(
+                name
+                for statement in tree.body
+                if isinstance(statement, (ast.Assign, ast.AnnAssign, ast.ImportFrom))
+                for name in _top_level_names(statement)
+                if name in held
+            )
+        if bound <= shared:
+            return shared
+        shared |= bound
+
+
+def _top_level_names(
+    statement: ast.Assign | ast.AnnAssign | ast.ImportFrom,
+) -> list[str]:
+    """The names a top-level assignment or import *statement* binds."""
+    if isinstance(statement, ast.ImportFrom):
+        return [alias.asname or alias.name for alias in statement.names]
+    targets = (
+        statement.targets if isinstance(statement, ast.Assign) else [statement.target]
+    )
+    return [target.id for target in targets if isinstance(target, ast.Name)]
+
+
+def test_the_library_logs_quietly_to_loggers_of_its_own() -> None:
+    sources = {
+        path.relative_to(SRC).as_posix(): path.read_text(encoding="utf-8")
+        for path in sorted(SRC.rglob("*.py"))
+    }
+    shared = shared_loggers(list(sources.values()))
+    found = [
+        offence
+        for where, text in sources.items()
+        if _may_hold_a_logger(text, shared)
+        for offence in logging_misuse(text, where, shared_loggers=shared)
+    ]
+    assert not found, "logging the library must not do:\n  " + "\n  ".join(found)
+
+
+def test_the_logging_rule_reads_a_loud_logger() -> None:
+    source = (
+        "import logging\n"
+        "_LOG = logging.getLogger('phonometry.simulation')\n"
+        "_OTHER = logging.getLogger(__name__ + 'x')\n"
+        "def f():\n"
+        "    _LOG.warning('slow')\n"
+        "    _LOG.addHandler(None)\n"
+        "    logging.basicConfig()\n"
+        "    _LOG.info('fine')\n"
+    )
+    assert logging_misuse(source, "x.py") == [
+        "x.py:3 takes a logger that is not phonometry's",
+        "x.py:5 calls _LOG.warning",
+        "x.py:6 calls _LOG.addHandler",
+        "x.py:7 calls logging.basicConfig",
+    ]
+
+
+def test_the_logging_rule_reads_every_spelling_of_a_logger() -> None:
+    """A logger is read however the module spells it, and nothing else is.
+
+    An alias of ``logging``, a name imported from it, a logger imported from
+    another module (by name or through its module), a logger held by an
+    annotated name, an attribute or a class, an alias, a child, a logger used
+    where it is taken and a call written over several lines are each read as
+    the call they stand for. A call named like a loud one on anything else
+    (``np.log``, ``warnings.warn``, the ``error`` of a list of issues) is its
+    own business.
+    """
+    source = (
+        "import logging as log\n"
+        "import warnings\n"
+        "import numpy as np\n"
+        "from logging import getLogger, warning as warn_root\n"
+        "from . import client\n"
+        "from .client import _LOG\n"
+        "_OWN: log.Logger = getLogger(name='phonometry.io')\n"
+        "_ROOT = log.getLogger()\n"
+        "class Run:\n"
+        "    _log = _OWN.getChild('run')\n"
+        "    def __init__(self, issues):\n"
+        "        self.issues = issues\n"
+        "        self.held = log.getLogger('phonometry.simulation')\n"
+        "        self.held.error(\n"
+        "            'slow'\n"
+        "        )\n"
+        "        getLogger('phonometry.io').critical('lost')\n"
+        "        warn_root('lost')\n"
+        "        _LOG.warning('slow')\n"
+        "        client._LOG.error('lost')\n"
+        "        self._log.exception('lost')\n"
+        "        alias = _OWN\n"
+        "        alias.fatal('lost')\n"
+        "        _OWN.debug('fine')\n"
+        "        self.held.info('fine')\n"
+        "        getLogger('phonometry.io').info('fine')\n"
+        "        np.log(2.0)\n"
+        "        warnings.warn('x', RuntimeWarning, stacklevel=1)\n"
+        "        self.issues.error('row 3', 'fine')\n"
+        "    @classmethod\n"
+        "    def make(cls):\n"
+        "        cls._log.warning('slow')\n"
+    )
+    assert logging_misuse(source, "x.py", shared_loggers=frozenset({"_LOG"})) == [
+        "x.py:8 takes a logger that is not phonometry's",
+        "x.py:14 calls self.held.error",
+        "x.py:17 calls getLogger('phonometry.io').critical",
+        "x.py:18 calls logging.warning",
+        "x.py:19 calls _LOG.warning",
+        "x.py:20 calls client._LOG.error",
+        "x.py:21 calls self._log.exception",
+        "x.py:23 calls alias.fatal",
+        "x.py:32 calls cls._log.warning",
+    ]
+
+
+def test_the_logging_rule_reads_every_way_of_configuring() -> None:
+    source = (
+        "import logging\n"
+        "import logging.config\n"
+        "_LOG = logging.getLogger('phonometry.simulation')\n"
+        "def configure(handler):\n"
+        "    _LOG.propagate = False\n"
+        "    _LOG.handlers.clear()\n"
+        "    _LOG.handlers[:] = []\n"
+        "    del _LOG.filters[:]\n"
+        "    _LOG.removeHandler(handler)\n"
+        "    _LOG.level += 10\n"
+        "    logging.raiseExceptions = False\n"
+        "    logging.lastResort = None\n"
+        "    logging.root.handlers = []\n"
+        "    logging.config.dictConfig({})\n"
+        "    handler.setLevel(logging.DEBUG)\n"
+    )
+    assert logging_misuse(source, "x.py") == [
+        "x.py:5 sets _LOG.propagate",
+        "x.py:6 calls _LOG.handlers.clear",
+        "x.py:7 sets _LOG.handlers[:]",
+        "x.py:8 deletes _LOG.filters[:]",
+        "x.py:9 calls _LOG.removeHandler",
+        "x.py:10 sets _LOG.level",
+        "x.py:11 sets logging.raiseExceptions",
+        "x.py:12 sets logging.lastResort",
+        "x.py:13 sets logging.root.handlers",
+        "x.py:14 calls logging.config.dictConfig",
+        "x.py:15 configures logging with setLevel",
+    ]
+
+
+def test_the_logging_rule_follows_a_logger_from_module_to_module() -> None:
+    """A logger imported, renamed and imported again is still the library's.
+
+    A name no module binds to a logger stays its own business.
+    """
+    sources = [
+        "import logging\n_LOG = logging.getLogger('phonometry.simulation')\n",
+        (
+            "from .client import _LOG as remote_log\n"
+            "node_log = remote_log.getChild('node')\n"
+        ),
+        "from .node import node_log\ndef f():\n    node_log.error('lost')\n",
+        "from .reader import log\nlog.error('a reader of its own')\n",
+    ]
+    shared = shared_loggers(sources)
+    assert shared == {"_LOG", "remote_log", "node_log"}
+    assert logging_misuse(sources[2], "x.py", shared_loggers=shared) == [
+        "x.py:3 calls node_log.error"
+    ]
+    assert logging_misuse(sources[3], "y.py", shared_loggers=shared) == []

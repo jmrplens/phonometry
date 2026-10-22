@@ -43,20 +43,22 @@ the run may fall back to NumPy:
 | `device_index` | which GPU, for `"cupy"` and `"torch:cuda"` | `0` |
 | `dtype` | `"float64"` or `"float32"` | `"float64"` |
 | `fallback` | step on NumPy with a warning when the device is not available, instead of raising | `False` |
+| `host` | the node the run goes to, by its name in the hosts file; see [Sending a simulation to a remote node](/phonometry/simulation/remote-node/) | `None` (this machine) |
+| `timeout_s` | the longest a run on a node may take, in seconds; only with a `host` | the hosts file's, else no limit |
 
 The record is a request. Building one imports and probes nothing, so a script
 that names a GPU can be written and checked on a laptop that has none; the
 engine checks the request when it is built. A request that cannot mean
 anything is refused at once with `ValueError`: `"torch:mps"` in float64 (MPS
 has no float64), an index on a device that has one instance (`"cpu"`,
-`"torch:cpu"` and `"torch:mps"`), and `fallback=True` on `"cpu"`, which is
-the fallback already.
+`"torch:cpu"` and `"torch:mps"`), `fallback=True` on `"cpu"` with no
+`host`, which is the fallback already, and a `timeout_s` without a `host`.
 
 ```python
 from phonometry import simulation
 
 print(simulation.Compute())
-# Compute(device='cpu', device_index=0, dtype='float64', fallback=False)
+# Compute(device='cpu', device_index=0, dtype='float64', fallback=False, host=None, timeout_s=None)
 request = simulation.Compute(device="cupy", device_index=1, dtype="float32")
 print(request.device, request.device_index, request.dtype)   # cupy 1 float32
 try:
@@ -71,12 +73,12 @@ take it as `compute=`:
 ```py
 gpu = simulation.Compute(device="cupy")
 sim = simulation.FDTD2D(343.0, 0.01, shape=(200, 300), compute=gpu)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
-    compute=gpu,
 )
+res = simulation.fdtd_simulation(run, compute=gpu)
 ```
 
 A float32 run needs no GPU: on NumPy it halves the memory every field and
@@ -84,12 +86,12 @@ every snapshot takes. Section 6 says how far its numbers can stray from a
 float64 run's.
 
 ```python
-light = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)], snapshot_every=50),
-    compute=simulation.Compute(dtype="float32"),
 )
+light = simulation.fdtd_simulation(run, compute=simulation.Compute(dtype="float32"))
 print(light.snapshots.dtype, light.pressures.dtype)   # float32 float64
 ```
 
@@ -102,7 +104,7 @@ was: each sample is cast once on its way off the device.
 | Device | What to install | Notes |
 |---|---|---|
 | `"cpu"` | nothing: NumPy is a dependency of phonometry | the reference every other device is compared with |
-| `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` | `pip install phonometry[torch]` | torch 2.3.0 or later with array-api-compat 1.5.1 or later; `[full]` leaves it out |
+| `"torch:cpu"`, `"torch:cuda"`, `"torch:mps"` | `pip install "phonometry[torch]"` | torch 2.3.0 or later with array-api-compat 1.5.1 or later; `[full]` leaves it out |
 | `"cupy"` | the CuPy wheel for your CUDA version, such as `pip install cupy-cuda12x` or `pip install cupy-cuda13x` | not an extra of phonometry, because the wheel has to match the CUDA your driver supports |
 
 `[full]` leaves torch out on purpose: the torch wheels PyPI serves for Linux
@@ -112,7 +114,7 @@ the torch it finds, and those libraries stay out:
 
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install phonometry[torch]
+pip install "phonometry[torch]"
 ```
 
 Adding that index with `--extra-index-url` is not enough: pip takes the
@@ -143,34 +145,39 @@ simulation functions, and the engine keeps the one it got: leaving a `use()`
 block does not move an engine built inside it.
 
 ```python
+run = simulation.FDTDRun(
+    343.0, 0.01, 1.0e-3, shape=(100, 150),
+    sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
+    recording=simulation.FDTDRecording(probes=[(100, 50)]),
+)
 with simulation.use(simulation.Compute(dtype="float32")):
-    inside = simulation.fdtd_simulation(
-        343.0, 0.01, 1.0e-3, shape=(100, 150),
-        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
-        recording=simulation.FDTDRecording(probes=[(100, 50)]),
-    )
-    pinned = simulation.fdtd_simulation(
-        343.0, 0.01, 1.0e-3, shape=(100, 150),
-        sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
-        recording=simulation.FDTDRecording(probes=[(100, 50)]),
-        compute=simulation.Compute(),
-    )
+    inside = simulation.fdtd_simulation(run)
+    pinned = simulation.fdtd_simulation(run, compute=simulation.Compute())
 print(inside.provenance.dtype, pinned.provenance.dtype)   # float32 float64
 ```
 
 `PHONOMETRY_COMPUTE` writes a placement as text,
-`device[:index][,option...]`, with the options `float32`, `float64` and
-`fallback`: `cupy`, `cupy:1`, `torch:cuda:1,fallback`, `torch:mps,float32`
-or `cpu,float32`. Spaces around the parts are ignored. The variable is read
-each time a placement is resolved and never at import, so it can be set after
-`import phonometry`. A value the grammar does not describe, an option given
-twice, two dtypes, or a request `Compute` refuses (`torch:mps` without
-`float32`) raises `ValueError` naming the variable when the first engine is
-built.
+`device[:index][@host][,option...]`, with the options `float32`, `float64`
+and `fallback`: `cupy`, `cupy:1`, `torch:cuda:1,fallback`,
+`torch:mps,float32`, `cpu,float32` or `cupy@nas`. Spaces around the parts are
+ignored. The variable is read each time a placement is resolved and never at
+import, so it can be set after `import phonometry`. A value the grammar does
+not describe, an option given twice, two dtypes, or a request `Compute`
+refuses (`torch:mps` without `float32`) raises `ValueError` naming the
+variable when the placement is resolved.
 
 ```bash
 PHONOMETRY_COMPUTE=cupy:1,fallback python study.py
 ```
+
+A host, `Compute(host="nas")` or `@nas` in the variable, sends a whole run to
+another machine, and only the two simulation functions take one:
+`fdtd_simulation(run, compute=...)` and
+`elastic_fdtd_simulation(run, compute=...)` run there and return the record a
+run here returns. An engine built directly steps in this process, and it
+raises `ValueError` for a placement that names a host, wherever the placement
+came from. [Sending a simulation to a remote node](/phonometry/simulation/remote-node/)
+says how to name a node and set one up.
 
 **Threads and processes.** `use()` holds its record in a context variable.
 Whether a new thread or process sees it depends on how it is started, so give
@@ -184,23 +191,23 @@ single = simulation.Compute(dtype="float32")
 
 
 def pulse_run(half_width_s):
-    return simulation.fdtd_simulation(
+    run = simulation.FDTDRun(
         343.0, 0.01, 1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=half_width_s)],
         recording=simulation.FDTDRecording(probes=[(100, 50)]),
-        compute=single,
     )
+    return simulation.fdtd_simulation(run, compute=single)
 
 
 with ThreadPoolExecutor(max_workers=2) as pool:
-    runs = list(pool.map(pulse_run, (2.0e-4, 3.0e-4)))
-print([run.provenance.dtype for run in runs])   # ['float32', 'float32']
+    results = list(pool.map(pulse_run, (2.0e-4, 3.0e-4)))
+print([res.provenance.dtype for res in results])   # ['float32', 'float32']
 ```
 
 ## 4. When the device is not there: `fallback`
 
-Without `fallback`, building an engine on a device that cannot be used
-raises, and the message says why:
+Without `fallback`, building an engine on a device that cannot be used, or
+sending a run to a node that fails, raises, and the message says why:
 
 - `ComputeImportError`, a subclass of `ImportError`, when the device's
   library is not installed (`"cupy"` without CuPy, or a `"torch:..."` device
@@ -213,24 +220,28 @@ raises, and the message says why:
   device that reports itself available is also given one small computation,
   once per process, and refused the same way if it fails: MPS in a macOS
   virtual machine cannot allocate, and CuPy without its CUDA compiler cannot
-  build a kernel.
+  build a kernel;
+- `ComputeRemoteError`, a subclass of `RuntimeError`, for a run sent to a
+  node with a `host`, when the connection or the node fails, the device
+  there included; [Sending a simulation to a remote node](/phonometry/simulation/remote-node/)
+  says what each failure means.
 
-With `fallback=True` neither is raised. The run warns with
+With `fallback=True` none of them is raised. The run warns with
 `ComputeFallbackWarning`, a `PhonometryWarning` whose message carries the
-reason, and steps on NumPy in the dtype that was asked for. The warning
-points at the line of your code that built the engine or called the
-simulation function, never at a line inside the library, and the result's
-provenance says `"cpu"`, so a run that fell back cannot pass for a GPU run
-later.
+reason, and steps on NumPy on this machine, in the dtype that was asked for.
+The warning points at the line of your code that built the engine or called
+the simulation function, never at a line inside the library, and the
+result's provenance says `"cpu"`, with no host, so a run that fell back
+cannot pass for a GPU run or a run on a node later.
 
 ```py
 request = simulation.Compute(device="cupy", fallback=True)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
-    compute=request,
 )
+res = simulation.fdtd_simulation(run, compute=request)
 # On a machine without CuPy:
 # ComputeFallbackWarning: device 'cupy' needs CuPy, which is not installed
 # (No module named 'cupy'); install the wheel for your CUDA version, e.g.
@@ -261,6 +272,7 @@ engine reports the same record as `sim.provenance`:
 | `cuda_driver_api` | the CUDA version the GPU driver supports (`"13.3"`), reported by CuPy only; it is not the NVIDIA driver's own version |
 | `gpu` | the GPU's name (`"Apple MPS"` on MPS), `None` off a GPU |
 | `host` | the machine the run went to, `None` for this one |
+| `package_digest` | the SHA-256 of the package that ran on the node, `None` for a run on this machine |
 
 ```python
 print(light.provenance.device, light.provenance.dtype, light.provenance.array_library)
@@ -270,16 +282,16 @@ print(light.provenance.device, light.provenance.dtype, light.provenance.array_li
 A run on CuPy records the card and the versions it stepped on:
 
 ```py
-gpu_run = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    compute=simulation.Compute(device="cupy"),
 )
-print(gpu_run.provenance)
+on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy"))
+print(on_gpu.provenance)
 # On the machine of the proof in section 6:
 # RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
 #     numpy_version='2.5.3', array_library='cupy 14.2.0', cuda_runtime='13.2',
-#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060')
+#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060', package_digest=None)
 ```
 
 An engine's fields live on its device. `sim.p`, `sim.vx` and `sim.vy` of an
@@ -404,12 +416,13 @@ array raises `TypeError`, and a number below 1 or not whole raises
 it was taken from, with the axes on the whole domain.
 
 ```python
-decimated = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
         snapshot_every=10, snapshot_decimation=4),
 )
+decimated = simulation.fdtd_simulation(run)
 print(decimated.snapshots.shape, decimated.snapshot_decimation)   # (17, 50, 75) 4
 decimated.plot(kind="snapshot")
 ```
@@ -450,6 +463,8 @@ phonometry computes on NumPy only.
   acoustic engine, its sources, probes and boundaries, and how to size a run.
 - [Elastic waves and fluid-solid coupling](/phonometry/simulation/elastic-waves/):
   the elastic engine, which takes the same `compute=`.
+- [Sending a simulation to a remote node](/phonometry/simulation/remote-node/):
+  the same run on another machine over SSH, with a `host` in the request.
 - API reference: [`simulation.compute`](/phonometry/reference/api/simulation/compute/),
   [`simulation.fdtd`](/phonometry/reference/api/simulation/fdtd/),
   [`simulation.elastic_fdtd`](/phonometry/reference/api/simulation/elastic-fdtd/).
@@ -483,7 +498,9 @@ Install CuPy for your CUDA version (`pip install cupy-cuda12x`) or the
 
 Because the request said `fallback=True` and the device could not be used:
 the library was missing or did not import, or the device was absent or
-failed its first small computation. The run warned with
+failed its first small computation, or, for a run sent to a node, the
+connection or the node failed. The run warned with
 `ComputeFallbackWarning`, whose message gives the reason, and
 `result.provenance.device` reads `"cpu"`. Without `fallback=True` the same
-request raises `ComputeImportError` or `ComputeDeviceError` instead.
+request raises `ComputeImportError` or `ComputeDeviceError` instead, or
+`ComputeRemoteError` for a run sent to a node.

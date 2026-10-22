@@ -529,6 +529,7 @@ export const topics = [
       'simulation/fdtd-simulation',
       'simulation/elastic-waves',
       'simulation/compute',
+      'simulation/remote-node',
       apiGroup('simulation'),
     ],
   },

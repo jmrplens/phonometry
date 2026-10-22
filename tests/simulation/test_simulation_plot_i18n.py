@@ -14,23 +14,31 @@ import pytest
 
 from phonometry.simulation import (
     ElasticRecording,
+    ElasticRun,
     ExplosionSource,
     elastic_fdtd_simulation,
 )
-from phonometry.simulation.fdtd import FDTDRecording, GaussianPulse, fdtd_simulation
+from phonometry.simulation.fdtd import (
+    FDTDRecording,
+    FDTDRun,
+    GaussianPulse,
+    fdtd_simulation,
+)
 
 
 def _result() -> object:
     mask = np.zeros((30, 40), dtype=bool)
     mask[12:18, 20:22] = True
     return fdtd_simulation(
-        343.0,
-        9.0e-3,
-        3.0e-3,
-        shape=(30, 40),
-        sources=[GaussianPulse(ix=7, iy=5, half_width_s=3.0e-4)],
-        recording=FDTDRecording(probes=[(10, 5), (24, 10)], snapshot_every=10),
-        obstacle_mask=mask,
+        FDTDRun(
+            343.0,
+            9.0e-3,
+            3.0e-3,
+            shape=(30, 40),
+            sources=[GaussianPulse(ix=7, iy=5, half_width_s=3.0e-4)],
+            recording=FDTDRecording(probes=[(10, 5), (24, 10)], snapshot_every=10),
+            obstacle_mask=mask,
+        )
     )
 
 
@@ -58,12 +66,14 @@ def test_fdtd_snapshot_es() -> None:
 
 def test_a_decimated_snapshot_covers_the_domain_without_stretching() -> None:
     res = fdtd_simulation(
-        343.0,
-        0.01,
-        1e-3,
-        shape=(30, 101),
-        sources=[GaussianPulse(ix=50, iy=15, half_width_s=4e-5)],
-        recording=FDTDRecording(snapshot_every=10, snapshot_decimation=4),
+        FDTDRun(
+            343.0,
+            0.01,
+            1e-3,
+            shape=(30, 101),
+            sources=[GaussianPulse(ix=50, iy=15, half_width_s=4e-5)],
+            recording=FDTDRecording(snapshot_every=10, snapshot_decimation=4),
+        )
     )
     ax = res.plot(kind="snapshot")
     image = ax.images[0]
@@ -82,13 +92,15 @@ def test_the_obstacles_of_a_decimated_snapshot_stay_on_the_domain() -> None:
     mask = np.zeros((30, 101), dtype=bool)
     mask[10:20, 60:70] = True
     res = fdtd_simulation(
-        343.0,
-        0.01,
-        1e-3,
-        shape=(30, 101),
-        sources=[GaussianPulse(ix=50, iy=15, half_width_s=4e-5)],
-        obstacle_mask=mask,
-        recording=FDTDRecording(snapshot_every=10, snapshot_decimation=4),
+        FDTDRun(
+            343.0,
+            0.01,
+            1e-3,
+            shape=(30, 101),
+            sources=[GaussianPulse(ix=50, iy=15, half_width_s=4e-5)],
+            obstacle_mask=mask,
+            recording=FDTDRecording(snapshot_every=10, snapshot_decimation=4),
+        )
     )
     ax = res.plot(kind="snapshot")
     assert ax.images[1].get_extent() == pytest.approx([0.0, 1.01, 0.30, 0.0])
@@ -100,14 +112,16 @@ def test_a_decimated_elastic_snapshot_covers_the_domain_without_stretching() -> 
         return float(np.exp(-(((t - 2e-5) / 5e-6) ** 2)))
 
     res = elastic_fdtd_simulation(
-        4000.0,
-        2300.0,
-        0.01,
-        1e-4,
-        rho=2500.0,
-        shape=(20, 21),
-        sources=[ExplosionSource(ix=10, iy=9, waveform=pulse)],
-        recording=ElasticRecording(snapshot_every=4, snapshot_decimation=3),
+        ElasticRun(
+            4000.0,
+            2300.0,
+            0.01,
+            1e-4,
+            rho=2500.0,
+            shape=(20, 21),
+            sources=[ExplosionSource(ix=10, iy=9, waveform=pulse)],
+            recording=ElasticRecording(snapshot_every=4, snapshot_decimation=3),
+        )
     )
     ax = res.plot(kind="snapshot")
     # ceil(20 / 3) rows and ceil(21 / 3) columns of 3-cell blocks: the last

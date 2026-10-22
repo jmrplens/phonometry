@@ -96,6 +96,25 @@ EXEMPT: dict[str, str] = {
     "io/_sidecar.py:_real": "CalibrationSidecar's own checks",
     "io/_sidecar.py:_labels": "CalibrationSidecar's own checks",
     "io/_sidecar.py:_check_text": "CalibrationSidecar's own checks",
+    # The hosts file parser: a field of the wrong type in the file the library
+    # reads is a malformed file, and the refusal names the file.
+    "simulation/_remote/hosts.py:load_host": "parses the hosts file",
+    "simulation/_remote/hosts.py:_entry": "parses the hosts file",
+    "simulation/_remote/hosts.py:_optional_text": "parses the hosts file",
+    "simulation/_remote/hosts.py:_timeout": "parses the hosts file",
+    # The frames of a remote run: a field of the wrong type in what the other
+    # end sent is a broken stream, refused as one, not the caller's mistake.
+    "simulation/_remote/bootstrap.py:read_header": "reads a frame the other end sent",
+    "simulation/_remote/bootstrap.py:field": "reads a frame the other end sent",
+    "simulation/_remote/bootstrap.py:_check_listing": "reads a frame the other end sent",
+    "simulation/_remote/bootstrap.py:_floors": "reads a frame the other end sent",
+    # The arguments of a remote run, as the node reads them.
+    "simulation/_remote/wire.py:_decode": "reads the data a client sent: a form the node cannot read is a broken job, refused as one",
+    # The placement of a remote run, as the node reads it: a field of the
+    # wrong type is a broken job, refused as one at the job's stage.
+    "simulation/_remote/node.py:_placement": "reads the placement a client sent",
+    # The result of a remote run, as the client reads it.
+    "simulation/_remote/client.py:_provenance": "checks what a node sent: a field of the wrong type is a failure of the node, refused as ComputeRemoteError",
 }
 
 

@@ -127,24 +127,30 @@ $$
             = \frac{c\,\Delta t\,\sqrt{2}}{\Delta x} \le 1,
 $$
 
-y `fdtd_simulation` deriva el paso temporal del parámetro `cfl` (este
-$\mathrm{CN}$, por defecto 0,6) y de la mayor velocidad del sonido del mapa. El
-esquema solo es **condicionalmente estable**: con $\mathrm{CN} \le 1$ la
-actualización ni crea ni destruye energía, y por encima del límite todo modo
-de longitud de onda próxima a la escala de la malla crece exponencialmente,
-así que la ejecución llega a `inf` en unos pocos centenares de pasos en vez
-de degradarse con suavidad (Ec. 4.14). Por eso `fdtd_simulation` rechaza
-cualquier `cfl` fuera de $(0, 1)$ en lugar de dejar que la ejecución
-arranque. La sección 6 usa además un número de Courant
-*por eje*, $S = c\,\Delta t/\Delta x = \mathrm{CN}/\sqrt{2}$, en la relación de
-dispersión; los dos no son el mismo número, y el `cfl = 0.6` por defecto
-significa $S = 0{,}424$.
+y la ejecución, `FDTDRun`, deriva el paso temporal al construirse, a partir
+del parámetro `cfl` (este $\mathrm{CN}$, por defecto 0,6) y de la mayor
+velocidad del sonido del mapa. El esquema solo es **condicionalmente
+estable**: con $\mathrm{CN} \le 1$ la actualización ni crea ni destruye
+energía, y por encima del límite todo modo de longitud de onda próxima a la
+escala de la malla crece exponencialmente, así que la ejecución llega a
+`inf` en unos pocos centenares de pasos en vez de degradarse con suavidad
+(Ec. 4.14). Por eso `FDTDRun` rechaza cualquier `cfl` fuera de $(0, 1)$ en
+lugar de dejar que la ejecución arranque. La sección 6 usa además un número
+de Courant *por eje*, $S = c\,\Delta t/\Delta x = \mathrm{CN}/\sqrt{2}$, en la
+relación de dispersión; los dos no son el mismo número, y el `cfl = 0.6` por
+defecto significa $S = 0{,}424$.
+
+Una simulación es un solo registro:
+`FDTDRun(c, dx, duration, sources=..., ...)` reúne el dominio, sus fuentes
+y lo que anota, y comprueba todos los argumentos al construirse, así que un
+argumento erróneo se rechaza donde se escribe la ejecución;
+`fdtd_simulation(run)` la calcula, y `compute=` dice dónde.
 
 ```python
 from phonometry import simulation
 
 # Un dominio de aire de 3.0 x 2.0 m: 300 x 200 celdas de 1 cm.
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0,             # c: velocidad del sonido [m/s], escalar o mapa sobre la malla
     0.01,              # dx: tamaño de celda cuadrada [m]
     2.0e-3,            # duration: tiempo simulado [s] (dt se deriva, no se da)
@@ -152,6 +158,7 @@ res = simulation.fdtd_simulation(
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
+res = simulation.fdtd_simulation(run)
 print(res.size)                  # (3.0, 2.0)  metros
 print(round(res.dt * 1e6, 2))    # 12.37  microsegundos (CN = 0.6)
 print(res.provenance.device, res.provenance.dtype)   # cpu float64
@@ -166,14 +173,12 @@ hay que instalar para cada uno, cómo elige uno todo un script y qué se promete
 sobre los números en cada uno.
 
 ```py
-on_gpu = simulation.fdtd_simulation(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
-    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
-    recording=simulation.FDTDRecording(probes=[(200, 100)]),
-    compute=simulation.Compute(device="cupy"),
-)
+on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy"))
 print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, y el nombre de la tarjeta
 ```
+
+Con un `host`, la misma ejecución va a otra máquina: véase
+[Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/).
 
 El paso temporal no es una entrada. Sale de `cfl` y de la mayor velocidad
 del sonido del mapa, y `res.dt` informa del valor que se usó: por eso la
@@ -347,10 +352,9 @@ ajusta hasta que la muestra modelada reproduce una absorción medida. Los dos
 límites merecen decirse sin rodeos: como la pérdida es independiente de la
 frecuencia y la impedancia se mantiene real, esto **no** es un modelo de
 Delany-Bazley ni de Johnson-Champoux-Allard y no reproducirá la dependencia
-con la frecuencia de un absorbente real; y `FDTD2D` acepta un escalar *o* un
-mapa `(ny, nx)`, mientras que la función de conveniencia `fdtd_simulation`
-solo admite un escalar, así que un absorbente región a región hay que
-construirlo sobre el motor.
+con la frecuencia de un absorbente real; y `damping` es un escalar *o* un
+mapa `(ny, nx)`, en un `FDTDRun` igual que en el motor `FDTD2D`, así que un
+absorbente región a región es un solo mapa de tasas de caída.
 
 ```python
 import numpy as np
@@ -820,7 +824,7 @@ from phonometry import simulation
 # barrera, la sonda B queda en sombra y solo recibe la onda difractada.
 mask = np.zeros((200, 300), dtype=bool)
 mask[60:, 150:154] = True
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, 0.01, 9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
@@ -828,6 +832,7 @@ res = simulation.fdtd_simulation(
     obstacle_mask=mask,
     boundaries="absorbing", absorbing_layer_cells=30,
 )
+res = simulation.fdtd_simulation(run)
 
 fig, (ax_f, ax_p) = plt.subplots(
     1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]})
@@ -976,11 +981,12 @@ from phonometry import simulation
 
 lx, ly, dx = 1.0, 0.7, 0.02
 nx, ny = round(lx / dx), round(ly / dx)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     343.0, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
+res = simulation.fdtd_simulation(run)
 p = res.pressures[0]
 # Enventana el registro (termina con los modos todavía resonando sin
 # amortiguar, y un truncamiento abrupto emborrona todos los picos) y
@@ -1015,11 +1021,12 @@ from phonometry import simulation
 
 lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
 nx, ny = round(lx / dx), round(ly / dx)
-res = simulation.fdtd_simulation(
+run = simulation.FDTDRun(
     c, dx, 0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
+res = simulation.fdtd_simulation(run)
 
 # Una línea: la historia de presión en la sonda de la que sale el espectro.
 res.plot(language="es")
@@ -1168,9 +1175,9 @@ DFT.
 El esquema explícito solo es estable mientras un frente de onda cruce como
 mucho una celda por paso temporal. Con celdas cuadradas el número de Courant
 es $\mathrm{CN} = c\,\Delta t\,\sqrt{2}/\Delta x \le 1$ (Attenborough y Van
-Renterghem, Ec. 4.13). `fdtd_simulation` deriva el paso temporal del
-parámetro `cfl` (ese mismo $\mathrm{CN}$, por defecto 0,6) y de la mayor
-velocidad del sonido del mapa, y rechaza los valores fuera de $(0, 1)$. El
+Renterghem, Ec. 4.13). `FDTDRun` deriva el paso temporal de su parámetro
+`cfl` (ese mismo $\mathrm{CN}$, por defecto 0,6) y de la mayor velocidad del
+sonido del mapa, y al construirse rechaza un `cfl` fuera de $(0, 1)$. El
 número de Courant *por eje* de la relación de dispersión de más arriba es un
 número distinto, $S = c\,\Delta t/\Delta x = \mathrm{CN}/\sqrt{2}$, que vale
 0,424 con el valor por defecto.

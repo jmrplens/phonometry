@@ -35,7 +35,7 @@ import pytest
 
 from phonometry import room
 from phonometry.room.image_source import _WALL_ORDER
-from phonometry.simulation import FDTDRecording, GaussianPulse, fdtd_simulation
+from phonometry.simulation import FDTDRecording, FDTDRun, GaussianPulse, fdtd_simulation
 
 C = 343.0
 
@@ -323,19 +323,21 @@ def test_fdtd_rigid_wall_echo_matches_first_image() -> None:
     width = 0.4e-3
     src = GaussianPulse(ix=int(src_x / dx), iy=ny // 2, half_width_s=width)
     res = fdtd_simulation(
-        C,
-        dx,
-        duration=0.012,
-        sources=[src],
-        shape=(ny, nx),
-        recording=FDTDRecording(probes=[(int(probe_x / dx), ny // 2)]),
-        boundaries={
-            "left": "rigid",
-            "right": "absorbing",
-            "top": "absorbing",
-            "bottom": "absorbing",
-        },
-        absorbing_layer_cells=25,
+        FDTDRun(
+            C,
+            dx,
+            duration=0.012,
+            sources=[src],
+            shape=(ny, nx),
+            recording=FDTDRecording(probes=[(int(probe_x / dx), ny // 2)]),
+            boundaries={
+                "left": "rigid",
+                "right": "absorbing",
+                "top": "absorbing",
+                "bottom": "absorbing",
+            },
+            absorbing_layer_cells=25,
+        )
     )
     p = res.pressures[0]
     t = res.times
@@ -362,14 +364,16 @@ def test_fdtd_damping_decay_recovers_t60() -> None:
     damping = 3.0 * math.log(10.0) / t60_target
     src = GaussianPulse(ix=nx // 3, iy=ny // 3, half_width_s=1.2e-3)
     res = fdtd_simulation(
-        C,
-        dx,
-        duration=1.2,
-        sources=[src],
-        shape=(ny, nx),
-        recording=FDTDRecording(probes=[(2 * nx // 3, 2 * ny // 3)]),
-        boundaries="rigid",
-        damping=damping,
+        FDTDRun(
+            C,
+            dx,
+            duration=1.2,
+            sources=[src],
+            shape=(ny, nx),
+            recording=FDTDRecording(probes=[(2 * nx // 3, 2 * ny // 3)]),
+            boundaries="rigid",
+            damping=damping,
+        )
     )
     p = res.pressures[0]
     fs = round(1.0 / res.dt)

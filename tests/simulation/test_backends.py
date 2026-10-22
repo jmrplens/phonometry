@@ -788,6 +788,7 @@ def test_a_numpy_run_imports_no_device_library() -> None:
         capture_output=True,
         text=True,
         check=False,
+        timeout=120,
     )
     assert done.returncode == 0, done.stderr
     assert done.stdout.strip() == "[]"

@@ -173,6 +173,7 @@ def test_a_bad_environment_value_does_not_break_the_import() -> None:
         capture_output=True,
         text=True,
         check=False,
+        timeout=120,
     )
     assert done.returncode == 0, done.stderr
 

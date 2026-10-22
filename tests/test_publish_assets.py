@@ -18,9 +18,9 @@ so read ``images/x`` as ``mages/x``, refusing every render as a stray file.
 from __future__ import annotations
 
 import pathlib
-import subprocess
 import sys
 
+import child_process
 import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
@@ -34,8 +34,12 @@ import publish_assets
 def _git(cwd: pathlib.Path, *args: str) -> str:
     # rstrip and not strip, for the same reason the script does: the porcelain
     # status of an unstaged change begins with a space that is part of it.
-    return subprocess.run(
-        ["git", "-C", str(cwd), *args], check=True, capture_output=True, text=True
+    return child_process.run(
+        ["git", "-C", str(cwd), *args],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=120,
     ).stdout.rstrip("\n")
 
 

@@ -186,6 +186,7 @@ def test_the_comment_still_imports_on_the_standard_library_alone() -> None:
         text=True,
         check=False,
         cwd=_ROOT,
+        timeout=120,
     )
     assert result.returncode == 0, result.stderr
 

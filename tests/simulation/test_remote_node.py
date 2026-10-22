@@ -60,6 +60,9 @@ _WATCHER = "phonometry-node-input"
 #: How long a test waits on a thread it started [s]: each ends within
 #: milliseconds once its input does.
 _THREAD_S = 30.0
+#: How long a node in a process of its own may take, from the package it is
+#: sent to its exit [s]: at most 4 s on a Windows runner, the slowest in CI.
+_NODE_S = 120.0
 
 
 def _job(
@@ -547,6 +550,11 @@ def _through_a_node(
     The input stays open until the node has exited, as a client still reading
     the answer keeps it. Returns the kinds of the frames, the last header and
     its buffers, the exit status and what the node wrote to standard error.
+
+    Standard error is read as it comes, so a node never waits on a pipe this
+    test is not reading; a node still running after :data:`_NODE_S` seconds
+    is killed, which ends every read and write below, and the test fails
+    saying so.
     """
     shipped = installed_package()
     hello = io.BytesIO()
@@ -581,6 +589,18 @@ def _through_a_node(
     assert process.stdin is not None
     assert process.stdout is not None
     assert process.stderr is not None
+    stderr = process.stderr
+    said: list[bytes] = []
+    reader = threading.Thread(target=lambda: said.append(stderr.read()), daemon=True)
+    reader.start()
+    expired = threading.Event()
+
+    def expire() -> None:
+        expired.set()
+        process.kill()
+
+    killer = threading.Timer(_NODE_S, expire)
+    killer.start()
     try:
         process.stdin.write(hello.getvalue() + package.getvalue() + job)
         process.stdin.flush()
@@ -592,15 +612,25 @@ def _through_a_node(
                 for n in bootstrap.field(header, "buffers", list)
             ]
             kinds.append(header["type"])
-        code = process.wait(timeout=60)
-        log = process.stderr.read()
+        code = process.wait(timeout=_NODE_S)
+    except (OSError, bootstrap.FrameError, subprocess.TimeoutExpired) as exc:
+        if expired.is_set():
+            pytest.fail(f"the node did not finish within {_NODE_S:g} s: {exc}")
+        raise
     finally:
+        killer.cancel()
         process.kill()
-        process.wait(timeout=60)
-        process.stdin.close()
+        process.wait(timeout=_NODE_S)
+        reader.join(_THREAD_S)
+        with contextlib.suppress(OSError):
+            process.stdin.close()
         process.stdout.close()
-        process.stderr.close()
-    return kinds, header, buffers, code, log
+        # A reader still blocked on standard error holds the file's lock:
+        # closing it would wait as long as the reader does.
+        if not reader.is_alive():
+            stderr.close()
+    assert not reader.is_alive(), "standard error stayed open after the node ended"
+    return kinds, header, buffers, code, b"".join(said)
 
 
 def test_the_bootstrap_hands_the_shipped_package_to_the_node_and_the_job_runs(

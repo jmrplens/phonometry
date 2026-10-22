@@ -581,3 +581,39 @@ the enum member in Python only, and the artifact regenerated
 **Enforced by:** `tests/test_repository_config.py::test_every_action_is_pinned_to_a_release_tag`, `CI: Audit the workflows with zizmor`
 
 **Exceptions.** An action whose maintainers publish no moving major tag is followed on the branch its README names as the release channel, listed with its reason in `_ACTION_CHANNELS` of the test: `pypa/gh-action-pypi-publish@release/v1`.
+
+<a id="t24"></a>
+### T24. Bound every wait a test makes on another process or thread
+
+**Why.** A wait with no bound holds its pytest-xdist worker for good when what it waits on never answers, and the run reports nothing more from that worker: Windows runs on Python 3.13 and 3.14 stopped at 30258 of 30261 tests and sat there until the six-hour limit, with no test named. Give `subprocess.run` and its kin `timeout=`, and `communicate`, `join`, `wait`, `result` and `acquire` a timeout, some thirty times the longest the wait took on the slowest runner. On Windows `subprocess.run` reads the pipes to their end after its timeout has killed the program, so a program that hands its pipes to a process of its own, as Git for Windows does, runs through `child_process.run` of `tests/`; a `multiprocessing` child is joined with `child_process.join`. Behind every bound, `faulthandler_timeout` in `pyproject.toml` ends a test still running after ten minutes with the stack of every thread and the test's name.
+
+**Do**
+
+```python
+import subprocess
+import sys
+import threading
+
+done = subprocess.run(
+    [sys.executable, "-c", "print('ready')"],
+    capture_output=True,
+    text=True,
+    check=True,
+    timeout=120,  # the program takes a second at most
+)
+reader = threading.Thread(target=print, args=(done.stdout,))
+reader.start()
+reader.join(30)
+assert not reader.is_alive()
+```
+
+**Don't**
+
+```py
+listed = subprocess.run(["git", "ls-files"], capture_output=True)  # waits as long as git does
+reader.join()  # waits as long as the thread does
+```
+
+**Enforced by:** `tests/test_child_process.py::test_every_wait_in_the_suite_has_a_bound`, review
+
+**Exceptions.** `_UNBOUNDED` in `tests/test_child_process.py`, keyed `"path::function"` with its reason: the stand-in for ssh waits on the command it runs as ssh does, and the client under test bounds that wait. Which program hands its pipes on, the scan cannot tell; review does.

@@ -178,5 +178,6 @@ def test_the_package_imports_on_its_own() -> None:
         capture_output=True,
         text=True,
         check=True,
+        timeout=120,
     )
     assert result.stdout.strip() == str(len(PUBLISHED_FLUIDS))

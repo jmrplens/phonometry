@@ -166,6 +166,7 @@ def _probe(
         check=False,
         cwd=_ROOT,
         env={**os.environ, "PHONOMETRY_ASSETS_DIR": str(_ROOT / "no-clips-here")},
+        timeout=120,
     )
 
 

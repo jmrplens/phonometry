@@ -30,6 +30,7 @@ import pathlib
 import sys
 from typing import TYPE_CHECKING, Any
 
+import child_process
 import numpy as np
 import pytest
 
@@ -372,7 +373,7 @@ def test_a_child_forked_after_the_parent_recorded_still_writes_its_own_fragment(
         target=_record_in_child, args=("drawn_in_the_child",)
     )
     child.start()
-    child.join()
+    child_process.join(child, timeout=120)
 
     assert child.exitcode == 0
     fragment = directory / f"{child.pid}.json"

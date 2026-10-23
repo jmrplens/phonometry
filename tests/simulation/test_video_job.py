@@ -217,13 +217,27 @@ def test_the_scratch_directory_goes_however_the_job_stops(
     assert list(scratch.iterdir()) == []
 
 
+@pytest.mark.parametrize(
+    "video_file",
+    [
+        "closed",
+        pytest.param(
+            "held open",
+            marks=pytest.mark.skipif(
+                sys.platform == "win32",
+                reason="Windows removes no file another handle holds open",
+            ),
+        ),
+    ],
+)
 def test_a_node_that_ends_its_process_at_once_removes_its_scratch_videos_first(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, video_file: str
 ) -> None:
     """A run that does not stop once its client is gone ends the node's process, which runs no finally.
 
     The node's input watcher removes the scratch directory of the video the
-    run was writing before it ends the process.
+    run was writing before it ends the process, on POSIX even while the
+    video is still open for writing, as ffmpeg holds it.
     """
     from phonometry.simulation._remote import node
 
@@ -242,10 +256,18 @@ def test_a_node_that_ends_its_process_at_once_removes_its_scratch_videos_first(
     writing, release = threading.Event(), threading.Event()
 
     def stuck(target: Path) -> None:
-        # A run that does not reach its next step: a long one, a hung encode.
-        target.write_bytes(b"half a video")
-        writing.set()
-        release.wait(30)
+        # A run that does not reach its next step: a long one, or a hung
+        # encode whose ffmpeg still holds the video open.
+        video = target.open("wb")
+        try:
+            video.write(b"half a video")
+            video.flush()
+            if video_file == "closed":
+                video.close()
+            writing.set()
+            release.wait(30)
+        finally:
+            video.close()
 
     def run() -> None:
         with contextlib.suppress(OSError):

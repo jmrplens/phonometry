@@ -33,11 +33,13 @@
 // a single card stops the check rather than passing unchecked. A pixel of a
 // card counts as title when its luminance is closer to the title's than to
 // that drawing's, which is a pixel at least half covered by the title's ink. A
-// straight stem 1 px past the limit puts a whole column of them there. A round
-// ending, the bowl of an "s" or a closing bracket, puts one or two, and that
-// is where the check is thinnest: the title of every card there is today,
-// moved 1 px past its limit, fails it, some by a single pixel, and a round
-// ending less than 1 px past the limit can pass.
+// straight stem 1 px past the limit puts a whole column of them there, and a
+// round ending, the bowl of an "s" or a closing bracket, five to fourteen. An
+// ending that reaches the limit at a point, the tail of an "l" or the arm of a
+// "y" or an "x", puts one or two, and that is where the check is thinnest: the
+// title of every card there is today, moved 1 px past its limit, fails it,
+// some by a single pixel, and any ending less than 1 px past the limit can
+// pass.
 //
 // The postbuild re-encodes every card with mozjpeg at quality 82. Two points
 // of the wave-simulation drawing's grid, at (778, 242) and (807, 255), are a

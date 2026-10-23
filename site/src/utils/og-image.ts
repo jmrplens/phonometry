@@ -207,11 +207,22 @@ const OPENERS =
  * Conjunctions and prepositions that open a phrase of their own, so a line
  * may start with one: "Silencers, Screens / and Barriers In Situ", "Sending a
  * simulation / to a remote node", "Medición del aislamiento / en
- * laboratorio", "Ruido de climatización / a la alemana".
+ * laboratorio".
  */
 const PHRASE_OPENERS: Record<Locale, Set<string>> = {
   en: new Set(OPENERS.split(' ')),
-  es: new Set(`${OPENERS} a`.split(' ')),
+  es: new Set(OPENERS.split(' ')),
+};
+
+/**
+ * Prepositions that open a phrase only before an article: the Spanish "a" of
+ * "Ruido de climatización / a la alemana". Without one it ties a term
+ * together as "de" does, "aislamiento a impacto", and a break before it would
+ * split the term, so it counts as no boundary at all.
+ */
+const OPENS_BEFORE_ARTICLE: Record<Locale, Set<string>> = {
+  en: new Set(),
+  es: new Set(['a']),
 };
 
 /**
@@ -362,6 +373,9 @@ function boundary(words: string[], i: number, locale: Locale): Boundary {
   const opener = functionWord(words[i]);
   const joinsModifiers = COMPOUND.test(words[i - 1]) && COMPOUND.test(words[i + 1] ?? '');
   if (CONJUNCTIONS.has(opener) && joinsModifiers) return 'none';
+  if (OPENS_BEFORE_ARTICLE[locale].has(opener)) {
+    return ARTICLE[locale].has(functionWord(words[i + 1] ?? '')) ? 'word' : 'none';
+  }
   if (PHRASE_OPENERS[locale].has(opener)) return 'word';
   if (OF.has(opener)) {
     return ARTICLE[locale].has(functionWord(words[i + 1] ?? '')) ? 'word' : 'of';
@@ -381,6 +395,8 @@ function phraseStarts(words: string[], k: number, locale: Locale): boolean {
   return (
     words[k].startsWith('(') ||
     PHRASE_OPENERS[locale].has(word) ||
+    (OPENS_BEFORE_ARTICLE[locale].has(word) &&
+      ARTICLE[locale].has(functionWord(words[k + 1] ?? ''))) ||
     OF.has(word) ||
     /[,;:]$/.test(words[k - 1])
   );

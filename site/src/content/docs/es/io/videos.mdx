@@ -310,13 +310,13 @@ va a mostrar y para las etiquetas de sus ejes y de su escala de color, así
 que nada se mueve de un fotograma a otro, y cada texto conserva su propio
 tamaño. El fotograma más pequeño en el que cada texto, a su propio tamaño,
 queda libre del margen del fotograma y el campo sigue viéndose, con cualquier
-versión de matplotlib que admita la biblioteca, es de 479 por 245 píxeles, y
-un `size` menor lanza `ValueError` al construirse el registro. Ese mínimo vale
-para una ejecución cuyo último fotograma llega antes de diez segundos. Una
-ejecución más larga escribe más cifras en el tiempo de su título, en
-milisegundos, así que su mínimo es más ancho: la función rechaza un fotograma
-más estrecho de lo que necesita la ejecución antes de que esta empiece, y su
-mensaje da el ancho.
+versión de matplotlib con la que se prueba la biblioteca, es de 479 por 245
+píxeles, y un `size` menor lanza `ValueError` al construirse el registro. Ese
+mínimo vale para una ejecución cuyo último fotograma llega antes de diez
+segundos. Una ejecución más larga escribe más cifras en el tiempo de su
+título, en milisegundos, así que su mínimo es más ancho: la función rechaza un
+fotograma más estrecho de lo que necesita la ejecución antes de que esta
+empiece, y su mensaje da el ancho.
 
 La escala de color es fija para todo el vídeo.
 `AnimationFrame(color_limit=...)` la da, en pascales, como el valor de cada

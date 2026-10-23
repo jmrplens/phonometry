@@ -34,10 +34,10 @@ leaves the frame and nothing moves from one frame to the next; the title is
 centred over the frame. Every text keeps its own size: a frame is at least
 479 by 245 pixels, the smallest in which every text, at its own size, stays
 clear of the frame's margin and covers no other, with the field still in
-view, on every matplotlib version the library supports. An axis too short
-for the numbers matplotlib would write along it keeps fewer of them, never
-one over another: a tall grid's narrow field may show a single number under
-it. That holds for a run of up to ten seconds; a longer one writes more
+view, on every matplotlib version the library is tested with. An axis too
+short for the numbers matplotlib would write along it keeps fewer of them,
+never one over another: a tall grid's narrow field may show a single number
+under it. That holds for a run of up to ten seconds; a longer one writes more
 digits in its title's time, and needs a frame about 10.6 pixels wider for
 each digit past four before the point in milliseconds: a narrower one is
 refused before the run starts, with the width it needs. The frames are drawn
@@ -160,6 +160,8 @@ _FLOOR_DIGITS: Final = 4
 #: title for every count from five to thirteen digits, the frame its text
 #: needs to stay clear of the margin is 479 plus this times the digits past
 #: four, rounded up (490, 501 and 511 pixels for five, six and seven).
+#: Measured with matplotlib 3.11; with matplotlib 3.10 six digits need 500,
+#: so there the rule is conservative.
 _DIGIT_WIDTH: Final = Fraction(53, 5)
 
 #: What every message that finds no colour scale asks for.
@@ -213,7 +215,8 @@ class AnimationFrame(RichDisplay):
     :param size: ``(width, height)`` of a frame in pixels, at least 479 by
         245, the smallest frame in which every text, at its own size, stays
         clear of the frame's margin and the field still shows, on every
-        matplotlib version the library supports (default ``(960, 540)``).
+        matplotlib version the library is tested with (default
+        ``(960, 540)``).
         That is for a run of up to ten seconds: a longer run needs a wider
         frame for the time its last title writes, which the writers ask for
         before the run starts.

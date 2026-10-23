@@ -40,10 +40,10 @@ leaves the frame and nothing moves from one frame to the next; the title is
 centred over the frame. Every text keeps its own size: a frame is at least
 479 by 245 pixels, the smallest in which every text, at its own size, stays
 clear of the frame's margin and covers no other, with the field still in
-view, on every matplotlib version the library supports. An axis too short
-for the numbers matplotlib would write along it keeps fewer of them, never
-one over another: a tall grid's narrow field may show a single number under
-it. That holds for a run of up to ten seconds; a longer one writes more
+view, on every matplotlib version the library is tested with. An axis too
+short for the numbers matplotlib would write along it keeps fewer of them,
+never one over another: a tall grid's narrow field may show a single number
+under it. That holds for a run of up to ten seconds; a longer one writes more
 digits in its title's time, and needs a frame about 10.6 pixels wider for
 each digit past four before the point in milliseconds: a narrower one is
 refused before the run starts, with the width it needs. The frames are drawn
@@ -93,7 +93,7 @@ How each frame of a simulation video is drawn: in which language, at what size, 
 | Name | Description |
 | :--- | :--- |
 | `language` | Label language, `"en"` (default) or `"es"`. |
-| `size` | `(width, height)` of a frame in pixels, at least 479 by 245, the smallest frame in which every text, at its own size, stays clear of the frame's margin and the field still shows, on every matplotlib version the library supports (default `(960, 540)`). That is for a run of up to ten seconds: a longer run needs a wider frame for the time its last title writes, which the writers ask for before the run starts. |
+| `size` | `(width, height)` of a frame in pixels, at least 479 by 245, the smallest frame in which every text, at its own size, stays clear of the frame's margin and the field still shows, on every matplotlib version the library is tested with (default `(960, 540)`). That is for a run of up to ten seconds: a longer run needs a wider frame for the time its last title writes, which the writers ask for before the run starts. |
 | `color_limit` | The value at either end of the colour scale, fixed for the whole video, in the unit of the field drawn: pascals for an acoustic run ([`write_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_fdtd_animation)), and for an elastic one ([`write_elastic_fdtd_animation`](/phonometry/reference/api/simulation/video/#write_elastic_fdtd_animation)) the unit of `ElasticRecording.snapshot_field`, pascals for `"p"` and metres per second for `"vx"` and `"vy"`. `None` (default) finds it in a first pass over the run. |
 
 **Raises**

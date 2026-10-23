@@ -2,7 +2,7 @@
  "environment": {
   "libc": "glibc 2.39",
   "machine": "x86_64",
-  "numpy": "2.5.3",
+  "numpy": "2.5.4",
   "numpy_avx512": "off",
   "python": "3.13",
   "system": "Linux"
@@ -15,7 +15,7 @@
   "4": "0x1.1ebe72fdb1f3ap-17"
  },
  "measured_on": {
-  "cpu": "AMD EPYC 9V74 80-Core Processor"
+  "cpu": "AMD EPYC 7763 64-Core Processor"
  },
  "scenarios": {
   "contour": {

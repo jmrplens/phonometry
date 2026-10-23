@@ -458,6 +458,34 @@ same run apart against the plateau method and the mass law.
 
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence.webm)
 
+## Writing the run to a video
+
+The run record this guide builds goes to the video writer as it is:
+`simulation.write_elastic_fdtd_animation` steps it and draws the field its
+recording's `snapshot_field` names, the pressure or a velocity component,
+into a WebM, an MP4 or a GIF as it is computed, a frame every
+`snapshot_every` steps, without storing the snapshots.
+[Writing animations and FDTD runs to video](../io/videos.md) says how a
+frame is drawn and its colour scale found, which encoder writes the file, and
+how the same call steps on a GPU or goes to a node.
+
+```python
+from phonometry import simulation
+
+run = simulation.ElasticRun(
+    4000.0, 2300.0, 0.01, 5e-4,
+    rho=2500.0, shape=(40, 60),
+    sources=[simulation.ExplosionSource(
+        ix=30, iy=20,
+        waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=2e-5).value,
+    )],
+    recording=simulation.ElasticRecording(snapshot_every=10, snapshot_field="p"),
+)
+res = simulation.write_elastic_fdtd_animation(
+    "elastic_pulse.webm", run, frame=simulation.AnimationFrame(size=(480, 320))
+)
+```
+
 ## What this solver does not do
 
 Everything the 2D acoustic solver cannot do, this one cannot either: the

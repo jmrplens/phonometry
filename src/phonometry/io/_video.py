@@ -1,0 +1,717 @@
+#  Copyright (c) 2026. Jose Manuel Requena Plens
+"""Writing a matplotlib animation to WebM, MP4 or GIF with ffmpeg (private).
+
+:func:`write_video` draws every frame of the animation with Agg, as raw RGBA
+bytes, and streams them into ffmpeg's stdin: no frame is written to disk, so
+a long animation costs this process the memory of one frame. A GIF is the
+exception inside ffmpeg, whose palette filter holds every frame until the
+last one has arrived. The file appears at ``path`` only once ffmpeg has
+finished it. Until then ffmpeg writes to a hidden partial file beside it, a
+name of its own for each write, which is removed whatever fails (ffmpeg
+exits, the disk fills, the animation's own drawing raises), so a failed
+write never leaves a truncated video at ``path`` and never replaces a good
+one. A finished video that the system will not let take ``path``'s place
+(on Windows, while a player holds the old file open) stays under its
+partial name, and the error says where.
+
+How a video is encoded is one record, :class:`VideoOptions`, which checks
+its fields when it is built; what depends on the file (the container its
+suffix names, and the codecs that container holds) is checked once the
+path is known, still before anything starts.
+
+Every frame is saved under the same settings whatever the caller's matplotlib
+configuration says: the standard bounding box (a ``"tight"`` box can change
+size from one frame to the next, which no encoder accepts), the figure's own
+dpi and its own facecolor, composited on white where it is transparent,
+because a video has no alpha. A figure whose size in pixels is odd is padded
+by one row or column of that colour, since the 4:2:0 pixel format every
+browser plays halves the chroma.
+"""
+
+from __future__ import annotations
+
+import contextlib
+import io
+import os
+import subprocess  # nosec B404 - frames piped to the ffmpeg find_ffmpeg resolved; no shell
+import threading
+import uuid
+from collections import deque
+from collections.abc import Sequence
+from contextlib import contextmanager
+from dataclasses import dataclass
+from fractions import Fraction
+from pathlib import Path
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, Final, get_args
+
+from .._internal.display import RichDisplay
+from .._internal.validation import require_choice, require_positive, require_scalar
+from ._video_encoders import (
+    CONTAINER_CODECS,
+    FFMPEG_NAMES,
+    NO_WINDOW,
+    Codec,
+    Container,
+    Encoder,
+    EncoderChoice,
+    FFmpeg,
+    FFmpegNotFoundError,
+    VideoArguments,
+    VideoEncoderError,
+    choose,
+    describe,
+    ffmpeg_command,
+    find_ffmpeg,
+    gif_arguments,
+    raw_arguments,
+    video_arguments,
+)
+from ._video_quality import Quality
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping
+
+    from matplotlib.animation import AbstractMovieWriter, Animation
+    from matplotlib.figure import Figure
+
+__all__ = ["FFmpegNotFoundError", "VideoEncoderError", "VideoOptions", "write_video"]
+
+_SUFFIXES: Final[Mapping[str, Container]] = MappingProxyType(
+    {".webm": "webm", ".mp4": "mp4", ".gif": "gif"}
+)
+# Read from the Literal types, so a choice added there is accepted here.
+_ENCODERS: Final[tuple[Encoder, ...]] = get_args(Encoder)
+_CODECS: Final[tuple[Codec, ...]] = get_args(Codec)
+_QUALITIES: Final[tuple[Quality, ...]] = get_args(Quality)
+
+#: How many of ffmpeg's last stderr lines an error quotes.
+_STDERR_LINES: Final = 20
+
+#: Seconds ffmpeg may take to finish once its input is closed.
+_EXIT_TIMEOUT_S: Final = 600.0
+
+_MATPLOTLIB_HINT = 'Writing a video requires matplotlib. Install it with: pip install "phonometry[plot]"'
+
+
+@dataclass(frozen=True, kw_only=True)
+class VideoOptions(RichDisplay):
+    """How a video is encoded: by which encoder, in which codec, at what quality and rate.
+
+    One record for every writer of a video (:func:`write_video` and the
+    simulation writers), checked when it is built. What depends on the file,
+    the container its suffix names and the codecs that container holds, is
+    checked when the path is known, still before anything starts.
+
+    :param encoder: ``"auto"`` (default: the GPU encoders first, NVENC,
+        Quick Sync, VAAPI and VideoToolbox, each tried on one real frame of
+        the video's size, then the CPU), ``"cpu"``, ``"nvenc"``, ``"qsv"``,
+        ``"vaapi"`` or ``"videotoolbox"``. A GIF is always written on the CPU.
+    :param codec: ``"av1"``, ``"vp9"``, ``"hevc"`` or ``"h264"``; ``None``
+        (default) takes the best the container holds that the encoder
+        writes, AV1 first. An ``encoder`` of your own must write it: NVENC
+        writes no VP9, VideoToolbox only HEVC and H.264. A GIF has no codec.
+    :param quality: ``"high"``, ``"standard"`` (default) or ``"small"``:
+        each encoder's constant-quality setting, or a GIF's palette size and
+        dither.
+    :param fps: Frames per second; ``None`` (default) takes the animation's
+        ``interval``, and a simulation video plays at 30.
+    :param ffmpeg_encoder: An ffmpeg encoder name to use as it is, with
+        ``ffmpeg_options``: no trial, no preset, no pixel format, and no
+        check that the container holds what it writes. Not with a GIF, nor
+        with an ``encoder`` or ``codec`` of your own.
+    :param ffmpeg_options: More ffmpeg output options, as separate strings,
+        written after the encoder's preset and pixel format (so a repeated
+        one of those wins) and before the container's own options (an MP4's
+        ``+faststart`` and HEVC tag, a GIF's endless loop), which stay; held
+        as a tuple.
+    :raises TypeError: for an ``encoder``, ``codec`` or ``quality`` that is
+        not a text, a ``fps`` that is not one number, an ``ffmpeg_encoder``
+        that is not a text, or ``ffmpeg_options`` that are not a sequence of
+        separate texts.
+    :raises ValueError: for a choice outside its options, a ``fps`` that is
+        not a positive finite number, an ``ffmpeg_encoder`` that does not
+        name an encoder, an ``ffmpeg_encoder`` together with an ``encoder``
+        or a ``codec`` of your own, or a ``codec`` that your ``encoder`` does
+        not write.
+    """
+
+    encoder: Encoder = "auto"
+    codec: Codec | None = None
+    quality: Quality = "standard"
+    fps: float | None = None
+    ffmpeg_encoder: str | None = None
+    ffmpeg_options: Sequence[str] = ()
+
+    def __post_init__(self) -> None:
+        """Refuse a field of the wrong type, or outside its options, when the record is built."""
+        encoder = require_choice(self.encoder, "encoder", _ENCODERS)
+        codec = (
+            None if self.codec is None else require_choice(self.codec, "codec", _CODECS)
+        )
+        quality = require_choice(self.quality, "quality", _QUALITIES)
+        rate = None
+        if self.fps is not None:
+            require_scalar(self.fps, "fps")
+            rate = require_positive(self.fps, "fps")
+        raw, options = _raw_ffmpeg(self.ffmpeg_encoder, self.ffmpeg_options)
+        if raw is not None and (encoder != "auto" or codec is not None):
+            msg = (
+                "'ffmpeg_encoder' names the encoder itself; leave 'encoder' at 'auto' "
+                "and 'codec' at None"
+            )
+            raise ValueError(msg)
+        _require_written(encoder, codec)
+        # Held as plain values and a tuple, so a list handed in cannot change
+        # the record after it is built, and a whole fps reads back as a float.
+        object.__setattr__(self, "encoder", encoder)
+        object.__setattr__(self, "codec", codec)
+        object.__setattr__(self, "quality", quality)
+        object.__setattr__(self, "fps", rate)
+        object.__setattr__(self, "ffmpeg_encoder", raw)
+        object.__setattr__(self, "ffmpeg_options", options)
+
+
+def video_options(video: object) -> VideoOptions:
+    """The options a writer was given: ``None`` is the default record.
+
+    :raises TypeError: for anything but ``None`` or a :class:`VideoOptions`.
+    """
+    if video is None:
+        return VideoOptions()
+    if not isinstance(video, VideoOptions):
+        msg = f"'video' must be a VideoOptions or None, got {type(video).__name__}"
+        raise TypeError(msg)
+    return video
+
+
+@dataclass(frozen=True)
+class VideoRequest:
+    """A video to write: where, in which container, with which options; nothing started."""
+
+    path: Path
+    container: Container
+    video: VideoOptions
+
+    def new_partial(self) -> Path:
+        """A hidden name beside ``path`` for the file being written, new on every call.
+
+        Two writes to the same path at once (two test workers, two render
+        lanes) each get their own, so neither overwrites the other's
+        unfinished file. The file is not created here: ffmpeg, or the client
+        of a node, creates it with the user's usual permissions.
+        """
+        return self.path.with_name(f".{self.path.name}.{uuid.uuid4().hex}.partial")
+
+
+def _target(path: object) -> tuple[Path, Container]:
+    """The output path and its container, refused before anything runs."""
+    if not isinstance(path, (str, os.PathLike)):
+        msg = f"'path' must be a str or an os.PathLike, got {type(path).__name__}"
+        raise TypeError(msg)
+    target = Path(path)
+    container = _SUFFIXES.get(target.suffix.lower())
+    if container is None:
+        msg = (
+            "'path' must end in .webm, .mp4 or .gif, the containers write_video "
+            f"writes; got {target.suffix or 'no suffix'!r}"
+        )
+        raise ValueError(msg)
+    if target.is_dir():
+        msg = f"'path' names a directory: {str(target)!r}"
+        raise ValueError(msg)
+    if not target.parent.is_dir():
+        msg = f"the directory of 'path' does not exist: {str(target.parent)!r}"
+        raise FileNotFoundError(msg)
+    return target, container
+
+
+def _raw_ffmpeg(
+    ffmpeg_encoder: object, ffmpeg_options: object
+) -> tuple[str | None, tuple[str, ...]]:
+    """The caller's own encoder name and options, checked as text."""
+    if isinstance(ffmpeg_options, str) or not isinstance(ffmpeg_options, Sequence):
+        msg = (
+            "'ffmpeg_options' must be a sequence of separate arguments, such as "
+            f"('-crf', '30'), got {ffmpeg_options!r}"
+        )
+        raise TypeError(msg)
+    options = tuple(ffmpeg_options)
+    strangers = [item for item in options if not isinstance(item, str)]
+    if strangers:
+        msg = f"every item of 'ffmpeg_options' must be a str, got {strangers[0]!r}"
+        raise TypeError(msg)
+    if ffmpeg_encoder is None:
+        return None, options
+    if not isinstance(ffmpeg_encoder, str):
+        msg = f"'ffmpeg_encoder' must be a str, got {type(ffmpeg_encoder).__name__}"
+        raise TypeError(msg)
+    if not ffmpeg_encoder or ffmpeg_encoder.startswith("-"):
+        msg = f"'ffmpeg_encoder' must name an encoder, such as 'libx264'; got {ffmpeg_encoder!r}"
+        raise ValueError(msg)
+    return ffmpeg_encoder, options
+
+
+def _written_by(encoder: Encoder) -> tuple[Codec, ...]:
+    """The codecs one kind of encoder writes, best first; none for ``"auto"``."""
+    return tuple(codec for codec in _CODECS if (encoder, codec) in FFMPEG_NAMES)
+
+
+def _require_written(encoder: Encoder, codec: Codec | None) -> None:
+    """Refuse a codec that the caller's own kind of encoder does not write."""
+    if encoder == "auto" or codec is None or codec in _written_by(encoder):
+        return
+    msg = (
+        f"encoder={encoder!r} writes {', '.join(_written_by(encoder))}; got "
+        f"codec={codec!r}. Choose one of those, or leave 'encoder' at 'auto' for "
+        f"the first encoder that writes {codec}"
+    )
+    raise ValueError(msg)
+
+
+def _require_encoder_fits(container: Container, encoder: Encoder) -> None:
+    """Refuse a kind of encoder of the caller's that writes none of the container's codecs."""
+    held = CONTAINER_CODECS[container]
+    if encoder == "auto" or set(_written_by(encoder)) & set(held):
+        return
+    fitting = [kind for kind in _ENCODERS if set(_written_by(kind)) & set(held)]
+    msg = (
+        f".{container} holds {', '.join(held)}, and encoder={encoder!r} writes "
+        f"{', '.join(_written_by(encoder))}; choose 'auto' or one of "
+        f"{', '.join(repr(kind) for kind in fitting)} for a .{container}, or a "
+        "container that holds what it writes"
+    )
+    raise ValueError(msg)
+
+
+def _require_combination(container: Container, video: VideoOptions) -> None:
+    """Refuse what the container rules out.
+
+    For a GIF: any codec, raw encoder or GPU encoder. For a video: a codec the
+    container does not hold, or a kind of encoder that writes none it holds.
+    """
+    if container == "gif":
+        if video.codec is not None or video.ffmpeg_encoder is not None:
+            msg = (
+                "a GIF is written by ffmpeg's palette filter: it takes neither "
+                "'codec' nor 'ffmpeg_encoder'"
+            )
+            raise ValueError(msg)
+        if video.encoder not in ("auto", "cpu"):
+            msg = f"a GIF is written on the CPU; got encoder={video.encoder!r}"
+            raise ValueError(msg)
+        return
+    if video.codec is not None and video.codec not in CONTAINER_CODECS[container]:
+        msg = (
+            f".{container} holds {', '.join(CONTAINER_CODECS[container])}; "
+            f"got codec={video.codec!r}"
+        )
+        raise ValueError(msg)
+    _require_encoder_fits(container, video.encoder)
+
+
+def video_request(path: object, video: VideoOptions) -> VideoRequest:
+    """The path checked against the options, and nothing started.
+
+    The simulation writers call it before their first step, so a path, or a
+    choice its container rules out, is refused before a long run rather than
+    after it.
+
+    :raises TypeError: for a ``path`` that is neither a text nor a path.
+    :raises ValueError: for a suffix other than the three, a path that names
+        a directory, a codec the container does not hold, an ``encoder``
+        that writes none of the codecs it holds, or, for a GIF, a codec, an
+        ``ffmpeg_encoder`` or an encoder other than the CPU.
+    :raises FileNotFoundError: when the directory of ``path`` does not exist.
+    """
+    target, container = _target(path)
+    _require_combination(container, video)
+    return VideoRequest(path=target, container=container, video=video)
+
+
+def _frame_rate(request: VideoRequest, anim: Animation) -> str:
+    """The rate ffmpeg reads the frames at, as an exact fraction.
+
+    Taken from ``fps``, or else from the animation's ``interval`` (in
+    milliseconds), the attribute :meth:`Animation.save` reads for the same
+    purpose. A fraction keeps 30000/1001 exact where a decimal would round it.
+
+    :raises TypeError: when the animation has no interval and no ``fps``.
+    :raises ValueError: when its interval is not a positive number.
+    """
+    fps = request.video.fps
+    if fps is None:
+        interval = getattr(anim, "_interval", None)
+        if not isinstance(interval, (int, float)):
+            msg = "the animation has no interval to take a frame rate from; pass 'fps'"
+            raise TypeError(msg)
+        if not interval > 0:
+            msg = f"the animation's interval is not positive ({interval!r} ms); pass 'fps'"
+            raise ValueError(msg)
+        fps = 1000.0 / interval
+    fraction = Fraction(fps).limit_denominator(1001)
+    return f"{fraction.numerator}/{fraction.denominator}"
+
+
+def _pad_color(fig: Figure) -> str:
+    """The figure's facecolor composited on white, as ``Animation.save`` does."""
+    from matplotlib.colors import to_hex, to_rgba
+
+    red, green, blue, alpha = to_rgba(fig.get_facecolor())
+    return to_hex(
+        (
+            alpha * red + 1.0 - alpha,
+            alpha * green + 1.0 - alpha,
+            alpha * blue + 1.0 - alpha,
+        )
+    )
+
+
+class _FramePipe:
+    """ffmpeg's side of the pipe: one process, one frame size, one output."""
+
+    def __init__(
+        self,
+        request: VideoRequest,
+        ffmpeg: FFmpeg,
+        rate: str,
+        *,
+        output: Path,
+        choice: EncoderChoice | None,
+    ) -> None:
+        self._request = request
+        self._ffmpeg = ffmpeg
+        self._rate = rate
+        self._output = output
+        self._choice = choice
+        self.encoder_name = "gif" if request.container == "gif" else ""
+        self._process: subprocess.Popen[bytes] | None = None
+        self._tail: deque[str] = deque(maxlen=_STDERR_LINES)
+        self._drain: threading.Thread | None = None
+        self._inches = (0.0, 0.0)
+        self._frame_bytes = 0
+        self._frames = 0
+
+    def open(self, fig: Figure) -> None:
+        """Measure the frame, choose the encoder and start ffmpeg."""
+        width, height = (int(side) for side in fig.bbox.size)
+        inches = fig.get_size_inches()
+        self._inches = (float(inches[0]), float(inches[1]))
+        self._frame_bytes = width * height * 4
+        command = ffmpeg_command(
+            self._ffmpeg.path,
+            width=width,
+            height=height,
+            rate=self._rate,
+            video=self._arguments(fig, width, height),
+            muxer=self._request.container,
+            output=str(self._output),
+        )
+        try:
+            self._process = subprocess.Popen(  # nosec B603 - an argument list to the ffmpeg find_ffmpeg resolved; no shell
+                command,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+                creationflags=NO_WINDOW,
+            )
+            drain = threading.Thread(target=self._read_stderr, daemon=True)
+            drain.start()
+        except (OSError, RuntimeError) as exc:
+            # A thread that cannot start leaves ffmpeg running with nobody to
+            # read it: it is stopped and its pipes closed.
+            self.abort()
+            msg = f"could not start {self._ffmpeg.path} to write {self._request.path}: {exc}"
+            raise VideoEncoderError(msg) from exc
+        self._drain = drain
+
+    def _arguments(self, fig: Figure, width: int, height: int) -> VideoArguments:
+        request = self._request
+        options = request.video
+        # The record holds a tuple already; the field is typed as the
+        # sequence a caller may hand in.
+        extra = tuple(options.ffmpeg_options)
+        if request.container == "gif":
+            return gif_arguments(quality=options.quality, options=extra)
+        pad_color = _pad_color(fig)
+        if options.ffmpeg_encoder is not None:
+            self.encoder_name = options.ffmpeg_encoder
+            return raw_arguments(
+                options.ffmpeg_encoder,
+                options=extra,
+                container=request.container,
+                width=width,
+                height=height,
+                pad_color=pad_color,
+            )
+        # An encoder the caller chose before a long run is not tried again.
+        choice = self._choice or choose(
+            self._ffmpeg,
+            encoder=options.encoder,
+            codec=options.codec,
+            container=request.container,
+            width=width,
+            height=height,
+        )
+        self.encoder_name = choice.name
+        return video_arguments(
+            choice,
+            quality=options.quality,
+            options=extra,
+            container=request.container,
+            width=width,
+            height=height,
+            pad_color=pad_color,
+        )
+
+    def _read_stderr(self) -> None:
+        process = self._process
+        if process is None or process.stderr is None:
+            return
+        # Closed at the end of the stream, by the thread that reads it.
+        with process.stderr:
+            for line in process.stderr:
+                self._tail.append(line.decode(errors="replace").rstrip())
+
+    def write_frame(
+        self, fig: Figure, dpi: float, savefig_kwargs: Mapping[str, Any]
+    ) -> None:
+        """Draw the figure as it stands and send its pixels to ffmpeg."""
+        # Held at the size the stream was opened with, as matplotlib's own
+        # writers hold it: an animation that resizes its figure would
+        # otherwise shear every frame after.
+        fig.set_size_inches(self._inches)
+        buffer = io.BytesIO()
+        # The format and the dpi are the stream's: they win over anything
+        # Animation.save hands on, rather than collide with it.
+        frame_options = {**savefig_kwargs, "format": "rgba", "dpi": dpi}
+        fig.savefig(buffer, **frame_options)
+        frame = buffer.getbuffer()
+        if frame.nbytes != self._frame_bytes:
+            msg = (
+                f"frame {self._frames} of {self._request.path.name} has "
+                f"{frame.nbytes} bytes where the first had {self._frame_bytes}"
+            )
+            raise VideoEncoderError(msg)
+        process = self._process
+        if process is None or process.stdin is None:
+            msg = "the video stream was not opened"
+            raise VideoEncoderError(msg)
+        try:
+            process.stdin.write(frame)
+        except OSError as exc:
+            reason = f"ffmpeg stopped reading at frame {self._frames}"
+            raise self._failure(reason) from exc
+        self._frames += 1
+
+    def close(self) -> None:
+        """Let ffmpeg finish the file; raise with its words if it fails."""
+        process = self._process
+        if process is None or process.stdin is None:
+            return
+        try:
+            process.stdin.close()
+            code = process.wait(timeout=_EXIT_TIMEOUT_S)
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            reason = "ffmpeg did not finish the file"
+            raise self._failure(reason) from exc
+        self._join()
+        if code != 0:
+            reason = f"ffmpeg exited with status {code}"
+            raise self._failure(reason)
+
+    def abort(self) -> None:
+        """Stop ffmpeg now; the partial file is the caller's to remove."""
+        process = self._process
+        if process is None:
+            return
+        if process.poll() is None:
+            process.kill()
+        if process.stdin is not None:
+            with contextlib.suppress(OSError):
+                process.stdin.close()
+        process.wait()
+        self._join()
+
+    def _join(self) -> None:
+        """Wait for the reader of stderr, or close the pipe if none started."""
+        if self._drain is not None:
+            self._drain.join(timeout=_EXIT_TIMEOUT_S)
+        elif self._process is not None and self._process.stderr is not None:
+            self._process.stderr.close()
+
+    def _failure(self, reason: str) -> VideoEncoderError:
+        self.abort()
+        said = "\n".join(self._tail) or "(nothing on stderr)"
+        return VideoEncoderError(
+            f"{reason} while writing {self._request.path}; ffmpeg said:\n{said}"
+        )
+
+
+def _movie_writer(pipe: _FramePipe) -> AbstractMovieWriter:
+    """The movie writer :meth:`Animation.save` drives, built on the pipe.
+
+    A class made here rather than at the top of the module, because importing
+    phonometry must not import matplotlib.
+    """
+    from matplotlib.animation import AbstractMovieWriter
+
+    class _PipeWriter(AbstractMovieWriter):
+        def setup(
+            self, fig: Figure, outfile: str | Path, dpi: float | None = None
+        ) -> None:
+            super().setup(fig, outfile, dpi)
+            pipe.open(fig)
+
+        def grab_frame(self, **savefig_kwargs: Any) -> None:
+            pipe.write_frame(self.fig, self.dpi, savefig_kwargs)
+
+        def finish(self) -> None:
+            pipe.close()
+
+        @contextmanager
+        def saving(
+            self,
+            fig: Figure,
+            outfile: str | Path,
+            dpi: float | None,
+            *args: Any,
+            **kwargs: Any,
+        ) -> Iterator[AbstractMovieWriter]:
+            self.setup(fig, outfile, dpi, *args, **kwargs)
+            try:
+                yield self
+            except BaseException:
+                pipe.abort()
+                raise
+            self.finish()
+
+    return _PipeWriter()
+
+
+def settle(partial: Path, path: Path) -> None:
+    """Put the finished video at *path*; if the system refuses, leave it at *partial* and say so.
+
+    :raises VideoEncoderError: when *partial* cannot take the place of *path*
+        (on Windows, while a player holds *path* open); the finished video
+        stays at *partial*, which the message names, so the run it cost is
+        not lost.
+    """
+    try:
+        partial.replace(path)
+    except OSError as exc:
+        msg = (
+            f"the video is finished but could not take the place of {path} ({exc}); "
+            f"it is at {partial}"
+        )
+        raise VideoEncoderError(msg) from exc
+
+
+def encode(
+    request: VideoRequest,
+    anim: Animation,
+    *,
+    ffmpeg: FFmpeg | None = None,
+    choice: EncoderChoice | None = None,
+) -> str:
+    """Write *anim* as *request* says; return the name of the encoder that wrote it.
+
+    :param ffmpeg: An ffmpeg already found and described
+        (:func:`~phonometry.io._video_encoders.describe`); ``None`` finds it.
+    :param choice: An encoder already chosen for this video at its size,
+        used without a second trial; ``None`` chooses one when the stream
+        opens. Ignored for a GIF and for the caller's own ``ffmpeg_encoder``.
+    :raises TypeError: when neither ``fps`` nor the animation gives a rate.
+    :raises ValueError: when the animation's interval is not positive.
+    :raises FFmpegNotFoundError: when ffmpeg is not found.
+    :raises VideoEncoderError: when no encoder can write it, ffmpeg cannot be
+        started or fails, or the finished file cannot take ``path``'s place.
+    """
+    import matplotlib as mpl
+
+    rate = _frame_rate(request, anim)
+    described = describe(find_ffmpeg()) if ffmpeg is None else ffmpeg
+    partial = request.new_partial()
+    pipe = _FramePipe(request, described, rate, output=partial, choice=choice)
+    try:
+        # Every frame is saved under these, whatever the caller's rcParams say.
+        with mpl.rc_context(
+            {
+                "savefig.bbox": "standard",
+                "savefig.dpi": "figure",
+                "savefig.facecolor": "auto",
+            }
+        ):
+            anim.save(str(partial), writer=_movie_writer(pipe))
+    except BaseException:
+        partial.unlink(missing_ok=True)
+        raise
+    settle(partial, request.path)
+    return pipe.encoder_name
+
+
+def _require_animation(anim: object) -> None:
+    """Refuse anything that is not a matplotlib animation."""
+    try:
+        from matplotlib.animation import Animation
+    except ImportError as exc:  # pragma: no cover - the base install has no plot
+        raise ImportError(_MATPLOTLIB_HINT) from exc
+    if not isinstance(anim, Animation):
+        msg = f"'anim' must be a matplotlib.animation.Animation, got {type(anim).__name__}"
+        raise TypeError(msg)
+
+
+def write_video(
+    path: str | os.PathLike[str],
+    anim: Animation,
+    *,
+    video: VideoOptions | None = None,
+) -> None:
+    """Write a matplotlib animation to a WebM, MP4 or GIF file with ffmpeg.
+
+    The container is the suffix of ``path``: ``.webm`` holds AV1 or VP9,
+    ``.mp4`` AV1, HEVC or H.264 (written to start playing before it has
+    downloaded, HEVC tagged so Apple's players open it), ``.gif`` a palette
+    of up to 256 colours. Every frame is drawn with Agg and piped to ffmpeg,
+    so this process holds one frame at a time; for a GIF, ffmpeg itself
+    holds every frame until the last one has arrived, since the palette is
+    computed from all of them. The file appears at ``path`` only when ffmpeg
+    has finished it, so a failure leaves whatever was there before.
+
+    ffmpeg is the program matplotlib's ``rcParams["animation.ffmpeg_path"]``
+    names (``"ffmpeg"`` on ``PATH`` by default). How it encodes is ``video``,
+    a :class:`VideoOptions`: by default the GPU encoders are tried first
+    (NVENC, Quick Sync, VAAPI, VideoToolbox), each with one real frame of
+    this size, and the CPU last: SVT-AV1, or without it VP9 in a WebM and
+    x265 or x264 in an MP4. A GIF is written on the CPU, with no trial. The
+    encoder chosen is logged on the ``phonometry.io`` logger.
+
+    :param path: Where to write; its suffix picks the container.
+    :param anim: Any :class:`matplotlib.animation.Animation`.
+    :param video: How to encode it (:class:`VideoOptions`); ``None``
+        (default) is ``VideoOptions()``: the first encoder that works, the
+        best codec the container holds, the standard quality, and the
+        animation's own frame rate.
+    :raises TypeError: if ``path`` is neither a text nor a path, ``video`` is
+        not a :class:`VideoOptions`, ``anim`` is not an animation, or the
+        animation has no interval and ``video`` no ``fps``.
+    :raises ValueError: for a suffix other than ``.webm``, ``.mp4`` or
+        ``.gif``, a path that names a directory, a codec the container does
+        not hold, an ``encoder`` that writes none of the codecs it holds
+        (VideoToolbox in a ``.webm``), for a GIF a codec, an
+        ``ffmpeg_encoder`` or an encoder other than the CPU, or an animation
+        interval that is not a positive number.
+    :raises FileNotFoundError: if the directory of ``path`` does not exist.
+    :raises FFmpegNotFoundError: if ffmpeg is not found, in Pyodide, or on
+        Windows when it was found only in the working directory.
+    :raises VideoEncoderError: if no encoder can write the video (the message
+        lists the ones that can), ffmpeg cannot be started or fails while
+        writing it (with the last lines it wrote on stderr), or the finished
+        video cannot take the place of ``path`` (on Windows, while a player
+        holds the old file open; the message says where the video was left).
+    :raises ImportError: if matplotlib is not installed.
+    """
+    options = video_options(video)
+    request = video_request(path, options)
+    _require_animation(anim)
+    encode(request, anim)

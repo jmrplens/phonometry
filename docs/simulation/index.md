@@ -123,6 +123,9 @@ so in its own opening.
   GPU: the hosts file that names a node, what each side checks, the errors
   and the fallback to NumPy, progress and timeouts, security in both
   directions, and when a run there gives the numbers of a run here.
+- [Writing animations and FDTD runs to video](../io/videos.md):
+  either solver's run written straight to a WebM, an MP4 or a GIF as it is
+  computed, here or on a node, without storing its snapshots.
 
 ## What this section does not cover
 

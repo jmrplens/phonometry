@@ -10,6 +10,10 @@ GaussianPulse, CWSource or SignalSource of exactly that type, which the
 node rebuilds from the record; any other callable is refused with a
 TypeError that names the argument, before a connection is opened.
 
+The frame and the video options of a video job (AnimationFrame and
+VideoOptions) are the library's own records too, and travel the same way:
+rebuilt on the node, they check their fields again there.
+
 The form is JSON with tagged objects, ``{"$": tag, ...}``, and a list of
 raw buffers for the arrays, little-endian and in C order. Nothing is
 pickled, so a node never runs code it was sent as data, and a number keeps
@@ -27,7 +31,9 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from ...io._video import VideoOptions
 from .. import elastic_fdtd, fdtd
+from ..video import AnimationFrame
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -54,6 +60,8 @@ _RECORDS: Mapping[str, type] = MappingProxyType(
             elastic_fdtd.ForceSource,
             elastic_fdtd.ElasticRecording,
             elastic_fdtd.ElasticBoundaries,
+            AnimationFrame,
+            VideoOptions,
         )
     }
 )

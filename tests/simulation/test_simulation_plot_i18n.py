@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import matplotlib as mpl
 
 mpl.use("Agg")
@@ -24,6 +26,9 @@ from phonometry.simulation.fdtd import (
     GaussianPulse,
     fdtd_simulation,
 )
+
+if TYPE_CHECKING:
+    from matplotlib.image import AxesImage
 
 
 def _result() -> object:
@@ -152,3 +157,150 @@ def test_an_undecimated_snapshot_is_drawn_as_it_was() -> None:
     assert ax.get_autoscalex_on()
     assert ax.get_autoscaley_on()
     plt.close(ax.figure)
+
+
+def _shown(image: AxesImage) -> tuple[np.ndarray, tuple[float, float], str]:
+    """What an image shows: its field, its colour scale and its colormap."""
+    vmin, vmax = image.get_clim()
+    return np.asarray(image.get_array()), (vmin, vmax), image.get_cmap().name
+
+
+def test_a_video_frame_shows_the_plot_s_field_scale_and_colormap() -> None:
+    """The frame is laid out for a video, but what it shows is the plot's."""
+    from matplotlib.figure import Figure
+
+    from phonometry._plot.simulation import fdtd_frame
+
+    res = _result()
+    frame = 2
+    field = res.snapshots[frame]
+    plotted = res.plot(ax=Figure().add_subplot(), kind="snapshot", frame=frame)
+    framed = fdtd_frame(
+        Figure().add_subplot(),
+        field,
+        dx=res.dx,
+        shape=res.shape,
+        sources=res.sources,
+        probe_positions=res.probe_positions,
+        obstacle_mask=res.obstacle_mask,
+        decimation=res.snapshot_decimation,
+        color_limit=float(np.abs(field).max()),
+        time_s=float(res.snapshot_times[frame]),
+        last_time_s=float(res.snapshot_times[-1]),
+        language="en",
+    )
+    shown, scale, colormap = _shown(plotted.images[0])
+    assert np.array_equal(np.asarray(framed.get_array()), shown)
+    assert framed.get_clim() == scale
+    assert framed.get_cmap().name == colormap == "RdBu_r"
+    assert framed.get_extent() == pytest.approx(plotted.images[0].get_extent())
+
+
+def test_an_update_moves_the_data_and_the_time_and_keeps_the_scale() -> None:
+    from matplotlib.figure import Figure
+
+    from phonometry._plot.simulation import (
+        _update_snapshot,
+        fdtd_frame,
+        fdtd_snapshot_title,
+    )
+
+    res = _result()
+    ax = Figure().add_subplot()
+    image = fdtd_frame(
+        ax,
+        res.snapshots[0],
+        dx=res.dx,
+        shape=res.shape,
+        sources=res.sources,
+        probe_positions=res.probe_positions,
+        obstacle_mask=res.obstacle_mask,
+        decimation=1,
+        color_limit=0.25,
+        time_s=0.0,
+        last_time_s=float(res.snapshot_times[-1]),
+        language="es",
+    )
+    later = res.snapshots[-1] * 10.0
+    title = fdtd_snapshot_title(float(res.snapshot_times[-1]), "es")
+    _update_snapshot(image, later, title)
+    assert image.get_clim() == (-0.25, 0.25)
+    assert np.array_equal(np.asarray(image.get_array()), later)
+    assert ax.get_title() == title
+    assert "Campo de presión FDTD" in title
+    assert "," in title  # the Spanish decimal comma of the time
+
+
+def test_an_elastic_video_frame_shows_the_plot_s_field_scale_and_colormap() -> None:
+    from matplotlib.figure import Figure
+
+    from phonometry._plot.simulation import elastic_frame
+
+    pulse = GaussianPulse(ix=0, iy=0, half_width_s=4e-5)
+    res = elastic_fdtd_simulation(
+        ElasticRun(
+            4000.0,
+            2300.0,
+            0.01,
+            2e-3,
+            rho=2500.0,
+            shape=(24, 30),
+            sources=[ExplosionSource(ix=15, iy=12, waveform=pulse.value)],
+            recording=ElasticRecording(
+                probes=[(5, 5)], snapshot_every=5, snapshot_field="vy"
+            ),
+        )
+    )
+    field = res.snapshots[3]
+    plotted = res.plot(ax=Figure().add_subplot(), kind="snapshot", frame=3)
+    framed = elastic_frame(
+        Figure().add_subplot(),
+        field,
+        dx=res.dx,
+        shape=res.shape,
+        sources=res.sources,
+        probe_positions=res.probe_positions,
+        obstacle_mask=res.obstacle_mask,
+        decimation=res.snapshot_decimation,
+        snapshot_field=res.snapshot_field,
+        color_limit=float(np.abs(field).max()),
+        time_s=float(res.snapshot_times[3]),
+        last_time_s=float(res.snapshot_times[-1]),
+        language="es",
+    )
+    shown, scale, colormap = _shown(plotted.images[0])
+    assert np.array_equal(np.asarray(framed.get_array()), shown)
+    assert framed.get_clim() == scale
+    assert framed.get_cmap().name == colormap == "RdBu_r"
+    assert framed.get_extent() == pytest.approx(plotted.images[0].get_extent())
+
+
+def test_the_snapshot_plot_refuses_a_colour_limit_by_name() -> None:
+    """The scale of a single snapshot is its own field's; vmin and vmax change it."""
+    res = _result()
+    with pytest.raises(TypeError, match="color_limit cannot be overridden"):
+        res.plot(kind="snapshot", color_limit=0.5)
+    plt.close("all")
+
+
+def test_the_elastic_snapshot_plot_refuses_a_colour_limit_by_name() -> None:
+    """The elastic snapshot takes its scale from its field as the acoustic one does."""
+
+    def pulse(t: float) -> float:
+        return float(np.exp(-(((t - 2e-5) / 5e-6) ** 2)))
+
+    res = elastic_fdtd_simulation(
+        ElasticRun(
+            4000.0,
+            2300.0,
+            0.01,
+            1e-4,
+            rho=2500.0,
+            shape=(20, 21),
+            sources=[ExplosionSource(ix=10, iy=9, waveform=pulse)],
+            recording=ElasticRecording(snapshot_every=4),
+        )
+    )
+    with pytest.raises(TypeError, match="color_limit cannot be overridden"):
+        res.plot(kind="snapshot", color_limit=0.5)
+    plt.close("all")

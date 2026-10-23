@@ -591,6 +591,30 @@ conversion, Scholte interface waves and immersed-plate transmission. That
 solver has its own guide,
 [Elastic waves and fluid-solid coupling](elastic-waves.md).
 
+## Writing the run to a video
+
+The run record this guide builds goes to the video writer as it is:
+`simulation.write_fdtd_animation` steps it and draws its pressure field into
+a WebM, an MP4 or a GIF as it is computed, a frame every `snapshot_every`
+steps, without storing the snapshots.
+[Writing animations and FDTD runs to video](../io/videos.md) says how a
+frame is drawn and its colour scale found, which encoder writes the file, and
+how the same call steps on a GPU or goes to a node.
+
+```python
+from phonometry import simulation
+
+run = simulation.FDTDRun(
+    343.0, 0.01, 2e-3,
+    shape=(60, 80),
+    sources=[simulation.GaussianPulse(ix=40, iy=30, half_width_s=5e-5)],
+    recording=simulation.FDTDRecording(snapshot_every=10),
+)
+res = simulation.write_fdtd_animation(
+    "fdtd_pulse.webm", run, frame=simulation.AnimationFrame(size=(480, 360))
+)
+```
+
 ## Quick answers
 
 ### How do I choose the FDTD grid spacing?

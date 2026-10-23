@@ -472,6 +472,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.simulation.ntff",
             "phonometry.simulation.elastic_fdtd",
             "phonometry.simulation.compute",
+            "phonometry.simulation.video",
         ),
     ),
 )
@@ -762,6 +763,10 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "sidecar_path": "phonometry.io",
     "write": "phonometry.io",
     "write_sidecar": "phonometry.io",
+    "write_video": "phonometry.io",
+    "VideoOptions": "phonometry.io",
+    "FFmpegNotFoundError": "phonometry.io",
+    "VideoEncoderError": "phonometry.io",
     # The catalogue row types are defined in phonometry._internal.catalogue,
     # because the domain packages whose tables hand out rows import them and
     # io importing a domain would close a cycle; io publishes them, as it

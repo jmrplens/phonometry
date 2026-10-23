@@ -82,7 +82,7 @@ van Vossen, Robertsson & Chapman, *Geophysics* 67(2), 618-624 (2002).
 from __future__ import annotations
 
 import dataclasses
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
 from dataclasses import KW_ONLY, dataclass
 from functools import cached_property
 from types import MappingProxyType
@@ -1979,6 +1979,27 @@ def _sample_probes(
     return 0.5 * (above + below)
 
 
+def _elastic_probe_setup(
+    sim: ElasticFDTD2D,
+    probe_ix: NDArray[np.int_],
+    probe_fields: tuple[str, ...],
+    steps: int,
+) -> tuple[dict[str, DeviceArray], DeviceArray | None]:
+    """The probes' gathers on the device, and a device buffer off NumPy.
+
+    As :func:`~phonometry.simulation.fdtd._probe_setup`, for the elastic
+    engine: the gathers are :func:`_probe_gathers`' (none without probes),
+    and the buffer holds one layer per entry of ``probe_fields``.
+    """
+    b = sim._backend
+    n_probes = probe_ix.shape[0]
+    gathers = _probe_gathers(sim, probe_ix[:, 1], probe_ix[:, 0]) if n_probes else {}
+    buffer = (
+        None if b.name == "numpy" else b.zeros((n_probes, len(probe_fields), steps + 1))
+    )
+    return gathers, buffer
+
+
 def _store_samples(
     sim: ElasticFDTD2D,
     probe_fields: tuple[str, ...],
@@ -2000,6 +2021,45 @@ def _store_samples(
             buffer[:, k, column] = sample
 
 
+def _elastic_march(
+    sim: ElasticFDTD2D,
+    steps: int,
+    probe_ix: NDArray[np.int_],
+    probe_fields: tuple[str, ...],
+    snapshot_every: int | None,
+    snapshot_field: Field,
+    snapshot_decimation: int,
+    signals: NDArray[np.float64],
+) -> Generator[DeviceArray, None, None]:
+    """Step the engine, record the probes, yield the snapshot field.
+
+    As :func:`~phonometry.simulation.fdtd._march`: with ``snapshot_every``
+    set, ``snapshot_field`` at the cell centres, cut to every
+    ``snapshot_decimation``-th cell, is yielded at t = 0 and after every
+    ``snapshot_every``-th step, on the device; every step is reported to the
+    step hook; the steps after the last yield run when the generator is
+    exhausted. On NumPy the probe samples go straight into ``signals``; on a
+    device into a buffer there, which comes to the host once, after the
+    march.
+    """
+    b = sim._backend
+    d = snapshot_decimation
+    if snapshot_every is not None:
+        yield sim.collocated(snapshot_field)[::d, ::d]
+    n_probes = probe_ix.shape[0]
+    gathers, buffer = _elastic_probe_setup(sim, probe_ix, probe_fields, steps)
+    with b.context():
+        for i in range(steps):
+            sim.step()
+            _observer.step_done(i + 1, steps)
+            if n_probes:
+                _store_samples(sim, probe_fields, gathers, i + 1, signals, buffer)
+            if snapshot_every is not None and (i + 1) % snapshot_every == 0:
+                yield sim.collocated(snapshot_field)[::d, ::d]
+    if buffer is not None:
+        signals[...] = b.to_host(buffer)
+
+
 def _record_elastic_run(
     sim: ElasticFDTD2D,
     steps: int,
@@ -2019,11 +2079,12 @@ def _record_elastic_run(
     of them. Both are allocated by the caller before the march, so that the
     run is never held twice, as a list of frames and their stack.
 
-    On NumPy the probe samples are written straight into ``signals``; on a
-    device they go into a buffer there, which comes to the host once, after
-    the march. Each snapshot is cut to every ``snapshot_decimation``-th cell
-    on the device and comes to the host as it is taken, so only the cells
-    it keeps cross.
+    The probes are read through :func:`_elastic_probe_setup` and
+    :func:`_store_samples`. On NumPy the probe samples are written straight
+    into ``signals``; on a device they go into a buffer there, which comes to
+    the host once, after the march. Each snapshot is cut to every
+    ``snapshot_decimation``-th cell on the device and comes to the host as
+    it is taken, so only the cells it keeps cross.
 
     After each step it tells a watcher, if one is set (:mod:`._observer`), how
     many steps are done; a node uses that to stop a run whose client went away.
@@ -2033,10 +2094,7 @@ def _record_elastic_run(
     if snapshots is not None:
         snapshots[0] = b.to_host(sim.collocated(snapshot_field)[::d, ::d])
     n_probes = probe_ix.shape[0]
-    gathers = _probe_gathers(sim, probe_ix[:, 1], probe_ix[:, 0]) if n_probes else {}
-    buffer = (
-        None if b.name == "numpy" else b.zeros((n_probes, len(probe_fields), steps + 1))
-    )
+    gathers, buffer = _elastic_probe_setup(sim, probe_ix, probe_fields, steps)
     with b.context():
         for i in range(steps):
             sim.step()

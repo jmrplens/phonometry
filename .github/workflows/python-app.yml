@@ -723,6 +723,11 @@ jobs:
       with:
         python-version: "3.13"
         cache: 'pip'
+    # The video guide's examples encode, so the snippets run where ffmpeg is.
+    - name: Install ffmpeg
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -y -q --no-install-recommends ffmpeg
     - name: Install dependencies
       # The guides plot and print fiches, so the snippets need the figure and
       # report stacks as well as the package itself.
@@ -1322,6 +1327,54 @@ jobs:
     - name: Run the backend tests
       run: pytest -q -rfEP -n auto tests/simulation
 
+  # The video writer pipes frames into ffmpeg, a system program rather than a
+  # wheel, so the main matrix runs its logic against a fake ffmpeg and skips
+  # the real encodes. This job installs Ubuntu's ffmpeg and runs them: WebM,
+  # MP4 and GIF are written, then decoded and counted with ffprobe. Whether
+  # that ffmpeg has SVT-AV1 decides whether the AV1-first CPU path was
+  # tested, and the summary says which rather than failing the build over a
+  # distribution's choice of encoders.
+  video:
+    name: Videos encode with a real ffmpeg
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install ffmpeg
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -y -q --no-install-recommends ffmpeg
+    - name: Say which CPU encoders this ffmpeg has
+      run: |
+        ffmpeg -hide_banner -version | head -1
+        if ffmpeg -hide_banner -encoders | grep -q ' libsvtav1 '; then
+          echo "AV1-first CPU path: tested, this ffmpeg has SVT-AV1" >> "$GITHUB_STEP_SUMMARY"
+        else
+          echo "AV1-first CPU path: untested, this ffmpeg has no SVT-AV1 (VP9 was tested)" >> "$GITHUB_STEP_SUMMARY"
+        fi
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt -r requirements-dev.txt
+        pip install -e .
+    # -rs prints why a test skipped, so a missing encoder reads in the log.
+    - name: Write and decode the videos
+      run: >-
+        pytest -q -rs -n auto
+        tests/io/test_video_encoders.py tests/io/test_write_video.py
+        tests/io/test_write_video_ffmpeg.py
+        tests/simulation/test_write_fdtd_animation.py
+        tests/simulation/test_write_elastic_fdtd_animation.py
+        tests/simulation/test_video_job.py
+
   # Apple's MPS device, on the macOS runners that expose a working one
   # (macOS 14 reports MPS available but cannot allocate on it). It holds the
   # float32 tolerance the guide publishes for torch:mps, and runs the long
@@ -1360,10 +1413,12 @@ jobs:
   # the cpu stage of the node image (docker/node/Dockerfile) with the pins it
   # installs itself, serves it through sshd on localhost, names it in a hosts
   # file, and runs the simulation functions both ways, compared with
-  # array_equal: the same pins on the same CPU agree bit for bit. It lints
-  # the image's Dockerfile and its provisioning script first. A pull request
-  # that moves the digest of the cpu stage's base image runs it too, so a
-  # new digest is checked before it is merged.
+  # array_equal: the same pins on the same CPU agree bit for bit. It writes
+  # a video there too, compares its run with the run here and counts its
+  # frames here with ffprobe. It lints the image's Dockerfile and its
+  # provisioning script first. A pull request that moves the digest of the
+  # cpu stage's base image runs it too, so a new digest is checked before it
+  # is merged.
   remote-node:
     name: Remote simulation on a localhost node
     # The release the node image's cpu stage starts from (docker/node/
@@ -1453,6 +1508,11 @@ jobs:
         printf '%s\n' "[hosts.ci]" 'ssh = "phonometry-ci-node"' 'runner = "docker"' \
           'image = "phonometry-node:cpu"' 'label = "the localhost node of CI"' 'timeout_s = 600' \
           > "$RUNNER_TEMP/hosts.toml"
+    # ffprobe counts the frames of the video the node sends back.
+    - name: Install ffmpeg
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install -y -q --no-install-recommends ffmpeg
     # A test that skips compares nothing, and pytest exits 0 all the same:
     # the job fails on any skip, whatever its reason. pytest writes no
     # colour, so that a summary line starts with SKIPPED and not with an
@@ -1466,7 +1526,8 @@ jobs:
         PHONOMETRY_HOSTS_FILE: ${{ runner.temp }}/hosts.toml
       run: |
         set -o pipefail
-        pytest -q --color=no -rfEPs tests/simulation/test_localhost_node.py | tee "$RUNNER_TEMP/node-tests.txt"
+        pytest -q --color=no -rfEPs tests/simulation/test_localhost_node.py tests/simulation/test_video_remote_node.py \
+          | tee "$RUNNER_TEMP/node-tests.txt"
         if grep -q '^SKIPPED' "$RUNNER_TEMP/node-tests.txt"; then
           echo "::error::The localhost-node tests skipped instead of running on the node."
           exit 1

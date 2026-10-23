@@ -84,7 +84,7 @@ from .compute import Compute, RunProvenance, _local_request, _requested
 from .ntff import ContourPhasors
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Sequence
+    from collections.abc import Callable, Generator, Iterable, Sequence
 
     from matplotlib.axes import Axes
 
@@ -2332,6 +2332,84 @@ def _recording_or_empty[R: RichDisplay](recording: object, record: type[R]) -> R
     return recording
 
 
+def _probe_setup(
+    sim: FDTD2D, probe_ix: NDArray[np.int_], steps: int
+) -> tuple[_backends.DeviceArray, _backends.DeviceArray | None]:
+    """The probes' flat cell indices on the device, and a device buffer off NumPy.
+
+    One flat index per cell, ``row * nx + column``, since the Array API
+    standard indexes one axis with an integer array, not two at once.
+    """
+    b = sim._backend
+    nx = sim.p.shape[1]
+    centre = b.index(probe_ix[:, 1] * nx + probe_ix[:, 0])
+    buffer = None if b.name == "numpy" else b.zeros((probe_ix.shape[0], steps + 1))
+    return centre, buffer
+
+
+def _store_pressures(
+    sim: FDTD2D,
+    centre: _backends.DeviceArray,
+    column: int,
+    pressures: NDArray[np.float64],
+    buffer: _backends.DeviceArray | None,
+) -> None:
+    """Write this step's probe samples into column *column* of the record.
+
+    Into ``pressures`` itself when there is no device ``buffer`` (NumPy),
+    into the buffer otherwise.
+    """
+    xp = sim._xp
+    sample = xp.take(xp.reshape(sim.p, (-1,)), centre)
+    if buffer is None:
+        pressures[:, column] = sample
+    else:
+        buffer[:, column] = sample
+
+
+def _march(
+    sim: FDTD2D,
+    steps: int,
+    probe_ix: NDArray[np.int_],
+    snapshot_every: int | None,
+    snapshot_decimation: int,
+    pressures: NDArray[np.float64],
+) -> Generator[_backends.DeviceArray, None, None]:
+    """Step the engine *steps* times, recording the probes, yielding the field.
+
+    With ``snapshot_every`` set, the pressure cut to every
+    ``snapshot_decimation``-th cell is yielded at t = 0 and after every
+    ``snapshot_every``-th step, still on the device and still the engine's
+    own: the caller copies what it keeps before it asks for the next one.
+    The steps after the last yield run when the generator is exhausted, so a
+    caller drains it to the end, or closes it when it stops early (which
+    leaves the device context it is suspended in). Each step is reported to
+    the step hook, as :func:`_record_run` reports it, so a node stops a run
+    whose client went away; a writer that finds its colour limit first
+    marches twice, and the count goes from 1 to *steps* twice.
+
+    It is :func:`_record_run`'s march with the field handed out instead of
+    stored, for a writer that draws each frame and keeps none; the two share
+    the probe helpers, so the probes record the same numbers either way.
+    """
+    b = sim._backend
+    d = snapshot_decimation
+    if snapshot_every is not None:
+        yield sim.p[::d, ::d]
+    n_probes = probe_ix.shape[0]
+    centre, buffer = _probe_setup(sim, probe_ix, steps)
+    with b.context():
+        for i in range(steps):
+            sim.step()
+            _observer.step_done(i + 1, steps)
+            if n_probes:
+                _store_pressures(sim, centre, i + 1, pressures, buffer)
+            if snapshot_every is not None and (i + 1) % snapshot_every == 0:
+                yield sim.p[::d, ::d]
+    if buffer is not None:
+        pressures[...] = b.to_host(buffer)
+
+
 def _record_run(
     sim: FDTD2D,
     steps: int,
@@ -2349,9 +2427,8 @@ def _record_run(
     allocated by the caller before the march, so that the run is never held
     twice, as a list of frames and their stack.
 
-    The probes are read through one flat index per cell, ``row * nx +
-    column``, since the Array API standard indexes one axis with an integer
-    array, not two at once. On NumPy the samples are written straight into
+    The probes are read through :func:`_probe_setup` and
+    :func:`_store_pressures`. On NumPy the samples are written straight into
     ``pressures``; on a device they go into a buffer there, which comes to
     the host once, after the march. Each snapshot is cut to every
     ``snapshot_decimation``-th cell on the device and comes to the host as
@@ -2360,24 +2437,18 @@ def _record_run(
     After each step it tells a watcher, if one is set (:mod:`._observer`), how
     many steps are done; a node uses that to stop a run whose client went away.
     """
-    b, xp = sim._backend, sim._xp
+    b = sim._backend
     d = snapshot_decimation
     if snapshots is not None:
         snapshots[0] = b.to_host(sim.p[::d, ::d])
     n_probes = probe_ix.shape[0]
-    nx = sim.p.shape[1]
-    centre = b.index(probe_ix[:, 1] * nx + probe_ix[:, 0])
-    buffer = None if b.name == "numpy" else b.zeros((n_probes, steps + 1))
+    centre, buffer = _probe_setup(sim, probe_ix, steps)
     with b.context():
         for i in range(steps):
             sim.step()
             _observer.step_done(i + 1, steps)
             if n_probes:
-                sample = xp.take(xp.reshape(sim.p, (-1,)), centre)
-                if buffer is None:
-                    pressures[:, i + 1] = sample
-                else:
-                    buffer[:, i + 1] = sample
+                _store_pressures(sim, centre, i + 1, pressures, buffer)
             if (
                 snapshots is not None
                 and snapshot_every is not None

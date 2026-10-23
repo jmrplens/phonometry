@@ -413,6 +413,7 @@ export const apiSections = {
       'reference/api/simulation/ntff',
       'reference/api/simulation/elastic-fdtd',
       'reference/api/simulation/compute',
+      'reference/api/simulation/video',
     ],
   },
 };

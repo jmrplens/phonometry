@@ -114,6 +114,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Overview](https://docs.jmrp.io/phonometry/io/)
 - [Reading and writing measurement audio](https://docs.jmrp.io/phonometry/io/audio-files/)
 - [Your own catalogues](https://docs.jmrp.io/phonometry/io/material-catalogues/)
+- [Writing animations and FDTD runs to video](https://docs.jmrp.io/phonometry/io/videos/)
 
 ## Hearing and perception
 
@@ -723,6 +724,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [simulation/elastic-fdtd](https://docs.jmrp.io/phonometry/reference/api/simulation/elastic-fdtd/)
 - [simulation/fdtd](https://docs.jmrp.io/phonometry/reference/api/simulation/fdtd/)
 - [simulation/ntff](https://docs.jmrp.io/phonometry/reference/api/simulation/ntff/)
+- [simulation/video](https://docs.jmrp.io/phonometry/reference/api/simulation/video/)
 - [solids/catalogue](https://docs.jmrp.io/phonometry/reference/api/solids/catalogue/)
 - [solids/damping](https://docs.jmrp.io/phonometry/reference/api/solids/damping/)
 - [solids/damping-treatments](https://docs.jmrp.io/phonometry/reference/api/solids/damping-treatments/)

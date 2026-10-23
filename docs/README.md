@@ -94,6 +94,7 @@ the rows every published catalogue hands out, and written back.
 
 - [Reading and writing measurement audio](io/audio-files.md): the whole workflow on one runnable page, from the meter's WAV to the calibrated level, the lossy warning, streaming, BWF writing, the sidecar and lossless conversion
 - [Your own catalogues](io/material-catalogues.md): a data sheet, a test report or a measurement of yours as a catalogue file, read into the rows every published catalogue hands out, searched with the same lookups, handed to the same models and completed in your editor with its JSON Schema
+- [Writing animations and FDTD runs to video](io/videos.md): any matplotlib animation to WebM, MP4 or GIF through ffmpeg, the encoder of a WebM or MP4 found by a real trial encode, and an acoustic or elastic FDTD run written straight to a video without storing its snapshots
 
 ### [Hearing and perception](perception/index.md)
 

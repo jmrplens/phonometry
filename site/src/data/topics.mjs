@@ -158,6 +158,7 @@ export const topics = [
       { slug: 'io', label: 'Overview', translations: { es: 'Resumen' } },
       'io/audio-files',
       'io/material-catalogues',
+      'io/videos',
       apiGroup('io'),
     ],
   },

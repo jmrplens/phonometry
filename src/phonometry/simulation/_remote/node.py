@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import contextlib
 import dataclasses
+import errno
 import os
 import shutil
 import sys
@@ -114,20 +115,31 @@ class _Watcher:
 def _watch_input(
     stream: IO[bytes], cancelled: threading.Event, finished: threading.Event
 ) -> None:
-    """Set *cancelled* when the input ends; end the process if the run then does not stop."""
+    """Set *cancelled* when the input ends; end the process if the run then does not stop.
+
+    :raises OSError: when the input cannot be copied for the thread that
+        reads it, as with no descriptor left (``EMFILE``).
+    """
+    # The thread reads a descriptor of its own, duplicated here before it
+    # starts, and closes it when the input ends. The stream stays the
+    # caller's, who may close it as soon as serve returns: a number taken
+    # from it inside the thread could by then name the next file opened, and
+    # the thread would read that file's bytes. On Windows the copy also has
+    # a lock of its own, so closing the stream never waits for this read. An
+    # input that is no file, or one already closed, is an ended one; a copy
+    # that cannot be made is an error, not a client gone.
+    try:
+        number: int | None = stream.fileno()
+    except (OSError, ValueError):
+        number = None
+    descriptor = None if number is None else os.dup(number)
 
     def watch() -> None:
-        # Anything the client sends after the job is ignored: only its end
-        # matters, and an input closed under this reader, or one that is no
-        # file, is an ended one. The descriptor is read, not the buffered
-        # file: a thread blocked in the file's read holds its lock, and the
-        # interpreter aborts at exit when it cannot take that lock.
-        with contextlib.suppress(OSError, ValueError):
-            descriptor = stream.fileno()
-            ended = False
-            while not ended:
-                ended = not os.read(descriptor, 1 << 16)
-        cancelled.set()
+        try:
+            if descriptor is not None:
+                _read_to_end(descriptor)
+        finally:
+            cancelled.set()
         if not finished.wait(_GRACE_S):
             sys.stderr.write(
                 "phonometry: the client is gone and the run did not stop; the node exits\n"
@@ -136,6 +148,27 @@ def _watch_input(
             os._exit(130)
 
     threading.Thread(target=watch, name="phonometry-node-input", daemon=True).start()
+
+
+def _read_to_end(descriptor: int) -> None:
+    """Read *descriptor* until it ends, then close it; a read that fails ends it too.
+
+    Anything the client sends after the job is ignored: only its end
+    matters. The descriptor is read, not a buffered file: a thread blocked
+    in a file's read holds its lock, and the interpreter aborts at exit
+    when it cannot take that lock. A read refused for a descriptor that is
+    no longer open (``EBADF``) leaves the number alone: closed by another
+    hand, it may already name a file of someone else's.
+    """
+    try:
+        chunk = os.read(descriptor, 1 << 16)
+        while chunk:
+            chunk = os.read(descriptor, 1 << 16)
+    except OSError as exc:
+        if exc.errno == errno.EBADF:
+            return
+    with contextlib.suppress(OSError):
+        os.close(descriptor)
 
 
 def _forget_host() -> None:
@@ -286,6 +319,9 @@ def serve(stream: IO[bytes], frames: IO[bytes]) -> int:
     :raises Refused: for a job that names a function the node does not run,
         or whose placement or arguments do not rebuild.
     :raises FrameError: for a job frame that breaks the framing.
+    :raises OSError: when the input cannot be copied for the thread that
+        watches it, as with no descriptor left; the bootstrap sends it as an
+        error frame.
     """
     _forget_host()
     name, arguments, placement = _read_job(stream)

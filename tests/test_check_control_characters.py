@@ -13,8 +13,9 @@ corpus is written with and must keep.
 from __future__ import annotations
 
 import pathlib
-import subprocess
 import sys
+
+import child_process
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -126,12 +127,13 @@ def test_nothing_the_scan_skips_is_text() -> None:
     """
     root = ccc.ROOT
     # A fixed argument vector
-    listed = subprocess.run(
+    listed = child_process.run(
         # git is on PATH
         ["git", "-C", str(root), "ls-files", "-z"],
         capture_output=True,
         check=True,
         text=True,
+        timeout=120,
     ).stdout
     tracked = [root / name for name in listed.split("\0") if name]
     scanned = set(ccc.tracked_files())

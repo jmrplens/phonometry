@@ -360,6 +360,10 @@ exclude_dirs = ["tests", ".venv"]
 relative_files = true
 
 [tool.pytest.ini_options]
+# faulthandler_exit_on_timeout, which the hang guard below rests on, came
+# with pytest 9.0; an older pytest would fail every failing test with an
+# INTERNALERROR instead of the failure.
+minversion = "9.0"
 pythonpath = ["tests"]
 # Group-aware distribution for `-n auto` runs: tests marked with
 # `xdist_group` land on one worker, so an expensive module-scoped fixture
@@ -367,7 +371,37 @@ pythonpath = ["tests"]
 # conformance registry) is computed once per run instead of once per worker
 # that happens to pick one of its consumers. Unmarked tests are distributed
 # exactly as with the default `load` mode, and the flag is inert without `-n`.
-addopts = ["--dist=loadgroup"]
+#
+# A worker that dies is not replaced (--max-worker-restart=0). Without it,
+# pytest-xdist 3.8 replaces the dead worker: if the queue has already
+# emptied, as when a test hangs near the end of a run, the controller then
+# waits forever with the other workers idle; if it has not, it puts the group
+# back with the hung test in it, another worker hangs on that test in its
+# turn, and the run only ends after 4 x n restarts, hours past the job's
+# limit. Without restarts the run stops at the first worker the guard below
+# ends, which costs the tests still queued, run by no worker and named by
+# nothing, and that worker's coverage; the test that hung is the one to fix
+# first. Inert without `-n` too.
+addopts = ["--dist=loadgroup", "--max-worker-restart=0"]
+# A test still running after fifteen minutes has hung. The slowest test takes
+# up to 258 s on a CI runner, a Windows one: the metadiffuser NTFF test with
+# its group's fixture, between 104 s and 258 s over 27 Windows cells of 9
+# runs, where the slowest on Linux took 125 s and on macOS 112 s. 900 s is
+# three and a half times the slowest seen, since a limit hit by a slow runner
+# ends the whole run. The tests-perf and minimum-versions jobs write no JUnit
+# file, so their slowest test is not measured; they run on Linux, and each
+# of their runs takes half as long as a Windows one.
+# pytest then prints the stack of every thread, the test's own frames among
+# them, and ends the process. Under `-n` the controller fails the test that
+# worker was running, by name, and stops the run once the other workers have
+# run the tests already sent to them, with the JUnit and coverage files
+# written; without `-n` the process ends at the stacks, with no summary.
+# pytest lifts the limit when a test fails, and tests/hang_guard.py sets it
+# again, so the teardown of a failed test has the whole limit from the
+# failure. Entering pdb turns it off, and `-o faulthandler_timeout=0` turns
+# it off for a session that needs longer.
+faulthandler_timeout = 900
+faulthandler_exit_on_timeout = true
 markers = [
     # The minimum-versions CI job runs the library's tests at the dependency
     # floors with --without-pinned-stack, which leaves the modules carrying

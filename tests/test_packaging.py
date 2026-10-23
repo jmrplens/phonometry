@@ -37,10 +37,10 @@ here can gate, so the prose keeps the mechanism and drops the number.
 
 import pathlib
 import re
-import subprocess
 import sys
 import tomllib
 
+import child_process
 import pytest
 
 import phonometry
@@ -174,11 +174,12 @@ def _tracked(paths: list[str], root: pathlib.Path = _ROOT) -> set[str]:
     about a repository built for the purpose.
     """
     # Fixed argv, paths from our own page
-    listed = subprocess.run(
+    listed = child_process.run(
         ["git", "-C", str(root), "ls-files", "-z", "--", *paths],
         capture_output=True,
         text=True,
         check=True,
+        timeout=120,
     ).stdout
     return set(listed.split("\0")) - {""}
 
@@ -186,11 +187,12 @@ def _tracked(paths: list[str], root: pathlib.Path = _ROOT) -> set[str]:
 def _git(root: pathlib.Path, *args: str) -> None:
     """Run one git command in *root*, for building a fixture repository."""
     # Fixed argv, arguments from this file
-    subprocess.run(
+    child_process.run(
         ["git", "-C", str(root), *args],
         capture_output=True,
         text=True,
         check=True,
+        timeout=120,
     )
 
 

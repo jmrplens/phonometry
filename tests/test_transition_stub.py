@@ -274,6 +274,7 @@ def test_the_lint_gate_reaches_the_shim() -> None:
         capture_output=True,
         text=True,
         check=False,
+        timeout=120,
     )
     visited = {pathlib.Path(p).resolve() for p in listing.stdout.splitlines() if p}
     assert _SHIM.resolve() in visited, (

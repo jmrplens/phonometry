@@ -20,6 +20,7 @@ import pathlib
 import subprocess  # nosec B404 - runs this interpreter on a fixed script
 import sys
 
+import child_process
 import pytest
 
 _SCRIPTS = pathlib.Path(__file__).resolve().parent.parent / "scripts"
@@ -57,7 +58,7 @@ def test_a_forked_child_runs_its_handler_exactly_once(tmp_path: pathlib.Path) ->
         target=_register_in_child, args=(str(record),)
     )
     child.start()
-    child.join()
+    child_process.join(child, timeout=120)
 
     assert child.exitcode == 0
     assert record.read_text(encoding="utf-8") == f"{child.pid}\n"
@@ -76,7 +77,11 @@ def test_a_process_that_exits_normally_runs_its_handler_exactly_once(
         "process_exit.run_at_exit(lambda: path.open('a').write('ran\\n'))\n"
     )
     done = subprocess.run(  # nosec B603 - this interpreter, a fixed script
-        [sys.executable, "-c", script], check=False, capture_output=True, text=True
+        [sys.executable, "-c", script],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=120,
     )
 
     assert done.returncode == 0, done.stderr
@@ -116,7 +121,7 @@ def test_a_variant_forked_after_the_parent_visited_writes_its_own_fragment(
         target=_visit_in_child, args=("drawn_in_the_child",)
     )
     child.start()
-    child.join()
+    child_process.join(child, timeout=120)
 
     assert child.exitcode == 0
     fragment = recording / f"{child.pid}.json"

@@ -615,6 +615,7 @@ def test_the_design_does_not_depend_on_the_blas_thread_count() -> None:
             capture_output=True,
             text=True,
             env=environment,
+            timeout=120,
         ).stdout.strip()
 
     assert digest("1") == digest("4")
@@ -663,6 +664,7 @@ def test_the_design_does_not_depend_on_the_blas_kernel() -> None:
             capture_output=True,
             text=True,
             env=environment,
+            timeout=120,
         )
         if finished.returncode == 0:
             digests[kernel] = finished.stdout.strip()
@@ -707,6 +709,7 @@ def test_the_design_does_not_depend_on_the_numpy_kernel() -> None:
             capture_output=True,
             text=True,
             env=environment,
+            timeout=120,
         )
         if finished.returncode == 0:
             digests[disabled or "everything"] = finished.stdout.strip()

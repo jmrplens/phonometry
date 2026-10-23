@@ -1138,6 +1138,10 @@ jobs:
 
   tests:
     runs-on: ${{ matrix.os }}
+    # Its longest cell in the last 72 passing runs took 45 min, on Windows.
+    # The Run tests step has a limit of its own; this one leaves the steps
+    # around it, the setup before and the uploads after, a quarter of an hour.
+    timeout-minutes: 95
     permissions:
       contents: read
       # Required for the OIDC-based Codecov upload (no token secret needed).
@@ -1178,6 +1182,15 @@ jobs:
       # pytest-cov combines the per-worker coverage into a single coverage.xml.
       # Pin the numerical thread pools to one thread each so the per-core xdist
       # workers do not oversubscribe the CPU with nested BLAS/OpenMP pools.
+      # The step took at most 43 min in those runs. A test that hangs is
+      # ended fifteen minutes after it started (faulthandler_timeout in
+      # pyproject.toml), and fifteen minutes after its failure when its
+      # teardown hangs; the other workers then run what was already sent to
+      # them, so a hang late in the run still ends inside 80 min, with the
+      # test named and the JUnit and coverage files written. Past that the
+      # runner stops pytest, which may then write neither for the uploads
+      # below.
+      timeout-minutes: 80
       env:
         OMP_NUM_THREADS: "1"
         MKL_NUM_THREADS: "1"
@@ -1215,6 +1228,9 @@ jobs:
   tests-perf:
     name: tests (numba-jitted kernel)
     runs-on: ubuntu-latest
+    # At most 23 min in its last 72 passing runs, and a hung test ends the
+    # run fifteen minutes after it started (pyproject.toml).
+    timeout-minutes: 50
     permissions:
       contents: read
     # Declared once for the whole job so the guard below runs under exactly the
@@ -1279,6 +1295,9 @@ jobs:
   array-api:
     name: FDTD engines on array-api-strict and torch (CPU)
     runs-on: ubuntu-latest
+    # Under 5 min in its last 18 passing runs, and a hung test ends the run
+    # fifteen minutes after it started (pyproject.toml).
+    timeout-minutes: 25
     permissions:
       contents: read
     # One thread per pool, as in the main test job: torch and the BLAS pools
@@ -1330,6 +1349,9 @@ jobs:
   mps:
     name: FDTD engines on torch MPS
     runs-on: macos-15
+    # Under 2 min in its last 18 passing runs, and a hung test ends the run
+    # fifteen minutes after it started (pyproject.toml).
+    timeout-minutes: 25
     permissions:
       contents: read
     steps:
@@ -1430,8 +1452,10 @@ jobs:
     # account whose password is locked, as a runner's may be: '*' is no
     # password, and not a locked one. sshd logs to a file of the job, which
     # the last step shows when the job fails or is cancelled. The hosts file
-    # bounds each run, so a node that stops answering fails its test instead
-    # of holding the job.
+    # bounds each run at five minutes, under the fifteen pytest gives a test
+    # (faulthandler_timeout in pyproject.toml), so a node that stops
+    # answering fails its test with the client's own error instead of
+    # holding the job or ending pytest; the step takes seconds.
     - name: Serve the node through sshd on localhost
       run: |
         user="$(id -un)"
@@ -1451,7 +1475,7 @@ jobs:
         chmod 600 ~/.ssh/config
         ssh -o BatchMode=yes phonometry-ci-node "docker image inspect --format '{{.Id}}' phonometry-node:cpu"
         printf '%s\n' "[hosts.ci]" 'ssh = "phonometry-ci-node"' 'runner = "docker"' \
-          'image = "phonometry-node:cpu"' 'label = "the localhost node of CI"' 'timeout_s = 600' \
+          'image = "phonometry-node:cpu"' 'label = "the localhost node of CI"' 'timeout_s = 300' \
           > "$RUNNER_TEMP/hosts.toml"
     # A test that skips compares nothing, and pytest exits 0 all the same:
     # the job fails on any skip, whatever its reason. pytest writes no
@@ -1502,6 +1526,9 @@ jobs:
   minimum-versions:
     name: Library tests at the dependency floors
     runs-on: ubuntu-latest
+    # Under 25 min in its last 72 passing runs, and a hung test ends the
+    # run fifteen minutes after it started (pyproject.toml).
+    timeout-minutes: 50
     permissions:
       contents: read
     env:

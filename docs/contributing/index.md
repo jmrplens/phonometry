@@ -223,6 +223,7 @@ Each rule on a page has the same parts:
 | [T21](tests.md#t21) | Add a new conformance vocabulary value to the site schema and both label maps | `scripts/check_conformance_vocabulary.py`, `make conformance-vocabulary`, `CI: Conformance report up to date` |
 | [T22](tests.md#t22) | Write every workflow so that zizmor finds nothing under `.github/` | `CI: Audit the workflows with zizmor` |
 | [T23](tests.md#t23) | Pin every action to a release tag, never a branch or a commit SHA | `tests/test_repository_config.py::test_every_action_is_pinned_to_a_release_tag`, `CI: Audit the workflows with zizmor` |
+| [T24](tests.md#t24) | Bound every wait a test makes on another process or thread | `tests/test_child_process.py::test_every_wait_in_the_suite_has_a_bound`, review |
 
 ### Documentation and figures
 

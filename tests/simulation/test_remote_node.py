@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import contextlib
 import dataclasses
+import errno
 import io
 import os
 import subprocess
@@ -12,7 +14,7 @@ import threading
 import time
 import warnings
 from types import MappingProxyType, SimpleNamespace
-from typing import TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -38,6 +40,7 @@ from phonometry.simulation._remote.package import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterator
     from pathlib import Path
 
 _CPU = {"device": "cpu", "device_index": 0, "dtype": "float64"}
@@ -54,6 +57,16 @@ _ACOUSTIC = FDTDRun(
 )
 #: What a job returns beside its record when it has bytes of its own to send.
 _VIDEO = b"\x1aE\xdf\xa3 a video"
+#: The name of the thread that watches a node's input.
+_WATCHER = "phonometry-node-input"
+#: How long a test waits on a thread it started [s]: each ends within
+#: milliseconds once its input does.
+_THREAD_S = 30.0
+#: How long a node in a process of its own may take, from the package it is
+#: sent to its exit [s]. On a Windows runner, the slowest in CI, it takes 2 s
+#: to 3.5 s, and took 31 s once, on Python 3.14: more than ten times that,
+#: and short of the fifteen minutes pytest gives the test.
+_NODE_S = 360.0
 
 
 def _job(
@@ -84,30 +97,69 @@ def _frames(data: bytes) -> list[tuple[dict[str, object], list[bytes]]]:
     return frames
 
 
+@contextlib.contextmanager
+def _closed_quietly(file: IO[bytes]) -> Iterator[IO[bytes]]:
+    """*file*, closed on the way out even when the flush of what it holds fails."""
+    try:
+        yield file
+    finally:
+        with contextlib.suppress(OSError):
+            file.close()
+
+
 def _serve(
-    job: bytes, *, end_input_after_s: float | None = None
+    job: bytes,
+    *,
+    end_input_after_s: float | None = None,
+    client_s: float = _THREAD_S,
 ) -> tuple[int, list[tuple[dict[str, object], list[bytes]]]]:
     """Serve *job* in this process, the input open as a client keeps it.
 
     The input stays open until the node answers, as a client's does, or ends
-    after *end_input_after_s* seconds, as when a client goes away.
+    after *end_input_after_s* seconds, as when a client goes away. The
+    threads the client and the node start here have ended when it returns.
+    The client has *client_s* seconds to send the job once the node is done.
+
+    The client's end of the input is closed after the node's: a client still
+    blocked writing a job the node stopped reading holds its file's lock, and
+    closing that file first would wait for the write. With the node's end
+    closed, the write fails, as it does when a connection drops.
     """
     read_end, write_end = os.pipe()
     out = io.BytesIO()
-    with os.fdopen(read_end, "rb") as stream, os.fdopen(write_end, "wb") as feed:
+    before = set(threading.enumerate())
+    with (
+        _closed_quietly(os.fdopen(write_end, "wb")) as feed,
+        os.fdopen(read_end, "rb") as stream,
+    ):
 
         def client() -> None:
-            feed.write(job)
-            feed.flush()
-            if end_input_after_s is not None:
-                time.sleep(end_input_after_s)
-                feed.close()
+            with contextlib.suppress(OSError):
+                feed.write(job)
+                feed.flush()
+                if end_input_after_s is not None:
+                    time.sleep(end_input_after_s)
+                    feed.close()
 
-        sender = threading.Thread(target=client)
+        sender = threading.Thread(target=client, daemon=True)
         sender.start()
-        code = node.serve(stream, out)
-        sender.join()
+        try:
+            code = node.serve(stream, out)
+        finally:
+            sender.join(client_s)
+        assert not sender.is_alive(), "the client never finished sending the job"
+    # Both ends are closed, so the input has ended: the node's watcher ends
+    # with it, and none outlives the test that started it.
+    _join_watchers(before)
     return code, _frames(out.getvalue())
+
+
+def _join_watchers(before: set[threading.Thread]) -> None:
+    """Wait for every watcher started since *before* was taken; fail on one that does not end."""
+    for thread in set(threading.enumerate()) - before:
+        if thread.name == _WATCHER:
+            thread.join(_THREAD_S)
+            assert not thread.is_alive(), "a watcher outlived the input it watched"
 
 
 def _array(descriptor: dict[str, object], buffer: bytes) -> np.ndarray:
@@ -226,6 +278,21 @@ def test_a_job_naming_another_function_is_refused() -> None:
     )
     with pytest.raises(bootstrap.Refused, match="the node runs"):
         _serve(job)
+
+
+def test_a_job_the_node_stops_reading_ends_the_helper_with_the_node_s_refusal() -> None:
+    """The client of :func:`_serve` blocked writing the rest of a refused job holds nothing.
+
+    The node refuses a frame by its first bytes and reads no further; the
+    client is left writing far more than a pipe holds, and :func:`_serve`
+    comes back once its time for the client is up, with the refusal.
+    """
+    job = b"NOPE" + bytes(4 << 20)
+    started = time.monotonic()
+    with pytest.raises(bootstrap.FrameError, match="does not start a frame"):
+        _serve(job, client_s=1.0)
+    elapsed = time.monotonic() - started
+    assert elapsed < _THREAD_S, f"the helper came back after {elapsed:.0f} s"
 
 
 def _raw_job(
@@ -430,6 +497,243 @@ def test_the_node_s_watcher_stops_a_cancelled_run_and_writes_progress(
         watcher(3, 100)
 
 
+# The thread that watches a node's input.
+
+
+class _Scheduler:
+    """The scheduler at its worst for the watcher: it takes the processor away once and gives it back when told."""
+
+    def __init__(self) -> None:
+        self.held = threading.Event()
+        self.released = threading.Event()
+
+    def hold(self) -> None:
+        """Hold the calling thread until released, the first time the watcher calls."""
+        if threading.current_thread().name == _WATCHER and not self.held.is_set():
+            self.held.set()
+            self.released.wait(_THREAD_S)
+
+
+class _HeldThreading:
+    """``threading`` as node.py sees it: the thread it starts is held before its first line."""
+
+    def __init__(self, scheduler: _Scheduler) -> None:
+        self._scheduler = scheduler
+
+    # Whatever threading holds, of whatever type it has.
+    def __getattr__(self, name: str) -> Any:  # noqa: ANN401
+        return getattr(threading, name)
+
+    # threading's own name, which node.py calls.
+    def Thread(  # noqa: N802
+        self, *, target: Callable[[], object], **options: Any
+    ) -> threading.Thread:
+        def held() -> None:
+            self._scheduler.hold()
+            target()
+
+        return threading.Thread(target=held, **options)
+
+
+class _HeldOs:
+    """``os`` as node.py sees it: the watcher's first call into it is held.
+
+    The call is held once its arguments are worked out, as a thread loses
+    the processor between taking a number and using it.
+    """
+
+    def __init__(self, scheduler: _Scheduler) -> None:
+        self._scheduler = scheduler
+
+    # Whatever os holds, of whatever type it has.
+    def __getattr__(self, name: str) -> Any:  # noqa: ANN401
+        value = getattr(os, name)
+        if not callable(value):
+            return value
+
+        def held(*args: object, **kwargs: object) -> object:
+            self._scheduler.hold()
+            return value(*args, **kwargs)
+
+        return held
+
+
+def _next_pipe_under(number: int) -> int:
+    """Open the next pipe with its read end under *number*, which is free; return its write end.
+
+    The lowest free number usually is *number* already. When a lower one is
+    free, the read end is moved onto *number*, the write end first taken off
+    it if it landed there.
+    """
+    next_read, next_write = os.pipe()
+    if next_read != number:
+        if next_write == number:
+            moved = os.dup(next_write)
+            os.close(next_write)
+            next_write = moved
+        os.dup2(next_read, number, inheritable=False)
+        os.close(next_read)
+    return next_write
+
+
+@pytest.mark.parametrize("moment", ["before its first line", "at its first call to os"])
+def test_the_watcher_reads_its_own_input_and_never_the_next_file_opened(
+    moment: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The caller may close the stream as soon as serve returns.
+
+    A watcher that took the stream's descriptor number in its own thread
+    could lose the processor before it read, or before it copied the
+    number, and then read whatever the process opened next under that
+    number: in a worker that serves one job after another, the next job's
+    pipe, whose job then never reaches its node. Here the watcher is held
+    at the worst moment, before it runs at all or at its first call to
+    ``os``, while the stream is closed and its number given to the next
+    pipe; it must still read its own input, and only that.
+    """
+    scheduler = _Scheduler()
+    if moment == "before its first line":
+        monkeypatch.setattr(node, "threading", _HeldThreading(scheduler))
+    else:
+        monkeypatch.setattr(node, "os", _HeldOs(scheduler))
+    read_end, write_end = os.pipe()
+    stream = os.fdopen(read_end, "rb")
+    opened = [write_end]
+    cancelled, finished = threading.Event(), threading.Event()
+    finished.set()  # the run is over: the watcher ends as soon as its input does
+    before = set(threading.enumerate())
+    try:
+        node._watch_input(stream, cancelled, finished)
+        assert scheduler.held.wait(_THREAD_S), "the watcher never ran"
+        stream.close()
+        # The next pipe the process opens, its read end under the number the
+        # stream had, and a job waiting in it.
+        next_write = _next_pipe_under(read_end)
+        opened.append(read_end)
+        os.write(next_write, b"the next job")
+        os.close(next_write)
+        scheduler.released.set()
+        still_watching = not cancelled.wait(0.5)
+        os.close(write_end)
+        opened.remove(write_end)
+        _join_watchers(before)
+        left = os.read(read_end, 64)
+    finally:
+        scheduler.released.set()
+        stream.close()
+        for descriptor in opened:
+            with contextlib.suppress(OSError):
+                os.close(descriptor)
+    assert left == b"the next job", "the watcher took the bytes of the next pipe"
+    assert still_watching, "the watcher stopped before its own input ended"
+    assert cancelled.is_set()
+
+
+class _FailingOs:
+    """``os`` as node.py sees it, the call it names failing with *code*; copies and closes are noted."""
+
+    def __init__(self, call: str, code: int) -> None:
+        self._call = call
+        self._code = code
+        self.copies: list[int] = []
+        self.closing: list[int] = []
+        self.closed: list[int] = []
+
+    # Whatever os holds, of whatever type it has.
+    def __getattr__(self, name: str) -> Any:  # noqa: ANN401
+        return getattr(os, name)
+
+    def _fail(self, call: str) -> None:
+        if call == self._call:
+            raise OSError(self._code, f"{call} failed on purpose")
+
+    def dup(self, descriptor: int) -> int:
+        self._fail("dup")
+        copy = os.dup(descriptor)
+        self.copies.append(copy)
+        return copy
+
+    def read(self, descriptor: int, size: int) -> bytes:
+        self._fail("read")
+        return os.read(descriptor, size)
+
+    def close(self, descriptor: int) -> None:
+        self.closing.append(descriptor)
+        self._fail("close")
+        os.close(descriptor)
+        self.closed.append(descriptor)
+
+
+def test_an_input_the_node_cannot_copy_is_an_error_and_not_a_client_gone(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """With no descriptor left, the node says so; it does not stop the run as if the client had left."""
+    monkeypatch.setattr(node, "os", _FailingOs("dup", errno.EMFILE))
+    read_end, write_end = os.pipe()
+    stream = os.fdopen(read_end, "rb")
+    cancelled, finished = threading.Event(), threading.Event()
+    # A watcher started all the same must not end this process once its
+    # grace runs out: the run it would wait for is over.
+    finished.set()
+    before = set(threading.enumerate())
+    try:
+        with pytest.raises(OSError, match="dup failed on purpose") as raised:
+            node._watch_input(stream, cancelled, finished)
+    finally:
+        stream.close()
+        os.close(write_end)
+    assert raised.value.errno == errno.EMFILE
+    assert not cancelled.is_set()
+    assert not any(t.name == _WATCHER for t in set(threading.enumerate()) - before)
+
+
+@pytest.mark.parametrize(
+    ("call", "code", "closes"),
+    [
+        pytest.param("read", errno.EIO, "its copy", id="read fails"),
+        pytest.param("read", errno.EBADF, "nothing", id="read finds no descriptor"),
+        pytest.param("close", errno.EIO, "its copy", id="close fails"),
+    ],
+)
+def test_a_watcher_whose_input_fails_still_stops_the_run(
+    call: str, code: int, closes: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A read or a close that fails ends the input too, and the run is told.
+
+    The copy is closed unless the read found it closed already: by then its
+    number may name another file, which is not the watcher's to close.
+    """
+    failing = _FailingOs(call, code)
+    monkeypatch.setattr(node, "os", failing)
+    read_end, write_end = os.pipe()
+    cancelled, finished = threading.Event(), threading.Event()
+    finished.set()  # the run is over: the watcher ends as soon as its input does
+    before = set(threading.enumerate())
+    try:
+        with os.fdopen(read_end, "rb") as stream:
+            node._watch_input(stream, cancelled, finished)
+            os.close(write_end)
+            write_end = -1
+            assert cancelled.wait(_THREAD_S), "the run was never told its input ended"
+            _join_watchers(before)
+    finally:
+        for descriptor in [write_end, *failing.copies]:
+            if descriptor >= 0 and descriptor not in failing.closed:
+                with contextlib.suppress(OSError):
+                    os.close(descriptor)
+    assert len(failing.copies) == 1
+    assert failing.closing == (failing.copies if closes == "its copy" else [])
+
+
+def test_an_input_that_is_no_file_has_ended() -> None:
+    cancelled, finished = threading.Event(), threading.Event()
+    finished.set()
+    before = set(threading.enumerate())
+    node._watch_input(io.BytesIO(b"sent after the job"), cancelled, finished)
+    assert cancelled.wait(_THREAD_S)
+    _join_watchers(before)
+
+
 # The bootstrap and the node together, in a process of their own.
 
 
@@ -441,6 +745,11 @@ def _through_a_node(
     The input stays open until the node has exited, as a client still reading
     the answer keeps it. Returns the kinds of the frames, the last header and
     its buffers, the exit status and what the node wrote to standard error.
+
+    Standard error is read as it comes, so a node never waits on a pipe this
+    test is not reading; a node still running after :data:`_NODE_S` seconds
+    is killed, which ends every read and write below, and the test fails
+    saying so.
     """
     shipped = installed_package()
     hello = io.BytesIO()
@@ -475,6 +784,18 @@ def _through_a_node(
     assert process.stdin is not None
     assert process.stdout is not None
     assert process.stderr is not None
+    stderr = process.stderr
+    said: list[bytes] = []
+    reader = threading.Thread(target=lambda: said.append(stderr.read()), daemon=True)
+    reader.start()
+    expired = threading.Event()
+
+    def expire() -> None:
+        expired.set()
+        process.kill()
+
+    killer = threading.Timer(_NODE_S, expire)
+    killer.start()
     try:
         process.stdin.write(hello.getvalue() + package.getvalue() + job)
         process.stdin.flush()
@@ -486,15 +807,29 @@ def _through_a_node(
                 for n in bootstrap.field(header, "buffers", list)
             ]
             kinds.append(header["type"])
-        code = process.wait(timeout=60)
-        log = process.stderr.read()
+        code = process.wait(timeout=_NODE_S)
+    except (OSError, bootstrap.FrameError, subprocess.TimeoutExpired) as exc:
+        if expired.is_set():
+            pytest.fail(f"the node did not finish within {_NODE_S:g} s: {exc}")
+        raise
     finally:
+        killer.cancel()
         process.kill()
-        process.wait(timeout=60)
-        process.stdin.close()
+        process.wait(timeout=_NODE_S)
+        reader.join(_THREAD_S)
+        with contextlib.suppress(OSError):
+            process.stdin.close()
         process.stdout.close()
-        process.stderr.close()
-    return kinds, header, buffers, code, log
+        # A reader still blocked on standard error holds the file's lock:
+        # closing it would wait as long as the reader does.
+        if not reader.is_alive():
+            stderr.close()
+    # A node killed once its answer was in comes back with the kill's status
+    # and no error above: the limit is what ended it, and the test says so.
+    if expired.is_set():
+        pytest.fail(f"the node did not finish within {_NODE_S:g} s")
+    assert not reader.is_alive(), "standard error stayed open after the node ended"
+    return kinds, header, buffers, code, b"".join(said)
 
 
 def test_the_bootstrap_hands_the_shipped_package_to_the_node_and_the_job_runs(

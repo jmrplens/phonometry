@@ -577,7 +577,10 @@ def test_a_stray_print_on_a_node_lands_on_standard_error() -> None:
         "out = b.claim_stdout(); print('stray'); b.write_frame(out, {'type': 'ok'})"
     )
     done = subprocess.run(
-        [sys.executable, "-I", "-c", script], capture_output=True, check=False
+        [sys.executable, "-I", "-c", script],
+        capture_output=True,
+        check=False,
+        timeout=120,
     )
     assert bootstrap.read_header(io.BytesIO(done.stdout)) == {
         "type": "ok",

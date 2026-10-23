@@ -20,10 +20,10 @@ from __future__ import annotations
 
 import pathlib
 import re
-import subprocess
 import sys
 import xml.etree.ElementTree as ET
 
+import child_process
 import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
@@ -154,10 +154,11 @@ def test_every_reference_to_a_badge_resolves_to_a_generated_file() -> None:
     guard that turns a rename into a failing test instead of a 404 in a
     rendered page.
     """
-    tracked = subprocess.run(
+    tracked = child_process.run(
         ["git", "-C", str(_ROOT), "ls-files", "-z"],
         capture_output=True,
         check=True,
+        timeout=120,
     ).stdout.decode()
     cited = re.compile(re.escape(cb.RAW_PATH) + r"/([\w.-]+\.svg)")
     known = set(cb.asset_names())

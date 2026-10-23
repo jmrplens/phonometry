@@ -93,6 +93,19 @@ To check coverage locally:
 pytest --cov=src/phonometry --cov-report=term-missing tests/
 ```
 
+A test still running after fifteen minutes ends the run
+(`faulthandler_timeout` in `pyproject.toml`): pytest prints the stack of
+every thread, the test's own frames among them. Under `-n` the controller
+also names the test and fails it, and the run stops once the other workers
+have run the tests already sent to them; the tests still queued do not run.
+Without `-n` the process ends at the stacks, with no summary. pytest lifts
+the limit when a test fails, and [`tests/hang_guard.py`](tests/hang_guard.py)
+sets it again, so the teardown of a failed test has fifteen minutes from the
+failure. `-o faulthandler_timeout=0` lifts the limit for a session that
+needs longer.
+A wait on another process or thread carries a bound of its own
+([T24](docs/contributing/tests.md#t24)).
+
 How a test is written, from where its expected values come from to how it
 waits on an error or a warning, is in the [Tests](docs/contributing/tests.md)
 page of the style guide. `make raises-blocks` runs

@@ -14,6 +14,7 @@ from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
+import child_process
 import pinned_stack
 import pytest
 import yaml
@@ -408,6 +409,7 @@ def _collect(directory: Path, *options: str) -> subprocess.CompletedProcess[str]
         ],
         cwd=directory,
         env={**os.environ, "PYTHONPATH": os.pathsep.join(path)},
+        timeout=120,
         check=False,
         capture_output=True,
         text=True,
@@ -479,11 +481,12 @@ _FLOOR_STATEMENTS = (
 
 
 def _tracked_text() -> list[Path]:
-    listed = subprocess.run(  # nosec B603 B607 - git on this checkout
+    listed = child_process.run(
         ["git", "ls-files", "-z"],
         cwd=_ROOT,
         check=True,
         capture_output=True,
+        timeout=120,
     ).stdout.decode("utf-8")
     skip = {".svg", ".png", ".jpg", ".pdf", ".npz", ".wav", ".gz", ".flac", ".webm"}
     return [

@@ -350,7 +350,7 @@ def _frame_rate(request: VideoRequest, anim: Animation) -> str:
     it positive and as near: a frame an hour is 1/3600, not 0/1.
 
     :raises TypeError: when the animation has no interval and no ``fps``.
-    :raises ValueError: when its interval is not a positive number.
+    :raises ValueError: when its interval is not a positive finite number.
     """
     fps = request.video.fps
     if fps is None:
@@ -358,9 +358,13 @@ def _frame_rate(request: VideoRequest, anim: Animation) -> str:
         if not isinstance(interval, (int, float)):
             msg = "the animation has no interval to take a frame rate from; pass 'fps'"
             raise TypeError(msg)
-        # NaN is refused with the rest: it compares false either way.
-        if math.isnan(interval) or interval <= 0:
-            msg = f"the animation's interval is not positive ({interval!r} ms); pass 'fps'"
+        # An infinite interval would give a rate of zero, and NaN compares
+        # false either way: both are refused with the rest.
+        if not math.isfinite(interval) or interval <= 0:
+            msg = (
+                f"the animation's interval is not a positive finite number "
+                f"({interval!r} ms); pass 'fps'"
+            )
             raise ValueError(msg)
         fps = 1000.0 / interval
     exact = Fraction(fps)
@@ -669,7 +673,8 @@ def encode(
         used without a second trial; ``None`` chooses one when the stream
         opens. Ignored for a GIF and for the caller's own ``ffmpeg_encoder``.
     :raises TypeError: when neither ``fps`` nor the animation gives a rate.
-    :raises ValueError: when the animation's interval is not positive.
+    :raises ValueError: when the animation's interval is not a positive
+        finite number.
     :raises FFmpegNotFoundError: when ffmpeg is not found.
     :raises VideoEncoderError: when no encoder can write it, ffmpeg cannot be
         started or fails, or the finished file cannot take ``path``'s place.
@@ -747,7 +752,7 @@ def write_video(
         not hold, an ``encoder`` that writes none of the codecs it holds
         (VideoToolbox in a ``.webm``), for a GIF a codec, an
         ``ffmpeg_encoder`` or an encoder other than the CPU, or an animation
-        interval that is not a positive number.
+        interval that is not a positive finite number.
     :raises FileNotFoundError: if the directory of ``path`` does not exist.
     :raises FFmpegNotFoundError: if ffmpeg is not found, in Pyodide, or on
         Windows when it was found only in the working directory.

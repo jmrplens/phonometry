@@ -734,6 +734,31 @@ def test_an_input_that_is_no_file_has_ended() -> None:
     _join_watchers(before)
 
 
+def test_a_node_whose_last_cleanup_fails_still_ends_its_process(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A run that does not stop once its client is gone ends the node, whatever the cleanup before the exit meets."""
+    monkeypatch.setattr(node, "_GRACE_S", 0.0)
+    codes: list[int] = []
+    monkeypatch.setattr(os, "_exit", codes.append)
+
+    def broken() -> None:
+        msg = "the cleanup failed on purpose"
+        raise RuntimeError(msg)
+
+    monkeypatch.setattr(node, "remove_scratch_videos", broken)
+    raised: list[type[BaseException]] = []
+    monkeypatch.setattr(
+        threading, "excepthook", lambda hook: raised.append(hook.exc_type)
+    )
+    cancelled, finished = threading.Event(), threading.Event()
+    before = set(threading.enumerate())
+    node._watch_input(io.BytesIO(b""), cancelled, finished)
+    _join_watchers(before)
+    assert codes == [130]
+    assert raised == [RuntimeError]
+
+
 # The bootstrap and the node together, in a process of their own.
 
 

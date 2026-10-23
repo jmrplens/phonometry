@@ -2032,7 +2032,7 @@ encoder chosen is logged on the `phonometry.io` logger.
 | Exception | When |
 | :--- | :--- |
 | TypeError | if `path` is neither a text nor a path, `video` is not a [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions), `anim` is not an animation, or the animation has no interval and `video` no `fps`. |
-| ValueError | for a suffix other than `.webm`, `.mp4` or `.gif`, a path that names a directory, a codec the container does not hold, an `encoder` that writes none of the codecs it holds (VideoToolbox in a `.webm`), for a GIF a codec, an `ffmpeg_encoder` or an encoder other than the CPU, or an animation interval that is not a positive number. |
+| ValueError | for a suffix other than `.webm`, `.mp4` or `.gif`, a path that names a directory, a codec the container does not hold, an `encoder` that writes none of the codecs it holds (VideoToolbox in a `.webm`), for a GIF a codec, an `ffmpeg_encoder` or an encoder other than the CPU, or an animation interval that is not a positive finite number. |
 | FileNotFoundError | if the directory of `path` does not exist. |
 | FFmpegNotFoundError | if ffmpeg is not found, in Pyodide, or on Windows when it was found only in the working directory. |
 | VideoEncoderError | if no encoder can write the video (the message lists the ones that can), ffmpeg cannot be started or fails while writing it (with the last lines it wrote on stderr), or the finished video cannot take the place of `path` (on Windows, while a player holds the old file open; the message says where the video was left). |

@@ -157,9 +157,12 @@ def _watch_input(
             )
             sys.stderr.flush()
             # The exit runs no finally, so a video's ffmpeg is stopped and
-            # its scratch files removed first.
-            remove_scratch_videos()
-            os._exit(130)
+            # its scratch files removed first; the exit follows whatever
+            # that cleanup meets.
+            try:
+                remove_scratch_videos()
+            finally:
+                os._exit(130)
 
     threading.Thread(target=watch, name="phonometry-node-input", daemon=True).start()
 

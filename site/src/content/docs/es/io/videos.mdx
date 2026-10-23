@@ -87,13 +87,13 @@ antes de que se ejecute nada.
 
 El archivo aparece en la ruta solo cuando ffmpeg lo ha terminado. Hasta
 entonces ffmpeg escribe en un archivo oculto a su lado, con un nombre propio
-para cada escritura, y ese archivo se borra pase lo que pase: que ffmpeg
-falle, que se llene el disco o que tu función de actualización lance una
-excepción, que te llega como esa misma excepción. Así, un fallo deja lo que
-había antes en la ruta, incluido un vídeo bueno. Un vídeo terminado al que
-Windows no deja ocupar el lugar del archivo antiguo, porque un reproductor
-tiene abierto el antiguo, no se tira: se queda a su lado con su nombre
-oculto, y el `io.VideoEncoderError` dice dónde.
+para cada escritura, y ese archivo se borra si algo corta la codificación, sea
+lo que sea: que ffmpeg falle, que se llene el disco o que tu función de
+actualización lance una excepción, que te llega como esa misma excepción. Así,
+un fallo deja lo que había antes en la ruta, incluido un vídeo bueno. Un vídeo
+terminado al que Windows no deja ocupar el lugar del archivo antiguo, porque
+un reproductor tiene abierto el antiguo, no se tira: se queda a su lado con su
+nombre oculto, y el `io.VideoEncoderError` dice dónde.
 
 Cada fotograma es la figura entera, a su propio tamaño y con sus propios
 colores, digan lo que digan tus ajustes de matplotlib sobre cómo guardar
@@ -381,7 +381,8 @@ ejecución avisa una sola vez y avanza con NumPy, las dos pasadas incluidas:
 
 ```py
 res = simulation.write_fdtd_animation(
-    "pulse.webm", run, compute=simulation.Compute(device="cupy")
+    "pulse.webm", run,
+    compute=simulation.Compute(device="cupy", fallback=True),
 )
 ```
 

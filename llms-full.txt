@@ -41082,8 +41082,8 @@ anything runs.
 
 The file appears at the path only once ffmpeg has finished it. Until then
 ffmpeg writes to a hidden file beside it, under a name of its own for each
-write, and that file is removed whatever goes wrong: ffmpeg fails, the disk
-fills, or your update function raises, which reaches you as its own
+write, and that file is removed whatever stops the encode: ffmpeg fails, the
+disk fills, or your update function raises, which reaches you as its own
 exception. So a failure leaves what was at the path before, a good video
 included. A finished video that Windows will not let take the old file's
 place, because a player holds the old file open, is not thrown away: it is
@@ -41355,7 +41355,8 @@ and steps on NumPy, both passes included:
 
 ```py
 res = simulation.write_fdtd_animation(
-    "pulse.webm", run, compute=simulation.Compute(device="cupy")
+    "pulse.webm", run,
+    compute=simulation.Compute(device="cupy", fallback=True),
 )
 ```
 

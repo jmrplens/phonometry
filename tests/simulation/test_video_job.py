@@ -235,9 +235,10 @@ def test_a_node_that_ends_its_process_at_once_removes_its_scratch_videos_first(
 ) -> None:
     """A run that does not stop once its client is gone ends the node's process, which runs no finally.
 
-    The node's input watcher removes the scratch directory of the video the
-    run was writing before it ends the process, on POSIX even while the
-    video is still open for writing, as ffmpeg holds it.
+    The node's input watcher stops the ffmpeg still running, then removes
+    the scratch directory of the video the run was writing, before it ends
+    the process; on POSIX even while the video is still open for writing,
+    as an ffmpeg not yet gone holds it.
     """
     from phonometry.simulation._remote import node
 
@@ -253,6 +254,12 @@ def test_a_node_that_ends_its_process_at_once_removes_its_scratch_videos_first(
         exited.set()
 
     monkeypatch.setattr(os, "_exit", ended)
+    at_stop: list[list[str]] = []
+
+    def stop() -> None:
+        at_stop.append(sorted(path.name for path in scratch.iterdir()))
+
+    monkeypatch.setattr(job, "stop_running_encoders", stop)
     writing, release = threading.Event(), threading.Event()
 
     def stuck(target: Path) -> None:
@@ -286,6 +293,9 @@ def test_a_node_that_ends_its_process_at_once_removes_its_scratch_videos_first(
     finally:
         release.set()
         runner.join(30)
+    # The encoders were stopped once, while the scratch directory was there.
+    assert len(at_stop) == 1
+    assert at_stop[0] != []
     assert at_exit == [[]]
     assert list(scratch.iterdir()) == []
 

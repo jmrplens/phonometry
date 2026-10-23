@@ -156,7 +156,8 @@ def _watch_input(
                 "phonometry: the client is gone and the run did not stop; the node exits\n"
             )
             sys.stderr.flush()
-            # The exit runs no finally, so a video's scratch files go first.
+            # The exit runs no finally, so a video's ffmpeg is stopped and
+            # its scratch files removed first.
             remove_scratch_videos()
             os._exit(130)
 

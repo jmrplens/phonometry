@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import gc
 import logging
+import subprocess
 import sys
 import threading
 from types import SimpleNamespace
@@ -326,6 +327,45 @@ def test_a_failed_write_leaves_no_pipe_open(
     with pytest.raises(io.VideoEncoderError, match="muxer failed"):
         io.write_video(tmp_path / "w.webm", animation)
     assert _unclosed(recwarn) == []
+
+
+def test_ffmpeg_is_known_while_it_encodes_and_forgotten_once_it_exits(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The ffmpeg of a video is tracked from its start until it has exited, whether it finished or failed."""
+    from phonometry.io import _video as pipe_module
+
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    running: list[int] = []
+
+    def count(_frame: int, _fig: Figure) -> None:
+        running.append(len(pipe_module._RUNNING))
+
+    io.write_video(tmp_path / "w.webm", _animation(on_frame=count))
+    assert running[-1] == 1
+    assert pipe_module._RUNNING == set()
+    fake.update(die_after_frames=3)
+    longer = _animation(frames=8)
+    with pytest.raises(io.VideoEncoderError, match="muxer failed"):
+        io.write_video(tmp_path / "w.webm", longer)
+    assert pipe_module._RUNNING == set()
+
+
+def test_stopping_the_running_encoders_ends_each_of_them(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """What a process about to end at once calls: every ffmpeg still running is stopped, and waited for."""
+    from phonometry.io import _video as pipe_module
+
+    # Stands for an ffmpeg that has its last frame and goes on encoding.
+    encoder = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+    monkeypatch.setattr(pipe_module, "_RUNNING", {encoder})
+    try:
+        pipe_module.stop_running_encoders()
+        assert encoder.poll() is not None
+    finally:
+        encoder.kill()
+        encoder.wait(timeout=30)
 
 
 def test_a_reader_of_ffmpeg_that_cannot_start_stops_it(

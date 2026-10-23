@@ -92,6 +92,16 @@ _STDERR_LINES: Final = 20
 #: Seconds ffmpeg may take to finish once its input is closed.
 _EXIT_TIMEOUT_S: Final = 600.0
 
+#: Seconds a stopped ffmpeg is given to exit, so that the files it held are
+#: released before the caller removes them.
+_STOP_TIMEOUT_S: Final = 5.0
+
+#: Every ffmpeg this process is running for a video, and the lock that guards
+#: them: a process about to end at once stops them from another thread
+#: (:func:`stop_running_encoders`).
+_RUNNING: set[subprocess.Popen[bytes]] = set()
+_RUNNING_LOCK = threading.Lock()
+
 _MATPLOTLIB_HINT = 'Writing a video requires matplotlib. Install it with: pip install "phonometry[plot]"'
 
 
@@ -420,6 +430,8 @@ class _FramePipe:
                 stderr=subprocess.PIPE,
                 creationflags=NO_WINDOW,
             )
+            with _RUNNING_LOCK:
+                _RUNNING.add(self._process)
             drain = threading.Thread(target=self._read_stderr, daemon=True)
             drain.start()
         except (OSError, RuntimeError) as exc:
@@ -520,6 +532,7 @@ class _FramePipe:
         except (OSError, subprocess.TimeoutExpired) as exc:
             reason = "ffmpeg did not finish the file"
             raise self._failure(reason) from exc
+        _forget(process)
         self._join()
         if code != 0:
             reason = f"ffmpeg exited with status {code}"
@@ -536,6 +549,7 @@ class _FramePipe:
             with contextlib.suppress(OSError):
                 process.stdin.close()
         process.wait()
+        _forget(process)
         self._join()
 
     def _join(self) -> None:
@@ -551,6 +565,29 @@ class _FramePipe:
         return VideoEncoderError(
             f"{reason} while writing {self._request.path}; ffmpeg said:\n{said}"
         )
+
+
+def _forget(process: subprocess.Popen[bytes]) -> None:
+    """Stop tracking *process*, which has exited."""
+    with _RUNNING_LOCK:
+        _RUNNING.discard(process)
+
+
+def stop_running_encoders() -> None:
+    """Stop every ffmpeg this process is still running for a video.
+
+    For a process about to end at once (``os._exit``, which runs no
+    ``finally``): an ffmpeg that has its last frame keeps encoding after its
+    parent has gone, and on Windows the file it holds cannot be removed.
+    Each is given a few seconds to exit, so that its files are released.
+    """
+    with _RUNNING_LOCK:
+        running = tuple(_RUNNING)
+    for process in running:
+        with contextlib.suppress(OSError):
+            process.kill()
+        with contextlib.suppress(OSError, subprocess.TimeoutExpired):
+            process.wait(timeout=_STOP_TIMEOUT_S)
 
 
 def _movie_writer(pipe: _FramePipe) -> AbstractMovieWriter:

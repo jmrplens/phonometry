@@ -8,9 +8,9 @@ node's own, because a WebM is finished by seeking back into the file, which
 a pipe cannot do. The node sends back the record's probe history, then the
 video's bytes as the stream after it (``node.FUNCTIONS`` names both); the
 scratch directory goes when the node closes the file, or just before the
-node ends its process at once. The client takes no more of those bytes than
-:func:`video_byte_cap` allows and none that do not begin as
-:data:`CONTAINER_HEADS` says the container does.
+node ends its process at once, once its ffmpeg is stopped. The client takes
+no more of those bytes than :func:`video_byte_cap` allows and none that do
+not begin as :data:`CONTAINER_HEADS` says the container does.
 
 A node that cannot draw (no matplotlib, or not the font every frame is drawn
 in) refuses here before it steps; one that cannot encode (no ffmpeg, or no
@@ -29,6 +29,7 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING, Final
 
 from .._internal.validation import require_choice
+from ..io._video import stop_running_encoders
 from .video import write_elastic_fdtd_animation, write_fdtd_animation
 
 if TYPE_CHECKING:
@@ -104,13 +105,15 @@ def _forget_scratch(scratch: Path) -> None:
 
 
 def remove_scratch_videos() -> None:
-    """Remove the scratch directory of every video this node is still writing or sending.
+    """Stop this node's running ffmpeg, then remove the scratch directory of every video it is writing or sending.
 
     For a node about to end its process at once (``os._exit``, which runs no
-    ``finally``), so that a run stopped that way leaves no video behind. A
-    file ffmpeg still holds open goes with its directory on POSIX; on
-    Windows it cannot be removed while ffmpeg runs, and its directory stays.
+    ``finally``), so that a run stopped that way leaves neither an ffmpeg
+    encoding nor a video behind. ffmpeg is stopped first because it would
+    go on encoding after the node, and because on Windows a file it still
+    holds cannot be removed.
     """
+    stop_running_encoders()
     with _SCRATCH_LOCK:
         scratches = tuple(_SCRATCH)
     for scratch in scratches:

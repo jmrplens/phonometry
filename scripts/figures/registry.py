@@ -435,7 +435,7 @@ from .materials import (
     generate_transmission_tube_geometry,
     generate_tube_working_ranges,
 )
-from .media import _extract_poster
+from .media import CLIP_ENCODER_ENV, _clip_encoder, _extract_poster
 from .metrology import (
     generate_calibration_narrowband_bias,
     generate_calibration_stability,
@@ -1654,7 +1654,7 @@ def generate_posters(output_dir: str) -> None:
         poster = _extract_poster(webm, _poster_ss_for(webm))
         print(f"  {Path(webm).name} -> {Path(poster).name}")
     clips = sorted({_clip_of(Path(webm).stem) for webm in webms})
-    _stamp_clips(clips, output_dir)
+    _stamp_clips(clips, output_dir, keep_encoder=True)
 
 
 def _clip_of(stem: str) -> str:
@@ -1857,7 +1857,9 @@ def _render_anim_variants(clip: str, output_dir: str) -> None:
     _audited_first(clip, side_by_side)
 
 
-def _stamp_clips(clips: list[str], output_dir: str) -> None:
+def _stamp_clips(
+    clips: list[str], output_dir: str, *, keep_encoder: bool = False
+) -> None:
     """Record the fingerprint of every clip whose four variants were written.
 
     Both render paths end here -- the sequential one and the process pool of
@@ -1869,6 +1871,14 @@ def _stamp_clips(clips: list[str], output_dir: str) -> None:
     renderer takes any output directory, and a render into a scratch one is
     for looking at, not a statement about what is published. An audit-only
     run (``--audit-only``) writes no clip at all, so it never stamps.
+
+    Each stamp names the encoder this run writes the WebM with
+    (:func:`figures.media._clip_encoder`). With *keep_encoder* the WebM was
+    not written here (``--posters`` cuts its stills from the one already
+    published), so the encoder recorded for it stays.
+
+    :raises ValueError: when the encoder named for the run is not a clip
+        encoder, or when *keep_encoder* is set and a clip has none recorded.
     """
     import pathlib
 
@@ -1881,7 +1891,9 @@ def _stamp_clips(clips: list[str], output_dir: str) -> None:
         or pathlib.Path(output_dir).resolve() != assets_dir.clips_dir().resolve()
     ):
         return
-    animation_fingerprint.stamp(clips)
+    animation_fingerprint.stamp(
+        clips, encoder=None if keep_encoder else _clip_encoder()
+    )
 
 
 def generate_animations(
@@ -2350,9 +2362,24 @@ def _audit_animations(names: list[str] | None, jobs: int | None) -> None:
     raise SystemExit(status)
 
 
+def _name_clip_encoder(encoder: str | None) -> None:
+    """Hand ``--clip-encoder`` to every process of the run through the environment.
+
+    The pool workers and the forked variants of a clip read the encoder from
+    :data:`figures.media.CLIP_ENCODER_ENV`, so it is set before any of them
+    starts. Without the option the environment is left as it is: a variable
+    already set there still names the encoder, and with neither the run names
+    SVT-AV1 (:func:`figures.media._clip_encoder`).
+    """
+    if encoder is not None:
+        os.environ[CLIP_ENCODER_ENV] = encoder
+
+
 def main(argv: list[str] | None = None) -> None:
     """CLI entry point: figures by default, clips behind ``--animations``."""
     import argparse
+
+    import animation_fingerprint
 
     parser = argparse.ArgumentParser(
         description="Regenerate the documentation figures (and animations) "
@@ -2377,6 +2404,13 @@ def main(argv: list[str] | None = None) -> None:
         metavar="NAME",
         help="with --animations, render only this clip (repeatable; use "
         "the output stem, e.g. --anim anim_schroeder)",
+    )
+    parser.add_argument(
+        "--clip-encoder",
+        choices=animation_fingerprint.CLIP_ENCODERS,
+        default=None,
+        help="with --animations, the ffmpeg encoder that writes each WebM: "
+        "libsvtav1 (a CPU; the default here) or av1_nvenc (an NVIDIA GPU)",
     )
     parser.add_argument(
         "--audit-only",
@@ -2408,6 +2442,7 @@ def main(argv: list[str] | None = None) -> None:
         "optional, e.g. --figure loudness_models_comparison)",
     )
     args = parser.parse_args(argv)
+    _name_clip_encoder(args.clip_encoder)
 
     img_dir = ".github/images"
     Path(img_dir).mkdir(parents=True, exist_ok=True)

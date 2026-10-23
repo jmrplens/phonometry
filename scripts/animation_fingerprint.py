@@ -95,18 +95,24 @@ import hashlib
 import json
 import pathlib
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
 
 _SCRIPTS = pathlib.Path(__file__).resolve().parent
 
-#: The stamped fingerprints, one ``<clip> <hash>`` line per clip, sorted.
+#: The stamped fingerprints, one ``<clip> <hash> <encoder>`` line per clip,
+#: sorted.
 #: Next to ``figure_language_baseline.txt``, which plays the same role for the
 #: language gate: a committed statement about the generated assets that CI
 #: checks the tree against.
 MANIFEST = _SCRIPTS / "animation_fingerprints.txt"
+
+#: The ffmpeg encoders a published clip may have been written by: both write
+#: AV1, on an NVIDIA GPU or on a CPU (the CPU one is publishable as well).
+ClipEncoder = Literal["av1_nvenc", "libsvtav1"]
+CLIP_ENCODERS: tuple[ClipEncoder, ...] = ("av1_nvenc", "libsvtav1")
 
 #: The package the walk starts in.
 _PKG_NAME = "figures"
@@ -893,31 +899,51 @@ _HEADER = """\
 # syntax tree, so comments and docstrings do not move it. See
 # scripts/animation_fingerprint.py.
 #
+# Each line: the clip, the fingerprint of the code that drew it, and the
+# ffmpeg encoder that wrote its WebM (av1_nvenc or libsvtav1).
+#
 # Written by the renderer. To refresh one clip, re-render it:
 #     python scripts/generate_graphs.py --animations --anim <clip>
 """
 
 
+def _manifest_lines() -> list[list[str]]:
+    if not MANIFEST.exists():
+        return []
+    rows: list[list[str]] = []
+    for line in MANIFEST.read_text(encoding="utf-8").splitlines():
+        text = line.strip()
+        if text and not text.startswith("#"):
+            rows.append(text.split())
+    return rows
+
+
 def read_manifest() -> dict[str, str]:
     """The stamped fingerprints, ``clip -> hash``."""
-    if not MANIFEST.exists():
-        return {}
-    out: dict[str, str] = {}
-    for line in MANIFEST.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#"):
-            continue
-        clip, _, digest = line.partition(" ")
-        out[clip] = digest.strip()
-    return out
+    return {row[0]: row[1] for row in _manifest_lines() if len(row) >= 2}
 
 
-def write_manifest(stamps: dict[str, str]) -> None:
-    body = "".join(f"{clip} {stamps[clip]}\n" for clip in sorted(stamps))
+def read_encoders() -> dict[str, str]:
+    """The encoder each clip's WebM was written by; a clip with none is left out."""
+    return {row[0]: row[2] for row in _manifest_lines() if len(row) >= 3}
+
+
+def write_manifest(stamps: dict[str, str], encoders: dict[str, str]) -> None:
+    body = "".join(
+        f"{clip} {stamps[clip]}"
+        + (f" {encoders[clip]}" if clip in encoders else "")
+        + "\n"
+        for clip in sorted(stamps)
+    )
     MANIFEST.write_text(_HEADER + body, encoding="utf-8")
 
 
-def stamp(clips: Iterable[str], root: pathlib.Path | None = None) -> None:
+def stamp(
+    clips: Iterable[str],
+    root: pathlib.Path | None = None,
+    *,
+    encoder: ClipEncoder | None,
+) -> None:
     """Record the current fingerprint of *clips*, leaving the rest alone.
 
     Called by the renderer once a clip's four variants are on disk, so the
@@ -930,8 +956,11 @@ def stamp(clips: Iterable[str], root: pathlib.Path | None = None) -> None:
     stamps -- the one failure mode of this file that would be invisible until
     CI asked for the missing clip.
 
+    :param encoder: The encoder that wrote the clips' WebM, or None to keep
+        the one recorded (re-extracted posters).
     :raises FileNotFoundError: when a clip steps an FDTD engine and the tree
         has no ``engine-digests.json``.
+    :raises ValueError: when *encoder* is None and a clip has none recorded.
     """
     import fcntl
 
@@ -947,9 +976,19 @@ def stamp(clips: Iterable[str], root: pathlib.Path | None = None) -> None:
         fcntl.flock(handle, fcntl.LOCK_EX)
         try:
             stamps = read_manifest()
+            encoders = read_encoders()
             for clip in names:
-                if clip in current:
-                    stamps[clip] = current[clip]
-            write_manifest(stamps)
+                if clip not in current:
+                    continue
+                stamps[clip] = current[clip]
+                if encoder is not None:
+                    encoders[clip] = encoder
+                elif clip not in encoders:
+                    msg = (
+                        f"{clip} has no encoder recorded; "
+                        "render it, not only its posters"
+                    )
+                    raise ValueError(msg)
+            write_manifest(stamps, encoders)
         finally:
             fcntl.flock(handle, fcntl.LOCK_UN)

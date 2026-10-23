@@ -29,6 +29,11 @@ to. They come off the same render as the WebM, so the fingerprint already
 speaks for how old they are; what is checked here is that they are there at
 all (:func:`outputs`).
 
+The stamp also names the ffmpeg encoder that wrote the clip's WebM, one of
+:data:`animation_fingerprint.CLIP_ENCODERS`, both of which write AV1. A line
+that names none was stamped before the manifest recorded it, so nothing says
+the clip on disk is AV1, and the clip is asked for again.
+
 The clips are not in this repository. They are published to
 ``jmrplens/phonometry-assets`` (see :mod:`assets_dir`), so "there at all"
 means present in that repository at the commit ``assets.lock`` records.
@@ -103,6 +108,7 @@ def main(argv: list[str] | None = None) -> int:
 
     current = fp.fingerprints(_SCRIPTS.parent)
     stamped = fp.read_manifest()
+    encoders = fp.read_encoders()
     present = published(arguments.manifest)
     problems: list[str] = []
     problems.extend(
@@ -133,6 +139,11 @@ def main(argv: list[str] | None = None) -> int:
             problems.append(
                 f"{clip}: drawn by code that has changed since "
                 f"(recorded {stamped[clip]}, current {current[clip]})"
+            )
+        if clip in stamped and encoders.get(clip) not in fp.CLIP_ENCODERS:
+            problems.append(
+                f"{clip}: no AV1 encoder recorded ({encoders.get(clip, 'none')}); "
+                "re-render the clip"
             )
 
     if problems:

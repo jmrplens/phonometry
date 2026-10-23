@@ -17,6 +17,7 @@ import os
 import sys
 from typing import TYPE_CHECKING, Any, cast
 
+import animation_fingerprint
 import clip_frame_audit
 import matplotlib.pyplot as plt
 
@@ -34,6 +35,28 @@ if TYPE_CHECKING:
 
     from matplotlib.animation import FuncAnimation
     from matplotlib.figure import Figure
+
+#: Names the ffmpeg encoder a render writes the WebM with, set from
+#: ``generate_graphs.py --clip-encoder``, so the pool workers and the forked
+#: variants of one render all read the same one.
+CLIP_ENCODER_ENV = "PHONOMETRY_CLIP_ENCODER"
+
+
+def _clip_encoder() -> animation_fingerprint.ClipEncoder:
+    """The encoder this render writes its WebM with; SVT-AV1 unless told.
+
+    :raises ValueError: for a name that is not one of the two clip encoders.
+    """
+    value = os.environ.get(CLIP_ENCODER_ENV, "libsvtav1")
+    for encoder in animation_fingerprint.CLIP_ENCODERS:
+        if value == encoder:
+            return encoder
+    msg = (
+        f"{CLIP_ENCODER_ENV} must be one of "
+        f"{', '.join(animation_fingerprint.CLIP_ENCODERS)}; got {value!r}"
+    )
+    raise ValueError(msg)
+
 
 # ====================================================================# Animations (Tier 1 pilot)
 # ---------------------------------------------------------------------------

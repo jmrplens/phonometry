@@ -539,7 +539,11 @@ def test_an_audit_only_run_encodes_nothing_and_stamps_nothing(
     assert not plt.fignum_exists(fig.number)  # type: ignore[attr-defined]
     # The same call stamps once the run encodes.
     stamped: list[list[str]] = []
-    monkeypatch.setattr(animation_fingerprint, "stamp", stamped.append)
+    monkeypatch.setattr(
+        animation_fingerprint,
+        "stamp",
+        lambda clips, root=None, *, encoder: stamped.append(list(clips)),
+    )
     monkeypatch.delenv(cfa.AUDIT_ENV)
     registry._stamp_clips(["anim_struck"], str(tmp_path))
     assert stamped == [["anim_struck"]]

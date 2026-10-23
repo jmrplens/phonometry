@@ -732,17 +732,23 @@ def test_re_extracting_the_posters_stamps_the_clips_they_belong_to(
     ):
         (tmp_path / f"{name}.webm").write_bytes(b"")
     cut: list[str] = []
-    stamped: list[list[str]] = []
+    stamped: list[tuple[list[str], bool]] = []
     monkeypatch.setattr(
         registry, "_extract_poster", lambda webm, ss: cut.append(webm) or webm
     )
     monkeypatch.setattr(registry, "_poster_ss_for", lambda webm: None)
     monkeypatch.setattr(
-        registry, "_stamp_clips", lambda clips, out: stamped.append(list(clips))
+        registry,
+        "_stamp_clips",
+        lambda clips, output_dir, *, keep_encoder=False: stamped.append(
+            (list(clips), keep_encoder)
+        ),
     )
     registry.generate_posters(str(tmp_path))
     assert len(cut) == 5
-    assert stamped == [["anim_one", "anim_two"]]
+    # The posters are cut from the WebM already there, so the encoder that
+    # wrote it stays the one recorded.
+    assert stamped == [(["anim_one", "anim_two"], True)]
 
 
 # -- what the check says ----------------------------------------------------
@@ -753,17 +759,31 @@ def _check(
     tmp_path: pathlib.Path,
     committed: list[str],
     stamps: dict[str, str],
+    *,
+    encoder: str | None = "libsvtav1",
 ) -> int:
-    """Run the freshness check over a made-up clips directory."""
+    """Run the freshness check over a made-up clips directory and manifest.
+
+    Each stamp is a manifest line that names *encoder* as the one that wrote
+    the clip, or names none when *encoder* is None.
+    """
     import check_animation_freshness as check
 
     images = tmp_path / "images"
     images.mkdir()
     for name in committed:
         (images / name).write_bytes(b"")
+    manifest = tmp_path / "manifest.txt"
+    manifest.write_text(
+        "".join(
+            f"{clip} {digest}" + (f" {encoder}" if encoder is not None else "") + "\n"
+            for clip, digest in stamps.items()
+        ),
+        encoding="utf-8",
+    )
     monkeypatch.setattr(check.assets_dir, "clips_dir", lambda: images)
     monkeypatch.setattr(check.fp, "fingerprints", lambda root: {"anim_one": "1"})
-    monkeypatch.setattr(check.fp, "read_manifest", lambda: stamps)
+    monkeypatch.setattr(check.fp, "MANIFEST", manifest)
     return check.main([])
 
 
@@ -777,6 +797,32 @@ def test_a_complete_and_stamped_clip_passes(
     code = _check(monkeypatch, tmp_path, check.outputs("anim_one"), {"anim_one": "1"})
     assert code == 0
     assert "1 published clips" in capsys.readouterr().out
+
+
+def test_a_fresh_clip_with_no_encoder_recorded_is_asked_for_again(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """A stamp that does not say which encoder wrote the WebM is not enough.
+
+    Every file is there and the fingerprint matches, but the manifest line is
+    the clip and its fingerprint with nothing after them: nothing says the
+    clip is AV1, so the check asks for the clip again.
+    """
+    import check_animation_freshness as check
+
+    code = _check(
+        monkeypatch,
+        tmp_path,
+        check.outputs("anim_one"),
+        {"anim_one": "1"},
+        encoder=None,
+    )
+    assert code == 1
+    out = capsys.readouterr().out
+    assert "anim_one: no AV1 encoder recorded (none); re-render the clip" in out
+    assert "drawn by code that has changed" not in out
 
 
 @pytest.mark.parametrize(
@@ -938,3 +984,32 @@ def test_the_engine_clips_of_the_repository_are_the_field_clips() -> None:
 
     root = pathlib.Path(__file__).resolve().parents[1]
     assert fp.engine_clips(root) == set(registry._ANIM_FIELDS)
+
+
+def test_a_stamp_records_the_encoder_and_a_poster_stamp_keeps_it(
+    tree: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest = tree / "manifest.txt"
+    monkeypatch.setattr(fp, "MANIFEST", manifest)
+    fp.stamp(["anim_one"], tree, encoder="av1_nvenc")
+    assert fp.read_encoders() == {"anim_one": "av1_nvenc"}
+    fp.stamp(["anim_one"], tree, encoder=None)
+    assert fp.read_encoders() == {"anim_one": "av1_nvenc"}
+
+
+def test_a_poster_stamp_of_a_clip_with_no_encoder_is_refused(
+    tree: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(fp, "MANIFEST", tree / "manifest.txt")
+    with pytest.raises(ValueError, match=r"anim_one has no encoder recorded"):
+        fp.stamp(["anim_one"], tree, encoder=None)
+
+
+def test_a_manifest_line_without_an_encoder_still_reads_its_fingerprint(
+    tree: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    manifest = tree / "manifest.txt"
+    manifest.write_text("anim_one 0123456789abcdef\n", encoding="utf-8")
+    monkeypatch.setattr(fp, "MANIFEST", manifest)
+    assert fp.read_manifest() == {"anim_one": "0123456789abcdef"}
+    assert fp.read_encoders() == {}

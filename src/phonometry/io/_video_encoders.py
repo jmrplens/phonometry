@@ -291,7 +291,7 @@ def _pad(width: int, height: int, pad_color: str) -> tuple[str, ...]:
     """Pad an odd frame to even sides (``yuv420p`` halves the chroma)."""
     if width % 2 == 0 and height % 2 == 0:
         return ()
-    return (f"pad=ceil(iw/2)*2:ceil(ih/2)*2:color={pad_color}",)
+    return ()
 
 
 def video_arguments(

@@ -1,6 +1,6 @@
 ---
 title: "Files"
-description: "The measurement's file layer: reading every linear WAV a meter writes into a calibrated Signal, headers-only inspection, block streaming into stateful filters, BWF writing with bext provenance and measured loudness, the calibration sidecar, lossless conversion, and catalogues of materials of your own; what stays out, and why."
+description: "The measurement's file layer: reading every linear WAV a meter writes into a calibrated Signal, headers-only inspection, block streaming into stateful filters, BWF writing with bext provenance and measured loudness, the calibration sidecar, lossless conversion, catalogues of materials of your own, and animations and FDTD runs written to video; what stays out, and why."
 ---
 
 import Scope from '../../../components/Scope.astro';
@@ -82,6 +82,9 @@ schema of every row class the library publishes.
   type it, is in
   [Reading a material datasheet](/phonometry/materials/reading-a-datasheet/),
   among the materials guides.
+- [Writing animations and FDTD runs to video](/phonometry/io/videos/): any
+  matplotlib animation to WebM, MP4 or GIF through ffmpeg, and an FDTD run
+  straight to a video.
 
 ## What this section does not cover
 
@@ -89,9 +92,11 @@ schema of every row class the library publishes.
 <ScopeClaim status="not-covered">
 **No playback, no editing, no effects.** This is a file layer for
 measurements, not an audio workstation: nothing here plays a sound, trims a
-region by ear, or applies gain. There is deliberately no lossy *writing*
-either: no measurement ends in an MP3, and a library whose job is
-preserving levels should not make one easy to produce.
+region by ear, or applies gain. There is deliberately no lossy writing of
+*audio* either: no measurement ends in an MP3, and a library whose job is
+preserving levels should not make one easy to produce. The videos the
+[video guide](/phonometry/io/videos/) writes are pictures of a plot or a
+simulation, not recordings, and are encoded as any video is.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">

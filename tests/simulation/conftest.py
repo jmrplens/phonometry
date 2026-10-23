@@ -1,16 +1,25 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""The strict array backend the engine tests step on, with one guard for all."""
+"""The strict array backend the engine tests step on, with one guard for all, and a node on this machine."""
 
 from __future__ import annotations
 
+import json
+import sys
+from pathlib import Path
 from typing import TYPE_CHECKING, NoReturn
 
 import pytest
 
 from phonometry.simulation import _backends as bk
+from phonometry.simulation._remote import bootstrap, command
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+_FAKE_SSH = Path(__file__).with_name("fake_ssh.py")
+#: The longest a run on the node may take in these tests [s]: the hosts
+#: file's timeout, far above what a run here takes, so no test can hang.
+_NODE_TIMEOUT_S = 120
 
 
 def _refuse_host_conversion(*_args: object, **_kwargs: object) -> NoReturn:
@@ -55,3 +64,35 @@ def go_strict(monkeypatch: pytest.MonkeyPatch) -> Callable[[], None]:
         _go_strict(monkeypatch)
 
     return switch
+
+
+@pytest.fixture(scope="module")
+def node_cache(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """One node cache for the module: the package travels once."""
+    return tmp_path_factory.mktemp("node-cache")
+
+
+@pytest.fixture
+def node(tmp_path: Path, node_cache: Path, monkeypatch: pytest.MonkeyPatch) -> str:
+    """A Python node on this machine, reached through the stand-in for ssh."""
+    hosts = tmp_path / "hosts.toml"
+    hosts.write_text(
+        "[hosts.here]\n"
+        'ssh = "node.example"\n'
+        'runner = "python"\n'
+        f"python = {json.dumps(sys.executable)}\n"
+        'label = "this machine"\n'
+        f"timeout_s = {_NODE_TIMEOUT_S}\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setenv("PHONOMETRY_HOSTS_FILE", str(hosts))
+    monkeypatch.setenv(bootstrap.CACHE_VAR, str(node_cache))
+    monkeypatch.setattr(command, "_SSH_PROGRAM", (sys.executable, str(_FAKE_SSH)))
+    for name in (
+        "FAKE_SSH_MODE",
+        "FAKE_SSH_LOG",
+        "FAKE_SSH_PIDFILE",
+        "PHONOMETRY_COMPUTE",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    return "here"

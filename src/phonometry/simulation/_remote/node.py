@@ -42,6 +42,10 @@ from typing import IO, TYPE_CHECKING, Any
 import numpy as np
 
 from .. import _observer
+from .._video_job import (
+    write_elastic_fdtd_animation_on_node,
+    write_fdtd_animation_on_node,
+)
 from ..compute import _ENV_VAR, Compute
 from ..elastic_fdtd import elastic_fdtd_simulation
 from ..fdtd import fdtd_simulation
@@ -76,6 +80,11 @@ FUNCTIONS: Mapping[
     {
         "fdtd_simulation": (_fdtd, ("pressures", "snapshots")),
         "elastic_fdtd_simulation": (_elastic, ("signals", "snapshots")),
+        "write_fdtd_animation": (write_fdtd_animation_on_node, ("pressures",)),
+        "write_elastic_fdtd_animation": (
+            write_elastic_fdtd_animation_on_node,
+            ("signals",),
+        ),
     }
 )
 #: The fields of a job's placement: no host (a run here stays here) and no

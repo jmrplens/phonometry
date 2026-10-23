@@ -63,7 +63,12 @@ if TYPE_CHECKING:
 _LOG = logging.getLogger("phonometry.simulation")
 
 #: The library functions that run on a node.
-RemoteFunction = Literal["fdtd_simulation", "elastic_fdtd_simulation"]
+RemoteFunction = Literal[
+    "fdtd_simulation",
+    "elastic_fdtd_simulation",
+    "write_fdtd_animation",
+    "write_elastic_fdtd_animation",
+]
 
 #: The dtypes a node may send, with their size in bytes. ``uint8`` is the
 #: dtype of a stream (:class:`StreamSpec`).
@@ -186,10 +191,18 @@ class StreamSpec:
     Its length is the node's to say, since the request cannot know it (the
     size of an encoded video), but never more than ``max_bytes``: a longer
     one is refused before a byte of it is read.
+
+    ``heads``, when given, are the bytes the stream must begin with, as
+    ``(offset, bytes)`` pairs, any one of which will do (a video's container
+    says what its file begins with): a stream too short to hold the shortest
+    of them, an empty one included, is refused before a byte of it is read,
+    and one whose first chunk begins as none of them before a byte of it
+    reaches the sink.
     """
 
     name: str
     max_bytes: int
+    heads: tuple[tuple[int, bytes], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -575,6 +588,14 @@ def _checked_stream(
     if length > spec.max_bytes:
         msg = f"the node sent {_quoted(length)} bytes of {_quoted(name)}, more than the {spec.max_bytes} the request allows"
         raise session.failure(msg)
+    if spec.heads:
+        shortest = min(at + len(head) for at, head in spec.heads)
+        if length < shortest:
+            msg = (
+                f"the node sent {length} bytes of {spec.name!r}, too few to begin as the "
+                "file the request names"
+            )
+            raise session.failure(msg)
     return length
 
 
@@ -749,11 +770,30 @@ def _fill(session: Session, spec: ArraySpec, target: NDArray[Any]) -> None:
         ).reshape(row_shape)
 
 
-def _drain(session: Session, length: int, sink: SupportsWrite[bytes]) -> None:
-    """Copy the *length* bytes of the stream into *sink*, a chunk at a time."""
+def _begins_as(chunk: bytes, heads: tuple[tuple[int, bytes], ...]) -> bool:
+    """Whether *chunk* holds one of *heads* at its offset."""
+    return any(chunk[at : at + len(head)] == head for at, head in heads)
+
+
+def _drain(
+    session: Session, spec: StreamSpec, length: int, sink: SupportsWrite[bytes]
+) -> None:
+    """Copy the *length* bytes of the stream into *sink*, a chunk at a time.
+
+    The first chunk is held to ``spec.heads``, when there are any, before a
+    byte of it is written, so bytes of another kind of file never reach
+    *sink*. That chunk is the whole stream or its first ``_STREAM_CHUNK``
+    bytes, far more than the few a container begins with; a head it does
+    not hold whole is no match.
+    """
     remaining = length
+    first = True
     while remaining > 0:
         chunk = session.read_exact(min(remaining, _STREAM_CHUNK))
+        if first and spec.heads and not _begins_as(chunk, spec.heads):
+            msg = f"the node's {spec.name!r} does not begin as the file the request names; nothing of it was kept"
+            raise session.failure(msg)
+        first = False
         sink.write(chunk)
         remaining -= len(chunk)
 
@@ -781,8 +821,8 @@ def _receive_result(
     _fill(session, expected.arrays[0], first)
     if second is not None:
         _fill(session, expected.arrays[1], second)
-    if sink is not None:
-        _drain(session, sizes[-1], sink)
+    if sink is not None and expected.stream is not None:
+        _drain(session, expected.stream, sizes[-1], sink)
     _relay(caught)
     return provenance
 

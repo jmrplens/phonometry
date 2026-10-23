@@ -99,6 +99,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   A55: every parameter of a function that runs on a node, and every field
   of the records it takes, has a form that travels as data.
 
+- **Any matplotlib animation writes to WebM, MP4 or GIF through ffmpeg,
+  the videos on a GPU encoder when one works.**
+  `io.write_video(path, anim)` takes the container from the suffix (`.webm`
+  holds AV1 or VP9, `.mp4` AV1, HEVC or H.264, `.gif` a palette of up to
+  256 colours), draws every frame with Agg and pipes it into ffmpeg, the
+  program matplotlib's `rcParams["animation.ffmpeg_path"]` names. How it
+  encodes is one record, `io.VideoOptions`, checked when it is built: by
+  default NVENC, Quick Sync, VAAPI and VideoToolbox are tried first, each on
+  one real frame of the video's size, then the CPU: SVT-AV1, or without it
+  VP9 in a WebM and x265 or x264 in an MP4. A GIF is written on the CPU,
+  with no trial. `quality`, `fps`, `codec` and raw
+  `ffmpeg_encoder`/`ffmpeg_options` are there when the defaults are not
+  enough. The file appears only when ffmpeg has finished it, so a failed
+  write leaves the previous file in place. `io.FFmpegNotFoundError` says
+  ffmpeg is missing and how to install it; `io.VideoEncoderError` says no
+  encoder can write the video, or ffmpeg failed, with its last words.
+
+- **An FDTD run writes straight to a video, here or on a node.**
+  `simulation.write_fdtd_animation(path, run)` and
+  `simulation.write_elastic_fdtd_animation(path, run)` step the run
+  `fdtd_simulation` or `elastic_fdtd_simulation` steps (an `FDTDRun` or an
+  `ElasticRun`, checked when it is built) and draw it into a video as it is
+  computed, with `compute=` for where it steps, a
+  `simulation.AnimationFrame` for how each frame is drawn (its language, its
+  size, 960 by 540 pixels by default and at least 479 by 239 pixels, and its
+  colour limit) and the `io.VideoOptions` of `io.write_video`; ffmpeg and
+  its encoder are checked before the first step too. A frame is laid out
+  once for the whole run, under matplotlib's default style, with every text
+  at its own size; a run whose last frame comes at ten seconds or later has
+  a wider floor, which its error names. One frame is drawn every
+  `snapshot_every` steps of the run's recording and none is stored: the
+  result comes back with its probes and times. The colour scale is fixed for
+  the whole video: `AnimationFrame(color_limit=...)`, in pascals or, for an
+  elastic run, in the unit of the field drawn, or else a first pass finds it
+  on the device, outside the sources and the absorbing layer. With a `host`
+  in `compute=`, the run is computed, drawn and encoded on that node, and
+  only the result and the video's bytes come back, held to the frames' size
+  and the container's first bytes and written to disk as they arrive; a node
+  without matplotlib, its font, ffmpeg or a working encoder refuses before
+  it steps. The new guide, "Writing animations and FDTD runs to video", says
+  all of this in English and Spanish, the FDTD guides and the node guide
+  link it, and the contributor guide adds A56: a program the library does
+  not ship, ffmpeg or ssh, runs by its full path, every argument is checked
+  before it starts, and the tests run a stand-in for it.
+
 - **A snapshot can keep every d-th cell, and the result says so.**
   `snapshot_decimation=` on `FDTDRecording`, `ElasticRecording`,
   `FDTD2D.run` and `ElasticFDTD2D.run` keeps every d-th cell along each axis,

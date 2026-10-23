@@ -826,6 +826,36 @@ desmonta esa misma ejecución frente al método de la meseta y a la ley de masas
   description="Dos campos FDTD elásticos en paralelo de la misma placa de acero de 10 mm tendida en aire mientras una onda plana sostenida llega a 45 grados. A 603 Hz, la mitad de la frecuencia de coincidencia, la onda se refleja casi totalmente y el débil nivel transmitido coincide con la ley de masas oblicua. A 2413 Hz, el doble de la frecuencia de coincidencia, la traza acústica coincide con la longitud de onda de flexión libre y bajo la placa crece un haz transmitido a 45 grados que mantiene el mismo nivel que el panel de baja frecuencia, allí donde la ley de masas predecía 12 dB más de aislamiento; el aire bajo la placa se dibuja en los dos paneles con una ganancia de representación anotada de 150 veces (+44 dB) para que el campo transmitido sea legible, con la frecuencia de coincidencia de 1206 Hz de la biblioteca y los niveles medido y de ley de masas anotados."
 />
 
+## Escribir la simulación en un vídeo
+
+El registro de la ejecución que construye esta guía pasa tal cual a la
+función que escribe el vídeo: `simulation.write_elastic_fdtd_animation` hace
+avanzar esa ejecución y dibuja el campo que nombra el `snapshot_field` de su
+`recording`, la presión o una componente de la velocidad, en un WebM, un MP4
+o un GIF a medida que se calcula, un fotograma cada `snapshot_every` pasos,
+sin guardar las instantáneas.
+[Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/)
+explica cómo se dibuja un fotograma y se encuentra su escala de color, qué
+codificador escribe el archivo y cómo la misma llamada avanza en una GPU o va
+a un nodo.
+
+```python
+from phonometry import simulation
+
+run = simulation.ElasticRun(
+    4000.0, 2300.0, 0.01, 5e-4,
+    rho=2500.0, shape=(40, 60),
+    sources=[simulation.ExplosionSource(
+        ix=30, iy=20,
+        waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=2e-5).value,
+    )],
+    recording=simulation.ElasticRecording(snapshot_every=10, snapshot_field="p"),
+)
+res = simulation.write_elastic_fdtd_animation(
+    "elastic_pulse.webm", run, frame=simulation.AnimationFrame(size=(480, 320))
+)
+```
+
 ## Qué cubre esta guía
 
 <Scope>

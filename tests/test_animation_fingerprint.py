@@ -22,9 +22,13 @@ from __future__ import annotations
 import ast
 import pathlib
 import sys
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from types import ModuleType
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -340,6 +344,86 @@ def _library_tree(root: pathlib.Path) -> pathlib.Path:
     return root
 
 
+_VIDEO = """
+from ._video_quality import ENCODER_QUALITY, GIF_PALETTE
+
+
+def _pipe(frames):
+    return [frame for frame in frames]
+
+
+def write_video(path, anim, *, quality="standard", ffmpeg_encoder=None):
+    if path.endswith(".gif"):
+        return GIF_PALETTE[quality], _pipe(anim)
+    if ffmpeg_encoder is None:
+        return ENCODER_QUALITY[quality], _pipe(anim)
+    return _pipe(anim)
+"""
+
+_VIDEO_QUALITY = """
+ENCODER_QUALITY = {"standard": ("-crf", "35")}
+GIF_PALETTE = {"standard": (128, "bayer")}
+"""
+
+
+def _video_tree(root: pathlib.Path) -> pathlib.Path:
+    """The miniature package, its first clip encoding through io with raw options."""
+    _library_tree(root)
+    io_package = root / "src" / "phonometry" / "io"
+    io_package.mkdir()
+    (io_package / "__init__.py").write_text("", encoding="utf-8")
+    (io_package / "_video.py").write_text(_VIDEO, encoding="utf-8")
+    (io_package / "_video_quality.py").write_text(_VIDEO_QUALITY, encoding="utf-8")
+    edit(
+        root,
+        "schematics",
+        "from .theme import COLOR_PRIMARY",
+        "from phonometry.io._video import write_video\nfrom .theme import COLOR_PRIMARY",
+    )
+    edit(
+        root,
+        "schematics",
+        '    _translate_str("only in clip one")',
+        '    _translate_str("only in clip one")\n'
+        '    write_video("one.webm", None, ffmpeg_encoder="av1_nvenc")',
+    )
+    return root
+
+
+@pytest.mark.parametrize(
+    ("path", "old", "new", "moves"),
+    [
+        # The encode path a clip's frames go through.
+        (
+            "_video.py",
+            "return [frame for frame in frames]",
+            "return list(frames)",
+            {"anim_one"},
+        ),
+        # The encoder presets, which a clip's own encoder and options bypass.
+        ("_video_quality.py", '("-crf", "35")', '("-crf", "30")', set()),
+        # The GIF palette, which a GIF written with a quality reads.
+        ("_video_quality.py", '(128, "bayer")', '(64, "bayer")', {"anim_one"}),
+    ],
+)
+def test_the_encode_path_is_followed_and_the_presets_are_not(
+    tmp_path: pathlib.Path, path: str, old: str, new: str, moves: set[str]
+) -> None:
+    tree = _video_tree(tmp_path)
+    before = fp.fingerprints(tree)
+    source = tree / "src" / "phonometry" / "io" / path
+    text = source.read_text(encoding="utf-8")
+    assert text.count(old) == 1, old
+    source.write_text(text.replace(old, new), encoding="utf-8")
+    after = fp.fingerprints(tree)
+    assert {clip for clip in before if before[clip] != after[clip]} == moves
+
+
+def test_every_ignored_symbol_is_in_the_tree() -> None:
+    sources = fp.Sources(pathlib.Path(__file__).resolve().parent.parent)
+    assert [symbol for symbol in fp._IGNORED if sources.node(symbol) is None] == []
+
+
 @pytest.mark.parametrize(
     ("path", "old", "new", "moves"),
     [
@@ -475,11 +559,30 @@ def test_a_new_clip_is_reported_rather_than_ignored(tree: pathlib.Path) -> None:
 # not finish that decide whether the manifest can be trusted.
 
 
-def _fake_batch(monkeypatch: pytest.MonkeyPatch, fails: str | None) -> list[list[str]]:
+@pytest.fixture
+def registry() -> Iterator[ModuleType]:
+    """The clip registry, with matplotlib's settings left as the test found them.
+
+    Importing the registry imports ``figures.theme``, which sets the settings
+    the generator draws with (the grid, the figure size, ``savefig.bbox``)
+    for the whole process: what the generator wants in a process of its own,
+    and what the first test of a worker to import it would otherwise leave to
+    every test after it. So the import, and the test with it, run inside
+    ``rc_context``.
+    """
+    import matplotlib as mpl
+
+    with mpl.rc_context():
+        from figures import registry
+
+        yield registry
+
+
+def _fake_batch(
+    monkeypatch: pytest.MonkeyPatch, registry: ModuleType, fails: str | None
+) -> list[list[str]]:
     """Run a three-clip batch with the rendering replaced, return the stamps."""
     import shutil
-
-    from figures import registry
 
     stamped: list[list[str]] = []
 
@@ -505,15 +608,15 @@ def _fake_batch(monkeypatch: pytest.MonkeyPatch, fails: str | None) -> list[list
 
 
 def test_a_finished_batch_stamps_every_clip_it_rendered(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, registry: ModuleType
 ) -> None:
-    assert _fake_batch(monkeypatch, fails=None) == [
+    assert _fake_batch(monkeypatch, registry, fails=None) == [
         ["anim_one", "anim_two", "anim_three"]
     ]
 
 
 def test_a_clip_that_dies_does_not_cost_the_stamps_of_the_ones_before_it(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, registry: ModuleType
 ) -> None:
     """The clips already on disk keep their fingerprints when a later one dies.
 
@@ -522,11 +625,11 @@ def test_a_clip_that_dies_does_not_cost_the_stamps_of_the_ones_before_it(
     the way to make it green again would be to render, at several minutes
     each, clips that are already correct.
     """
-    assert _fake_batch(monkeypatch, fails="anim_two") == [["anim_one"]]
+    assert _fake_batch(monkeypatch, registry, fails="anim_two") == [["anim_one"]]
 
 
 def _fake_parallel_batch(
-    monkeypatch: pytest.MonkeyPatch, fails: str | None
+    monkeypatch: pytest.MonkeyPatch, registry: ModuleType, fails: str | None
 ) -> list[list[str]]:
     """Run a three-clip *parallel* batch with the pool replaced, return the stamps.
 
@@ -542,8 +645,6 @@ def _fake_parallel_batch(
     the real thing.
     """
     import concurrent.futures as cf
-
-    from figures import registry
 
     stamped: list[list[str]] = []
 
@@ -586,15 +687,15 @@ def _fake_parallel_batch(
 
 
 def test_a_finished_parallel_batch_stamps_every_clip_it_rendered(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, registry: ModuleType
 ) -> None:
-    assert _fake_parallel_batch(monkeypatch, fails=None) == [
+    assert _fake_parallel_batch(monkeypatch, registry, fails=None) == [
         ["anim_one", "anim_two", "anim_three"]
     ]
 
 
 def test_a_parallel_task_that_dies_does_not_cost_the_stamps_of_the_ones_before_it(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, registry: ModuleType
 ) -> None:
     """A task still queued when another dies is cancelled, and stays unstamped.
 
@@ -606,11 +707,13 @@ def test_a_parallel_task_that_dies_does_not_cost_the_stamps_of_the_ones_before_i
     error with ``pytest.raises`` and then inspecting ``stamped`` is what pins
     the stamp as happening before the failure propagates, not after.
     """
-    assert _fake_parallel_batch(monkeypatch, fails="anim_two") == [["anim_one"]]
+    assert _fake_parallel_batch(monkeypatch, registry, fails="anim_two") == [
+        ["anim_one"]
+    ]
 
 
 def test_re_extracting_the_posters_stamps_the_clips_they_belong_to(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path, registry: ModuleType
 ) -> None:
     """The poster extractor is inside the fingerprint, so `make posters` stamps.
 
@@ -619,8 +722,6 @@ def test_re_extracting_the_posters_stamps_the_clips_they_belong_to(
     does, once per clip and not once per variant, or the check would keep
     asking for a re-render of frames that did not change.
     """
-    from figures import registry
-
     for name in (
         "anim_one",
         "anim_one_dark",

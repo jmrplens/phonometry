@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""simulation domain of phonometry (see module docstrings)."""
+"""simulation domain of phonometry: FDTD engines, their placement, and videos of a run (see module docstrings)."""
 
 from __future__ import annotations
 
@@ -42,6 +42,7 @@ from .fdtd import (
     fdtd_simulation,
 )
 from .ntff import SIMULATION_AIR, ContourPhasors, far_field_from_contour
+from .video import AnimationFrame, write_elastic_fdtd_animation, write_fdtd_animation
 
 __all__ = [
     "AIR",
@@ -51,6 +52,7 @@ __all__ = [
     "FDTD2D",
     "STEEL",
     "WATER",
+    "AnimationFrame",
     "CWSource",
     "Compute",
     "ComputeDeviceError",
@@ -79,4 +81,6 @@ __all__ = [
     "fdtd_simulation",
     "scholte_speed",
     "use",
+    "write_elastic_fdtd_animation",
+    "write_fdtd_animation",
 ]

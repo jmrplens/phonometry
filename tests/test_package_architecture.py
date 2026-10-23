@@ -106,6 +106,14 @@ ALLOWED_EDGES: set[tuple[str, str]] = {
     # still not a cycle at import time, because io's side is deferred into the
     # writer, so importing phonometry.io never pulls broadcast in
     ("broadcast", "io"),
+    # a simulation writes its run straight to a video through io's encoder
+    # pipe and options record (write_fdtd_animation and its elastic twin);
+    # the imports are lazy, inside the writers, or under TYPE_CHECKING, but
+    # for the remote wire table's (simulation._remote.wire imports io._video
+    # at module level, and is itself imported only once a run goes to a
+    # node), and io imports nothing from simulation, so the graph stays
+    # acyclic
+    ("simulation", "io"),
 }
 
 

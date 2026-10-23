@@ -547,12 +547,13 @@ def test_a_run_that_fails_after_its_last_frame_leaves_the_old_video(
     frame = AnimationFrame(size=(480, 246))
     encoding = video_module._preflight(request, frame.size)
     backend = bk.backend_for(Compute())
+    march = frames()
     with pytest.raises(RuntimeError, match="a step after the last frame failed"):
         video_module._render(
             request,
             encoding,
             frame,
-            frames=frames(),
+            frames=march,
             backend=backend,
             n_frames=3,
             frame_dt=1e-3,
@@ -664,6 +665,7 @@ def test_a_real_video_has_every_frame(tmp_path: Path) -> None:
         ],
         capture_output=True,
         text=True,
+        timeout=60,
         check=True,
     ).stdout
     probe = dict(line.split("=", 1) for line in shown.splitlines())

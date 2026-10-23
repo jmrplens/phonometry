@@ -330,6 +330,7 @@ def _skip_unless_this_ffmpeg_takes(video: VideoOptions) -> None:
         [ffmpeg, "-hide_banner", "-h", f"encoder={encoder}"],
         capture_output=True,
         text=True,
+        timeout=60,
         check=False,
     ).stdout
     if pixel_format not in described.split():

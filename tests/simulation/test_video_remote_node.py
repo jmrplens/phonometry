@@ -81,6 +81,7 @@ def test_a_node_s_video_and_result(tmp_path: Path) -> None:
         ],
         capture_output=True,
         text=True,
+        timeout=60,
         check=True,
     ).stdout
     probe = dict(line.split("=", 1) for line in shown.splitlines())

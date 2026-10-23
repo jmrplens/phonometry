@@ -38,6 +38,7 @@ def _svt_av1() -> bool:
         ["ffmpeg", "-hide_banner", "-encoders"],
         capture_output=True,
         text=True,
+        timeout=60,
         check=True,
     ).stdout
     return " libsvtav1 " in listing
@@ -75,6 +76,7 @@ def _probe(path: Path) -> dict[str, str]:
         ],
         capture_output=True,
         text=True,
+        timeout=60,
         check=True,
     ).stdout
     return dict(line.split("=", 1) for line in shown.splitlines())

@@ -32,6 +32,7 @@ from __future__ import annotations
 
 import contextlib
 import io
+import math
 import os
 import subprocess  # nosec B404 - frames piped to the ffmpeg find_ffmpeg resolved; no shell
 import threading
@@ -334,7 +335,9 @@ def _frame_rate(request: VideoRequest, anim: Animation) -> str:
 
     Taken from ``fps``, or else from the animation's ``interval`` (in
     milliseconds), the attribute :meth:`Animation.save` reads for the same
-    purpose. A fraction keeps 30000/1001 exact where a decimal would round it.
+    purpose. A fraction keeps 30000/1001 exact where a decimal would round it,
+    and a rate under one frame a second takes a denominator as fine as keeps
+    it positive and as near: a frame an hour is 1/3600, not 0/1.
 
     :raises TypeError: when the animation has no interval and no ``fps``.
     :raises ValueError: when its interval is not a positive number.
@@ -349,7 +352,8 @@ def _frame_rate(request: VideoRequest, anim: Animation) -> str:
             msg = f"the animation's interval is not positive ({interval!r} ms); pass 'fps'"
             raise ValueError(msg)
         fps = 1000.0 / interval
-    fraction = Fraction(fps).limit_denominator(1001)
+    exact = Fraction(fps)
+    fraction = exact.limit_denominator(max(1001, math.ceil(1001 / exact)))
     return f"{fraction.numerator}/{fraction.denominator}"
 
 
@@ -579,12 +583,14 @@ def _movie_writer(pipe: _FramePipe) -> AbstractMovieWriter:
             **kwargs: Any,
         ) -> Iterator[AbstractMovieWriter]:
             self.setup(fig, outfile, dpi, *args, **kwargs)
+            # Finishing waits for ffmpeg to write the file, which an interrupt
+            # may cut short: ffmpeg is stopped then too.
             try:
                 yield self
+                self.finish()
             except BaseException:
                 pipe.abort()
                 raise
-            self.finish()
 
     return _PipeWriter()
 

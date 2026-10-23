@@ -355,7 +355,15 @@ def test_a_reader_of_ffmpeg_that_cannot_start_stops_it(
 
 @pytest.mark.parametrize(
     ("interval", "fps", "rate"),
-    [(50.0, None, "20/1"), (50.0, 30000 / 1001, "30000/1001"), (40.0, 12.5, "25/2")],
+    [
+        (50.0, None, "20/1"),
+        (50.0, 30000 / 1001, "30000/1001"),
+        (40.0, 12.5, "25/2"),
+        # Under one frame a second the rate stays positive: a frame an hour.
+        (50.0, 1 / 3600, "1/3600"),
+        (3_600_000.0, None, "1/3600"),
+        (2500.0, None, "2/5"),
+    ],
 )
 def test_the_frame_rate(
     tmp_path: Path,
@@ -371,6 +379,40 @@ def test_the_frame_rate(
         video=io.VideoOptions(fps=fps),
     )
     assert _after(fake.encodes()[0]["argv"], "-r") == rate
+
+
+def test_an_interrupt_while_ffmpeg_finishes_stops_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An interrupt while ffmpeg finishes the file (a GIF's palette, a slow encoder) stops ffmpeg.
+
+    The interrupt reaches the caller as it is, ffmpeg is stopped rather than
+    left writing, and no hidden file is left beside the path.
+    """
+    from phonometry.io import _video as pipe_module
+
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    aborted: list[bool] = []
+    abort = pipe_module._FramePipe.abort
+
+    def interrupted(_pipe: object) -> None:
+        raise KeyboardInterrupt
+
+    def counted(pipe: pipe_module._FramePipe) -> None:
+        aborted.append(True)
+        abort(pipe)
+
+    monkeypatch.setattr(pipe_module._FramePipe, "close", interrupted)
+    monkeypatch.setattr(pipe_module._FramePipe, "abort", counted)
+    animation = _animation()
+    with pytest.raises(KeyboardInterrupt):
+        io.write_video(tmp_path / "w.webm", animation)
+    assert aborted == [True]
+    assert not (tmp_path / "w.webm").exists()
+    # On Windows the fake runs behind cmd.exe, which a kill does not reach,
+    # and the orphaned fake writes its output when its stdin closes.
+    if sys.platform != "win32":
+        assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
 
 
 def test_a_raw_encoder_passes_through(

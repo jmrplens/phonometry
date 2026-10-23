@@ -14,6 +14,7 @@
     "check:redirects": "node scripts/check-redirects.mjs",
     "check:search": "node scripts/check-search-designation.mjs",
     "check:sidebar": "node scripts/with-preview.mjs -- node scripts/check-sidebar.mjs",
+    "check:social-card-titles": "node scripts/check-social-card-titles.mjs",
     "check:social-cards": "node scripts/check-social-cards.mjs",
     "check:structured-data": "node scripts/check-structured-data.mjs",
     "check:types": "astro check",

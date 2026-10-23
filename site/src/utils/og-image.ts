@@ -126,14 +126,31 @@ function el(type: string, style: Style, ...children: (Node | string | null)[]): 
 }
 
 /**
+ * The fonts the card is set in, the display face of the title and the text
+ * face of the kicker and the strapline, read once.
+ */
+export async function cardFonts(): Promise<Fonts> {
+  const [display, regular] = await Promise.all([
+    once(fontDisplay, path.join(BRAND, 'fonts', 'FamiljenGrotesk-Bold.ttf')),
+    once(fontRegular, path.join(BRAND, 'fonts', 'IBMPlexSans-Regular.ttf')),
+  ]);
+  return [
+    { name: 'Familjen Grotesk', data: display, weight: 700, style: 'normal' },
+    { name: 'IBM Plex Sans', data: regular, weight: 400, style: 'normal' },
+  ];
+}
+
+/**
  * The title's type at one size. The card and the measurement below both set
- * the title in it, so a width measured is the width the card gets.
+ * the title in it, so a width measured is the width the card gets, and
+ * scripts/check-social-card-titles.mjs sets each line of every title in it
+ * again to measure where the line ends on the card.
  *
  * Each line is set unbroken: the card decides where the title breaks (see
  * `layOutTitle`), and satori draws those lines as they are.
  * @param size - Font size in pixels.
  */
-function titleType(size: number): Style {
+export function titleType(size: number): Style {
   return {
     fontFamily: 'Familjen Grotesk',
     fontSize: `${size}px`,
@@ -587,12 +604,16 @@ function prefer<T>(list: T[], test: (item: T) => boolean): T[] {
  *    "Sound Power of Multisource / Industrial Plants";
  * 3. a second line longer than one short word (LONE_WORD_MAX characters);
  * 4. the pair of lines closest to equal length.
+ *
+ * scripts/check-social-card-titles.mjs holds these rules: it lays out a table
+ * of titles whose size and lines it states, and every page's title, and
+ * fails on a title that breaks one.
  * @param title - The page title.
  * @param column - Width of the card's title column, in pixels.
  * @param fonts - The fonts the card is set in.
  * @param locale - The title's language.
  */
-async function layOutTitle(
+export async function layOutTitle(
   title: string,
   column: number,
   fonts: Fonts,
@@ -666,16 +687,7 @@ export interface OgCard {
  * @param card - Title, kicker and artwork key for this page.
  */
 export async function generateOgImage(card: OgCard): Promise<Buffer> {
-  const [display, regular, mark, art] = await Promise.all([
-    once(fontDisplay, path.join(BRAND, 'fonts', 'FamiljenGrotesk-Bold.ttf')),
-    once(fontRegular, path.join(BRAND, 'fonts', 'IBMPlexSans-Regular.ttf')),
-    getMark(),
-    getArt(card.art),
-  ]);
-  const fonts: Fonts = [
-    { name: 'Familjen Grotesk', data: display, weight: 700, style: 'normal' },
-    { name: 'IBM Plex Sans', data: regular, weight: 400, style: 'normal' },
-  ];
+  const [fonts, mark, art] = await Promise.all([cardFonts(), getMark(), getArt(card.art)]);
   // The title stops short of where its artwork brightens, which is a
   // different place on each drawing (src/lib/og-areas.mjs).
   const column = titleColumnFor(card.art);

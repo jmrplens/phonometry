@@ -293,6 +293,18 @@ jobs:
         # accessibility audit both pass on such a page.
         run: pnpm run check:math
         working-directory: site
+      - name: Check every social card title breaks where its rules say
+        # The card sets each title in one or two lines, and where it breaks
+        # follows rules about words: no line ends on an article, a
+        # preposition or a conjunction, no designation, part number or number
+        # and unit is parted, and a title steps down a size only when its
+        # column cannot hold it whole. A title broken in the wrong place fits
+        # its column like any other, so the pixel check below cannot see it.
+        # This lays out a table of titles whose size and lines it states, and
+        # every page's title, with the card's own code and fonts; it needs
+        # the install, not the build.
+        run: pnpm run check:social-card-titles
+        working-directory: site
       - name: Check every social card kept its mark and its title
         # The card a link preview shows is an image the build lays out with
         # satori and rasterises with sharp, and neither fails when something

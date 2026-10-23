@@ -465,8 +465,10 @@ def _render(
     or 30 frames per second without one. The first field sets the figure up,
     and *setup* lays it out for the whole run; each later one is drawn into
     it as the animation asks for it, which is when the engine steps to it.
-    After the last frame the generator is drained: the steps after it still
-    belong to the run, whose probes record them. However the encode ends
+    Once the last frame is drawn, and before ffmpeg finishes the file, the
+    generator is drained: the steps after that frame still belong to the
+    run, whose probes record them, and a run that fails there fails before
+    the video takes the place of what was at the path. However the encode ends
     (ffmpeg failing, the caller's interrupt), the generator is closed, so it
     does not stay suspended inside its device context until the garbage
     collector finds it.
@@ -489,6 +491,8 @@ def _render(
                 plot._update_snapshot(
                     image, _host(backend, next(frames)), title(k * frame_dt)
                 )
+            if k == n_frames - 1:
+                deque(frames, maxlen=0)
             return (image,)
 
         animation = FuncAnimation(
@@ -501,11 +505,9 @@ def _render(
             cache_frame_data=False,
             repeat=False,
         )
-        name = encode(
+        return encode(
             request, animation, ffmpeg=encoding.ffmpeg, choice=encoding.choice
         )
-        deque(frames, maxlen=0)
-    return name
 
 
 @dataclass(frozen=True)

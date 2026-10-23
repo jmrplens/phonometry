@@ -524,6 +524,45 @@ def test_a_drawing_that_fails_closes_the_march(
     assert not target.exists()
 
 
+def test_a_run_that_fails_after_its_last_frame_leaves_the_old_video(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The steps after the last frame run before the video takes the path's place.
+
+    A step there that fails (a source that raises, a run its client
+    cancelled) fails the call, and what was at the path stays there, with
+    no hidden file left beside it.
+    """
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+
+    def frames() -> Generator[np.ndarray, None, None]:
+        for _ in range(3):
+            yield np.zeros((8, 8))
+        msg = "a step after the last frame failed"
+        raise RuntimeError(msg)
+
+    target = tmp_path / "old.webm"
+    target.write_bytes(b"the video already there")
+    request = video_request(target, VideoOptions(encoder="cpu"))
+    frame = AnimationFrame(size=(480, 246))
+    encoding = video_module._preflight(request, frame.size)
+    backend = bk.backend_for(Compute())
+    with pytest.raises(RuntimeError, match="a step after the last frame failed"):
+        video_module._render(
+            request,
+            encoding,
+            frame,
+            frames=frames(),
+            backend=backend,
+            n_frames=3,
+            frame_dt=1e-3,
+            setup=lambda ax, field: ax.imshow(field),
+            title=str,
+        )
+    assert target.read_bytes() == b"the video already there"
+    assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
+
+
 def test_an_interrupted_first_pass_leaves_the_device_as_it_found_it() -> None:
     current = ["the caller's"]
 

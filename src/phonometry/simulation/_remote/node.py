@@ -161,8 +161,9 @@ def _read_to_end(descriptor: int) -> None:
     hand, it may already name a file of someone else's.
     """
     try:
-        while os.read(descriptor, 1 << 16):
-            pass
+        chunk = os.read(descriptor, 1 << 16)
+        while chunk:
+            chunk = os.read(descriptor, 1 << 16)
     except OSError as exc:
         if exc.errno == errno.EBADF:
             return

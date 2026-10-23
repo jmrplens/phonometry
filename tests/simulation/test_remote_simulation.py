@@ -487,13 +487,16 @@ def test_a_run_still_going_at_the_timeout_is_stopped_there_and_the_node_with_it(
     """
     pidfile = tmp_path / "node.pid"
     monkeypatch.setenv("FAKE_SSH_PIDFILE", str(pidfile))
-    # Thirty seconds of sound on the grid take minutes to compute.
-    run, request = _small(duration=30.0), Compute(host=node, timeout_s=2.0)
+    # Thirty seconds of sound on the grid take minutes to compute. The limit
+    # is well past the node's start, 2 to 4.6 s on the Windows runners and
+    # 31 s once, so the clock runs out on a run that has begun, and the test
+    # holds the watcher to a client gone in the middle of the job.
+    run, request = _small(duration=30.0), Compute(host=node, timeout_s=45.0)
     started = time.monotonic()
-    with pytest.raises(ComputeRemoteError, match="did not finish within 2 s"):
+    with pytest.raises(ComputeRemoteError, match="did not finish within 45 s"):
         fdtd_simulation(run, compute=request)
     elapsed = time.monotonic() - started
-    assert elapsed < 30.0, f"the run came back {elapsed:.0f} s after it began"
+    assert elapsed < 90.0, f"the run came back {elapsed:.0f} s after it began"
     if os.name == "posix":
         assert _written(pidfile), "the stand-in for ssh never started the node"
         pid = int(pidfile.read_text(encoding="utf-8"))

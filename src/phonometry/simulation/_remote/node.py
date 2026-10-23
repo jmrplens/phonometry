@@ -18,10 +18,11 @@ frame of the ``job`` stage.
 After the job a thread reads standard input until it ends. A client that
 closes its connection (an interrupt, a timeout, a closed notebook) ends it,
 and the run stops at its next step; a run that has not stopped
-:data:`_GRACE_S` seconds later ends the process. A client that vanishes
-without closing it (a machine put to sleep, a network that drops) ends it
-only when the node's ssh server notices, which its ``ClientAliveInterval``
-decides; the guide on remote nodes says how to set it.
+:data:`_GRACE_S` seconds later ends the process, after removing the scratch
+files of a video it was writing. A client that vanishes without closing it
+(a machine put to sleep, a network that drops) ends it only when the node's
+ssh server notices, which its ``ClientAliveInterval`` decides; the guide on
+remote nodes says how to set it.
 """
 
 from __future__ import annotations
@@ -43,6 +44,7 @@ import numpy as np
 
 from .. import _observer
 from .._video_job import (
+    remove_scratch_videos,
     write_elastic_fdtd_animation_on_node,
     write_fdtd_animation_on_node,
 )
@@ -154,6 +156,8 @@ def _watch_input(
                 "phonometry: the client is gone and the run did not stop; the node exits\n"
             )
             sys.stderr.flush()
+            # The exit runs no finally, so a video's scratch files go first.
+            remove_scratch_videos()
             os._exit(130)
 
     threading.Thread(target=watch, name="phonometry-node-input", daemon=True).start()

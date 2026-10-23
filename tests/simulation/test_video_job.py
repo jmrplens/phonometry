@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -213,6 +214,57 @@ def test_the_scratch_directory_goes_however_the_job_stops(
     )
     with watching, pytest.raises(error, match=words):
         _on_node()
+    assert list(scratch.iterdir()) == []
+
+
+def test_a_node_that_ends_its_process_at_once_removes_its_scratch_videos_first(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A run that does not stop once its client is gone ends the node's process, which runs no finally.
+
+    The node's input watcher removes the scratch directory of the video the
+    run was writing before it ends the process.
+    """
+    from phonometry.simulation._remote import node
+
+    scratch = tmp_path / "scratch"
+    scratch.mkdir()
+    monkeypatch.setattr(tempfile, "tempdir", str(scratch))
+    monkeypatch.setattr(node, "_GRACE_S", 0.0)
+    at_exit: list[list[str]] = []
+    exited = threading.Event()
+
+    def ended(_code: int) -> None:
+        at_exit.append(sorted(path.name for path in scratch.iterdir()))
+        exited.set()
+
+    monkeypatch.setattr(os, "_exit", ended)
+    writing, release = threading.Event(), threading.Event()
+
+    def stuck(target: Path) -> None:
+        # A run that does not reach its next step: a long one, a hung encode.
+        target.write_bytes(b"half a video")
+        writing.set()
+        release.wait(30)
+
+    def run() -> None:
+        with contextlib.suppress(OSError):
+            job._encoded("webm", stuck)
+
+    runner = threading.Thread(target=run)
+    runner.start()
+    try:
+        assert writing.wait(30)
+        assert [path.name for path in scratch.iterdir()] != []
+        read, write = os.pipe()
+        os.close(write)
+        with os.fdopen(read, "rb") as gone:
+            node._watch_input(gone, threading.Event(), threading.Event())
+            assert exited.wait(30)
+    finally:
+        release.set()
+        runner.join(30)
+    assert at_exit == [[]]
     assert list(scratch.iterdir()) == []
 
 

@@ -7,9 +7,10 @@ simulation, the drawing and the encode, into a scratch directory of the
 node's own, because a WebM is finished by seeking back into the file, which
 a pipe cannot do. The node sends back the record's probe history, then the
 video's bytes as the stream after it (``node.FUNCTIONS`` names both); the
-scratch directory goes when the node closes the file. The client takes no
-more of those bytes than :func:`video_byte_cap` allows and none that do not
-begin as :data:`CONTAINER_HEADS` says the container does.
+scratch directory goes when the node closes the file, or just before the
+node ends its process at once. The client takes no more of those bytes than
+:func:`video_byte_cap` allows and none that do not begin as
+:data:`CONTAINER_HEADS` says the container does.
 
 A node that cannot draw (no matplotlib, or not the font every frame is drawn
 in) refuses here before it steps; one that cannot encode (no ffmpeg, or no
@@ -22,6 +23,7 @@ from __future__ import annotations
 import io
 import shutil
 import tempfile
+import threading
 from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Final
@@ -43,6 +45,7 @@ if TYPE_CHECKING:
 __all__ = [
     "CONTAINER_HEADS",
     "NodeCannotAnimateError",
+    "remove_scratch_videos",
     "video_byte_cap",
     "write_elastic_fdtd_animation_on_node",
     "write_fdtd_animation_on_node",
@@ -82,8 +85,36 @@ _PRESET_BYTES_PER_PIXEL: Final = 2
 _CALLER_BYTES_PER_PIXEL: Final = 8
 
 
+#: The scratch directory of every video this node is writing or sending,
+#: and the lock that guards it: the node's input watcher reads it from its own
+#: thread when it ends the process at once.
+_SCRATCH: set[Path] = set()
+_SCRATCH_LOCK = threading.Lock()
+
+
 class NodeCannotAnimateError(RuntimeError):
     """This node can simulate but cannot draw a video."""
+
+
+def _forget_scratch(scratch: Path) -> None:
+    """Remove *scratch* and stop tracking it."""
+    shutil.rmtree(scratch, ignore_errors=True)
+    with _SCRATCH_LOCK:
+        _SCRATCH.discard(scratch)
+
+
+def remove_scratch_videos() -> None:
+    """Remove the scratch directory of every video this node is still writing or sending.
+
+    For a node about to end its process at once (``os._exit``, which runs no
+    ``finally``), so that a run stopped that way leaves no video behind. A
+    file ffmpeg still holds open goes with its directory on POSIX; on
+    Windows it cannot be removed while ffmpeg runs, and its directory stays.
+    """
+    with _SCRATCH_LOCK:
+        scratches = tuple(_SCRATCH)
+    for scratch in scratches:
+        shutil.rmtree(scratch, ignore_errors=True)
 
 
 class _ScratchVideo(io.BufferedReader):
@@ -103,7 +134,7 @@ class _ScratchVideo(io.BufferedReader):
         try:
             super().close()
         finally:
-            shutil.rmtree(self._scratch, ignore_errors=True)
+            _forget_scratch(self._scratch)
 
 
 def _decided_by_caller(video: VideoOptions) -> bool:
@@ -179,11 +210,13 @@ def _encoded[R](container: object, write: Callable[[Path], R]) -> tuple[R, NodeS
     suffix = require_choice(container, "container", _CONTAINERS)
     _check_font()
     scratch = Path(tempfile.mkdtemp(prefix="phonometry-video-"))
+    with _SCRATCH_LOCK:
+        _SCRATCH.add(scratch)
     try:
         result = write(scratch / f"video.{suffix}")
         stream = _ScratchVideo(scratch / f"video.{suffix}")
     except BaseException:
-        shutil.rmtree(scratch, ignore_errors=True)
+        _forget_scratch(scratch)
         raise
     return result, ("video", stream)
 

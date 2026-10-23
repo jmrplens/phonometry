@@ -230,10 +230,18 @@ def find_ffmpeg() -> str:
 def _run(
     command: list[str], *, stdin: bytes | None = None
 ) -> subprocess.CompletedProcess[bytes]:
-    """Run ffmpeg once and wait, with a timeout; never through a shell."""
+    """Run ffmpeg once and wait, with a timeout; never through a shell.
+
+    ffmpeg reads *stdin*, or nothing: it never inherits this process's own
+    input. On Windows a program started on a pipe that another thread of
+    this process is reading (a node's input watcher) blocks as it starts,
+    until that read ends; elsewhere ffmpeg would read what the caller's
+    input holds.
+    """
     return subprocess.run(  # nosec B603 - an argument list to the ffmpeg find_ffmpeg resolved; no shell
         command,
         input=stdin,
+        stdin=subprocess.DEVNULL if stdin is None else None,
         capture_output=True,
         timeout=_RUN_TIMEOUT_S,
         check=False,

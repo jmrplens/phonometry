@@ -158,6 +158,34 @@ def test_ffmpeg_runs_without_a_console_window(
     assert ve.NO_WINDOW == getattr(ve.subprocess, "CREATE_NO_WINDOW", 0)
 
 
+def test_ffmpeg_never_inherits_this_process_s_input(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ffmpeg reads the frame it is given, or nothing, never this process's own input.
+
+    On Windows a program started on a pipe another thread is reading (a
+    node's input watcher, which reads the node's input until its client
+    goes) blocks as it starts, so describing ffmpeg on a Windows node
+    waited for good.
+    """
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    seen: list[tuple[object, object]] = []
+    real_run = ve.subprocess.run
+
+    def run(*args: object, **kwargs: object) -> object:
+        seen.append((kwargs.get("stdin"), kwargs.get("input")))
+        return real_run(*args, **kwargs)  # type: ignore[call-overload]
+
+    monkeypatch.setattr(ve.subprocess, "run", run)
+    described = ve.describe(str(fake.launcher))
+    choice = ve.EncoderChoice("cpu", "vp9", "libvpx-vp9")
+    assert ve.trial(described, choice, width=64, height=64)
+    assert seen[:2] == [(subprocess.DEVNULL, None)] * 2
+    stdin, frame = seen[2]
+    assert stdin is None
+    assert frame == bytes(64 * 64 * 4)
+
+
 def test_describe_reads_the_version_and_the_compiled_encoders(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -487,11 +487,21 @@ def test_a_run_still_going_at_the_timeout_is_stopped_there_and_the_node_with_it(
     """
     pidfile = tmp_path / "node.pid"
     monkeypatch.setenv("FAKE_SSH_PIDFILE", str(pidfile))
-    # Thirty seconds of sound on the grid take minutes to compute. The limit
-    # is well past the node's start, 2 to 4.6 s on the Windows runners and
-    # 31 s once, so the clock runs out on a run that has begun, and the test
-    # holds the watcher to a client gone in the middle of the job.
-    run, request = _small(duration=30.0), Compute(host=node, timeout_s=45.0)
+    # Thirty seconds of sound on a 200 by 200 grid take hours on any runner;
+    # on the 20 by 20 grid of the other tests a fast macOS runner finished
+    # them inside the limit. The limit is well past the node's start, 2 to
+    # 4.6 s on the Windows runners and 31 s once, so the clock runs out on a
+    # run that has begun, and the test holds the watcher to a client gone in
+    # the middle of the job.
+    run = FDTDRun(
+        343.0,
+        0.01,
+        30.0,
+        shape=(200, 200),
+        sources=[GaussianPulse(ix=100, iy=100, half_width_s=4e-5)],
+        recording=FDTDRecording(probes=[(50, 50)]),
+    )
+    request = Compute(host=node, timeout_s=45.0)
     started = time.monotonic()
     with pytest.raises(ComputeRemoteError, match="did not finish within 45 s"):
         fdtd_simulation(run, compute=request)

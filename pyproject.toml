@@ -360,6 +360,10 @@ exclude_dirs = ["tests", ".venv"]
 relative_files = true
 
 [tool.pytest.ini_options]
+# faulthandler_exit_on_timeout, which the hang guard below rests on, came
+# with pytest 9.0; an older pytest would fail every failing test with an
+# INTERNALERROR instead of the failure.
+minversion = "9.0"
 pythonpath = ["tests"]
 # Group-aware distribution for `-n auto` runs: tests marked with
 # `xdist_group` land on one worker, so an expensive module-scoped fixture
@@ -368,14 +372,16 @@ pythonpath = ["tests"]
 # that happens to pick one of its consumers. Unmarked tests are distributed
 # exactly as with the default `load` mode, and the flag is inert without `-n`.
 #
-# A worker that dies is not replaced (--max-worker-restart=0). Under
-# loadgroup, pytest-xdist 3.8 puts a dead worker's group back in the queue
-# whole, the test that hung included: another worker runs that test again
-# and hangs in its turn, and the run then never ends. Without restarts the
-# run stops at the first worker the guard below ends, which costs the tests
-# still queued, run by no worker and named by nothing, and that worker's
-# coverage; the test that hung is the one to fix first. Inert without `-n`
-# too.
+# A worker that dies is not replaced (--max-worker-restart=0). Without it,
+# pytest-xdist 3.8 replaces the dead worker: if the queue has already
+# emptied, as when a test hangs near the end of a run, the controller then
+# waits forever with the other workers idle; if it has not, it puts the group
+# back with the hung test in it, another worker hangs on that test in its
+# turn, and the run only ends after 4 x n restarts, hours past the job's
+# limit. Without restarts the run stops at the first worker the guard below
+# ends, which costs the tests still queued, run by no worker and named by
+# nothing, and that worker's coverage; the test that hung is the one to fix
+# first. Inert without `-n` too.
 addopts = ["--dist=loadgroup", "--max-worker-restart=0"]
 # A test still running after fifteen minutes has hung. The slowest test takes
 # up to 258 s on a CI runner, a Windows one: the metadiffuser NTFF test with

@@ -348,7 +348,8 @@ def _frame_rate(request: VideoRequest, anim: Animation) -> str:
         if not isinstance(interval, (int, float)):
             msg = "the animation has no interval to take a frame rate from; pass 'fps'"
             raise TypeError(msg)
-        if not interval > 0:
+        # NaN is refused with the rest: it compares false either way.
+        if math.isnan(interval) or interval <= 0:
             msg = f"the animation's interval is not positive ({interval!r} ms); pass 'fps'"
             raise ValueError(msg)
         fps = 1000.0 / interval
@@ -583,14 +584,17 @@ def _movie_writer(pipe: _FramePipe) -> AbstractMovieWriter:
             **kwargs: Any,
         ) -> Iterator[AbstractMovieWriter]:
             self.setup(fig, outfile, dpi, *args, **kwargs)
-            # Finishing waits for ffmpeg to write the file, which an interrupt
-            # may cut short: ffmpeg is stopped then too.
+            finished = False
             try:
                 yield self
                 self.finish()
-            except BaseException:
-                pipe.abort()
-                raise
+                finished = True
+            finally:
+                # Finishing waits for ffmpeg to write the file; whatever ends
+                # the frames or that wait early (an error, an interrupt, the
+                # generator closed) stops ffmpeg instead.
+                if not finished:
+                    pipe.abort()
 
     return _PipeWriter()
 

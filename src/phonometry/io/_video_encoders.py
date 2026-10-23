@@ -273,14 +273,14 @@ def describe(path: str) -> FFmpeg:
         msg = f"{path} did not run: {(version.stderr or listing.stderr).decode(errors='replace')[-400:]}"
         raise VideoEncoderError(msg)
     lines = version.stdout.decode(errors="replace").splitlines()
+    matches = (
+        _ENCODER_LINE.match(line)
+        for line in listing.stdout.decode(errors="replace").splitlines()
+    )
     found = FFmpeg(
         path=path,
         version=lines[0] if lines else "",
-        encoders=frozenset(
-            match.group(1)
-            for line in listing.stdout.decode(errors="replace").splitlines()
-            if (match := _ENCODER_LINE.match(line))
-        ),
+        encoders=frozenset(match.group(1) for match in matches if match),
     )
     with _LOCK:
         _DESCRIBED[key] = found
@@ -295,11 +295,19 @@ def _container_options(container: Container, codec: Codec | None) -> tuple[str, 
     return (*tag, "-movflags", "+faststart")
 
 
-def _pad(width: int, height: int, pad_color: str) -> tuple[str, ...]:
-    """Pad an odd frame to even sides (``yuv420p`` halves the chroma)."""
+def _pad(width: int, height: int, pad_color: str) -> str | None:
+    """The filter that pads an odd frame to even sides (``yuv420p`` halves the chroma).
+
+    ``None`` for a frame whose sides are both even, which needs no padding.
+    """
     if width % 2 == 0 and height % 2 == 0:
-        return ()
-    return (f"pad=ceil(iw/2)*2:ceil(ih/2)*2:color={pad_color}",)
+        return None
+    return f"pad=ceil(iw/2)*2:ceil(ih/2)*2:color={pad_color}"
+
+
+def _filters(*steps: str | None) -> tuple[str, ...]:
+    """The filter chain: the steps given, in their order, without the absent ones."""
+    return tuple(step for step in steps if step)
 
 
 def video_arguments(
@@ -317,7 +325,7 @@ def video_arguments(
     pixels = () if pixel_format is None else ("-pix_fmt", pixel_format)
     return VideoArguments(
         before_input=before,
-        filters=(*_pad(width, height, pad_color), *((upload,) if upload else ())),
+        filters=_filters(_pad(width, height, pad_color), upload),
         codec_arguments=(
             "-c:v",
             choice.name,
@@ -346,7 +354,7 @@ def raw_arguments(
     """
     return VideoArguments(
         before_input=(),
-        filters=_pad(width, height, pad_color),
+        filters=_filters(_pad(width, height, pad_color)),
         codec_arguments=("-c:v", name, *options),
         muxer_options=_container_options(container, None),
     )

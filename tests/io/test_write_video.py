@@ -381,6 +381,20 @@ def test_the_frame_rate(
     assert _after(fake.encodes()[0]["argv"], "-r") == rate
 
 
+@pytest.mark.parametrize("interval", [0.0, -50.0, float("nan")])
+def test_an_interval_that_is_not_positive_is_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, interval: float
+) -> None:
+    """Zero, a negative interval and NaN are refused before ffmpeg runs."""
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    animation = _animation()
+    # Set on the animation itself: matplotlib's timer refuses a NaN interval.
+    monkeypatch.setattr(animation, "_interval", interval)
+    with pytest.raises(ValueError, match="interval is not positive"):
+        io.write_video(tmp_path / "w.webm", animation)
+    assert fake.calls() == []
+
+
 def test_an_interrupt_while_ffmpeg_finishes_stops_it(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

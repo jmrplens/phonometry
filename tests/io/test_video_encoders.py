@@ -289,7 +289,7 @@ def test_an_odd_frame_is_padded_and_hevc_in_mp4_is_tagged() -> None:
     assert video.filters == ("pad=ceil(iw/2)*2:ceil(ih/2)*2:color=#ffffff",)
     assert video.codec_arguments[:2] == ("-c:v", "libx265")
     assert video.codec_arguments[-2:] == ("-threads", "2")
-    assert ("-pix_fmt", "yuv420p") == video.codec_arguments[-4:-2]
+    assert video.codec_arguments[-4:-2] == ("-pix_fmt", "yuv420p")
     assert video.muxer_options == ("-tag:v", "hvc1", "-movflags", "+faststart")
 
 

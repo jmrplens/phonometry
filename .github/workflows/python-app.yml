@@ -1356,6 +1356,11 @@ jobs:
   video:
     name: Videos encode with a real ffmpeg
     runs-on: ubuntu-latest
+    # Its tests take under a minute in its first five passing runs, and
+    # installing ffmpeg took under a minute in three of them and 15 and 17
+    # min in the other two, waiting on Ubuntu's mirror; a hung test ends the
+    # run fifteen minutes after it started (pyproject.toml).
+    timeout-minutes: 45
     permissions:
       contents: read
     steps:
@@ -1451,8 +1456,10 @@ jobs:
     permissions:
       contents: read
     # A build of the image with nothing cached takes minutes and the runs take
-    # seconds: a job still going after this has hung.
-    timeout-minutes: 30
+    # seconds; installing ffmpeg, for ffprobe, took 15 and 17 min in two runs
+    # of the video job, waiting on Ubuntu's mirror: a job still going after
+    # this has hung.
+    timeout-minutes: 45
     steps:
     - uses: actions/checkout@v7
       with:

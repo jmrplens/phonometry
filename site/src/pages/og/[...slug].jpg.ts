@@ -27,6 +27,15 @@ interface Props {
   locale: 'en' | 'es';
 }
 
+/**
+ * The language a page is written in, which the card's furniture follows. The
+ * Spanish pages live under `es/`, and the Spanish home page is `es` itself.
+ * @param id - The page's collection id.
+ */
+function localeOf(id: string): 'en' | 'es' {
+  return id === 'es' || id.startsWith('es/') ? 'es' : 'en';
+}
+
 /** Docstring-generated API pages, which get the site-wide card instead. */
 function isApiReference(id: string): boolean {
   return /^(es\/)?reference\/api\//.test(id);
@@ -42,7 +51,7 @@ export async function getStaticPaths() {
   return pages
     .filter((page) => !isApiReference(page.id))
     .map((page) => {
-      const locale = page.id.startsWith('es/') ? 'es' : 'en';
+      const locale = localeOf(page.id);
       const slug = page.id.replace(/\/index$/, '') || 'index';
       return {
         params: { slug },

@@ -21,6 +21,8 @@ import path from 'node:path';
 import satori from 'satori';
 import sharp from 'sharp';
 
+import { artworkFile, TITLE_COLUMN_START, titleColumnFor } from '../lib/og-areas.mjs';
+
 /**
  * Where the brand assets live, relative to the working directory.
  *
@@ -35,7 +37,9 @@ const BRAND = path.join(process.cwd(), '..', '.github', 'brand');
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
 
-const PAD_X = 72;
+// The side padding is where the title column starts, which src/lib/og-areas.mjs
+// sets beside the column widths it measures from there.
+const PAD_X = TITLE_COLUMN_START;
 const PAD_Y = 60;
 
 // Straight from scripts/generate_brand.py, so a card cannot drift from the mark.
@@ -88,33 +92,20 @@ async function getMark(): Promise<string> {
 async function getArt(key: string): Promise<string> {
   const cached = artUris.get(key);
   if (cached) return cached;
-  const file = key === 'generic' ? 'generic.webp' : `area-${key}.webp`;
-  const buf = await readFile(path.join(BRAND, 'art', file));
+  const buf = await readFile(path.join(BRAND, 'art', artworkFile(key)));
   const jpeg = await sharp(buf).jpeg({ quality: 92 }).toBuffer();
   const uri = `data:image/jpeg;base64,${jpeg.toString('base64')}`;
   artUris.set(key, uri);
   return uri;
 }
 
-/**
- * Picks a title size that keeps the longest documentation titles to two lines.
- * @param title - The page title.
- */
-function titleSize(title: string): number {
-  const n = title.length;
-  if (n <= 22) return 68;
-  if (n <= 38) return 58;
-  if (n <= 56) return 48;
-  if (n <= 78) return 40;
-  return 34;
-}
-
 type Style = Record<string, string | number | undefined>;
 interface Node {
   type: string;
-  key: null;
+  key: string | number | null;
   props: { style?: Style; children?: unknown; [k: string]: unknown };
 }
+type Fonts = Parameters<typeof satori>[1]['fonts'];
 
 /**
  * Creates one satori node. Satori takes a React-shaped tree without React.
@@ -134,8 +125,545 @@ function el(type: string, style: Style, ...children: (Node | string | null)[]): 
   };
 }
 
+/**
+ * The fonts the card is set in, the display face of the title and the text
+ * face of the kicker and the strapline, read once.
+ */
+export async function cardFonts(): Promise<Fonts> {
+  const [display, regular] = await Promise.all([
+    once(fontDisplay, path.join(BRAND, 'fonts', 'FamiljenGrotesk-Bold.ttf')),
+    once(fontRegular, path.join(BRAND, 'fonts', 'IBMPlexSans-Regular.ttf')),
+  ]);
+  return [
+    { name: 'Familjen Grotesk', data: display, weight: 700, style: 'normal' },
+    { name: 'IBM Plex Sans', data: regular, weight: 400, style: 'normal' },
+  ];
+}
+
+/**
+ * The title's type at one size. The card and the measurement below both set
+ * the title in it, so a width measured is the width the card gets, and
+ * scripts/check-social-card-titles.mjs sets each line of every title in it
+ * again to measure where the line ends on the card.
+ *
+ * Each line is set unbroken: the card decides where the title breaks (see
+ * `layOutTitle`), and satori draws those lines as they are.
+ * @param size - Font size in pixels.
+ */
+export function titleType(size: number): Style {
+  return {
+    fontFamily: 'Familjen Grotesk',
+    fontSize: `${size}px`,
+    color: HEADING,
+    lineHeight: '1.12',
+    letterSpacing: '-0.015em',
+    whiteSpace: 'nowrap',
+  };
+}
+
+/**
+ * The title sizes, largest first: the five sizes the card has always used,
+ * and 44 px, which a title only reaches by stepping down (see `layOutTitle`).
+ */
+const TITLE_SIZES = [68, 58, 48, 44, 40, 34] as const;
+
+/**
+ * The size a title gets by its length: 68 px up to 22 characters, 58 px up to
+ * 38, 48 px up to 56, 40 px up to 78 and 34 px beyond. This is the table the
+ * card has always sized titles by, and it keeps titles of near-equal length,
+ * the pages of one section or a page and its translation, at the same size.
+ * @param title - The page title.
+ */
+function tableSize(title: string): number {
+  const n = title.length;
+  if (n <= 22) return 68;
+  if (n <= 38) return 58;
+  if (n <= 56) return 48;
+  if (n <= 78) return 40;
+  return 34;
+}
+
+/**
+ * The widest title column any card has, x = 72 to 932, where a title sits
+ * when its artwork leaves it the whole width, and where every title sat
+ * before the column depended on the artwork.
+ */
+const FULL_COLUMN = 860;
+
+/** The longest last line still too short to stand alone: one word this long or shorter. */
+const LONE_WORD_MAX = 8;
+
+/** The language a page, and so its title, is written in. */
+export type Locale = 'en' | 'es';
+
+/*
+ * The lists of function words below serve both languages at once. Their words
+ * hardly ever coincide, and where one does, as the "in" of the Latin "in situ"
+ * in a Spanish title, it plays the same part in both. "a" is the exception:
+ * an article in English, "a material datasheet", and a preposition in
+ * Spanish, "a la alemana", so the title's language decides which list it is
+ * in.
+ */
+
+/** Words a line never ends on: they belong with what follows them (`bound`). */
+const WEAK_END = new Set(
+  (
+    'a an the of in on at to for by and or nor but with from as into onto per via vs versus ' +
+    'under over between through within without ' +
+    'el la lo los las un una unos unas de del al en y e o u ni pero por para con sin sobre ' +
+    'entre desde hasta bajo según mediante hacia tras durante contra que se su sus'
+  ).split(' '),
+);
+
+const OPENERS =
+  'and or nor but in on at to for by with from into onto per via vs versus under over ' +
+  'between through within without y e o u ni pero en por para con sin sobre entre ' +
+  'desde hasta bajo según mediante hacia tras durante contra al del';
+
+/**
+ * Conjunctions and prepositions that open a phrase of their own, so a line
+ * may start with one: "Silencers, Screens / and Barriers In Situ", "Sending a
+ * simulation / to a remote node", "Medición del aislamiento / en
+ * laboratorio".
+ */
+const PHRASE_OPENERS: Record<Locale, Set<string>> = {
+  en: new Set(OPENERS.split(' ')),
+  es: new Set(OPENERS.split(' ')),
+};
+
+/**
+ * Prepositions that open a phrase only before an article: the Spanish "a" of
+ * "Ruido de climatización / a la alemana". Without one it ties a term
+ * together as "de" does, "aislamiento a impacto", and a break before it would
+ * split the term, so it counts as no boundary at all.
+ */
+const OPENS_BEFORE_ARTICLE: Record<Locale, Set<string>> = {
+  en: new Set(),
+  es: new Set(['a']),
+};
+
+/**
+ * "of" and "de" open a phrase only before an article, "of a Sound Level
+ * Meter", "de un sonómetro". Without one they join two nouns into one term,
+ * "tiempo de reverberación", "presión sonora de emisión", which a break would
+ * split. A break before one still parts less than a break inside a term, so
+ * the card takes it when no phrase boundary fits (`layOutTitle`).
+ */
+const OF = new Set(['of', 'de']);
+
+const ARTICLES = 'an the el la lo los las un una unos unas';
+const ARTICLE: Record<Locale, Set<string>> = {
+  en: new Set(`a ${ARTICLES}`.split(' ')),
+  es: new Set(ARTICLES.split(' ')),
+};
+
+/**
+ * The shortest a first line may be, as a fraction of the second, for a break
+ * before a conjunction or a preposition to count as a phrase boundary. A
+ * shorter one leaves the title hanging off a stub: "Emisión" over "de la
+ * fuente ferroviaria CNOSSOS-EU", "Reading" over "and writing measurement
+ * audio".
+ */
+const PHRASE_FIRST_LINE_MIN = 0.4;
+
+/** An abbreviation set in capitals: "ISO", "E", "ITU-R", "ISO/TS", "BS.468-4", "DB-HR". */
+const CAPITALS = /^[A-Z][A-Z0-9]*(?:[./-][A-Z0-9]+)*$/;
+/** The same, or one a number leads: "FDTD", "CNOSSOS-EU", "2D". */
+const ABBREVIATION = /^(?:[A-Z]|\d+[A-Z])[A-Z0-9]*(?:[./-][A-Z0-9]+)*$/;
+/** Words a designation is spelled with besides abbreviations and numbers. */
+const DESIGNATION_WORDS = new Set(['Doc', 'Mark']);
+/** A unit a number keeps on its line. */
+const UNIT = /^(?:[kMG]?Hz|dB[A-Z]?|m?s|[mck]?m|kg|k?Pa|°C|K|%)$/;
+
+/**
+ * A word without the brackets and punctuation around it.
+ * @param word - One space-separated word of the title.
+ */
+function bare(word: string): string {
+  return word.replace(/^[([¿¡«"]+/, '').replace(/[)\]»",;:.?!]+$/, '');
+}
+
+/**
+ * Whether the title may break at the space between two words.
+ *
+ * Only spaces are break points, so a hyphenated compound ("Steady-State",
+ * "fluid-solid", "tiempo-frecuencia") is never split at its hyphen. Of the
+ * spaces, the card does not break
+ * - inside a standard's designation: an abbreviation in capitals, or "Doc" or
+ *   "Mark", keeps the number, abbreviation or designation word after it, so
+ *   "ISO 532-2", "E DIN 45672-3", "ECAC Doc 29", "IEC TS 61400-11-2" and
+ *   "RC Mark II" stay on one line;
+ * - before a part number: "-2" in "ISO 8253-1 and -2" never starts a line;
+ * - around a slash or an ampersand standing alone, as in "NC / RC" and
+ *   "STOI & ESTOI";
+ * - between a number and its unit, "16 kHz".
+ * @param before - The word before the space.
+ * @param after - The word after it.
+ */
+function breakable(before: string, after: string): boolean {
+  if (/^-\d/.test(after)) return false;
+  if (['/', '&'].includes(before) || ['/', '&'].includes(after)) return false;
+  const opens =
+    !/[,;:]$/.test(before) &&
+    (CAPITALS.test(bare(before)) || DESIGNATION_WORDS.has(bare(before)));
+  const continues =
+    !after.startsWith('(') &&
+    (/^\d/.test(bare(after)) || CAPITALS.test(bare(after)) || DESIGNATION_WORDS.has(bare(after)));
+  if (opens && continues) return false;
+  if (/^\d[\d.,]*$/.test(before) && UNIT.test(bare(after))) return false;
+  return true;
+}
+
+/**
+ * A word as the lists of function words above spell it, in lower case, or
+ * nothing for an abbreviation in capitals: "EN" in "EN 16487" is no Spanish
+ * "en", nor "E" in "E DIN 4150-2" a Spanish "e".
+ * @param word - One space-separated word of the title.
+ */
+function functionWord(word: string): string {
+  return CAPITALS.test(word) ? '' : word.toLowerCase();
+}
+
+/**
+ * Whether the words from `i` to the end of the title are one designation: an
+ * abbreviation in capitals, or "Doc" or "Mark", with the words `breakable`
+ * keeps with it, as "CNOSSOS-EU", "EN 16487" and "FDTD 2D" end a title. One
+ * short word, "SEA" or "GFPE", is not enough: alone on the second line it
+ * would hang there as a lone word.
+ * @param words - The title's words.
+ * @param i - Index of the first word of the second line.
+ */
+function endsWithDesignation(words: string[], i: number): boolean {
+  const first = bare(words[i]);
+  if (!CAPITALS.test(first) && !DESIGNATION_WORDS.has(first)) return false;
+  for (let j = i + 1; j < words.length; j++) {
+    if (breakable(words[j - 1], words[j])) return false;
+  }
+  return i < words.length - 1 || words[i].length > LONE_WORD_MAX;
+}
+
+/**
+ * Whether the words before `i` are one designation that opens the title, as
+ * "2D FDTD" opens "2D FDTD wave simulation" and "CNOSSOS-EU" opens
+ * "CNOSSOS-EU railway source emission": abbreviations (ABBREVIATION) and the
+ * words `breakable` keeps with them, ending before the first word that is
+ * neither. A break there mirrors one before a designation that ends the
+ * title, and as there, one short word is not enough: alone on the first line
+ * it would be a stub.
+ * @param words - The title's words.
+ * @param i - Index of the first word of the second line.
+ */
+function startsWithDesignation(words: string[], i: number): boolean {
+  for (let j = 0; j < i; j++) {
+    const kept = j > 0 && !breakable(words[j - 1], words[j]);
+    if (!kept && !ABBREVIATION.test(bare(words[j]))) return false;
+  }
+  if (ABBREVIATION.test(bare(words[i]))) return false;
+  return i > 1 || words[0].length > LONE_WORD_MAX;
+}
+
+/** Conjunctions, which can join two modifiers of one noun as well as two phrases. */
+const CONJUNCTIONS = new Set('and or nor y e o u ni'.split(' '));
+/** A hyphenated compound, "Diffuse-Field", or a prefix whose noun comes later, "Low-". */
+const COMPOUND = /\p{L}-(?:\p{L}|$)/u;
+
+/**
+ * What kind of boundary a break falls on: `mark`, before a bracket, after a
+ * colon or semicolon, or before a designation that ends the title, which is
+ * the same break as before a bracketed one, "Emisión de la fuente ferroviaria
+ * / CNOSSOS-EU", or after one that opens it, "2D FDTD / wave simulation";
+ * `word`, before a conjunction or a preposition that opens a phrase; `of`,
+ * before an "of" or a "de" that opens none (OF), "Sound Power / of Multisource
+ * Industrial Plants"; `none`, anywhere else. That includes anywhere inside
+ * brackets, where the "and" of "(ISO 8253-1 and -2)" opens nothing, and before
+ * a conjunction between two hyphenated compounds, which joins two modifiers of
+ * one noun: "Random-Incidence and Diffuse-Field Response".
+ * @param words - The title's words.
+ * @param i - Index of the first word of the second line.
+ * @param locale - The title's language.
+ */
+function boundary(words: string[], i: number, locale: Locale): Boundary {
+  const before = words.slice(0, i).join(' ');
+  if (before.split('(').length > before.split(')').length) return 'none';
+  if (words[i].startsWith('(') || /[:;]$/.test(words[i - 1])) return 'mark';
+  if (endsWithDesignation(words, i) || startsWithDesignation(words, i)) return 'mark';
+  const opener = functionWord(words[i]);
+  const joinsModifiers = COMPOUND.test(words[i - 1]) && COMPOUND.test(words[i + 1] ?? '');
+  if (CONJUNCTIONS.has(opener) && joinsModifiers) return 'none';
+  if (OPENS_BEFORE_ARTICLE[locale].has(opener)) {
+    return ARTICLE[locale].has(functionWord(words[i + 1] ?? '')) ? 'word' : 'none';
+  }
+  if (PHRASE_OPENERS[locale].has(opener)) return 'word';
+  if (OF.has(opener)) {
+    return ARTICLE[locale].has(functionWord(words[i + 1] ?? '')) ? 'word' : 'of';
+  }
+  return 'none';
+}
+
+/**
+ * Whether a phrase starts at word `k`: a bracket, a conjunction or a
+ * preposition, or any word after a comma, colon or semicolon.
+ * @param words - The title's words.
+ * @param k - Index of the word.
+ * @param locale - The title's language.
+ */
+function phraseStarts(words: string[], k: number, locale: Locale): boolean {
+  const word = functionWord(words[k]);
+  return (
+    words[k].startsWith('(') ||
+    PHRASE_OPENERS[locale].has(word) ||
+    (OPENS_BEFORE_ARTICLE[locale].has(word) &&
+      ARTICLE[locale].has(functionWord(words[k + 1] ?? ''))) ||
+    OF.has(word) ||
+    /[,;:]$/.test(words[k - 1])
+  );
+}
+
+/**
+ * Whether a break before word `i` would part words that belong together,
+ * which the card keeps on one line as it keeps a designation:
+ * - a word that belongs with the next (WEAK_END) never ends a line, as "the"
+ *   in "Sound Power in the / Reverberation Room" or "de" in "Potencia
+ *   acústica en salas de / ensayo";
+ * - an article keeps the two words after it when its phrase ends there, at a
+ *   bracket, a conjunction, a preposition, a punctuation mark or the end of
+ *   the title: "the German Way" in "HVAC Noise the German Way (VDI 2081)".
+ *
+ * Like `breakable`, this decides the title's size as well as its lines: a
+ * title that cannot be set in two lines of its column without parting such
+ * words steps down the scale (`layOutTitle`).
+ * @param words - The title's words.
+ * @param i - Index of the first word of the second line.
+ * @param locale - The title's language.
+ */
+function bound(words: string[], i: number, locale: Locale): boolean {
+  if (WEAK_END.has(functionWord(words[i - 1]))) return true;
+  return (
+    i >= 2 &&
+    ARTICLE[locale].has(functionWord(words[i - 2])) &&
+    !phraseStarts(words, i - 1, locale) &&
+    !phraseStarts(words, i, locale) &&
+    (i + 1 === words.length || phraseStarts(words, i + 1, locale))
+  );
+}
+
+/** The kinds of boundary a break can fall on (`boundary`). */
+type Boundary = 'mark' | 'word' | 'of' | 'none';
+
+interface TitleBreak {
+  lines: [string] | [string, string];
+  /** Width of each line at 1 px; multiply by the size. */
+  widths: number[];
+  /** The second line is a single short word. */
+  lone: boolean;
+  /** The boundary the break falls on, from `boundary`. */
+  phrase: Boundary;
+  /**
+   * Whether this is the break the title had while the card filled its full
+   * column line by line, as `layOutTitle` estimates it.
+   */
+  had: boolean;
+}
+
+/**
+ * Every way to set the title in one or two lines, breaking where `breakable`
+ * allows and `bound` does not forbid: the whole title, then one entry per
+ * break point.
+ * @param title - The page title.
+ * @param locale - The title's language.
+ */
+function titleBreaks(title: string, locale: Locale): TitleBreak[] {
+  const words = title.split(' ');
+  const out: TitleBreak[] = [
+    { lines: [title], widths: [], lone: false, phrase: 'none', had: false },
+  ];
+  for (let i = 1; i < words.length; i++) {
+    if (!breakable(words[i - 1], words[i]) || bound(words, i, locale)) continue;
+    const second = words.slice(i).join(' ');
+    out.push({
+      lines: [words.slice(0, i).join(' '), second],
+      widths: [],
+      lone: !second.includes(' ') && second.length <= LONE_WORD_MAX,
+      phrase: boundary(words, i, locale),
+      had: false,
+    });
+  }
+  return out;
+}
+
+/**
+ * Every first line the card's earlier line breaking could end a line with:
+ * at each space, and after a hyphen or a slash that a letter follows, as in
+ * "Low-" or "(ISO/". Each comes with the index of the word the second line
+ * would start with, or -1 when the break falls inside a word.
+ * @param title - The page title.
+ */
+function earlierBreaks(title: string): { first: string; at: number }[] {
+  const words = title.split(' ');
+  const out: { first: string; at: number }[] = [];
+  for (let i = 0; i < words.length; i++) {
+    if (i > 0) out.push({ first: words.slice(0, i).join(' '), at: i });
+    for (const m of words[i].matchAll(/[-/](?=\p{L})/gu)) {
+      out.push({ first: [...words.slice(0, i), words[i].slice(0, m.index + 1)].join(' '), at: -1 });
+    }
+  }
+  return out;
+}
+
+/** Size the lines are measured at; any other size scales from it. */
+const MEASURE_SIZE = 100;
+
+/**
+ * Lays out every string once with satori, as the card sets a title line, and
+ * returns its width at 1 px.
+ *
+ * Text width is proportional to the size, the advances, the kerning and the
+ * letter spacing in em all scale with it, so one layout at MEASURE_SIZE prices
+ * every line at every size; a fine point scale keeps the layout from rounding
+ * the widths to whole pixels. Checked against a layout at each size of the
+ * scale, the scaled widths agree to a thousandth of a pixel.
+ * @param strings - The lines to measure.
+ * @param fonts - The fonts the card is set in.
+ */
+async function measureLines(strings: string[], fonts: Fonts): Promise<Map<string, number>> {
+  const unique = [...new Set(strings)];
+  const widths = new Map<string, number>();
+  const lines: Node[] = unique.map((s, i) => ({
+    type: 'div',
+    key: i,
+    props: { style: { display: 'flex', ...titleType(MEASURE_SIZE) }, children: s },
+  }));
+  const stack = el(
+    'div',
+    { display: 'flex', flexDirection: 'column', alignItems: 'flex-start' },
+    ...lines,
+  );
+  await satori(stack as never, {
+    width: 16 * OG_WIDTH,
+    fonts,
+    pointScaleFactor: 1000,
+    onNodeDetected: (node) => {
+      if (typeof node.key === 'number') widths.set(unique[node.key], node.width / MEASURE_SIZE);
+    },
+  });
+  for (const s of unique) {
+    if (!widths.has(s)) throw new Error(`og-image: satori did not lay out "${s}".`);
+  }
+  return widths;
+}
+
+/**
+ * The layouts that fit a column at one size: the one-line layout alone when
+ * the title fits on one line, otherwise the two-line layouts whose lines both
+ * fit. Empty when the title needs three lines or more.
+ * @param breaks - Measured candidate layouts.
+ * @param size - Font size in pixels.
+ * @param column - Column width in pixels.
+ */
+function fitting(breaks: TitleBreak[], size: number, column: number): TitleBreak[] {
+  const fits = (b: TitleBreak) => b.widths.every((w) => w * size <= column);
+  return fits(breaks[0]) ? [breaks[0]] : breaks.slice(1).filter(fits);
+}
+
+/**
+ * The items of `list` that pass `test`, or all of `list` when none does.
+ * @param list - Candidates.
+ * @param test - The preference.
+ */
+function prefer<T>(list: T[], test: (item: T) => boolean): T[] {
+  const kept = list.filter(test);
+  return kept.length > 0 ? kept : list;
+}
+
+/**
+ * Sets the title for a column: its size, and its one or two lines.
+ *
+ * The size is the one `tableSize` gives the title's length, so near-identical
+ * titles keep the same size and none gets larger than it was. The card steps
+ * down the scale, 58, 48, 44, 40, 34 px, only while the title cannot be set
+ * in two lines of its column at that size without parting words that belong
+ * together: the words of a designation, a hyphenated compound or a number and
+ * its unit (`breakable`), an article, a preposition or a conjunction and the
+ * word after it, or a short phrase an article opens (`bound`). So a title
+ * gets smaller than its table size only where the column its artwork leaves
+ * cannot hold it with all of those kept whole. Nothing fitting at 34 px stops
+ * the build: the card neither adds a third line nor cuts the title.
+ *
+ * At that size the title takes one line when it fits, and otherwise two. Of
+ * the two-line breaks that fit, the card prefers, in order:
+ * 1. a break at a phrase boundary, and of those the one the title had while
+ *    the card filled its full column line by line, as far as it can be told
+ *    (see below), then one before a bracket or a closing designation, after
+ *    an opening one or after a colon or semicolon, then one before a
+ *    conjunction or a preposition that opens a phrase (`boundary`) on a first
+ *    line that is no stub (PHRASE_FIRST_LINE_MIN);
+ * 2. a break before an "of" or a "de" that opens no phrase (`boundary`), on
+ *    a first line that is no stub. It parts the two terms the word joins, but
+ *    keeps the one after it whole, where a break on no boundary at all falls
+ *    inside a term: "Sound Power / of Multisource Industrial Plants", not
+ *    "Sound Power of Multisource / Industrial Plants";
+ * 3. a second line longer than one short word (LONE_WORD_MAX characters);
+ * 4. the pair of lines closest to equal length.
+ *
+ * scripts/check-social-card-titles.mjs holds these rules: it lays out a table
+ * of titles whose size and lines it states, and every page's title, and
+ * fails on a title that breaks one.
+ * @param title - The page title.
+ * @param column - Width of the card's title column, in pixels.
+ * @param fonts - The fonts the card is set in.
+ * @param locale - The title's language.
+ */
+export async function layOutTitle(
+  title: string,
+  column: number,
+  fonts: Fonts,
+  locale: Locale,
+): Promise<{ size: number; lines: string[] }> {
+  const breaks = titleBreaks(title, locale);
+  const earlier = earlierBreaks(title);
+  const widths = await measureLines(
+    [...breaks.flatMap((b) => b.lines), ...earlier.map((e) => e.first)],
+    fonts,
+  );
+  for (const b of breaks) b.widths = b.lines.map((line) => widths.get(line) ?? Infinity);
+
+  // The break the title had, estimated: the last place where the first line
+  // still fits the full column at the table size, filling it line by line as
+  // the card once did. Satori 0.47.1 set the cards then, and the widths here
+  // are those of the satori in use, which differ slightly, so on a few titles
+  // the estimate is not the break 0.47.1 drew: "Dónde se calcula una
+  // simulación: NumPy, / CuPy y torch", where 0.47.1 broke at the colon. Only
+  // a break between words that is still allowed can be kept.
+  const start = tableSize(title);
+  if ((widths.get(title) ?? Infinity) * start > FULL_COLUMN) {
+    const last = earlier.findLast((e) => (widths.get(e.first) ?? Infinity) * start <= FULL_COLUMN);
+    const words = title.split(' ');
+    const first = last && last.at > 0 ? words.slice(0, last.at).join(' ') : undefined;
+    for (const b of breaks) b.had = b.lines.length === 2 && b.lines[0] === first;
+  }
+
+  const size = TITLE_SIZES.find((s) => s <= start && fitting(breaks, s, column).length > 0);
+  if (size === undefined) {
+    throw new Error(
+      `og-image: the title "${title}" does not fit two lines of a ${column} px column even at ` +
+        `${TITLE_SIZES.at(-1)} px. Shorten it: the card neither adds a third line nor cuts it.`,
+    );
+  }
+  const noStub = (b: TitleBreak) => b.widths[0] >= PHRASE_FIRST_LINE_MIN * b.widths[1];
+  const atPhrase = (b: TitleBreak) => b.phrase === 'mark' || (b.phrase === 'word' && noStub(b));
+  let fit = fitting(breaks, size, column);
+  fit = prefer(fit, (b) => b.had && atPhrase(b));
+  fit = prefer(fit, (b) => b.phrase === 'mark');
+  fit = prefer(fit, atPhrase);
+  fit = prefer(fit, (b) => b.phrase === 'of' && noStub(b));
+  fit = prefer(fit, (b) => !b.lone);
+  const imbalance = (b: TitleBreak) => Math.abs(b.widths[0] - (b.widths[1] ?? b.widths[0]));
+  const best = fit.reduce((a, b) => (imbalance(b) < imbalance(a) ? b : a));
+  return { size, lines: [...best.lines] };
+}
+
 /** The strapline under the wordmark, in the card's own language. */
-const TAGLINE: Record<'en' | 'es', string> = {
+const TAGLINE: Record<Locale, string> = {
   en: 'Acoustic measurement toolkit for Python',
   es: 'Herramientas de medida acústica para Python',
 };
@@ -147,43 +675,81 @@ export interface OgCard {
   kicker?: string;
   /** Artwork key, from `artKeyFor`. */
   art: string;
-  /** Which language the card's own furniture is written in. */
-  locale: 'en' | 'es';
+  /**
+   * The language the page is written in, which the card's own furniture is
+   * written in too, and which tells the title's function words apart.
+   */
+  locale: Locale;
+}
+
+/** The card itself, which every other box sits in. */
+const GROUND: Style = {
+  display: 'flex',
+  width: '100%',
+  height: '100%',
+  position: 'relative',
+  backgroundColor: '#04222b',
+};
+
+/**
+ * The artwork, full bleed. It is already dark on the left, which is where the
+ * type sits, so it needs no scrim over it.
+ * @param art - The artwork's data URI, from `getArt`.
+ */
+function artwork(art: string): Node {
+  return {
+    type: 'img',
+    key: null,
+    props: {
+      src: art,
+      width: OG_WIDTH,
+      height: OG_HEIGHT,
+      style: { position: 'absolute', top: 0, left: 0, objectFit: 'cover' },
+    },
+  };
 }
 
 /**
- * Renders one card to PNG bytes.
+ * Lays a card's tree out and rasterises it into the bytes the endpoint serves.
+ * @param tree - The card, inside GROUND.
+ * @param fonts - The fonts the card is set in.
+ */
+async function render(tree: Node, fonts: Fonts): Promise<Buffer> {
+  const svg = await satori(tree as never, { width: OG_WIDTH, height: OG_HEIGHT, fonts });
+
+  // JPEG, not PNG: the cards carry photographic artwork, so a lossless encode
+  // costs several times the bytes for a difference no scraper will ever show.
+  return sharp(Buffer.from(svg)).jpeg({ quality: 88, progressive: true }).toBuffer();
+}
+
+/**
+ * Renders an artwork as a card shows it with nothing over it: the ground and
+ * the artwork of `generateOgImage`, placed, rasterised and encoded as there,
+ * without the mark, the type and the rule. scripts/check-social-cards.mjs
+ * compares every card with it past the end of the card's title column, where
+ * the card has to show its artwork and nothing else.
+ * @param art - Artwork key, from `artKeyFor`.
+ */
+export async function generateBareArtwork(art: string): Promise<Buffer> {
+  const [fonts, src] = await Promise.all([cardFonts(), getArt(art)]);
+  return render(el('div', GROUND, artwork(src)), fonts);
+}
+
+/**
+ * Renders one card to JPEG bytes.
  * @param card - Title, kicker and artwork key for this page.
  */
 export async function generateOgImage(card: OgCard): Promise<Buffer> {
-  const [display, regular, mark, art] = await Promise.all([
-    once(fontDisplay, path.join(BRAND, 'fonts', 'FamiljenGrotesk-Bold.ttf')),
-    once(fontRegular, path.join(BRAND, 'fonts', 'IBMPlexSans-Regular.ttf')),
-    getMark(),
-    getArt(card.art),
-  ]);
+  const [fonts, mark, art] = await Promise.all([cardFonts(), getMark(), getArt(card.art)]);
+  // The title stops short of where its artwork brightens, which is a
+  // different place on each drawing (src/lib/og-areas.mjs).
+  const column = titleColumnFor(card.art);
+  const title = await layOutTitle(card.title, column, fonts, card.locale);
 
   const tree = el(
     'div',
-    {
-      display: 'flex',
-      width: '100%',
-      height: '100%',
-      position: 'relative',
-      backgroundColor: '#04222b',
-    },
-    // The artwork, full bleed. It is already dark on the left, which is where
-    // the type sits, so it needs no scrim over it.
-    {
-      type: 'img',
-      key: null,
-      props: {
-        src: art,
-        width: OG_WIDTH,
-        height: OG_HEIGHT,
-        style: { position: 'absolute', top: 0, left: 0, objectFit: 'cover' },
-      },
-    } as Node,
+    GROUND,
+    artwork(art),
     // Positioned as well, so it paints over the artwork. CSS paints positioned
     // boxes after the boxes in normal flow, whatever their order in the tree,
     // and the artwork above is positioned. Satori 0.41 and older painted in
@@ -209,7 +775,7 @@ export async function generateOgImage(card: OgCard): Promise<Buffer> {
       // Middle: the area, then the page title.
       el(
         'div',
-        { display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '860px' },
+        { display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: `${FULL_COLUMN}px` },
         card.kicker
           ? el(
               'div',
@@ -225,14 +791,8 @@ export async function generateOgImage(card: OgCard): Promise<Buffer> {
           : null,
         el(
           'div',
-          {
-            fontFamily: 'Familjen Grotesk',
-            fontSize: `${titleSize(card.title)}px`,
-            color: HEADING,
-            lineHeight: '1.12',
-            letterSpacing: '-0.015em',
-          },
-          card.title,
+          { display: 'flex', flexDirection: 'column', maxWidth: `${column}px` },
+          ...title.lines.map((line) => el('div', titleType(title.size), line)),
         ),
       ),
       // Bottom: the wordmark, with a rule keeping it off the artwork.
@@ -259,16 +819,5 @@ export async function generateOgImage(card: OgCard): Promise<Buffer> {
     ),
   );
 
-  const svg = await satori(tree as never, {
-    width: OG_WIDTH,
-    height: OG_HEIGHT,
-    fonts: [
-      { name: 'Familjen Grotesk', data: display, weight: 700, style: 'normal' },
-      { name: 'IBM Plex Sans', data: regular, weight: 400, style: 'normal' },
-    ],
-  });
-
-  // JPEG, not PNG: the cards carry photographic artwork, so a lossless encode
-  // costs several times the bytes for a difference no scraper will ever show.
-  return sharp(Buffer.from(svg)).jpeg({ quality: 88, progressive: true }).toBuffer();
+  return render(tree, fonts);
 }

@@ -21,7 +21,9 @@ import numpy as np
 import pytest
 
 from phonometry import simulation
+from phonometry.io import VideoOptions
 from phonometry.simulation import (
+    AnimationFrame,
     CWSource,
     ElasticBoundaries,
     ElasticRecording,
@@ -108,11 +110,34 @@ _EVERY_ELASTIC_FIELD: dict[str, Any] = {
 #: scalar speed, and both tables give a map.
 _AT_DEFAULT = frozenset({"shape"})
 
+#: A frame record, every field away from its default.
+_EVERY_FRAME = AnimationFrame(language="es", size=(480, 246), color_limit=0.5)
+#: Video options, every field away from its default but ``ffmpeg_encoder``,
+#: which cannot sit beside an ``encoder`` and a ``codec`` of the caller's
+#: (``test_video_job.py`` sends one on its own).
+_EVERY_VIDEO = VideoOptions(
+    encoder="cpu",
+    codec="vp9",
+    quality="small",
+    fps=24.0,
+    ffmpeg_options=("-row-mt", "1"),
+)
+
 #: Each function a node runs, and an example of each of its parameters but
 #: ``compute``, which travels as the job's placement.
 _EVERY_PARAMETER: dict[str, dict[str, Any]] = {
     "fdtd_simulation": {"run": FDTDRun(**_EVERY_ACOUSTIC_FIELD)},
     "elastic_fdtd_simulation": {"run": ElasticRun(**_EVERY_ELASTIC_FIELD)},
+    "write_fdtd_animation": {
+        "run": FDTDRun(**_EVERY_ACOUSTIC_FIELD),
+        "frame": _EVERY_FRAME,
+        "video": _EVERY_VIDEO,
+    },
+    "write_elastic_fdtd_animation": {
+        "run": ElasticRun(**_EVERY_ELASTIC_FIELD),
+        "frame": _EVERY_FRAME,
+        "video": _EVERY_VIDEO,
+    },
 }
 
 
@@ -184,6 +209,8 @@ def _away_from(value: object, default: object) -> bool:
 def test_every_parameter_of_a_remote_function_travels(name: str) -> None:
     function = getattr(simulation, name)
     parameters = set(inspect.signature(function).parameters) - {"compute"}
+    # The path is the client's: the video is written there, on this machine.
+    parameters -= {"path"}
     assert set(_EVERY_PARAMETER[name]) == parameters, (
         "give every parameter an example here"
     )

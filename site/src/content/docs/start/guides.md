@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 166 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 167 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -117,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and sixty-six guides sit in thirteen topics, and each topic has its
+This page is the map. A hundred and sixty-seven guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -324,6 +324,9 @@ every published catalogue hands out.
   the rows every published catalogue hands out, searched with the same
   lookups, handed to the same models and completed in your editor with its
   JSON Schema.
+- [Writing animations and FDTD runs to video](/phonometry/io/videos/): any
+  matplotlib animation to WebM, MP4 or GIF through ffmpeg, and an FDTD run
+  straight to a video.
 
 ## [Hearing and perception](/phonometry/perception/)
 

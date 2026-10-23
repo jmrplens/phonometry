@@ -13,10 +13,11 @@ debajo de la mesa. El registro de la ejecución, `FDTDRun` o `ElasticRun`, es
 el mismo que toma una ejecución aquí, construido y comprobado aquí; la llamada
 es la misma, `fdtd_simulation(run, compute=...)` o
 `elastic_fdtd_simulation(run, compute=...)`, y también lo es el registro que
-devuelve. Solo esas dos funciones van a un nodo. Un motor construido
-directamente, `FDTD2D` o `ElasticFDTD2D`, avanza en este proceso, donde
-puedes leer y escribir sus campos entre un paso y el siguiente, y rechaza una
-petición que nombre un host.
+devuelve. Solo esas dos funciones, y las dos que escriben un vídeo a partir
+de las mismas ejecuciones, van a un nodo. Un motor construido directamente,
+`FDTD2D` o `ElasticFDTD2D`, avanza en este proceso, donde puedes leer y
+escribir sus campos entre un paso y el siguiente, y rechaza una petición que
+nombre un host.
 
 Esta página explica qué pasa cuando una ejecución va a un nodo, cómo
 nombrarlo, cómo preparar un nodo Docker o un nodo Python, qué puede fallar y
@@ -39,7 +40,10 @@ A partir de ahí, un solo proceso `ssh` lleva toda la ejecución. No hay que
 instalar ni mantener en marcha ningún servidor en el nodo: le basta con su
 servidor ssh. La ejecución viaja como datos, campo a campo, nunca como
 código, y el nodo la vuelve a construir con los constructores de la
-biblioteca, así que allí se comprueba otra vez.
+biblioteca, así que allí se comprueba otra vez. Las funciones que escriben
+vídeo también viajan, con su ejecución, su fotograma y sus opciones de vídeo
+como registros: véase
+[Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/).
 
 El nodo ejecuta tu propio phonometry, el que tienes instalado aquí, sea cual
 sea el que haya instalado allí. El cliente envía sus ficheros, los que
@@ -54,7 +58,8 @@ vayan y vengan.
 El nodo ejecuta la función en el dispositivo pedido, sin ninguna vuelta a
 NumPy por su cuenta, y devuelve las historias de las sondas y las
 instantáneas, que se leen aquí en arrays dimensionados a partir de tu
-petición. `result.provenance.host` nombra el nodo y
+petición; una función que escribe vídeo envía los bytes de su vídeo en lugar
+de las instantáneas. `result.provenance.host` nombra el nodo y
 `result.provenance.package_digest`, el paquete que se ejecutó; el resto de la
 procedencia es la del nodo: su NumPy, su biblioteca de arrays, su GPU.
 
@@ -251,6 +256,12 @@ shell. Después, el fichero de hosts nombra el intérprete por su ruta,
 cliente ejecuta ese `python` directamente, sin ningún script de activación
 antes, así que el entorno tiene que funcionar sin él.
 
+Un nodo que escribe vídeos
+([Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/))
+necesita dos cosas más: matplotlib en ese entorno, en la versión que pide el
+extra `plot` de la biblioteca, y ffmpeg en el `PATH` que ve la orden que ssh
+ejecuta allí. La imagen de Docker de la sección 3 lleva las dos.
+
 ## 5. Cuando algo sale mal
 
 | Qué salió mal | Qué se lanza | Cuándo |
@@ -347,10 +358,10 @@ variables `LC_*`), en la medida en que lo permita el `AcceptEnv` del nodo.
 
 Un trabajo no lleva código: el nodo ejecuta el paquete que enviaste, sobre su
 propio Python y sus propias bibliotecas. El trabajo nombra una de las dos
-funciones de simulación y lleva su ejecución como datos, que el nodo vuelve a
-construir con los constructores de la biblioteca, y un paquete se comprueba
-contra su digest antes de guardarse. El contenedor de un nodo Docker no tiene
-red.
+funciones de simulación o de las dos que escriben vídeo y lleva su ejecución
+como datos, que el nodo vuelve a construir con los constructores de la
+biblioteca, y un paquete se comprueba contra su digest antes de guardarse. El
+contenedor de un nodo Docker no tiene red.
 
 El cliente no se fía de los bytes que envía el nodo. Cada cabecera y cada
 array se comprueban contra lo que implica la petición, su nombre, su `dtype`,
@@ -404,11 +415,13 @@ ejecución aquí.
 <ScopeClaim status="not-covered" label="No cubierto">
 Un motor construido directamente, `FDTD2D` o `ElasticFDTD2D`, avanza en este
 proceso y no va a un nodo, y un nodo solo ejecuta las dos funciones de
-simulación, nunca código que elija quien llama. El único transporte es ssh.
-Un nodo no tiene planificador ni cola propios: dos ejecuciones enviadas a la
-vez se ejecutan en paralelo. La imagen del nodo se construye en el nodo y no
-se publica en ningún registro, y una máquina Windows no puede ser un nodo. Un
-nodo aún no codifica vídeo, aunque su imagen lleva ffmpeg para ello.
+simulación y las dos que escriben vídeo, nunca código que elija quien llama.
+El único transporte es ssh. Un nodo no tiene planificador ni cola propios:
+dos ejecuciones enviadas a la vez se ejecutan en paralelo. La imagen del nodo
+se construye en el nodo y no se publica en ningún registro, y una máquina
+Windows no puede ser un nodo. Un nodo codifica el vídeo de una ejecución que
+calcula, pero no una animación dibujada aquí: `io.write_video` solo se
+ejecuta en esta máquina.
 </ScopeClaim>
 </Scope>
 
@@ -455,5 +468,7 @@ Un servidor ssh en el que puedas iniciar sesión con una clave, en Linux o
 macOS con un shell POSIX de inicio de sesión, y o bien Docker con la imagen
 del nodo (y, para una GPU, el controlador de NVIDIA y el NVIDIA Container
 Toolkit), o bien un Python 3.12 o posterior con NumPy y SciPy en los mínimos
-de la biblioteca (y CuPy o torch para una GPU). No hace falta que phonometry
-esté instalado allí: el cliente envía el suyo.
+de la biblioteca (y CuPy o torch para una GPU). Para escribir vídeos, un
+nodo Python necesita además matplotlib, y ffmpeg en su `PATH`; la imagen
+de Docker lleva los dos. No hace falta que phonometry esté instalado allí: el
+cliente envía el suyo.

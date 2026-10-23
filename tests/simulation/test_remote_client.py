@@ -883,3 +883,81 @@ def test_a_node_s_warning_reaches_the_caller_escaped() -> None:
         warnings.simplefilter("always")
         _receive(stdout)
     assert _no_control([str(w.message) for w in record])
+
+
+# A video's own checks on the stream: the bytes its container begins with.
+
+_WEBM_HEAD = b"\x1a\x45\xdf\xa3"
+_HEADED = client.Expected(
+    arrays=_STREAMED.arrays,
+    stream=client.StreamSpec("video", max_bytes=64, heads=((0, _WEBM_HEAD),)),
+)
+
+
+def _video(data: bytes) -> bytes:
+    return _streamed({"name": "video", "dtype": "uint8", "shape": [len(data)]}, data)
+
+
+def test_a_stream_that_begins_as_its_file_reaches_the_sink_whole(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(client, "_STREAM_CHUNK", 7)
+    data = _WEBM_HEAD + bytes(range(40))
+    sink = io.BytesIO()
+    _receive(_video(data), expected=_HEADED, sink=sink)
+    assert sink.getvalue() == data
+
+
+@pytest.mark.parametrize(
+    ("data", "match"),
+    [
+        (b"", "0 bytes of 'video', too few to begin as the file the request names"),
+        (
+            _WEBM_HEAD[:2],
+            "2 bytes of 'video', too few to begin as the file the request names",
+        ),
+        (b"GIF89a" + bytes(10), "'video' does not begin as the file the request names"),
+    ],
+    ids=["empty", "short", "gif"],
+)
+def test_a_video_that_is_empty_short_or_another_file_reaches_no_sink(
+    data: bytes, match: str
+) -> None:
+    sink = io.BytesIO()
+    stdout = _video(data)
+    with pytest.raises(ComputeRemoteError, match=match):
+        _receive(stdout, expected=_HEADED, sink=sink)
+    assert sink.getvalue() == b""
+
+
+def test_a_stream_without_heads_is_read_as_before() -> None:
+    sink = io.BytesIO()
+    _receive(_video(b""), expected=_STREAMED, sink=sink)
+    assert sink.getvalue() == b""
+
+
+@pytest.mark.parametrize("data", [b"", b"GIF89a" + bytes(10)], ids=["empty", "gif"])
+def test_a_video_refused_by_its_heads_falls_back_here_with_nothing_in_the_sink(
+    data: bytes, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    _lab(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        client, "installed_package", lambda: Package(files=(), digest="0" * 64)
+    )
+    ready = _frame(
+        {"type": "hello", "protocol": bootstrap.PROTOCOL, "have": True}
+    ) + _frame({"type": "ready"})
+    monkeypatch.setattr(
+        client, "open_session", lambda entry, request: _answers(ready + _video(data))
+    )
+    request = Compute(host="lab", fallback=True)
+    sink = io.BytesIO()
+    with pytest.warns(
+        ComputeFallbackWarning,
+        match="'video'.*the file the request names.*running on NumPy here instead",
+    ):
+        provenance = client.run_remote(
+            "fdtd_simulation", request, {}, _HEADED, np.empty((2, 5)), None, sink=sink
+        )
+    assert provenance is None
+    assert sink.getvalue() == b""

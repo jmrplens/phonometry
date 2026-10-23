@@ -36,6 +36,9 @@ Only what can change a frame, and only the part of it the clip reaches:
   a wave field. A statement at the top of a module that the walk reaches
   counts as reached too, with what it names: ``figures.theme`` registers the
   dark field map that way;
+* and inside ``phonometry.io``, the encode path every clip's frames go
+  through (``write_video`` and the pipe into ffmpeg), except the encoder
+  presets of ``quality``, which a clip's own encoder and options bypass;
 * ``figures.theme.set_theme``, which is not called by the clip but decides
   the palette and the rcParams every frame is drawn with, and everything it
   reaches;
@@ -60,14 +63,14 @@ Known gaps, deliberately
 ------------------------
 
 * **The library's physics.** A clip calls ``phonometry`` for its numbers,
-  and outside ``phonometry._plot`` this walk stops at the package boundary.
-  Extending it there would trade a real but rare miss for a constant stream
-  of false positives from refactors that change no pixel, and a library
-  change that moves a number moves the static figures with it, where
-  ``check_figures.py`` does catch it. Drawing code is another matter: a
-  change to the colour a helper picks moves no number and still redraws
-  every clip that asks for it, so ``phonometry._plot`` is walked like
-  ``scripts/figures``.
+  and outside ``phonometry._plot`` and ``phonometry.io`` this walk stops at
+  the package boundary. Extending it there would trade a real but rare miss
+  for a constant stream of false positives from refactors that change no
+  pixel, and a library change that moves a number moves the static figures
+  with it, where ``check_figures.py`` does catch it. Drawing code is another
+  matter: a change to the colour a helper picks moves no number and still
+  redraws every clip that asks for it, so ``phonometry._plot`` is walked
+  like ``scripts/figures``.
 * **Pattern translations reached only through an f-string.** The selection
   below matches a table pattern against the clip's literal text, and a label
   assembled at run time from several pieces may not be recognisable in the
@@ -103,9 +106,13 @@ _PKG_NAME = "figures"
 #: root, and the dotted name it is imported under. ``phonometry._plot`` is the
 #: drawing code of the library, which the clips call for their colours and
 #: their axes; the rest of the library is physics (see "Known gaps").
+#: ``phonometry.io`` is the encode path: a clip's frames go through
+#: :func:`phonometry.io.write_video` into ffmpeg, so a change there can change
+#: the file.
 _PACKAGES: tuple[tuple[tuple[str, ...], tuple[str, ...]], ...] = (
     (("scripts", "figures"), (_PKG_NAME,)),
     (("src", "phonometry", "_plot"), ("phonometry", "_plot")),
+    (("src", "phonometry", "io"), ("phonometry", "io")),
 )
 
 #: Where the clip names are mapped to their builders.
@@ -122,12 +129,17 @@ _TABLES = (("figures.i18n", "_ES_EXACT"), ("figures.i18n", "_ES_PATTERNS"))
 #: Reached from the clip tail, but incapable of changing a frame: the remote
 #: encoder plumbing decides *where* ffmpeg runs, not what it is fed. Listing
 #: them keeps an ssh or container change from marking all forty-two clips
-#: stale. The encoder *settings* are not here: those do change the file.
+#: stale. The encoder *settings* a clip passes are not here: those do
+#: change the file.
 _IGNORED: frozenset[tuple[str, str]] = frozenset(
     {
         ("figures.media", "_gpu_encode_target"),
         ("figures.media", "_write_gpu_ffmpeg_wrapper"),
         ("figures.i18n", "audit_figure"),
+        # The encoder presets of write_video's ``quality``: the clips pass
+        # their own encoder and options, which bypass them, so a preset
+        # edit cannot change a clip and must not call them all stale.
+        ("phonometry.io._video_quality", "ENCODER_QUALITY"),
     }
 )
 
@@ -262,6 +274,8 @@ class Sources:
         parsed: dict[str, ast.Module] = {}
         for where, prefix in _PACKAGES:
             package_root = root.joinpath(*where)
+            if not package_root.is_dir():
+                continue
             for path in sorted(package_root.rglob("*.py")):
                 rel = path.relative_to(package_root).with_suffix("")
                 parts = list(rel.parts[:-1] if rel.name == "__init__" else rel.parts)
@@ -759,10 +773,10 @@ _HEADER = """\
 # each), so nothing else can tell that the code drawing a clip has moved since
 # the clip was written. Each hash covers the clip's builder, everything it
 # reaches inside scripts/figures (the shared clip tail, the theme, the
-# translation machinery) and inside phonometry._plot (the drawing helpers it
-# calls), and the translation-table entries its own strings select; it is
-# taken over the syntax tree, so comments and docstrings do not move it. See
-# scripts/animation_fingerprint.py.
+# translation machinery), inside phonometry._plot (the drawing helpers it
+# calls) and inside phonometry.io (the encode path), and the translation-table
+# entries its own strings select; it is taken over the syntax tree, so
+# comments and docstrings do not move it. See scripts/animation_fingerprint.py.
 #
 # Written by the renderer. To refresh one clip, re-render it:
 #     python scripts/generate_graphs.py --animations --anim <clip>

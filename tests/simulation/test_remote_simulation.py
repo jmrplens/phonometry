@@ -60,46 +60,11 @@ pytestmark = pytest.mark.xdist_group("remote-node")
 
 _FAKE_SSH = Path(__file__).with_name("fake_ssh.py")
 _SRC = Path(package.__file__).resolve().parents[3]
-#: The longest a run on the node may take in these tests [s]: the hosts
-#: file's timeout, far above what a run here takes, so no test can hang.
-_NODE_TIMEOUT_S = 120
 #: The longest the import check's own interpreter may take [s].
 _SUBPROCESS_TIMEOUT_S = 120
 #: The longest the stand-in for ssh may take to write the node's process
 #: id once the node has answered [s].
 _PIDFILE_WAIT_S = 30.0
-
-
-@pytest.fixture(scope="module")
-def node_cache(tmp_path_factory: pytest.TempPathFactory) -> Path:
-    """One node cache for the module: the package travels once."""
-    return tmp_path_factory.mktemp("node-cache")
-
-
-@pytest.fixture
-def node(tmp_path: Path, node_cache: Path, monkeypatch: pytest.MonkeyPatch) -> str:
-    """A Python node on this machine, reached through the stand-in for ssh."""
-    hosts = tmp_path / "hosts.toml"
-    hosts.write_text(
-        "[hosts.here]\n"
-        'ssh = "node.example"\n'
-        'runner = "python"\n'
-        f"python = {json.dumps(sys.executable)}\n"
-        'label = "this machine"\n'
-        f"timeout_s = {_NODE_TIMEOUT_S}\n",
-        encoding="utf-8",
-    )
-    monkeypatch.setenv("PHONOMETRY_HOSTS_FILE", str(hosts))
-    monkeypatch.setenv(bootstrap.CACHE_VAR, str(node_cache))
-    monkeypatch.setattr(command, "_SSH_PROGRAM", (sys.executable, str(_FAKE_SSH)))
-    for name in (
-        "FAKE_SSH_MODE",
-        "FAKE_SSH_LOG",
-        "FAKE_SSH_PIDFILE",
-        "PHONOMETRY_COMPUTE",
-    ):
-        monkeypatch.delenv(name, raising=False)
-    return "here"
 
 
 def _acoustic() -> FDTDRun:

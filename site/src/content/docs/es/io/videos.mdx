@@ -1,0 +1,524 @@
+---
+title: "Escribir animaciones y simulaciones FDTD en vídeo"
+description: "Cualquier animación de matplotlib a WebM, MP4 o GIF a través de ffmpeg. El codificador de un WebM o un MP4 se encuentra con una codificación de prueba real: primero NVENC, Quick Sync, VAAPI y VideoToolbox, después la CPU, en ella SVT-AV1 primero y nunca libaom. Un GIF se escribe en la CPU. Una simulación FDTD acústica o elástica se escribe directamente en un vídeo, aquí o en un nodo, sin guardar sus instantáneas."
+references:
+  - type: web
+    organization: "FFmpeg project"
+    title: "FFmpeg codecs documentation"
+    url: "https://ffmpeg.org/ffmpeg-codecs.html"
+    note: "Los codificadores entre los que elige write_video y las opciones de calidad constante que toma cada uno."
+  - type: web
+    organization: "Alliance for Open Media"
+    title: "SVT-AV1"
+    url: "https://gitlab.com/AOMediaCodec/SVT-AV1"
+    note: "El codificador AV1 que write_video prueba primero en la CPU, antes que VP9 en un WebM y que x265 o x264 en un MP4."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../components/SeeAlso.astro';
+
+`io.write_video` escribe cualquier animación de matplotlib en un archivo de
+vídeo: un WebM o un MP4 para una página web o una charla, o un GIF para un
+sitio donde un vídeo no se reproduce. La animación es cualquier
+`matplotlib.animation.Animation`, una `FuncAnimation` o una `ArtistAnimation`
+que hayas construido. Cada fotograma se dibuja con Agg y pasa por una
+tubería directamente a ffmpeg, que codifica un WebM o un MP4 con un
+codificador de GPU cuando alguno funciona en esta máquina y en la CPU cuando
+no funciona ninguno, y un GIF en la CPU. `simulation.write_fdtd_animation` y
+`simulation.write_elastic_fdtd_animation` escriben una simulación FDTD
+acústica o elástica directamente en un vídeo a medida que se calcula, aquí o
+en un nodo, sin guardar sus instantáneas (secciones 4 y 5).
+
+ffmpeg es un programa, no un paquete de Python, así que se instala aparte de
+phonometry: `conda install ffmpeg`, `apt install ffmpeg`,
+`brew install ffmpeg` o `winget install ffmpeg`. phonometry ejecuta el ffmpeg
+que ejecutaría matplotlib, el que nombra `rcParams["animation.ffmpeg_path"]`
+(`"ffmpeg"`, buscado en el `PATH`, salvo que lo cambies), y lanza
+`io.FFmpegNotFoundError` con esos comandos de instalación cuando no está. En
+Windows, que busca un programa en el directorio de trabajo antes que en el
+`PATH`, se rechaza un ffmpeg que solo esté ahí: ponlo en el `PATH`, o
+nómbralo por su ruta completa en ese rcParam. En Pyodide, que no puede
+arrancar un programa, `write_video` lanza el mismo error. matplotlib se
+instala con `pip install "phonometry[plot]"`.
+
+## 1. Cualquier animación: `io.write_video`
+
+`write_video(path, anim, *, video=None)` toma el archivo que se va a
+escribir, la animación y cómo codificarla (sección 2). Sin `video`, escribe
+el archivo el primer codificador que funciona aquí (la sección 2 dice en qué
+orden se prueban), con la calidad estándar y a la frecuencia de fotogramas
+de la propia animación:
+
+```python
+import numpy as np
+from matplotlib.animation import FuncAnimation
+from matplotlib.figure import Figure
+
+from phonometry import io
+
+fig = Figure(figsize=(3.2, 2.4), dpi=100)
+ax = fig.add_subplot()
+x = np.linspace(0.0, 2.0 * np.pi, 200)
+(line,) = ax.plot(x, np.sin(x))
+
+
+def update(k):
+    line.set_ydata(np.sin(x - 0.2 * k))
+    return (line,)
+
+
+animation = FuncAnimation(fig, update, frames=30, interval=50)
+io.write_video("wave.webm", animation)
+io.write_video("wave.gif", animation, video=io.VideoOptions(quality="small"))
+```
+
+El sufijo de la ruta es el contenedor:
+
+| Sufijo | Contiene, del mejor al peor | Notas |
+|---|---|---|
+| `.webm` | AV1, VP9 | |
+| `.mp4` | AV1, HEVC, H.264 | se escribe para que empiece a reproducirse antes de terminar de descargarse; HEVC lleva la etiqueta con la que lo abren los reproductores de Apple |
+| `.gif` | una paleta de hasta 256 colores | se escribe solo en la CPU, sin códec que elegir |
+
+Cualquier otro sufijo, o una ruta que nombre un directorio, lanza
+`ValueError`, y una ruta cuyo directorio no exista lanza `FileNotFoundError`,
+antes de que se ejecute nada.
+
+El archivo aparece en la ruta solo cuando ffmpeg lo ha terminado. Hasta
+entonces ffmpeg escribe en un archivo oculto a su lado, con un nombre propio
+para cada escritura, y ese archivo se borra si algo corta la codificación, sea
+lo que sea: que ffmpeg falle, que se llene el disco o que tu función de
+actualización lance una excepción, que te llega como esa misma excepción. Así,
+un fallo deja lo que había antes en la ruta, incluido un vídeo bueno. Un vídeo
+terminado al que Windows no deja ocupar el lugar del archivo antiguo, porque
+un reproductor tiene abierto el antiguo, no se tira: se queda a su lado con su
+nombre oculto, y el `io.VideoEncoderError` dice dónde.
+
+Cada fotograma es la figura entera, a su propio tamaño y con sus propios
+colores, digan lo que digan tus ajustes de matplotlib sobre cómo guardar
+figuras: un cuadro delimitador `"tight"`, que puede cambiar el tamaño de un
+fotograma a otro, se deja de lado durante la escritura, y un fondo
+transparente se pone sobre blanco, porque estos vídeos no llevan
+transparencia. En un WebM o un MP4, una figura cuyo tamaño en píxeles sea
+impar recibe una fila o una columna más del color de su propio fondo, porque
+el formato de píxel que reproducen los navegadores necesita lados pares. Una
+figura que tu función de actualización redimensiona se mantiene al tamaño
+que tenía cuando empezó la escritura.
+
+Python guarda un solo fotograma cada vez: cada uno se dibuja, se envía por
+la tubería y se descarta, y ningún fotograma se escribe en disco. Un GIF es
+la excepción dentro de ffmpeg. Su paleta se calcula a partir de todos los
+fotogramas en la misma ejecución de ffmpeg, que los conserva todos hasta que
+llega el último, así que un GIF largo y de gran tamaño ocupa esa memoria en
+ffmpeg. Una secuencia larga se escribe mejor en WebM o MP4.
+
+## 2. Cómo se codifica: `io.VideoOptions`
+
+Un solo registro de opciones de vídeo dice cómo se codifica un vídeo, y
+comprueba sus campos al construirse, así que un codificador mal escrito, o
+un codificador en bruto junto a un códec elegido por ti, se rechaza antes de
+dibujar un fotograma. Constrúyelo una vez y pasa el mismo registro a cada
+vídeo que escribas.
+
+| Campo | Valores | Por defecto |
+|---|---|---|
+| `encoder` | `"auto"`, `"cpu"`, `"nvenc"`, `"qsv"`, `"vaapi"`, `"videotoolbox"` | `"auto"` |
+| `codec` | `"av1"`, `"vp9"`, `"hevc"`, `"h264"` o `None` | `None`: el mejor que contenga el contenedor y escriba el codificador |
+| `quality` | `"high"`, `"standard"`, `"small"` | `"standard"` |
+| `fps` | fotogramas por segundo, un número positivo, o `None` | `None`: el `interval` de la animación |
+| `ffmpeg_encoder` | un nombre de codificador de ffmpeg, o `None` | `None` |
+| `ffmpeg_options` | más opciones de salida de ffmpeg, como textos separados | `()` |
+
+Construir el registro lanza `ValueError` (`TypeError` para un valor de tipo
+equivocado) ante una elección fuera de sus opciones, un `fps` que no sea un
+número finito positivo, un `ffmpeg_encoder` junto a un `encoder` o un
+`codec` elegidos por ti, y un `codec` que el tipo de codificador que
+nombraste no escribe, como `encoder="videotoolbox", codec="av1"`:
+VideoToolbox solo escribe HEVC y H.264. Lo que depende del archivo se
+comprueba cuando `write_video` tiene la ruta, todavía antes de que se
+ejecute ffmpeg: el sufijo, el directorio, un códec que el contenedor no
+contiene (VP9 en un `.mp4`), un codificador que no escribe ninguno de los
+códecs del contenedor (VideoToolbox en un `.webm`), y para un GIF cualquier
+códec, cualquier codificador en bruto y cualquier codificador que no sea
+`"auto"` o `"cpu"`.
+
+```python
+try:
+    io.write_video("wave.mp4", animation, video=io.VideoOptions(codec="vp9"))
+except ValueError as error:
+    print(error)   # .mp4 holds av1, hevc, h264; got codec='vp9'
+```
+
+**Qué codificador.** Con `encoder="auto"`, el valor por defecto, los tipos
+de codificador se prueban en este orden: NVENC en una GPU de NVIDIA, Quick
+Sync en una de Intel, VAAPI en Linux (a través de `/dev/dri/renderD128`),
+VideoToolbox en un Mac y, por último, la CPU. Dentro de cada tipo, los
+códecs del contenedor se prueban del mejor al peor, en el orden de la tabla
+de la sección 1, así que en un `.mp4` un HEVC de NVENC va antes que un AV1
+en la CPU. En la CPU, AV1 es SVT-AV1 y nunca libaom. Sin SVT-AV1, un
+`.webm` recibe VP9 de libvpx, y un `.mp4`, HEVC de x265 o H.264 de x264. Un
+GIF no tiene codificador que elegir: lo escribe en la CPU el filtro de
+paleta de ffmpeg, sin prueba.
+
+Un codificador es candidato cuando este ffmpeg se compiló con él
+(`ffmpeg -encoders` lo lista), y esa lista no dice nada del hardware: la
+mayoría de las compilaciones para Linux listan NVENC tenga o no la máquina
+una GPU de NVIDIA. Por eso, antes de que empiece el vídeo, cada candidato
+codifica por turno un fotograma negro del tamaño del vídeo, una
+codificación real, y el primero que lo consigue escribe el vídeo. Un éxito
+se recuerda durante el resto del proceso, para ese ffmpeg, ese codificador
+y ese tamaño de fotograma, y no se vuelve a probar; un fallo no se recuerda,
+porque un codificador de GPU que estaba ocupado hace un momento puede
+funcionar ahora.
+
+`encoder=` nombra un tipo, y solo se prueba ese tipo: cuando no puede
+escribir el vídeo, `io.VideoEncoderError` lo dice y lista los codificadores
+que sí pueden escribirlo aquí. `codec=` nombra el códec, y no se recurre a
+ningún otro: un `codec="av1"` que ningún codificador de aquí puede escribir
+lanza `io.VideoEncoderError` en lugar de escribir VP9.
+
+El codificador elegido se registra con nivel `INFO` en el logger
+`phonometry.io`, que está callado salvo que lo actives:
+
+```python
+import logging
+
+logging.basicConfig()
+logging.getLogger("phonometry.io").setLevel(logging.INFO)
+h264 = io.VideoOptions(encoder="cpu", codec="h264")
+io.write_video("wave.mp4", animation, video=h264)
+```
+
+Aquí se imprime `INFO:phonometry.io:writing mp4 with libx264 (cpu, h264)`. En
+una máquina con una GPU de NVIDIA y un ffmpeg compilado con NVENC, una
+llamada puede pedir la GPU por su nombre:
+
+```py
+io.write_video("wave.webm", animation, video=io.VideoOptions(encoder="nvenc", codec="av1"))
+```
+
+NVENC, Quick Sync, VAAPI y VideoToolbox se intentan y se usan, pero no se
+comprueban en CI, que escribe sus vídeos en la CPU.
+
+## 3. Calidad, frecuencia de fotogramas y ffmpeg en bruto
+
+`quality=` toma uno de tres preajustes, `"high"`, `"standard"` (el valor por
+defecto) o `"small"`. En cada codificador, un preajuste fija la opción de
+calidad constante propia de ese codificador, en su propia escala; en un GIF
+fija el tamaño de la paleta y el dither. `fps=` fija
+la frecuencia de fotogramas en fotogramas por segundo; si se deja en `None`,
+se toma del `interval` de la animación, los milisegundos entre fotogramas,
+igual que la toma `Animation.save`.
+
+`ffmpeg_options=` añade opciones de salida de ffmpeg, como textos separados,
+escritas después del preajuste del codificador y del formato de píxel, así
+que una opción que repitas prevalece sobre ellos. Las opciones propias del
+contenedor van después de las tuyas y se mantienen: el arranque de un MP4
+antes de terminar de descargarse, la etiqueta de un HEVC y el bucle sin fin
+de un GIF. `ffmpeg_encoder=` nombra un codificador de ffmpeg que se usa tal
+cual:
+
+```python
+raw = io.VideoOptions(
+    ffmpeg_encoder="libvpx-vp9",
+    ffmpeg_options=("-b:v", "0", "-crf", "40", "-pix_fmt", "yuv420p"),
+)
+io.write_video("wave_raw.webm", animation, video=raw)
+```
+
+Un nombre de codificador en bruto se salta la prueba, el preajuste, la
+comprobación del contenedor y el formato de píxel, así que acertar con ellos
+te toca a ti: aquí VP9, que un `.webm` contiene, y `yuv420p`, que reproducen
+los navegadores. Se mantienen dos cosas: el relleno de un tamaño impar y, en
+un MP4, la disposición que le permite empezar a reproducirse antes de
+terminar de descargarse. Un codificador que este ffmpeg no tiene falla en
+ffmpeg, y el `io.VideoEncoderError` lleva las últimas líneas que escribió
+ffmpeg. Un codificador en bruto no admite `encoder=` ni `codec=` a su lado,
+ni sirve para un GIF.
+
+Los preajustes son puntos de partida, no ajustes calibrados. phonometry usa
+el ffmpeg que encuentra, sin fijar ninguna versión, y el mismo CRF da otro
+tamaño y otra calidad de una versión mayor de SVT-AV1 a la siguiente. Un
+ajuste que hayas calibrado va por `ffmpeg_options`, con el ffmpeg con el que
+lo calibraste.
+
+## 4. Una simulación FDTD directamente a vídeo
+
+`simulation.write_fdtd_animation(path, run)` hace avanzar una ejecución FDTD
+acústica y dibuja su campo de presión en un vídeo a medida que la ejecución
+lo calcula:
+
+```python
+from phonometry import io, simulation
+
+run = simulation.FDTDRun(
+    343.0, 0.01, 4e-3,
+    shape=(80, 120),
+    sources=[simulation.GaussianPulse(ix=40, iy=40, half_width_s=5e-5)],
+    recording=simulation.FDTDRecording(probes=[(100, 40)], snapshot_every=8),
+    boundaries="absorbing", absorbing_layer_cells=15,
+)
+res = simulation.write_fdtd_animation(
+    "pulse.webm", run, frame=simulation.AnimationFrame(size=(480, 320))
+)
+print(res.snapshots is None, res.pressures.shape[0])
+# True 1
+```
+
+La ejecución es el `FDTDRun` que toma `fdtd_simulation`, comprobado al
+construirse, medio incluido, así que la misma ejecución puede simularse,
+escribirse en un vídeo o ambas cosas. Su `recording` fija los fotogramas:
+`snapshot_every` es el número de pasos entre dos fotogramas y es obligatorio,
+así que una ejecución que no registra instantáneas lanza `ValueError`
+nombrando `run.recording.snapshot_every`; `snapshot_decimation` fija las
+celdas que conserva un fotograma; y las sondas se registran en el resultado,
+en todos los pasos de la ejecución. Se dibuja un fotograma en t = 0 y otro
+cada `snapshot_every` pasos, y no se guarda ninguno: el resultado vuelve con
+sus sondas y sus tiempos y sin instantáneas, y por larga que sea la
+ejecución, esta máquina guarda un solo fotograma cada vez (salvo en un GIF,
+cuya paleta calcula ffmpeg a partir de todos los fotogramas, como dice la
+sección 1). Antes del primer paso se busca y se ejecuta ffmpeg, el
+codificador de un WebM o un MP4 se elige con la codificación de prueba de la
+sección 2 al tamaño del fotograma, y un `ffmpeg_encoder` en bruto se busca en
+la lista de este ffmpeg, así que un ffmpeg que falta, un codificador que no
+supera su prueba o un codificador en bruto que este ffmpeg no tiene no
+cuestan una ejecución.
+
+Cómo se dibuja cada fotograma es un solo registro,
+`simulation.AnimationFrame`, que comprueba sus campos al construirse:
+`language`, el idioma de las etiquetas, `"en"`, o `"es"` para español;
+`size`, el ancho y el alto del fotograma en píxeles, 960 por 540 píxeles
+salvo que diga otra cosa; y `color_limit`, la escala de color (más abajo).
+Cómo se codifica el vídeo es el mismo `io.VideoOptions` de la sección 2,
+pasado como `video=`, y el sufijo de la ruta es el contenedor, como en la
+sección 1. Un vídeo de simulación se reproduce a 30 fotogramas por segundo
+salvo que el `fps` de su `io.VideoOptions` diga otra cosa.
+
+Los fotogramas muestran lo que muestra
+`simulation.fdtd_simulation(run).plot(kind="snapshot")` para la misma
+ejecución: el mismo campo con el mismo mapa de colores, simétrico respecto a
+cero, con las mismas marcas y etiquetas, y el límite de la escala es el del
+propio vídeo, fijo para todo el vídeo, dado o encontrado como dice el párrafo
+siguiente. El resultado de la propia función que escribe el vídeo no guarda
+instantáneas: su `.plot()` dibuja las sondas, como el de cualquier resultado,
+y `.plot(kind="snapshot")` lanza `ValueError`. Los fotogramas se dibujan con
+el estilo por defecto de matplotlib, digan lo que digan tus ajustes, así que
+un vídeo escrito aquí y otro escrito en un nodo se ven iguales. Un fotograma
+se compone una sola vez para toda la ejecución, para el título más ancho que
+va a mostrar y para las etiquetas de sus ejes y de su escala de color, así
+que nada se mueve de un fotograma a otro, y cada texto conserva su propio
+tamaño. El fotograma más pequeño en el que cada texto, a su propio tamaño,
+queda libre del margen del fotograma y el campo sigue viéndose, con cualquier
+versión de matplotlib con la que se prueba la biblioteca, es de 479 por 245
+píxeles, y un `size` menor lanza `ValueError` al construirse el registro. Ese
+mínimo vale para una ejecución cuyo último fotograma llega antes de diez
+segundos. Una ejecución más larga escribe más cifras en el tiempo de su
+título, en milisegundos, así que su mínimo es más ancho: la función rechaza un
+fotograma más estrecho de lo que necesita la ejecución antes de que esta
+empiece, y su mensaje da el ancho.
+
+La escala de color es fija para todo el vídeo.
+`AnimationFrame(color_limit=...)` la da, en pascales, como el valor de cada
+extremo de la escala, y la ejecución avanza una sola vez. Sin ese límite, la
+ejecución avanza dos veces: una primera pasada busca, en el dispositivo en el
+que avanza la ejecución, la mayor magnitud que alcanza el campo fuera de las
+celdas de las fuentes, de las líneas de inyección de las fuentes de onda
+plana y de la capa absorbente, donde el campo es lo que la fuente o la
+esponja hacen de él y no la onda que muestra el vídeo, y la segunda pasada
+dibuja con ese límite. Ese límite lo fijan las celdas más intensas que quedan,
+que alrededor de una fuente puntual son las contiguas a ella, así que el vídeo
+por defecto de una fuente puntual puede verse tenue en cuanto su onda se
+extiende: un `AnimationFrame(color_limit=...)` menor lo hace más vivo, y toda
+celda que pase del límite toma el color del extremo de la escala. De la
+primera pasada, que no guarda nada, solo llega a esta máquina ese número.
+Cuando las fuentes, sus líneas y la capa absorbente cubren todas las celdas
+que conserva un fotograma, la función lanza `ValueError` antes de un solo
+paso; cuando el campo se queda en cero ahí durante toda la ejecución, o no es
+finito, lo lanza tras la primera pasada, antes de codificar el primer
+fotograma del vídeo. Cada mensaje pide `AnimationFrame(color_limit=...)`.
+
+`simulation.write_elastic_fdtd_animation(path, run)` hace lo mismo con el
+`ElasticRun` que toma `elastic_fdtd_simulation`, y dibuja el campo que nombra
+el `snapshot_field` de su `recording`, la presión `"p"` o una componente de
+la velocidad, `"vx"` o `"vy"`, como lo dibuja `.plot(kind="snapshot")` sobre
+el resultado de esa función. Aquí, una fuerza vertical sobre la superficie
+libre de un sólido, dibujada como su velocidad vertical:
+
+```python
+waveform = simulation.GaussianPulse(ix=0, iy=0, half_width_s=4e-5).value
+rayleigh = simulation.ElasticRun(
+    4000.0, 2300.0, 0.01, 5e-4,
+    rho=2500.0, shape=(60, 160),
+    sources=[
+        simulation.ForceSource(ix=80, iy=0, direction="y", waveform=waveform)
+    ],
+    recording=simulation.ElasticRecording(snapshot_every=8, snapshot_field="vy"),
+    boundaries=simulation.ElasticBoundaries(
+        sides={"top": "free", "left": "absorbing",
+               "right": "absorbing", "bottom": "absorbing"},
+        absorbing_layer_cells=12,
+    ),
+)
+res = simulation.write_elastic_fdtd_animation(
+    "rayleigh.webm", rayleigh,
+    frame=simulation.AnimationFrame(size=(640, 320), color_limit=5e-7),
+    video=io.VideoOptions(quality="small"),
+)
+```
+
+El `color_limit` de la función elástica está en la unidad del campo
+dibujado: pascales para `"p"`, metros por segundo para `"vx"` y `"vy"`. Sin
+él, su primera pasada deja fuera las celdas que excitan las fuentes y la capa
+absorbente; una superficie libre no se excita, y se queda dentro.
+
+Las dos funciones toman el `compute=` de las funciones de simulación, así que
+una ejecución puede avanzar en una GPU, como explica
+[Dónde se calcula una simulación](/phonometry/es/simulation/compute/).
+Entonces solo llegan a esta máquina, para dibujarse, las celdas que conserva
+un fotograma, un fotograma cada vez. Con `fallback=True` y sin GPU, la
+ejecución avisa una sola vez y avanza con NumPy, las dos pasadas incluidas:
+
+```py
+res = simulation.write_fdtd_animation(
+    "pulse.webm", run,
+    compute=simulation.Compute(device="cupy", fallback=True),
+)
+```
+
+## 5. En un nodo
+
+Con un `host` en su `compute=`, una función de escritura envía todo el
+trabajo a un nodo, una máquina nombrada en tu fichero de hosts como explica
+[Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/);
+`nas` es el nodo del fichero de hosts de esa guía:
+
+```py
+nas = simulation.Compute(device="cupy", host="nas")
+res = simulation.write_fdtd_animation("pulse.webm", run, compute=nas)
+res = simulation.write_elastic_fdtd_animation(
+    "rayleigh.webm", rayleigh, compute=nas,
+    frame=simulation.AnimationFrame(size=(640, 320), color_limit=5e-7),
+)
+print(res.provenance.host)   # nas
+```
+
+El nodo calcula la ejecución, dibuja sus fotogramas con el mismo estilo por
+defecto y codifica el vídeo con su propio ffmpeg, que lleva la imagen del
+nodo y que un nodo Python necesita en su `PATH`, junto a matplotlib. Solo
+vuelven el resultado y los bytes del vídeo, así que esta máquina no necesita
+para ello ni ffmpeg ni matplotlib, salvo que una ejecución fallida vuelva a
+ella con `fallback=True`. La ejecución, el registro del fotograma y las
+opciones de vídeo se comprueban primero aquí, incluido el contenedor de la
+ruta frente a las opciones, así que una llamada que se rechaza aquí nunca
+arranca ssh; el nodo los vuelve a comprobar al construirlos de nuevo. Un nodo
+al que le falta matplotlib, la tipografía con la que se dibuja cada
+fotograma, ffmpeg o un codificador que escriba el vídeo a su tamaño rechaza
+el trabajo antes de su primer paso, y `simulation.ComputeRemoteError` dice
+por qué.
+
+Los bytes del nodo se comprueban antes de llegar al disco aquí. No son más
+de los que caben en los fotogramas: dos bytes por píxel de cada fotograma,
+con sus lados rellenados hasta un número par, cuando deciden la codificación
+los preajustes de la biblioteca, u ocho cuando la deciden un `ffmpeg_encoder`
+o unas `ffmpeg_options` tuyos, más 1 MiB para el contenedor; un vídeo más
+largo se rechaza antes de leer un solo byte de él. Tienen que empezar como
+empieza un archivo del contenedor de la ruta, o no se conserva ninguno, y un
+vídeo vacío se rechaza. Se escriben en disco a medida que llegan, en un
+archivo oculto junto a la ruta, así que ese tope acota el disco, no la
+memoria, y el archivo ocupa el lugar de la ruta solo cuando se ha leído y
+comprobado toda la respuesta del nodo. Si algo detiene antes la ejecución,
+sea el nodo, la conexión o una interrupción, el archivo oculto se borra y la
+ruta se queda como estaba. Cada rechazo es un
+`simulation.ComputeRemoteError`; con `fallback=True` en la petición es en su
+lugar un `simulation.ComputeFallbackWarning`, y el vídeo se escribe aquí,
+con NumPy.
+
+`io.write_video` en sí solo se ejecuta en esta máquina: una animación
+dibujada aquí se codifica aquí, y solo las dos funciones de escritura de
+simulaciones van a un nodo.
+
+NVENC se verificó en el nodo con GPU del mantenedor: una ejecución calculada
+allí con CuPy y escrita en un vídeo AV1 por NVENC volvió con sondas iguales,
+bit a bit, a las de la misma ejecución con NumPy aquí. Es una sola
+verificación en una sola tarjeta, no una promesa para todas las GPU.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+Escribir cualquier animación de matplotlib en WebM (AV1, VP9), MP4 (AV1,
+HEVC, H.264) o GIF a través de ffmpeg en esta máquina, con las opciones de
+un solo registro comprobadas antes de que se ejecute nada; el codificador de
+un WebM o un MP4 elegido con una codificación de prueba real, primero los
+codificadores de GPU y la CPU la última, SVT-AV1 antes que VP9, x265 o x264,
+y un GIF escrito en la CPU; tres preajustes de calidad y opciones de ffmpeg
+en bruto; y una simulación FDTD acústica o elástica escrita directamente en
+un vídeo, aquí o calculada, dibujada y codificada en un nodo, con la escala
+de color dada o encontrada en el dispositivo, y los bytes del nodo
+comprobados antes de escribirse.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Las pistas de audio, y codificar en otra máquina una animación dibujada en
+esta. Quick Sync, VAAPI y VideoToolbox se intentan y se usan, pero no se
+comprueban en CI; NVENC tampoco se comprueba en CI, y se verificó en el nodo
+con GPU del mantenedor. Los fotogramas de un vídeo de simulación son el
+dibujo de una instantánea con el estilo por defecto de matplotlib, no un
+estilo ni una figura tuyos. Los preajustes de calidad son puntos de partida,
+no ajustes calibrados: phonometry usa el ffmpeg que encuentra, y el mismo
+CRF se lee de otra manera de una versión mayor de SVT-AV1 a la siguiente.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Dónde se calcula una simulación: NumPy, CuPy y torch](/phonometry/es/simulation/compute/):
+  los dispositivos en los que avanzan las simulaciones FDTD.
+- [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/):
+  la simulación acústica y las instantáneas del campo que registra.
+- [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
+  la simulación elástica y sus instantáneas.
+- [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/):
+  el fichero de hosts que nombra un nodo, y cómo preparar uno.
+- [Leer y escribir audio de medición](/phonometry/es/io/audio-files/): los
+  archivos de audio que lee y escribe `phonometry.io`.
+- Referencia de la API: [`phonometry.io`](/phonometry/es/reference/api/io/io/),
+  [`simulation.video`](/phonometry/es/reference/api/simulation/video/).
+
+</SeeAlso>
+
+## Respuestas rápidas
+
+### ¿Por qué mi vídeo salió en VP9?
+
+Porque el primer codificador que funcionó aquí escribe VP9. En un `.webm`,
+`"auto"` recorre los tipos de codificador en su orden y, dentro de cada uno,
+prueba AV1 antes que VP9: una GPU con Quick Sync o VAAPI que codifica VP9
+pero no AV1 escribe VP9 antes de llegar a la CPU, y la CPU, que solo toma
+AV1 de SVT-AV1 y nunca de libaom, escribe VP9 con libvpx cuando este ffmpeg
+no tiene SVT-AV1. Activa el logger `phonometry.io` (sección 2) para ver qué
+codificador lo escribió. Para obtener AV1, pasa `codec="av1"`, que toma el
+primer codificador que escribe AV1 aquí y lanza `io.VideoEncoderError` en
+lugar de escribir otra cosa; en la CPU eso necesita un ffmpeg que liste
+`libsvtav1` en `ffmpeg -encoders`.
+
+### ¿Puedo escribir un vídeo sin GPU?
+
+Sí. La CPU es el último tipo de codificador que prueba `"auto"`, así que en
+una máquina sin ningún codificador de GPU que funcione todos los vídeos se
+escriben ahí: SVT-AV1 o VP9 en un `.webm`, SVT-AV1, x265 o x264 en un
+`.mp4`. Un GIF se escribe siempre en la CPU. Pasa `encoder="cpu"` para
+saltarte del todo las pruebas en GPU.
+
+### ¿Por qué la simulación avanza dos veces?
+
+Porque no se dio un límite de color. La escala de color es fija para todo el
+vídeo, así que una primera pasada hace avanzar la ejecución para encontrar la
+mayor magnitud que alcanza el campo fuera de las fuentes y de la capa
+absorbente, y la segunda pasada dibuja los fotogramas en esa escala
+(sección 4). Da el límite, `frame=simulation.AnimationFrame(color_limit=...)`,
+en pascales o, para una ejecución elástica, en la unidad del campo dibujado,
+y la ejecución avanza una sola vez.

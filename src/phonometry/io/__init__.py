@@ -33,6 +33,18 @@ containers with samples, provenance and sidecar intact, and the calibration
 travels in a versioned JSON sidecar (:class:`CalibrationSidecar`) next to the
 audio, where the audio formats themselves have no field for it.
 
+:func:`write_video` writes any matplotlib animation to WebM, MP4 or GIF
+through ffmpeg, the program matplotlib already knows where to find: every
+frame is drawn with Agg and piped into ffmpeg's stdin, the encoder of a
+WebM or an MP4 is the first of the GPU encoders and then the CPU's that
+encodes a real frame of that size (a GIF is written on the CPU), and the
+file appears only when ffmpeg has finished it. How a
+video is encoded is one record, :class:`VideoOptions`, which the
+simulation writers take too.
+:class:`FFmpegNotFoundError` says ffmpeg is missing, with how to install it;
+:class:`VideoEncoderError` says no encoder can write the video, or ffmpeg
+failed while writing it, with its last words.
+
 The rows of the library's published tables of materials are data read from a
 file too, and the type they share lives here: :class:`CatalogueRow`, with
 :class:`BandedRow` for a row that prints one value per frequency band. Every
@@ -108,6 +120,7 @@ from ._sidecar import (
     write_sidecar,
 )
 from ._signal import Signal, SignalOrigin
+from ._video import FFmpegNotFoundError, VideoEncoderError, VideoOptions, write_video
 from ._wav import AudioFileInfo
 from ._write import ClippingWarning, write
 
@@ -125,10 +138,13 @@ __all__ = [
     "CatalogueWarning",
     "ClippingWarning",
     "CuePoint",
+    "FFmpegNotFoundError",
     "LossyCompressionWarning",
     "Provenance",
     "Signal",
     "SignalOrigin",
+    "VideoEncoderError",
+    "VideoOptions",
     "catalogue_schema",
     "convert",
     "info",
@@ -141,4 +157,5 @@ __all__ = [
     "write",
     "write_catalogue",
     "write_sidecar",
+    "write_video",
 ]

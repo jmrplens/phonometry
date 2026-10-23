@@ -39,6 +39,18 @@ containers with samples, provenance and sidecar intact, and the calibration
 travels in a versioned JSON sidecar ([`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar)) next to the
 audio, where the audio formats themselves have no field for it.
 
+[`write_video`](/phonometry/reference/api/io/io/#write_video) writes any matplotlib animation to WebM, MP4 or GIF
+through ffmpeg, the program matplotlib already knows where to find: every
+frame is drawn with Agg and piped into ffmpeg's stdin, the encoder of a
+WebM or an MP4 is the first of the GPU encoders and then the CPU's that
+encodes a real frame of that size (a GIF is written on the CPU), and the
+file appears only when ffmpeg has finished it. How a
+video is encoded is one record, [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions), which the
+simulation writers take too.
+[`FFmpegNotFoundError`](/phonometry/reference/api/io/io/#ffmpegnotfounderror) says ffmpeg is missing, with how to install it;
+[`VideoEncoderError`](/phonometry/reference/api/io/io/#videoencodererror) says no encoder can write the video, or ffmpeg
+failed while writing it, with its last words.
+
 The rows of the library's published tables of materials are data read from a
 file too, and the type they share lives here: [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow), with
 [`BandedRow`](/phonometry/reference/api/io/io/#bandedrow) for a row that prints one value per frequency band. Every
@@ -1136,6 +1148,10 @@ For the plain `data`-chunk case (no playlist, no wave list), which is
 what marker-writing recorders produce, `sample_offset` is the marker's
 position in samples from the start of the data.
 
+## FFmpegNotFoundError
+
+ffmpeg is not where matplotlib looks for it, or cannot run here.
+
 ## info
 
 ```python
@@ -1713,6 +1729,49 @@ computed from such a signal are not metrologically defensible, and the
 flag keeps that fact attached to the data after the read-time warning
 has scrolled away.
 
+## VideoEncoderError
+
+No encoder can write the video, or ffmpeg failed while writing it.
+
+## VideoOptions
+
+```python
+VideoOptions(
+    *,
+    encoder: Literal['auto', 'cpu', 'nvenc', 'qsv', 'vaapi', 'videotoolbox'] = 'auto',
+    codec: Literal['av1', 'vp9', 'hevc', 'h264'] | None = None,
+    quality: Literal['high', 'standard', 'small'] = 'standard',
+    fps: float | None = None,
+    ffmpeg_encoder: str | None = None,
+    ffmpeg_options: Sequence[str] = (),
+)
+```
+
+How a video is encoded: by which encoder, in which codec, at what quality and rate.
+
+One record for every writer of a video ([`write_video`](/phonometry/reference/api/io/io/#write_video) and the
+simulation writers), checked when it is built. What depends on the file,
+the container its suffix names and the codecs that container holds, is
+checked when the path is known, still before anything starts.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `encoder` | `"auto"` (default: the GPU encoders first, NVENC, Quick Sync, VAAPI and VideoToolbox, each tried on one real frame of the video's size, then the CPU), `"cpu"`, `"nvenc"`, `"qsv"`, `"vaapi"` or `"videotoolbox"`. A GIF is always written on the CPU. |
+| `codec` | `"av1"`, `"vp9"`, `"hevc"` or `"h264"`; `None` (default) takes the best the container holds that the encoder writes, AV1 first. An `encoder` of your own must write it: NVENC writes no VP9, VideoToolbox only HEVC and H.264. A GIF has no codec. |
+| `quality` | `"high"`, `"standard"` (default) or `"small"`: each encoder's constant-quality setting, or a GIF's palette size and dither. |
+| `fps` | Frames per second; `None` (default) takes the animation's `interval`, and a simulation video plays at 30. |
+| `ffmpeg_encoder` | An ffmpeg encoder name to use as it is, with `ffmpeg_options`: no trial, no preset, no pixel format, and no check that the container holds what it writes. Not with a GIF, nor with an `encoder` or `codec` of your own. |
+| `ffmpeg_options` | More ffmpeg output options, as separate strings, written after the encoder's preset and pixel format (so a repeated one of those wins) and before the container's own options (an MP4's `+faststart` and HEVC tag, a GIF's endless loop), which stay; held as a tuple. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for an `encoder`, `codec` or `quality` that is not a text, a `fps` that is not one number, an `ffmpeg_encoder` that is not a text, or `ffmpeg_options` that are not a sequence of separate texts. |
+| ValueError | for a choice outside its options, a `fps` that is not a positive finite number, an `ffmpeg_encoder` that does not name an encoder, an `ffmpeg_encoder` together with an `encoder` or a `codec` of your own, or a `codec` that your `encoder` does not write. |
+
 ## write
 
 ```python
@@ -1929,3 +1988,52 @@ is at *audio_path* and its channels can be read.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a factor, a reference SPL or a calibrator frequency that is not a real number as [`CalibrationSidecar`](/phonometry/reference/api/io/io/#calibrationsidecar) takes one (a bool, a text or a `Decimal` among them) or is not finite, a factor that is not positive, labels that are not a tuple or a list of texts, a model or a label that is not text or holds a lone surrogate, fields whose sidecar would pass 1 MiB, labels whose count is not the channel count of the audio file, or a pipe, a device, a socket or a directory at the sidecar's name, behind a link or not, each before the file at the sidecar's name is touched; a name that is not UTF-8 is named by its escapes. |
+
+## write_video
+
+```python
+write_video(
+    path: str | os.PathLike[str],
+    anim: Animation,
+    *,
+    video: VideoOptions | None = None,
+) -> None
+```
+
+Write a matplotlib animation to a WebM, MP4 or GIF file with ffmpeg.
+
+The container is the suffix of `path`: `.webm` holds AV1 or VP9,
+`.mp4` AV1, HEVC or H.264 (written to start playing before it has
+downloaded, HEVC tagged so Apple's players open it), `.gif` a palette
+of up to 256 colours. Every frame is drawn with Agg and piped to ffmpeg,
+so this process holds one frame at a time; for a GIF, ffmpeg itself
+holds every frame until the last one has arrived, since the palette is
+computed from all of them. The file appears at `path` only when ffmpeg
+has finished it, so a failure leaves whatever was there before.
+
+ffmpeg is the program matplotlib's `rcParams["animation.ffmpeg_path"]`
+names (`"ffmpeg"` on `PATH` by default). How it encodes is `video`,
+a [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions): by default the GPU encoders are tried first
+(NVENC, Quick Sync, VAAPI, VideoToolbox), each with one real frame of
+this size, and the CPU last: SVT-AV1, or without it VP9 in a WebM and
+x265 or x264 in an MP4. A GIF is written on the CPU, with no trial. The
+encoder chosen is logged on the `phonometry.io` logger.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `path` | Where to write; its suffix picks the container. |
+| `anim` | Any `matplotlib.animation.Animation`. |
+| `video` | How to encode it ([`VideoOptions`](/phonometry/reference/api/io/io/#videooptions)); `None` (default) is `VideoOptions()`: the first encoder that works, the best codec the container holds, the standard quality, and the animation's own frame rate. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | if `path` is neither a text nor a path, `video` is not a [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions), `anim` is not an animation, or the animation has no interval and `video` no `fps`. |
+| ValueError | for a suffix other than `.webm`, `.mp4` or `.gif`, a path that names a directory, a codec the container does not hold, an `encoder` that writes none of the codecs it holds (VideoToolbox in a `.webm`), for a GIF a codec, an `ffmpeg_encoder` or an encoder other than the CPU, or an animation interval that is not a positive finite number. |
+| FileNotFoundError | if the directory of `path` does not exist. |
+| FFmpegNotFoundError | if ffmpeg is not found, in Pyodide, or on Windows when it was found only in the working directory. |
+| VideoEncoderError | if no encoder can write the video (the message lists the ones that can), ffmpeg cannot be started or fails while writing it (with the last lines it wrote on stderr), or the finished video cannot take the place of `path` (on Windows, while a player holds the old file open; the message says where the video was left). |
+| ImportError | if matplotlib is not installed. |

@@ -1360,7 +1360,7 @@ _LOG.warning("the node is slow")  # an advisory is a warning, and WARNING prints
 
 **Enforced by:** `tests/test_package_architecture.py::test_the_library_logs_quietly_to_loggers_of_its_own`, `tests/test_package_architecture.py::test_the_logging_rule_reads_a_loud_logger`, `tests/test_package_architecture.py::test_the_logging_rule_reads_every_spelling_of_a_logger`, `tests/test_package_architecture.py::test_the_logging_rule_reads_every_way_of_configuring`, `tests/test_package_architecture.py::test_the_logging_rule_follows_a_logger_from_module_to_module`
 
-**Exceptions.** None. The caller turns the messages on, with `logging.basicConfig(level=logging.INFO)` or a handler on `phonometry.simulation`.
+**Exceptions.** None. The caller turns the messages on, with `logging.basicConfig(level=logging.INFO)` or a handler on `phonometry.simulation`; the encoder a video is written with is logged on `phonometry.io`.
 
 <a id="a55"></a>
 ### A55. Give every parameter of a function that runs on a node, and every field of the records it takes, a form that travels as data
@@ -1382,6 +1382,44 @@ source = simulation.ExplosionSource(ix=5, iy=5, waveform=pulse.value)  # rebuilt
 source = simulation.ExplosionSource(ix=5, iy=5, waveform=lambda t: 0.0)  # code: refused on the way to a node
 ```
 
-**Enforced by:** `tests/simulation/test_remote_wire.py::test_every_parameter_of_a_remote_function_travels`, `tests/simulation/test_remote_wire.py::test_every_field_of_a_run_travels`, `tests/simulation/test_remote_wire.py::test_the_guard_names_every_function_a_node_runs`, `tests/simulation/test_remote_simulation.py::test_the_remote_route_sends_every_parameter`, `CI: Remote simulation on a localhost node`
+**Enforced by:** `tests/simulation/test_remote_wire.py::test_every_parameter_of_a_remote_function_travels`, `tests/simulation/test_remote_wire.py::test_every_field_of_a_run_travels`, `tests/simulation/test_remote_wire.py::test_the_guard_names_every_function_a_node_runs`, `tests/simulation/test_remote_simulation.py::test_the_remote_route_sends_every_parameter`, `tests/simulation/test_video_remote.py::test_the_remote_route_sends_every_parameter`, `CI: Remote simulation on a localhost node`
 
-**Exceptions.** `compute`, which says where the run goes and travels as the job's placement. A new field of `FDTDRun` or `ElasticRun` gets a value in the tables of `tests/simulation/test_remote_wire.py`, away from its default where the run takes another, and a new function a node runs gets a row in `_EVERY_PARAMETER`, or the tests above fail.
+**Exceptions.** `compute`, which says where the run goes and travels as the job's placement; and `path`, the file a video writer writes on this machine: it stays on the client, and only its container travels, as `container` (the node encodes into a scratch file of its own and the video's bytes come back to be written there). A new field of `FDTDRun` or `ElasticRun` gets a value in the tables of `tests/simulation/test_remote_wire.py`, away from its default where the run takes another, and a new function a node runs gets a row in `_EVERY_PARAMETER`, or the tests above fail.
+
+<a id="a56"></a>
+### A56. Run a program the library does not ship by its full path, check everything before it starts, and fake it in tests
+
+**Why.** phonometry runs two programs it does not ship: ffmpeg, to write videos, and ssh, to reach a node. A bad argument found after the program started leaves a half-written file or a node busy for nothing; a program found on `PATH` by a bare name in one place and by a setting in another runs a different binary from the one the user configured (and on Windows a bare name is looked up in the working directory first); and a test that needs the real program either skips on every runner that lacks it or never runs at all.
+
+**Do**
+
+```python
+import subprocess
+
+from phonometry import io
+from phonometry.io._video import video_request
+from phonometry.io._video_encoders import NO_WINDOW, find_ffmpeg
+
+# The setting the user knows, rcParams["animation.ffmpeg_path"], resolved once to a full path.
+ffmpeg = find_ffmpeg()
+# The records checked themselves when built; the path is checked here, before the program starts.
+request = video_request("wave.webm", io.VideoOptions(quality="small"))
+done = subprocess.run(  # nosec B603 - an argument list to the full path find_ffmpeg resolved; no shell
+    [ffmpeg, "-hide_banner", "-version"],
+    capture_output=True,
+    timeout=60.0,
+    check=False,
+    creationflags=NO_WINDOW,  # no console window on Windows
+)
+reason = done.stderr.decode(errors="replace")[-400:]  # the last of its standard error, for the message
+```
+
+**Don't**
+
+```py
+subprocess.run(f"ffmpeg -i - {output}", shell=True)
+```
+
+Keep the last lines of the program's standard error for the error message. In tests, a stand-in written in Python takes the program's place on every system. `tests/fake_ffmpeg.py` writes a launcher (a shell script, or a `.cmd` file on Windows) that runs it with the test's interpreter, points `rcParams["animation.ffmpeg_path"]` at it and puts its directory first on `PATH`, and is steered by a JSON file the test writes and rewrites (the encoders it lists, the ones that work, when it dies). `tests/simulation/fake_ssh.py` is run through `command._SSH_PROGRAM`, which the `node` fixture points at it (a batch file on `PATH` could not carry the remote command intact on Windows), and is steered by `FAKE_SSH_MODE` (a refused key, a login banner, a hang, bytes that are no frame) and `FAKE_SSH_LOG` (a line per start). A test that needs the real program skips without it, with a reason that names the CI job that runs it there. Bandit reports every call as `B603`, and its `nosec` gives the reason ([C4](docstrings.md#c4)).
+
+**Enforced by:** `CI: Videos encode with a real ffmpeg`, `CI: Remote simulation on a localhost node`, `bandit`

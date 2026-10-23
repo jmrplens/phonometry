@@ -12,9 +12,10 @@ names one: a workstation with a GPU, a server, the NAS under the desk. The run
 record, `FDTDRun` or `ElasticRun`, is the one a run here takes, built and
 checked here; the call is the same, `fdtd_simulation(run, compute=...)` or
 `elastic_fdtd_simulation(run, compute=...)`; and so is the record it returns.
-Only those two functions go to a node. An engine built directly, `FDTD2D` or
-`ElasticFDTD2D`, steps in this process, where its fields are yours to read and
-write between steps, and it refuses a request that names a host.
+Only those two functions, and the two video writers that take the same runs,
+go to a node. An engine built directly, `FDTD2D` or `ElasticFDTD2D`, steps in
+this process, where its fields are yours to read and write between steps, and
+it refuses a request that names a host.
 
 This page says what happens when a run goes to a node, how to name one, how
 to set up a Docker node or a Python node, what can go wrong and what each
@@ -35,7 +36,9 @@ raises without a host. The function then refuses a run that cannot travel
 Then one `ssh` process carries the whole run. There is no server to install
 or keep running on the node: its ssh server is all it needs. The run travels
 as data, field by field, never as code, and the node builds it again with the
-library's constructors, so it checks itself again there.
+library's constructors, so it checks itself again there. The video writers
+travel too, their run, frame and video options as records: see
+[Writing animations and FDTD runs to video](/phonometry/io/videos/).
 
 The node runs your own phonometry, as installed here, whatever is installed
 there. The client sends its files, those a wheel of it would hold, once per
@@ -47,8 +50,9 @@ holds, so a long run keeps its package however many others come and go.
 
 The node runs the function on the device asked for, with no fallback of its
 own, and sends back the probe histories and the snapshots, which are read here
-into arrays sized from your request. `result.provenance.host` names the node
-and `result.provenance.package_digest` the package that ran; the rest of the
+into arrays sized from your request; a video writer sends its video's bytes
+instead of snapshots. `result.provenance.host` names the node and
+`result.provenance.package_digest` the package that ran; the rest of the
 provenance is the node's: its NumPy, its array library, its GPU.
 
 ## 2. Naming a node: the hosts file
@@ -233,6 +237,12 @@ file then names the interpreter by its path, `venvs/node/bin/python` from the
 home directory or the absolute path. The client runs that `python` directly,
 with no activation script first, so the environment must work without one.
 
+A node that writes videos
+([Writing animations and FDTD runs to video](/phonometry/io/videos/)) needs two things more:
+matplotlib in that environment, at the version the library's `plot` extra
+asks for, and ffmpeg on the `PATH` the command ssh runs there sees. The
+Docker image of section 3 holds both.
+
 ## 5. When something goes wrong
 
 | What went wrong | What is raised | When |
@@ -322,10 +332,10 @@ names with `SendEnv` or `SetEnv` (on Debian and Ubuntu, for example `LANG` and
 the `LC_*` variables), as far as the node's `AcceptEnv` allows.
 
 A job carries no code: the node runs the package you sent, on its own Python
-and libraries. The job names one of the two simulation functions and carries
-its run as data, which the node builds again with the library's constructors,
-and a package is checked against its digest before it is stored. A Docker
-node's container has no network.
+and libraries. The job names one of the two simulation functions or of the two
+video writers and carries its run as data, which the node builds again with
+the library's constructors, and a package is checked against its digest
+before it is stored. A Docker node's container has no network.
 
 The client does not trust the bytes the node sends. Every header and every
 array is checked against what the request implies, its name, its dtype, its
@@ -374,12 +384,13 @@ gives the numbers of a run here.
 
 <ScopeClaim status="not-covered" label="Not covered">
 An engine built directly, `FDTD2D` or `ElasticFDTD2D`, steps in this process
-and does not go to a node, and a node runs the two simulation functions only,
-never code of the caller's choosing. ssh is the only transport. A node has no
-scheduler or queue of its own: two runs sent at the same time run side by
-side. The node image is built on the node and published to no registry, and a
-Windows machine cannot be a node. A node encodes no video yet, though its
-image carries ffmpeg for it.
+and does not go to a node, and a node runs the two simulation functions and
+the two video writers only, never code of the caller's choosing. ssh is the
+only transport. A node has no scheduler or queue of its own: two runs sent at
+the same time run side by side. The node image is built on the node and
+published to no registry, and a Windows machine cannot be a node. A node
+encodes the video of a run it steps, but no animation drawn here:
+`io.write_video` runs on this machine only.
 </ScopeClaim>
 </Scope>
 
@@ -424,5 +435,7 @@ compare with NumPy's.
 An ssh server you can log in to with a key, on Linux or macOS with a POSIX
 login shell, and either Docker with the node image (and, for a GPU, the
 NVIDIA driver and the NVIDIA Container Toolkit) or a Python 3.12 or later with
-NumPy and SciPy at the library's floors (and CuPy or torch for a GPU). phonometry itself need not be
-installed there: the client sends its own.
+NumPy and SciPy at the library's floors (and CuPy or torch for a GPU). To
+write videos, a Python node also needs matplotlib, and ffmpeg on its
+`PATH`; the Docker image holds both. phonometry itself need not be installed there:
+the client sends its own.

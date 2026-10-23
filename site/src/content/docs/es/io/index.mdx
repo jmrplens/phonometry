@@ -1,6 +1,6 @@
 ---
 title: "Archivos"
-description: "La capa de archivos de la medición: leer en un Signal calibrado todo WAV lineal que escribe un sonómetro, inspección solo de cabeceras, flujo por bloques hacia filtros con estado, escritura BWF con procedencia bext y sonoridad medida, el sidecar de calibración, la conversión sin pérdidas y los catálogos de materiales propios; qué queda fuera, y por qué."
+description: "La capa de archivos de la medición: leer en un Signal calibrado todo WAV lineal que escribe un sonómetro, inspección solo de cabeceras, flujo por bloques hacia filtros con estado, escritura BWF con procedencia bext y sonoridad medida, el sidecar de calibración, la conversión sin pérdidas, los catálogos de materiales propios y las animaciones y simulaciones FDTD escritas en vídeo; qué queda fuera, y por qué."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -85,6 +85,9 @@ biblioteca.
   de características, antes de teclearlo, está en
   [Cómo leer la hoja de características de un material](/phonometry/es/materials/reading-a-datasheet/),
   entre las guías de materiales.
+- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/):
+  cualquier animación de matplotlib a WebM, MP4 o GIF a través de ffmpeg, y
+  una simulación FDTD directamente a un vídeo.
 
 ## Qué no cubre esta sección
 
@@ -93,9 +96,11 @@ biblioteca.
 **Ni reproducción, ni edición, ni efectos.** Esto es una capa de archivos
 para mediciones, no una estación de trabajo de audio: nada de aquí
 reproduce un sonido, recorta una región a oído ni aplica ganancia. Tampoco
-hay escritura con pérdidas, a propósito: ninguna medición termina en un
-MP3, y una biblioteca cuyo trabajo es conservar niveles no debería ponerlo
-fácil.
+hay escritura de *audio* con pérdidas, a propósito: ninguna medición termina
+en un MP3, y una biblioteca cuyo trabajo es conservar niveles no debería
+ponerlo fácil. Los vídeos que escribe la
+[guía de vídeo](/phonometry/es/io/videos/) son imágenes de una figura o de
+una simulación, no grabaciones, y se codifican como cualquier vídeo.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">

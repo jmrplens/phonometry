@@ -78,14 +78,19 @@ schema of every row class the library publishes.
   type it, is in
   [Reading a material datasheet](../materials/reading-a-datasheet.md),
   among the materials guides.
+- [Writing animations and FDTD runs to video](videos.md): any
+  matplotlib animation to WebM, MP4 or GIF through ffmpeg, and an FDTD run
+  straight to a video.
 
 ## What this section does not cover
 
 **No playback, no editing, no effects.** This is a file layer for
 measurements, not an audio workstation: nothing here plays a sound, trims a
-region by ear, or applies gain. There is deliberately no lossy *writing*
-either: no measurement ends in an MP3, and a library whose job is
-preserving levels should not make one easy to produce.
+region by ear, or applies gain. There is deliberately no lossy writing of
+*audio* either: no measurement ends in an MP3, and a library whose job is
+preserving levels should not make one easy to produce. The videos the
+[video guide](videos.md) writes are pictures of a plot or a
+simulation, not recordings, and are encoded as any video is.
 
 **AAC/M4A stays external.** Dictaphone and phone recordings in MP4
 containers are not decoded; the honest route is a one-line

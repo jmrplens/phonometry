@@ -156,7 +156,10 @@ def test_ssh_asks_for_no_terminal_and_forwards_nothing_of_the_client(
         assert options[options.index(setting) - 1] == "-o"
 
 
-@pytest.mark.skipif(shutil.which("ssh") is None, reason="no ssh client on PATH")
+@pytest.mark.skipif(
+    shutil.which("ssh") is None,
+    reason="needs an ssh client on PATH; every runner of the CI tests job has one",
+)
 def test_the_ssh_client_here_lets_no_setting_of_a_config_through(
     tmp_path: Path,
 ) -> None:

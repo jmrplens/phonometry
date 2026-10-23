@@ -146,15 +146,13 @@ ENGINE_DIGESTS = "engine-digests.json"
 #: clip by :func:`_selected_translations`.
 _TABLES = (("figures.i18n", "_ES_EXACT"), ("figures.i18n", "_ES_PATTERNS"))
 
-#: Reached from the clip tail, but incapable of changing a frame: the remote
-#: encoder plumbing decides *where* ffmpeg runs, not what it is fed. Listing
-#: them keeps an ssh or container change from marking all forty-two clips
-#: stale. The encoder *settings* a clip passes are not here: those do
-#: change the file.
+#: Reached from the clip tail, but incapable of changing a frame:
+#: ``audit_figure`` only names the clip the translation audit attributes its
+#: lookups to, so a change to that bookkeeping does not mark every clip
+#: stale. The encoder *settings* a clip passes are not here: those do change
+#: the file.
 _IGNORED: frozenset[tuple[str, str]] = frozenset(
     {
-        ("figures.media", "_gpu_encode_target"),
-        ("figures.media", "_write_gpu_ffmpeg_wrapper"),
         ("figures.i18n", "audit_figure"),
         # The encoder presets of write_video's ``quality``: the clips pass
         # their own encoder and options, which bypass them, so a preset

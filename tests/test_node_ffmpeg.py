@@ -3,10 +3,19 @@
 
 from __future__ import annotations
 
+import hashlib
+import io
+import os
+import shutil
 import sys
+import tarfile
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT / "scripts") not in sys.path:
@@ -168,3 +177,72 @@ def test_the_check_names_each_problem_and_fails(
     assert [line.startswith("::error::") for line in lines] == [True, True]
     assert "no longer downloads" in lines[0]
     assert "no month-end release" in lines[1]
+
+
+def _archive(
+    tmp_path: Path, names: tuple[str, ...] = ("ffmpeg", "ffprobe")
+) -> tuple[Path, str]:
+    """A small build laid out as BtbN's: ``<top>/bin/<program>``, a licence, the docs."""
+    source = tmp_path / "build.tar.xz"
+    with tarfile.open(source, "w:xz") as tar:
+        for name in (
+            *(f"bin/{program}" for program in names),
+            "LICENSE.txt",
+            "doc/ffmpeg.html",
+        ):
+            data = f"#!/bin/sh\necho {name}\n".encode()
+            info = tarfile.TarInfo(
+                f"ffmpeg-n9.0.2-17-g2a571b6068-linux64-gpl-9.0/{name}"
+            )
+            info.size = len(data)
+            tar.addfile(info, io.BytesIO(data))
+    return source, hashlib.sha256(source.read_bytes()).hexdigest()
+
+
+def _copy_from(source: Path, calls: list[str]) -> Callable[[str, Path], None]:
+    def download(url: str, target: Path) -> None:
+        calls.append(url)
+        shutil.copyfile(source, target)
+
+    return download
+
+
+def test_the_pinned_build_is_fetched_once_checked_and_cut_to_its_two_programs(
+    tmp_path: Path,
+) -> None:
+    source, sha256 = _archive(tmp_path)
+    pinned = node_ffmpeg.Pin("https://example.org/ffmpeg.tar.xz", sha256)
+    calls: list[str] = []
+    bin_dir = node_ffmpeg.fetch(
+        pinned, tmp_path / "cache", download=_copy_from(source, calls)
+    )
+    assert bin_dir == tmp_path / "cache" / sha256 / "bin"
+    assert sorted(path.name for path in bin_dir.iterdir()) == ["ffmpeg", "ffprobe"]
+    assert all(os.access(path, os.X_OK) for path in bin_dir.iterdir())
+    assert (
+        node_ffmpeg.fetch(
+            pinned, tmp_path / "cache", download=_copy_from(source, calls)
+        )
+        == bin_dir
+    )
+    assert calls == [pinned.url]
+
+
+def test_a_download_with_another_sha256_is_refused_and_leaves_nothing(
+    tmp_path: Path,
+) -> None:
+    source, _ = _archive(tmp_path)
+    pinned = node_ffmpeg.Pin("https://example.org/ffmpeg.tar.xz", "0" * 64)
+    download = _copy_from(source, [])
+    with pytest.raises(ValueError, match=r"not the pinned 0{64}"):
+        node_ffmpeg.fetch(pinned, tmp_path / "cache", download=download)
+    assert list((tmp_path / "cache").iterdir()) == []
+
+
+def test_a_build_without_ffprobe_is_refused(tmp_path: Path) -> None:
+    source, sha256 = _archive(tmp_path, ("ffmpeg",))
+    pinned = node_ffmpeg.Pin("https://example.org/ffmpeg.tar.xz", sha256)
+    download = _copy_from(source, [])
+    with pytest.raises(ValueError, match=r"bin/ffprobe"):
+        node_ffmpeg.fetch(pinned, tmp_path / "cache", download=download)
+    assert list((tmp_path / "cache").iterdir()) == []

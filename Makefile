@@ -526,10 +526,22 @@ assets:
 # clip is encoded, every frame of its four variants is held to the figure
 # gates (see `animation-audit`): a finding stops the render, naming the clip,
 # the variant, the frame and the finding, and nothing of the clip is encoded
-# or published.
+# or published. ANIM=anim_<name> renders one clip; CLIP_ENCODER=av1_nvenc
+# encodes on an NVIDIA GPU here (the default is SVT-AV1 on the CPU,
+# publishable with SVT-AV1 4, the major the clips are calibrated on:
+# PATH="$(make -s clip-ffmpeg):$PATH" make animations puts the build the node
+# image pins first).
 animations: assets
-	$(FIGURE_LANGUAGE_ENV) $(PYTHON) scripts/generate_graphs.py --animations
+	$(FIGURE_LANGUAGE_ENV) $(PYTHON) scripts/generate_graphs.py --animations $(if $(ANIM),--anim $(ANIM)) $(if $(CLIP_ENCODER),--clip-encoder $(CLIP_ENCODER))
 	@if [ "$(PUBLISH)" != "no" ]; then $(PYTHON) scripts/publish_assets.py; fi
+
+# The ffmpeg build the node image pins (docker/node/Dockerfile), for a CPU
+# render of the clips on this machine (Linux on x86_64): downloaded once into
+# ~/.cache/phonometry/ffmpeg/<sha256>, checked against the pinned SHA-256,
+# cut to ffmpeg and ffprobe, and its directory printed, for
+#   PATH="$(make -s clip-ffmpeg):$PATH" make animations
+clip-ffmpeg:
+	@$(PYTHON) scripts/node_ffmpeg.py fetch
 
 # The clips are never regenerated in CI, so nothing else can tell that the
 # code drawing one has moved since the clip was published -- which is how
@@ -803,7 +815,7 @@ check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
-	assets animations animation-freshness animation-audit posters brand lighthouse \
+	assets animations clip-ffmpeg animation-freshness animation-audit posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu gpu-parity node-image engine-digests coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \

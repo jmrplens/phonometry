@@ -228,3 +228,23 @@ def test_the_device_is_released_after_the_field_and_before_the_variants(
     assert events == ["field", "released"]
     written = {path.name for path in out.iterdir()}
     assert written == {f"{lang}_{dark}_True" for lang, dark in EXPECTED}
+
+
+def test_an_uncalibrated_svt_av1_stops_the_render_before_any_field(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """A field can take an hour; the encoder is asked about before it."""
+    import assets_dir
+    from figures import media
+
+    clip = "test_only_clip"
+    built: list[str] = []
+    monkeypatch.setitem(registry._ANIM_FIELDS, clip, lambda: built.append("field"))
+    monkeypatch.setitem(registry._ANIMATIONS, clip, lambda output_dir: None)
+    monkeypatch.setattr(assets_dir, "require_clips_dir", lambda: tmp_path)
+    monkeypatch.setattr(media, "_svt_av1_version", lambda: "99.0.0")
+    monkeypatch.delenv(media.CLIP_ENCODER_ENV, raising=False)
+    with pytest.raises(SystemExit) as stop:
+        registry.main(["--animations", "--anim", clip, "--jobs", "1"])
+    assert stop.value.code != 0
+    assert built == []

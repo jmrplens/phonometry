@@ -11,6 +11,7 @@ silently degrouping a cached figure or dropping a clip's field builder.
 :func:`main` is the command line over the same tables.
 """
 
+import argparse
 import os
 import sys
 from collections.abc import Callable
@@ -435,7 +436,7 @@ from .materials import (
     generate_transmission_tube_geometry,
     generate_tube_working_ranges,
 )
-from .media import CLIP_ENCODER_ENV, _clip_encoder, _extract_poster
+from .media import CLIP_ENCODER_ENV, _clip_encoder, _clip_options, _extract_poster
 from .metrology import (
     generate_calibration_narrowband_bias,
     generate_calibration_stability,
@@ -2375,10 +2376,29 @@ def _name_clip_encoder(encoder: str | None) -> None:
         os.environ[CLIP_ENCODER_ENV] = encoder
 
 
+def _require_a_clip_encoder(
+    parser: argparse.ArgumentParser, args: argparse.Namespace
+) -> None:
+    """Stop a run that renders clips when its encoder cannot write them.
+
+    A field can take an hour; an encoder that cannot write the clip is found
+    before the first one is computed: an SVT-AV1 of a major the clips were
+    not calibrated on, or one that does not say its version. An audit-only
+    run encodes nothing, and is not stopped.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, with
+        the reason, when the encoder cannot write the clips.
+    """
+    if not (args.animations or args.do_all) or args.audit_only:
+        return
+    try:
+        _clip_options(_clip_encoder())
+    except (ValueError, RuntimeError) as exc:
+        parser.error(str(exc))
+
+
 def main(argv: list[str] | None = None) -> None:
     """CLI entry point: figures by default, clips behind ``--animations``."""
-    import argparse
-
     import animation_fingerprint
 
     parser = argparse.ArgumentParser(
@@ -2443,6 +2463,7 @@ def main(argv: list[str] | None = None) -> None:
     )
     args = parser.parse_args(argv)
     _name_clip_encoder(args.clip_encoder)
+    _require_a_clip_encoder(parser, args)
 
     img_dir = ".github/images"
     Path(img_dir).mkdir(parents=True, exist_ok=True)

@@ -176,6 +176,18 @@ const FULL_COLUMN = 860;
 /** The longest last line still too short to stand alone: one word this long or shorter. */
 const LONE_WORD_MAX = 8;
 
+/** The language a page, and so its title, is written in. */
+export type Locale = 'en' | 'es';
+
+/*
+ * The lists of function words below serve both languages at once. Their words
+ * hardly ever coincide, and where one does, as the "in" of the Latin "in situ"
+ * in a Spanish title, it plays the same part in both. "a" is the exception:
+ * an article in English, "a material datasheet", and a preposition in
+ * Spanish, "a la alemana", so the title's language decides which list it is
+ * in.
+ */
+
 /** Words a line never ends on: they belong with what follows them (`bound`). */
 const WEAK_END = new Set(
   (
@@ -186,27 +198,36 @@ const WEAK_END = new Set(
   ).split(' '),
 );
 
+const OPENERS =
+  'and or nor but in on at to for by with from into onto per via vs versus under over ' +
+  'between through within without y e o u ni pero en por para con sin sobre entre ' +
+  'desde hasta bajo según mediante hacia tras durante contra al del';
+
 /**
  * Conjunctions and prepositions that open a phrase of their own, so a line
- * may start with one: "Silencers, Screens / and Barriers In Situ", "Medición
- * del aislamiento / en laboratorio".
+ * may start with one: "Silencers, Screens / and Barriers In Situ", "Sending a
+ * simulation / to a remote node", "Medición del aislamiento / en
+ * laboratorio", "Ruido de climatización / a la alemana".
  */
-const PHRASE_OPENERS = new Set(
-  (
-    'and or nor but in on at for by with from into onto per via vs versus under over ' +
-    'between through within without y e o u ni pero en por para con sin sobre entre ' +
-    'desde hasta bajo según mediante hacia tras durante contra al del'
-  ).split(' '),
-);
+const PHRASE_OPENERS: Record<Locale, Set<string>> = {
+  en: new Set(OPENERS.split(' ')),
+  es: new Set(`${OPENERS} a`.split(' ')),
+};
 
 /**
  * "of" and "de" open a phrase only before an article, "of a Sound Level
  * Meter", "de un sonómetro". Without one they join two nouns into one term,
  * "tiempo de reverberación", "presión sonora de emisión", which a break would
- * split.
+ * split. A break before one still parts less than a break inside a term, so
+ * the card takes it when no phrase boundary fits (`layOutTitle`).
  */
 const OF = new Set(['of', 'de']);
-const ARTICLE = new Set('a an the el la lo los las un una unos unas'.split(' '));
+
+const ARTICLES = 'an the el la lo los las un una unos unas';
+const ARTICLE: Record<Locale, Set<string>> = {
+  en: new Set(`a ${ARTICLES}`.split(' ')),
+  es: new Set(ARTICLES.split(' ')),
+};
 
 /**
  * The shortest a first line may be, as a fraction of the second, for a break
@@ -323,15 +344,17 @@ const COMPOUND = /\p{L}-(?:\p{L}|$)/u;
  * colon or semicolon, or before a designation that ends the title, which is
  * the same break as before a bracketed one, "Emisión de la fuente ferroviaria
  * / CNOSSOS-EU", or after one that opens it, "2D FDTD / wave simulation";
- * `word`, before a conjunction or a preposition that opens a phrase; `none`,
- * anywhere else. That includes anywhere inside brackets, where the "and" of
- * "(ISO 8253-1 and -2)" opens nothing, and before a conjunction between two
- * hyphenated compounds, which joins two modifiers of one noun: "Random-Incidence
- * and Diffuse-Field Response".
+ * `word`, before a conjunction or a preposition that opens a phrase; `of`,
+ * before an "of" or a "de" that opens none (OF), "Sound Power / of Multisource
+ * Industrial Plants"; `none`, anywhere else. That includes anywhere inside
+ * brackets, where the "and" of "(ISO 8253-1 and -2)" opens nothing, and before
+ * a conjunction between two hyphenated compounds, which joins two modifiers of
+ * one noun: "Random-Incidence and Diffuse-Field Response".
  * @param words - The title's words.
  * @param i - Index of the first word of the second line.
+ * @param locale - The title's language.
  */
-function boundary(words: string[], i: number): 'mark' | 'word' | 'none' {
+function boundary(words: string[], i: number, locale: Locale): Boundary {
   const before = words.slice(0, i).join(' ');
   if (before.split('(').length > before.split(')').length) return 'none';
   if (words[i].startsWith('(') || /[:;]$/.test(words[i - 1])) return 'mark';
@@ -339,8 +362,10 @@ function boundary(words: string[], i: number): 'mark' | 'word' | 'none' {
   const opener = functionWord(words[i]);
   const joinsModifiers = COMPOUND.test(words[i - 1]) && COMPOUND.test(words[i + 1] ?? '');
   if (CONJUNCTIONS.has(opener) && joinsModifiers) return 'none';
-  if (PHRASE_OPENERS.has(opener)) return 'word';
-  if (OF.has(opener) && ARTICLE.has(functionWord(words[i + 1] ?? ''))) return 'word';
+  if (PHRASE_OPENERS[locale].has(opener)) return 'word';
+  if (OF.has(opener)) {
+    return ARTICLE[locale].has(functionWord(words[i + 1] ?? '')) ? 'word' : 'of';
+  }
   return 'none';
 }
 
@@ -349,12 +374,13 @@ function boundary(words: string[], i: number): 'mark' | 'word' | 'none' {
  * preposition, or any word after a comma, colon or semicolon.
  * @param words - The title's words.
  * @param k - Index of the word.
+ * @param locale - The title's language.
  */
-function phraseStarts(words: string[], k: number): boolean {
+function phraseStarts(words: string[], k: number, locale: Locale): boolean {
   const word = functionWord(words[k]);
   return (
     words[k].startsWith('(') ||
-    PHRASE_OPENERS.has(word) ||
+    PHRASE_OPENERS[locale].has(word) ||
     OF.has(word) ||
     /[,;:]$/.test(words[k - 1])
   );
@@ -369,19 +395,27 @@ function phraseStarts(words: string[], k: number): boolean {
  * - an article keeps the two words after it when its phrase ends there, at a
  *   bracket, a conjunction, a preposition, a punctuation mark or the end of
  *   the title: "the German Way" in "HVAC Noise the German Way (VDI 2081)".
+ *
+ * Like `breakable`, this decides the title's size as well as its lines: a
+ * title that cannot be set in two lines of its column without parting such
+ * words steps down the scale (`layOutTitle`).
  * @param words - The title's words.
  * @param i - Index of the first word of the second line.
+ * @param locale - The title's language.
  */
-function bound(words: string[], i: number): boolean {
+function bound(words: string[], i: number, locale: Locale): boolean {
   if (WEAK_END.has(functionWord(words[i - 1]))) return true;
   return (
     i >= 2 &&
-    ARTICLE.has(functionWord(words[i - 2])) &&
-    !phraseStarts(words, i - 1) &&
-    !phraseStarts(words, i) &&
-    (i + 1 === words.length || phraseStarts(words, i + 1))
+    ARTICLE[locale].has(functionWord(words[i - 2])) &&
+    !phraseStarts(words, i - 1, locale) &&
+    !phraseStarts(words, i, locale) &&
+    (i + 1 === words.length || phraseStarts(words, i + 1, locale))
   );
 }
+
+/** The kinds of boundary a break can fall on (`boundary`). */
+type Boundary = 'mark' | 'word' | 'of' | 'none';
 
 interface TitleBreak {
   lines: [string] | [string, string];
@@ -390,8 +424,11 @@ interface TitleBreak {
   /** The second line is a single short word. */
   lone: boolean;
   /** The boundary the break falls on, from `boundary`. */
-  phrase: 'mark' | 'word' | 'none';
-  /** The break the title had while the card filled its full column line by line. */
+  phrase: Boundary;
+  /**
+   * Whether this is the break the title had while the card filled its full
+   * column line by line, as `layOutTitle` estimates it.
+   */
   had: boolean;
 }
 
@@ -400,20 +437,21 @@ interface TitleBreak {
  * allows and `bound` does not forbid: the whole title, then one entry per
  * break point.
  * @param title - The page title.
+ * @param locale - The title's language.
  */
-function titleBreaks(title: string): TitleBreak[] {
+function titleBreaks(title: string, locale: Locale): TitleBreak[] {
   const words = title.split(' ');
   const out: TitleBreak[] = [
     { lines: [title], widths: [], lone: false, phrase: 'none', had: false },
   ];
   for (let i = 1; i < words.length; i++) {
-    if (!breakable(words[i - 1], words[i]) || bound(words, i)) continue;
+    if (!breakable(words[i - 1], words[i]) || bound(words, i, locale)) continue;
     const second = words.slice(i).join(' ');
     out.push({
       lines: [words.slice(0, i).join(' '), second],
       widths: [],
       lone: !second.includes(' ') && second.length <= LONE_WORD_MAX,
-      phrase: boundary(words, i),
+      phrase: boundary(words, i, locale),
       had: false,
     });
   }
@@ -510,32 +548,41 @@ function prefer<T>(list: T[], test: (item: T) => boolean): T[] {
  * The size is the one `tableSize` gives the title's length, so near-identical
  * titles keep the same size and none gets larger than it was. The card steps
  * down the scale, 58, 48, 44, 40, 34 px, only while the title cannot be set
- * in two lines of its column at that size, breaking only where `breakable`
- * allows and `bound` does not forbid, so a title gets smaller than its table
- * size only where the column its artwork leaves cannot hold it. Nothing
- * fitting at 34 px stops the build: the card neither adds a third line nor
- * cuts the title.
+ * in two lines of its column at that size without parting words that belong
+ * together: the words of a designation, a hyphenated compound or a number and
+ * its unit (`breakable`), an article, a preposition or a conjunction and the
+ * word after it, or a short phrase an article opens (`bound`). So a title
+ * gets smaller than its table size only where the column its artwork leaves
+ * cannot hold it with all of those kept whole. Nothing fitting at 34 px stops
+ * the build: the card neither adds a third line nor cuts the title.
  *
  * At that size the title takes one line when it fits, and otherwise two. Of
  * the two-line breaks that fit, the card prefers, in order:
  * 1. a break at a phrase boundary, and of those the one the title had while
- *    the card filled its full column line by line, then one before a bracket
- *    or a closing designation, after an opening one or after a colon or
- *    semicolon, then one before a conjunction or a preposition that opens a
- *    phrase (`boundary`) on a first line that is no stub
- *    (PHRASE_FIRST_LINE_MIN);
- * 2. a second line longer than one short word (LONE_WORD_MAX characters);
- * 3. the pair of lines closest to equal length.
+ *    the card filled its full column line by line, as far as it can be told
+ *    (see below), then one before a bracket or a closing designation, after
+ *    an opening one or after a colon or semicolon, then one before a
+ *    conjunction or a preposition that opens a phrase (`boundary`) on a first
+ *    line that is no stub (PHRASE_FIRST_LINE_MIN);
+ * 2. a break before an "of" or a "de" that opens no phrase (`boundary`), on
+ *    a first line that is no stub. It parts the two terms the word joins, but
+ *    keeps the one after it whole, where a break on no boundary at all falls
+ *    inside a term: "Sound Power / of Multisource Industrial Plants", not
+ *    "Sound Power of Multisource / Industrial Plants";
+ * 3. a second line longer than one short word (LONE_WORD_MAX characters);
+ * 4. the pair of lines closest to equal length.
  * @param title - The page title.
  * @param column - Width of the card's title column, in pixels.
  * @param fonts - The fonts the card is set in.
+ * @param locale - The title's language.
  */
 async function layOutTitle(
   title: string,
   column: number,
   fonts: Fonts,
+  locale: Locale,
 ): Promise<{ size: number; lines: string[] }> {
-  const breaks = titleBreaks(title);
+  const breaks = titleBreaks(title, locale);
   const earlier = earlierBreaks(title);
   const widths = await measureLines(
     [...breaks.flatMap((b) => b.lines), ...earlier.map((e) => e.first)],
@@ -543,9 +590,13 @@ async function layOutTitle(
   );
   for (const b of breaks) b.widths = b.lines.map((line) => widths.get(line) ?? Infinity);
 
-  // The break the title had: the last place where the first line still fit
-  // the full column at the table size. Only a break between words that is
-  // still allowed can be kept.
+  // The break the title had, estimated: the last place where the first line
+  // still fits the full column at the table size, filling it line by line as
+  // the card once did. Satori 0.47.1 set the cards then, and the widths here
+  // are those of the satori in use, which differ slightly, so on a few titles
+  // the estimate is not the break 0.47.1 drew: "Dónde se calcula una
+  // simulación: NumPy, / CuPy y torch", where 0.47.1 broke at the colon. Only
+  // a break between words that is still allowed can be kept.
   const start = tableSize(title);
   if ((widths.get(title) ?? Infinity) * start > FULL_COLUMN) {
     const last = earlier.findLast((e) => (widths.get(e.first) ?? Infinity) * start <= FULL_COLUMN);
@@ -561,13 +612,13 @@ async function layOutTitle(
         `${TITLE_SIZES.at(-1)} px. Shorten it: the card neither adds a third line nor cuts it.`,
     );
   }
-  const atPhrase = (b: TitleBreak) =>
-    b.phrase === 'mark' ||
-    (b.phrase === 'word' && b.widths[0] >= PHRASE_FIRST_LINE_MIN * b.widths[1]);
+  const noStub = (b: TitleBreak) => b.widths[0] >= PHRASE_FIRST_LINE_MIN * b.widths[1];
+  const atPhrase = (b: TitleBreak) => b.phrase === 'mark' || (b.phrase === 'word' && noStub(b));
   let fit = fitting(breaks, size, column);
   fit = prefer(fit, (b) => b.had && atPhrase(b));
   fit = prefer(fit, (b) => b.phrase === 'mark');
   fit = prefer(fit, atPhrase);
+  fit = prefer(fit, (b) => b.phrase === 'of' && noStub(b));
   fit = prefer(fit, (b) => !b.lone);
   const imbalance = (b: TitleBreak) => Math.abs(b.widths[0] - (b.widths[1] ?? b.widths[0]));
   const best = fit.reduce((a, b) => (imbalance(b) < imbalance(a) ? b : a));
@@ -575,7 +626,7 @@ async function layOutTitle(
 }
 
 /** The strapline under the wordmark, in the card's own language. */
-const TAGLINE: Record<'en' | 'es', string> = {
+const TAGLINE: Record<Locale, string> = {
   en: 'Acoustic measurement toolkit for Python',
   es: 'Herramientas de medida acústica para Python',
 };
@@ -587,8 +638,11 @@ export interface OgCard {
   kicker?: string;
   /** Artwork key, from `artKeyFor`. */
   art: string;
-  /** Which language the card's own furniture is written in. */
-  locale: 'en' | 'es';
+  /**
+   * The language the page is written in, which the card's own furniture is
+   * written in too, and which tells the title's function words apart.
+   */
+  locale: Locale;
 }
 
 /**
@@ -609,7 +663,7 @@ export async function generateOgImage(card: OgCard): Promise<Buffer> {
   // The title stops short of where its artwork brightens, which is a
   // different place on each drawing (src/lib/og-areas.mjs).
   const column = titleColumnFor(card.art);
-  const title = await layOutTitle(card.title, column, fonts);
+  const title = await layOutTitle(card.title, column, fonts, card.locale);
 
   const tree = el(
     'div',

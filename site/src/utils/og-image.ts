@@ -682,8 +682,61 @@ export interface OgCard {
   locale: Locale;
 }
 
+/** The card itself, which every other box sits in. */
+const GROUND: Style = {
+  display: 'flex',
+  width: '100%',
+  height: '100%',
+  position: 'relative',
+  backgroundColor: '#04222b',
+};
+
 /**
- * Renders one card to PNG bytes.
+ * The artwork, full bleed. It is already dark on the left, which is where the
+ * type sits, so it needs no scrim over it.
+ * @param art - The artwork's data URI, from `getArt`.
+ */
+function artwork(art: string): Node {
+  return {
+    type: 'img',
+    key: null,
+    props: {
+      src: art,
+      width: OG_WIDTH,
+      height: OG_HEIGHT,
+      style: { position: 'absolute', top: 0, left: 0, objectFit: 'cover' },
+    },
+  };
+}
+
+/**
+ * Lays a card's tree out and rasterises it into the bytes the endpoint serves.
+ * @param tree - The card, inside GROUND.
+ * @param fonts - The fonts the card is set in.
+ */
+async function render(tree: Node, fonts: Fonts): Promise<Buffer> {
+  const svg = await satori(tree as never, { width: OG_WIDTH, height: OG_HEIGHT, fonts });
+
+  // JPEG, not PNG: the cards carry photographic artwork, so a lossless encode
+  // costs several times the bytes for a difference no scraper will ever show.
+  return sharp(Buffer.from(svg)).jpeg({ quality: 88, progressive: true }).toBuffer();
+}
+
+/**
+ * Renders an artwork as a card shows it with nothing over it: the ground and
+ * the artwork of `generateOgImage`, placed, rasterised and encoded as there,
+ * without the mark, the type and the rule. scripts/check-social-cards.mjs
+ * compares every card with it past the end of the card's title column, where
+ * the card has to show its artwork and nothing else.
+ * @param art - Artwork key, from `artKeyFor`.
+ */
+export async function generateBareArtwork(art: string): Promise<Buffer> {
+  const [fonts, src] = await Promise.all([cardFonts(), getArt(art)]);
+  return render(el('div', GROUND, artwork(src)), fonts);
+}
+
+/**
+ * Renders one card to JPEG bytes.
  * @param card - Title, kicker and artwork key for this page.
  */
 export async function generateOgImage(card: OgCard): Promise<Buffer> {
@@ -695,25 +748,8 @@ export async function generateOgImage(card: OgCard): Promise<Buffer> {
 
   const tree = el(
     'div',
-    {
-      display: 'flex',
-      width: '100%',
-      height: '100%',
-      position: 'relative',
-      backgroundColor: '#04222b',
-    },
-    // The artwork, full bleed. It is already dark on the left, which is where
-    // the type sits, so it needs no scrim over it.
-    {
-      type: 'img',
-      key: null,
-      props: {
-        src: art,
-        width: OG_WIDTH,
-        height: OG_HEIGHT,
-        style: { position: 'absolute', top: 0, left: 0, objectFit: 'cover' },
-      },
-    } as Node,
+    GROUND,
+    artwork(art),
     // Positioned as well, so it paints over the artwork. CSS paints positioned
     // boxes after the boxes in normal flow, whatever their order in the tree,
     // and the artwork above is positioned. Satori 0.41 and older painted in
@@ -783,9 +819,5 @@ export async function generateOgImage(card: OgCard): Promise<Buffer> {
     ),
   );
 
-  const svg = await satori(tree as never, { width: OG_WIDTH, height: OG_HEIGHT, fonts });
-
-  // JPEG, not PNG: the cards carry photographic artwork, so a lossless encode
-  // costs several times the bytes for a difference no scraper will ever show.
-  return sharp(Buffer.from(svg)).jpeg({ quality: 88, progressive: true }).toBuffer();
+  return render(tree, fonts);
 }

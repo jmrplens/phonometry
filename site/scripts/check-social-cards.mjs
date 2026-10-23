@@ -26,26 +26,39 @@
 // Each artwork brightens at a different x, and src/lib/og-areas.mjs keeps, per
 // artwork, the title column that stops short of it (TITLE_COLUMN). Past the
 // end of that column a card should hold its artwork and nothing else. What the
-// artwork looks like there is read from the cards themselves: all the cards of
-// one artwork share it, and their titles end at different places, so pixel by
-// pixel the darkest of them is the drawing. Every page has its Spanish twin
-// (check-i18n-parity.mjs), so every artwork is on two cards at least; one on
-// a single card stops the check rather than passing unchecked. A pixel of a
-// card counts as title when its luminance is closer to the title's than to
-// that drawing's, which is a pixel at least half covered by the title's ink. A
-// straight stem 1 px past the limit puts a whole column of them there, and a
-// round ending, the bowl of an "s" or a closing bracket, five to fourteen. An
-// ending that reaches the limit at a point, the tail of an "l" or the arm of a
-// "y" or an "x", puts one or two, and that is where the check is thinnest: the
-// title of every card there is today, moved 1 px past its limit, fails it,
-// some by a single pixel, and any ending less than 1 px past the limit can
-// pass.
+// artwork looks like there comes from the card's own code: generateBareArtwork
+// in src/utils/og-image.ts draws the artwork with nothing over it, placed and
+// encoded as on every card, and the postbuild's re-encode follows, from the
+// code the postbuild runs (scripts/shared/recompress.mjs). The drawing was
+// once read from the cards themselves, pixel by pixel the darkest of the
+// cards of one artwork, and that kept whatever title ink they all shared: an
+// artwork left with two cards whose titles crossed the limit at the same place
+// could pass. A pixel of a card counts as title when its luminance is closer to
+// the title's than to that drawing's, which is a pixel at least half covered
+// by the title's ink. A straight stem 1 px past the limit puts a whole column
+// of them there, and a round ending, the bowl of an "s" or a closing bracket,
+// five to fourteen. An ending that reaches the limit at a point, the tail of
+// an "l" or the arm of a "y" or an "x", puts one or two, and that is where the
+// check is thinnest: the title of every card there is today, moved 1 px past
+// its limit, fails it, some by a single pixel, and any ending less than 1 px
+// past the limit can pass.
 //
-// The postbuild re-encodes every card with mozjpeg at quality 82. Two points
-// of the wave-simulation drawing's grid, at (778, 242) and (807, 255), are a
-// bright cyan in the drawing and come out of that encode at a luminance of 237
-// to 245, against the title's 247, by an amount that varies from card to
-// card. That artwork, and only that one, is allowed two pixels.
+// The postbuild re-encodes every card with mozjpeg at quality 82, and the
+// encode of each block of a card depends on the rest of the card, so no card
+// is the bare drawing pixel for pixel past its limit. None comes near the
+// midpoint either: on the 457 cards, and on every page's title set on each of
+// the ten artworks, 4570 cards, the closest a pixel comes is 0.8 of a level.
+// That is at (778, 242), a point of the wave-simulation drawing's grid in a
+// bright cyan that comes out at a luminance of 245.2 on every card of that
+// drawing, 467 of them, and bare alike, against the title's 246.9. The grid's
+// other bright point, (807, 255), comes out at 236.7 or 238.5 depending on the
+// card and at 236.7 bare, 3.3 levels short of its midpoint at the brighter. So
+// no artwork is allowed a pixel past its limit.
+//
+// Every page but the API reference has its Spanish twin
+// (check-i18n-parity.mjs), so every artwork of TITLE_COLUMN is on two cards at
+// least. One on fewer, or on none, has lost cards on the way from the sidebar
+// to the card endpoint, and stops the check.
 //
 // Where each column ends comes from where its artwork brightens, measured by
 // hand (BRIGHT_FROM in og-areas.mjs), so the check above alone would let a
@@ -77,14 +90,23 @@ import {
   TITLE_COLUMN,
   TITLE_COLUMN_START,
 } from '../src/lib/og-areas.mjs';
+import { recompress } from './shared/recompress.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
+const SITE = join(here, '..');
 // The artwork masters, which the cards draw from (src/utils/og-image.ts).
-const ART = join(here, '..', '..', '.github', 'brand', 'art');
+const ART = join(SITE, '..', '.github', 'brand', 'art');
 // An explicit directory is for reproducing a defect against a build kept aside;
 // with none, the check reads the build that is there.
-const DIST = process.argv[2] ? resolve(process.argv[2]) : join(here, '..', 'dist');
+const DIST = process.argv[2] ? resolve(process.argv[2]) : join(SITE, 'dist');
 const OG = join(DIST, 'og');
+
+// The card's own code draws each artwork bare, below. It finds the brand
+// assets from the working directory, which is the site root for `pnpm run`;
+// this makes it so for a direct `node site/scripts/...` too, once the
+// directory above is resolved. Node strips the module's types itself.
+process.chdir(SITE);
+const { generateBareArtwork } = await import('../src/utils/og-image.ts');
 
 // The geometry of src/utils/og-image.ts: 72 px of side padding, 60 px at the
 // top, the mark 84 px square in the top left corner and the title in the
@@ -102,10 +124,6 @@ const MIN_MARK = 400;
 const MIN_TITLE = 300;
 // The title's colour, #f2f8fa, as a luminance on the 0-255 scale of the card.
 const TITLE_LUMA = luma(0xf2, 0xf8, 0xfa);
-// Title pixels allowed past the limit, per artwork: none, except the few the
-// re-encode can make of the two grid points of the wave-simulation drawing.
-// None of its cards uses them today.
-const PAST_LIMIT_ALLOWANCE = { simulation: 2 };
 // The rows a title can occupy, over which og-areas.mjs measures where each
 // artwork brightens. The titles' ink spans y 281 to 418 on every card.
 const TITLE_ROWS = { y0: 230, y1: 471 };
@@ -235,43 +253,33 @@ for (const file of files) {
 }
 
 /**
- * The cards grouped by a key.
- * @param {typeof cards} list - Cards.
- * @param {(card: (typeof cards)[number]) => string} key - Grouping key.
+ * The luminance of an artwork past `limit`, in the title's box, as a card
+ * shows it with nothing over it: drawn by the card's code, then put through
+ * the postbuild's re-encode as every card is.
+ * @param {string} art - Artwork key.
+ * @param {number} limit - The first column past the artwork's title column.
  */
-function groupBy(list, key) {
-  const groups = new Map();
-  for (const card of list) {
-    const k = key(card);
-    if (!groups.has(k)) groups.set(k, []);
-    groups.get(k).push(card);
-  }
-  return groups;
+async function bareDrawing(art, limit) {
+  const jpeg = await recompress(await generateBareArtwork(art), '.jpg');
+  const { data, info } = await sharp(jpeg).raw().toBuffer({ resolveWithObject: true });
+  return lumaIn(data, info, { ...TITLE, x0: limit });
 }
 
 const crossed = [];
-const alone = [];
-for (const [art, group] of groupBy(cards, (c) => c.art)) {
+const missing = [];
+for (const [art, width] of Object.entries(TITLE_COLUMN)) {
+  const group = cards.filter((card) => card.art === art);
   if (group.length < 2) {
-    alone.push(`  ${art}: only ${group[0].name}`);
-    continue;
+    missing.push(`  ${art}: ${group.length === 0 ? 'no card' : `only ${group[0].name}`}`);
   }
-  // The drawing past the limit, pixel by pixel the darkest of its cards.
-  const drawing = Float32Array.from(group[0].past);
-  for (const card of group) {
-    for (let p = 0; p < drawing.length; p++) drawing[p] = Math.min(drawing[p], card.past[p]);
-  }
-  const allowance = PAST_LIMIT_ALLOWANCE[art] ?? 0;
+  if (group.length === 0) continue;
+  const drawing = await bareDrawing(art, TITLE_COLUMN_START + width);
   for (const card of group) {
     let n = 0;
     for (let p = 0; p < drawing.length; p++) {
       if (card.past[p] > (TITLE_LUMA + drawing[p]) / 2) n++;
     }
-    if (n > allowance) {
-      crossed.push(
-        `  ${card.name}: ${n} px of title past x = ${card.limit} (allowance ${allowance})`,
-      );
-    }
+    if (n > 0) crossed.push(`  ${card.name}: ${n} px of title past x = ${card.limit}`);
   }
 }
 
@@ -351,13 +359,14 @@ if (glaring.length > 0) {
       glaring.join('\n'),
   );
 }
-if (alone.length > 0) {
+if (missing.length > 0) {
   console.error(
-    'Artworks on a single card, so the check cannot tell the drawing from a title there:\n' +
-      alone.join('\n'),
+    'Artworks on fewer than two cards, where every page but the API reference has one in ' +
+      'each language (src/pages/og/[...slug].jpg.ts, artKeyFor in src/lib/og-areas.mjs):\n' +
+      missing.join('\n'),
   );
 }
-const failed = [lost, crossed, strayed, alone, glaring].some((list) => list.length > 0);
+const failed = [lost, crossed, strayed, missing, glaring].some((list) => list.length > 0);
 if (failed) {
   process.exit(1);
 }

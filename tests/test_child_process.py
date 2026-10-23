@@ -160,13 +160,8 @@ _RUNNERS = frozenset({"run", "call", "check_call", "check_output"})
 #: an event's ``wait``, a future's ``result``, a lock's ``acquire``.
 _WAITS = frozenset({"join", "wait", "result", "acquire"})
 #: Waits with no bound, keyed by ``"path::function"``, each with its reason.
-_UNBOUNDED = {
-    "tests/simulation/fake_ssh.py::main": (
-        "the stand-in for ssh runs as its own process and waits for the "
-        "command it ran as ssh does; the client under test bounds the wait "
-        "and kills the stand-in"
-    ),
-}
+#: None has one today.
+_UNBOUNDED: dict[str, str] = {}
 
 
 def _forever(limit: ast.expr | None) -> bool:

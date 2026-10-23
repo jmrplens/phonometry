@@ -3,13 +3,15 @@
 
 The node is this machine: a Python node whose interpreter is the one running
 the tests, reached through ``fake_ssh.py``, which runs the remote command
-here as a shell would split it. The rest of the conversation is real: the
-bootstrap sent inline, the package shipped into a cache of the module's own,
-the job carrying the run, the arrays and the warnings. It runs on Linux,
-macOS and Windows; on Windows the stand-in enters through the module's hook,
-since a batch file on PATH cannot carry the remote command intact. Every run
-on the node is bounded by the hosts file's timeout, so a node that stops
-answering fails its test instead of holding the suite.
+here as a shell would split it and relays its streams as ssh does. The rest
+of the conversation is real: the bootstrap sent inline, the package shipped
+into a cache of the module's own, the job carrying the run, the arrays and
+the warnings. It runs on Linux, macOS and Windows; on Windows the stand-in
+enters through the module's hook, since a batch file on PATH cannot carry
+the remote command intact. Every run on the node is bounded by the hosts
+file's timeout: the client kills the stand-in, which closes the pipes it
+reads and the node's input with them, so a node that stops answering fails
+its test instead of holding the suite.
 """
 
 from __future__ import annotations
@@ -473,6 +475,32 @@ def test_a_node_that_never_answers_is_stopped_at_the_timeout(
     with pytest.raises(ComputeRemoteError, match="did not finish within 2 s"):
         fdtd_simulation(run, compute=request)
     assert time.monotonic() - started < 30.0
+
+
+def test_a_run_still_going_at_the_timeout_is_stopped_there_and_the_node_with_it(
+    node: str, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """The timeout ends the conversation, not only ssh: the client stops waiting, and the node stops.
+
+    Killing ssh closes the pipes the client reads, and the node's input
+    with them, as a connection that goes down does.
+    """
+    pidfile = tmp_path / "node.pid"
+    monkeypatch.setenv("FAKE_SSH_PIDFILE", str(pidfile))
+    # Thirty seconds of sound on the grid take minutes to compute.
+    run, request = _small(duration=30.0), Compute(host=node, timeout_s=2.0)
+    started = time.monotonic()
+    with pytest.raises(ComputeRemoteError, match="did not finish within 2 s"):
+        fdtd_simulation(run, compute=request)
+    elapsed = time.monotonic() - started
+    assert elapsed < 30.0, f"the run came back {elapsed:.0f} s after it began"
+    if os.name == "posix":
+        assert _written(pidfile), "the stand-in for ssh never started the node"
+        pid = int(pidfile.read_text(encoding="utf-8"))
+        deadline = time.monotonic() + 30.0
+        while _alive(pid) and time.monotonic() < deadline:
+            time.sleep(0.1)
+        assert not _alive(pid), "the node went on after its client was gone"
 
 
 def test_a_package_that_arrives_changed_is_refused(

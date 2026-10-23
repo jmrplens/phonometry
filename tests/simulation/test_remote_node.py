@@ -63,8 +63,10 @@ _WATCHER = "phonometry-node-input"
 #: milliseconds once its input does.
 _THREAD_S = 30.0
 #: How long a node in a process of its own may take, from the package it is
-#: sent to its exit [s]: at most 4 s on a Windows runner, the slowest in CI.
-_NODE_S = 120.0
+#: sent to its exit [s]. On a Windows runner, the slowest in CI, it takes 2 s
+#: to 3.5 s, and took 31 s once, on Python 3.14: more than ten times that,
+#: and short of the fifteen minutes pytest gives the test.
+_NODE_S = 360.0
 
 
 def _job(

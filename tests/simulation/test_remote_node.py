@@ -14,7 +14,7 @@ import threading
 import time
 import warnings
 from types import MappingProxyType, SimpleNamespace
-from typing import TYPE_CHECKING, Any
+from typing import IO, TYPE_CHECKING, Any
 
 import numpy as np
 import pytest
@@ -40,7 +40,7 @@ from phonometry.simulation._remote.package import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
     from pathlib import Path
 
 _CPU = {"device": "cpu", "device_index": 0, "dtype": "float64"}
@@ -95,33 +95,56 @@ def _frames(data: bytes) -> list[tuple[dict[str, object], list[bytes]]]:
     return frames
 
 
+@contextlib.contextmanager
+def _closed_quietly(file: IO[bytes]) -> Iterator[IO[bytes]]:
+    """*file*, closed on the way out even when the flush of what it holds fails."""
+    try:
+        yield file
+    finally:
+        with contextlib.suppress(OSError):
+            file.close()
+
+
 def _serve(
-    job: bytes, *, end_input_after_s: float | None = None
+    job: bytes,
+    *,
+    end_input_after_s: float | None = None,
+    client_s: float = _THREAD_S,
 ) -> tuple[int, list[tuple[dict[str, object], list[bytes]]]]:
     """Serve *job* in this process, the input open as a client keeps it.
 
     The input stays open until the node answers, as a client's does, or ends
     after *end_input_after_s* seconds, as when a client goes away. The
     threads the client and the node start here have ended when it returns.
+    The client has *client_s* seconds to send the job once the node is done.
+
+    The client's end of the input is closed after the node's: a client still
+    blocked writing a job the node stopped reading holds its file's lock, and
+    closing that file first would wait for the write. With the node's end
+    closed, the write fails, as it does when a connection drops.
     """
     read_end, write_end = os.pipe()
     out = io.BytesIO()
     before = set(threading.enumerate())
-    with os.fdopen(read_end, "rb") as stream, os.fdopen(write_end, "wb") as feed:
+    with (
+        _closed_quietly(os.fdopen(write_end, "wb")) as feed,
+        os.fdopen(read_end, "rb") as stream,
+    ):
 
         def client() -> None:
-            feed.write(job)
-            feed.flush()
-            if end_input_after_s is not None:
-                time.sleep(end_input_after_s)
-                feed.close()
+            with contextlib.suppress(OSError):
+                feed.write(job)
+                feed.flush()
+                if end_input_after_s is not None:
+                    time.sleep(end_input_after_s)
+                    feed.close()
 
         sender = threading.Thread(target=client, daemon=True)
         sender.start()
         try:
             code = node.serve(stream, out)
         finally:
-            sender.join(_THREAD_S)
+            sender.join(client_s)
         assert not sender.is_alive(), "the client never finished sending the job"
     # Both ends are closed, so the input has ended: the node's watcher ends
     # with it, and none outlives the test that started it.
@@ -253,6 +276,21 @@ def test_a_job_naming_another_function_is_refused() -> None:
     )
     with pytest.raises(bootstrap.Refused, match="the node runs"):
         _serve(job)
+
+
+def test_a_job_the_node_stops_reading_ends_the_helper_with_the_node_s_refusal() -> None:
+    """The client of :func:`_serve` blocked writing the rest of a refused job holds nothing.
+
+    The node refuses a frame by its first bytes and reads no further; the
+    client is left writing far more than a pipe holds, and :func:`_serve`
+    comes back once its time for the client is up, with the refusal.
+    """
+    job = b"NOPE" + bytes(4 << 20)
+    started = time.monotonic()
+    with pytest.raises(bootstrap.FrameError, match="does not start a frame"):
+        _serve(job, client_s=1.0)
+    elapsed = time.monotonic() - started
+    assert elapsed < _THREAD_S, f"the helper came back after {elapsed:.0f} s"
 
 
 def _raw_job(

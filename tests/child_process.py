@@ -46,12 +46,16 @@ def run(
     *options* are those of :class:`subprocess.Popen` (``text``, ``cwd``,
     ``env``).
 
+    :raises TypeError: for a *timeout* of ``None``, which sets no limit.
     :raises subprocess.TimeoutExpired: once the program has run *timeout*
         seconds; it has been killed, and the processes it started may still
         hold its output.
     :raises subprocess.CalledProcessError: with *check*, for a status other
         than 0.
     """
+    if timeout is None:
+        msg = "child_process.run takes a limit in seconds, not None"
+        raise TypeError(msg)
     if capture_output:
         options["stdout"] = options["stderr"] = subprocess.PIPE
     process = subprocess.Popen(args, **options)  # nosec B603 - a test's own argument list

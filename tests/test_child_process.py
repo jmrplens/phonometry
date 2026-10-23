@@ -153,15 +153,22 @@ def test_a_child_process_that_outlives_its_limit_is_killed_and_fails_the_test() 
 # --------------------------------------------------------------------------
 # Every wait in the suite has a bound.
 
-#: The ``subprocess`` functions that wait for the program they start.
+#: The ``subprocess`` functions that wait for the program they start;
+#: :func:`child_process.run` is one of them too.
 _RUNNERS = frozenset({"run", "call", "check_call", "check_output"})
+#: The modules whose runners take a ``timeout``.
+_RUNNER_MODULES = frozenset({"subprocess", "child_process"})
 #: Methods that wait on another process or thread, and wait for good when
 #: called with no argument: a thread's or process's ``join``, a process's or
 #: an event's ``wait``, a future's ``result``, a lock's ``acquire``.
 _WAITS = frozenset({"join", "wait", "result", "acquire"})
 #: Waits with no bound, keyed by ``"path::function"``, each with its reason.
-#: None has one today.
-_UNBOUNDED: dict[str, str] = {}
+_UNBOUNDED = {
+    "tests/test_child_process.py::test_child_process_refuses_a_run_with_no_limit": (
+        "child_process.run refuses a limit of None before it starts anything, "
+        "and the test shows it"
+    ),
+}
 
 
 def _forever(limit: ast.expr | None) -> bool:
@@ -190,7 +197,8 @@ def _argument(call: ast.Call, name: str, position: int | None) -> ast.expr | Non
 def _unbounded(call: ast.Call, modules: frozenset[str]) -> str | None:
     """What *call* waits on with no bound, or ``None`` for a call that is bounded or waits on nothing.
 
-    *modules* are the names ``subprocess`` goes by in the file. A ``join``,
+    *modules* are the names ``subprocess`` and :mod:`child_process` go by
+    in the file. A ``join``,
     ``wait`` or ``result`` called with arguments other than a limit belongs
     to some other API (``str.join``, a builder's ``result``) and passes; one
     given ``None`` or ``-1`` for its limit waits for good, as one given
@@ -220,14 +228,20 @@ def _unbounded(call: ast.Call, modules: frozenset[str]) -> str | None:
 
 def _waits(path: Path) -> list[tuple[str, str]]:
     """Each wait in *path* with no bound, as ``("path::function", what)``."""
-    tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-    where = path.relative_to(_ROOT).as_posix()
+    return _waits_in(
+        path.read_text(encoding="utf-8"), path.relative_to(_ROOT).as_posix()
+    )
+
+
+def _waits_in(source: str, where: str) -> list[tuple[str, str]]:
+    """Each wait in the Python *source* of the file *where* with no bound."""
+    tree = ast.parse(source, filename=where)
     modules = frozenset(
         alias.asname or alias.name
         for node in ast.walk(tree)
         if isinstance(node, ast.Import)
         for alias in node.names
-        if alias.name == "subprocess"
+        if alias.name in _RUNNER_MODULES
     )
     found: list[tuple[str, str]] = []
 
@@ -237,10 +251,10 @@ def _waits(path: Path) -> list[tuple[str, str]]:
             inner = scope
             if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
                 inner = f"{scope}.{child.name}" if scope else child.name
-            if isinstance(child, ast.ImportFrom) and child.module == "subprocess":
+            if isinstance(child, ast.ImportFrom) and child.module in _RUNNER_MODULES:
                 names = {alias.name for alias in child.names} & _RUNNERS
                 found.extend(
-                    (key, f"subprocess.{name} imported bare") for name in names
+                    (key, f"{child.module}.{name} imported bare") for name in names
                 )
             if isinstance(child, ast.Call) and (what := _unbounded(child, modules)):
                 found.append((key, f"line {child.lineno}: {what}"))
@@ -267,13 +281,37 @@ def _waits(path: Path) -> list[tuple[str, str]]:
         "lock.acquire(True)",
         "lock.acquire(timeout=-1)",
         "subprocess.run(['git'], **options)",
+        "child_process.run(['git'], timeout=None)",
+        "cp.run(['git'])",
     ],
 )
 def test_a_wait_with_no_bound_is_found(source: str) -> None:
     (call,) = (
         node for node in ast.walk(ast.parse(source)) if isinstance(node, ast.Call)
     )
-    assert _unbounded(call, frozenset({"subprocess", "sp"}))
+    assert _unbounded(call, frozenset({"subprocess", "sp", "child_process", "cp"}))
+
+
+def test_a_runner_is_known_under_the_name_its_module_is_imported_as() -> None:
+    source = (
+        "import child_process as cp\n"
+        "import subprocess as sp\n"
+        "from child_process import run\n"
+        "def launch():\n"
+        "    cp.run(['git'], timeout=None)\n"
+        "    sp.check_output(['git'])\n"
+    )
+    found = sorted(what for _, what in _waits_in(source, "tests/example.py"))
+    assert found == [
+        "child_process.run imported bare",
+        "line 5: cp.run without a timeout",
+        "line 6: sp.check_output without a timeout",
+    ]
+
+
+def test_child_process_refuses_a_run_with_no_limit() -> None:
+    with pytest.raises(TypeError, match="not None"):
+        child_process.run([sys.executable, "-c", "pass"], timeout=None)  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize(

@@ -616,4 +616,4 @@ reader.join()  # waits as long as the thread does
 
 **Enforced by:** `tests/test_child_process.py::test_every_wait_in_the_suite_has_a_bound`, review
 
-**Exceptions.** `_UNBOUNDED` in `tests/test_child_process.py`, keyed `"path::function"` with its reason, for a wait that can have no bound of its own; none needs one today. Which program hands its pipes on, the scan cannot tell; review does.
+**Exceptions.** `_UNBOUNDED` in `tests/test_child_process.py`, keyed `"path::function"` with its reason: today only the test that shows `child_process.run` refusing a limit of `None`, which it does before it starts anything. Which program hands its pipes on, the scan cannot tell; review does.

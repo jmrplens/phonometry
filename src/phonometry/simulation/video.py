@@ -32,15 +32,15 @@ out once for the whole run, for the widest title it shows (the time of its
 last frame) and the labels of its axes and colour scale, so that no text
 leaves the frame and nothing moves from one frame to the next; the title is
 centred over the frame. Every text keeps its own size: a frame is at least
-479 by 239 pixels, the smallest in which every text, at its own size, stays
+479 by 245 pixels, the smallest in which every text, at its own size, stays
 clear of the frame's margin and covers no other, with the field still in
-view. An axis too short for the numbers matplotlib would write along it
-keeps fewer of them, never one over another: a tall grid's narrow field may
-show a single number under it. That holds for a run of up to ten seconds; a
-longer one writes more digits in its title's time, and needs a frame about
-10.6 pixels wider for each digit past four before the point in
-milliseconds: a narrower one is refused before the run starts, with the
-width it needs. The frames are drawn
+view, on every matplotlib version the library supports. An axis too short
+for the numbers matplotlib would write along it keeps fewer of them, never
+one over another: a tall grid's narrow field may show a single number under
+it. That holds for a run of up to ten seconds; a longer one writes more
+digits in its title's time, and needs a frame about 10.6 pixels wider for
+each digit past four before the point in milliseconds: a narrower one is
+refused before the run starts, with the width it needs. The frames are drawn
 once and then updated in place, under matplotlib's default style whatever
 the caller's settings say, so a video written here and one written on
 another machine look alike. One frame is drawn every
@@ -130,23 +130,25 @@ _DEFAULT_FPS: Final = 30.0
 _DPI: Final = 100.0
 
 #: The smallest frame, in pixels, a simulation video is drawn at: its width
-#: and its height. From 479 by 239 every text of a frame keeps the size
+#: and its height. From 479 by 245 every text of a frame keeps the size
 #: matplotlib's default style gives it and lies inside the frame, clear of
 #: the margin the layout keeps at its edges and over no other text, and the
 #: field shows at least 14 pixels on its narrow side: for both writers'
 #: fields, in English and Spanish, on grids from ten times wider than tall
 #: to ten times taller than wide, for a run of up to ten seconds (four digits
 #: before the point in milliseconds; a longer run needs a wider frame, see
-#: _DIGIT_WIDTH). Measured a pixel at a time over those frames: one pixel
-#: narrower, the widest title (the Spanish one of an elastic pressure field)
-#: reaches into the margin at the sides; one pixel lower, the longest colour
-#: bar label (the Spanish particle velocity's, under the tallest title, the
-#: one of v_y) reaches into it at the bottom. The numbers are those of the
-#: text matplotlib sets with the FreeType and the DejaVu Sans it bundles: a
-#: change to either moves them, and the tests of the floor go red until they
-#: are measured again.
+#: _DIGIT_WIDTH), with matplotlib 3.10 as with 3.11. Measured a pixel at a
+#: time over those frames with both: one pixel narrower, the widest title
+#: (the Spanish one of an elastic pressure field) reaches into the margin at
+#: the sides with either. The height is 3.10's, which sets every text in a
+#: box 2 to 6 pixels taller than 3.11 does (a title 23 to 25 pixels high,
+#: against 18 or 19): one pixel lower, a field ten times taller than wide is
+#: under 14 pixels wide there, where 3.11 holds every frame down to 239
+#: pixels. The numbers are those of the text each matplotlib sets with the
+#: FreeType and the DejaVu Sans it bundles: a change to either moves them,
+#: and the tests of the floor go red until they are measured again.
 _MIN_WIDTH: Final = 479
-_MIN_HEIGHT: Final = 239
+_MIN_HEIGHT: Final = 245
 
 #: The digits before the point of a title's time, in milliseconds, that a
 #: frame :data:`_MIN_WIDTH` wide holds.
@@ -184,7 +186,7 @@ _SIDE_BANDS: Final[Mapping[str, Callable[[int], tuple[slice, slice]]]] = (
 
 
 def _frame_pixels(size: object) -> tuple[int, int]:
-    """The frame's width and height, whole numbers of pixels, at least 479 by 239."""
+    """The frame's width and height, whole numbers of pixels, at least 479 by 245."""
     if not isinstance(size, (tuple, list)):
         msg = f"'size' must be a pair (width, height) in pixels, got {size!r}"
         raise TypeError(msg)
@@ -209,11 +211,12 @@ class AnimationFrame(RichDisplay):
 
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param size: ``(width, height)`` of a frame in pixels, at least 479 by
-        239, the smallest frame in which every text, at its own size, stays
-        clear of the frame's margin and the field still shows (default
-        ``(960, 540)``). That is for a run of up to ten seconds: a longer run
-        needs a wider frame for the time its last title writes, which the
-        writers ask for before the run starts.
+        245, the smallest frame in which every text, at its own size, stays
+        clear of the frame's margin and the field still shows, on every
+        matplotlib version the library supports (default ``(960, 540)``).
+        That is for a run of up to ten seconds: a longer run needs a wider
+        frame for the time its last title writes, which the writers ask for
+        before the run starts.
     :param color_limit: The value at either end of the colour scale, fixed
         for the whole video, in the unit of the field drawn: pascals for an
         acoustic run (:func:`write_fdtd_animation`), and for an elastic one
@@ -225,7 +228,7 @@ class AnimationFrame(RichDisplay):
         other than numbers, or a ``color_limit`` that is not one number.
     :raises ValueError: for a ``language`` other than ``"en"`` and ``"es"``,
         a ``size`` of more or fewer than two sides, with a side that is not
-        a whole number, or narrower than 479 or lower than 239 pixels, or a
+        a whole number, or narrower than 479 or lower than 245 pixels, or a
         ``color_limit`` that is not a positive finite number.
     """
 

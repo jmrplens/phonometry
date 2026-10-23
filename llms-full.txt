@@ -41286,12 +41286,13 @@ so a video written here and one written on a node look alike. A frame is laid
 out once for the whole run, for the widest title it will show and the labels
 of its axes and colour scale, so nothing moves from one frame to the next, and
 every text keeps its own size. The smallest frame in which every text, at its
-own size, stays clear of the frame's margin and the field still shows is
-479 by 239 pixels, and a smaller `size` raises `ValueError` when the record
-is built. That floor holds for a run whose last frame comes before ten
-seconds. A longer run writes more digits in its title's time, in
-milliseconds, so its floor is wider: the writer refuses a frame narrower than
-the run needs before the run starts, and its message gives the width.
+own size, stays clear of the frame's margin and the field still shows, with
+every matplotlib version the library supports, is 479 by 245 pixels, and a
+smaller `size` raises `ValueError` when the record is built. That floor holds
+for a run whose last frame comes before ten seconds. A longer run writes more
+digits in its title's time, in milliseconds, so its floor is wider: the writer
+refuses a frame narrower than the run needs before the run starts, and its
+message gives the width.
 
 The colour scale is fixed for the whole video.
 `AnimationFrame(color_limit=...)` gives it, in pascals, as the value at either
@@ -41300,12 +41301,17 @@ first pass finds, on the device the run steps on, the largest magnitude the
 field reaches outside the source cells, the injection lines of plane-wave
 sources and the absorbing layer, where the field is what the source or the
 sponge makes it rather than the wave the video shows, and the second pass
-draws with that limit. Only that one number comes to this machine from the
-first pass, which stores nothing. When the sources, their lines and the
-absorbing layer cover every cell a frame keeps, the writer raises `ValueError`
-before a single step; when the field stays zero there for the whole run, or is
-not finite, it raises it after the first pass, before the video's first frame
-is encoded. Each message asks for `AnimationFrame(color_limit=...)`.
+draws with that limit. That limit is set by the strongest cells left, which
+around a point source are the cells right beside it, so the default video of a
+point source can look faint once its wave spreads out: a smaller
+`AnimationFrame(color_limit=...)` brightens it, any cell beyond the limit
+taking the colour at the end of the scale. Only that one number comes to this
+machine from the first pass, which stores nothing. When the sources, their
+lines and the absorbing layer cover every cell a frame keeps, the writer
+raises `ValueError` before a single step; when the field stays zero there for
+the whole run, or is not finite, it raises it after the first pass, before the
+video's first frame is encoded. Each message asks for
+`AnimationFrame(color_limit=...)`.
 
 `simulation.write_elastic_fdtd_animation(path, run)` does the same for the
 `ElasticRun` that `elastic_fdtd_simulation` takes, and draws the field its
@@ -55112,7 +55118,7 @@ documents, one page per module.
 | `FDTDRun` | `dataclass` | **One acoustic FDTD simulation, every argument checked when it is built (frozen; `c`, `dx` and `duration` by position, the rest by name).**<br>• `c`: sound-speed map [m/s], `(ny, nx)` array or scalar with `shape`<br>• `dx`: grid spacing [m]<br>• `duration`: physical time to simulate [s]<br>• `sources`: `GaussianPulse` \| `CWSource` \| `SignalSource` \| `PlaneWaveSource` list, held as a tuple<br>• `recording`: `FDTDRecording` (probe cells, snapshot cadence and decimation; Default: None, the time axis only)<br>• `boundaries`: `"rigid"` (Default) \| `"absorbing"` \| per-side mapping (name or real impedance [Pa·s/m]), held read-only<br>• `obstacle_mask`: boolean `(ny, nx)` rigid-cell map / `rho` (Default: 1.2) / `cfl` (Default: 0.6) / `absorbing_layer_cells` (Default: 20)<br>• `damping`: scalar or `(ny, nx)` map [1/s] (Default: 0.0)<br>• a bad argument raises when the run is built, the grid, the sponge, the impedance edges, the sources and the probes on the grid included | `run = simulation.FDTDRun(343, 0.01, 0.02, shape=(200, 300), sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3e-4)], recording=simulation.FDTDRecording(probes=[(200, 100)]))` |
 | `fdtd_simulation` | `function` | **2D acoustic FDTD wave simulation (staggered grid, leapfrog).**<br>• `run`: the simulation, an `FDTDRun`<br>• `compute`: where the run steps, a `Compute` (Default: `use()`, then `PHONOMETRY_COMPUTE`, then NumPy in float64); with a `host`, the whole run goes to that node and comes back as this record | `res = simulation.fdtd_simulation(run)`<br><br>• `FDTDResult` |
 | `write_fdtd_animation` | `function` | **Step an acoustic FDTD run and write its pressure field to a video.**<br>• `path`: `.webm` / `.mp4` / `.gif`, as `io.write_video`<br>• `run`: an `FDTDRun`, checked when built; `run.recording.snapshot_every` (required) is the frame cadence, its `snapshot_decimation` the cells a frame keeps<br>• `compute`: where the run steps, a `Compute`; with a `host` the node computes, draws and encodes, and the checked bytes are written here<br>• `frame`: how each frame is drawn, an `AnimationFrame` (Default: None, 960 by 540 pixels, English, the colour limit found in a first pass outside the sources, the injection lines and the absorbing layer)<br>• `video`: how it is encoded, an `io.VideoOptions` (Default: None; 30 frames per second unless its `fps` says otherwise)<br>No snapshot is stored; argument, video and ffmpeg errors are raised before the first step | `res = simulation.write_fdtd_animation("pulse.webm", simulation.FDTDRun(343, 0.01, 0.02, shape=(200, 300), sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3e-4)], recording=simulation.FDTDRecording(snapshot_every=10)))`<br><br>• `FDTDResult` without snapshots |
-| `AnimationFrame` | `dataclass` | **How each frame of a simulation video is drawn (frozen, keyword-only), checked when built.**<br>• `language`: `"en"` (Default) \| `"es"`<br>• `size`: `(width, height)` in pixels, at least 479 by 239, the smallest frame in which every text, at its own size, stays clear of the frame's margin; a run of 10 s or more needs a wider one for the time of its last title, about 10.6 pixels a digit past four in ms, which the writers name before the run starts (Default: `(960, 540)`)<br>• `color_limit`: the fixed colour scale, in the unit of the field drawn: [Pa] for an acoustic run; for an elastic run [Pa] for `"p"`, [m/s] for `"vx"` and `"vy"` (Default: None, found in a first pass) | `simulation.AnimationFrame(language="es", size=(1280, 720), color_limit=0.5)` |
+| `AnimationFrame` | `dataclass` | **How each frame of a simulation video is drawn (frozen, keyword-only), checked when built.**<br>• `language`: `"en"` (Default) \| `"es"`<br>• `size`: `(width, height)` in pixels, at least 479 by 245, the smallest frame in which every text, at its own size, stays clear of the frame's margin with every supported matplotlib version; a run of 10 s or more needs a wider one for the time of its last title, about 10.6 pixels a digit past four in ms, which the writers name before the run starts (Default: `(960, 540)`)<br>• `color_limit`: the fixed colour scale, in the unit of the field drawn: [Pa] for an acoustic run; for an elastic run [Pa] for `"p"`, [m/s] for `"vx"` and `"vy"` (Default: None, found in a first pass) | `simulation.AnimationFrame(language="es", size=(1280, 720), color_limit=0.5)` |
 | `FDTDResult` | `dataclass` | **FDTD simulation result.**<br>• `times` [s] / `pressures` [Pa] per probe, float64 whatever the run's dtype / `probes` / `probe_positions` [m]<br>• `dx` / `dt` / `shape` / `size` [m] / `sources` / `snapshots` (the run's dtype, `(n_frames, ceil(ny / d), ceil(nx / d))`) / `snapshot_times` / `obstacle_mask`<br>• `snapshot_decimation`: the `d` of the snapshots / `provenance`: where the run stepped, a `RunProvenance`; both required when built by hand<br>• `.plot()`: probe histories; `.plot(kind="snapshot")`: pressure field | `res.pressures, res.times`<br>`res.plot()` |
 | `FDTDRecording` | `dataclass` | **What an acoustic FDTD run records.**<br>• `probes`: `(ix, iy)` pressure-probe cells (Default: none)<br>• `snapshot_every` steps (Default: None)<br>• `snapshot_decimation`: keep every d-th cell along each axis (Default: 1) | `FDTDRecording(probes=[(200, 100)], snapshot_every=50, snapshot_decimation=2)` |
 | `FDTD2D` | `class` | **FDTD stepping engine (frame-by-frame access).**<br>• `c` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `sponge_width` / `sponge_sides` / `sponge_reflection` / `damping`<br>• `edge_impedance`: per-side real impedance [Pa·s/m] / `obstacle_mask`<br>• `compute`: where the engine steps, a `Compute`; never a host: an engine steps in this process<br>• `kappa`: bulk modulus [Pa], a read-only host copy | `sim = simulation.FDTD2D(343, 0.01, shape=(200, 300))`<br>`sim.add_source(src); sim.step(); sim.run(400, snapshot_every=10, snapshot_decimation=4)`<br>• `sim.p` / `sim.vx` / `sim.vy` (the device's arrays) / `sim.dt` / `sim.time` / `sim.energy()`<br>• `sim.host_field("p")`: a NumPy copy of a field on any device / `sim.provenance`<br>• `sim.plot_geometry(probes=...)`: draw the configured domain before running<br>• `sim.add_plane_wave(direction, center=..., width=..., wavelength=...)`: one-way plane packet initial condition<br>• `sim.add_contour_probe(ix0, ix1, iy0, iy1, frequencies=...)`: on-the-fly `p`/`v_n` phasor capture on a closed contour |

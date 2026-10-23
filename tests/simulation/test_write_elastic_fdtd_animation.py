@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 _PULSE = GaussianPulse(ix=0, iy=0, half_width_s=4e-5)
-_SMALL = AnimationFrame(size=(480, 240))
+_SMALL = AnimationFrame(size=(480, 246))
 # Steps between two frames: a run of 1 or 2 ms (943 or 1886 steps) draws
 # 16 or 32 frames, and steps on after its last one.
 _EVERY = 60
@@ -85,7 +85,7 @@ def test_the_result_is_the_simulation_s_without_snapshots(
     res = write_elastic_fdtd_animation(
         tmp_path / "e.webm",
         run,
-        frame=AnimationFrame(size=(480, 240), color_limit=1e-6),
+        frame=AnimationFrame(size=(480, 246), color_limit=1e-6),
     )
     reference = elastic_fdtd_simulation(run)
     assert np.array_equal(res.signals, reference.signals)
@@ -123,7 +123,7 @@ def test_a_given_limit_steps_once_and_a_found_one_twice(
     write_elastic_fdtd_animation(
         tmp_path / "r.webm",
         _run(1e-3),
-        frame=AnimationFrame(size=(480, 240), color_limit=limit),
+        frame=AnimationFrame(size=(480, 246), color_limit=limit),
     )
     assert len(engines) == builds
 
@@ -232,7 +232,7 @@ def test_a_field_that_never_leaves_the_sources_has_nothing_to_scale_by(
                     sources=[ExplosionSource(ix=10, iy=10, waveform=_PULSE.value)],
                     recording=ElasticRecording(snapshot_every=1000),
                 ),
-                "frame": AnimationFrame(size=(489, 240), color_limit=1e-6),
+                "frame": AnimationFrame(size=(489, 246), color_limit=1e-6),
             },
             ValueError,
             r"at least 490 pixels wide",

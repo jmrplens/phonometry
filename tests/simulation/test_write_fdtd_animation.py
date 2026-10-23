@@ -52,8 +52,8 @@ if TYPE_CHECKING:
 
 _SOURCE = GaussianPulse(ix=20, iy=15, half_width_s=4e-5)
 _PROBES = [(5, 5), (35, 25)]
-_SMALL = AnimationFrame(size=(480, 240))
-_SMALL_FIXED = AnimationFrame(size=(480, 240), color_limit=1.0)
+_SMALL = AnimationFrame(size=(480, 246))
+_SMALL_FIXED = AnimationFrame(size=(480, 246), color_limit=1.0)
 # A run of 12 s on cells of 10 m: 970 steps, the last frame at 11.13 s.
 _LONG = FDTDRun(
     343.0,
@@ -98,7 +98,7 @@ def test_one_frame_every_snapshot_every_steps(
     steps = res.times.size - 1
     (encode,) = fake.encodes()
     assert encode["frames"] == steps // 10 + 1
-    assert encode["argv"][encode["argv"].index("-s") + 1] == "480x240"
+    assert encode["argv"][encode["argv"].index("-s") + 1] == "480x246"
     assert encode["argv"][encode["argv"].index("-r") + 1] == "30/1"
     assert target.read_bytes().startswith(b"\x1a\x45\xdf\xa3")
 
@@ -324,10 +324,10 @@ _ELASTIC = ElasticRun(
         ),
         ({"run": "a run"}, TypeError, "FDTDRun"),
         ({"run": _ELASTIC}, TypeError, "FDTDRun"),
-        ({"frame": (480, 240)}, TypeError, "frame"),
+        ({"frame": (480, 246)}, TypeError, "frame"),
         # The last frame at 11132.29 ms: five digits, whose title needs 490 pixels.
         (
-            {"run": _LONG, "frame": AnimationFrame(size=(489, 240), color_limit=1.0)},
+            {"run": _LONG, "frame": AnimationFrame(size=(489, 246), color_limit=1.0)},
             ValueError,
             r"at least 490 pixels wide",
         ),
@@ -376,8 +376,8 @@ def test_a_frame_too_narrow_for_a_long_run_is_asked_for_at_the_width_it_needs(
     [
         ({"size": (480,)}, ValueError, "size"),
         ({"size": "large"}, TypeError, "size"),
-        ({"size": (478, 239)}, ValueError, "at least 479 by 239"),
-        ({"size": (480.5, 240)}, ValueError, "size"),
+        ({"size": (479, 244)}, ValueError, "at least 479 by 245"),
+        ({"size": (480.5, 246)}, ValueError, "size"),
         ({"color_limit": -1.0}, ValueError, "color_limit"),
         ({"color_limit": float("nan")}, ValueError, "color_limit"),
         ({"color_limit": "1"}, TypeError, "color_limit"),
@@ -397,7 +397,7 @@ def test_a_frame_holds_what_it_was_given() -> None:
     assert frame.size == (640, 480)
     assert frame.color_limit == 2.0
     with pytest.raises(AttributeError, match="size"):
-        frame.size = (480, 240)  # type: ignore[misc]
+        frame.size = (480, 246)  # type: ignore[misc]
 
 
 def test_a_missing_ffmpeg_is_found_out_before_a_step(
@@ -461,7 +461,7 @@ def test_a_failed_encode_closes_the_march(
             closed.append(True)
 
     request = video_request(tmp_path / "c.webm", VideoOptions(encoder="cpu"))
-    frame = AnimationFrame(size=(480, 240))
+    frame = AnimationFrame(size=(480, 246))
     encoding = video_module._preflight(request, frame.size)
     march = frames()
     backend = bk.backend_for(Compute())
@@ -502,7 +502,7 @@ def test_a_drawing_that_fails_closes_the_march(
     monkeypatch.setattr(plot, "_update_snapshot", broken)
     target = tmp_path / "f.webm"
     request = video_request(target, VideoOptions(encoder="cpu"))
-    frame = AnimationFrame(size=(480, 240))
+    frame = AnimationFrame(size=(480, 246))
     encoding = video_module._preflight(request, frame.size)
     march = frames()
     backend = bk.backend_for(Compute())
@@ -582,7 +582,7 @@ def test_the_frames_speak_spanish(
     write_fdtd_animation(
         tmp_path / "es.webm",
         _run(1e-3),
-        frame=AnimationFrame(language="es", size=(480, 240), color_limit=1.0),
+        frame=AnimationFrame(language="es", size=(480, 246), color_limit=1.0),
     )
     assert titles
     assert all(t.startswith("Campo de presión FDTD en $t$ =") for t in titles)
@@ -628,5 +628,5 @@ def test_a_real_video_has_every_frame(tmp_path: Path) -> None:
         check=True,
     ).stdout
     probe = dict(line.split("=", 1) for line in shown.splitlines())
-    assert (probe["width"], probe["height"]) == ("480", "240")
+    assert (probe["width"], probe["height"]) == ("480", "246")
     assert int(probe["nb_read_frames"]) == (res.times.size - 1) // 10 + 1

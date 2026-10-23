@@ -289,12 +289,13 @@ so a video written here and one written on a node look alike. A frame is laid
 out once for the whole run, for the widest title it will show and the labels
 of its axes and colour scale, so nothing moves from one frame to the next, and
 every text keeps its own size. The smallest frame in which every text, at its
-own size, stays clear of the frame's margin and the field still shows is
-479 by 239 pixels, and a smaller `size` raises `ValueError` when the record
-is built. That floor holds for a run whose last frame comes before ten
-seconds. A longer run writes more digits in its title's time, in
-milliseconds, so its floor is wider: the writer refuses a frame narrower than
-the run needs before the run starts, and its message gives the width.
+own size, stays clear of the frame's margin and the field still shows, with
+every matplotlib version the library supports, is 479 by 245 pixels, and a
+smaller `size` raises `ValueError` when the record is built. That floor holds
+for a run whose last frame comes before ten seconds. A longer run writes more
+digits in its title's time, in milliseconds, so its floor is wider: the writer
+refuses a frame narrower than the run needs before the run starts, and its
+message gives the width.
 
 The colour scale is fixed for the whole video.
 `AnimationFrame(color_limit=...)` gives it, in pascals, as the value at either
@@ -303,12 +304,17 @@ first pass finds, on the device the run steps on, the largest magnitude the
 field reaches outside the source cells, the injection lines of plane-wave
 sources and the absorbing layer, where the field is what the source or the
 sponge makes it rather than the wave the video shows, and the second pass
-draws with that limit. Only that one number comes to this machine from the
-first pass, which stores nothing. When the sources, their lines and the
-absorbing layer cover every cell a frame keeps, the writer raises `ValueError`
-before a single step; when the field stays zero there for the whole run, or is
-not finite, it raises it after the first pass, before the video's first frame
-is encoded. Each message asks for `AnimationFrame(color_limit=...)`.
+draws with that limit. That limit is set by the strongest cells left, which
+around a point source are the cells right beside it, so the default video of a
+point source can look faint once its wave spreads out: a smaller
+`AnimationFrame(color_limit=...)` brightens it, any cell beyond the limit
+taking the colour at the end of the scale. Only that one number comes to this
+machine from the first pass, which stores nothing. When the sources, their
+lines and the absorbing layer cover every cell a frame keeps, the writer
+raises `ValueError` before a single step; when the field stays zero there for
+the whole run, or is not finite, it raises it after the first pass, before the
+video's first frame is encoded. Each message asks for
+`AnimationFrame(color_limit=...)`.
 
 `simulation.write_elastic_fdtd_animation(path, run)` does the same for the
 `ElasticRun` that `elastic_fdtd_simulation` takes, and draws the field its

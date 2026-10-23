@@ -80,7 +80,7 @@ _ELASTIC = ElasticRun(
     sources=[_EXPLOSION],
     recording=ElasticRecording(probes=[(4, 4)], snapshot_every=5),
 )
-_FRAME = AnimationFrame(size=(480, 240), color_limit=1.0)
+_FRAME = AnimationFrame(size=(480, 246), color_limit=1.0)
 
 
 def _partials(directory: Path) -> list[str]:
@@ -113,7 +113,7 @@ def test_an_elastic_video_on_a_node(
         target,
         _ELASTIC,
         compute=Compute(host=node),
-        frame=AnimationFrame(size=(480, 240), color_limit=1e-6),
+        frame=AnimationFrame(size=(480, 246), color_limit=1e-6),
     )
     assert np.array_equal(res.signals, elastic_fdtd_simulation(_ELASTIC).signals)
     assert res.provenance.host == node
@@ -140,7 +140,7 @@ def test_a_client_without_ffmpeg_writes_on_a_node(
         (
             write_elastic_fdtd_animation,
             _ELASTIC,
-            AnimationFrame(size=(480, 240), color_limit=1e-6),
+            AnimationFrame(size=(480, 246), color_limit=1e-6),
             "argument",
         ),
     ],
@@ -204,7 +204,7 @@ def test_the_ffmpeg_here_is_never_run_on_the_remote_route(
             "run.recording.snapshot_every",
         ),
         ({"run": _ELASTIC}, TypeError, "FDTDRun"),
-        ({"frame": (480, 240)}, TypeError, "frame"),
+        ({"frame": (480, 246)}, TypeError, "frame"),
         # The last frame at 11132.29 ms: five digits, whose title needs 490 pixels.
         (
             {
@@ -216,7 +216,7 @@ def test_the_ffmpeg_here_is_never_run_on_the_remote_route(
                     sources=[_SOURCE],
                     recording=FDTDRecording(snapshot_every=900),
                 ),
-                "frame": AnimationFrame(size=(489, 240), color_limit=1.0),
+                "frame": AnimationFrame(size=(489, 246), color_limit=1.0),
             },
             ValueError,
             r"at least 490 pixels wide",
@@ -263,7 +263,7 @@ def test_a_waveform_that_cannot_travel_is_refused_before_ssh_starts(
         recording=ElasticRecording(snapshot_every=5),
     )
     request = Compute(host=node)
-    frame = AnimationFrame(size=(480, 240), color_limit=1e-6)
+    frame = AnimationFrame(size=(480, 246), color_limit=1e-6)
     with pytest.raises(
         TypeError, match=r"sources\[0\]\.waveform cannot travel to a node"
     ):

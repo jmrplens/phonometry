@@ -1,9 +1,10 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """A simulation video's frame is laid out once for its whole run, and no text of it leaves the frame.
 
-A frame is at least 479 by 239 pixels: the smallest in which every text keeps
+A frame is at least 479 by 245 pixels: the smallest in which every text keeps
 its own size inside the frame's margin, over no other text, and the field
-still shows; a smaller one is refused when the record is built.
+still shows, with matplotlib 3.10 as with 3.11; a smaller one is refused when
+the record is built.
 """
 
 from __future__ import annotations
@@ -14,7 +15,7 @@ import io
 import itertools
 import math
 import warnings
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 import numpy as np
 import pytest
@@ -54,7 +55,7 @@ _LAST_S = 9.99999
 #: again at every draw, put the y label out.
 _SIZES = (
     (960, 540),
-    (480, 240),
+    (480, 246),
     (640, 360),
     (1280, 720),
     (720, 720),
@@ -278,7 +279,7 @@ def test_the_layout_is_made_once_for_the_widest_title() -> None:
 @pytest.mark.parametrize("language", ["en", "es"])
 @pytest.mark.parametrize("kind", ["elastic vx", "elastic vy"])
 @pytest.mark.parametrize("width", [479, 960])
-@pytest.mark.parametrize("height", [239, 250, 260])
+@pytest.mark.parametrize("height", [245, 250, 260])
 def test_the_colour_bar_s_label_stays_under_the_title(
     drawn: list[_Drawn], height: int, width: int, kind: str, language: Language
 ) -> None:
@@ -308,7 +309,7 @@ def test_the_colour_bar_s_label_stays_under_the_title(
 #: decimals touch, and every second is kept; an axis with room for its
 #: labels keeps them all.
 _THINNED: dict[str, tuple[tuple[int, int], str, str, Language, list[str]]] = {
-    "the first alone": ((479, 239), "elastic p", "10:1", "en", ["0"]),
+    "the first alone": ((479, 245), "elastic p", "10:1", "en", ["0"]),
     "every second": (
         (960, 630),
         "elastic vx",
@@ -316,7 +317,7 @@ _THINNED: dict[str, tuple[tuple[int, int], str, str, Language, list[str]]] = {
         "es",
         ["0,000", "0,005", "0,010"],
     ),
-    "all of them": ((479, 239), "acoustic", "10:1", "en", ["0", "5"]),
+    "all of them": ((479, 245), "acoustic", "10:1", "en", ["0", "5"]),
 }
 
 
@@ -367,7 +368,7 @@ def test_the_widest_time_texts_have_every_digit_the_last_one_has() -> None:
 
 
 #: The smallest frame a simulation video is drawn at, in pixels.
-_FLOOR = (479, 239)
+_FLOOR = (479, 245)
 
 #: The margin, in pixels, the layout keeps between the frame's edges and
 #: every text: the pad of matplotlib's points at the frame's dots per inch.
@@ -455,7 +456,7 @@ def _defects(
 def test_at_the_floor_every_text_keeps_its_size_inside_the_frame_and_the_field_shows(
     drawn: list[_Drawn], kind: str, language: Language
 ) -> None:
-    """479 x 239, on grids from ten times wider than tall to ten times taller, light and dark.
+    """479 x 245, on grids from ten times wider than tall to ten times taller, light and dark.
 
     The first frame, one halfway and the last, whose time has the most
     digits a run of up to ten seconds shows, drawn as the writer draws
@@ -490,63 +491,121 @@ def test_at_the_floor_every_text_keeps_its_size_inside_the_frame_and_the_field_s
         assert dark == light, f"{kind} {language} grid {grid}"
 
 
-#: One pixel narrower than the floor, and one pixel lower, with the field
-#: whose frames show what the floor keeps out there, and what they show: the
-#: widest title, the Spanish one of the elastic pressure field at its last
-#: time, at the sides; the longest colour bar label, the Spanish particle
-#: velocity's under the tallest title, the one of v_y, at the bottom.
-_UNDER_THE_FLOOR = {
-    "one narrower": (
-        (478, 239),
-        "elastic p",
-        {"in the margin": {"Campo de presión del FDTD elástico en $t$ = 9999,99 ms"}},
+class _Measured(NamedTuple):
+    """What one matplotlib line was measured to need, a pixel at a time."""
+
+    #: The lowest frame, at the floor's width, whose frames are all clean.
+    height: int
+    #: The field whose frames, one pixel lower, show what the floor keeps
+    #: out (the other fields' show nothing), and the kind of what they show.
+    shown_by: str
+    shows: str
+    #: The width the widest title of each longer run needs.
+    widths: dict[str, int]
+
+
+#: What each matplotlib line needs. 3.10 sets every text in a box 2 to 6
+#: pixels taller than 3.11 does (a title 23 to 25 pixels high, against 18 or
+#: 19): one pixel under 245, a field ten times taller than wide, the Spanish
+#: v_x one, is under 14 pixels wide there, while 3.11 keeps every frame clean
+#: down to 239, under which the Spanish particle velocity's colour bar label,
+#: under the tallest title, the one of v_y, reaches into the margin at the
+#: bottom. The floor's height is the higher of the two. A title six digits
+#: long is a pixel narrower with 3.10, so there the width the writers ask for
+#: such a run has a pixel to spare.
+_MEASURED = {
+    (3, 10): _Measured(
+        245,
+        "elastic vx",
+        "a field that does not show",
+        {"five digits": 490, "six digits": 500},
     ),
-    "one lower": (
-        (479, 238),
+    (3, 11): _Measured(
+        239,
         "elastic vy",
-        {"in the margin": {"Velocidad de partícula [m/s]"}},
+        "in the margin",
+        {"five digits": 490, "six digits": 501},
     ),
 }
 
+#: What the matplotlib the tests run on needs. A line measured on neither is
+#: held to the newest one's numbers, so a change in how it sets text goes red
+#: here until it is measured.
+_HERE = _MEASURED.get(
+    (mpl.__version_info__.major, mpl.__version_info__.minor),
+    _MEASURED[max(_MEASURED)],
+)
 
-@pytest.mark.parametrize("kind", list(_FIELDS))
-@pytest.mark.parametrize("under", list(_UNDER_THE_FLOOR))
-def test_one_pixel_under_the_floor_a_text_at_its_own_size_reaches_the_margin(
-    drawn: list[_Drawn], under: str, kind: str
-) -> None:
-    """What the floor keeps out shows one pixel under it, on one side or the other.
 
-    Every text keeps its own size there too, so what shows is a text in the
-    margin the layout keeps at the frame's edges: the widest title one
-    pixel narrower, the longest colour bar label one pixel lower, while in
-    both languages' frames and on every grid the other fields show nothing.
-    No text covers another there, and the field still shows.
-    """
-    size, shown_by, shows = _UNDER_THE_FLOOR[under]
+def _shown(
+    drawn: list[_Drawn],
+    kind: str,
+    size: tuple[int, int],
+    last_s: float = _LAST_S,
+    languages: tuple[Language, ...] = _LANGUAGES,
+) -> dict[str, set[str]]:
+    """What the first and last frames of *kind* show of what the floor keeps out, on every grid."""
     found: dict[str, set[str]] = {}
-    for language, grid in itertools.product(_LANGUAGES, _GRIDS.values()):
+    for language, grid in itertools.product(languages, _GRIDS.values()):
         with contextlib.closing(
-            _frames(kind, size, grid, language, (0.0, _LAST_S))
+            _frames(kind, size, grid, language, (0.0, last_s))
         ) as frames:
             for figure in frames:
                 for what, texts in _defects(figure, drawn, size).items():
                     found.setdefault(what, set()).update(texts)
                 drawn.clear()
-    assert found == (shows if kind == shown_by else {})
+    return found
 
 
-@pytest.mark.parametrize("size", [(478, 239), (479, 238), (64, 64), (478, 1080)])
+@pytest.mark.parametrize("kind", list(_FIELDS))
+def test_one_pixel_narrower_than_the_floor_the_widest_title_reaches_the_margin(
+    drawn: list[_Drawn], kind: str
+) -> None:
+    """The Spanish title of the elastic pressure field at its last time, with 3.10 as with 3.11.
+
+    Every text keeps its own size there too, so what shows is a text in the
+    margin the layout keeps at the frame's edges, while in both languages'
+    frames and on every grid the other fields show nothing. No text covers
+    another there, and the field still shows.
+    """
+    title = "Campo de presión del FDTD elástico en $t$ = 9999,99 ms"
+    shows = {"in the margin": {title}} if kind == "elastic p" else {}
+    assert _shown(drawn, kind, (_FLOOR[0] - 1, _FLOOR[1])) == shows
+
+
+@pytest.mark.parametrize("kind", list(_FIELDS))
+def test_the_floor_is_as_low_as_the_matplotlib_with_the_tallest_text_allows(
+    drawn: list[_Drawn], kind: str
+) -> None:
+    """At the floor's width, the lowest clean frame on this matplotlib, and one pixel lower.
+
+    With 3.10 that frame is the floor itself, and one pixel lower a 10:1
+    field is under 14 pixels wide; 3.11 keeps every frame clean down to 239
+    pixels, one under which a colour bar label reaches into the margin.
+    Every text keeps its own size there too.
+    """
+    assert _FLOOR[1] == max(line.height for line in _MEASURED.values())
+    width = _FLOOR[0]
+    assert _shown(drawn, kind, (width, _HERE.height)) == {}
+    lower = _shown(drawn, kind, (width, _HERE.height - 1))
+    assert set(lower) == ({_HERE.shows} if kind == _HERE.shown_by else set())
+
+
+@pytest.mark.parametrize(
+    "size", [(478, 245), (479, 244), (479, 239), (64, 64), (478, 1080)]
+)
 def test_a_frame_under_the_floor_is_refused_naming_it(size: tuple[int, int]) -> None:
-    with pytest.raises(ValueError, match=r"at least 479 by 239 pixels"):
+    with pytest.raises(ValueError, match=r"at least 479 by 245 pixels"):
         AnimationFrame(size=size)
 
 
 def test_a_frame_at_the_floor_is_built() -> None:
-    assert AnimationFrame(size=(479, 239)).size == _FLOOR
+    assert AnimationFrame(size=(479, 245)).size == _FLOOR
 
 
 #: A run longer than ten seconds, by the digits before the point of its last
-#: frame's time in milliseconds: that time, and the width its title needs.
+#: frame's time in milliseconds: that time, and the width the writers ask for
+#: it, which its title needs with 3.11 (and a pixel less with 3.10, for six).
 _LONGER_RUNS = {
     "five digits": (99.99999, 490),
     "six digits": (999.99999, 501),
@@ -579,7 +638,7 @@ def test_a_longer_run_needs_a_frame_as_wide_as_its_last_title(
 def test_a_longer_run_at_the_width_it_needs_keeps_every_text_clear_of_the_margin(
     drawn: list[_Drawn], run: str, kind: str
 ) -> None:
-    """At the width the run's last title needs, by 239 pixels: what the floor holds, holds."""
+    """At the width the writers ask for the run, by 245 pixels: what the floor holds, holds."""
     last_s, width = _LONGER_RUNS[run]
     size = (width, _FLOOR[1])
     for language, grid in itertools.product(_LANGUAGES, _GRIDS.values()):
@@ -601,26 +660,25 @@ def test_a_longer_run_at_the_width_it_needs_keeps_every_text_clear_of_the_margin
 def test_one_pixel_narrower_than_a_longer_run_needs_is_refused_and_would_show(
     drawn: list[_Drawn], run: str
 ) -> None:
-    """The writers refuse it; drawn anyway, the widest title reaches into the margin."""
+    """The writers refuse it; one pixel under the width the title needs here, it shows.
+
+    The width the writers ask for is never less than the one the run's
+    widest title needs on this matplotlib, where that title clears the
+    margin, and one pixel narrower it reaches into it.
+    """
     last_s, width = _LONGER_RUNS[run]
-    size = (width - 1, _FLOOR[1])
-    narrower = AnimationFrame(size=size)
+    narrower = AnimationFrame(size=(width - 1, _FLOOR[1]))
     with pytest.raises(ValueError, match=rf"at least {width} pixels wide"):
         video_module._require_width(narrower, last_s)
     video_module._require_width(AnimationFrame(size=(width, _FLOOR[1])), last_s)
-    found: dict[str, set[str]] = {}
-    for grid in _GRIDS.values():
-        with contextlib.closing(
-            _frames("elastic p", size, grid, "es", (0.0, last_s))
-        ) as frames:
-            for figure in frames:
-                for what, texts in _defects(figure, drawn, size).items():
-                    found.setdefault(what, set()).update(texts)
-                drawn.clear()
+    needs = _HERE.widths[run]
+    assert needs <= width
     time_text = plot._time_text(last_s, "es")
-    assert found == {
-        "in the margin": {f"Campo de presión del FDTD elástico en $t$ = {time_text} ms"}
-    }
+    title = f"Campo de presión del FDTD elástico en $t$ = {time_text} ms"
+    spanish: tuple[Language, ...] = ("es",)
+    assert _shown(drawn, "elastic p", (needs, _FLOOR[1]), last_s, spanish) == {}
+    shown = _shown(drawn, "elastic p", (needs - 1, _FLOOR[1]), last_s, spanish)
+    assert shown == {"in the margin": {title}}
 
 
 #: A pad, and how far the labels of a field and of its colour bar reach, in

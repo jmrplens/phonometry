@@ -57,7 +57,7 @@ def test_a_node_s_video_and_result(tmp_path: Path) -> None:
         target,
         run,
         compute=Compute(host=_NODE),
-        frame=AnimationFrame(size=(480, 240)),
+        frame=AnimationFrame(size=(480, 246)),
         video=VideoOptions(encoder="cpu"),
     )
     local = fdtd_simulation(run)
@@ -86,5 +86,5 @@ def test_a_node_s_video_and_result(tmp_path: Path) -> None:
     probe = dict(line.split("=", 1) for line in shown.splitlines())
     # The node image's pinned ffmpeg carries SVT-AV1, so the CPU writes AV1.
     assert probe["codec_name"] == "av1"
-    assert (probe["width"], probe["height"]) == ("480", "240")
+    assert (probe["width"], probe["height"]) == ("480", "246")
     assert int(probe["nb_read_frames"]) == (res.times.size - 1) // 10 + 1

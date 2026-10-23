@@ -61,7 +61,7 @@ _RUN = FDTDRun(
     sources=[GaussianPulse(ix=20, iy=15, half_width_s=4e-5)],
     recording=FDTDRecording(probes=[(5, 5)], snapshot_every=10),
 )
-_FRAME = AnimationFrame(size=(480, 240), color_limit=1.0)
+_FRAME = AnimationFrame(size=(480, 246), color_limit=1.0)
 
 
 def _on_node(container: object = "webm", **changes: Any) -> tuple[Any, tuple[str, Any]]:
@@ -114,7 +114,7 @@ def test_the_elastic_node_returns_the_signals(
     )
     result, (_, stream) = job.write_elastic_fdtd_animation_on_node(
         run=run,
-        frame=AnimationFrame(size=(480, 240), color_limit=1e-6),
+        frame=AnimationFrame(size=(480, 246), color_limit=1e-6),
         video=VideoOptions(),
         container="gif",
         compute=Compute(),
@@ -259,7 +259,7 @@ def test_a_node_without_matplotlib_simulates_and_refuses_to_animate() -> None:
 @pytest.mark.parametrize(
     "record",
     [
-        AnimationFrame(language="es", size=(480, 240), color_limit=0.5),
+        AnimationFrame(language="es", size=(480, 246), color_limit=0.5),
         VideoOptions(
             encoder="cpu",
             codec="vp9",

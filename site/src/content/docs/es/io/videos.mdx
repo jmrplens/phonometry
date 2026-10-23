@@ -309,13 +309,14 @@ se compone una sola vez para toda la ejecución, para el título más ancho que
 va a mostrar y para las etiquetas de sus ejes y de su escala de color, así
 que nada se mueve de un fotograma a otro, y cada texto conserva su propio
 tamaño. El fotograma más pequeño en el que cada texto, a su propio tamaño,
-queda libre del margen del fotograma y el campo sigue viéndose es de
-479 por 239 píxeles, y un `size` menor lanza `ValueError` al construirse el
-registro. Ese mínimo vale para una ejecución cuyo último fotograma llega
-antes de diez segundos. Una ejecución más larga escribe más cifras en el
-tiempo de su título, en milisegundos, así que su mínimo es más ancho: la
-función rechaza un fotograma más estrecho de lo que necesita la ejecución
-antes de que esta empiece, y su mensaje da el ancho.
+queda libre del margen del fotograma y el campo sigue viéndose, con cualquier
+versión de matplotlib que admita la biblioteca, es de 479 por 245 píxeles, y
+un `size` menor lanza `ValueError` al construirse el registro. Ese mínimo vale
+para una ejecución cuyo último fotograma llega antes de diez segundos. Una
+ejecución más larga escribe más cifras en el tiempo de su título, en
+milisegundos, así que su mínimo es más ancho: la función rechaza un fotograma
+más estrecho de lo que necesita la ejecución antes de que esta empiece, y su
+mensaje da el ancho.
 
 La escala de color es fija para todo el vídeo.
 `AnimationFrame(color_limit=...)` la da, en pascales, como el valor de cada
@@ -325,13 +326,17 @@ que avanza la ejecución, la mayor magnitud que alcanza el campo fuera de las
 celdas de las fuentes, de las líneas de inyección de las fuentes de onda
 plana y de la capa absorbente, donde el campo es lo que la fuente o la
 esponja hacen de él y no la onda que muestra el vídeo, y la segunda pasada
-dibuja con ese límite. De la primera pasada, que no guarda nada, solo llega
-a esta máquina ese número. Cuando las fuentes, sus líneas y la capa
-absorbente cubren todas las celdas que conserva un fotograma, la función
-lanza `ValueError` antes de un solo paso; cuando el campo se queda en cero
-ahí durante toda la ejecución, o no es finito, lo lanza tras la primera
-pasada, antes de codificar el primer fotograma del vídeo. Cada mensaje pide
-`AnimationFrame(color_limit=...)`.
+dibuja con ese límite. Ese límite lo fijan las celdas más intensas que quedan,
+que alrededor de una fuente puntual son las contiguas a ella, así que el vídeo
+por defecto de una fuente puntual puede verse tenue en cuanto su onda se
+extiende: un `AnimationFrame(color_limit=...)` menor lo hace más vivo, y toda
+celda que pase del límite toma el color del extremo de la escala. De la
+primera pasada, que no guarda nada, solo llega a esta máquina ese número.
+Cuando las fuentes, sus líneas y la capa absorbente cubren todas las celdas
+que conserva un fotograma, la función lanza `ValueError` antes de un solo
+paso; cuando el campo se queda en cero ahí durante toda la ejecución, o no es
+finito, lo lanza tras la primera pasada, antes de codificar el primer
+fotograma del vídeo. Cada mensaje pide `AnimationFrame(color_limit=...)`.
 
 `simulation.write_elastic_fdtd_animation(path, run)` hace lo mismo con el
 `ElasticRun` que toma `elastic_fdtd_simulation`, y dibuja el campo que nombra

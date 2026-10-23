@@ -123,7 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ElasticRun`, checked when it is built) and draw it into a video as it is
   computed, with `compute=` for where it steps, a
   `simulation.AnimationFrame` for how each frame is drawn (its language, its
-  size, 960 by 540 pixels by default and at least 479 by 239 pixels, and its
+  size, 960 by 540 pixels by default and at least 479 by 245 pixels, and its
   colour limit) and the `io.VideoOptions` of `io.write_video`; ffmpeg and
   its encoder are checked before the first step too. A frame is laid out
   once for the whole run, under matplotlib's default style, with every text

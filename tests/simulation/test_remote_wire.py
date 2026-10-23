@@ -111,7 +111,7 @@ _EVERY_ELASTIC_FIELD: dict[str, Any] = {
 _AT_DEFAULT = frozenset({"shape"})
 
 #: A frame record, every field away from its default.
-_EVERY_FRAME = AnimationFrame(language="es", size=(480, 240), color_limit=0.5)
+_EVERY_FRAME = AnimationFrame(language="es", size=(480, 246), color_limit=0.5)
 #: Video options, every field away from its default but ``ffmpeg_encoder``,
 #: which cannot sit beside an ``encoder`` and a ``codec`` of the caller's
 #: (``test_video_job.py`` sends one on its own).

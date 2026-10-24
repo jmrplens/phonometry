@@ -548,8 +548,10 @@ class _FramePipe:
             )
             with _RUNNING_LOCK:
                 _RUNNING.add(self._process)
-            drain = threading.Thread(target=self._read_stderr, daemon=True)
-            drain.start()
+            # Kept before it starts: an interrupt inside start() may come
+            # when the reader already runs, and it is then waited for.
+            self._drain = threading.Thread(target=self._read_stderr, daemon=True)
+            self._drain.start()
         except (OSError, RuntimeError) as exc:
             # A thread that cannot start leaves ffmpeg running with nobody to
             # read it: it is stopped and its pipes closed.
@@ -561,7 +563,6 @@ class _FramePipe:
             # as it is.
             self.abort()
             raise
-        self._drain = drain
 
     def _arguments(self, fig: Figure, width: int, height: int) -> VideoArguments:
         request = self._request
@@ -608,6 +609,10 @@ class _FramePipe:
         process = self._process
         if process is None or process.stderr is None:
             return
+        with self._tail_lock:
+            # Closed by an abort that came before this reader started.
+            if process.stderr.closed:
+                return
         # Closed at the end of the stream, by the thread that reads it.
         with process.stderr:
             for line in process.stderr:
@@ -689,11 +694,16 @@ class _FramePipe:
         self._join()
 
     def _join(self) -> None:
-        """Wait for the reader of stderr, or close the pipe if none started."""
-        if self._drain is not None:
-            self._drain.join(timeout=_EXIT_TIMEOUT_S)
-        elif self._process is not None and self._process.stderr is not None:
-            self._process.stderr.close()
+        """Wait for the reader of stderr, or close the pipe if it is not running."""
+        drain, process = self._drain, self._process
+        with self._tail_lock:
+            # Decided under the reader's lock: a reader that starts after
+            # this finds its pipe closed and leaves it alone.
+            running = drain is not None and drain.is_alive()
+            if not running and process is not None and process.stderr is not None:
+                process.stderr.close()
+        if running and drain is not None:
+            drain.join(timeout=_EXIT_TIMEOUT_S)
 
     def _failure(self, reason: str) -> VideoEncoderError:
         """Stop ffmpeg; the error names the file, the encoder and what ffmpeg wrote last on stderr."""

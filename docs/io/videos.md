@@ -20,9 +20,10 @@ matplotlib would run, the one `rcParams["animation.ffmpeg_path"]` names
 (`"ffmpeg"`, looked up on `PATH`, unless you set it), and raises
 `io.FFmpegNotFoundError` with those install commands when it is not there.
 On Windows, which looks for a program in the working directory before
-`PATH`, an ffmpeg there never runs: the one on `PATH` runs in its place, and
-an ffmpeg found only there is refused: put it on `PATH`, or name it by its
-full path in that rcParam. In Pyodide, which cannot start a program,
+`PATH`, an ffmpeg there gives way to the one on `PATH`, and one found only
+there is refused: put it on `PATH`, or name it by its full path in that
+rcParam. Named by its full path, or found in a working directory that `PATH`
+itself lists, it runs as found. In Pyodide, which cannot start a program,
 `write_video` raises the same error. matplotlib itself comes with
 `pip install "phonometry[plot]"`.
 

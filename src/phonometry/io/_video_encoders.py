@@ -187,9 +187,10 @@ def _outside_the_working_directory(named: str, found: str) -> str:
     directory before ``PATH``, so an ``ffmpeg.exe`` or ``ffmpeg.bat`` left in
     a notebook's folder would run in place of the one the user installed.
     Such a file is passed over and ``PATH`` is searched on its own; ffmpeg
-    runs by the full path found there, so the file in the working directory
-    never runs. A name with a directory, or a working directory that
-    ``PATH`` itself lists, is the user's own choice, and is run as found.
+    runs by the path found there, which holds a directory, so the file in
+    the working directory does not run. A name with a directory, or a
+    working directory that ``PATH`` itself lists, is the user's own choice,
+    and is run as found.
 
     :raises FFmpegNotFoundError: for an ffmpeg found only in the working
         directory.
@@ -223,7 +224,7 @@ def _outside_the_working_directory(named: str, found: str) -> str:
 
 
 def find_ffmpeg() -> str:
-    """The ffmpeg matplotlib would run: ``rcParams["animation.ffmpeg_path"]``, by its full path.
+    """The ffmpeg matplotlib would run: ``rcParams["animation.ffmpeg_path"]``, by the path it was found at.
 
     On Windows a bare name is looked up on ``PATH`` past an ffmpeg in the
     working directory, which Windows searches first.

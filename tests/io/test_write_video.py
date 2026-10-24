@@ -609,6 +609,58 @@ def test_an_interrupt_before_the_reader_starts_stops_ffmpeg(
         assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
 
 
+@pytest.mark.parametrize("reader", ["running", "not yet scheduled"])
+def test_an_interrupt_as_the_reader_starts_never_closes_its_pipe_under_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, reader: str
+) -> None:
+    """An interrupt inside the reader's start() leaves its thread nothing to raise.
+
+    The interrupt can come when the reader of stderr already runs, which is
+    then waited for, or before the reader is scheduled, which then finds its
+    pipe closed and stops.
+    """
+    from phonometry.io import _video as pipe_module
+
+    entered, go = threading.Event(), threading.Event()
+    readers: list[threading.Thread] = []
+    read_stderr = pipe_module._FramePipe._read_stderr
+
+    def held(pipe: pipe_module._FramePipe) -> None:
+        entered.set()
+        # Long enough for a pipe closed under the reader to be closed first.
+        go.wait(timeout=1.0)
+        read_stderr(pipe)
+
+    class Interrupted(threading.Thread):
+        def start(self) -> None:
+            readers.append(self)
+            if reader == "running":
+                super().start()
+                assert entered.wait(timeout=10.0)
+            raise KeyboardInterrupt
+
+    raised: list[object] = []
+    monkeypatch.setattr(threading, "excepthook", raised.append)
+    monkeypatch.setattr(pipe_module._FramePipe, "_read_stderr", held)
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    monkeypatch.setattr(
+        pipe_module,
+        "threading",
+        SimpleNamespace(Thread=Interrupted, Lock=threading.Lock),
+    )
+    animation = _animation()
+    with pytest.raises(KeyboardInterrupt):
+        io.write_video(tmp_path / "w.webm", animation)
+    (thread,) = readers
+    if reader == "not yet scheduled":
+        # Scheduled only after the interrupt.
+        threading.Thread.start(thread)
+    go.set()
+    thread.join(timeout=10.0)
+    assert not thread.is_alive()
+    assert raised == []
+
+
 def test_the_last_words_are_copied_whole_while_the_reader_still_reads(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -628,6 +680,8 @@ def test_the_last_words_are_copied_whole_while_the_reader_still_reads(
     )
 
     class Stream:
+        closed = False
+
         def __enter__(self) -> Stream:
             return self
 

@@ -239,7 +239,7 @@ draws its pressure field into a video as the run computes it:
 from phonometry import io, simulation
 
 run = simulation.FDTDRun(
-    c=343.0, dx=0.01, duration_s=4e-3,
+    c=343.0, dx=0.01, duration_s=2.2e-3,
     shape=(80, 120),
     sources=[simulation.GaussianPulse(ix=40, iy=40, half_width_s=5e-5)],
     recording=simulation.FDTDRecording(probes=[(100, 40)], snapshot_every=8),

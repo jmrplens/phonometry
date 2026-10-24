@@ -223,7 +223,7 @@ def test_a_name_whose_status_cannot_be_read_is_left_to_the_check_that_the_direct
     # Inside a directory without search permission the status of the name
     # cannot be read, so nothing can tell a directory from a file there; the
     # name is left to the check that the directory takes a file, which finds
-    # what the directory allows before ffmpeg starts. Here it takes one, and
+    # what the directory allows before the first frame. Here it takes one, and
     # the fake runs in a process of its own, so the write goes through.
     fake_ffmpeg.install(tmp_path, monkeypatch)
     target = tmp_path / "w.webm"
@@ -253,7 +253,7 @@ def test_a_directory_that_cannot_be_reached_is_refused_before_anything_runs(
 
 
 @pytest.mark.parametrize("directory", ["refusing", "proc"])
-def test_a_directory_that_does_not_take_the_video_is_refused_before_ffmpeg_starts(
+def test_a_directory_that_does_not_take_the_video_is_refused_before_a_frame_is_drawn(
     directory: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     fake = fake_ffmpeg.install(tmp_path, monkeypatch)
@@ -274,7 +274,10 @@ def test_a_directory_that_does_not_take_the_video_is_refused_before_ffmpeg_start
     assert str(target) in str(caught.value)
     # The caller's path, never the hidden file that was refused.
     assert ".partial" not in str(caught.value)
-    assert fake.calls() == []
+    # ffmpeg is found and asked what it can do, as before any write, but
+    # nothing is encoded, not even a trial frame.
+    assert fake.trials() == []
+    assert fake.encodes() == []
     assert drawn == []
     if directory == "refusing":
         assert target.read_bytes() == b"the video that was there"

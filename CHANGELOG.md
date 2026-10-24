@@ -2162,7 +2162,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cannot be reached. A directory or a disk that refuses the video is
   reported with your path and the system's reason, no longer with the
   hidden file's name: `io.write_video` now checks that the directory takes
-  a file before ffmpeg starts, as the two simulation writers do. When ffmpeg
+  a file before the first frame is drawn, as the two simulation writers do. When ffmpeg
   fails while it writes, the error names the encoder, which ffmpeg does not
   always do (an option it does not know is refused without a word of the
   encoder). A raw `ffmpeg_encoder` this ffmpeg lacks, or `ffmpeg_options` it

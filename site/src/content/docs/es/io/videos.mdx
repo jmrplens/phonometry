@@ -85,7 +85,7 @@ Cualquier otro sufijo, o una ruta que nombre un directorio, lanza
 `ValueError`, y una ruta cuyo directorio no exista o no se pueda alcanzar lanza
 `FileNotFoundError`, antes de que se ejecute nada. Un directorio que no admite
 el archivo lanza `io.VideoEncoderError`, que nombra la ruta y el motivo que da
-el sistema, antes de que arranque ffmpeg.
+el sistema, antes de dibujar el primer fotograma.
 
 El archivo aparece en la ruta solo cuando ffmpeg lo ha terminado. Hasta
 entonces ffmpeg escribe en un archivo oculto a su lado, con un nombre propio

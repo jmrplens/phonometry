@@ -41080,7 +41080,7 @@ Any other suffix, or a path that names a directory, raises `ValueError`, and
 a path whose directory does not exist or cannot be reached raises
 `FileNotFoundError`, before anything runs. A directory that does not take the
 file raises `io.VideoEncoderError`, naming the path and the system's reason,
-before ffmpeg starts.
+before the first frame is drawn.
 
 The file appears at the path only once ffmpeg has finished it. Until then
 ffmpeg writes to a hidden file beside it, under a name of its own for each

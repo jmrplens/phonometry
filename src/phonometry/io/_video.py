@@ -836,7 +836,7 @@ def write_video(
         Windows when it was found only in the working directory.
     :raises VideoEncoderError: if no encoder can write the video (the message
         lists the ones that can), the directory of ``path`` does not take the
-        file (before ffmpeg starts; the message names ``path`` and the
+        file (before the first frame is drawn; the message names ``path`` and the
         system's reason), ffmpeg cannot be started or fails while writing it
         (the message names the encoder and quotes the last lines ffmpeg wrote
         on stderr; a raw ``ffmpeg_encoder`` it lacks or ``ffmpeg_options`` it
@@ -849,10 +849,10 @@ def write_video(
     request = video_request(path, options)
     _require_animation(animation)
     # The arguments and ffmpeg are checked before the directory is, as the
-    # simulation writers do: a wrong argument or a missing ffmpeg is reported
-    # as itself, and the probe file is made only for a video that can be
-    # written.
+    # simulation writers do: a wrong argument, a missing ffmpeg or one that
+    # does not run is reported as itself, and the probe file is made only for
+    # a video that can be written.
     _frame_rate(request, animation)
-    found = find_ffmpeg()
+    ffmpeg = describe(find_ffmpeg())
     require_writable(request)
-    encode(request, animation, ffmpeg=describe(found))
+    encode(request, animation, ffmpeg=ffmpeg)

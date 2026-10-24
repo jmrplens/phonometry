@@ -37,7 +37,8 @@ que ejecutaría matplotlib, el que nombra `rcParams["animation.ffmpeg_path"]`
 (`"ffmpeg"`, buscado en el `PATH`, salvo que lo cambies), y lanza
 `io.FFmpegNotFoundError` con esos comandos de instalación cuando no está. En
 Windows, que busca un programa en el directorio de trabajo antes que en el
-`PATH`, se rechaza un ffmpeg que solo esté ahí: ponlo en el `PATH`, o
+`PATH`, un ffmpeg que esté ahí nunca se ejecuta: en su lugar se ejecuta el
+del `PATH`, y se rechaza un ffmpeg que solo esté ahí: ponlo en el `PATH`, o
 nómbralo por su ruta completa en ese rcParam. En Pyodide, que no puede
 arrancar un programa, `write_video` lanza el mismo error. matplotlib se
 instala con `pip install "phonometry[plot]"`.

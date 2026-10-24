@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
+import logging
+import os
 import re
 import shutil
 import subprocess
 import sys
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import pytest
 
@@ -17,9 +19,6 @@ import fake_ffmpeg
 
 from phonometry.io import _video_encoders as ve
 from phonometry.io._video_quality import ENCODER_QUALITY, GIF_PALETTE
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 def test_every_encoder_name_has_its_three_presets() -> None:
@@ -120,24 +119,72 @@ def test_pyodide_says_why(monkeypatch: pytest.MonkeyPatch) -> None:
         ve.find_ffmpeg()
 
 
-def test_windows_does_not_run_an_ffmpeg_from_the_working_directory(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def _windows_lookup(name: str) -> str | None:
+    """What ``shutil.which`` does on Windows: a bare name in the working directory first, then on PATH."""
+    given = Path(name)
+    places = (
+        [str(given.parent)]
+        if given.name != name
+        else [os.curdir, *os.environ["PATH"].split(os.pathsep)]
+    )
+    for place in places:
+        for candidate in (given.name, f"{given.name}.exe"):
+            if (Path(place) / candidate).is_file():
+                # Windows writes the directory it searched, "." included.
+                return f"{place}{os.sep}{candidate}"
+    return None
+
+
+@pytest.fixture
+def windows(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """A Windows lookup of a bare ``"ffmpeg"`` from *tmp_path*, which holds a planted ``ffmpeg.exe``."""
     import matplotlib as mpl
 
-    planted = tmp_path / "ffmpeg.exe"
-    planted.write_bytes(b"")
+    (tmp_path / "ffmpeg.exe").write_bytes(b"")
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("PATH", str(tmp_path / "elsewhere"))
     monkeypatch.setitem(mpl.rcParams, "animation.ffmpeg_path", "ffmpeg")
-    # What Windows' lookup does with a bare name: the working directory first.
-    monkeypatch.setattr(ve.shutil, "which", lambda name: str(planted))
+    monkeypatch.setattr(ve.shutil, "which", _windows_lookup)
     monkeypatch.setattr(sys, "platform", "win32")
-    with pytest.raises(ve.FFmpegNotFoundError, match="working directory"):
+    return tmp_path
+
+
+def test_windows_does_not_run_an_ffmpeg_found_only_in_the_working_directory(
+    windows: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import matplotlib as mpl
+
+    with pytest.raises(
+        ve.FFmpegNotFoundError,
+        match=r"^ffmpeg was found only in the working directory \(\.[/\\]ffmpeg\.exe\)",
+    ):
         ve.find_ffmpeg()
     # Named by its full path, the same file is the user's own choice.
-    monkeypatch.setitem(mpl.rcParams, "animation.ffmpeg_path", str(planted))
-    assert ve.find_ffmpeg() == str(planted)
+    planted = str(windows / "ffmpeg.exe")
+    monkeypatch.setitem(mpl.rcParams, "animation.ffmpeg_path", planted)
+    assert ve.find_ffmpeg() == planted
+
+
+def test_windows_runs_the_ffmpeg_on_path_past_one_in_the_working_directory(
+    windows: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    installed = windows / "elsewhere" / "ffmpeg.exe"
+    installed.parent.mkdir()
+    installed.write_bytes(b"")
+    with caplog.at_level(logging.INFO, logger="phonometry.io"):
+        assert ve.find_ffmpeg() == str(installed)
+    (record,) = caplog.records
+    assert "ffmpeg.exe" in record.getMessage()
+    assert str(installed) in record.getMessage()
+
+
+def test_windows_runs_an_ffmpeg_from_a_working_directory_path_lists(
+    windows: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv(
+        "PATH", os.pathsep.join([str(windows / "elsewhere"), str(windows)])
+    )
+    assert ve.find_ffmpeg() == f"{os.curdir}{os.sep}ffmpeg.exe"
 
 
 def test_ffmpeg_runs_without_a_console_window(

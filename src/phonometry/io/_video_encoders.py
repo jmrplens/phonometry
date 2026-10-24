@@ -168,36 +168,53 @@ _DESCRIBED: dict[tuple[str, int, int], FFmpeg] = {}
 _PASSED: set[tuple[str, str, str, int, int]] = set()
 
 
-def _outside_the_working_directory(named: str, found: str) -> None:
-    """Refuse, on Windows, an ffmpeg found only because Windows looks in the working directory first.
+def _outside_the_working_directory(named: str, found: str) -> str:
+    """The ffmpeg to run: on Windows, the one on ``PATH`` rather than one in the working directory.
 
-    A bare name such as ``"ffmpeg"`` is looked up there before ``PATH``, so
-    an ``ffmpeg.exe`` or ``ffmpeg.bat`` left in a notebook's folder would run
-    in place of the one the user installed. A name with a directory, or a
-    working directory that ``PATH`` itself lists, is the user's own choice.
+    Windows looks a bare name such as ``"ffmpeg"`` up in the working
+    directory before ``PATH``, so an ``ffmpeg.exe`` or ``ffmpeg.bat`` left in
+    a notebook's folder would run in place of the one the user installed.
+    Such a file is passed over and ``PATH`` is searched on its own; ffmpeg
+    runs by the full path found there, so the file in the working directory
+    never runs. A name with a directory, or a working directory that
+    ``PATH`` itself lists, is the user's own choice, and is run as found.
 
-    :raises FFmpegNotFoundError: for such an ffmpeg.
+    :raises FFmpegNotFoundError: for an ffmpeg found only in the working
+        directory.
     """
     if sys.platform != "win32" or Path(named).name != named:
-        return
+        return found
     here = Path.cwd().resolve()
-    listed = {
-        Path(entry).resolve()
-        for entry in os.environ.get("PATH", "").split(os.pathsep)
-        if entry
-    }
-    if Path(found).resolve().parent == here and here not in listed:
-        msg = (
-            f"ffmpeg was found only in the working directory ({found}), which Windows "
-            "searches before PATH; phonometry does not run a program from there. "
-            "Put ffmpeg on PATH, or name it by its full path in "
-            "rcParams['animation.ffmpeg_path']"
-        )
-        raise FFmpegNotFoundError(msg)
+    entries = [entry for entry in os.environ.get("PATH", "").split(os.pathsep) if entry]
+    if Path(found).parent.resolve() != here or here in {
+        Path(entry).resolve() for entry in entries
+    }:
+        return found
+    for entry in entries:
+        # A name with a directory is looked up in that directory alone.
+        installed = shutil.which(str(Path(entry) / named))
+        if installed is not None:
+            _LOG.info(
+                "running %s from PATH, not %s from the working directory, which "
+                "Windows searches first",
+                installed,
+                found,
+            )
+            return installed
+    msg = (
+        f"ffmpeg was found only in the working directory ({found}), which Windows "
+        "searches before PATH; phonometry does not run a program from there. "
+        "Put ffmpeg on PATH, or name it by its full path in "
+        "rcParams['animation.ffmpeg_path']"
+    )
+    raise FFmpegNotFoundError(msg)
 
 
 def find_ffmpeg() -> str:
-    """The ffmpeg matplotlib would run: ``rcParams["animation.ffmpeg_path"]``.
+    """The ffmpeg matplotlib would run: ``rcParams["animation.ffmpeg_path"]``, by its full path.
+
+    On Windows a bare name is looked up on ``PATH`` past an ffmpeg in the
+    working directory, which Windows searches first.
 
     :raises FFmpegNotFoundError: when that name is not on ``PATH``, in
         Pyodide, which cannot start a program, or on Windows when it was
@@ -223,8 +240,7 @@ def find_ffmpeg() -> str:
             f"rcParams['animation.ffmpeg_path'] names, is not on PATH; {_INSTALL_HINT}"
         )
         raise FFmpegNotFoundError(msg)
-    _outside_the_working_directory(named, found)
-    return found
+    return _outside_the_working_directory(named, found)
 
 
 def _run(

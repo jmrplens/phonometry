@@ -68,8 +68,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   file (`hosts.toml` under `$XDG_CONFIG_HOME/phonometry/`, by default
   `~/.config/phonometry/`, `%APPDATA%\phonometry\` on Windows, or wherever
   `PHONOMETRY_HOSTS_FILE` points), and returns the record a run here returns.
-  A hosts file that does not exist, a path under a file included, is the
-  `KeyError` of a host the file does not name, on every system.
+  A hosts file that does not exist, a path under a file included, raises
+  `KeyError` naming the missing file, on every system; one that exists and
+  cannot be read stays a `ValueError`.
   The node, a Linux or macOS machine with a POSIX login shell, runs a Python
   environment with NumPy and SciPy or, on Linux, Docker with the image of
   `docker/node/Dockerfile`, built on it with `make node-image HOST=nas`,
@@ -3441,9 +3442,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   impedance profile given as a list as the record's own read-only array,
   and the run that holds it checks it. `boundaries=None` is rigid on all
   four sides for either run. `FDTDRun` refuses `boundaries` that are not an
-  `FDTDBoundaries`, and `ElasticRun` `boundaries` that are not an
-  `ElasticBoundaries`, with a `TypeError` naming `boundaries`, where the
-  function failed inside the run. `ElasticBoundaries` now holds a mapping of
+  `FDTDBoundaries` (a text or a mapping included) with a `TypeError` naming
+  `boundaries`, and `ElasticRun` refuses `boundaries` that are not an
+  `ElasticBoundaries` with the same `TypeError`, where the function failed
+  inside the run. `ElasticBoundaries` now holds a mapping of
   sides as a read-only mapping of its own, so a run cannot follow the
   caller's later edits to the dictionary.
 

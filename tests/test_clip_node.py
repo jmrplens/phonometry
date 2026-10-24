@@ -13,6 +13,7 @@ connection open, not the drawing.
 
 from __future__ import annotations
 
+import contextlib
 import io
 import json
 import os
@@ -429,10 +430,30 @@ def _orphaning(pidfile: pathlib.Path, ending: str) -> str:
     )
 
 
+def _state(pid: int) -> str | None:
+    """The state Linux gives process *pid* (``R``, ``S``, ``Z``...); None where /proc does not say."""
+    try:
+        stat = pathlib.Path(f"/proc/{pid}/stat").read_text(
+            encoding="ascii", errors="replace"
+        )
+    except OSError:
+        return None
+    # "pid (name) state ...": the name may hold spaces and parentheses.
+    fields = stat.rpartition(")")[2].split()
+    return fields[0] if fields else None
+
+
 def _gone(pid: int, *, within_s: float = 10.0) -> bool:
-    """Whether process *pid* is gone within *within_s*; one that is not is killed here."""
+    """Whether process *pid* is gone within *within_s*; one that is not is killed here.
+
+    A process that has ended and that nothing has reaped, a zombie, is gone:
+    a signal still finds it, but it runs nothing. Linux says so in /proc;
+    elsewhere only a process that no longer exists counts.
+    """
     deadline = time.monotonic() + within_s
     while time.monotonic() < deadline:
+        if _state(pid) in ("Z", "X"):
+            return True
         try:
             os.kill(pid, 0)
         except ProcessLookupError:
@@ -440,6 +461,26 @@ def _gone(pid: int, *, within_s: float = 10.0) -> bool:
         time.sleep(0.1)
     os.kill(pid, signal.SIGKILL)
     return False
+
+
+@pytest.mark.skipif(
+    not pathlib.Path("/proc/self/stat").is_file(),
+    reason="Linux names a zombie in /proc",
+)
+def test_a_process_that_ended_but_was_never_reaped_is_gone() -> None:
+    """A lane's child killed with its group is reparented, and stays a zombie where nothing reaps it.
+
+    So it is in the node's container, whose first process reaps no orphans.
+    """
+    process = subprocess.Popen([sys.executable, "-c", "pass"])
+    try:
+        deadline = time.monotonic() + 30.0
+        while _state(process.pid) != "Z" and time.monotonic() < deadline:
+            time.sleep(0.05)
+        assert _state(process.pid) == "Z"
+        assert _gone(process.pid, within_s=1.0)
+    finally:
+        process.wait(timeout=30)
 
 
 def _starter(scripts: dict[str, str]) -> Callable[..., subprocess.Popen[bytes]]:
@@ -814,6 +855,120 @@ def test_a_lane_whose_render_ends_takes_what_it_started_with_it(
     assert _gone(int(pidfile.read_text())), "a child outlived its lane's render"
 
 
+def _unreaped(pid: int) -> bool:
+    """Whether *pid* is a child of this process that is not reaped: running, or ended and not collected."""
+    try:
+        os.waitid(os.P_PID, pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+    except ChildProcessError:
+        return False
+    return True
+
+
+def _signals(
+    monkeypatch: pytest.MonkeyPatch,
+) -> list[tuple[int, signal.Signals, bool]]:
+    """Each signal sent to a process group: the group, the signal, and whether its leader was unreaped."""
+    sent: list[tuple[int, signal.Signals, bool]] = []
+    killpg = os.killpg
+
+    def recorded(group: int, sig: signal.Signals) -> None:
+        sent.append((group, sig, _unreaped(group)))
+        killpg(group, sig)
+
+    monkeypatch.setattr(clip_node.os, "killpg", recorded)
+    return sent
+
+
+_PEEKS = pytest.mark.skipif(
+    not hasattr(os, "waitid") or not hasattr(os, "WNOWAIT"),
+    reason="the platform cannot ask whether a child ended without reaping it",
+)
+
+
+@_PEEKS
+def test_a_finished_lane_s_group_is_ended_before_its_leader_is_reaped(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A reaped leader's number may go to a new process, which a signal to its group would reach."""
+    sent = _signals(monkeypatch)
+    good = check_animation_freshness.outputs("anim_good")
+    results = list(
+        clip_node.run_lanes(
+            tmp_path,
+            _job(("anim_bad", "cpu"), ("anim_good", "cpu")),
+            cancel=threading.Event(),
+            fingerprints={},
+            start=_starter(
+                {"anim_bad": _writer([], exit_code=3), "anim_good": _writer(good)}
+            ),
+        )
+    )
+    assert len(results) == 2
+    assert [sig for _, sig, _ in sent] == [signal.SIGKILL] * 2
+    assert all(unreaped for _, _, unreaped in sent), sent
+
+
+@_PEEKS
+def test_a_stopped_lane_s_group_is_killed_before_its_leader_is_reaped(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A lane stopped while it runs: SIGTERM, SIGKILL once it has ended, and only then is it reaped."""
+    sent = _signals(monkeypatch)
+    process = subprocess.Popen(
+        [sys.executable, "-c", "import time; time.sleep(60)"],
+        start_new_session=True,
+    )
+    lane = clip_node._Lane(
+        clip_node.ClipJob("anim_x", "cpu"), tmp_path, process, tmp_path / "log.txt"
+    )
+    try:
+        clip_node.stop([lane], grace_s=10.0)
+        assert [sig for _, sig, _ in sent] == [signal.SIGTERM, signal.SIGKILL]
+        assert all(unreaped for _, _, unreaped in sent), sent
+        assert process.returncode == -signal.SIGTERM
+    finally:
+        process.kill()
+        process.wait(timeout=30)
+
+
+def test_every_finished_lane_s_group_is_ended_before_a_clip_is_sent(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Sending a clip takes seconds, which a lane that finished beside it would wait reaped."""
+    sent: list[int] = []
+    monkeypatch.setattr(clip_node.os, "killpg", lambda group, sig: sent.append(group))
+
+    class _Ended:
+        # Numbers past any pid Linux gives, so no signal reaches a process.
+        def __init__(self, pid: int) -> None:
+            self.pid, self.returncode = pid, None
+
+        def poll(self) -> int:
+            self.returncode = 1
+            return 1
+
+        def wait(self, timeout: float) -> int:
+            return self.poll()
+
+    pids = iter([1 << 30, (1 << 30) + 1])
+
+    def start(
+        argv: list[str], env: dict[str, str], cwd: pathlib.Path, log: pathlib.Path
+    ) -> _Ended:
+        return _Ended(next(pids))
+
+    lanes = clip_node.run_lanes(
+        tmp_path,
+        _job(("anim_a", "cpu"), ("anim_b", "cpu")),
+        cancel=threading.Event(),
+        fingerprints={},
+        start=start,
+    )
+    with contextlib.closing(lanes):
+        next(lanes)
+        assert sorted(sent) == [1 << 30, (1 << 30) + 1]
+
+
 @pytest.mark.parametrize("whose", ["zero", "init", "this process's"])
 def test_no_signal_for_a_lane_reaches_this_process_s_group_or_init(
     monkeypatch: pytest.MonkeyPatch, whose: str
@@ -865,6 +1020,24 @@ def test_only_the_end_of_a_lane_s_log_is_read(tmp_path: pathlib.Path) -> None:
     failure = clip_node._failure("anim_x", "the render exited with 1", log)
     assert len(json.dumps(failure)) < bootstrap.MAX_HEADER // 8
     assert failure["error"].splitlines()[-1] == "the last words"
+
+
+def test_a_last_line_longer_than_what_is_read_is_still_sent(
+    tmp_path: pathlib.Path,
+) -> None:
+    """A progress meter rewritten with a carriage return past the read window, then a kill.
+
+    Its end is the only text the render left, and a log tail that dropped the
+    line read in part would send none.
+    """
+    log = tmp_path / "log.txt"
+    meter = "".join(f"\rframe {n:6d} of 999999" for n in range(5000))
+    log.write_text(f"the render started\n{meter}\n", encoding="utf-8")
+    assert len(meter) > clip_node._LOG_BYTES
+    failure = clip_node._failure("anim_x", "the render exited with -9", log)
+    error = failure["error"].splitlines()
+    assert error[0] == "the render exited with -9"
+    assert error[-1] == "frame   4999 of 999999"
 
 
 def test_a_refusal_is_cut_to_what_a_frame_carries(

@@ -43,6 +43,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import time
 from typing import TYPE_CHECKING, Any, BinaryIO
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -124,6 +125,13 @@ _CLIP_NAME = re.compile(r"\w+\Z", re.ASCII)
 _CANCEL_SIGNALS = tuple(
     getattr(signal, name) for name in ("SIGTERM", "SIGHUP") if hasattr(signal, name)
 )
+
+#: Whether this platform can say that a child has ended without reaping it
+#: (``waitid`` with ``WNOWAIT``), which keeps a finished lane's group id its
+#: own until the group is signalled.
+_PEEKS = hasattr(os, "waitid") and hasattr(os, "WNOWAIT")
+#: How often a lane being stopped is asked whether it has ended [s].
+_PEEK_S = 0.05
 
 #: The thread pools pinned and the hash seed fixed, as `make graphs` does.
 _FIGURE_ENV = {
@@ -685,22 +693,60 @@ def _signal_group(process: Any, sig: signal.Signals) -> None:  # noqa: ANN401
         os.killpg(pid, sig)
 
 
+# A lane's process is a Popen in a render and a stand-in in the scheduling test.
+def _ended(process: Any) -> bool:  # noqa: ANN401
+    """Whether a lane's render has ended, its leader left unreaped where the platform allows.
+
+    An ended leader that is not reaped keeps its number, and with it its
+    group's, so a signal sent to the group then reaches the lane's processes
+    and no process that took the number since. The caller reaps it once the
+    group is signalled. Where ``waitid`` cannot leave it so, it is reaped
+    here, and the caller signals the group at once.
+    """
+    pid = process.pid
+    if _PEEKS and process.returncode is None and isinstance(pid, int) and pid > 1:
+        # A stand-in's number is no child of this process.
+        with contextlib.suppress(ChildProcessError):
+            peeked = os.waitid(os.P_PID, pid, os.WEXITED | os.WNOHANG | os.WNOWAIT)
+            return peeked is not None
+    return process.poll() is not None
+
+
 def stop(running: Sequence[_Lane], *, grace_s: float = 5.0) -> None:
     """End every running lane and everything it started.
 
     Each lane's process group is sent SIGTERM, and SIGKILL once its render
-    has had *grace_s* to go, which also ends whatever it left behind. No
-    wait is unbounded: a process the kernel cannot end at once (one held in
-    the GPU driver) is left to it rather than waited for.
+    has ended or had *grace_s* to, which also ends whatever it left behind;
+    its leader is reaped only then, so the group's number is still the
+    lane's when it is killed (:func:`_ended`). No wait is unbounded: a
+    process the kernel cannot end at once (one held in the GPU driver) is
+    left to it rather than waited for.
     """
     for lane in running:
         _signal_group(lane.process, signal.SIGTERM)
     for lane in running:
-        with contextlib.suppress(subprocess.TimeoutExpired):
-            lane.process.wait(timeout=grace_s)
+        deadline = time.monotonic() + grace_s
+        while not _ended(lane.process) and time.monotonic() < deadline:
+            time.sleep(_PEEK_S)
         _signal_group(lane.process, signal.SIGKILL)
         with contextlib.suppress(subprocess.TimeoutExpired):
             lane.process.wait(timeout=grace_s)
+
+
+def _finished(running: list[_Lane]) -> list[_Lane]:
+    """The lanes whose render has ended, taken out of *running*, each with its group ended.
+
+    What a render left running goes with it: a variant, or a worker of a
+    render that was killed. Every finished lane's group is killed before a
+    clip is sent, which takes seconds, while its leader still holds the
+    group's number (:func:`_ended`); the leader is reaped after.
+    """
+    done = [lane for lane in running if _ended(lane.process)]
+    for lane in done:
+        running.remove(lane)
+        _signal_group(lane.process, signal.SIGKILL)
+        lane.process.poll()
+    return done
 
 
 def _outputs(directory: pathlib.Path, clip: str, job: Job) -> list[pathlib.Path]:
@@ -720,7 +766,10 @@ def _log_tail(log: pathlib.Path) -> str:
     """The end of *log*, at most :data:`_LOG_BYTES` of it; empty when there is none.
 
     Only the end is read: a byte read takes at least a byte once escaped, so
-    more could never be sent. A first line read in part is left out.
+    more could never be sent. A first line read in part is left out, unless
+    nothing else would be left: a last line longer than what is read (a
+    progress meter that rewrites itself with a carriage return, then a kill)
+    is the only text the render left.
 
     :raises OSError: when the log is there but cannot be read.
     """
@@ -732,7 +781,9 @@ def _log_tail(log: pathlib.Path) -> str:
     except FileNotFoundError:
         return ""
     if start and b"\n" in data:
-        data = data.split(b"\n", 1)[1]
+        rest = data.split(b"\n", 1)[1]
+        if rest.strip():
+            data = rest
     return data.decode("utf-8", errors="replace")
 
 
@@ -850,13 +901,8 @@ def run_lanes(
                         root, job, clip, room, start, alone=solo.get(clip.name, False)
                     )
                 )
-            done = [lane for lane in running if lane.process.poll() is not None]
+            done = _finished(running)
             for lane in done:
-                running.remove(lane)
-                # What the render left running goes with it: a variant or a
-                # worker of a render that was killed. Its group's id stays
-                # taken while any of them lives.
-                _signal_group(lane.process, signal.SIGKILL)
                 yield collect(lane, job, fingerprints)
             if not done:
                 cancel.wait(0.5)

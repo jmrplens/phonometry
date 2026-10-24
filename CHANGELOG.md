@@ -155,7 +155,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `FDTD2D.run` and `ElasticFDTD2D.run` keeps every d-th cell along each axis,
   starting with the first, so a frame is `ceil(ny / d)` by `ceil(nx / d)`, a
   quarter of the memory at `d = 2`; on a GPU the field is sliced on the
-  device and only the kept cells cross to the host.
+  device and only the kept cells are copied into NumPy.
   `FDTDResult.snapshot_decimation` and `ElasticFDTDResult.snapshot_decimation`
   record it as an `int`, a result refuses snapshots that are not on the
   decimated grid, and `.plot(kind="snapshot")` draws each sample over the

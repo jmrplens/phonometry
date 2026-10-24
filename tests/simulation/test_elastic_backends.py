@@ -190,7 +190,7 @@ def test_numpy_field_reads_the_stresses_as_stored() -> None:
         sim.numpy_field("p")  # type: ignore[arg-type]
 
 
-def test_the_lame_maps_are_read_only_host_copies() -> None:
+def test_the_lame_maps_are_read_only_numpy_copies() -> None:
     sim = ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(10, 12))
     for name in ("mu", "lam"):
         with pytest.raises(ValueError, match="read-only"):

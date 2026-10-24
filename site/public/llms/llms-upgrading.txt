@@ -1391,7 +1391,7 @@ an `aircraft.ANPDatabase` is built from, and the medium maps of
 `simulation.FDTD2D` and `simulation.ElasticFDTD2D`, whose `c`, `rho`, `c_p`
 and `c_s` now stay the ones the time step was computed from. The maps the
 engines derive from them, `FDTD2D.kappa` and `ElasticFDTD2D.mu` and `.lam`,
-are read-only host copies too: in 4.0.0rc1 an edit to one reached part of the
+are read-only NumPy copies too: in 4.0.0rc1 an edit to one reached part of the
 step and not the time step, and now it raises `ValueError`, so a different
 medium is a new engine built from edited maps. A `Signal`
 keeps a copy of its own samples too, which stays writeable for processing in

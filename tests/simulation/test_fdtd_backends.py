@@ -217,7 +217,7 @@ def test_run_takes_the_snapshot_names() -> None:
     assert frames.shape == (4, 5, 6)
 
 
-def test_the_material_maps_are_read_only_host_copies() -> None:
+def test_the_material_maps_are_read_only_numpy_copies() -> None:
     sim = FDTD2D(343.0, 0.01, shape=(8, 8))
     assert isinstance(sim.kappa, np.ndarray)
     with pytest.raises(ValueError, match="read-only"):

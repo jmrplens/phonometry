@@ -1426,8 +1426,8 @@ y los mapas del medio de `simulation.FDTD2D` y `simulation.ElasticFDTD2D`,
 cuyos `c`, `rho`, `c_p` y `c_s` siguen siendo ahora aquellos con los que se
 calculó el paso de tiempo. Los mapas que las simulaciones derivan de ellos,
 `FDTD2D.kappa` y `ElasticFDTD2D.mu` y `.lam`, son también copias de solo
-lectura en el anfitrión (la memoria de la CPU): en la 4.0.0rc1 editar uno
-llegaba a parte del avance y no al paso de tiempo, y ahora lanza
+lectura en NumPy: en la 4.0.0rc1 editar uno llegaba a parte del avance y no
+al paso de tiempo, y ahora lanza
 `ValueError`, así que otro medio es una simulación nueva construida con los
 mapas editados. Una `Signal` también guarda una copia propia de sus
 muestras, que sigue siendo escribible para procesarla en su sitio, como

@@ -201,7 +201,7 @@ def _iso9612_annex_d_tasks() -> list[ph.hearing.Task]:
     tasks = []
     for samples, duration, drange in ref.ISO9612_ANNEX_D_TASKS:
         tasks.append(
-            Task(samples=samples, duration_hours=duration, duration_range=drange)
+            Task(samples=samples, duration_hours=duration, duration_range_hours=drange)
         )
     return tasks
 

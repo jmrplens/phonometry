@@ -183,7 +183,7 @@ def _require_metrics_restate(result: PileStrikeResult) -> None:
 
     :param result: The strike whose stored metrics are measured.
     :raises ValueError: if any of the four does not restate ``pressure_pa``, or
-        ``pulse_duration`` does not restate it at ``fs``.
+        ``pulse_duration_s`` does not restate it at ``fs``.
     """
     # In pascals whatever the stored type: a Signal presents its samples
     # through its own calibration, which is 1.0 on the ones this module
@@ -212,7 +212,7 @@ def _require_metrics_restate(result: PileStrikeResult) -> None:
             "the pressure level",
         ),
         (
-            "pulse_duration",
+            "pulse_duration_s",
             _pulse_duration(trace, result.fs),
             "the 5 % to 95 % energy duration",
         ),
@@ -273,7 +273,7 @@ class PileStrikeResult(OwnsArrays):
     :ivar single_strike_sel: Single-strike SEL, in dB re 1 µPa²·s.
     :ivar peak_spl: Zero-to-peak sound pressure level, in dB re 1 µPa.
     :ivar spl: Sound pressure level (Leq over the record), in dB re 1 µPa.
-    :ivar pulse_duration: 90 %-energy pulse duration, in s.
+    :ivar pulse_duration_s: 90 %-energy pulse duration, in s.
     :ivar pressure_pa: The strike pressure waveform, in Pa, in the type it
         arrived as: a :class:`~phonometry.io.Signal` when the input was one
         (carrying ``calibration_factor=1.0`` when it was calibrated), a bare
@@ -284,7 +284,7 @@ class PileStrikeResult(OwnsArrays):
     single_strike_sel: float
     peak_spl: float
     spl: float
-    pulse_duration: float
+    pulse_duration_s: float
     pressure_pa: Signal | NDArray[np.float64]
     fs: float
 
@@ -600,7 +600,7 @@ def pile_strike_metrics(
         single_strike_sel=sound_exposure_level(sig, fs_v),
         peak_spl=peak_sound_pressure_level(sig),
         spl=sound_pressure_level(sig),
-        pulse_duration=_pulse_duration(sig, fs_v),
+        pulse_duration_s=_pulse_duration(sig, fs_v),
         pressure_pa=like_input(pressure_pa, sig),
         fs=fs_v,
     )

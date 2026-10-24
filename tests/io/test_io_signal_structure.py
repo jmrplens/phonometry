@@ -69,7 +69,7 @@ def test_crop_cuts_at_the_seconds_asked_for() -> None:
     """The span in seconds, and the rate and the factor that come with it."""
     cropped = _stereo().crop(0.25, 0.75)
     assert cropped.n_samples == FS // 2
-    assert cropped.duration == pytest.approx(0.5)
+    assert cropped.duration_s == pytest.approx(0.5)
     assert cropped.fs == FS
     assert cropped.calibration_factor == CAL
 

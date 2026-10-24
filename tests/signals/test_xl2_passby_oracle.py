@@ -141,7 +141,7 @@ def test_passby_levels_and_loudness_match_the_published_row(
     sig = io.read(_DATA / name)
     assert sig.fs == 48000
     assert sig.n_channels == 1
-    assert sig.duration == 4.0
+    assert sig.duration_s == 4.0
     factor = _calibration_factor(full_scale_spl)
     x = np.asarray(sig)
 

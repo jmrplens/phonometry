@@ -4393,6 +4393,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   whatever it holds, and on a message that names a count by its old
   spelling.
 
+- **Every duration ends in its unit.** `materials.adrienne_window` takes
+  `flat_duration_s=`, `leading_duration_s=` and `trailing_duration_s=` where
+  it took `flat_duration=`, `leading_duration=` and `trailing_duration=`;
+  `StationarityTestResult` holds `segment_duration_s` and `PileStrikeResult`
+  `pulse_duration_s`, all in seconds; and `io.Signal` and `io.AudioFileInfo`
+  give the length of a record as `duration_s` where they gave `duration`.
+  `hearing.Task` takes the range and the observations of a task's duration,
+  in hours, as `duration_range_hours` and `duration_observations_hours` where
+  it took `duration_range` and `duration_samples`, a name that read as a
+  count of samples. `tests/test_public_vocabulary.py` fails on a public
+  parameter, field, property, function, method, constant or attribute a
+  plain class sets on `self`, a property or a method a public class
+  inherits from a private base included, that says it is a duration and
+  does not end in its unit of time (`_s`, `_ms`, `_minutes`, `_hours`,
+  `_days` or `_years`), unless it is a choice or a switch, ends
+  in a suffix that says it holds no length of time (the decibels of a
+  `duration_correction`; the uncertainty of a duration is a length of time
+  and ends in its unit), or is kept with its reason: the sub-interval
+  `durations` of `environment.rating_level`, which may be in any unit, the
+  one of its `reference_time`, and the verb
+  `building.check_background_duration`. The migration guide lists every
+  renamed name.
+
 - **A confidence bound says it is one.** The spectral density results of
   `signals`, `SpectralDensityResult` and `MultitaperSpectralDensityResult`,
   carry their chi-square bounds as `confidence_lower` and

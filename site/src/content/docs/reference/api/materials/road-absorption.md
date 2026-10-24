@@ -106,9 +106,9 @@ to have absorption \< 0.05, Annex B).
 adrienne_window(
     fs: float,
     *,
-    flat_duration: float = 0.005,
-    leading_duration: float = 0.0005,
-    trailing_duration: float = 0.005,
+    flat_duration_s: float = 0.005,
+    leading_duration_s: float = 0.0005,
+    trailing_duration_s: float = 0.005,
     leading_edge: Literal['blackman-harris', 'cosine-squared'] = 'blackman-harris',
     trailing_edge: Literal['blackman-harris', 'cosine-squared'] = 'blackman-harris',
 ) -> NDArray[np.float64]
@@ -138,9 +138,9 @@ normative fixed set of timings. The lower usable frequency scales as
 | Name | Description |
 | :--- | :--- |
 | `fs` | Sampling frequency, in hertz (ISO 13472-1 Clause 6.2 requires `fs > 40 kHz` in practice). |
-| `flat_duration` | Flat-portion duration, in seconds (default 5 ms). |
-| `leading_duration` | Leading-edge (rise) duration, in seconds; 0 gives a sharp step onset. |
-| `trailing_duration` | Trailing-edge (fall) duration, in seconds. |
+| `flat_duration_s` | Flat-portion duration, in seconds (default 5 ms). |
+| `leading_duration_s` | Leading-edge (rise) duration, in seconds; 0 gives a sharp step onset. |
+| `trailing_duration_s` | Trailing-edge (fall) duration, in seconds. |
 | `leading_edge` | Leading-edge shape, `"blackman-harris"` or `"cosine-squared"`. |
 | `trailing_edge` | Trailing-edge shape, `"blackman-harris"` or `"cosine-squared"`. |
 
@@ -151,7 +151,7 @@ normative fixed set of timings. The lower usable frequency scales as
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `fs` is not positive, a duration is negative, the flat duration is not positive, or an edge shape is unknown. |
-| TypeError | if `flat_duration`, `fs`, `leading_duration` or `trailing_duration` is not a single number. |
+| TypeError | if `flat_duration_s`, `fs`, `leading_duration_s` or `trailing_duration_s` is not a single number. |
 
 ## check_spot_frequency_range
 

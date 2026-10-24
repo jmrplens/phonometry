@@ -302,7 +302,7 @@ def plot_pile_strike(
     axes[1].set_ylabel(_t("Cumulative energy (norm.)", language))
     axes[1].set_xlabel(_t(_TIME_LABEL, language))
     axes[1].set_title(
-        f"{_t('90 % pulse duration', language)} = {format_number(result.pulse_duration * 1e3, language, decimals=0)} ms"
+        f"{_t('90 % pulse duration', language)} = {format_number(result.pulse_duration_s * 1e3, language, decimals=0)} ms"
     )
     axes[1].grid(visible=True, alpha=0.3)
     localize_axes(axes[0], language)

@@ -306,9 +306,9 @@ def _edge(n_samples: int, shape: str, *, rising: bool) -> NDArray[np.float64]:
 def adrienne_window(
     fs: float,
     *,
-    flat_duration: float = _ADRIENNE_FLAT,
-    leading_duration: float = _ADRIENNE_LEADING,
-    trailing_duration: float = _ADRIENNE_TRAILING,
+    flat_duration_s: float = _ADRIENNE_FLAT,
+    leading_duration_s: float = _ADRIENNE_LEADING,
+    trailing_duration_s: float = _ADRIENNE_TRAILING,
     leading_edge: LeadingEdge = "blackman-harris",
     trailing_edge: LeadingEdge = "blackman-harris",
 ) -> Real:
@@ -331,10 +331,10 @@ def adrienne_window(
 
     :param fs: Sampling frequency, in hertz (ISO 13472-1 Clause 6.2 requires
         ``fs > 40 kHz`` in practice).
-    :param flat_duration: Flat-portion duration, in seconds (default 5 ms).
-    :param leading_duration: Leading-edge (rise) duration, in seconds; 0 gives a
-        sharp step onset.
-    :param trailing_duration: Trailing-edge (fall) duration, in seconds.
+    :param flat_duration_s: Flat-portion duration, in seconds (default 5 ms).
+    :param leading_duration_s: Leading-edge (rise) duration, in seconds; 0
+        gives a sharp step onset.
+    :param trailing_duration_s: Trailing-edge (fall) duration, in seconds.
     :param leading_edge: Leading-edge shape, ``"blackman-harris"`` or
         ``"cosine-squared"``.
     :param trailing_edge: Trailing-edge shape, ``"blackman-harris"`` or
@@ -344,29 +344,29 @@ def adrienne_window(
     :raises ValueError: If ``fs`` is not positive, a duration is
         negative, the flat duration is not positive, or an edge shape is
         unknown.
-    :raises TypeError: if ``flat_duration``, ``fs``, ``leading_duration`` or
-        ``trailing_duration`` is not a single number.
+    :raises TypeError: if ``flat_duration_s``, ``fs``, ``leading_duration_s`` or
+        ``trailing_duration_s`` is not a single number.
     """
-    require_scalar(flat_duration, "flat_duration")
+    require_scalar(flat_duration_s, "flat_duration_s")
     require_scalar(fs, "fs")
-    require_scalar(leading_duration, "leading_duration")
-    require_scalar(trailing_duration, "trailing_duration")
+    require_scalar(leading_duration_s, "leading_duration_s")
+    require_scalar(trailing_duration_s, "trailing_duration_s")
     if fs <= 0.0:
         raise ValueError(_FS_POSITIVE)
-    if flat_duration <= 0.0:
-        msg = "'flat_duration' must be positive."
+    if flat_duration_s <= 0.0:
+        msg = "'flat_duration_s' must be positive."
         raise ValueError(msg)
-    if leading_duration < 0.0 or trailing_duration < 0.0:
+    if leading_duration_s < 0.0 or trailing_duration_s < 0.0:
         msg = "Edge durations must be non-negative."
         raise ValueError(msg)
     if leading_edge not in _EDGE_SHAPES or trailing_edge not in _EDGE_SHAPES:
         msg = f"Edge shapes must be one of {_EDGE_SHAPES}."
         raise ValueError(msg)
-    n_lead = round(leading_duration * fs)
-    n_flat = round(flat_duration * fs)
-    n_trail = round(trailing_duration * fs)
+    n_lead = round(leading_duration_s * fs)
+    n_flat = round(flat_duration_s * fs)
+    n_trail = round(trailing_duration_s * fs)
     if n_flat <= 0:
-        msg = "'flat_duration' is too short for 'fs'."
+        msg = "'flat_duration_s' is too short for 'fs'."
         raise ValueError(msg)
     rising = _edge(n_lead, leading_edge, rising=True)
     flat = np.ones(n_flat, dtype=np.float64)

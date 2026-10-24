@@ -333,8 +333,8 @@ Task(
     *,
     samples: tuple[float, ...],
     duration_hours: float,
-    duration_samples: tuple[float, ...] | None = None,
-    duration_range: tuple[float, float] | None = None,
+    duration_observations_hours: tuple[float, ...] | None = None,
+    duration_range_hours: tuple[float, float] | None = None,
     label: str | None = None,
     instrument: Literal['class1', 'class2', 'personal_exposimeter'] | None = None,
 )
@@ -348,8 +348,8 @@ One task of a task-based measurement (ISO 9612:2009 Clause 9).
 | :--- | :--- |
 | `samples` | Measured `Lp,A,eqT,mi` levels for the task, dB. At least three are recommended (Clause 9.3); a single conservative value is allowed for negligible tasks (its `u1a` is then zero). |
 | `duration_hours` | Arithmetic mean task duration `T_m` (Eq 5), hours. |
-| `duration_samples` | Optional independent duration observations `T_m,j` (hours) used for `u1b` via Eq C.7. |
-| `duration_range` | Optional `(T_min, T_max)` range (hours); `u1b` is then `0.5*(T_max - T_min)` (Eq C.7 NOTE). Ignored if `duration_samples` is given. |
+| `duration_observations_hours` | Optional independent duration observations `T_m,j` (hours) used for `u1b` via Eq C.7. |
+| `duration_range_hours` | Optional `(T_min, T_max)` range (hours); `u1b` is then `0.5*(T_max - T_min)` (Eq C.7 NOTE). Ignored if `duration_observations_hours` is given. |
 | `label` | Optional human-readable task name. |
 | `instrument` | Optional per-task instrument class overriding the call default (selects `u2` from Table C.5). |
 

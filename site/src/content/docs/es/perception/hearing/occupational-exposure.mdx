@@ -61,7 +61,7 @@ y llama a `hearing.task_based_exposure(tasks)`. Para la jornada del soldador
 del anexo D que se usa abajo devuelve `lex_8h` = 84,3 dB con una
 `expanded_uncertainty` $U = 3{,}2$ dB, así que el `upper_limit` unilateral al
 95 % es 87,5 dB, porque por defecto se incluye el término de duración $u_{1\mathrm{b}}$
-del anexo C construido a partir del `duration_range` de cada tarea. El
+del anexo C construido a partir del `duration_range_hours` de cada tarea. El
 fragmento del apartado 1 pasa `include_duration_uncertainty=False` para
 reproducir el caso a del anexo D, donde las duraciones se tratan como exactas,
 y eso es lo que baja $U$ a 2,7 dB y el límite superior a 87,0 dB.
@@ -200,9 +200,9 @@ from phonometry import hearing
 tasks = [
     hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
     hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
-         duration_range=(4.0, 6.0), label="welding"),
+         duration_range_hours=(4.0, 6.0), label="welding"),
     hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
-         duration_range=(1.0, 2.0), label="cutting/grinding"),
+         duration_range_hours=(1.0, 2.0), label="cutting/grinding"),
 ]
 res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
 print(f"LEX,8h = {res.lex_8h:.1f} dB   U = {res.expanded_uncertainty:.1f} dB")
@@ -261,9 +261,9 @@ from phonometry import hearing
 tasks = [
     hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
     hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
-         duration_range=(4.0, 6.0), label="welding"),
+         duration_range_hours=(4.0, 6.0), label="welding"),
     hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
-         duration_range=(1.0, 2.0), label="cutting/grinding"),
+         duration_range_hours=(1.0, 2.0), label="cutting/grinding"),
 ]
 res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
 
@@ -433,7 +433,7 @@ en la página de [Teoría](/phonometry/es/reference/theory/environment-transport
 
 | Parámetro | Se aplica a | Tipo | Unidades | Rango / def. | Notas |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `tasks` | tarea | lista de `Task` | — | $\ge 1$ | Cada `Task` tiene `samples`, `duration_hours`, `duration_range`/`duration_samples` opcionales, `label`, `instrument` |
+| `tasks` | tarea | lista de `Task` | — | $\ge 1$ | Cada `Task` tiene `samples`, `duration_hours`, `duration_range_hours`/`duration_observations_hours` opcionales, `label`, `instrument` |
 | `samples` | función / jornada | secuencia | dB | $\ge 2$ ($\ge 5$ / $\ge 3$ recomendado) | Muestras aleatorias $L_{p,\mathrm{A,eq}T}$ |
 | `effective_duration_hours` | función / jornada | float | h | $> 0$ | Duración efectiva de la jornada $T_\mathrm{e}$ |
 | `instrument` | todas | str | — | `'class1'`, `'class2'`, `'personal_exposimeter'` (def.) | Selecciona $u_2$ (Tabla C.5) |

@@ -84,7 +84,7 @@ def test_pile_strike_metrics_bundle_and_plot() -> None:
         underwater.sound_exposure_level(x, FS)
     )
     assert res.peak_spl == pytest.approx(underwater.peak_sound_pressure_level(x))
-    assert 0.0 < res.pulse_duration < 0.25
+    assert 0.0 < res.pulse_duration_s < 0.25
     axes = res.plot()
     assert len(axes) == 2
 
@@ -157,7 +157,7 @@ def test_pile_strike_result_accepts_a_silent_trace_peaking_at_minus_infinity() -
         single_strike_sel=-np.inf,
         peak_spl=-np.inf,
         spl=-np.inf,
-        pulse_duration=0.0,
+        pulse_duration_s=0.0,
         pressure_pa=np.zeros(16),
         fs=float(FS),
     )
@@ -421,5 +421,5 @@ def test_a_pulse_duration_left_behind_by_a_new_shape_is_refused() -> None:
         "single_strike_sel": underwater.sound_exposure_level(reshaped, FS),
         "spl": underwater.sound_pressure_level(reshaped),
     }
-    with pytest.raises(ValueError, match=r"'pulse_duration' must be the 5 % to 95 %"):
+    with pytest.raises(ValueError, match=r"'pulse_duration_s' must be the 5 % to 95 %"):
         dataclasses.replace(res, pressure_pa=reshaped, **restated)

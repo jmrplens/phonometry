@@ -253,8 +253,8 @@ def test_stationary_noise_is_accepted() -> None:
     assert res.bounds == (64, 125)
     assert res.segment_values.size == 20
     # Segment centres: half a segment in, one segment apart.
-    assert res.segment_times[0] == pytest.approx(res.segment_duration / 2)
-    assert np.diff(res.segment_times) == pytest.approx(res.segment_duration)
+    assert res.segment_times[0] == pytest.approx(res.segment_duration_s / 2)
+    assert np.diff(res.segment_times) == pytest.approx(res.segment_duration_s)
     # The trend test it ran on the segment sequence, and its null moments:
     # Eqs. (4.54)-(4.55) for N = 20, mean 95 and variance 237.5.
     trend = ph.metrology.trend_test(res.segment_values)
@@ -298,7 +298,7 @@ def test_stationarity_trailing_samples_are_discarded() -> None:
     rng = np.random.default_rng(6)
     x = rng.standard_normal(1013)  # 1013 = 10 * 101 + 3
     res = ph.metrology.stationarity_test(x, FS, n_segments=10)
-    assert res.segment_duration == pytest.approx(101 / FS)
+    assert res.segment_duration_s == pytest.approx(101 / FS)
 
 
 def test_stationarity_validation() -> None:

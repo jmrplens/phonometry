@@ -29,16 +29,25 @@ import importlib
 import inspect
 import pkgutil
 import re
+import sys
 import textwrap
+import types
+import typing
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
+_SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+from check_parameter_units import DIMENSIONLESS
+
 import phonometry
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Iterable, Iterator, Mapping
 
 #: A bare name that spells a concept the rest of the API spells otherwise,
 #: mapped to the spelling it has to use.
@@ -192,13 +201,30 @@ def _public_modules() -> Iterator[object]:
         yield importlib.import_module(info.name)
 
 
-def _public_names() -> Iterator[tuple[str, str, str, str, str]]:
+def _public_names(
+    members: Iterable[tuple[str, object]] | None = None,
+) -> Iterator[tuple[str, str, str, str, str]]:
     """``(where, name, annotation, kind, text)`` for every public field and parameter.
 
     ``kind`` is ``field``, ``property``, ``param``, ``varargs`` (``*args``) or
     ``varkw`` (``**kwargs``); ``text`` is the ``:param`` text of a parameter,
-    or ``""``.
+    or ``""``. The names are those of *members*, every public function and
+    class by default, and of the private bases those classes inherit from.
     """
+    members = list(_public_members() if members is None else members)
+    for key, obj in members:
+        if inspect.isclass(obj):
+            yield from _class_names(key, obj)
+        else:
+            yield from _parameters(key, obj)
+    for key, base, constructs in _private_bases(members):
+        if constructs:
+            yield from _parameters(f"{key}.__init__", vars(base)["__init__"])
+        yield from _member_names(key, base)
+
+
+def _public_members() -> Iterator[tuple[str, object]]:
+    """``(where, member)`` for every public function and class, once each."""
     seen: set[str] = set()
     # The root publishes its three classes (``Signal``, ``ReportMetadata``,
     # ``PhonometryWarning``) through a lazy ``__getattr__``, so they are read
@@ -216,10 +242,8 @@ def _public_names() -> Iterator[tuple[str, str, str, str, str]]:
             if key in seen:
                 continue
             seen.add(key)
-            if inspect.isfunction(obj):
-                yield from _parameters(key, obj)
-            elif inspect.isclass(obj):
-                yield from _class_names(key, obj)
+            if inspect.isfunction(obj) or inspect.isclass(obj):
+                yield key, obj
 
 
 def _param_text(func: object, name: str) -> str:
@@ -268,6 +292,11 @@ def _class_names(where: str, cls: type) -> Iterator[tuple[str, str, str, str, st
             yield f"{where}.{name}", name, str(annotations.get(name, "")), "field", ""
     elif "__init__" in vars(cls):
         yield from _parameters(f"{where}.__init__", vars(cls)["__init__"])
+    yield from _member_names(where, cls)
+
+
+def _member_names(where: str, cls: type) -> Iterator[tuple[str, str, str, str, str]]:
+    """The properties of *cls* and the parameters of its methods, from its own body."""
     for name, member in vars(cls).items():
         if name.startswith("_"):
             continue
@@ -287,16 +316,54 @@ def _class_names(where: str, cls: type) -> Iterator[tuple[str, str, str, str, st
             yield from _parameters(f"{where}.{name}", member)
 
 
-def _self_targets(func: object) -> Iterator[str]:
-    """The public names *func* assigns on ``self`` (``self.fs = fs``)."""
+def _private_bases(
+    members: Iterable[tuple[str, object]],
+) -> Iterator[tuple[str, type, bool]]:
+    """``(where, base, constructs)`` for every phonometry base no public name reaches.
+
+    A public class inherits the properties and methods of its bases, and the
+    walk by name reads a base only where a public module lists it. A base
+    such as ``_DrawableLayer``, whose ``plot`` six public layers inherit, is
+    listed nowhere, so each such base of a class in *members* is read once,
+    where it is defined. ``constructs`` says whether a public class runs the
+    ``__init__`` of the base as its own.
+    """
+    members = list(members)
+    public = {where for where, _ in members}
+    bases: dict[str, tuple[type, bool]] = {}
+    for _, cls in members:
+        if not inspect.isclass(cls):
+            continue
+        for base in cls.__mro__[1:]:
+            owner = getattr(base, "__module__", "") or ""
+            key = f"{owner}.{base.__qualname__}"
+            if not owner.startswith("phonometry") or key in public:
+                continue
+            constructs = vars(base).get("__init__") is cls.__init__
+            known = bases.get(key, (base, False))[1]
+            bases[key] = (base, known or constructs)
+    for key, (base, constructs) in bases.items():
+        yield key, base, constructs
+
+
+def _self_targets(func: object) -> Iterator[tuple[str, str]]:
+    """``(name, annotation)`` for each public name *func* assigns on ``self``.
+
+    ``self.fs = fs`` gives ``("fs", "")``, and an annotated assignment such
+    as ``self.high_accuracy: bool = True`` gives its annotation.
+    """
     try:
         source = textwrap.dedent(inspect.getsource(func))  # type: ignore[arg-type]
     except (OSError, TypeError):  # pragma: no cover - no source to read
         return
     for node in ast.walk(ast.parse(source)):
+        annotation = ""
         if isinstance(node, ast.Assign):
             targets = list(node.targets)
-        elif isinstance(node, ast.AnnAssign | ast.AugAssign):
+        elif isinstance(node, ast.AnnAssign):
+            targets = [node.target]
+            annotation = ast.unparse(node.annotation)
+        elif isinstance(node, ast.AugAssign):
             targets = [node.target]
         else:
             continue
@@ -308,48 +375,44 @@ def _self_targets(func: object) -> Iterator[str]:
                     and element.value.id == "self"
                     and not element.attr.startswith("_")
                 ):
-                    yield element.attr
+                    yield element.attr, annotation
 
 
-def _instance_attributes() -> Iterator[tuple[str, str]]:
-    """``(where, name)`` for every public attribute a public plain class sets.
+def _instance_attributes(
+    members: Iterable[tuple[str, object]] | None = None,
+) -> Iterator[tuple[str, str, str]]:
+    """``(where, name, annotation)`` for every public attribute a plain class sets.
 
     A dataclass declares its fields, a property is a member of its class, and
     the walk above reads both. A plain class such as ``OctaveFilterBank``
     writes its public attributes in a method (``self.fs = fs``), where no
     signature, field list or member shows them, so they are read from the
-    source of every method of the class and of its phonometry bases. That is
-    how ``bank.freq``, ``bank.freq_d`` and ``bank.num_bands`` stayed public
-    long after every field and parameter of the same quantities was spelled
-    out.
+    source of every method of the class and of its phonometry bases, with
+    the annotation of an annotated assignment, or ``""``. That is how
+    ``bank.freq``, ``bank.freq_d`` and ``bank.num_bands`` stayed public long
+    after every field and parameter of the same quantities was spelled out.
+    The classes are those of *members*, every public class by default.
     """
-    seen: set[str] = set()
-    for module in _public_modules():
-        for attr, obj in vars(module).items():
-            if attr.startswith("_") or not inspect.isclass(obj):
+    for key, obj in _public_members() if members is None else members:
+        if not inspect.isclass(obj) or dataclasses.is_dataclass(obj):
+            continue
+        names: dict[str, str] = {}
+        for klass in obj.__mro__:
+            if not (getattr(klass, "__module__", "") or "").startswith("phonometry"):
                 continue
-            owner = getattr(obj, "__module__", "") or ""
-            if not owner.startswith("phonometry") or dataclasses.is_dataclass(obj):
-                continue
-            key = f"{owner}.{obj.__qualname__}"
-            if key in seen:
-                continue
-            seen.add(key)
-            names: set[str] = set()
-            for klass in obj.__mro__:
-                if not (getattr(klass, "__module__", "") or "").startswith(
-                    "phonometry"
-                ):
-                    continue
-                for member in vars(klass).values():
-                    if inspect.isfunction(member):
-                        names.update(_self_targets(member))
-            yield from ((f"{key}.{name}", name) for name in sorted(names))
+            for member in vars(klass).values():
+                if inspect.isfunction(member):
+                    for name, annotation in _self_targets(member):
+                        names[name] = names.get(name) or annotation
+        yield from (
+            (f"{key}.{name}", name, annotation)
+            for name, annotation in sorted(names.items())
+        )
 
 
 def test_the_attribute_walk_reads_the_plain_classes() -> None:
     """The walk sees what a plain class writes on ``self``, or it proves nothing."""
-    found = {where for where, _ in _instance_attributes()}
+    found = {where for where, *_ in _instance_attributes()}
     assert "phonometry.filters.core.OctaveFilterBank.fs" in found
     assert "phonometry.filters.weighting.WeightingFilter.high_accuracy" in found
 
@@ -358,7 +421,7 @@ def test_one_concept_is_spelled_one_way() -> None:
     """The minority spellings of a bare concept name are gone and stay gone."""
     names = [(where, name) for where, name, *_ in _public_names()]
     assert len(names) > 5000, "the walk found too few names to mean anything"
-    names += list(_instance_attributes())
+    names += [(where, name) for where, name, _ in _instance_attributes()]
     offenders = sorted(
         f"{where}: {name!r} is spelled {_MINORITY[name]!r} everywhere else"
         for where, name in names
@@ -1079,12 +1142,13 @@ def test_words_are_spelled_out() -> None:
         offenders += [
             f"{where}: {problem}" for problem in _spelling_problems(name, kind=kind)
         ]
-    for where, name in _instance_attributes():
+    for where, name, annotation in _instance_attributes():
         if where in seen or where in _SPELLING_EXEMPT:
             continue
         seen.add(where)
         offenders += [
-            f"{where}: {problem}" for problem in _spelling_problems(name, kind="field")
+            f"{where}: {problem}"
+            for problem in _spelling_problems(name, kind="field", annotation=annotation)
         ]
     for module in _public_modules():
         path = module.__name__  # type: ignore[attr-defined]
@@ -1155,7 +1219,7 @@ def test_every_kept_spelling_still_exists() -> None:
     found = (
         {where for where, *_ in _public_names()}
         | {where for where, *_ in _module_names()}
-        | {where for where, _ in _instance_attributes()}
+        | {where for where, *_ in _instance_attributes()}
     )
     stale = sorted(set(_SPELLING_EXEMPT) - found)
     assert not stale, "\n".join(stale)
@@ -1393,6 +1457,404 @@ def test_the_count_rule_reads_a_name(
     name: str, annotation: str, expected: list[str]
 ) -> None:
     assert _count_problems(name, annotation) == expected
+
+
+# ---------------------------------------------------------------------------
+# A duration says its unit.
+# ---------------------------------------------------------------------------
+
+#: The words that make a name a duration, whatever else it says.
+_DURATION_WORDS = frozenset({"duration", "durations"})
+#: The endings a duration is written in: the second and the millisecond, and
+#: the minute, the hour, the day and the year spelled out, as
+#: ``duration_s``, ``duration_ms``, ``assessment_period_minutes``,
+#: ``duration_hours``, ``duration_days`` and ``exposure_duration_years``
+#: write them.
+_DURATION_UNITS = ("_s", "_ms", "_minutes", "_hours", "_days", "_years")
+_DURATION_UNIT_RULE = "a duration ends in its time unit, as in duration_s"
+#: The endings that say a name with the word holds no length of time, so it
+#: needs no unit of time: the suffixes ``scripts/check_parameter_units.py``
+#: reads as unitless (the decibels of a ``duration_correction``, a ratio, an
+#: index), less ``_uncertainty``. The uncertainty of a duration is a length
+#: of time in the unit of the duration, as ``u1b`` of ISO 9612 (Eq C.7) is
+#: in hours, so it ends in its unit (``sweep_duration_uncertainty_s``).
+_DURATION_UNITLESS = tuple(
+    suffix for suffix in DIMENSIONLESS if suffix != "_uncertainty"
+)
+#: Where a duration keeps a name without its unit, keyed by location, each
+#: with the reason. An entry that names nothing, or names a duration the
+#: rule no longer reports, fails the test too.
+_DURATION_EXEMPT = {
+    "phonometry.environment.assessment.impulsive_sound.rating_level(durations)": (
+        "the durations of the sub-intervals in any time unit, read beside a "
+        "reference_time in the same unit: the rating level of ISO/PAS 1996-3 "
+        "clause 8 uses only their ratio, so no unit is assumed and none can "
+        "be lost"
+    ),
+    "phonometry.building.measurement.service_equipment.check_background_duration": (
+        "a verb, not a duration: it holds the durations_s of the background "
+        "measurements of ISO/DIS 16032 7.6 to approximately 30 s and returns "
+        "a BackgroundDurationCheck"
+    ),
+}
+
+
+def _module_namespace(where: str) -> Mapping[str, object]:
+    """The namespace of the module a location of the walk is defined in.
+
+    A location is the module's path followed by a qualified name and, for a
+    parameter, the parameter in brackets, so the module is the longest
+    leading run of the dotted path that is an imported module.
+    """
+    parts = where.split("(", 1)[0].split(".")
+    for end in range(len(parts), 0, -1):
+        module = sys.modules.get(".".join(parts[:end]))
+        if module is not None:
+            return vars(module)
+    return {}
+
+
+def _is_choice(node: ast.expr, namespace: Mapping[str, object]) -> bool:
+    """Whether one member of an annotation is a ``Literal`` or names one."""
+    if isinstance(node, ast.Subscript):
+        head = node.value
+        name = head.attr if isinstance(head, ast.Attribute) else getattr(head, "id", "")
+        return name == "Literal"
+    if isinstance(node, ast.Name):
+        value = namespace.get(node.id)
+        value = getattr(value, "__value__", value)  # a ``type X = ...`` alias
+        return typing.get_origin(value) is typing.Literal
+    return False
+
+
+def _is_choice_or_flag(annotation: str, namespace: Mapping[str, object]) -> bool:
+    """Whether the annotation is a ``Literal`` choice or a ``bool``, or ``None``.
+
+    The annotation is the text the walk reads, so an alias such as
+    ``VibrationDuration`` is looked up in the namespace of the module that
+    wrote it, and a class a module without postponed annotations shows as
+    ``<class 'bool'>`` is read by its name.
+    """
+    text = re.sub(r"<class '([\w.]+)'>", r"\1", annotation)
+    try:
+        tree = ast.parse(text, mode="eval").body
+    except SyntaxError:
+        return False
+    members: list[ast.expr] = []
+    pending = [tree]
+    while pending:
+        node = pending.pop()
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+            pending.extend((node.left, node.right))
+        elif not (isinstance(node, ast.Constant) and node.value is None):
+            members.append(node)
+    return bool(members) and all(
+        (isinstance(node, ast.Name) and node.id == "bool")
+        or _is_choice(node, namespace)
+        for node in members
+    )
+
+
+def _duration_problems(
+    name: str, annotation: str, namespace: Mapping[str, object] | None = None
+) -> list[str]:
+    """Why a value named *name* that is a duration does not say its unit.
+
+    A name is a duration when one of its words is ``duration`` or
+    ``durations``. It ends in a unit of time (:data:`_DURATION_UNITS`) or in a
+    suffix that says the value holds no length of time
+    (:data:`_DURATION_UNITLESS`), as the decibels of a
+    ``duration_correction``. The uncertainty of a duration is not one of
+    them: the ``u1b`` of ISO 9612 (Eq C.7) is in hours, so it is written
+    ``duration_uncertainty_hours``. A choice among labels
+    (``duration: Literal["short_term", "long_term"]``) and a switch
+    (``include_duration_uncertainty: bool``) hold no length of time and are
+    outside the rule.
+    """
+    lowered = name.lower()
+    if _DURATION_WORDS.isdisjoint(lowered.split("_")):
+        return []
+    if lowered.endswith(_DURATION_UNITS) or lowered.endswith(_DURATION_UNITLESS):
+        return []
+    if _is_choice_or_flag(annotation, namespace or {}):
+        return []
+    return [_DURATION_UNIT_RULE]
+
+
+def _returns(function: object) -> str:
+    """The text of the return annotation of *function*, or ``""``."""
+    return str(getattr(function, "__annotations__", {}).get("return", ""))
+
+
+def _exported_names(
+    modules: Iterable[types.ModuleType],
+) -> Iterator[tuple[str, str, str]]:
+    """``(where, name, annotation)`` for every function and constant *modules* list.
+
+    A function is read by the name its module lists in ``__all__``, where it
+    is defined and with the annotation of what it returns, so a predicate
+    that returns a ``bool`` reads as a switch. A constant is read in lower
+    case (``TAKT_DURATION_S`` as ``takt_duration_s``) with the type of its
+    value, once, where the first module that lists it publishes it.
+    """
+    seen: set[tuple[str, int]] = set()
+    for module in modules:
+        for name in getattr(module, "__all__", ()):
+            value = getattr(module, name)
+            if inspect.isclass(value) or inspect.ismodule(value):
+                continue
+            if (name, id(value)) in seen:
+                continue
+            seen.add((name, id(value)))
+            if callable(value):
+                owner = getattr(value, "__module__", None) or module.__name__
+                where = f"{owner}.{getattr(value, '__qualname__', name)}"
+                yield where, name, _returns(value)
+            else:
+                where = f"{module.__name__}.{name}"
+                yield where, name.lower(), type(value).__name__
+
+
+def _method_names(
+    members: Iterable[tuple[str, object]],
+) -> Iterator[tuple[str, str, str]]:
+    """``(where, name, annotation)`` for every public method of a class in *members*.
+
+    A method, a static method and a class method are read by name, with the
+    annotation of what they return, on the class and on each private base it
+    inherits from; a property is read with the fields.
+    """
+    members = list(members)
+    classes = [(where, member) for where, member in members if inspect.isclass(member)]
+    classes += [(where, base) for where, base, _ in _private_bases(members)]
+    for where, cls in classes:
+        for name, attribute in vars(cls).items():
+            function = (
+                attribute.__func__
+                if isinstance(attribute, staticmethod | classmethod)
+                else attribute
+            )
+            if not name.startswith("_") and inspect.isfunction(function):
+                yield f"{where}.{name}", name, _returns(function)
+
+
+def _named_durations(
+    members: Iterable[tuple[str, object]] | None = None,
+    modules: Iterable[types.ModuleType] | None = None,
+) -> Iterator[tuple[str, str, str]]:
+    """``(where, name, annotation)`` for every public name the duration rule reads.
+
+    A parameter, a field and a property; a function, a method, a static
+    method and a class method; an attribute a plain class sets on ``self``;
+    and a constant. A property or a method a class inherits from a private
+    base is read where the base defines it. *members* are every public
+    function and class and *modules* every public module, by default.
+    """
+    members = list(_public_members() if members is None else members)
+    for where, name, annotation, kind, _ in _public_names(members):
+        if kind in {"param", "field", "property"}:
+            yield where, name, annotation
+    yield from _exported_names(_public_modules() if modules is None else modules)
+    yield from _method_names(members)
+    yield from _instance_attributes(members)
+
+
+def _duration_offenders(
+    names: Iterable[tuple[str, str, str]],
+) -> dict[str, list[str]]:
+    """Every duration among *names* the rule reports, by location, exemptions included."""
+    return {
+        where: problems
+        for where, name, annotation in names
+        if (problems := _duration_problems(name, annotation, _module_namespace(where)))
+    }
+
+
+def test_a_duration_ends_in_its_unit() -> None:
+    """``duration_s``, ``duration_hours``, ``exposure_duration_years``.
+
+    A parameter, a field, a property, a function, a method, a constant or an
+    attribute a plain class sets on ``self`` whose name says it is a
+    duration ends in the unit of time it holds or returns, so
+    ``segment_duration`` cannot be read in seconds by one caller and in
+    milliseconds by the next: the name is where the unit is written, beside
+    the ``duration_ms`` of a toneburst, the ``duration_hours`` of a working
+    day, ``rectangular_pulse_duration_s`` and ``TAKT_DURATION_S``. The count
+    rule above refuses a unit alone (``seconds``); this one refuses a
+    duration without one.
+    """
+    offenders = sorted(
+        f"{where}: {problem}"
+        for where, problems in _duration_offenders(_named_durations()).items()
+        if where not in _DURATION_EXEMPT
+        for problem in problems
+    )
+    assert not offenders, "\n".join(offenders)
+
+
+def test_every_kept_duration_spelling_is_still_one() -> None:
+    """An exemption from the duration rule that excuses nothing is a stale one."""
+    stale = sorted(set(_DURATION_EXEMPT) - set(_duration_offenders(_named_durations())))
+    assert not stale, "\n".join(stale)
+
+
+_ALIASES = {
+    "VibrationDuration": typing.Literal["short_term", "long_term"],
+    "Threshold": float,
+}
+
+
+@pytest.mark.parametrize(
+    ("name", "annotation", "expected"),
+    [
+        ("duration", "float", [_DURATION_UNIT_RULE]),
+        ("segment_duration", "float", [_DURATION_UNIT_RULE]),
+        ("durations", "ArrayLike", [_DURATION_UNIT_RULE]),
+        ("duration_range", "tuple[float, float] | None", [_DURATION_UNIT_RULE]),
+        # ``_samples`` is a count of samples, not a unit of time.
+        ("duration_samples", "tuple[float, ...] | None", [_DURATION_UNIT_RULE]),
+        ("duration", "Threshold", [_DURATION_UNIT_RULE]),
+        ("duration", "VibrationDuration | float", [_DURATION_UNIT_RULE]),
+        ("duration_s", "float", []),
+        ("durations_s", "ArrayLike", []),
+        ("duration_ms", "float", []),
+        ("assessment_duration_minutes", "float", []),
+        ("duration_range_hours", "tuple[float, float] | None", []),
+        ("duration_days", "int", []),
+        ("exposure_duration_years", "int", []),
+        ("sweep_duration_uncertainty_s", "float", []),
+        ("duration_correction", "float", []),
+        ("duration_ratio", "float", []),
+        # The uncertainty of a duration is a length of time.
+        ("duration_uncertainty", "float", [_DURATION_UNIT_RULE]),
+        ("duration_uncertainty_hours", "float", []),
+        ("include_duration_uncertainty", "bool", []),
+        ("duration", "VibrationDuration", []),
+        ("duration", "VibrationDuration | None", []),
+        ("duration", "Literal['short_term', 'long_term']", []),
+        ("duration", "bool", []),
+        ("duration", "<class 'bool'>", []),
+        ("duration", "<class 'float'>", [_DURATION_UNIT_RULE]),
+        # A name without the word is the count rule's or no rule's.
+        ("reference_time", "float", []),
+        ("period", "float", []),
+    ],
+)
+def test_the_duration_rule_reads_a_name(
+    name: str, annotation: str, expected: list[str]
+) -> None:
+    assert _duration_problems(name, annotation, _ALIASES) == expected
+
+
+def test_the_duration_rule_reads_a_function_a_method_and_a_constant() -> None:
+    """A function, a method or a constant named for a duration says its unit too.
+
+    The walk reads the name a module lists in ``__all__`` and the methods of
+    a class, beside the parameters, fields and properties: a function
+    ``strike_duration`` that returns seconds, a method ``rise_duration``, a
+    static or class method and a constant ``DEFAULT_PULSE_DURATION`` are
+    refused, the same names with their unit pass, and so does a predicate
+    that returns a ``bool``.
+    """
+
+    def strike_duration(x: float) -> float:
+        return x
+
+    def strike_duration_s(x: float) -> float:
+        return x
+
+    def is_long_duration(x: float) -> bool:
+        return x > 1.0
+
+    class PileStrike:
+        def rise_duration(self) -> float:
+            return 0.0
+
+        def rise_duration_ms(self) -> float:
+            return 0.0
+
+        @staticmethod
+        def tail_duration() -> float:
+            return 0.0
+
+        @classmethod
+        def decay_duration(cls) -> float:
+            return 0.0
+
+        def has_duration(self) -> bool:
+            return True
+
+    module = types.ModuleType("probe")
+    exported = {
+        "strike_duration": strike_duration,
+        "strike_duration_s": strike_duration_s,
+        "is_long_duration": is_long_duration,
+        "PileStrike": PileStrike,
+        "DEFAULT_PULSE_DURATION": 0.1,
+        "TAKT_DURATION_S": 0.125,
+        "SHORT_DURATION_ENABLED": True,
+    }
+    vars(module).update(exported, __all__=list(exported))
+    names = [
+        *_exported_names([module, module]),
+        *_method_names([("probe.PileStrike", PileStrike)]),
+    ]
+    offenders = _duration_offenders(names)
+    assert sorted(where.rsplit(".", 1)[-1] for where in offenders) == [
+        "DEFAULT_PULSE_DURATION",
+        "decay_duration",
+        "rise_duration",
+        "strike_duration",
+        "tail_duration",
+    ]
+    assert len(names) == 11, "a name read twice, or one not read"
+
+
+def test_the_duration_rule_reads_an_attribute_and_an_inherited_member() -> None:
+    """An attribute set on ``self`` and a member of a private base say their unit too.
+
+    A plain class writes ``self.hold_duration`` in a method, where no
+    signature or field list shows it, and a public class inherits a property
+    ``ring_duration``, a method ``settle_duration`` and its ``__init__`` from
+    a private base no public module lists. Each one without its unit is
+    refused, the same names with their unit pass, and so does an attribute
+    annotated ``bool``.
+    """
+
+    class _Ringing:
+        def __init__(self, ring_duration: float) -> None:
+            self.decay_duration = ring_duration
+
+        @property
+        def ring_duration(self) -> float:
+            return 0.0
+
+        @property
+        def ring_duration_s(self) -> float:
+            return 0.0
+
+        def settle_duration(self) -> float:
+            return 0.0
+
+    class Bell(_Ringing):
+        def strike(self) -> None:
+            self.hold_duration = 0.5
+            self.hold_duration_s = 0.5
+            self.long_duration: bool = True
+
+    _Ringing.__module__ = Bell.__module__ = "phonometry.probe"
+    names = list(_named_durations([("phonometry.probe.Bell", Bell)], []))
+    offenders = _duration_offenders(names)
+    assert sorted(where.rsplit(".", 1)[-1] for where in offenders) == [
+        "__init__(ring_duration)",
+        "decay_duration",
+        "hold_duration",
+        "ring_duration",
+        "settle_duration",
+    ]
+    assert len({where for where, *_ in names}) == len(names) == 9, (
+        "a name read twice, or one not read"
+    )
 
 
 #: A parameter that names the time signal in a spelling the API retired.

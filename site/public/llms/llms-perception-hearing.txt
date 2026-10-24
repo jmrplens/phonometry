@@ -618,9 +618,9 @@ from phonometry import hearing
 tasks = [
     hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
     hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
-         duration_range=(4.0, 6.0), label="welding"),
+         duration_range_hours=(4.0, 6.0), label="welding"),
     hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
-         duration_range=(1.0, 2.0), label="cutting/grinding"),
+         duration_range_hours=(1.0, 2.0), label="cutting/grinding"),
 ]
 res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
 print(f"LEX,8h = {res.lex_8h:.1f} dB   U = {res.expanded_uncertainty:.1f} dB")
@@ -657,9 +657,9 @@ from phonometry import hearing
 tasks = [
     hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
     hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
-         duration_range=(4.0, 6.0), label="welding"),
+         duration_range_hours=(4.0, 6.0), label="welding"),
     hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
-         duration_range=(1.0, 2.0), label="cutting/grinding"),
+         duration_range_hours=(1.0, 2.0), label="cutting/grinding"),
 ]
 res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
 
@@ -719,7 +719,7 @@ derived on the [Theory](https://docs.jmrp.io/phonometry/reference/theory/environ
 
 | Parameter | Applies to | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `tasks` | task | list of `Task` | — | $\ge 1$ | Each `Task` has `samples`, `duration_hours`, optional `duration_range`/`duration_samples`, `label`, `instrument` |
+| `tasks` | task | list of `Task` | — | $\ge 1$ | Each `Task` has `samples`, `duration_hours`, optional `duration_range_hours`/`duration_observations_hours`, `label`, `instrument` |
 | `samples` | job / full-day | sequence | dB | $\ge 2$ ($\ge 5$ / $\ge 3$ advised) | Random $L_{p,\mathrm{A,eq}T}$ samples |
 | `effective_duration_hours` | job / full-day | float | h | $> 0$ | Effective working-day duration $T_\mathrm{e}$ |
 | `instrument` | all | str | — | `'class1'`, `'class2'`, `'personal_exposimeter'` (default) | Selects $u_2$ (Table C.5) |

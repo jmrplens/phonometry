@@ -114,7 +114,7 @@ PileStrikeResult(
     single_strike_sel: float,
     peak_spl: float,
     spl: float,
-    pulse_duration: float,
+    pulse_duration_s: float,
     pressure_pa: Signal | NDArray[np.float64],
     fs: float,
 )
@@ -129,7 +129,7 @@ Per-strike pile-driving metrics (ISO 18406).
 | `single_strike_sel` | Single-strike SEL, in dB re 1 µPa²·s. |
 | `peak_spl` | Zero-to-peak sound pressure level, in dB re 1 µPa. |
 | `spl` | Sound pressure level (Leq over the record), in dB re 1 µPa. |
-| `pulse_duration` | 90 %-energy pulse duration, in s. |
+| `pulse_duration_s` | 90 %-energy pulse duration, in s. |
 | `pressure_pa` | The strike pressure waveform, in Pa, in the type it arrived as: a [`Signal`](/phonometry/reference/api/io/io/#signal) when the input was one (carrying `calibration_factor=1.0` when it was calibrated), a bare array otherwise. |
 | `fs` | Sample rate, in Hz. |
 

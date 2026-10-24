@@ -204,7 +204,7 @@ class Signal(RichDisplay):
         return int(self.data.shape[-1])
 
     @property
-    def duration(self) -> float:
+    def duration_s(self) -> float:
         """Length in seconds."""
         return self.n_samples / float(self.fs)
 
@@ -260,7 +260,7 @@ class Signal(RichDisplay):
             *tmax* is not after *tmin*.
         """
         start = 0.0 if tmin is None else float(tmin)
-        stop = self.duration if tmax is None else float(tmax)
+        stop = self.duration_s if tmax is None else float(tmax)
         if not np.isfinite(start) or not np.isfinite(stop):
             msg = "'tmin' and 'tmax' must be finite times in seconds"
             raise ValueError(msg)

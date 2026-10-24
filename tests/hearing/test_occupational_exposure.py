@@ -127,13 +127,13 @@ def _annex_d_tasks() -> list[Task]:
         Task(
             samples=(80.1, 82.2, 79.6),
             duration_hours=5.0,
-            duration_range=(4.0, 6.0),
+            duration_range_hours=(4.0, 6.0),
             label="welding",
         ),
         Task(
             samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2),
             duration_hours=1.5,
-            duration_range=(1.0, 2.0),
+            duration_range_hours=(1.0, 2.0),
             label="cutting/grinding",
         ),
     ]
@@ -186,10 +186,16 @@ def test_annex_d_duration_sensitivities() -> None:
     assert by_label["cutting/grinding"].c1b == pytest.approx(2.1, abs=0.05)
 
 
-def test_duration_samples_u1b_is_standard_error_of_mean() -> None:
-    """Eq C.7 divides by J(J-1): samples (4, 6) h give u1b = 1.0 h, not sqrt(2)."""
+def test_duration_observations_u1b_is_standard_error_of_mean() -> None:
+    """Eq C.7 divides by J(J-1): observations (4, 6) h give u1b = 1.0 h, not sqrt(2)."""
     result = task_based_exposure(
-        [Task(samples=(85.0, 85.0), duration_hours=5.0, duration_samples=(4.0, 6.0))],
+        [
+            Task(
+                samples=(85.0, 85.0),
+                duration_hours=5.0,
+                duration_observations_hours=(4.0, 6.0),
+            )
+        ],
         warn=False,
     )
     assert result.tasks[0].u1b == pytest.approx(1.0, abs=1e-9)
@@ -353,9 +359,11 @@ def test_job_based_requires_two_samples() -> None:
 
 def test_duration_range_order_validated() -> None:
     reversed_range = Task(
-        samples=(85.0, 85.0), duration_hours=4.0, duration_range=(6.0, 4.0)
+        samples=(85.0, 85.0), duration_hours=4.0, duration_range_hours=(6.0, 4.0)
     )
-    with pytest.raises(ValueError, match=r"duration_range must be \(T_min, T_max\)"):
+    with pytest.raises(
+        ValueError, match=r"duration_range_hours must be \(T_min, T_max\)"
+    ):
         task_based_exposure([reversed_range])
 
 

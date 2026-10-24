@@ -90,7 +90,7 @@ def generate_signal_provenance(output_dir: str) -> None:
     ax = fig.add_subplot(grid[0, 0])
     sig.plot(ax=ax, language=_LANG)
     ax.set_title("The samples, back in pascals", pad=12)
-    ax.set_xlim(0.0, sig.duration)
+    ax.set_xlim(0.0, sig.duration_s)
 
     card = fig.add_subplot(grid[0, 1])
     card.set_axis_off()

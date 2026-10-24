@@ -741,7 +741,7 @@ class StationarityTestResult(OwnsArrays):
     :ivar p_value: Two-sided p-value of the observed count.
     :ivar alpha: Significance level (default 0.05).
     :ivar n_segments: Number of segments the record was divided into.
-    :ivar segment_duration: Duration of each segment, in seconds.
+    :ivar segment_duration_s: Duration of each segment, in seconds.
     :ivar fs: Sample rate of the record, in Hz.
     """
 
@@ -756,7 +756,7 @@ class StationarityTestResult(OwnsArrays):
     _: KW_ONLY
     alpha: float
     n_segments: int
-    segment_duration: float
+    segment_duration_s: float
     fs: float
 
     @property
@@ -938,7 +938,7 @@ def stationarity_test(
         p_value=trend.p_value,
         alpha=alpha,
         n_segments=segments,
-        segment_duration=duration,
+        segment_duration_s=duration,
         fs=fs_v,
     )
 

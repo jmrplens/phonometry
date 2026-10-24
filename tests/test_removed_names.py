@@ -672,6 +672,9 @@ _RENAMED_4_0_KEYWORDS = [
         "assessment_period_min",
         "assessment_period_minutes",
     ),
+    ("materials", "adrienne_window", "flat_duration", "flat_duration_s"),
+    ("materials", "adrienne_window", "leading_duration", "leading_duration_s"),
+    ("materials", "adrienne_window", "trailing_duration", "trailing_duration_s"),
 ]
 
 
@@ -706,6 +709,11 @@ _RESPELLED_4_0_FIELDS = [
     ("building", "PathContribution", "fraction", "energy_fraction"),
     ("building", "DetailedAirborneResult", "fractions", "energy_fractions"),
     ("building", "DetailedImpactResult", "fractions", "energy_fractions"),
+    ("hearing", "Task", "duration_range", "duration_range_hours"),
+    ("hearing", "Task", "duration_samples", "duration_observations_hours"),
+    ("metrology", "StationarityTestResult", "segment_duration", "segment_duration_s"),
+    ("underwater", "PileStrikeResult", "pulse_duration", "pulse_duration_s"),
+    ("io", "AudioFileInfo", "duration", "duration_s"),
 ]
 
 
@@ -717,6 +725,11 @@ def test_a_field_the_4_0_respelled_is_gone(
     fields = {field.name for field in dataclasses.fields(owner)}
     assert new in fields
     assert old not in fields
+
+
+def test_the_length_of_a_signal_names_its_unit() -> None:
+    assert not hasattr(ph.Signal, "duration")
+    assert isinstance(ph.Signal.duration_s, property)
 
 
 # --------------------------------------------------------------------------- #

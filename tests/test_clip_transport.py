@@ -559,13 +559,10 @@ def test_a_refusal_carries_the_nodes_reasons(tmp_path: pathlib.Path) -> None:
     stream = _stream(
         ({"type": "refused", "problems": ["ffmpeg has no av1_nvenc encoder"]}, [])
     )
+    places = _places(tmp_path)
     with pytest.raises(RuntimeError, match=r"no av1_nvenc encoder"):
         clip_transport.receive_all(
-            stream,
-            expect=_EXPECT,
-            places=_places(tmp_path),
-            current={},
-            still=lambda: True,
+            stream, expect=_EXPECT, places=places, current={}, still=lambda: True
         )
 
 
@@ -597,13 +594,10 @@ def test_text_from_the_node_reaches_the_terminal_escaped(
         "type": "refused",
         "problems": [f"ffmpeg has no av1_nvenc encoder{_ESCAPE}"],
     }
+    stream, places = _stream((refused, [])), _places(tmp_path)
     with pytest.raises(RuntimeError, match=r"the node cannot render") as caught:
         clip_transport.receive_all(
-            _stream((refused, [])),
-            expect=_EXPECT,
-            places=_places(tmp_path),
-            current={},
-            still=lambda: True,
+            stream, expect=_EXPECT, places=places, current={}, still=lambda: True
         )
     assert "\x1b" not in str(caught.value)
     assert str(caught.value).endswith("encoder\\x1b]52;c;ZXZpbA==\\x07")
@@ -613,13 +607,10 @@ def test_a_refusal_whose_reasons_are_not_a_list_is_still_read(
     tmp_path: pathlib.Path,
 ) -> None:
     stream = _stream(({"type": "refused", "problems": 3}, []))
+    places = _places(tmp_path)
     with pytest.raises(RuntimeError, match=r"the node cannot render: 3"):
         clip_transport.receive_all(
-            stream,
-            expect=_EXPECT,
-            places=_places(tmp_path),
-            current={},
-            still=lambda: True,
+            stream, expect=_EXPECT, places=places, current={}, still=lambda: True
         )
 
 
@@ -998,9 +989,10 @@ def test_a_run_from_a_checkout_with_changes_starts_no_node(
     def spawn(argv: list[str], **kwargs: Any) -> subprocess.Popen[bytes]:
         pytest.fail("a node was started from a checkout with changes")
 
+    compute = Compute(host="here")
     with pytest.raises(clip_transport.DirtyTreeError, match=r"scripts/b\.py"):
         clip_transport.render_on_host(
-            Compute(host="here"),
+            compute,
             requested=None,
             force=False,
             audit_only=False,
@@ -1083,9 +1075,10 @@ def test_the_road_through_the_loader_brings_the_nodes_refusal_back(
             still=lambda: True,
         )
 
+    archive = data.getvalue()
     with pytest.raises(
         RuntimeError, match=r"the node cannot render: ffmpeg is not on PATH"
     ):
-        clip_transport._talk(entry, compute, header, data.getvalue(), receive, spawn)
+        clip_transport._talk(entry, compute, header, archive, receive, spawn)
     # The node was let finish: it removed the tree it unpacked into its TMPDIR.
     assert list(node_tmp.iterdir()) == []

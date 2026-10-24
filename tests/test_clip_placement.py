@@ -32,6 +32,11 @@ if str(_ROOT / "scripts") not in sys.path:
 import animation_fingerprint as fp
 import clip_placement
 
+# The tests read the registry and the field builders, whose import sets the
+# figure theme; imported here, it is set before any test's matplotlib
+# settings are compared, whichever test of the worker imports it first.
+import figures.registry  # noqa: F401
+
 from phonometry.simulation import FDTD2D, Compute, CWSource
 
 # The registry imports the whole figure stack, which the pinned job owns.

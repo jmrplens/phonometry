@@ -627,8 +627,9 @@ def test_a_broken_frames_pipe_ends_every_lane(tmp_path: pathlib.Path) -> None:
             {"anim_fast": _writer(fast, sleep=1.0), "anim_slow": _forking(pidfile)}
         ),
     )
+    frames = _BrokenPipe()
     with pytest.raises(BrokenPipeError):
-        clip_node.deliver(_BrokenPipe(), lanes)
+        clip_node.deliver(frames, lanes)
     assert _gone(int(pidfile.read_text())), "a lane outlived the broken frames pipe"
 
 

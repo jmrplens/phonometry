@@ -326,7 +326,7 @@ def _torch(compute: Compute) -> Backend:
             exc,
             needs="PyTorch with array-api-compat",
             packages=("torch", "array_api_compat"),
-            install="pip install phonometry[torch]",
+            install='pip install "phonometry[torch]"',
             repair=(
                 "check that the libraries PyTorch loads, CUDA's among them, "
                 "are present and match its build"

@@ -61,7 +61,7 @@ if TYPE_CHECKING:
     from ..room.acoustics import RoomAcousticsResult
 
 _INSTALL_HINT = (
-    "Plotting requires matplotlib. Install it with: pip install phonometry[plot]"
+    'Plotting requires matplotlib. Install it with: pip install "phonometry[plot]"'
 )
 
 #: Nominal octave-band centres used by the STI computation (125 Hz - 8 kHz).

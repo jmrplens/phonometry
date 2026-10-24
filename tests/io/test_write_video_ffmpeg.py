@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
+import sys
 from typing import TYPE_CHECKING
 
 import pytest
@@ -104,6 +105,21 @@ def test_the_file_decodes_at_the_size_and_length_drawn(
     assert probe["codec_name"] in codecs
     assert (probe["width"], probe["height"]) == ("200", "150")
     assert probe["nb_read_frames"] == "6"
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="a Windows file name cannot hold a colon"
+)
+def test_a_relative_path_with_a_colon_is_a_file_not_a_protocol(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ffmpeg reads ``x:y/w.webm`` as the protocol ``x``; the path it is handed is absolute."""
+    (tmp_path / "x:y").mkdir()
+    monkeypatch.chdir(tmp_path)
+    io.write_video(
+        "x:y/w.webm", _animation(200, 150), video=io.VideoOptions(encoder="cpu")
+    )
+    assert _probe(tmp_path / "x:y" / "w.webm")["nb_read_frames"] == "6"
 
 
 def test_an_odd_figure_comes_out_even(tmp_path: Path) -> None:

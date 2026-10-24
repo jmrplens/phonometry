@@ -771,7 +771,9 @@ def encode(
 
     rate = _frame_rate(request, animation)
     described = describe(find_ffmpeg()) if ffmpeg is None else ffmpeg
-    partial = request.new_partial()
+    # Absolute, so that ffmpeg reads it as a file: a relative "x:y/w.webm"
+    # would be the protocol "x".
+    partial = request.new_partial().absolute()
     pipe = _FramePipe(request, described, rate, output=partial, choice=choice)
     try:
         # Every frame is saved under these, whatever the caller's rcParams say.

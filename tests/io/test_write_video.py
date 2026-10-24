@@ -186,6 +186,23 @@ def test_every_frame_is_drawn_with_agg_whatever_the_canvas(
     assert corner.tolist() == [0x33, 0x66, 0x99, 255]
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="a Windows file name cannot hold a colon"
+)
+def test_ffmpeg_is_handed_the_absolute_path_of_the_file_it_writes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A relative ``x:y/w.webm`` would reach ffmpeg as the protocol ``x``."""
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    (tmp_path / "x:y").mkdir()
+    monkeypatch.chdir(tmp_path)
+    io.write_video("x:y/w.webm", _animation())
+    written = Path(fake.encodes()[0]["argv"][-1])
+    assert written.is_absolute()
+    assert written.parent == tmp_path / "x:y"
+    assert (tmp_path / "x:y" / "w.webm").read_bytes().startswith(b"\x1a\x45\xdf\xa3")
+
+
 def test_a_figure_resized_by_the_animation_keeps_its_size(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

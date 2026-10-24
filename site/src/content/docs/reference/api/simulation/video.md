@@ -56,11 +56,11 @@ another machine look alike. One frame is drawn every
 
 The colour scale is fixed for the whole video. With a limit given, each
 frame is drawn as the run computes it. Without one the run steps twice: a
-first pass finds, on the device, the largest magnitude the drawn field
-reaches outside the source cells, the plane-wave injection lines and the
-absorbing layer, where the field is what the source or the sponge makes it
-rather than the wave the video shows, and the second pass draws with that
-limit. Neither pass stores a snapshot.
+first pass, which stops at the last frame, finds, on the device, the largest
+magnitude the drawn field reaches outside the source cells, the plane-wave
+injection lines and the absorbing layer, where the field is what the source
+or the sponge makes it rather than the wave the video shows, and the second
+pass draws with that limit. Neither pass stores a snapshot.
 
 With a `host` in `compute` the run is computed, drawn and encoded on
 that node, named in the hosts file (see the guide on remote nodes), and only

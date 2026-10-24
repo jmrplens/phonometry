@@ -77,6 +77,21 @@ def engines(monkeypatch: pytest.MonkeyPatch) -> list[ElasticFDTD2D]:
     return built
 
 
+def test_the_first_pass_stops_at_the_last_frame(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, engines: list[ElasticFDTD2D]
+) -> None:
+    """As the acoustic writer's: the pass that finds the limit leaves the steps after the last frame."""
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    run = _run()
+    steps = run._checked.steps
+    assert steps % _EVERY, "a run whose last frame comes before its last step"
+    res = write_elastic_fdtd_animation(tmp_path / "f.webm", run, frame=_SMALL)
+    first, second = engines
+    assert first.n == steps - steps % _EVERY
+    assert second.n == steps
+    assert np.array_equal(res.signals, elastic_fdtd_simulation(run).signals)
+
+
 def test_the_result_is_the_simulation_s_without_snapshots(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -838,6 +838,25 @@ def test_the_frames_speak_spanish(
     assert all("," in t for t in titles)
 
 
+def test_the_first_pass_stops_at_the_last_frame(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, engines: list[FDTD2D]
+) -> None:
+    """The steps after the last frame draw nothing, so the pass that finds the limit leaves them.
+
+    The second pass takes every step, for the probes, which come out as the
+    simulation's.
+    """
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    run = _run(recording=FDTDRecording(probes=_PROBES, snapshot_every=7))
+    steps = run._checked.steps
+    assert steps % 7, "a run whose last frame comes before its last step"
+    res = write_fdtd_animation(tmp_path / "f.webm", run, frame=_SMALL)
+    first, second = engines
+    assert first.n == steps - steps % 7
+    assert second.n == steps
+    assert np.array_equal(res.pressures, fdtd_simulation(run).pressures)
+
+
 def test_the_frames_use_the_default_style(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

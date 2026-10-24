@@ -50,11 +50,11 @@ another machine look alike. One frame is drawn every
 
 The colour scale is fixed for the whole video. With a limit given, each
 frame is drawn as the run computes it. Without one the run steps twice: a
-first pass finds, on the device, the largest magnitude the drawn field
-reaches outside the source cells, the plane-wave injection lines and the
-absorbing layer, where the field is what the source or the sponge makes it
-rather than the wave the video shows, and the second pass draws with that
-limit. Neither pass stores a snapshot.
+first pass, which stops at the last frame, finds, on the device, the largest
+magnitude the drawn field reaches outside the source cells, the plane-wave
+injection lines and the absorbing layer, where the field is what the source
+or the sponge makes it rather than the wave the video shows, and the second
+pass draws with that limit. Neither pass stores a snapshot.
 
 With a ``host`` in ``compute`` the run is computed, drawn and encoded on
 that node, named in the hosts file (see the guide on remote nodes), and only
@@ -349,6 +349,17 @@ def _frame_cadence(snapshot_every: int | None) -> int:
 def _last_frame_time(checks: _AcousticChecks | _ElasticChecks, every: int) -> float:
     """The time, in seconds, of a run's last frame, one drawn every *every* steps."""
     return (checks.steps // every) * (every * checks.dt)
+
+
+def _first_pass_steps(checks: _AcousticChecks | _ElasticChecks) -> tuple[int, int]:
+    """The steps a first pass takes, up to the run's last frame, and the steps between two frames.
+
+    The steps after the last frame draw nothing, so the pass that finds the
+    colour limit stops before them; the second pass takes them, for the
+    probes.
+    """
+    every = _frame_cadence(checks.snapshot_every)
+    return checks.steps - checks.steps % every, every
 
 
 def _shown_time(time_s: float, language: Language) -> str:
@@ -981,18 +992,14 @@ def _acoustic_scale(
 def _acoustic_limit(
     run: FDTDRun, compute: Compute | None, keep: NDArray[np.bool_]
 ) -> tuple[float, Compute]:
-    """The first pass: the colour limit, and where the run really stepped."""
+    """The first pass, up to the last frame: the colour limit, and where the run really stepped."""
     checks = run._checked
+    steps, every = _first_pass_steps(checks)
     sim = _acoustic_engine(run, compute)
     no_probes = np.zeros((0, 2), dtype=np.int_)
-    unrecorded = np.zeros((0, checks.steps + 1))
+    unrecorded = np.zeros((0, steps + 1))
     frames = _march(
-        sim,
-        checks.steps,
-        no_probes,
-        checks.snapshot_every,
-        checks.snapshot_decimation,
-        unrecorded,
+        sim, steps, no_probes, every, checks.snapshot_decimation, unrecorded
     )
     return _found_limit(sim, frames, keep, _ACOUSTIC_COVERING)
 
@@ -1190,17 +1197,18 @@ def _elastic_scale(
 def _elastic_limit(
     run: ElasticRun, compute: Compute | None, keep: NDArray[np.bool_]
 ) -> tuple[float, Compute]:
-    """The first pass: the colour limit, and where the run really stepped."""
+    """The first pass, up to the last frame: the colour limit, and where the run really stepped."""
     checks = run._checked
+    steps, every = _first_pass_steps(checks)
     sim = _elastic_engine(run, compute)
     no_probes = np.zeros((0, 2), dtype=np.int_)
-    unrecorded = np.zeros((0, len(checks.fields), checks.steps + 1))
+    unrecorded = np.zeros((0, len(checks.fields), steps + 1))
     frames = _elastic_march(
         sim,
-        checks.steps,
+        steps,
         no_probes,
         checks.fields,
-        checks.snapshot_every,
+        every,
         checks.snapshot_field,
         checks.snapshot_decimation,
         unrecorded,

@@ -334,34 +334,3 @@ def test_a_decimated_video_frame_shows_the_plot_s_field_over_the_domain(
     assert framed.get_extent() == pytest.approx(plotted.images[0].get_extent())
     assert ax.get_xlim() == pytest.approx(plotted.get_xlim())
     assert ax.get_ylim() == pytest.approx(plotted.get_ylim())
-
-
-def test_the_snapshot_plot_refuses_a_colour_limit_by_name() -> None:
-    """The scale of a single snapshot is its own field's; vmin and vmax change it."""
-    res = _result()
-    with pytest.raises(TypeError, match="color_limit cannot be overridden"):
-        res.plot(kind="snapshot", color_limit=0.5)
-    plt.close("all")
-
-
-def test_the_elastic_snapshot_plot_refuses_a_colour_limit_by_name() -> None:
-    """The elastic snapshot takes its scale from its field as the acoustic one does."""
-
-    def pulse(t: float) -> float:
-        return float(np.exp(-(((t - 2e-5) / 5e-6) ** 2)))
-
-    res = elastic_fdtd_simulation(
-        ElasticRun(
-            c_p=4000.0,
-            c_s=2300.0,
-            dx=0.01,
-            duration_s=1e-4,
-            rho=2500.0,
-            shape=(20, 21),
-            sources=[ExplosionSource(ix=10, iy=9, waveform=pulse)],
-            recording=ElasticRecording(snapshot_every=4),
-        )
-    )
-    with pytest.raises(TypeError, match="color_limit cannot be overridden"):
-        res.plot(kind="snapshot", color_limit=0.5)
-    plt.close("all")

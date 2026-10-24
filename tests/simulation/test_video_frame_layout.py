@@ -10,7 +10,6 @@ the record is built.
 from __future__ import annotations
 
 import contextlib
-import hashlib
 import io
 import itertools
 import math
@@ -117,7 +116,6 @@ def _frames(
     grid: tuple[int, int],
     language: Language,
     times: tuple[float, ...],
-    saved: list[bytes] | None = None,
 ) -> Generator[Figure, None, None]:
     """Draw a video's frames at *times*, through the writer's own set-up and update.
 
@@ -167,10 +165,7 @@ def _frames(
                     else plot.elastic_snapshot_title(time_s, name, language)
                 )
                 plot._update_snapshot(image, rng.standard_normal(grid) * limit, title)
-            frame = io.BytesIO()
-            figure.savefig(frame, format="rgba")
-            if saved is not None:
-                saved.append(frame.getvalue())
+            figure.savefig(io.BytesIO(), format="rgba")
             yield figure
 
 
@@ -456,39 +451,30 @@ def _defects(
 def test_at_the_floor_every_text_keeps_its_size_inside_the_frame_and_the_field_shows(
     drawn: list[_Drawn], kind: str, language: Language
 ) -> None:
-    """479 x 245, on grids from ten times wider than tall to ten times taller, light and dark.
+    """479 x 245, on grids from ten times wider than tall to ten times taller.
 
     The first frame, one halfway and the last, whose time has the most
     digits a run of up to ten seconds shows, drawn as the writer draws
     them: no warning; every text at the size matplotlib's default style
     gives its kind, outside the margin the layout keeps at the frame's
     edges, over no other text, tick labels included; the field at least 14
-    pixels on its narrow side. Dark is a caller's ``dark_background``:
-    the frame is drawn under the default style whatever the caller's says,
-    so it is the light frame, pixel for pixel.
+    pixels on its narrow side. A caller's dark style does not reach the
+    frames, which the writers' own tests hold (``test_write_fdtd_animation``):
+    here the frames are drawn under the default style by this module's
+    helper, so a dark half would test the helper.
     """
     times = (0.0, _LAST_S / 2, _LAST_S)
     for grid in _GRIDS.values():
-        pixels: dict[str, list[bytes]] = {"default": [], "dark_background": []}
-        for caller, saved in pixels.items():
-            where = f"{kind} {language} grid {grid} under {caller}"
-            with (
-                style.context(caller),
-                warnings.catch_warnings(record=True) as caught,
-                contextlib.closing(
-                    _frames(kind, _FLOOR, grid, language, times, saved)
-                ) as frames,
-            ):
-                warnings.simplefilter("always")
-                for figure in frames:
-                    assert _defects(figure, drawn, _FLOOR) == {}, where
-                    drawn.clear()
-            assert not [str(w.message) for w in caught], where
-        light, dark = (
-            [hashlib.sha256(frame).hexdigest() for frame in pixels[caller]]
-            for caller in ("default", "dark_background")
-        )
-        assert dark == light, f"{kind} {language} grid {grid}"
+        where = f"{kind} {language} grid {grid}"
+        with (
+            warnings.catch_warnings(record=True) as caught,
+            contextlib.closing(_frames(kind, _FLOOR, grid, language, times)) as frames,
+        ):
+            warnings.simplefilter("always")
+            for figure in frames:
+                assert _defects(figure, drawn, _FLOOR) == {}, where
+                drawn.clear()
+        assert not [str(w.message) for w in caught], where
 
 
 class _Measured(NamedTuple):
@@ -497,9 +483,10 @@ class _Measured(NamedTuple):
     #: The lowest frame, at the floor's width, whose frames are all clean.
     height: int
     #: The field whose frames, one pixel lower, show what the floor keeps
-    #: out (the other fields' show nothing), and the kind of what they show.
+    #: out (the other fields' show nothing), and what they show, by kind:
+    #: the text in the margin, or the size of the field that does not show.
     shown_by: str
-    shows: str
+    shows: dict[str, set[str]]
     #: The width the widest title of each longer run needs.
     widths: dict[str, int]
 
@@ -517,13 +504,13 @@ _MEASURED = {
     (3, 10): _Measured(
         245,
         "elastic vx",
-        "a field that does not show",
+        {"a field that does not show": {"13.94 x 139.44"}},
         {"five digits": 490, "six digits": 500},
     ),
     (3, 11): _Measured(
         239,
         "elastic vy",
-        "in the margin",
+        {"in the margin": {"Velocidad de partícula [m/s]"}},
         {"five digits": 490, "six digits": 501},
     ),
 }
@@ -582,13 +569,15 @@ def test_the_floor_is_as_low_as_the_matplotlib_with_the_tallest_text_allows(
     With 3.10 that frame is the floor itself, and one pixel lower a 10:1
     field is under 14 pixels wide; 3.11 keeps every frame clean down to 239
     pixels, one under which a colour bar label reaches into the margin.
-    Every text keeps its own size there too.
+    Every text keeps its own size there too. What shows is held whole, the
+    label or the field's size in pixels, not only its kind, so a frame one
+    pixel lower that fails for another text fails here.
     """
     assert _FLOOR[1] == max(line.height for line in _MEASURED.values())
     width = _FLOOR[0]
     assert _shown(drawn, kind, (width, _HERE.height)) == {}
     lower = _shown(drawn, kind, (width, _HERE.height - 1))
-    assert set(lower) == ({_HERE.shows} if kind == _HERE.shown_by else set())
+    assert lower == (_HERE.shows if kind == _HERE.shown_by else {})
 
 
 @pytest.mark.parametrize(
@@ -738,7 +727,13 @@ def test_the_layout_keeps_every_reach_inside_the_frame_and_the_cells_square(
 
 
 def test_in_a_low_frame_the_colour_bar_s_label_keeps_under_the_title() -> None:
-    """The label takes the frame's height under the title, past the field's slot."""
+    """The label takes the frame's height under the title, past the field's slot.
+
+    The layout function alone, with no frame built: 320 by 240 pixels is
+    under the floor, so no frame is ever drawn at that size, and it is used
+    here because there a 199-pixel label is longer than the field's slot,
+    the case this test is about.
+    """
     layout = _layout((320.0, 240.0), 4 / 3, bar_label=199.0)
     ceiling = 240.0 - 2 * _PAD - 20.0
     assert layout.label_centre - 199.0 / 2 >= _PAD - 1e-9

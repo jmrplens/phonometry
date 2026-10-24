@@ -841,12 +841,23 @@ def test_the_frames_speak_spanish(
 def test_the_frames_use_the_default_style(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    first = tmp_path / "first.rgba"
-    fake_ffmpeg.install(tmp_path, monkeypatch, first_frame=str(first))
-    monkeypatch.setitem(mpl.rcParams, "figure.facecolor", "black")
-    write_fdtd_animation(tmp_path / "d.webm", _run(1e-3), frame=_SMALL_FIXED)
-    corner = np.frombuffer(first.read_bytes(), dtype=np.uint8)[:4]
+    """A caller's dark style does not reach the frames: pixel for pixel, the default style's.
+
+    The writer draws under ``style.context("default")``, which sets every
+    setting back, so the first frame written under ``dark_background`` is
+    the one written under the default style, white page and all.
+    """
+    from matplotlib import style
+
+    light, dark = tmp_path / "light.rgba", tmp_path / "dark.rgba"
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch, first_frame=str(light))
+    write_fdtd_animation(tmp_path / "light.webm", _run(1e-3), frame=_SMALL_FIXED)
+    fake.update(first_frame=str(dark))
+    with style.context("dark_background"):
+        write_fdtd_animation(tmp_path / "dark.webm", _run(1e-3), frame=_SMALL_FIXED)
+    corner = np.frombuffer(light.read_bytes(), dtype=np.uint8)[:4]
     assert corner.tolist() == [255, 255, 255, 255]
+    assert dark.read_bytes() == light.read_bytes()
 
 
 @pytest.mark.skipif(

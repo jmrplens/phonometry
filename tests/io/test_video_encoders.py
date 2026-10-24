@@ -357,6 +357,39 @@ def test_no_encoder_at_all_says_what_was_tried(
         )
 
 
+@pytest.mark.parametrize(
+    ("container", "codec", "libraries"),
+    [
+        ("webm", None, "SVT-AV1 or libvpx"),
+        ("mp4", None, "SVT-AV1, x265 or x264"),
+        ("webm", "vp9", "libvpx"),
+        ("mp4", "h264", "x264"),
+    ],
+)
+def test_the_install_hint_names_what_the_container_holds(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    container: ve.Container,
+    codec: ve.Codec | None,
+    libraries: str,
+) -> None:
+    """With no encoder working, the hint names the CPU encoders that write what was asked, in that container."""
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch, working=[])
+    ffmpeg = ve.describe(str(fake.launcher))
+    with pytest.raises(
+        ve.VideoEncoderError,
+        match=rf"\. Install an ffmpeg built with {libraries}\.$",
+    ):
+        ve.choose(
+            ffmpeg,
+            encoder="auto",
+            codec=codec,
+            container=container,
+            width=32,
+            height=32,
+        )
+
+
 def test_mp4_prefers_av1_then_hevc_then_h264(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

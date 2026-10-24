@@ -92,6 +92,16 @@ FFMPEG_NAMES: Final[Mapping[tuple[Hardware, Codec], str]] = MappingProxyType(
     }
 )
 
+#: The library each CPU encoder comes from, as an install hint names it.
+_CPU_LIBRARIES: Final[Mapping[str, str]] = MappingProxyType(
+    {
+        "libsvtav1": "SVT-AV1",
+        "libvpx-vp9": "libvpx",
+        "libx265": "x265",
+        "libx264": "x264",
+    }
+)
+
 #: What each kind needs around the encoder: options before the input, a
 #: filter that hands the frames to the device, and the pixel format.
 _HARDWARE: Final[Mapping[Hardware, tuple[tuple[str, ...], str | None, str | None]]] = (
@@ -550,9 +560,9 @@ def choose(
                 choice.codec,
             )
             return choice
-    wanted = "/".join(CONTAINER_CODECS[container] if codec is None else (codec,))
+    codecs = CONTAINER_CODECS[container] if codec is None else (codec,)
     msg = (
-        f"encoder={encoder!r} cannot write {wanted} into .{container} with "
+        f"encoder={encoder!r} cannot write {'/'.join(codecs)} into .{container} with "
         f"{ffmpeg.path} ({ffmpeg.version}); tried {', '.join(tried) or 'nothing it has'}."
     )
     if encoder != "auto":
@@ -565,5 +575,12 @@ def choose(
         ]
         msg += f" Working here: {', '.join(working) or 'none'}."
     else:
-        msg += " Install an ffmpeg built with SVT-AV1, libvpx or x264."
+        msg += f" Install an ffmpeg built with {_cpu_libraries(codecs)}."
     raise VideoEncoderError(msg)
+
+
+def _cpu_libraries(codecs: tuple[Codec, ...]) -> str:
+    """The libraries whose CPU encoders write *codecs*, best first: ``"SVT-AV1 or libvpx"``."""
+    libraries = [_CPU_LIBRARIES[FFMPEG_NAMES["cpu", codec]] for codec in codecs]
+    *rest, last = libraries or [""]
+    return f"{', '.join(rest)} or {last}" if rest else last

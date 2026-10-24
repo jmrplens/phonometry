@@ -41085,10 +41085,12 @@ ffmpeg writes to a hidden file beside it, under a name of its own for each
 write, and that file is removed whatever stops the encode: ffmpeg fails, the
 disk fills, or your update function raises, which reaches you as its own
 exception. So a failure leaves what was at the path before, a good video
-included. A finished video that Windows will not let take the old file's
-place, because a player holds the old file open, is not thrown away: it is
-left beside it under its hidden name, and the `io.VideoEncoderError` says
-where.
+included. A hidden file the system will not let go, as one a scanner holds
+open on Windows, stays where it is, and what reaches you is still what
+stopped the encode. A finished video that Windows will not let take the
+old file's place, because a player holds the old file open, is not thrown
+away: it is left beside it under its hidden name, and the
+`io.VideoEncoderError` says where.
 
 Each frame is the whole figure at its own size and in its own colours,
 whatever your matplotlib settings say about saving figures: a `"tight"`
@@ -41218,8 +41220,9 @@ A raw encoder name bypasses the trial, the preset, the container check and
 the pixel format, so they are yours to get right: here VP9, which a `.webm`
 holds, and `yuv420p`, which browsers play. Two things stay: the padding of
 an odd size, and in an MP4 the layout that lets it start playing before it
-has downloaded. An encoder this ffmpeg lacks fails in ffmpeg, and the
-`io.VideoEncoderError` carries the last lines ffmpeg wrote. A raw encoder
+has downloaded. An encoder this ffmpeg lacks, or an option it refuses,
+fails in ffmpeg within the first frames, and the `io.VideoEncoderError`
+names the encoder and carries the last lines ffmpeg wrote. A raw encoder
 takes no `encoder=` or `codec=` beside it, and no GIF.
 
 The presets are starting points, not calibrated settings. phonometry uses

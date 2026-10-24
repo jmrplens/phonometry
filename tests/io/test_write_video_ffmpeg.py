@@ -44,13 +44,18 @@ def _svt_av1() -> bool:
     return " libsvtav1 " in listing
 
 
-def _animation(width: int, height: int, frames: int = 6) -> FuncAnimation:
+def _animation(
+    width: int, height: int, frames: int = 6, drawn: list[int] | None = None
+) -> FuncAnimation:
+    """A line animation exactly *width* by *height* pixels; each frame it draws goes into *drawn*."""
     fig = Figure(figsize=((width + 0.5) / 100, (height + 0.5) / 100), dpi=100)
     FigureCanvasAgg(fig)
     ax = fig.add_subplot()
     (line,) = ax.plot([0.0, 1.0], [0.0, 1.0])
 
     def update(k: int) -> tuple[Line2D]:
+        if drawn is not None:
+            drawn.append(k)
         line.set_ydata([0.0, float(k)])
         return (line,)
 
@@ -116,3 +121,60 @@ def test_the_cpu_writes_av1_first(tmp_path: Path) -> None:
     target = tmp_path / "w.webm"
     io.write_video(target, _animation(200, 150), video=io.VideoOptions(encoder="cpu"))
     assert _probe(target)["codec_name"] == "av1"
+
+
+def _compiled_in(encoder: str) -> bool:
+    listing = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-encoders"],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=True,
+    ).stdout
+    return f" {encoder} " in listing
+
+
+@pytest.mark.parametrize(
+    ("name", "video", "said"),
+    [
+        (
+            "w.webm",
+            io.VideoOptions(ffmpeg_encoder="phonometry-no-such-encoder"),
+            r"Unknown encoder 'phonometry-no-such-encoder'",
+        ),
+        (
+            "w.webm",
+            io.VideoOptions(ffmpeg_encoder="libvpx-vp9", ffmpeg_options=("-crf", "99")),
+            r"'crf' out of range",
+        ),
+        (
+            "w.mp4",
+            io.VideoOptions(
+                ffmpeg_encoder="libx264", ffmpeg_options=("-preset", "phonometry")
+            ),
+            r"invalid preset 'phonometry'",
+        ),
+    ],
+    ids=["unknown-encoder", "refused-when-ffmpeg-starts", "refused-at-the-first-frame"],
+)
+def test_an_encoder_or_option_of_the_caller_s_that_ffmpeg_refuses_fails_at_once(
+    tmp_path: Path, name: str, video: io.VideoOptions, said: str
+) -> None:
+    """Used as it is, with no trial: ffmpeg's own refusal, within the first frames, and nothing left."""
+    encoder = video.ffmpeg_encoder
+    assert encoder is not None
+    if encoder.startswith("lib") and not _compiled_in(encoder):
+        pytest.skip(f"this ffmpeg has no {encoder}")
+    target = tmp_path / name
+    target.write_bytes(b"the video that was there")
+    n_frames = 60
+    drawn: list[int] = []
+    animation = _animation(200, 150, frames=n_frames, drawn=drawn)
+    with pytest.raises(io.VideoEncoderError, match=said) as caught:
+        io.write_video(target, animation, video=video)
+    message = str(caught.value)
+    assert f"while writing {target} with the encoder {encoder}" in message
+    # ffmpeg reads ahead a few frames before it gives up, never the run.
+    assert 0 < len(drawn) < n_frames // 2
+    assert target.read_bytes() == b"the video that was there"
+    assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []

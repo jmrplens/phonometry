@@ -2142,6 +2142,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A video that fails to write says why, and a directory or a disk that
+  refuses it is an `io.VideoEncoderError` naming your path, on every route.**
+  A hidden partial file the system would not let go (a scanner holding it on
+  Windows, a directory that takes files and lets none be removed) put a raw
+  `PermissionError` in place of the error that stopped `io.write_video`, and
+  in the two simulation writers it refused a write that could go ahead: the
+  file that checks the directory before the first step, and the one a failed
+  node's bytes would have gone into before a fallback, raised it once they
+  had shown the directory takes a file. Such a file now stays, hidden, and
+  the error raised is the one that stopped the write, or none. A path inside
+  a directory this process cannot search made the path check raise
+  `PermissionError` on Python 3.12 and 3.13 (3.14 let it through); it now
+  goes on to the write, which reports it as a directory that refuses the
+  video. A simulation video's directory or disk that refuses it is reported
+  with your path and the system's reason, no longer with the hidden file's
+  name. When ffmpeg fails while it writes, the error names the encoder, which
+  ffmpeg does not always do (an option it does not know is refused without a
+  word of the encoder). A raw `ffmpeg_encoder` this ffmpeg lacks, or
+  `ffmpeg_options` it refuses, stops the write within its first frames and
+  leaves nothing at the path, here and on a node, and the tests now hold that
+  with a real ffmpeg.
+
 - **`fdtd_simulation` takes a `PlaneWaveSource` by its type, and draws the
   snapshot of a plane-wave run.** The function always handed a plane wave to
   the engine, but its `sources` were typed and documented as point sources

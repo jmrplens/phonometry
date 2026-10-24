@@ -65,7 +65,8 @@ beside ``path``, created before ssh starts so that a directory that does not
 take it fails first: never more of them than the frames can take, and none
 that do not begin as the container ``path`` names. That file takes
 ``path``'s place once the node's whole answer has been read and checked, and
-is removed if anything fails before.
+is removed if anything fails before (or stays, hidden, if the system does
+not let it go, which hides no error).
 """
 
 from __future__ import annotations
@@ -662,7 +663,8 @@ class _PartialFile:
     A failure of this machine's disk, to create the file, to write the bytes
     or to close it (a directory that refuses files, a full disk, a quota), is
     a :class:`~phonometry.io.VideoEncoderError` naming ``path``, as ffmpeg's
-    is on this machine.
+    is on this machine; it never names the hidden file, which the caller
+    did not ask for.
     """
 
     def __init__(self, request: VideoRequest) -> None:
@@ -673,7 +675,11 @@ class _PartialFile:
     def _failure(self, exc: OSError) -> VideoEncoderError:
         from ..io._video_encoders import VideoEncoderError
 
-        return VideoEncoderError(f"could not write the video for {self._target}: {exc}")
+        # The system's reason without the name it was given, the hidden file's.
+        reason = exc.strerror or str(exc)
+        return VideoEncoderError(
+            f"could not write the video for {self._target}: {reason}"
+        )
 
     def _opened(self) -> BinaryIO:
         if self._handle is None:
@@ -718,21 +724,27 @@ class _PartialFile:
         """Close and remove the file: the run failed, or falls back to this machine.
 
         The file is removed even when closing it fails, and that failure is
-        the one raised.
+        the one raised. A file the system does not let go (a scanner holding
+        it on Windows, a directory that takes files and lets none be removed)
+        stays, hidden: it was created, so the directory takes the video, and
+        nothing the caller asked for depends on its going.
 
         :raises VideoEncoderError: when closing the file fails.
         """
         try:
             self.close()
         finally:
-            self.path.unlink(missing_ok=True)
+            with contextlib.suppress(OSError):
+                self.path.unlink(missing_ok=True)
 
 
 def _require_writable(request: VideoRequest) -> None:
     """Create and remove a file beside ``path``, so a directory that does not take one fails now.
 
     ffmpeg would find it only when it starts, at the first frame, after a
-    first pass has stepped the whole run to find the colour limit.
+    first pass has stepped the whole run to find the colour limit. Creating
+    the file is the test: one that cannot be removed after it
+    (:meth:`_PartialFile.discard`) refuses nothing.
 
     :raises VideoEncoderError: when the directory does not take the file.
     """
@@ -1054,10 +1066,13 @@ def write_fdtd_animation(
     :raises VideoEncoderError: If no encoder can write the video, a raw
         ``ffmpeg_encoder`` is not in this ffmpeg (both before any step), or
         the directory of ``path`` does not take a file (before any step, and
-        before ssh starts); if ffmpeg cannot be started or fails while
-        writing it, this machine's disk does not take the bytes of a node's
-        video as they arrive (it is full, say), or the finished video cannot
-        take the place of ``path`` (the message says where it was left).
+        before ssh starts; the message names ``path``); if ffmpeg cannot be
+        started or fails while writing it, ``ffmpeg_options`` it refuses
+        included, at the first frames (the message names the encoder and
+        quotes ffmpeg), this machine's disk does not take the bytes of a
+        node's video as they arrive (it is full, say), or the finished video
+        cannot take the place of ``path`` (the message says where it was
+        left).
     :raises ComputeImportError: When the device's library is not installed
         or does not import.
     :raises ComputeDeviceError: When the device is not present or not
@@ -1066,7 +1081,8 @@ def write_fdtd_animation(
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeRemoteError: For a failure of the connection or of the
         node (one without matplotlib or the font every frame is drawn in,
-        without ffmpeg, or without an encoder that writes this video), or
+        without ffmpeg, without an encoder that writes this video or the raw
+        ``ffmpeg_encoder``, or whose ffmpeg refuses the ``ffmpeg_options``), or
         video bytes back that are more than the frames can take, too few to
         be a video, or not the container ``path`` names; with
         ``fallback=True`` the run warns once with
@@ -1261,10 +1277,13 @@ def write_elastic_fdtd_animation(
     :raises VideoEncoderError: If no encoder can write the video, a raw
         ``ffmpeg_encoder`` is not in this ffmpeg (both before any step), or
         the directory of ``path`` does not take a file (before any step, and
-        before ssh starts); if ffmpeg cannot be started or fails while
-        writing it, this machine's disk does not take the bytes of a node's
-        video as they arrive (it is full, say), or the finished video cannot
-        take the place of ``path`` (the message says where it was left).
+        before ssh starts; the message names ``path``); if ffmpeg cannot be
+        started or fails while writing it, ``ffmpeg_options`` it refuses
+        included, at the first frames (the message names the encoder and
+        quotes ffmpeg), this machine's disk does not take the bytes of a
+        node's video as they arrive (it is full, say), or the finished video
+        cannot take the place of ``path`` (the message says where it was
+        left).
     :raises ComputeImportError: When the device's library is not installed
         or does not import.
     :raises ComputeDeviceError: When the device is not present or not
@@ -1273,7 +1292,8 @@ def write_elastic_fdtd_animation(
     :raises KeyError: For a ``host`` the hosts file does not name.
     :raises ComputeRemoteError: For a failure of the connection or of the
         node (one without matplotlib or the font every frame is drawn in,
-        without ffmpeg, or without an encoder that writes this video), or
+        without ffmpeg, without an encoder that writes this video or the raw
+        ``ffmpeg_encoder``, or whose ffmpeg refuses the ``ffmpeg_options``), or
         video bytes back that are more than the frames can take, too few to
         be a video, or not the container ``path`` names; with
         ``fallback=True`` the run warns once with

@@ -90,10 +90,13 @@ entonces ffmpeg escribe en un archivo oculto a su lado, con un nombre propio
 para cada escritura, y ese archivo se borra si algo corta la codificación, sea
 lo que sea: que ffmpeg falle, que se llene el disco o que tu función de
 actualización lance una excepción, que te llega como esa misma excepción. Así,
-un fallo deja lo que había antes en la ruta, incluido un vídeo bueno. Un vídeo
-terminado al que Windows no deja ocupar el lugar del archivo antiguo, porque
-un reproductor tiene abierto el antiguo, no se tira: se queda a su lado con su
-nombre oculto, y el `io.VideoEncoderError` dice dónde.
+un fallo deja lo que había antes en la ruta, incluido un vídeo bueno. Un
+archivo oculto que el sistema no deja borrar, como uno que un antivirus tiene
+abierto en Windows, se queda donde está, y lo que te llega sigue siendo lo que
+cortó la codificación. Un vídeo terminado al que Windows no deja ocupar el
+lugar del archivo antiguo, porque un reproductor tiene abierto el antiguo, no
+se tira: se queda a su lado con su nombre oculto, y el `io.VideoEncoderError`
+dice dónde.
 
 Cada fotograma es la figura entera, a su propio tamaño y con sus propios
 colores, digan lo que digan tus ajustes de matplotlib sobre cómo guardar
@@ -232,10 +235,11 @@ comprobación del contenedor y el formato de píxel, así que acertar con ellos
 te toca a ti: aquí VP9, que un `.webm` contiene, y `yuv420p`, que reproducen
 los navegadores. Se mantienen dos cosas: el relleno de un tamaño impar y, en
 un MP4, la disposición que le permite empezar a reproducirse antes de
-terminar de descargarse. Un codificador que este ffmpeg no tiene falla en
-ffmpeg, y el `io.VideoEncoderError` lleva las últimas líneas que escribió
-ffmpeg. Un codificador en bruto no admite `encoder=` ni `codec=` a su lado,
-ni sirve para un GIF.
+terminar de descargarse. Un codificador que este ffmpeg no tiene, o una
+opción que rechaza, falla en ffmpeg en los primeros fotogramas, y el
+`io.VideoEncoderError` nombra el codificador y lleva las últimas líneas que
+escribió ffmpeg. Un codificador en bruto no admite `encoder=` ni `codec=` a
+su lado, ni sirve para un GIF.
 
 Los preajustes son puntos de partida, no ajustes calibrados. phonometry usa
 el ffmpeg que encuentra, sin fijar ninguna versión, y el mismo CRF da otro

@@ -17,6 +17,7 @@ import pytest
 pytest.importorskip("matplotlib")
 import fake_ffmpeg
 import matplotlib as mpl
+import refusing_disk
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_svg import FigureCanvasSVG
@@ -189,6 +190,45 @@ def test_a_failed_encode_keeps_the_old_file(
         io.write_video(target, animation)
     assert target.read_bytes() == b"the video that was there"
     assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
+
+
+def test_a_failed_encode_names_the_encoder_that_ran(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The fake's NVENC fails its trial, so SVT-AV1 writes, and dies at frame 3.
+    fake_ffmpeg.install(tmp_path, monkeypatch, die_after_frames=3)
+    animation = _animation(frames=8)
+    with pytest.raises(io.VideoEncoderError) as caught:
+        io.write_video(tmp_path / "w.webm", animation)
+    assert "with the encoder libsvtav1; ffmpeg said:" in str(caught.value)
+
+
+def test_a_partial_file_the_system_will_not_remove_does_not_hide_the_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake_ffmpeg.install(tmp_path, monkeypatch, die_after_frames=3)
+    target = tmp_path / "w.webm"
+    target.write_bytes(b"the video that was there")
+    refusing_disk.hold_partials(monkeypatch)
+    animation = _animation(frames=8)
+    # ffmpeg's failure, not the one removing its unfinished file met after it.
+    with pytest.raises(io.VideoEncoderError, match="muxer failed"):
+        io.write_video(target, animation)
+    assert target.read_bytes() == b"the video that was there"
+
+
+def test_a_name_whose_status_cannot_be_read_is_left_to_the_encoder(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Inside a directory without search permission the check cannot tell a
+    # directory from a file at the name; the encoder, which writes there,
+    # finds what the directory allows. The fake runs in a process of its
+    # own, which the refusal does not reach, so here the write goes through.
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "w.webm"
+    refusing_disk.refuse_status(monkeypatch, target)
+    io.write_video(target, _animation())
+    assert target.read_bytes().startswith(b"\x1a\x45\xdf\xa3")
 
 
 def test_a_finished_video_that_cannot_take_the_place_of_path_says_where_it_is(

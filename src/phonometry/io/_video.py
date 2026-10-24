@@ -10,9 +10,11 @@ finished it. Until then ffmpeg writes to a hidden partial file beside it, a
 name of its own for each write, which is removed whatever fails (ffmpeg
 exits, the disk fills, the animation's own drawing raises), so a failed
 write never leaves a truncated video at ``path`` and never replaces a good
-one. A finished video that the system will not let take ``path``'s place
-(on Windows, while a player holds the old file open) stays under its
-partial name, and the error says where.
+one; a partial file the system will not let go (a scanner holding it on
+Windows) stays under its hidden name, and the error raised is still the
+one that stopped the write. A finished video that the system will not let
+take ``path``'s place (on Windows, while a player holds the old file open)
+stays under its partial name, and the error says where.
 
 How a video is encoded is one record, :class:`VideoOptions`, which checks
 its fields when it is built; what depends on the file (the container its
@@ -215,6 +217,21 @@ class VideoRequest:
         return self.path.with_name(f".{self.path.name}.{uuid.uuid4().hex}.partial")
 
 
+def _is_dir(path: Path) -> bool:
+    """Whether *path* is a directory; ``False`` when its status cannot be read.
+
+    Inside a directory this process cannot search, :meth:`Path.is_dir`
+    raises :class:`PermissionError` on Python 3.12 and 3.13 and answers
+    ``False`` on 3.14. Every version answers ``False`` here, and what the
+    directory allows is found by the write itself, which reports it as it
+    reports any directory that refuses the video.
+    """
+    try:
+        return path.is_dir()
+    except OSError:
+        return False
+
+
 def _target(path: object) -> tuple[Path, Container]:
     """The output path and its container, refused before anything runs."""
     if not isinstance(path, (str, os.PathLike)):
@@ -228,10 +245,10 @@ def _target(path: object) -> tuple[Path, Container]:
             f"writes; got {target.suffix or 'no suffix'!r}"
         )
         raise ValueError(msg)
-    if target.is_dir():
+    if _is_dir(target):
         msg = f"'path' names a directory: {str(target)!r}"
         raise ValueError(msg)
-    if not target.parent.is_dir():
+    if not _is_dir(target.parent):
         msg = f"the directory of 'path' does not exist: {str(target.parent)!r}"
         raise FileNotFoundError(msg)
     return target, container
@@ -507,7 +524,14 @@ class _FramePipe:
         # Animation.save hands on, rather than collide with it.
         frame_options = {**savefig_kwargs, "format": "rgba", "dpi": dpi}
         fig.savefig(buffer, **frame_options)
-        frame = buffer.getbuffer()
+        # Released however this ends: an error a caller keeps holds this
+        # frame's locals, and a buffer still exported cannot be freed.
+        with buffer.getbuffer() as frame:
+            self._send(frame)
+        self._frames += 1
+
+    def _send(self, frame: memoryview) -> None:
+        """Hand one frame's pixels to ffmpeg, once it is the size of the first."""
         if frame.nbytes != self._frame_bytes:
             msg = (
                 f"frame {self._frames} of {self._request.path.name} has "
@@ -523,7 +547,6 @@ class _FramePipe:
         except OSError as exc:
             reason = f"ffmpeg stopped reading at frame {self._frames}"
             raise self._failure(reason) from exc
-        self._frames += 1
 
     def close(self) -> None:
         """Let ffmpeg finish the file; raise with its words if it fails."""
@@ -564,10 +587,14 @@ class _FramePipe:
             self._process.stderr.close()
 
     def _failure(self, reason: str) -> VideoEncoderError:
+        """Stop ffmpeg; the error names the file, the encoder and what ffmpeg wrote last on stderr."""
         self.abort()
         said = "\n".join(self._tail) or "(nothing on stderr)"
+        # Named here because ffmpeg does not always name it: an option it
+        # does not know is refused without a word of the encoder.
+        encoder = f" with the encoder {self.encoder_name}" if self.encoder_name else ""
         return VideoEncoderError(
-            f"{reason} while writing {self._request.path}; ffmpeg said:\n{said}"
+            f"{reason} while writing {self._request.path}{encoder}; ffmpeg said:\n{said}"
         )
 
 
@@ -696,7 +723,11 @@ def encode(
         ):
             anim.save(str(partial), writer=_movie_writer(pipe))
     except BaseException:
-        partial.unlink(missing_ok=True)
+        # The error that stopped the write is the one raised: an unfinished
+        # file the system does not let go (a scanner holding it on Windows)
+        # stays, hidden, rather than hide that error behind its own.
+        with contextlib.suppress(OSError):
+            partial.unlink(missing_ok=True)
         raise
     settle(partial, request.path)
     return pipe.encoder_name
@@ -758,9 +789,12 @@ def write_video(
         Windows when it was found only in the working directory.
     :raises VideoEncoderError: if no encoder can write the video (the message
         lists the ones that can), ffmpeg cannot be started or fails while
-        writing it (with the last lines it wrote on stderr), or the finished
-        video cannot take the place of ``path`` (on Windows, while a player
-        holds the old file open; the message says where the video was left).
+        writing it, a raw ``ffmpeg_encoder`` it lacks or ``ffmpeg_options``
+        it refuses included, within the first frames (the message names the
+        encoder and quotes the last lines ffmpeg wrote on stderr), or the
+        finished video cannot take the place of ``path`` (on Windows, while
+        a player holds the old file open; the message says where the video
+        was left).
     :raises ImportError: if matplotlib is not installed.
     """
     options = video_options(video)

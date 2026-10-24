@@ -1744,6 +1744,7 @@ VideoOptions(
     fps: float | None = None,
     ffmpeg_encoder: str | None = None,
     ffmpeg_options: Sequence[str] = (),
+    vaapi_device: str = '/dev/dri/renderD128',
 )
 ```
 
@@ -1764,13 +1765,14 @@ checked when the path is known, still before anything starts.
 | `fps` | Frames per second; `None` (default) takes the animation's `interval`, and a simulation video plays at 30. |
 | `ffmpeg_encoder` | An ffmpeg encoder name to use as it is, with `ffmpeg_options`: no trial, no preset, no pixel format, and no check that the container holds what it writes. Not with a GIF, nor with an `encoder` or `codec` of your own. |
 | `ffmpeg_options` | More ffmpeg output options, as separate strings, written after the encoder's preset and pixel format (so a repeated one of those wins) and before the container's own options (an MP4's `+faststart` and HEVC tag, a GIF's endless loop), which stay; held as a tuple. |
+| `vaapi_device` | The GPU device a VAAPI encoder encodes on, as the path of its device file on the machine that encodes (the node's, for a video written on a node); `"/dev/dri/renderD128"` (default) is the first GPU of a Linux machine. Used whenever the library tries or uses a VAAPI encoder; an `ffmpeg_encoder` of your own takes none of the library's device setup. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for an `encoder`, `codec` or `quality` that is not a text, a `fps` that is not one number, an `ffmpeg_encoder` that is not a text, or `ffmpeg_options` that are not a sequence of separate texts. |
-| ValueError | for a choice outside its options, a `fps` that is not a positive finite number, an `ffmpeg_encoder` that does not name an encoder, an `ffmpeg_encoder` together with an `encoder` or a `codec` of your own, or a `codec` that your `encoder` does not write. |
+| TypeError | for an `encoder`, `codec` or `quality` that is not a text, a `fps` that is not one number (a bool is not one), an `ffmpeg_encoder` that is not a text, `ffmpeg_options` that are not a sequence of separate texts, or a `vaapi_device` that is not a text. |
+| ValueError | for a choice outside its options, a `fps` that is not a positive finite number, an `ffmpeg_encoder` that does not name an encoder, an empty `vaapi_device`, an `ffmpeg_encoder`, `ffmpeg_options` or `vaapi_device` that hold a NUL character, which no argument of a program can carry, an `ffmpeg_encoder` together with an `encoder` or a `codec` of your own, or a `codec` that your `encoder` does not write. |
 
 ## write
 

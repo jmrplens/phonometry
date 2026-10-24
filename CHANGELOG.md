@@ -114,10 +114,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   VP9 in a WebM and x265 or x264 in an MP4. A GIF is written on the CPU,
   with no trial. `quality`, `fps`, `codec` and raw
   `ffmpeg_encoder`/`ffmpeg_options` are there when the defaults are not
-  enough. The file appears only when ffmpeg has finished it, so a failed
-  write leaves the previous file in place. `io.FFmpegNotFoundError` says
-  ffmpeg is missing and how to install it; `io.VideoEncoderError` says no
-  encoder can write the video, or ffmpeg failed, with its last words.
+  enough, and `vaapi_device` names the GPU VAAPI encodes on when it is not
+  `/dev/dri/renderD128`, the first one. The file appears only when ffmpeg
+  has finished it, so a failed write leaves the previous file in place.
+  `io.FFmpegNotFoundError` says ffmpeg is missing and how to install it;
+  `io.VideoEncoderError` says no encoder can write the video, or ffmpeg
+  failed, with its last words.
 
 - **An FDTD run writes straight to a video, here or on a node.**
   `simulation.write_fdtd_animation(path, run)` and
@@ -2171,6 +2173,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   encoder). A raw `ffmpeg_encoder` this ffmpeg lacks, or `ffmpeg_options` it
   refuses, stops the write within its first frames and leaves the path as it
   was, here and on a node, and the tests now hold that with a real ffmpeg.
+
+- **A video passes over an ffmpeg in the Windows working directory, draws
+  every frame with Agg, and says more of what went wrong.** On Windows an
+  ffmpeg that Windows finds first in the working directory no longer stops
+  `io.write_video` or the two simulation writers when another is on `PATH`:
+  that one runs in its place, and only an ffmpeg found nowhere else is
+  refused. Every frame is drawn with Agg, also from a figure whose canvas
+  writes RGBA its own way, as Cairo's does, and the row or column that evens
+  out an odd frame has exactly the colour of a half-transparent figure's
+  frames, where it was one level off. A relative path whose first directory
+  holds a colon (`x:y/w.webm`) is written as a file, where ffmpeg read it as
+  the protocol `x`. `io.VideoOptions` refuses a bool for `fps`, where `True`
+  was read as one frame a second, and a NUL character in `ffmpeg_encoder` or
+  `ffmpeg_options` when it is built, where it was refused only as ffmpeg
+  started, for `ffmpeg_options` after a simulation's whole run. An ffmpeg
+  that has gone between being found and being run, or whose `-version` run
+  fails, is an `io.VideoEncoderError` that names it and quotes the run that
+  failed; with no encoder working, the install hint names the encoders of the
+  container and codec asked for (SVT-AV1 or libvpx for a WebM, SVT-AV1, x265
+  or x264 for an MP4); and why each encoder failed its trial is logged at
+  DEBUG on `phonometry.io`. An interrupt as ffmpeg starts stops it, with no
+  stray error from the thread that reads ffmpeg's last words, and the error
+  that quotes those words no longer breaks when their reader outlives its
+  wait.
 
 - **`fdtd_simulation` takes a `PlaneWaveSource` by its type, and draws the
   snapshot of a plane-wave run.** The function always handed a plane wave to

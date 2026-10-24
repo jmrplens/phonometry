@@ -37,10 +37,12 @@ que ejecutaría matplotlib, el que nombra `rcParams["animation.ffmpeg_path"]`
 (`"ffmpeg"`, buscado en el `PATH`, salvo que lo cambies), y lanza
 `io.FFmpegNotFoundError` con esos comandos de instalación cuando no está. En
 Windows, que busca un programa en el directorio de trabajo antes que en el
-`PATH`, se rechaza un ffmpeg que solo esté ahí: ponlo en el `PATH`, o
-nómbralo por su ruta completa en ese rcParam. En Pyodide, que no puede
-arrancar un programa, `write_video` lanza el mismo error. matplotlib se
-instala con `pip install "phonometry[plot]"`.
+`PATH`, un ffmpeg que esté ahí cede el paso al del `PATH`, y se rechaza uno
+que solo esté ahí: ponlo en el `PATH`, o nómbralo por su ruta completa en
+ese rcParam. Nombrado por su ruta completa, o encontrado en un directorio
+de trabajo que el propio `PATH` incluye, se ejecuta ese mismo. En Pyodide,
+que no puede arrancar un programa, `write_video` lanza el mismo error.
+matplotlib se instala con `pip install "phonometry[plot]"`.
 
 ## 1. Cualquier animación: `io.write_video`
 
@@ -134,13 +136,17 @@ vídeo que escribas.
 | `fps` | fotogramas por segundo, un número positivo, o `None` | `None`: el `interval` de la animación |
 | `ffmpeg_encoder` | un nombre de codificador de ffmpeg, o `None` | `None` |
 | `ffmpeg_options` | más opciones de salida de ffmpeg, como textos separados | `()` |
+| `vaapi_device` | la ruta del dispositivo de GPU en el que codifica VAAPI | `"/dev/dri/renderD128"` |
 
 Construir el registro lanza `ValueError` (`TypeError` para un valor de tipo
-equivocado) ante una elección fuera de sus opciones, un `fps` que no sea un
-número finito positivo, un `ffmpeg_encoder` junto a un `encoder` o un
-`codec` elegidos por ti, y un `codec` que el tipo de codificador que
-nombraste no escribe, como `encoder="videotoolbox", codec="av1"`:
-VideoToolbox solo escribe HEVC y H.264. Lo que depende del archivo se
+equivocado, como un booleano en `fps`) ante una elección fuera de sus
+opciones, un `fps` que no sea un número finito positivo, un `vaapi_device`
+vacío, un `ffmpeg_encoder`, unas `ffmpeg_options` o un `vaapi_device` que
+contengan un carácter NUL, que ningún argumento de un programa puede llevar,
+un `ffmpeg_encoder` junto a un `encoder` o un `codec` elegidos por ti, y un
+`codec` que el tipo de codificador que nombraste no escribe, como
+`encoder="videotoolbox", codec="av1"`: VideoToolbox solo escribe HEVC y
+H.264. Lo que depende del archivo se
 comprueba cuando `write_video` tiene la ruta, todavía antes de que se
 ejecute ffmpeg: el sufijo, el directorio, un códec que el contenedor no
 contiene (VP9 en un `.mp4`), un codificador que no escribe ninguno de los
@@ -157,8 +163,9 @@ except ValueError as error:
 
 **Qué codificador.** Con `encoder="auto"`, el valor por defecto, los tipos
 de codificador se prueban en este orden: NVENC en una GPU de NVIDIA, Quick
-Sync en una de Intel, VAAPI en Linux (a través de `/dev/dri/renderD128`),
-VideoToolbox en un Mac y, por último, la CPU. Dentro de cada tipo, los
+Sync en una de Intel, VAAPI en Linux (a través de `/dev/dri/renderD128`, la
+primera GPU, o del dispositivo que nombre `vaapi_device`), VideoToolbox en un
+Mac y, por último, la CPU. Dentro de cada tipo, los
 códecs del contenedor se prueban del mejor al peor, en el orden de la tabla
 de la sección 1, así que en un `.mp4` un HEVC de NVENC va antes que un AV1
 en la CPU. En la CPU, AV1 es SVT-AV1 y nunca libaom. Sin SVT-AV1, un
@@ -195,9 +202,11 @@ h264 = io.VideoOptions(encoder="cpu", codec="h264")
 io.write_video("wave.mp4", animation, video=h264)
 ```
 
-Aquí se imprime `INFO:phonometry.io:writing mp4 with libx264 (cpu, h264)`. En
-una máquina con una GPU de NVIDIA y un ffmpeg compilado con NVENC, una
-llamada puede pedir la GPU por su nombre:
+Aquí se imprime `INFO:phonometry.io:writing mp4 with libx264 (cpu, h264)`.
+Con nivel `DEBUG`, el logger dice además por qué falló su prueba cada
+codificador descartado, con lo último que escribió ffmpeg, como una GPU que
+no encontró. En una máquina con una GPU de NVIDIA y un ffmpeg compilado con
+NVENC, una llamada puede pedir la GPU por su nombre:
 
 ```py
 io.write_video("wave.webm", animation, video=io.VideoOptions(encoder="nvenc", codec="av1"))
@@ -412,7 +421,8 @@ print(res.provenance.host)   # nas
 
 El nodo calcula la ejecución, dibuja sus fotogramas con el mismo estilo por
 defecto y codifica el vídeo con su propio ffmpeg, que lleva la imagen del
-nodo y que un nodo Python necesita en su `PATH`, junto a matplotlib. Solo
+nodo y que un nodo Python necesita en su `PATH`, junto a matplotlib; un
+`vaapi_device` nombra un dispositivo del nodo. Solo
 vuelven el resultado y los bytes del vídeo, así que esta máquina no necesita
 para ello ni ffmpeg ni matplotlib, salvo que una ejecución fallida vuelva a
 ella con `fallback=True`. La ejecución, el registro del fotograma y las

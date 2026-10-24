@@ -323,6 +323,7 @@ def _preflight(request: VideoRequest, size: tuple[int, int]) -> _Encoding:
         container=request.container,
         width=width,
         height=height,
+        vaapi_device=options.vaapi_device,
     )
     return _Encoding(ffmpeg, choice)
 

@@ -46,12 +46,15 @@ from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, get_args
+from typing import TYPE_CHECKING, Any, Final, cast, get_args
+
+import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.validation import require_choice, require_positive, require_scalar
 from ._video_encoders import (
     CONTAINER_CODECS,
+    DEFAULT_VAAPI_DEVICE,
     FFMPEG_NAMES,
     NO_WINDOW,
     Codec,
@@ -138,15 +141,24 @@ class VideoOptions(RichDisplay):
         one of those wins) and before the container's own options (an MP4's
         ``+faststart`` and HEVC tag, a GIF's endless loop), which stay; held
         as a tuple.
+    :param vaapi_device: The GPU device a VAAPI encoder encodes on, as the
+        path of its device file on the machine that encodes (the node's, for
+        a video written on a node); ``"/dev/dri/renderD128"`` (default) is
+        the first GPU of a Linux machine. Used whenever the library tries or
+        uses a VAAPI encoder; an ``ffmpeg_encoder`` of your own takes none of
+        the library's device setup.
     :raises TypeError: for an ``encoder``, ``codec`` or ``quality`` that is
-        not a text, a ``fps`` that is not one number, an ``ffmpeg_encoder``
-        that is not a text, or ``ffmpeg_options`` that are not a sequence of
-        separate texts.
+        not a text, a ``fps`` that is not one number (a bool is not one), an
+        ``ffmpeg_encoder`` that is not a text, ``ffmpeg_options`` that are
+        not a sequence of separate texts, or a ``vaapi_device`` that is not a
+        text.
     :raises ValueError: for a choice outside its options, a ``fps`` that is
         not a positive finite number, an ``ffmpeg_encoder`` that does not
-        name an encoder, an ``ffmpeg_encoder`` together with an ``encoder``
-        or a ``codec`` of your own, or a ``codec`` that your ``encoder`` does
-        not write.
+        name an encoder, an empty ``vaapi_device``, an ``ffmpeg_encoder``,
+        ``ffmpeg_options`` or ``vaapi_device`` that hold a NUL character,
+        which no argument of a program can carry, an ``ffmpeg_encoder``
+        together with an ``encoder`` or a ``codec`` of your own, or a
+        ``codec`` that your ``encoder`` does not write.
     """
 
     encoder: Encoder = "auto"
@@ -155,6 +167,7 @@ class VideoOptions(RichDisplay):
     fps: float | None = None
     ffmpeg_encoder: str | None = None
     ffmpeg_options: Sequence[str] = ()
+    vaapi_device: str = DEFAULT_VAAPI_DEVICE
 
     def __post_init__(self) -> None:
         """Refuse a field of the wrong type, or outside its options, when the record is built."""
@@ -163,10 +176,7 @@ class VideoOptions(RichDisplay):
             None if self.codec is None else require_choice(self.codec, "codec", _CODECS)
         )
         quality = require_choice(self.quality, "quality", _QUALITIES)
-        rate = None
-        if self.fps is not None:
-            require_scalar(self.fps, "fps")
-            rate = require_positive(self.fps, "fps")
+        rate = None if self.fps is None else _frames_per_second(self.fps)
         raw, options = _raw_ffmpeg(self.ffmpeg_encoder, self.ffmpeg_options)
         if raw is not None and (encoder != "auto" or codec is not None):
             msg = (
@@ -175,6 +185,7 @@ class VideoOptions(RichDisplay):
             )
             raise ValueError(msg)
         _require_written(encoder, codec)
+        _require_device(self.vaapi_device)
         # Held as plain values and a tuple, so a list handed in cannot change
         # the record after it is built, and a whole fps reads back as a float.
         object.__setattr__(self, "encoder", encoder)
@@ -260,6 +271,59 @@ def _target(path: object) -> tuple[Path, Container]:
     return target, container
 
 
+def _frames_per_second(fps: object) -> float:
+    """The caller's ``fps``, one positive finite number.
+
+    :raises TypeError: for a bool, a text, an array or anything else that is
+        not one number.
+    :raises ValueError: for a number that is not positive and finite.
+    """
+    if isinstance(fps, bool | np.bool_):
+        # float(True) is 1.0: read as a number it would be a frame a second.
+        msg = f"'fps' must be one number, not a bool; got {fps!r}."
+        raise TypeError(msg)
+    require_scalar(fps, "fps")
+    return require_positive(cast("float", fps), "fps")
+
+
+def _without_nul(texts: tuple[str, ...], name: str) -> None:
+    """Refuse a text that holds a NUL character, which no argument of a program can carry.
+
+    :raises ValueError: naming *name*, for the first such text.
+    """
+    held = next((text for text in texts if "\0" in text), None)
+    if held is not None:
+        msg = (
+            f"'{name}' cannot hold a NUL character, which no argument of a program "
+            f"can carry; got {held!r}"
+        )
+        raise ValueError(msg)
+
+
+def _require_device(vaapi_device: object) -> None:
+    """Refuse a ``vaapi_device`` that is not a path ffmpeg can be handed.
+
+    Whether the device exists is the trial's to find, on the machine that
+    encodes.
+
+    :raises TypeError: for anything but a text.
+    :raises ValueError: for an empty text, or one that holds a NUL character.
+    """
+    if not isinstance(vaapi_device, str):
+        msg = (
+            "'vaapi_device' must be a str, the path of the GPU device VAAPI encodes "
+            f"on, such as '/dev/dri/renderD128'; got {type(vaapi_device).__name__}"
+        )
+        raise TypeError(msg)
+    if not vaapi_device:
+        msg = (
+            "'vaapi_device' must name the GPU device VAAPI encodes on, such as "
+            "'/dev/dri/renderD128'; got ''"
+        )
+        raise ValueError(msg)
+    _without_nul((vaapi_device,), "vaapi_device")
+
+
 def _raw_ffmpeg(
     ffmpeg_encoder: object, ffmpeg_options: object
 ) -> tuple[str | None, tuple[str, ...]]:
@@ -275,6 +339,7 @@ def _raw_ffmpeg(
     if strangers:
         msg = f"every item of 'ffmpeg_options' must be a str, got {strangers[0]!r}"
         raise TypeError(msg)
+    _without_nul(options, "ffmpeg_options")
     if ffmpeg_encoder is None:
         return None, options
     if not isinstance(ffmpeg_encoder, str):
@@ -283,6 +348,7 @@ def _raw_ffmpeg(
     if not ffmpeg_encoder or ffmpeg_encoder.startswith("-"):
         msg = f"'ffmpeg_encoder' must name an encoder, such as 'libx264'; got {ffmpeg_encoder!r}"
         raise ValueError(msg)
+    _without_nul((ffmpeg_encoder,), "ffmpeg_encoder")
     return ffmpeg_encoder, options
 
 
@@ -397,17 +463,36 @@ def _frame_rate(request: VideoRequest, animation: Animation) -> str:
 
 
 def _pad_color(fig: Figure) -> str:
-    """The figure's facecolor composited on white, as ``Animation.save`` does."""
-    from matplotlib.colors import to_hex, to_rgba
+    """The figure's facecolor composited on white, as ``Animation.save`` does, at the level Agg draws it.
+
+    The composite is computed in the order ``Animation.save`` computes it,
+    and each channel is taken to eight bits as Agg takes it, rounding a
+    half up: :func:`matplotlib.colors.to_hex` rounds a half to even, and
+    would pad a half-transparent ``#336699`` with ``b2`` where the frames
+    show ``b3``.
+    """
+    from matplotlib.colors import to_rgba
 
     red, green, blue, alpha = to_rgba(fig.get_facecolor())
-    return to_hex(
-        (
-            alpha * red + 1.0 - alpha,
-            alpha * green + 1.0 - alpha,
-            alpha * blue + 1.0 - alpha,
-        )
+    levels = (
+        math.floor((alpha * channel + 1.0 - alpha) * 255.0 + 0.5)
+        for channel in (red, green, blue)
     )
+    return "#" + "".join(f"{level:02x}" for level in levels)
+
+
+def _with_agg(fig: Figure) -> dict[str, str]:
+    """What makes ``savefig`` draw *fig*'s RGBA frame with Agg.
+
+    Nothing for a canvas whose RGBA writer is Agg's own (an Agg canvas, or a
+    GUI one built on it), which keeps its renderer from one frame to the
+    next; ``backend="agg"`` for any other, so that a canvas with an RGBA
+    writer of its own (Cairo's) does not draw the frames.
+    """
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    own = getattr(type(fig.canvas), "print_rgba", None)
+    return {} if own is FigureCanvasAgg.print_rgba else {"backend": "agg"}
 
 
 class _FramePipe:
@@ -430,6 +515,9 @@ class _FramePipe:
         self.encoder_name = "gif" if request.container == "gif" else ""
         self._process: subprocess.Popen[bytes] | None = None
         self._tail: deque[str] = deque(maxlen=_STDERR_LINES)
+        # The reader may outlive its wait (a program behind cmd.exe holding
+        # the pipe open), so the tail is copied under the lock it appends under.
+        self._tail_lock = threading.Lock()
         self._drain: threading.Thread | None = None
         self._inches = (0.0, 0.0)
         self._frame_bytes = 0
@@ -460,15 +548,21 @@ class _FramePipe:
             )
             with _RUNNING_LOCK:
                 _RUNNING.add(self._process)
-            drain = threading.Thread(target=self._read_stderr, daemon=True)
-            drain.start()
+            # Kept before it starts: an interrupt inside start() may come
+            # when the reader already runs, and it is then waited for.
+            self._drain = threading.Thread(target=self._read_stderr, daemon=True)
+            self._drain.start()
         except (OSError, RuntimeError) as exc:
             # A thread that cannot start leaves ffmpeg running with nobody to
             # read it: it is stopped and its pipes closed.
             self.abort()
             msg = f"could not start {self._ffmpeg.path} to write {self._request.path}: {exc}"
             raise VideoEncoderError(msg) from exc
-        self._drain = drain
+        except BaseException:
+            # So does an interrupt between the two, which reaches the caller
+            # as it is.
+            self.abort()
+            raise
 
     def _arguments(self, fig: Figure, width: int, height: int) -> VideoArguments:
         request = self._request
@@ -497,6 +591,7 @@ class _FramePipe:
             container=request.container,
             width=width,
             height=height,
+            vaapi_device=options.vaapi_device,
         )
         self.encoder_name = choice.name
         return video_arguments(
@@ -507,16 +602,23 @@ class _FramePipe:
             width=width,
             height=height,
             pad_color=pad_color,
+            vaapi_device=options.vaapi_device,
         )
 
     def _read_stderr(self) -> None:
         process = self._process
         if process is None or process.stderr is None:
             return
+        with self._tail_lock:
+            # Closed by an abort that came before this reader started.
+            if process.stderr.closed:
+                return
         # Closed at the end of the stream, by the thread that reads it.
         with process.stderr:
             for line in process.stderr:
-                self._tail.append(line.decode(errors="replace").rstrip())
+                text = line.decode(errors="replace").rstrip()
+                with self._tail_lock:
+                    self._tail.append(text)
 
     def write_frame(
         self, fig: Figure, dpi: float, savefig_kwargs: Mapping[str, Any]
@@ -527,9 +629,14 @@ class _FramePipe:
         # otherwise shear every frame after.
         fig.set_size_inches(self._inches)
         buffer = io.BytesIO()
-        # The format and the dpi are the stream's: they win over anything
-        # Animation.save hands on, rather than collide with it.
-        frame_options = {**savefig_kwargs, "format": "rgba", "dpi": dpi}
+        # The format, the dpi and the renderer are the stream's: they win
+        # over anything Animation.save hands on, rather than collide with it.
+        frame_options = {
+            **savefig_kwargs,
+            "format": "rgba",
+            "dpi": dpi,
+            **_with_agg(fig),
+        }
         fig.savefig(buffer, **frame_options)
         # Released however this ends: an error a caller keeps holds this
         # frame's locals, and a buffer still exported cannot be freed.
@@ -587,16 +694,22 @@ class _FramePipe:
         self._join()
 
     def _join(self) -> None:
-        """Wait for the reader of stderr, or close the pipe if none started."""
-        if self._drain is not None:
-            self._drain.join(timeout=_EXIT_TIMEOUT_S)
-        elif self._process is not None and self._process.stderr is not None:
-            self._process.stderr.close()
+        """Wait for the reader of stderr, or close the pipe if it is not running."""
+        drain, process = self._drain, self._process
+        with self._tail_lock:
+            # Decided under the reader's lock: a reader that starts after
+            # this finds its pipe closed and leaves it alone.
+            running = drain is not None and drain.is_alive()
+            if not running and process is not None and process.stderr is not None:
+                process.stderr.close()
+        if running and drain is not None:
+            drain.join(timeout=_EXIT_TIMEOUT_S)
 
     def _failure(self, reason: str) -> VideoEncoderError:
         """Stop ffmpeg; the error names the file, the encoder and what ffmpeg wrote last on stderr."""
         self.abort()
-        said = "\n".join(self._tail) or "(nothing on stderr)"
+        with self._tail_lock:
+            said = "\n".join(self._tail) or "(nothing on stderr)"
         # Named here because ffmpeg does not always name it: an option it
         # does not know is refused without a word of the encoder.
         encoder = f" with the encoder {self.encoder_name}" if self.encoder_name else ""
@@ -752,7 +865,9 @@ def encode(
 
     rate = _frame_rate(request, animation)
     described = describe(find_ffmpeg()) if ffmpeg is None else ffmpeg
-    partial = request.new_partial()
+    # Absolute, so that ffmpeg reads it as a file: a relative "x:y/w.webm"
+    # would be the protocol "x".
+    partial = request.new_partial().absolute()
     pipe = _FramePipe(request, described, rate, output=partial, choice=choice)
     try:
         # Every frame is saved under these, whatever the caller's rcParams say.

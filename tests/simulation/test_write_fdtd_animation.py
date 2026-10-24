@@ -105,6 +105,22 @@ def test_one_frame_every_snapshot_every_steps(
     assert target.read_bytes().startswith(b"\x1a\x45\xdf\xa3")
 
 
+def test_vaapi_is_tried_before_the_run_and_used_on_the_device_named(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = fake_ffmpeg.install(
+        tmp_path, monkeypatch, encoders=["av1_vaapi"], working=["av1_vaapi"]
+    )
+    video = VideoOptions(encoder="vaapi", vaapi_device="/dev/dri/renderD129")
+    write_fdtd_animation(
+        tmp_path / "v.webm", _run(1e-3), frame=_SMALL_FIXED, video=video
+    )
+    (trial,) = fake.trials()
+    (encode,) = fake.encodes()
+    for argv in (trial["argv"], encode["argv"]):
+        assert argv[argv.index("-vaapi_device") + 1] == "/dev/dri/renderD129"
+
+
 def test_the_default_frame_is_960_by_540(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

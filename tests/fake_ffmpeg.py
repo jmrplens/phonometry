@@ -12,7 +12,10 @@ JSON file the test writes and may rewrite between two calls:
 * ``working``: the ones an encode succeeds with (the others fail the way an
   NVENC encoder fails on a machine without the GPU);
 * ``die_after_frames``: stop reading and fail after this many frames;
-* ``first_frame``: a path the first frame's raw bytes are copied to.
+* ``first_frame``: a path the first frame's raw bytes are copied to;
+* ``said``: what ``-version`` and ``-encoders`` write on stderr, by flag
+  (``{"-version": "a warning"}``);
+* ``fails``: the flags of the two whose run exits with an error.
 
 Every run appends one line of JSON to the log the helper names: the argument
 list, what kind of run it was and how many whole frames arrived on stdin. A
@@ -46,6 +49,8 @@ DEFAULTS: dict[str, Any] = {
     "working": ["libsvtav1", "libvpx-vp9", "libx264", "libx265"],
     "die_after_frames": None,
     "first_frame": None,
+    "said": {},
+    "fails": [],
 }
 
 #: The first bytes each muxer writes.
@@ -110,19 +115,29 @@ def _encode(spec: dict[str, Any], argv: list[str]) -> int:
     return 0
 
 
+def _listing(spec: dict[str, Any], argv: list[str], flag: str) -> int:
+    """Answer ``-version`` or ``-encoders``, or fail as the spec says."""
+    _log(spec, {"kind": flag[1:], "argv": argv, "frames": 0, "remainder": 0})
+    said = spec.get("said", {}).get(flag)
+    if said:
+        sys.stderr.write(said + "\n")
+    if flag in spec.get("fails", []):
+        return 1
+    if flag == "-version":
+        sys.stdout.write(spec["version"] + "\n")
+        return 0
+    sys.stdout.write("Encoders:\n V..... = Video\n ------\n")
+    for name in spec["encoders"]:
+        sys.stdout.write(f" V....D {name:<20} fake {name}\n")
+    return 0
+
+
 def main(argv: list[str]) -> int:
     """Behave as the spec file says; return the exit status."""
     spec = json.loads(Path(os.environ[SPEC_VARIABLE]).read_text(encoding="utf-8"))
-    if "-version" in argv:
-        _log(spec, {"kind": "version", "argv": argv, "frames": 0, "remainder": 0})
-        sys.stdout.write(spec["version"] + "\n")
-        return 0
-    if "-encoders" in argv:
-        _log(spec, {"kind": "encoders", "argv": argv, "frames": 0, "remainder": 0})
-        sys.stdout.write("Encoders:\n V..... = Video\n ------\n")
-        for name in spec["encoders"]:
-            sys.stdout.write(f" V....D {name:<20} fake {name}\n")
-        return 0
+    for flag in ("-version", "-encoders"):
+        if flag in argv:
+            return _listing(spec, argv, flag)
     return _encode(spec, argv)
 
 

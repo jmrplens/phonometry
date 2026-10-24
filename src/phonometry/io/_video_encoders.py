@@ -10,8 +10,8 @@ tries them (NVENC, Quick Sync, VAAPI, VideoToolbox, then the CPU), encodes
 one black frame of the real frame size to ffmpeg's null muxer, and the first
 that succeeds writes the video. A success is remembered for the rest of the
 process, keyed by the ffmpeg binary and its version, the encoder and the
-frame size; a failure is not, because a GPU encoder that failed for want of
-a free session works a second later.
+frame size, and for VAAPI the device; a failure is not, because a GPU
+encoder that failed for want of a free session works a second later.
 
 On the CPU the AV1 encoder is SVT-AV1; when it is absent a WebM gets VP9
 (libvpx) and an MP4 HEVC (x265) or H.264 (x264). libaom, the reference AV1
@@ -92,26 +92,38 @@ FFMPEG_NAMES: Final[Mapping[tuple[Hardware, Codec], str]] = MappingProxyType(
     }
 )
 
-#: What each kind needs around the encoder: options before the input, a
-#: filter that hands the frames to the device, and the pixel format.
-_HARDWARE: Final[Mapping[Hardware, tuple[tuple[str, ...], str | None, str | None]]] = (
-    MappingProxyType(
-        {
-            "cpu": ((), None, "yuv420p"),
-            "nvenc": ((), None, "yuv420p"),
-            "qsv": ((), None, "nv12"),
-            "vaapi": (
-                ("-vaapi_device", "/dev/dri/renderD128"),
-                "format=nv12,hwupload",
-                None,
-            ),
-            "videotoolbox": ((), None, "yuv420p"),
-        }
-    )
+#: The library each CPU encoder comes from, as an install hint names it.
+_CPU_LIBRARIES: Final[Mapping[str, str]] = MappingProxyType(
+    {
+        "libsvtav1": "SVT-AV1",
+        "libvpx-vp9": "libvpx",
+        "libx265": "x265",
+        "libx264": "x264",
+    }
 )
+
+#: What each kind needs around the encoder: a filter that hands the frames
+#: to the device, and the pixel format. VAAPI also needs its device named
+#: before the input (:func:`video_arguments`).
+_HARDWARE: Final[Mapping[Hardware, tuple[str | None, str | None]]] = MappingProxyType(
+    {
+        "cpu": (None, "yuv420p"),
+        "nvenc": (None, "yuv420p"),
+        "qsv": (None, "nv12"),
+        "vaapi": ("format=nv12,hwupload", None),
+        "videotoolbox": (None, "yuv420p"),
+    }
+)
+
+#: The GPU device VAAPI encodes on unless ``VideoOptions.vaapi_device``
+#: names another: the first GPU of a Linux machine.
+DEFAULT_VAAPI_DEVICE: Final = "/dev/dri/renderD128"
 
 #: Seconds a trial encode or a ``-version`` run may take.
 _RUN_TIMEOUT_S: Final = 60.0
+
+#: How many of the last characters ffmpeg wrote on stderr a message quotes.
+_STDERR_TAIL_CHARS: Final = 400
 
 #: Keeps a console window from flashing up for every ffmpeg run on Windows
 #: (from a notebook or pythonw), as matplotlib's own movie writers do; the
@@ -165,39 +177,57 @@ class VideoArguments:
 
 _LOCK = threading.Lock()
 _DESCRIBED: dict[tuple[str, int, int], FFmpeg] = {}
-_PASSED: set[tuple[str, str, str, int, int]] = set()
+_PASSED: set[tuple[str, str, str, int, int, str]] = set()
 
 
-def _outside_the_working_directory(named: str, found: str) -> None:
-    """Refuse, on Windows, an ffmpeg found only because Windows looks in the working directory first.
+def _outside_the_working_directory(named: str, found: str) -> str:
+    """The ffmpeg to run: on Windows, the one on ``PATH`` rather than one in the working directory.
 
-    A bare name such as ``"ffmpeg"`` is looked up there before ``PATH``, so
-    an ``ffmpeg.exe`` or ``ffmpeg.bat`` left in a notebook's folder would run
-    in place of the one the user installed. A name with a directory, or a
-    working directory that ``PATH`` itself lists, is the user's own choice.
+    Windows looks a bare name such as ``"ffmpeg"`` up in the working
+    directory before ``PATH``, so an ``ffmpeg.exe`` or ``ffmpeg.bat`` left in
+    a notebook's folder would run in place of the one the user installed.
+    Such a file is passed over and ``PATH`` is searched on its own; ffmpeg
+    runs by the path found there, which holds a directory, so the file in
+    the working directory does not run. A name with a directory, or a
+    working directory that ``PATH`` itself lists, is the user's own choice,
+    and is run as found.
 
-    :raises FFmpegNotFoundError: for such an ffmpeg.
+    :raises FFmpegNotFoundError: for an ffmpeg found only in the working
+        directory.
     """
     if sys.platform != "win32" or Path(named).name != named:
-        return
+        return found
     here = Path.cwd().resolve()
-    listed = {
-        Path(entry).resolve()
-        for entry in os.environ.get("PATH", "").split(os.pathsep)
-        if entry
-    }
-    if Path(found).resolve().parent == here and here not in listed:
-        msg = (
-            f"ffmpeg was found only in the working directory ({found}), which Windows "
-            "searches before PATH; phonometry does not run a program from there. "
-            "Put ffmpeg on PATH, or name it by its full path in "
-            "rcParams['animation.ffmpeg_path']"
-        )
-        raise FFmpegNotFoundError(msg)
+    entries = [entry for entry in os.environ.get("PATH", "").split(os.pathsep) if entry]
+    if Path(found).parent.resolve() != here or here in {
+        Path(entry).resolve() for entry in entries
+    }:
+        return found
+    for entry in entries:
+        # A name with a directory is looked up in that directory alone.
+        installed = shutil.which(str(Path(entry) / named))
+        if installed is not None:
+            _LOG.info(
+                "running %s from PATH, not %s from the working directory, which "
+                "Windows searches first",
+                installed,
+                found,
+            )
+            return installed
+    msg = (
+        f"ffmpeg was found only in the working directory ({found}), which Windows "
+        "searches before PATH; phonometry does not run a program from there. "
+        "Put ffmpeg on PATH, or name it by its full path in "
+        "rcParams['animation.ffmpeg_path']"
+    )
+    raise FFmpegNotFoundError(msg)
 
 
 def find_ffmpeg() -> str:
-    """The ffmpeg matplotlib would run: ``rcParams["animation.ffmpeg_path"]``.
+    """The ffmpeg matplotlib would run: ``rcParams["animation.ffmpeg_path"]``, by the path it was found at.
+
+    On Windows a bare name is looked up on ``PATH`` past an ffmpeg in the
+    working directory, which Windows searches first.
 
     :raises FFmpegNotFoundError: when that name is not on ``PATH``, in
         Pyodide, which cannot start a program, or on Windows when it was
@@ -223,8 +253,7 @@ def find_ffmpeg() -> str:
             f"rcParams['animation.ffmpeg_path'] names, is not on PATH; {_INSTALL_HINT}"
         )
         raise FFmpegNotFoundError(msg)
-    _outside_the_working_directory(named, found)
-    return found
+    return _outside_the_working_directory(named, found)
 
 
 def _run(
@@ -249,33 +278,59 @@ def _run(
     )
 
 
+def _tail(stderr: bytes) -> str:
+    """The last of what ffmpeg wrote on stderr, as text, for a message or the log."""
+    return stderr.decode(errors="replace")[-_STDERR_TAIL_CHARS:].strip()
+
+
+def _listed(path: str, flag: str) -> bytes:
+    """What the ffmpeg at *path* writes on stdout for *flag*, ``-version`` or ``-encoders``.
+
+    :raises VideoEncoderError: when it does not start, does not finish in
+        time, or exits with an error; the message quotes that run's own
+        stderr.
+    """
+    try:
+        done = _run([path, "-hide_banner", flag])
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        msg = f"{path} did not run: {exc}"
+        raise VideoEncoderError(msg) from exc
+    if done.returncode:
+        said = _tail(done.stderr) or "nothing on stderr"
+        msg = (
+            f"{path} did not run: {said} ({flag} exited with status {done.returncode})"
+        )
+        raise VideoEncoderError(msg)
+    return done.stdout
+
+
 def describe(path: str) -> FFmpeg:
     """The version line and the compiled encoders of the ffmpeg at *path*.
 
     Read once per binary and process: the key is the path with the file's
     modification time and size, so an ffmpeg replaced on disk is read again.
+    The encoders are listed only once ``-version`` has succeeded.
 
-    :raises VideoEncoderError: when that ffmpeg does not run.
+    :raises VideoEncoderError: when that ffmpeg is gone, cannot be read, or
+        does not run (the message names *path*, and quotes the stderr of the
+        run that failed).
     """
-    status = Path(path).stat()
+    try:
+        status = Path(path).stat()
+    except OSError as exc:
+        msg = f"{path} did not run: {exc}"
+        raise VideoEncoderError(msg) from exc
     key = (path, status.st_mtime_ns, status.st_size)
     with _LOCK:
         known = _DESCRIBED.get(key)
     if known is not None:
         return known
-    try:
-        version = _run([path, "-hide_banner", "-version"])
-        listing = _run([path, "-hide_banner", "-encoders"])
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        msg = f"{path} did not run: {exc}"
-        raise VideoEncoderError(msg) from exc
-    if version.returncode or listing.returncode:
-        msg = f"{path} did not run: {(version.stderr or listing.stderr).decode(errors='replace')[-400:]}"
-        raise VideoEncoderError(msg)
-    lines = version.stdout.decode(errors="replace").splitlines()
+    version = _listed(path, "-version")
+    listing = _listed(path, "-encoders")
+    lines = version.decode(errors="replace").splitlines()
     matches = (
         _ENCODER_LINE.match(line)
-        for line in listing.stdout.decode(errors="replace").splitlines()
+        for line in listing.decode(errors="replace").splitlines()
     )
     found = FFmpeg(
         path=path,
@@ -319,10 +374,15 @@ def video_arguments(
     width: int,
     height: int,
     pad_color: str,
+    vaapi_device: str,
 ) -> VideoArguments:
-    """The encoder part of the command for an encoder the library chose."""
-    before, upload, pixel_format = _HARDWARE[choice.hardware]
+    """The encoder part of the command for an encoder the library chose.
+
+    A VAAPI encoder encodes on *vaapi_device*; the others take no device.
+    """
+    upload, pixel_format = _HARDWARE[choice.hardware]
     pixels = () if pixel_format is None else ("-pix_fmt", pixel_format)
+    before = ("-vaapi_device", vaapi_device) if choice.hardware == "vaapi" else ()
     return VideoArguments(
         before_input=before,
         filters=_filters(_pad(width, height, pad_color), upload),
@@ -428,9 +488,17 @@ def ffmpeg_command(
     ]
 
 
-def trial(ffmpeg: FFmpeg, choice: EncoderChoice, *, width: int, height: int) -> bool:
-    """Whether *choice* encodes one black frame of this size here, now."""
-    key = (ffmpeg.path, ffmpeg.version, choice.name, width, height)
+def trial(
+    ffmpeg: FFmpeg, choice: EncoderChoice, *, width: int, height: int, vaapi_device: str
+) -> bool:
+    """Whether *choice* encodes one black frame of this size here, now.
+
+    A VAAPI encoder is tried on *vaapi_device*, and its success is
+    remembered for that device only. A failure is logged at DEBUG on
+    ``phonometry.io``, with the last of what ffmpeg wrote on stderr.
+    """
+    device = vaapi_device if choice.hardware == "vaapi" else ""
+    key = (ffmpeg.path, ffmpeg.version, choice.name, width, height, device)
     with _LOCK:
         if key in _PASSED:
             return True
@@ -442,6 +510,7 @@ def trial(ffmpeg: FFmpeg, choice: EncoderChoice, *, width: int, height: int) -> 
         width=width,
         height=height,
         pad_color="black",
+        vaapi_device=vaapi_device,
     )
     command = ffmpeg_command(
         ffmpeg.path,
@@ -455,9 +524,20 @@ def trial(ffmpeg: FFmpeg, choice: EncoderChoice, *, width: int, height: int) -> 
     )
     try:
         done = _run(command, stdin=bytes(width * height * 4))
-    except (OSError, subprocess.TimeoutExpired):
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        _LOG.debug("%s failed its trial at %dx%d: %s", choice.name, width, height, exc)
         return False
     if done.returncode != 0:
+        # Why a GPU encoder was passed over (no device, no free session, a
+        # driver too old) is in its words, for whoever turns DEBUG on.
+        _LOG.debug(
+            "%s failed its trial at %dx%d (status %d): %s",
+            choice.name,
+            width,
+            height,
+            done.returncode,
+            _tail(done.stderr),
+        )
         return False
     with _LOCK:
         _PASSED.add(key)
@@ -485,8 +565,11 @@ def choose(
     container: Container,
     width: int,
     height: int,
+    vaapi_device: str,
 ) -> EncoderChoice:
     """The first encoder that passes its trial, logged on ``phonometry.io``.
+
+    A VAAPI encoder is tried on *vaapi_device*.
 
     :raises VideoEncoderError: when none does; for an explicit ``encoder``
         the message lists the encoders that pass here.
@@ -496,7 +579,7 @@ def choose(
         ffmpeg, encoder=encoder, codec=codec, container=container
     ):
         tried.append(choice.name)
-        if trial(ffmpeg, choice, width=width, height=height):
+        if trial(ffmpeg, choice, width=width, height=height, vaapi_device=vaapi_device):
             _LOG.info(
                 "writing %s with %s (%s, %s)",
                 container,
@@ -505,9 +588,9 @@ def choose(
                 choice.codec,
             )
             return choice
-    wanted = "/".join(CONTAINER_CODECS[container] if codec is None else (codec,))
+    codecs = CONTAINER_CODECS[container] if codec is None else (codec,)
     msg = (
-        f"encoder={encoder!r} cannot write {wanted} into .{container} with "
+        f"encoder={encoder!r} cannot write {'/'.join(codecs)} into .{container} with "
         f"{ffmpeg.path} ({ffmpeg.version}); tried {', '.join(tried) or 'nothing it has'}."
     )
     if encoder != "auto":
@@ -516,9 +599,16 @@ def choose(
             for c in _candidates(
                 ffmpeg, encoder="auto", codec=codec, container=container
             )
-            if trial(ffmpeg, c, width=width, height=height)
+            if trial(ffmpeg, c, width=width, height=height, vaapi_device=vaapi_device)
         ]
         msg += f" Working here: {', '.join(working) or 'none'}."
     else:
-        msg += " Install an ffmpeg built with SVT-AV1, libvpx or x264."
+        msg += f" Install an ffmpeg built with {_cpu_libraries(codecs)}."
     raise VideoEncoderError(msg)
+
+
+def _cpu_libraries(codecs: tuple[Codec, ...]) -> str:
+    """The libraries whose CPU encoders write *codecs*, best first: ``"SVT-AV1 or libvpx"``."""
+    libraries = [_CPU_LIBRARIES[FFMPEG_NAMES["cpu", codec]] for codec in codecs]
+    *rest, last = libraries or [""]
+    return f"{', '.join(rest)} or {last}" if rest else last

@@ -8,6 +8,7 @@ import logging
 import subprocess
 import sys
 import threading
+from collections import deque
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
@@ -28,6 +29,7 @@ from phonometry import io
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
+    from typing import BinaryIO
 
     from matplotlib.lines import Line2D
 
@@ -53,7 +55,7 @@ def _animation(
     *,
     frames: int = 6,
     pixels: tuple[int, int] = (200, 150),
-    facecolor: str = "white",
+    facecolor: str | tuple[float, float, float, float] = "white",
     canvas: type = FigureCanvasAgg,
     on_frame: Callable[[int, Figure], None] | None = None,
     interval: float = 50.0,
@@ -150,6 +152,33 @@ def test_an_odd_figure_is_padded_with_its_own_colour(
     assert _after(argv, "-vf") == "pad=ceil(iw/2)*2:ceil(ih/2)*2:color=#336699"
 
 
+@pytest.mark.parametrize(
+    ("facecolor", "colour"),
+    [
+        # 0.7 x 255 = 178.5: Agg rounds the half up to b3, as the pad must.
+        ((0.2, 0.4, 0.6, 0.5), "99b3cc"),
+        ((0.0, 0.0, 0.0, 0.5), "808080"),
+        ((1.0, 0.0, 0.0, 0.25), "ffbfbf"),
+    ],
+)
+def test_a_transparent_figure_is_padded_with_the_colour_its_frames_show(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    facecolor: tuple[float, float, float, float],
+    colour: str,
+) -> None:
+    """The pad is the facecolor laid on white as Animation.save lays it, level for level."""
+    first = tmp_path / "first.rgba"
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch, first_frame=str(first))
+    io.write_video(
+        tmp_path / "w.webm", _animation(pixels=(201, 151), facecolor=facecolor)
+    )
+    pad = _after(fake.encodes()[0]["argv"], "-vf")
+    assert pad == f"pad=ceil(iw/2)*2:ceil(ih/2)*2:color=#{colour}"
+    corner = np.frombuffer(first.read_bytes(), dtype=np.uint8)[:4]
+    assert bytes(corner).hex() == f"{colour}ff"
+
+
 def test_the_callers_settings_do_not_reach_the_frames(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -163,6 +192,43 @@ def test_the_callers_settings_do_not_reach_the_frames(
     assert _after(fake.encodes()[0]["argv"], "-s") == "200x150"
     corner = np.frombuffer(first.read_bytes(), dtype=np.uint8)[:4]
     assert corner.tolist() == [0x33, 0x66, 0x99, 255]
+
+
+class _OwnRGBACanvas(FigureCanvasAgg):
+    """A canvas that writes RGBA its own way, as Cairo's does: here, every pixel black and clear."""
+
+    def print_rgba(self, filename_or_obj: BinaryIO, **_kwargs: object) -> None:
+        width, height = (int(side) for side in self.figure.bbox.size)
+        filename_or_obj.write(bytes(width * height * 4))
+
+
+def test_every_frame_is_drawn_with_agg_whatever_the_canvas(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A canvas with its own RGBA writer (Cairo's) does not draw the frames: Agg does."""
+    first = tmp_path / "first.rgba"
+    fake_ffmpeg.install(tmp_path, monkeypatch, first_frame=str(first))
+    animation = _animation(facecolor="#336699", canvas=_OwnRGBACanvas)
+    io.write_video(tmp_path / "w.webm", animation)
+    corner = np.frombuffer(first.read_bytes(), dtype=np.uint8)[:4]
+    assert corner.tolist() == [0x33, 0x66, 0x99, 255]
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="a Windows file name cannot hold a colon"
+)
+def test_ffmpeg_is_handed_the_absolute_path_of_the_file_it_writes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A relative ``x:y/w.webm`` would reach ffmpeg as the protocol ``x``."""
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    (tmp_path / "x:y").mkdir()
+    monkeypatch.chdir(tmp_path)
+    io.write_video("x:y/w.webm", _animation())
+    written = Path(fake.encodes()[0]["argv"][-1])
+    assert written.is_absolute()
+    assert written.parent == tmp_path / "x:y"
+    assert (tmp_path / "x:y" / "w.webm").read_bytes().startswith(b"\x1a\x45\xdf\xa3")
 
 
 def test_a_figure_resized_by_the_animation_keeps_its_size(
@@ -499,7 +565,11 @@ def test_a_reader_of_ffmpeg_that_cannot_start_stops_it(
 
     fake_ffmpeg.install(tmp_path, monkeypatch)
     # The module's own name only: no other thread of the process is touched.
-    monkeypatch.setattr(pipe_module, "threading", SimpleNamespace(Thread=Unstartable))
+    monkeypatch.setattr(
+        pipe_module,
+        "threading",
+        SimpleNamespace(Thread=Unstartable, Lock=threading.Lock),
+    )
     animation = _animation()
     gc.collect()
     recwarn.clear()
@@ -510,6 +580,157 @@ def test_a_reader_of_ffmpeg_that_cannot_start_stops_it(
     # and the orphaned fake writes its output when its stdin closes.
     if sys.platform != "win32":
         assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
+
+
+def test_an_interrupt_before_the_reader_starts_stops_ffmpeg(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, recwarn: pytest.WarningsRecorder
+) -> None:
+    """An interrupt between ffmpeg's start and its reader's reaches the caller, and stops ffmpeg."""
+    from phonometry.io import _video as pipe_module
+
+    class Interrupted(threading.Thread):
+        def start(self) -> None:
+            raise KeyboardInterrupt
+
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    monkeypatch.setattr(
+        pipe_module,
+        "threading",
+        SimpleNamespace(Thread=Interrupted, Lock=threading.Lock),
+    )
+    animation = _animation()
+    gc.collect()
+    recwarn.clear()
+    with pytest.raises(KeyboardInterrupt):
+        io.write_video(tmp_path / "w.webm", animation)
+    assert pipe_module._RUNNING == set()
+    assert _unclosed(recwarn) == []
+    if sys.platform != "win32":
+        assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
+
+
+@pytest.mark.parametrize("reader", ["running", "not yet scheduled"])
+def test_an_interrupt_as_the_reader_starts_never_closes_its_pipe_under_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, reader: str
+) -> None:
+    """An interrupt inside the reader's start() leaves its thread nothing to raise.
+
+    The interrupt can come when the reader of stderr already runs, which is
+    then waited for, or before the reader is scheduled, which then finds its
+    pipe closed and stops.
+    """
+    from phonometry.io import _video as pipe_module
+
+    entered, go = threading.Event(), threading.Event()
+    readers: list[threading.Thread] = []
+    read_stderr = pipe_module._FramePipe._read_stderr
+
+    def held(pipe: pipe_module._FramePipe) -> None:
+        entered.set()
+        # Long enough for a pipe closed under the reader to be closed first.
+        go.wait(timeout=1.0)
+        read_stderr(pipe)
+
+    class Interrupted(threading.Thread):
+        def start(self) -> None:
+            readers.append(self)
+            if reader == "running":
+                super().start()
+                assert entered.wait(timeout=10.0)
+            raise KeyboardInterrupt
+
+    raised: list[object] = []
+    monkeypatch.setattr(threading, "excepthook", raised.append)
+    monkeypatch.setattr(pipe_module._FramePipe, "_read_stderr", held)
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    monkeypatch.setattr(
+        pipe_module,
+        "threading",
+        SimpleNamespace(Thread=Interrupted, Lock=threading.Lock),
+    )
+    animation = _animation()
+    with pytest.raises(KeyboardInterrupt):
+        io.write_video(tmp_path / "w.webm", animation)
+    (thread,) = readers
+    if reader == "not yet scheduled":
+        # Scheduled only after the interrupt.
+        threading.Thread.start(thread)
+    go.set()
+    thread.join(timeout=10.0)
+    assert not thread.is_alive()
+    assert raised == []
+
+
+def test_the_last_words_are_copied_whole_while_the_reader_still_reads(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A reader of stderr that outlives its wait never breaks the error that quotes it.
+
+    On Windows a program behind cmd.exe can hold ffmpeg's stderr open after
+    ffmpeg is stopped, so the reader may still be appending a line while
+    the error copies the last ones.
+    """
+    from phonometry.io import _video as pipe_module
+    from phonometry.io._video_encoders import FFmpeg
+
+    first_in, released, late_in = (
+        threading.Event(),
+        threading.Event(),
+        threading.Event(),
+    )
+
+    class Stream:
+        closed = False
+
+        def __enter__(self) -> Stream:
+            return self
+
+        def __exit__(self, *_exc: object) -> None:
+            return None
+
+        def __iter__(self) -> Iterator[bytes]:
+            yield b"first line\n"
+            released.wait(timeout=10.0)
+            yield b"late line\n"
+
+    class Tail(deque[str]):
+        def append(self, line: str) -> None:
+            super().append(line)
+            (first_in if line == "first line" else late_in).set()
+
+        def __iter__(self) -> Iterator[str]:
+            for line in super().__iter__():
+                yield line
+                # Halfway through the copy, the reader gets its next line.
+                released.set()
+                late_in.wait(timeout=0.5)
+
+    class Exited:
+        stdin = None
+        stderr = Stream()
+
+        def poll(self) -> int:
+            return 0
+
+        def wait(self, timeout: float | None = None) -> int:
+            return 0
+
+    request = pipe_module.video_request(tmp_path / "w.webm", io.VideoOptions())
+    ffmpeg = FFmpeg(path="ffmpeg", version="", encoders=frozenset())
+    pipe = pipe_module._FramePipe(
+        request, ffmpeg, "20/1", output=tmp_path / "p.webm", choice=None
+    )
+    pipe._process = Exited()  # type: ignore[assignment]
+    pipe._tail = Tail(maxlen=20)
+    reader = threading.Thread(target=pipe._read_stderr, daemon=True)
+    reader.start()
+    assert first_in.wait(timeout=10.0)
+    pipe._drain = reader
+    monkeypatch.setattr(pipe_module, "_EXIT_TIMEOUT_S", 0.05)
+    error = pipe._failure("ffmpeg exited with status 1")
+    assert str(error).endswith("ffmpeg said:\nfirst line")
+    reader.join(timeout=10.0)
+    assert not reader.is_alive()
 
 
 @pytest.mark.parametrize(
@@ -617,6 +838,36 @@ def test_a_raw_encoder_passes_through(
         ({"ffmpeg_options": (30,)}, TypeError, "ffmpeg_options"),
         ({"fps": 0.0}, ValueError, "fps"),
         ({"fps": "30"}, TypeError, "fps"),
+        # float(True) is 1.0: read as a number, it would be a frame a second.
+        ({"fps": True}, TypeError, "^'fps' must be one number, not a bool; got True"),
+        (
+            {"fps": np.True_},
+            TypeError,
+            "^'fps' must be one number, not a bool; got np.True_",
+        ),
+        # No argument of a program can carry a NUL: Popen would refuse it,
+        # for a simulation writer after the whole run.
+        (
+            {"ffmpeg_encoder": "libx264\x00"},
+            ValueError,
+            "^'ffmpeg_encoder' cannot hold a NUL character",
+        ),
+        (
+            {"ffmpeg_options": ("-crf", "3\x000")},
+            ValueError,
+            "^'ffmpeg_options' cannot hold a NUL character",
+        ),
+        ({"vaapi_device": 128}, TypeError, "^'vaapi_device' must be a str"),
+        (
+            {"vaapi_device": ""},
+            ValueError,
+            "^'vaapi_device' must name the GPU device VAAPI encodes on",
+        ),
+        (
+            {"vaapi_device": "/dev/dri/render\x00D128"},
+            ValueError,
+            "^'vaapi_device' cannot hold a NUL character",
+        ),
         ({"encoder": "gpu"}, ValueError, "encoder"),
         ({"codec": "mpeg2"}, ValueError, "codec"),
         ({"quality": 3}, TypeError, "quality"),
@@ -641,7 +892,12 @@ def test_the_options_hold_what_they_were_given() -> None:
     )
     assert options.ffmpeg_options == ("-crf", "40")
     assert options.fps == 24.0
-    assert io.VideoOptions() == io.VideoOptions(encoder="auto", quality="standard")
+    assert io.VideoOptions() == io.VideoOptions(
+        encoder="auto", quality="standard", vaapi_device="/dev/dri/renderD128"
+    )
+    assert io.VideoOptions(vaapi_device="/dev/dri/renderD129").vaapi_device == (
+        "/dev/dri/renderD129"
+    )
     with pytest.raises(AttributeError, match="fps"):
         options.fps = 30.0  # type: ignore[misc]
 
@@ -716,6 +972,26 @@ def test_a_missing_ffmpeg_is_its_own_error(
     animation = _animation()
     with pytest.raises(io.FFmpegNotFoundError, match="animation.ffmpeg_path"):
         io.write_video(tmp_path / "w.webm", animation)
+
+
+def test_vaapi_is_tried_and_used_on_the_device_named(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = fake_ffmpeg.install(
+        tmp_path,
+        monkeypatch,
+        encoders=["av1_vaapi", "libsvtav1"],
+        working=["av1_vaapi", "libsvtav1"],
+    )
+    video = io.VideoOptions(encoder="vaapi", vaapi_device="/dev/dri/renderD129")
+    io.write_video(tmp_path / "w.webm", _animation(), video=video)
+    (trial,) = fake.trials()
+    (encode,) = fake.encodes()
+    for argv in (trial["argv"], encode["argv"]):
+        start = argv.index("-vaapi_device")
+        assert argv[start : start + 2] == ["-vaapi_device", "/dev/dri/renderD129"]
+        assert start < argv.index("-i")
+    assert _after(encode["argv"], "-c:v") == "av1_vaapi"
 
 
 def test_the_choice_is_logged(

@@ -106,6 +106,27 @@ def test_a_node_writes_the_video_and_this_machine_the_file(
     assert _partials(tmp_path) == []
 
 
+def test_a_node_encodes_vaapi_on_the_device_named(
+    node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The device is the node's: it travels with the options and is used there."""
+    fake = fake_ffmpeg.install(
+        tmp_path, monkeypatch, encoders=["av1_vaapi"], working=["av1_vaapi"]
+    )
+    video = VideoOptions(encoder="vaapi", vaapi_device="/dev/dri/renderD129")
+    target = tmp_path / "vaapi.webm"
+    res = write_fdtd_animation(
+        target, _RUN, compute=Compute(host=node), frame=_FRAME, video=video
+    )
+    assert res.provenance.host == node
+    (trial,) = fake.trials()
+    (encode,) = fake.encodes()
+    assert "phonometry-video-" in encode["argv"][-1]
+    for argv in (trial["argv"], encode["argv"]):
+        assert argv[argv.index("-vaapi_device") + 1] == "/dev/dri/renderD129"
+    assert target.read_bytes().startswith(_WEBM)
+
+
 def test_an_elastic_video_on_a_node(
     node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

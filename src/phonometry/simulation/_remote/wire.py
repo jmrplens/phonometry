@@ -56,6 +56,7 @@ _RECORDS: Mapping[str, type] = MappingProxyType(
             fdtd.SignalSource,
             fdtd.PlaneWaveSource,
             fdtd.FDTDRecording,
+            fdtd.FDTDBoundaries,
             elastic_fdtd.ExplosionSource,
             elastic_fdtd.ForceSource,
             elastic_fdtd.ElasticRecording,

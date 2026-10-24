@@ -141,19 +141,20 @@ relación de dispersión; los dos no son el mismo número, y el `cfl = 0.6` por
 defecto significa $S = 0{,}424$.
 
 Una simulación es un solo registro:
-`FDTDRun(c, dx, duration, sources=..., ...)` reúne el dominio, sus fuentes
-y lo que anota, y comprueba todos los argumentos al construirse, así que un
-argumento erróneo se rechaza donde se escribe la ejecución;
-`fdtd_simulation(run)` la calcula, y `compute=` dice dónde.
+`FDTDRun(c=..., dx=..., duration_s=..., sources=..., ...)` toma cada campo
+por su nombre, reúne el dominio, sus fuentes y lo que anota, y comprueba
+todos los argumentos al construirse, así que un argumento erróneo se rechaza
+donde se escribe la ejecución; `fdtd_simulation(run)` la calcula, y
+`compute=` dice dónde.
 
 ```python
 from phonometry import simulation
 
 # Un dominio de aire de 3.0 x 2.0 m: 300 x 200 celdas de 1 cm.
 run = simulation.FDTDRun(
-    343.0,             # c: velocidad del sonido [m/s], escalar o mapa sobre la malla
-    0.01,              # dx: tamaño de celda cuadrada [m]
-    2.0e-3,            # duration: tiempo simulado [s] (dt se deriva, no se da)
+    c=343.0,           # velocidad del sonido [m/s], escalar o mapa sobre la malla
+    dx=0.01,           # tamaño de celda cuadrada [m]
+    duration_s=2.0e-3, # tiempo simulado [s] (dt se deriva, no se da)
     shape=(200, 300),  # (ny, nx) celdas -> un dominio de 2.0 x 3.0 m
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
@@ -303,7 +304,10 @@ limitarse a cambiar. Por eso el panel mallado de la sección 4 corre a medio
 milímetro, mucho más fino de lo que exige su longitud de onda de 17 cm: allí
 la resolución la fija la geometría, no la longitud de onda.
 
-Cada lado del dominio puede llevar su propia condición de contorno:
+Cada lado del dominio puede llevar su propia condición de contorno, que una
+ejecución recibe en un solo registro `FDTDBoundaries`: `sides=` da una
+condición a los cuatro lados o asigna a cada lado la suya, y
+`absorbing_layer_cells=` fija el grosor de la esponja:
 
 - ``"rigid"`` (por defecto): un reflector perfecto, $R = +1$.
 - ``"absorbing"``: una capa esponja de `absorbing_layer_cells` celdas cuya
@@ -825,12 +829,13 @@ from phonometry import simulation
 mask = np.zeros((200, 300), dtype=bool)
 mask[60:, 150:154] = True
 run = simulation.FDTDRun(
-    343.0, 0.01, 9.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
         probes=[(100, 100), (240, 100)], snapshot_every=75),
     obstacle_mask=mask,
-    boundaries="absorbing", absorbing_layer_cells=30,
+    boundaries=simulation.FDTDBoundaries(
+        sides="absorbing", absorbing_layer_cells=30),
 )
 res = simulation.fdtd_simulation(run)
 
@@ -982,7 +987,7 @@ from phonometry import simulation
 lx, ly, dx = 1.0, 0.7, 0.02
 nx, ny = round(lx / dx), round(ly / dx)
 run = simulation.FDTDRun(
-    343.0, dx, 0.35, shape=(ny, nx),
+    c=343.0, dx=dx, duration_s=0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
@@ -1022,7 +1027,7 @@ from phonometry import simulation
 lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
 nx, ny = round(lx / dx), round(ly / dx)
 run = simulation.FDTDRun(
-    c, dx, 0.35, shape=(ny, nx),
+    c=c, dx=dx, duration_s=0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
@@ -1087,7 +1092,7 @@ a un nodo.
 from phonometry import simulation
 
 run = simulation.FDTDRun(
-    343.0, 0.01, 2e-3,
+    c=343.0, dx=0.01, duration_s=2e-3,
     shape=(60, 80),
     sources=[simulation.GaussianPulse(ix=40, iy=30, half_width_s=5e-5)],
     recording=simulation.FDTDRecording(snapshot_every=10),

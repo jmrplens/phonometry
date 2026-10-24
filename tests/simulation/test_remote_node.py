@@ -24,6 +24,7 @@ from phonometry.simulation import (
     ElasticRecording,
     ElasticRun,
     ExplosionSource,
+    FDTDBoundaries,
     FDTDRecording,
     FDTDRun,
     GaussianPulse,
@@ -46,14 +47,13 @@ if TYPE_CHECKING:
 _CPU = {"device": "cpu", "device_index": 0, "dtype": "float64"}
 _PROBES = [(30, 15), (5, 5)]
 _ACOUSTIC = FDTDRun(
-    343.0,
-    0.01,
-    2e-3,
+    c=343.0,
+    dx=0.01,
+    duration_s=2e-3,
     shape=(30, 40),
     sources=[GaussianPulse(ix=10, iy=15, half_width_s=4e-5)],
     recording=FDTDRecording(probes=_PROBES, snapshot_every=20, snapshot_decimation=2),
-    boundaries="absorbing",
-    absorbing_layer_cells=5,
+    boundaries=FDTDBoundaries(sides="absorbing", absorbing_layer_cells=5),
 )
 #: What a job returns beside its record when it has bytes of its own to send.
 _VIDEO = b"\x1aE\xdf\xa3 a video"
@@ -186,10 +186,10 @@ def test_a_job_comes_back_as_the_run_here() -> None:
 
 def test_an_elastic_job_without_snapshots_sends_only_its_signals() -> None:
     run = ElasticRun(
-        4000.0,
-        2300.0,
-        0.01,
-        1e-4,
+        c_p=4000.0,
+        c_s=2300.0,
+        dx=0.01,
+        duration_s=1e-4,
         rho=2500.0,
         shape=(20, 21),
         sources=[
@@ -247,7 +247,7 @@ def test_a_stream_a_job_returns_travels_after_its_arrays_and_is_closed(
 
 def test_a_client_that_goes_away_stops_the_run_at_its_next_step() -> None:
     long_run = dataclasses.replace(
-        _ACOUSTIC, duration=30.0, recording=FDTDRecording(probes=_PROBES)
+        _ACOUSTIC, duration_s=30.0, recording=FDTDRecording(probes=_PROBES)
     )
     started = time.monotonic()
     code, frames = _serve(
@@ -452,14 +452,14 @@ def test_a_simulation_reports_each_step_to_its_watcher(function: str) -> None:
     seen: list[tuple[int, int]] = []
     with _observer.observing(lambda done, total: seen.append((done, total))):
         if function == "fdtd":
-            res = fdtd_simulation(dataclasses.replace(_ACOUSTIC, duration=1e-4))
+            res = fdtd_simulation(dataclasses.replace(_ACOUSTIC, duration_s=1e-4))
         else:
             res = elastic_fdtd_simulation(
                 ElasticRun(
-                    4000.0,
-                    2300.0,
-                    0.01,
-                    1e-4,
+                    c_p=4000.0,
+                    c_s=2300.0,
+                    dx=0.01,
+                    duration_s=1e-4,
                     rho=2500.0,
                     shape=(12, 12),
                     sources=[

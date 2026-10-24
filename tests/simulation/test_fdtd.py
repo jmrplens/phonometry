@@ -25,6 +25,7 @@ import pytest
 from phonometry.simulation.fdtd import (
     FDTD2D,
     CWSource,
+    FDTDBoundaries,
     FDTDRecording,
     FDTDResult,
     FDTDRun,
@@ -59,9 +60,9 @@ def test_rigid_box_modes_match_analytic_eigenfrequencies() -> None:
     nx, ny = round(lx / dx), round(ly / dx)
     res = fdtd_simulation(
         FDTDRun(
-            C0,
-            dx,
-            0.35,
+            c=C0,
+            dx=dx,
+            duration_s=0.35,
             shape=(ny, nx),
             sources=[GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
             recording=FDTDRecording(probes=[(nx - 4, ny - 3)]),
@@ -81,9 +82,9 @@ def test_tube_resonances_match_analytic_harmonics() -> None:
     nx = round(length / dx)
     res = fdtd_simulation(
         FDTDRun(
-            C0,
-            dx,
-            0.5,
+            c=C0,
+            dx=dx,
+            duration_s=0.5,
             shape=(3, nx),
             sources=[GaussianPulse(ix=30, iy=1, half_width_s=1.5e-4)],
             recording=FDTDRecording(probes=[(nx - 5, 1)]),
@@ -103,14 +104,13 @@ def free_field() -> FDTDResult:
     """A resolved Gaussian pulse radiating into absorbing boundaries."""
     return fdtd_simulation(
         FDTDRun(
-            C0,
-            0.01,
-            8.6e-3,
+            c=C0,
+            dx=0.01,
+            duration_s=8.6e-3,
             shape=(320, 420),
             sources=[GaussianPulse(ix=60, iy=160, half_width_s=3.0e-4)],
             recording=FDTDRecording(probes=[(180, 160), (300, 160)]),
-            boundaries="absorbing",
-            absorbing_layer_cells=40,
+            boundaries=FDTDBoundaries(sides="absorbing", absorbing_layer_cells=40),
         )
     )
 
@@ -140,18 +140,20 @@ def test_rigid_wall_reflection_matches_image_source() -> None:
     dx = 0.01
     res = fdtd_simulation(
         FDTDRun(
-            C0,
-            dx,
-            7.5e-3,
+            c=C0,
+            dx=dx,
+            duration_s=7.5e-3,
             shape=(300, 300),
             sources=[GaussianPulse(ix=50, iy=150, half_width_s=1.0e-4)],
             recording=FDTDRecording(probes=[(100, 150)]),
-            boundaries={
-                "right": "absorbing",
-                "top": "absorbing",
-                "bottom": "absorbing",
-            },
-            absorbing_layer_cells=30,
+            boundaries=FDTDBoundaries(
+                sides={
+                    "right": "absorbing",
+                    "top": "absorbing",
+                    "bottom": "absorbing",
+                },
+                absorbing_layer_cells=30,
+            ),
         )
     )
     p = res.pressures[0]
@@ -348,9 +350,9 @@ def _slab_run(
     """Amplitude behind / beside the slab and the snapshots of one run."""
     res = fdtd_simulation(
         FDTDRun(
-            C0,
-            0.02,
-            7.0e-3,
+            c=C0,
+            dx=0.02,
+            duration_s=7.0e-3,
             shape=(100, 150),
             sources=[GaussianPulse(ix=30, iy=50, half_width_s=5e-5)],
             recording=FDTDRecording(
@@ -358,7 +360,7 @@ def _slab_run(
                 snapshot_every=50,
             ),
             obstacle_mask=obstacle,
-            boundaries="absorbing",
+            boundaries=FDTDBoundaries(sides="absorbing"),
         )
     )
     return (
@@ -405,9 +407,9 @@ def test_obstacle_mask_validation() -> None:
         sim.add_source(masked_source)
     with pytest.raises(ValueError, match=r"probe .* lies inside an obstacle"):
         FDTDRun(
-            C0,
-            0.05,
-            1e-3,
+            c=C0,
+            dx=0.05,
+            duration_s=1e-3,
             shape=(10, 10),
             obstacle_mask=mask,
             sources=[open_source],
@@ -431,8 +433,17 @@ def test_boundary_spec_rejects_unknown_values(
     match: str,
 ) -> None:
     sources = [GaussianPulse(ix=5, iy=5, half_width_s=1e-4)]
+    # The record holds the sides as given; the run that reads them refuses.
+    sides = FDTDBoundaries(sides=boundaries)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match=match):
-        FDTDRun(C0, 0.05, 1e-3, shape=(30, 30), sources=sources, boundaries=boundaries)
+        FDTDRun(
+            c=C0,
+            dx=0.05,
+            duration_s=1e-3,
+            shape=(30, 30),
+            sources=sources,
+            boundaries=sides,
+        )
 
 
 @pytest.mark.parametrize(
@@ -479,14 +490,14 @@ def _duct_echo(
     """
     res = fdtd_simulation(
         FDTDRun(
-            C0,
-            0.01,
-            0.030,
+            c=C0,
+            dx=0.01,
+            duration_s=0.030,
             rho=RHO0,
             shape=(3, 1200),
             sources=[GaussianPulse(ix=900, iy=1, half_width_s=2e-4)],
             recording=FDTDRecording(probes=[(600, 1)]),
-            boundaries=boundaries,
+            boundaries=FDTDBoundaries(sides=boundaries),
         )
     )
     p, t = res.pressures[0], res.times
@@ -522,9 +533,9 @@ def test_damping_through_the_public_api() -> None:
     def peak(damping: float) -> float:
         res = fdtd_simulation(
             FDTDRun(
-                C0,
-                0.05,
-                5e-3,
+                c=C0,
+                dx=0.05,
+                duration_s=5e-3,
                 shape=(40, 60),
                 damping=damping,
                 sources=[GaussianPulse(ix=10, iy=10, half_width_s=1e-4)],
@@ -545,16 +556,18 @@ def test_unstable_or_invalid_cfl_is_rejected(cfl: float) -> None:
     with pytest.raises(
         ValueError, match=r"cfl must lie in.*the leapfrog scheme is unstable"
     ):
-        FDTDRun(C0, 0.05, 1e-3, shape=(20, 20), cfl=cfl, sources=sources)
+        FDTDRun(
+            c=C0, dx=0.05, duration_s=1e-3, shape=(20, 20), cfl=cfl, sources=sources
+        )
 
 
 def test_stable_cfl_values_are_accepted() -> None:
     for cfl in (0.1, 0.6, 0.99):
         res = fdtd_simulation(
             FDTDRun(
-                C0,
-                0.05,
-                2e-3,
+                c=C0,
+                dx=0.05,
+                duration_s=2e-3,
                 shape=(20, 20),
                 cfl=cfl,
                 sources=[GaussianPulse(ix=5, iy=5, half_width_s=1e-4)],
@@ -570,9 +583,9 @@ def test_stable_cfl_values_are_accepted() -> None:
 def test_result_records_probes_and_snapshots() -> None:
     res = fdtd_simulation(
         FDTDRun(
-            C0,
-            0.05,
-            5e-3,
+            c=C0,
+            dx=0.05,
+            duration_s=5e-3,
             shape=(40, 60),
             sources=[CWSource(ix=10, iy=10, frequency=800.0)],
             recording=FDTDRecording(probes=[(30, 20), (50, 35)], snapshot_every=25),
@@ -601,14 +614,13 @@ def test_two_runs_are_bit_identical() -> None:
     def run() -> FDTDResult:
         return fdtd_simulation(
             FDTDRun(
-                C0,
-                0.02,
-                3e-3,
+                c=C0,
+                dx=0.02,
+                duration_s=3e-3,
                 shape=(80, 100),
                 sources=[GaussianPulse(ix=50, iy=40, half_width_s=1e-4)],
                 recording=FDTDRecording(probes=[(70, 40)], snapshot_every=40),
-                boundaries="absorbing",
-                absorbing_layer_cells=15,
+                boundaries=FDTDBoundaries(sides="absorbing", absorbing_layer_cells=15),
             )
         )
 
@@ -631,9 +643,9 @@ def test_each_snapshot_is_the_field_of_its_own_step() -> None:
     every = 10
     res = fdtd_simulation(
         FDTDRun(
-            C0,
-            0.05,
-            1.6e-2,
+            c=C0,
+            dx=0.05,
+            duration_s=1.6e-2,
             shape=(40, 60),
             sources=[GaussianPulse(ix=20, iy=20, half_width_s=5e-4)],
             recording=FDTDRecording(probes=[(30, 20), (50, 35)], snapshot_every=every),
@@ -650,18 +662,22 @@ def test_each_snapshot_is_the_field_of_its_own_step() -> None:
     ("kwargs", "match"),
     [
         ({"sources": []}, "at least one source"),
-        ({"duration": 0.0}, "duration must be positive"),
-        ({"duration": 1e-9}, "at least one time step"),
+        ({"duration_s": 0.0}, "duration_s must be positive"),
+        ({"duration_s": 1e-9}, "duration_s must cover at least one time step"),
         (
             {"recording": FDTDRecording(probes=[(99, 0)])},
             r"probe .* lies outside the grid",
         ),
         (
-            {"boundaries": "absorbing", "absorbing_layer_cells": 0},
+            {"boundaries": FDTDBoundaries(sides="absorbing", absorbing_layer_cells=0)},
             "absorbing_layer_cells must be >= 1",
         ),
         (
-            {"boundaries": "absorbing", "absorbing_layer_cells": 2.5},
+            {
+                "boundaries": FDTDBoundaries(
+                    sides="absorbing", absorbing_layer_cells=2.5
+                )
+            },
             "'absorbing_layer_cells' must be a whole number",
         ),
     ],
@@ -671,13 +687,12 @@ def test_simulation_rejects_invalid_arguments(
     match: str,
 ) -> None:
     full: dict[str, object] = {
-        "duration": 1e-3,
+        "duration_s": 1e-3,
         "sources": [GaussianPulse(ix=5, iy=5, half_width_s=1e-4)],
         **kwargs,
     }
-    duration = full.pop("duration")
     with pytest.raises(ValueError, match=match):
-        FDTDRun(C0, 0.05, duration, shape=(30, 30), **full)
+        FDTDRun(c=C0, dx=0.05, shape=(30, 30), **full)
 
 
 @pytest.mark.parametrize(
@@ -728,9 +743,9 @@ def test_a_recording_holds_whole_pairs_and_counts() -> None:
 def test_a_run_without_a_recording_keeps_only_the_time_axis() -> None:
     res = fdtd_simulation(
         FDTDRun(
-            C0,
-            0.05,
-            1e-3,
+            c=C0,
+            dx=0.05,
+            duration_s=1e-3,
             shape=(30, 30),
             sources=[GaussianPulse(ix=5, iy=5, half_width_s=1e-4)],
         )
@@ -820,9 +835,9 @@ def small_result() -> FDTDResult:
     mask[12:18, 20:22] = True
     return fdtd_simulation(
         FDTDRun(
-            C0,
-            0.05,
-            3e-3,
+            c=C0,
+            dx=0.05,
+            duration_s=3e-3,
             shape=(30, 40),
             sources=[GaussianPulse(ix=8, iy=15, half_width_s=1e-4)],
             recording=FDTDRecording(probes=[(30, 15)], snapshot_every=20),
@@ -899,9 +914,9 @@ def test_plot_snapshot_cmap_follows_background(small_result: FDTDResult) -> None
 def test_plot_rejects_unknown_kind_and_missing_snapshots() -> None:
     res = fdtd_simulation(
         FDTDRun(
-            C0,
-            0.05,
-            1e-3,
+            c=C0,
+            dx=0.05,
+            duration_s=1e-3,
             shape=(20, 20),
             sources=[GaussianPulse(ix=5, iy=5, half_width_s=1e-4)],
             recording=FDTDRecording(probes=[(10, 10)]),

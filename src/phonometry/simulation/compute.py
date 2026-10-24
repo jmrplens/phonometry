@@ -277,16 +277,16 @@ class RunProvenance(RichDisplay):
         ``"major.minor"`` (``"13.3"``), where the array library reports it
         (CuPy), else ``None``. It is not the NVIDIA driver's own version.
     :ivar gpu: The GPU's name, or ``None``.
-    :ivar package_digest: The SHA-256 of the package the node ran, in
+    :ivar package_sha256: The SHA-256 of the package the node ran, in
         lowercase hex, or ``None`` for a run on this machine.
     :raises TypeError: for a ``device`` or ``dtype`` that is not text, a
         ``device_index`` that is not a number (a bool is not one), a
         ``numpy_version`` that is not text, or a ``host``,
         ``array_library``, ``cuda_runtime``, ``cuda_driver_api``, ``gpu`` or
-        ``package_digest`` that is neither text nor ``None``.
+        ``package_sha256`` that is neither text nor ``None``.
     :raises ValueError: for an unknown device or dtype, ``"torch:mps"`` in
         float64, an index on a device that has one instance, an index that
-        is not a whole number of 0 or more, or a ``package_digest`` that is
+        is not a whole number of 0 or more, or a ``package_sha256`` that is
         not 64 lowercase hexadecimal digits.
     """
 
@@ -299,7 +299,7 @@ class RunProvenance(RichDisplay):
     cuda_runtime: str | None
     cuda_driver_api: str | None
     gpu: str | None
-    package_digest: str | None
+    package_sha256: str | None
 
     def __post_init__(self) -> None:
         """Refuse a record no run could have written, as :class:`Compute` does."""
@@ -316,10 +316,10 @@ class RunProvenance(RichDisplay):
                 msg = f"'{name}' must be a text or None, got {value!r}."
                 raise TypeError(msg)
         if (
-            self.package_digest is not None
-            and _DIGEST.fullmatch(self.package_digest) is None
+            self.package_sha256 is not None
+            and _DIGEST.fullmatch(self.package_sha256) is None
         ):
-            msg = f"'package_digest' must be 64 lowercase hexadecimal digits, got {self.package_digest!r}."
+            msg = f"'package_sha256' must be 64 lowercase hexadecimal digits, got {self.package_sha256!r}."
             raise ValueError(msg)
 
 
@@ -331,7 +331,7 @@ _OPTIONAL_TEXTS = (
     "cuda_runtime",
     "cuda_driver_api",
     "gpu",
-    "package_digest",
+    "package_sha256",
 )
 
 

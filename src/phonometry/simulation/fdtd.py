@@ -54,7 +54,7 @@ edge, and second-order convergence under grid refinement.
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import dataclass
 from functools import cached_property
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal, Protocol
@@ -95,6 +95,7 @@ __all__ = [
     "FDTD2D",
     "CWSource",
     "ContourProbe",
+    "FDTDBoundaries",
     "FDTDRecording",
     "FDTDResult",
     "FDTDRun",
@@ -799,11 +800,11 @@ def _acoustic_medium(
     )
 
 
-def _step_count(duration: float, dt: float) -> int:
-    """The number of steps of *dt* that cover *duration*, at least one."""
-    steps = round(duration / dt)
+def _step_count(duration_s: float, dt: float) -> int:
+    """The number of steps of *dt* that cover *duration_s*, at least one."""
+    steps = round(duration_s / dt)
     if steps < 1:
-        msg = f"duration must cover at least one time step (dt = {dt:.3e} s)"
+        msg = f"duration_s must cover at least one time step (dt = {dt:.3e} s)"
         raise ValueError(msg)
     return steps
 
@@ -1954,6 +1955,45 @@ class FDTDRecording(RichDisplay):
         object.__setattr__(self, "snapshot_decimation", decimation)
 
 
+@dataclass(frozen=True, kw_only=True)
+class FDTDBoundaries(OwnsArrays):
+    """How the four edges of the acoustic domain are terminated.
+
+    The sponge thickness only means anything where a side is absorbing, which
+    is why it travels with the sides rather than beside them.
+
+    :param sides: ``"rigid"`` (default), ``"absorbing"``, or a mapping from
+        side name (``left``/``right``/``top``/``bottom``) to ``"rigid"``,
+        ``"absorbing"``, or a real specific impedance [Pa s/m] (scalar or
+        per-edge-cell 1D array, Eqs. 4.33-4.35); a side the mapping leaves
+        out is rigid. A mapping is held as a read-only copy, and an
+        impedance profile given as a list as a read-only array of the
+        record's own, so a change to the caller's dictionary or list
+        afterwards does not reach the record.
+    :param absorbing_layer_cells: Sponge-layer thickness for absorbing sides,
+        in cells.
+    """
+
+    sides: (
+        AcousticBoundary | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]]
+    ) = "rigid"
+    absorbing_layer_cells: int = 20
+
+    def __post_init__(self) -> None:
+        """Hold a mapping of sides as a read-only copy of its own.
+
+        The sides and the thickness are checked where a run reads them, not
+        here.
+        """
+        if isinstance(self.sides, Mapping):
+            held = {side: _held_map(value) for side, value in self.sides.items()}
+            object.__setattr__(self, "sides", MappingProxyType(held))
+
+    def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
+        """Rebuild from the fields: a read-only mapping of sides does not pickle."""
+        return reduce_with_plain_rows(self)
+
+
 @dataclass(frozen=True)
 class _AcousticChecks:
     """What the checks of an :class:`FDTDRun` found, kept with the run.
@@ -1983,7 +2023,7 @@ class _AcousticChecks:
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FDTDRun(OwnsArrays):
     r"""One acoustic FDTD simulation: the domain, its sources and what it records.
 
@@ -1992,15 +2032,14 @@ class FDTDRun(OwnsArrays):
     edges, the obstacle, and the sources and the probes on the grid. A run
     that builds is one :func:`fdtd_simulation` can step, here or on a node,
     and a bad argument raises where the run is written, with the class and
-    the words the function always raised. The sources are held as a tuple,
-    a mapping of boundaries as a read-only mapping, and each array as the
-    run's own read-only copy, so nothing the caller changes afterwards
-    reaches a checked run.
+    the words the function always raised. The sources are held as a tuple
+    and each array as the run's own read-only copy, so nothing the caller
+    changes afterwards reaches a checked run.
 
     :param c: Sound-speed map [m/s], shape ``(ny, nx)``, or a scalar with an
         explicit ``shape``.
     :param dx: Grid spacing [m] (square cells).
-    :param duration: Physical time to simulate [s].
+    :param duration_s: Physical time to simulate [s].
     :param sources: One or more of :class:`GaussianPulse`,
         :class:`CWSource`, :class:`SignalSource` or :class:`PlaneWaveSource`.
     :param shape: Grid shape ``(ny, nx)``, required when ``c`` is a scalar.
@@ -2011,48 +2050,41 @@ class FDTDRun(OwnsArrays):
     :param recording: What the run records (:class:`FDTDRecording`): the
         probe cells, and the snapshot cadence and decimation. ``None``
         records nothing but the time axis.
-    :param boundaries: ``"rigid"`` (default), ``"absorbing"``, or a mapping
-        from side name (``left``/``right``/``top``/``bottom``) to
-        ``"rigid"``, ``"absorbing"``, or a real specific impedance
-        [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35).
-    :param absorbing_layer_cells: Sponge-layer thickness for absorbing
-        sides, in cells.
+    :param boundaries: How the domain edges are terminated
+        (:class:`FDTDBoundaries`): the rigid, absorbing and impedance sides,
+        and the sponge thickness of the absorbing ones. ``None`` is rigid on
+        all four sides.
     :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells
         (rasterised interior geometry).
     :param damping: Bulk amplitude decay rate [1/s]: a scalar for the whole
         field or an ``(ny, nx)`` map.
-    :raises TypeError: If an argument is of the wrong type: a ``duration``,
+    :raises TypeError: If an argument is of the wrong type: a ``duration_s``,
         ``cfl`` or ``dx`` that is not one number, a ``recording`` that is
-        neither an :class:`FDTDRecording` nor ``None``, an
-        ``absorbing_layer_cells`` that is not a number, a ``shape`` that is
-        not a pair, a complex medium, or an ``obstacle_mask`` that is not
-        boolean.
-    :raises ValueError: If an argument is out of its range, or a source, a
-        probe or the obstacle does not fit the grid.
+        neither an :class:`FDTDRecording` nor ``None``, ``boundaries`` that
+        are neither an :class:`FDTDBoundaries` nor ``None``, an
+        ``absorbing_layer_cells`` of the boundaries that is not a number, a
+        ``shape`` that is not a pair, a complex medium, or an
+        ``obstacle_mask`` that is not boolean.
+    :raises ValueError: If an argument is out of its range, a side of the
+        boundaries is unknown or terminated by an unknown name, or a source,
+        a probe or the obstacle does not fit the grid.
     """
 
     c: float | Field2D
     dx: float
-    duration: float
-    _: KW_ONLY
+    duration_s: float
     sources: Sequence[AnySource]
     shape: tuple[int, int] | None = None
     rho: float | Field2D = 1.2
     cfl: float = 0.6
     recording: FDTDRecording | None = None
-    boundaries: (
-        AcousticBoundary | Mapping[Side, AcousticBoundary | float | NDArray[np.float64]]
-    ) = "rigid"
-    absorbing_layer_cells: int = 20
+    boundaries: FDTDBoundaries | None = None
     obstacle_mask: NDArray[np.bool_] | None = None
     damping: float | Field2D = 0.0
 
     def __post_init__(self) -> None:
         """Hold the containers and the maps so they cannot change, then check every argument."""
         object.__setattr__(self, "sources", tuple(self.sources))
-        if isinstance(self.boundaries, Mapping):
-            held = {side: _held_map(value) for side, value in self.boundaries.items()}
-            object.__setattr__(self, "boundaries", MappingProxyType(held))
         for name in ("c", "rho", "damping"):
             object.__setattr__(self, name, _held_map(getattr(self, name)))
         object.__setattr__(self, "obstacle_mask", _held_map(self.obstacle_mask, None))
@@ -2067,7 +2099,7 @@ class FDTDRun(OwnsArrays):
         return _acoustic_checks(self)
 
     def __reduce__(self) -> tuple[Any, tuple[type, dict[str, Any]]]:
-        """Rebuild from the fields: a read-only mapping of boundaries does not pickle."""
+        """Rebuild from the fields, so the run checks itself again where it arrives."""
         return reduce_with_plain_rows(self)
 
 
@@ -2105,29 +2137,43 @@ def _held_map(
     return value if held is None else read_only(held)
 
 
+def _acoustic_boundaries_or_rigid(boundaries: object) -> FDTDBoundaries:
+    """A run's ``boundaries``, or rigid on all four sides for ``None``.
+
+    :raises TypeError: for anything but ``None`` or an :class:`FDTDBoundaries`.
+    """
+    if boundaries is None:
+        return FDTDBoundaries()
+    if not isinstance(boundaries, FDTDBoundaries):
+        msg = f"'boundaries' must be an FDTDBoundaries or None, got {type(boundaries).__name__}."
+        raise TypeError(msg)
+    return boundaries
+
+
 def _acoustic_checks(run: FDTDRun) -> _AcousticChecks:
     """Check every argument of *run*, as :func:`fdtd_simulation` always did.
 
-    The recording's type, the sponge thickness, the sources, the duration
-    and the boundaries, then the medium (:func:`_acoustic_medium`: the grid
-    and the time step, the density, the sponge and the damping, the
-    impedance edges, the obstacle), then the sources and the probes on the
-    grid and the step count. The recording checked its own fields when it
-    was built; here its probes meet the grid.
+    The recording's type, the boundaries' type and their sponge thickness,
+    the sources, the duration and the sides, then the medium
+    (:func:`_acoustic_medium`: the grid and the time step, the density, the
+    sponge and the damping, the impedance edges, the obstacle), then the
+    sources and the probes on the grid and the step count. The recording
+    checked its own fields when it was built; here its probes meet the grid.
 
     :raises TypeError: as :class:`FDTDRun` documents.
     :raises ValueError: as :class:`FDTDRun` documents.
     """
     recording = _recording_or_empty(run.recording, FDTDRecording)
-    require_scalar(run.absorbing_layer_cells, "absorbing_layer_cells")
+    boundaries = _acoustic_boundaries_or_rigid(run.boundaries)
+    require_scalar(boundaries.absorbing_layer_cells, "absorbing_layer_cells")
     if len(run.sources) == 0:
         msg = "at least one source is required"
         raise ValueError(msg)
-    duration = _positive_finite("duration", run.duration)
-    absorbing_sides, edge_impedance = _parse_boundaries(run.boundaries)
+    duration_s = _positive_finite("duration_s", run.duration_s)
+    absorbing_sides, edge_impedance = _parse_boundaries(boundaries.sides)
     width = 0
     if absorbing_sides:
-        width = _integer("absorbing_layer_cells", run.absorbing_layer_cells)
+        width = _integer("absorbing_layer_cells", boundaries.absorbing_layer_cells)
         if width < 1:
             msg = "absorbing_layer_cells must be >= 1"
             raise ValueError(msg)
@@ -2156,7 +2202,7 @@ def _acoustic_checks(run: FDTDRun) -> _AcousticChecks:
         edge_impedance=MappingProxyType(edge_impedance),
         sponge_width=width,
         probe_ix=read_only(_probe_indices(recording.probes, (ny, nx), medium.obstacle)),
-        steps=_step_count(duration, medium.dt),
+        steps=_step_count(duration_s, medium.dt),
         snapshot_every=recording.snapshot_every,
         snapshot_decimation=recording.snapshot_decimation,
     )
@@ -2464,7 +2510,7 @@ def fdtd_simulation(run: FDTDRun, *, compute: Compute | None = None) -> FDTDResu
 
     Builds the staggered-grid domain (Attenborough & Van Renterghem 2021,
     Eqs. 4.11-4.12), applies the requested boundary conditions, injects the
-    sources and integrates for ``duration`` seconds, recording the pressure
+    sources and integrates for ``duration_s`` seconds, recording the pressure
     at every probe each time step and, optionally, full-field snapshots.
 
     The grid covers ``(nx * dx, ny * dx)`` metres; a cell index ``(ix, iy)``

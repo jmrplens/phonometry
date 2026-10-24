@@ -83,7 +83,7 @@ from __future__ import annotations
 
 import dataclasses
 from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
-from dataclasses import KW_ONLY, dataclass
+from dataclasses import dataclass
 from functools import cached_property
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
@@ -1700,7 +1700,7 @@ class _ElasticChecks:
         )
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ElasticRun(OwnsArrays):
     r"""One elastic (P-SV) FDTD simulation: the domain, its sources and what it records.
 
@@ -1715,7 +1715,7 @@ class ElasticRun(OwnsArrays):
         an explicit ``shape``.
     :param c_s: S-wave speed map [m/s]; ``c_s = 0`` marks fluid cells.
     :param dx: Grid spacing [m] (square cells).
-    :param duration: Physical time to simulate [s].
+    :param duration_s: Physical time to simulate [s].
     :param sources: One or more of :class:`ExplosionSource` or
         :class:`ForceSource`.
     :param rho: Density map [kg/m3]; scalar or ``(ny, nx)`` array.
@@ -1743,8 +1743,7 @@ class ElasticRun(OwnsArrays):
     c_p: float | Field2D
     c_s: float | Field2D
     dx: float
-    duration: float
-    _: KW_ONLY
+    duration_s: float
     sources: Sequence[ElasticSource]
     rho: float | Field2D
     shape: tuple[int, int] | None = None
@@ -1805,7 +1804,7 @@ def _elastic_checks(run: ElasticRun) -> _ElasticChecks:
     if len(run.sources) == 0:
         msg = "at least one source is required"
         raise ValueError(msg)
-    duration = _positive_finite("duration", run.duration)
+    duration_s = _positive_finite("duration_s", run.duration_s)
     absorbing_sides, free_sides = _parse_elastic_boundaries(boundaries.sides)
     width = _validated_absorbing_layer(boundaries, absorbing_sides)
     medium = _elastic_medium(
@@ -1835,7 +1834,7 @@ def _elastic_checks(run: ElasticRun) -> _ElasticChecks:
         sponge_width=width,
         probe_ix=read_only(_probe_indices(recording.probes, (ny, nx), medium.obstacle)),
         fields=tuple(recording.probe_fields),
-        steps=_step_count(duration, medium.dt),
+        steps=_step_count(duration_s, medium.dt),
         snapshot_every=recording.snapshot_every,
         snapshot_field=recording.snapshot_field,
         snapshot_decimation=recording.snapshot_decimation,
@@ -2134,7 +2133,7 @@ def elastic_fdtd_simulation(
 
     Builds the staggered velocity-stress grid (Virieux 1986, Eq. 5), applies
     the requested boundary conditions, injects the sources and integrates
-    for ``duration`` seconds, recording the selected fields at every probe
+    for ``duration_s`` seconds, recording the selected fields at every probe
     each time step and, optionally, full-field snapshots.
 
     The grid covers ``(nx * dx, ny * dx)`` metres; a cell index ``(ix, iy)``

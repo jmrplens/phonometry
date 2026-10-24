@@ -68,6 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   file (`hosts.toml` under `$XDG_CONFIG_HOME/phonometry/`, by default
   `~/.config/phonometry/`, `%APPDATA%\phonometry\` on Windows, or wherever
   `PHONOMETRY_HOSTS_FILE` points), and returns the record a run here returns.
+  A hosts file that does not exist, a path under a file included, is the
+  `KeyError` of a host the file does not name, on every system.
   The node, a Linux or macOS machine with a POSIX login shell, runs a Python
   environment with NumPy and SciPy or, on Linux, Docker with the image of
   `docker/node/Dockerfile`, built on it with `make node-image HOST=nas`,
@@ -89,7 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   own class, or as a `RuntimeWarning` led by the class's path when that
   class cannot be built here, and an interrupt stops the node's run.
   `result.provenance.host` names the node and the new
-  `result.provenance.package_digest` the package that ran; progress goes to
+  `result.provenance.package_sha256` the package that ran; progress goes to
   the `phonometry.simulation` logger, silent unless configured. `Compute`
   gains `host` and `timeout_s`. `FDTD2D` and `ElasticFDTD2D` refuse a host:
   an engine steps in this process. The new guide, "Sending a simulation to
@@ -3413,29 +3415,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   migration guide shows.
 
 - **A simulation is one record, checked when it is built.**
-  `simulation.FDTDRun(c, dx, duration, *, sources, shape=None, rho=1.2,
-  cfl=0.6, recording=None, boundaries="rigid", absorbing_layer_cells=20,
-  obstacle_mask=None, damping=0.0)` and `simulation.ElasticRun(c_p, c_s, dx,
-  duration, *, sources, rho, shape=None, cfl=0.6, recording=None,
-  boundaries=None, obstacle_mask=None, damping=0.0)` hold the arguments
-  `fdtd_simulation` and `elastic_fdtd_simulation` took, and the two functions
-  take the run: `fdtd_simulation(run, *, compute=None)` and
-  `elastic_fdtd_simulation(run, *, compute=None)`. A run checks every
-  argument when it is built, the grid's included (the time step, the
-  density, the sponge, the impedance edges, the obstacle, and the sources
-  and the probes on the grid), with the class and the words the functions
-  raised, so a run that builds is one the function can step. Both records
-  are frozen and take their grid and their duration by position and the
-  rest by name; the sources are held as a tuple, a mapping of boundaries as
-  a read-only mapping, and every array, and every real-valued map given as
-  nested lists, as the run's own read-only array, so no later change the
-  caller makes to the list of sources, the mapping of boundaries, an array
-  or a real-valued map reaches a checked run. `damping` takes a scalar for
-  the whole field or an `(ny, nx)` map, as the engines do.
-  `ElasticRun` refuses `boundaries` that are not an `ElasticBoundaries` with
-  a `TypeError`, where the function failed inside the run. `ElasticBoundaries`
-  now holds a mapping of sides as a read-only mapping of its own, so a run
-  cannot follow the caller's later edits to the dictionary.
+  `simulation.FDTDRun(*, c, dx, duration_s, sources, shape=None, rho=1.2,
+  cfl=0.6, recording=None, boundaries=None, obstacle_mask=None,
+  damping=0.0)` and `simulation.ElasticRun(*, c_p, c_s, dx, duration_s,
+  sources, rho, shape=None, cfl=0.6, recording=None, boundaries=None,
+  obstacle_mask=None, damping=0.0)` hold the arguments `fdtd_simulation` and
+  `elastic_fdtd_simulation` took, the duration in seconds as `duration_s`,
+  and the two functions take the run: `fdtd_simulation(run, *,
+  compute=None)` and `elastic_fdtd_simulation(run, *, compute=None)`. A run
+  checks every argument when it is built, the grid's included (the time
+  step, the density, the sponge, the impedance edges, the obstacle, and the
+  sources and the probes on the grid), with the class and the words the
+  functions raised, a refused duration naming `duration_s`, so a run that
+  builds is one the function can step. Both records are frozen and take
+  every field by name, so two numbers written in the wrong order cannot
+  build a valid run; the sources are held as a tuple, and every array, and
+  every real-valued map given as nested lists, as the run's own read-only
+  array, so no later change the caller makes to the list of sources, an
+  array or a real-valued map reaches a checked run. `damping` takes a scalar
+  for the whole field or an `(ny, nx)` map, as the engines do. The acoustic
+  boundaries are one new record, `simulation.FDTDBoundaries(*,
+  sides="rigid", absorbing_layer_cells=20)`, as the elastic ones are one
+  `ElasticBoundaries`: the sponge thickness travels with the sides it
+  belongs to, a mapping of sides is held as a read-only mapping and an
+  impedance profile given as a list as the record's own read-only array,
+  and the run that holds it checks it. `boundaries=None` is rigid on all
+  four sides for either run. `FDTDRun` refuses `boundaries` that are not an
+  `FDTDBoundaries`, and `ElasticRun` `boundaries` that are not an
+  `ElasticBoundaries`, with a `TypeError` naming `boundaries`, where the
+  function failed inside the run. `ElasticBoundaries` now holds a mapping of
+  sides as a read-only mapping of its own, so a run cannot follow the
+  caller's later edits to the dictionary.
 
 - **`FDTD2D.kappa`, `ElasticFDTD2D.mu` and `ElasticFDTD2D.lam` are
   read-only.** They are host copies the engine computed from its medium, as

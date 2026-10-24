@@ -60,7 +60,7 @@ def _run(duration: float = 2e-3, **changes: Any) -> ElasticRun:
         ),
     }
     arguments.update(changes)
-    return ElasticRun(4000.0, 2300.0, 0.01, duration, **arguments)
+    return ElasticRun(c_p=4000.0, c_s=2300.0, dx=0.01, duration_s=duration, **arguments)
 
 
 @pytest.fixture
@@ -206,9 +206,9 @@ def test_a_field_that_never_leaves_the_sources_has_nothing_to_scale_by(
         (
             {
                 "run": FDTDRun(
-                    343.0,
-                    0.01,
-                    1e-3,
+                    c=343.0,
+                    dx=0.01,
+                    duration_s=1e-3,
                     shape=(20, 20),
                     sources=[_PULSE],
                     recording=FDTDRecording(snapshot_every=2),
@@ -223,10 +223,10 @@ def test_a_field_that_never_leaves_the_sources_has_nothing_to_scale_by(
         (
             {
                 "run": ElasticRun(
-                    4000.0,
-                    2300.0,
-                    100.0,
-                    12.0,
+                    c_p=4000.0,
+                    c_s=2300.0,
+                    dx=100.0,
+                    duration_s=12.0,
                     rho=2500.0,
                     shape=(20, 24),
                     sources=[ExplosionSource(ix=10, iy=10, waveform=_PULSE.value)],

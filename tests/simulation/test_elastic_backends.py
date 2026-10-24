@@ -80,10 +80,10 @@ def _layered_run(snapshot_field: Field, snapshot_every: int) -> ElasticFDTDResul
     probes = [(0, 0), (nx - 1, 0), (0, ny - 1), (nx - 1, ny - 1), (7, 4), (11, 12)]
     return elastic_fdtd_simulation(
         ElasticRun(
-            c_p,
-            c_s,
-            0.01,
-            1e-4,
+            c_p=c_p,
+            c_s=c_s,
+            dx=0.01,
+            duration_s=1e-4,
             sources=[ExplosionSource(ix=10, iy=6, waveform=_pulse)],
             rho=rho,
             recording=ElasticRecording(
@@ -145,9 +145,9 @@ def test_a_recorded_acoustic_run_agrees_with_numpy(
     def simulate() -> FDTDResult:
         return fdtd_simulation(
             FDTDRun(
-                343.0,
-                0.01,
-                1e-3,
+                c=343.0,
+                dx=0.01,
+                duration_s=1e-3,
                 shape=(16, 20),
                 sources=[CWSource(ix=6, iy=7, frequency=2000.0)],
                 recording=FDTDRecording(

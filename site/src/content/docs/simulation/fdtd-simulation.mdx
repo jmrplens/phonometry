@@ -132,9 +132,10 @@ outside $(0, 1)$ instead of letting the run start. Section 6 also uses a
 in the dispersion relation; the two are not the same number, and the default
 `cfl = 0.6` means $S = 0.424$.
 
-A simulation is one record: `FDTDRun(c, dx, duration, sources=..., ...)`
-holds the domain, its sources and what it records, and checks every argument
-when it is built, so a mistake raises where the run is written;
+A simulation is one record:
+`FDTDRun(c=..., dx=..., duration_s=..., sources=..., ...)` takes every field
+by name, holds the domain, its sources and what it records, and checks every
+argument when it is built, so a mistake raises where the run is written;
 `fdtd_simulation(run)` steps it, and `compute=` says where.
 
 ```python
@@ -142,9 +143,9 @@ from phonometry import simulation
 
 # A 3.0 x 2.0 m air domain: 300 x 200 cells of 1 cm.
 run = simulation.FDTDRun(
-    343.0,             # c: sound speed [m/s], a scalar or a map over the grid
-    0.01,              # dx: square cell size [m]
-    2.0e-3,            # duration: simulated time [s] (dt is derived, not given)
+    c=343.0,           # sound speed [m/s], a scalar or a map over the grid
+    dx=0.01,           # square cell size [m]
+    duration_s=2.0e-3, # simulated time [s] (dt is derived, not given)
     shape=(200, 300),  # (ny, nx) cells -> a 2.0 x 3.0 m domain
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
@@ -287,7 +288,10 @@ is why the meshed panel of section 4 runs at half a millimetre, far finer
 than its 17 cm wavelength requires: there the geometry, not the wavelength,
 sets the resolution.
 
-Each domain side can carry its own boundary condition:
+Each domain side can carry its own boundary condition, which a run takes as
+one `FDTDBoundaries` record: `sides=` gives one condition to all four sides
+or maps each side to its own, and `absorbing_layer_cells=` sets the
+thickness of the sponge:
 
 - ``"rigid"`` (default): a perfect reflector, $R = +1$.
 - ``"absorbing"``: a sponge layer of `absorbing_layer_cells` cells whose
@@ -779,12 +783,13 @@ from phonometry import simulation
 mask = np.zeros((200, 300), dtype=bool)
 mask[60:, 150:154] = True
 run = simulation.FDTDRun(
-    343.0, 0.01, 9.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
         probes=[(100, 100), (240, 100)], snapshot_every=75),
     obstacle_mask=mask,
-    boundaries="absorbing", absorbing_layer_cells=30,
+    boundaries=simulation.FDTDBoundaries(
+        sides="absorbing", absorbing_layer_cells=30),
 )
 res = simulation.fdtd_simulation(run)
 
@@ -921,7 +926,7 @@ from phonometry import simulation
 lx, ly, dx = 1.0, 0.7, 0.02
 nx, ny = round(lx / dx), round(ly / dx)
 run = simulation.FDTDRun(
-    343.0, dx, 0.35, shape=(ny, nx),
+    c=343.0, dx=dx, duration_s=0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
@@ -959,7 +964,7 @@ from phonometry import simulation
 lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
 nx, ny = round(lx / dx), round(ly / dx)
 run = simulation.FDTDRun(
-    c, dx, 0.35, shape=(ny, nx),
+    c=c, dx=dx, duration_s=0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
@@ -1019,7 +1024,7 @@ how the same call steps on a GPU or goes to a node.
 from phonometry import simulation
 
 run = simulation.FDTDRun(
-    343.0, 0.01, 2e-3,
+    c=343.0, dx=0.01, duration_s=2e-3,
     shape=(60, 80),
     sources=[simulation.GaussianPulse(ix=40, iy=30, half_width_s=5e-5)],
     recording=simulation.FDTDRecording(snapshot_every=10),

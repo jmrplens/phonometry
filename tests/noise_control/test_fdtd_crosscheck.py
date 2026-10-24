@@ -39,6 +39,7 @@ import pytest
 from phonometry.noise_control import silencers as sl
 from phonometry.simulation.fdtd import (
     CWSource,
+    FDTDBoundaries,
     FDTDRecording,
     FDTDRun,
     GaussianPulse,
@@ -68,21 +69,23 @@ def _pulse_spectrum(
     dt = 0.6 * dx / (_C * math.sqrt(2.0))
     res = fdtd_simulation(
         FDTDRun(
-            _C,
-            dx,
-            steps * dt,
+            c=_C,
+            dx=dx,
+            duration_s=steps * dt,
             sources=[
                 GaussianPulse(ix=source[0], iy=source[1], half_width_s=pulse_width)
             ],
             shape=obstacle.shape,
             recording=FDTDRecording(probes=[probe]),
-            boundaries={
-                "left": "absorbing",
-                "right": "absorbing",
-                "top": "rigid",
-                "bottom": "rigid",
-            },
-            absorbing_layer_cells=sponge,
+            boundaries=FDTDBoundaries(
+                sides={
+                    "left": "absorbing",
+                    "right": "absorbing",
+                    "top": "rigid",
+                    "bottom": "rigid",
+                },
+                absorbing_layer_cells=sponge,
+            ),
             obstacle_mask=obstacle,
         )
     )
@@ -122,14 +125,13 @@ def _transmitted_rms(frequency: float) -> float:
     dt = 0.6 * _DX / (_C * math.sqrt(2.0))
     res = fdtd_simulation(
         FDTDRun(
-            _C,
-            _DX,
-            steps * dt,
+            c=_C,
+            dx=_DX,
+            duration_s=steps * dt,
             sources=[src],
             shape=(_NY, _NX),
             recording=FDTDRecording(probes=[(170, 7)]),
-            boundaries=boundaries,
-            absorbing_layer_cells=10,
+            boundaries=FDTDBoundaries(sides=boundaries, absorbing_layer_cells=10),
             obstacle_mask=mask,
         )
     )

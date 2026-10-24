@@ -27,6 +27,7 @@ from phonometry.simulation import (
     ElasticRecording,
     ElasticRun,
     ExplosionSource,
+    FDTDBoundaries,
     FDTDRecording,
     FDTDRun,
     GaussianPulse,
@@ -52,16 +53,15 @@ def _acoustic(duration: float) -> FDTDRun:
     mask = np.zeros((120, 160), dtype=bool)
     mask[50:70, 90:95] = True
     return FDTDRun(
-        343.0,
-        0.01,
-        duration,
+        c=343.0,
+        dx=0.01,
+        duration_s=duration,
         shape=(120, 160),
         sources=[GaussianPulse(ix=30, iy=60, half_width_s=4e-5)],
         recording=FDTDRecording(
             probes=[(120, 60), (80, 20)], snapshot_every=25, snapshot_decimation=2
         ),
-        boundaries="absorbing",
-        absorbing_layer_cells=12,
+        boundaries=FDTDBoundaries(sides="absorbing", absorbing_layer_cells=12),
         obstacle_mask=mask,
     )
 
@@ -75,19 +75,19 @@ def test_a_remote_acoustic_run_equals_the_run_here() -> None:
     there = fdtd_simulation(run, compute=Compute(host=NODE))
     _assert_same_result(there, here)
     assert there.provenance.host == NODE
-    assert there.provenance.package_digest == package.installed_package().digest
+    assert there.provenance.package_sha256 == package.installed_package().digest
     assert (
-        dataclasses.replace(there.provenance, host=None, package_digest=None)
+        dataclasses.replace(there.provenance, host=None, package_sha256=None)
         == here.provenance
     )
 
 
 def test_a_remote_elastic_run_equals_the_run_here() -> None:
     run = ElasticRun(
-        4000.0,
-        2300.0,
-        0.01,
-        4e-4,
+        c_p=4000.0,
+        c_s=2300.0,
+        dx=0.01,
+        duration_s=4e-4,
         rho=2500.0,
         shape=(60, 61),
         sources=[

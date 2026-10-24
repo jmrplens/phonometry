@@ -229,11 +229,12 @@ draws its pressure field into a video as the run computes it:
 from phonometry import io, simulation
 
 run = simulation.FDTDRun(
-    343.0, 0.01, 4e-3,
+    c=343.0, dx=0.01, duration_s=4e-3,
     shape=(80, 120),
     sources=[simulation.GaussianPulse(ix=40, iy=40, half_width_s=5e-5)],
     recording=simulation.FDTDRecording(probes=[(100, 40)], snapshot_every=8),
-    boundaries="absorbing", absorbing_layer_cells=15,
+    boundaries=simulation.FDTDBoundaries(
+        sides="absorbing", absorbing_layer_cells=15),
 )
 res = simulation.write_fdtd_animation(
     "pulse.webm", run, frame=simulation.AnimationFrame(size=(480, 320))
@@ -315,7 +316,7 @@ vertical velocity:
 ```python
 waveform = simulation.GaussianPulse(ix=0, iy=0, half_width_s=4e-5).value
 rayleigh = simulation.ElasticRun(
-    4000.0, 2300.0, 0.01, 5e-4,
+    c_p=4000.0, c_s=2300.0, dx=0.01, duration_s=5e-4,
     rho=2500.0, shape=(60, 160),
     sources=[
         simulation.ForceSource(ix=80, iy=0, direction="y", waveform=waveform)

@@ -449,9 +449,9 @@ def _fdtd() -> object:
     sim = simulation.FDTD2D(343.0, 0.02, shape=(100, 100))
     return simulation.fdtd_simulation(
         simulation.FDTDRun(
-            343.0,
-            0.02,
-            100 * sim.dt,
+            c=343.0,
+            dx=0.02,
+            duration_s=100 * sim.dt,
             sources=[simulation.GaussianPulse(ix=50, iy=50, half_width_s=2e-4)],
             shape=(100, 100),
             recording=simulation.FDTDRecording(probes=[(10, 10)], snapshot_every=1),
@@ -468,10 +468,10 @@ def _elastic_fdtd() -> object:
     pulse = simulation.GaussianPulse(ix=0, iy=0, half_width_s=2e-4)
     return simulation.elastic_fdtd_simulation(
         simulation.ElasticRun(
-            c_p,
-            3200.0,
-            dx,
-            160 * dt,
+            c_p=c_p,
+            c_s=3200.0,
+            dx=dx,
+            duration_s=160 * dt,
             sources=[simulation.ExplosionSource(ix=50, iy=30, waveform=pulse.value)],
             rho=7850.0,
             shape=(60, 100),
@@ -769,7 +769,7 @@ def _built_by_hand() -> dict[str, tuple[Callable[[np.ndarray], object], str]]:
                     cuda_runtime=None,
                     cuda_driver_api=None,
                     gpu=None,
-                    package_digest=None,
+                    package_sha256=None,
                 ),
             ),
             "pressures",

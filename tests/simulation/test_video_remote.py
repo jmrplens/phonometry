@@ -65,18 +65,18 @@ _EXPLOSION = ExplosionSource(
     ix=12, iy=10, waveform=GaussianPulse(ix=0, iy=0, half_width_s=2e-5).value
 )
 _RUN = FDTDRun(
-    343.0,
-    0.01,
-    1e-3,
+    c=343.0,
+    dx=0.01,
+    duration_s=1e-3,
     shape=(30, 40),
     sources=[_SOURCE],
     recording=FDTDRecording(probes=[(5, 5)], snapshot_every=10),
 )
 _ELASTIC = ElasticRun(
-    4000.0,
-    2300.0,
-    0.01,
-    5e-4,
+    c_p=4000.0,
+    c_s=2300.0,
+    dx=0.01,
+    duration_s=5e-4,
     rho=2500.0,
     shape=(20, 24),
     sources=[_EXPLOSION],
@@ -194,9 +194,9 @@ def test_the_ffmpeg_here_is_never_run_on_the_remote_route(
         (
             {
                 "run": FDTDRun(
-                    343.0,
-                    0.01,
-                    1e-3,
+                    c=343.0,
+                    dx=0.01,
+                    duration_s=1e-3,
                     shape=(30, 40),
                     sources=[_SOURCE],
                     recording=FDTDRecording(probes=[(5, 5)]),
@@ -211,9 +211,9 @@ def test_the_ffmpeg_here_is_never_run_on_the_remote_route(
         (
             {
                 "run": FDTDRun(
-                    343.0,
-                    10.0,
-                    12.0,
+                    c=343.0,
+                    dx=10.0,
+                    duration_s=12.0,
                     shape=(30, 40),
                     sources=[_SOURCE],
                     recording=FDTDRecording(snapshot_every=900),
@@ -273,10 +273,10 @@ def test_a_waveform_that_cannot_travel_is_refused_before_ssh_starts(
     log = tmp_path / "ssh.log"
     monkeypatch.setenv("FAKE_SSH_LOG", str(log))
     run = ElasticRun(
-        4000.0,
-        2300.0,
-        0.01,
-        1e-4,
+        c_p=4000.0,
+        c_s=2300.0,
+        dx=0.01,
+        duration_s=1e-4,
         rho=2500.0,
         shape=(20, 24),
         sources=[ExplosionSource(ix=12, iy=10, waveform=lambda t: 0.0 * t)],

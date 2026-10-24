@@ -234,7 +234,7 @@ _RUN: dict[str, object] = {
     "cuda_runtime": "13.2",
     "cuda_driver_api": "13.3",
     "gpu": "NVIDIA GeForce RTX 4060",
-    "package_digest": None,
+    "package_sha256": None,
 }
 
 
@@ -462,17 +462,17 @@ def test_a_remote_error_refines_runtime_error_and_survives_a_process_boundary() 
 
 def test_a_provenance_names_the_package_that_ran() -> None:
     digest = "0123456789abcdef" * 4
-    record = RunProvenance(**{**_RUN, "host": "nas", "package_digest": digest})  # type: ignore[arg-type]
-    assert record.package_digest == digest
+    record = RunProvenance(**{**_RUN, "host": "nas", "package_sha256": digest})  # type: ignore[arg-type]
+    assert record.package_sha256 == digest
 
 
 @pytest.mark.parametrize(
     ("value", "error"),
     [("abc", ValueError), ("0123456789ABCDEF" * 4, ValueError), (7, TypeError)],
 )
-def test_a_package_digest_is_sixty_four_lowercase_hex_digits(
+def test_a_package_sha256_is_sixty_four_lowercase_hex_digits(
     value: object, error: type[Exception]
 ) -> None:
-    fields = {**_RUN, "package_digest": value}
-    with pytest.raises(error, match="'package_digest'"):
+    fields = {**_RUN, "package_sha256": value}
+    with pytest.raises(error, match="'package_sha256'"):
         RunProvenance(**fields)  # type: ignore[arg-type]

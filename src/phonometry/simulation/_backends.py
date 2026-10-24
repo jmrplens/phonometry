@@ -122,7 +122,7 @@ def _provenance(compute: Compute, **found: str | None) -> RunProvenance:
         cuda_runtime=found.get("cuda_runtime"),
         cuda_driver_api=found.get("cuda_driver_api"),
         gpu=found.get("gpu"),
-        package_digest=None,
+        package_sha256=None,
     )
 
 

@@ -225,9 +225,9 @@ _ROUTES: dict[str, Callable[[], object]] = {
     ),
     "fdtd_simulation": lambda: fdtd_simulation(
         FDTDRun(
-            343.0,
-            0.01,
-            1e-4,
+            c=343.0,
+            dx=0.01,
+            duration_s=1e-4,
             shape=(8, 8),
             sources=[GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
         ),
@@ -235,10 +235,10 @@ _ROUTES: dict[str, Callable[[], object]] = {
     ),
     "elastic_fdtd_simulation": lambda: elastic_fdtd_simulation(
         ElasticRun(
-            4000.0,
-            2300.0,
-            0.01,
-            1e-5,
+            c_p=4000.0,
+            c_s=2300.0,
+            dx=0.01,
+            duration_s=1e-5,
             rho=2500.0,
             shape=(8, 8),
             sources=[ExplosionSource(ix=4, iy=4, waveform=lambda t: t)],
@@ -762,11 +762,12 @@ _NUMPY_RUN = """
 import sys
 from phonometry import simulation as s
 s.fdtd_simulation(s.FDTDRun(
-    343.0, 0.01, 1e-4, shape=(8, 8), recording=s.FDTDRecording(probes=[(4, 4)]),
+    c=343.0, dx=0.01, duration_s=1e-4, shape=(8, 8),
+    recording=s.FDTDRecording(probes=[(4, 4)]),
     sources=[s.GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
 ))
 s.elastic_fdtd_simulation(s.ElasticRun(
-    4000.0, 2300.0, 0.01, 1e-5, rho=2500.0, shape=(8, 8),
+    c_p=4000.0, c_s=2300.0, dx=0.01, duration_s=1e-5, rho=2500.0, shape=(8, 8),
     sources=[s.ExplosionSource(ix=4, iy=4, waveform=lambda t: t)],
 ))
 libraries = {"cupy", "torch", "array_api_compat", "array_api_strict"}
@@ -800,28 +801,26 @@ def test_a_numpy_run_imports_no_device_library() -> None:
 def _acoustic_run(compute: Compute, **changes: Any) -> object:
     """A small acoustic run, the bad argument of the case in *changes*."""
     arguments: dict[str, Any] = {
-        "duration": 1e-4,
+        "duration_s": 1e-4,
         "shape": (8, 8),
         "sources": [GaussianPulse(ix=4, iy=4, half_width_s=4e-5)],
         "recording": FDTDRecording(probes=[(4, 4)]),
         **changes,
     }
-    duration = arguments.pop("duration")
-    return fdtd_simulation(FDTDRun(343.0, 0.01, duration, **arguments), compute=compute)
+    return fdtd_simulation(FDTDRun(c=343.0, dx=0.01, **arguments), compute=compute)
 
 
 def _elastic_run(compute: Compute, **changes: Any) -> object:
     """A small elastic run, the bad argument of the case in *changes*."""
     arguments: dict[str, Any] = {
-        "duration": 1e-5,
+        "duration_s": 1e-5,
         "shape": (8, 8),
         "sources": [ExplosionSource(ix=4, iy=4, waveform=_ramp)],
         "recording": ElasticRecording(probes=[(4, 4)]),
         **changes,
     }
-    duration = arguments.pop("duration")
     return elastic_fdtd_simulation(
-        ElasticRun(4000.0, 2300.0, 0.01, duration, rho=2500.0, **arguments),
+        ElasticRun(c_p=4000.0, c_s=2300.0, dx=0.01, rho=2500.0, **arguments),
         compute=compute,
     )
 
@@ -859,8 +858,8 @@ _BAD_ARGUMENTS: dict[str, tuple[Callable[[Compute], object], str]] = {
         "plane-wave offset lies outside the grid",
     ),
     "acoustic run, too short": (
-        lambda c: _acoustic_run(c, duration=1e-9),
-        "duration must cover at least one time step",
+        lambda c: _acoustic_run(c, duration_s=1e-9),
+        "duration_s must cover at least one time step",
     ),
     "elastic run, probe off the grid": (
         lambda c: _elastic_run(c, recording=ElasticRecording(probes=[(4, 20)])),
@@ -881,8 +880,8 @@ _BAD_ARGUMENTS: dict[str, tuple[Callable[[Compute], object], str]] = {
         "source position lies inside an obstacle",
     ),
     "elastic run, too short": (
-        lambda c: _elastic_run(c, duration=1e-12),
-        "duration must cover at least one time step",
+        lambda c: _elastic_run(c, duration_s=1e-12),
+        "duration_s must cover at least one time step",
     ),
     "acoustic cfl": (
         lambda c: FDTD2D(343.0, 0.01, shape=(8, 8), cfl=1.5, compute=c),

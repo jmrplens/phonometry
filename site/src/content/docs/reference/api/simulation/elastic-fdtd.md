@@ -112,7 +112,7 @@ Run a deterministic 2D elastic (P-SV) FDTD simulation.
 
 Builds the staggered velocity-stress grid (Virieux 1986, Eq. 5), applies
 the requested boundary conditions, injects the sources and integrates
-for `duration` seconds, recording the selected fields at every probe
+for `duration_s` seconds, recording the selected fields at every probe
 each time step and, optionally, full-field snapshots.
 
 The grid covers `(nx * dx, ny * dx)` metres; a cell index `(ix, iy)`
@@ -540,11 +540,11 @@ nothing (the default) runs the physics and keeps only the time axis.
 
 ```python
 ElasticRun(
+    *,
     c_p: float | NDArray[np.float64],
     c_s: float | NDArray[np.float64],
     dx: float,
-    duration: float,
-    *,
+    duration_s: float,
     sources: Sequence[ExplosionSource | ForceSource],
     rho: float | NDArray[np.float64],
     shape: tuple[int, int] | None = None,
@@ -572,7 +572,7 @@ grid), and nothing the caller changes afterwards reaches a checked run.
 | `c_p` | P-wave speed map [m/s], shape `(ny, nx)`, or a scalar with an explicit `shape`. |
 | `c_s` | S-wave speed map [m/s]; `c_s = 0` marks fluid cells. |
 | `dx` | Grid spacing [m] (square cells). |
-| `duration` | Physical time to simulate [s]. |
+| `duration_s` | Physical time to simulate [s]. |
 | `sources` | One or more of [`ExplosionSource`](/phonometry/reference/api/simulation/elastic-fdtd/#explosionsource) or [`ForceSource`](/phonometry/reference/api/simulation/elastic-fdtd/#forcesource). |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
 | `shape` | Grid shape `(ny, nx)`, required when `c_p` is scalar. |

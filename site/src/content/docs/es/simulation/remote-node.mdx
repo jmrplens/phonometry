@@ -60,7 +60,7 @@ NumPy por su cuenta, y devuelve las historias de las sondas y las
 instantáneas, que se leen aquí en arrays dimensionados a partir de tu
 petición; una función que escribe vídeo envía los bytes de su vídeo en lugar
 de las instantáneas. `result.provenance.host` nombra el nodo y
-`result.provenance.package_digest`, el paquete que se ejecutó; el resto de la
+`result.provenance.package_sha256`, el paquete que se ejecutó; el resto de la
 procedencia es la del nodo: su NumPy, su biblioteca de arrays, su GPU.
 
 ## 2. Nombrar un nodo: el fichero de hosts
@@ -144,7 +144,7 @@ La ejecución y la llamada son las de una ejecución aquí:
 
 ```py
 run = simulation.FDTDRun(
-    343.0, 0.01, 0.05, shape=(400, 600),
+    c=343.0, dx=0.01, duration_s=0.05, shape=(400, 600),
     sources=[simulation.GaussianPulse(ix=150, iy=200, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(450, 200)]),
 )

@@ -141,17 +141,18 @@ def generate_fdtd_simulation(output_dir: str) -> None:
     mask[60:, 150:154] = True
     res = simulation.fdtd_simulation(
         simulation.FDTDRun(
-            343.0,
-            dx,
-            9.0e-3,
+            c=343.0,
+            dx=dx,
+            duration_s=9.0e-3,
             shape=(200, 300),
             sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
             recording=simulation.FDTDRecording(
                 probes=[(100, 100), (240, 100)], snapshot_every=75
             ),
             obstacle_mask=mask,
-            boundaries="absorbing",
-            absorbing_layer_cells=30,
+            boundaries=simulation.FDTDBoundaries(
+                sides="absorbing", absorbing_layer_cells=30
+            ),
         )
     )
 
@@ -186,10 +187,10 @@ def generate_elastic_halfspace_waves(output_dir: str) -> None:
     steps = round(duration / dt)
     res = simulation.elastic_fdtd_simulation(
         simulation.ElasticRun(
-            c_p,
-            c_s,
-            dx,
-            duration,
+            c_p=c_p,
+            c_s=c_s,
+            dx=dx,
+            duration_s=duration,
             rho=rho,
             shape=(300, 600),
             cfl=cfl,
@@ -287,10 +288,10 @@ def _scholte_interface_result() -> ElasticFDTDResult:
 
     return simulation.elastic_fdtd_simulation(
         simulation.ElasticRun(
-            c_p,
-            c_s,
-            dx,
-            duration,
+            c_p=c_p,
+            c_s=c_s,
+            dx=dx,
+            duration_s=duration,
             rho=rho,
             sources=[
                 simulation.ExplosionSource(ix=60, iy=89, waveform=ricker, amplitude=1e3)
@@ -354,9 +355,9 @@ def generate_fdtd_room_modes(output_dir: str) -> None:
     nx, ny = round(lx / dx), round(ly / dx)
     res = simulation.fdtd_simulation(
         simulation.FDTDRun(
-            c,
-            dx,
-            0.35,
+            c=c,
+            dx=dx,
+            duration_s=0.35,
             shape=(ny, nx),
             sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
             recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),

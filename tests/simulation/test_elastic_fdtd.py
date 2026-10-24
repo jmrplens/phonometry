@@ -163,10 +163,10 @@ def body_waves() -> ElasticFDTDResult:
     w = 8e-6
     return elastic_fdtd_simulation(
         ElasticRun(
-            CP_AL,
-            CS_AL,
-            0.002,
-            2.2e-4,
+            c_p=CP_AL,
+            c_s=CS_AL,
+            dx=0.002,
+            duration_s=2.2e-4,
             rho=RHO_AL,
             shape=(501, 501),
             sources=[
@@ -230,10 +230,10 @@ def test_rayleigh_wave_speed_matches_characteristic_equation() -> None:
     w = 8e-6
     res = elastic_fdtd_simulation(
         ElasticRun(
-            CP_AL,
-            CS_AL,
-            0.002,
-            5.0e-4,
+            c_p=CP_AL,
+            c_s=CS_AL,
+            dx=0.002,
+            duration_s=5.0e-4,
             rho=RHO_AL,
             shape=(240, 660),
             sources=[
@@ -680,7 +680,7 @@ def test_a_whole_float_cell_index_is_held_as_an_int_and_steps(kind: str) -> None
     ("kwargs", "match"),
     [
         ({"sources": []}, "at least one source"),
-        ({"duration": 1e-9}, "at least one time step"),
+        ({"duration_s": 1e-9}, "duration_s must cover at least one time step"),
         (
             {"recording": ElasticRecording(probes=[(99, 0)])},
             r"probe .* lies outside the grid",
@@ -712,7 +712,7 @@ def test_simulation_rejects_invalid_arguments(
     match: str,
 ) -> None:
     full: dict[str, object] = {
-        "duration": 1e-3,
+        "duration_s": 1e-3,
         "sources": [
             ExplosionSource(
                 ix=5, iy=5, waveform=GaussianPulse(ix=0, iy=0, half_width_s=1e-4).value
@@ -720,9 +720,8 @@ def test_simulation_rejects_invalid_arguments(
         ],
         **kwargs,
     }
-    duration = full.pop("duration")
     with pytest.raises(ValueError, match=match):
-        ElasticRun(6000.0, 3000.0, 0.05, duration, rho=2700.0, shape=(30, 30), **full)
+        ElasticRun(c_p=6000.0, c_s=3000.0, dx=0.05, rho=2700.0, shape=(30, 30), **full)
 
 
 @pytest.mark.parametrize(
@@ -791,7 +790,15 @@ def _small_run(**kwargs: object) -> ElasticFDTDResult:
     }
     defaults.update(kwargs)
     return elastic_fdtd_simulation(
-        ElasticRun(6000.0, 3000.0, 0.02, 2e-3, rho=2700.0, shape=(40, 60), **defaults)  # type: ignore[arg-type]
+        ElasticRun(
+            c_p=6000.0,
+            c_s=3000.0,
+            dx=0.02,
+            duration_s=2e-3,
+            rho=2700.0,
+            shape=(40, 60),
+            **defaults,  # type: ignore[arg-type]
+        )
     )
 
 

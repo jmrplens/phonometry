@@ -76,7 +76,7 @@ de simulación lo toman como `compute=`:
 gpu = simulation.Compute(device="cupy")
 sim = simulation.FDTD2D(343.0, 0.01, shape=(200, 300), compute=gpu)
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
@@ -89,7 +89,7 @@ pueden apartarse sus números de los de una ejecución en float64.
 
 ```python
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)], snapshot_every=50),
 )
@@ -151,7 +151,7 @@ bloque `use()` no mueve una simulación construida dentro de él.
 
 ```python
 run = simulation.FDTDRun(
-    343.0, 0.01, 1.0e-3, shape=(100, 150),
+    c=343.0, dx=0.01, duration_s=1.0e-3, shape=(100, 150),
     sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(100, 50)]),
 )
@@ -199,7 +199,7 @@ single = simulation.Compute(dtype="float32")
 
 def pulse_run(half_width_s):
     run = simulation.FDTDRun(
-        343.0, 0.01, 1.0e-3, shape=(100, 150),
+        c=343.0, dx=0.01, duration_s=1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=half_width_s)],
         recording=simulation.FDTDRecording(probes=[(100, 50)]),
     )
@@ -247,7 +247,7 @@ NumPy no puede pasar después por una ejecución en GPU ni en un nodo.
 ```py
 request = simulation.Compute(device="cupy", fallback=True)
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
@@ -282,7 +282,7 @@ simulación da el mismo registro como `sim.provenance`:
 | `cuda_driver_api` | la versión de CUDA que admite el controlador de la GPU (`"13.3"`), que solo da CuPy; no es la versión propia del controlador de NVIDIA |
 | `gpu` | el nombre de la GPU (`"Apple MPS"` en MPS), `None` fuera de una GPU |
 | `host` | la máquina a la que fue la ejecución, `None` para esta |
-| `package_digest` | el SHA-256 del paquete que se ejecutó en el nodo, `None` para una ejecución en esta máquina |
+| `package_sha256` | el SHA-256 del paquete que se ejecutó en el nodo, `None` para una ejecución en esta máquina |
 
 ```python
 print(light.provenance.device, light.provenance.dtype, light.provenance.array_library)
@@ -293,7 +293,7 @@ Una ejecución en CuPy registra la tarjeta y las versiones con las que avanzó:
 
 ```py
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
 )
 on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy"))
@@ -301,7 +301,7 @@ print(on_gpu.provenance)
 # En la máquina de la prueba de la sección 6:
 # RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
 #     numpy_version='2.5.3', array_library='cupy 14.2.0', cuda_runtime='13.2',
-#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060', package_digest=None)
+#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060', package_sha256=None)
 ```
 
 Los campos de una simulación viven en su dispositivo. `sim.p`, `sim.vx` y
@@ -436,7 +436,7 @@ celdas del que se tomó, con los ejes sobre el dominio completo.
 
 ```python
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
         snapshot_every=10, snapshot_decimation=4),

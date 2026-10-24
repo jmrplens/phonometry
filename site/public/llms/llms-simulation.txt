@@ -239,7 +239,7 @@ take it as `compute=`:
 gpu = simulation.Compute(device="cupy")
 sim = simulation.FDTD2D(343.0, 0.01, shape=(200, 300), compute=gpu)
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
@@ -252,7 +252,7 @@ float64 run's.
 
 ```python
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)], snapshot_every=50),
 )
@@ -311,7 +311,7 @@ block does not move an engine built inside it.
 
 ```python
 run = simulation.FDTDRun(
-    343.0, 0.01, 1.0e-3, shape=(100, 150),
+    c=343.0, dx=0.01, duration_s=1.0e-3, shape=(100, 150),
     sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(100, 50)]),
 )
@@ -357,7 +357,7 @@ single = simulation.Compute(dtype="float32")
 
 def pulse_run(half_width_s):
     run = simulation.FDTDRun(
-        343.0, 0.01, 1.0e-3, shape=(100, 150),
+        c=343.0, dx=0.01, duration_s=1.0e-3, shape=(100, 150),
         sources=[simulation.GaussianPulse(ix=30, iy=50, half_width_s=half_width_s)],
         recording=simulation.FDTDRecording(probes=[(100, 50)]),
     )
@@ -402,7 +402,7 @@ cannot pass for a GPU run or a run on a node later.
 ```py
 request = simulation.Compute(device="cupy", fallback=True)
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
@@ -437,7 +437,7 @@ engine reports the same record as `sim.provenance`:
 | `cuda_driver_api` | the CUDA version the GPU driver supports (`"13.3"`), reported by CuPy only; it is not the NVIDIA driver's own version |
 | `gpu` | the GPU's name (`"Apple MPS"` on MPS), `None` off a GPU |
 | `host` | the machine the run went to, `None` for this one |
-| `package_digest` | the SHA-256 of the package that ran on the node, `None` for a run on this machine |
+| `package_sha256` | the SHA-256 of the package that ran on the node, `None` for a run on this machine |
 
 ```python
 print(light.provenance.device, light.provenance.dtype, light.provenance.array_library)
@@ -448,7 +448,7 @@ A run on CuPy records the card and the versions it stepped on:
 
 ```py
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
 )
 on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy"))
@@ -456,7 +456,7 @@ print(on_gpu.provenance)
 # On the machine of the proof in section 6:
 # RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
 #     numpy_version='2.5.3', array_library='cupy 14.2.0', cuda_runtime='13.2',
-#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060', package_digest=None)
+#     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060', package_sha256=None)
 ```
 
 An engine's fields live on its device. `sim.p`, `sim.vx` and `sim.vy` of an
@@ -582,7 +582,7 @@ it was taken from, with the axes on the whole domain.
 
 ```python
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
         snapshot_every=10, snapshot_decimation=4),
@@ -738,9 +738,10 @@ the shortest; in mixed domains the fluid P wavelength can be shorter, as
 in water at 1480 m/s over a 2000 m/s-shear sediment).
 
 A simulation is one record:
-`ElasticRun(c_p, c_s, dx, duration, sources=..., rho=..., ...)` holds the
-domain, its sources and what it records, and checks every argument when it
-is built, so a mistake raises where the run is written;
+`ElasticRun(c_p=..., c_s=..., dx=..., duration_s=..., sources=..., rho=..., ...)`
+takes every field by name, holds the domain, its sources and what it
+records, and checks every argument when it is built, so a mistake raises
+where the run is written;
 `elastic_fdtd_simulation(run)` steps it, and `compute=` says where.
 
 ```python
@@ -752,7 +753,8 @@ from phonometry.simulation import ALUMINUM
 # probes 100 and 220 cells away; c_P falls out of the differential delay.
 w = 8e-6
 run = simulation.ElasticRun(
-    ALUMINUM.c_p, ALUMINUM.c_s, 0.002, 1.1e-4, rho=ALUMINUM.rho,
+    c_p=ALUMINUM.c_p, c_s=ALUMINUM.c_s, dx=0.002, duration_s=1.1e-4,
+    rho=ALUMINUM.rho,
     shape=(501, 501),
     sources=[simulation.ExplosionSource(
         ix=250, iy=250,
@@ -838,7 +840,8 @@ dx, w = 0.001, 8e-6
 dt = 0.6 * dx / (ALUMINUM.c_p * np.sqrt(2.0))
 steps = round(7.3e-5 / dt)
 run = simulation.ElasticRun(
-    ALUMINUM.c_p, ALUMINUM.c_s, dx, 7.3e-5, rho=ALUMINUM.rho,
+    c_p=ALUMINUM.c_p, c_s=ALUMINUM.c_s, dx=dx, duration_s=7.3e-5,
+    rho=ALUMINUM.rho,
     shape=(300, 600),
     sources=[simulation.ForceSource(
         ix=300, iy=0, direction="y", amplitude=1e6,
@@ -1077,7 +1080,7 @@ def ricker(t):
     return (1.0 - 2.0 * a) * np.exp(-a)
 
 run = simulation.ElasticRun(
-    c_p, c_s, dx, 0.232, rho=rho,
+    c_p=c_p, c_s=c_s, dx=dx, duration_s=0.232, rho=rho,
     sources=[simulation.ExplosionSource(ix=60, iy=89, waveform=ricker,
                                         amplitude=1e3)],
     boundaries=simulation.ElasticBoundaries(sides="absorbing",
@@ -1146,7 +1149,7 @@ how the same call steps on a GPU or goes to a node.
 from phonometry import simulation
 
 run = simulation.ElasticRun(
-    4000.0, 2300.0, 0.01, 5e-4,
+    c_p=4000.0, c_s=2300.0, dx=0.01, duration_s=5e-4,
     rho=2500.0, shape=(40, 60),
     sources=[simulation.ExplosionSource(
         ix=30, iy=20,
@@ -1363,9 +1366,10 @@ and the run, `FDTDRun`, derives the time step when it is built, from the
 in the map; values outside $(0, 1)$ are rejected because the scheme is
 unconditionally meaningless beyond the bound (Eq. 4.14).
 
-A simulation is one record: `FDTDRun(c, dx, duration, sources=..., ...)`
-holds the domain, its sources and what it records, and checks every argument
-when it is built, so a mistake raises where the run is written;
+A simulation is one record:
+`FDTDRun(c=..., dx=..., duration_s=..., sources=..., ...)` takes every field
+by name, holds the domain, its sources and what it records, and checks every
+argument when it is built, so a mistake raises where the run is written;
 `fdtd_simulation(run)` steps it, and `compute=` says where.
 
 ```python
@@ -1373,7 +1377,7 @@ from phonometry import simulation
 
 # A 3.0 x 2.0 m air domain: 300 x 200 cells of 1 cm.
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
@@ -1448,7 +1452,9 @@ sim.add_source(PlaneWaveSource(direction="down", waveform=tone.value, offset=22)
 Geometry is **rasterised**: `obstacle_mask` marks rigid cells, and every
 face touching a masked cell is closed (Eq. 4.32 again), so walls, barriers
 and scatterers of any shape are just boolean arrays. Each domain side can
-carry its own boundary condition:
+carry its own boundary condition, which a run takes as one `FDTDBoundaries`
+record: `sides=` gives one condition to all four sides or maps each side to
+its own, and `absorbing_layer_cells=` sets the thickness of the sponge:
 
 - ``"rigid"`` (default): a perfect reflector, $R = +1$.
 - ``"absorbing"``: a sponge layer of `absorbing_layer_cells` cells whose
@@ -1706,12 +1712,13 @@ from phonometry import simulation
 mask = np.zeros((200, 300), dtype=bool)
 mask[60:, 150:154] = True
 run = simulation.FDTDRun(
-    343.0, 0.01, 9.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
         probes=[(100, 100), (240, 100)], snapshot_every=75),
     obstacle_mask=mask,
-    boundaries="absorbing", absorbing_layer_cells=30,
+    boundaries=simulation.FDTDBoundaries(
+        sides="absorbing", absorbing_layer_cells=30),
 )
 res = simulation.fdtd_simulation(run)
 
@@ -1738,7 +1745,7 @@ from phonometry import simulation
 lx, ly, dx = 1.0, 0.7, 0.02
 nx, ny = round(lx / dx), round(ly / dx)
 run = simulation.FDTDRun(
-    343.0, dx, 0.35, shape=(ny, nx),
+    c=343.0, dx=dx, duration_s=0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
@@ -1771,7 +1778,7 @@ from phonometry import simulation
 lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
 nx, ny = round(lx / dx), round(ly / dx)
 run = simulation.FDTDRun(
-    c, dx, 0.35, shape=(ny, nx),
+    c=c, dx=dx, duration_s=0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
@@ -1888,7 +1895,7 @@ how the same call steps on a GPU or goes to a node.
 from phonometry import simulation
 
 run = simulation.FDTDRun(
-    343.0, 0.01, 2e-3,
+    c=343.0, dx=0.01, duration_s=2e-3,
     shape=(60, 80),
     sources=[simulation.GaussianPulse(ix=40, iy=30, half_width_s=5e-5)],
     recording=simulation.FDTDRecording(snapshot_every=10),
@@ -2033,7 +2040,7 @@ The node runs the function on the device asked for, with no fallback of its
 own, and sends back the probe histories and the snapshots, which are read here
 into arrays sized from your request; a video writer sends its video's bytes
 instead of snapshots. `result.provenance.host` names the node and
-`result.provenance.package_digest` the package that ran; the rest of the
+`result.provenance.package_sha256` the package that ran; the rest of the
 provenance is the node's: its NumPy, its array library, its GPU.
 
 ## 2. Naming a node: the hosts file
@@ -2113,7 +2120,7 @@ The run and the call are those of a run here:
 
 ```py
 run = simulation.FDTDRun(
-    343.0, 0.01, 0.05, shape=(400, 600),
+    c=343.0, dx=0.01, duration_s=0.05, shape=(400, 600),
     sources=[simulation.GaussianPulse(ix=150, iy=200, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(450, 200)]),
 )

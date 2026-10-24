@@ -465,7 +465,7 @@ Run a deterministic 2D acoustic FDTD simulation.
 
 Builds the staggered-grid domain (Attenborough & Van Renterghem 2021,
 Eqs. 4.11-4.12), applies the requested boundary conditions, injects the
-sources and integrates for `duration` seconds, recording the pressure
+sources and integrates for `duration_s` seconds, recording the pressure
 at every probe each time step and, optionally, full-field snapshots.
 
 The grid covers `(nx * dx, ny * dx)` metres; a cell index `(ix, iy)`
@@ -504,6 +504,28 @@ spreading rather than the 3D spherical $1/r$.
 | ComputeImportError | When the device's library is not installed or does not import. |
 | ComputeDeviceError | When the device is not present, or fails a first small computation; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy instead. |
 | ComputeRemoteError | For a failure of the connection or of the node; with `fallback=True` the run warns with [`ComputeFallbackWarning`](/phonometry/reference/api/simulation/compute/#computefallbackwarning) and steps on NumPy here instead. |
+
+## FDTDBoundaries
+
+```python
+FDTDBoundaries(
+    *,
+    sides: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | NDArray[np.float64]] = 'rigid',
+    absorbing_layer_cells: int = 20,
+)
+```
+
+How the four edges of the acoustic domain are terminated.
+
+The sponge thickness only means anything where a side is absorbing, which
+is why it travels with the sides rather than beside them.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `sides` | `"rigid"` (default), `"absorbing"`, or a mapping from side name (`left`/`right`/`top`/`bottom`) to `"rigid"`, `"absorbing"`, or a real specific impedance [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35); a side the mapping leaves out is rigid. A mapping is held as a read-only copy, and an impedance profile given as a list as a read-only array of the record's own, so a change to the caller's dictionary or list afterwards does not reach the record. |
+| `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells. |
 
 ## FDTDRecording
 
@@ -615,17 +637,16 @@ Domain size `(lx, ly)` [m].
 
 ```python
 FDTDRun(
+    *,
     c: float | NDArray[np.float64],
     dx: float,
-    duration: float,
-    *,
+    duration_s: float,
     sources: Sequence[GaussianPulse | CWSource | SignalSource | PlaneWaveSource],
     shape: tuple[int, int] | None = None,
     rho: float | NDArray[np.float64] = 1.2,
     cfl: float = 0.6,
     recording: FDTDRecording | None = None,
-    boundaries: Literal['rigid', 'absorbing'] | Mapping[Literal['left', 'right', 'top', 'bottom'], Literal['rigid', 'absorbing'] | float | NDArray[np.float64]] = 'rigid',
-    absorbing_layer_cells: int = 20,
+    boundaries: FDTDBoundaries | None = None,
     obstacle_mask: NDArray[np.bool_] | None = None,
     damping: float | NDArray[np.float64] = 0.0,
 )
@@ -638,10 +659,9 @@ the time step, the density, the sponge and the damping, the impedance
 edges, the obstacle, and the sources and the probes on the grid. A run
 that builds is one [`fdtd_simulation`](/phonometry/reference/api/simulation/fdtd/#fdtd_simulation) can step, here or on a node,
 and a bad argument raises where the run is written, with the class and
-the words the function always raised. The sources are held as a tuple,
-a mapping of boundaries as a read-only mapping, and each array as the
-run's own read-only copy, so nothing the caller changes afterwards
-reaches a checked run.
+the words the function always raised. The sources are held as a tuple
+and each array as the run's own read-only copy, so nothing the caller
+changes afterwards reaches a checked run.
 
 **Parameters**
 
@@ -649,14 +669,13 @@ reaches a checked run.
 | :--- | :--- |
 | `c` | Sound-speed map [m/s], shape `(ny, nx)`, or a scalar with an explicit `shape`. |
 | `dx` | Grid spacing [m] (square cells). |
-| `duration` | Physical time to simulate [s]. |
+| `duration_s` | Physical time to simulate [s]. |
 | `sources` | One or more of [`GaussianPulse`](/phonometry/reference/api/simulation/fdtd/#gaussianpulse), [`CWSource`](/phonometry/reference/api/simulation/fdtd/#cwsource), [`SignalSource`](/phonometry/reference/api/simulation/fdtd/#signalsource) or [`PlaneWaveSource`](/phonometry/reference/api/simulation/fdtd/#planewavesource). |
 | `shape` | Grid shape `(ny, nx)`, required when `c` is a scalar. |
 | `rho` | Density map [kg/m3]; scalar or `(ny, nx)` array. |
 | `cfl` | Courant number in `(0, 1)` (Eqs. 4.13-4.14); the time step is $\Delta t = C_\mathrm{N}\, \Delta x / (c_{\max} \sqrt{2})$. Default 0.6. |
 | `recording` | What the run records ([`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording)): the probe cells, and the snapshot cadence and decimation. `None` records nothing but the time axis. |
-| `boundaries` | `"rigid"` (default), `"absorbing"`, or a mapping from side name (`left`/`right`/`top`/`bottom`) to `"rigid"`, `"absorbing"`, or a real specific impedance [Pa s/m] (scalar or per-edge-cell 1D array, Eqs. 4.33-4.35). |
-| `absorbing_layer_cells` | Sponge-layer thickness for absorbing sides, in cells. |
+| `boundaries` | How the domain edges are terminated ([`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries)): the rigid, absorbing and impedance sides, and the sponge thickness of the absorbing ones. `None` is rigid on all four sides. |
 | `obstacle_mask` | Boolean map, shape `(ny, nx)`, of rigid cells (rasterised interior geometry). |
 | `damping` | Bulk amplitude decay rate [1/s]: a scalar for the whole field or an `(ny, nx)` map. |
 
@@ -664,8 +683,8 @@ reaches a checked run.
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | If an argument is of the wrong type: a `duration`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, an `absorbing_layer_cells` that is not a number, a `shape` that is not a pair, a complex medium, or an `obstacle_mask` that is not boolean. |
-| ValueError | If an argument is out of its range, or a source, a probe or the obstacle does not fit the grid. |
+| TypeError | If an argument is of the wrong type: a `duration_s`, `cfl` or `dx` that is not one number, a `recording` that is neither an [`FDTDRecording`](/phonometry/reference/api/simulation/fdtd/#fdtdrecording) nor `None`, `boundaries` that are neither an [`FDTDBoundaries`](/phonometry/reference/api/simulation/fdtd/#fdtdboundaries) nor `None`, an `absorbing_layer_cells` of the boundaries that is not a number, a `shape` that is not a pair, a complex medium, or an `obstacle_mask` that is not boolean. |
+| ValueError | If an argument is out of its range, a side of the boundaries is unknown or terminated by an unknown name, or a source, a probe or the obstacle does not fit the grid. |
 
 ## GaussianPulse
 

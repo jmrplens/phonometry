@@ -45,9 +45,9 @@ pytestmark = [
 
 def test_a_node_s_video_and_result(tmp_path: Path) -> None:
     run = FDTDRun(
-        343.0,
-        0.01,
-        2e-3,
+        c=343.0,
+        dx=0.01,
+        duration_s=2e-3,
         shape=(60, 80),
         sources=[GaussianPulse(ix=40, iy=30, half_width_s=4e-5)],
         recording=FDTDRecording(probes=[(10, 10), (70, 50)], snapshot_every=10),

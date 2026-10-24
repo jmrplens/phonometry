@@ -11,6 +11,7 @@ from phonometry.simulation import (
     ElasticRecording,
     ElasticRun,
     ExplosionSource,
+    FDTDBoundaries,
     FDTDRecording,
     FDTDRun,
     GaussianPulse,
@@ -33,7 +34,7 @@ def _acoustic_run(**changes: Any) -> FDTDRun:
         ),
     }
     arguments.update(changes)
-    return FDTDRun(343.0, 0.01, 1e-3, **arguments)
+    return FDTDRun(c=343.0, dx=0.01, duration_s=1e-3, **arguments)
 
 
 def _elastic_run(**changes: Any) -> ElasticRun:
@@ -50,13 +51,14 @@ def _elastic_run(**changes: Any) -> ElasticRun:
         ),
     }
     arguments.update(changes)
-    return ElasticRun(4000.0, 2300.0, 0.01, 1e-3, **arguments)
+    return ElasticRun(c_p=4000.0, c_s=2300.0, dx=0.01, duration_s=1e-3, **arguments)
 
 
 def test_a_march_without_frames_records_what_the_simulation_records() -> None:
     run = _acoustic_run(
-        boundaries={"top": "absorbing", "left": 900.0},
-        absorbing_layer_cells=6,
+        boundaries=FDTDBoundaries(
+            sides={"top": "absorbing", "left": 900.0}, absorbing_layer_cells=6
+        ),
         damping=20.0,
     )
     checks = run._checked

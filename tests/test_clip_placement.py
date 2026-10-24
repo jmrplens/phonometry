@@ -19,6 +19,7 @@ measurement, not by the fingerprint.
 from __future__ import annotations
 
 import pathlib
+import subprocess
 import sys
 import types
 
@@ -343,3 +344,85 @@ def test_the_metadiffuser_steps_as_many_pairs_at_once_as_the_ram_holds(
     from figures.fields import metadiffuser
 
     assert metadiffuser._meta_workers(available) == workers
+
+
+def test_a_lane_has_half_of_what_is_free_less_room_for_its_context() -> None:
+    free, ram = 6 << 30, 12 << 30
+    assert (
+        clip_placement.gpu_budget(free, alone=False)
+        == free // 2 - clip_placement.CONTEXT_BYTES
+    )
+    assert (
+        clip_placement.gpu_budget(free, alone=True)
+        == free - clip_placement.CONTEXT_BYTES
+    )
+    assert clip_placement.host_share(ram, alone=False) == ram // 2
+    assert clip_placement.host_share(ram, alone=True) == ram
+
+
+@pytest.mark.parametrize(
+    ("device", "gpu_need", "host_need", "verdict"),
+    [
+        ("cpu", 0, 0, "shares"),
+        ("gpu", 2 << 30, 0, "shares"),
+        ("gpu", 4 << 30, 0, "alone"),
+        ("gpu", 6 << 30, 0, "refused"),
+        ("gpu-whole", 1 << 30, 0, "alone"),
+        ("cpu", 0, 7 << 30, "alone"),
+        ("cpu", 0, 13 << 30, "refused"),
+        ("gpu", 2 << 30, 13 << 30, "shares"),
+    ],
+)
+def test_a_clip_shares_runs_alone_or_cannot_run_by_its_recorded_needs(
+    device: str, gpu_need: int, host_need: int, verdict: str
+) -> None:
+    """6 GiB free on the GPU, 12 GiB of RAM available: a lane has half of each."""
+    runs_alone, reasons = clip_placement.lane_fit(
+        "anim_x",
+        device,
+        gpu_need=gpu_need,
+        host_need=host_need,
+        free_gpu=6 << 30,
+        available=12 << 30,
+    )
+    assert ("refused" if reasons else "alone" if runs_alone else "shares") == verdict
+    assert all("anim_x" in reason for reason in reasons)
+
+
+def test_without_a_gpu_named_a_gpu_clip_needs_no_gpu_memory() -> None:
+    """A GPU clip steps on NumPy when no GPU is named; its GPU peak does not count."""
+    assert clip_placement.lane_fit(
+        "anim_x", "gpu", gpu_need=9 << 30, host_need=0, free_gpu=0, available=None
+    ) == (False, [])
+
+
+def test_a_gpu_clip_on_numpy_needs_the_ram_its_field_takes_there() -> None:
+    """The metadiffuser on a CPU render: its float64 pairs on NumPy, alone."""
+    assert clip_placement.lane_fit(
+        "anim_x",
+        "gpu",
+        gpu_need=6 << 30,
+        host_need=7 << 30,
+        free_gpu=0,
+        available=12 << 30,
+    ) == (True, [])
+
+
+def test_the_free_gpu_memory_is_asked_of_cupy_in_a_process_of_its_own() -> None:
+    seen: list[list[str]] = []
+
+    def run(argv: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+        seen.append(argv)
+        return subprocess.CompletedProcess(argv, 0, stdout="6442450944\n", stderr="")
+
+    assert clip_placement.free_gpu_bytes(1, run=run) == 6442450944
+    assert seen[0][0] == sys.executable
+    assert "Device(1).mem_info[0]" in seen[0][-1]
+
+
+def test_an_answer_that_is_not_a_count_of_bytes_is_refused() -> None:
+    def run(argv: list[str], **_: object) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(argv, 0, stdout="", stderr="")
+
+    with pytest.raises(ValueError, match=r"GPU 0"):
+        clip_placement.free_gpu_bytes(0, run=run)

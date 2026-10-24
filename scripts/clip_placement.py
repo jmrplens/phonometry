@@ -19,16 +19,25 @@ field is computed, not what the field is or how it is drawn, so neither it
 nor the device table enters a clip's fingerprint (``animation_fingerprint``).
 The registry is read when a scene asks, not when this module is imported,
 because the scenes are imported by the registry.
+
+It also says how a GPU and the RAM are shared when clips render side by
+side, on a node (``scripts/clip_node.py``) or on this machine's GPU
+(``figures.registry``): two at a time, each with half of what is free when
+the render starts, and a clip whose recorded needs do not fit half runs
+alone.
 """
 
 from __future__ import annotations
 
 import os
 import pathlib
+import subprocess
 import sys
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from phonometry.simulation import Compute
 
 #: Where a clip's field is computed: ``"cpu"`` on NumPy; ``"gpu"`` on the GPU
@@ -180,3 +189,101 @@ def release_device() -> None:
         return
     cupy.get_default_memory_pool().free_all_blocks()
     cupy.get_default_pinned_memory_pool().free_all_blocks()
+
+
+#: Clips rendered at once on one GPU: a node's lanes, or the workers of a
+#: render on this machine's GPU.
+LANES = 2
+
+#: Room left beside each lane's pool for its CUDA context, which CuPy's pool
+#: limit does not count: about a hundred MiB on the node's RTX 4060, with
+#: room for a driver that takes more.
+CONTEXT_BYTES = 256 << 20
+
+#: How long CuPy may take to say how much memory is free on a GPU [s]: an
+#: import and a CUDA context, long past what either takes on a working card.
+_FREE_GPU_PROBE_S = 120
+
+
+def _share(free: int, *, alone: bool) -> int:
+    return free if alone else free // LANES
+
+
+def gpu_budget(free: int, *, alone: bool) -> int:
+    """The bytes one lane's CuPy pool may hold, of *free* on its GPU.
+
+    Half of what is free when the render starts, or all of it for a clip
+    that runs alone, less the room for the lane's CUDA context. What other
+    processes hold is never the lanes' to take.
+    """
+    return _share(free, alone=alone) - CONTEXT_BYTES
+
+
+def host_share(available: int, *, alone: bool) -> int:
+    """The bytes of RAM one lane may hold, of *available*: half, or all of it alone."""
+    return _share(available, alone=alone)
+
+
+def free_gpu_bytes(index: int = 0, *, run: Callable[..., Any] = subprocess.run) -> int:
+    """The memory free on CUDA GPU *index*, asked of CuPy in a process of its own.
+
+    So the asking process never holds a CUDA context while the lanes, or the
+    pool workers of a render here, need the card.
+
+    :raises subprocess.CalledProcessError: when CuPy cannot say (not
+        installed, no GPU, a CUDA error).
+    :raises subprocess.TimeoutExpired: when it does not answer in time.
+    :raises ValueError: when its answer is not a count of bytes.
+    """
+    probe = f"import cupy; print(cupy.cuda.Device({index}).mem_info[0])"
+    out = run(
+        [sys.executable, "-c", probe],
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=_FREE_GPU_PROBE_S,
+    ).stdout
+    words = str(out).split()
+    if not words or not words[-1].isdigit():
+        msg = f"CuPy did not name the free memory of GPU {index}: {str(out).strip()!r}"
+        raise ValueError(msg)
+    return int(words[-1])
+
+
+def lane_fit(
+    clip: str,
+    device: ClipDevice,
+    *,
+    gpu_need: int,
+    host_need: int,
+    free_gpu: int,
+    available: int | None,
+) -> tuple[bool, list[str]]:
+    """Whether *clip* runs alone, and why it cannot run at all (empty when it can).
+
+    A clip shares the GPU and the RAM with one other lane when its recorded
+    needs fit a lane's share of what is free, runs alone when they fit only
+    all of it, and cannot run when they do not fit that either. A
+    ``"gpu-whole"`` clip always runs alone. The GPU need counts where the
+    clip steps on a GPU; with no GPU free to share (no GPU named) a GPU clip
+    steps on NumPy, and its RAM need counts instead, which is what its field
+    takes on NumPy. With the RAM unknown (off Linux), the RAM need does not.
+    """
+    alone = device == "gpu-whole"
+    reasons: list[str] = []
+    on_gpu = device != "cpu" and free_gpu > 0
+    if on_gpu:
+        need = max(gpu_need, 1)
+        if need > gpu_budget(free_gpu, alone=True):
+            reasons.append(
+                f"{clip} needs {need >> 20} MiB of GPU memory; {free_gpu >> 20} MiB is free on the GPU"
+            )
+        alone = alone or need > gpu_budget(free_gpu, alone=False)
+    if host_need > 0 and available is not None and not on_gpu:
+        if host_need > available:
+            reasons.append(
+                f"{clip} needs {host_need >> 20} MiB of RAM; {available >> 20} MiB is available"
+            )
+        alone = alone or host_need > host_share(available, alone=False)
+    return alone, reasons

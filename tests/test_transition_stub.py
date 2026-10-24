@@ -29,6 +29,7 @@ import pathlib
 import re
 import shutil
 import subprocess
+import sys
 import tomllib
 import warnings
 from typing import TYPE_CHECKING
@@ -38,6 +39,12 @@ from packaging.requirements import Requirement
 from packaging.version import Version
 
 import phonometry
+
+_SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+import check_conformance_claims as ccc
 
 if TYPE_CHECKING:
     import types
@@ -50,6 +57,7 @@ _SHIM = _STUB / "src" / "pyoctaveband" / "__init__.py"
 _README = _STUB / "README.md"
 _PYPROJECT = _STUB / "pyproject.toml"
 _WORKFLOW = _ROOT / ".github" / "workflows" / "python-app.yml"
+_GUIDE = _ROOT / "docs" / "start" / "upgrading.md"
 
 # A claim that some gate never reached the shim, made in the same sentence as
 # linting. The lint step has covered `stub/` since the shim was committed, so
@@ -249,6 +257,58 @@ def test_the_readme_routes_off_the_bridge_once_the_tree_has_left_the_pin() -> No
         f"phonometry {phonometry.__version__} is outside the stub's pin "
         f"'{specifier}'. The published page is where a user of the old name "
         f"finds that out, so it has to link {_UPGRADE_GUIDE}"
+    )
+
+
+def test_the_readme_quotes_the_counts_the_report_gives() -> None:
+    """The page sells the project on its conformance counts, so they are current.
+
+    It quoted 995 checks across 77 domains and 408 standards, the counts of
+    4.0.0rc1, long after the report had moved on, because the writer that keeps
+    every other quoted count current did not read this page. PyPI freezes a
+    long description at upload, so a count stale on the day the stub goes out
+    stays published. The three are read the way that writer reads them, so a
+    count wrapped away from its phrase fails here instead of going unread.
+    """
+    assert _README in ccc.sources(), "the claims writer does not read the stub's page"
+    expected = ccc.expected_counts()
+    claims = [
+        claim
+        for line in _README.read_text(encoding="utf-8").splitlines()
+        for claim in ccc.claims_in(line)
+    ]
+    assert {claim.field for claim in claims} == {"total", "domains", "standards"}, (
+        "stub/README.md must state the checks, the domains and the standards in "
+        "the report's own wording, each phrase on one line"
+    )
+    stale = [
+        f"{claim.phrase!r} (report: {expected[claim.field]})"
+        for claim in claims
+        if claim.claimed != expected[claim.field]
+    ]
+    assert not stale, f"stub/README.md quotes stale counts: {stale}"
+
+
+def test_the_readme_counts_the_traps_the_guide_names() -> None:
+    """The page promises the guide's list of traps, by number.
+
+    It said three after the guide had grown a fourth, which sends a reader
+    looking for the third and stopping there.
+    """
+    heading = re.search(
+        r"^## (\w+) where the obvious fix is the wrong one$",
+        _GUIDE.read_text(encoding="utf-8"),
+        re.MULTILINE,
+    )
+    assert heading is not None, f"{_GUIDE.name} no longer has its list of traps"
+    promised = re.search(
+        r"\b(\w+) places where the obvious fix\s+is the wrong one",
+        _README.read_text(encoding="utf-8"),
+    )
+    assert promised is not None, "stub/README.md no longer points at the traps"
+    assert promised.group(1).lower() == heading.group(1).lower(), (
+        f"stub/README.md promises {promised.group(1)} traps, the guide names "
+        f"{heading.group(1).lower()}"
     )
 
 

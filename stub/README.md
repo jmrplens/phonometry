@@ -1,10 +1,10 @@
 # PyOctaveBand is now [phonometry](https://pypi.org/project/phonometry/)
 
 Same author, same project, grown well past what the old name described. The
-package you installed for fractional octave-band filtering now runs 995
-conformance checks across 77 domains and 408 standards, and reaches from
-filters, weighting and sound level metrology to psychoacoustics, rooms and
-buildings, materials, vibration, environmental, aircraft and underwater
+package you installed for fractional octave-band filtering now runs
+1893 conformance checks across 111 domains and 523 standards, and reaches
+from filters, weighting and sound level metrology to psychoacoustics, rooms
+and buildings, materials, vibration, environmental, aircraft and underwater
 acoustics, electroacoustics and wave simulation. Every metric is implemented
 from its governing standard and pinned to a number printed in it.
 
@@ -32,7 +32,7 @@ the module of its domain, so a `PyOctaveBand` that installed 4.x would resolve
 to a library that raises `AttributeError` for names `pyoctaveband` promises.
 This package will not follow it. Install phonometry under its own name and
 take the guide below: it maps every 3.x name to its new home, and it names the
-three places where the obvious fix is the wrong one.
+four places where the obvious fix is the wrong one.
 
 - Upgrading to 4.0: https://docs.jmrp.io/phonometry/start/upgrading/
 - Documentation: https://docs.jmrp.io/phonometry/

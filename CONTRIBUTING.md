@@ -362,8 +362,9 @@ Nothing else states them by hand:
 - the Astro pages import them from `site/src/data/conformance-stats.mjs`, which
   parses the header at build time;
 - everything with no build step to interpolate through (`.zenodo.json`, the
-  plain-markdown mirror under `docs/`, the landing-page meta descriptions and
-  the JSON-LD blocks in the site frontmatter) is rewritten by the second step
+  plain-markdown mirror under `docs/`, the READMEs at the root and the one the
+  PyOctaveBand stub publishes, the landing-page meta descriptions and the
+  JSON-LD blocks in the site frontmatter) is rewritten by the second step
   of `make conformance`, which is
   `scripts/check_conformance_claims.py --write`. It replaces only the digits of
   a recognised claim, so unrelated numbers and the surrounding prose are left

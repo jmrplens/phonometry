@@ -1,11 +1,11 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Physics and determinism checks of the acoustic engine on small grids.
+"""Physics checks of the acoustic engine on small grids, and what it refuses.
 
 A rigid box conserves energy, a sponge absorbs it, a centred pulse stays
-symmetric, a faster region refracts, two runs are bit-identical, and the
-constructor refuses what it should. The analytic-oracle validation is in
-``test_fdtd.py``; these are the quick checks that used to run through the
-documentation's import shim.
+symmetric, a faster region refracts, and the constructor, the two sources and
+``run`` refuse what they should. The analytic-oracle validation and the check
+that two runs are bit-identical are in ``test_fdtd.py``; these are the quick
+checks that used to run through the documentation's import shim.
 """
 
 from __future__ import annotations

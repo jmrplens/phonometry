@@ -5,29 +5,45 @@ They used to step a replica of the acoustic engine, sent to the GPU host by
 scripts of their own and configured by ``PHONO_GPU_*`` settings in ``.env``.
 The clips now step ``phonometry.simulation`` on the device the registry
 records, and a node is named in the hosts file. This holds the old road
-closed: no module imports the replica or its transport, and no file a
-developer reads or runs names one of its settings.
+closed: none of the replica's scripts is back, no module imports one of
+them, and no tracked file names a ``PHONO_GPU_`` setting, whatever the
+setting is called and wherever the file sits. The changelog is the one
+exception: its released entries keep the names they shipped with.
 """
 
 from __future__ import annotations
 
 import ast
+import functools
 import pathlib
+import re
+from typing import TYPE_CHECKING
+
+import child_process
+import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
 
 _ROOT = pathlib.Path(__file__).resolve().parents[1]
+_THIS = pathlib.Path(__file__).resolve().relative_to(_ROOT).as_posix()
 
 _GONE_MODULES = frozenset(
     {"fdtd2d", "fdtd_dispatch", "fdtd_gpu", "fdtd_gpu_remote", "job_runner"}
 )
-_GONE_SETTINGS = (
-    "PHONO_GPU_HOST",
-    "PHONO_GPU_USER",
-    "PHONO_GPU_NAME",
-    "PHONO_GPU_DOCKER_IMAGE",
-    "PHONO_GPU_WORKDIR",
-    "PHONO_GPU_ENCODE",
-    "PHONO_GPU_FFMPEG_IMAGE",
-)
+#: Where the replica and its transport lived.
+_GONE_SCRIPTS = tuple(f"scripts/{name}.py" for name in sorted(_GONE_MODULES))
+
+#: Every setting of the old road began with this prefix, and so does a read
+#: of one, whether it spells the whole name or completes it at run time
+#: (``f"PHONO_GPU_{key}"``), so the prefix is what is searched for, not a
+#: list of names.
+_SETTING = re.compile(r"PHONO_GPU_[\w{}]*")
+_SETTING_BYTES = b"PHONO_GPU_"
+
+#: The tracked files that may name one: this guard, which names them to
+#: refuse them, and the changelog, the record of what was released with them.
+_MAY_NAME = frozenset({_THIS, "CHANGELOG.md"})
 
 
 def _imported(tree: ast.AST) -> set[str]:
@@ -40,31 +56,180 @@ def _imported(tree: ast.AST) -> set[str]:
     return names
 
 
+def replica_scripts(paths: Iterable[str]) -> list[str]:
+    """The *paths* under ``scripts/`` that carry the name of a replica module.
+
+    The five it lived at, and the same names in a folder below them:
+    ``scripts/figures/fdtd2d.py`` would be imported as ``figures.fdtd2d``,
+    which the import scan reads as ``figures``.
+    """
+    return sorted(
+        path
+        for path in paths
+        if path.startswith("scripts/")
+        and pathlib.PurePosixPath(path).suffix == ".py"
+        and pathlib.PurePosixPath(path).stem in _GONE_MODULES
+    )
+
+
+@functools.cache
+def _tracked_names() -> tuple[str, ...]:
+    """Every file git tracks in the repository this guard sits in."""
+    # Fixed argv, run on the repository this file belongs to
+    listed = child_process.run(
+        ["git", "-C", str(_ROOT), "ls-files", "-z"],
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=120,
+    ).stdout
+    return tuple(name for name in listed.split("\0") if name)
+
+
+def _tracked_texts() -> Iterator[tuple[str, str]]:
+    """Each tracked text file that holds the prefix, as its path and its text.
+
+    A file holding a NUL byte is binary and left out. The rest are decoded
+    with any undecodable byte replaced, so a file in another encoding is
+    still read for an ASCII name. A tracked path that is not a file here, a
+    submodule or a file deleted in the working tree, has nothing to read.
+    """
+    for name in _tracked_names():
+        path = _ROOT / name
+        if not path.is_file():
+            continue
+        data = path.read_bytes()
+        if _SETTING_BYTES in data and b"\0" not in data:
+            yield name, data.decode("utf-8", errors="replace")
+
+
+def old_settings_named(files: Iterable[tuple[str, str]]) -> list[str]:
+    """``path: setting`` for each ``PHONO_GPU_`` setting a file names.
+
+    *files* are ``(path in the repository, text)`` pairs; the files of
+    :data:`_MAY_NAME` are passed over.
+    """
+    return [
+        f"{name}: {setting}"
+        for name, text in files
+        if name not in _MAY_NAME
+        for setting in sorted(set(_SETTING.findall(text)))
+    ]
+
+
+def test_none_of_the_replicas_scripts_is_back() -> None:
+    present = (
+        path.relative_to(_ROOT).as_posix() for path in (_ROOT / "scripts").rglob("*.py")
+    )
+    back = replica_scripts(present)
+    assert not back, "\n".join(back)
+
+
 def test_no_module_imports_the_replica_or_its_transport() -> None:
     found = []
     for folder in ("src", "scripts", "tests"):
         for path in (_ROOT / folder).rglob("*.py"):
-            hit = _imported(ast.parse(path.read_text(encoding="utf-8"))) & _GONE_MODULES
+            text = path.read_text(encoding="utf-8")
+            # An import names the module, so a file that never does is not parsed.
+            if not any(name in text for name in _GONE_MODULES):
+                continue
+            hit = _imported(ast.parse(text)) & _GONE_MODULES
             if hit:
                 found.append(f"{path.relative_to(_ROOT)}: {sorted(hit)}")
     assert not found, "\n".join(found)
 
 
-def test_no_file_a_developer_reads_names_an_old_gpu_setting() -> None:
-    paths = [
-        _ROOT / "Makefile",
-        _ROOT / ".env.example",
-        _ROOT / "CONTRIBUTING.md",
-        *(_ROOT / ".github" / "workflows").glob("*.yml"),
-        *(_ROOT / "scripts").rglob("*.py"),
-        *(_ROOT / "docs").rglob("*.md"),
-        *(_ROOT / "site" / "src" / "content").rglob("*.md*"),
-    ]
-    found = [
-        f"{path.relative_to(_ROOT)}: {name}"
-        for path in paths
-        if "superpowers" not in path.parts
-        for name in _GONE_SETTINGS
-        if name in path.read_text(encoding="utf-8")
-    ]
+def test_no_tracked_file_names_an_old_gpu_setting() -> None:
+    found = old_settings_named(_tracked_texts())
     assert not found, "\n".join(found)
+
+
+@pytest.mark.parametrize("path", _GONE_SCRIPTS)
+def test_a_replica_script_added_again_is_seen(path: str) -> None:
+    assert replica_scripts([path]) == [path]
+
+
+def test_a_replica_module_under_another_folder_of_scripts_is_seen() -> None:
+    assert replica_scripts(["scripts/figures/fdtd2d.py"]) == [
+        "scripts/figures/fdtd2d.py"
+    ]
+
+
+def test_the_scripts_that_stay_are_not_taken_for_the_replica() -> None:
+    assert replica_scripts(["scripts/engine_scenarios.py", "scripts/fdtd2d.txt"]) == []
+
+
+@pytest.mark.parametrize(
+    ("path", "text", "setting"),
+    [
+        (
+            "src/phonometry/simulation/compute.py",
+            'host = os.environ.get("PHONO_GPU_HOST")\n',
+            "PHONO_GPU_HOST",
+        ),
+        (
+            "tests/conftest.py",
+            'host = os.environ.get("PHONO_GPU_HOST")\n',
+            "PHONO_GPU_HOST",
+        ),
+        (
+            ".github/actions/clips/action.yml",
+            "runs:\n  env:\n    PHONO_GPU_HOST: nas\n",
+            "PHONO_GPU_HOST",
+        ),
+        (
+            "scripts/figures/media.py",
+            'value = os.environ.get(f"PHONO_GPU_{key}")\n',
+            "PHONO_GPU_{key}",
+        ),
+        (
+            "scripts/clip_link.py",
+            'port = os.environ.get("PHONO_GPU_PORT")\n',
+            "PHONO_GPU_PORT",
+        ),
+        (
+            ".github/scripts/comment_pr.py",
+            'name = os.environ["PHONO_GPU_NAME"]\n',
+            "PHONO_GPU_NAME",
+        ),
+        (
+            "docker/node/provision.sh",
+            'ssh "$PHONO_GPU_USER@nas"\n',
+            "PHONO_GPU_USER",
+        ),
+    ],
+    ids=[
+        "library",
+        "conftest",
+        "action",
+        "built from parts",
+        "a name never listed",
+        "github script",
+        "docker",
+    ],
+)
+def test_a_setting_of_the_old_road_is_seen_wherever_it_is_named(
+    path: str, text: str, setting: str
+) -> None:
+    assert old_settings_named([(path, text)]) == [f"{path}: {setting}"]
+
+
+def test_the_changelog_and_this_guard_may_name_one() -> None:
+    text = "PHONO_GPU_HOST\n"
+    assert old_settings_named([("CHANGELOG.md", text), (_THIS, text)]) == []
+
+
+def test_the_scan_reaches_the_folders_a_setting_could_hide_in() -> None:
+    tracked = _tracked_names()
+    for folder in (
+        "src/",
+        "scripts/",
+        "tests/",
+        "docs/",
+        "site/",
+        "docker/",
+        ".github/workflows/",
+        ".github/scripts/",
+    ):
+        assert any(name.startswith(folder) for name in tracked), folder
+    assert {"Makefile", ".env.example", "CONTRIBUTING.md"} <= set(tracked)

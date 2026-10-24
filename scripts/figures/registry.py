@@ -26,6 +26,7 @@ import encode_slots
 import matplotlib.pyplot as plt
 
 from phonometry._i18n import Language
+from phonometry.io import FFmpegNotFoundError
 from phonometry.simulation import Compute
 
 from .aircraft import (
@@ -2438,8 +2439,8 @@ def _require_a_clip_encoder(
 
     A field can take an hour; an encoder that cannot write the clip is found
     before the first one is computed: an SVT-AV1 of a major the clips were
-    not calibrated on, or one that does not say its version. An audit-only
-    run encodes nothing, and is not stopped.
+    not calibrated on, one that does not say its version, or no ffmpeg to
+    ask. An audit-only run encodes nothing, and is not stopped.
 
     :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, with
         the reason, when the encoder cannot write the clips.
@@ -2448,7 +2449,7 @@ def _require_a_clip_encoder(
         return
     try:
         _clip_options(_clip_encoder())
-    except (ValueError, RuntimeError) as exc:
+    except (ValueError, RuntimeError, FFmpegNotFoundError) as exc:
         parser.error(str(exc))
 
 

@@ -260,9 +260,15 @@ def test_the_changelog_and_this_guard_may_name_one() -> None:
 
 
 def test_the_reading_step_reads_the_tracked_files_that_name_one() -> None:
-    """A scan that read no file would find no setting: the two files that may name one are read."""
+    """A scan that read no file would find no setting: the files known to name one are read.
+
+    This guard names the prefix to refuse it, so it is always among them;
+    the changelog is while an entry of it still names a setting.
+    """
     read = {name for name, _ in _tracked_texts()}
-    assert {"CHANGELOG.md", _THIS} <= read
+    assert _THIS in read
+    if _SETTING_BYTES in (_ROOT / "CHANGELOG.md").read_bytes():
+        assert "CHANGELOG.md" in read
 
 
 def test_the_scan_reaches_the_folders_a_setting_could_hide_in() -> None:

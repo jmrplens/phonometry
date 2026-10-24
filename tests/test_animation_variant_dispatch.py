@@ -244,11 +244,41 @@ def test_an_uncalibrated_svt_av1_stops_the_render_before_any_field(
     monkeypatch.setitem(registry._ANIM_FIELDS, clip, lambda: built.append("field"))
     monkeypatch.setitem(registry._ANIMATIONS, clip, lambda output_dir: None)
     monkeypatch.setattr(assets_dir, "require_clips_dir", lambda: tmp_path)
-    monkeypatch.setattr(media, "_svt_av1_version", lambda: "99.0.0")
+    # The program is named, not looked for: no ffmpeg need be installed.
+    monkeypatch.setattr(media, "find_ffmpeg", lambda: "ffmpeg")
+    monkeypatch.setattr(media, "_svt_av1_version", lambda ffmpeg: "99.0.0")
     monkeypatch.delenv(media.CLIP_ENCODER_ENV, raising=False)
     with pytest.raises(SystemExit) as stop:
         registry.main(["--animations", "--anim", clip, "--jobs", "1"])
     assert stop.value.code != 0
+    assert built == []
+
+
+def test_a_render_with_no_ffmpeg_stops_with_its_reason_before_any_field(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """An ffmpeg that is not there ends the run with the reason, never a traceback."""
+    import assets_dir
+    import matplotlib as mpl
+    from figures import media
+
+    clip = "test_only_clip"
+    built: list[str] = []
+    monkeypatch.setitem(registry._ANIM_FIELDS, clip, lambda: built.append("field"))
+    monkeypatch.setitem(registry._ANIMATIONS, clip, lambda output_dir: None)
+    monkeypatch.setattr(assets_dir, "require_clips_dir", lambda: tmp_path)
+    monkeypatch.delenv(media.CLIP_ENCODER_ENV, raising=False)
+    argv = ["--animations", "--anim", clip, "--jobs", "1"]
+    missing = str(tmp_path / "no-ffmpeg-here")
+    with (
+        mpl.rc_context({"animation.ffmpeg_path": missing}),
+        pytest.raises(SystemExit) as stop,
+    ):
+        registry.main(argv)
+    assert stop.value.code == 2
+    assert "ffmpeg was not found" in capsys.readouterr().err
     assert built == []
 
 

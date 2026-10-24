@@ -33,6 +33,7 @@ import argparse
 import contextlib
 import dataclasses
 import importlib.metadata
+import json
 import os
 import pathlib
 import re
@@ -66,6 +67,18 @@ ARCHIVE_LIMIT = 256 << 20
 #: The most language records one clip's render may send back: one per
 #: process that drew (the render, its four variants, a field's worker pool).
 MAX_FRAGMENTS = 16
+
+#: The most bytes, once escaped as JSON, of what the node says back: one line
+#: of its words, one string (a reason, a problem), and the end of a lane's
+#: log; and the most problems one refusal lists. Together they keep every
+#: header under half the reader's limit of 1 MiB, where one control character
+#: takes six bytes and a character past the Basic Multilingual Plane twelve.
+_LINE_BYTES = 2 << 10
+_TEXT_BYTES = 8 << 10
+_LOG_BYTES = 64 << 10
+_MAX_PROBLEMS = 64
+#: What marks a line cut short.
+_CUT = " [...]"
 
 #: What a node that lacks something it needs is told to do about it.
 _REBUILD = (
@@ -211,9 +224,7 @@ class Job:
         if not isinstance(audit_only, bool):
             msg = f"a job's audit_only is true or false; got {audit_only!r:.80}"
             raise ValueError(msg)
-        encoder = _one_of(
-            header.get("encoder"), animation_fingerprint.CLIP_ENCODERS, "encoder"
-        )
+        encoder = _encoder(header.get("encoder"))
         return cls(clips=clips, compute=compute, encoder=encoder, audit_only=audit_only)
 
 
@@ -255,7 +266,7 @@ def _bytes(entry: Mapping[str, Any], key: str) -> int:
     """
     value = entry.get(key, 0)
     if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-        msg = f"a clip's {key} is a count of bytes, 0 or more; got {value!r}"
+        msg = f"a clip's {key} is a count of bytes, 0 or more; got {value!r:.80}"
         raise ValueError(msg)
     return value
 
@@ -270,6 +281,62 @@ def _one_of[T: str](value: object, choices: tuple[T, ...], what: str) -> T:
             return choice
     msg = f"a clip {what} is one of {', '.join(choices)}; got {value!r:.80}"
     raise ValueError(msg)
+
+
+def _encoder(value: object) -> animation_fingerprint.ClipEncoder:
+    """The clip encoder *value* names.
+
+    :raises ValueError: for a name that is not one of the clip encoders.
+    """
+    return _one_of(value, animation_fingerprint.CLIP_ENCODERS, "encoder")
+
+
+def _escaped_size(text: str) -> int:
+    """The bytes *text* takes in a frame header, which JSON escapes."""
+    return len(json.dumps(text)) - 2
+
+
+def _cut(line: str) -> str:
+    """*line* whole, or its longest start that fits :data:`_LINE_BYTES`, marked."""
+    if _escaped_size(line) <= _LINE_BYTES:
+        return line
+    room = _LINE_BYTES - len(_CUT)
+    # Each character takes at least a byte, so no longer start can fit.
+    low, high = 0, min(len(line), room)
+    while low < high:
+        middle = (low + high + 1) // 2
+        if _escaped_size(line[:middle]) <= room:
+            low = middle
+        else:
+            high = middle - 1
+    return line[:low] + _CUT
+
+
+def _sendable(text: str, *, limit: int = _TEXT_BYTES) -> str:
+    """*text* cut to what a frame carries: each line to :data:`_LINE_BYTES`,
+    and as many of its last lines as fit *limit* bytes, both once escaped.
+
+    Every string of the node's own words goes through here before it is sent:
+    a lane's log, an ffmpeg or CuPy message, a value echoed from the job.
+    """
+    kept: list[str] = []
+    size = 0
+    for whole in reversed(text.splitlines()):
+        line = _cut(whole)
+        # The newline that joins it to the next takes two bytes.
+        size += _escaped_size(line) + 2
+        if size > limit:
+            break
+        kept.append(line)
+    return "\n".join(reversed(kept))
+
+
+def _refusal(problems: Sequence[str]) -> dict[str, Any]:
+    """The frame that refuses a job for *problems*, cut to what a frame carries."""
+    shown = [_sendable(problem) for problem in problems[:_MAX_PROBLEMS]]
+    if len(problems) > _MAX_PROBLEMS:
+        shown.append(f"and {len(problems) - _MAX_PROBLEMS} more")
+    return {"type": "refused", "problems": shown}
 
 
 def _listed(listing: str, name: str) -> bool:
@@ -606,8 +673,16 @@ def _admissible(
 
 # A lane's process is a Popen in a render and a stand-in in the scheduling test.
 def _signal_group(process: Any, sig: signal.Signals) -> None:  # noqa: ANN401
+    """Send *sig* to the process group *process* leads, and to nothing else.
+
+    A lane leads a group of its own, so a pid of 0 or 1, or this process's
+    own group, is never a lane's, and is left alone.
+    """
+    pid = process.pid
+    if not isinstance(pid, int) or pid <= 1 or pid == os.getpgrp():
+        return
     with contextlib.suppress(ProcessLookupError, PermissionError):
-        os.killpg(process.pid, sig)
+        os.killpg(pid, sig)
 
 
 def stop(running: Sequence[_Lane], *, grace_s: float = 5.0) -> None:
@@ -641,17 +716,38 @@ def _outputs(directory: pathlib.Path, clip: str, job: Job) -> list[pathlib.Path]
     ]
 
 
+def _log_tail(log: pathlib.Path) -> str:
+    """The end of *log*, at most :data:`_LOG_BYTES` of it; empty when there is none.
+
+    Only the end is read: a byte read takes at least a byte once escaped, so
+    more could never be sent. A first line read in part is left out.
+
+    :raises OSError: when the log is there but cannot be read.
+    """
+    try:
+        with log.open("rb") as stream:
+            start = max(0, stream.seek(0, os.SEEK_END) - _LOG_BYTES)
+            stream.seek(start)
+            data = stream.read(_LOG_BYTES)
+    except FileNotFoundError:
+        return ""
+    if start and b"\n" in data:
+        data = data.split(b"\n", 1)[1]
+    return data.decode("utf-8", errors="replace")
+
+
 def _failure(clip: str, reason: str, log: pathlib.Path) -> dict[str, Any]:
-    tail = (
-        log.read_text(encoding="utf-8", errors="replace").splitlines()[-40:]
-        if log.exists()
-        else []
-    )
+    """The frame that says *clip* failed: why, and the end of its lane's log.
+
+    :raises OSError: when the log is there but cannot be read.
+    """
+    tail = _sendable(_log_tail(log), limit=_LOG_BYTES)
+    error = _sendable(reason)
     return {
         "type": "clip",
         "clip": clip,
         "ok": False,
-        "error": "\n".join([reason, *tail]),
+        "error": f"{error}\n{tail}" if tail else error,
     }
 
 
@@ -757,6 +853,10 @@ def run_lanes(
             done = [lane for lane in running if lane.process.poll() is not None]
             for lane in done:
                 running.remove(lane)
+                # What the render left running goes with it: a variant or a
+                # worker of a render that was killed. Its group's id stays
+                # taken while any of them lives.
+                _signal_group(lane.process, signal.SIGKILL)
                 yield collect(lane, job, fingerprints)
             if not done:
                 cancel.wait(0.5)
@@ -866,13 +966,13 @@ def _serve(out: BinaryIO, stdin: BinaryIO) -> int:
     try:
         job = _read_job(stdin)
     except ValueError as exc:
-        clip_link.send(out, {"type": "refused", "problems": [str(exc)]})
+        clip_link.send(out, _refusal([str(exc)]))
         return 1
     cancel = threading.Event()
     with cancelled_by_signals(cancel):
         problems, room, alone = readiness(_ROOT, job)
         if problems:
-            clip_link.send(out, {"type": "refused", "problems": problems})
+            clip_link.send(out, _refusal(problems))
             return 1
         fingerprints = animation_fingerprint.fingerprints(_ROOT)
         threading.Thread(

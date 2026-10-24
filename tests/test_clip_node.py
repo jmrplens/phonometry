@@ -23,6 +23,7 @@ import sys
 import tarfile
 import threading
 import time
+import types
 from typing import TYPE_CHECKING, Any
 
 import pytest
@@ -35,6 +36,8 @@ import clip_node
 import clip_placement
 import encode_slots
 from figures import media
+
+from phonometry.simulation._remote import bootstrap
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -413,6 +416,19 @@ def _forking(pidfile: pathlib.Path) -> str:
     )
 
 
+def _orphaning(pidfile: pathlib.Path, ending: str) -> str:
+    """A render that forks a child of its own, then ends by *ending* and leaves it."""
+    return (
+        "import os, signal, time\n"
+        "pid = os.fork()\n"
+        "if pid == 0:\n"
+        "    time.sleep(60)\n"
+        "    os._exit(0)\n"
+        f"open({str(pidfile)!r}, 'w').write(str(pid))\n"
+        f"{ending}\n"
+    )
+
+
 def _gone(pid: int, *, within_s: float = 10.0) -> bool:
     """Whether process *pid* is gone within *within_s*; one that is not is killed here."""
     deadline = time.monotonic() + within_s
@@ -489,10 +505,12 @@ def test_lanes_run_two_at_a_time_and_a_clip_that_runs_alone_alone(
 
     class _Fake:
         def __init__(self, clip: str) -> None:
+            # A pid no process group has: the node signals a finished
+            # lane's group, and this stand-in's must reach nothing.
             self.clip, self.polls, self.pid, self.returncode = (
                 clip,
                 0,
-                os.getpid(),
+                1 << 30,
                 None,
             )
             running.add(clip)
@@ -771,3 +789,123 @@ def test_the_node_exits_cleanly_while_the_client_holds_its_input(
         node.stdout.close()
     assert returncode == 0, errors.read_text(encoding="utf-8", errors="replace")
     assert answer["type"] == "done"
+
+
+@pytest.mark.parametrize(
+    "ending",
+    ["os._exit(0)", "os.kill(os.getpid(), signal.SIGKILL)"],
+    ids=["exits", "is killed"],
+)
+def test_a_lane_whose_render_ends_takes_what_it_started_with_it(
+    tmp_path: pathlib.Path, ending: str
+) -> None:
+    """A render killed (by the OOM killer, say) or gone leaves no process of its lane behind."""
+    pidfile = tmp_path / "child.pid"
+    results = list(
+        clip_node.run_lanes(
+            tmp_path,
+            _job(("anim_dies", "cpu")),
+            cancel=threading.Event(),
+            fingerprints={},
+            start=_starter({"anim_dies": _orphaning(pidfile, ending)}),
+        )
+    )
+    assert [header["ok"] for header, _ in results] == [False]
+    assert _gone(int(pidfile.read_text())), "a child outlived its lane's render"
+
+
+@pytest.mark.parametrize("whose", ["zero", "init", "this process's"])
+def test_no_signal_for_a_lane_reaches_this_process_s_group_or_init(
+    monkeypatch: pytest.MonkeyPatch, whose: str
+) -> None:
+    sent: list[int] = []
+    monkeypatch.setattr(clip_node.os, "killpg", lambda group, sig: sent.append(group))
+    pid = {"zero": 0, "init": 1, "this process's": os.getpgrp()}[whose]
+    clip_node._signal_group(types.SimpleNamespace(pid=pid), signal.SIGKILL)
+    assert sent == []
+
+
+@pytest.mark.parametrize(
+    "char",
+    ["x", "\x1b", "\u00e9", "\U0001f50a"],
+    ids=["ascii", "control", "accent", "astral"],
+)
+def test_a_failing_lane_s_log_is_cut_to_what_a_frame_carries(
+    tmp_path: pathlib.Path, char: str
+) -> None:
+    """Forty lines of 40 000 characters would make a header past the reader's limit.
+
+    The limit is on the header as JSON writes it, where a control character
+    takes six bytes and a character past the Basic Multilingual Plane twelve.
+    """
+    import clip_link
+
+    log = tmp_path / "log.txt"
+    lines = [f"{n} {char * 40_000}" for n in range(40)]
+    log.write_text("\n".join([*lines, "the last words"]) + "\n", encoding="utf-8")
+    failure = clip_node._failure("anim_x", "the render exited with 1", log)
+    stream = io.BytesIO()
+    clip_link.send(stream, failure)
+    assert len(stream.getvalue()) < bootstrap.MAX_HEADER // 8
+    stream.seek(0)
+    header, _ = clip_link.receive(stream, lambda _header: [])
+    error = header["error"].splitlines()
+    assert error[0] == "the render exited with 1"
+    assert error[-1] == "the last words"
+    assert all(len(json.dumps(line)[1:-1]) <= clip_node._LINE_BYTES for line in error)
+
+
+def test_only_the_end_of_a_lane_s_log_is_read(tmp_path: pathlib.Path) -> None:
+    """A log of any size costs no more than its end: a render that wrote without end."""
+    log = tmp_path / "log.txt"
+    with log.open("wb") as sink:
+        sink.truncate(64 << 20)
+        sink.seek(0, os.SEEK_END)
+        sink.write(b"\nthe last words\n")
+    failure = clip_node._failure("anim_x", "the render exited with 1", log)
+    assert len(json.dumps(failure)) < bootstrap.MAX_HEADER // 8
+    assert failure["error"].splitlines()[-1] == "the last words"
+
+
+def test_a_refusal_is_cut_to_what_a_frame_carries(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A node's words of any length or number (here CuPy's last line) still make a frame."""
+    import clip_link
+
+    said = "the last line " + "\x1b" * 400_000
+    monkeypatch.setattr(
+        clip_node,
+        "readiness",
+        lambda root, job: ([said] * 100, clip_node.Room(0, None), {}),
+    )
+    sent = io.BytesIO()
+    clip_link.send(
+        sent,
+        {
+            "type": "job",
+            "version": clip_node.PROTOCOL,
+            "clips": [{"name": "anim_x", "device": "gpu"}],
+            "compute": "cupy",
+            "encoder": "av1_nvenc",
+            "audit_only": False,
+        },
+    )
+    sent.seek(0)
+    monkeypatch.setattr(sys, "stdin", io.TextIOWrapper(sent))
+    frames = tmp_path / "frames"
+    with frames.open("wb") as sink:
+        assert clip_node.serve(os.dup(sink.fileno())) == 1
+    assert frames.stat().st_size < bootstrap.MAX_HEADER // 2
+    with frames.open("rb") as stream:
+        answer, _ = clip_link.receive(stream, lambda _header: [])
+    *problems, more = answer["problems"]
+    assert all(problem.startswith("the last line ") for problem in problems)
+    assert more == f"and {100 - len(problems)} more"
+
+
+def test_a_clip_encoder_is_read_by_name() -> None:
+    assert clip_node._encoder("av1_nvenc") == "av1_nvenc"
+    assert clip_node._encoder("libsvtav1") == "libsvtav1"
+    with pytest.raises(ValueError, match=r"encoder"):
+        clip_node._encoder("libvpx-vp9")

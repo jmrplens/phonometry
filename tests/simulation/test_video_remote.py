@@ -75,6 +75,10 @@ _RUN = FDTDRun(
     sources=[_SOURCE],
     recording=FDTDRecording(probes=[(5, 5)], snapshot_every=10),
 )
+#: An elastic run of 471 steps, a frame every 50 of them: ten frames, which
+#: the node draws one at a time. A frame every fifth step, 95 of them, made
+#: the two tests that write it take about 17 s, against 5 s, and tested no
+#: more: neither counts the frames.
 _ELASTIC = ElasticRun(
     c_p=4000.0,
     c_s=2300.0,
@@ -83,7 +87,7 @@ _ELASTIC = ElasticRun(
     rho=2500.0,
     shape=(20, 24),
     sources=[_EXPLOSION],
-    recording=ElasticRecording(probes=[(4, 4)], snapshot_every=5),
+    recording=ElasticRecording(probes=[(4, 4)], snapshot_every=50),
 )
 _FRAME = AnimationFrame(size=(480, 246), color_limit=1.0)
 

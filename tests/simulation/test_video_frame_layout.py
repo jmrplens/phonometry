@@ -222,13 +222,15 @@ def test_no_text_leaves_the_frame_and_nothing_moves(
 ) -> None:
     """At every size, for grids from wide to tall: no warning, every text inside, one layout.
 
-    The first frame, one halfway and the last, whose time has the most
-    digits of the run, are drawn; after each, every text drawn and every
-    axes (the field's and the colour bar's) lie inside the frame, no text
-    overlaps the title or another text, and every axes sits where it sat in
-    the first.
+    The first frame and the last, whose time has the most digits of the
+    run, are drawn; after each, every text drawn and every axes (the
+    field's and the colour bar's) lie inside the frame, no text overlaps the
+    title or another text, and every axes sits where it sat in the first. A
+    frame halfway, whose title shows other digits, adds nothing at these
+    sizes that the floor's test, which draws one at the tightest size,
+    does not hold.
     """
-    times = (0.0, _LAST_S / 2, _LAST_S)
+    times = (0.0, _LAST_S)
     for grid in _GRIDS.values():
         where = f"{kind} {language} {size} grid {grid}"
         with (

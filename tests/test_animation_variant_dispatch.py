@@ -40,11 +40,7 @@ if TYPE_CHECKING:
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
-# Importing the generator's figures sets the settings it draws with for the
-# whole process: inside rc_context they are put back at once, and each test
-# here takes them from the figure_theme fixture instead.
-with mpl.rc_context():
-    from figures import i18n, registry, theme
+from figures import i18n, registry, theme
 
 # The figure, diagram and badge tooling is tied to the pinned figure stack its
 # artefacts are drawn with, so the minimum-versions job deselects this module.

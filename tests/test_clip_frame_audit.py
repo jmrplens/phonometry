@@ -41,12 +41,7 @@ import check_figure_legends as legends
 import check_figure_minus_sign as minus_sign
 import check_figure_text_clearance as text_clearance
 import clip_frame_audit as cfa
-
-# Importing the generator's figures sets the settings it draws with for the
-# whole process: inside rc_context they are put back at once, and each test
-# here takes them from the figure_theme fixture instead.
-with mpl.rc_context():
-    from figures import media, registry
+from figures import media, registry
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator

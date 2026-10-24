@@ -607,3 +607,35 @@ def test_one_clip_at_a_time_on_a_gpu_here_has_all_of_what_is_free(
     whole_gpu = clip_placement.gpu_budget(free, alone=True)
     whole_ram = clip_placement.host_share(12 << 30, alone=True)
     assert started == [("alone", ["anim_a"], str(whole_gpu), str(whole_ram))]
+
+
+@pytest.mark.parametrize(
+    ("scratch", "budget"),
+    [("lane", "4026531840"), ("lane", None), (None, "4026531840")],
+    ids=["node-lane", "cpu-clip-lane", "budget-given"],
+)
+def test_a_render_given_its_budget_keeps_it_and_asks_the_gpu_nothing(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    scratch: str | None,
+    budget: str | None,
+) -> None:
+    """A node's lane renders with the share its node gave it, not all of the card."""
+    import clip_placement
+
+    probes: list[int] = []
+
+    def probe(index: int = 0, **_: object) -> int:
+        probes.append(index)
+        return 8 << 30
+
+    started = _a_gpu_here(monkeypatch, tmp_path, free=probe, need=1 << 30)
+    if budget is not None:
+        monkeypatch.setenv(clip_placement.GPU_BYTES_ENV, budget)
+    monkeypatch.setenv(clip_placement.HOST_BYTES_ENV, str(3 << 30))
+    argv = ["--animations", "--anim", "anim_a", "--jobs", "1"]
+    if scratch is not None:
+        argv += ["--scratch-dir", str(tmp_path / scratch)]
+    registry.main(argv)
+    assert probes == []
+    assert started == [("alone", ["anim_a"], budget, str(3 << 30))]

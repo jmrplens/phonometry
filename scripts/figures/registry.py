@@ -2636,6 +2636,23 @@ def _gpu_lanes_here(
     return free_gpu, available, shared, alone
 
 
+def _gpu_here(placement: Compute, args: argparse.Namespace) -> bool:
+    """Whether this run divides this machine's GPU between its clips itself, as a node does.
+
+    Only with CuPy named here and no budget given. A node's lane renders
+    into a scratch directory with the share of the GPU its node gave it
+    (``PHONOMETRY_CLIP_GPU_BYTES``), or none for a clip that steps on NumPy;
+    it keeps what it was given and asks the GPU nothing more, as does a run
+    given a budget by hand.
+    """
+    return (
+        placement.host is None
+        and placement.device == "cupy"
+        and args.scratch_dir is None
+        and not os.environ.get(clip_placement.GPU_BYTES_ENV, "").strip()
+    )
+
+
 def _render_on_gpu_here(
     parser: argparse.ArgumentParser,
     clip_dir: str,
@@ -2681,7 +2698,8 @@ def _render_clips(
     :func:`_render_anim_variants`). On this machine's GPU
     (``PHONOMETRY_COMPUTE=cupy``) one clip at a time has all of what the GPU
     has free, and a pool renders as a node does
-    (:func:`_render_on_gpu_here`).
+    (:func:`_render_on_gpu_here`); a node's lane keeps the budget its node
+    gave it (:func:`_gpu_here`).
 
     :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, before
         any field is computed, when a clip does not fit this machine's GPU
@@ -2689,7 +2707,7 @@ def _render_clips(
     :raises RuntimeError: when ffmpeg is not on ``PATH``, or a clip fails to
         render on the pool.
     """
-    gpu_here = placement.host is None and placement.device == "cupy"
+    gpu_here = _gpu_here(placement, args)
     if args.anim or jobs == 1:
         if gpu_here:
             free_gpu, available, _, _ = _gpu_lanes_here(

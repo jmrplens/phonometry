@@ -91,6 +91,31 @@ def test_the_svt_av1_version_is_read_from_its_own_message() -> None:
     assert media.read_svt_av1_version("ffmpeg", run=run) == "4.2.0"
 
 
+def test_the_svt_av1_asked_is_that_of_the_ffmpeg_that_encodes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """write_video runs the ffmpeg matplotlib's ``animation.ffmpeg_path`` names, so the probe asks that one.
+
+    Any program stands in for it here: the probe that would run it is
+    replaced, and only the program it is handed is looked at.
+    """
+    asked: list[str] = []
+
+    def read(ffmpeg: str, **_: object) -> str:
+        asked.append(ffmpeg)
+        return "4.2.0"
+
+    monkeypatch.setattr(media, "read_svt_av1_version", read)
+    media._svt_av1_version.cache_clear()
+    try:
+        with mpl.rc_context({"animation.ffmpeg_path": sys.executable}):
+            options = media._clip_options("libsvtav1")
+    finally:
+        media._svt_av1_version.cache_clear()
+    assert asked == [shutil.which(sys.executable)]
+    assert options[options.index("-crf") + 1] == "51"
+
+
 def test_an_svt_av1_that_names_no_version_is_refused() -> None:
     def run(argv: list[str], **_: object) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess(argv, 1, "", "Unknown encoder 'libsvtav1'\n")

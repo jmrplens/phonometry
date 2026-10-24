@@ -17,7 +17,6 @@ from __future__ import annotations
 import functools
 import os
 import re
-import shutil
 import subprocess
 from typing import TYPE_CHECKING, Any
 
@@ -27,6 +26,7 @@ import encode_slots
 import matplotlib.pyplot as plt
 
 from phonometry import io as pm_io
+from phonometry.io._video_encoders import find_ffmpeg
 
 from .i18n import (
     _LANG,
@@ -193,12 +193,12 @@ def read_svt_av1_version(
 
 
 @functools.cache
-def _svt_av1_version() -> str:
-    """:func:`read_svt_av1_version` of the ffmpeg on PATH, asked once per process.
+def _svt_av1_version(ffmpeg: str) -> str:
+    """:func:`read_svt_av1_version` of *ffmpeg*, asked once per program and process.
 
     :raises RuntimeError: as :func:`read_svt_av1_version` does.
     """
-    return read_svt_av1_version(shutil.which("ffmpeg") or "ffmpeg")
+    return read_svt_av1_version(ffmpeg)
 
 
 def _svt_av1_options(version: str) -> tuple[str, ...]:
@@ -225,12 +225,18 @@ def _svt_av1_options(version: str) -> tuple[str, ...]:
 def _clip_options(encoder: animation_fingerprint.ClipEncoder) -> tuple[str, ...]:
     """The ffmpeg options *encoder* writes a clip's WebM with: AV1 either way.
 
+    The SVT-AV1 asked for its version is that of the ffmpeg
+    ``phonometry.io.write_video`` runs, found the way it finds it (matplotlib's
+    ``animation.ffmpeg_path`` on ``PATH``), so the setting is the one
+    calibrated for the program that encodes.
+
     :raises ValueError: for an SVT-AV1 whose major version was not calibrated.
     :raises RuntimeError: when ffmpeg's SVT-AV1 does not say its version.
+    :raises phonometry.io.FFmpegNotFoundError: when that ffmpeg is not found.
     """
     if encoder == "av1_nvenc":
         return _NVENC_OPTIONS
-    return _svt_av1_options(_svt_av1_version())
+    return _svt_av1_options(_svt_av1_version(find_ffmpeg()))
 
 
 def _translate_str(s: str) -> str:

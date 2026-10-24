@@ -246,7 +246,9 @@ def test_a_directory_that_cannot_be_reached_is_refused_before_anything_runs(
         FileNotFoundError, match="does not exist or cannot be reached"
     ) as caught:
         io.write_video(target, animation)
-    assert str(target.parent) in str(caught.value)
+    # The message quotes the directory as Python writes it, so on Windows
+    # its backslashes are doubled.
+    assert repr(str(target.parent)) in str(caught.value)
     assert fake.calls() == []
 
 

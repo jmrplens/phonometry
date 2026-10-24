@@ -528,7 +528,7 @@ def _render(
 
 
 @dataclass(frozen=True)
-class _Call[R: (FDTDRun, ElasticRun)]:
+class _CheckedCall[R: (FDTDRun, ElasticRun)]:
     """What a writer was asked for, checked: the run, its frames, where it runs and the video.
 
     ``placement`` is the request resolved (the argument, :func:`use`, the
@@ -554,7 +554,7 @@ def _checked_call[R: (FDTDRun, ElasticRun)](
     frame: AnimationFrame | None,
     video: VideoOptions | None,
     scale: Callable[[R, float | None], float | NDArray[np.bool_]],
-) -> _Call[R]:
+) -> _CheckedCall[R]:
     """A writer's arguments, checked in the order every route checks them.
 
     The run's kind, the frame record's, the placement, the frame cadence,
@@ -587,7 +587,7 @@ def _checked_call[R: (FDTDRun, ElasticRun)](
     _require_width(drawn, _last_frame_time(checked._checked, every))
     request = video_request(path, video_options(video))
     limit = scale(checked, drawn.color_limit)
-    return _Call(checked, drawn, placement, every, request, limit)
+    return _CheckedCall(checked, drawn, placement, every, request, limit)
 
 
 def _kept(
@@ -651,30 +651,40 @@ def _found_limit(
     return found, _ran(sim.provenance)
 
 
-def _encoding_and_limit[R: (FDTDRun, ElasticRun)](
-    call: _Call[R],
-    compute: Compute | None,
-    first_pass: Callable[[R, Compute | None, NDArray[np.bool_]], tuple[float, Compute]],
-) -> tuple[_Encoding, float, Compute | None]:
-    """The encoder, chosen before any step; then the colour limit, and where the run steps.
+def _encoding_here[R: (FDTDRun, ElasticRun)](call: _CheckedCall[R]) -> _Encoding:
+    """The encoder of a video written here, chosen, and the directory of ``path`` checked.
 
-    A limit the frame gave is taken as it is, and the run steps where
-    *compute* asks. Without one, *first_pass* (the kind's own) steps the run
-    to find it, and the run then steps where that pass really stepped.
+    Called before any step, a first pass's included: a missing ffmpeg, an
+    encoder that cannot write the video or a directory that does not take
+    it then costs no run.
 
     :raises FFmpegNotFoundError: when ffmpeg is not found.
     :raises VideoEncoderError: when it does not run, has no encoder that
         writes this video, or the directory of ``path`` does not take a file.
-    :raises ValueError: when the first pass finds nothing to scale by.
     """
     from ..io._video import require_writable
 
     encoding = _preflight(call.request, call.drawn.size)
     require_writable(call.request)
+    return encoding
+
+
+def _color_limit[R: (FDTDRun, ElasticRun)](
+    call: _CheckedCall[R],
+    compute: Compute | None,
+    first_pass: Callable[[R, Compute | None, NDArray[np.bool_]], tuple[float, Compute]],
+) -> tuple[float, Compute | None]:
+    """The colour limit, and where the run steps.
+
+    A limit the frame gave is taken as it is, and the run steps where
+    *compute* asks. Without one, *first_pass* (the kind's own) steps the run
+    to find it, and the run then steps where that pass really stepped.
+
+    :raises ValueError: when the first pass finds nothing to scale by.
+    """
     if isinstance(call.scale, float):
-        return encoding, call.scale, compute
-    limit, ran = first_pass(call.run, compute, call.scale)
-    return encoding, limit, ran
+        return call.scale, compute
+    return first_pass(call.run, compute, call.scale)
 
 
 class _PartialFile:
@@ -756,14 +766,14 @@ class _PartialFile:
 
 def _node_video[R: (FDTDRun, ElasticRun), T](
     function: RemoteFunction,
-    call: _Call[R],
-    history: tuple[str, tuple[int, ...]],
+    call: _CheckedCall[R],
+    record_spec: tuple[str, tuple[int, ...]],
     result: Callable[[R, NDArray[np.float64], RunProvenance], T],
 ) -> T | None:
     """Run a writer on the node ``call.placement`` names; its video takes ``path``'s place here.
 
     The node computes, draws and encodes, with the records this machine has
-    already checked. Its probe history, named and shaped as *history* says,
+    already checked. Its probe history, named and shaped as *record_spec* says,
     is read into an array here, from which *result* (the kind's own) builds
     the record. Its video's bytes are written, as they arrive, into a hidden
     file beside ``path``: never more of them than
@@ -787,7 +797,7 @@ def _node_video[R: (FDTDRun, ElasticRun), T](
     request = call.request
     width, height = call.drawn.size
     n_frames = call.run._checked.steps // call.every + 1
-    name, shape = history
+    name, shape = record_spec
     record = np.zeros(shape, dtype=np.float64)
     stream = StreamSpec(
         "video",
@@ -825,7 +835,7 @@ def _node_video[R: (FDTDRun, ElasticRun), T](
     return result(call.run, record, ran)
 
 
-class _FrameWhere(TypedDict):
+class _FrameCommon(TypedDict):
     """What the first frame of either kind of run is drawn from alike."""
 
     dx: float
@@ -845,13 +855,13 @@ def _probe_positions(checks: _AcousticChecks | _ElasticChecks) -> NDArray[np.flo
 
 
 def _render_run[R: (FDTDRun, ElasticRun)](
-    call: _Call[R],
+    call: _CheckedCall[R],
     encoding: _Encoding,
     frames: Generator[DeviceArray, None, None],
     backend: Backend,
     *,
     limit: float,
-    draw: Callable[[Axes, NDArray[np.float64], _FrameWhere], AxesImage],
+    draw: Callable[[Axes, NDArray[np.float64], _FrameCommon], AxesImage],
     title: Callable[[float], str],
 ) -> None:
     """Draw *frames*, one at t = 0 and one every ``call.every`` steps, into the video.
@@ -865,7 +875,7 @@ def _render_run[R: (FDTDRun, ElasticRun)](
     checks = call.run._checked
     n_frames = checks.steps // call.every + 1
     frame_dt = call.every * checks.dt
-    where = _FrameWhere(
+    common = _FrameCommon(
         dx=checks.dx,
         shape=checks.grid,
         probe_positions=_probe_positions(checks),
@@ -884,7 +894,7 @@ def _render_run[R: (FDTDRun, ElasticRun)](
         backend=backend,
         n_frames=n_frames,
         frame_dt=frame_dt,
-        setup=lambda ax, field: draw(ax, field, where),
+        setup=lambda ax, field: draw(ax, field, common),
         title=title,
     )
 
@@ -1114,7 +1124,8 @@ def write_fdtd_animation(
             return there
         # The node failed and the request asked to write here instead.
         compute = _placement_here(call.placement)
-    encoding, limit, compute = _encoding_and_limit(call, compute, _acoustic_limit)
+    encoding = _encoding_here(call)
+    limit, compute = _color_limit(call, compute, _acoustic_limit)
     sim = _acoustic_engine(run, compute)
     pressures = np.zeros(history, dtype=np.float64)
     frames = _march(
@@ -1126,10 +1137,10 @@ def write_fdtd_animation(
         pressures,
     )
 
-    def draw(ax: Axes, field: NDArray[np.float64], where: _FrameWhere) -> AxesImage:
+    def draw(ax: Axes, field: NDArray[np.float64], common: _FrameCommon) -> AxesImage:
         from .._plot.simulation import fdtd_frame
 
-        return fdtd_frame(ax, field, sources=run.sources, **where)
+        return fdtd_frame(ax, field, sources=run.sources, **common)
 
     def title(time_s: float) -> str:
         from .._plot.simulation import fdtd_snapshot_title
@@ -1328,7 +1339,8 @@ def write_elastic_fdtd_animation(
             return there
         # The node failed and the request asked to write here instead.
         compute = _placement_here(call.placement)
-    encoding, limit, compute = _encoding_and_limit(call, compute, _elastic_limit)
+    encoding = _encoding_here(call)
+    limit, compute = _color_limit(call, compute, _elastic_limit)
     sim = _elastic_engine(run, compute)
     signals = np.zeros(history, dtype=np.float64)
     frames = _elastic_march(
@@ -1342,7 +1354,7 @@ def write_elastic_fdtd_animation(
         signals,
     )
 
-    def draw(ax: Axes, field: NDArray[np.float64], where: _FrameWhere) -> AxesImage:
+    def draw(ax: Axes, field: NDArray[np.float64], common: _FrameCommon) -> AxesImage:
         from .._plot.simulation import elastic_frame
 
         return elastic_frame(
@@ -1350,7 +1362,7 @@ def write_elastic_fdtd_animation(
             field,
             sources=run.sources,
             snapshot_field=checks.snapshot_field,
-            **where,
+            **common,
         )
 
     def title(time_s: float) -> str:

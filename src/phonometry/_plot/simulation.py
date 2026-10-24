@@ -203,10 +203,11 @@ def _draw_field(
 ) -> AxesImage:
     """Draw one field raster with the geometry overlaid (shared core).
 
-    The domain is the ``shape`` grid of spacing ``dx``, the product a result's
-    ``size`` is. A field recorded with ``decimation`` d keeps the first cell
-    of every d by d block of that grid; the obstacle map is the whole grid
-    whatever the field keeps, and is drawn over the domain.
+    The domain is the ``shape`` grid of spacing ``dx``, whose extent, ``shape``
+    times ``dx``, is a result's ``size``. A field recorded with ``decimation``
+    d keeps the first cell of every d by d block of that grid; the obstacle
+    map is the whole grid whatever the field keeps, and is drawn over the
+    domain.
 
     ``color_limit`` fixes the symmetric colour scale, as a video needs for all
     its frames; ``None`` takes it from this field. Returns the image, which

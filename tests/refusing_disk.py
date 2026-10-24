@@ -33,7 +33,18 @@ def refuse_status(monkeypatch: pytest.MonkeyPatch, path: pathlib.Path) -> None:
             raise PermissionError(errno.EACCES, "Permission denied", refused)
         return real_stat(target, *args, **kwargs)
 
+    real_isdir = os.path.isdir
+
+    def isdir(target: str | bytes | os.PathLike[str] | os.PathLike[bytes]) -> bool:
+        # Path.is_dir on Python 3.14 asks os.path.isdir, which on Windows
+        # reads the status without os.stat; a real unsearchable directory
+        # reads there as no directory at all.
+        if os.fspath(target) == refused:
+            return False
+        return real_isdir(target)
+
     monkeypatch.setattr(os, "stat", stat)
+    monkeypatch.setattr(os.path, "isdir", isdir)
 
 
 def hold_partials(monkeypatch: pytest.MonkeyPatch) -> None:

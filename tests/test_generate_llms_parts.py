@@ -26,6 +26,8 @@ import generate_llms as llms
 
 _HEAD_END = "\n---\n"
 _SOURCE = re.compile(r"^Source: \S+$", re.MULTILINE)
+#: A link to a shard file, capturing the name ``llms-`` precedes.
+_PART_FILE = re.compile(r"/llms/llms-([a-z0-9-]+)\.txt")
 
 
 def _bytes(text: str) -> int:
@@ -54,7 +56,7 @@ def _write_page(docs: Path, name: str, sections: list[tuple[str, int]]) -> str:
     for heading, size in sections:
         lines += [f"## {heading}", ""]
         sentence = f"Prose of the section {heading.lower()}, written to fill it. "
-        lines += [sentence * max(1, size // len(sentence)), ""]
+        lines += [(sentence * max(1, size // len(sentence))).rstrip(), ""]
     (docs / name).write_text("\n".join(lines), encoding="utf-8")
     return name
 
@@ -193,6 +195,47 @@ def test_parts_are_balanced_rather_than_filled_in_turn(
     assert [
         sum(line.startswith("## ") for line in _page_lines(part)) for part in parts
     ] == [3, 3]
+
+
+def test_every_part_fits_once_its_head_lists_three_parts_or_more(
+    docs: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Each part added to a page lengthens the head of every part by a link.
+
+    The fixed page needs three parts under a budget of 25,000 bytes. One byte
+    under the largest of them, the same three no longer fit, although the
+    shorter head of a page in two would still leave them room: the room for
+    the page has to be measured under the head that lists every part, and that
+    takes this page to four. Under both budgets every part fits, opens on its
+    own number, names every part in order, and the index entries of the shard
+    link those same files; together the parts hold the page line for line.
+    """
+    sections = [("Section 0", 10_200)]
+    sections += [(f"Section {n}", 10_000) for n in range(1, 6)]
+    page = [(_write_page(docs, "long.md", sections), "long")]
+    whole = _page_lines(llms._shard_text("Long", page))
+    monkeypatch.setattr(llms, "SHARD_LIMIT_BYTES", 25_000)
+    three = llms._shard_parts("long", "Long", page)
+    tight = max(map(_bytes, three)) - 1
+    monkeypatch.setattr(llms, "SHARD_LIMIT_BYTES", tight)
+    four = llms._shard_parts("long", "Long", page)
+
+    for limit, parts, count in ((25_000, three, 3), (tight, four, 4)):
+        files = list(llms._published({"long": parts}))
+        entries = llms._full_text_entries("Long", tuple(files))
+        for number, (part, entry) in enumerate(zip(parts, entries, strict=True), 1):
+            label = f"Long, part {number} of {len(parts)}"
+            assert _bytes(part) <= limit, (
+                f"{label} is {_bytes(part):,} bytes, over the {limit:,} budget"
+            )
+            assert part.splitlines()[0] == f"# phonometry: {label}"
+            assert re.findall(_PART_FILE, part.split(_HEAD_END, 1)[0]) == files
+            assert entry.startswith(f"- [{label}](")
+        assert re.findall(_PART_FILE, "\n".join(entries)) == files
+        assert files == [f"long-{number}" for number in range(1, count + 1)], (
+            f"{len(parts)} parts under {limit:,} bytes, not {count}"
+        )
+        assert [line for part in parts for line in _page_lines(part)] == whole
 
 
 @pytest.mark.parametrize(

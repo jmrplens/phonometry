@@ -1411,6 +1411,9 @@ jobs:
   engine-digests:
     name: FDTD engines hold their golden digests
     runs-on: ubuntu-24.04
+    # Under a minute in its first five runs, and a hung test ends the run
+    # fifteen minutes after it started (pyproject.toml).
+    timeout-minutes: 25
     permissions:
       contents: read
     steps:
@@ -1430,8 +1433,11 @@ jobs:
     - name: Hold the engines to their golden digests
       env:
         PHONOMETRY_ENGINE_DIGESTS: require
+      # Assigned before it is exported: export would return its own status
+      # and hide the helper's, so a helper that fails would not fail the step.
       run: |
-        export NPY_DISABLE_CPU_FEATURES="$(python scripts/engine_digests.py --avx512-features)"
+        features="$(python scripts/engine_digests.py --avx512-features)"
+        export NPY_DISABLE_CPU_FEATURES="$features"
         python scripts/engine_digests.py --output engine-digests.measured.json
         pytest -q -n0 tests/simulation/test_engine_golden_digests.py
     - name: Keep the measured digests

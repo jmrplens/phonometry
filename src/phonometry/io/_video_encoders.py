@@ -113,6 +113,9 @@ _HARDWARE: Final[Mapping[Hardware, tuple[tuple[str, ...], str | None, str | None
 #: Seconds a trial encode or a ``-version`` run may take.
 _RUN_TIMEOUT_S: Final = 60.0
 
+#: How many of the last characters ffmpeg wrote on stderr a message quotes.
+_STDERR_TAIL_CHARS: Final = 400
+
 #: Keeps a console window from flashing up for every ffmpeg run on Windows
 #: (from a notebook or pythonw), as matplotlib's own movie writers do; the
 #: flag exists only there, and is 0 elsewhere.
@@ -265,33 +268,59 @@ def _run(
     )
 
 
+def _tail(stderr: bytes) -> str:
+    """The last of what ffmpeg wrote on stderr, as text, for a message or the log."""
+    return stderr.decode(errors="replace")[-_STDERR_TAIL_CHARS:].strip()
+
+
+def _listed(path: str, flag: str) -> bytes:
+    """What the ffmpeg at *path* writes on stdout for *flag*, ``-version`` or ``-encoders``.
+
+    :raises VideoEncoderError: when it does not start, does not finish in
+        time, or exits with an error; the message quotes that run's own
+        stderr.
+    """
+    try:
+        done = _run([path, "-hide_banner", flag])
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        msg = f"{path} did not run: {exc}"
+        raise VideoEncoderError(msg) from exc
+    if done.returncode:
+        said = _tail(done.stderr) or "nothing on stderr"
+        msg = (
+            f"{path} did not run: {said} ({flag} exited with status {done.returncode})"
+        )
+        raise VideoEncoderError(msg)
+    return done.stdout
+
+
 def describe(path: str) -> FFmpeg:
     """The version line and the compiled encoders of the ffmpeg at *path*.
 
     Read once per binary and process: the key is the path with the file's
     modification time and size, so an ffmpeg replaced on disk is read again.
+    The encoders are listed only once ``-version`` has succeeded.
 
-    :raises VideoEncoderError: when that ffmpeg does not run.
+    :raises VideoEncoderError: when that ffmpeg is gone, cannot be read, or
+        does not run (the message names *path*, and quotes the stderr of the
+        run that failed).
     """
-    status = Path(path).stat()
+    try:
+        status = Path(path).stat()
+    except OSError as exc:
+        msg = f"{path} did not run: {exc}"
+        raise VideoEncoderError(msg) from exc
     key = (path, status.st_mtime_ns, status.st_size)
     with _LOCK:
         known = _DESCRIBED.get(key)
     if known is not None:
         return known
-    try:
-        version = _run([path, "-hide_banner", "-version"])
-        listing = _run([path, "-hide_banner", "-encoders"])
-    except (OSError, subprocess.TimeoutExpired) as exc:
-        msg = f"{path} did not run: {exc}"
-        raise VideoEncoderError(msg) from exc
-    if version.returncode or listing.returncode:
-        msg = f"{path} did not run: {(version.stderr or listing.stderr).decode(errors='replace')[-400:]}"
-        raise VideoEncoderError(msg)
-    lines = version.stdout.decode(errors="replace").splitlines()
+    version = _listed(path, "-version")
+    listing = _listed(path, "-encoders")
+    lines = version.decode(errors="replace").splitlines()
     matches = (
         _ENCODER_LINE.match(line)
-        for line in listing.stdout.decode(errors="replace").splitlines()
+        for line in listing.decode(errors="replace").splitlines()
     )
     found = FFmpeg(
         path=path,

@@ -242,6 +242,52 @@ def test_describe_reads_the_version_and_the_compiled_encoders(
     assert {"libsvtav1", "av1_nvenc"} <= found.encoders
 
 
+def test_an_ffmpeg_that_has_gone_is_an_encoder_error_naming_it(tmp_path: Path) -> None:
+    """A binary found a moment ago and removed since is refused as one that does not run."""
+    gone = tmp_path / "ffmpeg"
+    with pytest.raises(
+        ve.VideoEncoderError, match=rf"^{re.escape(str(gone))} did not run: "
+    ):
+        ve.describe(str(gone))
+
+
+def test_a_version_that_fails_is_reported_and_the_encoders_are_not_listed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = fake_ffmpeg.install(
+        tmp_path,
+        monkeypatch,
+        said={"-version": "libavutil: version broke"},
+        fails=["-version"],
+    )
+    with pytest.raises(
+        ve.VideoEncoderError,
+        match=r" did not run: libavutil: version broke \(-version exited with status 1\)$",
+    ):
+        ve.describe(str(fake.launcher))
+    assert [call["kind"] for call in fake.calls()] == ["version"]
+
+
+def test_a_listing_that_fails_is_reported_with_its_own_words(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The -version run's own stderr (a warning, on success) is not taken for the failure's."""
+    fake = fake_ffmpeg.install(
+        tmp_path,
+        monkeypatch,
+        said={
+            "-version": "a library warns on every run",
+            "-encoders": "the encoder list broke",
+        },
+        fails=["-encoders"],
+    )
+    with pytest.raises(
+        ve.VideoEncoderError,
+        match=r" did not run: the encoder list broke \(-encoders exited with status 1\)$",
+    ):
+        ve.describe(str(fake.launcher))
+
+
 def test_auto_takes_the_first_encoder_that_passes_a_trial(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -175,8 +175,11 @@ __all__ = [
 ElasticBoundary = Literal["rigid", "absorbing", "free"]
 _BOUNDARY_NAMES: tuple[ElasticBoundary, ...] = ("rigid", "absorbing", "free")
 
+#: The axis a body force pushes along, by name.
+ForceDirection = Literal["x", "y"]
+
 #: Force directions accepted by :class:`ForceSource`.
-_DIRECTIONS = ("x", "y")
+_DIRECTIONS: tuple[ForceDirection, ...] = ("x", "y")
 
 #: Fields a probe or a snapshot can record.
 _FIELD_NAMES: tuple[Field, ...] = ("p", "vx", "vy")
@@ -257,7 +260,7 @@ class ForceSource(RichDisplay):
 
     ix: int
     iy: int
-    direction: Literal["x", "y"]
+    direction: ForceDirection
     waveform: Callable[[float], float]
     amplitude: float = 1.0
 
@@ -546,14 +549,14 @@ def _resolve_speed_map(
 
 
 def _resolve_free_sides(
-    free_sides: str | Iterable[str] | None,
-) -> tuple[str, ...]:
+    free_sides: Side | Iterable[Side] | None,
+) -> tuple[Side, ...]:
     """Normalise the free-surface side spec into a validated tuple."""
     if free_sides is None:
         return ()
     if isinstance(free_sides, str):
         # A bare string would iterate per character; treat it as one side.
-        sides: tuple[str, ...] = (free_sides,)
+        sides: tuple[Side, ...] = (free_sides,)
     else:
         sides = tuple(free_sides)
     unknown = set(sides) - set(_SIDES)
@@ -631,11 +634,11 @@ class _ElasticMedium:
     rho_map: Field2D
     dx: float
     dt: float
-    sponge_width: int
+    absorbing_layer_cells: int
     sides: tuple[Side, ...]
-    sponge_sides: tuple[Side, ...]
+    absorbing_sides: tuple[Side, ...]
     damping_map: NDArray[np.float64]
-    free_sides: tuple[str, ...]
+    free_sides: tuple[Side, ...]
     obstacle: NDArray[np.bool_] | None
 
 
@@ -646,12 +649,12 @@ def _elastic_medium(
     *,
     rho: float | Field2D,
     cfl: float,
-    sponge_width: int,
-    sponge_sides: Side | Iterable[Side] | None,
-    sponge_reflection: float,
+    absorbing_layer_cells: int,
+    absorbing_sides: Side | Iterable[Side] | None,
+    absorbing_layer_reflection: float,
     damping: float | NDArray[np.float64],
     shape: tuple[int, int] | None,
-    free_sides: str | Iterable[str] | None,
+    free_sides: Side | Iterable[Side] | None,
     obstacle_mask: NDArray[np.bool_] | None,
 ) -> _ElasticMedium:
     """Check every argument of :class:`ElasticFDTD2D` that describes the medium.
@@ -665,12 +668,12 @@ def _elastic_medium(
     ny, nx = cp_map.shape
     cs_map = _checked_shear_speed(c_s, cp_map)
     rho_map = _checked_density(rho, ny, nx)
-    width, damping_map = _validate_sponge_damping(
-        sponge_width, sponge_reflection, damping, ny, nx
+    cells, damping_map = _validate_sponge_damping(
+        absorbing_layer_cells, absorbing_layer_reflection, damping, ny, nx
     )
-    sides = _resolve_sponge_sides(sponge_sides)
-    width = require_count(width, "sponge_width", at_least=None)
-    used = sides if width > 0 else ()
+    sides = _resolve_sponge_sides(absorbing_sides)
+    cells = require_count(cells, "absorbing_layer_cells", at_least=None)
+    used = sides if cells > 0 else ()
     free = _resolve_free_sides(free_sides)
     overlap = set(free) & set(used)
     if overlap:
@@ -682,9 +685,9 @@ def _elastic_medium(
         rho_map=rho_map,
         dx=dx,
         dt=dt,
-        sponge_width=width,
+        absorbing_layer_cells=cells,
         sides=sides,
-        sponge_sides=used,
+        absorbing_sides=used,
         damping_map=damping_map,
         free_sides=free,
         obstacle=_validated_obstacle(obstacle_mask, ny, nx),
@@ -788,31 +791,33 @@ class ElasticFDTD2D:
         alone, independent of ``c_S`` and of the Poisson ratio) and values
         in ``(0, 1)`` are accepted. The default 0.6 keeps a wide stability
         margin with moderate numerical dispersion.
-    :param sponge_width: Thickness of the absorbing layer in cells
-        (0 = no absorbing sides).
-    :param sponge_sides: Which sides absorb: a single side name or an
+    :param absorbing_layer_cells: Thickness of the absorbing (sponge) layer,
+        in cells (default 0, no layer and no absorbing side).
+    :param absorbing_sides: Which sides absorb: a single side name or an
         iterable drawn from ``{"left", "right", "top", "bottom"}``
-        (default: all four when ``sponge_width > 0``).
-    :param sponge_reflection: Target round-trip amplitude reflection of the
-        sponge layer; sets the peak absorption rate.
+        (default: all four when ``absorbing_layer_cells > 0``).
+    :param absorbing_layer_reflection: Target round-trip amplitude reflection
+        of the sponge layer; sets the peak absorption rate.
     :param damping: Bulk amplitude decay rate [1/s]: a scalar for the whole
         field or an ``(ny, nx)`` map for locally lossy regions.
     :param shape: Grid shape ``(ny, nx)``, required only when ``c_p`` is a
         scalar.
     :param free_sides: Sides carrying a traction-free surface (stress
-        imaging, Moczo et al. Eq. 9.9): the surface plane runs through the
-        boundary row/column of cell centres, the normal stress is pinned to
-        zero there and the shear stress is imaged antisymmetrically above
-        it. A side cannot be both free and absorbing.
+        imaging, Moczo et al. Eq. 9.9): a single side name or an iterable
+        drawn from ``{"left", "right", "top", "bottom"}`` (default: none).
+        The surface plane runs through the boundary row/column of cell
+        centres, the normal stress is pinned to zero there and the shear
+        stress is imaged antisymmetrically above it. A side cannot be both
+        free and absorbing.
     :param obstacle_mask: Boolean map, shape ``(ny, nx)``, of rigid cells:
         every face adjacent to a masked cell is closed (zero normal
         velocity) and every touching corner shear stress is zeroed, i.e. a
         shear-free rigid inclusion, rasterising arbitrary interior geometry.
     :param compute: Where the engine steps (:class:`Compute`); ``None``
         follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
-    :raises TypeError: if ``cfl`` is not a single number, ``sponge_width`` is a flag,
-        a text or an array where a count goes, or ``compute`` is neither a
-        :class:`Compute` nor ``None``.
+    :raises TypeError: if ``cfl`` or ``absorbing_layer_reflection`` is not a single
+        number, ``absorbing_layer_cells`` is a flag, a text or an array where a
+        count goes, or ``compute`` is neither a :class:`Compute` nor ``None``.
     :raises ValueError: for an argument out of its range, and for a ``compute``
         that names a host: an engine steps in this process, and only
         :func:`elastic_fdtd_simulation` runs on a node.
@@ -831,12 +836,12 @@ class ElasticFDTD2D:
         *,
         rho: float | Field2D,
         cfl: float = 0.6,
-        sponge_width: int = 0,
-        sponge_sides: Side | Iterable[Side] | None = None,
-        sponge_reflection: float = _DEFAULT_SPONGE_REFLECTION,
+        absorbing_layer_cells: int = 0,
+        absorbing_sides: Side | Iterable[Side] | None = None,
+        absorbing_layer_reflection: float = _DEFAULT_SPONGE_REFLECTION,
         damping: float | NDArray[np.float64] = 0.0,
         shape: tuple[int, int] | None = None,
-        free_sides: str | Iterable[str] | None = None,
+        free_sides: Side | Iterable[Side] | None = None,
         obstacle_mask: NDArray[np.bool_] | None = None,
         compute: Compute | None = None,
     ) -> None:
@@ -846,9 +851,9 @@ class ElasticFDTD2D:
             dx,
             rho=rho,
             cfl=cfl,
-            sponge_width=sponge_width,
-            sponge_sides=sponge_sides,
-            sponge_reflection=sponge_reflection,
+            absorbing_layer_cells=absorbing_layer_cells,
+            absorbing_sides=absorbing_sides,
+            absorbing_layer_reflection=absorbing_layer_reflection,
             damping=damping,
             shape=shape,
             free_sides=free_sides,
@@ -857,12 +862,12 @@ class ElasticFDTD2D:
         cp_map, cs_map, rho_map = medium.cp_map, medium.cs_map, medium.rho_map
         self.dx, self.dt = medium.dx, medium.dt
         ny, nx = cp_map.shape
-        #: Sponge-layer width in cells (read-only configuration record).
-        self.sponge_width = medium.sponge_width
-        #: Sides carrying a sponge layer when ``sponge_width > 0``.
-        self.sponge_sides: tuple[str, ...] = medium.sponge_sides
+        #: Thickness of the absorbing (sponge) layer, in cells.
+        self.absorbing_layer_cells = medium.absorbing_layer_cells
+        #: Sides carrying the absorbing layer; none when it has no cells.
+        self.absorbing_sides: tuple[Side, ...] = medium.absorbing_sides
         #: Sides carrying a traction-free surface (immutable record).
-        self.free_sides: tuple[str, ...] = medium.free_sides
+        self.free_sides: tuple[Side, ...] = medium.free_sides
         self._obstacle: NDArray[np.bool_] | None = medium.obstacle
 
         # Every argument is checked on the host before the device is asked
@@ -879,10 +884,10 @@ class ElasticFDTD2D:
         self.rho = read_only_copy(rho_map)
         c_max = float(cp_map.max())
         #: Shear modulus ``mu = rho c_s**2`` at cell centres, a read-only
-        #: host copy.
+        #: NumPy copy.
         self.mu = read_only_copy(rho_map * cs_map**2)
         #: First Lame parameter ``lambda = rho (c_p**2 - 2 c_s**2)``, a
-        #: read-only host copy.
+        #: read-only NumPy copy.
         self.lam = read_only_copy(
             np.maximum(rho_map * (cp_map**2 - 2.0 * cs_map**2), 0.0)
         )
@@ -928,8 +933,8 @@ class ElasticFDTD2D:
 
         self._init_decay(
             medium.sides,
-            medium.sponge_width,
-            sponge_reflection,
+            medium.absorbing_layer_cells,
+            absorbing_layer_reflection,
             medium.damping_map,
             c_max,
         )
@@ -976,8 +981,9 @@ class ElasticFDTD2D:
         :param regions: ``(where, material)`` pairs painted in order, each
             material taken in any of the forms ``background`` takes.
         :param kwargs: Forwarded to :class:`ElasticFDTD2D` (``cfl``,
-            ``sponge_width``, ``sponge_sides``, ``sponge_reflection``,
-            ``damping``, ``free_sides``, ``obstacle_mask``, ``compute``).
+            ``absorbing_layer_cells``, ``absorbing_sides``,
+            ``absorbing_layer_reflection``, ``damping``, ``free_sides``,
+            ``obstacle_mask``, ``compute``).
         :return: The configured stepping engine.
         :raises ValueError: If a mask does not match ``shape`` or a
             material spec is invalid, a catalogue row's refusal among them,
@@ -1036,9 +1042,9 @@ class ElasticFDTD2D:
 
     def _init_decay(
         self,
-        sides: tuple[str, ...],
-        sponge_width: int,
-        sponge_reflection: float,
+        sides: tuple[Side, ...],
+        absorbing_layer_cells: int,
+        absorbing_layer_reflection: float,
         damping: NDArray[np.float64],
         c_max: float,
     ) -> None:
@@ -1046,8 +1052,8 @@ class ElasticFDTD2D:
         sigma = _sigma_map(
             self.txx.shape,
             sides,
-            sponge_width,
-            sponge_reflection,
+            absorbing_layer_cells,
+            absorbing_layer_reflection,
             damping,
             c_max,
             self.dx,
@@ -1113,8 +1119,8 @@ class ElasticFDTD2D:
         it is exactly the acoustic pressure, and in solids it is the
         convenient scalar for probes and snapshots. It is computed on the
         engine's device, where the stresses live: a NumPy array by default,
-        the backend's own array on another device; :meth:`host_field` gives
-        host copies of the stresses it is built from.
+        the backend's own array on another device; :meth:`numpy_field` gives
+        NumPy copies of the stresses it is built from.
         """
         with self._backend.context():
             return -0.5 * (self.txx + self.tyy)
@@ -1366,7 +1372,7 @@ class ElasticFDTD2D:
         value), so probes and snapshots of every field share the cell-centre
         positions. The result is on the engine's device, where the fields
         live: a NumPy array by default, the backend's own array on another
-        device; :meth:`host_field` gives host copies of the stored fields.
+        device; :meth:`numpy_field` gives NumPy copies of the stored fields.
         """
         if field == "p":
             return self.p
@@ -1388,18 +1394,20 @@ class ElasticFDTD2D:
     def run(
         self,
         n_steps: int,
+        *,
         snapshot_every: int | None = None,
         snapshot_decimation: int = 1,
     ) -> NDArray[np.floating]:
         """Advance ``n_steps`` steps, optionally recording pressure frames.
 
-        With ``snapshot_every = k`` a host copy of the synthetic pressure
+        With ``snapshot_every = k`` a NumPy copy of the synthetic pressure
         ``p`` is stored after every ``k``-th step (and one of the initial
         state), keeping every ``snapshot_decimation``-th cell along each
         axis; the stacked ``(n_frames, ny', nx')`` array plugs straight into
         a ``FuncAnimation`` ``imshow`` update. Without ``snapshot_every`` an
         empty array is returned and only the final state is kept (read it
-        with :meth:`host_field`).
+        with :meth:`numpy_field`). The two counts are taken by name, as
+        :class:`ElasticRecording` takes them.
 
         :raises TypeError: if ``snapshot_decimation``, ``n_steps`` or
             ``snapshot_every`` is a flag, a text or an array where a count goes.
@@ -1409,7 +1417,7 @@ class ElasticFDTD2D:
         """
         return _run_recording(self, n_steps, snapshot_every, snapshot_decimation)
 
-    #: The arrays the engine stores, the names :meth:`host_field` reads.
+    #: The arrays the engine stores, the names :meth:`numpy_field` reads.
     _STORED: tuple[Literal["txx", "tyy", "txy", "vx", "vy"], ...] = (
         "txx",
         "tyy",
@@ -1418,18 +1426,18 @@ class ElasticFDTD2D:
         "vy",
     )
 
-    def host_field(
-        self, name: Literal["txx", "tyy", "txy", "vx", "vy"]
+    def numpy_field(
+        self, field: Literal["txx", "tyy", "txy", "vx", "vy"]
     ) -> NDArray[np.floating]:
-        """A NumPy copy of the stored field *name*, whatever the device.
+        """A NumPy copy of the stored *field*, in this process, whatever the device.
 
-        :param name: ``"txx"`` or ``"tyy"`` (cell centres), ``"txy"``
+        :param field: ``"txx"`` or ``"tyy"`` (cell centres), ``"txy"``
             (interior corners), ``"vx"`` or ``"vy"`` (faces).
-        :raises TypeError: if ``name`` is not a text.
+        :raises TypeError: if ``field`` is not a text.
         :raises ValueError: for a field the engine does not store.
         """
-        require_choice(name, "name", self._STORED)
-        return np.array(self._backend.to_host(getattr(self, name)), copy=True)
+        require_choice(field, "field", self._STORED)
+        return np.array(self._backend.to_host(getattr(self, field)), copy=True)
 
     @property
     def provenance(self) -> RunProvenance:
@@ -1471,7 +1479,7 @@ class ElasticFDTDResult(OwnsArrays):
 
     times: NDArray[np.float64]
     signals: NDArray[np.float64]
-    probe_fields: tuple[str, ...]
+    probe_fields: tuple[Field, ...]
     probes: NDArray[np.int_]
     probe_positions: NDArray[np.float64]
     dx: float
@@ -1482,7 +1490,7 @@ class ElasticFDTDResult(OwnsArrays):
     snapshot_times: NDArray[np.float64] | None
     snapshot_field: Field
     obstacle_mask: NDArray[np.bool_] | None
-    free_sides: tuple[str, ...]
+    free_sides: tuple[Side, ...]
     snapshot_decimation: int
     provenance: RunProvenance
 
@@ -1611,7 +1619,7 @@ class ElasticRecording(RichDisplay):
     """
 
     probes: Sequence[tuple[int, int]] = ()
-    probe_fields: Sequence[str] = ("vy",)
+    probe_fields: Sequence[Field] = ("vy",)
     snapshot_every: int | None = None
     snapshot_field: Field = "p"
     snapshot_decimation: int = 1
@@ -1683,11 +1691,11 @@ class _ElasticChecks:
     dx: float
     dt: float
     obstacle: NDArray[np.bool_] | None
-    free_sides: tuple[str, ...]
+    free_sides: tuple[Side, ...]
     absorbing_sides: tuple[Side, ...]
-    sponge_width: int
+    absorbing_layer_cells: int
     probe_ix: NDArray[np.int_]
-    fields: tuple[str, ...]
+    fields: tuple[Field, ...]
     steps: int
     snapshot_every: int | None
     snapshot_field: Field
@@ -1813,9 +1821,9 @@ def _elastic_checks(run: ElasticRun) -> _ElasticChecks:
         run.dx,
         rho=run.rho,
         cfl=run.cfl,
-        sponge_width=width,
-        sponge_sides=absorbing_sides or None,
-        sponge_reflection=_DEFAULT_SPONGE_REFLECTION,
+        absorbing_layer_cells=width,
+        absorbing_sides=absorbing_sides or None,
+        absorbing_layer_reflection=_DEFAULT_SPONGE_REFLECTION,
         damping=run.damping,
         shape=run.shape,
         free_sides=free_sides,
@@ -1831,7 +1839,7 @@ def _elastic_checks(run: ElasticRun) -> _ElasticChecks:
         obstacle=None if medium.obstacle is None else read_only(medium.obstacle),
         free_sides=medium.free_sides,
         absorbing_sides=absorbing_sides,
-        sponge_width=width,
+        absorbing_layer_cells=width,
         probe_ix=read_only(_probe_indices(recording.probes, (ny, nx), medium.obstacle)),
         fields=tuple(recording.probe_fields),
         steps=_step_count(duration_s, medium.dt),
@@ -1854,8 +1862,8 @@ def _elastic_engine(run: ElasticRun, compute: Compute | None) -> ElasticFDTD2D:
         run.dx,
         rho=run.rho,
         cfl=run.cfl,
-        sponge_width=checks.sponge_width,
-        sponge_sides=checks.absorbing_sides or None,
+        absorbing_layer_cells=checks.absorbing_layer_cells,
+        absorbing_sides=checks.absorbing_sides or None,
         damping=run.damping,
         shape=run.shape,
         free_sides=checks.free_sides,
@@ -1904,7 +1912,7 @@ def _parse_elastic_boundaries(
     return tuple(absorbing), tuple(free)
 
 
-def _resolve_probe_fields(probe_fields: Sequence[str]) -> tuple[str, ...]:
+def _resolve_probe_fields(probe_fields: Sequence[Field]) -> tuple[Field, ...]:
     """Validate the probe-field spec into a non-empty unique tuple."""
     fields = tuple(probe_fields)
     if not fields:
@@ -1957,7 +1965,7 @@ def _probe_gathers(
 
 
 def _sample_probes(
-    sim: ElasticFDTD2D, field: str, g: dict[str, DeviceArray]
+    sim: ElasticFDTD2D, field: Field, g: dict[str, DeviceArray]
 ) -> DeviceArray:
     """Sample one field at the probe cell centres (velocities averaged)."""
     xp = sim._xp
@@ -1981,7 +1989,7 @@ def _sample_probes(
 def _elastic_probe_setup(
     sim: ElasticFDTD2D,
     probe_ix: NDArray[np.int_],
-    probe_fields: tuple[str, ...],
+    probe_fields: tuple[Field, ...],
     steps: int,
 ) -> tuple[dict[str, DeviceArray], DeviceArray | None]:
     """The probes' gathers on the device, and a device buffer off NumPy.
@@ -2001,7 +2009,7 @@ def _elastic_probe_setup(
 
 def _store_samples(
     sim: ElasticFDTD2D,
-    probe_fields: tuple[str, ...],
+    probe_fields: tuple[Field, ...],
     gathers: dict[str, DeviceArray],
     column: int,
     signals: NDArray[np.float64],
@@ -2024,7 +2032,7 @@ def _elastic_march(
     sim: ElasticFDTD2D,
     steps: int,
     probe_ix: NDArray[np.int_],
-    probe_fields: tuple[str, ...],
+    probe_fields: tuple[Field, ...],
     snapshot_every: int | None,
     snapshot_field: Field,
     snapshot_decimation: int,
@@ -2063,7 +2071,7 @@ def _record_elastic_run(
     sim: ElasticFDTD2D,
     steps: int,
     probe_ix: NDArray[np.int_],
-    probe_fields: tuple[str, ...],
+    probe_fields: tuple[Field, ...],
     snapshot_every: int | None,
     snapshot_field: Field,
     snapshot_decimation: int,
@@ -2114,7 +2122,7 @@ def _record_elastic_run(
 
 def _validated_absorbing_layer(
     boundaries: ElasticBoundaries,
-    absorbing_sides: tuple[str, ...],
+    absorbing_sides: tuple[Side, ...],
 ) -> int:
     """Validate the absorbing-layer thickness; 0 when no side absorbs."""
     if not absorbing_sides:

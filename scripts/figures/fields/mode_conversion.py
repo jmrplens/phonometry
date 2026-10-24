@@ -135,7 +135,7 @@ def _mc_run(theta_deg: float, compute: Compute) -> tuple[Any, Any]:
     c_s[iface:] = STEEL.c_s
     rho[iface:] = STEEL.rho
     sim = simulation.ElasticFDTD2D(
-        c_p, c_s, dx, rho=rho, sponge_width=_MC_SPONGE, compute=compute
+        c_p, c_s, dx, rho=rho, absorbing_layer_cells=_MC_SPONGE, compute=compute
     )
     # Tapered aperture, centred so the beam axis meets the contact at the
     # middle of the frame whatever the incidence: a soft-edged beam instead

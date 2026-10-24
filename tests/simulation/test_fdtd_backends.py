@@ -173,7 +173,7 @@ def test_a_contour_probe_resets_on_the_strict_backend(
     assert backend.name == "array-api-strict"
     assert np.abs(backend.to_host(probe._sums)).max() > 0.0
     probe.reset()
-    assert probe.samples == 0
+    assert probe.n_samples == 0
     assert not backend.to_host(probe._sums).any()
     if probe._carry is not None:
         assert not backend.to_host(probe._carry).any()
@@ -186,21 +186,21 @@ def test_a_write_into_the_field_from_outside_is_stepped(on_strict: None) -> None
     sim.p[10, 10] = 1.0
     sim.step()
     assert ref is sim.p
-    assert np.abs(sim.host_field("p")).max() > 0.0
+    assert np.abs(sim.numpy_field("p")).max() > 0.0
 
 
-def test_host_field_is_a_copy_in_numpy() -> None:
+def test_numpy_field_is_a_copy_in_numpy() -> None:
     sim = FDTD2D(343.0, 0.01, shape=(8, 8))
-    got = sim.host_field("vx")
+    got = sim.numpy_field("vx")
     assert isinstance(got, np.ndarray)
     got[...] = 7.0
-    assert float(np.abs(sim.host_field("vx")).max()) == 0.0
+    assert float(np.abs(sim.numpy_field("vx")).max()) == 0.0
 
 
-def test_host_field_refuses_a_field_it_does_not_store() -> None:
+def test_numpy_field_refuses_a_field_it_does_not_store() -> None:
     sim = FDTD2D(343.0, 0.01, shape=(8, 8))
-    with pytest.raises(ValueError, match="'name' must be one of"):
-        sim.host_field("txx")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'field' must be one of"):
+        sim.numpy_field("txx")  # type: ignore[arg-type]
 
 
 def test_the_engine_records_where_it_ran() -> None:

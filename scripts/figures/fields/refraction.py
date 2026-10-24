@@ -148,8 +148,8 @@ def _refraction_fields(
         sim = FDTD2D(
             c_map,
             dx,
-            sponge_width=40,
-            sponge_sides=("left", "right", "bottom"),
+            absorbing_layer_cells=40,
+            absorbing_sides=("left", "right", "bottom"),
             compute=compute,
         )
         ix, iy = round(_REFR_SRC[0] / dx), round(_REFR_SRC[1] / dx)

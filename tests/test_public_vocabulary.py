@@ -993,6 +993,7 @@ _SPELLED_OUT = {
     "refs": "references",
     "anim": "animation",
     "anims": "animations",
+    "sim": "engine",
 }
 
 #: ``minimum`` and ``maximum`` written as the library writes them, by kind.
@@ -1341,6 +1342,14 @@ _COUNT_EXEMPT = {
         "is the cell, as the sample is of delay_samples"
     ),
     "phonometry.simulation.fdtd.FDTDBoundaries.absorbing_layer_cells": (
+        "the thickness of the absorbing layer counted in grid cells: the unit "
+        "is the cell, as the sample is of delay_samples"
+    ),
+    "phonometry.simulation.fdtd.FDTD2D.__init__(absorbing_layer_cells)": (
+        "the thickness of the absorbing layer counted in grid cells: the unit "
+        "is the cell, as the sample is of delay_samples"
+    ),
+    "phonometry.simulation.elastic_fdtd.ElasticFDTD2D.__init__(absorbing_layer_cells)": (
         "the thickness of the absorbing layer counted in grid cells: the unit "
         "is the cell, as the sample is of delay_samples"
     ),

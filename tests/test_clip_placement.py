@@ -263,7 +263,7 @@ def test_a_ram_budget_that_is_not_a_positive_count_is_refused(
 
 
 def _small_cw_run() -> FDTD2D:
-    sim = FDTD2D(343.0, 0.05, shape=(40, 50), sponge_width=6)
+    sim = FDTD2D(343.0, 0.05, shape=(40, 50), absorbing_layer_cells=6)
     sim.add_source(CWSource(ix=20, iy=20, frequency=300.0, ramp_cycles=1.0))
     return sim
 

@@ -589,7 +589,7 @@ def _kept(
         ``AnimationFrame(color_limit=...)``.
     """
     keep = np.ones(checks.grid, dtype=np.bool_)
-    _sponge_cells(keep, checks.absorbing_sides, checks.sponge_width)
+    _sponge_cells(keep, checks.absorbing_sides, checks.absorbing_layer_cells)
     for cells in driven:
         keep[cells] = False
     d = checks.snapshot_decimation

@@ -519,7 +519,7 @@ def test_a_device_that_cannot_compute_falls_back_when_asked(
     assert "failed a first small computation" in str(caught[0].message)
     assert caught[0].filename == __file__
     assert (sim.provenance.device, sim.provenance.dtype) == ("cpu", "float32")
-    assert sim.host_field("vx").dtype == np.float32
+    assert sim.numpy_field("vx").dtype == np.float32
 
 
 def test_a_device_is_probed_once_per_process(
@@ -892,7 +892,7 @@ _BAD_ARGUMENTS: dict[str, tuple[Callable[[Compute], object], str]] = {
             343.0,
             0.01,
             shape=(8, 8),
-            sponge_width=2,
+            absorbing_layer_cells=2,
             edge_impedance={"left": 413.0},
             compute=c,
         ),
@@ -911,7 +911,7 @@ _BAD_ARGUMENTS: dict[str, tuple[Callable[[Compute], object], str]] = {
             0.01,
             rho=2500.0,
             shape=(8, 8),
-            sponge_width=2,
+            absorbing_layer_cells=2,
             free_sides="top",
             compute=c,
         ),

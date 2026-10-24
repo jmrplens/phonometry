@@ -161,15 +161,15 @@ def _pillar_fields(n_frames: int = _PILLAR_FRAMES) -> tuple[Any, Any]:
         343.0,
         _PILLAR_DX,
         shape=(_PILLAR_NY, _PILLAR_NX),
-        sponge_width=80,
-        sponge_sides=("left", "right"),
+        absorbing_layer_cells=80,
+        absorbing_sides=("left", "right"),
         damping=25.0,
         obstacle_mask=_pillar_mask(),
         compute=clip_placement.compute_for("anim_fdtd_pillar_hall"),
     )
 
     lam0 = 343.0 / _PILLAR_F0
-    sim.add_plane_wave("right", center=0.30, width=0.08, wavelength=lam0)
+    sim.add_plane_wave("right", center_m=0.30, half_width_m=0.08, wavelength_m=lam0)
     for _ in range(_PILLAR_WARM * _PILLAR_EVERY):
         sim.step()
     frames = np.empty((n_frames, _PILLAR_NY, _PILLAR_NX), dtype=np.float32)

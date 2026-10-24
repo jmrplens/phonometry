@@ -240,8 +240,8 @@ def _oblique_water_trace(
         dx,
         background=WATER,
         regions=regions,
-        sponge_width=30,
-        sponge_sides=("bottom",),
+        absorbing_layer_cells=30,
+        absorbing_sides=("bottom",),
         cfl=cfl,
     )
     y_interface = ny_w * dx
@@ -333,8 +333,8 @@ def test_scholte_wave_speed_van_vossen_configuration() -> None:
         dx,
         background=VV_FLUID,
         regions=[((slice(iy_interface, None), slice(None)), VV_SOLID)],
-        sponge_width=20,
-        sponge_sides=("top", "bottom"),
+        absorbing_layer_cells=20,
+        absorbing_sides=("top", "bottom"),
     )
     f0, t0 = 50.0, 0.030
 

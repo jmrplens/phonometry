@@ -82,8 +82,8 @@ def _ground_effect_fields(
         c0,
         dx,
         shape=(ny, nx),
-        sponge_width=40,
-        sponge_sides=("left", "right", "bottom"),
+        absorbing_layer_cells=40,
+        absorbing_sides=("left", "right", "bottom"),
         compute=clip_placement.compute_for("anim_fdtd_ground_effect"),
     )
     sim.add_source(CWSource(ix=80, iy=75, frequency=_GROUND_FREQ, ramp_cycles=2.0))

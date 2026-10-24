@@ -153,10 +153,10 @@ def _dispersion_fields() -> tuple[Any, ...]:
             compute=compute,
         )
         sim.add_plane_wave(
-            "right", center=_DISP_X0, width=_DISP_W, wavelength=_DISP_LAMBDA
+            "right", center_m=_DISP_X0, half_width_m=_DISP_W, wavelength_m=_DISP_LAMBDA
         )
         courant = _DISP_C * sim.dt / dx
-        v_pred = _disp_packet_group_speed(sim.host_field("p")[1, :n_vis], dx, courant)
+        v_pred = _disp_packet_group_speed(sim.numpy_field("p")[1, :n_vis], dx, courant)
         xp = sim._backend.xp
         visible = sim._backend.index(np.arange(n_vis))
         raw_t: list[float] = []

@@ -120,8 +120,8 @@ def _duct_cut_on_fields() -> tuple[Any, Any, Any, Any, Any, tuple[float, float]]
             c0,
             dx,
             shape=(ny, nx),
-            sponge_width=_DUCT_SPONGE,
-            sponge_sides=("right",),
+            absorbing_layer_cells=_DUCT_SPONGE,
+            absorbing_sides=("right",),
             compute=compute,
         )
         sim.add_source(

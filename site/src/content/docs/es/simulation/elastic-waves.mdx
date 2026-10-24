@@ -181,9 +181,9 @@ La ejecución se calculó con NumPy en float64, como registra
 acústico, y también `ElasticFDTD2D.from_regions`: el bloque anterior calcula
 en una GPU de NVIDIA con CuPy con un argumento más. En un dispositivo así los
 campos propios del motor, `sim.p` y `sim.collocated(field)` incluidos,
-son arrays de ese dispositivo, y `sim.host_field(name)` da una copia en NumPy;
-un resultado está en el anfitrión (la memoria de la CPU) sea cual sea el
-dispositivo con el que se calculó. [Dónde se calcula una simulación](/phonometry/es/simulation/compute/)
+son arrays de ese dispositivo, y `sim.numpy_field(field)` da una copia en
+NumPy; un resultado guarda arrays de NumPy sea cual sea el dispositivo con el
+que se calculó. [Dónde se calcula una simulación](/phonometry/es/simulation/compute/)
 trata los dispositivos, qué hay que instalar para cada uno y qué se promete
 sobre los números en cada uno.
 

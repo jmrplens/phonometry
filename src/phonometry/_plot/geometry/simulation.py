@@ -67,7 +67,7 @@ def _fdtd_sponge_bands(
     ax: Axes, sim: FDTD2D, lx: float, ly: float, handles: dict[str, Any]
 ) -> None:
     """Shade the sponge layers on their configured sides."""
-    depth = sim.sponge_width * sim.dx
+    depth = sim.absorbing_layer_cells * sim.dx
     if depth <= 0.0:
         return
     rects = {
@@ -76,7 +76,7 @@ def _fdtd_sponge_bands(
         "top": (0.0, 0.0, lx, depth),
         "bottom": (0.0, ly - depth, lx, depth),
     }
-    for side in sim.sponge_sides:
+    for side in sim.absorbing_sides:
         x0, y0, width, height = rects[side]
         handles["sponge"] = _material_rect(
             ax,
@@ -102,7 +102,7 @@ def _fdtd_edges(
     for side, seg in segments.items():
         if side in sim.edge_impedance:
             colour, key = _C_SECONDARY, "impedance"
-        elif side in sim.sponge_sides:
+        elif side in sim.absorbing_sides:
             continue
         else:
             colour, key = _C_EDGE, "rigid"
@@ -119,7 +119,7 @@ def plot_fdtd_domain(
     sim: FDTD2D,
     ax: Axes | None = None,
     *,
-    probes: ArrayLike | None = None,
+    probe_positions: ArrayLike | None = None,
     language: Language = "en",
     **kwargs: Any,
 ) -> Axes:
@@ -133,8 +133,10 @@ def plot_fdtd_domain(
     :param sim: A :class:`~phonometry.simulation.FDTD2D` instance (fresh or
         already stepped; only its static configuration is drawn).
     :param ax: Existing axes, or ``None`` to create a figure.
-    :param probes: Optional probe positions to preview, shape ``(N, 2)`` as
-        ``(x, y)`` in metres (the ``fdtd_simulation`` convention).
+    :param probe_positions: Optional probe positions to preview, shape
+        ``(N, 2)`` as ``(x, y)`` in metres. ``FDTD2D.plot_geometry`` takes
+        the probe cells and hands their centres here, the positions
+        ``FDTDResult.probe_positions`` holds.
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param kwargs: Forwarded to the domain ``imshow`` of the obstacle layer.
     :return: The axes.
@@ -144,11 +146,11 @@ def plot_fdtd_domain(
     from ..._i18n import localize_axes
 
     pts: NDArray[np.float64] | None = None
-    if probes is not None:
-        pts = np.asarray(probes, dtype=np.float64)
+    if probe_positions is not None:
+        pts = np.asarray(probe_positions, dtype=np.float64)
         # The number is a count of array axes, not a quantity.
         if pts.ndim != 2 or pts.shape[1] != 2:  # noqa: PLR2004
-            msg = "'probes' must have shape (N, 2)."
+            msg = "'probe_positions' must have shape (N, 2)."
             raise ValueError(msg)
     if ax is None:
         ax = _new_axes()

@@ -86,7 +86,7 @@ def _meshed_metadiffuser_ntff_levels() -> tuple[Any, Any]:
         343.0,
         dx,
         shape=(ny, nx),
-        sponge_width=sponge,
+        absorbing_layer_cells=sponge,
         cfl=0.9,
         obstacle_mask=mask,
         compute=Compute(),
@@ -256,10 +256,10 @@ def _meta_pair(
             dx,
             rho=rho,
             shape=(_META_NY, _META_NX),
-            sponge_width=200,
+            absorbing_layer_cells=200,
             compute=compute,
         )
-        sim.add_plane_wave("up", center=0.80, width=0.05, wavelength=lam0)
+        sim.add_plane_wave("up", center_m=0.80, half_width_m=0.05, wavelength_m=lam0)
         lateral = sim._backend.asarray(taper[np.newaxis, :])
         sim.p *= lateral
         sim.vy *= lateral

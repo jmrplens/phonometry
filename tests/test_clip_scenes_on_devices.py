@@ -35,7 +35,7 @@ _FIELD_NAMES = frozenset({"p", "vx", "vy", "txx", "tyy", "txy"})
 #: Calls on a backend or an engine that return a device array.
 _DEVICE_MAKERS = frozenset({"zeros", "asarray", "index", "collocated"})
 #: Calls that return a host array.
-_HOST_ARRAYS = frozenset({"_host", "_blanked", "to_host", "host_field"})
+_HOST_ARRAYS = frozenset({"_host", "_blanked", "to_host", "numpy_field"})
 #: The names the engine's array namespace goes by: ``xp``, ``sim._xp``,
 #: ``sim._backend.xp``.
 _DEVICE_NAMESPACES = frozenset({"xp", "_xp"})

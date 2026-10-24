@@ -100,7 +100,7 @@ def _ducting_fields(
     p_all, e_all = [], []
     times = np.zeros(0)
     for depth in _DUCT_SRC_DEPTHS:
-        sim = FDTD2D(c_map, dx, rho=1025.0, sponge_width=30, compute=compute)
+        sim = FDTD2D(c_map, dx, rho=1025.0, absorbing_layer_cells=30, compute=compute)
         iy = round(depth / dx)
         sim.add_source(GaussianPulse(ix=100, iy=iy, half_width_s=width))
         sim.add_source(

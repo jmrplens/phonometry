@@ -172,8 +172,8 @@ elastic solver takes the same `compute=` as the acoustic one, and so does
 `ElasticFDTD2D.from_regions`: the block above steps on an NVIDIA GPU through
 CuPy with one more argument. On such a device the engine's own fields,
 `sim.p` and `sim.collocated(field)` included, are that device's arrays, and
-`sim.host_field(name)` gives a NumPy copy; a result is on the host whatever
-device stepped. [Where a simulation runs](/phonometry/simulation/compute/) covers the devices, what each needs
+`sim.numpy_field(field)` gives a NumPy copy; a result holds NumPy arrays
+whatever device stepped. [Where a simulation runs](/phonometry/simulation/compute/) covers the devices, what each needs
 installed and what is promised about the numbers on each.
 
 ```py

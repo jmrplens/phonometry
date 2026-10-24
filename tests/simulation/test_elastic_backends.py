@@ -172,7 +172,7 @@ def test_a_stress_written_from_outside_is_stepped(on_strict: None) -> None:
     sim = ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(20, 20))
     sim.txx[10, 4:8] -= 1.0
     sim.step()
-    assert np.abs(sim.host_field("vx")).max() > 0.0
+    assert np.abs(sim.numpy_field("vx")).max() > 0.0
 
 
 def test_from_regions_takes_the_placement() -> None:
@@ -183,11 +183,11 @@ def test_from_regions_takes_the_placement() -> None:
     assert sim.txx.dtype == np.float32
 
 
-def test_host_field_reads_the_stresses_as_stored() -> None:
+def test_numpy_field_reads_the_stresses_as_stored() -> None:
     sim = ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(10, 12))
-    assert sim.host_field("txy").shape == (9, 11)
-    with pytest.raises(ValueError, match="'name' must be one of"):
-        sim.host_field("p")  # type: ignore[arg-type]
+    assert sim.numpy_field("txy").shape == (9, 11)
+    with pytest.raises(ValueError, match="'field' must be one of"):
+        sim.numpy_field("p")  # type: ignore[arg-type]
 
 
 def test_the_lame_maps_are_read_only_host_copies() -> None:

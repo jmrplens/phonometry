@@ -130,10 +130,12 @@ def _diffusion_fields(
     every = _DIFF_EVERY
     sims = []
     for rho in (rho_flat, rho_qrd, rho_ref):
-        sim = FDTD2D(c0, dx, rho=rho, shape=(ny, nx), sponge_width=40, compute=compute)
+        sim = FDTD2D(
+            c0, dx, rho=rho, shape=(ny, nx), absorbing_layer_cells=40, compute=compute
+        )
         # One-way carrier-under-Gaussian packet toward the panel, the
         # leapfrog-consistent initial condition the solver now provides.
-        sim.add_plane_wave("up", center=y_pkt, width=sig, wavelength=lam0)
+        sim.add_plane_wave("up", center_m=y_pkt, half_width_m=sig, wavelength_m=lam0)
         sims.append(sim)
     # The three runs advance in lockstep so the scattered field
     # (total - incident, exact by linearity) is available at every step

@@ -132,8 +132,8 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
             dx,
             rho=_HS_RHO,
             shape=(_HS_NY, _HS_NX),
-            sponge_width=_HS_SPONGE,
-            sponge_sides=("left", "right", "bottom"),
+            absorbing_layer_cells=_HS_SPONGE,
+            absorbing_sides=("left", "right", "bottom"),
             free_sides=("top",) if free else None,
             compute=compute,
         )

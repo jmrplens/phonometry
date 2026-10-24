@@ -485,7 +485,7 @@ def _transmission_tube_fields(
             compute=compute,
         )
         sim.add_plane_wave(
-            "right", center=0.35, width=0.10, wavelength=343.0 / _VTUBE_F
+            "right", center_m=0.35, half_width_m=0.10, wavelength_m=343.0 / _VTUBE_F
         )
         ps: list[Any] = []
         ts: list[float] = []

@@ -101,8 +101,8 @@ def _barrier_fields(n_frames: int = _BARRIER_FRAMES) -> tuple[Any, Any, Any, Any
                 dx,
                 shape=(ny, nx),
                 rho=1.2 if rho_map is None else rho_map,
-                sponge_width=40,
-                sponge_sides=("left", "right", "bottom"),
+                absorbing_layer_cells=40,
+                absorbing_sides=("left", "right", "bottom"),
                 compute=compute,
             )
             sim.add_source(CWSource(ix=100, iy=25, frequency=f, ramp_cycles=2.0))

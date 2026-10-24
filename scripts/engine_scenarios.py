@@ -53,7 +53,7 @@ def _air(shape: tuple[int, int]) -> NDArray[np.float64]:
 
 
 def _sponge(m: ModuleType, kw: dict[str, Any]) -> Engine:
-    sim = m.FDTD2D(_air((48, 64)), 0.01, sponge_width=8, **kw)
+    sim = m.FDTD2D(_air((48, 64)), 0.01, absorbing_layer_cells=8, **kw)
     sim.add_source(m.GaussianPulse(ix=20, iy=24, half_width_s=4e-5))
     return sim
 
@@ -85,18 +85,18 @@ def _plane_wave(m: ModuleType, kw: dict[str, Any]) -> Engine:
         343.0,
         0.01,
         shape=(64, 48),
-        sponge_width=10,
-        sponge_sides=("top", "bottom"),
+        absorbing_layer_cells=10,
+        absorbing_sides=("top", "bottom"),
         **kw,
     )
     pulse = m.GaussianPulse(ix=0, iy=0, half_width_s=5e-5)
     sim.add_source(m.PlaneWaveSource(direction="down", waveform=pulse.value, offset=12))
-    sim.add_plane_wave("right", center=0.15, width=0.04, wavelength=0.05)
+    sim.add_plane_wave("right", center_m=0.15, half_width_m=0.04, wavelength_m=0.05)
     return sim
 
 
 def _contour(m: ModuleType, kw: dict[str, Any]) -> Engine:
-    sim = m.FDTD2D(343.0, 0.01, shape=(48, 48), sponge_width=8, **kw)
+    sim = m.FDTD2D(343.0, 0.01, shape=(48, 48), absorbing_layer_cells=8, **kw)
     sim.add_source(m.CWSource(ix=24, iy=24, frequency=3000.0))
     sim.add_contour_probe(14, 33, 14, 33, frequencies=[3000.0, 1500.0])
     return sim
@@ -113,8 +113,8 @@ def _elastic_layers(m: ModuleType, kw: dict[str, Any]) -> Engine:
         c_s,
         0.01,
         rho=rho,
-        sponge_width=8,
-        sponge_sides=("left", "right", "bottom"),
+        absorbing_layer_cells=8,
+        absorbing_sides=("left", "right", "bottom"),
         free_sides=("top",),
         **kw,
     )
@@ -180,7 +180,7 @@ SCENARIOS: tuple[Scenario, ...] = (
 
 
 def _host(engine: Engine, name: str) -> NDArray[np.floating]:
-    reader = getattr(engine, "host_field", None)
+    reader = getattr(engine, "numpy_field", None)
     if reader is not None:
         return np.asarray(reader(name))
     return np.array(getattr(engine, name))

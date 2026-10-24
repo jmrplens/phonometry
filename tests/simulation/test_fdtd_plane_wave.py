@@ -39,7 +39,7 @@ def test_packet_travels_at_phase_speed_one_way(
     direction: str, axis: int, sign: float
 ) -> None:
     sim = FDTD2D(C0, DX, shape=(120, 120))
-    sim.add_plane_wave(direction, center=0.6, width=0.08)
+    sim.add_plane_wave(direction, center_m=0.6, half_width_m=0.08)
     start = _centroid(sim, axis)
     steps = 30
     for _ in range(steps):
@@ -58,7 +58,7 @@ def test_packet_travels_at_phase_speed_one_way(
 
 def test_packet_stays_plane_and_supports_carrier() -> None:
     sim = FDTD2D(C0, DX, shape=(100, 60))
-    sim.add_plane_wave("down", center=0.35, width=0.10, wavelength=0.20)
+    sim.add_plane_wave("down", center_m=0.35, half_width_m=0.10, wavelength_m=0.20)
     for _ in range(25):
         sim.step()
     # Transverse flatness: every row is constant across x.
@@ -72,11 +72,19 @@ def test_packet_stays_plane_and_supports_carrier() -> None:
 def test_packet_validation() -> None:
     sim = FDTD2D(C0, DX, shape=(20, 20))
     with pytest.raises(ValueError, match=r"'direction' must be"):
-        sim.add_plane_wave("north", center=0.1, width=0.02)
-    with pytest.raises(ValueError, match="'width' must be positive"):
-        sim.add_plane_wave("down", center=0.1, width=0.0)
-    with pytest.raises(ValueError, match="'wavelength' must be positive"):
-        sim.add_plane_wave("down", center=0.1, width=0.02, wavelength=-1.0)
+        sim.add_plane_wave("north", center_m=0.1, half_width_m=0.02)
+    with pytest.raises(ValueError, match="'half_width_m' must be positive"):
+        sim.add_plane_wave("down", center_m=0.1, half_width_m=0.0)
+    with pytest.raises(ValueError, match="'wavelength_m' must be positive"):
+        sim.add_plane_wave("down", center_m=0.1, half_width_m=0.02, wavelength_m=-1.0)
+
+
+@pytest.mark.parametrize("old", ["center", "width", "wavelength"])
+def test_the_packet_refuses_its_lengths_without_their_unit(old: str) -> None:
+    sim = FDTD2D(C0, DX, shape=(20, 20))
+    lengths = {"center_m": 0.1, "half_width_m": 0.02, old: 0.05}
+    with pytest.raises(TypeError, match=f"'{old}'"):
+        sim.add_plane_wave("down", **lengths)  # type: ignore[arg-type]
 
 
 def test_packet_rejects_non_finite_parameters() -> None:
@@ -84,16 +92,16 @@ def test_packet_rejects_non_finite_parameters() -> None:
     # pressure field into NaN; an infinite width painted a uniform amplitude
     # over the entire domain.
     sim = FDTD2D(C0, DX, shape=(20, 20))
-    with pytest.raises(ValueError, match="'width' must be positive"):
-        sim.add_plane_wave("down", center=0.1, width=np.nan)
-    with pytest.raises(ValueError, match="'width' must be positive"):
-        sim.add_plane_wave("down", center=0.1, width=np.inf)
-    with pytest.raises(ValueError, match="'wavelength' must be positive"):
-        sim.add_plane_wave("down", center=0.1, width=0.02, wavelength=np.nan)
-    with pytest.raises(ValueError, match="center must be finite"):
-        sim.add_plane_wave("down", center=np.nan, width=0.02)
+    with pytest.raises(ValueError, match="'half_width_m' must be positive"):
+        sim.add_plane_wave("down", center_m=0.1, half_width_m=np.nan)
+    with pytest.raises(ValueError, match="'half_width_m' must be positive"):
+        sim.add_plane_wave("down", center_m=0.1, half_width_m=np.inf)
+    with pytest.raises(ValueError, match="'wavelength_m' must be positive"):
+        sim.add_plane_wave("down", center_m=0.1, half_width_m=0.02, wavelength_m=np.nan)
+    with pytest.raises(ValueError, match="center_m must be finite"):
+        sim.add_plane_wave("down", center_m=np.nan, half_width_m=0.02)
     with pytest.raises(ValueError, match="amplitude must be finite"):
-        sim.add_plane_wave("down", center=0.1, width=0.02, amplitude=np.nan)
+        sim.add_plane_wave("down", center_m=0.1, half_width_m=0.02, amplitude=np.nan)
     assert float(np.abs(sim.p).max()) == 0.0  # nothing landed on the field
 
 
@@ -110,7 +118,7 @@ def test_plane_wave_source_rejects_bad_waveform_and_amplitude() -> None:
 def test_rigid_wall_doubles_incident_pressure() -> None:
     # A packet hitting the rigid bottom edge doubles while reflecting.
     sim = FDTD2D(C0, DX, shape=(160, 40))
-    sim.add_plane_wave("down", center=0.6, width=0.06)
+    sim.add_plane_wave("down", center_m=0.6, half_width_m=0.06)
     peak_free = float(np.abs(sim.p).max())
     best = 0.0
     for _ in range(260):
@@ -124,8 +132,8 @@ def test_plane_source_steady_state_is_plane_and_one_way() -> None:
         C0,
         DX,
         shape=(160, 80),
-        sponge_width=20,
-        sponge_sides=("top", "bottom"),
+        absorbing_layer_cells=20,
+        absorbing_sides=("top", "bottom"),
     )
     waveform = CWSource(ix=0, iy=0, frequency=1000.0)
     sim.add_source(

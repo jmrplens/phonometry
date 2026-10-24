@@ -115,15 +115,15 @@ def generate_fdtd_domain_geometry(output_dir: str) -> None:
         343.0,
         0.05,
         shape=(60, 90),
-        sponge_width=8,
-        sponge_sides=("left", "right"),
+        absorbing_layer_cells=8,
+        absorbing_sides=("left", "right"),
         edge_impedance={"top": 413.0},
         obstacle_mask=mask,
         compute=Compute(),
     )
     sim.add_source(GaussianPulse(ix=10, iy=30, half_width_s=1e-3))
     _fig, ax = plt.subplots(figsize=(10, 6.6))
-    sim.plot_geometry(ax=ax, probes=[(3.0, 1.5), (4.0, 2.0)], language=_LANG)
+    sim.plot_geometry(ax=ax, probes=[(59, 29), (79, 39)], language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "fdtd_domain_geometry.svg")
     plt.close()
@@ -443,8 +443,8 @@ def generate_fdtd_plane_wave_launch(output_dir: str) -> None:
         343.0,
         dx,
         shape=(160, 80),
-        sponge_width=sponge,
-        sponge_sides=("top", "bottom"),
+        absorbing_layer_cells=sponge,
+        absorbing_sides=("top", "bottom"),
         compute=Compute(),
     )
     sim.add_source(

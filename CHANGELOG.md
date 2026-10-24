@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   refuses a provenance that is not one, and a `RunProvenance` refuses fields
   no run could have written. On another
   device the engines' fields, `ElasticFDTD2D.p` and `collocated()` included,
-  are that device's arrays, `host_field(name)` gives a NumPy copy on any
+  are that device's arrays, `numpy_field(field)` gives a NumPy copy on any
   device, and a result holds NumPy arrays whatever stepped. After
   construction the engines touch their fields only with Array API standard
   operations, and NumPy's numbers did not move: the NumPy path is held bit
@@ -3399,8 +3399,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - **`fdtd_simulation` takes what it records as one `FDTDRecording`, and
-  `FDTD2D.run` and `ElasticFDTD2D.run` name their snapshot options as the
-  recordings do.** The `probes=`, `snapshot_every=` and
+  `FDTD2D.run` and `ElasticFDTD2D.run` name their snapshot options, and take
+  them by name, as the recordings do.** The `probes=`, `snapshot_every=` and
   `snapshot_decimation=` of `fdtd_simulation` are the fields of
   `simulation.FDTDRecording`, the `recording` of the run (the entry below),
   as an elastic run takes an `ElasticRecording`. Both records refuse a
@@ -3414,9 +3414,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `snapshot_decimation=`, the names `FDTDRecording` and `ElasticRecording`
   take, and every route refuses a bad count with the same class and the same
   words: a flag, a text or an array is a `TypeError`, and a number that is
-  not a whole number of 1 or more a `ValueError`. A call that passed the
-  cadence by position is unchanged; one that named it renames it, as the
-  migration guide shows.
+  not a whole number of 1 or more a `ValueError`. The two counts are taken
+  by name only, as the recordings take them: a call that passed them by
+  position, `run(400, 10, 2)`, names them,
+  `run(400, snapshot_every=10, snapshot_decimation=2)`, and one that named
+  them renames them, as the migration guide shows.
+
+- **The FDTD engines use the words of the runs: an absorbing layer counted in
+  cells, plane-wave lengths in metres, probes previewed in cells.**
+  `FDTD2D` and `ElasticFDTD2D` take `absorbing_layer_cells=` (default 0, no
+  layer), `absorbing_sides=` and `absorbing_layer_reflection=` where they took
+  `sponge_width=`, `sponge_sides=` and `sponge_reflection=`, and read
+  `.absorbing_layer_cells` and `.absorbing_sides` where they read
+  `.sponge_width` and `.sponge_sides`: the words an acoustic run and an
+  `ElasticBoundaries` use for the same layer. The sponge is still the layer's
+  physical name in the guides, and its errors name the new parameters.
+  `FDTD2D.add_plane_wave(direction, *, center_m, half_width_m,
+  amplitude=1.0, wavelength_m=None)` says the unit of each length, where it
+  took `center=`, `width=` and `wavelength=`; `half_width_m` is the `1/e`
+  half-width of the envelope, as `GaussianPulse.half_width_s` is in time.
+  `FDTD2D.plot_geometry(probes=)` takes the `(ix, iy)` cells that
+  `FDTDRecording.probes` takes, where it took positions in metres, draws each
+  at the cell centre `FDTDResult.probe_positions` records, and refuses a cell
+  off the grid or inside an obstacle in the words a run uses. The
+  constructor of `simulation.ContourProbe` names the engine it reads
+  `engine`, where it said `sim`. Every old keyword raises `TypeError`.
+
+- **The closed choices of the FDTD engines and their records are typed
+  `Literal`.** The sides of `ElasticFDTD2D(free_sides=)` and the
+  `free_sides`, `absorbing_sides` and `edge_impedance` the engines and
+  `ElasticFDTDResult` hold are typed by side, `"left"`, `"right"`, `"top"` or
+  `"bottom"`; the fields of `ElasticRecording.probe_fields` and
+  `ElasticFDTDResult.probe_fields` by field, `"p"`, `"vx"` or `"vy"`; the
+  `direction` of `PlaneWaveSource` and of `FDTD2D.add_plane_wave` by travel,
+  and the `direction` of `ForceSource` by axis. A type checker offers the
+  options and refuses a misspelling before the run; nothing changes at run
+  time.
 
 - **A simulation is one record, checked when it is built.**
   `simulation.FDTDRun(*, c, dx, duration_s, sources, shape=None, rho=1.2,
@@ -3454,7 +3487,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   caller's later edits to the dictionary.
 
 - **`FDTD2D.kappa`, `ElasticFDTD2D.mu` and `ElasticFDTD2D.lam` are
-  read-only.** They are host copies the engine computed from its medium, as
+  read-only.** They are NumPy copies the engine computed from its medium, as
   `c`, `rho`, `c_p` and `c_s` already were. An edit used to reach part of the
   step and not the time step computed from the same maps; now it raises
   `ValueError`, and the engine steps on device copies of its own. A
@@ -4364,7 +4397,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `signals.tone_burst` and `ToneBurstResult` and `n_cycles` on the saw-tooth
   burst of `vibration`, `n_trials` on `metrology.monte_carlo`, `n_passages`
   and `n_stages` on the silencer and valve functions of `noise_control`,
-  `n_steps` on `FDTD2D.run` and `ElasticFDTD2D.run`, `max_n_arrivals` on
+  `n_steps` on `FDTD2D.run` and `ElasticFDTD2D.run`, `n_samples` on
+  `simulation.ContourProbe`, now read-only, `max_n_arrivals` on
   `underwater.eigenrays`, `n_sidebands`, `n_poles`, `n_rotor_bars`,
   `n_slot_harmonics` and `n_lobe_orders` on the fault frequencies of
   `vibration`, `n_stories` on the building models, and

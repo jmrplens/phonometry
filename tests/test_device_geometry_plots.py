@@ -712,9 +712,9 @@ def test_fdtd_domain_preview_places_the_probes_where_the_run_records_them() -> N
 
     recording = FDTDRecording(probes=[(5, 3), (17, 9)])
     run = FDTDRun(
-        343.0,
-        0.05,
-        2e-3,
+        c=343.0,
+        dx=0.05,
+        duration_s=2e-3,
         shape=(12, 20),
         sources=[GaussianPulse(ix=10, iy=6, half_width_s=2e-4)],
         recording=recording,

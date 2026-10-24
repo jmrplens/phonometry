@@ -655,6 +655,25 @@ def test_a_raw_encoder_passes_through(
         ({"ffmpeg_options": (30,)}, TypeError, "ffmpeg_options"),
         ({"fps": 0.0}, ValueError, "fps"),
         ({"fps": "30"}, TypeError, "fps"),
+        # float(True) is 1.0: read as a number, it would be a frame a second.
+        ({"fps": True}, TypeError, "^'fps' must be one number, not a bool; got True"),
+        (
+            {"fps": np.True_},
+            TypeError,
+            "^'fps' must be one number, not a bool; got np.True_",
+        ),
+        # No argument of a program can carry a NUL: Popen would refuse it,
+        # for a simulation writer after the whole run.
+        (
+            {"ffmpeg_encoder": "libx264\x00"},
+            ValueError,
+            "^'ffmpeg_encoder' cannot hold a NUL character",
+        ),
+        (
+            {"ffmpeg_options": ("-crf", "3\x000")},
+            ValueError,
+            "^'ffmpeg_options' cannot hold a NUL character",
+        ),
         ({"encoder": "gpu"}, ValueError, "encoder"),
         ({"codec": "mpeg2"}, ValueError, "codec"),
         ({"quality": 3}, TypeError, "quality"),

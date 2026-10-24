@@ -46,7 +46,9 @@ from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Final, get_args
+from typing import TYPE_CHECKING, Any, Final, cast, get_args
+
+import numpy as np
 
 from .._internal.display import RichDisplay
 from .._internal.validation import require_choice, require_positive, require_scalar
@@ -139,14 +141,15 @@ class VideoOptions(RichDisplay):
         ``+faststart`` and HEVC tag, a GIF's endless loop), which stay; held
         as a tuple.
     :raises TypeError: for an ``encoder``, ``codec`` or ``quality`` that is
-        not a text, a ``fps`` that is not one number, an ``ffmpeg_encoder``
-        that is not a text, or ``ffmpeg_options`` that are not a sequence of
-        separate texts.
+        not a text, a ``fps`` that is not one number (a bool is not one), an
+        ``ffmpeg_encoder`` that is not a text, or ``ffmpeg_options`` that are
+        not a sequence of separate texts.
     :raises ValueError: for a choice outside its options, a ``fps`` that is
         not a positive finite number, an ``ffmpeg_encoder`` that does not
-        name an encoder, an ``ffmpeg_encoder`` together with an ``encoder``
-        or a ``codec`` of your own, or a ``codec`` that your ``encoder`` does
-        not write.
+        name an encoder, an ``ffmpeg_encoder`` or ``ffmpeg_options`` that
+        hold a NUL character, which no argument of a program can carry, an
+        ``ffmpeg_encoder`` together with an ``encoder`` or a ``codec`` of
+        your own, or a ``codec`` that your ``encoder`` does not write.
     """
 
     encoder: Encoder = "auto"
@@ -163,10 +166,7 @@ class VideoOptions(RichDisplay):
             None if self.codec is None else require_choice(self.codec, "codec", _CODECS)
         )
         quality = require_choice(self.quality, "quality", _QUALITIES)
-        rate = None
-        if self.fps is not None:
-            require_scalar(self.fps, "fps")
-            rate = require_positive(self.fps, "fps")
+        rate = None if self.fps is None else _frames_per_second(self.fps)
         raw, options = _raw_ffmpeg(self.ffmpeg_encoder, self.ffmpeg_options)
         if raw is not None and (encoder != "auto" or codec is not None):
             msg = (
@@ -260,6 +260,35 @@ def _target(path: object) -> tuple[Path, Container]:
     return target, container
 
 
+def _frames_per_second(fps: object) -> float:
+    """The caller's ``fps``, one positive finite number.
+
+    :raises TypeError: for a bool, a text, an array or anything else that is
+        not one number.
+    :raises ValueError: for a number that is not positive and finite.
+    """
+    if isinstance(fps, bool | np.bool_):
+        # float(True) is 1.0: read as a number it would be a frame a second.
+        msg = f"'fps' must be one number, not a bool; got {fps!r}."
+        raise TypeError(msg)
+    require_scalar(fps, "fps")
+    return require_positive(cast("float", fps), "fps")
+
+
+def _without_nul(texts: tuple[str, ...], name: str) -> None:
+    """Refuse a text that holds a NUL character, which no argument of a program can carry.
+
+    :raises ValueError: naming *name*, for the first such text.
+    """
+    held = next((text for text in texts if "\0" in text), None)
+    if held is not None:
+        msg = (
+            f"'{name}' cannot hold a NUL character, which no argument of a program "
+            f"can carry; got {held!r}"
+        )
+        raise ValueError(msg)
+
+
 def _raw_ffmpeg(
     ffmpeg_encoder: object, ffmpeg_options: object
 ) -> tuple[str | None, tuple[str, ...]]:
@@ -275,6 +304,7 @@ def _raw_ffmpeg(
     if strangers:
         msg = f"every item of 'ffmpeg_options' must be a str, got {strangers[0]!r}"
         raise TypeError(msg)
+    _without_nul(options, "ffmpeg_options")
     if ffmpeg_encoder is None:
         return None, options
     if not isinstance(ffmpeg_encoder, str):
@@ -283,6 +313,7 @@ def _raw_ffmpeg(
     if not ffmpeg_encoder or ffmpeg_encoder.startswith("-"):
         msg = f"'ffmpeg_encoder' must name an encoder, such as 'libx264'; got {ffmpeg_encoder!r}"
         raise ValueError(msg)
+    _without_nul((ffmpeg_encoder,), "ffmpeg_encoder")
     return ffmpeg_encoder, options
 
 

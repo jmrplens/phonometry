@@ -137,11 +137,14 @@ vídeo que escribas.
 | `ffmpeg_options` | más opciones de salida de ffmpeg, como textos separados | `()` |
 
 Construir el registro lanza `ValueError` (`TypeError` para un valor de tipo
-equivocado) ante una elección fuera de sus opciones, un `fps` que no sea un
-número finito positivo, un `ffmpeg_encoder` junto a un `encoder` o un
-`codec` elegidos por ti, y un `codec` que el tipo de codificador que
-nombraste no escribe, como `encoder="videotoolbox", codec="av1"`:
-VideoToolbox solo escribe HEVC y H.264. Lo que depende del archivo se
+equivocado, como un booleano en `fps`) ante una elección fuera de sus
+opciones, un `fps` que no sea un número finito positivo, un
+`ffmpeg_encoder` o unas `ffmpeg_options` que contengan un carácter NUL, que
+ningún argumento de un programa puede llevar, un `ffmpeg_encoder` junto a un
+`encoder` o un `codec` elegidos por ti, y un `codec` que el tipo de
+codificador que nombraste no escribe, como
+`encoder="videotoolbox", codec="av1"`: VideoToolbox solo escribe HEVC y
+H.264. Lo que depende del archivo se
 comprueba cuando `write_video` tiene la ruta, todavía antes de que se
 ejecute ffmpeg: el sufijo, el directorio, un códec que el contenedor no
 contiene (VP9 en un `.mp4`), un codificador que no escribe ninguno de los

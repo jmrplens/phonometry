@@ -233,7 +233,16 @@ class EmissionPressureResult(OwnsArrays):
     def plot(
         self, ax: Axes | None = None, *, language: Language = "en", **kwargs: Any
     ) -> Axes:
-        """Plot the reading, the two corrections and what is left of them."""
+        """Plot the reading, the two corrections and what is left of them.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the bars' ``Axes.bar``.
+        :return: The axes.
+        :raises TypeError: for ``x``, ``height`` or ``bottom``, which the plot
+            sets itself: each bar stands where the reading and its
+            corrections put it.
+        """
         from .._i18n import check_language
         from .._plot.emission import plot_emission_pressure
 

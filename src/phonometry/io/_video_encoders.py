@@ -144,7 +144,7 @@ class FFmpegNotFoundError(FileNotFoundError):
 
 
 class VideoEncoderError(RuntimeError):
-    """No encoder can write the video, or ffmpeg failed while writing it."""
+    """No encoder can write the video, ffmpeg cannot start or fails while writing it, or this machine's disk does not take it."""
 
 
 @dataclass(frozen=True)
@@ -259,7 +259,11 @@ def find_ffmpeg() -> str:
 def _run(
     command: list[str], *, stdin: bytes | None = None
 ) -> subprocess.CompletedProcess[bytes]:
-    """Run ffmpeg once and wait, with a timeout; never through a shell.
+    """Run ffmpeg once and wait, with a timeout, from an argument list rather than through a shell.
+
+    An ffmpeg that is a batch file (``.bat`` or ``.cmd``) is the exception:
+    Windows runs one through ``cmd.exe``, which reads the arguments by its
+    own rules.
 
     ffmpeg reads *stdin*, or nothing: it never inherits this process's own
     input. On Windows a program started on a pipe that another thread of

@@ -110,7 +110,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   program matplotlib's `rcParams["animation.ffmpeg_path"]` names. How it
   encodes is one record, `io.VideoOptions`, checked when it is built: by
   default NVENC, Quick Sync, VAAPI and VideoToolbox are tried first, each on
-  one real frame of the video's size, then the CPU: SVT-AV1, or without it
+  one black frame of the video's size, then the CPU: SVT-AV1, or without it
   VP9 in a WebM and x265 or x264 in an MP4. A GIF is written on the CPU,
   with no trial. `quality`, `fps`, `codec` and raw
   `ffmpeg_encoder`/`ffmpeg_options` are there when the defaults are not
@@ -2146,6 +2146,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a diagram shows is the one its clause prints.
 
 ### Fixed
+
+- **`AnimationFrame` refuses a bool for its colour limit, and the snapshot
+  plot of a video writer's result says where snapshots come from.**
+  `AnimationFrame(color_limit=True)` was read as the number 1.0 and drew the
+  scale at ±1 in the field's unit, where `size=(True, 240)` was already
+  refused; it now raises `TypeError`, as any other value that is not one
+  number does. `.plot(kind="snapshot")` on the result of
+  `simulation.write_fdtd_animation` or
+  `simulation.write_elastic_fdtd_animation` asked to rerun the simulation
+  with `snapshot_every` set, which that run had set; it now names
+  `fdtd_simulation` or `elastic_fdtd_simulation` and says that a run written
+  to a video stores no snapshots. The video guide, the API reference and the
+  docstrings now say no more than the writers do: the trial encode is one
+  black frame; an MP4's HEVC tag is added for the HEVC the library chooses,
+  not for an `ffmpeg_encoder` of yours; the partial file beside the path is
+  hidden by its leading dot on Linux and macOS only; and the floor of 479 by
+  245 pixels holds for a run whose last frame comes before ten seconds, on a
+  grid up to ten times longer one way than the other.
 
 - **A video that fails to write says why, and a directory or a disk that
   refuses it is an `io.VideoEncoderError` naming your path, on every route.**

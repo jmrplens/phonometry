@@ -34,13 +34,14 @@ leaves the frame and nothing moves from one frame to the next; the title is
 centred over the frame. Every text keeps its own size: a frame is at least
 479 by 245 pixels, the smallest in which every text, at its own size, stays
 clear of the frame's margin and covers no other, with the field still in
-view, on every matplotlib version the library is tested with. An axis too
-short for the numbers matplotlib would write along it keeps fewer of them,
-never one over another: a tall grid's narrow field may show a single number
-under it. That holds for a run of up to ten seconds; a longer one writes more
-digits in its title's time, and needs a frame about 10.6 pixels wider for
-each digit past four before the point in milliseconds: a narrower one is
-refused before the run starts, with the width it needs. The frames are drawn
+view for a grid up to ten times longer one way than the other, on every
+matplotlib version the library is tested with. An axis too short for the
+numbers matplotlib would write along it keeps fewer of them, never one over
+another: a tall grid's narrow field may show a single number under it. That
+holds for a run whose last frame comes before ten seconds; a later one
+writes more digits in its title's time, and needs a frame about 10.6 pixels
+wider for each digit past four before the point in milliseconds: a narrower
+one is refused before the run starts, with the width it needs. The frames are drawn
 once and then updated in place, under matplotlib's default style whatever
 the caller's settings say, so a video written here and one written on
 another machine look alike. One frame is drawn every
@@ -60,13 +61,14 @@ that node, named in the hosts file (see the guide on remote nodes), and only
 the result and the video's bytes come back. Every argument is checked here
 first, so a call refused here never starts ssh, and ffmpeg is found and run
 on the node: this machine runs it only when a node that failed falls back
-to it (``fallback=True``). The bytes go, as they arrive, into a hidden file
-beside ``path``, created before ssh starts so that a directory that does not
-take it fails first: never more of them than the frames can take, and none
-that do not begin as the container ``path`` names. That file takes
-``path``'s place once the node's whole answer has been read and checked, and
-is removed if anything fails before (or stays, hidden, if the system does
-not let it go, which hides no error).
+to it (``fallback=True``). The bytes go, as they arrive, into a partial file
+beside ``path``, whose name starts with a dot (hidden on Linux and macOS),
+created before ssh starts so that a directory that does not take it fails
+first: never more of them than the frames can take, and none that do not
+begin as the container ``path`` names. That file takes ``path``'s place once
+the node's whole answer has been read and checked, and is removed if
+anything fails before (or stays, under its own name, if the system does not
+let it go, which hides no error).
 """
 
 from __future__ import annotations
@@ -215,12 +217,12 @@ class AnimationFrame(RichDisplay):
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param size: ``(width, height)`` of a frame in pixels, at least 479 by
         245, the smallest frame in which every text, at its own size, stays
-        clear of the frame's margin and the field still shows, on every
-        matplotlib version the library is tested with (default
-        ``(960, 540)``).
-        That is for a run of up to ten seconds: a longer run needs a wider
-        frame for the time its last title writes, which the writers ask for
-        before the run starts.
+        clear of the frame's margin and the field still shows (for a grid up
+        to ten times longer one way than the other), on every matplotlib
+        version the library is tested with (default ``(960, 540)``).
+        That is for a run whose last frame comes before ten seconds: a later
+        one needs a wider frame for the time its last title writes, which
+        the writers ask for before the run starts.
     :param color_limit: The value at either end of the colour scale, fixed
         for the whole video, in the unit of the field drawn: pascals for an
         acoustic run (:func:`write_fdtd_animation`), and for an elastic one
@@ -229,7 +231,8 @@ class AnimationFrame(RichDisplay):
         per second for ``"vx"`` and ``"vy"``. ``None`` (default) finds it in
         a first pass over the run.
     :raises TypeError: for a ``size`` that is not a pair or holds something
-        other than numbers, or a ``color_limit`` that is not one number.
+        other than numbers, or a ``color_limit`` that is not one number (a
+        bool is not one).
     :raises ValueError: for a ``language`` other than ``"en"`` and ``"es"``,
         a ``size`` of more or fewer than two sides, with a side that is not
         a whole number, or narrower than 479 or lower than 245 pixels, or a
@@ -245,6 +248,10 @@ class AnimationFrame(RichDisplay):
         language = check_language(self.language)
         size = _frame_pixels(self.size)
         limit = None
+        if isinstance(self.color_limit, bool | np.bool_):
+            # float(True) is 1.0: read as a number, a flag would set the scale.
+            msg = f"'color_limit' must be one number, not a bool; got {self.color_limit!r}"
+            raise TypeError(msg)
         if self.color_limit is not None:
             require_scalar(self.color_limit, "color_limit")
             limit = require_positive(self.color_limit, "color_limit")
@@ -345,10 +352,14 @@ def _last_frame_time(checks: _AcousticChecks | _ElasticChecks, every: int) -> fl
 
 
 def _shown_time(time_s: float, language: Language) -> str:
-    """A time as a video's title writes it: in milliseconds, two decimals, in the language's notation."""
-    from .._i18n import format_number
+    """A time as a video's title writes it, by the function the title is written with.
 
-    return format_number(float(time_s) * 1000.0, language, decimals=2)
+    Imported here, not at the top: the drawing module needs no matplotlib to
+    import, and this machine needs none for a video a node draws.
+    """
+    from .._plot.simulation import _time_text
+
+    return _time_text(time_s, language)
 
 
 def _width_for(last_time_s: float, language: Language) -> int:
@@ -507,6 +518,10 @@ def _render(
             cache_frame_data=False,
             repeat=False,
         )
+        # The style context resets every rcParam, rcParams["animation.ffmpeg_path"]
+        # included, so the encode is handed the ffmpeg and the encoder found
+        # before it: inside the context, looking for ffmpeg again would find
+        # the default "ffmpeg" rather than the one the caller named.
         return encode(
             request, animation, ffmpeg=encoding.ffmpeg, choice=encoding.choice
         )
@@ -553,8 +568,9 @@ def _checked_call[R: (FDTDRun, ElasticRun)](
         path.
     :raises ValueError: for a run that records no snapshots, a malformed
         ``PHONOMETRY_COMPUTE``, a frame too narrow for the title of the run's
-        last frame, a path whose container rules out the options, or nothing
-        to find the colour scale by.
+        last frame, a path of another suffix, a path that names a directory,
+        a path whose container rules out the options, or nothing to find the
+        colour scale by.
     :raises FileNotFoundError: when the directory of *path* does not exist
         or cannot be reached.
     """
@@ -1040,16 +1056,18 @@ def write_fdtd_animation(
     :raises ValueError: If the run records no snapshots
         (``run.recording`` is ``None``, or its ``snapshot_every`` is), the
         frame is narrower than the title of the run's last frame needs (a
-        run of ten seconds or more; the message gives the width), the path's
-        suffix is not one of the three or its container rules out the
-        options, ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
+        run whose last frame comes at ten seconds or later; the message gives
+        the width), the path's suffix is not one of the three, the path names
+        a directory, or its container rules out the options,
+        ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
         the colour scale by (the message asks for
         ``AnimationFrame(color_limit=...)``), or the hosts file is malformed.
     :raises FileNotFoundError: If the directory of ``path`` does not exist
         or cannot be reached (it sits inside a directory this process
         cannot search); before any step, and before ssh starts.
-    :raises FFmpegNotFoundError: If ffmpeg is not found, or on Windows is
-        found only in the working directory; before any step.
+    :raises FFmpegNotFoundError: For a video written here (no ``host``, or
+        a node that failed with ``fallback=True``), if ffmpeg is not found, or
+        on Windows is found only in the working directory; before any step.
     :raises VideoEncoderError: If no encoder can write the video, a raw
         ``ffmpeg_encoder`` is not in this ffmpeg (both before any step), or
         the directory of ``path`` does not take a file (before any step, and
@@ -1252,16 +1270,18 @@ def write_elastic_fdtd_animation(
     :raises ValueError: If the run records no snapshots
         (``run.recording`` is ``None``, or its ``snapshot_every`` is), the
         frame is narrower than the title of the run's last frame needs (a
-        run of ten seconds or more; the message gives the width), the path's
-        suffix is not one of the three or its container rules out the
-        options, ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
+        run whose last frame comes at ten seconds or later; the message gives
+        the width), the path's suffix is not one of the three, the path names
+        a directory, or its container rules out the options,
+        ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
         the colour scale by (the message asks for
         ``AnimationFrame(color_limit=...)``), or the hosts file is malformed.
     :raises FileNotFoundError: If the directory of ``path`` does not exist
         or cannot be reached (it sits inside a directory this process
         cannot search); before any step, and before ssh starts.
-    :raises FFmpegNotFoundError: If ffmpeg is not found, or on Windows is
-        found only in the working directory; before any step.
+    :raises FFmpegNotFoundError: For a video written here (no ``host``, or
+        a node that failed with ``fallback=True``), if ffmpeg is not found, or
+        on Windows is found only in the working directory; before any step.
     :raises VideoEncoderError: If no encoder can write the video, a raw
         ``ffmpeg_encoder`` is not in this ffmpeg (both before any step), or
         the directory of ``path`` does not take a file (before any step, and

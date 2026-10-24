@@ -3,7 +3,9 @@
 
 :func:`run_remote` is the remote route of
 :func:`~phonometry.simulation.fdtd_simulation` and
-:func:`~phonometry.simulation.elastic_fdtd_simulation`. Everything that can
+:func:`~phonometry.simulation.elastic_fdtd_simulation`, and of the two video
+writers, :func:`~phonometry.simulation.write_fdtd_animation` and
+:func:`~phonometry.simulation.write_elastic_fdtd_animation`. Everything that can
 refuse the call does so before a connection opens: the hosts file names the
 node, the arguments become data, the package is read from disk. Then one
 ``ssh`` process carries the conversation :mod:`.bootstrap` defines.
@@ -12,8 +14,9 @@ The client does not trust the bytes a node sends. Every header field is
 checked for its type, and every array against the name, the dtype and the
 shape the request implies, before a byte of it is read; the arrays are read
 one row at a time into host arrays the caller allocated, and a stream after
-them (a video) is checked against its cap and written to the caller's sink a
-chunk at a time. Text the node sends reaches the caller's terminal, log and
+them (a video) is checked against its cap, and its first bytes against the
+ones its file must begin with, and written to the caller's sink a chunk at a
+time. Text the node sends reaches the caller's terminal, log and
 warnings with its control characters escaped (:func:`_printable`). A
 failure of the transport or of the node is a :class:`ComputeRemoteError`
 carrying the node's traceback and the end of its standard error; with
@@ -623,7 +626,8 @@ def _check_arrays(
 
     Refused before a byte of any is read: another list of arrays than the
     request implies, an array of another name, dtype or shape, a stream
-    longer than its cap, or buffers that do not hold what was described.
+    longer than its cap or too short to hold the first bytes its file begins
+    with, or buffers that do not hold what was described.
     """
     described = session.field(header, "arrays", list)
     wanted: list[ArraySpec | StreamSpec] = [*expected.arrays]
@@ -784,7 +788,9 @@ def _drain(
     byte of it is written, so bytes of another kind of file never reach
     *sink*. That chunk is the whole stream or its first ``_STREAM_CHUNK``
     bytes, far more than the few a container begins with; a head it does
-    not hold whole is no match.
+    not hold whole is no match. A stream that breaks after its first chunk
+    (the node or the connection failing) has written what came before to
+    *sink*: the caller discards it.
     """
     remaining = length
     first = True
@@ -906,7 +912,9 @@ def run_remote(
 
     :return: The run's provenance, its host and package digest set; ``None``
         when the run failed, ``request.fallback`` asks to run here instead,
-        and the :class:`ComputeFallbackWarning` was raised.
+        and the :class:`ComputeFallbackWarning` was raised. After a failure,
+        raised or answered with ``None``, *sink* may hold the first part of a
+        stream that broke: the caller discards it.
     :raises KeyError: for a host the hosts file does not name.
     :raises ValueError: for a hosts file that cannot be read or is
         malformed, or arrays and a sink that do not match *expected*.

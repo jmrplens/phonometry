@@ -1041,6 +1041,8 @@ class ProgramCharacteristicVoltage(OwnsArrays):
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the bars' ``Axes.bar``.
         :return: The axes.
+        :raises TypeError: for ``bottom``, which the plot sets itself: each
+            bar rises from the floor of the axis to its level.
         """
         from .._i18n import check_language
         from .._plot.headphones import plot_programme_characteristic_voltage

@@ -924,6 +924,8 @@ class BinnedSoundLevels(OwnsArrays):
         :param language: ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the bin averages.
         :return: The axes.
+        :raises TypeError: for ``yerr``, which the plot sets itself: each bin
+            average carries the uncertainty of its mean.
         """
         from ..._i18n import check_language
         from ..._plot.wind_turbine_receptor import plot_binned_sound_levels

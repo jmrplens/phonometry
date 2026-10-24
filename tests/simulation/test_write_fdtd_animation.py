@@ -10,6 +10,7 @@ import pathlib
 import re
 import shutil
 import subprocess
+import sys
 import warnings
 from typing import TYPE_CHECKING, Any, NoReturn
 
@@ -152,6 +153,65 @@ def test_the_result_is_the_simulation_s_without_snapshots(
     assert res.provenance == reference.provenance
 
 
+def test_the_snapshot_plot_of_the_writer_s_result_says_where_snapshots_come_from(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The run recorded snapshot_every, so "set it" would send the caller round in a circle."""
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    res = write_fdtd_animation(tmp_path / "s.webm", _run(1e-3), frame=_SMALL_FIXED)
+    with pytest.raises(
+        ValueError,
+        match=r"^the result holds no snapshots; rerun fdtd_simulation with "
+        r"snapshot_every set \(a run that write_fdtd_animation wrote to a video "
+        r"stores none\)$",
+    ):
+        res.plot(kind="snapshot")
+
+
+@pytest.mark.parametrize("frame", [_SMALL, _SMALL_FIXED], ids=["found", "given"])
+@pytest.mark.parametrize("decimation", [1, 3])
+def test_the_probes_are_the_simulation_s_on_either_route_and_any_decimation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    frame: AnimationFrame,
+    decimation: int,
+) -> None:
+    """Bit for bit, whether the colour limit is found in a first pass or given, whatever a frame keeps."""
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    recording = FDTDRecording(
+        probes=_PROBES, snapshot_every=10, snapshot_decimation=decimation
+    )
+    run = _run(recording=recording)
+    res = write_fdtd_animation(tmp_path / "p.webm", run, frame=frame)
+    reference = fdtd_simulation(run)
+    assert np.array_equal(res.pressures, reference.pressures)
+    assert res.snapshot_decimation == decimation
+    assert res.provenance == reference.provenance
+
+
+def test_the_layout_is_made_for_the_time_of_the_last_frame(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The first frame is laid out for the title of the last, one drawn every snapshot_every steps."""
+    from phonometry._plot import simulation as plot
+
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    seen: list[float] = []
+    original = plot.fdtd_frame
+
+    def recorded(*args: Any, **kwargs: Any) -> AxesImage:
+        seen.append(kwargs["last_time_s"])
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(plot, "fdtd_frame", recorded)
+    run = _run()
+    write_fdtd_animation(tmp_path / "t.webm", run, frame=_SMALL_FIXED)
+    checks = run._checked
+    # 162 steps, a frame every 10: the last frame at step 160, not 162.
+    assert checks.steps % 10 != 0
+    assert seen == [(checks.steps // 10) * 10 * checks.dt]
+
+
 @pytest.mark.parametrize(("frame", "builds"), [(_SMALL_FIXED, 1), (_SMALL, 2)])
 def test_a_given_limit_steps_once_and_a_found_one_twice(
     tmp_path: Path,
@@ -191,6 +251,21 @@ def test_the_found_limit_leaves_out_the_driven_cells() -> None:
     # The driven cells did carry a field; the limit just did not read it.
     assert float(np.max(np.abs(res.snapshots) * (1.0 - keep))) > 0.0
     assert ran == Compute()
+
+
+def test_the_peak_reads_only_the_cells_kept() -> None:
+    """A cell left out is never read, however strong: the mask is applied to every frame."""
+    keep = np.ones((4, 5), dtype=np.bool_)
+    keep[1, 2] = False
+
+    def frames() -> Generator[np.ndarray, None, None]:
+        for strongest in (3.0, -7.0):
+            field = np.full((4, 5), 0.5)
+            field[1, 2] = 100.0
+            field[3, 4] = strongest
+            yield field
+
+    assert video_module._peak(frames(), bk.backend_for(Compute()), keep) == 7.0
 
 
 def test_on_the_strict_backend(
@@ -406,6 +481,77 @@ def test_a_bad_argument_starts_nothing(
     assert fake.calls() == []
 
 
+def test_a_malformed_compute_variable_or_a_missing_directory_starts_nothing(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, engines: list[FDTD2D]
+) -> None:
+    """Neither runs ffmpeg nor builds an engine: both are refused with the arguments."""
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    run = _run(1e-3)
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", "gpu-please")
+    with pytest.raises(ValueError, match="PHONOMETRY_COMPUTE='gpu-please'"):
+        write_fdtd_animation(tmp_path / "e.webm", run, frame=_SMALL)
+    monkeypatch.delenv("PHONOMETRY_COMPUTE")
+    missing = tmp_path / "missing" / "m.webm"
+    with pytest.raises(FileNotFoundError, match="does not exist or cannot be reached"):
+        write_fdtd_animation(missing, run, frame=_SMALL)
+    assert engines == []
+    assert fake.calls() == []
+
+
+@pytest.mark.parametrize(
+    ("changes", "error", "match"),
+    [
+        # The run's kind first, before the path.
+        ({"run": "a run", "path": "r.avi"}, TypeError, "FDTDRun"),
+        # The frame's record before the compute record.
+        ({"frame": (480, 246), "compute": "cupy"}, TypeError, "'frame'"),
+        # The frame's width against the run before the path.
+        (
+            {
+                "run": _LONG,
+                "frame": AnimationFrame(size=(489, 246), color_limit=1.0),
+                "path": "r.avi",
+            },
+            ValueError,
+            "at least 490 pixels wide",
+        ),
+        # The path before the colour scale, which this grid leaves nothing
+        # to find by.
+        (
+            {
+                "path": "r.avi",
+                "run": _run(
+                    1e-3,
+                    shape=(12, 12),
+                    sources=[GaussianPulse(ix=6, iy=6, half_width_s=4e-5)],
+                    recording=FDTDRecording(snapshot_every=10),
+                    boundaries=FDTDBoundaries(
+                        sides="absorbing", absorbing_layer_cells=6
+                    ),
+                ),
+            },
+            ValueError,
+            "webm",
+        ),
+    ],
+    ids=["run-path", "frame-compute", "width-path", "path-scale"],
+)
+def test_of_two_bad_arguments_the_first_checked_is_refused(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    changes: dict[str, Any],
+    error: type[Exception],
+    match: str,
+) -> None:
+    """The order :func:`_checked_call` states, the one every route checks in."""
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / changes.pop("path", "r.webm")
+    arguments: dict[str, Any] = {"run": _run(1e-3), "frame": _SMALL, **changes}
+    with pytest.raises(error, match=match):
+        write_fdtd_animation(target, **arguments)
+    assert fake.calls() == []
+
+
 def test_a_frame_too_narrow_for_a_long_run_is_asked_for_at_the_width_it_needs(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, engines: list[FDTD2D]
 ) -> None:
@@ -433,6 +579,13 @@ def test_a_frame_too_narrow_for_a_long_run_is_asked_for_at_the_width_it_needs(
         ({"color_limit": -1.0}, ValueError, "color_limit"),
         ({"color_limit": float("nan")}, ValueError, "color_limit"),
         ({"color_limit": "1"}, TypeError, "color_limit"),
+        # A flag is not a number: float(True) would draw the scale at ±1.
+        (
+            {"color_limit": True},
+            TypeError,
+            "'color_limit' must be one number, not a bool",
+        ),
+        ({"color_limit": np.True_}, TypeError, "not a bool"),
         ({"language": "fr"}, ValueError, "language"),
     ],
 )
@@ -574,6 +727,10 @@ def test_a_drawing_that_fails_closes_the_march(
     assert caught.type is RuntimeError
     assert closed == [True]
     assert not target.exists()
+    # On Windows the fake runs behind cmd.exe, which a kill does not reach,
+    # and the orphaned fake writes its output when its stdin closes.
+    if sys.platform != "win32":
+        assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
 
 
 def test_a_run_that_fails_after_its_last_frame_leaves_the_old_video(

@@ -37,13 +37,14 @@ audio, where the audio formats themselves have no field for it.
 through ffmpeg, the program matplotlib already knows where to find: every
 frame is drawn with Agg and piped into ffmpeg's stdin, the encoder of a
 WebM or an MP4 is the first of the GPU encoders and then the CPU's that
-encodes a real frame of that size (a GIF is written on the CPU), and the
+encodes one black frame of that size (a GIF is written on the CPU), and the
 file appears only when ffmpeg has finished it. How a
 video is encoded is one record, :class:`VideoOptions`, which the
 simulation writers take too.
 :class:`FFmpegNotFoundError` says ffmpeg is missing, with how to install it;
-:class:`VideoEncoderError` says no encoder can write the video, or ffmpeg
-failed while writing it, with its last words.
+:class:`VideoEncoderError` says no encoder can write the video, ffmpeg
+cannot start or failed while writing it (with its last words), or the
+directory or the disk does not take the file.
 
 The rows of the library's published tables of materials are data read from a
 file too, and the type they share lives here: :class:`CatalogueRow`, with

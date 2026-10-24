@@ -258,6 +258,22 @@ EmissionPressureResult.plot(
 
 Plot the reading, the two corrections and what is left of them.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the bars' `Axes.bar`. |
+
+**Returns:** The axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `x`, `height` or `bottom`, which the plot sets itself: each bar stands where the reading and its corrections put it. |
+
 ### EmissionPressureResult.upper_bound
 
 *property*

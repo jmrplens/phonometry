@@ -942,6 +942,22 @@ def test_in_situ_element_plot_draws_both_spectra(situ: dict, language: str) -> N
     plt.close(ax.get_figure())
 
 
+@pytest.mark.parametrize("result", ["airborne", "impact"])
+def test_the_stacked_bars_keep_their_own_baseline(
+    result: str, request: pytest.FixtureRequest
+) -> None:
+    """Each path's share stands on the paths below it, so ``bottom`` is refused."""
+    plt = pytest.importorskip("matplotlib.pyplot")
+    detailed = request.getfixturevalue(result)
+    with pytest.raises(
+        TypeError,
+        match=r"stacks each path's share on the paths below it; "
+        r"bottom cannot be overridden\.$",
+    ):
+        detailed.plot(bottom=0.0)
+    plt.close("all")
+
+
 def test_plot_rejects_an_unknown_language(
     airborne: building.DetailedAirborneResult,
 ) -> None:

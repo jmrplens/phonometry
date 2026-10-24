@@ -552,6 +552,12 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the verdict markers. |
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `yerr` on the margins of the electrical test of the frequency weightings, which the plot sets itself: each result's error bar is its own uncertainty. |
+
 ### SoundLevelMeterPeriodicRequirement.title
 
 *property*
@@ -716,6 +722,12 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 | `ax` | Existing axes, or `None` to create a figure. |
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the verdict markers. |
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `yerr`, which the plot sets itself: each clause's deciding result carries its own uncertainty. |
 
 ### SoundLevelMeterPeriodicVerification.requirement()
 

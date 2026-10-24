@@ -1983,6 +1983,9 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the verdict markers.
+        :raises TypeError: for ``yerr`` on the margins of the electrical test
+            of the frequency weightings, which the plot sets itself: each
+            result's error bar is its own uncertainty.
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_slm_periodic_requirement
@@ -2935,6 +2938,8 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the verdict markers.
+        :raises TypeError: for ``yerr``, which the plot sets itself: each
+            clause's deciding result carries its own uncertainty.
         """
         from .._i18n import check_language
         from .._plot.metrology import plot_slm_periodic_verification

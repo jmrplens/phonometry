@@ -825,8 +825,8 @@ def plot_fdtd_snapshot(
     if result.snapshots is None or result.snapshot_times is None:
         msg = (
             "the result holds no snapshots; rerun fdtd_simulation with "
-            "snapshot_every set (a run that write_fdtd_animation wrote to a "
-            "video stores none)"
+            "run.recording.snapshot_every set (a run that write_fdtd_animation "
+            "wrote to a video stores none)"
         )
         raise ValueError(msg)
     refuse_fixed_keywords(
@@ -950,8 +950,8 @@ def plot_elastic_snapshot(
     if result.snapshots is None or result.snapshot_times is None:
         msg = (
             "the result holds no snapshots; rerun elastic_fdtd_simulation with "
-            "snapshot_every set (a run that write_elastic_fdtd_animation wrote "
-            "to a video stores none)"
+            "run.recording.snapshot_every set (a run that "
+            "write_elastic_fdtd_animation wrote to a video stores none)"
         )
         raise ValueError(msg)
     refuse_fixed_keywords(

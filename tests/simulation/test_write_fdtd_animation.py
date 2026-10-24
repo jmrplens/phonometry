@@ -162,8 +162,8 @@ def test_the_snapshot_plot_of_the_writer_s_result_says_where_snapshots_come_from
     with pytest.raises(
         ValueError,
         match=r"^the result holds no snapshots; rerun fdtd_simulation with "
-        r"snapshot_every set \(a run that write_fdtd_animation wrote to a video "
-        r"stores none\)$",
+        r"run\.recording\.snapshot_every set \(a run that write_fdtd_animation "
+        r"wrote to a video stores none\)$",
     ):
         res.plot(kind="snapshot")
 
@@ -583,9 +583,9 @@ def test_a_frame_too_narrow_for_a_long_run_is_asked_for_at_the_width_it_needs(
         (
             {"color_limit": True},
             TypeError,
-            "'color_limit' must be one number, not a bool",
+            r"^'color_limit' must be one number, not a bool; got True\.$",
         ),
-        ({"color_limit": np.True_}, TypeError, "not a bool"),
+        ({"color_limit": np.True_}, TypeError, r"not a bool; got np\.True_\.$"),
         ({"language": "fr"}, ValueError, "language"),
     ],
 )

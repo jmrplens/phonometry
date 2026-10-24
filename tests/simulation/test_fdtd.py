@@ -924,7 +924,11 @@ def test_plot_rejects_unknown_kind_and_missing_snapshots() -> None:
     )
     with pytest.raises(ValueError, match=r"kind must be 'probes'"):
         res.plot(kind="field")
-    with pytest.raises(ValueError, match=r"the result holds no snapshots"):
+    with pytest.raises(
+        ValueError,
+        match=r"the result holds no snapshots; rerun fdtd_simulation with "
+        r"run\.recording\.snapshot_every set",
+    ):
         res.plot(kind="snapshot")
 
 

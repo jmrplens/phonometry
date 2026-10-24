@@ -1849,6 +1849,13 @@ class DetailedAirborneResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the stacked bars' ``Axes.bar``.
+        :return: The axes.
+        :raises TypeError: for ``bottom``, which the plot sets itself: each
+            path's share stands on the shares of the paths below it.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_detailed_airborne_prediction
@@ -1936,6 +1943,13 @@ class DetailedImpactResult(OwnsArrays):
 
         Requires matplotlib (``pip install phonometry[plot]``); returns the
         :class:`~matplotlib.axes.Axes`.
+
+        :param ax: Existing axes, or ``None`` to create a figure.
+        :param language: Label language, ``"en"`` (default) or ``"es"``.
+        :param kwargs: Forwarded to the stacked bars' ``Axes.bar``.
+        :return: The axes.
+        :raises TypeError: for ``bottom``, which the plot sets itself: each
+            path's share stands on the shares of the paths below it.
         """
         from ..._i18n import check_language
         from ..._plot.building import plot_detailed_impact_prediction

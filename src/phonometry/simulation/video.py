@@ -250,7 +250,7 @@ class AnimationFrame(RichDisplay):
         limit = None
         if isinstance(self.color_limit, bool | np.bool_):
             # float(True) is 1.0: read as a number, a flag would set the scale.
-            msg = f"'color_limit' must be one number, not a bool; got {self.color_limit!r}"
+            msg = f"'color_limit' must be one number, not a bool; got {self.color_limit!r}."
             raise TypeError(msg)
         if self.color_limit is not None:
             require_scalar(self.color_limit, "color_limit")

@@ -144,7 +144,7 @@ class FFmpegNotFoundError(FileNotFoundError):
 
 
 class VideoEncoderError(RuntimeError):
-    """No encoder can write the video, ffmpeg cannot start or fails while writing it, or this machine's disk does not take it."""
+    """No encoder can write the video, ffmpeg cannot start or fails while writing it, or the directory or the disk does not take the file."""
 
 
 @dataclass(frozen=True)

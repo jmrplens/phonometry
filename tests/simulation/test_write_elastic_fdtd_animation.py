@@ -109,8 +109,8 @@ def test_the_snapshot_plot_of_the_writer_s_result_says_where_snapshots_come_from
     with pytest.raises(
         ValueError,
         match=r"^the result holds no snapshots; rerun elastic_fdtd_simulation with "
-        r"snapshot_every set \(a run that write_elastic_fdtd_animation wrote to a "
-        r"video stores none\)$",
+        r"run\.recording\.snapshot_every set \(a run that "
+        r"write_elastic_fdtd_animation wrote to a video stores none\)$",
     ):
         res.plot(kind="snapshot")
 

@@ -290,6 +290,42 @@ def test_a_listing_that_fails_is_reported_with_its_own_words(
         ve.describe(str(fake.launcher))
 
 
+def _not_a_program(tmp_path: Path) -> Path:
+    """A file where an ffmpeg would be that no system starts: text, and not executable.
+
+    Named ``ffmpeg.exe`` on Windows, which then refuses it as no Win32
+    application rather than look for an ``ffmpeg.exe`` beside it.
+    """
+    path = tmp_path / ("ffmpeg.exe" if sys.platform == "win32" else "ffmpeg")
+    path.write_text("not a program\n", encoding="utf-8")
+    return path
+
+
+def test_an_ffmpeg_that_does_not_start_is_an_encoder_error_naming_it(
+    tmp_path: Path,
+) -> None:
+    """A file that is there but is no program is refused as an ffmpeg that does not run."""
+    broken = _not_a_program(tmp_path)
+    with pytest.raises(
+        ve.VideoEncoderError, match=rf"^{re.escape(str(broken))} did not run: "
+    ) as raised:
+        ve.describe(str(broken))
+    assert isinstance(raised.value.__cause__, OSError)
+
+
+def test_an_ffmpeg_that_does_not_answer_in_time_is_an_encoder_error_naming_it(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    # No program starts and answers -version within a millisecond.
+    monkeypatch.setattr(ve, "_RUN_TIMEOUT_S", 1e-3)
+    with pytest.raises(
+        ve.VideoEncoderError, match=rf"^{re.escape(str(fake.launcher))} did not run: "
+    ) as raised:
+        ve.describe(str(fake.launcher))
+    assert isinstance(raised.value.__cause__, subprocess.TimeoutExpired)
+
+
 def test_auto_takes_the_first_encoder_that_passes_a_trial(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -335,6 +371,47 @@ def test_a_failed_trial_logs_what_ffmpeg_said_at_debug(
         "fake ffmpeg: Error while opening encoder av1_nvenc"
     ]
     assert {r.name for r in failed} == {"phonometry.io"}
+
+
+def _failed_trial(ffmpeg: ve.FFmpeg, caplog: pytest.LogCaptureFixture) -> BaseException:
+    """The error a failed VP9 trial at 32x32 quotes in what it logs at DEBUG on phonometry.io."""
+    choice = ve.EncoderChoice("cpu", "vp9", "libvpx-vp9")
+    with caplog.at_level(logging.DEBUG, logger="phonometry.io"):
+        passed = ve.trial(
+            ffmpeg, choice, width=32, height=32, vaapi_device=ve.DEFAULT_VAAPI_DEVICE
+        )
+    assert not passed
+    [record] = [r for r in caplog.records if r.levelno == logging.DEBUG]
+    assert record.name == "phonometry.io"
+    assert record.getMessage().startswith("libvpx-vp9 failed its trial at 32x32: ")
+    assert isinstance(record.args, tuple)
+    error = record.args[-1]
+    assert isinstance(error, BaseException)
+    assert record.getMessage().endswith(f": {error}")
+    return error
+
+
+def test_a_trial_whose_ffmpeg_does_not_start_fails_and_logs_why_at_debug(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    """An ffmpeg gone bad since it was described fails the trial, which says why."""
+    broken = ve.FFmpeg(
+        path=str(_not_a_program(tmp_path)),
+        version="ffmpeg version 7.1-fake",
+        encoders=frozenset({"libvpx-vp9"}),
+    )
+    assert isinstance(_failed_trial(broken, caplog), OSError)
+
+
+def test_a_trial_that_does_not_finish_in_time_fails_and_logs_why_at_debug(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """An encoder that hangs (a GPU one as it opens, say) is passed over like one that fails."""
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    ffmpeg = ve.describe(str(fake.launcher))
+    # No program starts and encodes a frame within a millisecond.
+    monkeypatch.setattr(ve, "_RUN_TIMEOUT_S", 1e-3)
+    assert isinstance(_failed_trial(ffmpeg, caplog), subprocess.TimeoutExpired)
 
 
 def test_vp9_when_svt_av1_is_absent(

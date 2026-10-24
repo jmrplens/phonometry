@@ -1389,7 +1389,7 @@ source = simulation.ExplosionSource(ix=5, iy=5, waveform=lambda t: 0.0)  # code:
 <a id="a56"></a>
 ### A56. Run a program the library does not ship by its full path, check everything before it starts, and fake it in tests
 
-**Why.** phonometry runs two programs it does not ship: ffmpeg, to write videos, and ssh, to reach a node. A bad argument found after the program started leaves a half-written file or a node busy for nothing; a program found on `PATH` by a bare name in one place and by a setting in another runs a different binary from the one the user configured (and on Windows a bare name is looked up in the working directory first); and a test that needs the real program either skips on every runner that lacks it or never runs at all.
+**Why.** phonometry runs two programs it does not ship: ffmpeg, to write videos, and ssh, to reach a node. A bad argument found after the program started leaves a half-written file or a node busy for nothing; a program found on `PATH` by a bare name in one place and by a setting in another runs a different binary from the one the user configured; and a test that needs the real program either skips on every runner that lacks it or never runs at all. ffmpeg, which every video starts wherever it is written, keeps two more rules on Windows, and the example shows both: Windows looks a bare name up in the working directory before `PATH`, so `find_ffmpeg` refuses an ffmpeg it finds there first, and a console program started from a notebook or `pythonw` opens a window of its own, so ffmpeg starts with `NO_WINDOW`. Both are ffmpeg's: the ssh route finds ssh with `shutil.which` and starts it in a process group of its own, without either.
 
 **Do**
 

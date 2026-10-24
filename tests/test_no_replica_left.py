@@ -17,6 +17,7 @@ import ast
 import functools
 import pathlib
 import re
+import unicodedata
 from typing import TYPE_CHECKING
 
 import child_process
@@ -54,6 +55,32 @@ def _imported(tree: ast.AST) -> set[str]:
         elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
             names.add(node.module.split(".")[0])
     return names
+
+
+def replica_imports(files: Iterable[tuple[str, str]]) -> list[str]:
+    """``path: [modules]`` for each file that imports a module of the replica.
+
+    *files* are ``(path, source)`` pairs. An import names the module, so a
+    file whose text never does is not parsed. The text is looked at as
+    Python reads an identifier, its compatibility characters folded (NFKC):
+    ``import`` of a name in fullwidth letters imports the ASCII module.
+    """
+    found = []
+    for name, text in files:
+        folded = unicodedata.normalize("NFKC", text)
+        if not any(module in folded for module in _GONE_MODULES):
+            continue
+        hit = _imported(ast.parse(text)) & _GONE_MODULES
+        if hit:
+            found.append(f"{name}: {sorted(hit)}")
+    return found
+
+
+def _python_sources() -> Iterator[tuple[str, str]]:
+    """Each module under src/, scripts/ and tests/, as its path and its source."""
+    for folder in ("src", "scripts", "tests"):
+        for path in (_ROOT / folder).rglob("*.py"):
+            yield path.relative_to(_ROOT).as_posix(), path.read_text(encoding="utf-8")
 
 
 def replica_scripts(paths: Iterable[str]) -> list[str]:
@@ -126,17 +153,30 @@ def test_none_of_the_replicas_scripts_is_back() -> None:
 
 
 def test_no_module_imports_the_replica_or_its_transport() -> None:
-    found = []
-    for folder in ("src", "scripts", "tests"):
-        for path in (_ROOT / folder).rglob("*.py"):
-            text = path.read_text(encoding="utf-8")
-            # An import names the module, so a file that never does is not parsed.
-            if not any(name in text for name in _GONE_MODULES):
-                continue
-            hit = _imported(ast.parse(text)) & _GONE_MODULES
-            if hit:
-                found.append(f"{path.relative_to(_ROOT)}: {sorted(hit)}")
+    found = replica_imports(_python_sources())
     assert not found, "\n".join(found)
+
+
+def _fullwidth(text: str) -> str:
+    """*text* in the fullwidth forms of its ASCII characters, which Python reads as the ASCII ones."""
+    return "".join(chr(ord(char) + 0xFEE0) for char in text)
+
+
+@pytest.mark.parametrize(
+    ("source", "module"),
+    [
+        (f"import {_fullwidth('fdtd2d')}\n", "fdtd2d"),
+        (f"from {_fullwidth('fdtd_gpu')} import run\n", "fdtd_gpu"),
+        (f"import {_fullwidth('job')}_runner as runner\n", "job_runner"),
+    ],
+    ids=["import", "from", "in part"],
+)
+def test_an_import_spelled_in_compatibility_characters_is_seen(
+    source: str, module: str
+) -> None:
+    """Python folds an identifier's compatibility characters (NFKC) before it imports the module."""
+    found = replica_imports([("scripts/example.py", source)])
+    assert found == [f"scripts/example.py: ['{module}']"]
 
 
 def test_no_tracked_file_names_an_old_gpu_setting() -> None:
@@ -217,6 +257,12 @@ def test_a_setting_of_the_old_road_is_seen_wherever_it_is_named(
 def test_the_changelog_and_this_guard_may_name_one() -> None:
     text = "PHONO_GPU_HOST\n"
     assert old_settings_named([("CHANGELOG.md", text), (_THIS, text)]) == []
+
+
+def test_the_reading_step_reads_the_tracked_files_that_name_one() -> None:
+    """A scan that read no file would find no setting: the two files that may name one are read."""
+    read = {name for name, _ in _tracked_texts()}
+    assert {"CHANGELOG.md", _THIS} <= read
 
 
 def test_the_scan_reaches_the_folders_a_setting_could_hide_in() -> None:

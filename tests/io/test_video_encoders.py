@@ -305,6 +305,24 @@ def test_auto_takes_the_first_encoder_that_passes_a_trial(
     assert all(t["frames"] == 1 for t in fake.trials())
 
 
+def test_a_failed_trial_logs_what_ffmpeg_said_at_debug(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Why NVENC was passed over is on the phonometry.io logger, for whoever turns DEBUG on."""
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    ffmpeg = ve.describe(str(fake.launcher))
+    with caplog.at_level(logging.DEBUG, logger="phonometry.io"):
+        ve.choose(
+            ffmpeg, encoder="auto", codec=None, container="webm", width=32, height=32
+        )
+    failed = [r for r in caplog.records if r.levelno == logging.DEBUG]
+    assert [r.getMessage() for r in failed] == [
+        "av1_nvenc failed its trial at 32x32 (status 1): "
+        "fake ffmpeg: Error while opening encoder av1_nvenc"
+    ]
+    assert {r.name for r in failed} == {"phonometry.io"}
+
+
 def test_vp9_when_svt_av1_is_absent(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

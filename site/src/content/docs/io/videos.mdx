@@ -189,6 +189,8 @@ io.write_video("wave.mp4", animation, video=h264)
 ```
 
 Here it prints `INFO:phonometry.io:writing mp4 with libx264 (cpu, h264)`.
+At `DEBUG` the logger also says why each encoder passed over failed its
+trial, with the last of what ffmpeg wrote, such as a GPU it did not find.
 On a machine with an NVIDIA GPU and an ffmpeg built with NVENC, a call can
 ask for the GPU by name:
 

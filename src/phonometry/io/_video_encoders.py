@@ -484,7 +484,11 @@ def ffmpeg_command(
 
 
 def trial(ffmpeg: FFmpeg, choice: EncoderChoice, *, width: int, height: int) -> bool:
-    """Whether *choice* encodes one black frame of this size here, now."""
+    """Whether *choice* encodes one black frame of this size here, now.
+
+    A failure is logged at DEBUG on ``phonometry.io``, with the last of what
+    ffmpeg wrote on stderr.
+    """
     key = (ffmpeg.path, ffmpeg.version, choice.name, width, height)
     with _LOCK:
         if key in _PASSED:
@@ -510,9 +514,20 @@ def trial(ffmpeg: FFmpeg, choice: EncoderChoice, *, width: int, height: int) -> 
     )
     try:
         done = _run(command, stdin=bytes(width * height * 4))
-    except (OSError, subprocess.TimeoutExpired):
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        _LOG.debug("%s failed its trial at %dx%d: %s", choice.name, width, height, exc)
         return False
     if done.returncode != 0:
+        # Why a GPU encoder was passed over (no device, no free session, a
+        # driver too old) is in its words, for whoever turns DEBUG on.
+        _LOG.debug(
+            "%s failed its trial at %dx%d (status %d): %s",
+            choice.name,
+            width,
+            height,
+            done.returncode,
+            _tail(done.stderr),
+        )
         return False
     with _LOCK:
         _PASSED.add(key)

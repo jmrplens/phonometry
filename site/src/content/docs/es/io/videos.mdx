@@ -196,9 +196,11 @@ h264 = io.VideoOptions(encoder="cpu", codec="h264")
 io.write_video("wave.mp4", animation, video=h264)
 ```
 
-Aquí se imprime `INFO:phonometry.io:writing mp4 with libx264 (cpu, h264)`. En
-una máquina con una GPU de NVIDIA y un ffmpeg compilado con NVENC, una
-llamada puede pedir la GPU por su nombre:
+Aquí se imprime `INFO:phonometry.io:writing mp4 with libx264 (cpu, h264)`.
+Con nivel `DEBUG`, el logger dice además por qué falló su prueba cada
+codificador descartado, con lo último que escribió ffmpeg, como una GPU que
+no encontró. En una máquina con una GPU de NVIDIA y un ffmpeg compilado con
+NVENC, una llamada puede pedir la GPU por su nombre:
 
 ```py
 io.write_video("wave.webm", animation, video=io.VideoOptions(encoder="nvenc", codec="av1"))

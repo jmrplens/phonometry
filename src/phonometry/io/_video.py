@@ -480,6 +480,9 @@ class _FramePipe:
         self.encoder_name = "gif" if request.container == "gif" else ""
         self._process: subprocess.Popen[bytes] | None = None
         self._tail: deque[str] = deque(maxlen=_STDERR_LINES)
+        # The reader may outlive its wait (a program behind cmd.exe holding
+        # the pipe open), so the tail is copied under the lock it appends under.
+        self._tail_lock = threading.Lock()
         self._drain: threading.Thread | None = None
         self._inches = (0.0, 0.0)
         self._frame_bytes = 0
@@ -518,6 +521,11 @@ class _FramePipe:
             self.abort()
             msg = f"could not start {self._ffmpeg.path} to write {self._request.path}: {exc}"
             raise VideoEncoderError(msg) from exc
+        except BaseException:
+            # So does an interrupt between the two, which reaches the caller
+            # as it is.
+            self.abort()
+            raise
         self._drain = drain
 
     def _arguments(self, fig: Figure, width: int, height: int) -> VideoArguments:
@@ -566,7 +574,9 @@ class _FramePipe:
         # Closed at the end of the stream, by the thread that reads it.
         with process.stderr:
             for line in process.stderr:
-                self._tail.append(line.decode(errors="replace").rstrip())
+                text = line.decode(errors="replace").rstrip()
+                with self._tail_lock:
+                    self._tail.append(text)
 
     def write_frame(
         self, fig: Figure, dpi: float, savefig_kwargs: Mapping[str, Any]
@@ -651,7 +661,8 @@ class _FramePipe:
     def _failure(self, reason: str) -> VideoEncoderError:
         """Stop ffmpeg; the error names the file, the encoder and what ffmpeg wrote last on stderr."""
         self.abort()
-        said = "\n".join(self._tail) or "(nothing on stderr)"
+        with self._tail_lock:
+            said = "\n".join(self._tail) or "(nothing on stderr)"
         # Named here because ffmpeg does not always name it: an option it
         # does not know is refused without a word of the encoder.
         encoder = f" with the encoder {self.encoder_name}" if self.encoder_name else ""

@@ -8,6 +8,7 @@ import logging
 import subprocess
 import sys
 import threading
+from collections import deque
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
@@ -564,7 +565,11 @@ def test_a_reader_of_ffmpeg_that_cannot_start_stops_it(
 
     fake_ffmpeg.install(tmp_path, monkeypatch)
     # The module's own name only: no other thread of the process is touched.
-    monkeypatch.setattr(pipe_module, "threading", SimpleNamespace(Thread=Unstartable))
+    monkeypatch.setattr(
+        pipe_module,
+        "threading",
+        SimpleNamespace(Thread=Unstartable, Lock=threading.Lock),
+    )
     animation = _animation()
     gc.collect()
     recwarn.clear()
@@ -575,6 +580,103 @@ def test_a_reader_of_ffmpeg_that_cannot_start_stops_it(
     # and the orphaned fake writes its output when its stdin closes.
     if sys.platform != "win32":
         assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
+
+
+def test_an_interrupt_before_the_reader_starts_stops_ffmpeg(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, recwarn: pytest.WarningsRecorder
+) -> None:
+    """An interrupt between ffmpeg's start and its reader's reaches the caller, and stops ffmpeg."""
+    from phonometry.io import _video as pipe_module
+
+    class Interrupted(threading.Thread):
+        def start(self) -> None:
+            raise KeyboardInterrupt
+
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    monkeypatch.setattr(
+        pipe_module,
+        "threading",
+        SimpleNamespace(Thread=Interrupted, Lock=threading.Lock),
+    )
+    animation = _animation()
+    gc.collect()
+    recwarn.clear()
+    with pytest.raises(KeyboardInterrupt):
+        io.write_video(tmp_path / "w.webm", animation)
+    assert pipe_module._RUNNING == set()
+    assert _unclosed(recwarn) == []
+    if sys.platform != "win32":
+        assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
+
+
+def test_the_last_words_are_copied_whole_while_the_reader_still_reads(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A reader of stderr that outlives its wait never breaks the error that quotes it.
+
+    On Windows a program behind cmd.exe can hold ffmpeg's stderr open after
+    ffmpeg is stopped, so the reader may still be appending a line while
+    the error copies the last ones.
+    """
+    from phonometry.io import _video as pipe_module
+    from phonometry.io._video_encoders import FFmpeg
+
+    first_in, released, late_in = (
+        threading.Event(),
+        threading.Event(),
+        threading.Event(),
+    )
+
+    class Stream:
+        def __enter__(self) -> Stream:
+            return self
+
+        def __exit__(self, *_exc: object) -> None:
+            return None
+
+        def __iter__(self) -> Iterator[bytes]:
+            yield b"first line\n"
+            released.wait(timeout=10.0)
+            yield b"late line\n"
+
+    class Tail(deque[str]):
+        def append(self, line: str) -> None:
+            super().append(line)
+            (first_in if line == "first line" else late_in).set()
+
+        def __iter__(self) -> Iterator[str]:
+            for line in super().__iter__():
+                yield line
+                # Halfway through the copy, the reader gets its next line.
+                released.set()
+                late_in.wait(timeout=0.5)
+
+    class Exited:
+        stdin = None
+        stderr = Stream()
+
+        def poll(self) -> int:
+            return 0
+
+        def wait(self, timeout: float | None = None) -> int:
+            return 0
+
+    request = pipe_module.video_request(tmp_path / "w.webm", io.VideoOptions())
+    ffmpeg = FFmpeg(path="ffmpeg", version="", encoders=frozenset())
+    pipe = pipe_module._FramePipe(
+        request, ffmpeg, "20/1", output=tmp_path / "p.webm", choice=None
+    )
+    pipe._process = Exited()  # type: ignore[assignment]
+    pipe._tail = Tail(maxlen=20)
+    reader = threading.Thread(target=pipe._read_stderr, daemon=True)
+    reader.start()
+    assert first_in.wait(timeout=10.0)
+    pipe._drain = reader
+    monkeypatch.setattr(pipe_module, "_EXIT_TIMEOUT_S", 0.05)
+    error = pipe._failure("ffmpeg exited with status 1")
+    assert str(error).endswith("ffmpeg said:\nfirst line")
+    reader.join(timeout=10.0)
+    assert not reader.is_alive()
 
 
 @pytest.mark.parametrize(

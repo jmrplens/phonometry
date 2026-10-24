@@ -433,10 +433,12 @@ archivo oculto junto a la ruta, así que ese tope acota el disco, no la
 memoria, y el archivo ocupa el lugar de la ruta solo cuando se ha leído y
 comprobado toda la respuesta del nodo. Si algo detiene antes la ejecución,
 sea el nodo, la conexión o una interrupción, el archivo oculto se borra y la
-ruta se queda como estaba. Cada rechazo es un
+ruta se queda como estaba. Un archivo oculto que el sistema no deja borrar,
+como uno que un antivirus tiene abierto en Windows, se queda donde está, y la
+ejecución falla, o vuelve a NumPy, igual que sin él. Cada rechazo es un
 `simulation.ComputeRemoteError`; con `fallback=True` en la petición es en su
-lugar un `simulation.ComputeFallbackWarning`, y el vídeo se escribe aquí,
-con NumPy.
+lugar un `simulation.ComputeFallbackWarning`, y el vídeo se escribe aquí, con
+NumPy.
 
 `io.write_video` en sí solo se ejecuta en esta máquina: una animación
 dibujada aquí se codifica aquí, y solo las dos funciones de escritura de

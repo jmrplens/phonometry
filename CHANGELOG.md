@@ -2151,18 +2151,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   file that checks the directory before the first step, and the one a failed
   node's bytes would have gone into before a fallback, raised it once they
   had shown the directory takes a file. Such a file now stays, hidden, and
-  the error raised is the one that stopped the write, or none. A path inside
-  a directory this process cannot search made the path check raise
+  the error raised is the one that stopped the write, or none. A path whose
+  own directory this process cannot search made the path check raise
   `PermissionError` on Python 3.12 and 3.13 (3.14 let it through); it now
-  goes on to the write, which reports it as a directory that refuses the
-  video. A simulation video's directory or disk that refuses it is reported
-  with your path and the system's reason, no longer with the hidden file's
-  name. When ffmpeg fails while it writes, the error names the encoder, which
-  ffmpeg does not always do (an option it does not know is refused without a
-  word of the encoder). A raw `ffmpeg_encoder` this ffmpeg lacks, or
-  `ffmpeg_options` it refuses, stops the write within its first frames and
-  leaves nothing at the path, here and on a node, and the tests now hold that
-  with a real ffmpeg.
+  goes on to the check that the directory takes a file, which reports it as
+  a directory that refuses the video. A path whose directory cannot be
+  reached at all, since it sits inside one this process cannot search,
+  raised the same `PermissionError`; it is now the `FileNotFoundError` of a
+  missing directory, whose message says the directory does not exist or
+  cannot be reached. A directory or a disk that refuses the video is
+  reported with your path and the system's reason, no longer with the
+  hidden file's name: `io.write_video` now checks that the directory takes
+  a file before ffmpeg starts, as the two simulation writers do. When ffmpeg
+  fails while it writes, the error names the encoder, which ffmpeg does not
+  always do (an option it does not know is refused without a word of the
+  encoder). A raw `ffmpeg_encoder` this ffmpeg lacks, or `ffmpeg_options` it
+  refuses, stops the write within its first frames and leaves the path as it
+  was, here and on a node, and the tests now hold that with a real ffmpeg.
 
 - **`fdtd_simulation` takes a `PlaneWaveSource` by its type, and draws the
   snapshot of a plane-wave run.** The function always handed a plane wave to

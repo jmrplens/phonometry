@@ -554,7 +554,8 @@ def _checked_call[R: (FDTDRun, ElasticRun)](
         ``PHONOMETRY_COMPUTE``, a frame too narrow for the title of the run's
         last frame, a path whose container rules out the options, or nothing
         to find the colour scale by.
-    :raises FileNotFoundError: when the directory of *path* does not exist.
+    :raises FileNotFoundError: when the directory of *path* does not exist
+        or cannot be reached.
     """
     from ..io._video import video_options, video_request
 
@@ -649,8 +650,10 @@ def _encoding_and_limit[R: (FDTDRun, ElasticRun)](
         writes this video, or the directory of ``path`` does not take a file.
     :raises ValueError: when the first pass finds nothing to scale by.
     """
+    from ..io._video import require_writable
+
     encoding = _preflight(call.request, call.drawn.size)
-    _require_writable(call.request)
+    require_writable(call.request)
     if isinstance(call.scale, float):
         return encoding, call.scale, compute
     limit, ran = first_pass(call.run, compute, call.scale)
@@ -673,13 +676,9 @@ class _PartialFile:
         self._handle: BinaryIO | None = None
 
     def _failure(self, exc: OSError) -> VideoEncoderError:
-        from ..io._video_encoders import VideoEncoderError
+        from ..io._video import disk_failure
 
-        # The system's reason without the name it was given, the hidden file's.
-        reason = exc.strerror or str(exc)
-        return VideoEncoderError(
-            f"could not write the video for {self._target}: {reason}"
-        )
+        return disk_failure(self._target, exc)
 
     def _opened(self) -> BinaryIO:
         if self._handle is None:
@@ -736,21 +735,6 @@ class _PartialFile:
         finally:
             with contextlib.suppress(OSError):
                 self.path.unlink(missing_ok=True)
-
-
-def _require_writable(request: VideoRequest) -> None:
-    """Create and remove a file beside ``path``, so a directory that does not take one fails now.
-
-    ffmpeg would find it only when it starts, at the first frame, after a
-    first pass has stepped the whole run to find the colour limit. Creating
-    the file is the test: one that cannot be removed after it
-    (:meth:`_PartialFile.discard`) refuses nothing.
-
-    :raises VideoEncoderError: when the directory does not take the file.
-    """
-    probe = _PartialFile(request)
-    probe.open()
-    probe.discard()
 
 
 def _node_video[R: (FDTDRun, ElasticRun), T](
@@ -1060,19 +1044,20 @@ def write_fdtd_animation(
         options, ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
         the colour scale by (the message asks for
         ``AnimationFrame(color_limit=...)``), or the hosts file is malformed.
-    :raises FileNotFoundError: If the directory of ``path`` does not exist.
+    :raises FileNotFoundError: If the directory of ``path`` does not exist
+        or cannot be reached (it sits inside a directory this process
+        cannot search); before any step, and before ssh starts.
     :raises FFmpegNotFoundError: If ffmpeg is not found, or on Windows is
         found only in the working directory; before any step.
     :raises VideoEncoderError: If no encoder can write the video, a raw
         ``ffmpeg_encoder`` is not in this ffmpeg (both before any step), or
         the directory of ``path`` does not take a file (before any step, and
         before ssh starts; the message names ``path``); if ffmpeg cannot be
-        started or fails while writing it, ``ffmpeg_options`` it refuses
-        included, at the first frames (the message names the encoder and
-        quotes ffmpeg), this machine's disk does not take the bytes of a
-        node's video as they arrive (it is full, say), or the finished video
-        cannot take the place of ``path`` (the message says where it was
-        left).
+        started or fails while writing it (the message names the encoder and
+        quotes ffmpeg; ``ffmpeg_options`` it refuses fail at the first
+        frames), this machine's disk does not take the bytes of a node's
+        video as they arrive (it is full, say), or the finished video cannot
+        take the place of ``path`` (the message says where it was left).
     :raises ComputeImportError: When the device's library is not installed
         or does not import.
     :raises ComputeDeviceError: When the device is not present or not
@@ -1271,19 +1256,20 @@ def write_elastic_fdtd_animation(
         options, ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
         the colour scale by (the message asks for
         ``AnimationFrame(color_limit=...)``), or the hosts file is malformed.
-    :raises FileNotFoundError: If the directory of ``path`` does not exist.
+    :raises FileNotFoundError: If the directory of ``path`` does not exist
+        or cannot be reached (it sits inside a directory this process
+        cannot search); before any step, and before ssh starts.
     :raises FFmpegNotFoundError: If ffmpeg is not found, or on Windows is
         found only in the working directory; before any step.
     :raises VideoEncoderError: If no encoder can write the video, a raw
         ``ffmpeg_encoder`` is not in this ffmpeg (both before any step), or
         the directory of ``path`` does not take a file (before any step, and
         before ssh starts; the message names ``path``); if ffmpeg cannot be
-        started or fails while writing it, ``ffmpeg_options`` it refuses
-        included, at the first frames (the message names the encoder and
-        quotes ffmpeg), this machine's disk does not take the bytes of a
-        node's video as they arrive (it is full, say), or the finished video
-        cannot take the place of ``path`` (the message says where it was
-        left).
+        started or fails while writing it (the message names the encoder and
+        quotes ffmpeg; ``ffmpeg_options`` it refuses fail at the first
+        frames), this machine's disk does not take the bytes of a node's
+        video as they arrive (it is full, say), or the finished video cannot
+        take the place of ``path`` (the message says where it was left).
     :raises ComputeImportError: When the device's library is not installed
         or does not import.
     :raises ComputeDeviceError: When the device is not present or not

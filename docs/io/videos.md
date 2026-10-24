@@ -389,10 +389,12 @@ an empty video is refused. They are written to disk as they arrive, into a
 hidden file beside the path, so that ceiling bounds the disk, not the memory,
 and the file takes the path's place only once the node's whole answer has been
 read and checked. Whatever stops the run before that, the node, the connection
-or an interrupt, the hidden file is removed and the path is left as it was.
-Each refusal is a `simulation.ComputeRemoteError`; with `fallback=True` in the
-request it is a `simulation.ComputeFallbackWarning` instead, and the video is
-written here, on NumPy.
+or an interrupt, the hidden file is removed and the path is left as it was. A
+hidden file the system will not let go, as one a scanner holds open on
+Windows, stays where it is, and the run fails, or falls back, as it would
+without it. Each refusal is a `simulation.ComputeRemoteError`; with
+`fallback=True` in the request it is a `simulation.ComputeFallbackWarning`
+instead, and the video is written here, on NumPy.
 
 `io.write_video` itself runs on this machine only: an animation drawn here is
 encoded here, and only the two simulation writers go to a node.

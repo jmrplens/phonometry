@@ -249,6 +249,24 @@ def test_a_bad_argument_never_reaches_the_node(
     assert _partials(tmp_path) == []
 
 
+def test_a_directory_that_cannot_be_reached_never_reaches_the_node(
+    node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Refused as on this machine: the path's directory sits inside one this
+    # process cannot search, so it may exist and still take nothing.
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    log = tmp_path / "ssh.log"
+    monkeypatch.setenv("FAKE_SSH_LOG", str(log))
+    target = tmp_path / "locked" / "sub" / "r.webm"
+    target.parent.mkdir(parents=True)
+    refusing_disk.refuse_status(monkeypatch, target.parent)
+    request = Compute(host=node, fallback=True)
+    with pytest.raises(FileNotFoundError, match="does not exist or cannot be reached"):
+        write_fdtd_animation(target, _RUN, compute=request, frame=_FRAME)
+    assert not log.exists()
+    assert fake.calls() == []
+
+
 def test_a_waveform_that_cannot_travel_is_refused_before_ssh_starts(
     node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -500,18 +518,6 @@ def test_a_partial_file_the_system_will_not_remove_does_not_stop_a_fallback(
     assert refusing_disk.partial_sizes(tmp_path) == [0, 0]
 
 
-def _refusing_partials(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Make this process's directories refuse a partial file, as one without write permission does."""
-    real_open = pathlib.Path.open
-
-    def refused(self: pathlib.Path, *args: Any, **kwargs: Any) -> object:
-        if self.name.endswith(".partial"):
-            raise PermissionError(errno.EACCES, "Permission denied", str(self))
-        return real_open(self, *args, **kwargs)
-
-    monkeypatch.setattr(pathlib.Path, "open", refused)
-
-
 @pytest.mark.parametrize("directory", ["refusing", "unsearchable", "proc"])
 def test_a_directory_that_cannot_take_the_video_is_refused_before_ssh_starts(
     directory: str, node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -524,7 +530,7 @@ def test_a_directory_that_cannot_take_the_video_is_refused_before_ssh_starts(
             pytest.skip("no /proc, the directory nobody can write a file into")
         target = pathlib.Path("/proc/out.webm")
     else:
-        _refusing_partials(monkeypatch)
+        refusing_disk.refuse_partials(monkeypatch)
         target = tmp_path / "out.webm"
     if directory == "unsearchable":
         # A name inside it has no status to read, as well as taking no file.

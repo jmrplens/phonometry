@@ -8,6 +8,7 @@ import logging
 import subprocess
 import sys
 import threading
+from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
@@ -27,7 +28,6 @@ from phonometry import io
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
-    from pathlib import Path
 
     from matplotlib.lines import Line2D
 
@@ -229,6 +229,53 @@ def test_a_name_whose_status_cannot_be_read_is_left_to_the_encoder(
     refusing_disk.refuse_status(monkeypatch, target)
     io.write_video(target, _animation())
     assert target.read_bytes().startswith(b"\x1a\x45\xdf\xa3")
+
+
+def test_a_directory_that_cannot_be_reached_is_refused_before_anything_runs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The path's directory sits inside one this process cannot search: it
+    # may exist, but nothing can be written into it, nor told about it.
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "locked" / "sub" / "w.webm"
+    target.parent.mkdir(parents=True)
+    refusing_disk.refuse_status(monkeypatch, target.parent)
+    animation = _animation()
+    with pytest.raises(
+        FileNotFoundError, match="does not exist or cannot be reached"
+    ) as caught:
+        io.write_video(target, animation)
+    assert str(target.parent) in str(caught.value)
+    assert fake.calls() == []
+
+
+@pytest.mark.parametrize("directory", ["refusing", "proc"])
+def test_a_directory_that_does_not_take_the_video_is_refused_before_ffmpeg_starts(
+    directory: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    if directory == "proc":
+        if not Path("/proc/self").is_dir():
+            pytest.skip("no /proc, the directory nobody can write a file into")
+        target = Path("/proc/out.webm")
+    else:
+        refusing_disk.refuse_partials(monkeypatch)
+        target = tmp_path / "out.webm"
+        target.write_bytes(b"the video that was there")
+    drawn: list[int] = []
+    animation = _animation(on_frame=lambda k, _fig: drawn.append(k))
+    with pytest.raises(
+        io.VideoEncoderError, match="could not write the video for"
+    ) as caught:
+        io.write_video(target, animation)
+    assert str(target) in str(caught.value)
+    # The caller's path, never the hidden file that was refused.
+    assert ".partial" not in str(caught.value)
+    assert fake.calls() == []
+    assert drawn == []
+    if directory == "refusing":
+        assert target.read_bytes() == b"the video that was there"
+        assert refusing_disk.partial_sizes(tmp_path) == []
 
 
 def test_a_finished_video_that_cannot_take_the_place_of_path_says_where_it_is(

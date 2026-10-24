@@ -222,9 +222,12 @@ def _is_dir(path: Path) -> bool:
 
     Inside a directory this process cannot search, :meth:`Path.is_dir`
     raises :class:`PermissionError` on Python 3.12 and 3.13 and answers
-    ``False`` on 3.14. Every version answers ``False`` here, and what the
-    directory allows is found by the write itself, which reports it as it
-    reports any directory that refuses the video.
+    ``False`` on 3.14; every version answers ``False`` here. For ``path``
+    itself, in its own directory, that leaves what the directory allows to
+    :func:`require_writable`, which reports it as it reports any directory
+    that refuses the video. A directory of ``path`` that cannot be reached
+    (one inside a directory this process cannot search) reads as missing,
+    since nothing can be written into it.
     """
     try:
         return path.is_dir()
@@ -249,7 +252,10 @@ def _target(path: object) -> tuple[Path, Container]:
         msg = f"'path' names a directory: {str(target)!r}"
         raise ValueError(msg)
     if not _is_dir(target.parent):
-        msg = f"the directory of 'path' does not exist: {str(target.parent)!r}"
+        msg = (
+            "the directory of 'path' does not exist or cannot be reached: "
+            f"{str(target.parent)!r}"
+        )
         raise FileNotFoundError(msg)
     return target, container
 
@@ -350,7 +356,8 @@ def video_request(path: object, video: VideoOptions) -> VideoRequest:
         a directory, a codec the container does not hold, an ``encoder``
         that writes none of the codecs it holds, or, for a GIF, a codec, an
         ``ffmpeg_encoder`` or an encoder other than the CPU.
-    :raises FileNotFoundError: when the directory of ``path`` does not exist.
+    :raises FileNotFoundError: when the directory of ``path`` does not exist
+        or cannot be reached.
     """
     target, container = _target(path)
     _require_combination(container, video)
@@ -685,6 +692,41 @@ def settle(partial: Path, path: Path) -> None:
         raise VideoEncoderError(msg) from exc
 
 
+def disk_failure(path: Path, exc: OSError) -> VideoEncoderError:
+    """The error for this machine's disk refusing the video for *path*.
+
+    It names *path* and gives the system's reason without the name the
+    system was given, which is the hidden partial file's: the caller did
+    not ask for that file and may not know it exists.
+    """
+    reason = exc.strerror or str(exc)
+    return VideoEncoderError(f"could not write the video for {path}: {reason}")
+
+
+def require_writable(request: VideoRequest) -> None:
+    """Create and remove a hidden file beside ``path``, so a directory that does not take one fails now.
+
+    ffmpeg would find it only once it runs, after the encoders have been
+    tried, and for a simulation writer after a first pass has stepped the
+    whole run to find the colour limit. Creating the file is the test: one
+    the system then does not let go (a scanner holding it on Windows, a
+    directory that takes files and lets none be removed) stays, hidden, and
+    refuses nothing.
+
+    :raises VideoEncoderError: when the directory does not take the file
+        (the message names ``path``, never the hidden file).
+    """
+    probe = request.new_partial()
+    try:
+        with probe.open("xb"):
+            pass  # Created, and closed empty: that is the whole test.
+    except OSError as exc:
+        raise disk_failure(request.path, exc) from exc
+    finally:
+        with contextlib.suppress(OSError):
+            probe.unlink(missing_ok=True)
+
+
 def encode(
     request: VideoRequest,
     anim: Animation,
@@ -784,20 +826,24 @@ def write_video(
         (VideoToolbox in a ``.webm``), for a GIF a codec, an
         ``ffmpeg_encoder`` or an encoder other than the CPU, or an animation
         interval that is not a positive finite number.
-    :raises FileNotFoundError: if the directory of ``path`` does not exist.
+    :raises FileNotFoundError: if the directory of ``path`` does not exist
+        or cannot be reached (it sits inside a directory this process cannot
+        search).
     :raises FFmpegNotFoundError: if ffmpeg is not found, in Pyodide, or on
         Windows when it was found only in the working directory.
     :raises VideoEncoderError: if no encoder can write the video (the message
-        lists the ones that can), ffmpeg cannot be started or fails while
-        writing it, a raw ``ffmpeg_encoder`` it lacks or ``ffmpeg_options``
-        it refuses included, within the first frames (the message names the
-        encoder and quotes the last lines ffmpeg wrote on stderr), or the
-        finished video cannot take the place of ``path`` (on Windows, while
-        a player holds the old file open; the message says where the video
-        was left).
+        lists the ones that can), the directory of ``path`` does not take the
+        file (before ffmpeg starts; the message names ``path`` and the
+        system's reason), ffmpeg cannot be started or fails while writing it
+        (the message names the encoder and quotes the last lines ffmpeg wrote
+        on stderr; a raw ``ffmpeg_encoder`` it lacks or ``ffmpeg_options`` it
+        refuses fail within the first frames), or the finished video cannot
+        take the place of ``path`` (on Windows, while a player holds the old
+        file open; the message says where the video was left).
     :raises ImportError: if matplotlib is not installed.
     """
     options = video_options(video)
     request = video_request(path, options)
     _require_animation(anim)
+    require_writable(request)
     encode(request, anim)

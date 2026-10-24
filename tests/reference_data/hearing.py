@@ -19,9 +19,9 @@ from __future__ import annotations
 # task-based welder day; its case (a) omits the task-duration uncertainty
 # (U = 2,7 dB), case (b) includes it (U = 3,2 dB). Annexes E (job-based, 18
 # workers) and F (full-day forklift drivers) use the Table C.4 sampling budget.
-# Task tuples are (samples, duration_hours, duration_range) so the conformance
-# report can rebuild the Task objects (Task is not importable here — this module
-# is stdlib-only). Mirrors tests/hearing/test_occupational_exposure.py.
+# Task tuples are (samples, duration_hours, duration_range_hours) so the
+# conformance report can rebuild the Task objects (Task is not importable here —
+# this module is stdlib-only). Mirrors tests/hearing/test_occupational_exposure.py.
 # ---------------------------------------------------------------------------
 ISO9612_ANNEX_D_TASKS: tuple[tuple, ...] = (
     ((70.0,), 1.5, None),

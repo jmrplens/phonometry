@@ -178,7 +178,7 @@ from phonometry import underwater
 sel_ss = underwater.single_strike_sel(strike_pressure, fs)   # dB re 1 µPa²·s
 sel_cum = underwater.cumulative_sel_identical(sel_ss, 2000)   # 2000 strikes
 res = underwater.pile_strike_metrics(strike_pressure, fs)
-print(res.single_strike_sel, res.peak_spl, res.pulse_duration)
+print(res.single_strike_sel, res.peak_spl, res.pulse_duration_s)
 res.plot()   # waveform + cumulative energy (needs matplotlib)
 ```
 

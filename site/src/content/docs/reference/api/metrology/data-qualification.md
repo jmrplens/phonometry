@@ -392,7 +392,7 @@ StationarityTestResult(
     *,
     alpha: float,
     n_segments: int,
-    segment_duration: float,
+    segment_duration_s: float,
     fs: float,
 )
 ```
@@ -419,7 +419,7 @@ procedure). The hypothesis of stationarity is accepted when
 | `p_value` | Two-sided p-value of the observed count. |
 | `alpha` | Significance level (default 0.05). |
 | `n_segments` | Number of segments the record was divided into. |
-| `segment_duration` | Duration of each segment, in seconds. |
+| `segment_duration_s` | Duration of each segment, in seconds. |
 | `fs` | Sample rate of the record, in Hz. |
 
 ### StationarityTestResult.bounds

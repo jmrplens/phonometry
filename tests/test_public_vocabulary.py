@@ -29,16 +29,24 @@ import importlib
 import inspect
 import pkgutil
 import re
+import sys
 import textwrap
+import typing
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
+_SCRIPTS = str(Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+from check_parameter_units import DIMENSIONLESS
+
 import phonometry
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Iterable, Iterator, Mapping
 
 #: A bare name that spells a concept the rest of the API spells otherwise,
 #: mapped to the spelling it has to use.
@@ -1393,6 +1401,192 @@ def test_the_count_rule_reads_a_name(
     name: str, annotation: str, expected: list[str]
 ) -> None:
     assert _count_problems(name, annotation) == expected
+
+
+# ---------------------------------------------------------------------------
+# A duration says its unit.
+# ---------------------------------------------------------------------------
+
+#: The words that make a name a duration, whatever else it says.
+_DURATION_WORDS = frozenset({"duration", "durations"})
+#: The endings a duration is written in: the second and the millisecond, and
+#: the minute, the hour, the day and the year spelled out, as
+#: ``duration_s``, ``duration_ms``, ``assessment_period_minutes``,
+#: ``duration_hours``, ``duration_days`` and ``exposure_duration_years``
+#: write them.
+_DURATION_UNITS = ("_s", "_ms", "_minutes", "_hours", "_days", "_years")
+_DURATION_UNIT_RULE = "a duration ends in its time unit, as in duration_s"
+#: Where a duration keeps a name without its unit, keyed by location, each
+#: with the reason. An entry that names nothing, or names a duration the
+#: rule no longer reports, fails the test too.
+_DURATION_EXEMPT = {
+    "phonometry.environment.assessment.impulsive_sound.rating_level(durations)": (
+        "the durations of the sub-intervals in any time unit, read beside a "
+        "reference_time in the same unit: the rating level of ISO/PAS 1996-3 "
+        "clause 8 uses only their ratio, so no unit is assumed and none can "
+        "be lost"
+    ),
+}
+
+
+def _module_namespace(where: str) -> Mapping[str, object]:
+    """The namespace of the module a location of the walk is defined in.
+
+    A location is the module's path followed by a qualified name and, for a
+    parameter, the parameter in brackets, so the module is the longest
+    leading run of the dotted path that is an imported module.
+    """
+    parts = where.split("(", 1)[0].split(".")
+    for end in range(len(parts), 0, -1):
+        module = sys.modules.get(".".join(parts[:end]))
+        if module is not None:
+            return vars(module)
+    return {}
+
+
+def _is_choice(node: ast.expr, namespace: Mapping[str, object]) -> bool:
+    """Whether one member of an annotation is a ``Literal`` or names one."""
+    if isinstance(node, ast.Subscript):
+        head = node.value
+        name = head.attr if isinstance(head, ast.Attribute) else getattr(head, "id", "")
+        return name == "Literal"
+    if isinstance(node, ast.Name):
+        value = namespace.get(node.id)
+        value = getattr(value, "__value__", value)  # a ``type X = ...`` alias
+        return typing.get_origin(value) is typing.Literal
+    return False
+
+
+def _is_choice_or_flag(annotation: str, namespace: Mapping[str, object]) -> bool:
+    """Whether the annotation is a ``Literal`` choice or a ``bool``, or ``None``.
+
+    The annotation is the text the walk reads, so an alias such as
+    ``VibrationDuration`` is looked up in the namespace of the module that
+    wrote it, and a class a module without postponed annotations shows as
+    ``<class 'bool'>`` is read by its name.
+    """
+    text = re.sub(r"<class '([\w.]+)'>", r"\1", annotation)
+    try:
+        tree = ast.parse(text, mode="eval").body
+    except SyntaxError:
+        return False
+    members: list[ast.expr] = []
+    pending = [tree]
+    while pending:
+        node = pending.pop()
+        if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+            pending.extend((node.left, node.right))
+        elif not (isinstance(node, ast.Constant) and node.value is None):
+            members.append(node)
+    return bool(members) and all(
+        (isinstance(node, ast.Name) and node.id == "bool")
+        or _is_choice(node, namespace)
+        for node in members
+    )
+
+
+def _duration_problems(
+    name: str, annotation: str, namespace: Mapping[str, object] | None = None
+) -> list[str]:
+    """Why a value named *name* that is a duration does not say its unit.
+
+    A name is a duration when one of its words is ``duration`` or
+    ``durations``. It ends in a unit of time (:data:`_DURATION_UNITS`) or in a
+    suffix that says the value has no unit of its own, as the decibels of a
+    ``duration_correction`` or of the ``duration_uncertainty`` of ISO 9612
+    (``DIMENSIONLESS`` of ``scripts/check_parameter_units.py``). A choice
+    among labels (``duration: Literal["short_term", "long_term"]``) and a
+    switch (``include_duration_uncertainty: bool``) hold no length of time and
+    are outside the rule.
+    """
+    lowered = name.lower()
+    if _DURATION_WORDS.isdisjoint(lowered.split("_")):
+        return []
+    if lowered.endswith(_DURATION_UNITS) or lowered.endswith(DIMENSIONLESS):
+        return []
+    if _is_choice_or_flag(annotation, namespace or {}):
+        return []
+    return [_DURATION_UNIT_RULE]
+
+
+def _duration_offenders() -> dict[str, list[str]]:
+    """Every public duration the rule reports, by location, exemptions included."""
+    return {
+        where: problems
+        for where, name, annotation, kind, _ in _public_names()
+        if kind in {"param", "field", "property"}
+        and (problems := _duration_problems(name, annotation, _module_namespace(where)))
+    }
+
+
+def test_a_duration_ends_in_its_unit() -> None:
+    """``duration_s``, ``duration_hours``, ``exposure_duration_years``.
+
+    A parameter, a field or a property whose name says it is a duration ends
+    in the unit of time it holds, so ``segment_duration`` cannot be read in
+    seconds by one caller and in milliseconds by the next: the name is where
+    the unit is written, beside the ``duration_ms`` of a toneburst and the
+    ``duration_hours`` of a working day. The count rule above refuses a unit
+    alone (``seconds``); this one refuses a duration without one.
+    """
+    offenders = sorted(
+        f"{where}: {problem}"
+        for where, problems in _duration_offenders().items()
+        if where not in _DURATION_EXEMPT
+        for problem in problems
+    )
+    assert not offenders, "\n".join(offenders)
+
+
+def test_every_kept_duration_spelling_is_still_one() -> None:
+    """An exemption from the duration rule that excuses nothing is a stale one."""
+    stale = sorted(set(_DURATION_EXEMPT) - set(_duration_offenders()))
+    assert not stale, "\n".join(stale)
+
+
+_ALIASES = {
+    "VibrationDuration": typing.Literal["short_term", "long_term"],
+    "Threshold": float,
+}
+
+
+@pytest.mark.parametrize(
+    ("name", "annotation", "expected"),
+    [
+        ("duration", "float", [_DURATION_UNIT_RULE]),
+        ("segment_duration", "float", [_DURATION_UNIT_RULE]),
+        ("durations", "ArrayLike", [_DURATION_UNIT_RULE]),
+        ("duration_range", "tuple[float, float] | None", [_DURATION_UNIT_RULE]),
+        # ``_samples`` is a count of samples, not a unit of time.
+        ("duration_samples", "tuple[float, ...] | None", [_DURATION_UNIT_RULE]),
+        ("duration", "Threshold", [_DURATION_UNIT_RULE]),
+        ("duration", "VibrationDuration | float", [_DURATION_UNIT_RULE]),
+        ("duration_s", "float", []),
+        ("durations_s", "ArrayLike", []),
+        ("duration_ms", "float", []),
+        ("assessment_duration_minutes", "float", []),
+        ("duration_range_hours", "tuple[float, float] | None", []),
+        ("duration_days", "int", []),
+        ("exposure_duration_years", "int", []),
+        ("sweep_duration_uncertainty_s", "float", []),
+        ("duration_correction", "float", []),
+        ("duration_uncertainty", "float", []),
+        ("include_duration_uncertainty", "bool", []),
+        ("duration", "VibrationDuration", []),
+        ("duration", "VibrationDuration | None", []),
+        ("duration", "Literal['short_term', 'long_term']", []),
+        ("duration", "bool", []),
+        ("duration", "<class 'bool'>", []),
+        ("duration", "<class 'float'>", [_DURATION_UNIT_RULE]),
+        # A name without the word is the count rule's or no rule's.
+        ("reference_time", "float", []),
+        ("period", "float", []),
+    ],
+)
+def test_the_duration_rule_reads_a_name(
+    name: str, annotation: str, expected: list[str]
+) -> None:
+    assert _duration_problems(name, annotation, _ALIASES) == expected
 
 
 #: A parameter that names the time signal in a spelling the API retired.

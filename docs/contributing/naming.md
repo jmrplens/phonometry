@@ -747,9 +747,9 @@ sweep_signal(fs, seconds=2.0)
 htlan(..., years=10)
 ```
 
-**Enforced by:** `tests/test_public_vocabulary.py::test_a_count_is_n_plural`, review
+**Enforced by:** `tests/test_public_vocabulary.py::test_a_count_is_n_plural`, `tests/test_public_vocabulary.py::test_a_duration_ends_in_its_unit`, `tests/test_public_vocabulary.py::test_every_kept_duration_spelling_is_still_one`
 
-**Exceptions.** A rate is not a duration (`seconds_per_decade`). The test refuses a name that is a unit alone; how the unit is spelled, a minute included, is [N17](#n17).
+**Exceptions.** A rate is not a duration (`seconds_per_decade`). The first test refuses a name that is a unit alone; the second refuses a name with the word `duration` or `durations` that does not end in `_s`, `_ms`, `_minutes`, `_hours`, `_days` or `_years`. A choice or a switch holds no length of time (`duration: Literal["short_term", "long_term"]`, `include_duration_uncertainty: bool`), and a suffix that says the value carries no unit ends the name instead (`duration_correction`, in decibels). A duration that keeps a name without its unit goes in `_DURATION_EXEMPT` of the test, keyed by location with its reason, as the sub-interval `durations` of `environment.rating_level`, in the unit of its `reference_time`. How the unit is spelled, a minute included, is [N17](#n17).
 
 <a id="n32"></a>
 ### N32. Spell every identifier and every value a caller types in American English

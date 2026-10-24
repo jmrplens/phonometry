@@ -220,7 +220,7 @@ def test_rf64_reads_through_the_ds64_sizes(tmp_path: Path) -> None:
     described = info(path)
     assert described.container == "RF64"
     assert described.n_samples == codes.size
-    assert described.duration == pytest.approx(codes.size / FS)
+    assert described.duration_s == pytest.approx(codes.size / FS)
 
 
 def test_bw64_reads_like_the_rf64_it_differs_from_in_fourcc_alone(
@@ -305,7 +305,7 @@ def test_info_describes_headers_without_the_samples(tmp_path: Path) -> None:
     assert described.fs == FS
     assert described.n_channels == 1
     assert described.n_samples == 10
-    assert described.duration == pytest.approx(10 / FS)
+    assert described.duration_s == pytest.approx(10 / FS)
     assert described.bit_depth == 16
     assert not described.lossy
     assert described.bext is not None
@@ -373,7 +373,7 @@ def test_info_answers_a_giant_rf64_from_its_headers_alone(
     assert described.fs == FS
     assert described.n_channels == 2
     assert described.n_samples == frames
-    assert described.duration == pytest.approx(frames / FS)
+    assert described.duration_s == pytest.approx(frames / FS)
     assert described.bit_depth == 16
     assert not described.lossy
 

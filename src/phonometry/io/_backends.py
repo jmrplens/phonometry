@@ -355,7 +355,7 @@ def info(path: str | Path) -> AudioFileInfo:
         fs=fs,
         n_channels=int(file_info.channels),
         n_samples=frames,
-        duration=frames / float(fs) if fs else 0.0,
+        duration_s=frames / float(fs) if fs else 0.0,
         bit_depth=_SUBTYPE_BITS.get(str(file_info.subtype)),
         lossy=_soundfile_lossy(str(file_info.subtype)),
         bext=read_flac_bext(path) if format_name == _FLAC_NAME else None,

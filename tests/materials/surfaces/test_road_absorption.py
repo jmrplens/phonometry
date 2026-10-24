@@ -230,7 +230,7 @@ def test_reflection_input_guards() -> None:
 # --------------------------------------------------------------------------- #
 def test_adrienne_window_length_and_flat_top() -> None:
     w = adrienne_window(
-        FS, flat_duration=5e-3, leading_duration=0.5e-3, trailing_duration=5e-3
+        FS, flat_duration_s=5e-3, leading_duration_s=0.5e-3, trailing_duration_s=5e-3
     )
     n_lead = round(0.5e-3 * FS)
     n_flat = round(5e-3 * FS)
@@ -242,7 +242,7 @@ def test_adrienne_window_length_and_flat_top() -> None:
 
 def test_adrienne_window_endpoints_and_sharp_leading_edge() -> None:
     w = adrienne_window(
-        FS, flat_duration=5e-3, leading_duration=0.5e-3, trailing_duration=5e-3
+        FS, flat_duration_s=5e-3, leading_duration_s=0.5e-3, trailing_duration_s=5e-3
     )
     n_lead = round(0.5e-3 * FS)
     n_trail = round(5e-3 * FS)
@@ -270,8 +270,8 @@ def test_adrienne_window_energy_in_flat_region() -> None:
 def test_adrienne_window_cosine_squared_shape() -> None:
     w = adrienne_window(
         FS,
-        leading_duration=0.0,
-        trailing_duration=2e-3,
+        leading_duration_s=0.0,
+        trailing_duration_s=2e-3,
         trailing_edge="cosine-squared",
     )
     n_flat = round(5e-3 * FS)
@@ -287,9 +287,9 @@ def test_adrienne_blackman_harris_edges_meet_flat_at_unity() -> None:
     # flat top, so the flat-to-edge transition is continuous (no ~0.26 % step).
     w = adrienne_window(
         FS,
-        leading_duration=1e-3,
-        flat_duration=5e-3,
-        trailing_duration=3e-3,
+        leading_duration_s=1e-3,
+        flat_duration_s=5e-3,
+        trailing_duration_s=3e-3,
         leading_edge="blackman-harris",
         trailing_edge="blackman-harris",
     )
@@ -306,10 +306,10 @@ def test_adrienne_blackman_harris_edges_meet_flat_at_unity() -> None:
 def test_adrienne_window_guards() -> None:
     with pytest.raises(ValueError, match="'fs' must be positive"):
         adrienne_window(0.0)
-    with pytest.raises(ValueError, match="'flat_duration' must be positive"):
-        adrienne_window(FS, flat_duration=0.0)
+    with pytest.raises(ValueError, match="'flat_duration_s' must be positive"):
+        adrienne_window(FS, flat_duration_s=0.0)
     with pytest.raises(ValueError, match="Edge durations must be non-negative"):
-        adrienne_window(FS, leading_duration=-1e-3)
+        adrienne_window(FS, leading_duration_s=-1e-3)
     with pytest.raises(ValueError, match="Edge shapes must be one of"):
         adrienne_window(FS, trailing_edge="triangular")
 
@@ -399,7 +399,7 @@ def test_the_functions_that_took_a_deprecated_fs_alias_still_require_fs() -> Non
     hi = _incident_ir()
     hr = 0.4 * np.roll(hi, 96)
     with pytest.raises(TypeError, match="missing 1 required positional argument"):
-        adrienne_window(flat_duration=0.005)  # type: ignore[call-arg]
+        adrienne_window(flat_duration_s=0.005)  # type: ignore[call-arg]
     with pytest.raises(ValueError, match="fs is required"):
         in_situ_absorption_spectrum(hi, hr)
 

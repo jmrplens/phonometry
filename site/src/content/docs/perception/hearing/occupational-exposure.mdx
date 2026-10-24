@@ -57,7 +57,7 @@ Describe each activity as a `hearing.Task` with its samples and duration, then
 call `hearing.task_based_exposure(tasks)`. For the Annex D welder's day below
 it returns `lex_8h` = 84.3 dB with an `expanded_uncertainty` $U = 3.2$ dB, so
 the one-sided 95 % `upper_limit` is 87.5 dB, because the default includes the
-Annex C duration term $u_{1\mathrm{b}}$ built from each task's `duration_range`. The §1
+Annex C duration term $u_{1\mathrm{b}}$ built from each task's `duration_range_hours`. The §1
 snippet passes `include_duration_uncertainty=False` to reproduce Annex D case a,
 where the durations are treated as exact, and that is what drops $U$ to 2.7 dB
 and the upper limit to 87.0 dB. Unstructured days use
@@ -183,9 +183,9 @@ from phonometry import hearing
 tasks = [
     hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
     hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
-         duration_range=(4.0, 6.0), label="welding"),
+         duration_range_hours=(4.0, 6.0), label="welding"),
     hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
-         duration_range=(1.0, 2.0), label="cutting/grinding"),
+         duration_range_hours=(1.0, 2.0), label="cutting/grinding"),
 ]
 res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
 print(f"LEX,8h = {res.lex_8h:.1f} dB   U = {res.expanded_uncertainty:.1f} dB")
@@ -242,9 +242,9 @@ from phonometry import hearing
 tasks = [
     hearing.Task(samples=(70.0,), duration_hours=1.5, label="planning/breaks"),
     hearing.Task(samples=(80.1, 82.2, 79.6), duration_hours=5.0,
-         duration_range=(4.0, 6.0), label="welding"),
+         duration_range_hours=(4.0, 6.0), label="welding"),
     hearing.Task(samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2), duration_hours=1.5,
-         duration_range=(1.0, 2.0), label="cutting/grinding"),
+         duration_range_hours=(1.0, 2.0), label="cutting/grinding"),
 ]
 res = hearing.task_based_exposure(tasks, include_duration_uncertainty=False, warn=False)
 
@@ -402,7 +402,7 @@ derived on the [Theory](/phonometry/reference/theory/environment-transport/) pag
 
 | Parameter | Applies to | Type | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `tasks` | task | list of `Task` | — | $\ge 1$ | Each `Task` has `samples`, `duration_hours`, optional `duration_range`/`duration_samples`, `label`, `instrument` |
+| `tasks` | task | list of `Task` | — | $\ge 1$ | Each `Task` has `samples`, `duration_hours`, optional `duration_range_hours`/`duration_observations_hours`, `label`, `instrument` |
 | `samples` | job / full-day | sequence | dB | $\ge 2$ ($\ge 5$ / $\ge 3$ advised) | Random $L_{p,\mathrm{A,eq}T}$ samples |
 | `effective_duration_hours` | job / full-day | float | h | $> 0$ | Effective working-day duration $T_\mathrm{e}$ |
 | `instrument` | all | str | — | `'class1'`, `'class2'`, `'personal_exposimeter'` (default) | Selects $u_2$ (Table C.5) |

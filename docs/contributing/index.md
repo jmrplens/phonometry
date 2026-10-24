@@ -71,7 +71,7 @@ Each rule on a page has the same parts:
 | [N28](naming.md#n28) | Spell words out: `microphone`, `laboratory`, `reference`, `standard_deviation`, `frequency`, `confidence` | `tests/test_public_vocabulary.py::test_words_are_spelled_out`, `tests/test_public_vocabulary.py::test_the_row_keys_of_a_verdict_are_spelled_out`, `tests/test_public_vocabulary.py::test_every_kept_spelling_still_exists` |
 | [N29](naming.md#n29) | Write `min` and `max` in every public name, `MIN` and `MAX` in a constant | `tests/test_public_vocabulary.py::test_words_are_spelled_out` |
 | [N30](naming.md#n30) | Name a count `n_<plural>`, and a limit on one `min_n_` or `max_n_` | `tests/test_public_vocabulary.py::test_a_count_is_n_plural`, `tests/test_public_vocabulary.py::test_every_kept_count_spelling_still_exists` |
-| [N31](naming.md#n31) | Name a duration by its quantity, then its unit | `tests/test_public_vocabulary.py::test_a_count_is_n_plural`, review |
+| [N31](naming.md#n31) | Name a duration by its quantity, then its unit | `tests/test_public_vocabulary.py::test_a_count_is_n_plural`, `tests/test_public_vocabulary.py::test_a_duration_ends_in_its_unit`, `tests/test_public_vocabulary.py::test_every_kept_duration_spelling_is_still_one` |
 | [N32](naming.md#n32) | Spell every identifier and every value a caller types in American English | `scripts/check_identifier_spelling.py`, `make identifier-spelling`, `CI: Every public quantity names its unit` |
 | [N33](naming.md#n33) | Write a printed symbol in a public name in lower snake case | review |
 | [N34](naming.md#n34) | Name a type alias in PascalCase | review |

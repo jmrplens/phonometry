@@ -44,7 +44,7 @@ recording = 0.02 * rng.standard_normal(10 * fs)
 io.write("measurement.wav", recording, fs, subtype="PCM_24")
 
 sig = io.read("measurement.wav")
-print(sig.fs, sig.n_channels, f"{sig.duration:.1f} s")    # 48000 1 10.0 s
+print(sig.fs, sig.n_channels, f"{sig.duration_s:.1f} s")  # 48000 1 10.0 s
 print(sig.source.format_name, sig.source.bit_depth)       # PCM 24
 ```
 
@@ -127,7 +127,7 @@ instant on a 12-hour RF64, and it still describes a compressed WAV that
 ```python
 meta = io.info("measurement.wav")
 print(meta.container, meta.format_name, meta.bit_depth)   # WAV PCM 24
-print(meta.n_samples, f"{meta.duration:.1f} s")              # 480000 10.0 s
+print(meta.n_samples, f"{meta.duration_s:.1f} s")         # 480000 10.0 s
 ```
 
 ## Calibrating from the calibrator take

@@ -107,7 +107,7 @@ AudioFileInfo(
     fs: int,
     n_channels: int,
     n_samples: int,
-    duration: float,
+    duration_s: float,
     bit_depth: int | None,
     *,
     lossy: bool,
@@ -1613,7 +1613,7 @@ edge.
 
 *property*
 
-### Signal.duration
+### Signal.duration_s
 
 *property*
 

@@ -308,11 +308,11 @@ class Task(RichDisplay):
         three are recommended (Clause 9.3); a single conservative value is
         allowed for negligible tasks (its ``u1a`` is then zero).
     :param duration_hours: Arithmetic mean task duration ``T_m`` (Eq 5), hours.
-    :param duration_samples: Optional independent duration observations ``T_m,j``
-        (hours) used for ``u1b`` via Eq C.7.
-    :param duration_range: Optional ``(T_min, T_max)`` range (hours); ``u1b`` is
-        then ``0.5*(T_max - T_min)`` (Eq C.7 NOTE). Ignored if
-        ``duration_samples`` is given.
+    :param duration_observations_hours: Optional independent duration
+        observations ``T_m,j`` (hours) used for ``u1b`` via Eq C.7.
+    :param duration_range_hours: Optional ``(T_min, T_max)`` range (hours);
+        ``u1b`` is then ``0.5*(T_max - T_min)`` (Eq C.7 NOTE). Ignored if
+        ``duration_observations_hours`` is given.
     :param label: Optional human-readable task name.
     :param instrument: Optional per-task instrument class overriding the call
         default (selects ``u2`` from Table C.5).
@@ -320,8 +320,8 @@ class Task(RichDisplay):
 
     samples: tuple[float, ...]
     duration_hours: float
-    duration_samples: tuple[float, ...] | None = None
-    duration_range: tuple[float, float] | None = None
+    duration_observations_hours: tuple[float, ...] | None = None
+    duration_range_hours: tuple[float, float] | None = None
     label: str | None = None
     instrument: InstrumentClass | None = None
 
@@ -679,16 +679,16 @@ def _duration_uncertainty(task: Task) -> float:
     Independent duration observations take precedence over a declared
     ``(T_min, T_max)`` range; without either, the duration is taken as exact.
     """
-    if task.duration_samples is not None:
-        j = np.asarray(task.duration_samples, dtype=float)
+    if task.duration_observations_hours is not None:
+        j = np.asarray(task.duration_observations_hours, dtype=float)
         if j.size < _MIN_SAMPLES_FOR_SPREAD:
             return 0.0
         # Eq C.7 divides by J(J-1), like Eq C.6: standard error of the mean.
         return float(np.std(j, ddof=1) / sqrt(j.size))
-    if task.duration_range is not None:
-        t_min, t_max = task.duration_range
+    if task.duration_range_hours is not None:
+        t_min, t_max = task.duration_range_hours
         if t_max < t_min:
-            msg = "duration_range must be (T_min, T_max) with T_max >= T_min."
+            msg = "duration_range_hours must be (T_min, T_max) with T_max >= T_min."
             raise ValueError(msg)
         return 0.5 * (t_max - t_min)
     return 0.0

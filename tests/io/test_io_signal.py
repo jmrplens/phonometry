@@ -83,7 +83,7 @@ def test_signal_properties() -> None:
     sig = Signal(data=np.zeros((3, 2 * FS)), fs=FS)
     assert sig.n_channels == 3
     assert sig.n_samples == 2 * FS
-    assert sig.duration == pytest.approx(2.0)
+    assert sig.duration_s == pytest.approx(2.0)
 
 
 def test_metadata_fields_default_to_none() -> None:

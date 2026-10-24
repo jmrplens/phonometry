@@ -2236,13 +2236,13 @@ def generate_exposure_uncertainty(output_dir: str) -> None:
         Task(
             samples=(80.1, 82.2, 79.6),
             duration_hours=5.0,
-            duration_range=(4.0, 6.0),
+            duration_range_hours=(4.0, 6.0),
             label="welding",
         ),
         Task(
             samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2),
             duration_hours=1.5,
-            duration_range=(1.0, 2.0),
+            duration_range_hours=(1.0, 2.0),
             label="cutting/grinding",
         ),
     ]
@@ -2892,13 +2892,13 @@ def generate_exposure_budget(output_dir: str) -> None:
         hearing.Task(
             samples=(80.1, 82.2, 79.6),
             duration_hours=5.0,
-            duration_range=(4.0, 6.0),
+            duration_range_hours=(4.0, 6.0),
             label="welding",
         ),
         hearing.Task(
             samples=(86.5, 92.4, 89.3, 93.2, 87.8, 86.2),
             duration_hours=1.5,
-            duration_range=(1.0, 2.0),
+            duration_range_hours=(1.0, 2.0),
             label="cutting/\ngrinding",
         ),
     ]

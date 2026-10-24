@@ -12,7 +12,7 @@ each with the LEX,8h and the uncertainty its worked example prints.
 from __future__ import annotations
 
 # ---------------------------------------------------------------------------
-# ISO 9612:2009 occupational noise exposure — the three normative worked
+# ISO 9612:2009 occupational noise exposure: the three normative worked
 # examples (Annexes D/E/F), reproduced digit-for-digit by the test suite. Each
 # stores the raw measured levels/durations and the standard's reported LEX,8h
 # and expanded uncertainty U (k = 1,65, one-sided 95 %). Annex D is the
@@ -20,8 +20,9 @@ from __future__ import annotations
 # (U = 2,7 dB), case (b) includes it (U = 3,2 dB). Annexes E (job-based, 18
 # workers) and F (full-day forklift drivers) use the Table C.4 sampling budget.
 # Task tuples are (samples, duration_hours, duration_range_hours) so the
-# conformance report can rebuild the Task objects (Task is not importable here —
-# this module is stdlib-only). Mirrors tests/hearing/test_occupational_exposure.py.
+# conformance report can rebuild the Task objects (Task is not importable here,
+# because this module is stdlib-only). Mirrors
+# tests/hearing/test_occupational_exposure.py.
 # ---------------------------------------------------------------------------
 ISO9612_ANNEX_D_TASKS: tuple[tuple, ...] = (
     ((70.0,), 1.5, None),

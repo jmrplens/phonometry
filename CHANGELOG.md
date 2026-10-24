@@ -4403,13 +4403,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   in hours, as `duration_range_hours` and `duration_observations_hours` where
   it took `duration_range` and `duration_samples`, a name that read as a
   count of samples. `tests/test_public_vocabulary.py` fails on a public
-  parameter, field or property that says it is a duration and does not end
-  in its unit of time (`_s`, `_ms`, `_minutes`, `_hours`, `_days` or
-  `_years`), unless it is a choice or a switch, ends in a suffix that says
-  it carries no unit (the decibels of a `duration_correction`), or is kept
-  with its reason, as the sub-interval `durations` of
-  `environment.rating_level` are: they may be in any unit, the one of its
-  `reference_time`. The migration guide lists every renamed name.
+  parameter, field, property, function, method or constant that says it is
+  a duration and does not end in its unit of time (`_s`, `_ms`, `_minutes`,
+  `_hours`, `_days` or `_years`), unless it is a choice or a switch, ends
+  in a suffix that says it holds no length of time (the decibels of a
+  `duration_correction`; the uncertainty of a duration is a length of time
+  and ends in its unit), or is kept with its reason: the sub-interval
+  `durations` of `environment.rating_level`, which may be in any unit, the
+  one of its `reference_time`, and the verb
+  `building.check_background_duration`. The migration guide lists every
+  renamed name.
 
 - **A confidence bound says it is one.** The spectral density results of
   `signals`, `SpectralDensityResult` and `MultitaperSpectralDensityResult`,

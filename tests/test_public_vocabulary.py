@@ -31,6 +31,7 @@ import pkgutil
 import re
 import sys
 import textwrap
+import types
 import typing
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -207,6 +208,15 @@ def _public_names() -> Iterator[tuple[str, str, str, str, str]]:
     ``varkw`` (``**kwargs``); ``text`` is the ``:param`` text of a parameter,
     or ``""``.
     """
+    for key, obj in _public_members():
+        if inspect.isclass(obj):
+            yield from _class_names(key, obj)
+        else:
+            yield from _parameters(key, obj)
+
+
+def _public_members() -> Iterator[tuple[str, object]]:
+    """``(where, member)`` for every public function and class, once each."""
     seen: set[str] = set()
     # The root publishes its three classes (``Signal``, ``ReportMetadata``,
     # ``PhonometryWarning``) through a lazy ``__getattr__``, so they are read
@@ -224,10 +234,8 @@ def _public_names() -> Iterator[tuple[str, str, str, str, str]]:
             if key in seen:
                 continue
             seen.add(key)
-            if inspect.isfunction(obj):
-                yield from _parameters(key, obj)
-            elif inspect.isclass(obj):
-                yield from _class_names(key, obj)
+            if inspect.isfunction(obj) or inspect.isclass(obj):
+                yield key, obj
 
 
 def _param_text(func: object, name: str) -> str:
@@ -1416,6 +1424,15 @@ _DURATION_WORDS = frozenset({"duration", "durations"})
 #: write them.
 _DURATION_UNITS = ("_s", "_ms", "_minutes", "_hours", "_days", "_years")
 _DURATION_UNIT_RULE = "a duration ends in its time unit, as in duration_s"
+#: The endings that say a name with the word holds no length of time, so it
+#: needs no unit of time: the suffixes ``scripts/check_parameter_units.py``
+#: reads as unitless (the decibels of a ``duration_correction``, a ratio, an
+#: index), less ``_uncertainty``. The uncertainty of a duration is a length
+#: of time in the unit of the duration, as ``u1b`` of ISO 9612 (Eq C.7) is
+#: in hours, so it ends in its unit (``sweep_duration_uncertainty_s``).
+_DURATION_UNITLESS = tuple(
+    suffix for suffix in DIMENSIONLESS if suffix != "_uncertainty"
+)
 #: Where a duration keeps a name without its unit, keyed by location, each
 #: with the reason. An entry that names nothing, or names a duration the
 #: rule no longer reports, fails the test too.
@@ -1425,6 +1442,11 @@ _DURATION_EXEMPT = {
         "reference_time in the same unit: the rating level of ISO/PAS 1996-3 "
         "clause 8 uses only their ratio, so no unit is assumed and none can "
         "be lost"
+    ),
+    "phonometry.building.measurement.service_equipment.check_background_duration": (
+        "a verb, not a duration: it holds the durations_s of the background "
+        "measurements of ISO/DIS 16032 7.6 to approximately 30 s and returns "
+        "a BackgroundDurationCheck"
     ),
 }
 
@@ -1492,46 +1514,119 @@ def _duration_problems(
 
     A name is a duration when one of its words is ``duration`` or
     ``durations``. It ends in a unit of time (:data:`_DURATION_UNITS`) or in a
-    suffix that says the value has no unit of its own, as the decibels of a
-    ``duration_correction`` or of the ``duration_uncertainty`` of ISO 9612
-    (``DIMENSIONLESS`` of ``scripts/check_parameter_units.py``). A choice
-    among labels (``duration: Literal["short_term", "long_term"]``) and a
-    switch (``include_duration_uncertainty: bool``) hold no length of time and
-    are outside the rule.
+    suffix that says the value holds no length of time
+    (:data:`_DURATION_UNITLESS`), as the decibels of a
+    ``duration_correction``. The uncertainty of a duration is not one of
+    them: the ``u1b`` of ISO 9612 (Eq C.7) is in hours, so it is written
+    ``duration_uncertainty_hours``. A choice among labels
+    (``duration: Literal["short_term", "long_term"]``) and a switch
+    (``include_duration_uncertainty: bool``) hold no length of time and are
+    outside the rule.
     """
     lowered = name.lower()
     if _DURATION_WORDS.isdisjoint(lowered.split("_")):
         return []
-    if lowered.endswith(_DURATION_UNITS) or lowered.endswith(DIMENSIONLESS):
+    if lowered.endswith(_DURATION_UNITS) or lowered.endswith(_DURATION_UNITLESS):
         return []
     if _is_choice_or_flag(annotation, namespace or {}):
         return []
     return [_DURATION_UNIT_RULE]
 
 
-def _duration_offenders() -> dict[str, list[str]]:
-    """Every public duration the rule reports, by location, exemptions included."""
+def _returns(function: object) -> str:
+    """The text of the return annotation of *function*, or ``""``."""
+    return str(getattr(function, "__annotations__", {}).get("return", ""))
+
+
+def _exported_names(
+    modules: Iterable[types.ModuleType],
+) -> Iterator[tuple[str, str, str]]:
+    """``(where, name, annotation)`` for every function and constant *modules* list.
+
+    A function is read by the name its module lists in ``__all__``, where it
+    is defined and with the annotation of what it returns, so a predicate
+    that returns a ``bool`` reads as a switch. A constant is read in lower
+    case (``TAKT_DURATION_S`` as ``takt_duration_s``) with the type of its
+    value, once, where the first module that lists it publishes it.
+    """
+    seen: set[tuple[str, int]] = set()
+    for module in modules:
+        for name in getattr(module, "__all__", ()):
+            value = getattr(module, name)
+            if inspect.isclass(value) or inspect.ismodule(value):
+                continue
+            if (name, id(value)) in seen:
+                continue
+            seen.add((name, id(value)))
+            if callable(value):
+                owner = getattr(value, "__module__", None) or module.__name__
+                where = f"{owner}.{getattr(value, '__qualname__', name)}"
+                yield where, name, _returns(value)
+            else:
+                where = f"{module.__name__}.{name}"
+                yield where, name.lower(), type(value).__name__
+
+
+def _method_names(
+    members: Iterable[tuple[str, object]],
+) -> Iterator[tuple[str, str, str]]:
+    """``(where, name, annotation)`` for every public method of a class in *members*.
+
+    A method, a static method and a class method are read by name, with the
+    annotation of what they return; a property is read with the fields.
+    """
+    for where, member in members:
+        if not inspect.isclass(member):
+            continue
+        for name, attribute in vars(member).items():
+            function = (
+                attribute.__func__
+                if isinstance(attribute, staticmethod | classmethod)
+                else attribute
+            )
+            if not name.startswith("_") and inspect.isfunction(function):
+                yield f"{where}.{name}", name, _returns(function)
+
+
+def _named_durations() -> Iterator[tuple[str, str, str]]:
+    """``(where, name, annotation)`` for every public name the duration rule reads.
+
+    A parameter, a field and a property; a function, a method, a static
+    method and a class method; and a constant.
+    """
+    for where, name, annotation, kind, _ in _public_names():
+        if kind in {"param", "field", "property"}:
+            yield where, name, annotation
+    yield from _exported_names(_public_modules())
+    yield from _method_names(_public_members())
+
+
+def _duration_offenders(
+    names: Iterable[tuple[str, str, str]],
+) -> dict[str, list[str]]:
+    """Every duration among *names* the rule reports, by location, exemptions included."""
     return {
         where: problems
-        for where, name, annotation, kind, _ in _public_names()
-        if kind in {"param", "field", "property"}
-        and (problems := _duration_problems(name, annotation, _module_namespace(where)))
+        for where, name, annotation in names
+        if (problems := _duration_problems(name, annotation, _module_namespace(where)))
     }
 
 
 def test_a_duration_ends_in_its_unit() -> None:
     """``duration_s``, ``duration_hours``, ``exposure_duration_years``.
 
-    A parameter, a field or a property whose name says it is a duration ends
-    in the unit of time it holds, so ``segment_duration`` cannot be read in
-    seconds by one caller and in milliseconds by the next: the name is where
-    the unit is written, beside the ``duration_ms`` of a toneburst and the
-    ``duration_hours`` of a working day. The count rule above refuses a unit
-    alone (``seconds``); this one refuses a duration without one.
+    A parameter, a field, a property, a function, a method or a constant
+    whose name says it is a duration ends in the unit of time it holds or
+    returns, so ``segment_duration`` cannot be read in seconds by one caller
+    and in milliseconds by the next: the name is where the unit is written,
+    beside the ``duration_ms`` of a toneburst, the ``duration_hours`` of a
+    working day, ``rectangular_pulse_duration_s`` and ``TAKT_DURATION_S``.
+    The count rule above refuses a unit alone (``seconds``); this one
+    refuses a duration without one.
     """
     offenders = sorted(
         f"{where}: {problem}"
-        for where, problems in _duration_offenders().items()
+        for where, problems in _duration_offenders(_named_durations()).items()
         if where not in _DURATION_EXEMPT
         for problem in problems
     )
@@ -1540,7 +1635,7 @@ def test_a_duration_ends_in_its_unit() -> None:
 
 def test_every_kept_duration_spelling_is_still_one() -> None:
     """An exemption from the duration rule that excuses nothing is a stale one."""
-    stale = sorted(set(_DURATION_EXEMPT) - set(_duration_offenders()))
+    stale = sorted(set(_DURATION_EXEMPT) - set(_duration_offenders(_named_durations())))
     assert not stale, "\n".join(stale)
 
 
@@ -1570,7 +1665,10 @@ _ALIASES = {
         ("exposure_duration_years", "int", []),
         ("sweep_duration_uncertainty_s", "float", []),
         ("duration_correction", "float", []),
-        ("duration_uncertainty", "float", []),
+        ("duration_ratio", "float", []),
+        # The uncertainty of a duration is a length of time.
+        ("duration_uncertainty", "float", [_DURATION_UNIT_RULE]),
+        ("duration_uncertainty_hours", "float", []),
         ("include_duration_uncertainty", "bool", []),
         ("duration", "VibrationDuration", []),
         ("duration", "VibrationDuration | None", []),
@@ -1587,6 +1685,70 @@ def test_the_duration_rule_reads_a_name(
     name: str, annotation: str, expected: list[str]
 ) -> None:
     assert _duration_problems(name, annotation, _ALIASES) == expected
+
+
+def test_the_duration_rule_reads_a_function_a_method_and_a_constant() -> None:
+    """A function, a method or a constant named for a duration says its unit too.
+
+    The walk reads the name a module lists in ``__all__`` and the methods of
+    a class, beside the parameters, fields and properties: a function
+    ``strike_duration`` that returns seconds, a method ``rise_duration``, a
+    static or class method and a constant ``DEFAULT_PULSE_DURATION`` are
+    refused, the same names with their unit pass, and so does a predicate
+    that returns a ``bool``.
+    """
+
+    def strike_duration(x: float) -> float:
+        return x
+
+    def strike_duration_s(x: float) -> float:
+        return x
+
+    def is_long_duration(x: float) -> bool:
+        return x > 1.0
+
+    class PileStrike:
+        def rise_duration(self) -> float:
+            return 0.0
+
+        def rise_duration_ms(self) -> float:
+            return 0.0
+
+        @staticmethod
+        def tail_duration() -> float:
+            return 0.0
+
+        @classmethod
+        def decay_duration(cls) -> float:
+            return 0.0
+
+        def has_duration(self) -> bool:
+            return True
+
+    module = types.ModuleType("probe")
+    exported = {
+        "strike_duration": strike_duration,
+        "strike_duration_s": strike_duration_s,
+        "is_long_duration": is_long_duration,
+        "PileStrike": PileStrike,
+        "DEFAULT_PULSE_DURATION": 0.1,
+        "TAKT_DURATION_S": 0.125,
+        "SHORT_DURATION_ENABLED": True,
+    }
+    vars(module).update(exported, __all__=list(exported))
+    names = [
+        *_exported_names([module, module]),
+        *_method_names([("probe.PileStrike", PileStrike)]),
+    ]
+    offenders = _duration_offenders(names)
+    assert sorted(where.rsplit(".", 1)[-1] for where in offenders) == [
+        "DEFAULT_PULSE_DURATION",
+        "decay_duration",
+        "rise_duration",
+        "strike_duration",
+        "tail_duration",
+    ]
+    assert len(names) == 11, "a name read twice, or one not read"
 
 
 #: A parameter that names the time signal in a spelling the API retired.

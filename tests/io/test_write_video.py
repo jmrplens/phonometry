@@ -54,7 +54,7 @@ def _animation(
     *,
     frames: int = 6,
     pixels: tuple[int, int] = (200, 150),
-    facecolor: str = "white",
+    facecolor: str | tuple[float, float, float, float] = "white",
     canvas: type = FigureCanvasAgg,
     on_frame: Callable[[int, Figure], None] | None = None,
     interval: float = 50.0,
@@ -149,6 +149,33 @@ def test_an_odd_figure_is_padded_with_its_own_colour(
     argv = fake.encodes()[0]["argv"]
     assert _after(argv, "-s") == "201x151"
     assert _after(argv, "-vf") == "pad=ceil(iw/2)*2:ceil(ih/2)*2:color=#336699"
+
+
+@pytest.mark.parametrize(
+    ("facecolor", "colour"),
+    [
+        # 0.7 x 255 = 178.5: Agg rounds the half up to b3, as the pad must.
+        ((0.2, 0.4, 0.6, 0.5), "99b3cc"),
+        ((0.0, 0.0, 0.0, 0.5), "808080"),
+        ((1.0, 0.0, 0.0, 0.25), "ffbfbf"),
+    ],
+)
+def test_a_transparent_figure_is_padded_with_the_colour_its_frames_show(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    facecolor: tuple[float, float, float, float],
+    colour: str,
+) -> None:
+    """The pad is the facecolor laid on white as Animation.save lays it, level for level."""
+    first = tmp_path / "first.rgba"
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch, first_frame=str(first))
+    io.write_video(
+        tmp_path / "w.webm", _animation(pixels=(201, 151), facecolor=facecolor)
+    )
+    pad = _after(fake.encodes()[0]["argv"], "-vf")
+    assert pad == f"pad=ceil(iw/2)*2:ceil(ih/2)*2:color=#{colour}"
+    corner = np.frombuffer(first.read_bytes(), dtype=np.uint8)[:4]
+    assert bytes(corner).hex() == f"{colour}ff"
 
 
 def test_the_callers_settings_do_not_reach_the_frames(

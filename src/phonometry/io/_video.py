@@ -428,17 +428,22 @@ def _frame_rate(request: VideoRequest, animation: Animation) -> str:
 
 
 def _pad_color(fig: Figure) -> str:
-    """The figure's facecolor composited on white, as ``Animation.save`` does."""
-    from matplotlib.colors import to_hex, to_rgba
+    """The figure's facecolor composited on white, as ``Animation.save`` does, at the level Agg draws it.
+
+    The composite is computed in the order ``Animation.save`` computes it,
+    and each channel is taken to eight bits as Agg takes it, rounding a
+    half up: :func:`matplotlib.colors.to_hex` rounds a half to even, and
+    would pad a half-transparent ``#336699`` with ``b2`` where the frames
+    show ``b3``.
+    """
+    from matplotlib.colors import to_rgba
 
     red, green, blue, alpha = to_rgba(fig.get_facecolor())
-    return to_hex(
-        (
-            alpha * red + 1.0 - alpha,
-            alpha * green + 1.0 - alpha,
-            alpha * blue + 1.0 - alpha,
-        )
+    levels = (
+        math.floor((alpha * channel + 1.0 - alpha) * 255.0 + 0.5)
+        for channel in (red, green, blue)
     )
+    return "#" + "".join(f"{level:02x}" for level in levels)
 
 
 def _with_agg(fig: Figure) -> dict[str, str]:

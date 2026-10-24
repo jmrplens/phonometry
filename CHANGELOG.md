@@ -3426,7 +3426,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   layer), `absorbing_sides=` and `absorbing_layer_reflection=` where they took
   `sponge_width=`, `sponge_sides=` and `sponge_reflection=`, and read
   `.absorbing_layer_cells` and `.absorbing_sides` where they read
-  `.sponge_width` and `.sponge_sides`: the words an acoustic run and an
+  `.sponge_width` and `.sponge_sides`: the words an `FDTDBoundaries` and an
   `ElasticBoundaries` use for the same layer. The sponge is still the layer's
   physical name in the guides, and its errors name the new parameters.
   `FDTD2D.add_plane_wave(direction, *, center_m, half_width_m,

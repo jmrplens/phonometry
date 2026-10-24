@@ -16,10 +16,13 @@ node says reaches the terminal with its control characters escaped.
 from __future__ import annotations
 
 import io
+import os
 import pathlib
+import signal
 import subprocess
 import sys
 import tarfile
+import threading
 from typing import TYPE_CHECKING, Any, BinaryIO
 
 import child_process
@@ -40,7 +43,7 @@ import figures.registry  # noqa: F401
 from phonometry.simulation._remote.hosts import HostEntry
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Mapping
 
 # The client reads the frame audit and the registry: the figure stack.
 pytestmark = pytest.mark.pinned_stack
@@ -329,7 +332,9 @@ def stamps(monkeypatch: pytest.MonkeyPatch) -> list[tuple[list[str], str | None]
     monkeypatch.setattr(
         animation_fingerprint,
         "stamp",
-        lambda clips, root=None, *, encoder: seen.append((list(clips), encoder)),
+        lambda clips, root=None, *, encoder, current=None: seen.append(
+            (list(clips), encoder)
+        ),
     )
     return seen
 
@@ -453,6 +458,35 @@ def test_a_copy_that_stops_part_way_replaces_none_of_the_clip_s_files(
     assert sorted(p.name for p in places.clips.iterdir()) == sorted(names)
     assert all((places.clips / name).read_bytes() == b"earlier run" for name in names)
     assert stamps == []
+
+
+def test_a_clip_is_stamped_with_the_fingerprint_it_was_compared_with(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The stamp takes the fingerprints the run took on the tree it sent, not every clip's again.
+
+    Taking them all takes from twenty seconds to a minute, for each clip the
+    run copies, and the tree they were taken on is the run's own, which
+    nothing changes.
+    """
+    import animation_fingerprint
+
+    def again(root: pathlib.Path) -> dict[str, str]:
+        pytest.fail("the stamp took every clip's fingerprint again")
+
+    monkeypatch.setattr(animation_fingerprint, "MANIFEST", tmp_path / "manifest.txt")
+    monkeypatch.setattr(animation_fingerprint, "fingerprints", again)
+    header, buffers = _clip_frame()
+    reason = clip_transport.accept(
+        header,
+        buffers,
+        current={"anim_x": "f00d"},
+        expect=_EXPECT,
+        places=_places(tmp_path),
+    )
+    assert reason is None
+    assert animation_fingerprint.read_manifest() == {"anim_x": "f00d"}
+    assert animation_fingerprint.read_encoders() == {"anim_x": "av1_nvenc"}
 
 
 def _stream(*frames: tuple[dict[str, Any], list[bytes]], cut: int = 0) -> io.BytesIO:
@@ -677,6 +711,168 @@ def test_what_the_node_writes_to_its_standard_error_reaches_the_terminal_escaped
     assert "Traceback\n  boom\\x1b]52;c;ZXZpbA==\\x07\n" in shown
 
 
+def test_a_checkout_that_moves_stops_the_node_at_the_first_clip_it_sends(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """No clip rendered after the checkout moved would be copied, so the node is not left rendering them.
+
+    The node here sends its first clip and gives the client ten seconds to
+    close its input before it sends the next one.
+    """
+    from phonometry.simulation import Compute
+    from phonometry.simulation._remote import command
+
+    monkeypatch.setattr(command, "_SSH_PROGRAM", ("ssh",))
+    first = _stream(_clip_frame("anim_x")).getvalue()
+    rest = _stream(_clip_frame("anim_y"), ({"type": "done"}, [])).getvalue()
+    program = (
+        "import sys, threading\n"
+        "closed = threading.Event()\n"
+        "def drain():\n"
+        "    sys.stdin.buffer.read()\n"
+        "    closed.set()\n"
+        "threading.Thread(target=drain, daemon=True).start()\n"
+        f"sys.stdout.buffer.write({first!r})\n"
+        "sys.stdout.buffer.flush()\n"
+        "if not closed.wait(10):\n"
+        f"    sys.stdout.buffer.write({rest!r})\n"
+        "    sys.stdout.buffer.flush()\n"
+        "    closed.wait(60)\n"
+    )
+
+    def spawn(argv: list[str], **kwargs: Any) -> subprocess.Popen[bytes]:
+        return subprocess.Popen([sys.executable, "-c", program], **kwargs)
+
+    expect = clip_transport.Expect(
+        clips=frozenset({"anim_x", "anim_y"}), encoder="av1_nvenc", audit_only=False
+    )
+    problems = clip_transport._talk(
+        _here(),
+        Compute(host="here"),
+        clip_transport.job_header(
+            sorted(expect.clips),
+            devices={},
+            gpu_bytes={},
+            host_bytes={},
+            compute="cpu",
+            encoder="av1_nvenc",
+            audit_only=False,
+        ),
+        b"0" * 64,
+        lambda stream: clip_transport.receive_all(
+            stream,
+            expect=expect,
+            places=_places(tmp_path),
+            current={"anim_x": "f00d", "anim_y": "f00d"},
+            still=lambda: False,
+        ),
+        spawn,
+    )
+    assert problems == [
+        "anim_x: the checkout moved during the run; not copied",
+        "anim_y: the checkout moved during the run; the node was stopped before it sent it",
+    ]
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="a session is POSIX")
+def test_the_connection_leads_a_session_of_its_own(
+    repo: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Ctrl-C at the terminal reaches this process and not ssh, so the node is told to stop, not cut off."""
+    from phonometry.simulation import Compute
+    from phonometry.simulation._remote import command
+
+    monkeypatch.setattr(clip_link, "host_entry", lambda name: _here())
+    monkeypatch.setattr(command, "_SSH_PROGRAM", ("ssh",))
+    answer = _answering(({"type": "done"}, []))
+    sessions: list[tuple[int, int]] = []
+
+    def spawn(argv: list[str], **kwargs: Any) -> subprocess.Popen[bytes]:
+        # Popen returns once the program runs, so its session is set by then.
+        process = answer(argv, **kwargs)
+        sessions.append((process.pid, os.getsid(process.pid)))
+        return process
+
+    found = clip_transport.check_node(
+        Compute(host="here"), encoder="libsvtav1", root=repo, spawn=spawn
+    )
+    assert found == []
+    ((pid, session),) = sessions
+    assert session == pid
+
+
+class _InterruptedInItsGrace(subprocess.Popen[bytes]):
+    """ssh, and a second Ctrl-C at the terminal while the node is given its grace.
+
+    The first wait is the grace; whatever waits after it is let through.
+    """
+
+    interrupted = False
+
+    def wait(self, timeout: float | None = None) -> int:
+        if not self.interrupted:
+            self.interrupted = True
+            raise KeyboardInterrupt
+        return super().wait(timeout)
+
+
+def _relayed(process: subprocess.Popen[bytes]) -> threading.Thread:
+    relay = threading.Thread(
+        target=clip_transport._relay, args=(process.stderr,), daemon=True
+    )
+    relay.start()
+    return relay
+
+
+def test_a_second_interrupt_while_the_node_is_given_its_grace_still_ends_ssh() -> None:
+    """ssh leads a session of its own, which nothing else at the terminal ends: it is never left behind."""
+    process = _InterruptedInItsGrace(
+        [sys.executable, "-c", "import time; time.sleep(60)"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    relay = _relayed(process)
+    try:
+        with pytest.raises(KeyboardInterrupt):
+            clip_transport._end(process, relay)
+        assert process.poll() is not None, "ssh outlived a second interrupt"
+    finally:
+        process.kill()
+        process.wait(timeout=30)
+        relay.join(timeout=30)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="a kill on Windows says no signal")
+def test_a_node_blocked_sending_ends_without_waiting_out_its_grace(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Once the client stops reading, a node in the middle of a send learns it at once.
+
+    Its output is closed before the grace begins, so the send fails and the
+    node ends of itself instead of being killed when the grace runs out.
+    """
+    monkeypatch.setattr(clip_transport, "EXIT_GRACE_S", 20.0)
+    sending = "import sys; sys.stdout.buffer.write(b'0' * (8 << 20)); sys.stdout.buffer.flush()"
+    process = subprocess.Popen(
+        [sys.executable, "-c", sending],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    relay = _relayed(process)
+    try:
+        clip_transport._end(process, relay)
+        assert process.returncode is not None
+        assert process.returncode != -signal.SIGKILL, (
+            "the node was waited out and killed"
+        )
+    finally:
+        process.kill()
+        process.wait(timeout=30)
+        relay.join(timeout=30)
+
+
 def _answering(
     *frames: tuple[dict[str, Any], list[bytes]],
 ) -> Callable[..., subprocess.Popen[bytes]]:
@@ -700,7 +896,8 @@ def test_a_run_stamps_each_clip_on_the_tree_it_sent(
     """The fingerprints are taken on HEAD as the node was sent it, never on the working tree.
 
     An edit saved while a clip is copied would otherwise be stamped as the
-    code that clip was rendered from.
+    code that clip was rendered from. They are taken once: each stamp is
+    handed those the clip was compared with.
     """
     import animation_fingerprint
     import assets_dir
@@ -709,7 +906,9 @@ def test_a_run_stamps_each_clip_on_the_tree_it_sent(
     from phonometry.simulation._remote import command
 
     trees: list[pathlib.Path] = []
-    stamped: list[tuple[list[str], pathlib.Path | None, str | None]] = []
+    stamped: list[
+        tuple[list[str], pathlib.Path | None, str | None, Mapping[str, str] | None]
+    ] = []
 
     def fingerprints(root: pathlib.Path) -> dict[str, str]:
         # The archive's tree: what a render reads of HEAD, and nothing else.
@@ -719,11 +918,13 @@ def test_a_run_stamps_each_clip_on_the_tree_it_sent(
         return {"anim_x": "f00d"}
 
     def stamp(
-        clips: list[str], root: pathlib.Path | None = None, *, encoder: str | None
+        clips: list[str],
+        root: pathlib.Path | None = None,
+        *,
+        encoder: str | None,
+        current: Mapping[str, str] | None = None,
     ) -> None:
-        assert root is not None
-        fingerprints(root)
-        stamped.append((list(clips), root, encoder))
+        stamped.append((list(clips), root, encoder, current))
 
     monkeypatch.setattr(animation_fingerprint, "fingerprints", fingerprints)
     monkeypatch.setattr(animation_fingerprint, "stamp", stamp)
@@ -750,8 +951,9 @@ def test_a_run_stamps_each_clip_on_the_tree_it_sent(
     assert sorted(p.name for p in (tmp_path / "images").iterdir()) == sorted(
         check_animation_freshness.outputs("anim_x")
     )
-    assert trees[0] != repo
-    assert stamped == [(["anim_x"], trees[0], "av1_nvenc")]
+    (tree,) = trees
+    assert tree != repo
+    assert stamped == [(["anim_x"], tree, "av1_nvenc", {"anim_x": "f00d"})]
 
 
 @pytest.mark.parametrize(

@@ -997,6 +997,25 @@ def test_a_stamp_records_the_encoder_and_a_poster_stamp_keeps_it(
     assert fp.read_encoders() == {"anim_one": "av1_nvenc"}
 
 
+def test_a_stamp_given_the_fingerprints_of_its_tree_records_them_as_given(
+    tree: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A caller that has taken them on the tree already passes them, and they are not taken again.
+
+    Only the clips named are stamped: the rest of the mapping is left out.
+    """
+
+    def again(root: pathlib.Path) -> dict[str, str]:
+        pytest.fail("the stamp took the fingerprints it was given")
+
+    monkeypatch.setattr(fp, "MANIFEST", tree / "manifest.txt")
+    monkeypatch.setattr(fp, "fingerprints", again)
+    taken = {"anim_one": "0123456789abcdef", "anim_two": "fedcba9876543210"}
+    fp.stamp(["anim_one"], tree, encoder="libsvtav1", current=taken)
+    assert fp.read_manifest() == {"anim_one": "0123456789abcdef"}
+    assert fp.read_encoders() == {"anim_one": "libsvtav1"}
+
+
 def test_a_poster_stamp_of_a_clip_with_no_encoder_is_refused(
     tree: pathlib.Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

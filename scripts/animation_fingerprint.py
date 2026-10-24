@@ -98,7 +98,7 @@ import sys
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Iterator
+    from collections.abc import Iterable, Iterator, Mapping
 
 _SCRIPTS = pathlib.Path(__file__).resolve().parent
 
@@ -941,6 +941,7 @@ def stamp(
     root: pathlib.Path | None = None,
     *,
     encoder: ClipEncoder | None,
+    current: Mapping[str, str] | None = None,
 ) -> None:
     """Record the current fingerprint of *clips*, leaving the rest alone.
 
@@ -956,6 +957,10 @@ def stamp(
 
     :param encoder: The encoder that wrote the clips' WebM, or None to keep
         the one recorded (re-extracted posters).
+    :param current: The fingerprints of *root*'s clips, for a caller that
+        has already taken them on a tree nothing changes since (a node run,
+        on the archive it sent); None takes them here, every registered
+        clip's, which takes from twenty seconds to a minute.
     :raises FileNotFoundError: when a clip steps an FDTD engine and the tree
         has no ``engine-digests.json``.
     :raises ValueError: when *encoder* is None and a clip has none recorded.
@@ -965,7 +970,8 @@ def stamp(
     names = list(clips)
     if not names:
         return
-    current = fingerprints(root or _SCRIPTS.parent)
+    if current is None:
+        current = fingerprints(root or _SCRIPTS.parent)
     # The lock file is never removed: unlinking it after the release lets a
     # later run create a fresh inode and lock that one while another run is
     # still inside the old one, which is the very race this guards.

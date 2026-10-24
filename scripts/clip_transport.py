@@ -21,7 +21,8 @@ keeps every clip that arrived whole and nothing else, and the next run
 picks up the rest. The fingerprints, those compared and those stamped, are
 taken on the archive as it was sent, unpacked here, so an edit saved while
 a clip is copied is never stamped as the code that rendered it; a clip that
-arrives once the checkout has moved is not copied at all.
+arrives once the checkout has moved is not copied at all, and the node is
+stopped there, since no clip it renders after that would be.
 """
 
 from __future__ import annotations
@@ -310,10 +311,10 @@ def default_encoder(compute: Compute) -> animation_fingerprint.ClipEncoder:
 class Expect:
     """What this run asked the node for.
 
-    :ivar tree: The archive the node was sent, unpacked here: each stamp is
-        taken on it, so it records the code the clip was rendered from
-        whatever the working tree holds by then; ``None`` takes it on this
-        checkout.
+    :ivar tree: The archive the node was sent, unpacked here: the
+        fingerprints each clip is compared with and stamped with are taken on
+        it, so a stamp records the code the clip was rendered from whatever
+        the working tree holds by then; ``None`` stands for this checkout.
     """
 
     clips: frozenset[str]
@@ -481,7 +482,10 @@ def accept(
 
     *header* is a frame :func:`result_sizes` took, and *buffers* its files.
     The clip's files are replaced together, its language records in place
-    of those an earlier run of it left, and only then is it stamped.
+    of those an earlier run of it left, and only then is it stamped, with
+    the fingerprint in *current* it was compared with: those of
+    ``expect.tree``, which nothing changes during the run, so they are not
+    taken again.
 
     :raises OSError: when a file cannot be written, which leaves the clip's
         files on disk as they were, or cannot be moved in; the clip is not
@@ -516,7 +520,9 @@ def accept(
         writes += records
     _land(writes, stale)
     if not expect.audit_only:
-        animation_fingerprint.stamp([clip], expect.tree, encoder=expect.encoder)
+        animation_fingerprint.stamp(
+            [clip], expect.tree, encoder=expect.encoder, current=current
+        )
     return None
 
 
@@ -529,6 +535,15 @@ def _refusal(header: Mapping[str, Any]) -> str:
     )
 
 
+def _moved(clip: str, remaining: set[str]) -> list[str]:
+    """The problems of a run whose checkout moved as *clip* arrived, with *remaining* still to come."""
+    moved = "the checkout moved during the run"
+    return [f"{clip}: {moved}; not copied"] + [
+        f"{other}: {moved}; the node was stopped before it sent it"
+        for other in sorted(remaining)
+    ]
+
+
 def receive_all(
     stream: BinaryIO,
     *,
@@ -539,10 +554,12 @@ def receive_all(
 ) -> list[str]:
     """Take every frame the node sends; the problems, one per clip.
 
-    ``still()`` says the checkout is as it was when the run began; a clip
-    that arrives after it moved is not copied. A node that stops before it
-    says it is done is a problem even when no clip is missing: a check (a
-    job of no clips), or a crash after the last clip.
+    ``still()`` says the checkout is as it was when the run began. A clip
+    that arrives after it moved is not copied, and nor would any after it
+    be, so the reading stops there: :func:`_talk` then closes the node's
+    input, which stops its lanes. A node that stops before it says it is
+    done is a problem even when no clip is missing: a check (a job of no
+    clips), or a crash after the last clip.
 
     :raises RuntimeError: when the node refuses the job.
     :raises ValueError: for a frame this run did not ask for; the clips
@@ -570,11 +587,9 @@ def receive_all(
                 f"{c}: the node never sent it" for c in sorted(remaining)
             ]
         remaining.discard(header["clip"])
-        reason = (
-            accept(header, buffers, current=current, expect=expect, places=places)
-            if still()
-            else f"{header['clip']}: the checkout moved during the run; not copied"
-        )
+        if not still():
+            return problems + _moved(header["clip"], remaining)
+        reason = accept(header, buffers, current=current, expect=expect, places=places)
         if reason is None:
             sys.stderr.write(f"  {header['clip']}: received\n")
         else:
@@ -634,24 +649,31 @@ def _end(process: subprocess.Popen[bytes], relay: threading.Thread) -> None:
     """Close the node's input, give it :data:`EXIT_GRACE_S` to end, and kill it if it does not.
 
     Closing its input is how the node is told to stop: it ends every lane's
-    process group and removes what it unpacked. Every wait here is bounded.
+    process group and removes what it unpacked. Its output is closed first,
+    as nothing reads it any more: a node in the middle of sending a clip
+    learns it at once, instead of waiting out its grace. ssh leads a session
+    of its own, which an interrupt at the terminal does not reach, so it is
+    killed here whatever ends the wait, a second interrupt included. Every
+    wait here is bounded.
     """
-    if process.stdin is not None:
-        with contextlib.suppress(OSError):
-            process.stdin.close()
-    try:
-        process.wait(timeout=EXIT_GRACE_S)
-    except subprocess.TimeoutExpired:
-        process.kill()
-        with contextlib.suppress(subprocess.TimeoutExpired):
-            process.wait(timeout=_KILLED_S)
-    relay.join(timeout=_KILLED_S)
     if process.stdout is not None:
         process.stdout.close()
-    # A relay still blocked on the stream (held open by a process ssh
-    # started) holds its lock: closing it would wait as long.
-    if process.stderr is not None and not relay.is_alive():
-        process.stderr.close()
+    try:
+        if process.stdin is not None:
+            with contextlib.suppress(OSError):
+                process.stdin.close()
+        with contextlib.suppress(subprocess.TimeoutExpired):
+            process.wait(timeout=EXIT_GRACE_S)
+    finally:
+        if process.poll() is None:
+            process.kill()
+            with contextlib.suppress(subprocess.TimeoutExpired):
+                process.wait(timeout=_KILLED_S)
+        relay.join(timeout=_KILLED_S)
+        # A relay still blocked on the stream (held open by a process ssh
+        # started) holds its lock: closing it would wait as long.
+        if process.stderr is not None and not relay.is_alive():
+            process.stderr.close()
 
 
 def _talk(
@@ -665,9 +687,12 @@ def _talk(
     """Start the node, send it the bootstrap, the archive and the job, and take its answer.
 
     Its input stays open while *receive* reads, since closing it cancels
-    the run. A node that exits before it has read everything leaves a broken
-    pipe here; what it said, if anything, is still read, and an exit status
-    other than 0 is named.
+    the run. ssh is started in a session of its own: Ctrl-C at the terminal
+    reaches this process alone, which then closes the node's input and
+    gives it its grace (:func:`_end`), rather than cutting the connection
+    under it. A node that exits before it has read everything leaves a
+    broken pipe here; what it said, if anything, is still read, and an exit
+    status other than 0 is named.
 
     :raises FileNotFoundError: when no ``ssh`` is on ``PATH``.
     :raises OSError: when the connection cannot be started; and whatever
@@ -678,6 +703,7 @@ def _talk(
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        start_new_session=True,
     )
     relay = threading.Thread(
         target=_relay, args=(process.stderr,), name="clip-node-stderr", daemon=True

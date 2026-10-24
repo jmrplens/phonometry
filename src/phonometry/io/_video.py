@@ -845,5 +845,11 @@ def write_video(
     options = video_options(video)
     request = video_request(path, options)
     _require_animation(anim)
+    # The arguments and ffmpeg are checked before the directory is, as the
+    # simulation writers do: a wrong argument or a missing ffmpeg is reported
+    # as itself, and the probe file is made only for a video that can be
+    # written.
+    _frame_rate(request, anim)
+    found = find_ffmpeg()
     require_writable(request)
-    encode(request, anim)
+    encode(request, anim, ffmpeg=describe(found))

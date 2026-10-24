@@ -1195,12 +1195,19 @@ def _render_part(
     )
 
 
-def _oversized_section(md_name: str, sections: list[str], room: int) -> str:
-    """Why a page cannot be cut into parts that fit, naming the culprit."""
-    size = len((DOCS / md_name).read_bytes())
+def _oversized_section(
+    *, slug: str, md_name: str, shard_bytes: int, sections: list[str], room: int
+) -> str:
+    """Why a page cannot be cut into parts that fit, naming the culprit.
+
+    The size quoted is the shard's, *shard_bytes*, not the source file's: the
+    head, the attribution and the absolute links the shard adds can take a
+    page whose own file fits the budget over it.
+    """
     lead = (
-        f"generate_llms.py: docs/{md_name} is {size:,} bytes, over the "
-        f"{SHARD_LIMIT_BYTES:,} byte budget of one fetch, and "
+        f"generate_llms.py: docs/{md_name} makes llms-{slug}.txt "
+        f"{shard_bytes:,} bytes, over the {SHARD_LIMIT_BYTES:,} byte budget of "
+        "one fetch, and "
     )
     if not any(section.startswith("## ") for section in sections):
         return lead + "it has no H2 heading to cut it at. Divide it under H2 headings."
@@ -1223,7 +1230,9 @@ def _oversized_section(md_name: str, sections: list[str], room: int) -> str:
     )
 
 
-def _page_parts(slug: str, title: str, page: tuple[str, str]) -> tuple[str, ...]:
+def _page_parts(
+    slug: str, title: str, page: tuple[str, str], *, shard_bytes: int
+) -> tuple[str, ...]:
     """A page too long for one fetch, cut at its H2 headings into parts.
 
     As few parts as fit the budget, as even as the sections allow, each a
@@ -1232,7 +1241,8 @@ def _page_parts(slug: str, title: str, page: tuple[str, str]) -> tuple[str, ...]
     cited back. The head grows with the number of parts it lists, so the count
     is settled first and the room each part leaves for the page follows from
     it. A section over the budget by itself cannot be placed in any part, and
-    is refused by name rather than cut mid-text.
+    is refused by name rather than cut mid-text; *shard_bytes*, the size of
+    the page as one shard, is the size that refusal quotes.
     """
     md_name, route = page
     sections = _sections(_page_text(md_name))
@@ -1245,7 +1255,15 @@ def _page_parts(slug: str, title: str, page: tuple[str, str]) -> tuple[str, ...]
         )
         room = SHARD_LIMIT_BYTES - len(head.encode("utf-8"))
         if len(sections) < 2 or max(sizes) > room:
-            raise SystemExit(_oversized_section(md_name, sections, room))
+            raise SystemExit(
+                _oversized_section(
+                    slug=slug,
+                    md_name=md_name,
+                    shard_bytes=shard_bytes,
+                    sections=sections,
+                    room=room,
+                )
+            )
         needed = len(_starts(sizes, room))
         if needed <= count:
             break
@@ -1280,9 +1298,10 @@ def _shard_parts(
     page itself is cut, at its own H2 headings.
     """
     text = _shard_text(title, pages)
-    if len(pages) != 1 or len(text.encode("utf-8")) <= SHARD_LIMIT_BYTES:
+    shard_bytes = len(text.encode("utf-8"))
+    if len(pages) != 1 or shard_bytes <= SHARD_LIMIT_BYTES:
         return (text,)
-    return _page_parts(slug, title, pages[0])
+    return _page_parts(slug, title, pages[0], shard_bytes=shard_bytes)
 
 
 def _published(shards: Mapping[str, tuple[str, ...]]) -> dict[str, str]:

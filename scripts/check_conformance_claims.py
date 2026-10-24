@@ -18,10 +18,10 @@ The Astro page bodies import the numbers from
 the text that has no build step to interpolate through: the plain-markdown
 mirror under ``docs/``, the ``README.md`` and generated ``README_PYPI.md`` at
 the repository root, the README of the PyOctaveBand transition stub, the
-``.zenodo.json`` description, and the YAML frontmatter of the site pages (the landing-page meta descriptions and the
-JSON-LD blocks on the conformance pages, which are static data parsed before
-MDX ever runs). Those used to be edited by hand after every change that moved
-a count.
+``.zenodo.json`` description, and the YAML frontmatter of the site pages (the
+landing-page meta descriptions and the JSON-LD blocks on the conformance
+pages, which are static data parsed before MDX ever runs). Those used to be
+edited by hand after every change that moved a count.
 
 The READMEs are why the file set reaches the repository root at all, instead
 of stopping at ``docs/``. They sat outside it, said "more than 250 standards"

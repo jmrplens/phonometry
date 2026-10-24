@@ -66,6 +66,19 @@ def docs(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
+def _whole_shards(monkeypatch: pytest.MonkeyPatch) -> dict[str, str]:
+    """Every shard in one file, built under a budget each of them fits whole.
+
+    The real budget may already have cut the upgrade guide, and will once a
+    branch adds to it, so a test that needs the page in one piece builds it
+    with no budget to speak of and sets the one it tests afterwards.
+    """
+    monkeypatch.setattr(llms, "SHARD_LIMIT_BYTES", 10**9)
+    shards = llms.build_shards()
+    assert all(len(parts) == 1 for parts in shards.values())
+    return {slug: parts[0] for slug, parts in shards.items()}
+
+
 def test_the_upgrade_guide_over_the_budget_is_cut_at_its_h2_headings(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -74,12 +87,7 @@ def test_the_upgrade_guide_over_the_budget_is_cut_at_its_h2_headings(
     Every part fits, every part after the first opens on an H2, and the parts
     together hold the page line for line: nothing dropped, nothing repeated.
     """
-    whole = llms.build_shards()["upgrading"]
-    assert isinstance(whole, tuple), (
-        "build_shards() gives each shard as one text, so a shard has no way to "
-        "travel in parts"
-    )
-    (text,) = whole
+    text = _whole_shards(monkeypatch)["upgrading"]
     limit = _bytes(text) * 3 // 5
     monkeypatch.setattr(llms, "SHARD_LIMIT_BYTES", limit)
 
@@ -106,22 +114,20 @@ def test_every_shard_that_fits_is_left_as_it_was(
     refuse and a narrower split to fix; every shard under it is byte for byte
     what it was.
     """
-    before = llms.build_shards()
-    (upgrading,) = before["upgrading"]
-    limit = _bytes(upgrading) * 3 // 5
+    before = _whole_shards(monkeypatch)
+    limit = _bytes(before["upgrading"]) * 3 // 5
     monkeypatch.setattr(llms, "SHARD_LIMIT_BYTES", limit)
 
     after = llms.build_shards()
 
     assert after.keys() == before.keys()
-    assert all(len(parts) == 1 for parts in before.values())
     cut = {slug for slug, parts in after.items() if len(parts) > 1}
     assert "upgrading" in cut
     for slug, parts in after.items():
         if slug not in cut:
-            assert parts == before[slug], f"llms-{slug}.txt changed"
+            assert parts == (before[slug],), f"llms-{slug}.txt changed"
         else:
-            assert _bytes(before[slug][0]) > limit
+            assert _bytes(before[slug]) > limit
 
 
 def test_a_fenced_line_that_looks_like_an_h2_is_not_a_cut(
@@ -213,13 +219,24 @@ def test_a_section_over_the_budget_by_itself_is_refused_by_name(
 def test_a_page_with_no_h2_over_the_budget_is_refused_by_name(
     docs: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    (docs / "flat.md").write_text(
-        "# Flat\n\n" + "One long paragraph and no section. " * 2_000,
-        encoding="utf-8",
-    )
-    monkeypatch.setattr(llms, "SHARD_LIMIT_BYTES", 40_000)
+    """The refusal gives the size the shard would have, not the source's.
 
-    with pytest.raises(SystemExit, match=r"docs/flat\.md.*no H2 heading"):
+    The shard adds its head, the attribution and absolute links to the page,
+    so a page whose own file fits the budget can still make a shard over it:
+    quoting the source's size would report a number under the budget as the
+    reason the run stopped.
+    """
+    limit = 40_000
+    source = "# Flat\n\n" + "One long paragraph and no section. " * 1_141
+    (docs / "flat.md").write_text(source, encoding="utf-8")
+    monkeypatch.setattr(llms, "SHARD_LIMIT_BYTES", limit)
+    shard = _bytes(llms._shard_text("Flat", [("flat.md", "flat")]))
+    assert _bytes(source) <= limit < shard
+
+    with pytest.raises(
+        SystemExit,
+        match=rf"docs/flat\.md makes llms-flat\.txt {shard:,} bytes.*no H2 heading",
+    ):
         llms._shard_parts("flat", "Flat", [("flat.md", "flat")])
 
 
@@ -227,7 +244,7 @@ def test_the_index_lists_every_part_and_not_the_whole(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """``llms.txt`` names each part file, and no file the run did not write."""
-    (upgrading,) = llms.build_shards()["upgrading"]
+    upgrading = _whole_shards(monkeypatch)["upgrading"]
     monkeypatch.setattr(llms, "SHARD_LIMIT_BYTES", _bytes(upgrading) * 3 // 5)
     shards = llms.build_shards()
     files = {slug: llms._part_names(slug, len(parts)) for slug, parts in shards.items()}
@@ -247,7 +264,7 @@ def test_the_index_lists_every_part_and_not_the_whole(
 
 def test_a_carved_out_heading_links_every_part_of_its_shard() -> None:
     """The index heading of a cut shard offers each part, in order."""
-    files = {slug: (slug,) for slug in llms.build_shards()}
+    files: dict[str, tuple[str, ...]] = {slug: (slug,) for slug in llms.build_shards()}
     files["devices-emission-intensity"] = llms._part_names(
         "devices-emission-intensity", 2
     )

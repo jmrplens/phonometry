@@ -5076,6 +5076,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `llms-reference.txt` for the glossary finds it at the new address, and the
   ISO 3743 guide joins the reverberant sound power shard,
   `llms-devices-emission-reverberant.txt`.
+- **A page too long for one fetch reaches an AI client in numbered parts.**
+  A shard that holds a single page, as `llms-upgrading.txt` holds the upgrade
+  guide, has no narrower split to move to once the page outgrows the
+  200 000-byte budget. `make llms` now publishes such a page as
+  `llms-<shard>-1.txt`, `llms-<shard>-2.txt` and so on, cut at its own H2
+  headings into as few parts as fit, each part opening with the page's
+  attribution and naming every other part, and `llms.txt` lists every part
+  where it listed the shard. A client that fetched `llms-upgrading.txt` finds
+  the guide in `llms-upgrading-1.txt` and the parts after it from the release
+  in which the guide outgrows the budget. A section over the budget by itself
+  stops the run with the page and the heading named, and a shard of several
+  pages is still narrowed by a split that follows the domain.
 - **The published catalogues page reads in Spanish, and its controls sit on the table.**
   The Spanish page printed every row's words in English: the 1227 material
   names, their variants and groups, the notes on rows and cells, and the

@@ -135,14 +135,15 @@ vídeo que escribas.
 | `fps` | fotogramas por segundo, un número positivo, o `None` | `None`: el `interval` de la animación |
 | `ffmpeg_encoder` | un nombre de codificador de ffmpeg, o `None` | `None` |
 | `ffmpeg_options` | más opciones de salida de ffmpeg, como textos separados | `()` |
+| `vaapi_device` | la ruta del dispositivo de GPU en el que codifica VAAPI | `"/dev/dri/renderD128"` |
 
 Construir el registro lanza `ValueError` (`TypeError` para un valor de tipo
 equivocado, como un booleano en `fps`) ante una elección fuera de sus
-opciones, un `fps` que no sea un número finito positivo, un
-`ffmpeg_encoder` o unas `ffmpeg_options` que contengan un carácter NUL, que
-ningún argumento de un programa puede llevar, un `ffmpeg_encoder` junto a un
-`encoder` o un `codec` elegidos por ti, y un `codec` que el tipo de
-codificador que nombraste no escribe, como
+opciones, un `fps` que no sea un número finito positivo, un `vaapi_device`
+vacío, un `ffmpeg_encoder`, unas `ffmpeg_options` o un `vaapi_device` que
+contengan un carácter NUL, que ningún argumento de un programa puede llevar,
+un `ffmpeg_encoder` junto a un `encoder` o un `codec` elegidos por ti, y un
+`codec` que el tipo de codificador que nombraste no escribe, como
 `encoder="videotoolbox", codec="av1"`: VideoToolbox solo escribe HEVC y
 H.264. Lo que depende del archivo se
 comprueba cuando `write_video` tiene la ruta, todavía antes de que se
@@ -161,8 +162,9 @@ except ValueError as error:
 
 **Qué codificador.** Con `encoder="auto"`, el valor por defecto, los tipos
 de codificador se prueban en este orden: NVENC en una GPU de NVIDIA, Quick
-Sync en una de Intel, VAAPI en Linux (a través de `/dev/dri/renderD128`),
-VideoToolbox en un Mac y, por último, la CPU. Dentro de cada tipo, los
+Sync en una de Intel, VAAPI en Linux (a través de `/dev/dri/renderD128`, la
+primera GPU, o del dispositivo que nombre `vaapi_device`), VideoToolbox en un
+Mac y, por último, la CPU. Dentro de cada tipo, los
 códecs del contenedor se prueban del mejor al peor, en el orden de la tabla
 de la sección 1, así que en un `.mp4` un HEVC de NVENC va antes que un AV1
 en la CPU. En la CPU, AV1 es SVT-AV1 y nunca libaom. Sin SVT-AV1, un
@@ -418,7 +420,8 @@ print(res.provenance.host)   # nas
 
 El nodo calcula la ejecución, dibuja sus fotogramas con el mismo estilo por
 defecto y codifica el vídeo con su propio ffmpeg, que lleva la imagen del
-nodo y que un nodo Python necesita en su `PATH`, junto a matplotlib. Solo
+nodo y que un nodo Python necesita en su `PATH`, junto a matplotlib; un
+`vaapi_device` nombra un dispositivo del nodo. Solo
 vuelven el resultado y los bytes del vídeo, así que esta máquina no necesita
 para ello ni ffmpeg ni matplotlib, salvo que una ejecución fallida vuelva a
 ella con `fallback=True`. La ejecución, el registro del fotograma y las

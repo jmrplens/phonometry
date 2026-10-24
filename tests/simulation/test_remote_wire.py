@@ -132,6 +132,7 @@ _EVERY_VIDEO = VideoOptions(
     quality="small",
     fps=24.0,
     ffmpeg_options=("-row-mt", "1"),
+    vaapi_device="/dev/dri/renderD129",
 )
 
 #: Each function a node runs, and an example of each of its parameters but

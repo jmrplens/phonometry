@@ -54,6 +54,7 @@ from .._internal.display import RichDisplay
 from .._internal.validation import require_choice, require_positive, require_scalar
 from ._video_encoders import (
     CONTAINER_CODECS,
+    DEFAULT_VAAPI_DEVICE,
     FFMPEG_NAMES,
     NO_WINDOW,
     Codec,
@@ -140,16 +141,24 @@ class VideoOptions(RichDisplay):
         one of those wins) and before the container's own options (an MP4's
         ``+faststart`` and HEVC tag, a GIF's endless loop), which stay; held
         as a tuple.
+    :param vaapi_device: The GPU device a VAAPI encoder encodes on, as the
+        path of its device file on the machine that encodes (the node's, for
+        a video written on a node); ``"/dev/dri/renderD128"`` (default) is
+        the first GPU of a Linux machine. Used whenever the library tries or
+        uses a VAAPI encoder; an ``ffmpeg_encoder`` of your own takes none of
+        the library's device setup.
     :raises TypeError: for an ``encoder``, ``codec`` or ``quality`` that is
         not a text, a ``fps`` that is not one number (a bool is not one), an
-        ``ffmpeg_encoder`` that is not a text, or ``ffmpeg_options`` that are
-        not a sequence of separate texts.
+        ``ffmpeg_encoder`` that is not a text, ``ffmpeg_options`` that are
+        not a sequence of separate texts, or a ``vaapi_device`` that is not a
+        text.
     :raises ValueError: for a choice outside its options, a ``fps`` that is
         not a positive finite number, an ``ffmpeg_encoder`` that does not
-        name an encoder, an ``ffmpeg_encoder`` or ``ffmpeg_options`` that
-        hold a NUL character, which no argument of a program can carry, an
-        ``ffmpeg_encoder`` together with an ``encoder`` or a ``codec`` of
-        your own, or a ``codec`` that your ``encoder`` does not write.
+        name an encoder, an empty ``vaapi_device``, an ``ffmpeg_encoder``,
+        ``ffmpeg_options`` or ``vaapi_device`` that hold a NUL character,
+        which no argument of a program can carry, an ``ffmpeg_encoder``
+        together with an ``encoder`` or a ``codec`` of your own, or a
+        ``codec`` that your ``encoder`` does not write.
     """
 
     encoder: Encoder = "auto"
@@ -158,6 +167,7 @@ class VideoOptions(RichDisplay):
     fps: float | None = None
     ffmpeg_encoder: str | None = None
     ffmpeg_options: Sequence[str] = ()
+    vaapi_device: str = DEFAULT_VAAPI_DEVICE
 
     def __post_init__(self) -> None:
         """Refuse a field of the wrong type, or outside its options, when the record is built."""
@@ -175,6 +185,7 @@ class VideoOptions(RichDisplay):
             )
             raise ValueError(msg)
         _require_written(encoder, codec)
+        _require_device(self.vaapi_device)
         # Held as plain values and a tuple, so a list handed in cannot change
         # the record after it is built, and a whole fps reads back as a float.
         object.__setattr__(self, "encoder", encoder)
@@ -287,6 +298,30 @@ def _without_nul(texts: tuple[str, ...], name: str) -> None:
             f"can carry; got {held!r}"
         )
         raise ValueError(msg)
+
+
+def _require_device(vaapi_device: object) -> None:
+    """Refuse a ``vaapi_device`` that is not a path ffmpeg can be handed.
+
+    Whether the device exists is the trial's to find, on the machine that
+    encodes.
+
+    :raises TypeError: for anything but a text.
+    :raises ValueError: for an empty text, or one that holds a NUL character.
+    """
+    if not isinstance(vaapi_device, str):
+        msg = (
+            "'vaapi_device' must be a str, the path of the GPU device VAAPI encodes "
+            f"on, such as '/dev/dri/renderD128'; got {type(vaapi_device).__name__}"
+        )
+        raise TypeError(msg)
+    if not vaapi_device:
+        msg = (
+            "'vaapi_device' must name the GPU device VAAPI encodes on, such as "
+            "'/dev/dri/renderD128'; got ''"
+        )
+        raise ValueError(msg)
+    _without_nul((vaapi_device,), "vaapi_device")
 
 
 def _raw_ffmpeg(
@@ -555,6 +590,7 @@ class _FramePipe:
             container=request.container,
             width=width,
             height=height,
+            vaapi_device=options.vaapi_device,
         )
         self.encoder_name = choice.name
         return video_arguments(
@@ -565,6 +601,7 @@ class _FramePipe:
             width=width,
             height=height,
             pad_color=pad_color,
+            vaapi_device=options.vaapi_device,
         )
 
     def _read_stderr(self) -> None:

@@ -10,8 +10,8 @@ tries them (NVENC, Quick Sync, VAAPI, VideoToolbox, then the CPU), encodes
 one black frame of the real frame size to ffmpeg's null muxer, and the first
 that succeeds writes the video. A success is remembered for the rest of the
 process, keyed by the ffmpeg binary and its version, the encoder and the
-frame size; a failure is not, because a GPU encoder that failed for want of
-a free session works a second later.
+frame size, and for VAAPI the device; a failure is not, because a GPU
+encoder that failed for want of a free session works a second later.
 
 On the CPU the AV1 encoder is SVT-AV1; when it is absent a WebM gets VP9
 (libvpx) and an MP4 HEVC (x265) or H.264 (x264). libaom, the reference AV1
@@ -102,23 +102,22 @@ _CPU_LIBRARIES: Final[Mapping[str, str]] = MappingProxyType(
     }
 )
 
-#: What each kind needs around the encoder: options before the input, a
-#: filter that hands the frames to the device, and the pixel format.
-_HARDWARE: Final[Mapping[Hardware, tuple[tuple[str, ...], str | None, str | None]]] = (
-    MappingProxyType(
-        {
-            "cpu": ((), None, "yuv420p"),
-            "nvenc": ((), None, "yuv420p"),
-            "qsv": ((), None, "nv12"),
-            "vaapi": (
-                ("-vaapi_device", "/dev/dri/renderD128"),
-                "format=nv12,hwupload",
-                None,
-            ),
-            "videotoolbox": ((), None, "yuv420p"),
-        }
-    )
+#: What each kind needs around the encoder: a filter that hands the frames
+#: to the device, and the pixel format. VAAPI also needs its device named
+#: before the input (:func:`video_arguments`).
+_HARDWARE: Final[Mapping[Hardware, tuple[str | None, str | None]]] = MappingProxyType(
+    {
+        "cpu": (None, "yuv420p"),
+        "nvenc": (None, "yuv420p"),
+        "qsv": (None, "nv12"),
+        "vaapi": ("format=nv12,hwupload", None),
+        "videotoolbox": (None, "yuv420p"),
+    }
 )
+
+#: The GPU device VAAPI encodes on unless ``VideoOptions.vaapi_device``
+#: names another: the first GPU of a Linux machine.
+DEFAULT_VAAPI_DEVICE: Final = "/dev/dri/renderD128"
 
 #: Seconds a trial encode or a ``-version`` run may take.
 _RUN_TIMEOUT_S: Final = 60.0
@@ -178,7 +177,7 @@ class VideoArguments:
 
 _LOCK = threading.Lock()
 _DESCRIBED: dict[tuple[str, int, int], FFmpeg] = {}
-_PASSED: set[tuple[str, str, str, int, int]] = set()
+_PASSED: set[tuple[str, str, str, int, int, str]] = set()
 
 
 def _outside_the_working_directory(named: str, found: str) -> str:
@@ -374,10 +373,15 @@ def video_arguments(
     width: int,
     height: int,
     pad_color: str,
+    vaapi_device: str,
 ) -> VideoArguments:
-    """The encoder part of the command for an encoder the library chose."""
-    before, upload, pixel_format = _HARDWARE[choice.hardware]
+    """The encoder part of the command for an encoder the library chose.
+
+    A VAAPI encoder encodes on *vaapi_device*; the others take no device.
+    """
+    upload, pixel_format = _HARDWARE[choice.hardware]
     pixels = () if pixel_format is None else ("-pix_fmt", pixel_format)
+    before = ("-vaapi_device", vaapi_device) if choice.hardware == "vaapi" else ()
     return VideoArguments(
         before_input=before,
         filters=_filters(_pad(width, height, pad_color), upload),
@@ -483,13 +487,17 @@ def ffmpeg_command(
     ]
 
 
-def trial(ffmpeg: FFmpeg, choice: EncoderChoice, *, width: int, height: int) -> bool:
+def trial(
+    ffmpeg: FFmpeg, choice: EncoderChoice, *, width: int, height: int, vaapi_device: str
+) -> bool:
     """Whether *choice* encodes one black frame of this size here, now.
 
-    A failure is logged at DEBUG on ``phonometry.io``, with the last of what
-    ffmpeg wrote on stderr.
+    A VAAPI encoder is tried on *vaapi_device*, and its success is
+    remembered for that device only. A failure is logged at DEBUG on
+    ``phonometry.io``, with the last of what ffmpeg wrote on stderr.
     """
-    key = (ffmpeg.path, ffmpeg.version, choice.name, width, height)
+    device = vaapi_device if choice.hardware == "vaapi" else ""
+    key = (ffmpeg.path, ffmpeg.version, choice.name, width, height, device)
     with _LOCK:
         if key in _PASSED:
             return True
@@ -501,6 +509,7 @@ def trial(ffmpeg: FFmpeg, choice: EncoderChoice, *, width: int, height: int) -> 
         width=width,
         height=height,
         pad_color="black",
+        vaapi_device=vaapi_device,
     )
     command = ffmpeg_command(
         ffmpeg.path,
@@ -555,8 +564,11 @@ def choose(
     container: Container,
     width: int,
     height: int,
+    vaapi_device: str,
 ) -> EncoderChoice:
     """The first encoder that passes its trial, logged on ``phonometry.io``.
+
+    A VAAPI encoder is tried on *vaapi_device*.
 
     :raises VideoEncoderError: when none does; for an explicit ``encoder``
         the message lists the encoders that pass here.
@@ -566,7 +578,7 @@ def choose(
         ffmpeg, encoder=encoder, codec=codec, container=container
     ):
         tried.append(choice.name)
-        if trial(ffmpeg, choice, width=width, height=height):
+        if trial(ffmpeg, choice, width=width, height=height, vaapi_device=vaapi_device):
             _LOG.info(
                 "writing %s with %s (%s, %s)",
                 container,
@@ -586,7 +598,7 @@ def choose(
             for c in _candidates(
                 ffmpeg, encoder="auto", codec=codec, container=container
             )
-            if trial(ffmpeg, c, width=width, height=height)
+            if trial(ffmpeg, c, width=width, height=height, vaapi_device=vaapi_device)
         ]
         msg += f" Working here: {', '.join(working) or 'none'}."
     else:

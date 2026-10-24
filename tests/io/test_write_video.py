@@ -803,6 +803,17 @@ def test_a_raw_encoder_passes_through(
             ValueError,
             "^'ffmpeg_options' cannot hold a NUL character",
         ),
+        ({"vaapi_device": 128}, TypeError, "^'vaapi_device' must be a str"),
+        (
+            {"vaapi_device": ""},
+            ValueError,
+            "^'vaapi_device' must name the GPU device VAAPI encodes on",
+        ),
+        (
+            {"vaapi_device": "/dev/dri/render\x00D128"},
+            ValueError,
+            "^'vaapi_device' cannot hold a NUL character",
+        ),
         ({"encoder": "gpu"}, ValueError, "encoder"),
         ({"codec": "mpeg2"}, ValueError, "codec"),
         ({"quality": 3}, TypeError, "quality"),
@@ -827,7 +838,12 @@ def test_the_options_hold_what_they_were_given() -> None:
     )
     assert options.ffmpeg_options == ("-crf", "40")
     assert options.fps == 24.0
-    assert io.VideoOptions() == io.VideoOptions(encoder="auto", quality="standard")
+    assert io.VideoOptions() == io.VideoOptions(
+        encoder="auto", quality="standard", vaapi_device="/dev/dri/renderD128"
+    )
+    assert io.VideoOptions(vaapi_device="/dev/dri/renderD129").vaapi_device == (
+        "/dev/dri/renderD129"
+    )
     with pytest.raises(AttributeError, match="fps"):
         options.fps = 30.0  # type: ignore[misc]
 
@@ -902,6 +918,26 @@ def test_a_missing_ffmpeg_is_its_own_error(
     animation = _animation()
     with pytest.raises(io.FFmpegNotFoundError, match="animation.ffmpeg_path"):
         io.write_video(tmp_path / "w.webm", animation)
+
+
+def test_vaapi_is_tried_and_used_on_the_device_named(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = fake_ffmpeg.install(
+        tmp_path,
+        monkeypatch,
+        encoders=["av1_vaapi", "libsvtav1"],
+        working=["av1_vaapi", "libsvtav1"],
+    )
+    video = io.VideoOptions(encoder="vaapi", vaapi_device="/dev/dri/renderD129")
+    io.write_video(tmp_path / "w.webm", _animation(), video=video)
+    (trial,) = fake.trials()
+    (encode,) = fake.encodes()
+    for argv in (trial["argv"], encode["argv"]):
+        start = argv.index("-vaapi_device")
+        assert argv[start : start + 2] == ["-vaapi_device", "/dev/dri/renderD129"]
+        assert start < argv.index("-i")
+    assert _after(encode["argv"], "-c:v") == "av1_vaapi"
 
 
 def test_the_choice_is_logged(

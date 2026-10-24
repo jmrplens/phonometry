@@ -26,6 +26,8 @@ _FPS = f"{video._DEFAULT_FPS:g}"
 _FLOOR = f"{video._MIN_WIDTH} by {video._MIN_HEIGHT}"
 _FLOOR_ES = f"{video._MIN_WIDTH} por {video._MIN_HEIGHT}"
 _DIGIT_WIDTH = f"{float(video._DIGIT_WIDTH):g}"
+_VAAPI_DEVICE = f"`{io.VideoOptions().vaapi_device}`"
+_VAAPI_DEFAULT = f'`"{io.VideoOptions().vaapi_device}"`'
 
 #: The bytes a pixel a node's video may take, as the prose spells them. A
 #: ceiling the map does not hold fails here, at collection, until the guide,
@@ -45,6 +47,8 @@ _GUIDE_PHRASES: dict[str, tuple[str, ...]] = {
         f"{_SPELLED['en'][_PRESET_BYTES]} bytes a pixel",
         f"{_SPELLED['en'][_CALLER_BYTES]} when",
         f"plus {_SLACK_MIB}",
+        f"| `vaapi_device` | the path of the GPU device VAAPI encodes on | {_VAAPI_DEFAULT} |",
+        f"(through {_VAAPI_DEVICE}, the first GPU,",
     ),
     "es": (
         f"{_WIDTH} por {_HEIGHT} píxeles",
@@ -54,6 +58,8 @@ _GUIDE_PHRASES: dict[str, tuple[str, ...]] = {
         f"{_SPELLED['es'][_PRESET_BYTES]} bytes por píxel",
         f"{_SPELLED['es'][_CALLER_BYTES]} cuando",
         f"más {_SLACK_MIB}",
+        f"| `vaapi_device` | la ruta del dispositivo de GPU en el que codifica VAAPI | {_VAAPI_DEFAULT} |",
+        f"(a través de {_VAAPI_DEVICE}, la primera GPU,",
     ),
 }
 
@@ -69,12 +75,14 @@ _CHANGELOG_PHRASES: tuple[str, ...] = (
     f"up to {_COLOURS} colours",
     f"{_WIDTH} by {_HEIGHT} pixels by default",
     f"at least {_FLOOR} pixels",
+    f"{_VAAPI_DEVICE}, the first one",
 )
 
 #: What each documented object prints of its defaults: functions, records and
 #: the writers' module, whose docstring the API reference publishes.
 _DOCSTRING_PHRASES: list[tuple[object, tuple[str, ...]]] = [
     (io.write_video, (f"up to {_COLOURS} colours",)),
+    (io.VideoOptions, (f'``"{io.VideoOptions().vaapi_device}"`` (default)',)),
     (
         write_fdtd_animation,
         (f"{_WIDTH} by {_HEIGHT} pixels", f"{_FPS} frames per second"),
@@ -104,7 +112,10 @@ _DOCSTRING_PHRASES: list[tuple[object, tuple[str, ...]]] = [
 
 #: What each row of the API table prints of the defaults.
 _API_ROW_PHRASES: dict[str, tuple[str, ...]] = {
-    "VideoOptions": (f"{_FPS} for a simulation video",),
+    "VideoOptions": (
+        f"{_FPS} for a simulation video",
+        f"(Default: `'{io.VideoOptions().vaapi_device}'`, the first GPU)",
+    ),
     "write_fdtd_animation": (
         f"{_WIDTH} by {_HEIGHT} pixels",
         f"{_FPS} frames per second",

@@ -114,14 +114,16 @@ to every video you write.
 | `fps` | frames per second, a positive number, or `None` | `None`: the animation's `interval` |
 | `ffmpeg_encoder` | an ffmpeg encoder name, or `None` | `None` |
 | `ffmpeg_options` | more ffmpeg output options, as separate texts | `()` |
+| `vaapi_device` | the path of the GPU device VAAPI encodes on | `"/dev/dri/renderD128"` |
 
 Building the record raises `ValueError` (`TypeError` for a value of the
 wrong type, such as a bool for `fps`) for a choice outside its options, an
-`fps` that is not a positive finite number, an `ffmpeg_encoder` or
-`ffmpeg_options` holding a NUL character, which no argument of a program can
-carry, an `ffmpeg_encoder` together with an `encoder` or a `codec` of your
-own, and a `codec` that the kind of encoder you named does not write, such
-as `encoder="videotoolbox", codec="av1"`: VideoToolbox writes HEVC and H.264
+`fps` that is not a positive finite number, an empty `vaapi_device`, an
+`ffmpeg_encoder`, `ffmpeg_options` or `vaapi_device` holding a NUL character,
+which no argument of a program can carry, an `ffmpeg_encoder` together with
+an `encoder` or a `codec` of your own, and a `codec` that the kind of
+encoder you named does not write, such as
+`encoder="videotoolbox", codec="av1"`: VideoToolbox writes HEVC and H.264
 only. What depends on the file is checked when
 `write_video` has the path, still before ffmpeg runs: the suffix, the
 directory, a codec the container does not hold (VP9 in an `.mp4`), an
@@ -138,9 +140,10 @@ except ValueError as error:
 
 **Which encoder.** With `encoder="auto"`, the default, the kinds of encoder
 are tried in this order: NVENC on an NVIDIA GPU, Quick Sync on an Intel
-one, VAAPI on Linux (through `/dev/dri/renderD128`), VideoToolbox on a Mac,
-and then the CPU. Within each kind the container's codecs are tried best
-first, in the order of the table in section 1, so in an `.mp4` an NVENC
+one, VAAPI on Linux (through `/dev/dri/renderD128`, the first GPU, or the
+device `vaapi_device` names), VideoToolbox on a Mac, and then the CPU.
+Within each kind the container's codecs are tried best first, in the order
+of the table in section 1, so in an `.mp4` an NVENC
 HEVC comes before a CPU AV1. On the CPU, AV1 is SVT-AV1 and never libaom.
 Without SVT-AV1, a `.webm` gets VP9 from libvpx, and an `.mp4` HEVC from
 x265, or H.264 from x264. A GIF has no encoder to choose: ffmpeg's palette
@@ -377,7 +380,8 @@ print(res.provenance.host)   # nas
 
 The node computes the run, draws its frames under the same default style and
 encodes the video with its own ffmpeg, which the node image carries and a
-Python node needs on its `PATH`, beside matplotlib. Only the result and the
+Python node needs on its `PATH`, beside matplotlib; a `vaapi_device` names a
+device of the node's. Only the result and the
 video's bytes come back, so this machine needs neither ffmpeg nor matplotlib
 for it, unless a failed run comes back to it through `fallback=True`. The run,
 the frame and the video options are checked here first, the path's container

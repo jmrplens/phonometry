@@ -226,7 +226,9 @@ def test_ffmpeg_never_inherits_this_process_s_input(
     monkeypatch.setattr(ve.subprocess, "run", run)
     described = ve.describe(str(fake.launcher))
     choice = ve.EncoderChoice("cpu", "vp9", "libvpx-vp9")
-    assert ve.trial(described, choice, width=64, height=64)
+    assert ve.trial(
+        described, choice, width=64, height=64, vaapi_device=ve.DEFAULT_VAAPI_DEVICE
+    )
     assert seen[:2] == [(subprocess.DEVNULL, None)] * 2
     stdin, frame = seen[2]
     assert stdin is None
@@ -294,7 +296,13 @@ def test_auto_takes_the_first_encoder_that_passes_a_trial(
     fake = fake_ffmpeg.install(tmp_path, monkeypatch)
     ffmpeg = ve.describe(str(fake.launcher))
     choice = ve.choose(
-        ffmpeg, encoder="auto", codec=None, container="webm", width=320, height=240
+        ffmpeg,
+        encoder="auto",
+        codec=None,
+        container="webm",
+        width=320,
+        height=240,
+        vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
     )
     assert choice == ve.EncoderChoice("cpu", "av1", "libsvtav1")
     # NVENC is compiled in but fails its trial, so it is tried first and
@@ -313,7 +321,13 @@ def test_a_failed_trial_logs_what_ffmpeg_said_at_debug(
     ffmpeg = ve.describe(str(fake.launcher))
     with caplog.at_level(logging.DEBUG, logger="phonometry.io"):
         ve.choose(
-            ffmpeg, encoder="auto", codec=None, container="webm", width=32, height=32
+            ffmpeg,
+            encoder="auto",
+            codec=None,
+            container="webm",
+            width=32,
+            height=32,
+            vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
         )
     failed = [r for r in caplog.records if r.levelno == logging.DEBUG]
     assert [r.getMessage() for r in failed] == [
@@ -334,7 +348,13 @@ def test_vp9_when_svt_av1_is_absent(
     )
     ffmpeg = ve.describe(str(fake.launcher))
     choice = ve.choose(
-        ffmpeg, encoder="cpu", codec=None, container="webm", width=64, height=64
+        ffmpeg,
+        encoder="cpu",
+        codec=None,
+        container="webm",
+        width=64,
+        height=64,
+        vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
     )
     assert choice.name == "libvpx-vp9"
 
@@ -346,7 +366,13 @@ def test_a_success_is_remembered_and_a_failure_is_not(
     ffmpeg = ve.describe(str(fake.launcher))
     for _ in range(2):
         ve.choose(
-            ffmpeg, encoder="auto", codec=None, container="webm", width=32, height=32
+            ffmpeg,
+            encoder="auto",
+            codec=None,
+            container="webm",
+            width=32,
+            height=32,
+            vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
         )
     names = [t["argv"][t["argv"].index("-c:v") + 1] for t in fake.trials()]
     # Both failures (NVENC, SVT-AV1) are tried again; the VP9 success is not.
@@ -360,7 +386,13 @@ def test_an_explicit_encoder_that_fails_lists_the_ones_that_work(
     ffmpeg = ve.describe(str(fake.launcher))
     with pytest.raises(ve.VideoEncoderError, match="libsvtav1"):
         ve.choose(
-            ffmpeg, encoder="nvenc", codec=None, container="webm", width=32, height=32
+            ffmpeg,
+            encoder="nvenc",
+            codec=None,
+            container="webm",
+            width=32,
+            height=32,
+            vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
         )
 
 
@@ -371,7 +403,13 @@ def test_no_encoder_at_all_says_what_was_tried(
     ffmpeg = ve.describe(str(fake.launcher))
     with pytest.raises(ve.VideoEncoderError, match=r"\.webm"):
         ve.choose(
-            ffmpeg, encoder="auto", codec=None, container="webm", width=32, height=32
+            ffmpeg,
+            encoder="auto",
+            codec=None,
+            container="webm",
+            width=32,
+            height=32,
+            vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
         )
 
 
@@ -405,6 +443,7 @@ def test_the_install_hint_names_what_the_container_holds(
             container=container,
             width=32,
             height=32,
+            vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
         )
 
 
@@ -414,9 +453,51 @@ def test_mp4_prefers_av1_then_hevc_then_h264(
     fake = fake_ffmpeg.install(tmp_path, monkeypatch, working=["libx265", "libx264"])
     ffmpeg = ve.describe(str(fake.launcher))
     choice = ve.choose(
-        ffmpeg, encoder="cpu", codec=None, container="mp4", width=32, height=32
+        ffmpeg,
+        encoder="cpu",
+        codec=None,
+        container="mp4",
+        width=32,
+        height=32,
+        vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
     )
     assert choice.name == "libx265"
+
+
+def test_vaapi_encodes_on_the_device_named_and_no_other_kind_takes_one() -> None:
+    def arguments(choice: ve.EncoderChoice) -> ve.VideoArguments:
+        return ve.video_arguments(
+            choice,
+            quality="standard",
+            options=(),
+            container="webm",
+            width=960,
+            height=540,
+            pad_color="#ffffff",
+            vaapi_device="/dev/dri/renderD129",
+        )
+
+    vaapi = arguments(ve.EncoderChoice("vaapi", "av1", "av1_vaapi"))
+    assert vaapi.before_input == ("-vaapi_device", "/dev/dri/renderD129")
+    assert vaapi.filters == ("format=nv12,hwupload",)
+    assert "-pix_fmt" not in vaapi.codec_arguments
+    nvenc = arguments(ve.EncoderChoice("nvenc", "av1", "av1_nvenc"))
+    assert nvenc.before_input == ()
+    assert ve.DEFAULT_VAAPI_DEVICE == "/dev/dri/renderD128"
+
+
+def test_a_vaapi_success_is_remembered_for_its_device_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = fake_ffmpeg.install(
+        tmp_path, monkeypatch, encoders=["av1_vaapi"], working=["av1_vaapi"]
+    )
+    ffmpeg = ve.describe(str(fake.launcher))
+    choice = ve.EncoderChoice("vaapi", "av1", "av1_vaapi")
+    for device in ("/dev/dri/renderD128", "/dev/dri/renderD128", "/dev/dri/renderD129"):
+        assert ve.trial(ffmpeg, choice, width=32, height=32, vaapi_device=device)
+    devices = [t["argv"][t["argv"].index("-vaapi_device") + 1] for t in fake.trials()]
+    assert devices == ["/dev/dri/renderD128", "/dev/dri/renderD129"]
 
 
 def test_an_odd_frame_is_padded_and_hevc_in_mp4_is_tagged() -> None:
@@ -429,6 +510,7 @@ def test_an_odd_frame_is_padded_and_hevc_in_mp4_is_tagged() -> None:
         width=961,
         height=541,
         pad_color="#ffffff",
+        vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
     )
     assert video.filters == ("pad=ceil(iw/2)*2:ceil(ih/2)*2:color=#ffffff",)
     assert video.codec_arguments[:2] == ("-c:v", "libx265")

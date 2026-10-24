@@ -114,10 +114,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   VP9 in a WebM and x265 or x264 in an MP4. A GIF is written on the CPU,
   with no trial. `quality`, `fps`, `codec` and raw
   `ffmpeg_encoder`/`ffmpeg_options` are there when the defaults are not
-  enough. The file appears only when ffmpeg has finished it, so a failed
-  write leaves the previous file in place. `io.FFmpegNotFoundError` says
-  ffmpeg is missing and how to install it; `io.VideoEncoderError` says no
-  encoder can write the video, or ffmpeg failed, with its last words.
+  enough, and `vaapi_device` names the GPU VAAPI encodes on when it is not
+  `/dev/dri/renderD128`, the first one. The file appears only when ffmpeg
+  has finished it, so a failed write leaves the previous file in place.
+  `io.FFmpegNotFoundError` says ffmpeg is missing and how to install it;
+  `io.VideoEncoderError` says no encoder can write the video, or ffmpeg
+  failed, with its last words.
 
 - **An FDTD run writes straight to a video, here or on a node.**
   `simulation.write_fdtd_animation(path, run)` and

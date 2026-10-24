@@ -27,7 +27,7 @@ by its full path in that rcParam. In Pyodide, which cannot start a program,
 
 ## 1. Any animation: `io.write_video`
 
-`write_video(path, anim, *, video=None)` takes the file to write, the
+`write_video(path, animation, *, video=None)` takes the file to write, the
 animation, and how to encode it (section 2). With no `video`, the first
 encoder that works here writes the file (section 2 says in which order they
 are tried), at the standard quality and at the animation's own frame rate:

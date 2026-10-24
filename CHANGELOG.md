@@ -101,7 +101,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - **Any matplotlib animation writes to WebM, MP4 or GIF through ffmpeg,
   the videos on a GPU encoder when one works.**
-  `io.write_video(path, anim)` takes the container from the suffix (`.webm`
+  `io.write_video(path, animation)` takes the container from the suffix (`.webm`
   holds AV1 or VP9, `.mp4` AV1, HEVC or H.264, `.gif` a palette of up to
   256 colours), draws every frame with Agg and pipes it into ffmpeg, the
   program matplotlib's `rcParams["animation.ffmpeg_path"]` names. How it

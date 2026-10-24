@@ -699,7 +699,7 @@ def test_a_path_or_an_animation_of_another_type_starts_nothing(
     animation = _animation()
     with pytest.raises(TypeError, match="path"):
         io.write_video(5, animation)  # type: ignore[arg-type]
-    with pytest.raises(TypeError, match="anim"):
+    with pytest.raises(TypeError, match="'animation' must be a matplotlib"):
         io.write_video(tmp_path / "w.webm", "frames")  # type: ignore[arg-type]
     assert fake.calls() == []
 

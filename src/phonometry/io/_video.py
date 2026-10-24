@@ -364,7 +364,7 @@ def video_request(path: object, video: VideoOptions) -> VideoRequest:
     return VideoRequest(path=target, container=container, video=video)
 
 
-def _frame_rate(request: VideoRequest, anim: Animation) -> str:
+def _frame_rate(request: VideoRequest, animation: Animation) -> str:
     """The rate ffmpeg reads the frames at, as an exact fraction.
 
     Taken from ``fps``, or else from the animation's ``interval`` (in
@@ -378,7 +378,7 @@ def _frame_rate(request: VideoRequest, anim: Animation) -> str:
     """
     fps = request.video.fps
     if fps is None:
-        interval = getattr(anim, "_interval", None)
+        interval = getattr(animation, "_interval", None)
         if not isinstance(interval, (int, float)):
             msg = "the animation has no interval to take a frame rate from; pass 'fps'"
             raise TypeError(msg)
@@ -729,12 +729,12 @@ def require_writable(request: VideoRequest) -> None:
 
 def encode(
     request: VideoRequest,
-    anim: Animation,
+    animation: Animation,
     *,
     ffmpeg: FFmpeg | None = None,
     choice: EncoderChoice | None = None,
 ) -> str:
-    """Write *anim* as *request* says; return the name of the encoder that wrote it.
+    """Write *animation* as *request* says; return the name of the encoder that wrote it.
 
     :param ffmpeg: An ffmpeg already found and described
         (:func:`~phonometry.io._video_encoders.describe`); ``None`` finds it.
@@ -750,7 +750,7 @@ def encode(
     """
     import matplotlib as mpl
 
-    rate = _frame_rate(request, anim)
+    rate = _frame_rate(request, animation)
     described = describe(find_ffmpeg()) if ffmpeg is None else ffmpeg
     partial = request.new_partial()
     pipe = _FramePipe(request, described, rate, output=partial, choice=choice)
@@ -763,7 +763,7 @@ def encode(
                 "savefig.facecolor": "auto",
             }
         ):
-            anim.save(str(partial), writer=_movie_writer(pipe))
+            animation.save(str(partial), writer=_movie_writer(pipe))
     except BaseException:
         # The error that stopped the write is the one raised: an unfinished
         # file the system does not let go (a scanner holding it on Windows)
@@ -775,20 +775,23 @@ def encode(
     return pipe.encoder_name
 
 
-def _require_animation(anim: object) -> None:
+def _require_animation(animation: object) -> None:
     """Refuse anything that is not a matplotlib animation."""
     try:
         from matplotlib.animation import Animation
     except ImportError as exc:  # pragma: no cover - the base install has no plot
         raise ImportError(_MATPLOTLIB_HINT) from exc
-    if not isinstance(anim, Animation):
-        msg = f"'anim' must be a matplotlib.animation.Animation, got {type(anim).__name__}"
+    if not isinstance(animation, Animation):
+        msg = (
+            "'animation' must be a matplotlib.animation.Animation, "
+            f"got {type(animation).__name__}"
+        )
         raise TypeError(msg)
 
 
 def write_video(
     path: str | os.PathLike[str],
-    anim: Animation,
+    animation: Animation,
     *,
     video: VideoOptions | None = None,
 ) -> None:
@@ -812,14 +815,14 @@ def write_video(
     encoder chosen is logged on the ``phonometry.io`` logger.
 
     :param path: Where to write; its suffix picks the container.
-    :param anim: Any :class:`matplotlib.animation.Animation`.
+    :param animation: Any :class:`matplotlib.animation.Animation`.
     :param video: How to encode it (:class:`VideoOptions`); ``None``
         (default) is ``VideoOptions()``: the first encoder that works, the
         best codec the container holds, the standard quality, and the
         animation's own frame rate.
     :raises TypeError: if ``path`` is neither a text nor a path, ``video`` is
-        not a :class:`VideoOptions`, ``anim`` is not an animation, or the
-        animation has no interval and ``video`` no ``fps``.
+        not a :class:`VideoOptions`, ``animation`` is not a matplotlib
+        animation, or it has no interval and ``video`` no ``fps``.
     :raises ValueError: for a suffix other than ``.webm``, ``.mp4`` or
         ``.gif``, a path that names a directory, a codec the container does
         not hold, an ``encoder`` that writes none of the codecs it holds
@@ -844,12 +847,12 @@ def write_video(
     """
     options = video_options(video)
     request = video_request(path, options)
-    _require_animation(anim)
+    _require_animation(animation)
     # The arguments and ffmpeg are checked before the directory is, as the
     # simulation writers do: a wrong argument or a missing ffmpeg is reported
     # as itself, and the probe file is made only for a video that can be
     # written.
-    _frame_rate(request, anim)
+    _frame_rate(request, animation)
     found = find_ffmpeg()
     require_writable(request)
-    encode(request, anim, ffmpeg=describe(found))
+    encode(request, animation, ffmpeg=describe(found))

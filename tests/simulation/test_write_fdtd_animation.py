@@ -19,6 +19,7 @@ import pytest
 pytest.importorskip("matplotlib")
 import fake_ffmpeg
 import matplotlib as mpl
+import refusing_disk
 
 from phonometry import io
 from phonometry.io import VideoOptions
@@ -293,9 +294,45 @@ def test_a_directory_that_cannot_take_the_video_is_refused_before_a_step(
     ) as caught:
         write_fdtd_animation(target, run, frame=_SMALL)
     assert str(target) in str(caught.value)
+    # The caller's path, never the hidden file the probe tried.
+    assert ".partial" not in str(caught.value)
     assert engines == []
     assert fake.encodes() == []
     assert list(tmp_path.glob("*.partial")) == []
+
+
+def test_a_directory_this_process_cannot_search_is_refused_before_a_step(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, engines: list[FDTD2D]
+) -> None:
+    # Its own status reads; a name inside it does not, and no file goes in.
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "s.webm"
+    refusing_disk.refuse_status(monkeypatch, target)
+    refusing_disk.refuse_partials(monkeypatch)
+    run = _run(1e-3)
+    with pytest.raises(
+        io.VideoEncoderError, match="could not write the video"
+    ) as caught:
+        write_fdtd_animation(target, run, frame=_SMALL)
+    assert f"for {target}: Permission denied" in str(caught.value)
+    assert ".partial" not in str(caught.value)
+    assert engines == []
+    assert fake.encodes() == []
+
+
+def test_a_probe_the_system_will_not_remove_does_not_stop_the_write(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The probe's file was created, so the directory takes the video; that
+    # it stays (a scanner holds it on Windows, or the directory lets no file
+    # go) refuses nothing.
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    refusing_disk.hold_partials(monkeypatch)
+    target = tmp_path / "p.webm"
+    write_fdtd_animation(target, _run(1e-3), frame=_SMALL_FIXED)
+    assert target.read_bytes().startswith(b"\x1a\x45\xdf\xa3")
+    # What stays is the probe's empty file, hidden; none of the video.
+    assert refusing_disk.partial_sizes(tmp_path) == [0]
 
 
 _ELASTIC = ElasticRun(
@@ -671,3 +708,44 @@ def test_a_real_video_has_every_frame(tmp_path: Path) -> None:
     probe = dict(line.split("=", 1) for line in shown.splitlines())
     assert (probe["width"], probe["height"]) == ("480", "246")
     assert int(probe["nb_read_frames"]) == (res.times.size - 1) // 10 + 1
+
+
+@pytest.mark.skipif(
+    shutil.which("ffmpeg") is None,
+    reason="needs ffmpeg on PATH; the CI video job installs it",
+)
+def test_options_ffmpeg_refuses_fail_at_the_first_frames_of_the_run(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A raw encoder's options are not tried before the run; ffmpeg's refusal stops it at its first frames."""
+    from phonometry._plot import simulation as plot
+
+    listing = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-encoders"],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=True,
+    ).stdout
+    if " libvpx-vp9 " not in listing:
+        pytest.skip("this ffmpeg has no libvpx-vp9")
+    drawn: list[str] = []
+    update = plot._update_snapshot
+
+    def counted(image: AxesImage, field: NDArray[np.float64], title: str) -> None:
+        drawn.append(title)
+        update(image, field, title)
+
+    monkeypatch.setattr(plot, "_update_snapshot", counted)
+    target = tmp_path / "raw.webm"
+    target.write_bytes(b"the video that was there")
+    # About a hundred frames, a few of which ffmpeg reads before it gives up.
+    run = _run(2e-2)
+    n_frames = run._checked.steps // 10 + 1
+    video = VideoOptions(ffmpeg_encoder="libvpx-vp9", ffmpeg_options=("-crf", "99"))
+    with pytest.raises(io.VideoEncoderError, match="'crf' out of range") as caught:
+        write_fdtd_animation(target, run, frame=_SMALL_FIXED, video=video)
+    assert f"while writing {target} with the encoder libvpx-vp9" in str(caught.value)
+    assert len(drawn) < n_frames // 2
+    assert target.read_bytes() == b"the video that was there"
+    assert list(tmp_path.glob("*.partial")) == []

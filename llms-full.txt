@@ -41040,7 +41040,7 @@ by its full path in that rcParam. In Pyodide, which cannot start a program,
 
 ## 1. Any animation: `io.write_video`
 
-`write_video(path, anim, *, video=None)` takes the file to write, the
+`write_video(path, animation, *, video=None)` takes the file to write, the
 animation, and how to encode it (section 2). With no `video`, the first
 encoder that works here writes the file (section 2 says in which order they
 are tried), at the standard quality and at the animation's own frame rate:
@@ -41077,18 +41077,22 @@ The suffix of the path is the container:
 | `.gif` | a palette of up to 256 colours | written on the CPU only, with no codec to choose |
 
 Any other suffix, or a path that names a directory, raises `ValueError`, and
-a path whose directory does not exist raises `FileNotFoundError`, before
-anything runs.
+a path whose directory does not exist or cannot be reached raises
+`FileNotFoundError`, before anything runs. A directory that does not take the
+file raises `io.VideoEncoderError`, naming the path and the system's reason,
+before the first frame is drawn.
 
 The file appears at the path only once ffmpeg has finished it. Until then
 ffmpeg writes to a hidden file beside it, under a name of its own for each
 write, and that file is removed whatever stops the encode: ffmpeg fails, the
 disk fills, or your update function raises, which reaches you as its own
 exception. So a failure leaves what was at the path before, a good video
-included. A finished video that Windows will not let take the old file's
-place, because a player holds the old file open, is not thrown away: it is
-left beside it under its hidden name, and the `io.VideoEncoderError` says
-where.
+included. A hidden file the system will not let go, as one a scanner holds
+open on Windows, stays where it is, and what reaches you is still what
+stopped the encode. A finished video that Windows will not let take the
+old file's place, because a player holds the old file open, is not thrown
+away: it is left beside it under its hidden name, and the
+`io.VideoEncoderError` says where.
 
 Each frame is the whole figure at its own size and in its own colours,
 whatever your matplotlib settings say about saving figures: a `"tight"`
@@ -41218,8 +41222,9 @@ A raw encoder name bypasses the trial, the preset, the container check and
 the pixel format, so they are yours to get right: here VP9, which a `.webm`
 holds, and `yuv420p`, which browsers play. Two things stay: the padding of
 an odd size, and in an MP4 the layout that lets it start playing before it
-has downloaded. An encoder this ffmpeg lacks fails in ffmpeg, and the
-`io.VideoEncoderError` carries the last lines ffmpeg wrote. A raw encoder
+has downloaded. An encoder this ffmpeg lacks, or an option it refuses,
+fails in ffmpeg within the first frames, and the `io.VideoEncoderError`
+names the encoder and carries the last lines ffmpeg wrote. A raw encoder
 takes no `encoder=` or `codec=` beside it, and no GIF.
 
 The presets are starting points, not calibrated settings. phonometry uses
@@ -41399,10 +41404,12 @@ an empty video is refused. They are written to disk as they arrive, into a
 hidden file beside the path, so that ceiling bounds the disk, not the memory,
 and the file takes the path's place only once the node's whole answer has been
 read and checked. Whatever stops the run before that, the node, the connection
-or an interrupt, the hidden file is removed and the path is left as it was.
-Each refusal is a `simulation.ComputeRemoteError`; with `fallback=True` in the
-request it is a `simulation.ComputeFallbackWarning` instead, and the video is
-written here, on NumPy.
+or an interrupt, the hidden file is removed and the path is left as it was. A
+hidden file the system will not let go, as one a scanner holds open on
+Windows, stays where it is, and the run fails, or falls back, as it would
+without it. Each refusal is a `simulation.ComputeRemoteError`; with
+`fallback=True` in the request it is a `simulation.ComputeFallbackWarning`
+instead, and the video is written here, on NumPy.
 
 `io.write_video` itself runs on this machine only: an animation drawn here is
 encoded here, and only the two simulation writers go to a node.
@@ -52940,7 +52947,7 @@ documents, one page per module.
 | `read_sidecar` / `write_sidecar` / `sidecar_path` | `function` | **Sidecar round-trip.**<br>• `read_sidecar(path)`: the sidecar next to an audio file, or None (foreign or newer schema refused loudly)<br>• `write_sidecar(path, calibration_factor, ...)`: write one, with the optional calibrator tone metadata<br>• `sidecar_path(path)`: where it lives | `io.write_sidecar("m.wav", cal, reference_spl=94.0)` |
 | `LossyCompressionWarning` | `warning class` | **A lossy decoder produced these samples** (MP3/Ogg/Opus/ADPCM): levels are not metrologically defensible. Subclass of `PhonometryWarning`<br>Emitted by `io.read` / `io.read_blocks` / `io.convert` | `warnings.simplefilter('error', io.LossyCompressionWarning)` |
 | `ClippingWarning` | `warning class` | **Samples clipped while quantizing on write:** count and peak overshoot in dBFS; the file is written with saturated codes rather than wrapped ones. Subclass of `PhonometryWarning`<br>Emitted by `io.write` | `warnings.simplefilter('error', io.ClippingWarning)` |
-| `write_video` | `function` | **Write any matplotlib animation to WebM, MP4 or GIF with ffmpeg.**<br>• `path`: the suffix picks the container: `.webm` (AV1, VP9), `.mp4` (AV1, HEVC, H.264), `.gif`<br>• `anim`: any `matplotlib.animation.Animation`<br>• `video`: how to encode it, a `VideoOptions` (Default: None, `VideoOptions()`: GPU encoders first, each tried on a real frame, then the CPU; a GIF always on the CPU, with no trial)<br>The file appears only when ffmpeg has finished it; ffmpeg is the program `rcParams['animation.ffmpeg_path']` names | `io.write_video("wave.webm", anim)`<br>`io.write_video("wave.gif", anim, video=io.VideoOptions(quality="small"))` |
+| `write_video` | `function` | **Write any matplotlib animation to WebM, MP4 or GIF with ffmpeg.**<br>• `path`: the suffix picks the container: `.webm` (AV1, VP9), `.mp4` (AV1, HEVC, H.264), `.gif`<br>• `animation`: any `matplotlib.animation.Animation`<br>• `video`: how to encode it, a `VideoOptions` (Default: None, `VideoOptions()`: GPU encoders first, each tried on a real frame, then the CPU; a GIF always on the CPU, with no trial)<br>The file appears only when ffmpeg has finished it; ffmpeg is the program `rcParams['animation.ffmpeg_path']` names | `io.write_video("wave.webm", animation)`<br>`io.write_video("wave.gif", animation, video=io.VideoOptions(quality="small"))` |
 | `VideoOptions` | `dataclass` | **How a video is encoded (frozen, keyword-only), checked when built.**<br>• `encoder`: `'auto'` (Default: GPU encoders first, each tried on a real frame, then the CPU; a GIF always on the CPU, with no trial) \| `'cpu'` \| `'nvenc'` \| `'qsv'` \| `'vaapi'` \| `'videotoolbox'`<br>• `codec`: `'av1'` \| `'vp9'` \| `'hevc'` \| `'h264'` (Default: None, the best the container holds that the encoder writes, AV1 first)<br>• `quality`: `'high'` \| `'standard'` (Default) \| `'small'`<br>• `fps` (Default: None, the animation's interval; 30 for a simulation video) / `ffmpeg_encoder` / `ffmpeg_options`: raw ffmpeg, passed through<br>What the container rules out is checked when the path is known | `io.VideoOptions(encoder="cpu", codec="h264")`<br>`io.VideoOptions(ffmpeg_encoder="libvpx-vp9", ffmpeg_options=("-crf", "40"))` |
 | `FFmpegNotFoundError` | `exception` | **ffmpeg is not where matplotlib looks for it, or cannot run here (Pyodide)**, with how to install it when it is missing; on Windows also an ffmpeg found only in the working directory. Subclass of `FileNotFoundError` | `except io.FFmpegNotFoundError: ...` |
 | `VideoEncoderError` | `exception` | **No encoder can write the video, or ffmpeg failed while writing it**, with the encoders that work here (for an encoder you named) or ffmpeg's last words; also when the finished video cannot take the place of `path`, which it is left beside. Subclass of `RuntimeError` | `except io.VideoEncoderError: ...` |

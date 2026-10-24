@@ -928,6 +928,8 @@ _SPELLED_OUT = {
     "freqs": "frequencies",
     "ref": "reference",
     "refs": "references",
+    "anim": "animation",
+    "anims": "animations",
 }
 
 #: ``minimum`` and ``maximum`` written as the library writes them, by kind.
@@ -1055,7 +1057,8 @@ def test_words_are_spelled_out() -> None:
     never a bare ``max_db``. A confidence bound is ``confidence_lower`` or
     ``confidence_upper``, so ``ci`` is a word of no public name, the ISO 717-2
     adaptation term C_I aside. The attributes a plain class writes on
-    ``self`` are held to the same words as the fields of a dataclass.
+    ``self`` are held to the same words as the fields of a dataclass. An
+    animation is ``animation``, never ``anim``.
     """
     offenders: list[str] = []
     seen: set[str] = set()

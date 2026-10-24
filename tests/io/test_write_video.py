@@ -8,6 +8,7 @@ import logging
 import subprocess
 import sys
 import threading
+from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any
 
@@ -17,6 +18,7 @@ import pytest
 pytest.importorskip("matplotlib")
 import fake_ffmpeg
 import matplotlib as mpl
+import refusing_disk
 from matplotlib.animation import FuncAnimation
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.backends.backend_svg import FigureCanvasSVG
@@ -26,7 +28,6 @@ from phonometry import io
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
-    from pathlib import Path
 
     from matplotlib.lines import Line2D
 
@@ -189,6 +190,124 @@ def test_a_failed_encode_keeps_the_old_file(
         io.write_video(target, animation)
     assert target.read_bytes() == b"the video that was there"
     assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
+
+
+def test_a_failed_encode_names_the_encoder_that_ran(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The fake's NVENC fails its trial, so SVT-AV1 writes, and dies at frame 3.
+    fake_ffmpeg.install(tmp_path, monkeypatch, die_after_frames=3)
+    animation = _animation(frames=8)
+    with pytest.raises(io.VideoEncoderError) as caught:
+        io.write_video(tmp_path / "w.webm", animation)
+    assert "with the encoder libsvtav1; ffmpeg said:" in str(caught.value)
+
+
+def test_a_partial_file_the_system_will_not_remove_does_not_hide_the_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake_ffmpeg.install(tmp_path, monkeypatch, die_after_frames=3)
+    target = tmp_path / "w.webm"
+    target.write_bytes(b"the video that was there")
+    refusing_disk.hold_partials(monkeypatch)
+    animation = _animation(frames=8)
+    # ffmpeg's failure, not the one removing its unfinished file met after it.
+    with pytest.raises(io.VideoEncoderError, match="muxer failed"):
+        io.write_video(target, animation)
+    assert target.read_bytes() == b"the video that was there"
+
+
+def test_a_name_whose_status_cannot_be_read_is_left_to_the_check_that_the_directory_takes_a_file(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Inside a directory without search permission the status of the name
+    # cannot be read, so nothing can tell a directory from a file there; the
+    # name is left to the check that the directory takes a file, which finds
+    # what the directory allows before the first frame. Here it takes one, and
+    # the fake runs in a process of its own, so the write goes through.
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "w.webm"
+    refusing_disk.refuse_status(monkeypatch, target)
+    io.write_video(target, _animation())
+    assert target.read_bytes().startswith(b"\x1a\x45\xdf\xa3")
+
+
+def test_a_directory_that_cannot_be_reached_is_refused_before_anything_runs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The path's directory sits inside one this process cannot search: it
+    # may exist, but nothing can be written into it, nor told about it.
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "locked" / "sub" / "w.webm"
+    target.parent.mkdir(parents=True)
+    refusing_disk.refuse_status(monkeypatch, target.parent)
+    animation = _animation()
+    with pytest.raises(
+        FileNotFoundError, match="does not exist or cannot be reached"
+    ) as caught:
+        io.write_video(target, animation)
+    # The message quotes the directory as Python writes it, so on Windows
+    # its backslashes are doubled.
+    assert repr(str(target.parent)) in str(caught.value)
+    assert fake.calls() == []
+
+
+@pytest.mark.parametrize("directory", ["refusing", "proc"])
+def test_a_directory_that_does_not_take_the_video_is_refused_before_a_frame_is_drawn(
+    directory: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    if directory == "proc":
+        if not Path("/proc/self").is_dir():
+            pytest.skip("no /proc, the directory nobody can write a file into")
+        target = Path("/proc/out.webm")
+    else:
+        refusing_disk.refuse_partials(monkeypatch)
+        target = tmp_path / "out.webm"
+        target.write_bytes(b"the video that was there")
+    drawn: list[int] = []
+    animation = _animation(on_frame=lambda k, _fig: drawn.append(k))
+    with pytest.raises(
+        io.VideoEncoderError, match="could not write the video for"
+    ) as caught:
+        io.write_video(target, animation)
+    assert str(target) in str(caught.value)
+    # The caller's path, never the hidden file that was refused.
+    assert ".partial" not in str(caught.value)
+    # ffmpeg is found and asked what it can do, as before any write, but
+    # nothing is encoded, not even a trial frame.
+    assert fake.trials() == []
+    assert fake.encodes() == []
+    assert drawn == []
+    if directory == "refusing":
+        assert target.read_bytes() == b"the video that was there"
+        assert refusing_disk.partial_sizes(tmp_path) == []
+
+
+def test_an_argument_error_in_a_directory_that_does_not_take_the_video_is_itself(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The arguments are checked before the directory is, as the simulation
+    # writers do, so a missing rate is a TypeError wherever the video goes.
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    refusing_disk.refuse_partials(monkeypatch)
+    animation = _animation()
+    monkeypatch.setattr(animation, "_interval", None)
+    with pytest.raises(TypeError, match="fps"):
+        io.write_video(tmp_path / "out.webm", animation)
+    assert fake.calls() == []
+    assert refusing_disk.partial_sizes(tmp_path) == []
+
+
+def test_a_missing_ffmpeg_in_a_directory_that_does_not_take_the_video_is_itself(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setitem(mpl.rcParams, "animation.ffmpeg_path", "no-such-ffmpeg-here")
+    refusing_disk.refuse_partials(monkeypatch)
+    animation = _animation()
+    with pytest.raises(io.FFmpegNotFoundError, match="animation.ffmpeg_path"):
+        io.write_video(tmp_path / "out.webm", animation)
+    assert refusing_disk.partial_sizes(tmp_path) == []
 
 
 def test_a_finished_video_that_cannot_take_the_place_of_path_says_where_it_is(
@@ -585,7 +704,7 @@ def test_a_path_or_an_animation_of_another_type_starts_nothing(
     animation = _animation()
     with pytest.raises(TypeError, match="path"):
         io.write_video(5, animation)  # type: ignore[arg-type]
-    with pytest.raises(TypeError, match="anim"):
+    with pytest.raises(TypeError, match="'animation' must be a matplotlib"):
         io.write_video(tmp_path / "w.webm", "frames")  # type: ignore[arg-type]
     assert fake.calls() == []
 

@@ -1994,7 +1994,7 @@ is at *audio_path* and its channels can be read.
 ```python
 write_video(
     path: str | os.PathLike[str],
-    anim: Animation,
+    animation: Animation,
     *,
     video: VideoOptions | None = None,
 ) -> None
@@ -2024,16 +2024,16 @@ encoder chosen is logged on the `phonometry.io` logger.
 | Name | Description |
 | :--- | :--- |
 | `path` | Where to write; its suffix picks the container. |
-| `anim` | Any `matplotlib.animation.Animation`. |
+| `animation` | Any `matplotlib.animation.Animation`. |
 | `video` | How to encode it ([`VideoOptions`](/phonometry/reference/api/io/io/#videooptions)); `None` (default) is `VideoOptions()`: the first encoder that works, the best codec the container holds, the standard quality, and the animation's own frame rate. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | if `path` is neither a text nor a path, `video` is not a [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions), `anim` is not an animation, or the animation has no interval and `video` no `fps`. |
+| TypeError | if `path` is neither a text nor a path, `video` is not a [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions), `animation` is not a matplotlib animation, or it has no interval and `video` no `fps`. |
 | ValueError | for a suffix other than `.webm`, `.mp4` or `.gif`, a path that names a directory, a codec the container does not hold, an `encoder` that writes none of the codecs it holds (VideoToolbox in a `.webm`), for a GIF a codec, an `ffmpeg_encoder` or an encoder other than the CPU, or an animation interval that is not a positive finite number. |
-| FileNotFoundError | if the directory of `path` does not exist. |
+| FileNotFoundError | if the directory of `path` does not exist or cannot be reached (it sits inside a directory this process cannot search). |
 | FFmpegNotFoundError | if ffmpeg is not found, in Pyodide, or on Windows when it was found only in the working directory. |
-| VideoEncoderError | if no encoder can write the video (the message lists the ones that can), ffmpeg cannot be started or fails while writing it (with the last lines it wrote on stderr), or the finished video cannot take the place of `path` (on Windows, while a player holds the old file open; the message says where the video was left). |
+| VideoEncoderError | if no encoder can write the video (the message lists the ones that can), the directory of `path` does not take the file (before the first frame is drawn; the message names `path` and the system's reason), ffmpeg cannot be started or fails while writing it (the message names the encoder and quotes the last lines ffmpeg wrote on stderr; a raw `ffmpeg_encoder` it lacks or `ffmpeg_options` it refuses fail within the first frames), or the finished video cannot take the place of `path` (on Windows, while a player holds the old file open; the message says where the video was left). |
 | ImportError | if matplotlib is not installed. |

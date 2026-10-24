@@ -10,9 +10,11 @@ finished it. Until then ffmpeg writes to a hidden partial file beside it, a
 name of its own for each write, which is removed whatever fails (ffmpeg
 exits, the disk fills, the animation's own drawing raises), so a failed
 write never leaves a truncated video at ``path`` and never replaces a good
-one. A finished video that the system will not let take ``path``'s place
-(on Windows, while a player holds the old file open) stays under its
-partial name, and the error says where.
+one; a partial file the system will not let go (a scanner holding it on
+Windows) stays under its hidden name, and the error raised is still the
+one that stopped the write. A finished video that the system will not let
+take ``path``'s place (on Windows, while a player holds the old file open)
+stays under its partial name, and the error says where.
 
 How a video is encoded is one record, :class:`VideoOptions`, which checks
 its fields when it is built; what depends on the file (the container its
@@ -215,6 +217,24 @@ class VideoRequest:
         return self.path.with_name(f".{self.path.name}.{uuid.uuid4().hex}.partial")
 
 
+def _is_dir(path: Path) -> bool:
+    """Whether *path* is a directory; ``False`` when its status cannot be read.
+
+    Inside a directory this process cannot search, :meth:`Path.is_dir`
+    raises :class:`PermissionError` on Python 3.12 and 3.13 and answers
+    ``False`` on 3.14; every version answers ``False`` here. For ``path``
+    itself, in its own directory, that leaves what the directory allows to
+    :func:`require_writable`, which reports it as it reports any directory
+    that refuses the video. A directory of ``path`` that cannot be reached
+    (one inside a directory this process cannot search) reads as missing,
+    since nothing can be written into it.
+    """
+    try:
+        return path.is_dir()
+    except OSError:
+        return False
+
+
 def _target(path: object) -> tuple[Path, Container]:
     """The output path and its container, refused before anything runs."""
     if not isinstance(path, (str, os.PathLike)):
@@ -228,11 +248,14 @@ def _target(path: object) -> tuple[Path, Container]:
             f"writes; got {target.suffix or 'no suffix'!r}"
         )
         raise ValueError(msg)
-    if target.is_dir():
+    if _is_dir(target):
         msg = f"'path' names a directory: {str(target)!r}"
         raise ValueError(msg)
-    if not target.parent.is_dir():
-        msg = f"the directory of 'path' does not exist: {str(target.parent)!r}"
+    if not _is_dir(target.parent):
+        msg = (
+            "the directory of 'path' does not exist or cannot be reached: "
+            f"{str(target.parent)!r}"
+        )
         raise FileNotFoundError(msg)
     return target, container
 
@@ -333,14 +356,15 @@ def video_request(path: object, video: VideoOptions) -> VideoRequest:
         a directory, a codec the container does not hold, an ``encoder``
         that writes none of the codecs it holds, or, for a GIF, a codec, an
         ``ffmpeg_encoder`` or an encoder other than the CPU.
-    :raises FileNotFoundError: when the directory of ``path`` does not exist.
+    :raises FileNotFoundError: when the directory of ``path`` does not exist
+        or cannot be reached.
     """
     target, container = _target(path)
     _require_combination(container, video)
     return VideoRequest(path=target, container=container, video=video)
 
 
-def _frame_rate(request: VideoRequest, anim: Animation) -> str:
+def _frame_rate(request: VideoRequest, animation: Animation) -> str:
     """The rate ffmpeg reads the frames at, as an exact fraction.
 
     Taken from ``fps``, or else from the animation's ``interval`` (in
@@ -354,7 +378,7 @@ def _frame_rate(request: VideoRequest, anim: Animation) -> str:
     """
     fps = request.video.fps
     if fps is None:
-        interval = getattr(anim, "_interval", None)
+        interval = getattr(animation, "_interval", None)
         if not isinstance(interval, (int, float)):
             msg = "the animation has no interval to take a frame rate from; pass 'fps'"
             raise TypeError(msg)
@@ -507,7 +531,14 @@ class _FramePipe:
         # Animation.save hands on, rather than collide with it.
         frame_options = {**savefig_kwargs, "format": "rgba", "dpi": dpi}
         fig.savefig(buffer, **frame_options)
-        frame = buffer.getbuffer()
+        # Released however this ends: an error a caller keeps holds this
+        # frame's locals, and a buffer still exported cannot be freed.
+        with buffer.getbuffer() as frame:
+            self._send(frame)
+        self._frames += 1
+
+    def _send(self, frame: memoryview) -> None:
+        """Hand one frame's pixels to ffmpeg, once it is the size of the first."""
         if frame.nbytes != self._frame_bytes:
             msg = (
                 f"frame {self._frames} of {self._request.path.name} has "
@@ -523,7 +554,6 @@ class _FramePipe:
         except OSError as exc:
             reason = f"ffmpeg stopped reading at frame {self._frames}"
             raise self._failure(reason) from exc
-        self._frames += 1
 
     def close(self) -> None:
         """Let ffmpeg finish the file; raise with its words if it fails."""
@@ -564,10 +594,14 @@ class _FramePipe:
             self._process.stderr.close()
 
     def _failure(self, reason: str) -> VideoEncoderError:
+        """Stop ffmpeg; the error names the file, the encoder and what ffmpeg wrote last on stderr."""
         self.abort()
         said = "\n".join(self._tail) or "(nothing on stderr)"
+        # Named here because ffmpeg does not always name it: an option it
+        # does not know is refused without a word of the encoder.
+        encoder = f" with the encoder {self.encoder_name}" if self.encoder_name else ""
         return VideoEncoderError(
-            f"{reason} while writing {self._request.path}; ffmpeg said:\n{said}"
+            f"{reason} while writing {self._request.path}{encoder}; ffmpeg said:\n{said}"
         )
 
 
@@ -658,14 +692,49 @@ def settle(partial: Path, path: Path) -> None:
         raise VideoEncoderError(msg) from exc
 
 
+def disk_failure(path: Path, exc: OSError) -> VideoEncoderError:
+    """The error for this machine's disk refusing the video for *path*.
+
+    It names *path* and gives the system's reason without the name the
+    system was given, which is the hidden partial file's: the caller did
+    not ask for that file and may not know it exists.
+    """
+    reason = exc.strerror or str(exc)
+    return VideoEncoderError(f"could not write the video for {path}: {reason}")
+
+
+def require_writable(request: VideoRequest) -> None:
+    """Create and remove a hidden file beside ``path``, so a directory that does not take one fails now.
+
+    ffmpeg would find it only once it runs, after the encoders have been
+    tried, and for a simulation writer after a first pass has stepped the
+    whole run to find the colour limit. Creating the file is the test: one
+    the system then does not let go (a scanner holding it on Windows, a
+    directory that takes files and lets none be removed) stays, hidden, and
+    refuses nothing.
+
+    :raises VideoEncoderError: when the directory does not take the file
+        (the message names ``path``, never the hidden file).
+    """
+    probe = request.new_partial()
+    try:
+        with probe.open("xb"):
+            pass  # Created, and closed empty: that is the whole test.
+    except OSError as exc:
+        raise disk_failure(request.path, exc) from exc
+    finally:
+        with contextlib.suppress(OSError):
+            probe.unlink(missing_ok=True)
+
+
 def encode(
     request: VideoRequest,
-    anim: Animation,
+    animation: Animation,
     *,
     ffmpeg: FFmpeg | None = None,
     choice: EncoderChoice | None = None,
 ) -> str:
-    """Write *anim* as *request* says; return the name of the encoder that wrote it.
+    """Write *animation* as *request* says; return the name of the encoder that wrote it.
 
     :param ffmpeg: An ffmpeg already found and described
         (:func:`~phonometry.io._video_encoders.describe`); ``None`` finds it.
@@ -681,7 +750,7 @@ def encode(
     """
     import matplotlib as mpl
 
-    rate = _frame_rate(request, anim)
+    rate = _frame_rate(request, animation)
     described = describe(find_ffmpeg()) if ffmpeg is None else ffmpeg
     partial = request.new_partial()
     pipe = _FramePipe(request, described, rate, output=partial, choice=choice)
@@ -694,28 +763,35 @@ def encode(
                 "savefig.facecolor": "auto",
             }
         ):
-            anim.save(str(partial), writer=_movie_writer(pipe))
+            animation.save(str(partial), writer=_movie_writer(pipe))
     except BaseException:
-        partial.unlink(missing_ok=True)
+        # The error that stopped the write is the one raised: an unfinished
+        # file the system does not let go (a scanner holding it on Windows)
+        # stays, hidden, rather than hide that error behind its own.
+        with contextlib.suppress(OSError):
+            partial.unlink(missing_ok=True)
         raise
     settle(partial, request.path)
     return pipe.encoder_name
 
 
-def _require_animation(anim: object) -> None:
+def _require_animation(animation: object) -> None:
     """Refuse anything that is not a matplotlib animation."""
     try:
         from matplotlib.animation import Animation
     except ImportError as exc:  # pragma: no cover - the base install has no plot
         raise ImportError(_MATPLOTLIB_HINT) from exc
-    if not isinstance(anim, Animation):
-        msg = f"'anim' must be a matplotlib.animation.Animation, got {type(anim).__name__}"
+    if not isinstance(animation, Animation):
+        msg = (
+            "'animation' must be a matplotlib.animation.Animation, "
+            f"got {type(animation).__name__}"
+        )
         raise TypeError(msg)
 
 
 def write_video(
     path: str | os.PathLike[str],
-    anim: Animation,
+    animation: Animation,
     *,
     video: VideoOptions | None = None,
 ) -> None:
@@ -739,31 +815,44 @@ def write_video(
     encoder chosen is logged on the ``phonometry.io`` logger.
 
     :param path: Where to write; its suffix picks the container.
-    :param anim: Any :class:`matplotlib.animation.Animation`.
+    :param animation: Any :class:`matplotlib.animation.Animation`.
     :param video: How to encode it (:class:`VideoOptions`); ``None``
         (default) is ``VideoOptions()``: the first encoder that works, the
         best codec the container holds, the standard quality, and the
         animation's own frame rate.
     :raises TypeError: if ``path`` is neither a text nor a path, ``video`` is
-        not a :class:`VideoOptions`, ``anim`` is not an animation, or the
-        animation has no interval and ``video`` no ``fps``.
+        not a :class:`VideoOptions`, ``animation`` is not a matplotlib
+        animation, or it has no interval and ``video`` no ``fps``.
     :raises ValueError: for a suffix other than ``.webm``, ``.mp4`` or
         ``.gif``, a path that names a directory, a codec the container does
         not hold, an ``encoder`` that writes none of the codecs it holds
         (VideoToolbox in a ``.webm``), for a GIF a codec, an
         ``ffmpeg_encoder`` or an encoder other than the CPU, or an animation
         interval that is not a positive finite number.
-    :raises FileNotFoundError: if the directory of ``path`` does not exist.
+    :raises FileNotFoundError: if the directory of ``path`` does not exist
+        or cannot be reached (it sits inside a directory this process cannot
+        search).
     :raises FFmpegNotFoundError: if ffmpeg is not found, in Pyodide, or on
         Windows when it was found only in the working directory.
     :raises VideoEncoderError: if no encoder can write the video (the message
-        lists the ones that can), ffmpeg cannot be started or fails while
-        writing it (with the last lines it wrote on stderr), or the finished
-        video cannot take the place of ``path`` (on Windows, while a player
-        holds the old file open; the message says where the video was left).
+        lists the ones that can), the directory of ``path`` does not take the
+        file (before the first frame is drawn; the message names ``path`` and the
+        system's reason), ffmpeg cannot be started or fails while writing it
+        (the message names the encoder and quotes the last lines ffmpeg wrote
+        on stderr; a raw ``ffmpeg_encoder`` it lacks or ``ffmpeg_options`` it
+        refuses fail within the first frames), or the finished video cannot
+        take the place of ``path`` (on Windows, while a player holds the old
+        file open; the message says where the video was left).
     :raises ImportError: if matplotlib is not installed.
     """
     options = video_options(video)
     request = video_request(path, options)
-    _require_animation(anim)
-    encode(request, anim)
+    _require_animation(animation)
+    # The arguments and ffmpeg are checked before the directory is, as the
+    # simulation writers do: a wrong argument, a missing ffmpeg or one that
+    # does not run is reported as itself, and the probe file is made only for
+    # a video that can be written.
+    _frame_rate(request, animation)
+    ffmpeg = describe(find_ffmpeg())
+    require_writable(request)
+    encode(request, animation, ffmpeg=ffmpeg)

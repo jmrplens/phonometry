@@ -12,6 +12,8 @@ import contextlib
 import errno
 import inspect
 import pathlib
+import shutil
+import subprocess
 import warnings
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
@@ -22,6 +24,7 @@ import pytest
 pytest.importorskip("matplotlib")
 import fake_ffmpeg
 import matplotlib as mpl
+import refusing_disk
 
 from phonometry import io
 from phonometry.io import VideoOptions
@@ -48,7 +51,6 @@ from phonometry.simulation import video as video_module
 from phonometry.simulation._remote import client
 
 if TYPE_CHECKING:
-    import subprocess
     from collections.abc import Callable
     from pathlib import Path
     from typing import BinaryIO
@@ -245,6 +247,24 @@ def test_a_bad_argument_never_reaches_the_node(
     assert not log.exists()
     assert fake.calls() == []
     assert _partials(tmp_path) == []
+
+
+def test_a_directory_that_cannot_be_reached_never_reaches_the_node(
+    node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Refused as on this machine: the path's directory sits inside one this
+    # process cannot search, so it may exist and still take nothing.
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    log = tmp_path / "ssh.log"
+    monkeypatch.setenv("FAKE_SSH_LOG", str(log))
+    target = tmp_path / "locked" / "sub" / "r.webm"
+    target.parent.mkdir(parents=True)
+    refusing_disk.refuse_status(monkeypatch, target.parent)
+    request = Compute(host=node, fallback=True)
+    with pytest.raises(FileNotFoundError, match="does not exist or cannot be reached"):
+        write_fdtd_animation(target, _RUN, compute=request, frame=_FRAME)
+    assert not log.exists()
+    assert fake.calls() == []
 
 
 def test_a_waveform_that_cannot_travel_is_refused_before_ssh_starts(
@@ -479,19 +499,26 @@ def test_a_failed_node_falls_back_here_once_when_asked(
     assert _partials(tmp_path) == []
 
 
-def _refusing_partials(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Make this process's directories refuse a partial file, as one without write permission does."""
-    real_open = pathlib.Path.open
+def test_a_partial_file_the_system_will_not_remove_does_not_stop_a_fallback(
+    node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The file the node's bytes would have gone into, then the probe of the
+    # video written here: both created, so the directory takes a video, and
+    # neither removed (a scanner holds them on Windows, or the directory
+    # lets no file go), which refuses nothing.
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    monkeypatch.setenv("FAKE_SSH_MODE", "refuse")
+    refusing_disk.hold_partials(monkeypatch)
+    target = tmp_path / "held.webm"
+    request = Compute(host=node, fallback=True)
+    with pytest.warns(ComputeFallbackWarning, match="refused the ssh key"):
+        res = write_fdtd_animation(target, _RUN, compute=request, frame=_FRAME)
+    assert res.provenance.host is None
+    assert target.read_bytes().startswith(_WEBM)
+    assert refusing_disk.partial_sizes(tmp_path) == [0, 0]
 
-    def refused(self: pathlib.Path, *args: Any, **kwargs: Any) -> object:
-        if self.name.endswith(".partial"):
-            raise PermissionError(errno.EACCES, "Permission denied", str(self))
-        return real_open(self, *args, **kwargs)
 
-    monkeypatch.setattr(pathlib.Path, "open", refused)
-
-
-@pytest.mark.parametrize("directory", ["refusing", "proc"])
+@pytest.mark.parametrize("directory", ["refusing", "unsearchable", "proc"])
 def test_a_directory_that_cannot_take_the_video_is_refused_before_ssh_starts(
     directory: str, node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -503,17 +530,23 @@ def test_a_directory_that_cannot_take_the_video_is_refused_before_ssh_starts(
             pytest.skip("no /proc, the directory nobody can write a file into")
         target = pathlib.Path("/proc/out.webm")
     else:
-        _refusing_partials(monkeypatch)
+        refusing_disk.refuse_partials(monkeypatch)
         target = tmp_path / "out.webm"
+    if directory == "unsearchable":
+        # A name inside it has no status to read, as well as taking no file.
+        refusing_disk.refuse_status(monkeypatch, target)
     request = Compute(host=node, fallback=True)
     with pytest.raises(
         io.VideoEncoderError, match="could not write the video"
     ) as caught:
         write_fdtd_animation(target, _RUN, compute=request, frame=_FRAME)
     assert str(target) in str(caught.value)
+    # The caller's path, never the hidden file that was refused.
+    assert ".partial" not in str(caught.value)
     assert not log.exists()
     assert fake.calls() == []
-    assert not target.exists()
+    # Listed, not stat'ed: the name of an unsearchable directory has no status.
+    assert target.name not in [p.name for p in target.parent.iterdir()]
 
 
 class _FullDisk:
@@ -584,3 +617,49 @@ def test_discarding_a_file_that_fails_to_close_removes_it_and_raises_that_failur
         partial.discard()
     assert str(request.path) in str(caught.value)
     assert not partial.path.exists()
+
+
+@pytest.mark.skipif(
+    shutil.which("ffmpeg") is None,
+    reason="needs ffmpeg on PATH, which the node finds; the CI video job installs it",
+)
+@pytest.mark.parametrize(
+    ("video", "said"),
+    [
+        (
+            VideoOptions(ffmpeg_encoder="phonometry-no-such-encoder"),
+            r"has no encoder 'phonometry-no-such-encoder'",
+        ),
+        (
+            VideoOptions(ffmpeg_encoder="libvpx-vp9", ffmpeg_options=("-crf", "99")),
+            r"(?s)with the encoder libvpx-vp9; ffmpeg said:.*'crf' out of range",
+        ),
+    ],
+    ids=["unknown-encoder", "refused-option"],
+)
+def test_an_encoder_or_option_of_the_caller_s_that_the_node_s_ffmpeg_refuses(
+    video: VideoOptions, said: str, node: str, tmp_path: Path
+) -> None:
+    """The node's real ffmpeg refuses: a failure of the node's, in ffmpeg's words, and nothing left here.
+
+    A raw encoder the node lacks is refused before the node steps; options
+    it refuses, at the first frames of its encode, as on this machine.
+    """
+    encoder = video.ffmpeg_encoder
+    assert encoder is not None
+    listing = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-encoders"],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=True,
+    ).stdout
+    if encoder.startswith("lib") and f" {encoder} " not in listing:
+        pytest.skip(f"this ffmpeg has no {encoder}")
+    target = tmp_path / "raw.webm"
+    target.write_bytes(b"the video that was there")
+    request = Compute(host=node)
+    with pytest.raises(ComputeRemoteError, match=said):
+        write_fdtd_animation(target, _RUN, compute=request, frame=_FRAME, video=video)
+    assert target.read_bytes() == b"the video that was there"
+    assert _partials(tmp_path) == []

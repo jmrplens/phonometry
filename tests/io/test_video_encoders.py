@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -19,6 +20,9 @@ import fake_ffmpeg
 
 from phonometry.io import _video_encoders as ve
 from phonometry.io._video_quality import ENCODER_QUALITY, GIF_PALETTE
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def test_every_encoder_name_has_its_three_presets() -> None:
@@ -40,11 +44,16 @@ _AVOPTIONS_HEADER = re.compile(r"^\S.*AVOptions:$")
 
 
 def _help(ffmpeg: str, *topic: str) -> list[str]:
-    """The lines of ``ffmpeg -h <topic>``: an argument list, no shell."""
+    """The lines of ``ffmpeg -h <topic>``: an argument list, no shell.
+
+    Read as UTF-8 whatever the console's code page, a byte it cannot read
+    replaced: an option's name is ASCII, and its description is not read.
+    """
     done = subprocess.run(
         [ffmpeg, "-hide_banner", "-h", *topic],
         capture_output=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=60,
         check=True,
     )
@@ -83,11 +92,17 @@ def test_every_preset_flag_is_an_option_its_encoder_has() -> None:
             "the CI video job installs it"
         )
     compiled = ve.describe(ffmpeg).encoders
+    checked = sorted({name for name, _ in ENCODER_QUALITY} & compiled)
+    if not checked:
+        pytest.skip(
+            "this ffmpeg has none of the encoders the presets name, so no "
+            "flag of theirs can be read"
+        )
     generic = _generic_options(_help(ffmpeg, "full"))
     own: dict[str, set[str]] = {}
     unknown: set[str] = set()
     for (name, _), row in ENCODER_QUALITY.items():
-        if name not in compiled:
+        if name not in checked:
             continue
         if name not in own:
             own[name] = _option_names(_help(ffmpeg, f"encoder={name}"))
@@ -478,7 +493,11 @@ def test_no_encoder_at_all_says_what_was_tried(
 ) -> None:
     fake = fake_ffmpeg.install(tmp_path, monkeypatch, encoders=["libx264"], working=[])
     ffmpeg = ve.describe(str(fake.launcher))
-    with pytest.raises(ve.VideoEncoderError, match=r"\.webm"):
+    with pytest.raises(
+        ve.VideoEncoderError,
+        match=r"^encoder='auto' cannot write av1/vp9 into \.webm with .*; "
+        r"tried nothing it has\. Install an ffmpeg built with SVT-AV1",
+    ):
         ve.choose(
             ffmpeg,
             encoder="auto",
@@ -524,6 +543,50 @@ def test_the_install_hint_names_what_the_container_holds(
         )
 
 
+def test_encoders_that_fail_their_trials_are_named(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch, working=[])
+    ffmpeg = ve.describe(str(fake.launcher))
+    with pytest.raises(
+        ve.VideoEncoderError, match=r"; tried av1_nvenc, libsvtav1, libvpx-vp9\."
+    ):
+        ve.choose(
+            ffmpeg,
+            encoder="auto",
+            codec=None,
+            container="webm",
+            width=32,
+            height=32,
+            vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
+        )
+
+
+def test_a_gpu_encoder_of_a_lesser_codec_comes_before_the_cpu_s_av1_in_an_mp4(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The kinds of encoder go first, the codecs within each: NVENC's HEVC before SVT-AV1."""
+    fake = fake_ffmpeg.install(
+        tmp_path,
+        monkeypatch,
+        encoders=["av1_nvenc", "hevc_nvenc", "libsvtav1", "libx265"],
+        working=["hevc_nvenc", "libsvtav1", "libx265"],
+    )
+    ffmpeg = ve.describe(str(fake.launcher))
+    choice = ve.choose(
+        ffmpeg,
+        encoder="auto",
+        codec=None,
+        container="mp4",
+        width=64,
+        height=64,
+        vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
+    )
+    assert choice == ve.EncoderChoice("nvenc", "hevc", "hevc_nvenc")
+    tried = [t["argv"][t["argv"].index("-c:v") + 1] for t in fake.trials()]
+    assert tried == ["av1_nvenc", "hevc_nvenc"]
+
+
 def test_mp4_prefers_av1_then_hevc_then_h264(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -539,6 +602,9 @@ def test_mp4_prefers_av1_then_hevc_then_h264(
         vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
     )
     assert choice.name == "libx265"
+    # SVT-AV1 is compiled in and fails here, so it is tried first; x264 never is.
+    tried = [t["argv"][t["argv"].index("-c:v") + 1] for t in fake.trials()]
+    assert tried == ["libsvtav1", "libx265"]
 
 
 def test_vaapi_encodes_on_the_device_named_and_no_other_kind_takes_one() -> None:
@@ -645,3 +711,74 @@ def test_the_command_reads_raw_rgba_from_stdin() -> None:
         "-cq",
         "44",
     ]
+
+
+@pytest.mark.parametrize(
+    ("pixels", "filters"),
+    [
+        ((64, 64), ("format=nv12,hwupload",)),
+        (
+            (65, 64),
+            ("pad=ceil(iw/2)*2:ceil(ih/2)*2:color=#ffffff", "format=nv12,hwupload"),
+        ),
+    ],
+)
+def test_vaapi_opens_its_device_and_uploads_the_frames(
+    pixels: tuple[int, int], filters: tuple[str, ...]
+) -> None:
+    """The device the guide names, the frames handed to it in NV12, an odd frame padded first."""
+    width, height = pixels
+    video = ve.video_arguments(
+        ve.EncoderChoice("vaapi", "h264", "h264_vaapi"),
+        quality="standard",
+        options=(),
+        container="mp4",
+        width=width,
+        height=height,
+        pad_color="#ffffff",
+        vaapi_device=ve.DEFAULT_VAAPI_DEVICE,
+    )
+    assert video.before_input == ("-vaapi_device", "/dev/dri/renderD128")
+    assert video.filters == filters
+    # The upload sets the pixel format; a -pix_fmt after it would undo it.
+    assert "-pix_fmt" not in video.codec_arguments
+    assert video.codec_arguments[:2] == ("-c:v", "h264_vaapi")
+
+
+def _described_by(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path, answer: object
+) -> Callable[[], ve.FFmpeg]:
+    """describe() of a launcher of this test's own, with each run of ffmpeg answered by *answer*."""
+    launcher = tmp_path / "ffmpeg"
+    launcher.write_bytes(b"")
+
+    def run(command: list[str], **_kwargs: object) -> object:
+        if isinstance(answer, BaseException):
+            raise answer
+        return answer
+
+    monkeypatch.setattr(ve, "_run", run)
+    return lambda: ve.describe(str(launcher))
+
+
+def test_an_ffmpeg_that_exits_with_an_error_does_not_run(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    failed = subprocess.CompletedProcess(
+        ["ffmpeg"], 1, stdout=b"", stderr=b"error while loading shared libraries"
+    )
+    describe = _described_by(monkeypatch, tmp_path, failed)
+    with pytest.raises(
+        ve.VideoEncoderError, match=r"did not run: error while loading shared libraries"
+    ):
+        describe()
+
+
+def test_an_ffmpeg_that_hangs_does_not_run(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    describe = _described_by(
+        monkeypatch, tmp_path, subprocess.TimeoutExpired(["ffmpeg"], 60.0)
+    )
+    with pytest.raises(ve.VideoEncoderError, match=r"did not run: .*timed out"):
+        describe()

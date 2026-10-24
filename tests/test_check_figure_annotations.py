@@ -56,6 +56,12 @@ if _SCRIPTS not in sys.path:
 import check_figure_annotations as check
 import figure_annotation_audit as audit
 
+# Importing the figure theme sets the settings the generator draws with, for
+# the whole process. Imported as the module is collected, the settings are in
+# place before any test's are compared, so the test that sets the theme does
+# not fail at teardown when it runs alone.
+from figures import i18n, theme
+
 # The figure, diagram and badge tooling is tied to the pinned figure stack its
 # artefacts are drawn with, so the minimum-versions job deselects this module.
 pytestmark = pytest.mark.pinned_stack
@@ -912,8 +918,6 @@ def test_the_spanish_pass_is_measured_and_says_so(
     and *after* the translation, and the record has to say which drawing it
     is talking about.
     """
-    from figures import i18n, theme
-
     english = "brief"
     spanish = "una anotación considerablemente más larga que la inglesa"
     monkeypatch.setitem(i18n._ES_EXACT, english, spanish)

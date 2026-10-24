@@ -961,3 +961,51 @@ def test_a_video_refused_by_its_heads_falls_back_here_with_nothing_in_the_sink(
         )
     assert provenance is None
     assert sink.getvalue() == b""
+
+
+#: An MP4's head is four bytes in, after the size of its first box; a GIF has
+#: two heads, one per version, either of which will do.
+_MANY_HEADS = ((4, b"ftyp"), (0, b"GIF87a"), (0, b"GIF89a"))
+_OFFSET_AND_MANY = client.Expected(
+    arrays=_STREAMED.arrays,
+    stream=client.StreamSpec("video", max_bytes=64, heads=_MANY_HEADS),
+)
+
+
+@pytest.mark.parametrize(
+    "data",
+    [b"\x00\x00\x00\x18ftypisom", b"GIF87a", b"GIF89a" + bytes(4)],
+    ids=["mp4-at-4", "gif87a", "gif89a"],
+)
+def test_a_stream_may_begin_as_any_of_its_heads_at_its_offset(data: bytes) -> None:
+    sink = io.BytesIO()
+    _receive(_video(data), expected=_OFFSET_AND_MANY, sink=sink)
+    assert sink.getvalue() == data
+
+
+@pytest.mark.parametrize(
+    ("data", "match"),
+    [
+        # The shortest head ends at byte 6: GIF87a, GIF89a, or ftyp at 4.
+        (b"\x00\x00\x00", "3 bytes of 'video', too few to begin"),
+        # ftyp at the start, not four bytes in.
+        (b"ftypisom", "does not begin as the file the request names"),
+        (b"GIF88a", "does not begin as the file the request names"),
+    ],
+    ids=["short", "ftyp-at-0", "gif88a"],
+)
+def test_a_head_counts_only_at_its_own_offset(data: bytes, match: str) -> None:
+    sink = io.BytesIO()
+    stdout = _video(data)
+    with pytest.raises(ComputeRemoteError, match=match):
+        _receive(stdout, expected=_OFFSET_AND_MANY, sink=sink)
+    assert sink.getvalue() == b""
+
+
+def test_the_shortest_stream_is_where_the_nearest_head_ends() -> None:
+    """Six bytes are enough to hold a GIF's head, and five are not, whatever an MP4's needs."""
+    assert client._begins_as(b"GIF89a", _MANY_HEADS)
+    stdout = _video(b"GIF89")
+    sink = io.BytesIO()
+    with pytest.raises(ComputeRemoteError, match="5 bytes of 'video', too few"):
+        _receive(stdout, expected=_OFFSET_AND_MANY, sink=sink)

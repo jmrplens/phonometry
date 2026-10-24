@@ -27,7 +27,6 @@ from typing import TYPE_CHECKING, Self
 import pytest
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
     from types import ModuleType
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
@@ -560,22 +559,23 @@ def test_a_new_clip_is_reported_rather_than_ignored(tree: pathlib.Path) -> None:
 
 
 @pytest.fixture
-def registry() -> Iterator[ModuleType]:
+def registry() -> ModuleType:
     """The clip registry, with matplotlib's settings left as the test found them.
 
     Importing the registry imports ``figures.theme``, which sets the settings
     the generator draws with (the grid, the figure size, ``savefig.bbox``)
     for the whole process: what the generator wants in a process of its own,
     and what the first test of a worker to import it would otherwise leave to
-    every test after it. So the import, and the test with it, run inside
-    ``rc_context``.
+    every test after it. So the import runs inside ``rc_context``, and the
+    test after it does not: a setting the test itself leaves changed is
+    still reported by the check in ``conftest.py``.
     """
     import matplotlib as mpl
 
     with mpl.rc_context():
         from figures import registry
 
-        yield registry
+    return registry
 
 
 def _fake_batch(

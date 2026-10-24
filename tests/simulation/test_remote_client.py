@@ -912,13 +912,14 @@ def test_a_stream_that_begins_as_its_file_reaches_the_sink_whole(
     ("data", "match"),
     [
         (b"", "0 bytes of 'video', too few to begin as the file the request names"),
+        (_WEBM_HEAD[:1], "1 byte of 'video', too few to begin as the file"),
         (
             _WEBM_HEAD[:2],
             "2 bytes of 'video', too few to begin as the file the request names",
         ),
         (b"GIF89a" + bytes(10), "'video' does not begin as the file the request names"),
     ],
-    ids=["empty", "short", "gif"],
+    ids=["empty", "one-byte", "short", "gif"],
 )
 def test_a_video_that_is_empty_short_or_another_file_reaches_no_sink(
     data: bytes, match: str
@@ -928,6 +929,23 @@ def test_a_video_that_is_empty_short_or_another_file_reaches_no_sink(
     with pytest.raises(ComputeRemoteError, match=match):
         _receive(stdout, expected=_HEADED, sink=sink)
     assert sink.getvalue() == b""
+
+
+@pytest.mark.parametrize(
+    ("heads", "shown"),
+    [
+        (((0, b""),), "b'' at 0"),
+        (((-1, b"ftyp"),), "b'ftyp' at -1"),
+        (((4, b"ftyp"), (0, b"")), "b'' at 0"),
+    ],
+    ids=["empty", "negative-offset", "one-of-two-empty"],
+)
+def test_a_head_every_stream_would_begin_as_is_refused(
+    heads: tuple[tuple[int, bytes], ...], shown: str
+) -> None:
+    """An empty head matches any stream at any length, so it would turn both checks off."""
+    with pytest.raises(ValueError, match=rf"a head of 'video' is .*, got {shown}$"):
+        client.StreamSpec("video", max_bytes=64, heads=heads)
 
 
 def test_a_stream_without_heads_is_read_as_before() -> None:

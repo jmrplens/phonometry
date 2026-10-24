@@ -200,12 +200,24 @@ class StreamSpec:
     says what its file begins with): a stream too short to hold the shortest
     of them, an empty one included, is refused before a byte of it is read,
     and one whose first chunk begins as none of them before a byte of it
-    reaches the sink.
+    reaches the sink. An empty head, which every stream would begin as, or
+    one at a negative offset is refused when the record is built.
+
+    :raises ValueError: for an empty head or a negative offset.
     """
 
     name: str
     max_bytes: int
     heads: tuple[tuple[int, bytes], ...] = ()
+
+    def __post_init__(self) -> None:
+        for at, head in self.heads:
+            if at < 0 or not head:
+                msg = (
+                    f"a head of {self.name!r} is some bytes at an offset of 0 or "
+                    f"more, got {head!r} at {at}"
+                )
+                raise ValueError(msg)
 
 
 @dataclass(frozen=True)
@@ -594,9 +606,10 @@ def _checked_stream(
     if spec.heads:
         shortest = min(at + len(head) for at, head in spec.heads)
         if length < shortest:
+            noun = "byte" if length == 1 else "bytes"
             msg = (
-                f"the node sent {length} bytes of {spec.name!r}, too few to begin as the "
-                "file the request names"
+                f"the node sent {length} {noun} of {spec.name!r}, too few to begin as "
+                "the file the request names"
             )
             raise session.failure(msg)
     return length

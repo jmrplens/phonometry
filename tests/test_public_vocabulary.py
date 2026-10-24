@@ -201,18 +201,26 @@ def _public_modules() -> Iterator[object]:
         yield importlib.import_module(info.name)
 
 
-def _public_names() -> Iterator[tuple[str, str, str, str, str]]:
+def _public_names(
+    members: Iterable[tuple[str, object]] | None = None,
+) -> Iterator[tuple[str, str, str, str, str]]:
     """``(where, name, annotation, kind, text)`` for every public field and parameter.
 
     ``kind`` is ``field``, ``property``, ``param``, ``varargs`` (``*args``) or
     ``varkw`` (``**kwargs``); ``text`` is the ``:param`` text of a parameter,
-    or ``""``.
+    or ``""``. The names are those of *members*, every public function and
+    class by default, and of the private bases those classes inherit from.
     """
-    for key, obj in _public_members():
+    members = list(_public_members() if members is None else members)
+    for key, obj in members:
         if inspect.isclass(obj):
             yield from _class_names(key, obj)
         else:
             yield from _parameters(key, obj)
+    for key, base, constructs in _private_bases(members):
+        if constructs:
+            yield from _parameters(f"{key}.__init__", vars(base)["__init__"])
+        yield from _member_names(key, base)
 
 
 def _public_members() -> Iterator[tuple[str, object]]:
@@ -284,6 +292,11 @@ def _class_names(where: str, cls: type) -> Iterator[tuple[str, str, str, str, st
             yield f"{where}.{name}", name, str(annotations.get(name, "")), "field", ""
     elif "__init__" in vars(cls):
         yield from _parameters(f"{where}.__init__", vars(cls)["__init__"])
+    yield from _member_names(where, cls)
+
+
+def _member_names(where: str, cls: type) -> Iterator[tuple[str, str, str, str, str]]:
+    """The properties of *cls* and the parameters of its methods, from its own body."""
     for name, member in vars(cls).items():
         if name.startswith("_"):
             continue
@@ -303,16 +316,54 @@ def _class_names(where: str, cls: type) -> Iterator[tuple[str, str, str, str, st
             yield from _parameters(f"{where}.{name}", member)
 
 
-def _self_targets(func: object) -> Iterator[str]:
-    """The public names *func* assigns on ``self`` (``self.fs = fs``)."""
+def _private_bases(
+    members: Iterable[tuple[str, object]],
+) -> Iterator[tuple[str, type, bool]]:
+    """``(where, base, constructs)`` for every phonometry base no public name reaches.
+
+    A public class inherits the properties and methods of its bases, and the
+    walk by name reads a base only where a public module lists it. A base
+    such as ``_DrawableLayer``, whose ``plot`` six public layers inherit, is
+    listed nowhere, so each such base of a class in *members* is read once,
+    where it is defined. ``constructs`` says whether a public class runs the
+    ``__init__`` of the base as its own.
+    """
+    members = list(members)
+    public = {where for where, _ in members}
+    bases: dict[str, tuple[type, bool]] = {}
+    for _, cls in members:
+        if not inspect.isclass(cls):
+            continue
+        for base in cls.__mro__[1:]:
+            owner = getattr(base, "__module__", "") or ""
+            key = f"{owner}.{base.__qualname__}"
+            if not owner.startswith("phonometry") or key in public:
+                continue
+            constructs = vars(base).get("__init__") is cls.__init__
+            known = bases.get(key, (base, False))[1]
+            bases[key] = (base, known or constructs)
+    for key, (base, constructs) in bases.items():
+        yield key, base, constructs
+
+
+def _self_targets(func: object) -> Iterator[tuple[str, str]]:
+    """``(name, annotation)`` for each public name *func* assigns on ``self``.
+
+    ``self.fs = fs`` gives ``("fs", "")``, and an annotated assignment such
+    as ``self.high_accuracy: bool = True`` gives its annotation.
+    """
     try:
         source = textwrap.dedent(inspect.getsource(func))  # type: ignore[arg-type]
     except (OSError, TypeError):  # pragma: no cover - no source to read
         return
     for node in ast.walk(ast.parse(source)):
+        annotation = ""
         if isinstance(node, ast.Assign):
             targets = list(node.targets)
-        elif isinstance(node, ast.AnnAssign | ast.AugAssign):
+        elif isinstance(node, ast.AnnAssign):
+            targets = [node.target]
+            annotation = ast.unparse(node.annotation)
+        elif isinstance(node, ast.AugAssign):
             targets = [node.target]
         else:
             continue
@@ -324,48 +375,44 @@ def _self_targets(func: object) -> Iterator[str]:
                     and element.value.id == "self"
                     and not element.attr.startswith("_")
                 ):
-                    yield element.attr
+                    yield element.attr, annotation
 
 
-def _instance_attributes() -> Iterator[tuple[str, str]]:
-    """``(where, name)`` for every public attribute a public plain class sets.
+def _instance_attributes(
+    members: Iterable[tuple[str, object]] | None = None,
+) -> Iterator[tuple[str, str, str]]:
+    """``(where, name, annotation)`` for every public attribute a plain class sets.
 
     A dataclass declares its fields, a property is a member of its class, and
     the walk above reads both. A plain class such as ``OctaveFilterBank``
     writes its public attributes in a method (``self.fs = fs``), where no
     signature, field list or member shows them, so they are read from the
-    source of every method of the class and of its phonometry bases. That is
-    how ``bank.freq``, ``bank.freq_d`` and ``bank.num_bands`` stayed public
-    long after every field and parameter of the same quantities was spelled
-    out.
+    source of every method of the class and of its phonometry bases, with
+    the annotation of an annotated assignment, or ``""``. That is how
+    ``bank.freq``, ``bank.freq_d`` and ``bank.num_bands`` stayed public long
+    after every field and parameter of the same quantities was spelled out.
+    The classes are those of *members*, every public class by default.
     """
-    seen: set[str] = set()
-    for module in _public_modules():
-        for attr, obj in vars(module).items():
-            if attr.startswith("_") or not inspect.isclass(obj):
+    for key, obj in _public_members() if members is None else members:
+        if not inspect.isclass(obj) or dataclasses.is_dataclass(obj):
+            continue
+        names: dict[str, str] = {}
+        for klass in obj.__mro__:
+            if not (getattr(klass, "__module__", "") or "").startswith("phonometry"):
                 continue
-            owner = getattr(obj, "__module__", "") or ""
-            if not owner.startswith("phonometry") or dataclasses.is_dataclass(obj):
-                continue
-            key = f"{owner}.{obj.__qualname__}"
-            if key in seen:
-                continue
-            seen.add(key)
-            names: set[str] = set()
-            for klass in obj.__mro__:
-                if not (getattr(klass, "__module__", "") or "").startswith(
-                    "phonometry"
-                ):
-                    continue
-                for member in vars(klass).values():
-                    if inspect.isfunction(member):
-                        names.update(_self_targets(member))
-            yield from ((f"{key}.{name}", name) for name in sorted(names))
+            for member in vars(klass).values():
+                if inspect.isfunction(member):
+                    for name, annotation in _self_targets(member):
+                        names[name] = names.get(name) or annotation
+        yield from (
+            (f"{key}.{name}", name, annotation)
+            for name, annotation in sorted(names.items())
+        )
 
 
 def test_the_attribute_walk_reads_the_plain_classes() -> None:
     """The walk sees what a plain class writes on ``self``, or it proves nothing."""
-    found = {where for where, _ in _instance_attributes()}
+    found = {where for where, *_ in _instance_attributes()}
     assert "phonometry.filters.core.OctaveFilterBank.fs" in found
     assert "phonometry.filters.weighting.WeightingFilter.high_accuracy" in found
 
@@ -374,7 +421,7 @@ def test_one_concept_is_spelled_one_way() -> None:
     """The minority spellings of a bare concept name are gone and stay gone."""
     names = [(where, name) for where, name, *_ in _public_names()]
     assert len(names) > 5000, "the walk found too few names to mean anything"
-    names += list(_instance_attributes())
+    names += [(where, name) for where, name, _ in _instance_attributes()]
     offenders = sorted(
         f"{where}: {name!r} is spelled {_MINORITY[name]!r} everywhere else"
         for where, name in names
@@ -1095,12 +1142,13 @@ def test_words_are_spelled_out() -> None:
         offenders += [
             f"{where}: {problem}" for problem in _spelling_problems(name, kind=kind)
         ]
-    for where, name in _instance_attributes():
+    for where, name, annotation in _instance_attributes():
         if where in seen or where in _SPELLING_EXEMPT:
             continue
         seen.add(where)
         offenders += [
-            f"{where}: {problem}" for problem in _spelling_problems(name, kind="field")
+            f"{where}: {problem}"
+            for problem in _spelling_problems(name, kind="field", annotation=annotation)
         ]
     for module in _public_modules():
         path = module.__name__  # type: ignore[attr-defined]
@@ -1171,7 +1219,7 @@ def test_every_kept_spelling_still_exists() -> None:
     found = (
         {where for where, *_ in _public_names()}
         | {where for where, *_ in _module_names()}
-        | {where for where, _ in _instance_attributes()}
+        | {where for where, *_ in _instance_attributes()}
     )
     stale = sorted(set(_SPELLING_EXEMPT) - found)
     assert not stale, "\n".join(stale)
@@ -1573,12 +1621,14 @@ def _method_names(
     """``(where, name, annotation)`` for every public method of a class in *members*.
 
     A method, a static method and a class method are read by name, with the
-    annotation of what they return; a property is read with the fields.
+    annotation of what they return, on the class and on each private base it
+    inherits from; a property is read with the fields.
     """
-    for where, member in members:
-        if not inspect.isclass(member):
-            continue
-        for name, attribute in vars(member).items():
+    members = list(members)
+    classes = [(where, member) for where, member in members if inspect.isclass(member)]
+    classes += [(where, base) for where, base, _ in _private_bases(members)]
+    for where, cls in classes:
+        for name, attribute in vars(cls).items():
             function = (
                 attribute.__func__
                 if isinstance(attribute, staticmethod | classmethod)
@@ -1588,17 +1638,25 @@ def _method_names(
                 yield f"{where}.{name}", name, _returns(function)
 
 
-def _named_durations() -> Iterator[tuple[str, str, str]]:
+def _named_durations(
+    members: Iterable[tuple[str, object]] | None = None,
+    modules: Iterable[types.ModuleType] | None = None,
+) -> Iterator[tuple[str, str, str]]:
     """``(where, name, annotation)`` for every public name the duration rule reads.
 
     A parameter, a field and a property; a function, a method, a static
-    method and a class method; and a constant.
+    method and a class method; an attribute a plain class sets on ``self``;
+    and a constant. A property or a method a class inherits from a private
+    base is read where the base defines it. *members* are every public
+    function and class and *modules* every public module, by default.
     """
-    for where, name, annotation, kind, _ in _public_names():
+    members = list(_public_members() if members is None else members)
+    for where, name, annotation, kind, _ in _public_names(members):
         if kind in {"param", "field", "property"}:
             yield where, name, annotation
-    yield from _exported_names(_public_modules())
-    yield from _method_names(_public_members())
+    yield from _exported_names(_public_modules() if modules is None else modules)
+    yield from _method_names(members)
+    yield from _instance_attributes(members)
 
 
 def _duration_offenders(
@@ -1615,14 +1673,15 @@ def _duration_offenders(
 def test_a_duration_ends_in_its_unit() -> None:
     """``duration_s``, ``duration_hours``, ``exposure_duration_years``.
 
-    A parameter, a field, a property, a function, a method or a constant
-    whose name says it is a duration ends in the unit of time it holds or
-    returns, so ``segment_duration`` cannot be read in seconds by one caller
-    and in milliseconds by the next: the name is where the unit is written,
-    beside the ``duration_ms`` of a toneburst, the ``duration_hours`` of a
-    working day, ``rectangular_pulse_duration_s`` and ``TAKT_DURATION_S``.
-    The count rule above refuses a unit alone (``seconds``); this one
-    refuses a duration without one.
+    A parameter, a field, a property, a function, a method, a constant or an
+    attribute a plain class sets on ``self`` whose name says it is a
+    duration ends in the unit of time it holds or returns, so
+    ``segment_duration`` cannot be read in seconds by one caller and in
+    milliseconds by the next: the name is where the unit is written, beside
+    the ``duration_ms`` of a toneburst, the ``duration_hours`` of a working
+    day, ``rectangular_pulse_duration_s`` and ``TAKT_DURATION_S``. The count
+    rule above refuses a unit alone (``seconds``); this one refuses a
+    duration without one.
     """
     offenders = sorted(
         f"{where}: {problem}"
@@ -1749,6 +1808,53 @@ def test_the_duration_rule_reads_a_function_a_method_and_a_constant() -> None:
         "tail_duration",
     ]
     assert len(names) == 11, "a name read twice, or one not read"
+
+
+def test_the_duration_rule_reads_an_attribute_and_an_inherited_member() -> None:
+    """An attribute set on ``self`` and a member of a private base say their unit too.
+
+    A plain class writes ``self.hold_duration`` in a method, where no
+    signature or field list shows it, and a public class inherits a property
+    ``ring_duration``, a method ``settle_duration`` and its ``__init__`` from
+    a private base no public module lists. Each one without its unit is
+    refused, the same names with their unit pass, and so does an attribute
+    annotated ``bool``.
+    """
+
+    class _Ringing:
+        def __init__(self, ring_duration: float) -> None:
+            self.decay_duration = ring_duration
+
+        @property
+        def ring_duration(self) -> float:
+            return 0.0
+
+        @property
+        def ring_duration_s(self) -> float:
+            return 0.0
+
+        def settle_duration(self) -> float:
+            return 0.0
+
+    class Bell(_Ringing):
+        def strike(self) -> None:
+            self.hold_duration = 0.5
+            self.hold_duration_s = 0.5
+            self.long_duration: bool = True
+
+    _Ringing.__module__ = Bell.__module__ = "phonometry.probe"
+    names = list(_named_durations([("phonometry.probe.Bell", Bell)], []))
+    offenders = _duration_offenders(names)
+    assert sorted(where.rsplit(".", 1)[-1] for where in offenders) == [
+        "__init__(ring_duration)",
+        "decay_duration",
+        "hold_duration",
+        "ring_duration",
+        "settle_duration",
+    ]
+    assert len({where for where, *_ in names}) == len(names) == 9, (
+        "a name read twice, or one not read"
+    )
 
 
 #: A parameter that names the time signal in a spelling the API retired.

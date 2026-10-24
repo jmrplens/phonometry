@@ -4403,9 +4403,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   in hours, as `duration_range_hours` and `duration_observations_hours` where
   it took `duration_range` and `duration_samples`, a name that read as a
   count of samples. `tests/test_public_vocabulary.py` fails on a public
-  parameter, field, property, function, method or constant that says it is
-  a duration and does not end in its unit of time (`_s`, `_ms`, `_minutes`,
-  `_hours`, `_days` or `_years`), unless it is a choice or a switch, ends
+  parameter, field, property, function, method, constant or attribute a
+  plain class sets on `self`, a property or a method a public class
+  inherits from a private base included, that says it is a duration and
+  does not end in its unit of time (`_s`, `_ms`, `_minutes`, `_hours`,
+  `_days` or `_years`), unless it is a choice or a switch, ends
   in a suffix that says it holds no length of time (the decibels of a
   `duration_correction`; the uncertainty of a duration is a length of time
   and ends in its unit), or is kept with its reason: the sub-interval

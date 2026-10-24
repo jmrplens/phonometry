@@ -426,3 +426,12 @@ def test_an_answer_that_is_not_a_count_of_bytes_is_refused() -> None:
 
     with pytest.raises(ValueError, match=r"GPU 0"):
         clip_placement.free_gpu_bytes(0, run=run)
+
+
+def test_a_host_in_the_environment_is_refused_where_a_field_steps(
+    devices: dict[str, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A field steps where its clip is rendered; `make animations` sends the render."""
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", "cupy@nas")
+    with pytest.raises(ValueError, match=r"make animations"):
+        clip_placement.compute_for("anim_gpu")

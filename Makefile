@@ -530,10 +530,21 @@ assets:
 # encodes on an NVIDIA GPU here (the default is SVT-AV1 on the CPU,
 # publishable with SVT-AV1 4, the major the clips are calibrated on:
 # PATH="$(make -s clip-ffmpeg):$PATH" make animations puts the build the node
-# image pins first).
+# image pins first). With a host in PHONOMETRY_COMPUTE
+# (PHONOMETRY_COMPUTE=cupy@nas make animations), the clips are rendered on
+# that node (scripts/clip_transport.py), only the stale ones unless FORCE=1,
+# and copied and stamped here as each comes back. With a GPU here
+# (PHONOMETRY_COMPUTE=cupy), two clips render at a time, as on a node.
 animations: assets
-	$(FIGURE_LANGUAGE_ENV) $(PYTHON) scripts/generate_graphs.py --animations $(if $(ANIM),--anim $(ANIM)) $(if $(CLIP_ENCODER),--clip-encoder $(CLIP_ENCODER))
+	$(FIGURE_LANGUAGE_ENV) $(PYTHON) scripts/generate_graphs.py --animations $(if $(ANIM),--anim $(ANIM)) $(if $(CLIP_ENCODER),--clip-encoder $(CLIP_ENCODER)) $(if $(FORCE),--force)
 	@if [ "$(PUBLISH)" != "no" ]; then $(PYTHON) scripts/publish_assets.py; fi
+
+# Whether the node in PHONOMETRY_COMPUTE can render the clips: its encoder,
+# a software AV1 decoder, WebP, the pinned figure stack, the free memory of
+# its GPU, and one NVENC frame or the SVT-AV1 the clips were calibrated for.
+# Nothing is rendered.
+clip-node-check:
+	$(PYTHON) scripts/clip_transport.py --check $(if $(CLIP_ENCODER),--clip-encoder $(CLIP_ENCODER))
 
 # The ffmpeg build the node image pins (docker/node/Dockerfile), for a CPU
 # render of the clips on this machine (Linux on x86_64): downloaded once into
@@ -565,7 +576,8 @@ animation-freshness:
 # the render: every frame of every clip in its four variants, no video, no
 # fingerprint stamped, nothing published, and every finding listed with the
 # frames it holds over. ANIM=anim_<name> inspects one clip; the field clips
-# need their simulation, so the GPU settings in .env. No CI job runs it,
+# step their simulation; with a host in PHONOMETRY_COMPUTE the inspection
+# runs on that node. No CI job runs it,
 # because CI cannot render a clip: the freshness check fails a change to a
 # clip's drawing code (scripts/figures, and the phonometry._plot helpers it
 # draws with) until the clip is rendered again, and the render runs this
@@ -815,7 +827,7 @@ check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
-	assets animations clip-ffmpeg animation-freshness animation-audit posters brand lighthouse \
+	assets animations clip-node-check clip-ffmpeg animation-freshness animation-audit posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu gpu-parity node-image engine-digests coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \

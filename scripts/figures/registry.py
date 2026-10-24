@@ -13,16 +13,20 @@ silently degrouping a cached figure or dropping a clip's field builder.
 
 import argparse
 import os
+import subprocess
 import sys
+import tempfile
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, Literal
 
 import assets_dir
 import clip_placement
+import encode_slots
 import matplotlib.pyplot as plt
 
 from phonometry._i18n import Language
+from phonometry.simulation import Compute
 
 from .aircraft import (
     generate_aircraft_atmospheric_absorption,
@@ -2484,8 +2488,248 @@ def _clips_directory(scratch: Path | None, *, needed: bool) -> str:
     return str(assets_dir.require_clips_dir()) if needed else ""
 
 
+def _placement() -> Compute:
+    """Where ``PHONOMETRY_COMPUTE`` asks the clips to step, read once per run.
+
+    :raises ValueError: when ``PHONOMETRY_COMPUTE`` does not parse.
+    """
+    from phonometry.simulation.compute import _requested
+
+    return _requested(None)
+
+
+def _placement_of_run(parser: argparse.ArgumentParser) -> Compute:
+    """:func:`_placement`, or a stop naming what is wrong with ``PHONOMETRY_COMPUTE``.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error` when
+        ``PHONOMETRY_COMPUTE`` does not parse.
+    """
+    try:
+        return _placement()
+    except ValueError as exc:
+        parser.error(str(exc))
+
+
+def _send_to_a_node(
+    parser: argparse.ArgumentParser, args: argparse.Namespace, placement: Compute
+) -> None:
+    """With a host in ``PHONOMETRY_COMPUTE``, render the clips on that node and end the run.
+
+    The node asks its own ffmpeg before it renders, never this machine's, so
+    this comes before :func:`_require_a_clip_encoder`. A render into a
+    scratch directory is a node's own, and is rendered where it runs. What
+    stops the node run (a checkout with changes, a host the hosts file does
+    not name, a node that refuses the job) is named in one line.
+
+    :raises SystemExit: with the node run's status when it ends; through
+        :meth:`argparse.ArgumentParser.error` when the host comes with
+        anything but ``--animations``, or with what stopped the node run.
+    :raises OSError: when a clip's files cannot be written.
+    :raises tarfile.TarError: when the archive sent does not unpack here.
+    :raises subprocess.CalledProcessError: when this is not a checkout.
+    :raises subprocess.TimeoutExpired: when git does not answer in time.
+    """
+    if placement.host is None or args.scratch_dir is not None:
+        return
+    if not args.animations or args.do_all or args.posters:
+        parser.error("a host in PHONOMETRY_COMPUTE goes with --animations alone")
+    import clip_transport
+
+    try:
+        status = clip_transport.main_on_host(
+            placement,
+            requested=args.anim,
+            force=args.force,
+            audit_only=args.audit_only,
+            encoder=args.clip_encoder or clip_transport.default_encoder(placement),
+        )
+    except (RuntimeError, ValueError, KeyError, FileNotFoundError) as exc:
+        parser.error(str(exc.args[0]) if exc.args else repr(exc))
+    raise SystemExit(status)
+
+
+def _gpu_room_here(placement: Compute) -> tuple[int, int | None]:
+    """What this machine's GPU and RAM have free as the render starts.
+
+    :raises subprocess.CalledProcessError: when CuPy cannot say what the GPU
+        has free.
+    :raises subprocess.TimeoutExpired: when it does not say in time.
+    :raises ValueError: when its answer is not a count of bytes, or when
+        ``PHONOMETRY_CLIP_HOST_BYTES`` is not a positive count of bytes.
+    """
+    free_gpu = clip_placement.free_gpu_bytes(placement.device_index)
+    return free_gpu, clip_placement.host_bytes()
+
+
+def _lane_env_here(free_gpu: int, available: int | None, *, alone: bool) -> None:
+    """Give the render's workers a lane's budgets and the NVENC slots, as a node's lanes get them."""
+    os.environ[clip_placement.GPU_BYTES_ENV] = str(
+        clip_placement.gpu_budget(free_gpu, alone=alone)
+    )
+    if available is not None:
+        os.environ[clip_placement.HOST_BYTES_ENV] = str(
+            clip_placement.host_share(available, alone=alone)
+        )
+    if os.name == "posix":
+        slots = Path(tempfile.gettempdir()) / "phonometry-encode-slots"
+        os.environ.setdefault(
+            encode_slots.SLOTS_ENV, f"{slots}:{encode_slots.NVENC_SESSIONS}"
+        )
+
+
+def _split_for_gpu_here(
+    clips: list[str], free_gpu: int, available: int | None
+) -> tuple[list[str], list[str]]:
+    """The clips that share this machine's GPU two at a time, and those that run alone.
+
+    :raises ValueError: naming every clip whose recorded needs do not fit even alone.
+    """
+    shared: list[str] = []
+    alone: list[str] = []
+    reasons: list[str] = []
+    for clip in clips:
+        runs_alone, why = clip_placement.lane_fit(
+            clip,
+            _ANIM_DEVICES.get(clip, "cpu"),
+            gpu_need=_ANIM_GPU_BYTES.get(clip, 0),
+            host_need=_ANIM_HOST_BYTES.get(clip, 0),
+            free_gpu=free_gpu,
+            available=available,
+        )
+        reasons.extend(why)
+        (alone if runs_alone else shared).append(clip)
+    if reasons:
+        raise ValueError("; ".join(reasons))
+    return shared, alone
+
+
+def _unreadable_gpu(index: int, exc: subprocess.SubprocessError) -> str:
+    """Why the free memory of GPU *index* could not be read, in CuPy's last words."""
+    # A probe that timed out keeps its output as bytes, whatever it was asked.
+    said = getattr(exc, "stderr", None) or b""
+    text = said.decode("utf-8", "replace") if isinstance(said, bytes) else str(said)
+    lines = text.strip().splitlines()
+    return (
+        f"the free memory of GPU {index} could not be read through CuPy: "
+        f"{lines[-1] if lines else exc}"
+    )
+
+
+def _gpu_lanes_here(
+    parser: argparse.ArgumentParser, clips: list[str], placement: Compute
+) -> tuple[int, int | None, list[str], list[str]]:
+    """What this machine's GPU and RAM have free, the clips that share them and those that run alone.
+
+    Asked before any field is computed, so a GPU whose free memory cannot be
+    read, or a clip that does not fit even alone, stops the run first.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, with
+        the reason, in either case.
+    """
+    try:
+        free_gpu, available = _gpu_room_here(placement)
+        shared, alone = _split_for_gpu_here(clips, free_gpu, available)
+    except subprocess.SubprocessError as exc:
+        parser.error(_unreadable_gpu(placement.device_index, exc))
+    except ValueError as exc:
+        parser.error(str(exc))
+    return free_gpu, available, shared, alone
+
+
+def _render_on_gpu_here(
+    parser: argparse.ArgumentParser,
+    clip_dir: str,
+    clips: list[str],
+    jobs: int,
+    placement: Compute,
+) -> None:
+    """Render *clips* on this machine's GPU under a node's rules.
+
+    At most two clips at a time (``clip_placement.LANES``), each worker's CuPy
+    pool held to a lane's share of what the GPU has free now and its RAM to a
+    lane's share of what is available, the NVENC sessions shared through
+    ``encode_slots``; a clip whose recorded needs do not fit a lane's share
+    renders after them, one at a time, with all of it.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, before
+        any field is computed, for a clip that does not fit even alone or a
+        GPU whose free memory cannot be read.
+    :raises RuntimeError: when a clip fails to render on the pool; a clip
+        that runs alone raises what its render raises.
+    """
+    free_gpu, available, shared, alone = _gpu_lanes_here(parser, clips, placement)
+    if shared:
+        _lane_env_here(free_gpu, available, alone=False)
+        _generate_animations_parallel(clip_dir, shared, min(jobs, clip_placement.LANES))
+    if alone:
+        _lane_env_here(free_gpu, available, alone=True)
+        generate_animations(clip_dir, alone, variants=True)
+
+
+def _render_clips(
+    parser: argparse.ArgumentParser,
+    args: argparse.Namespace,
+    clip_dir: str,
+    jobs: int,
+    placement: Compute,
+) -> None:
+    """Render the clips here: one at a time, or on a process pool.
+
+    A targeted re-render (``--anim``) and an explicit ``--jobs 1`` walk the
+    clips one at a time: each clip's field is simulated once and its four
+    language/theme variants then render off that single computation (see
+    :func:`_render_anim_variants`). On this machine's GPU
+    (``PHONOMETRY_COMPUTE=cupy``) one clip at a time has all of what the GPU
+    has free, and a pool renders as a node does
+    (:func:`_render_on_gpu_here`).
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error`, before
+        any field is computed, when a clip does not fit this machine's GPU
+        even alone or its free memory cannot be read; for an unknown clip.
+    :raises RuntimeError: when ffmpeg is not on ``PATH``, or a clip fails to
+        render on the pool.
+    """
+    gpu_here = placement.host is None and placement.device == "cupy"
+    if args.anim or jobs == 1:
+        if gpu_here:
+            free_gpu, available, _, _ = _gpu_lanes_here(
+                parser, list(args.anim or _ANIMATIONS), placement
+            )
+            _lane_env_here(free_gpu, available, alone=True)
+        generate_animations(clip_dir, args.anim, variants=True)
+        return
+    import shutil
+
+    if shutil.which("ffmpeg") is None:
+        msg = (
+            "ffmpeg was not found on PATH; it is required to encode "
+            "the animation WebM/GIF outputs. Install ffmpeg and retry."
+        )
+        raise RuntimeError(msg)
+    clips = list(_ANIMATIONS)
+    print(
+        f"--- Generating animations ({len(clips)} clips "
+        f"x 4 variants, {jobs} jobs) into {clip_dir} ---"
+    )
+    if gpu_here:
+        _render_on_gpu_here(parser, clip_dir, clips, jobs, placement)
+    else:
+        _generate_animations_parallel(clip_dir, clips, jobs)
+
+
 def main(argv: list[str] | None = None) -> None:
-    """CLI entry point: figures by default, clips behind ``--animations``."""
+    """CLI entry point: figures by default, clips behind ``--animations``.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error` for
+        arguments that do not go together, a ``PHONOMETRY_COMPUTE`` that does
+        not parse, an encoder that cannot write the clips, or a clip that
+        cannot fit this machine's GPU; with the status of a node run or an
+        audit-only run when it ends.
+    :raises RuntimeError: when ffmpeg is not on ``PATH``, or a clip fails to
+        render.
+    :raises FileNotFoundError: when the run writes clips, names no scratch
+        directory, and the clips directory is not inside an assets checkout.
+    """
     import animation_fingerprint
 
     parser = argparse.ArgumentParser(
@@ -2518,6 +2762,12 @@ def main(argv: list[str] | None = None) -> None:
         default=None,
         help="with --animations, the ffmpeg encoder that writes each WebM: "
         "libsvtav1 (a CPU; the default here) or av1_nvenc (an NVIDIA GPU)",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="with --animations and a host in PHONOMETRY_COMPUTE, render the "
+        "clips that are fresh too (by default a node run renders only the stale ones)",
     )
     parser.add_argument(
         "--audit-only",
@@ -2559,10 +2809,6 @@ def main(argv: list[str] | None = None) -> None:
     )
     args = parser.parse_args(argv)
     _name_clip_encoder(args.clip_encoder)
-    _require_a_clip_encoder(parser, args)
-
-    img_dir = ".github/images"
-    Path(img_dir).mkdir(parents=True, exist_ok=True)
 
     do_figs = not (args.animations or args.posters) or args.do_all
     do_anim = args.animations or args.do_all
@@ -2570,6 +2816,12 @@ def main(argv: list[str] | None = None) -> None:
     if args.anim and not do_anim:
         parser.error("--anim requires --animations (or --all)")
     _require_animations_for_a_scratch_dir(parser, args)
+    placement = _placement_of_run(parser)
+    _send_to_a_node(parser, args, placement)
+    _require_a_clip_encoder(parser, args)
+
+    img_dir = ".github/images"
+    Path(img_dir).mkdir(parents=True, exist_ok=True)
     if args.audit_only:
         if not args.animations or args.do_all or args.posters:
             parser.error("--audit-only goes with --animations alone")
@@ -2601,27 +2853,7 @@ def main(argv: list[str] | None = None) -> None:
             _generate_figures_parallel(img_dir, funcs, jobs)
 
     if do_anim:
-        if args.anim or jobs == 1:
-            # A targeted re-render (``--anim``) and an explicit ``--jobs 1``
-            # walk the clips one at a time: each clip's field is simulated
-            # once and its four language/theme variants then render off that
-            # single computation (see _render_anim_variants).
-            generate_animations(clip_dir, args.anim, variants=True)
-        else:
-            import shutil
-
-            if shutil.which("ffmpeg") is None:
-                msg = (
-                    "ffmpeg was not found on PATH; it is required to encode "
-                    "the animation WebM/GIF outputs. Install ffmpeg and retry."
-                )
-                raise RuntimeError(msg)
-            clips = list(_ANIMATIONS)
-            print(
-                f"--- Generating animations ({len(clips)} clips "
-                f"x 4 variants, {jobs} jobs) into {clip_dir} ---"
-            )
-            _generate_animations_parallel(clip_dir, clips, jobs)
+        _render_clips(parser, args, clip_dir, jobs, placement)
 
     print("Graphics generated successfully.")
 

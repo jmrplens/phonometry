@@ -76,9 +76,10 @@ def compute_for(clip: str) -> Compute:
     """The placement *clip*'s field steps on, in float64.
 
     :raises KeyError: for a clip with no recorded device.
-    :raises ValueError: when ``PHONOMETRY_COMPUTE`` is malformed, asks for
-        float32, names a GPU library other than CuPy or a GPU other than the
-        first, or when the lane budget is not a positive count of bytes.
+    :raises ValueError: when ``PHONOMETRY_COMPUTE`` is malformed, names a
+        host, asks for float32, names a GPU library other than CuPy or a GPU
+        other than the first, or when the lane budget is not a positive
+        count of bytes.
     """
     from phonometry.simulation import Compute
     from phonometry.simulation.compute import _requested
@@ -86,6 +87,12 @@ def compute_for(clip: str) -> Compute:
     if device_of(clip) == "cpu":
         return Compute(device="cpu")
     ambient = _requested(None)
+    if ambient.host is not None:
+        msg = (
+            f"PHONOMETRY_COMPUTE names the host {ambient.host!r}, and a clip's field "
+            "steps where the clip is rendered; `make animations` sends the render there"
+        )
+        raise ValueError(msg)
     if ambient.device not in ("cpu", "cupy"):
         msg = (
             f"PHONOMETRY_COMPUTE names {ambient.device!r}; a clip steps on NumPy "

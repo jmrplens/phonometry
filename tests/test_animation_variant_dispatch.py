@@ -24,6 +24,8 @@ from __future__ import annotations
 import multiprocessing as mp
 import os
 import pathlib
+import re
+import subprocess
 import sys
 from typing import TYPE_CHECKING
 
@@ -316,3 +318,292 @@ def test_a_scratch_audit_writes_its_findings_there(
     with pytest.raises(SystemExit, match=r"^0$"):
         registry.main(argv)
     assert walked == [str((tmp_path / "audit").resolve())]
+
+
+def _unset(monkeypatch: pytest.MonkeyPatch, *names: str) -> None:
+    """Unset *names* for the test and restore them after, even if the code sets them."""
+    for name in names:
+        monkeypatch.setenv(name, "")
+        monkeypatch.delenv(name)
+
+
+@pytest.mark.parametrize(
+    ("placement", "encoder"), [("cupy@nas", "av1_nvenc"), ("cpu@nas", "libsvtav1")]
+)
+def test_a_host_in_the_placement_sends_the_render_to_the_node(
+    monkeypatch: pytest.MonkeyPatch, placement: str, encoder: str
+) -> None:
+    """The node asks its own ffmpeg; this machine's encoder is never checked for a node run."""
+    import clip_transport
+
+    calls: list[dict[str, object]] = []
+
+    def on_host(compute: object, **kwargs: object) -> int:
+        calls.append({"host": getattr(compute, "host", None), **kwargs})
+        return 0
+
+    def refuse(_name: object) -> tuple[str, ...]:
+        msg = "a node run checked this machine's encoder"
+        raise AssertionError(msg)
+
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", placement)
+    monkeypatch.setattr(clip_transport, "main_on_host", on_host)
+    # The registry calls the name it imported from figures.media.
+    monkeypatch.setattr(registry, "_clip_options", refuse)
+    with pytest.raises(SystemExit) as stop:
+        registry.main(["--animations", "--anim", "anim_schroeder"])
+    assert stop.value.code == 0
+    assert calls == [
+        {
+            "host": "nas",
+            "requested": ["anim_schroeder"],
+            "force": False,
+            "audit_only": False,
+            "encoder": encoder,
+        }
+    ]
+
+
+def test_a_gpu_here_renders_two_clips_at_a_time_and_a_large_one_alone(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """A render on this machine's GPU keeps a node's rules: two lanes, a lane's budget, the NVENC slots."""
+    import shutil
+
+    import assets_dir
+    import clip_placement
+    import encode_slots
+
+    free, ram = 6 << 30, 12 << 30
+    lane = clip_placement.gpu_budget(free, alone=False)
+    devices = {"anim_a": "gpu", "anim_b": "gpu", "anim_big": "gpu", "anim_c": "cpu"}
+    seen: list[tuple[str, list[str], int, str | None]] = []
+
+    def pool(img_dir: str, names: list[str], jobs: int) -> None:
+        seen.append(
+            ("pool", sorted(names), jobs, os.environ.get(clip_placement.GPU_BYTES_ENV))
+        )
+
+    def one_at_a_time(img_dir: str, names: list[str] | None, *, variants: bool) -> None:
+        seen.append(
+            (
+                "alone",
+                sorted(names or []),
+                1,
+                os.environ.get(clip_placement.GPU_BYTES_ENV),
+            )
+        )
+
+    _unset(
+        monkeypatch,
+        clip_placement.GPU_BYTES_ENV,
+        clip_placement.HOST_BYTES_ENV,
+        encode_slots.SLOTS_ENV,
+    )
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", "cupy")
+    monkeypatch.setattr(
+        registry, "_ANIMATIONS", dict.fromkeys(devices, lambda output_dir: None)
+    )
+    monkeypatch.setattr(registry, "_ANIM_DEVICES", devices)
+    monkeypatch.setattr(
+        registry,
+        "_ANIM_GPU_BYTES",
+        {"anim_a": 1 << 30, "anim_b": 1 << 30, "anim_big": lane + 1},
+    )
+    monkeypatch.setattr(registry, "_ANIM_HOST_BYTES", {})
+    monkeypatch.setattr(registry, "_generate_animations_parallel", pool)
+    monkeypatch.setattr(registry, "generate_animations", one_at_a_time)
+    monkeypatch.setattr(clip_placement, "free_gpu_bytes", lambda index=0, **_: free)
+    monkeypatch.setattr(clip_placement, "host_bytes", lambda: ram)
+    monkeypatch.setattr(assets_dir, "require_clips_dir", lambda: tmp_path)
+    monkeypatch.setattr(registry, "_clip_options", lambda encoder: ())
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/ffmpeg")
+    registry.main(["--animations", "--jobs", "8"])
+    assert seen == [
+        ("pool", ["anim_a", "anim_b", "anim_c"], 2, str(lane)),
+        ("alone", ["anim_big"], 1, str(clip_placement.gpu_budget(free, alone=True))),
+    ]
+    assert os.environ[encode_slots.SLOTS_ENV].endswith(
+        f":{encode_slots.NVENC_SESSIONS}"
+    )
+
+
+@pytest.mark.parametrize(
+    "stop",
+    [
+        RuntimeError(
+            "the node renders the committed code; commit first (1 changed: src/x.py)"
+        ),
+        KeyError("no host 'nas' in hosts.toml; it names none"),
+    ],
+    ids=["changes", "no-host"],
+)
+def test_what_stops_a_node_run_is_named_in_one_line(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    stop: Exception,
+) -> None:
+    """A checkout with changes or a host the file does not name is a sentence, not a traceback."""
+    import clip_transport
+
+    def on_host(compute: object, **_: object) -> int:
+        raise stop
+
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", "cupy@nas")
+    monkeypatch.setattr(clip_transport, "main_on_host", on_host)
+    with pytest.raises(SystemExit) as ended:
+        registry.main(["--animations"])
+    assert ended.value.code == 2
+    assert f"error: {stop.args[0]}\n" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize(
+    ("compute", "argv", "reason"),
+    [
+        ("cupy@nas", ["--animations", "--all"], "goes with --animations alone"),
+        ("cupy@nas", ["--animations", "--posters"], "goes with --animations alone"),
+        ("cupy@nas", [], "goes with --animations alone"),
+        ("warp", ["--animations"], "PHONOMETRY_COMPUTE='warp'"),
+    ],
+)
+def test_a_placement_a_run_cannot_take_stops_it_before_anything_is_sent(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    compute: str,
+    argv: list[str],
+    reason: str,
+) -> None:
+    """A host goes with the clips alone, and a placement that does not parse is named."""
+    import clip_transport
+
+    def on_host(compute: object, **_: object) -> int:
+        msg = "the run was sent to a node"
+        raise AssertionError(msg)
+
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", compute)
+    monkeypatch.setattr(clip_transport, "main_on_host", on_host)
+    with pytest.raises(SystemExit) as ended:
+        registry.main(argv)
+    assert ended.value.code == 2
+    assert reason in capsys.readouterr().err
+
+
+def _a_gpu_here(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    *,
+    free: Callable[..., int],
+    need: int,
+) -> list[tuple[str, list[str], str | None, str | None]]:
+    """This machine with a GPU and one GPU clip that needs *need* bytes of it.
+
+    Each entry of the list returned is a render the run started: the path
+    (``pool`` or ``alone``), its clips, and the GPU and RAM budgets its
+    workers were given.
+    """
+    import shutil
+
+    import assets_dir
+    import clip_placement
+    import encode_slots
+
+    started: list[tuple[str, list[str], str | None, str | None]] = []
+
+    def record(path: str) -> Callable[..., None]:
+        def render(
+            img_dir: str, names: list[str] | None, *_: object, **__: object
+        ) -> None:
+            budgets = (clip_placement.GPU_BYTES_ENV, clip_placement.HOST_BYTES_ENV)
+            gpu, ram = (os.environ.get(name) for name in budgets)
+            started.append((path, sorted(names or []), gpu, ram))
+
+        return render
+
+    _unset(
+        monkeypatch,
+        clip_placement.GPU_BYTES_ENV,
+        clip_placement.HOST_BYTES_ENV,
+        encode_slots.SLOTS_ENV,
+    )
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", "cupy")
+    monkeypatch.setattr(registry, "_ANIMATIONS", {"anim_a": lambda output_dir: None})
+    monkeypatch.setattr(registry, "_ANIM_DEVICES", {"anim_a": "gpu"})
+    monkeypatch.setattr(registry, "_ANIM_GPU_BYTES", {"anim_a": need})
+    monkeypatch.setattr(registry, "_ANIM_HOST_BYTES", {})
+    monkeypatch.setattr(registry, "_generate_animations_parallel", record("pool"))
+    monkeypatch.setattr(registry, "generate_animations", record("alone"))
+    monkeypatch.setattr(clip_placement, "free_gpu_bytes", free)
+    monkeypatch.setattr(clip_placement, "host_bytes", lambda: 12 << 30)
+    monkeypatch.setattr(assets_dir, "require_clips_dir", lambda: tmp_path)
+    monkeypatch.setattr(registry, "_clip_options", lambda encoder: ())
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/ffmpeg")
+    return started
+
+
+def _no_device(index: int = 0, **_: object) -> int:
+    """CuPy's probe on a machine whose driver sees no GPU."""
+    raise subprocess.CalledProcessError(
+        1,
+        ["python", "-c", "..."],
+        stderr="Traceback (most recent call last):\n"
+        "cupy_backends.cuda.api.runtime.CUDARuntimeError: cudaErrorNoDevice\n",
+    )
+
+
+def _probe_hangs(index: int = 0, **_: object) -> int:
+    """CuPy's probe on a card that never answers; a timeout keeps its output as bytes."""
+    raise subprocess.TimeoutExpired(
+        ["python", "-c", "..."], 120, stderr=b"waiting for the CUDA driver\n"
+    )
+
+
+@pytest.mark.parametrize("argv", [["--jobs", "8"], ["--anim", "anim_a"]])
+@pytest.mark.parametrize(
+    ("free", "need", "reason"),
+    [
+        (
+            _no_device,
+            1 << 20,
+            r"GPU 0 could not be read through CuPy: [\w.]+: cudaErrorNoDevice\n",
+        ),
+        (
+            _probe_hangs,
+            1 << 20,
+            r"GPU 0 could not be read through CuPy: waiting for the CUDA driver\n",
+        ),
+        (lambda index=0, **_: 1 << 30, 2 << 30, r"anim_a needs 2048 MiB of GPU memory"),
+    ],
+    ids=["unreadable", "hangs", "too-large"],
+)
+def test_a_gpu_here_that_cannot_hold_a_clip_stops_the_run_before_any_field(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    capsys: pytest.CaptureFixture[str],
+    argv: list[str],
+    free: Callable[..., int],
+    need: int,
+    reason: str,
+) -> None:
+    """One clip at a time or on the pool, the GPU is asked before a field steps."""
+    started = _a_gpu_here(monkeypatch, tmp_path, free=free, need=need)
+    with pytest.raises(SystemExit) as ended:
+        registry.main(["--animations", *argv])
+    assert ended.value.code == 2
+    assert re.search(reason, capsys.readouterr().err)
+    assert started == []
+
+
+def test_one_clip_at_a_time_on_a_gpu_here_has_all_of_what_is_free(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """A targeted re-render runs alone, so its lane is the whole GPU and RAM."""
+    import clip_placement
+
+    free = 6 << 30
+    started = _a_gpu_here(
+        monkeypatch, tmp_path, free=lambda index=0, **_: free, need=1 << 30
+    )
+    registry.main(["--animations", "--anim", "anim_a"])
+    whole_gpu = clip_placement.gpu_budget(free, alone=True)
+    whole_ram = clip_placement.host_share(12 << 30, alone=True)
+    assert started == [("alone", ["anim_a"], str(whole_gpu), str(whole_ram))]

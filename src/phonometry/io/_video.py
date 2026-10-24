@@ -410,6 +410,20 @@ def _pad_color(fig: Figure) -> str:
     )
 
 
+def _with_agg(fig: Figure) -> dict[str, str]:
+    """What makes ``savefig`` draw *fig*'s RGBA frame with Agg.
+
+    Nothing for a canvas whose RGBA writer is Agg's own (an Agg canvas, or a
+    GUI one built on it), which keeps its renderer from one frame to the
+    next; ``backend="agg"`` for any other, so that a canvas with an RGBA
+    writer of its own (Cairo's) does not draw the frames.
+    """
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+    own = getattr(type(fig.canvas), "print_rgba", None)
+    return {} if own is FigureCanvasAgg.print_rgba else {"backend": "agg"}
+
+
 class _FramePipe:
     """ffmpeg's side of the pipe: one process, one frame size, one output."""
 
@@ -527,9 +541,14 @@ class _FramePipe:
         # otherwise shear every frame after.
         fig.set_size_inches(self._inches)
         buffer = io.BytesIO()
-        # The format and the dpi are the stream's: they win over anything
-        # Animation.save hands on, rather than collide with it.
-        frame_options = {**savefig_kwargs, "format": "rgba", "dpi": dpi}
+        # The format, the dpi and the renderer are the stream's: they win
+        # over anything Animation.save hands on, rather than collide with it.
+        frame_options = {
+            **savefig_kwargs,
+            "format": "rgba",
+            "dpi": dpi,
+            **_with_agg(fig),
+        }
         fig.savefig(buffer, **frame_options)
         # Released however this ends: an error a caller keeps holds this
         # frame's locals, and a buffer still exported cannot be freed.

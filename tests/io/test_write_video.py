@@ -28,6 +28,7 @@ from phonometry import io
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
+    from typing import BinaryIO
 
     from matplotlib.lines import Line2D
 
@@ -161,6 +162,26 @@ def test_the_callers_settings_do_not_reach_the_frames(
     ):
         io.write_video(tmp_path / "w.webm", animation)
     assert _after(fake.encodes()[0]["argv"], "-s") == "200x150"
+    corner = np.frombuffer(first.read_bytes(), dtype=np.uint8)[:4]
+    assert corner.tolist() == [0x33, 0x66, 0x99, 255]
+
+
+class _OwnRGBACanvas(FigureCanvasAgg):
+    """A canvas that writes RGBA its own way, as Cairo's does: here, every pixel black and clear."""
+
+    def print_rgba(self, filename_or_obj: BinaryIO, **_kwargs: object) -> None:
+        width, height = (int(side) for side in self.figure.bbox.size)
+        filename_or_obj.write(bytes(width * height * 4))
+
+
+def test_every_frame_is_drawn_with_agg_whatever_the_canvas(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A canvas with its own RGBA writer (Cairo's) does not draw the frames: Agg does."""
+    first = tmp_path / "first.rgba"
+    fake_ffmpeg.install(tmp_path, monkeypatch, first_frame=str(first))
+    animation = _animation(facecolor="#336699", canvas=_OwnRGBACanvas)
+    io.write_video(tmp_path / "w.webm", animation)
     corner = np.frombuffer(first.read_bytes(), dtype=np.uint8)[:4]
     assert corner.tolist() == [0x33, 0x66, 0x99, 255]
 

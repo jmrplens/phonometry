@@ -136,9 +136,10 @@ of interest, replacing the other by a boundary condition (an impedance edge
 or a sponge) is usually far cheaper than meshing both.
 
 A simulation is one record:
-`ElasticRun(c_p, c_s, dx, duration, sources=..., rho=..., ...)` holds the
-domain, its sources and what it records, and checks every argument when it
-is built, so a mistake raises where the run is written;
+`ElasticRun(c_p=..., c_s=..., dx=..., duration_s=..., sources=..., rho=..., ...)`
+takes every field by name, holds the domain, its sources and what it
+records, and checks every argument when it is built, so a mistake raises
+where the run is written;
 `elastic_fdtd_simulation(run)` steps it, and `compute=` says where.
 
 ```python
@@ -150,7 +151,8 @@ from phonometry.simulation import ALUMINUM
 # probes 100 and 220 cells away; c_P falls out of the differential delay.
 w = 8e-6
 run = simulation.ElasticRun(
-    ALUMINUM.c_p, ALUMINUM.c_s, 0.002, 1.1e-4, rho=ALUMINUM.rho,
+    c_p=ALUMINUM.c_p, c_s=ALUMINUM.c_s, dx=0.002, duration_s=1.1e-4,
+    rho=ALUMINUM.rho,
     shape=(501, 501),
     sources=[simulation.ExplosionSource(
         ix=250, iy=250,
@@ -289,7 +291,8 @@ dx, w = 0.001, 8e-6
 dt = 0.6 * dx / (ALUMINUM.c_p * np.sqrt(2.0))
 steps = round(7.3e-5 / dt)
 run = simulation.ElasticRun(
-    ALUMINUM.c_p, ALUMINUM.c_s, dx, 7.3e-5, rho=ALUMINUM.rho,
+    c_p=ALUMINUM.c_p, c_s=ALUMINUM.c_s, dx=dx, duration_s=7.3e-5,
+    rho=ALUMINUM.rho,
     shape=(300, 600),
     sources=[simulation.ForceSource(
         ix=300, iy=0, direction="y", amplitude=1e6,
@@ -678,7 +681,7 @@ def ricker(t):
     return (1.0 - 2.0 * a) * np.exp(-a)
 
 run = simulation.ElasticRun(
-    c_p, c_s, dx, 0.232, rho=rho,
+    c_p=c_p, c_s=c_s, dx=dx, duration_s=0.232, rho=rho,
     sources=[simulation.ExplosionSource(ix=60, iy=89, waveform=ricker,
                                         amplitude=1e3)],
     boundaries=simulation.ElasticBoundaries(sides="absorbing",
@@ -787,7 +790,7 @@ how the same call steps on a GPU or goes to a node.
 from phonometry import simulation
 
 run = simulation.ElasticRun(
-    4000.0, 2300.0, 0.01, 5e-4,
+    c_p=4000.0, c_s=2300.0, dx=0.01, duration_s=5e-4,
     rho=2500.0, shape=(40, 60),
     sources=[simulation.ExplosionSource(
         ix=30, iy=20,

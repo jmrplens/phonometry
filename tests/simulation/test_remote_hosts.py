@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import os
 import sys
 from pathlib import Path
 
@@ -243,22 +242,13 @@ def test_a_malformed_file_is_a_value_error_that_names_it(
     assert str(hosts_at) in str(caught.value)
 
 
-#: What a hosts path under a file raises. Windows reports a path whose middle
-#: component is a file as one that does not exist (ERROR_PATH_NOT_FOUND, a
-#: FileNotFoundError), so there the hosts file is missing, the KeyError of no
-#: file at all; elsewhere it is a path that cannot be read.
-_UNDER_A_FILE = (
-    (KeyError, "does not exist")
-    if os.name == "nt"
-    else (ValueError, "the hosts file cannot be read")
-)
-
-
 @pytest.mark.parametrize(
     ("kind", "error", "match"),
     [
         ("a directory", ValueError, "the hosts file cannot be read"),
-        ("under a file", *_UNDER_A_FILE),
+        # A path whose middle component is a file names no file there, on
+        # every system: the KeyError of no hosts file at all.
+        ("under a file", KeyError, "does not exist"),
     ],
 )
 def test_a_hosts_file_that_cannot_be_read_is_refused_naming_it(

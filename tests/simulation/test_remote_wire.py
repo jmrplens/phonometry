@@ -2,9 +2,10 @@
 """A simulation travels to a node as data, never as code.
 
 A run has to reach the node as the record the caller built: the tables below
-give every field of each run a value, away from its default where the run
-takes another, and every parameter of each function a node runs an example,
-and the guards fail when a field or a parameter is added without one. A
+give every field of each run, and of the boundaries a run holds, a value,
+away from its default where the record takes another, and every parameter of
+each function a node runs an example, and the guards fail when a field or a
+parameter is added without one. A
 callable travels only as the ``value`` of a library source; anything else is
 refused with a TypeError that names it.
 """
@@ -29,6 +30,7 @@ from phonometry.simulation import (
     ElasticRecording,
     ElasticRun,
     ExplosionSource,
+    FDTDBoundaries,
     FDTDRecording,
     FDTDRun,
     ForceSource,
@@ -41,12 +43,26 @@ from phonometry.simulation._remote import wire
 _MASK = np.zeros((10, 12), dtype=bool)
 _MASK[4:6, 7:9] = True
 
+#: A value for every field of the acoustic boundaries, away from its default.
+_EVERY_ACOUSTIC_BOUNDARY_FIELD: dict[str, Any] = {
+    "sides": MappingProxyType(
+        {"left": "absorbing", "top": 413.0, "right": np.linspace(400.0, 500.0, 10)}
+    ),
+    "absorbing_layer_cells": 2,
+}
+
+#: A value for every field of the elastic boundaries, away from its default.
+_EVERY_ELASTIC_BOUNDARY_FIELD: dict[str, Any] = {
+    "sides": {"top": "free", "bottom": "absorbing"},
+    "absorbing_layer_cells": 2,
+}
+
 #: A value for every field of an FDTDRun, away from its default where the run
 #: takes another (``shape`` is read only with a scalar ``c``).
 _EVERY_ACOUSTIC_FIELD: dict[str, Any] = {
     "c": np.full((10, 12), 343.0),
     "dx": 0.01,
-    "duration": 1e-4,
+    "duration_s": 1e-4,
     "sources": [
         GaussianPulse(ix=2, iy=3, half_width_s=4e-5, t0=1.6e-4, amplitude=2.0),
         CWSource(ix=3, iy=3, frequency=2000.0, ramp_cycles=1.5),
@@ -63,10 +79,7 @@ _EVERY_ACOUSTIC_FIELD: dict[str, Any] = {
     "recording": FDTDRecording(
         probes=[(2, 2), (9, 8)], snapshot_every=2, snapshot_decimation=3
     ),
-    "boundaries": MappingProxyType(
-        {"left": "absorbing", "top": 413.0, "right": np.linspace(400.0, 500.0, 10)}
-    ),
-    "absorbing_layer_cells": 2,
+    "boundaries": FDTDBoundaries(**_EVERY_ACOUSTIC_BOUNDARY_FIELD),
     "obstacle_mask": _MASK,
     "damping": np.linspace(0.0, 3.0, 120).reshape(10, 12),
 }
@@ -76,7 +89,7 @@ _EVERY_ELASTIC_FIELD: dict[str, Any] = {
     "c_p": np.full((10, 12), 4000.0),
     "c_s": np.float32(2300.0),
     "dx": 0.01,
-    "duration": 2e-4,
+    "duration_s": 2e-4,
     "sources": [
         ExplosionSource(
             ix=5, iy=4, waveform=GaussianPulse(ix=0, iy=0, half_width_s=2e-5).value
@@ -99,9 +112,7 @@ _EVERY_ELASTIC_FIELD: dict[str, Any] = {
         snapshot_field="vx",
         snapshot_decimation=2,
     ),
-    "boundaries": ElasticBoundaries(
-        sides={"top": "free", "bottom": "absorbing"}, absorbing_layer_cells=2
-    ),
+    "boundaries": ElasticBoundaries(**_EVERY_ELASTIC_BOUNDARY_FIELD),
     "obstacle_mask": _MASK,
     "damping": np.float64(0.5),
 }
@@ -176,7 +187,12 @@ def _assert_same(got: object, want: object, where: str = "") -> None:
 
 @pytest.mark.parametrize(
     ("record", "table"),
-    [(FDTDRun, _EVERY_ACOUSTIC_FIELD), (ElasticRun, _EVERY_ELASTIC_FIELD)],
+    [
+        (FDTDRun, _EVERY_ACOUSTIC_FIELD),
+        (ElasticRun, _EVERY_ELASTIC_FIELD),
+        (FDTDBoundaries, _EVERY_ACOUSTIC_BOUNDARY_FIELD),
+        (ElasticBoundaries, _EVERY_ELASTIC_BOUNDARY_FIELD),
+    ],
 )
 def test_every_field_of_a_run_travels(record: type, table: dict[str, Any]) -> None:
     fields = {f.name for f in dataclasses.fields(record) if f.init}
@@ -266,8 +282,8 @@ def test_an_array_keeps_its_dtype_shape_and_order() -> None:
         ),
         ({"c": np.array(["343"])}, "c cannot travel to a node: an array of <U3"),
         (
-            {"boundaries": {1: "rigid"}},
-            r"boundaries cannot travel to a node: its key 1 is not a text",
+            {"sides": {1: "rigid"}},
+            r"sides cannot travel to a node: its key 1 is not a text",
         ),
         ({"shape": {10, 12}}, "shape cannot travel to a node: a set"),
         (
@@ -287,9 +303,9 @@ def test_an_integer_json_cannot_carry_is_refused_by_name_before_it_is_written() 
     # A run takes a snapshot interval of any size; JSON writes no integer of
     # more than 4300 digits, and a node reads none outside an int64.
     run = FDTDRun(
-        343.0,
-        0.01,
-        1e-3,
+        c=343.0,
+        dx=0.01,
+        duration_s=1e-3,
         shape=(20, 20),
         sources=[GaussianPulse(ix=10, iy=10, half_width_s=4e-5)],
         recording=FDTDRecording(snapshot_every=10**5000),
@@ -352,9 +368,10 @@ def test_a_long_double_is_refused_rather_than_rounded() -> None:
 def test_a_read_only_mapping_of_a_run_is_read_only_again_on_the_node() -> None:
     """A run's boundaries travel as a dict, and the rebuilt run freezes them again.
 
-    The acoustic run holds a mapping of sides with an impedance array in it,
-    the elastic run an ElasticBoundaries holding a mapping of sides: each
-    comes back as the record it was, its arrays the rebuilt run's own.
+    The acoustic run holds an FDTDBoundaries whose mapping of sides has an
+    impedance array in it, the elastic run an ElasticBoundaries holding a
+    mapping of sides: each comes back as the record it was, its arrays the
+    rebuilt run's own.
     """
     acoustic = FDTDRun(**_EVERY_ACOUSTIC_FIELD)
     elastic = ElasticRun(**_EVERY_ELASTIC_FIELD)
@@ -364,8 +381,9 @@ def test_a_read_only_mapping_of_a_run_is_read_only_again_on_the_node() -> None:
     rebuilt_acoustic, rebuilt_elastic = back["acoustic"], back["elastic"]
     assert isinstance(rebuilt_acoustic, FDTDRun)
     assert isinstance(rebuilt_elastic, ElasticRun)
-    assert isinstance(rebuilt_acoustic.boundaries, MappingProxyType)
-    impedance = rebuilt_acoustic.boundaries["right"]
+    assert isinstance(rebuilt_acoustic.boundaries, FDTDBoundaries)
+    assert isinstance(rebuilt_acoustic.boundaries.sides, MappingProxyType)
+    impedance = rebuilt_acoustic.boundaries.sides["right"]
     assert isinstance(impedance, np.ndarray)
     assert not impedance.flags.writeable
     assert isinstance(rebuilt_acoustic.c, np.ndarray)
@@ -376,7 +394,12 @@ def test_a_read_only_mapping_of_a_run_is_read_only_again_on_the_node() -> None:
 
 def test_a_float32_array_stays_float32() -> None:
     c = np.linspace(330.0, 350.0, 120, dtype=np.float32).reshape(10, 12)
-    run = FDTDRun(c, 0.01, 1e-4, sources=[GaussianPulse(ix=2, iy=3, half_width_s=4e-5)])
+    run = FDTDRun(
+        c=c,
+        dx=0.01,
+        duration_s=1e-4,
+        sources=[GaussianPulse(ix=2, iy=3, half_width_s=4e-5)],
+    )
     back = _round_trip({"c": c, "run": run})
     _assert_same(back["c"], c, "c")
     _assert_same(back["run"], run, "run")

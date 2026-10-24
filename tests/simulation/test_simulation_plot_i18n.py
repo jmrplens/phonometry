@@ -36,9 +36,9 @@ def _result() -> object:
     mask[12:18, 20:22] = True
     return fdtd_simulation(
         FDTDRun(
-            343.0,
-            9.0e-3,
-            3.0e-3,
+            c=343.0,
+            dx=9.0e-3,
+            duration_s=3.0e-3,
             shape=(30, 40),
             sources=[GaussianPulse(ix=7, iy=5, half_width_s=3.0e-4)],
             recording=FDTDRecording(probes=[(10, 5), (24, 10)], snapshot_every=10),
@@ -72,9 +72,9 @@ def test_fdtd_snapshot_es() -> None:
 def test_a_decimated_snapshot_covers_the_domain_without_stretching() -> None:
     res = fdtd_simulation(
         FDTDRun(
-            343.0,
-            0.01,
-            1e-3,
+            c=343.0,
+            dx=0.01,
+            duration_s=1e-3,
             shape=(30, 101),
             sources=[GaussianPulse(ix=50, iy=15, half_width_s=4e-5)],
             recording=FDTDRecording(snapshot_every=10, snapshot_decimation=4),
@@ -98,9 +98,9 @@ def test_the_obstacles_of_a_decimated_snapshot_stay_on_the_domain() -> None:
     mask[10:20, 60:70] = True
     res = fdtd_simulation(
         FDTDRun(
-            343.0,
-            0.01,
-            1e-3,
+            c=343.0,
+            dx=0.01,
+            duration_s=1e-3,
             shape=(30, 101),
             sources=[GaussianPulse(ix=50, iy=15, half_width_s=4e-5)],
             obstacle_mask=mask,
@@ -118,10 +118,10 @@ def test_a_decimated_elastic_snapshot_covers_the_domain_without_stretching() -> 
 
     res = elastic_fdtd_simulation(
         ElasticRun(
-            4000.0,
-            2300.0,
-            0.01,
-            1e-4,
+            c_p=4000.0,
+            c_s=2300.0,
+            dx=0.01,
+            duration_s=1e-4,
             rho=2500.0,
             shape=(20, 21),
             sources=[ExplosionSource(ix=10, iy=9, waveform=pulse)],
@@ -239,10 +239,10 @@ def test_an_elastic_video_frame_shows_the_plot_s_field_scale_and_colormap() -> N
     pulse = GaussianPulse(ix=0, iy=0, half_width_s=4e-5)
     res = elastic_fdtd_simulation(
         ElasticRun(
-            4000.0,
-            2300.0,
-            0.01,
-            2e-3,
+            c_p=4000.0,
+            c_s=2300.0,
+            dx=0.01,
+            duration_s=2e-3,
             rho=2500.0,
             shape=(24, 30),
             sources=[ExplosionSource(ix=15, iy=12, waveform=pulse.value)],
@@ -291,10 +291,10 @@ def test_the_elastic_snapshot_plot_refuses_a_colour_limit_by_name() -> None:
 
     res = elastic_fdtd_simulation(
         ElasticRun(
-            4000.0,
-            2300.0,
-            0.01,
-            1e-4,
+            c_p=4000.0,
+            c_s=2300.0,
+            dx=0.01,
+            duration_s=1e-4,
             rho=2500.0,
             shape=(20, 21),
             sources=[ExplosionSource(ix=10, iy=9, waveform=pulse)],

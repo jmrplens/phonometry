@@ -42,6 +42,7 @@ from phonometry.simulation import (
     ElasticRecording,
     ElasticRun,
     ExplosionSource,
+    FDTDBoundaries,
     FDTDRecording,
     FDTDRun,
     GaussianPulse,
@@ -71,9 +72,9 @@ def _acoustic() -> FDTDRun:
     mask = np.zeros((40, 50), dtype=bool)
     mask[18:22, 30:33] = True
     return FDTDRun(
-        343.0,
-        0.01,
-        2e-3,
+        c=343.0,
+        dx=0.01,
+        duration_s=2e-3,
         shape=(40, 50),
         sources=[
             GaussianPulse(ix=10, iy=20, half_width_s=4e-5),
@@ -86,17 +87,18 @@ def _acoustic() -> FDTDRun:
         recording=FDTDRecording(
             probes=[(40, 20), (25, 10)], snapshot_every=10, snapshot_decimation=3
         ),
-        boundaries={"left": "absorbing", "top": 413.0},
-        absorbing_layer_cells=6,
+        boundaries=FDTDBoundaries(
+            sides={"left": "absorbing", "top": 413.0}, absorbing_layer_cells=6
+        ),
         obstacle_mask=mask,
     )
 
 
 def _small(duration: float = 1e-3) -> FDTDRun:
     return FDTDRun(
-        343.0,
-        0.01,
-        duration,
+        c=343.0,
+        dx=0.01,
+        duration_s=duration,
         shape=(20, 20),
         sources=[GaussianPulse(ix=10, iy=10, half_width_s=4e-5)],
         recording=FDTDRecording(probes=[(5, 5)]),
@@ -113,7 +115,7 @@ def _elastic(**changes: object) -> ElasticRun:
         "sources": [source],
         **changes,
     }
-    return ElasticRun(4000.0, 2300.0, 0.01, 1e-4, **fields)  # type: ignore[arg-type]
+    return ElasticRun(c_p=4000.0, c_s=2300.0, dx=0.01, duration_s=1e-4, **fields)  # type: ignore[arg-type]
 
 
 def _run_for(function: Callable[..., object]) -> FDTDRun | ElasticRun:
@@ -166,19 +168,19 @@ def test_a_run_on_a_node_equals_the_run_here(node: str) -> None:
     there = fdtd_simulation(run, compute=Compute(host=node))
     _assert_same_result(there, here)
     assert there.provenance.host == node
-    assert there.provenance.package_digest == package.installed_package().digest
+    assert there.provenance.package_sha256 == package.installed_package().digest
     assert (
-        dataclasses.replace(there.provenance, host=None, package_digest=None)
+        dataclasses.replace(there.provenance, host=None, package_sha256=None)
         == here.provenance
     )
 
 
 def test_an_elastic_float32_run_on_a_node_equals_the_run_here(node: str) -> None:
     run = ElasticRun(
-        4000.0,
-        2300.0,
-        0.01,
-        2e-4,
+        c_p=4000.0,
+        c_s=2300.0,
+        dx=0.01,
+        duration_s=2e-4,
         rho=2500.0,
         shape=(30, 31),
         sources=[
@@ -205,9 +207,9 @@ def test_an_elastic_float32_run_on_a_node_equals_the_run_here(node: str) -> None
 
 def test_a_run_with_no_probes_and_no_snapshots_comes_back_whole(node: str) -> None:
     run = FDTDRun(
-        343.0,
-        0.01,
-        1e-3,
+        c=343.0,
+        dx=0.01,
+        duration_s=1e-3,
         shape=(20, 20),
         sources=[GaussianPulse(ix=10, iy=10, half_width_s=4e-5)],
     )
@@ -254,7 +256,7 @@ def test_the_remote_route_sends_every_parameter(
             cuda_runtime=None,
             cuda_driver_api=None,
             gpu=None,
-            package_digest="0" * 64,
+            package_sha256="0" * 64,
         )
 
     monkeypatch.setattr(client, "run_remote", capture)
@@ -267,7 +269,8 @@ def test_the_remote_route_sends_every_parameter(
 def test_a_run_here_imports_nothing_of_the_remote_route() -> None:
     code = (
         "import sys; from phonometry.simulation import FDTDRun, GaussianPulse, fdtd_simulation; "
-        "fdtd_simulation(FDTDRun(343.0, 0.01, 1e-4, shape=(8, 8), sources=[GaussianPulse(ix=4, iy=4, half_width_s=4e-5)])); "
+        "fdtd_simulation(FDTDRun(c=343.0, dx=0.01, duration_s=1e-4, shape=(8, 8), "
+        "sources=[GaussianPulse(ix=4, iy=4, half_width_s=4e-5)])); "
         "print(sorted(m for m in sys.modules if m.startswith('phonometry.simulation._remote')))"
     )
     env = {k: v for k, v in os.environ.items() if k != "PHONOMETRY_COMPUTE"}
@@ -459,9 +462,9 @@ def test_a_run_still_going_at_the_timeout_is_stopped_there_and_the_node_with_it(
     # run that has begun, and the test holds the watcher to a client gone in
     # the middle of the job.
     run = FDTDRun(
-        343.0,
-        0.01,
-        30.0,
+        c=343.0,
+        dx=0.01,
+        duration_s=30.0,
         shape=(200, 200),
         sources=[GaussianPulse(ix=100, iy=100, half_width_s=4e-5)],
         recording=FDTDRecording(probes=[(50, 50)]),

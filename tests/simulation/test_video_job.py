@@ -55,9 +55,9 @@ if TYPE_CHECKING:
 _SRC = Path(__file__).resolve().parents[2] / "src"
 
 _RUN = FDTDRun(
-    343.0,
-    0.01,
-    1e-3,
+    c=343.0,
+    dx=0.01,
+    duration_s=1e-3,
     shape=(30, 40),
     sources=[GaussianPulse(ix=20, iy=15, half_width_s=4e-5)],
     recording=FDTDRecording(probes=[(5, 5)], snapshot_every=10),
@@ -98,10 +98,10 @@ def test_the_elastic_node_returns_the_signals(
 ) -> None:
     fake_ffmpeg.install(tmp_path, monkeypatch)
     run = ElasticRun(
-        4000.0,
-        2300.0,
-        0.01,
-        5e-4,
+        c_p=4000.0,
+        c_s=2300.0,
+        dx=0.01,
+        duration_s=5e-4,
         rho=2500.0,
         shape=(20, 24),
         sources=[
@@ -310,7 +310,7 @@ from phonometry.simulation import AnimationFrame, Compute, FDTDRecording, FDTDRu
 from phonometry.simulation._remote import node
 from phonometry.simulation._video_job import NodeCannotAnimateError
 run = FDTDRun(
-    343.0, 0.01, 1e-4, shape=(10, 12),
+    c=343.0, dx=0.01, duration_s=1e-4, shape=(10, 12),
     sources=[GaussianPulse(ix=5, iy=5, half_width_s=4e-5)],
     recording=FDTDRecording(probes=[(2, 2)], snapshot_every=2),
 )

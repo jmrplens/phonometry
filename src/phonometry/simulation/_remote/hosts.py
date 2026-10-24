@@ -90,7 +90,9 @@ def load_host(name: str) -> HostEntry:
     path = hosts_file()
     try:
         raw = path.read_bytes()
-    except FileNotFoundError:
+    # A path under a file names no file there: Windows reports it as missing,
+    # POSIX as a component that is not a directory, and both mean no file.
+    except (FileNotFoundError, NotADirectoryError):
         msg = f"no host {name!r}: the hosts file {path} does not exist"
         raise KeyError(msg) from None
     except OSError as exc:

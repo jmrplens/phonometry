@@ -66,7 +66,7 @@ _RUN: dict[str, object] = {
     "cuda_runtime": None,
     "cuda_driver_api": None,
     "gpu": None,
-    "package_digest": None,
+    "package_sha256": None,
 }
 _PRESSURES: dict[str, object] = {
     "name": "pressures",
@@ -364,7 +364,7 @@ def test_a_result_is_read_row_by_row_into_the_array_the_caller_made() -> None:
     target = np.empty((2, 5))
     provenance = _receive(_result(), first=target)
     assert np.array_equal(target, np.arange(10.0).reshape(2, 5))
-    assert (provenance.host, provenance.package_digest) == ("nas", "a" * 64)
+    assert (provenance.host, provenance.package_sha256) == ("nas", "a" * 64)
 
 
 @pytest.mark.parametrize(
@@ -408,7 +408,7 @@ def test_a_result_that_is_not_what_the_request_implies_is_refused_before_it_is_r
         ({"extra": 1}, "provenance holds"),
         ({"device_index": -1}, "not one a run could write"),
         (
-            {"package_digest": "b" * 64},
+            {"package_sha256": "b" * 64},
             "names a host or a package, which only the client sets",
         ),
         (

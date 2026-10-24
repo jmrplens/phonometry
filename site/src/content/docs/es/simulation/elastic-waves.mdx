@@ -145,11 +145,11 @@ condición de contorno (un borde de impedancia o una esponja) suele salir
 mucho más barato que mallar los dos.
 
 Una simulación es un solo registro:
-`ElasticRun(c_p, c_s, dx, duration, sources=..., rho=..., ...)` reúne el
-dominio, sus fuentes y lo que anota, y comprueba todos los argumentos al
-construirse, así que un argumento erróneo se rechaza donde se escribe la
-ejecución; `elastic_fdtd_simulation(run)` la calcula, y `compute=` dice
-dónde.
+`ElasticRun(c_p=..., c_s=..., dx=..., duration_s=..., sources=..., rho=..., ...)`
+toma cada campo por su nombre, reúne el dominio, sus fuentes y lo que anota,
+y comprueba todos los argumentos al construirse, así que un argumento
+erróneo se rechaza donde se escribe la ejecución;
+`elastic_fdtd_simulation(run)` la calcula, y `compute=` dice dónde.
 
 ```python
 import numpy as np
@@ -160,7 +160,8 @@ from phonometry.simulation import ALUMINUM
 # alcanza dos sondas a 100 y 220 celdas; c_P sale del retardo diferencial.
 w = 8e-6
 run = simulation.ElasticRun(
-    ALUMINUM.c_p, ALUMINUM.c_s, 0.002, 1.1e-4, rho=ALUMINUM.rho,
+    c_p=ALUMINUM.c_p, c_s=ALUMINUM.c_s, dx=0.002, duration_s=1.1e-4,
+    rho=ALUMINUM.rho,
     shape=(501, 501),
     sources=[simulation.ExplosionSource(
         ix=250, iy=250,
@@ -314,7 +315,8 @@ dx, w = 0.001, 8e-6
 dt = 0.6 * dx / (ALUMINUM.c_p * np.sqrt(2.0))
 steps = round(7.3e-5 / dt)
 run = simulation.ElasticRun(
-    ALUMINUM.c_p, ALUMINUM.c_s, dx, 7.3e-5, rho=ALUMINUM.rho,
+    c_p=ALUMINUM.c_p, c_s=ALUMINUM.c_s, dx=dx, duration_s=7.3e-5,
+    rho=ALUMINUM.rho,
     shape=(300, 600),
     sources=[simulation.ForceSource(
         ix=300, iy=0, direction="y", amplitude=1e6,
@@ -723,7 +725,7 @@ def ricker(t):
     return (1.0 - 2.0 * a) * np.exp(-a)
 
 run = simulation.ElasticRun(
-    c_p, c_s, dx, 0.232, rho=rho,
+    c_p=c_p, c_s=c_s, dx=dx, duration_s=0.232, rho=rho,
     sources=[simulation.ExplosionSource(ix=60, iy=89, waveform=ricker,
                                         amplitude=1e3)],
     boundaries=simulation.ElasticBoundaries(sides="absorbing",
@@ -843,7 +845,7 @@ a un nodo.
 from phonometry import simulation
 
 run = simulation.ElasticRun(
-    4000.0, 2300.0, 0.01, 5e-4,
+    c_p=4000.0, c_s=2300.0, dx=0.01, duration_s=5e-4,
     rho=2500.0, shape=(40, 60),
     sources=[simulation.ExplosionSource(
         ix=30, iy=20,

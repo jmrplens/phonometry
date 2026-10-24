@@ -34,9 +34,9 @@ def _chk_fdtd_box_mode() -> Outcome:
     nx, ny = round(lx / dx), round(ly / dx)
     res = ph.simulation.fdtd_simulation(
         ph.simulation.FDTDRun(
-            c,
-            dx,
-            0.35,
+            c=c,
+            dx=dx,
+            duration_s=0.35,
             shape=(ny, nx),
             sources=[ph.simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
             recording=ph.simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
@@ -62,14 +62,15 @@ def _chk_fdtd_pulse_delay() -> Outcome:
     c, dx = 343.0, 0.01
     res = ph.simulation.fdtd_simulation(
         ph.simulation.FDTDRun(
-            c,
-            dx,
-            6.5e-3,
+            c=c,
+            dx=dx,
+            duration_s=6.5e-3,
             shape=(200, 300),
             sources=[ph.simulation.GaussianPulse(ix=40, iy=100, half_width_s=1.5e-4)],
             recording=ph.simulation.FDTDRecording(probes=[(100, 100), (160, 100)]),
-            boundaries="absorbing",
-            absorbing_layer_cells=30,
+            boundaries=ph.simulation.FDTDBoundaries(
+                sides="absorbing", absorbing_layer_cells=30
+            ),
         )
     )
     t1 = res.times[int(np.argmax(res.pressures[0]))]

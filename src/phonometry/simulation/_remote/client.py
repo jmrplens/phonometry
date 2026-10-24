@@ -666,7 +666,7 @@ def _provenance(
     except (TypeError, ValueError) as exc:
         msg = f"the node's provenance is not one a run could write: {_cut(str(exc))}"
         raise session.failure(msg) from None
-    if ran.host is not None or ran.package_digest is not None:
+    if ran.host is not None or ran.package_sha256 is not None:
         msg = "the node's provenance names a host or a package, which only the client sets"
         raise session.failure(msg)
     if (ran.device, ran.dtype) != (request.device, request.dtype):
@@ -677,7 +677,7 @@ def _provenance(
             **dataclasses.asdict(ran),
             "host": request.host,
             "device_index": request.device_index,
-            "package_digest": digest,
+            "package_sha256": digest,
         }
     )
 

@@ -105,7 +105,7 @@ RunProvenance(
     cuda_runtime: str | None,
     cuda_driver_api: str | None,
     gpu: str | None,
-    package_digest: str | None,
+    package_sha256: str | None,
 )
 ```
 
@@ -124,14 +124,14 @@ Where a run actually stepped, recorded by the result.
 | `cuda_runtime` | The CUDA runtime the array library uses, as `"major.minor"` (`"13.2"`), or `None` off a CUDA device. |
 | `cuda_driver_api` | The CUDA version the GPU driver supports, as `"major.minor"` (`"13.3"`), where the array library reports it (CuPy), else `None`. It is not the NVIDIA driver's own version. |
 | `gpu` | The GPU's name, or `None`. |
-| `package_digest` | The SHA-256 of the package the node ran, in lowercase hex, or `None` for a run on this machine. |
+| `package_sha256` | The SHA-256 of the package the node ran, in lowercase hex, or `None` for a run on this machine. |
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| TypeError | for a `device` or `dtype` that is not text, a `device_index` that is not a number (a bool is not one), a `numpy_version` that is not text, or a `host`, `array_library`, `cuda_runtime`, `cuda_driver_api`, `gpu` or `package_digest` that is neither text nor `None`. |
-| ValueError | for an unknown device or dtype, `"torch:mps"` in float64, an index on a device that has one instance, an index that is not a whole number of 0 or more, or a `package_digest` that is not 64 lowercase hexadecimal digits. |
+| TypeError | for a `device` or `dtype` that is not text, a `device_index` that is not a number (a bool is not one), a `numpy_version` that is not text, or a `host`, `array_library`, `cuda_runtime`, `cuda_driver_api`, `gpu` or `package_sha256` that is neither text nor `None`. |
+| ValueError | for an unknown device or dtype, `"torch:mps"` in float64, an index on a device that has one instance, an index that is not a whole number of 0 or more, or a `package_sha256` that is not 64 lowercase hexadecimal digits. |
 
 ## use
 

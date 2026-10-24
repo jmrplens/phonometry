@@ -32,6 +32,7 @@ from phonometry.simulation import (
     ComputeFallbackWarning,
     ElasticRun,
     ExplosionSource,
+    FDTDBoundaries,
     FDTDRecording,
     FDTDRun,
     GaussianPulse,
@@ -57,9 +58,9 @@ _SMALL = AnimationFrame(size=(480, 246))
 _SMALL_FIXED = AnimationFrame(size=(480, 246), color_limit=1.0)
 # A run of 12 s on cells of 10 m: 970 steps, the last frame at 11.13 s.
 _LONG = FDTDRun(
-    343.0,
-    10.0,
-    12.0,
+    c=343.0,
+    dx=10.0,
+    duration_s=12.0,
     shape=(30, 40),
     sources=[_SOURCE],
     recording=FDTDRecording(snapshot_every=900),
@@ -73,7 +74,7 @@ def _run(duration: float = 2e-3, **changes: Any) -> FDTDRun:
         "recording": FDTDRecording(probes=_PROBES, snapshot_every=10),
     }
     arguments.update(changes)
-    return FDTDRun(343.0, 0.01, duration, **arguments)
+    return FDTDRun(c=343.0, dx=0.01, duration_s=duration, **arguments)
 
 
 @pytest.fixture
@@ -151,17 +152,16 @@ def test_a_given_limit_steps_once_and_a_found_one_twice(
 def test_the_found_limit_leaves_out_the_driven_cells() -> None:
     pulse = GaussianPulse(ix=0, iy=0, half_width_s=5e-5)
     run = FDTDRun(
-        343.0,
-        0.01,
-        2e-3,
+        c=343.0,
+        dx=0.01,
+        duration_s=2e-3,
         shape=(40, 50),
         sources=[
             _SOURCE,
             PlaneWaveSource(direction="down", waveform=pulse.value, offset=9),
         ],
         recording=FDTDRecording(snapshot_every=5),
-        boundaries={"top": "absorbing"},
-        absorbing_layer_cells=8,
+        boundaries=FDTDBoundaries(sides={"top": "absorbing"}, absorbing_layer_cells=8),
     )
     keep = video_module._acoustic_keep(run)
     assert keep[15, 20] == 0.0  # the point source
@@ -227,8 +227,7 @@ def test_a_covered_grid_has_nothing_to_scale_by(
         shape=(12, 12),
         sources=[GaussianPulse(ix=6, iy=6, half_width_s=4e-5)],
         recording=FDTDRecording(snapshot_every=10),
-        boundaries="absorbing",
-        absorbing_layer_cells=6,
+        boundaries=FDTDBoundaries(sides="absorbing", absorbing_layer_cells=6),
     )
     with pytest.raises(
         ValueError,
@@ -336,10 +335,10 @@ def test_a_probe_the_system_will_not_remove_does_not_stop_the_write(
 
 
 _ELASTIC = ElasticRun(
-    4000.0,
-    2300.0,
-    0.01,
-    1e-3,
+    c_p=4000.0,
+    c_s=2300.0,
+    dx=0.01,
+    duration_s=1e-3,
     rho=2500.0,
     shape=(20, 24),
     sources=[ExplosionSource(ix=12, iy=10, waveform=_SOURCE.value)],

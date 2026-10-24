@@ -1276,7 +1276,7 @@ _COUNT_EXEMPT = {
         "the thickness of the absorbing layer counted in grid cells: the unit "
         "is the cell, as the sample is of delay_samples"
     ),
-    "phonometry.simulation.fdtd.FDTDRun.absorbing_layer_cells": (
+    "phonometry.simulation.fdtd.FDTDBoundaries.absorbing_layer_cells": (
         "the thickness of the absorbing layer counted in grid cells: the unit "
         "is the cell, as the sample is of delay_samples"
     ),

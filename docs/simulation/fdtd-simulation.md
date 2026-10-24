@@ -80,9 +80,10 @@ and the run, `FDTDRun`, derives the time step when it is built, from the
 in the map; values outside $(0, 1)$ are rejected because the scheme is
 unconditionally meaningless beyond the bound (Eq. 4.14).
 
-A simulation is one record: `FDTDRun(c, dx, duration, sources=..., ...)`
-holds the domain, its sources and what it records, and checks every argument
-when it is built, so a mistake raises where the run is written;
+A simulation is one record:
+`FDTDRun(c=..., dx=..., duration_s=..., sources=..., ...)` takes every field
+by name, holds the domain, its sources and what it records, and checks every
+argument when it is built, so a mistake raises where the run is written;
 `fdtd_simulation(run)` steps it, and `compute=` says where.
 
 ```python
@@ -90,7 +91,7 @@ from phonometry import simulation
 
 # A 3.0 x 2.0 m air domain: 300 x 200 cells of 1 cm.
 run = simulation.FDTDRun(
-    343.0, 0.01, 2.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=2.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(probes=[(200, 100)]),
 )
@@ -165,7 +166,9 @@ sim.add_source(PlaneWaveSource(direction="down", waveform=tone.value, offset=22)
 Geometry is **rasterised**: `obstacle_mask` marks rigid cells, and every
 face touching a masked cell is closed (Eq. 4.32 again), so walls, barriers
 and scatterers of any shape are just boolean arrays. Each domain side can
-carry its own boundary condition:
+carry its own boundary condition, which a run takes as one `FDTDBoundaries`
+record: `sides=` gives one condition to all four sides or maps each side to
+its own, and `absorbing_layer_cells=` sets the thickness of the sponge:
 
 - ``"rigid"`` (default): a perfect reflector, $R = +1$.
 - ``"absorbing"``: a sponge layer of `absorbing_layer_cells` cells whose
@@ -423,12 +426,13 @@ from phonometry import simulation
 mask = np.zeros((200, 300), dtype=bool)
 mask[60:, 150:154] = True
 run = simulation.FDTDRun(
-    343.0, 0.01, 9.0e-3, shape=(200, 300),
+    c=343.0, dx=0.01, duration_s=9.0e-3, shape=(200, 300),
     sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
     recording=simulation.FDTDRecording(
         probes=[(100, 100), (240, 100)], snapshot_every=75),
     obstacle_mask=mask,
-    boundaries="absorbing", absorbing_layer_cells=30,
+    boundaries=simulation.FDTDBoundaries(
+        sides="absorbing", absorbing_layer_cells=30),
 )
 res = simulation.fdtd_simulation(run)
 
@@ -455,7 +459,7 @@ from phonometry import simulation
 lx, ly, dx = 1.0, 0.7, 0.02
 nx, ny = round(lx / dx), round(ly / dx)
 run = simulation.FDTDRun(
-    343.0, dx, 0.35, shape=(ny, nx),
+    c=343.0, dx=dx, duration_s=0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
@@ -488,7 +492,7 @@ from phonometry import simulation
 lx, ly, dx, c = 1.0, 0.7, 0.02, 343.0
 nx, ny = round(lx / dx), round(ly / dx)
 run = simulation.FDTDRun(
-    c, dx, 0.35, shape=(ny, nx),
+    c=c, dx=dx, duration_s=0.35, shape=(ny, nx),
     sources=[simulation.GaussianPulse(ix=7, iy=5, half_width_s=2.0e-4)],
     recording=simulation.FDTDRecording(probes=[(nx - 4, ny - 3)]),
 )
@@ -605,7 +609,7 @@ how the same call steps on a GPU or goes to a node.
 from phonometry import simulation
 
 run = simulation.FDTDRun(
-    343.0, 0.01, 2e-3,
+    c=343.0, dx=0.01, duration_s=2e-3,
     shape=(60, 80),
     sources=[simulation.GaussianPulse(ix=40, iy=30, half_width_s=5e-5)],
     recording=simulation.FDTDRecording(snapshot_every=10),

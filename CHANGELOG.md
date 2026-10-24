@@ -3424,11 +3424,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `elastic_fdtd_simulation` took, the duration in seconds as `duration_s`,
   and the two functions take the run: `fdtd_simulation(run, *,
   compute=None)` and `elastic_fdtd_simulation(run, *, compute=None)`. A run
-  checks every argument when it is built, the grid's included (the time
-  step, the density, the sponge, the impedance edges, the obstacle, and the
-  sources and the probes on the grid), with the class and the words the
-  functions raised, a refused duration naming `duration_s`, so a run that
-  builds is one the function can step. Both records are frozen and take
+  checks every argument when it is built. That includes what depends on the
+  grid: the time step, the density, the absorbing layer, the impedance edges,
+  the obstacle, and where the sources and the probes sit. A wrong argument
+  raises the same exception, with the same message, that the function raised
+  for it before; a refused duration names `duration_s`. So a run that builds
+  is one the function can step. Both records are frozen and take
   every field by name, so two numbers written in the wrong order cannot
   build a valid run; the sources are held as a tuple, and every array, and
   every real-valued map given as nested lists, as the run's own read-only

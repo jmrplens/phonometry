@@ -455,7 +455,7 @@ on_gpu = simulation.fdtd_simulation(run, compute=simulation.Compute(device="cupy
 print(on_gpu.provenance)
 # On the machine of the proof in section 6:
 # RunProvenance(host=None, device='cupy', device_index=0, dtype='float64',
-#     numpy_version='2.5.3', array_library='cupy 14.2.0', cuda_runtime='13.2',
+#     numpy_version='2.5.4', array_library='cupy 14.2.0', cuda_runtime='13.2',
 #     cuda_driver_api='13.3', gpu='NVIDIA GeForce RTX 4060', package_sha256=None)
 ```
 

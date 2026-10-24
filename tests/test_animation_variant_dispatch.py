@@ -35,11 +35,16 @@ import matplotlib as mpl
 mpl.use("Agg")
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable
+    from types import ModuleType
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
-from figures import i18n, registry, theme
+# Importing the generator's figures sets the settings it draws with for the
+# whole process: inside rc_context they are put back at once, and each test
+# here takes them from the figure_theme fixture instead.
+with mpl.rc_context():
+    from figures import i18n, registry, theme
 
 # The figure, diagram and badge tooling is tied to the pinned figure stack its
 # artefacts are drawn with, so the minimum-versions job deselects this module.
@@ -65,19 +70,17 @@ def _no_frames_to_judge(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.fixture(autouse=True)
-def _restore_language_and_theme() -> Iterator[None]:
-    """Put the process back the way it was found.
+def _restore_language_and_theme(figure_theme: ModuleType) -> None:
+    """Put the process back the way it was found, through ``figure_theme``.
 
     ``_render_anim_variant`` sets the language and the theme and never puts
     them back, which is right for it: the generator gives each variant a
     process, or ends the run. Called here it would leave the Spanish labels
     and the dark stylesheet in place for whatever test the worker picks up
     next, and the one that notices is a figure check measuring ink against a
-    background that is suddenly black.
+    background that is suddenly black. The fixture puts back the language,
+    the theme and every setting after each test.
     """
-    yield
-    i18n.set_lang("en")
-    theme.set_theme(dark=False)
 
 
 def test_the_four_variants_are_the_ones_the_registry_lists() -> None:

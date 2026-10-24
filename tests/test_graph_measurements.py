@@ -12,6 +12,7 @@ import math
 import pathlib
 import sys
 
+import matplotlib as mpl
 import numpy as np
 import pytest
 from reference_data import (
@@ -22,7 +23,12 @@ from reference_data import (
 )
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "scripts"))
-import generate_graphs
+
+# Importing the generator's figures sets the settings it draws with for the
+# whole process: inside rc_context they are put back at once, so no test
+# collected after this module draws with them.
+with mpl.rc_context():
+    import generate_graphs
 
 # The figure, diagram and badge tooling is tied to the pinned figure stack its
 # artefacts are drawn with, so the minimum-versions job deselects this module.

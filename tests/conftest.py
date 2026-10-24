@@ -1,8 +1,9 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 import os
 import sys
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator
 from pathlib import Path
+from types import ModuleType
 
 import pinned_stack
 import pytest
@@ -116,6 +117,97 @@ def _matplotlib_settings_unchanged() -> Iterator[None]:
         f"({', '.join(changed[:8])}{', ...' if len(changed) > 8 else ''}); "
         "change them inside matplotlib.rc_context() or plt.style.context()"
     )
+
+
+#: The settings that choose the backend, which a test module may set as it is
+#: imported (``matplotlib.use("Agg")``): they change no figure.
+_BACKEND_SETTINGS = frozenset({"backend", "backend_fallback"})
+
+#: The first test module whose import left matplotlib's settings changed, and
+#: those settings, in the run's stash.
+_SETTINGS_CHANGED_AT = pytest.StashKey[tuple[str, tuple[str, ...]]]()
+
+
+def _settings_changed_since_matplotlib_read_them() -> tuple[str, ...]:
+    """The settings that differ from the ones matplotlib read when it was imported, its backend aside."""
+    matplotlib = sys.modules.get("matplotlib")
+    if matplotlib is None:
+        return ()
+    now = dict.copy(matplotlib.rcParams)
+    read = dict.copy(matplotlib.rcParamsOrig)
+    return tuple(
+        sorted(
+            key
+            for key in now.keys() | read.keys()
+            if key not in _BACKEND_SETTINGS and now.get(key) != read.get(key)
+        )
+    )
+
+
+@pytest.hookimpl(wrapper=True)
+def pytest_make_collect_report(
+    collector: pytest.Collector,
+) -> Generator[None, pytest.CollectReport, pytest.CollectReport]:
+    """Note the first test module whose import leaves matplotlib's settings changed.
+
+    A module that changes them as it is imported, ``scripts/figures/theme.py``
+    imported at its top above all, changes them before any test of the worker
+    runs, so every test the worker runs after it draws with them, and passes
+    or fails by what else the worker collected. The check of each test
+    (:func:`_matplotlib_settings_unchanged`) cannot see that: the settings
+    were already changed when it took its copy.
+    ``test_matplotlib_settings.py`` reads what is noted here.
+    """
+    report = yield
+    if (
+        isinstance(collector, pytest.Module)
+        and _SETTINGS_CHANGED_AT not in collector.config.stash
+    ):
+        changed = _settings_changed_since_matplotlib_read_them()
+        if changed:
+            collector.config.stash[_SETTINGS_CHANGED_AT] = (collector.nodeid, changed)
+    return report
+
+
+@pytest.fixture
+def settings_changed_by_collection(
+    request: pytest.FixtureRequest,
+) -> tuple[str, tuple[str, ...]] | None:
+    """The first test module whose import changed matplotlib's settings, and which, or ``None``."""
+    return request.config.stash.get(_SETTINGS_CHANGED_AT, None)
+
+
+#: Where the generators of the documentation's figures live.
+_SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
+
+
+@pytest.fixture
+def figure_theme() -> Iterator[ModuleType]:
+    """The documentation figures' theme for one test: light, English, the generator's settings.
+
+    ``scripts/figures/theme.py`` sets the settings the generator draws with
+    when it is imported and again at every ``set_theme``, and ``set_theme``
+    and ``i18n.set_lang`` rebind globals of the generator's modules. Here the
+    theme is imported, set light and English, inside ``rc_context``, and
+    after the test the language, the theme and every setting are put back,
+    whatever the test switched. A test module that imports a module of
+    ``figures`` at its top does it inside ``rc_context``, so that importing it
+    changes no setting (``test_matplotlib_settings.py`` holds that).
+    """
+    import matplotlib as mpl
+
+    if str(_SCRIPTS) not in sys.path:
+        sys.path.insert(0, str(_SCRIPTS))
+    with mpl.rc_context():
+        from figures import i18n, theme
+
+        i18n.set_lang("en")
+        theme.set_theme(dark=False)
+        try:
+            yield theme
+        finally:
+            i18n.set_lang("en")
+            theme.set_theme(dark=False)
 
 
 @pytest.fixture(autouse=True)

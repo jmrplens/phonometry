@@ -22,7 +22,7 @@ version from `main`, and the remedy for any older version is to upgrade.
 | 3.x | No: upgrade to the latest 4.x |
 | 2.x and earlier, including `PyOctaveBand` | No |
 
-Staying on the latest 4.x is cheap by design. From 4.0.0 on, a name that a
+Staying on the latest 4.x is cheap by design. After 4.0.0, a name that a
 release renames keeps working, with a `DeprecationWarning` that names its
 replacement, and goes only in the next major release
 ([rule A16](docs/contributing/api.md#a16) of the contributor guide). The step

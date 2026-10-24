@@ -248,3 +248,71 @@ def test_an_uncalibrated_svt_av1_stops_the_render_before_any_field(
         registry.main(["--animations", "--anim", clip, "--jobs", "1"])
     assert stop.value.code != 0
     assert built == []
+
+
+def test_a_scratch_render_writes_there_and_stamps_nothing(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """The node renders into a directory of its own and never stamps."""
+    import shutil
+
+    import animation_fingerprint
+    import assets_dir
+
+    clip = "test_only_clip"
+
+    def draw(output_dir: str) -> None:
+        (pathlib.Path(output_dir) / f"{clip}.webm").write_bytes(b"x")
+
+    def refuse(*_: object, **__: object) -> None:
+        msg = "a scratch render reached the assets or the manifest"
+        raise AssertionError(msg)
+
+    monkeypatch.setitem(registry._ANIMATIONS, clip, draw)
+    monkeypatch.setattr(registry, "_render_anim_variants", lambda c, d: draw(d))
+    monkeypatch.setattr(assets_dir, "require_clips_dir", refuse)
+    monkeypatch.setattr(animation_fingerprint, "stamp", refuse)
+    # The SVT-AV1 check before any field would ask this machine's ffmpeg; the
+    # registry calls the name it imported from figures.media.
+    monkeypatch.setattr(registry, "_clip_options", lambda encoder: ())
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/ffmpeg")
+    registry.main(
+        ["--animations", "--anim", clip, "--jobs", "1", "--scratch-dir", str(tmp_path)]
+    )
+    assert (tmp_path / "clips" / f"{clip}.webm").exists()
+
+
+def test_a_scratch_audit_writes_its_findings_there(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """An audit-only run on a node leaves its findings beside its clips."""
+    import assets_dir
+    import clip_frame_audit
+
+    clip = "test_only_clip"
+    walked: list[str] = []
+
+    def refuse() -> None:
+        msg = "a scratch audit reached the assets"
+        raise AssertionError(msg)
+
+    def walk(output_dir: str, names: list[str], *, variants: bool) -> None:
+        walked.append(output_dir)
+
+    monkeypatch.setitem(registry._ANIMATIONS, clip, lambda output_dir: None)
+    monkeypatch.setattr(registry, "generate_animations", walk)
+    monkeypatch.setattr(clip_frame_audit, "report", lambda directory, clips: 0)
+    monkeypatch.setattr(assets_dir, "require_clips_dir", refuse)
+    # Set here so that the variable the command sets is put back afterwards.
+    monkeypatch.setenv(clip_frame_audit.AUDIT_ENV, str(tmp_path / "elsewhere"))
+    argv = [
+        "--animations",
+        "--audit-only",
+        "--anim",
+        clip,
+        "--scratch-dir",
+        str(tmp_path),
+    ]
+    with pytest.raises(SystemExit, match=r"^0$"):
+        registry.main(argv)
+    assert walked == [str((tmp_path / "audit").resolve())]

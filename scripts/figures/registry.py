@@ -16,7 +16,7 @@ import os
 import sys
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import assets_dir
 import clip_placement
@@ -2371,16 +2371,20 @@ def _select_figures(names: list[str] | None) -> list[Callable[[str], None]]:
     return selected
 
 
-def _audit_animations(names: list[str] | None, jobs: int | None) -> None:
+def _audit_animations(
+    names: list[str] | None, jobs: int | None, directory: Path | None = None
+) -> None:
     """Hold every frame of *names* (every clip by default) to the figure gates.
 
     The clips are rendered as for an encode, through the same
     ``_render_clip``, with :data:`clip_frame_audit.AUDIT_ENV` naming the
     directory each variant writes its findings to: while it is set a clip is
-    inspected and not encoded, and :func:`_stamp_clips` stamps nothing. One
-    clip, or ``--jobs 1``, walks the clips in this process (a field clip's
-    four variants fork off one simulation); otherwise the clips go to the
-    process pool of a full render. Exits with the status of
+    inspected and not encoded, and :func:`_stamp_clips` stamps nothing. The
+    findings go to *directory*, emptied first, or to
+    :data:`clip_frame_audit.DEFAULT_DIR` when it is ``None``. One clip, or
+    ``--jobs 1``, walks the clips in this process (a field clip's four
+    variants fork off one simulation); otherwise the clips go to the process
+    pool of a full render. Exits with the status of
     :func:`clip_frame_audit.report`, after every clip has been inspected.
     """
     import shutil
@@ -2392,7 +2396,9 @@ def _audit_animations(names: list[str] | None, jobs: int | None) -> None:
     if unknown:
         msg = f"unknown animation(s) {unknown}; available: {', '.join(sorted(_ANIMATIONS))}"
         raise SystemExit(msg)
-    directory = Path(clip_frame_audit.DEFAULT_DIR).resolve()
+    directory = (
+        Path(clip_frame_audit.DEFAULT_DIR) if directory is None else directory
+    ).resolve()
     shutil.rmtree(directory, ignore_errors=True)
     directory.mkdir(parents=True)
     os.environ[clip_frame_audit.AUDIT_ENV] = str(directory)
@@ -2440,6 +2446,42 @@ def _require_a_clip_encoder(
         _clip_options(_clip_encoder())
     except (ValueError, RuntimeError) as exc:
         parser.error(str(exc))
+
+
+def _require_animations_for_a_scratch_dir(
+    parser: argparse.ArgumentParser, args: argparse.Namespace
+) -> None:
+    """Stop a run that names a scratch directory and renders no clips.
+
+    :raises SystemExit: through :meth:`argparse.ArgumentParser.error` when
+        ``--scratch-dir`` comes without ``--animations``.
+    """
+    if args.scratch_dir is not None and not args.animations:
+        parser.error("--scratch-dir goes with --animations")
+
+
+def _scratch(args: argparse.Namespace, name: Literal["clips", "audit"]) -> Path | None:
+    """``DIR/name`` of ``--scratch-dir DIR``, or ``None`` when the run names none."""
+    return None if args.scratch_dir is None else args.scratch_dir / name
+
+
+def _clips_directory(scratch: Path | None, *, needed: bool) -> str:
+    """The directory this run writes its clips and posters into.
+
+    The clips and their posters are binary and live in a repository of their
+    own; see scripts/assets_dir.py. Its checkout is resolved only when the
+    run is about to write one (*needed*), so a figures-only run needs none.
+    A *scratch* directory needs none either, and is made if missing: what is
+    written there is not published, and :func:`_stamp_clips` stamps only a
+    render into the published directory. ``""`` when nothing is written.
+
+    :raises FileNotFoundError: when the run writes clips, names no scratch
+        directory, and the clips directory is not inside an assets checkout.
+    """
+    if scratch is not None:
+        scratch.mkdir(parents=True, exist_ok=True)
+        return str(scratch)
+    return str(assets_dir.require_clips_dir()) if needed else ""
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -2506,6 +2548,15 @@ def main(argv: list[str] | None = None) -> None:
         help="render only this figure (repeatable; the generate_ prefix is "
         "optional, e.g. --figure loudness_models_comparison)",
     )
+    parser.add_argument(
+        "--scratch-dir",
+        type=Path,
+        default=None,
+        metavar="DIR",
+        help="with --animations, write the clips into DIR/clips and the audit "
+        "findings into DIR/audit, without the assets checkout and without "
+        "stamping a fingerprint (how a render node works)",
+    )
     args = parser.parse_args(argv)
     _name_clip_encoder(args.clip_encoder)
     _require_a_clip_encoder(parser, args)
@@ -2518,15 +2569,13 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.anim and not do_anim:
         parser.error("--anim requires --animations (or --all)")
+    _require_animations_for_a_scratch_dir(parser, args)
     if args.audit_only:
         if not args.animations or args.do_all or args.posters:
             parser.error("--audit-only goes with --animations alone")
-        _audit_animations(args.anim, args.jobs)
+        _audit_animations(args.anim, args.jobs, directory=_scratch(args, "audit"))
         return
-    # The clips and their posters are binary and live in a repository of
-    # their own; see scripts/assets_dir.py. Resolved only when a run is about
-    # to write one, so a figures-only run needs no checkout of it.
-    clip_dir = str(assets_dir.require_clips_dir()) if (do_anim or args.posters) else ""
+    clip_dir = _clips_directory(_scratch(args, "clips"), needed=do_anim or args.posters)
     if args.posters and not do_anim:
         print(f"--- Re-extracting animation posters into {clip_dir} ---")
         generate_posters(clip_dir)

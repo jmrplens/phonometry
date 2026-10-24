@@ -9,8 +9,9 @@ and the rest simply live at a named address instead of a flat one. So most of th
 work is an import sweep, and this page is mostly a map.
 
 Read the first two sections and you can fix the imports. Read the third even
-if you are in a hurry, because in four places the obvious fix is the wrong
-one, and three of those four change a number without raising anything.
+if you are in a hurry, because in four places, one of them only for code
+written against 4.0.0rc1, the obvious fix is the wrong one, and three of those
+four change a number without raising anything.
 
 ## The one rule: imports move down one level
 
@@ -227,8 +228,8 @@ print(atmosphere.temperature_c, atmosphere.static_pressure_kpa)
 
 Ten signatures took more than thirteen parameters each, and in 4.0 the
 options that belong together are one record. A 3.3.0 keyword among them is
-not renamed but gone, so `octave_filter(x, fs, calibration_factor=2.0)` raises
-`TypeError`: build the record the keyword went into and pass that. Every field
+not renamed but gone, so a call that passes one raises `TypeError`: build the
+record the keyword went into and pass that. Every field
 of a record is written by name, and a field with a default has the default its
 keyword had, so a record carries only what you change. The atmospheres of the
 section above are records of the same kind; these are the rest:
@@ -281,9 +282,11 @@ Twenty-two functions of 3.3.0 took the air they compute in as loose numbers:
 a speed of sound and a density, for the visco-thermal models a viscosity, a
 Prandtl number, a ratio of specific heats and a static pressure, and for the
 thermal correction of ISO 9053-2 a specific heat and a thermal conductivity,
-each with a default of its own. In 4.0 each takes one `fluid=`, a `fluids.Fluid` that
-carries every property its model reads, and the loose keywords are gone, so a
-call that passed one raises `TypeError`. Left out, `fluid=` is
+each with a default of its own. In 4.0 these twenty-two take one `fluid=`, a
+`fluids.Fluid` that carries every property its model reads, and their loose
+keywords are gone, so a call that passed one raises `TypeError`. Other functions
+that take a speed of sound or a density, `expansion_chamber` among them, keep
+their own keywords. Left out, `fluid=` is
 `materials.ABSORBER_AIR`, which holds the defaults 3.3.0 had: 343 m/s,
 1.205 kg/m³, 1.84·10⁻⁵ Pa s, a Prandtl number of 0.71, a ratio of specific heats
 of 1.4 and 101.325 kPa. A call that never passed the air gives the number it
@@ -659,9 +662,10 @@ each tone by name, `wavelength=lam`: it is a length of the same shape as the
 distance to the first minimum beside it, and the two bind either way round.
 
 A signal function takes the samples and their rate by position, and the
-quantity that says what it does to them by name. These six took that quantity
-by position in 3.3.0. The rate may now be left out when `x` is a `Signal`,
-which carries its own:
+quantity that says what it does to them by name. These took that quantity by
+position in 3.3.0, even where it is a choice, as the weighting `name` of
+`apply_weighting` is, or a count, as an `order` is. The rate may now be left
+out when the samples are a `Signal`, which carries its own:
 
 | 3.3.0 | 4.0 |
 | --- | --- |
@@ -671,6 +675,12 @@ which carries its own:
 | `lifter(x, fs, 0.002)` | `signals.lifter(x, fs, cutoff=0.002)` |
 | `time_synchronous_average(x, fs, 0.05)` | `signals.time_synchronous_average(x, fs, period_s=0.05)`, the period in seconds, as its name now says |
 | `resample_signal(x, fs, 32000)` | `signals.resample_signal(x, fs, fs_new=32000)` |
+| `harmonic_distortion(x, fs, 1000.0, 2)` | `electroacoustics.harmonic_distortion(x, fs, fundamental=1000.0, order=2)` |
+| `difference_frequency_distortion(x, fs, 1000.0, 1200.0)` | `electroacoustics.difference_frequency_distortion(x, fs, f1=1000.0, f2=1200.0)` |
+| `modulation_distortion(x, fs, 60.0, 7000.0)` | `electroacoustics.modulation_distortion(x, fs, f_low=60.0, f_high=7000.0)` |
+| `swept_sine_distortion(recorded, fs, 20.0, 20000.0, 2.0)` | `electroacoustics.swept_sine_distortion(recorded, fs, f1=20.0, f2=20000.0, duration_s=2.0)` |
+| `apply_weighting(x, fs, "Wk")` | `vibration.apply_weighting(x, fs, name="Wk")` |
+| `sound_intensity(p1, p2, fs, 0.012)` | `emission.sound_intensity(p1, p2, fs, spacing_m=0.012)` |
 
 ```python
 import numpy as np
@@ -2199,26 +2209,18 @@ finish the upgrade, that is a defect and it is worth
 did move are below. Each moved because 3.3.0 disagreed with the document it
 follows, or because a default changed.
 
-Two verdicts are graded more strictly, as the section on filter classes above
-says. `verify_filter_class` grades the effective bandwidth of 5.12 and the
-summation of 5.16 as well as the Table 1 mask for the 2014 edition, and the
-filter integrated response of 4.5.3 and the summation of 4.9 for
-`edition="1995"`, so a bank's class is the strictest it meets on all three.
-Every band is graded at the bank's input rate up to half of it, so the Table 1
-margins of a decimated band take in the alias images its decimation folds onto
-it. And the decimated filter banks themselves changed: each band now keeps its
-processing Nyquist frequency sixteen times its upper edge and decimates through
-an anti-aliasing filter sized for a 120 dB stopband, so a band level moves by
-up to 0.07 dB on white noise.
+`verify_filter_class` grades every requirement of IEC 61260-1 at the bank's
+input rate, not the Table 1 mask alone, and a band of a decimated bank moves by
+up to 0.07 dB on white noise: the section on filter classes above says how.
 
 | What moved | 3.3.0 | 4.0 |
 | --- | --- | --- |
-| A and C weighting through `WeightingFilter.filter`, which is now designed at the input rate instead of oversampled | A at 48 kHz: −2.60 dB, −7.03 dB and −10.15 dB at the 10, 16 and 20 kHz rows of IEC 61672-1 Table 3; at 16 kHz, A −13.1 dB and C −16.7 dB at the 8 kHz row | −2.49 dB, −6.60 dB and −9.32 dB, the design goals within 0.02 dB; −1.11 dB and −3.01 dB at the 8 kHz row |
-| `WeightingFilter(..., stateful=True)`, which ran the plain bilinear design in 3.3.0 and runs the accurate one now | A at 48 kHz: −7.05 dB at the 12.5 kHz row; G at its own 10 Hz reference: −26.3 dB at 8 kHz and −35.8 dB at 1 kHz | −4.32 dB, the design goal; 0 dB at every rate |
+| Every curve, A, B, C, D, G and AU, through `WeightingFilter.filter` and `filters.weighting_filter`, which are now designed at the input rate instead of oversampled, and so every level that weights a signal through them, `signals.laeq` among them | A at 48 kHz: −2.60 dB, −7.03 dB and −10.15 dB at the 10, 16 and 20 kHz rows of IEC 61672-1 Table 3; at 16 kHz, A −13.1 dB and C −16.7 dB at the 8 kHz row; at 32 kHz, B −23.9 dB, D −17.1 dB and AU −35.9 dB at 16 kHz | −2.49 dB, −6.60 dB and −9.32 dB, the design goals within 0.02 dB; −1.11 dB and −3.01 dB at the 8 kHz row; B −8.42 dB, D −0.69 dB and AU −19.61 dB, again the design goals |
+| `WeightingFilter(..., stateful=True)`, which in 3.3.0 ran A as the plain bilinear design and G with sections designed for an oversampled rate, both at the input rate, and runs the accurate design now | A at 48 kHz: −7.05 dB at the 12.5 kHz row; G at its own 10 Hz reference: −26.3 dB at 8 kHz and −36.3 dB at 1 kHz | −4.32 dB, the design goal; 0 dB at every rate |
 | `verify_weighting_class` | graded the designed sections, and gave class 1 to an A weighting at 16 kHz that lost 12 dB at the 8 kHz row | grades the path a signal takes through `WeightingFilter.filter` |
-| `itu_r_468_weighting`, now `electroacoustics.weighting_bs468` | ITU-R BS.468-4 Table 1 interpolated between its rows: 4.45 dB at 11.06 kHz | the curve of the network the Recommendation prints: 5.06 dB there, and within 0.05 dB of Table 1 at its rows |
+| `itu_r_468_weighting`, now `electroacoustics.weighting_bs468` | ITU-R BS.468-4 Table 1 interpolated between its rows: 4.45 dB at 11.06 kHz | the curve of the network the Recommendation prints: 5.06 dB there, and at most about 0.05 dB from Table 1 at its rows |
 | `sae_band_attenuation`, now `aircraft.band_attenuation_arp5534` | the saturation vapour pressure of ISO 9613-1 | the one SAE ARP 5534 prints: about 0.01 dB less over 1 km at 8 kHz and 10 kHz |
-| `extended_tube_chamber` with an inlet or outlet extension | the straight section between the two side branches taken over the whole chamber length L | over L − L_a − L_b, which reproduces Bies Figure 8.20: for L = 0.5 m and extensions of 0.125 m and 0.25 m, 22.7 dB at 200 Hz where it was 0.6 dB |
+| `extended_tube_chamber` with an inlet or outlet extension | the straight section between the two side branches taken over the whole chamber length L | over L − L_a − L_b, which reproduces Bies Figure 8.20: for L = 0.5 m, an area ratio m = 16 and extensions of 0.125 m and 0.25 m, 22.7 dB at 200 Hz where it was 0.6 dB |
 | `underwater.ray_trace` and `environment.atmospheric_ray_paths` at a reflection | a whole step taken through the boundary and folded back | a sub-step that ends on the boundary, so a ray that bounces lands elsewhere: one ray of a 100 m channel ends 5 km out at 9.4 m depth, where it ended at 0.3 m |
 | `room.open_plan_metrics` where the STI never falls to the threshold | a distraction or privacy distance of 10¹⁵ m or more | NaN |
 | `effective_kappa` and `thermal_boundary_layer_thickness` left at their default air | the five values ISO 9053-2 Annex A.3 prints | the air of IEC 61094-2 at the same state, which moves the correction in its fifth figure, as the section on `fluid=` says |
@@ -2226,15 +2228,15 @@ up to 0.07 dB on white noise.
 
 The ISO 3382 fiche of a one-third-octave analysis takes its single-number
 reverberation time over the six bands from 400 Hz to 1250 Hz, as clause 9.1
-prints, where it averaged the 500 Hz and 1 kHz bands. The microphone fiche
+prints, where it averaged the 500 Hz and 1 kHz bands. The ISO 10846 fiche of
+an indirect determination boxes the stiffness at the lowest line ISO 10846-3
+Inequality (2) admits, with a transmissibility of 0.1 or less, where it boxed
+the lowest line of the sweep, inside the resonance region. The microphone fiche
 writes dB(468) for the ITU-R BS.468-4 weighting, which 3.3.0 let you label
 CCIR. A plot draws a band with no reading as no bar, where it drew a measured
-zero. Two more are in the sections above: `installed_dynamic_stiffness`
-raises below 100 kPa·s/m² without its gas term, where it returned the
-stiffness with the term dropped, and the ISO 3746 survey positions of
-`emission.measurement_positions` are those of ISO 3746 Table B.1 over one
-reflecting plane, where they were four positions of ISO 3744, and are given
-over three planes, where 3.3.0 raised `NotImplementedError`.
+zero. Two more are in the sections above: `installed_dynamic_stiffness` below
+100 kPa·s/m², and the ISO 3746 survey positions of
+`emission.measurement_positions`.
 
 For code written against 4.0.0rc1, the `Signal` contract is the one it was,
 now kept in two more places, the blocks of `read_blocks` and the waveforms

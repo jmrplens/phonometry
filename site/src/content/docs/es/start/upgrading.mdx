@@ -10,8 +10,9 @@ de en una plana. Así que el trabajo es sobre todo un barrido de imports, y esta
 página es sobre todo un mapa.
 
 Con las dos primeras secciones arreglas los imports. La tercera léela aunque
-tengas prisa, porque en cuatro sitios el arreglo evidente es el equivocado, y
-tres de esos cuatro cambian un número sin levantar nada.
+tengas prisa, porque en cuatro sitios, uno de ellos solo para el código escrito
+contra la 4.0.0rc1, el arreglo evidente es el equivocado, y tres de esos cuatro
+cambian un número sin levantar nada.
 
 ## La regla única: los imports bajan un nivel
 
@@ -234,11 +235,11 @@ print(atmosphere.temperature_c, atmosphere.static_pressure_kpa)
 
 Diez firmas tomaban más de trece parámetros cada una, y en la 4.0 las opciones
 que van juntas son un registro. Una palabra clave de la 3.3.0 entre ellas no se
-renombró, sino que desapareció, así que
-`octave_filter(x, fs, calibration_factor=2.0)` lanza `TypeError`: construye el
-registro al que fue la palabra clave y pasa ese. Cada campo de un registro se
-escribe por su nombre, y un campo con valor por defecto tiene el que tenía su
-palabra clave, así que un registro lleva solo lo que cambias. Las atmósferas de
+renombró, sino que desapareció, así que una llamada que la pasa lanza
+`TypeError`: construye el registro al que fue la palabra clave y pasa ese. Cada
+campo de un registro se escribe por su nombre, y un campo con valor por defecto
+tiene el que tenía su palabra clave, así que un registro lleva solo lo que
+cambias. Las atmósferas de
 la sección anterior son registros de la misma clase; estos son los demás:
 
 | 3.3.0 | 4.0 |
@@ -291,9 +292,11 @@ una viscosidad, un número de Prandtl, una relación de calores específicos y u
 presión estática, y en la corrección térmica de la ISO 9053-2 un calor
 específico y una conductividad térmica, cada uno con su propio valor por
 defecto.
-En la 4.0 cada una toma un único `fluid=`, un `fluids.Fluid` que lleva todas
-las propiedades que lee su modelo, y las palabras clave sueltas han
-desaparecido, así que una llamada que pasaba una lanza `TypeError`. Si se
+En la 4.0 estas veintidós toman un único `fluid=`, un `fluids.Fluid` que lleva
+todas las propiedades que lee su modelo, y sus palabras clave sueltas han
+desaparecido, así que una llamada que pasaba una lanza `TypeError`. Otras funciones
+que toman una velocidad del sonido o una densidad, entre ellas
+`expansion_chamber`, conservan sus propias palabras clave. Si se
 omite, `fluid=` es `materials.ABSORBER_AIR`, que guarda los valores por defecto
 de la 3.3.0: 343 m/s, 1,205 kg/m³, 1,84·10⁻⁵ Pa s, un número de Prandtl de
 0,71, una relación de calores específicos de 1,4 y 101,325 kPa. Una llamada que
@@ -679,8 +682,10 @@ cualquier orden.
 
 Una función de señal toma por posición las muestras y su frecuencia de
 muestreo, y por su nombre la magnitud que dice lo que hace con ellas. Estas
-seis tomaban esa magnitud por posición en la 3.3.0. La frecuencia de muestreo
-puede omitirse ahora cuando `x` es un `Signal`, que lleva la suya:
+tomaban esa magnitud por posición en la 3.3.0, incluso cuando es una elección,
+como el `name` de la ponderación de `apply_weighting`, o un recuento, como un
+`order`. La frecuencia de muestreo puede omitirse ahora cuando las muestras son
+un `Signal`, que lleva la suya:
 
 | 3.3.0 | 4.0 |
 | --- | --- |
@@ -690,6 +695,12 @@ puede omitirse ahora cuando `x` es un `Signal`, que lleva la suya:
 | `lifter(x, fs, 0.002)` | `signals.lifter(x, fs, cutoff=0.002)` |
 | `time_synchronous_average(x, fs, 0.05)` | `signals.time_synchronous_average(x, fs, period_s=0.05)`, el periodo en segundos, como dice ahora su nombre |
 | `resample_signal(x, fs, 32000)` | `signals.resample_signal(x, fs, fs_new=32000)` |
+| `harmonic_distortion(x, fs, 1000.0, 2)` | `electroacoustics.harmonic_distortion(x, fs, fundamental=1000.0, order=2)` |
+| `difference_frequency_distortion(x, fs, 1000.0, 1200.0)` | `electroacoustics.difference_frequency_distortion(x, fs, f1=1000.0, f2=1200.0)` |
+| `modulation_distortion(x, fs, 60.0, 7000.0)` | `electroacoustics.modulation_distortion(x, fs, f_low=60.0, f_high=7000.0)` |
+| `swept_sine_distortion(recorded, fs, 20.0, 20000.0, 2.0)` | `electroacoustics.swept_sine_distortion(recorded, fs, f1=20.0, f2=20000.0, duration_s=2.0)` |
+| `apply_weighting(x, fs, "Wk")` | `vibration.apply_weighting(x, fs, name="Wk")` |
+| `sound_intensity(p1, p2, fs, 0.012)` | `emission.sound_intensity(p1, p2, fs, spacing_m=0.012)` |
 
 ```python
 import numpy as np
@@ -2262,27 +2273,19 @@ merece la pena [avisar](https://github.com/jmrplens/phonometry/issues). Los
 números que sí se movieron están abajo. Cada uno se movió porque la 3.3.0 no
 coincidía con el documento que sigue, o porque cambió un valor por defecto.
 
-Dos veredictos califican con más rigor, como explica la sección sobre las
-clases de filtro de más arriba. `verify_filter_class` califica el ancho de
-banda efectivo del 5.12 y la suma de salidas del 5.16 además de la máscara de
-la Tabla 1 para la edición de 2014, y la respuesta integrada del filtro del
-4.5.3 y la suma del 4.9 con `edition="1995"`, así que la clase de un banco es
-la más estricta que cumple en los tres. Cada banda se califica a la frecuencia
-de entrada del banco hasta la mitad de ella, así que los márgenes de la Tabla 1
-de una banda diezmada recogen las imágenes que su diezmado pliega sobre ella. Y
-los propios bancos de filtros diezmados cambiaron: cada banda conserva ahora su
-frecuencia de Nyquist de proceso en dieciséis veces su borde superior y diezma
-con un filtro antialiasing dimensionado para una banda atenuada de 120 dB, así
-que el nivel de una banda se mueve hasta 0,07 dB con ruido blanco.
+`verify_filter_class` califica todos los requisitos de IEC 61260-1 a la
+frecuencia de entrada del banco, no solo la máscara de la Tabla 1, y una banda
+de un banco diezmado se mueve hasta 0,07 dB con ruido blanco: la sección sobre
+las clases de filtro de más arriba explica cómo.
 
 | Lo que se movió | 3.3.0 | 4.0 |
 | --- | --- | --- |
-| Las ponderaciones A y C a través de `WeightingFilter.filter`, que ahora se diseñan a la frecuencia de entrada en vez de sobremuestreadas | A a 48 kHz: −2,60 dB, −7,03 dB y −10,15 dB en las filas de 10, 16 y 20 kHz de la Tabla 3 de IEC 61672-1; a 16 kHz, A −13,1 dB y C −16,7 dB en la fila de 8 kHz | −2,49 dB, −6,60 dB y −9,32 dB, los objetivos de diseño con 0,02 dB de diferencia como mucho; −1,11 dB y −3,01 dB en la fila de 8 kHz |
-| `WeightingFilter(..., stateful=True)`, que en la 3.3.0 ejecutaba el diseño bilineal simple y ahora ejecuta el preciso | A a 48 kHz: −7,05 dB en la fila de 12,5 kHz; G en su propia referencia de 10 Hz: −26,3 dB a 8 kHz y −35,8 dB a 1 kHz | −4,32 dB, el objetivo de diseño; 0 dB a cualquier frecuencia de muestreo |
+| Todas las curvas, A, B, C, D, G y AU, a través de `WeightingFilter.filter` y de `filters.weighting_filter`, que ahora se diseñan a la frecuencia de entrada en vez de sobremuestreadas, y por tanto todo nivel que pondera una señal con ellas, `signals.laeq` entre ellos | A a 48 kHz: −2,60 dB, −7,03 dB y −10,15 dB en las filas de 10, 16 y 20 kHz de la Tabla 3 de IEC 61672-1; a 16 kHz, A −13,1 dB y C −16,7 dB en la fila de 8 kHz; a 32 kHz, B −23,9 dB, D −17,1 dB y AU −35,9 dB a 16 kHz | −2,49 dB, −6,60 dB y −9,32 dB, los objetivos de diseño con 0,02 dB de diferencia como mucho; −1,11 dB y −3,01 dB en la fila de 8 kHz; B −8,42 dB, D −0,69 dB y AU −19,61 dB, de nuevo los objetivos de diseño |
+| `WeightingFilter(..., stateful=True)`, que en la 3.3.0 ejecutaba A con el diseño bilineal simple y G con secciones diseñadas para una frecuencia sobremuestreada, las dos a la frecuencia de entrada, y ahora ejecuta el diseño preciso | A a 48 kHz: −7,05 dB en la fila de 12,5 kHz; G en su propia referencia de 10 Hz: −26,3 dB a 8 kHz y −36,3 dB a 1 kHz | −4,32 dB, el objetivo de diseño; 0 dB a cualquier frecuencia de muestreo |
 | `verify_weighting_class` | calificaba las secciones diseñadas, y daba la clase 1 a una ponderación A a 16 kHz que perdía 12 dB en la fila de 8 kHz | califica el camino que recorre una señal a través de `WeightingFilter.filter` |
-| `itu_r_468_weighting`, ahora `electroacoustics.weighting_bs468` | la Tabla 1 de UIT-R BS.468-4 interpolada entre sus filas: 4,45 dB a 11,06 kHz | la curva de la red que imprime la Recomendación: 5,06 dB ahí, y a 0,05 dB como mucho de la Tabla 1 en sus filas |
+| `itu_r_468_weighting`, ahora `electroacoustics.weighting_bs468` | la Tabla 1 de UIT-R BS.468-4 interpolada entre sus filas: 4,45 dB a 11,06 kHz | la curva de la red que imprime la Recomendación: 5,06 dB ahí, y a unos 0,05 dB como mucho de la Tabla 1 en sus filas |
 | `sae_band_attenuation`, ahora `aircraft.band_attenuation_arp5534` | la presión de vapor de saturación de la ISO 9613-1 | la que imprime SAE ARP 5534: unos 0,01 dB menos en 1 km a 8 kHz y 10 kHz |
-| `extended_tube_chamber` con una prolongación de entrada o de salida | el tramo recto entre las dos ramas laterales tomado sobre toda la longitud L de la cámara | sobre L − L_a − L_b, que reproduce la Figura 8.20 de Bies: para L = 0,5 m y prolongaciones de 0,125 m y 0,25 m, 22,7 dB a 200 Hz donde daba 0,6 dB |
+| `extended_tube_chamber` con una prolongación de entrada o de salida | el tramo recto entre las dos ramas laterales tomado sobre toda la longitud L de la cámara | sobre L − L_a − L_b, que reproduce la Figura 8.20 de Bies: para L = 0,5 m, una relación de áreas m = 16 y prolongaciones de 0,125 m y 0,25 m, 22,7 dB a 200 Hz donde daba 0,6 dB |
 | `underwater.ray_trace` y `environment.atmospheric_ray_paths` en una reflexión | un paso entero dado a través de la frontera y plegado de vuelta | un subpaso que acaba en la frontera, así que un rayo que rebota llega a otro sitio: un rayo de un canal de 100 m acaba a 5 km a 9,4 m de profundidad, donde acababa a 0,3 m |
 | `room.open_plan_metrics` cuando el STI nunca baja hasta el umbral | una distancia de distracción o de privacidad de 10¹⁵ m o más | NaN |
 | `effective_kappa` y `thermal_boundary_layer_thickness` con su aire por defecto | los cinco valores que imprime el Anexo A.3 de la ISO 9053-2 | el aire de IEC 61094-2 en el mismo estado, que mueve la corrección en su quinta cifra, como dice la sección sobre `fluid=` |
@@ -2291,15 +2294,15 @@ que el nivel de una banda se mueve hasta 0,07 dB con ruido blanco.
 La ficha ISO 3382 de un análisis en tercios de octava toma su tiempo de
 reverberación de un solo número sobre las seis bandas de 400 Hz a 1250 Hz,
 como imprime el apartado 9.1, donde promediaba las bandas de 500 Hz y 1 kHz. La
-ficha del micrófono escribe dB(468) para la ponderación UIT-R BS.468-4, que la
-3.3.0 te dejaba etiquetar como CCIR. Una gráfica dibuja una banda sin lectura
-como ninguna barra, donde dibujaba un cero medido. Hay dos más en las secciones
-de arriba: `installed_dynamic_stiffness` lanza un error por debajo de
-100 kPa·s/m² sin su término del gas, donde devolvía la rigidez con ese término
-suprimido, y las posiciones del método de control de la ISO 3746 de
-`emission.measurement_positions` son las de la Tabla B.1 de la ISO 3746 sobre
-un plano reflectante, donde eran cuatro posiciones de la ISO 3744, y se dan
-sobre tres planos, donde la 3.3.0 lanzaba `NotImplementedError`.
+ficha ISO 10846 de una determinación indirecta enmarca la rigidez en la línea
+más baja que admite la Desigualdad (2) de la ISO 10846-3, con una
+transmisibilidad de 0,1 o menos, donde enmarcaba la línea más baja del barrido,
+dentro de la zona de la resonancia. La ficha del micrófono escribe dB(468) para
+la ponderación UIT-R BS.468-4, que la 3.3.0 te dejaba etiquetar como CCIR. Una
+gráfica dibuja una banda sin lectura como ninguna barra, donde dibujaba un cero medido. Hay dos más en las secciones
+de arriba: `installed_dynamic_stiffness` por debajo de 100 kPa·s/m², y las
+posiciones del método de control de la ISO 3746 de
+`emission.measurement_positions`.
 
 Para el código escrito contra la 4.0.0rc1, el contrato de `Signal` es el que
 era, ahora cumplido en dos sitios más, los bloques de `read_blocks` y las

@@ -781,13 +781,6 @@ coverage:
 test-perf:
 	$(TEST_ENV) NUMBA_DISABLE_JIT=0 $(PYTHON) -m pytest -n auto tests/
 
-# The FDTD GPU parity, which needs a CUDA device. There is one either way: a
-# local CuPy install, or the machine named by PHONO_GPU_HOST in .env, which is
-# where the animation renders already run. With neither, every GPU case skips
-# and says which of the two is missing.
-test-gpu:
-	$(TEST_ENV) $(PYTHON) -m pytest -rs tests/test_fdtd_gpu_parity.py
-
 # The CuPy proof in gpu-parity.lock, run where CuPy and an NVIDIA GPU are
 # (docker/node/Dockerfile builds such an environment). Rerun it after any
 # change to the engines, fdtd.py, elastic_fdtd.py and _backends.py under
@@ -828,7 +821,7 @@ check: lint security test
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figure-ticks figures reports \
 	assets animations clip-node-check clip-ffmpeg animation-freshness animation-audit posters brand lighthouse \
-	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu gpu-parity node-image engine-digests coverage check \
+	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf gpu-parity node-image engine-digests coverage check \
 	snippets snippets-static claims subscripts euler-number docstring-math language-forwarding \
 	fence-names fence-readers decimal-comma spanish-accents figure-decimal-point figure-legends figure-tick-clearance \
 	figure-text-clearance figure-minus-sign control-characters hazards dead-constants raises-blocks reference-values \

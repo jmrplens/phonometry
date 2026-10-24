@@ -186,7 +186,7 @@ ci:
 
 "area: simulation":
   - changed-files:
-      - any-glob-to-any-file: ["src/phonometry/simulation/**", "tests/simulation/**", "scripts/fdtd2d.py"]
+      - any-glob-to-any-file: ["src/phonometry/simulation/**", "tests/simulation/**", "scripts/engine_*.py"]
 
 "area: speech":
   - changed-files:

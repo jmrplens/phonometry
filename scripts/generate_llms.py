@@ -48,6 +48,8 @@ import subprocess
 import tomllib
 from typing import TYPE_CHECKING
 
+from markdown_fences import code_lines
+
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
@@ -1112,39 +1114,21 @@ def _shard_text(title: str, pages: list[tuple[str, str]]) -> str:
     )
 
 
-#: An opening or closing code fence: three or more backticks or tildes.
-_FENCE = re.compile(r"\s*(`{3,}|~{3,})(.*)")
-
-
-def _fence_after(line: str, fence: str) -> str:
-    """The code fence open after *line*: its marker, or ``""`` outside one."""
-    match = _FENCE.match(line)
-    if match is None:
-        return fence
-    marker, rest = match.groups()
-    if not fence:
-        return marker
-    # A fence closes on a run of its own character at least as long as the
-    # one that opened it, with nothing after it.
-    closes = marker[0] == fence[0] and len(marker) >= len(fence) and not rest.strip()
-    return "" if closes else fence
-
-
 def _sections(content: str) -> list[str]:
     """A page cut before each of its H2 headings.
 
     A ``## `` line inside a code fence is code, a Python comment for one, and
-    never a cut. The first section is whatever comes before the first H2: the
-    page title and its introduction.
+    never a cut; ``markdown_fences`` says which lines are code, as it does for
+    every script that reads a page. The first section is whatever comes before
+    the first H2: the page title and its introduction.
     """
+    lines = content.splitlines()
     sections: list[list[str]] = [[]]
-    fence = ""
-    for line in content.splitlines():
-        if not fence and line.startswith("## "):
+    for line, code in zip(lines, code_lines(lines), strict=True):
+        if not code and line.startswith("## "):
             sections.append([])
         sections[-1].append(line)
-        fence = _fence_after(line, fence)
-    return ["\n".join(lines) for lines in sections if any(map(str.strip, lines))]
+    return ["\n".join(part) for part in sections if any(map(str.strip, part))]
 
 
 def _starts(sizes: list[int], capacity: int) -> list[int]:

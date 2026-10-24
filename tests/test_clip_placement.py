@@ -9,9 +9,11 @@ one; another is chosen with ``CUDA_VISIBLE_DEVICES``) and steps on NumPy
 when none is named; any other GPU library is refused, as the clips' GPU
 fields are measured on CuPy only; the clips are computed in float64; the
 memory a render lane may hold is set on CuPy's pool, and the RAM it may
-hold is read from its budget or from what the machine has available; and
-the table is outside every clip's fingerprint, because where a field is
-computed is held to the NumPy field by measurement, not by the fingerprint.
+hold is read from its budget or from what the machine has available; every
+GPU clip has the GPU memory its field was measured to need, and each need
+is a count of bytes; and the tables are outside every clip's fingerprint,
+because where a field is computed is held to the NumPy field by
+measurement, not by the fingerprint.
 """
 
 from __future__ import annotations
@@ -107,12 +109,28 @@ def test_every_field_clip_has_a_device_and_nothing_else_does() -> None:
     assert set(registry._ANIM_DEVICES.values()) <= {"cpu", "gpu", "gpu-whole"}
 
 
-def test_the_device_table_is_in_no_fingerprint() -> None:
-    """Where a field is computed is held to the NumPy field by measurement, not here."""
+def test_the_device_and_memory_tables_are_in_no_fingerprint() -> None:
+    """Where a field is computed, and the memory it needs, are measured, not hashed."""
     sources = fp.Sources(_ROOT)
+    tables = {
+        ("figures.registry", name)
+        for name in ("_ANIM_DEVICES", "_ANIM_GPU_BYTES", "_ANIM_HOST_BYTES")
+    }
     for clip, entry in sources.clips().items():
         closure = sources.closure([entry, *fp._EXTRA_ROOTS])
-        assert ("figures.registry", "_ANIM_DEVICES") not in closure, clip
+        assert not tables & closure, clip
+
+
+def test_each_gpu_clip_has_a_measured_peak_and_its_needs_are_bytes() -> None:
+    from figures import registry
+
+    on_gpu = {
+        clip for clip, device in registry._ANIM_DEVICES.items() if device != "cpu"
+    }
+    assert registry._ANIM_GPU_BYTES.keys() == on_gpu
+    assert registry._ANIM_HOST_BYTES.keys() <= registry._ANIM_DEVICES.keys()
+    needs = [*registry._ANIM_GPU_BYTES.values(), *registry._ANIM_HOST_BYTES.values()]
+    assert all(isinstance(n, int) and n > 0 for n in needs)
 
 
 class _Pool:

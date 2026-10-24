@@ -377,6 +377,7 @@ from .fields import (
     animate_fdtd_transmission_tube,
     animate_standing_wave_tube,
 )
+from .fields.metadiffuser import _META_PAIR_BYTES, _META_PAIR_MARGIN
 from .i18n import set_lang
 from .io import generate_signal_provenance
 from .materials import (
@@ -2188,46 +2189,90 @@ if not _ANIM_WEIGHTS.keys() <= _ANIMATIONS.keys():
     msg = f"animation names not in _ANIMATIONS: {_unknown_anim}"
     raise RuntimeError(msg)
 
-# Where each clip's field is computed (scripts/clip_placement.py): measured
-# per clip, the wall time of its field on CuPy against NumPy's, on the GPU
-# node. A clip not yet measured steps on NumPy, as every clip did before;
-# "gpu" shares the GPU with the other render lane, "gpu-whole" takes all
-# the GPU memory that is free and runs alone. Kept here beside the
-# scheduling weights, and out of every clip's fingerprint: the engines step
-# bit for bit on CuPy (gpu-parity.lock), and a clip goes to the GPU only once
-# its whole field, the scene's own arithmetic on the device included, has
-# been measured against its NumPy field.
+# Where each clip's field is computed (scripts/clip_placement.py), measured
+# on the GPU node (an RTX 4060 shared with other services): the wall time of
+# the field alone on CuPy against NumPy, taken on 2026-10-21, a clip going to
+# the GPU when it saves a fifth or more and its whole field on CuPy is within
+# 1e-9 of its NumPy field, array by array, compared on 2026-10-24. A clip not
+# yet measured steps on NumPy, as every clip did before; "gpu" shares the GPU
+# with the other render lane, "gpu-whole" takes all the GPU memory that is
+# free and runs alone. Kept here beside the scheduling weights, and out of
+# every clip's fingerprint: the engines step bit for bit on CuPy
+# (gpu-parity.lock), and a clip goes to the GPU only once its whole field,
+# the scene's own arithmetic on the device included, has been measured
+# against its NumPy field.
 _ANIM_DEVICES: dict[str, clip_placement.ClipDevice] = {
-    "anim_fdtd_open_end": "cpu",
-    "anim_fdtd_room_modes": "cpu",
-    "anim_fdtd_barrier": "cpu",
-    "anim_fdtd_critical_angle": "cpu",
-    "anim_fdtd_ground_effect": "cpu",
-    "anim_fdtd_ducting": "cpu",
-    "anim_fdtd_diffusion": "cpu",
+    "anim_fdtd_open_end": "gpu",
+    "anim_fdtd_room_modes": "gpu",
+    "anim_fdtd_barrier": "gpu",
+    "anim_fdtd_critical_angle": "gpu",
+    "anim_fdtd_ground_effect": "gpu",
+    "anim_fdtd_ducting": "gpu",
+    "anim_fdtd_diffusion": "gpu",
     "anim_fdtd_dispersion": "cpu",
-    "anim_fdtd_duct_cut_on": "cpu",
+    "anim_fdtd_duct_cut_on": "gpu",
     "anim_fdtd_metadiffuser": "cpu",
     "anim_fdtd_impedance_tube": "cpu",
     "anim_fdtd_transmission_tube": "cpu",
-    "anim_fdtd_slit_absorber": "cpu",
-    "anim_fdtd_expansion_chamber": "cpu",
-    "anim_fdtd_side_branch": "cpu",
-    "anim_fdtd_absorption_placement": "cpu",
-    "anim_fdtd_aperture_slit": "cpu",
-    "anim_fdtd_refraction": "cpu",
-    "anim_elastic_plate_junction": "cpu",
-    "anim_elastic_coincidence": "cpu",
-    "anim_elastic_halfspace_waves": "cpu",
-    "anim_elastic_mode_conversion": "cpu",
-    "anim_elastic_radiation_efficiency": "cpu",
-    "anim_fdtd_pillar_hall": "cpu",
+    "anim_fdtd_slit_absorber": "gpu",
+    "anim_fdtd_expansion_chamber": "gpu",
+    "anim_fdtd_side_branch": "gpu",
+    "anim_fdtd_absorption_placement": "gpu",
+    "anim_fdtd_aperture_slit": "gpu",
+    "anim_fdtd_refraction": "gpu",
+    "anim_elastic_plate_junction": "gpu",
+    "anim_elastic_coincidence": "gpu",
+    "anim_elastic_halfspace_waves": "gpu",
+    "anim_elastic_mode_conversion": "gpu",
+    "anim_elastic_radiation_efficiency": "cpu",  # CuPy: 1.3e-8 of the peak off
+    "anim_fdtd_pillar_hall": "gpu",
 }
 
 # Every clip with a field has a device, and nothing else does; fail fast.
 if _ANIM_DEVICES.keys() != _ANIM_FIELDS.keys():
     _mismatch = sorted(_ANIM_DEVICES.keys() ^ _ANIM_FIELDS.keys())
     msg = f"_ANIM_DEVICES and _ANIM_FIELDS name different clips: {_mismatch}"
+    raise RuntimeError(msg)
+
+# The most bytes CuPy's pool held in use while each GPU clip's field was
+# computed, measured on the GPU node on 2026-10-24. A node gives a clip a
+# lane's share of the GPU memory it has free, runs it alone when its peak
+# needs more, and refuses it when even all that is free would not hold it
+# (scripts/clip_node.py).
+_ANIM_GPU_BYTES: dict[str, int] = {
+    "anim_fdtd_open_end": 38270976,
+    "anim_fdtd_room_modes": 29363712,
+    "anim_fdtd_barrier": 33558528,
+    "anim_fdtd_critical_angle": 18462720,
+    "anim_fdtd_ground_effect": 32513024,
+    "anim_fdtd_ducting": 80566272,
+    "anim_fdtd_diffusion": 75966976,
+    "anim_fdtd_duct_cut_on": 51883008,
+    "anim_fdtd_slit_absorber": 101320704,
+    "anim_fdtd_expansion_chamber": 7155200,
+    "anim_fdtd_side_branch": 22141952,
+    "anim_fdtd_absorption_placement": 10107392,
+    "anim_fdtd_aperture_slit": 147385344,
+    "anim_fdtd_refraction": 111309312,
+    "anim_elastic_plate_junction": 100576256,
+    "anim_elastic_coincidence": 196166144,
+    "anim_elastic_halfspace_waves": 170378240,
+    "anim_elastic_mode_conversion": 15355904,
+    "anim_fdtd_pillar_hall": 84403200,
+}
+
+# The least RAM a clip's field steps in on NumPy, recorded for the one clip
+# that can outgrow a lane's share of a node's RAM there: the metadiffuser
+# steps one float64 lockstep pair at the least (fields/metadiffuser.py). It
+# counts where the clip steps on NumPy, a render with no GPU named, and not
+# where its pairs step on a GPU (clip_placement.lane_fit).
+_ANIM_HOST_BYTES: dict[str, int] = {
+    "anim_fdtd_metadiffuser": int(_META_PAIR_BYTES * _META_PAIR_MARGIN),
+}
+
+# Every GPU clip has a measured peak, and nothing else has one; fail fast.
+if _ANIM_GPU_BYTES.keys() != {c for c, d in _ANIM_DEVICES.items() if d != "cpu"}:
+    msg = "_ANIM_GPU_BYTES must name exactly the clips _ANIM_DEVICES puts on a GPU"
     raise RuntimeError(msg)
 
 

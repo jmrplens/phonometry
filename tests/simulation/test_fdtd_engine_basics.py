@@ -16,15 +16,17 @@ import pytest
 from phonometry.simulation.fdtd import FDTD2D, CWSource, GaussianPulse
 
 
-def _pulse_box(sponge_width: int) -> FDTD2D:
+def _pulse_box(absorbing_layer_cells: int) -> FDTD2D:
     """A homogeneous box with a centred Gaussian pulse (odd grid)."""
-    sim = FDTD2D(343.0, 0.05, shape=(81, 101), sponge_width=sponge_width)
+    sim = FDTD2D(
+        343.0, 0.05, shape=(81, 101), absorbing_layer_cells=absorbing_layer_cells
+    )
     sim.add_source(GaussianPulse(ix=50, iy=40, half_width_s=6 * sim.dt))
     return sim
 
 
 def test_rigid_box_conserves_energy() -> None:
-    sim = _pulse_box(sponge_width=0)
+    sim = _pulse_box(absorbing_layer_cells=0)
     sim.run(200)
     e_ref = sim.energy()
     sim.run(600)
@@ -34,7 +36,7 @@ def test_rigid_box_conserves_energy() -> None:
 
 
 def test_sponge_absorbs_energy() -> None:
-    sim = _pulse_box(sponge_width=20)
+    sim = _pulse_box(absorbing_layer_cells=20)
     sim.run(60)  # pulse radiated, front just reaching the layer
     e_ref = sim.energy()
     sim.run(740)  # wavefront crosses the absorbing layer
@@ -42,7 +44,7 @@ def test_sponge_absorbs_energy() -> None:
 
 
 def test_centered_pulse_stays_symmetric() -> None:
-    sim = _pulse_box(sponge_width=0)
+    sim = _pulse_box(absorbing_layer_cells=0)
     sim.run(500)
     # A centred source in a homogeneous rigid box has both mirror symmetries.
     np.testing.assert_allclose(sim.p, sim.p[::-1, :], atol=1e-12)
@@ -82,14 +84,26 @@ def test_scalar_c_requires_shape() -> None:
         ({"dx": np.nan}, "dx must be positive"),
         ({"damping": -1.0}, "damping must be non-negative"),
         ({"damping": np.inf}, "damping must be non-negative"),
-        ({"sponge_width": -1}, "sponge_width must be non-negative"),
-        ({"sponge_width": 10}, "sponge_width must be narrower"),
-        ({"sponge_width": 4, "sponge_reflection": 0.0}, "sponge_reflection"),
-        ({"sponge_width": 4, "sponge_reflection": 1.0}, "sponge_reflection"),
-        ({"sponge_width": 4, "sponge_sides": ("north",)}, "sponge sides"),
-        ({"sponge_width": 4, "sponge_sides": "north"}, "sponge sides"),
+        ({"absorbing_layer_cells": -1}, "absorbing_layer_cells must be non-negative"),
+        ({"absorbing_layer_cells": 10}, "absorbing_layer_cells must be fewer"),
+        (
+            {"absorbing_layer_cells": 4, "absorbing_layer_reflection": 0.0},
+            "absorbing_layer_reflection must lie strictly between 0 and 1",
+        ),
+        (
+            {"absorbing_layer_cells": 4, "absorbing_layer_reflection": 1.0},
+            "absorbing_layer_reflection must lie strictly between 0 and 1",
+        ),
+        (
+            {"absorbing_layer_cells": 4, "absorbing_sides": ("north",)},
+            "unknown absorbing sides",
+        ),
+        (
+            {"absorbing_layer_cells": 4, "absorbing_sides": "north"},
+            "unknown absorbing sides",
+        ),
         # A malformed grid shape used to be reported by somebody else: numpy,
-        # or the sponge_width guard for a zero-length side, or a message
+        # or the absorbing_layer_cells guard for a zero-length side, or a message
         # blaming c. A complex c or rho ran to completion on its real part.
         ({"shape": (0, 10)}, "shape must be a pair of positive integers"),
         ({"shape": (-1, 10)}, "shape must be a pair of positive integers"),
@@ -136,9 +150,11 @@ def test_a_whole_float_grid_shape_is_taken_as_its_counts() -> None:
     assert sim.c.shape == (10, 12)
 
 
-def test_sponge_sides_accepts_a_bare_string() -> None:
+def test_absorbing_sides_accepts_a_bare_string() -> None:
     # A single side name must mean that side, not its individual characters.
-    sim = FDTD2D(343.0, 0.05, shape=(20, 20), sponge_width=5, sponge_sides="left")
+    sim = FDTD2D(
+        343.0, 0.05, shape=(20, 20), absorbing_layer_cells=5, absorbing_sides="left"
+    )
     assert float(sim._decay_p[10, 0]) < 1.0  # left edge absorbs
     assert float(sim._decay_p[10, -1]) == 1.0  # right edge stays rigid
 

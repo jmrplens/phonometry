@@ -17,12 +17,22 @@ version from `main`, and the remedy for any older version is to upgrade.
 
 | Version | Supported |
 | :--- | :--- |
-| Latest 3.x release | Yes |
-| Earlier 3.x releases | Upgrade to the latest 3.x |
+| Latest 4.x release | Yes |
+| Earlier 4.x releases, and the 4.0.0rc1 pre-release | Upgrade to the latest 4.x |
+| 3.x | No: upgrade to the latest 4.x |
 | 2.x and earlier, including `PyOctaveBand` | No |
 
-The `PyOctaveBand` package on PyPI is a stub that only redirects to
-`phonometry` and receives no fixes.
+Staying on the latest 4.x is cheap by design. From 4.0.0 on, a name that a
+release renames keeps working, with a `DeprecationWarning` that names its
+replacement, and goes only in the next major release
+([rule A16](docs/contributing/api.md#a16) of the contributor guide). The step
+from 3.x to 4.x is the one that breaks, on purpose:
+[Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/start/upgrading/)
+maps every 3.x name to its new home, and it also lists what changed after
+4.0.0rc1.
+
+The `PyOctaveBand` package on PyPI is a stub that installs `phonometry` 3.x
+and receives no fixes. Install `phonometry` itself for a supported version.
 
 Supported interpreters and platforms are whatever the test matrix in
 [`.github/workflows/python-app.yml`](.github/workflows/python-app.yml)

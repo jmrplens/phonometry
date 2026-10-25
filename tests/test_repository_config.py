@@ -17,6 +17,7 @@ from a second copy of the claim.
 
 from __future__ import annotations
 
+import builtins
 import pathlib
 import re
 import shlex
@@ -289,44 +290,32 @@ def _category(warning_filter: str) -> str:
     return fields[2].strip() if len(fields) > 2 else ""
 
 
-def _import_roots(options: Mapping[str, str | Sequence[str]]) -> list[pathlib.Path]:
-    """The directories where an import can reach code of this repository.
+def _names_a_builtin_warning(category: str) -> bool:
+    """Whether pytest resolves ``category`` without importing anything.
 
-    ``src/``, which holds phonometry, and every ``pythonpath`` entry, which
-    pytest puts on ``sys.path``: ``tests/`` here, with helper modules such as
-    ``oracle_data.py`` and helper packages such as ``reference_data/``.
+    An empty category stands for :class:`Warning`, and a name without a dot is
+    looked up in :mod:`builtins`. pytest imports the module of any dotted name,
+    whether it lies in phonometry, in a helper on pytest's path, in a package
+    at the repository root or in a third-party package.
     """
-    entries = options.get("pythonpath", [])
-    paths = shlex.split(entries) if isinstance(entries, str) else list(entries)
-    return [_ROOT / "src", *(_ROOT / path for path in paths)]
+    if not category:
+        return True
+    found = None if "." in category else getattr(builtins, category, None)
+    return isinstance(found, type) and issubclass(found, Warning)
 
 
-def _imports_this_repository(category: str, roots: Sequence[pathlib.Path]) -> bool:
-    """Whether resolving ``category`` imports a module or package in ``roots``.
-
-    A name without a dot is a builtin class, which pytest takes from
-    :mod:`builtins` without importing anything.
-    """
-    package, dot, _ = category.partition(".")
-    if not dot or not package:
-        return False
-    return any(
-        (root / f"{package}.py").is_file() or (root / package).is_dir()
-        for root in roots
-    )
-
-
-def test_reading_the_pytest_configuration_imports_nothing_of_this_repository() -> None:
-    """A warning filter in the pytest configuration names no class of ours.
+def test_the_pytest_configuration_filters_warnings_by_builtin_class() -> None:
+    """Every warning filter in the pytest configuration names a builtin class.
 
     pytest imports the class a filter names while it reads its configuration,
-    before pytest-cov starts measuring. A filter that named
-    ``phonometry.filters.FilterBankWarning`` imported most of the package
-    there, and every line that runs at import time (the imports, the ``def``
-    lines, the module constants) was reported uncovered by Codecov and
-    SonarCloud alike. A builtin category with the message, or a
-    ``filterwarnings`` mark on the tests concerned, filters the same warning
-    without the import.
+    before pytest-cov starts measuring and before ``tests/conftest.py`` runs.
+    A filter that named ``phonometry.filters.FilterBankWarning`` imported most
+    of the package there, and every line that runs at import time (the
+    imports, the ``def`` lines, the module constants) was reported uncovered
+    by Codecov and SonarCloud alike. A builtin class imports nothing; a
+    warning its message cannot single out under one is filtered by a
+    ``filterwarnings`` mark on the tests concerned, which pytest resolves when
+    they run.
     """
     with (_ROOT / "pyproject.toml").open("rb") as handle:
         options = tomllib.load(handle)["tool"]["pytest"]["ini_options"]
@@ -334,10 +323,11 @@ def test_reading_the_pytest_configuration_imports_nothing_of_this_repository() -
     assert filters, (
         "the pytest configuration carries no warning filter; update this test"
     )
-    roots = _import_roots(options)
-    offending = [f for f in filters if _imports_this_repository(_category(f), roots)]
+    offending = [f for f in filters if not _names_a_builtin_warning(_category(f))]
     assert offending == [], (
-        f"these warning filters import our code before pytest-cov measures: {offending}"
+        f"these warning filters name a class pytest imports before coverage starts: "
+        f"{offending}; name the builtin class the warning derives from "
+        "(docs/contributing/tests.md#t25)"
     )
 
 
@@ -357,13 +347,15 @@ def test_reading_the_pytest_configuration_imports_nothing_of_this_repository() -
         ({"addopts": "-q\n-W error::phonometry.PhonometryWarning"}, True),
         ({"filterwarnings": ["ignore:Low sampling rate:UserWarning"]}, False),
         ({"filterwarnings": ["error:.*since phonometry.*:DeprecationWarning"]}, False),
-        ({"filterwarnings": ["ignore::numpy.exceptions.ComplexWarning"]}, False),
+        ({"filterwarnings": ["ignore::scripts.check_raises_blocks.X"]}, True),
+        ({"filterwarnings": ["ignore::numpy.exceptions.ComplexWarning"]}, True),
+        ({"filterwarnings": ["ignore::ValueError"]}, True),
+        ({"filterwarnings": ["ignore:Low sampling rate"]}, False),
     ],
 )
 def test_the_filter_reader_sees_every_form_pytest_accepts(
     options: Mapping[str, str | Sequence[str]], *, expected: bool
 ) -> None:
-    """A filter of ours is found in each place and spelling pytest reads."""
-    roots = _import_roots({"pythonpath": ["tests"], **options})
+    """A class pytest would import is found in each place and spelling it reads."""
     found = [_category(f) for f in _config_time_filters(options)]
-    assert any(_imports_this_repository(c, roots) for c in found) is expected
+    assert any(not _names_a_builtin_warning(c) for c in found) is expected

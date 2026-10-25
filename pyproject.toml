@@ -421,7 +421,7 @@ filterwarnings = [
     # the JIT off. FilterBankWarning is a UserWarning, and no other warning of
     # the library, its dependencies or the standard library starts with this
     # message, so the same warnings are ignored. tests/test_repository_config.py
-    # keeps the library's classes out of this list.
+    # holds every category in this list to a builtin class.
     "ignore:Low sampling rate:UserWarning",
     # 4.0 carries no deprecated names: the aliases the 3.x layout left behind
     # were removed with the shims that served them. The rule stays as a guard,

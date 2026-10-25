@@ -1114,18 +1114,29 @@ def _shard_text(title: str, pages: list[tuple[str, str]]) -> str:
     )
 
 
+#: An ATX H2 heading as CommonMark reads one: up to three spaces of indent, two
+#: hashes, then a space, a tab or the end of the line. Four spaces of indent
+#: make an indented code block, and ``##x`` is a paragraph, not a heading.
+_H2 = re.compile(r" {0,3}##(?:[ \t]|$)")
+
+
+def _is_h2(line: str) -> bool:
+    """Whether *line*, read outside code, is an H2 heading."""
+    return _H2.match(line) is not None
+
+
 def _sections(content: str) -> list[str]:
     """A page cut before each of its H2 headings.
 
-    A ``## `` line inside a code fence is code, a Python comment for one, and
-    never a cut; ``markdown_fences`` says which lines are code, as it does for
+    A heading is an H2 as CommonMark reads one (``_H2``). A ``## `` line
+    inside a code fence is code, a Python comment for one, and never a cut; ``markdown_fences`` says which lines are code, as it does for
     every script that reads a page. The first section is whatever comes before
     the first H2: the page title and its introduction.
     """
     lines = content.splitlines()
     sections: list[list[str]] = [[]]
     for line, code in zip(lines, code_lines(lines), strict=True):
-        if not code and line.startswith("## "):
+        if not code and _is_h2(line):
             sections.append([])
         sections[-1].append(line)
     return ["\n".join(part) for part in sections if any(map(str.strip, part))]
@@ -1193,13 +1204,13 @@ def _oversized_section(
         f"{shard_bytes:,} bytes, over the {SHARD_LIMIT_BYTES:,} byte budget of "
         "one fetch, and "
     )
-    if not any(section.startswith("## ") for section in sections):
+    if not any(_is_h2(section) for section in sections):
         return lead + "it has no H2 heading to cut it at. Divide it under H2 headings."
     name, largest = max(
         (
             (
-                section.splitlines()[0]
-                if section.startswith("## ")
+                section.splitlines()[0].strip()
+                if _is_h2(section)
                 else "the text before its first H2",
                 len(section.encode("utf-8")),
             )

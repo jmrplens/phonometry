@@ -167,6 +167,36 @@ def test_a_fenced_line_that_looks_like_an_h2_is_not_a_cut(
     assert _page_lines(parts[1])[0] == "## Second"
 
 
+def test_a_cut_falls_at_every_heading_commonmark_reads_as_an_h2() -> None:
+    """Indent of up to three spaces and a tab after the hashes still make an H2.
+
+    Four spaces of indent make an indented code block, three hashes an H3,
+    and ``##x`` with nothing between is a paragraph: none of them is a cut.
+    """
+    page = "\n".join(
+        [
+            "# Title",
+            "## Plain",
+            "  ## Indented by two",
+            "##\tAfter a tab",
+            "##",
+            "    ## Indented code",
+            "### An H3",
+            "##not a heading",
+        ]
+    )
+
+    heads = [section.splitlines()[0] for section in llms._sections(page)]
+
+    assert heads == [
+        "# Title",
+        "## Plain",
+        "  ## Indented by two",
+        "##\tAfter a tab",
+        "##",
+    ]
+
+
 def test_a_page_under_the_budget_stays_one_file(
     docs: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

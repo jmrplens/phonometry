@@ -1,11 +1,14 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Which file runs for a program the library does not ship, named by a bare name (private).
 
-Windows looks a bare name such as ``"ssh"`` up in the working directory
-before the directories ``PATH`` lists, and ``shutil.which`` does the same
-unless ``NoDefaultCurrentDirectoryInExePath`` is set, so an ``ssh.exe`` or an
-``ssh.bat`` left in a notebook's folder would run in place of the program the
-user installed. :func:`past_the_working_directory` passes over such a file.
+Windows looks a bare name such as ``"ffmpeg"`` or ``"ssh"`` up in the
+working directory before the directories ``PATH`` lists, and ``shutil.which``
+does the same unless ``NoDefaultCurrentDirectoryInExePath`` is set, so an
+``ssh.exe`` or an ``ffmpeg.bat`` left in a notebook's folder would run in place
+of the program the user installed. :func:`past_the_working_directory` passes
+over such a file. The video writer's ffmpeg lookup and the remote route's ssh
+lookup both go through it; each refuses a program found only there with an
+error of its own, and logs a file passed over to a logger of its own.
 """
 
 from __future__ import annotations

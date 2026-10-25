@@ -19,11 +19,16 @@ from __future__ import annotations
 
 import pathlib
 import re
+import shlex
 import sys
 import tomllib
+from typing import TYPE_CHECKING
 
 import pytest
 import yaml
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _SCRIPTS = str(_ROOT / "scripts")
@@ -251,3 +256,86 @@ def test_every_action_is_pinned_to_a_release_tag() -> None:
                 continue
             unpinned.append(f"{path.name}: {action}@{ref}")
     assert unpinned == []
+
+
+def _config_time_filters(options: Mapping[str, str | Sequence[str]]) -> list[str]:
+    """Every warning filter pytest resolves while it reads its configuration.
+
+    Those are the ``filterwarnings`` entries and the ``-W`` options in
+    ``addopts``; a ``filterwarnings`` mark is resolved when its test runs.
+    """
+    entries = options.get("filterwarnings", [])
+    filters = [entries] if isinstance(entries, str) else list(entries)
+    addopts = options.get("addopts", [])
+    args = shlex.split(addopts) if isinstance(addopts, str) else list(addopts)
+    for index, arg in enumerate(args):
+        if arg in {"-W", "--pythonwarnings"} and index + 1 < len(args):
+            filters.append(args[index + 1])
+        elif arg.startswith("--pythonwarnings="):
+            filters.append(arg.partition("=")[2])
+        elif arg.startswith("-W") and arg != "-W":
+            filters.append(arg[2:].removeprefix("="))
+    return filters
+
+
+def _category(warning_filter: str) -> str:
+    """The category field of ``action:message:category:module:lineno``."""
+    fields = warning_filter.split(":")
+    return fields[2].strip() if len(fields) > 2 else ""
+
+
+def _imports_this_repository(category: str) -> bool:
+    """Whether resolving ``category`` imports phonometry or a helper under tests/.
+
+    A name without a dot is a builtin class, which pytest takes from
+    :mod:`builtins` without importing anything.
+    """
+    package, dot, _ = category.partition(".")
+    if not dot:
+        return False
+    return package == "phonometry" or (_ROOT / "tests" / f"{package}.py").is_file()
+
+
+def test_reading_the_pytest_configuration_imports_nothing_of_this_repository() -> None:
+    """A warning filter in the pytest configuration names no class of ours.
+
+    pytest imports the class a filter names while it reads its configuration,
+    before pytest-cov starts measuring. A filter that named
+    ``phonometry.filters.FilterBankWarning`` imported most of the package
+    there, and every line that runs at import time (the imports, the ``def``
+    lines, the module constants) was reported uncovered by Codecov and
+    SonarCloud alike. A builtin category with the message, or a
+    ``filterwarnings`` mark on the tests concerned, filters the same warning
+    without the import.
+    """
+    with (_ROOT / "pyproject.toml").open("rb") as handle:
+        options = tomllib.load(handle)["tool"]["pytest"]["ini_options"]
+    filters = _config_time_filters(options)
+    assert filters, (
+        "the pytest configuration carries no warning filter; update this test"
+    )
+    offending = [f for f in filters if _imports_this_repository(_category(f))]
+    assert offending == [], (
+        f"these warning filters import our code before pytest-cov measures: {offending}"
+    )
+
+
+@pytest.mark.parametrize(
+    ("options", "expected"),
+    [
+        ({"filterwarnings": ["ignore:Low:phonometry.filters.FilterBankWarning"]}, True),
+        ({"filterwarnings": "ignore::oracle_data.OracleWarning"}, True),
+        ({"addopts": ["-W", "error::phonometry.PhonometryWarning"]}, True),
+        ({"addopts": "-q -Werror::phonometry.PhonometryWarning"}, True),
+        ({"addopts": ["--pythonwarnings=ignore::phonometry.PhonometryWarning"]}, True),
+        ({"filterwarnings": ["ignore:Low sampling rate:UserWarning"]}, False),
+        ({"filterwarnings": ["error:.*since phonometry.*:DeprecationWarning"]}, False),
+        ({"filterwarnings": ["ignore::numpy.exceptions.ComplexWarning"]}, False),
+    ],
+)
+def test_the_filter_reader_sees_every_form_pytest_accepts(
+    options: Mapping[str, str | Sequence[str]], *, expected: bool
+) -> None:
+    """A filter of ours is found in each place and spelling pytest reads."""
+    found = [_category(f) for f in _config_time_filters(options)]
+    assert any(_imports_this_repository(c) for c in found) is expected

@@ -205,9 +205,10 @@ def test_the_api_rows_print_the_code_s_defaults(
 def _quoted() -> tuple[str, ...]:
     """What the guide quotes the code saying: the VAAPI device, a log line, an error.
 
-    Each made by the code itself: the device from the arguments VAAPI gets,
-    the log line from the choice of an encoder (its trial stood in for), the
-    error from the refusal of a codec the container does not hold.
+    Each made by the code itself: the device from the arguments VAAPI gets
+    with the options' default device, the log line from the choice of an
+    encoder (its trial stood in for), the error from the refusal of a codec
+    the container does not hold.
     """
     (device,) = [
         argument
@@ -219,6 +220,7 @@ def _quoted() -> tuple[str, ...]:
             width=64,
             height=64,
             pad_color="#ffffff",
+            vaapi_device=io.VideoOptions().vaapi_device,
         ).before_input
         if argument.startswith("/")
     ]
@@ -234,7 +236,13 @@ def _logged(monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture) -
     ffmpeg = ve.FFmpeg(path="ffmpeg", version="", encoders=frozenset({"libx264"}))
     with caplog.at_level(logging.INFO, logger="phonometry.io"):
         ve.choose(
-            ffmpeg, encoder="cpu", codec="h264", container="mp4", width=64, height=64
+            ffmpeg,
+            encoder="cpu",
+            codec="h264",
+            container="mp4",
+            width=64,
+            height=64,
+            vaapi_device=io.VideoOptions().vaapi_device,
         )
     (record,) = caplog.records
     return f"{record.levelname}:{record.name}:{record.getMessage()}"

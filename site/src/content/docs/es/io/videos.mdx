@@ -229,11 +229,12 @@ toma `Animation.save`.
 `ffmpeg_options=` añade opciones de salida de ffmpeg, como textos separados,
 escritas después del preajuste del codificador y del formato de píxel, así que
 una opción que repitas prevalece sobre ellos. Las opciones propias del
-contenedor van después de las tuyas y se mantienen: el arranque de un MP4
-antes de terminar de descargarse, la etiqueta de un HEVC que eligió la
-biblioteca (con un `ffmpeg_encoder` tuyo, añade tú `-tag:v hvc1`) y el bucle
-sin fin de un GIF. `ffmpeg_encoder=` nombra un codificador de ffmpeg que se
-usa tal cual:
+contenedor van después de las tuyas y se mantienen: el `-movflags +faststart`
+de un MP4, que lleva el índice del archivo (su caja `moov`) al principio, para
+que un reproductor pueda empezar antes de terminar de descargarlo; la etiqueta
+de un HEVC que eligió la biblioteca (con un `ffmpeg_encoder` tuyo, añade tú
+`-tag:v hvc1`); y el bucle sin fin de un GIF. `ffmpeg_encoder=` nombra un
+codificador de ffmpeg que se usa tal cual:
 
 ```python
 raw = io.VideoOptions(
@@ -436,24 +437,37 @@ fotograma, ffmpeg o un codificador que escriba el vídeo a su tamaño rechaza
 el trabajo antes de su primer paso, y `simulation.ComputeRemoteError` dice
 por qué.
 
-Los bytes del nodo se comprueban antes de llegar al disco de esta máquina. No
-son más de los que caben en los fotogramas: dos bytes por píxel de cada
-fotograma, con sus lados rellenados hasta un número par, cuando deciden la
-codificación los preajustes de la biblioteca, u ocho cuando la deciden un
-`ffmpeg_encoder` o unas `ffmpeg_options` tuyos, más 1 MiB para el contenedor;
-un vídeo más grande se rechaza antes de leer un solo byte de él. Tienen que
-empezar como empieza un archivo del contenedor de la ruta, o no se conserva
-ninguno, y un vídeo vacío se rechaza. Se escriben en disco a medida que
-llegan, en un archivo parcial junto a la ruta, como en la sección 1, así que
-ese tope acota el disco, no la memoria, y el archivo ocupa el lugar de la ruta
-solo cuando se ha leído y comprobado toda la respuesta del nodo. Si algo
-detiene antes la ejecución, sea el nodo, la conexión o una interrupción, el
-archivo parcial se borra y la ruta se queda como estaba. Un archivo parcial
-que el sistema no deja borrar, como uno que un antivirus tiene abierto en
-Windows, se queda donde está, y la ejecución falla, o vuelve a NumPy, igual
-que sin él. Cada rechazo es un `simulation.ComputeRemoteError`; con
+Los bytes del nodo se comprueban antes de que el vídeo ocupe el lugar de la
+ruta en esta máquina. El tamaño que declara el nodo no pasa de lo que cabe en
+los fotogramas: dos bytes por píxel de cada fotograma, con sus lados
+rellenados hasta un número par, cuando deciden la codificación los preajustes
+de la biblioteca, u ocho cuando la deciden un `ffmpeg_encoder` o unas
+`ffmpeg_options` tuyos, más 1 MiB para el contenedor; un vídeo más grande se
+rechaza antes de leer un solo byte de él. Los primeros bytes tienen que
+empezar como empieza un archivo del contenedor de la ruta, o no se escribe
+ninguno, y un vídeo vacío se rechaza. A partir de ahí los bytes se escriben en
+disco a medida que llegan, en un archivo parcial junto a la ruta, como en la
+sección 1, así que ese tope acota el disco, no la memoria, y el archivo ocupa
+el lugar de la ruta solo cuando se ha leído y comprobado toda la respuesta del
+nodo. Si algo detiene antes la ejecución, sea el nodo, la conexión o una
+interrupción, el archivo parcial se borra y la ruta se queda como estaba. Un
+archivo parcial que el sistema no deja borrar, como uno que un antivirus tiene
+abierto en Windows, se queda donde está, y la ejecución falla, o vuelve a
+NumPy, igual que sin él. Cada rechazo de los bytes del nodo, y cada fallo del
+nodo o de la conexión, es un `simulation.ComputeRemoteError`; con
 `fallback=True` en la petición es en su lugar un
 `simulation.ComputeFallbackWarning`, y el vídeo se escribe aquí, con NumPy.
+
+Otra cosa es que el disco de esta máquina rechace el vídeo, y `fallback=True`
+no lo convierte en un `simulation.ComputeFallbackWarning`: es un
+`io.VideoEncoderError` que nombra la ruta y el motivo que da el sistema, como
+en la sección 1. Un directorio que no admite el archivo parcial lo lanza antes
+de que arranque ssh. Una escritura que el disco rechaza mientras llegan los
+bytes, o al cerrar el archivo (un disco lleno, una cuota agotada), también lo
+lanza: el archivo parcial se borra y la ruta se queda como estaba. Un vídeo
+terminado al que el sistema no deja ocupar el lugar de la ruta, como en
+Windows mientras un reproductor tiene abierto el archivo antiguo, se queda con
+su nombre de archivo parcial, y el `io.VideoEncoderError` dice dónde.
 
 `io.write_video` en sí solo se ejecuta en esta máquina: una animación
 dibujada aquí se codifica aquí, y solo las dos funciones de escritura de
@@ -477,7 +491,7 @@ y un GIF escrito en la CPU; tres preajustes de calidad y opciones de ffmpeg
 en bruto; y una simulación FDTD acústica o elástica escrita directamente en
 un vídeo, aquí o calculada, dibujada y codificada en un nodo, con la escala
 de color dada o encontrada en el dispositivo, y los bytes del nodo
-comprobados antes de escribirse.
+comprobados antes de que el vídeo ocupe el lugar de la ruta.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">

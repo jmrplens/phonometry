@@ -263,9 +263,14 @@ def _config_time_filters(options: Mapping[str, str | Sequence[str]]) -> list[str
 
     Those are the ``filterwarnings`` entries and the ``-W`` options in
     ``addopts``; a ``filterwarnings`` mark is resolved when its test runs.
+    A string is read as pytest reads it: ``filterwarnings`` one filter per
+    non-blank line, ``addopts`` split as a shell would split it.
     """
     entries = options.get("filterwarnings", [])
-    filters = [entries] if isinstance(entries, str) else list(entries)
+    if isinstance(entries, str):
+        filters = [line.strip() for line in entries.split("\n") if line.strip()]
+    else:
+        filters = list(entries)
     addopts = options.get("addopts", [])
     args = shlex.split(addopts) if isinstance(addopts, str) else list(addopts)
     for index, arg in enumerate(args):
@@ -284,16 +289,31 @@ def _category(warning_filter: str) -> str:
     return fields[2].strip() if len(fields) > 2 else ""
 
 
-def _imports_this_repository(category: str) -> bool:
-    """Whether resolving ``category`` imports phonometry or a helper under tests/.
+def _import_roots(options: Mapping[str, str | Sequence[str]]) -> list[pathlib.Path]:
+    """The directories where an import can reach code of this repository.
+
+    ``src/``, which holds phonometry, and every ``pythonpath`` entry, which
+    pytest puts on ``sys.path``: ``tests/`` here, with helper modules such as
+    ``oracle_data.py`` and helper packages such as ``reference_data/``.
+    """
+    entries = options.get("pythonpath", [])
+    paths = shlex.split(entries) if isinstance(entries, str) else list(entries)
+    return [_ROOT / "src", *(_ROOT / path for path in paths)]
+
+
+def _imports_this_repository(category: str, roots: Sequence[pathlib.Path]) -> bool:
+    """Whether resolving ``category`` imports a module or package in ``roots``.
 
     A name without a dot is a builtin class, which pytest takes from
     :mod:`builtins` without importing anything.
     """
     package, dot, _ = category.partition(".")
-    if not dot:
+    if not dot or not package:
         return False
-    return package == "phonometry" or (_ROOT / "tests" / f"{package}.py").is_file()
+    return any(
+        (root / f"{package}.py").is_file() or (root / package).is_dir()
+        for root in roots
+    )
 
 
 def test_reading_the_pytest_configuration_imports_nothing_of_this_repository() -> None:
@@ -314,7 +334,8 @@ def test_reading_the_pytest_configuration_imports_nothing_of_this_repository() -
     assert filters, (
         "the pytest configuration carries no warning filter; update this test"
     )
-    offending = [f for f in filters if _imports_this_repository(_category(f))]
+    roots = _import_roots(options)
+    offending = [f for f in filters if _imports_this_repository(_category(f), roots)]
     assert offending == [], (
         f"these warning filters import our code before pytest-cov measures: {offending}"
     )
@@ -328,6 +349,12 @@ def test_reading_the_pytest_configuration_imports_nothing_of_this_repository() -
         ({"addopts": ["-W", "error::phonometry.PhonometryWarning"]}, True),
         ({"addopts": "-q -Werror::phonometry.PhonometryWarning"}, True),
         ({"addopts": ["--pythonwarnings=ignore::phonometry.PhonometryWarning"]}, True),
+        ({"filterwarnings": "ignore::reference_data.room.RoomWarning"}, True),
+        (
+            {"filterwarnings": "ignore::UserWarning\nignore::phonometry.X"},
+            True,
+        ),
+        ({"addopts": "-q\n-W error::phonometry.PhonometryWarning"}, True),
         ({"filterwarnings": ["ignore:Low sampling rate:UserWarning"]}, False),
         ({"filterwarnings": ["error:.*since phonometry.*:DeprecationWarning"]}, False),
         ({"filterwarnings": ["ignore::numpy.exceptions.ComplexWarning"]}, False),
@@ -337,5 +364,6 @@ def test_the_filter_reader_sees_every_form_pytest_accepts(
     options: Mapping[str, str | Sequence[str]], *, expected: bool
 ) -> None:
     """A filter of ours is found in each place and spelling pytest reads."""
+    roots = _import_roots({"pythonpath": ["tests"], **options})
     found = [_category(f) for f in _config_time_filters(options)]
-    assert any(_imports_this_repository(c) for c in found) is expected
+    assert any(_imports_this_repository(c, roots) for c in found) is expected

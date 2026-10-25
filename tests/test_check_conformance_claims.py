@@ -7,8 +7,8 @@ count say the same thing. Two properties matter more than the happy path:
 
 * it must move the number wherever it is quoted, in either language, in
   markdown prose, in the root ``README.md`` and the ``README_PYPI.md``
-  published to PyPI, in MDX frontmatter and in the ``.zenodo.json``
-  description;
+  published to PyPI, in the README the PyOctaveBand stub publishes there, in
+  MDX frontmatter and in the ``.zenodo.json`` description;
 * it must move *only* those numbers. A blind ``str.replace`` of the old count
   for the new one has already corrupted an unrelated figure in this repository
   (``replace("303", "316")`` also hit "303 operating days"), so the writer
@@ -96,6 +96,13 @@ def corpus(tmp_path: pathlib.Path) -> pathlib.Path:
         f"The report runs {OLD_TOTAL} conformance checks across {OLD_DOMAINS} "
         f"domains and {OLD_STANDARDS} standards, each pinning a value.\n",
     )
+    # The other page PyPI freezes at upload: the transition stub's, which
+    # sells the project on the same counts.
+    _write(
+        root / "stub" / "README.md",
+        f"The package now runs {OLD_TOTAL} conformance checks across "
+        f"{OLD_DOMAINS} domains and {OLD_STANDARDS} standards.\n" + DECOY_LINES,
+    )
     _write(
         root / "docs" / "start" / "getting-started.md",
         f"- [Conformance report](CONFORMANCE.md): the value of all "
@@ -142,12 +149,11 @@ def corpus(tmp_path: pathlib.Path) -> pathlib.Path:
         f"- a local plan quoting {OLD_TOTAL} conformance checks.\n",
     )
     # The root markdown is globbed, not walked: a README one level down belongs
-    # to something else (the compatibility stub keeps its own, pinned to the
-    # release it describes) and must not be rewritten from this repository's
-    # report.
+    # to something else (the notes on the oracle data, say) and must not be
+    # rewritten from this repository's report. The stub's is named, not walked.
     _write(
-        root / "stub" / "README.md",
-        f"- the stub quotes {OLD_TOTAL} conformance checks of its own.\n",
+        root / "tests" / "data" / "README.md",
+        f"- the oracle notes quote {OLD_TOTAL} conformance checks of their own.\n",
     )
     return root
 
@@ -165,6 +171,7 @@ def test_check_reports_every_stale_claim(
     for quoted in (
         "README.md",
         "README_PYPI.md",
+        "stub/README.md",
         "docs/start/getting-started.md",
         "site/src/content/docs/index.mdx",
         "site/src/content/docs/es/index.mdx",
@@ -183,7 +190,7 @@ def test_write_moves_every_quoted_count(
     assert _run(corpus, "--write") == 0
     assert "Rewrote" in capsys.readouterr().out
 
-    for readme in ("README.md", "README_PYPI.md"):
+    for readme in ("README.md", "README_PYPI.md", "stub/README.md"):
         text = (corpus / readme).read_text(encoding="utf8")
         assert (
             f"{TOTAL} conformance checks across {DOMAINS} domains and "
@@ -235,7 +242,8 @@ def test_write_leaves_the_decoys_alone(corpus: pathlib.Path) -> None:
     assert started.endswith(DECOY_LINES)
     assert f"one for each of the {OLD_TOTAL} rows of Annex {OLD_DOMAINS}." in started
 
-    assert (corpus / "README.md").read_text(encoding="utf8").endswith(DECOY_LINES)
+    for readme in ("README.md", "stub/README.md"):
+        assert (corpus / readme).read_text(encoding="utf8").endswith(DECOY_LINES)
 
     english = (corpus / "site/src/content/docs/index.mdx").read_text(encoding="utf8")
     assert f"measured over {OLD_DOMAINS} weeks" in english
@@ -260,16 +268,16 @@ def test_write_is_idempotent(corpus: pathlib.Path) -> None:
 def test_write_touches_only_the_files_that_quote_a_count(corpus: pathlib.Path) -> None:
     """Excluded and count-free files come out byte-identical.
 
-    ``stub/README.md`` is in the list for the same reason the root markdown is
-    globbed rather than walked: it is a different package's page, describing a
-    different release, and this report says nothing about it.
+    ``tests/data/README.md`` is in the list for the same reason the root
+    markdown is globbed rather than walked: it describes something else, and
+    this report says nothing about it.
     """
     untouched = [
         corpus / "CHANGELOG.md",
         corpus / "docs" / "ERRATA.md",
         corpus / "docs" / "superpowers" / "notes.md",
         corpus / "docs" / "conformance.json",
-        corpus / "stub" / "README.md",
+        corpus / "tests" / "data" / "README.md",
     ]
     before = {p: p.read_bytes() for p in untouched}
     assert _run(corpus, "--write") == 0

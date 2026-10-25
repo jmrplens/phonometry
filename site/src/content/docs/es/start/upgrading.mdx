@@ -10,8 +10,9 @@ de en una plana. Así que el trabajo es sobre todo un barrido de imports, y esta
 página es sobre todo un mapa.
 
 Con las dos primeras secciones arreglas los imports. La tercera léela aunque
-tengas prisa, porque en cuatro sitios el arreglo evidente es el equivocado, y
-dos de esos cuatro cambian un número sin levantar nada.
+tengas prisa, porque en cuatro sitios, uno de ellos solo para el código escrito
+contra la 4.0.0rc1, el arreglo evidente es el equivocado, y tres de esos cuatro
+cambian un número sin levantar nada.
 
 ## La regla única: los imports bajan un nivel
 
@@ -163,15 +164,30 @@ salta nada.
 | --- | --- |
 | `GasStream(inlet_temperature_k=T_kelvin, ...)` | `GasStream(inlet_temperature_c=T_kelvin - 273.15, ...)` |
 
-### `scattering_diffusion.speed_of_sound` tomaba Celsius, y su sustituto responde distinto
+### `speed_of_sound` es `speed_of_sound_iso17497`, no `fluids.air()`
 
-El auxiliar de ISO 17497-1 que se llamaba igual tomaba grados Celsius, así que
-ahí no hay conversión que hacer. La trampa es el sustituto. `fluids.air()` usa
-un modelo del medio más completo que aquella fórmula de una línea de la
-ISO 17497-1, y a 20 °C responde 343,99 m/s donde el auxiliar viejo respondía
-343,20 m/s. Es poco, y no es nada despreciable si estás reproduciendo una
-medición hecha con el número antiguo. El apartado 8 de la ISO 17497-1 imprime
-la fórmula si necesitas ese apartado exacto.
+El `speed_of_sound(temperature)` de la 3.3.0, en el primer nivel y en
+`materials.scattering_diffusion`, es la fórmula de una línea de la
+ISO 17497-1, y en la 4.0 es `materials.speed_of_sound_iso17497`: la misma
+fórmula y el mismo número, con la temperatura, todavía en grados Celsius,
+escrita por su nombre. La trampa es el otro candidato. `fluids.air()` es de
+donde el resto de la 4.0 lee la velocidad del sonido del aire, así que parece
+la casa nueva de una función que la devolvía, pero calcula aire húmedo por el
+Anexo F de IEC 61094-2: a 20 °C responde 343,99 m/s donde la fórmula de la
+ISO 17497-1 responde 343,20 m/s, y no salta nada. Es poco, y no es nada
+despreciable si estás reproduciendo una medición hecha con el número antiguo.
+
+```python
+from phonometry import fluids, materials
+
+print(round(float(materials.speed_of_sound_iso17497(temperature_c=20.0)), 2))    # 343.2
+air = fluids.air(temperature_c=20.0, relative_humidity_percent=50.0, static_pressure_pa=101_325.0)
+print(round(air.speed_of_sound, 2))                                              # 343.99
+```
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `speed_of_sound(T_celsius)` | `materials.speed_of_sound_iso17497(temperature_c=T_celsius)` |
 
 ### El campo `tl` de un resultado submarino es `pl`
 
@@ -204,9 +220,9 @@ desaparecido del todo:
 | `rotorcraft_noise.rotorcraft_noise_contour(...)` | lo mismo, con `RotorcraftAtmosphere` |
 | `outdoor_propagation.predicted_receiver_level(..., humidity=70.0)` | `predicted_receiver_level(..., atmosphere=AtmosphericConditions(relative_humidity_percent=70.0))` |
 
-Las sustituciones punto a punto del rotorcraft fueron por el mismo camino:
-`bank_angle` y `path_angle` son ahora
-`RotorcraftTrackState(bank_angle_deg=..., path_angle_deg=...)`.
+Las demás opciones de estas funciones también pasaron a registros, entre ellas
+las sustituciones punto a punto del rotorcraft, y la sección siguiente las
+recorre.
 
 ```python
 from phonometry.aircraft.airport_noise import AerodromeAtmosphere
@@ -214,6 +230,121 @@ from phonometry.aircraft.airport_noise import AerodromeAtmosphere
 atmosphere = AerodromeAtmosphere(temperature_c=15.0, static_pressure_kpa=101.325)
 print(atmosphere.temperature_c, atmosphere.static_pressure_kpa)
 ```
+
+## Las firmas más largas toman sus opciones en registros
+
+Diez firmas tomaban más de trece parámetros cada una, y en la 4.0 las opciones
+que van juntas son un registro. Una palabra clave de la 3.3.0 entre ellas no se
+renombró, sino que desapareció, así que una llamada que la pasa lanza
+`TypeError`: construye el registro al que fue la palabra clave y pasa ese. Cada
+campo de un registro se escribe por su nombre, y un campo con valor por defecto
+tiene el que tenía su palabra clave, así que un registro lleva solo lo que
+cambias. Las atmósferas de
+la sección anterior son registros de la misma clase; estos son los demás:
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `filter_type=`, `ripple=` y `attenuation=` en `octave_filter` y `OctaveFilterBank`, y `resample=` en `OctaveFilterBank` | `design=filters.FilterDesign(filter_type=..., ripple=..., attenuation=..., resample=...)` |
+| `calibration_factor=` y `dbfs=` en `octave_filter` y `OctaveFilterBank` | `calibration=filters.LevelCalibration(factor=..., dbfs=...)` |
+| `show=` y `plot_file=` en `octave_filter` y `OctaveFilterBank` | `response_plot=filters.ResponsePlot(show=..., file=...)` |
+| `stateful=` y `steady_ic=` en `OctaveFilterBank` | `block_processing=filters.BlockProcessing(stateful=..., steady_ic=...)` |
+| `polar=`, `polar_frequency=` y `directivity_index_db=` en `microphone_characteristics` | `directivity=electroacoustics.MicrophoneDirectivity(polar=..., frequency=..., index=...)` |
+| `noise_voltage=`, `equivalent_noise_level_db=`, `noise_weighting=` y `noise_spectrum=` en `microphone_characteristics` | `noise=electroacoustics.MicrophoneNoise(voltage_v=..., equivalent_level=..., weighting=..., spectrum=...)`, cuya ponderación es `"A"` o `"468"`, como dice la tabla de una grafía por concepto |
+| `max_spl_db=`, `max_spl_thd_percent=` y `distortion=` en `microphone_characteristics` | `overload=electroacoustics.MicrophoneOverload(spl=..., thd_percent=..., distortion=...)` |
+| `rated_impedance=`, `minimum_load_impedance=`, `powering=` y `supply_current_ma=` en `microphone_characteristics` | `electrical=electroacoustics.MicrophoneElectrical(rated_impedance_ohm=..., min_load_impedance_ohm=..., powering=..., supply_current_ma=...)` |
+| `directivity=` (un `RadiatingPistonResult`), `polar=`, `polar_frequency=` y `directivity_index_db=` en `loudspeaker_characteristics` | `directivity=electroacoustics.LoudspeakerDirectivity(piston=..., polar=..., frequency=..., index=...)` |
+| `rated_frequency_range=`, `rated_noise_power=`, `rated_sinusoidal_power=` y `resonance_frequency=` en `loudspeaker_characteristics` | `ratings=electroacoustics.LoudspeakerRatings(frequency_range=..., noise_power=..., sinusoidal_power=..., resonance_frequency=...)` |
+| `absorption_area=`, `reverberation_time=`, `volume=`, `mean_absorption_coefficient=` y `room_surface=` en `sound_power_pressure` | `room=emission.RoomEnvironment(...)`, con los mismos cinco nombres |
+| `distance`, `source_height` y `receiver_height` por posición, y `projected_distance=`, en `predicted_receiver_level` | `environment.PropagationGeometry(distance=..., source_height_m=..., receiver_height_m=..., projected_distance=...)` como segundo argumento, tras el nivel de potencia acústica |
+| `ground_source=`, `ground_middle=` y `ground_receiver=` en `predicted_receiver_level` | `ground=environment.GroundFactors(source=..., middle=..., receiver=...)` |
+| `directivity_index=` y `d_omega=` en `predicted_receiver_level` | `directivity=environment.DirectivityCorrection(index=..., d_omega=...)` |
+| `ground_roll=`, `landing_roll=` y `bank=` en `aircraft.event_level` y `noise_contour` | `segments=aircraft.FlightSegmentState(ground_roll=..., landing_roll=..., bank=...)` |
+| `atmospheric_method=` en `rotorcraft_event_level` y `rotorcraft_noise_contour` | el `atmospheric_method` de su `RotorcraftAtmosphere` |
+| `receiver_height=`, `ground_elevation=`, `flow_resistivity=`, `terrain=` y `terrain_resolution=` en esas mismas dos | `ground=aircraft.RotorcraftGround(receiver_height_m=..., ground_elevation=..., flow_resistivity=..., terrain=..., terrain_resolution=...)` |
+| `airspeed=`, `path_angle=`, `heading=` y `bank_angle=` en esas mismas dos | `track_state=aircraft.RotorcraftTrackState(airspeed=..., path_angle_deg=..., heading=..., bank_angle_deg=...)` |
+| `scaling_factor=` y `triangles=` en esas mismas dos | `interpolation=aircraft.FlightConditionInterpolation(scaling_factor=..., triangles=...)` |
+
+`OctaveFilterBank(48000, 3)` se lee como antes, porque los cuatro argumentos
+que se escriben por posición conservaron su sitio; en `octave_filter`, toda
+opción que va detrás de `limits` se escribe por su nombre.
+
+```python
+import numpy as np
+
+from phonometry import filters
+
+x = np.random.default_rng(0).standard_normal(48_000)
+try:
+    filters.octave_filter(x, 48_000, calibration_factor=2.0)
+except TypeError as error:
+    print(type(error).__name__)
+# TypeError
+result = filters.octave_filter(x, 48_000, calibration=filters.LevelCalibration(factor=2.0))
+print(len(result.frequencies))
+# 11
+```
+
+## El aire de un modelo es un único `fluid=`
+
+Veintidós funciones de la 3.3.0 tomaban como números sueltos el aire en el que
+calculan: una velocidad del sonido y una densidad, en los modelos viscotérmicos
+una viscosidad, un número de Prandtl, una relación de calores específicos y una
+presión estática, y en la corrección térmica de la ISO 9053-2 un calor
+específico y una conductividad térmica, cada uno con su propio valor por
+defecto.
+En la 4.0 estas veintidós toman un único `fluid=`, un `fluids.Fluid` que lleva
+todas las propiedades que lee su modelo, y sus palabras clave sueltas han
+desaparecido, así que una llamada que pasaba una lanza `TypeError`. Otras funciones
+que toman una velocidad del sonido o una densidad, entre ellas
+`expansion_chamber`, conservan sus propias palabras clave. Si se
+omite, `fluid=` es `materials.ABSORBER_AIR`, que guarda los valores por defecto
+de la 3.3.0: 343 m/s, 1,205 kg/m³, 1,84·10⁻⁵ Pa s, un número de Prandtl de
+0,71, una relación de calores específicos de 1,4 y 101,325 kPa. Una llamada que
+nunca pasó el aire da el número que daba.
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `speed_of_sound=` y `air_density=` en `delany_bazley`, `miki`, `membrane_resonance_frequency`, `mass_law_transmission_loss`, `single_panel_transmission_loss`, `double_wall_transmission_loss`, `mass_spring_mass_resonance`, `ground_effect` y `barrier_insertion_loss` | `fluid=` |
+| `speed_of_sound=`, `air_density=` y `viscosity=` en `layered_absorber` y `diffuse_field_absorption`; `air_density=` y `viscosity=` en `perforated_plate_impedance` y `microperforated_plate_impedance` | `fluid=` |
+| `speed_of_sound=`, `air_density=`, `viscosity=`, `prandtl_number=`, `heat_capacity_ratio=` y `atmospheric_pressure=` en `johnson_champoux_allard`, `slit_helmholtz_absorber` y `critical_coupling_design`, y los mismos salvo `speed_of_sound=` en `helmholtz_resonator_impedance`, `slit_effective_properties` y `rectangular_duct_properties` | `fluid=`, cuyo `static_pressure_pa` es la presión, en pascales como antes |
+| `air_density=` en `atmospheric_parabolic_equation` | `fluid=` |
+| `speed_of_sound=`, `air_density=`, `specific_heat_ratio=`, `specific_heat_cp=` y `thermal_conductivity=` en `effective_kappa`, y los mismos salvo `specific_heat_ratio=` en `thermal_boundary_layer_thickness` | `fluid=`, con otro valor por defecto, más abajo |
+
+Pasa como un `Fluid` el aire al que te refieres. `fluids.air()` calcula uno a
+una temperatura, una humedad y una presión, y un `Fluid` construido a mano
+lleva los números que imprime un libro. Un modelo que lee una propiedad que el
+fluido no lleva lanza `fluids.FluidPropertyUnavailableError`, nombrándola.
+
+```python
+import numpy as np
+
+from phonometry import fluids, materials
+
+f = np.array([250.0, 1000.0])
+print(materials.delany_bazley(f, 20_000.0).characteristic_impedance.round(1))
+# [971.5-775.5j 609.6-281.1j]
+book_air = fluids.Fluid(
+    temperature_c=20.0,
+    static_pressure_pa=101_325.0,
+    composition={},
+    model="el aire del libro que se reproduce",
+    validity="",
+    properties={"speed_of_sound": 340.0, "density": 1.21},
+)
+# delany_bazley(f, 20000.0, speed_of_sound=340.0, air_density=1.21) en la 3.3.0
+print(materials.delany_bazley(f, 20_000.0, fluid=book_air).characteristic_impedance.round(1))
+# [965.3-769.6j 606.1-279.j ]
+```
+
+Dos de las veintidós toman otro aire por defecto. `effective_kappa` y
+`thermal_boundary_layer_thickness`, la corrección térmica de la ISO 9053-2,
+tomaban por defecto en la 3.3.0 los cinco valores que imprime el Anexo A.3 de
+la ISO 9053-2, dos de los cuales no son del aire que el anexo dice usar
+([registro de erratas](/phonometry/es/reference/errata/)). En la 4.0 toman ese
+aire, el del Anexo F de IEC 61094-2 en el estado del Anexo A.3: 23 °C,
+101,325 kPa y un 50 % de humedad relativa. La corrección se mueve en su quinta
+cifra, `effective_kappa(0.01, 0.001, 250.0)` es 1,400297 donde era 1,400339, y
+los resultados impresos del Anexo A.3 siguen saliendo.
 
 ## Un parámetro que nombra una magnitud lleva su unidad
 
@@ -549,6 +680,43 @@ longitud de onda de cada tono, `wavelength=lam`: es una longitud de la misma
 forma que la distancia al primer mínimo que va a su lado, y las dos se ligan en
 cualquier orden.
 
+Una función de señal toma por posición las muestras y su frecuencia de
+muestreo, y por su nombre la magnitud que dice lo que hace con ellas. Estas
+tomaban esa magnitud por posición en la 3.3.0, incluso cuando es una elección,
+como el `name` de la ponderación de `apply_weighting`, o un recuento, como un
+`order`. La frecuencia de muestreo puede omitirse ahora cuando las muestras son
+un `Signal`, que lleva la suya:
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `linkwitz_riley(x, fs, 1000.0, 4)` | `filters.linkwitz_riley(x, fs, frequency=1000.0, order=4)`, con el `frequency` que era `freq` |
+| `parametric_eq(x, fs, sections)` | `filters.parametric_eq(x, fs, sections=sections)` |
+| `zoom_fft(x, fs, 900.0, 1100.0)` | `signals.zoom_fft(x, fs, f_min=900.0, f_max=1100.0)` |
+| `lifter(x, fs, 0.002)` | `signals.lifter(x, fs, cutoff=0.002)` |
+| `time_synchronous_average(x, fs, 0.05)` | `signals.time_synchronous_average(x, fs, period_s=0.05)`, el periodo en segundos, como dice ahora su nombre |
+| `resample_signal(x, fs, 32000)` | `signals.resample_signal(x, fs, fs_new=32000)` |
+| `harmonic_distortion(x, fs, 1000.0, 2)` | `electroacoustics.harmonic_distortion(x, fs, fundamental=1000.0, order=2)` |
+| `difference_frequency_distortion(x, fs, 1000.0, 1200.0)` | `electroacoustics.difference_frequency_distortion(x, fs, f1=1000.0, f2=1200.0)` |
+| `modulation_distortion(x, fs, 60.0, 7000.0)` | `electroacoustics.modulation_distortion(x, fs, f_low=60.0, f_high=7000.0)` |
+| `swept_sine_distortion(recorded, fs, 20.0, 20000.0, 2.0)` | `electroacoustics.swept_sine_distortion(recorded, fs, f1=20.0, f2=20000.0, duration_s=2.0)` |
+| `apply_weighting(x, fs, "Wk")` | `vibration.apply_weighting(x, fs, name="Wk")` |
+| `sound_intensity(p1, p2, fs, 0.012)` | `emission.sound_intensity(p1, p2, fs, spacing_m=0.012)` |
+
+```python
+import numpy as np
+
+from phonometry import io, signals
+
+fs = 8000
+x = io.Signal(np.sin(2 * np.pi * 1000.0 * np.arange(fs) / fs), fs)
+try:
+    signals.zoom_fft(x, fs, 900.0, 1100.0)
+except TypeError as error:
+    print(error)      # zoom_fft() takes from 1 to 2 positional arguments but 4 were given
+zoom = signals.zoom_fft(x, f_min=900.0, f_max=1100.0)
+print(zoom.frequencies[np.argmax(zoom.amplitude)])      # 1000.0
+```
+
 Un registro que construyes y entregas a una función se escribe por nombre del
 mismo modo: `aircraft.RotorcraftHemisphere(freqs, az, po, levels)` es
 `RotorcraftHemisphere(frequencies=freqs, azimuth_deg=az, polar_deg=po,
@@ -617,7 +785,7 @@ muestreo es `fs` en todas las funciones.
 | `omc_uncertainty=` en `sound_power_pressure` y `sound_energy_pressure`, `sigma_omc=` en `sound_power_anechoic`, `precision_uncertainty`, `sound_power_in_situ` y `sound_energy_in_situ`, `.sigma_omc` en `InSituSoundPowerResult` | `sigma_omc_db` |
 | `level=`, `measured_level=`, `operational_level=` en `sti_from_impulse_response`, `stipa`, `sti_adjusted_for_levels` y `STIResult.adjusted_for_levels` | `levels=`, `measured_levels=`, `operational_levels=` |
 | `.passed` en `AircraftSystemComplianceResult`, `QuasiPeakDynamicsResult`, `HeavyImpactSourceCheck`, `RigidMassCalibrationResult` | `.passes`, como en todos los demás verificadores |
-| `MicrophoneNoise(weighting="CCIR")` | `MicrophoneNoise(weighting="468")`, la grafía que usan `weighting_filter` y `weighted_thd` para la curva UIT-R BS.468-4 |
+| `microphone_characteristics(noise_weighting="CCIR")` (3.3.0, donde la ponderación era una etiqueta libre) y `MicrophoneNoise(weighting="CCIR")` (4.0.0rc1) | `noise=MicrophoneNoise(weighting="468")`, la grafía que usan `weighting_filter` y `weighted_thd` para la curva UIT-R BS.468-4. La ponderación es `"A"` o `"468"`, y `microphone_characteristics` rechaza cualquier otra con `ValueError` |
 | `atmospheric_pressure_kpa=` en las funciones de la ISO 9613-1, `atmospheric_absorption`, `outdoor_propagation_attenuation`, `AtmosphericAttenuation`, `AtmosphericConditions`, `sae_band_attenuation` (ahora `band_attenuation_arp5534`), `AircraftBandAttenuation`, `AerodromeAtmosphere`, `RotorcraftAtmosphere`, `impedance_adjustment`, `atmospheric_adjustment`, los métodos de `AnpAircraft` y `AnpDatabase`, `air_density_iso10534` y `air_density_astm` (ahora `air_density_astm_e2611`); `atmospheric_pressure_pa=` en `enclosed_gas_stiffness` y `floating_floor_resonance`; `barometric_pressure_pa=` en `sound_power_intensity_precision`; `absolute_pressure_pa=` en `sea_water_density` | `static_pressure_kpa=` o `static_pressure_pa=`, en la misma unidad |
 | `ambient_pressure_pa=` en `normal_air_density` | `atmospheric_pressure_pa=`, la atmósfera exterior junto a la presión estática manométrica del conducto |
 | `environmental_ratio_from_absorption(absorption_area_m2=)`, `running_rms_decay_time(integration_time_s=)` y `verify_running_rms_decay(integration_time_s=)` | `absorption_area=` e `integration_time=`, la grafía del resto de sus paquetes |
@@ -848,6 +1016,7 @@ y la probabilidad de cobertura de una incertidumbre expandida se escribe
 | `materials.PUBLISHED_AIR` | `materials.ABSORBER_AIR`, el aire seco a 20 °C que los modelos de absorbentes usan por defecto, con los mismos valores. El prefijo `PUBLISHED_` es de los catálogos, y el nombre ya no atribuye ese aire al modelo de Johnson-Champoux-Allard, cuyo libro imprime otro |
 | `metrology.combine_uncertainty(model, quantities)` | `metrology.uncertainty_propagation(model, quantities)`, con los mismos argumentos |
 | `metrology.expanded_uncertainty(result, 0.95)` | `result.expanded(0.95)`, el método del resultado que recibía |
+| `environmental.expanded_uncertainty(u, confidence=0.95)`, la de la ISO 1996-2, que el primer nivel de la 3.3.0 publicaba como `environmental_expanded_uncertainty` | `environment.environmental_expanded_uncertainty(u, coverage=0.95)`, con el mismo número: 2,4 dB para una `u` de 1,2 dB. El `expanded_uncertainty` de primer nivel de la 3.3.0 era otra función, la de la ISO 12999-1, que da 2,352 dB para la misma `u`; la tabla de los nombres que ya no están dice adónde fue |
 | `coverage_factor(0.95, one_sided)` en el primer nivel de la 3.3.0 | `building.insulation_coverage_factor(0.95, one_sided=...)`, el factor de la ISO 12999-1 al que remitía. `metrology.coverage_factor(coverage, dof)` es otra función, el factor GUM de la t de Student, que da 1,96 a dos decimales para el 95 % e infinitos grados de libertad y no tiene forma unilateral |
 
 Los nombres de la raíz de la 3.3.0 que esto renombra o retira (`combine_uncertainties`,
@@ -1075,19 +1244,24 @@ dibujo se lee como el resultado:
 
 ## Los veredictos son objetos de resultado, no diccionarios
 
-Las cinco funciones `verify_*` devolvían `dict[str, Any]` y ahora devuelven una
-dataclase congelada, como cualquier otro resultado de la biblioteca. Dos
-envoltorios públicos que existían sólo para empaquetar ese diccionario se
-fueron con el cambio, ya que el verificador devuelve ahora el objeto él mismo.
+Las tres funciones `verify_*` de la 3.3.0 devolvían `dict[str, Any]` y ahora
+devuelven una dataclase congelada, como cualquier otro resultado de la
+biblioteca. `filter_class_compliance`, el envoltorio público que existía solo
+para empaquetar el veredicto del filtro, se fue con el cambio, ya que el
+verificador devuelve ahora el objeto él mismo. Cada clave del diccionario es un
+atributo del mismo nombre, salvo `passed`, que es `passes`, y todo argumento
+que va detrás de aquel sobre el que trata la llamada se escribe por su nombre.
 
 | 3.3.0 | 4.0 |
 | --- | --- |
-| `verify_filter_class(bank)["overall_class"]` | `verify_filter_class(bank).overall_class` |
-| `verify_weighting_class(wf)["overall_class"]` | `verify_weighting_class(wf).overall_class` |
-| `verify_intensity_class(...)["bands"]` | `verify_intensity_class(...).bands` |
-| `verify_quasi_peak_dynamics()["passed"]` | `verify_quasi_peak_dynamics().passes` |
-| `verify_aircraft_noise_system(...)["passed"]` | `verify_aircraft_noise_system(...).passes` |
-| `filter_class_compliance(bank)` | `verify_filter_class(bank)`, que devuelve el mismo `FilterComplianceResult` |
+| `verify_filter_class(bank)["overall_class"]` | `filters.verify_filter_class(bank).overall_class` |
+| `verify_filter_class(bank, 4096)` | `filters.verify_filter_class(bank, n_points=4096)` |
+| `verify_weighting_class(wf)["overall_class"]` | `filters.verify_weighting_class(wf).overall_class` |
+| `verify_aircraft_noise_system(...)["passed"]` | `aircraft.verify_aircraft_noise_system(...).passes` |
+| `filter_class_compliance(bank)` | `filters.verify_filter_class(bank)`, que devuelve el mismo `FilterComplianceResult` |
+
+`verify_intensity_class` y `verify_quasi_peak_dynamics` son posteriores a la
+3.3.0, y en la 4.0.0rc1 ya devolvían sus registros.
 
 ```python
 from phonometry.filters import OctaveFilterBank, verify_filter_class
@@ -2047,7 +2221,7 @@ Todo lo demás se movió. Estos setenta y ocho no existen en ningún módulo pú
 | `calculate_sensitivity` | `metrology.sensitivity`, el mismo renombrado de la 3.1 |
 | `filter_class_compliance` | `filters.verify_filter_class` |
 | `air_density_iso`, `speed_of_sound_iso` | `materials.air_density_iso10534`, `materials.speed_of_sound_iso10534`, y lee el aviso de los kelvin de más arriba |
-| `speed_of_sound` | `fluids.air(temperature_c=...).speed_of_sound` para el medio. Usa un modelo más completo que aquella fórmula de una línea de la ISO 17497-1, así que el número se mueve: 343,99 m/s frente a 343,20 m/s a 20 °C |
+| `speed_of_sound` | `materials.speed_of_sound_iso17497(temperature_c=...)`, la misma fórmula de la ISO 17497-1 y el mismo número. No `fluids.air(...).speed_of_sound`, que calcula aire húmedo con otro modelo: 343,99 m/s frente a 343,20 m/s a 20 °C, como dice la sección del arreglo evidente |
 | `depth_to_pressure` | `fluids.depth_to_gauge_pressure_mpa(depth_m=...)`, que devuelve el mismo número, o `fluids.depth_to_absolute_pressure_pa` para la absoluta. Las dos son keyword-only y las dos toman un `latitude_deg` opcional |
 | `TransmissionLossResult` | `PropagationLossResult`, con `.tl` renombrado a `.pl` |
 | `partial_exposure` | `vibration.daily_exposure`, llamada con el valor y la duración de una sola operación. `partial_exposure` era un segundo nombre de la misma función, y el número no se mueve |
@@ -2071,7 +2245,7 @@ Todo lo demás se movió. Estos setenta y ocho no existen en ningún módulo pú
 | `HAV_EAV_A8`, `HAV_ELV_A8`, `WBV_EAV_A8`, `WBV_ELV_A8` | `vibration.HAV_EAV_A8_M_S2`, `vibration.HAV_ELV_A8_M_S2`, `vibration.WBV_EAV_A8_M_S2`, `vibration.WBV_ELV_A8_M_S2`, los valores de A(8) de la Directiva 2002/44/CE. `WBV_EAV_VDV` y `WBV_ELV_VDV` conservan su nombre, porque un valor de dosis de vibración tiene una sola unidad, m/s^1,75 |
 | `combine_uncertainties` | `metrology.combined_standard_uncertainty`, la única raíz de la suma de cuadrados, que toma las contribuciones como una sola secuencia: `combine_uncertainties(3.0, 4.0)` es `combined_standard_uncertainty([3.0, 4.0])` |
 | `combine_uncertainty` | `metrology.uncertainty_propagation`, la propagación GUM a través de un modelo, con los mismos `model`, `quantities` y `correlation` |
-| `expanded_uncertainty` | `building.insulation_expanded_uncertainty(u, coverage, one_sided=...)`, la función de la ISO 12999-1 a la que remitía el nombre de primer nivel de la 3.3.0, con el mismo número: `expanded_uncertainty(1.2)` e `insulation_expanded_uncertainty(1.2)` dan los dos 2,352 dB. La incertidumbre expandida GUM de un resultado propagado es `result.expanded(coverage)` |
+| `expanded_uncertainty` | `building.insulation_expanded_uncertainty(u, coverage, one_sided=...)`, la función de la ISO 12999-1 a la que remitía el nombre de primer nivel de la 3.3.0, con el mismo número: `expanded_uncertainty(1.2)` e `insulation_expanded_uncertainty(1.2)` dan los dos 2,352 dB. La incertidumbre expandida GUM de un resultado propagado es `result.expanded(coverage)`. `environmental.expanded_uncertainty`, la función de la ISO 1996-2 con el mismo nombre, es `environment.environmental_expanded_uncertainty(u, coverage=...)`, 2,4 dB para el mismo 1,2 dB |
 | `combine_linings`, `combine_subareas`, `combine_partial_exposures`, `combine_age_and_noise` | `building.combined_lining_improvement`, `building.subarea_intensity_level`, `vibration.combined_daily_exposure`, `hearing.age_and_noise_threshold`: un cálculo se nombra por lo que devuelve |
 | `air_attenuation_m` | `environment.air_power_attenuation_per_m`. La m que devuelve es el coeficiente de atenuación de potencia de la ISO 354, en 1/m, no una longitud |
 | `attenuation_from_alpha`, `air_attenuation_coefficient` | `materials.power_attenuation_from_alpha`, la única conversión que hacen la ISO 354 y la ISO 17497-1. Su argumento es `attenuation_db_per_m`, donde las dos funciones antiguas lo llamaban `alpha` y `pressure_attenuation_db_per_m`. Rechaza un alfa NaN o infinito, que `attenuation_from_alpha` dejaba pasar |
@@ -2092,31 +2266,46 @@ Todo lo demás se movió. Estos setenta y ocho no existen en ningún módulo pú
 
 ## Lo que no ha cambiado
 
-Los números. El informe de conformidad son las mismas 995 comprobaciones contra
-las mismas normas con los mismos valores esperados que tenía antes de la
-reorganización, y de cada renombrado de esta página se comprobó que devuelve lo
-que devolvía su predecesor. Si un resultado se mueve después de que termines de
-actualizar, eso es un defecto y merece la pena
-[avisar](https://github.com/jmrplens/phonometry/issues).
+Casi todos los números. Cada renombrado de esta página devuelve lo que devolvía
+su predecesor, salvo donde esta sección diga otra cosa, y si cualquier otro
+resultado se mueve después de que termines de actualizar, eso es un defecto y
+merece la pena [avisar](https://github.com/jmrplens/phonometry/issues). Los
+números que sí se movieron están abajo. Cada uno se movió porque la 3.3.0 no
+coincidía con el documento que sigue, o porque cambió un valor por defecto.
 
-Un veredicto es la excepción, y la sección sobre las clases de filtro de más
-arriba explica cómo: `verify_filter_class` califica el ancho de banda efectivo
-del 5.12 y la suma de salidas del 5.16 además de la máscara de la Tabla 1 para
-la edición de 2014, y la respuesta integrada del filtro del 4.5.3 y la suma del
-4.9 con `edition="1995"`, así que la clase de un banco es la más estricta que
-cumple en los tres. Cada banda se califica a la frecuencia de entrada del banco
-hasta la mitad de ella, así que los márgenes de la Tabla 1 de una banda
-diezmada recogen las imágenes que su diezmado pliega sobre ella.
+`verify_filter_class` califica todos los requisitos de IEC 61260-1 a la
+frecuencia de entrada del banco, no solo la máscara de la Tabla 1, y una banda
+de un banco diezmado se mueve hasta 0,07 dB con ruido blanco: la sección sobre
+las clases de filtro de más arriba explica cómo.
 
-Los bancos de filtros diezmados son la otra: cada banda conserva ahora su
-frecuencia de Nyquist de proceso en dieciséis veces su borde superior y diezma
-con un filtro antialiasing dimensionado para una banda atenuada de 120 dB, así
-que el nivel de una banda se mueve hasta 0,07 dB con ruido blanco, como dice la
-misma sección.
+| Lo que se movió | 3.3.0 | 4.0 |
+| --- | --- | --- |
+| Todas las curvas, A, B, C, D, G y AU, a través de `WeightingFilter.filter` y de `filters.weighting_filter`, que ahora se diseñan a la frecuencia de entrada en vez de sobremuestreadas, y por tanto todo nivel que pondera una señal con ellas, `signals.laeq` entre ellos | A a 48 kHz: −2,60 dB, −7,03 dB y −10,15 dB en las filas de 10, 16 y 20 kHz de la Tabla 3 de IEC 61672-1; a 16 kHz, A −13,1 dB y C −16,7 dB en la fila de 8 kHz; a 32 kHz, B −23,9 dB, D −17,1 dB y AU −35,9 dB a 16 kHz | −2,49 dB, −6,60 dB y −9,32 dB, los objetivos de diseño con 0,02 dB de diferencia como mucho; −1,11 dB y −3,01 dB en la fila de 8 kHz; B −8,42 dB, D −0,69 dB y AU −19,61 dB, de nuevo los objetivos de diseño |
+| `WeightingFilter(..., stateful=True)`, que en la 3.3.0 ejecutaba A con el diseño bilineal simple y G con secciones diseñadas para una frecuencia sobremuestreada, las dos a la frecuencia de entrada, y ahora ejecuta el diseño preciso | A a 48 kHz: −7,05 dB en la fila de 12,5 kHz; G en su propia referencia de 10 Hz: −26,3 dB a 8 kHz y −36,3 dB a 1 kHz | −4,32 dB, el objetivo de diseño; 0 dB a cualquier frecuencia de muestreo |
+| `verify_weighting_class` | calificaba las secciones diseñadas, y daba la clase 1 a una ponderación A a 16 kHz que perdía 12 dB en la fila de 8 kHz | califica el camino que recorre una señal a través de `WeightingFilter.filter` |
+| `itu_r_468_weighting`, ahora `electroacoustics.weighting_bs468` | la Tabla 1 de UIT-R BS.468-4 interpolada entre sus filas: 4,45 dB a 11,06 kHz | la curva de la red que imprime la Recomendación: 5,06 dB ahí, y a unos 0,05 dB como mucho de la Tabla 1 en sus filas |
+| `sae_band_attenuation`, ahora `aircraft.band_attenuation_arp5534` | la presión de vapor de saturación de la ISO 9613-1 | la que imprime SAE ARP 5534: unos 0,01 dB menos en 1 km a 8 kHz y 10 kHz |
+| `extended_tube_chamber` con una prolongación de entrada o de salida | el tramo recto entre las dos ramas laterales tomado sobre toda la longitud L de la cámara | sobre L − L_a − L_b, que reproduce la Figura 8.20 de Bies: para L = 0,5 m, una relación de áreas m = 16 y prolongaciones de 0,125 m y 0,25 m, 22,7 dB a 200 Hz donde daba 0,6 dB |
+| `underwater.ray_trace` y `environment.atmospheric_ray_paths` en una reflexión | un paso entero dado a través de la frontera y plegado de vuelta | un subpaso que acaba en la frontera, así que un rayo que rebota llega a otro sitio: un rayo de un canal de 100 m acaba a 5 km a 9,4 m de profundidad, donde acababa a 0,3 m |
+| `room.open_plan_metrics` cuando el STI nunca baja hasta el umbral | una distancia de distracción o de privacidad de 10¹⁵ m o más | NaN |
+| `effective_kappa` y `thermal_boundary_layer_thickness` con su aire por defecto | los cinco valores que imprime el Anexo A.3 de la ISO 9053-2 | el aire de IEC 61094-2 en el mismo estado, que mueve la corrección en su quinta cifra, como dice la sección sobre `fluid=` |
+| un valor que cae justo en un límite que imprime una norma | se juzgaba por los últimos bits de su valor en coma flotante | se asienta antes a nueve decimales, igual en cualquier máquina |
 
-Lo que dibuja cada `.plot()` está intacto, y también lo que imprime cada
-`.report()` salvo una etiqueta: la ficha del micrófono escribe dB(468) donde
-escribía dB(CCIR). El contrato de `Signal` es el que era, ahora cumplido en dos
-sitios más, los bloques de `read_blocks` y las formas de onda dentro de cinco
-resultados. Cada fórmula está intacta también. La 4.0 recolocó los muebles y
-puso la unidad en la etiqueta; salvo esas dos, no recalculó nada.
+La ficha ISO 3382 de un análisis en tercios de octava toma su tiempo de
+reverberación de un solo número sobre las seis bandas de 400 Hz a 1250 Hz,
+como imprime el apartado 9.1, donde promediaba las bandas de 500 Hz y 1 kHz. La
+ficha ISO 10846 de una determinación indirecta enmarca la rigidez en la línea
+más baja que admite la Desigualdad (2) de la ISO 10846-3, con una
+transmisibilidad de 0,1 o menos, donde enmarcaba la línea más baja del barrido,
+dentro de la zona de la resonancia. La ficha del micrófono escribe dB(468) para
+la ponderación UIT-R BS.468-4, que la 3.3.0 te dejaba etiquetar como CCIR. Una
+gráfica dibuja una banda sin lectura como ninguna barra, donde dibujaba un cero medido. Hay dos más en las secciones
+de arriba: `installed_dynamic_stiffness` por debajo de 100 kPa·s/m², y las
+posiciones del método de control de la ISO 3746 de
+`emission.measurement_positions`.
+
+Para el código escrito contra la 4.0.0rc1, el contrato de `Signal` es el que
+era, ahora cumplido en dos sitios más, los bloques de `read_blocks` y las
+formas de onda dentro de cinco resultados. Cualquier otra fórmula está intacta.
+La 4.0 recolocó los muebles y puso la unidad en la etiqueta; salvo lo que
+recoge esta sección, no recalculó nada.

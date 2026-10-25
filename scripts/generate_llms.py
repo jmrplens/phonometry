@@ -23,7 +23,10 @@ Three kinds of artifact are produced:
     ``llms-full.txt`` is roughly 291k tokens, so a client that truncates at a
     few hundred kilobytes (most of them do) reads the first few metrology
     guides and nothing else, which is the worst possible sample: it looks like
-    the old narrow library.
+    the old narrow library. A shard that holds one page too long for a single
+    fetch travels in numbered parts instead, ``llms-<area>-1.txt``,
+    ``llms-<area>-2.txt`` and so on, cut at the page's own H2 headings (see
+    :func:`_page_parts`).
 ``llms-full.txt``
     The complete concatenation, kept for clients that can take it.
 
@@ -37,11 +40,18 @@ convention names. Deterministic: regenerate with ``make llms``.
 from __future__ import annotations
 
 import functools
+import itertools
 import json
 import pathlib
 import re
 import subprocess
 import tomllib
+from typing import TYPE_CHECKING
+
+from markdown_fences import code_lines
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DOCS = ROOT / "docs"
@@ -86,8 +96,12 @@ DOI = "10.5281/zenodo.21215280"
 #: that cap response size, with room for a page to grow. Enforced: main() exits
 #: non-zero if a shard is over it (see :func:`_check_shard_budget`). A shard
 #: exactly at the limit passes; only strictly over fails, both here and in the
-#: message it raises.
+#: message it raises. A shard of a single page over it is cut into parts at the
+#: page's H2 headings rather than refused (see :func:`_page_parts`).
 SHARD_LIMIT_BYTES = 200_000
+
+#: The title of the upgrade guide's shard, in its head and in the index.
+UPGRADING_TITLE = "Upgrading from 3.3 to 4.0"
 
 #: The glossary page, which has a shard of its own (see :func:`build_shards`).
 GLOSSARY_ROUTE = "reference/glossary"
@@ -709,22 +723,72 @@ def _summary(version: str) -> list[str]:
     ]
 
 
-def build_llms_txt(version: str, shard_slugs: tuple[str, ...]) -> str:
-    pages = dict(_routes())
-    route_to_file = {route: name for name, route in pages.items()}
-    members = _area_members()
-    labels = dict(AREAS)
+def _shard_url(name: str) -> str:
+    """Where a shard file is published, *name* being what ``llms-`` precedes."""
+    return f"{SITE_URL}/llms/llms-{name}.txt"
 
-    def link(route: str) -> str | None:
-        name = route_to_file.get(route)
-        if name is None:
-            return None
-        return f"- [{_page_title(DOCS / name)}]({SITE_URL}/{route}/)"
 
-    lines = _summary(version)
-    lines += ["## Start here", ""]
+def _part_names(slug: str, count: int) -> tuple[str, ...]:
+    """The file names a shard publishes under: its own, or one per part.
+
+    A shard in one piece keeps its slug. One cut into parts numbers them from
+    1, extending the slug the way a carved-out shard extends the name of the
+    folder it came from: ``llms-upgrading.txt`` becomes
+    ``llms-upgrading-1.txt``, ``llms-upgrading-2.txt`` and so on.
+    """
+    if count == 1:
+        return (slug,)
+    return tuple(f"{slug}-{number}" for number in range(1, count + 1))
+
+
+def _part_label(label: str, number: int, count: int) -> str:
+    """The name of one part of a shard, in its own head and in the index."""
+    return f"{label}, part {number} of {count}"
+
+
+def _full_text_entries(label: str, files: tuple[str, ...]) -> list[str]:
+    """The index lines for one shard: one, or one per part, in order."""
+    if len(files) == 1:
+        return [f"- [{label}]({_shard_url(files[0])})"]
+    return [
+        f"- [{_part_label(label, number, len(files))}]({_shard_url(name)})"
+        for number, name in enumerate(files, start=1)
+    ]
+
+
+def _full_text_links(files: tuple[str, ...]) -> str:
+    """The full-text links a carved-out heading of the index carries."""
+    if len(files) == 1:
+        return f"[full text]({_shard_url(files[0])})"
+    return " · ".join(
+        f"[{_part_label('full text', number, len(files))}]({_shard_url(name)})"
+        for number, name in enumerate(files, start=1)
+    )
+
+
+def _shard_urls(shard_files: Mapping[str, tuple[str, ...]], slug: str) -> str:
+    """Every URL of one shard, comma separated, for a sentence of the index."""
+    return ", ".join(_shard_url(name) for name in shard_files.get(slug, (slug,)))
+
+
+@functools.cache
+def _route_files() -> dict[str, str]:
+    """Site route -> its page under docs/."""
+    return {route: name for name, route in _routes()}
+
+
+def _page_entry(route: str) -> str | None:
+    """The index line of one page, or None when it has no mirror page."""
+    name = _route_files().get(route)
+    if name is None:
+        return None
+    return f"- [{_page_title(DOCS / name)}]({SITE_URL}/{route}/)"
+
+
+def _start_section() -> list[str]:
+    lines = ["## Start here", ""]
     for route in START_ROUTES:
-        entry = link(route)
+        entry = _page_entry(route)
         if entry is None:
             # These are listed by hand, so an unresolvable one is always a
             # bug; the About page went missing this way once, silently.
@@ -734,74 +798,85 @@ def build_llms_txt(version: str, shard_slugs: tuple[str, ...]) -> str:
             )
             raise SystemExit(msg)
         lines.append(entry)
-    lines += [
+    return [
+        *lines,
         f"- [Guides index]({SITE_URL}/start/guides/)",
         f"- [Glossary of quantities]({SITE_URL}/reference/glossary/)",
         "",
     ]
 
-    shard_of = {
-        route: slug for slug, routes in _shard_members().items() for route in routes
-    }
-    for slug, routes in members.items():
-        lines += [f"## {labels.get(slug, 'Other guides')}", ""]
-        if slug != "other":
-            lines.append(f"- [Overview]({SITE_URL}/{slug}/)")
-        # The shards are per subgroup, so the index says which subgroup, and
-        # therefore which shard, each run of guides belongs to: a client that
-        # wants the full text of one part should not have to infer the shard
-        # from the URL path.
-        #
-        # The runs are emitted shard by shard rather than in the folder's own
-        # reading order, because a heading claims everything under it until the
-        # next one. Walking the reading order and switching heading on first
-        # sight of a new shard put a guide of the parent shard under a carved
-        # out heading whenever the carve-out was not the tail of that order,
-        # which is how the surface-velocity route came to sit under a heading
-        # about sound intensity. Within each run the reading order is kept.
-        grouped: dict[str, list[str]] = {}
-        for route in routes:
-            grouped.setdefault(shard_of.get(route, slug), []).append(route)
-        for group in [slug, *(g for g in grouped if g != slug)]:
-            if group not in grouped:
-                continue
-            if group != slug:
-                folder = _shard_folders().get(group, group)
-                lines += [
-                    "",
-                    f"### {_shard_label(group)}",
-                    "",
-                    (
-                        f"- [Overview]({SITE_URL}/{folder}/) · "
-                        f"[full text]({SITE_URL}/llms/llms-{group}.txt)"
-                    ),
-                ]
-            for route in grouped[group]:
-                if entry := link(route):
-                    lines.append(entry)
-        lines.append("")
 
-    lines += [
+def _area_section(
+    slug: str, routes: list[str], shard_files: Mapping[str, tuple[str, ...]]
+) -> list[str]:
+    """One topic of the index: its overview, then its guides, run by shard."""
+    lines = [f"## {dict(AREAS).get(slug, 'Other guides')}", ""]
+    if slug != "other":
+        lines.append(f"- [Overview]({SITE_URL}/{slug}/)")
+    shard_of = {
+        route: shard for shard, members in _shard_members().items() for route in members
+    }
+    # The shards are per subgroup, so the index says which subgroup, and
+    # therefore which shard, each run of guides belongs to: a client that
+    # wants the full text of one part should not have to infer the shard
+    # from the URL path.
+    #
+    # The runs are emitted shard by shard rather than in the folder's own
+    # reading order, because a heading claims everything under it until the
+    # next one. Walking the reading order and switching heading on first
+    # sight of a new shard put a guide of the parent shard under a carved
+    # out heading whenever the carve-out was not the tail of that order,
+    # which is how the surface-velocity route came to sit under a heading
+    # about sound intensity. Within each run the reading order is kept.
+    grouped: dict[str, list[str]] = {}
+    for route in routes:
+        grouped.setdefault(shard_of.get(route, slug), []).append(route)
+    for group in [slug, *(g for g in grouped if g != slug)]:
+        if group != slug and group in grouped:
+            folder = _shard_folders().get(group, group)
+            lines += [
+                "",
+                f"### {_shard_label(group)}",
+                "",
+                (
+                    f"- [Overview]({SITE_URL}/{folder}/) · "
+                    + _full_text_links(shard_files.get(group, (group,)))
+                ),
+            ]
+        lines += [
+            entry for route in grouped.get(group, []) if (entry := _page_entry(route))
+        ]
+    lines.append("")
+    return lines
+
+
+def _reference_section(shard_files: Mapping[str, tuple[str, ...]]) -> list[str]:
+    lines = [
         "## Theory and reference",
         "",
         (
             "The theory pages travel in their own shard "
-            f"({SITE_URL}/llms/llms-theory.txt), the glossary in another "
-            f"({SITE_URL}/llms/llms-glossary.txt), and the rest of the reference "
-            f"in {SITE_URL}/llms/llms-reference.txt."
+            f"({_shard_urls(shard_files, 'theory')}), the glossary in another "
+            f"({_shard_urls(shard_files, 'glossary')}), and the rest of the "
+            f"reference in {_shard_urls(shard_files, 'reference')}."
         ),
         "",
     ]
-    for route in sorted(
-        route
-        for route in pages.values()
-        if route.startswith("reference/") and route != "reference/why-phonometry"
-    ):
-        if entry := link(route):
-            lines.append(entry)
-    lines.append("")
-
     lines += [
+        entry
+        for route in sorted(
+            route
+            for route in _route_files()
+            if route.startswith("reference/") and route != "reference/why-phonometry"
+        )
+        if (entry := _page_entry(route))
+    ]
+    lines.append("")
+    return lines
+
+
+def _provenance_section() -> list[str]:
+    return [
         "## Evidence and provenance",
         "",
         (
@@ -837,48 +912,77 @@ def build_llms_txt(version: str, shard_slugs: tuple[str, ...]) -> str:
         f"- [Archived release (DOI)](https://doi.org/{DOI})",
         "- [Licence: MIT](https://opensource.org/licenses/MIT)",
         "",
-        "## Full text",
-        "",
-        (
-            "One file per area, each small enough to fetch whole. `llms-full.txt` is "
-            "the complete concatenation and is far too large for a single fetch in "
-            "most clients."
-        ),
-        "",
-        f"- [Start here]({SITE_URL}/llms/llms-start.txt)",
     ]
-    if "upgrading" in shard_slugs:
-        lines.append(
-            f"- [Upgrading from 3.3 to 4.0]({SITE_URL}/llms/llms-upgrading.txt)"
-        )
-    if "theory" in shard_slugs:
-        lines.append(f"- [Theory and reference]({SITE_URL}/llms/llms-theory.txt)")
-    # Grouped by topic in the order the site lists them, the topic's own shard
-    # first, so the list reads like the navigation rather than like a sort key.
-    # The slugs are the shards actually built this run: a hand-kept list here
-    # published a link to a shard that a content move could stop producing.
-    # "upgrading" and "theory" are listed by hand just above, next to "start":
-    # none is a topic, so the loop below would otherwise never place them.
-    listed: set[str] = {"start", "upgrading", "theory"}
+
+
+def _topic_shards(shard_slugs: tuple[str, ...]) -> list[str]:
+    """The shards of the topics, in the order the site lists them.
+
+    Grouped by topic, the topic's own shard first, so the list reads like the
+    navigation rather than like a sort key. Within a topic the subgroups come
+    in the order the topic overview teaches them, matching the navigation;
+    alphabetical-by-slug put Calibration before Spectra in a topic whose
+    overview teaches them the other way round. The slugs are the shards
+    actually built this run: a hand-kept list here published a link to a shard
+    that a content move could stop producing.
+    """
     folders = _shard_folders()
+    ordered: list[str] = []
     for topic, _label in AREAS:
-        # Subgroups in the order the topic overview teaches them, matching the
-        # navigation above; alphabetical-by-slug put Calibration before Spectra
-        # in a topic whose overview teaches them the other way round.
         nav_order = {folder: rank for rank, folder in enumerate(_subgroups(topic))}
-        for slug in [t for t in shard_slugs if t == topic] + sorted(
-            (t for t in shard_slugs if t.startswith(f"{topic}-")),
-            key=lambda t: (nav_order.get(folders.get(t, ""), len(nav_order)), t),
-        ):
-            listed.add(slug)
-            lines.append(f"- [{_shard_label(slug)}]({SITE_URL}/llms/llms-{slug}.txt)")
-    for slug in shard_slugs:
-        if slug not in listed:
-            label = "Other guides" if slug == "other" else _shard_label(slug)
-            lines.append(f"- [{label}]({SITE_URL}/llms/llms-{slug}.txt)")
+        ordered += [slug for slug in shard_slugs if slug == topic]
+        ordered += sorted(
+            (slug for slug in shard_slugs if slug.startswith(f"{topic}-")),
+            key=lambda slug: (
+                nav_order.get(folders.get(slug, ""), len(nav_order)),
+                slug,
+            ),
+        )
+    return ordered
+
+
+def _full_text_section(shard_files: Mapping[str, tuple[str, ...]]) -> list[str]:
+    intro = "One file per area, each small enough to fetch whole."
+    if any(len(files) > 1 for files in shard_files.values()):
+        intro += (
+            " A page too long for one fetch travels in numbered parts, cut at "
+            "its own sections."
+        )
+    intro += (
+        " `llms-full.txt` is the complete concatenation and is far too large "
+        "for a single fetch in most clients."
+    )
+    lines = ["## Full text", "", intro, ""]
+    lines += _full_text_entries("Start here", shard_files.get("start", ("start",)))
+    # "upgrading" and "theory" are listed by hand, next to "start": none is a
+    # topic, so the walk of the topics below would never place them.
+    for slug, label in (
+        ("upgrading", UPGRADING_TITLE),
+        ("theory", "Theory and reference"),
+    ):
+        if slug in shard_files:
+            lines += _full_text_entries(label, shard_files[slug])
+    topics = _topic_shards(tuple(shard_files))
     lines += [
-        f"- [Everything]({SITE_URL}/llms-full.txt)",
-        "",
+        entry
+        for slug in topics
+        for entry in _full_text_entries(_shard_label(slug), shard_files[slug])
+    ]
+    listed = {"start", "upgrading", "theory", *topics}
+    lines += [
+        entry
+        for slug, files in shard_files.items()
+        if slug not in listed
+        for entry in _full_text_entries(
+            "Other guides" if slug == "other" else _shard_label(slug), files
+        )
+    ]
+    lines += [f"- [Everything]({SITE_URL}/llms-full.txt)", ""]
+    return lines
+
+
+def _closing_sections() -> list[str]:
+    lines = [
         "## Spanish",
         "",
         (
@@ -902,6 +1006,23 @@ def build_llms_txt(version: str, shard_slugs: tuple[str, ...]) -> str:
         for route in _api_routes()
     ]
     lines.append("")
+    return lines
+
+
+def build_llms_txt(version: str, shard_files: Mapping[str, tuple[str, ...]]) -> str:
+    """The index, *shard_files* naming the files each shard published.
+
+    A shard in one piece names one file; a page cut into parts names one per
+    part (see :func:`_part_names`), and the index lists every one of them.
+    """
+    lines = _summary(version)
+    lines += _start_section()
+    for slug, routes in _area_members().items():
+        lines += _area_section(slug, routes, shard_files)
+    lines += _reference_section(shard_files)
+    lines += _provenance_section()
+    lines += _full_text_section(shard_files)
+    lines += _closing_sections()
     return "\n".join(lines)
 
 
@@ -943,8 +1064,8 @@ def _absolutize_links(content: str, md_name: str) -> str:
     return re.sub(r"\]\(((?:\.\./)*[\w./-]+\.md)(#[\w-]+)?\)", repl, content)
 
 
-def _body(md_name: str, route: str, pages: dict[str, str]) -> str:
-    """One page, ready to concatenate: attribution header then verbatim text."""
+def _page_text(md_name: str) -> str:
+    """One page as the artifacts carry it: no index backlink, absolute links."""
     content = (DOCS / md_name).read_text(encoding="utf-8")
     # Drop the docs-index backlink line; keep everything else verbatim.
     content = "\n".join(
@@ -952,7 +1073,11 @@ def _body(md_name: str, route: str, pages: dict[str, str]) -> str:
         for line in content.splitlines()
         if not line.startswith("← [Documentation index]")
     ).strip()
-    content = _absolutize_links(content, md_name)
+    return _absolutize_links(content, md_name)
+
+
+def _attributed(md_name: str, route: str, content: str) -> str:
+    """Page text ready to concatenate: attribution header, then the text."""
     # A plain "Source:" line as well as the HTML comment: markdown-to-text
     # pipelines routinely strip comments, and a passage extracted with its
     # attribution stripped is a passage that cannot be cited back.
@@ -963,29 +1088,249 @@ def _body(md_name: str, route: str, pages: dict[str, str]) -> str:
     return f"\n{header}\n{content}\n\n---\n"
 
 
-def build_shards() -> dict[str, str]:
-    """One text artifact per area, keyed by shard slug."""
-    pages = dict(_routes())
-    route_to_file = {route: name for name, route in pages.items()}
-    members = _shard_members()
+def _body(md_name: str, route: str) -> str:
+    """One page, ready to concatenate: attribution header then verbatim text."""
+    return _attributed(md_name, route, _page_text(md_name))
 
+
+def _shard_head(title: str, note: str) -> list[str]:
+    """The lines every shard file opens with."""
+    return [
+        f"# phonometry: {title}",
+        "",
+        f"Part of {SITE_URL}/llms.txt. {note}",
+        "",
+        "---",
+    ]
+
+
+def _shard_text(title: str, pages: list[tuple[str, str]]) -> str:
+    """A shard in one file: its head, then each ``(file, route)`` page in turn."""
+    return "\n".join(
+        [
+            *_shard_head(title, "Full text of the pages in this area."),
+            *(_body(name, route) for name, route in pages),
+        ]
+    )
+
+
+#: An ATX H2 heading as CommonMark reads one: up to three spaces of indent, two
+#: hashes, then a space, a tab or the end of the line. Four spaces of indent
+#: make an indented code block, and ``##x`` is a paragraph, not a heading.
+_H2 = re.compile(r" {0,3}##(?:[ \t]|$)")
+
+
+def _is_h2(line: str) -> bool:
+    """Whether *line*, read outside code, is an H2 heading."""
+    return _H2.match(line) is not None
+
+
+def _sections(content: str) -> list[str]:
+    """A page cut before each of its H2 headings.
+
+    A heading is an H2 as CommonMark reads one (``_H2``). A ``## `` line
+    inside a code fence is code, a Python comment for one, and never a cut; ``markdown_fences`` says which lines are code, as it does for
+    every script that reads a page. The first section is whatever comes before
+    the first H2: the page title and its introduction.
+    """
+    lines = content.splitlines()
+    sections: list[list[str]] = [[]]
+    for line, code in zip(lines, code_lines(lines), strict=True):
+        if not code and _is_h2(line):
+            sections.append([])
+        sections[-1].append(line)
+    return ["\n".join(part) for part in sections if any(map(str.strip, part))]
+
+
+def _starts(sizes: list[int], capacity: int) -> list[int]:
+    """Where each part begins when sections fill parts in order up to *capacity*."""
+    starts = [0]
+    used = 0
+    for index, size in enumerate(sizes):
+        if used and used + size > capacity:
+            starts.append(index)
+            used = 0
+        used += size
+    return starts
+
+
+def _balanced_starts(sizes: list[int], count: int, capacity: int) -> list[int]:
+    """The cut into at most *count* parts whose largest part is smallest.
+
+    Filling each part to the brim before opening the next would leave a stub
+    at the end, and move every cut whenever a line is added near the top of
+    the page. The smallest capacity that still needs no more parts is found by
+    bisection; it is never above *capacity*, which already needs *count*.
+    """
+    low, high = max(sizes), capacity
+    while low < high:
+        middle = (low + high) // 2
+        if len(_starts(sizes, middle)) <= count:
+            high = middle
+        else:
+            low = middle + 1
+    return _starts(sizes, low)
+
+
+def _render_part(
+    *, slug: str, title: str, page: tuple[str, str], number: int, count: int, text: str
+) -> str:
+    """One part of a page cut into *count*: its head, then its sections."""
+    urls = ", ".join(_shard_url(name) for name in _part_names(slug, count))
+    note = (
+        f"One page in {count} parts, cut at its own sections so that each fits "
+        f"one fetch: {urls}."
+    )
+    md_name, route = page
+    return "\n".join(
+        [
+            *_shard_head(_part_label(title, number, count), note),
+            _attributed(md_name, route, text),
+        ]
+    )
+
+
+def _oversized_section(
+    *, slug: str, md_name: str, shard_bytes: int, sections: list[str], room: int
+) -> str:
+    """Why a page cannot be cut into parts that fit, naming the culprit.
+
+    The size quoted is the shard's, *shard_bytes*, not the source file's: the
+    head, the attribution and the absolute links the shard adds can take a
+    page whose own file fits the budget over it.
+    """
+    lead = (
+        f"generate_llms.py: docs/{md_name} makes llms-{slug}.txt "
+        f"{shard_bytes:,} bytes, over the {SHARD_LIMIT_BYTES:,} byte budget of "
+        "one fetch, and "
+    )
+    if not any(_is_h2(section) for section in sections):
+        return lead + "it has no H2 heading to cut it at. Divide it under H2 headings."
+    name, largest = max(
+        (
+            (
+                section.splitlines()[0].strip()
+                if _is_h2(section)
+                else "the text before its first H2",
+                len(section.encode("utf-8")),
+            )
+            for section in sections
+        ),
+        key=lambda pair: pair[1],
+    )
+    return (
+        lead + f"its section {name!r} alone is {largest:,} bytes, more than the "
+        f"{room:,} a part has room for. Divide that section under H2 headings of "
+        "its own; do not raise SHARD_LIMIT_BYTES."
+    )
+
+
+def _page_parts(
+    slug: str, title: str, page: tuple[str, str], *, shard_bytes: int
+) -> tuple[str, ...]:
+    """A page too long for one fetch, cut at its H2 headings into parts.
+
+    As few parts as fit the budget, as even as the sections allow, each a
+    whole shard of its own: the head names every part, and the page's
+    attribution opens each one, so a passage read from any part can still be
+    cited back. The head grows with the number of parts it lists, so the count
+    is settled first and the room each part leaves for the page follows from
+    it. A section over the budget by itself cannot be placed in any part, and
+    is refused by name rather than cut mid-text; *shard_bytes*, the size of
+    the page as one shard, is the size that refusal quotes.
+    """
+    md_name, route = page
+    sections = _sections(_page_text(md_name))
+    # The newline that joins a section to the next one counts against it.
+    sizes = [len(section.encode("utf-8")) + 1 for section in sections]
+    count = 2
+    while True:
+        head = _render_part(
+            slug=slug, title=title, page=page, number=count, count=count, text=""
+        )
+        room = SHARD_LIMIT_BYTES - len(head.encode("utf-8"))
+        if len(sections) < 2 or max(sizes) > room:
+            raise SystemExit(
+                _oversized_section(
+                    slug=slug,
+                    md_name=md_name,
+                    shard_bytes=shard_bytes,
+                    sections=sections,
+                    room=room,
+                )
+            )
+        needed = len(_starts(sizes, room))
+        if needed <= count:
+            break
+        count = needed
+    starts = [*_balanced_starts(sizes, count, room), len(sections)]
+    texts = [
+        "\n".join(sections[begin:end]).strip()
+        for begin, end in itertools.pairwise(starts)
+    ]
+    return tuple(
+        _render_part(
+            slug=slug,
+            title=title,
+            page=page,
+            number=number,
+            count=len(texts),
+            text=text,
+        )
+        for number, text in enumerate(texts, start=1)
+    )
+
+
+def _shard_parts(
+    slug: str, title: str, pages: list[tuple[str, str]]
+) -> tuple[str, ...]:
+    """A shard's text: one file, or numbered parts for one page over the budget.
+
+    A shard of several pages over the budget stays whole, for
+    :func:`_check_shard_budget` to refuse: those are narrowed by a split that
+    follows a grouping of the domain (see ``MANUAL_SPLITS``), never by a cut
+    chosen for size. A shard of one page has nothing left to narrow, so the
+    page itself is cut, at its own H2 headings.
+    """
+    text = _shard_text(title, pages)
+    shard_bytes = len(text.encode("utf-8"))
+    if len(pages) != 1 or shard_bytes <= SHARD_LIMIT_BYTES:
+        return (text,)
+    return _page_parts(slug, title, pages[0], shard_bytes=shard_bytes)
+
+
+def _published(shards: Mapping[str, tuple[str, ...]]) -> dict[str, str]:
+    """Every file the shards publish, by the name ``llms-`` precedes.
+
+    Refuses two shards that would write one file: a shard ``a`` in two parts
+    and a shard ``a-1`` would otherwise overwrite each other in silence.
+    """
+    files: dict[str, str] = {}
+    for slug, parts in shards.items():
+        for name, text in zip(_part_names(slug, len(parts)), parts, strict=True):
+            if name in files:
+                msg = (
+                    f"generate_llms.py: two shards publish llms-{name}.txt; "
+                    f"rename the shard {slug} or the one it collides with."
+                )
+                raise SystemExit(msg)
+            files[name] = text
+    return files
+
+
+def build_shards() -> dict[str, tuple[str, ...]]:
+    """Shard slug -> its text, in one file or, for one long page, in parts."""
+    pages = dict(_routes())
+    route_to_file = _route_files()
+    shards: dict[str, tuple[str, ...]] = {}
     emitted: set[str] = set()
 
-    def emit(title: str, routes: list[str]) -> str:
-        parts = [
-            f"# phonometry: {title}",
-            "",
-            f"Part of {SITE_URL}/llms.txt. Full text of the pages in this area.",
-            "",
-            "---",
+    def emit(slug: str, title: str, routes: list[str]) -> None:
+        held = [
+            (route_to_file[route], route) for route in routes if route in route_to_file
         ]
-        for route in routes:
-            name = route_to_file.get(route)
-            if name is None:
-                continue
-            emitted.add(route)
-            parts.append(_body(name, route, pages))
-        return "\n".join(parts)
+        emitted.update(route for _name, route in held)
+        shards[slug] = _shard_parts(slug, title, held)
 
     # Theory used to travel inside the start shard: six mirror pages with
     # eighteen figures pushed llms-start.txt itself over budget. It gets its
@@ -998,22 +1343,25 @@ def build_shards() -> dict[str, str]:
     # The migration guide gets the same treatment: one row per 4.0 break, it
     # alone took llms-start.txt over budget, and a client after the
     # getting-started page has no reason to fetch every renamed parameter.
+    # When the page alone outgrows the budget it travels in numbered parts
+    # (see _page_parts).
     start_routes = [route for route in START_ROUTES if route != UPGRADING_ROUTE]
-    shards = {"start": emit("start here", [*start_overview, *start_routes])}
+    emit("start", "start here", [*start_overview, *start_routes])
     if UPGRADING_ROUTE in route_to_file:
-        shards["upgrading"] = emit("Upgrading from 3.3 to 4.0", [UPGRADING_ROUTE])
+        emit("upgrading", UPGRADING_TITLE, [UPGRADING_ROUTE])
     if theory:
-        shards["theory"] = emit("Theory and reference", theory)
+        emit("theory", "Theory and reference", theory)
 
     manual_split_slugs = {
         slug for splits in MANUAL_SPLITS.values() for slug, _label, _leaves in splits
     }
-    for slug, routes in members.items():
+    for slug, routes in _shard_members().items():
         overview = _shard_folders().get(slug, slug)
         # A carved-out shard (see MANUAL_SPLITS) has no overview page of its
         # own; the folder it names already opened its primary shard above.
         include_overview = overview in route_to_file and slug not in manual_split_slugs
-        shards[slug] = emit(
+        emit(
+            slug,
             _shard_label(slug),
             ([overview] if include_overview else []) + routes,
         )
@@ -1036,9 +1384,9 @@ def build_shards() -> dict[str, str]:
         and route != GLOSSARY_ROUTE
     )
     if reference:
-        shards["reference"] = emit("Reference", reference)
+        emit("reference", "Reference", reference)
     if GLOSSARY_ROUTE in route_to_file:
-        shards["glossary"] = emit("Glossary of quantities", [GLOSSARY_ROUTE])
+        emit("glossary", "Glossary of quantities", [GLOSSARY_ROUTE])
 
     # Every mirror page belongs to a shard; a page that falls between the
     # buckets is how the bibliography went missing. The set compared against is
@@ -1054,9 +1402,8 @@ def build_shards() -> dict[str, str]:
 
 
 def build_llms_full(llms_txt: str) -> str:
-    pages = dict(_routes())
     parts = [llms_txt, "\n---\n"]
-    parts += [_body(name, route, pages) for name, route in _routes()]
+    parts += [_body(name, route) for name, route in _routes()]
     return "\n".join(parts)
 
 
@@ -1092,7 +1439,9 @@ def _check_shard_budget(sizes: dict[str, int]) -> None:
     client that truncates at a few hundred kilobytes read a partial shard and
     nothing here ever said so. The budget is not negotiable (see its own
     docstring); the only fix for an oversized shard is a narrower split, never
-    a higher SHARD_LIMIT_BYTES.
+    a higher SHARD_LIMIT_BYTES. A shard of one page does not reach this check
+    over the budget: :func:`_page_parts` has already cut it at its H2
+    headings, or refused the section that does not fit any part.
     """
     oversized = sorted(
         (slug, size) for slug, size in sizes.items() if size > SHARD_LIMIT_BYTES
@@ -1116,17 +1465,22 @@ def main() -> None:
     _check_readme_covers_the_mirror()
     version = _version()
     shards = build_shards()
-    llms = build_llms_txt(version, tuple(shards))
+    files = _published(shards)
+    llms = build_llms_txt(
+        version,
+        {slug: _part_names(slug, len(parts)) for slug, parts in shards.items()},
+    )
     (ROOT / "llms.txt").write_text(llms, encoding="utf-8")
     (ROOT / "llms-full.txt").write_text(build_llms_full(llms), encoding="utf-8")
 
     # Remove shards this run no longer produces. Regrouping a section renames
     # its shard, and an orphan left behind would keep serving text that
-    # llms.txt no longer indexes, silently and indefinitely. The root-level
-    # sweep also retires shards left by the era when they lived next to
-    # llms.txt.
+    # llms.txt no longer indexes, silently and indefinitely. A page cut into
+    # parts retires its single file the same way, and the parts it no longer
+    # needs. The root-level sweep also retires shards left by the era when
+    # they lived next to llms.txt.
     SHARDS_DIR.mkdir(parents=True, exist_ok=True)
-    keep = {f"llms-{slug}.txt" for slug in shards}
+    keep = {f"llms-{name}.txt" for name in files}
     for path in SHARDS_DIR.glob("llms-*.txt"):
         if path.name not in keep:
             path.unlink()
@@ -1137,9 +1491,9 @@ def main() -> None:
             print(f"  removed stale shard {path.name}")
 
     sizes: dict[str, int] = {}
-    for slug, text in shards.items():
-        (SHARDS_DIR / f"llms-{slug}.txt").write_text(text, encoding="utf-8")
-        sizes[slug] = len(text.encode("utf-8"))
+    for name, text in files.items():
+        (SHARDS_DIR / f"llms-{name}.txt").write_text(text, encoding="utf-8")
+        sizes[name] = len(text.encode("utf-8"))
 
     print(
         f"llms.txt regenerated (v{version}): {len(_routes())} pages, "

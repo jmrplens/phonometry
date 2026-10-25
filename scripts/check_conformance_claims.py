@@ -17,11 +17,11 @@ The Astro page bodies import the numbers from
 ``site/src/data/conformance-stats.mjs``, so they cannot drift. What is left is
 the text that has no build step to interpolate through: the plain-markdown
 mirror under ``docs/``, the ``README.md`` and generated ``README_PYPI.md`` at
-the repository root, the ``.zenodo.json`` description, and the YAML
-frontmatter of the site pages (the landing-page meta descriptions and the
-JSON-LD blocks on the conformance pages, which are static data parsed before
-MDX ever runs). Those used to be edited by hand after every change that moved
-a count.
+the repository root, the README of the PyOctaveBand transition stub, the
+``.zenodo.json`` description, and the YAML frontmatter of the site pages (the
+landing-page meta descriptions and the JSON-LD blocks on the conformance
+pages, which are static data parsed before MDX ever runs). Those used to be
+edited by hand after every change that moved a count.
 
 The READMEs are why the file set reaches the repository root at all, instead
 of stopping at ``docs/``. They sat outside it, said "more than 250 standards"
@@ -179,7 +179,7 @@ def expected_counts(root: pathlib.Path = ROOT) -> dict[str, int]:
 def sources(root: pathlib.Path = ROOT) -> list[pathlib.Path]:
     """Every prose file that could quote a count.
 
-    Three places, for three reasons.
+    Four places, for four reasons.
 
     The guides and their site mirrors, walked from ``docs/`` and
     ``site/src/content/docs/``.
@@ -192,6 +192,11 @@ def sources(root: pathlib.Path = ROOT) -> list[pathlib.Path]:
     when the release goes out is published wrong for good. The glob is
     deliberately not ``rglob``: recursing from the root would pull in
     ``stub/``, ``site/`` and every vendored tree under them.
+
+    ``stub/README.md``, named rather than reached by a walk. It is the PyPI
+    page of the PyOctaveBand transition package, frozen at its upload like the
+    other one, and it sells the project on these same counts: it quoted the
+    counts of 4.0.0rc1 for as long as nothing here read it.
 
     ``.zenodo.json``, because its description is prose too: it is the text the
     archived record shows, it states the counts, and it has no build step to
@@ -209,6 +214,9 @@ def sources(root: pathlib.Path = ROOT) -> list[pathlib.Path]:
         for pattern in ("*.md", "*.mdx"):
             found += sorted(base.rglob(pattern))
     found += sorted(root.glob("*.md"))
+    stub = root / "stub" / "README.md"
+    if stub.is_file():
+        found.append(stub)
     kept = [
         path
         for path in found

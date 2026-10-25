@@ -31,6 +31,22 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import generate_llms as llms
 
 
+def _shard_of_links(line: str) -> str:
+    """The shard whose full text a heading's links fetch.
+
+    One link names the shard's own file; a shard cut into parts links each
+    part, ``llms-<shard>-1.txt`` onwards, and every one must be there in order.
+    """
+    names = re.findall(r"/llms/llms-([a-z0-9-]+)\.txt", line)
+    if len(names) == 1:
+        return names[0]
+    shard = names[0].rsplit("-", 1)[0]
+    assert tuple(names) == llms._part_names(shard, len(names)), (
+        f"a heading links parts of more than one shard, or not all of them: {names}"
+    )
+    return shard
+
+
 def _runs_of(text: str) -> dict[str, list[str]]:
     """The routes listed under each ``###`` heading, keyed by its shard slug.
 
@@ -45,7 +61,7 @@ def _runs_of(text: str) -> dict[str, list[str]]:
         elif line.startswith("### "):
             current = ""
         elif current == "" and "/llms/llms-" in line:
-            current = line.split("/llms/llms-", 1)[1].split(".txt", 1)[0]
+            current = _shard_of_links(line)
             runs.setdefault(current, [])
         elif current and (m := re.search(r"\]\(\S+?/phonometry/(\S+?)/\)", line)):
             runs[current].append(m.group(1))

@@ -1389,7 +1389,7 @@ source = simulation.ExplosionSource(ix=5, iy=5, waveform=lambda t: 0.0)  # code:
 <a id="a56"></a>
 ### A56. Run a program the library does not ship by its full path, check everything before it starts, and fake it in tests
 
-**Why.** phonometry runs two programs it does not ship: ffmpeg, to write videos, and ssh, to reach a node. A bad argument found after the program started leaves a half-written file or a node busy for nothing; a program found on `PATH` by a bare name in one place and by a setting in another runs a different binary from the one the user configured; and a test that needs the real program either skips on every runner that lacks it or never runs at all. Every video starts ffmpeg on the machine that writes it, and ffmpeg keeps two more rules on Windows, which the example shows: Windows looks a bare name up in the working directory before `PATH`, so `find_ffmpeg` refuses an ffmpeg it finds there first, and a console program started from a notebook or `pythonw` opens a window of its own, so ffmpeg starts with `NO_WINDOW`. Both are ffmpeg's: the ssh route finds ssh with `shutil.which` and starts it in a process group of its own, without either.
+**Why.** phonometry runs two programs it does not ship: ffmpeg, to write videos, and ssh, to reach a node. A bad argument found after the program started leaves a half-written file or a node busy for nothing; a program found on `PATH` by a bare name in one place and by a setting in another runs a different binary from the one the user configured; and a test that needs the real program either skips on every runner that lacks it or never runs at all. Every video starts ffmpeg on the machine that writes it, and ffmpeg keeps two more rules on Windows, which the example shows. Windows looks a bare name up in the working directory before `PATH`, so a file of that name left in a notebook's folder would run in place of the ffmpeg the user installed: `find_ffmpeg` passes over it to the one on `PATH`, which runs by its full path, and refuses with `FFmpegNotFoundError` an ffmpeg found only there; a working directory that `PATH` itself lists, or an ffmpeg named by its full path in `rcParams["animation.ffmpeg_path"]`, is the user's own choice. And a console program started from a notebook or `pythonw` opens a window of its own, so ffmpeg starts with `NO_WINDOW`. Both are ffmpeg's: the ssh route finds ssh with `shutil.which` and starts it in a process group of its own, without either.
 
 **Do**
 
@@ -1400,7 +1400,8 @@ from phonometry import io
 from phonometry.io._video import video_request
 from phonometry.io._video_encoders import NO_WINDOW, find_ffmpeg
 
-# The setting the user knows, rcParams["animation.ffmpeg_path"], resolved once to a full path.
+# The setting the user knows, rcParams["animation.ffmpeg_path"], resolved once to a full path
+# (on Windows the one on PATH, past an ffmpeg in the working directory).
 ffmpeg = find_ffmpeg()
 # The records checked themselves when built; the path is checked here, before the program starts.
 request = video_request("wave.webm", io.VideoOptions(quality="small"))

@@ -13,9 +13,12 @@ no more of those bytes than :func:`video_byte_cap` allows and none that do
 not begin as :data:`CONTAINER_HEADS` says the container does.
 
 A node that cannot draw (no matplotlib, or not the font every frame is drawn
-in) refuses here before it steps; one that cannot encode (no ffmpeg, or no
-encoder that writes this video at its size) is refused by the writer's own
-check, also before it steps.
+in) refuses here before it steps, and before the writer checks the run, the
+frame and the video options again: on such a node every job is refused as
+one it cannot draw (the client checked the same arguments before it sent
+them). One that cannot encode (no ffmpeg, or no encoder that writes this
+video at its size) is refused by the writer's own check, also before it
+steps.
 """
 
 from __future__ import annotations
@@ -26,17 +29,17 @@ import tempfile
 import threading
 from pathlib import Path
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, get_args
 
 from .._internal.validation import require_choice
 from ..io._video import stop_running_encoders
+from ..io._video_encoders import Container
 from .video import write_elastic_fdtd_animation, write_fdtd_animation
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Mapping
 
     from ..io._video import VideoOptions
-    from ..io._video_encoders import Container
     from ._remote.node import NodeStream
     from .compute import Compute
     from .elastic_fdtd import ElasticFDTDResult, ElasticRun
@@ -54,10 +57,11 @@ __all__ = [
 
 #: The font matplotlib's default style draws every label in; it ships inside
 #: matplotlib, so only a damaged install lacks it.
-_FONT = "DejaVu Sans"
+_FONT: Final = "DejaVu Sans"
 
-#: The containers a node writes.
-_CONTAINERS: Final[tuple[Container, ...]] = ("webm", "mp4", "gif")
+#: The containers a node writes: every one the video writer does, read from
+#: the Literal type, so a container added there is taken here.
+_CONTAINERS: Final[tuple[Container, ...]] = get_args(Container)
 
 #: Where each container's own first bytes are, and what they are. A GIF says
 #: which of its two versions it is.
@@ -79,10 +83,11 @@ _CONTAINER_SLACK: Final = 1 << 20
 #: raw 4:2:0 frames and of a GIF of noise.
 _PRESET_BYTES_PER_PIXEL: Final = 2
 
-#: The same when the caller's options decide the encode: raw 16-bit RGBA, the
-#: most a lossless encode of an 8-bit frame needs, at whatever bit depth the
-#: caller asks for (on noise, about three at 8 bits and up to about seven and
-#: a half at 10 or 12, x265 in 12-bit planar RGB).
+#: The same when the caller's options decide the encode: raw 16-bit RGBA. A
+#: measured bound, not a proven one: no lossless encode of an 8-bit frame
+#: measured took more, at whatever bit depth it was asked for (on noise, with
+#: ffmpeg 7.1, about three at 8 bits in YUV 4:4:4 and four in planar RGB, and
+#: up to about seven and a half at 10 or 12, x265 in 12-bit planar RGB).
 _CALLER_BYTES_PER_PIXEL: Final = 8
 
 
@@ -163,13 +168,14 @@ def video_byte_cap(
     room for its block lengths. Eight when the caller's options decide it
     (an ``ffmpeg_encoder`` of the caller's, or any ``ffmpeg_options``, which
     come after the library's preset and pixel format and so win over them):
-    raw 16-bit RGBA, the most a lossless encode of the library's 8-bit
-    frames needs, at whatever bit depth the caller asks for. On noise an
-    8-bit lossless 4:4:4 encode takes about three, and one at 10 or 12 bits
-    up to about seven and a half (x265 in 12-bit planar RGB). Plus 1 MiB for
-    what a container adds. A node's video longer than this is refused before
-    a byte of it is read. The bytes are written to disk as they arrive, so
-    this bounds the disk, not the memory.
+    raw 16-bit RGBA, a bound measured rather than proven: no lossless encode
+    of the library's 8-bit frames measured took more, at whatever bit depth
+    it was asked for. On noise, with ffmpeg 7.1, an 8-bit lossless encode
+    took about three in YUV 4:4:4 and about four in planar RGB, and one at
+    10 or 12 bits up to about seven and a half (x265 in 12-bit planar RGB).
+    Plus 1 MiB for what a container adds. A node's video larger than this is
+    refused before a byte of it is read. The bytes are written to disk as
+    they arrive, so this bounds the disk, not the memory.
     """
     padded = (width + width % 2) * (height + height % 2)
     per_pixel = (
@@ -215,9 +221,10 @@ def _encoded[R](container: object, write: Callable[[Path], R]) -> tuple[R, NodeS
     scratch = Path(tempfile.mkdtemp(prefix="phonometry-video-"))
     with _SCRATCH_LOCK:
         _SCRATCH.add(scratch)
+    path = scratch / f"video.{suffix}"
     try:
-        result = write(scratch / f"video.{suffix}")
-        stream = _ScratchVideo(scratch / f"video.{suffix}")
+        result = write(path)
+        stream = _ScratchVideo(path)
     except BaseException:
         _forget_scratch(scratch)
         raise

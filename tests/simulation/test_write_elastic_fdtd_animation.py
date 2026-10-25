@@ -77,6 +77,21 @@ def engines(monkeypatch: pytest.MonkeyPatch) -> list[ElasticFDTD2D]:
     return built
 
 
+def test_the_first_pass_stops_at_the_last_frame(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, engines: list[ElasticFDTD2D]
+) -> None:
+    """As the acoustic writer's: the pass that finds the limit leaves the steps after the last frame."""
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    run = _run()
+    steps = run._checked.steps
+    assert steps % _EVERY, "a run whose last frame comes before its last step"
+    res = write_elastic_fdtd_animation(tmp_path / "f.webm", run, frame=_SMALL)
+    first, second = engines
+    assert first.n == steps - steps % _EVERY
+    assert second.n == steps
+    assert np.array_equal(res.signals, elastic_fdtd_simulation(run).signals)
+
+
 def test_the_result_is_the_simulation_s_without_snapshots(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -97,8 +112,29 @@ def test_the_result_is_the_simulation_s_without_snapshots(
     assert fake.encodes()[0]["frames"] == (res.times.size - 1) // _EVERY + 1
 
 
+def test_the_snapshot_plot_of_the_writer_s_result_says_where_snapshots_come_from(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    res = write_elastic_fdtd_animation(
+        tmp_path / "s.webm",
+        _run(1e-3),
+        frame=AnimationFrame(size=(480, 246), color_limit=1e-6),
+    )
+    with pytest.raises(
+        ValueError,
+        match=r"^the result holds no snapshots; rerun elastic_fdtd_simulation with "
+        r"run\.recording\.snapshot_every set \(a run that "
+        r"write_elastic_fdtd_animation wrote to a video stores none\)$",
+    ):
+        res.plot(kind="snapshot")
+
+
 def test_the_found_limit_leaves_out_the_driven_cells() -> None:
-    run = _run()
+    # Drawn as v_x, which the force drives at the two cells either side of
+    # its face: the field there is stronger than anywhere the limit reads.
+    recording = ElasticRecording(snapshot_every=_EVERY, snapshot_field="vx")
+    run = _run(recording=recording)
     keep = video_module._elastic_keep(run)
     assert keep[15, 20] == 0.0  # the explosion's cell
     assert keep[4, 8] == 0.0  # the two cells either side of the force's face
@@ -109,6 +145,17 @@ def test_the_found_limit_leaves_out_the_driven_cells() -> None:
     res = elastic_fdtd_simulation(run)
     assert res.snapshots is not None
     assert limit == float(np.max(np.abs(res.snapshots) * keep))
+    # The limit read the kept cells only: the driven ones reach higher.
+    assert float(np.max(np.abs(res.snapshots))) > limit
+
+
+def test_a_vertical_force_drives_the_two_cells_either_side_of_its_face() -> None:
+    run = _run(sources=[ForceSource(ix=8, iy=4, direction="y", waveform=_PULSE.value)])
+    keep = video_module._elastic_keep(run)
+    assert keep[4, 8] == 0.0
+    assert keep[5, 8] == 0.0
+    assert keep[4, 9] == 1.0  # beside the face, not across it
+    assert keep[3, 8] == 1.0
 
 
 @pytest.mark.parametrize(("limit", "builds"), [(1e-6, 1), (None, 2)])
@@ -171,15 +218,25 @@ def test_a_covered_grid_asks_for_the_limit(
     assert fake.calls() == []
 
 
+@pytest.mark.parametrize("direction", ["x", "y"])
 @pytest.mark.parametrize("field", ["p", "vx", "vy"])
 def test_a_field_that_never_leaves_the_sources_has_nothing_to_scale_by(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, field: Literal["p", "vx", "vy"]
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    engines: list[ElasticFDTD2D],
+    field: Literal["p", "vx", "vy"],
+    direction: Literal["x", "y"],
 ) -> None:
-    # One step: the engine has written only the cells the sources drive.
+    # One step: the engine has written only the cells the sources drive, a
+    # force of either direction included, so the first pass finds nothing.
     fake = fake_ffmpeg.install(tmp_path, monkeypatch)
     one_step = ElasticFDTD2D(4000.0, 2300.0, 0.01, rho=2500.0, shape=(30, 40)).dt
     recording = ElasticRecording(snapshot_every=1, snapshot_field=field)
-    run = _run(one_step, recording=recording)
+    sources = [
+        ExplosionSource(ix=20, iy=15, waveform=_PULSE.value),
+        ForceSource(ix=8, iy=4, direction=direction, waveform=_PULSE.value),
+    ]
+    run = _run(one_step, recording=recording, sources=sources)
     # An elastic run has no injection lines: the message does not name any.
     with pytest.raises(
         ValueError,
@@ -187,6 +244,7 @@ def test_a_field_that_never_leaves_the_sources_has_nothing_to_scale_by(
         r"for the whole run.*AnimationFrame\(color_limit=\.\.\.\)$",
     ):
         write_elastic_fdtd_animation(tmp_path / "z.webm", run, frame=_SMALL)
+    assert len(engines) == 1  # the first pass's; no second pass was built
     assert fake.encodes() == []
 
 

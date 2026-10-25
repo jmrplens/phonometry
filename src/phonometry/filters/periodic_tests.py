@@ -606,6 +606,8 @@ class PeriodicTestClause(RichDisplay):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the verdict markers.
+        :raises TypeError: for ``yerr`` on the margins of Clause 13, which the
+            plot sets itself: each result's error bar is its own uncertainty.
         """
         from .._i18n import check_language
         from .._plot.filters import plot_periodic_clause
@@ -881,6 +883,8 @@ class FilterPeriodicVerification(RichDisplay):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the verdict markers.
+        :raises TypeError: for ``yerr``, which the plot sets itself: each
+            result's error bar is its own uncertainty.
         """
         from .._i18n import check_language
         from .._plot.filters import plot_periodic_verification

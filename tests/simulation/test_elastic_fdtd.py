@@ -974,7 +974,8 @@ def test_plot_rejects_unknown_kind_and_missing_snapshots() -> None:
     with pytest.raises(ValueError, match=r"kind must be 'probes'"):
         res.plot(kind="field")
     with pytest.raises(
-        ValueError, match=r"holds no snapshots; rerun .* with snapshot_every"
+        ValueError,
+        match=r"holds no snapshots; rerun .* with run\.recording\.snapshot_every",
     ):
         res.plot(kind="snapshot")
 

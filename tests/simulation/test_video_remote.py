@@ -9,11 +9,13 @@ of ``tests/fake_ffmpeg.py``, which the node's own process finds on PATH.
 from __future__ import annotations
 
 import contextlib
+import dataclasses
 import errno
 import inspect
 import pathlib
 import shutil
 import subprocess
+import sys
 import warnings
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
@@ -22,6 +24,7 @@ import numpy as np
 import pytest
 
 pytest.importorskip("matplotlib")
+import child_process
 import fake_ffmpeg
 import matplotlib as mpl
 import refusing_disk
@@ -48,7 +51,7 @@ from phonometry.simulation import (
     write_fdtd_animation,
 )
 from phonometry.simulation import video as video_module
-from phonometry.simulation._remote import client
+from phonometry.simulation._remote import client, package
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -72,6 +75,10 @@ _RUN = FDTDRun(
     sources=[_SOURCE],
     recording=FDTDRecording(probes=[(5, 5)], snapshot_every=10),
 )
+#: An elastic run of 471 steps, a frame every 50 of them: ten frames, which
+#: the node draws one at a time. A frame every fifth step, 95 of them, made
+#: the two tests that write it take about 17 s, against 5 s, and tested no
+#: more: neither counts the frames.
 _ELASTIC = ElasticRun(
     c_p=4000.0,
     c_s=2300.0,
@@ -80,7 +87,7 @@ _ELASTIC = ElasticRun(
     rho=2500.0,
     shape=(20, 24),
     sources=[_EXPLOSION],
-    recording=ElasticRecording(probes=[(4, 4)], snapshot_every=5),
+    recording=ElasticRecording(probes=[(4, 4)], snapshot_every=50),
 )
 _FRAME = AnimationFrame(size=(480, 246), color_limit=1.0)
 
@@ -100,6 +107,12 @@ def test_a_node_writes_the_video_and_this_machine_the_file(
     assert np.array_equal(res.times, here.times)
     assert res.snapshots is None
     assert res.provenance.host == node
+    # The rest of the provenance is the run's here, the node's package aside.
+    assert res.provenance.package_sha256 == package.installed_package().digest
+    assert (
+        dataclasses.replace(res.provenance, host=None, package_sha256=None)
+        == here.provenance
+    )
     assert target.read_bytes().startswith(_WEBM)
     # The node encoded into a scratch directory of its own, not into `target`.
     assert "phonometry-video-" in fake.encodes()[0]["argv"][-1]
@@ -140,6 +153,62 @@ def test_an_elastic_video_on_a_node(
     )
     assert np.array_equal(res.signals, elastic_fdtd_simulation(_ELASTIC).signals)
     assert res.provenance.host == node
+    assert target.read_bytes().startswith(_WEBM)
+
+
+#: A client process that cannot import matplotlib, writing a video on the node
+#: the test's fixture names: argv is the stand-in for ssh, the path, the host.
+_WITHOUT_MATPLOTLIB = """
+import importlib.abc
+import sys
+
+
+class _Absent(importlib.abc.MetaPathFinder):
+    def find_spec(self, name, path=None, target=None):
+        if name.partition(".")[0] == "matplotlib":
+            raise ImportError(f"{name} is not installed on this machine")
+        return None
+
+
+sys.meta_path.insert(0, _Absent())
+from phonometry.simulation import (
+    AnimationFrame, Compute, FDTDRecording, FDTDRun, GaussianPulse,
+    write_fdtd_animation,
+)
+from phonometry.simulation._remote import command
+
+command._SSH_PROGRAM = (sys.executable, sys.argv[1])
+run = FDTDRun(
+    c=343.0, dx=0.01, duration_s=1e-3, shape=(30, 40),
+    sources=[GaussianPulse(ix=20, iy=15, half_width_s=4e-5)],
+    recording=FDTDRecording(probes=[(5, 5)], snapshot_every=10),
+)
+res = write_fdtd_animation(
+    sys.argv[2], run, compute=Compute(host=sys.argv[3]),
+    frame=AnimationFrame(size=(480, 246)),
+)
+print(res.provenance.host, "matplotlib" in sys.modules)
+"""
+
+
+def test_a_client_without_matplotlib_writes_on_a_node(
+    node: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Only the node draws: this machine checks the frame and the path, and writes the bytes, with no matplotlib.
+
+    The colour limit is found on the node too, by a first pass there.
+    """
+    fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "remote.webm"
+    fake_ssh = pathlib.Path(__file__).with_name("fake_ssh.py")
+    done = child_process.run(
+        [sys.executable, "-c", _WITHOUT_MATPLOTLIB, str(fake_ssh), str(target), node],
+        timeout=300,
+        capture_output=True,
+        text=True,
+    )
+    assert done.returncode == 0, done.stderr
+    assert done.stdout.split() == [node, "False"]
     assert target.read_bytes().startswith(_WEBM)
 
 

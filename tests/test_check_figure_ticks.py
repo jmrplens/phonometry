@@ -57,6 +57,7 @@ pytestmark = pytest.mark.pinned_stack
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+    from types import ModuleType
 
     from matplotlib.figure import Figure
 
@@ -313,22 +314,19 @@ def test_the_measurement_leaves_the_written_file_alone() -> None:
     assert before == after
 
 
-def test_the_spanish_pass_is_measured_and_says_so(tmp_path: pathlib.Path) -> None:
+def test_the_spanish_pass_is_measured_and_says_so(
+    tmp_path: pathlib.Path, figure_theme: ModuleType
+) -> None:
     """Measured through the saver, on both light passes and never the dark one."""
-    from figures import i18n, theme
+    from figures import i18n
 
-    saved = dict(mpl.rcParams)
-    try:
-        for lang, dark in (("en", False), ("es", False), ("es", True)):
-            i18n.set_lang(lang)
-            theme.set_theme(dark=dark)
-            fig = _band_axis(cleared=False)
-            theme.save_figure(str(tmp_path), "probe.svg")
-            plt.close(fig)
-    finally:
-        i18n.set_lang("en")
-        theme.set_theme(dark=False)
-        mpl.rcParams.update(saved)
+    # The fixture puts the language, the theme and the settings back.
+    for lang, dark in (("en", False), ("es", False), ("es", True)):
+        i18n.set_lang(lang)
+        figure_theme.set_theme(dark=dark)
+        fig = _band_axis(cleared=False)
+        figure_theme.save_figure(str(tmp_path), "probe.svg")
+        plt.close(fig)
 
     assert _kinds(audit._FOUND["probe"], audit.STRAY)
     assert _kinds(audit._FOUND["probe_es"], audit.STRAY)

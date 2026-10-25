@@ -120,7 +120,7 @@ class VideoOptions(RichDisplay):
     checked when the path is known, still before anything starts.
 
     :param encoder: ``"auto"`` (default: the GPU encoders first, NVENC,
-        Quick Sync, VAAPI and VideoToolbox, each tried on one real frame of
+        Quick Sync, VAAPI and VideoToolbox, each tried on one black frame of
         the video's size, then the CPU), ``"cpu"``, ``"nvenc"``, ``"qsv"``,
         ``"vaapi"`` or ``"videotoolbox"``. A GIF is always written on the CPU.
     :param codec: ``"av1"``, ``"vp9"``, ``"hevc"`` or ``"h264"``; ``None``
@@ -138,9 +138,10 @@ class VideoOptions(RichDisplay):
         with an ``encoder`` or ``codec`` of your own.
     :param ffmpeg_options: More ffmpeg output options, as separate strings,
         written after the encoder's preset and pixel format (so a repeated
-        one of those wins) and before the container's own options (an MP4's
-        ``+faststart`` and HEVC tag, a GIF's endless loop), which stay; held
-        as a tuple.
+        one of those wins) and before the container's own options, which
+        stay: an MP4's ``+faststart``, and its HEVC tag when the library
+        chose HEVC (not for an ``ffmpeg_encoder`` of your own), and a GIF's
+        endless loop; held as a tuple.
     :param vaapi_device: The GPU device a VAAPI encoder encodes on, as the
         path of its device file on the machine that encodes (the node's, for
         a video written on a node); ``"/dev/dri/renderD128"`` (default) is
@@ -914,7 +915,8 @@ def write_video(
 
     The container is the suffix of ``path``: ``.webm`` holds AV1 or VP9,
     ``.mp4`` AV1, HEVC or H.264 (written to start playing before it has
-    downloaded, HEVC tagged so Apple's players open it), ``.gif`` a palette
+    downloaded, an HEVC the library chose tagged so Apple's players open
+    it), ``.gif`` a palette
     of up to 256 colours. Every frame is drawn with Agg and piped to ffmpeg,
     so this process holds one frame at a time; for a GIF, ffmpeg itself
     holds every frame until the last one has arrived, since the palette is
@@ -924,7 +926,7 @@ def write_video(
     ffmpeg is the program matplotlib's ``rcParams["animation.ffmpeg_path"]``
     names (``"ffmpeg"`` on ``PATH`` by default). How it encodes is ``video``,
     a :class:`VideoOptions`: by default the GPU encoders are tried first
-    (NVENC, Quick Sync, VAAPI, VideoToolbox), each with one real frame of
+    (NVENC, Quick Sync, VAAPI, VideoToolbox), each with one black frame of
     this size, and the CPU last: SVT-AV1, or without it VP9 in a WebM and
     x265 or x264 in an MP4. A GIF is written on the CPU, with no trial. The
     encoder chosen is logged on the ``phonometry.io`` logger.

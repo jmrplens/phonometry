@@ -3,7 +3,9 @@
 
 :func:`run_remote` is the remote route of
 :func:`~phonometry.simulation.fdtd_simulation` and
-:func:`~phonometry.simulation.elastic_fdtd_simulation`. Everything that can
+:func:`~phonometry.simulation.elastic_fdtd_simulation`, and of the two video
+writers, :func:`~phonometry.simulation.write_fdtd_animation` and
+:func:`~phonometry.simulation.write_elastic_fdtd_animation`. Everything that can
 refuse the call does so before a connection opens: the hosts file names the
 node, the arguments become data, the package is read from disk. Then one
 ``ssh`` process carries the conversation :mod:`.bootstrap` defines.
@@ -12,8 +14,9 @@ The client does not trust the bytes a node sends. Every header field is
 checked for its type, and every array against the name, the dtype and the
 shape the request implies, before a byte of it is read; the arrays are read
 one row at a time into host arrays the caller allocated, and a stream after
-them (a video) is checked against its cap and written to the caller's sink a
-chunk at a time. Text the node sends reaches the caller's terminal, log and
+them (a video) is checked against its cap, and its first bytes against the
+ones its file must begin with, and written to the caller's sink a chunk at a
+time. Text the node sends reaches the caller's terminal, log and
 warnings with its control characters escaped (:func:`_printable`). A
 failure of the transport or of the node is a :class:`ComputeRemoteError`
 carrying the node's traceback and the end of its standard error; with
@@ -197,12 +200,24 @@ class StreamSpec:
     says what its file begins with): a stream too short to hold the shortest
     of them, an empty one included, is refused before a byte of it is read,
     and one whose first chunk begins as none of them before a byte of it
-    reaches the sink.
+    reaches the sink. An empty head, which every stream would begin as, or
+    one at a negative offset is refused when the record is built.
+
+    :raises ValueError: for an empty head or a negative offset.
     """
 
     name: str
     max_bytes: int
     heads: tuple[tuple[int, bytes], ...] = ()
+
+    def __post_init__(self) -> None:
+        for at, head in self.heads:
+            if at < 0 or not head:
+                msg = (
+                    f"a head of {self.name!r} is some bytes at an offset of 0 or "
+                    f"more, got {head!r} at {at}"
+                )
+                raise ValueError(msg)
 
 
 @dataclass(frozen=True)
@@ -451,14 +466,22 @@ def _remedy(stage: str, entry: HostEntry) -> str | None:
 
 
 def _popen(argv: list[str]) -> subprocess.Popen[bytes]:
-    """Start ssh in a process group of its own: an interrupt reaches this process, which stops ssh."""
+    """Start ssh in a process group of its own: an interrupt reaches this process, which stops ssh.
+
+    On Windows ssh also starts with no console window. Started from a
+    process with no console (``pythonw``, or a notebook kernel a GUI front
+    end started), a console program such as ssh would open one of its own
+    for the whole run; ssh never prompts (``BatchMode``), and it is stopped
+    with ``kill()``, never by a console event, so it needs none.
+    """
     if sys.platform == "win32":
         return subprocess.Popen(  # nosec B603 - the library's own argv, the destination after "--"
             argv,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+            | subprocess.CREATE_NO_WINDOW,
         )
     return subprocess.Popen(  # nosec B603 - the library's own argv, the destination after "--"
         argv,
@@ -489,14 +512,15 @@ def _refuse_pyodide(host: str) -> None:
 def open_session(entry: HostEntry, request: Compute) -> Iterator[Session]:
     """One ssh process to *entry*, stopped on the way out whatever happened.
 
-    :raises ComputeRemoteError: in Pyodide, without an ssh client, or when
-        ssh does not start.
+    :raises ComputeRemoteError: in Pyodide, without an ssh client on
+        ``PATH``, on Windows with an ssh found only in the working directory,
+        or when ssh does not start.
     """
     _refuse_pyodide(entry.name)
     try:
         argv = command.ssh_argv(entry, request)
-    except FileNotFoundError:
-        msg = f"node {entry.name!r}: no ssh client on PATH; install OpenSSH to run on a node"
+    except FileNotFoundError as exc:
+        msg = f"node {entry.name!r}: {exc}"
         raise ComputeRemoteError(msg, host=entry.name) from None
     timeout_s = request.timeout_s if request.timeout_s is not None else entry.timeout_s
     try:
@@ -591,9 +615,10 @@ def _checked_stream(
     if spec.heads:
         shortest = min(at + len(head) for at, head in spec.heads)
         if length < shortest:
+            noun = "byte" if length == 1 else "bytes"
             msg = (
-                f"the node sent {length} bytes of {spec.name!r}, too few to begin as the "
-                "file the request names"
+                f"the node sent {length} {noun} of {spec.name!r}, too few to begin as "
+                "the file the request names"
             )
             raise session.failure(msg)
     return length
@@ -623,7 +648,8 @@ def _check_arrays(
 
     Refused before a byte of any is read: another list of arrays than the
     request implies, an array of another name, dtype or shape, a stream
-    longer than its cap, or buffers that do not hold what was described.
+    longer than its cap or too short to hold the first bytes its file begins
+    with, or buffers that do not hold what was described.
     """
     described = session.field(header, "arrays", list)
     wanted: list[ArraySpec | StreamSpec] = [*expected.arrays]
@@ -784,7 +810,9 @@ def _drain(
     byte of it is written, so bytes of another kind of file never reach
     *sink*. That chunk is the whole stream or its first ``_STREAM_CHUNK``
     bytes, far more than the few a container begins with; a head it does
-    not hold whole is no match.
+    not hold whole is no match. A stream that breaks after its first chunk
+    (the node or the connection failing) has written what came before to
+    *sink*: the caller discards it.
     """
     remaining = length
     first = True
@@ -906,7 +934,9 @@ def run_remote(
 
     :return: The run's provenance, its host and package digest set; ``None``
         when the run failed, ``request.fallback`` asks to run here instead,
-        and the :class:`ComputeFallbackWarning` was raised.
+        and the :class:`ComputeFallbackWarning` was raised. After a failure,
+        raised or answered with ``None``, *sink* may hold the first part of a
+        stream that broke: the caller discards it.
     :raises KeyError: for a host the hosts file does not name.
     :raises ValueError: for a hosts file that cannot be read or is
         malformed, or arrays and a sink that do not match *expected*.

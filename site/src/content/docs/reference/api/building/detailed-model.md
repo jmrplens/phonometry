@@ -470,6 +470,22 @@ Plot the per-band path contributions and the resulting `R'`.
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
 
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the stacked bars' `Axes.bar`. |
+
+**Returns:** The axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `bottom`, which the plot sets itself: each path's share stands on the shares of the paths below it. |
+
 ### DetailedAirborneResult.report()
 
 ```python
@@ -556,6 +572,22 @@ Plot the per-band path contributions and the resulting `L'n`.
 
 Requires matplotlib (`pip install phonometry[plot]`); returns the
 `Axes`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `ax` | Existing axes, or `None` to create a figure. |
+| `language` | Label language, `"en"` (default) or `"es"`. |
+| `kwargs` | Forwarded to the stacked bars' `Axes.bar`. |
+
+**Returns:** The axes.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `bottom`, which the plot sets itself: each path's share stands on the shares of the paths below it. |
 
 ### DetailedImpactResult.report()
 

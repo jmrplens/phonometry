@@ -10,6 +10,7 @@ the ffprobe that decodes the video here.
 
 from __future__ import annotations
 
+import dataclasses
 import os
 import shutil
 import subprocess
@@ -28,6 +29,7 @@ from phonometry.simulation import (
     fdtd_simulation,
     write_fdtd_animation,
 )
+from phonometry.simulation._remote import package
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -65,6 +67,11 @@ def test_a_node_s_video_and_result(tmp_path: Path) -> None:
     assert np.array_equal(res.times, local.times)
     assert res.snapshots is None
     assert res.provenance.host == _NODE
+    assert res.provenance.package_sha256 == package.installed_package().digest
+    assert (
+        dataclasses.replace(res.provenance, host=None, package_sha256=None)
+        == local.provenance
+    )
     shown = subprocess.run(
         [
             "ffprobe",

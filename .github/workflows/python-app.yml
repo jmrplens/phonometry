@@ -1350,9 +1350,9 @@ jobs:
   # wheel, so the main matrix runs its logic against a fake ffmpeg and skips
   # the real encodes. This job installs Ubuntu's ffmpeg and runs them: WebM,
   # MP4 and GIF are written, then decoded and counted with ffprobe. Whether
-  # that ffmpeg has SVT-AV1 decides whether the AV1-first CPU path was
-  # tested, and the summary says which rather than failing the build over a
-  # distribution's choice of encoders.
+  # that ffmpeg has SVT-AV1 decides whether the AV1-first CPU path is
+  # tested, and the summary says which, before the tests run, rather than
+  # failing the build over a distribution's choice of encoders.
   video:
     name: Videos encode with a real ffmpeg
     runs-on: ubuntu-latest
@@ -1380,9 +1380,9 @@ jobs:
       run: |
         ffmpeg -hide_banner -version | head -1
         if ffmpeg -hide_banner -encoders | grep -q ' libsvtav1 '; then
-          echo "AV1-first CPU path: tested, this ffmpeg has SVT-AV1" >> "$GITHUB_STEP_SUMMARY"
+          echo "This ffmpeg has SVT-AV1, so the AV1-first CPU path is tested below" >> "$GITHUB_STEP_SUMMARY"
         else
-          echo "AV1-first CPU path: untested, this ffmpeg has no SVT-AV1 (VP9 was tested)" >> "$GITHUB_STEP_SUMMARY"
+          echo "This ffmpeg has no SVT-AV1, so the AV1-first CPU path is not tested below (VP9 is)" >> "$GITHUB_STEP_SUMMARY"
         fi
     - name: Install dependencies
       run: |

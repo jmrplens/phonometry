@@ -758,6 +758,8 @@ class RoundRobinPrecision(OwnsArrays):
         :param kwargs: Forwarded to the histogram bars.
         :return: The axes. Requires matplotlib
             (``pip install phonometry[plot]``).
+        :raises TypeError: for ``width`` or ``align``, which the plot sets
+            itself: each bar covers the class it counts.
         """
         from ..._i18n import check_language
         from ..._plot.environment import plot_round_robin_precision

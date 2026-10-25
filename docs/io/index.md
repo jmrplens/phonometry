@@ -58,6 +58,12 @@ JSON Schema of such a file, so an editor completes one as you type it and
 marks what the reader would refuse for its form; the site publishes the
 schema of every row class the library publishes.
 
+The last files the library writes are not measurements: videos.
+`write_video` writes any matplotlib animation to a WebM, an MP4 or a GIF
+through ffmpeg, on a GPU encoder when one works here, and the two simulation
+writers draw an FDTD run straight into a video as it is computed, here or on
+a node, without storing its snapshots.
+
 ## Pages in this section
 
 - [Reading and writing measurement audio](audio-files.md): the

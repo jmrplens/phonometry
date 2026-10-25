@@ -246,6 +246,8 @@ if TYPE_CHECKING:
     from matplotlib.lines import Line2D
     from matplotlib.patches import Patch
 
+    from phonometry.simulation import ElasticFDTDResult, FDTDResult
+
 
 # --------------------------------------------------------------------------
 # Soft-dependency contract: lazy import + ImportError guidance
@@ -1366,6 +1368,57 @@ def _obstacle_domain() -> object:
     return FDTD2D(343.0, 0.05, shape=(20, 20), obstacle_mask=mask)
 
 
+def _snapshot_plot(result: FDTDResult | ElasticFDTDResult) -> object:
+    """*result* with its snapshot plot as its ``plot``, for a row of the table below."""
+    import functools
+    import types
+
+    return types.SimpleNamespace(plot=functools.partial(result.plot, kind="snapshot"))
+
+
+def _acoustic_snapshots() -> object:
+    from phonometry.simulation import (
+        FDTDRecording,
+        FDTDRun,
+        GaussianPulse,
+        fdtd_simulation,
+    )
+
+    run = FDTDRun(
+        c=343.0,
+        dx=9.0e-3,
+        duration_s=1.0e-3,
+        shape=(20, 24),
+        sources=[GaussianPulse(ix=7, iy=5, half_width_s=1.0e-4)],
+        recording=FDTDRecording(snapshot_every=10),
+    )
+    return _snapshot_plot(fdtd_simulation(run))
+
+
+def _elastic_snapshots() -> object:
+    from phonometry.simulation import (
+        ElasticRecording,
+        ElasticRun,
+        ExplosionSource,
+        elastic_fdtd_simulation,
+    )
+
+    def pulse(t: float) -> float:
+        return float(np.exp(-(((t - 2e-5) / 5e-6) ** 2)))
+
+    run = ElasticRun(
+        c_p=4000.0,
+        c_s=2300.0,
+        dx=0.01,
+        duration_s=1e-4,
+        rho=2500.0,
+        shape=(20, 21),
+        sources=[ExplosionSource(ix=10, iy=9, waveform=pulse)],
+        recording=ElasticRecording(snapshot_every=4),
+    )
+    return _snapshot_plot(elastic_fdtd_simulation(run))
+
+
 @pytest.mark.parametrize(
     ("factory", "draw", "keyword", "value"),
     [
@@ -1373,8 +1426,19 @@ def _obstacle_domain() -> object:
         (_round_robin_precision, "plot", "align", "center"),
         (_programme_characteristic_voltage, "plot", "bottom", 0.0),
         (_binned_levels, "plot", "yerr", 0.0),
+        (_filter_periodic, "plot", "yerr", 0.0),
+        (lambda: _filter_periodic().clause("13"), "plot", "yerr", 0.0),
+        (_slm_periodic, "plot", "yerr", 0.0),
+        (
+            lambda: _slm_periodic().requirement("electrical_weighting"),
+            "plot",
+            "yerr",
+            0.0,
+        ),
         (_obstacle_domain, "plot_geometry", "extent", (0.0, 1.0, 1.0, 0.0)),
         (_obstacle_domain, "plot_geometry", "origin", "lower"),
+        (_acoustic_snapshots, "plot", "color_limit", 0.5),
+        (_elastic_snapshots, "plot", "color_limit", 0.5),
     ],
 )
 def test_a_keyword_the_renderer_computes_from_the_data_is_refused(
@@ -1383,7 +1447,8 @@ def test_a_keyword_the_renderer_computes_from_the_data_is_refused(
     """The caller's style wins over the renderer's, its data does not.
 
     A bar baseline measured from a floor, the error bars of a mean, the bins
-    of a histogram and the extent of a field drawn from the caller would put
+    of a histogram, the extent of a field and the colour limit of a single
+    snapshot, whose scale is its own field's, drawn from the caller would put
     the data where it was not measured, so the renderer names and refuses
     them instead of drawing the caller's numbers over its own.
     """

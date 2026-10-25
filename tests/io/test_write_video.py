@@ -269,6 +269,28 @@ def test_a_failed_encode_names_the_encoder_that_ran(
     assert "with the encoder libsvtav1; ffmpeg said:" in str(caught.value)
 
 
+def test_an_encoder_that_fails_once_every_frame_is_in_says_how_ffmpeg_exited(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ffmpeg read every frame and exited with an error while it finished the file."""
+    fake = fake_ffmpeg.install(tmp_path, monkeypatch)
+    target = tmp_path / "w.webm"
+    target.write_bytes(b"the video that was there")
+    animation = _animation()
+    aom = io.VideoOptions(ffmpeg_encoder="libaom-av1")
+    with pytest.raises(
+        io.VideoEncoderError,
+        match=r"^ffmpeg exited with status 1 while writing .*w\.webm with the "
+        r"encoder libaom-av1; ffmpeg said:\nfake ffmpeg: Error while opening "
+        r"encoder libaom-av1$",
+    ):
+        io.write_video(target, animation, video=aom)
+    assert fake.encodes()[0]["frames"] == 6
+    assert target.read_bytes() == b"the video that was there"
+    if sys.platform != "win32":
+        assert [p.name for p in tmp_path.iterdir() if p.name.endswith(".partial")] == []
+
+
 def test_a_partial_file_the_system_will_not_remove_does_not_hide_the_failure(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

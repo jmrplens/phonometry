@@ -616,6 +616,12 @@ so on) that draws the widest deviation in at most 25 classes.
 
 **Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `width` or `align`, which the plot sets itself: each bar covers the class it counts. |
+
 ### RoundRobinPrecision.q09_level_difference
 
 *property*

@@ -25,7 +25,7 @@ from matplotlib.figure import Figure
 
 from phonometry import io
 from phonometry.io import VideoOptions
-from phonometry.io._video_encoders import FFMPEG_NAMES
+from phonometry.io._video_encoders import FFMPEG_NAMES, describe
 from phonometry.simulation import (
     FDTD2D,
     AnimationFrame,
@@ -384,8 +384,8 @@ def test_the_callers_options_widen_the_ceiling(
 
 
 #: Options of the caller's that override the library's preset and pixel
-#: format (they come after both): lossless 4:4:4 at 8 bits, the least an
-#: 8-bit encode can compress.
+#: format (they come after both): lossless 4:4:4 at 8 bits, in YUV, about
+#: three bytes a pixel on noise (8-bit planar RGB takes about four).
 _LOSSLESS_444 = ("-pix_fmt", "yuv444p", "-crf", "0")
 
 #: The same frames encoded losslessly at 10 and 12 bits, which an 8-bit frame
@@ -398,22 +398,29 @@ _VP9_LOSSLESS_12 = ("-pix_fmt", "yuv444p12le", "-crf", "0", "-lossless", "1")
 
 
 def _skip_unless_this_ffmpeg_takes(video: VideoOptions) -> None:
-    """Skip a case whose options ask for a pixel format its encoder does not take in this ffmpeg.
+    """Skip a case whose encoder this ffmpeg lacks, or does not take the pixel format its options ask for.
 
-    An ffmpeg without the encoder lists no format for it, so that case skips
-    too.
+    The encoder is the one the case's kind of encoder and codec name; a
+    distribution's ffmpeg may be built without x265 or libvpx, and a case
+    that needs one is not a failure of the writer there.
     """
-    options = video.ffmpeg_options
-    if video.codec is None or "-pix_fmt" not in options:
+    if video.codec is None:
         return
-    encoder = FFMPEG_NAMES["cpu", video.codec]
-    pixel_format = options[options.index("-pix_fmt") + 1]
+    kind = "cpu" if video.encoder == "auto" else video.encoder
+    encoder = FFMPEG_NAMES[kind, video.codec]
     ffmpeg = shutil.which("ffmpeg")
     assert ffmpeg is not None
+    if encoder not in describe(ffmpeg).encoders:
+        pytest.skip(f"this ffmpeg has no {encoder}")
+    options = video.ffmpeg_options
+    if "-pix_fmt" not in options:
+        return
+    pixel_format = options[options.index("-pix_fmt") + 1]
     described = subprocess.run(
         [ffmpeg, "-hide_banner", "-h", f"encoder={encoder}"],
         capture_output=True,
-        text=True,
+        encoding="utf-8",
+        errors="replace",
         timeout=60,
         check=False,
     ).stdout

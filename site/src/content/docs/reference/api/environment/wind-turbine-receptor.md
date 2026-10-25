@@ -256,6 +256,12 @@ uncertainty as error bars.
 
 **Returns:** The axes.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `yerr`, which the plot sets itself: each bin average carries the uncertainty of its mean. |
+
 ## EXAMPLE_TYPE_B_UNCERTAINTIES_DB
 
 *Constant* (`mapping`).

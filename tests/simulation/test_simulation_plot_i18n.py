@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import matplotlib as mpl
 
@@ -275,32 +275,62 @@ def test_an_elastic_video_frame_shows_the_plot_s_field_scale_and_colormap() -> N
     assert framed.get_extent() == pytest.approx(plotted.images[0].get_extent())
 
 
-def test_the_snapshot_plot_refuses_a_colour_limit_by_name() -> None:
-    """The scale of a single snapshot is its own field's; vmin and vmax change it."""
-    res = _result()
-    with pytest.raises(TypeError, match="color_limit cannot be overridden"):
-        res.plot(kind="snapshot", color_limit=0.5)
-    plt.close("all")
+@pytest.mark.parametrize("kind", ["acoustic", "elastic"])
+def test_a_decimated_video_frame_shows_the_plot_s_field_over_the_domain(
+    kind: str,
+) -> None:
+    """Each kept sample over its block of cells, the axes ending at the domain's edges, as the plot draws it."""
+    from matplotlib.figure import Figure
 
+    from phonometry._plot.simulation import elastic_frame, fdtd_frame
 
-def test_the_elastic_snapshot_plot_refuses_a_colour_limit_by_name() -> None:
-    """The elastic snapshot takes its scale from its field as the acoustic one does."""
-
-    def pulse(t: float) -> float:
-        return float(np.exp(-(((t - 2e-5) / 5e-6) ** 2)))
-
-    res = elastic_fdtd_simulation(
-        ElasticRun(
-            c_p=4000.0,
-            c_s=2300.0,
-            dx=0.01,
-            duration_s=1e-4,
-            rho=2500.0,
-            shape=(20, 21),
-            sources=[ExplosionSource(ix=10, iy=9, waveform=pulse)],
-            recording=ElasticRecording(snapshot_every=4),
+    pulse = GaussianPulse(ix=0, iy=0, half_width_s=4e-5)
+    if kind == "acoustic":
+        res: Any = fdtd_simulation(
+            FDTDRun(
+                c=343.0,
+                dx=0.01,
+                duration_s=1e-3,
+                shape=(30, 101),
+                sources=[GaussianPulse(ix=50, iy=15, half_width_s=4e-5)],
+                recording=FDTDRecording(snapshot_every=10, snapshot_decimation=4),
+            )
         )
-    )
-    with pytest.raises(TypeError, match="color_limit cannot be overridden"):
-        res.plot(kind="snapshot", color_limit=0.5)
-    plt.close("all")
+    else:
+        res = elastic_fdtd_simulation(
+            ElasticRun(
+                c_p=4000.0,
+                c_s=2300.0,
+                dx=0.01,
+                duration_s=2e-4,
+                rho=2500.0,
+                shape=(20, 21),
+                sources=[ExplosionSource(ix=10, iy=9, waveform=pulse.value)],
+                recording=ElasticRecording(snapshot_every=4, snapshot_decimation=3),
+            )
+        )
+    frame = 2
+    field = res.snapshots[frame]
+    plotted = res.plot(ax=Figure().add_subplot(), kind="snapshot", frame=frame)
+    where: dict[str, Any] = {
+        "dx": res.dx,
+        "shape": res.shape,
+        "sources": res.sources,
+        "probe_positions": res.probe_positions,
+        "obstacle_mask": res.obstacle_mask,
+        "decimation": res.snapshot_decimation,
+        "color_limit": float(np.abs(field).max()),
+        "time_s": float(res.snapshot_times[frame]),
+        "last_time_s": float(res.snapshot_times[-1]),
+        "language": "en",
+    }
+    ax = Figure().add_subplot()
+    if kind == "acoustic":
+        framed = fdtd_frame(ax, field, **where)
+    else:
+        framed = elastic_frame(ax, field, snapshot_field=res.snapshot_field, **where)
+    assert res.snapshot_decimation > 1
+    assert np.array_equal(np.asarray(framed.get_array()), np.asarray(field))
+    assert framed.get_extent() == pytest.approx(plotted.images[0].get_extent())
+    assert ax.get_xlim() == pytest.approx(plotted.get_xlim())
+    assert ax.get_ylim() == pytest.approx(plotted.get_ylim())

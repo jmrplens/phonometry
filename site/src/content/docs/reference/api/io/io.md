@@ -43,13 +43,14 @@ audio, where the audio formats themselves have no field for it.
 through ffmpeg, the program matplotlib already knows where to find: every
 frame is drawn with Agg and piped into ffmpeg's stdin, the encoder of a
 WebM or an MP4 is the first of the GPU encoders and then the CPU's that
-encodes a real frame of that size (a GIF is written on the CPU), and the
+encodes one black frame of that size (a GIF is written on the CPU), and the
 file appears only when ffmpeg has finished it. How a
 video is encoded is one record, [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions), which the
 simulation writers take too.
 [`FFmpegNotFoundError`](/phonometry/reference/api/io/io/#ffmpegnotfounderror) says ffmpeg is missing, with how to install it;
-[`VideoEncoderError`](/phonometry/reference/api/io/io/#videoencodererror) says no encoder can write the video, or ffmpeg
-failed while writing it, with its last words.
+[`VideoEncoderError`](/phonometry/reference/api/io/io/#videoencodererror) says no encoder can write the video, ffmpeg
+cannot start or failed while writing it (with its last words), or the
+directory or the disk does not take the file.
 
 The rows of the library's published tables of materials are data read from a
 file too, and the type they share lives here: [`CatalogueRow`](/phonometry/reference/api/io/io/#cataloguerow), with
@@ -1731,7 +1732,7 @@ has scrolled away.
 
 ## VideoEncoderError
 
-No encoder can write the video, or ffmpeg failed while writing it.
+No encoder can write the video, ffmpeg cannot start or fails while writing it, or the directory or the disk does not take the file.
 
 ## VideoOptions
 
@@ -1759,12 +1760,12 @@ checked when the path is known, still before anything starts.
 
 | Name | Description |
 | :--- | :--- |
-| `encoder` | `"auto"` (default: the GPU encoders first, NVENC, Quick Sync, VAAPI and VideoToolbox, each tried on one real frame of the video's size, then the CPU), `"cpu"`, `"nvenc"`, `"qsv"`, `"vaapi"` or `"videotoolbox"`. A GIF is always written on the CPU. |
+| `encoder` | `"auto"` (default: the GPU encoders first, NVENC, Quick Sync, VAAPI and VideoToolbox, each tried on one black frame of the video's size, then the CPU), `"cpu"`, `"nvenc"`, `"qsv"`, `"vaapi"` or `"videotoolbox"`. A GIF is always written on the CPU. |
 | `codec` | `"av1"`, `"vp9"`, `"hevc"` or `"h264"`; `None` (default) takes the best the container holds that the encoder writes, AV1 first. An `encoder` of your own must write it: NVENC writes no VP9, VideoToolbox only HEVC and H.264. A GIF has no codec. |
 | `quality` | `"high"`, `"standard"` (default) or `"small"`: each encoder's constant-quality setting, or a GIF's palette size and dither. |
 | `fps` | Frames per second; `None` (default) takes the animation's `interval`, and a simulation video plays at 30. |
 | `ffmpeg_encoder` | An ffmpeg encoder name to use as it is, with `ffmpeg_options`: no trial, no preset, no pixel format, and no check that the container holds what it writes. Not with a GIF, nor with an `encoder` or `codec` of your own. |
-| `ffmpeg_options` | More ffmpeg output options, as separate strings, written after the encoder's preset and pixel format (so a repeated one of those wins) and before the container's own options (an MP4's `+faststart` and HEVC tag, a GIF's endless loop), which stay; held as a tuple. |
+| `ffmpeg_options` | More ffmpeg output options, as separate strings, written after the encoder's preset and pixel format (so a repeated one of those wins) and before the container's own options, which stay: an MP4's `+faststart`, and its HEVC tag when the library chose HEVC (not for an `ffmpeg_encoder` of your own), and a GIF's endless loop; held as a tuple. |
 | `vaapi_device` | The GPU device a VAAPI encoder encodes on, as the path of its device file on the machine that encodes (the node's, for a video written on a node); `"/dev/dri/renderD128"` (default) is the first GPU of a Linux machine. Used whenever the library tries or uses a VAAPI encoder; an `ffmpeg_encoder` of your own takes none of the library's device setup. |
 
 **Raises**
@@ -2006,7 +2007,8 @@ Write a matplotlib animation to a WebM, MP4 or GIF file with ffmpeg.
 
 The container is the suffix of `path`: `.webm` holds AV1 or VP9,
 `.mp4` AV1, HEVC or H.264 (written to start playing before it has
-downloaded, HEVC tagged so Apple's players open it), `.gif` a palette
+downloaded, an HEVC the library chose tagged so Apple's players open
+it), `.gif` a palette
 of up to 256 colours. Every frame is drawn with Agg and piped to ffmpeg,
 so this process holds one frame at a time; for a GIF, ffmpeg itself
 holds every frame until the last one has arrived, since the palette is
@@ -2016,7 +2018,7 @@ has finished it, so a failure leaves whatever was there before.
 ffmpeg is the program matplotlib's `rcParams["animation.ffmpeg_path"]`
 names (`"ffmpeg"` on `PATH` by default). How it encodes is `video`,
 a [`VideoOptions`](/phonometry/reference/api/io/io/#videooptions): by default the GPU encoders are tried first
-(NVENC, Quick Sync, VAAPI, VideoToolbox), each with one real frame of
+(NVENC, Quick Sync, VAAPI, VideoToolbox), each with one black frame of
 this size, and the CPU last: SVT-AV1, or without it VP9 in a WebM and
 x265 or x264 in an MP4. A GIF is written on the CPU, with no trial. The
 encoder chosen is logged on the `phonometry.io` logger.

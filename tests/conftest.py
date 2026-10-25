@@ -3,13 +3,16 @@ import os
 import sys
 from collections.abc import Iterator
 from pathlib import Path
+from types import ModuleType
 
 import pinned_stack
 import pytest
 
 # pytest's limit on a test's time (faulthandler_timeout in pyproject.toml),
-# set again once a test has failed, so that its teardown has one too.
-pytest_plugins = ("hang_guard",)
+# set again once a test has failed, so that its teardown has one too; and
+# matplotlib's settings, which a test must leave as it found them and which
+# are put back after each test module is imported.
+pytest_plugins = ("hang_guard", "matplotlib_guard")
 
 # Select a non-interactive matplotlib backend for the headless test suite.
 # The library no longer forces a backend (see issue #52), so the test harness
@@ -88,34 +91,37 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
         )
 
 
-@pytest.fixture(autouse=True)
-def _matplotlib_settings_unchanged() -> Iterator[None]:
-    """Fail a test that leaves matplotlib's global settings changed.
+#: Where the generators of the documentation's figures live.
+_SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
 
-    ``plt.style.use`` or an assignment to ``rcParams`` outlives the test that
-    made it and draws the figures of whatever test the worker runs next, so a
-    figure test passed or failed with the order the workers were dealt: the
-    dark page the contrast tests left behind turned a legend frame black, and
-    the legend check of another module no longer saw it. A test changes the
-    settings inside ``matplotlib.rc_context()`` or ``plt.style.context()``.
-    The settings are read raw, so no deprecated key warns.
+
+@pytest.fixture
+def figure_theme() -> Iterator[ModuleType]:
+    """The documentation figures' theme for one test: light, English, the generator's settings.
+
+    ``scripts/figures/theme.py`` sets the settings the generator draws with
+    when it is imported and again at every ``set_theme``, and ``set_theme``
+    and ``i18n.set_lang`` rebind globals of the generator's modules. Here the
+    theme is imported, set light and English, inside ``rc_context``, and
+    after the test the language, the theme and every setting are put back,
+    whatever the test switched. Importing a test module changes no setting
+    for any test (``matplotlib_guard.py`` puts them back), so a test that
+    draws with the generator's settings asks for them here.
     """
-    matplotlib = sys.modules.get("matplotlib")
-    before = None if matplotlib is None else dict.copy(matplotlib.rcParams)
-    yield
-    if before is None:
-        return
-    after = dict.copy(sys.modules["matplotlib"].rcParams)
-    if after == before:
-        return
-    changed = sorted(
-        key for key in after.keys() | before.keys() if after.get(key) != before.get(key)
-    )
-    pytest.fail(
-        f"the test left {len(changed)} matplotlib setting(s) changed "
-        f"({', '.join(changed[:8])}{', ...' if len(changed) > 8 else ''}); "
-        "change them inside matplotlib.rc_context() or plt.style.context()"
-    )
+    import matplotlib as mpl
+
+    if str(_SCRIPTS) not in sys.path:
+        sys.path.insert(0, str(_SCRIPTS))
+    with mpl.rc_context():
+        from figures import i18n, theme
+
+        i18n.set_lang("en")
+        theme.set_theme(dark=False)
+        try:
+            yield theme
+        finally:
+            i18n.set_lang("en")
+            theme.set_theme(dark=False)
 
 
 @pytest.fixture(autouse=True)

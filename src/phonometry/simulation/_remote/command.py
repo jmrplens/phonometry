@@ -11,15 +11,19 @@ comes from the hosts file is quoted.
 
 from __future__ import annotations
 
+import logging
 import shlex
 import shutil
 from typing import TYPE_CHECKING
 
+from ..._internal.programs import past_the_working_directory
 from . import bootstrap
 
 if TYPE_CHECKING:
     from ..compute import Compute
     from .hosts import HostEntry
+
+_LOG = logging.getLogger("phonometry.simulation")
 
 #: The options every connection takes. Options on the command line win over
 #: ``~/.ssh/config``, so whatever the file says for the host, a run gets no
@@ -103,17 +107,39 @@ _SSH_PROGRAM: tuple[str, ...] | None = None
 
 
 def ssh_program() -> tuple[str, ...]:
-    """The program, and its leading arguments, that runs ``ssh``.
+    """The program, and its leading arguments, that runs ``ssh``, by the path it was found at.
 
-    :raises FileNotFoundError: when no ``ssh`` is on ``PATH``.
+    On Windows, which looks a bare name up in the working directory before
+    ``PATH``, an ``ssh`` there is passed over for the one on ``PATH``, and
+    the log says so at INFO on ``phonometry.simulation``; one found nowhere
+    else is refused. A working directory that ``PATH`` itself lists is the
+    user's own choice, and its ``ssh`` runs.
+
+    :raises FileNotFoundError: when no ``ssh`` is on ``PATH``, or on Windows
+        when it was found only in the working directory.
     """
     if _SSH_PROGRAM is not None:
         return _SSH_PROGRAM
     found = shutil.which("ssh")
     if found is None:
-        msg = "no ssh client on PATH"
+        msg = "no ssh client on PATH; install OpenSSH to run on a node"
         raise FileNotFoundError(msg)
-    return (found,)
+    installed = past_the_working_directory("ssh", found)
+    if installed is None:
+        msg = (
+            f"ssh was found only in the working directory ({found}), which Windows "
+            "searches before PATH; phonometry does not run a program from there. "
+            "Put an OpenSSH client on PATH to run on a node"
+        )
+        raise FileNotFoundError(msg)
+    if installed != found:
+        _LOG.info(
+            "running %s from PATH, not %s from the working directory, which "
+            "Windows searches first",
+            installed,
+            found,
+        )
+    return (installed,)
 
 
 def ssh_argv(entry: HostEntry, request: Compute) -> list[str]:

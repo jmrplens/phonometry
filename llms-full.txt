@@ -39784,6 +39784,12 @@ JSON Schema of such a file, so an editor completes one as you type it and
 marks what the reader would refuse for its form; the site publishes the
 schema of every row class the library publishes.
 
+The last files the library writes are not measurements: videos.
+`write_video` writes any matplotlib animation to a WebM, an MP4 or a GIF
+through ffmpeg, on a GPU encoder when one works here, and the two simulation
+writers draw an FDTD run straight into a video as it is computed, here or on
+a node, without storing its snapshots.
+
 ## Pages in this section
 
 - [Reading and writing measurement audio](https://docs.jmrp.io/phonometry/io/audio-files/): the
@@ -41085,16 +41091,16 @@ file raises `io.VideoEncoderError`, naming the path and the system's reason,
 before the first frame is drawn.
 
 The file appears at the path only once ffmpeg has finished it. Until then
-ffmpeg writes to a hidden file beside it, under a name of its own for each
-write, and that file is removed whatever stops the encode: ffmpeg fails, the
-disk fills, or your update function raises, which reaches you as its own
-exception. So a failure leaves what was at the path before, a good video
-included. A hidden file the system will not let go, as one a scanner holds
-open on Windows, stays where it is, and what reaches you is still what
-stopped the encode. A finished video that Windows will not let take the
-old file's place, because a player holds the old file open, is not thrown
-away: it is left beside it under its hidden name, and the
-`io.VideoEncoderError` says where.
+ffmpeg writes to a partial file beside it, under a name of its own for each
+write, one that starts with a dot so that Linux and macOS hide it, and that
+file is removed whatever stops the encode: ffmpeg fails, the disk fills, or
+your update function raises, which reaches you as its own exception. So a
+failure leaves what was at the path before, a good video included. A partial
+file the system will not let go, as one a scanner holds open on Windows, stays
+where it is, and what reaches you is still what stopped the encode. A finished
+video that Windows will not let take the old file's place, because a player
+holds the old file open, is not thrown away: it is left beside it under its
+partial name, and the `io.VideoEncoderError` says where.
 
 Each frame is the whole figure at its own size and in its own colours,
 whatever your matplotlib settings say about saving figures: a `"tight"`
@@ -41216,8 +41222,11 @@ the milliseconds between frames, as `Animation.save` takes it.
 `ffmpeg_options=` adds ffmpeg output options, as separate texts, written
 after the encoder's preset and pixel format, so an option you repeat wins
 over them. The container's own options come after yours and stay: an MP4's
-start before it has downloaded, the tag of an HEVC, and a GIF's endless
-loop. `ffmpeg_encoder=` names an ffmpeg encoder to use as it is:
+`-movflags +faststart`, which moves the file's index (its `moov` box) to the
+front, so that a player can start before the file has downloaded; the tag of
+an HEVC the library chose (with an `ffmpeg_encoder` of your own, add
+`-tag:v hvc1` yourself); and a GIF's endless loop. `ffmpeg_encoder=` names an
+ffmpeg encoder to use as it is:
 
 ```python
 raw = io.VideoOptions(
@@ -41251,7 +41260,7 @@ draws its pressure field into a video as the run computes it:
 from phonometry import io, simulation
 
 run = simulation.FDTDRun(
-    c=343.0, dx=0.01, duration_s=4e-3,
+    c=343.0, dx=0.01, duration_s=2.2e-3,
     shape=(80, 120),
     sources=[simulation.GaussianPulse(ix=40, iy=40, half_width_s=5e-5)],
     recording=simulation.FDTDRecording(probes=[(100, 40)], snapshot_every=8),
@@ -41293,21 +41302,22 @@ of its `io.VideoOptions` says otherwise.
 The frames show what `simulation.fdtd_simulation(run).plot(kind="snapshot")`
 shows for the same run: the same field on the same colormap, symmetric about
 zero, with the same marks and labels, the limit of the scale being the video's
-own, fixed for the whole video, given or found as the next paragraph says.
-The writer's own result holds no snapshots: its `.plot()` draws the probes, as
-any result's does, and `.plot(kind="snapshot")` raises `ValueError`. The
-frames are drawn under matplotlib's default style, whatever your settings say,
-so a video written here and one written on a node look alike. A frame is laid
-out once for the whole run, for the widest title it will show and the labels
-of its axes and colour scale, so nothing moves from one frame to the next, and
+own, fixed for the whole video, given or found as the next paragraph says. The
+writer's own result holds no snapshots: its `.plot()` draws the probes, as any
+result's does, and `.plot(kind="snapshot")` raises `ValueError`. The frames
+are drawn under matplotlib's default style, whatever your settings say, so a
+video written here and one written on a node look alike. A frame is laid out
+once for the whole run, for the widest title it will show and the labels of
+its axes and colour scale, so nothing moves from one frame to the next, and
 every text keeps its own size. The smallest frame in which every text, at its
-own size, stays clear of the frame's margin and the field still shows, with
-every matplotlib version the library is tested with, is 479 by 245 pixels, and
-a smaller `size` raises `ValueError` when the record is built. That floor
-holds for a run whose last frame comes before ten seconds. A longer run writes
-more digits in its title's time, in milliseconds, so its floor is wider: the
-writer refuses a frame narrower than the run needs before the run starts, and
-its message gives the width.
+own size, stays clear of the frame's margin and the field still shows, for a
+grid up to ten times longer one way than the other, with every matplotlib
+version the library is tested with, is 479 by 245 pixels, and a smaller `size`
+raises `ValueError` when the record is built. That floor holds for a run whose
+last frame comes before ten seconds. A longer run writes more digits in its
+title's time, in milliseconds, so its floor is wider: the writer refuses a
+frame narrower than the run needs before the run starts, and its message gives
+the width.
 
 The colour scale is fixed for the whole video.
 `AnimationFrame(color_limit=...)` gives it, in pascals, as the value at either
@@ -41405,22 +41415,34 @@ matplotlib, or not the font every frame is drawn in, no ffmpeg, or no encoder
 that writes the video at its size refuses before its first step, and
 `simulation.ComputeRemoteError` says why.
 
-The node's bytes are checked before they reach the disk here. They are no more
-than the frames can take: two bytes a pixel of every frame, its sides padded
-to even, when the library's presets decide the encode, or eight when an
-`ffmpeg_encoder` or `ffmpeg_options` of yours do, plus 1 MiB for the
-container; a longer video is refused before a byte of it is read. They must
-begin as a file of the path's container begins, or none of them is kept, and
-an empty video is refused. They are written to disk as they arrive, into a
-hidden file beside the path, so that ceiling bounds the disk, not the memory,
-and the file takes the path's place only once the node's whole answer has been
-read and checked. Whatever stops the run before that, the node, the connection
-or an interrupt, the hidden file is removed and the path is left as it was. A
-hidden file the system will not let go, as one a scanner holds open on
-Windows, stays where it is, and the run fails, or falls back, as it would
-without it. Each refusal is a `simulation.ComputeRemoteError`; with
+The node's bytes are checked before the video takes the path's place here.
+The size the node declares is no more than the frames can take: two bytes a
+pixel of every frame, its sides padded to even, when the library's presets
+decide the encode, or eight when an `ffmpeg_encoder` or `ffmpeg_options` of
+yours do, plus 1 MiB for the container; a larger video is refused before a
+byte of it is read. The first bytes must begin as a file of the path's
+container begins, or none of them is written, and an empty video is refused.
+From there the bytes are written to disk as they arrive, into a partial file
+beside the path, as in section 1, so that ceiling bounds the disk, not the
+memory, and the file takes the path's place only once the node's whole answer
+has been read and checked. Whatever stops the run before that, the node, the
+connection or an interrupt, the partial file is removed and the path is left
+as it was. A partial file the system will not let go, as one a scanner holds
+open on Windows, stays where it is, and the run fails, or falls back, as it
+would without it. Each refusal of the node's bytes, and each failure of the
+node or of the connection, is a `simulation.ComputeRemoteError`; with
 `fallback=True` in the request it is a `simulation.ComputeFallbackWarning`
 instead, and the video is written here, on NumPy.
+
+This machine's disk refusing the video is another matter, and `fallback=True`
+does not turn it into a `simulation.ComputeFallbackWarning`: it is an
+`io.VideoEncoderError` that names the path and the system's reason, as in
+section 1. A directory that does not take the partial file raises it before
+ssh starts. A write the disk refuses as the bytes arrive, or when the file is
+closed (a full disk, a used-up quota), raises it too: the partial file is
+removed and the path is left as it was. A finished video that the system will
+not let take the path's place, as on Windows while a player holds the old file
+open, stays under its partial name, and the `io.VideoEncoderError` says where.
 
 `io.write_video` itself runs on this machine only: an animation drawn here is
 encoded here, and only the two simulation writers go to a node.
@@ -41439,8 +41461,8 @@ by a real trial encode, GPU encoders first and the CPU last, SVT-AV1 before
 VP9, x265 or x264, and a GIF written on the CPU; three quality presets and
 raw ffmpeg options; and an acoustic or elastic FDTD run written straight to a
 video, here or computed, drawn and encoded on a node, with the colour scale
-given or found on the device, and the node's bytes checked before they are
-written.
+given or found on the device, and the node's bytes checked before the video
+takes the path's place.
 
 **Not covered.** Audio tracks, and encoding on another machine an animation
 drawn on this one. Quick Sync, VAAPI and VideoToolbox are tried and used but
@@ -52958,10 +52980,10 @@ documents, one page per module.
 | `read_sidecar` / `write_sidecar` / `sidecar_path` | `function` | **Sidecar round-trip.**<br>• `read_sidecar(path)`: the sidecar next to an audio file, or None (foreign or newer schema refused loudly)<br>• `write_sidecar(path, calibration_factor, ...)`: write one, with the optional calibrator tone metadata<br>• `sidecar_path(path)`: where it lives | `io.write_sidecar("m.wav", cal, reference_spl=94.0)` |
 | `LossyCompressionWarning` | `warning class` | **A lossy decoder produced these samples** (MP3/Ogg/Opus/ADPCM): levels are not metrologically defensible. Subclass of `PhonometryWarning`<br>Emitted by `io.read` / `io.read_blocks` / `io.convert` | `warnings.simplefilter('error', io.LossyCompressionWarning)` |
 | `ClippingWarning` | `warning class` | **Samples clipped while quantizing on write:** count and peak overshoot in dBFS; the file is written with saturated codes rather than wrapped ones. Subclass of `PhonometryWarning`<br>Emitted by `io.write` | `warnings.simplefilter('error', io.ClippingWarning)` |
-| `write_video` | `function` | **Write any matplotlib animation to WebM, MP4 or GIF with ffmpeg.**<br>• `path`: the suffix picks the container: `.webm` (AV1, VP9), `.mp4` (AV1, HEVC, H.264), `.gif`<br>• `animation`: any `matplotlib.animation.Animation`<br>• `video`: how to encode it, a `VideoOptions` (Default: None, `VideoOptions()`: GPU encoders first, each tried on a real frame, then the CPU; a GIF always on the CPU, with no trial)<br>The file appears only when ffmpeg has finished it; ffmpeg is the program `rcParams['animation.ffmpeg_path']` names | `io.write_video("wave.webm", animation)`<br>`io.write_video("wave.gif", animation, video=io.VideoOptions(quality="small"))` |
-| `VideoOptions` | `dataclass` | **How a video is encoded (frozen, keyword-only), checked when built.**<br>• `encoder`: `'auto'` (Default: GPU encoders first, each tried on a real frame, then the CPU; a GIF always on the CPU, with no trial) \| `'cpu'` \| `'nvenc'` \| `'qsv'` \| `'vaapi'` \| `'videotoolbox'`<br>• `codec`: `'av1'` \| `'vp9'` \| `'hevc'` \| `'h264'` (Default: None, the best the container holds that the encoder writes, AV1 first)<br>• `quality`: `'high'` \| `'standard'` (Default) \| `'small'`<br>• `fps` (Default: None, the animation's interval; 30 for a simulation video) / `ffmpeg_encoder` / `ffmpeg_options`: raw ffmpeg, passed through<br>• `vaapi_device`: the GPU device VAAPI encodes on, a path on the machine that encodes (Default: `'/dev/dri/renderD128'`, the first GPU)<br>What the container rules out is checked when the path is known | `io.VideoOptions(encoder="cpu", codec="h264")`<br>`io.VideoOptions(ffmpeg_encoder="libvpx-vp9", ffmpeg_options=("-crf", "40"))` |
+| `write_video` | `function` | **Write any matplotlib animation to WebM, MP4 or GIF with ffmpeg.**<br>• `path`: the suffix picks the container: `.webm` (AV1, VP9), `.mp4` (AV1, HEVC, H.264), `.gif`<br>• `animation`: any `matplotlib.animation.Animation`<br>• `video`: how to encode it, a `VideoOptions` (Default: None, `VideoOptions()`: GPU encoders first, each tried on one black frame of the video's size, then the CPU; a GIF always on the CPU, with no trial)<br>The file appears only when ffmpeg has finished it; ffmpeg is the program `rcParams['animation.ffmpeg_path']` names | `io.write_video("wave.webm", animation)`<br>`io.write_video("wave.gif", animation, video=io.VideoOptions(quality="small"))` |
+| `VideoOptions` | `dataclass` | **How a video is encoded (frozen, keyword-only), checked when built.**<br>• `encoder`: `'auto'` (Default: GPU encoders first, each tried on one black frame of the video's size, then the CPU; a GIF always on the CPU, with no trial) \| `'cpu'` \| `'nvenc'` \| `'qsv'` \| `'vaapi'` \| `'videotoolbox'`<br>• `codec`: `'av1'` \| `'vp9'` \| `'hevc'` \| `'h264'` (Default: None, the best the container holds that the encoder writes, AV1 first)<br>• `quality`: `'high'` \| `'standard'` (Default) \| `'small'`<br>• `fps` (Default: None, the animation's interval; 30 for a simulation video) / `ffmpeg_encoder` / `ffmpeg_options`: raw ffmpeg, passed through<br>• `vaapi_device`: the GPU device VAAPI encodes on, a path on the machine that encodes (Default: `'/dev/dri/renderD128'`, the first GPU)<br>What the container rules out is checked when the path is known | `io.VideoOptions(encoder="cpu", codec="h264")`<br>`io.VideoOptions(ffmpeg_encoder="libvpx-vp9", ffmpeg_options=("-crf", "40"))` |
 | `FFmpegNotFoundError` | `exception` | **ffmpeg is not where matplotlib looks for it, or cannot run here (Pyodide)**, with how to install it when it is missing; on Windows also an ffmpeg found only in the working directory. Subclass of `FileNotFoundError` | `except io.FFmpegNotFoundError: ...` |
-| `VideoEncoderError` | `exception` | **No encoder can write the video, or ffmpeg failed while writing it**, with the encoders that work here (for an encoder you named) or ffmpeg's last words; also when the finished video cannot take the place of `path`, which it is left beside. Subclass of `RuntimeError` | `except io.VideoEncoderError: ...` |
+| `VideoEncoderError` | `exception` | **No encoder can write the video, or ffmpeg cannot start or failed while writing it**, with the encoders that work here (for an encoder you named) or the encoder and ffmpeg's last words; also when the directory or the disk does not take the file (with your path and the system's reason), and when the finished video cannot take the place of `path`, which it is left beside. Subclass of `RuntimeError` | `except io.VideoEncoderError: ...` |
 | `CatalogueRow` | `dataclass` | **The row every published catalogue hands out, with what each cell said.**<br>• `name`, `source` (document, table, PDF page and printed folio), `table`, `variant`, `group`, `note`<br>• A quantity is `None` when the page had something other than a number there, and `ranges`, `bounded_above` / `bounded_below`, `reported`, `unquantified`, `uncertainty`, `not_derivable` and `misprinted` say what<br>• `basis`: field or `'row'` → what the source claims the value is, one of `CATALOGUE_BASES`; `.basis_of(field)` reads it, and `''` means the source does not say<br>• `derived`: field → how this library computed it, written by `.from_printed` on every row the library builds (one passed to `Cls(...)` is the caller's, and `.printed_fields()` leaves it out with its value); `converted`: field → the page's figure and its unit, `(figure, unit)`, for a value held in a unit the page does not use; `carried`: field → the row the page gives it on, for a value it gives by reference to another row<br>• `.from_printed(**cells)` builds a row and fills what follows from its cells, `.printed_fields()` gives the cells back; `.printed(field)` narrows or refuses, `.why_missing(field)` says what the page had, `.is_derived(field)`, `.is_approximate(field)`<br>• Checks itself when built, whoever builds it, and raises `CatalogueError` for a cell nothing downstream can read: a number that is `NaN`, a `bool` or a text, a hedge on a field the class does not have, a bound with no range, a value beside `misprinted`, a density or a length below zero, a porosity above 1; sets and mappings frozen all the way down<br>• `provenance`: the `Provenance` of a row read from a catalogue file of yours, `None` on every packaged row; `.why_missing` names the document by its kind ('the datasheet prints ...', 'the page' without one) and quotes a converted figure before the value the row holds<br>Frozen and keyword-only; a subclass leaves out `slots=True` and annotates its fields `float \| None`, `int \| None`, `bool`, `str`, `frozenset[str]` or `Mapping[str, ...]`, anything else (a bare `float` or `int` too) a `TypeError` | `row = solids.PUBLISHED_SOLIDS['hopkins-2007-table-a2/aircrete']`<br>`row.basis_of('poisson_ratio')  # 'estimated'` |
 | `BandedRow` | `dataclass` | **A catalogue row that prints one value per frequency band.**<br>• One field per band, so every hedge of `CatalogueRow` applies to a band as to any other cell<br>• `.bands()`: the bands the row prints; `.spectrum()`: `{band_hz: value}` over them, a band the page left empty left out rather than read as zero; `.values_at(frequencies)`: the row at an array of frequencies | `materials.PUBLISHED_ABSORPTION['bies-2017-table-6-2/unoccupied_heavily_upholstered_seats'].spectrum()[500]  # 0.81` |
 | `CatalogueRow.from_printed` | `classmethod` | **A row built from the cells its page prints, completed and marked.**<br>• `**cells`: the printed cells under the class's field names, with their hedges, as a data file writes them<br>• Checks every cell as the constructor does, then fills what follows from them (a modulus from a plate speed, a density and a Poisson ratio) and names each filled value in `derived`, never over a printed value or a hedged cell; when the printed cells a value rests on do not share one `basis`, the text names the basis of each<br>• Cells the arithmetic refuses (a modulus and a shear modulus no isotropic solid has together) raise `CatalogueError` naming them, unless `not_derivable` says the value does not follow<br>• A figure in another unit of the same kind as its field (`thickness_m` for `thickness_mm`, `flow_resistivity_kpa_s_m2`, `temperature_k`), or under a unit the class takes as an alias of its own (`absorption_area_125_ft2` on `AbsorptionAreaSpectrum`), as a value or as the key of a hedge, is converted on its digits with an exact factor, rounded once, and recorded in `converted`; every number of one cell in one unit<br>• The one path that works anything out, and every packaged catalogue is built through it; `Cls(...)` stays literal. A `derived` among the cells raises `CatalogueError` | `row = solids.SolidMaterial.from_printed(name='Board', source='...', density_kg_m3=860.0, plate_longitudinal_speed_m_s=1490.0, poisson_ratio=0.3)`<br>`row.is_derived('youngs_modulus_pa')  # True` |
@@ -72858,11 +72880,18 @@ sends, so the node's shell would never expand the `~`. A file saved with a
 byte-order mark, as Windows Notepad saves UTF-8, reads like any other.
 
 **What ssh needs.** The client runs the `ssh` of your machine, OpenSSH 7.6 or
-newer, and a run never asks for anything: ssh runs in batch mode. Log in to
-the node with a key ssh can use without a prompt, from `ssh-agent` or with no
-passphrase, and connect once by hand to accept the node's host key. A user, a
-port, a key or a jump host belongs in a `Host` alias of `~/.ssh/config`. The
-options the client gives ssh on the command line win over that file for what
+newer, and a run never asks for anything: ssh runs in batch mode. It is the
+`ssh` on `PATH`, run by the full path found there. On Windows, which looks for
+a program in the working directory before `PATH`, an `ssh` there gives way to
+the one on `PATH`, and one found only there is refused with a
+`ComputeRemoteError`: put an OpenSSH client on `PATH`. Found in a working
+directory that `PATH` itself lists, it runs as found. On Windows ssh also
+starts with no console window, so a run from a notebook or from `pythonw`
+opens none. Log in to the node with a key ssh can use without a prompt, from
+`ssh-agent` or with no passphrase, and connect once by hand to accept the
+node's host key. A user, a port, a key or a jump host belongs in a `Host`
+alias of `~/.ssh/config`. The options the client gives ssh on the command
+line win over that file for what
 a run cannot have: a `RemoteCommand` or a `LocalCommand` of the alias does
 not run, nothing is forwarded (section 7), and no connection is shared:
 every run is a connection of its own, whatever `ControlMaster` the alias
@@ -73006,7 +73035,7 @@ Docker image of section 3 holds both.
 | a run that cannot travel: a source whose waveform is a callable other than the `.value` of a `GaussianPulse`, `CWSource` or `SignalSource`, or a whole number outside the range of an int64 | `TypeError`, naming the source or the field | when the function is called, before the hosts file is read |
 | a host the file does not name, or no hosts file | `KeyError` | before ssh starts |
 | a hosts file that cannot be read or is not TOML, or a malformed entry | `ValueError`, naming the file | before ssh starts |
-| no ssh client on `PATH`, Pyodide, a package that cannot be read from disk or holds a file no node would write, or a job too long for the header a node reads (a run of several thousand point sources) | `ComputeRemoteError` | before ssh starts |
+| no ssh client on `PATH`, even on Windows with one in the working directory, Pyodide, a package that cannot be read from disk or holds a file no node would write, or a job too long for the header a node reads (a run of several thousand point sources) | `ComputeRemoteError` | before ssh starts |
 | anything that fails in the connection or on the node | `ComputeRemoteError` | when it fails |
 
 The message of a `ComputeRemoteError` says what happened and, when it can

@@ -1304,6 +1304,12 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The axes.
 
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| TypeError | for `bottom`, which the plot sets itself: each bar rises from the floor of the axis to its level. |
+
 ### ProgramCharacteristicVoltage.voltages_v
 
 *property*

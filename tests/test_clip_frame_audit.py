@@ -45,6 +45,7 @@ from figures import media, registry
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
+    from types import ModuleType
 
     from matplotlib.artist import Artist
     from matplotlib.figure import Figure
@@ -71,19 +72,20 @@ FRAMES = 10
 
 
 @pytest.fixture(autouse=True)
-def _render_mode(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
-    """Every test starts in a render, not an audit-only run, and closes its figures."""
-    from figures import i18n, theme
+def _render_mode(
+    monkeypatch: pytest.MonkeyPatch, figure_theme: ModuleType
+) -> Iterator[None]:
+    """Every test starts in a render, not an audit-only run, and closes its figures.
 
+    Each draws with the generator's settings, light and English
+    (``figure_theme``), which a render through the pool path changes in this
+    process and never puts back: the fixture does, so the next test does not
+    read ink against the page this one left.
+    """
     for name in (cfa.AUDIT_ENV, cfa.GATE_ENV, cfa.AUDITED_ENV):
         monkeypatch.delenv(name, raising=False)
     yield
     plt.close("all")
-    # A render through the pool path sets the language and the theme of
-    # this process and never puts them back; the next test reads ink against
-    # the page it finds.
-    i18n.set_lang("en")
-    theme.set_theme(dark=False)
 
 
 def _clip(

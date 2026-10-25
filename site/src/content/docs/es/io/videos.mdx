@@ -90,17 +90,18 @@ el archivo lanza `io.VideoEncoderError`, que nombra la ruta y el motivo que da
 el sistema, antes de dibujar el primer fotograma.
 
 El archivo aparece en la ruta solo cuando ffmpeg lo ha terminado. Hasta
-entonces ffmpeg escribe en un archivo oculto a su lado, con un nombre propio
-para cada escritura, y ese archivo se borra si algo corta la codificación, sea
-lo que sea: que ffmpeg falle, que se llene el disco o que tu función de
-actualización lance una excepción, que te llega como esa misma excepción. Así,
-un fallo deja lo que había antes en la ruta, incluido un vídeo bueno. Un
-archivo oculto que el sistema no deja borrar, como uno que un antivirus tiene
-abierto en Windows, se queda donde está, y lo que te llega sigue siendo lo que
-cortó la codificación. Un vídeo terminado al que Windows no deja ocupar el
-lugar del archivo antiguo, porque un reproductor tiene abierto el antiguo, no
-se tira: se queda a su lado con su nombre oculto, y el `io.VideoEncoderError`
-dice dónde.
+entonces ffmpeg escribe en un archivo parcial a su lado, con un nombre propio
+para cada escritura, que empieza por un punto para que Linux y macOS lo
+oculten, y ese archivo se borra si algo corta la codificación, sea lo que sea:
+que ffmpeg falle, que se llene el disco o que tu función de actualización
+lance una excepción, que te llega como esa misma excepción. Así, un fallo deja
+lo que había antes en la ruta, incluido un vídeo bueno. Un archivo parcial que
+el sistema no deja borrar, como uno que un antivirus tiene abierto en Windows,
+se queda donde está, y lo que te llega sigue siendo lo que cortó la
+codificación. Un vídeo terminado al que Windows no deja ocupar el lugar del
+archivo antiguo, porque un reproductor tiene abierto el antiguo, no se tira:
+se queda a su lado con su nombre de archivo parcial, y el
+`io.VideoEncoderError` dice dónde.
 
 Cada fotograma es la figura entera, a su propio tamaño y con sus propios
 colores, digan lo que digan tus ajustes de matplotlib sobre cómo guardar
@@ -191,7 +192,7 @@ ningún otro: un `codec="av1"` que ningún codificador de aquí puede escribir
 lanza `io.VideoEncoderError` en lugar de escribir VP9.
 
 El codificador elegido se registra con nivel `INFO` en el logger
-`phonometry.io`, que está callado salvo que lo actives:
+`phonometry.io`, que permanece silencioso salvo que lo actives:
 
 ```python
 import logging
@@ -212,7 +213,7 @@ NVENC, una llamada puede pedir la GPU por su nombre:
 io.write_video("wave.webm", animation, video=io.VideoOptions(encoder="nvenc", codec="av1"))
 ```
 
-NVENC, Quick Sync, VAAPI y VideoToolbox se intentan y se usan, pero no se
+NVENC, Quick Sync, VAAPI y VideoToolbox se prueban y se usan, pero no se
 comprueban en CI, que escribe sus vídeos en la CPU.
 
 ## 3. Calidad, frecuencia de fotogramas y ffmpeg en bruto
@@ -220,18 +221,20 @@ comprueban en CI, que escribe sus vídeos en la CPU.
 `quality=` toma uno de tres preajustes, `"high"`, `"standard"` (el valor por
 defecto) o `"small"`. En cada codificador, un preajuste fija la opción de
 calidad constante propia de ese codificador, en su propia escala; en un GIF
-fija el tamaño de la paleta y el dither. `fps=` fija
-la frecuencia de fotogramas en fotogramas por segundo; si se deja en `None`,
-se toma del `interval` de la animación, los milisegundos entre fotogramas,
-igual que la toma `Animation.save`.
+fija el tamaño de la paleta y el dither. `fps=` fija la frecuencia de
+fotogramas en fotogramas por segundo; si se deja en `None`, se toma del
+`interval` de la animación, los milisegundos entre fotogramas, igual que la
+toma `Animation.save`.
 
 `ffmpeg_options=` añade opciones de salida de ffmpeg, como textos separados,
-escritas después del preajuste del codificador y del formato de píxel, así
-que una opción que repitas prevalece sobre ellos. Las opciones propias del
-contenedor van después de las tuyas y se mantienen: el arranque de un MP4
-antes de terminar de descargarse, la etiqueta de un HEVC y el bucle sin fin
-de un GIF. `ffmpeg_encoder=` nombra un codificador de ffmpeg que se usa tal
-cual:
+escritas después del preajuste del codificador y del formato de píxel, así que
+una opción que repitas prevalece sobre ellos. Las opciones propias del
+contenedor van después de las tuyas y se mantienen: el `-movflags +faststart`
+de un MP4, que lleva el índice del archivo (su caja `moov`) al principio, para
+que un reproductor pueda empezar antes de terminar de descargarlo; la etiqueta
+de un HEVC que eligió la biblioteca (con un `ffmpeg_encoder` tuyo, añade tú
+`-tag:v hvc1`); y el bucle sin fin de un GIF. `ffmpeg_encoder=` nombra un
+codificador de ffmpeg que se usa tal cual:
 
 ```python
 raw = io.VideoOptions(
@@ -268,7 +271,7 @@ lo calcula:
 from phonometry import io, simulation
 
 run = simulation.FDTDRun(
-    c=343.0, dx=0.01, duration_s=4e-3,
+    c=343.0, dx=0.01, duration_s=2.2e-3,
     shape=(80, 120),
     sources=[simulation.GaussianPulse(ix=40, iy=40, half_width_s=5e-5)],
     recording=simulation.FDTDRecording(probes=[(100, 40)], snapshot_every=8),
@@ -286,20 +289,19 @@ La ejecución es el `FDTDRun` que toma `fdtd_simulation`, comprobado al
 construirse, medio incluido, así que la misma ejecución puede simularse,
 escribirse en un vídeo o ambas cosas. Su `recording` fija los fotogramas:
 `snapshot_every` es el número de pasos entre dos fotogramas y es obligatorio,
-así que una ejecución que no registra instantáneas lanza `ValueError`
-nombrando `run.recording.snapshot_every`; `snapshot_decimation` fija las
-celdas que conserva un fotograma; y las sondas se registran en el resultado,
-en todos los pasos de la ejecución. Se dibuja un fotograma en t = 0 y otro
-cada `snapshot_every` pasos, y no se guarda ninguno: el resultado vuelve con
-sus sondas y sus tiempos y sin instantáneas, y por larga que sea la
-ejecución, esta máquina guarda un solo fotograma cada vez (salvo en un GIF,
-cuya paleta calcula ffmpeg a partir de todos los fotogramas, como dice la
-sección 1). Antes del primer paso se busca y se ejecuta ffmpeg, el
-codificador de un WebM o un MP4 se elige con la codificación de prueba de la
-sección 2 al tamaño del fotograma, y un `ffmpeg_encoder` en bruto se busca en
-la lista de este ffmpeg, así que un ffmpeg que falta, un codificador que no
-supera su prueba o un codificador en bruto que este ffmpeg no tiene no
-cuestan una ejecución.
+así que una ejecución que no registra instantáneas lanza un `ValueError` que
+nombra `run.recording.snapshot_every`; `snapshot_decimation` fija las celdas
+que conserva un fotograma; y las sondas se registran en el resultado, en todos
+los pasos de la ejecución. Se dibuja un fotograma en t = 0 y otro cada
+`snapshot_every` pasos, y no se guarda ninguno: el resultado vuelve con sus
+sondas y sus tiempos y sin instantáneas, y por larga que sea la ejecución,
+esta máquina guarda un solo fotograma cada vez (salvo en un GIF, cuya paleta
+calcula ffmpeg a partir de todos los fotogramas, como dice la sección 1).
+Antes del primer paso se busca y se ejecuta ffmpeg, el codificador de un WebM
+o un MP4 se elige con la codificación de prueba de la sección 2 al tamaño del
+fotograma, y un `ffmpeg_encoder` en bruto se busca en la lista de este ffmpeg,
+así que ni la falta de ffmpeg, ni un codificador que no supera su prueba, ni
+un codificador en bruto que este ffmpeg no tiene hacen perder una ejecución.
 
 Cómo se dibuja cada fotograma es un solo registro,
 `simulation.AnimationFrame`, que comprueba sus campos al construirse:
@@ -322,17 +324,18 @@ y `.plot(kind="snapshot")` lanza `ValueError`. Los fotogramas se dibujan con
 el estilo por defecto de matplotlib, digan lo que digan tus ajustes, así que
 un vídeo escrito aquí y otro escrito en un nodo se ven iguales. Un fotograma
 se compone una sola vez para toda la ejecución, para el título más ancho que
-va a mostrar y para las etiquetas de sus ejes y de su escala de color, así
-que nada se mueve de un fotograma a otro, y cada texto conserva su propio
-tamaño. El fotograma más pequeño en el que cada texto, a su propio tamaño,
-queda libre del margen del fotograma y el campo sigue viéndose, con cualquier
-versión de matplotlib con la que se prueba la biblioteca, es de 479 por 245
-píxeles, y un `size` menor lanza `ValueError` al construirse el registro. Ese
-mínimo vale para una ejecución cuyo último fotograma llega antes de diez
-segundos. Una ejecución más larga escribe más cifras en el tiempo de su
-título, en milisegundos, así que su mínimo es más ancho: la función rechaza un
-fotograma más estrecho de lo que necesita la ejecución antes de que esta
-empiece, y su mensaje da el ancho.
+va a mostrar y para las etiquetas de sus ejes y de su escala de color, así que
+nada se mueve de un fotograma a otro, y cada texto conserva su propio tamaño.
+El fotograma más pequeño en el que cada texto, a su propio tamaño, queda libre
+del margen del fotograma y el campo sigue viéndose, para una malla hasta diez
+veces más larga en un sentido que en el otro, con cualquier versión de
+matplotlib con la que se prueba la biblioteca, es de 479 por 245 píxeles, y un
+`size` menor lanza `ValueError` al construirse el registro. Ese mínimo vale
+para una ejecución cuyo último fotograma llega antes de diez segundos. Una
+ejecución más larga escribe más cifras en el tiempo de su título, en
+milisegundos, así que su mínimo es más ancho: la función rechaza un fotograma
+más estrecho de lo que necesita la ejecución antes de que esta empiece, y su
+mensaje da el ancho.
 
 La escala de color es fija para todo el vídeo.
 `AnimationFrame(color_limit=...)` la da, en pascales, como el valor de cada
@@ -434,24 +437,37 @@ fotograma, ffmpeg o un codificador que escriba el vídeo a su tamaño rechaza
 el trabajo antes de su primer paso, y `simulation.ComputeRemoteError` dice
 por qué.
 
-Los bytes del nodo se comprueban antes de llegar al disco aquí. No son más
-de los que caben en los fotogramas: dos bytes por píxel de cada fotograma,
-con sus lados rellenados hasta un número par, cuando deciden la codificación
-los preajustes de la biblioteca, u ocho cuando la deciden un `ffmpeg_encoder`
-o unas `ffmpeg_options` tuyos, más 1 MiB para el contenedor; un vídeo más
-largo se rechaza antes de leer un solo byte de él. Tienen que empezar como
-empieza un archivo del contenedor de la ruta, o no se conserva ninguno, y un
-vídeo vacío se rechaza. Se escriben en disco a medida que llegan, en un
-archivo oculto junto a la ruta, así que ese tope acota el disco, no la
-memoria, y el archivo ocupa el lugar de la ruta solo cuando se ha leído y
-comprobado toda la respuesta del nodo. Si algo detiene antes la ejecución,
-sea el nodo, la conexión o una interrupción, el archivo oculto se borra y la
-ruta se queda como estaba. Un archivo oculto que el sistema no deja borrar,
-como uno que un antivirus tiene abierto en Windows, se queda donde está, y la
-ejecución falla, o vuelve a NumPy, igual que sin él. Cada rechazo es un
-`simulation.ComputeRemoteError`; con `fallback=True` en la petición es en su
-lugar un `simulation.ComputeFallbackWarning`, y el vídeo se escribe aquí, con
-NumPy.
+Los bytes del nodo se comprueban antes de que el vídeo ocupe el lugar de la
+ruta en esta máquina. El tamaño que declara el nodo no pasa de lo que cabe en
+los fotogramas: dos bytes por píxel de cada fotograma, con sus lados
+rellenados hasta un número par, cuando deciden la codificación los preajustes
+de la biblioteca, u ocho cuando la deciden un `ffmpeg_encoder` o unas
+`ffmpeg_options` tuyos, más 1 MiB para el contenedor; un vídeo más grande se
+rechaza antes de leer un solo byte de él. Los primeros bytes tienen que
+empezar como empieza un archivo del contenedor de la ruta, o no se escribe
+ninguno, y un vídeo vacío se rechaza. A partir de ahí los bytes se escriben en
+disco a medida que llegan, en un archivo parcial junto a la ruta, como en la
+sección 1, así que ese tope acota el disco, no la memoria, y el archivo ocupa
+el lugar de la ruta solo cuando se ha leído y comprobado toda la respuesta del
+nodo. Si algo detiene antes la ejecución, sea el nodo, la conexión o una
+interrupción, el archivo parcial se borra y la ruta se queda como estaba. Un
+archivo parcial que el sistema no deja borrar, como uno que un antivirus tiene
+abierto en Windows, se queda donde está, y la ejecución falla, o vuelve a
+NumPy, igual que sin él. Cada rechazo de los bytes del nodo, y cada fallo del
+nodo o de la conexión, es un `simulation.ComputeRemoteError`; con
+`fallback=True` en la petición es en su lugar un
+`simulation.ComputeFallbackWarning`, y el vídeo se escribe aquí, con NumPy.
+
+Otra cosa es que el disco de esta máquina rechace el vídeo, y `fallback=True`
+no lo convierte en un `simulation.ComputeFallbackWarning`: es un
+`io.VideoEncoderError` que nombra la ruta y el motivo que da el sistema, como
+en la sección 1. Un directorio que no admite el archivo parcial lo lanza antes
+de que arranque ssh. Una escritura que el disco rechaza mientras llegan los
+bytes, o al cerrar el archivo (un disco lleno, una cuota agotada), también lo
+lanza: el archivo parcial se borra y la ruta se queda como estaba. Un vídeo
+terminado al que el sistema no deja ocupar el lugar de la ruta, como en
+Windows mientras un reproductor tiene abierto el archivo antiguo, se queda con
+su nombre de archivo parcial, y el `io.VideoEncoderError` dice dónde.
 
 `io.write_video` en sí solo se ejecuta en esta máquina: una animación
 dibujada aquí se codifica aquí, y solo las dos funciones de escritura de
@@ -475,12 +491,12 @@ y un GIF escrito en la CPU; tres preajustes de calidad y opciones de ffmpeg
 en bruto; y una simulación FDTD acústica o elástica escrita directamente en
 un vídeo, aquí o calculada, dibujada y codificada en un nodo, con la escala
 de color dada o encontrada en el dispositivo, y los bytes del nodo
-comprobados antes de escribirse.
+comprobados antes de que el vídeo ocupe el lugar de la ruta.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
 Las pistas de audio, y codificar en otra máquina una animación dibujada en
-esta. Quick Sync, VAAPI y VideoToolbox se intentan y se usan, pero no se
+esta. Quick Sync, VAAPI y VideoToolbox se prueban y se usan, pero no se
 comprueban en CI; NVENC tampoco se comprueba en CI, y se verificó en el nodo
 con GPU del mantenedor. Los fotogramas de un vídeo de simulación son el
 dibujo de una instantánea con el estilo por defecto de matplotlib, no un

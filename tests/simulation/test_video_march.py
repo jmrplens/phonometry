@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -21,6 +21,9 @@ from phonometry.simulation import (
 )
 from phonometry.simulation import elastic_fdtd as ef
 from phonometry.simulation import fdtd as fd
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 _PULSE = GaussianPulse(ix=0, iy=0, half_width_s=4e-5)
 
@@ -88,8 +91,69 @@ def test_the_march_yields_every_frame_and_finishes_on_exhaustion() -> None:
     assert taken[0].shape == (10, 15)
     assert sim.n == checks.steps
     reference = fdtd_simulation(run)
+    assert reference.snapshots is not None
     assert np.array_equal(pressures, reference.pressures)
     assert np.array_equal(np.stack(taken), reference.snapshots)
+
+
+def test_on_a_device_the_probes_come_to_the_host_once_the_march_is_drained(
+    go_strict: Callable[[], None],
+) -> None:
+    """Off NumPy the probes are kept on the device and copied into the history after the last step.
+
+    The steps after the last frame belong to the run, so they are in the copy;
+    until the march is drained the history the caller handed in holds nothing.
+    """
+    run = _acoustic_run()
+    checks = run._checked
+    every = checks.snapshot_every
+    assert every is not None
+    reference = fdtd_simulation(run)
+    go_strict()
+    sim = fd._acoustic_engine(run, None)
+    pressures = np.zeros((checks.probe_ix.shape[0], checks.steps + 1))
+    frames = fd._march(
+        sim,
+        checks.steps,
+        checks.probe_ix,
+        every,
+        checks.snapshot_decimation,
+        pressures,
+    )
+    for _ in range(checks.steps // every):
+        next(frames)
+    assert not pressures.any()
+    assert len(list(frames)) == 1  # the last frame, then the steps after it
+    assert sim.n == checks.steps
+    assert np.array_equal(pressures, reference.pressures)
+
+
+def test_a_march_closed_early_steps_no_further() -> None:
+    """A caller that stops (a failed encode, an interrupt) closes the march, and the engine stops there."""
+    run = _acoustic_run()
+    checks = run._checked
+    every = checks.snapshot_every
+    assert every is not None
+    sim = fd._acoustic_engine(run, None)
+    pressures = np.zeros((checks.probe_ix.shape[0], checks.steps + 1))
+    frames = fd._march(
+        sim,
+        checks.steps,
+        checks.probe_ix,
+        every,
+        checks.snapshot_decimation,
+        pressures,
+    )
+    next(frames)  # t = 0
+    next(frames)  # after snapshot_every steps
+    frames.close()
+    assert sim.n == every
+    assert list(frames) == []
+    # The probes recorded the steps that ran, and none after.
+    reference = fdtd_simulation(run)
+    done = every + 1
+    assert np.array_equal(pressures[:, :done], reference.pressures[:, :done])
+    assert not pressures[:, done:].any()
 
 
 def test_the_march_reports_every_step() -> None:

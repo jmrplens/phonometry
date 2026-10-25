@@ -62,6 +62,7 @@ pytestmark = pytest.mark.pinned_stack
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+    from types import ModuleType
 
     from matplotlib.artist import Artist
     from matplotlib.axes import Axes
@@ -902,7 +903,7 @@ def test_a_label_on_a_three_dimensional_plate_is_measured_where_it_is_drawn() ->
 
 
 def test_the_spanish_pass_is_measured_and_says_so(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path, figure_theme: ModuleType
 ) -> None:
     """Spanish prose is longer, and half the corpus is Spanish.
 
@@ -912,28 +913,21 @@ def test_the_spanish_pass_is_measured_and_says_so(
     and *after* the translation, and the record has to say which drawing it
     is talking about.
     """
-    from figures import i18n, theme
+    from figures import i18n
 
     english = "brief"
     spanish = "una anotación considerablemente más larga que la inglesa"
     monkeypatch.setitem(i18n._ES_EXACT, english, spanish)
 
-    saved = dict(mpl.rcParams)
-    try:
-        for lang, dark in (("en", False), ("es", False), ("es", True)):
-            i18n.set_lang(lang)
-            theme.set_theme(dark=dark)
-            fig, ax = _blank()
-            ax.plot([0.45, 1.0], [0.5, 0.5], color="black", linewidth=6.0)
-            ax.text(0.02, 0.5, english, ha="left", va="center")
-            theme.save_figure(str(tmp_path), "probe.svg")
-            plt.close(fig)
-    finally:
-        # ``set_lang`` and ``set_theme`` rebind module globals and the whole
-        # rcParams; the next test must not inherit a dark Spanish figure.
-        i18n.set_lang("en")
-        theme.set_theme(dark=False)
-        mpl.rcParams.update(saved)
+    # The fixture puts the language, the theme and the settings back.
+    for lang, dark in (("en", False), ("es", False), ("es", True)):
+        i18n.set_lang(lang)
+        figure_theme.set_theme(dark=dark)
+        fig, ax = _blank()
+        ax.plot([0.45, 1.0], [0.5, 0.5], color="black", linewidth=6.0)
+        ax.text(0.02, 0.5, english, ha="left", va="center")
+        figure_theme.save_figure(str(tmp_path), "probe.svg")
+        plt.close(fig)
 
     assert audit._FOUND["probe"] == []
     (hit,) = _of_kind(audit._FOUND["probe_es"], audit.BEHIND)

@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from .._i18n import Language
-    from ..simulation.elastic_fdtd import ElasticFDTDResult, ElasticSource
+    from ..simulation.elastic_fdtd import ElasticFDTDResult, ElasticSource, Field
     from ..simulation.fdtd import AnySource, FDTDResult
 
 _TIME_LABEL = "Time [ms]"
@@ -203,10 +203,11 @@ def _draw_field(
 ) -> AxesImage:
     """Draw one field raster with the geometry overlaid (shared core).
 
-    The domain is the ``shape`` grid of spacing ``dx``, the product a result's
-    ``size`` is. A field recorded with ``decimation`` d keeps the first cell
-    of every d by d block of that grid; the obstacle map is the whole grid
-    whatever the field keeps, and is drawn over the domain.
+    The domain is the ``shape`` grid of spacing ``dx``, whose extent, ``shape``
+    times ``dx``, is a result's ``size``. A field recorded with ``decimation``
+    d keeps the first cell of every d by d block of that grid; the obstacle
+    map is the whole grid whatever the field keeps, and is drawn over the
+    domain.
 
     ``color_limit`` fixes the symmetric colour scale, as a video needs for all
     its frames; ``None`` takes it from this field. Returns the image, which
@@ -306,7 +307,7 @@ def _fdtd_title(time_text: str, language: Language) -> str:
     return _t("FDTD pressure field at $t$ = {t_txt} ms", language, t_txt=time_text)
 
 
-def _elastic_title(time_text: str, snapshot_field: str, language: Language) -> str:
+def _elastic_title(time_text: str, snapshot_field: Field, language: Language) -> str:
     """The title of an elastic field at the time *time_text* (in milliseconds) writes."""
     return _t(_ELASTIC_FIELD_TITLES[snapshot_field], language, t_txt=time_text)
 
@@ -317,7 +318,7 @@ def fdtd_snapshot_title(time_s: float, language: Language) -> str:
 
 
 def elastic_snapshot_title(
-    time_s: float, snapshot_field: str, language: Language
+    time_s: float, snapshot_field: Field, language: Language
 ) -> str:
     """The title of an elastic field (``"p"``, ``"vx"``, ``"vy"``) at *time_s* seconds."""
     return _elastic_title(_time_text(time_s, language), snapshot_field, language)
@@ -733,7 +734,7 @@ def elastic_frame(
     probe_positions: NDArray[np.float64],
     obstacle_mask: NDArray[np.bool_] | None,
     decimation: int,
-    snapshot_field: str,
+    snapshot_field: Field,
     color_limit: float,
     time_s: float,
     last_time_s: float,
@@ -824,8 +825,9 @@ def plot_fdtd_snapshot(
     """
     if result.snapshots is None or result.snapshot_times is None:
         msg = (
-            "the result holds no snapshots; rerun the "
-            "simulation with snapshot_every set"
+            "the result holds no snapshots; rerun fdtd_simulation with "
+            "run.recording.snapshot_every set (a run that write_fdtd_animation "
+            "wrote to a video stores none)"
         )
         raise ValueError(msg)
     refuse_fixed_keywords(
@@ -948,8 +950,9 @@ def plot_elastic_snapshot(
     """
     if result.snapshots is None or result.snapshot_times is None:
         msg = (
-            "the result holds no snapshots; rerun the "
-            "simulation with snapshot_every set"
+            "the result holds no snapshots; rerun elastic_fdtd_simulation with "
+            "run.recording.snapshot_every set (a run that "
+            "write_elastic_fdtd_animation wrote to a video stores none)"
         )
         raise ValueError(msg)
     refuse_fixed_keywords(

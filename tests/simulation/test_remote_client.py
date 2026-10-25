@@ -15,6 +15,7 @@ import importlib.util
 import io
 import logging
 import re
+import subprocess
 import sys
 import threading
 import types
@@ -243,6 +244,46 @@ def test_an_interrupt_while_the_session_is_built_stops_ssh(
     with pytest.raises(KeyboardInterrupt), opening:
         pass
     assert process.killed, "ssh outlived an interrupt that came before its session"
+
+
+#: The two flags Windows starts ssh with, as its headers define them; the
+#: test puts them on ``subprocess`` where this system has none.
+_CREATE_NEW_PROCESS_GROUP = 0x00000200
+_CREATE_NO_WINDOW = 0x08000000
+
+
+@pytest.mark.parametrize(
+    ("platform", "expected"),
+    [
+        (
+            "win32",
+            {"creationflags": _CREATE_NEW_PROCESS_GROUP | _CREATE_NO_WINDOW},
+        ),
+        ("linux", {"start_new_session": True}),
+    ],
+)
+def test_ssh_starts_in_a_group_of_its_own_and_on_windows_with_no_console_window(
+    monkeypatch: pytest.MonkeyPatch, platform: str, expected: dict[str, object]
+) -> None:
+    """An interrupt reaches this process, which stops ssh; from a notebook or pythonw no window opens."""
+    started = object()
+    seen: dict[str, object] = {}
+
+    def popen(argv: list[str], **options: object) -> object:
+        seen.update(options, argv=argv)
+        return started
+
+    monkeypatch.setattr(sys, "platform", platform)
+    monkeypatch.setattr(
+        subprocess, "CREATE_NEW_PROCESS_GROUP", _CREATE_NEW_PROCESS_GROUP, raising=False
+    )
+    monkeypatch.setattr(
+        subprocess, "CREATE_NO_WINDOW", _CREATE_NO_WINDOW, raising=False
+    )
+    monkeypatch.setattr(subprocess, "Popen", popen)
+    assert client._popen(["ssh", "--", "node"]) is started
+    pipes = dict.fromkeys(("stdin", "stdout", "stderr"), subprocess.PIPE)
+    assert seen == {"argv": ["ssh", "--", "node"], **pipes, **expected}
 
 
 def test_progress_lines_go_to_the_log_and_the_rest_to_the_tail(
@@ -912,13 +953,14 @@ def test_a_stream_that_begins_as_its_file_reaches_the_sink_whole(
     ("data", "match"),
     [
         (b"", "0 bytes of 'video', too few to begin as the file the request names"),
+        (_WEBM_HEAD[:1], "1 byte of 'video', too few to begin as the file"),
         (
             _WEBM_HEAD[:2],
             "2 bytes of 'video', too few to begin as the file the request names",
         ),
         (b"GIF89a" + bytes(10), "'video' does not begin as the file the request names"),
     ],
-    ids=["empty", "short", "gif"],
+    ids=["empty", "one-byte", "short", "gif"],
 )
 def test_a_video_that_is_empty_short_or_another_file_reaches_no_sink(
     data: bytes, match: str
@@ -928,6 +970,23 @@ def test_a_video_that_is_empty_short_or_another_file_reaches_no_sink(
     with pytest.raises(ComputeRemoteError, match=match):
         _receive(stdout, expected=_HEADED, sink=sink)
     assert sink.getvalue() == b""
+
+
+@pytest.mark.parametrize(
+    ("heads", "shown"),
+    [
+        (((0, b""),), "b'' at 0"),
+        (((-1, b"ftyp"),), "b'ftyp' at -1"),
+        (((4, b"ftyp"), (0, b"")), "b'' at 0"),
+    ],
+    ids=["empty", "negative-offset", "one-of-two-empty"],
+)
+def test_a_head_every_stream_would_begin_as_is_refused(
+    heads: tuple[tuple[int, bytes], ...], shown: str
+) -> None:
+    """An empty head matches any stream at any length, so it would turn both checks off."""
+    with pytest.raises(ValueError, match=rf"a head of 'video' is .*, got {shown}$"):
+        client.StreamSpec("video", max_bytes=64, heads=heads)
 
 
 def test_a_stream_without_heads_is_read_as_before() -> None:
@@ -961,3 +1020,51 @@ def test_a_video_refused_by_its_heads_falls_back_here_with_nothing_in_the_sink(
         )
     assert provenance is None
     assert sink.getvalue() == b""
+
+
+#: An MP4's head is four bytes in, after the size of its first box; a GIF has
+#: two heads, one per version, either of which will do.
+_MANY_HEADS = ((4, b"ftyp"), (0, b"GIF87a"), (0, b"GIF89a"))
+_OFFSET_AND_MANY = client.Expected(
+    arrays=_STREAMED.arrays,
+    stream=client.StreamSpec("video", max_bytes=64, heads=_MANY_HEADS),
+)
+
+
+@pytest.mark.parametrize(
+    "data",
+    [b"\x00\x00\x00\x18ftypisom", b"GIF87a", b"GIF89a" + bytes(4)],
+    ids=["mp4-at-4", "gif87a", "gif89a"],
+)
+def test_a_stream_may_begin_as_any_of_its_heads_at_its_offset(data: bytes) -> None:
+    sink = io.BytesIO()
+    _receive(_video(data), expected=_OFFSET_AND_MANY, sink=sink)
+    assert sink.getvalue() == data
+
+
+@pytest.mark.parametrize(
+    ("data", "match"),
+    [
+        # The shortest head ends at byte 6: GIF87a, GIF89a, or ftyp at 4.
+        (b"\x00\x00\x00", "3 bytes of 'video', too few to begin"),
+        # ftyp at the start, not four bytes in.
+        (b"ftypisom", "does not begin as the file the request names"),
+        (b"GIF88a", "does not begin as the file the request names"),
+    ],
+    ids=["short", "ftyp-at-0", "gif88a"],
+)
+def test_a_head_counts_only_at_its_own_offset(data: bytes, match: str) -> None:
+    sink = io.BytesIO()
+    stdout = _video(data)
+    with pytest.raises(ComputeRemoteError, match=match):
+        _receive(stdout, expected=_OFFSET_AND_MANY, sink=sink)
+    assert sink.getvalue() == b""
+
+
+def test_the_shortest_stream_is_where_the_nearest_head_ends() -> None:
+    """Six bytes are enough to hold a GIF's head, and five are not, whatever an MP4's needs."""
+    assert client._begins_as(b"GIF89a", _MANY_HEADS)
+    stdout = _video(b"GIF89")
+    sink = io.BytesIO()
+    with pytest.raises(ComputeRemoteError, match="5 bytes of 'video', too few"):
+        _receive(stdout, expected=_OFFSET_AND_MANY, sink=sink)

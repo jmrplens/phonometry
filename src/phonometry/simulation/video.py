@@ -34,13 +34,14 @@ leaves the frame and nothing moves from one frame to the next; the title is
 centred over the frame. Every text keeps its own size: a frame is at least
 479 by 245 pixels, the smallest in which every text, at its own size, stays
 clear of the frame's margin and covers no other, with the field still in
-view, on every matplotlib version the library is tested with. An axis too
-short for the numbers matplotlib would write along it keeps fewer of them,
-never one over another: a tall grid's narrow field may show a single number
-under it. That holds for a run of up to ten seconds; a longer one writes more
-digits in its title's time, and needs a frame about 10.6 pixels wider for
-each digit past four before the point in milliseconds: a narrower one is
-refused before the run starts, with the width it needs. The frames are drawn
+view for a grid up to ten times longer one way than the other, on every
+matplotlib version the library is tested with. An axis too short for the
+numbers matplotlib would write along it keeps fewer of them, never one over
+another: a tall grid's narrow field may show a single number under it. That
+holds for a run whose last frame comes before ten seconds; a later one
+writes more digits in its title's time, and needs a frame about 10.6 pixels
+wider for each digit past four before the point in milliseconds: a narrower
+one is refused before the run starts, with the width it needs. The frames are drawn
 once and then updated in place, under matplotlib's default style whatever
 the caller's settings say, so a video written here and one written on
 another machine look alike. One frame is drawn every
@@ -49,24 +50,25 @@ another machine look alike. One frame is drawn every
 
 The colour scale is fixed for the whole video. With a limit given, each
 frame is drawn as the run computes it. Without one the run steps twice: a
-first pass finds, on the device, the largest magnitude the drawn field
-reaches outside the source cells, the plane-wave injection lines and the
-absorbing layer, where the field is what the source or the sponge makes it
-rather than the wave the video shows, and the second pass draws with that
-limit. Neither pass stores a snapshot.
+first pass, which stops at the last frame, finds, on the device, the largest
+magnitude the drawn field reaches outside the source cells, the plane-wave
+injection lines and the absorbing layer, where the field is what the source
+or the sponge makes it rather than the wave the video shows, and the second
+pass draws with that limit. Neither pass stores a snapshot.
 
 With a ``host`` in ``compute`` the run is computed, drawn and encoded on
 that node, named in the hosts file (see the guide on remote nodes), and only
 the result and the video's bytes come back. Every argument is checked here
 first, so a call refused here never starts ssh, and ffmpeg is found and run
 on the node: this machine runs it only when a node that failed falls back
-to it (``fallback=True``). The bytes go, as they arrive, into a hidden file
-beside ``path``, created before ssh starts so that a directory that does not
-take it fails first: never more of them than the frames can take, and none
-that do not begin as the container ``path`` names. That file takes
-``path``'s place once the node's whole answer has been read and checked, and
-is removed if anything fails before (or stays, hidden, if the system does
-not let it go, which hides no error).
+to it (``fallback=True``). The bytes go, as they arrive, into a partial file
+beside ``path``, whose name starts with a dot (hidden on Linux and macOS),
+created before ssh starts so that a directory that does not take it fails
+first: never more of them than the frames can take, and none that do not
+begin as the container ``path`` names. That file takes ``path``'s place once
+the node's whole answer has been read and checked, and is removed if
+anything fails before (or stays, under its own name, if the system does not
+let it go, which hides no error).
 """
 
 from __future__ import annotations
@@ -215,12 +217,12 @@ class AnimationFrame(RichDisplay):
     :param language: Label language, ``"en"`` (default) or ``"es"``.
     :param size: ``(width, height)`` of a frame in pixels, at least 479 by
         245, the smallest frame in which every text, at its own size, stays
-        clear of the frame's margin and the field still shows, on every
-        matplotlib version the library is tested with (default
-        ``(960, 540)``).
-        That is for a run of up to ten seconds: a longer run needs a wider
-        frame for the time its last title writes, which the writers ask for
-        before the run starts.
+        clear of the frame's margin and the field still shows (for a grid up
+        to ten times longer one way than the other), on every matplotlib
+        version the library is tested with (default ``(960, 540)``).
+        That is for a run whose last frame comes before ten seconds: a later
+        one needs a wider frame for the time its last title writes, which
+        the writers ask for before the run starts.
     :param color_limit: The value at either end of the colour scale, fixed
         for the whole video, in the unit of the field drawn: pascals for an
         acoustic run (:func:`write_fdtd_animation`), and for an elastic one
@@ -229,7 +231,8 @@ class AnimationFrame(RichDisplay):
         per second for ``"vx"`` and ``"vy"``. ``None`` (default) finds it in
         a first pass over the run.
     :raises TypeError: for a ``size`` that is not a pair or holds something
-        other than numbers, or a ``color_limit`` that is not one number.
+        other than numbers, or a ``color_limit`` that is not one number (a
+        bool is not one).
     :raises ValueError: for a ``language`` other than ``"en"`` and ``"es"``,
         a ``size`` of more or fewer than two sides, with a side that is not
         a whole number, or narrower than 479 or lower than 245 pixels, or a
@@ -245,6 +248,10 @@ class AnimationFrame(RichDisplay):
         language = check_language(self.language)
         size = _frame_pixels(self.size)
         limit = None
+        if isinstance(self.color_limit, bool | np.bool_):
+            # float(True) is 1.0: read as a number, a flag would set the scale.
+            msg = f"'color_limit' must be one number, not a bool; got {self.color_limit!r}."
+            raise TypeError(msg)
         if self.color_limit is not None:
             require_scalar(self.color_limit, "color_limit")
             limit = require_positive(self.color_limit, "color_limit")
@@ -344,11 +351,26 @@ def _last_frame_time(checks: _AcousticChecks | _ElasticChecks, every: int) -> fl
     return (checks.steps // every) * (every * checks.dt)
 
 
-def _shown_time(time_s: float, language: Language) -> str:
-    """A time as a video's title writes it: in milliseconds, two decimals, in the language's notation."""
-    from .._i18n import format_number
+def _first_pass_steps(checks: _AcousticChecks | _ElasticChecks) -> tuple[int, int]:
+    """The steps a first pass takes, up to the run's last frame, and the steps between two frames.
 
-    return format_number(float(time_s) * 1000.0, language, decimals=2)
+    The steps after the last frame draw nothing, so the pass that finds the
+    colour limit stops before them; the second pass takes them, for the
+    probes.
+    """
+    every = _frame_cadence(checks.snapshot_every)
+    return checks.steps - checks.steps % every, every
+
+
+def _shown_time(time_s: float, language: Language) -> str:
+    """A time as a video's title writes it, by the function the title is written with.
+
+    Imported here, not at the top: the drawing module needs no matplotlib to
+    import, and this machine needs none for a video a node draws.
+    """
+    from .._plot.simulation import _time_text
+
+    return _time_text(time_s, language)
 
 
 def _width_for(last_time_s: float, language: Language) -> int:
@@ -507,13 +529,17 @@ def _render(
             cache_frame_data=False,
             repeat=False,
         )
+        # The style context resets every rcParam, rcParams["animation.ffmpeg_path"]
+        # included, so the encode is handed the ffmpeg and the encoder found
+        # before it: inside the context, looking for ffmpeg again would find
+        # the default "ffmpeg" rather than the one the caller named.
         return encode(
             request, animation, ffmpeg=encoding.ffmpeg, choice=encoding.choice
         )
 
 
 @dataclass(frozen=True)
-class _Call[R: (FDTDRun, ElasticRun)]:
+class _CheckedCall[R: (FDTDRun, ElasticRun)]:
     """What a writer was asked for, checked: the run, its frames, where it runs and the video.
 
     ``placement`` is the request resolved (the argument, :func:`use`, the
@@ -539,7 +565,7 @@ def _checked_call[R: (FDTDRun, ElasticRun)](
     frame: AnimationFrame | None,
     video: VideoOptions | None,
     scale: Callable[[R, float | None], float | NDArray[np.bool_]],
-) -> _Call[R]:
+) -> _CheckedCall[R]:
     """A writer's arguments, checked in the order every route checks them.
 
     The run's kind, the frame record's, the placement, the frame cadence,
@@ -553,8 +579,9 @@ def _checked_call[R: (FDTDRun, ElasticRun)](
         path.
     :raises ValueError: for a run that records no snapshots, a malformed
         ``PHONOMETRY_COMPUTE``, a frame too narrow for the title of the run's
-        last frame, a path whose container rules out the options, or nothing
-        to find the colour scale by.
+        last frame, a path of another suffix, a path that names a directory,
+        a path whose container rules out the options, or nothing to find the
+        colour scale by.
     :raises FileNotFoundError: when the directory of *path* does not exist
         or cannot be reached.
     """
@@ -571,7 +598,7 @@ def _checked_call[R: (FDTDRun, ElasticRun)](
     _require_width(drawn, _last_frame_time(checked._checked, every))
     request = video_request(path, video_options(video))
     limit = scale(checked, drawn.color_limit)
-    return _Call(checked, drawn, placement, every, request, limit)
+    return _CheckedCall(checked, drawn, placement, every, request, limit)
 
 
 def _kept(
@@ -635,30 +662,40 @@ def _found_limit(
     return found, _ran(sim.provenance)
 
 
-def _encoding_and_limit[R: (FDTDRun, ElasticRun)](
-    call: _Call[R],
-    compute: Compute | None,
-    first_pass: Callable[[R, Compute | None, NDArray[np.bool_]], tuple[float, Compute]],
-) -> tuple[_Encoding, float, Compute | None]:
-    """The encoder, chosen before any step; then the colour limit, and where the run steps.
+def _encoding_here[R: (FDTDRun, ElasticRun)](call: _CheckedCall[R]) -> _Encoding:
+    """The encoder of a video written here, chosen, and the directory of ``path`` checked.
 
-    A limit the frame gave is taken as it is, and the run steps where
-    *compute* asks. Without one, *first_pass* (the kind's own) steps the run
-    to find it, and the run then steps where that pass really stepped.
+    Called before any step, a first pass's included: a missing ffmpeg, an
+    encoder that cannot write the video or a directory that does not take
+    it then costs no run.
 
     :raises FFmpegNotFoundError: when ffmpeg is not found.
     :raises VideoEncoderError: when it does not run, has no encoder that
         writes this video, or the directory of ``path`` does not take a file.
-    :raises ValueError: when the first pass finds nothing to scale by.
     """
     from ..io._video import require_writable
 
     encoding = _preflight(call.request, call.drawn.size)
     require_writable(call.request)
+    return encoding
+
+
+def _color_limit[R: (FDTDRun, ElasticRun)](
+    call: _CheckedCall[R],
+    compute: Compute | None,
+    first_pass: Callable[[R, Compute | None, NDArray[np.bool_]], tuple[float, Compute]],
+) -> tuple[float, Compute | None]:
+    """The colour limit, and where the run steps.
+
+    A limit the frame gave is taken as it is, and the run steps where
+    *compute* asks. Without one, *first_pass* (the kind's own) steps the run
+    to find it, and the run then steps where that pass really stepped.
+
+    :raises ValueError: when the first pass finds nothing to scale by.
+    """
     if isinstance(call.scale, float):
-        return encoding, call.scale, compute
-    limit, ran = first_pass(call.run, compute, call.scale)
-    return encoding, limit, ran
+        return call.scale, compute
+    return first_pass(call.run, compute, call.scale)
 
 
 class _PartialFile:
@@ -740,14 +777,14 @@ class _PartialFile:
 
 def _node_video[R: (FDTDRun, ElasticRun), T](
     function: RemoteFunction,
-    call: _Call[R],
-    history: tuple[str, tuple[int, ...]],
+    call: _CheckedCall[R],
+    record_spec: tuple[str, tuple[int, ...]],
     result: Callable[[R, NDArray[np.float64], RunProvenance], T],
 ) -> T | None:
     """Run a writer on the node ``call.placement`` names; its video takes ``path``'s place here.
 
     The node computes, draws and encodes, with the records this machine has
-    already checked. Its probe history, named and shaped as *history* says,
+    already checked. Its probe history, named and shaped as *record_spec* says,
     is read into an array here, from which *result* (the kind's own) builds
     the record. Its video's bytes are written, as they arrive, into a hidden
     file beside ``path``: never more of them than
@@ -771,7 +808,7 @@ def _node_video[R: (FDTDRun, ElasticRun), T](
     request = call.request
     width, height = call.drawn.size
     n_frames = call.run._checked.steps // call.every + 1
-    name, shape = history
+    name, shape = record_spec
     record = np.zeros(shape, dtype=np.float64)
     stream = StreamSpec(
         "video",
@@ -809,7 +846,7 @@ def _node_video[R: (FDTDRun, ElasticRun), T](
     return result(call.run, record, ran)
 
 
-class _FrameWhere(TypedDict):
+class _FrameCommon(TypedDict):
     """What the first frame of either kind of run is drawn from alike."""
 
     dx: float
@@ -829,13 +866,13 @@ def _probe_positions(checks: _AcousticChecks | _ElasticChecks) -> NDArray[np.flo
 
 
 def _render_run[R: (FDTDRun, ElasticRun)](
-    call: _Call[R],
+    call: _CheckedCall[R],
     encoding: _Encoding,
     frames: Generator[DeviceArray, None, None],
     backend: Backend,
     *,
     limit: float,
-    draw: Callable[[Axes, NDArray[np.float64], _FrameWhere], AxesImage],
+    draw: Callable[[Axes, NDArray[np.float64], _FrameCommon], AxesImage],
     title: Callable[[float], str],
 ) -> None:
     """Draw *frames*, one at t = 0 and one every ``call.every`` steps, into the video.
@@ -849,7 +886,7 @@ def _render_run[R: (FDTDRun, ElasticRun)](
     checks = call.run._checked
     n_frames = checks.steps // call.every + 1
     frame_dt = call.every * checks.dt
-    where = _FrameWhere(
+    common = _FrameCommon(
         dx=checks.dx,
         shape=checks.grid,
         probe_positions=_probe_positions(checks),
@@ -868,7 +905,7 @@ def _render_run[R: (FDTDRun, ElasticRun)](
         backend=backend,
         n_frames=n_frames,
         frame_dt=frame_dt,
-        setup=lambda ax, field: draw(ax, field, where),
+        setup=lambda ax, field: draw(ax, field, common),
         title=title,
     )
 
@@ -955,18 +992,14 @@ def _acoustic_scale(
 def _acoustic_limit(
     run: FDTDRun, compute: Compute | None, keep: NDArray[np.bool_]
 ) -> tuple[float, Compute]:
-    """The first pass: the colour limit, and where the run really stepped."""
+    """The first pass, up to the last frame: the colour limit, and where the run really stepped."""
     checks = run._checked
+    steps, every = _first_pass_steps(checks)
     sim = _acoustic_engine(run, compute)
     no_probes = np.zeros((0, 2), dtype=np.int_)
-    unrecorded = np.zeros((0, checks.steps + 1))
+    unrecorded = np.zeros((0, steps + 1))
     frames = _march(
-        sim,
-        checks.steps,
-        no_probes,
-        checks.snapshot_every,
-        checks.snapshot_decimation,
-        unrecorded,
+        sim, steps, no_probes, every, checks.snapshot_decimation, unrecorded
     )
     return _found_limit(sim, frames, keep, _ACOUSTIC_COVERING)
 
@@ -1040,16 +1073,18 @@ def write_fdtd_animation(
     :raises ValueError: If the run records no snapshots
         (``run.recording`` is ``None``, or its ``snapshot_every`` is), the
         frame is narrower than the title of the run's last frame needs (a
-        run of ten seconds or more; the message gives the width), the path's
-        suffix is not one of the three or its container rules out the
-        options, ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
+        run whose last frame comes at ten seconds or later; the message gives
+        the width), the path's suffix is not one of the three, the path names
+        a directory, or its container rules out the options,
+        ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
         the colour scale by (the message asks for
         ``AnimationFrame(color_limit=...)``), or the hosts file is malformed.
     :raises FileNotFoundError: If the directory of ``path`` does not exist
         or cannot be reached (it sits inside a directory this process
         cannot search); before any step, and before ssh starts.
-    :raises FFmpegNotFoundError: If ffmpeg is not found, or on Windows is
-        found only in the working directory; before any step.
+    :raises FFmpegNotFoundError: For a video written here (no ``host``, or
+        a node that failed with ``fallback=True``), if ffmpeg is not found, or
+        on Windows is found only in the working directory; before any step.
     :raises VideoEncoderError: If no encoder can write the video, a raw
         ``ffmpeg_encoder`` is not in this ffmpeg (both before any step), or
         the directory of ``path`` does not take a file (before any step, and
@@ -1096,7 +1131,8 @@ def write_fdtd_animation(
             return there
         # The node failed and the request asked to write here instead.
         compute = _placement_here(call.placement)
-    encoding, limit, compute = _encoding_and_limit(call, compute, _acoustic_limit)
+    encoding = _encoding_here(call)
+    limit, compute = _color_limit(call, compute, _acoustic_limit)
     sim = _acoustic_engine(run, compute)
     pressures = np.zeros(history, dtype=np.float64)
     frames = _march(
@@ -1108,10 +1144,10 @@ def write_fdtd_animation(
         pressures,
     )
 
-    def draw(ax: Axes, field: NDArray[np.float64], where: _FrameWhere) -> AxesImage:
+    def draw(ax: Axes, field: NDArray[np.float64], common: _FrameCommon) -> AxesImage:
         from .._plot.simulation import fdtd_frame
 
-        return fdtd_frame(ax, field, sources=run.sources, **where)
+        return fdtd_frame(ax, field, sources=run.sources, **common)
 
     def title(time_s: float) -> str:
         from .._plot.simulation import fdtd_snapshot_title
@@ -1161,17 +1197,18 @@ def _elastic_scale(
 def _elastic_limit(
     run: ElasticRun, compute: Compute | None, keep: NDArray[np.bool_]
 ) -> tuple[float, Compute]:
-    """The first pass: the colour limit, and where the run really stepped."""
+    """The first pass, up to the last frame: the colour limit, and where the run really stepped."""
     checks = run._checked
+    steps, every = _first_pass_steps(checks)
     sim = _elastic_engine(run, compute)
     no_probes = np.zeros((0, 2), dtype=np.int_)
-    unrecorded = np.zeros((0, len(checks.fields), checks.steps + 1))
+    unrecorded = np.zeros((0, len(checks.fields), steps + 1))
     frames = _elastic_march(
         sim,
-        checks.steps,
+        steps,
         no_probes,
         checks.fields,
-        checks.snapshot_every,
+        every,
         checks.snapshot_field,
         checks.snapshot_decimation,
         unrecorded,
@@ -1252,16 +1289,18 @@ def write_elastic_fdtd_animation(
     :raises ValueError: If the run records no snapshots
         (``run.recording`` is ``None``, or its ``snapshot_every`` is), the
         frame is narrower than the title of the run's last frame needs (a
-        run of ten seconds or more; the message gives the width), the path's
-        suffix is not one of the three or its container rules out the
-        options, ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
+        run whose last frame comes at ten seconds or later; the message gives
+        the width), the path's suffix is not one of the three, the path names
+        a directory, or its container rules out the options,
+        ``PHONOMETRY_COMPUTE`` is malformed, there is nothing to find
         the colour scale by (the message asks for
         ``AnimationFrame(color_limit=...)``), or the hosts file is malformed.
     :raises FileNotFoundError: If the directory of ``path`` does not exist
         or cannot be reached (it sits inside a directory this process
         cannot search); before any step, and before ssh starts.
-    :raises FFmpegNotFoundError: If ffmpeg is not found, or on Windows is
-        found only in the working directory; before any step.
+    :raises FFmpegNotFoundError: For a video written here (no ``host``, or
+        a node that failed with ``fallback=True``), if ffmpeg is not found, or
+        on Windows is found only in the working directory; before any step.
     :raises VideoEncoderError: If no encoder can write the video, a raw
         ``ffmpeg_encoder`` is not in this ffmpeg (both before any step), or
         the directory of ``path`` does not take a file (before any step, and
@@ -1308,7 +1347,8 @@ def write_elastic_fdtd_animation(
             return there
         # The node failed and the request asked to write here instead.
         compute = _placement_here(call.placement)
-    encoding, limit, compute = _encoding_and_limit(call, compute, _elastic_limit)
+    encoding = _encoding_here(call)
+    limit, compute = _color_limit(call, compute, _elastic_limit)
     sim = _elastic_engine(run, compute)
     signals = np.zeros(history, dtype=np.float64)
     frames = _elastic_march(
@@ -1322,7 +1362,7 @@ def write_elastic_fdtd_animation(
         signals,
     )
 
-    def draw(ax: Axes, field: NDArray[np.float64], where: _FrameWhere) -> AxesImage:
+    def draw(ax: Axes, field: NDArray[np.float64], common: _FrameCommon) -> AxesImage:
         from .._plot.simulation import elastic_frame
 
         return elastic_frame(
@@ -1330,7 +1370,7 @@ def write_elastic_fdtd_animation(
             field,
             sources=run.sources,
             snapshot_field=checks.snapshot_field,
-            **where,
+            **common,
         )
 
     def title(time_s: float) -> str:

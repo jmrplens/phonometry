@@ -72,16 +72,16 @@ file raises `io.VideoEncoderError`, naming the path and the system's reason,
 before the first frame is drawn.
 
 The file appears at the path only once ffmpeg has finished it. Until then
-ffmpeg writes to a hidden file beside it, under a name of its own for each
-write, and that file is removed whatever stops the encode: ffmpeg fails, the
-disk fills, or your update function raises, which reaches you as its own
-exception. So a failure leaves what was at the path before, a good video
-included. A hidden file the system will not let go, as one a scanner holds
-open on Windows, stays where it is, and what reaches you is still what
-stopped the encode. A finished video that Windows will not let take the
-old file's place, because a player holds the old file open, is not thrown
-away: it is left beside it under its hidden name, and the
-`io.VideoEncoderError` says where.
+ffmpeg writes to a partial file beside it, under a name of its own for each
+write, one that starts with a dot so that Linux and macOS hide it, and that
+file is removed whatever stops the encode: ffmpeg fails, the disk fills, or
+your update function raises, which reaches you as its own exception. So a
+failure leaves what was at the path before, a good video included. A partial
+file the system will not let go, as one a scanner holds open on Windows, stays
+where it is, and what reaches you is still what stopped the encode. A finished
+video that Windows will not let take the old file's place, because a player
+holds the old file open, is not thrown away: it is left beside it under its
+partial name, and the `io.VideoEncoderError` says where.
 
 Each frame is the whole figure at its own size and in its own colours,
 whatever your matplotlib settings say about saving figures: a `"tight"`
@@ -203,8 +203,11 @@ the milliseconds between frames, as `Animation.save` takes it.
 `ffmpeg_options=` adds ffmpeg output options, as separate texts, written
 after the encoder's preset and pixel format, so an option you repeat wins
 over them. The container's own options come after yours and stay: an MP4's
-start before it has downloaded, the tag of an HEVC, and a GIF's endless
-loop. `ffmpeg_encoder=` names an ffmpeg encoder to use as it is:
+`-movflags +faststart`, which moves the file's index (its `moov` box) to the
+front, so that a player can start before the file has downloaded; the tag of
+an HEVC the library chose (with an `ffmpeg_encoder` of your own, add
+`-tag:v hvc1` yourself); and a GIF's endless loop. `ffmpeg_encoder=` names an
+ffmpeg encoder to use as it is:
 
 ```python
 raw = io.VideoOptions(
@@ -238,7 +241,7 @@ draws its pressure field into a video as the run computes it:
 from phonometry import io, simulation
 
 run = simulation.FDTDRun(
-    c=343.0, dx=0.01, duration_s=4e-3,
+    c=343.0, dx=0.01, duration_s=2.2e-3,
     shape=(80, 120),
     sources=[simulation.GaussianPulse(ix=40, iy=40, half_width_s=5e-5)],
     recording=simulation.FDTDRecording(probes=[(100, 40)], snapshot_every=8),
@@ -280,21 +283,22 @@ of its `io.VideoOptions` says otherwise.
 The frames show what `simulation.fdtd_simulation(run).plot(kind="snapshot")`
 shows for the same run: the same field on the same colormap, symmetric about
 zero, with the same marks and labels, the limit of the scale being the video's
-own, fixed for the whole video, given or found as the next paragraph says.
-The writer's own result holds no snapshots: its `.plot()` draws the probes, as
-any result's does, and `.plot(kind="snapshot")` raises `ValueError`. The
-frames are drawn under matplotlib's default style, whatever your settings say,
-so a video written here and one written on a node look alike. A frame is laid
-out once for the whole run, for the widest title it will show and the labels
-of its axes and colour scale, so nothing moves from one frame to the next, and
+own, fixed for the whole video, given or found as the next paragraph says. The
+writer's own result holds no snapshots: its `.plot()` draws the probes, as any
+result's does, and `.plot(kind="snapshot")` raises `ValueError`. The frames
+are drawn under matplotlib's default style, whatever your settings say, so a
+video written here and one written on a node look alike. A frame is laid out
+once for the whole run, for the widest title it will show and the labels of
+its axes and colour scale, so nothing moves from one frame to the next, and
 every text keeps its own size. The smallest frame in which every text, at its
-own size, stays clear of the frame's margin and the field still shows, with
-every matplotlib version the library is tested with, is 479 by 245 pixels, and
-a smaller `size` raises `ValueError` when the record is built. That floor
-holds for a run whose last frame comes before ten seconds. A longer run writes
-more digits in its title's time, in milliseconds, so its floor is wider: the
-writer refuses a frame narrower than the run needs before the run starts, and
-its message gives the width.
+own size, stays clear of the frame's margin and the field still shows, for a
+grid up to ten times longer one way than the other, with every matplotlib
+version the library is tested with, is 479 by 245 pixels, and a smaller `size`
+raises `ValueError` when the record is built. That floor holds for a run whose
+last frame comes before ten seconds. A longer run writes more digits in its
+title's time, in milliseconds, so its floor is wider: the writer refuses a
+frame narrower than the run needs before the run starts, and its message gives
+the width.
 
 The colour scale is fixed for the whole video.
 `AnimationFrame(color_limit=...)` gives it, in pascals, as the value at either
@@ -392,22 +396,34 @@ matplotlib, or not the font every frame is drawn in, no ffmpeg, or no encoder
 that writes the video at its size refuses before its first step, and
 `simulation.ComputeRemoteError` says why.
 
-The node's bytes are checked before they reach the disk here. They are no more
-than the frames can take: two bytes a pixel of every frame, its sides padded
-to even, when the library's presets decide the encode, or eight when an
-`ffmpeg_encoder` or `ffmpeg_options` of yours do, plus 1 MiB for the
-container; a longer video is refused before a byte of it is read. They must
-begin as a file of the path's container begins, or none of them is kept, and
-an empty video is refused. They are written to disk as they arrive, into a
-hidden file beside the path, so that ceiling bounds the disk, not the memory,
-and the file takes the path's place only once the node's whole answer has been
-read and checked. Whatever stops the run before that, the node, the connection
-or an interrupt, the hidden file is removed and the path is left as it was. A
-hidden file the system will not let go, as one a scanner holds open on
-Windows, stays where it is, and the run fails, or falls back, as it would
-without it. Each refusal is a `simulation.ComputeRemoteError`; with
+The node's bytes are checked before the video takes the path's place here.
+The size the node declares is no more than the frames can take: two bytes a
+pixel of every frame, its sides padded to even, when the library's presets
+decide the encode, or eight when an `ffmpeg_encoder` or `ffmpeg_options` of
+yours do, plus 1 MiB for the container; a larger video is refused before a
+byte of it is read. The first bytes must begin as a file of the path's
+container begins, or none of them is written, and an empty video is refused.
+From there the bytes are written to disk as they arrive, into a partial file
+beside the path, as in section 1, so that ceiling bounds the disk, not the
+memory, and the file takes the path's place only once the node's whole answer
+has been read and checked. Whatever stops the run before that, the node, the
+connection or an interrupt, the partial file is removed and the path is left
+as it was. A partial file the system will not let go, as one a scanner holds
+open on Windows, stays where it is, and the run fails, or falls back, as it
+would without it. Each refusal of the node's bytes, and each failure of the
+node or of the connection, is a `simulation.ComputeRemoteError`; with
 `fallback=True` in the request it is a `simulation.ComputeFallbackWarning`
 instead, and the video is written here, on NumPy.
+
+This machine's disk refusing the video is another matter, and `fallback=True`
+does not turn it into a `simulation.ComputeFallbackWarning`: it is an
+`io.VideoEncoderError` that names the path and the system's reason, as in
+section 1. A directory that does not take the partial file raises it before
+ssh starts. A write the disk refuses as the bytes arrive, or when the file is
+closed (a full disk, a used-up quota), raises it too: the partial file is
+removed and the path is left as it was. A finished video that the system will
+not let take the path's place, as on Windows while a player holds the old file
+open, stays under its partial name, and the `io.VideoEncoderError` says where.
 
 `io.write_video` itself runs on this machine only: an animation drawn here is
 encoded here, and only the two simulation writers go to a node.
@@ -426,8 +442,8 @@ by a real trial encode, GPU encoders first and the CPU last, SVT-AV1 before
 VP9, x265 or x264, and a GIF written on the CPU; three quality presets and
 raw ffmpeg options; and an acoustic or elastic FDTD run written straight to a
 video, here or computed, drawn and encoded on a node, with the colour scale
-given or found on the device, and the node's bytes checked before they are
-written.
+given or found on the device, and the node's bytes checked before the video
+takes the path's place.
 
 **Not covered.** Audio tracks, and encoding on another machine an animation
 drawn on this one. Quick Sync, VAAPI and VideoToolbox are tried and used but

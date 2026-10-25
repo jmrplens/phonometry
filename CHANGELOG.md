@@ -2147,6 +2147,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A run on a node passes over an ssh in the Windows working directory, and
+  opens no console window.** On Windows, which looks for a program in the
+  working directory before `PATH`, an `ssh.exe` or `ssh.bat` left in a
+  notebook's folder ran in place of the OpenSSH client you installed, since
+  the client found ssh by its bare name. It now runs the `ssh` on `PATH`, by
+  its full path, past one in the working directory, and says so in the log
+  at INFO on `phonometry.simulation`; an ssh found only there is refused
+  before ssh starts, with a `ComputeRemoteError` naming the node and the
+  file, as `io.write_video` and the two video writers treat ffmpeg. A
+  working directory that `PATH` itself lists is still your own choice. On
+  Windows ssh also starts with no console window, where a run from a
+  notebook or from `pythonw` opened one for its whole length. The
+  remote-node guide in English and Spanish, with its docs/ mirror, says both.
+
 - **`simulation.AnimationFrame` refuses a bool for its colour limit, and the
   snapshot plot of a video writer's result says where snapshots come from.**
   `AnimationFrame(color_limit=True)` was read as the number 1.0 and drew the

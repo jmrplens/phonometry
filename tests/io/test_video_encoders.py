@@ -9,7 +9,6 @@ import re
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
@@ -17,12 +16,14 @@ import pytest
 pytest.importorskip("matplotlib")
 
 import fake_ffmpeg
+import windows_lookup
 
 from phonometry.io import _video_encoders as ve
 from phonometry.io._video_quality import ENCODER_QUALITY, GIF_PALETTE
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from pathlib import Path
 
 
 def test_every_encoder_name_has_its_three_presets() -> None:
@@ -134,22 +135,6 @@ def test_pyodide_says_why(monkeypatch: pytest.MonkeyPatch) -> None:
         ve.find_ffmpeg()
 
 
-def _windows_lookup(name: str) -> str | None:
-    """What ``shutil.which`` does on Windows: a bare name in the working directory first, then on PATH."""
-    given = Path(name)
-    places = (
-        [str(given.parent)]
-        if given.name != name
-        else [os.curdir, *os.environ["PATH"].split(os.pathsep)]
-    )
-    for place in places:
-        for candidate in (given.name, f"{given.name}.exe"):
-            if (Path(place) / candidate).is_file():
-                # Windows writes the directory it searched, "." included.
-                return f"{place}{os.sep}{candidate}"
-    return None
-
-
 @pytest.fixture
 def windows(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     """A Windows lookup of a bare ``"ffmpeg"`` from *tmp_path*, which holds a planted ``ffmpeg.exe``."""
@@ -159,7 +144,7 @@ def windows(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("PATH", str(tmp_path / "elsewhere"))
     monkeypatch.setitem(mpl.rcParams, "animation.ffmpeg_path", "ffmpeg")
-    monkeypatch.setattr(ve.shutil, "which", _windows_lookup)
+    monkeypatch.setattr(ve.shutil, "which", windows_lookup.which)
     monkeypatch.setattr(sys, "platform", "win32")
     return tmp_path
 

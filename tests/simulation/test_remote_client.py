@@ -15,6 +15,7 @@ import importlib.util
 import io
 import logging
 import re
+import subprocess
 import sys
 import threading
 import types
@@ -243,6 +244,46 @@ def test_an_interrupt_while_the_session_is_built_stops_ssh(
     with pytest.raises(KeyboardInterrupt), opening:
         pass
     assert process.killed, "ssh outlived an interrupt that came before its session"
+
+
+#: The two flags Windows starts ssh with, as its headers define them; the
+#: test puts them on ``subprocess`` where this system has none.
+_CREATE_NEW_PROCESS_GROUP = 0x00000200
+_CREATE_NO_WINDOW = 0x08000000
+
+
+@pytest.mark.parametrize(
+    ("platform", "expected"),
+    [
+        (
+            "win32",
+            {"creationflags": _CREATE_NEW_PROCESS_GROUP | _CREATE_NO_WINDOW},
+        ),
+        ("linux", {"start_new_session": True}),
+    ],
+)
+def test_ssh_starts_in_a_group_of_its_own_and_on_windows_with_no_console_window(
+    monkeypatch: pytest.MonkeyPatch, platform: str, expected: dict[str, object]
+) -> None:
+    """An interrupt reaches this process, which stops ssh; from a notebook or pythonw no window opens."""
+    started = object()
+    seen: dict[str, object] = {}
+
+    def popen(argv: list[str], **options: object) -> object:
+        seen.update(options, argv=argv)
+        return started
+
+    monkeypatch.setattr(sys, "platform", platform)
+    monkeypatch.setattr(
+        subprocess, "CREATE_NEW_PROCESS_GROUP", _CREATE_NEW_PROCESS_GROUP, raising=False
+    )
+    monkeypatch.setattr(
+        subprocess, "CREATE_NO_WINDOW", _CREATE_NO_WINDOW, raising=False
+    )
+    monkeypatch.setattr(subprocess, "Popen", popen)
+    assert client._popen(["ssh", "--", "node"]) is started
+    pipes = dict.fromkeys(("stdin", "stdout", "stderr"), subprocess.PIPE)
+    assert seen == {"argv": ["ssh", "--", "node"], **pipes, **expected}
 
 
 def test_progress_lines_go_to_the_log_and_the_rest_to_the_tail(

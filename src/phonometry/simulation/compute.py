@@ -98,8 +98,9 @@ class ComputeFallbackWarning(PhonometryWarning):
 class ComputeRemoteError(RuntimeError):
     """A run sent to a node failed in the connection or on the node.
 
-    Raised for a transport failure (no ssh client, a node that cannot be
-    reached, a stream that breaks the protocol, a run past its timeout) and
+    Raised for a transport failure (no ssh client on ``PATH``, where on
+    Windows one in the working directory does not count, a node that cannot
+    be reached, a stream that breaks the protocol, a run past its timeout) and
     for a failure on the node (an image or a Python environment that cannot
     run the package, an exception raised by the run itself). A wrong
     argument is never one: it raises its own ``TypeError`` or ``ValueError``

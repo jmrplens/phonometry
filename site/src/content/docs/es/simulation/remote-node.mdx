@@ -113,10 +113,18 @@ notas de Windows, se lee como cualquier otro.
 
 **Qué necesita ssh.** El cliente ejecuta el `ssh` de tu máquina, OpenSSH 7.6
 o posterior, y una ejecución nunca pregunta nada: ssh trabaja en modo por
-lotes. Accede al nodo con una clave que ssh pueda usar sin preguntar, desde
-`ssh-agent` o sin frase de contraseña, y conéctate una vez a mano para
-aceptar la clave de host del nodo. Un usuario, un puerto, una clave o un host
-de salto van en un alias `Host` de `~/.ssh/config`. Las opciones que el
+lotes. Es el `ssh` del `PATH`, ejecutado por la ruta completa en la que se
+encuentra. En Windows, que busca un programa en el directorio de trabajo
+antes que en el `PATH`, un `ssh` que esté ahí cede el paso al del `PATH`, y
+uno que solo esté ahí se rechaza con un `ComputeRemoteError`: pon un cliente
+OpenSSH en el `PATH`. Encontrado en un directorio de trabajo que el propio
+`PATH` incluye, se ejecuta ese mismo. En Windows ssh arranca además sin
+ventana de consola, así que una ejecución desde un cuaderno o desde
+`pythonw` no abre ninguna. Accede al nodo con una clave que ssh pueda usar
+sin preguntar, desde `ssh-agent` o sin frase de contraseña, y conéctate una
+vez a mano para aceptar la clave de host del nodo. Un usuario, un puerto, una
+clave o un host de salto van en un alias `Host` de `~/.ssh/config`. Las
+opciones que el
 cliente le da a ssh en la línea de órdenes mandan sobre ese fichero en lo que
 una ejecución no puede tener: un `RemoteCommand` o un `LocalCommand` del
 alias no se ejecutan, no se reenvía nada (sección 7) y no se comparte
@@ -270,7 +278,7 @@ ejecuta allí. La imagen de Docker de la sección 3 lleva las dos.
 | una ejecución que no puede viajar: una fuente cuya forma de onda es un invocable distinto del `.value` de un `GaussianPulse`, `CWSource` o `SignalSource`, o un número entero fuera del rango de un int64 | `TypeError`, nombrando la fuente o el campo | al llamar a la función, antes de leer el fichero de hosts |
 | un host que el fichero no nombra, o ningún fichero de hosts | `KeyError` | antes de que arranque ssh |
 | un fichero de hosts que no se puede leer o no es TOML, o una entrada mal formada | `ValueError`, nombrando el fichero | antes de que arranque ssh |
-| ningún cliente ssh en el `PATH`, Pyodide, un paquete que no se puede leer del disco o que contiene un fichero que ningún nodo escribiría, o un trabajo demasiado largo para la cabecera que lee un nodo (una ejecución de varios miles de fuentes puntuales) | `ComputeRemoteError` | antes de que arranque ssh |
+| ningún cliente ssh en el `PATH`, aunque en Windows haya uno en el directorio de trabajo, Pyodide, un paquete que no se puede leer del disco o que contiene un fichero que ningún nodo escribiría, o un trabajo demasiado largo para la cabecera que lee un nodo (una ejecución de varios miles de fuentes puntuales) | `ComputeRemoteError` | antes de que arranque ssh |
 | cualquier cosa que falle en la conexión o en el nodo | `ComputeRemoteError` | cuando falla |
 
 El mensaje de un `ComputeRemoteError` dice qué pasó y, cuando puede saberlo,

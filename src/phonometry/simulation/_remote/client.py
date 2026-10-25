@@ -466,14 +466,22 @@ def _remedy(stage: str, entry: HostEntry) -> str | None:
 
 
 def _popen(argv: list[str]) -> subprocess.Popen[bytes]:
-    """Start ssh in a process group of its own: an interrupt reaches this process, which stops ssh."""
+    """Start ssh in a process group of its own: an interrupt reaches this process, which stops ssh.
+
+    On Windows ssh also starts with no console window. Started from a
+    notebook or ``pythonw``, which have no console, a console program such
+    as ssh would open one of its own for the whole run; ssh never prompts
+    (``BatchMode``), and it is stopped with ``kill()``, never by a console
+    event, so it needs none.
+    """
     if sys.platform == "win32":
         return subprocess.Popen(  # nosec B603 - the library's own argv, the destination after "--"
             argv,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+            | subprocess.CREATE_NO_WINDOW,
         )
     return subprocess.Popen(  # nosec B603 - the library's own argv, the destination after "--"
         argv,
@@ -504,14 +512,15 @@ def _refuse_pyodide(host: str) -> None:
 def open_session(entry: HostEntry, request: Compute) -> Iterator[Session]:
     """One ssh process to *entry*, stopped on the way out whatever happened.
 
-    :raises ComputeRemoteError: in Pyodide, without an ssh client, or when
-        ssh does not start.
+    :raises ComputeRemoteError: in Pyodide, without an ssh client on
+        ``PATH``, on Windows with an ssh found only in the working directory,
+        or when ssh does not start.
     """
     _refuse_pyodide(entry.name)
     try:
         argv = command.ssh_argv(entry, request)
-    except FileNotFoundError:
-        msg = f"node {entry.name!r}: no ssh client on PATH; install OpenSSH to run on a node"
+    except FileNotFoundError as exc:
+        msg = f"node {entry.name!r}: {exc}"
         raise ComputeRemoteError(msg, host=entry.name) from None
     timeout_s = request.timeout_s if request.timeout_s is not None else entry.timeout_s
     try:

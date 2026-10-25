@@ -6,6 +6,7 @@ from __future__ import annotations
 import dataclasses
 import io
 import json
+import logging
 import os
 import shlex
 import shutil
@@ -16,9 +17,10 @@ from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 import pytest
+import windows_lookup
 
-from phonometry.simulation import Compute
-from phonometry.simulation._remote import bootstrap, command, node
+from phonometry.simulation import Compute, ComputeRemoteError
+from phonometry.simulation._remote import bootstrap, client, command, node
 from phonometry.simulation._remote.hosts import HostEntry
 
 if TYPE_CHECKING:
@@ -417,5 +419,105 @@ def test_no_ssh_on_the_path_is_a_missing_file(
 ) -> None:
     monkeypatch.setattr(command, "_SSH_PROGRAM", None)
     monkeypatch.setenv("PATH", str(tmp_path))
-    with pytest.raises(FileNotFoundError, match="no ssh client on PATH"):
+    with pytest.raises(
+        FileNotFoundError,
+        match=r"^no ssh client on PATH; install OpenSSH to run on a node$",
+    ):
         command.ssh_program()
+
+
+@pytest.fixture
+def windows(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """A Windows lookup of ``ssh`` from *tmp_path*, which holds a planted ``ssh.exe``."""
+    (tmp_path / "ssh.exe").write_bytes(b"")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("PATH", str(tmp_path / "elsewhere"))
+    monkeypatch.setattr(command, "_SSH_PROGRAM", None)
+    monkeypatch.setattr(shutil, "which", windows_lookup.which)
+    monkeypatch.setattr(sys, "platform", "win32")
+    return tmp_path
+
+
+def _install_ssh(directory: Path) -> Path:
+    installed = directory / "ssh.exe"
+    installed.parent.mkdir(exist_ok=True)
+    installed.write_bytes(b"")
+    return installed
+
+
+def test_windows_does_not_run_an_ssh_found_only_in_the_working_directory(
+    windows: Path,
+) -> None:
+    with pytest.raises(
+        FileNotFoundError,
+        match=r"^ssh was found only in the working directory \(\.[/\\]ssh\.exe\), "
+        r"which Windows searches before PATH; phonometry does not run a program "
+        r"from there\. Put an OpenSSH client on PATH to run on a node$",
+    ):
+        command.ssh_program()
+
+
+def test_an_ssh_found_only_in_the_working_directory_is_a_remote_error_before_ssh_starts(
+    windows: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The remote route reports it as it reports no ssh at all: a ComputeRemoteError naming the node."""
+
+    def popen(argv: list[str]) -> None:
+        msg = f"ssh started: {argv}"
+        raise AssertionError(msg)
+
+    monkeypatch.setattr(client, "_popen", popen)
+    with (
+        pytest.raises(
+            ComputeRemoteError,
+            match=r"^node 'nas': ssh was found only in the working directory ",
+        ) as raised,
+        client.open_session(_DOCKER, Compute(host="nas")),
+    ):
+        pass
+    assert raised.value.host == "nas"
+
+
+def test_windows_runs_the_ssh_on_path_past_one_in_the_working_directory(
+    windows: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    installed = _install_ssh(windows / "elsewhere")
+    with caplog.at_level(logging.INFO, logger="phonometry.simulation"):
+        assert command.ssh_program() == (str(installed),)
+    assert caplog.record_tuples == [
+        (
+            "phonometry.simulation",
+            logging.INFO,
+            f"running {installed} from PATH, not {os.curdir}{os.sep}ssh.exe from the "
+            "working directory, which Windows searches first",
+        )
+    ]
+
+
+def test_windows_takes_the_first_ssh_of_path_in_its_order(
+    windows: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    first, second = windows / "first", windows / "second"
+    monkeypatch.setenv("PATH", os.pathsep.join([str(first), str(second)]))
+    _install_ssh(second)
+    assert command.ssh_program() == (str(second / "ssh.exe"),)
+    _install_ssh(first)
+    assert command.ssh_program() == (str(first / "ssh.exe"),)
+
+
+def test_windows_runs_an_ssh_from_a_working_directory_path_lists(
+    windows: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _install_ssh(windows / "elsewhere")
+    monkeypatch.setenv(
+        "PATH", os.pathsep.join([str(windows / "elsewhere"), str(windows)])
+    )
+    assert command.ssh_program() == (f"{os.curdir}{os.sep}ssh.exe",)
+
+
+def test_only_windows_passes_over_what_the_lookup_found_in_the_working_directory(
+    windows: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Elsewhere a bare name is never looked up in the working directory first, so what was found runs."""
+    monkeypatch.setattr(sys, "platform", "linux")
+    assert command.ssh_program() == (f"{os.curdir}{os.sep}ssh.exe",)

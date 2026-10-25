@@ -2,7 +2,7 @@
 
 # Tests
 
-This page governs the test suite and the checks around it: where a test lives and what it is called, where an expected value comes from, how a test waits on an error or a warning, which data the repository keeps, how a guard and its exemptions are written and proved, how a conformance row reaches the library, and how a workflow under `.github/` is held. Read it before you add or change a file under `tests/`, a guard under `scripts/check_*.py`, a row under `scripts/conformance/` or a workflow under `.github/workflows/`.
+This page governs the test suite and the checks around it: where a test lives and what it is called, where an expected value comes from, how a test waits on an error or a warning, which data the repository keeps, how a guard and its exemptions are written and proved, how a conformance row reaches the library, how a workflow under `.github/` is held, and what the pytest configuration may import. Read it before you add or change a file under `tests/`, a guard under `scripts/check_*.py`, a row under `scripts/conformance/`, a workflow under `.github/workflows/` or the pytest configuration in `pyproject.toml`.
 
 <a id="t1"></a>
 ### T1. Give each module one test file, named `test_<module>.py`
@@ -617,3 +617,28 @@ reader.join()  # waits as long as the thread does
 **Enforced by:** `tests/test_child_process.py::test_every_wait_in_the_suite_has_a_bound`, review
 
 **Exceptions.** `_UNBOUNDED` in `tests/test_child_process.py`, keyed `"path::function"` with its reason: today only the test that shows `child_process.run` refusing a limit of `None`, which it does before it starts anything. Which program hands its pipes on, the scan cannot tell; review does.
+
+<a id="t25"></a>
+### T25. Filter a warning in the pytest configuration by a builtin class, never an imported one
+
+**Why.** pytest imports the class a `filterwarnings` entry or a `-W` in `addopts` names while it reads `pyproject.toml`, before pytest-cov starts measuring and before `tests/conftest.py` runs. The entry that named `phonometry.filters.FilterBankWarning` imported 71 modules of the package there, unmeasured: every line that runs at import time (the imports, the `def` and `class` lines, the module constants, the dataclass field defaults) was reported uncovered by Codecov and SonarCloud, which charged those lines to the new code of every pull request, and the suite measured 92.0 % where it ran 96.9 %. With numba installed, the same import compiled the impulse kernel of `filters.weighting` before `tests/conftest.py` set `NUMBA_DISABLE_JIT`, so the kernel the suite means to trace ran compiled and was never counted. A class of a third-party package is no safer: pytest imports that package, and whatever it imports, at the same moment, where a builtin class imports nothing. Name the builtin class the warning derives from, `UserWarning` for every `PhonometryWarning`, and let the message single it out, once you have checked that no other warning of the library, its dependencies or the standard library starts with that message. A warning its message cannot single out is filtered by a `filterwarnings` mark on the tests that meet it, which pytest resolves when the test runs. Inside a test, [T10](#t10) still holds: `pytest.warns` and a mark name the topic class.
+
+**Do**
+
+```toml
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:Low sampling rate:UserWarning",
+]
+```
+
+**Don't**
+
+```toml
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:Low sampling rate:phonometry.filters.FilterBankWarning",  # imports the package before coverage starts
+]
+```
+
+**Enforced by:** `tests/test_repository_config.py::test_the_pytest_configuration_filters_warnings_by_builtin_class`

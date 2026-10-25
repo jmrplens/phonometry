@@ -17,13 +17,19 @@ from a second copy of the claim.
 
 from __future__ import annotations
 
+import builtins
 import pathlib
 import re
+import shlex
 import sys
 import tomllib
+from typing import TYPE_CHECKING
 
 import pytest
 import yaml
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping, Sequence
 
 _ROOT = pathlib.Path(__file__).resolve().parent.parent
 _SCRIPTS = str(_ROOT / "scripts")
@@ -251,3 +257,105 @@ def test_every_action_is_pinned_to_a_release_tag() -> None:
                 continue
             unpinned.append(f"{path.name}: {action}@{ref}")
     assert unpinned == []
+
+
+def _config_time_filters(options: Mapping[str, str | Sequence[str]]) -> list[str]:
+    """Every warning filter pytest resolves while it reads its configuration.
+
+    Those are the ``filterwarnings`` entries and the ``-W`` options in
+    ``addopts``; a ``filterwarnings`` mark is resolved when its test runs.
+    A string is read as pytest reads it: ``filterwarnings`` one filter per
+    non-blank line, ``addopts`` split as a shell would split it.
+    """
+    entries = options.get("filterwarnings", [])
+    if isinstance(entries, str):
+        filters = [line.strip() for line in entries.split("\n") if line.strip()]
+    else:
+        filters = list(entries)
+    addopts = options.get("addopts", [])
+    args = shlex.split(addopts) if isinstance(addopts, str) else list(addopts)
+    for index, arg in enumerate(args):
+        if arg in {"-W", "--pythonwarnings"} and index + 1 < len(args):
+            filters.append(args[index + 1])
+        elif arg.startswith("--pythonwarnings="):
+            filters.append(arg.partition("=")[2])
+        elif arg.startswith("-W") and arg != "-W":
+            filters.append(arg[2:].removeprefix("="))
+    return filters
+
+
+def _category(warning_filter: str) -> str:
+    """The category field of ``action:message:category:module:lineno``."""
+    fields = warning_filter.split(":")
+    return fields[2].strip() if len(fields) > 2 else ""
+
+
+def _names_a_builtin_warning(category: str) -> bool:
+    """Whether pytest resolves ``category`` without importing anything.
+
+    An empty category stands for :class:`Warning`, and a name without a dot is
+    looked up in :mod:`builtins`. pytest imports the module of any dotted name,
+    whether it lies in phonometry, in a helper on pytest's path, in a package
+    at the repository root or in a third-party package.
+    """
+    if not category:
+        return True
+    found = None if "." in category else getattr(builtins, category, None)
+    return isinstance(found, type) and issubclass(found, Warning)
+
+
+def test_the_pytest_configuration_filters_warnings_by_builtin_class() -> None:
+    """Every warning filter in the pytest configuration names a builtin class.
+
+    pytest imports the class a filter names while it reads its configuration,
+    before pytest-cov starts measuring and before ``tests/conftest.py`` runs.
+    A filter that named ``phonometry.filters.FilterBankWarning`` imported most
+    of the package there, and every line that runs at import time (the
+    imports, the ``def`` lines, the module constants) was reported uncovered
+    by Codecov and SonarCloud alike. A builtin class imports nothing; a
+    warning its message cannot single out under one is filtered by a
+    ``filterwarnings`` mark on the tests concerned, which pytest resolves when
+    they run.
+    """
+    with (_ROOT / "pyproject.toml").open("rb") as handle:
+        options = tomllib.load(handle)["tool"]["pytest"]["ini_options"]
+    filters = _config_time_filters(options)
+    assert filters, (
+        "the pytest configuration carries no warning filter; update this test"
+    )
+    offending = [f for f in filters if not _names_a_builtin_warning(_category(f))]
+    assert offending == [], (
+        f"these warning filters name a class pytest imports before coverage starts: "
+        f"{offending}; name the builtin class the warning derives from "
+        "(docs/contributing/tests.md#t25)"
+    )
+
+
+@pytest.mark.parametrize(
+    ("options", "expected"),
+    [
+        ({"filterwarnings": ["ignore:Low:phonometry.filters.FilterBankWarning"]}, True),
+        ({"filterwarnings": "ignore::oracle_data.OracleWarning"}, True),
+        ({"addopts": ["-W", "error::phonometry.PhonometryWarning"]}, True),
+        ({"addopts": "-q -Werror::phonometry.PhonometryWarning"}, True),
+        ({"addopts": ["--pythonwarnings=ignore::phonometry.PhonometryWarning"]}, True),
+        ({"filterwarnings": "ignore::reference_data.room.RoomWarning"}, True),
+        (
+            {"filterwarnings": "ignore::UserWarning\nignore::phonometry.X"},
+            True,
+        ),
+        ({"addopts": "-q\n-W error::phonometry.PhonometryWarning"}, True),
+        ({"filterwarnings": ["ignore:Low sampling rate:UserWarning"]}, False),
+        ({"filterwarnings": ["error:.*since phonometry.*:DeprecationWarning"]}, False),
+        ({"filterwarnings": ["ignore::scripts.check_raises_blocks.X"]}, True),
+        ({"filterwarnings": ["ignore::numpy.exceptions.ComplexWarning"]}, True),
+        ({"filterwarnings": ["ignore::ValueError"]}, True),
+        ({"filterwarnings": ["ignore:Low sampling rate"]}, False),
+    ],
+)
+def test_the_filter_reader_sees_every_form_pytest_accepts(
+    options: Mapping[str, str | Sequence[str]], *, expected: bool
+) -> None:
+    """A class pytest would import is found in each place and spelling it reads."""
+    found = [_category(f) for f in _config_time_filters(options)]
+    assert any(not _names_a_builtin_warning(c) for c in found) is expected

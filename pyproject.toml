@@ -411,7 +411,18 @@ markers = [
     "pinned_stack: tests the figure, diagram or badge tooling, which runs on the pinned figure stack only",
 ]
 filterwarnings = [
-    "ignore:Low sampling rate:phonometry.filters.FilterBankWarning",
+    # The filter bank's warning on a band above the Nyquist frequency, named
+    # by its builtin base class. pytest imports the class a filter names while
+    # it reads this file, before pytest-cov starts measuring, so naming
+    # phonometry.filters.FilterBankWarning imported most of the package
+    # unmeasured: every line that runs at import time (the imports, the def
+    # lines, the module constants) was reported uncovered, and with numba
+    # installed the impulse kernel was compiled before conftest.py could turn
+    # the JIT off. FilterBankWarning is a UserWarning, and no other warning of
+    # the library, its dependencies or the standard library starts with this
+    # message, so the same warnings are ignored. tests/test_repository_config.py
+    # holds every category in this list to a builtin class.
+    "ignore:Low sampling rate:UserWarning",
     # 4.0 carries no deprecated names: the aliases the 3.x layout left behind
     # were removed with the shims that served them. The rule stays as a guard,
     # so the day a deprecation is introduced the suite fails instead of

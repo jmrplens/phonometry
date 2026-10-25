@@ -31,7 +31,7 @@ Each rule on a page has the same parts:
 - [API shape](api.md) (A): where a public name lives and how it is imported, what a module publishes, the shape of a signature, what a function returns, how a verdict answers, which error or warning a refusal raises, and how a name is renamed or retired.
 - [Docstrings and comments](docstrings.md) (D, C): the module docstring and the document it names, function and class docstrings, the mathematics they carry, comments in the code, and how long a module grows. D rules cover docstrings and modules, C rules cover comments.
 - [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, the data the package publishes, and the fields an FDTD engine steps.
-- [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, and the workflows under `.github/`.
+- [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, the workflows under `.github/`, and what the pytest configuration may import.
 - [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues page, the errata register and the frames of a clip.
 - [Prose, commits and pull requests](prose.md) (P): the language of each surface, the characters a text may hold, citing a page, the CHANGELOG, commit messages and pull request text.
 
@@ -225,6 +225,7 @@ Each rule on a page has the same parts:
 | [T22](tests.md#t22) | Write every workflow so that zizmor finds nothing under `.github/` | `CI: Audit the workflows with zizmor` |
 | [T23](tests.md#t23) | Pin every action to a release tag, never a branch or a commit SHA | `tests/test_repository_config.py::test_every_action_is_pinned_to_a_release_tag`, `CI: Audit the workflows with zizmor` |
 | [T24](tests.md#t24) | Bound every wait a test makes on another process or thread | `tests/test_child_process.py::test_every_wait_in_the_suite_has_a_bound`, review |
+| [T25](tests.md#t25) | Filter a warning in the pytest configuration by a builtin class, never an imported one | `tests/test_repository_config.py::test_the_pytest_configuration_filters_warnings_by_builtin_class` |
 
 ### Documentation and figures
 

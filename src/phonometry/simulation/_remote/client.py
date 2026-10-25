@@ -469,10 +469,10 @@ def _popen(argv: list[str]) -> subprocess.Popen[bytes]:
     """Start ssh in a process group of its own: an interrupt reaches this process, which stops ssh.
 
     On Windows ssh also starts with no console window. Started from a
-    notebook or ``pythonw``, which have no console, a console program such
-    as ssh would open one of its own for the whole run; ssh never prompts
-    (``BatchMode``), and it is stopped with ``kill()``, never by a console
-    event, so it needs none.
+    process with no console (``pythonw``, or a notebook kernel a GUI front
+    end started), a console program such as ssh would open one of its own
+    for the whole run; ssh never prompts (``BatchMode``), and it is stopped
+    with ``kill()``, never by a console event, so it needs none.
     """
     if sys.platform == "win32":
         return subprocess.Popen(  # nosec B603 - the library's own argv, the destination after "--"

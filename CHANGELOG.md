@@ -2159,7 +2159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   working directory that `PATH` itself lists is still your own choice. On
   Windows ssh also starts with no console window, where a run from a
   notebook or from `pythonw` opened one for its whole length. The
-  remote-node guide in English and Spanish, with its docs/ mirror, says both.
+  remote-node guide says both, in English and Spanish.
 
 - **`simulation.AnimationFrame` refuses a bool for its colour limit, and the
   snapshot plot of a video writer's result says where snapshots come from.**

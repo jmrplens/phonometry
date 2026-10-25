@@ -126,8 +126,9 @@ _RUN_TIMEOUT_S: Final = 60.0
 _STDERR_TAIL_CHARS: Final = 400
 
 #: Keeps a console window from flashing up for every ffmpeg run on Windows
-#: (from a notebook or pythonw), as matplotlib's own movie writers do; the
-#: flag exists only there, and is 0 elsewhere.
+#: (from a process with no console: pythonw, or a notebook kernel a GUI front
+#: end started), as matplotlib's own movie writers do; the flag exists only
+#: there, and is 0 elsewhere.
 NO_WINDOW: Final[int] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
 
 _INSTALL_HINT = (

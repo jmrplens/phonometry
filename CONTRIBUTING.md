@@ -92,6 +92,9 @@ To check coverage locally:
 ```bash
 pytest --cov=src/phonometry --cov-report=term-missing tests/
 ```
+A warning filter in the pytest configuration names a builtin class, never
+one of phonometry, or coverage misses every line that runs when the package
+is imported ([T25](docs/contributing/tests.md#t25)).
 
 A test still running after fifteen minutes ends the run
 (`faulthandler_timeout` in `pyproject.toml`): pytest prints the stack of

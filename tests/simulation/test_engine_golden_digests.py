@@ -71,6 +71,17 @@ def test_the_digests_are_taken_on_numpy_whatever_the_environment_names(
     assert there == here
 
 
+def test_the_fluid_energy_is_taken_on_numpy_whatever_the_environment_names(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The fluid-energy record follows no GPU named in the environment either."""
+    seed = ed.FLUID_SEEDS[0]
+    monkeypatch.delenv("PHONOMETRY_COMPUTE", raising=False)
+    here = float.hex(ed.fluid_energy(seed))
+    monkeypatch.setenv("PHONOMETRY_COMPUTE", "cupy:7")
+    assert float.hex(ed.fluid_energy(seed)) == here
+
+
 def test_the_environment_names_the_c_library() -> None:
     """libm is the C library's, so two runners that differ there can differ in the bits."""
     name, version = platform.libc_ver()

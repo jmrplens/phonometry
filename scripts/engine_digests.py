@@ -89,8 +89,13 @@ def array_digest(array: NDArray[Any]) -> str:
 
 
 def fluid_grid() -> ElasticFDTD2D:
-    """An all-fluid elastic grid with a small solid patch whose lambda is zero."""
-    from phonometry.simulation import elastic_fdtd
+    """An all-fluid elastic grid with a small solid patch whose lambda is zero.
+
+    Placed on NumPy whatever ``use()`` or ``PHONOMETRY_COMPUTE`` ask, as
+    :func:`numpy_run` is, so its energy is NumPy's in a shell set up for the
+    clips too.
+    """
+    from phonometry.simulation import Compute, elastic_fdtd
 
     ny, nx = 24, 30
     c_p = np.full((ny, nx), 1480.0)
@@ -99,7 +104,7 @@ def fluid_grid() -> ElasticFDTD2D:
     c_p[9:15, 12:18] = _LAMBDA_ZERO_C_P
     c_s[9:15, 12:18] = _LAMBDA_ZERO_C_S
     rho[9:15, 12:18] = 2500.0
-    return elastic_fdtd.ElasticFDTD2D(c_p, c_s, 0.01, rho=rho)
+    return elastic_fdtd.ElasticFDTD2D(c_p, c_s, 0.01, rho=rho, compute=Compute())
 
 
 def fluid_energy(seed: int) -> float:

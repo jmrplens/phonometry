@@ -16,8 +16,8 @@
 # pins in requirements-dev.txt, which installs the same chain for the
 # `.report()` tests. Generated from the maintainer's venv that produced the
 # committed fiches.
-reportlab==5.0.1
-svglib==2.3.0
+reportlab==5.1.0
+svglib==2.3.1
 pypdfium2==5.14.0
 lxml==6.1.3
 cssselect2==0.10.1

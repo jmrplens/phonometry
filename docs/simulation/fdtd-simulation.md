@@ -115,6 +115,8 @@ print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's 
 
 With a `host` the same run goes to another machine: see
 [Sending a simulation to a remote node](remote-node.md).
+[Where heavy work runs](where-it-runs.md) maps the devices, the nodes and
+the encoders in one place.
 
 The grid is index-based: cell ``(ix, iy)`` has its centre at
 ``((ix + 0.5) * dx, (iy + 0.5) * dx)`` metres, with rows plotted downward
@@ -125,7 +127,7 @@ The grid is index-based: cell ``(ix, iy)`` has its centre at
 
 Three source types inject a **soft source** (an additive pressure
 contribution that does not scatter passing waves) at a grid cell:
-`GaussianPulse` (a broadband pulse of temporal half-width `width`),
+`GaussianPulse` (a broadband pulse of temporal half-width `half_width_s`),
 `CWSource` (a sine tone faded in with a raised-cosine ramp so its onset does
 not splash a broadband transient) and `SignalSource` (an arbitrary sampled
 waveform, linearly interpolated onto the simulation time steps). Probes
@@ -137,7 +139,7 @@ passed as `recording=`; a run without one keeps only its time axis.
 sources, so a diffuser or a barrier is often better interrogated with a
 plane wavefront. Two tools cover it, each one-way through its own mechanism:
 
-- `sim.add_plane_wave(direction, center=..., width=..., wavelength=...)`
+- `sim.add_plane_wave(direction, center_m=..., half_width_m=..., wavelength_m=...)`
   superimposes a Gaussian packet (optionally carrying a sine) as an
   initial condition travelling toward `"down"`, `"up"`, `"left"` or
   `"right"`; the leapfrog-consistent velocity written half a step back
@@ -155,12 +157,12 @@ plane wavefront. Two tools cover it, each one-way through its own mechanism:
 ```python
 from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
 
-sim = FDTD2D(343.0, 0.01, shape=(160, 80), sponge_width=20,
-             sponge_sides=("top", "bottom"))
+sim = FDTD2D(343.0, 0.01, shape=(160, 80), absorbing_layer_cells=20,
+             absorbing_sides=("top", "bottom"))
 tone = CWSource(ix=0, iy=0, frequency=1000.0)          # reused as a waveform
 sim.add_source(PlaneWaveSource(direction="down", waveform=tone.value, offset=22))
-# or, for a single packet: sim.add_plane_wave("down", center=0.4,
-#                                             width=0.08, wavelength=0.34)
+# or, for a single packet: sim.add_plane_wave("down", center_m=0.4,
+#                                             half_width_m=0.08, wavelength_m=0.34)
 ```
 
 Geometry is **rasterised**: `obstacle_mask` marks rigid cells, and every
@@ -218,10 +220,12 @@ print(round(float(echo[np.abs(echo).argmax()] / incident), 2))  # 0.5
 
 Before spending a single time step, `sim.plot_geometry()` draws the
 configured domain: edges, sponges, obstacles, sources and the probes you
-intend to record. Catching a sponge on the wrong side or a probe in the
+intend to record, given as the `(ix, iy)` cells an `FDTDRecording` takes and
+refused in the words a run uses when one is off the grid or inside an
+obstacle. Catching a sponge on the wrong side or a probe in the
 wrong place costs seconds here and a full re-run later.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_domain_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_domain_geometry.svg" alt="Setup drawing of a 4.5 by 3 metre FDTD domain before any time stepping: pale blue sponge layers along the left and right edges, an orange impedance edge along the top, a grey rectangular obstacle just left of centre, the source star at (0.5, 1.5) and two probe circles at (3, 1.5) and (4, 2), with a legend naming the sponge layer, impedance edge, rigid edge, source and probe" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_domain_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_domain_geometry.svg" alt="Setup drawing of a 4.5 by 3 metre FDTD domain before any time stepping: pale blue sponge layers along the left and right edges, an orange impedance edge along the top, a grey rectangular obstacle just left of centre, the source star at about (0.5, 1.5) and two probe circles at about (3, 1.5) and (4, 2), the centres of cells (59, 29) and (79, 39), with a legend naming the sponge layer, impedance edge, rigid edge, source and probe" width="88%"></picture>
 
 *Everything the run will see, before it runs: the sponge layers eat the
 left and right boundaries, the top edge carries the anechoic $\rho c$ impedance,
@@ -238,13 +242,14 @@ from phonometry import simulation
 
 mask = np.zeros((60, 90), dtype=bool)
 mask[25:35, 40:44] = True
-sim = simulation.FDTD2D(343.0, 0.05, shape=(60, 90), sponge_width=8,
-                        sponge_sides=("left", "right"),
+sim = simulation.FDTD2D(343.0, 0.05, shape=(60, 90), absorbing_layer_cells=8,
+                        absorbing_sides=("left", "right"),
                         edge_impedance={"top": 413.0}, obstacle_mask=mask)
 sim.add_source(simulation.GaussianPulse(ix=10, iy=30, half_width_s=1e-3))
 
 # Check the domain before running it: nothing has been stepped yet.
-sim.plot_geometry(probes=[(3.0, 1.5), (4.0, 2.0)])
+# The probes are the (ix, iy) cells an FDTDRecording takes, drawn at their centres.
+sim.plot_geometry(probes=[(59, 29), (79, 39)])
 plt.show()
 ```
 
@@ -284,7 +289,7 @@ import numpy as np
 from phonometry import simulation
 
 c0, dx, f0 = 343.0, 0.005, 2000.0
-sim = simulation.FDTD2D(c0, dx, shape=(300, 300), sponge_width=40)
+sim = simulation.FDTD2D(c0, dx, shape=(300, 300), absorbing_layer_cells=40)
 sim.add_source(simulation.CWSource(ix=150, iy=150, frequency=f0))
 probe = sim.add_contour_probe(90, 210, 90, 210, frequencies=[f0])
 sim.run(round(4.5e-3 / sim.dt))            # run the transient out
@@ -367,7 +372,7 @@ for n, (h, ln, lc, wn, wc) in enumerate(rows):
         mask[r0:r1, lat + round((xn + ln * 1e-3) / dx):
              lat + round((xn + (ln + lc) * 1e-3) / dx)] = False
 
-sim = simulation.FDTD2D(c0, dx, shape=mask.shape, sponge_width=sponge,
+sim = simulation.FDTD2D(c0, dx, shape=mask.shape, absorbing_layer_cells=sponge,
                         cfl=0.9, obstacle_mask=mask)   # 340 cells/lambda:
 sim.add_source(simulation.PlaneWaveSource(           # dispersion negligible
     direction="down", waveform=simulation.CWSource(ix=0, iy=0, frequency=f0).value, offset=sponge))

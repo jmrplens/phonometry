@@ -417,7 +417,7 @@ class CeilingAttenuationResult(OwnsArrays):
     ) -> Axes:
         """Plot ``Dn,c`` against the fitted ASTM E413 contour.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -563,7 +563,7 @@ class PlenumFlankingResult(OwnsArrays):
     ) -> Axes:
         """Plot ``Rcl`` against the two ceiling reduction indices.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

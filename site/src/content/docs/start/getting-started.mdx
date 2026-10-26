@@ -33,15 +33,15 @@ array-api-compat 1.5.1 for `[torch]`.
 ### Optional extras
 
 ```bash
-pip install phonometry[plot]    # matplotlib, for filter response plots and result .plot() methods
-pip install phonometry[perf]    # numba, faster 'impulse' time weighting
-pip install phonometry[report]  # reportlab + svglib, so result .report() methods render normative PDF fiches (their figure panel needs [plot] too)
-pip install phonometry[audio]   # python-soundfile, so phonometry.io also reads FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV
-pip install phonometry[full]    # all of the above (recommended)
-pip install phonometry[torch]   # torch + array-api-compat, so the FDTD engines run on PyTorch (CPU, CUDA or Apple MPS); not part of [full]
+pip install "phonometry[plot]"    # matplotlib, for filter response plots and result .plot() methods
+pip install "phonometry[perf]"    # numba, faster 'impulse' time weighting
+pip install "phonometry[report]"  # reportlab + svglib, so result .report() methods render normative PDF fiches (their figure panel needs [plot] too)
+pip install "phonometry[audio]"   # python-soundfile, so phonometry.io also reads FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV
+pip install "phonometry[full]"    # all of the above (recommended)
+pip install "phonometry[torch]"   # torch + array-api-compat, so the FDTD engines run on PyTorch (CPU, CUDA or Apple MPS); not part of [full]
 ```
 
-I recommend `pip install phonometry[full]`: it brings matplotlib, numba,
+I recommend `pip install "phonometry[full]"`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
 enabled except the torch backend of the FDTD engines, which `[torch]` adds. The
 base install computes every metric on NumPy and SciPy alone, including reading
@@ -71,7 +71,7 @@ the torch it finds, and those libraries stay out:
 
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install phonometry[torch]
+pip install "phonometry[torch]"
 ```
 
 Adding that index with `--extra-index-url` is not enough: pip takes the

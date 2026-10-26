@@ -365,7 +365,7 @@ behind the qualification have their own figure, on the
 [`FieldIndicators`](/phonometry/reference/api/power/intensity/#fieldindicators) that
 [`field_indicators`](/phonometry/reference/api/power/intensity/#field_indicators) returns.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

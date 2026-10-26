@@ -322,7 +322,7 @@ class EcmaLoudness(OwnsArrays):
         """Plot the average specific loudness N'(z) (see :mod:`phonometry._plot.psychoacoustics`).
 
         Adds a loudness-vs-time panel.  Requires matplotlib
-        (``pip install phonometry[plot]``).
+        (``pip install "phonometry[plot]"``).
         """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import plot_ecma_loudness

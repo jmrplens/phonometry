@@ -66,10 +66,10 @@ engines of `phonometry.simulation` run on PyTorch, on a CPU, an NVIDIA GPU or
 Apple's MPS; `[full]` leaves it out, since the torch wheels PyPI serves on
 Linux bring gigabytes of CUDA libraries). On a Linux machine without an NVIDIA
 GPU, run `pip install torch --index-url https://download.pytorch.org/whl/cpu`
-before `pip install phonometry[torch]`: torch then comes from PyTorch's CPU
+before `pip install "phonometry[torch]"`: torch then comes from PyTorch's CPU
 index and those libraries stay out.
 
-I recommend `pip install phonometry[full]`: it brings matplotlib, numba,
+I recommend `pip install "phonometry[full]"`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
 enabled except the torch backend of the FDTD engines, which `[torch]` adds. The
 base install computes every metric on NumPy and SciPy alone: it includes

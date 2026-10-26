@@ -583,7 +583,7 @@ class ExposureResult(RichDisplay):
 
         Only task-based results carry per-task contributions (the job and
         full-day strategies raise :class:`ValueError`). Requires matplotlib
-        (``pip install phonometry[plot]``); returns the
+        (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -633,7 +633,7 @@ class ExposureResult(RichDisplay):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for a task-based result's chart,
-            matplotlib) is not installed (``pip install phonometry[report]``).
+            matplotlib) is not installed (``pip install "phonometry[report]"``).
         """
         from .._i18n import check_language
 

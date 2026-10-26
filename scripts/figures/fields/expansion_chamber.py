@@ -17,7 +17,7 @@ from ..media import (
 )
 from ..schematics import _page_chip
 from ..theme import CMAP_FIELD, COLOR_FG, COLOR_GRID, COLOR_PRIMARY
-from ._core import _anim_speaker
+from ._core import _anim_speaker, _blanked, _host, _settled_envelope
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -61,9 +61,12 @@ def _expansion_chamber_fields(
     stop band), the settled centreline |p| envelopes, the frame times and
     the library transmission losses at the two carriers.
     """
-    import fdtd2d
+    import clip_placement
 
     from phonometry import noise_control
+    from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
+
+    compute = clip_placement.compute_for("anim_fdtd_expansion_chamber")
 
     dx = _CHAMBER_DX
     pipe_cells = round(_CHAMBER_BORE / dx)  # 20 cells
@@ -93,26 +96,27 @@ def _expansion_chamber_fields(
     every = 6
     runs = []
     times = np.zeros(0)
+    blank = ~air[::2, ::2]
     for f in (f_pass, f_peak):
-        sim = fdtd2d.FDTD2D(
+        sim = FDTD2D(
             343.0,
             dx,
             shape=(ny, nx),
             rho=rho_map,
             edge_impedance={"left": 1.2 * 343.0, "right": 1.2 * 343.0},
+            compute=compute,
         )
-        tone = fdtd2d.CWSource(ix=0, iy=0, frequency=f)
+        tone = CWSource(ix=0, iy=0, frequency=f)
         sim.add_source(
-            fdtd2d.PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
+            PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
         )
-        mid = ny // 2
-        period = round(1.0 / (f * sim.dt))
-        settle = round(0.030 / sim.dt)
-        env = np.zeros(sim.p[mid, ::2].shape, dtype=np.float32)
-        for i in range(settle):
-            sim.step()
-            if i >= settle - period:
-                np.maximum(env, np.abs(sim.p[mid, ::2]), out=env)
+        env = _settled_envelope(
+            sim,
+            settle=round(0.030 / sim.dt),
+            period=round(1.0 / (f * sim.dt)),
+            row=ny // 2,
+            columns=slice(None, None, 2),
+        )
         ps: list[Any] = []
         ts: list[float] = []
         while len(ps) < n_frames:
@@ -121,9 +125,9 @@ def _expansion_chamber_fields(
                 # The dense wall cells ring with the injection line;
                 # blank them to NaN (transparent under imshow) so the
                 # display and its color scale only see the air path.
-                ps.append(np.where(air, sim.p, np.nan)[::2, ::2].astype(np.float32))
+                ps.append(_blanked(sim, sim.p[::2, ::2], blank))
                 ts.append(sim.time)
-        runs.append((np.stack(ps), env))
+        runs.append((np.stack(ps), _host(sim, env)))
         times = np.asarray(ts)
     return runs[0], runs[1], times, (float(tls[0]), float(tls[1]))
 

@@ -1977,7 +1977,7 @@ class SoundLevelMeterPeriodicRequirement(RichDisplay):
         (4.4). The title names the clause and its verdict above the clause's
         heading.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -2932,7 +2932,7 @@ class SoundLevelMeterPeriodicVerification(RichDisplay):
         :meth:`SoundLevelMeterPeriodicRequirement.plot` draws its results one
         by one.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

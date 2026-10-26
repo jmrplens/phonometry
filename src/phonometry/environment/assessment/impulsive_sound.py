@@ -230,7 +230,7 @@ class ImpulseProminenceResult(OwnsArrays):
     ) -> Axes:
         """Plot the adjustment curve ``KI(P)`` with the impulses marked.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -278,8 +278,8 @@ class ImpulseProminenceResult(OwnsArrays):
         :raises ValueError: If ``language`` is not one of the supported
             languages, or if ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from ..._i18n import check_language
 
@@ -635,7 +635,7 @@ class ImpulsiveSoundResult(OwnsArrays):
         least-squares onset line and the level difference of the governing
         impulse, annotated with the prominence, adjustment and category.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         return _plot_impulsive_sound(self, ax=ax, language=language, **kwargs)
@@ -687,7 +687,7 @@ class LevelHistory(OwnsArrays):
     ) -> Axes:
         """Plot the level trace against time.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         return _plot_level_history(self, ax=ax, language=language, **kwargs)

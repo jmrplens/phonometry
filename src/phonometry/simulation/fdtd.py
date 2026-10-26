@@ -112,9 +112,12 @@ Side = Literal["left", "right", "top", "bottom"]
 #: How a side of the acoustic domain is terminated, by name.
 AcousticBoundary = Literal["rigid", "absorbing"]
 
+#: A direction a plane wave travels in, in the axes of ``FDTD2D.plot_geometry``.
+Travel = Literal["down", "up", "left", "right"]
+
 _SIDES: tuple[Side, ...] = ("left", "right", "top", "bottom")
 #: Plane-wave travel directions accepted by ``FDTD2D.add_plane_wave``.
-_SIDE_TRAVEL = ("down", "up", "left", "right")
+_SIDE_TRAVEL: tuple[Travel, ...] = ("down", "up", "left", "right")
 
 #: Boundary-condition names accepted by :func:`fdtd_simulation`.
 _BOUNDARY_NAMES = ("rigid", "absorbing")
@@ -362,7 +365,7 @@ class PlaneWaveSource(RichDisplay):
     :ivar amplitude: Extra gain applied to ``waveform``.
     """
 
-    direction: str
+    direction: Travel
     waveform: Callable[[float], float]
     offset: int = 0
     amplitude: float = 1.0
@@ -413,50 +416,53 @@ def _sponge_profile(
 
 def _sigma_map(
     shape: tuple[int, int],
-    sides: tuple[str, ...],
-    sponge_width: int,
-    sponge_reflection: float,
+    sides: tuple[Side, ...],
+    absorbing_layer_cells: int,
+    absorbing_layer_reflection: float,
     damping: NDArray[np.float64],
     c_max: float,
     dx: float,
 ) -> Field2D:
     """Absorption-rate map sigma(x, y) [1/s]: sponge ramps plus damping."""
     ny, nx = shape
+    cells = absorbing_layer_cells
     sigma_max = 0.0
-    if sponge_width > 0:
+    if cells > 0:
         # Quadratic-profile PML-style rate for a target reflection R:
         # exp(-2 * sigma_max * (w dx) / (3 c)) = R  (two-way transit).
         sigma_max = (
-            -3.0 * c_max * float(np.log(sponge_reflection)) / (2.0 * sponge_width * dx)
+            -3.0
+            * c_max
+            * float(np.log(absorbing_layer_reflection))
+            / (2.0 * cells * dx)
         )
-    sig_x = _sponge_profile(
-        nx, sponge_width, ("left" in sides, "right" in sides), sigma_max
-    )
-    sig_y = _sponge_profile(
-        ny, sponge_width, ("top" in sides, "bottom" in sides), sigma_max
-    )
+    sig_x = _sponge_profile(nx, cells, ("left" in sides, "right" in sides), sigma_max)
+    sig_y = _sponge_profile(ny, cells, ("top" in sides, "bottom" in sides), sigma_max)
     return sig_x[np.newaxis, :] + sig_y[:, np.newaxis] + damping
 
 
 def _validate_sponge_damping(
-    sponge_width: int,
-    sponge_reflection: float,
+    absorbing_layer_cells: int,
+    absorbing_layer_reflection: float,
     damping: float | NDArray[np.float64],
     ny: int,
     nx: int,
 ) -> tuple[int, NDArray[np.float64]]:
-    """Validate the sponge/damping spec into ``(width, damping map)``."""
-    require_scalar(sponge_reflection, "sponge_reflection")
-    require_scalar(sponge_width, "sponge_width")
-    sponge_width = _integer("sponge_width", sponge_width)
-    if sponge_width < 0:
-        msg = "sponge_width must be non-negative"
+    """Validate the sponge/damping spec into ``(cells, damping map)``."""
+    require_scalar(absorbing_layer_reflection, "absorbing_layer_reflection")
+    require_scalar(absorbing_layer_cells, "absorbing_layer_cells")
+    cells = _integer("absorbing_layer_cells", absorbing_layer_cells)
+    if cells < 0:
+        msg = "absorbing_layer_cells must be non-negative"
         raise ValueError(msg)
-    if sponge_width >= min(nx, ny):
-        msg = "sponge_width must be narrower than the smallest grid side"
+    if cells >= min(nx, ny):
+        msg = (
+            "absorbing_layer_cells must be fewer than the cells along the "
+            "shortest grid side"
+        )
         raise ValueError(msg)
-    if not 0.0 < sponge_reflection < 1.0:
-        msg = "sponge_reflection must lie strictly between 0 and 1"
+    if not 0.0 < absorbing_layer_reflection < 1.0:
+        msg = "absorbing_layer_reflection must lie strictly between 0 and 1"
         raise ValueError(msg)
     damping_map = np.asarray(damping, dtype=np.float64)
     if damping_map.ndim not in (0, 2):
@@ -471,7 +477,7 @@ def _validate_sponge_damping(
             f"damping map shape {damping_map.shape} does not match the grid {(ny, nx)}"
         )
         raise ValueError(msg)
-    return sponge_width, damping_map
+    return cells, damping_map
 
 
 class _PressureEngine(Protocol):
@@ -632,19 +638,19 @@ def _resolve_rho_map(rho: float | Field2D, ny: int, nx: int) -> Field2D:
 
 
 def _resolve_sponge_sides(
-    sponge_sides: Side | Iterable[Side] | None,
+    absorbing_sides: Side | Iterable[Side] | None,
 ) -> tuple[Side, ...]:
     """Normalise the sponge-side spec into a validated tuple of side names."""
-    if sponge_sides is None:
+    if absorbing_sides is None:
         sides: tuple[Side, ...] = _SIDES
-    elif isinstance(sponge_sides, str):
+    elif isinstance(absorbing_sides, str):
         # A bare string would iterate per character; treat it as one side.
-        sides = (sponge_sides,)
+        sides = (absorbing_sides,)
     else:
-        sides = tuple(sponge_sides)
+        sides = tuple(absorbing_sides)
     unknown = set(sides) - set(_SIDES)
     if unknown:
-        msg = f"unknown sponge sides: {sorted(unknown)}"
+        msg = f"unknown absorbing sides: {sorted(unknown)}"
         raise ValueError(msg)
     return sides
 
@@ -670,7 +676,7 @@ def _edge_impedance_profile(
 
 def _validated_impedances(
     edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None,
-    absorbing: tuple[str, ...],
+    absorbing: tuple[Side, ...],
     ny: int,
     nx: int,
 ) -> list[tuple[str, Field2D]]:
@@ -749,9 +755,9 @@ class _AcousticMedium:
     rho_map: Field2D
     dx: float
     dt: float
-    sponge_width: int
+    absorbing_layer_cells: int
     sides: tuple[Side, ...]
-    sponge_sides: tuple[Side, ...]
+    absorbing_sides: tuple[Side, ...]
     damping_map: NDArray[np.float64]
     impedances: list[tuple[str, Field2D]]
     obstacle: NDArray[np.bool_] | None
@@ -763,9 +769,9 @@ def _acoustic_medium(
     *,
     rho: float | Field2D,
     cfl: float,
-    sponge_width: int,
-    sponge_sides: Side | Iterable[Side] | None,
-    sponge_reflection: float,
+    absorbing_layer_cells: int,
+    absorbing_sides: Side | Iterable[Side] | None,
+    absorbing_layer_reflection: float,
     damping: float | NDArray[np.float64],
     shape: tuple[int, int] | None,
     edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None,
@@ -780,20 +786,20 @@ def _acoustic_medium(
     c_map, dx, dt = _acoustic_grid(c, shape, cfl, dx)
     ny, nx = c_map.shape
     rho_map = _resolve_rho_map(rho, ny, nx)
-    width, damping_map = _validate_sponge_damping(
-        sponge_width, sponge_reflection, damping, ny, nx
+    cells, damping_map = _validate_sponge_damping(
+        absorbing_layer_cells, absorbing_layer_reflection, damping, ny, nx
     )
-    sides = _resolve_sponge_sides(sponge_sides)
-    width = require_count(width, "sponge_width", at_least=None)
-    used = sides if width > 0 else ()
+    sides = _resolve_sponge_sides(absorbing_sides)
+    cells = require_count(cells, "absorbing_layer_cells", at_least=None)
+    used = sides if cells > 0 else ()
     return _AcousticMedium(
         c_map=c_map,
         rho_map=rho_map,
         dx=dx,
         dt=dt,
-        sponge_width=width,
+        absorbing_layer_cells=cells,
         sides=sides,
-        sponge_sides=used,
+        absorbing_sides=used,
         damping_map=damping_map,
         impedances=_validated_impedances(edge_impedance, used, ny, nx),
         obstacle=_validated_obstacle(obstacle_mask, ny, nx),
@@ -978,14 +984,13 @@ class ContourProbe:
         ``(n_points, 2)``, ordered left, right, top, bottom face.
     :ivar normals: Outward unit normals of each sample, same shape.
     :ivar frequencies: The tracked frequencies [Hz].
-    :ivar samples: Number of steps accumulated since the last reset.
     :raises TypeError: if ``ix0``, ``ix1``, ``iy0`` or ``iy1`` is a flag, a text or an
         array where a count goes.
     """
 
     def __init__(
         self,
-        sim: FDTD2D,
+        engine: FDTD2D,
         ix0: int,
         ix1: int,
         iy0: int,
@@ -996,7 +1001,7 @@ class ContourProbe:
         require_scalar(ix1, "ix1")
         require_scalar(iy0, "iy0")
         require_scalar(iy1, "iy1")
-        ny, nx = sim.p.shape
+        ny, nx = engine.p.shape
         ix0 = _integer("ix0", ix0)
         ix1 = _integer("ix1", ix1)
         iy0 = _integer("iy0", iy0)
@@ -1019,13 +1024,13 @@ class ContourProbe:
                 "frequencies must be a non-empty 1D sequence of positive finite values"
             )
             raise ValueError(msg)
-        if sim._obstacle is not None:
+        if engine._obstacle is not None:
             # Every sampled face needs open cells on both of its sides:
             # the two cell columns flanking the vertical faces and the two
             # cell rows flanking the horizontal ones.
             blocked = bool(
-                sim._obstacle[iy0 : iy1 + 1, [ix0 - 1, ix0, ix1, ix1 + 1]].any()
-                or sim._obstacle[[iy0 - 1, iy0, iy1, iy1 + 1], ix0 : ix1 + 1].any()
+                engine._obstacle[iy0 : iy1 + 1, [ix0 - 1, ix0, ix1, ix1 + 1]].any()
+                or engine._obstacle[[iy0 - 1, iy0, iy1, iy1 + 1], ix0 : ix1 + 1].any()
             )
             if blocked:
                 msg = (
@@ -1040,7 +1045,7 @@ class ContourProbe:
         self._xs = slice(ix0, ix1 + 1)
         n_side = iy1 - iy0 + 1
         n_band = ix1 - ix0 + 1
-        dx = sim.dx
+        dx = engine.dx
         y_faces = (np.arange(iy0, iy1 + 1, dtype=np.float64) + 0.5) * dx
         x_faces = (np.arange(ix0, ix1 + 1, dtype=np.float64) + 0.5) * dx
         pos = np.empty((2 * (n_side + n_band), 2), dtype=np.float64)
@@ -1061,9 +1066,9 @@ class ContourProbe:
         self.normals: NDArray[np.float64] = nrm
         self.frequencies: tuple[float, ...] = tuple(float(f) for f in freqs)
         self._omega = 2.0 * np.pi * freqs
-        self._dt = sim.dt
+        self._dt = engine.dt
         self._dx = dx
-        b = sim._backend
+        b = engine._backend
         self._backend = b
         self._segments = (s_left, s_right, s_top, s_bottom)
         n_points = pos.shape[0]
@@ -1079,7 +1084,12 @@ class ContourProbe:
         # This step's face samples (p, v_n) in the field dtype, shaped to
         # broadcast over the parts and filled in place every step.
         self._now = b.zeros((2, 1, n_points))
-        self.samples = 0
+        self._n_samples = 0
+
+    @property
+    def n_samples(self) -> int:
+        """Number of DFT samples accumulated since the last reset, one per step."""
+        return self._n_samples
 
     def reset(self) -> None:
         """Clear the running sums (call once the field is steady)."""
@@ -1087,7 +1097,7 @@ class ContourProbe:
             self._sums[...] = 0.0
             if self._carry is not None:
                 self._carry[...] = 0.0
-        self.samples = 0
+        self._n_samples = 0
 
     def _accumulate(
         self,
@@ -1132,7 +1142,7 @@ class ContourProbe:
             self._sums += term
         else:
             self._add_compensated(term)
-        self.samples += 1
+        self._n_samples += 1
 
     def _add_compensated(self, term: _backends.DeviceArray) -> None:
         """Add *term* to float32 sums with Neumaier's compensated summation.
@@ -1172,7 +1182,7 @@ class ContourProbe:
                 f"(tracked: {self.frequencies})"
             )
             raise ValueError(msg)
-        if self.samples == 0:
+        if self._n_samples == 0:
             msg = "no samples accumulated yet; step the simulation first"
             raise ValueError(msg)
         i = matches[0]
@@ -1187,7 +1197,7 @@ class ContourProbe:
         acc_p.real, acc_p.imag = sums[0, 0], sums[0, 1]
         acc_v = np.empty_like(acc_p)
         acc_v.real, acc_v.imag = sums[1, 0], sums[1, 1]
-        scale = 2.0 / self.samples
+        scale = 2.0 / self._n_samples
         return ContourPhasors(
             frequency=self.frequencies[i],
             positions=self.positions,
@@ -1221,15 +1231,16 @@ class FDTD2D:
         values
         in ``(0, 1)`` are accepted. The default 0.6 keeps a wide stability
         margin with moderate numerical dispersion.
-    :param sponge_width: Thickness of the absorbing layer in cells
-        (0 = no absorbing sides).
-    :param sponge_sides: Which sides absorb: a single side name or an
+    :param absorbing_layer_cells: Thickness of the absorbing (sponge) layer,
+        in cells (default 0, no layer and no absorbing side).
+    :param absorbing_sides: Which sides absorb: a single side name or an
         iterable drawn from ``{"left", "right", "top", "bottom"}``
-        (default: all four when ``sponge_width > 0``). ``left``/``right``
-        are the low/high column edges and ``top``/``bottom`` the low/high
-        row edges (the default ``imshow`` origin).
-    :param sponge_reflection: Target round-trip amplitude reflection of the
-        sponge layer; sets the peak absorption rate.
+        (default: all four when ``absorbing_layer_cells > 0``).
+        ``left``/``right`` are the low/high column edges and
+        ``top``/``bottom`` the low/high row edges (the default ``imshow``
+        origin).
+    :param absorbing_layer_reflection: Target round-trip amplitude reflection
+        of the sponge layer; sets the peak absorption rate.
     :param damping: Bulk amplitude decay rate [1/s]: a scalar applied to
         the whole field (a simple stand-in for air/wall absorption;
         ``6.91 / T60`` gives a ``T60`` seconds reverberant decay) or an
@@ -1251,9 +1262,10 @@ class FDTD2D:
         velocity, Eq. 4.32), rasterising arbitrary interior geometry.
     :param compute: Where the engine steps (:class:`Compute`); ``None``
         follows :func:`use`, then ``PHONOMETRY_COMPUTE``, then NumPy.
-    :raises TypeError: if ``cfl``, ``dx`` or ``sponge_reflection`` is not a single
-        number, ``sponge_width`` is a flag, a text or an array where a count goes,
-        or ``compute`` is neither a :class:`Compute` nor ``None``.
+    :raises TypeError: if ``cfl``, ``dx`` or ``absorbing_layer_reflection`` is not
+        a single number, ``absorbing_layer_cells`` is a flag, a text or an array
+        where a count goes, or ``compute`` is neither a :class:`Compute` nor
+        ``None``.
     :raises ValueError: for an argument out of its range, and for a ``compute``
         that names a host: an engine steps in this process, and only
         :func:`fdtd_simulation` runs on a node.
@@ -1271,9 +1283,9 @@ class FDTD2D:
         *,
         rho: float | Field2D = 1.2,
         cfl: float = 0.6,
-        sponge_width: int = 0,
-        sponge_sides: Side | Iterable[Side] | None = None,
-        sponge_reflection: float = _DEFAULT_SPONGE_REFLECTION,
+        absorbing_layer_cells: int = 0,
+        absorbing_sides: Side | Iterable[Side] | None = None,
+        absorbing_layer_reflection: float = _DEFAULT_SPONGE_REFLECTION,
         damping: float | NDArray[np.float64] = 0.0,
         shape: tuple[int, int] | None = None,
         edge_impedance: Mapping[Side, float | NDArray[np.float64]] | None = None,
@@ -1285,9 +1297,9 @@ class FDTD2D:
             dx,
             rho=rho,
             cfl=cfl,
-            sponge_width=sponge_width,
-            sponge_sides=sponge_sides,
-            sponge_reflection=sponge_reflection,
+            absorbing_layer_cells=absorbing_layer_cells,
+            absorbing_sides=absorbing_sides,
+            absorbing_layer_reflection=absorbing_layer_reflection,
             damping=damping,
             shape=shape,
             edge_impedance=edge_impedance,
@@ -1296,10 +1308,10 @@ class FDTD2D:
         c_map, rho_map = medium.c_map, medium.rho_map
         self.dx, self.dt = medium.dx, medium.dt
         ny, nx = c_map.shape
-        #: Sponge-layer width in cells (read-only configuration record).
-        self.sponge_width = medium.sponge_width
-        #: Sides carrying a sponge layer when ``sponge_width > 0``.
-        self.sponge_sides: tuple[str, ...] = medium.sponge_sides
+        #: Thickness of the absorbing (sponge) layer, in cells.
+        self.absorbing_layer_cells = medium.absorbing_layer_cells
+        #: Sides carrying the absorbing layer; none when it has no cells.
+        self.absorbing_sides: tuple[Side, ...] = medium.absorbing_sides
         self._obstacle: NDArray[np.bool_] | None = medium.obstacle
 
         # Every argument is checked on the host before the device is asked
@@ -1317,7 +1329,7 @@ class FDTD2D:
         c_max = float(c_map.max())
         #: Mean sound speed, cached for the plane-wave machinery.
         self._c_ref = float(c_map.mean())
-        #: Bulk modulus at the cell centres [Pa], a read-only host copy.
+        #: Bulk modulus at the cell centres [Pa], a read-only NumPy copy.
         self.kappa = read_only_copy(rho_map * c_map**2)
         self._kappa = backend.asarray(self.kappa)
         # Density averaged onto the faces where each velocity lives, kept on
@@ -1340,8 +1352,8 @@ class FDTD2D:
 
         self._init_decay(
             medium.sides,
-            medium.sponge_width,
-            sponge_reflection,
+            medium.absorbing_layer_cells,
+            absorbing_layer_reflection,
             medium.damping_map,
             c_max,
         )
@@ -1358,7 +1370,7 @@ class FDTD2D:
         #: Per-side impedance boundaries as supplied (immutable record), read
         #: once the edges have validated them; an array profile is kept as a
         #: read-only copy of its own.
-        self.edge_impedance: Mapping[str, float | NDArray[np.float64]] = (
+        self.edge_impedance: Mapping[Side, float | NDArray[np.float64]] = (
             MappingProxyType(
                 {
                     side: float(value)
@@ -1372,9 +1384,9 @@ class FDTD2D:
 
     def _init_decay(
         self,
-        sides: tuple[str, ...],
-        sponge_width: int,
-        sponge_reflection: float,
+        sides: tuple[Side, ...],
+        absorbing_layer_cells: int,
+        absorbing_layer_reflection: float,
         damping: NDArray[np.float64],
         c_max: float,
     ) -> None:
@@ -1382,8 +1394,8 @@ class FDTD2D:
         sigma = _sigma_map(
             self.p.shape,
             sides,
-            sponge_width,
-            sponge_reflection,
+            absorbing_layer_cells,
+            absorbing_layer_reflection,
             damping,
             c_max,
             self.dx,
@@ -1419,16 +1431,16 @@ class FDTD2D:
 
     def add_plane_wave(
         self,
-        direction: Literal["down", "up", "left", "right"],
+        direction: Travel,
         *,
-        center: float,
-        width: float,
+        center_m: float,
+        half_width_m: float,
         amplitude: float = 1.0,
-        wavelength: float | None = None,
+        wavelength_m: float | None = None,
     ) -> None:
-        """Superimpose a one-way plane wave packet as an initial condition.
+        r"""Superimpose a one-way plane wave packet as an initial condition.
 
-        A Gaussian envelope (optionally carrying a sine at ``wavelength``)
+        A Gaussian envelope (optionally carrying a sine at ``wavelength_m``)
         is written onto the pressure field, and the leapfrog-consistent
         particle velocity is written a half time step back, so the packet
         propagates only toward ``direction`` (the axes of
@@ -1442,25 +1454,29 @@ class FDTD2D:
 
         :param direction: Travel direction, one of ``"down"``, ``"up"``,
             ``"left"``, ``"right"``.
-        :param center: Envelope centre along the travel axis, in metres.
-        :param width: Gaussian envelope width (the ``1/e`` half-width), in
-            metres.
-        :param amplitude: Peak pressure of the envelope, in pascals.
-        :param wavelength: Optional carrier wavelength, in metres; ``None``
-            gives the pure Gaussian pulse.
+        :param center_m: Envelope centre along the travel axis [m].
+        :param half_width_m: Gaussian envelope half-width :math:`w` [m], the
+            ``1/e`` point of :math:`\mathrm{e}^{-((x - x_0)/w)^2}`, as
+            :attr:`GaussianPulse.half_width_s` is in time.
+        :param amplitude: Peak pressure of the envelope [Pa].
+        :param wavelength_m: Optional carrier wavelength [m]; ``None`` gives
+            the pure Gaussian pulse.
         :raises ValueError: For an unknown direction, a non-positive or
-            non-finite ``width``/``wavelength``, or a non-finite
-            ``center``/``amplitude``.
-        :raises TypeError: if ``amplitude``, ``center``, ``wavelength`` or ``width`` is
-            not a single number.
+            non-finite ``half_width_m``/``wavelength_m``, or a non-finite
+            ``center_m``/``amplitude``.
+        :raises TypeError: if ``amplitude``, ``center_m``, ``wavelength_m`` or
+            ``half_width_m`` is not a single number.
         """
         if direction not in _SIDE_TRAVEL:
             msg = "'direction' must be 'down', 'up', 'left' or 'right'."
             raise ValueError(msg)
-        width = require_positive(width, "width")
-        if wavelength is not None:
-            wavelength = require_positive(wavelength, "wavelength")
-        center = _finite("center", center)
+        width = require_positive(half_width_m, "half_width_m")
+        wavelength = (
+            None
+            if wavelength_m is None
+            else require_positive(wavelength_m, "wavelength_m")
+        )
+        center = _finite("center_m", center_m)
         amplitude = _finite("amplitude", amplitude)
 
         def profile(coord: NDArray[np.floating]) -> NDArray[np.float64]:
@@ -1503,29 +1519,43 @@ class FDTD2D:
         self,
         ax: Axes | None = None,
         *,
-        probes: ArrayLike | None = None,
+        probes: Iterable[tuple[int, int]] | None = None,
         language: Language = "en",
         **kwargs: Any,
     ) -> Axes:
         """Draw the configured domain before running it.
 
         Domain extent, obstacles, sponge layers, impedance and rigid edges
-        and the added sources, with optional probe positions previewed; no
+        and the added sources, with optional probe cells previewed; no
         time stepping happens. Requires matplotlib
-        (``pip install phonometry[plot]``); returns the
+        (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
-        :param probes: Optional probe positions ``(x, y)`` in metres, shape
-            ``(N, 2)`` (the :func:`fdtd_simulation` convention).
+        :param probes: Optional probe cells as ``(ix, iy)`` index pairs, the
+            cells :class:`FDTDRecording` takes. Each is drawn at its cell
+            centre ``((ix + 0.5) * dx, (iy + 0.5) * dx)``, where the run
+            records it (:attr:`FDTDResult.probe_positions`).
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the obstacle ``imshow``.
+        :raises TypeError: for a probe that is not a pair, or an index that is
+            not a number.
+        :raises ValueError: for a probe of more or fewer than two indices, an
+            index that is not whole, or a cell outside the grid or inside an
+            obstacle, refused in the words a run uses.
         """
         from .._i18n import check_language
         from .._plot.geometry import plot_fdtd_domain
 
         check_language(language)
-        return plot_fdtd_domain(self, ax=ax, probes=probes, language=language, **kwargs)
+        positions = None
+        if probes is not None:
+            cells = _probe_indices(probes, self.c.shape, self._obstacle)
+            if cells.shape[0]:
+                positions = (cells.astype(np.float64) + 0.5) * self.dx
+        return plot_fdtd_domain(
+            self, ax=ax, probe_positions=positions, language=language, **kwargs
+        )
 
     def add_source(self, source: AnySource) -> None:
         """Register a source: a point injection or a plane-wave line.
@@ -1659,18 +1689,20 @@ class FDTD2D:
     def run(
         self,
         n_steps: int,
+        *,
         snapshot_every: int | None = None,
         snapshot_decimation: int = 1,
     ) -> NDArray[np.floating]:
         """Advance ``n_steps`` steps, optionally recording pressure frames.
 
-        With ``snapshot_every = k`` a host copy of ``p`` is stored after
+        With ``snapshot_every = k`` a NumPy copy of ``p`` is stored after
         every ``k``-th step (and one of the initial state), keeping every
         ``snapshot_decimation``-th cell along each axis; the stacked
         ``(n_frames, ny', nx')`` array plugs straight into a ``FuncAnimation``
         ``imshow`` update. Without ``snapshot_every`` an empty array is
         returned and only the final state is kept (read it with
-        :meth:`host_field`).
+        :meth:`numpy_field`). The two counts are taken by name, as
+        :class:`FDTDRecording` takes them.
 
         :raises TypeError: if ``snapshot_decimation``, ``n_steps`` or
             ``snapshot_every`` is a flag, a text or an array where a count goes.
@@ -1680,18 +1712,18 @@ class FDTD2D:
         """
         return _run_recording(self, n_steps, snapshot_every, snapshot_decimation)
 
-    #: The arrays the engine stores, the names :meth:`host_field` reads.
+    #: The arrays the engine stores, the names :meth:`numpy_field` reads.
     _STORED: tuple[Literal["p", "vx", "vy"], ...] = ("p", "vx", "vy")
 
-    def host_field(self, name: Literal["p", "vx", "vy"]) -> NDArray[np.floating]:
-        """A NumPy copy of the stored field *name*, whatever the device.
+    def numpy_field(self, field: Literal["p", "vx", "vy"]) -> NDArray[np.floating]:
+        """A NumPy copy of the stored *field*, in this process, whatever the device.
 
-        :param name: ``"p"`` (cell centres), ``"vx"`` or ``"vy"`` (faces).
-        :raises TypeError: if ``name`` is not a text.
+        :param field: ``"p"`` (cell centres), ``"vx"`` or ``"vy"`` (faces).
+        :raises TypeError: if ``field`` is not a text.
         :raises ValueError: for a field the engine does not store.
         """
-        require_choice(name, "name", self._STORED)
-        return np.array(self._backend.to_host(getattr(self, name)), copy=True)
+        require_choice(field, "field", self._STORED)
+        return np.array(self._backend.to_host(getattr(self, field)), copy=True)
 
     @property
     def provenance(self) -> RunProvenance:
@@ -2010,7 +2042,7 @@ class _AcousticChecks:
     obstacle: NDArray[np.bool_] | None
     absorbing_sides: tuple[Side, ...]
     edge_impedance: Mapping[Side, float | NDArray[np.float64]]
-    sponge_width: int
+    absorbing_layer_cells: int
     probe_ix: NDArray[np.int_]
     steps: int
     snapshot_every: int | None
@@ -2182,9 +2214,9 @@ def _acoustic_checks(run: FDTDRun) -> _AcousticChecks:
         run.dx,
         rho=run.rho,
         cfl=run.cfl,
-        sponge_width=width,
-        sponge_sides=absorbing_sides or None,
-        sponge_reflection=_DEFAULT_SPONGE_REFLECTION,
+        absorbing_layer_cells=width,
+        absorbing_sides=absorbing_sides or None,
+        absorbing_layer_reflection=_DEFAULT_SPONGE_REFLECTION,
         damping=run.damping,
         shape=run.shape,
         edge_impedance=edge_impedance or None,
@@ -2200,7 +2232,7 @@ def _acoustic_checks(run: FDTDRun) -> _AcousticChecks:
         obstacle=None if medium.obstacle is None else read_only(medium.obstacle),
         absorbing_sides=absorbing_sides,
         edge_impedance=MappingProxyType(edge_impedance),
-        sponge_width=width,
+        absorbing_layer_cells=width,
         probe_ix=read_only(_probe_indices(recording.probes, (ny, nx), medium.obstacle)),
         steps=_step_count(duration_s, medium.dt),
         snapshot_every=recording.snapshot_every,
@@ -2220,8 +2252,8 @@ def _acoustic_engine(run: FDTDRun, compute: Compute | None) -> FDTD2D:
         run.dx,
         rho=run.rho,
         cfl=run.cfl,
-        sponge_width=checks.sponge_width,
-        sponge_sides=checks.absorbing_sides or None,
+        absorbing_layer_cells=checks.absorbing_layer_cells,
+        absorbing_sides=checks.absorbing_sides or None,
         damping=run.damping,
         shape=run.shape,
         edge_impedance=checks.edge_impedance or None,

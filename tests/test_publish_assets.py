@@ -114,6 +114,45 @@ def test_a_stray_file_outside_images_is_refused(checkout: pathlib.Path) -> None:
         publish_assets.refuse_unless_publishable(checkout)
 
 
+@pytest.mark.parametrize(
+    "name",
+    [".anim_one.webm.previous", ".anim_one.webm.partial"],
+    ids=["aside", "partial"],
+)
+def test_a_hidden_file_in_images_is_refused(checkout: pathlib.Path, name: str) -> None:
+    """What a copy stopped half way left beside the clips is never published as one."""
+    (checkout / "images" / "anim_one.webm").write_bytes(b"v2")
+    (checkout / "images" / name).write_bytes(b"v1")
+    with pytest.raises(RuntimeError, match=f"hidden files in images/ \\({name}\\)"):
+        publish_assets.refuse_unless_publishable(checkout)
+
+
+@pytest.mark.parametrize(
+    "where",
+    [
+        "images/.anim_one.webm.previous",
+        "images/new/.anim_one.webm.partial",
+        "images/.kept/anim_one.webm",
+    ],
+    ids=["in images", "in an untracked folder", "in a hidden folder"],
+)
+def test_a_hidden_file_is_refused_whatever_git_shows_of_untracked_files(
+    checkout: pathlib.Path, where: str
+) -> None:
+    """``git add --all images`` stages what ``git status`` was told not to show.
+
+    The checkout here hides untracked files from its status, and git folds
+    an untracked folder into one line of its own name.
+    """
+    _git(checkout, "config", "status.showUntrackedFiles", "no")
+    hidden = checkout / where
+    hidden.parent.mkdir(parents=True, exist_ok=True)
+    hidden.write_bytes(b"v1")
+    name = where.removeprefix("images/").replace(".", r"\.")
+    with pytest.raises(RuntimeError, match=f"hidden files in images/ \\({name}\\)"):
+        publish_assets.refuse_unless_publishable(checkout)
+
+
 def test_a_checkout_off_main_is_refused(checkout: pathlib.Path) -> None:
     _git(checkout, "checkout", "-q", "-b", "scratch")
     with pytest.raises(RuntimeError, match="is on 'scratch', not main"):

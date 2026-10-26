@@ -505,7 +505,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
         an upper bound hatched and named as one, a band that fails the
         background requirement of 4.5 otherwise cross-hatched and named as
         that, and the expanded uncertainty as an error bar where ``sigma_omc_db``
-        was given. Requires matplotlib (``pip install phonometry[plot]``).
+        was given. Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -558,7 +558,7 @@ class HardWalledSoundPowerResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install phonometry[report]``).
+            not installed (``pip install "phonometry[report]"``).
         """
         from .._i18n import check_language
 
@@ -1263,7 +1263,7 @@ class HardWalledRoomCheck(OwnsArrays):
     ) -> Axes:
         """Plot the orientation spread per band against the Table 3 limit.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1474,7 +1474,7 @@ class SourceLocationPlan(OwnsArrays):
         r"""Plot :math:`s_\mathrm{M}` per band against the table's class limits,
         with the number of source locations over each bar.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

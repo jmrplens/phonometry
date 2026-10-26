@@ -1534,7 +1534,7 @@ class InSituElementResult(OwnsArrays):
     ) -> Axes:
         """Plot the in-situ ``Rsitu`` and ``Ln,situ`` spectra of the element.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -1847,7 +1847,7 @@ class DetailedAirborneResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band path contributions and the resulting ``R'``.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1941,7 +1941,7 @@ class DetailedImpactResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band path contributions and the resulting ``L'n``.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

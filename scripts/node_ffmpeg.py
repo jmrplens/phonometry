@@ -10,18 +10,26 @@ month-end build of the same variant is out, with its URL and SHA-256. BtbN
 keeps month-end releases for about two years and daily ones for two weeks,
 so only a month-end release is offered. The pin is moved by hand, as the
 Dockerfile's comment says, because the SVT-AV1 inside a new build has to be
-checked on a node first. Standard library only.
+checked on a node first. ``python scripts/node_ffmpeg.py fetch`` downloads
+the pinned build for a CPU render of the documentation clips on this
+machine, checks it and prints the directory of its ffmpeg and ffprobe, or
+says in one line why it could not and exits 1. Standard library only.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import platform
 import re
+import shutil
 import sys
+import tarfile
+import tempfile
 import urllib.request
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING, Any, NamedTuple
 
 if TYPE_CHECKING:
@@ -218,14 +226,158 @@ def _answers(url: str) -> bool:
     return status == 200
 
 
+#: The programs ``fetch`` keeps from the build.
+_PROGRAMS = ("ffmpeg", "ffprobe")
+
+
+def _download(url: str, target: Path) -> None:
+    """Write the file at *url* to *target*.
+
+    :raises OSError: when the download fails (``urllib.error.URLError`` is one).
+    """
+    with urllib.request.urlopen(url, timeout=600) as response, target.open("wb") as out:
+        shutil.copyfileobj(response, out)
+
+
+def _complete(bin_dir: Path) -> bool:
+    return all((bin_dir / name).is_file() for name in _PROGRAMS)
+
+
+def _bin_dir(pinned: Pin, cache: Path) -> Path:
+    """Where the ``ffmpeg`` and ``ffprobe`` of *pinned* are kept under *cache*."""
+    return cache / pinned.sha256 / "bin"
+
+
+def _unpack(archive: Path, staged: Path) -> None:
+    """``<top>/bin/ffmpeg`` and ``<top>/bin/ffprobe`` of *archive*, into *staged*.
+
+    :raises ValueError: when the archive holds no ``bin/ffmpeg`` or no
+        ``bin/ffprobe``.
+    """
+    staged.mkdir()
+    with tarfile.open(archive, "r:xz") as tar:
+        for member in tar.getmembers():
+            parts = PurePosixPath(member.name).parts
+            source = tar.extractfile(member) if member.isfile() else None
+            if (
+                source is None
+                or len(parts) != 3
+                or parts[1] != "bin"
+                or parts[2] not in _PROGRAMS
+            ):
+                continue
+            with source, (staged / parts[2]).open("wb") as out:
+                shutil.copyfileobj(source, out)
+            (staged / parts[2]).chmod(0o755)
+    missing = [f"bin/{name}" for name in _PROGRAMS if not (staged / name).is_file()]
+    if missing:
+        msg = f"the pinned ffmpeg build holds no {', '.join(missing)}"
+        raise ValueError(msg)
+
+
+def fetch(
+    pinned: Pin, cache: Path, *, download: Callable[[str, Path], None] = _download
+) -> Path:
+    """The ``bin`` directory of the pinned build under *cache*, downloaded once.
+
+    The archive is checked against the pin's SHA-256 before anything in it is
+    unpacked, and only ``ffmpeg`` and ``ffprobe`` are kept, in a directory
+    named by that SHA-256, which appears whole or not at all.
+
+    :raises ValueError: when the download's SHA-256 is not the pin's, or the
+        build lacks one of the two programs; nothing is left behind.
+    :raises OSError: when the download fails, or the build cannot take its
+        place in *cache*.
+    """
+    bin_dir = _bin_dir(pinned, cache)
+    if _complete(bin_dir):
+        return bin_dir
+    cache.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=cache) as scratch:
+        archive = Path(scratch) / "ffmpeg.tar.xz"
+        download(pinned.url, archive)
+        with archive.open("rb") as handle:
+            digest = hashlib.file_digest(handle, "sha256").hexdigest()
+        if digest != pinned.sha256:
+            msg = f"the download of {pinned.url} has SHA-256 {digest}, not the pinned {pinned.sha256}"
+            raise ValueError(msg)
+        staged = Path(scratch) / "bin"
+        _unpack(archive, staged)
+        bin_dir.parent.mkdir(exist_ok=True)
+        try:
+            staged.rename(bin_dir)
+        except OSError:
+            if not _complete(bin_dir):  # another fetch did not put it there first
+                raise
+    return bin_dir
+
+
+def _cache() -> Path:
+    base = os.environ.get("XDG_CACHE_HOME", "")
+    root = Path(base) if base and Path(base).is_absolute() else Path.home() / ".cache"
+    return root / "phonometry" / "ffmpeg"
+
+
+def _linux_x86_64() -> bool:
+    """Whether this machine runs the pinned build: Linux on x86_64."""
+    return sys.platform == "linux" and platform.machine() == "x86_64"
+
+
+def _fetch_here(pinned: Pin) -> int:
+    """Fetch *pinned* into the user's cache and print its ``bin`` directory.
+
+    Stderr says what happened: the build was downloaded and checked against
+    the pin's SHA-256, or served from the cache, which holds it only once
+    checked. A fetch that fails (:func:`fetch`'s ``ValueError`` or
+    ``OSError``) says why in one line, prints no directory and returns 1, as
+    it does off Linux on x86_64, so that
+    ``ffmpeg_dir="$(make -s clip-ffmpeg)" && PATH="$ffmpeg_dir:$PATH" ...``
+    stops there.
+    """
+    if not _linux_x86_64():
+        sys.stderr.write(
+            "The pinned ffmpeg is BtbN's build for Linux on x86_64. Here, render the clips "
+            "with an ffmpeg whose SVT-AV1 is 4.x, or on a node.\n"
+        )
+        return 1
+    cache = _cache()
+    cached = _complete(_bin_dir(pinned, cache))
+    try:
+        bin_dir = fetch(pinned, cache)
+    except (ValueError, OSError) as exc:
+        sys.stderr.write(
+            f"error: the pinned ffmpeg ({pinned.url}) could not be fetched into "
+            f"{cache}: {exc}\n"
+        )
+        return 1
+    if cached:
+        sys.stderr.write(
+            f"ffmpeg served from the cache, checked against SHA-256 {pinned.sha256} "
+            f"when it was downloaded from {pinned.url}\n"
+        )
+    else:
+        sys.stderr.write(
+            f"ffmpeg downloaded from {pinned.url} and checked against SHA-256 "
+            f"{pinned.sha256}\n"
+        )
+    sys.stdout.write(f"{bin_dir}\n")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser(
         "check", help="compare the pin with BtbN's releases; exit 1 when it should move"
     )
-    parser.parse_args(argv)
+    commands.add_parser(
+        "fetch",
+        help="download the pinned build here, check it, and print its bin directory",
+    )
+    args = parser.parse_args(argv)
     pinned = pin(DOCKERFILE.read_text(encoding="utf-8"))
+    if args.command == "fetch":
+        return _fetch_here(pinned)
     found = problems(pinned, _releases(), answers=_answers)
     for line in found:
         sys.stdout.write(f"::error::{line}\n")

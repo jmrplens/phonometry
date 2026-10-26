@@ -478,7 +478,7 @@ impedance `rho c`. A matrix built by the solvers retains both
 `plot()` takes no arguments there; only a hand-built matrix (for
 example [`air_layer_transfer_matrix`](/phonometry/reference/api/materials/four-microphone/#air_layer_transfer_matrix)) must supply them.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes` of the transmission-loss curve.
 
 **Parameters**
@@ -512,7 +512,7 @@ TransferMatrix.plot_geometry(
 
 Draw the four-microphone tube to scale (dimensioned side view).
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Raises**

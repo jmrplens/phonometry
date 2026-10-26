@@ -9,7 +9,7 @@ acoustics, electroacoustics and wave simulation. Every metric is implemented
 from its governing standard and pinned to a number printed in it.
 
 ```bash
-pip install phonometry[full]
+pip install "phonometry[full]"
 ```
 
 ```python

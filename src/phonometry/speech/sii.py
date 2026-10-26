@@ -859,7 +859,7 @@ class SIIResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band audibility weighted by importance, with the SII.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -901,8 +901,8 @@ class SIIResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or
             ``language`` is not a supported language.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
 
@@ -992,7 +992,7 @@ class StandardSpeechSpectrum(OwnsArrays):
         each vocal effort in :attr:`vocal_efforts` is one labelled line, so the
         whole spectrum lifting with vocal effort reads at a glance.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1342,7 +1342,7 @@ class SIIProcedure(OwnsArrays):
         limits, so procedures with different band counts and widths can be
         overlaid on the same logarithmic frequency axis and compared directly.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
 
         :param ax: Existing axes, or ``None`` to create a figure.

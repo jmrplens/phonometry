@@ -216,7 +216,7 @@ BasePlateScatteringCheck.plot(
 
 Draw $s_\mathrm{base}$ against the stepped limit of Table 1.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -485,7 +485,7 @@ ScatteringResult.plot(
 
 Plot the scattering coefficient `s` versus frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes` and never calls `plt.show`.
 
 ### ScatteringResult.report()
@@ -530,7 +530,7 @@ rating.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
 
 ## ScatteringUncertainty
 

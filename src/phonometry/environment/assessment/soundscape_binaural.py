@@ -404,7 +404,7 @@ class BinauralIndicators(RichDisplay):
             :data:`BINAURAL_PARAMETERS`; ``None`` draws the first one computed.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the left-ear bars.
-        :return: The axes. Requires matplotlib (``pip install phonometry[plot]``).
+        :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
         :raises ValueError: if the row was not computed or nothing was.
         """
         from ..._i18n import check_language

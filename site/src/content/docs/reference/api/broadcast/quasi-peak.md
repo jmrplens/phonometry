@@ -307,7 +307,7 @@ QuasiPeakResult.plot(
 
 Plot the quasi-peak trace over time, with the reading marked.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

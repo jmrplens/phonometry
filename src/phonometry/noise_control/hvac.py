@@ -719,7 +719,7 @@ class HVACSpectrumResult(OwnsArrays):
     ) -> Axes:
         """Plot the quantity against a continuous log-frequency axis.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.noise_control import plot_hvac_spectrum
@@ -768,7 +768,7 @@ class HVACSpectrumResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install phonometry[report]``).
+            not installed (``pip install "phonometry[report]"``).
         """
         from .._i18n import check_language
 

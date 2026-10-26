@@ -291,7 +291,7 @@ def test_plot_raises_helpful_error_without_matplotlib(
 
     res = _zwicker_stationary()
     monkeypatch.setattr(builtins, "__import__", blocked)
-    with pytest.raises(ImportError, match=r"pip install phonometry\[plot\]"):
+    with pytest.raises(ImportError, match=r'pip install "phonometry\[plot\]"'):
         res.plot()
 
 

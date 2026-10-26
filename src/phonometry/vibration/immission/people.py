@@ -995,7 +995,7 @@ class PeopleAssessment(RichDisplay):
     ) -> Axes:
         """Draw the two assessment quantities against the three guide values.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

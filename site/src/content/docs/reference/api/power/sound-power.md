@@ -630,7 +630,7 @@ SoundEnergyResult.plot(
 
 Plot the LJ spectrum with the A-weighted total annotated.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## SoundPowerResult
@@ -730,7 +730,7 @@ SoundPowerResult.plot(
 
 Plot the LW spectrum with the A-weighted total annotated.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### SoundPowerResult.report()
@@ -777,7 +777,7 @@ applied background (`K1`) and environmental (`K2`) corrections.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
 
 ## SoundPowerWarning
 

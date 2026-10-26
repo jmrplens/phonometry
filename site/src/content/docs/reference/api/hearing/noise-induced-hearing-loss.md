@@ -153,7 +153,7 @@ HTLANResult.plot(
 
 Plot the age, noise and combined threshold components over frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### HTLANResult.report()
@@ -291,7 +291,7 @@ NIPTSResult.plot(
 
 Plot the NIPTS spectrum with the fractile band over frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### NIPTSResult.report()

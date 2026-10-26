@@ -467,7 +467,7 @@ DetailedAirborneResult.plot(
 
 Plot the per-band path contributions and the resulting `R'`.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**
@@ -570,7 +570,7 @@ DetailedImpactResult.plot(
 
 Plot the per-band path contributions and the resulting `L'n`.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**
@@ -1477,7 +1477,7 @@ InSituElementResult.plot(
 
 Plot the in-situ `Rsitu` and `Ln,situ` spectra of the element.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## laboratory_total_loss_factor

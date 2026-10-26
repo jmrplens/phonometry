@@ -823,7 +823,7 @@ class SignalBurstVerification(OwnsArrays):
     ) -> Axes:
         """Draw the deviations against the printed tolerance band.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

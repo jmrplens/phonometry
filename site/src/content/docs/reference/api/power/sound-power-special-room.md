@@ -606,7 +606,7 @@ as Figure B.3 of the standard, with the limits widening above the
 6,3 kHz band as the text of 6.3 says (the figure widens them at
 6,3 kHz already; see `docs/ERRATA.md`).
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -767,7 +767,7 @@ Plot the octave-band spectrum with the A-weighted total annotated.
 A band whose background margin fell below 4 dB is hatched as not
 meeting 9.8, and the expanded uncertainty is drawn as an error bar
 where `sigma_omc_db` was given. Requires matplotlib
-(`pip install phonometry[plot]`).
+(`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -825,7 +825,7 @@ as 9.8 asks.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
 
 ### SpecialRoomSoundPowerResult.sigma_tot
 
@@ -907,7 +907,7 @@ SpecialRoomSuitabilityCheck.plot(
 
 Plot the difference per band within the ± Table 1 limits.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -966,7 +966,7 @@ Plot each surface's coefficient within the 0,5 to 1,5 band of the
 mean, and the floor against its 0,06, with every coefficient outside
 6.4 ringed and the verdict in the title.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 

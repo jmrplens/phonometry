@@ -34,7 +34,10 @@ surfaces with Rayleigh waves, and fluid-solid coupling with mode
 conversion, Scholte interface waves and immersed-plate transmission. A third
 page, common to both, says where a run steps: NumPy, CuPy or torch, chosen
 per call, per block of code or per process, with what is promised about the
-numbers on each device.
+numbers on each device. A run can go three ways beyond NumPy on this
+machine: onto another device, onto a node reached over SSH, and straight into
+a video. [Where heavy work runs](where-it-runs.md) maps
+the devices, the nodes and the encoders in one place.
 
 A good way to read it is alongside the closed-form pages it cross-checks:
 the modal frequencies of [room acoustics](../buildings/rooms/room-acoustics.md)
@@ -126,6 +129,9 @@ so in its own opening.
 - [Writing animations and FDTD runs to video](../io/videos.md):
   either solver's run written straight to a WebM, an MP4 or a GIF as it is
   computed, here or on a node, without storing its snapshots.
+- [Where heavy work runs: CPU or GPU, here or on a node](where-it-runs.md):
+  the map of where a run steps and where its video is encoded, on this
+  machine or on a node, on a CPU or a GPU, with the page that explains each.
 
 ## What this section does not cover
 

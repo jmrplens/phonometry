@@ -20,8 +20,8 @@ de `FDTD2D` detrás de `fdtd_simulation` y la elástica de `ElasticFDTD2D`
 detrás de `elastic_fdtd_simulation`, calculan con NumPy por defecto, y en una
 GPU de NVIDIA con CuPy o con PyTorch (en una CPU, una GPU de NVIDIA o el MPS
 de Apple) cuando se les pide. Es un mismo código de avance para todos: cada
-simulación construye sus mapas en el anfitrión (la memoria de la CPU) con
-NumPy en float64 al crearse, los pasa al dispositivo una sola vez y, a partir
+simulación construye sus mapas con NumPy en float64, en este proceso, al
+crearse, los pasa al dispositivo una sola vez y, a partir
 de ahí, solo toca sus campos con operaciones del estándar de arrays de
 Python (el *array API standard*), que implementan las tres bibliotecas.
 
@@ -32,6 +32,8 @@ calculó y qué promete la biblioteca sobre los números en cada dispositivo. La
 física, las fuentes y los contornos son los mismos en todos; se explican en
 [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/) y en
 [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/).
+[Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/)
+reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 ## 1. Pedir un dispositivo: `Compute`
 
@@ -123,7 +125,9 @@ pip install "phonometry[torch]"
 
 Añadir ese índice con `--extra-index-url` no basta: pip toma el torch más
 reciente que encuentra en cualquiera de los dos índices, también el de
-PyPI con CUDA.
+PyPI con CUDA. Cuando falta torch, el `ComputeImportError` que lanza una
+simulación da el mismo consejo: estas dos órdenes para `"torch:cpu"`, y
+solo el extra para `"torch:cuda"` y `"torch:mps"`.
 
 `"torch:mps"` necesita un Mac con Apple silicon y calcula solo en float32.
 CuPy necesita una GPU de NVIDIA y su controlador; la prueba de la sección 6 se
@@ -176,12 +180,13 @@ PHONOMETRY_COMPUTE=cupy:1,fallback python study.py
 ```
 
 Un host, `Compute(host="nas")` o `@nas` en la variable, envía una ejecución
-entera a otra máquina, y solo lo aceptan las dos funciones de simulación:
-`fdtd_simulation(run, compute=...)` y
+entera a otra máquina, y solo lo aceptan las dos funciones de simulación y
+las dos que escriben un vídeo: `fdtd_simulation(run, compute=...)` y
 `elastic_fdtd_simulation(run, compute=...)` se ejecutan allí y devuelven el
-registro que devuelve una ejecución aquí. `FDTD2D` y `ElasticFDTD2D`,
-construidos directamente, avanzan en este proceso y lanzan `ValueError` ante
-una ubicación que nombre un host, venga de donde venga.
+registro que devuelve una ejecución aquí, y las que escriben un vídeo traen
+también el vídeo. `FDTD2D` y `ElasticFDTD2D`, construidos directamente,
+avanzan en este proceso y lanzan `ValueError` ante una ubicación que nombre
+un host, venga de donde venga.
 [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/)
 explica cómo nombrar un nodo y prepararlo.
 
@@ -308,10 +313,10 @@ Los campos de una simulación viven en su dispositivo. `sim.p`, `sim.vx` y
 `sim.vy` de un `FDTD2D`, los cinco arrays de esfuerzo y velocidad de un
 `ElasticFDTD2D`, su presión sintética `sim.p` y `sim.collocated(field)` son
 arrays de NumPy con NumPy y arrays propios de la biblioteca del dispositivo en
-los demás casos. `sim.host_field(name)` devuelve una copia en NumPy de un
+los demás casos. `sim.numpy_field(field)` devuelve una copia en NumPy de un
 campo almacenado en cualquier dispositivo, y `sim.run(...)` devuelve sus
-fotogramas de instantáneas en el anfitrión. Lo que devuelve una función de
-simulación ya está en el anfitrión: un resultado guarda arrays de NumPy sea
+fotogramas de instantáneas como arrays de NumPy. Lo que devuelve una función
+de simulación ya es NumPy: un resultado guarda arrays de NumPy sea
 cual sea el dispositivo con el que se calculó. Con CuPy y un `device_index`
 distinto de 0, una escritura en un campo desde fuera de la simulación, como
 `sim.p[10, 10] = 1.0`, se ejecuta en el dispositivo actual de CuPy, así que
@@ -322,7 +327,7 @@ simulación.
 sim = simulation.FDTD2D(343.0, 0.01, shape=(100, 150), compute=simulation.Compute(dtype="float32"))
 sim.add_source(simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4))
 frames = sim.run(200, snapshot_every=50, snapshot_decimation=2)
-field = sim.host_field("p")
+field = sim.numpy_field("p")
 print(frames.shape, frames.dtype, type(field).__name__, sim.provenance.device)
 # (5, 50, 75) float32 ndarray cpu
 ```
@@ -340,10 +345,11 @@ obstáculo), sobre mallas de 32 por 40 a 64 por 48 celdas avanzadas entre 60 y
 
 **NumPy, float64: idéntico bit a bit.** Las mismas entradas dan salidas
 idénticas bit a bit en la misma plataforma: sin números aleatorios y con
-todas las operaciones en un orden fijo. El camino de NumPy se compara además,
-bit a bit, con una copia congelada de las dos simulaciones tal como eran antes
-de poder calcular en otro sitio, de modo que los demás dispositivos no le han
-costado nada a los números de NumPy.
+todas las operaciones en un orden fijo. El camino de NumPy se compara además
+con digests SHA-256 de cada número que dan esos escenarios, tomados de las
+dos simulaciones tal como eran antes de poder calcular en otro sitio
+(`engine-digests.json`, comprobado en CI), de modo que los demás dispositivos
+no le han costado nada a los números de NumPy.
 
 **CuPy, float64: campos idénticos bit a bit, según lo medido.** En una NVIDIA
 GeForce RTX 4060 con el controlador de NVIDIA 610.57.04, CuPy 14.2.0
@@ -423,7 +429,7 @@ ocupa 1,9 MB, y una ejecución guarda uno cada `snapshot_every` pasos.
 por la primera, de modo que un fotograma tiene $\lceil n_y/d \rceil$ por
 $\lceil n_x/d \rceil$ celdas: `d = 2` guarda una cuarta parte de las celdas y
 `d = 4`, la dieciseisava parte. En una GPU el campo se recorta primero en el
-dispositivo, y solo las celdas conservadas pasan al anfitrión.
+dispositivo, y solo las celdas conservadas se copian a NumPy.
 
 La opción tiene el mismo nombre y la misma regla en todas partes:
 `FDTDRecording(snapshot_every=, snapshot_decimation=)`,

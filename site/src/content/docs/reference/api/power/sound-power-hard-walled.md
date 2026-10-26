@@ -284,7 +284,7 @@ HardWalledRoomCheck.plot(
 
 Plot the orientation spread per band against the Table 3 limit.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -424,7 +424,7 @@ One bar per octave band of `LW` (or `LJ`), a band that 8.1.3 makes
 an upper bound hatched and named as one, a band that fails the
 background requirement of 4.5 otherwise cross-hatched and named as
 that, and the expanded uncertainty as an error bar where `sigma_omc_db`
-was given. Requires matplotlib (`pip install phonometry[plot]`).
+was given. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 
@@ -482,7 +482,7 @@ marked `†` and named as not fulfilling it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
 
 ### HardWalledSoundPowerResult.sigma_tot
 
@@ -780,7 +780,7 @@ SourceLocationPlan.plot(
 Plot $s_\mathrm{M}$ per band against the table's class limits,
 with the number of source locations over each bar.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 

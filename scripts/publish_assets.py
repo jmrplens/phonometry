@@ -56,23 +56,41 @@ def _head_here() -> str:
 
 
 def refuse_unless_publishable(checkout: pathlib.Path) -> None:
-    """Raise with the reason when the checkout is not safe to publish from."""
+    """Raise with the reason when the checkout is not safe to publish from.
+
+    No clip's name starts with a dot: a hidden file in ``images/``, or one
+    in a hidden folder there, is one a copy stopped half way left (a file it
+    was writing, or one it had set aside), and is refused rather than
+    published as a clip. Every untracked file is listed one by one, whatever
+    the checkout's git is set to show of them: ``git add --all images``
+    stages them all.
+    """
     branch = _git(checkout, "rev-parse", "--abbrev-ref", "HEAD")
     if branch != "main":
         msg = (
             f"{checkout} is on {branch!r}, not main; the clips are published from main"
         )
         raise RuntimeError(msg)
-    dirty = [
-        line
-        for line in _git(checkout, "status", "--porcelain").splitlines()
-        if not line[3:].startswith("images/")
-    ]
+    listing = _git(checkout, "status", "--porcelain", "--untracked-files=all")
+    changed = [line[3:] for line in listing.splitlines()]
+    dirty = [path for path in changed if not path.startswith("images/")]
     if dirty:
-        listed = ", ".join(line[3:] for line in dirty[:5])
+        listed = ", ".join(dirty[:5])
         msg = (
             f"{checkout} has changes outside images/ ({listed}); publish or "
             "discard them first so they are not committed as clips"
+        )
+        raise RuntimeError(msg)
+    hidden = [
+        path.removeprefix("images/")
+        for path in changed
+        if any(part.startswith(".") for part in pathlib.PurePosixPath(path).parts)
+    ]
+    if hidden:
+        listed = ", ".join(hidden[:5])
+        msg = (
+            f"{checkout} has hidden files in images/ ({listed}), left by a copy "
+            "that was stopped; remove them first so they are not published"
         )
         raise RuntimeError(msg)
 

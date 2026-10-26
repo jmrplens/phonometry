@@ -226,7 +226,7 @@ BarrierInsertionLoss.plot(
 
 Plot the insertion loss versus frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### BarrierInsertionLoss.plot_geometry()
@@ -242,7 +242,7 @@ BarrierInsertionLoss.plot_geometry(
 
 Draw the source-barrier-receiver section to scale.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### BarrierInsertionLoss.report()
@@ -569,5 +569,5 @@ SphericalGroundResult.plot(
 
 Plot the excess attenuation $\Delta L$ versus frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.

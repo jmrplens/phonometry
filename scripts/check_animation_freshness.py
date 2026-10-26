@@ -20,7 +20,12 @@ recomputed from the current sources and compared. A clip whose fingerprint
 moved is stale: the code that draws it has changed since it was last
 rendered, so re-render it, which also publishes the result::
 
-    python scripts/generate_graphs.py --animations --anim <clip>
+    make animations ANIM=<clip>
+
+On a machine whose ffmpeg has no SVT-AV1 4, the pinned build goes first on
+``PATH`` (``ffmpeg_dir="$(make -s clip-ffmpeg)" && PATH="$ffmpeg_dir:$PATH"
+make animations ANIM=<clip>``); with a GPU node in ``PHONOMETRY_COMPUTE``,
+the node renders it. CONTRIBUTING.md (Clips) explains both.
 
 A render writes more than the four WebM variants, and the extra files are the
 ones a half-finished render loses quietly: the poster still each embed shows
@@ -28,6 +33,11 @@ before the video loads, and the two English GIFs the GitHub pages fall back
 to. They come off the same render as the WebM, so the fingerprint already
 speaks for how old they are; what is checked here is that they are there at
 all (:func:`outputs`).
+
+The stamp also names the ffmpeg encoder that wrote the clip's WebM, one of
+:data:`animation_fingerprint.CLIP_ENCODERS`, both of which write AV1. A line
+that names none was stamped before the manifest recorded it, so nothing says
+the clip on disk is AV1, and the clip is asked for again.
 
 The clips are not in this repository. They are published to
 ``jmrplens/phonometry-assets`` (see :mod:`assets_dir`), so "there at all"
@@ -103,6 +113,7 @@ def main(argv: list[str] | None = None) -> int:
 
     current = fp.fingerprints(_SCRIPTS.parent)
     stamped = fp.read_manifest()
+    encoders = fp.read_encoders()
     present = published(arguments.manifest)
     problems: list[str] = []
     problems.extend(
@@ -134,12 +145,17 @@ def main(argv: list[str] | None = None) -> int:
                 f"{clip}: drawn by code that has changed since "
                 f"(recorded {stamped[clip]}, current {current[clip]})"
             )
+        if clip in stamped and encoders.get(clip) not in fp.CLIP_ENCODERS:
+            problems.append(
+                f"{clip}: no AV1 encoder recorded ({encoders.get(clip, 'none')}); "
+                "re-render the clip"
+            )
 
     if problems:
         print(
             "::error::a published clip is incomplete or older than the code "
-            "that draws it - re-render it with "
-            "'python scripts/generate_graphs.py --animations --anim <clip>'"
+            "that draws it - re-render it with 'make animations ANIM=<clip>' "
+            "(CONTRIBUTING.md, Clips: the ffmpeg it needs, or a GPU node)"
         )
         for problem in problems:
             print(f"  - {problem}")

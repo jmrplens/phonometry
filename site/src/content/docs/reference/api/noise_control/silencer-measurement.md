@@ -903,7 +903,7 @@ OperatingLine.plot(
 
 Plot the measured points and the line fitted through them.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### OperatingLine.valid_range
 

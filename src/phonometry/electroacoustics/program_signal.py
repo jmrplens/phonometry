@@ -601,7 +601,7 @@ class ProgramSignalCheck(OwnsArrays):
     ) -> Axes:
         """Draw the referred band levels inside the tolerances of Table II.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

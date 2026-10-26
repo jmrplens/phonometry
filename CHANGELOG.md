@@ -33,11 +33,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   refuses a provenance that is not one, and a `RunProvenance` refuses fields
   no run could have written. On another
   device the engines' fields, `ElasticFDTD2D.p` and `collocated()` included,
-  are that device's arrays, `host_field(name)` gives a NumPy copy on any
+  are that device's arrays, `numpy_field(field)` gives a NumPy copy on any
   device, and a result holds NumPy arrays whatever stepped. After
   construction the engines touch their fields only with Array API standard
   operations, and NumPy's numbers did not move: the NumPy path is held bit
-  for bit to a frozen copy of the engines as they were. On CuPy in float64
+  for bit to SHA-256 digests of every number the engine scenarios give,
+  taken from the engines as they were (`engine-digests.json`, checked in
+  one CI job on Ubuntu 24.04 and its C library, glibc 2.39, with NumPy's
+  AVX-512 kernels switched off). On CuPy in float64
   every field, snapshot and contour phasor came out bit-identical to NumPy's
   on an NVIDIA GeForce RTX 4060 with CuPy 14.2.0, and the energy within
   1.79e-16 relative; `gpu-parity.lock` records that proof with a fingerprint
@@ -154,7 +157,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `FDTD2D.run` and `ElasticFDTD2D.run` keeps every d-th cell along each axis,
   starting with the first, so a frame is `ceil(ny / d)` by `ceil(nx / d)`, a
   quarter of the memory at `d = 2`; on a GPU the field is sliced on the
-  device and only the kept cells cross to the host.
+  device and only the kept cells are copied into NumPy.
   `FDTDResult.snapshot_decimation` and `ElasticFDTDResult.snapshot_decimation`
   record it as an `int`, a result refuses snapshots that are not on the
   decimated grid, and `.plot(kind="snapshot")` draws each sample over the
@@ -162,15 +165,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   snapshots keep the dtype the run stepped in, so a float32 run's take half
   the memory; the probe histories stay float64.
 
-- **`pip install phonometry[torch]` installs the torch backend of the FDTD
-  engines.** It brings torch 2.3.0 or later and array-api-compat 1.5.1 or
+- **`pip install "phonometry[torch]"` installs the torch backend of the
+  FDTD engines.** It brings torch 2.3.0 or later and array-api-compat 1.5.1 or
   later, the oldest releases the backend's tests pass with, which the
   minimum-versions CI job installs. `[full]` leaves it out on purpose,
   because the torch wheels PyPI serves on Linux bring gigabytes of CUDA
   libraries; on a Linux machine without an NVIDIA GPU, running
   `pip install torch --index-url https://download.pytorch.org/whl/cpu` before
-  `pip install phonometry[torch]` takes the CPU wheels instead. The install pages, the README and llms.txt
-  say so in English and Spanish.
+  `pip install "phonometry[torch]"` takes the CPU wheels instead. The install
+  pages, the README and llms.txt say so in English and Spanish, and so does
+  the `ComputeImportError` an engine raises when torch is missing: these two
+  commands for `torch:cpu`, the extra alone for `torch:cuda` and `torch:mps`.
 
 - **Contributors and coding agents have one written style guide.**
   `docs/contributing/` says how phonometry names things, shapes its public API,
@@ -3454,9 +3459,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The documentation's clips are computed by the public engines and encoded
+  by `phonometry.io.write_video`, the road a user has, and all 43 were
+  rendered again on it.** Each field steps `phonometry.simulation` on the
+  device it was measured to want, NumPy for the small grids and CuPy for the
+  large ones, and keeps its per-step reductions on that device. The WebM is
+  AV1, from NVENC on a GPU or from SVT-AV1 4 on a CPU at the same quality in
+  a smaller file, with the ffmpeg build the node image pins
+  (`make clip-ffmpeg` fetches it for a render here), and the manifest of the
+  clips records which encoder wrote each, which `make clip-codecs` reads
+  back. With a GPU node in the hosts file,
+  `PHONOMETRY_COMPUTE=cupy@<name> make animations` renders the clips there,
+  two at a time, from the committed code only, and copies and stamps each
+  one here once its files and its fingerprint are checked;
+  `make clip-node-check` asks a node whether it can, and a run that cannot
+  go on stops with a `clip_transport.NodeRunError` that says why in one line.
+  A clip's fingerprint now reads every module the clip runs on import, and a
+  module that changes nothing a frame is drawn with moves no clip. A clip of
+  a simulated field goes stale when what the engines compute changes,
+  through their golden digests (`engine-digests.json`), not when their
+  source is rewritten.
+
+- **Every install command quotes the requirement that carries extras**
+  (`pip install "phonometry[torch]"`), in the guides in English and Spanish,
+  the docstrings, the messages the library raises, the README and llms.txt,
+  so it runs as written in zsh, which reads the brackets as a glob. A check
+  in CI keeps it so.
+
 - **`fdtd_simulation` takes what it records as one `FDTDRecording`, and
-  `FDTD2D.run` and `ElasticFDTD2D.run` name their snapshot options as the
-  recordings do.** The `probes=`, `snapshot_every=` and
+  `FDTD2D.run` and `ElasticFDTD2D.run` name their snapshot options, and take
+  them by name, as the recordings do.** The `probes=`, `snapshot_every=` and
   `snapshot_decimation=` of `fdtd_simulation` are the fields of
   `simulation.FDTDRecording`, the `recording` of the run (the entry below),
   as an elastic run takes an `ElasticRecording`. Both records refuse a
@@ -3470,9 +3502,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `snapshot_decimation=`, the names `FDTDRecording` and `ElasticRecording`
   take, and every route refuses a bad count with the same class and the same
   words: a flag, a text or an array is a `TypeError`, and a number that is
-  not a whole number of 1 or more a `ValueError`. A call that passed the
-  cadence by position is unchanged; one that named it renames it, as the
-  migration guide shows.
+  not a whole number of 1 or more a `ValueError`. The two counts are taken
+  by name only, as the recordings take them: a call that passed them by
+  position, `run(400, 10, 2)`, names them,
+  `run(400, snapshot_every=10, snapshot_decimation=2)`, and one that named
+  them renames them, as the migration guide shows.
+
+- **The FDTD engines use the words of the runs: an absorbing layer counted in
+  cells, plane-wave lengths in metres, probes previewed in cells.**
+  `FDTD2D` and `ElasticFDTD2D` take `absorbing_layer_cells=` (default 0, no
+  layer), `absorbing_sides=` and `absorbing_layer_reflection=` where they took
+  `sponge_width=`, `sponge_sides=` and `sponge_reflection=`, and read
+  `.absorbing_layer_cells` and `.absorbing_sides` where they read
+  `.sponge_width` and `.sponge_sides`: the words an `FDTDBoundaries` and an
+  `ElasticBoundaries` use for the same layer. The sponge is still the layer's
+  physical name in the guides, and its errors name the new parameters.
+  `FDTD2D.add_plane_wave(direction, *, center_m, half_width_m,
+  amplitude=1.0, wavelength_m=None)` says the unit of each length, where it
+  took `center=`, `width=` and `wavelength=`; `half_width_m` is the `1/e`
+  half-width of the envelope, as `GaussianPulse.half_width_s` is in time.
+  `FDTD2D.plot_geometry(probes=)` takes the `(ix, iy)` cells that
+  `FDTDRecording.probes` takes, where it took positions in metres, draws each
+  at the cell centre `FDTDResult.probe_positions` records, and refuses a cell
+  off the grid or inside an obstacle in the words a run uses. The
+  constructor of `simulation.ContourProbe` names the engine it reads
+  `engine`, where it said `sim`. Every old keyword raises `TypeError`.
+
+- **The closed choices of the FDTD engines and their records are typed
+  `Literal`.** The sides of `ElasticFDTD2D(free_sides=)` and the
+  `free_sides`, `absorbing_sides` and `edge_impedance` the engines and
+  `ElasticFDTDResult` hold are typed by side, `"left"`, `"right"`, `"top"` or
+  `"bottom"`; the fields of `ElasticRecording.probe_fields` and
+  `ElasticFDTDResult.probe_fields` by field, `"p"`, `"vx"` or `"vy"`; the
+  `direction` of `PlaneWaveSource` and of `FDTD2D.add_plane_wave` by travel,
+  and the `direction` of `ForceSource` by axis. A type checker offers the
+  options and refuses a misspelling before the run; nothing changes at run
+  time.
 
 - **A simulation is one record, checked when it is built.**
   `simulation.FDTDRun(*, c, dx, duration_s, sources, shape=None, rho=1.2,
@@ -3510,7 +3575,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   caller's later edits to the dictionary.
 
 - **`FDTD2D.kappa`, `ElasticFDTD2D.mu` and `ElasticFDTD2D.lam` are
-  read-only.** They are host copies the engine computed from its medium, as
+  read-only.** They are NumPy copies the engine computed from its medium, as
   `c`, `rho`, `c_p` and `c_s` already were. An edit used to reach part of the
   step and not the time step computed from the same maps; now it raises
   `ValueError`, and the engine steps on device copies of its own. A
@@ -4420,7 +4485,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `signals.tone_burst` and `ToneBurstResult` and `n_cycles` on the saw-tooth
   burst of `vibration`, `n_trials` on `metrology.monte_carlo`, `n_passages`
   and `n_stages` on the silencer and valve functions of `noise_control`,
-  `n_steps` on `FDTD2D.run` and `ElasticFDTD2D.run`, `max_n_arrivals` on
+  `n_steps` on `FDTD2D.run` and `ElasticFDTD2D.run`, `n_samples` on
+  `simulation.ContourProbe`, now read-only, `max_n_arrivals` on
   `underwater.eigenrays`, `n_sidebands`, `n_poles`, `n_rotor_bars`,
   `n_slot_harmonics` and `n_lobe_orders` on the fault frequencies of
   `vibration`, `n_stories` on the building models, and
@@ -5452,6 +5518,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   too, the word its figure already used.
 
 ### Removed
+
+- **The replica FDTD engine of the documentation scripts and its GPU
+  transport are gone** (`scripts/fdtd2d.py`, `fdtd_dispatch.py`,
+  `fdtd_gpu.py`, `fdtd_gpu_remote.py`, `job_runner.py`), with their parity
+  test, `make test-gpu` and the `PHONO_GPU_*` settings of `.env`: a node is
+  an entry of the hosts file, and the clips reach it through the public
+  engines.
 
 - **`rigid_mass_calibration_check`, `satisfies_lower_requirement`,
   `satisfies_upper_requirement`, `strong_coupling_satisfied` and
@@ -16070,7 +16143,7 @@ the whole of the migration.
   `IntensityResult`), reproducing each result's documentation figure in a
   single call (`res.plot()`). matplotlib stays a soft dependency: importing
   and computing work without it, and `.plot()` raises a clear `ImportError`
-  with `pip install phonometry[plot]` guidance when it is missing. The
+  with `pip install "phonometry[plot]"` guidance when it is missing. The
   renderers create their own figure when `ax` is `None`, always return the
   Matplotlib `Axes` (an array for multi-panel figures) and never call
   `plt.show()`, so they compose into larger layouts. To feed those

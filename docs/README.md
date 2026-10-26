@@ -351,6 +351,7 @@ field itself on a finite-difference grid.
 - [Elastic waves and fluid-solid coupling](simulation/elastic-waves.md): the elastic P-SV companion solver (Virieux 1986) on the same staggered grid, with stress-imaging free surfaces and Rayleigh waves, fluids as the shear-free limit, and fluid-solid coupling validated against Brekhovskikh & Godin: mode conversion, Scholte interface waves and immersed-plate transmission
 - [Where a simulation runs: NumPy, CuPy and torch](simulation/compute.md): both solvers on NumPy, on an NVIDIA GPU through CuPy or on PyTorch, chosen with a `Compute` request, a `use()` block or `PHONOMETRY_COMPUTE`, with the fallback to NumPy, the provenance every result records, the bit-identical CuPy fields and the published torch bounds, and decimated snapshots
 - [Sending a simulation to a remote node](simulation/remote-node.md): either solver's run on another machine over SSH, on a Docker node built from the repository's image or in a Python environment, with or without a GPU: the hosts file that names a node, what each side checks, the errors and the fallback to NumPy, progress and timeouts, security in both directions, and when a run there gives the numbers of a run here
+- [Where heavy work runs: CPU or GPU, here or on a node](simulation/where-it-runs.md): the map of where simulations and videos run, on this machine or on a node over SSH, on a CPU or a GPU: the devices a run steps on, a node in the hosts file, the CPU and GPU encoders of a video, and the page that explains each
 
 ## Reference
 

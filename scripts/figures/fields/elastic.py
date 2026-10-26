@@ -6,8 +6,11 @@ the body-wave speeds, the density, the mesh and the bending stiffness
 derived from them.
 """
 
+from __future__ import annotations
+
+from dataclasses import dataclass
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -28,7 +31,14 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
-from ._core import _fit_text_x, _gain_note, _solid_in_field, _weak_field_gain
+from ._core import _fit_text_x, _gain_note, _host, _solid_in_field, _weak_field_gain
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.image import AxesImage
+    from matplotlib.lines import Line2D
+    from matplotlib.text import Text
+    from numpy.typing import NDArray
 
 # --- Elastic FDTD clips: plate junction and coincidence --------------------
 # Both clips run the library's 2D P-SV solver (phonometry.simulation
@@ -93,8 +103,11 @@ def _plate_junction_fields() -> tuple[Any, Any, Any, Any, int]:
     speed c_g = 2 c_B(4 kHz) = 1251 m/s: t = 0.5 ms + 1.2 x 1.52 ms =
     2.32 ms -> 462 active frames.
     """
+    import clip_placement
+
     from phonometry import simulation
 
+    compute = clip_placement.compute_for("anim_elastic_plate_junction")
     dx = _EL_DX
     bp, m2 = _elastic_plate_bp_m2()
     c_b = float((bp / m2) ** 0.25 * np.sqrt(2.0 * np.pi * _EJ_F0))
@@ -131,7 +144,9 @@ def _plate_junction_fields() -> tuple[Any, Any, Any, Any, int]:
             c_p[r0:r_end, j0 : j0 + 4] = _EL_CP
             c_s[r0:r_end, j0 : j0 + 4] = _EL_CS
             rho[r0:r_end, j0 : j0 + 4] = _EL_RHO
-        sim = simulation.ElasticFDTD2D(c_p, c_s, dx, rho=rho, sponge_width=_EJ_SPONGE)
+        sim = simulation.ElasticFDTD2D(
+            c_p, c_s, dx, rho=rho, absorbing_layer_cells=_EJ_SPONGE, compute=compute
+        )
         # Vertical force on the top surface (the vy face between the air
         # row r0 - 1 and the first plate row): Lamb-style A0 launcher.
         sim.add_source(
@@ -143,6 +158,7 @@ def _plate_junction_fields() -> tuple[Any, Any, Any, Any, int]:
                 waveform=burst,
             )
         )
+        xp = sim._backend.xp
         frames: list[Any] = []
         hl: list[Any] = []
         vl: list[Any] = []
@@ -150,16 +166,227 @@ def _plate_junction_fields() -> tuple[Any, Any, Any, Any, int]:
         for _ in range(n_active):
             for _s in range(every):
                 sim.step()
-            v = np.hypot(sim.collocated("vx"), sim.collocated("vy"))
-            frames.append(v[rows, cols].astype(np.float32))
+            v = xp.hypot(
+                sim.collocated("vx")[rows, cols], sim.collocated("vy")[rows, cols]
+            )
+            frames.append(_host(sim, v))
             # Mid-plane plate velocities: the vy face row and (junction
             # run) the vx face column through the middle of each plate.
-            hl.append(sim.vy[r0 + 1, :].astype(np.float32))
-            vl.append(sim.vx[:, j0 + 1].astype(np.float32))
+            hl.append(_host(sim, sim.vy[r0 + 1, :]))
+            vl.append(_host(sim, sim.vx[:, j0 + 1]))
             ts.append(sim.time)
         runs.append((np.stack(frames), np.stack(hl), np.stack(vl)))
     lines = (runs[0][1], runs[1][1], runs[1][2])
     return runs[0][0], runs[1][0], lines, np.asarray(ts), n_active
+
+
+@dataclass(frozen=True)
+class _EjPlates:
+    """Where the junction clip's plates sit: grid indices and mid-plane lines.
+
+    :ivar c0: First vy face column kept in the view.
+    :ivar c1: One past the last vy face column kept in the view.
+    :ivar j0: First column of the vertical plate.
+    :ivar r0: First row of the horizontal plate.
+    :ivar r_end: One past the last row of the vertical plate.
+    :ivar x_h: The vy faces in the view [m].
+    :ivar x_hj: The vy faces from the view's left edge to the junction [m].
+    :ivar y_v: The vx faces down the vertical plate [m].
+    :ivar y_mid: Height of the horizontal plate's mid-plane [m].
+    :ivar x_mid: Abscissa of the vertical plate's mid-plane [m].
+    """
+
+    c0: int
+    c1: int
+    j0: int
+    r0: int
+    r_end: int
+    x_h: NDArray[np.floating[Any]]
+    x_hj: NDArray[np.floating[Any]]
+    y_v: NDArray[np.floating[Any]]
+    y_mid: float
+    x_mid: float
+
+
+def _ej_plates() -> _EjPlates:
+    """The plates of the junction clip on its grid, cropped to its view."""
+    x0, x1, _, _ = _EJ_VIEW
+    dx = _EL_DX
+    j0 = round(_EJ_JUNC_X / dx)
+    r0 = round(_EJ_PLATE_Y / dx)
+    r_end = r0 + round((_EL_H + _EJ_VERT_LEN) / dx)
+    c0, c1 = round(x0 / dx), round(x1 / dx)
+    return _EjPlates(
+        c0=c0,
+        c1=c1,
+        j0=j0,
+        r0=r0,
+        r_end=r_end,
+        x_h=(np.arange(c0, c1) + 0.5) * dx,  # vy faces, cropped
+        x_hj=(np.arange(c0, j0 + 4) + 0.5) * dx,  # up to the junction
+        y_v=(np.arange(r0, r_end) + 0.5) * dx,  # vx faces, vertical
+        y_mid=_EJ_PLATE_Y + 0.5 * _EL_H,
+        x_mid=_EJ_JUNC_X + 2.0 * dx,
+    )
+
+
+def _ej_panel(
+    ax: Axes,
+    data: NDArray[np.float32],
+    title: str,
+    verdict: str,
+    *,
+    with_junction: bool,
+    vmax: float,
+    plates: _EjPlates,
+) -> tuple[AxesImage, Text, list[Line2D]]:
+    """One panel of the junction clip: the field, the plates and their labels.
+
+    Returns the field image, the verdict pill (written out, so the clamp
+    measures the pill that will be drawn) and the deflection lines riding on
+    the plates, one per plate.
+    """
+    from matplotlib.patches import Rectangle
+
+    T = _translate_str
+    x0, x1, y0, y1 = _EJ_VIEW
+    ax.grid(visible=False)
+    im = ax.imshow(
+        data[0],
+        origin="upper",
+        extent=(x0, x1, y1, y0),
+        cmap="magma",
+        vmin=0.0,
+        vmax=vmax,
+        aspect="equal",
+        interpolation="bilinear",
+    )
+    ax.set_title(title, fontsize=10, pad=3.0)
+    # The 10 mm plates, drawn as thin open rectangles so the field
+    # inside stays visible.
+    px1 = _EJ_JUNC_X + 4 * _EL_DX if with_junction else x1
+    ax.add_patch(
+        Rectangle(
+            (x0, _EJ_PLATE_Y),
+            px1 - x0,
+            _EL_H,
+            facecolor="none",
+            edgecolor=COLOR_FG,
+            lw=0.7,
+            alpha=0.8,
+        )
+    )
+    if with_junction:
+        y_end = _EJ_PLATE_Y + _EL_H + _EJ_VERT_LEN
+        ax.add_patch(
+            Rectangle(
+                (_EJ_JUNC_X, _EJ_PLATE_Y),
+                4 * _EL_DX,
+                y_end - _EJ_PLATE_Y,
+                facecolor="none",
+                edgecolor=COLOR_FG,
+                lw=0.7,
+                alpha=0.8,
+            )
+        )
+        # The same dark pill the clip's other labels carry: white on
+        # its own over magma, this one washed out to ~1.2:1 every time
+        # the bright spot reached the free end, which is exactly when
+        # the label matters.
+        ax.text(
+            _EJ_JUNC_X - 0.055,
+            y_end - 0.005,
+            T("free end"),
+            ha="right",
+            va="bottom",
+            color="white",
+            fontsize=7,
+            zorder=5,
+            bbox={
+                "boxstyle": _ANIM_PILL_BOX,
+                "facecolor": "black",
+                "alpha": 0.5,
+                "edgecolor": "none",
+            },
+        )
+    ax.plot(
+        [_EJ_SRC_X],
+        [_EJ_PLATE_Y - 0.008],
+        marker="v",
+        ms=5,
+        color=COLOR_TERTIARY,
+        markeredgecolor="white",
+        markeredgewidth=0.6,
+        zorder=4,
+    )
+    if not with_junction:
+        ax.text(
+            x0 + 0.015,
+            y1 - 0.02,
+            T("4 kHz tone burst at ▼"),
+            ha="left",
+            va="bottom",
+            color="white",
+            fontsize=7.5,
+            zorder=5,
+            bbox={
+                "boxstyle": _ANIM_PILL_BOX,
+                "facecolor": "black",
+                "alpha": 0.5,
+                "edgecolor": "none",
+            },
+        )
+    # The exaggerated deflection lines riding on the plates.
+    if with_junction:
+        (ln_h,) = ax.plot(
+            plates.x_hj,
+            np.full(plates.x_hj.size, plates.y_mid),
+            color="white",
+            lw=1.1,
+            alpha=0.85,
+            zorder=3.5,
+        )
+        (ln_v,) = ax.plot(
+            np.full(plates.y_v.size, plates.x_mid),
+            plates.y_v,
+            color="white",
+            lw=1.1,
+            alpha=0.85,
+            zorder=3.5,
+        )
+        lines = [ln_h, ln_v]
+    else:
+        (ln_h,) = ax.plot(
+            plates.x_h,
+            np.full(plates.x_h.size, plates.y_mid),
+            color="white",
+            lw=1.1,
+            alpha=0.85,
+            zorder=3.5,
+        )
+        lines = [ln_h]
+    ax.set_ylim(y1, y0)
+    ax.set_ylabel("y [m]", fontsize=8)
+    ax.tick_params(labelsize=7)
+    # Written out here so the clamp measures the pill that will actually
+    # be drawn; update() blanks it until the reveal.
+    v_txt = ax.text(
+        x1 - 0.015,
+        y1 - 0.02,
+        verdict,
+        ha="right",
+        va="bottom",
+        color="white",
+        fontsize=8,
+        zorder=5,
+        bbox={
+            "boxstyle": _ANIM_PILL_BOX,
+            "facecolor": "black",
+            "alpha": 0.5,
+            "edgecolor": "none",
+        },
+    )
+    return im, v_txt, lines
 
 
 def animate_elastic_plate_junction(output_dir: str) -> None:
@@ -170,8 +397,6 @@ def animate_elastic_plate_junction(output_dir: str) -> None:
     verdict pill quotes the closed-form junction_transmission coefficient
     the guide computes for this corner.
     """
-    from matplotlib.patches import Rectangle
-
     from phonometry import vibration
 
     T = _translate_str
@@ -182,22 +407,13 @@ def animate_elastic_plate_junction(output_dir: str) -> None:
     res = vibration.junction_transmission("L", _EL_H, c_pl, m2, _EL_H, c_pl, m2)
     tau0 = float(res.corner[0])
     kij = float(res.corner_reduction_index)
-    x0, x1, y0, y1 = _EJ_VIEW
+    x0, x1, _, _ = _EJ_VIEW
     vmax = float(np.quantile(v_junc, 0.9995))
     # Exaggerated plate-deflection overlays: the plate is only 10 mm
     # thick on screen, so the signed mid-plane velocity is drawn as a
     # deflected line (a fixed gain shared by all three lines).
     gain = 0.045 / float(np.quantile(np.abs(hl_junc), 0.999))
-    dx = _EL_DX
-    j0 = round(_EJ_JUNC_X / dx)
-    r0 = round(_EJ_PLATE_Y / dx)
-    r_end = r0 + round((_EL_H + _EJ_VERT_LEN) / dx)
-    c0, c1 = round(x0 / dx), round(x1 / dx)
-    x_h = (np.arange(c0, c1) + 0.5) * dx  # vy faces, cropped
-    x_hj = (np.arange(c0, j0 + 4) + 0.5) * dx  # up to the junction
-    y_v = (np.arange(r0, r_end) + 0.5) * dx  # vx faces, vertical
-    y_mid = _EJ_PLATE_Y + 0.5 * _EL_H
-    x_mid = _EJ_JUNC_X + 2.0 * dx
+    plates = _ej_plates()
 
     fig = _anim_figure()
     # Two stacked 2.3:1 equal-aspect panels are height-limited on the
@@ -223,146 +439,17 @@ def animate_elastic_plate_junction(output_dir: str) -> None:
     ims: list[Any] = []
     v_txts: list[Any] = []
     ln_arts: list[Any] = []
-    for ax, title, data, with_junction in (
-        (axes[0], titles[0], v_ctrl, False),
-        (axes[1], titles[1], v_junc, True),
-    ):
-        ax.grid(visible=False)
-        im = ax.imshow(
-            data[0],
-            origin="upper",
-            extent=(x0, x1, y1, y0),
-            cmap="magma",
-            vmin=0.0,
+    for row, (data, with_junction) in enumerate(((v_ctrl, False), (v_junc, True))):
+        im, v_txt, panel_lines = _ej_panel(
+            axes[row],
+            data,
+            titles[row],
+            verdicts[row],
+            with_junction=with_junction,
             vmax=vmax,
-            aspect="equal",
-            interpolation="bilinear",
+            plates=plates,
         )
-        ax.set_title(title, fontsize=10, pad=3.0)
-        # The 10 mm plates, drawn as thin open rectangles so the field
-        # inside stays visible.
-        px1 = _EJ_JUNC_X + 4 * _EL_DX if with_junction else x1
-        ax.add_patch(
-            Rectangle(
-                (x0, _EJ_PLATE_Y),
-                px1 - x0,
-                _EL_H,
-                facecolor="none",
-                edgecolor=COLOR_FG,
-                lw=0.7,
-                alpha=0.8,
-            )
-        )
-        if with_junction:
-            y_end = _EJ_PLATE_Y + _EL_H + _EJ_VERT_LEN
-            ax.add_patch(
-                Rectangle(
-                    (_EJ_JUNC_X, _EJ_PLATE_Y),
-                    4 * _EL_DX,
-                    y_end - _EJ_PLATE_Y,
-                    facecolor="none",
-                    edgecolor=COLOR_FG,
-                    lw=0.7,
-                    alpha=0.8,
-                )
-            )
-            # The same dark pill the clip's other labels carry: white on
-            # its own over magma, this one washed out to ~1.2:1 every time
-            # the bright spot reached the free end, which is exactly when
-            # the label matters.
-            ax.text(
-                _EJ_JUNC_X - 0.055,
-                y_end - 0.005,
-                T("free end"),
-                ha="right",
-                va="bottom",
-                color="white",
-                fontsize=7,
-                zorder=5,
-                bbox={
-                    "boxstyle": _ANIM_PILL_BOX,
-                    "facecolor": "black",
-                    "alpha": 0.5,
-                    "edgecolor": "none",
-                },
-            )
-        ax.plot(
-            [_EJ_SRC_X],
-            [_EJ_PLATE_Y - 0.008],
-            marker="v",
-            ms=5,
-            color=COLOR_TERTIARY,
-            markeredgecolor="white",
-            markeredgewidth=0.6,
-            zorder=4,
-        )
-        if not with_junction:
-            ax.text(
-                x0 + 0.015,
-                y1 - 0.02,
-                T("4 kHz tone burst at ▼"),
-                ha="left",
-                va="bottom",
-                color="white",
-                fontsize=7.5,
-                zorder=5,
-                bbox={
-                    "boxstyle": _ANIM_PILL_BOX,
-                    "facecolor": "black",
-                    "alpha": 0.5,
-                    "edgecolor": "none",
-                },
-            )
-        # The exaggerated deflection lines riding on the plates.
-        if with_junction:
-            (ln_h,) = ax.plot(
-                x_hj,
-                np.full(x_hj.size, y_mid),
-                color="white",
-                lw=1.1,
-                alpha=0.85,
-                zorder=3.5,
-            )
-            (ln_v,) = ax.plot(
-                np.full(y_v.size, x_mid),
-                y_v,
-                color="white",
-                lw=1.1,
-                alpha=0.85,
-                zorder=3.5,
-            )
-            ln_arts += [ln_h, ln_v]
-        else:
-            (ln_h,) = ax.plot(
-                x_h,
-                np.full(x_h.size, y_mid),
-                color="white",
-                lw=1.1,
-                alpha=0.85,
-                zorder=3.5,
-            )
-            ln_arts.append(ln_h)
-        ax.set_ylim(y1, y0)
-        ax.set_ylabel("y [m]", fontsize=8)
-        ax.tick_params(labelsize=7)
-        # Written out here so the clamp below measures the pill that will
-        # actually be drawn; update() blanks it until the reveal.
-        v_txt = ax.text(
-            x1 - 0.015,
-            y1 - 0.02,
-            verdicts[1 if with_junction else 0],
-            ha="right",
-            va="bottom",
-            color="white",
-            fontsize=8,
-            zorder=5,
-            bbox={
-                "boxstyle": _ANIM_PILL_BOX,
-                "facecolor": "black",
-                "alpha": 0.5,
-                "edgecolor": "none",
-            },
-        )
+        ln_arts += panel_lines
         ims.append(im)
         v_txts.append(v_txt)
     axes[1].set_xlabel("x [m]", fontsize=8, labelpad=2.0)
@@ -389,6 +476,9 @@ def animate_elastic_plate_junction(output_dir: str) -> None:
             v_txt.set_text("")
 
     reveal = int(0.62 * n_active)
+    c0, c1, j0 = plates.c0, plates.c1, plates.j0
+    r0, r_end = plates.r0, plates.r_end
+    y_mid, x_mid = plates.y_mid, plates.x_mid
 
     def update(k: int) -> tuple[Any, ...]:
         kf = min(k, n_active - 1)
@@ -486,8 +576,11 @@ def _coincidence_fields() -> tuple[Any, Any, Any, list[float], int]:
     = 1), the frame times, the measured transmitted levels [dB re
     incident] and the active frame count.
     """
+    import clip_placement
+
     from phonometry import simulation, vibration
 
+    compute = clip_placement.compute_for("anim_elastic_coincidence")
     dx = _EL_DX
     bp, m2 = _elastic_plate_bp_m2()
     fc = vibration.coincidence_frequency(m2, bp)
@@ -506,8 +599,8 @@ def _coincidence_fields() -> tuple[Any, Any, Any, list[float], int]:
     n_active = int(np.ceil((ramp_t + 1.2 * flight) / (every * dt)))
     steps = n_active * every
 
-    src_cols = np.arange(_EC_SPONGE, _EC_NX - _EC_SPONGE)
-    x_src = (src_cols + 0.5) * dx
+    src_cols = slice(_EC_SPONGE, _EC_NX - _EC_SPONGE)
+    x_src = (np.arange(_EC_SPONGE, _EC_NX - _EC_SPONGE) + 0.5) * dx
     x0, x1, y0, y1 = _EC_VIEW
     rows = slice(round(y0 / dx), round(y1 / dx), 2)
     cols = slice(round(x0 / dx), round(x1 / dx), 2)
@@ -528,25 +621,29 @@ def _coincidence_fields() -> tuple[Any, Any, Any, list[float], int]:
         c_p[r0 : r0 + 4] = _EL_CP * _EC_CB_TUNE
         c_s[r0 : r0 + 4] = _EL_CS * _EC_CB_TUNE
         rho[r0 : r0 + 4] = _EL_RHO
-        sim = simulation.ElasticFDTD2D(c_p, c_s, dx, rho=rho, sponge_width=_EC_SPONGE)
-        omega = 2.0 * np.pi * f0
-        phase_x = omega * np.sin(theta) * x_src / _EL_C0
+        sim = simulation.ElasticFDTD2D(
+            c_p, c_s, dx, rho=rho, absorbing_layer_cells=_EC_SPONGE, compute=compute
+        )
+        backend = sim._backend
+        xp = backend.xp
+        omega = float(2.0 * np.pi * f0)
+        phase_x = backend.asarray(omega * np.sin(theta) * x_src / _EL_C0)
         frames: list[Any] = []
         ts: list[float] = []
-        inc = 0.0
+        incident = backend.zeros(())
         for i in range(steps):
             sim.step()
             t = sim.time
             r = min(t / ramp_t, 1.0)
-            drive = (r * r * (3.0 - 2.0 * r)) * np.sin(omega * t - phase_x)
+            drive = (r * r * (3.0 - 2.0 * r)) * xp.sin(omega * t - phase_x)
             sim.txx[src_row, src_cols] -= drive
             sim.tyy[src_row, src_cols] -= drive
             if w0 <= t <= w1:
-                inc = max(inc, abs(float(sim.p[p_row, p_col])))
+                incident = xp.maximum(incident, xp.abs(sim.p[p_row, p_col]))
             if (i + 1) % every == 0:
-                frames.append(sim.p[rows, cols].astype(np.float32))
+                frames.append(_host(sim, sim.p[rows, cols]))
                 ts.append(t)
-        stack = np.stack(frames) / inc
+        stack = np.stack(frames) / backend.scalar(incident)
         tail = stack[3 * n_active // 4 :]
         # The stored rows start at y0; index the under-plate box within.
         rb0 = (b_rows.start - rows.start) // 2

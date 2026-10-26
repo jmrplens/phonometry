@@ -121,7 +121,7 @@ AbsorptionUncertaintyResult.plot(
 
 Plot the quantity with its `±U` uncertainty ribbon (band quantities).
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### AbsorptionUncertaintyResult.reported_expanded_uncertainty

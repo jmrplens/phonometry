@@ -784,7 +784,7 @@ TrainCategoryPrediction.plot(
 
 Draw the emission, the floor spectrum and the KB-weighted bands.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 

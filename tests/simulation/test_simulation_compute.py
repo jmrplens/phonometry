@@ -522,7 +522,11 @@ def test_an_engine_under_a_host_from_the_environment_asks_for_compute_explicitly
     ("build", "bad", "match"),
     [
         (_acoustic_engine, {"rho": -1.0}, "rho must be strictly positive"),
-        (_acoustic_engine, {"sponge_width": 9}, "sponge_width must be narrower"),
+        (
+            _acoustic_engine,
+            {"absorbing_layer_cells": 9},
+            "absorbing_layer_cells must be fewer",
+        ),
         (_elastic_engine, {"free_sides": "middle"}, "unknown free sides"),
     ],
 )

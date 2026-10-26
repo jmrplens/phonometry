@@ -32,7 +32,7 @@ Each rule on a page has the same parts:
 - [Docstrings and comments](docstrings.md) (D, C): the module docstring and the document it names, function and class docstrings, the mathematics they carry, comments in the code, and how long a module grows. D rules cover docstrings and modules, C rules cover comments.
 - [Numbers and data](numerics.md) (X): comparing computed values, validating what a caller passes, the arrays a result keeps, units, references and precision, the data the package publishes, and the fields an FDTD engine steps.
 - [Tests](tests.md) (T): where a test lives, where an expected value comes from, how a test waits on an error or a warning, the data the repository keeps, guards and their exemptions, conformance rows, the workflows under `.github/`, and what the pytest configuration may import.
-- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues page, the errata register and the frames of a clip.
+- [Documentation and figures](docs-and-figures.md) (F): the guides, their Spanish twins and the `docs/` mirror, code fences, figures and the `.plot()` code that draws them, records in a notebook, the catalogues page, the errata register, the frames of a clip and the device its field steps on, and the install commands a page prints.
 - [Prose, commits and pull requests](prose.md) (P): the language of each surface, the characters a text may hold, citing a page, the CHANGELOG, commit messages and pull request text.
 
 ## Rules
@@ -195,7 +195,7 @@ Each rule on a page has the same parts:
 | [X18](numerics.md#x18) | Write a catalogue number as printed, and say in words why a cell is empty | `tests/test_internal_catalogue.py::test_no_number_carries_more_digits_than_a_page_prints`, `tests/test_internal_catalogue.py::test_an_unquantified_cell_holds_what_the_page_printed`, `tests/test_internal_catalogue.py::test_a_not_derivable_cell_says_why_in_words`, `tests/test_internal_catalogue.py::test_a_misprinted_cell_says_what_the_page_printed_and_why_it_cannot_be` |
 | [X19](numerics.md#x19) | Publish both values when two printed sources disagree; never vote by majority | `scripts/check_solid_agreement.py`, `scripts/check_shared_sources.py`, `make solid-agreement`, `make shared-sources`, `CI: The books agree about the solids they share`, `tests/test_check_solid_agreement.py` |
 | [X20](numerics.md#x20) | Rename a catalogue field in its data, spec, schema, baseline and translations together | `tests/test_published_catalogue_fingerprint.py::test_every_published_row_is_the_baseline_carried_through_the_changes`, `make catalogue-data`, `make catalogue-schema` |
-| [X21](numerics.md#x21) | Touch an engine's field only with Array API standard operations | `CI: FDTD engines on array-api-strict and torch (CPU)`, `tests/simulation/test_gpu_parity_lock.py` |
+| [X21](numerics.md#x21) | Touch an engine's field only with Array API standard operations | `CI: FDTD engines on array-api-strict and torch (CPU)`, `CI: FDTD engines hold their golden digests`, `make engine-digests`, `tests/simulation/test_engine_golden_digests.py`, `tests/simulation/test_gpu_parity_lock.py` |
 
 ### Tests
 
@@ -291,6 +291,8 @@ Each rule on a page has the same parts:
 | [F58](docs-and-figures.md#f58) | Quote a printed value, its symbols and its separator exactly as the source prints them | review |
 | [F59](docs-and-figures.md#f59) | Add or remove an errata entry in docs/ERRATA.md and docs/ERRATA.es.md together | `make site-reports`, `CI: Generated evidence pages up to date` |
 | [F60](docs-and-figures.md#f60) | Hold every frame of a clip to the figure gates before it is encoded | `scripts/clip_frame_audit.py`, `make animation-audit`, `tests/test_clip_frame_audit.py` |
+| [F61](docs-and-figures.md#f61) | Step a clip's field where the registry puts it, and keep it on that device between captures | `tests/test_clip_scenes_on_devices.py`, `tests/test_clip_placement.py` |
+| [F62](docs-and-figures.md#f62) | Quote the extras of every install command | `scripts/check_quoted_extras.py`, `CI: Every install command quotes its extras`, `tests/test_check_quoted_extras.py` |
 
 ### Prose, commits and pull requests
 

@@ -531,6 +531,7 @@ export const topics = [
       'simulation/elastic-waves',
       'simulation/compute',
       'simulation/remote-node',
+      'simulation/where-it-runs',
       apiGroup('simulation'),
     ],
   },

@@ -138,7 +138,7 @@ DynamicStiffnessResult.plot(
 
 Plot `f0(s')` with this design point marked.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### DynamicStiffnessResult.report()

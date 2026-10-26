@@ -279,7 +279,7 @@ class EcmaRoughness(OwnsArrays):
         """Plot the roughness result (see :mod:`phonometry._plot.psychoacoustics`).
 
         Draws the time-dependent roughness R(l50) and a specific-roughness
-        heatmap. Requires matplotlib (``pip install phonometry[plot]``).
+        heatmap. Requires matplotlib (``pip install "phonometry[plot]"``).
         """
         from ..._i18n import check_language
         from ..._plot.psychoacoustics import plot_ecma_roughness

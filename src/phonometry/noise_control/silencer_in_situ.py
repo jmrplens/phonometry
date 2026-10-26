@@ -808,7 +808,7 @@ class SilencerInSituResult(OwnsArrays):
     ) -> Axes:
         """Draw the level difference and the loss it becomes.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

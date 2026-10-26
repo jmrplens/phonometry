@@ -462,7 +462,7 @@ MeasuredBarrierInsertionLoss.plot(
 
 Draw the four levels and the insertion loss they give.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 

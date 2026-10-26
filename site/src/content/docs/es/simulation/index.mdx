@@ -42,7 +42,11 @@ con conversión de modo, ondas de interfase de Scholte y transmisión de
 placas sumergidas. Una tercera página, común a las dos, explica dónde se
 calcula una ejecución: NumPy, CuPy o torch, elegido por llamada, por bloque de
 código o por proceso, con lo que se promete sobre los números en cada
-dispositivo.
+dispositivo. Una ejecución puede ir por tres caminos más allá de NumPy en
+esta máquina: a otro dispositivo, a un nodo al que se llega por SSH y
+directamente a un vídeo.
+[Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/)
+reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 Una buena forma de leerla es junto a las páginas de forma cerrada que
 contrasta: las frecuencias modales de
@@ -155,6 +159,10 @@ dice en su propia apertura.
   la ejecución de cualquiera de los dos esquemas escrita directamente en un
   WebM, un MP4 o un GIF a medida que se calcula, aquí o en un nodo, sin
   guardar sus instantáneas.
+- [Dónde se ejecuta el trabajo pesado: CPU, GPU o un nodo](/phonometry/es/simulation/where-it-runs/):
+  el mapa de dónde avanza una ejecución y dónde se codifica su vídeo, en esta
+  máquina o en un nodo, en una CPU o en una GPU, con la página que explica
+  cada uno.
 
 ## Qué no cubre esta sección
 

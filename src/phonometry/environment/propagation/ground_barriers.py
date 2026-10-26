@@ -267,7 +267,7 @@ class SphericalGroundResult(OwnsArrays):
     ) -> Axes:
         r"""Plot the excess attenuation :math:`\Delta L` versus frequency.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -743,7 +743,7 @@ class BarrierInsertionLoss(OwnsArrays):
     ) -> Axes:
         """Plot the insertion loss versus frequency.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -758,7 +758,7 @@ class BarrierInsertionLoss(OwnsArrays):
     ) -> Axes:
         """Draw the source-barrier-receiver section to scale.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

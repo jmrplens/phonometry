@@ -124,5 +124,5 @@ Plot the intermediate intelligibility that averages to the index.
 
 For STOI this is the mean correlation per one-third-octave band; for
 ESTOI, whose index mixes the bands, it is the spectral correlation per
-analysis segment. Requires matplotlib (`pip install phonometry[plot]`);
+analysis segment. Requires matplotlib (`pip install "phonometry[plot]"`);
 returns the `Axes`.

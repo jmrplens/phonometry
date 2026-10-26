@@ -125,7 +125,7 @@ Plot the practical curve vs the shifted reference (ISO 11654).
 
 Unfavourable deviations (measured below the shifted reference) are
 shaded and `alpha_w` annotated. Requires matplotlib
-(`pip install phonometry[plot]`); returns the
+(`pip install "phonometry[plot]"`); returns the
 `Axes` and never calls `plt.show`.
 
 ### AbsorptionRatingResult.rating_label
@@ -176,7 +176,7 @@ full ISO 354 one-third-octave `alpha_s` table with the octave
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
 
 ## practical_absorption_coefficient
 

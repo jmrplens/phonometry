@@ -316,7 +316,7 @@ class FacadePredictionResult(OwnsArrays):
     ) -> Axes:
         """Draw the composite facade elevation, element areas to scale.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -369,8 +369,8 @@ class FacadePredictionResult(OwnsArrays):
             supported, or the result lacks the ISO 717-1 single-number ratings
             (build it on the 5 octave or 16 one-third-octave bands).
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from .detailed_model import _check_report_request
 

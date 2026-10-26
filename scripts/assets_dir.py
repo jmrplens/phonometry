@@ -15,8 +15,8 @@ the directory this module names.
 
 Resolution, in order:
 
-1. ``PHONOMETRY_ASSETS_DIR`` in the environment, or in the repository ``.env``
-   next to the GPU settings, naming the ``images`` directory of the checkout.
+1. ``PHONOMETRY_ASSETS_DIR`` in the environment, or in the repository
+   ``.env``, naming the ``images`` directory of the checkout.
 2. Otherwise ``<repository>/../phonometry-assets/images``, a sibling checkout,
    which is what ``make assets`` creates.
 
@@ -24,9 +24,9 @@ Nothing falls back to ``.github/images``. A clip written there would be
 reported by ``check_figures.py`` as a figure nobody committed, and the whole
 point of the split is that no clip enters this repository again.
 
-Only the standard library is imported here: ``.env`` is read by
-:mod:`repo_env`, not by the GPU runner, which needs NumPy. Asking where the
-clips are has to work where nothing is installed, because
+Only the standard library is imported here, and ``.env`` is read by
+:mod:`repo_env`, which imports nothing else either. Asking where the clips
+are has to work where nothing is installed, because
 ``check_animation_freshness.py`` promises to ride in any job and ``make
 assets`` is the first thing a fresh clone runs.
 """
@@ -62,8 +62,8 @@ def default_dir() -> Path:
 def clips_dir() -> Path:
     """The directory the clips are rendered into and published from.
 
-    Reads ``.env`` first, dotenv-style, so a value set there beside the GPU
-    host is honoured without exporting anything.
+    Reads ``.env`` first, dotenv-style, so a value set there is honoured
+    without exporting anything.
     """
     repo_env.load_env()
     configured = os.environ.get(VARIABLE, "").strip()

@@ -132,7 +132,7 @@ DiffuseFieldAbsorptionResult.plot(
 Plot the random-incidence absorption spectrum
 $\alpha_{\mathrm{dif}}(f)$.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## layered_absorber
@@ -235,7 +235,7 @@ LayeredAbsorberResult.plot(
 Plot the absorption spectrum $\alpha(f)$ with
 $\lvert R \rvert$ overlaid.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### LayeredAbsorberResult.plot_geometry()
@@ -251,7 +251,7 @@ LayeredAbsorberResult.plot_geometry(
 
 Draw the solved stack cross-section to scale (dimensioned).
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## MembraneLayer

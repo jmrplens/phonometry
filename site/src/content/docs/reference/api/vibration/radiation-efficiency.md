@@ -219,7 +219,7 @@ RadiationEfficiencyResult.plot(
 
 Plot the radiation efficiency `sigma(f)` on log-log axes.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### RadiationEfficiencyResult.plot_geometry()
@@ -235,7 +235,7 @@ RadiationEfficiencyResult.plot_geometry(
 
 Draw the baffled plate to scale.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### RadiationEfficiencyResult.radiation_index

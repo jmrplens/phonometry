@@ -519,7 +519,7 @@ def test_a_device_that_cannot_compute_falls_back_when_asked(
     assert "failed a first small computation" in str(caught[0].message)
     assert caught[0].filename == __file__
     assert (sim.provenance.device, sim.provenance.dtype) == ("cpu", "float32")
-    assert sim.host_field("vx").dtype == np.float32
+    assert sim.numpy_field("vx").dtype == np.float32
 
 
 def test_a_device_is_probed_once_per_process(
@@ -672,6 +672,69 @@ def test_torch_absent_is_an_import_error_that_says_so(
     request = Compute(device="torch:cpu")
     with pytest.raises(ComputeImportError, match="which is not installed"):
         bk.backend_for(request)
+
+
+#: How to install torch for each device, as the compute guide says: the CPU
+#: wheels first for torch:cpu, so that pip does not bring PyPI's CUDA build.
+#: No punctuation touches the index URL, which is copied with the command.
+_TORCH_INSTALL: dict[Device, str] = {
+    "torch:cpu": (
+        "pip install torch --index-url https://download.pytorch.org/whl/cpu "
+        'and then pip install "phonometry[torch]"'
+    ),
+    "torch:cuda": 'pip install "phonometry[torch]"',
+    "torch:mps": 'pip install "phonometry[torch]"',
+}
+
+
+#: What the fallback warning adds after the error it carries.
+_FALLBACK_TAIL = "; running on NumPy instead (fallback=True)"
+
+
+def _missing_torch_message(route: str, request: Compute) -> str:
+    """The error a missing torch reaches the caller with, by *route*.
+
+    The fallback warning carries the error with :data:`_FALLBACK_TAIL` after
+    it, which is cut off here.
+    """
+    if route == "fallback warning":
+        with warnings.catch_warnings(record=True) as warned:
+            warnings.simplefilter("always")
+            bk.backend_for(
+                Compute(device=request.device, dtype=request.dtype, fallback=True)
+            )
+        assert [w.category for w in warned] == [ComputeFallbackWarning]
+        warning = str(warned[0].message)
+        assert warning.endswith(_FALLBACK_TAIL)
+        return warning.removesuffix(_FALLBACK_TAIL)
+    ask: dict[str, Callable[[], object]] = {
+        "backend_for": lambda: bk.backend_for(request),
+        "loader": lambda: bk.LOADERS[request.device](request),
+        "FDTD2D": lambda: FDTD2D(343.0, 0.01, shape=(8, 8), compute=request),
+    }
+    with pytest.raises(ComputeImportError) as caught:
+        ask[route]()
+    return str(caught.value)
+
+
+@pytest.mark.parametrize("missing", ["torch", "array_api_compat"])
+@pytest.mark.parametrize(
+    "route", ["backend_for", "loader", "FDTD2D", "fallback warning"]
+)
+@pytest.mark.parametrize("device", sorted(_TORCH_INSTALL))
+def test_a_missing_torch_says_how_to_install_it_for_the_device(
+    monkeypatch: pytest.MonkeyPatch, device: Device, route: str, missing: str
+) -> None:
+    """torch:cpu is told to take the CPU wheels first; a GPU device, the extra alone."""
+    if missing == "torch":
+        monkeypatch.setitem(sys.modules, "torch", None)
+    else:
+        monkeypatch.setitem(sys.modules, "torch", types.ModuleType("torch"))
+        monkeypatch.setitem(sys.modules, "array_api_compat", None)
+    dtype: Dtype = "float32" if device == "torch:mps" else "float64"
+    message = _missing_torch_message(route, Compute(device=device, dtype=dtype))
+    assert "which is not installed" in message
+    assert message.endswith(f"; {_TORCH_INSTALL[device]}")
 
 
 def _installed_but_broken(
@@ -892,7 +955,7 @@ _BAD_ARGUMENTS: dict[str, tuple[Callable[[Compute], object], str]] = {
             343.0,
             0.01,
             shape=(8, 8),
-            sponge_width=2,
+            absorbing_layer_cells=2,
             edge_impedance={"left": 413.0},
             compute=c,
         ),
@@ -911,7 +974,7 @@ _BAD_ARGUMENTS: dict[str, tuple[Callable[[Compute], object], str]] = {
             0.01,
             rho=2500.0,
             shape=(8, 8),
-            sponge_width=2,
+            absorbing_layer_cells=2,
             free_sides="top",
             compute=c,
         ),

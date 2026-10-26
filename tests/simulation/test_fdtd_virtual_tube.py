@@ -76,7 +76,7 @@ def _run_tube(
         damping=damping,
         edge_impedance=boundaries,
     )
-    sim.add_plane_wave("right", center=0.35, width=0.05)
+    sim.add_plane_wave("right", center_m=0.35, half_width_m=0.05)
     records = np.empty((len(probe_cells), steps))
     for n in range(steps):
         sim.step()

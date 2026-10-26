@@ -2,7 +2,7 @@
 
 # Documentation and figures
 
-This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues page; the errata register; and the frames of a clip, held to the figure gates before it is encoded. Read it before you add or change a guide, a figure or a renderer, an animation or an errata entry. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
+This page governs what a reader of phonometry sees outside the code: the guides of the site, their Spanish twins and their plain-markdown mirror under `docs/`; the code fences those pages print; the figures, plates, fiches and clips the generators draw, and the `.plot()` code that draws them; how a record shows itself in a notebook; the published catalogues page; the errata register; the frames of a clip, held to the figure gates before it is encoded, and the device its field steps on; and the install commands a page prints. Read it before you add or change a guide, a figure or a renderer, an animation, an errata entry or an install command. The signature of `.plot()` and where a renderer imports matplotlib are API rules ([A28](api.md#a28), [A10](api.md#a10)); the slope of a subscript, in a docstring or on a plate, is set by [D16 to D21](docstrings.md#d16); the wording of the prose itself is in [prose.md](prose.md). Examples that import from `phonometry._plot`, `phonometry._i18n` or `phonometry._internal` stand for code inside the package, where the import is relative ([A11](api.md#a11)).
 
 ## Guides and the docs mirror
 
@@ -1224,8 +1224,9 @@ git add .github/images/anim_reverberation.webm
 
 **Do**
 
-```text
-python scripts/generate_graphs.py --animations --anim anim_epnl_flyover
+```bash
+# with the ffmpeg build the clips are calibrated on, as CONTRIBUTING.md shows
+ffmpeg_dir="$(make -s clip-ffmpeg)" && PATH="$ffmpeg_dir:$PATH" make animations ANIM=anim_epnl_flyover
 ```
 
 **Don't**
@@ -1236,7 +1237,7 @@ Change a scene in scripts/figures/ (or a phonometry._plot helper it draws with) 
 
 **Enforced by:** `scripts/check_animation_freshness.py`, `make animation-freshness`
 
-**Exceptions.** The fingerprint (`scripts/animation_fingerprint.py`) follows a clip's code through `scripts/figures` and through the drawing helpers of `phonometry._plot` it calls (the colours of a fill or a quiet line, the frequency axis, the dark field map), and stops at the rest of the library: a change to the physics moves the static figures, where `scripts/check_figures.py` catches it.
+**Exceptions.** The fingerprint (`scripts/animation_fingerprint.py`) follows a clip's code through `scripts/figures`, through the drawing helpers of `phonometry._plot` it calls (the colours of a fill or a quiet line, the frequency axis, the dark field map) and through the encode path of `phonometry.io`, and stops at the rest of the library: a change to the physics moves the static figures, where `scripts/check_figures.py` catches it. A clip that steps an FDTD engine is tied instead to what the engines compute, through their golden digests (`engine-digests.json`, which one CI job measures and checks, and `make engine-digests RUN=<run id>` takes from it): rewording an engine moves no clip, and a change that moves the engines' numbers moves the digests and makes every field clip stale. Each line of the manifest also names the encoder that wrote the clip's WebM (`av1_nvenc` or `libsvtav1`), and `make clip-codecs` (`scripts/check_clip_codecs.py`) reads every published WebM and checks that it is AV1 from that encoder; CI never fetches a clip, so it runs where the clips are, after a render and before publishing.
 
 <a id="f53"></a>
 ### F53. Embed an animation lazily, with its space reserved
@@ -1424,7 +1425,8 @@ A commit that adds the English entry and leaves the Spanish register for later.
 
 ```bash
 make animation-audit ANIM=anim_epnl_flyover   # every frame of its four variants, no video
-python scripts/generate_graphs.py --animations --anim anim_epnl_flyover   # the render audits first
+# the render audits first, with the ffmpeg build the clips are calibrated on
+ffmpeg_dir="$(make -s clip-ffmpeg)" && PATH="$ffmpeg_dir:$PATH" make animations ANIM=anim_epnl_flyover
 ```
 
 **Don't**
@@ -1436,4 +1438,75 @@ frames between the first and the poster are never looked at.
 
 **Enforced by:** `scripts/clip_frame_audit.py`, `make animation-audit`, `tests/test_clip_frame_audit.py`
 
-**Exceptions.** Every frame is inspected, none sampled: run over every frame of the 43 clips as they were drawn before the audit, 24 of the 314 runs of a finding held for a single frame (in six clips), which any stride would have let through. A finding that is a decision goes in the gate's own exemption table, with the reason, keyed for a clip the way that table keys a figure: `check_figure_text_clearance.EXEMPTIONS` by the drawing with its language suffix (`anim_epnl_flyover`, `anim_epnl_flyover_es`) or `drawing: text`; `check_figure_legends.EXEMPTIONS` by the clip alone; `check_figure_minus_sign.ALLOWED` and `check_figure_decimal_point.ALLOWED` by `clip: text`, with no language or theme suffix. The figure gates leave such an entry alone, and the audit-only run fails it once no frame fires it. No CI job runs the audit, because CI cannot render a clip: the freshness check ([F52](#f52)) fails a change to a clip's drawing code, in `scripts/figures` or in the `phonometry._plot` helpers it draws with, until the clip is rendered again, and the render runs the audit. A change to the audit or to a checker moves no fingerprint, so after one, `make animation-audit` over every clip shows whether the published clips still pass.
+**Exceptions.** Every frame is inspected, none sampled: run over every frame of the 43 clips as they were drawn before the audit, 24 of the 314 runs of a finding held for a single frame (in six clips), which any stride would have let through. A finding that is a decision goes in the gate's own exemption table, with the reason, keyed for a clip the way that table keys a figure: `check_figure_text_clearance.EXEMPTIONS` by the drawing with its language suffix (`anim_epnl_flyover`, `anim_epnl_flyover_es`) or `drawing: text`; `check_figure_legends.EXEMPTIONS` by the clip alone; `check_figure_minus_sign.ALLOWED` and `check_figure_decimal_point.ALLOWED` by `clip: text`, with no language or theme suffix. The figure gates leave such an entry alone, and the audit-only run fails it once no frame fires it. No CI job runs the audit, because CI cannot render a clip: the freshness check ([F52](#f52)) fails a change to a clip's drawing code, in `scripts/figures`, in the `phonometry._plot` helpers it draws with or in the encode path of `phonometry.io`, until the clip is rendered again, and the render runs the audit. A change to the audit or to a checker moves no fingerprint, so after one, `make animation-audit` over every clip shows whether the published clips still pass.
+
+## Clip fields
+
+<a id="f61"></a>
+### F61. Step a clip's field where the registry puts it, and keep it on that device between captures
+
+**Why.** A scene steps `phonometry.simulation` on the device its clip is measured to want (`scripts/clip_placement.py`, `figures.registry._ANIM_DEVICES`), which is a GPU for the large fields. Code that works on NumPy breaks there: CuPy refuses a host array added into a device field, and a field read to the host on every step costs a copy and a sync per step, which can cost more than the step.
+
+**Do**
+
+```python
+import clip_placement
+import numpy as np
+from figures.fields._core import _host
+
+from phonometry.simulation import FDTD2D
+
+sim = FDTD2D(..., compute=clip_placement.compute_for("anim_fdtd_open_end"))
+xp = sim._backend.xp
+row, omega, phase, beta, steps, every = 40, 2.0 * np.pi * 500.0, 0.0, 0.98, 600, 6
+taper = sim._backend.asarray(np.hanning(sim.p.shape[1]))   # once, before the loop
+ms = sim._backend.zeros(tuple(sim.p.shape))
+frames = []
+for i in range(steps):
+    sim.step()
+    sim.vy[row] += taper * xp.sin(omega * sim.time - phase)
+    ms = beta * ms + (1.0 - beta) * sim.p**2
+    if (i + 1) % every == 0:
+        frames.append(_host(sim, sim.p[::2, ::2]))
+```
+
+**Don't**
+
+```py
+sim = FDTD2D(...)                     # no compute=: PHONOMETRY_COMPUTE decides
+ms = np.zeros_like(sim.p)
+for i in range(steps):
+    sim.step()
+    sim.vy[row] += np.hanning(sim.p.shape[1]) * np.sin(omega * sim.time - phase)
+    level = float(sim.p[iy, ix])
+    frames.append(sim.p[::2, ::2].astype(np.float32))
+```
+
+**Enforced by:** `tests/test_clip_scenes_on_devices.py`, `tests/test_clip_placement.py`
+
+**Exceptions.** Code before the loop builds maps and drive vectors with any NumPy call; they go to the device once, through the engine's `asarray`. A capture brings its frame to the host with `_host`; a reduction over every step stays in the engine's namespace and crosses once, after the loop. A clip's device is measured, never guessed: it is the GPU only where the field was measured to save a fifth or more of its time there and to stay close to its NumPy field, output by output, with the NumPy reference run in the same container image as the GPU run (NumPy's float32 `log10` changed bits between 2.5.3 and 2.5.4 on the same CPU). Every output keeps its NaN and infinities in the same places; a float64 output stays within 1e-9 of its peak; a float32 output, a frame among them, within 1e-9 of its peak or within one float32 step (one unit in the last place) of every value, since a bound below a float32 value's own resolution would demand bit identity, and neither result is more accurate than the other. The fields step in float64 on every device.
+
+## Install commands
+
+<a id="f62"></a>
+### F62. Quote the extras of every install command
+
+**Why.** zsh, the default shell on macOS, reads the brackets of an extras requirement as a glob and stops with "no matches found" before pip runs. A command copied from a page, a docstring, a message the library raises or the README must run as written in every shell.
+
+**Do**
+
+```bash
+pip install "phonometry[torch]"
+pip install -e ".[full]"
+pip install torch --index-url https://download.pytorch.org/whl/cpu   # a CPU-only Linux machine, first
+```
+
+**Don't**
+
+```bash
+pip install phonometry[torch]   # zsh: no matches found: phonometry[torch]
+```
+
+**Enforced by:** `scripts/check_quoted_extras.py`, `CI: Every install command quotes its extras`, `tests/test_check_quoted_extras.py`
+
+**Exceptions.** A line that shows zsh's own "no matches found" is the failure shown on purpose. Tests are not published and are not read. A sentence that names an extra without installing it (the `[torch]` extra) is not a command. A requirement is one word of the command, so a quote that opens it quotes all of it, a path or a variable inside included.

@@ -183,5 +183,5 @@ MooreGlasbergLoudness.plot(
 
 Plot the specific loudness N'(i) over the ERB-number scale.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.  See `phonometry._plot.psychoacoustics`.

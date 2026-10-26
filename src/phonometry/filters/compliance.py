@@ -1531,7 +1531,7 @@ class FilterComplianceResult(OwnsArrays):
         ``"effective_bandwidth"`` draws :math:`\Delta B` of every band between
         the limits of 5.12.2, and ``"summation"`` the Formula (3) curve of
         every inner band between the limits of 5.16. Requires matplotlib
-        (``pip install phonometry[plot]``) and returns the
+        (``pip install "phonometry[plot]"``) and returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1587,8 +1587,8 @@ class FilterComplianceResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
 

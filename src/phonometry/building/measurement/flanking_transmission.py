@@ -481,7 +481,7 @@ class VibrationReductionResult(OwnsArrays):
     ) -> Axes:
         """Plot ``Kij`` against frequency.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -521,8 +521,8 @@ class VibrationReductionResult(OwnsArrays):
         :raises ValueError: If ``engine`` is unknown or the result carries no
             band centre frequencies.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         _validate_report_request(engine, language)
         from ..._report.iso10848 import render_vibration_reduction_report
@@ -843,8 +843,8 @@ class FlankingLevelDifferenceResult(OwnsArrays):
             4, or the result has no single-number rating (the band count is
             neither 16 nor 5).
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         _validate_report_request(engine, language)
         if self.rating is None:
@@ -927,8 +927,8 @@ class FlankingImpactLevelResult(OwnsArrays):
             4, or the result has no single-number rating (the band count is
             neither 16 nor 5).
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         _validate_report_request(engine, language)
         if self.rating is None:
@@ -1201,7 +1201,7 @@ class StrongCouplingCheck(OwnsArrays):
         shaded, where the elements are strongly coupled and ``Kij`` may not be
         relevant, and a band where the inequality does not hold is marked.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.

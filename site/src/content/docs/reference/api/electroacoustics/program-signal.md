@@ -250,7 +250,7 @@ ProgramSignalCheck.plot(
 
 Draw the referred band levels inside the tolerances of Table II.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 

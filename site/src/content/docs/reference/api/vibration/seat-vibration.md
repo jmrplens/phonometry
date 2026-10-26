@@ -318,7 +318,7 @@ SeatTransmissionResult.plot(
 
 Draw the runs, their means and the SEAT factor between them.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

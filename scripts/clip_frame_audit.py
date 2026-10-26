@@ -115,8 +115,8 @@ since none carries a clip's name (``check_figure_legends.is_clip``);
 
 Running it
 ----------
-A render runs it: ``python scripts/generate_graphs.py --animations --anim
-<clip>``. To inspect without rendering, for a sweep or after a change to a
+A render runs it: ``make animations ANIM=<clip>``. To inspect without
+rendering, for a sweep or after a change to a
 clip's drawing code::
 
     python scripts/generate_graphs.py --animations --audit-only [--anim CLIP]

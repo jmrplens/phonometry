@@ -453,7 +453,7 @@ class LoopField(OwnsArrays):
         0 dB reference and the plus or minus 3 dB band of IEC 60118-4:2014
         8.4.3 around it.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -900,7 +900,7 @@ class LoopImpedance(OwnsArrays):
         The resistance is drawn as a floor and the corner frequency marked,
         where the magnitude has risen to :math:`\sqrt{2}` times the resistance.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -985,7 +985,7 @@ class MaxOutputCurrent(OwnsArrays):
     ) -> Axes:
         """Draw the distortion against the load current, with the rated THD.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1231,7 +1231,7 @@ class AmplifierFrequencyResponse(OwnsArrays):
     ) -> Axes:
         """Draw the response against frequency, 0 dB at 1 kHz (5.4.12.3).
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1407,7 +1407,7 @@ class AGCCharacteristic(OwnsArrays):
         The span of :attr:`agc_range_db` is shaded, with the 3 dB output band
         it is taken over.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1519,7 +1519,7 @@ class QuadraturePhaseError(OwnsArrays):
     ) -> Axes:
         """Draw the deviation from 90 degrees against frequency.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1630,7 +1630,7 @@ class NeckLoopCharacteristics(OwnsArrays):
     ) -> Axes:
         """Draw the frequency response on the jig, 0 dB at 1 kHz.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -1835,7 +1835,7 @@ class NeckLoopVerification(RichDisplay):
     ) -> Axes:
         """Draw each measured value as a share of its limit.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

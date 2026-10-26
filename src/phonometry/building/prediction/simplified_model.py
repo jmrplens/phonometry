@@ -263,7 +263,7 @@ class AirbornePredictionResult(RichDisplay):
     ) -> Axes:
         """Plot the per-path shares of the transmitted energy.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -315,8 +315,8 @@ class AirbornePredictionResult(RichDisplay):
         :raises ValueError: If ``engine`` is unknown or ``language`` is not
             supported.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from ..._i18n import check_language
 
@@ -368,7 +368,7 @@ class ImpactPredictionResult(RichDisplay):
     ) -> Axes:
         """Plot the Formula 21 terms and the resulting ``L'n,w``.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -422,8 +422,8 @@ class ImpactPredictionResult(RichDisplay):
         :raises ValueError: If ``engine`` is unknown or ``language`` is not
             supported.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from ..._i18n import check_language
 

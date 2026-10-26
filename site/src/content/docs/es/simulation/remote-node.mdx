@@ -26,6 +26,8 @@ otro y cuándo una ejecución allí da los números que da una ejecución aquí.
 dispositivo en sí, NumPy, CuPy o torch, se elige como explica
 [Dónde se calcula una simulación](/phonometry/es/simulation/compute/), y todo
 eso vale también en un nodo.
+[Dónde se ejecuta el trabajo pesado](/phonometry/es/simulation/where-it-runs/)
+reúne en un sitio los dispositivos, los nodos y los codificadores.
 
 ## 1. Qué pasa cuando una ejecución va a un nodo
 
@@ -404,6 +406,17 @@ nodo desde tu copia del repositorio, con el Dockerfile y el programa de
 arranque tal como los cambiaste. Tras un cambio en un motor,
 `make gpu-parity`, ejecutado desde tu copia en esa imagen sobre la GPU del
 nodo, renueva la prueba en GPU de `gpu-parity.lock`.
+
+### Renderizar en un nodo los clips de la documentación
+
+Los clips animados de la documentación, la mayoría simulaciones que avanzan
+con los motores de esta página, se pueden renderizar en el mismo nodo: con el
+nodo en el fichero de hosts, `PHONOMETRY_COMPUTE=cupy@<nombre> make animations`
+envía allí el código del último commit del repositorio, renderiza los clips
+de dos en dos con la GPU y NVENC, y los trae de vuelta comprobados. La
+[guía para contribuir](https://github.com/jmrplens/phonometry/blob/main/CONTRIBUTING.md#clips)
+lo explica, junto con cómo renderizarlos aquí en una CPU, que también da clips
+listos para publicar.
 
 ## Qué cubre esta guía
 

@@ -289,7 +289,7 @@ def test_flexural_dispersion_of_thin_plate_strip() -> None:
     a_kirchhoff = (e_apparent * h**2 / (12.0 * RHO_ST)) ** 0.25
 
     # Graded damping ramps play the sponge role at both strip ends (the
-    # strip is far thinner than any usable sponge_width).
+    # strip is far thinner than any usable absorbing layer).
     wd = 250
     sig = np.zeros((ny, nx))
     ramp = (np.arange(wd) + 1.0) / wd
@@ -492,8 +492,8 @@ def test_mu_zero_everywhere_reproduces_acoustic_fdtd() -> None:
         c,
         0.01,
         rho=rho,
-        sponge_width=10,
-        sponge_sides=("left", "top"),
+        absorbing_layer_cells=10,
+        absorbing_sides=("left", "top"),
         obstacle_mask=mask,
     )
     elastic = ElasticFDTD2D(
@@ -501,8 +501,8 @@ def test_mu_zero_everywhere_reproduces_acoustic_fdtd() -> None:
         0.0,
         0.01,
         rho=rho,
-        sponge_width=10,
-        sponge_sides=("left", "top"),
+        absorbing_layer_cells=10,
+        absorbing_sides=("left", "top"),
         obstacle_mask=mask,
     )
     assert elastic.dt == acoustic.dt
@@ -599,7 +599,7 @@ def test_energy_is_conserved_in_a_closed_domain() -> None:
                 "c_s": 3000.0,
                 "shape": (10, 10),
                 "free_sides": "top",
-                "sponge_width": 3,
+                "absorbing_layer_cells": 3,
             },
             "both free and absorbing",
         ),
@@ -996,3 +996,54 @@ def test_the_elastic_simulation_keeps_maps_of_its_own() -> None:
     assert float(sim.rho.min()) == 7800.0
     for kept in (sim.c_p, sim.c_s, sim.rho):
         assert not kept.flags.writeable
+
+
+def test_the_snapshot_counts_of_run_are_taken_by_name() -> None:
+    """``run(4, 2)`` read the 2 as a cadence; the records take both counts by name."""
+    sim = ElasticFDTD2D(6000.0, 3000.0, 0.01, rho=2700.0, shape=(12, 12))
+    with pytest.raises(TypeError, match="positional argument"):
+        sim.run(4, 2)  # type: ignore[misc]
+    assert sim.n == 0
+    frames = sim.run(4, snapshot_every=2, snapshot_decimation=2)
+    assert frames.shape == (3, 6, 6)
+    assert sim.n == 4
+
+
+@pytest.mark.parametrize(
+    ("old", "value"),
+    [("sponge_width", 4), ("sponge_sides", "left"), ("sponge_reflection", 1e-3)],
+)
+def test_the_engine_refuses_the_old_names_of_its_absorbing_layer(
+    old: str, value: object
+) -> None:
+    with pytest.raises(TypeError, match=old):
+        ElasticFDTD2D(6000.0, 3000.0, 0.01, rho=2700.0, shape=(12, 12), **{old: value})
+
+
+def test_the_engine_names_its_absorbing_layer_as_the_run_does() -> None:
+    sim = ElasticFDTD2D(
+        6000.0,
+        3000.0,
+        0.01,
+        rho=2700.0,
+        shape=(20, 20),
+        absorbing_layer_cells=4,
+        absorbing_sides=("left", "bottom"),
+        absorbing_layer_reflection=1e-3,
+        free_sides="top",
+    )
+    assert sim.absorbing_layer_cells == 4
+    assert sim.absorbing_sides == ("left", "bottom")
+    assert sim.free_sides == ("top",)
+    assert not hasattr(sim, "sponge_width")
+    assert not hasattr(sim, "sponge_sides")
+    with pytest.raises(ValueError, match="unknown absorbing sides"):
+        ElasticFDTD2D(
+            6000.0,
+            3000.0,
+            0.01,
+            rho=2700.0,
+            shape=(20, 20),
+            absorbing_layer_cells=4,
+            absorbing_sides="north",  # type: ignore[arg-type]
+        )

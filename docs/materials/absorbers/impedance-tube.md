@@ -575,7 +575,7 @@ rho[:, -d_cells:] = 3.0 * rho0            # denser and lossy
 sigma[:, -d_cells:] = 600.0
 sim = FDTD2D(c, dx, rho=rho, damping=sigma,
              edge_impedance={"left": rho0 * c0})   # anechoic source end
-sim.add_plane_wave("right", center=0.35, width=0.05)
+sim.add_plane_wave("right", center_m=0.35, half_width_m=0.05)
 mics = (219, 229)                         # the ISO microphone pair
 records = np.zeros((2, 9000))
 for n in range(records.shape[1]):

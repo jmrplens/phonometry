@@ -480,7 +480,7 @@ class WeightingResponse(OwnsArrays):
     ) -> Axes:
         """Plot the weighting factor (dB) versus frequency.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
         from ..._i18n import check_language
@@ -734,7 +734,7 @@ class WeightedSpectrum(OwnsArrays):
     ) -> Axes:
         """Plot the unweighted and weighted band spectra with ``a_w``.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
         from ..._i18n import check_language
@@ -1387,7 +1387,7 @@ class DailyVibrationExposure(OwnsArrays):
     ) -> Axes:
         """Plot the partial exposures against the EAV / ELV thresholds.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
         from ..._i18n import check_language

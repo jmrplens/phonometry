@@ -176,7 +176,7 @@ representative value marked.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the left-ear bars. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Raises**
 

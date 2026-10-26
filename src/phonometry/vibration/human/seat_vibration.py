@@ -294,7 +294,7 @@ class SeatTransmissionResult(RichDisplay):
     ) -> Axes:
         """Draw the runs, their means and the SEAT factor between them.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

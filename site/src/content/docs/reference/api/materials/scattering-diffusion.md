@@ -144,7 +144,7 @@ DiffusionResult.plot(
 
 Plot the polar response with the diffusion coefficient annotated.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 polar `Axes` and never calls `plt.show`.
 
 ### DiffusionResult.report()
@@ -188,7 +188,7 @@ there is no pass/fail verdict.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
 
 ## DiffusionSpectrum
 
@@ -233,7 +233,7 @@ DiffusionSpectrum.plot(
 
 Plot the diffusion coefficient `d` versus frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes` and never calls `plt.show`.
 
 ### DiffusionSpectrum.report()
@@ -277,7 +277,7 @@ characterisation, so there is no pass/fail verdict.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
 
 ## directional_diffusion
 

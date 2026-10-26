@@ -148,7 +148,7 @@ deviation the marker (a diamond when it conforms, a cross when it does
 not), the actual uncertainty the error bar and the maximum-permitted
 one the shaded band behind it.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

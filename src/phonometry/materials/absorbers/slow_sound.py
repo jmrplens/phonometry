@@ -157,7 +157,7 @@ class HelmholtzResonator(RichDisplay):
     ) -> Axes:
         """Draw the resonator cross-section to scale (dimensioned).
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -591,7 +591,7 @@ class SlitResonatorAbsorberResult(OwnsArrays):
     ) -> Axes:
         """Plot the absorption spectrum ``alpha(f)`` with ``|R|`` overlaid.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -605,7 +605,7 @@ class SlitResonatorAbsorberResult(OwnsArrays):
     ) -> Axes:
         """Draw one period of the panel cross-section to scale (dimensioned).
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

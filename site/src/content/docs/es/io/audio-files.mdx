@@ -501,7 +501,7 @@ nivel archivado es *idéntico*, no meramente parecido.
 
 ## Qué lee y escribe cada instalación
 
-| | Instalación base (NumPy + SciPy) | Con `pip install phonometry[audio]` |
+| | Instalación base (NumPy + SciPy) | Con `pip install "phonometry[audio]"` |
 | :--- | :--- | :--- |
 | Leer | WAV/BWF: PCM a cualquier profundidad, IEEE float de 32/64, EXTENSIBLE (etiquetas de canal), `bext`, puntos de cue, RF64/BW64 | + FLAC, AIFF, Ogg Vorbis, Opus, MP3, WAV comprimido (ADPCM, ley A/µ) |
 | Escribir | WAV/BWF: PCM de 16/24/32, float de 32/64, RF64 automático, `bext`, sidecar | + FLAC (PCM hasta 24 bits, `bext` transportado) |

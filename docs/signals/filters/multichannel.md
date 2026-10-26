@@ -174,7 +174,7 @@ Additional performance notes:
   rate, which is both faster and numerically more stable (see
   [Theory](../../reference/theory/signal-analysis.md)).
 - **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
-  numba is installed (`pip install phonometry[perf]`).
+  numba is installed (`pip install "phonometry[perf]"`).
 
 ## See also
 

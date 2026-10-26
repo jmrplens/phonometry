@@ -507,7 +507,7 @@ class RainGeneratorVerification(OwnsArrays):
 
         Every quantity is drawn as its deviation from the nominal value in
         units of its tolerance, so the three share one axis and the window is
-        -1 to 1. Requires matplotlib (``pip install phonometry[plot]``);
+        -1 to 1. Requires matplotlib (``pip install "phonometry[plot]"``);
         returns the :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -637,7 +637,7 @@ class RainfallReferenceCorrection(OwnsArrays):
 
         The gap between the two curves is the correction every specimen of
         the laboratory is normalized by. Requires matplotlib
-        (``pip install phonometry[plot]``); returns the
+        (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -822,7 +822,7 @@ class RainfallSoundResult(OwnsArrays):
     ) -> Axes:
         """Plot the sound intensity level per band, normalized when available.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

@@ -375,7 +375,7 @@ class RoomModesResult(OwnsArrays):
         axial / tangential / oblique; the lower panel draws the smooth modal
         density (Long Equation (8.46)). The Schroeder frequency, when known,
         is marked on both. Requires matplotlib
-        (``pip install phonometry[plot]``).
+        (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.room import plot_room_modes

@@ -170,7 +170,7 @@ per-one-third-octave table of the random-incidence absorption $\alpha_\mathrm{s}
 scattering coefficient $s$ beside the $s(f)$ curve on a categorical band axis,
 and a boxed characterisation headline (no pass/fail). `verbose=True` adds the
 specular absorption $\alpha_\mathrm{spec}$ column and `language="es"` renders the
-Spanish fiche; it needs the report extra (`pip install phonometry[report]`).
+Spanish fiche; it needs the report extra (`pip install "phonometry[report]"`).
 
 [![ISO 17497-1 scattering example report: a metadata header, the per-one-third-octave table of the random-incidence absorption and the scattering coefficient beside the s(f) band-axis curve, and the boxed characterisation headline over the tested frequency range](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_scattering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_scattering_example.pdf)
 

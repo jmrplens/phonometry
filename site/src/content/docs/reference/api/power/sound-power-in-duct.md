@@ -255,7 +255,7 @@ Plot the in-duct sound power spectrum with the A-weighted total.
 
 One bar per one-third-octave band of `sound_power_level`, the
 $L_{W\mathrm{A}}$ of Annex C in the title. Requires matplotlib
-(`pip install phonometry[plot]`); returns the
+(`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

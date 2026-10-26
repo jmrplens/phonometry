@@ -551,7 +551,7 @@ ReactiveSilencerResult.plot(
 
 Plot the transmission (and insertion) loss against frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### ReactiveSilencerResult.plot_geometry()
@@ -569,7 +569,7 @@ Draw the silencer cross-section to scale (dimensioned side cut).
 A named device is drawn from its `geometry`; a result assembled by a
 [`SilencerChain`](/phonometry/reference/api/noise_control/silencers/#silencerchain) is drawn from that `chain`, duct by duct.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**
@@ -632,7 +632,7 @@ transmission-loss relation.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
 
 ## shunt_matrix
 
@@ -764,7 +764,7 @@ stub of any length: it is marked with a leader at the station where it
 joins the run, carrying its label and, when the analysis grid resolves
 one, the frequency at which it comes closest to shorting the duct.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

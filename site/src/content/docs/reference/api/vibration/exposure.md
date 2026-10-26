@@ -381,7 +381,7 @@ DailyVibrationExposure.plot(
 
 Plot the partial exposures against the EAV / ELV thresholds.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes` and never calls `plt.show`.
 
 ### DailyVibrationExposure.report()
@@ -975,7 +975,7 @@ WeightedSpectrum.plot(
 
 Plot the unweighted and weighted band spectra with `a_w`.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes` and never calls `plt.show`.
 
 ## weighting_factors
@@ -1049,5 +1049,5 @@ WeightingResponse.plot(
 
 Plot the weighting factor (dB) versus frequency.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes` and never calls `plt.show`.

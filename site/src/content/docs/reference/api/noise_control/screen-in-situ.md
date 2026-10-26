@@ -440,7 +440,7 @@ ScreenInSituResult.plot(
 
 Draw the two levels and the attenuation between them.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Parameters**
 

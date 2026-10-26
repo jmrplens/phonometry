@@ -23,6 +23,7 @@ from ..theme import (
     COLOR_PRIMARY,
     COLOR_SECONDARY,
 )
+from ._core import _blanked, _host, _settled_envelope
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -76,7 +77,11 @@ def _open_end_fields(
     :return: The two masked frame stacks, the two settled centreline
         envelopes, and the frame times.
     """
-    import fdtd2d
+    import clip_placement
+
+    from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
+
+    compute = clip_placement.compute_for("anim_fdtd_open_end")
 
     dx = _OPEN_DX
     bore = round(_OPEN_BORE / dx)
@@ -92,8 +97,9 @@ def _open_end_fields(
 
     runs: list[tuple[Any, Any]] = []
     times = np.zeros(0)
+    blank = ~air[::2, ::2]
     for frequency in _OPEN_FREQS:
-        sim = fdtd2d.FDTD2D(
+        sim = FDTD2D(
             343.0,
             dx,
             shape=(ny, nx),
@@ -104,19 +110,19 @@ def _open_end_fields(
                 "top": 1.2 * 343.0,
                 "bottom": 1.2 * 343.0,
             },
+            compute=compute,
         )
-        tone = fdtd2d.CWSource(ix=0, iy=0, frequency=frequency)
+        tone = CWSource(ix=0, iy=0, frequency=frequency)
         sim.add_source(
-            fdtd2d.PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
+            PlaneWaveSource(direction="right", waveform=tone.value, offset=2)
         )
-        axis = y0 + bore // 2
-        period = round(1.0 / (frequency * sim.dt))
-        settle = round(_OPEN_SETTLE_S / sim.dt)
-        envelope = np.zeros(mouth, dtype=np.float32)
-        for step in range(settle):
-            sim.step()
-            if step >= settle - period:
-                np.maximum(envelope, np.abs(sim.p[axis, :mouth]), out=envelope)
+        envelope = _settled_envelope(
+            sim,
+            settle=round(_OPEN_SETTLE_S / sim.dt),
+            period=round(1.0 / (frequency * sim.dt)),
+            row=y0 + bore // 2,
+            columns=slice(None, mouth),
+        )
         frames: list[Any] = []
         stamps: list[float] = []
         while len(frames) < n_frames:
@@ -124,9 +130,9 @@ def _open_end_fields(
             if sim.n % _OPEN_EVERY == 0:
                 # The dense cells ring with the injection line; blanking
                 # them keeps the colour scale on the air path.
-                frames.append(np.where(air, sim.p, np.nan)[::2, ::2].astype(np.float32))
+                frames.append(_blanked(sim, sim.p[::2, ::2], blank))
                 stamps.append(sim.time)
-        runs.append((np.stack(frames), envelope))
+        runs.append((np.stack(frames), _host(sim, envelope)))
         times = np.asarray(stamps)
     return runs[0][0], runs[0][1], runs[1][0], runs[1][1], times
 

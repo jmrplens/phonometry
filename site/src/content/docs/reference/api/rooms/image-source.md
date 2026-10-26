@@ -231,7 +231,7 @@ Plot the reflectogram: reflection level in dB against arrival time.
 
 Stems the per-image amplitudes (in dB re the direct sound), coloured by
 reflection order, with the $1 / r$ free-field envelope overlaid.
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### ImageSourceResult.plot_geometry()
@@ -248,7 +248,7 @@ ImageSourceResult.plot_geometry(
 
 Draw the image-source lattice in plan view (x-y), to scale.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

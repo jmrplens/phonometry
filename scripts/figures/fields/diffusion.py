@@ -5,6 +5,7 @@ from functools import lru_cache
 from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 
 from ..media import _anim_figure, _render_clip, _translate_str
 from ..theme import (
@@ -13,7 +14,7 @@ from ..theme import (
     FIELD_INK,
     FIELD_STROKE,
 )
-from ._core import _fit_text_below, _solid_in_field
+from ._core import _fit_text_below, _host, _solid_in_field
 
 _QRD_DESIGN_F = 343.0 / 0.56  # ~612 Hz: lambda0 = 0.56 m
 _QRD_SLAB = (2.085, 3.915, 0.55, 0.85)  # x0, x1, y0, y1 of the panel slab
@@ -36,6 +37,22 @@ def _qrd_wells() -> list[tuple[float, float, float]]:
             wells.append((x + fin_w, x + fin_w + well_w, s * unit))
             x += fin_w + well_w
     return wells
+
+
+def _qrd_density(rho_flat: NDArray[np.float64], dx: float) -> NDArray[np.float64]:
+    """The flat slab's density map with the quadratic-residue wells cut in.
+
+    Each well of nonzero depth is opened to the air from the slab face down
+    to its depth; a zero-depth well stays solid, flush with the slab face.
+    """
+    y1 = _QRD_SLAB[3]
+    rho_qrd = rho_flat.copy()
+    for wx0, wx1, d in _qrd_wells():
+        if d > 0.0:
+            rho_qrd[
+                round((y1 - d) / dx) : round(y1 / dx), round(wx0 / dx) : round(wx1 / dx)
+            ] = 1.2
+    return rho_qrd
 
 
 # Diffuser timeline. Mesh: the carrier is the 612 Hz design frequency
@@ -86,19 +103,18 @@ def _diffusion_fields(
     arc angles [deg], and the scattered energy levels on the arc [dB] per
     panel (flat, QRD) for the diffusion-coefficient check.
     """
-    import fdtd2d
+    import clip_placement
+
+    from phonometry.simulation import FDTD2D
+
+    compute = clip_placement.compute_for("anim_fdtd_diffusion")
 
     c0, dx = 343.0, 0.01
     ny, nx = 440, 600  # 4.4 m x 6.0 m
     x0, x1, y0, y1 = _QRD_SLAB
     rho_flat = np.full((ny, nx), 1.2)
     rho_flat[round(y0 / dx) : round(y1 / dx), round(x0 / dx) : round(x1 / dx)] = 1.2e6
-    rho_qrd = rho_flat.copy()
-    for wx0, wx1, d in _qrd_wells():
-        if d > 0.0:
-            rho_qrd[
-                round((y1 - d) / dx) : round(y1 / dx), round(wx0 / dx) : round(wx1 / dx)
-            ] = 1.2
+    rho_qrd = _qrd_density(rho_flat, dx)
     rho_ref = np.full((ny, nx), 1.2)
 
     # Downgoing packet: carrier at the design wavelength under a Gaussian
@@ -114,20 +130,25 @@ def _diffusion_fields(
     every = _DIFF_EVERY
     sims = []
     for rho in (rho_flat, rho_qrd, rho_ref):
-        sim = fdtd2d.FDTD2D(c0, dx, rho=rho, shape=(ny, nx), sponge_width=40)
+        sim = FDTD2D(
+            c0, dx, rho=rho, shape=(ny, nx), absorbing_layer_cells=40, compute=compute
+        )
         # One-way carrier-under-Gaussian packet toward the panel, the
         # leapfrog-consistent initial condition the solver now provides.
-        sim.add_plane_wave("up", center=y_pkt, width=sig, wavelength=lam0)
+        sim.add_plane_wave("up", center_m=y_pkt, half_width_m=sig, wavelength_m=lam0)
         sims.append(sim)
     # The three runs advance in lockstep so the scattered field
     # (total - incident, exact by linearity) is available at every step
     # for the arc energies and for the fading envelope trails (6 ms
     # half-life). Below the panel face the difference is just the ghost
     # of the unblocked incident wave, so the trail is masked there.
+    backend = sims[0]._backend
+    xp = backend.xp
     decay = float(2.0 ** (-sims[0].dt / 0.006))
     face_row = round(y1 / dx)
-    trails = [np.zeros_like(sims[0].p) for _ in range(2)]
-    arc_e = np.zeros((2, theta.size))
+    arc_flat = backend.index(iy_arc * nx + ix_arc)
+    trails = [backend.zeros((ny, nx)) for _ in range(2)]
+    arc_sum = backend.zeros((2, theta.size))
     tot_frames: list[list[Any]] = [[], []]
     trail_frames: list[list[Any]] = [[], []]
     ts: list[float] = []
@@ -137,13 +158,14 @@ def _diffusion_fields(
         for j in range(2):
             scat = sims[j].p - sims[2].p
             scat[:face_row, :] = 0.0
-            arc_e[j] += scat[iy_arc, ix_arc] ** 2
-            np.maximum(trails[j] * decay, np.abs(scat), out=trails[j])
+            arc_sum[j] += xp.take(xp.reshape(scat, (-1,)), arc_flat) ** 2
+            trails[j] = xp.maximum(trails[j] * decay, xp.abs(scat))
         if sims[0].n % every == 0 and len(ts) < n_frames:
             for j in range(2):
-                tot_frames[j].append(sims[j].p[::2, ::2].astype(np.float32))
-                trail_frames[j].append(trails[j][::2, ::2].astype(np.float32))
+                tot_frames[j].append(_host(sims[j], sims[j].p[::2, ::2]))
+                trail_frames[j].append(_host(sims[j], trails[j][::2, ::2]))
             ts.append(sims[0].time)
+    arc_e = _host(sims[0], arc_sum, dtype=np.float64)
     times = np.asarray(ts)
     tot = np.stack([np.stack(f) for f in tot_frames])
     trail = np.stack([np.stack(f) for f in trail_frames])

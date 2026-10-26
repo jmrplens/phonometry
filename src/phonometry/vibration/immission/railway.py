@@ -833,7 +833,7 @@ class TrainPassage(OwnsArrays):
     ) -> Axes:
         """Draw the running level with the three stretches marked on it.
 
-        Requires matplotlib (``pip install phonometry[plot]``). The spectra of
+        Requires matplotlib (``pip install "phonometry[plot]"``). The spectra of
         Figure 6 are :meth:`plot_spectrum`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

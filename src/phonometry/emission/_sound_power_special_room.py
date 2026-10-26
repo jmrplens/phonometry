@@ -553,7 +553,7 @@ class SpecialRoomReverberationCheck(OwnsArrays):
         6,3 kHz band as the text of 6.3 says (the figure widens them at
         6,3 kHz already; see ``docs/ERRATA.md``).
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -854,7 +854,7 @@ class SpecialRoomSurfaceCheck(OwnsArrays):
         mean, and the floor against its 0,06, with every coefficient outside
         6.4 ringed and the verdict in the title.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1034,7 +1034,7 @@ class SpecialRoomSuitabilityCheck(OwnsArrays):
     ) -> Axes:
         """Plot the difference per band within the ± Table 1 limits.
 
-        Requires matplotlib (``pip install phonometry[plot]``).
+        Requires matplotlib (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1426,7 +1426,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         A band whose background margin fell below 4 dB is hatched as not
         meeting 9.8, and the expanded uncertainty is drawn as an error bar
         where ``sigma_omc_db`` was given. Requires matplotlib
-        (``pip install phonometry[plot]``).
+        (``pip install "phonometry[plot]"``).
 
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
@@ -1478,7 +1478,7 @@ class SpecialRoomSoundPowerResult(OwnsArrays):
         :raises ValueError: If ``engine`` is not ``"reportlab"`` or ``language``
             is unknown.
         :raises ImportError: If reportlab (or, for the figure, matplotlib) is
-            not installed (``pip install phonometry[report]``).
+            not installed (``pip install "phonometry[report]"``).
         """
         from .._i18n import check_language
 

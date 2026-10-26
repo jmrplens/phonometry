@@ -313,6 +313,22 @@ def _torch_device(torch: ModuleType, compute: Compute) -> object:
     return torch.device(kind)
 
 
+def _torch_install(compute: Compute) -> str:
+    """How to install torch for *compute*'s device, as the compute guide says.
+
+    For ``torch:cpu`` the CPU wheels first, then the extra, which keeps the
+    torch it finds: the wheels PyPI serves for Linux bring gigabytes of CUDA
+    libraries a CPU never uses. For a GPU device the extra alone. No
+    punctuation touches the index URL, so the command copies as it reads.
+    """
+    if compute.device == "torch:cpu":
+        return (
+            "pip install torch --index-url https://download.pytorch.org/whl/cpu "
+            'and then pip install "phonometry[torch]"'
+        )
+    return 'pip install "phonometry[torch]"'
+
+
 def _torch(compute: Compute) -> Backend:
     # Imported here, when the device is asked for, and never at module import.
     # Any exception, as for CuPy: torch reports a missing CUDA or cuDNN
@@ -326,7 +342,7 @@ def _torch(compute: Compute) -> Backend:
             exc,
             needs="PyTorch with array-api-compat",
             packages=("torch", "array_api_compat"),
-            install="pip install phonometry[torch]",
+            install=_torch_install(compute),
             repair=(
                 "check that the libraries PyTorch loads, CUDA's among them, "
                 "are present and match its build"

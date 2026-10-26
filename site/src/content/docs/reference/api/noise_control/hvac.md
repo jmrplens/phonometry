@@ -856,7 +856,7 @@ HVACSpectrumResult.plot(
 
 Plot the quantity against a continuous log-frequency axis.
 
-Requires matplotlib (`pip install phonometry[plot]`).
+Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### HVACSpectrumResult.report()
 
@@ -902,7 +902,7 @@ relation.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"` or `language` is unknown. |
-| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install phonometry[report]`). |
+| ImportError | If reportlab (or, for the figure, matplotlib) is not installed (`pip install "phonometry[report]"`). |
 
 ## HVACWarning
 

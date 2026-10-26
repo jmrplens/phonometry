@@ -240,7 +240,7 @@ class AirborneInsulationResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band insulation quantities (``DnT``, ``D``, ``R'``).
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -291,8 +291,8 @@ class AirborneInsulationResult(OwnsArrays):
             16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-1
             rating needs.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         return _render_iso16283(
             self,
@@ -380,7 +380,7 @@ class ImpactInsulationResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band impact levels (``L'nT`` and, if present, ``L'n``).
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -430,8 +430,8 @@ class ImpactInsulationResult(OwnsArrays):
             16 core one-third-octave bands (100 Hz to 3150 Hz) the ISO 717-2
             rating needs.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         return _render_iso16283(
             self,
@@ -519,7 +519,7 @@ class FacadeInsulationResult(OwnsArrays):
 
         Draws the standardized level difference and any other available
         quantities (``D2m``, ``D2m,n``, ``R'``) against frequency. Requires
-        matplotlib (``pip install phonometry[plot]``); returns the
+        matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -575,8 +575,8 @@ class FacadeInsulationResult(OwnsArrays):
             the 16 core one-third-octave bands (100 Hz to 3150 Hz) the
             ISO 717-1 rating needs.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         return _render_iso16283_facade(
             self,

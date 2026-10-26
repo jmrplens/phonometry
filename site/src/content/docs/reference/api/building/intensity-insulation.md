@@ -282,7 +282,7 @@ Plot `DI,n,e` against the shifted ISO 717-1 reference curve.
 
 Delegates to the weighted-rating plot. Requires the automatic rating
 to be available (16 or 5 bands) and matplotlib
-(`pip install phonometry[plot]`); returns the
+(`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### IntensityElementNormalizedResult.report()
@@ -350,7 +350,7 @@ PASS/FAIL verdict; the element insulation passes at or above the target.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown, `language` is not one of the supported values, the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-1 rating the fiche needs was not formed), or `fpi` / `residual_index` do not match the band count. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded rating figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded rating figure (`pip install "phonometry[plot]"`). |
 
 ## IntensityReductionResult
 
@@ -394,7 +394,7 @@ Plot `RI` against the shifted ISO 717-1 reference curve.
 Delegates to the weighted-rating plot (measured `RI` versus the
 shifted reference, unfavourable deviations shaded). Requires the
 automatic rating to be available (16 or 5 bands) and matplotlib
-(`pip install phonometry[plot]`); returns the
+(`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### IntensityReductionResult.report()
@@ -460,7 +460,7 @@ and name the measurement standard in `measurement_standard`
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is unknown, `language` is not one of the supported values, the result carries no single-number rating (its band count is neither 16 one-third-octave nor 5 octave, so the ISO 717-1 rating the fiche needs was not formed), or `fpi` / `residual_index` do not match the band count. |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded rating figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded rating figure (`pip install "phonometry[plot]"`). |
 
 ## limp_panel_reduction_index
 

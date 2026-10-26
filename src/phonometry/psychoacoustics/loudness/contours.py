@@ -283,7 +283,7 @@ class EqualLoudnessContours(OwnsArrays):
 
         Draws sound pressure level in dB against a logarithmic frequency axis:
         one line per loudness level in :attr:`phons`, plus the threshold of
-        hearing. Requires matplotlib (``pip install phonometry[plot]``);
+        hearing. Requires matplotlib (``pip install "phonometry[plot]"``);
         returns the :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes to draw on, or ``None`` to create a figure.

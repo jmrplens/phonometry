@@ -435,6 +435,7 @@ tablas nivel-potencia-distancia (NPD) en pies y calcula en metros:
 | `plateau_height=` en `plateau_transmission_loss` y `SoundReductionResult` | `plateau_height_db=` |
 | `distance=`, `distances=` y sus compuestos en `aircraft`: `npd_level`, `npd_curve`, `event_level`, `noise_contour`, `noise_fraction`, `AnpNpdCurves`, `AnpDatabase`, `RotorcraftHemisphere`, `hover_ring_hemisphere`, las funciones de propagación de helicópteros y sus resultados | `distance_m=`, `distances_m=`, `reference_distance_m=`, `horizontal_distance_m=`, `scaled_distance_m=`, `query_distances_m=`, `table_distances_m` |
 | `ReportMetadata(mic_spacing=, thickness=)` | `microphone_spacing_m=`, `thickness_m=` |
+| `center=`, `width=` y `wavelength=` en `FDTD2D.add_plane_wave` | `center_m=`, `half_width_m=` (la semianchura en `1/e`, como `GaussianPulse.half_width_s` lo es en el tiempo) y `wavelength_m=`, junto a las anchuras que el motor cuenta en celdas |
 
 Trece longitudes se escriben además por su nombre, porque llevan valor por
 defecto y el nombre es el único sitio donde se ve la unidad:
@@ -769,6 +770,8 @@ muestreo es `fs` en todas las funciones.
 | `c=` y `rho=` en `sound_intensity`, `c=` en las dos conversiones de desajuste de fase, `phase_mismatch()` (ahora `phase_mismatch_deg()`), `absorption_coefficient_uncertainty` y `monopole_source_level` | `speed_of_sound=`, `density=` |
 | `speed_of_sound_m_s=` en `thickness_critical_frequency_product` | `speed_of_sound=` |
 | `sample_rate` en el `SignalSource` de FDTD, `STOIResult` e `impact_force_exposure_level` | `fs` |
+| `sponge_width=`, `sponge_sides=`, `sponge_reflection=` y `.sponge_width`/`.sponge_sides` en `FDTD2D` y `ElasticFDTD2D` | `absorbing_layer_cells=`, `absorbing_sides=`, `absorbing_layer_reflection=` y `.absorbing_layer_cells`/`.absorbing_sides`, las palabras que usan los registros de una ejecución para la misma capa, como `FDTDBoundaries.absorbing_layer_cells` y `ElasticBoundaries.absorbing_layer_cells`; el valor por defecto sigue siendo 0, sin capa |
+| `FDTD2D.plot_geometry(probes=)` en metros (4.0.0rc1) | celdas `(ix, iy)`, como `FDTDRecording.probes`; cada una se dibuja en el centro de celda que anota `FDTDResult.probe_positions`, y una celda fuera de la malla o dentro de un obstáculo se rechaza como la rechaza una ejecución |
 | `freq=` en `linkwitz_riley` y `adaptation_term_kc` | `frequency=` y `frequencies=` |
 | `band["freq"]` en las filas `bands` de `FilterComplianceResult`, `WeightingComplianceResult` e `IntensityInstrumentComplianceResult`, y `between_nominals["worst_freq"]` en `WeightingComplianceResult` | `band["frequency"]` y `between_nominals["worst_frequency"]` |
 | `.frequency` en los resultados que llevan un eje de frecuencias: `IntensityResult`, `FieldIndicators`, `IntensityInstrumentComplianceResult`, `RoomAcousticsResult`, los cinco resultados de auditorio, `ImpedanceTubeResult`, `PorousMediumResult`, `LayeredAbsorberResult`, `DiffuseFieldAbsorptionResult`, `BiotWavesResult`, `SlitResonatorAbsorberResult`, `MetadiffuserResult`, `TransferMatrix`, los dos resultados de ruido de válvulas, `AircraftBandAttenuation`, `AmbientNoiseResult`, `ShipTrafficSpectrum` | `.frequencies` |
@@ -843,7 +846,11 @@ conserva su grafía: también es una variante
 estadounidense, todos los nombres la escriben igual y es el formato de archivo
 de tus propios catálogos. Una cadena que imprime una fuente conserva lo
 impreso, y por eso la superficie de CNOSSOS de abajo sigue siendo
-`"optimised brushed down concrete"`.
+`"optimised brushed down concrete"`. Las opciones cerradas de los motores
+FDTD y de sus registros también son un `Literal`: un lado, un campo anotado,
+el sentido de avance de una onda plana y el eje de una fuerza, así que un
+comprobador de tipos rechaza `free_sides="Top"` antes de la ejecución; en
+tiempo de ejecución no cambia nada.
 
 | 3.3.0 o 4.0.0rc1 | 4.0 |
 | --- | --- |
@@ -923,7 +930,8 @@ estos aparecen en la tabla de los nombres que ya no están.
 | `trials=` en `metrology.monte_carlo`, y `MonteCarloResult.trials` | `n_trials` |
 | el `passages` de `silencer_self_noise`, `valve_style_modifier`, `multihole_incipient_cavitation_ratio` y `uniform_passage_style_modifier`, y el `stages` de `stage_level_correction` | `n_passages` y `n_stages` |
 | el `steps` de `FDTD2D.run` y `ElasticFDTD2D.run`, y `max_arrivals=` en `underwater.eigenrays` | `n_steps` y `max_n_arrivals=` |
-| `record_every=` y `decimate=` en `FDTD2D.run` y `ElasticFDTD2D.run` | `snapshot_every=` y `snapshot_decimation=`, los nombres que dan `FDTDRecording` y `ElasticRecording` a las mismas dos cuentas |
+| `simulation.ContourProbe.samples` y `ContourProbe(sim=...)` | `.n_samples`, de solo lectura, y `engine=` |
+| `record_every=` y `decimate=` en `FDTD2D.run` y `ElasticFDTD2D.run`, por posición o por nombre | `snapshot_every=` y `snapshot_decimation=`, los nombres que dan `FDTDRecording` y `ElasticRecording` a las mismas dos cuentas, y como en ellos solo por nombre: `run(400, 10, 2)` es `run(400, snapshot_every=10, snapshot_decimation=2)` |
 | `fdtd_simulation(probes=..., snapshot_every=..., snapshot_decimation=...)` | `fdtd_simulation(FDTDRun(..., recording=FDTDRecording(probes=..., snapshot_every=..., snapshot_decimation=...)))`: lo que anota una ejecución acústica es un solo registro, el `recording` de la ejecución, como lo de una elástica es un `ElasticRecording`; una ejecución sin él solo anota su eje temporal, como antes |
 | `fdtd_simulation(c, dx, duration, sources=..., ...)` y `elastic_fdtd_simulation(c_p, c_s, dx, duration, sources=..., rho=..., ...)` | `fdtd_simulation(FDTDRun(c=c, dx=dx, duration_s=duration, sources=..., boundaries=simulation.FDTDBoundaries(sides=..., absorbing_layer_cells=...), ...))` y `elastic_fdtd_simulation(ElasticRun(c_p=c_p, c_s=c_s, dx=dx, duration_s=duration, sources=..., rho=..., ...))`: una simulación es un solo registro, con los mismos argumentos, que toma cada campo por su nombre y los comprueba todos al construirse. `duration` es `duration_s`, y los `boundaries=` y `absorbing_layer_cells=` de la ejecución acústica son ahora un solo `FDTDBoundaries`, como los de la elástica son un solo `ElasticBoundaries`; `compute=` se queda en la función. Un argumento mal dado se rechaza donde se escribe la ejecución, con la misma clase y las mismas palabras, salvo que una duración rechazada nombra ahora `duration_s` |
 | un `boundaries=` de `elastic_fdtd_simulation` que no es un `ElasticBoundaries`, que fallaba dentro de la ejecución | se rechaza con `TypeError` al construir el `ElasticRun` |
@@ -1592,8 +1600,8 @@ y los mapas del medio de `simulation.FDTD2D` y `simulation.ElasticFDTD2D`,
 cuyos `c`, `rho`, `c_p` y `c_s` siguen siendo ahora aquellos con los que se
 calculó el paso de tiempo. Los mapas que las simulaciones derivan de ellos,
 `FDTD2D.kappa` y `ElasticFDTD2D.mu` y `.lam`, son también copias de solo
-lectura en el anfitrión (la memoria de la CPU): en la 4.0.0rc1 editar uno
-llegaba a parte del avance y no al paso de tiempo, y ahora lanza
+lectura en NumPy: en la 4.0.0rc1 editar uno llegaba a parte del avance y no
+al paso de tiempo, y ahora lanza
 `ValueError`, así que otro medio es una simulación nueva construida con los
 mapas editados. Una `Signal` también guarda una copia propia de sus
 muestras, que sigue siendo escribible para procesarla en su sitio, como

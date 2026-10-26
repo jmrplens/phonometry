@@ -621,7 +621,7 @@ class SoundStrengthResult(OwnsArrays):
 
         With ``ax`` given, only the strength panel is drawn on it; otherwise a
         second panel shows the two levels G is the difference of. Requires
-        matplotlib (``pip install phonometry[plot]``); returns the
+        matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` (or an array of two).
         """
         from .._i18n import check_language
@@ -810,7 +810,7 @@ class LateralEnergyResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band lateral fraction against the Table A.1 range.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -949,7 +949,7 @@ class LateLateralResult(OwnsArrays):
     ) -> Axes:
         """Plot the per-band late lateral level against the Table A.1 range.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -1147,7 +1147,7 @@ class InterauralCorrelationResult(OwnsArrays):
     ) -> Axes:
         """Plot the correlation function over the search window, per band.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language
@@ -1387,7 +1387,7 @@ class StageSupportResult(OwnsArrays):
     ) -> Axes:
         """Plot both supports per band against the Table C.1 ranges.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from .._i18n import check_language

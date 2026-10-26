@@ -5,52 +5,58 @@
 # the clip was written. Each hash covers the clip's builder, everything it
 # reaches inside scripts/figures (the shared clip tail, the theme, the
 # translation machinery), inside phonometry._plot (the drawing helpers it
-# calls) and inside phonometry.io (the encode path), and the translation-table
-# entries its own strings select; it is taken over the syntax tree, so
-# comments and docstrings do not move it. See scripts/animation_fingerprint.py.
+# calls) and inside phonometry.io (the encode path), the translation-table
+# entries its own strings select and, for a clip that steps an FDTD engine,
+# the engines' golden digests (engine-digests.json); it is taken over the
+# syntax tree, so comments and docstrings do not move it. See
+# scripts/animation_fingerprint.py.
+#
+# Each line: the clip, the fingerprint of the code that drew it, and the
+# ffmpeg encoder that wrote its WebM (av1_nvenc or libsvtav1).
 #
 # Written by the renderer. To refresh one clip, re-render it:
-#     python scripts/generate_graphs.py --animations --anim <clip>
-anim_block_vs_exponential 8d67da9c76e4f0ec
-anim_comb_filtering a65a2fed0bbcc997
-anim_dynamic_stiffness_sweep cd3a16bc5fb9e50d
-anim_elastic_coincidence df13bc2c9d3bac42
-anim_elastic_halfspace_waves fe8a1170f5019c38
-anim_elastic_mode_conversion 70add045f3bc9821
-anim_elastic_plate_junction 9a716dc54d40d99d
-anim_elastic_radiation_efficiency 47d85e99d07c6c0c
-anim_epnl_flyover 7e38cacda92942f0
-anim_fdtd_absorption_placement a5ecb06c0f45ce5a
-anim_fdtd_aperture_slit 68cfcfc921782660
-anim_fdtd_barrier da42b45633a5f17e
-anim_fdtd_critical_angle 8fdc6a225305a7ab
-anim_fdtd_diffusion 6684f9052af2ee18
-anim_fdtd_dispersion 31daa52d7ebe23ba
-anim_fdtd_duct_cut_on bc0f273c9de0cae3
-anim_fdtd_ducting c344353ef5dd5c9e
-anim_fdtd_expansion_chamber d99f9f3d1bd9f330
-anim_fdtd_ground_effect 5a5716ebae5628a0
-anim_fdtd_impedance_tube 78a7639d5e0eff3d
-anim_fdtd_metadiffuser 8a77e98f60d6dc7e
-anim_fdtd_open_end ac5362806161cf95
-anim_fdtd_pillar_hall fc2f7f87d2a2b81f
-anim_fdtd_refraction 2277e0359f7dac0d
-anim_fdtd_room_modes 045ba5e7d37d6c7d
-anim_fdtd_side_branch f15917cb7a856627
-anim_fdtd_slit_absorber 782b34991e022f6a
-anim_fdtd_transmission_tube 4ca134396c3467a4
-anim_feedback_howl aa88868c580abbd7
-anim_flanking_paths 3b82bf4f4ef69ba0
-anim_image_source_buildup 2a01c172b052dfaf
-anim_instantaneous_intensity dc99d41155c33ad0
-anim_intensity_scan_power 2f1a10535a10c1d4
-anim_iso717_shift 6ab215b1506e3561
-anim_loudness_gating 2cdf0b83a9b8086d
-anim_modulation_transfer dd548a2180d0c9b1
-anim_onset_detection 1d2dfaf495fb3d62
-anim_power_two_rooms d9044490a86d3297
-anim_schroeder d14b9a260f4053cc
-anim_specific_loudness d67790390b4332bf
-anim_standing_wave_tube 2fcc75302551e39d
-anim_sweep_deconvolution 51d747f5db0a35bf
-anim_time_weighting eec462fd1e46712c
+#     make animations ANIM=<clip>
+# (CONTRIBUTING.md, Clips: the ffmpeg it needs, or a GPU node).
+anim_block_vs_exponential 28169bdc7e1aacb2 av1_nvenc
+anim_comb_filtering e6f0fcb29e0372bf av1_nvenc
+anim_dynamic_stiffness_sweep 68da0107d9c0aa40 av1_nvenc
+anim_elastic_coincidence 90da516dd18ca63b av1_nvenc
+anim_elastic_halfspace_waves 8f264ff1be08dda1 av1_nvenc
+anim_elastic_mode_conversion c215d616336c0644 av1_nvenc
+anim_elastic_plate_junction 1e7a06431720dab6 av1_nvenc
+anim_elastic_radiation_efficiency 286f15237af3ec02 av1_nvenc
+anim_epnl_flyover 446b28b9b5dd20ec av1_nvenc
+anim_fdtd_absorption_placement cd1451b702db5669 av1_nvenc
+anim_fdtd_aperture_slit 3623eb37a3a15247 av1_nvenc
+anim_fdtd_barrier b05f6e665422f99c av1_nvenc
+anim_fdtd_critical_angle d72b1efdf215325d av1_nvenc
+anim_fdtd_diffusion 78de201998bc5a93 av1_nvenc
+anim_fdtd_dispersion babdce7d8ce523f2 av1_nvenc
+anim_fdtd_duct_cut_on b6482a2513f07dc8 av1_nvenc
+anim_fdtd_ducting a80472338163542b av1_nvenc
+anim_fdtd_expansion_chamber f3baae9450bfeaee av1_nvenc
+anim_fdtd_ground_effect 711f5ed379589061 av1_nvenc
+anim_fdtd_impedance_tube e5b2bab2095cfd94 av1_nvenc
+anim_fdtd_metadiffuser d100e03667e3799c av1_nvenc
+anim_fdtd_open_end 41ecedba9636b429 av1_nvenc
+anim_fdtd_pillar_hall 48b030fd1f78c07f av1_nvenc
+anim_fdtd_refraction 4d4265cf87c7fe13 av1_nvenc
+anim_fdtd_room_modes 5b9e849c1fe3b75b av1_nvenc
+anim_fdtd_side_branch 16896c70ff75ed86 av1_nvenc
+anim_fdtd_slit_absorber a607fb2cf31e4f52 av1_nvenc
+anim_fdtd_transmission_tube c4b8d31e5938f4ef av1_nvenc
+anim_feedback_howl 2927103b5b5989c4 av1_nvenc
+anim_flanking_paths c0757ccbdb5409eb av1_nvenc
+anim_image_source_buildup 7d7a4b9c64431ad9 av1_nvenc
+anim_instantaneous_intensity fcd5cd5ac9b89dc5 av1_nvenc
+anim_intensity_scan_power cd14741231e6c275 av1_nvenc
+anim_iso717_shift e291f3a5d217b287 av1_nvenc
+anim_loudness_gating 9c064b5f2ea90176 av1_nvenc
+anim_modulation_transfer 2183ce8ae3b97318 av1_nvenc
+anim_onset_detection 01a2bf00c09db43f av1_nvenc
+anim_power_two_rooms eef2ebb780cb9a3e av1_nvenc
+anim_schroeder c190e00b896427c0 av1_nvenc
+anim_specific_loudness 085fdeb1e81af0ac av1_nvenc
+anim_standing_wave_tube 1ac7a521bbf60f28 av1_nvenc
+anim_sweep_deconvolution a0f2ad3dd83fb80f av1_nvenc
+anim_time_weighting a8a0cfe853f16929 av1_nvenc

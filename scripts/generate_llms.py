@@ -656,17 +656,17 @@ def _summary(version: str) -> list[str]:
         "Install:",
         "",
         "```bash",
-        "pip install phonometry            # core (NumPy + SciPy only)",
-        "pip install phonometry[plot]      # + matplotlib figures and .plot()",
-        "pip install phonometry[perf]      # + numba-jitted impulse kernel",
-        "pip install phonometry[report]    # + reportlab and svglib, for .report() PDF fiches",
-        "pip install phonometry[audio]     # + python-soundfile, for FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV",
-        "pip install phonometry[full]      # all of the above (recommended)",
-        "pip install phonometry[torch]     # + torch and array-api-compat, the FDTD engines on PyTorch; not in [full]",
+        "pip install phonometry              # core (NumPy + SciPy only)",
+        'pip install "phonometry[plot]"      # + matplotlib figures and .plot()',
+        'pip install "phonometry[perf]"      # + numba-jitted impulse kernel',
+        'pip install "phonometry[report]"    # + reportlab and svglib, for .report() PDF fiches',
+        'pip install "phonometry[audio]"     # + python-soundfile, for FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV',
+        'pip install "phonometry[full]"      # all of the above (recommended)',
+        'pip install "phonometry[torch]"     # + torch and array-api-compat, the FDTD engines on PyTorch; not in [full]',
         "```",
         "",
         (
-            "I recommend `pip install phonometry[full]`, which enables every "
+            'I recommend `pip install "phonometry[full]"`, which enables every '
             "feature except the torch backend of the FDTD engines, which "
             "`[torch]` adds. The base install computes every metric on NumPy and "
             "SciPy alone; without the extras only the `.plot()` figures, the "
@@ -680,7 +680,7 @@ def _summary(version: str) -> list[str]:
             "of CUDA libraries; on a Linux machine without an NVIDIA GPU, "
             "running `pip install torch --index-url "
             "https://download.pytorch.org/whl/cpu` before "
-            "`pip install phonometry[torch]` takes the CPU wheels instead."
+            '`pip install "phonometry[torch]"` takes the CPU wheels instead.'
         ),
         "",
         (

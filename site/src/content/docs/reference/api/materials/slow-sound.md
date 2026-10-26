@@ -267,7 +267,7 @@ HelmholtzResonator.plot(
 
 Draw the resonator cross-section to scale (dimensioned).
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## plot_helmholtz_resonator_geometry
@@ -542,7 +542,7 @@ SlitResonatorAbsorberResult.plot(
 
 Plot the absorption spectrum `alpha(f)` with `|R|` overlaid.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### SlitResonatorAbsorberResult.plot_geometry()
@@ -558,7 +558,7 @@ SlitResonatorAbsorberResult.plot_geometry(
 
 Draw one period of the panel cross-section to scale (dimensioned).
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## SlowSoundAbsorberWarning

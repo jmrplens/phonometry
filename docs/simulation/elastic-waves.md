@@ -101,8 +101,8 @@ elastic solver takes the same `compute=` as the acoustic one, and so does
 `ElasticFDTD2D.from_regions`: the block above steps on an NVIDIA GPU through
 CuPy with one more argument. On such a device the engine's own fields,
 `sim.p` and `sim.collocated(field)` included, are that device's arrays, and
-`sim.host_field(name)` gives a NumPy copy; a result is on the host whatever
-device stepped. [Where a simulation runs](compute.md) covers the devices, what each needs
+`sim.numpy_field(field)` gives a NumPy copy; a result holds NumPy arrays
+whatever device stepped. [Where a simulation runs](compute.md) covers the devices, what each needs
 installed and what is promised about the numbers on each.
 
 ```py
@@ -114,6 +114,8 @@ print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's 
 
 With a `host` the same run goes to another machine: see
 [Sending a simulation to a remote node](remote-node.md).
+[Where heavy work runs](where-it-runs.md) maps the devices, the nodes and
+the encoders in one place.
 
 ## 2. Fluids inside the elastic solver
 

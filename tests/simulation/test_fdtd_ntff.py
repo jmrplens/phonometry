@@ -119,7 +119,7 @@ def monopole_far_field() -> dict[str, object]:
     field ``p = A H0(2)(k r)`` fitted at an independent probe cell.
     """
     dx, ny, nx = 0.005, 300, 300
-    sim = FDTD2D(C0, dx, shape=(ny, nx), sponge_width=40)
+    sim = FDTD2D(C0, dx, shape=(ny, nx), absorbing_layer_cells=40)
     cx, cy = nx // 2, ny // 2
     sim.add_source(CWSource(ix=cx, iy=cy, frequency=F0, ramp_cycles=4.0))
     probe = sim.add_contour_probe(cx - 60, cx + 60, cy - 60, cy + 60, frequencies=[F0])
@@ -219,7 +219,7 @@ def test_dipole_pattern_matches_two_source_oracle() -> None:
     # Two antiphase monopoles 3 cm apart: |F| ~ |sin(k s/2 cos a)| with
     # nulls broadside, the two-element array-factor oracle.
     dx, ny, nx = 0.005, 300, 300
-    sim = FDTD2D(C0, dx, shape=(ny, nx), sponge_width=40)
+    sim = FDTD2D(C0, dx, shape=(ny, nx), absorbing_layer_cells=40)
     cx, cy = nx // 2, ny // 2
     sim.add_source(
         CWSource(ix=cx - 3, iy=cy, frequency=F0, amplitude=1.0, ramp_cycles=4.0)
@@ -271,7 +271,12 @@ def _cw_panel_levels(
     """
     ny, nx = mask.shape
     sim = FDTD2D(
-        C0, dx, shape=(ny, nx), sponge_width=sponge, cfl=0.9, obstacle_mask=mask
+        C0,
+        dx,
+        shape=(ny, nx),
+        absorbing_layer_cells=sponge,
+        cfl=0.9,
+        obstacle_mask=mask,
     )
     sim.add_source(
         PlaneWaveSource(

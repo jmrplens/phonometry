@@ -111,7 +111,7 @@ Plot the equal-loudness contour family with the hearing threshold.
 
 Draws sound pressure level in dB against a logarithmic frequency axis:
 one line per loudness level in `phons`, plus the threshold of
-hearing. Requires matplotlib (`pip install phonometry[plot]`);
+hearing. Requires matplotlib (`pip install "phonometry[plot]"`);
 returns the `Axes`.
 
 **Parameters**

@@ -254,7 +254,7 @@ Plot the impulse response: waveform and log-magnitude decay.
 Draws the (normalised) time-domain waveform and, below it, the
 log-magnitude envelope in dB with a Schroeder energy-decay overlay.
 With `ax` given, only the decay panel is drawn on it. Requires
-matplotlib (`pip install phonometry[plot]`); returns the
+matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes` (or an array of two axes).
 
 ### ImpulseResponseResult.shape
@@ -544,7 +544,7 @@ Two stacked panels: the time-domain waveform, and the sweep's Welch
 magnitude spectrum overlaid on the synthesis target (both in dB re
 their in-band maximum). With `ax` given, only the spectrum panel
 is drawn on it. Requires matplotlib
-(`pip install phonometry[plot]`).
+(`pip install "phonometry[plot]"`).
 
 **Parameters**
 

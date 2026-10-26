@@ -450,7 +450,7 @@ class AbsorptionRatingResult(OwnsArrays):
 
         Unfavourable deviations (measured below the shifted reference) are
         shaded and ``alpha_w`` annotated. Requires matplotlib
-        (``pip install phonometry[plot]``); returns the
+        (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
         """
         from ..._i18n import check_language
@@ -493,8 +493,8 @@ class AbsorptionRatingResult(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from ..._i18n import check_language
 

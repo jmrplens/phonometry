@@ -5,20 +5,28 @@ The clip builders in :mod:`figures.schematics` and :mod:`figures.fields` only
 draw frames; this module decides how many there are and what they are written
 to. It carries the two animation norms as constants (the 12 s schematic
 timeline with its closing hold, the wider budget the wave-field clips size
-themselves against), the VP9 and remote AV1/NVENC encoder settings, and
+themselves against), the AV1 settings of the two clip encoders, and
 :func:`_save_animation`, which writes each clip in its four language x theme
-variants as WebM, extracts the deferred-loading poster still and adds the
-English GIF for the GitHub docs.
+variants as AV1 WebM (NVENC on a GPU, SVT-AV1 4 on a CPU, at the setting
+calibrated on it) through ``phonometry.io.write_video``, extracts the
+deferred-loading poster still and adds the English GIF for the GitHub docs.
 """
 
 from __future__ import annotations
 
+import functools
 import os
-import sys
-from typing import TYPE_CHECKING, Any, cast
+import re
+import subprocess
+from typing import TYPE_CHECKING, Any
 
+import animation_fingerprint
 import clip_frame_audit
+import encode_slots
 import matplotlib.pyplot as plt
+
+from phonometry import io as pm_io
+from phonometry.io._video_encoders import find_ffmpeg
 
 from .i18n import (
     _LANG,
@@ -34,6 +42,28 @@ if TYPE_CHECKING:
 
     from matplotlib.animation import FuncAnimation
     from matplotlib.figure import Figure
+
+#: Names the ffmpeg encoder a render writes the WebM with, set from
+#: ``generate_graphs.py --clip-encoder``, so the pool workers and the forked
+#: variants of one render all read the same one.
+CLIP_ENCODER_ENV = "PHONOMETRY_CLIP_ENCODER"
+
+
+def _clip_encoder() -> animation_fingerprint.ClipEncoder:
+    """The encoder this render writes its WebM with; SVT-AV1 unless told.
+
+    :raises ValueError: for a name that is not one of the two clip encoders.
+    """
+    value = os.environ.get(CLIP_ENCODER_ENV, "libsvtav1")
+    for encoder in animation_fingerprint.CLIP_ENCODERS:
+        if value == encoder:
+            return encoder
+    msg = (
+        f"{CLIP_ENCODER_ENV} must be one of "
+        f"{', '.join(animation_fingerprint.CLIP_ENCODERS)}; got {value!r}"
+    )
+    raise ValueError(msg)
+
 
 # ====================================================================# Animations (Tier 1 pilot)
 # ---------------------------------------------------------------------------
@@ -78,43 +108,135 @@ _GIF_COLORS = 64
 # Rounded box of the verdict/annotation pills drawn over the clips.
 _ANIM_PILL_BOX = "round,pad=0.25"
 
-# VP9 encoding for the site WebM. Beyond the constant-quality base
-# (``-crf 40 -b:v 0``) the screen-content tuning, row multithreading and the
-# ``good`` deadline cut the encode time roughly in half at the same file size
-# (the flat schematic / field content compresses identically). ``-cpu-used``
-# trades encode speed for compression effort; on this content the size and
-# quality are essentially flat from 2 through 4, so the run uses the faster
-# setting. ``-threads`` is capped so eight parallel Python workers do not
-# oversubscribe the box. Animations are not byte-compared (unlike the
-# SVG/WebP figures), so the mild run-to-run variance these knobs introduce is
-# harmless.
-_ANIM_CPU_USED = 4
-_ANIM_ENCODE_THREADS = 3
+#: AV1 NVENC's options for the clips, on an NVIDIA GPU: cq 44 was calibrated
+#: against the VP9 crf-40 size on the metadiffuser clip (cq 42 = parity,
+#: 46 = -22 %), at the same resolution. The quality table of ``io`` is not
+#: used here; these raw options are what the clips' fingerprint covers.
+_NVENC_OPTIONS = (
+    "-b:v",
+    "0",
+    "-cq",
+    "44",
+    "-preset",
+    "p6",
+    "-pix_fmt",
+    "yuv420p",
+    "-an",
+)
+
+#: SVT-AV1's constant rate factor and preset for the clips, on a CPU, by the
+#: major version of the SVT-AV1 library ffmpeg was built with. CRF and presets
+#: change meaning from one major to the next, and the clips are calibrated on
+#: one: SVT-AV1 4, the library in the ffmpeg build the node image pins
+#: (docker/node/Dockerfile; make clip-ffmpeg fetches the same build here).
+#: The row is the quality AV1 NVENC gives at cq 44 in a smaller file: on the
+#: clip the NVENC setting above was calibrated on, drawn and never encoded
+#: before, preset 6 at the highest CRF whose VMAF and SSIM are both at least
+#: cq 44's (measured 2026-10-21 on SVT-AV1 4.2.0 in ffmpeg 9.0: CRF 51, VMAF
+#: 96.27 and SSIM 0.99705 against 96.24 and 0.99646, a file 47 % smaller).
+#: Another major gets a row only from the same measurement made on it.
+_SVT_AV1_CALIBRATED: dict[int, tuple[int, int]] = {
+    4: (51, 6),  # SVT-AV1 4.2.0, ffmpeg 9.0
+}
+
+#: How SVT-AV1 names itself when an encode starts.
+_SVT_AV1_VERSION = re.compile(r"SVT-AV1 Encoder Lib v(\d+)\.(\d+)\.(\d+)")
+
+#: How long the one-frame encode that reads SVT-AV1's version may take [s].
+_SVT_AV1_PROBE_S = 120
 
 
-def _vp9_extra_args() -> list[str]:
-    """ffmpeg args for the tuned constant-quality VP9 WebM encode."""
-    return [
-        "-b:v",
-        "0",
-        "-crf",
-        "40",
-        "-tune-content",
-        "screen",
-        "-row-mt",
-        "1",
-        "-deadline",
-        "good",
-        "-cpu-used",
-        str(_ANIM_CPU_USED),
-        "-threads",
-        str(_ANIM_ENCODE_THREADS),
-        "-pix_fmt",
-        "yuv420p",
-        "-an",
-        "-loglevel",
-        "error",
-    ]
+def read_svt_av1_version(
+    ffmpeg: str, *, run: Callable[..., Any] = subprocess.run
+) -> str:
+    """The SVT-AV1 library *ffmpeg* encodes with, as ``"4.2.0"``.
+
+    SVT-AV1 names itself when an encode starts, so one black frame is encoded
+    and its message read.
+
+    :raises RuntimeError: when the encode names no version (no libsvtav1, or
+        a build that does not say), with ffmpeg's last line, or when *ffmpeg*
+        does not run or does not finish.
+    """
+    try:
+        done = run(
+            [
+                ffmpeg,
+                "-hide_banner",
+                "-f",
+                "lavfi",
+                "-i",
+                "color=c=black:s=64x64:d=0.04",
+                "-frames:v",
+                "1",
+                "-c:v",
+                "libsvtav1",
+                "-f",
+                "null",
+                "-",
+            ],
+            stdin=subprocess.DEVNULL,
+            capture_output=True,
+            text=True,
+            timeout=_SVT_AV1_PROBE_S,
+            check=False,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        msg = f"{ffmpeg} did not encode a frame with libsvtav1: {exc}"
+        raise RuntimeError(msg) from exc
+    match = _SVT_AV1_VERSION.search(done.stderr)
+    if match is None:
+        last = (done.stderr.strip().splitlines() or ["no message"])[-1]
+        msg = f"ffmpeg's libsvtav1 named no SVT-AV1 version: {last}"
+        raise RuntimeError(msg)
+    return ".".join(match.groups())
+
+
+@functools.cache
+def _svt_av1_version(ffmpeg: str) -> str:
+    """:func:`read_svt_av1_version` of *ffmpeg*, asked once per program and process.
+
+    :raises RuntimeError: as :func:`read_svt_av1_version` does.
+    """
+    return read_svt_av1_version(ffmpeg)
+
+
+def _svt_av1_options(version: str) -> tuple[str, ...]:
+    """SVT-AV1's options for the clips, at the calibration of *version*'s major.
+
+    :raises ValueError: for a major version the clips were not calibrated on.
+    """
+    major = int(version.split(".", 1)[0])
+    if major not in _SVT_AV1_CALIBRATED:
+        calibrated = ", ".join(
+            f"SVT-AV1 {known}.x at preset {preset} CRF {crf}"
+            for known, (crf, preset) in sorted(_SVT_AV1_CALIBRATED.items())
+        )
+        msg = (
+            f"ffmpeg's SVT-AV1 is {version}; calibrated: {calibrated}, and no other "
+            "major: encode with the ffmpeg build docker/node/Dockerfile pins (make "
+            "clip-ffmpeg fetches it on Linux x86_64) or on a node"
+        )
+        raise ValueError(msg)
+    crf, preset = _SVT_AV1_CALIBRATED[major]
+    return ("-crf", str(crf), "-preset", str(preset), "-pix_fmt", "yuv420p", "-an")
+
+
+def _clip_options(encoder: animation_fingerprint.ClipEncoder) -> tuple[str, ...]:
+    """The ffmpeg options *encoder* writes a clip's WebM with: AV1 either way.
+
+    The SVT-AV1 asked for its version is that of the ffmpeg
+    ``phonometry.io.write_video`` runs, found the way it finds it (matplotlib's
+    ``animation.ffmpeg_path`` on ``PATH``), so the setting is the one
+    calibrated for the program that encodes.
+
+    :raises ValueError: for an SVT-AV1 whose major version was not calibrated.
+    :raises RuntimeError: when ffmpeg's SVT-AV1 does not say its version.
+    :raises phonometry.io.FFmpegNotFoundError: when that ffmpeg is not found.
+    """
+    if encoder == "av1_nvenc":
+        return _NVENC_OPTIONS
+    return _svt_av1_options(_svt_av1_version(find_ffmpeg()))
 
 
 def _translate_str(s: str) -> str:
@@ -124,13 +246,11 @@ def _translate_str(s: str) -> str:
     -- which are rewritten every frame and never pass through ``save_figure``
     -- can be localised at creation time instead.
     """
-    import re as _re
-
     if _LANG == "en" or not s:
         return s
     out = lookup(s)
-    if "$" not in out and _re.search(r"\d\.\d", out):
-        out = _re.sub(r"(?<![\d.A-Za-z])(\d+)\.(\d+)(?![.\d])", r"\1,\2", out)
+    if "$" not in out and re.search(r"\d\.\d", out):
+        out = re.sub(r"(?<![\d.A-Za-z])(\d+)\.(\d+)(?![.\d])", r"\1,\2", out)
     return out
 
 
@@ -263,120 +383,6 @@ def _extract_poster(webm: str, poster_ss: float | None = None) -> str:
     return poster
 
 
-def _gpu_encode_target() -> dict[str, str] | None:
-    """The remote AV1 (NVENC) encode target from .env, if enabled and alive.
-
-    Opt-in through ``PHONO_GPU_ENCODE=av1`` next to the ``PHONO_GPU_*``
-    host settings: VP9 has no NVIDIA encoder, so the hardware path writes
-    AV1 into the same WebM container (the site embeds are codec-agnostic;
-    the GitHub GIF is still derived locally). Any doubt (no .env, host
-    down, flag off) returns ``None`` and the clips keep the CPU VP9 path.
-    """
-    import subprocess
-
-    def decline(reason: str) -> None:
-        # Say it out loud: the CPU path writes VP9, which is around 40 % larger
-        # than the AV1 the committed clips use, and a silent downgrade only
-        # shows up as an unexplained size jump in a later diff.
-        print(f"note: encoding on the CPU as VP9, {reason}", file=sys.stderr)
-
-    try:
-        import repo_env
-
-        repo_env.load_env()
-    except ImportError:
-        decline("repo_env is not importable")
-        return None
-    if os.environ.get("PHONO_GPU_ENCODE", "").lower() != "av1":
-        decline(
-            "PHONO_GPU_ENCODE is not 'av1' in the environment or in "
-            f"{repo_env.ENV_FILE}"
-        )
-        return None
-    host = os.environ.get("PHONO_GPU_HOST", "")
-    user = os.environ.get("PHONO_GPU_USER", "root")
-    image = os.environ.get("PHONO_GPU_FFMPEG_IMAGE", "linuxserver/ffmpeg:latest")
-    if not host:
-        decline("PHONO_GPU_HOST is not set")
-        return None
-    probe = subprocess.run(
-        [
-            "ssh",
-            "-o",
-            "BatchMode=yes",
-            "-o",
-            "ConnectTimeout=4",
-            "--",
-            f"{user}@{host}",
-            "true",
-        ],
-        capture_output=True,
-        check=False,
-    )
-    if probe.returncode != 0:
-        decline(f"{user}@{host} did not answer")
-        return None
-    workdir = os.environ.get("PHONO_GPU_WORKDIR", "/tmp/phonometry-gpu")
-    return {"target": f"{user}@{host}", "image": image, "workdir": workdir}
-
-
-def _av1_nvenc_extra_args() -> list[str]:
-    """ffmpeg args for the remote AV1 NVENC encode (WebM container)."""
-    return [
-        "-c:v",
-        "av1_nvenc",
-        # cq 44 calibrated against the VP9 crf-40 size on the metadiffuser
-        # clip (cq 42 = parity, 46 = -22 %): smaller files, same resolution.
-        "-b:v",
-        "0",
-        "-cq",
-        "44",
-        "-preset",
-        "p6",
-        "-pix_fmt",
-        "yuv420p",
-        "-an",
-        "-loglevel",
-        "error",
-    ]
-
-
-def _write_gpu_ffmpeg_wrapper(target: str, image: str, workdir: str) -> str:
-    """A throwaway ffmpeg shim that runs the encode on the GPU host.
-
-    Matplotlib's writer spawns ``ffmpeg <args> <output>`` and streams raw
-    frames on stdin; the shim forwards stdin over ssh into the NVENC
-    container, which writes the WebM to a file in the remote work
-    directory (the matroska muxer needs a seekable target), and the shim
-    then fetches it back with scp and cleans up.
-    """
-    import shlex
-    import tempfile
-    from pathlib import Path
-
-    q_target = shlex.quote(target)
-    q_image = shlex.quote(image)
-    q_dir = shlex.quote(workdir)
-    script = f"""#!/bin/bash
-set -euo pipefail
-out="${{@: -1}}"
-args=("${{@:1:$#-1}}")
-rid="enc-$$-$RANDOM.webm"
-quoted=$(printf ' %q' "${{args[@]}}")
-ssh -o BatchMode=yes -- {q_target} \
-    "mkdir -p {q_dir} && docker run --rm -i --gpus all \
-     -v {q_dir}:/work {q_image}$quoted /work/$rid"
-scp -q -- {q_target}:{q_dir}/"$rid" "$out"
-ssh -o BatchMode=yes -- {q_target} "rm -f {q_dir}/$rid"
-"""
-    with tempfile.NamedTemporaryFile(
-        "w", suffix=".sh", prefix="ffmpeg-gpu-", delete=False
-    ) as handle:
-        handle.write(script)
-    Path(handle.name).chmod(0o755)
-    return handle.name
-
-
 def _save_animation(
     anim: FuncAnimation,
     fig: Figure,
@@ -388,65 +394,53 @@ def _save_animation(
     gif_fps: int | None = None,
     poster_ss: float | None = None,
 ) -> None:
-    """Write *anim* to WebM (always), its poster JPEG and, for English, a GIF.
+    """Write *anim* to AV1 WebM (always), its poster still and, for English, a GIF.
 
-    The GIF is derived from the just-written WebM with an ffmpeg palette pass
-    so the GitHub docs get a compact, self-contained loop; the site embeds the
-    WebM directly. Every WebM variant also gets a ``_poster.webp`` still (see
-    :func:`_extract_poster`) so the site ``<video>`` embeds can defer loading
-    (``preload="none"``) behind a meaningful frame. ``fps`` overrides the
-    shared WebM rate and ``gif_fps`` the GIF sampling rate (long clips drop
-    GIF frames to stay within GitHub-friendly file sizes). ``savefig.bbox``
-    is forced to ``standard`` so every frame keeps the same canvas size (a
-    ``tight`` box would jitter and break the encoder).
+    The WebM is AV1 (NVENC on a GPU, SVT-AV1 4 on a CPU, at the setting
+    calibrated on it, :func:`_clip_options`) through
+    ``phonometry.io.write_video``, by the encoder ``PHONOMETRY_CLIP_ENCODER``
+    names (:func:`_clip_encoder`). The GIF is derived from the just-written
+    WebM with an ffmpeg palette pass so the GitHub docs get a compact,
+    self-contained loop; the site embeds the WebM directly. Every WebM
+    variant also gets a ``_poster.webp`` still (see :func:`_extract_poster`)
+    so the site ``<video>`` embeds can defer loading (``preload="none"``)
+    behind a meaningful frame. ``fps`` overrides the shared WebM rate and
+    ``gif_fps`` the GIF sampling rate (long clips drop GIF frames to stay
+    within GitHub-friendly file sizes).
+
+    :raises ValueError: for an encoder that is not a clip encoder, an SVT-AV1
+        whose major version was not calibrated, or a malformed
+        ``PHONOMETRY_ENCODE_SLOTS``.
+    :raises RuntimeError: when ffmpeg's SVT-AV1 does not say its version.
+    :raises phonometry.io.FFmpegNotFoundError: when ffmpeg is not on PATH.
+    :raises phonometry.io.VideoEncoderError: when ffmpeg cannot write the WebM.
+    :raises subprocess.CalledProcessError: when ffmpeg cannot cut the poster
+        or the GIF from it.
+    :raises PermissionError: for a GPU encode, when the NVENC slots'
+        directory is a link or not a directory, belongs to another user or
+        is open to others, or a lock file in it is a link
+        (:func:`encode_slots.slot`).
+    :raises OSError: for a GPU encode, when the slots' directory cannot be
+        made or opened, or a lock file cannot be opened or locked.
+    :raises ImportError: for a GPU encode with ``PHONOMETRY_ENCODE_SLOTS``
+        set, where there is no :mod:`fcntl` (off POSIX).
     """
-    import subprocess
-
-    from matplotlib.animation import FFMpegWriter
-
     webm = _anim_path(output_dir, stem, "webm")
     rate = _ANIM_FPS if fps is None else fps
-    # Matplotlib types the writer rate as an int, but the writer only
-    # formats it into ffmpeg's ``-r`` and a fractional rate is legal there.
-    # A clip whose capture stride was cut by a non-integer factor plays at
-    # the matching fractional rate so its pacing stays exact.
-    rate_arg = cast(int, rate)
-    gpu = _gpu_encode_target()
-    saved = False
-    if gpu is not None:
-        wrapper = _write_gpu_ffmpeg_wrapper(gpu["target"], gpu["image"], gpu["workdir"])
-        try:
-            writer = FFMpegWriter(
-                fps=rate_arg, codec="av1_nvenc", extra_args=_av1_nvenc_extra_args()
-            )
-            with plt.rc_context(
-                {"savefig.bbox": "standard", "animation.ffmpeg_path": wrapper}
-            ):
-                anim.save(
-                    webm,
-                    writer=writer,
-                    dpi=_ANIM_DPI,
-                    savefig_kwargs={"facecolor": fig.get_facecolor()},
-                )
-            saved = True
-        except (RuntimeError, subprocess.CalledProcessError, OSError) as exc:
-            print(f"  [gpu-encode] {stem}: {exc}; falling back to VP9")
-        finally:
-            # The code that draws the clips is hashed into
-            # scripts/animation_fingerprints.txt, so rewriting this asks for a
-            # re-render that would draw the very same frames.
-            os.remove(wrapper)  # noqa: PTH107
-    if not saved:
-        writer = FFMpegWriter(
-            fps=rate_arg, codec="libvpx-vp9", extra_args=_vp9_extra_args()
+    encoder = _clip_encoder()
+    # write_video draws the figure at its own size and dpi (2400 x 1350 for a
+    # clip), with its facecolor and the standard bbox, so every frame keeps
+    # one canvas. A GPU encode waits for a free NVENC session on a node.
+    with encode_slots.slot(encoder):
+        pm_io.write_video(
+            webm,
+            anim,
+            video=pm_io.VideoOptions(
+                fps=float(rate),
+                ffmpeg_encoder=encoder,
+                ffmpeg_options=_clip_options(encoder),
+            ),
         )
-        with plt.rc_context({"savefig.bbox": "standard"}):
-            anim.save(
-                webm,
-                writer=writer,
-                dpi=_ANIM_DPI,
-                savefig_kwargs={"facecolor": fig.get_facecolor()},
-            )
     _extract_poster(webm, poster_ss)
     made_gif = False
     if make_gif and _LANG == "en":

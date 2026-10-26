@@ -116,7 +116,7 @@ _SUBTYPE_BITS = {
     "DOUBLE": 64,
 }
 
-_AUDIO_EXTRA_HINT = "Install the [audio] extra with: pip install phonometry[audio]"
+_AUDIO_EXTRA_HINT = 'Install the [audio] extra with: pip install "phonometry[audio]"'
 
 
 def _sniff(path: str | Path) -> str | None:

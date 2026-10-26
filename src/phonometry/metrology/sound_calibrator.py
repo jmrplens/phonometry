@@ -749,7 +749,7 @@ class SoundCalibratorRequirement(RichDisplay):
     ) -> Axes:
         """Draw each measurement against the requirement's limits, as Figure E.1.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -834,7 +834,7 @@ class SoundCalibratorVerification(RichDisplay):
         acceptance limit and the uncertainty as a share of its maximum. A
         requirement conforms when both of its bars stop at or before 100 %.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :param ax: Existing axes, or ``None`` to create a figure.

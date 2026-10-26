@@ -260,7 +260,7 @@ class JointOpenBandRating(RichDisplay):
     ) -> Axes:
         """Plot the open-band single numbers beside the bands taken as open.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -509,7 +509,7 @@ class LaboratoryJointInsulationResult(OwnsArrays):
         The test curve with its minimum values marked, :math:`R_\mathrm{s}'`
         and :math:`R_\mathrm{s,max}`, and the shifted ISO 717-1 reference
         curve over the rating range, as the diagram of Figure J.7. Requires
-        matplotlib (``pip install phonometry[plot]``); returns the
+        matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -784,7 +784,7 @@ class JointTestElementCheck(RichDisplay):
     ) -> Axes:
         """Plot the length and width of the joint against their bounds.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -892,7 +892,7 @@ class GapWidthCheck(RichDisplay):
     ) -> Axes:
         """Plot the readings with their average and the 0,3 mm band.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -1039,7 +1039,7 @@ class JointGapSeries(OwnsArrays):
         The measured widths as open circles on the line through them, with
         :math:`b_\mathrm{min}`, :math:`b_\mathrm{n}` and
         :math:`b_\mathrm{n} + 3` marked. Requires matplotlib
-        (``pip install phonometry[plot]``); returns the
+        (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :raises TypeError: if ``quantity`` is not a text.
@@ -1059,7 +1059,7 @@ class JointGapSeries(OwnsArrays):
         r"""Plot :math:`R_\mathrm{s}` in octave bands at every gap width, as Figure J.9.
 
         Every result must hold whole octaves of one-third-octave bands.
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language
@@ -1216,7 +1216,7 @@ class JointGapSeriesCheck(RichDisplay):
     ) -> Axes:
         """Plot the measured gap widths against the three widths J.4 asks for.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

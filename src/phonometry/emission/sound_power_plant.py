@@ -1323,7 +1323,7 @@ class PlantMeasurementContour(OwnsArrays):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the position markers.
-        :return: The axes. Requires matplotlib (``pip install phonometry[plot]``).
+        :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.emission_plant import plot_plant_contour
@@ -1720,7 +1720,7 @@ class PlantSoundPowerResult(OwnsArrays):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the band bars.
-        :return: The axes. Requires matplotlib (``pip install phonometry[plot]``).
+        :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.emission_plant import plot_plant_sound_power
@@ -2008,7 +2008,7 @@ class PlantMeasurementCheck(RichDisplay):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the bars.
-        :return: The axes. Requires matplotlib (``pip install phonometry[plot]``).
+        :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.emission_plant import plot_plant_measurement_check
@@ -2302,7 +2302,7 @@ class PartialPlantContributions(OwnsArrays):
         :param ax: Existing axes, or ``None`` to create a figure.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the total's bars.
-        :return: The axes. Requires matplotlib (``pip install phonometry[plot]``).
+        :return: The axes. Requires matplotlib (``pip install "phonometry[plot]"``).
         """
         from .._i18n import check_language
         from .._plot.emission_plant import plot_partial_plant_contributions

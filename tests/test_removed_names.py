@@ -675,6 +675,18 @@ _RENAMED_4_0_KEYWORDS = [
     ("materials", "adrienne_window", "flat_duration", "flat_duration_s"),
     ("materials", "adrienne_window", "leading_duration", "leading_duration_s"),
     ("materials", "adrienne_window", "trailing_duration", "trailing_duration_s"),
+    ("simulation", "FDTD2D", "sponge_width", "absorbing_layer_cells"),
+    ("simulation", "FDTD2D", "sponge_sides", "absorbing_sides"),
+    ("simulation", "FDTD2D", "sponge_reflection", "absorbing_layer_reflection"),
+    ("simulation", "ElasticFDTD2D", "sponge_width", "absorbing_layer_cells"),
+    ("simulation", "ElasticFDTD2D", "sponge_sides", "absorbing_sides"),
+    (
+        "simulation",
+        "ElasticFDTD2D",
+        "sponge_reflection",
+        "absorbing_layer_reflection",
+    ),
+    ("simulation", "ContourProbe", "sim", "engine"),
 ]
 
 
@@ -730,6 +742,26 @@ def test_a_field_the_4_0_respelled_is_gone(
 def test_the_length_of_a_signal_names_its_unit() -> None:
     assert not hasattr(ph.Signal, "duration")
     assert isinstance(ph.Signal.duration_s, property)
+
+
+def test_the_engines_name_their_methods_and_lengths_as_the_runs_do() -> None:
+    """The engines' rc1 spellings are gone: the layer, the packet, the copy."""
+    for engine in (ph.simulation.FDTD2D, ph.simulation.ElasticFDTD2D):
+        assert not hasattr(engine, "host_field")
+        assert "field" in inspect.signature(engine.numpy_field).parameters
+    packet = inspect.signature(ph.simulation.FDTD2D.add_plane_wave).parameters
+    assert {"center_m", "half_width_m", "wavelength_m"} <= set(packet)
+    assert not {"center", "width", "wavelength"} & set(packet)
+
+
+def test_the_contour_probe_counts_its_samples_by_n_samples() -> None:
+    """``ContourProbe.samples`` read as the sample values; it was a count."""
+    engine = ph.simulation.FDTD2D(343.0, 0.05, shape=(12, 12))
+    probe = engine.add_contour_probe(3, 8, 3, 8, frequencies=[500.0])
+    assert not hasattr(probe, "samples")
+    assert probe.n_samples == 0
+    with pytest.raises(AttributeError, match="n_samples"):
+        probe.n_samples = 1  # type: ignore[misc]
 
 
 # --------------------------------------------------------------------------- #

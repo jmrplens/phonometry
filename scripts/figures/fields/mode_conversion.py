@@ -1,14 +1,19 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Water over steel: one incident beam, two transmitted waves, two angles."""
 
+from __future__ import annotations
+
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from ..media import _ANIM_PILL_BOX, _anim_figure, _render_clip, _translate_str
 from ..theme import CMAP_FIELD, COLOR_FG, FIELD_INK, FIELD_STROKE
-from ._core import _gain_note, _weak_field_gain
+from ._core import _gain_note, _host, _weak_field_gain
+
+if TYPE_CHECKING:
+    from phonometry.simulation import Compute
 
 # The water-steel contact of the elastic-waves guide, at the bench scale of
 # an immersion ultrasonic inspection: a 200 kHz beam in water gives
@@ -107,13 +112,15 @@ def _mc_reflection(theta_deg: float) -> complex:
     return complex((z_total - z) / (z_total + z))
 
 
-def _mc_run(theta_deg: float) -> tuple[Any, Any]:
+def _mc_run(theta_deg: float, compute: Compute) -> tuple[Any, Any]:
     """One oblique-beam run; returns (vy frames, frame times).
 
     A sustained, phase-graded, tapered line source in the water launches a
     beam at ``theta_deg`` onto the contact. Nothing is subtracted here and
     nothing is measured off it: see :func:`_mode_conversion_fields` for why
     this scene shows the regimes but does not price them.
+
+    :param compute: Where the run steps.
     """
     from phonometry import simulation
     from phonometry.simulation import STEEL, WATER
@@ -127,7 +134,9 @@ def _mc_run(theta_deg: float) -> tuple[Any, Any]:
     c_p[iface:] = STEEL.c_p
     c_s[iface:] = STEEL.c_s
     rho[iface:] = STEEL.rho
-    sim = simulation.ElasticFDTD2D(c_p, c_s, dx, rho=rho, sponge_width=_MC_SPONGE)
+    sim = simulation.ElasticFDTD2D(
+        c_p, c_s, dx, rho=rho, absorbing_layer_cells=_MC_SPONGE, compute=compute
+    )
     # Tapered aperture, centred so the beam axis meets the contact at the
     # middle of the frame whatever the incidence: a soft-edged beam instead
     # of a hard-clipped one keeps the edge diffraction out of the picture.
@@ -138,6 +147,11 @@ def _mc_run(theta_deg: float) -> tuple[Any, Any]:
     x_src = (src_cols + 0.5) * dx
     omega = 2.0 * np.pi * _MC_F0
     phase_x = omega * float(np.sin(theta)) * x_src / WATER.c_p
+    backend = sim._backend
+    xp = backend.xp
+    src = slice(_MC_SPONGE, _MC_NX - _MC_SPONGE)
+    taper_d = backend.asarray(taper)
+    phase_d = backend.asarray(phase_x)
     ramp_t = _MC_RAMP / _MC_F0
     every = _MC_EVERY
     # Flight: source line to the contact along the beam (the water depth /
@@ -156,12 +170,12 @@ def _mc_run(theta_deg: float) -> tuple[Any, Any]:
         sim.step()
         t = sim.time
         r = min(t / ramp_t, 1.0)
-        drive = (r * r * (3.0 - 2.0 * r)) * taper * np.sin(omega * t - phase_x)
-        sim.txx[_MC_SRC_ROW, src_cols] -= drive
-        sim.tyy[_MC_SRC_ROW, src_cols] -= drive
+        drive = (r * r * (3.0 - 2.0 * r)) * taper_d * xp.sin(omega * t - phase_d)
+        sim.txx[_MC_SRC_ROW, src] -= drive
+        sim.tyy[_MC_SRC_ROW, src] -= drive
         if (i + 1) % every == 0:
             vy = sim.collocated("vy")
-            frames.append(vy[rows, cols].astype(np.float32))
+            frames.append(_host(sim, vy[rows, cols]))
             ts.append(t)
     return np.stack(frames), np.asarray(ts)
 
@@ -205,10 +219,13 @@ def _mode_conversion_fields() -> tuple[Any, Any, Any, Any]:
     Returns the three ``vy`` frame stacks, each normalised to the amplitude
     of its own settled water half, and the frame times.
     """
+    import clip_placement
+
+    compute = clip_placement.compute_for("anim_elastic_mode_conversion")
     stacks: list[Any] = []
     times = np.zeros(0)
     for theta in _MC_ANGLES:
-        stack, times = _mc_run(theta)
+        stack, times = _mc_run(theta, compute)
         n_active = stack.shape[0]
         i_steel = _mc_geometry()[1] - _mc_geometry()[2].start
         settled = slice(3 * n_active // 4, n_active)

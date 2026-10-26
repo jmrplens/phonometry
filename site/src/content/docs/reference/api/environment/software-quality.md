@@ -242,7 +242,7 @@ program's deviation from its centre, a dot inside and a cross outside.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the line of result markers. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ## CERTIFIED_RESULT_TOLERANCE_DB
 
@@ -396,7 +396,7 @@ shaded.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the line of sample points. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 ### LevelDifferenceQuantiles.q01_level_difference
 
@@ -614,7 +614,7 @@ so on) that draws the widest deviation in at most 25 classes.
 | `language` | Label language, `"en"` (default) or `"es"`. |
 | `kwargs` | Forwarded to the histogram bars. |
 
-**Returns:** The axes. Requires matplotlib (`pip install phonometry[plot]`).
+**Returns:** The axes. Requires matplotlib (`pip install "phonometry[plot]"`).
 
 **Raises**
 

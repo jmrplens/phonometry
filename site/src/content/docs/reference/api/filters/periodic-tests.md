@@ -263,7 +263,7 @@ deviation to its nearer acceptance limit, with the actual uncertainty
 as its error bar; a result at or above zero lies within its limits.
 A result drawn hollow is one 5.3 forbids using.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**
@@ -396,7 +396,7 @@ maximum-permitted band. Clause 13, whose limits run from a few tenths
 of a decibel to 70 dB, is drawn as each result's margin to its nearer
 limit against the test frequency: at or above zero it conforms.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 **Parameters**

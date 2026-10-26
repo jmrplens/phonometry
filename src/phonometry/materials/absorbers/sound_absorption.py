@@ -546,7 +546,7 @@ class SoundAbsorptionMeasurement(OwnsArrays):
 
         Draws ``alpha_s`` over the one-third-octave band axis (ISO 354). Values
         above 1,0 are kept (Clause 3.7 NOTE 2), so the axis grows to show them.
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` and never calls ``plt.show``.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -592,8 +592,8 @@ class SoundAbsorptionMeasurement(OwnsArrays):
         :return: The written ``path`` as a :class:`str`.
         :raises ValueError: If ``engine`` is not ``"reportlab"``.
         :raises ImportError: If reportlab is not installed
-            (``pip install phonometry[report]``), or matplotlib is missing for
-            the embedded figure (``pip install phonometry[plot]``).
+            (``pip install "phonometry[report]"``), or matplotlib is missing for
+            the embedded figure (``pip install "phonometry[plot]"``).
         """
         from ..._i18n import check_language
 

@@ -578,7 +578,7 @@ class TransferMatrix(OwnsArrays):
         ``plot()`` takes no arguments there; only a hand-built matrix (for
         example :func:`air_layer_transfer_matrix`) must supply them.
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes` of the transmission-loss curve.
 
         :param ax: Existing axes, or ``None`` to create a figure.
@@ -621,7 +621,7 @@ class TransferMatrix(OwnsArrays):
     ) -> Axes:
         """Draw the four-microphone tube to scale (dimensioned side view).
 
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
 
         :raises ValueError: If the matrix does not retain its tube geometry

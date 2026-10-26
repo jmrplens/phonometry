@@ -9,16 +9,16 @@ The project was published as **PyOctaveBand** until version 3.0.0. Third-party r
 Install:
 
 ```bash
-pip install phonometry            # core (NumPy + SciPy only)
-pip install phonometry[plot]      # + matplotlib figures and .plot()
-pip install phonometry[perf]      # + numba-jitted impulse kernel
-pip install phonometry[report]    # + reportlab and svglib, for .report() PDF fiches
-pip install phonometry[audio]     # + python-soundfile, for FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV
-pip install phonometry[full]      # all of the above (recommended)
-pip install phonometry[torch]     # + torch and array-api-compat, the FDTD engines on PyTorch; not in [full]
+pip install phonometry              # core (NumPy + SciPy only)
+pip install "phonometry[plot]"      # + matplotlib figures and .plot()
+pip install "phonometry[perf]"      # + numba-jitted impulse kernel
+pip install "phonometry[report]"    # + reportlab and svglib, for .report() PDF fiches
+pip install "phonometry[audio]"     # + python-soundfile, for FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV
+pip install "phonometry[full]"      # all of the above (recommended)
+pip install "phonometry[torch]"     # + torch and array-api-compat, the FDTD engines on PyTorch; not in [full]
 ```
 
-I recommend `pip install phonometry[full]`, which enables every feature except the torch backend of the FDTD engines, which `[torch]` adds. The base install computes every metric on NumPy and SciPy alone; without the extras only the `.plot()` figures, the `.report()` PDF fiches (whose figure panel needs matplotlib as well as reportlab and svglib), the compressed audio formats and the torch backend of the FDTD engines are unavailable. The `impulse` time weighting still works without numba, on a pure-Python kernel that is only slower, and the FDTD engines run on NumPy either way, and on an NVIDIA GPU once CuPy is installed. `[full]` leaves torch out because the torch wheels PyPI serves on Linux bring gigabytes of CUDA libraries; on a Linux machine without an NVIDIA GPU, running `pip install torch --index-url https://download.pytorch.org/whl/cpu` before `pip install phonometry[torch]` takes the CPU wheels instead.
+I recommend `pip install "phonometry[full]"`, which enables every feature except the torch backend of the FDTD engines, which `[torch]` adds. The base install computes every metric on NumPy and SciPy alone; without the extras only the `.plot()` figures, the `.report()` PDF fiches (whose figure panel needs matplotlib as well as reportlab and svglib), the compressed audio formats and the torch backend of the FDTD engines are unavailable. The `impulse` time weighting still works without numba, on a pure-Python kernel that is only slower, and the FDTD engines run on NumPy either way, and on an NVIDIA GPU once CuPy is installed. `[full]` leaves torch out because the torch wheels PyPI serves on Linux bring gigabytes of CUDA libraries; on a Linux machine without an NVIDIA GPU, running `pip install torch --index-url https://download.pytorch.org/whl/cpu` before `pip install "phonometry[torch]"` takes the CPU wheels instead.
 
 One caveat about `[full]`: numba is the only extra that caps NumPy, and it raises that cap only once it supports a new NumPy minor, so in the weeks after a NumPy minor release `phonometry[full]` (like `phonometry[perf]`) can resolve one minor behind what a plain install gets. numba only makes the `impulse` time weighting faster, so install `phonometry[plot,report]` instead if you need the newest NumPy the day it ships.
 
@@ -398,6 +398,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 ## Wave simulation
 
 - [Overview](https://docs.jmrp.io/phonometry/simulation/)
+- [Where heavy work runs: CPU or GPU, here or on a node](https://docs.jmrp.io/phonometry/simulation/where-it-runs/)
 - [2D FDTD wave simulation](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/)
 - [Elastic waves and fluid-solid coupling](https://docs.jmrp.io/phonometry/simulation/elastic-waves/)
 - [Where a simulation runs: NumPy, CuPy and torch](https://docs.jmrp.io/phonometry/simulation/compute/)
@@ -439,10 +440,11 @@ The theory pages travel in their own shard (https://docs.jmrp.io/phonometry/llms
 
 ## Full text
 
-One file per area, each small enough to fetch whole. `llms-full.txt` is the complete concatenation and is far too large for a single fetch in most clients.
+One file per area, each small enough to fetch whole. A page too long for one fetch travels in numbered parts, cut at its own sections. `llms-full.txt` is the complete concatenation and is far too large for a single fetch in most clients.
 
 - [Start here](https://docs.jmrp.io/phonometry/llms/llms-start.txt)
-- [Upgrading from 3.3 to 4.0](https://docs.jmrp.io/phonometry/llms/llms-upgrading.txt)
+- [Upgrading from 3.3 to 4.0, part 1 of 2](https://docs.jmrp.io/phonometry/llms/llms-upgrading-1.txt)
+- [Upgrading from 3.3 to 4.0, part 2 of 2](https://docs.jmrp.io/phonometry/llms/llms-upgrading-2.txt)
 - [Theory and reference](https://docs.jmrp.io/phonometry/llms/llms-theory.txt)
 - [Signal analysis](https://docs.jmrp.io/phonometry/llms/llms-signals.txt)
 - [Octave filtering](https://docs.jmrp.io/phonometry/llms/llms-signals-filters.txt)
@@ -9495,7 +9497,7 @@ it (a lower impact level is better). Setting `verbose=True` swaps the two-column
 shifted reference, unfavourable deviation).
 
 Rendering needs reportlab, kept out of the runtime dependencies as the optional
-`phonometry[report]` extra (`pip install phonometry[report]`); a missing
+`phonometry[report]` extra (`pip install "phonometry[report]"`); a missing
 reportlab raises a clear `ImportError` with the install command, and the plot
 still needs matplotlib (`phonometry[plot]`). Only `engine="reportlab"` is
 supported; any other engine raises `ValueError`. The fiche renders in English by
@@ -39618,7 +39620,7 @@ level is *identical*, not merely close.
 
 ## What each install reads and writes
 
-| | Base install (NumPy + SciPy) | With `pip install phonometry[audio]` |
+| | Base install (NumPy + SciPy) | With `pip install "phonometry[audio]"` |
 | :--- | :--- | :--- |
 | Read | WAV/BWF: PCM at any depth, IEEE float 32/64, EXTENSIBLE (channel labels), `bext`, cue points, RF64/BW64 | + FLAC, AIFF, Ogg Vorbis, Opus, MP3, compressed WAV (ADPCM, A-law/µ-law) |
 | Write | WAV/BWF: PCM 16/24/32, float 32/64, RF64 automatic, `bext`, sidecar | + FLAC (PCM up to 24-bit, `bext` carried) |
@@ -41031,6 +41033,8 @@ GIF on the CPU. `simulation.write_fdtd_animation` and
 `simulation.write_elastic_fdtd_animation` write an acoustic or elastic FDTD
 run straight to a video as it is computed, here or on a node, without storing
 its snapshots (sections 4 and 5).
+[Where heavy work runs](https://docs.jmrp.io/phonometry/simulation/where-it-runs/) maps the devices, the
+nodes and the encoders in one place.
 
 ffmpeg is a program, not a Python package, so it is installed apart from
 phonometry: `conda install ffmpeg`, `apt install ffmpeg`,
@@ -42980,7 +42984,7 @@ rho[:, -d_cells:] = 3.0 * rho0            # denser and lossy
 sigma[:, -d_cells:] = 600.0
 sim = FDTD2D(c, dx, rho=rho, damping=sigma,
              edge_impedance={"left": rho0 * c0})   # anechoic source end
-sim.add_plane_wave("right", center=0.35, width=0.05)
+sim.add_plane_wave("right", center_m=0.35, half_width_m=0.05)
 mics = (219, 229)                         # the ISO microphone pair
 records = np.zeros((2, 9000))
 for n in range(records.shape[1]):
@@ -44788,7 +44792,7 @@ per-one-third-octave table of the random-incidence absorption $\alpha_\mathrm{s}
 scattering coefficient $s$ beside the $s(f)$ curve on a categorical band axis,
 and a boxed characterisation headline (no pass/fail). `verbose=True` adds the
 specular absorption $\alpha_\mathrm{spec}$ column and `language="es"` renders the
-Spanish fiche; it needs the report extra (`pip install phonometry[report]`).
+Spanish fiche; it needs the report extra (`pip install "phonometry[report]"`).
 
 [![ISO 17497-1 scattering example report: a metadata header, the per-one-third-octave table of the random-incidence absorption and the scattering coefficient beside the s(f) band-axis curve, and the boxed characterisation headline over the tested frequency range](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_scattering_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso17497_scattering_example.pdf)
 
@@ -55163,12 +55167,12 @@ documents, one page per module.
 | `FDTDResult` | `dataclass` | **FDTD simulation result.**<br>• `times` [s] / `pressures` [Pa] per probe, float64 whatever the run's dtype / `probes` / `probe_positions` [m]<br>• `dx` / `dt` / `shape` / `size` [m] / `sources` / `snapshots` (the run's dtype, `(n_frames, ceil(ny / d), ceil(nx / d))`) / `snapshot_times` / `obstacle_mask`<br>• `snapshot_decimation`: the `d` of the snapshots / `provenance`: where the run stepped, a `RunProvenance`; both required when built by hand<br>• `.plot()`: probe histories; `.plot(kind="snapshot")`: pressure field | `res.pressures, res.times`<br>`res.plot()` |
 | `FDTDRecording` | `dataclass` | **What an acoustic FDTD run records.**<br>• `probes`: `(ix, iy)` pressure-probe cells (Default: none)<br>• `snapshot_every` steps (Default: None)<br>• `snapshot_decimation`: keep every d-th cell along each axis (Default: 1) | `FDTDRecording(probes=[(200, 100)], snapshot_every=50, snapshot_decimation=2)` |
 | `FDTDBoundaries` | `dataclass` | **How the four edges of the acoustic domain end (frozen, keyword-only).**<br>• `sides`: `"rigid"` (Default) \| `"absorbing"` \| per-side mapping (`"rigid"`, `"absorbing"` or a real specific impedance [Pa·s/m], scalar or one per edge cell), held read-only; a side it leaves out is rigid<br>• `absorbing_layer_cells`: sponge thickness of the absorbing sides, in cells (Default: 20)<br>• checked by the run that holds it | `simulation.FDTDBoundaries(sides={"left": "absorbing", "top": 413.0}, absorbing_layer_cells=30)` |
-| `FDTD2D` | `class` | **FDTD stepping engine (frame-by-frame access).**<br>• `c` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `sponge_width` / `sponge_sides` / `sponge_reflection` / `damping`<br>• `edge_impedance`: per-side real impedance [Pa·s/m] / `obstacle_mask`<br>• `compute`: where the engine steps, a `Compute`; never a host: an engine steps in this process<br>• `kappa`: bulk modulus [Pa], a read-only host copy | `sim = simulation.FDTD2D(343, 0.01, shape=(200, 300))`<br>`sim.add_source(src); sim.step(); sim.run(400, snapshot_every=10, snapshot_decimation=4)`<br>• `sim.p` / `sim.vx` / `sim.vy` (the device's arrays) / `sim.dt` / `sim.time` / `sim.energy()`<br>• `sim.host_field("p")`: a NumPy copy of a field on any device / `sim.provenance`<br>• `sim.plot_geometry(probes=...)`: draw the configured domain before running<br>• `sim.add_plane_wave(direction, center=..., width=..., wavelength=...)`: one-way plane packet initial condition<br>• `sim.add_contour_probe(ix0, ix1, iy0, iy1, frequencies=...)`: on-the-fly `p`/`v_n` phasor capture on a closed contour |
+| `FDTD2D` | `class` | **FDTD stepping engine (frame-by-frame access).**<br>• `c` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `absorbing_layer_cells`: sponge thickness in cells (Default: 0, no layer) / `absorbing_sides` / `absorbing_layer_reflection` / `damping`<br>• `edge_impedance`: per-side real impedance [Pa·s/m] / `obstacle_mask`<br>• `compute`: where the engine steps, a `Compute`; never a host: an engine steps in this process<br>• `kappa`: bulk modulus [Pa], a read-only NumPy copy | `sim = simulation.FDTD2D(343, 0.01, shape=(200, 300))`<br>`sim.add_source(src); sim.step(); sim.run(400, snapshot_every=10, snapshot_decimation=4)`: the counts by name<br>• `sim.p` / `sim.vx` / `sim.vy` (the device's arrays) / `sim.dt` / `sim.time` / `sim.energy()`<br>• `sim.numpy_field("p")`: a NumPy copy of a field on any device / `sim.provenance`<br>• `sim.plot_geometry(probes=[(ix, iy), ...])`: probe cells; draw the configured domain before running<br>• `sim.add_plane_wave(direction, center_m=..., half_width_m=..., wavelength_m=...)`: one-way plane packet initial condition [m]<br>• `sim.add_contour_probe(ix0, ix1, iy0, iy1, frequencies=...)`: on-the-fly `p`/`v_n` phasor capture on a closed contour |
 | `GaussianPulse` | `dataclass` | **Gaussian pulse source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `half_width_s` [s] / `t0` [s] (Default: `4*half_width_s`) / `amplitude` [Pa] | `GaussianPulse(ix=60, iy=100, half_width_s=3e-4)` |
 | `PlaneWaveSource` | `dataclass` | **Sustained one-way plane wave injected on a line (TF/SF style).**<br>• `direction`: 'down'/'up'/'left'/'right' (travel)<br>• `waveform`: callable t → p_inc(t) [Pa] (reuse a point source's `.value`)<br>• `offset`: line position in cells from the launch edge (place it just inside a sponge)<br>• `amplitude` (Default: 1.0) | `sim.add_source(simulation.PlaneWaveSource(direction='down', waveform=simulation.CWSource(ix=0, iy=0, frequency=1000.0).value, offset=22))`<br><br>• Transversely plane to machine precision; ~1e-4 residual behind the line |
 | `CWSource` | `dataclass` | **Continuous sine source with raised-cosine onset for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `frequency` [Hz] / `amplitude` [Pa] / `ramp_cycles` | `CWSource(ix=25, iy=25, frequency=170)` |
 | `SignalSource` | `dataclass` | **Arbitrary sampled waveform source for the FDTD solver.**<br>• `ix` / `iy`: source cell<br>• `samples` [Pa] / `fs` [Hz] / `amplitude`<br>Linearly interpolated onto the simulation time steps | `SignalSource(ix=60, iy=100, samples=sig, fs=48000)` |
-| `ContourProbe` | `class` | **On-the-fly DFT of `p` and `v_n` on a closed rectangular contour.**<br>Created by `FDTD2D.add_contour_probe`; running DFT sums per point and frequency, so CW runs store no time histories<br>• `positions` / `normals` / `frequencies` / `samples`<br>• `.reset()`: restart accumulation once the field is steady<br>• `.phasors(frequency)`: the captured `ContourPhasors` | `probe = sim.add_contour_probe(90, 470, 90, 345, frequencies=[2000.0])`<br>`sim.run(steps); probe.reset(); sim.run(window)`<br>`ph = probe.phasors(2000.0)` |
+| `ContourProbe` | `class` | **On-the-fly DFT of `p` and `v_n` on a closed rectangular contour.**<br>Created by `FDTD2D.add_contour_probe`; running DFT sums per point and frequency, so CW runs store no time histories<br>• `positions` / `normals` / `frequencies` / `n_samples`: steps accumulated since the last reset, read-only<br>• `.reset()`: restart accumulation once the field is steady<br>• `.phasors(frequency)`: the captured `ContourPhasors` | `probe = sim.add_contour_probe(90, 470, 90, 345, frequencies=[2000.0])`<br>`sim.run(steps); probe.reset(); sim.run(window)`<br>`ph = probe.phasors(2000.0)` |
 | `ContourPhasors` | `dataclass` | **Steady-state `p` and `v_n` phasors on a closed contour (`exp(+jωt)`).**<br>• `frequency` [Hz] / `positions` `(n, 2)` [m] / `normals` (outward)<br>• `pressure` [Pa] / `normal_velocity` [m/s] (complex) / `segment` [m]<br>• `.subtract(reference)`: scattered = total − incident phasors | `scattered = total.subtract(reference)` |
 | `far_field_from_contour` | `function` | **2D near-to-far-field transformation (Kirchhoff-Helmholtz integral).**<br>• `contour`: `ContourPhasors`<br>• `angles_deg` [deg]: observation directions `(cos a, sin a)` in grid axes<br>• `distance`: `None` (far-field pattern `F(a)`, `p → F e^{−jkr}/√r`) or a radius [m] for the exact Hankel evaluation<br>• `origin`: phase-reference point<br>• `fluid`: `Fluid` (Default: `SIMULATION_AIR`, the medium the solver runs in) | `F = simulation.far_field_from_contour(ph, np.arange(-180, 180, 2), origin=(xc, yc))`<br><br>• Complex pattern, one value per angle_deg |
 | `ElasticRun` | `dataclass` | **One elastic P-SV FDTD simulation, every argument checked when it is built (frozen, keyword-only).**<br>• `c_p` / `c_s`: wave-speed maps [m/s], `(ny, nx)` arrays or scalars with `shape` (`c_s = 0` marks fluid cells)<br>• `dx`: grid spacing [m] / `duration_s` [s] / `rho`: density map [kg/m³], required<br>• `sources`: `ExplosionSource` \| `ForceSource` list, held as a tuple<br>• `recording`: `ElasticRecording` (probe cells and fields, snapshot cadence, field and decimation; Default: None)<br>• `boundaries`: `ElasticBoundaries` (the four sides and the sponge thickness; Default: None, rigid)<br>• `obstacle_mask` / `cfl` (Default: 0.6)<br>• `damping`: scalar or `(ny, nx)` map [1/s] (Default: 0.0)<br>• a bad argument raises when the run is built | `run = simulation.ElasticRun(c_p=6320, c_s=3130, dx=0.001, duration_s=5e-5, rho=2700, shape=(300, 600), sources=[simulation.ForceSource(ix=300, iy=0, direction='y', waveform=simulation.GaussianPulse(ix=0, iy=0, half_width_s=8e-6).value)], boundaries=simulation.ElasticBoundaries(sides={'top': 'free'}))` |
@@ -55177,7 +55181,7 @@ documents, one page per module.
 | `ElasticFDTDResult` | `dataclass` | **Elastic FDTD simulation result.**<br>• `times` [s] / `signals` `(n_probes, n_fields, n_steps+1)`, float64 whatever the run's dtype / `probe_fields` / `probes` / `probe_positions` [m]<br>• `dx` / `dt` / `shape` / `size` [m] / `sources` / `snapshots` (the run's dtype, `(n_frames, ceil(ny / d), ceil(nx / d))`) / `snapshot_times` / `snapshot_field` / `obstacle_mask` / `free_sides`<br>• `snapshot_decimation` / `provenance` (a `RunProvenance`), both required when built by hand<br>• `.plot()`: probe histories; `.plot(kind="snapshot")`: recorded field | `res.signals, res.times`<br>`res.plot()` |
 | `ElasticRecording` | `dataclass` | **What an elastic FDTD run records.**<br>• `probes`: `(ix, iy)` cells (Default: none)<br>• `probe_fields`: `("p" \| "vx" \| "vy", ...)` (Default: `("vy",)`)<br>• `snapshot_every` steps (Default: None)<br>• `snapshot_field` (Default: `"p"`)<br>• `snapshot_decimation`: keep every d-th cell along each axis (Default: 1) | `ElasticRecording(probes=[(300, 0)], snapshot_every=50, snapshot_field='vy', snapshot_decimation=2)` |
 | `ElasticBoundaries` | `dataclass` | **How the four edges of the elastic domain end.**<br>• `sides`: `"rigid"` (Default) \| `"absorbing"` \| `"free"` (stress-imaging surface) \| per-side mapping<br>• `absorbing_layer_cells` (Default: 20) | `ElasticBoundaries(sides={'top': 'free'}, absorbing_layer_cells=40)` |
-| `ElasticFDTD2D` | `class` | **Elastic P-SV stepping engine (frame-by-frame access).**<br>• `c_p` / `c_s` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `free_sides`: traction-free surfaces (stress imaging)<br>• `sponge_width` / `sponge_sides` / `sponge_reflection` / `damping` / `obstacle_mask`<br>• `compute`: where the engine steps, a `Compute`; never a host: an engine steps in this process | `sim = simulation.ElasticFDTD2D(6320, 3130, 0.001, rho=2700, shape=(300, 600), free_sides='top')`<br>`sim.add_source(src); sim.step(); sim.run(400, snapshot_every=10, snapshot_decimation=2)`<br>• `sim.txx` / `sim.tyy` / `sim.txy` / `sim.vx` / `sim.vy` / `sim.p` (the device's arrays) / `sim.dt` / `sim.time` / `sim.energy()`<br>• `sim.lam` / `sim.mu`: Lamé parameters [Pa], read-only host copies<br>• `sim.collocated(field)`: one field interpolated to cell centres, on the device<br>• `sim.host_field("txx")`: a NumPy copy of a stored field / `sim.provenance` |
+| `ElasticFDTD2D` | `class` | **Elastic P-SV stepping engine (frame-by-frame access).**<br>• `c_p` / `c_s` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `free_sides`: traction-free surfaces (stress imaging)<br>• `absorbing_layer_cells`: sponge thickness in cells (Default: 0, no layer) / `absorbing_sides` / `absorbing_layer_reflection` / `damping` / `obstacle_mask`<br>• `compute`: where the engine steps, a `Compute`; never a host: an engine steps in this process | `sim = simulation.ElasticFDTD2D(6320, 3130, 0.001, rho=2700, shape=(300, 600), free_sides='top')`<br>`sim.add_source(src); sim.step(); sim.run(400, snapshot_every=10, snapshot_decimation=2)`<br>• `sim.txx` / `sim.tyy` / `sim.txy` / `sim.vx` / `sim.vy` / `sim.p` (the device's arrays) / `sim.dt` / `sim.time` / `sim.energy()`<br>• `sim.lam` / `sim.mu`: Lamé parameters [Pa], read-only NumPy copies<br>• `sim.collocated(field)`: one field interpolated to cell centres, on the device<br>• `sim.numpy_field("txx")`: a NumPy copy of a stored field / `sim.provenance` |
 | `ElasticFDTD2D.from_regions` | `classmethod` | **Layered/embedded set-ups from named materials (no manual maps).**<br>• `shape`: `(ny, nx)` / `dx` [m]<br>• `background`: `Material`, `(c_p, c_s, rho)` or a solid's catalogue row filling the grid<br>• `regions`: `(where, material)` pairs painted in order (`where`: boolean mask or numpy index)<br>• remaining kwargs forwarded to the constructor, `compute` among them | `sim = ElasticFDTD2D.from_regions((300, 600), 0.001, background=WATER, regions=[(np.s_[150:, :], STEEL)])` |
 | `Material` | `dataclass` | **Isotropic medium as wave speeds and density (frozen).**<br>• `c_p` [m/s] / `c_s` [m/s] (`0` marks a fluid) / `rho` [kg/m³]<br>• `is_fluid`: `c_s == 0`<br>Must satisfy `c_p² ≥ 2 c_s²` (non-negative λ)<br>Wherever one is taken, a solid's catalogue row is taken too: its `bulk_longitudinal_speed_m_s`, `transverse_speed_m_s` and `density_kg_m3`, read through `.printed()`; never its plate or bar speed | `Material(c_p=5958, c_s=3184.7, rho=7850)` |
 | `SIMULATION_AIR` | `Fluid` | **The air the acoustic solvers run in.**<br>343.0 m/s, 1.2 kg/m³, the `AIR` `Material` written as a fluid<br>• the `fluid` default of `far_field_from_contour`<br>• a `phonometry.fluids.Fluid`: pass a computed one, or a water, to transform out of the medium the run actually used | `simulation.SIMULATION_AIR.density  # 1.2` |
@@ -55197,7 +55201,7 @@ documents, one page per module.
 | `TonalityWarning` | `warning class` | **Tonality advisory.**<br>Emitted for biased tonality estimates (e.g. coarse FFT resolution) | `warnings.simplefilter('error', TonalityWarning)` |
 | `STIWarning` | `warning class` | **STI/STIPA advisory.**<br>Emitted for suspect speech-intelligibility measurements or inputs | `warnings.simplefilter('error', STIWarning)` |
 | `__version__` | `str` | **Package version string.**<br>(no parameters) | `phonometry.__version__  # '4.0.0rc1'` |
-| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NIPTSResult`, `HTLANResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SELDistribution`, `LevelDifferenceQuantiles`, `RoundRobinPrecision`, `CalculationVerification`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `ComparisonCalibration`, `EnvironmentalSensitivityCorrection`, `JigDiameterCorrection`, `DiameterSoundFieldCorrection`, `JigCouplerVerification`, `ComparisonUncertaintyBudget`, `FreeFieldRegion`, `ReciprocityCalibration`, `ReciprocityUncertaintyBudget`, `CouplerTransferImpedance`, `HeatConductionCorrection`, `CapillaryTubeImpedance`, `WaveMotionCorrection`, `CouplerCheck`, `CouplerParameterUncertainty`, `ReciprocityAirAttenuation`, `AcousticCenter`, `FreeFieldArrangementCheck`, `FreeFieldParameterUncertainty`, `SoundLevelMeterPeriodicRequirement`, `SoundLevelMeterPeriodicVerification`, `FieldStrengthReading`, `BackgroundNoiseAssessment`, `InductionLoopVerification`, `LoopRequirement`, `AmplifierOverloadVerification`, `LoopField`, `LoopImpedance`, `AmplifierFrequencyResponse`, `AGCCharacteristic`, `QuadraturePhaseError`, `MaxOutputCurrent`, `NeckLoopCharacteristics`, `NeckLoopVerification`, `ProgramSignalCheck`, `RatedImpedanceVerification`, `ProgramCharacteristicVoltage`, `LimitingTestSignalCheck`, `ProtectionVoltage`, `CouplerFrequencyResponse`, `CrosstalkAttenuation`, `FieldComparisonResponse`, `EarCanalFrequencyResponse`, `EarCanalMicrophoneVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LaboratoryAirborneInsulationResult`, `LaboratoryImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `PlantMeasurementContour`, `PlantSoundPowerResult`, `PlantMeasurementCheck`, `PartialPlantContributions`, `HighFrequencySoundPowerResult`, `InverseSquareLawResult`, `FreeFieldCheck`, `SourceDirectionalityResult`, `ReferenceSourceCalibration`, `ReferenceSoundSourceVerdict`, `ReferenceSourceDriftResult`, `TurbineMeasurementSurface`, `TurbineMicrophoneArray`, `TurbineEnvironmentalCorrection`, `TurbineTestEnvironmentCheck`, `TurbineSoundPowerResult`, `TurbineNoiseDeclaration`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InSituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install phonometry[plot]`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
+| `.plot()` | `method` | **One-line canonical figure on every result object (soft matplotlib dependency).**<br>Available on `ZwickerLoudness`, `MooreGlasbergLoudness`, `MooreGlasbergTimeVaryingLoudness`, `EcmaLoudness`, `EcmaTonality`, `EcmaRoughness`, `PsychoacousticAnnoyanceResult`, `FluctuationStrengthResult`, `ProgramLoudnessResult`, `KWeightingResponse`, `STIResult`, `SIIResult`, `SIIProcedure`, `StandardSpeechSpectrum`, `NCResult`, `RCResult`, `AgeThresholdResult`, `NIPTSResult`, `HTLANResult`, `ImpulseProminenceResult`, `ImpulsiveSoundResult`, `SELDistribution`, `LevelDifferenceQuantiles`, `RoundRobinPrecision`, `CalculationVerification`, `DirectivityFactor`, `RandomIncidenceSensitivity`, `DiffuseFieldSensitivity`, `AdjustmentValue`, `FreeFieldCorrection`, `CorrectionUncertaintyBudget`, `CorrectionUncertaintyVerification`, `ComparisonCalibration`, `EnvironmentalSensitivityCorrection`, `JigDiameterCorrection`, `DiameterSoundFieldCorrection`, `JigCouplerVerification`, `ComparisonUncertaintyBudget`, `FreeFieldRegion`, `ReciprocityCalibration`, `ReciprocityUncertaintyBudget`, `CouplerTransferImpedance`, `HeatConductionCorrection`, `CapillaryTubeImpedance`, `WaveMotionCorrection`, `CouplerCheck`, `CouplerParameterUncertainty`, `ReciprocityAirAttenuation`, `AcousticCenter`, `FreeFieldArrangementCheck`, `FreeFieldParameterUncertainty`, `SoundLevelMeterPeriodicRequirement`, `SoundLevelMeterPeriodicVerification`, `FieldStrengthReading`, `BackgroundNoiseAssessment`, `InductionLoopVerification`, `LoopRequirement`, `AmplifierOverloadVerification`, `LoopField`, `LoopImpedance`, `AmplifierFrequencyResponse`, `AGCCharacteristic`, `QuadraturePhaseError`, `MaxOutputCurrent`, `NeckLoopCharacteristics`, `NeckLoopVerification`, `ProgramSignalCheck`, `RatedImpedanceVerification`, `ProgramCharacteristicVoltage`, `LimitingTestSignalCheck`, `ProtectionVoltage`, `CouplerFrequencyResponse`, `CrosstalkAttenuation`, `FieldComparisonResponse`, `EarCanalFrequencyResponse`, `EarCanalMicrophoneVerification`, `MultipleShockResult`, `ImpulseResponseResult`, `DecayCurve`, `RoomAcousticsResult`, `ReverberationResult`, `ReverberationModelResult`, `DynamicStiffnessResult`, `MobilityResult`, `TransferStiffnessResult`, `BandAveragedStiffness`, `LevelDifferenceCheck`, `OutputMassCheck`, `EffectiveBlockingMass`, `DrivingPointStiffnessResult`, `DrivingPointUncertainty`, `VibrationSoundPowerResult`, `StructureBornePowerResult`, `InstalledSourceResult`, `WeightedRatingResult`, `ImpactRatingResult`, `ImpactImprovementRatingResult`, `FacadeInsulationResult`, `LaboratoryAirborneInsulationResult`, `LaboratoryImpactInsulationResult`, `SoundPowerResult`, `SoundEnergyResult`, `ReverberationSoundPowerResult`, `ReverberationSoundEnergyResult`, `InSituSoundPowerResult`, `InDuctSoundPowerResult`, `PlantMeasurementContour`, `PlantSoundPowerResult`, `PlantMeasurementCheck`, `PartialPlantContributions`, `HighFrequencySoundPowerResult`, `InverseSquareLawResult`, `FreeFieldCheck`, `SourceDirectionalityResult`, `ReferenceSourceCalibration`, `ReferenceSoundSourceVerdict`, `ReferenceSourceDriftResult`, `TurbineMeasurementSurface`, `TurbineMicrophoneArray`, `TurbineEnvironmentalCorrection`, `TurbineTestEnvironmentCheck`, `TurbineSoundPowerResult`, `TurbineNoiseDeclaration`, `SoundPowerIntensityResult`, `DiscretePointIntensityResult`, `PrecisionSoundPowerResult`, `PrecisionIntensityResult`, `IntensityResult`, `UncertaintyResult`, `AbsorptionRatingResult`, `ScatteringResult`, `DiffusionResult`, `DiffusionSpectrum`, `InSituAbsorptionResult`, `WeightingResponse`, `WeightedSpectrum`, `Signal` and `DailyVibrationExposure`.<br>• `ax`: existing Axes, or None to build a fresh figure (Default: None)<br>• returns the Matplotlib `Axes` (an array of Axes for multi-panel figures); never calls `plt.show()`<br>• needs matplotlib (`pip install "phonometry[plot]"`) | `res.plot()`<br>`decay_curve(ir, fs).plot()` |
 
 ## Notes
 
@@ -61757,7 +61761,7 @@ Additional performance notes:
   rate, which is both faster and numerically more stable (see
   [Theory](https://docs.jmrp.io/phonometry/reference/theory/signal-analysis/)).
 - **Optional numba**: the `impulse` time weighting kernel is JIT-compiled when
-  numba is installed (`pip install phonometry[perf]`).
+  numba is installed (`pip install "phonometry[perf]"`).
 
 ## See also
 
@@ -63293,7 +63297,7 @@ start from rest again.
 ## 7. Performance note
 
 The `impulse` mode uses an asymmetric kernel that is JIT-compiled when
-[numba](https://numba.pydata.org/) is installed (`pip install phonometry[perf]`).
+[numba](https://numba.pydata.org/) is installed (`pip install "phonometry[perf]"`).
 Without numba a pure-Python fallback produces identical results, just slower.
 
 See [Integrated & Statistical Levels](https://docs.jmrp.io/phonometry/signals/levels/levels/) for $L_\mathrm{eq}$/$L_N$ metrics
@@ -70804,8 +70808,8 @@ engines of `phonometry.simulation`, the acoustic `FDTD2D` behind
 `fdtd_simulation` and the elastic `ElasticFDTD2D` behind
 `elastic_fdtd_simulation`, step on NumPy by default, and on an NVIDIA GPU
 through CuPy or on PyTorch (on a CPU, an NVIDIA GPU or Apple's MPS) when you
-ask. It is one stepping code for all of them: each engine builds its maps on
-the host in NumPy float64 when it is constructed, hands them to the device
+ask. It is one stepping code for all of them: each engine builds its maps in
+NumPy float64, in this process, when it is constructed, hands them to the device
 once, and from then on touches its fields only with operations of the Python
 array API standard, which the three libraries implement.
 
@@ -70816,6 +70820,8 @@ about the numbers on each device. The physics, the sources and the
 boundaries are the same everywhere; they are explained in
 [2D FDTD wave simulation](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/) and
 [Elastic waves and fluid-solid coupling](https://docs.jmrp.io/phonometry/simulation/elastic-waves/).
+[Where heavy work runs](https://docs.jmrp.io/phonometry/simulation/where-it-runs/) maps the devices, the nodes and the
+encoders in one place.
 
 ## 1. Asking for a device: `Compute`
 
@@ -70903,7 +70909,10 @@ pip install "phonometry[torch]"
 ```
 
 Adding that index with `--extra-index-url` is not enough: pip takes the
-newest torch it finds on either index, PyPI's CUDA build included.
+newest torch it finds on either index, PyPI's CUDA build included. When
+torch is missing, the `ComputeImportError` an engine raises gives the same
+advice: these two commands for `"torch:cpu"`, and the extra alone for
+`"torch:cuda"` and `"torch:mps"`.
 
 `"torch:mps"` needs a Mac with Apple silicon and steps in float32 only. CuPy
 needs an NVIDIA GPU and its driver; the proof of section 6 ran on
@@ -70956,13 +70965,14 @@ PHONOMETRY_COMPUTE=cupy:1,fallback python study.py
 ```
 
 A host, `Compute(host="nas")` or `@nas` in the variable, sends a whole run to
-another machine, and only the two simulation functions take one:
-`fdtd_simulation(run, compute=...)` and
+another machine, and only the two simulation functions and the two video
+writers take one: `fdtd_simulation(run, compute=...)` and
 `elastic_fdtd_simulation(run, compute=...)` run there and return the record a
-run here returns. An engine built directly steps in this process, and it
-raises `ValueError` for a placement that names a host, wherever the placement
-came from. [Sending a simulation to a remote node](https://docs.jmrp.io/phonometry/simulation/remote-node/) says how to
-name a node and set one up.
+run here returns, and the writers bring back the video too. An engine built
+directly steps in this process, and it raises `ValueError` for a placement
+that names a host, wherever the placement came from.
+[Sending a simulation to a remote node](https://docs.jmrp.io/phonometry/simulation/remote-node/) says how to name a
+node and set one up.
 
 **Threads and processes.** `use()` holds its record in a context variable.
 Whether a new thread or process sees it depends on how it is started, so give
@@ -71082,10 +71092,10 @@ print(on_gpu.provenance)
 An engine's fields live on its device. `sim.p`, `sim.vx` and `sim.vy` of an
 `FDTD2D`, the five stress and velocity arrays of an `ElasticFDTD2D`, its
 synthetic pressure `sim.p` and `sim.collocated(field)` are NumPy arrays on
-NumPy and the device library's own arrays elsewhere. `sim.host_field(name)`
+NumPy and the device library's own arrays elsewhere. `sim.numpy_field(field)`
 returns a NumPy copy of a stored field on every device, and `sim.run(...)`
-returns its snapshot frames on the host. What a simulation function returns
-is on the host already: a result holds NumPy arrays whatever device stepped.
+returns its snapshot frames as NumPy arrays. What a simulation function
+returns is NumPy already: a result holds NumPy arrays whatever device stepped.
 On CuPy with a `device_index` other than 0, a write into a field from
 outside the engine, such as `sim.p[10, 10] = 1.0`, runs on CuPy's current
 device, so make it inside `with cupy.cuda.Device(i):` with `i` the engine's
@@ -71095,7 +71105,7 @@ index.
 sim = simulation.FDTD2D(343.0, 0.01, shape=(100, 150), compute=simulation.Compute(dtype="float32"))
 sim.add_source(simulation.GaussianPulse(ix=30, iy=50, half_width_s=3.0e-4))
 frames = sim.run(200, snapshot_every=50, snapshot_decimation=2)
-field = sim.host_field("p")
+field = sim.numpy_field("p")
 print(frames.shape, frames.dtype, type(field).__name__, sim.provenance.device)
 # (5, 50, 75) float32 ndarray cpu
 ```
@@ -71112,8 +71122,9 @@ decimated snapshots in two of them.
 
 **NumPy, float64: bit-identical.** Identical inputs give bit-identical
 outputs on the same platform: no random numbers, and every operation in a
-fixed order. The NumPy path is also held bit for bit to a frozen copy of the
-two engines as they stood before they could step anywhere else, so the other
+fixed order. The NumPy path is also held to SHA-256 digests of every number
+those scenarios give, recorded from the two engines as they stood before they
+could step anywhere else (`engine-digests.json`, checked in CI), so the other
 devices cost the NumPy numbers nothing.
 
 **CuPy, float64: bit-identical fields, as measured.** On an NVIDIA GeForce RTX
@@ -71188,8 +71199,8 @@ frame of a 400 by 600 cell grid takes 1.9 MB, and a run keeps one every
 `snapshot_decimation=d` keeps every `d`-th cell along each axis, starting
 with the first, so a frame is $\lceil n_y/d \rceil$ by $\lceil n_x/d \rceil$:
 `d = 2` stores a quarter of the cells and `d = 4` a sixteenth. On a GPU the
-field is sliced on the device first, and only the kept cells cross to the
-host.
+field is sliced on the device first, and only the kept cells are copied into
+NumPy.
 
 The option has the same name and the same rule everywhere:
 `FDTDRecording(snapshot_every=, snapshot_decimation=)`,
@@ -71394,8 +71405,8 @@ elastic solver takes the same `compute=` as the acoustic one, and so does
 `ElasticFDTD2D.from_regions`: the block above steps on an NVIDIA GPU through
 CuPy with one more argument. On such a device the engine's own fields,
 `sim.p` and `sim.collocated(field)` included, are that device's arrays, and
-`sim.host_field(name)` gives a NumPy copy; a result is on the host whatever
-device stepped. [Where a simulation runs](https://docs.jmrp.io/phonometry/simulation/compute/) covers the devices, what each needs
+`sim.numpy_field(field)` gives a NumPy copy; a result holds NumPy arrays
+whatever device stepped. [Where a simulation runs](https://docs.jmrp.io/phonometry/simulation/compute/) covers the devices, what each needs
 installed and what is promised about the numbers on each.
 
 ```py
@@ -71407,6 +71418,8 @@ print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's 
 
 With a `host` the same run goes to another machine: see
 [Sending a simulation to a remote node](https://docs.jmrp.io/phonometry/simulation/remote-node/).
+[Where heavy work runs](https://docs.jmrp.io/phonometry/simulation/where-it-runs/) maps the devices, the nodes and
+the encoders in one place.
 
 ## 2. Fluids inside the elastic solver
 
@@ -72021,6 +72034,8 @@ print(on_gpu.provenance.device, on_gpu.provenance.gpu)   # cupy, and the card's 
 
 With a `host` the same run goes to another machine: see
 [Sending a simulation to a remote node](https://docs.jmrp.io/phonometry/simulation/remote-node/).
+[Where heavy work runs](https://docs.jmrp.io/phonometry/simulation/where-it-runs/) maps the devices, the nodes and
+the encoders in one place.
 
 The grid is index-based: cell ``(ix, iy)`` has its centre at
 ``((ix + 0.5) * dx, (iy + 0.5) * dx)`` metres, with rows plotted downward
@@ -72031,7 +72046,7 @@ The grid is index-based: cell ``(ix, iy)`` has its centre at
 
 Three source types inject a **soft source** (an additive pressure
 contribution that does not scatter passing waves) at a grid cell:
-`GaussianPulse` (a broadband pulse of temporal half-width `width`),
+`GaussianPulse` (a broadband pulse of temporal half-width `half_width_s`),
 `CWSource` (a sine tone faded in with a raised-cosine ramp so its onset does
 not splash a broadband transient) and `SignalSource` (an arbitrary sampled
 waveform, linearly interpolated onto the simulation time steps). Probes
@@ -72043,7 +72058,7 @@ passed as `recording=`; a run without one keeps only its time axis.
 sources, so a diffuser or a barrier is often better interrogated with a
 plane wavefront. Two tools cover it, each one-way through its own mechanism:
 
-- `sim.add_plane_wave(direction, center=..., width=..., wavelength=...)`
+- `sim.add_plane_wave(direction, center_m=..., half_width_m=..., wavelength_m=...)`
   superimposes a Gaussian packet (optionally carrying a sine) as an
   initial condition travelling toward `"down"`, `"up"`, `"left"` or
   `"right"`; the leapfrog-consistent velocity written half a step back
@@ -72061,12 +72076,12 @@ plane wavefront. Two tools cover it, each one-way through its own mechanism:
 ```python
 from phonometry.simulation import FDTD2D, CWSource, PlaneWaveSource
 
-sim = FDTD2D(343.0, 0.01, shape=(160, 80), sponge_width=20,
-             sponge_sides=("top", "bottom"))
+sim = FDTD2D(343.0, 0.01, shape=(160, 80), absorbing_layer_cells=20,
+             absorbing_sides=("top", "bottom"))
 tone = CWSource(ix=0, iy=0, frequency=1000.0)          # reused as a waveform
 sim.add_source(PlaneWaveSource(direction="down", waveform=tone.value, offset=22))
-# or, for a single packet: sim.add_plane_wave("down", center=0.4,
-#                                             width=0.08, wavelength=0.34)
+# or, for a single packet: sim.add_plane_wave("down", center_m=0.4,
+#                                             half_width_m=0.08, wavelength_m=0.34)
 ```
 
 Geometry is **rasterised**: `obstacle_mask` marks rigid cells, and every
@@ -72124,10 +72139,12 @@ print(round(float(echo[np.abs(echo).argmax()] / incident), 2))  # 0.5
 
 Before spending a single time step, `sim.plot_geometry()` draws the
 configured domain: edges, sponges, obstacles, sources and the probes you
-intend to record. Catching a sponge on the wrong side or a probe in the
+intend to record, given as the `(ix, iy)` cells an `FDTDRecording` takes and
+refused in the words a run uses when one is off the grid or inside an
+obstacle. Catching a sponge on the wrong side or a probe in the
 wrong place costs seconds here and a full re-run later.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_domain_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_domain_geometry.svg" alt="Setup drawing of a 4.5 by 3 metre FDTD domain before any time stepping: pale blue sponge layers along the left and right edges, an orange impedance edge along the top, a grey rectangular obstacle just left of centre, the source star at (0.5, 1.5) and two probe circles at (3, 1.5) and (4, 2), with a legend naming the sponge layer, impedance edge, rigid edge, source and probe" width="88%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_domain_geometry_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/fdtd_domain_geometry.svg" alt="Setup drawing of a 4.5 by 3 metre FDTD domain before any time stepping: pale blue sponge layers along the left and right edges, an orange impedance edge along the top, a grey rectangular obstacle just left of centre, the source star at about (0.5, 1.5) and two probe circles at about (3, 1.5) and (4, 2), the centres of cells (59, 29) and (79, 39), with a legend naming the sponge layer, impedance edge, rigid edge, source and probe" width="88%"></picture>
 
 *Everything the run will see, before it runs: the sponge layers eat the
 left and right boundaries, the top edge carries the anechoic $\rho c$ impedance,
@@ -72144,13 +72161,14 @@ from phonometry import simulation
 
 mask = np.zeros((60, 90), dtype=bool)
 mask[25:35, 40:44] = True
-sim = simulation.FDTD2D(343.0, 0.05, shape=(60, 90), sponge_width=8,
-                        sponge_sides=("left", "right"),
+sim = simulation.FDTD2D(343.0, 0.05, shape=(60, 90), absorbing_layer_cells=8,
+                        absorbing_sides=("left", "right"),
                         edge_impedance={"top": 413.0}, obstacle_mask=mask)
 sim.add_source(simulation.GaussianPulse(ix=10, iy=30, half_width_s=1e-3))
 
 # Check the domain before running it: nothing has been stepped yet.
-sim.plot_geometry(probes=[(3.0, 1.5), (4.0, 2.0)])
+# The probes are the (ix, iy) cells an FDTDRecording takes, drawn at their centres.
+sim.plot_geometry(probes=[(59, 29), (79, 39)])
 plt.show()
 ```
 
@@ -72190,7 +72208,7 @@ import numpy as np
 from phonometry import simulation
 
 c0, dx, f0 = 343.0, 0.005, 2000.0
-sim = simulation.FDTD2D(c0, dx, shape=(300, 300), sponge_width=40)
+sim = simulation.FDTD2D(c0, dx, shape=(300, 300), absorbing_layer_cells=40)
 sim.add_source(simulation.CWSource(ix=150, iy=150, frequency=f0))
 probe = sim.add_contour_probe(90, 210, 90, 210, frequencies=[f0])
 sim.run(round(4.5e-3 / sim.dt))            # run the transient out
@@ -72273,7 +72291,7 @@ for n, (h, ln, lc, wn, wc) in enumerate(rows):
         mask[r0:r1, lat + round((xn + ln * 1e-3) / dx):
              lat + round((xn + (ln + lc) * 1e-3) / dx)] = False
 
-sim = simulation.FDTD2D(c0, dx, shape=mask.shape, sponge_width=sponge,
+sim = simulation.FDTD2D(c0, dx, shape=mask.shape, absorbing_layer_cells=sponge,
                         cfl=0.9, obstacle_mask=mask)   # 340 cells/lambda:
 sim.add_source(simulation.PlaneWaveSource(           # dispersion negligible
     direction="down", waveform=simulation.CWSource(ix=0, iy=0, frequency=f0).value, offset=sponge))
@@ -72648,7 +72666,10 @@ surfaces with Rayleigh waves, and fluid-solid coupling with mode
 conversion, Scholte interface waves and immersed-plate transmission. A third
 page, common to both, says where a run steps: NumPy, CuPy or torch, chosen
 per call, per block of code or per process, with what is promised about the
-numbers on each device.
+numbers on each device. A run can go three ways beyond NumPy on this
+machine: onto another device, onto a node reached over SSH, and straight into
+a video. [Where heavy work runs](https://docs.jmrp.io/phonometry/simulation/where-it-runs/) maps
+the devices, the nodes and the encoders in one place.
 
 A good way to read it is alongside the closed-form pages it cross-checks:
 the modal frequencies of [room acoustics](https://docs.jmrp.io/phonometry/buildings/rooms/room-acoustics/)
@@ -72740,6 +72761,9 @@ so in its own opening.
 - [Writing animations and FDTD runs to video](https://docs.jmrp.io/phonometry/io/videos/):
   either solver's run written straight to a WebM, an MP4 or a GIF as it is
   computed, here or on a node, without storing its snapshots.
+- [Where heavy work runs: CPU or GPU, here or on a node](https://docs.jmrp.io/phonometry/simulation/where-it-runs/):
+  the map of where a run steps and where its video is encoded, on this
+  machine or on a node, on a CPU or a GPU, with the page that explains each.
 
 ## What this section does not cover
 
@@ -72800,7 +72824,8 @@ to set up a Docker node or a Python node, what can go wrong and what each
 error says, how to follow a run, what each side trusts of the other, and when
 a run there gives the numbers a run here gives. The device itself, NumPy,
 CuPy or torch, is chosen as [Where a simulation runs](https://docs.jmrp.io/phonometry/simulation/compute/) explains,
-and all of it holds on a node.
+and all of it holds on a node. [Where heavy work runs](https://docs.jmrp.io/phonometry/simulation/where-it-runs/) maps
+the devices, the nodes and the encoders in one place.
 
 ## 1. What happens when a run goes to a node
 
@@ -73152,6 +73177,17 @@ bootstrap as you changed them. After a change to an engine, `make gpu-parity`,
 run from your checkout in that image on the node's GPU, renews the GPU proof
 in `gpu-parity.lock`.
 
+### Rendering the documentation clips on a node
+
+The documentation's animated clips, most of them simulations stepped on the
+engines of this page, can be rendered on the same node: with the node in the
+hosts file, `PHONOMETRY_COMPUTE=cupy@<name> make animations` sends the
+repository's committed code there, renders the clips two at a time with the
+GPU and NVENC, and brings them back checked. The
+[contributing guide](https://github.com/jmrplens/phonometry/blob/main/CONTRIBUTING.md#clips)
+explains it, and how to render them here on a CPU, which gives clips fit to
+publish too.
+
 ## What this guide covers
 
 **Covered.** Running `fdtd_simulation` and `elastic_fdtd_simulation` on
@@ -73213,6 +73249,158 @@ NumPy and SciPy at the library's floors (and CuPy or torch for a GPU). To
 write videos, a Python node also needs matplotlib, and ffmpeg on its
 `PATH`; the Docker image holds both. phonometry itself need not be installed there:
 the client sends its own.
+
+---
+
+
+<!-- source: docs/simulation/where-it-runs.md | canonical: https://docs.jmrp.io/phonometry/simulation/where-it-runs/ -->
+Source: https://docs.jmrp.io/phonometry/simulation/where-it-runs/
+
+# Where heavy work runs: CPU or GPU, here or on a node
+
+Two things in phonometry take long enough to want a faster machine: stepping
+an FDTD engine, acoustic or elastic, and writing a video of it. Both can run
+on this machine or on a node you reach over SSH, and both can use a GPU when
+one is there. This page is the map; each road has a page of its own.
+
+## Where a simulation steps
+
+A run is a record of what to simulate (`FDTDRun`, or `ElasticRun` for the
+elastic engine), checked when it is built. Where it steps is apart from it: a
+`Compute` record, passed as `compute=` to `fdtd_simulation`,
+`elastic_fdtd_simulation`, the two engines and the two animation writers, so
+the same run steps anywhere. With nothing passed and no `PHONOMETRY_COMPUTE`
+set it steps on NumPy, here, in float64, and every result records where it
+ran:
+
+```python
+from phonometry import simulation
+
+run = simulation.FDTDRun(
+    c=343.0, dx=0.02, duration_s=2.0e-3, shape=(60, 80),
+    sources=[simulation.GaussianPulse(ix=20, iy=30, half_width_s=3.0e-4)],
+    recording=simulation.FDTDRecording(probes=[(60, 30)]),
+)
+res = simulation.fdtd_simulation(run)
+print(res.provenance.device, res.provenance.host)   # cpu None
+```
+
+| Device | Steps on | What to install | What is promised |
+|---|---|---|---|
+| `"cpu"` | NumPy, on this machine's CPU | nothing | the reference, bit for bit |
+| `"cupy"` | an NVIDIA GPU | the CuPy wheel for your CUDA version | the fields bit for bit, as measured |
+| `"torch:cpu"` | PyTorch on the CPU | `pip install torch --index-url https://download.pytorch.org/whl/cpu`, then `pip install "phonometry[torch]"` | within a published bound |
+| `"torch:cuda"` | PyTorch on an NVIDIA GPU | `pip install "phonometry[torch]"` | no measured bound yet |
+| `"torch:mps"` | Apple's GPU, in float32 only | `pip install "phonometry[torch]"` | within a published float32 bound |
+
+On Linux the CPU line takes torch from PyTorch's CPU index first, because the
+torch that PyPI serves there brings gigabytes of CUDA libraries a CPU never
+uses.
+
+[Where a simulation runs](https://docs.jmrp.io/phonometry/simulation/compute/) explains each
+device, the `use()` block and the `PHONOMETRY_COMPUTE` variable, the fallback
+to NumPy, and the measurements behind the last column.
+
+## Here or on a node
+
+Give the record a host and the same call runs on that node, with the result
+coming back as if it had run here:
+
+```py
+gpu_node = simulation.Compute(device="cupy", host="nas")
+res = simulation.fdtd_simulation(run, compute=gpu_node)
+print(res.provenance.host, res.provenance.gpu)   # nas, and the card's name
+```
+
+A node is an entry of your hosts file, reached over SSH, running the node's
+container image or a Python environment of its own. A job names a library
+function and carries its run as data, never code of your own; the node runs
+the phonometry you have here, sent once per version, and its answer is
+checked before it is trusted. An engine built directly (`FDTD2D`,
+`ElasticFDTD2D`) steps in this process: your own code drives it, step by
+step, and that cannot travel.
+[Sending a simulation to a remote node](https://docs.jmrp.io/phonometry/simulation/remote-node/)
+explains the hosts file, the node image and what each side trusts.
+
+## Where a video is encoded
+
+A video is drawn with matplotlib and encoded by ffmpeg, on a CPU encoder or
+a GPU one. How it is encoded is a record of its own, `io.VideoOptions`, which
+`io.write_video` and the two simulation writers take as `video=`; with none,
+the encoder is chosen for you (`encoder="auto"`).
+
+A simulation writer draws one frame for each snapshot its run records, so the
+snapshot cadence is the frame cadence:
+`recording=simulation.FDTDRecording(snapshot_every=10)` keeps the field every
+ten steps, and a run that records no snapshots is refused with `ValueError`.
+The `run` of the table and of the code below records them.
+
+| | A CPU encoder | A GPU encoder |
+|---|---|---|
+| Here | `io.write_video(path, animation, video=io.VideoOptions(encoder="cpu"))`: SVT-AV1, or without it VP9 in a WebM and x265 or x264 in an MP4 | `VideoOptions(encoder="auto")`, the default, tries NVENC, Quick Sync, VAAPI and VideoToolbox, each with a real one-frame encode, then the CPU |
+| On a node | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(host="nas"), video=io.VideoOptions(encoder="cpu"))` | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(device="cupy", host="nas"), video=io.VideoOptions(encoder="nvenc"))`: the node computes, draws and encodes; a GPU encoder there needs a GPU placement (`"cupy"` or `"torch:cuda"`), the one that hands a Docker node's container its GPU |
+
+```py
+from phonometry import io, simulation
+
+io.write_video("wave.webm", animation)   # any matplotlib animation, encoded here
+run = simulation.FDTDRun(
+    c=343.0, dx=0.01, duration_s=4.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    recording=simulation.FDTDRecording(snapshot_every=10),
+)
+simulation.write_fdtd_animation(
+    "pulse.webm", run,
+    compute=simulation.Compute(device="cupy", host="nas"),
+    video=io.VideoOptions(encoder="nvenc"),
+)
+```
+
+The frame a writer draws (its language, its size, the colour limit) is the
+third record, `simulation.AnimationFrame`, passed as `frame=`. A GIF is
+always written on the CPU.
+
+An animation you draw yourself is encoded here only: what travels to a node
+is what the library can draw again there, the two simulation writers.
+[Writing animations and FDTD runs to video](https://docs.jmrp.io/phonometry/io/videos/) explains
+the containers, the codecs, the encoders and the quality presets.
+
+## Which to choose
+
+- A small grid steps as fast on NumPy, or faster: a GPU pays a fixed cost for
+  every operation it launches, and only a grid large enough spends it.
+- A large grid and an NVIDIA GPU here: `Compute(device="cupy")`.
+- A Mac: `Compute(device="torch:mps", dtype="float32")`, with the float32
+  bound the compute page publishes.
+- No GPU here, one on a machine you can reach: the same record with
+  `host=`.
+- A video: `io.VideoOptions(encoder="auto")`, the default, here, or the
+  simulation writers with a host when the drawing should happen next to the
+  GPU too.
+
+## What this guide covers
+
+**Covered.** The map of where phonometry's heavy work runs: the devices a
+simulation steps on, a node named in the hosts file, and the CPU and GPU
+encoders of a video, here or on a node, with the page that explains each.
+
+**Not covered.** Running code of your own on a node: only the library's
+functions travel, with their arguments as data. Encoding on a node an
+animation drawn here. JAX and the other array libraries. NVENC, Quick Sync,
+VAAPI and VideoToolbox are tried and used, and not tested in CI.
+
+## See also
+
+- [Where a simulation runs: NumPy, CuPy and torch](https://docs.jmrp.io/phonometry/simulation/compute/):
+  every device, the `use()` block, `PHONOMETRY_COMPUTE` and what is promised
+  on each.
+- [Sending a simulation to a remote node](https://docs.jmrp.io/phonometry/simulation/remote-node/):
+  the hosts file, the node image and what each side trusts.
+- [Writing animations and FDTD runs to video](https://docs.jmrp.io/phonometry/io/videos/): the
+  containers, codecs, encoders and quality presets.
+- [2D FDTD wave simulation](https://docs.jmrp.io/phonometry/simulation/fdtd-simulation/) and
+  [Elastic waves and fluid-solid coupling](https://docs.jmrp.io/phonometry/simulation/elastic-waves/):
+  the two engines.
 
 ---
 
@@ -73747,15 +73935,15 @@ array-api-compat 1.5.1 for `[torch]`.
 Optional extras:
 
 ```bash
-pip install phonometry[plot]    # matplotlib, for filter response plots and result .plot() methods
-pip install phonometry[perf]    # numba, faster 'impulse' time weighting
-pip install phonometry[report]  # reportlab + svglib, so result .report() methods render normative PDF fiches (their figure panel needs [plot] too)
-pip install phonometry[audio]   # python-soundfile, so phonometry.io also reads FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV
-pip install phonometry[full]    # all of the above (recommended)
-pip install phonometry[torch]   # torch + array-api-compat, so the FDTD engines run on PyTorch (CPU, CUDA or Apple MPS); not part of [full]
+pip install "phonometry[plot]"    # matplotlib, for filter response plots and result .plot() methods
+pip install "phonometry[perf]"    # numba, faster 'impulse' time weighting
+pip install "phonometry[report]"  # reportlab + svglib, so result .report() methods render normative PDF fiches (their figure panel needs [plot] too)
+pip install "phonometry[audio]"   # python-soundfile, so phonometry.io also reads FLAC, AIFF, Ogg/Opus, MP3 and compressed WAV
+pip install "phonometry[full]"    # all of the above (recommended)
+pip install "phonometry[torch]"   # torch + array-api-compat, so the FDTD engines run on PyTorch (CPU, CUDA or Apple MPS); not part of [full]
 ```
 
-I recommend `pip install phonometry[full]`: it brings matplotlib, numba,
+I recommend `pip install "phonometry[full]"`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
 enabled except the torch backend of the FDTD engines, which `[torch]` adds. The
 base install computes every metric on NumPy and SciPy alone, and that includes
@@ -73785,7 +73973,7 @@ the torch it finds, and those libraries stay out:
 
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install phonometry[torch]
+pip install "phonometry[torch]"
 ```
 
 Adding that index with `--extra-index-url` is not enough: pip takes the
@@ -74642,6 +74830,7 @@ tables in feet and computes in metres:
 | `plateau_height=` on `plateau_transmission_loss` and `SoundReductionResult` | `plateau_height_db=` |
 | `distance=`, `distances=` and their compounds in `aircraft`: `npd_level`, `npd_curve`, `event_level`, `noise_contour`, `noise_fraction`, `AnpNpdCurves`, `AnpDatabase`, `RotorcraftHemisphere`, `hover_ring_hemisphere`, the rotorcraft propagation functions and their results | `distance_m=`, `distances_m=`, `reference_distance_m=`, `horizontal_distance_m=`, `scaled_distance_m=`, `query_distances_m=`, `table_distances_m` |
 | `ReportMetadata(mic_spacing=, thickness=)` | `microphone_spacing_m=`, `thickness_m=` |
+| `center=`, `width=` and `wavelength=` on `FDTD2D.add_plane_wave` | `center_m=`, `half_width_m=` (the `1/e` half-width, as `GaussianPulse.half_width_s` is in time) and `wavelength_m=`, beside the widths the engine counts in cells |
 
 Thirteen lengths are written by name now as well, because they carry a default
 and the name is the only place the unit shows: `npd_curve(query_distances_m=)`,
@@ -74966,6 +75155,8 @@ hertz, `levels` in decibels and the sample rate is `fs` on every function.
 | `c=` and `rho=` on `sound_intensity`, `c=` on the two phase-mismatch conversions, `phase_mismatch()` (now `phase_mismatch_deg()`), `absorption_coefficient_uncertainty` and `monopole_source_level` | `speed_of_sound=`, `density=` |
 | `speed_of_sound_m_s=` on `thickness_critical_frequency_product` | `speed_of_sound=` |
 | `sample_rate` on the FDTD `SignalSource`, `STOIResult` and `impact_force_exposure_level` | `fs` |
+| `sponge_width=`, `sponge_sides=`, `sponge_reflection=` and `.sponge_width`/`.sponge_sides` on `FDTD2D` and `ElasticFDTD2D` | `absorbing_layer_cells=`, `absorbing_sides=`, `absorbing_layer_reflection=` and `.absorbing_layer_cells`/`.absorbing_sides`, the words the run records use for the same layer, as `FDTDBoundaries.absorbing_layer_cells` and `ElasticBoundaries.absorbing_layer_cells` do; the default is still 0, no layer |
+| `FDTD2D.plot_geometry(probes=)` in metres (4.0.0rc1) | `(ix, iy)` cells, as `FDTDRecording.probes`; each is drawn at the cell centre `FDTDResult.probe_positions` records, and a cell off the grid or inside an obstacle is refused as a run refuses it |
 | `freq=` on `linkwitz_riley` and `adaptation_term_kc` | `frequency=` and `frequencies=` |
 | `band["freq"]` in the `bands` rows of `FilterComplianceResult`, `WeightingComplianceResult` and `IntensityInstrumentComplianceResult`, and `between_nominals["worst_freq"]` on `WeightingComplianceResult` | `band["frequency"]` and `between_nominals["worst_frequency"]` |
 | `.frequency` on the results that carry a frequency axis: `IntensityResult`, `FieldIndicators`, `IntensityInstrumentComplianceResult`, `RoomAcousticsResult`, the five auditorium results, `ImpedanceTubeResult`, `PorousMediumResult`, `LayeredAbsorberResult`, `DiffuseFieldAbsorptionResult`, `BiotWavesResult`, `SlitResonatorAbsorberResult`, `MetadiffuserResult`, `TransferMatrix`, the two valve-noise results, `AircraftBandAttenuation`, `AmbientNoiseResult`, `ShipTrafficSpectrum` | `.frequencies` |
@@ -75037,7 +75228,10 @@ published table and a string of a published tuple of choices. `catalogue`
 keeps its spelling: it is an American variant too, every name writes it the
 same way, and it is the file format of your own catalogues. A string a source
 prints keeps its print, which is why the CNOSSOS surface below is still
-`"optimised brushed down concrete"`.
+`"optimised brushed down concrete"`. The closed choices of the FDTD engines
+and their records are typed `Literal` too, a side, a recorded field, a plane
+wave's travel and a force's axis, so a type checker refuses
+`free_sides="Top"` before the run; nothing changes at run time.
 
 | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- |
@@ -75116,7 +75310,8 @@ of the signal functions always used; called by position, nothing changes. The
 | `trials=` on `metrology.monte_carlo`, and `MonteCarloResult.trials` | `n_trials` |
 | the `passages` of `silencer_self_noise`, `valve_style_modifier`, `multihole_incipient_cavitation_ratio` and `uniform_passage_style_modifier`, and the `stages` of `stage_level_correction` | `n_passages` and `n_stages` |
 | the `steps` of `FDTD2D.run` and `ElasticFDTD2D.run`, and `max_arrivals=` on `underwater.eigenrays` | `n_steps` and `max_n_arrivals=` |
-| `record_every=` and `decimate=` on `FDTD2D.run` and `ElasticFDTD2D.run` | `snapshot_every=` and `snapshot_decimation=`, the names `FDTDRecording` and `ElasticRecording` take for the same two counts |
+| `simulation.ContourProbe.samples` and `ContourProbe(sim=...)` | `.n_samples`, read-only, and `engine=` |
+| `record_every=` and `decimate=` on `FDTD2D.run` and `ElasticFDTD2D.run`, by position or by name | `snapshot_every=` and `snapshot_decimation=`, the names `FDTDRecording` and `ElasticRecording` take for the same two counts, and like them keyword-only: `run(400, 10, 2)` is `run(400, snapshot_every=10, snapshot_decimation=2)` |
 | `fdtd_simulation(probes=..., snapshot_every=..., snapshot_decimation=...)` | `fdtd_simulation(FDTDRun(..., recording=FDTDRecording(probes=..., snapshot_every=..., snapshot_decimation=...)))`: what an acoustic run records is one record, the `recording` of the run, as an elastic run's is one `ElasticRecording`; a run without one records only its time axis, as before |
 | `fdtd_simulation(c, dx, duration, sources=..., ...)` and `elastic_fdtd_simulation(c_p, c_s, dx, duration, sources=..., rho=..., ...)` | `fdtd_simulation(FDTDRun(c=c, dx=dx, duration_s=duration, sources=..., boundaries=simulation.FDTDBoundaries(sides=..., absorbing_layer_cells=...), ...))` and `elastic_fdtd_simulation(ElasticRun(c_p=c_p, c_s=c_s, dx=dx, duration_s=duration, sources=..., rho=..., ...))`: a simulation is one record, with the same arguments, which takes every field by name and checks them all when it is built. `duration` is `duration_s`, and the acoustic `boundaries=` and `absorbing_layer_cells=` are now one `FDTDBoundaries`, as the elastic ones are one `ElasticBoundaries`; `compute=` stays on the function. A bad argument raises where the run is written, with the same class and the same words, except that a refused duration now names `duration_s` |
 | a `boundaries=` of `elastic_fdtd_simulation` that is not an `ElasticBoundaries`, which failed inside the run | refused with `TypeError` when the `ElasticRun` is built |
@@ -75767,7 +75962,7 @@ an `aircraft.ANPDatabase` is built from, and the medium maps of
 `simulation.FDTD2D` and `simulation.ElasticFDTD2D`, whose `c`, `rho`, `c_p`
 and `c_s` now stay the ones the time step was computed from. The maps the
 engines derive from them, `FDTD2D.kappa` and `ElasticFDTD2D.mu` and `.lam`,
-are read-only host copies too: in 4.0.0rc1 an edit to one reached part of the
+are read-only NumPy copies too: in 4.0.0rc1 an edit to one reached part of the
 step and not the time step, and now it raises `ValueError`, so a different
 medium is a new engine built from edited maps. A `Signal`
 keeps a copy of its own samples too, which stays writeable for processing in

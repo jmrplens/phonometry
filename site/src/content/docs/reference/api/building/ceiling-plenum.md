@@ -187,7 +187,7 @@ CeilingAttenuationResult.plot(
 
 Plot `Dn,c` against the fitted ASTM E413 contour.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### CeilingAttenuationResult.rounded
@@ -399,5 +399,5 @@ PlenumFlankingResult.plot(
 
 Plot `Rcl` against the two ceiling reduction indices.
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.

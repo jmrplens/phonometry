@@ -1,0 +1,171 @@
+---
+title: "Dónde se ejecuta el trabajo pesado: CPU, GPU o un nodo"
+description: "Dónde se ejecuta el trabajo pesado de phonometry, simulaciones y vídeos por igual: en esta máquina o en un nodo al que se llega por SSH, en una CPU o en una GPU; qué dispositivo y qué codificador pedir, y la página que explica cada uno a fondo."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../components/SeeAlso.astro';
+
+Dos cosas de phonometry tardan lo bastante como para querer una máquina más
+rápida: hacer avanzar una simulación FDTD, acústica o elástica, y escribir un
+vídeo de ella. Las dos pueden ejecutarse en esta máquina o en un nodo al que
+llegas por SSH, y las dos pueden usar una GPU cuando la hay. Esta página es el
+mapa; cada camino tiene su propia página.
+
+## Dónde avanza una simulación
+
+Una ejecución es un registro de lo que se simula (`FDTDRun`, o `ElasticRun`
+para la simulación elástica), comprobado al construirlo. Dónde avanza va
+aparte: un registro `Compute`, que se pasa como `compute=` a
+`fdtd_simulation`, a `elastic_fdtd_simulation`, a los dos motores y a las dos
+funciones que escriben animaciones, de modo que la misma ejecución avanza en
+cualquier sitio. Si no se pasa nada y `PHONOMETRY_COMPUTE` no está definida,
+avanza con NumPy, aquí, en float64, y cada resultado registra dónde se
+ejecutó:
+
+```python
+from phonometry import simulation
+
+run = simulation.FDTDRun(
+    c=343.0, dx=0.02, duration_s=2.0e-3, shape=(60, 80),
+    sources=[simulation.GaussianPulse(ix=20, iy=30, half_width_s=3.0e-4)],
+    recording=simulation.FDTDRecording(probes=[(60, 30)]),
+)
+res = simulation.fdtd_simulation(run)
+print(res.provenance.device, res.provenance.host)   # cpu None
+```
+
+| Dispositivo | Avanza en | Qué instalar | Qué se promete |
+|---|---|---|---|
+| `"cpu"` | NumPy, en la CPU de esta máquina | nada | la referencia, bit a bit |
+| `"cupy"` | una GPU de NVIDIA | el wheel de CuPy para tu versión de CUDA | los campos bit a bit, según lo medido |
+| `"torch:cpu"` | PyTorch en la CPU | `pip install torch --index-url https://download.pytorch.org/whl/cpu` y después `pip install "phonometry[torch]"` | dentro de una cota publicada |
+| `"torch:cuda"` | PyTorch en una GPU de NVIDIA | `pip install "phonometry[torch]"` | todavía sin cota medida |
+| `"torch:mps"` | la GPU de Apple, solo en float32 | `pip install "phonometry[torch]"` | dentro de una cota publicada en float32 |
+
+En Linux, la fila de la CPU toma primero torch del índice de CPU de PyTorch,
+porque el torch que sirve PyPI allí trae gigabytes de bibliotecas de CUDA que
+una CPU nunca usa.
+
+[Dónde se calcula una simulación](/phonometry/es/simulation/compute/) explica
+cada dispositivo, el bloque `use()` y la variable `PHONOMETRY_COMPUTE`, la
+vuelta a NumPy y las mediciones que respaldan la última columna.
+
+## Aquí o en un nodo
+
+Si el registro nombra un host, la misma llamada se ejecuta en ese nodo, y el
+resultado vuelve como si se hubiera ejecutado aquí:
+
+```py
+gpu_node = simulation.Compute(device="cupy", host="nas")
+res = simulation.fdtd_simulation(run, compute=gpu_node)
+print(res.provenance.host, res.provenance.gpu)   # nas, y el nombre de la tarjeta
+```
+
+Un nodo es una entrada de tu fichero de hosts: se llega a él por SSH y
+ejecuta la imagen de contenedor del nodo o un entorno de Python propio. Un
+trabajo nombra una función de la biblioteca y lleva su ejecución como datos,
+nunca código tuyo; el nodo ejecuta el phonometry que tienes aquí, enviado una
+vez por versión, y su respuesta se comprueba antes de fiarse de ella. Un motor
+construido directamente (`FDTD2D`, `ElasticFDTD2D`) avanza en este proceso:
+lo mueve tu propio código, paso a paso, y eso no puede viajar.
+[Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/)
+explica el fichero de hosts, la imagen del nodo y de qué se fía cada lado.
+
+## Dónde se codifica un vídeo
+
+Un vídeo se dibuja con matplotlib y lo codifica ffmpeg, con un codificador de
+CPU o uno de GPU. Cómo se codifica es un registro propio, `io.VideoOptions`,
+que `io.write_video` y las dos funciones que escriben simulaciones toman como
+`video=`; sin él, el codificador se elige solo (`encoder="auto"`).
+
+Una función que escribe una simulación dibuja un fotograma por cada
+instantánea que registra su ejecución, así que la cadencia de las
+instantáneas es la de los fotogramas:
+`recording=simulation.FDTDRecording(snapshot_every=10)` guarda el campo cada
+diez pasos, y una ejecución que no registra instantáneas se rechaza con
+`ValueError`. La ejecución `run` de la tabla y del código de abajo las
+registra.
+
+| | Un codificador de CPU | Un codificador de GPU |
+|---|---|---|
+| Aquí | `io.write_video(path, animation, video=io.VideoOptions(encoder="cpu"))`: SVT-AV1 o, sin él, VP9 en un WebM y x265 o x264 en un MP4 | `VideoOptions(encoder="auto")`, el valor por defecto, prueba NVENC, Quick Sync, VAAPI y VideoToolbox, cada uno con una codificación real de un fotograma, y después la CPU |
+| En un nodo | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(host="nas"), video=io.VideoOptions(encoder="cpu"))` | `simulation.write_fdtd_animation(path, run, compute=simulation.Compute(device="cupy", host="nas"), video=io.VideoOptions(encoder="nvenc"))`: el nodo calcula, dibuja y codifica; un codificador de GPU allí necesita una ubicación en GPU (`"cupy"` o `"torch:cuda"`), la que da su GPU al contenedor de un nodo Docker |
+
+```py
+from phonometry import io, simulation
+
+io.write_video("wave.webm", animation)   # cualquier animación de matplotlib, codificada aquí
+run = simulation.FDTDRun(
+    c=343.0, dx=0.01, duration_s=4.0e-3, shape=(200, 300),
+    sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3.0e-4)],
+    recording=simulation.FDTDRecording(snapshot_every=10),
+)
+simulation.write_fdtd_animation(
+    "pulse.webm", run,
+    compute=simulation.Compute(device="cupy", host="nas"),
+    video=io.VideoOptions(encoder="nvenc"),
+)
+```
+
+El fotograma que dibuja una de esas funciones (su idioma, su tamaño, el
+límite de color) es el tercer registro, `simulation.AnimationFrame`, que se
+pasa como `frame=`. Un GIF se escribe siempre en la CPU.
+
+Una animación que dibujas tú se codifica solo aquí: lo que viaja a un nodo es
+lo que la biblioteca puede volver a dibujar allí, las dos funciones que
+escriben simulaciones.
+[Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/)
+explica los contenedores, los códecs, los codificadores y los preajustes de
+calidad.
+
+## Qué elegir
+
+- Una malla pequeña avanza igual de rápido con NumPy, o más: una GPU paga un
+  coste fijo por cada operación que lanza, y solo una malla lo bastante
+  grande lo amortiza.
+- Una malla grande y una GPU de NVIDIA aquí: `Compute(device="cupy")`.
+- Un Mac: `Compute(device="torch:mps", dtype="float32")`, con la cota en
+  float32 que publica la página de cálculo.
+- Sin GPU aquí, pero con una en una máquina a la que llegas: el mismo
+  registro con `host=`.
+- Un vídeo: `io.VideoOptions(encoder="auto")`, el valor por defecto, aquí, o
+  las funciones que escriben simulaciones con un host cuando el dibujo
+  también deba hacerse junto a la GPU.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+El mapa de dónde se ejecuta el trabajo pesado de phonometry: los
+dispositivos en los que avanza una simulación, un nodo nombrado en el fichero
+de hosts y los codificadores de CPU y de GPU de un vídeo, aquí o en un nodo,
+con la página que explica cada uno.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Ejecutar código propio en un nodo: solo viajan las funciones de la
+biblioteca, con sus argumentos como datos. Codificar en un nodo una animación
+dibujada aquí. JAX y las demás bibliotecas de arrays. NVENC, Quick Sync,
+VAAPI y VideoToolbox se prueban y se usan, y no se comprueban en CI.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Dónde se calcula una simulación: NumPy, CuPy y torch](/phonometry/es/simulation/compute/):
+  cada dispositivo, el bloque `use()`, `PHONOMETRY_COMPUTE` y lo que se
+  promete en cada uno.
+- [Enviar una simulación a un nodo remoto](/phonometry/es/simulation/remote-node/):
+  el fichero de hosts, la imagen del nodo y de qué se fía cada lado.
+- [Escribir animaciones y simulaciones FDTD en vídeo](/phonometry/es/io/videos/):
+  los contenedores, los códecs, los codificadores y los preajustes de
+  calidad.
+- [Simulación de ondas FDTD 2D](/phonometry/es/simulation/fdtd-simulation/) y
+  [Ondas elásticas y acoplamiento fluido-sólido](/phonometry/es/simulation/elastic-waves/):
+  las dos simulaciones.
+
+</SeeAlso>

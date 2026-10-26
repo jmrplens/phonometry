@@ -541,7 +541,11 @@ def test_an_audit_only_run_encodes_nothing_and_stamps_nothing(
     assert not plt.fignum_exists(fig.number)  # type: ignore[attr-defined]
     # The same call stamps once the run encodes.
     stamped: list[list[str]] = []
-    monkeypatch.setattr(animation_fingerprint, "stamp", stamped.append)
+    monkeypatch.setattr(
+        animation_fingerprint,
+        "stamp",
+        lambda clips, root=None, *, encoder: stamped.append(list(clips)),
+    )
     monkeypatch.delenv(cfa.AUDIT_ENV)
     registry._stamp_clips(["anim_struck"], str(tmp_path))
     assert stamped == [["anim_struck"]]
@@ -569,8 +573,11 @@ def test_the_audit_only_command_inspects_every_variant_and_exits_with_its_verdic
     )
     # Set here so that the variable the command sets is put back afterwards.
     monkeypatch.setenv(cfa.AUDIT_ENV, str(tmp_path / "audit"))
+    # The clip steps nothing; a GPU named in the shell would be asked about.
+    monkeypatch.delenv("PHONOMETRY_COMPUTE", raising=False)
+    argv = ["--animations", "--audit-only", "--anim", "anim_fake", "--jobs", "1"]
     with pytest.raises(SystemExit, match=f"^{status}$") as finished:
-        registry._audit_animations(["anim_fake"], 1)
+        registry.main(argv)
     assert finished.value.code == status
     fragments = sorted(path.name for path in (tmp_path / "audit").glob("*.json"))
     assert fragments == sorted(

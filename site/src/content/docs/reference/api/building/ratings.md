@@ -124,7 +124,7 @@ bands 100-3150 Hz, with the unfavourable deviations (measurement
 above the reference) shaded on the core bands and the bands outside
 the core range marked as the enlarged range; the title carries the
 impact rating with `CI` and, when covered, `CI,50-2500`.
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## ExtendedWeightedRatingResult
@@ -190,7 +190,7 @@ bands 100-3150 Hz, with the unfavourable deviations shaded on the
 core bands and the bands outside the core range marked as the
 enlarged range; the title carries `Rw (C; Ctr)` and every Annex B
 adaptation term the input covered. Requires matplotlib
-(`pip install phonometry[plot]`); returns the
+(`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## impact_improvement_adaptation_term
@@ -308,7 +308,7 @@ ImpactImprovementRatingResult.plot(
 
 Plot the improvement spectrum with its rating (ISO 717-2).
 
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ## ImpactRatingResult
@@ -354,7 +354,7 @@ Plot the measured curve vs the shifted reference (ISO 717-2).
 
 Unfavourable deviations (measurement above the reference, the sign
 opposite to airborne) are shaded and `Ln,w (CI)` annotated.
-Requires matplotlib (`pip install phonometry[plot]`); returns the
+Requires matplotlib (`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### ImpactRatingResult.report()
@@ -397,7 +397,7 @@ optional verdict row and a footer with the fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`, `symbol` is not a valid quantity-symbol shape, or the result was built without the per-band data (`frequencies`, `measured`, `shifted_reference`). |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |
 
 ## LINING_REFERENCE_ELEMENTS
 
@@ -475,7 +475,7 @@ Plot `Rref,without` and `Rref,with` with the improvement ratings.
 Draws the reference curve of the basic element and the same curve
 raised by the measured `ΔR`, the two curves Annex D rates; the title
 carries `ΔRw`, `Δ(Rw + C)` and `Δ(Rw + Ctr)` with the element
-index. Requires matplotlib (`pip install phonometry[plot]`); returns
+index. Requires matplotlib (`pip install "phonometry[plot]"`); returns
 the `Axes`.
 
 ## weighted_impact_improvement
@@ -802,7 +802,7 @@ Plot the measured curve vs the shifted reference (ISO 717-1).
 
 Unfavourable deviations (reference above measurement) are shaded and
 `Rw (C; Ctr)` annotated. Requires matplotlib
-(`pip install phonometry[plot]`); returns the
+(`pip install "phonometry[plot]"`); returns the
 `Axes`.
 
 ### WeightedRatingResult.report()
@@ -845,4 +845,4 @@ row and a footer with the fixed disclaimer.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `engine` is not `"reportlab"`, `symbol` is not a valid quantity-symbol shape, or the result was built without the per-band data (`frequencies`, `measured`, `shifted_reference`). |
-| ImportError | If reportlab is not installed (`pip install phonometry[report]`), or matplotlib is missing for the embedded figure (`pip install phonometry[plot]`). |
+| ImportError | If reportlab is not installed (`pip install "phonometry[report]"`), or matplotlib is missing for the embedded figure (`pip install "phonometry[plot]"`). |

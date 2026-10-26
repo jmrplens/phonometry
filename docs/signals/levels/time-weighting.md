@@ -270,7 +270,7 @@ start from rest again.
 ## 7. Performance note
 
 The `impulse` mode uses an asymmetric kernel that is JIT-compiled when
-[numba](https://numba.pydata.org/) is installed (`pip install phonometry[perf]`).
+[numba](https://numba.pydata.org/) is installed (`pip install "phonometry[perf]"`).
 Without numba a pure-Python fallback produces identical results, just slower.
 
 See [Integrated & Statistical Levels](levels.md) for $L_\mathrm{eq}$/$L_N$ metrics

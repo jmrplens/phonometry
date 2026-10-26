@@ -361,7 +361,7 @@ class LiningImprovementResult(RichDisplay):
 
         Draws the three Annex D curves over the tabulated range with this
         system's own resonance marked, the analogue of Figures D.2 and D.3.
-        Requires matplotlib (``pip install phonometry[plot]``); returns the
+        Requires matplotlib (``pip install "phonometry[plot]"``); returns the
         :class:`~matplotlib.axes.Axes`.
         """
         from ..._i18n import check_language

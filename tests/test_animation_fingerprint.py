@@ -2624,3 +2624,54 @@ def test_the_standard_library_is_read_alike_on_every_supported_python() -> None:
     }
     assert sys.stdlib_module_names - fp._STANDARD_LIBRARY == set()
     assert exceptions - fp._BUILTIN_EXCEPTIONS == set()
+
+
+class _FakeMsvcrt:
+    """Stand-in for Windows' :mod:`msvcrt`: refuses the first lock with EDEADLOCK."""
+
+    LK_LOCK = 1
+    LK_UNLCK = 0
+
+    def __init__(self, refusals: int) -> None:
+        self.refusals = refusals
+        self.calls: list[int] = []
+
+    def locking(self, fd: int, mode: int, nbytes: int) -> None:
+        import errno
+
+        assert nbytes == 1
+        self.calls.append(mode)
+        if mode == self.LK_LOCK and self.refusals:
+            self.refusals -= 1
+            raise OSError(errno.EDEADLOCK, "Resource deadlock avoided")
+
+
+def test_the_stamp_lock_waits_out_a_busy_lock_on_windows_and_releases_it(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Off POSIX the manifest lock retries msvcrt's give-up and always unlocks."""
+    fake = _FakeMsvcrt(refusals=2)
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setitem(sys.modules, "msvcrt", fake)
+    with fp._locked(tmp_path / "manifest.lock"):
+        assert fake.calls == [fake.LK_LOCK] * 3
+    assert fake.calls == [fake.LK_LOCK] * 3 + [fake.LK_UNLCK]
+
+
+def test_the_stamp_lock_on_windows_raises_what_is_not_a_busy_lock(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A lock failure other than EDEADLOCK is not retried for ever."""
+    import errno
+
+    class _Denied(_FakeMsvcrt):
+        def locking(self, fd: int, mode: int, nbytes: int) -> None:
+            raise OSError(errno.EACCES, "Permission denied")
+
+    monkeypatch.setattr(sys, "platform", "win32")
+    monkeypatch.setitem(sys.modules, "msvcrt", _Denied(refusals=0))
+    with (
+        pytest.raises(OSError, match="Permission denied"),
+        fp._locked(tmp_path / "m.lock"),
+    ):
+        pass

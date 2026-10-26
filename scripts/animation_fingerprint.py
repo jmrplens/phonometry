@@ -132,6 +132,7 @@ import ast
 import contextlib
 import copy
 import dataclasses
+import errno
 import hashlib
 import json
 import pathlib
@@ -1159,7 +1160,8 @@ _STANDARD_LIBRARY = frozenset(
 )
 
 #: The exception classes Python builds in, on every version this runs on (3.12
-#: to 3.14), so that what counts as one cannot differ between machines.
+#: to 3.14) and on every platform, so that what counts as one cannot differ
+#: between machines. ``WindowsError`` is a builtin on Windows alone.
 _BUILTIN_EXCEPTIONS = frozenset(
     [
         "ArithmeticError",
@@ -1231,6 +1233,7 @@ _BUILTIN_EXCEPTIONS = frozenset(
         "UserWarning",
         "ValueError",
         "Warning",
+        "WindowsError",
         "ZeroDivisionError",
     ]
 )
@@ -2734,6 +2737,46 @@ def write_manifest(stamps: dict[str, str], encoders: dict[str, str]) -> None:
     MANIFEST.write_text(_HEADER + body, encoding="utf-8")
 
 
+@contextlib.contextmanager
+def _locked(path: pathlib.Path) -> Iterator[None]:
+    """Hold an exclusive lock on *path* for the block, on POSIX and on Windows.
+
+    The lock file is never removed: unlinking it after the release lets a
+    later run create a fresh inode and lock that one while another run is
+    still inside the old one, which is the very race this guards.
+
+    :param path: The lock file, created when missing and never truncated.
+    """
+    with path.open("a+b") as handle:
+        if sys.platform == "win32":
+            import msvcrt
+
+            # msvcrt locks a byte range, and LK_LOCK gives up with EDEADLOCK
+            # after ten tries a second apart; a run behind a long batch keeps
+            # waiting, as flock does.
+            while True:
+                handle.seek(0)
+                try:
+                    msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK, 1)
+                    break
+                except OSError as exc:
+                    if exc.errno != errno.EDEADLOCK:
+                        raise
+            try:
+                yield
+            finally:
+                handle.seek(0)
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(handle, fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(handle, fcntl.LOCK_UN)
+
+
 def stamp(
     clips: Iterable[str],
     root: pathlib.Path | None = None,
@@ -2765,34 +2808,21 @@ def stamp(
         or when a clip steps an FDTD engine and the tree's
         ``engine-digests.json`` does not hold the engines' digests.
     """
-    import fcntl
-
     names = list(clips)
     if not names:
         return
     if current is None:
         current = fingerprints(root or _SCRIPTS.parent)
-    # The lock file is never removed: unlinking it after the release lets a
-    # later run create a fresh inode and lock that one while another run is
-    # still inside the old one, which is the very race this guards.
-    lock = MANIFEST.with_suffix(".lock")
-    with lock.open("w") as handle:
-        fcntl.flock(handle, fcntl.LOCK_EX)
-        try:
-            stamps = read_manifest()
-            encoders = read_encoders()
-            for clip in names:
-                if clip not in current:
-                    continue
-                stamps[clip] = current[clip]
-                if encoder is not None:
-                    encoders[clip] = encoder
-                elif clip not in encoders:
-                    msg = (
-                        f"{clip} has no encoder recorded; "
-                        "render it, not only its posters"
-                    )
-                    raise ValueError(msg)
-            write_manifest(stamps, encoders)
-        finally:
-            fcntl.flock(handle, fcntl.LOCK_UN)
+    with _locked(MANIFEST.with_suffix(".lock")):
+        stamps = read_manifest()
+        encoders = read_encoders()
+        for clip in names:
+            if clip not in current:
+                continue
+            stamps[clip] = current[clip]
+            if encoder is not None:
+                encoders[clip] = encoder
+            elif clip not in encoders:
+                msg = f"{clip} has no encoder recorded; render it, not only its posters"
+                raise ValueError(msg)
+        write_manifest(stamps, encoders)

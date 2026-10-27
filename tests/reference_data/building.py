@@ -753,7 +753,7 @@ ISO9611_FREE_VELOCITY_REFERENCE = 5.0e-8  # m/s
 # ISO 10140-5:2010+A1:2014 Table B.1 printed the same curves with the same
 # integer ratings; its 2021 edition refers to ISO 717-1 for them.
 # ---------------------------------------------------------------------------
-ISO717_1_TABLE_E1_PRINTED: dict[str, dict[str, tuple[int, float]]] = {
+ISO717_1_TABLE_E1_PRINTED: dict[BasicElement, dict[str, tuple[int, float]]] = {
     "heavy_wall": {
         "rating": (53, 53.4),
         "c": (-1, -1.6),
@@ -794,7 +794,9 @@ ISO717_1_TABLE_E1_PRINTED: dict[str, dict[str, tuple[int, float]]] = {
 # decimal), (integer, one decimal)). The lightweight floors No 1 and No 2 share
 # the column "C1 and C2". ISO 10140-5:2010+A1:2014 Table C.1 printed the same
 # integer values; its 2021 edition refers to ISO 717-2 for them.
-ISO717_2_TABLE4_PRINTED: dict[str, tuple[tuple[int, float], tuple[int, float]]] = {
+ISO717_2_TABLE4_PRINTED: dict[
+    ReferenceFloor, tuple[tuple[int, float], tuple[int, float]]
+] = {
     "heavyweight": ((78, 77.6), (-11, -10.3)),
     "lightweight_1": ((72, 71.8), (0, 0.0)),
     "lightweight_2": ((72, 71.8), (0, 0.0)),
@@ -855,7 +857,7 @@ ISO717_1_TABLE_E1_BANDS: tuple[float, ...] = (
     4000.0,
     5000.0,
 )
-ISO717_1_TABLE_E1_CURVES: dict[str, tuple[float, ...]] = {
+ISO717_1_TABLE_E1_CURVES: dict[BasicElement, tuple[float, ...]] = {
     "heavy_wall": (
         *(35.3, 37.3, 39.4, 40.0, 40.0, 40.0, 40.0, 41.0, 43.5, 46.1, 48.5),
         *(51.0, 53.6, 56.0, 58.4, 61.1, 63.6, 65.0, 65.0, 65.0, 65.0),

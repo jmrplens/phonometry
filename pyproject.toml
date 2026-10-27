@@ -372,11 +372,13 @@ exclude = ['^tests/data-local/']
 # An ignore names the error it silences, so it cannot hide a second one.
 enable_error_code = ["ignore-without-code"]
 
-# The packages that ship no type information, and only those: a missing stub
-# anywhere else is an error, not a silent `Any`. The list is what a run with no
-# exemption reports, here and in an environment installed the way the CI
-# quality job installs it (numba is in neither of its requirement files, and
-# cupy, torch and array_api_compat are the optional compute backends).
+# The packages the type checker cannot read types for, here or in CI, and only
+# those: a missing stub anywhere else is an error, not a silent `Any`. Six ship
+# no type information (scipy, reportlab, pypdfium2, soundfile, mpl_toolkits and
+# fontTools). The CI quality job does not install the other four: numba, which
+# is in neither of its requirement files, and cupy, torch and array_api_compat,
+# the optional compute backends. The list is what a run with no exemption
+# reports, here and in an environment installed the way that job installs it.
 [[tool.mypy.overrides]]
 module = [
     "array_api_compat.*",

@@ -408,11 +408,57 @@ def test_the_filter_reader_sees_every_form_pytest_accepts(
 # Makefile and the pull request template had both dropped `stub/src`, and
 # nothing compared any of them with another.
 
-#: A type-check command: `mypy`, or the Makefile's `$(MYPY)`, at the start of
-#: a command, with whatever follows it up to the end of that command.
-_MYPY_COMMAND = re.compile(
-    r"(?:^|&&|\|\||[;|(])\s*(?:mypy|\$\(MYPY\))(?=\s|$|[;&|)])(?P<arguments>[^;&|)\n]*)"
+#: A variable set for the one command it precedes: ``MYPYPATH=tests mypy``.
+_SET_BEFORE = r"[A-Za-z_][A-Za-z0-9_]*=\S*\s+"
+
+#: A program that runs the command after it, with its own options: ``env``,
+#: ``time``, ``exec``, or a tool's ``run`` (``uv run``, ``poetry run``).
+_WRAPPER = r"(?:env|time|exec|(?:uv|poetry|pdm|pipx|hatch)\s+run)(?:\s+-\S+)*\s+"
+
+#: A Python interpreter under any path, or a Makefile variable that names
+#: one, with the options it takes before ``-m``.
+_INTERPRETER = (
+    r"(?:(?:\S*/)?python[0-9.]*|py|\$\([A-Za-z_]+\)|\$\{[A-Za-z_]+\})"
+    r"(?:\s+-[XW]\s*\S+|\s+-\S+)*?"
 )
+
+
+def _command_pattern(variables: str) -> re.Pattern[str]:
+    """A type-check command at the start of a command, up to its end.
+
+    The program is ``mypy`` under any path, an interpreter running it as a
+    module, or a Makefile variable that holds it, *variables* being a regex
+    of their names. Variables set before it and wrappers that run it are part
+    of the command; ``prefix`` holds them and ``arguments`` what follows the
+    program.
+    """
+    program = (
+        rf"{_INTERPRETER}\s+-m\s*mypy"
+        r"|(?:\S*/)?mypy"
+        rf"|\$\((?:{variables})\)|\$\{{(?:{variables})\}}"
+    )
+    return re.compile(
+        rf"(?:^|&&|\|\||[;|(])\s*(?P<prefix>(?:{_SET_BEFORE}|{_WRAPPER})*)"
+        rf"(?:{program})(?=\s|$|[;&|)])(?P<arguments>[^;&|)\n]*)"
+    )
+
+
+#: The command as CI, the pages and the scripts write it: the Makefile's
+#: ``$(MYPY)`` is the one variable they may name.
+_MYPY_COMMAND = _command_pattern("MYPY")
+
+#: A command already found, read back with any variable as its program.
+_FOUND_COMMAND = _command_pattern("[A-Za-z_][A-Za-z0-9_]*")
+
+#: A variable assignment of a Makefile, in any of make's flavours, possibly
+#: indented inside a conditional.
+_MAKE_ASSIGNMENT = re.compile(
+    r"^ *(?:(?:export|override) +)*(?P<name>[A-Za-z_][A-Za-z0-9_]*) *"
+    r"(?P<operator>:{1,3}=|[?+!]?=) *(?P<value>.*)$"
+)
+
+#: A shell comment, from a ``#`` that starts a word to the end of the line.
+_COMMENT = re.compile(r"(?:^|\s)#.*")
 
 #: A Markdown fence, opening or closing.
 _FENCE = re.compile(r"^\s*(?:```|~~~)")
@@ -431,8 +477,12 @@ _MYPY_STATED_IN = (
 )
 
 #: The roots bare `mypy` has to keep checking: the package, the scripts, the
-#: transition shim and the script that writes the pull request comment.
-_MYPY_ROOTS = ("src", "scripts", "stub/src", ".github/scripts")
+#: transition shim, the static typing pins and the script that writes the pull
+#: request comment.
+_MYPY_ROOTS = ("src", "scripts", "stub/src", "tests/static_typing", ".github/scripts")
+
+#: The files mypy reads its configuration from before ``pyproject.toml``.
+_MYPY_SHADOWING_CONFIGS = ("mypy.ini", ".mypy.ini")
 
 
 def _tracked(*patterns: str) -> list[str]:
@@ -459,33 +509,96 @@ def _scripts_of(node: object) -> list[str]:
     return []
 
 
-def _commands_in(lines: Sequence[str]) -> list[str]:
-    """The type-check commands in *lines*, each as written."""
+def _joined(text: str) -> list[str]:
+    """The lines of a script, each continued line joined to the next."""
+    return text.replace("\\\n", " ").splitlines()
+
+
+def _commands_in(
+    lines: Sequence[str], pattern: re.Pattern[str] = _MYPY_COMMAND
+) -> list[str]:
+    """The type-check commands in *lines*, each as written, spaces folded."""
     return [
-        match.group(0).strip(" ;&|(")
+        " ".join(match.group(0).strip(" ;&|(").split())
         for line in lines
-        for match in _MYPY_COMMAND.finditer(line.strip().lstrip("@-+"))
+        for match in pattern.finditer(line.strip().lstrip("@-+"))
     ]
+
+
+def _spells_out(command: str) -> bool:
+    """Whether *command* gives mypy anything ``pyproject.toml`` should hold.
+
+    That is an argument (a path, an option, a comment aside), or a search
+    path set before it in ``MYPYPATH``, which is ``mypy_path`` by another
+    name.
+    """
+    match = _FOUND_COMMAND.match(command)
+    if match is None:
+        msg = f"not a type-check command: {command!r}"
+        raise ValueError(msg)
+    arguments = _COMMENT.sub("", match["arguments"]).strip()
+    return bool(arguments) or bool(re.search(r"(?:^|\s)MYPYPATH=", match["prefix"]))
 
 
 def _markdown_commands(text: str) -> list[str]:
     """The type-check commands a page gives: fenced lines and inline code.
 
     Prose that names the tool is not a command; a code span or a fenced
-    block is how every page here writes something to run.
+    block is how every page here writes something to run. A fenced line that
+    ends in a backslash goes on in the next one.
     """
     commands: list[str] = []
     fenced = False
+    continued = ""
     for line in text.splitlines():
-        if _FENCE.match(line):
+        if not continued and _FENCE.match(line):
             fenced = not fenced
             continue
         if fenced:
-            commands += _commands_in([line])
+            if line.rstrip().endswith("\\"):
+                continued += line.rstrip()[:-1] + " "
+                continue
+            commands += _commands_in([continued + line])
+            continued = ""
         else:
             spans = [span.strip() for span in _CODE_SPAN.findall(line)]
             commands += _commands_in(spans)
     return commands
+
+
+def _makefile_commands(text: str) -> list[str]:
+    """The type-check commands of a Makefile, in its variables and recipes.
+
+    A recipe runs ``$(MYPY)``, whose value is set apart, indented inside
+    ``ifeq`` where no recipe line is; so every assignment is read as well, a
+    variable that holds the program is followed into the recipes that name
+    it, and a ``+=`` onto one is an argument given to the program.
+    """
+    lines = _joined(text)
+    assignments = [
+        found
+        for line in lines
+        if not line.startswith("\t") and (found := _MAKE_ASSIGNMENT.match(line))
+    ]
+    holders = {"MYPY"}
+    while True:
+        pattern = _command_pattern("|".join(sorted(holders)))
+        grown = holders | {
+            found["name"]
+            for found in assignments
+            if _commands_in([found["value"]], pattern)
+        }
+        if grown == holders:
+            break
+        holders = grown
+    commands: list[str] = []
+    for found in assignments:
+        if found["operator"] == "+=" and found["name"] in holders:
+            commands.append(f"$({found['name']}) {found['value']}".strip())
+        else:
+            commands += _commands_in([found["value"]], pattern)
+    recipes = [line for line in lines if line.startswith("\t")]
+    return commands + _commands_in(recipes, pattern)
 
 
 def _stated_mypy_commands() -> dict[str, list[str]]:
@@ -496,15 +609,13 @@ def _stated_mypy_commands() -> dict[str, list[str]]:
     stated: dict[str, list[str]] = {}
     for name in _tracked(".github/*.yml", ".github/*.yaml"):
         document = yaml.safe_load((_ROOT / name).read_text(encoding="utf-8"))
-        scripts = _scripts_of(document)
         stated[name] = _commands_in(
-            [line for script in scripts for line in script.splitlines()]
+            [line for script in _scripts_of(document) for line in _joined(script)]
         )
-    for name in _tracked("Makefile", "*/Makefile"):
-        text = (_ROOT / name).read_text(encoding="utf-8")
-        stated[name] = _commands_in(
-            [line for line in text.splitlines() if line.startswith("\t")]
-        )
+    for name in _tracked("Makefile", "*/Makefile", "*.mk"):
+        stated[name] = _makefile_commands((_ROOT / name).read_text(encoding="utf-8"))
+    for name in _tracked("*.sh", "hooks/*"):
+        stated[name] = _commands_in(_joined((_ROOT / name).read_text(encoding="utf-8")))
     for name in _tracked("*.md", "*.mdx"):
         if name == "CHANGELOG.md":
             continue
@@ -518,7 +629,9 @@ def test_every_stated_type_check_is_bare_mypy() -> None:
 
     A path list written out in one of them is a second copy of ``files``,
     and the copies drift: the Makefile and the pull request template had
-    both lost ``stub/src`` while CI still checked it.
+    both lost ``stub/src`` while CI still checked it. Any spelling of the
+    program counts, ``python -m mypy`` and ``.venv/bin/mypy`` among them, and
+    so does the value the Makefile gives ``$(MYPY)``.
     """
     stated = _stated_mypy_commands()
     missing = [name for name in _MYPY_STATED_IN if name not in stated]
@@ -530,7 +643,7 @@ def test_every_stated_type_check_is_bare_mypy() -> None:
         f"{name}: {command}"
         for name, commands in sorted(stated.items())
         for command in commands
-        if command not in ("mypy", "$(MYPY)")
+        if _spells_out(command)
     ]
     assert not spelled_out, (
         f"run the type check as bare `mypy`, whose paths are `files` under "
@@ -547,19 +660,136 @@ def test_every_stated_type_check_is_bare_mypy() -> None:
         ("mypy takes the paths it is given.\n", []),
         ("```\nruff check . && mypy stub/src\n```\n", ["mypy stub/src"]),
         ("```\nmypyc build\n```\n", []),
+        ("Its settings would move to `mypy.ini`.\n", []),
+        ("```\npython -m mypy src\n```\n", ["python -m mypy src"]),
+        ("`python3.12 -I -m mypy`\n", ["python3.12 -I -m mypy"]),
+        ("`.venv/bin/mypy src scripts`\n", [".venv/bin/mypy src scripts"]),
+        ("```\nMYPYPATH=tests mypy\n```\n", ["MYPYPATH=tests mypy"]),
+        ("`uv run --frozen mypy src`\n", ["uv run --frozen mypy src"]),
+        ("```\nmypy \\\n  src \\\n  scripts\n```\n", ["mypy src scripts"]),
     ],
-    ids=["fenced", "code span", "bare in prose", "prose", "chained", "other tool"],
+    ids=[
+        "fenced",
+        "code span",
+        "bare in prose",
+        "prose",
+        "chained",
+        "other tool",
+        "config file",
+        "module",
+        "module with options",
+        "path",
+        "variable set before",
+        "wrapped",
+        "continued",
+    ],
 )
 def test_the_command_reader_finds_a_command_and_only_a_command(
     text: str, expected: list[str]
 ) -> None:
-    """The scan reads code, not prose, and a command after ``&&`` too."""
+    """The scan reads code, not prose, and any spelling of the program."""
     assert _markdown_commands(text) == expected
 
 
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("MYPY = $(BIN)/mypy\n\nlint:\n\t$(MYPY)\n", ["$(BIN)/mypy", "$(MYPY)"]),
+        (
+            "ifeq (,$(wildcard .venv))\n    MYPY = mypy\nelse\n"
+            "    MYPY = $(BIN)/mypy src\nendif\n",
+            ["mypy", "$(BIN)/mypy src"],
+        ),
+        ("MYPY = mypy\nMYPY += src\n", ["mypy", "$(MYPY) src"]),
+        ("lint:\n\t$(PYTHON) -m mypy\n", ["$(PYTHON) -m mypy"]),
+        (
+            "CHECK := $(BIN)/mypy\n\nlint:\n\t@$(CHECK) \\\n\t    src\n",
+            ["$(BIN)/mypy", "$(CHECK) src"],
+        ),
+        (
+            "FIGURE_ENV = OMP_NUM_THREADS=1 \\\n\tPYTHONHASHSEED=0\n",
+            [],
+        ),
+    ],
+    ids=[
+        "variable and recipe",
+        "assignment inside ifeq",
+        "appended",
+        "module in a recipe",
+        "another variable, continued",
+        "no type check",
+    ],
+)
+def test_the_makefile_reader_follows_the_program_into_its_variables(
+    text: str, expected: list[str]
+) -> None:
+    """Assignments are read where they sit, and a holder of mypy is followed."""
+    assert _makefile_commands(text) == expected
+
+
+@pytest.mark.parametrize(
+    ("command", "expected"),
+    [
+        ("mypy", False),
+        ("$(MYPY)", False),
+        (".venv/bin/mypy", False),
+        ("python -m mypy", False),
+        ("$(PYTHON) -m mypy", False),
+        ("uv run mypy", False),
+        ("mypy # the gate", False),
+        ("mypy src", True),
+        ("mypy --strict", True),
+        ("python -m mypy src", True),
+        ("$(BIN)/mypy src", True),
+        ("$(MYPY) $(MYPYFLAGS)", True),
+        ("MYPYPATH=tests mypy", True),
+    ],
+)
+def test_a_bare_command_is_told_from_one_that_spells_its_paths_out(
+    command: str, *, expected: bool
+) -> None:
+    """What follows the program, or a search path set before it, is spelled out."""
+    assert _spells_out(command) is expected
+
+
+def _covers(entry: str, root: str) -> bool:
+    """Whether the ``files`` entry *entry* reaches every file under *root*."""
+    within = pathlib.PurePosixPath(entry).parts
+    return pathlib.PurePosixPath(root).parts[: len(within)] == within
+
+
+@pytest.mark.parametrize(
+    ("entry", "root", "expected"),
+    [
+        ("tests/static_typing", "tests/static_typing", True),
+        ("tests", "tests/static_typing", True),
+        (".", "src", True),
+        ("tests/static", "tests/static_typing", False),
+        ("tests/static_typing", "tests", False),
+    ],
+)
+def test_a_files_entry_covers_itself_and_what_lies_under_it(
+    entry: str, root: str, *, expected: bool
+) -> None:
+    """A parent directory in ``files`` covers a root; a sibling prefix does not."""
+    assert _covers(entry, root) is expected
+
+
 def test_bare_mypy_checks_every_root_the_gate_needs() -> None:
-    """``files`` under [tool.mypy] holds every root CI has to type check."""
+    """``files`` under [tool.mypy] reaches every root CI has to type check."""
     with (_ROOT / "pyproject.toml").open("rb") as handle:
         files = tomllib.load(handle)["tool"]["mypy"]["files"]
-    missing = [root for root in _MYPY_ROOTS if root not in files]
-    assert not missing, f"[tool.mypy] files no longer lists {missing}"
+    missing = [
+        root for root in _MYPY_ROOTS if not any(_covers(entry, root) for entry in files)
+    ]
+    assert not missing, f"[tool.mypy] files no longer reaches {missing}"
+
+
+def test_no_config_file_takes_the_place_of_pyproject() -> None:
+    """mypy reads ``mypy.ini`` or ``.mypy.ini`` before ``pyproject.toml``.
+
+    Either one, tracked or left behind locally, would make bare ``mypy``
+    ignore ``[tool.mypy]`` without a word, and check whatever it lists.
+    """
+    present = [name for name in _MYPY_SHADOWING_CONFIGS if (_ROOT / name).exists()]
+    assert not present, f"{present} would replace [tool.mypy] in pyproject.toml"

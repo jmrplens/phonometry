@@ -67,7 +67,7 @@ def _curve(table: object, bands: list[float]) -> np.ndarray:
 @pytest.mark.parametrize("element", sorted(ref.ISO717_1_TABLE_E1_PRINTED))
 @pytest.mark.parametrize("one_decimal", [False, True])
 def test_table_e1_curves_reproduce_every_printed_term(
-    element: str, *, one_decimal: bool
+    element: BasicElement, *, one_decimal: bool
 ) -> None:
     """ISO 717-1:2020 Table E.1: Rw and all eight adaptation terms, both forms."""
     printed = ref.ISO717_1_TABLE_E1_PRINTED[element]
@@ -83,7 +83,7 @@ def test_table_e1_curves_reproduce_every_printed_term(
 @pytest.mark.parametrize("floor", sorted(ref.ISO717_2_TABLE4_PRINTED))
 @pytest.mark.parametrize("one_decimal", [False, True])
 def test_table_4_curves_reproduce_their_printed_ratings(
-    floor: str, *, one_decimal: bool
+    floor: ReferenceFloor, *, one_decimal: bool
 ) -> None:
     """ISO 717-2:2020 Table 4: Ln,r,0,w and CI,r,0 of every floor, both forms."""
     (rating, rating_1dp), (ci, ci_1dp) = ref.ISO717_2_TABLE4_PRINTED[floor]
@@ -95,7 +95,7 @@ def test_table_4_curves_reproduce_their_printed_ratings(
 
 
 @pytest.mark.parametrize("element", sorted(ref.ISO717_1_TABLE_E1_CURVES))
-def test_table_e1_curves_are_the_printed_bands(element: str) -> None:
+def test_table_e1_curves_are_the_printed_bands(element: BasicElement) -> None:
     """ISO 717-1:2020 Table E.1, all 21 bands of each element as printed."""
     table = building.LINING_REFERENCE_ELEMENTS[element]
     assert tuple(table) == ref.ISO717_1_TABLE_E1_BANDS

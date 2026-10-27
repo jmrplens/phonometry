@@ -745,7 +745,7 @@ ISO8041_1_ANNEX_B_PHASES_DEG: dict[WeightingName, tuple[tuple[int, float], ...]]
 # per region: f <= ft1 and f >= ft4: +26 %/-100 %; ft1 < f < ft2 and
 # ft3 < f < ft4: +26 %/-21 %; ft2 <= f <= ft3: +12 %/-11 %.
 _WBV_TRANSITIONS = (10.0**-0.6, 10.0**-0.2, 10.0**1.8, 10.0**2.2)
-ISO8041_1_TABLE4_TRANSITIONS: dict[str, tuple[float, float, float, float]] = {
+ISO8041_1_TABLE4_TRANSITIONS: dict[WeightingName, tuple[float, float, float, float]] = {
     "Wb": _WBV_TRANSITIONS,
     "Wc": _WBV_TRANSITIONS,
     "Wd": _WBV_TRANSITIONS,

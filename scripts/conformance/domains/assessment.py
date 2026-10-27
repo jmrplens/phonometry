@@ -699,7 +699,7 @@ def _chk_hpd_applications() -> Outcome:
     )
     pnr = hml.noise_reduction
     if pnr is None:
-        msg = "the HML method is given the A-weighted level, so it reports PNR"
+        msg = "the HML method reported no PNR, though it was given the A-weighted level"
         raise ValueError(msg)
     snr_rating = ph.hearing.snr_rating(attenuation)
     by_c = ph.hearing.snr_protected_level(snr_rating, l_p_c=ref.ISO4869_2_ANNEX_B_LPC)

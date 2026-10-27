@@ -1259,10 +1259,10 @@ Ninety public functions and methods follow the rule, `room.room_constant`,
 | 3.3.0 or 4.0.0rc1 | 4.0 |
 | --- | --- |
 | `room.room_constant(100.0, np.array(0.2))` returned the `float` `25.0` | it returns `array(25.)`; `float(...)` or `.item()` gives the number |
-| `emission.local_environmental_correction([0.5])` returned a `float`, as did its three neighbours and `WorkstationBackgroundCorrection.correction` for any one-element input | it returns a one-element array; hand over `0.5` for a number |
+| `emission.local_environmental_correction([0.5])` returned a `float` for any one-element input, as did `emission.environmental_ratio_from_k2`, `emission.environmental_ratio_from_absorption`, and the `background_margin_db` field and the `correction` property of the `WorkstationBackgroundCorrection` that `emission.background_noise_correction_at_workstation` returns | each gives a one-element array; hand over `0.5` for a number |
 | `electroacoustics.piston_resistance(1.0)` returned a `numpy.float64`, as did `piston_reactance` and `piston_directivity` | it returns a Python `float`, with no `.shape` or `.dtype` |
 
-Sixty-six of them are typed overloads now, so a type checker reads
+Sixty-six of them gain typed overloads, so a type checker reads
 `room.room_constant(100.0, 0.2)` as a `float` and
 `room.room_constant(100.0, alphas)` as an array whatever the shape of
 `alphas`; an `ArrayLike` or a nested list reads as the union, which a typed

@@ -22,6 +22,7 @@ import pathlib
 import sys
 import textwrap
 
+import numpy as np
 import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
@@ -696,6 +697,9 @@ def test_a_number_or_an_array_without_overloads_is_refused(
         "complex | NDArray[np.complex128]",
         "bool | NDArray[np.bool_]",
         "np.float64 | NDArray[np.float64]",
+        "np.double | np.ndarray",
+        "np.int_ | np.ndarray",
+        "float | np.matrix",
         "np.floating[Any] | np.ndarray",
         "Literal['A', 'B'] | NDArray[np.str_]",
         "str | NDArray[np.str_]",
@@ -713,6 +717,23 @@ def test_every_spelling_of_a_value_or_an_array_is_read(
         """,
     )
     assert list(refused) == ["level"]
+
+
+def test_every_numpy_scalar_and_array_class_is_known() -> None:
+    """The gate names numpy's types by hand, so a new numpy cannot slip one past it.
+
+    It stays free of numpy, which leaves the two sets to be kept against the
+    numpy installed here: every scalar class it exports (a subclass of
+    ``numpy.generic``, aliases such as ``double`` and ``int_`` included) is a
+    single value, and every array class (a subclass of ``numpy.ndarray``) an
+    array.
+    """
+    exported = {name: getattr(np, name) for name in dir(np)}
+    classes = {name: obj for name, obj in exported.items() if isinstance(obj, type)}
+    scalars = {f"numpy.{n}" for n, c in classes.items() if issubclass(c, np.generic)}
+    arrays = {f"numpy.{n}" for n, c in classes.items() if issubclass(c, np.ndarray)}
+    assert scalars - cro._SCALARS == set()
+    assert arrays - cro._ARRAYS == set()
 
 
 @pytest.mark.parametrize(

@@ -276,7 +276,11 @@ class WorkstationBackgroundCorrection(OwnsArrays):
 
     @property
     def correction(self) -> float | NDArray[np.float64]:
-        """:math:`K_1`, in decibels: a number, or one value per band."""
+        """:math:`K_1`, in decibels: a number, or one value per band.
+
+        A ``float`` when ``background_margin_db`` is a number, and an array
+        when it is a sequence or an array, a zero-dimensional one included.
+        """
         delta = np.asarray(self.background_margin_db, dtype=np.float64)
         clamped = np.clip(delta, self._floor_db, None)
         correction = -10.0 * np.log10(1.0 - np.power(10.0, -0.1 * clamped))

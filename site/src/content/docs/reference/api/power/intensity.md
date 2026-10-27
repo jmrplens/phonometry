@@ -285,6 +285,9 @@ The verdict: $F_1$ stays within the limit in every band.
 
 Whether $F_1$ stays within the limit: a bool, or one per band.
 
+A `bool` when `f1` is a number, and an array of them when it is a
+sequence or an array, a zero-dimensional one included.
+
 Judged settled: samples whose standard deviation is 0,6 of their mean
 in decimal are at the limit, whichever side of it the last bits fall.
 

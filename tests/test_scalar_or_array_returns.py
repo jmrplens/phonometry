@@ -23,10 +23,12 @@ a missing ``frequency``) have a test of their own below.
 
 from __future__ import annotations
 
+import functools
 import importlib
 import inspect
+import pathlib
+import sys
 import types
-import typing
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
@@ -49,8 +51,17 @@ from phonometry import (
     vibration,
 )
 
+_SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
+if _SCRIPTS not in sys.path:
+    sys.path.insert(0, _SCRIPTS)
+
+import ast_scan
+import check_return_overloads as cro
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator, Mapping
+
+    from numpy.typing import NDArray
 
 _ZONES = vibration.ZoneBoundaries(a_b=1.0, b_c=2.0, c_d=3.0)
 
@@ -455,19 +466,22 @@ def _public_callables() -> Iterator[Callable[..., object]]:
                     yield function
 
 
-#: How a head that returns one value spells it: a number, or a grade.
-_SINGLE_VALUES = frozenset({"float", "int", "bool", "str", "EvaluationZone"})
+@functools.cache
+def _source() -> cro.Package:
+    """The package as the gate reads it: every head, its aliases expanded."""
+    return cro.Package(ast_scan.python_files([], cro.SOURCE), cro.SOURCE)
 
 
 def _tells_a_value_from_an_array(function: Callable[..., object]) -> bool:
-    """Whether the heads of *function* return a single value alone and an array alone."""
-    returns = [
-        str(head.__annotations__.get("return", ""))
-        for head in typing.get_overloads(function)
-    ]
-    arrays = [r for r in returns if "ndarray" in r.lower() and "|" not in r]
-    values = [r for r in returns if r in _SINGLE_VALUES or r.startswith("Literal[")]
-    return bool(arrays and values)
+    """Whether the heads of *function* return a single value alone and an array alone.
+
+    Read from the source by the gate's own reader, so a head that spells the
+    array or the value through an alias (``Real``, ``Grade``) or as a numpy
+    scalar is classified as the gate classifies it.
+    """
+    package = _source()
+    read = package.functions.get(f"{function.__module__}.{function.__qualname__}")
+    return read is not None and cro.tells_a_value_from_an_array(package, read)
 
 
 def test_every_function_of_a_number_or_an_array_has_a_case() -> None:
@@ -576,6 +590,38 @@ def test_the_piston_functions_return_a_python_float() -> None:
     ):
         assert type(function(1.0)) is float
     assert type(electroacoustics.piston_directivity(2.0, 0.3)) is float
+
+
+def _stationary(f1: float | NDArray[np.float64]) -> object:
+    return emission.FieldStationarityCheck(f1).stationary
+
+
+def _workstation_correction(margin: float | NDArray[np.float64]) -> object:
+    return emission.WorkstationBackgroundCorrection(margin).correction
+
+
+@pytest.mark.parametrize(
+    ("read", "number", "single"),
+    [(_stationary, 0.3, bool), (_workstation_correction, 8.0, float)],
+    ids=[
+        "FieldStationarityCheck.stationary",
+        "WorkstationBackgroundCorrection.correction",
+    ],
+)
+def test_the_two_properties_follow_the_field_they_read(
+    read: Callable[[float | NDArray[np.float64]], object], number: float, single: type
+) -> None:
+    """A property has no argument to overload on: the field it reads decides its form."""
+    expected = read(number)
+    assert type(expected) is single
+    assert type(read(np.float64(number))) is single
+    listed = read(np.array([number, number]))
+    assert isinstance(listed, np.ndarray)
+    assert listed.shape == (2,)
+    zero = read(np.asarray(number))
+    assert isinstance(zero, np.ndarray)
+    assert zero.ndim == 0
+    assert zero[()] == expected
 
 
 def test_the_helper_refuses_a_result_its_like_does_not_shape() -> None:

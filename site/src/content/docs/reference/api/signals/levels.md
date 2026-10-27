@@ -156,7 +156,7 @@ ln_levels(
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
-) -> dict[int, float | np.ndarray]
+) -> dict[int, float | NDArray[np.float64]]
 ```
 
 Statistical percentile levels (LN) from the time-weighted level envelope.

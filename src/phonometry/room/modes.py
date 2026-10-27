@@ -67,7 +67,7 @@ from typing import TYPE_CHECKING, Any, overload
 import numpy as np
 
 from .._internal.frozen import OwnsArrays
-from .._internal.types import as_float_or_array
+from .._internal.types import as_float_if_reduced, as_float_or_array
 from .._internal.validation import require_positive, require_ranks, require_same_length
 from .steady_field import schroeder_frequency
 
@@ -167,7 +167,7 @@ def room_mode_frequency(
         msg = "'orders' must be non-negative integers."
         raise ValueError(msg)
     freqs = 0.5 * c0 * np.sqrt(np.sum((n / dims) ** 2, axis=1))
-    return float(freqs[0]) if single else np.asarray(freqs, dtype=np.float64)
+    return as_float_if_reduced(freqs[0] if single else freqs)
 
 
 @overload

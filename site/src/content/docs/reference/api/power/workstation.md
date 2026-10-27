@@ -669,6 +669,9 @@ cannot be built to hold a correction its margin does not give.
 
 $K_1$, in decibels: a number, or one value per band.
 
+A `float` when `background_margin_db` is a number, and an array
+when it is a sequence or an array, a zero-dimensional one included.
+
 ### WorkstationBackgroundCorrection.upper_bound
 
 *property*

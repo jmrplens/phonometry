@@ -154,7 +154,7 @@ def ln_levels(
     *,
     calibration_factor: float | None = None,
     dbfs: bool = False,
-) -> dict[int, float | np.ndarray]:
+) -> dict[int, float | NDArray[np.float64]]:
     """Statistical percentile levels (LN) from the time-weighted level envelope.
 
     L10 is the level exceeded 10% of the time (90th percentile of the level
@@ -207,11 +207,10 @@ def ln_levels(
         dbfs=dbfs,
     )
 
-    result: dict[int, float | np.ndarray] = {}
-    for value in n:
-        p = np.percentile(levels, 100 - value, axis=-1)
-        result[value] = float(p) if np.ndim(p) == 0 else np.asarray(p)
-    return result
+    return {
+        value: as_float_if_reduced(np.percentile(levels, 100 - value, axis=-1))
+        for value in n
+    }
 
 
 def lc_peak(

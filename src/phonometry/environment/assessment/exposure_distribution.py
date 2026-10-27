@@ -83,7 +83,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays, read_only
-from ..._internal.types import as_float_or_array
+from ..._internal.types import as_float_if_reduced, as_float_or_array
 from ..._internal.validation import (
     _as_float64,
     require_count,
@@ -242,9 +242,7 @@ def frequency_weighted_sel(
     total = np.squeeze(peak, axis=-1) + 10.0 * np.log10(
         np.sum(10.0 ** (0.1 * (weighted - peak)), axis=-1)
     )
-    if np.ndim(total) == 0:
-        return float(total)
-    return total
+    return as_float_if_reduced(total)
 
 
 def replica_probabilities(

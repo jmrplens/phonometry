@@ -76,6 +76,7 @@ if TYPE_CHECKING:
 from .._internal.boundary import settled, settled_net_share
 from .._internal.frozen import OwnsArrays
 from .._internal.levels_math import energy_mean
+from .._internal.types import answer_form, as_float_if_reduced, one_value
 from .._internal.utils import _typesignal
 from .._internal.validation import (
     require_axis_count,
@@ -405,13 +406,20 @@ class FieldStationarityCheck(OwnsArrays):
     def stationary(self) -> bool | NDArray[np.bool_]:
         """Whether :math:`F_1` stays within the limit: a bool, or one per band.
 
+        A ``bool`` when ``f1`` is a number, and an array of them when it is a
+        sequence or an array, a zero-dimensional one included.
+
         Judged settled: samples whose standard deviation is 0,6 of their mean
         in decimal are at the limit, whichever side of it the last bits fall.
         """
-        within = settled(np.asarray(self.f1, dtype=np.float64)) <= self.limit
-        return (
-            bool(within) if np.ndim(within) == 0 else np.asarray(within, dtype=np.bool_)
+        within = np.asarray(
+            settled(np.asarray(self.f1, dtype=np.float64)) <= self.limit,
+            dtype=np.bool_,
         )
+        form = answer_form((self.f1,))
+        if form == "array":
+            return within
+        return bool(one_value(within)) if form == "number" else one_value(within)
 
     @property
     def passes(self) -> bool:
@@ -954,17 +962,17 @@ def temporal_variability_indicator(
             "(ISO 9614-1 Annex A Note 9 recommends M = 10)."
         )
         raise ValueError(msg)
-    if samples.ndim == 1:
-        return _coefficient_of_variation(samples, non_positive_message=_F1_NON_POSITIVE)
-    return np.asarray(
+    bands = samples.reshape(samples.shape[0], -1)
+    f1 = np.asarray(
         [
             _coefficient_of_variation(
-                samples[:, b], non_positive_message=_F1_NON_POSITIVE
+                bands[:, b], non_positive_message=_F1_NON_POSITIVE
             )
-            for b in range(samples.shape[1])
+            for b in range(bands.shape[1])
         ],
         dtype=np.float64,
     )
+    return as_float_if_reduced(f1.reshape(samples.shape[1:]))
 
 
 def _field_indicators_1d(lp: np.ndarray, i_n: np.ndarray) -> tuple[float, float, float]:

@@ -5,10 +5,14 @@ An array in, an array out: a number gives a ``float``, a sequence or an array
 an array, and an argument whose shape a type checker cannot know (an
 ``ArrayLike``, a nested list) the union. The heads take their arguments as
 type parameters bounded by the three forms, because mypy reads an argument
-whose type holds an ``Any`` (the shape of every ``NDArray[np.float64]`` does)
-as matching every head it fits and returns ``Any`` unless those heads agree
-on its type; with a bound, each head is inferred to the argument's own type
-and the first one stands. ``tests/test_scalar_or_array_returns.py`` holds the
+whose type holds an explicit ``Any`` (a bare ``np.ndarray``, the
+``dtype[Any]`` that ``np.array(...)`` returns, a shape written
+``tuple[Any, ...]``) as matching every head it fits, and returns ``Any``
+unless those heads agree on its type. With a bound, each head is inferred to
+the argument's own type and the first one stands:
+``room.room_constant(100.0, np.array([0.2, 0.3]))`` reads as
+``NDArray[np.float64]``, where heads written with the plain forms read it as
+``Any``. ``tests/test_scalar_or_array_returns.py`` holds the
 runtime to the heads; this file holds the heads, for one function of each
 shape, and it only holds them because CI type checks every file in this
 directory alongside ``src`` and ``scripts``.
@@ -47,6 +51,7 @@ def test_arrays_read_as_an_array() -> None:
     assert_type(room.room_constant(100.0, _ARRAY), NDArray[np.float64])
     assert_type(room.room_constant(100.0, _ANY_SHAPE), NDArray[np.float64])
     assert_type(room.room_constant(100.0, np.array(0.2)), NDArray[np.float64])
+    assert_type(room.room_constant(100.0, np.array([0.2, 0.3])), NDArray[np.float64])
 
 
 def test_what_mypy_cannot_shape_reads_as_the_union() -> None:

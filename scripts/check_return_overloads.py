@@ -338,10 +338,26 @@ _SEVERAL = frozenset(
     }
 )
 
-#: The numpy arrays, of any dtype, that hold several axes.
-_ARRAYS = frozenset({"numpy.ndarray", "numpy.typing.NDArray"})
+#: The numpy arrays, of any dtype: what holds several axes, or several values.
+#: Every array class numpy exports is here, the subclasses of ``ndarray``
+#: included; ``tests/test_check_return_overloads.py`` holds the list to the
+#: numpy installed, since this script does not import it.
+_ARRAYS = frozenset(
+    {
+        "numpy.ndarray",
+        "numpy.typing.NDArray",
+        "numpy.matrix",
+        "numpy.memmap",
+        "numpy.recarray",
+    }
+)
 
 #: The single values a function may return in place of an array of them.
+#: Every scalar class numpy exports is here, under each of its names
+#: (``double`` is ``float64``, ``int_`` is ``intp``), with the extended
+#: precisions of every platform (``float96`` on 32-bit x86, ``float128`` on
+#: 64-bit); ``tests/test_check_return_overloads.py`` holds the list to the
+#: numpy installed, since this script does not import it.
 _SCALARS = frozenset(
     {
         "builtins.float",
@@ -351,32 +367,69 @@ _SCALARS = frozenset(
         "builtins.str",
         "typing.Literal",
         "typing_extensions.Literal",
+        # The abstract classes.
         "numpy.generic",
         "numpy.number",
+        "numpy.inexact",
         "numpy.floating",
+        "numpy.complexfloating",
         "numpy.integer",
         "numpy.signedinteger",
         "numpy.unsignedinteger",
-        "numpy.complexfloating",
+        "numpy.flexible",
+        "numpy.character",
+        # Floating point, by size and by C name.
         "numpy.float16",
         "numpy.float32",
         "numpy.float64",
+        "numpy.float96",
+        "numpy.float128",
+        "numpy.half",
+        "numpy.single",
+        "numpy.double",
         "numpy.longdouble",
+        # Complex, by size and by C name.
+        "numpy.complex64",
+        "numpy.complex128",
+        "numpy.complex192",
+        "numpy.complex256",
+        "numpy.csingle",
+        "numpy.cdouble",
+        "numpy.clongdouble",
+        # Signed integers, by size and by C name.
         "numpy.int8",
         "numpy.int16",
         "numpy.int32",
         "numpy.int64",
         "numpy.intp",
+        "numpy.int_",
+        "numpy.byte",
+        "numpy.short",
+        "numpy.intc",
+        "numpy.long",
+        "numpy.longlong",
+        # Unsigned integers, by size and by C name.
         "numpy.uint8",
         "numpy.uint16",
         "numpy.uint32",
         "numpy.uint64",
-        "numpy.complex64",
-        "numpy.complex128",
+        "numpy.uintp",
+        "numpy.uint",
+        "numpy.ubyte",
+        "numpy.ushort",
+        "numpy.uintc",
+        "numpy.ulong",
+        "numpy.ulonglong",
+        # The rest: truth values, times, text, bytes, records, objects.
         "numpy.bool",
         "numpy.bool_",
+        "numpy.datetime64",
+        "numpy.timedelta64",
         "numpy.str_",
         "numpy.bytes_",
+        "numpy.void",
+        "numpy.record",
+        "numpy.object_",
     }
 )
 
@@ -992,6 +1045,19 @@ def reaching_polar(package: Package) -> set[str]:
     return reached
 
 
+def tells_a_value_from_an_array(package: Package, function: Function) -> bool:
+    """Whether a function's heads say both cases: one the value alone, one the array.
+
+    ``tests/test_scalar_or_array_returns.py`` reads the package through this
+    too, so that every function the gate takes as overloaded on the shape of
+    its input has its runtime called there.
+    """
+    shapes = [package.values(function.module, head.returns) for head in function.heads]
+    return any(single and not several for single, several in shapes) and any(
+        several and not single for single, several in shapes
+    )
+
+
 def _scalar_findings(package: Package, function: Function, path: str) -> list[Finding]:
     """A single value or an array, where an overload should say which.
 
@@ -1000,13 +1066,12 @@ def _scalar_findings(package: Package, function: Function, path: str) -> list[Fi
     """
     module = function.module
     shapes = [package.values(module, head.returns) for head in function.heads]
-    says_single = any(single and not several for single, several in shapes)
-    says_several = any(several and not single for single, several in shapes)
+    says_both = tells_a_value_from_an_array(package, function)
     found: list[Finding] = []
     for head, (single, several) in zip(function.heads, shapes, strict=True):
         if head.returns is None or not (single and several):
             continue
-        if not (says_single and says_several):
+        if not says_both:
             found.append(
                 Finding(
                     path,

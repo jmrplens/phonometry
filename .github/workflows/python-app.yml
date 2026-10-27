@@ -85,7 +85,11 @@ jobs:
     # `[tool.ruff]`, so this never touches the documentation snippets.
     - name: Check formatting with Ruff
       run: ruff format --check .
-    # `stub/src` is in this list because it was in no path list at all. The
+    # Bare `mypy`: the paths it checks are `files` under [tool.mypy] in
+    # pyproject.toml, which `make lint` and every page that gives the command
+    # read too. While each of them spelled the list out, two had already
+    # dropped `stub/src` without anything noticing.
+    # `stub/src` is in that list because it was in no path list at all. The
     # PyOctaveBand transition shim lives outside the package this repository
     # installs, so nothing here ever imported or type checked it, and two
     # defects reached its published page that way. Ruff walks the tree from
@@ -94,8 +98,13 @@ jobs:
     # only a type checker can see, such as a published catalogue joined with
     # a caller's being accepted by a lookup's `catalogue=`: the suite runs
     # those files, but a wrong annotation passes at run time.
+    # `.github/scripts` holds the script that writes this pull request's
+    # comment, which sat under none of the paths. And the conformance
+    # scripts compare against the oracle tables in `tests/`: until the
+    # checker was told where those live, every value read from them was
+    # `Any` and the comparison went unchecked.
     - name: Type check with Mypy
-      run: mypy src scripts stub/src tests/static_typing
+      run: mypy
     - name: Security check with Bandit
       run: bandit -r src
     # The workflows hold the repository's tokens and the release's identity, and

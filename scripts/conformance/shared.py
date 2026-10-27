@@ -181,11 +181,11 @@ def _weighting_deviation(
     """
     wf = filters.WeightingFilter(fs, curve)
     if curve == "G":
-        rows = [r for r in ref.ISO7196_TABLE2 if r[0] < fs / 2]
+        rows_g = [r for r in ref.ISO7196_TABLE2 if r[0] < fs / 2]
         # Table 2 lists nominal one-third-octave labels; evaluate at the
         # exact base-10 frequencies 10**(n/10) as IEC 61672-1 Annex D does.
-        freqs = np.array([10 ** (round(10 * math.log10(r[0])) / 10) for r in rows])
-        nominal = np.array([r[1] for r in rows])
+        freqs = np.array([10 ** (round(10 * math.log10(r[0])) / 10) for r in rows_g])
+        nominal = np.array([r[1] for r in rows_g])
         upper = np.full(nominal.shape, ref.ISO7196_G_TOLERANCE_DB)
         lower = np.full(nominal.shape, -ref.ISO7196_G_TOLERANCE_DB)
     elif curve == "B":

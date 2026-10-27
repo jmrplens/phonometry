@@ -70,10 +70,11 @@ To set up your development environment:
 We enforce strict code quality standards. Before submitting a Pull Request, please ensure your code passes the following checks:
 
 ### 1. Type Checking (MyPy)
-We use strict type checking. Ensure no errors are reported on the paths CI
-checks:
+We use strict type checking. Ensure no errors are reported. Run it bare: the
+paths it checks are `files` under `[tool.mypy]` in `pyproject.toml`, the same
+list CI checks:
 ```bash
-mypy src scripts stub/src tests/static_typing
+mypy
 ```
 
 ### 2. Linting & Formatting (Ruff)

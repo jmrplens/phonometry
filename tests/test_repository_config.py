@@ -25,6 +25,7 @@ import sys
 import tomllib
 from typing import TYPE_CHECKING
 
+import child_process
 import pytest
 import yaml
 
@@ -398,3 +399,167 @@ def test_the_filter_reader_sees_every_form_pytest_accepts(
     """A class pytest would import is found in each place and spelling it reads."""
     found = [_category(f) for f in _config_time_filters(options)]
     assert any(not _names_a_builtin_warning(c) for c in found) is expected
+
+
+# ---------------------------------------------------------------------------
+# The type check is one command, bare `mypy`, wherever it is given to be run.
+# Its paths live in one place, `files` under [tool.mypy] in pyproject.toml.
+# While CI, the Makefile and three pages each spelled the list out, the
+# Makefile and the pull request template had both dropped `stub/src`, and
+# nothing compared any of them with another.
+
+#: A type-check command: `mypy`, or the Makefile's `$(MYPY)`, at the start of
+#: a command, with whatever follows it up to the end of that command.
+_MYPY_COMMAND = re.compile(
+    r"(?:^|&&|\|\||[;|(])\s*(?:mypy|\$\(MYPY\))(?=\s|$|[;&|)])(?P<arguments>[^;&|)\n]*)"
+)
+
+#: A Markdown fence, opening or closing.
+_FENCE = re.compile(r"^\s*(?:```|~~~)")
+
+#: An inline code span of a Markdown page.
+_CODE_SPAN = re.compile(r"`([^`\n]+)`")
+
+#: Where the command is given today. Each must still be found, so the scan
+#: cannot pass by reading nothing.
+_MYPY_STATED_IN = (
+    ".github/pull_request_template.md",
+    ".github/workflows/python-app.yml",
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "Makefile",
+)
+
+#: The roots bare `mypy` has to keep checking: the package, the scripts, the
+#: transition shim and the script that writes the pull request comment.
+_MYPY_ROOTS = ("src", "scripts", "stub/src", ".github/scripts")
+
+
+def _tracked(*patterns: str) -> list[str]:
+    """The tracked paths that match *patterns*, relative to the root."""
+    listed = child_process.run(
+        ["git", "ls-files", "-z", "--", *patterns],
+        cwd=_ROOT,
+        check=True,
+        capture_output=True,
+        timeout=120,
+    ).stdout.decode("utf-8")
+    return [name for name in listed.split("\0") if name]
+
+
+def _scripts_of(node: object) -> list[str]:
+    """Every ``run:`` script of a workflow or an action, at any depth."""
+    if isinstance(node, dict):
+        found = [node["run"]] if isinstance(node.get("run"), str) else []
+        for value in node.values():
+            found += _scripts_of(value)
+        return found
+    if isinstance(node, list):
+        return [script for item in node for script in _scripts_of(item)]
+    return []
+
+
+def _commands_in(lines: Sequence[str]) -> list[str]:
+    """The type-check commands in *lines*, each as written."""
+    return [
+        match.group(0).strip(" ;&|(")
+        for line in lines
+        for match in _MYPY_COMMAND.finditer(line.strip().lstrip("@-+"))
+    ]
+
+
+def _markdown_commands(text: str) -> list[str]:
+    """The type-check commands a page gives: fenced lines and inline code.
+
+    Prose that names the tool is not a command; a code span or a fenced
+    block is how every page here writes something to run.
+    """
+    commands: list[str] = []
+    fenced = False
+    for line in text.splitlines():
+        if _FENCE.match(line):
+            fenced = not fenced
+            continue
+        if fenced:
+            commands += _commands_in([line])
+        else:
+            spans = [span.strip() for span in _CODE_SPAN.findall(line)]
+            commands += _commands_in(spans)
+    return commands
+
+
+def _stated_mypy_commands() -> dict[str, list[str]]:
+    """Every type-check command the tracked tree tells anyone to run, by file.
+
+    The CHANGELOG is left out: it records the commands of past releases.
+    """
+    stated: dict[str, list[str]] = {}
+    for name in _tracked(".github/*.yml", ".github/*.yaml"):
+        document = yaml.safe_load((_ROOT / name).read_text(encoding="utf-8"))
+        scripts = _scripts_of(document)
+        stated[name] = _commands_in(
+            [line for script in scripts for line in script.splitlines()]
+        )
+    for name in _tracked("Makefile", "*/Makefile"):
+        text = (_ROOT / name).read_text(encoding="utf-8")
+        stated[name] = _commands_in(
+            [line for line in text.splitlines() if line.startswith("\t")]
+        )
+    for name in _tracked("*.md", "*.mdx"):
+        if name == "CHANGELOG.md":
+            continue
+        text = (_ROOT / name).read_text(encoding="utf-8")
+        stated[name] = _markdown_commands(text)
+    return {name: commands for name, commands in stated.items() if commands}
+
+
+def test_every_stated_type_check_is_bare_mypy() -> None:
+    """CI, ``make lint`` and every page run the type check as plain ``mypy``.
+
+    A path list written out in one of them is a second copy of ``files``,
+    and the copies drift: the Makefile and the pull request template had
+    both lost ``stub/src`` while CI still checked it.
+    """
+    stated = _stated_mypy_commands()
+    missing = [name for name in _MYPY_STATED_IN if name not in stated]
+    assert not missing, (
+        f"no type-check command found in {missing}; if one moved, update "
+        "_MYPY_STATED_IN, and if the scan stopped finding it, fix the scan"
+    )
+    spelled_out = [
+        f"{name}: {command}"
+        for name, commands in sorted(stated.items())
+        for command in commands
+        if command not in ("mypy", "$(MYPY)")
+    ]
+    assert not spelled_out, (
+        f"run the type check as bare `mypy`, whose paths are `files` under "
+        f"[tool.mypy] in pyproject.toml: {spelled_out}"
+    )
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("```bash\nmypy src scripts\n```\n", ["mypy src scripts"]),
+        ("- [ ] `mypy src`\n", ["mypy src"]),
+        ("Run (`pytest`, `mypy`, `ruff`).\n", ["mypy"]),
+        ("mypy takes the paths it is given.\n", []),
+        ("```\nruff check . && mypy stub/src\n```\n", ["mypy stub/src"]),
+        ("```\nmypyc build\n```\n", []),
+    ],
+    ids=["fenced", "code span", "bare in prose", "prose", "chained", "other tool"],
+)
+def test_the_command_reader_finds_a_command_and_only_a_command(
+    text: str, expected: list[str]
+) -> None:
+    """The scan reads code, not prose, and a command after ``&&`` too."""
+    assert _markdown_commands(text) == expected
+
+
+def test_bare_mypy_checks_every_root_the_gate_needs() -> None:
+    """``files`` under [tool.mypy] holds every root CI has to type check."""
+    with (_ROOT / "pyproject.toml").open("rb") as handle:
+        files = tomllib.load(handle)["tool"]["mypy"]["files"]
+    missing = [root for root in _MYPY_ROOTS if root not in files]
+    assert not missing, f"[tool.mypy] files no longer lists {missing}"

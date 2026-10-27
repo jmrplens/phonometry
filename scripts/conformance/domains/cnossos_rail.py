@@ -53,36 +53,46 @@ def _cnossos_rail_case(case: dict[str, str]) -> RailwayEmissionResult:
         n_axles=int(vehicle["axles"]),
         wheel_roughness=ph.environment.WavelengthSpectrum(
             wavelengths_mm=lam,
-            levels=wavelength[("wheel_roughness", vehicle["wheel_roughness"])],
+            levels=np.asarray(
+                wavelength[("wheel_roughness", vehicle["wheel_roughness"])]
+            ),
         ),
         contact_filter=ph.environment.WavelengthSpectrum(
             wavelengths_mm=lam,
-            levels=wavelength[("contact_filter", vehicle["contact_filter"])],
+            levels=np.asarray(
+                wavelength[("contact_filter", vehicle["contact_filter"])]
+            ),
         ),
         wheel_transfer=frequency[("wheel_transfer", vehicle["wheel_transfer"], "")],
         superstructure_transfer=frequency[
             ("superstructure_transfer", case["superstructure_transfer"], "")
         ],
         traction=ph.environment.RailSourceSpectra(
-            source_a=frequency[(traction, vehicle["traction"], "A")],
-            source_b=frequency[(traction, vehicle["traction"], "B")],
+            source_a=np.asarray(frequency[(traction, vehicle["traction"], "A")]),
+            source_b=np.asarray(frequency[(traction, vehicle["traction"], "B")]),
         ),
         aerodynamic=ph.environment.RailSourceSpectra(
-            source_a=frequency[("aerodynamic", vehicle["aerodynamic"], "A")],
-            source_b=frequency[("aerodynamic", vehicle["aerodynamic"], "B")],
+            source_a=np.asarray(
+                frequency[("aerodynamic", vehicle["aerodynamic"], "A")]
+            ),
+            source_b=np.asarray(
+                frequency[("aerodynamic", vehicle["aerodynamic"], "B")]
+            ),
         ),
         aerodynamic_alpha=float(case["aero_alpha"]),
     )
     track = ph.environment.RailwayTrack(
         rail_roughness=ph.environment.WavelengthSpectrum(
             wavelengths_mm=lam,
-            levels=wavelength[("rail_roughness", case["rail_roughness"])],
+            levels=np.asarray(wavelength[("rail_roughness", case["rail_roughness"])]),
         ),
         track_transfer=frequency[("track_transfer", case["track_transfer"], "")],
         impact_roughness=(
             ph.environment.WavelengthSpectrum(
                 wavelengths_mm=lam,
-                levels=wavelength[("impact_roughness", case["impact_roughness"])],
+                levels=np.asarray(
+                    wavelength[("impact_roughness", case["impact_roughness"])]
+                ),
             )
             if case["impact_roughness"]
             else None
@@ -231,8 +241,8 @@ def _chk_cnossos_rail_source_tables() -> Outcome:
     bad = 0
     impact = ph.environment.impact_roughness_single().levels
     bad += sum(1 for a, b in zip(impact, ref.CNOSSOS_RAIL_G4, strict=True) if a != b)
-    for key, (low, high) in ref.CNOSSOS_RAIL_G5.items():
-        power = ph.environment.traction_sound_power(key)
+    for vehicle, (low, high) in ref.CNOSSOS_RAIL_G5.items():
+        power = ph.environment.traction_sound_power(vehicle)
         got_low, got_high = power.source_a, power.source_b
         bad += sum(1 for a, b in zip(got_low, low, strict=True) if a != b)
         bad += sum(1 for a, b in zip(got_high, high, strict=True) if a != b)
@@ -242,10 +252,12 @@ def _chk_cnossos_rail_source_tables() -> Outcome:
     bad += sum(
         1 for a, b in zip(got_high, ref.CNOSSOS_RAIL_G6_B, strict=True) if a != b
     )
-    for key, expected in ref.CNOSSOS_RAIL_G7.items():
+    for bridge, expected in ref.CNOSSOS_RAIL_G7.items():
         bad += sum(
             1
-            for a, b in zip(ph.environment.bridge_transfer(key), expected, strict=True)
+            for a, b in zip(
+                ph.environment.bridge_transfer(bridge), expected, strict=True
+            )
             if a != b
         )
     return count(

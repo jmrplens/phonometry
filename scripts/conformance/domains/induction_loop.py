@@ -53,7 +53,7 @@ import reference_data as ref
 
 from phonometry import electroacoustics as ea
 
-from ..registry import Outcome, mask, numeric, record, register
+from ..registry import Outcome, mask, numeric, printed_cell, record, register
 
 _AFILS = "Audio-frequency induction loops (IEC 60118-4:2014+A1, IEC 62489-1:2010+A1)"
 
@@ -275,7 +275,7 @@ def _chk_field_reached() -> Outcome:
     def verdict(levels: list[float], specified: float = 0.0) -> bool:
         return ea.verify_induction_loop_system(levels, specified_level=specified).passes
 
-    pink = ref.IEC60118_4_TABLE3["pink_noise"][0]
+    pink = printed_cell(ref.IEC60118_4_TABLE3["pink_noise"][0])
     return _window_row(
         {
             "0 dB at one point, -3 dB elsewhere": (True, verdict([-3.0, 0.0])),

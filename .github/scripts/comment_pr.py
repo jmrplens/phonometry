@@ -106,17 +106,17 @@ def parse_test_results(test_dir: str, ref: str) -> tuple[str, int, int]:
         f_name = f_path.name
         try:
             tree = ET.parse(f_path)
-            root = tree.getroot()
+            report = tree.getroot()
 
-            if root.tag == "testsuites":
+            if report.tag == "testsuites":
                 tests = 0
                 failures = 0
-                for suite in root:
+                for suite in report:
                     tests += int(suite.attrib.get("tests", 0))
                     failures += int(suite.attrib.get("failures", 0))
             else:
-                tests = int(root.attrib.get("tests", 0))
-                failures = int(root.attrib.get("failures", 0))
+                tests = int(report.attrib.get("tests", 0))
+                failures = int(report.attrib.get("failures", 0))
 
             version = f_name.replace("test-results-", "").replace(".xml", "")
 
@@ -158,7 +158,8 @@ def head_document() -> dict[str, Any] | None:
     path = Path(ARTIFACT)
     if not path.is_file():
         return None
-    return json.loads(path.read_text(encoding="utf-8"))
+    document: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
+    return document
 
 
 def base_document() -> dict[str, Any] | None:
@@ -221,9 +222,9 @@ def _moved(before: dict[str, Any], after: dict[str, Any]) -> bool:
     old = before["deviation"].get("value")
     new = after["deviation"].get("value")
     if old is None or new is None:
-        return old != new
+        return bool(old != new)
     quantum = 10.0 ** -max(int(after["precision"]), 3)
-    return abs(new - old) > quantum
+    return bool(abs(new - old) > quantum)
 
 
 def _used(check: dict[str, Any]) -> str:

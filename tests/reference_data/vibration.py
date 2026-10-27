@@ -53,7 +53,7 @@ ISO8041_1_WD_REF_FACTOR = 0.1261  # Table 1, Wd @ 100 rad/s
 # factors to 4 significant figures). Transcribed from the standard and
 # cross-validated against the printed dB column (20 lg factor within the
 # 0,01 dB print rounding) row by row.
-ISO8041_1_ANNEX_B_FACTORS: dict[str, tuple[tuple[int, float], ...]] = {
+ISO8041_1_ANNEX_B_FACTORS: dict[WeightingName, tuple[tuple[int, float], ...]] = {
     "Wb": (
         (-10, 0.02494),
         (-9, 0.03941),
@@ -811,7 +811,7 @@ _SHARED_BAND_LIMITING: tuple[tuple[int, float], ...] = (
     (25, 0.0995),
     (26, 0.06297),
 )
-ISO8041_1_ANNEX_B_BAND_LIMITING: dict[str, tuple[tuple[int, float], ...]] = {
+ISO8041_1_ANNEX_B_BAND_LIMITING: dict[WeightingName, tuple[tuple[int, float], ...]] = {
     "Wb": _SHARED_BAND_LIMITING,
     "Wc": _SHARED_BAND_LIMITING,
     "Wd": _SHARED_BAND_LIMITING,

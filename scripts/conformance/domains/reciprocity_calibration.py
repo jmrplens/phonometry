@@ -39,6 +39,7 @@ from __future__ import annotations
 
 import dataclasses
 import math
+from typing import TypedDict
 
 import numpy as np
 import reference_data as ref
@@ -50,7 +51,16 @@ from ..registry import Outcome, count, numeric, record, register, residue_text
 
 _IEC61094 = "Microphone calibration by reciprocity (IEC 61094-2, IEC 61094-3)"
 
-_CONDITIONS = {
+
+class _Conditions(TypedDict):
+    """The environment every reciprocity call takes, as its keyword arguments."""
+
+    temperature_c: float
+    static_pressure_pa: float
+    relative_humidity_percent: float
+
+
+_CONDITIONS: _Conditions = {
     "temperature_c": ref.IEC61094_RECIPROCITY_REFERENCE_CONDITIONS[0],
     "static_pressure_pa": ref.IEC61094_RECIPROCITY_REFERENCE_CONDITIONS[1],
     "relative_humidity_percent": ref.IEC61094_RECIPROCITY_REFERENCE_CONDITIONS[2],
@@ -572,14 +582,15 @@ def _chk_large_volume_heat() -> Outcome:
     )
     surface = math.pi * 0.02 * 0.02 + 2 * math.pi * b * (d + port)
     worst = 0.0
-    for conditions in (
+    environments: tuple[_Conditions, ...] = (
         _CONDITIONS,
         {
             "temperature_c": 20.0,
             "static_pressure_pa": 95000.0,
             "relative_humidity_percent": 60.0,
         },
-    ):
+    )
+    for conditions in environments:
         gas = fluids.air(**conditions)
         kappa = gas.heat_capacity_ratio
         for x in (2.0, 20.0):

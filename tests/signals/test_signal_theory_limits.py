@@ -122,7 +122,7 @@ def test_multichannel_mismatched_lengths() -> None:
     # refuses it, and names the parameter that carried it.
     with pytest.raises(ValueError, match=r"'x' must be numeric"):
         # type ignore because list of lists of floats is technically not what we hint, but what user might pass
-        filters.octave_filter(x, fs)  # type: ignore
+        filters.octave_filter(x, fs)  # type: ignore[arg-type]
 
 
 def test_sos_stability_at_low_freq_high_fs() -> None:

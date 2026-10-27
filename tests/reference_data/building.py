@@ -18,6 +18,11 @@ single worked example in two files.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.building.measurement.ratings import BasicElement, ReferenceFloor
+
 # ---------------------------------------------------------------------------
 # ISO 717-1 Annex C, Table C.1 - measured airborne sound reduction index R
 # (100-3150 Hz, one-third-octave). The worked example gives
@@ -954,7 +959,7 @@ ISO717_2_SLOPED_DELTA_L: tuple[float, ...] = (
 )
 # (weighted reduction, adaptation term, Ln,r,w of the covered reference curve,
 # its CI,r), per floor.
-ISO717_2_SLOPED_EXPECTED: dict[str, tuple[int, int, int, int]] = {
+ISO717_2_SLOPED_EXPECTED: dict[ReferenceFloor, tuple[int, int, int, int]] = {
     "heavyweight": (20, -10, 58, -1),
     "lightweight_1": (6, -1, 66, 1),
     "lightweight_2": (6, -1, 66, 1),
@@ -967,7 +972,7 @@ ISO717_1_SLOPED_DELTA_R: tuple[float, ...] = (
 )
 # Delta of Rw, Rw + C, Rw + Ctr, Rw + C50-3150, Rw + C50-5000, Rw + C100-5000,
 # Rw + Ctr,50-3150, Rw + Ctr,50-5000 and Rw + Ctr,100-5000, per element.
-ISO717_1_SLOPED_EXPECTED: dict[str, tuple[int, ...]] = {
+ISO717_1_SLOPED_EXPECTED: dict[BasicElement, tuple[int, ...]] = {
     "heavy_wall": (6, 5, 4, 4, 4, 5, 1, 1, 4),
     "heavy_floor": (6, 5, 4, 5, 5, 5, 1, 1, 4),
     "lightweight_wall": (10, 10, 7, 9, 9, 10, 5, 5, 7),
@@ -983,7 +988,7 @@ ISO717_1_DIPPED_DELTA_R: tuple[float, ...] = (
     *(1.0, 1.0, 1.0, -7.0, -3.0, 1.0, 5.0, 9.0, 13.0, 14.0, 14.0),
     *(14.0, 14.0, 14.0, 14.0, 14.0, 14.0, 6.0, -3.0, -11.0, -3.0),
 )
-ISO717_1_DIPPED_EXPECTED: dict[str, tuple[int, ...]] = {
+ISO717_1_DIPPED_EXPECTED: dict[BasicElement, tuple[int, ...]] = {
     "heavy_wall": (7, 5, 2, 4, 3, 4, 1, 1, 2),
     "heavy_floor": (7, 5, 3, 5, 4, 4, 2, 2, 3),
     "lightweight_wall": (11, 10, 6, 9, 8, 8, 6, 5, 5),

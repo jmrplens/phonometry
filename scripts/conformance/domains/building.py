@@ -995,7 +995,7 @@ def _chk_iso16283_63_hz_octave_substitution() -> Outcome:
         frequencies=freqs,
         procedure=ph.building.LowFrequencyProcedure(
             volume=18.0,
-            corner_levels=ref.ISO16283_LF_CORNER_LEVELS,
+            corner_levels=np.asarray(ref.ISO16283_LF_CORNER_LEVELS),
             reverberation_63_octave=ref.ISO16283_LF_T63_OCTAVE_S,
         ),
         reverberation_time=times,
@@ -1024,7 +1024,7 @@ def _chk_iso16283_low_frequency_shared() -> Outcome:
     l1 = [80.0, 82.0, 79.0, 75.0, 74.0]
     procedure = ph.building.LowFrequencyProcedure(
         volume=18.0,
-        corner_levels=ref.ISO16283_LF_CORNER_LEVELS,
+        corner_levels=np.asarray(ref.ISO16283_LF_CORNER_LEVELS),
         reverberation_63_octave=ref.ISO16283_LF_T63_OCTAVE_S,
     )
     records = [

@@ -248,7 +248,7 @@ def _loudness_examples_outcome(
 ) -> Outcome:
     """Write one file carrying three worked-example values; compare on disk."""
     examples = [ref.TECH3285_LOUDNESS_EXAMPLES[i] for i in rows]
-    overrides = {
+    overrides: dict[str, float | None] = {
         "loudness_value": None,
         "loudness_range": None,
         "max_true_peak_level": None,

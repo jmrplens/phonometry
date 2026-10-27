@@ -27,9 +27,14 @@ two different ways.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import reference_data as ref
 
 from phonometry import building
+
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
 
 #: Critical frequencies of the three constructions, in hertz.
 FC_FLOOR, FC_EXT, FC_INT = 76.8, 92.6, 128.4
@@ -153,7 +158,9 @@ def elements() -> dict[str, building.HomogeneousElement]:
     return built
 
 
-def airborne_paths(situ: dict, delta_r: object) -> list:
+def airborne_paths(
+    situ: dict[str, building.InSituElementResult], delta_r: ArrayLike
+) -> list[building.BandPath]:
     """The twelve flanking paths of the Annex L airborne example.
 
     Each of the four flanking elements contributes ``Df``, ``Fd`` and ``Ff``.
@@ -210,7 +217,9 @@ def airborne_paths(situ: dict, delta_r: object) -> list:
     return paths
 
 
-def impact_paths(situ: dict, delta_l: object) -> list:
+def impact_paths(
+    situ: dict[str, building.InSituElementResult], delta_l: ArrayLike
+) -> list[building.BandPath]:
     """The four flanking impact paths of the Annex G example.
 
     :param situ: The elements of :func:`elements` run through
@@ -250,7 +259,7 @@ def junction_paths(label: str, kij: dict[str, float]) -> tuple[float, float]:
 
 def floating_floor_resonance() -> float:
     """The floating floor's resonance ``fo = 160 √(s'/m')``, in hertz."""
-    return (
+    return float(
         160.0
         * (ref.ISO12354_ANNEX_L_FLOATING_STIFFNESS / ref.ISO12354_ANNEX_L_FLOATING_MASS)
         ** 0.5

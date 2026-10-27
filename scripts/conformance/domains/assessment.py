@@ -697,6 +697,10 @@ def _chk_hpd_applications() -> Outcome:
         ref.ISO4869_2_ANNEX_B_LPC,
         ph.hearing.hml_rating(attenuation),
     )
+    pnr = hml.noise_reduction
+    if pnr is None:
+        msg = "the HML method is given the A-weighted level, so it reports PNR"
+        raise ValueError(msg)
     snr_rating = ph.hearing.snr_rating(attenuation)
     by_c = ph.hearing.snr_protected_level(snr_rating, l_p_c=ref.ISO4869_2_ANNEX_B_LPC)
     by_a = ph.hearing.snr_protected_level(
@@ -705,7 +709,7 @@ def _chk_hpd_applications() -> Outcome:
         c_minus_a=ref.ISO4869_2_ANNEX_B_LPC - ref.ISO4869_2_ANNEX_B_LPA,
     )
     passed = (
-        abs(hml.noise_reduction - ref.ISO4869_2_ANNEX_C_PNR84) <= 1e-9
+        abs(pnr - ref.ISO4869_2_ANNEX_C_PNR84) <= 1e-9
         and hml.reported_level == ref.ISO4869_2_ANNEX_C_REPORTED
         and snr_rating.reported == ref.ISO4869_2_ANNEX_D_SNR84
         and by_c.reported_level == ref.ISO4869_2_ANNEX_D_REPORTED
@@ -714,10 +718,10 @@ def _chk_hpd_applications() -> Outcome:
     return Outcome(
         expected="PNR84 = 22,5 dB; SNR84 = 21 dB; both report 82 dB",
         computed=(
-            f"{hml.noise_reduction:.1f} dB; {snr_rating.reported} dB; "
+            f"{pnr:.1f} dB; {snr_rating.reported} dB; "
             f"{hml.reported_level} and {by_c.reported_level} dB"
         ),
-        delta=f"{hml.noise_reduction - ref.ISO4869_2_ANNEX_C_PNR84:+.3f} dB",
+        delta=f"{pnr - ref.ISO4869_2_ANNEX_C_PNR84:+.3f} dB",
         passed=passed,
     )
 
@@ -818,10 +822,12 @@ def _chk_anr_table_a3_uncertainty() -> Outcome:
     chained_u95 = _half_up(2.0 * chained_u)
     matching = int(np.sum(chained_u == printed_u) + np.sum(chained_u95 == printed_u95))
     moved_u = tuple(
-        np.flatnonzero(_half_up(result.standard_uncertainty_db) != printed_u)
+        int(i)
+        for i in np.flatnonzero(_half_up(result.standard_uncertainty_db) != printed_u)
     )
     moved_u95 = tuple(
-        np.flatnonzero(_half_up(result.expanded_uncertainty_db) != printed_u95)
+        int(i)
+        for i in np.flatnonzero(_half_up(result.expanded_uncertainty_db) != printed_u95)
     )
     registered = (
         moved_u == ref.ISO4869_6_TABLE_A3_U_ROUNDED_FROM_SIGMA

@@ -14,12 +14,19 @@ pass-bys, so the fit itself has no printed oracle.
 printed one, so the whole chain can be run from pass-bys to the index; what it
 checks is the chain, not the regression.
 
-Stdlib only, like every module of this package.
+Stdlib only at run time; the phonometry alias is imported for the type checker
+alone.
 """
 
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.environment.sources._statistical_pass_by import (
+        RoadSpeedCategory,
+    )
 
 # ---------------------------------------------------------------------------
 # ISO 11819-1:1997 Table 1 (folio 13): reference speed (km/h) and weighting
@@ -71,7 +78,7 @@ ANNEX_D_AVERAGE_DB: dict[str, float] = {"1": 76.4, "2a": 81.0, "2b": 84.0}
 # ISO 11819-1:1997 Annex E, "Sound level and speed regression data
 # (uncorrected for temperature)", road speed category medium (folio 26).
 # ---------------------------------------------------------------------------
-ANNEX_E_ROAD_SPEED_CATEGORY = "medium"
+ANNEX_E_ROAD_SPEED_CATEGORY: RoadSpeedCategory = "medium"
 ANNEX_E_VEHICLE_COUNTS: dict[str, int] = {"1": 107, "2a": 34, "2b": 53}
 ANNEX_E_HEAVY_VEHICLE_COUNT = 87
 ANNEX_E_INTERCEPTS_DB: dict[str, float] = {"1": 16.6, "2a": 46.5, "2b": 34.5}

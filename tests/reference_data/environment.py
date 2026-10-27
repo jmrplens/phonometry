@@ -18,6 +18,14 @@ from __future__ import annotations
 import csv
 import math
 import pathlib
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from phonometry.environment.sources.cnossos_rail import (
+        BridgeTypeName,
+        TrackTransferCode,
+        TractionVehicleName,
+    )
 
 #: Versioned root of the committed oracle data.
 _DATA = pathlib.Path(__file__).parent.parent / "data"
@@ -1014,7 +1022,7 @@ CNOSSOS_RAIL_G2: dict[tuple[float, float], tuple[float, ...]] = {
 }
 
 #: Table G-3a track transfer, as replaced by (EU) 2021/1226 point (20)(c).
-CNOSSOS_RAIL_G3A: dict[str, tuple[float, ...]] = {
+CNOSSOS_RAIL_G3A: dict[TrackTransferCode, tuple[float, ...]] = {
     "M/S": (
         53.3,
         59.3,
@@ -1404,7 +1412,9 @@ CNOSSOS_RAIL_G4: tuple[float, ...] = (
 #: point (20)(f) replaced the 6 300 Hz pair of the 2 200 kW diesel
 #: locomotive, 31,4 / 30,7, by 81,4 / 80,7; the replacement is applied
 #: below at the two marked positions.
-CNOSSOS_RAIL_G5: dict[str, tuple[tuple[float, ...], tuple[float, ...]]] = {
+CNOSSOS_RAIL_G5: dict[
+    TractionVehicleName, tuple[tuple[float, ...], tuple[float, ...]]
+] = {
     "diesel locomotive, c. 800 kW": (
         (
             98.9,
@@ -1736,7 +1746,7 @@ CNOSSOS_RAIL_G6_B: tuple[float, ...] = (
 CNOSSOS_RAIL_G6_ALPHA = 50.0
 
 #: Table G-7 bridge transfer, as replaced by (EU) 2021/1226 point (20)(h).
-CNOSSOS_RAIL_G7: dict[str, tuple[float, ...]] = {
+CNOSSOS_RAIL_G7: dict[BridgeTypeName, tuple[float, ...]] = {
     "+10 dB(A)": (
         85.2,
         87.1,

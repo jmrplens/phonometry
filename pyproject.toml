@@ -272,6 +272,9 @@ select = [
                             # looks inside, or a reasoned noqa when openness is
                             # the point; every site was read one by one before
                             # this went on
+    "PGH003",               # a `type: ignore` names the error it silences.
+                            # mypy's `ignore-without-code` says the same where
+                            # mypy reads; this holds every file ruff reads
 ]
 ignore = [
     # TC006 quotes the first argument of `typing.cast`, which that function
@@ -348,9 +351,45 @@ raises-extend-require-match-for = ["AttributeError"]
 [tool.ruff.lint.isort]
 known-first-party = ["phonometry"]
 
+# Bare `mypy` is the command everywhere: CI, `make lint` and every page that
+# states it read the paths from here, so no two of them can drift apart again.
 [tool.mypy]
 python_version = "3.12"
 strict = true
+# `.github/scripts` holds the PR-comment script CI runs, which no other root
+# reached. `stub/src` is the PyOctaveBand transition shim, outside the package.
+files = ["src", "scripts", "stub/src", "tests/static_typing", ".github/scripts"]
+# The conformance scripts import the oracle tables (`reference_data`) and the
+# shared ISO 12354 fixture from `tests/`, as `scripts/conformance/registry.py`
+# arranges at run time. Without this the checker could not find them, and the
+# old global `ignore_missing_imports` turned every value read from them into
+# `Any`: the scripts were never checked against the oracles they compare with.
+# `scripts` is here for the same reason: the PR-comment script imports the
+# conformance package from it, and a file checked on its own has to find it.
+mypy_path = ["tests", "scripts"]
+# Untracked local oracle work, never part of the repository.
+exclude = ['^tests/data-local/']
+# An ignore names the error it silences, so it cannot hide a second one.
+enable_error_code = ["ignore-without-code"]
+
+# The packages that ship no type information, and only those: a missing stub
+# anywhere else is an error, not a silent `Any`. The list is what a run with no
+# exemption reports, here and in an environment installed the way the CI
+# quality job installs it (numba is in neither of its requirement files, and
+# cupy, torch and array_api_compat are the optional compute backends).
+[[tool.mypy.overrides]]
+module = [
+    "array_api_compat.*",
+    "cupy.*",
+    "fontTools.*",
+    "mpl_toolkits.*",
+    "numba.*",
+    "pypdfium2.*",
+    "reportlab.*",
+    "scipy.*",
+    "soundfile.*",
+    "torch.*",
+]
 ignore_missing_imports = true
 
 [tool.bandit]

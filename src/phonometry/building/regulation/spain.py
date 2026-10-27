@@ -96,7 +96,7 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Iterable, Mapping, Sequence
 
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -112,6 +112,21 @@ ReceivingRoom = Literal["protected", "habitable"]
 _SPECTRA: tuple[Spectrum, ...] = ("pink", "traffic", "railway", "aircraft")
 _A5_SPECTRA: tuple[Spectrum, ...] = ("pink", "railway")
 _A6_SPECTRA: tuple[Spectrum, ...] = ("traffic", "aircraft")
+#: The receiving rooms DB-HR 2.1.1 and 2.1.2 distinguish.
+_RECEIVING_ROOMS: tuple[ReceivingRoom, ...] = ("protected", "habitable")
+#: Other spellings of a room use of DB-HR 2.2 that the ``Literal`` of
+#: :func:`db_hr_reverberation_requirement` lists, by the use each stands for.
+_USE_OF_ROOM: Mapping[str, str] = MappingProxyType(
+    {
+        "conference_hall": "classroom",
+        "lecture_hall": "classroom",
+        "aula": "classroom",
+        "dining_room": "restaurant",
+        "comedor": "restaurant",
+        "common_areas": "common_area",
+        "zonas_comunes": "common_area",
+    }
+)
 
 __all__ = [
     "DB_HR_FREQUENCIES_HZ",
@@ -361,13 +376,19 @@ def _round_half_up(value: float, decimals: int = 0) -> float:
     return float(round_half_up(value, decimals))
 
 
-def _normalise(value: str, aliases: Mapping[str, str], name: str) -> str:
-    """Lower-case ``value``, normalise separators and resolve aliases."""
-    if not isinstance(value, str):
-        msg = f"'{name}' must be a string; got {value!r}."
-        raise TypeError(msg)
-    key = value.strip().lower().replace(" ", "_").replace("-", "_")
-    return aliases.get(key, key)
+def _resolved(
+    value: object, name: str, canonical: Iterable[str], aliases: Mapping[str, str]
+) -> str:
+    """The canonical spelling of an option a caller names, as written.
+
+    *canonical* are the options the table prints and *aliases* the other
+    spellings the ``Literal`` lists on purpose; an alias of an option the
+    table does not hold is no option here.
+    """
+    known = sorted(set(canonical))
+    offered = (*known, *(alias for alias, to in aliases.items() if to in known))
+    named = require_choice(value, name, offered)
+    return aliases.get(named, named)
 
 
 # --------------------------------------------------------------------------- #
@@ -508,14 +529,9 @@ def db_hr_global_index(
     :return: A :class:`DBHRGlobalIndexResult`.
     :raises ValueError: For an unknown spectrum, a wrong band count, or
         non-finite values.
+    :raises TypeError: if ``spectrum`` is not a text.
     """
-    key = str(spectrum).strip().lower()
-    if key not in _SPECTRA:
-        msg = (
-            "'spectrum' must be one of "
-            f"{sorted(DB_HR_NORMALIZED_SPECTRA)}; got {spectrum!r}."
-        )
-        raise ValueError(msg)
+    key = require_choice(spectrum, "spectrum", _SPECTRA)
     values = np.asarray(band_values, dtype=np.float64)
     if values.ndim != 1:
         msg = "'band_values' must be one-dimensional."
@@ -637,8 +653,9 @@ def d2m_nt_a(
         (Table A.4), per the dominant outdoor noise.
     :return: A :class:`DBHRGlobalIndexResult` named ``"D2m,nT,A"``.
     :raises ValueError: For a spectrum Formula (A.5) does not cover.
+    :raises TypeError: if ``spectrum`` is not a text.
     """
-    key = str(spectrum).strip().lower()
+    key = require_choice(spectrum, "spectrum", _SPECTRA)
     if key not in _A5_SPECTRA:
         msg = (
             "Formula (A.5) evaluates 'D2m,nT,A' for pink noise or, on a "
@@ -679,8 +696,9 @@ def d2m_nt_atr(
         (Table A.2), per the dominant outdoor noise.
     :return: A :class:`DBHRGlobalIndexResult` named ``_D2M_NT_ATR``.
     :raises ValueError: For a spectrum Formula (A.6) does not cover.
+    :raises TypeError: if ``spectrum`` is not a text.
     """
-    key = str(spectrum).strip().lower()
+    key = require_choice(spectrum, "spectrum", _SPECTRA)
     if key not in _A6_SPECTRA:
         msg = (
             "Formula (A.6) evaluates 'D2m,nT,Atr' for road-traffic noise or, "
@@ -919,11 +937,16 @@ def db_hr_facade_requirement(
         railway-dominant site, on ``D2m,nT,A``.
     :raises ValueError: For an unknown use/room combination, an unknown
         dominant noise, or a non-finite ``Ld``.
-    :raises TypeError: if ``ld`` is not a single number.
+    :raises TypeError: if ``ld`` is not a single number, or ``building_use``,
+        ``dominant_noise`` or ``room_type`` is not a text.
     """
     value = _finite(ld, "ld")
-    use = _normalise(building_use, _USE_ALIASES, "building_use")
-    room = _normalise(room_type, _ROOM_ALIASES, "room_type")
+    use = _resolved(
+        building_use, "building_use", {u for u, _ in _FACADE_ROWS}, _USE_ALIASES
+    )
+    room = _resolved(
+        room_type, "room_type", {r for _, r in _FACADE_ROWS}, _ROOM_ALIASES
+    )
     if (use, room) not in _FACADE_ROWS:
         msg = (
             "Unknown (building_use, room_type) combination "
@@ -931,13 +954,9 @@ def db_hr_facade_requirement(
             f"{sorted(_FACADE_ROWS)}."
         )
         raise ValueError(msg)
-    noise = str(dominant_noise).strip().lower()
-    if noise not in ("road", "railway", "aircraft"):
-        msg = (
-            "'dominant_noise' must be 'road', 'railway' or 'aircraft'; got "
-            f"{dominant_noise!r}."
-        )
-        raise ValueError(msg)
+    noise = require_choice(
+        dominant_noise, "dominant_noise", ("road", "railway", "aircraft")
+    )
     if quiet_facade:
         value -= _QUIET_FACADE_REDUCTION
 
@@ -1067,20 +1086,20 @@ def db_hr_airborne_requirement(
     :param shared_opening: The two rooms share a door or window.
     :return: A tuple of :class:`DBHRRequirement`, of length one in the general
         case and two when ``shared_opening`` applies.
-    :raises ValueError: For an unknown combination, or for ``shared_opening``
-        in a case DB-HR does not contemplate (a protected room against a
-        services or activity room, and any ``"same_unit"`` case).
+    :raises ValueError: For a room either argument does not name, or for
+        ``shared_opening`` in a case DB-HR does not contemplate (a protected
+        room against a services or activity room, and any ``"same_unit"``
+        case).
+    :raises TypeError: if ``receiving_room`` or ``source_room`` is not a text.
     """
-    receiving = str(receiving_room).strip().lower()
-    source = str(source_room).strip().lower()
+    receiving = require_choice(receiving_room, "receiving_room", _RECEIVING_ROOMS)
+    source = require_choice(
+        source_room,
+        "source_room",
+        ("same_unit", "other_unit", "installations", "activity"),
+    )
+    # DB-HR 2.1.1 states a requirement for every pair of the two rooms.
     key = (receiving, source)
-    if key not in _AIRBORNE_ROWS:
-        msg = (
-            "Unknown (receiving_room, source_room) combination "
-            f"{(receiving_room, source_room)!r}; DB-HR 2.1.1 covers "
-            f"{sorted(_AIRBORNE_ROWS)}."
-        )
-        raise ValueError(msg)
     if not shared_opening:
         quantity, limit, reference, description = _AIRBORNE_ROWS[key]
         requirements = [
@@ -1141,7 +1160,9 @@ _PARTY_WALL_ROUTES: dict[str, tuple[float, str]] = {
 }
 
 
-def db_hr_party_wall_requirement(quantity: str = "D2m,nT,Atr") -> DBHRRequirement:
+def db_hr_party_wall_requirement(
+    quantity: Literal["D2m,nT,Atr", "DnT,A"] = "D2m,nT,Atr",
+) -> DBHRRequirement:
     """Airborne requirement on a party wall between two buildings (DB-HR 2.1.1 c).
 
     For a habitable or protected room against a *medianería*, DB-HR offers two
@@ -1150,18 +1171,13 @@ def db_hr_party_wall_requirement(quantity: str = "D2m,nT,Atr") -> DBHRRequiremen
     ``DnT,A`` of at least 50 dBA. They are alternatives, not cumulative
     requirements, so this function returns the one route asked for.
 
-    :param quantity: ``_D2M_NT_ATR`` (default, the per-leaf route) or
-        ``_DNT_A`` (the combined route).
+    :param quantity: ``"D2m,nT,Atr"`` (default, the per-leaf route, 40 dBA)
+        or ``"DnT,A"`` (the combined route, 50 dBA).
     :return: The :class:`DBHRRequirement` of the chosen route.
+    :raises TypeError: if ``quantity`` is not a text.
     :raises ValueError: For an unknown quantity.
     """
-    key = str(quantity).strip()
-    if key not in _PARTY_WALL_ROUTES:
-        msg = (
-            "'quantity' must be 'D2m,nT,Atr' (per leaf, 40 dBA) or 'DnT,A' "
-            f"(both leaves together, 50 dBA); got {quantity!r}."
-        )
-        raise ValueError(msg)
+    key = require_choice(quantity, "quantity", tuple(_PARTY_WALL_ROUTES))
     limit, description = _PARTY_WALL_ROUTES[key]
     return DBHRRequirement(
         quantity=key,
@@ -1201,8 +1217,14 @@ def db_hr_impact_requirement(
         ``"activity"``.
     :return: The :class:`DBHRRequirement` on ``L'nT,w``.
     :raises ValueError: For a combination DB-HR states no impact limit for.
+    :raises TypeError: if ``receiving_room`` or ``source_room`` is not a text.
     """
-    key = (str(receiving_room).strip().lower(), str(source_room).strip().lower())
+    key = (
+        require_choice(receiving_room, "receiving_room", _RECEIVING_ROOMS),
+        require_choice(
+            source_room, "source_room", ("other_unit", "installations", "activity")
+        ),
+    )
     if key not in _IMPACT_ROWS:
         msg = (
             "DB-HR 2.1.2 states no impact requirement for "
@@ -1276,18 +1298,11 @@ def db_hr_reverberation_requirement(
         (the 0,5 s limit).
     :return: The :class:`DBHRRequirement`.
     :raises ValueError: For an unknown room use.
+    :raises TypeError: if ``room_use`` is not a text.
     """
-    key = str(room_use).strip().lower().replace(" ", "_").replace("-", "_")
-    aliases = {
-        "conference_hall": "classroom",
-        "lecture_hall": "classroom",
-        "aula": "classroom",
-        "dining_room": "restaurant",
-        "comedor": "restaurant",
-        "common_areas": "common_area",
-        "zonas_comunes": "common_area",
-    }
-    key = aliases.get(key, key)
+    key = _resolved(
+        room_use, "room_use", ("classroom", "restaurant", "common_area"), _USE_OF_ROOM
+    )
     if key == "common_area":
         return DBHRRequirement(
             quantity="A/V",

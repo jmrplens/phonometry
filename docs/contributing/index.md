@@ -125,7 +125,7 @@ Each rule on a page has the same parts:
 | [A42](api.md#a42) | Raise `TypeError` for a wrong type and `ValueError` for a right type's wrong value | `tests/test_error_kinds.py::test_a_wrong_type_raises_type_error`, `tests/test_error_kinds.py::test_every_exemption_names_a_function_that_exists` |
 | [A43](api.md#a43) | Refuse an array or a text where one number belongs with a `TypeError` naming it | `tests/test_scalar_guards.py::test_every_public_scalar_parameter_refuses_an_array_or_a_text_by_name`, `tests/test_scalar_guards.py::test_a_text_where_a_number_belongs_is_one_class_everywhere`, `tests/test_scalar_guards.py::test_a_field_of_text_is_a_type_error` |
 | [A44](api.md#a44) | Raise `KeyError` for a missing name or key, `ValueError` for an uncovered value | review |
-| [A45](api.md#a45) | Refuse an unknown choice with `ValueError`, and a choice that is not text with `TypeError` | `tests/test_choice_vocabulary.py::test_a_retired_spelling_is_refused`, review |
+| [A45](api.md#a45) | Refuse an unknown choice with `ValueError`, and a choice that is not text with `TypeError`, checked as written | `scripts/check_choice_literals.py`, `make choice-literals`, `tests/test_check_choice_literals.py::test_every_literal_choice_is_checked_as_written`, `tests/test_choice_vocabulary.py::test_a_retired_spelling_is_refused`, review |
 | [A46](api.md#a46) | Refuse malformed data the library reads with `ValueError` naming the file | review |
 | [A47](api.md#a47) | Name in an error message the parameter the caller passed | `tests/test_public_vocabulary.py::test_a_message_names_the_parameter_the_caller_passed`, review |
 | [A48](api.md#a48) | Put an error message in a variable before raising it | `ruff EM` |
@@ -342,7 +342,7 @@ These rules are held by review alone, or a check covers only part of them, and a
 - [A30](api.md#a30): refuse a public dataclass field or public constructor parameter whose name starts with an underscore.
 - [A37](api.md#a37): require the docstring of every public record with a field typed `Signal | NDArray` to say that the field holds a Signal when one came in.
 - [A44](api.md#a44): an AST check that a public `__getitem__` or `requirement()` that misses raises `KeyError`, and that a plot selector raises `ValueError`.
-- [A45](api.md#a45): require every `Literal`-typed public parameter to pass through `require_choice`.
+- [A45](api.md#a45): require every `Literal`-typed public parameter to pass through `require_choice`; `scripts/check_choice_literals.py` already fails one cleaned up before its check.
 - [A47](api.md#a47): read the messages of public functions defined in private modules too, and refuse a quoted name that is neither a parameter of the function nor a field of its record.
 - [D1](docstrings.md#d1): require the first paragraph of every public module docstring to name a designation with its year, or a dated book, against an exemption table.
 - [D2](docstrings.md#d2): refuse a draft designation (`E DIN`, `ISO/DIS`, `prEN`, `FprEN`) in a docstring without its date.

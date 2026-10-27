@@ -126,7 +126,7 @@ to 150 m³.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `volume` is not in `(0, 150]`, or `room` is not tabulated for that volume range. |
-| TypeError | if `volume` is not a single number. |
+| TypeError | if `volume` is not a single number, or `room` is not a text. |
 
 ## reverberation_index
 

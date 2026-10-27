@@ -776,7 +776,7 @@ def cabin_insulation(
         ``a_weighted_cabin_level``, ``a_weighted_room_level`` or
         ``internal_noise_level`` is not a single number, or ``cabin_background_levels``,
         ``cabin_levels``, ``frequencies``, ``room_background_levels`` or ``room_levels``
-        holds a text or a value that is not a real number.
+        holds a text or a value that is not a real number, or ``method`` is not a text.
     """
     room = require_finite_array(room_levels, "room_levels")
     cabin = require_finite_array(cabin_levels, "cabin_levels")
@@ -793,7 +793,7 @@ def cabin_insulation(
             msg = "'frequencies' must be positive."
             raise ValueError(msg)
     fraction = require_band_fraction(fraction, "fraction")
-    how = require_choice(str(method), "method", _METHODS)
+    how = require_choice(method, "method", _METHODS)
     _check_band_range(
         freqs, fraction, standard="ISO 11957", category=CabinInsulationWarning
     )
@@ -864,13 +864,14 @@ def weighted_cabin_insulation(
     :raises ValueError: For a spectrum that is not the rating bands, an
         unknown method or a band set other than 1 or 3.
     :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float), or
-        ``insulation`` holds a text or a value that is not a real number.
+        ``insulation`` holds a text or a value that is not a real number, or ``method``
+        is not a text.
     """
     from ..building import weighted_rating
 
     values = require_finite_array(insulation, "insulation")
     fraction = require_band_fraction(fraction, "fraction")
-    how = require_choice(str(method), "method", _METHODS)
+    how = require_choice(method, "method", _METHODS)
     bands = _rating_bands(fraction)
     _require_rating_bands(values, bands)
     result = weighted_rating(values, fraction)
@@ -1168,11 +1169,11 @@ def uncertainty_conditions(
     :return: The statement, as a :class:`CabinUncertainty`.
     :raises ValueError: For a non-positive volume or an unknown method.
     :raises TypeError: if ``cabin_volume_m3`` or ``room_volume_m3`` is not a single
-        number.
+        number, or ``method`` is not a text.
     """
     room = require_positive(room_volume_m3, "room_volume_m3")
     cabin = require_positive(cabin_volume_m3, "cabin_volume_m3")
-    how = require_choice(str(method), "method", _METHODS)
+    how = require_choice(method, "method", _METHODS)
     ratio = room / cabin
     statement = CabinUncertainty(method=how, volume_ratio=ratio)
     # Clause 10 states no uncertainty for the actual-noise method at all, so

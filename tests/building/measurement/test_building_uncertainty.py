@@ -300,9 +300,16 @@ def test_table3_single_number(
 
 
 def test_airborne_aliases_share_row() -> None:
-    for alias in ("R_w", "Rprime_w", "Dn_w", "DnT_w"):
+    for alias in ("r_w", "rprime_w", "dn_w", "dnt_w"):
         assert single_number_uncertainty(alias, "A") == pytest.approx(1.2)
         assert single_number_uncertainty(alias, "B") == pytest.approx(0.9)
+
+
+@pytest.mark.parametrize("spelling", ["R_w", "Rprime_w", "DnT_w", " r_w "])
+def test_a_descriptor_is_written_as_listed(spelling: str) -> None:
+    """The aliases are the lower-case spellings the Literal lists, as written."""
+    with pytest.raises(ValueError, match=r"'quantity' must be one of"):
+        single_number_uncertainty(spelling, "A")  # type: ignore[arg-type]
 
 
 # --------------------------------------------------------------------------- #
@@ -320,7 +327,7 @@ def test_table5_impact_single_number(
 
 
 def test_impact_single_number_aliases() -> None:
-    for alias in ("Lprime_n_w", "LnT_w"):
+    for alias in ("lprime_n_w", "lnt_w"):
         assert single_number_uncertainty(alias, "C") == pytest.approx(0.5)
 
 
@@ -610,8 +617,8 @@ def test_a_conformity_refuses_a_number_that_is_not_finite(
 # Validation of unknown quantities / situations.
 # --------------------------------------------------------------------------- #
 def test_unknown_quantity() -> None:
-    with pytest.raises(ValueError, match="Unknown single-number quantity"):
-        single_number_uncertainty("nonsense", "A")
+    with pytest.raises(ValueError, match="'quantity' must be one of"):
+        single_number_uncertainty("nonsense", "A")  # type: ignore[arg-type]
 
 
 def test_unknown_measurand() -> None:

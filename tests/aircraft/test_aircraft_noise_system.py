@@ -72,8 +72,20 @@ def test_out_of_range_angle_raises() -> None:
 
 
 def test_linearity_rejects_unknown_key() -> None:
-    with pytest.raises(ValueError, match="linearity keys must be"):
-        aircraft.verify_aircraft_noise_system(linearity={"refernce": 0.3})
+    with pytest.raises(ValueError, match="'linearity' must be one of .*got 'refernce'"):
+        aircraft.verify_aircraft_noise_system(linearity={"refernce": 0.3})  # type: ignore[dict-item]
+
+
+def test_linearity_rejects_a_key_that_is_not_a_text() -> None:
+    """A key that only prints as a range is no range."""
+
+    class Printed:
+        def __str__(self) -> str:
+            return "reference"
+
+    linearity = {Printed(): 0.3}
+    with pytest.raises(TypeError, match="'linearity' must be one of .*, a text"):
+        aircraft.verify_aircraft_noise_system(linearity=linearity)  # type: ignore[arg-type]
 
 
 def test_resolution_rejects_negative() -> None:

@@ -426,8 +426,11 @@ def test_area_type_aliases_and_catalogue() -> None:
     assert (
         rd.activity_limits("residential").as_dict() == rd.activity_limits("a").as_dict()
     )
-    assert rd.activity_limits("INDUSTRIAL").day == rd.activity_limits("b").day
+    assert rd.activity_limits("industrial").day == rd.activity_limits("b").day
     assert rd.outdoor_quality_objectives("sanitary").night == 50.0
+    for spelling in ("INDUSTRIAL", " a ", "A"):
+        with pytest.raises(ValueError, match=r"'area_type' must be one of"):
+            rd.activity_limits(spelling)  # type: ignore[arg-type]
 
 
 def test_regulation_limits_lookup_by_period() -> None:
@@ -680,8 +683,8 @@ def test_limit_lookup_validation() -> None:
         ValueError, match=r"Unknown \(building_use, room_type\) combination"
     ):
         rd.indoor_quality_objectives("residential", "classrooms")
-    with pytest.raises(ValueError, match=r"'urbanization' must be 'existing'"):
-        rd.outdoor_quality_objectives("a", urbanization="future")
+    with pytest.raises(ValueError, match=r"'urbanization' must be one of"):
+        rd.outdoor_quality_objectives("a", urbanization="future")  # type: ignore[arg-type]
     with pytest.raises(KeyError, match=r"RegulationLimits holds the periods"):
         rd.activity_limits("a")["afternoon"]
 
@@ -823,7 +826,8 @@ def test_an_area_type_that_is_not_a_string_is_refused_by_name() -> None:
 
     Passing something other than a string used to die inside ``str.strip``
     with an anonymous ``AttributeError``; the refusal names the argument, and
-    it is a ``ValueError`` like every other refusal in this module.
+    it is a ``TypeError``, because a number where a word belongs is the wrong
+    type.
     """
-    with pytest.raises(TypeError, match=r"'area_type' must be a string"):
+    with pytest.raises(TypeError, match=r"'area_type' must be one of .*, a text"):
         rd.infrastructure_limits(5)  # type: ignore[arg-type]

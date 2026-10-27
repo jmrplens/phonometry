@@ -185,7 +185,7 @@ ISO 3741 correction 6.4 asks for, and a margin under
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra that do not match, an unknown method or band fraction, or an A-weighted pair under a method that does not define one. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), `a_weighted_cabin_level`, `a_weighted_room_level` or `internal_noise_level` is not a single number, or `cabin_background_levels`, `cabin_levels`, `frequencies`, `room_background_levels` or `room_levels` holds a text or a value that is not a real number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), `a_weighted_cabin_level`, `a_weighted_room_level` or `internal_noise_level` is not a single number, or `cabin_background_levels`, `cabin_levels`, `frequencies`, `room_background_levels` or `room_levels` holds a text or a value that is not a real number, or `method` is not a text. |
 
 ## CabinInsulationResult
 
@@ -803,7 +803,7 @@ declared value to ISO 4871.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive volume or an unknown method. |
-| TypeError | if `cabin_volume_m3` or `room_volume_m3` is not a single number. |
+| TypeError | if `cabin_volume_m3` or `room_volume_m3` is not a single number, or `method` is not a text. |
 
 ## WALL_CLEARANCE_FACTOR
 
@@ -851,7 +851,7 @@ answer to that objection.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a spectrum that is not the rating bands, an unknown method or a band set other than 1 or 3. |
-| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `insulation` holds a text or a value that is not a real number. |
+| TypeError | if `fraction` is not an integer (a word, a flag or a float), or `insulation` holds a text or a value that is not a real number, or `method` is not a text. |
 
 ## WeightedCabinInsulation
 

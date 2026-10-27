@@ -280,11 +280,12 @@ def geometric_exponent(
     :param wave: ``"surface"`` or ``"body"``.
     :return: :math:`n`: 0, 0,5, 1 or 1,5.
     :raises ValueError: For an unknown geometry, character or wave.
+    :raises TypeError: if ``character``, ``geometry`` or ``wave`` is not a text.
     """
     key = (
-        require_choice(str(geometry), "geometry", _GEOMETRIES),
-        require_choice(str(character), "character", _CHARACTERS),
-        require_choice(str(wave), "wave", _WAVES),
+        require_choice(geometry, "geometry", _GEOMETRIES),
+        require_choice(character, "character", _CHARACTERS),
+        require_choice(wave, "wave", _WAVES),
     )
     return SOURCE_EXPONENTS[key]
 

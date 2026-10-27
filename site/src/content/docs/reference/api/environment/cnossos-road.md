@@ -156,7 +156,7 @@ propulsion noise, a noisy one does not increase it.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
-| TypeError | if `junction_distance`, `road_slope_percent` or `speed_kmh` is not a single number. |
+| TypeError | if `junction_distance`, `road_slope_percent` or `speed_kmh` is not a single number, or `category` is not a text. |
 
 ## ROAD_REFERENCE_SPEED_KMH
 
@@ -220,7 +220,7 @@ and their total power is the propulsion term alone (2.2.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
-| TypeError | if `junction_distance`, `speed_kmh`, `studded_fraction`, `studded_months` or `temperature_c` is not a single number. |
+| TypeError | if `junction_distance`, `speed_kmh`, `studded_fraction`, `studded_months` or `temperature_c` is not a single number, or `category` is not a text. |
 
 ## ROAD_SOURCE_HEIGHT_M
 
@@ -302,6 +302,7 @@ Look up a Table F-4 row.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the surface is not tabulated in Table F-4. |
+| TypeError | if `surface` is not a text. |
 
 ## road_vehicle_sound_power
 
@@ -349,6 +350,7 @@ propulsion term is the whole of it (2.2.3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If an input is invalid. |
+| TypeError | if `category` or `surface` is not a text. |
 
 ## RoadEmissionCoefficients
 

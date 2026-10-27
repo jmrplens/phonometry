@@ -830,3 +830,230 @@ def test_an_area_type_is_one_every_limit_table_prints() -> None:
     )
     resolved = {spain._AREA_ALIASES.get(o, o) for o in typing.get_args(spain.AreaType)}
     assert all(resolved == set(table) for table in tables)
+
+
+# --------------------------------------------------------------------------
+# One spelling (rule A45): a choice typed Literal is checked as written.
+
+#: The options of the synthetic choices below.
+_Pace = Literal["fast", "slow"]
+_PACES: tuple[_Pace, ...] = ("fast", "slow")
+
+
+def _folded_before_the_check(mode: _Pace) -> str:
+    key = mode.strip().lower()
+    return require_choice(key, "mode", _PACES)
+
+
+def _checked_before_the_fold(mode: _Pace) -> str:
+    named = require_choice(mode, "mode", _PACES)
+    return named.upper()
+
+
+def _refused_before_the_fold(mode: _Pace) -> str:
+    if mode not in _PACES:
+        raise ValueError(mode)
+    return mode.title()
+
+
+def _made_a_text(mode: _Pace) -> str:
+    return require_choice(
+        str(mode),
+        "mode",
+        _PACES,
+    )
+
+
+def _lowered(text: str) -> str:
+    return text.lower()
+
+
+def _folded_by_a_helper(mode: _Pace) -> str:
+    return require_choice(_lowered(mode), "mode", _PACES)
+
+
+def _checks(text: object) -> _Pace:
+    return require_choice(text, "mode", _PACES)
+
+
+def _checked_by_a_helper(mode: _Pace) -> str:
+    _checks(mode)
+    return mode.casefold()
+
+
+def _folded_after_a_private_helper(mode: _Pace) -> bool:
+    return _resolve(mode).upper() == "FAST"
+
+
+#: Spellings no option lists, mapped to one.
+_UNLISTED_ALIASES = {"quick": "fast"}
+
+#: A spelling the Literal lists on purpose, mapped to the option it stands for.
+_LISTED_ALIASES = {"slow": "fast"}
+
+
+def _maps_an_unlisted_alias(mode: _Pace) -> str:
+    key = _UNLISTED_ALIASES.get(mode, mode)
+    return require_choice(key, "mode", _PACES)
+
+
+def _maps_a_listed_alias(mode: _Pace) -> str:
+    key = _LISTED_ALIASES.get(mode, mode)
+    return require_choice(key, "mode", _PACES)
+
+
+def _items_folded(sides: Sequence[_Side]) -> set[str]:
+    return {side.lower() for side in sides if side.lower() in ("left", "right")}
+
+
+def _keys_checked_as_a_whole(levels: Mapping[_Side, float]) -> set[str]:
+    extra = set(levels) - {"left", "right"}
+    if extra:
+        raise ValueError(sorted(extra))
+    return {str(side) for side in levels}
+
+
+def _cleaned(
+    function: object, name: str, *, options: tuple[str, ...], collection: bool = False
+) -> list[str]:
+    reading = ccl._received(
+        function,
+        name,
+        options=frozenset(options),
+        collection=collection,
+        depth=0,
+    )
+    return ccl._cleans_up_first(reading)
+
+
+def test_a_clean_up_before_the_check_is_refused() -> None:
+    """``mode.strip().lower()`` ahead of ``require_choice`` lets ``" FAST "`` in."""
+    assert _cleaned(_folded_before_the_check, "mode", options=_PACES) == [
+        ".lower()",
+        ".strip()",
+    ]
+
+
+def test_a_check_as_written_before_the_clean_up_passes() -> None:
+    """A clean-up after the text is checked as written accepts nothing more."""
+    assert _cleaned(_checked_before_the_fold, "mode", options=_PACES) == []
+    assert _cleaned(_refused_before_the_fold, "mode", options=_PACES) == []
+
+
+def test_a_text_made_of_any_value_is_a_clean_up() -> None:
+    """``str(mode)`` takes ``2`` for ``"2"``, on a line of its own or not."""
+    assert _cleaned(_made_a_text, "mode", options=_PACES) == ["str()"]
+
+
+def test_a_clean_up_in_a_helper_is_followed() -> None:
+    """The helper folds the text it is handed before anyone checks it."""
+    assert _cleaned(_folded_by_a_helper, "mode", options=_PACES) == [
+        "handed to _lowered(text), .lower()"
+    ]
+
+
+def test_a_check_in_a_helper_is_a_check_where_it_is_called() -> None:
+    """A helper that checks the text first checks it for its caller."""
+    assert _cleaned(_checked_by_a_helper, "mode", options=_PACES) == []
+
+
+def test_a_clean_up_of_what_a_private_helper_hands_back_is_one() -> None:
+    """``_resolve(mode).upper()`` folds the text the helper hands back."""
+    assert _cleaned(_folded_after_a_private_helper, "mode", options=_PACES) == [
+        ".upper()"
+    ]
+
+
+def test_an_alias_the_literal_does_not_list_is_refused() -> None:
+    """``ALIASES.get(mode, mode)`` with a key no option spells takes it in;
+    a map of spellings the ``Literal`` lists on purpose accepts nothing more.
+    """
+    assert _cleaned(_maps_an_unlisted_alias, "mode", options=_PACES) == [
+        "an alias map .get(text, text)"
+    ]
+    assert _cleaned(_maps_a_listed_alias, "mode", options=_PACES) == []
+
+
+def test_the_items_of_a_collection_are_read_one_by_one() -> None:
+    """Each item folded before its check is a clean-up; a leftover refused as
+    a whole (``set(levels) - OPTIONS``) is a check of every key as written.
+    """
+    sides = ("left", "right")
+    assert _cleaned(_items_folded, "sides", options=sides, collection=True) == [
+        ".lower()"
+    ]
+    assert (
+        _cleaned(_keys_checked_as_a_whole, "levels", options=sides, collection=True)
+        == []
+    )
+
+
+@dataclass(frozen=True)
+class _Checked:
+    """A record that checks its choice as written when it is built."""
+
+    pace: _Pace
+
+    def __post_init__(self) -> None:
+        require_choice(self.pace, "pace", _PACES)
+
+
+@dataclass(frozen=True)
+class _Unchecked:
+    """A record that leaves its choice to whoever reads it."""
+
+    stride: _Pace
+
+
+def _reads_checked(record: _Checked) -> bool:
+    return record.pace.lower() == "fast"
+
+
+def _reads_unchecked(record: _Unchecked) -> bool:
+    return record.stride.lower() == "fast"
+
+
+def test_a_record_field_is_read_where_its_module_uses_it() -> None:
+    """A field checked when the record is built may be cleaned up later; one
+    that is not is cleaned up by the module that reads it.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    options = frozenset(_PACES)
+    checked = ccl._field_spelling(
+        _Checked, "pace", constants, options=options, collection=False
+    )
+    unchecked = ccl._field_spelling(
+        _Unchecked, "stride", constants, options=options, collection=False
+    )
+    assert checked == []
+    assert unchecked == [".lower() in _reads_unchecked()"]
+
+
+def test_every_literal_choice_is_checked_as_written() -> None:
+    """The package passes: no public choice typed ``Literal`` is cleaned up
+    before its check, here or in a function it is handed to (rule A45).
+    """
+    assert list(ccl.cleaned_up_choices()) == []
+
+
+#: Two route names, bound to constants a table is keyed by.
+_PER_LEAF = "per_leaf"
+_TOGETHER = "together"
+_ROUTES = {_PER_LEAF: 40.0, _TOGETHER: 50.0}
+
+
+def _route(quantity: str) -> float:
+    if quantity not in _ROUTES:
+        raise ValueError(quantity)
+    return _ROUTES[quantity]
+
+
+def test_a_table_keyed_by_named_constants_holds_their_strings() -> None:
+    """``{_DNT_A: ...}`` is keyed by the text ``_DNT_A`` is bound to, so a
+    ``str`` checked against it is a closed choice like one checked against
+    ``{"DnT,A": ...}``.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    assert ccl.strings_of(ast.Name(id="_ROUTES"), constants) == ("per_leaf", "together")
+    found = ccl.code_evidence(_tree(_route), ccl._the_name("quantity"), constants)
+    assert found == ["'in' a set of strings", "a lookup by key"]

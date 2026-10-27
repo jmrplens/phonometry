@@ -365,7 +365,7 @@ single_number_uncertainty(
 
 The tabulated single-number standard uncertainty `u`, in dB.
 
-Descriptors (case-insensitive, with aliases) cover the ISO 717 ratings:
+Descriptors, written as listed, with aliases, cover the ISO 717 ratings:
 `"r_w"` (also `rprime_w`/`dn_w`/`dnt_w`) and its spectrum-adaptation
 variants `"r_w+c_50_5000"` etc. (Table 3); `"ln_w"`/`"ln_w+ci"` (Table 5);
 `"delta_lw"` (Table 7). `upper_limit=True` selects the situation-A `σR95`
@@ -390,6 +390,7 @@ available for impact sound insulation (Table 5, footnote a).
 | Exception | When |
 | :--- | :--- |
 | ValueError | Unknown descriptor, an untabulated situation, or an `upper_limit` request outside airborne/situation A. |
+| TypeError | if `quantity` is not a text. |
 
 ## single_number_uncertainty_uncorrelated
 

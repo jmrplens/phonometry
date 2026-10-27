@@ -416,10 +416,11 @@ def test_start_of_roll_directivity_properties() -> None:
     # Beyond the 762 m normalising distance the correction scales by dSOR,0/dSOR.
     near = start_of_roll_directivity(180.0, 762.0, "jet")
     assert start_of_roll_directivity(180.0, 1524.0, "jet") == pytest.approx(near / 2.0)
-    # "propeller"/"prop" are accepted aliases for the turboprop curve.
-    assert start_of_roll_directivity(120.0, 300.0, "prop") == pytest.approx(
-        start_of_roll_directivity(120.0, 300.0, "turboprop")
-    )
+    # The engine is named as the Literal spells it: "prop" and "turbofan",
+    # aliases of 3.3.0, are refused like any other word.
+    for alias in ("prop", "propeller", "turbofan", "Jet"):
+        with pytest.raises(ValueError, match=r"'engine' must be one of"):
+            start_of_roll_directivity(120.0, 300.0, alias)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match=r"'engine' must be"):
         start_of_roll_directivity(120.0, 300.0, "rocket")
     with pytest.raises(ValueError, match=r"'distance_m' must be positive"):
@@ -664,8 +665,18 @@ def test_event_level_invalid_inputs() -> None:
             [[0.0, 0.0, 0.0, 1.0, 1.0]], [0.0, 0.0, 0.0], _NP, _ND, _NSEL, _NMAX
         )
     good = [[0.0, 0.0, 300.0, 10000.0, _VREF], [1000.0, 0.0, 300.0, 10000.0, _VREF]]
-    with pytest.raises(ValueError, match=r"'metric' must be 'exposure'"):
+    with pytest.raises(ValueError, match=r"'metric' must be one of .*got 'Lden'"):
         event_level(good, [0.0, 100.0, 0.0], _NP, _ND, _NSEL, _NMAX, metric="Lden")
+    with pytest.raises(ValueError, match=r"'metric' must be one of .*got 'Exposure'"):
+        event_level(
+            good,
+            [0.0, 100.0, 0.0],
+            _NP,
+            _ND,
+            _NSEL,
+            _NMAX,
+            metric="Exposure",  # type: ignore[arg-type]
+        )
     with pytest.raises(ValueError, match=r"'lateral_m' must be non-negative"):
         lateral_attenuation(30.0, -1.0)
     with pytest.raises(ValueError, match=r"'mounting' must be"):

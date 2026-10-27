@@ -415,7 +415,7 @@ exists.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For levels that do not match band for band, a band centre that is not strictly positive, or an unknown receiver type. |
-| TypeError | if `frequencies` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` holds a text or a value that is not a real number, or `receiver_type_after` or `receiver_type_before` is not a text. |
 
 ## MeasuredBarrierInsertionLoss
 

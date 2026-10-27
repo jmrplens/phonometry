@@ -189,7 +189,7 @@ def ln_levels(
         if not 0 < value < 100:  # noqa: PLR2004
             msg = "Percentile values in 'n' must be between 0 and 100."
             raise ValueError(msg)
-    if _require_str(weighting, "weighting").upper() != "Z":
+    if _require_str(weighting, "weighting") != "Z":
         x_proc = weighting_filter(x_proc, fs, weighting)
 
     envelope = time_weighting(x_proc, fs, mode=mode)
@@ -199,7 +199,7 @@ def ln_levels(
     # 0.15 dB L10-L90 spread on a 2 s steady tone). 5*tau leaves it 99.3%
     # settled, cutting that residual ~12x, and matches the ~8*tau skip that
     # _validate_reference_stability already uses in calibration.py.
-    tau = {"fast": 0.125, "slow": 1.0, "impulse": 0.035}[mode.lower()]
+    tau = {"fast": 0.125, "slow": 1.0, "impulse": 0.035}[mode]
     skip = min(int(5 * tau * fs), envelope.shape[-1] // 2)
     levels = _level_db(
         mean_square=envelope[..., skip:],
@@ -308,7 +308,7 @@ def sel(
     if fs <= 0:
         msg = "Sample rate 'fs' must be positive."
         raise ValueError(msg)
-    if _require_str(weighting, "weighting").upper() != "Z":
+    if _require_str(weighting, "weighting") != "Z":
         x_proc = weighting_filter(x_proc, fs, weighting)
     duration_s = x_proc.shape[-1] / fs
     base = leq(x_proc, calibration_factor=calibration_factor, dbfs=dbfs)

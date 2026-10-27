@@ -309,12 +309,11 @@ def ground_effect_adjustment(
 def _resolve_flow_resistivity(flow_resistivity: float | str) -> float:
     """The flow resistivity ``σ`` in Pa·s/m² from a value or CNOSSOS class letter."""
     if isinstance(flow_resistivity, str):
-        key = flow_resistivity.strip().upper()
-        if key not in _FLOW_RESISTIVITY:
+        if flow_resistivity not in _FLOW_RESISTIVITY:
             valid = ", ".join(sorted(_FLOW_RESISTIVITY))
             msg = f"'flow_resistivity' class must be one of {valid}, got {flow_resistivity!r}."
             raise ValueError(msg)
-        return _FLOW_RESISTIVITY[key]
+        return _FLOW_RESISTIVITY[flow_resistivity]
     return require_positive(flow_resistivity, "flow_resistivity")
 
 

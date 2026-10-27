@@ -158,7 +158,7 @@ Volume absorption coefficient $\alpha$, in dB/km.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `model` is unknown or an input is invalid. |
-| TypeError | if `depth`, `salinity` or `temperature_c` is not a single number. |
+| TypeError | if `depth`, `salinity` or `temperature_c` is not a single number, or `model` is not a text. |
 
 ## spreading_loss
 
@@ -193,4 +193,4 @@ $20 \log_{10}(R_0) + 10 \log_{10}(R/R_0)$ (mode stripping in a channel).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `transition_range` is not a single number. |
+| TypeError | if `transition_range` is not a single number, or `law` is not a text. |

@@ -10,7 +10,7 @@ it; this module builds a column out of them.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -154,5 +154,5 @@ def sound_speed_profile(
         speeds_of_sound=c,
         gradient_per_s=gradient_per_s,
         # sea_water_sound_speed has refused any other name by now.
-        model=cast("SoundSpeedModel", model.strip().lower()),
+        model=model,
     )

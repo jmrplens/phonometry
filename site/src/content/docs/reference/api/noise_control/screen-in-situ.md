@@ -312,7 +312,7 @@ machine's, so the pair is refused rather than computed under
 | Exception | When |
 | :--- | :--- |
 | ValueError | For spectra that do not match, a band centre or a distance that is not strictly positive, an unknown source kind, half an A-weighted pair, or an A-weighted pair with an artificial source. |
-| TypeError | if `distance` is not a single number, or `frequencies`, `screened_levels` or `unscreened_levels` holds a text or a value that is not a real number. |
+| TypeError | if `distance` is not a single number, or `frequencies`, `screened_levels` or `unscreened_levels` holds a text or a value that is not a real number, or `source_kind` is not a text. |
 
 ## screen_background_corrected_level
 

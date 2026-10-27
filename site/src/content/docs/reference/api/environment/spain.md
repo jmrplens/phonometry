@@ -119,6 +119,7 @@ area they sit in (Article 24.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown area type. |
+| TypeError | if `area_type` is not a text. |
 
 ## ActivityAssessment
 
@@ -232,6 +233,7 @@ the street is not.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown combination. |
+| TypeError | if `building_use` or `room_type` is not a text. |
 
 ## assess_activity
 
@@ -424,6 +426,7 @@ cultural buildings.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown combination. |
+| TypeError | if `building_use` or `room_type` is not a text. |
 
 ## infrastructure_limits
 
@@ -452,6 +455,7 @@ values (Article 23.1).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown area type. |
+| TypeError | if `area_type` is not a text. |
 
 ## long_term_corrected_level
 
@@ -552,6 +556,7 @@ or below it (Article 25.1 a iii).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown area type. |
+| TypeError | if `area_type` is not a text. |
 
 ## NoisePhase
 
@@ -638,6 +643,7 @@ numeric objective: footnote (2) refers it to the adjoining areas.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown area type or urbanisation state. |
+| TypeError | if `area_type` or `urbanization` is not a text. |
 
 ## PeriodAssessment
 
@@ -976,3 +982,4 @@ Indoor vibration quality objective `Law`, in dB (Annex II Table C).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown building use. |
+| TypeError | if `building_use` is not a text. |

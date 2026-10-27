@@ -33,7 +33,7 @@ Doc 29 5th ed. Vol 3 Part 1 reference workbook.
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
-from typing import TYPE_CHECKING, Any, Literal, NamedTuple, cast
+from typing import TYPE_CHECKING, Any, Literal, NamedTuple
 
 import numpy as np
 
@@ -55,6 +55,9 @@ if TYPE_CHECKING:
     from .._i18n import Language
 
 Mounting = Literal["wing", "fuselage", "propeller"]
+
+#: The engine mountings of Eq. 4-15/4-16, as :data:`Mounting` spells them.
+_MOUNTINGS: tuple[Mounting, ...] = ("wing", "fuselage", "propeller")
 
 __all__ = [
     "AerodromeAtmosphere",
@@ -127,19 +130,17 @@ def engine_installation_correction(
     :param mounting: ``"wing"``, ``"fuselage"`` or ``"propeller"``.
     :return: The correction ``ΔI``, in dB (added to the level).
     :raises ValueError: If ``mounting`` is unknown or the angle is non-finite.
-    :raises TypeError: if ``depression_deg`` is not a single number.
+    :raises TypeError: if ``depression_deg`` is not a single number, or
+        ``mounting`` is not a text.
     """
     require_scalar(depression_deg, "depression_deg")
     phi = float(depression_deg)
     if not np.isfinite(phi):
         msg = "'depression_deg' must be finite."
         raise ValueError(msg)
-    key = mounting.strip().lower()
-    if key in ("propeller", "prop"):
+    key = require_choice(mounting, "mounting", _MOUNTINGS)
+    if key == "propeller":
         return 0.0
-    if key not in _INSTALLATION:
-        msg = f"'mounting' must be 'wing', 'fuselage' or 'propeller', got {mounting!r}."
-        raise ValueError(msg)
     a, b, c = _INSTALLATION[key]
     phi_eff = np.radians(max(phi, 0.0))  # for φ<0, ΔI(φ)=ΔI(0)
     num = (a * np.cos(phi_eff) ** 2 + np.sin(phi_eff) ** 2) ** b
@@ -308,7 +309,8 @@ def start_of_roll_directivity(
     :param engine: ``"jet"`` (turbofan, Eq. 4-24a) or ``"turboprop"`` (Eq. 4-24b).
     :return: The directivity correction ``ΔSOR``, in dB (added to the level).
     :raises ValueError: If ``engine`` is unknown or the inputs are invalid.
-    :raises TypeError: if ``azimuth_deg`` or ``distance_m`` is not a single number.
+    :raises TypeError: if ``azimuth_deg`` or ``distance_m`` is not a single
+        number, or ``engine`` is not a text.
     """
     require_scalar(azimuth_deg, "azimuth_deg")
     psi = float(azimuth_deg)
@@ -317,14 +319,11 @@ def start_of_roll_directivity(
     if not (np.isfinite(psi) and np.isfinite(dsor) and dsor > 0.0):
         msg = "'distance_m' must be positive and inputs finite."
         raise ValueError(msg)
-    key = engine.strip().lower()
-    if key not in ("jet", "turbofan", "turboprop", "prop", "propeller"):
-        msg = f"'engine' must be 'jet' or 'turboprop', got {engine!r}."
-        raise ValueError(msg)
+    key = require_choice(engine, "engine", ("jet", "turboprop"))
     if psi < _SOR_PSI_MIN_DEG:  # ahead of / abeam the aircraft: no rearward directivity
         return 0.0
     psi = min(psi, 180.0)
-    if key in ("jet", "turbofan"):
+    if key == "jet":
         r = np.pi * psi / 180.0
         d0 = (
             2329.44
@@ -704,13 +703,13 @@ _AIRBORNE = FlightSegmentState()
 EventMetric = Literal["exposure", "maximum"]
 
 
-def _checked_metric(metric: str) -> EventMetric:
-    """Normalise and validate the requested event-level metric."""
-    key = metric.strip().lower()
-    if key not in ("exposure", "maximum"):
-        msg = "'metric' must be 'exposure' or 'maximum'."
-        raise ValueError(msg)
-    return cast("EventMetric", key)
+#: The single-event levels :data:`EventMetric` names.
+_METRICS: tuple[EventMetric, ...] = ("exposure", "maximum")
+
+
+def _checked_metric(metric: object) -> EventMetric:
+    """The requested event-level metric, as written."""
+    return require_choice(metric, "metric", _METRICS)
 
 
 @dataclass(frozen=True)
@@ -948,7 +947,7 @@ def _event_level_core(
     (Doc 29 §4.2).
     """
     engine: Literal["jet", "turboprop"] = (
-        "turboprop" if mounting.strip().lower() in ("propeller", "prop") else "jet"
+        "turboprop" if mounting == "propeller" else "jet"
     )
     n_segments = max(pts.shape[0] - 1, 0)
     # Unbanked flight is the default; resolving it once keeps the per-segment
@@ -1174,7 +1173,7 @@ def _grid_installation(
     mount_key: str,
 ) -> NDArray[np.float64]:
     """``ΔI(φ)`` (Eq. 4-15/4-16), the array form of :func:`engine_installation_correction`."""
-    if mount_key in ("propeller", "prop"):
+    if mount_key == "propeller":
         return np.zeros_like(phi_att, dtype=np.float64)
     a_i, b_i, c_i = _INSTALLATION[mount_key]
     phi_eff = np.radians(np.maximum(phi_att, 0.0))
@@ -1354,8 +1353,7 @@ def _grid_event_levels(
     scalar-equivalence test guard that.
     """
     require_scalar(vref, "vref")
-    mount_key = mounting.strip().lower()
-    engine_installation_correction(0.0, mounting)  # validate 'mounting' once
+    mount_key = require_choice(mounting, "mounting", _MOUNTINGS)
     if not (np.isfinite(vref) and vref > 0.0):
         msg = "'reference_speed_m_s' must be positive."
         raise ValueError(msg)
@@ -1441,6 +1439,7 @@ def event_level(
     :return: A :class:`FlyoverResult`. If every segment is degenerate
         (zero length) the level is ``-inf``.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``metric`` or ``mounting`` is not a text.
     """
     pts = _validate_path(path)
     obs = np.asarray(observer, dtype=np.float64).ravel()
@@ -1448,6 +1447,7 @@ def event_level(
         msg = "'observer' must be a finite (x, y, z) point."
         raise ValueError(msg)
     key = _checked_metric(metric)
+    require_choice(mounting, "mounting", _MOUNTINGS)
     gr = _validate_ground_roll(segments.ground_roll, pts.shape[0])
     lr = _validate_ground_roll(segments.landing_roll, pts.shape[0])
     bk = _validate_bank(segments.bank, pts.shape[0])
@@ -1563,6 +1563,7 @@ def noise_contour(
         :class:`FlightSegmentState` (see :func:`event_level`).
     :return: A :class:`NoiseContourResult`.
     :raises ValueError: If the inputs are invalid.
+    :raises TypeError: if ``metric`` or ``mounting`` is not a text.
     """
     gx = np.asarray(x, dtype=np.float64).ravel()
     gy = np.asarray(y, dtype=np.float64).ravel()

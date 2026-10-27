@@ -235,7 +235,7 @@ linearly between the two bracketing samples. Real waveguides oscillate, so
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `figure_of_merit` is not a single number. |
+| TypeError | if `figure_of_merit` is not a single number, or `crossing` is not a text. |
 
 ## detection_threshold
 

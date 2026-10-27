@@ -161,11 +161,13 @@ WESTON_SEABEDS: Mapping[str, WestonSeabed] = MappingProxyType(
 def _seabed(seabed: str | WestonSeabed) -> WestonSeabed:
     if isinstance(seabed, WestonSeabed):
         return seabed
-    key = str(seabed).strip().lower()
-    if key not in WESTON_SEABEDS:
+    if not isinstance(seabed, str):
+        msg = f"'seabed' must be a text or a WestonSeabed; got {seabed!r}."
+        raise TypeError(msg)
+    if seabed not in WESTON_SEABEDS:
         msg = f"'seabed' must be one of {tuple(WESTON_SEABEDS)} or a WestonSeabed, got {seabed!r}."
         raise ValueError(msg)
-    return WESTON_SEABEDS[key]
+    return WESTON_SEABEDS[seabed]
 
 
 def critical_grazing_angle(sound_speed_ratio: float) -> float:

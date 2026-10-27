@@ -1108,9 +1108,9 @@ def __getitem__(self, period):
 **Exceptions.** A plot selector is a choice and raises `ValueError` ([A45](#a45)); a printed catalogue cell without a number raises `ValueError` naming what the page holds.
 
 <a id="a45"></a>
-### A45. Refuse an unknown choice with `ValueError`, and a choice that is not text with `TypeError`
+### A45. Refuse an unknown choice with `ValueError`, and a choice that is not text with `TypeError`, checked as written
 
-**Why.** A choice names an option whatever it looks up inside, so a miss is a bad value; a number where a name belongs is the wrong type, as `require_choice` has it.
+**Why.** A choice names an option whatever it looks up inside, so a miss is a bad value; a number where a name belongs is the wrong type, as `require_choice` has it. The check reads the text as the caller wrote it: a `Literal` lists one spelling of each option, and a body that folds the case, strips the spaces, swaps separators, maps an alias of its own or makes a text of any value with `str()` before it checks took `"a"` for `"A"`, `" fast "` for `"fast"` and `2023` for `"2023"` at run time while a type checker refused all three. 186 public parameters and record fields did, the core filters among them (`WeightingFilter(48000, "a")`, `time_weighting(x, fs, mode="FAST")`).
 
 **Do**
 
@@ -1120,6 +1120,8 @@ with pytest.raises(ValueError, match="'period' must be one of "):
     require_choice("noon", "period", options)
 with pytest.raises(TypeError, match="'period' must be one of .*, a text"):
     require_choice(5, "period", options)
+with pytest.raises(ValueError, match="'period' must be one of "):
+    require_choice("Day", "period", options)
 ```
 
 **Don't**
@@ -1127,11 +1129,13 @@ with pytest.raises(TypeError, match="'period' must be one of .*, a text"):
 ```py
 if period not in PERIODS:
     raise KeyError(period)
+key = period.strip().lower()
+year = require_choice(str(edition), "edition", EDITIONS)
 ```
 
-**Enforced by:** `tests/test_choice_vocabulary.py::test_a_retired_spelling_is_refused`, review
+**Enforced by:** `scripts/check_choice_literals.py`, `make choice-literals`, `tests/test_check_choice_literals.py::test_every_literal_choice_is_checked_as_written`, `tests/test_choice_vocabulary.py::test_a_retired_spelling_is_refused`, review
 
-**Exceptions.** A plot selector (`FilterComplianceResult.plot(requirement=...)`, `BinauralIndicators.plot(parameter=...)`) chooses what to draw, so an unknown name is a `ValueError`; the same name read back from the result (`binding_margin(requirement, ...)`) is a key, and its miss is a `KeyError` ([A44](#a44)).
+**Exceptions.** A spelling the `Literal` lists on purpose (`"docente"` for `"educational"`, `"dnt_w"` for `"r_w"`) is mapped to its option once the text is checked as written, and a clean-up after the check accepts nothing more. Text the library reads from a file, such as the operation column of an ANP database or a flap identifier a procedure spells, is data, not a caller's choice, and is folded as the file needs ([A46](#a46)). A plot selector (`FilterComplianceResult.plot(requirement=...)`, `BinauralIndicators.plot(parameter=...)`) chooses what to draw, so an unknown name is a `ValueError`; the same name read back from the result (`binding_margin(requirement, ...)`) is a key, and its miss is a `KeyError` ([A44](#a44)).
 
 <a id="a46"></a>
 ### A46. Refuse malformed data the library reads with `ValueError` naming the file

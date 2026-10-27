@@ -637,8 +637,34 @@ def test_one_heavy_vehicle_short_of_7_3_warns() -> None:
 def test_a_category_the_method_does_not_use_is_refused() -> None:
     categories, speeds, levels = _annex_e_rows()
     categories[0] = "1b"
-    with pytest.raises(ValueError, match="clause 4"):
+    with pytest.raises(ValueError, match="'vehicle_category' must be one of"):
         statistical_pass_by(categories, speeds, levels, road_speed_category="medium")
+
+
+@pytest.mark.parametrize("category", ["2A", " 1"])
+def test_a_category_is_taken_as_written(category: str) -> None:
+    """``"2A"`` and ``" 1"`` were folded onto ``"2a"`` and ``"1"``; each is a
+    text that names no category now.
+    """
+    categories, speeds, levels = _annex_e_rows()
+    categories[0] = category
+    with pytest.raises(ValueError, match="'vehicle_category' must be one of"):
+        statistical_pass_by(categories, speeds, levels, road_speed_category="medium")
+
+
+def test_a_category_that_is_not_a_text_is_refused() -> None:
+    """``1`` was read as ``"1"``; a number where a category belongs is the
+    wrong type.
+    """
+    categories, speeds, levels = _annex_e_rows()
+    mixed: list[object] = [1, *categories[1:]]
+    with pytest.raises(TypeError, match="'vehicle_category' must be one of .*, a text"):
+        statistical_pass_by(
+            mixed,  # type: ignore[arg-type]
+            speeds,
+            levels,
+            road_speed_category="medium",
+        )
 
 
 def test_an_unknown_road_speed_category_is_refused() -> None:

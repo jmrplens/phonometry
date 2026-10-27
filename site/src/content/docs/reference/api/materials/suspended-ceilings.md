@@ -314,7 +314,7 @@ substructure pitch of "approx. 0,6 m" of 4.1.1.2.3.4
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a non-positive area or depth, a negative or non-finite deflection, substructure or support dimension or fixture density, a non-positive or non-finite support centre distance, a relative humidity that is empty, not one-dimensional, not finite or outside 0 % to 100 %, an unknown mounting letter, or a type E arrangement with no depth given. |
-| TypeError | if `area`, `deflection_mm`, `depth_mm`, `fixture_density_kg_m2`, `substructure_height_mm`, `substructure_width_mm`, `support_center_distance_m`, `support_height_mm` or `support_width_mm` is not a single number, or `relative_humidity_percent` holds a text or a value that is not a real number. |
+| TypeError | if `area`, `deflection_mm`, `depth_mm`, `fixture_density_kg_m2`, `substructure_height_mm`, `substructure_width_mm`, `support_center_distance_m`, `support_height_mm` or `support_width_mm` is not a single number, or `relative_humidity_percent` holds a text or a value that is not a real number, or `mounting` is not a text. |
 
 ## EN16487_COVERAGE_FACTOR
 
@@ -385,6 +385,7 @@ What one mounting letter of EN ISO 354 Annex B means here.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a letter this test code does not admit. |
+| TypeError | if `letter` is not a text. |
 
 ## MOUNTING_TYPES
 

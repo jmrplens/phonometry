@@ -68,13 +68,14 @@ supplied. No background correction is applied (Clause 6.2).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, overload
+from typing import TYPE_CHECKING, Any, Literal, get_args, overload
 
 import numpy as np
 
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     check_engine,
+    require_choice,
     require_equal_shapes,
     require_ranks,
     require_same_length,
@@ -298,6 +299,9 @@ SurveyRoom = Literal[
     "d+h",
 ]
 
+#: The room keys of Table 4, as :data:`SurveyRoom` spells them.
+_SURVEY_ROOMS: tuple[SurveyRoom, ...] = get_args(SurveyRoom)
+
 
 @overload
 def estimate_reverberation_index(
@@ -343,7 +347,8 @@ def estimate_reverberation_index(
         dB, or the scalar A-/C-weighted index when ``weighted`` is ``True``.
     :raises ValueError: If ``volume`` is not in ``(0, 150]``, or ``room`` is
         not tabulated for that volume range.
-    :raises TypeError: if ``volume`` is not a single number.
+    :raises TypeError: if ``volume`` is not a single number, or ``room`` is
+        not a text.
     """
     v = _positive(volume, "volume")
     if v > _TABLE3_VOLUME_LIMITS[-1]:
@@ -359,8 +364,7 @@ def estimate_reverberation_index(
     )
 
     entries = _TABLE3[idx]
-    room_norm = room.strip().lower()
-    key = "furnished" if room_norm in ("furnished", "other", "others") else room_norm
+    key = require_choice(room, "room", _SURVEY_ROOMS)
     if key not in entries:
         available = ", ".join(sorted(entries))
         limits = _TABLE3_VOLUME_LIMITS

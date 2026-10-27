@@ -593,9 +593,18 @@ def test_flap_lookup_names_the_configuration_it_could_not_find() -> None:
         aircraft.flap("D", "40")
 
 
-def test_flap_lookup_folds_case_and_padding() -> None:
-    """The tables disagree with themselves about both (open item O-10)."""
-    assert _aircraft("JETW").flap("d", " zero ").drag_ratio == pytest.approx(0.055)
+def test_flap_lookup_folds_the_flap_identifier() -> None:
+    """The tables disagree with themselves about case and padding of the flap
+    identifier (open item O-10), so the lookup folds both of its sides.
+    """
+    assert _aircraft("JETW").flap("D", " zero ").drag_ratio == pytest.approx(0.055)
+
+
+def test_flap_lookup_takes_the_operation_as_written() -> None:
+    """The operation is the caller's choice, ``"A"`` or ``"D"``, and no other."""
+    aircraft = _aircraft("JETW")
+    with pytest.raises(ValueError, match=r"'operation' must be one of .*got 'd'"):
+        aircraft.flap("d", "ZERO")  # type: ignore[arg-type]
 
 
 # --------------------------------------------------------------------------

@@ -805,7 +805,7 @@ def measured_insertion_loss_indirect(
     :raises ValueError: For levels that do not match band for band, a band
         centre that is not strictly positive, or an unknown receiver type.
     :raises TypeError: if ``frequencies`` holds a text or a value that is not a real
-        number.
+        number, or ``receiver_type_after`` or ``receiver_type_before`` is not a text.
     """
     ref_b, ref_a, rec_b, rec_a, freqs = _four_levels(
         reference_levels_before,
@@ -815,10 +815,10 @@ def measured_insertion_loss_indirect(
         frequencies,
     )
     before_type = require_choice(
-        str(receiver_type_before), "receiver_type_before", _RECEIVER_TYPES
+        receiver_type_before, "receiver_type_before", _RECEIVER_TYPES
     )
     after_type = require_choice(
-        str(receiver_type_after), "receiver_type_after", _RECEIVER_TYPES
+        receiver_type_after, "receiver_type_after", _RECEIVER_TYPES
     )
     correction_before = RECEIVER_CORRECTIONS[before_type]
     correction_after = RECEIVER_CORRECTIONS[after_type]

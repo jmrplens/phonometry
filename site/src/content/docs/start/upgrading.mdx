@@ -2242,6 +2242,220 @@ print(issubclass(environment.RoadDeviceWarning, phonometry.PhonometryWarning))
 # True
 ```
 
+## A choice is matched as it is written
+
+A parameter or a record field typed with a `Literal` of its options takes the
+spellings that `Literal` lists, and only those. Before 4.0, 186 of them
+folded the case, stripped the spaces, swapped `_`, `-` and spaces, mapped
+an alias of their own or made a text of any value with `str()` before they
+looked the choice up, so a call a type checker refused ran all the same:
+`filters.WeightingFilter(48000, "a")`, `filters.time_weighting(x, fs,
+mode="FAST")`, `vibration.guide_values("residential", edition=1999)`. In 4.0
+such a call raises `ValueError`, or `TypeError` for a value that is not text,
+and the fix is to write the option as its `Literal` lists it. The aliases a
+`Literal` lists on purpose still work: `"docente"` for `"educational"` in
+`building.db_hr_facade_requirement`, `"dnt_w"` for `"r_w"` in
+`building.single_number_uncertainty`. Files the library reads, such as an ANP
+database, are still read whatever case they write their words in.
+
+```python
+from phonometry import filters
+
+try:
+    filters.WeightingFilter(48000, "a")
+except ValueError as refusal:
+    print(type(refusal).__name__)
+print(filters.WeightingFilter(48000, "A").weighting)
+# ValueError
+# A
+```
+
+Each row is a parameter that stopped taking a spelling, with an example of each
+kind it took and every alias of its own. The examples come from running the
+calls the test suite makes, and a few written for the purpose, with the spelling
+changed, on the code just before 4.0. Some of the parameters are newer than
+4.0.0rc1, or were renamed after it; their rows concern only code written since.
+
+| Parameter | Took before 4.0 | 4.0 raises |
+| --- | --- | --- |
+| `aircraft.ANPAircraft.spectral_class(operation=)` | another case (`"DEPARTURE"` for `"departure"`); spaces around it (`" departure "` for `"departure"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `aircraft.ANPDatabase.event_level(metric=)` | another case (`"EXPOSURE"` for `"exposure"`); spaces around it (`" exposure "` for `"exposure"`) | `ValueError` |
+| `aircraft.ANPDatabase.flight_profile(operation=)` | another case (`"DEPARTURE"` for `"departure"`); spaces around it (`" departure "` for `"departure"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `aircraft.ANPDatabase.noise_contour(metric=)` | another case (`"EXPOSURE"` for `"exposure"`); spaces around it (`" exposure "` for `"exposure"`) | `ValueError` |
+| `aircraft.ANPDatabase.npd_curves(operation=)` | another case (`"DEPARTURE"` for `"departure"`); spaces around it (`" A "` for `"A"`); aliases of its own (`"a"`, `"approach"`, `"arrivals"`, `"d"`, `"departures"`, `"landing"`, `"take-off"`, `"takeoff"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `aircraft.ANPDatabase.profile(operation=)` | another case (`"DEPARTURE"` for `"departure"`); spaces around it (`" departure "` for `"departure"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `aircraft.AircraftSystemComplianceResult(linearity=)` | keys that are not text but print as options | `TypeError` for a value that is not text |
+| `aircraft.PerformanceAircraft.flap(operation=)` | another case (`"d"` for `"D"`); spaces around it (`" D "` for `"D"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `aircraft.engine_installation_correction(mounting=)` | another case (`"WING"` for `"wing"`); spaces around it (`" wing "` for `"wing"`); aliases of its own (`"prop"`) | `ValueError` |
+| `aircraft.event_level(metric=)` | another case (`"EXPOSURE"` for `"exposure"`); spaces around it (`" exposure "` for `"exposure"`) | `ValueError` |
+| `aircraft.event_level(mounting=)` | another case (`"WING"` for `"wing"`); spaces around it (`" wing "` for `"wing"`) | `ValueError` |
+| `aircraft.ground_effect_adjustment(flow_resistivity=)` | another case (`"g"` for `"G"`); spaces around it (`" G "` for `"G"`) | `ValueError` |
+| `aircraft.noise_contour(metric=)` | another case (`"EXPOSURE"` for `"exposure"`); spaces around it (`" exposure "` for `"exposure"`) | `ValueError` |
+| `aircraft.noise_contour(mounting=)` | another case (`"WING"` for `"wing"`); spaces around it (`" wing "` for `"wing"`) | `ValueError` |
+| `aircraft.start_of_roll_directivity(engine=)` | another case (`"JET"` for `"jet"`); spaces around it (`" jet "` for `"jet"`); aliases of its own (`"prop"`, `"propeller"`, `"turbofan"`) | `ValueError` |
+| `aircraft.terrain_screening_adjustment(flow_resistivity=)` | another case (`"d"` for `"D"`); spaces around it (`" D "` for `"D"`) | `ValueError` |
+| `building.d2m_nt_a(spectrum=)` | another case (`"RAILWAY"` for `"railway"`); spaces around it (`" railway "` for `"railway"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `building.d2m_nt_atr(spectrum=)` | another case (`"TRAFFIC"` for `"traffic"`); spaces around it (`" traffic "` for `"traffic"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `building.db_hr_airborne_requirement(receiving_room=)` | another case (`"PROTECTED"` for `"protected"`); spaces around it (`" protected "` for `"protected"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `building.db_hr_airborne_requirement(source_room=)` | another case (`"SAME_UNIT"` for `"same_unit"`); spaces around it (`" same_unit "` for `"same_unit"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `building.db_hr_facade_requirement(building_use=)` | another case (`"RESIDENTIAL"` for `"residential"`); spaces around it (`" residential "` for `"residential"`) | `ValueError` |
+| `building.db_hr_facade_requirement(dominant_noise=)` | another case (`"ROAD"` for `"road"`); spaces around it (`" road "` for `"road"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `building.db_hr_facade_requirement(room_type=)` | another case (`"BEDROOMS"` for `"bedrooms"`); spaces around it (`" bedrooms "` for `"bedrooms"`) | `ValueError` |
+| `building.db_hr_global_index(spectrum=)` | another case (`"PINK"` for `"pink"`); spaces around it (`" pink "` for `"pink"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `building.db_hr_impact_requirement(receiving_room=)` | another case (`"PROTECTED"` for `"protected"`); spaces around it (`" protected "` for `"protected"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `building.db_hr_impact_requirement(source_room=)` | another case (`"OTHER_UNIT"` for `"other_unit"`); spaces around it (`" other_unit "` for `"other_unit"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `building.db_hr_reverberation_requirement(room_use=)` | another case (`"CLASSROOM"` for `"classroom"`); spaces around it (`" classroom "` for `"classroom"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `building.estimate_reverberation_index(room=)` | another case (`"G"` for `"g"`); spaces around it (`" g "` for `"g"`); aliases of its own (`"other"`, `"others"`) | `ValueError` |
+| `building.single_number_uncertainty(quantity=)` | another case (`"R_W"` for `"r_w"`); spaces around it (`" r_w "` for `"r_w"`) | `ValueError` |
+| `building.uncertain_value(quantity=)` | another case (`"R_W"` for `"r_w"`); spaces around it (`" r_w "` for `"r_w"`) | `ValueError` |
+| `environment.activity_limits(area_type=)` | another case (`"A"` for `"a"`); spaces around it (`" a "` for `"a"`) | `ValueError` |
+| `environment.adjacent_premises_limits(building_use=)` | another case (`"RESIDENTIAL"` for `"residential"`); spaces around it (`" residential "` for `"residential"`) | `ValueError` |
+| `environment.adjacent_premises_limits(room_type=)` | another case (`"BEDROOMS"` for `"bedrooms"`); spaces around it (`" bedrooms "` for `"bedrooms"`) | `ValueError` |
+| `environment.assess_activity(period_hours=)` | another case (keys: `{"Day": 12.0}`); spaces around it (keys: `{" day ": 12.0}`); keys that are not text but print as options | `ValueError`, and `TypeError` for a value that is not text |
+| `environment.bridge_transfer(bridge=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.indoor_quality_objectives(building_use=)` | another case (`"RESIDENTIAL"` for `"residential"`); spaces around it (`" residential "` for `"residential"`) | `ValueError` |
+| `environment.indoor_quality_objectives(room_type=)` | another case (`"LIVING"` for `"living"`); spaces around it (`" living "` for `"living"`) | `ValueError` |
+| `environment.infrastructure_limits(area_type=)` | another case (`"E"` for `"e"`); spaces around it (`" e "` for `"e"`) | `ValueError` |
+| `environment.max_infrastructure_limit(area_type=)` | another case (`"E"` for `"e"`); spaces around it (`" e "` for `"e"`) | `ValueError` |
+| `environment.measured_insertion_loss_indirect(receiver_type_after=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.measured_insertion_loss_indirect(receiver_type_before=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.outdoor_quality_objectives(area_type=)` | another case (`"E"` for `"e"`); spaces around it (`" e "` for `"e"`) | `ValueError` |
+| `environment.outdoor_quality_objectives(urbanization=)` | another case (`"EXISTING"` for `"existing"`); spaces around it (`" existing "` for `"existing"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `environment.pass_by_regression(vehicle_category=)` | spaces around it (`" 1 "` for `"1"`); a number (`1` for `"1"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `environment.rail_roughness(roughness=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.road_propulsion_noise(category=)` | a number (`1` for `"1"`); a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.road_propulsion_noise(surface=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.road_rolling_noise(category=)` | a number (`1` for `"1"`); a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.road_rolling_noise(surface=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.road_source_power(surface=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.road_surface_coefficients(surface=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.road_vehicle_sound_power(category=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.road_vehicle_sound_power(surface=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.statistical_pass_by(corrected_vehicle_sound_levels=)` | another case (keys: `{"1": 78.8, "2A": 81.1, "2B": 83.8}`); spaces around it (keys: `{" 1 ": 78.8, " 2a ": 81.1, " 2b ": 83.8}`); keys that are not text but print as options | `ValueError`, and `TypeError` for a value that is not text |
+| `environment.statistical_pass_by(reference_levels=)` | another case (keys: `{"1": 80.0, "2A": 85.0, "2B": 89.0}`); spaces around it (keys: `{" 1 ": 80.0, " 2a ": 85.0, " 2b ": 89.0}`); keys that are not text but print as options | `ValueError`, and `TypeError` for a value that is not text |
+| `environment.statistical_pass_by(weighting_factors=)` | another case (keys: `{"1": 0.9, "2A": 0.075, "2B": 0.025}`); spaces around it (keys: `{" 1 ": 0.9, " 2a ": 0.075, " 2b ": 0.025}`); keys that are not text but print as options | `ValueError`, and `TypeError` for a value that is not text |
+| `environment.statistical_pass_by_index(vehicle_sound_levels=)` | another case (keys: `{"1": 78.5, "2A": 81.1, "2B": 83.8}`); spaces around it (keys: `{" 1 ": 78.5, " 2a ": 81.1, " 2b ": 83.8}`); keys that are not text but print as options | `ValueError`, and `TypeError` for a value that is not text |
+| `environment.statistical_pass_by_index(weighting_factors=)` | another case (keys: `{"1": 0.8, "2A": 0.1, "2B": 0.1}`); spaces around it (keys: `{" 1 ": 0.8, " 2a ": 0.1, " 2b ": 0.1}`); keys that are not text but print as options | `ValueError`, and `TypeError` for a value that is not text |
+| `environment.track_transfer(track=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.traction_sound_power(vehicle=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `environment.vibration_quality_objective(building_use=)` | another case (`"RESIDENTIAL"` for `"residential"`); spaces around it (`" residential "` for `"residential"`) | `ValueError` |
+| `environment.wheel_roughness(brake=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `filters.OctaveFilterBank.filter(mode=)` | another case (`"RMS"` for `"rms"`) | `ValueError` |
+| `filters.OctaveFilterBank.spectrogram(mode=)` | another case (`"RMS"` for `"rms"`) | `ValueError` |
+| `filters.TimeWeighting(mode=)` | another case (`"FAST"` for `"fast"`) | `ValueError` |
+| `filters.WeightingFilter(weighting=)` | another case (`"a"` for `"A"`) | `ValueError` |
+| `filters.time_weighting(initial_state=)` | another case (`"ZERO"` for `"zero"`) | `ValueError` |
+| `filters.time_weighting(mode=)` | another case (`"FAST"` for `"fast"`) | `ValueError` |
+| `fluids.sea_water(sound_speed_model=)` | another case (`"UNESCO"` for `"unesco"`); spaces around it (`" unesco "` for `"unesco"`) | `ValueError` |
+| `fluids.sea_water_sound_speed(model=)` | another case (`"MACKENZIE"` for `"mackenzie"`); spaces around it (`" mackenzie "` for `"mackenzie"`) | `ValueError` |
+| `materials.check_ceiling_specimen(mounting=)` | another case (`"e"` for `"E"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `materials.mounting_type(letter=)` | another case (`"e"` for `"E"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `metrology.CalibratorTableRow.for_class(calibrator_class=)` | another case (`"1/m"` for `"1/M"`); spaces around it (`" 1 "` for `"1"`); a number (`1` for `"1"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `metrology.sensitivity(calibrator_class=)` | spaces around it (`" 1 "` for `"1"`); a number (`1` for `"1"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `metrology.verify_sound_calibrator(calibrator_class=)` | spaces around it (`" 1 "` for `"1"`); a number (`1` for `"1"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `metrology.verify_sound_calibrator(environmental_test=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.applicable_methods(condition=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.applicable_methods(source_kind=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.cabin_insulation(method=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.check_enclosure_test_environment(base_standard=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.enclosure_artificial_source_insulation(condition=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.enclosure_artificial_source_insulation(quantity=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.enclosure_sound_power_insulation(condition=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.enclosure_sound_power_insulation(source_kind=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.enclosure_sound_pressure_insulation(condition=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.enclosure_sound_pressure_insulation(source_kind=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.screen_attenuation(source_kind=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.uncertainty_conditions(method=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.weighted_cabin_insulation(method=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `noise_control.weighted_enclosure_insulation(quantity=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `signals.ln_levels(mode=)` | another case (`"FAST"` for `"fast"`) | `ValueError` |
+| `signals.ln_levels(weighting=)` | another case (`"a"` for `"A"`) | `ValueError` |
+| `signals.sel(weighting=)` | another case (`"a"` for `"A"`) | `ValueError` |
+| `underwater.VolumeAbsorption(model=)` | another case (`"THORP"` for `"thorp"`); spaces around it (`" thorp "` for `"thorp"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.WeightedExposureResult(group=)` | another case (`"vhf"` for `"VHF"`); spaces around it (`" VHF "` for `"VHF"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.WeightedExposureResult(guidance=)` | another case (`"NMFS-2024"` for `"nmfs-2024"`); spaces around it (`" nmfs-2024 "` for `"nmfs-2024"`); another separator (`"nmfs_2024"` for `"nmfs-2024"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.audiogram_parameters(group=)` | another case (`"hf"` for `"HF"`); spaces around it (`" HF "` for `"HF"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.auditory_weighting(group=)` | another case (`"hf"` for `"HF"`); spaces around it (`" HF "` for `"HF"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.auditory_weighting(guidance=)` | another case (`"NMFS-2018"` for `"nmfs-2018"`); spaces around it (`" nmfs-2018 "` for `"nmfs-2018"`); another separator (`"nmfs_2018"` for `"nmfs-2018"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.detection_range(law=)` | another case (`"SPHERICAL"` for `"spherical"`); spaces around it (`" spherical "` for `"spherical"`) | `ValueError` |
+| `underwater.detection_range(model=)` | another case (`"FRANCOIS-GARRISON"` for `"francois-garrison"`); spaces around it (`" francois-garrison "` for `"francois-garrison"`) | `ValueError` |
+| `underwater.detection_range_from_curve(crossing=)` | another case (`"FIRST"` for `"first"`); spaces around it (`" first "` for `"first"`) | `ValueError` |
+| `underwater.effective_depth(seabed=)` | another case (`"SAND"` for `"sand"`); spaces around it (`" sand "` for `"sand"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.eigenrays(bottom=)` | another case (`"PRESSURE-RELEASE"` for `"pressure-release"`); spaces around it (`" pressure-release "` for `"pressure-release"`) | `ValueError` |
+| `underwater.exposure_criteria(group=)` | another case (`"lf"` for `"LF"`); spaces around it (`" LF "` for `"LF"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.exposure_criteria(guidance=)` | another case (`"SOUTHALL-2019"` for `"southall-2019"`); spaces around it (`" southall-2019 "` for `"southall-2019"`); another separator (`"southall_2019"` for `"southall-2019"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.gaussian_beams(bottom=)` | another case (`"RIGID"` for `"rigid"`); spaces around it (`" rigid "` for `"rigid"`) | `ValueError` |
+| `underwater.group_audiogram(group=)` | another case (`"hf"` for `"HF"`); spaces around it (`" HF "` for `"HF"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.hearing_groups(guidance=)` | another case (`"SOUTHALL-2019"` for `"southall-2019"`); spaces around it (`" southall-2019 "` for `"southall-2019"`); another separator (`"southall_2019"` for `"southall-2019"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.normal_modes(bottom=)` | another case (`"PRESSURE-RELEASE"` for `"pressure-release"`); spaces around it (`" pressure-release "` for `"pressure-release"`) | `ValueError` |
+| `underwater.propagation_loss(law=)` | another case (`"SPHERICAL"` for `"spherical"`); spaces around it (`" spherical "` for `"spherical"`) | `ValueError` |
+| `underwater.propagation_loss(model=)` | another case (`"FRANCOIS-GARRISON"` for `"francois-garrison"`); spaces around it (`" francois-garrison "` for `"francois-garrison"`) | `ValueError` |
+| `underwater.reflection_loss_gradient(seabed=)` | another case (`"SAND"` for `"sand"`); spaces around it (`" sand "` for `"sand"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.seawater_absorption(model=)` | another case (`"THORP"` for `"thorp"`); spaces around it (`" thorp "` for `"thorp"`) | `ValueError` |
+| `underwater.ship_source_spectrum(model=)` | another case (`"JOMOPANS-ECHO"` for `"jomopans-echo"`); spaces around it (`" jomopans-echo "` for `"jomopans-echo"`) | `ValueError` |
+| `underwater.ship_source_spectrum(vessel_class=)` | another case (`"BULKER"` for `"bulker"`); spaces around it (`" bulker "` for `"bulker"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.sound_speed_profile(model=)` | another case (`"MEDWIN"` for `"medwin"`); spaces around it (`" medwin "` for `"medwin"`) | `ValueError` |
+| `underwater.spreading_loss(law=)` | another case (`"SPHERICAL"` for `"spherical"`); spaces around it (`" spherical "` for `"spherical"`) | `ValueError` |
+| `underwater.waveguide_cutoff_frequency(seabed=)` | another case (`"SAND"` for `"sand"`); spaces around it (`" sand "` for `"sand"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.weighted_exposure(group=)` | another case (`"vhf"` for `"VHF"`); spaces around it (`" VHF "` for `"VHF"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.weighted_exposure(guidance=)` | another case (`"NMFS-2024"` for `"nmfs-2024"`); spaces around it (`" nmfs-2024 "` for `"nmfs-2024"`); another separator (`"nmfs_2024"` for `"nmfs-2024"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.weighting_parameters(group=)` | another case (`"hf"` for `"HF"`); spaces around it (`" HF "` for `"HF"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.weighting_parameters(guidance=)` | another case (`"NMFS-2018"` for `"nmfs-2018"`); spaces around it (`" nmfs-2018 "` for `"nmfs-2018"`); another separator (`"nmfs_2018"` for `"nmfs-2018"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.weston_propagation_loss(seabed=)` | another case (`"SAND"` for `"sand"`); spaces around it (`" sand "` for `"sand"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `underwater.weston_regime_boundaries(seabed=)` | another case (`"SAND"` for `"sand"`); spaces around it (`" sand "` for `"sand"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `vibration.PhaseVerification(weighting=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.RunningRMSDecayVerification(method=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.WeightingVerification(weighting=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.admissible_exposure_s(time_of_day=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.angular_average_transmission_coefficient(junction=)` | another case (`"x"` for `"X"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `vibration.angular_average_transmission_coefficient(section=)` | another case (`"CORNER"` for `"corner"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `vibration.assess_people_in_buildings(source=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.assess_railway_change(time_of_day=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.assessment_vibration_severity(time_of_day=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.band_limited_weighting_factor(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.check_loose_mounting(direction=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.check_loose_mounting(surface=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.construction_guide_values(area=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.construction_guide_values(stage=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.corner_transmission_coefficient(junction=)` | another case (`"x"` for `"X"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `vibration.foundation_to_floor_level_difference(floor=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.foundation_to_floor_level_difference(statistic=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.geometric_exponent(character=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.geometric_exponent(geometry=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.geometric_exponent(wave=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.ground_to_floor_level_difference(floor=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.ground_to_foundation_level_difference(level=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.ground_to_foundation_level_difference(statistic=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.guide_values(area=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.guide_values(edition=)` | a number (`1999` for `"1999"`); a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.guide_values(source=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.guide_values(time_of_day=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.indication_tolerance_percent(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.instrument_confidence_limit_percent(quantity=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.junction_transmission(junction=)` | another case (`"l"` for `"L"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `vibration.kb_fmax_from_peak_velocity(kind=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.phase_tolerance_deg(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.railway_assessment_severity(time_of_day=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.railway_guide_values(alignment=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.railway_guide_values(area=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.railway_guide_values(time_of_day=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.reference_indication(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.running_rms_decay_time(method=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.sawtooth_burst(application=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.signal_burst_indications(application=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.signal_burst_indications(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.straight_transmission_coefficient(junction=)` | another case (`"t1"` for `"T1"`); a value that is not text but prints as an option | `ValueError`, and `TypeError` for a value that is not text |
+| `vibration.train_assessment_severity(time_of_day=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.train_decay_exponent(fitted_with=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.train_weighting_factor(alignment=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.train_weighting_factor(kind=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.verify_phase_response(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.verify_running_rms_decay(method=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.verify_signal_burst_response(application=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.verify_signal_burst_response(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.verify_weighting(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+| `vibration.weighting_tolerance_percent(name=)` | a value that is not text but prints as an option | `TypeError` for a value that is not text |
+
 ## The seventy-eight names that are gone
 
 Everything else moved. These seventy-eight exist in no public module:

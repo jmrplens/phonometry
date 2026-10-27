@@ -65,6 +65,7 @@ import numpy as np
 from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
+    require_choice,
     require_count,
     require_equal_shapes,
     require_finite_fields,
@@ -543,19 +544,15 @@ _CRITERIA: dict[
 }
 
 
-def _check_guidance(guidance: str) -> Guidance:
-    """Normalise and validate a guidance-version name.
+def _check_guidance(guidance: object) -> Guidance:
+    """A guidance-version name, as written.
 
-    :param guidance: One of :data:`WEIGHTING_GUIDANCE` (case-insensitive,
-        underscores accepted).
-    :return: The canonical name.
+    :param guidance: One of :data:`WEIGHTING_GUIDANCE`.
+    :return: The name.
+    :raises TypeError: If the version is not a text.
     :raises ValueError: If the version is unknown.
     """
-    key = str(guidance).strip().lower().replace("_", "-")
-    if key not in WEIGHTING_GUIDANCE:
-        msg = f"'guidance' must be one of {WEIGHTING_GUIDANCE}, got {guidance!r}."
-        raise ValueError(msg)
-    return key
+    return require_choice(guidance, "guidance", WEIGHTING_GUIDANCE)
 
 
 def hearing_groups(guidance: Guidance = "nmfs-2024") -> tuple[HearingGroup, ...]:
@@ -564,6 +561,7 @@ def hearing_groups(guidance: Guidance = "nmfs-2024") -> tuple[HearingGroup, ...]
     :param guidance: One of :data:`WEIGHTING_GUIDANCE`.
     :return: The group codes, in the order the source tabulates them.
     :raises ValueError: If the version is unknown.
+    :raises TypeError: if ``guidance`` is not a text.
     """
     return tuple(_PARAMETERS[_check_guidance(guidance)])
 
@@ -573,21 +571,24 @@ def weighting_parameters(
 ) -> WeightingParameters:
     """Weighting/exposure parameters of one hearing group.
 
-    :param group: Hearing-group code as used by ``guidance`` (case-insensitive).
+    :param group: Hearing-group code as used by ``guidance``, as written.
     :param guidance: One of :data:`WEIGHTING_GUIDANCE`.
     :return: The :class:`WeightingParameters` row.
+    :raises TypeError: If ``group`` or ``guidance`` is not a text.
     :raises ValueError: If the version or the group is unknown.
     """
     key = _check_guidance(guidance)
     table = _PARAMETERS[key]
-    name = str(group).strip().upper()
-    if name not in table:
+    if not isinstance(group, str):
+        msg = f"'group' must be a text, one of {tuple(table)}; got {group!r}."
+        raise TypeError(msg)
+    if group not in table:
         msg = (
             f"'group' must be one of {tuple(table)} for guidance {key!r}, got {group!r}."
             " Group codes are not portable between guidance versions."
         )
         raise ValueError(msg)
-    return table[name]
+    return table[group]
 
 
 def _band_pass_db(

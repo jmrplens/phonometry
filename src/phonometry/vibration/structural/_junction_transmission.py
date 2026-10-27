@@ -301,7 +301,7 @@ def _critical_frequency(thickness: float, wave_speed: float) -> float:
 
 def _junction(junction: str) -> tuple[float, float, float | None]:
     """Validated ``(J1, J2, J3)`` for a perpendicular junction name."""
-    name = require_choice(str(junction).upper(), "junction", tuple(_JUNCTIONS))
+    name = require_choice(junction, "junction", tuple(_JUNCTIONS))
     return _JUNCTIONS[name]
 
 
@@ -348,7 +348,8 @@ def corner_transmission_coefficient(
     :return: ``tau12(theta)`` (same shape as *angle*).
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle or an unknown junction.
-    :raises TypeError: if ``chi`` or ``psi`` is not a single number.
+    :raises TypeError: if ``chi`` or ``psi`` is not a single number, or ``junction`` is
+        not a text.
     """
     theta = _check_angle(angle_rad)
     c = require_positive(chi, "chi")
@@ -381,7 +382,8 @@ def straight_transmission_coefficient(
     :return: ``tau13(theta)`` (same shape as *angle*).
     :raises ValueError: for a non-positive ``chi``/``psi``, an out-of-range
         angle, or a junction without a straight section.
-    :raises TypeError: if ``chi`` or ``psi`` is not a single number.
+    :raises TypeError: if ``chi`` or ``psi`` is not a single number, or ``junction`` is
+        not a text.
     """
     theta = _check_angle(angle_rad)
     c = require_positive(chi, "chi")
@@ -454,10 +456,10 @@ def angular_average_transmission_coefficient(
     :return: The angular-average transmission coefficient ``tau_bar``.
     :raises ValueError: for a non-positive ``chi``/``psi``, an unknown junction
         or section, or a straight section that does not exist.
-    :raises TypeError: if ``chi`` is not a single number.
+    :raises TypeError: if ``chi`` is not a single number, or ``section`` is not a text.
     """
     require_scalar(chi, "chi")
-    section = require_choice(str(section).lower(), "section", ("corner", "straight"))
+    section = require_choice(section, "section", ("corner", "straight"))
     if section == "corner":
 
         def coeff(t: float) -> float:
@@ -863,8 +865,9 @@ def junction_transmission(
         one-degree steps).
     :return: A :class:`JunctionTransmissionResult`.
     :raises ValueError: for a non-positive input or an unknown junction.
+    :raises TypeError: if ``junction`` is not a text.
     """
-    name = require_choice(str(junction).upper(), "junction", tuple(_JUNCTIONS))
+    name = require_choice(junction, "junction", tuple(_JUNCTIONS))
     params = junction_wave_parameters(
         thickness1_m,
         wave_speed1,

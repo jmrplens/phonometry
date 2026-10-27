@@ -188,6 +188,7 @@ class CalibratorTableRow(RichDisplay):
             designation, which reads the column of its class (5.1.14).
         :return: The printed figure, or ``None`` where the table prints a dash.
         :raises ValueError: for an unknown class.
+        :raises TypeError: if ``calibrator_class`` is not a text.
         """
         column = {"LS": self.class_ls, "1": self.class_1, "2": self.class_2}
         return column[_base_class(calibrator_class)]
@@ -407,19 +408,13 @@ def _base_class(calibrator_class: str) -> CalibratorClass:
     return cast("CalibratorClass", designation.split("/", 1)[0])
 
 
-def _designation(calibrator_class: str | int) -> CalibratorClass:
-    """Normalise a class designation, accepting ``1``, ``"1"`` and ``"ls/m"``.
+def _designation(calibrator_class: object) -> CalibratorClass:
+    """A class designation of IEC 60942:2017 Table 1, as written.
 
+    :raises TypeError: for a designation that is not a text.
     :raises ValueError: for a designation Table 1 does not list.
     """
-    designation = str(calibrator_class).strip().upper()
-    if designation not in CALIBRATOR_CLASSES:
-        msg = (
-            f"'calibrator_class' must be one of {', '.join(CALIBRATOR_CLASSES)} "
-            f"(IEC 60942:2017 Table 1); got {calibrator_class!r}."
-        )
-        raise ValueError(msg)
-    return designation
+    return require_choice(calibrator_class, "calibrator_class", CALIBRATOR_CLASSES)
 
 
 def _banded(
@@ -983,13 +978,14 @@ def verify_sound_calibrator(
         frequency the class has no acceptance limit at, a static-pressure
         correction given for a class that is not an /M pistonphone, or one
         missing for an /M pistonphone whose level is given.
-    :raises TypeError: if ``nominal_frequency_hz`` is not a single number.
+    :raises TypeError: if ``nominal_frequency_hz`` is not a single number, or
+        ``calibrator_class`` or ``environmental_test`` is not a text.
     """
     designation = _designation(calibrator_class)
     base = _base_class(designation)
     f = require_positive(nominal_frequency_hz, "nominal_frequency_hz")
     test = require_choice(
-        str(environmental_test), "environmental_test", _ENVIRONMENTAL_TESTS
+        environmental_test, "environmental_test", _ENVIRONMENTAL_TESTS
     )
     if _banded(LEVEL_ACCEPTANCE_LIMITS_DB, base, f) is None:
         span = "31.5 Hz to 16 kHz" if base == "1" else "160 Hz to 1250 Hz"

@@ -41,6 +41,7 @@ import numpy as np
 from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_above_absolute_zero,
+    require_choice,
     require_ranks,
     require_same_length,
     require_scalar,
@@ -59,13 +60,13 @@ __all__ = [
     "spreading_loss",
 ]
 
-_SPREADING_LAWS = ("spherical", "cylindrical", "practical")
 #: The three seawater absorption models (Francois-Garrison, Ainslie-McColm,
 #: Thorp).
 AbsorptionModel = Literal["francois-garrison", "ainslie-mccolm", "thorp"]
 
 #: A geometric spreading law of :func:`spreading_loss`.
 SpreadingLaw = Literal["spherical", "cylindrical", "practical"]
+_SPREADING_LAWS: tuple[SpreadingLaw, ...] = ("spherical", "cylindrical", "practical")
 
 _ABSORPTION_MODELS: tuple[AbsorptionModel, ...] = (
     "francois-garrison",
@@ -120,24 +121,23 @@ def spreading_loss(
         ``"practical"``.
     :return: Spreading loss per range, in dB.
     :raises ValueError: If the inputs are invalid.
-    :raises TypeError: if ``transition_range`` is not a single number.
+    :raises TypeError: if ``transition_range`` is not a single number, or
+        ``law`` is not a text.
     """
     r = _positive_array(range_m, "range_m")
-    key = law.strip().lower()
+    key = require_choice(law, "law", _SPREADING_LAWS)
     if key == "spherical":
         return 20.0 * np.log10(r)
     if key == "cylindrical":
         return 10.0 * np.log10(r)
-    if key == "practical":
-        if transition_range is None:
-            msg = "'transition_range' is required for the 'practical' law."
-            raise ValueError(msg)
-        r0 = _positive(transition_range, "transition_range")
-        return np.where(
-            r <= r0, 20.0 * np.log10(r), 20.0 * np.log10(r0) + 10.0 * np.log10(r / r0)
-        )
-    msg = f"'law' must be one of {_SPREADING_LAWS}, got {law!r}."
-    raise ValueError(msg)
+    # "practical"
+    if transition_range is None:
+        msg = "'transition_range' is required for the 'practical' law."
+        raise ValueError(msg)
+    r0 = _positive(transition_range, "transition_range")
+    return np.where(
+        r <= r0, 20.0 * np.log10(r), 20.0 * np.log10(r0) + 10.0 * np.log10(r / r0)
+    )
 
 
 def _thorp(f_khz: NDArray[np.float64]) -> NDArray[np.float64]:
@@ -224,7 +224,7 @@ def seawater_absorption(
     :return: Absorption coefficient per frequency, in dB/km.
     :raises ValueError: If ``model`` is unknown or an input is invalid.
     :raises TypeError: if ``depth``, ``salinity`` or ``temperature_c`` is not a single
-        number.
+        number, or ``model`` is not a text.
     """
     f_khz = _positive_array(frequency_hz, "frequency_hz") / 1000.0
     require_scalar(temperature_c, "temperature_c")
@@ -240,7 +240,7 @@ def seawater_absorption(
         msg = "'salinity' and 'depth' must be non-negative."
         raise ValueError(msg)
     require_above_absolute_zero(t, "temperature_c")
-    key = model.strip().lower()
+    key = require_choice(model, "model", _ABSORPTION_MODELS)
     if key == "thorp":
         return _thorp(f_khz)
     if key == "francois-garrison":
@@ -258,10 +258,8 @@ def seawater_absorption(
             )
             raise ValueError(msg)
         return _francois_garrison(f_khz, t, s, z, float(ph))
-    if key == "ainslie-mccolm":
-        return _ainslie_mccolm(f_khz, t, s, z / _M_PER_KM, float(ph))
-    msg = f"'model' must be one of {_ABSORPTION_MODELS}, got {model!r}."
-    raise ValueError(msg)
+    # "ainslie-mccolm"
+    return _ainslie_mccolm(f_khz, t, s, z / _M_PER_KM, float(ph))
 
 
 @dataclass(frozen=True)
@@ -390,6 +388,6 @@ def propagation_loss(
         absorption=absorption,
         frequency=f,
         absorption_db_per_km=alpha,
-        law=law.strip().lower(),
-        model=model.strip().lower(),
+        law=law,
+        model=model,
     )

@@ -253,7 +253,7 @@ Speed of sound in sea water, in metres per second.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `model` is unknown or an input is non-finite. |
-| TypeError | if `latitude_deg` is not a single number, or `depth_m`, `salinity_psu` or `temperature_c` holds a text or a value that is not a real number. |
+| TypeError | if `model` is not a text, `latitude_deg` is not a single number, or `depth_m`, `salinity_psu` or `temperature_c` holds a text or a value that is not a real number. |
 
 :::note
 Each equation is a fit over a bounded oceanographic domain and

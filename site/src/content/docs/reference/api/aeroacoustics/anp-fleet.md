@@ -182,6 +182,7 @@ Spectral class of this aircraft's NPD for an operation.
 | Exception | When |
 | :--- | :--- |
 | KeyError | if the database carries no such class. |
+| TypeError | if `operation` is not a text. |
 
 ## ANPDatabase
 
@@ -306,6 +307,7 @@ which is why one has to be given and why the answer is not a table entry.
 | Exception | When |
 | :--- | :--- |
 | KeyError | If the aircraft has no procedural-step profile or no default weight for the request. |
+| TypeError | if `operation` is not a text. |
 
 ### ANPDatabase.noise_contour()
 
@@ -383,6 +385,7 @@ NPD curves for an aircraft, operation and noise metric.
 | :--- | :--- |
 | KeyError | If the aircraft has no NPD data for the request. |
 | ValueError | If the metric or operation is unknown. |
+| TypeError | if `operation` is not a text. |
 
 ### ANPDatabase.performance_aircraft()
 
@@ -516,6 +519,7 @@ none named `"DEFAULT"`) raises listing the identifiers.
 | :--- | :--- |
 | KeyError | If the aircraft is unknown, has no fixed-point profile for the request, or `profile_id` is not among the available ones. |
 | ValueError | If `profile_id` is `None` and several profiles exist with none of them named `"DEFAULT"`. |
+| TypeError | if `operation` is not a text. |
 
 ### ANPDatabase.revised_npd_curves()
 

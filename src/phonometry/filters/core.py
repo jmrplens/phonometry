@@ -539,24 +539,19 @@ def _validate_bank_design(
     return [float(f) for f in limits]
 
 
-def _require_level_mode(mode: str) -> Mode:
-    """Check ``mode`` at the entry point the caller typed.
+def _require_level_mode(mode: object) -> Mode:
+    """Check ``mode`` at the entry point the caller typed, as written.
 
     ``_calculate_level`` inspects the mode band by band, after the filtering
     work is done and only when levels are computed at all, so a typo used to
-    surface late or, with ``calculate_level=False``, not at all. Lowercasing
-    before the membership check preserves the case-insensitivity the level
-    calculation always had.
+    surface late or, with ``calculate_level=False``, not at all.
 
     :param mode: The requested level mode.
-    :return: The validated mode, lowercased.
+    :return: The validated mode.
     :raises TypeError: for a non-string mode.
     :raises ValueError: for a string that is neither ``'rms'`` nor ``'peak'``.
     """
-    if not isinstance(mode, str):
-        msg = f"'mode' must be a string; got {type(mode).__name__}."
-        raise TypeError(msg)
-    return require_choice(mode.lower(), "mode", _LEVEL_MODES)
+    return require_choice(mode, "mode", _LEVEL_MODES)
 
 
 def _require_bank_input(x_proc: np.ndarray) -> None:
@@ -798,6 +793,7 @@ class OctaveFilterBank:
         :return: An :class:`OctaveFilterResult` carrying the band ``levels``,
             their ``frequencies`` and, when ``sigbands`` asked for them, the
             per-band ``bands``.
+        :raises TypeError: if ``mode`` is not a text.
         """
         if zero_phase and self.stateful:
             msg = "zero_phase is not compatible with stateful processing."
@@ -911,7 +907,8 @@ class OctaveFilterBank:
             ``(channels, bands, frames)`` for 2D input, ``frequencies`` holds
             the exact mid-band frequencies and ``times`` each window's centre
             in seconds.
-        :raises TypeError: if ``overlap`` or ``window_time`` is not a single number.
+        :raises TypeError: if ``overlap`` or ``window_time`` is not a single number, or
+            ``mode`` is not a text.
         """
         require_scalar(overlap, "overlap")
         if self.stateful:
@@ -1063,11 +1060,11 @@ class OctaveFilterBank:
 
     def _calculate_level(self, y: np.ndarray, mode: Mode) -> NDArray[np.float64]:
         """Calculate the level (RMS or Peak) in dB."""
-        if mode.lower() == "rms":
+        if mode == "rms":
             # Use norm for better performance and reduced memory overhead
             # RMS = ||y|| / sqrt(N)
             val_linear = np.linalg.norm(y, axis=-1) / np.sqrt(y.shape[-1])
-        elif mode.lower() == "peak":
+        elif mode == "peak":
             val_linear = np.max(np.abs(y), axis=-1)
         else:
             msg = "Invalid mode. Use 'rms' or 'peak'."

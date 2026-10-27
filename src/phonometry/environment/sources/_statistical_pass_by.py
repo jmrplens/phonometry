@@ -288,15 +288,12 @@ def _road_category(road_speed_category: str) -> RoadSpeedCategory:
 
 
 def _vehicle_category(vehicle_category: object) -> VehicleCategory:
-    key = str(vehicle_category).strip().lower()
-    if key not in SPB_VEHICLE_CATEGORIES:
-        msg = (
-            f"vehicle category {vehicle_category!r} is not one ISO 11819-1 uses; "
-            "the method measures cars ('1'), dual-axle heavy vehicles ('2a') and "
-            "multi-axle heavy vehicles ('2b') only (clause 4)."
-        )
-        raise ValueError(msg)
-    return key
+    """A vehicle category of ISO 11819-1, as written.
+
+    The method measures cars (``"1"``), dual-axle heavy vehicles (``"2a"``)
+    and multi-axle heavy vehicles (``"2b"``) only (clause 4).
+    """
+    return require_choice(vehicle_category, "vehicle_category", SPB_VEHICLE_CATEGORIES)
 
 
 def _per_category(
@@ -665,7 +662,8 @@ def pass_by_regression(
         a level that is not finite, inputs that do not match pass-by for
         pass-by, fewer than three pass-bys, or pass-bys all at one speed.
     :raises TypeError: if ``road_speed_category`` is not a text, or ``max_levels`` or
-        ``speeds_kmh`` holds a text or a value that is not a real number.
+        ``speeds_kmh`` holds a text or a value that is not a real number, or
+        ``vehicle_category`` is not a text.
     """
     road = _road_category(road_speed_category)
     category = _vehicle_category(vehicle_category)

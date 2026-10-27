@@ -444,7 +444,7 @@ SIGNAL_BURST_RESPONSE: Mapping[
 
 def _require_application(application: str) -> SawtoothBurstTest:
     """Return the Table 6 row of ``application`` or raise ``ValueError``."""
-    key = require_choice(str(application), "application", tuple(SAWTOOTH_BURST_TESTS))
+    key = require_choice(application, "application", tuple(SAWTOOTH_BURST_TESTS))
     return SAWTOOTH_BURST_TESTS[key]
 
 
@@ -455,7 +455,7 @@ def _require_row(test: SawtoothBurstTest, name: str) -> BurstRow:
     silently tested: Table 6 pairs each weighting with one application, and
     the printed cells of the other two do not describe it.
     """
-    return require_choice(str(name), "name", (BAND_LIMITING, *test.weightings))
+    return require_choice(name, "name", (BAND_LIMITING, *test.weightings))
 
 
 def _require_cycles(test: SawtoothBurstTest, n_cycles: int | None) -> int | None:
@@ -552,7 +552,8 @@ def sawtooth_burst(
         rate is not one this clause defines, or the amplitude is not finite
         and positive.
     :raises TypeError: If ``n_cycles`` is neither an integer nor ``None``, or
-        ``amplitude_m_s2`` or ``fs`` is not one number.
+        ``amplitude_m_s2`` or ``fs`` is not one number, or ``application`` is not a
+        text.
     """
     test = _require_application(application)
     burst_cycles = _require_cycles(test, n_cycles)
@@ -685,8 +686,8 @@ def signal_burst_indications(
         the units of each quantity.
     :raises ValueError: As for :func:`sawtooth_burst`, and if the weighting
         belongs to another application.
-    :raises TypeError: If ``n_cycles`` is neither an integer nor ``None``, or
-        ``fs`` is not one number.
+    :raises TypeError: If ``n_cycles`` is neither an integer nor ``None``, or ``fs`` is
+        not one number, or ``application`` or ``name`` is not a text.
     """
     test = _require_application(application)
     row = _require_row(test, name)
@@ -898,8 +899,9 @@ def verify_signal_burst_response(
         application, if the rows disagree about which columns they report, if
         ``measured`` is empty, if an indication is negative or not finite, or
         if the amplitude is not finite and positive.
-    :raises TypeError: If a burst length is neither an integer nor ``None``,
-        or ``amplitude_m_s2`` is not one number.
+    :raises TypeError: If a burst length is neither an integer nor ``None``, or
+        ``amplitude_m_s2`` is not one number, or ``application`` or ``name`` is not a
+        text.
     """
     test = _require_application(application)
     row = _require_row(test, name)

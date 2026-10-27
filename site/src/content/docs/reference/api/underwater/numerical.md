@@ -265,7 +265,7 @@ it to keep everything the fan bracketed.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `receiver_depth` or `receiver_range` is not a single number, or `max_n_arrivals` or `n_steps` is a flag, a text or an array where a count goes. |
+| TypeError | if `receiver_depth` or `receiver_range` is not a single number, or `max_n_arrivals` or `n_steps` is a flag, a text or an array where a count goes, or `bottom` is not a text. |
 
 ## FluidSeabed
 
@@ -551,7 +551,7 @@ direct way to trade resolution for time.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `frequency_hz`, `max_range`, `range_step` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes. |
+| TypeError | if `frequency_hz`, `max_range`, `range_step` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes, or `absorption` or `bottom` is not a text. |
 
 **Warns**
 
@@ -681,7 +681,7 @@ to resolve it).
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the inputs are invalid. |
-| TypeError | if `density`, `frequency_hz`, `receiver_depth` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes. |
+| TypeError | if `density`, `frequency_hz`, `receiver_depth` or `source_depth` is not a single number, or `n_depth_points` is a flag, a text or an array where a count goes, or `bottom` is not a text. |
 
 ## NormalModeResult
 

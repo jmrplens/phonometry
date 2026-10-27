@@ -311,6 +311,7 @@ The exponent $n$ of Formula (2) for a source and a wave, Figure 1.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown geometry, character or wave. |
+| TypeError | if `character`, `geometry` or `wave` is not a text. |
 
 ## impact_peak_velocity_mm_s
 

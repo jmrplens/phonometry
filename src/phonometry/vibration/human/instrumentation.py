@@ -399,8 +399,9 @@ def indication_tolerance_percent(name: WeightingName) -> float:
     :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
     :return: The permitted deviation of the indication, in per cent.
     :raises ValueError: If the weighting is not one of the nine.
+    :raises TypeError: if ``name`` is not a text.
     """
-    weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
+    weighting = require_choice(name, "name", WEIGHTING_NAMES)
     if weighting == LOW_FREQUENCY_WEIGHTING:
         return LOW_FREQUENCY_INDICATION_TOLERANCE_PERCENT
     return INDICATION_TOLERANCE_PERCENT
@@ -420,8 +421,9 @@ def weighting_tolerance_percent(
         transition frequencies, where the standard sets no lower limit at all.
     :raises ValueError: If the weighting is not one of the nine, or a
         frequency is not positive and finite.
+    :raises TypeError: if ``name`` is not a text.
     """
-    weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
+    weighting = require_choice(name, "name", WEIGHTING_NAMES)
     f = np.asarray(frequencies, dtype=np.float64)
     if f.size and not np.all(np.isfinite(f) & (f > 0.0)):
         msg = _FREQUENCIES_MSG
@@ -451,8 +453,9 @@ def phase_tolerance_deg(
     :param frequencies: Frequencies at which the band is wanted, in hertz.
     :return: The permitted deviation, in degrees, infinite in the two tails.
     :raises ValueError: As for :func:`weighting_tolerance_percent`.
+    :raises TypeError: if ``name`` is not a text.
     """
-    weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
+    weighting = require_choice(name, "name", WEIGHTING_NAMES)
     f = np.asarray(frequencies, dtype=np.float64)
     if f.size and not np.all(np.isfinite(f) & (f > 0.0)):
         msg = _FREQUENCIES_MSG
@@ -639,9 +642,10 @@ def verify_weighting(
         arrays do not have the same shape, if a frequency is not positive and
         finite, if a measured factor is negative or not finite, or if the
         expanded uncertainty is negative or not finite.
-    :raises TypeError: if ``expanded_uncertainty_percent`` is not a single number.
+    :raises TypeError: if ``expanded_uncertainty_percent`` is not a single number, or
+        ``name`` is not a text.
     """
-    weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
+    weighting = require_choice(name, "name", WEIGHTING_NAMES)
     uncertainty = _checked_uncertainty(
         expanded_uncertainty_percent, "expanded_uncertainty_percent"
     )
@@ -1120,12 +1124,12 @@ def verify_phase_response(
         finite, if a phase is not finite, or if there are fewer than two
         frequencies or they do not strictly ascend.
     :raises TypeError: if ``frequencies`` or ``measured_phase_deg`` holds a text or a
-        value that is not a real number.
+        value that is not a real number, or ``name`` is not a text.
     :warns HumanVibrationWarning: When every phase error is a half turn,
         which is an inverted signal rather than a phase response the
         criterion can grade.
     """
-    weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
+    weighting = require_choice(name, "name", WEIGHTING_NAMES)
     f = require_positive_array(frequencies, "frequencies")
     measured = require_finite_array(measured_phase_deg, "measured_phase_deg")
     require_equal_shapes(
@@ -1163,8 +1167,9 @@ def reference_indication(name: WeightingName) -> float:
     :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
     :return: The weighted acceleration, in metres per second squared.
     :raises ValueError: If the weighting is not one of the nine.
+    :raises TypeError: if ``name`` is not a text.
     """
-    weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
+    weighting = require_choice(name, "name", WEIGHTING_NAMES)
     factor = float(
         np.asarray(weighting_factors(weighting, [REFERENCE_FREQUENCY_HZ[weighting]]))[0]
     )
@@ -1221,8 +1226,9 @@ def band_limited_weighting_factor(name: WeightingName) -> float:
     :param name: One of :data:`~phonometry.vibration.WEIGHTING_NAMES`.
     :return: ``|H(f_ref)| / |H_BL(f_ref)|``, dimensionless.
     :raises ValueError: If the weighting is not one of the nine.
+    :raises TypeError: if ``name`` is not a text.
     """
-    weighting = require_choice(str(name), "name", WEIGHTING_NAMES)
+    weighting = require_choice(name, "name", WEIGHTING_NAMES)
     frequencies = [REFERENCE_FREQUENCY_HZ[weighting]]
     overall = float(np.asarray(weighting_factors(weighting, frequencies))[0])
     band_limited = float(np.asarray(band_limiting_factors(weighting, frequencies))[0])
@@ -1291,9 +1297,10 @@ def running_rms_decay_time(integration_time: float, *, method: Method) -> float:
     :return: The time to 10 % of the initial indicated value, in seconds.
     :raises ValueError: If ``method`` is neither average, or the integration
         time is not positive and finite.
-    :raises TypeError: if ``integration_time`` is not a single number.
+    :raises TypeError: if ``integration_time`` is not a single number, or ``method`` is
+        not a text.
     """
-    averaging = require_choice(str(method), "method", ("linear", "exponential"))
+    averaging = require_choice(method, "method", ("linear", "exponential"))
     require_scalar(integration_time, "integration_time")
     tau = float(integration_time)
     if not math.isfinite(tau) or tau <= 0.0:
@@ -1336,9 +1343,7 @@ class RunningRMSDecayVerification(RichDisplay):
 
     def _row(self) -> tuple[float, float]:
         """The printed decay time and its tolerance, in seconds."""
-        averaging = require_choice(
-            str(self.method), "method", ("linear", "exponential")
-        )
+        averaging = require_choice(self.method, "method", ("linear", "exponential"))
         tau = float(self.integration_time)
         for printed_tau, printed_time, tolerance in RUNNING_RMS_DECAY_TIME_S[averaging]:
             if math.isclose(tau, printed_tau, rel_tol=1e-9, abs_tol=0.0):
@@ -1454,10 +1459,11 @@ def verify_running_rms_decay(
     :raises ValueError: If ``method`` is neither average, if the measured time
         is not positive and finite, or if the integration time is not one of
         the three printed time constants.
-    :raises TypeError: if ``measured_time_s`` is not a single number.
+    :raises TypeError: if ``measured_time_s`` is not a single number, or ``method`` is
+        not a text.
     """
     averaging: Method
-    averaging = require_choice(str(method), "method", ("linear", "exponential"))
+    averaging = require_choice(method, "method", ("linear", "exponential"))
     require_scalar(measured_time_s, "measured_time_s")
     measured = float(measured_time_s)
     if not math.isfinite(measured) or measured <= 0.0:

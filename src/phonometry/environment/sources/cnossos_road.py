@@ -60,6 +60,7 @@ from ..._internal.display import RichDisplay
 from ..._internal.frozen import OwnsArrays, reduce_with_plain_rows
 from ..._internal.validation import (
     require_axis_count,
+    require_choice,
     require_equal_counts,
     require_ranks,
     require_same_length,
@@ -546,14 +547,14 @@ def road_surface_coefficients(
     :param surface: A :class:`RoadSurface` member or its description string.
     :return: The :class:`RoadSurfaceCoefficients` of that surface.
     :raises ValueError: If the surface is not tabulated in Table F-4.
+    :raises TypeError: if ``surface`` is not a text.
     """
-    key = surface.value if isinstance(surface, RoadSurface) else str(surface)
-    row = _TABLE_F4.get(key)
-    if row is None:
-        raise ValueError(
-            f"Unknown road surface {key!r}; Table F-4 tabulates: "
-            + ", ".join(sorted(_TABLE_F4))
-        )
+    key = (
+        surface.value
+        if isinstance(surface, RoadSurface)
+        else require_choice(surface, "surface", tuple(m.value for m in RoadSurface))
+    )
+    row = _TABLE_F4[key]
     v_min, v_max, per_category = row
     return RoadSurfaceCoefficients(
         name=key,
@@ -614,12 +615,13 @@ def _combine_rolling_and_propulsion(
 
 
 def _category_key(category: RoadVehicleCategory | str) -> RoadVehicleCode:
-    key = category.value if isinstance(category, RoadVehicleCategory) else str(category)
-    if key not in _TABLE_F1:
-        raise ValueError(
-            f"Unknown vehicle category {key!r}; Table [2.2.a] categories with "
-            "coefficients in Appendix F are: " + ", ".join(_TABLE_F1)
+    key = (
+        category.value
+        if isinstance(category, RoadVehicleCategory)
+        else require_choice(
+            category, "category", tuple(m.value for m in RoadVehicleCategory)
         )
+    )
     # _TABLE_F1 holds exactly the five codes, so the key is one of them.
     return cast("RoadVehicleCode", key)
 
@@ -785,7 +787,8 @@ def road_rolling_noise(
     :return: ``L_WR,i,m`` over the eight octave bands, in dB re 1 pW.
     :raises ValueError: If an input is invalid.
     :raises TypeError: if ``junction_distance``, ``speed_kmh``, ``studded_fraction``,
-        ``studded_months`` or ``temperature_c`` is not a single number.
+        ``studded_months`` or ``temperature_c`` is not a single number, or ``category``
+        is not a text.
     """
     key = _category_key(category)
     _require_category(key, coefficients)
@@ -855,7 +858,7 @@ def road_propulsion_noise(
     :return: ``L_WP,i,m`` over the eight octave bands, in dB re 1 pW.
     :raises ValueError: If an input is invalid.
     :raises TypeError: if ``junction_distance``, ``road_slope_percent`` or ``speed_kmh``
-        is not a single number.
+        is not a single number, or ``category`` is not a text.
     """
     key = _category_key(category)
     _require_category(key, coefficients)
@@ -920,6 +923,7 @@ def road_vehicle_sound_power(
     :param coefficients: The Appendix F database to use.
     :return: ``L_W,i,m`` over the eight octave bands, in dB re 1 pW.
     :raises ValueError: If an input is invalid.
+    :raises TypeError: if ``category`` or ``surface`` is not a text.
     """
     key = _category_key(category)
     propulsion = road_propulsion_noise(

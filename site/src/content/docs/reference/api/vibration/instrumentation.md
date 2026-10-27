@@ -142,6 +142,7 @@ the ambiguity is registered in `docs/ERRATA.md`.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine. |
+| TypeError | if `name` is not a text. |
 
 ## CENTRAL_TOLERANCE_PERCENT
 
@@ -237,6 +238,7 @@ The Table 2 indication tolerance at the reference frequency.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine. |
+| TypeError | if `name` is not a text. |
 
 ## ISO8041_COVERAGE_FACTOR
 
@@ -359,6 +361,7 @@ r.m.s.-only meter is not graded on phase at all.
 | Exception | When |
 | :--- | :--- |
 | ValueError | As for [`weighting_tolerance_percent`](/phonometry/reference/api/vibration/instrumentation/#weighting_tolerance_percent). |
+| TypeError | if `name` is not a text. |
 
 ## PhaseVerification
 
@@ -515,6 +518,7 @@ expected indication is the product of the two.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine. |
+| TypeError | if `name` is not a text. |
 
 ## RUNNING_RMS_CONSISTENCY_TOLERANCE_PERCENT
 
@@ -574,7 +578,7 @@ for the three time constants the standard tabulates.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `method` is neither average, or the integration time is not positive and finite. |
-| TypeError | if `integration_time` is not a single number. |
+| TypeError | if `integration_time` is not a single number, or `method` is not a text. |
 
 ## RUNNING_RMS_DECAY_TIME_S
 
@@ -773,7 +777,7 @@ this function does not perform.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine, if the two arrays do not have the same shape, if a frequency is not positive and finite, if a phase is not finite, or if there are fewer than two frequencies or they do not strictly ascend. |
-| TypeError | if `frequencies` or `measured_phase_deg` holds a text or a value that is not a real number. |
+| TypeError | if `frequencies` or `measured_phase_deg` holds a text or a value that is not a real number, or `name` is not a text. |
 
 **Warns**
 
@@ -819,7 +823,7 @@ against a band the standard does not give.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If `method` is neither average, if the measured time is not positive and finite, or if the integration time is not one of the three printed time constants. |
-| TypeError | if `measured_time_s` is not a single number. |
+| TypeError | if `measured_time_s` is not a single number, or `method` is not a text. |
 
 ## verify_weighting
 
@@ -870,7 +874,7 @@ by [`MAX_EXPANDED_UNCERTAINTY_PERCENT`](/phonometry/reference/api/vibration/inst
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine, if the two arrays do not have the same shape, if a frequency is not positive and finite, if a measured factor is negative or not finite, or if the expanded uncertainty is negative or not finite. |
-| TypeError | if `expanded_uncertainty_percent` is not a single number. |
+| TypeError | if `expanded_uncertainty_percent` is not a single number, or `name` is not a text. |
 
 ## WEIGHTING_CONSISTENCY_TOLERANCE_PERCENT
 
@@ -905,6 +909,7 @@ The Table 5 band around a weighting, region by region.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the weighting is not one of the nine, or a frequency is not positive and finite. |
+| TypeError | if `name` is not a text. |
 
 ## WeightingVerification
 

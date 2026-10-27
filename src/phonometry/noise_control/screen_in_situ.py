@@ -444,14 +444,14 @@ def screen_attenuation(
         A-weighted pair, or an A-weighted pair with an artificial source.
     :raises TypeError: if ``distance`` is not a single number, or ``frequencies``,
         ``screened_levels`` or ``unscreened_levels`` holds a text or a value that is not
-        a real number.
+        a real number, or ``source_kind`` is not a text.
     """
     unscreened = require_finite_array(unscreened_levels, "unscreened_levels")
     screened = require_finite_array(screened_levels, "screened_levels")
     if unscreened.shape != screened.shape:
         msg = "'unscreened_levels' and 'screened_levels' must match band for band."
         raise ValueError(msg)
-    kind = require_choice(str(source_kind), "source_kind", _SOURCE_KINDS)
+    kind = require_choice(source_kind, "source_kind", _SOURCE_KINDS)
     freqs: NDArray[np.float64] | None = None
     if frequencies is not None:
         freqs = require_positive_array(frequencies, "frequencies")

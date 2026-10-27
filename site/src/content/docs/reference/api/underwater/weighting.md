@@ -225,6 +225,7 @@ Hearing-group codes defined by a guidance version.
 | Exception | When |
 | :--- | :--- |
 | ValueError | If the version is unknown. |
+| TypeError | if `guidance` is not a text. |
 
 ## weighted_exposure
 
@@ -385,7 +386,7 @@ Weighting/exposure parameters of one hearing group.
 
 | Name | Description |
 | :--- | :--- |
-| `group` | Hearing-group code as used by `guidance` (case-insensitive). |
+| `group` | Hearing-group code as used by `guidance`, as written. |
 | `guidance` | One of [`WEIGHTING_GUIDANCE`](/phonometry/reference/api/underwater/weighting/#weighting_guidance). |
 
 **Returns:** The [`WeightingParameters`](/phonometry/reference/api/underwater/weighting/#weightingparameters) row.
@@ -394,6 +395,7 @@ Weighting/exposure parameters of one hearing group.
 
 | Exception | When |
 | :--- | :--- |
+| TypeError | If `group` or `guidance` is not a text. |
 | ValueError | If the version or the group is unknown. |
 
 ## WeightingParameters

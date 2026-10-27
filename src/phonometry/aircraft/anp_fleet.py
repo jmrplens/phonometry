@@ -127,8 +127,12 @@ _MOUNTING: dict[str, Mounting] = {
 _DEPARTURE: OperationCode = "D"
 #: ANP operation code for arrival (on-ground segments are a landing roll).
 _ARRIVAL: OperationCode = "A"
-#: Operation aliases -> ANP operation code (``"A"`` arrival, ``"D"`` departure).
-_OPERATION: dict[str, OperationCode] = {
+#: The operations a caller names, as :data:`Operation` spells them.
+_OPERATIONS: tuple[Operation, ...] = ("departure", "D", "arrival", "A")
+#: Operation spellings of the ANP database files -> ANP operation code (``"A"``
+#: arrival, ``"D"`` departure), matched after folding case and padding: the
+#: files are data the library reads, and their exports disagree on both.
+_FILE_OPERATION: dict[str, OperationCode] = {
     "a": _ARRIVAL,
     "arrival": _ARRIVAL,
     "arrivals": _ARRIVAL,
@@ -154,15 +158,22 @@ _COL_THRUST_RATING = "Thrust Rating"
 _COL_OP_TYPE = "Op Type"
 
 
-def _operation_code(operation: str) -> OperationCode:
-    """Normalise an operation label to the ANP code ``"A"``/``"D"``."""
-    key = str(operation).strip().lower()
-    if key not in _OPERATION:
+def _operation_code(operation: object) -> OperationCode:
+    """The ANP code ``"A"``/``"D"`` of an operation a caller names, as written."""
+    named = require_choice(operation, "operation", _OPERATIONS)
+    return _ARRIVAL if named in {"arrival", "A"} else _DEPARTURE
+
+
+def _file_operation_code(text: str) -> OperationCode:
+    """The ANP code ``"A"``/``"D"`` of an operation a database file spells."""
+    key = text.strip().lower()
+    if key not in _FILE_OPERATION:
         msg = (
-            f"'operation' must be 'departure'/'D' or 'arrival'/'A', got {operation!r}."
+            f"an ANP file gives the operation {text!r}, which names neither an "
+            "arrival nor a departure."
         )
         raise ValueError(msg)
-    return _OPERATION[key]
+    return _FILE_OPERATION[key]
 
 
 def _rows(text: str) -> list[dict[str, str]]:
@@ -525,6 +536,7 @@ class ANPAircraft(RichDisplay):
         :param operation: ``"departure"``/``"D"`` or ``"arrival"``/``"A"``.
         :return: The :class:`SpectralClass` the ANP database assigns.
         :raises KeyError: if the database carries no such class.
+        :raises TypeError: if ``operation`` is not a text.
         """
         op = _operation_code(operation)
         class_id = (
@@ -821,6 +833,7 @@ class ANPDatabase:
         :return: An :class:`ANPNPDCurves`.
         :raises KeyError: If the aircraft has no NPD data for the request.
         :raises ValueError: If the metric or operation is unknown.
+        :raises TypeError: if ``operation`` is not a text.
         """
         if metric not in _METRICS:
             msg = f"'metric' must be one of {_METRICS}, got {metric!r}."
@@ -876,6 +889,7 @@ class ANPDatabase:
             for the request, or ``profile_id`` is not among the available ones.
         :raises ValueError: If ``profile_id`` is ``None`` and several profiles
             exist with none of them named ``"DEFAULT"``.
+        :raises TypeError: if ``operation`` is not a text.
         """
         if aircraft_id not in self._aircraft:
             msg = (
@@ -1107,6 +1121,7 @@ class ANPDatabase:
             :class:`~phonometry.aircraft.flight_performance.FlightProfile`.
         :raises KeyError: If the aircraft has no procedural-step profile or no
             default weight for the request.
+        :raises TypeError: if ``operation`` is not a text.
         """
         op = _operation_code(operation)
         acft = self.performance_aircraft(aircraft_id)
@@ -1562,7 +1577,7 @@ def _parse_profiles(
             # lookup compares against an already-normalised code, so a row
             # spelling its operation "d" would simply never be found and the
             # aeroplane would report no fixed-point profile at all.
-            _operation_code(row[_COL_OP_TYPE]),
+            _file_operation_code(row[_COL_OP_TYPE]),
             row["Profile_ID"],
             int(float(row[_COL_STAGE_LENGTH])),
         )
@@ -1672,7 +1687,7 @@ def _parse_aerodynamic_table(
         # would be stored with the landing coefficient and still be found
         # by a departure. Eq. B-15 would then rotate at the wrong speed
         # with nothing to show for it.
-        op = _operation_code(row[_COL_OP_TYPE])
+        op = _file_operation_code(row[_COL_OP_TYPE])
         # The take-off speed coefficient C and the landing one D live in
         # separate columns, and a row fills whichever its operation flies.
         speed = _optional(row["C"] if op == _DEPARTURE else row["D"])
@@ -1798,7 +1813,7 @@ def _parse_spectral_classes(text: str) -> dict[str, SpectralClass]:
         class_id = row["Spectral Class ID"]
         out[class_id] = SpectralClass(
             class_id=class_id,
-            operation=_operation_code(row[_COL_OP_TYPE]),
+            operation=_file_operation_code(row[_COL_OP_TYPE]),
             description=row.get("Description", ""),
             frequencies=frequencies,
             levels=levels,

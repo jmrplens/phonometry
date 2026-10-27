@@ -81,7 +81,7 @@ names.
 | Exception | When |
 | :--- | :--- |
 | ValueError | For a negative acceleration, a non-positive frequency, or an unknown direction or surface. |
-| TypeError | if `peak_acceleration_m_s2` or `upper_frequency_hz` is not a single number. |
+| TypeError | if `peak_acceleration_m_s2` or `upper_frequency_hz` is not a single number, or `direction` or `surface` is not a text. |
 
 ## CLEARANCE_TO_DISTURBING_BODY_FACTOR
 
@@ -132,6 +132,7 @@ The confidence limit of the meter's own error on one quantity (Table 3).
 | Exception | When |
 | :--- | :--- |
 | ValueError | For an unknown quantity or class. |
+| TypeError | if `quantity` is not a text. |
 
 ## INSTRUMENT_CONFIDENCE_LIMITS_PERCENT
 

@@ -85,6 +85,7 @@ from ..._internal.frozen import OwnsArrays
 from ..._internal.validation import (
     require_axis_count,
     require_axis_rank,
+    require_choice,
     require_count,
     require_equal_counts,
     require_equal_shapes,
@@ -1866,13 +1867,13 @@ def wheel_roughness(
     :return: The wavelengths in mm and the levels in dB, as a
         :class:`WavelengthSpectrum`.
     :raises ValueError: If the brake type is not tabulated.
+    :raises TypeError: if ``brake`` is not a text.
     """
-    key = brake.value if isinstance(brake, BrakeType) else str(brake)
-    if key not in _TABLE_G1A:
-        raise ValueError(
-            f"Unknown brake type {key!r}; Table G-1a tabulates: "
-            + ", ".join(_TABLE_G1A)
-        )
+    key = (
+        brake.value
+        if isinstance(brake, BrakeType)
+        else require_choice(brake, "brake", tuple(m.value for m in BrakeType))
+    )
     return WavelengthSpectrum(
         wavelengths_mm=np.asarray(_WAVELENGTHS_WHEEL, dtype=np.float64),
         levels=np.asarray(_TABLE_G1A[key], dtype=np.float64),
@@ -1893,9 +1894,14 @@ def rail_roughness(
     :return: The wavelengths in mm and the levels in dB, as a
         :class:`WavelengthSpectrum`.
     :raises ValueError: If the class carries no spectrum in Table G-1b.
+    :raises TypeError: if ``roughness`` is not a text.
     """
     key = (
-        roughness.value if isinstance(roughness, RailRoughnessClass) else str(roughness)
+        roughness.value
+        if isinstance(roughness, RailRoughnessClass)
+        else require_choice(
+            roughness, "roughness", tuple(m.value for m in RailRoughnessClass)
+        )
     )
     if key not in _TABLE_G1B:
         raise ValueError(
@@ -1981,13 +1987,13 @@ def track_transfer(
     :param track: A :class:`TrackTransferClass` member or its column code.
     :return: The 24 1/3-octave values, in dB.
     :raises ValueError: If the column is not tabulated.
+    :raises TypeError: if ``track`` is not a text.
     """
-    key = track.value if isinstance(track, TrackTransferClass) else str(track)
-    if key not in _TABLE_G3A:
-        raise ValueError(
-            f"Unknown track transfer column {key!r}; Table G-3a tabulates: "
-            + ", ".join(_TABLE_G3A)
-        )
+    key = (
+        track.value
+        if isinstance(track, TrackTransferClass)
+        else require_choice(track, "track", tuple(m.value for m in TrackTransferClass))
+    )
     return np.asarray(_TABLE_G3A[key], dtype=np.float64)
 
 
@@ -2063,13 +2069,13 @@ def traction_sound_power(
     :return: The 24 band levels at source height A and at source height B,
         as a :class:`RailSourceSpectra`.
     :raises ValueError: If the vehicle is not tabulated.
+    :raises TypeError: if ``vehicle`` is not a text.
     """
-    key = vehicle.value if isinstance(vehicle, TractionVehicle) else str(vehicle)
-    if key not in _TABLE_G5:
-        raise ValueError(
-            f"Unknown traction vehicle {key!r}; Table G-5 tabulates: "
-            + ", ".join(_TABLE_G5)
-        )
+    key = (
+        vehicle.value
+        if isinstance(vehicle, TractionVehicle)
+        else require_choice(vehicle, "vehicle", tuple(m.value for m in TractionVehicle))
+    )
     low, high = _TABLE_G5[key]
     return RailSourceSpectra(
         source_a=np.asarray(low, dtype=np.float64),
@@ -2128,12 +2134,13 @@ def bridge_transfer(bridge: BridgeType | BridgeTypeName) -> NDArray[np.float64]:
     :param bridge: A :class:`BridgeType` member or its column label.
     :return: The 24 1/3-octave values, in dB.
     :raises ValueError: If the column is not tabulated.
+    :raises TypeError: if ``bridge`` is not a text.
     """
-    key = bridge.value if isinstance(bridge, BridgeType) else str(bridge)
-    if key not in _TABLE_G7:
-        raise ValueError(
-            f"Unknown bridge type {key!r}; Table G-7 tabulates: " + ", ".join(_TABLE_G7)
-        )
+    key = (
+        bridge.value
+        if isinstance(bridge, BridgeType)
+        else require_choice(bridge, "bridge", tuple(m.value for m in BridgeType))
+    )
     return np.asarray(_TABLE_G7[key], dtype=np.float64)
 
 

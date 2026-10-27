@@ -957,20 +957,24 @@ def test_invalid_inputs() -> None:
         railway_source_power(running, zero_length)
     with pytest.raises(ValueError, match=r"'height' must be 1"):
         vertical_directivity(10.0, height=3)
-    with pytest.raises(ValueError, match="Unknown brake type"):
-        wheel_roughness("z")
+    with pytest.raises(ValueError, match="'brake' must be one of"):
+        wheel_roughness("z")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'brake' must be one of"):
+        wheel_roughness("C")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="'brake' must be one of .*, a text"):
+        wheel_roughness(1)  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="no spectrum in Table G-1b"):
         rail_roughness(RailRoughnessClass.BAD)
     with pytest.raises(ValueError, match="Unknown contact filter"):
         contact_filter((7.0, 7.0))
-    with pytest.raises(ValueError, match="Unknown track transfer"):
-        track_transfer("Z/Z")
+    with pytest.raises(ValueError, match="'track' must be one of"):
+        track_transfer("Z/Z")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="Unknown wheel diameter"):
         wheel_transfer(1.0)
-    with pytest.raises(ValueError, match="Unknown traction vehicle"):
-        traction_sound_power("steam")
-    with pytest.raises(ValueError, match="Unknown bridge type"):
-        bridge_transfer("wooden")
+    with pytest.raises(ValueError, match="'vehicle' must be one of"):
+        traction_sound_power("steam")  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="'bridge' must be one of"):
+        bridge_transfer("wooden")  # type: ignore[arg-type]
     short_roughness = np.zeros(3)
     roughness = np.zeros(24)
     with pytest.raises(ValueError, match="must hold 24 values"):

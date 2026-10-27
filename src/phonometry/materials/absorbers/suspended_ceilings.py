@@ -342,8 +342,9 @@ def mounting_type(letter: MountingLetter) -> str:
     :param letter: ``"A"``, ``"B"``, ``"E"`` or ``"J"``.
     :return: The description in the words of 4.1.1.2.
     :raises ValueError: For a letter this test code does not admit.
+    :raises TypeError: if ``letter`` is not a text.
     """
-    key = require_choice(str(letter).upper(), "letter", tuple(MOUNTING_TYPES))
+    key = require_choice(letter, "letter", tuple(MOUNTING_TYPES))
     return MOUNTING_TYPES[key]
 
 
@@ -603,10 +604,11 @@ def check_ceiling_specimen(
         ``fixture_density_kg_m2``, ``substructure_height_mm``,
         ``substructure_width_mm``, ``support_center_distance_m``, ``support_height_mm``
         or ``support_width_mm`` is not a single number, or ``relative_humidity_percent``
-        holds a text or a value that is not a real number.
+        holds a text or a value that is not a real number, or ``mounting`` is not a
+        text.
     """
     area = require_positive(area, "area")
-    letter = require_choice(str(mounting).upper(), "mounting", tuple(MOUNTING_TYPES))
+    letter = require_choice(mounting, "mounting", tuple(MOUNTING_TYPES))
     if letter == "E" and depth_mm is None:
         msg = (
             "A type E mounting is defined by the air space behind it, so "

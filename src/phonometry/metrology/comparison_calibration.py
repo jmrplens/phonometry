@@ -209,7 +209,7 @@ import math
 from dataclasses import KW_ONLY, dataclass
 from dataclasses import field as dataclass_field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 from scipy import special
@@ -575,6 +575,39 @@ def _d1_row(
     )
 
 
+#: The components of IEC 61094-5:2016 Table D.1, by the name
+#: :func:`comparison_uncertainty_budget` takes each by.
+PressureComparisonComponent = Literal[
+    "reference",
+    "capacitance",
+    "non_linearity",
+    "impedance",
+    "polarizing_voltage",
+    "repeatability",
+    "drift",
+    "rounding",
+]
+
+#: The components of IEC 61094-8:2012 Table 2, by the name
+#: :func:`comparison_uncertainty_budget` takes each by.
+FreeFieldComparisonComponent = Literal[
+    "reference",
+    "source_stability",
+    "positioning",
+    "alignment",
+    "free_field",
+    "non_plane_wave",
+    "environment",
+    "polarizing_voltage",
+    "capacitance",
+    "non_linearity",
+    "rounding",
+    "repeatability",
+]
+
+#: A component of either table, the keys a budget of either field may take.
+ComparisonComponent = Literal[PressureComparisonComponent, FreeFieldComparisonComponent]
+
 #: IEC 61094-5:2016 Table D.1, "Example uncertainty budget", for a
 #: simultaneous calibration of a low-sensitivity WS2P microphone against an
 #: LS2P reference in the coupler of Figure A.1, at 2 kHz. Keyed by the name
@@ -596,26 +629,30 @@ def _d1_row(
 #: deviates from 200 V, and the capacitance component to be reconsidered. A
 #: set-up that needs them passes them to :func:`comparison_uncertainty_budget`
 #: as ``additional_components``.
-IEC61094_5_TABLE_D1: Mapping[str, ComparisonUncertaintyRow] = MappingProxyType(
-    {
-        "reference": _d1_row("Sensitivity of reference microphone", 0.05, 2.0, 0.025),
-        "capacitance": _d1_row("Microphone capacitance", 0.01, _SQRT3, 0.006),
-        "non_linearity": _d1_row("Non-linearity", 0.03, _SQRT3, 0.017),
-        "impedance": _d1_row("Microphone impedance", 0.005, _SQRT3, 0.003),
-        "polarizing_voltage": _d1_row(
-            "Polarising voltage", 20.0 * math.log10(200.2 / 200.0), _SQRT3, 0.005
-        ),
-        "repeatability": ComparisonUncertaintyRow(
-            component="Repeatability", standard_uncertainty_db=0.025
-        ),
-        "drift": _d1_row(
-            "Drift in reference microphone sensitivity since last calibration",
-            0.03,
-            _SQRT3,
-            0.017,
-        ),
-        "rounding": _d1_row("Rounding of reported results", 0.005, _SQRT3, 0.003),
-    }
+IEC61094_5_TABLE_D1: Mapping[PressureComparisonComponent, ComparisonUncertaintyRow] = (
+    MappingProxyType(
+        {
+            "reference": _d1_row(
+                "Sensitivity of reference microphone", 0.05, 2.0, 0.025
+            ),
+            "capacitance": _d1_row("Microphone capacitance", 0.01, _SQRT3, 0.006),
+            "non_linearity": _d1_row("Non-linearity", 0.03, _SQRT3, 0.017),
+            "impedance": _d1_row("Microphone impedance", 0.005, _SQRT3, 0.003),
+            "polarizing_voltage": _d1_row(
+                "Polarising voltage", 20.0 * math.log10(200.2 / 200.0), _SQRT3, 0.005
+            ),
+            "repeatability": ComparisonUncertaintyRow(
+                component="Repeatability", standard_uncertainty_db=0.025
+            ),
+            "drift": _d1_row(
+                "Drift in reference microphone sensitivity since last calibration",
+                0.03,
+                _SQRT3,
+                0.017,
+            ),
+            "rounding": _d1_row("Rounding of reported results", 0.005, _SQRT3, 0.003),
+        }
+    )
 )
 
 #: IEC 61094-8:2012 Table 2, "Typical uncertainty components", keyed by the
@@ -623,49 +660,55 @@ IEC61094_5_TABLE_D1: Mapping[str, ComparisonUncertaintyRow] = MappingProxyType(
 #: the subclause references the table prints ("-" for the rounding error).
 #: The table prints no values: 8.8 asks for each as a standard uncertainty at
 #: each frequency.
-IEC61094_8_TABLE_2: Mapping[str, ComparisonUncertaintyRow] = MappingProxyType(
-    {
-        "reference": ComparisonUncertaintyRow(
-            "Free-field sensitivity of the reference microphone", ("8.2",)
-        ),
-        "source_stability": ComparisonUncertaintyRow(
-            "Stability of sound source", ("8.4",)
-        ),
-        "positioning": ComparisonUncertaintyRow(
-            "Positioning accuracy (including acoustic centre uncertainty)",
-            ("7.3", "8.4"),
-        ),
-        "alignment": ComparisonUncertaintyRow(
-            "Alignment between source and receiver", ("7.4", "8.4")
-        ),
-        "free_field": ComparisonUncertaintyRow(
-            "Quality of free-field environment or influence of signal processing",
-            ("8.5", "8.6"),
-        ),
-        "non_plane_wave": ComparisonUncertaintyRow(
-            "Influence of non-plane wave", ("6.3",)
-        ),
-        "environment": ComparisonUncertaintyRow(
-            "Influence of environmental conditions", ("7.6",)
-        ),
-        "polarizing_voltage": ComparisonUncertaintyRow(
-            "Polarizing voltage", ("7.2", "8.2")
-        ),
-        "capacitance": ComparisonUncertaintyRow("Microphone capacitance", ("8.7.1",)),
-        "non_linearity": ComparisonUncertaintyRow(
-            "Measurement system non-linearity", ("8.7.2",)
-        ),
-        "rounding": ComparisonUncertaintyRow("Rounding error"),
-        "repeatability": ComparisonUncertaintyRow(
-            "Measurement repeatability", ("8.3",)
-        ),
-    }
+IEC61094_8_TABLE_2: Mapping[FreeFieldComparisonComponent, ComparisonUncertaintyRow] = (
+    MappingProxyType(
+        {
+            "reference": ComparisonUncertaintyRow(
+                "Free-field sensitivity of the reference microphone", ("8.2",)
+            ),
+            "source_stability": ComparisonUncertaintyRow(
+                "Stability of sound source", ("8.4",)
+            ),
+            "positioning": ComparisonUncertaintyRow(
+                "Positioning accuracy (including acoustic centre uncertainty)",
+                ("7.3", "8.4"),
+            ),
+            "alignment": ComparisonUncertaintyRow(
+                "Alignment between source and receiver", ("7.4", "8.4")
+            ),
+            "free_field": ComparisonUncertaintyRow(
+                "Quality of free-field environment or influence of signal processing",
+                ("8.5", "8.6"),
+            ),
+            "non_plane_wave": ComparisonUncertaintyRow(
+                "Influence of non-plane wave", ("6.3",)
+            ),
+            "environment": ComparisonUncertaintyRow(
+                "Influence of environmental conditions", ("7.6",)
+            ),
+            "polarizing_voltage": ComparisonUncertaintyRow(
+                "Polarizing voltage", ("7.2", "8.2")
+            ),
+            "capacitance": ComparisonUncertaintyRow(
+                "Microphone capacitance", ("8.7.1",)
+            ),
+            "non_linearity": ComparisonUncertaintyRow(
+                "Measurement system non-linearity", ("8.7.2",)
+            ),
+            "rounding": ComparisonUncertaintyRow("Rounding error"),
+            "repeatability": ComparisonUncertaintyRow(
+                "Measurement repeatability", ("8.3",)
+            ),
+        }
+    )
 )
 
 #: The table each field's budget draws its components from.
-_BUDGET_TABLES: Mapping[str, Mapping[str, ComparisonUncertaintyRow]] = MappingProxyType(
-    {"pressure": IEC61094_5_TABLE_D1, "free": IEC61094_8_TABLE_2}
-)
+_BUDGET_TABLES: Mapping[
+    CalibrationField,
+    Mapping[PressureComparisonComponent, ComparisonUncertaintyRow]
+    | Mapping[FreeFieldComparisonComponent, ComparisonUncertaintyRow],
+] = MappingProxyType({"pressure": IEC61094_5_TABLE_D1, "free": IEC61094_8_TABLE_2})
 
 
 @dataclass(frozen=True)
@@ -2569,8 +2612,43 @@ def _component(value: float | Quantity, name: str) -> Quantity:
     return Quantity(value=0.0, uncertainty=number, name=name)
 
 
+@overload
 def comparison_uncertainty_budget(
-    standard_uncertainties_db: Mapping[str, float | Quantity],
+    standard_uncertainties_db: Mapping[PressureComparisonComponent, float | Quantity],
+    *,
+    frequency_hz: float,
+    field: Literal["pressure"] = "pressure",
+    additional_components: Sequence[Quantity] = (),
+    coverage_factor: float = _COVERAGE_FACTOR,
+) -> ComparisonUncertaintyBudget: ...
+
+
+@overload
+def comparison_uncertainty_budget(
+    standard_uncertainties_db: Mapping[FreeFieldComparisonComponent, float | Quantity],
+    *,
+    frequency_hz: float,
+    field: Literal["free"],
+    additional_components: Sequence[Quantity] = (),
+    coverage_factor: float = _COVERAGE_FACTOR,
+) -> ComparisonUncertaintyBudget: ...
+
+
+@overload
+def comparison_uncertainty_budget(
+    standard_uncertainties_db: Mapping[PressureComparisonComponent, float | Quantity]
+    | Mapping[FreeFieldComparisonComponent, float | Quantity],
+    *,
+    frequency_hz: float,
+    field: CalibrationField,
+    additional_components: Sequence[Quantity] = (),
+    coverage_factor: float = _COVERAGE_FACTOR,
+) -> ComparisonUncertaintyBudget: ...
+
+
+def comparison_uncertainty_budget(
+    standard_uncertainties_db: Mapping[PressureComparisonComponent, float | Quantity]
+    | Mapping[FreeFieldComparisonComponent, float | Quantity],
     *,
     frequency_hz: float,
     field: CalibrationField = "pressure",
@@ -2618,7 +2696,10 @@ def comparison_uncertainty_budget(
     """
     field = require_choice(field, "field", CALIBRATION_FIELDS)
     table = _BUDGET_TABLES[field]
-    unknown = [key for key in standard_uncertainties_db if key not in table]
+    given: Mapping[ComparisonComponent, float | Quantity] = dict(
+        standard_uncertainties_db.items()
+    )
+    unknown = [key for key in given if key not in table]
     if unknown:
         msg = (
             f"{unknown} are not components of {_STANDARDS[field]}'s table; the "
@@ -2630,8 +2711,8 @@ def comparison_uncertainty_budget(
     components: list[str] = []
     quantities: list[Quantity] = []
     for key, row in table.items():
-        if key in standard_uncertainties_db:
-            quantities.append(_component(standard_uncertainties_db[key], key))
+        if key in given:
+            quantities.append(_component(given[key], key))
             names.append(key)
             components.append(row.component)
     for extra in additional_components:

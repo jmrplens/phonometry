@@ -22,11 +22,15 @@ exactly on a band of frequency.
 from __future__ import annotations
 
 import math
+from typing import TYPE_CHECKING
 
 import numpy as np
 from reference_data import rolling_stock_noise as ref
 
 import phonometry as ph
+
+if TYPE_CHECKING:
+    from phonometry.environment.sources.track_decay import Direction
 
 from ..registry import Outcome, count, numeric, record, register
 
@@ -103,12 +107,13 @@ def _chk_roughness_limit_listing() -> Outcome:
 )
 def _chk_decay_limits() -> Outcome:
     published = ph.environment.REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M
+    figure_3: tuple[tuple[Direction, tuple[float, ...]], ...] = (
+        ("vertical", ref.FIGURE_3_VERTICAL_DB_PER_M),
+        ("lateral", ref.FIGURE_3_LATERAL_DB_PER_M),
+    )
     cells = [
         (float(published[direction].get(f, math.nan)), float(v))
-        for direction, printed in (
-            ("vertical", ref.FIGURE_3_VERTICAL_DB_PER_M),
-            ("lateral", ref.FIGURE_3_LATERAL_DB_PER_M),
-        )
+        for direction, printed in figure_3
         for f, v in zip(ref.FIGURE_3_FREQUENCIES_HZ, printed, strict=True)
     ]
     matching = sum(1 for got, want in cells if math.isclose(got, want))

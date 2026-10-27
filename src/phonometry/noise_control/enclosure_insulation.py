@@ -197,6 +197,39 @@ _ISO_11201: Final = "ISO 11201"
 _ISO_11202: Final = "ISO 11202"
 _ISO_11204: Final = "ISO 11204"
 
+#: A base standard Table 1 of either part determines a sound power by.
+SoundPowerStandard = Literal[
+    "ISO 3741",
+    "ISO 3742",
+    "ISO 3743-1",
+    "ISO 3743-2",
+    "ISO 3744",
+    "ISO 3746",
+    "ISO 3747",
+    "ISO 9614-1",
+    "ISO 9614-2",
+]
+
+#: A base standard Table 1 of either part determines a sound pressure level by.
+SoundPressureStandard = Literal["ISO 11201", "ISO 11202", "ISO 11204"]
+
+_SOUND_POWER_STANDARDS: tuple[SoundPowerStandard, ...] = (
+    _ISO_3741,
+    _ISO_3742,
+    _ISO_3743_1,
+    _ISO_3743_2,
+    _ISO_3744,
+    _ISO_3746,
+    _ISO_3747,
+    _ISO_9614_1,
+    _ISO_9614_2,
+)
+_SOUND_PRESSURE_STANDARDS: tuple[SoundPressureStandard, ...] = (
+    _ISO_11201,
+    _ISO_11202,
+    _ISO_11204,
+)
+
 #: A base standard of Table C.1 of part 2, by its designation.
 TestEnvironmentStandard = Literal[
     "ISO 3743-1",
@@ -563,7 +596,7 @@ def enclosure_sound_power_insulation(
     frequencies: ArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
-    base_standard: str = _ISO_3744,
+    base_standard: SoundPowerStandard = _ISO_3744,
     condition: EnclosureCondition = "laboratory",
     source_kind: SourceKind = "actual",
     fraction: BandFraction | np.integer[Any] = 3,
@@ -582,21 +615,23 @@ def enclosure_sound_power_insulation(
     :param a_weighted_without: :math:`L_{WA}` without the enclosure, in
         decibels, when it was measured rather than computed.
     :param a_weighted_with: The same with the enclosure, in decibels.
-    :param base_standard: The standard the sound power came from, as Table 1
-        lists them.
+    :param base_standard: The standard the sound power came from, one of
+        those Table 1 of either part lists for a sound power (default
+        ``"ISO 3744"``).
     :param condition: ``"laboratory"`` for part 1, ``"in-situ"`` for part 2.
     :param source_kind: ``"actual"``, ``"reciprocity"`` or ``"artificial"``.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
         octaves.
     :return: The insertion loss, as an :class:`EnclosureInsulationResult`.
     :raises ValueError: For spectra that do not match, non-finite values, half
-        an A-weighted pair, an unknown condition, source kind or band
-        fraction, or a combination of condition and source kind Table 1 does
-        not have.
-    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
-        ``a_weighted_with`` or ``a_weighted_without`` is not a single number, or
-        ``frequencies``, ``level_with`` or ``level_without`` holds a text or a value
-        that is not a real number.
+        an A-weighted pair, an unknown base standard, condition, source kind or
+        band fraction, or a combination of condition and source kind Table 1
+        does not have.
+    :raises TypeError: if ``base_standard`` is not a text, ``fraction`` is not an
+        integer (a word, a flag or a float), ``a_weighted_with`` or
+        ``a_weighted_without`` is not a single number, or ``frequencies``,
+        ``level_with`` or ``level_without`` holds a text or a value that is not a
+        real number.
     """
     return _insulation(
         level_without,
@@ -605,7 +640,9 @@ def enclosure_sound_power_insulation(
         a_weighted_without=a_weighted_without,
         a_weighted_with=a_weighted_with,
         quantity="sound_power",
-        base_standard=base_standard,
+        base_standard=require_choice(
+            base_standard, "base_standard", _SOUND_POWER_STANDARDS
+        ),
         condition=condition,
         source_kind=source_kind,
         fraction=fraction,
@@ -619,7 +656,7 @@ def enclosure_sound_pressure_insulation(
     frequencies: ArrayLike | None = None,
     a_weighted_without: float | None = None,
     a_weighted_with: float | None = None,
-    base_standard: str = _ISO_11201,
+    base_standard: SoundPressureStandard = _ISO_11201,
     condition: EnclosureCondition = "laboratory",
     source_kind: SourceKind = "actual",
     fraction: BandFraction | np.integer[Any] = 3,
@@ -640,20 +677,23 @@ def enclosure_sound_pressure_insulation(
     :param a_weighted_without: :math:`L_{pA}` without the enclosure, in
         decibels, when it was measured rather than computed.
     :param a_weighted_with: The same with the enclosure, in decibels.
-    :param base_standard: The standard the pressure levels came from.
+    :param base_standard: The standard the pressure levels came from, one of
+        those Table 1 of either part lists for a sound pressure level
+        (default ``"ISO 11201"``).
     :param condition: ``"laboratory"`` for part 1, ``"in-situ"`` for part 2.
     :param source_kind: ``"actual"``, ``"reciprocity"`` or ``"artificial"``.
     :param fraction: The band set, 3 for one-third octaves (default) or 1 for
         octaves.
     :return: The insertion loss, as an :class:`EnclosureInsulationResult`.
     :raises ValueError: For spectra that do not match, non-finite values, half
-        an A-weighted pair, an unknown condition, source kind or band
-        fraction, or a combination of condition and source kind Table 1 does
-        not have.
-    :raises TypeError: if ``fraction`` is not an integer (a word, a flag or a float),
-        ``a_weighted_with`` or ``a_weighted_without`` is not a single number, or
-        ``frequencies``, ``level_with`` or ``level_without`` holds a text or a value
-        that is not a real number.
+        an A-weighted pair, an unknown base standard, condition, source kind or
+        band fraction, or a combination of condition and source kind Table 1
+        does not have.
+    :raises TypeError: if ``base_standard`` is not a text, ``fraction`` is not an
+        integer (a word, a flag or a float), ``a_weighted_with`` or
+        ``a_weighted_without`` is not a single number, or ``frequencies``,
+        ``level_with`` or ``level_without`` holds a text or a value that is not a
+        real number.
     """
     return _insulation(
         level_without,
@@ -662,7 +702,9 @@ def enclosure_sound_pressure_insulation(
         a_weighted_without=a_weighted_without,
         a_weighted_with=a_weighted_with,
         quantity="sound_pressure",
-        base_standard=base_standard,
+        base_standard=require_choice(
+            base_standard, "base_standard", _SOUND_PRESSURE_STANDARDS
+        ),
         condition=condition,
         source_kind=source_kind,
         fraction=fraction,

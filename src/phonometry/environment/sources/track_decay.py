@@ -81,7 +81,7 @@ __all__ = [
 
 #: 6.6: the two directions a decay rate is measured in, the vertical response
 #: to a vertical force and the lateral (transverse) response to a lateral one.
-TRACK_DECAY_DIRECTIONS: tuple[str, ...] = ("vertical", "lateral")
+TRACK_DECAY_DIRECTIONS: tuple[Direction, ...] = ("vertical", "lateral")
 
 #: 6.7 and Figure 2: the positions of the hammer impacts, in sleeper bays from
 #: the accelerometer at the middle of bay 0. Quarter bays out to 2,5, half

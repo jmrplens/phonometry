@@ -542,6 +542,9 @@ class RadiatingPistonResult(OwnsArrays):
             carries no directivity.
         :param language: Label language, ``"en"`` (default) or ``"es"``.
         :param kwargs: Forwarded to the piston rectangle.
+        :raises TypeError: if ``frequency_index`` is not a single number.
+        :raises ValueError: if ``frequency_index`` does not index one of the
+            computed frequencies, when the result carries a directivity.
         """
         from .._i18n import check_language
         from .._plot.geometry import plot_piston_result_geometry

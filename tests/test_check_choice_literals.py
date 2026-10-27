@@ -21,8 +21,10 @@ import pathlib
 import sys
 import textwrap
 import typing
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Literal
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -35,7 +37,7 @@ from phonometry._internal.validation import require_choice
 from phonometry.filters.weighting import time_weighting
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Mapping, Sequence
 
     import pytest
 
@@ -162,6 +164,58 @@ def _item_by_item(levels: dict[str, float]) -> None:
             raise ValueError(side)
 
 
+def _held_table(sides: Sequence[str]) -> None:
+    table = _SIDES
+    if set(sides) - set(table):
+        raise ValueError(sides)
+
+
+def _picked_table(sides: Sequence[str], *, strict: bool) -> None:
+    table = _SIDES if strict else ("top", "bottom")
+    if set(sides) - set(table):
+        raise ValueError(sides)
+
+
+#: A table of tables, one picked by the caller's kind.
+_TABLES = {"plan": _SIDES, "section": ("up", "down")}
+
+
+def _one_of_the_tables(levels: dict[str, float], kind: str) -> None:
+    table = _TABLES[kind]
+    unknown = [key for key in levels if key not in table]
+    if unknown:
+        raise ValueError(unknown)
+
+
+#: A frozen table the source builds with code, whose keys only the running
+#: module holds.
+_BUILT = MappingProxyType(dict.fromkeys(name.lower() for name in ("North", "South")))
+
+
+def _built_table(sides: Sequence[str]) -> None:
+    if set(sides) - set(_BUILT):
+        raise ValueError(sides)
+
+
+def _a_set_copy(limits: Mapping[str, float]) -> None:
+    given = {str(direction) for direction in limits}
+    if given - set(_SIDES):
+        raise ValueError(sorted(given))
+
+
+def _a_list_copy(sides: Sequence[str]) -> None:
+    names = [side.strip().lower() for side in sides]
+    if set(names) - set(_SIDES):
+        raise ValueError(names)
+
+
+#: An alias that hides a collection of any strings behind a name.
+_FreeSides = Iterable[str]
+
+#: An alias of the options, which stays a closed choice once spelled out.
+_Side = Literal["left", "right"]
+
+
 def _one_looked_for(sides: Sequence[str]) -> bool:
     return "top" in sides
 
@@ -264,6 +318,87 @@ def test_the_strings_held_in_a_local_are_followed() -> None:
             _tree(function), ccl._the_name("sides"), constants, collection=True
         )
         assert found, function.__name__
+
+
+def test_a_table_held_in_a_local_is_the_table_written_in_place() -> None:
+    """``table = _SIDES``, a table picked by a conditional expression and one
+    table of a table of tables are the sets of strings they hold.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    for function, name in (
+        (_held_table, "sides"),
+        (_picked_table, "sides"),
+        (_one_of_the_tables, "levels"),
+    ):
+        found = ccl.code_evidence(
+            _tree(function), ccl._the_name(name), constants, collection=True
+        )
+        assert found, function.__name__
+
+
+def test_a_table_of_tables_holds_the_keys_of_all_its_tables() -> None:
+    """Whichever table is picked, a key of any of them is an option."""
+    constants = ccl._module_constants(sys.modules[__name__])
+    picked = ast.parse("_TABLES[kind]", mode="eval").body
+    assert set(ccl.strings_of(picked, constants)) == {*_SIDES, "up", "down"}
+    # A table of numbers is no set of strings.
+    assert (
+        ccl.strings_of(ast.parse("_SIDE_TABLE[k]", mode="eval").body, constants) == ()
+    )
+
+
+def test_a_frozen_table_built_with_code_is_read_off_the_module() -> None:
+    """The keys of a table the source builds when it runs come from the module."""
+    constants = ccl._module_constants(sys.modules[__name__])
+    assert set(ccl.strings_of(ast.Name(id="_BUILT"), constants)) == {"north", "south"}
+    found = ccl.code_evidence(
+        _tree(_built_table), ccl._the_name("sides"), constants, collection=True
+    )
+    assert found == ["a set difference with a set of strings"]
+
+
+def test_a_comprehension_that_copies_the_items_is_followed() -> None:
+    """``{str(d) for d in limits}`` and ``[s.lower() for s in sides]`` hold the
+    caller's strings, so a set difference on the copy closes the original.
+    """
+    constants = ccl._module_constants(sys.modules[__name__])
+    for function, name in ((_a_set_copy, "limits"), (_a_list_copy, "sides")):
+        found = ccl.code_evidence(
+            _tree(function), ccl._the_name(name), constants, collection=True
+        )
+        assert "a set difference with a set of strings" in found, function.__name__
+
+
+def test_an_alias_is_read_as_what_it_stands_for() -> None:
+    """A collection of strings behind an alias takes any strings; an alias of
+    the options stays a ``Literal``, and a quoted option is never a name.
+    """
+    read = ccl.expanded("_FreeSides | None", __name__)
+    assert read == "Iterable[str] | None"
+    assert ccl.takes_any_strings(read)
+    assert ccl._is_literal(ccl.expanded("Sequence[_Side]", __name__))
+    assert ccl.expanded("Literal['_FreeSides']", __name__) == "Literal['_FreeSides']"
+
+
+def test_a_table_imported_from_a_sibling_module_is_followed() -> None:
+    """``from .fdtd import _SIDES`` gives the elastic engine the acoustic one's
+    sides, read where they are written, and a set difference with them closes
+    a collection of sides.
+    """
+    from phonometry.simulation import elastic_fdtd
+
+    constants = ccl._constants_of(elastic_fdtd.__name__)
+    assert set(ccl.strings_of(ast.Name(id="_SIDES"), constants)) == {
+        "left",
+        "right",
+        "top",
+        "bottom",
+    }
+    tree = ast.parse("def f(sides):\n    return set(sides) - set(_SIDES)\n")
+    found = ccl.code_evidence(
+        tree, ccl._the_name("sides"), dict(constants), collection=True
+    )
+    assert found == ["a set difference with a set of strings"]
 
 
 def test_each_item_and_each_key_is_read() -> None:
@@ -445,10 +580,20 @@ def test_every_vocabulary_offers_what_its_table_holds() -> None:
     from phonometry.electroacoustics import headphones
     from phonometry.emission import free_field_qualification
     from phonometry.environment.assessment import soundscape, soundscape_binaural
-    from phonometry.environment.sources import cnossos_rail, cnossos_road
+    from phonometry.environment.sources import (
+        cnossos_rail,
+        cnossos_road,
+        rolling_stock_noise,
+        track_decay,
+    )
     from phonometry.hearing import sound_field_audiometry
     from phonometry.materials.absorbers import porous, suspended_ceilings
-    from phonometry.metrology import free_field_corrections, sound_level_meter
+    from phonometry.metrology import (
+        comparison_calibration,
+        free_field_corrections,
+        reciprocity_calibration,
+        sound_level_meter,
+    )
     from phonometry.noise_control import (
         _duct_path,
         duct_modes,
@@ -469,6 +614,21 @@ def test_every_vocabulary_offers_what_its_table_holds() -> None:
         "speed_of_sound",
     }
     groups = {key for table in hearing._PARAMETERS.values() for key in table}
+    # The base standards of Table 1 of ISO 11546, by the quantity each row
+    # gives: a sound power (D_W...) or a sound pressure level (D_p, D_pA).
+    methods = [row for rows in enclosure_insulation._METHODS.values() for row in rows]
+    power = {
+        row.base_standard
+        for row in methods
+        if any(q.startswith("D_W") for q in row.quantities)
+    }
+    pressure = {
+        row.base_standard
+        for row in methods
+        if any(q in {"D_p", "D_pA"} for q in row.quantities)
+    }
+    comparison = comparison_calibration
+    reciprocity = reciprocity_calibration
     pairs: list[tuple[object, object]] = [
         (exposure.WeightingName, exposure._WEIGHTINGS),
         (signal_burst.BurstApplication, signal_burst.SAWTOOTH_BURST_TESTS),
@@ -548,6 +708,25 @@ def test_every_vocabulary_offers_what_its_table_holds() -> None:
         (silencers.SilencerDimension, silencers._GEOMETRY_KEYS),
         (_duct_path.DuctSectionDimension, dimensions),
         (signal_burst.BurstQuantity, signal_burst.BURST_TOLERANCE_PERCENT),
+        (comparison.PressureComparisonComponent, comparison.IEC61094_5_TABLE_D1),
+        (comparison.FreeFieldComparisonComponent, comparison.IEC61094_8_TABLE_2),
+        (
+            comparison.ComparisonComponent,
+            {*comparison.IEC61094_5_TABLE_D1, *comparison.IEC61094_8_TABLE_2},
+        ),
+        (reciprocity.PressureReciprocityComponent, reciprocity.IEC61094_2_TABLE_1),
+        (reciprocity.FreeFieldReciprocityComponent, reciprocity.IEC61094_3_TABLE_1),
+        (
+            reciprocity.ReciprocityComponent,
+            {*reciprocity.IEC61094_2_TABLE_1, *reciprocity.IEC61094_3_TABLE_1},
+        ),
+        (enclosure_insulation.SoundPowerStandard, power),
+        (enclosure_insulation.SoundPressureStandard, pressure),
+        (track_decay.Direction, track_decay.TRACK_DECAY_DIRECTIONS),
+        (
+            track_decay.Direction,
+            rolling_stock_noise.REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M,
+        ),
     ]
     assert _closed(pairs) == []
 

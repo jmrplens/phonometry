@@ -282,10 +282,28 @@ given `coupling_impedance_pa_s_m3` = $Z_x$, exactly.
 
 ```python
 comparison_uncertainty_budget(
-    standard_uncertainties_db: Mapping[str, float | Quantity],
+    standard_uncertainties_db: Mapping[Literal['reference', 'capacitance', 'non_linearity', 'impedance', 'polarizing_voltage', 'repeatability', 'drift', 'rounding'], float | Quantity],
     *,
     frequency_hz: float,
-    field: Literal['pressure', 'free'] = 'pressure',
+    field: Literal['pressure'] = 'pressure',
+    additional_components: Sequence[Quantity] = (),
+    coverage_factor: float = 2.0,
+) -> ComparisonUncertaintyBudget
+
+comparison_uncertainty_budget(
+    standard_uncertainties_db: Mapping[Literal['reference', 'source_stability', 'positioning', 'alignment', 'free_field', 'non_plane_wave', 'environment', 'polarizing_voltage', 'capacitance', 'non_linearity', 'rounding', 'repeatability'], float | Quantity],
+    *,
+    frequency_hz: float,
+    field: Literal['free'],
+    additional_components: Sequence[Quantity] = (),
+    coverage_factor: float = 2.0,
+) -> ComparisonUncertaintyBudget
+
+comparison_uncertainty_budget(
+    standard_uncertainties_db: Mapping[Literal['reference', 'capacitance', 'non_linearity', 'impedance', 'polarizing_voltage', 'repeatability', 'drift', 'rounding'], float | Quantity] | Mapping[Literal['reference', 'source_stability', 'positioning', 'alignment', 'free_field', 'non_plane_wave', 'environment', 'polarizing_voltage', 'capacitance', 'non_linearity', 'rounding', 'repeatability'], float | Quantity],
+    *,
+    frequency_hz: float,
+    field: Literal['pressure', 'free'],
     additional_components: Sequence[Quantity] = (),
     coverage_factor: float = 2.0,
 ) -> ComparisonUncertaintyBudget

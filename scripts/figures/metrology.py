@@ -48,6 +48,9 @@ if TYPE_CHECKING:
         RandomIncidenceSensitivity,
         SoundLevelMeterPeriodicVerification,
     )
+    from phonometry.metrology.comparison_calibration import (
+        PressureComparisonComponent,
+    )
 
 
 def generate_calibration_stability(output_dir: str) -> None:
@@ -1738,7 +1741,7 @@ def generate_free_field_verification(output_dir: str) -> None:
 
 
 #: IEC 61094-5 Table D.1, the eight standard uncertainties at 2 kHz, dB.
-_TABLE_D1_DB = {
+_TABLE_D1_DB: "dict[PressureComparisonComponent, float]" = {
     "reference": 0.025,
     "capacitance": 0.006,
     "non_linearity": 0.017,

@@ -54,12 +54,21 @@ A collection of strings (``Sequence[str]``, ``tuple[str, ...]``,
 item is followed through a ``for`` loop, a comprehension, ``enumerate``,
 ``.items()`` and ``.keys()``, and a set difference with the options
 (``set(sides) - _SIDES``) or a subset test (``<=``, ``issubset``) closes the
-collection as a whole. The table a test reads may be written in place, held
-in a local (one branch of a conditional expression included) or imported
-from another module of the package. A record field is followed out of the
-``__post_init__`` into the helper it is handed to, and a comparison of
-``<record>.<field>`` with a string in any function of the record's module
-closes it as well.
+collection as a whole; a comprehension that copies each item (``{str(d)
+for d in limits}``) holds the caller's strings as surely as ``set(sides)``.
+The table a test reads may be written in place, held in a local, picked by a
+conditional expression both of whose branches are tables, picked out of a
+table of tables (``_BUDGET_TABLES[field]``, read as the keys of all of them)
+or imported from another module of the package; a frozen table the source
+builds with code (``MappingProxyType({**_rows(...)})``) is read off the
+imported module. A record field is followed out of the ``__post_init__`` into
+the helper it is handed to, and a comparison of ``<record>.<field>`` with a
+string in any function of the record's module closes it as well.
+
+An annotation is read through the type aliases of the module that writes it
+(:func:`expanded`), the ones under ``if TYPE_CHECKING:`` and the imported
+ones included, so ``free_sides: _FreeSides | None`` with ``_FreeSides =
+Iterable[str]`` is a collection of any strings.
 """
 
 from __future__ import annotations
@@ -83,7 +92,7 @@ import phonometry
 from phonometry._internal.catalogue import CatalogueRow
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterator, Mapping
     from types import FunctionType, ModuleType
 
 #: The members of an annotation that let any string through.
@@ -498,7 +507,8 @@ def _derived_from(value: ast.expr, matches: Callable[[ast.expr], bool]) -> bool:
     The target itself through the calls that only clean it up, an alias
     lookup ``ALIASES.get(name, name)``, a private helper handed the target
     first (``_normalise(name, ALIASES, "name")``), or the strings of the
-    target held in another container: ``tuple(sides)``, ``set(sides)`` or
+    target held in another container: ``tuple(sides)``, ``set(sides)``, a
+    comprehension that copies each item (``{str(d) for d in limits}``) or
     the one-item ``(side,)`` a bare string becomes, on either branch of a
     conditional expression.
     """
@@ -516,7 +526,44 @@ def _derived_from(value: ast.expr, matches: Callable[[ast.expr], bool]) -> bool:
         )
     if isinstance(value, ast.Tuple | ast.List | ast.Set):
         return any(matches(element) for element in value.elts)
+    if isinstance(value, ast.SetComp | ast.ListComp | ast.GeneratorExp):
+        return _copies_items(value, matches)
     return False
+
+
+def _copies_items(
+    value: ast.SetComp | ast.ListComp | ast.GeneratorExp,
+    matches: Callable[[ast.expr], bool],
+) -> bool:
+    """Whether a comprehension holds the target's items, each cleaned up.
+
+    ``{str(direction) for direction in limits}`` or ``[s.lower() for s in
+    sides]``: one loop over the target (its keys, for a mapping) whose element
+    is the loop variable through the calls that only clean up a text.
+    """
+    if len(value.generators) != 1:
+        return False
+    generator = value.generators[0]
+    element = _bare(value.elt)
+    return (
+        isinstance(generator.target, ast.Name)
+        and isinstance(element, ast.Name)
+        and element.id == generator.target.id
+        and matches(_held(_keys_of(generator.iter)))
+    )
+
+
+def _keys_of(node: ast.expr) -> ast.expr:
+    """*node* without a ``.keys()`` that only reads a mapping's keys."""
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "keys"
+        and not node.args
+        and not node.keywords
+    ):
+        return node.func.value
+    return node
 
 
 def _holds_items(node: ast.Call) -> bool:
@@ -594,7 +641,12 @@ _IMPORT_DEPTH = 3
 
 
 def _assigned(node: ast.stmt) -> list[tuple[str, ast.expr]]:
-    """The names a module-level assignment binds, each with its value."""
+    """The names a module-level assignment binds, each with its value.
+
+    ``X = ...``, ``X: T = ...`` and the ``type X = ...`` of an alias.
+    """
+    if isinstance(node, ast.TypeAlias) and isinstance(node.name, ast.Name):
+        return [(node.name.id, node.value)]
     if isinstance(node, ast.Assign):
         return [
             (target.id, node.value)
@@ -632,6 +684,19 @@ def _imported_constants(
     ]
 
 
+def _module_statements(body: list[ast.stmt]) -> Iterator[ast.stmt]:
+    """The statements of a module body, those of its top-level ``if`` blocks
+    included: an alias or an import under ``if TYPE_CHECKING:`` is the
+    module's as surely as one written at the top.
+    """
+    for node in body:
+        if isinstance(node, ast.If):
+            yield from _module_statements(node.body)
+            yield from _module_statements(node.orelse)
+        else:
+            yield node
+
+
 @functools.cache
 def _constants_of(module_name: str, depth: int = 0) -> MappingProxyType[str, ast.expr]:
     module = sys.modules.get(module_name)
@@ -643,26 +708,90 @@ def _constants_of(module_name: str, depth: int = 0) -> MappingProxyType[str, ast
         return MappingProxyType({})
     package = module.__package__ or module_name.rpartition(".")[0]
     found: dict[str, ast.expr] = {}
-    for node in tree.body:
+    for node in _module_statements(tree.body):
         if isinstance(node, ast.ImportFrom):
             if depth < _IMPORT_DEPTH:
                 for name, value in _imported_constants(node, package, depth):
                     found.setdefault(name, value)
             continue
         found.update(_assigned(node))
+    _read_frozen_tables(found, vars(module))
     return MappingProxyType(found)
 
 
+def _read_frozen_tables(
+    found: dict[str, ast.expr], namespace: dict[str, object]
+) -> None:
+    """Replace each constant of *found* the source builds with code by its value.
+
+    Only a constant whose expression holds no strings :func:`strings_of` can
+    read, and only when the running module holds a frozen table under its name
+    (:func:`_runtime_table`).
+    """
+    for name, value in list(found.items()):
+        if strings_of(value, found):
+            continue
+        held = _runtime_table(namespace.get(name))
+        if held is not None:
+            found[name] = held
+
+
+#: How many tables deep a table of tables is spelled out from its value.
+_TABLE_DEPTH = 2
+
+
+def _runtime_table(value: object, depth: int = 0) -> ast.expr | None:
+    """A frozen table of strings the source builds with code, as its value reads.
+
+    ``MappingProxyType({**_rows(...)})`` names its keys only when it runs; a
+    published table is frozen (a ``MappingProxyType``, a ``tuple`` or a
+    ``frozenset``), so its keys or items are read off the imported module and
+    spelled as the display that would hold them. A mutable ``dict`` is left
+    alone: a cache or a registry fills one as the program runs.
+    """
+    if depth > _TABLE_DEPTH:
+        return None
+    if (
+        isinstance(value, MappingProxyType)
+        and value
+        and all(isinstance(key, str) for key in value)
+    ):
+        return ast.Dict(
+            keys=[ast.Constant(value=key) for key in value],
+            values=[
+                _runtime_table(item, depth + 1) or ast.Constant(value=None)
+                for item in value.values()
+            ],
+        )
+    if (
+        isinstance(value, tuple | frozenset)
+        and value
+        and all(isinstance(item, str) for item in value)
+    ):
+        items = sorted(value) if isinstance(value, frozenset) else list(value)
+        return ast.Tuple(
+            elts=[ast.Constant(value=item) for item in items], ctx=ast.Load()
+        )
+    return None
+
+
+#: How many names, calls and subscripts deep a set of strings is resolved.
+_STRINGS_DEPTH = 6
+
+
 def strings_of(
-    node: ast.expr | None, constants: dict[str, ast.expr], depth: int = 0
+    node: ast.expr | None, constants: Mapping[str, ast.expr], depth: int = 0
 ) -> tuple[str, ...]:
     """The string options an expression holds, or ``()`` when it holds none.
 
     A tuple, list or set of string constants, the string keys of a dict, a
-    call wrapping one of those (``frozenset(...)``, ``MappingProxyType(...)``)
-    and a module constant bound to one of those.
+    call wrapping one of those (``frozenset(...)``, ``MappingProxyType(...)``),
+    a name bound to one of those (a module constant, or a local the caller
+    adds to *constants*), a conditional expression both of whose branches
+    hold one (``_SIDES if strict else ("top",)``), and one table of a table of
+    tables (``_TABLES[kind]``), read as the keys any of its tables holds.
     """
-    if node is None or depth > 4:
+    if node is None or depth > _STRINGS_DEPTH:
         return ()
     if isinstance(node, ast.Tuple | ast.List | ast.Set):
         values = [
@@ -681,7 +810,62 @@ def strings_of(
         return strings_of(node.args[0], constants, depth + 1)
     if isinstance(node, ast.Name) and node.id in constants:
         return strings_of(constants[node.id], constants, depth + 1)
+    return _picked_strings(node, constants, depth)
+
+
+def _picked_strings(
+    node: ast.expr, constants: Mapping[str, ast.expr], depth: int
+) -> tuple[str, ...]:
+    """The strings of a table picked when the code runs, or ``()``.
+
+    One branch of a conditional expression both of whose branches hold
+    strings, or one table of a table of tables (:func:`_keys_of_tables`).
+    """
+    if isinstance(node, ast.IfExp):
+        body = strings_of(node.body, constants, depth + 1)
+        orelse = strings_of(node.orelse, constants, depth + 1)
+        return tuple(dict.fromkeys(body + orelse)) if body and orelse else ()
+    if isinstance(node, ast.Subscript):
+        return _keys_of_tables(node.value, constants, depth + 1)
     return ()
+
+
+def _dict_display(
+    node: ast.expr, constants: Mapping[str, ast.expr], depth: int
+) -> ast.Dict | None:
+    """The dict display a name or a wrapping call stands for, or ``None``."""
+    while depth <= _STRINGS_DEPTH:
+        if isinstance(node, ast.Dict):
+            return node
+        if isinstance(node, ast.Name) and node.id in constants:
+            node = constants[node.id]
+        elif isinstance(node, ast.Call) and node.args:
+            node = node.args[0]
+        else:
+            return None
+        depth += 1
+    return None
+
+
+def _keys_of_tables(
+    node: ast.expr, constants: Mapping[str, ast.expr], depth: int
+) -> tuple[str, ...]:
+    """The keys of the tables a table of tables holds, all of them together.
+
+    ``_BUDGET_TABLES[field]`` is one of the tables ``_BUDGET_TABLES`` maps to,
+    so a key is closed when every one of them holds strings; the union is the
+    set a caller may pick from, whichever table is picked.
+    """
+    table = _dict_display(node, constants, depth)
+    if table is None or not table.values:
+        return ()
+    keys: list[str] = []
+    for value in table.values:
+        held = strings_of(value, constants, depth + 1)
+        if not held:
+            return ()
+        keys.extend(held)
+    return tuple(dict.fromkeys(keys))
 
 
 def _call_name(node: ast.Call) -> str:
@@ -832,6 +1016,25 @@ def _item_names(tree: ast.AST, is_target: Callable[[ast.expr], bool]) -> set[str
     return names
 
 
+def _local_tables(
+    tree: ast.AST, constants: Mapping[str, ast.expr]
+) -> dict[str, ast.expr]:
+    """The locals of *tree* bound to a set of strings, by name.
+
+    ``table = _BUDGET_TABLES[field]``, ``table = _SIDES if strict else
+    ("top",)`` or ``options = tuple(_SIDES)``: a test against the local is a
+    test against the strings it holds (:func:`strings_of`).
+    """
+    found: dict[str, ast.expr] = {}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign | ast.AnnAssign):
+            continue
+        for name, value in _assigned(node):
+            if strings_of(value, {**constants, **found}):
+                found.setdefault(name, value)
+    return found
+
+
 def code_evidence(
     tree: ast.AST,
     is_target: Callable[[ast.expr], bool],
@@ -845,9 +1048,11 @@ def code_evidence(
     strings is taken away is refused (``set(sides) - set(SIDES)``), when it
     is tested as a subset of one (``set(sides) <= SIDES``,
     ``.issubset(SIDES)``), or when one string is looked for in it
-    (``"top" in sides``).
+    (``"top" in sides``). The set of strings may be held in a local of
+    *tree* (:func:`_local_tables`) as well as written in place.
     """
     found: list[str] = []
+    constants = {**constants, **_local_tables(tree, constants)}
     is_target = _following(tree, is_target)
     items = _item_names(tree, is_target) if collection else set()
     if items:
@@ -1081,7 +1286,10 @@ def _checks_received(
     """Whether *callee* types its parameter *received* ``Literal`` or checks
     it against a fixed set of strings itself.
     """
-    annotation = str(inspect.signature(callee).parameters[received].annotation)
+    annotation = expanded(
+        str(inspect.signature(callee).parameters[received].annotation),
+        callee.__module__,
+    )
     if _is_literal(annotation):
         return True
     tree = _parsed(callee)
@@ -1123,6 +1331,7 @@ def passed_on_evidence(  # noqa: PLR0913
     namespace = _namespace(function, tree, module_name)
     matches = _following(tree, target or _the_name(name))
     spread = _spread_dicts(tree)
+    known = {**constants, **_local_tables(tree, constants)}
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
             continue
@@ -1139,7 +1348,7 @@ def passed_on_evidence(  # noqa: PLR0913
             continue
         callee_constants = {
             **_module_constants(sys.modules.get(callee.__module__)),
-            **_bound_tables(handed, constants),
+            **_bound_tables(handed, known),
         }
         label = f"handed to {callee.__qualname__}({received})"
         if _checks_received(callee, received, callee_constants, collection=collection):
@@ -1239,6 +1448,83 @@ def _parsed(obj: object) -> ast.AST | None:
 
 def _annotation(value: object) -> str:
     return value if isinstance(value, str) else getattr(value, "__name__", str(value))
+
+
+#: A quoted string inside an annotation (``Literal['top', 'left']``), whose
+#: words are options, never names.
+_QUOTED_TEXT = re.compile(r"""('[^']*'|"[^"]*")""")
+
+#: A bare name in an annotation, not the attribute part of a dotted one.
+_ANNOTATION_NAME = re.compile(r"(?<![\w.])[A-Za-z_]\w*")
+
+#: How many aliases deep an annotation is spelled out.
+_ALIAS_DEPTH = 4
+
+
+def _reads_as_type(node: ast.expr) -> bool:
+    """Whether a module-level value is a type alias's definition.
+
+    A subscripted type (``Iterable[str]``, ``Literal[...]``), a union of
+    types (``str | Iterable[str]``) or ``str`` itself.
+    """
+    if isinstance(node, ast.Subscript):
+        return isinstance(node.value, ast.Name | ast.Attribute)
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.BitOr):
+        return all(
+            _reads_as_type(side)
+            or isinstance(side, ast.Name | ast.Attribute)
+            or (isinstance(side, ast.Constant) and side.value is None)
+            for side in (node.left, node.right)
+        )
+    return isinstance(node, ast.Name) and node.id == "str"
+
+
+@functools.cache
+def _type_aliases(module_name: str) -> MappingProxyType[str, str]:
+    """The type aliases *module_name* defines or imports, as their definition reads."""
+    return MappingProxyType(
+        {
+            name: ast.unparse(value)
+            for name, value in _constants_of(module_name).items()
+            if _reads_as_type(value)
+        }
+    )
+
+
+def expanded(annotation: str, module_name: str, depth: int = 0) -> str:
+    """*annotation* with every type alias of its module spelled out.
+
+    ``free_sides: _FreeSides | None`` with ``_FreeSides = Iterable[str]`` in
+    the module takes any strings as surely as ``Iterable[str] | None``: the
+    guard reads what the alias stands for, not its name. A ``Literal`` alias
+    becomes its ``Literal[...]``, which stays a closed choice.
+    """
+    if depth > _ALIAS_DEPTH:
+        return annotation
+    aliases = _type_aliases(module_name)
+
+    def substitute(match: re.Match[str]) -> str:
+        name = match.group(0)
+        if name not in aliases:
+            return name
+        # No parentheses: a union is read the same inside a union or a
+        # subscript, and a member in parentheses would hide its own members.
+        return expanded(aliases[name], module_name, depth + 1)
+
+    pieces = _QUOTED_TEXT.split(annotation)
+    # Odd indices are the quoted strings the split kept; they stay as written.
+    return "".join(
+        piece if index % 2 else _ANNOTATION_NAME.sub(substitute, piece)
+        for index, piece in enumerate(pieces)
+    )
+
+
+def _field_module(record: type, name: str) -> str:
+    """The module that annotates field *name* of *record*, where its aliases live."""
+    for owner in record.__mro__:
+        if name in inspect.get_annotations(owner):
+            return owner.__module__
+    return record.__module__
 
 
 def _field_of_self(name: str) -> Callable[[ast.expr], bool]:
@@ -1407,8 +1693,9 @@ def string_choices() -> Iterator[Choice]:
                 continue
             for field in dataclasses.fields(obj):  # type: ignore[arg-type]
                 annotation = _annotation(field.type)
-                collection = takes_any_strings(annotation)
-                if not (collection or takes_any_string(annotation)):
+                read = expanded(annotation, _field_module(obj, field.name))
+                collection = takes_any_strings(read)
+                if not (collection or takes_any_string(read)):
                     continue
                 name = field.name
                 evidence = _field_evidence(obj, name, constants, collection=collection)
@@ -1427,8 +1714,9 @@ def string_choices() -> Iterator[Choice]:
             if parameter.name in {"self", "cls"}:
                 continue
             annotation = _annotation(parameter.annotation)
-            collection = takes_any_strings(annotation)
-            if not (collection or takes_any_string(annotation)):
+            read = expanded(annotation, home)
+            collection = takes_any_strings(read)
+            if not (collection or takes_any_string(read)):
                 continue
             name = parameter.name
             evidence = (

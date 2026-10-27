@@ -606,7 +606,7 @@ the uncertainty of that parameter on each of the three microphones.
 ```python
 CouplerParameterUncertainty(
     frequencies: NDArray[np.float64],
-    component_uncertainties_db: Mapping[str, NDArray[np.float64]],
+    component_uncertainties_db: Mapping[Literal['series_impedance', 'voltage_ratio', 'cross_talk', 'noise', 'distortion', 'frequency', 'receiver_ground_shield', 'transmitter_ground_shield', 'coupler_length', 'coupler_diameter', 'coupler_volume', 'coupler_surface_area', 'leakage', 'capillary_tube_dimensions', 'static_pressure', 'temperature', 'relative_humidity', 'front_cavity_depth', 'front_cavity_volume', 'equivalent_volume', 'resonance_frequency', 'loss_factor', 'diaphragm_compliance', 'diaphragm_mass', 'diaphragm_resistance', 'front_cavity_thread', 'polarizing_voltage', 'heat_conduction_theory', 'excess_volume', 'viscosity_losses', 'radial_wave_motion', 'rounding', 'repeatability', 'static_pressure_corrections', 'temperature_corrections'], NDArray[np.float64]],
     microphone: int,
 )
 ```

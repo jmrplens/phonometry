@@ -87,6 +87,7 @@ from .._internal.validation import (
 from .free_field_corrections import _band_column, _frequency_axis
 from .reciprocity_calibration import (
     _TRIAD_PAIRS,
+    FreeFieldReciprocityComponent,
     ReciprocityCalibration,
     _complex_column,
     _solved,
@@ -1046,7 +1047,9 @@ class FreeFieldParameterUncertainty(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    component_uncertainties_db: Mapping[str, NDArray[np.float64]]
+    component_uncertainties_db: Mapping[
+        FreeFieldReciprocityComponent, NDArray[np.float64]
+    ]
     microphone: int
 
     def __post_init__(self) -> None:
@@ -1058,7 +1061,7 @@ class FreeFieldParameterUncertainty(OwnsArrays):
         """
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
-        components = {}
+        components: dict[FreeFieldReciprocityComponent, NDArray[np.float64]] = {}
         for name, value in self.component_uncertainties_db.items():
             column = np.asarray(value, dtype=np.float64).reshape(-1)
             if (
@@ -1071,7 +1074,7 @@ class FreeFieldParameterUncertainty(OwnsArrays):
                     "be one finite, non-negative value per frequency."
                 )
                 raise ValueError(msg)
-            components[str(name)] = read_only(column)
+            components[name] = read_only(column)
         object.__setattr__(
             self, "component_uncertainties_db", MappingProxyType(components)
         )
@@ -1277,7 +1280,7 @@ def free_field_parameter_uncertainty(
 
     nominal = level()
     u = uncertainties
-    components: dict[str, NDArray[np.float64]] = {}
+    components: dict[FreeFieldReciprocityComponent, NDArray[np.float64]] = {}
     if u.u_distance_m > 0.0:
         changes = []
         for index in range(3):
@@ -1293,11 +1296,12 @@ def free_field_parameter_uncertainty(
             moved_centres[index] = centres[index] + centre_u
             changes.append(level(new_centres=moved_centres) - nominal)
         components["acoustic_centers"] = np.sqrt(sum(c**2 for c in changes))
-    for key, index, step in (
+    condition_steps: tuple[tuple[FreeFieldReciprocityComponent, int, float], ...] = (
         ("static_pressure", 1, u.u_static_pressure_pa),
         ("temperature", 0, u.u_temperature_k),
         ("relative_humidity", 2, u.u_relative_humidity_percent),
-    ):
+    )
+    for key, index, step in condition_steps:
         if step > 0.0:
             shifted = list(conditions)
             shifted[index] += step

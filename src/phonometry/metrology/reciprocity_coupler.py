@@ -118,6 +118,7 @@ from .._internal.validation import (
 from .free_field_corrections import _frequency_axis
 from .reciprocity_calibration import (
     _TRIAD_PAIRS,
+    PressureReciprocityComponent,
     ReciprocityCalibration,
     _complex_column,
     _solved,
@@ -2034,7 +2035,9 @@ class CouplerParameterUncertainty(OwnsArrays):
     """
 
     frequencies: NDArray[np.float64]
-    component_uncertainties_db: Mapping[str, NDArray[np.float64]]
+    component_uncertainties_db: Mapping[
+        PressureReciprocityComponent, NDArray[np.float64]
+    ]
     microphone: int
 
     def __post_init__(self) -> None:
@@ -2046,7 +2049,7 @@ class CouplerParameterUncertainty(OwnsArrays):
         """
         frequencies = _frequency_axis(self.frequencies)
         object.__setattr__(self, "frequencies", read_only(frequencies))
-        components = {}
+        components: dict[PressureReciprocityComponent, NDArray[np.float64]] = {}
         for name, value in self.component_uncertainties_db.items():
             column = np.asarray(value, dtype=np.float64).reshape(-1)
             if (
@@ -2059,7 +2062,7 @@ class CouplerParameterUncertainty(OwnsArrays):
                     "one finite, non-negative value per frequency."
                 )
                 raise ValueError(msg)
-            components[str(name)] = read_only(column)
+            components[name] = read_only(column)
         object.__setattr__(
             self, "component_uncertainties_db", MappingProxyType(components)
         )
@@ -2282,8 +2285,10 @@ def coupler_parameter_uncertainty(
         return np.abs(_level_change(nominal, changed, microphone))
 
     u = uncertainties
-    components: dict[str, NDArray[np.float64]] = {}
-    coupler_steps = _coupler_steps(
+    components: dict[PressureReciprocityComponent, NDArray[np.float64]] = {}
+    coupler_steps: dict[
+        PressureReciprocityComponent, PlaneWaveCoupler | LargeVolumeCoupler
+    ] = _coupler_steps(
         coupler,
         (
             ("coupler_length", "length_m", u.u_coupler_length_m),
@@ -2301,22 +2306,24 @@ def coupler_parameter_uncertainty(
         components["capillary_tube_dimensions"] = np.sqrt(
             sum(moved(new_coupler=tubes) ** 2 for tubes in capillary)
         )
-    for key, index, step in (
+    condition_steps: tuple[tuple[PressureReciprocityComponent, int, float], ...] = (
         ("static_pressure", 1, u.u_static_pressure_pa),
         ("temperature", 0, u.u_temperature_k),
         ("relative_humidity", 2, u.u_relative_humidity_percent),
-    ):
+    )
+    for key, index, step in condition_steps:
         if step > 0.0:
             shifted = list(conditions)
             shifted[index] += step
             components[key] = moved(new_conditions=tuple(shifted))  # type: ignore[arg-type]
-    for key, field, step in (
+    microphone_steps: tuple[tuple[PressureReciprocityComponent, str, float], ...] = (
         ("front_cavity_depth", "front_cavity_depth_m", u.u_front_cavity_depth_m),
         ("front_cavity_volume", "front_cavity_volume_m3", u.u_front_cavity_volume_m3),
         ("equivalent_volume", "equivalent_volume_m3", u.u_equivalent_volume_m3),
         ("resonance_frequency", "resonance_frequency_hz", u.u_resonance_frequency_hz),
         ("loss_factor", "loss_factor", u.u_loss_factor),
-    ):
+    )
+    for key, field, step in microphone_steps:
         if step > 0.0:
             components[key] = np.sqrt(
                 sum(
@@ -2341,16 +2348,16 @@ def _moved_microphone(
     return microphones[:index] + (changed,) + microphones[index + 1 :]
 
 
-def _coupler_steps(
+def _coupler_steps[K: str](
     coupler: PlaneWaveCoupler | LargeVolumeCoupler,
-    moves: Sequence[tuple[str, str, float]],
-) -> dict[str, PlaneWaveCoupler | LargeVolumeCoupler]:
+    moves: Sequence[tuple[K, str, float]],
+) -> dict[K, PlaneWaveCoupler | LargeVolumeCoupler]:
     """The coupler with each of its dimensions moved, keyed by Table 1.
 
     :param moves: ``(key, field, standard uncertainty)`` for each dimension,
         the uncertainty already checked to be finite and non-negative.
     """
-    steps: dict[str, PlaneWaveCoupler | LargeVolumeCoupler] = {}
+    steps: dict[K, PlaneWaveCoupler | LargeVolumeCoupler] = {}
     for key, field, u in moves:
         if u <= 0.0:
             continue

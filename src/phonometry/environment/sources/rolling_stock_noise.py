@@ -123,7 +123,7 @@ from .acoustic_roughness import (
     average_roughness_spectra,
     redistributed_band_energies,
 )
-from .track_decay import TRACK_DECAY_DIRECTIONS, TrackDecayRate
+from .track_decay import TRACK_DECAY_DIRECTIONS, Direction, TrackDecayRate
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
     from collections.abc import Callable, Mapping, Sequence
@@ -206,7 +206,7 @@ REFERENCE_TRACK_ROUGHNESS_LIMIT_DB: Mapping[float, float] = MappingProxyType(
 #: dB/m, keyed by direction and then by nominal one-third octave band
 #: frequency in hertz, from 250 Hz to 5 000 Hz. Figure 3 prints them in a
 #: table beside the curves; below 250 Hz it sets no limit.
-REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M: Mapping[str, Mapping[float, float]] = (
+REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M: Mapping[Direction, Mapping[float, float]] = (
     MappingProxyType(
         {
             "vertical": MappingProxyType(
@@ -1786,7 +1786,7 @@ class ReferenceTrackCheck(RichDisplay):
     roughness: tuple[AcousticRoughnessSpectrum, ...]
     decay_rates: tuple[TrackDecayRate, ...]
     roughness_limit_db: Mapping[float, float]
-    decay_limits_db_per_m: Mapping[str, Mapping[float, float]]
+    decay_limits_db_per_m: Mapping[Direction, Mapping[float, float]]
     small_deviations: SmallRoughnessDeviation | None = None
     _: KW_ONLY
     curve_radius_m: float | None = None
@@ -1950,8 +1950,8 @@ def _frozen_roughness_limit(
 
 
 def _frozen_decay_limits(
-    limits: Mapping[str, Mapping[float, float]],
-) -> Mapping[str, Mapping[float, float]]:
+    limits: Mapping[Direction, Mapping[float, float]],
+) -> Mapping[Direction, Mapping[float, float]]:
     """A read-only copy of decay-rate limits, direction to band to rate.
 
     :raises ValueError: Unless the limits give at least one band for each
@@ -1988,9 +1988,7 @@ def _frozen_decay_limits(
         raise ValueError(msg)
     return MappingProxyType(
         {
-            str(direction): MappingProxyType(
-                {float(f): float(v) for f, v in limit.items()}
-            )
+            direction: MappingProxyType({float(f): float(v) for f, v in limit.items()})
             for direction, limit in limits.items()
         }
     )
@@ -2222,7 +2220,8 @@ def _decay_condition(
 
 
 def _decay_conditions(
-    decay_rates: Sequence[TrackDecayRate], limits: Mapping[str, Mapping[float, float]]
+    decay_rates: Sequence[TrackDecayRate],
+    limits: Mapping[Direction, Mapping[float, float]],
 ) -> list[TrackCondition]:
     """The requirements of 6.2.6 and, with the grid known, of EN 15461 6.7 and 7."""
     conditions = [
@@ -2265,7 +2264,7 @@ def check_reference_track(
     track_gradient_ratio: float | None = None,
     small_deviations: SmallRoughnessDeviation | None = None,
     roughness_limit_db: BandMapping = REFERENCE_TRACK_ROUGHNESS_LIMIT_DB,
-    decay_limits_db_per_m: Mapping[str, BandMapping] = (
+    decay_limits_db_per_m: Mapping[Direction, BandMapping] = (
         REFERENCE_TRACK_DECAY_LIMITS_DB_PER_M
     ),
 ) -> ReferenceTrackCheck:

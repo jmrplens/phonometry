@@ -75,10 +75,28 @@ changed one at a time by their associated uncertainty":
 
 ```python
 reciprocity_uncertainty_budget(
-    standard_uncertainties_db: Mapping[str, ArrayLike],
+    standard_uncertainties_db: Mapping[Literal['series_impedance', 'voltage_ratio', 'cross_talk', 'noise', 'distortion', 'frequency', 'receiver_ground_shield', 'transmitter_ground_shield', 'coupler_length', 'coupler_diameter', 'coupler_volume', 'coupler_surface_area', 'leakage', 'capillary_tube_dimensions', 'static_pressure', 'temperature', 'relative_humidity', 'front_cavity_depth', 'front_cavity_volume', 'equivalent_volume', 'resonance_frequency', 'loss_factor', 'diaphragm_compliance', 'diaphragm_mass', 'diaphragm_resistance', 'front_cavity_thread', 'polarizing_voltage', 'heat_conduction_theory', 'excess_volume', 'viscosity_losses', 'radial_wave_motion', 'rounding', 'repeatability', 'static_pressure_corrections', 'temperature_corrections'], ArrayLike],
     *,
     frequencies: ArrayLike,
-    field: Literal['pressure', 'free'] = 'pressure',
+    field: Literal['pressure'] = 'pressure',
+    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
+    coverage_factor: float = 2.0,
+) -> ReciprocityUncertaintyBudget
+
+reciprocity_uncertainty_budget(
+    standard_uncertainties_db: Mapping[Literal['series_impedance', 'voltage_ratio', 'cross_talk', 'noise', 'distortion', 'reflections', 'frequency', 'receiver_shield', 'transmitter_shield', 'distance', 'static_pressure', 'temperature', 'relative_humidity', 'standing_waves', 'air_attenuation', 'acoustic_centers', 'polarizing_voltage', 'plane_wave_deviation', 'mathematical_manipulations', 'rounding', 'repeatability', 'static_pressure_corrections', 'temperature_corrections'], ArrayLike],
+    *,
+    frequencies: ArrayLike,
+    field: Literal['free'],
+    additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
+    coverage_factor: float = 2.0,
+) -> ReciprocityUncertaintyBudget
+
+reciprocity_uncertainty_budget(
+    standard_uncertainties_db: Mapping[Literal['series_impedance', 'voltage_ratio', 'cross_talk', 'noise', 'distortion', 'frequency', 'receiver_ground_shield', 'transmitter_ground_shield', 'coupler_length', 'coupler_diameter', 'coupler_volume', 'coupler_surface_area', 'leakage', 'capillary_tube_dimensions', 'static_pressure', 'temperature', 'relative_humidity', 'front_cavity_depth', 'front_cavity_volume', 'equivalent_volume', 'resonance_frequency', 'loss_factor', 'diaphragm_compliance', 'diaphragm_mass', 'diaphragm_resistance', 'front_cavity_thread', 'polarizing_voltage', 'heat_conduction_theory', 'excess_volume', 'viscosity_losses', 'radial_wave_motion', 'rounding', 'repeatability', 'static_pressure_corrections', 'temperature_corrections'], ArrayLike] | Mapping[Literal['series_impedance', 'voltage_ratio', 'cross_talk', 'noise', 'distortion', 'reflections', 'frequency', 'receiver_shield', 'transmitter_shield', 'distance', 'static_pressure', 'temperature', 'relative_humidity', 'standing_waves', 'air_attenuation', 'acoustic_centers', 'polarizing_voltage', 'plane_wave_deviation', 'mathematical_manipulations', 'rounding', 'repeatability', 'static_pressure_corrections', 'temperature_corrections'], ArrayLike],
+    *,
+    frequencies: ArrayLike,
+    field: Literal['pressure', 'free'],
     additional_uncertainties_db: Mapping[str, ArrayLike] | None = None,
     coverage_factor: float = 2.0,
 ) -> ReciprocityUncertaintyBudget

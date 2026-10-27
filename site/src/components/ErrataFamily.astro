@@ -1,0 +1,90 @@
+---
+/**
+ * One document family of the errata registry, as the index lists it: the
+ * family's name linked to its page, and every entry on that page linked to the
+ * entry itself.
+ *
+ * The registry used to be one page, and its entries' anchors were the ids the
+ * build gives their headings. Those ids are computed after the mathematics in
+ * a heading is typeset ("$\sigma_\mathrm{TO}$" becomes "σto"), so nothing but
+ * the build can say what they are. Reading them here, off the family page as
+ * the build renders it, is what lets the index link every entry exactly, and
+ * what lets ErrataRouter.astro send a link written against the old single
+ * page to the entry's new home: the anchor did not change, only the page it
+ * is on.
+ *
+ * `scripts/generate_site_reports.py` writes both the family pages and the
+ * list of these components on the index, so a family named here without a
+ * page is a generator bug, and the build says so rather than listing nothing.
+ */
+import type { MarkdownHeading } from 'astro';
+import { getEntry, render } from 'astro:content';
+
+interface Props {
+	/** The family page's slug under `reference/errata/`. */
+	slug: string;
+	/** The name the index lists the family under. */
+	name: string;
+}
+const { slug, name } = Astro.props;
+
+const lang = (Astro.locals.starlightRoute?.lang ?? Astro.currentLocale ?? 'en').startsWith('es')
+	? 'es'
+	: 'en';
+const id = `${lang === 'es' ? 'es/' : ''}reference/errata/${slug}`;
+const entry = await getEntry('docs', id);
+if (!entry) {
+	throw new Error(
+		`[ErrataFamily] the errata index lists "${slug}", but there is no page ${id}. ` +
+			'Regenerate the errata pages with `make site-reports`.',
+	);
+}
+const { headings }: { headings: MarkdownHeading[] } = await render(entry);
+const entries = headings.filter((heading) => heading.depth === 2);
+
+const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
+const page = `${BASE}/${id}/`;
+const count =
+	lang === 'es'
+		? `${entries.length} ${entries.length === 1 ? 'entrada' : 'entradas'}`
+		: `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
+---
+
+<div class="errata-family" data-errata-family>
+	<p class="errata-family-name">
+		<a href={page}>{name}</a>
+		<span class="errata-family-count">{count}</span>
+	</p>
+	<ul>
+		{entries.map((heading) => (
+			<li>
+				<a href={`${page}#${heading.slug}`}>{heading.text}</a>
+			</li>
+		))}
+	</ul>
+</div>
+
+<style is:global>
+	/* Global under a class of its own: the index lists close to a hundred
+	   families and every element of a scoped template carries the hash. */
+	.errata-family {
+		margin-block: 1rem;
+	}
+
+	.errata-family .errata-family-name {
+		margin-block: 0 0.25rem;
+		font-weight: 600;
+	}
+
+	.errata-family .errata-family-count {
+		margin-inline-start: 0.4rem;
+		font-weight: 400;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+	}
+
+	.errata-family ul {
+		margin-block: 0;
+		font-size: var(--sl-text-sm);
+	}
+</style>

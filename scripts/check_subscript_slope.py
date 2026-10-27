@@ -278,10 +278,13 @@ _INDEX_RUN = re.compile(r"[ijk]{1,2}")
 #: :func:`_base_symbol` names as a page would.
 _RUNNING_OPERATORS = frozenset({"\\sum", "\\prod", "\\Sigma"})
 
-#: The errata register, both editions and its site page, which quotes what a
-#: print sets, upright indices included, and so is not held to
-#: :func:`index_slips`. Matched on the file name alone.
-_TRANSCRIPTIONS = re.compile(r"(?:^|/)errata(?:\.es)?\.mdx?$", re.IGNORECASE)
+#: The errata register, both editions and its site pages (the index and one
+#: page per document family, in ``errata/``), which quote what a print sets,
+#: upright indices included, and so are not held to :func:`index_slips`.
+#: Matched on the file name, or on the folder the site pages live in.
+_TRANSCRIPTIONS = re.compile(
+    r"(?:^|/)errata(?:\.es)?\.mdx?$|(?:^|/)errata/[^/]+\.mdx?$", re.IGNORECASE
+)
 
 #: A cheap test for an image that may carry a running index: a sum, or a
 #: subscript with a comma in it, braced or wrapped. An image without one is not

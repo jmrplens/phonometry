@@ -76,7 +76,9 @@ const weightOption = option('--weight');
 const asTyped = flag('--as-typed');
 const queries = args.length > 0 ? args : DEFAULT_QUERIES;
 const ranking =
-  weightOption === undefined ? PAGEFIND_RANKING : { metaWeights: { standards: Number(weightOption) } };
+  weightOption === undefined
+    ? PAGEFIND_RANKING
+    : { metaWeights: { ...PAGEFIND_RANKING.metaWeights, standards: Number(weightOption) } };
 
 const { declared } = await readDeclaredDesignations(path.join(siteRoot, 'src/content/docs'));
 /** @type {Map<string, string[]>} route -> tokens its bibliography indexes */

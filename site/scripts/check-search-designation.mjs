@@ -619,7 +619,9 @@ for (const lang of LANGS) {
   // order. Each search must then return the same pages from both, which is
   // what shows they read the same chunks, before its top five is compared.
   const weighted = await loadSearchIndex(distDir, lang, PAGEFIND_RANKING);
-  const unweighted = await loadSearchIndex(distDir, lang, { metaWeights: { standards: 0 } });
+  const unweighted = await loadSearchIndex(distDir, lang, {
+    metaWeights: { ...PAGEFIND_RANKING.metaWeights, standards: 0 },
+  });
   const fieldWords = new Set();
   for (const url of scope) for (const token of built.get(url).tokens) if (!/[0-9]/.test(token)) fieldWords.add(token);
   const plainFieldWords = [...fieldWords].filter((word) => !ISSUER_WORDS.has(word)).sort();

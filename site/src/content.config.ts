@@ -293,6 +293,12 @@ export const collections = {
       // no-op the day it is reached for.
       extend: z.object({
         references: references.optional(),
+        // The title the site search ranks the page by, when it should not be
+        // the page's own. scripts/generate_site_reports.py sets it on the
+        // errata pages, which are titled after a document they do not
+        // implement; src/components/Head.astro and src/lib/search-ranking.mjs
+        // say what it does.
+        searchTitle: z.string().optional(),
       }).merge(topicSchema),
     }),
   }),

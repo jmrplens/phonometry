@@ -588,6 +588,14 @@ and its separators is [F58](docs/contributing/docs-and-figures.md#f58). The Engl
 the authoritative one, and the ratio, page-citation and procedure checks
 read it alone.
 
+On the site, each entry is published on the page of the document family its
+heading names, under `/reference/errata/`. A heading that opens with a
+standard's designation lands on that series' page (`ISO 3743-2:2018` on
+`iso-3743`), created the first time the series has an entry. A heading that
+opens with an author or an issuer lands on the page of its row in `SOURCES`
+in `scripts/generate_site_reports.py`; for a source the registry has not cited
+before, `make site-reports` stops and asks for that row, which names the page.
+
 A second script is a contributor tool rather than a gate:
 
 ```bash

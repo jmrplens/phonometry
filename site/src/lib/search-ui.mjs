@@ -18,6 +18,13 @@
  *
  * The search box keeps showing the reader's own words; only what is searched
  * for changes.
+ *
+ * The same subclass shows a page's `display_title` in place of the title it is
+ * ranked by, when the page has one. The errata pages are ranked by the name of
+ * the register and shown by their own (src/lib/search-ranking.mjs says why);
+ * `processResult` is the option Pagefind's UI calls on every result before it
+ * draws it, and Starlight already passes one, which rewrites the URLs, so it
+ * runs first and this one after it.
  */
 import { PagefindUI as Upstream } from 'pagefind-default-ui-upstream';
 // From its own module, never from standard-search.mjs: the tokenizer and its
@@ -35,6 +42,30 @@ export class PagefindUI extends Upstream {
     globalThis.__phonometrySearchNormalizer = SEARCH_TERM_NORMALIZER_MARK;
     // A fresh object, not the caller's: the upstream constructor `delete`s
     // the keys it consumes out of whatever it is handed.
-    super({ ...options, processTerm: normalizeDesignationQuery });
+    const upstreamResult = options?.processResult;
+    super({
+      ...options,
+      processTerm: normalizeDesignationQuery,
+      processResult: (result) => {
+        const processed = upstreamResult?.(result) ?? result;
+        return showDisplayTitle(processed);
+      },
+    });
   }
+}
+
+/**
+ * Put a result's `display_title` where the panel reads its title, and drop
+ * the field, which the panel would otherwise print as a tag under the result.
+ *
+ * @param {{meta?: Record<string, string>}} result  One Pagefind result.
+ * @returns {typeof result} The same result.
+ */
+export function showDisplayTitle(result) {
+  const shown = result?.meta?.display_title;
+  if (shown) {
+    result.meta.title = shown;
+    delete result.meta.display_title;
+  }
+  return result;
 }

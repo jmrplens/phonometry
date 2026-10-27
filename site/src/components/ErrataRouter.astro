@@ -1,0 +1,47 @@
+---
+/**
+ * Sends a link written against the old single errata page to the entry's page.
+ *
+ * Until the registry was split into one page per document family, every entry
+ * lived on `/reference/errata/` and was linked as `/reference/errata/#<entry>`.
+ * Those links are in issues, papers, search results and other people's pages,
+ * and a static host cannot redirect a fragment, because the fragment never
+ * reaches the server. So the index does it: when the address names a fragment
+ * that no element of the index carries, the script looks for the index's own
+ * link to an entry with that anchor, which ErrataFamily.astro wrote from the
+ * family page as the build rendered it, and replaces the address with it. The
+ * entries kept their anchors when they moved, so the old fragment is the new
+ * one on another page.
+ *
+ * `location.replace` rather than an assignment, so the dead address does not
+ * stay in the history for the back button to return to. A fragment the index
+ * holds itself (a section of the index) is left alone, and so is one no entry
+ * has, which then scrolls nowhere, as any unknown fragment does.
+ */
+---
+
+<script>
+	/** The fragment of a URL or of the address bar, as the id it names. */
+	const fragmentOf = (hash: string) => {
+		try {
+			return decodeURIComponent(hash.replace(/^#/, ''));
+		} catch {
+			return '';
+		}
+	};
+
+	const route = () => {
+		const wanted = fragmentOf(location.hash);
+		if (!wanted || document.getElementById(wanted)) return;
+		const links = document.querySelectorAll<HTMLAnchorElement>('[data-errata-family] a[href*="#"]');
+		for (const link of links) {
+			if (fragmentOf(new URL(link.href).hash) === wanted) {
+				location.replace(link.href);
+				return;
+			}
+		}
+	};
+
+	route();
+	window.addEventListener('hashchange', route);
+</script>

@@ -27,12 +27,24 @@
  * arrangement Glossary.astro, Sidebar.astro and PageActions.astro use - so with
  * the script disabled the page is the full report and only the controls are
  * missing.
+ *
+ * Every byte a row spends is spent once per check, close to two thousand
+ * times, and Googlebot reads only the first 2 MB of a page, counted
+ * uncompressed, before it stops: past that point the rows are never indexed.
+ * So a row carries its id, its verdict and its cells and nothing else. The
+ * styles below are global under `.conformance` rather than scoped, because a
+ * scoped stylesheet stamps its hash class on every element of the template,
+ * which was a quarter of the page; the search reads the text the row already
+ * shows rather than a lowercased copy of it in an attribute; the numeric
+ * columns are styled by position; and the verdict mark is a CSS image drawn
+ * beside the word (src/lib/verdict-marks.mjs). Together that took the page
+ * from 2.47 MB to about 1.2 MB at 1,893 checks.
  */
 import { getEntry } from 'astro:content';
 import type { z } from 'astro/zod';
 import type { conformanceSchema } from '../content.config';
 
-import { markId, sprite } from '../lib/verdict-marks.mjs';
+import { markOf, markStyle } from '../lib/verdict-marks.mjs';
 
 interface Props {
 	/** Locale of the page the report is rendered on. */
@@ -344,33 +356,9 @@ const legendVerdicts = ['pass', 'fail', 'by-design', 'not-applicable'].filter(
 /** How much of the bar is green. Whole percent; the figures beside it are exact. */
 const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100;
 
-/**
- * Everything one row can be searched by, lowercased once at build time.
- *
- * Every document the citation names, and the place in each. Searching for
- * "iso 16283-3" used to find one row of the nine that cite it, because the
- * other eight write it as "-3:2016" inside the clause of part 1.
- */
-const searchable = (row: (typeof rows)[number]) =>
-	[
-		row.check.reference.cite,
-		...row.check.reference.documents.map((document) => document.designation),
-		...row.check.reference.documents.map((document) => document.clause ?? ''),
-		row.check.quantity,
-		row.check.unit ?? '',
-	]
-		.join(' ')
-		.toLowerCase();
 ---
 
-<div class="conformance" data-conformance>
-	{/*
-		The four marks, defined once for the whole page. Hidden from layout and
-		from assistive technology: it is a definition, not a picture, and every
-		place that draws from it states the verdict in words of its own.
-	*/}
-	<svg class="mark-sprite" aria-hidden="true" focusable="false" set:html={sprite} />
-
+<div class="conformance" data-conformance style={markStyle}>
 	{/*
 		The summary card. Its committed twin under .github/badges is a picture of
 		English words, which is right for GitHub and wrong for the Spanish page
@@ -397,15 +385,16 @@ const searchable = (row: (typeof rows)[number]) =>
 		</div>
 	</section>
 
+	{/*
+		Every verdict mark on the page is a CSS image beside a word, keyed on a
+		`data-mark` attribute here and on the row's own `data-verdict` in the
+		tables below. The word is the verdict; the mark only repeats it, so it is
+		never in the accessibility tree.
+	*/}
 	<p class="conformance-legend">
 		<b>{t.legend}.</b>
 		{legendVerdicts.map((verdict) => (
-			<span class="legend-entry">
-				<svg class="mark" width="16" height="16" aria-hidden="true" focusable="false">
-					<use href={`#${markId(verdict)}`} />
-				</svg>
-				{verdictWord(verdict)}
-			</span>
+			<span class="legend-entry" data-mark={markOf(verdict)}>{verdictWord(verdict)}</span>
 		))}
 		<span class="legend-note">{t.legendNote}</span>
 	</p>
@@ -460,10 +449,7 @@ const searchable = (row: (typeof rows)[number]) =>
 						{filterPanel.rows.map((row: Record<string, any>) => (
 							<tr>
 								<td>{row.architecture}</td>
-								<td>
-									<svg class="mark" width="16" height="16" aria-hidden="true" focusable="false">
-										<use href={`#${markId(row.verdict)}`} />
-									</svg>
+								<td data-mark={markOf(row.verdict)}>
 									{row.verdict === 'by-design'
 										? `${verdictWord('by-design')} (${row.reason})`
 										: row.class === undefined
@@ -549,11 +535,8 @@ const searchable = (row: (typeof rows)[number]) =>
 		const green = domain.passing === domain.checks;
 		return (
 			<details class="conformance-domain" data-domain-section={domain.id} open={!green}>
-				<summary>
-					{/* Decorative: the tally beside it already says how many passed. */}
-					<svg class="mark" width="16" height="16" aria-hidden="true" focusable="false">
-						<use href={`#${green ? 'cv-pass' : 'cv-fail'}`} />
-					</svg>
+				{/* Decorative mark: the tally beside it already says how many passed. */}
+				<summary data-mark={green ? 'pass' : 'fail'}>
 					<b>{domain.title}</b>
 					<span class="tally">
 						{domain.passing}/{domain.checks}
@@ -563,7 +546,7 @@ const searchable = (row: (typeof rows)[number]) =>
 					<table>
 						<thead>
 							<tr>
-								<th class="status">{t.status}</th>
+								<th>{t.status}</th>
 								<th>{t.standard}</th>
 								<th>{t.quantity}</th>
 								<th>{t.expected}</th>
@@ -574,46 +557,50 @@ const searchable = (row: (typeof rows)[number]) =>
 							</tr>
 						</thead>
 						<tbody>
+							{/*
+								A row is its anchor, its verdict and its eight cells; the
+								column a cell sits in styles it (see `.conformance-domain`
+								below), so no cell carries a class of its own. The
+								verdict word is drawn, not hidden: it is the one cell
+								that has to be legible without scrolling, and its mark
+								is a CSS image keyed on `data-verdict`.
+
+								The separators are text, not decoration. The colon
+								before the edition used to be a CSS `content`, which
+								the search cannot read, so "IEC 61260-1:2014" matched
+								nothing; the space before the clause and before the
+								relation keeps the text the search reads in words. The
+								clause and the relation are blocks, so neither space
+								shows.
+							*/}
 							{domainRows.map((row) => (
-								<tr
-									id={row.anchor}
-									data-row
-									data-verdict={row.check.verdict}
-									data-text={searchable(row)}
-								>
-									<td class="status">
-										{/*
-											The word is drawn, not hidden. It used to sit in a
-											`visually-hidden` span, which left the silhouette as the
-											only thing a sighted reader had - and the silhouette is
-											in the last column of a table wider than the well, so
-											below 1440 px there was no verdict in the row at all.
-											The mark stays `aria-hidden`, so a screen reader still
-											hears the verdict exactly once.
-										*/}
-										<svg class="mark" width="16" height="16" aria-hidden="true" focusable="false">
-											<use href={`#${markId(row.check.verdict)}`} />
-										</svg>
-										{verdictWord(row.check.verdict)}
-									</td>
+								<tr id={row.anchor} data-verdict={row.check.verdict}>
+									<td>{verdictWord(row.check.verdict)}</td>
 									<td>
 										{row.check.reference.documents.map((document) => (
 											<span class="document">
 												{document.relation && (
-													<span class="relation">{relationText(document)}</span>
+													<Fragment>
+														<span class="relation">{relationText(document)}</span>{' '}
+													</Fragment>
 												)}
-												<span class="designation">{document.designation}</span>
-												{document.edition && <span class="edition">{document.edition}</span>}
-												{document.clause && <span class="clause">{document.clause}</span>}
+												<b>{document.designation}</b>
+												{document.edition && `:${document.edition}`}
+												{document.clause && (
+													<Fragment>
+														{' '}
+														<span class="clause">{document.clause}</span>
+													</Fragment>
+												)}{' '}
 											</span>
 										))}
 									</td>
 									<td>{row.check.quantity}</td>
 									<td>{sideText(row.check.expected, row.check)}</td>
 									<td>{sideText(row.check.computed, row.check)}</td>
-									<td class="numeric">{limitText(row.check)}</td>
-									<td class="numeric">{deviationText(row.check)}</td>
-									<td class="numeric used">{percent(row.used)}</td>
+									<td>{limitText(row.check)}</td>
+									<td>{deviationText(row.check)}</td>
+									<td>{percent(row.used)}</td>
 								</tr>
 							))}
 						</tbody>
@@ -637,16 +624,45 @@ const searchable = (row: (typeof rows)[number]) =>
 		const failing = root.querySelector('[data-failing]') as HTMLInputElement | null;
 		const empty = root.querySelector('[data-empty]') as HTMLElement | null;
 		const sections = [...root.querySelectorAll('[data-domain-section]')] as HTMLDetailsElement[];
-		const rows = [...root.querySelectorAll('[data-row]')] as HTMLElement[];
+		const rows = [...root.querySelectorAll('tr[data-verdict]')] as HTMLTableRowElement[];
 		controls?.removeAttribute('hidden');
 
+		/**
+		 * The text a search is matched against, folded the same way on both
+		 * sides: lower case, and commas, colons and the hyphen before a year
+		 * read as spaces. Those three are the punctuation a citation and the
+		 * row disagree on, and nothing else: "ANSI S1.11-2004" in a citation is
+		 * "ANSI S1.11:2004" in the row, "Long, Architectural Acoustics 2e" is
+		 * "Long, Architectural Acoustics:2e", so folding them lets either form
+		 * find the row. A hyphen inside a designation stays a hyphen, which is
+		 * what keeps "IEC 61260-1" from matching "IEC 61260:1995".
+		 */
+		const fold = (text: string) =>
+			text
+				.toLowerCase()
+				.replace(/-(?=(?:19|20)\d\d\b)/g, ' ')
+				.replace(/[,:]/g, ' ')
+				.replace(/\s+/g, ' ')
+				.trim();
+
+		// Everything a row shows but its verdict word: the documents and the
+		// place in each, the quantity, and the values with their units. Read
+		// once, from the cells themselves, so the search can never disagree
+		// with what the row says.
+		const haystacks = new Map(
+			rows.map((row) => [
+				row,
+				fold([...row.cells].slice(1).map((cell) => cell.textContent ?? '').join(' ')),
+			]),
+		);
+
 		const apply = () => {
-			const needle = (search?.value ?? '').trim().toLowerCase();
+			const needle = fold(search?.value ?? '');
 			const wanted = domain?.value ?? '';
 			const onlyFailing = failing?.checked ?? false;
 			let shown = 0;
 			for (const row of rows) {
-				const text = row.dataset.text ?? '';
+				const text = haystacks.get(row) ?? '';
 				// "Failing" means the verdict `fail`, and not "anything that is
 				// not a pass". A `by-design` row is an architecture excluded
 				// from a class mask on purpose; listing it under a control
@@ -661,7 +677,7 @@ const searchable = (row: (typeof rows)[number]) =>
 			for (const section of sections) {
 				const id = section.dataset.domainSection ?? '';
 				const inDomain = !wanted || wanted === id;
-				const visibleRows = [...section.querySelectorAll('[data-row]')].filter(
+				const visibleRows = [...section.querySelectorAll('tr[data-verdict]')].filter(
 					(row) => !(row as HTMLElement).hidden,
 				).length;
 				section.hidden = !inDomain || visibleRows === 0;
@@ -694,7 +710,11 @@ const searchable = (row: (typeof rows)[number]) =>
 	}
 </script>
 
-<style>
+<style is:global>
+	/* Global, and every rule held under `.conformance` (or a class that only
+	   this component uses) instead. A scoped stylesheet would stamp its hash
+	   class on every element of the template, and the template has about
+	   thirty thousand of them, so the scoping alone was 565 kB of the page. */
 	.conformance .note {
 		font-size: var(--sl-text-sm);
 		color: var(--sl-color-gray-3);
@@ -702,7 +722,7 @@ const searchable = (row: (typeof rows)[number]) =>
 	}
 
 	/* Wide tables scroll inside their own box; the page body never does. */
-	.table-scroll {
+	.conformance .table-scroll {
 		overflow-x: auto;
 		margin-block: 0.5rem 1rem;
 	}
@@ -737,13 +757,15 @@ const searchable = (row: (typeof rows)[number]) =>
 		vertical-align: top;
 	}
 
-	.conformance td.numeric {
+	.conformance td.numeric,
+	.conformance-domain td:nth-child(n + 6) {
 		font-variant-numeric: tabular-nums;
 		white-space: nowrap;
 		text-align: end;
 	}
 
-	.conformance td.used {
+	.conformance td.used,
+	.conformance-domain td:nth-child(8) {
 		font-weight: 600;
 	}
 
@@ -766,12 +788,8 @@ const searchable = (row: (typeof rows)[number]) =>
 		color: var(--sl-color-gray-3);
 	}
 
-	.conformance .designation {
+	.conformance .document b {
 		font-weight: 600;
-	}
-
-	.conformance .edition::before {
-		content: ':';
 	}
 
 	.conformance .clause {
@@ -779,44 +797,50 @@ const searchable = (row: (typeof rows)[number]) =>
 		color: var(--sl-color-gray-3);
 	}
 
-	/* The sprite is a definition, not a picture: out of flow and zero-sized, so
-	   it cannot open a gap at the top of the page. Taken out this way rather
-	   than with `display:none`, which is the documented way to stop a `<use>`
-	   resolving against the symbols inside it. */
-	.conformance .mark-sprite {
-		position: absolute;
-		width: 0;
-		height: 0;
-		overflow: hidden;
-	}
+	/* The verdict marks: one CSS image per verdict, set once on the report's
+	   root as `--cv-<verdict>` (src/lib/verdict-marks.mjs), drawn beside the
+	   word of every element that says which verdict it shows, `data-mark` on
+	   the legend, the panel and the section headings and the row's own
+	   `data-verdict` in the tables.
 
-	/* Sized in ems so the mark grows with the reader's text, and pushed a
+	   Sized in ems so the mark grows with the reader's text, and pushed a
 	   fraction below the baseline so a 16 px square sits optically centred on
-	   a line of 14 px text rather than riding above it.
-
-	   `display: inline-block` is not decoration: Starlight's content reset
-	   gives every `svg` `display: block`, which put the mark on a line of its
-	   own above the word it belongs to in every table cell that draws one.
-	   Measured at 1280 px, the mark's top was 20 px above the word's; with
-	   this rule they share a line box, at no cost in English (59.8 px either
-	   way) and 4.8 px of column width in Spanish, where "Cumple" is the
-	   longer word. Inside the
-	   legend and the section headings, which are flex containers, the
-	   declaration is ignored, so the one place it changes anything is the
-	   cells. */
-	.conformance .mark {
+	   a line of 14 px text rather than riding above it. In the legend and the
+	   section headings, which are flex containers, the box is a flex item and
+	   the container's gap spaces it; a cell has no gap to lean on, so there the
+	   mark carries its own margin. Printing keeps it: a background is dropped
+	   by default when a page is printed, and the mark is part of the report. */
+	.conformance [data-mark]::before,
+	.conformance-domain tr[data-verdict] > td:first-child::before {
+		content: '';
 		display: inline-block;
 		width: 1.15em;
 		height: 1.15em;
 		vertical-align: -0.22em;
 		flex: none;
+		background: var(--cv-mark, var(--cv-not-applicable)) center / contain no-repeat;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
 	}
 
-	/* A cell has no gap property to lean on, so the mark carries its own. The
-	   markup deliberately has no whitespace between the mark and the word, and
-	   that is what stops them being split. */
-	.conformance td .mark {
+	.conformance td[data-mark]::before,
+	.conformance-domain tr[data-verdict] > td:first-child::before {
 		margin-inline-end: 0.3rem;
+	}
+
+	.conformance [data-mark='pass'],
+	.conformance-domain tr[data-verdict='pass'] > td:first-child {
+		--cv-mark: var(--cv-pass);
+	}
+
+	.conformance [data-mark='fail'],
+	.conformance-domain tr[data-verdict='fail'] > td:first-child {
+		--cv-mark: var(--cv-fail);
+	}
+
+	.conformance [data-mark='by-design'],
+	.conformance-domain tr[data-verdict='by-design'] > td:first-child {
+		--cv-mark: var(--cv-by-design);
 	}
 
 	/* The verdict leads the row and never wraps. Leading, because it is the one
@@ -824,8 +848,8 @@ const searchable = (row: (typeof rows)[number]) =>
 	   guarantees the first column is inside it, and this table is wider than
 	   the content well at every viewport the site is read at. Never wrapping,
 	   because "By design" broken across two lines reads as two verdicts. */
-	.conformance td.status,
-	.conformance th.status {
+	.conformance-domain td:first-child,
+	.conformance-domain th:first-child {
 		white-space: nowrap;
 	}
 
@@ -835,7 +859,7 @@ const searchable = (row: (typeof rows)[number]) =>
 	   Measured at 1280 px, "Cumple" ended 3 px from the designation beside it,
 	   which reads as one run of text rather than two columns; with this it is
 	   13 px in Spanish and 18 px in English, and the table grows by 10 px. */
-	.conformance .status + * {
+	.conformance-domain :is(td, th):nth-child(2) {
 		padding-inline-start: 1.2rem;
 	}
 
@@ -970,26 +994,26 @@ const searchable = (row: (typeof rows)[number]) =>
 	   FDTD wave simulation (Attenborough & Van Renterghem 2021, Ch. 4)", which
 	   asks for 521 px inside a 374 px row. Measured at a 390 px viewport, that
 	   one element took the document to 542 px; with these rules it is 390. */
-	.control-search {
+	.conformance .control-search {
 		flex: 1 1 16rem;
 		min-width: 0;
 	}
 
-	.control-search input {
+	.conformance .control-search input {
 		width: 100%;
 	}
 
-	.control-domain {
+	.conformance .control-domain {
 		flex: 1 1 12rem;
 		min-width: 0;
 	}
 
-	.control-domain select {
+	.conformance .control-domain select {
 		width: 100%;
 		max-width: 100%;
 	}
 
-	.control-failing {
+	.conformance .control-failing {
 		display: flex;
 		align-items: center;
 		gap: 0.35rem;
@@ -1028,7 +1052,7 @@ const searchable = (row: (typeof rows)[number]) =>
 		display: none !important;
 	}
 
-	.visually-hidden {
+	.conformance .visually-hidden {
 		position: absolute;
 		width: 1px;
 		height: 1px;

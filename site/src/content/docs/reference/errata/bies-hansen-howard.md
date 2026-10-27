@@ -1,7 +1,7 @@
 ---
 title: "Errata in Bies, Hansen & Howard (2017)"
 description: "Errata in Bies, Hansen & Howard (2017): 4 defects in the printed text, with the evidence and what phonometry does about each."
-searchTitle: "Errata"
+searchTitle: ""
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

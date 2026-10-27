@@ -13,9 +13,23 @@
  * page to the entry's new home: the anchor did not change, only the page it
  * is on.
  *
+ * Each link reads as the entry's own heading, typeset as the family page
+ * typesets it: its inner HTML is taken from the page as the build rendered
+ * it, matched by the heading's id. The plain text of a heading
+ * (`heading.text`) is what is left once its mathematics is typeset, which
+ * drops a radical, an exponent and every subscript ("√(S_f2/π)" reads
+ * "Sf2/π", "25 m³" reads "25 m3") and leaves zero-width spaces behind, on
+ * the one page that lists printing defects. The heading HTML already went
+ * through the site's own KaTeX pipeline (rehypeKatex and
+ * rehypeSingleTextMath in astro.config.mjs), so the link carries the same
+ * formula with the same TeX for a screen reader, and the KaTeX stylesheet
+ * is already on every page.
+ *
  * `scripts/generate_site_reports.py` writes both the family pages and the
  * list of these components on the index, so a family named here without a
  * page is a generator bug, and the build says so rather than listing nothing.
+ * So is a heading the rendered page does not hold: the link would otherwise
+ * fall back to the flattened text without anything noticing.
  */
 import type { MarkdownHeading } from 'astro';
 import { getEntry, render } from 'astro:content';
@@ -40,7 +54,27 @@ if (!entry) {
 	);
 }
 const { headings }: { headings: MarkdownHeading[] } = await render(entry);
-const entries = headings.filter((heading) => heading.depth === 2);
+const html = entry.rendered?.html;
+if (!html) {
+	throw new Error(
+		`[ErrataFamily] ${id} has no rendered HTML to read its headings from. ` +
+			'The family pages are Markdown under the glob loader, which renders them.',
+	);
+}
+/** A heading id as a regular expression matches it literally. */
+const literal = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const entries = headings
+	.filter((heading) => heading.depth === 2)
+	.map((heading) => {
+		const match = new RegExp(`<h2\\b[^>]*\\bid="${literal(heading.slug)}"[^>]*>([\\s\\S]*?)</h2>`).exec(html);
+		if (!match) {
+			throw new Error(
+				`[ErrataFamily] ${id} lists the heading "${heading.text}" (#${heading.slug}), ` +
+					'but its rendered HTML holds no <h2> with that id.',
+			);
+		}
+		return { slug: heading.slug, html: match[1].trim() };
+	});
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
 const page = `${BASE}/${id}/`;
@@ -58,7 +92,7 @@ const count =
 	<ul>
 		{entries.map((heading) => (
 			<li>
-				<a href={`${page}#${heading.slug}`}>{heading.text}</a>
+				<a href={`${page}#${heading.slug}`} set:html={heading.html} />
 			</li>
 		))}
 	</ul>

@@ -1,6 +1,7 @@
 ---
 title: "Source properties that are not errata"
 description: "Properties of the published sources that look like misprints and are not, recorded so that nobody corrects the library to match them."
+searchWeight: 0.8
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

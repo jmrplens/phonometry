@@ -591,10 +591,14 @@ read it alone.
 On the site, each entry is published on the page of the document family its
 heading names, under `/reference/errata/`. A heading that opens with a
 standard's designation lands on that series' page (`ISO 3743-2:2018` on
-`iso-3743`), created the first time the series has an entry. A heading that
-opens with an author or an issuer lands on the page of its row in `SOURCES`
-in `scripts/generate_site_reports.py`; for a source the registry has not cited
-before, `make site-reports` stops and asks for that row, which names the page.
+`iso-3743`, `DIN EN ISO 717-1:2021` on `iso-717`), created the first time the
+series has an entry. A heading that opens with an author or an issuer lands on
+the page of its row in `SOURCES` in `scripts/generate_site_reports.py`; for a
+source the registry has not cited before, `make site-reports` stops and asks
+for that row, which names the page. A heading that opens with a designation
+the script does not read (`ISO/IEC 17025:2017`) stops it too, and asks for
+the prefix to be taught to `_DESIGNATION` rather than for a row, which would
+file a standard among the books.
 
 A second script is a contributor tool rather than a gate:
 

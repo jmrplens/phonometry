@@ -1,7 +1,7 @@
 ---
 title: "Errata in NMFS (2024)"
 description: "Errata in NMFS (2024): 1 defect in the printed text, with the evidence and what phonometry does about it."
-searchTitle: "Errata"
+searchTitle: ""
 ---
 
 <!-- Generated from docs/ERRATA.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

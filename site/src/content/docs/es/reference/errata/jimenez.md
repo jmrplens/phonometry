@@ -1,7 +1,7 @@
 ---
 title: "Erratas de Jiménez et al. (2017)"
 description: "Erratas de Jiménez et al. (2017): 2 defectos del texto impreso, con la evidencia y lo que hace phonometry con cada uno."
-searchTitle: "Erratas"
+searchTitle: ""
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

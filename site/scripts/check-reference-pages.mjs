@@ -6,17 +6,20 @@
 // used to read, the class on each numeric cell and the SVG of each verdict
 // mark. What has to survive that is behaviour, and only a browser can show
 // it: the search still finds a row by the citation as the source writes it,
-// the domain and failing filters still narrow the tables, a link to one row
-// still opens the section that holds it, and the marks are still drawn.
+// a citation of several documents pasted whole included, the domain and
+// failing filters still narrow the tables, a link to one row still opens the
+// section that holds it, and the marks are still drawn, each section heading
+// keeping Starlight's disclosure chevron beside its own.
 //
 // The errata registry became an index and one page per document family. A
 // link written against the old single page, `/reference/errata/#<entry>`,
 // has to land on the entry's new page, and a fragment the index holds itself
-// has to stay where it is. And a family page is ranked in the site search by
-// the register's name rather than its own title, which the search panel
-// must still show (src/lib/search-ui.mjs): the index check in
-// check-search-designation.mjs reads Pagefind directly and never sees the
-// panel.
+// has to stay where it is. The index lists every entry as its heading reads,
+// mathematics typeset, not as the plain text a typeset formula leaves behind.
+// And a family page is ranked in the site search by an empty title rather
+// than its own, which the search panel must still show
+// (src/lib/search-ui.mjs): the index check in check-search-designation.mjs
+// reads Pagefind directly and never sees the panel.
 //
 // Usage: node scripts/check-reference-pages.mjs [--base http://localhost:4321]
 import { BASE_PATH, baseFrom, createExpect, launchBrowser } from './shared/audit.mjs';
@@ -60,6 +63,7 @@ for (const path of ['/reference/conformance/', '/es/reference/conformance/']) {
 				total: rows.length,
 				visible: visible.length,
 				standards: visible.map((row) => row.cells[1].textContent.replace(/\s+/g, ' ').trim()),
+				cites: visible.map((row) => row.dataset.cite ?? ''),
 				// Everything the search reads: every cell but the verdict.
 				texts: visible.map((row) =>
 					[...row.cells]
@@ -114,6 +118,29 @@ for (const path of ['/reference/conformance/', '/es/reference/conformance/']) {
 			},
 			{ some: true, allPartOne: true },
 		);
+	}
+
+	// A citation of several documents, pasted whole as the report prints it
+	// in "Closest to the limit" and in docs/CONFORMANCE.md. The cells write
+	// the connector between the documents as words, so only the citation the
+	// row keeps in `data-cite` can match it. One literal, and the first
+	// citation the page holds for each connector the report prints.
+	{
+		const samples = await page.evaluate(() => {
+			const cites = [...document.querySelectorAll('tr[data-cite]')].map((row) => row.dataset.cite);
+			return {
+				count: cites.length,
+				picked: [' vs ', ' / ', ' + ', ' via ', ' against '].map(
+					(connector) => cites.find((cite) => cite.includes(connector)) ?? null,
+				),
+			};
+		});
+		expect(`${path}: rows of several documents carry their citation`, samples.count > 0, true);
+		for (const cite of new Set(['ISO 3747:2010 Eq. 11 vs ISO 3741:2010 Eq. 21', ...samples.picked])) {
+			if (!cite) continue;
+			const got = await search(cite);
+			expect(`${path}: searching the whole citation "${cite}" finds its row`, got.cites.includes(cite), true);
+		}
 	}
 
 	// A query that matches nothing says so.
@@ -174,24 +201,44 @@ for (const path of ['/reference/conformance/', '/es/reference/conformance/']) {
 		await page.click('[data-failing]');
 	}
 
-	// Every verdict is still drawn: the row's mark, and the legend's.
+	// Every verdict is still drawn: the row's mark, the legend's and each
+	// section heading's. A heading's mark sits on a child of the <summary>,
+	// never on the summary's own `::before`: Starlight draws the disclosure
+	// chevron there with a mask, and a mark drawn on it is cut to the
+	// chevron's shape and turns with it, so neither the chevron nor the mark
+	// is left. Both are read off the computed style, which is all a reader
+	// sees of them.
 	{
 		const got = await page.evaluate(() => {
-			const image = (element) =>
-				element ? getComputedStyle(element, '::before').backgroundImage : '';
+			const before = (element) => (element ? getComputedStyle(element, '::before') : null);
+			const image = (element) => before(element)?.backgroundImage ?? '';
+			const mask = (element) => {
+				const box = before(element);
+				return box ? box.maskImage || box.webkitMaskImage || 'none' : '';
+			};
 			const row = document.querySelector('tr[data-verdict] > td:first-child');
 			const legend = document.querySelector('.legend-entry[data-mark]');
-			const box = row ? getComputedStyle(row, '::before') : null;
+			const summaries = [...document.querySelectorAll('details[data-domain-section] > summary')];
+			const marks = summaries.map((summary) => summary.querySelector('[data-mark]'));
+			const box = before(row);
 			return {
 				row: image(row).includes('data:image/svg+xml'),
 				legend: image(legend).includes('data:image/svg+xml'),
 				sized: !!box && parseFloat(box.width) > 8,
+				sections: summaries.length > 0,
+				chevrons: summaries.every((summary) => !summary.hasAttribute('data-mark') && mask(summary) !== 'none'),
+				headingMarks: marks.every(
+					(mark) => !!mark && mask(mark) === 'none' && image(mark).includes('data:image/svg+xml'),
+				),
 			};
 		});
-		expect(`${path}: the verdict marks are drawn beside the words`, got, {
+		expect(`${path}: the verdict marks are drawn beside the words, and each section keeps its chevron`, got, {
 			row: true,
 			legend: true,
 			sized: true,
+			sections: true,
+			chevrons: true,
+			headingMarks: true,
 		});
 	}
 
@@ -304,6 +351,59 @@ for (const path of ['/reference/errata/', '/es/reference/errata/']) {
 	});
 }
 
+// Every entry link on the index reads as the entry's heading, mathematics
+// typeset. The heading's plain text is what is left of a formula once it is
+// typeset: a radical, an exponent and every subscript drop out, and KaTeX's
+// zero-width spaces (U+200B) stay behind. The hydraulic diameter of ISO 5136,
+// D_h = √(S_f2/π), was listed as "Dh=Sf2/π" with three of them. So outside
+// a formula a link carries no zero-width space, and it carries the same
+// formulas, by their TeX, as the heading it points at on the family page.
+for (const path of ['/reference/errata/', '/es/reference/errata/']) {
+	const page = await open(path);
+	const got = await page.evaluate(async () => {
+		const ZWSP = '\u200b';
+		const flat = (element) => {
+			const copy = element.cloneNode(true);
+			for (const formula of copy.querySelectorAll('.katex')) formula.remove();
+			return copy.textContent ?? '';
+		};
+		const tex = (element) =>
+			[...element.querySelectorAll('.katex')].map((formula) => formula.getAttribute('aria-label') ?? '');
+		const links = [...document.querySelectorAll('[data-errata-family] ul a')];
+		const pages = new Map();
+		const problems = [];
+		let formulas = 0;
+		for (const link of links) {
+			const url = new URL(link.href);
+			const id = decodeURIComponent(url.hash.slice(1));
+			if (flat(link).includes(ZWSP)) problems.push(`#${id}: zero-width space in "${flat(link)}"`);
+			if (!pages.has(url.pathname)) {
+				const html = await (await fetch(url.pathname)).text();
+				pages.set(url.pathname, new DOMParser().parseFromString(html, 'text/html'));
+			}
+			const heading = pages.get(url.pathname).getElementById(id);
+			if (!heading) {
+				problems.push(`#${id}: no heading with that id on ${url.pathname}`);
+				continue;
+			}
+			const want = tex(heading);
+			formulas += want.length;
+			if (JSON.stringify(tex(link)) !== JSON.stringify(want)) {
+				problems.push(`#${id}: the link carries ${JSON.stringify(tex(link))}, the heading ${JSON.stringify(want)}`);
+			}
+		}
+		return { links: links.length, formulas, problems };
+	});
+	await page.close();
+	expect(
+		`errata: ${path} lists every entry as its heading reads, mathematics typeset ` +
+			`(${got.links} links, ${got.formulas} formulas)` +
+			(got.problems.length ? `\n    ${got.problems.slice(0, 5).join('\n    ')}` : ''),
+		{ some: got.links > 0, withMath: got.formulas > 0, problems: got.problems.length },
+		{ some: true, withMath: true, problems: 0 },
+	);
+}
+
 // --- The search panel ----------------------------------------------------------
 
 /** A result's own title link, not the links of the sections listed under it. */
@@ -318,15 +418,23 @@ async function searchPanel(path, query, wanted) {
 	await page.click('site-search button[data-open-modal]');
 	await page.waitForSelector('#starlight__search input', { visible: true });
 	await page.type('#starlight__search input', query);
-	await page.waitForFunction(
-		(href, titleLink) =>
-			[...document.querySelectorAll(`.pagefind-ui__result ${titleLink}`)].some(
-				(link) => link.getAttribute('href')?.includes(href) && link.textContent.trim(),
-			),
-		{ timeout: 60000 },
-		wanted,
-		TITLE_LINK,
-	);
+	// The panel lays out every result at once and fills each one in as its
+	// data arrives, so the order can be read only once every page the check
+	// compares has arrived. A page that never does is reported by the
+	// expectation below rather than by a timeout here.
+	await page
+		.waitForFunction(
+			(hrefs, titleLink) =>
+				hrefs.every((href) =>
+					[...document.querySelectorAll(`.pagefind-ui__result ${titleLink}`)].some(
+						(link) => link.getAttribute('href')?.includes(href) && link.textContent.trim(),
+					),
+				),
+			{ timeout: 60000 },
+			wanted,
+			TITLE_LINK,
+		)
+		.catch(() => {});
 	const results = await page.evaluate((titleLink) =>
 		[...document.querySelectorAll('.pagefind-ui__result')].map((result) => {
 			const link = result.querySelector(titleLink);
@@ -360,7 +468,7 @@ for (const { path, query, guide, errata, title } of [
 		title: 'Erratas de VDI 2081',
 	},
 ]) {
-	const results = await searchPanel(path, query, errata);
+	const results = await searchPanel(path, query, [errata, guide]);
 	const at = (route) => results.findIndex((result) => result.href.includes(route));
 	const page = results[at(errata)];
 	expect(

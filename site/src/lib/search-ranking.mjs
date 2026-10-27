@@ -26,13 +26,18 @@
  * pages, one per document family, are titled after the document ("Errata in
  * VDI 2081"), and Pagefind boosts a title five times, so a title that is
  * nothing but a designation put each of them above the guides written to that
- * document, on exactly the searches the field above is there to win. Those
- * pages are ranked by the title of the register they belong to
+ * document, on exactly the searches the field above is there to win; ranked
+ * by the register's name instead, two of them came above the registry's own
+ * index on a search for "errata". Those pages are ranked by an empty title
  * (`searchTitle` in their frontmatter, written by
  * scripts/generate_site_reports.py, and turned into Pagefind's `title` by
  * src/components/Head.astro), and the search panel shows `display_title` in
  * its place (src/lib/search-ui.mjs). Their text is indexed as any other page's,
- * so a search for the document still finds them, after the guides.
+ * so a search still finds them: after the guides for a designation those
+ * guides declare, with or without the register's word ("VDI 2081 errata"),
+ * first for a book and the register's word together ("Allard Atalla
+ * errata"), and possibly first for a book or guidance document no guide
+ * declares ("NORAH2").
  */
 export const PAGEFIND_RANKING = { metaWeights: { standards: 3, display_title: 0 } };
 

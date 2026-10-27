@@ -222,15 +222,26 @@ EDITIONS: tuple[Edition, ...] = (
 #: ``ITU-R BS.468-4``, ``ANSI S3.5-1997``, ``VDI 2081 Blatt 1:2001``. The
 #: ``rest`` group runs to the end of the designation (parts, edition,
 #: amendments), never into the prose after it.
+#:
+#: A national body's adoption prefix (``UNE-``, ``BS ``, ``DIN ``) is read
+#: before the issuer, so ``DIN EN ISO 717-1`` is ISO 717 and ``DIN EN 61260``
+#: is EN 61260; a standard of DIN's own (``DIN 4150-3``) leaves no issuer
+#: after the prefix, and the expression falls back to reading DIN as the
+#: issuer. ``ISO/IEC`` is not read: whether a joint document belongs on an
+#: ISO page or one of its own is a choice to make the day the registry first
+#: cites one, and until then :func:`family_of` stops on it and says so.
 _DESIGNATION = re.compile(
-    r"(?:UNE-|BS )?(?P<draft>E )?"
-    r"(?P<issuer>EN ISO|ISO(?:/(?:TS|TR|PAS|DIS))?|IEC(?: TS)?|EN|DIN|ECMA|ITU-R BS|ANSI|VDI)"
+    r"(?:UNE-|BS |DIN )?(?P<draft>E )?"
+    r"(?P<issuer>EN ISO|ISO(?:/(?:TS|TR|PAS|DIS))?|IEC(?: TS| TR)?|EN|CEN(?:/TS)?|DIN|ECMA"
+    r"|ITU-R BS|ANSI(?:/ASA)?|VDI)"
     r"(?P<sep>[ .-])(?P<number>S?\d+(?:\.\d+)?)(?P<rest>[^\s,()\"'«»“”]*(?: Blatt [^\s,()]+)?)"
 )
 
 #: The body a family is keyed on, for each way the registry writes an issuer:
-#: a technical specification, report or draft of ISO is still ISO, and a
-#: European adoption of an ISO standard (``EN ISO``) is that standard.
+#: a technical specification, report or draft of ISO is still ISO, a European
+#: adoption of an ISO standard (``EN ISO``) is that standard, a CEN technical
+#: specification belongs with the EN series of its number, and ANSI/ASA is
+#: ANSI as the Acoustical Society publishes it.
 _CANONICAL_ISSUER = {
     "EN ISO": "ISO",
     "ISO/TS": "ISO",
@@ -238,7 +249,19 @@ _CANONICAL_ISSUER = {
     "ISO/PAS": "ISO",
     "ISO/DIS": "ISO",
     "IEC TS": "IEC",
+    "IEC TR": "IEC",
+    "CEN": "EN",
+    "CEN/TS": "EN",
+    "ANSI/ASA": "ANSI",
 }
+
+#: A heading that opens with what reads as a standard's designation, one or
+#: more capitalised issuer words and a number (``ISO/IEC 17025``,
+#: ``ASTM C423``), which :data:`_DESIGNATION` does not know. It tells the two
+#: fixes apart when :func:`family_of` stops: a standard needs its prefix
+#: taught to the expression, and a row in :data:`SOURCES` would file it under
+#: the books and papers.
+_LOOKS_LIKE_A_DESIGNATION = re.compile(r"^(?:[A-Z]{2,}[ /.-])+[A-Z]*\s?S?\d")
 
 #: Families that are one document line under two issuers. EN 12354:2000 was
 #: replaced by EN ISO 12354:2017, and EN 61260 and EN 61094 are the CENELEC
@@ -424,7 +447,7 @@ def family_of(heading: str) -> Family:
 
     A heading that opens with a standard's designation belongs to that
     standard's series, named after every way the registry writes it (see
-    :func:`series_name`); any other heading must open with the name of a
+    :func:`series_names`); any other heading must open with the name of a
     :data:`SOURCES` row.
 
     :param heading: An English entry heading, without its ``##``.
@@ -461,6 +484,15 @@ def family_of(heading: str) -> Family:
                 name_es=source.name_es,
                 article_es=source.article_es,
             )
+    if _LOOKS_LIKE_A_DESIGNATION.match(heading):
+        sys.exit(
+            f"docs/ERRATA.md: the entry {heading!r} opens with what looks like a "
+            "standard's designation that scripts/generate_site_reports.py does not "
+            "read. Teach _DESIGNATION its prefix and _CANONICAL_ISSUER the series it "
+            "belongs to; a row in SOURCES would file a standard under 'Guidance, "
+            "regulations, books and papers'. If it is not a standard, add a row to "
+            "SOURCES naming the page it belongs on."
+        )
     sys.exit(
         f"docs/ERRATA.md: the entry {heading!r} opens with neither a standard's "
         "designation nor a source scripts/generate_site_reports.py knows. Add a "
@@ -540,20 +572,22 @@ def _join(items: Sequence[str], lang: Lang) -> str:
     return f"{head} {word} {last}"
 
 
-def series_name(slug: str, found: Sequence[Designation]) -> str:
-    """The name of a standards family: every series it gathers, keyed one first.
+def series_names(slug: str, found: Sequence[Designation]) -> list[str]:
+    """Every series a standards family gathers, the one it is keyed on first.
+
+    The caller joins them in its own language (:func:`_join`), which is what
+    lets Spanish write "e" before a series that starts with the sound /i/.
 
     :param slug: The family's slug.
     :type slug: str
     :param found: Every designation of the family, in registry order.
     :type found: Sequence[Designation]
-    :return: For example ``ISO 12354 and EN 12354``.
-    :rtype: str
+    :return: For example ``["ISO 12354", "EN 12354"]``.
+    :rtype: list[str]
     """
     series = list(dict.fromkeys(d.series for d in found))
     keyed = [s for s in series if f"{_slug_part(s.split()[0])}-" in f"{slug}-"]
-    ordered = keyed[:1] + [s for s in series if s not in keyed[:1]]
-    return " and ".join(ordered)
+    return keyed[:1] + [s for s in series if s not in keyed[:1]]
 
 
 def editions_of(found: Sequence[Designation]) -> list[str]:
@@ -630,9 +664,9 @@ def plan_families(headings: Sequence[str]) -> list[FamilyPage]:
     for slug, family in families.items():
         own = found.get(slug, [])
         if family.group == "standards":
-            name = series_name(slug, own)
-            name_en = name
-            name_es = name.replace(" and ", " y ")
+            series = series_names(slug, own)
+            name_en = _join(series, "en")
+            name_es = _join(series, "es")
         else:
             name_en, name_es = family.name_en, family.name_es
         pages.append(
@@ -668,29 +702,54 @@ def page_title(page: FamilyPage, lang: Lang) -> str:
     return f"Errata in {page.name(lang)}" if lang == "en" else f"Erratas {page.of()}"
 
 
-def search_title(page: FamilyPage, lang: Lang) -> str | None:
+def search_title(page: FamilyPage) -> str | None:
     """The title the site search ranks a family page by, if not its own.
 
     A family page is titled after the document it is about ("Errata in VDI
     2081"), and the site search gives a title five times the weight of the
-    text. A page whose title is a designation then ranks above the guides
-    written to that document on a search for it, which is the one search the
-    site's ranking exists to win for those guides
-    (``site/src/lib/search-ranking.mjs``). So the page is ranked by the name of
-    the register it belongs to; its text is indexed as any page's, and the
-    search panel still shows its own title. The page of properties that are
-    not errata names no document and keeps its title.
+    text. Ranked by that title, a page whose title is a designation came above
+    the guides written to the document on a search for it, which is the one
+    search the site's ranking exists to win for those guides
+    (``site/src/lib/search-ranking.mjs``); and ranked by the register's name,
+    two of the 95 pages came above the registry's own index on a search for
+    "errata". So the page is ranked by no title at all, an empty one: its text
+    is indexed as any page's, which is what finds it for its document and the
+    register's word together ("Allard Atalla errata"), and the search panel
+    still shows its own title. The page of properties that are not errata
+    names no document and keeps its title, at the weight :func:`search_weight`
+    gives it.
 
     :param page: The family.
     :type page: FamilyPage
-    :param lang: The language of the page.
-    :type lang: Lang
-    :return: The ranking title, or ``None`` to rank the page by its own.
+    :return: The ranking title, empty, or ``None`` to rank the page by its own.
     :rtype: str | None
     """
     if page.family.group == "not-errata":
         return None
-    return "Errata" if lang == "en" else "Erratas"
+    return ""
+
+
+#: The weight the site search gives the page of properties that are not
+#: errata, against 1 for every other page. It is the one page of the registry
+#: ranked by its own title, and that title carries the register's word as the
+#: index's does ("Propiedades de las fuentes que no son erratas"); at full
+#: weight the shorter page came first for "erratas" and "registro de erratas".
+#: At 0.8 the index is first for both, by 2 % and 3.5 %, and the page still
+#: comes first for its own name ("not errata", "no son erratas"), by 1.6 % and
+#: 40 %. Measured over the built index; ``check:search`` holds all six.
+SEARCH_WEIGHT = 0.8
+
+
+def search_weight(page: FamilyPage) -> float | None:
+    """The search weight a family page is indexed at, if not the usual one.
+
+    :param page: The family.
+    :type page: FamilyPage
+    :return: :data:`SEARCH_WEIGHT` for the page of properties that are not
+        errata, ``None`` for every other page.
+    :rtype: float | None
+    """
+    return SEARCH_WEIGHT if page.family.group == "not-errata" else None
 
 
 def page_description(page: FamilyPage, lang: Lang) -> str:
@@ -799,8 +858,11 @@ def render_family(page: FamilyPage, edition: Edition, registry: Registry) -> str
     """
     lang = edition.lang
     body = "\n\n".join(registry.entries[position][1] for position in page.positions)
-    ranked_by = search_title(page, lang)
-    search = f"searchTitle: {_yaml(ranked_by)}\n" if ranked_by else ""
+    ranked_by = search_title(page)
+    weight = search_weight(page)
+    search = f"searchTitle: {_yaml(ranked_by)}\n" if ranked_by is not None else ""
+    if weight is not None:
+        search += f"searchWeight: {weight}\n"
     return (
         "---\n"
         f"title: {_yaml(page_title(page, lang))}\n"

@@ -13,10 +13,14 @@
  * the dates now sit together in the last-updated line at the end of the page
  * (LastUpdated.astro), which is where a reader looks for them. What the byline
  * added was the maintainer's name between the reader and the first sentence.
+ *
+ * The title takes the page's search weight, when it sets one
+ * (SearchWeight.astro).
  */
 import Default from '@astrojs/starlight/components/PageTitle.astro';
 import PageChips from './PageChips.astro';
 import PhIcon from './PhIcon.astro';
+import SearchWeight from './SearchWeight.astro';
 import { topics } from '../data/topics.mjs';
 
 interface RouteData {
@@ -33,21 +37,23 @@ const slug = id.replace(/^es\/?/, '');
 const topicId = topics.find((topic) => topic.link === `/${slug}/`)?.id;
 ---
 
-{
-  topicId ? (
-    <div class="ph-title-row">
-      <PhIcon name={topicId} class="ph-title-icon" />
+<SearchWeight>
+  {
+    topicId ? (
+      <div class="ph-title-row">
+        <PhIcon name={topicId} class="ph-title-icon" />
+        <Default>
+          <slot />
+        </Default>
+      </div>
+    ) : (
       <Default>
         <slot />
       </Default>
-    </div>
-  ) : (
-    <Default>
-      <slot />
-    </Default>
-  )
-}
-<PageChips />
+    )
+  }
+  <PageChips />
+</SearchWeight>
 
 <style>
   /* The heading's own top margin sat inside the row and pushed the h1 half of

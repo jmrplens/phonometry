@@ -20,8 +20,8 @@
  * for changes.
  *
  * The same subclass shows a page's `display_title` in place of the title it is
- * ranked by, when the page has one. The errata pages are ranked by the name of
- * the register and shown by their own (src/lib/search-ranking.mjs says why);
+ * ranked by, when the page has one. The errata pages are ranked by an empty
+ * title and shown by their own (src/lib/search-ranking.mjs says why);
  * `processResult` is the option Pagefind's UI calls on every result before it
  * draws it, and Starlight already passes one, which rewrites the URLs, so it
  * runs first and this one after it.

@@ -31,7 +31,8 @@
  * Every byte a row spends is spent once per check, close to two thousand
  * times, and Googlebot reads only the first 2 MB of a page, counted
  * uncompressed, before it stops: past that point the rows are never indexed.
- * So a row carries its id, its verdict and its cells and nothing else. The
+ * So a row carries its id, its verdict and its cells, and the citation as
+ * printed only where its cells cannot spell it (several documents). The
  * styles below are global under `.conformance` rather than scoped, because a
  * scoped stylesheet stamps its hash class on every element of the template,
  * which was a quarter of the page; the search reads the text the row already
@@ -535,8 +536,15 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 		const green = domain.passing === domain.checks;
 		return (
 			<details class="conformance-domain" data-domain-section={domain.id} open={!green}>
-				{/* Decorative mark: the tally beside it already says how many passed. */}
-				<summary data-mark={green ? 'pass' : 'fail'}>
+				{/*
+					Decorative mark: the tally beside it already says how many
+					passed. It is an empty child of its own and not the summary's
+					own `::before`, which Starlight draws the disclosure chevron
+					with: a mark there takes the chevron's mask and turns with it
+					when the section opens, and the chevron is gone.
+				*/}
+				<summary>
+					<span data-mark={green ? 'pass' : 'fail'}></span>
 					<b>{domain.title}</b>
 					<span class="tally">
 						{domain.passing}/{domain.checks}
@@ -572,9 +580,25 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 								relation keeps the text the search reads in words. The
 								clause and the relation are blocks, so neither space
 								shows.
+
+								A row that cites more than one document also carries
+								the citation as the report prints it, in `data-cite`,
+								because its cells write the connector between the
+								documents as words ("compared with", "read via") where
+								the citation writes "vs", "/" or "+". The search reads
+								the attribute with the cells, so a citation copied whole
+								from "Closest to the limit" or from docs/CONFORMANCE.md
+								still finds its row. A row of one document needs none:
+								its cells already hold its citation.
 							*/}
 							{domainRows.map((row) => (
-								<tr id={row.anchor} data-verdict={row.check.verdict}>
+								<tr
+									id={row.anchor}
+									data-verdict={row.check.verdict}
+									data-cite={
+										row.check.reference.documents.length > 1 ? row.check.reference.cite : undefined
+									}
+								>
 									<td>{verdictWord(row.check.verdict)}</td>
 									<td>
 										{row.check.reference.documents.map((document) => (
@@ -630,12 +654,15 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 		/**
 		 * The text a search is matched against, folded the same way on both
 		 * sides: lower case, and commas, colons and the hyphen before a year
-		 * read as spaces. Those three are the punctuation a citation and the
-		 * row disagree on, and nothing else: "ANSI S1.11-2004" in a citation is
-		 * "ANSI S1.11:2004" in the row, "Long, Architectural Acoustics 2e" is
-		 * "Long, Architectural Acoustics:2e", so folding them lets either form
-		 * find the row. A hyphen inside a designation stays a hyphen, which is
-		 * what keeps "IEC 61260-1" from matching "IEC 61260:1995".
+		 * read as spaces. Within one document those three are the punctuation
+		 * a citation and the row disagree on: "ANSI S1.11-2004" in a citation
+		 * is "ANSI S1.11:2004" in the row, "Long, Architectural Acoustics 2e"
+		 * is "Long, Architectural Acoustics:2e", so folding them lets either
+		 * form find the row. Between documents they also disagree on the
+		 * connector, which the row writes as words, and that is why a row of
+		 * several documents keeps its citation in `data-cite`. A hyphen inside
+		 * a designation stays a hyphen, which is what keeps "IEC 61260-1" from
+		 * matching "IEC 61260:1995".
 		 */
 		const fold = (text: string) =>
 			text
@@ -648,11 +675,16 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 		// Everything a row shows but its verdict word: the documents and the
 		// place in each, the quantity, and the values with their units. Read
 		// once, from the cells themselves, so the search can never disagree
-		// with what the row says.
+		// with what the row says; and, on a row of several documents, the
+		// citation as the report prints it.
 		const haystacks = new Map(
 			rows.map((row) => [
 				row,
-				fold([...row.cells].slice(1).map((cell) => cell.textContent ?? '').join(' ')),
+				fold(
+					[row.dataset.cite ?? '', ...[...row.cells].slice(1).map((cell) => cell.textContent ?? '')].join(
+						' ',
+					),
+				),
 			]),
 		);
 
@@ -800,15 +832,16 @@ const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100
 	/* The verdict marks: one CSS image per verdict, set once on the report's
 	   root as `--cv-<verdict>` (src/lib/verdict-marks.mjs), drawn beside the
 	   word of every element that says which verdict it shows, `data-mark` on
-	   the legend, the panel and the section headings and the row's own
-	   `data-verdict` in the tables.
+	   the legend and the panel, on an empty span before each section heading
+	   and the row's own `data-verdict` in the tables. Never on a <summary>:
+	   its `::before` is Starlight's disclosure chevron.
 
 	   Sized in ems so the mark grows with the reader's text, and pushed a
 	   fraction below the baseline so a 16 px square sits optically centred on
 	   a line of 14 px text rather than riding above it. In the legend and the
-	   section headings, which are flex containers, the box is a flex item and
-	   the container's gap spaces it; a cell has no gap to lean on, so there the
-	   mark carries its own margin. Printing keeps it: a background is dropped
+	   section headings, which are flex containers, the box (or the span that
+	   holds it) is a flex item and the container's gap spaces it; a cell has
+	   no gap to lean on, so there the mark carries its own margin. Printing keeps it: a background is dropped
 	   by default when a page is printed, and the mark is part of the report. */
 	.conformance [data-mark]::before,
 	.conformance-domain tr[data-verdict] > td:first-child::before {

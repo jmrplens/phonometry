@@ -91,7 +91,11 @@ function absolutize(text, fromRoute) {
   const here = fromRoute.includes("/") ? fromRoute.replace(/\/[^/]*$/, "") : "";
   return text
     .split("\n")
-    .filter((line) => !line.startsWith("← [Documentation index]"))
+    // The mirror's backlink to its own index, read by its target rather than
+    // its words, so it goes in any language: a page copy is not read from
+    // inside docs/, and the Spanish registry's, "Índice de la documentación",
+    // would send a Spanish reader to the English documentation's root.
+    .filter((line) => !/^← \[[^\]]*\]\((?:\.\.\/)*README\.md\)\s*$/.test(line))
     .join("\n")
     .replace(/\]\(((?:\.\.\/)*[\w./-]+)\.md(#[\w-]+)?\)/g, (whole, target, anchor = "") => {
       const base = target.replace(/^.*\//, "");

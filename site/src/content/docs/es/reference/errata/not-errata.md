@@ -1,6 +1,7 @@
 ---
 title: "Propiedades de las fuentes que no son erratas"
 description: "Propiedades de las fuentes publicadas que parecen erratas y no lo son, registradas para que nadie corrija la biblioteca para ajustarse a ellas."
+searchWeight: 0.8
 ---
 
 <!-- Generated from docs/ERRATA.es.md by scripts/generate_site_reports.py (`make site-reports`). Edit the source document, never this page. -->

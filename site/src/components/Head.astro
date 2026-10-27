@@ -337,12 +337,14 @@ const jsonLd = graph.length
   />
 )}
 {/* The title the site search ranks this page by, when it is not the page's
-    own: an errata page is titled after a document it does not implement, and
-    the five-fold boost Pagefind gives a title would put it above the guides
-    written to that document (src/lib/search-ranking.mjs). Pagefind takes an
-    explicit `title` field over the page's h1; `display_title` ranks nothing
-    and is what the search panel shows (src/lib/search-ui.mjs). */}
-{data.searchTitle && (
+    own, an empty one included: an errata page is titled after a document it
+    does not implement and after the register, and the five-fold boost
+    Pagefind gives a title would put it above the guides written to that
+    document and above the registry's index (src/lib/search-ranking.mjs).
+    Pagefind takes an explicit `title` field over the page's h1, empty or not;
+    `display_title` ranks nothing and is what the search panel shows
+    (src/lib/search-ui.mjs). */}
+{data.searchTitle !== undefined && (
   <>
     <meta name="phonometry-search-title" data-pagefind-meta="title[content]" content={data.searchTitle} />
     <meta name="phonometry-display-title" data-pagefind-meta="display_title[content]" content={title} />

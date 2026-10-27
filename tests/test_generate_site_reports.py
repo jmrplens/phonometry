@@ -180,6 +180,15 @@ def test_the_shipped_editions_pass_the_gate() -> None:
         ("EN 61260:1995, 3.2, NOTE 3 (base two)", "iec-61260", "EN 61260"),
         ("UNE-EN 61094-5:2017, Table D.1 (six values)", "iec-61094", "EN 61094"),
         ("EN 1793-5:2016, Formula (1) against Formula (4)", "en-1793", "EN 1793"),
+        # Spellings no shipped heading opens with yet, each read as the series
+        # it belongs to rather than stopping the run or landing among the books.
+        ("DIN EN ISO 717-1:2021, Annex A (a term)", "iso-717", "ISO 717"),
+        ("DIN ISO 9613-2:1999, 7.3 (a ground factor)", "iso-9613", "ISO 9613"),
+        ("DIN EN 61260:1996, 4.2 (a band edge)", "iec-61260", "EN 61260"),
+        ("DIN 4150-3:1999-02, Table 1 (a guide value)", "din-4150", "DIN 4150"),
+        ("ANSI/ASA S1.11-2014, Table 1 (a class)", "ansi-s1-11", "ANSI/ASA S1.11"),
+        ("IEC TR 61094-7:2006, Figure 3 (a correction)", "iec-61094", "IEC TR 61094"),
+        ("CEN/TS 1793-5:2003, 4.1 (a window)", "en-1793", "CEN/TS 1793"),
     ],
 )
 def test_a_standard_lands_on_its_series_page(
@@ -223,6 +232,20 @@ def test_an_unknown_source_stops_the_run_and_asks_for_a_row() -> None:
     """
     with pytest.raises(SystemExit, match="Add a row to SOURCES"):
         generate_site_reports.family_of("Smith (2030), Table 1 (a new book)")
+
+
+@pytest.mark.parametrize(
+    "heading",
+    ["ISO/IEC 17025:2017, 7.2 (a requirement)", "ASTM C423-17, 9.1 (a formula)"],
+)
+def test_an_unread_designation_asks_for_the_expression_not_a_row(heading: str) -> None:
+    """A standard the expression does not read is not filed among the books.
+
+    A row in SOURCES would put it under "Guidance, regulations, books and
+    papers", so the run says to teach ``_DESIGNATION`` its prefix instead.
+    """
+    with pytest.raises(SystemExit, match="Teach _DESIGNATION its prefix"):
+        generate_site_reports.family_of(heading)
 
 
 def test_the_properties_that_are_not_errata_get_their_own_page() -> None:
@@ -292,6 +315,19 @@ def test_spanish_names_take_their_article_and_conjunction() -> None:
     )
     assert "ISO 3743-1:2010 and ISO 3743-2:2018" in generate_site_reports.page_intro(
         iso, "en"
+    )
+
+
+def test_a_family_of_two_series_is_named_with_the_spanish_conjunction() -> None:
+    """Spanish joins a second series that starts with /i/ with "e", not "y"."""
+    (page,) = generate_site_reports.plan_families(
+        ["ISO/PAS 1996-3:2022, Clause 5 (a range)", "ISO 1996-2:2017, Annex A (a term)"]
+    )
+    assert page.name("en") == "ISO 1996 and ISO/PAS 1996"
+    assert page.name("es") == "ISO 1996 e ISO/PAS 1996"
+    assert (
+        generate_site_reports.page_title(page, "es")
+        == "Erratas de ISO 1996 e ISO/PAS 1996"
     )
 
 
@@ -365,13 +401,14 @@ def test_a_page_the_generator_no_longer_writes_is_deleted(
     assert generate_site_reports.stale_pages([kept]) == [generated]
 
 
-def test_a_family_page_is_ranked_by_the_register_and_shown_by_its_title() -> None:
-    """A page about one document is ranked by the register's name, not its own.
+def test_a_family_page_is_ranked_by_no_title_and_shown_by_its_own() -> None:
+    """A page about one document is ranked by an empty title, not its own.
 
-    Its title is the document's designation, and the site search weights a
-    title five times; ranked by it, the page would outrank the guides written
-    to the document. The page of properties that are not errata names no
-    document and keeps its own title.
+    Its title is the document's designation with the register's word, and the
+    site search weights a title five times; ranked by it, the page would
+    outrank the guides written to the document, and the registry's index on a
+    search for the registry. The page of properties that are not errata names
+    no document, keeps its own title and is indexed at a lower weight instead.
     """
     pages = generate_site_reports.plan_families(
         [
@@ -381,9 +418,13 @@ def test_a_family_page_is_ranked_by_the_register_and_shown_by_its_title() -> Non
     )
     by_slug = {page.family.slug: page for page in pages}
     vdi, plain = by_slug["vdi-2081"], by_slug["not-errata"]
-    assert generate_site_reports.search_title(vdi, "en") == "Errata"
-    assert generate_site_reports.search_title(vdi, "es") == "Erratas"
-    assert generate_site_reports.search_title(plain, "en") is None
+    assert generate_site_reports.search_title(vdi) == ""
+    assert generate_site_reports.search_title(plain) is None
+    assert generate_site_reports.search_weight(vdi) is None
+    assert (
+        generate_site_reports.search_weight(plain)
+        == generate_site_reports.SEARCH_WEIGHT
+    )
     edition = generate_site_reports.EDITIONS[0]
     registry = generate_site_reports.Registry(
         preamble="",
@@ -392,9 +433,14 @@ def test_a_family_page_is_ranked_by_the_register_and_shown_by_its_title() -> Non
             (generate_site_reports.NOT_ERRATA_HEADING, "## Related ...\n\nText."),
         ),
     )
-    text = generate_site_reports.render_family(vdi, edition, registry)
-    assert 'title: "Errata in VDI 2081"\n' in text
-    assert 'searchTitle: "Errata"\n' in text.split("---")[1]
-    assert "searchTitle" not in generate_site_reports.render_family(
+    frontmatter = generate_site_reports.render_family(vdi, edition, registry).split(
+        "---"
+    )[1]
+    assert 'title: "Errata in VDI 2081"\n' in frontmatter
+    assert 'searchTitle: ""\n' in frontmatter
+    assert "searchWeight" not in frontmatter
+    plain_frontmatter = generate_site_reports.render_family(
         plain, edition, registry
-    )
+    ).split("---")[1]
+    assert "searchTitle" not in plain_frontmatter
+    assert f"searchWeight: {generate_site_reports.SEARCH_WEIGHT}\n" in plain_frontmatter

@@ -1,5 +1,6 @@
 import { defineRouteMiddleware, type StarlightRouteData } from '@astrojs/starlight/route-data';
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { englishTwin, isApiRoute, isFallbackRoute } from './lib/fallback-routes.mjs';
 import { hasMarkdownCopy, markdownCopyPath, routeOf } from './lib/page-markdown.mjs';
 
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -28,6 +29,48 @@ const published = new Set(
 );
 
 type SidebarEntry = StarlightRouteData['sidebar'][number];
+
+/**
+ * The head of an API page, as src/lib/fallback-routes.mjs says it should be.
+ *
+ * Starlight writes a self canonical, an `og:url` and an hreflang link per
+ * locale plus `x-default` on every route, its fallback routes included
+ * (utils/head.ts), so the Spanish copy of an English API page claimed to be a
+ * Spanish page of its own. Here the Spanish copy names the English page in its
+ * canonical and its `og:url`, and both sides of the pair lose their hreflang
+ * links. Every other page keeps Starlight's head as it is.
+ *
+ * The rule is keyed on the address, and Starlight's own flag has to agree with
+ * it: a translated Spanish API page, or an untranslated page anywhere else,
+ * would be served with a head that misdescribes it, so either one stops the
+ * build here rather than shipping.
+ */
+function declareFallback(route: StarlightRouteData): void {
+  const id = route.id;
+  // Absent rather than false on the routes that are no translation at all, the
+  // 404 among them.
+  const fallback = route.isFallback === true;
+  if (fallback !== isFallbackRoute(id)) {
+    throw new Error(
+      `${id}: Starlight ${fallback ? 'serves it as fallback content' : 'has a translation of it'}, ` +
+        'and src/lib/fallback-routes.mjs says the opposite. The canonical, hreflang and sitemap ' +
+        'rules there assume the Spanish API reference is the only untranslated subtree.',
+    );
+  }
+  if (!isApiRoute(id)) return;
+  route.head = route.head.filter(
+    (entry) => !(entry.tag === 'link' && entry.attrs?.rel === 'alternate' && entry.attrs?.hreflang),
+  );
+  if (!fallback) return;
+  for (const entry of route.head) {
+    if (entry.tag === 'link' && entry.attrs?.rel === 'canonical' && typeof entry.attrs.href === 'string') {
+      entry.attrs.href = englishTwin(entry.attrs.href, BASE);
+    }
+    if (entry.tag === 'meta' && entry.attrs?.property === 'og:url' && typeof entry.attrs.content === 'string') {
+      entry.attrs.content = englishTwin(entry.attrs.content, BASE);
+    }
+  }
+}
 
 /** Every link in a sidebar tree, at any depth. */
 function* sidebarLinks(entries: SidebarEntry[]): Generator<Extract<SidebarEntry, { type: 'link' }>> {
@@ -95,9 +138,19 @@ export const onRequest = defineRouteMiddleware(({ locals, url }) => {
   // have no hand-editable source: an "Edit page" link there would invite web
   // edits that the next regeneration silently discards. The prose that a
   // reader could usefully fix lives in the docstrings, not in these files.
-  if (/^(es\/)?reference\/api(\/|$)/.test(starlightRoute.entry?.id ?? '')) {
+  if (isApiRoute(starlightRoute.entry?.id ?? '')) {
     starlightRoute.editUrl = undefined;
   }
+
+  declareFallback(starlightRoute);
+
+  // Open Graph names a locale as language_TERRITORY. Starlight writes the bare
+  // language (`en`, `es`) and Head.astro writes the full form next to its
+  // alternate, so every page carried two `og:locale` tags that disagreed. The
+  // full form is the one the protocol defines, and it is Head.astro's.
+  starlightRoute.head = starlightRoute.head.filter(
+    (entry) => !(entry.tag === 'meta' && entry.attrs?.property === 'og:locale'),
+  );
 
   // Starlight builds a splash page without a sidebar, which also removes the
   // mobile menu button. Turn it on so the pane exists: what renders in it is

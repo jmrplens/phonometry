@@ -28,6 +28,7 @@ import { fileURLToPath } from 'node:url';
 
 import { basePath, siteUrl } from '../src/data/site.mjs';
 import { topicForSlug, topicSections } from '../src/data/topics.mjs';
+import { englishTwin, isApiRoute, isFallbackRoute } from '../src/lib/fallback-routes.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 // An explicit directory is for reproducing a defect against a build kept aside;
@@ -154,7 +155,7 @@ const files = walk(DIST).sort();
 if (files.length === 0) throw new Error(`no HTML under ${DIST}: build the site first`);
 
 // Tallies, so a check that silently stopped looking at anything says so.
-const seen = { pages: 0, redirects: 0, blocks: 0, sections: 0, guides: 0, api: 0 };
+const seen = { pages: 0, redirects: 0, blocks: 0, sections: 0, guides: 0, api: 0, fallbacks: 0 };
 const missingSection = [];
 const wrongSection = [];
 
@@ -173,9 +174,15 @@ for (const file of files) {
 	seen.pages += 1;
 
 	const route = routeOf(file);
-	const lang = route.startsWith('/es/') ? 'es' : 'en';
-	const slug = route.replace(/^\/(es\/)?/, '').replace(/\/$/, '');
-	const canonical = `${ORIGIN}${route}`;
+	// A Spanish API page serves its English twin as fallback content and
+	// publishes the English page's graph, naming the English address as its own
+	// (src/lib/fallback-routes.mjs). That is the one way a page's graph may name
+	// another address than its route, and it is checked as the twin's below.
+	const own = isFallbackRoute(route) ? englishTwin(route) : route;
+	if (own !== route) seen.fallbacks += 1;
+	const lang = own.startsWith('/es/') ? 'es' : 'en';
+	const slug = own.replace(/^\/(es\/)?/, '').replace(/\/$/, '');
+	const canonical = `${ORIGIN}${own}`;
 	const is404 = slug === '404';
 	const isHome = slug === '';
 
@@ -291,10 +298,14 @@ for (const file of files) {
 
 	// The two locales are one work. English pages point forward to their
 	// translation, Spanish pages point back at the original; a page carrying
-	// both, or neither, is claiming something else.
+	// both, or neither, is claiming something else. The API reference has one
+	// version, in English, and declares neither on either route.
 	const pairing = lang === 'en' ? 'workTranslation' : 'translationOfWork';
 	const opposite = lang === 'en' ? 'translationOfWork' : 'workTranslation';
-	if (article[pairing] === undefined || article[opposite] !== undefined) {
+	if (isApiRoute(slug)) {
+		const declared = ['workTranslation', 'translationOfWork'].filter((key) => article[key] !== undefined);
+		if (declared.length > 0) fail(`${route}: an API page declares ${declared.join(' and ')}`);
+	} else if (article[pairing] === undefined || article[opposite] !== undefined) {
 		const declared =
 			['workTranslation', 'translationOfWork'].filter((key) => article[key] !== undefined).join(' and ') ||
 			'neither';
@@ -382,7 +393,8 @@ if (missingSection.length === 0 && wrongSection.length === 0) {
 }
 
 ok(`parsed ${seen.blocks} ld+json blocks across ${seen.pages} pages (${seen.redirects} redirect stubs skipped)`);
-ok(`${seen.guides} guide pages typed as learning resources, ${seen.api} API pages as APIReference`);
+ok(`checked ${seen.guides} guide pages for the learning-resource type and ${seen.api} API pages for APIReference`);
+ok(`checked ${seen.fallbacks} Spanish API routes against their English twin's graph`);
 
 console.log(`\n${failures} failing check(s).`);
 process.exit(failures ? 1 : 0);

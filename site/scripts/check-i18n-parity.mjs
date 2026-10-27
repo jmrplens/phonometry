@@ -36,6 +36,12 @@ function walk(dir) {
 // serves it on /es/, where the untranslated notice says so (i18n/es.json).
 // Everything else is bilingual and this check is what enforces that, so the
 // exemption is this subtree and nothing else.
+//
+// The exemption goes both ways. Because these Spanish routes carry the English
+// text, they name the English page canonical, carry no hreflang and stay out of
+// the sitemap (src/lib/fallback-routes.mjs), and those rules are written for
+// the whole subtree. A Spanish file under es/reference/api/ would be a real
+// translation served with a head that calls it a copy, so there must be none.
 const apiRef = join("reference", "api");
 const isApiRef = (p) => p === apiRef || p.startsWith(apiRef + sep);
 
@@ -43,6 +49,17 @@ const enPages = walk(docsDir)
 	.map((p) => relative(docsDir, p))
 	.filter((p) => !isApiRef(p));
 const esPages = walk(esDir).map((p) => relative(esDir, p));
+
+const translatedApi = esPages.filter(isApiRef).sort();
+if (translatedApi.length) {
+	console.error("i18n parity check FAILED:");
+	for (const p of translatedApi)
+		console.error(
+			`  ES page in the English-only API reference: es/${p}` +
+				" (its route is treated as a fallback copy of the English page)",
+		);
+	process.exit(1);
+}
 
 const enSet = new Set(enPages);
 const esSet = new Set(esPages);

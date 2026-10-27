@@ -4,6 +4,7 @@ import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import sitemap from '@astrojs/sitemap';
 import starlightLinksValidator from 'starlight-links-validator';
 import starlightImageZoom from 'starlight-image-zoom';
 import remarkMath from 'remark-math';
@@ -14,6 +15,7 @@ import { topics } from './src/data/topics.mjs';
 import { doi, doiUrl } from './src/data/citation.mjs';
 import { redirects } from './src/data/redirects.mjs';
 import { basePath, siteUrl } from './src/data/site.mjs';
+import { isFallbackRoute } from './src/lib/fallback-routes.mjs';
 import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
 import { PAGEFIND_RANKING } from './src/lib/search-ranking.mjs';
 import { rehypeWrappableMath } from './src/lib/wrappable-math.mjs';
@@ -163,6 +165,13 @@ function rehypeTableAlign() {
 
 const fullUrl = `${siteUrl}${basePath}`;
 const repositoryUrl = 'https://github.com/jmrplens/phonometry';
+
+// The two languages, read by Starlight and by the sitemap's hreflang pairing,
+// which have to agree.
+const locales = {
+  root: { label: 'English', lang: 'en' },
+  es: { label: 'Español', lang: 'es' },
+};
 const authorUrl = 'https://jmrp.io';
 const socialImageUrl = `${fullUrl}/og-image.png`;
 const authorId = `${authorUrl}/#person`;
@@ -623,10 +632,7 @@ export default defineConfig({
         { icon: 'linkedin', label: 'LinkedIn', href: 'https://linkedin.com/in/jmrplens' },
       ],
       defaultLocale: 'root',
-      locales: {
-        root: { label: 'English', lang: 'en' },
-        es: { label: 'Español', lang: 'es' },
-      },
+      locales,
       head: [
         // GitHub Pages cannot send a Content-Security-Policy header, so the
         // policy travels as a meta tag: everything the site loads is
@@ -736,6 +742,21 @@ export default defineConfig({
         // JSON-LD structured data
         { tag: 'script', attrs: { type: 'application/ld+json' }, content: jsonLd },
       ],
+    }),
+    // Starlight adds this integration itself unless the site configures it,
+    // and its own copy lists every route, the Spanish API pages included,
+    // each with an hreflang pair. Those pages are the English reference served
+    // as fallback content and name the English page canonical
+    // (src/lib/fallback-routes.mjs), and a sitemap should list canonical URLs
+    // only, so they are filtered out here. The filter runs before the language
+    // alternates are paired, so the English API entries lose their Spanish
+    // alternate with it. The i18n option is the one Starlight would pass.
+    sitemap({
+      i18n: {
+        defaultLocale: 'root',
+        locales: Object.fromEntries(Object.entries(locales).map(([key, { lang }]) => [key, lang])),
+      },
+      filter: (page) => !isFallbackRoute(new URL(page).pathname, basePath),
     }),
   ],
 });

@@ -24,10 +24,11 @@
 // that it is at most 160 characters long, and that no other page of the same
 // language says the same thing, ignoring case and spacing. A page whose
 // frontmatter has no description inherits the 319-character site description,
-// so a forgotten one fails here as too long, and twice as a duplicate.
+// so a forgotten one fails here as too long, and as a duplicate once a second
+// page of its language forgets too.
 //
 // Three kinds of file are not held to it: the redirect stubs, which are not
-// pages; the two error pages, which no engine indexes and which carry the site
+// pages; the error page, which no engine indexes and which carries the site
 // description; and the Spanish routes src/lib/fallback-routes.mjs serves as
 // fallback, which repeat their English twin's description on purpose and name
 // that twin canonical. The English twin is checked.
